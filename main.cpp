@@ -8,7 +8,7 @@
 #include "ParmParse.H"
 #include "EBIndexSpace.H"
 
-#include "ComputationalGeometry.H"
+#include "computational_geometry.H"
 #include "sphere_sphere_geometry.H"
 
 //
@@ -25,11 +25,11 @@ int main(int argc, char* argv[]){
 
   const int nCells = 512;
   const RealVect& a_probLo = -RealVect::Unit;
-  PhysicalDomain physdom(-RealVect::Unit, RealVect::Unit);
+  physical_domain physdom(-RealVect::Unit, RealVect::Unit);
   ProblemDomain probdom(IntVect::Zero, (nCells - 1)*IntVect::Unit);
   const Real& finestdx = (physdom.get_prob_lo()[0] - physdom.get_prob_hi()[0])/nCells;
 
-  ComputationalGeometry* compgeom = static_cast<ComputationalGeometry*> (new sphere_sphere_geometry());
+  computational_geometry* compgeom = static_cast<computational_geometry*> (new sphere_sphere_geometry());
   compgeom->build_geometries(physdom, probdom, finestdx, 8);
 
   // Real r;

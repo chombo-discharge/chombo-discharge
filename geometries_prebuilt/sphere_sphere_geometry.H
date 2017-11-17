@@ -8,12 +8,12 @@
 #ifndef _SPHERE_SPHERE_GEOM_
 #define _SPHERE_SPHERE_GEOM_
 
-#include "ComputationalGeometry.H"
+#include "computational_geometry.H"
 
 /*!
   @brief This is a class that defines one electrode sphere and one dielectric sphere. 
 */
-class sphere_sphere_geometry : public ComputationalGeometry {
+class sphere_sphere_geometry : public computational_geometry {
 public:
 
   /*!
