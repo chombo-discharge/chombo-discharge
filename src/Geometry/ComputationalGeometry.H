@@ -1,0 +1,132 @@
+/*!
+  @file ComputationalGeometry.H
+  @brief Declaration of an abstract base class for defining geometries
+  @author Robert Marskar
+  @date Nov. 2017
+*/
+
+#ifndef _COMPUTATIONALGEOMETRY_
+#define _COMPUTATIONALGEOMETRY_
+
+#include <BaseIF.H>
+#include <MFIndexSpace.H>
+#include <Box.H>
+#include <RealVect.H>
+#include <ProblemDomain.H>
+
+#include "Dielectric.H"
+#include "Electrode.H"
+#include "PhysicalDomain.H"
+
+/*!
+  @brief Global stuff for phases
+*/
+namespace Phase {
+  enum WhichPhase {
+    Gas = 0,
+    Solid = 1
+  };
+};
+
+/*!
+  @brief Abstract base class for geometries
+*/
+class ComputationalGeometry {
+public:
+
+  /*!
+    @brief Constructor
+  */
+  ComputationalGeometry();
+
+  /*!
+    @brief Destructor
+  */
+  virtual ~ComputationalGeometry();
+  
+  /*!
+    @brief Get dielectrics
+  */
+  virtual const Vector<Dielectric>& get_dielectrics() const;
+
+  /*!
+    @brief Get conductors
+  */
+  virtual const Vector<Electrode>& get_electrodes() const;
+
+  /*!
+    @brief Get the background permittivity
+  */
+  virtual const Real& get_eps0() const;
+  
+  /*!
+    @brief Set electrodes
+  */
+  virtual void set_dielectrics(Vector<Dielectric>& a_dielectrics);
+
+  /*!
+    @brief Set electrodes
+  */
+  virtual void set_electrodes(Vector<Electrode>& a_electrodes);
+
+  /*!
+    @brief Get the background permittivity
+  */
+  virtual void set_eps0(const Real a_eps0);
+
+  /*!
+    @brief Get the EBIndexSpaces
+  */
+  virtual const RefCountedPtr<MFIndexSpace> get_ebis_mf() const;
+
+  /*!
+    @brief Build MFIndexSpace
+    @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
+    into boxes as well as the maximum number of coarsenings. The computed domain is (a_origin, a_origin + a_box*a_dx)
+  */
+  virtual void build_geometries(const PhysicalDomain& a_physDom,
+				const ProblemDomain&  a_finestDomain,
+				const Real&           a_finestDx,
+  				const int&            a_nCellMax = -1,
+  				const int&            a_maxCoarsen = -1);
+
+protected:
+
+  /*!
+    @brief MF index space
+  */
+  RefCountedPtr<MFIndexSpace> m_ebis_mf;
+
+  /*!
+    @brief Background permittivity
+  */
+  Real m_eps0;
+
+  /*!
+    @brief Dielectrics
+  */
+  Vector<Dielectric> m_dielectrics;
+
+  /*!
+    @brief Electrodes
+  */
+  Vector<Electrode> m_electrodes;
+
+  /*!
+    @brief Geometry server for gas phase
+  */
+  virtual void build_gas_geoserv(GeometryService*     a_geoserver,
+				 const ProblemDomain& a_finestDomain,
+				 const RealVect&      a_origin,
+				 const Real&          a_dx);
+
+  /*!
+    @brief Geometry server for solid phas
+  */
+  virtual void build_solid_geoserv(GeometryService*     a_geoserver,
+				   const ProblemDomain& a_finestDomain,
+				   const RealVect&      a_origin,
+				   const Real&          a_dx);
+
+};
+#endif
