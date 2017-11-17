@@ -19,19 +19,19 @@
 //
 sphere_sphere_geometry::sphere_sphere_geometry(){
 
-  Real eps0, eps_mat, elec_rad, diel_rad;
+  Real eps0 = 1, eps_mat = 1, elec_rad = 0.1, diel_rad = 0.1;
   Vector<Real> center;
-  RealVect elec_center, diel_center;
-  bool live;
+  RealVect elec_center = 0.5*RealVect::Unit, diel_center = -0.5*RealVect::Unit;
+  bool live = true;
 
-  ParmParse pp("sphere_sphere_geometry");
-  pp.get("electrode_radius",  elec_rad);
-  pp.getarr("electrode_center",  center, 0, SpaceDim); elec_center = RealVect(D_DECL(center[0], center[1], center[2]));
-  pp.get("electrode_live",    live); 
-  pp.get("eps0",              eps0);
-  pp.get("dielectric_radius", diel_rad);
-  pp.getarr("dielectric_center", center, 0, SpaceDim); diel_center = RealVect(D_DECL(center[0], center[1], center[2]));
-  pp.get("dielectric_eps",    eps_mat);
+  // ParmParse pp("sphere_sphere_geometry");
+  // pp.get("electrode_radius",  elec_rad);
+  // pp.getarr("electrode_center",  center, 0, SpaceDim); elec_center = RealVect(D_DECL(center[0], center[1], center[2]));
+  // pp.get("electrode_live",    live); 
+  // pp.get("eps0",              eps0);
+  // pp.get("dielectric_radius", diel_rad);
+  // pp.getarr("dielectric_center", center, 0, SpaceDim); diel_center = RealVect(D_DECL(center[0], center[1], center[2]));
+  // pp.get("dielectric_eps",    eps_mat);
 
 
   // Create geometry

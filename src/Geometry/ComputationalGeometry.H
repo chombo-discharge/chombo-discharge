@@ -22,6 +22,8 @@
   @brief Global stuff for phases
 */
 namespace Phase {
+  const int num_phases = 2;
+  
   enum WhichPhase {
     Gas = 0,
     Solid = 1
@@ -43,6 +45,16 @@ public:
     @brief Destructor
   */
   virtual ~ComputationalGeometry();
+
+  /*!
+    @brief Minimum refines
+  */
+  static int s_minRef;
+
+  /*!
+    @brief Maximum refines
+  */
+  static int s_maxRef;
   
   /*!
     @brief Get dielectrics
@@ -115,7 +127,7 @@ protected:
   /*!
     @brief Geometry server for gas phase
   */
-  virtual void build_gas_geoserv(GeometryService*     a_geoserver,
+  virtual void build_gas_geoserv(GeometryService*&     a_geoserver,
 				 const ProblemDomain& a_finestDomain,
 				 const RealVect&      a_origin,
 				 const Real&          a_dx);
@@ -123,7 +135,7 @@ protected:
   /*!
     @brief Geometry server for solid phas
   */
-  virtual void build_solid_geoserv(GeometryService*     a_geoserver,
+  virtual void build_solid_geoserv(GeometryService*&     a_geoserver,
 				   const ProblemDomain& a_finestDomain,
 				   const RealVect&      a_origin,
 				   const Real&          a_dx);

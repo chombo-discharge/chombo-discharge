@@ -14,6 +14,9 @@
 
 #include "ComputationalGeometry.H"
 
+int ComputationalGeometry::s_minRef = 0;
+int ComputationalGeometry::s_maxRef = 0;
+
 //
 ComputationalGeometry::ComputationalGeometry(){
 
@@ -73,8 +76,8 @@ void ComputationalGeometry::build_geometries(const PhysicalDomain& a_physDom,
 
   // Build geoservers
   Vector<GeometryService*> geoservers(2, NULL);
-  this->build_gas_geoserv(geoservers[0],   a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
-  this->build_solid_geoserv(geoservers[1], a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
+  this->build_gas_geoserv(geoservers[Phase::Gas],   a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
+  this->build_solid_geoserv(geoservers[Phase::Solid], a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
 
   // Define MF
   m_ebis_mf->define(a_finestDomain.domainBox(),
@@ -86,7 +89,7 @@ void ComputationalGeometry::build_geometries(const PhysicalDomain& a_physDom,
 }
 
 //
-void ComputationalGeometry::build_gas_geoserv(GeometryService*     a_geoserver,
+void ComputationalGeometry::build_gas_geoserv(GeometryService*&     a_geoserver,
 					      const ProblemDomain& a_finestDomain,
 					      const RealVect&      a_origin,
 					      const Real&          a_dx){
@@ -106,13 +109,13 @@ void ComputationalGeometry::build_gas_geoserv(GeometryService*     a_geoserver,
   }
   else {
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
-    
-    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, 0, 0));
+
+    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
   }
 }
 
 //
-void ComputationalGeometry::build_solid_geoserv(GeometryService*     a_geoserver,
+void ComputationalGeometry::build_solid_geoserv(GeometryService*&     a_geoserver,
 						const ProblemDomain& a_finestDomain,
 						const RealVect&      a_origin,
 						const Real&          a_dx){
@@ -143,7 +146,7 @@ void ComputationalGeometry::build_solid_geoserv(GeometryService*     a_geoserver
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new UnionIF(parts));
 
     // Set up the rest
-    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, 0, 0));
+    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
 
   }
 }

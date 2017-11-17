@@ -23,7 +23,18 @@ int main(int argc, char* argv[]){
   // --------------------------------------------
   EBIndexSpace* fieldEBIS = new EBIndexSpace();
 
-  sphere_sphere_geometry::dumpScript();
+  const int nCells = 512;
+  const RealVect& a_probLo = -RealVect::Unit;
+  PhysicalDomain physdom(-RealVect::Unit, RealVect::Unit);
+  ProblemDomain probdom(IntVect::Zero, (nCells - 1)*IntVect::Unit);
+  const Real& finestdx = (physdom.get_prob_lo()[0] - physdom.get_prob_hi()[0])/nCells;
+
+  ComputationalGeometry* compgeom = static_cast<ComputationalGeometry*> (new sphere_sphere_geometry());
+  compgeom->build_geometries(physdom, probdom, finestdx, 8);
+
+  // Real r;
+  // ParmParse pp("sphere");
+  // pp.get("electrode_radius", r);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();
