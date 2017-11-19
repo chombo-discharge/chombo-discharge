@@ -12,6 +12,7 @@
 
 #include "computational_geometry.H"
 #include "plasma_kinetics.H"
+#include "time_stepper.H"
 #include "wall_bc.H"
 #include "physical_domain.H"
 
@@ -32,7 +33,8 @@ public:
     @brief Full constructor. Subsequently calls define
   */
   plasma_engine(const RefCountedPtr<computational_geometry>& a_compgeom,
-		const RefCountedPtr<plasma_kinetics>&        a_plaskin);
+		const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+		const RefCountedPtr<time_stepper>&           a_timestepper);
 
   /*!
     @brief Constructor
@@ -43,6 +45,16 @@ public:
     @brief Setup function
   */
   virtual void setup_fresh();
+
+  /*!
+    @brief Set for restart
+  */
+  virtual void setup_for_restart(const std::string a_restart_file);
+
+  /*!
+    @brief Do initial regrids
+  */
+  virtual void initial_regrids(const int a_init_regrids);
 
   /*!
     @brief Verbosity
@@ -97,6 +109,11 @@ protected:
   RefCountedPtr<physical_domain> m_physdom;
 
   /*!
+    @brief Time stpeper
+  */
+  RefCountedPtr<time_stepper> m_timestepper;
+
+  /*!
     @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
   */
   Vector<RefCountedPtr<wall_bc> > m_wallbc;
@@ -111,10 +128,30 @@ protected:
   */
   virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
 
+    /*!
+    @brief Set the time stepper
+  */
+  virtual void set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper);
+
   /*!
     @brief Allocate data holders for wall bcs so they can be set
   */
   virtual void allocate_wall_bc();
+
+  /*!
+    @brief Write a plot file
+  */
+  virtual void write_plot_file();
+
+  /*!
+    @brief Write a checkpoint file
+  */
+  virtual void write_checkpoint_file();
+
+  /*!
+    @brief Read checkpoint file
+  */
+  virtual void read_checkpoint_file();
 
   /*!
     @brief Internal bc map for Poisson stuff

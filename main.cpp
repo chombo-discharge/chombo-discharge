@@ -19,26 +19,27 @@ int main(int argc, char* argv[]){
   MPI_Init(&argc,&argv);
 #endif
 
-
   // Physical domain, geometry, time stepper, amr, and plasma kinetics
   const RealVect probLo = -RealVect::Unit;
   const RealVect probHi =  RealVect::Unit;
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>( NULL);
+  RefCountedPtr<plasma_kinetics> timestepper     = RefCountedPtr<time_stepper>( NULL);
 
 
 
   // Set up plasma engine
-  RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(compgeom, plaskin));
+  RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(compgeom, plaskin, timestepper));
+  engine->set_verbosity(10);
   engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);
   engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
   engine->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
   engine->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
-  engine->set_verbosity(3);
+
   engine->set_physical_domain(physdom);
   
-
+  engine->setup_fresh();
 
   // Real r;
   // ParmParse pp("sphere");

@@ -15,7 +15,8 @@ plasma_engine::plasma_engine(){
 }
 
 plasma_engine::plasma_engine(const RefCountedPtr<computational_geometry>& a_compgeom,
-			     const RefCountedPtr<plasma_kinetics>&        a_plaskin){
+			     const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+			     const RefCountedPtr<time_stepper>&           a_timestepper){
   CH_TIME("plasma_engine::plasma_engine(full)");
   if(m_verbosity > 2){
     pout() << "plasma_engine::plasma_engine(full)" << endl;
@@ -23,6 +24,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<computational_geometry>& a_comp
 
   this->set_computational_geometry(a_compgeom);
   this->set_plasma_kinetics(a_plaskin);
+  this->set_time_stepper(a_timestepper);
 
   this->allocate_wall_bc();
 }
@@ -58,6 +60,10 @@ void plasma_engine::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_
   m_plaskin = a_plaskin;
 }
 
+void plasma_engine::set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper){
+  m_timestepper = a_timestepper;
+}
+
 void plasma_engine::setup_fresh(){
   CH_TIME("plasma_engine::setup_fresh");
   if(m_verbosity > 2){
@@ -73,6 +79,14 @@ void plasma_engine::setup_fresh(){
   const Real& finestdx = (m_physdom->get_prob_lo()[0] - m_physdom->get_prob_hi()[0])/nCells;
   
   m_compgeom->build_geometries(*m_physdom, probdom, finestdx, 8);
+}
+
+void plasma_engine::setup_for_restart(const std::string a_restart_file){
+  
+}
+
+void plasma_engine::initial_regrids(const int a_init_regrids){
+
 }
 
 void plasma_engine::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const Potential::GroundLive a_live){
@@ -118,6 +132,18 @@ void plasma_engine::sanity_check(){
       }
     }
   }
+}
+
+void plasma_engine::write_plot_file(){
+  
+}
+
+void plasma_engine::write_checkpoint_file(){
+  
+}
+
+void plasma_engine::read_checkpoint_file(){
+  
 }
 
 wall_bc& plasma_engine::get_wall_bc(const int a_dir, Side::LoHiSide a_side) const{
