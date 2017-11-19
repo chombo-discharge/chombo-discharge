@@ -23,11 +23,6 @@ computational_geometry::computational_geometry(){
   m_eps0 = 1.0;
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
-  m_wallbc.resize(2*SpaceDim);
-
-  for (int i = 0; i < 2*SpaceDim; i++){
-    m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
-  }
   
   m_ebis_mf = RefCountedPtr<MFIndexSpace> (new MFIndexSpace());
 }
@@ -59,24 +54,6 @@ void computational_geometry::set_electrodes(Vector<electrode>& a_electrodes){
   m_electrodes = a_electrodes;
 }
 
-void computational_geometry::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const bool a_live){
-
-  const int idx = this->map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Dirichlet));
-  m_wallbc[idx]->set_live(a_live);
-}
-
-void computational_geometry::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-
-  const int idx = this->map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Neumann));
-  m_wallbc[idx]->set_value(a_value);
-}
-
-const wall_bc& computational_geometry::get_wall_bc(const int a_dir, Side::LoHiSide a_side) const{
-  return *m_wallbc[this->map_bc(a_dir, a_side)];
-}
-
 void computational_geometry::set_eps0(const Real a_eps0){
   m_eps0 = a_eps0;
 }
@@ -86,8 +63,6 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
 					      const Real&            a_finestDx,
 					      const int&             a_nCellMax,
 					      const int&             a_maxCoarsen){
-
-  this->sanity_check();
   
   // Build geoservers
   Vector<GeometryService*> geoservers(2, NULL);
@@ -162,22 +137,4 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
 
   }
-}
-
-void computational_geometry::sanity_check(){
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sideit; sideit.ok(); ++sideit){
-      if(!m_wallbc[map_bc(dir, sideit())].isNull()){
-	MayDay::Abort("computational_geometry::sanity_check() failed. Wall BC has not been set properly");
-      }
-    }
-  }
-      
-}
-
-int computational_geometry::map_bc(const int a_dir, const Side::LoHiSide a_side) const {
-  const int iside = (a_side == Side::Lo) ? 0 : 1;
-
-  return 2*a_dir + iside;
 }

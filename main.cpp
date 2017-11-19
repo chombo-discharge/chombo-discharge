@@ -8,8 +8,9 @@
 #include "ParmParse.H"
 #include "EBIndexSpace.H"
 
-#include "computational_geometry.H"
 #include "sphere_sphere_geometry.H"
+#include "plasma_engine.H"
+#include "plasma_kinetics.H"
 
 //
 int main(int argc, char* argv[]){
@@ -18,19 +19,26 @@ int main(int argc, char* argv[]){
   MPI_Init(&argc,&argv);
 #endif
 
-  // --------------------------------------------
-  // EBIndexSpace for ion domain and field domain
-  // --------------------------------------------
-  EBIndexSpace* fieldEBIS = new EBIndexSpace();
 
-  const int nCells = 512;
-  const RealVect& a_probLo = -RealVect::Unit;
-  physical_domain physdom(-RealVect::Unit, RealVect::Unit);
-  ProblemDomain probdom(IntVect::Zero, (nCells - 1)*IntVect::Unit);
-  const Real& finestdx = (physdom.get_prob_lo()[0] - physdom.get_prob_hi()[0])/nCells;
+  // Physical domain, geometry, time stepper, amr, and plasma kinetics
+  const RealVect probLo = -RealVect::Unit;
+  const RealVect probHi =  RealVect::Unit;
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
+  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>( NULL);
 
-  computational_geometry* compgeom = static_cast<computational_geometry*> (new sphere_sphere_geometry());
-  compgeom->build_geometries(physdom, probdom, finestdx, 8);
+
+
+  // Set up plasma engine
+  RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(compgeom, plaskin));
+  engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);
+  engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
+  engine->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
+  engine->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
+  engine->set_verbosity(3);
+  engine->set_physical_domain(physdom);
+  
+
 
   // Real r;
   // ParmParse pp("sphere");

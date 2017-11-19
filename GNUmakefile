@@ -22,6 +22,7 @@ base_dir = .
 src_dirs = ./src		\
 	./src/geometry		\
 	./src/global		\
+	./src/plasma_solver 	\
 	./src/poisson_solver 	\
 	./geometries_prebuilt	\
 

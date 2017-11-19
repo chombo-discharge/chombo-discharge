@@ -1,13 +1,1 @@
-# SPHERE_SPHERE_GEOMETRY (sphere_sphere_geometry.H)
-# -------------------------------------------------
-# Template script for defining a prebuilt geometry
-# consisting of a dielectric sphere and an electrode
-# sphere
-
-sphere_sphere_geometry.electrode_radius  = 0.1		 # Electrode radius (float)
-sphere_sphere_geometry.electrode_center  = 0.5 0.5		 # Electrode sphere center (spacedim array of floats)
-sphere_sphere_geometry.electrode_live    = 1		 # Electrode is live or not (boolean) 
-sphere_sphere_geometry.eps0              = 1		 # Gas permittivity
-sphere_sphere_geometry.dielectric_radius = 0.2		 # Dielectric radius (float) 
-sphere_sphere_geometry.dielectric_center = -0.5 -0.5		 # Dielectric center (spacedim array of floats)
-sphere_sphere_geometry.dielectric_eps    = 4		 # Dielectric permittivity (float) 
+test.schme = 1.0

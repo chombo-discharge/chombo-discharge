@@ -17,7 +17,6 @@
 #include "dielectric.H"
 #include "electrode.H"
 #include "physical_domain.H"
-#include "wall_bc.H"
 
 /*!
   @brief Global stuff for phases
@@ -30,7 +29,6 @@ namespace Phase {
     Solid = 1
   };
 };
-
 
 /*!
   @brief Abstract base class for geometries
@@ -84,21 +82,6 @@ public:
   virtual void set_electrodes(Vector<electrode>& a_electrodes);
 
   /*!
-    @brief Set Dirichlet wall BC
-  */
-  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const bool a_live);
-
-  /*!
-    @brief Set Neumann wall BC
-  */
-  virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
-    @brief Get Poisson BC at specified domain wall
-  */
-  virtual const wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
-
-  /*!
     @brief Get the background permittivity
   */
   virtual void set_eps0(const Real a_eps0);
@@ -132,11 +115,6 @@ protected:
   Real m_eps0;
 
   /*!
-    @brief Wall boundary conditions
-  */
-  Vector<RefCountedPtr<wall_bc> > m_wallbc;
-
-  /*!
     @brief dielectrics
   */
   Vector<dielectric> m_dielectrics;
@@ -161,16 +139,6 @@ protected:
 				   const ProblemDomain& a_finestDomain,
 				   const RealVect&      a_origin,
 				   const Real&          a_dx);
-
-  /*!
-    @brief Sanity check
-  */
-  virtual void sanity_check();
-
-  /*!
-    @brief Internal bc map
-  */
-  int map_bc(const int a_dir, const Side::LoHiSide a_side) const;
 
 };
 #endif
