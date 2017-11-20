@@ -8,9 +8,21 @@
 #include "amr_mesh.H"
 
 amr_mesh::amr_mesh(){
+
+  // Default stuff will crash. 
+  this->set_verbosity(10);
+  this->set_coarsest_num_cells(IntVect::Zero);
+  this->set_max_amr_depth(-1);
+  this->set_refinement_ratio(-2);
+  this->set_blocking_factor(-8);
+  this->set_max_box_size(-32);
+  this->set_redist_rad(-1);
+  this->set_num_ghost(-2);
+  this->set_eb_ghost(-4);
 }
 
 amr_mesh::~amr_mesh(){
+  
 }
 
 void amr_mesh::set_mfis(const RefCountedPtr<MFIndexSpace>& a_mfis){
@@ -22,17 +34,34 @@ void amr_mesh::set_mfis(const RefCountedPtr<MFIndexSpace>& a_mfis){
   m_mfis = a_mfis;
 }
 
+void amr_mesh::build_domains(){
+
+  const int nlevels = 1 + m_max_amr_depth;
+  
+  m_domains.resize(nlevels);
+  m_dx.resize(nlevels);
+  m_ref_ratios.resize(nlevels, m_ref_ratio);
+
+  m_dx[0] = (m_physdom->get_prob_hi()[0] - m_physdom->get_prob_lo()[0])/(m_num_cells[0] - m_num_cells[0]);
+  m_domains[0] = ProblemDomain(IntVect::Zero, m_num_cells - IntVect::Unit);
+  for (int lvl = 1; lvl <= m_max_amr_depth; lvl++){
+    m_dx[lvl] = m_dx[lvl-1]/m_ref_ratio;
+    m_domains[lvl] = m_domains[lvl-1].refine(m_ref_ratio);
+  }
+}
+
 void amr_mesh::regrid(const Vector<IntVectSet>& a_tags){
   CH_TIME("amr_mesh::regrid");
   if(m_verbosity > 3){
     pout() << "amr_mesh::regrid" << endl;
   }
 
-  this->define_eblevelgrid();
-  this->define_eb_coar_ave();
-  this->define_eb_quad_cfi();
-  this->define_redist_oper();
-  this->define_flux_reg();
+
+  // this->define_eblevelgrid(); // Define EBLevelGrid objects on both phases
+  // this->define_eb_coar_ave(); // Define EBCoarseAverage on both phases
+  // this->define_eb_quad_cfi(); // Define nwoebquadcfinterp on both phases
+  // this->define_flux_reg();    // Define flux register (Phase::Gas only)
+  // this->define_redist_oper(); // Define redistribution (Phase::Gas only)
 }
 
 void amr_mesh::average_down(EBAMRCellData& a_data, Phase::WhichPhase a_phase){
@@ -108,36 +137,64 @@ void amr_mesh::set_verbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 }
 
+void amr_mesh::set_coarsest_num_cells(const IntVect a_num_cells){
+  m_num_cells = a_num_cells;
+}
+
+void amr_mesh::set_max_amr_depth(const int a_max_amr_depth){
+  m_max_amr_depth = a_max_amr_depth;
+}
+
+void amr_mesh::set_refinement_ratio(const int a_refinement_ratio){
+  CH_TIME("amr_mesh::set_refinement_ratio");
+  m_ref_ratio = a_refinement_ratio;
+}
+
 void amr_mesh::set_max_box_size(const int a_max_box_size){
   CH_TIME("amr_mesh::set_max_box_size");
-  CH_assert(a_max_box_size >= 4);
-  
   m_max_box_size = a_max_box_size;
 }
 
 void amr_mesh::set_blocking_factor(const int a_blocking_factor){
   CH_TIME("amr_mesh::set_blocking_factor");
-  CH_assert(a_blocking_factor >= 4);
-  
   m_blocking_factor = a_blocking_factor;
 }
 
 void amr_mesh::set_eb_ghost(const int a_ebghost){
   CH_TIME("amr_mesh:.set_eb_ghost");
-  CH_assert(a_ebghost > 0);
   m_ebghost = a_ebghost;
 }
 
 void amr_mesh::set_num_ghost(const int a_num_ghost){
   CH_TIME("amr_mesh::set_num_ghost");
-  CH_assert(a_num_ghost > 0);
   m_num_ghost = a_num_ghost;
 }
 
 void amr_mesh::set_redist_rad(const int a_redist_rad){
   CH_TIME("amr_mesh::set_redist_rads");
-  CH_assert(a_redist_rad > 0);
   m_redist_rad = a_redist_rad;
+}
+
+void amr_mesh::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
+  m_physdom = a_physdom;
+}
+
+void amr_mesh::sanity_check(){
+  CH_TIME("amr_mesh::sanity_check");
+  if(m_verbosity > 1){
+    pout() << "amr_mesh::sanity_check" << endl;
+  }
+
+  CH_assert(m_max_amr_depth > 0);
+  CH_assert(m_ref_ratio == 2 || m_ref_ratio == 4);
+  CH_assert(m_blocking_factor >= 4 && m_blocking_factor % m_ref_ratio == 0);
+  CH_assert(m_max_box_size > 8 && m_max_box_size % m_blocking_factor == 0);
+
+  // Make sure that the isotropic constraint isn't violated
+  const RealVect realbox = m_physdom->get_prob_hi() - m_physdom->get_prob_lo();
+  for (int dir = 0; dir < SpaceDim - 1; dir++){
+    CH_assert(realbox[dir]/m_num_cells[dir] == realbox[dir+1]/m_num_cells[dir+1]);
+  }
 }
 
 int amr_mesh::get_finest_level(){
@@ -148,12 +205,32 @@ int amr_mesh::get_max_amr_depth(){
   return m_max_amr_depth;
 }
 
+int amr_mesh::get_refinement_ratio(){
+  return m_ref_ratio;
+}
+
+int amr_mesh::get_blocking_factor(){
+  return m_blocking_factor;
+}
+
+int amr_mesh::get_max_box_size(){
+  return m_max_box_size;
+}
+
+ProblemDomain amr_mesh::get_finest_domain(){
+  return m_domains[m_max_amr_depth];
+}
+
+Real amr_mesh::get_finest_dx(){
+  return m_dx[m_max_amr_depth];
+}
+
 Vector<Real>& amr_mesh::get_dx(){
   return m_dx;
 }
 
 Vector<int>& amr_mesh::get_ref_rat(){
-  return m_refinement_ratios;
+  return m_ref_ratios;
 }
 
 Vector<DisjointBoxLayout>& amr_mesh::get_grids(){
@@ -251,7 +328,7 @@ void amr_mesh::define_eb_coar_ave(){
 											 m_ebisl[Phase::Gas][lvl],
 											 m_ebisl[Phase::Gas][lvl-1],
 											 m_domains[lvl-1],
-											 m_refinement_ratios[lvl-1],
+											 m_ref_ratios[lvl-1],
 											 comps,
 											 ebis_gas));
       }
@@ -261,7 +338,7 @@ void amr_mesh::define_eb_coar_ave(){
 											   m_ebisl[Phase::Solid][lvl],
 											   m_ebisl[Phase::Solid][lvl-1],
 											   m_domains[lvl-1],
-											   m_refinement_ratios[lvl-1],
+											   m_ref_ratios[lvl-1],
 											   comps,
 											   ebis_sol));
       }
@@ -292,7 +369,7 @@ void amr_mesh::define_eb_quad_cfi(){
 											     m_ebisl[Phase::Gas][lvl],
 											     m_ebisl[Phase::Gas][lvl-1],
 											     m_domains[lvl-1],
-											     m_refinement_ratios[lvl-1],
+											     m_ref_ratios[lvl-1],
 											     comps,
 											     m_dx[lvl],
 											     m_num_ghost*IntVect::Unit,
@@ -306,7 +383,7 @@ void amr_mesh::define_eb_quad_cfi(){
 											       m_ebisl[Phase::Solid][lvl],
 											       m_ebisl[Phase::Solid][lvl-1],
 											       m_domains[lvl-1],
-											       m_refinement_ratios[lvl-1],
+											       m_ref_ratios[lvl-1],
 											       comps,
 											       m_dx[lvl],
 											       m_num_ghost*IntVect::Unit,
@@ -336,7 +413,7 @@ void amr_mesh::define_flux_reg(){
       if(ebis_gas != NULL){
 	m_flux_reg[Phase::Solid][lvl] = RefCountedPtr<EBFastFR> (new EBFastFR(*m_eblg[Phase::Gas][lvl+1],
 									      *m_eblg[Phase::Gas][lvl],
-									      m_refinement_ratios[lvl],
+									      m_ref_ratios[lvl],
 									      comps,
 									      !m_ebcf));
       }
@@ -375,7 +452,7 @@ void amr_mesh::define_redist_oper(){
 						       m_ebisl[Phase::Gas][lvl],
 						       m_ebisl[Phase::Gas][lvl-1],
 						       m_domains[lvl-1].domainBox(),
-						       m_refinement_ratios[lvl-1],
+						       m_ref_ratios[lvl-1],
 						       comps,
 						       m_redist_rad,
 						       ebis_gas);
@@ -391,7 +468,7 @@ void amr_mesh::define_redist_oper(){
 						       m_grids[lvl],
 						       m_ebisl[Phase::Gas][lvl],
 						       m_domains[lvl].domainBox(),
-						       m_refinement_ratios[lvl],
+						       m_ref_ratios[lvl],
 						       comps,
 						       m_redist_rad,
 						       ebis_gas);
@@ -400,7 +477,7 @@ void amr_mesh::define_redist_oper(){
 	m_coar_to_coar_redist[Phase::Gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
 	m_coar_to_coar_redist[Phase::Gas][lvl]->define(*m_eblg[Phase::Gas][lvl+1],
 						       *m_eblg[Phase::Gas][lvl],
-						       m_refinement_ratios[lvl],
+						       m_ref_ratios[lvl],
 						       comps,
 						       m_redist_rad);
 

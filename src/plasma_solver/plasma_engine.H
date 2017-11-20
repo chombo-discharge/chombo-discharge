@@ -38,6 +38,7 @@ public:
 		const RefCountedPtr<computational_geometry>& a_compgeom,
 		const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 		const RefCountedPtr<time_stepper>&           a_timestepper,
+		const RefCountedPtr<amr_mesh>&               a_amr,
 		const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL));
 
   /*!
@@ -80,12 +81,10 @@ public:
   */
   virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
 
-
-
   /*!
     @brief Set amr
   */
-  virtual void set_amr();
+  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
     @brief Sanity check
@@ -98,6 +97,11 @@ protected:
     @brief Constructor
   */
   plasma_engine();
+
+  /*!
+    @brief Index space
+  */
+  RefCountedPtr<MFIndexSpace> m_mfis;
 
   /*!
     @brief AMR
@@ -185,6 +189,16 @@ protected:
   virtual void read_checkpoint_file();
 
   /*!
+    @brief Get geometric tags
+  */
+  virtual void get_geom_tags();
+
+  /*!
+    @brief Do a regrid step
+  */
+  virtual void regrid();
+
+  /*!
     @brief Internal bc map for Poisson stuff
   */
   virtual int map_bc(const int a_dir, const Side::LoHiSide a_side) const;
@@ -193,5 +207,25 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
+
+  /*!
+    @brief Time step
+   */
+  int m_time_step;
+
+  /*!
+    @brief Tags
+  */
+  Vector<IntVectSet> m_cell_tags;
+
+  /*!
+    @brief Tags
+  */
+  Vector<IntVectSet> m_geom_tags;
+
+  /*!
+    @brief Tag layouts
+  */
+  Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_layout_tags;
 };
 #endif

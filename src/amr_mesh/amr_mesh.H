@@ -36,13 +36,8 @@ public:
     @brief Destructor
   */
   ~amr_mesh();
-  
-  /*!
-    @brief Set MFIndexSpace
-  */
-  virtual void set_mfis(const RefCountedPtr<MFIndexSpace>& a_mfis);
 
-  /*!
+    /*!
     @brief Average down
   */
   virtual void average_down(EBAMRCellData& a_data, Phase::WhichPhase a_phase);
@@ -61,11 +56,41 @@ public:
     @brief Interpolate ghost vectors
   */
   virtual void interp_ghost(EBAMRCellData& a_data, Phase::WhichPhase a_phase);
+  
+  /*!
+    @brief Set MFIndexSpace
+  */
+  virtual void set_mfis(const RefCountedPtr<MFIndexSpace>& a_mfis);
+
+  /*!
+    @brief Build domains
+  */
+  virtual void build_domains();
+
+  /*!
+    @brief Set the physical domain
+  */
+  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
 
   /*!
     @brief Set verbosity
   */
   virtual void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Set coarsest level box; this is the coarsest domain (well, except for lower levels GMG)
+  */
+  virtual void set_coarsest_num_cells(const IntVect a_num_cells);
+
+  /*!
+    @brief Maximum AMR depth
+  */
+  virtual void set_max_amr_depth(const int a_max_amr_depth);
+
+  /*!
+    @brief Set refinement ratio
+  */
+  virtual void set_refinement_ratio(const int a_refinement_ratio);
 
   /*!
     @brief Set the maximum box size
@@ -97,6 +122,11 @@ public:
   */
   virtual void regrid(const Vector<IntVectSet>& a_tags);
 
+  /*!
+    @brief Do a sanity check to make sure everything is set up correctly
+  */
+  virtual void sanity_check();
+
     /*!
     @brief Get refinement ratios
   */
@@ -106,6 +136,31 @@ public:
     @brief Get maximum amr depth
   */
   virtual int get_max_amr_depth();
+
+  /*!
+    @brief Get blocking factor
+  */
+  virtual int get_blocking_factor();
+
+  /*!
+    @brief Get maximum box size
+  */
+  virtual int get_max_box_size();
+
+  /*!
+    @brief Get refinement ratio
+  */
+  virtual int get_refinement_ratio();
+
+  /*!
+    @brief Get finest domain
+  */
+  virtual ProblemDomain get_finest_domain();
+
+  /*!
+    @brief Get finest level
+  */
+  virtual Real get_finest_dx();
 
   /*!
     @brief Get resolutions
@@ -181,6 +236,21 @@ protected:
   RefCountedPtr<MFIndexSpace> m_mfis;
 
   /*!
+    @brief Physical domain (needed for computing dx)
+  */
+  RefCountedPtr<physical_domain> m_physdom;
+
+  /*!
+    @brief Coarsest box where we compute
+  */
+  IntVect m_num_cells;
+
+  /*!
+    @brief Refinement ratio
+  */
+  int m_ref_ratio;
+
+  /*!
     @brief Verbosity
   */
   int m_verbosity;
@@ -238,7 +308,7 @@ protected:
   /*!
     @brief AMR resolutions
   */
-  Vector<int> m_refinement_ratios;
+  Vector<int> m_ref_ratios;
 
   /*!
     @brief Level resolutions

@@ -27,25 +27,35 @@ int main(int argc, char* argv[]){
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
-  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>( NULL);
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>( NULL);
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(NULL);
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(NULL);
+  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+
+  // Set up the amr strategey
+  amr->set_verbosity(10);                        // Set verbosity
+  amr->set_coarsest_num_cells(64*IntVect::Unit); // Set number of cells on coarsest level
+  amr->set_max_amr_depth(2);                     // Set max amr depth
+  amr->set_refinement_ratio(2);                  // Set refinement ratio
+  amr->set_blocking_factor(8);                   // Set blocking factor
+  amr->set_max_box_size(32);                     // Set max box size
+  amr->set_redist_rad(1);                        // Set redistribution radius
+  amr->set_num_ghost(2);                         // Set number of ghost cells
+  amr->set_eb_ghost(4);                          // Set EB ghost vectors
+  amr->set_physical_domain(physdom);             // Set physical domain
 
   // Set up plasma engine
   RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 											compgeom,
 											plaskin,
-											timestepper));
-  engine->set_verbosity(10);
-  engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);
+											timestepper,
+											amr));
+  engine->set_verbosity(10);                                        
+  engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
   engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
   engine->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
   engine->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
   
   engine->setup_fresh();
-
-  // Real r;
-  // ParmParse pp("sphere");
-  // pp.get("electrode_radius", r);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();
