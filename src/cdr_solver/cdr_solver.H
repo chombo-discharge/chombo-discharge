@@ -33,9 +33,9 @@ public:
   virtual void advance(const Real& a_dt);
 
   /*!
-    @brief Advance state
+    @brief Advance state. The default is explicit Euler - overwrite it if you want. 
   */
-  virtual void advance(EBAMRCellData& a_state, const Real& a_dt) = 0;
+  virtual void advance(EBAMRCellData& a_state, const Real& a_dt);
 
   /*!
     @brief Compute right-hand side
@@ -47,6 +47,21 @@ public:
   */
   virtual void compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt);
 
+  /*!
+    @brief Get the ghost cell requirement
+  */
+  virtual int query_ghost_vec() = 0;
+
+  /*!
+    @brief Compute the CFL 
+  */
+  virtual Real compute_dt();
+
+  /*!
+    @brief Diffusive or not
+  */
+  bool is_diffusive();
+  
   /*!
     @brief Get the internal state
    */
@@ -91,14 +106,44 @@ protected:
   void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
 
   /*!
-    @brief Allocate temporaries
+    @brief Allocate a data holder
   */
-  virtual void allocate_temporaries();
+  virtual void allocate(EBAMRCellData& a_data);
 
   /*!
-    @brief Delete temporaries
+    @brief Allocate a data holder
   */
-  virtual void delete_temporaries();
+  virtual void allocate(EBAMRFluxData& a_data);
+
+  /*!
+    @brief Allocate a data holder
+  */
+  virtual void allocate(EBAMRIVData& a_data);
+
+  /*!
+    @brief Deallocate a data holder
+  */
+  virtual void deallocate(EBAMRCellData& a_data);
+
+  /*!
+    @brief Deallocate a data holder
+  */
+  virtual void deallocate(EBAMRFluxData& a_data);
+
+    /*!
+    @brief Deallocate a data holder
+  */
+  virtual void deallocate(EBAMRIVData& a_data);
+
+  /*!
+    @brief Compute advective derivative
+  */
+  virtual void compute_advective_derivative(EBAMRCellData& a_adv_deriv, const EBAMRCellData& a_state);
+
+  /*!
+    @brief Compute diffusion term
+  */
+  virtual void compute_diffusion_term(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
 
   /*!
     @brief Extrapolate state to faces. 
@@ -114,20 +159,19 @@ protected:
   /*!
     @brief Compute the non-conservative divergence
   */
-  virtual void nonconservative_divergence(EBAMRCellData& a_noncons_div, const EBAMRCellData& a_cons_div);
+  virtual void nonconservative_divergence(EBAMRIVData& a_noncons_div, const EBAMRCellData& a_cons_div);
 
   /*!
-    @brief Compute the hybrid divergence
+    @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence
   */
-  virtual void hybrid_divergence(EBAMRCellData&       a_hybrid_div,
-				 EBAMRIVData&         a_mass_diff,
-				 const EBAMRCellData& a_cons_div,
-				 const EBAMRCellData& a_noncons_div);
+  virtual void hybrid_divergence(EBAMRCellData&     a_hybrid_div,
+				 EBAMRIVData&       a_mass_diff,
+				 const EBAMRIVData& a_noncons_div);
 
   /*!
     @brief Increment flux registers. 
   */
-  virtual void increment_flux_registers(const EBAMRCellData& a_face_state, const EBAMRCellData& a_velo_face);
+  virtual void increment_flux_register(const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_velo_face);
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
@@ -170,6 +214,11 @@ protected:
     @brief Computational geometry
   */
   RefCountedPtr<computational_geometry> m_compgeom;
+
+  /*!
+    @brief Also solve for diffusion
+  */
+  bool m_diffusive;
 
   /*!
     @brief State data (i.e. the ion density)
