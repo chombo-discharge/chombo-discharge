@@ -16,6 +16,7 @@
 #include "wall_bc.H"
 #include "physical_domain.H"
 #include "amr_mesh.H"
+#include "cell_tagger.H"
 
 namespace Potential {
   enum GroundLive {
@@ -33,9 +34,11 @@ public:
   /*!
     @brief Full constructor. Subsequently calls define
   */
-  plasma_engine(const RefCountedPtr<computational_geometry>& a_compgeom,
+  plasma_engine(const RefCountedPtr<physical_domain>&        a_physdom,
+		const RefCountedPtr<computational_geometry>& a_compgeom,
 		const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-		const RefCountedPtr<time_stepper>&           a_timestepper);
+		const RefCountedPtr<time_stepper>&           a_timestepper,
+		const RefCountedPtr<cell_tagger>&            a_celltagger);
 
   /*!
     @brief Constructor
@@ -77,10 +80,7 @@ public:
   */
   virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
 
-  /*!
-    @brief Set physical domain
-  */
-  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
 
   /*!
     @brief Set amr
@@ -125,6 +125,11 @@ protected:
   RefCountedPtr<time_stepper> m_timestepper;
 
   /*!
+    @brief Set the cell tagger
+   */
+  RefCountedPtr<cell_tagger> m_celltagger;
+
+  /*!
     @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
   */
   Vector<RefCountedPtr<wall_bc> > m_wallbc;
@@ -139,10 +144,25 @@ protected:
   */
   virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
 
-    /*!
+  /*!
     @brief Set the time stepper
   */
   virtual void set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper);
+  
+    /*!
+    @brief Set physical domain
+  */
+  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
+  /*!
+    @brief Set the cell tagger
+  */
+  virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
+
+  /*!
+    @brief Define the cell tagger
+  */
+  virtual void define_cell_tagger();
 
   /*!
     @brief Allocate data holders for wall bcs so they can be set
@@ -173,6 +193,5 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
-  
 };
 #endif

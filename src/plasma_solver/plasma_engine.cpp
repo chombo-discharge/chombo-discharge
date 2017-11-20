@@ -14,19 +14,24 @@ plasma_engine::plasma_engine(){
   }
 }
 
-plasma_engine::plasma_engine(const RefCountedPtr<computational_geometry>& a_compgeom,
+plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_physdom,
+			     const RefCountedPtr<computational_geometry>& a_compgeom,
 			     const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-			     const RefCountedPtr<time_stepper>&           a_timestepper){
+			     const RefCountedPtr<time_stepper>&           a_timestepper,
+			     const RefCountedPtr<cell_tagger>&            a_celltagger){
   CH_TIME("plasma_engine::plasma_engine(full)");
   if(m_verbosity > 2){
     pout() << "plasma_engine::plasma_engine(full)" << endl;
   }
 
-  this->set_computational_geometry(a_compgeom);
-  this->set_plasma_kinetics(a_plaskin);
-  this->set_time_stepper(a_timestepper);
-  this->set_amr();
+  this->set_physical_domain(a_physdom);         // Set physical domain
+  this->set_computational_geometry(a_compgeom); // Set computational geometry
+  this->set_plasma_kinetics(a_plaskin);         // Set plasma kinetics
+  this->set_time_stepper(a_timestepper);        // Set time stepper
+  this->set_amr();                              // Set amr
+  this->set_cell_tagger(a_celltagger);          // Set cell tagger
 
+  this->define_cell_tagger();
   this->allocate_wall_bc();
 }
 
@@ -63,6 +68,16 @@ void plasma_engine::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_
 
 void plasma_engine::set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper){
   m_timestepper = a_timestepper;
+}
+
+void plasma_engine::set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger){
+  m_celltagger = a_celltagger;
+}
+
+void plasma_engine::define_cell_tagger(){
+  if(!m_celltagger.isNull()){
+    m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
+  }
 }
 
 void plasma_engine::set_amr(){
