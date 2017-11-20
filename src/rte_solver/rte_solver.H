@@ -48,6 +48,11 @@ public:
   virtual void compute_boundary_flux(EBAMRIVData& a_bc_flux, const EBAMRCellData& a_state) = 0;
 
   /*!
+    @brief Return required number of ghost cells
+  */
+  virtual int query_ghost() const = 0;
+
+  /*!
     @brief Get multifluid state
   */
   EBAMRCellData& get_isotropic_state();

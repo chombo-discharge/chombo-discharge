@@ -15,6 +15,7 @@
 #include "time_stepper.H"
 #include "wall_bc.H"
 #include "physical_domain.H"
+#include "amr_mesh.H"
 
 namespace Potential {
   enum GroundLive {
@@ -82,6 +83,11 @@ public:
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
 
   /*!
+    @brief Set amr
+  */
+  virtual void set_amr();
+
+  /*!
     @brief Sanity check
   */
   virtual void sanity_check();
@@ -92,6 +98,11 @@ protected:
     @brief Constructor
   */
   plasma_engine();
+
+  /*!
+    @brief AMR
+  */
+  RefCountedPtr<amr_mesh> m_amr;
 
   /*!
     @brief Geometry

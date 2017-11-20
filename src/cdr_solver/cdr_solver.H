@@ -50,7 +50,7 @@ public:
   /*!
     @brief Get the ghost cell requirement
   */
-  virtual int query_ghost_vec() = 0;
+  virtual int query_ghost() const = 0;
 
   /*!
     @brief Compute the CFL 

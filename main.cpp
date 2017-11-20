@@ -28,8 +28,6 @@ int main(int argc, char* argv[]){
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>( NULL);
   RefCountedPtr<plasma_kinetics> timestepper     = RefCountedPtr<time_stepper>( NULL);
-  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
-
 
 
   // Set up plasma engine

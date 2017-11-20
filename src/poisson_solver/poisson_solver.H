@@ -48,6 +48,11 @@ public:
   virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source) = 0;
 
   /*!
+    @brief Query the required number of ghost cells
+  */
+  virtual int query_ghost() const = 0;
+  
+  /*!
     @brief Get multifluid state
   */
   MFAMRCellData& get_state();

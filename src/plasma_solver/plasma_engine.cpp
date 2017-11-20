@@ -25,6 +25,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<computational_geometry>& a_comp
   this->set_computational_geometry(a_compgeom);
   this->set_plasma_kinetics(a_plaskin);
   this->set_time_stepper(a_timestepper);
+  this->set_amr();
 
   this->allocate_wall_bc();
 }
@@ -62,6 +63,16 @@ void plasma_engine::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_
 
 void plasma_engine::set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper){
   m_timestepper = a_timestepper;
+}
+
+void plasma_engine::set_amr(){
+  CH_TIME("plasma_engine::create_amr");
+  if(m_verbosity > 2){
+    pout() << "plasma_engine::create_amr" << endl;
+  }
+
+  m_amr = RefCountedPtr<amr_mesh> (new amr_mesh());
+  m_amr->set_mfis(m_compgeom->get_ebis_mf());
 }
 
 void plasma_engine::setup_fresh(){

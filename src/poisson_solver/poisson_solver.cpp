@@ -22,6 +22,14 @@ void poisson_solver::setup_base(const computational_geometry* const a_compgeom){
   this->alias_internals();
 }
 
+void poisson_solver::solve() {
+  this->solve(m_state, m_source);
+}
+
+void poisson_solver::solve(MFAMRCellData& a_state){
+  this->solve(a_state, m_source);
+}
+
 MFAMRCellData& poisson_solver::get_state(){
   return m_state;
 }
