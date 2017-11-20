@@ -25,20 +25,16 @@ int main(int argc, char* argv[]){
   const RealVect probLo = -RealVect::Unit;
   const RealVect probHi =  RealVect::Unit;
 
-  
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>( NULL);
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>( NULL);
-  RefCountedPtr<cell_tagger> celltagger          = RefCountedPtr<cell_tagger> (NULL);
-
 
   // Set up plasma engine
   RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 											compgeom,
 											plaskin,
-											timestepper,
-											celltagger));
+											timestepper));
   engine->set_verbosity(10);
   engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);
   engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);

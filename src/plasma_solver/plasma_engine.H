@@ -32,13 +32,13 @@ class plasma_engine {
 public:
 
   /*!
-    @brief Full constructor. Subsequently calls define
+    @brief Full constructor. 
   */
   plasma_engine(const RefCountedPtr<physical_domain>&        a_physdom,
 		const RefCountedPtr<computational_geometry>& a_compgeom,
 		const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 		const RefCountedPtr<time_stepper>&           a_timestepper,
-		const RefCountedPtr<cell_tagger>&            a_celltagger);
+		const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL));
 
   /*!
     @brief Constructor
