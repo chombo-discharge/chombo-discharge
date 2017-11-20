@@ -1,5 +1,5 @@
 # Chombo library directory
-CHOMBO_HOME   := /home/marskar/Projects/mf-chombo/lib
+CHOMBO_HOME   := /home/robertm/Projects/mf-chombo/lib
 
 # Make rules
 include $(CHOMBO_HOME)/mk/Make.defs
@@ -20,10 +20,12 @@ all: all-test
 #
 base_dir = .
 src_dirs = ./src		\
+	./src/cdr_solver	\
 	./src/geometry		\
 	./src/global		\
 	./src/plasma_solver 	\
 	./src/poisson_solver 	\
+	./src/rte_solver 	\
 	./geometries_prebuilt	\
 
 # Define rules to build everything

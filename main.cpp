@@ -11,6 +11,7 @@
 #include "sphere_sphere_geometry.H"
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
+#include "rte_solver.H"
 
 //
 int main(int argc, char* argv[]){
