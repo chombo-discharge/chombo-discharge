@@ -17,18 +17,9 @@
 #include "dielectric.H"
 #include "electrode.H"
 #include "physical_domain.H"
+#include "mfis.H"
 
-/*!
-  @brief Global stuff for phases
-*/
-namespace Phase {
-  const int num_phases = 2;
-  
-  enum WhichPhase {
-    Gas = 0,
-    Solid = 1
-  };
-};
+
 
 /*!
   @brief Abstract base class for geometries
@@ -89,7 +80,7 @@ public:
   /*!
     @brief Get the EBIndexSpaces
   */
-  virtual const RefCountedPtr<MFIndexSpace> get_ebis_mf() const;
+  virtual const RefCountedPtr<mfis> get_mfis() const;
 
   /*!
     @brief Build MFIndexSpace
@@ -105,9 +96,9 @@ public:
 protected:
 
   /*!
-    @brief MF index space
+    @brief Multifluid index spaces
   */
-  RefCountedPtr<MFIndexSpace> m_ebis_mf;
+  RefCountedPtr<mfis> m_mfis;
 
   /*!
     @brief Background permittivity

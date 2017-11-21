@@ -10,6 +10,7 @@
 
 #include "type_definitions.H"
 #include "computational_geometry.H"
+#include "mfis.H"
 
 #include <DisjointBoxLayout.H>
 #include <ProblemDomain.H>
@@ -58,9 +59,9 @@ public:
   virtual void interp_ghost(EBAMRCellData& a_data, Phase::WhichPhase a_phase);
   
   /*!
-    @brief Set MFIndexSpace
+    @brief Set mfis
   */
-  virtual void set_mfis(const RefCountedPtr<MFIndexSpace>& a_mfis);
+  virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
 
   /*!
     @brief Build domains
@@ -91,6 +92,16 @@ public:
     @brief Set refinement ratio
   */
   virtual void set_refinement_ratio(const int a_refinement_ratio);
+
+  /*!
+    @brief Set buffer size
+  */
+  virtual void set_buffer_size(const int a_buffer_size);
+
+  /*!
+    @brief Set fill ratio
+  */
+  virtual void set_fill_ratio(const Real a_fill_ratio);
 
   /*!
     @brief Set the maximum box size
@@ -231,9 +242,9 @@ public:
 protected:
 
   /*!
-    @brief MFIndexSpace
+    @brief mfis
   */
-  RefCountedPtr<MFIndexSpace> m_mfis;
+  RefCountedPtr<mfis> m_mfis;
 
   /*!
     @brief Physical domain (needed for computing dx)
@@ -244,6 +255,11 @@ protected:
     @brief Coarsest box where we compute
   */
   IntVect m_num_cells;
+
+  /*!
+    @brief Fill ratio
+  */
+  Real m_fill_ratio;
 
   /*!
     @brief Refinement ratio
@@ -269,6 +285,11 @@ protected:
     @brief Max box size
   */
   int m_max_box_size;
+
+  /*!
+    @brief Set buffer size
+  */
+  int m_buffer_size;
 
   /*!
     @brief Blocking factor
@@ -359,6 +380,16 @@ protected:
     @brief Fine to coarse redistribution
   */
   Vector<Vector<RefCountedPtr<EBFineToCoarRedist> > > m_fine_to_coar_redist;
+
+  /*!
+    @brief Build new grids. This also load balances. 
+  */
+  virtual void build_grids(Vector<IntVectSet>& a_tags);
+
+  /*!
+    @brief Load balance grids
+  */
+  virtual void load_balance(Vector<int>& a_proc_assign, Vector<Box>& a_boxes, const int a_lvl);
 
   /*!
     @brief Define EBLevelGrid

@@ -17,6 +17,7 @@
 #include "physical_domain.H"
 #include "amr_mesh.H"
 #include "cell_tagger.H"
+#include "mfis.H"
 
 namespace Potential {
   enum GroundLive {
@@ -87,6 +88,11 @@ public:
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
+    @brief Set geometric refinement depth
+  */
+  virtual void set_geom_refinement_depth(const int a_depth);
+
+  /*!
     @brief Sanity check
   */
   virtual void sanity_check();
@@ -101,7 +107,7 @@ protected:
   /*!
     @brief Index space
   */
-  RefCountedPtr<MFIndexSpace> m_mfis;
+  RefCountedPtr<mfis> m_mfis;
 
   /*!
     @brief AMR
@@ -163,10 +169,7 @@ protected:
   */
   virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
 
-  /*!
-    @brief Define the cell tagger
-  */
-  virtual void define_cell_tagger();
+
 
   /*!
     @brief Allocate data holders for wall bcs so they can be set
@@ -212,6 +215,11 @@ protected:
     @brief Time step
    */
   int m_time_step;
+
+  /*!
+    @brief Geometric tag depth
+  */
+  int m_geom_tag_depth;
 
   /*!
     @brief Tags

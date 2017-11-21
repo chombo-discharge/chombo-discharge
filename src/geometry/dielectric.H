@@ -35,10 +35,14 @@ public:
   */
   void define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
 
-  //
+  /*!
+    @brief Get level-set function
+  */
   const RefCountedPtr<BaseIF>& get_function() const;
 
-  //
+  /*!
+    @brief Get permittivity
+  */
   const Real& get_permittivity() const;
 
 protected:

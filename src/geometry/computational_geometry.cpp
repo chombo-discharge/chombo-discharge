@@ -11,6 +11,8 @@
 #include <AllRegularService.H>
 #include <GeometryService.H>
 #include <WrappedGShop.H>
+#include <GeometryShop.H>
+#include <ComplementIF.H>
 
 #include "computational_geometry.H"
 
@@ -24,7 +26,7 @@ computational_geometry::computational_geometry(){
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
   
-  m_ebis_mf = RefCountedPtr<MFIndexSpace> (new MFIndexSpace());
+  m_mfis = RefCountedPtr<mfis> (new mfis());
 }
 
 computational_geometry::~computational_geometry(){
@@ -42,8 +44,8 @@ const Real& computational_geometry::get_eps0() const {
   return m_eps0;
 }
 
-const RefCountedPtr<MFIndexSpace> computational_geometry::get_ebis_mf() const {
-  return m_ebis_mf;
+const RefCountedPtr<mfis> computational_geometry::get_mfis() const {
+  return m_mfis;
 }
 
 void computational_geometry::set_dielectrics(Vector<dielectric>& a_dielectrics){
@@ -63,19 +65,20 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
 					      const Real&            a_finestDx,
 					      const int&             a_nCellMax,
 					      const int&             a_maxCoarsen){
+
+
   
   // Build geoservers
   Vector<GeometryService*> geoservers(2, NULL);
-  this->build_gas_geoserv(geoservers[Phase::Gas],   a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
+  this->build_gas_geoserv(geoservers[Phase::Gas],     a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
   this->build_solid_geoserv(geoservers[Phase::Solid], a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
 
-  // Define MF
-  m_ebis_mf->define(a_finestDomain.domainBox(),
-		    a_physDom.get_prob_lo(),
-		    a_finestDx,
-		    geoservers,
-		    a_nCellMax,
-		    a_maxCoarsen);
+  m_mfis->define(a_finestDomain.domainBox(), // Define MF
+		 a_physDom.get_prob_lo(),
+		 a_finestDx,
+		 geoservers,
+		 a_nCellMax,
+		 a_maxCoarsen);
 }
 
 void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
@@ -86,10 +89,10 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
   // The gas ebis is the intersection of electrodes and dielectrics
   Vector<BaseIF*> parts;
   for (int i = 0; i < m_dielectrics.size(); i++){
-    parts.push_back(&(*m_dielectrics[i].get_function()));
+    parts.push_back(&(*(m_dielectrics[i].get_function())));
   }
   for (int i = 0; i < m_electrodes.size(); i++){
-    parts.push_back(&(*m_electrodes[i].get_function()));
+    parts.push_back(&(*(m_electrodes[i].get_function())));
   }
 
   // Create geoshop; either all regular or an intersection
@@ -117,24 +120,22 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     parts_electrodes.push_back(&(*m_electrodes[i].get_function()));
   }
 
-  // Create EBIndexSpace. If there are no solid phases, return ull
+  // Create EBIndexSpace. If there are no solid phases, return null
   if(parts_dielectrics.size() == 0){
-    a_geoserver = new AllRegularService();
+    a_geoserver = NULL;
   }
   else {
-    Vector<BaseIF*> parts;
+    Vector<BaseIF*> union_parts;
 
-    //
-    RefCountedPtr<BaseIF> diel_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_dielectrics));
-    RefCountedPtr<BaseIF> elec_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_electrodes));
-    parts.push_back(&(*diel_baseif));
-    parts.push_back(&(*elec_baseif));
+    RefCountedPtr<BaseIF> diel_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_dielectrics)); // Gas outside dielectric
+    RefCountedPtr<BaseIF> elec_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_electrodes));  // Gas outside electrodes
+    RefCountedPtr<BaseIF> diel_compif = RefCountedPtr<BaseIF> (new ComplementIF(*diel_baseif));        // Inside of dielectrics
+    
+    union_parts.push_back(&(*elec_baseif)); // Parts for union
+    union_parts.push_back(&(*diel_compif)); // Parts for union
+    
+    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new UnionIF(union_parts)); // Union to get rid of electrode
 
-    // Create union to get rid of electrode part
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new UnionIF(parts));
-
-    // Set up the rest
     a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
-
   }
 }

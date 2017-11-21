@@ -32,6 +32,20 @@ public:
     @returns Actual time step used (can be different from a_dt for adaptive methods)
   */
   virtual Real advance(const Real a_dt) = 0;
+
+  /*!
+    @brief Query about necessary number of ghost cells. This collects that from the individual solvers. 
+  */
+  virtual int query_ghost(){
+    return 2;
+  }
+
+  /*!
+    @brief Instantiate solvers
+  */
+  virtual void instantiate_solvers(){
+
+  }
   
 protected:
 

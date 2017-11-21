@@ -21,7 +21,7 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
 
   Real eps0 = 1, eps_mat = 1, elec_rad = 0.1, diel_rad = 0.1;
   Vector<Real> center;
-  RealVect elec_center = 0.5*RealVect::Unit, diel_center = -0.5*RealVect::Unit;
+  RealVect elec_center = 0.25*RealVect::Unit, diel_center = -0.25*RealVect::Unit;
   bool live = true;
 
   // ParmParse pp("sphere_sphere_geometry");
