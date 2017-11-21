@@ -48,17 +48,17 @@ class nwoebquadcfinterp
 public:
 
   ///
-  nwoebquadcfinterp(const DisjointBoxLayout& a_gridsFine,
-                    const DisjointBoxLayout& a_gridsCoar,
-                    const EBISLayout&        a_ebislFine,
-                    const EBISLayout&        a_ebislCoar,
-                    const ProblemDomain&     a_domainCoar,
-                    const int&               a_nref,
-                    const int&               a_nvar,
-                    const Real&              a_dxFine,
-                    const IntVect&           a_ghost,
-                    const LayoutData<IntVectSet>&  a_cfivs,
-		    const EBIndexSpace* const a_ebisPtr = Chombo_EBIS::instance());
+  nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
+                    const DisjointBoxLayout&           a_gridsCoar,
+                    const EBISLayout&                  a_ebislFine,
+                    const EBISLayout&                  a_ebislCoar,
+                    const ProblemDomain&               a_domainCoar,
+                    const int&                         a_nref,
+                    const int&                         a_nvar,
+                    const Real&                        a_dxFine,
+                    const int&                         a_ghost,
+                    const LayoutData<IntVectSet>&      a_cfivs,
+		    const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
 
   ///
   ~nwoebquadcfinterp()
@@ -85,7 +85,7 @@ public:
 
 protected:
   void
-  defineInternals(const LayoutData<IntVectSet>& a_cfivs, const EBIndexSpace* const a_ebisPtr);
+  defineInternals(const LayoutData<IntVectSet>& a_cfivs, const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
   void
   defineStencils (const LayoutData<IntVectSet>& a_cfivs);
   
@@ -115,7 +115,7 @@ protected:
   int               m_nref;
   int               m_nvar;
   Real              m_dxFine;
-  IntVect           m_ghost;
+  int               m_ghost;
   LayoutData<RefCountedPtr< AggStencil<EBCellFAB, EBCellFAB> > > m_stencil;
   LevelData<EBCellFAB> m_bufferCoFi;
   

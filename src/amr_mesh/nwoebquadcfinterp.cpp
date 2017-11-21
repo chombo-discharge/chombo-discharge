@@ -20,17 +20,17 @@
 
 /***********************/
 nwoebquadcfinterp::
-nwoebquadcfinterp(const DisjointBoxLayout&       a_gridsFine,
-                  const DisjointBoxLayout&       a_gridsCoar,
-                  const EBISLayout&              a_ebislFine,
-                  const EBISLayout&              a_ebislCoar,
-                  const ProblemDomain&           a_domainCoar,
-                  const int&                     a_nref,
-                  const int&                     a_nvar,
-                  const Real&                    a_dxFine,
-                  const IntVect &                a_ghost,
-                  const LayoutData<IntVectSet>&  a_cfivs,
-		  const EBIndexSpace* const a_ebisPtr)             
+nwoebquadcfinterp(const DisjointBoxLayout&           a_gridsFine,
+                  const DisjointBoxLayout&           a_gridsCoar,
+                  const EBISLayout&                  a_ebislFine,
+                  const EBISLayout&                  a_ebislCoar,
+                  const ProblemDomain&               a_domainCoar,
+                  const int&                         a_nref,
+                  const int&                         a_nvar,
+                  const Real&                        a_dxFine,
+                  const int&                         a_ghost,
+                  const LayoutData<IntVectSet>&      a_cfivs,
+		  const RefCountedPtr<EBIndexSpace>& a_ebisPtr)            
 {
   m_gridsFine  =  a_gridsFine ;          
   m_gridsCoar  =  a_gridsCoar ;     
@@ -45,17 +45,18 @@ nwoebquadcfinterp(const DisjointBoxLayout&       a_gridsFine,
 }
 void 
 nwoebquadcfinterp::
-defineInternals(const LayoutData<IntVectSet>&  a_cfivs, const EBIndexSpace* const a_ebisPtr)             
+defineInternals(const LayoutData<IntVectSet>&  a_cfivs, const RefCountedPtr<EBIndexSpace>& a_ebisPtr)             
 {
   m_gridsCoFi= DisjointBoxLayout();
+
   coarsen(m_gridsCoFi, m_gridsFine, m_nref);
 
   a_ebisPtr->fillEBISLayout(m_ebislCoFi,
-                          m_gridsCoFi,
-                          m_domainCoar, 4);
+			    m_gridsCoFi,
+			    m_domainCoar, m_ghost);
 
   EBCellFactory fact(m_ebislCoFi);
-  m_bufferCoFi.define(m_gridsCoFi, m_nvar, 4*IntVect::Unit, fact);
+  m_bufferCoFi.define(m_gridsCoFi, m_nvar, m_ghost*IntVect::Unit, fact);
 
   defineStencils(a_cfivs);
 }
@@ -64,7 +65,7 @@ nwoebquadcfinterp::
 defineStencils(const LayoutData<IntVectSet>&  a_cfivs)             
 {
   EBCellFactory fact(m_ebislFine);
-  LevelData<EBCellFAB> proxyLevel(m_gridsFine, 1, m_ghost, fact);
+  LevelData<EBCellFAB> proxyLevel(m_gridsFine, 1, m_ghost*IntVect::Unit, fact);
   m_stencil.define(m_gridsFine);
   for(DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit)
     {
@@ -114,10 +115,16 @@ getStencil(VoFStencil           & a_stencil,
   VolIndex fineVoF = a_vofFine;
   Real dxFine = m_dxFine;  Real dxCoar = m_nref*m_dxFine;
   a_stencil.clear();
+#if 0 // original code. breaks for m_nref != 2
   VolIndex coarVoF = a_ebisFine.coarsen(a_vofFine);
+#else // Robert's code as of Nov. 21 2017
+  VolIndex coarVoF(coarsen(fineVoF.gridIndex(), m_nref), fineVoF.cellIndex());
+#endif
+  
   RealVect coarLoc = EBArith::getVofLocation(coarVoF, dxCoar*RealVect::Unit, RealVect::Zero);
   RealVect fineLoc = EBArith::getVofLocation(fineVoF, dxFine*RealVect::Unit, RealVect::Zero);
   RealVect dist = fineLoc - coarLoc;
+
   EBArith::getExtrapolationStencil(a_stencil, dist, dxCoar*RealVect::Unit, coarVoF, a_ebisCoFi);
 }  
 /***********************/

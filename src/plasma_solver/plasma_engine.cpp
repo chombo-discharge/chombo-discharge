@@ -158,9 +158,11 @@ void plasma_engine::setup_fresh(){
   Vector<LevelData<EBCellFAB>* > data(1 + finest);
   for (int lvl = 0; lvl <= finest; lvl++){
     EBCellFactory fact(ebisl[lvl]);
-    data[lvl] = new LevelData<EBCellFAB> (grids[lvl], 1, IntVect::Unit, fact);
+    data[lvl] = new LevelData<EBCellFAB> (grids[lvl], 1, 2*IntVect::Unit, fact);
+    EBLevelDataOps::setVal(*data[lvl], (0.5+lvl)*(0.5+lvl));
   }
-  EBAMRDataOps::setVal(data, 0.0);
+  m_amr->average_down(data, Phase::Gas);
+  m_amr->interp_ghost(data, Phase::Gas);
 
   Vector<std::string> names(1);
   Vector<Real> coveredVals;
@@ -231,13 +233,13 @@ void plasma_engine::sanity_check(){
     pout() << "plasma_engine::sanity_check" << endl;
   }
 
-  // for (int dir = 0; dir < SpaceDim; dir++){
-  //   for (SideIterator sideit; sideit.ok(); ++sideit){
-  //     if(m_wallbc[map_bc(dir, sideit())].isNull()){
-  // 	MayDay::Abort("computational_geometry::sanity_check() failed. Wall BC has not been set properly");
-  //     }
-  //   }
-  // }
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sideit; sideit.ok(); ++sideit){
+      if(m_wallbc[map_bc(dir, sideit())].isNull()){
+  	MayDay::Abort("computational_geometry::sanity_check() failed. Wall BC has not been set properly");
+      }
+    }
+  }
 }
 
 void plasma_engine::regrid(){
@@ -276,7 +278,7 @@ void plasma_engine::get_geom_tags(){
 
   const int maxdepth = m_amr->get_max_amr_depth();
 
-  m_geom_tags.resize(1 + maxdepth);
+  m_geom_tags.resize(maxdepth);
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(Phase::Gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(Phase::Solid);
@@ -284,7 +286,7 @@ void plasma_engine::get_geom_tags(){
   CH_assert(ebis_sol != NULL);
   CH_assert(ebis_gas != NULL);
 
-  for (int lvl = 0; lvl <= maxdepth; lvl++){
+  for (int lvl = 0; lvl < maxdepth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that. 
     const ProblemDomain& cur_dom = m_amr->get_domains()[lvl];
     const int which_level = ebis_gas->getLevel(cur_dom);
 
@@ -296,8 +298,8 @@ void plasma_engine::get_geom_tags(){
   }
 
   // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
-  for (int lvl = 0; lvl <= maxdepth; lvl++){
-    m_geom_tags[lvl].grow(2);
+  for (int lvl = 0; lvl < maxdepth; lvl++){
+    m_geom_tags[lvl].grow(1);
   }
 }
 

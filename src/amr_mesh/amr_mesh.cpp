@@ -20,6 +20,7 @@ amr_mesh::amr_mesh(){
   this->set_blocking_factor(-8);
   this->set_max_box_size(-32);
   this->set_buffer_size(0);
+  this->set_ebcf(true);
   this->set_fill_ratio(-1.0);
   this->set_redist_rad(-1);
   this->set_num_ghost(-2);
@@ -104,7 +105,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags){
 
     this->define_eblevelgrid(); // Define EBLevelGrid objects on both phases
     this->define_eb_coar_ave(); // Define EBCoarseAverage on both phases
-    //    this->define_eb_quad_cfi(); // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
+    this->define_eb_quad_cfi(); // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
     this->define_flux_reg();    // Define flux register (Phase::Gas only)
     this->define_redist_oper(); // Define redistribution (Phase::Gas only)
   }
@@ -154,8 +155,6 @@ void amr_mesh::define_eblevelgrid(){
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_levelgrid" << endl;
   }
-
-  m_ebghost = 4;
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(Phase::Gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(Phase::Solid);
@@ -229,7 +228,7 @@ void amr_mesh::define_eb_quad_cfi(){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-	LayoutData<IntVectSet>& cfivs = *(m_eblg[Phase::Gas][lvl]->getCFIVS());
+	const LayoutData<IntVectSet>& cfivs = *(m_eblg[Phase::Gas][lvl]->getCFIVS());
 	m_quadcfi[Phase::Gas][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
 											     m_grids[lvl-1],
 											     m_ebisl[Phase::Gas][lvl],
@@ -238,11 +237,11 @@ void amr_mesh::define_eb_quad_cfi(){
 											     m_ref_ratios[lvl-1],
 											     comps,
 											     m_dx[lvl],
-											     m_num_ghost*IntVect::Unit,
+											     m_num_ghost,
 											     cfivs,
 											     ebis_gas));
       }
-      if(ebis_sol.isNull()){
+      if(!ebis_sol.isNull()){
 	LayoutData<IntVectSet>& cfivs = *(m_eblg[Phase::Solid][lvl]->getCFIVS());
 	m_quadcfi[Phase::Solid][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
 											       m_grids[lvl-1],
@@ -252,7 +251,7 @@ void amr_mesh::define_eb_quad_cfi(){
 											       m_ref_ratios[lvl-1],
 											       comps,
 											       m_dx[lvl],
-											       m_num_ghost*IntVect::Unit,
+											       m_num_ghost,
 											       cfivs,
 											       ebis_sol));
       }
@@ -439,6 +438,10 @@ void amr_mesh::set_coarsest_num_cells(const IntVect a_num_cells){
 
 void amr_mesh::set_max_amr_depth(const int a_max_amr_depth){
   m_max_amr_depth = a_max_amr_depth;
+}
+
+void amr_mesh::set_ebcf(const bool a_ebcf){
+  m_ebcf = a_ebcf;
 }
 
 void amr_mesh::set_refinement_ratio(const int a_refinement_ratio){

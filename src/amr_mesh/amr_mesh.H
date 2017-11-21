@@ -89,6 +89,11 @@ public:
   virtual void set_max_amr_depth(const int a_max_amr_depth);
 
   /*!
+    @brief Tell amr_mesh to forget about ebcf (user must guarantee that this is the case)
+  */
+  virtual void set_ebcf(const bool a_ebcf);
+
+  /*!
     @brief Set refinement ratio
   */
   virtual void set_refinement_ratio(const int a_refinement_ratio);
