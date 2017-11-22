@@ -118,7 +118,7 @@ getStencil(VoFStencil           & a_stencil,
 #if 0 // original code. breaks for m_nref != 2
   VolIndex coarVoF = a_ebisFine.coarsen(a_vofFine);
 #else // Robert's code as of Nov. 21 2017
-  VolIndex coarVoF(coarsen(fineVoF.gridIndex(), m_nref), fineVoF.cellIndex());
+  VolIndex coarVoF = m_ebislFine.coarsen(a_vofFine, m_nref, a_dit);
 #endif
   
   RealVect coarLoc = EBArith::getVofLocation(coarVoF, dxCoar*RealVect::Unit, RealVect::Zero);

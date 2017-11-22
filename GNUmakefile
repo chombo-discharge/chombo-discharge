@@ -1,5 +1,5 @@
 # Chombo library directory
-CHOMBO_HOME   := /home/marskar/Projects/mf-chombo/lib
+CHOMBO_HOME   := /home/robertm/Projects/mf-chombo/lib
 
 # Make rules
 include $(CHOMBO_HOME)/mk/Make.defs

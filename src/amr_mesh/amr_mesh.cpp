@@ -162,10 +162,12 @@ void amr_mesh::define_eblevelgrid(){
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(!ebis_sol.isNull()){
       m_eblg[Phase::Gas][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_ebghost, ebis_gas));
+      m_eblg[Phase::Gas][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl], ebis_gas);
       m_ebisl[Phase::Gas][lvl] = m_eblg[Phase::Gas][lvl]->getEBISL();
     }
     if(!ebis_sol.isNull()){
       m_eblg[Phase::Solid][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_ebghost, ebis_sol));
+      m_eblg[Phase::Solid][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl], ebis_gas);
       m_ebisl[Phase::Solid][lvl] = m_eblg[Phase::Solid][lvl]->getEBISL();
     }
   }
