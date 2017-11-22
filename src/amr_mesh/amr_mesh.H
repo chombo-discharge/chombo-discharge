@@ -11,6 +11,7 @@
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "mfis.H"
+#include "irreg_amr_stencil.H"
 
 #include <DisjointBoxLayout.H>
 #include <ProblemDomain.H>
@@ -38,7 +39,7 @@ public:
   */
   ~amr_mesh();
 
-    /*!
+  /*!
     @brief Average down
   */
   virtual void average_down(EBAMRCellData& a_data, Phase::WhichPhase a_phase);
@@ -134,6 +135,16 @@ public:
   virtual void set_redist_rad(const int a_redist_rad);
 
   /*!
+    @brief Set irregular stencil order
+  */
+  virtual void set_irreg_sten_order(const int a_irreg_sten_order);
+
+  /*!
+    @brief Set maximum stencil radius for irregular stencils
+  */
+  virtual void set_irreg_sten_radius(const int a_irreg_sten_radius);
+
+  /*!
     @brief Regrid function. Generate new grids. 
   */
   virtual void regrid(const Vector<IntVectSet>& a_tags);
@@ -203,7 +214,7 @@ public:
   */
   virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(Phase::WhichPhase a_phase);
 
-    /*!
+  /*!
     @brief Get the EBISLayouts
   */
   virtual Vector<EBISLayout>& get_ebisl(Phase::WhichPhase a_phase);
@@ -238,10 +249,20 @@ public:
   */
   virtual Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(Phase::WhichPhase a_phase);
 
-    /*!
+  /*!
     @brief Get coar-to-coar redistribution
   */
   virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(Phase::WhichPhase a_phase);
+
+  /*!
+    @brief Get interpolation stencils
+  */
+  virtual irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(Phase::WhichPhase a_phase);
+
+  /*!
+    @brief Get interpolation stencils
+  */
+  virtual irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(Phase::WhichPhase a_phase);
 
   
 protected:
@@ -317,6 +338,16 @@ protected:
   int m_redist_rad;
 
   /*!
+    @brief Stencil order for irregular stencils
+  */
+  int m_irreg_sten_order;
+
+  /*!
+    @brief radius for irregular stencils
+  */
+  int m_irreg_sten_radius;
+
+  /*!
     @brief Grids have EB x CF crossing
   */
   bool m_ebcf;
@@ -387,6 +418,16 @@ protected:
   Vector<Vector<RefCountedPtr<EBFineToCoarRedist> > > m_fine_to_coar_redist;
 
   /*!
+    @brief Interpolation stencil for interpolating to cell centroid
+  */
+  Vector<RefCountedPtr<irreg_amr_stencil<centroid_interp> > > m_centroid_interp;
+
+  /*!
+    @brief Interpolation stencil for interpolating to boundary centroid
+  */
+  Vector<RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> > > m_eb_centroid_interp;
+
+  /*!
     @brief Build new grids. This also load balances. 
   */
   virtual void build_grids(Vector<IntVectSet>& a_tags);
@@ -420,6 +461,11 @@ protected:
     @brief Define flux registers
   */
   virtual void define_flux_reg();
+
+  /*!
+    @brief Define irregular stencils
+  */
+  virtual void define_irreg_sten();
 };
 
 #endif

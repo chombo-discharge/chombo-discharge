@@ -159,10 +159,15 @@ void plasma_engine::setup_fresh(){
   for (int lvl = 0; lvl <= finest; lvl++){
     EBCellFactory fact(ebisl[lvl]);
     data[lvl] = new LevelData<EBCellFAB> (grids[lvl], 1, 2*IntVect::Unit, fact);
-    EBLevelDataOps::setVal(*data[lvl], (0.5+lvl)*(0.5+lvl));
+    EBLevelDataOps::setVal(*data[lvl], lvl);//(0.5+lvl)*(0.5+lvl));
   }
   m_amr->average_down(data, Phase::Gas);
   m_amr->interp_ghost(data, Phase::Gas);
+
+  // Apply a centroid-interpolation stencil
+  //  irreg_amr_stencil<centroid_interp>& stencils = m_amr->get_centroid_interp_stencils(Phase::Gas);
+  irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(Phase::Gas);
+  stencils.apply(data);
 
   Vector<std::string> names(1);
   Vector<Real> coveredVals;

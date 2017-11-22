@@ -15,14 +15,34 @@
 #include <BaseIF.H>
 #include <SphereIF.H>
 
+#include "perlin_sphere_if.H"
+#include "box_if.H"
+#include "new_sphere_if.H"
+
 
 //
 sphere_sphere_geometry::sphere_sphere_geometry(){
 
-  Real eps0 = 1, eps_mat = 1, elec_rad = 0.1, diel_rad = 0.1;
-  Vector<Real> center;
-  RealVect elec_center = 0.25*RealVect::Unit, diel_center = -0.25*RealVect::Unit;
+  Real eps0 = 1;
+  Real eps_mat = 1;
+  Real elec_rad = 0.1;
+  Real diel_rad = 0.1;
+  Real elec_noise = 5.E-3;
+  Real diel_noise = 5.E-3;
+  Real elec_persist = 0.5;
+  Real diel_persist = 0.5;
+  
+  RealVect elec_center = 0.25*RealVect::Unit;
+  RealVect diel_center = -0.25*RealVect::Unit;
+  RealVect elec_noise_freq = 400.*RealVect::Unit;
+  RealVect diel_noise_freq = 400.*RealVect::Unit;
+  
   bool live = true;
+  bool reseed = true;
+
+  int elec_octaves = 3;
+  int diel_octaves = 3;
+
 
   // ParmParse pp("sphere_sphere_geometry");
   // pp.get("electrode_radius",  elec_rad);
@@ -39,11 +59,25 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   m_dielectrics.resize(1);
   m_electrodes.resize(1);
 
-  RefCountedPtr<BaseIF> diel_sphere = RefCountedPtr<BaseIF> (new SphereIF(diel_rad, diel_center, 0));
-  RefCountedPtr<BaseIF> elec_sphere  = RefCountedPtr<BaseIF> (new SphereIF(elec_rad, elec_center, 0));
+  //  RefCountedPtr<BaseIF> diel_sphere = RefCountedPtr<BaseIF> (new SphereIF(diel_rad, diel_center, 0));
+  RefCountedPtr<BaseIF> diel_sphere = RefCountedPtr<BaseIF> (new perlin_sphere_if(diel_rad,
+  										  diel_center,
+  										  0,
+  										  diel_noise,
+  										  diel_noise_freq,
+  										  diel_persist,
+  										  diel_octaves,
+  										  false));
+  RefCountedPtr<BaseIF> elec_sphere = RefCountedPtr<BaseIF> (new perlin_sphere_if(elec_rad,
+  										  elec_center,
+  										  0,
+  										  elec_noise,
+  										  elec_noise_freq,
+  										  elec_persist,
+  										  elec_octaves,
+  										  false));
   m_dielectrics[0].define(diel_sphere, eps_mat);
   m_electrodes[0].define(elec_sphere, live);
-  
 }
 
 //

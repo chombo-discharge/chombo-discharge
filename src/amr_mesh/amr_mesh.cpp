@@ -25,6 +25,8 @@ amr_mesh::amr_mesh(){
   this->set_redist_rad(-1);
   this->set_num_ghost(-2);
   this->set_eb_ghost(-4);
+  this->set_irreg_sten_order(-1);
+  this->set_irreg_sten_radius(-1);
 }
 
 amr_mesh::~amr_mesh(){
@@ -55,6 +57,8 @@ void amr_mesh::build_domains(){
   m_quadcfi.resize(Phase::num_phases);
   m_flux_reg.resize(Phase::num_phases);
   m_level_redist.resize(Phase::num_phases);
+  m_centroid_interp.resize(Phase::num_phases);
+  m_eb_centroid_interp.resize(Phase::num_phases);
   m_coar_to_fine_redist.resize(Phase::num_phases);
   m_coar_to_coar_redist.resize(Phase::num_phases);
   m_fine_to_coar_redist.resize(Phase::num_phases);
@@ -108,6 +112,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags){
     this->define_eb_quad_cfi(); // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
     this->define_flux_reg();    // Define flux register (Phase::Gas only)
     this->define_redist_oper(); // Define redistribution (Phase::Gas only)
+    this->define_irreg_sten();  // Define irregular stencils
   }
 }
 
@@ -361,6 +366,28 @@ void amr_mesh::define_redist_oper(){
   }
 }
 
+void amr_mesh::define_irreg_sten(){
+  CH_TIME("amr_mesh::define_irreg_sten");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::define_irreg_sten" << endl;
+  }
+
+  const int order = m_irreg_sten_order;
+  const int rad   = m_irreg_sten_radius;
+
+
+  m_centroid_interp[Phase::Gas] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
+    (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[Phase::Gas], m_domains, m_dx, m_finest_level, order, rad));
+  m_eb_centroid_interp[Phase::Gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
+    (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[Phase::Gas], m_domains, m_dx, m_finest_level, order, rad));
+
+  
+  m_centroid_interp[Phase::Solid] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
+    (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[Phase::Solid], m_domains, m_dx, m_finest_level, order, rad));
+  m_eb_centroid_interp[Phase::Solid] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
+    (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[Phase::Solid], m_domains, m_dx, m_finest_level, order, rad));
+}
+
 void amr_mesh::average_down(EBAMRCellData& a_data, Phase::WhichPhase a_phase){
   CH_TIME("amr_mesh::average_down");
   if(m_verbosity > 3){
@@ -484,6 +511,16 @@ void amr_mesh::set_redist_rad(const int a_redist_rad){
   m_redist_rad = a_redist_rad;
 }
 
+void amr_mesh::set_irreg_sten_order(const int a_irreg_sten_order){
+  CH_TIME("amr_mesh::irreg_sten_order");
+  m_irreg_sten_order = a_irreg_sten_order;
+}
+
+void amr_mesh::set_irreg_sten_radius(const int a_irreg_sten_radius){
+  CH_TIME("amr_mesh::irreg_sten_radius");
+  m_irreg_sten_radius = a_irreg_sten_radius;
+}
+
 void amr_mesh::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
   m_physdom = a_physdom;
 }
@@ -497,9 +534,11 @@ void amr_mesh::sanity_check(){
   CH_assert(m_max_amr_depth > 0);
   CH_assert(m_ref_ratio == 2 || m_ref_ratio == 4);
   CH_assert(m_blocking_factor >= 4 && m_blocking_factor % m_ref_ratio == 0);
-  CH_assert(m_max_box_size > 8 && m_max_box_size % m_blocking_factor == 0);
+  CH_assert(m_max_box_size >= 8 && m_max_box_size % m_blocking_factor == 0);
   CH_assert(m_fill_ratio > 0. && m_fill_ratio <= 1.0);
   CH_assert(m_buffer_size > 0);
+  CH_assert(m_irreg_sten_order == 1 ||  m_irreg_sten_order == 2);
+  CH_assert(m_irreg_sten_radius == 1 || m_irreg_sten_radius == 2);
 
   // Make sure that the isotropic constraint isn't violated
   const RealVect realbox = m_physdom->get_prob_hi() - m_physdom->get_prob_lo();
@@ -594,4 +633,12 @@ Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(P
   CH_assert(a_phase == Phase::Gas); // This is disabled since we only solve cdr in gas phase.
 
   return m_fine_to_coar_redist[a_phase];;
+}
+
+irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(Phase::WhichPhase a_phase){
+  return *m_centroid_interp[a_phase];
+}
+
+irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(Phase::WhichPhase a_phase){
+  return *m_eb_centroid_interp[a_phase];
 }

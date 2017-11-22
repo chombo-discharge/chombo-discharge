@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
 
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(32*IntVect::Unit);  // Set number of cells on coarsest level
+  amr->set_coarsest_num_cells(64*IntVect::Unit);  // Set number of cells on coarsest level
   amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF
   amr->set_refinement_ratio(4);                   // Set refinement ratio
@@ -45,6 +45,8 @@ int main(int argc, char* argv[]){
   amr->set_num_ghost(2);                          // Set number of ghost cells (this is overridden inside plasma_engine)
   amr->set_eb_ghost(2);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
+  amr->set_irreg_sten_order(1);
+  amr->set_irreg_sten_radius(1);
 
   // Set up plasma engine
   RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
