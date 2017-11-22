@@ -40,7 +40,7 @@ public:
   ~amr_mesh();
 
   /*!
-    @brief Deallocate data
+    @brief Deallocate data. You should never need this, smart pointers are you friends :)
   */
   template<typename T> void deallocate(Vector<T*>& a_data);
 

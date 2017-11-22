@@ -155,12 +155,8 @@ void plasma_engine::setup_fresh(){
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
   const Vector<ProblemDomain>& domains = m_amr->get_domains();
   const Vector<Real>& dx = m_amr->get_dx();
-  Vector<LevelData<EBCellFAB>* > data(1 + finest);
-  for (int lvl = 0; lvl <= finest; lvl++){
-    EBCellFactory fact(ebisl[lvl]);
-    data[lvl] = new LevelData<EBCellFAB> (grids[lvl], 1, 2*IntVect::Unit, fact);
-    EBLevelDataOps::setVal(*data[lvl], lvl);//(0.5+lvl)*(0.5+lvl));
-  }
+  EBAMRCellData data;
+  m_amr->allocate(data, Phase::Gas, 1, 2);
   m_amr->average_down(data, Phase::Gas);
   m_amr->interp_ghost(data, Phase::Gas);
 
@@ -171,10 +167,15 @@ void plasma_engine::setup_fresh(){
 
   Vector<std::string> names(1);
   Vector<Real> coveredVals;
+
+  Vector<LevelData<EBCellFAB>* > data_write(data.size());
+  for (int lvl = 0; lvl <= finest; lvl++){
+    data_write[lvl] = &(*data[lvl]);
+  }
   names[0] = "data";
   writeEBHDF5("test.hdf5",
 	      grids,
-	      data,
+	      data_write,
 	      names,
 	      domains[0],
 	      dx[0],

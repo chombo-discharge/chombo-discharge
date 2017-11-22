@@ -9,16 +9,17 @@
 #define _TYPE_DEFINITIONS_
 
 #include <LevelData.H>
+#include <RefCountedPtr.H>
 #include <EBCellFAB.H>
 #include <EBFluxFAB.H>
 #include <EBFaceFAB.H>
 #include <BaseIVFAB.H>
 #include <MFCellFAB.H>
 
-typedef Vector<LevelData<MFCellFAB>* >        MFAMRCellData;
-typedef Vector<LevelData<EBCellFAB>* >        EBAMRCellData;
-typedef Vector<LevelData<EBFluxFAB>* >        EBAMRFluxData;
-typedef Vector<LevelData<EBFaceFAB>* >        EBAMRFaceData;
-typedef Vector<LevelData<BaseIVFAB<Real> >* > EBAMRIVData;
+typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
+typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >        EBAMRCellData;
+typedef Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        EBAMRFluxData;
+typedef Vector<RefCountedPtr<LevelData<EBFaceFAB> > >        EBAMRFaceData;
+typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;
 
 #endif

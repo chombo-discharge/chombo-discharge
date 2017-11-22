@@ -33,6 +33,16 @@ amr_mesh::~amr_mesh(){
   
 }
 
+template<typename T> void amr_mesh::deallocate(Vector<T*>& a_data){
+  CH_TIME("amr_mesh::deallocate");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::deallocate" << endl;
+  }
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    delete a_data[lvl];
+  }
+}
+
 void amr_mesh::allocate(EBAMRCellData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(cell)");
   if(m_verbosity > 5){
@@ -46,7 +56,8 @@ void amr_mesh::allocate(EBAMRCellData& a_data, Phase::WhichPhase a_phase, const 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     EBCellFactory fact(m_ebisl[a_phase][lvl]);
 
-    a_data[lvl] = new LevelData<EBCellFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact);
+    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
+      (new LevelData<EBCellFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
   }
 }
 
@@ -63,7 +74,8 @@ void amr_mesh::allocate(EBAMRFluxData& a_data, Phase::WhichPhase a_phase, const 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     EBFluxFactory fact(m_ebisl[a_phase][lvl]);
 
-    a_data[lvl] = new LevelData<EBFluxFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact);
+    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> >
+      (new LevelData<EBFluxFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
   }
 }
 
@@ -90,17 +102,8 @@ void amr_mesh::allocate(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const in
 
     BaseIVFactory<Real> fact(m_ebisl[a_phase][lvl], irreg_sets);
 
-    a_data[lvl] = new LevelData<BaseIVFAB<Real> >(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact);
-  }
-}
-
-template<typename T> void amr_mesh::deallocate(Vector<T*>& a_data){
-  CH_TIME("amr_mesh::deallocate");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::deallocate" << endl;
-  }
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    delete a_data[lvl];
+    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
+      (new LevelData<BaseIVFAB<Real> >(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
   }
 }
 
@@ -157,8 +160,6 @@ void amr_mesh::build_domains(){
 
   m_dx[0] = (m_physdom->get_prob_hi()[0] - m_physdom->get_prob_lo()[0])/m_num_cells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_num_cells - IntVect::Unit);
-  
-  
 
   for (int lvl = 1; lvl <= m_max_amr_depth; lvl++){
     m_dx[lvl]      = m_dx[lvl-1]/m_ref_ratio;

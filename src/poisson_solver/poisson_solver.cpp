@@ -61,7 +61,7 @@ MFAMRCellData& poisson_solver::get_source(){
 }
 
 EBAMRCellData& poisson_solver::get_state_phase(Phase::WhichPhase a_phase){
-  this->alias_internals();
+  //  this->alias_internals();
   
   if(a_phase == Phase::Gas){
     return m_state_gas;
@@ -75,7 +75,7 @@ EBAMRCellData& poisson_solver::get_state_phase(Phase::WhichPhase a_phase){
 }
 
 EBAMRCellData& poisson_solver::get_source_phase(Phase::WhichPhase a_phase){
-  this->alias_internals();
+  //  this->alias_internals();
 
   if(a_phase == Phase::Gas){
     return m_state_gas;
@@ -103,10 +103,10 @@ void poisson_solver::set_time(const Real a_time) {
 }
 
 //
-void poisson_solver::alias_internals(){
-  aliasMF(m_state_gas,   Phase::Gas,   m_state);
-  aliasMF(m_state_solid, Phase::Solid, m_state);
+// void poisson_solver::alias_internals(){
+//   aliasMF(m_state_gas,   Phase::Gas,   m_state);
+//   aliasMF(m_state_solid, Phase::Solid, m_state);
 
-  aliasMF(m_source_gas,   Phase::Gas,   m_source);
-  aliasMF(m_source_solid, Phase::Solid, m_source);
-}
+//   aliasMF(m_source_gas,   Phase::Gas,   m_source);
+//   aliasMF(m_source_solid, Phase::Solid, m_source);
+// }

@@ -70,9 +70,9 @@ template<class T> void irreg_amr_stencil<T>::define(const Vector<DisjointBoxLayo
 
 //
 template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a_dst,
-							    const LevelData<EBCellFAB>& a_src,
-							    const int                   a_lvl,
-							    const bool                  a_limit) const {
+						   const LevelData<EBCellFAB>& a_src,
+						   const int                   a_lvl,
+						   const bool                  a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const DisjointBoxLayout& dbl  = m_grids[a_lvl];
@@ -122,8 +122,8 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a
 
 //
 template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
-							    const int             a_lvl,
-							    const bool            a_limit) const {
+						   const int             a_lvl,
+						   const bool            a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const DisjointBoxLayout& dbl = m_grids[a_lvl];
@@ -174,9 +174,9 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
 
 //
 template<class T> void irreg_amr_stencil<T>::apply(LevelData<BaseIVFAB<Real> >& a_dst,
-							    const LevelData<EBCellFAB>&  a_src,
-							    const int                    a_lvl,
-							    const bool                   a_limit) const {
+						   const LevelData<EBCellFAB>&  a_src,
+						   const int                    a_lvl,
+						   const bool                   a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   //
@@ -223,7 +223,7 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<BaseIVFAB<Real> >& 
 }
 
 template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData& a_data,
-							    const bool   a_limit) const {
+						   const bool   a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -233,8 +233,8 @@ template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData& a_data,
 
 //
 template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData&       a_dst,
-							    const EBAMRCellData& a_src,
-							    const bool         a_limit) const {
+						   const EBAMRCellData& a_src,
+						   const bool         a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -244,8 +244,8 @@ template<class T> void irreg_amr_stencil<T>::apply(EBAMRCellData&       a_dst,
 
 //
 template<class T> void irreg_amr_stencil<T>::apply(EBAMRIVData&         a_dst,
-							    const EBAMRCellData& a_src,
-							    const bool         a_limit) const {
+						   const EBAMRCellData& a_src,
+						   const bool         a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -255,8 +255,8 @@ template<class T> void irreg_amr_stencil<T>::apply(EBAMRIVData&         a_dst,
 
 //
 template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRIVData*>&         a_dst,
-							    const Vector<EBAMRCellData*>& a_src,
-							    const bool                  a_limit) const {
+						   const Vector<EBAMRCellData*>& a_src,
+						   const bool                  a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const int dstSize = a_dst.size();
@@ -272,7 +272,7 @@ template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRIVData*>&        
 }
 
 template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>& a_data,
-							    const bool            a_limit) const {
+						   const bool            a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const int dstSize = a_data.size();
@@ -283,8 +283,8 @@ template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>& a_dat
 }
 
 template<class T> void irreg_amr_stencil<T>::apply(Vector<EBAMRCellData*>&       a_dst,
-							    const Vector<EBAMRCellData*>& a_src,
-							    const bool                  a_limit) const {
+						   const Vector<EBAMRCellData*>& a_src,
+						   const bool                  a_limit) const {
   CH_TIME("irreg_amr_stencil::apply");
 
   const int dstSize = a_dst.size();

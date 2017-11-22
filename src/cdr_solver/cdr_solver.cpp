@@ -6,8 +6,7 @@
 */
 
 #include "cdr_solver.H"
-
-#include <EBAMRDataOps.H>
+#include "data_ops.H"
 
 cdr_solver::cdr_solver(){
   
@@ -35,7 +34,7 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   EBAMRCellData rhs;
   this->allocate(rhs);
 
-  EBAMRDataOps::incr(a_state, rhs, a_dt);
+  data_ops::incr(a_state, rhs, a_dt);
 
   this->deallocate(rhs);
 }
@@ -46,13 +45,13 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt){
 
 void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt){
 
-  EBAMRDataOps::setVal(a_rhs, 0.0);
+  data_ops::set_value(a_rhs, 0.0);
 
   // Advective derivative
   EBAMRCellData advective_derivative;
   this->allocate(advective_derivative);
   this->compute_advective_derivative(advective_derivative, a_state);
-  EBAMRDataOps::incr(a_rhs, advective_derivative, -1.0);
+  data_ops::incr(a_rhs, advective_derivative, -1.0);
   this->deallocate(advective_derivative);
 
   // Diffusion term
@@ -60,16 +59,16 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state,
     EBAMRCellData diffusion_term;
     this->allocate(diffusion_term);
     this->compute_diffusion_term(diffusion_term, a_state);
-    EBAMRDataOps::incr(a_rhs, diffusion_term, 1.0);
+    data_ops::incr(a_rhs, diffusion_term, 1.0);
   }
 
   // Source term
-  EBAMRDataOps::incr(a_rhs, m_source, 1.0);
+  data_ops::incr(a_rhs, m_source, 1.0);
 }
 
 void cdr_solver::compute_advective_derivative(EBAMRCellData& a_adv_deriv, const EBAMRCellData& a_state){
 
-  EBAMRDataOps::setVal(a_adv_deriv, 0.0); // Reset
+  data_ops::set_value(a_adv_deriv, 0.0); // Reset
 
   EBAMRFluxData face_state; 
   EBAMRIVData   noncons_div;
