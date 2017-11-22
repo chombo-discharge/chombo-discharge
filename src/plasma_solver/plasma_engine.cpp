@@ -236,6 +236,7 @@ void plasma_engine::sanity_check(){
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sideit; sideit.ok(); ++sideit){
       if(m_wallbc[map_bc(dir, sideit())].isNull()){
+	pout() << "computational_geometry::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
   	MayDay::Abort("computational_geometry::sanity_check() failed. Wall BC has not been set properly");
       }
     }

@@ -33,8 +33,8 @@ int main(int argc, char* argv[]){
 
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(64*IntVect::Unit);  // Set number of cells on coarsest level
-  amr->set_max_amr_depth(3);                      // Set max amr depth
+  amr->set_coarsest_num_cells(32*IntVect::Unit);  // Set number of cells on coarsest level
+  amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF
   amr->set_refinement_ratio(4);                   // Set refinement ratio
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -54,10 +54,21 @@ int main(int argc, char* argv[]){
 											amr));
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(2);
-  engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
-  engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-  engine->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
-  engine->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
+  if(SpaceDim == 2){
+    engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
+    engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
+    engine->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
+    engine->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
+  }
+  else if(SpaceDim == 3){
+    engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
+    engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
+    engine->set_neumann_wall_bc(1,   Side::Lo, 0.0);                  
+    engine->set_neumann_wall_bc(1,   Side::Hi, 0.0);
+    engine->set_dirichlet_wall_bc(2, Side::Lo, Potential::Ground);
+    engine->set_dirichlet_wall_bc(2, Side::Hi, Potential::Live);
+  }
+  
   
   engine->setup_fresh();
 
