@@ -4,17 +4,16 @@
   @author Robert Marskar
 */
 
-// Chombo files
-#include "ParmParse.H"
-#include "EBIndexSpace.H"
+#include <ParmParse.H>
 
 #include "sphere_sphere_geometry.H"
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "rte_solver.H"
 #include "amr_mesh.H"
+#include "poisson_multifluid_gmg.H"
+#include "poisson_staircase_gmg.H"
 
-//
 int main(int argc, char* argv[]){
 
 #ifdef CH_MPI
@@ -73,6 +72,13 @@ int main(int argc, char* argv[]){
   
   
   engine->setup_fresh();
+
+
+  // Set up a poisson solver
+  RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
+  poisson->set_amr(amr);
+  poisson->solve();
+  
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

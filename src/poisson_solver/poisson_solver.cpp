@@ -10,16 +10,38 @@
 
 
 poisson_solver::poisson_solver(){
+  CH_TIME("poisson_solver::set_verbosity");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_verbosity" << endl;
+  }
+  
+  this->set_verbosity(-1);
+
 }
 
 poisson_solver::~poisson_solver(){
 }
 
-void poisson_solver::setup_base(const computational_geometry* const a_compgeom){
+void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
+  CH_TIME("poisson_solver::set_computational_geometry");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_computational_geometry" << endl;
+  }
+
   m_compgeom = a_compgeom;
+}
 
+void poisson_solver::set_amr(const RefCountedPtr<amr_mesh> a_amr){
+  CH_TIME("poisson_solver::set_amr");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_amr" << endl;
+  }
 
-  this->alias_internals();
+  m_amr = a_amr;
+}
+
+void poisson_solver::set_verbosity(const int a_verbosity){
+  m_verbosity = a_verbosity;
 }
 
 void poisson_solver::solve() {
@@ -50,7 +72,6 @@ EBAMRCellData& poisson_solver::get_state_phase(Phase::WhichPhase a_phase){
   else{
     MayDay::Abort("poisson_solver::get_state_phase - unknown phase");
   }
-
 }
 
 EBAMRCellData& poisson_solver::get_source_phase(Phase::WhichPhase a_phase){

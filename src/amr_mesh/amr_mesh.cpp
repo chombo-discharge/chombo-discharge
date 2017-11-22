@@ -33,6 +33,77 @@ amr_mesh::~amr_mesh(){
   
 }
 
+void amr_mesh::allocate(EBAMRCellData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost){
+  CH_TIME("amr_mesh::allocate(cell)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(cell)" << endl;
+  }
+
+  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
+
+  a_data.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    EBCellFactory fact(m_ebisl[a_phase][lvl]);
+
+    a_data[lvl] = new LevelData<EBCellFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact);
+  }
+}
+
+void amr_mesh::allocate(EBAMRFluxData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost){
+  CH_TIME("amr_mesh::allocate(flux)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(flux)" << endl;
+  }
+
+  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
+
+  a_data.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    EBFluxFactory fact(m_ebisl[a_phase][lvl]);
+
+    a_data[lvl] = new LevelData<EBFluxFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact);
+  }
+}
+
+void amr_mesh::allocate(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost){
+  CH_TIME("amr_mesh::allocate(baseiv)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(baseiv)" << endl;
+  }
+
+  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
+
+  a_data.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+
+    LayoutData<IntVectSet> irreg_sets(m_grids[lvl]);
+    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+      Box box = m_grids[lvl].get(dit());
+      box.grow(ghost);
+      box &= m_domains[lvl];
+
+      irreg_sets[dit()] = m_ebisl[a_phase][lvl][dit()].getIrregIVS(box);
+    }
+
+    BaseIVFactory<Real> fact(m_ebisl[a_phase][lvl], irreg_sets);
+
+    a_data[lvl] = new LevelData<BaseIVFAB<Real> >(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact);
+  }
+}
+
+template<typename T> void amr_mesh::deallocate(Vector<T*>& a_data){
+  CH_TIME("amr_mesh::deallocate");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::deallocate" << endl;
+  }
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    delete a_data[lvl];
+  }
+}
+
 void amr_mesh::set_mfis(const RefCountedPtr<mfis>& a_mfis){
   CH_TIME("amr_mesh::set_mfis");
   if(m_verbosity > 3){

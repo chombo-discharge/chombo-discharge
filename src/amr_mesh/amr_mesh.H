@@ -40,6 +40,29 @@ public:
   ~amr_mesh();
 
   /*!
+    @brief Deallocate data
+  */
+  template<typename T> void deallocate(Vector<T*>& a_data);
+
+  /*!
+    @brief Allocate a data holder. 
+    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+  */
+  virtual void allocate(EBAMRCellData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
+
+  /*!
+    @brief Allocate a data holder. 
+    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+  */
+  virtual void allocate(EBAMRFluxData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
+
+  /*!
+    @brief Allocate a data holder. 
+    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+  */
+  virtual void allocate(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
+
+  /*!
     @brief Average down
   */
   virtual void average_down(EBAMRCellData& a_data, Phase::WhichPhase a_phase);

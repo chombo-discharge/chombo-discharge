@@ -10,6 +10,7 @@
 
 #include "type_definitions.H"
 #include "computational_geometry.H"
+#include "amr_mesh.H"
 
 /*!
   @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
@@ -30,17 +31,22 @@ public:
   /*!
     @brief Set up Poisson solver
   */
-  virtual void setup_base(const computational_geometry* a_compgeom);
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+
+  /*!
+    @brief Set the amr object
+  */
+  virtual void set_amr(const RefCountedPtr<amr_mesh> a_amr);
 
   /*!
     @brief Solve Poisson equation
   */
-  virtual void solve() = 0;
+  virtual void solve();
 
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual void solve(MFAMRCellData& a_state) = 0;
+  virtual void solve(MFAMRCellData& a_state);
 
   /*!
     @brief Solve Poisson onto state 
@@ -88,6 +94,11 @@ public:
   void set_time(const Real a_time);
 
   /*!
+    @brief Set verbosity.
+  */
+  void set_verbosity(const int a_verbosity);
+
+  /*!
     @brief Set potential at current time. 
   */
   void set_potential(const Real a_potential);
@@ -97,7 +108,12 @@ protected:
   /*!
     @brief Computational geometry. Needed for passing in BCs on EBs. 
   */
-  const computational_geometry* m_compgeom;
+  RefCountedPtr<computational_geometry> m_compgeom;
+
+  /*!
+    @brief Computational geometry. Needed for passing in BCs on EBs. 
+  */
+  RefCountedPtr<amr_mesh> m_amr;
 
   /*!
     @brief State data (i.e. the potential)
@@ -148,6 +164,11 @@ protected:
     @brief Current potential. For passing into BC objects. 
   */
   Real m_current_potential;
+
+  /*!
+    @brief Verbosity
+  */
+  int m_verbosity;
 
   /*!
     @brief Alias internal states so ensure pointers point where they are supposed to
