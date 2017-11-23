@@ -22,16 +22,27 @@ poisson_solver::poisson_solver(){
 poisson_solver::~poisson_solver(){
 }
 
-void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
+void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
   CH_TIME("poisson_solver::set_computational_geometry");
   if(m_verbosity > 5){
     pout() << "poisson_solver::set_computational_geometry" << endl;
   }
 
   m_compgeom = a_compgeom;
+
+  this->set_mfis(m_compgeom->get_mfis());
 }
 
-void poisson_solver::set_amr(const RefCountedPtr<amr_mesh> a_amr){
+void poisson_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
+  CH_TIME("poisson_solver::set_mfis");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_mfis" << endl;
+  }
+
+  m_mfis = a_mfis;
+}
+
+void poisson_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("poisson_solver::set_amr");
   if(m_verbosity > 5){
     pout() << "poisson_solver::set_amr" << endl;
@@ -92,21 +103,18 @@ EBAMRIVData& poisson_solver::get_jump(){
   return m_jump;
 }
 
-//
 Real poisson_solver::get_time() const{
   return m_time;
 }
 
-//
 void poisson_solver::set_time(const Real a_time) {
   m_time = a_time;
 }
 
-//
-// void poisson_solver::alias_internals(){
+void poisson_solver::alias_internals(){
 //   aliasMF(m_state_gas,   Phase::Gas,   m_state);
 //   aliasMF(m_state_solid, Phase::Solid, m_state);
 
 //   aliasMF(m_source_gas,   Phase::Gas,   m_source);
 //   aliasMF(m_source_solid, Phase::Solid, m_source);
-// }
+}

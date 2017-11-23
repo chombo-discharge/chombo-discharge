@@ -19,3 +19,15 @@ void data_ops::set_value(EBAMRCellData& a_data, const Real& a_value){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);
   }
 }
+
+void data_ops::set_value(EBAMRFluxData& a_data, const Real& a_value){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    EBLevelDataOps::setVal(*a_data[lvl], a_value);
+  }
+}
+
+void data_ops::set_value(EBAMRIVData& a_data, const Real& a_value){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    EBLevelDataOps::setVal(*a_data[lvl], a_value);
+  }
+}

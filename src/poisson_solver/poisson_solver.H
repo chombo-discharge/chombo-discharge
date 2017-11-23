@@ -31,12 +31,12 @@ public:
   /*!
     @brief Set up Poisson solver
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
   /*!
     @brief Set the amr object
   */
-  virtual void set_amr(const RefCountedPtr<amr_mesh> a_amr);
+  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
     @brief Solve Poisson equation
@@ -106,6 +106,11 @@ public:
 protected:
 
   /*!
+    @brief MFindex space
+  */
+  RefCountedPtr<mfis> m_mfis;
+
+  /*!
     @brief Computational geometry. Needed for passing in BCs on EBs. 
   */
   RefCountedPtr<computational_geometry> m_compgeom;
@@ -173,6 +178,11 @@ protected:
   /*!
     @brief Alias internal states so ensure pointers point where they are supposed to
   */
-  void alias_internals();
+  virtual void alias_internals();
+
+  /*!
+    @brief Set the mfis
+  */
+  virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
 };
 #endif

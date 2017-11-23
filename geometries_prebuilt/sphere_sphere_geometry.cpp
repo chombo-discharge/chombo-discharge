@@ -27,8 +27,8 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   Real eps_mat = 1;
   Real elec_rad = 0.1;
   Real diel_rad = 0.1;
-  Real elec_noise = 5.E-3;
-  Real diel_noise = 5.E-3;
+  Real elec_noise = 6.E-3;
+  Real diel_noise = 6.E-3;
   Real elec_persist = 0.5;
   Real diel_persist = 0.5;
   
@@ -40,8 +40,8 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   bool live = true;
   bool reseed = true;
 
-  int elec_octaves = 3;
-  int diel_octaves = 3;
+  int elec_octaves = 1;
+  int diel_octaves = 1;
 
 
   // ParmParse pp("sphere_sphere_geometry");

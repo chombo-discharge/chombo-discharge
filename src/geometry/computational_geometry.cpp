@@ -44,7 +44,7 @@ const Real& computational_geometry::get_eps0() const {
   return m_eps0;
 }
 
-const RefCountedPtr<mfis> computational_geometry::get_mfis() const {
+const RefCountedPtr<mfis>& computational_geometry::get_mfis() const {
   return m_mfis;
 }
 

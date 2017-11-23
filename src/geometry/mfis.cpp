@@ -37,6 +37,6 @@ void mfis::define(const Box                     & a_domain,
   }
 }
   
-const RefCountedPtr<EBIndexSpace> mfis::get_ebis(Phase::WhichPhase a_whichEBIS) const {
+const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(Phase::WhichPhase a_whichEBIS) const {
   return m_ebis[a_whichEBIS];
 }

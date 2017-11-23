@@ -33,16 +33,16 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(64*IntVect::Unit);  // Set number of cells on coarsest level
-  amr->set_max_amr_depth(2);                      // Set max amr depth
-  amr->set_ebcf(false);                           // Tell amr to forget about EBCF
+  amr->set_max_amr_depth(4);                      // Set max amr depth
+  amr->set_ebcf(false);                           // Tell amr to forget about EBCF. 
   amr->set_refinement_ratio(4);                   // Set refinement ratio
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(4);                    // Set blocking factor
-  amr->set_buffer_size(1);                        // Set buffer size
-  amr->set_max_box_size(16);                      // Set max box size
+  amr->set_blocking_factor(8);                    // Set blocking factor
+  amr->set_buffer_size(2);                        // Set buffer size
+  amr->set_max_box_size(64);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
-  amr->set_num_ghost(2);                          // Set number of ghost cells (this is overridden inside plasma_engine)
-  amr->set_eb_ghost(2);                           // Set EB ghost vectors
+  amr->set_num_ghost(3);                          // Set number of ghost cells (this is overridden inside plasma_engine)
+  amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
   amr->set_irreg_sten_order(1);
   amr->set_irreg_sten_radius(1);
@@ -76,7 +76,9 @@ int main(int argc, char* argv[]){
 
   // Set up a poisson solver
   RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
+  poisson->set_verbosity(10);
   poisson->set_amr(amr);
+  poisson->set_computational_geometry(compgeom);
   poisson->solve();
   
 

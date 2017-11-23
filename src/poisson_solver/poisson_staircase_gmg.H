@@ -12,6 +12,10 @@
 #include "poisson_solver.H"
 
 #include <AMRMultiGrid.H>
+#include <BiCGStabSolver.H>
+#include <EBConductivityOpFactory.H>
+#include <BaseDomainBC.H>
+#include <BaseEBBC.H>
 
 
 /*!
@@ -41,16 +45,31 @@ public:
   virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source);
 
   /*!
-    @brief 2 ghost cells. That's what we need. 
+    @brief Return 2, this is the minimum ghost cells we need. 
   */
   virtual int query_ghost() const;
   
 protected:
-  
+
   /*!
-    @brief Bottom solver
+    @brief Needs setup
   */
-  RefCountedPtr<LinearSolver<LevelData<EBCellFAB> > > m_bottom_solver;
+  bool m_needs_setup;
+
+  /*!
+    @brief 
+  */
+  int m_num_ghost;
+
+  /*!
+    @brief alpha-coefficient for EBConductivityOp
+  */
+  Real m_alpha;
+
+  /*!
+    @brief beta-coefficient for EBConductivityOp
+  */
+  Real m_beta;
 
   /*!
     @brief a coefficient
@@ -68,20 +87,49 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > >m_bco_irreg;
 
   /*!
+    @brief Domain bc factory
+  */
+  RefCountedPtr<BaseDomainBCFactory> m_domain_bc_factory;
+
+  /*!
+    @brief Embedded boundary BC factory
+  */
+  RefCountedPtr<BaseEBBCFactory> m_eb_bc_factory;
+
+  /*!
+    @brief Operator factory for AMRMultiGrid
+  */
+  RefCountedPtr<EBConductivityOpFactory> m_cond_op_fact;
+
+  /*!
+    @brief Bottom solver
+  */
+  RefCountedPtr<LinearSolver<LevelData<EBCellFAB> > > m_bottom_solver;
+
+  /*!
     @brief Geometric multigrid solver
   */
   AMRMultiGrid<LevelData<EBCellFAB> > m_gmg_solver;
 
   /*!
-    @brief Needs setup
+    @brief Conjugate gradient solver for coarsest level
   */
-  bool m_needs_setup;
+  BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
 
   /*!
     @brief Set up the geometric multigrid solver 
   */
   virtual void setup_gmg();
 
+  /*!
+    @brief Set coefficients
+  */
+  virtual void define_coefficients();
+
+  /*!
+    @brief BC
+  */
+  virtual void setup_bc();
 };
 
 #endif

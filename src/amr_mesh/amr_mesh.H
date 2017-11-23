@@ -203,14 +203,19 @@ public:
   virtual int get_refinement_ratio();
 
   /*!
-    @brief Get finest domain
+    @brief Get number of ghost cells
   */
-  virtual ProblemDomain get_finest_domain();
-
+  virtual int get_num_ghost();
+  
   /*!
     @brief Get finest level
   */
   virtual Real get_finest_dx();
+
+  /*!
+    @brief Get finest domain
+  */
+  virtual ProblemDomain get_finest_domain();
 
   /*!
     @brief Get resolutions

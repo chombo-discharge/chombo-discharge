@@ -55,7 +55,7 @@ public:
   /*!
     @brief Get a particular ebis
   */
-  const RefCountedPtr<EBIndexSpace> get_ebis(Phase::WhichPhase a_whichEBIS) const;
+  const RefCountedPtr<EBIndexSpace>& get_ebis(Phase::WhichPhase a_whichEBIS) const;
 
 protected:
 

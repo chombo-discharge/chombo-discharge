@@ -603,7 +603,7 @@ void amr_mesh::sanity_check(){
     pout() << "amr_mesh::sanity_check" << endl;
   }
 
-  CH_assert(m_max_amr_depth > 0);
+  CH_assert(m_max_amr_depth >= 0);
   CH_assert(m_ref_ratio == 2 || m_ref_ratio == 4);
   CH_assert(m_blocking_factor >= 4 && m_blocking_factor % m_ref_ratio == 0);
   CH_assert(m_max_box_size >= 8 && m_max_box_size % m_blocking_factor == 0);
@@ -629,6 +629,10 @@ int amr_mesh::get_max_amr_depth(){
 
 int amr_mesh::get_refinement_ratio(){
   return m_ref_ratio;
+}
+
+int amr_mesh::get_num_ghost(){
+  return m_num_ghost;
 }
 
 int amr_mesh::get_blocking_factor(){
@@ -663,12 +667,12 @@ Vector<ProblemDomain>& amr_mesh::get_domains(){
   return m_domains;
 }
 
-Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(Phase::WhichPhase a_phase){
-  return m_eblg[a_phase];
-}
-
 Vector<EBISLayout>& amr_mesh::get_ebisl(Phase::WhichPhase a_phase){
   return m_ebisl[a_phase];
+}
+
+Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(Phase::WhichPhase a_phase){
+  return m_eblg[a_phase];
 }
 
 Vector<RefCountedPtr<EBCoarseAverage> >& amr_mesh::get_coarave(Phase::WhichPhase a_phase){

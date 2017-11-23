@@ -143,7 +143,7 @@ void plasma_engine::setup_fresh(){
     m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen. 
   }
   else {
-    m_amr->set_num_ghost(2);
+    m_amr->set_num_ghost(3);
   }
 
   m_amr->regrid(m_geom_tags); // Regrid using geometric tags
@@ -156,7 +156,7 @@ void plasma_engine::setup_fresh(){
   const Vector<ProblemDomain>& domains = m_amr->get_domains();
   const Vector<Real>& dx = m_amr->get_dx();
   EBAMRCellData data;
-  m_amr->allocate(data, Phase::Gas, 1, 2);
+  m_amr->allocate(data, Phase::Gas, 1);
   m_amr->average_down(data, Phase::Gas);
   m_amr->interp_ghost(data, Phase::Gas);
 

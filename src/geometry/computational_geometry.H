@@ -80,7 +80,7 @@ public:
   /*!
     @brief Get the EBIndexSpaces
   */
-  virtual const RefCountedPtr<mfis> get_mfis() const;
+  virtual const RefCountedPtr<mfis>& get_mfis() const;
 
   /*!
     @brief Build MFIndexSpace
