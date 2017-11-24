@@ -9,6 +9,7 @@
 
 #include <BRMeshRefine.H>
 #include <EBEllipticLoadBalance.H>
+#include <EBArith.H>
 
 amr_mesh::amr_mesh(){
 
@@ -129,6 +130,7 @@ void amr_mesh::build_domains(){
   m_ebisl.resize(Phase::num_phases);
   m_coarave.resize(Phase::num_phases);
   m_quadcfi.resize(Phase::num_phases);
+  m_old_quadcfi.resize(Phase::num_phases);
   m_flux_reg.resize(Phase::num_phases);
   m_level_redist.resize(Phase::num_phases);
   m_centroid_interp.resize(Phase::num_phases);
@@ -142,6 +144,7 @@ void amr_mesh::build_domains(){
   m_coarave[Phase::Gas].resize(nlevels);
   m_quadcfi[Phase::Gas].resize(nlevels);
   m_flux_reg[Phase::Gas].resize(nlevels);
+  m_old_quadcfi[Phase::Gas].resize(nlevels);
   m_level_redist[Phase::Gas].resize(nlevels);
   m_coar_to_fine_redist[Phase::Gas].resize(nlevels);
   m_coar_to_coar_redist[Phase::Gas].resize(nlevels);
@@ -152,6 +155,7 @@ void amr_mesh::build_domains(){
   m_coarave[Phase::Solid].resize(nlevels);
   m_quadcfi[Phase::Solid].resize(nlevels);
   m_flux_reg[Phase::Solid].resize(nlevels);
+  m_old_quadcfi[Phase::Solid].resize(nlevels);
   m_level_redist[Phase::Solid].resize(nlevels);
   m_coar_to_fine_redist[Phase::Solid].resize(nlevels);
   m_coar_to_coar_redist[Phase::Solid].resize(nlevels);
@@ -225,6 +229,49 @@ void amr_mesh::load_balance(Vector<int>& a_proc_assign, Vector<Box>& a_boxes, co
 
   mortonOrdering((Vector<Box>&) a_boxes); // Use space filling curves
   EBEllipticLoadBalance(a_proc_assign, a_boxes, m_domains[a_lvl], false, m_mfis->get_ebis(Phase::Gas)); // Loads for each box
+}
+
+void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi){
+  CH_TIME("amr_mesh::compute_gradient");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::compute_gradient" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    CH_assert(a_phi[lvl]->nComp()      == 1);
+    CH_assert(a_gradient[lvl]->nComp() == SpaceDim);
+    
+    const DisjointBoxLayout& dbl = m_grids[lvl]; // Doing this since I assume everything is defined over m_grids
+    
+    LayoutData<IntVectSet> cfivs;
+    EBArith::defineCFIVS(cfivs, dbl, m_domains[lvl]);
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& grad        = (*a_gradient[lvl])[dit()];
+      const EBCellFAB& phi   = (*a_phi[lvl])[dit()];
+      const EBISBox& ebisbox = phi.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(dbl.get(dit()));
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  
+	  grad(vof, dir) = 0.;
+
+	  VoFStencil sten;
+	  EBArith::getFirstDerivStencil(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
+	  for (int i = 0; i < sten.size(); i++){
+	    const VolIndex& ivof = sten.vof(i);
+	    const Real& iweight  = sten.weight(i);
+	    
+	    grad(vof, dir) += phi(ivof, 0)*iweight;
+	  }
+	}
+      }
+    }
+  }
 }
 
 void amr_mesh::define_eblevelgrid(){
@@ -319,6 +366,17 @@ void amr_mesh::define_eb_quad_cfi(){
 											     m_num_ghost,
 											     cfivs,
 											     ebis_gas));
+
+	m_old_quadcfi[Phase::Gas][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
+											   m_grids[lvl-1],
+											   m_ebisl[Phase::Gas][lvl],
+											   m_ebisl[Phase::Gas][lvl-1],
+											   m_domains[lvl-1],
+											   m_ref_ratios[lvl-1],
+											   1,
+											   cfivs,
+											   ebis_gas));
+											   
       }
       if(!ebis_sol.isNull()){
 	LayoutData<IntVectSet>& cfivs = *(m_eblg[Phase::Solid][lvl]->getCFIVS());
@@ -333,6 +391,16 @@ void amr_mesh::define_eb_quad_cfi(){
 											       m_num_ghost,
 											       cfivs,
 											       ebis_sol));
+	
+	m_old_quadcfi[Phase::Solid][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
+											   m_grids[lvl-1],
+											   m_ebisl[Phase::Solid][lvl],
+											   m_ebisl[Phase::Solid][lvl-1],
+											   m_domains[lvl-1],
+											   m_ref_ratios[lvl-1],
+											   1,
+											   cfivs,
+											   ebis_gas));
       }
     }
   }
@@ -681,6 +749,10 @@ Vector<RefCountedPtr<EBCoarseAverage> >& amr_mesh::get_coarave(Phase::WhichPhase
 
 Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(Phase::WhichPhase a_phase){
   return m_quadcfi[a_phase];
+}
+
+Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(Phase::WhichPhase a_phase){
+  return m_old_quadcfi[a_phase];
 }
 
 Vector<RefCountedPtr<EBFastFR> >&  amr_mesh::get_flux_reg(Phase::WhichPhase a_phase){

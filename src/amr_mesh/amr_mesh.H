@@ -45,6 +45,13 @@ public:
   template<typename T> void deallocate(Vector<T*>& a_data);
 
   /*!
+    @brief Compute cell-centered gradient. 
+    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
+    nor are ghost cells updated. 
+  */
+  virtual void compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi);
+
+  /*!
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
@@ -255,7 +262,12 @@ public:
   /*!
     @brief Get the ghost cell interpolation utility
   */
-  virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(Phase::WhichPhase);
+  virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(Phase::WhichPhase a_phase);
+
+  /*!
+    @brief Get the old interpolation utility (needed for EBConductivityOps)
+  */
+  virtual Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(Phase::WhichPhase a_phase);
 
   /*!
     @brief Get flux register
@@ -419,6 +431,11 @@ protected:
     @brief QuadCFInterp. One for each phase
   */
   Vector<Vector<RefCountedPtr<nwoebquadcfinterp> > > m_quadcfi;
+
+  /*!
+    @brief Old type quadcfi. Needed for EBConductivtyOps
+  */
+  Vector<Vector<RefCountedPtr<EBQuadCFInterp> > > m_old_quadcfi; 
   
   /*!
     @brief Flux register

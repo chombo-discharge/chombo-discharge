@@ -3,6 +3,7 @@
   @brief Declaration of the main class for time/space advancement of streamer equations
   @author Robert Marskar
   @date Nov. 2017
+  @todo Move the BC stuff to poisson_solver
 */
 
 #ifndef _PLASMA_ENGINE_

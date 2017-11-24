@@ -17,7 +17,6 @@
 #include <BaseDomainBC.H>
 #include <BaseEBBC.H>
 
-
 /*!
   @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
 */
@@ -45,6 +44,20 @@ public:
   virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source);
 
   /*!
+    @brief Set solver parameters. These are normally good for this class. 
+  */
+  virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
+					 amrmg::which_mg a_gmg_type      = amrmg::vcycle,
+					 const int a_verbosity           = 10,
+					 const int a_pre_smooth          = 16,
+					 const int a_post_smooth         = 16,
+					 const int a_bot_smooth          = 16,
+					 const int a_max_iter            = 50,
+					 const Real a_eps                = 1.E-30,
+					 const Real a_hang               = 0.2,
+					 const Real a_norm_thresh        = 1.E-30);
+
+  /*!
     @brief Return 2, this is the minimum ghost cells we need. 
   */
   virtual int query_ghost() const;
@@ -52,14 +65,59 @@ public:
 protected:
 
   /*!
+    @brief Relaxation type for gmg
+  */
+  relax::which_relax m_gmg_relax_type;
+
+  /*!
+    @brief GMG multigrid type
+  */
+  amrmg::which_mg m_gmg_type;
+
+  /*!
     @brief Needs setup
   */
   bool m_needs_setup;
 
   /*!
+    @brief Verbosity for geometric multigrid
+  */
+  int m_gmg_verbosity;
+
+  /*!
+    @brief Number of smoothings before averaging
+  */
+  int m_gmg_pre_smooth;
+
+  /*!
+    @brief Number of smoothings before averaging
+  */
+  int m_gmg_post_smooth;
+
+  /*!
+    @brief Number of smoothing before bottom solver
+  */
+  int m_gmg_bot_smooth;
+
+  /*!
+    @brief Maximum number of iterations
+  */
+  int m_gmg_max_iter;
+
+  /*!
     @brief 
   */
-  int m_num_ghost;
+  Real m_gmg_eps;
+  
+  /*!
+    @brief 
+  */
+  Real m_gmg_hang;
+
+  /*!
+    @brief 
+  */
+  Real m_gmg_norm_thresh;
 
   /*!
     @brief alpha-coefficient for EBConductivityOp

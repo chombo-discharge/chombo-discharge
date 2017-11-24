@@ -41,7 +41,6 @@ int main(int argc, char* argv[]){
   amr->set_buffer_size(2);                        // Set buffer size
   amr->set_max_box_size(64);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
-  amr->set_num_ghost(3);                          // Set number of ghost cells (this is overridden inside plasma_engine)
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
   amr->set_irreg_sten_order(1);
