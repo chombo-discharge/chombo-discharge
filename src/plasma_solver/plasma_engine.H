@@ -3,7 +3,6 @@
   @brief Declaration of the main class for time/space advancement of streamer equations
   @author Robert Marskar
   @date Nov. 2017
-  @todo Move the BC stuff to poisson_solver
 */
 
 #ifndef _PLASMA_ENGINE_
@@ -14,18 +13,10 @@
 #include "computational_geometry.H"
 #include "plasma_kinetics.H"
 #include "time_stepper.H"
-#include "wall_bc.H"
 #include "physical_domain.H"
 #include "amr_mesh.H"
 #include "cell_tagger.H"
 #include "mfis.H"
-
-namespace Potential {
-  enum GroundLive {
-    Ground = false,
-    Live   = true
-  };
-};
 
 /*!
   @brief Main class for time/space advancement of streamer equations
@@ -67,21 +58,6 @@ public:
     @brief Verbosity
   */
   virtual void set_verbosity(const int a_verbosity);
-
-    /*!
-    @brief Set Dirichlet wall BC
-  */
-  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const Potential::GroundLive a_live);
-
-  /*!
-    @brief Set Neumann wall BC
-  */
-  virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
-    @brief Get Poisson BC at specified domain wall
-  */
-  virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
 
   /*!
     @brief Set amr
@@ -141,11 +117,6 @@ protected:
   RefCountedPtr<cell_tagger> m_celltagger;
 
   /*!
-    @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
-  */
-  Vector<RefCountedPtr<wall_bc> > m_wallbc;
-
-  /*!
     @brief Set the computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
@@ -169,13 +140,6 @@ protected:
     @brief Set the cell tagger
   */
   virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
-
-
-
-  /*!
-    @brief Allocate data holders for wall bcs so they can be set
-  */
-  virtual void allocate_wall_bc();
 
   /*!
     @brief Write a plot file
@@ -201,11 +165,6 @@ protected:
     @brief Do a regrid step
   */
   virtual void regrid();
-
-  /*!
-    @brief Internal bc map for Poisson stuff
-  */
-  virtual int map_bc(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Verbosity

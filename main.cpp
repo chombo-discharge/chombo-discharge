@@ -52,32 +52,35 @@ int main(int argc, char* argv[]){
 											plaskin,
 											timestepper,
 											amr));
-  engine->set_verbosity(10);
-  engine->set_geom_refinement_depth(2);
-  if(SpaceDim == 2){
-    engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
-    engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    engine->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
-    engine->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
-  }
-  else if(SpaceDim == 3){
-    engine->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
-    engine->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    engine->set_neumann_wall_bc(1,   Side::Lo, 0.0);                  
-    engine->set_neumann_wall_bc(1,   Side::Hi, 0.0);
-    engine->set_dirichlet_wall_bc(2, Side::Lo, Potential::Ground);
-    engine->set_dirichlet_wall_bc(2, Side::Hi, Potential::Live);
-  }
-  
-  
-  engine->setup_fresh();
 
-
-  // Set up a poisson solver
+  // Set up the Poisson solver
   RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
   poisson->set_verbosity(10);
   poisson->set_amr(amr);
   poisson->set_computational_geometry(compgeom);
+
+  if(SpaceDim == 2){
+    poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
+    poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
+    poisson->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
+    poisson->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
+  }
+  else if(SpaceDim == 3){
+    poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
+    poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
+    poisson->set_neumann_wall_bc(1,   Side::Lo, 0.0);                  
+    poisson->set_neumann_wall_bc(1,   Side::Hi, 0.0);
+    poisson->set_dirichlet_wall_bc(2, Side::Lo, Potential::Ground);
+    poisson->set_dirichlet_wall_bc(2, Side::Hi, Potential::Live);
+  }
+  
+
+  // Setup plasma engine
+  engine->set_verbosity(10);
+  engine->set_geom_refinement_depth(2);
+  engine->setup_fresh();
+
+  // Poisson solver solves
   poisson->solve();
   
 

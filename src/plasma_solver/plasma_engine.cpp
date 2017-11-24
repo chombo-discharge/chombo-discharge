@@ -44,23 +44,14 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
     m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
   }
 
-  this->allocate_wall_bc();
+
 }
 
 plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
 }
 
-void plasma_engine::allocate_wall_bc(){
-  CH_TIME("plasma_engine::plasma_engine(full)");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::plasma_engine(full)" << endl;
-  }
-  m_wallbc.resize(2*SpaceDim);
-  for (int i = 0; i < 2*SpaceDim; i++){
-    m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
-  }
-}
+
 
 void plasma_engine::set_verbosity(const int a_verbosity){
   CH_TIME("plasma_engine::set_verbosity");
@@ -203,27 +194,7 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
   }
 }
 
-void plasma_engine::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const Potential::GroundLive a_live){
-  CH_TIME("plasma_engine::set_dirichlet_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_dirichlet_wall_bc" << endl;
-  }
 
-  const int idx = this->map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Dirichlet));
-  m_wallbc[idx]->set_live(a_live);
-}
-
-void plasma_engine::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("plasma_engine::set_neumann_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_neumann_wall_bc" << endl;
-  }
-
-  const int idx = this->map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Neumann));
-  m_wallbc[idx]->set_value(a_value);
-}
 
 void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
   CH_TIME("plasma_engine::set_physical_domain");
@@ -237,15 +208,6 @@ void plasma_engine::sanity_check(){
   CH_TIME("plasma_engine::sanity_check");
   if(m_verbosity > 4){
     pout() << "plasma_engine::sanity_check" << endl;
-  }
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sideit; sideit.ok(); ++sideit){
-      if(m_wallbc[map_bc(dir, sideit())].isNull()){
-	pout() << "computational_geometry::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
-  	MayDay::Abort("computational_geometry::sanity_check() failed. Wall BC has not been set properly");
-      }
-    }
   }
 }
 
@@ -310,20 +272,4 @@ void plasma_engine::get_geom_tags(){
   }
 }
 
-wall_bc& plasma_engine::get_wall_bc(const int a_dir, Side::LoHiSide a_side) const{
-  CH_TIME("plasma_engine::get_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::get_wall_bc" << endl;
-  }
-  return *m_wallbc[this->map_bc(a_dir, a_side)];
-}
 
-int plasma_engine::map_bc(const int a_dir, const Side::LoHiSide a_side) const {
-  CH_TIME("plasma_engine::get_wall_bc");
-  if(m_verbosity > 999){
-    pout() << "plasma_engine::get_wall_bc" << endl;
-  }
-  const int iside = (a_side == Side::Lo) ? 0 : 1;
-
-  return 2*a_dir + iside;
-}

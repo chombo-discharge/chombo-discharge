@@ -11,6 +11,14 @@
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
+#include "wall_bc.H"
+
+namespace Potential {
+  enum GroundLive {
+    Ground = false,
+    Live   = true
+  };
+};
 
 /*!
   @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
@@ -57,6 +65,26 @@ public:
     @brief Query the required number of ghost cells
   */
   virtual int query_ghost() const = 0;
+
+  /*!
+    @brief Set Dirichlet wall BC
+  */
+  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const Potential::GroundLive a_live);
+
+  /*!
+    @brief Set Neumann wall BC
+  */
+  virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+
+  /*!
+    @brief Get Poisson BC at specified domain wall
+  */
+  virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
+
+  /*!
+    @brief Sanity check
+  */
+  virtual void sanity_check();
   
   /*!
     @brief Get multifluid state
@@ -116,9 +144,14 @@ protected:
   RefCountedPtr<computational_geometry> m_compgeom;
 
   /*!
-    @brief Computational geometry. Needed for passing in BCs on EBs. 
+    @brief AMR; needed for grid stuff
   */
   RefCountedPtr<amr_mesh> m_amr;
+
+  /*!
+    @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
+  */
+  Vector<RefCountedPtr<wall_bc> > m_wallbc;
 
   /*!
     @brief State data (i.e. the potential)
@@ -184,5 +217,16 @@ protected:
     @brief Set the mfis
   */
   virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
+
+  
+  /*!
+    @brief Allocate data holders for wall bcs so they can be set
+  */
+  virtual void allocate_wall_bc();
+
+  /*!
+    @brief Internal bc map for Poisson equations
+  */
+  virtual int map_bc(const int a_dir, const Side::LoHiSide a_side) const;
 };
 #endif
