@@ -81,6 +81,7 @@ int main(int argc, char* argv[]){
   engine->setup_fresh();
 
   // Poisson solver solves
+  poisson->sanity_check();
   poisson->solve();
   
 
