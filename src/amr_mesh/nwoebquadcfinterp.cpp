@@ -53,10 +53,10 @@ defineInternals(const LayoutData<IntVectSet>&  a_cfivs, const RefCountedPtr<EBIn
 
   a_ebisPtr->fillEBISLayout(m_ebislCoFi,
 			    m_gridsCoFi,
-			    m_domainCoar, m_ghost);
+			    m_domainCoar, m_ghost); // This originally had 4 ghost cells
 
   EBCellFactory fact(m_ebislCoFi);
-  m_bufferCoFi.define(m_gridsCoFi, m_nvar, m_ghost*IntVect::Unit, fact);
+  m_bufferCoFi.define(m_gridsCoFi, m_nvar, m_ghost*IntVect::Unit, fact); // This orginally had 4 ghost cells. 
 
   defineStencils(a_cfivs);
 }
