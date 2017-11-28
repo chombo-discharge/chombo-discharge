@@ -217,16 +217,10 @@ protected:
     @brief Set the mfis
   */
   virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
-
   
   /*!
     @brief Allocate data holders for wall bcs so they can be set
   */
   virtual void allocate_wall_bc();
-
-  /*!
-    @brief Internal bc map for Poisson equations
-  */
-  virtual int map_bc(const int a_dir, const Side::LoHiSide a_side) const;
 };
 #endif

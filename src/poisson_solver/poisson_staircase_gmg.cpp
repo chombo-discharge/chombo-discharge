@@ -97,7 +97,7 @@ void poisson_staircase_gmg::solve(){
   }
 
   
-#if 0 // This is a test, GMG is now set up correctly
+#if 1 // This is a test, GMG is now set up correctly
 
   const int comps                  = 1;
   const int ghost                  = m_amr->get_num_ghost();

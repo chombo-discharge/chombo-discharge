@@ -29,3 +29,9 @@ void wall_bc::set_live(bool a_live){
 WallBC::WhichBC wall_bc::which_bc(){
   return m_which;
 }
+
+int wall_bc::map_bc(const int a_dir, const Side::LoHiSide a_side) {
+  const int iside = (a_side == Side::Lo) ? 0 : 1;
+
+  return 2*a_dir + iside;
+}

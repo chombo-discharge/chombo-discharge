@@ -36,19 +36,24 @@ public:
   ~wall_bc();
 
   /*!
+    @brief Mapping of bcs
+  */
+  static int map_bc(const int a_dir, const Side::LoHiSide a_side);
+
+  /*!
     @brief Set value
   */
-  void set_value(Real a_value);
+  virtual void set_value(Real a_value);
 
   /*!
     @brief Set live or not
   */
-  void set_live(bool a_live);
+  virtual void set_live(bool a_live);
 
   /*!
     @brief Get BC type
   */
-  WallBC::WhichBC which_bc();
+  virtual WallBC::WhichBC which_bc();
 
 protected:
 

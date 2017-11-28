@@ -8,7 +8,6 @@
 #include "poisson_solver.H"
 #include "MFAliasFactory.H"
 
-
 poisson_solver::poisson_solver(){
   CH_TIME("poisson_solver::set_verbosity");
   if(m_verbosity > 5){
@@ -69,7 +68,7 @@ void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_sid
     pout() << "poisson_solver::set_dirichlet_wall_bc" << endl;
   }
 
-  const int idx = this->map_bc(a_dir, a_side);
+  const int idx = wall_bc::map_bc(a_dir, a_side);
   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Dirichlet));
   m_wallbc[idx]->set_live(a_live);
 }
@@ -80,7 +79,7 @@ void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side,
     pout() << "poisson_solver::set_neumann_wall_bc" << endl;
   }
 
-  const int idx = this->map_bc(a_dir, a_side);
+  const int idx = wall_bc::map_bc(a_dir, a_side);
   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Neumann));
   m_wallbc[idx]->set_value(a_value);
 }
@@ -117,22 +116,12 @@ void poisson_solver::sanity_check(){
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sideit; sideit.ok(); ++sideit){
-      if(m_wallbc[map_bc(dir, sideit())].isNull()){
+      if(m_wallbc[wall_bc::map_bc(dir, sideit())].isNull()){
 	pout() << "poisson_solver::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
   	MayDay::Abort("poisson_solver::sanity_check() failed. Wall BC has not been set properly");
       }
     }
   }
-}
-
-int poisson_solver::map_bc(const int a_dir, const Side::LoHiSide a_side) const {
-  CH_TIME("poisson_solver::get_wall_bc");
-  if(m_verbosity > 999){
-    pout() << "poisson_solver::get_wall_bc" << endl;
-  }
-  const int iside = (a_side == Side::Lo) ? 0 : 1;
-
-  return 2*a_dir + iside;
 }
 
 Real poisson_solver::get_time() const{
@@ -144,7 +133,7 @@ wall_bc& poisson_solver::get_wall_bc(const int a_dir, Side::LoHiSide a_side) con
   if(m_verbosity > 5){
     pout() << "poisson_solver::get_wall_bc" << endl;
   }
-  return *m_wallbc[this->map_bc(a_dir, a_side)];
+  return *m_wallbc[wall_bc::map_bc(a_dir, a_side)];
 }
 
 MFAMRCellData& poisson_solver::get_state(){
