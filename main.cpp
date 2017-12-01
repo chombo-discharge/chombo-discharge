@@ -53,11 +53,13 @@ int main(int argc, char* argv[]){
 											timestepper,
 											amr));
 
-  // Set up the Poisson solver
-  RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
+  // Set up a Poisson solver
+  //  RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
+  RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
   poisson->set_verbosity(10);
   poisson->set_amr(amr);
   poisson->set_computational_geometry(compgeom);
+  poisson->set_physical_domain(physdom);
 
   if(SpaceDim == 2){
     poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  

@@ -9,6 +9,7 @@
 #define _POISSON_MULTIFLUID_GMG_
 
 #include "poisson_solver.H"
+#include "mf_helmholtz_opfactory.H"
 
 /*!
   @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
@@ -49,6 +50,11 @@ protected:
     @brief Needs setup
   */
   bool m_needs_setup;
+
+  /*!
+    @brief Operator factory
+  */
+  RefCountedPtr<mf_helmholtz_opfactory> m_opfact;
 
   /*!
     @brief Set up the geometric multigrid solver 

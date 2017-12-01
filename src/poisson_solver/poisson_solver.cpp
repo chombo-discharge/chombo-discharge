@@ -33,6 +33,15 @@ void poisson_solver::set_computational_geometry(const RefCountedPtr<computationa
   this->set_mfis(m_compgeom->get_mfis());
 }
 
+void poisson_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
+  CH_TIME("poisson_solver::set_physical_domain");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_physical_domain" << endl;
+  }
+
+  m_physdom = a_physdom;
+}
+
 void poisson_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
   CH_TIME("poisson_solver::set_mfis");
   if(m_verbosity > 5){
@@ -113,6 +122,9 @@ void poisson_solver::sanity_check(){
   if(m_verbosity > 4){
     pout() << "poisson_solver::sanity_check" << endl;
   }
+
+  CH_assert(!m_compgeom.isNull());
+  CH_assert(!m_physdom.isNull());
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sideit; sideit.ok(); ++sideit){
