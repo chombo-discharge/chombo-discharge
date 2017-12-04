@@ -15,7 +15,25 @@
 #include <EBFaceFAB.H>
 #include <BaseIVFAB.H>
 #include <MFCellFAB.H>
+#include <MFFluxFAB.H>
 
+#include "MFBaseIVFAB.H"
+
+/*!
+  @brief phase names
+*/
+namespace Phase {
+  const int num_phases = 2;
+  
+  enum WhichPhase {
+    Gas   = 0,
+    Solid = 1
+  };
+};
+
+/*!
+  @brief Relaxation types for multigrid
+*/
 namespace relax {
   enum which_relax {
     jacobi       = 0,
@@ -24,6 +42,9 @@ namespace relax {
   };
 };
 
+/*!
+  @brief Multigrid cycle types
+*/
 namespace amrmg {
   enum which_mg {
     full   = 0,
@@ -32,7 +53,10 @@ namespace amrmg {
   };
 };
 
+
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
+typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;
+typedef Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >      MFAMRIVData;
 typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >        EBAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        EBAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<EBFaceFAB> > >        EBAMRFaceData;

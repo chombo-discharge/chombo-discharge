@@ -6,6 +6,7 @@
 */
 
 #include "poisson_multifluid_gmg.H"
+#include "data_ops.H"
 
 #include <MFCellFAB.H>
 #include <MFLevelDataOps.H>
@@ -71,17 +72,44 @@ void poisson_multifluid_gmg::setup_gmg(){
   
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
   RefCountedPtr<BaseEBBCFactory>     ebcfact = RefCountedPtr<BaseEBBCFactory> (NULL);
+
+
+  // Create two MFBaseIVFABs and copy between them
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    Vector<EBISLayout> ebisl(2);
+    Vector<int> comps(2);
+
+    ebisl[Phase::Gas] = m_amr->get_ebisl(Phase::Gas)[lvl];
+    ebisl[Phase::Solid] = m_amr->get_ebisl(Phase::Solid)[lvl];
+
+    comps[Phase::Gas] = 1;
+    comps[Phase::Solid] = 1;
+
+    MFBaseIVFABFactory fact(ebisl, comps);
+
+    const int ignored = 0;
+    LevelData<MFBaseIVFAB>* mfiv1 = new LevelData<MFBaseIVFAB> (grids[lvl], ignored, 2*IntVect::Unit, fact);
+    LevelData<MFBaseIVFAB>* mfiv2 = new LevelData<MFBaseIVFAB> (grids[lvl], ignored, 2*IntVect::Unit, fact);
+
+    data_ops::set_value(*mfiv1, 1.0);
+    data_ops::set_value(*mfiv2, 2.0);
+
+    mfiv1->copyTo(*mfiv2);
+
+  }
+
   
-  m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(ebis_gas,
-									       ebis_sol,
-									       refinement_ratios,
-									       domains[0],
-									       dx[0],
-									       origin,
-									       domfact,
-									       ebcfact,
-									       2*IntVect::Unit,
-									       2*IntVect::Unit));
+  // m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(ebis_gas,
+  // 									       ebis_sol,
+  // 									       refinement_ratios,
+  // 									       domains[0],
+  // 									       dx[0],
+  // 									       origin,
+  // 									       domfact,
+  // 									       ebcfact,
+  // 									       2*IntVect::Unit,
+  // 									       2*IntVect::Unit));
 									       
 									       
 									       

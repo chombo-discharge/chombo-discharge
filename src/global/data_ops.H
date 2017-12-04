@@ -24,5 +24,7 @@ public:
   static void set_value(EBAMRFluxData& a_lhs, const Real& a_value);
 
   static void set_value(EBAMRIVData& a_lhs, const Real& a_value);
+
+  static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
 };
 #endif

@@ -9,6 +9,7 @@
 
 #include "type_definitions.H"
 #include "mf_helmholtz_op.H"
+#include "mfis.H"
 
 #include <AMRMultiGrid.H>
 #include <BaseDomainBC.H>
@@ -16,25 +17,34 @@
 #include <ProblemDomain.H>
 #include <RefCountedPtr.H>
 #include <EBIndexSpace.H>
+#include <EBQuadCFInterp.H>
 #include <MFCellFAB.H>
 
+/*!
+  @brief Factory class for generationg mf_helmholtz_op's. 
+*/
 class mf_helmholtz_opfactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
-
+  
   /*!
     @brief Factory class for creating multifluid helmholtz operators
+    @note This class generates its own EBConductivityOps as well as it's own interpolation utilities. 
   */
-  mf_helmholtz_opfactory(const RefCountedPtr<EBIndexSpace>&        a_ebis_gas,
-			 const RefCountedPtr<EBIndexSpace>&        a_ebis_solid,
+  mf_helmholtz_opfactory(const RefCountedPtr<mfis>&                a_mfis,
+			 const MFAMRCellData&                      a_aco,
+			 const MFAMRFluxData&                      a_bco,
+			 const MFAMRIVData&                        a_bco_irreg,
+			 const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
+			 const RefCountedPtr<BaseEBBCFactory>&     a_ebbc,
 			 const Vector<int>&                        a_ref_ratio,
 			 const ProblemDomain&                      a_coarsest_domain,
 			 const Real&                               a_coarsest_dx,
 			 const RealVect&                           a_origin,
-			 const RefCountedPtr<BaseDomainBCFactory>& a_domainbc_factory,
-			 const RefCountedPtr<BaseEBBCFactory>&     a_ebbc_factory,
 			 const IntVect&                            a_ghost_phi,
 			 const IntVect&                            a_ghost_rhs,
-			 int                                       a_num_levels = -1);
+			 int                                       a_num_levels = -1){
+
+  }
 
   /*!
     @brief Destructor
@@ -52,7 +62,7 @@ public:
   static void set_relax_type(const int a_relax_type);
 
   /*!
-    @brief Set jump condition
+    @brief Set jump conditions. 
     @param[in] a_gas_perm Gas-side permittivity
     @param[in] a_solid_perm Solid permittivity on jump cells
     @param[in] a_jump Surface charge (divided by eps0)
@@ -100,16 +110,6 @@ public:
 protected:
 
   /*!
-    @brief Gas-side ebis
-  */
-  RefCountedPtr<EBIndexSpace> m_ebis_gas;
-
-  /*!
-    @brief EBIS inside of solids
-  */
-  RefCountedPtr<EBIndexSpace> m_ebis_solid;
-  
-  /*!
     @brief Drop to bottom solver
   */
   static int s_drop_bottom;
@@ -118,6 +118,57 @@ protected:
     @brief Relaxation type
   */
   static int s_relax_type;
+
+  /*!
+    @brief Gas-side ebis
+  */
+  RefCountedPtr<EBIndexSpace> m_ebis_gas;
+
+  /*!
+    @brief EBIS inside of solids
+  */
+  RefCountedPtr<EBIndexSpace> m_ebis_sol;
+
+  /*!
+    @brief Interpolation utility for gas-side data
+  */
+  RefCountedPtr<EBQuadCFInterp> m_cfi_gas;
+
+  /*!
+    @brief Interpolation utility for solid-side data
+  */
+  RefCountedPtr<EBQuadCFInterp> m_cfi_sol;
+
+  /*!
+    @brief Domain boundary conditions
+  */
+  RefCountedPtr<BaseDomainBCFactory> m_dombc;
+
+  /*!
+    @brief EB boundary conditions
+  */
+  RefCountedPtr<BaseEBBCFactory> m_ebbc;
+
+  /*!
+    @brief a-coefficient for gas side
+  */
+  Vector<RefCountedPtr<LevelData<EBCellFAB> > > m_aco_gas;
+
+  /*!
+    @brief a-coefficient for gas side
+  */
+  Vector<RefCountedPtr<LevelData<EBCellFAB> > > m_aco_sol;
+
+  /*!
+    @brief Ghost cells for solution vector
+  */
+  IntVect m_ghost_phi;
+
+  /*!
+    @brief Ghost cells for solution vector
+  */
+  IntVect m_ghost_rhs;
+  
 
   /*!
     @brief Defined or not

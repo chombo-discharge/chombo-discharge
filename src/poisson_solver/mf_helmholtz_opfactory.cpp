@@ -9,21 +9,6 @@
 int mf_helmholtz_opfactory::s_drop_bottom = 2;
 int mf_helmholtz_opfactory::s_relax_type  = 2;
 
-mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<EBIndexSpace>&        a_ebis_gas,
-					       const RefCountedPtr<EBIndexSpace>&        a_ebis_solid,
-					       const Vector<int>&                        a_ref_ratio,
-					       const ProblemDomain&                      a_coarsest_domain,
-					       const Real&                               a_coarsest_dx,
-					       const RealVect&                           a_origin,
-					       const RefCountedPtr<BaseDomainBCFactory>& a_domainbc_factory,
-					       const RefCountedPtr<BaseEBBCFactory>&     a_ebbc_factory,
-					       const IntVect&                            a_ghost_phi,
-					       const IntVect&                            a_ghost_rhs,
-					       int                                       a_num_levels){
-
-  MayDay::Abort("mf_helmholtz_opfactory::mf_helmholtz_opfactory - not implemented");
-
-}
 
 mf_helmholtz_opfactory::~mf_helmholtz_opfactory(){
 

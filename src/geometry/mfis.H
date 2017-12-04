@@ -8,21 +8,13 @@
 #ifndef _mfindexspace_
 #define _mfindexspace_
 
+#include "type_definitions.H"
+
 #include <GeometryService.H>
 #include <EBIndexSpace.H>
 #include <RealVect.H>
 
-/*!
-  @brief Global stuff for phases
-*/
-namespace Phase {
-  const int num_phases = 2;
-  
-  enum WhichPhase {
-    Gas = 0,
-    Solid = 1
-  };
-};
+
 
 /*!
   @brief Two-fluid index space

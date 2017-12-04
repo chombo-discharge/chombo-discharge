@@ -19,8 +19,6 @@
 #include "physical_domain.H"
 #include "mfis.H"
 
-
-
 /*!
   @brief Abstract base class for geometries
 */

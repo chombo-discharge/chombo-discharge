@@ -1,0 +1,50 @@
+  LoadBalance  sizes: a_computeLoads=16 a_boxes=16 a_LBnumProc=10
+minload=1 on rank:0  maxload=2 on rank:4
+loadbalance efficiency = 0.75  Nboxes=16
+average number of boxes per proc = 1.6
+rank0  load=1 boxes(1)=rank1  load=1 boxes(1)=rank2  load=1 boxes(1)=rank3  load=1 boxes(1)=rank4  load=2 boxes(2)=rank5  load=2 boxes(2)=rank6  load=2 boxes(2)=rank7  load=2 boxes(2)=rank8  load=2 boxes(2)=rank9  load=2 boxes(2)=
+
+  LoadBalance  sizes: a_computeLoads=4 a_boxes=4 a_LBnumProc=10
+minload=0 on rank:4  maxload=1 on rank:0
+loadbalance efficiency = -0.5  Nboxes=4
+average number of boxes per proc = 0.4
+rank0  load=1 boxes(1)=rank1  load=1 boxes(1)=rank2  load=1 boxes(1)=rank3  load=1 boxes(1)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+
+  LoadBalance  sizes: a_computeLoads=16 a_boxes=16 a_LBnumProc=10
+minload=1 on rank:0  maxload=2 on rank:4
+loadbalance efficiency = 0.75  Nboxes=16
+average number of boxes per proc = 1.6
+rank0  load=1 boxes(1)=rank1  load=1 boxes(1)=rank2  load=1 boxes(1)=rank3  load=1 boxes(1)=rank4  load=2 boxes(2)=rank5  load=2 boxes(2)=rank6  load=2 boxes(2)=rank7  load=2 boxes(2)=rank8  load=2 boxes(2)=rank9  load=2 boxes(2)=
+
+  LoadBalance  sizes: a_computeLoads=4 a_boxes=4 a_LBnumProc=10
+minload=0 on rank:4  maxload=1 on rank:0
+loadbalance efficiency = -0.5  Nboxes=4
+average number of boxes per proc = 0.4
+rank0  load=1 boxes(1)=rank1  load=1 boxes(1)=rank2  load=1 boxes(1)=rank3  load=1 boxes(1)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+
+  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
+minload=0 on rank:2  maxload=1024 on rank:0
+loadbalance efficiency = -3  Nboxes=2
+average number of boxes per proc = 0.2
+rank0  load=1024 boxes(1)=rank1  load=1024 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+
+  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
+minload=0 on rank:2  maxload=1564216 on rank:0
+loadbalance efficiency = -3.02567  Nboxes=2
+average number of boxes per proc = 0.2
+rank0  load=1564216 boxes(1)=rank1  load=1548238 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+
+  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
+minload=0 on rank:2  maxload=1024 on rank:0
+loadbalance efficiency = -3  Nboxes=2
+average number of boxes per proc = 0.2
+rank0  load=1024 boxes(1)=rank1  load=1024 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+
+  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
+minload=0 on rank:2  maxload=1530601 on rank:0
+loadbalance efficiency = -3.00091  Nboxes=2
+average number of boxes per proc = 0.2
+rank0  load=1530601 boxes(1)=rank1  load=1530044 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+
+
+
