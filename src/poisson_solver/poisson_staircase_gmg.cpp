@@ -127,6 +127,8 @@ void poisson_staircase_gmg::solve(){
     E_ptr.push_back(&(*E[lvl]));
   }
 
+  m_gmg_solver.getInfo();
+
   m_gmg_solver.solve(phi_ptr, src_ptr, finest_level, 0);
 
   // Compute gradient

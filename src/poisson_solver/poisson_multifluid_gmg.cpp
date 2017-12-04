@@ -99,17 +99,27 @@ void poisson_multifluid_gmg::setup_gmg(){
 
   }
 
-  
-  // m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(ebis_gas,
-  // 									       ebis_sol,
-  // 									       refinement_ratios,
-  // 									       domains[0],
-  // 									       dx[0],
-  // 									       origin,
-  // 									       domfact,
-  // 									       ebcfact,
-  // 									       2*IntVect::Unit,
-  // 									       2*IntVect::Unit));
+  MFAMRCellData aco;
+  MFAMRFluxData bco;
+  MFAMRIVData   bco_irreg;
+  Real          alpha = 0.0;
+  Real          beta  = 0.0;
+
+  m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
+									       aco,
+									       bco,
+									       bco_irreg,
+									       alpha,
+									       beta,
+									       dx[0],
+									       domains[0],
+  									       refinement_ratios,
+									       grids,
+  									       domfact,
+									       ebcfact,
+  									       origin,
+  									       2*IntVect::Unit,
+  									       2*IntVect::Unit));
 									       
 									       
 									       

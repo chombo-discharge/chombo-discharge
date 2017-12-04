@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
   amr->set_buffer_size(2);                        // Set buffer size
   amr->set_max_box_size(64);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
-  amr->set_eb_ghost(2);                           // Set EB ghost vectors
+  amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
   amr->set_irreg_sten_order(1);
   amr->set_irreg_sten_radius(1);
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
 											amr));
 
   // Set up a Poisson solver
-  //  RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
+  //RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
   RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
   poisson->set_verbosity(10);
   poisson->set_amr(amr);

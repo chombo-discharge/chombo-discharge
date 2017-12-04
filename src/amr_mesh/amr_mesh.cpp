@@ -277,7 +277,7 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi)
 void amr_mesh::define_eblevelgrid(){
   CH_TIME("amr_mesh::define_eblevelgrid");
   if(m_verbosity > 2){
-    pout() << "amr_mesh::define_levelgrid" << endl;
+    pout() << "amr_mesh::define_eblevelgrid" << endl;
   }
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(Phase::Gas);
@@ -291,7 +291,7 @@ void amr_mesh::define_eblevelgrid(){
     }
     if(!ebis_sol.isNull()){
       m_eblg[Phase::Solid][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_ebghost, ebis_sol));
-      m_eblg[Phase::Solid][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl], ebis_gas);
+      m_eblg[Phase::Solid][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl], ebis_sol);
       m_ebisl[Phase::Solid][lvl] = m_eblg[Phase::Solid][lvl]->getEBISL();
     }
   }
