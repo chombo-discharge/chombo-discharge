@@ -99,13 +99,24 @@ void poisson_multifluid_gmg::setup_gmg(){
 
   }
 
-  MFAMRCellData aco;
-  MFAMRFluxData bco;
-  MFAMRIVData   bco_irreg;
+  MFAMRCellData aco(1);
+  MFAMRFluxData bco(1);
+  MFAMRIVData   bco_irreg(1);
   Real          alpha = 0.0;
   Real          beta  = 0.0;
 
+  Vector<MFLevelGrid> mfeblg(1 + finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    Vector<EBLevelGrid> eblg_phases(Phase::num_phases);
+    eblg_phases[Phase::Gas] = *(m_amr->get_eblg(Phase::Gas)[lvl]);
+    eblg_phases[Phase::Solid] = *(m_amr->get_eblg(Phase::Solid)[lvl]);
+    mfeblg[lvl].define(eblg_phases);
+  }
+
   m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
+									       mfeblg,
+									       refinement_ratios,
+									       grids,
 									       aco,
 									       bco,
 									       bco_irreg,
@@ -113,8 +124,6 @@ void poisson_multifluid_gmg::setup_gmg(){
 									       beta,
 									       dx[0],
 									       domains[0],
-  									       refinement_ratios,
-									       grids,
   									       domfact,
 									       ebcfact,
   									       origin,

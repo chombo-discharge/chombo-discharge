@@ -12,6 +12,7 @@
 #include "mf_helmholtz_op.H"
 #include "mfis.H"
 #include "mfalias.H"
+#include "MFLevelGrid.H"
 
 #include <AMRMultiGrid.H>
 #include <MFAliasFactory.H>
@@ -38,8 +39,12 @@ public:
   /*!
     @brief Factory class for creating multifluid helmholtz operators
     @note This class generates its own EBConductivityOps as well as it's own interpolation utilities. 
+    @details This class only supports two-phase solutions with single components
   */
   mf_helmholtz_opfactory(const RefCountedPtr<mfis>&                a_mfis,
+			 const Vector<MFLevelGrid>&                a_mflg,
+			 const Vector<int>&                        a_ref_rat,
+			 const Vector<DisjointBoxLayout>&          a_grids,
 			 const MFAMRCellData&                      a_aco,
 			 const MFAMRFluxData&                      a_bco,
 			 const MFAMRIVData&                        a_bco_irreg,
@@ -47,8 +52,6 @@ public:
 			 const Real&                               a_beta,
 			 const Real&                               a_coarsest_dx,
 			 const ProblemDomain&                      a_coarsest_domain,
-			 const Vector<int>&                        a_ref_rat,
-			 const Vector<DisjointBoxLayout>&          a_grids,
 			 const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
 			 const RefCountedPtr<BaseEBBCFactory>&     a_ebbc,
 			 const RealVect&                           a_origin,
@@ -60,6 +63,7 @@ public:
 #endif
     
     m_mfis       = a_mfis;
+    m_mflg       = a_mflg;
     m_aco        = a_aco;
     m_bco        = a_bco;
     m_bco_irreg  = a_bco_irreg;
@@ -83,7 +87,10 @@ public:
       m_domains[lvl].refine(m_ref_rat[lvl-1]);
     }
 
-
+    m_aco_mg.resize(m_num_levels);
+    m_bco_mg.resize(m_num_levels);
+    m_bco_irreg_mg.resize(m_num_levels);
+    m_mflg_mg.resize(m_num_levels);
     m_grids_mg.resize(m_num_levels);
     m_domains_mg.resize(m_num_levels);
     m_has_mg_objects.resize(m_num_levels);
@@ -97,10 +104,18 @@ public:
 
 	const int mg_refi = 2;
 
+	m_aco_mg[lvl].resize(0);
+	m_bco_mg[lvl].resize(0);
+	m_bco_irreg_mg[lvl].resize(0);
+	m_mflg_mg[lvl].resize(0);
 	m_grids_mg[lvl].resize(0);
 	m_domains_mg[lvl].resize(0);
 	m_layout_changed_mg.resize(0);
-	
+
+	m_aco_mg[lvl].push_back(m_aco[lvl]);
+	m_bco_mg[lvl].push_back(m_bco[lvl]);
+	m_bco_irreg_mg[lvl].push_back(m_bco_irreg[lvl]);
+	m_mflg_mg[lvl].push_back(m_mflg[lvl]);
 	m_grids_mg[lvl].push_back(m_grids[lvl]);
 	m_domains_mg[lvl].push_back(m_domains[lvl]);
 	m_layout_changed_mg[lvl].push_back(m_layout_changed[lvl]);
@@ -109,9 +124,12 @@ public:
 	bool at_amr_lvl  = true;
 	ProblemDomain cur_domain = m_domains[lvl];
 	while(has_coarser){
-
+#if 1 // Debug
+	  pout() << "getting mflg_fine" << endl;
+#endif
 	  int imgsize = m_grids_mg[lvl].size();
 	  const DisjointBoxLayout& fine_grid = m_grids_mg[lvl][imgsize - 1];
+	  const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1]; // This code breaks because we haven't added all levels
 
 	  DisjointBoxLayout grid_coar_mg;
 	  ProblemDomain domain_coar_mg;
@@ -141,6 +159,17 @@ public:
 	    m_domains_mg[lvl].push_back(domain_coar_mg);
 	    m_layout_changed_mg[lvl].push_back(layout_changed);
 	    cur_domain.coarsen(mg_refi);
+
+	    // Create storage for coarsened coefficients. We're now into hardcoded two-phase single-component stuff
+	    const int phases = 2;
+	    const int comps  = 1;
+	    
+	    Vector<int> comps(phases, comps);
+	    Vector<EBLevelGrid> eblgs(phases);
+	    for (int i = 0; i < phases; i++){
+	      
+	    }
+
 	  }
 	}
       }
@@ -222,8 +251,8 @@ public:
 	mfalias::aliasMF(aco_fine,       i, a_aco_fine);
 	mfalias::aliasMF(bco_coar,       i, a_bco_coar); 
 	mfalias::aliasMF(bco_fine,       i, a_bco_fine);       
-	// aliasMF(bco_irreg_coar, i, a_bco_irreg_coar); 
-	// aliasMF(bco_irreg_fine, i, a_bco_irreg_fine);
+	mfalias::aliasMF(bco_irreg_coar, i, a_bco_irreg_coar); 
+	mfalias::aliasMF(bco_irreg_fine, i, a_bco_irreg_fine);
 	
 	aveop.average(aco_coar,       aco_fine,       interv);
 	aveop.average(bco_coar,       bco_fine,       interv);
@@ -240,7 +269,8 @@ public:
   }
 
   /*!
-    @brief Coarsen jump conditions. Needed for multigrid
+    @brief Coarsen jump conditions; 
+    @details Routine is called every time set_jump is called because coarsened BCs are needed for multigrid. 
   */
   virtual void coarsen_stuff(LevelData<BaseIVFAB<Real> >&       a_ajump_coar,
 			     LevelData<BaseIVFAB<Real> >&       a_bjump_coar,
@@ -377,6 +407,11 @@ protected:
   EBAMRIVData m_sigma;
 
   /*!
+    @brief EBLevelGrids (in MFLevelGrid form)
+  */
+  Vector<MFLevelGrid> m_mflg;
+
+  /*!
     @brief Refinement ratios
   */
   Vector<int> m_ref_rat;
@@ -425,6 +460,11 @@ protected:
     @brief Irregular b-coefficient for multigrid
   */
   Vector<MFAMRIVData> m_bco_irreg_mg;
+
+  /*!
+    @brief MFLevelGrids for MultiGrid
+  */
+  Vector<Vector<MFLevelGrid> > m_mflg_mg;
 
   /*!
     @brief Has multigrid objects or not

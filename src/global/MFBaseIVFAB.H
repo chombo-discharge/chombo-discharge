@@ -58,7 +58,6 @@ public:
     @brief Get BaseIVFAB for phase
   */
   virtual BaseIVFAB<Real>& get_ivfab(const int a_phase){
-    CH_assert(a_phase < m_phase.size());
     return *m_phase[a_phase];
   }
 
@@ -66,8 +65,14 @@ public:
     @brief Get BaseIVFAB for phase
   */
   virtual const BaseIVFAB<Real>& get_ivfab(const int a_phase) const {
-    CH_assert(a_phase < m_phase.size());
     return *m_phase[a_phase];
+  }
+
+  /*!
+    @brief Get BaseIVFAB for phase
+  */
+  virtual BaseIVFAB<Real>* get_phase_ptr(int a_phase){
+    return m_phase[a_phase];
   }
 
   /*!
