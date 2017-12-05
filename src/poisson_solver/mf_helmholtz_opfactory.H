@@ -58,10 +58,6 @@ public:
 			 const IntVect&                            a_ghost_phi,
 			 const IntVect&                            a_ghost_rhs,
 			 int                                       a_num_levels = -1){
-#if 1 // Debugging
-    pout() << "creating op factory" << endl;
-#endif
-    
     m_mfis       = a_mfis;
     m_mflg       = a_mflg;
     m_aco        = a_aco;
@@ -100,7 +96,7 @@ public:
     for (int lvl = 0; lvl < m_num_levels; lvl++){
       if(lvl == 0 || m_ref_rat[lvl] > 2) { 
 	
-	m_has_mg_objects[lvl] = (s_test_ref < s_max_box_size);
+	m_has_mg_objects[lvl] = true;
 
 	const int mg_refi = 2;
 
@@ -124,12 +120,10 @@ public:
 	bool at_amr_lvl  = true;
 	ProblemDomain cur_domain = m_domains[lvl];
 	while(has_coarser){
-#if 1 // Debug
-	  pout() << "getting mflg_fine" << endl;
-#endif
+
 	  int imgsize = m_grids_mg[lvl].size();
 	  const DisjointBoxLayout& fine_grid = m_grids_mg[lvl][imgsize - 1];
-	  const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1]; // This code breaks because we haven't added all levels
+	  const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1]; // Previous added MFLevelGrid. We need to coarsen it. 
 
 	  DisjointBoxLayout grid_coar_mg;
 	  ProblemDomain domain_coar_mg;
@@ -160,15 +154,49 @@ public:
 	    m_layout_changed_mg[lvl].push_back(layout_changed);
 	    cur_domain.coarsen(mg_refi);
 
-	    // Create storage for coarsened coefficients. We're now into hardcoded two-phase single-component stuff
-	    const int phases = 2;
-	    const int comps  = 1;
-	    
-	    Vector<int> comps(phases, comps);
-	    Vector<EBLevelGrid> eblgs(phases);
-	    for (int i = 0; i < phases; i++){
-	      
+	    const int  ncomps = 1; // Number of components we solve for. Always 1. 
+	    const int ebghost = 4; // Ghost cells for MG, using 4 since that allows refinement of 4
+	    const int   ghost = 1; // Necessary ghost cells for second order
+
+	    m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, mflg_fine.get_ebis()));
+
+	    const int img = m_mflg_mg[lvl].size() - 1; // Last one added, i.e. the coarsest that we have so far
+
+	    const MFLevelGrid& mflg_coar = m_mflg_mg[lvl][img  ];    // Coarsened EBLevelGrids for all phases
+	    const MFLevelGrid& mflg_fine = m_mflg_mg[lvl][img-1];    // Fine EBLevelGrids for all phases
+
+	    Vector<EBISLayout> ebisl_coar = mflg_coar.get_ebisl();  // Need this stuff for factories. 
+	    Vector<int> comps;
+	    for (int i = 0; i < ebisl_coar.size(); i++){
+	      comps.push_back(ncomps);
 	    }
+
+	    MFCellFactory      cellfact(ebisl_coar, comps);
+	    MFFluxFactory      fluxfact(ebisl_coar, comps);
+	    MFBaseIVFABFactory ivfact(ebisl_coar,   comps);
+
+	    RefCountedPtr<LevelData<MFCellFAB> > aco_coar = RefCountedPtr<LevelData<MFCellFAB> >
+	      (new LevelData<MFCellFAB>(grid_coar_mg, ncomps, ghost*IntVect::Unit, cellfact));
+	    RefCountedPtr<LevelData<MFFluxFAB> > bco_coar = RefCountedPtr<LevelData<MFFluxFAB> >
+	      (new LevelData<MFFluxFAB>(grid_coar_mg, ncomps, ghost*IntVect::Unit, fluxfact));
+	    RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg_coar = RefCountedPtr<LevelData<MFBaseIVFAB> >
+	      (new LevelData<MFBaseIVFAB>(grid_coar_mg, ncomps, ghost*IntVect::Unit, ivfact));
+	    
+
+	    this->coarsen_coefficients(*aco_coar, // Coarsen coefficients
+	    			       *bco_coar,
+	    			       *bco_irreg_coar,
+	    			       mflg_coar,
+	    			       mflg_fine,
+	    			       *m_aco_mg[lvl][img-1],
+	    			       *m_bco_mg[lvl][img-1],
+	    			       *m_bco_irreg_mg[lvl][img-1],
+	    			       mg_refi);
+
+	    m_aco_mg[lvl].push_back(aco_coar);
+	    m_bco_mg[lvl].push_back(bco_coar);
+	    m_bco_irreg_mg[lvl].push_back(bco_irreg_coar);
+
 
 	  }
 	}
@@ -214,14 +242,14 @@ public:
   virtual void coarsen_coefficients(LevelData<MFCellFAB>&         a_aco_coar,
 				    LevelData<MFFluxFAB>&         a_bco_coar,
 				    LevelData<MFBaseIVFAB>&       a_bco_irreg_coar,
-				    const Vector<EBLevelGrid>&    a_eblg_phases_coar,
-				    const Vector<EBLevelGrid>&    a_eblg_phases_fine,
+				    const MFLevelGrid&            a_mflg_coar,
+				    const MFLevelGrid&            a_mflg_fine,
 				    const LevelData<MFCellFAB>&   a_aco_fine,
 				    const LevelData<MFFluxFAB>&   a_bco_fine,
 				    const LevelData<MFBaseIVFAB>& a_bco_irreg_fine,
 				    const int&                    a_ref_to_depth){
     CH_assert(a_ref_to_depth > 0);
-
+    
     const int ncomp = 1;
     const Interval interv(0,ncomp - 1);
 
@@ -231,10 +259,9 @@ public:
       a_bco_irreg_fine.copyTo(interv, a_bco_irreg_coar, interv);
     }
     else {
-
-      for (int i = 0; i < a_eblg_phases_coar.size(); i++){
-	const EBLevelGrid& eblg_coar = a_eblg_phases_coar[i];
-	const EBLevelGrid& eblg_fine = a_eblg_phases_fine[i];
+      for (int i = 0; i < a_mflg_coar.num_phases(); i++){
+	const EBLevelGrid& eblg_coar = a_mflg_coar.get_eblg(i);
+	const EBLevelGrid& eblg_fine = a_mflg_fine.get_eblg(i);
 	EBCoarseAverage aveop(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 			      eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 			      eblg_coar.getDomain(), a_ref_to_depth, ncomp,
@@ -258,14 +285,11 @@ public:
 	aveop.average(bco_coar,       bco_fine,       interv);
 	aveop.average(bco_irreg_coar, bco_irreg_fine, interv);
 
+	aco_coar.exchange();
+	bco_coar.exchange();
+	bco_irreg_coar.exchange();
       }
-
-      
-      MayDay::Abort("mf_helmholtz_opfactory::coarsen_coefficients - MFCoarseAverage not implemented");
     }
-    a_aco_coar.exchange(interv);
-    a_bco_coar.exchange(interv);
-    a_bco_irreg_coar.exchange(interv);
   }
 
   /*!

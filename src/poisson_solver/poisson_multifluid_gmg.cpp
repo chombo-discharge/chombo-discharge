@@ -99,11 +99,19 @@ void poisson_multifluid_gmg::setup_gmg(){
 
   }
 
-  MFAMRCellData aco(1);
-  MFAMRFluxData bco(1);
-  MFAMRIVData   bco_irreg(1);
-  Real          alpha = 0.0;
-  Real          beta  = 0.0;
+  // Allocate coefficients
+  MFAMRCellData aco;
+  MFAMRFluxData bco;
+  MFAMRIVData   bco_irreg;
+  Real          alpha =  0.0;
+  Real          beta  = -1.0;
+
+  const int ncomps = 1;
+  const int ghosts = 1;
+  m_amr->allocate(aco,       ncomps, ghosts);
+  m_amr->allocate(bco,       ncomps, ghosts);
+  m_amr->allocate(bco_irreg, ncomps, ghosts);
+
 
   Vector<MFLevelGrid> mfeblg(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){

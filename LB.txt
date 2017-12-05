@@ -1,3 +1,15 @@
+  LoadBalance  sizes: a_computeLoads=256 a_boxes=256 a_LBnumProc=10
+minload=25 on rank:0  maxload=26 on rank:4
+loadbalance efficiency = 0.984375  Nboxes=256
+average number of boxes per proc = 25.6
+rank0  load=25 boxes(25)=rank1  load=25 boxes(25)=rank2  load=25 boxes(25)=rank3  load=25 boxes(25)=rank4  load=26 boxes(26)=rank5  load=26 boxes(26)=rank6  load=26 boxes(26)=rank7  load=26 boxes(26)=rank8  load=26 boxes(26)=rank9  load=26 boxes(26)=
+
+  LoadBalance  sizes: a_computeLoads=64 a_boxes=64 a_LBnumProc=10
+minload=6 on rank:0  maxload=7 on rank:6
+loadbalance efficiency = 0.90625  Nboxes=64
+average number of boxes per proc = 6.4
+rank0  load=6 boxes(6)=rank1  load=6 boxes(6)=rank2  load=6 boxes(6)=rank3  load=6 boxes(6)=rank4  load=6 boxes(6)=rank5  load=6 boxes(6)=rank6  load=7 boxes(7)=rank7  load=7 boxes(7)=rank8  load=7 boxes(7)=rank9  load=7 boxes(7)=
+
   LoadBalance  sizes: a_computeLoads=16 a_boxes=16 a_LBnumProc=10
 minload=1 on rank:0  maxload=2 on rank:4
 loadbalance efficiency = 0.75  Nboxes=16
@@ -10,6 +22,18 @@ loadbalance efficiency = -0.5  Nboxes=4
 average number of boxes per proc = 0.4
 rank0  load=1 boxes(1)=rank1  load=1 boxes(1)=rank2  load=1 boxes(1)=rank3  load=1 boxes(1)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
 
+  LoadBalance  sizes: a_computeLoads=256 a_boxes=256 a_LBnumProc=10
+minload=25 on rank:0  maxload=26 on rank:4
+loadbalance efficiency = 0.984375  Nboxes=256
+average number of boxes per proc = 25.6
+rank0  load=25 boxes(25)=rank1  load=25 boxes(25)=rank2  load=25 boxes(25)=rank3  load=25 boxes(25)=rank4  load=26 boxes(26)=rank5  load=26 boxes(26)=rank6  load=26 boxes(26)=rank7  load=26 boxes(26)=rank8  load=26 boxes(26)=rank9  load=26 boxes(26)=
+
+  LoadBalance  sizes: a_computeLoads=64 a_boxes=64 a_LBnumProc=10
+minload=6 on rank:0  maxload=7 on rank:6
+loadbalance efficiency = 0.90625  Nboxes=64
+average number of boxes per proc = 6.4
+rank0  load=6 boxes(6)=rank1  load=6 boxes(6)=rank2  load=6 boxes(6)=rank3  load=6 boxes(6)=rank4  load=6 boxes(6)=rank5  load=6 boxes(6)=rank6  load=7 boxes(7)=rank7  load=7 boxes(7)=rank8  load=7 boxes(7)=rank9  load=7 boxes(7)=
+
   LoadBalance  sizes: a_computeLoads=16 a_boxes=16 a_LBnumProc=10
 minload=1 on rank:0  maxload=2 on rank:4
 loadbalance efficiency = 0.75  Nboxes=16
@@ -22,29 +46,29 @@ loadbalance efficiency = -0.5  Nboxes=4
 average number of boxes per proc = 0.4
 rank0  load=1 boxes(1)=rank1  load=1 boxes(1)=rank2  load=1 boxes(1)=rank3  load=1 boxes(1)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
 
-  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
-minload=0 on rank:2  maxload=1024 on rank:0
-loadbalance efficiency = -3  Nboxes=2
-average number of boxes per proc = 0.2
-rank0  load=1024 boxes(1)=rank1  load=1024 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+  LoadBalance  sizes: a_computeLoads=22 a_boxes=22 a_LBnumProc=10
+minload=384 on rank:0  maxload=512 on rank:9
+loadbalance efficiency = 0.75  Nboxes=22
+average number of boxes per proc = 2.2
+rank0  load=384 boxes(1)=rank1  load=384 boxes(3)=rank2  load=384 boxes(2)=rank3  load=384 boxes(1)=rank4  load=448 boxes(3)=rank5  load=448 boxes(2)=rank6  load=384 boxes(3)=rank7  load=384 boxes(2)=rank8  load=384 boxes(1)=rank9  load=512 boxes(4)=
 
-  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
-minload=0 on rank:2  maxload=1524900 on rank:0
-loadbalance efficiency = -3.01154  Nboxes=2
-average number of boxes per proc = 0.2
-rank0  load=1524900 boxes(1)=rank1  load=1517879 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+  LoadBalance  sizes: a_computeLoads=22 a_boxes=22 a_LBnumProc=10
+minload=2910460 on rank:5  maxload=4780627 on rank:8
+loadbalance efficiency = 0.725241  Nboxes=22
+average number of boxes per proc = 2.2
+rank0  load=3070668 boxes(2)=rank1  load=3548042 boxes(2)=rank2  load=4170901 boxes(2)=rank3  load=3605009 boxes(2)=rank4  load=4745321 boxes(3)=rank5  load=2910460 boxes(2)=rank6  load=3023475 boxes(2)=rank7  load=4400784 boxes(2)=rank8  load=4780627 boxes(3)=rank9  load=3246905 boxes(2)=
 
-  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
-minload=0 on rank:2  maxload=1024 on rank:0
-loadbalance efficiency = -3  Nboxes=2
-average number of boxes per proc = 0.2
-rank0  load=1024 boxes(1)=rank1  load=1024 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+  LoadBalance  sizes: a_computeLoads=68 a_boxes=68 a_LBnumProc=10
+minload=1344 on rank:3  maxload=1600 on rank:0
+loadbalance efficiency = 0.893805  Nboxes=68
+average number of boxes per proc = 6.8
+rank0  load=1600 boxes(5)=rank1  load=1472 boxes(8)=rank2  load=1408 boxes(7)=rank3  load=1344 boxes(4)=rank4  load=1408 boxes(10)=rank5  load=1600 boxes(5)=rank6  load=1472 boxes(8)=rank7  load=1408 boxes(7)=rank8  load=1344 boxes(4)=rank9  load=1408 boxes(10)=
 
-  LoadBalance  sizes: a_computeLoads=2 a_boxes=2 a_LBnumProc=10
-minload=0 on rank:2  maxload=2345122 on rank:1
-loadbalance efficiency = -3.96512  Nboxes=2
-average number of boxes per proc = 0.2
-rank0  load=1586268 boxes(1)=rank1  load=2345122 boxes(1)=rank2  load=0 boxes(0)=rank3  load=0 boxes(0)=rank4  load=0 boxes(0)=rank5  load=0 boxes(0)=rank6  load=0 boxes(0)=rank7  load=0 boxes(0)=rank8  load=0 boxes(0)=rank9  load=0 boxes(0)=
+  LoadBalance  sizes: a_computeLoads=68 a_boxes=68 a_LBnumProc=10
+minload=10107940 on rank:1  maxload=11355813 on rank:5
+loadbalance efficiency = 0.950709  Nboxes=68
+average number of boxes per proc = 6.8
+rank0  load=10491439 boxes(7)=rank1  load=10107940 boxes(6)=rank2  load=10895340 boxes(7)=rank3  load=10712432 boxes(7)=rank4  load=10940638 boxes(7)=rank5  load=11355813 boxes(6)=rank6  load=10880307 boxes(7)=rank7  load=10779435 boxes(7)=rank8  load=11016466 boxes(7)=rank9  load=11043865 boxes(7)=
 
 
 

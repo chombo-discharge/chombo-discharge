@@ -70,6 +70,24 @@ public:
   virtual void allocate(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
+    @brief Allocate a data holder. 
+    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+  */
+  virtual void allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_ghost = -1);
+
+  /*!
+    @brief Allocate a data holder. 
+    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+  */
+  virtual void allocate(MFAMRFluxData& a_data, const int a_ncomp, const int a_ghost = -1);
+  
+  /*!
+    @brief Allocate a data holder. 
+    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+  */
+  virtual void allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghost = -1);
+
+  /*!
     @brief Average down
   */
   virtual void average_down(EBAMRCellData& a_data, Phase::WhichPhase a_phase);

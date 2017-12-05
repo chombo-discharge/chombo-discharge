@@ -24,6 +24,16 @@ public:
 
   }
 
+  MFLevelGrid(const DisjointBoxLayout&          a_dbl,
+	      const ProblemDomain&              a_domain,
+	      const int                         a_ebghost,
+	      const Vector<const EBIndexSpace*> a_ebis){
+    m_eblg.resize(0);
+    for (int i = 0; i < a_ebis.size(); i++){
+      m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_ebis[i]));
+    }
+  }
+
   /*!
     @brief Constructor
   */
@@ -36,6 +46,13 @@ public:
   */
   ~MFLevelGrid(){
 
+  }
+
+  /*!
+    @brief Number of phases
+  */
+  virtual const int num_phases() const {
+    return m_eblg.size();
   }
 
   /*!
@@ -55,19 +72,28 @@ public:
   /*!
     @brief Get phase
   */
-  const EBLevelGrid& get_eblg(int a_phase) const {
+  virtual const EBLevelGrid& get_eblg(int a_phase) const {
     return m_eblg[a_phase];
   }
 
   /*!
     @brief Get EBISLayouts
   */
-  Vector<EBISLayout> get_ebisl() {
+  virtual const Vector<EBISLayout> get_ebisl() const {
     Vector<EBISLayout> ebisl;
     for (int i = 0; i < m_eblg.size(); i++){
       ebisl.push_back(m_eblg[i].getEBISL());
     }
     return ebisl;
+  }
+
+  virtual const Vector<const EBIndexSpace*> get_ebis() const {
+    Vector<const EBIndexSpace*> ebis;
+    for (int i = 0; i < m_eblg.size(); i++){
+      ebis.push_back(m_eblg[i].getEBIS());
+    }
+
+    return ebis;
   }
   
 private:

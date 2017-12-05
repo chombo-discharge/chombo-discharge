@@ -7,7 +7,7 @@
 #include "mf_helmholtz_opfactory.H"
 
 int mf_helmholtz_opfactory::s_max_box_size = 32;
-int mf_helmholtz_opfactory::s_test_ref     = 2;
+int mf_helmholtz_opfactory::s_test_ref     = 32;
 int mf_helmholtz_opfactory::s_relax_type   = 2;
 
 mf_helmholtz_opfactory::~mf_helmholtz_opfactory(){

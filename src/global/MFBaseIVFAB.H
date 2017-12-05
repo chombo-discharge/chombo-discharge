@@ -199,7 +199,7 @@ public:
     
     Vector<IntVectSet> ivs(num_phases);
     Vector<EBGraph> ebgraph(num_phases);
-    
+
     for (int i = 0; i < num_phases; ++i){
       ivs[i]     = m_ebisl[i][a_dit].getIrregIVS(a_box);
       ebgraph[i] = m_ebisl[i][a_dit].getEBGraph();
