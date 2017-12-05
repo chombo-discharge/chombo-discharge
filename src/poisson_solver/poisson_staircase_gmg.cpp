@@ -80,6 +80,7 @@ void poisson_staircase_gmg::define_coefficients(){
   data_ops::set_value(m_aco,       1.0);
   data_ops::set_value(m_bco,       1.0);
   data_ops::set_value(m_bco_irreg, 1.0);
+
 }
 
 void poisson_staircase_gmg::solve(){
