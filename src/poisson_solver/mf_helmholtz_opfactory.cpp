@@ -33,11 +33,6 @@ void mf_helmholtz_opfactory::set_jump(const EBAMRIVData& a_ajump,
   m_jumpset = true;
 }
 
-MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemDomain& a_fine_ebis, int a_depth, bool a_homo_only){
-  MayDay::Abort("mf_helmholtz_opfactory::MGnewOp - not implemented");
-  return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (NULL);
-}
-
 AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_fineindexspace){
   MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - not implemented");
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);

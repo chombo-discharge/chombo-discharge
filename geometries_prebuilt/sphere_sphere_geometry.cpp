@@ -27,8 +27,8 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   Real eps_mat = 1;
   Real elec_rad = 0.1;
   Real diel_rad = 0.1;
-  Real elec_noise = 6.E-3;
-  Real diel_noise = 6.E-3;
+  Real elec_noise = 3.E-3;
+  Real diel_noise = 3.E-3;
   Real elec_persist = 0.5;
   Real diel_persist = 0.5;
   

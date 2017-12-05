@@ -7,6 +7,7 @@
 
 #include "poisson_multifluid_gmg.H"
 #include "data_ops.H"
+#include "MFQuadCFInterp.H"
 
 #include <MFCellFAB.H>
 #include <MFLevelDataOps.H>
@@ -112,17 +113,27 @@ void poisson_multifluid_gmg::setup_gmg(){
   m_amr->allocate(bco,       ncomps, ghosts);
   m_amr->allocate(bco_irreg, ncomps, ghosts);
 
-
+  
   Vector<MFLevelGrid> mfeblg(1 + finest_level);
+  Vector<MFQuadCFInterp> mfquadcfi(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){
     Vector<EBLevelGrid> eblg_phases(Phase::num_phases);
+    Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(Phase::num_phases);
+
+    
     eblg_phases[Phase::Gas] = *(m_amr->get_eblg(Phase::Gas)[lvl]);
     eblg_phases[Phase::Solid] = *(m_amr->get_eblg(Phase::Solid)[lvl]);
+
+    quadcfi_phases[Phase::Gas] =   (m_amr->get_old_quadcfi(Phase::Gas)[lvl]);
+    quadcfi_phases[Phase::Solid] = (m_amr->get_old_quadcfi(Phase::Solid)[lvl]);
+    
     mfeblg[lvl].define(eblg_phases);
+    mfquadcfi[lvl].define(quadcfi_phases);
   }
 
   m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
 									       mfeblg,
+									       mfquadcfi,
 									       refinement_ratios,
 									       grids,
 									       aco,

@@ -13,6 +13,7 @@
 #include "mfis.H"
 #include "mfalias.H"
 #include "MFLevelGrid.H"
+#include "MFQuadCFInterp.H"
 
 #include <AMRMultiGrid.H>
 #include <MFAliasFactory.H>
@@ -43,6 +44,7 @@ public:
   */
   mf_helmholtz_opfactory(const RefCountedPtr<mfis>&                a_mfis,
 			 const Vector<MFLevelGrid>&                a_mflg,
+			 const Vector<MFQuadCFInterp>&             a_mfquadcfi,
 			 const Vector<int>&                        a_ref_rat,
 			 const Vector<DisjointBoxLayout>&          a_grids,
 			 const MFAMRCellData&                      a_aco,
@@ -58,8 +60,12 @@ public:
 			 const IntVect&                            a_ghost_phi,
 			 const IntVect&                            a_ghost_rhs,
 			 int                                       a_num_levels = -1){
+
+    CH_assert(a_mflg[0].num_phases() == 2); // What, you don't like two-phase?
+    
     m_mfis       = a_mfis;
     m_mflg       = a_mflg;
+    m_mfquadcfi  = a_mfquadcfi;
     m_aco        = a_aco;
     m_bco        = a_bco;
     m_bco_irreg  = a_bco_irreg;
@@ -336,7 +342,67 @@ public:
   /*!
     @brief Factory method
   */
-  virtual MGLevelOp<LevelData<MFCellFAB> >* MGnewOp(const ProblemDomain& a_fine_ebis, int a_depth, bool a_homo_only = true);
+  virtual MGLevelOp<LevelData<MFCellFAB> >* MGnewOp(const ProblemDomain& a_domain_fine, int a_depth, bool a_homo_only = true){
+
+    // Find out the starting point. 
+    int ref_lvl;
+    bool found = false;
+
+    for (int lvl = 0; lvl < m_num_levels && !found; lvl++){
+      if(a_domain_fine == m_domains[lvl]){
+	found = true;
+	ref_lvl = lvl;
+      }
+    }
+
+    if(!found){
+      MayDay::Error("mf_helmholtzopfactory::MGnewOp - no corresponding AMRLevel to starting point of MGnewOp");
+    }
+
+    Real           dx_mg_level;
+    MFLevelGrid    mflg_level_mg;
+    MFLevelGrid    mflg_coar_mg;
+    MFQuadCFInterp quadcfi;        // Only defined on amr levels
+
+    RefCountedPtr<LevelData<MFCellFAB> >   aco;
+    RefCountedPtr<LevelData<MFFluxFAB> >   bco;
+    RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
+    
+    if(a_depth == 0){ // Depth = 0 implies an AMR level
+      mflg_level_mg = m_mflg[ref_lvl];
+
+      aco       = m_aco[ref_lvl];
+      bco       = m_bco[ref_lvl];
+      bco_irreg = m_bco_irreg[ref_lvl];
+      quadcfi   = m_mfquadcfi[ref_lvl];
+
+      if(m_has_mg_objects[ref_lvl]){ 
+	mflg_coar_mg = m_mflg_mg[ref_lvl][1]; 
+      }
+    }
+    else{
+      int icoar = 1;
+      for (int idep = 0; idep < a_depth; idep++){
+	icoar *= 2;
+      }
+
+      const ProblemDomain domain_fine = mflg_level_mg.get_eblg(0).getDomain();
+      ProblemDomain domain_box_mg_lvl = coarsen(domain_fine, icoar);
+
+      bool found_mg_level = false;
+      int num_mg_levels   = m_mflg_mg[ref_lvl].size();
+
+      for (int img = 0; img < num_mg_levels; img++){
+	if(m_mflg_mg[ref_lvl][img].get_eblg(0).getDomain() == domain_box_mg_lvl){
+	  
+	}
+      }
+    }
+
+
+    
+    return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (NULL);
+  }
 
   /*!
     @brief Factory method
@@ -355,6 +421,8 @@ public:
 					  const RealVect&                a_dxCoar,
 					  const int&                     a_whichLevel,
 					  const int&                     a_mgLevel){
+
+    return static_cast<mf_helmholtz_op*> (NULL);
     
   }
 
@@ -436,6 +504,11 @@ protected:
   Vector<MFLevelGrid> m_mflg;
 
   /*!
+    @brief Interpolation utilities
+  */
+  Vector<MFQuadCFInterp> m_mfquadcfi;
+
+  /*!
     @brief Refinement ratios
   */
   Vector<int> m_ref_rat;
@@ -456,7 +529,7 @@ protected:
   Vector<Real> m_dx;
 
   /*!
-    @brief Averaging operator
+    @brief Averaging operator - not sure how to use this yet :)
   */
   Vector<EBCoarseAverage> m_aveop;
 
@@ -504,16 +577,6 @@ protected:
     @brief Layout changed or not
   */
   std::vector<std::vector<bool> > m_layout_changed_mg;
-
-  /*!
-    @brief Interpolation utility for gas-side data
-  */
-  RefCountedPtr<EBQuadCFInterp> m_cfi_gas;
-
-  /*!
-    @brief Interpolation utility for solid-side data
-  */
-  RefCountedPtr<EBQuadCFInterp> m_cfi_sol;
 
   /*!
     @brief Domain boundary conditions
@@ -569,4 +632,5 @@ private:
     MayDay::Error("mf_helmholtz_opfactory:: invalid constructor");
   }
 };
+
 #endif
