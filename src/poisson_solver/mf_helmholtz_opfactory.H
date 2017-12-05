@@ -100,11 +100,11 @@ public:
     m_layout_changed_mg.resize(m_num_levels);
     
     for (int lvl = 0; lvl < m_num_levels; lvl++){
-      if(lvl == 0 || m_ref_rat[lvl] > 2) { 
+      if(lvl == 0 || m_ref_rat[lvl] > 2) { // Must be able to generate MultiGrid objects for bottom level and if ref > 2
 	
 	m_has_mg_objects[lvl] = true;
 
-	const int mg_refi = 2;
+	const int mg_refi = 2;             // MultiGrid uses VCycling, refinement of 2. 
 
 	m_aco_mg[lvl].resize(0);
 	m_bco_mg[lvl].resize(0);
@@ -114,8 +114,8 @@ public:
 	m_domains_mg[lvl].resize(0);
 	m_layout_changed_mg.resize(0);
 
-	m_aco_mg[lvl].push_back(m_aco[lvl]);
-	m_bco_mg[lvl].push_back(m_bco[lvl]);
+	m_aco_mg[lvl].push_back(m_aco[lvl]);                         // lvl is AMR level, second index is MG level for current
+	m_bco_mg[lvl].push_back(m_bco[lvl]);                         // AMR level *sigh*...
 	m_bco_irreg_mg[lvl].push_back(m_bco_irreg[lvl]);
 	m_mflg_mg[lvl].push_back(m_mflg[lvl]);
 	m_grids_mg[lvl].push_back(m_grids[lvl]);
@@ -125,25 +125,30 @@ public:
 	bool has_coarser = true;
 	bool at_amr_lvl  = true;
 	ProblemDomain cur_domain = m_domains[lvl];
-	while(has_coarser){
+	while(has_coarser){ 
 
 	  int imgsize = m_grids_mg[lvl].size();
-	  const DisjointBoxLayout& fine_grid = m_grids_mg[lvl][imgsize - 1];
-	  const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1]; // Previous added MFLevelGrid. We need to coarsen it. 
+	  const DisjointBoxLayout& fine_grid = m_grids_mg[lvl][imgsize - 1]; // Finer grid for current MG level
+	  const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1];  // Finer MFLevelGrid for current MG level
 
 	  DisjointBoxLayout grid_coar_mg;
 	  ProblemDomain domain_coar_mg;
 
 	  bool layout_changed;
 
-	  has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,
-						   domain_coar_mg,
-						   fine_grid,
-						   cur_domain,
-						   mg_refi,
-						   s_max_box_size,
-						   layout_changed,
-						   s_test_ref);
+	  // Check if we have coarser stuff
+	  has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,   // Grid
+						   domain_coar_mg, // Domain  
+						   fine_grid,      // Fine level grid
+						   cur_domain,     // Current domain
+						   mg_refi,        // Refinement factor
+						   s_max_box_size, // 
+						   layout_changed, //
+						   s_test_ref);    //
+
+#if 1 // Debug
+	  pout() << "lvl = " << lvl << "\t has_coarser = " << has_coarser << endl;
+#endif
 
 	  if(at_amr_lvl && !has_coarser){
 	    m_has_mg_objects[lvl] = false;
