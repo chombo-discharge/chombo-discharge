@@ -80,10 +80,11 @@ public:
     @brief Get EBISLayouts
   */
   virtual const Vector<EBISLayout> get_ebisl() const {
+    MayDay::Abort("MFLevelGrid::get_ebisl() - code appers to be broken"); // Maybe we should return by reference
     Vector<EBISLayout> ebisl;
     for (int i = 0; i < m_eblg.size(); i++){
       ebisl.push_back(m_eblg[i].getEBISL());
-    }
+    } // This appears to be broekN!
     return ebisl;
   }
 

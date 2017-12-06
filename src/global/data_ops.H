@@ -19,6 +19,10 @@ class data_ops {
 public:
   static void incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale);
 
+  static void scale(EBAMRIVData& a_lhs, const Real& a_scale);
+
+  static void scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale);
+
   static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
 
   static void set_value(EBAMRFluxData& a_lhs, const Real& a_value);
@@ -26,5 +30,7 @@ public:
   static void set_value(EBAMRIVData& a_lhs, const Real& a_value);
 
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
+
+
 };
 #endif

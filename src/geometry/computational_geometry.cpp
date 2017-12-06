@@ -126,16 +126,16 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     a_geoserver = NULL;
   }
   else {
-    Vector<BaseIF*> union_parts;
+    Vector<BaseIF*> parts;
 
     RefCountedPtr<BaseIF> diel_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_dielectrics)); // Gas outside dielectric
     RefCountedPtr<BaseIF> elec_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_electrodes));  // Gas outside electrodes
     RefCountedPtr<BaseIF> diel_compif = RefCountedPtr<BaseIF> (new ComplementIF(*diel_baseif));        // Inside of dielectrics
     
-    union_parts.push_back(&(*elec_baseif)); // Parts for union
-    union_parts.push_back(&(*diel_compif)); // Parts for union
+    parts.push_back(&(*diel_compif)); // Parts for intersection
+    parts.push_back(&(*elec_baseif)); // Parts for intersection
     
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new UnionIF(union_parts)); // Union to get rid of electrode
+    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
 
     //    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
     a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit));

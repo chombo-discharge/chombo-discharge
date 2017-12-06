@@ -158,14 +158,11 @@ void poisson_multifluid_gmg::setup_gmg(){
 									       domains[0],
   									       domfact,
 									       ebcfact,
-									       ajump,
-									       bjump,
-									       cjump,
-									       sigma,
-									       jump_cells,
   									       origin,
   									       2*IntVect::Unit,
   									       2*IntVect::Unit));
+
+  m_opfact->set_jump(1.0, 1.0);
 									       
 									       
 									       

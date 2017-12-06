@@ -13,6 +13,24 @@ void data_ops::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real
   }
 }
 
+void data_ops::scale(EBAMRIVData& a_lhs, const Real& a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::scale(*a_lhs[lvl], a_scale);
+  }
+}
+
+void data_ops::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    BaseIVFAB<Real>& lhs = a_lhs[dit()];
+
+    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
+      for (int comp = 0; comp < a_lhs.nComp(); comp++){
+	lhs(vofit(), comp) *= a_scale;
+      }
+    }
+  }
+}
+
 void data_ops::set_value(EBAMRCellData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);

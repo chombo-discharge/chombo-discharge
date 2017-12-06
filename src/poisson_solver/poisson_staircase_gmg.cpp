@@ -73,9 +73,9 @@ void poisson_staircase_gmg::define_coefficients(){
   m_alpha =  0.0;
   m_beta  = -1.0;
 
-  m_amr->allocate(m_aco,       Phase::Gas, 1, m_amr->get_num_ghost());
-  m_amr->allocate(m_bco,       Phase::Gas, 1, m_amr->get_num_ghost());
-  m_amr->allocate(m_bco_irreg, Phase::Gas, 1, m_amr->get_num_ghost());
+  m_amr->allocate(m_aco,       Phase::Solid, 1, m_amr->get_num_ghost());
+  m_amr->allocate(m_bco,       Phase::Solid, 1, m_amr->get_num_ghost());
+  m_amr->allocate(m_bco_irreg, Phase::Solid, 1, m_amr->get_num_ghost());
 
   data_ops::set_value(m_aco,       1.0);
   data_ops::set_value(m_bco,       1.0);
@@ -100,21 +100,23 @@ void poisson_staircase_gmg::solve(){
   
 #if 1 // This is a test, GMG is now set up correctly
 
+  Phase::WhichPhase phase = Phase::Solid;
+  
   const int comps                  = 1;
   const int ghost                  = m_amr->get_num_ghost();
   const int finest_level           = m_amr->get_finest_level();
   Vector<int> ref_ratios           = m_amr->get_ref_rat();
   Vector<Real>& dx                 = m_amr->get_dx();
-  Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(Phase::Gas);
+  Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(phase);
   Vector<ProblemDomain>& domains   = m_amr->get_domains();
   Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
 
   
   EBAMRCellData phi, src, res, E;
-  m_amr->allocate(phi, Phase::Gas, comps,    ghost);
-  m_amr->allocate(src, Phase::Gas, comps,    ghost);
-  m_amr->allocate(res, Phase::Gas, comps,    ghost);
-  m_amr->allocate(E,   Phase::Gas, SpaceDim, ghost);
+  m_amr->allocate(phi, phase, comps,    ghost);
+  m_amr->allocate(src, phase, comps,    ghost);
+  m_amr->allocate(res, phase, comps,    ghost);
+  m_amr->allocate(E,   phase, SpaceDim, ghost);
 
   data_ops::set_value(src, 0.0);
   data_ops::set_value(phi, 0.0);
@@ -133,15 +135,15 @@ void poisson_staircase_gmg::solve(){
   m_gmg_solver.solve(phi_ptr, src_ptr, finest_level, 0);
 
   // Compute gradient
-  m_amr->average_down(phi, Phase::Gas);
-  m_amr->interp_ghost(phi, Phase::Gas);
+  m_amr->average_down(phi, phase);
+  m_amr->interp_ghost(phi, phase);
   m_amr->compute_gradient(E, phi);
-  m_amr->average_down(E, Phase::Gas);
-  m_amr->interp_ghost(E, Phase::Gas);
+  m_amr->average_down(E, phase);
+  m_amr->interp_ghost(E, phase);
 
-  irreg_amr_stencil<centroid_interp> stencils = m_amr->get_centroid_interp_stencils(Phase::Gas);
+  irreg_amr_stencil<centroid_interp> stencils = m_amr->get_centroid_interp_stencils(phase);
   stencils.apply(E);
-  m_amr->average_down(E, Phase::Gas);
+  m_amr->average_down(E, phase);
   
   // Write data
   Vector<std::string> names(SpaceDim);
@@ -151,7 +153,7 @@ void poisson_staircase_gmg::solve(){
   if(SpaceDim == 3){
     names[2] = "z-E";
   }
-  m_amr->average_down(phi, Phase::Gas);
+  m_amr->average_down(phi, phase);
   writeEBHDF5("E.hdf5",
 	      grids,
 	      E_ptr,
@@ -202,23 +204,25 @@ void poisson_staircase_gmg::setup_gmg(){
     pout() << "poisson_staircase_gmg::setup_gmg" << endl;
   }
 
+  Phase::WhichPhase phase = Phase::Solid;
+  
   const int comps                  = 1;
   const int finest_level           = m_amr->get_finest_level();
   const int ghost                  = m_amr->get_num_ghost();
   Vector<int> ref_ratios           = m_amr->get_ref_rat();
   Vector<Real>& dx                 = m_amr->get_dx();
   Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(Phase::Gas);
+  Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(phase);
   Vector<EBLevelGrid> levelgrids;
 
   
   for (int lvl = 0; lvl <= finest_level; lvl++){ 
-    levelgrids.push_back(*(m_amr->get_eblg(Phase::Gas)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
+    levelgrids.push_back(*(m_amr->get_eblg(phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
   }
 
 
   m_cond_op_fact = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelgrids,
-										       m_amr->get_old_quadcfi(Phase::Gas),
+										       m_amr->get_old_quadcfi(phase),
 										       m_alpha,
 										       m_beta,
 										       m_aco,

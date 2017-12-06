@@ -14,8 +14,6 @@
 #include <EBIndexSpace.H>
 #include <RealVect.H>
 
-
-
 /*!
   @brief Two-fluid index space
 */

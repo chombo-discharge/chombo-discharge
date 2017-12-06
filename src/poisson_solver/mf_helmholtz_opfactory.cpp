@@ -22,28 +22,45 @@ void mf_helmholtz_opfactory::set_relax_type(int a_relax_type){
   s_relax_type = a_relax_type;
 }
 
-void mf_helmholtz_opfactory::set_jump(const EBAMRIVData& a_ajump,
-				      const EBAMRIVData& a_bjump,
-				      const EBAMRIVData& a_cjump,
-				      const EBAMRIVData& a_sigma){
-  m_ajump   = a_ajump;
-  m_bjump   = a_bjump;
-  m_cjump   = a_cjump;
-  m_sigma   = a_sigma;
-  m_jumpset = true;
-}
-
-AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_fineindexspace){
-  MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - not implemented");
-  return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
-}
-
 void mf_helmholtz_opfactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
   delete a_reclaim;
 }
 
 void mf_helmholtz_opfactory::AMRreclaim(mf_helmholtz_op* a_reclaim){
   delete a_reclaim;
+}
+
+void mf_helmholtz_opfactory::average_down_amr(){
+  CH_TIME("mf_helmholtz_opfactory::average_down_amr");
+    
+  const int ncomp        = 0;
+  const Interval interv  = Interval(0, ncomp -1);
+  const int finest_level = m_num_levels - 1;
+
+  for (int lvl = finest_level; lvl > 0; lvl--){ // Average down AMR levels
+    m_aveop[lvl]->average(*m_jump[lvl-1], *m_jump[lvl], interv);
+  }
+}
+
+void mf_helmholtz_opfactory::set_jump(const Real& a_sigma, const Real& a_scale){
+  CH_TIME("mf_helmholtz_opfactory::set_jump(scalar)");
+  for (int lvl = 0; lvl < m_num_levels; lvl++){
+    EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
+    data_ops::scale(*m_jump[lvl], a_sigma);
+  }
+
+  this->average_down_amr();
+}
+
+void mf_helmholtz_opfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_scale){
+  CH_TIME("mf_helmholtz_opfactory::set_jump(data based)");
+
+  for (int lvl = 0; lvl < m_num_levels; lvl++){
+    a_sigma[lvl]->copyTo(*m_jump[lvl]);
+    data_ops::scale(*m_jump[lvl], a_scale);
+  }
+
+  this->average_down_amr();
 }
 
 int mf_helmholtz_opfactory::refToFiner(const ProblemDomain& a_domain) const{
@@ -62,4 +79,9 @@ int mf_helmholtz_opfactory::refToFiner(const ProblemDomain& a_domain) const{
   }
   
   return retval;
+}
+
+AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_fineindexspace){
+  MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - not implemented");
+  return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
 }
