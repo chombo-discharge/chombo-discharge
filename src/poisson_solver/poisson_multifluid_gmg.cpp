@@ -10,6 +10,7 @@
 #include "MFQuadCFInterp.H"
 
 #include <MFCellFAB.H>
+#include <LayoutData.H>
 #include <MFLevelDataOps.H>
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
@@ -101,6 +102,18 @@ void poisson_multifluid_gmg::setup_gmg(){
   }
 
   // Allocate coefficients
+  EBAMRIVData   ajump;
+  EBAMRIVData   bjump;
+  EBAMRIVData   cjump;
+  EBAMRIVData   sigma;
+  Vector<RefCountedPtr<LayoutData<IntVectSet> > > jump_cells(1 + finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    jump_cells[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet> (grids[lvl]));
+    const IntVectSet interface_ivs = m_mfis->interface_region(domains[lvl]);
+    for (DataIterator dit = jump_cells[lvl]->dataIterator(); dit.ok(); ++dit){
+      (*jump_cells[lvl])[dit()] = interface_ivs & grids[lvl].get(dit());
+    }
+  }
   MFAMRCellData aco;
   MFAMRFluxData bco;
   MFAMRIVData   bco_irreg;
@@ -145,6 +158,11 @@ void poisson_multifluid_gmg::setup_gmg(){
 									       domains[0],
   									       domfact,
 									       ebcfact,
+									       ajump,
+									       bjump,
+									       cjump,
+									       sigma,
+									       jump_cells,
   									       origin,
   									       2*IntVect::Unit,
   									       2*IntVect::Unit));

@@ -56,6 +56,11 @@ public:
 			 const ProblemDomain&                      a_coarsest_domain,
 			 const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
 			 const RefCountedPtr<BaseEBBCFactory>&     a_ebbc,
+			 const EBAMRIVData&                        a_ajump,
+			 const EBAMRIVData&                        a_bjump,
+			 const EBAMRIVData&                        a_cjump,
+			 const EBAMRIVData&                        a_sigma,
+			 const Vector<RefCountedPtr<LayoutData<IntVectSet> > > &    a_jump_cells,
 			 const RealVect&                           a_origin,
 			 const IntVect&                            a_ghost_phi,
 			 const IntVect&                            a_ghost_rhs,
@@ -92,6 +97,9 @@ public:
     m_aco_mg.resize(m_num_levels);
     m_bco_mg.resize(m_num_levels);
     m_bco_irreg_mg.resize(m_num_levels);
+    m_ajump_mg.resize(m_num_levels);
+    m_bjump_mg.resize(m_num_levels);
+    m_cjump_mg.resize(m_num_levels);
     m_mflg_mg.resize(m_num_levels);
     m_grids_mg.resize(m_num_levels);
     m_domains_mg.resize(m_num_levels);
@@ -106,21 +114,21 @@ public:
 
 	const int mg_refi = 2;             // MultiGrid uses VCycling, refinement of 2. 
 
-	m_aco_mg[lvl].resize(0);
-	m_bco_mg[lvl].resize(0);
-	m_bco_irreg_mg[lvl].resize(0);
-	m_mflg_mg[lvl].resize(0);
-	m_grids_mg[lvl].resize(0);
-	m_domains_mg[lvl].resize(0);
-	m_layout_changed_mg.resize(0);
+	m_aco_mg[lvl].resize(0);           // aco for all MG levels at this level
+	m_bco_mg[lvl].resize(0);           // bco for all MG levels at this level
+	m_bco_irreg_mg[lvl].resize(0);     // bco for all MG levels at this level
+	m_mflg_mg[lvl].resize(0);          // MFLevelGrids for all MG levels at this level
+	m_grids_mg[lvl].resize(0);         // Grids for all MG levels at this level
+	m_domains_mg[lvl].resize(0);       // Domains for all MG levels at this level
+	m_layout_changed_mg.resize(0);     // Layout changed for all MG levels at this level
 
-	m_aco_mg[lvl].push_back(m_aco[lvl]);                         // lvl is AMR level, second index is MG level for current
-	m_bco_mg[lvl].push_back(m_bco[lvl]);                         // AMR level *sigh*...
-	m_bco_irreg_mg[lvl].push_back(m_bco_irreg[lvl]);
-	m_mflg_mg[lvl].push_back(m_mflg[lvl]);
-	m_grids_mg[lvl].push_back(m_grids[lvl]);
-	m_domains_mg[lvl].push_back(m_domains[lvl]);
-	m_layout_changed_mg[lvl].push_back(m_layout_changed[lvl]);
+	m_aco_mg[lvl].push_back(m_aco[lvl]);                         // MG depth 0 is an AMR level
+	m_bco_mg[lvl].push_back(m_bco[lvl]);                         //  
+	m_bco_irreg_mg[lvl].push_back(m_bco_irreg[lvl]);             // 
+	m_mflg_mg[lvl].push_back(m_mflg[lvl]);                       // 
+	m_grids_mg[lvl].push_back(m_grids[lvl]);                     // 
+	m_domains_mg[lvl].push_back(m_domains[lvl]);                 // 
+	m_layout_changed_mg[lvl].push_back(m_layout_changed[lvl]);   // 
 
 	bool has_coarser = true;
 	bool at_amr_lvl  = true;
@@ -338,6 +346,8 @@ public:
 
   /*!
     @brief Set jump conditions. 
+    @details This call must be performed before each solve; this call updates the boundary conditions on the jump interface, 
+    including MG levels. 
   */
   virtual void set_jump(const EBAMRIVData& a_ajump,
 			const EBAMRIVData& a_bjump,
@@ -348,8 +358,9 @@ public:
     @brief Factory method
   */
   virtual MGLevelOp<LevelData<MFCellFAB> >* MGnewOp(const ProblemDomain& a_domain_fine, int a_depth, bool a_homo_only = true){
-
-    // Find out the starting point. 
+    CH_TIME("mf_helmholtz_opfactory::MGnewOp");
+    
+    // Find the AMR level starting point
     int ref_lvl;
     bool found = false;
 
@@ -364,6 +375,7 @@ public:
       MayDay::Error("mf_helmholtzopfactory::MGnewOp - no corresponding AMRLevel to starting point of MGnewOp");
     }
 
+    bool           has_coarser_mg;
     Real           dx_mg_level;
     MFLevelGrid    mflg_level_mg;
     MFLevelGrid    mflg_coar_mg;
@@ -373,37 +385,58 @@ public:
     RefCountedPtr<LevelData<MFFluxFAB> >   bco;
     RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
     
-    if(a_depth == 0){ // Depth = 0 implies an AMR level
-      mflg_level_mg = m_mflg[ref_lvl];
+    if(a_depth == 0){ // This is an AMR level
+      mflg_level_mg = m_mflg[ref_lvl];       // Levelgrids    }
+      aco           = m_aco[ref_lvl];        // coefficients  }
+      bco           = m_bco[ref_lvl];        // coefficient   } Non-coarsened stuff
+      bco_irreg     = m_bco_irreg[ref_lvl];  // coefficient   }
+      quadcfi       = m_mfquadcfi[ref_lvl];  // QuadCFI       }
 
-      aco       = m_aco[ref_lvl];
-      bco       = m_bco[ref_lvl];
-      bco_irreg = m_bco_irreg[ref_lvl];
-      quadcfi   = m_mfquadcfi[ref_lvl];
-
-      if(m_has_mg_objects[ref_lvl]){ 
-	mflg_coar_mg = m_mflg_mg[ref_lvl][1]; 
+      has_coarser_mg = m_has_mg_objects[ref_lvl];
+      if(has_coarser_mg){ 
+	mflg_coar_mg = m_mflg_mg[ref_lvl][1]; // Coarsened EBLevelGrids
       }
     }
-    else{
+    else{ // Not an AMR level
       int icoar = 1;
       for (int idep = 0; idep < a_depth; idep++){
 	icoar *= 2;
       }
 
-      const ProblemDomain domain_fine = mflg_level_mg.get_eblg(0).getDomain();
-      ProblemDomain domain_box_mg_lvl = coarsen(domain_fine, icoar);
+      const ProblemDomain domain_fine = mflg_level_mg.get_eblg(0).getDomain();   // 
+      ProblemDomain domain_box_mg_lvl = coarsen(domain_fine, icoar);             // Coarsened a_depth times by factor 2
 
       bool found_mg_level = false;
       int num_mg_levels   = m_mflg_mg[ref_lvl].size();
 
       for (int img = 0; img < num_mg_levels; img++){
-	if(m_mflg_mg[ref_lvl][img].get_eblg(0).getDomain() == domain_box_mg_lvl){
-	  
+	if(m_mflg_mg[ref_lvl][img].get_eblg(0).getDomain() == domain_box_mg_lvl){ // Check which mg level we're after
+
+	  aco            = m_aco_mg[ref_lvl][img];
+	  bco            = m_bco_mg[ref_lvl][img];
+	  bco_irreg      = m_bco_irreg_mg[ref_lvl][img];
+	  found_mg_level = true;
+
+	  MayDay::Warning("mf_helmholtz_opfactory::MGnewOp - boundary conditions have not been placed yet");
+
+	  has_coarser_mg = img+1 < m_mflg_mg[ref_lvl].size(); // Are there more mg levels below this one?
+	  if(has_coarser_mg){
+	    mflg_coar_mg = m_mflg_mg[ref_lvl][img+1]; // Next coarser MFLevelGrid for MG
+	  }
+	  break;
 	}
+      }
+      
+      bool coarsenable = found_mg_level;
+      dx_mg_level = m_dx[ref_lvl];  // Resolution on AMR level
+      dx_mg_level *= Real(icoar);   // Resolution on MG level
+
+      if(!coarsenable) {
+	return NULL;
       }
     }
 
+    // Create boundary conditions - should the jump conditions be a part of the BaseEBBC or not?
 
     
     return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (NULL);
@@ -499,9 +532,29 @@ protected:
   EBAMRIVData m_cjump;
 
   /*!
+    @brief Jump coefficient for lower levels MG
+  */
+  EBAMRIVData m_ajump_mg;
+
+  /*!
+    @brief Jump coefficient for lower levels MG
+  */
+  EBAMRIVData m_bjump_mg;
+
+  /*!
+    @brief Jump coefficient for lower levels MG
+  */
+  EBAMRIVData m_cjump_mg;
+
+  /*!
     @brief Jump condition
   */
   EBAMRIVData m_sigma;
+
+  /*!
+    @brief Jump condition for lower levels MG
+  */
+  EBAMRIVData m_sigma_mg;
 
   /*!
     @brief EBLevelGrids (in MFLevelGrid form)

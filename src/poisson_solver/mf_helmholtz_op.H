@@ -14,9 +14,14 @@
 class mf_helmholtz_op {
 public:
 
-  mf_helmholtz_op();
+  mf_helmholtz_op(){
 
-  virtual ~mf_helmholtz_op();
+  }
+  
+
+  virtual ~mf_helmholtz_op(){
+
+  }
 
 protected:
 

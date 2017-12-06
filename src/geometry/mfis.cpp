@@ -40,3 +40,16 @@ void mfis::define(const Box                     & a_domain,
 const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(Phase::WhichPhase a_whichEBIS) const {
   return m_ebis[a_whichEBIS];
 }
+
+const IntVectSet mfis::interface_region(const ProblemDomain& a_domain) const {
+  CH_TIME("mfis::interface_region");
+
+  const int which_level = m_ebis[0]->getLevel(a_domain);
+  
+  IntVectSet iface_reg = m_ebis[0]->irregCells(which_level);
+  for (int i = 1; i < m_ebis.size(); i++){
+    iface_reg &= m_ebis[i]->irregCells(which_level);
+  }
+
+  return iface_reg;
+}
