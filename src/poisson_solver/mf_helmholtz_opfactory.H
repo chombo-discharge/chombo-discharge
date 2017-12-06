@@ -199,29 +199,9 @@ protected:
   MFAMRIVData m_bco_irreg;
 
   /*!
-    @brief Jump coefficient for lower levels MG
-  */
-  EBAMRIVData m_ajump_mg;
-
-  /*!
-    @brief Jump coefficient for lower levels MG
-  */
-  EBAMRIVData m_bjump_mg;
-
-  /*!
-    @brief Jump coefficient for lower levels MG
-  */
-  EBAMRIVData m_cjump_mg;
-
-  /*!
     @brief Jump condition
   */
   EBAMRIVData m_jump;
-
-  /*!
-    @brief Jump condition for lower levels MG
-  */
-  EBAMRIVData m_jump_mg;
 
   /*!
     @brief EBLevelGrids (in MFLevelGrid form)
@@ -277,6 +257,11 @@ protected:
     @brief Domains for multigrid
   */
   Vector<Vector<ProblemDomain> > m_domains_mg;
+
+  /*!
+    @brief Coarsened surface charge for lower levels of multigrid
+  */
+  Vector<EBAMRIVData> m_jump_mg;
 
   /*!
     @brief a-coefficient for multigrid

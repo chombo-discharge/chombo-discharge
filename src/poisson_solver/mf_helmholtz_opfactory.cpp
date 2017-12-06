@@ -82,9 +82,6 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
   m_aco_mg.resize(m_num_levels);
   m_bco_mg.resize(m_num_levels);
   m_bco_irreg_mg.resize(m_num_levels);
-  m_ajump_mg.resize(m_num_levels);
-  m_bjump_mg.resize(m_num_levels);
-  m_cjump_mg.resize(m_num_levels);
   m_mflg_mg.resize(m_num_levels);
   m_grids_mg.resize(m_num_levels);
   m_aveop_mg.resize(m_num_levels);
@@ -93,6 +90,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
   m_layout_changed.resize(m_num_levels);
   m_layout_changed_mg.resize(m_num_levels);
   m_aveop_mg.resize(m_num_levels);
+  m_jump_mg.resize(m_num_levels);
     
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     if(lvl == 0 || m_ref_rat[lvl] > 2) { // Must be able to generate MultiGrid objects for bottom level and if ref > 2
@@ -101,14 +99,15 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 
       const int mg_refi = 2;             // MultiGrid uses VCycling, refinement of 2. 
 
-      m_aco_mg[lvl].resize(0);           // aco for all MG levels at this level
-      m_bco_mg[lvl].resize(0);           // bco for all MG levels at this level
-      m_bco_irreg_mg[lvl].resize(0);     // bco for all MG levels at this level
-      m_mflg_mg[lvl].resize(0);          // MFLevelGrids for all MG levels at this level
-      m_grids_mg[lvl].resize(0);         // Grids for all MG levels at this level
-      m_domains_mg[lvl].resize(0);       // Domains for all MG levels at this level
-      m_layout_changed_mg[lvl].resize(0);     // Layout changed for all MG levels at this level
-      m_aveop_mg[lvl].resize(0);
+      m_aco_mg[lvl].resize(0);            // aco for all MG levels at this level
+      m_bco_mg[lvl].resize(0);            // bco for all MG levels at this level
+      m_bco_irreg_mg[lvl].resize(0);      // bco for all MG levels at this level
+      m_mflg_mg[lvl].resize(0);           // MFLevelGrids for all MG levels at this level
+      m_grids_mg[lvl].resize(0);          // Grids for all MG levels at this level
+      m_domains_mg[lvl].resize(0);        // Domains for all MG levels at this level
+      m_layout_changed_mg[lvl].resize(0); // Layout changed for all MG levels at this level
+      m_aveop_mg[lvl].resize(0);          //
+      m_jump_mg[lvl].resize(0);          // sigma for all MG levels at this AMR level
 
       m_aco_mg[lvl].push_back(m_aco[lvl]);                         // MG depth 0 is an AMR level
       m_bco_mg[lvl].push_back(m_bco[lvl]);                         //  
@@ -117,7 +116,8 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
       m_grids_mg[lvl].push_back(m_grids[lvl]);                     // 
       m_domains_mg[lvl].push_back(m_domains[lvl]);                 // 
       m_layout_changed_mg[lvl].push_back(m_layout_changed[lvl]);   //
-      m_aveop_mg[lvl].push_back(m_aveop[lvl]);
+      m_aveop_mg[lvl].push_back(m_aveop[lvl]);                     // This is null for lvl = 0
+      m_jump_mg[lvl].push_back(m_jump[lvl]);                       //
 
       bool has_coarser = true;
       bool at_amr_lvl  = true;
@@ -179,7 +179,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 	    comps.push_back(ncomps);
 	  }
 
-	  // Averaging operator for m_sigma_mg
+	  // Averaging operator for m_jump_mg
 	  const int ncomp      = 1;
 	  const int main_phase = 0;
 	  const EBLevelGrid& eblg_fine = mflg_fine.get_eblg(main_phase);
@@ -189,6 +189,20 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 								   eblg_coar.getDomain(), mg_refi, ncomp,
 								   eblg_coar.getEBIS()));
 
+	  // Coarsened m_jump_mg
+	  LayoutData<IntVectSet> isect_cells (eblg_coar.getDBL());
+	  for (DataIterator dit = isect_cells.dataIterator(); dit.ok(); ++dit){
+	    isect_cells[dit()] = m_mfis->interface_region(eblg_coar.getDomain()) & eblg_coar.getDBL().get(dit());
+	  }
+	  BaseIVFactory<Real> fact(eblg_coar.getEBISL(), isect_cells);
+
+	  RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump_coar = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
+	    (new LevelData<BaseIVFAB<Real> > (grid_coar_mg, ncomps, ghost*IntVect::Unit, fact)); 
+
+	  
+
+
+	  // Coarsened coefficients
 	  MFCellFactory      cellfact(ebisl_coar, comps);
 	  MFFluxFactory      fluxfact(ebisl_coar, comps);
 	  MFBaseIVFABFactory ivfact  (ebisl_coar, comps);
@@ -215,8 +229,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 	  m_bco_mg[lvl].push_back(bco_coar);
 	  m_bco_irreg_mg[lvl].push_back(bco_irreg_coar);
 	  m_aveop_mg[lvl].push_back(aveop);
-
-
+	  m_jump_mg[lvl].push_back(jump_coar);
 	}
       }
     }
@@ -339,7 +352,6 @@ void mf_helmholtz_opfactory::define_jump_stuff(){
 									 eblg_coar.getEBIS()));
     }
   }
-  pout() << m_aveop.size() << endl;
 }
 
 void mf_helmholtz_opfactory::average_down_amr(){
@@ -351,13 +363,36 @@ void mf_helmholtz_opfactory::average_down_amr(){
 
   for (int lvl = finest_level; lvl > 0; lvl--){ // Average down AMR levels
     m_aveop[lvl]->average(*m_jump[lvl-1], *m_jump[lvl], interv);
+#if 1 // Debug
+    pout() << "mf_helmholtz_opfactory::average_down_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
+#endif
   }
 }
 
 void mf_helmholtz_opfactory::average_down_mg(){
   CH_TIME("mf_helmholtz_opfactory::average_down_mg");
 
-  MayDay::Warning("mf_helmholtz_opfactory::average_down_mg - not implemented");
+  const int ncomp        = 0;
+  const Interval interv  = Interval(0, ncomp -1);
+  
+  for (int lvl = 0; lvl < m_num_levels; lvl++){ // Average down the MG stuff
+    if(m_has_mg_objects[lvl]){
+      EBAMRIVData& jump_mg = m_jump_mg[lvl];
+
+      const int finest_mg_level = jump_mg.size() - 1;
+
+      // img = 0 is the finest MG level, but this has already been averaged down
+      for (int img = 1; img <= finest_mg_level; img++){ // This time, 0 is the finest level. m_jump_mg[lvl][0] is the same
+#if 1 // DEBUG
+	pout() << "mf_helmholtz_opfactory::average_down_mg from AMR level = " << lvl
+	       << " from MG level = " << img+1
+	       << " to   MG level = " << img << endl;
+#endif
+	m_aveop_mg[lvl][img]->average(*jump_mg[img], *jump_mg[img+1], interv);
+      }
+    }
+  }
+  MayDay::Abort("mf_helmholtz_opfactory::average_down_mg - ensure that everything is averaged down correctly!");
 }
 
 void mf_helmholtz_opfactory::set_jump(const Real& a_sigma, const Real& a_scale){
@@ -368,6 +403,7 @@ void mf_helmholtz_opfactory::set_jump(const Real& a_sigma, const Real& a_scale){
   }
 
   this->average_down_amr();
+  this->average_down_mg();
 }
 
 void mf_helmholtz_opfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_scale){
@@ -379,6 +415,7 @@ void mf_helmholtz_opfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_
   }
 
   this->average_down_amr();
+  this->average_down_mg();
 }
 
 int mf_helmholtz_opfactory::refToFiner(const ProblemDomain& a_domain) const{
