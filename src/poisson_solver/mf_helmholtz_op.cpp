@@ -19,7 +19,6 @@ mf_helmholtz_op::~mf_helmholtz_op(){
 
 void mf_helmholtz_op::define(const RefCountedPtr<mfis>&         a_mfis,
 			     const RefCountedPtr<BaseDomainBC>& a_dombc,
-			     const RefCountedPtr<BaseEBBC>&     a_ebbc,
 			     const RefCountedPtr<jump_bc>&      a_jumpbc,
 			     const DisjointBoxLayout&           a_dbl,
 			     const DisjointBoxLayout&           a_dbl_finer,

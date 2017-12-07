@@ -10,6 +10,7 @@
 
 #include "type_definitions.H"
 #include "mfis.H"
+#include "jump_bc.H"
 
 #include <RefCountedPtr.H>
 #include <MFCellFAB.H>
@@ -23,9 +24,6 @@
 */
 class mf_helmholtz_op {
 public:
-
-  
-  class jump_bc; // Forward declare for now so that it compiles
 
   /*!
     @brief Constructor
@@ -43,7 +41,6 @@ public:
   */
   virtual void define(const RefCountedPtr<mfis>&         a_mfis,
 		      const RefCountedPtr<BaseDomainBC>& a_dombc,
-		      const RefCountedPtr<BaseEBBC>&     a_ebbc,
 		      const RefCountedPtr<jump_bc>&      a_jumpbc,
 		      const DisjointBoxLayout&           a_dbl,
 		      const DisjointBoxLayout&           a_dbl_finer,
