@@ -116,7 +116,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
       m_grids_mg[lvl].push_back(m_grids[lvl]);                     // 
       m_domains_mg[lvl].push_back(m_domains[lvl]);                 // 
       m_layout_changed_mg[lvl].push_back(m_layout_changed[lvl]);   //
-      m_aveop_mg[lvl].push_back(m_aveop[lvl]);                     // This is null for lvl = 0
+      m_aveop_mg[lvl].push_back(m_aveop[lvl]);                     // This is null for lvl = 0, but not otherwise
       m_jump_mg[lvl].push_back(m_jump[lvl]);                       //
 
       bool has_coarser = true;
@@ -189,24 +189,19 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 								   eblg_coar.getDomain(), mg_refi, ncomp,
 								   eblg_coar.getEBIS()));
 
-	  // Coarsened m_jump_mg
+	  // Interface cells on MG level img
 	  LayoutData<IntVectSet> isect_cells (eblg_coar.getDBL());
 	  for (DataIterator dit = isect_cells.dataIterator(); dit.ok(); ++dit){
 	    isect_cells[dit()] = m_mfis->interface_region(eblg_coar.getDomain()) & eblg_coar.getDBL().get(dit());
 	  }
-	  BaseIVFactory<Real> fact(eblg_coar.getEBISL(), isect_cells);
 
-	  RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump_coar = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-	    (new LevelData<BaseIVFAB<Real> > (grid_coar_mg, ncomps, ghost*IntVect::Unit, fact)); 
-
-	  
-
-
-	  // Coarsened coefficients
 	  MFCellFactory      cellfact(ebisl_coar, comps);
 	  MFFluxFactory      fluxfact(ebisl_coar, comps);
 	  MFBaseIVFABFactory ivfact  (ebisl_coar, comps);
+	  BaseIVFactory<Real> fact   (eblg_coar.getEBISL(), isect_cells);
 
+	  RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump_coar = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
+	    (new LevelData<BaseIVFAB<Real> > (grid_coar_mg, ncomps, ghost*IntVect::Unit, fact)); 
 	  RefCountedPtr<LevelData<MFCellFAB> > aco_coar = RefCountedPtr<LevelData<MFCellFAB> >
 	    (new LevelData<MFCellFAB>(grid_coar_mg, ncomps, ghost*IntVect::Unit, cellfact));
 	  RefCountedPtr<LevelData<MFFluxFAB> > bco_coar = RefCountedPtr<LevelData<MFFluxFAB> >
@@ -363,7 +358,7 @@ void mf_helmholtz_opfactory::average_down_amr(){
 
   for (int lvl = finest_level; lvl > 0; lvl--){ // Average down AMR levels
     m_aveop[lvl]->average(*m_jump[lvl-1], *m_jump[lvl], interv);
-#if 1 // Debug
+#if 0 // Debug
     pout() << "mf_helmholtz_opfactory::average_down_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
 #endif
   }
@@ -377,22 +372,22 @@ void mf_helmholtz_opfactory::average_down_mg(){
   
   for (int lvl = 0; lvl < m_num_levels; lvl++){ // Average down the MG stuff
     if(m_has_mg_objects[lvl]){
-      EBAMRIVData& jump_mg = m_jump_mg[lvl];
+      EBAMRIVData& jump_mg = m_jump_mg[lvl]; // m_jump_mg[lvl][0] is the AMR level, which has already been coarsened
 
-      const int finest_mg_level = jump_mg.size() - 1;
+      const int finest_mg_level   = 0;
+      const int coarsest_mg_level = jump_mg.size() - 1;
 
-      // img = 0 is the finest MG level, but this has already been averaged down
-      for (int img = 1; img <= finest_mg_level; img++){ // This time, 0 is the finest level. m_jump_mg[lvl][0] is the same
-#if 1 // DEBUG
+      for (int img = finest_mg_level + 1; img <= coarsest_mg_level; img++){ 
+#if 0 // DEBUG
 	pout() << "mf_helmholtz_opfactory::average_down_mg from AMR level = " << lvl
-	       << " from MG level = " << img+1
+	       << " from MG level = " << img-1
 	       << " to   MG level = " << img << endl;
 #endif
-	m_aveop_mg[lvl][img]->average(*jump_mg[img], *jump_mg[img+1], interv);
+	m_aveop_mg[lvl][img]->average(*jump_mg[img-1], *jump_mg[img], interv); // Average down onto level img
       }
     }
   }
-  MayDay::Abort("mf_helmholtz_opfactory::average_down_mg - ensure that everything is averaged down correctly!");
+
 }
 
 void mf_helmholtz_opfactory::set_jump(const Real& a_sigma, const Real& a_scale){

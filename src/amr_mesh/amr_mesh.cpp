@@ -44,6 +44,19 @@ template<typename T> void amr_mesh::deallocate(Vector<T*>& a_data){
   }
 }
 
+template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data){
+  CH_TIME("amr_mesh::alias");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::alias" << endl;
+  }
+
+  a_alias.resize(a_data.size());
+  
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    a_alias[lvl] = &(*a_data[lvl]);
+  }
+}
+
 void amr_mesh::allocate(EBAMRCellData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(cell)");
   if(m_verbosity > 5){
@@ -181,6 +194,35 @@ void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghos
 
     a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
       (new LevelData<MFBaseIVFAB>(m_grids[lvl], ignored, ghost*IntVect::Unit, factory));
+  }
+}
+
+void amr_mesh::allocate_interface(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost){
+  CH_TIME("amr_mesh::allocate_interface(baseiv)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate_interface(baseiv)" << endl;
+  }
+
+  const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
+
+  a_data.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+
+    const IntVectSet interface_ivs = m_mfis->interface_region(m_domains[lvl]);
+    LayoutData<IntVectSet> irreg_sets(m_grids[lvl]);
+    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+      Box box = m_grids[lvl].get(dit());
+      box.grow(ghost);
+      box &= m_domains[lvl];
+
+      irreg_sets[dit()] = interface_ivs & box; 
+    }
+
+    BaseIVFactory<Real> fact(m_ebisl[a_phase][lvl], irreg_sets);
+
+    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
+      (new LevelData<BaseIVFAB<Real> >(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
   }
 }
 

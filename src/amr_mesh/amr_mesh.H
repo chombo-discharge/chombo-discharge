@@ -45,6 +45,11 @@ public:
   template<typename T> void deallocate(Vector<T*>& a_data);
 
   /*!
+    @brief Turn smart-pointer data structure into regular-pointer data structure
+  */
+  template<typename T> void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
+
+  /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
@@ -86,6 +91,12 @@ public:
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghost = -1);
+
+  /*!
+    @brief Allocate a data holder over the intersecting regions of the mfis
+    @note This routines _allocates_, so if a_data is not empty you're leaking memory
+  */
+  virtual void allocate_interface(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Average down

@@ -125,6 +125,7 @@ void poisson_multifluid_gmg::setup_gmg(){
   m_amr->allocate(aco,       ncomps, ghosts);
   m_amr->allocate(bco,       ncomps, ghosts);
   m_amr->allocate(bco_irreg, ncomps, ghosts);
+  m_amr->allocate_interface(sigma, Phase::Gas, 1, 0);
 
   
   Vector<MFLevelGrid> mfeblg(1 + finest_level);
