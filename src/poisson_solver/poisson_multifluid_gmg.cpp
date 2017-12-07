@@ -49,8 +49,8 @@ void poisson_multifluid_gmg::setup_gmg(){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     Vector<EBISLayout> ebisl_phases(2);
     Vector<int> components(2);
-    ebisl_phases[0] = m_amr->get_ebisl(Phase::Gas)[lvl];
-    ebisl_phases[1] = m_amr->get_ebisl(Phase::Solid)[lvl];
+    ebisl_phases[0] = m_amr->get_ebisl(phase::gas)[lvl];
+    ebisl_phases[1] = m_amr->get_ebisl(phase::solid)[lvl];
     components[0] = 1;
     components[1] = 1;
     
@@ -64,8 +64,8 @@ void poisson_multifluid_gmg::setup_gmg(){
   }
 
   // Things to pass to the operator factory
-  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(Phase::Gas);
-  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(Phase::Solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
   const Vector<int>& refinement_ratios  = m_amr->get_ref_rat();
   const Vector<ProblemDomain>& domains  = m_amr->get_domains();
   const Vector<Real>& dx                = m_amr->get_dx();
@@ -82,11 +82,11 @@ void poisson_multifluid_gmg::setup_gmg(){
     Vector<EBISLayout> ebisl(2);
     Vector<int> comps(2);
 
-    ebisl[Phase::Gas] = m_amr->get_ebisl(Phase::Gas)[lvl];
-    ebisl[Phase::Solid] = m_amr->get_ebisl(Phase::Solid)[lvl];
+    ebisl[phase::gas] = m_amr->get_ebisl(phase::gas)[lvl];
+    ebisl[phase::solid] = m_amr->get_ebisl(phase::solid)[lvl];
 
-    comps[Phase::Gas] = 1;
-    comps[Phase::Solid] = 1;
+    comps[phase::gas] = 1;
+    comps[phase::solid] = 1;
 
     MFBaseIVFABFactory fact(ebisl, comps);
 
@@ -125,21 +125,21 @@ void poisson_multifluid_gmg::setup_gmg(){
   m_amr->allocate(aco,       ncomps, ghosts);
   m_amr->allocate(bco,       ncomps, ghosts);
   m_amr->allocate(bco_irreg, ncomps, ghosts);
-  m_amr->allocate_interface(sigma, Phase::Gas, 1, 0);
+  m_amr->allocate_interface(sigma, phase::gas, 1, 0);
 
   
   Vector<MFLevelGrid> mfeblg(1 + finest_level);
   Vector<MFQuadCFInterp> mfquadcfi(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    Vector<EBLevelGrid> eblg_phases(Phase::num_phases);
-    Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(Phase::num_phases);
+    Vector<EBLevelGrid> eblg_phases(phase::num_phases);
+    Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(phase::num_phases);
 
     
-    eblg_phases[Phase::Gas] = *(m_amr->get_eblg(Phase::Gas)[lvl]);
-    eblg_phases[Phase::Solid] = *(m_amr->get_eblg(Phase::Solid)[lvl]);
+    eblg_phases[phase::gas] = *(m_amr->get_eblg(phase::gas)[lvl]);
+    eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
 
-    quadcfi_phases[Phase::Gas] =   (m_amr->get_old_quadcfi(Phase::Gas)[lvl]);
-    quadcfi_phases[Phase::Solid] = (m_amr->get_old_quadcfi(Phase::Solid)[lvl]);
+    quadcfi_phases[phase::gas] =   (m_amr->get_old_quadcfi(phase::gas)[lvl]);
+    quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
     
     mfeblg[lvl].define(eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);

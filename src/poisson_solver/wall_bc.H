@@ -11,11 +11,11 @@
 #include <LoHiSide.H>
 #include <RealVect.H>
 
-namespace WallBC {
-  enum WhichBC {
-    Dirichlet = 0,
-    Neumann = 1,
-    Robin = 2,
+namespace wallbc {
+  enum which_bc {
+    dirichlet = 0,
+    neumann = 1,
+    robin = 2,
   };
 };
 
@@ -28,7 +28,7 @@ public:
   /*!
     @brief Create BC of a type
   */
-  wall_bc(const int a_dir, const Side::LoHiSide a_side, WallBC::WhichBC a_which);
+  wall_bc(const int a_dir, const Side::LoHiSide a_side, wallbc::which_bc a_which);
 
   /*!
     @brief Destructor
@@ -53,7 +53,7 @@ public:
   /*!
     @brief Get BC type
   */
-  virtual WallBC::WhichBC which_bc();
+  virtual wallbc::which_bc which_bc();
 
 protected:
 
@@ -80,7 +80,7 @@ protected:
   /*!
     @brief BC type
   */
-  WallBC::WhichBC m_which;
+  wallbc::which_bc m_which;
 };
 
 #endif

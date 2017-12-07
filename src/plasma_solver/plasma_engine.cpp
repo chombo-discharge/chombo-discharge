@@ -142,18 +142,18 @@ void plasma_engine::setup_fresh(){
 
   // Write a plot file
   const int finest = m_amr->get_finest_level();
-  const Vector<EBISLayout>& ebisl = m_amr->get_ebisl(Phase::Gas);
+  const Vector<EBISLayout>& ebisl = m_amr->get_ebisl(phase::gas);
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
   const Vector<ProblemDomain>& domains = m_amr->get_domains();
   const Vector<Real>& dx = m_amr->get_dx();
   EBAMRCellData data;
-  m_amr->allocate(data, Phase::Gas, 1);
-  m_amr->average_down(data, Phase::Gas);
-  m_amr->interp_ghost(data, Phase::Gas);
+  m_amr->allocate(data, phase::gas, 1);
+  m_amr->average_down(data, phase::gas);
+  m_amr->interp_ghost(data, phase::gas);
 
   // Apply a centroid-interpolation stencil
-  //  irreg_amr_stencil<centroid_interp>& stencils = m_amr->get_centroid_interp_stencils(Phase::Gas);
-  irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(Phase::Gas);
+  //  irreg_amr_stencil<centroid_interp>& stencils = m_amr->get_centroid_interp_stencils(phase::gas);
+  irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(phase::gas);
   stencils.apply(data);
 
   Vector<std::string> names(1);
@@ -249,8 +249,8 @@ void plasma_engine::get_geom_tags(){
 
   m_geom_tags.resize(maxdepth);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(Phase::Gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(Phase::Solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
   CH_assert(ebis_sol != NULL);
   CH_assert(ebis_gas != NULL);

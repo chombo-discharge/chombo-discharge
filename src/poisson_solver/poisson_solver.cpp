@@ -71,14 +71,14 @@ void poisson_solver::allocate_wall_bc(){
   }
 }
 
-void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const Potential::GroundLive a_live){
+void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live){
   CH_TIME("poisson_solver::set_dirichlet_wall_bc");
   if(m_verbosity > 5){
     pout() << "poisson_solver::set_dirichlet_wall_bc" << endl;
   }
 
   const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Dirichlet));
+  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::dirichlet));
   m_wallbc[idx]->set_live(a_live);
 }
 
@@ -89,7 +89,7 @@ void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side,
   }
 
   const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, WallBC::Neumann));
+  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
   m_wallbc[idx]->set_value(a_value);
 }
 
@@ -110,11 +110,11 @@ void poisson_solver::set_time(const Real a_time) {
 }
 
 void poisson_solver::alias_internals(){
-//   aliasMF(m_state_gas,   Phase::Gas,   m_state);
-//   aliasMF(m_state_solid, Phase::Solid, m_state);
+//   aliasMF(m_state_gas,   phase::gas,   m_state);
+//   aliasMF(m_state_solid, phase::solid, m_state);
 
-//   aliasMF(m_source_gas,   Phase::Gas,   m_source);
-//   aliasMF(m_source_solid, Phase::Solid, m_source);
+//   aliasMF(m_source_gas,   phase::gas,   m_source);
+//   aliasMF(m_source_solid, phase::solid, m_source);
 }
 
 void poisson_solver::sanity_check(){
@@ -156,13 +156,13 @@ MFAMRCellData& poisson_solver::get_source(){
   return m_source;
 }
 
-EBAMRCellData& poisson_solver::get_state_phase(Phase::WhichPhase a_phase){
+EBAMRCellData& poisson_solver::get_state_phase(phase::which_phase a_phase){
   //  this->alias_internals();
   
-  if(a_phase == Phase::Gas){
+  if(a_phase == phase::gas){
     return m_state_gas;
   }
-  else if(a_phase == Phase::Solid){
+  else if(a_phase == phase::solid){
     return m_state_solid;
   }
   else{
@@ -170,13 +170,13 @@ EBAMRCellData& poisson_solver::get_state_phase(Phase::WhichPhase a_phase){
   }
 }
 
-EBAMRCellData& poisson_solver::get_source_phase(Phase::WhichPhase a_phase){
+EBAMRCellData& poisson_solver::get_source_phase(phase::which_phase a_phase){
   //  this->alias_internals();
 
-  if(a_phase == Phase::Gas){
+  if(a_phase == phase::gas){
     return m_state_gas;
   }
-  else if(a_phase == Phase::Solid){
+  else if(a_phase == phase::solid){
     return m_state_solid;
   }
   else{

@@ -73,9 +73,9 @@ void poisson_staircase_gmg::define_coefficients(){
   m_alpha =  0.0;
   m_beta  = -1.0;
 
-  m_amr->allocate(m_aco,       Phase::Solid, 1, m_amr->get_num_ghost());
-  m_amr->allocate(m_bco,       Phase::Solid, 1, m_amr->get_num_ghost());
-  m_amr->allocate(m_bco_irreg, Phase::Solid, 1, m_amr->get_num_ghost());
+  m_amr->allocate(m_aco,       phase::gas, 1, m_amr->get_num_ghost());
+  m_amr->allocate(m_bco,       phase::gas, 1, m_amr->get_num_ghost());
+  m_amr->allocate(m_bco_irreg, phase::gas, 1, m_amr->get_num_ghost());
 
   data_ops::set_value(m_aco,       1.0);
   data_ops::set_value(m_bco,       1.0);
@@ -100,7 +100,7 @@ void poisson_staircase_gmg::solve(){
   
 #if 1 // This is a test, GMG is now set up correctly
 
-  Phase::WhichPhase phase = Phase::Solid;
+  phase::which_phase phase = phase::gas;
   
   const int comps                  = 1;
   const int ghost                  = m_amr->get_num_ghost();
@@ -204,7 +204,7 @@ void poisson_staircase_gmg::setup_gmg(){
     pout() << "poisson_staircase_gmg::setup_gmg" << endl;
   }
 
-  Phase::WhichPhase phase = Phase::Solid;
+  phase::which_phase phase = phase::gas;
   
   const int comps                  = 1;
   const int finest_level           = m_amr->get_finest_level();

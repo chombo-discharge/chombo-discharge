@@ -45,7 +45,7 @@ public:
   /*!
     @brief Get a particular ebis
   */
-  const RefCountedPtr<EBIndexSpace>& get_ebis(Phase::WhichPhase a_whichEBIS) const;
+  const RefCountedPtr<EBIndexSpace>& get_ebis(phase::which_phase a_whichEBIS) const;
 
   /*!
     @brief Get the interface region. This is defined as the intersection between the irregular cells of the 

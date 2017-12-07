@@ -9,7 +9,7 @@
 #include <AllRegularService.H>
 
 mfis::mfis(){
-  m_ebis.resize(Phase::num_phases);
+  m_ebis.resize(phase::num_phases);
   for (int i = 0; i < m_ebis.size(); i++){
     m_ebis[i] = RefCountedPtr<EBIndexSpace> (new EBIndexSpace());
   }
@@ -27,17 +27,17 @@ void mfis::define(const Box                     & a_domain,
 		  bool                            a_fix_phase){
 
 
-  m_ebis[Phase::Gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[Phase::Gas],   a_nCellMax, a_max_coar);
+  m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
 
-  if(a_geoservers[Phase::Solid] == NULL){
-    m_ebis[Phase::Solid] = RefCountedPtr<EBIndexSpace> (NULL);
+  if(a_geoservers[phase::solid] == NULL){
+    m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace> (NULL);
   }
   else{
-    m_ebis[Phase::Solid]->define(a_domain, a_origin, a_dx, *a_geoservers[Phase::Solid], a_nCellMax, a_max_coar);
+    m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
   }
 }
   
-const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(Phase::WhichPhase a_whichEBIS) const {
+const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(phase::which_phase a_whichEBIS) const {
   return m_ebis[a_whichEBIS];
 }
 

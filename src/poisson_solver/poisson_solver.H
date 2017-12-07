@@ -13,10 +13,10 @@
 #include "amr_mesh.H"
 #include "wall_bc.H"
 
-namespace Potential {
-  enum GroundLive {
-    Ground = false,
-    Live   = true
+namespace potential {
+  enum ground_live {
+    ground = false,
+    live   = true
   };
 };
 
@@ -74,7 +74,7 @@ public:
   /*!
     @brief Set Dirichlet wall BC
   */
-  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const Potential::GroundLive a_live);
+  virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live);
 
   /*!
     @brief Set Neumann wall BC
@@ -104,12 +104,12 @@ public:
   /*!
     @brief Get state on specified phase. This uses aliasing
   */
-  EBAMRCellData& get_state_phase(Phase::WhichPhase a_phase);
+  EBAMRCellData& get_state_phase(phase::which_phase a_phase);
 
   /*!
     @brief Get source on specified phase. This uses aliasing
   */
-  EBAMRCellData& get_source_phase(Phase::WhichPhase a_phase);
+  EBAMRCellData& get_source_phase(phase::which_phase a_phase);
 
   /*!
     @brief Get the jump state

@@ -64,16 +64,16 @@ int main(int argc, char* argv[]){
   if(SpaceDim == 2){
     poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
     poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    poisson->set_dirichlet_wall_bc(1, Side::Lo, Potential::Ground);
-    poisson->set_dirichlet_wall_bc(1, Side::Hi, Potential::Live);
+    poisson->set_dirichlet_wall_bc(1, Side::Lo, potential::ground);
+    poisson->set_dirichlet_wall_bc(1, Side::Hi, potential::live);
   }
   else if(SpaceDim == 3){
     poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
     poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
     poisson->set_neumann_wall_bc(1,   Side::Lo, 0.0);                  
     poisson->set_neumann_wall_bc(1,   Side::Hi, 0.0);
-    poisson->set_dirichlet_wall_bc(2, Side::Lo, Potential::Ground);
-    poisson->set_dirichlet_wall_bc(2, Side::Hi, Potential::Live);
+    poisson->set_dirichlet_wall_bc(2, Side::Lo, potential::ground);
+    poisson->set_dirichlet_wall_bc(2, Side::Hi, potential::live);
   }
   
 

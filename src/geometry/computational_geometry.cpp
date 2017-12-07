@@ -70,8 +70,8 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
   
   // Build geoservers
   Vector<GeometryService*> geoservers(2, NULL);
-  this->build_gas_geoserv(geoservers[Phase::Gas],     a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
-  this->build_solid_geoserv(geoservers[Phase::Solid], a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
+  this->build_gas_geoserv(geoservers[phase::gas],     a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
+  this->build_solid_geoserv(geoservers[phase::solid], a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
 
   m_mfis->define(a_finestDomain.domainBox(), // Define MF
 		 a_physDom.get_prob_lo(),

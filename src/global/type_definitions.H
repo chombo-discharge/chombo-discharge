@@ -22,12 +22,12 @@
 /*!
   @brief phase names
 */
-namespace Phase {
+namespace phase {
   const int num_phases = 2;
   
-  enum WhichPhase {
-    Gas   = 0,
-    Solid = 1
+  enum which_phase {
+    gas   = 0,
+    solid = 1
   };
 };
 

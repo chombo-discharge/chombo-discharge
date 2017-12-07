@@ -60,19 +60,19 @@ public:
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
-  virtual void allocate(EBAMRCellData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
+  virtual void allocate(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
-  virtual void allocate(EBAMRFluxData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
+  virtual void allocate(EBAMRFluxData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
-  virtual void allocate(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
+  virtual void allocate(EBAMRIVData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 
@@ -96,27 +96,27 @@ public:
     @brief Allocate a data holder over the intersecting regions of the mfis
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
-  virtual void allocate_interface(EBAMRIVData& a_data, Phase::WhichPhase a_phase, const int a_ncomp, const int a_ghost = -1);
+  virtual void allocate_interface(EBAMRIVData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Average down
   */
-  virtual void average_down(EBAMRCellData& a_data, Phase::WhichPhase a_phase);
+  virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
     @brief Average down
   */
-  virtual void average_down(EBAMRFluxData& a_data, Phase::WhichPhase a_phase);
+  virtual void average_down(EBAMRFluxData& a_data, phase::which_phase a_phase);
 
   /*!
     @brief Average down
   */
-  virtual void average_down(EBAMRIVData& a_data, Phase::WhichPhase a_phase);
+  virtual void average_down(EBAMRIVData& a_data, phase::which_phase a_phase);
 
   /*!
     @brief Interpolate ghost vectors
   */
-  virtual void interp_ghost(EBAMRCellData& a_data, Phase::WhichPhase a_phase);
+  virtual void interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase);
   
   /*!
     @brief Set mfis
@@ -276,62 +276,62 @@ public:
   /*!
     @brief Get the EBLevelGrid 
   */
-  virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(phase::which_phase a_phase);
 
   /*!
     @brief Get the EBISLayouts
   */
-  virtual Vector<EBISLayout>& get_ebisl(Phase::WhichPhase a_phase);
+  virtual Vector<EBISLayout>& get_ebisl(phase::which_phase a_phase);
 
   /*!
     @brief Get the coarsening utility
   */
-  virtual Vector<RefCountedPtr<EBCoarseAverage> >& get_coarave(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBCoarseAverage> >& get_coarave(phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cell interpolation utility
   */
-  virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(phase::which_phase a_phase);
 
   /*!
     @brief Get the old interpolation utility (needed for EBConductivityOps)
   */
-  virtual Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(phase::which_phase a_phase);
 
   /*!
     @brief Get flux register
   */
-  virtual Vector<RefCountedPtr<EBFastFR> >&  get_flux_reg(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBFastFR> >&  get_flux_reg(phase::which_phase a_phase);
 
   /*!
     @brief Get redistribution
   */
-  virtual Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-fine redistribution
   */
-  virtual Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-coar redistribution
   */
-  virtual Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBCoarToCoarRedist> >&  get_coar_to_coar_redist(phase::which_phase a_phase);
 
   /*!
     @brief Get coar-to-coar redistribution
   */
-  virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(Phase::WhichPhase a_phase);
+  virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(phase::which_phase a_phase);
 
   /*!
     @brief Get interpolation stencils
   */
-  virtual irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(Phase::WhichPhase a_phase);
+  virtual irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(phase::which_phase a_phase);
 
   /*!
     @brief Get interpolation stencils
   */
-  virtual irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(Phase::WhichPhase a_phase);
+  virtual irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(phase::which_phase a_phase);
 
   
 protected:
