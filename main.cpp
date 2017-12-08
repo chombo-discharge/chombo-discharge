@@ -40,13 +40,13 @@ int main(int argc, char* argv[]){
   amr->set_refinement_ratio(4);                   // Set refinement ratio
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
   amr->set_blocking_factor(8);                    // Set blocking factor
-  amr->set_buffer_size(2);                        // Set buffer size
-  amr->set_max_box_size(128);                      // Set max box size
+  amr->set_buffer_size(1);                        // Set buffer size
+  amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
-  amr->set_irreg_sten_order(1);
-  amr->set_irreg_sten_radius(1);
+  amr->set_irreg_sten_order(1);                   // Set extrapolation stencil order
+  amr->set_irreg_sten_radius(1);                  // Set extrapolation stencil radius
 
   // Set up plasma engine
   RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,

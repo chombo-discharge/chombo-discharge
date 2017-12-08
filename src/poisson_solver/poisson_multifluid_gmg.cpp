@@ -9,6 +9,7 @@
 #include "data_ops.H"
 #include "MFQuadCFInterp.H"
 #include "MFInterfaceFAB.H"
+#include "jump_bc.H"
 
 #include <Stencils.H>
 #include <MFCellFAB.H>
@@ -113,6 +114,11 @@ void poisson_multifluid_gmg::setup_gmg(){
       MFInterfaceFAB<VoFStencil>& sten = mfstencil[dit()];
       sten.define(mflg, dit());
     }
+
+    LayoutData<IntVectSet> cfivs;
+    EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
+
+    jump_bc* jump = new jump_bc(mflg, dx[lvl], 2, &cfivs);
   }
 
   // Allocate coefficients

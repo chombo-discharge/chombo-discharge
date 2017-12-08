@@ -28,19 +28,35 @@ public:
   jump_bc();
 
   /*!
+    @brief Full constructor
+  */
+  jump_bc(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_order, const LayoutData<IntVectSet>* a_cfivs);
+
+  /*!
     @brief Destructor
   */
   virtual ~jump_bc();
 
   /*!
-    @brief Define function
+    @brief Switch between quadrant-based and non-quadrant based least squares stencils
   */
-  virtual void define(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_order);
+  static bool s_quadrant_based;
 
   /*!
-    @brief Build stencils for matching
+    @brief Radius for least squares stencils
   */
-  virtual void build_stencils();
+  static int s_lsq_radius;
+
+  /*!
+    @brief Define function
+  */
+  virtual void define(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_order, const LayoutData<IntVectSet>* a_cfivs);
+
+  /*!
+    @brief
+  */
+  virtual void match_bc(MFInterfaceFAB<Real>& m_phibc, const MFCellFAB& a_phi);
+
 
 protected:
 
@@ -67,6 +83,21 @@ protected:
   int m_order;
 
   /*!
+    @brief Resolution at level
+  */
+  Real m_dx;
+
+/*!
+  @brief Is defined or not
+*/
+bool m_defined;
+
+  /*!
+    @brief Coarse-fine interface
+  */
+  const LayoutData<IntVectSet>* m_cfivs;
+
+  /*!
     @brief Surface potential. Adding it on both sides for simplicity 
   */
   LayoutData<MFInterfaceFAB<Real> > m_soln;
@@ -87,14 +118,27 @@ protected:
   LayoutData<MFInterfaceFAB<VoFStencil> > m_stencils;
 
   /*!
-    @brief Get a second order stencil for the current vof
+    @brief Build stencils for matching
   */
-  virtual bool get_second_order_sten(Real& a_weight, VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox);
+  virtual void build_stencils();
 
   /*!
-    @brief Get a first order stencil
+    @brief Get a second order stencil 
   */
-  virtual bool get_first_order_sten(Real& a_weight, VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox);
+  virtual bool get_second_order_sten(Real&             a_weight,
+				     VoFStencil&       a_stencil,
+				     const VolIndex&   a_vof,
+				     const EBISBox&    a_ebisbox,
+				     const IntVectSet& a_cfivs);
+
+  /*!
+    @brief Get a first order stencil 
+  */
+  virtual void get_first_order_sten(Real&             a_weight,
+				    VoFStencil&       a_stencil,
+				    const VolIndex&   a_vof,
+				    const EBISBox&    a_ebisbox,
+				    const IntVectSet& a_cfivs);
 };
 
 #endif
