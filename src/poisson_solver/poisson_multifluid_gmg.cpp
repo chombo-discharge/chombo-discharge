@@ -8,7 +8,9 @@
 #include "poisson_multifluid_gmg.H"
 #include "data_ops.H"
 #include "MFQuadCFInterp.H"
+#include "MFInterfaceFAB.H"
 
+#include <Stencils.H>
 #include <MFCellFAB.H>
 #include <LayoutData.H>
 #include <MFLevelDataOps.H>
@@ -99,6 +101,18 @@ void poisson_multifluid_gmg::setup_gmg(){
 
     mfiv1->copyTo(*mfiv2);
 
+    Vector<EBLevelGrid> eblg;
+    eblg.push_back(*(m_amr->get_eblg(phase::gas)[lvl]));
+    eblg.push_back(*(m_amr->get_eblg(phase::solid)[lvl]));
+    LayoutData<MFInterfaceFAB<Real> >       bco(grids[lvl]);
+    LayoutData<MFInterfaceFAB<Real> >       weights(grids[lvl]);
+    LayoutData<MFInterfaceFAB<VoFStencil> > mfstencil(grids[lvl]);
+
+    MFLevelGrid mflg(m_mfis, eblg);
+    for (DataIterator dit = mfstencil.dataIterator(); dit.ok(); ++dit){
+      MFInterfaceFAB<VoFStencil>& sten = mfstencil[dit()];
+      sten.define(mflg, dit());
+    }
   }
 
   // Allocate coefficients
@@ -127,7 +141,8 @@ void poisson_multifluid_gmg::setup_gmg(){
   m_amr->allocate(bco_irreg, ncomps, ghosts);
   m_amr->allocate_interface(sigma, phase::gas, 1, 0);
 
-  
+
+    
   Vector<MFLevelGrid> mfeblg(1 + finest_level);
   Vector<MFQuadCFInterp> mfquadcfi(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -141,7 +156,7 @@ void poisson_multifluid_gmg::setup_gmg(){
     quadcfi_phases[phase::gas] =   (m_amr->get_old_quadcfi(phase::gas)[lvl]);
     quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
     
-    mfeblg[lvl].define(eblg_phases);
+    mfeblg[lvl].define(m_mfis, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
   }
 
@@ -164,7 +179,4 @@ void poisson_multifluid_gmg::setup_gmg(){
   									       2*IntVect::Unit));
 
   m_opfact->set_jump(1.0, 1.0);
-									       
-									       
-									       
 }

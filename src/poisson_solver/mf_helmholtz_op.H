@@ -11,6 +11,7 @@
 #include "type_definitions.H"
 #include "mfis.H"
 #include "jump_bc.H"
+#include "MFLevelGrid.H"
 
 #include <RefCountedPtr.H>
 #include <MFCellFAB.H>
@@ -42,6 +43,10 @@ public:
   virtual void define(const RefCountedPtr<mfis>&         a_mfis,
 		      const RefCountedPtr<BaseDomainBC>& a_dombc,
 		      const RefCountedPtr<jump_bc>&      a_jumpbc,
+		      const MFLevelGrid&                 a_mflg_fine,
+		      const MFLevelGrid&                 a_mflg,
+		      const MFLevelGrid&                 a_mflg_coar,
+		      const MFLevelGrid&                 a_mflg_coar_mg,
 		      const DisjointBoxLayout&           a_dbl,
 		      const DisjointBoxLayout&           a_dbl_finer,
 		      const DisjointBoxLayout&           a_dbl_coarser,

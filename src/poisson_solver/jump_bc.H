@@ -8,25 +8,47 @@
 #ifndef _JUMP_BC_
 #define _JUMP_BC_
 
-#include <BaseEBBC.H>
+#include "MFLevelGrid.H"
 
 
 /*!
-  @brief Class for switching between multifluid-based Dirichlet and pure Dirichelt boundary conditions
+  @brief Class for deriving the surface potential for multifluid poisson equations
 */
-class jump_bc : public ConductivityBaseEBBC {
+class jump_bc {
 public:
 
-  jump_bc(){
+  /*!
+    @brief Empty constructor, must call define
+  */
+  jump_bc(){}
 
-  }
+  /*!
+    @brief Destructor
+  */
+  virtual ~jump_bc(){}
 
-  ~jump_bc(){
+  /*!
+    @brief Define function
+  */
+  virtual void define(const ProblemDomain& a_domain, const MFLevelGrid& a_mflg, const Real& a_dx){}
 
-  }
-  
+  /*!
+    @brief Build stencils for matching
+  */
+  virtual void build_stencils(){}
+
 protected:
-  
+
+  /*!
+    @brief B-coefficient on each side
+  */
+  MFBaseIVFAB m_bco;
+
+  /*!
+    @brief Weights at the boundary
+  */
+  MFBaseIVFAB m_wb;
+    
 };
 
 #endif

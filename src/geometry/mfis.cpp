@@ -41,6 +41,15 @@ const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(phase::which_phase a_whichEBIS
   return m_ebis[a_whichEBIS];
 }
 
+const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const int a_phase) const {
+  return m_ebis[a_phase];
+}
+
+
+const int mfis::num_phases() const{
+  return m_ebis.size();
+}
+
 const IntVectSet mfis::interface_region(const ProblemDomain& a_domain) const {
   CH_TIME("mfis::interface_region");
 

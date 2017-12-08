@@ -162,7 +162,8 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 	  const int ebghost = 4; // Ghost cells for MG, using 4 since that allows refinement of 4
 	  const int   ghost = 1; // Necessary ghost cells for second order
 
-	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, mflg_fine.get_ebis()));
+	  //	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, mflg_fine.get_ebis()));
+	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, m_mfis));
 
 	  const int img = m_mflg_mg[lvl].size() - 1; // Last one added, i.e. the coarsest that we have so far
 

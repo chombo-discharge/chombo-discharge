@@ -29,8 +29,8 @@ public:
     @brief Full constructor. 
   */
   MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
-	  const Vector<EBGraph>&    a_phase_graphs,
-	  const Vector<int>&        a_ncomp){
+	      const Vector<EBGraph>&    a_phase_graphs,
+	      const Vector<int>&        a_ncomp){
     CH_TIME("MFBaseIVFAB::MFBaseIVFAB");
 
     const int num_phases = a_regions.size();
@@ -42,7 +42,6 @@ public:
     for (int i = 0; i < num_phases; i++){
       m_phase[i] = new BaseIVFAB<Real>(a_regions[i], a_phase_graphs[i], a_ncomp[i]);
     }
-
   }
 
   /*!

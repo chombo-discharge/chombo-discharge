@@ -48,10 +48,20 @@ public:
   const RefCountedPtr<EBIndexSpace>& get_ebis(phase::which_phase a_whichEBIS) const;
 
   /*!
+    @brief Get a particular ebis
+  */
+  const RefCountedPtr<EBIndexSpace>& get_ebis(const int a_phase) const;
+
+  /*!
     @brief Get the interface region. This is defined as the intersection between the irregular cells of the 
     gas phase and the other phases. 
   */
   const IntVectSet interface_region(const ProblemDomain& a_domain) const;
+
+  /*!
+    @brief Get number of phases
+  */
+  const int num_phases() const;
 
 protected:
 

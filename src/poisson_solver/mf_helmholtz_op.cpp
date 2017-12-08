@@ -20,6 +20,10 @@ mf_helmholtz_op::~mf_helmholtz_op(){
 void mf_helmholtz_op::define(const RefCountedPtr<mfis>&         a_mfis,
 			     const RefCountedPtr<BaseDomainBC>& a_dombc,
 			     const RefCountedPtr<jump_bc>&      a_jumpbc,
+			     const MFLevelGrid&                 a_mflg_fine,
+			     const MFLevelGrid&                 a_mflg,
+			     const MFLevelGrid&                 a_mflg_coar,
+			     const MFLevelGrid&                 a_mflg_coar_mg,
 			     const DisjointBoxLayout&           a_dbl,
 			     const DisjointBoxLayout&           a_dbl_finer,
 			     const DisjointBoxLayout&           a_dbl_coarser,
@@ -43,9 +47,9 @@ void mf_helmholtz_op::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
   m_beta  = a_beta;
 }
 
-void mf_helmholtz_op::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
-				       const LevelData<MFCellFAB>& a_correction,
-				       const LevelData<MFCellFAB>& a_coarseCorrection){
+void mf_helmholtz_op::AMRUpdateResidual(LevelData<MFCellFAB>&      a_residual,
+					const LevelData<MFCellFAB>& a_correction,
+					const LevelData<MFCellFAB>& a_coarseCorrection){
   CH_TIME("MFPoissonOp::AMRUpdateResidual");
   bool homogeneousBC = true;
   //  computeBoundaryN(a_correction, homogeneousBC);

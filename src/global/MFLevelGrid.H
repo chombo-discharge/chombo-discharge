@@ -24,21 +24,26 @@ public:
 
   }
 
+  /*!
+    @brief Full constructor. Does full allocation
+  */
   MFLevelGrid(const DisjointBoxLayout&          a_dbl,
 	      const ProblemDomain&              a_domain,
 	      const int                         a_ebghost,
-	      const Vector<const EBIndexSpace*> a_ebis){
+	      const RefCountedPtr<mfis>&        a_mfis){
+    m_mfis = a_mfis;
     m_eblg.resize(0);
-    for (int i = 0; i < a_ebis.size(); i++){
-      m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_ebis[i]));
+    for (int i = 0; i < a_mfis->num_phases(); i++){
+      m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_mfis->get_ebis(i)));
     }
   }
 
   /*!
-    @brief Constructor
+    @brief Alternative full constructor - RefCounted storage so no allocation here
   */
-  MFLevelGrid(Vector<EBLevelGrid>& a_eblg){
-    this->define(a_eblg);
+  MFLevelGrid(const RefCountedPtr<mfis>& a_mfis,
+	      const Vector<EBLevelGrid>& a_eblg){
+    this->define(a_mfis, a_eblg);
   }
 
   /*!
@@ -58,8 +63,31 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(Vector<EBLevelGrid>& a_eblg){
+  virtual void define(const RefCountedPtr<mfis>& a_mfis,
+		      const Vector<EBLevelGrid>& a_eblg){
+    m_mfis = a_mfis;
     m_eblg = a_eblg;
+  }
+
+  /*!
+    @brief Get the index space
+  */
+  virtual const RefCountedPtr<mfis>& get_mfis() const {
+    return m_mfis;
+  }
+
+  /*!
+    @brief Get the problem domain
+  */
+  virtual ProblemDomain get_domain() const {
+    return m_eblg[0].getDomain();
+  }
+
+  /*!
+    @brief Get the grids
+  */
+  virtual const DisjointBoxLayout get_grids() const {
+    return m_eblg[0].getDBL();
   }
 
   /*!
@@ -75,29 +103,10 @@ public:
   virtual const EBLevelGrid& get_eblg(int a_phase) const {
     return m_eblg[a_phase];
   }
-
-  /*!
-    @brief Get EBISLayouts
-  */
-  virtual const Vector<EBISLayout> get_ebisl() const {
-    MayDay::Abort("MFLevelGrid::get_ebisl() - code appers to be broken"); // Maybe we should return by reference
-    Vector<EBISLayout> ebisl;
-    for (int i = 0; i < m_eblg.size(); i++){
-      ebisl.push_back(m_eblg[i].getEBISL());
-    } // This appears to be broekN!
-    return ebisl;
-  }
-
-  virtual const Vector<const EBIndexSpace*> get_ebis() const {
-    Vector<const EBIndexSpace*> ebis;
-    for (int i = 0; i < m_eblg.size(); i++){
-      ebis.push_back(m_eblg[i].getEBIS());
-    }
-
-    return ebis;
-  }
   
 private:
+
+  RefCountedPtr<mfis> m_mfis;
 
   Vector<EBLevelGrid> m_eblg;
 };

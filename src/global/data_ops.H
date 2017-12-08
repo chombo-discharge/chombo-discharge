@@ -9,6 +9,7 @@
 #define _data_ops_
 
 #include "type_definitions.H"
+#include "MFInterfaceFAB.H"
 
 #include "EBLevelDataOps.H"
 
@@ -31,6 +32,10 @@ public:
 
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
 
+  template <typename T> static void set_value(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
 
 };
+
+#include "data_opsI.H"
+
 #endif
