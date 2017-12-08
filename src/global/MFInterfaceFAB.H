@@ -16,7 +16,6 @@
 #include <BaseIVFAB.H>
 #include <IntVectSet.H>
 
-
 /*!
   @brief Class for holding BaseIVFAB<T> on the interface between two phases. 
 */
@@ -45,6 +44,9 @@ public:
     }
   }
 
+  /*!
+    @brief Define function
+  */
   virtual void define(const MFLevelGrid& a_mflg, const DataIndex& a_dit){
 
     const DisjointBoxLayout& dbl    = a_mflg.get_grids();
@@ -52,8 +54,6 @@ public:
     const RefCountedPtr<mfis>& mfis = a_mflg.get_mfis();
     const IntVectSet ivs            = mfis->interface_region(domain) & dbl.get(a_dit);
     const int num_phases            = mfis->num_phases();
-
-    pout() << ivs << endl;
     
     m_phase.resize(num_phases, NULL);
     

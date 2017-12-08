@@ -20,6 +20,8 @@ int main(int argc, char* argv[]){
   MPI_Init(&argc,&argv);
 #endif
 
+  EBIndexSpace::s_useMemoryLoadBalance = false;
+
   // Physical domain, geometry, time stepper, amr, and plasma kinetics
   const RealVect probLo = -RealVect::Unit;
   const RealVect probHi =  RealVect::Unit;
@@ -39,7 +41,7 @@ int main(int argc, char* argv[]){
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
   amr->set_blocking_factor(8);                    // Set blocking factor
   amr->set_buffer_size(2);                        // Set buffer size
-  amr->set_max_box_size(64);                      // Set max box size
+  amr->set_max_box_size(128);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
