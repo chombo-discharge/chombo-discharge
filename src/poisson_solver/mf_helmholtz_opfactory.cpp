@@ -530,12 +530,85 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 
 mf_helmholtz_op* mf_helmholtz_opfactory::createOperator(const DisjointBoxLayout&       a_dilboMGLevel,
 							const DisjointBoxLayout&       a_dilboCoarMG,
-							const ProblemDomain&           a_domainMGLevel,
+							const ProblemDomain&           a_domain_mg_level,
 							const bool&                    a_hasMGObjects,
 							const bool&                    a_layoutChanged,
 							const RealVect&                a_dxMGLevel,
 							const RealVect&                a_dxCoar,
-							const int&                     a_whichLevel,
+							const int&                     a_which_level,
 							const int&                     a_mgLevel){
-  return static_cast<mf_helmholtz_op*> (NULL);
+
+  // All this shit must be set.
+
+  RefCountedPtr<MFQuadCFInterp> quadcfi;
+
+  RefCountedPtr<LevelData<MFCellFAB> >   aco;
+  RefCountedPtr<LevelData<MFFluxFAB> >   bco;
+  RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
+  
+  MFLevelGrid mflg_fine;
+  MFLevelGrid mflg;
+  MFLevelGrid mflg_coar;
+  MFLevelGrid mflg_coar_mg;
+
+  DisjointBoxLayout dbl;
+  DisjointBoxLayout dbl_fine;
+  DisjointBoxLayout dbl_coar;
+  DisjointBoxLayout dbl_coar_mg;
+
+  ProblemDomain domain;
+
+  bool layout_changed;
+  bool has_mg_objects;
+  bool has_fine;
+  bool has_coar;
+
+  int ref_to_fine;
+  int ref_to_coar;
+  int relax_type;
+  int ebbc_order;
+
+  IntVect ghost_phi;
+  IntVect ghost_rhs;
+
+  Real dx;
+  Real dx_coar;
+  Real alpha;
+  Real beta;
+ 
+
+    
+  mf_helmholtz_op* oper = new mf_helmholtz_op();
+
+  oper->define(m_mfis,
+	       quadcfi,
+	       m_dombc,
+	       aco,
+	       bco,
+	       bco_irreg,
+	       mflg_fine,
+	       mflg,
+	       mflg_coar,
+	       mflg_coar_mg,
+	       dbl,
+	       dbl_fine,
+	       dbl_coar,
+	       dbl_coar_mg,
+	       domain,
+	       layout_changed,
+	       has_mg_objects,
+	       has_fine,
+	       has_coar,
+	       ref_to_fine,
+	       ref_to_coar,
+	       relax_type,
+	       ebbc_order,
+	       ghost_phi,
+	       ghost_rhs,
+	       dx,
+	       dx_coar,
+	       alpha,
+	       beta);
+
+  return oper;
 }
