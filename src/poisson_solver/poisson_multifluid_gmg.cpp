@@ -60,15 +60,23 @@ void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_rela
 }
 
 void poisson_multifluid_gmg::solve(){
-  if(m_needs_setup){
-    this->setup_gmg();
+  CH_TIME("poisson_multifluid_gmg::solve");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::solve";
   }
-
   
+  this->solve(m_state, m_source);
 }
 
 void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& a_source){
+  CH_TIME("poisson_multifluid_gmg::solve(mfamrcell, mfamrcell");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
+  }
 
+  if(m_needs_setup){
+    this->setup_gmg();
+  }
 }
 
 void poisson_multifluid_gmg::set_coefficients(){
@@ -202,13 +210,33 @@ void poisson_multifluid_gmg::setup_gmg(){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
   
-  this->set_coefficients(); // Set coefficients
-
-#if 1 // Testing stuff
+  this->set_coefficients();       // Set coefficients
+  this->setup_operator_factory(); // Set the operator factory
+  this->setup_solver();           // Set up the AMR multigrid solver
+  
+#if 0 // Testing stuff
   this->do_ebcond_test();
 #endif
+#if 0 // Testing stuff
+  this->base_tests();
+#endif
+  
 
-  // Create an EBConductivityOpFactory and test with Dirichlet BCs
+
+}
+
+void poisson_multifluid_gmg::setup_operator_factory(){
+  CH_TIME("poisson_multifluid_gmg::setup_operator_factory");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::setup_operator_factory" << endl;
+  }
+}
+
+void poisson_multifluid_gmg::setup_solver(){
+  CH_TIME("poisson_multifluid_gmg::setup_solver");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::setup_solver" << endl;
+  }
 }
 
 void poisson_multifluid_gmg::do_ebcond_test(){
@@ -229,6 +257,12 @@ void poisson_multifluid_gmg::do_ebcond_test(){
   for (int lvl = 0; lvl <= finest_level; lvl++){ 
     levelgrids.push_back(*(m_amr->get_eblg(phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
   }
+
+  // Match BC
+  EBAMRIVData sigma, phi_bc;
+  m_amr->allocate(sigma,  phase::gas, 1, 0);
+  m_amr->allocate(phi_bc, phase::gas, 1, 0);
+  
 
   // Boundary conditions. Dirichlet everywhere for testing purposes
   DirichletConductivityDomainBCFactory* dombc_fact = new DirichletConductivityDomainBCFactory();
@@ -261,6 +295,9 @@ void poisson_multifluid_gmg::do_ebcond_test(){
     bco.push_back(cur_bco);
     bco_irreg.push_back(cur_bco_irreg);
   }
+
+
+  
 
 
   m_cond_op_fact = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelgrids,
@@ -309,7 +346,7 @@ void poisson_multifluid_gmg::do_ebcond_test(){
   m_amr->average_down(E, phase);
   m_amr->interp_ghost(E, phase);
 
-    // Write data
+  // Write data
   Vector<std::string> names(SpaceDim);
   Vector<Real> covered_values;
   names[0] = "x-E";

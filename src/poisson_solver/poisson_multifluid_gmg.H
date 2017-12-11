@@ -185,6 +185,16 @@ protected:
 			   const Real&               a_dx,
 			   const Vector<dielectric>& a_dielectrics);
 
+  /*!
+    @brief Set up the operator factory
+  */
+  virtual void setup_operator_factory();
+
+
+  /*!
+    @brief Set up AMRMultiGrid
+  */
+  virtual void setup_solver();
 
   // Putting this in a function of its own
   virtual void base_tests();
