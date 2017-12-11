@@ -230,6 +230,8 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::setup_operator_factory" << endl;
   }
+
+  // Set up the mf_helmholtz_opfactory
 }
 
 void poisson_multifluid_gmg::setup_solver(){

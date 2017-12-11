@@ -15,6 +15,7 @@
 #include "MFLevelGrid.H"
 #include "MFQuadCFInterp.H"
 #include "data_ops.H"
+#include "electrode.H" 
 
 #include <EBLevelDataOps.H>
 #include <AMRMultiGrid.H>
@@ -102,6 +103,11 @@ public:
     @brief Set simplified jump condition
   */
   virtual void set_jump(const Real& a_sigma, const Real& a_scale);
+
+  /*!
+    @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
+  */
+  virtual void set_electrodes(const Vector<electrode>& a_electrodes);
 
   /*!
     @brief Average down the surface charge on AMR levels
@@ -202,6 +208,11 @@ protected:
     @brief Jump condition
   */
   EBAMRIVData m_jump;
+
+  /*!
+    @brief Electrodes
+  */
+  Vector<electrode> m_electrodes;
 
   /*!
     @brief EBLevelGrids (in MFLevelGrid form)

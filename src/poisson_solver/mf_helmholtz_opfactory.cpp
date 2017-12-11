@@ -70,7 +70,6 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
 	   << endl;
   }
 #endif
-
 }
 
 mf_helmholtz_opfactory::~mf_helmholtz_opfactory(){
@@ -412,6 +411,12 @@ void mf_helmholtz_opfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_
 
   this->average_down_amr();
   this->average_down_mg();
+}
+
+void mf_helmholtz_opfactory::set_electrodes(const Vector<electrode>& a_electrodes){
+  CH_TIME("mf_helmholtz_opfactory::set_electrodes");
+  
+  m_electrodes = a_electrodes;
 }
 
 int mf_helmholtz_opfactory::refToFiner(const ProblemDomain& a_domain) const{
