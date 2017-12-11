@@ -40,8 +40,144 @@ void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
 
 }
 
-void poisson_multifluid_gmg::setup_gmg(){
+void poisson_multifluid_gmg::set_coefficients(){
+  CH_TIME("poisson_multifluid_gmg::set_coefficients");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::set_coefficients" << endl;
+  }
 
+  const int ncomps = 1;
+  const int ghosts = 1;
+  const Real eps0  = m_compgeom->get_eps0();
+  
+  m_amr->allocate(m_aco,       ncomps, ghosts);
+  m_amr->allocate(m_bco,       ncomps, ghosts);
+  m_amr->allocate(m_bco_irreg, ncomps, ghosts);
+
+  data_ops::set_value(m_aco,       0.0);   // Always zero for poisson equation
+  data_ops::set_value(m_bco,       eps0); // Set equal to something large to detect bugs
+  data_ops::set_value(m_bco_irreg, eps0); // Set equal to something large to detect bugs
+
+  this->set_permittivities(m_compgeom->get_dielectrics());
+}
+
+void poisson_multifluid_gmg::set_permittivities(const Vector<dielectric>& a_dielectrics){
+  CH_TIME("poisson_multifluid_gmg::set_permittivities");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::set_permittivities" << endl;
+  }
+
+  if(a_dielectrics.size() > 0){
+    const RealVect origin  = m_physdom->get_prob_lo();
+    const Vector<Real> dx  = m_amr->get_dx();
+    const int finest_level = m_amr->get_finest_level();
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+
+      LevelData<EBFluxFAB> bco;
+      LevelData<BaseIVFAB<Real> > bco_irreg;
+
+      mfalias::aliasMF(bco,       phase::solid, *m_bco[lvl]);
+      mfalias::aliasMF(bco_irreg, phase::solid, *m_bco_irreg[lvl]);
+
+      for (DataIterator dit = bco.dataIterator(); dit.ok(); ++dit){
+	EBFluxFAB& perm          = bco[dit()];
+	BaseIVFAB<Real>& perm_eb = bco_irreg[dit()];
+
+	this->set_face_perm(perm,  origin, dx[lvl], a_dielectrics);
+	this->set_eb_perm(perm_eb, origin, dx[lvl], a_dielectrics);
+      }
+    }
+  }
+}
+
+void poisson_multifluid_gmg::set_face_perm(EBFluxFAB&                a_perm,
+					   const RealVect&           a_origin,
+					   const Real&               a_dx,
+					   const Vector<dielectric>& a_dielectrics){
+  CH_TIME("poisson_multifluid_gmg::set_face_perm");
+  if(m_verbosity > 10){
+    pout() << "poisson_multifluid_gmg::set_face_perm" << endl;
+  }
+
+  const int comp         = 0;
+  const IntVectSet ivs   = IntVectSet(a_perm.getRegion());
+  const EBISBox& ebisbox = a_perm.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+      const FaceIndex& face  = faceit();
+      const IntVect iv       = face.gridIndex(Side::Lo);
+      const RealVect pos     = a_origin + a_dx*iv + 0.5*a_dx*BASISV(dir);
+      
+      Real dist   = 1.E99;
+      int closest = 0;
+      for (int i = 0; i < a_dielectrics.size(); i++){
+	const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
+
+	const Real cur_dist = func->value(pos);
+	
+	if(cur_dist <= dist){
+	  dist = cur_dist;
+	  closest = i;
+	}
+      }
+
+      a_perm[dir](face, comp) = a_dielectrics[closest].get_permittivity();
+    }
+  }
+}
+
+
+void poisson_multifluid_gmg::set_eb_perm(BaseIVFAB<Real>&          a_perm,
+					 const RealVect&           a_origin,
+					 const Real&               a_dx,
+					 const Vector<dielectric>& a_dielectrics){
+  CH_TIME("poisson_multifluid_gmg::set_eb_perm");
+  if(m_verbosity > 10){
+    pout() << "poisson_multifluid_gmg::set_eb_perm" << endl;
+  }
+  
+  const int comp         = 0;
+  const IntVectSet ivs   = a_perm.getIVS();
+  const EBGraph& ebgraph = a_perm.getEBGraph();
+
+  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect pos  = EBArith::getVofLocation(vof, a_dx, a_origin); // This is strictly speaking not on the boundary...
+      
+    Real dist   = 1.E99;
+    int closest = 0;
+    for (int i = 0; i < a_dielectrics.size(); i++){
+      const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
+
+      const Real cur_dist = func->value(pos);
+	
+      if(cur_dist <= dist){
+	dist = cur_dist;
+	closest = i;
+      }
+    }
+
+    a_perm(vof, comp) = a_dielectrics[closest].get_permittivity();
+  }
+}
+
+void poisson_multifluid_gmg::setup_gmg(){
+  CH_TIME("poisson_multifluid_gmg::setup_gmg");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
+  }
+  
+  this->set_coefficients(); // Set coefficients
+
+}
+
+void poisson_multifluid_gmg::base_tests(){
+
+  this->base_tests();
   const int finest_level = m_amr->get_finest_level();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
 
@@ -78,18 +214,12 @@ void poisson_multifluid_gmg::setup_gmg(){
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
   RefCountedPtr<BaseEBBCFactory>     ebcfact = RefCountedPtr<BaseEBBCFactory> (NULL);
 
-  MFAMRCellData aco;
-  MFAMRFluxData bco;
-  MFAMRIVData   bco_irreg;
   EBAMRIVData   sigma;
   Real          alpha =  0.0;
   Real          beta  = -1.0;
 
   const int ncomps = 1;
   const int ghosts = 1;
-  m_amr->allocate(aco,       ncomps, ghosts);
-  m_amr->allocate(bco,       ncomps, ghosts);
-  m_amr->allocate(bco_irreg, ncomps, ghosts);
   m_amr->allocate(sigma, phase::gas, 1, 0);
 
 
@@ -132,7 +262,7 @@ void poisson_multifluid_gmg::setup_gmg(){
     LayoutData<IntVectSet> cfivs;
     EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
 
-    jump_bc* jump = new jump_bc(mflg, *bco_irreg[lvl], dx[lvl], 2, &cfivs);
+    jump_bc* jump = new jump_bc(mflg, *m_bco_irreg[lvl], dx[lvl], 2, &cfivs);
     
   }
 
@@ -175,9 +305,9 @@ void poisson_multifluid_gmg::setup_gmg(){
 									       mfquadcfi,
 									       refinement_ratios,
 									       grids,
-									       aco,
-									       bco,
-									       bco_irreg,
+									       m_aco,
+									       m_bco,
+									       m_bco_irreg,
 									       alpha,
 									       beta,
 									       dx[0],
@@ -185,8 +315,8 @@ void poisson_multifluid_gmg::setup_gmg(){
   									       domfact,
 									       ebcfact,
   									       origin,
-  									       2*IntVect::Unit,
-  									       2*IntVect::Unit));
+  									       3*IntVect::Unit,
+  									       3*IntVect::Unit));
 
   m_opfact->set_jump(1.0, 1.0);
 
@@ -199,7 +329,7 @@ void poisson_multifluid_gmg::setup_gmg(){
 
   LayoutData<IntVectSet> cfivs;
   EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
-  jump_bc* jump = new jump_bc(mfeblg[lvl], *bco_irreg[lvl], dx[lvl], 2, &cfivs);
+  jump_bc* jump = new jump_bc(mfeblg[lvl], *m_bco_irreg[lvl], dx[lvl], 2, &cfivs);
 
   EBLevelDataOps::setVal(*sigma[lvl], 1.0);
   MFLevelDataOps::setVal(*m_state[lvl], 1.0);

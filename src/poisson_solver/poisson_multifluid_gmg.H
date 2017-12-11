@@ -41,8 +41,6 @@ public:
     @brief 2 ghost cells. That's what we need. 
   */
   virtual int query_ghost() const;
-
-
   
 protected:
 
@@ -57,8 +55,53 @@ protected:
   RefCountedPtr<mf_helmholtz_opfactory> m_opfact;
 
   /*!
+    @brief b-coefficient
+  */
+  MFAMRCellData m_aco;
+
+  /*!
+    @brief b-coefficient
+  */
+  MFAMRFluxData m_bco;
+
+  /*!
+    @brief b-coefficient
+  */
+  MFAMRIVData m_bco_irreg;
+
+  /*!
     @brief Set up the geometric multigrid solver 
   */
   virtual void setup_gmg();
+
+  /*!
+    @brief Set coefficients
+  */
+  virtual void set_coefficients();
+
+  /*!
+    @brief Set the permittivities
+  */
+  virtual void set_permittivities(const Vector<dielectric>& a_dielectrics);
+
+  /*!
+    @brief Set face-centered permittivities
+  */
+  virtual void set_face_perm(EBFluxFAB&                a_perm,
+			     const RealVect&           a_origin,
+			     const Real&               a_dx,
+			     const Vector<dielectric>& a_dielectrics);
+
+  /*!
+    @brief Set EB-centered permittivities
+  */
+  virtual void set_eb_perm(BaseIVFAB<Real>&          a_perm,
+			   const RealVect&           a_origin,
+			   const Real&               a_dx,
+			   const Vector<dielectric>& a_dielectrics);
+
+
+  // Putting this in a function of its owns
+  virtual void base_tests();
 };
 #endif

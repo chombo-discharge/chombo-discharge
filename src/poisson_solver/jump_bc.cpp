@@ -90,9 +90,6 @@ void jump_bc::build_stencils(){
 
   const int comp = 0;
 
-#if 1 // Debug
-  pout() << "building stencils" << endl;
-#endif
   CH_assert(!m_mfis.isNull());
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
@@ -129,9 +126,6 @@ void jump_bc::build_stencils(){
       }
     }
   }
-#if 1 // Debug
-  pout() << "done building stencils" << endl;
-#endif
 }
 
 
@@ -272,7 +266,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
     a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
-#if 1 // Print BC pot
+#if 0 // Print BC pot
     pout() << vofit() << a_phibc(vof, comp) << endl;
 #endif
   }

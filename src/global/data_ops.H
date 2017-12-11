@@ -30,6 +30,16 @@ public:
 
   static void set_value(EBAMRIVData& a_lhs, const Real& a_value);
 
+  static void set_value(MFAMRCellData& a_lhs, const Real& a_value);
+
+  static void set_value(LevelData<MFCellFAB>& a_lhs, const Real& a_value);
+
+  static void set_value(MFAMRFluxData& a_lhs, const Real& a_value);
+
+  static void set_value(LevelData<MFFluxFAB>& a_lhs, const Real& a_value);
+
+  static void set_value(MFAMRIVData& a_lhs, const Real& a_value);
+
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
 
   template <typename T> static void set_value(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);

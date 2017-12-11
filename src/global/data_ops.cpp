@@ -49,6 +49,38 @@ void data_ops::set_value(EBAMRIVData& a_data, const Real& a_value){
   }
 }
 
+void data_ops::set_value(MFAMRCellData& a_lhs, const Real& a_value){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::set_value(*a_lhs[lvl], a_value);
+  }
+}
+
+void data_ops::set_value(LevelData<MFCellFAB>& a_lhs, const Real& a_value){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    MFCellFAB& lhs = a_lhs[dit()];
+    lhs.setVal(a_value);
+  }
+}
+
+void data_ops::set_value(MFAMRFluxData& a_lhs, const Real& a_value){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::set_value(*a_lhs[lvl] , a_value);
+  }
+}
+
+void data_ops::set_value(LevelData<MFFluxFAB>& a_lhs, const Real& a_value){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    MFFluxFAB& lhs = a_lhs[dit()];
+    lhs.setVal(a_value);
+  }
+}
+
+void data_ops::set_value(MFAMRIVData& a_lhs, const Real& a_value){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::set_value(*a_lhs[lvl] , a_value);
+  }
+}
+
 void data_ops::set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     a_lhs[dit()].setVal(a_value);
