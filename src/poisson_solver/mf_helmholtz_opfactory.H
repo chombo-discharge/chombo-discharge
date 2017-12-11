@@ -72,12 +72,17 @@ public:
   /*!
     @brief Set when to drop to the bottom solver
   */
-  static void set_bottom_drop(const int a_bottom_drop);
+  virtual void set_bottom_drop(const int a_bottom_drop);
 
   /*!
     @brief Set when to drop to the bottom solver
   */
-  static void set_relax_type(const int a_relax_type);
+  virtual void set_relax_type(const int a_relax_type);
+
+  /*!
+    @brief MG stuff
+  */
+  virtual void set_max_box_size(const int a_max_box_size);
 
   /*!
     @brief Coarsen coefficients for multigrid
@@ -169,20 +174,7 @@ public:
 
 protected:
 
-  /*!
-    @brief Drop to bottom solver
-  */
-  static int s_test_ref;
 
-  /*!
-    @brief Internal stuff
-  */
-  static int s_max_box_size;
-
-  /*!
-    @brief Relaxation type
-  */
-  static int s_relax_type;
 
   /*!
     @brief EBIndexSpaces
@@ -328,6 +320,21 @@ protected:
     @brief Number of AMR levels
   */
   int m_num_levels;
+
+  /*!
+    @brief Drop to bottom solver
+  */
+  int m_test_ref;
+
+  /*!
+    @brief Internal stuff
+  */
+  int m_max_box_size;
+
+  /*!
+    @brief Relaxation type
+  */
+  int m_relax_type;
 
   /*!
     @brief Ghost cells for solution vector

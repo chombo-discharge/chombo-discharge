@@ -44,11 +44,11 @@ public:
     @brief Define function
   */
   virtual void define(const RefCountedPtr<mfis>&                    a_mfis,
-		      const RefCountedPtr<MFQuadCFInterp>&          a_quadcfi,
 		      const RefCountedPtr<BaseDomainBC>&            a_dombc,
 		      const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
 		      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 		      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
+		      const MFQuadCFInterp&                         a_quadcfi,
 		      const MFLevelGrid&                            a_mflg_fine,
 		      const MFLevelGrid&                            a_mflg,
 		      const MFLevelGrid&                            a_mflg_coar,

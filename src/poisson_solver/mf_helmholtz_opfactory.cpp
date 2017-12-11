@@ -6,10 +6,6 @@
 
 #include "mf_helmholtz_opfactory.H"
 
-int mf_helmholtz_opfactory::s_max_box_size = 32;
-int mf_helmholtz_opfactory::s_test_ref     = 4;
-int mf_helmholtz_opfactory::s_relax_type   = 2;
-
 mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&                a_mfis,
 					       const Vector<MFLevelGrid>&                a_mflg,
 					       const Vector<MFQuadCFInterp>&             a_mfquadcfi,
@@ -138,9 +134,9 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 						 fine_grid,      // Fine level grid
 						 cur_domain,     // Current domain
 						 mg_refi,        // Refinement factor
-						 s_max_box_size, // 
+						 m_max_box_size, // 
 						 layout_changed, //
-						 s_test_ref);    //
+						 m_test_ref);    //
 
 	if(at_amr_lvl && !has_coarser){
 	  m_has_mg_objects[lvl] = false;
@@ -291,11 +287,15 @@ void mf_helmholtz_opfactory::coarsen_coefficients(LevelData<MFCellFAB>&         
 }
 
 void mf_helmholtz_opfactory::set_bottom_drop(const int a_bottom_drop){
-  s_test_ref = a_bottom_drop;
+  m_test_ref = a_bottom_drop;
 }
 
-void mf_helmholtz_opfactory::set_relax_type(int a_relax_type){
-  s_relax_type = a_relax_type;
+void mf_helmholtz_opfactory::set_relax_type(const int a_relax_type){
+  m_relax_type = a_relax_type;
+}
+
+void mf_helmholtz_opfactory::set_max_box_size(const int a_max_box_size){
+  m_max_box_size = a_max_box_size;
 }
 
 void mf_helmholtz_opfactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
@@ -446,13 +446,15 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
   int ref_lvl;
   bool found = false;
 
+#if 0 // Remove for testing purpsoes
   for (int lvl = 0; lvl < m_num_levels && !found; lvl++){
     if(a_domain_fine == m_domains[lvl]){
       found = true;
       ref_lvl = lvl;
     }
   }
-
+#endif
+  
   if(!found){
     MayDay::Error("mf_helmholtzopfactory::MGnewOp - no corresponding AMRLevel to starting point of MGnewOp");
   }
@@ -523,8 +525,32 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
   return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (NULL);
 }
 
-AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_fineindexspace){
+AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_domain_fine){
+  CH_TIME("mf_helmholtz_opfactory::AMRnewOp");
+
+  int ref    = -1;
+  bool found = false;
+
+#if 0 // Remove just to test
+  for (int lvl = 0; lvl < m_num_levels; lvl++){
+    if(a_domain_fine == m_domains[lvl]){
+      found = true;
+      ref   = lvl;
+      break;
+    }
+  }
+#endif
+
+  if(!found){
+    MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - no corresponding starting level to a_domain_fine");
+  }
+     
+  
+  
+
+#if 1 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - not implemented");
+#endif
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
 }
 
@@ -539,12 +565,11 @@ mf_helmholtz_op* mf_helmholtz_opfactory::createOperator(const DisjointBoxLayout&
 							const int&                     a_mgLevel){
 
   // All this shit must be set.
-
-  RefCountedPtr<MFQuadCFInterp> quadcfi;
-
   RefCountedPtr<LevelData<MFCellFAB> >   aco;
   RefCountedPtr<LevelData<MFFluxFAB> >   bco;
   RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
+
+  MFQuadCFInterp quadcfi;
   
   MFLevelGrid mflg_fine;
   MFLevelGrid mflg;
@@ -565,7 +590,7 @@ mf_helmholtz_op* mf_helmholtz_opfactory::createOperator(const DisjointBoxLayout&
 
   int ref_to_fine;
   int ref_to_coar;
-  int relax_type;
+  int relax_type    = m_relax_type;
   int ebbc_order;
 
   IntVect ghost_phi;
@@ -575,17 +600,15 @@ mf_helmholtz_op* mf_helmholtz_opfactory::createOperator(const DisjointBoxLayout&
   Real dx_coar;
   Real alpha;
   Real beta;
- 
-
     
   mf_helmholtz_op* oper = new mf_helmholtz_op();
 
   oper->define(m_mfis,
-	       quadcfi,
 	       m_dombc,
 	       aco,
 	       bco,
 	       bco_irreg,
+	       quadcfi,
 	       mflg_fine,
 	       mflg,
 	       mflg_coar,
@@ -601,7 +624,7 @@ mf_helmholtz_op* mf_helmholtz_opfactory::createOperator(const DisjointBoxLayout&
 	       has_coar,
 	       ref_to_fine,
 	       ref_to_coar,
-	       relax_type,
+	       m_relax_type,
 	       ebbc_order,
 	       ghost_phi,
 	       ghost_rhs,

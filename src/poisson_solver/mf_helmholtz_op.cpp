@@ -18,11 +18,11 @@ mf_helmholtz_op::~mf_helmholtz_op(){
 }
 
 void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfis,
-			     const RefCountedPtr<MFQuadCFInterp>&          a_quadcfi,
 			     const RefCountedPtr<BaseDomainBC>&            a_dombc,
 			     const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
 			     const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 			     const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
+			     const MFQuadCFInterp&                         a_quadcfi,
 			     const MFLevelGrid&                            a_mflg_fine,
 			     const MFLevelGrid&                            a_mflg,
 			     const MFLevelGrid&                            a_mflg_coar,
@@ -69,8 +69,8 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     m_eb_alias[i]   = new LevelData<BaseIVFAB<Real> >();
   }
   
-  // Object for matching boundary conditions. Native EBBC is always Dirichlet
-  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, 2, (a_mflg.get_eblg(0)).getCFIVS()));
+  // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
+  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
 
   for (int iphase = 0; iphase < num_phases; iphase++){
 
@@ -80,7 +80,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     const EBLevelGrid& eblg_mg   = a_mflg_coar_mg.get_eblg(iphase);
     const EBISLayout&  ebisl     = eblg.getEBISL();
 
-    const RefCountedPtr<EBQuadCFInterp>& quadcfi = a_quadcfi->get_quadcfi_ptr(iphase);
+    const RefCountedPtr<EBQuadCFInterp>& quadcfi = a_quadcfi.get_quadcfi_ptr(iphase);
 
     m_acoeffs[iphase]     = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
     m_bcoeffs[iphase]     = RefCountedPtr<LevelData<EBFluxFAB> >        (new LevelData<EBFluxFAB>());
@@ -90,7 +90,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 												       a_dx*RealVect::Unit,
 												       &a_ghost_phi,
 												       &a_ghost_rhs));
-
+    
     mfalias::aliasMF(*m_acoeffs[iphase],     iphase, *a_aco);
     mfalias::aliasMF(*m_bcoeffs[iphase],     iphase, *a_bco);
     mfalias::aliasMF(*m_bcoeffs_irr[iphase], iphase, *a_bco_irreg);
