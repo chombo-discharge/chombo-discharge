@@ -78,6 +78,20 @@ void poisson_multifluid_gmg::setup_gmg(){
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
   RefCountedPtr<BaseEBBCFactory>     ebcfact = RefCountedPtr<BaseEBBCFactory> (NULL);
 
+  MFAMRCellData aco;
+  MFAMRFluxData bco;
+  MFAMRIVData   bco_irreg;
+  EBAMRIVData   sigma;
+  Real          alpha =  0.0;
+  Real          beta  = -1.0;
+
+  const int ncomps = 1;
+  const int ghosts = 1;
+  m_amr->allocate(aco,       ncomps, ghosts);
+  m_amr->allocate(bco,       ncomps, ghosts);
+  m_amr->allocate(bco_irreg, ncomps, ghosts);
+  m_amr->allocate_interface(sigma, phase::gas, 1, 0);
+
 
   // Create two MFBaseIVFABs and copy between them
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -118,14 +132,14 @@ void poisson_multifluid_gmg::setup_gmg(){
     LayoutData<IntVectSet> cfivs;
     EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
 
-    jump_bc* jump = new jump_bc(mflg, dx[lvl], 2, &cfivs);
+    jump_bc* jump = new jump_bc(mflg, *bco_irreg[lvl], dx[lvl], 2, &cfivs);
   }
 
   // Allocate coefficients
   EBAMRIVData   ajump;
   EBAMRIVData   bjump;
   EBAMRIVData   cjump;
-  EBAMRIVData   sigma;
+
   Vector<RefCountedPtr<LayoutData<IntVectSet> > > jump_cells(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){
     jump_cells[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet> (grids[lvl]));
@@ -134,18 +148,7 @@ void poisson_multifluid_gmg::setup_gmg(){
       (*jump_cells[lvl])[dit()] = interface_ivs & grids[lvl].get(dit());
     }
   }
-  MFAMRCellData aco;
-  MFAMRFluxData bco;
-  MFAMRIVData   bco_irreg;
-  Real          alpha =  0.0;
-  Real          beta  = -1.0;
 
-  const int ncomps = 1;
-  const int ghosts = 1;
-  m_amr->allocate(aco,       ncomps, ghosts);
-  m_amr->allocate(bco,       ncomps, ghosts);
-  m_amr->allocate(bco_irreg, ncomps, ghosts);
-  m_amr->allocate_interface(sigma, phase::gas, 1, 0);
 
 
     

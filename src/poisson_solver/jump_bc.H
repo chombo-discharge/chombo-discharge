@@ -17,7 +17,7 @@
 #include <EBISBox.H>
 
 /*!
-  @brief Class for deriving the surface potential for multifluid poisson equations
+  @brief Class matching the surface potential with multifluid poisson
 */
 class jump_bc {
 public:
@@ -30,7 +30,11 @@ public:
   /*!
     @brief Full constructor
   */
-  jump_bc(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_order, const LayoutData<IntVectSet>* a_cfivs);
+  jump_bc(const MFLevelGrid&            a_mflg,
+	  const LevelData<MFBaseIVFAB>& a_bco,
+	  const Real&                   a_dx,
+	  const int                     a_order,
+	  const LayoutData<IntVectSet>* a_cfivs);
 
   /*!
     @brief Destructor
@@ -50,12 +54,20 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_order, const LayoutData<IntVectSet>* a_cfivs);
+  virtual void define(const MFLevelGrid&            a_mflg,
+		      const LevelData<MFBaseIVFAB>& a_bco,
+		      const Real&                   a_dx,
+		      const int                     a_order,
+		      const LayoutData<IntVectSet>* a_cfivs);
 
   /*!
-    @brief
+    @brief Match the boundary condition
   */
-  virtual void match_bc(MFInterfaceFAB<Real>& m_phibc, const MFCellFAB& a_phi);
+  virtual void match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+			const LevelData<BaseIVFAB<Real> >& a_jump,
+			const LevelData<MFCellFAB>&        a_phi);
+
+
 
 
 protected:
@@ -87,20 +99,15 @@ protected:
   */
   Real m_dx;
 
-/*!
-  @brief Is defined or not
-*/
-bool m_defined;
+  /*!
+    @brief Is defined or not
+  */
+  bool m_defined;
 
   /*!
     @brief Coarse-fine interface
   */
   const LayoutData<IntVectSet>* m_cfivs;
-
-  /*!
-    @brief Surface potential. Adding it on both sides for simplicity 
-  */
-  LayoutData<MFInterfaceFAB<Real> > m_soln;
 
   /*!
     @brief b-coefficient on each side
@@ -116,6 +123,11 @@ bool m_defined;
     @brief Stencils on each side
   */
   LayoutData<MFInterfaceFAB<VoFStencil> > m_stencils;
+
+  /*!
+    @brief Set b-coefficient
+  */
+  virtual void set_bco(const LevelData<MFBaseIVFAB>& a_bco);
 
   /*!
     @brief Build stencils for matching
@@ -139,6 +151,16 @@ bool m_defined;
 				    const VolIndex&   a_vof,
 				    const EBISBox&    a_ebisbox,
 				    const IntVectSet& a_cfivs);
+
+  /*!
+    @brief Match the boundary condition
+  */
+  virtual void match_bc(BaseIVFAB<Real>&                  a_phibc,
+			const BaseIVFAB<Real>&            a_jump,
+			const MFCellFAB&                  a_phi,
+			const MFInterfaceFAB<Real>&       a_bco,
+			const MFInterfaceFAB<Real>&       a_weights,
+			const MFInterfaceFAB<VoFStencil>& a_stencils);
 };
 
 #endif

@@ -239,7 +239,7 @@ protected:
   Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_jumpcells;
 
   /*!
-    @brief Averaging operator - this should be replaced by EBCoarseAverageIV 
+    @brief Averaging operator. 
   */
   Vector<RefCountedPtr<EBCoarseAverage> > m_aveop;
 

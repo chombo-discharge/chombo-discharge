@@ -16,17 +16,25 @@ jump_bc::jump_bc(){
   CH_TIME("jump_bc::jump_bc(weak)");
 }
 
-jump_bc::jump_bc(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_order, const LayoutData<IntVectSet>* a_cfivs){
+jump_bc::jump_bc(const MFLevelGrid&            a_mflg,
+		 const LevelData<MFBaseIVFAB>& a_bco,
+		 const Real&                   a_dx,
+		 const int                     a_order,
+		 const LayoutData<IntVectSet>* a_cfivs){
   CH_TIME("jump_bc::jump_bc(full)");
 
-  this->define(a_mflg, a_dx, a_order, a_cfivs);
+  this->define(a_mflg, a_bco, a_dx, a_order, a_cfivs);
 }
 
 jump_bc::~jump_bc(){
   CH_TIME("jump_bc::~jump_bc(full)");
 }
 
-void jump_bc::define(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_order, const LayoutData<IntVectSet>* a_cfivs){
+void jump_bc::define(const MFLevelGrid&            a_mflg,
+		     const LevelData<MFBaseIVFAB>& a_bco,
+		     const Real&                   a_dx,
+		     const int                     a_order,
+		     const LayoutData<IntVectSet>* a_cfivs){
   CH_TIME("jump_bc::define");
   m_mflg   = a_mflg;
   m_dx     = a_dx;
@@ -37,23 +45,41 @@ void jump_bc::define(const MFLevelGrid& a_mflg, const Real& a_dx, const int a_or
   m_cfivs  = a_cfivs;
 
   m_bco.define(m_grids);
-  m_soln.define(m_grids);
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
 
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     MFInterfaceFAB<Real>& bco         = m_bco[dit()];
-    MFInterfaceFAB<Real>& soln        = m_soln[dit()];
     MFInterfaceFAB<Real>& weights     = m_weights[dit()];
     MFInterfaceFAB<VoFStencil>& stens = m_stencils[dit()];
 
     bco.define(m_mflg,     dit());
-    soln.define(m_mflg,    dit());
     weights.define(m_mflg, dit());
     stens.define(m_mflg,   dit());
   }
 
+  this->set_bco(a_bco);
   this->build_stencils();
+
+  m_defined = true;
+}
+
+void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
+  CH_TIME("jump_bc::build_stencils");
+
+  const int comp = 0;
+  for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
+    for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
+
+      BaseIVFAB<Real>& bco             = m_bco[dit()].get_ivfab(iphase);
+      const BaseIVFAB<Real>& bco_irreg = a_bco[dit()].get_ivfab(iphase);
+
+      for (VoFIterator vofit(bco.getIVS(), bco.getEBGraph()); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	bco(vof, comp) = bco_irreg(vof, comp);
+      }
+    }
+  }
 }
 
 void jump_bc::build_stencils(){
@@ -167,6 +193,79 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
   }
 }
 
-void jump_bc::match_bc(MFInterfaceFAB<Real>& m_phibc, const MFCellFAB& m_phi){
+void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+		       const LevelData<BaseIVFAB<Real> >& a_jump,
+		       const LevelData<MFCellFAB>&        a_phi){
+  CH_TIME("jump_bc::match_bc(1)");
 
+  for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
+    this->match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()]);
+  }
+}
+
+void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
+		       const BaseIVFAB<Real>&            a_jump,
+		       const MFCellFAB&                  a_phi,
+		       const MFInterfaceFAB<Real>&       a_bco,
+		       const MFInterfaceFAB<Real>&       a_weights,
+		       const MFInterfaceFAB<VoFStencil>& a_stencils){
+  CH_TIME("jump_bc::match_bc(2)");
+
+  const int comp   = 0;
+  const int phase1 = 0;
+  const int phase2 = 1;
+  
+  const IntVectSet& ivs = a_bco.get_ivs(); // Maybe the IVS should be a member variable or something?
+
+  const BaseIVFAB<Real>& bco1        = a_bco.get_ivfab(phase1);
+  const BaseIVFAB<Real>& bco2        = a_bco.get_ivfab(phase2);
+  const BaseIVFAB<Real>& w1          = a_weights.get_ivfab(phase1);
+  const BaseIVFAB<Real>& w2          = a_weights.get_ivfab(phase2);
+  
+  const BaseIVFAB<VoFStencil>& sten1 = a_stencils.get_ivfab(phase1);
+  const BaseIVFAB<VoFStencil>& sten2 = a_stencils.get_ivfab(phase2);
+  
+  const EBCellFAB& phi1              = a_phi.getPhase(phase1);
+  const EBCellFAB& phi2              = a_phi.getPhase(phase2);
+
+  const EBGraph& graph1              = bco1.getEBGraph();
+  const EBGraph& graph2              = bco2.getEBGraph();
+
+  // Set phibc = a_jump
+  for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit(); 
+    a_phibc(vof, comp) = a_jump(vof, comp);
+  }
+
+  // First phase loop. Add first stencil stuff
+  for (VoFIterator vofit(ivs, graph1); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    const VoFStencil& sten = sten1(vof, comp);
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof = sten.vof(i);
+      const Real& iweight  = sten.weight(i);
+
+      a_phibc(vof, comp) += bco1(vof, comp)*phi1(ivof,comp)*iweight;
+    }
+  }
+
+  // Second phase loop. Add second stencil stuff
+  for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    const VoFStencil& sten = sten2(vof, comp);
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof = sten.vof(i);
+      const Real& iweight  = sten.weight(i);
+
+      a_phibc(vof, comp) += bco2(vof, comp)*phi2(ivof,comp)*iweight;
+    }
+  }
+
+  // Divide by weights
+  for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+  }
 }

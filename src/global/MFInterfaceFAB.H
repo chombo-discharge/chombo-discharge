@@ -52,16 +52,20 @@ public:
     const DisjointBoxLayout& dbl    = a_mflg.get_grids();
     const ProblemDomain& domain     = a_mflg.get_domain();
     const RefCountedPtr<mfis>& mfis = a_mflg.get_mfis();
-    const IntVectSet ivs            = mfis->interface_region(domain) & dbl.get(a_dit);
     const int num_phases            = mfis->num_phases();
-    
+
+    m_ivs = mfis->interface_region(domain) & dbl.get(a_dit);
     m_phase.resize(num_phases, NULL);
     
     for (int i = 0; i < num_phases; i++){
       const EBLevelGrid& eblg = a_mflg.get_eblg(i);
       const EBISLayout& ebisl = eblg.getEBISL();
-      m_phase[i] = new BaseIVFAB<T>(ivs, ebisl[a_dit].getEBGraph(), 1);
+      m_phase[i] = new BaseIVFAB<T>(m_ivs, ebisl[a_dit].getEBGraph(), 1);
     }
+  }
+
+  virtual const IntVectSet& get_ivs() const {
+    return m_ivs;
   }
 
   /*!
@@ -105,6 +109,8 @@ public:
 protected:
 
   Vector<BaseIVFAB<T>* > m_phase;
+
+  IntVectSet m_ivs;
 };
 
 #endif
