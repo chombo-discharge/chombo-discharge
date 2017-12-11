@@ -59,8 +59,8 @@ void poisson_multifluid_gmg::setup_gmg(){
     
     MFCellFactory cellfact(ebisl_phases, components);
 
-    m_state[lvl] = RefCountedPtr<LevelData<MFCellFAB> > (new LevelData<MFCellFAB>(grids[lvl], 1, 2*IntVect::Unit, cellfact));
-    m_source[lvl] =RefCountedPtr<LevelData<MFCellFAB> > (new LevelData<MFCellFAB>(grids[lvl], 1, 2*IntVect::Unit, cellfact));
+    m_state[lvl] = RefCountedPtr<LevelData<MFCellFAB> > (new LevelData<MFCellFAB>(grids[lvl], 1, 3*IntVect::Unit, cellfact));
+    m_source[lvl] =RefCountedPtr<LevelData<MFCellFAB> > (new LevelData<MFCellFAB>(grids[lvl], 1, 3*IntVect::Unit, cellfact));
 
     MFLevelDataOps::setVal(*m_state[lvl], 0.0);
     MFLevelDataOps::setVal(*m_source[lvl], 0.0);
@@ -90,7 +90,7 @@ void poisson_multifluid_gmg::setup_gmg(){
   m_amr->allocate(aco,       ncomps, ghosts);
   m_amr->allocate(bco,       ncomps, ghosts);
   m_amr->allocate(bco_irreg, ncomps, ghosts);
-  m_amr->allocate_interface(sigma, phase::gas, 1, 0);
+  m_amr->allocate(sigma, phase::gas, 1, 0);
 
 
   // Create two MFBaseIVFABs and copy between them
@@ -133,6 +133,7 @@ void poisson_multifluid_gmg::setup_gmg(){
     EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
 
     jump_bc* jump = new jump_bc(mflg, *bco_irreg[lvl], dx[lvl], 2, &cfivs);
+    
   }
 
   // Allocate coefficients
@@ -188,4 +189,27 @@ void poisson_multifluid_gmg::setup_gmg(){
   									       2*IntVect::Unit));
 
   m_opfact->set_jump(1.0, 1.0);
+
+
+  // Test the jump_bc stuff
+  // 1. Allocate surface potential
+  const int lvl = finest_level;
+  EBAMRIVData phi_bc;
+  m_amr->allocate(phi_bc, phase::gas, 1, 0);
+
+  LayoutData<IntVectSet> cfivs;
+  EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
+  jump_bc* jump = new jump_bc(mfeblg[lvl], *bco_irreg[lvl], dx[lvl], 2, &cfivs);
+
+  EBLevelDataOps::setVal(*sigma[lvl], 0.0);
+  MFLevelDataOps::setVal(*m_state[lvl], 1.0);
+
+  jump->match_bc(*phi_bc[lvl], *sigma[lvl], *m_state[lvl]);
+
+  for (DataIterator dit = phi_bc[lvl]->dataIterator(); dit.ok(); ++dit){
+    BaseIVFAB<Real>& phibc = (*phi_bc[lvl])[dit()];
+    for (VoFIterator vofit(phibc.getIVS(), phibc.getEBGraph()); vofit.ok(); ++vofit){
+      //      pout() << phibc(vofit(), 0) << endl;
+    }
+  }
 }

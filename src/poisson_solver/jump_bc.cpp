@@ -48,6 +48,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
 
+
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     MFInterfaceFAB<Real>& bco         = m_bco[dit()];
     MFInterfaceFAB<Real>& weights     = m_weights[dit()];
@@ -67,6 +68,9 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
 void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
   CH_TIME("jump_bc::build_stencils");
 
+#if 1 // Debug
+  pout() << "setting bco" << endl;
+#endif
   const int comp = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
@@ -78,6 +82,10 @@ void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
 	const VolIndex& vof = vofit();
 	bco(vof, comp) = bco_irreg(vof, comp);
       }
+
+#if 1 // Test
+      bco.setVal(1.0);
+#endif
     }
   }
 }
@@ -87,6 +95,10 @@ void jump_bc::build_stencils(){
 
   const int comp = 0;
 
+#if 1 // Debug
+  pout() << "building stencils" << endl;
+#endif
+  CH_assert(!m_mfis.isNull());
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
 
@@ -95,8 +107,10 @@ void jump_bc::build_stencils(){
 
       const EBLevelGrid& eblg = m_mflg.get_eblg(iphase);
       const EBISLayout ebisl  = eblg.getEBISL();
+
       const EBISBox& ebisbox  = ebisl[dit()];
       const IntVectSet& cfivs = (*m_cfivs)[dit()];
+
 
       for (VoFIterator vofit(weights.getIVS(), weights.getEBGraph()); vofit.ok(); ++vofit){
 	const VolIndex& vof     = vofit();
@@ -109,12 +123,20 @@ void jump_bc::build_stencils(){
 	if(m_order == 2){
 	  drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
-	else if(m_order == 1 || drop_order){
+	else if(m_order == 1){
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
+
+	else if(m_order == 2 && drop_order){
+	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	}
+
       }
     }
   }
+#if 1 // Debug
+  pout() << "done building stencils" << endl;
+#endif
 }
 
 
@@ -133,13 +155,13 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
   
   EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, m_dx*RealVect::Unit, a_cfivs);
   if(drop_order){
-#if 0 // Debug
+#if 1 // Debug
     pout() << "could not get stencil for vof = " << a_vof << "\t dx = " << m_dx << endl;
     MayDay::Abort("jump_bc::get_second_order_sten - could not get stencil");
 #endif
     return true;
   }
-#if 0 // Debug
+#if 1 // Debug
   else{
     pout() << "getting stencil" << endl;
   }
@@ -150,18 +172,18 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
   CH_assert(point_stencils.size() >= 2);
 
   Real& x1    = distance_along_lines[0];
-  Real& x2    = distance_along_lines[0];
+  Real& x2    = distance_along_lines[1];
   Real denom  = x2*x2*x1 - x1*x1*x2;
 
   VoFStencil& phi1Sten = point_stencils[0];
   VoFStencil& phi2Sten = point_stencils[1];
   
-  phi1Sten *=-x2*x2/denom;
-  phi2Sten *= x1*x1/denom;
+  phi1Sten *= -x2*x2/denom;
+  phi2Sten *=  x1*x1/denom;
 
-  a_weight =-x1*x1/denom + x2*x2/denom;
-  a_stencil += phi1Sten;
-  a_stencil += phi2Sten;
+  a_weight   = -x1*x1/denom + x2*x2/denom;
+  a_stencil +=  phi1Sten;
+  a_stencil +=  phi2Sten;
 }
 
 void jump_bc::get_first_order_sten(Real&             a_weight,
@@ -170,8 +192,6 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 				   const EBISBox&    a_ebisbox,
 				   const IntVectSet& a_cfivs){
   CH_TIME("jump_bc::get_first_order_sten");
-
-  MayDay::Abort("jump_bc::get_first_order_sten - not implemented");
 
   const RealVect& normal   = a_ebisbox.normal(a_vof);
   const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
@@ -197,6 +217,10 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		       const LevelData<BaseIVFAB<Real> >& a_jump,
 		       const LevelData<MFCellFAB>&        a_phi){
   CH_TIME("jump_bc::match_bc(1)");
+
+#if 1// Debug
+  pout() << "matching bc" << endl;
+#endif
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
     this->match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()]);
@@ -232,12 +256,16 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const EBGraph& graph2              = bco2.getEBGraph();
 
   // Set phibc = a_jump
+#if 1 // Debug
+  pout() << "jump shit" << endl;
+#endif
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
   }
 
   // First phase loop. Add first stencil stuff
+
   for (VoFIterator vofit(ivs, graph1); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
@@ -245,11 +273,20 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     for (int i = 0; i < sten.size(); i++){
       const VolIndex& ivof = sten.vof(i);
       const Real& iweight  = sten.weight(i);
-
-      a_phibc(vof, comp) += bco1(vof, comp)*phi1(ivof,comp)*iweight;
+#if 1 // Debug
+      pout() << "doing phase 1, bco = " << bco1(vof, comp)
+	     << "\t phi1 = " << phi1(ivof, comp)
+	     << "\t weight = " << iweight
+	     << endl;
+#endif
+      a_phibc(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
     }
   }
-
+  
+#if 1 // Debug
+  pout() << "doing phase 2" << endl;
+#endif
+  
   // Second phase loop. Add second stencil stuff
   for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
@@ -258,14 +295,26 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     for (int i = 0; i < sten.size(); i++){
       const VolIndex& ivof = sten.vof(i);
       const Real& iweight  = sten.weight(i);
-
-      a_phibc(vof, comp) += bco2(vof, comp)*phi2(ivof,comp)*iweight;
+#if 1 // debug
+      pout() << "doing phase 1, bco = " << bco2(vof, comp)
+	     << "\t phi1 = " << phi2(ivof, comp)
+	     << "\t weight = " << iweight
+	     << endl;
+#endif
+      a_phibc(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
     }
   }
-
+  
+#if 1 // Debug
+  pout() << "scale shit" << endl;
+#endif
   // Divide by weights
   for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-    a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+    //    a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+    a_phibc(vof, comp) *= 1./(bco1(vof,comp)*w1(vof,comp) + bco2(vof,comp)*w2(vof, comp));
+#if 1 // Test
+    pout() << vofit() << a_phibc(vof, comp) << endl;
+#endif
   }
 }
