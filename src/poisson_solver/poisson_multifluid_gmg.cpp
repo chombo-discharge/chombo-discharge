@@ -15,9 +15,13 @@
 #include <MFCellFAB.H>
 #include <LayoutData.H>
 #include <MFLevelDataOps.H>
+#include <DirichletConductivityDomainBC.H>
+#include <DirichletConductivityEBBC.H>
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
+
+  this->set_gmg_solver_parameters();
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -26,6 +30,33 @@ poisson_multifluid_gmg::~poisson_multifluid_gmg(){
 
 int poisson_multifluid_gmg::query_ghost() const {
   return 2; // Need this many cells
+}
+
+void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_relax_type,
+						       amrmg::which_mg a_gmg_type,      
+						       const int a_verbosity,          
+						       const int a_pre_smooth,         
+						       const int a_post_smooth,       
+						       const int a_bot_smooth,         
+						       const int a_max_iter,           
+						       const Real a_eps,               
+						       const Real a_hang,              
+						       const Real a_norm_thresh){
+  CH_TIME("poisson_multifluid_gmg::set_gmg_solver_parameters");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::set_gmg_solver_parameters" << endl;
+  }
+
+  m_gmg_relax_type  = a_relax_type;
+  m_gmg_type        = a_gmg_type;
+  m_gmg_verbosity   = a_verbosity;
+  m_gmg_pre_smooth  = a_pre_smooth;
+  m_gmg_post_smooth = a_post_smooth;
+  m_gmg_bot_smooth  = a_bot_smooth;
+  m_gmg_max_iter    = a_max_iter;
+  m_gmg_eps         = a_eps;
+  m_gmg_hang        = a_hang;
+  m_gmg_norm_thresh = a_norm_thresh;
 }
 
 void poisson_multifluid_gmg::solve(){
@@ -173,6 +204,132 @@ void poisson_multifluid_gmg::setup_gmg(){
   
   this->set_coefficients(); // Set coefficients
 
+#if 1 // Testing stuff
+  this->do_ebcond_test();
+#endif
+
+  // Create an EBConductivityOpFactory and test with Dirichlet BCs
+}
+
+void poisson_multifluid_gmg::do_ebcond_test(){
+
+  pout() << "doing ebcond test" << endl;
+  
+  const phase::which_phase phase   = phase::gas;
+  const int comps                  = 1;
+  const int finest_level           = m_amr->get_finest_level();
+  const int ghost                  = m_amr->get_num_ghost();
+  Vector<int> ref_ratios           = m_amr->get_ref_rat();
+  Vector<Real>& dx                 = m_amr->get_dx();
+  Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(phase);
+  Vector<EBLevelGrid> levelgrids;
+
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){ 
+    levelgrids.push_back(*(m_amr->get_eblg(phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
+  }
+
+  // Boundary conditions. Dirichlet everywhere for testing purposes
+  DirichletConductivityDomainBCFactory* dombc_fact = new DirichletConductivityDomainBCFactory();
+  DirichletConductivityEBBCFactory* ebbc_fact      = new DirichletConductivityEBBCFactory();
+
+  dombc_fact->setValue(0.0);
+  ebbc_fact->setValue(1.0);
+  ebbc_fact->setOrder(2);
+
+  RefCountedPtr<BaseDomainBCFactory> m_domain_bc_factory = RefCountedPtr<BaseDomainBCFactory> (dombc_fact);
+  RefCountedPtr<BaseEBBCFactory> m_eb_bc_factory     = RefCountedPtr<BaseEBBCFactory>     (ebbc_fact);
+
+  Vector<RefCountedPtr<LevelData<EBCellFAB> > > aco;
+  Vector<RefCountedPtr<LevelData<EBFluxFAB> > > bco;
+  Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > bco_irreg;
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    RefCountedPtr<LevelData<EBCellFAB> > cur_aco = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+    RefCountedPtr<LevelData<EBFluxFAB> > cur_bco = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
+    RefCountedPtr<LevelData<BaseIVFAB<Real> > > cur_bco_irreg = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
+      (new LevelData<BaseIVFAB<Real> >());
+
+    LevelData<EBCellFAB>* aliasphi = new LevelData<EBCellFAB>();
+
+    mfalias::aliasMF(*cur_aco, phase::gas, *m_aco[lvl]);
+    mfalias::aliasMF(*cur_bco, phase::gas, *m_bco[lvl]);
+    mfalias::aliasMF(*cur_bco_irreg, phase::gas, *m_bco_irreg[lvl]);
+
+    aco.push_back(cur_aco);
+    bco.push_back(cur_bco);
+    bco_irreg.push_back(cur_bco_irreg);
+  }
+
+
+  m_cond_op_fact = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelgrids,
+										       m_amr->get_old_quadcfi(phase),
+										       0.0,
+										       -1.0,
+										       aco,
+										       bco, 
+										       bco_irreg, 
+										       dx[0],
+										       ref_ratios,
+										       m_domain_bc_factory,
+										       m_eb_bc_factory,
+										       ghost*IntVect::Unit,
+										       ghost*IntVect::Unit,
+										       m_gmg_relax_type));
+
+  m_gmg_solver.define(domains[0], *m_cond_op_fact, &m_bicgstab, 1 + finest_level);
+  m_gmg_solver.setSolverParameters(m_gmg_pre_smooth, m_gmg_post_smooth, m_gmg_bot_smooth, m_gmg_type, m_gmg_max_iter,
+				   m_gmg_eps, m_gmg_hang, m_gmg_norm_thresh);
+  m_gmg_solver.m_verbosity = m_gmg_verbosity;
+
+
+  EBAMRCellData phi, src, E;
+  m_amr->allocate(E,   phase::gas, SpaceDim, 3);
+  m_amr->allocate(phi, phase::gas, 1, 3);
+  m_amr->allocate(src, phase::gas, 1, 3);
+
+  data_ops::set_value(src, 0.0);
+  data_ops::set_value(phi, 0.0);
+  data_ops::set_value(E, 0.0);
+
+  Vector<LevelData<EBCellFAB>* > phi_ptr, src_ptr, E_ptr;
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    phi_ptr.push_back(&(*phi[lvl]));
+    src_ptr.push_back(&(*src[lvl]));
+    E_ptr.push_back(&(*E[lvl]));
+  }
+
+  m_gmg_solver.solve(phi_ptr, src_ptr, finest_level, 0);
+
+  // Compute gradient
+  m_amr->average_down(phi, phase);
+  m_amr->interp_ghost(phi, phase);
+  m_amr->compute_gradient(E, phi);
+  m_amr->average_down(E, phase);
+  m_amr->interp_ghost(E, phase);
+
+    // Write data
+  Vector<std::string> names(SpaceDim);
+  Vector<Real> covered_values;
+  names[0] = "x-E";
+  names[1] = "y-E";
+  if(SpaceDim == 3){
+    names[2] = "z-E";
+  }
+  m_amr->average_down(phi, phase);
+  writeEBHDF5("E.hdf5",
+	      m_amr->get_grids(), 
+	      E_ptr,
+	      names,
+	      domains[0],
+	      dx[0],
+	      0.0,
+	      0.0,
+	      m_amr->get_ref_rat(),
+	      1 + finest_level,
+	      false,
+	      covered_values);
 }
 
 void poisson_multifluid_gmg::base_tests(){
