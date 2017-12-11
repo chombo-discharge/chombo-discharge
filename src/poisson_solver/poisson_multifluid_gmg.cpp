@@ -201,15 +201,8 @@ void poisson_multifluid_gmg::setup_gmg(){
   EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
   jump_bc* jump = new jump_bc(mfeblg[lvl], *bco_irreg[lvl], dx[lvl], 2, &cfivs);
 
-  EBLevelDataOps::setVal(*sigma[lvl], 0.0);
+  EBLevelDataOps::setVal(*sigma[lvl], 1.0);
   MFLevelDataOps::setVal(*m_state[lvl], 1.0);
 
   jump->match_bc(*phi_bc[lvl], *sigma[lvl], *m_state[lvl]);
-
-  for (DataIterator dit = phi_bc[lvl]->dataIterator(); dit.ok(); ++dit){
-    BaseIVFAB<Real>& phibc = (*phi_bc[lvl])[dit()];
-    for (VoFIterator vofit(phibc.getIVS(), phibc.getEBGraph()); vofit.ok(); ++vofit){
-      //      pout() << phibc(vofit(), 0) << endl;
-    }
-  }
 }
