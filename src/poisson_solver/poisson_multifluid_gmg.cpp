@@ -29,7 +29,7 @@ poisson_multifluid_gmg::~poisson_multifluid_gmg(){
 }
 
 int poisson_multifluid_gmg::query_ghost() const {
-  return 2; // Need this many cells
+  return 3; // Need this many cells
 }
 
 void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_relax_type,
@@ -93,9 +93,9 @@ void poisson_multifluid_gmg::set_coefficients(){
   m_amr->allocate(m_bco,       ncomps, ghosts);
   m_amr->allocate(m_bco_irreg, ncomps, ghosts);
 
-  data_ops::set_value(m_aco,       0.0);   // Always zero for poisson equation
-  data_ops::set_value(m_bco,       eps0); // Set equal to something large to detect bugs
-  data_ops::set_value(m_bco_irreg, eps0); // Set equal to something large to detect bugs
+  data_ops::set_value(m_aco,       0.0);  // Always zero for poisson equation
+  data_ops::set_value(m_bco,       eps0); // Will override this later
+  data_ops::set_value(m_bco_irreg, eps0); // Will override this later
 
   this->set_permittivities(m_compgeom->get_dielectrics());
 }
@@ -232,6 +232,65 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   }
 
   // Set up the mf_helmholtz_opfactory
+  const int finest_level                 = m_amr->get_finest_level();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  const RealVect& origin                 = m_physdom->get_prob_lo();
+
+  // This stuff is needed for the operator factory
+  Vector<MFLevelGrid>    mflg(1 + finest_level);
+  Vector<MFQuadCFInterp> mfquadcfi(1 + finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    Vector<EBLevelGrid>                    eblg_phases(phase::num_phases);
+    Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(phase::num_phases);
+
+    eblg_phases[phase::gas]   = *(m_amr->get_eblg(phase::gas)[lvl]);
+    eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
+
+    quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(phase::gas)[lvl]);
+    quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
+    
+    mflg[lvl].define(m_mfis, eblg_phases);
+    mfquadcfi[lvl].define(quadcfi_phases);
+  }
+
+  for (int lvl = 1; lvl <= finest_level; lvl++){
+    for (int iphase = 0; iphase < 2; iphase++){
+      CH_assert(!(mfquadcfi[lvl]).get_quadcfi_ptr(iphase).isNull());
+    }
+  }
+
+  const Real alpha =  0.0;
+  const Real beta  = -1.0;
+
+  RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
+
+  const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
+  const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
+  
+
+  m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
+									       mflg,
+									       mfquadcfi,
+									       refinement_ratios,
+									       grids,
+									       m_aco,
+									       m_bco,
+									       m_bco_irreg,
+									       alpha,
+									       beta,
+									       dx[0],
+									       domains[0],
+									       domfact,
+									       origin,
+									       ghost_phi,
+									       ghost_rhs,
+									       1 + finest_level));
+
+  m_opfact->set_jump(0.0, 1.0);
+
 }
 
 void poisson_multifluid_gmg::setup_solver(){
@@ -239,6 +298,11 @@ void poisson_multifluid_gmg::setup_solver(){
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::setup_solver" << endl;
   }
+
+  const int finest_level       = m_amr->get_finest_level();
+  const ProblemDomain coar_dom = m_amr->get_domains()[0];
+
+  m_gmg_solver.define(coar_dom, *m_opfact, &m_bicgstab, 1 + finest_level);
 }
 
 void poisson_multifluid_gmg::do_ebcond_test(){
@@ -317,10 +381,10 @@ void poisson_multifluid_gmg::do_ebcond_test(){
 										       ghost*IntVect::Unit,
 										       m_gmg_relax_type));
 
-  m_gmg_solver.define(domains[0], *m_cond_op_fact, &m_bicgstab, 1 + finest_level);
-  m_gmg_solver.setSolverParameters(m_gmg_pre_smooth, m_gmg_post_smooth, m_gmg_bot_smooth, m_gmg_type, m_gmg_max_iter,
+  m_cond_solver.define(domains[0], *m_cond_op_fact, &m_cond_bicgstab, 1 + finest_level);
+  m_cond_solver.setSolverParameters(m_gmg_pre_smooth, m_gmg_post_smooth, m_gmg_bot_smooth, m_gmg_type, m_gmg_max_iter,
 				   m_gmg_eps, m_gmg_hang, m_gmg_norm_thresh);
-  m_gmg_solver.m_verbosity = m_gmg_verbosity;
+  m_cond_solver.m_verbosity = m_gmg_verbosity;
 
 
   EBAMRCellData phi, src, E;
@@ -339,7 +403,7 @@ void poisson_multifluid_gmg::do_ebcond_test(){
     E_ptr.push_back(&(*E[lvl]));
   }
 
-  m_gmg_solver.solve(phi_ptr, src_ptr, finest_level, 0);
+  m_cond_solver.solve(phi_ptr, src_ptr, finest_level, 0);
 
   // Compute gradient
   m_amr->average_down(phi, phase);
@@ -509,7 +573,6 @@ void poisson_multifluid_gmg::base_tests(){
 									       dx[0],
 									       domains[0],
   									       domfact,
-									       ebcfact,
   									       origin,
   									       3*IntVect::Unit,
   									       3*IntVect::Unit));

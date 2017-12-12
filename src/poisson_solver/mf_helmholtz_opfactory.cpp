@@ -19,7 +19,6 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
 					       const Real&                               a_coarsest_dx,
 					       const ProblemDomain&                      a_coarsest_domain,
 					       const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
-					       const RefCountedPtr<BaseEBBCFactory>&     a_ebbc,
 					       const RealVect&                           a_origin,
 					       const IntVect&                            a_ghost_phi,
 					       const IntVect&                            a_ghost_rhs,
@@ -36,7 +35,6 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
   m_bco_irreg  = a_bco_irreg;
   m_alpha      = a_alpha;
   m_beta       = a_beta;
-  m_ebbc       = a_ebbc;
   m_dombc      = a_dombc;
   m_ref_rat    = a_ref_rat;
   m_grids      = a_grids;
@@ -51,8 +49,12 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
     m_dx[lvl] = m_dx[lvl-1]/m_ref_rat[lvl-1];
     m_domains[lvl] = m_domains[lvl-1];
     m_domains[lvl].refine(m_ref_rat[lvl-1]);
-  } 
-    
+  }
+
+  this->set_relax_type(2);        // Default relaxation type
+  this->set_bottom_drop(8);       // Default bottom drop
+  this->set_max_box_size(32);     // Default max box size
+  
   this->define_jump_stuff();      // Define jump cell stuff
   this->define_multigrid_stuff(); // Define things for lower levels of multigrid. Must happen after define_jump_stuff
   this->set_jump(0.0, 1.0);       // Default, no surface charge. 
@@ -138,6 +140,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 						 layout_changed, //
 						 m_test_ref);    //
 
+
 	if(at_amr_lvl && !has_coarser){
 	  m_has_mg_objects[lvl] = false;
 	}
@@ -157,6 +160,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 	  const int ebghost = 4; // Ghost cells for MG, using 4 since that allows refinement of 4
 	  const int   ghost = 1; // Necessary ghost cells for second order
 
+
 	  //	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, mflg_fine.get_ebis()));
 	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, m_mfis));
 
@@ -174,6 +178,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 	    ebisl_coar.push_back(ebisl);
 	    comps.push_back(ncomps);
 	  }
+
 
 	  // Averaging operator for m_jump_mg
 	  const int ncomp      = 1;
@@ -441,97 +446,12 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 								  int                  a_depth,
 								  bool                 a_homo_only){
   CH_TIME("mf_helmholtz_opfactory::MGnewOp");
-    
-  // Find the AMR level starting point
-  int ref_lvl;
-  bool found = false;
-
-#if 0 // Remove for testing purpsoes
-  for (int lvl = 0; lvl < m_num_levels && !found; lvl++){
-    if(a_domain_fine == m_domains[lvl]){
-      found = true;
-      ref_lvl = lvl;
-    }
-  }
+#if 1 // Test
+  pout() << "MGnewOp" << endl;
 #endif
-  
-  if(!found){
-    MayDay::Error("mf_helmholtzopfactory::MGnewOp - no corresponding AMRLevel to starting point of MGnewOp");
-  }
-
-  bool           has_coarser_mg;
-  Real           dx_mg_level;
-  MFLevelGrid    mflg_level_mg;
-  MFLevelGrid    mflg_coar_mg;
-  MFQuadCFInterp quadcfi;        // Only defined on amr levels
-
-  RefCountedPtr<LevelData<MFCellFAB> >   aco;
-  RefCountedPtr<LevelData<MFFluxFAB> >   bco;
-  RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
-    
-  if(a_depth == 0){ // This is an AMR level
-    mflg_level_mg = m_mflg[ref_lvl];       // Levelgrids    }
-    aco           = m_aco[ref_lvl];        // coefficients  }
-    bco           = m_bco[ref_lvl];        // coefficient   } Non-coarsened stuff
-    bco_irreg     = m_bco_irreg[ref_lvl];  // coefficient   }
-    quadcfi       = m_mfquadcfi[ref_lvl];  // QuadCFI       }
-
-    has_coarser_mg = m_has_mg_objects[ref_lvl];
-    if(has_coarser_mg){ 
-      mflg_coar_mg = m_mflg_mg[ref_lvl][1]; // Coarsened EBLevelGrids
-    }
-  }
-  else{ // Not an AMR level
-    int icoar = 1;
-    for (int idep = 0; idep < a_depth; idep++){
-      icoar *= 2;
-    }
-
-    const ProblemDomain domain_fine = mflg_level_mg.get_eblg(0).getDomain();   // 
-    ProblemDomain domain_box_mg_lvl = coarsen(domain_fine, icoar);             // Coarsened a_depth times by factor 2
-
-    bool found_mg_level = false;
-    int num_mg_levels   = m_mflg_mg[ref_lvl].size();
-
-    for (int img = 0; img < num_mg_levels; img++){
-      if(m_mflg_mg[ref_lvl][img].get_eblg(0).getDomain() == domain_box_mg_lvl){ // Check which mg level we're after
-
-	aco            = m_aco_mg[ref_lvl][img];
-	bco            = m_bco_mg[ref_lvl][img];
-	bco_irreg      = m_bco_irreg_mg[ref_lvl][img];
-	found_mg_level = true;
-
-	MayDay::Warning("mf_helmholtz_opfactory::MGnewOp - boundary conditions have not been placed yet");
-
-	has_coarser_mg = img+1 < m_mflg_mg[ref_lvl].size(); // Are there more mg levels below this one?
-	if(has_coarser_mg){
-	  mflg_coar_mg = m_mflg_mg[ref_lvl][img+1]; // Next coarser MFLevelGrid for MG
-	}
-	break;
-      }
-    }
-      
-    bool coarsenable = found_mg_level;
-    dx_mg_level = m_dx[ref_lvl];  // Resolution on AMR level
-    dx_mg_level *= Real(icoar);   // Resolution on MG level
-
-    if(!coarsenable) {
-      return NULL;
-    }
-  }
-
-  // Create boundary conditions - should the jump conditions be a part of the BaseEBBC or not?
-    
-  return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (NULL);
-}
-
-AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_domain_fine){
-  CH_TIME("mf_helmholtz_opfactory::AMRnewOp");
-
   int ref    = -1;
   bool found = false;
 
-#if 0 // Remove just to test
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     if(a_domain_fine == m_domains[lvl]){
       found = true;
@@ -539,17 +459,280 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
       break;
     }
   }
-#endif
 
   if(!found){
-    MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - no corresponding starting level to a_domain_fine");
+    MayDay::Abort("mf_helmholtz_opfactory::MGnewOp - no corresponding starting level to a_domain_fine");
   }
+  
+
+  // All this shit must be set.
+  RefCountedPtr<LevelData<MFCellFAB> >   aco;
+  RefCountedPtr<LevelData<MFFluxFAB> >   bco;
+  RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
+
+  MFQuadCFInterp quadcfi;
+  
+  MFLevelGrid mflg_fine;
+  MFLevelGrid mflg;
+  MFLevelGrid mflg_coar;
+  MFLevelGrid mflg_coar_mg;
+  
+  DisjointBoxLayout dbl;
+  DisjointBoxLayout dbl_fine;
+  DisjointBoxLayout dbl_coar;
+  DisjointBoxLayout dbl_coar_mg;
+
+  ProblemDomain domain;
+
+  bool layout_changed;
+  bool has_mg   = false;
+  bool has_fine = false;
+  bool has_coar = false;
+
+  int bog_ref = 2;
+  int ref_to_fine = bog_ref;
+  int ref_to_coar = bog_ref;
+  int relax_type = m_relax_type;
+  int ebbc_order;
+
+  IntVect ghost_phi = m_ghost_phi;
+  IntVect ghost_rhs = m_ghost_rhs;
+
+  Real dx;
+  Real dx_coar;
+  Real alpha = m_alpha;
+  Real beta = m_beta;
+
+  if(a_depth == 0){ // this is an AMR level
+    aco       = m_aco[ref];
+    bco       = m_bco[ref];
+    bco_irreg = m_bco_irreg[ref];
+
+    quadcfi   = m_mfquadcfi[ref];
+
+    has_mg = m_has_mg_objects[ref];
+
+    if(has_mg){
+      mflg_coar_mg = m_mflg_coar_mg[ref][1];
+    }
+
+    dbl = m_grids[ref];
+    dx  = m_dx[ref];
+  }
+  else{ // MG levels
+    bool found_mg_level = false;
+    
+    const int icoar  = pow(2, a_depth); 
+    const int num_mg = m_mflg_mg[ref].size();
+
+    const ProblemDomain domain_fine     = m_domains[ref];
+    const ProblemDomain domain_mg_level = coarsen(domain_fine, icoar);
+
+
+    for (int img = 0; img < num_mg; img++){
+      if(m_domains_mg[ref][img] == domain_mg_level){
+	mflg = m_mflg_mg[ref][img];
+
+	aco     = m_aco_mg[ref][img];
+	bco     = m_bco_mg[ref][img];
+	bco_irr = m_bcoirr_mg[ref][img];
+      }
+    }
+
+    
+  }
+      
+      
+
+
+  has_fine = ref < m_num_levels - 1;
+  has_coar = ref > 0;
+
+
+  if(has_coar){
+    const int coar_lvl = ref - 1;
+    mflg_coar   = m_mflg[coar_lvl];
+    ref_to_coar = m_ref_rat[coar_lvl];
+    dx_coar     = m_dx[coar_lvl];
+    dbl_coar    = m_grids[coar_lvl];
+  }
+
+  if(has_fine){
+    mflg_fine   = m_mflg[ref + 1];
+    ref_to_fine = m_ref_rat[ref];
+    dbl_fine    = m_grids[ref+1];
+  }
+
+  if(has_mg){
+    mflg_coar_mg = m_mflg_mg[ref][1];  // Coarser state 
+    dbl_coar_mg  = m_grids_mg[ref][1]; // Coarser MG state
+  }
+  
+
+  mf_helmholtz_op* oper = new mf_helmholtz_op();
+  
+
+  oper->define(m_mfis,
+	       m_dombc,
+	       aco,
+	       bco,
+	       bco_irreg,
+	       quadcfi,
+	       mflg_fine,
+	       mflg,
+	       mflg_coar,
+	       mflg_coar_mg,
+	       dbl,
+	       dbl_fine,
+	       dbl_coar,
+	       dbl_coar_mg,
+	       domain,
+	       layout_changed,
+	       has_mg,
+	       has_fine,
+	       has_coar,
+	       ref_to_fine,
+	       ref_to_coar,
+	       m_relax_type,
+	       ebbc_order,
+	       ghost_phi,
+	       ghost_rhs,
+	       dx,
+	       dx_coar,
+	       alpha,
+	       beta);
      
   
   
 
 #if 1 // Debug-stop
-  MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - not implemented");
+  MayDay::Abort("mf_helmholtz_opfactory::mgnewop - implementation is not finished!");
+#endif
+  return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
+
+    
+
+}
+
+AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_domain_fine){
+  CH_TIME("mf_helmholtz_opfactory::AMRnewOp");
+  pout() << "mf_helmoltz_opfactory::AMRnewOp" << endl;
+  int ref    = -1;
+  bool found = false;
+
+  for (int lvl = 0; lvl < m_num_levels; lvl++){
+    if(a_domain_fine == m_domains[lvl]){
+      found = true;
+      ref   = lvl;
+      break;
+    }
+  }
+
+  if(!found){
+    MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - no corresponding starting level to a_domain_fine");
+  }
+  
+
+  // All this shit must be set.
+  RefCountedPtr<LevelData<MFCellFAB> >   aco       = m_aco[ref];
+  RefCountedPtr<LevelData<MFFluxFAB> >   bco       = m_bco[ref];
+  RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg = m_bco_irreg[ref];
+
+  MFQuadCFInterp quadcfi = m_mfquadcfi[ref];
+  
+  MFLevelGrid mflg_fine;
+  MFLevelGrid mflg = m_mflg[ref];
+  MFLevelGrid mflg_coar;
+  MFLevelGrid mflg_coar_mg;
+  
+  DisjointBoxLayout dbl = m_grids[ref];
+  DisjointBoxLayout dbl_fine;
+  DisjointBoxLayout dbl_coar;
+  DisjointBoxLayout dbl_coar_mg;
+
+  ProblemDomain domain = m_domains[ref];
+
+  bool layout_changed = m_layout_changed[ref];
+  bool has_mg         = m_has_mg_objects[ref];
+  bool has_fine       = ref < m_num_levels -1;
+  bool has_coar       = ref > 0;
+
+  int ref_to_fine;
+  int ref_to_coar;
+  int relax_type = m_relax_type;
+  int ebbc_order;
+
+  IntVect ghost_phi = m_ghost_phi;
+  IntVect ghost_rhs = m_ghost_rhs;
+
+  Real dx = m_dx[ref];
+  Real dx_coar;
+  Real alpha = m_alpha;
+  Real beta  = m_beta;
+
+
+  has_fine = ref < m_num_levels - 1;
+  has_coar = ref > 0;
+
+
+  if(has_coar){
+    const int coar_lvl = ref - 1;
+    mflg_coar   = m_mflg[coar_lvl];
+    ref_to_coar = m_ref_rat[coar_lvl];
+    dx_coar     = m_dx[coar_lvl];
+    dbl_coar    = m_grids[coar_lvl];
+  }
+
+  if(has_fine){
+    mflg_fine   = m_mflg[ref + 1];
+    ref_to_fine = m_ref_rat[ref];
+    dbl_fine    = m_grids[ref+1];
+  }
+
+  if(has_mg){
+    mflg_coar_mg = m_mflg_mg[ref][1];  // Coarser state 
+    dbl_coar_mg  = m_grids_mg[ref][1]; // Coarser MG state
+  }
+  
+
+  mf_helmholtz_op* oper = new mf_helmholtz_op();
+  
+
+  oper->define(m_mfis,
+	       m_dombc,
+	       aco,
+	       bco,
+	       bco_irreg,
+	       quadcfi,
+	       mflg_fine,
+	       mflg,
+	       mflg_coar,
+	       mflg_coar_mg,
+	       dbl,
+	       dbl_fine,
+	       dbl_coar,
+	       dbl_coar_mg,
+	       domain,
+	       layout_changed,
+	       has_mg,
+	       has_fine,
+	       has_coar,
+	       ref_to_fine,
+	       ref_to_coar,
+	       m_relax_type,
+	       ebbc_order,
+	       ghost_phi,
+	       ghost_rhs,
+	       dx,
+	       dx_coar,
+	       alpha,
+	       beta);
+     
+  
+  
+
+#if 1 // Debug-stop
+  MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - implementation is not finished!");
 #endif
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
 }
@@ -575,7 +758,7 @@ mf_helmholtz_op* mf_helmholtz_opfactory::createOperator(const DisjointBoxLayout&
   MFLevelGrid mflg;
   MFLevelGrid mflg_coar;
   MFLevelGrid mflg_coar_mg;
-
+  
   DisjointBoxLayout dbl;
   DisjointBoxLayout dbl_fine;
   DisjointBoxLayout dbl_coar;

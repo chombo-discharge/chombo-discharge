@@ -58,7 +58,6 @@ public:
 			 const Real&                               a_coarsest_dx,
 			 const ProblemDomain&                      a_coarsest_domain,
 			 const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
-			 const RefCountedPtr<BaseEBBCFactory>&     a_ebbc,
 			 const RealVect&                           a_origin,
 			 const IntVect&                            a_ghost_phi,
 			 const IntVect&                            a_ghost_rhs,
@@ -310,11 +309,6 @@ protected:
     @brief Domain boundary conditions
   */
   RefCountedPtr<BaseDomainBCFactory> m_dombc;
-
-  /*!
-    @brief EB boundary conditions
-  */
-  RefCountedPtr<BaseEBBCFactory> m_ebbc;
 
   /*!
     @brief Number of AMR levels

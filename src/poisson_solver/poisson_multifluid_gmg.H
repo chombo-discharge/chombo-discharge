@@ -144,15 +144,26 @@ protected:
   */
   MFAMRIVData m_bco_irreg;
 
+
   /*!
     @brief Geometric multigrid solver
   */
-  AMRMultiGrid<LevelData<EBCellFAB> > m_gmg_solver;
+  AMRMultiGrid<LevelData<MFCellFAB> > m_gmg_solver;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
   */
-  BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
+  BiCGStabSolver<LevelData<MFCellFAB> > m_bicgstab;
+
+    /*!
+      @brief Geometric multigrid solver
+  */
+  AMRMultiGrid<LevelData<EBCellFAB> > m_cond_solver;
+
+    /*!
+    @brief Conjugate gradient solver bottom MG level
+  */
+  BiCGStabSolver<LevelData<EBCellFAB> > m_cond_bicgstab;
 
   /*!
     @brief Set up the geometric multigrid solver 

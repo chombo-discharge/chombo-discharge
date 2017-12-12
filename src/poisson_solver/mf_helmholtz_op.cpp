@@ -8,6 +8,8 @@
 #include "mf_helmholtz_op.H"
 #include "mfalias.H"
 
+#include <DirichletConductivityDomainBC.H>
+
 mf_helmholtz_op::mf_helmholtz_op(){
 
 }
@@ -33,7 +35,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 			     const DisjointBoxLayout&                      a_dbl_coar_mg,
 			     const ProblemDomain&                          a_domain,
 			     const bool&                                   a_layout_changed,
-			     const bool&                                   a_has_mg_objects,
+			     const bool&                                   a_has_mg,
 			     const bool&                                   a_has_fine,
 			     const bool&                                   a_has_coar,
 			     const int&                                    a_ref_to_fine,
@@ -50,7 +52,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   const int num_phases = a_mfis->num_phases();
 
 #if 1
-  MayDay::Warning("Remember to check how many aliasing holders we need");
+  MayDay::Warning("mf_helmholtz_op::mf_helmholtz_op - remember to check how many aliasing holders we need");
 #endif
   const int num_alias  = 4;
   
@@ -68,19 +70,33 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     m_flux_alias[i] = new LevelData<EBFluxFAB>();
     m_eb_alias[i]   = new LevelData<BaseIVFAB<Real> >();
   }
-  
+
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
   m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
 
   for (int iphase = 0; iphase < num_phases; iphase++){
 
-    const EBLevelGrid& eblg_fine = a_mflg_fine.get_eblg(iphase);
     const EBLevelGrid& eblg      = a_mflg.get_eblg(iphase);
-    const EBLevelGrid& eblg_coar = a_mflg_coar.get_eblg(iphase);
-    const EBLevelGrid& eblg_mg   = a_mflg_coar_mg.get_eblg(iphase);
     const EBISLayout&  ebisl     = eblg.getEBISL();
 
+    EBLevelGrid eblg_fine;
+    EBLevelGrid eblg_coar;
+    EBLevelGrid eblg_mg;
+
+    if(a_has_fine){
+      eblg_fine = a_mflg_fine.get_eblg(iphase);
+    }
+    if(a_has_coar){
+      eblg_coar = a_mflg_coar.get_eblg(iphase);
+    }
+    if(a_has_mg){
+      eblg_mg   = a_mflg_coar_mg.get_eblg(iphase);
+    }
+
     const RefCountedPtr<EBQuadCFInterp>& quadcfi = a_quadcfi.get_quadcfi_ptr(iphase);
+    if(a_has_coar){
+      CH_assert(!quadcfi.isNull());
+    }
 
     m_acoeffs[iphase]     = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
     m_bcoeffs[iphase]     = RefCountedPtr<LevelData<EBFluxFAB> >        (new LevelData<EBFluxFAB>());
@@ -90,7 +106,17 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 												       a_dx*RealVect::Unit,
 												       &a_ghost_phi,
 												       &a_ghost_rhs));
-    
+
+#if 1
+    m_ebbc[iphase]->setValue(0.0);
+    m_ebbc[iphase]->setOrder(2);
+    MayDay::Warning("mf_helmholtz_op::mf_helmholtz_op - remember to fix domain boundary conditions");
+    RefCountedPtr<DirichletConductivityDomainBC> dombc = RefCountedPtr<DirichletConductivityDomainBC>
+      (new DirichletConductivityDomainBC());
+    dombc->setValue(0.0);
+#endif
+
+
     mfalias::aliasMF(*m_acoeffs[iphase],     iphase, *a_aco);
     mfalias::aliasMF(*m_bcoeffs[iphase],     iphase, *a_bco);
     mfalias::aliasMF(*m_bcoeffs_irr[iphase], iphase, *a_bco_irreg);
@@ -99,13 +125,13 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     const RefCountedPtr<LevelData<EBFluxFAB> >&        bco     = m_bcoeffs[iphase];
     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& bco_irr = m_bcoeffs_irr[iphase];
     const RefCountedPtr<DirichletConductivityEBBC>     ebbc    = m_ebbc[iphase];
-    
+
     m_ebops[iphase] = RefCountedPtr<EBConductivityOp> (new EBConductivityOp(eblg_fine,
 									    eblg,
 									    eblg_coar,
 									    eblg_mg,
 									    quadcfi,
-									    a_dombc,
+									    dombc,
 									    ebbc,
 									    a_dx,
 									    a_dx_coar,
@@ -113,7 +139,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 									    a_ref_to_coar,
 									    a_has_fine,
 									    a_has_coar,
-									    a_has_mg_objects,
+									    a_has_mg,
 									    a_layout_changed,
 									    a_alpha,
 									    a_beta,
