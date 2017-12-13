@@ -46,14 +46,16 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
   m_domains[0] = a_coarsest_domain;
     
   for (int lvl = 1; lvl < m_num_levels; lvl++){
-    m_dx[lvl] = m_dx[lvl-1]/m_ref_rat[lvl-1];
+    m_dx[lvl]      = m_dx[lvl-1]/m_ref_rat[lvl-1];
+
+
     m_domains[lvl] = m_domains[lvl-1];
     m_domains[lvl].refine(m_ref_rat[lvl-1]);
   }
 
   this->set_ebbc_order(2);        // Default is second order BCs
   this->set_relax_type(2);        // Default relaxation type
-  this->set_bottom_drop(8);       // Default bottom drop
+  this->set_bottom_drop(16);      // Default bottom drop
   this->set_max_box_size(32);     // Default max box size
   
   this->define_jump_stuff();      // Define jump cell stuff
@@ -159,10 +161,8 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 
 	  const int  ncomps = 1; // Number of components we solve for. Always 1. 
 	  const int ebghost = 4; // Ghost cells for MG, using 4 since that allows refinement of 4
-	  const int   ghost = 1; // Necessary ghost cells for second order
+	  const int   ghost = 1; // Ghost cells
 
-
-	  //	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, mflg_fine.get_ebis()));
 	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, m_mfis));
 
 	  const int img = m_mflg_mg[lvl].size() - 1; // Last one added, i.e. the coarsest that we have so far
@@ -191,7 +191,7 @@ void mf_helmholtz_opfactory::define_multigrid_stuff(){
 								   eblg_coar.getDomain(), mg_refi, ncomp,
 								   eblg_coar.getEBIS()));
 
-	  // Interface cells on MG level img
+	  // Interface cells on MG level img. 
 	  LayoutData<IntVectSet> isect_cells (eblg_coar.getDBL());
 	  for (DataIterator dit = isect_cells.dataIterator(); dit.ok(); ++dit){
 	    isect_cells[dit()] = m_mfis->interface_region(eblg_coar.getDomain()) & eblg_coar.getDBL().get(dit());
@@ -496,7 +496,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
   bool has_fine = false;
   bool has_coar = false;
 
-  int bog_ref = 2;
+  int bog_ref     = 2;
   int ref_to_fine = bog_ref;
   int ref_to_coar = bog_ref;
   int relax_type  = m_relax_type;
@@ -514,6 +514,10 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
   if(ref > 0){
     dx_coar = m_dx[ref-1];
   }
+
+#if 1
+  pout() << "trying to define stuff" << endl;
+#endif
 
   if(a_depth == 0){ // this is an AMR level
     aco       = m_aco[ref];
@@ -539,12 +543,15 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
     const int icoar  = pow(2, a_depth); 
     const int num_mg = m_mflg_mg[ref].size();
 
+    pout() << "finding domains" << endl;
     const ProblemDomain domain_fine     = m_domains[ref];
     const ProblemDomain domain_mg_level = coarsen(domain_fine, icoar);
 
 
     for (int img = 0; img < num_mg; img++){
       if(m_domains_mg[ref][img] == domain_mg_level){
+
+	pout() << "found mg level" << endl;
 	found_mg_level = true;
 	
 	mflg = m_mflg_mg[ref][img];
@@ -563,10 +570,17 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 	break;
       }
     }
+
+    const bool coarsenable = found_mg_level;
+    if(!coarsenable){
+      pout() << "mgnewop::no MG" << endl;
+      return NULL;
+    }
   }
 
   mf_helmholtz_op* oper = new mf_helmholtz_op();
-  
+
+  pout() << "mgnewop::defining oper, ref = " << ref << endl;
 
   oper->define(m_mfis,           // Set from factory
 	       m_dombc,          // Set from factory
@@ -593,19 +607,23 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 	       dx_coar,          // Set to m_dx[ref-1] (for AMR). Undefined for MG
 	       alpha,            // Set to m_alpha
 	       beta);            // Set to m_beta
+
+  pout() << "done defining oper" << endl;
      
   
   
 
 #if 0 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::mgnewop - implementation is not finished!");
+#else
+  pout() << "mf_helmholtz_opfactory::MGnewOp - returning new op" << endl;
 #endif
-  return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (NULL);
+  return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (oper);
 }
 
 AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_domain_fine){
   CH_TIME("mf_helmholtz_opfactory::AMRnewOp");
-  pout() << "mf_helmoltz_opfactory::AMRnewOp" << endl;
+  pout() << "mf_helmholtz_opfactory::AMRnewOp" << endl;
   int ref    = -1;
   bool found = false;
 
@@ -616,6 +634,8 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
       break;
     }
   }
+
+  pout() << "amrnewop:: ref = " << ref << " domain = " << m_domains[ref] << endl;
 
   if(!found){
     MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - no corresponding starting level to a_domain_fine");
@@ -633,11 +653,6 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
   MFLevelGrid mflg = m_mflg[ref];
   MFLevelGrid mflg_coar;
   MFLevelGrid mflg_coar_mg;
-  
-  DisjointBoxLayout dbl = m_grids[ref];
-  DisjointBoxLayout dbl_fine;
-  DisjointBoxLayout dbl_coar;
-  DisjointBoxLayout dbl_coar_mg;
 
   ProblemDomain domain = m_domains[ref];
 
@@ -669,18 +684,16 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
     mflg_coar   = m_mflg[coar_lvl];
     ref_to_coar = m_ref_rat[coar_lvl];
     dx_coar     = m_dx[coar_lvl];
-    dbl_coar    = m_grids[coar_lvl];
   }
 
   if(has_fine){
     mflg_fine   = m_mflg[ref + 1];
     ref_to_fine = m_ref_rat[ref];
-    dbl_fine    = m_grids[ref+1];
   }
 
   if(has_mg){
-    mflg_coar_mg = m_mflg_mg[ref][1];  // Coarser state 
-    dbl_coar_mg  = m_grids_mg[ref][1]; // Coarser MG state
+    const int next_coarser = 1;
+    mflg_coar_mg = m_mflg_mg[ref][next_coarser];  // Coarser state 
   }
   
 
@@ -718,6 +731,9 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 
 #if 0 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - implementation is not finished!");
+#else
+  pout() << "mf_helmholtz_opfactory::AMRnewOp - returning new op" << endl;
 #endif
-  return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
+  return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (oper);
+
 }

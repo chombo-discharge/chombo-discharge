@@ -23,11 +23,12 @@
 #include <BaseEBBC.H>
 #include <EBConductivityOp.H>
 #include <DirichletConductivityEBBC.H>
+#include <AMRTGA.H>
 
 /*!
   @brief Operator class for solving the variable-coefficient Helmholtz equation with multigrid in two phases
 */
-class mf_helmholtz_op {//: public TGAHelmOp<LevelData<MFCellFAB> >{
+class mf_helmholtz_op : public TGAHelmOp<LevelData<MFCellFAB> >{
 public:
 
   /*!
@@ -132,14 +133,6 @@ public:
   */
   virtual void applyOp(LevelData<MFCellFAB>&        a_lhs,
 		       const LevelData<MFCellFAB>&  a_phi,
-		       DataIterator&                a_dit,
-		       bool                         a_homogeneous = false);
-
-  /*!
-    @brief Apply operator
-  */
-  virtual void applyOp(LevelData<MFCellFAB>&        a_lhs,
-		       const LevelData<MFCellFAB>&  a_phi,
 		       bool                         a_homogeneous = false);
   
   /*!
@@ -206,6 +199,118 @@ public:
                      int                         iterations);
 
   /*!
+    @brief Create a coarsened data holder
+  */
+  virtual void createCoarser(LevelData<MFCellFAB>&       a_coarse,
+                             const LevelData<MFCellFAB>& a_fine,
+                             bool ghosted);
+
+  /*!
+     @brief Calculate restricted residual
+     @details a_resCoarse[2h] = I[h->2h] (rhsFine[h] - L[h](phiFine[h])
+  */
+  virtual void restrictResidual(LevelData<MFCellFAB>&       a_resCoarse,
+                                LevelData<MFCellFAB>&       a_phiFine,
+                                const LevelData<MFCellFAB>& a_rhsFine);
+
+  /*!
+     @brief Correct the fine solution based on coarse correction
+     @details a_phiThisLevel += I[2h->h](a_correctCoarse)
+  */
+  virtual void prolongIncrement(LevelData<MFCellFAB>&       a_phiThisLevel,
+                                const LevelData<MFCellFAB>& a_correctCoarse);
+
+  /*!
+   @brief Returns 1 when there are no coarser AMRLevelOp objects 
+  */
+  virtual int refToCoarser();
+
+  /*!
+    @brief Compute residual
+    @details a_residual = a_rhs - L(a_phi, a_phiFine, a_phiCoarse) 
+  */
+  virtual void AMRResidual(LevelData<MFCellFAB>&       a_residual,
+                           const LevelData<MFCellFAB>& a_phiFine,
+                           const LevelData<MFCellFAB>& a_phi,
+                           const LevelData<MFCellFAB>& a_phiCoarse,
+                           const LevelData<MFCellFAB>& a_rhs,
+                           bool                        a_homogeneousBC,
+                           AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp);
+
+
+  /*!
+    @brief Compute residual assuming no more coarser AMR levels 
+  */
+  virtual void AMRResidualNC(LevelData<MFCellFAB>&       a_residual,
+                             const LevelData<MFCellFAB>& a_phiFine,
+                             const LevelData<MFCellFAB>& a_phi,
+                             const LevelData<MFCellFAB>& a_rhs,
+                             bool                        a_homogeneousBC,
+                             AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp);
+
+  /*!
+    @brief Compute residual assuming no finer AMR levels
+    @details a_residual = a_rhs - L(a_phi, a_phiCoarse)  
+  */
+  virtual void AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
+                             const LevelData<MFCellFAB>& a_phi,
+                             const LevelData<MFCellFAB>& a_phiCoarse,
+                             const LevelData<MFCellFAB>& a_rhs,
+			     bool                        a_homogeneousBC);
+
+  /*!
+    @brief AMR operator assuming no more coarser AMR levels 
+  */
+  virtual void AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
+                             const LevelData<MFCellFAB>& a_phiFine,
+                             const LevelData<MFCellFAB>& a_phi,
+                             bool                        a_homogeneousBC,
+                             AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp);
+
+    /*! 
+    @brief AMR operator assuming no finer level 
+  */
+  virtual void AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
+                             const LevelData<MFCellFAB>& a_phi,
+                             const LevelData<MFCellFAB>& a_phiCoarse,
+                             bool a_homogeneousBC);
+
+
+  /*!
+    @brief Apply AMR operator, including coarse-fine matching conditions
+  */
+  virtual void AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
+                           const LevelData<MFCellFAB>& a_phiFine,
+                           const LevelData<MFCellFAB>& a_phi,
+                           const LevelData<MFCellFAB>& a_phiCoarse,
+                           bool                        a_homogeneousBC,
+                           AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp);
+  
+
+
+
+  /*!
+    @brief Restrict residual 
+    @details a_resCoarse = I[h-2h]( a_residual - L(a_correction, a_coarseCorrection))
+    it is assumed that a_resCoarse has already been filled in with the coarse
+    version of AMRResidualNF and that this operation is free to overwrite
+    in the overlap regions.
+  */
+  virtual void AMRRestrict(LevelData<MFCellFAB>&       a_resCoarse,
+                           const LevelData<MFCellFAB>& a_residual,
+                           const LevelData<MFCellFAB>& a_correction,
+                           const LevelData<MFCellFAB>& a_coarseCorrection,
+                           bool                        a_skip_res);
+
+  /*!
+    @brief Prologn residual 
+    @details a_correction += I[h->h](a_coarseCorrection)
+  */
+  virtual void AMRProlong(LevelData<MFCellFAB>&       a_correction,
+                          const LevelData<MFCellFAB>& a_coarseCorrection);
+
+
+  /*!
     @brief Update the AMR residual
   */
   virtual void AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
@@ -220,6 +325,13 @@ public:
 		       const LevelData<MFCellFAB>& a_fine_resid,
 		       const int&                  a_ref_rat,
 		       const int&                  a_ord);
+
+  /*!
+    @brief Compute kappa norm
+  */
+  virtual Real kappaNorm(Real&                       a_volume,
+			 const LevelData<MFCellFAB>& a_data,
+			 int                         a_p) const;
 protected:
 
   /*!
@@ -245,17 +357,7 @@ protected:
   /*!
     @brief Aliasing stuff
   */
-  Vector<LevelData<EBCellFAB>* > m_cell_alias;
-
-  /*!
-    @brief Aliasing stuff
-  */
-  Vector<LevelData<EBFluxFAB>* > m_flux_alias;
-
-  /*!
-    @brief Aliasing stuff
-  */
-  Vector<LevelData<BaseIVFAB<Real> >* > m_eb_alias;
+  Vector<LevelData<EBCellFAB>* > m_alias;
 
   /*!
     @brief Surface potential
@@ -297,6 +399,11 @@ protected:
     @brief Problem domain
   */
   ProblemDomain m_domain;
+
+  /*!
+    @brief Coarser MFLevelGrid for MG
+  */
+  MFLevelGrid m_mflg_coar_mg;
   
   /*!
     @brief Number of phases.
@@ -304,9 +411,19 @@ protected:
   int m_phases;
 
   /*!
+    @brief Number of components
+  */
+  int m_ncomp;
+
+  /*!
     @brief Relaxation type
   */
   int m_relax;
+
+  /*!
+    @brief Refinement factor to coarser level
+  */
+  int m_ref_to_coarser;
   
   /*!
     @brief alpha coefficient
