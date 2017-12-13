@@ -15,6 +15,7 @@
 #include "electrode.H"
 #include "MFQuadCFInterp.H"
 
+#include <LevelDataOps.H>
 #include <RefCountedPtr.H>
 #include <MFCellFAB.H>
 #include <MFFluxFAB.H>
@@ -26,7 +27,7 @@
 /*!
   @brief Operator class for solving the variable-coefficient Helmholtz equation with multigrid in two phases
 */
-class mf_helmholtz_op {
+class mf_helmholtz_op {//: public TGAHelmOp<LevelData<MFCellFAB> >{
 public:
 
   /*!
@@ -53,10 +54,6 @@ public:
 		      const MFLevelGrid&                            a_mflg,
 		      const MFLevelGrid&                            a_mflg_coar,
 		      const MFLevelGrid&                            a_mflg_coar_mg,
-		      const DisjointBoxLayout&                      a_dbl,
-		      const DisjointBoxLayout&                      a_dbl_finer,
-		      const DisjointBoxLayout&                      a_dbl_coarser,
-		      const DisjointBoxLayout&                      a_dbl_coar_mg,
 		      const ProblemDomain&                          a_domain,
 		      const bool&                                   a_layout_changed,
 		      const bool&                                   a_has_mg_objects,
@@ -73,10 +70,7 @@ public:
 		      const Real&                                   a_alpha,
 		      const Real&                                   a_beta);
 
-  /*!
-    @brief Reset for TGA
-  */
-  virtual void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta);
+
 
   /*!
     @brief Set jump condition
@@ -92,6 +86,124 @@ public:
     @brief Update boundary conditions before relaxation
   */
   virtual void update_bc();
+
+  /*!
+    @brief Reset for TGA
+  */
+  virtual void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta);
+
+  /*!
+    @brief Set diagonal scale of the operator
+  */
+  virtual void diagonalScale(LevelData<MFCellFAB>& a_rhs);
+
+  /*!
+    @brief TGA --no op in this case
+  */
+  virtual void divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs);
+
+  /*!
+    @brief Apply operator without any boundary or coarse-fine
+  */
+  virtual void applyOpNoBoundary(LevelData<MFCellFAB>&       a_opPhi,
+                                 const LevelData<MFCellFAB>& a_phi);
+
+  /*!
+    @brief Set time
+  */
+  virtual void setTime(Real a_oldTime, Real a_mu, Real a_dt);
+
+  /*!
+    @brief Compute residual
+  */
+  virtual void residual(LevelData<MFCellFAB>&       a_lhs,
+                        const LevelData<MFCellFAB>& a_phi,
+                        const LevelData<MFCellFAB>& a_rhs,
+			bool                        a_homogeneous = false);
+
+  /*!
+    @brief Apply preconditioner
+  */
+  virtual void preCond(LevelData<MFCellFAB>&       a_correction,
+                       const LevelData<MFCellFAB>& a_residual);
+
+  /*!
+    @brief Apply operator
+  */
+  virtual void applyOp(LevelData<MFCellFAB>&        a_lhs,
+		       const LevelData<MFCellFAB>&  a_phi,
+		       DataIterator&                a_dit,
+		       bool                         a_homogeneous = false);
+
+  /*!
+    @brief Apply operator
+  */
+  virtual void applyOp(LevelData<MFCellFAB>&        a_lhs,
+		       const LevelData<MFCellFAB>&  a_phi,
+		       bool                         a_homogeneous = false);
+  
+  /*!
+    @brief Create a clone of this operator
+  */
+  virtual void create(LevelData<MFCellFAB>&       a_lhs,
+		      const LevelData<MFCellFAB>& a_rhs);
+
+  /*!
+    @brief Create a coarsened version of this operator
+  */
+  virtual void createCoarsened(LevelData<MFCellFAB>&       a_lhs,
+			       const LevelData<MFCellFAB>& a_rhs,
+			       const int&                  a_refRat);
+
+  /*!
+    @brief Assign operator
+  */
+  virtual void assign(LevelData<MFCellFAB>&       a_lhs,
+                      const LevelData<MFCellFAB>& a_rhs);
+
+  /*!
+    @brief Dot product
+  */
+  virtual Real dotProduct(const LevelData<MFCellFAB>& a_1,
+                          const LevelData<MFCellFAB>& a_2);
+
+  /*!
+    @brief Incremetn
+  */
+  virtual void incr(LevelData<MFCellFAB>&       a_lhs,
+		    const LevelData<MFCellFAB>& a_x,
+		    Real                        a_scale);
+
+  /*!
+    @brief Multiply
+  */
+  virtual void axby(LevelData<MFCellFAB>&       a_lhs,
+		    const LevelData<MFCellFAB>& a_x,
+		    const LevelData<MFCellFAB>& a_y,
+		    Real a,
+		    Real b);
+
+  /*!
+    @brief Scale
+  */
+  virtual void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
+
+  /*!
+    @brief Compute norm
+  */
+  virtual Real norm(const LevelData<MFCellFAB>& a_x, int a_ord);
+
+  /*!
+    @brief Set to zero
+  */
+  virtual void setToZero(LevelData<MFCellFAB>& a_x);
+
+  /*!
+    @brief Relax
+  */
+  virtual void relax(LevelData<MFCellFAB>&       a_e,
+                     const LevelData<MFCellFAB>& a_residual,
+                     int                         iterations);
 
   /*!
     @brief Update the AMR residual
@@ -149,6 +261,11 @@ protected:
     @brief Surface potential
   */
   LevelData<BaseIVFAB<Real> > m_surfpot;
+
+  /*!
+    @brief Arithmetic multifluid operators
+  */
+  LevelDataOps<MFCellFAB> m_ops;
   
   /*!
     @brief Class for computing BC matching
@@ -175,11 +292,21 @@ protected:
     @brief Electrodes
   */
   Vector<electrode> m_electrodes;
+
+  /*!
+    @brief Problem domain
+  */
+  ProblemDomain m_domain;
   
   /*!
     @brief Number of phases.
   */
   int m_phases;
+
+  /*!
+    @brief Relaxation type
+  */
+  int m_relax;
   
   /*!
     @brief alpha coefficient

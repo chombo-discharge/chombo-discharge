@@ -84,6 +84,11 @@ public:
   virtual void set_max_box_size(const int a_max_box_size);
 
   /*!
+    @brief Set boundary condition order
+  */
+  virtual void set_ebbc_order(const int a_order);
+
+  /*!
     @brief Coarsen coefficients for multigrid
   */
   virtual void coarsen_coefficients(LevelData<MFCellFAB>&         a_aco_coar,
@@ -152,19 +157,6 @@ public:
     @brief Factory method
   */
   virtual AMRLevelOp<LevelData<MFCellFAB> >* AMRnewOp(const ProblemDomain& a_fineindexspace);
-
-  /*!
-    @brief Factory method. This interface will probably change. 
-  */
-  virtual mf_helmholtz_op* createOperator(const DisjointBoxLayout&       a_dilboMGLevel,
-					  const DisjointBoxLayout&       a_dilboCoarMG,
-					  const ProblemDomain&           a_domainMGLevel,
-					  const bool&                    a_hasMGObjects,
-					  const bool&                    a_layoutChanged,
-					  const RealVect&                a_dxMGLevel,
-					  const RealVect&                a_dxCoar,
-					  const int&                     a_whichLevel,
-					  const int&                     a_mgLevel);
 
   /*!
     @brief Refinement ratio between this level and the coarser level. Returns 1 when there are no coarser levels
@@ -314,6 +306,11 @@ protected:
     @brief Number of AMR levels
   */
   int m_num_levels;
+
+  /*!
+    @brief Boundary conditiosn order
+  */
+  int m_ebbc_order;
 
   /*!
     @brief Drop to bottom solver

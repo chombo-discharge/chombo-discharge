@@ -51,6 +51,7 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
     m_domains[lvl].refine(m_ref_rat[lvl-1]);
   }
 
+  this->set_ebbc_order(2);        // Default is second order BCs
   this->set_relax_type(2);        // Default relaxation type
   this->set_bottom_drop(8);       // Default bottom drop
   this->set_max_box_size(32);     // Default max box size
@@ -291,6 +292,10 @@ void mf_helmholtz_opfactory::coarsen_coefficients(LevelData<MFCellFAB>&         
   }
 }
 
+void mf_helmholtz_opfactory::set_ebbc_order(const int a_ebbc_order){
+  m_ebbc_order = a_ebbc_order;
+}
+
 void mf_helmholtz_opfactory::set_bottom_drop(const int a_bottom_drop){
   m_test_ref = a_bottom_drop;
 }
@@ -298,6 +303,8 @@ void mf_helmholtz_opfactory::set_bottom_drop(const int a_bottom_drop){
 void mf_helmholtz_opfactory::set_relax_type(const int a_relax_type){
   m_relax_type = a_relax_type;
 }
+
+
 
 void mf_helmholtz_opfactory::set_max_box_size(const int a_max_box_size){
   m_max_box_size = a_max_box_size;
@@ -447,7 +454,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 								  bool                 a_homo_only){
   CH_TIME("mf_helmholtz_opfactory::MGnewOp");
 #if 1 // Test
-  pout() << "MGnewOp" << endl;
+  pout() << "mf_helmholtz_opfactory::MGnewOp" << endl;
 #endif
   int ref    = -1;
   bool found = false;
@@ -492,8 +499,8 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
   int bog_ref = 2;
   int ref_to_fine = bog_ref;
   int ref_to_coar = bog_ref;
-  int relax_type = m_relax_type;
-  int ebbc_order;
+  int relax_type  = m_relax_type;
+  int ebbc_order  = m_ebbc_order;
 
   IntVect ghost_phi = m_ghost_phi;
   IntVect ghost_rhs = m_ghost_rhs;
@@ -501,19 +508,26 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
   Real dx;
   Real dx_coar;
   Real alpha = m_alpha;
-  Real beta = m_beta;
+  Real beta  = m_beta;
+
+  dx_coar = -1.0;
+  if(ref > 0){
+    dx_coar = m_dx[ref-1];
+  }
 
   if(a_depth == 0){ // this is an AMR level
     aco       = m_aco[ref];
     bco       = m_bco[ref];
     bco_irreg = m_bco_irreg[ref];
-
     quadcfi   = m_mfquadcfi[ref];
+    mflg      = m_mflg[ref];
+    domain    = m_domains[ref];
+    layout_changed = m_layout_changed[ref];
 
     has_mg = m_has_mg_objects[ref];
 
     if(has_mg){
-      mflg_coar_mg = m_mflg_coar_mg[ref][1];
+      mflg_coar_mg = m_mflg_mg[ref][1];
     }
 
     dbl = m_grids[ref];
@@ -531,87 +545,62 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 
     for (int img = 0; img < num_mg; img++){
       if(m_domains_mg[ref][img] == domain_mg_level){
+	found_mg_level = true;
+	
 	mflg = m_mflg_mg[ref][img];
+	domain = m_domains_mg[ref][img];
 
-	aco     = m_aco_mg[ref][img];
-	bco     = m_bco_mg[ref][img];
-	bco_irr = m_bcoirr_mg[ref][img];
+	aco       = m_aco_mg[ref][img];
+	bco       = m_bco_mg[ref][img];
+	bco_irreg = m_bco_irreg_mg[ref][img];
+	layout_changed = m_layout_changed_mg[ref][img];
+	dx = m_dx[ref]*Real(icoar);
+	has_mg = img + 1 < num_mg;
+	if(has_mg){
+	  mflg_coar_mg = m_mflg_mg[ref][img + 1];
+	}
+
+	break;
       }
     }
-
-    
   }
-      
-      
-
-
-  has_fine = ref < m_num_levels - 1;
-  has_coar = ref > 0;
-
-
-  if(has_coar){
-    const int coar_lvl = ref - 1;
-    mflg_coar   = m_mflg[coar_lvl];
-    ref_to_coar = m_ref_rat[coar_lvl];
-    dx_coar     = m_dx[coar_lvl];
-    dbl_coar    = m_grids[coar_lvl];
-  }
-
-  if(has_fine){
-    mflg_fine   = m_mflg[ref + 1];
-    ref_to_fine = m_ref_rat[ref];
-    dbl_fine    = m_grids[ref+1];
-  }
-
-  if(has_mg){
-    mflg_coar_mg = m_mflg_mg[ref][1];  // Coarser state 
-    dbl_coar_mg  = m_grids_mg[ref][1]; // Coarser MG state
-  }
-  
 
   mf_helmholtz_op* oper = new mf_helmholtz_op();
   
 
-  oper->define(m_mfis,
-	       m_dombc,
-	       aco,
-	       bco,
-	       bco_irreg,
-	       quadcfi,
-	       mflg_fine,
-	       mflg,
-	       mflg_coar,
-	       mflg_coar_mg,
-	       dbl,
-	       dbl_fine,
-	       dbl_coar,
-	       dbl_coar_mg,
-	       domain,
-	       layout_changed,
-	       has_mg,
-	       has_fine,
-	       has_coar,
-	       ref_to_fine,
-	       ref_to_coar,
-	       m_relax_type,
-	       ebbc_order,
-	       ghost_phi,
-	       ghost_rhs,
-	       dx,
-	       dx_coar,
-	       alpha,
-	       beta);
+  oper->define(m_mfis,           // Set from factory
+	       m_dombc,          // Set from factory
+	       aco,              // Set to m_aco[ref] (for AMR) or m_aco_mg[ref][img] for MG
+	       bco,              // Set to m_bco[ref] (for AMR) or m_bco_mg[ref][img] for MG
+	       bco_irreg,        // Set to m_bco_irreg[ref] (for AMR) or m_bco_irreg_mg[ref][img] for MG
+	       quadcfi,          // Set to m_mfquadcfi[ref] (for AMR). Undefined for MG. 
+	       mflg_fine,        // Undefined. 
+	       mflg,             // Set to m_mflg[ref] (for AMR) or m_mflg_mg[ref][img] (for MG)
+	       mflg_coar,        // Undefined.
+	       mflg_coar_mg,     // Set
+	       domain,           // Set to m_domains[ref] (for AMR) or m_domains_mg[ref][img] (for MG)
+	       layout_changed,   // Set to m_layout_changed[ref] (for AMR), or m_layout_changed_mg[ref][img] (for MG)
+	       has_mg,           // Set to has_mg_objects[ref] (for AMR), or (img + 1) < num_mg (for MG)
+	       has_fine,         // Always false
+	       has_coar,         // Always false
+	       ref_to_fine,      // Set to bogus ref
+	       ref_to_coar,      // Set to bogus ref
+	       relax_type,       // Set to m_relax_type
+	       ebbc_order,       // Set to m_ebbc_order
+	       ghost_phi,        // Set to m_ghost_phi
+	       ghost_rhs,        // Set to m_ghost_rhs
+	       dx,               // Set to m_dx[ref] (for AMR) or m_dx[ref]*icoar (for MG)
+	       dx_coar,          // Set to m_dx[ref-1] (for AMR). Undefined for MG
+	       alpha,            // Set to m_alpha
+	       beta);            // Set to m_beta
      
   
   
 
-#if 1 // Debug-stop
+#if 0 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::mgnewop - implementation is not finished!");
 #endif
-  return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
-
-    
-
+  return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (NULL);
 }
 
 AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_domain_fine){
@@ -660,7 +649,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
   int ref_to_fine;
   int ref_to_coar;
   int relax_type = m_relax_type;
-  int ebbc_order;
+  int ebbc_order = m_ebbc_order; 
 
   IntVect ghost_phi = m_ghost_phi;
   IntVect ghost_rhs = m_ghost_rhs;
@@ -708,10 +697,6 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 	       mflg,
 	       mflg_coar,
 	       mflg_coar_mg,
-	       dbl,
-	       dbl_fine,
-	       dbl_coar,
-	       dbl_coar_mg,
 	       domain,
 	       layout_changed,
 	       has_mg,
@@ -731,90 +716,8 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
   
   
 
-#if 1 // Debug-stop
+#if 0 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - implementation is not finished!");
 #endif
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (NULL);
-}
-
-mf_helmholtz_op* mf_helmholtz_opfactory::createOperator(const DisjointBoxLayout&       a_dilboMGLevel,
-							const DisjointBoxLayout&       a_dilboCoarMG,
-							const ProblemDomain&           a_domain_mg_level,
-							const bool&                    a_hasMGObjects,
-							const bool&                    a_layoutChanged,
-							const RealVect&                a_dxMGLevel,
-							const RealVect&                a_dxCoar,
-							const int&                     a_which_level,
-							const int&                     a_mgLevel){
-
-  // All this shit must be set.
-  RefCountedPtr<LevelData<MFCellFAB> >   aco;
-  RefCountedPtr<LevelData<MFFluxFAB> >   bco;
-  RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
-
-  MFQuadCFInterp quadcfi;
-  
-  MFLevelGrid mflg_fine;
-  MFLevelGrid mflg;
-  MFLevelGrid mflg_coar;
-  MFLevelGrid mflg_coar_mg;
-  
-  DisjointBoxLayout dbl;
-  DisjointBoxLayout dbl_fine;
-  DisjointBoxLayout dbl_coar;
-  DisjointBoxLayout dbl_coar_mg;
-
-  ProblemDomain domain;
-
-  bool layout_changed;
-  bool has_mg_objects;
-  bool has_fine;
-  bool has_coar;
-
-  int ref_to_fine;
-  int ref_to_coar;
-  int relax_type    = m_relax_type;
-  int ebbc_order;
-
-  IntVect ghost_phi;
-  IntVect ghost_rhs;
-
-  Real dx;
-  Real dx_coar;
-  Real alpha;
-  Real beta;
-    
-  mf_helmholtz_op* oper = new mf_helmholtz_op();
-
-  oper->define(m_mfis,
-	       m_dombc,
-	       aco,
-	       bco,
-	       bco_irreg,
-	       quadcfi,
-	       mflg_fine,
-	       mflg,
-	       mflg_coar,
-	       mflg_coar_mg,
-	       dbl,
-	       dbl_fine,
-	       dbl_coar,
-	       dbl_coar_mg,
-	       domain,
-	       layout_changed,
-	       has_mg_objects,
-	       has_fine,
-	       has_coar,
-	       ref_to_fine,
-	       ref_to_coar,
-	       m_relax_type,
-	       ebbc_order,
-	       ghost_phi,
-	       ghost_rhs,
-	       dx,
-	       dx_coar,
-	       alpha,
-	       beta);
-
-  return oper;
 }
