@@ -6,6 +6,8 @@
 
 #include "mf_helmholtz_opfactory.H"
 
+#define verb 0
+
 mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&                a_mfis,
 					       const Vector<MFLevelGrid>&                a_mflg,
 					       const Vector<MFQuadCFInterp>&             a_mfquadcfi,
@@ -38,6 +40,8 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
   m_dombc      = a_dombc;
   m_ref_rat    = a_ref_rat;
   m_grids      = a_grids;
+  m_ghost_phi  = a_ghost_phi;
+  m_ghost_rhs  = a_ghost_rhs;
     
   m_domains.resize(m_num_levels);
   m_dx.resize(m_num_levels);
@@ -370,7 +374,7 @@ void mf_helmholtz_opfactory::average_down_amr(){
 
   for (int lvl = finest_level; lvl > 0; lvl--){ // Average down AMR levels
     m_aveop[lvl]->average(*m_jump[lvl-1], *m_jump[lvl], interv);
-#if 0 // Debug
+#if verb // Debug
     pout() << "mf_helmholtz_opfactory::average_down_amr from AMR level = " << lvl << " and onto AMR level = " << lvl - 1 << endl;
 #endif
   }
@@ -390,7 +394,7 @@ void mf_helmholtz_opfactory::average_down_mg(){
       const int coarsest_mg_level = jump_mg.size() - 1;
 
       for (int img = finest_mg_level + 1; img <= coarsest_mg_level; img++){ 
-#if 0 // DEBUG
+#if verb // DEBUG
 	pout() << "mf_helmholtz_opfactory::average_down_mg from AMR level = " << lvl
 	       << " from MG level = " << img-1
 	       << " to   MG level = " << img << endl;
@@ -453,7 +457,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 								  int                  a_depth,
 								  bool                 a_homo_only){
   CH_TIME("mf_helmholtz_opfactory::MGnewOp");
-#if 1 // Test
+#if verb // Test
   pout() << "mf_helmholtz_opfactory::MGnewOp" << endl;
 #endif
   int ref    = -1;
@@ -515,7 +519,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
     dx_coar = m_dx[ref-1];
   }
 
-#if 1
+#if verb
   pout() << "trying to define stuff" << endl;
 #endif
 
@@ -543,7 +547,6 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
     const int icoar  = pow(2, a_depth); 
     const int num_mg = m_mflg_mg[ref].size();
 
-    pout() << "finding domains" << endl;
     const ProblemDomain domain_fine     = m_domains[ref];
     const ProblemDomain domain_mg_level = coarsen(domain_fine, icoar);
 
@@ -551,7 +554,6 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
     for (int img = 0; img < num_mg; img++){
       if(m_domains_mg[ref][img] == domain_mg_level){
 
-	pout() << "found mg level" << endl;
 	found_mg_level = true;
 	
 	mflg = m_mflg_mg[ref][img];
@@ -573,14 +575,14 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 
     const bool coarsenable = found_mg_level;
     if(!coarsenable){
+#if verb
       pout() << "mgnewop::no MG" << endl;
+#endif
       return NULL;
     }
   }
 
   mf_helmholtz_op* oper = new mf_helmholtz_op();
-
-  pout() << "mgnewop::defining oper, ref = " << ref << endl;
 
   oper->define(m_mfis,           // Set from factory
 	       m_dombc,          // Set from factory
@@ -608,14 +610,17 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 	       alpha,            // Set to m_alpha
 	       beta);            // Set to m_beta
 
+#if verb
   pout() << "done defining oper" << endl;
+#endif
      
   
   
 
 #if 0 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::mgnewop - implementation is not finished!");
-#else
+#endif
+#if verb
   pout() << "mf_helmholtz_opfactory::MGnewOp - returning new op" << endl;
 #endif
   return static_cast<MGLevelOp<LevelData<MFCellFAB> >* > (oper);
@@ -623,7 +628,9 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 
 AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const ProblemDomain& a_domain_fine){
   CH_TIME("mf_helmholtz_opfactory::AMRnewOp");
+#if verb
   pout() << "mf_helmholtz_opfactory::AMRnewOp" << endl;
+#endif
   int ref    = -1;
   bool found = false;
 
@@ -635,7 +642,9 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
     }
   }
 
+#if verb
   pout() << "amrnewop:: ref = " << ref << " domain = " << m_domains[ref] << endl;
+#endif
 
   if(!found){
     MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - no corresponding starting level to a_domain_fine");
@@ -669,6 +678,10 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
   IntVect ghost_phi = m_ghost_phi;
   IntVect ghost_rhs = m_ghost_rhs;
 
+#if verb
+  pout() << "factory ghost = " << m_ghost_phi << endl;
+#endif
+
   Real dx = m_dx[ref];
   Real dx_coar;
   Real alpha = m_alpha;
@@ -677,6 +690,10 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 
   has_fine = ref < m_num_levels - 1;
   has_coar = ref > 0;
+
+#if verb
+  pout() << "has_fine = " << has_fine << endl;
+#endif
 
 
   if(has_coar){
@@ -698,7 +715,6 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
   
 
   mf_helmholtz_op* oper = new mf_helmholtz_op();
-  
 
   oper->define(m_mfis,
 	       m_dombc,
@@ -731,7 +747,8 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 
 #if 0 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - implementation is not finished!");
-#else
+#endif
+#if verb
   pout() << "mf_helmholtz_opfactory::AMRnewOp - returning new op" << endl;
 #endif
   return static_cast<AMRLevelOp<LevelData<MFCellFAB> >* > (oper);

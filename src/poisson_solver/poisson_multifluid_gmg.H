@@ -144,7 +144,6 @@ protected:
   */
   MFAMRIVData m_bco_irreg;
 
-
   /*!
     @brief Geometric multigrid solver
   */

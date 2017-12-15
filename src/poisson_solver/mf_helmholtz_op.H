@@ -332,6 +332,13 @@ public:
   virtual Real kappaNorm(Real&                       a_volume,
 			 const LevelData<MFCellFAB>& a_data,
 			 int                         a_p) const;
+
+  /*!
+    @brief Jacobi iteration
+  */
+  virtual void levelJacobi( LevelData<MFCellFAB>&       a_phi,
+			    const LevelData<MFCellFAB>& a_rhs);
+
 protected:
 
   /*!
@@ -368,6 +375,16 @@ protected:
     @brief Arithmetic multifluid operators
   */
   LevelDataOps<MFCellFAB> m_ops;
+
+  /*!
+    @brief Some extra storage
+  */
+  LevelData<MFCellFAB> m_tmp;
+
+  /*!
+    @brief Some extra storage
+  */
+  LevelData<MFCellFAB> m_weights;
   
   /*!
     @brief Class for computing BC matching
@@ -424,6 +441,16 @@ protected:
     @brief Refinement factor to coarser level
   */
   int m_ref_to_coarser;
+
+  /*!
+    @brief Number of ghost cells
+  */
+  IntVect m_ghost_rhs;
+
+  /*!
+    @brief Number of ghost cells
+  */
+  IntVect m_ghost_phi;
   
   /*!
     @brief alpha coefficient

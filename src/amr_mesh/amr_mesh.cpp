@@ -128,7 +128,7 @@ void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_gh
   }
 
   const int ghost   = (a_ghost == -1) ? m_num_ghost : a_ghost;
-  const int ignored = 99;
+  const int ignored = a_ncomp;
 
   a_data.resize(1 + m_finest_level);
 

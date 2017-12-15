@@ -64,6 +64,14 @@ void poisson_multifluid_gmg::solve(){
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::solve";
   }
+
+#if 1 // Remove this shit later
+  m_amr->allocate(m_state,  1, 3);
+  m_amr->allocate(m_source, 1, 3);
+
+  data_ops::set_value(m_state, 0.0);
+  data_ops::set_value(m_source, 0.0);
+#endif
   
   this->solve(m_state, m_source);
 }
@@ -77,6 +85,19 @@ void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
   if(m_needs_setup){
     this->setup_gmg();
   }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  Vector<LevelData<MFCellFAB>* > phi_ptr, rhs_ptr;
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    phi_ptr.push_back(&(*a_state[lvl]));
+    rhs_ptr.push_back(&(*a_source[lvl]));
+  }
+
+  m_gmg_solver.getInfo();
+
+  pout() << "solving" << endl;
+  m_gmg_solver.solve(phi_ptr, rhs_ptr, finest_level, 0);
 }
 
 void poisson_multifluid_gmg::set_coefficients(){
