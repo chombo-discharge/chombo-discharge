@@ -87,7 +87,7 @@ public:
   /*!
     @brief Update boundary conditions before relaxation
   */
-  virtual void update_bc();
+  virtual void update_bc(const LevelData<MFCellFAB>& a_phi);
 
   /*!
     @brief Reset for TGA
@@ -333,7 +333,7 @@ public:
   /*!
     @brief Set BC from matching criteria
   */
-  virtual void set_bc_from_matching();
+  virtual void set_bc_from_matching(const LevelData<MFCellFAB>& a_phi);
 
 
   /*!

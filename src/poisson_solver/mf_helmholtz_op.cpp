@@ -134,6 +134,11 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 #if verb
     MayDay::Warning("mf_helmholtz_op::mf_helmholtz_op - fix up boundary conditions!");
 #endif
+    DirichletConductivityDomainBCFactory bcfact;
+    bcfact.setValue(0.0);
+    
+    RefCountedPtr<DirichletConductivityDomainBC> dombc = RefCountedPtr<DirichletConductivityDomainBC>
+      (bcfact.create(a_domain, ebisl, a_dx*RealVect::Unit));
 
     m_ebbc[iphase]        = RefCountedPtr<DirichletConductivityEBBC>    (new DirichletConductivityEBBC(a_domain,
 												       ebisl,
@@ -141,14 +146,9 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 												       &a_ghost_phi,
 												       &a_ghost_rhs));
 
-    m_ebbc[iphase]->setValue(1.0);
+    m_ebbc[iphase]->setValue(0.0);
     m_ebbc[iphase]->setOrder(2);
 
-    DirichletConductivityDomainBCFactory bcfact;
-    bcfact.setValue(0.0);
-    
-    RefCountedPtr<DirichletConductivityDomainBC> dombc = RefCountedPtr<DirichletConductivityDomainBC>
-      (bcfact.create(a_domain, ebisl, a_dx*RealVect::Unit));
 
     // Create storage for data-based dirichlet boundary conditions
     LayoutData<IntVectSet> ivs(eblg.getDBL());
@@ -160,9 +160,10 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     m_dirival[iphase] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
       (new LevelData<BaseIVFAB<Real> > (eblg.getDBL(), 1, IntVect::Zero, ivfact));
 
-    EBLevelDataOps::setVal(*m_dirival[iphase], 1.0);
-
+    EBLevelDataOps::setVal(*m_dirival[iphase], 9999.9);
     m_ebbc[iphase]->setData(m_dirival[iphase]);
+
+
 #endif
 
     mfalias::aliasMF(*m_acoeffs[iphase],     iphase, *a_aco);
@@ -214,22 +215,21 @@ void mf_helmholtz_op::set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >
 }
 
 void mf_helmholtz_op::set_electrodes(const Vector<electrode>& a_electrodes){
-  m_electrodes = a_electrodes;
 #if verb
   pout() << "mf_helmholtz_op::set_electrodes"<< endl;
 #endif
+
+  m_electrodes = a_electrodes;
+  this->set_bc_from_levelset();
 }
 
-void mf_helmholtz_op::update_bc(){
+void mf_helmholtz_op::update_bc(const LevelData<MFCellFAB>& a_phi){
 #if verb
   pout() << "mf_helmholtz_op::update_bc"<< endl;
 #endif
 
   this->set_bc_from_levelset();
-  this->set_bc_from_matching();
-
-
-  m_hasBC = true;
+  this->set_bc_from_matching(a_phi);
 }
 
 void mf_helmholtz_op::set_bc_from_levelset(){
@@ -263,9 +263,17 @@ void mf_helmholtz_op::set_bc_from_levelset(){
   }
 }
 
-void mf_helmholtz_op::set_bc_from_matching(){
-#if 0
-  MayDay::Abort("mf_helmholtz_op::set_bc_from_matching - not implemented");
+void mf_helmholtz_op::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi){
+#if verb
+  MayDay::Abort("mf_helmholtz_op::set_bc_from_matching");
+#endif
+
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    m_jumpbc->match_bc(*m_dirival[iphase], a_phi);
+  }
+
+#if verb
+  MayDay::Abort("mf_helmholtz_op::set_bc_from_matching - done");
 #endif
 }
 
@@ -662,7 +670,7 @@ void mf_helmholtz_op::relax(LevelData<MFCellFAB>&       a_e,
   }
 #else
   for (int i = 0; i < iterations; i++){
-    //    this->update_bc();
+    this->update_bc(a_e);
     this->levelJacobi(a_e, a_residual, iterations);
   }
 #endif
@@ -681,7 +689,6 @@ void mf_helmholtz_op::levelJacobi(LevelData<MFCellFAB>&       a_phi,
     
     m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
   }
-
 }
 
 void mf_helmholtz_op::createCoarser(LevelData<MFCellFAB>&       a_coarse,

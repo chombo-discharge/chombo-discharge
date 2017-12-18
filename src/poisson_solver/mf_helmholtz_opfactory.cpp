@@ -748,9 +748,6 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 	       m_origin);
 
   oper->set_electrodes(m_electrodes);
-     
-  
-  
 
 #if 0 // Debug-stop
   MayDay::Abort("mf_helmholtz_opfactory::AMRnewOp - implementation is not finished!");

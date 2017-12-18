@@ -67,6 +67,12 @@ public:
 			const LevelData<BaseIVFAB<Real> >& a_jump,
 			const LevelData<MFCellFAB>&        a_phi);
 
+  /*!
+    @brief Match the boundary condition. No surface charge.
+  */
+  virtual void match_bc(LevelData<BaseIVFAB<Real> >& a_phibc,
+			const LevelData<MFCellFAB>&  a_phi);
+
 
 
 

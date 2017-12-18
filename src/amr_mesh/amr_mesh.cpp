@@ -345,7 +345,6 @@ void amr_mesh::load_balance(Vector<int>& a_proc_assign, Vector<Box>& a_boxes, co
     pout() << "amr_mesh::load_balance" << endl;
   }
 
-  mortonOrdering((Vector<Box>&) a_boxes); // Use space filling curves
   EBEllipticLoadBalance(a_proc_assign, a_boxes, m_domains[a_lvl], false, m_mfis->get_ebis(phase::gas)); // Loads for each box
 }
 

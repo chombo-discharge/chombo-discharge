@@ -94,9 +94,6 @@ void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
     rhs_ptr.push_back(&(*a_source[lvl]));
   }
 
-  m_gmg_solver.getInfo();
-
-  pout() << "solving" << endl;
   m_gmg_solver.solve(phi_ptr, rhs_ptr, finest_level, 0);
 }
 
@@ -324,8 +321,14 @@ void poisson_multifluid_gmg::setup_solver(){
   const ProblemDomain coar_dom = m_amr->get_domains()[0];
 
   m_gmg_solver.define(coar_dom, *m_opfact, &m_bicgstab, 1 + finest_level);
-  m_gmg_solver.setSolverParameters(m_gmg_pre_smooth, m_gmg_post_smooth, m_gmg_bot_smooth, m_gmg_type, m_gmg_max_iter,
-				   m_gmg_eps, m_gmg_hang, m_gmg_norm_thresh);
+  m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
+				   m_gmg_post_smooth,
+				   m_gmg_bot_smooth,
+				   m_gmg_type,
+				   m_gmg_max_iter,
+				   m_gmg_eps,
+				   m_gmg_hang,
+				   m_gmg_norm_thresh);
   m_gmg_solver.m_verbosity = m_gmg_verbosity;
 }
 

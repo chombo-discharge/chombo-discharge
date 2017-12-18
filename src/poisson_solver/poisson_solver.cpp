@@ -184,6 +184,9 @@ void poisson_solver::write_plot_file(const int a_step){
 	  data_gas(iv, 0) = data_sol(iv,0);
 	  src_gas(iv,0)   = src_sol(iv,0);
 	}
+	if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){
+	  data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
+	}
       }
 
 
@@ -200,7 +203,9 @@ void poisson_solver::write_plot_file(const int a_step){
     output_ptr.push_back(&(*output[lvl]));
   }
 
-  Vector<Real> covered_values;
+
+
+  Vector<Real> covered_values(2,0.0);
   string fname(file_char);
   writeEBHDF5(fname,
 	      m_amr->get_grids(),
