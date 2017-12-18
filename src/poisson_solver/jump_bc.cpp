@@ -243,19 +243,20 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
   const EBGraph& graph1              = bco1.getEBGraph();
   const EBGraph& graph2              = bco2.getEBGraph();
+
+#if 0 // Debug
+  const EBISBox& ebis1 = phi1.getEBISBox();
+  const EBISBox& ebis2 = phi2.getEBISBox();
+
+  const IntVectSet phiivs = a_phibc.getIVS();
+  CH_assert(phiivs.contains(ivs));
+#endif
   
   // Set phibc = a_jump
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
-
-#if 0 // Debug
-    const EBISBox& ebis1 = phi1.getEBISBox();
-    const EBISBox& ebis2 = phi2.getEBISBox();
-    //    pout() << ebis1.normal(vof) + ebis2.normal(vof) << endl;
-    //    pout() << ebis1.volFrac(vof) + ebis2.volFrac(vof) << endl;
-    //    pout() << ebis1.bndryArea(vof) - ebis2.bndryArea(vof) << endl;
-#endif
+    //    a_phibc(vof, comp) = 1000.;
   }
 
   // First phase loop. Add first stencil stuff
@@ -273,7 +274,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   // Second phase loop. Add second stencil stuff
   for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-
+    
     const VoFStencil& sten = sten2(vof, comp);
     for (int i = 0; i < sten.size(); i++){
       const VolIndex& ivof = sten.vof(i);
@@ -286,6 +287,5 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
     a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
-
   }
 }
