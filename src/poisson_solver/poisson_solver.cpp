@@ -7,8 +7,10 @@
 
 #include "poisson_solver.H"
 #include "MFAliasFactory.H"
+#include "mfalias.H"
 
 #include <MFAMRIO.H>
+#include <EBAMRIO.H>
 
 poisson_solver::poisson_solver(){
   CH_TIME("poisson_solver::set_verbosity");
@@ -145,12 +147,71 @@ void poisson_solver::write_plot_file(const int a_step){
   char file_char[1000];
   sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", a_step, SpaceDim);
 
-  Vector<LevelData<MFCellFAB>*> state_ptr;
-  for (int lvl = 0; lvl < m_state.size(); lvl++){
-    state_ptr.push_back(&(*m_state[lvl]));
-  }
+
+  Vector<string> names(1);
+  names[0] = "potential";
+
+  Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
+  m_amr->allocate(output, phase::gas, 1, 0);
   
-  writeMFAMRname(&state_ptr, 0, file_char);
+  for (int lvl = 0; lvl < output.size(); lvl++){
+    LevelData<EBCellFAB> alias_gas, alias_sol;
+
+    mfalias::aliasMF(alias_gas, phase::gas,   *m_state[lvl]);
+    mfalias::aliasMF(alias_sol, phase::solid, *m_state[lvl]);
+
+
+
+    // Copy all covered cells 
+    for (DataIterator dit = alias_sol.dataIterator(); dit.ok(); ++dit){
+      const Box box = alias_sol.disjointBoxLayout().get(dit());
+      const IntVectSet ivs(box);
+      const EBISBox& ebisb_gas = alias_gas[dit()].getEBISBox();
+      const EBISBox& ebisb_sol = alias_sol[dit()].getEBISBox();
+
+      FArrayBox& data_gas = alias_gas[dit()].getFArrayBox();
+      FArrayBox& data_sol = alias_sol[dit()].getFArrayBox();
+
+
+      for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+	const IntVect iv = ivsit();
+	if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){
+	  data_gas(iv, 0) = data_sol(iv,0);
+	}
+	if(ebisb_gas.isCovered(iv) && ebisb_sol.isCovered(iv)){
+	  // Need to get from potential. 
+	}
+      }
+    }
+
+    alias_gas.copyTo(*output[lvl]);
+  }
+
+  m_amr->average_down(output, phase::gas);
+
+  Vector<LevelData<EBCellFAB>* > output_ptr;
+  for (int lvl = 0; lvl < m_state.size(); lvl++){
+    output_ptr.push_back(&(*output[lvl]));
+  }
+
+  Vector<Real> covered_values;
+  string fname(file_char);
+  writeEBHDF5(fname,
+	      m_amr->get_grids(),
+	      output_ptr,
+	      names,
+	      m_amr->get_domains()[0].domainBox(),
+	      m_amr->get_dx()[0],
+	      0.0,
+	      0.0,
+	      m_amr->get_ref_rat(),
+	      m_amr->get_finest_level() + 1,
+	      false,
+	      covered_values);
+
+
+  
+
 }
 #endif
 
