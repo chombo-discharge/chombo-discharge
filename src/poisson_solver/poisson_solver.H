@@ -67,11 +67,6 @@ public:
   virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source) = 0;
 
   /*!
-    @brief Query the required number of ghost cells
-  */
-  virtual int query_ghost() const = 0;
-
-  /*!
     @brief Set Dirichlet wall BC
   */
   virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live);
@@ -81,15 +76,27 @@ public:
   */
   virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
+#ifdef CH_USE_HDF5
   /*!
-    @brief Get Poisson BC at specified domain wall
+    @brief Write plot file
   */
-  virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
+  virtual void write_plot_file(const int a_step = 0);
+#endif
 
   /*!
     @brief Sanity check
   */
   virtual void sanity_check();
+
+  /*!
+    @brief Query the required number of ghost cells
+  */
+  virtual int query_ghost() const = 0;
+
+  /*!
+    @brief Get Poisson BC at specified domain wall
+  */
+  virtual wall_bc& get_wall_bc(const int a_dir, Side::LoHiSide a_side) const;
   
   /*!
     @brief Get multifluid state

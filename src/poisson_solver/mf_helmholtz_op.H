@@ -69,7 +69,8 @@ public:
 		      const Real&                                   a_dx,
 		      const Real&                                   a_dx_coar,
 		      const Real&                                   a_alpha,
-		      const Real&                                   a_beta);
+		      const Real&                                   a_beta,
+		      const RealVect&                               a_origin);
 
 
 
@@ -317,6 +318,23 @@ public:
 				 const LevelData<MFCellFAB>& a_correction,
 				 const LevelData<MFCellFAB>& a_coarseCorrection);
 
+  /*!
+    @brief Jacobi iteration
+  */
+  virtual void levelJacobi( LevelData<MFCellFAB>&       a_phi,
+			    const LevelData<MFCellFAB>& a_rhs,
+			    const int                   a_iterations);
+
+  /*!
+    @brief Set BC from level set functions
+  */
+  virtual void set_bc_from_levelset();
+
+  /*!
+    @brief Set BC from matching criteria
+  */
+  virtual void set_bc_from_matching();
+
 
   /*!
     @brief Get the norm
@@ -333,14 +351,14 @@ public:
 			 const LevelData<MFCellFAB>& a_data,
 			 int                         a_p) const;
 
-  /*!
-    @brief Jacobi iteration
-  */
-  virtual void levelJacobi( LevelData<MFCellFAB>&       a_phi,
-			    const LevelData<MFCellFAB>& a_rhs,
-			    const int                   a_iterations);
+
 
 protected:
+
+  /*!
+    @brief Index spaces
+  */
+  RefCountedPtr<mfis> m_mfis;
 
   /*!
     @brief EB operators
@@ -457,6 +475,11 @@ protected:
     @brief Number of ghost cells
   */
   IntVect m_ghost_phi;
+
+  /*!
+    @brief Level resolution
+  */
+  Real m_dx;
   
   /*!
     @brief alpha coefficient
@@ -467,6 +490,11 @@ protected:
     @brief beta-coefficient
   */
   Real m_beta;
+
+  /*!
+    @brief Origin
+  */
+  RealVect m_origin;
 
   /*!
     @brief Has BC been set?

@@ -42,6 +42,7 @@ mf_helmholtz_opfactory::mf_helmholtz_opfactory(const RefCountedPtr<mfis>&       
   m_grids      = a_grids;
   m_ghost_phi  = a_ghost_phi;
   m_ghost_rhs  = a_ghost_rhs;
+  m_origin     = a_origin;
     
   m_domains.resize(m_num_levels);
   m_dx.resize(m_num_levels);
@@ -608,7 +609,10 @@ MGLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::MGnewOp(const ProblemD
 	       dx,               // Set to m_dx[ref] (for AMR) or m_dx[ref]*icoar (for MG)
 	       dx_coar,          // Set to m_dx[ref-1] (for AMR). Undefined for MG
 	       alpha,            // Set to m_alpha
-	       beta);            // Set to m_beta
+	       beta,             // Set to m_beta
+	       m_origin);        // Origin
+
+  oper->set_electrodes(m_electrodes);
 
 #if verb
   pout() << "done defining oper" << endl;
@@ -740,7 +744,8 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 	       dx,
 	       dx_coar,
 	       alpha,
-	       beta);
+	       beta,
+	       m_origin);
 
   oper->set_electrodes(m_electrodes);
      

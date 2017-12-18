@@ -87,6 +87,7 @@ int main(int argc, char* argv[]){
   // Poisson solver solves
   poisson->sanity_check();
   poisson->solve();
+  poisson->write_plot_file();
   
 
 #ifdef CH_MPI

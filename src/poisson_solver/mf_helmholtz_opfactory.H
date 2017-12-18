@@ -347,6 +347,11 @@ protected:
   */
   Real m_beta;
 
+  /*!
+    @brief Origin
+  */
+  RealVect m_origin;
+
   
 private:
   

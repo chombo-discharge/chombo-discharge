@@ -48,7 +48,8 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 			     const Real&                                   a_dx,
 			     const Real&                                   a_dx_coar,
 			     const Real&                                   a_alpha,
-			     const Real&                                   a_beta){
+			     const Real&                                   a_beta,
+			     const RealVect&                               a_origin){
 
 
   const int num_phases = a_mfis->num_phases();
@@ -60,7 +61,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 #endif
   const int num_alias  = 4;
 
-  m_hasBC = false;
+  m_mfis = a_mfis;
   m_ncomp = 1;
   m_relax = a_relax_type;
   m_domain = a_domain;
@@ -74,6 +75,8 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   m_ref_to_coarser = a_ref_to_coar;
   m_ghost_phi = a_ghost_phi;
   m_ghost_rhs = a_ghost_rhs;
+  m_origin = a_origin;
+  m_dx = a_dx;
   m_dirival.resize(num_phases);
 
   if(a_has_mg){
@@ -222,7 +225,48 @@ void mf_helmholtz_op::update_bc(){
   pout() << "mf_helmholtz_op::update_bc"<< endl;
 #endif
 
+  this->set_bc_from_levelset();
+  this->set_bc_from_matching();
+
+
+  m_hasBC = true;
+}
+
+void mf_helmholtz_op::set_bc_from_levelset(){
+  CH_TIME("mf_helmholtz_op::set_bc_from_levelset");
   
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
+
+    for (DataIterator dit = val.dataIterator(); dit.ok(); ++dit){
+      const IntVectSet& ivs  = val[dit()].getIVS();
+      const EBGraph& ebgraph = val[dit()].getEBGraph();
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect& pos = EBArith::getVofLocation(vof, m_dx, m_origin);
+
+	int  func = 0;
+	Real dist = m_electrodes[0].get_function()->value(pos);
+
+	for (int i = 1; i < m_electrodes.size(); i++){
+	  Real cur_val = (m_electrodes[i].get_function())->value(pos);
+	  if(Abs(cur_val) < dist){
+	    func = i;
+	    dist  = cur_val;
+	  }
+	}
+
+	val[dit()](vof, 0) = m_electrodes[func].is_live() ? 1 : 0;
+      }
+    }
+  }
+}
+
+void mf_helmholtz_op::set_bc_from_matching(){
+#if 0
+  MayDay::Abort("mf_helmholtz_op::set_bc_from_matching - not implemented");
+#endif
 }
 
 void mf_helmholtz_op::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
@@ -486,15 +530,17 @@ Real mf_helmholtz_op::norm(const LevelData<MFCellFAB>& a_x, int a_ord){
 #endif
   Real volume;
   Real rtn = this->kappaNorm(volume, a_x, a_ord);
+#if verb
+  pout() << "mf_helmholtz_op::norm - done"<< endl;
+#endif
   return rtn;
 }
 
 Real mf_helmholtz_op::kappaNorm(Real&                       a_volume,
 				const LevelData<MFCellFAB>& a_data,
-				int                         a_p) const{
+				int                         a_p) const {
 
 #if verb
-  MayDay::Abort("error");
   pout() << "mf_helmholtz_op::kappaNorm"<< endl;
 #endif
   Real accum = 0.0;
@@ -616,6 +662,7 @@ void mf_helmholtz_op::relax(LevelData<MFCellFAB>&       a_e,
   }
 #else
   for (int i = 0; i < iterations; i++){
+    //    this->update_bc();
     this->levelJacobi(a_e, a_residual, iterations);
   }
 #endif

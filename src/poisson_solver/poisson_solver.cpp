@@ -8,6 +8,8 @@
 #include "poisson_solver.H"
 #include "MFAliasFactory.H"
 
+#include <MFAMRIO.H>
+
 poisson_solver::poisson_solver(){
   CH_TIME("poisson_solver::set_verbosity");
   if(m_verbosity > 5){
@@ -135,6 +137,22 @@ void poisson_solver::sanity_check(){
     }
   }
 }
+
+#ifdef CH_USE_HDF5
+void poisson_solver::write_plot_file(const int a_step){
+  CH_TIME("poisson_solver::write_plot_file");
+
+  char file_char[1000];
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", a_step, SpaceDim);
+
+  Vector<LevelData<MFCellFAB>*> state_ptr;
+  for (int lvl = 0; lvl < m_state.size(); lvl++){
+    state_ptr.push_back(&(*m_state[lvl]));
+  }
+  
+  writeMFAMRname(&state_ptr, 0, file_char);
+}
+#endif
 
 Real poisson_solver::get_time() const{
   return m_time;
