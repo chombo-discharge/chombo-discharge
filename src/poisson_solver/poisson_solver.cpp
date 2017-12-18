@@ -148,43 +148,49 @@ void poisson_solver::write_plot_file(const int a_step){
   sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", a_step, SpaceDim);
 
 
-  Vector<string> names(1);
+  Vector<string> names(2);
   names[0] = "potential";
+  names[1] = "source";
 
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
-  m_amr->allocate(output, phase::gas, 1, 0);
+  m_amr->allocate(output, phase::gas, 2, 0);
   
   for (int lvl = 0; lvl < output.size(); lvl++){
-    LevelData<EBCellFAB> alias_gas, alias_sol;
+    LevelData<EBCellFAB> state_gas,  source_gas;
+    LevelData<EBCellFAB> state_sol,  source_sol;
 
-    mfalias::aliasMF(alias_gas, phase::gas,   *m_state[lvl]);
-    mfalias::aliasMF(alias_sol, phase::solid, *m_state[lvl]);
 
+    mfalias::aliasMF(state_gas,  phase::gas,   *m_state[lvl]);
+    mfalias::aliasMF(source_gas, phase::gas,   *m_source[lvl]);
+    mfalias::aliasMF(state_sol,  phase::solid, *m_state[lvl]);
+    mfalias::aliasMF(source_sol, phase::solid, *m_source[lvl]);
 
 
     // Copy all covered cells 
-    for (DataIterator dit = alias_sol.dataIterator(); dit.ok(); ++dit){
-      const Box box = alias_sol.disjointBoxLayout().get(dit());
+    for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
+      const Box box = state_sol.disjointBoxLayout().get(dit());
       const IntVectSet ivs(box);
-      const EBISBox& ebisb_gas = alias_gas[dit()].getEBISBox();
-      const EBISBox& ebisb_sol = alias_sol[dit()].getEBISBox();
+      const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
+      const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
 
-      FArrayBox& data_gas = alias_gas[dit()].getFArrayBox();
-      FArrayBox& data_sol = alias_sol[dit()].getFArrayBox();
-
+      FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
+      FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
+      FArrayBox& src_gas  = source_gas[dit()].getFArrayBox();
+      FArrayBox& src_sol  = source_sol[dit()].getFArrayBox();
 
       for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
 	const IntVect iv = ivsit();
 	if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){
 	  data_gas(iv, 0) = data_sol(iv,0);
-	}
-	if(ebisb_gas.isCovered(iv) && ebisb_sol.isCovered(iv)){
-	  // Need to get from potential. 
+	  src_gas(iv,0)   = src_sol(iv,0);
 	}
       }
+
+
     }
 
-    alias_gas.copyTo(*output[lvl]);
+    state_gas.copyTo(Interval(0,0), *output[lvl], Interval(0,0));
+    source_gas.copyTo(Interval(0,0), *output[lvl], Interval(1,1));
   }
 
   m_amr->average_down(output, phase::gas);
