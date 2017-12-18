@@ -53,11 +53,14 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 
   const int num_phases = a_mfis->num_phases();
 
+
+
 #if verb
   MayDay::Warning("mf_helmholtz_op::mf_helmholtz_op - remember to check how many aliasing holders we need");
 #endif
   const int num_alias  = 4;
 
+  m_hasBC = false;
   m_ncomp = 1;
   m_relax = a_relax_type;
   m_domain = a_domain;
@@ -71,6 +74,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   m_ref_to_coarser = a_ref_to_coar;
   m_ghost_phi = a_ghost_phi;
   m_ghost_rhs = a_ghost_rhs;
+  m_dirival.resize(num_phases);
 
   if(a_has_mg){
     m_mflg_coar_mg = a_mflg_coar_mg;
@@ -128,14 +132,12 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     MayDay::Warning("mf_helmholtz_op::mf_helmholtz_op - fix up boundary conditions!");
 #endif
 
-#if verb
-    pout() << "a_domain = " << a_domain << endl;
-#endif
     m_ebbc[iphase]        = RefCountedPtr<DirichletConductivityEBBC>    (new DirichletConductivityEBBC(a_domain,
 												       ebisl,
 												       a_dx*RealVect::Unit,
 												       &a_ghost_phi,
 												       &a_ghost_rhs));
+
     m_ebbc[iphase]->setValue(1.0);
     m_ebbc[iphase]->setOrder(2);
 
@@ -144,42 +146,31 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     
     RefCountedPtr<DirichletConductivityDomainBC> dombc = RefCountedPtr<DirichletConductivityDomainBC>
       (bcfact.create(a_domain, ebisl, a_dx*RealVect::Unit));
+
+    // Create storage for data-based dirichlet boundary conditions
+    LayoutData<IntVectSet> ivs(eblg.getDBL());
+    for (DataIterator dit = ivs.dataIterator(); dit.ok(); ++dit){
+      ivs[dit()] = ebisl[dit()].getIrregIVS(eblg.getDBL().get(dit()));
+    }
+
+    BaseIVFactory<Real> ivfact(ebisl, ivs);
+    m_dirival[iphase] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
+      (new LevelData<BaseIVFAB<Real> > (eblg.getDBL(), 1, IntVect::Zero, ivfact));
+
+    EBLevelDataOps::setVal(*m_dirival[iphase], 1.0);
+
+    m_ebbc[iphase]->setData(m_dirival[iphase]);
 #endif
 
     mfalias::aliasMF(*m_acoeffs[iphase],     iphase, *a_aco);
     mfalias::aliasMF(*m_bcoeffs[iphase],     iphase, *a_bco);
     mfalias::aliasMF(*m_bcoeffs_irr[iphase], iphase, *a_bco_irreg);
 
-#if 1 // Original code
     const RefCountedPtr<LevelData<EBCellFAB> >&        aco     = m_acoeffs[iphase];
     const RefCountedPtr<LevelData<EBFluxFAB> >&        bco     = m_bcoeffs[iphase];
     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& bco_irr = m_bcoeffs_irr[iphase];
     const RefCountedPtr<DirichletConductivityEBBC>&    ebbc    = m_ebbc[iphase];
-#else // Debug override, use internal stuff
 
-    const RefCountedPtr<DirichletConductivityEBBC>&    ebbc    = m_ebbc[iphase];
-
-
-    const int nghost = 1;
-    LayoutData<IntVectSet> irregSets(eblg.getDBL());
-    for (DataIterator dit = eblg.getDBL().dataIterator(); dit.ok(); ++dit){
-      Box grownBox = grow(eblg.getDBL().get(dit()), nghost);
-      grownBox &= a_domain,
-	irregSets[dit()] = eblg.getEBISL()[dit()].getIrregIVS(grownBox);
-      irregSets[dit()] |= eblg.getEBISL()[dit()].getMultiCells(grownBox);
-    }
-
-    EBCellFactory cellfact(ebisl);
-    EBFluxFactory fluxfact(ebisl);
-    BaseIVFactory<Real> ivfact(ebisl, irregSets);
-
-    RefCountedPtr<LevelData<EBCellFAB> >        aco = RefCountedPtr<LevelData<EBCellFAB> >
-      (new LevelData<EBCellFAB>(eblg.getDBL(), m_ncomp, nghost*IntVect::Unit, cellfact));
-    RefCountedPtr<LevelData<EBFluxFAB> >        bco = RefCountedPtr<LevelData<EBFluxFAB> >
-      (new LevelData<EBFluxFAB>(eblg.getDBL(), m_ncomp, nghost*IntVect::Unit, fluxfact));
-    RefCountedPtr<LevelData<BaseIVFAB<Real> > > bco_irr = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-      ( new LevelData<BaseIVFAB<Real> >(eblg.getDBL(), m_ncomp, nghost*IntVect::Unit, ivfact) );
-#endif
     m_ebops[iphase] = RefCountedPtr<EBConductivityOp> (new EBConductivityOp(eblg_fine,
     									    eblg,
     									    eblg_coar,
@@ -229,7 +220,9 @@ void mf_helmholtz_op::set_electrodes(const Vector<electrode>& a_electrodes){
 void mf_helmholtz_op::update_bc(){
 #if verb
   pout() << "mf_helmholtz_op::update_bc"<< endl;
-#endif  
+#endif
+
+  
 }
 
 void mf_helmholtz_op::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
@@ -622,9 +615,9 @@ void mf_helmholtz_op::relax(LevelData<MFCellFAB>&       a_e,
     }
   }
 #else
-  //  for (int i = 0; i < iterations; i++){
-  this->levelJacobi(a_e, a_residual, iterations);
-    //  }
+  for (int i = 0; i < iterations; i++){
+    this->levelJacobi(a_e, a_residual, iterations);
+  }
 #endif
 }
 
@@ -639,7 +632,7 @@ void mf_helmholtz_op::levelJacobi(LevelData<MFCellFAB>&       a_phi,
     mfalias::aliasMF(*m_alias[0], iphase, a_phi);
     mfalias::aliasMF(*m_alias[1], iphase, a_rhs);
     
-    m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], a_iterations);
+    m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
   }
 
 }

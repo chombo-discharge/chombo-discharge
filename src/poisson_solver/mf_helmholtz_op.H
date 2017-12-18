@@ -363,6 +363,11 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > m_bcoeffs_irr;
 
   /*!
+    @brief 
+  */
+  Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > m_dirival;
+
+  /*!
     @brief Aliasing stuff
   */
   Vector<LevelData<EBCellFAB>* > m_alias;
@@ -462,6 +467,11 @@ protected:
     @brief beta-coefficient
   */
   Real m_beta;
+
+  /*!
+    @brief Has BC been set?
+  */
+  bool m_hasBC;
   
 private:
   

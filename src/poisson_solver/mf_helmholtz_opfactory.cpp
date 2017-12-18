@@ -741,6 +741,8 @@ AMRLevelOp<LevelData<MFCellFAB> >* mf_helmholtz_opfactory::AMRnewOp(const Proble
 	       dx_coar,
 	       alpha,
 	       beta);
+
+  oper->set_electrodes(m_electrodes);
      
   
   
