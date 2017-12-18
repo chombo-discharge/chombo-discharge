@@ -50,7 +50,11 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
 
-
+#if 1 // Debug
+  ProblemDomain domain = a_mflg.get_eblg(0).getDomain();
+  RefCountedPtr<mfis> is = a_mflg.get_mfis();
+  pout() << "isect cells on domain " << domain << " = " << is->interface_region(domain).numPts() << endl;
+#endif
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     MFInterfaceFAB<Real>& bco         = m_bco[dit()];
     MFInterfaceFAB<Real>& weights     = m_weights[dit()];
@@ -228,7 +232,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const int phase1 = 0;
   const int phase2 = 1;
   
-  const IntVectSet& ivs = a_bco.get_ivs(); 
+  const IntVectSet& ivs = a_weights.get_ivs();
 
   const BaseIVFAB<Real>& bco1        = a_bco.get_ivfab(phase1);
   const BaseIVFAB<Real>& bco2        = a_bco.get_ivfab(phase2);
@@ -256,7 +260,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
-    //    a_phibc(vof, comp) = 1000.;
+    a_phibc(vof, comp) = 1000.;
   }
 
   // First phase loop. Add first stencil stuff

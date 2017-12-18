@@ -124,7 +124,6 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     }
 
 
-
     m_acoeffs[iphase]     = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
     m_bcoeffs[iphase]     = RefCountedPtr<LevelData<EBFluxFAB> >        (new LevelData<EBFluxFAB>());
     m_bcoeffs_irr[iphase] = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >());
@@ -295,7 +294,14 @@ void mf_helmholtz_op::diagonalScale(LevelData<MFCellFAB>& a_rhs){
 #if verb
   pout() << "mf_helmholtz_op::setdiagonalscale"<< endl;
 #endif
-  MFLevelDataOps::kappaWeight(a_rhs);
+
+  // Operator diagonal scale
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
+
+    m_ebops[iphase]->diagonalScale(*m_alias[0], true);
+  }
+  //  MFLevelDataOps::kappaWeight(a_rhs); // This came from MFPoissonOp
 }
 
 void mf_helmholtz_op::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
@@ -308,7 +314,6 @@ void mf_helmholtz_op::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
 
     m_ebops[iphase]->divideByIdentityCoef(*m_alias[0]);
   }
-
 }
 
 void mf_helmholtz_op::applyOpNoBoundary(LevelData<MFCellFAB>&       a_opPhi,

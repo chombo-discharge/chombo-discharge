@@ -24,11 +24,11 @@
 sphere_sphere_geometry::sphere_sphere_geometry(){
 
   Real eps0 = 1.0;
-  Real eps_mat = 1.0;
+  Real eps_mat = 10.0;
   Real elec_rad = 0.1;
   Real diel_rad = 0.1;
-  Real elec_noise = 0.E-3;
-  Real diel_noise = 0.E-3;
+  Real elec_noise = 3.E-3;
+  Real diel_noise = 3.E-3;
   Real elec_persist = 0.5;
   Real diel_persist = 0.5;
   
