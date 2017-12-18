@@ -69,7 +69,7 @@ void poisson_multifluid_gmg::solve(){
   m_amr->allocate(m_state,  1, 3);
   m_amr->allocate(m_source, 1, 3);
 
-  data_ops::set_value(m_state, 0.0);
+  data_ops::set_value(m_state,  1.0);
   data_ops::set_value(m_source, 0.0);
 #endif
   
@@ -114,7 +114,7 @@ void poisson_multifluid_gmg::set_coefficients(){
   m_amr->allocate(m_bco,       ncomps, ghosts);
   m_amr->allocate(m_bco_irreg, ncomps, ghosts);
 
-  data_ops::set_value(m_aco,       0.0);  // Always zero for poisson equation
+  data_ops::set_value(m_aco,       1.0);  // Always zero for poisson equation
   data_ops::set_value(m_bco,       eps0); // Will override this later
   data_ops::set_value(m_bco_irreg, eps0); // Will override this later
 
@@ -324,6 +324,9 @@ void poisson_multifluid_gmg::setup_solver(){
   const ProblemDomain coar_dom = m_amr->get_domains()[0];
 
   m_gmg_solver.define(coar_dom, *m_opfact, &m_bicgstab, 1 + finest_level);
+  m_gmg_solver.setSolverParameters(m_gmg_pre_smooth, m_gmg_post_smooth, m_gmg_bot_smooth, m_gmg_type, m_gmg_max_iter,
+				   m_gmg_eps, m_gmg_hang, m_gmg_norm_thresh);
+  m_gmg_solver.m_verbosity = m_gmg_verbosity;
 }
 
 void poisson_multifluid_gmg::do_ebcond_test(){

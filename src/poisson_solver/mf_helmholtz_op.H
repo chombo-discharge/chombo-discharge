@@ -337,7 +337,8 @@ public:
     @brief Jacobi iteration
   */
   virtual void levelJacobi( LevelData<MFCellFAB>&       a_phi,
-			    const LevelData<MFCellFAB>& a_rhs);
+			    const LevelData<MFCellFAB>& a_rhs,
+			    const int                   a_iterations);
 
 protected:
 

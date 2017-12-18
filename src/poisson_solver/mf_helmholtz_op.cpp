@@ -11,8 +11,9 @@
 #include <DirichletConductivityDomainBC.H>
 #include <MFLevelDataOps.H>
 #include <BaseIVFactory.H>
+#include <EBAMRDataOps.H>
 
-#define verb 1
+#define verb 0
 
 mf_helmholtz_op::mf_helmholtz_op(){
 
@@ -136,7 +137,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 												       &a_ghost_phi,
 												       &a_ghost_rhs));
     m_ebbc[iphase]->setValue(1.0);
-    m_ebbc[iphase]->setOrder(1);
+    m_ebbc[iphase]->setOrder(2);
 
     DirichletConductivityDomainBCFactory bcfact;
     bcfact.setValue(0.0);
@@ -214,8 +215,6 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   m_ops.define(fac);
 }
 
-
-
 void mf_helmholtz_op::set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
   m_jump = a_jump;
 }
@@ -257,7 +256,14 @@ void mf_helmholtz_op::diagonalScale(LevelData<MFCellFAB>& a_rhs){
 void mf_helmholtz_op::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
 #if verb
   pout() << "mf_helmholtz_op::dividebyidenticyoef"<< endl;
-#endif  
+#endif
+
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
+
+    m_ebops[iphase]->divideByIdentityCoef(*m_alias[0]);
+  }
+
 }
 
 void mf_helmholtz_op::applyOpNoBoundary(LevelData<MFCellFAB>&       a_opPhi,
@@ -495,6 +501,7 @@ Real mf_helmholtz_op::kappaNorm(Real&                       a_volume,
 				int                         a_p) const{
 
 #if verb
+  MayDay::Abort("error");
   pout() << "mf_helmholtz_op::kappaNorm"<< endl;
 #endif
   Real accum = 0.0;
@@ -615,14 +622,15 @@ void mf_helmholtz_op::relax(LevelData<MFCellFAB>&       a_e,
     }
   }
 #else
-  for (int i = 0; i < iterations; i++){
-    this->levelJacobi(a_e, a_residual);
-  }
+  //  for (int i = 0; i < iterations; i++){
+  this->levelJacobi(a_e, a_residual, iterations);
+    //  }
 #endif
 }
 
 void mf_helmholtz_op::levelJacobi(LevelData<MFCellFAB>&       a_phi,
-				  const LevelData<MFCellFAB>& a_rhs){
+				  const LevelData<MFCellFAB>& a_rhs,
+				  const int                   a_iterations){
   CH_TIME("mf_helmholtz_op::levelJacobi");
   LevelData<MFCellFAB>& resid = m_tmp;
   bool homogeneous = true;
@@ -631,7 +639,7 @@ void mf_helmholtz_op::levelJacobi(LevelData<MFCellFAB>&       a_phi,
     mfalias::aliasMF(*m_alias[0], iphase, a_phi);
     mfalias::aliasMF(*m_alias[1], iphase, a_rhs);
     
-    m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
+    m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], a_iterations);
   }
 
 }

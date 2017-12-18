@@ -268,7 +268,7 @@ void plasma_engine::get_geom_tags(){
 
   // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
   for (int lvl = 0; lvl < maxdepth; lvl++){
-    m_geom_tags[lvl].grow(2);
+    m_geom_tags[lvl].grow(1);
   }
 }
 
