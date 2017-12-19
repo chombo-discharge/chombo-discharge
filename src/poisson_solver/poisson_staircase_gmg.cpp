@@ -204,10 +204,23 @@ void poisson_staircase_gmg::setup_gmg(){
     pout() << "poisson_staircase_gmg::setup_gmg" << endl;
   }
 
+    const int finest_level = m_amr->get_finest_level();
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const ProblemDomain dom = m_amr->get_domains()[lvl];
+    const RefCountedPtr<EBIndexSpace>& ebis1 = m_mfis->get_ebis(phase::gas);
+    const RefCountedPtr<EBIndexSpace>& ebis2 = m_mfis->get_ebis(phase::solid);
+    const int whichLev = ebis1->getLevel(dom);
+    pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis1 irreg = " << ebis1->irregCells(whichLev).numPts() << endl;
+    pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis2 irreg = " << ebis2->irregCells(whichLev).numPts() << endl;
+    pout() << "level = " << lvl << "\t domain = " << dom << "\t isect_cells = " << m_mfis->interface_region(dom).numPts() << endl;
+    pout() << endl;
+  }
+
   phase::which_phase phase = phase::gas;
   
   const int comps                  = 1;
-  const int finest_level           = m_amr->get_finest_level();
+  //  const int finest_level           = m_amr->get_finest_level();
   const int ghost                  = m_amr->get_num_ghost();
   Vector<int> ref_ratios           = m_amr->get_ref_rat();
   Vector<Real>& dx                 = m_amr->get_dx();

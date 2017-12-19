@@ -261,6 +261,7 @@ void plasma_engine::get_geom_tags(){
 
     m_geom_tags[lvl].makeEmpty();
     m_geom_tags[lvl] |= ebis_gas->irregCells(which_level);
+
     if(!ebis_sol.isNull()){
       m_geom_tags[lvl] |= ebis_sol->irregCells(which_level);
     }

@@ -103,6 +103,23 @@ public:
   virtual const EBLevelGrid& get_eblg(int a_phase) const {
     return m_eblg[a_phase];
   }
+
+  /*!
+    @brief Get interface region between two phases.
+  */
+  virtual IntVectSet interface_region(const Box&       a_box,
+				      const DataIndex& a_dit,
+				      const int        a_phase1 = 0,
+				      const int        a_phase2 = 1) const {
+
+    const EBLevelGrid& eblg1 = this->get_eblg(a_phase1);
+    const EBLevelGrid& eblg2 = this->get_eblg(a_phase2);
+
+    const EBISBox& ebisbox1  = eblg1.getEBISL()[a_dit];
+    const EBISBox& ebisbox2  = eblg2.getEBISL()[a_dit];
+
+    return ebisbox1.getIrregIVS(a_box) & ebisbox2.getIrregIVS(a_box);
+  }
   
 private:
 

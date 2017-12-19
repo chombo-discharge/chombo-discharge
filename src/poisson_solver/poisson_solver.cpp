@@ -185,7 +185,7 @@ void poisson_solver::write_plot_file(const int a_step){
 	  src_gas(iv,0)   = src_sol(iv,0);
 	}
 	if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){
-	  data_gas(iv, 0) = 100.;//0.5*(data_gas(iv,0) + data_sol(iv,0));
+	  data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
 	}
       }
 

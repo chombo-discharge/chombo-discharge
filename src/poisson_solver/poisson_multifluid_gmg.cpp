@@ -69,7 +69,7 @@ void poisson_multifluid_gmg::solve(){
   m_amr->allocate(m_state,  1, 3);
   m_amr->allocate(m_source, 1, 3);
 
-  data_ops::set_value(m_state,  0.0);
+  data_ops::set_value(m_state,  100);
   data_ops::set_value(m_source, 0.0);
 #endif
   
@@ -111,7 +111,7 @@ void poisson_multifluid_gmg::set_coefficients(){
   m_amr->allocate(m_bco,       ncomps, ghosts);
   m_amr->allocate(m_bco_irreg, ncomps, ghosts);
 
-  data_ops::set_value(m_aco,       0.0);  // Always zero for poisson equation
+  data_ops::set_value(m_aco,       1.0);  // Always zero for poisson equation, but that is done from alpha. 
   data_ops::set_value(m_bco,       eps0); // Will override this later
   data_ops::set_value(m_bco_irreg, eps0); // Will override this later
 
@@ -227,18 +227,18 @@ void poisson_multifluid_gmg::setup_gmg(){
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
-  const int finest_level = m_amr->get_finest_level();
+  // const int finest_level = m_amr->get_finest_level();
   
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const ProblemDomain dom = m_amr->get_domains()[lvl];
-    const RefCountedPtr<EBIndexSpace>& ebis1 = m_mfis->get_ebis(phase::gas);
-    const RefCountedPtr<EBIndexSpace>& ebis2 = m_mfis->get_ebis(phase::solid);
-    const int whichLev = ebis1->getLevel(dom);
-    pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis1 irreg = " << ebis1->irregCells(whichLev).numPts() << endl;
-    pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis2 irreg = " << ebis2->irregCells(whichLev).numPts() << endl;
-    pout() << "level = " << lvl << "\t domain = " << dom << "\t isect_cells = " << m_mfis->interface_region(dom).numPts() << endl;
-    pout() << endl;
-  }
+  // for (int lvl = 0; lvl <= finest_level; lvl++){
+  //   const ProblemDomain dom = m_amr->get_domains()[lvl];
+  //   const RefCountedPtr<EBIndexSpace>& ebis1 = m_mfis->get_ebis(phase::gas);
+  //   const RefCountedPtr<EBIndexSpace>& ebis2 = m_mfis->get_ebis(phase::solid);
+  //   const int whichLev = ebis1->getLevel(dom);
+  //   pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis1 irreg = " << ebis1->irregCells(whichLev).numPts() << endl;
+  //   pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis2 irreg = " << ebis2->irregCells(whichLev).numPts() << endl;
+  //   pout() << "level = " << lvl << "\t domain = " << dom << "\t isect_cells = " << m_mfis->interface_region(dom).numPts() << endl;
+  //   pout() << endl;
+  // }
   
   this->set_coefficients();       // Set coefficients
   this->setup_operator_factory(); // Set the operator factory
@@ -249,6 +249,7 @@ void poisson_multifluid_gmg::setup_gmg(){
 #endif
 #if 0 // Testing stuff
   this->base_tests();
+  MayDay::Abort("stop");
 #endif
   
 
@@ -319,7 +320,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       ghost_rhs,
 									       1 + finest_level));
 
-  m_opfact->set_bottom_drop(64);
+  m_opfact->set_bottom_drop(32);
   m_opfact->set_jump(0.0, 1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 }
@@ -600,22 +601,22 @@ void poisson_multifluid_gmg::base_tests(){
     mfquadcfi[lvl].define(quadcfi_phases);
   }
 
-  m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
-									       mfeblg,
-									       mfquadcfi,
-									       refinement_ratios,
-									       grids,
-									       m_aco,
-									       m_bco,
-									       m_bco_irreg,
-									       alpha,
-									       beta,
-									       dx[0],
-									       domains[0],
-  									       domfact,
-  									       origin,
-  									       3*IntVect::Unit,
-  									       3*IntVect::Unit));
+  // m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
+  // 									       mfeblg,
+  // 									       mfquadcfi,
+  // 									       refinement_ratios,
+  // 									       grids,
+  // 									       m_aco,
+  // 									       m_bco,
+  // 									       m_bco_irreg,
+  // 									       alpha,
+  // 									       beta,
+  // 									       dx[0],
+  // 									       domains[0],
+  // 									       domfact,
+  // 									       origin,
+  // 									       3*IntVect::Unit,
+  // 									       3*IntVect::Unit));
 
   m_opfact->set_jump(1.0, 1.0);
 

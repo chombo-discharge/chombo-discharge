@@ -35,9 +35,9 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(4);                      // Set max amr depth
+  amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF. 
-  amr->set_refinement_ratio(2);                   // Set refinement ratio
+  amr->set_refinement_ratio(4);                   // Set refinement ratio
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
   amr->set_blocking_factor(8);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size

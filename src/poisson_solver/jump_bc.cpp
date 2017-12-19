@@ -50,7 +50,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
 
-#if 1 // Debug
+#if 0 // Debug
   ProblemDomain domain = a_mflg.get_eblg(0).getDomain();
   RefCountedPtr<mfis> is = a_mflg.get_mfis();
   pout() << "isect cells on domain " << domain << " = " << is->interface_region(domain).numPts() << endl;
@@ -123,7 +123,7 @@ void jump_bc::build_stencils(){
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
 
-	else if(m_order == 2 && drop_order){
+	if(m_order == 2 && drop_order){
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
       }
@@ -232,8 +232,10 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const int phase1 = 0;
   const int phase2 = 1;
   
-  const IntVectSet& ivs = a_weights.get_ivs();
+  const IntVectSet& ivs = a_stencils.get_ivs();
 
+  //  pout() << "cells = " << ivs.numPts() << endl;
+  
   const BaseIVFAB<Real>& bco1        = a_bco.get_ivfab(phase1);
   const BaseIVFAB<Real>& bco2        = a_bco.get_ivfab(phase2);
   const BaseIVFAB<Real>& w1          = a_weights.get_ivfab(phase1);
@@ -248,19 +250,11 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const EBGraph& graph1              = bco1.getEBGraph();
   const EBGraph& graph2              = bco2.getEBGraph();
 
-#if 0 // Debug
-  const EBISBox& ebis1 = phi1.getEBISBox();
-  const EBISBox& ebis2 = phi2.getEBISBox();
-
-  const IntVectSet phiivs = a_phibc.getIVS();
-  CH_assert(phiivs.contains(ivs));
-#endif
   
   // Set phibc = a_jump
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
-    a_phibc(vof, comp) = 1000.;
   }
 
   // First phase loop. Add first stencil stuff
@@ -288,8 +282,9 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   }
   
   // Divide by weights
-  for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
+  for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-    a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+    const Real denom    = bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp);
+    a_phibc(vof, comp) *= 1./denom;
   }
 }

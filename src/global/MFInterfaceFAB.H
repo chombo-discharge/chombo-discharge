@@ -54,7 +54,7 @@ public:
     const RefCountedPtr<mfis>& mfis = a_mflg.get_mfis();
     const int num_phases            = mfis->num_phases();
 
-    m_ivs = mfis->interface_region(domain) & dbl.get(a_dit);
+    m_ivs = a_mflg.interface_region(dbl.get(a_dit), a_dit);
     m_phase.resize(num_phases, NULL);
     
     for (int i = 0; i < num_phases; i++){

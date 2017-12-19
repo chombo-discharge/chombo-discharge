@@ -227,7 +227,7 @@ void mf_helmholtz_op::update_bc(const LevelData<MFCellFAB>& a_phi){
   pout() << "mf_helmholtz_op::update_bc"<< endl;
 #endif
 
-  this->set_bc_from_levelset();
+  //  this->set_bc_from_levelset();
   this->set_bc_from_matching(a_phi);
 }
 
@@ -296,12 +296,12 @@ void mf_helmholtz_op::diagonalScale(LevelData<MFCellFAB>& a_rhs){
 #endif
 
   // Operator diagonal scale
-  for (int iphase = 0; iphase < m_phases; iphase++){
-    mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
+  // for (int iphase = 0; iphase < m_phases; iphase++){
+  //   mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
 
-    m_ebops[iphase]->diagonalScale(*m_alias[0], true);
-  }
-  //  MFLevelDataOps::kappaWeight(a_rhs); // This came from MFPoissonOp
+  //   m_ebops[iphase]->diagonalScale(*m_alias[0], true);
+  // }
+  MFLevelDataOps::kappaWeight(a_rhs); // This came from MFPoissonOp
 }
 
 void mf_helmholtz_op::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
@@ -312,7 +312,7 @@ void mf_helmholtz_op::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
   for (int iphase = 0; iphase < m_phases; iphase++){
     mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
 
-    m_ebops[iphase]->divideByIdentityCoef(*m_alias[0]);
+    //    m_ebops[iphase]->divideByIdentityCoef(*m_alias[0]);
   }
 }
 
@@ -377,6 +377,8 @@ void mf_helmholtz_op::applyOp(LevelData<MFCellFAB>&        a_lhs,
   MayDay::Warning("mf_helmholtz_op::applyOp - the matching condition should be updated first");
 #endif
 
+  //  this->update_bc(a_phi);
+
   for (int i=0; i < m_phases; i++){
     mfalias::aliasMF(*m_alias[0], i, a_lhs);
     mfalias::aliasMF(*m_alias[1], i, a_phi);
@@ -401,8 +403,6 @@ void mf_helmholtz_op::createCoarsened(LevelData<MFCellFAB>&       a_lhs,
 #if verb
   pout() << "mf_helmholtz_op::createCoarsened"<< endl;
 #endif
-
-
 
   const IntVect ghostVec = a_rhs.ghostVect();
 
@@ -814,6 +814,8 @@ void mf_helmholtz_op::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
 #if verb
   MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
 #endif
+
+  //  this->update_bc(a_phi);
   
   for (int i=0; i < m_phases; i++){
     mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
@@ -842,6 +844,7 @@ void mf_helmholtz_op::AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
 #if verb
   MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
 #endif
+  //  this->update_bc(a_phi);
   
   for (int i=0; i<m_phases; i++){
     mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
@@ -866,6 +869,7 @@ void mf_helmholtz_op::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 #if verb
   MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
 #endif
+  //  this->update_bc(a_phi);
 
   for (int iphase = 0; iphase < m_phases; iphase++){
     mfalias::aliasMF(*m_alias[0], iphase, a_LofPhi);
@@ -934,6 +938,8 @@ void mf_helmholtz_op::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
 #if verb
   MayDay::Warning("mf_helmholtz_op::applyOp - the matching condition should be updated first");
 #endif
+
+  //  this->update_bc(a_correction);
 
   for (int i=0; i < m_phases; i++){
     mfalias::aliasMF(*m_alias[0], i, a_residual);
