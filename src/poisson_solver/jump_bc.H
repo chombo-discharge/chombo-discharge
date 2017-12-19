@@ -65,13 +65,15 @@ public:
   */
   virtual void match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 			const LevelData<BaseIVFAB<Real> >& a_jump,
-			const LevelData<MFCellFAB>&        a_phi);
+			const LevelData<MFCellFAB>&        a_phi,
+			const bool                         a_homogeneous);
 
   /*!
     @brief Match the boundary condition. No surface charge.
   */
   virtual void match_bc(LevelData<BaseIVFAB<Real> >& a_phibc,
-			const LevelData<MFCellFAB>&  a_phi);
+			const LevelData<MFCellFAB>&  a_phi,
+			const bool                   a_homogeneous);
 
 
 
@@ -166,7 +168,8 @@ protected:
 			const MFCellFAB&                  a_phi,
 			const MFInterfaceFAB<Real>&       a_bco,
 			const MFInterfaceFAB<Real>&       a_weights,
-			const MFInterfaceFAB<VoFStencil>& a_stencils);
+			const MFInterfaceFAB<VoFStencil>& a_stencils,
+			const bool                        a_homogeneous);
 };
 
 #endif

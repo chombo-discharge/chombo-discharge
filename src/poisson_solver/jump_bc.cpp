@@ -50,11 +50,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
 
-#if 0 // Debug
-  ProblemDomain domain = a_mflg.get_eblg(0).getDomain();
-  RefCountedPtr<mfis> is = a_mflg.get_mfis();
-  pout() << "isect cells on domain " << domain << " = " << is->interface_region(domain).numPts() << endl;
-#endif
+  int num = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     MFInterfaceFAB<Real>& bco         = m_bco[dit()];
     MFInterfaceFAB<Real>& weights     = m_weights[dit()];
@@ -198,24 +194,26 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 
 void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		       const LevelData<BaseIVFAB<Real> >& a_jump,
-		       const LevelData<MFCellFAB>&        a_phi){
+		       const LevelData<MFCellFAB>&        a_phi,
+		       const bool                         a_homogeneous){
   CH_TIME("jump_bc::match_bc(1)");
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
-    this->match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()]);
+    this->match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
   }
 }
 
 void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
-		       const LevelData<MFCellFAB>&        a_phi){
+		       const LevelData<MFCellFAB>&        a_phi,
+		       const bool                         a_homogeneous){
   CH_TIME("jump_bc::match_bc(1)");
 
   const int ncomp = 1;
-  
+
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real> zero(a_phibc[dit()].getIVS(), a_phibc[dit()].getEBGraph(), ncomp);
     zero.setVal(0.0);
-    this->match_bc(a_phibc[dit()], zero, a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()]);
+    this->match_bc(a_phibc[dit()], zero, a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
   }
 }
 
@@ -224,7 +222,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const MFCellFAB&                  a_phi,
 		       const MFInterfaceFAB<Real>&       a_bco,
 		       const MFInterfaceFAB<Real>&       a_weights,
-		       const MFInterfaceFAB<VoFStencil>& a_stencils){
+		       const MFInterfaceFAB<VoFStencil>& a_stencils,
+		       const bool                        a_homogeneous){
   CH_TIME("jump_bc::match_bc(2)");
 
 
@@ -232,9 +231,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const int phase1 = 0;
   const int phase2 = 1;
   
-  const IntVectSet& ivs = a_stencils.get_ivs();
-
-  //  pout() << "cells = " << ivs.numPts() << endl;
+  const IntVectSet& ivs = a_bco.get_ivs();
   
   const BaseIVFAB<Real>& bco1        = a_bco.get_ivfab(phase1);
   const BaseIVFAB<Real>& bco2        = a_bco.get_ivfab(phase2);

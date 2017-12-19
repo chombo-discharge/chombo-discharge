@@ -247,9 +247,9 @@ void poisson_multifluid_gmg::setup_gmg(){
 #if 0 // Testing stuff
   this->do_ebcond_test();
 #endif
-#if 0 // Testing stuff
+#if 1 // Testing stuff
   this->base_tests();
-  MayDay::Abort("stop");
+  //  MayDay::Abort("stop");
 #endif
   
 
@@ -478,7 +478,6 @@ void poisson_multifluid_gmg::do_ebcond_test(){
 
 void poisson_multifluid_gmg::base_tests(){
 
-  this->base_tests();
   const int finest_level = m_amr->get_finest_level();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
 
@@ -563,7 +562,7 @@ void poisson_multifluid_gmg::base_tests(){
     LayoutData<IntVectSet> cfivs;
     EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
 
-    jump_bc* jump = new jump_bc(mflg, *m_bco_irreg[lvl], dx[lvl], 2, &cfivs);
+    //    jump_bc* jump = new jump_bc(mflg, *m_bco_irreg[lvl], dx[lvl], 2, &cfivs);
     
   }
 
@@ -631,8 +630,9 @@ void poisson_multifluid_gmg::base_tests(){
   EBArith::defineCFIVS(cfivs, grids[lvl], domains[lvl]);
   jump_bc* jump = new jump_bc(mfeblg[lvl], *m_bco_irreg[lvl], dx[lvl], 2, &cfivs);
 
-  EBLevelDataOps::setVal(*sigma[lvl], 1.0);
-  MFLevelDataOps::setVal(*m_state[lvl], 1.0);
+  EBLevelDataOps::setVal(*sigma[lvl], 0.0);
+  MFLevelDataOps::setVal(*m_state[lvl], 1.23456789);
 
-  jump->match_bc(*phi_bc[lvl], *sigma[lvl], *m_state[lvl]);
+
+  jump->match_bc(*phi_bc[lvl], *m_state[lvl], false);
 }
