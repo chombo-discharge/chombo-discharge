@@ -56,7 +56,7 @@ int main(int argc, char* argv[]){
 											amr));
 
   // Set up a Poisson solver
-  //  RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
+  //RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
   RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
   poisson->set_verbosity(10);
   poisson->set_amr(amr);

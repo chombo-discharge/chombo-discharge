@@ -5,8 +5,10 @@
   @date Dec. 2017
 */
 
+#include "mfdirichletconductivityebbc.H"
 #include "mf_helmholtz_op.H"
 #include "mfalias.H"
+
 
 #include <DirichletConductivityDomainBC.H>
 #include <MFLevelDataOps.H>
@@ -140,11 +142,22 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     RefCountedPtr<DirichletConductivityDomainBC> dombc = RefCountedPtr<DirichletConductivityDomainBC>
       (bcfact.create(a_domain, ebisl, a_dx*RealVect::Unit));
 
-    m_ebbc[iphase]        = RefCountedPtr<DirichletConductivityEBBC>    (new DirichletConductivityEBBC(a_domain,
-												       ebisl,
-												       a_dx*RealVect::Unit,
-												       &a_ghost_phi,
-												       &a_ghost_rhs));
+
+
+#if 1 // Testing
+    m_ebbc[iphase] = RefCountedPtr<mfdirichletconductivityebbc> (new mfdirichletconductivityebbc(a_domain,
+												 ebisl,
+												 a_dx*RealVect::Unit,
+												 &a_ghost_phi,
+												 &a_ghost_rhs)),
+#else
+      
+      m_ebbc[iphase]        = RefCountedPtr<DirichletConductivityEBBC>    (new DirichletConductivityEBBC(a_domain,
+													 ebisl,
+													 a_dx*RealVect::Unit,
+													 &a_ghost_phi,
+													 &a_ghost_rhs));
+#endif
 
     m_ebbc[iphase]->setValue(0.0);
     m_ebbc[iphase]->setOrder(2);
@@ -173,31 +186,31 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     const RefCountedPtr<LevelData<EBCellFAB> >&        aco     = m_acoeffs[iphase];
     const RefCountedPtr<LevelData<EBFluxFAB> >&        bco     = m_bcoeffs[iphase];
     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& bco_irr = m_bcoeffs_irr[iphase];
-    const RefCountedPtr<DirichletConductivityEBBC>&    ebbc    = m_ebbc[iphase];
+    const RefCountedPtr<mfdirichletconductivityebbc>&    ebbc  = m_ebbc[iphase];
 
     m_ebops[iphase] = RefCountedPtr<EBConductivityOp> (new EBConductivityOp(eblg_fine,
-    									    eblg,
-    									    eblg_coar,
-    									    eblg_mg,
-    									    quadcfi,
-    									    dombc,
-    									    ebbc,
-    									    a_dx,
-    									    a_dx_coar,
-    									    a_ref_to_fine,
-    									    a_ref_to_coar,
-    									    a_has_fine,
-    									    a_has_coar,
-    									    a_has_mg,
-    									    a_layout_changed,
+									    eblg,
+									    eblg_coar,
+									    eblg_mg,
+									    quadcfi,
+									    dombc,
+									    ebbc,
+									    a_dx,
+									    a_dx_coar,
+									    a_ref_to_fine,
+									    a_ref_to_coar,
+									    a_has_fine,
+									    a_has_coar,
+									    a_has_mg,
+									    a_layout_changed,
 									    a_alpha,
 									    a_beta,
-    									    aco,
-    									    bco,
-    									    bco_irr,
-    									    a_ghost_phi,
-    									    a_ghost_rhs,
-    									    a_relax_type));
+									    aco,
+									    bco,
+									    bco_irr,
+									    a_ghost_phi,
+									    a_ghost_rhs,
+									    a_relax_type));
   }
 
 
@@ -480,11 +493,11 @@ Real mf_helmholtz_op::dotProduct(const LevelData<MFCellFAB>& a_data1,
   int result;
 
   result = MPI_Allreduce(&accum, &recv, 1, MPI_CH_REAL,
-                         MPI_SUM, Chombo_MPI::comm);
+			 MPI_SUM, Chombo_MPI::comm);
   accum = recv;
 
   result = MPI_Allreduce(&volume, &recv, 1, MPI_CH_REAL,
-                         MPI_SUM, Chombo_MPI::comm);
+			 MPI_SUM, Chombo_MPI::comm);
   volume = recv;
 #endif
 
@@ -589,14 +602,14 @@ Real mf_helmholtz_op::kappaNorm(Real&                       a_volume,
       a_volume += curVolume;
 
       for (int i=0; i<ncomp; i++) {
-        if (a_p == 0){
+	if (a_p == 0){
 	  if (cur[i] > accum){
 	    accum = cur[i];
 	  }
-        }
+	}
 	else {
-          accum += cur[i];
-        }
+	  accum += cur[i];
+	}
       }
     }
 #ifdef CH_MPI
@@ -626,13 +639,13 @@ Real mf_helmholtz_op::kappaNorm(Real&                       a_volume,
   if (a_p != 0)
     {
       if (a_volume > 0.0)
-        {
-          accum = accum / a_volume;
-        }
+	{
+	  accum = accum / a_volume;
+	}
       else
-        {
-          accum = 0;
-        }
+	{
+	  accum = 0;
+	}
       Real invPow = 1.0/a_p;
       accum = pow(accum,invPow);
     }
@@ -894,7 +907,7 @@ void mf_helmholtz_op::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
   }
 
 #if verb
-    pout() << "mf_helmholtz_op::amroperator - done" << endl;
+  pout() << "mf_helmholtz_op::amroperator - done" << endl;
 #endif
 }
 

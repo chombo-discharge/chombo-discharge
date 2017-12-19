@@ -283,5 +283,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     const VolIndex& vof = vofit();
     const Real denom    = bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp);
     a_phibc(vof, comp) *= 1./denom;
+    a_phibc(vof, comp) = 1.0;
   }
 }

@@ -14,6 +14,7 @@
 #include "MFLevelGrid.H"
 #include "electrode.H"
 #include "MFQuadCFInterp.H"
+#include "mfdirichletconductivityebbc.H"
 
 #include <LevelDataOps.H>
 #include <RefCountedPtr.H>
@@ -429,7 +430,9 @@ protected:
   /*!
     @brief Dirichlet conductivity bc for each phase
   */
-  Vector<RefCountedPtr<DirichletConductivityEBBC> > m_ebbc;
+  //  Vector<RefCountedPtr<DirichletConductivityEBBC> > m_ebbc;
+
+  Vector<RefCountedPtr<mfdirichletconductivityebbc> > m_ebbc;
 
   /*!
     @brief Electrodes
