@@ -9,7 +9,6 @@
 #include "mf_helmholtz_op.H"
 #include "mfalias.H"
 
-
 #include <DirichletConductivityDomainBC.H>
 #include <MFLevelDataOps.H>
 #include <BaseIVFactory.H>
@@ -161,6 +160,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 
     m_ebbc[iphase]->setValue(0.0);
     m_ebbc[iphase]->setOrder(2);
+    m_ebbc[iphase]->define_ivs(a_mflg);
 
 
     // Create storage for data-based dirichlet boundary conditions

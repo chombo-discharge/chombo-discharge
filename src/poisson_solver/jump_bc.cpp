@@ -226,6 +226,10 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const bool                        a_homogeneous){
   CH_TIME("jump_bc::match_bc(2)");
 
+#if 1 // Don't modify bc value for now. I'm working on something else
+  return;
+#endif
+
 
   const int comp   = 0;
   const int phase1 = 0;
@@ -283,6 +287,5 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     const VolIndex& vof = vofit();
     const Real denom    = bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp);
     a_phibc(vof, comp) *= 1./denom;
-    a_phibc(vof, comp) = 1.0;
   }
 }

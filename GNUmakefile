@@ -20,15 +20,15 @@ all: all-test
 
 #
 base_dir = .
-src_dirs = ./src		\
-	./src/amr_mesh		\
-	./src/cdr_solver	\
-	./src/geometry		\
-	./src/global		\
-	./src/plasma_solver 	\
-	./src/poisson_solver 	\
-	./src/rte_solver 	\
-	./geometries_prebuilt	\
+src_dirs = ./src				\
+	./src/amr_mesh				\
+	./src/cdr_solver			\
+	./src/geometry				\
+	./src/global				\
+	./src/plasma_solver		 	\
+	./src/poisson_solver		 	\
+	./src/rte_solver		 	\
+	./geometries_prebuilt			\
 
 # Define rules to build everything
 include $(CHOMBO_HOME)/mk/Make.example

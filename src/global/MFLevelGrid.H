@@ -9,6 +9,8 @@
 #ifndef _MFLEVELGRID_
 #define _MFLEVELGRID_
 
+#include "mfis.H"
+
 #include "EBLevelGrid.H"
 
 /*!

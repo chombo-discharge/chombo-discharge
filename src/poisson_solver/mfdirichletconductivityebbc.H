@@ -9,6 +9,9 @@
 #ifndef _MFDIRICHLETCONDUCTIVITYEBBC_
 #define _MFDIRICHLETCONDUCTIVITYEBBC_
 
+#include "MFLevelGrid.H"
+#include "mfis.H"
+
 #include <DirichletConductivityEBBC.H>
 
 /*!
@@ -38,5 +41,39 @@ public:
   */
   virtual ~mfdirichletconductivityebbc();
 
+  /*!
+    @brief Define interface cells
+  */
+  virtual void define_ivs(const MFLevelGrid& a_mflg);
+
+#if 1
+  /*!
+    @brief Apply EB flux
+  */
+
+  virtual void applyEBFlux(EBCellFAB&                    a_lphi,
+			   const EBCellFAB&              a_phi,
+			   VoFIterator&                  a_vofit,
+			   const LayoutData<IntVectSet>& a_cfivs,
+			   const DataIndex&              a_dit,
+			   const RealVect&               a_probLo,
+			   const RealVect&               a_dx,
+			   const Real&                   a_factor,
+			   const bool&                   a_useHomogeneous,
+			   const Real&                   a_time);
+#endif
+
+
+protected:
+
+  /*!
+    @brief Interface cells
+  */
+  LayoutData<IntVectSet> m_ivs;
+
+  /*!
+    @brief VoFIterator for boundary condition matching cells
+  */
+  VoFIterator m_vofiter_matching;
 };
 #endif
