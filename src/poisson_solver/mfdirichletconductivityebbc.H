@@ -77,8 +77,18 @@ protected:
   LayoutData<IntVectSet> m_ivs;
 
   /*!
+    @brief Flux to be smooshed into applyEBFlux for multi-fluid cells
+  */
+  LevelData<BaseIVFAB<Real> >* m_dphidn;
+
+  /*!
     @brief VoFIterator for boundary condition matching cells
   */
   VoFIterator m_vofiter_matching;
+
+  /*!
+    @brief Make sure multifluid cells have been set
+  */
+  bool m_definedmf;
 };
 #endif

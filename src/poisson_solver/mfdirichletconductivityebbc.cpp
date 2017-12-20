@@ -23,13 +23,20 @@ void mfdirichletconductivityebbc::define_ivs(const MFLevelGrid& a_mflg){
     m_ivs[dit()] = a_mflg.interface_region(dbl.get(dit()), dit());
     num += m_ivs[dit()].numPts();
   }
+
+  m_definedmf = true;
 }
 
 void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const Real& a_factor){
 
+  if(!m_definedmf){
+    MayDay::Error("mfdirichletconductivityebbc::define - must set multifluid cells first!");
+  }
+  
 #if 1
   DirichletConductivityEBBC::define(a_cfivs, a_factor);
 #else // This is where the new code goes. 
+
 
 #endif
 
