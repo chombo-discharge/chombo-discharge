@@ -309,8 +309,6 @@ void mf_helmholtz_opfactory::set_relax_type(const int a_relax_type){
   m_relax_type = a_relax_type;
 }
 
-
-
 void mf_helmholtz_opfactory::set_max_box_size(const int a_max_box_size){
   m_max_box_size = a_max_box_size;
 }

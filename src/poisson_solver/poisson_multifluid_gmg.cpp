@@ -69,7 +69,7 @@ void poisson_multifluid_gmg::solve(){
   m_amr->allocate(m_state,  1, 3);
   m_amr->allocate(m_source, 1, 3);
 
-  data_ops::set_value(m_state,  100);
+  data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
 #endif
   
@@ -247,9 +247,9 @@ void poisson_multifluid_gmg::setup_gmg(){
 #if 0 // Testing stuff
   this->do_ebcond_test();
 #endif
-#if 1 // Testing stuff
+#if 0 // Testing stuff
   this->base_tests();
-  //  MayDay::Abort("stop");
+  MayDay::Abort("stop");
 #endif
   
 
@@ -294,7 +294,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   }
 
   const Real alpha =  0.0;
-  const Real beta  = -1.0;
+  const Real beta  =  1.0;
 
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
 
@@ -320,7 +320,8 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       ghost_rhs,
 									       1 + finest_level));
 
-  m_opfact->set_bottom_drop(64);
+  m_opfact->set_relax_type(2);
+  m_opfact->set_bottom_drop(32);
   m_opfact->set_jump(0.0, 1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 }
@@ -633,6 +634,7 @@ void poisson_multifluid_gmg::base_tests(){
   EBLevelDataOps::setVal(*sigma[lvl], 0.0);
   MFLevelDataOps::setVal(*m_state[lvl], 1.23456789);
 
-
+  pout() << "matching bc" << endl;
   jump->match_bc(*phi_bc[lvl], *m_state[lvl], false);
+  pout() << "done matching bc" << endl;
 }

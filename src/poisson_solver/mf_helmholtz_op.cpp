@@ -89,8 +89,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   }
 
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
-  //m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
-  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, 1, (a_mflg.get_eblg(0)).getCFIVS()));
+  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
 
   Vector<EBISLayout> layouts(num_phases);
   Vector<int> comps(num_phases);;
@@ -159,7 +158,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 #endif
 
     m_ebbc[iphase]->setValue(0.0);
-    m_ebbc[iphase]->setOrder(2);
+    m_ebbc[iphase]->setOrder(1);
     m_ebbc[iphase]->define_ivs(a_mflg);
 
 
@@ -188,6 +187,9 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& bco_irr = m_bcoeffs_irr[iphase];
     const RefCountedPtr<mfdirichletconductivityebbc>&  ebbc    = m_ebbc[iphase];
 
+    const Real alpha = a_alpha;
+    const Real beta  = a_beta;
+
     m_ebops[iphase] = RefCountedPtr<EBConductivityOp> (new EBConductivityOp(eblg_fine,
 									    eblg,
 									    eblg_coar,
@@ -203,8 +205,8 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 									    a_has_coar,
 									    a_has_mg,
 									    a_layout_changed,
-									    a_alpha,
-									    a_beta,
+									    alpha,
+									    beta,
 									    aco,
 									    bco,
 									    bco_irr,
@@ -237,7 +239,7 @@ void mf_helmholtz_op::set_electrodes(const Vector<electrode>& a_electrodes){
 }
 
 void mf_helmholtz_op::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){
-#if verb
+#if 0
   pout() << "mf_helmholtz_op::update_bc"<< endl;
 #endif
 
@@ -301,13 +303,13 @@ void mf_helmholtz_op::diagonalScale(LevelData<MFCellFAB>& a_rhs){
   pout() << "mf_helmholtz_op::setdiagonalscale"<< endl;
 #endif
 
-  // Operator diagonal scale
-  for (int iphase = 0; iphase < m_phases; iphase++){
-    mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
+  // // Operator diagonal scale
+  // for (int iphase = 0; iphase < m_phases; iphase++){
+  //   mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
 
-    m_ebops[iphase]->diagonalScale(*m_alias[0], true);
-  }
-  //  MFLevelDataOps::kappaWeight(a_rhs); // This came from MFPoissonOp
+  //   m_ebops[iphase]->diagonalScale(*m_alias[0], true);
+  // }
+  MFLevelDataOps::kappaWeight(a_rhs); // This came from MFPoissonOp
 }
 
 void mf_helmholtz_op::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
@@ -361,8 +363,11 @@ void mf_helmholtz_op::residual(LevelData<MFCellFAB>&        a_lhs,
 #endif
   
   this->applyOp(a_lhs, a_phi, a_homogeneous);
-  this->incr(a_lhs, a_rhs, -1);
-  this->scale(a_lhs, -1.0);
+
+  // Make residual rhs - L(phi)
+  this->scale(a_lhs,      -1.0);
+  this->incr(a_lhs, a_rhs, 1.0);
+
 }
 
 void mf_helmholtz_op::preCond(LevelData<MFCellFAB>&       a_correction,
@@ -371,7 +376,7 @@ void mf_helmholtz_op::preCond(LevelData<MFCellFAB>&       a_correction,
 #if verb
   pout() << "mf_helmholtz_op::precond"<< endl;
 #endif
-  this->relax(a_correction, a_residual, 40);
+  this->relax(a_correction, a_residual, 10);
 }
 
 void mf_helmholtz_op::applyOp(LevelData<MFCellFAB>&        a_lhs,
@@ -667,7 +672,7 @@ void mf_helmholtz_op::relax(LevelData<MFCellFAB>&       a_e,
 #endif
 
 #if 0
-  for (int i=0; i<iterations; i++){
+  for (int i=0; i < iterations; i++){
     if (m_relax == 0){
       this->levelJacobi(a_e, a_residual);
     }
@@ -724,7 +729,6 @@ void mf_helmholtz_op::createCoarser(LevelData<MFCellFAB>&       a_coarse,
     ebisl[iphase] = m_mflg_coar_mg.get_eblg(iphase).getEBISL();
   }
 
-
   MFCellFactory factory(ebisl, comps);
   a_coarse.define(dbl, m_ncomp, a_fine.ghostVect(), factory);
 }
@@ -773,98 +777,9 @@ void mf_helmholtz_op::AMRResidual(LevelData<MFCellFAB>&       a_residual,
 
   this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoarse, a_homogeneousBC, a_finerOp);
 
-  this->scale(a_residual,-1.0);
-  this->incr(a_residual,a_rhs,1.0);
-}
-
-void mf_helmholtz_op::AMRResidualNC(LevelData<MFCellFAB>&       a_residual,
-				    const LevelData<MFCellFAB>& a_phiFine,
-				    const LevelData<MFCellFAB>& a_phi,
-				    const LevelData<MFCellFAB>& a_rhs,
-				    bool                        a_homogeneousBC,
-				    AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
-  CH_TIME("mf_helmholtz_op::AMRResidualNC");
-#if verb
-  pout() << "mf_helmholtz_op::amrresidualnc"<< endl;
-#endif
-
-  this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousBC, a_finerOp);
-  this->scale(a_residual,-1.0);
-  this->incr(a_residual,a_rhs,1.0);
-
-#if verb
-  pout() << "mf_helmholtz_op::amrresidualnc - done"<< endl;
-#endif
-}
-
-
-void mf_helmholtz_op::AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
-				    const LevelData<MFCellFAB>& a_phi,
-				    const LevelData<MFCellFAB>& a_phiCoarse,
-				    const LevelData<MFCellFAB>& a_rhs,
-				    bool                        a_homogeneousBC){
-  CH_TIME("mf_helmholtz_op::AMRResidualNF");
-#if verb
-  pout() << "mf_helmholtz_op::amrresidualnf"<< endl;
-#endif
-
-  this->AMROperatorNF(a_residual, a_phi, a_phiCoarse, a_homogeneousBC);
-  this->scale(a_residual,-1.0);
-  this->incr(a_residual,a_rhs,1.0);
-}
-
-void mf_helmholtz_op::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
-				    const LevelData<MFCellFAB>& a_phiFine,
-				    const LevelData<MFCellFAB>& a_phi,
-				    bool                        a_homogeneousBC,
-				    AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp)
-{
-  CH_TIME("mf_helmholtz_op::AMROperatorNC");
-#if verb
-  pout() << "mf_helmholtz_op::amroperatornc"<< endl;
-#endif
-#if verb
-  MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
-#endif
-
-  this->update_bc(a_phi, a_homogeneousBC);
-  
-  for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
-    mfalias::aliasMF(*m_alias[1], i, a_phi);
-    mfalias::aliasMF(*m_alias[3], i, a_phiFine);
-    
-    m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], NULL, a_homogeneousBC, true);
-
-    mf_helmholtz_op* finerOp = (mf_helmholtz_op*) a_finerOp;
-    m_ebops[i]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[i]);
-  }
-#if verb
-  pout() << "mf_helmholtz_op::amroperatornc - done"<< endl;
-#endif
-}
-
-void mf_helmholtz_op::AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
-				    const LevelData<MFCellFAB>& a_phi,
-				    const LevelData<MFCellFAB>& a_phiCoarse,
-				    bool                        a_homogeneousBC){
-  CH_TIME("mf_helmholtz_op::AMROperatorNF");
-#if verb
-  pout() << "mf_helmholtz_op::amroperatornf"<< endl;
-#endif
-
-#if verb
-  MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
-#endif
-  this->update_bc(a_phi, a_homogeneousBC);
-  
-  for (int i=0; i<m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
-    mfalias::aliasMF(*m_alias[1], i, a_phi);
-    mfalias::aliasMF(*m_alias[2], i, a_phiCoarse);
-      
-    m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
-  }
+  // Make residual = a_rhs - L(phi)
+  this->scale(a_residual,      -1.0);
+  this->incr(a_residual, a_rhs, 1.0);
 }
 
 void mf_helmholtz_op::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
@@ -885,26 +800,124 @@ void mf_helmholtz_op::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 
   for (int iphase = 0; iphase < m_phases; iphase++){
     mfalias::aliasMF(*m_alias[0], iphase, a_LofPhi);
-    mfalias::aliasMF(*m_alias[1], iphase, a_phi);
-    mfalias::aliasMF(*m_alias[2], iphase, a_phiCoarse);
-    mfalias::aliasMF(*m_alias[3], iphase, a_phiFine);
-#if verb
-    pout() << "apply op" << endl;
-#endif
-    m_ebops[iphase]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
-      
+    mfalias::aliasMF(*m_alias[1], iphase, a_phiFine);
+    mfalias::aliasMF(*m_alias[2], iphase, a_phi);
+    mfalias::aliasMF(*m_alias[3], iphase, a_phiCoarse);
+
     mf_helmholtz_op* finerOp = (mf_helmholtz_op*) a_finerOp;
 
-#if verb
-    pout() << "reflux" << endl;
-#endif
-    m_ebops[iphase]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[iphase]);
+    m_ebops[iphase]->AMROperator(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_homogeneousBC, finerOp->m_ebops[iphase]);
   }
+										 
+  //    m_ebops[iphase]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
+  //    m_ebops[iphase]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[iphase]);
 
 #if verb
   pout() << "mf_helmholtz_op::amroperator - done" << endl;
 #endif
 }
+
+void mf_helmholtz_op::AMRResidualNC(LevelData<MFCellFAB>&       a_residual,
+				    const LevelData<MFCellFAB>& a_phiFine,
+				    const LevelData<MFCellFAB>& a_phi,
+				    const LevelData<MFCellFAB>& a_rhs,
+				    bool                        a_homogeneousBC,
+				    AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
+  CH_TIME("mf_helmholtz_op::AMRResidualNC");
+#if verb
+  pout() << "mf_helmholtz_op::amrresidualnc"<< endl;
+#endif
+
+  this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousBC, a_finerOp);
+
+  // Make residual = a_rhs - L(phi)
+  this->scale(a_residual,      -1.0);
+  this->incr(a_residual, a_rhs, 1.0);
+
+#if verb
+  pout() << "mf_helmholtz_op::amrresidualnc - done"<< endl;
+#endif
+}
+
+void mf_helmholtz_op::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
+				    const LevelData<MFCellFAB>& a_phiFine,
+				    const LevelData<MFCellFAB>& a_phi,
+				    bool                        a_homogeneousBC,
+				    AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp)
+{
+  CH_TIME("mf_helmholtz_op::AMROperatorNC");
+#if verb
+  pout() << "mf_helmholtz_op::amroperatornc"<< endl;
+#endif
+#if verb
+  MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
+#endif
+
+  this->update_bc(a_phi, a_homogeneousBC);
+  
+  for (int i=0; i < m_phases; i++){
+    mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
+    mfalias::aliasMF(*m_alias[1], i, a_phiFine);
+    mfalias::aliasMF(*m_alias[2], i, a_phi);
+
+    mf_helmholtz_op* finerOp = (mf_helmholtz_op*) a_finerOp;
+    m_ebops[i]->AMROperatorNC(*m_alias[0], *m_alias[1], *m_alias[2], a_homogeneousBC, finerOp->m_ebops[i]);
+
+    
+    
+    // m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], NULL, a_homogeneousBC, true);
+
+    // mf_helmholtz_op* finerOp = (mf_helmholtz_op*) a_finerOp;
+    // m_ebops[i]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[i]);
+  }
+#if verb
+  pout() << "mf_helmholtz_op::amroperatornc - done"<< endl;
+#endif
+}
+
+
+void mf_helmholtz_op::AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
+				    const LevelData<MFCellFAB>& a_phi,
+				    const LevelData<MFCellFAB>& a_phiCoarse,
+				    const LevelData<MFCellFAB>& a_rhs,
+				    bool                        a_homogeneousBC){
+  CH_TIME("mf_helmholtz_op::AMRResidualNF");
+#if verb
+  pout() << "mf_helmholtz_op::amrresidualnf"<< endl;
+#endif
+
+  this->AMROperatorNF(a_residual, a_phi, a_phiCoarse, a_homogeneousBC);
+
+  // Make residual = a_rhs - L(phi)
+  this->scale(a_residual,      -1.0);
+  this->incr(a_residual, a_rhs, 1.0);
+}
+
+void mf_helmholtz_op::AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
+				    const LevelData<MFCellFAB>& a_phi,
+				    const LevelData<MFCellFAB>& a_phiCoarse,
+				    bool                        a_homogeneousBC){
+  CH_TIME("mf_helmholtz_op::AMROperatorNF");
+#if verb
+  pout() << "mf_helmholtz_op::amroperatornf"<< endl;
+#endif
+
+#if verb
+  MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
+#endif
+  this->update_bc(a_phi, a_homogeneousBC);
+  
+  for (int i=0; i<m_phases; i++){
+    mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
+    mfalias::aliasMF(*m_alias[1], i, a_phi);
+    mfalias::aliasMF(*m_alias[2], i, a_phiCoarse);
+
+    m_ebops[i]->AMROperatorNF(*m_alias[0], *m_alias[1], *m_alias[2], a_homogeneousBC);
+    //    m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
+  }
+}
+
+
 
 void mf_helmholtz_op::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
 					const LevelData<MFCellFAB>& a_correction,
@@ -937,6 +950,7 @@ void mf_helmholtz_op::AMRRestrict(LevelData<MFCellFAB>&       a_resCoarse,
 #if verb
   pout() << "mf_helmholtz_op::amrrestrict"<< endl;
 #endif
+  
   for (int i=0; i < m_phases; i++){
     mfalias::aliasMF(*m_alias[0], i, a_resCoarse);
     mfalias::aliasMF(*m_alias[1], i, a_residual);
@@ -953,6 +967,7 @@ void mf_helmholtz_op::AMRProlong(LevelData<MFCellFAB>&       a_correction,
 #if verb
   pout() << "mf_helmholtz_op::amrprolong"<< endl;
 #endif
+  
   for (int i=0; i < m_phases; i++){
     mfalias::aliasMF(*m_alias[0], i, a_correction);
     mfalias::aliasMF(*m_alias[1], i, a_coarseCorrection);

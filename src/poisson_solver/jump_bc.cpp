@@ -46,6 +46,7 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
 
   CH_assert(m_mfis->num_phases() == 2); // Only two-phase
 
+  m_ivs.define(m_grids);
   m_bco.define(m_grids);
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
@@ -59,6 +60,8 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
     bco.define(m_mflg,     dit());
     weights.define(m_mflg, dit());
     stens.define(m_mflg,   dit());
+
+    m_ivs[dit()] = bco.get_ivs();
   }
 
   this->set_bco(a_bco);
@@ -210,9 +213,9 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 
   const int ncomp = 1;
 
+
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real> zero(a_phibc[dit()].getIVS(), a_phibc[dit()].getEBGraph(), ncomp);
-    zero.setVal(0.0);
     this->match_bc(a_phibc[dit()], zero, a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
   }
 }
@@ -225,11 +228,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const MFInterfaceFAB<VoFStencil>& a_stencils,
 		       const bool                        a_homogeneous){
   CH_TIME("jump_bc::match_bc(2)");
-
-#if 0 // Don't modify bc value for now. I'm working on something else
-  return;
-#endif
-
 
   const int comp   = 0;
   const int phase1 = 0;
@@ -285,7 +283,62 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   // Divide by weights
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-    const Real denom    = bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp);
-    a_phibc(vof, comp) *= 1./denom;
+    a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+  }
+}
+
+void jump_bc::compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&       a_dphidn,
+			     const Vector<LevelData<BaseIVFAB<Real> > >& a_phibc,
+			     const LevelData<MFCellFAB>&                 a_phi){
+
+  for (int iphase = 0; iphase < m_mfis->num_phases(); iphase++){
+    this->compute_dphidn(a_dphidn[iphase], a_phibc[iphase], a_phi, iphase);
+  }
+}
+
+void jump_bc::compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			     const LevelData<BaseIVFAB<Real> >& a_phibc,
+			     const LevelData<MFCellFAB>&        a_phi,
+			     const int                          a_phase){
+
+  for (DataIterator dit = a_dphidn.dataIterator(); dit.ok(); ++dit){
+    this->compute_dphidn(a_dphidn[dit()], a_phibc[dit()], a_phi[dit()].getPhase(a_phase), dit(), a_phase);
+  }
+}
+
+void jump_bc::compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			     const LevelData<BaseIVFAB<Real> >& a_phibc,
+			     const LevelData<EBCellFAB>&        a_phi,
+			     const int                          a_phase){
+  
+  for (DataIterator dit = a_dphidn.dataIterator(); dit.ok(); ++dit){
+    this->compute_dphidn(a_dphidn[dit()], a_phibc[dit()], a_phi[dit()], dit(), a_phase);
+  }
+}
+
+void jump_bc::compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
+			     const BaseIVFAB<Real>& a_phibc,
+			     const EBCellFAB&       a_phi,
+			     const DataIndex&       a_dit,
+			     const int              a_phase){
+  const int comp = 0.;
+
+  const BaseIVFAB<Real>& wb             = m_weights[a_dit].get_ivfab(a_phase);
+  const BaseIVFAB<VoFStencil>& stencils = m_stencils[a_dit].get_ivfab(a_phase);
+
+  for (VoFIterator vofit(m_ivs[a_dit], a_dphidn.getEBGraph()); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    // Apply stencil wb*phi_B + sum(wi*phi_i)
+    Real dphidn = wb(vof, comp)*a_phi(vof,comp);
+
+    const VoFStencil& sten = stencils(vof, comp);
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof = sten.vof(i);
+      const Real& weight   = sten.weight(i);
+      dphidn += weight*a_phi(ivof, comp);
+    }
+
+    a_dphidn(vof, comp) = dphidn;
   }
 }

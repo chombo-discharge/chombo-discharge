@@ -60,6 +60,9 @@ public:
 		      const int                     a_order,
 		      const LayoutData<IntVectSet>* a_cfivs);
 
+
+			      
+
   /*!
     @brief Match the boundary condition
   */
@@ -74,6 +77,39 @@ public:
   virtual void match_bc(LevelData<BaseIVFAB<Real> >& a_phibc,
 			const LevelData<MFCellFAB>&  a_phi,
 			const bool                   a_homogeneous);
+
+
+  /*!
+    @brief Compute dphidn for all phases
+  */
+  virtual void compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&        a_dphidn,
+			      const Vector<LevelData<BaseIVFAB<Real> > >&  a_phibc,
+			      const LevelData<MFCellFAB>&                  a_phi);
+  /*!
+    @brief Compute dphidn for specified phase usign precomputed phibc
+  */
+  virtual void compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			      const LevelData<BaseIVFAB<Real> >& a_phibc,
+			      const LevelData<MFCellFAB>&        a_phi,
+			      const int                          a_phase);
+  
+  /*!
+    @brief Compute dphidn for specified phase usign precomputed phibc
+  */
+  virtual void compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			      const LevelData<BaseIVFAB<Real> >& a_phibc,
+			      const LevelData<EBCellFAB>&        a_phi,
+			      const int                          a_phase);
+
+  /*!
+    @brief Compute dphidn for specified phase usign precomputed phibc
+  */
+  virtual void compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
+			      const BaseIVFAB<Real>& a_phibc,
+			      const EBCellFAB&       a_phi,
+			      const DataIndex&       a_dit,
+			      const int              a_phase);
+
 
 
 
@@ -116,6 +152,11 @@ protected:
     @brief Coarse-fine interface
   */
   const LayoutData<IntVectSet>* m_cfivs;
+
+  /*!
+    @brief Cells on which a jump condition is defined
+  */
+  LayoutData<IntVectSet> m_ivs;
 
   /*!
     @brief b-coefficient on each side
