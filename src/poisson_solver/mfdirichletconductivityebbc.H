@@ -46,6 +46,11 @@ public:
   */
   virtual void define_ivs(const MFLevelGrid& a_mflg);
 
+  /*!
+    @brief Define stencils and stuff
+  */
+  virtual void define(const LayoutData<IntVectSet>& a_cfivs, const Real& a_factor);
+
 #if 1
   /*!
     @brief Apply EB flux

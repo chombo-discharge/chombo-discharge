@@ -25,6 +25,18 @@ void mfdirichletconductivityebbc::define_ivs(const MFLevelGrid& a_mflg){
   }
 }
 
+void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const Real& a_factor){
+
+#if 1
+  DirichletConductivityEBBC::define(a_cfivs, a_factor);
+#else // This is where the new code goes. 
+
+#endif
+
+
+  
+}
+
 void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
 					      const EBCellFAB&              a_phi,
 					      VoFIterator&                  a_vofit,
