@@ -19,25 +19,23 @@
 #include "box_if.H"
 #include "new_sphere_if.H"
 
-
-//
 sphere_sphere_geometry::sphere_sphere_geometry(){
 
-  Real eps0 = 1.0;
-  Real eps_mat = 10.0;
-  Real elec_rad = 0.1;
-  Real diel_rad = 0.1;
-  Real elec_noise = 5.E-3;
-  Real diel_noise = 5.E-3;
+  Real eps0         = 1.0;
+  Real eps_mat      = 1.0;
+  Real elec_rad     = 0.1;
+  Real diel_rad     = 0.1;
+  Real elec_noise   = 0.E-3;
+  Real diel_noise   = 0.E-3;
   Real elec_persist = 0.5;
   Real diel_persist = 0.5;
   
-  RealVect elec_center = -0.25*RealVect::Unit;
-  RealVect diel_center =  0.25*RealVect::Unit;
+  RealVect elec_center     = -0.25*RealVect::Unit;
+  RealVect diel_center     =  0.25*RealVect::Unit;
   RealVect elec_noise_freq = 400.*RealVect::Unit;
   RealVect diel_noise_freq = 400.*RealVect::Unit;
   
-  bool live = true;
+  bool live   = true;
   bool reseed = true;
 
   int elec_octaves = 1;

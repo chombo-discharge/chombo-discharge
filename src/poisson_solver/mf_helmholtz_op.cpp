@@ -89,8 +89,8 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   }
 
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
-  //  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
-  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, 2, (a_mflg.get_eblg(0)).getCFIVS()));
+  //m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
+  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, 1, (a_mflg.get_eblg(0)).getCFIVS()));
 
   Vector<EBISLayout> layouts(num_phases);
   Vector<int> comps(num_phases);;
@@ -186,7 +186,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     const RefCountedPtr<LevelData<EBCellFAB> >&        aco     = m_acoeffs[iphase];
     const RefCountedPtr<LevelData<EBFluxFAB> >&        bco     = m_bcoeffs[iphase];
     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& bco_irr = m_bcoeffs_irr[iphase];
-    const RefCountedPtr<mfdirichletconductivityebbc>&    ebbc  = m_ebbc[iphase];
+    const RefCountedPtr<mfdirichletconductivityebbc>&  ebbc    = m_ebbc[iphase];
 
     m_ebops[iphase] = RefCountedPtr<EBConductivityOp> (new EBConductivityOp(eblg_fine,
 									    eblg,
@@ -277,17 +277,9 @@ void mf_helmholtz_op::set_bc_from_levelset(){
 }
 
 void mf_helmholtz_op::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){
-#if verb
-  MayDay::Abort("mf_helmholtz_op::set_bc_from_matching");
-#endif
-
   for (int iphase = 0; iphase < m_phases; iphase++){
     m_jumpbc->match_bc(*m_dirival[iphase], a_phi, a_homogeneous);
   }
-
-#if verb
-  MayDay::Abort("mf_helmholtz_op::set_bc_from_matching - done");
-#endif
 }
 
 void mf_helmholtz_op::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
@@ -336,6 +328,8 @@ void mf_helmholtz_op::applyOpNoBoundary(LevelData<MFCellFAB>&       a_opPhi,
   pout() << "mf_helmholtz_op::applyopnoboundary"<< endl;
 #endif
   CH_TIME("mf_helmholtz_op::applyOpNoBoundary");
+
+  this->update_bc(a_phi, true);
   for (int iphase=0; iphase < m_phases; iphase++){
     mfalias::aliasMF(*m_alias[0], iphase, a_opPhi);
     mfalias::aliasMF(*m_alias[1], iphase, a_phi);
@@ -708,6 +702,7 @@ void mf_helmholtz_op::levelJacobi(LevelData<MFCellFAB>&       a_phi,
   for (int iphase = 0; iphase < m_phases; iphase++){
     mfalias::aliasMF(*m_alias[0], iphase, a_phi);
     mfalias::aliasMF(*m_alias[1], iphase, a_rhs);
+    //    mfalias::aliasMF(*m_alias[2], iphase, resid);
     
     m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
   }
@@ -884,7 +879,7 @@ void mf_helmholtz_op::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 #endif
 
 #if verb
-  MayDay::Warning("mf_helmholtz_op::AMROperatorNC - must update BCfirst");
+  MayDay::Warning("mf_helmholtz_op::AMROperator - must update BCfirst");
 #endif
   this->update_bc(a_phi, a_homogeneousBC);
 
@@ -911,6 +906,28 @@ void mf_helmholtz_op::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 #endif
 }
 
+void mf_helmholtz_op::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
+					const LevelData<MFCellFAB>& a_correction,
+					const LevelData<MFCellFAB>& a_coarseCorrection){
+  CH_TIME("mf_helmholtz_op::AMRUpdateResidual");
+#if verb
+  pout() << "mf_helmholtz_op::amrupdateresidual"<< endl;
+#endif
+
+#if verb
+  MayDay::Warning("mf_helmholtz_op::applyOp - the matching condition should be updated first");
+#endif
+  this->update_bc(a_correction, true);
+
+  for (int i=0; i < m_phases; i++){
+    mfalias::aliasMF(*m_alias[0], i, a_residual);
+    mfalias::aliasMF(*m_alias[1], i, a_correction);
+    mfalias::aliasMF(*m_alias[2], i, a_coarseCorrection);
+    
+    m_ebops[i]->AMRUpdateResidual(*m_alias[0], *m_alias[1], *m_alias[2]);
+  }
+}
+
 void mf_helmholtz_op::AMRRestrict(LevelData<MFCellFAB>&       a_resCoarse,
 				  const LevelData<MFCellFAB>& a_residual,
 				  const LevelData<MFCellFAB>& a_correction,
@@ -926,7 +943,7 @@ void mf_helmholtz_op::AMRRestrict(LevelData<MFCellFAB>&       a_resCoarse,
     mfalias::aliasMF(*m_alias[2], i, a_correction);
     mfalias::aliasMF(*m_alias[3], i, a_coarseCorrection);
     
-    m_ebops[i]->AMRRestrict(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3]);
+    m_ebops[i]->AMRRestrict(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_skip_res);
   }
 }
 
@@ -944,28 +961,7 @@ void mf_helmholtz_op::AMRProlong(LevelData<MFCellFAB>&       a_correction,
   }
 }
 
-void mf_helmholtz_op::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
-					const LevelData<MFCellFAB>& a_correction,
-					const LevelData<MFCellFAB>& a_coarseCorrection){
-  CH_TIME("mf_helmholtz_op::AMRUpdateResidual");
-#if verb
-  pout() << "mf_helmholtz_op::amrupdateresidual"<< endl;
-#endif
 
-#if verb
-  MayDay::Warning("mf_helmholtz_op::applyOp - the matching condition should be updated first");
-#endif
-  bool homogeneousBC = true;
-  this->update_bc(a_correction, homogeneousBC);
-
-  for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_residual);
-    mfalias::aliasMF(*m_alias[1], i, a_correction);
-    mfalias::aliasMF(*m_alias[2], i, a_coarseCorrection);
-    
-    m_ebops[i]->AMRUpdateResidual(*m_alias[0], *m_alias[1], *m_alias[2]);
-  }
-}
 
 Real mf_helmholtz_op::AMRNorm(const LevelData<MFCellFAB>& a_coar_resid,
 			      const LevelData<MFCellFAB>& a_fine_resid,

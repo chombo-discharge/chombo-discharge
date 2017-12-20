@@ -206,7 +206,7 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		       const LevelData<MFCellFAB>&        a_phi,
 		       const bool                         a_homogeneous){
-  CH_TIME("jump_bc::match_bc(1)");
+  CH_TIME("jump_bc::match_bc(2)");
 
   const int ncomp = 1;
 
@@ -226,7 +226,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const bool                        a_homogeneous){
   CH_TIME("jump_bc::match_bc(2)");
 
-#if 1 // Don't modify bc value for now. I'm working on something else
+#if 0 // Don't modify bc value for now. I'm working on something else
   return;
 #endif
 
