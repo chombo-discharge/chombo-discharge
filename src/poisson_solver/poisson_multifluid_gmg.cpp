@@ -321,7 +321,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       1 + finest_level));
 
   m_opfact->set_relax_type(2);
-  m_opfact->set_bottom_drop(32);
+  m_opfact->set_bottom_drop(64);
   m_opfact->set_jump(0.0, 1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 }

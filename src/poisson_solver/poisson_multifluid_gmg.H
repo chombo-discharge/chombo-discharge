@@ -43,7 +43,7 @@ public:
   */
   virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source);
 
-    /*!
+  /*!
     @brief Set solver parameters. These are normally good for this class. 
   */
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
@@ -52,9 +52,9 @@ public:
 					 const int a_pre_smooth          = 16,
 					 const int a_post_smooth         = 16,
 					 const int a_bot_smooth          = 16,
-					 const int a_max_iter            = 32,
+					 const int a_max_iter            = 128,
 					 const Real a_eps                = 1.E-30,
-					 const Real a_hang               = 0.2,
+					 const Real a_hang               = 1.E-20,
 					 const Real a_norm_thresh        = 1.E-30);
 
   /*!
@@ -154,12 +154,12 @@ protected:
   */
   BiCGStabSolver<LevelData<MFCellFAB> > m_bicgstab;
 
-    /*!
-      @brief Geometric multigrid solver
+  /*!
+    @brief Geometric multigrid solver
   */
   AMRMultiGrid<LevelData<EBCellFAB> > m_cond_solver;
 
-    /*!
+  /*!
     @brief Conjugate gradient solver bottom MG level
   */
   BiCGStabSolver<LevelData<EBCellFAB> > m_cond_bicgstab;

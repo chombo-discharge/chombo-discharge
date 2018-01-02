@@ -263,7 +263,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
-
     inhomo1(vof, comp) = a_jump(vof, comp);
     inhomo2(vof, comp) = a_jump(vof, comp);
   }
@@ -277,7 +276,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       const VolIndex& ivof = sten.vof(i);
       const Real& iweight  = sten.weight(i);
       a_phibc(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
-
       inhomo2(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
     }
   }
@@ -291,7 +289,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       const VolIndex& ivof = sten.vof(i);
       const Real& iweight  = sten.weight(i);
       a_phibc(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
-
       inhomo1(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
     }
   }
