@@ -28,18 +28,22 @@ public:
 			      const EBISLayout&    a_ebisl,
 			      const RealVect&      a_dx,
 			      const IntVect*       a_ghost_phi,
-			      const IntVect*       a_ghost_rhs) : DirichletConductivityEBBC(a_domain,
-											    a_ebisl,
-											    a_dx,
-											    a_ghost_phi,
-											    a_ghost_rhs){
-
-  }
+			      const IntVect*       a_ghost_rhs);
   
   /*!
     @brief Destructor
   */
   virtual ~mfdirichletconductivityebbc();
+
+  /*!
+    @brief Switch between quadrant-based and non-quadrant based least squares stencils
+  */
+  static bool s_quadrant_based;
+
+  /*!
+    @brief Radius for least squares stencils
+  */
+  static int s_lsq_radius;
 
   /*!
     @brief Define interface cells
@@ -55,7 +59,6 @@ public:
   /*!
     @brief Apply EB flux
   */
-
   virtual void applyEBFlux(EBCellFAB&                    a_lphi,
 			   const EBCellFAB&              a_phi,
 			   VoFIterator&                  a_vofit,
@@ -68,13 +71,79 @@ public:
 			   const Real&                   a_time);
 #endif
 
+  /*!
+    @brief Get a second order stencil 
+  */
+  virtual bool get_second_order_sten(Real&             a_weight,
+				     VoFStencil&       a_stencil,
+				     const VolIndex&   a_vof,
+				     const EBISBox&    a_ebisbox,
+				     const IntVectSet& a_cfivs);
+
+  /*!
+    @brief Get a first order stencil 
+  */
+  virtual void get_first_order_sten(Real&             a_weight,
+				    VoFStencil&       a_stencil,
+				    const VolIndex&   a_vof,
+				    const EBISBox&    a_ebisbox,
+				    const IntVectSet& a_cfivs);
+
+
+#if 0 // As long as we overwrite this, we can not expect convergence unless EVERYTHING works
+  /*!
+    @brief Get stencils for computing the flux
+  */
+  virtual LayoutData<BaseIVFAB<VoFStencil> >* getFluxStencil(int ivar);
+#endif
+
 
 protected:
+
+  /*!
+    @brief Problem domain
+  */
+  ProblemDomain m_domain;
+  
+  /*!
+    @brief EBIS layout
+  */
+  EBISLayout m_ebisl;
+
+  /*!
+    @brief Resolution
+  */
+  RealVect m_dx;
+
+  /*!
+    @brief Boundary condition order
+  */
+  int m_order;
 
   /*!
     @brief Interface cells
   */
   LayoutData<IntVectSet> m_ivs;
+
+  /*!
+    @brief Weights for irregular cells
+  */
+  LayoutData<BaseIVFAB<Real> > m_irreg_weights;
+
+  /*!
+    @brief Weights for matching cells
+  */
+  LayoutData<BaseIVFAB<Real> > m_matching_weights;
+
+  /*!
+    @brief Stencils on irregular cells
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_irreg_stencils;
+
+  /*!
+    @brief Stencils on matching cells
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_matching_stencils;
 
   /*!
     @brief Flux to be smooshed into applyEBFlux for multi-fluid cells

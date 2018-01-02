@@ -190,6 +190,9 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
     const Real alpha = a_alpha;
     const Real beta  = a_beta;
 
+#if verb
+    pout() << "mf_helmholtz_op::creating factory" << endl;
+#endif
     m_ebops[iphase] = RefCountedPtr<EBConductivityOp> (new EBConductivityOp(eblg_fine,
 									    eblg,
 									    eblg_coar,
@@ -213,6 +216,9 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 									    a_ghost_phi,
 									    a_ghost_rhs,
 									    a_relax_type));
+#if verb
+    pout() << "mf_helmholtz_op::done creating factory" << endl;
+#endif
   }
 
 
@@ -863,8 +869,6 @@ void mf_helmholtz_op::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
     mf_helmholtz_op* finerOp = (mf_helmholtz_op*) a_finerOp;
     m_ebops[i]->AMROperatorNC(*m_alias[0], *m_alias[1], *m_alias[2], a_homogeneousBC, finerOp->m_ebops[i]);
 
-    
-    
     // m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], NULL, a_homogeneousBC, true);
 
     // mf_helmholtz_op* finerOp = (mf_helmholtz_op*) a_finerOp;

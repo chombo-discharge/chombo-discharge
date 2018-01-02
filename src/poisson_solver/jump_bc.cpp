@@ -130,7 +130,6 @@ void jump_bc::build_stencils(){
   }
 }
 
-
 bool jump_bc::get_second_order_sten(Real&             a_weight,
 				    VoFStencil&       a_stencil,
 				    const VolIndex&   a_vof,
@@ -149,7 +148,7 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
     return true;
   }
 
-  // If we got this far we have a stnecil
+  // If we got this far we have a stencil
   CH_assert(distance_along_lines.size() >= 2);
   CH_assert(point_stencils.size() >= 2);
 
