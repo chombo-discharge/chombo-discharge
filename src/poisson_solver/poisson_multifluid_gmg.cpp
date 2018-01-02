@@ -111,7 +111,7 @@ void poisson_multifluid_gmg::set_coefficients(){
   m_amr->allocate(m_bco,       ncomps, ghosts);
   m_amr->allocate(m_bco_irreg, ncomps, ghosts);
 
-  data_ops::set_value(m_aco,       1.0);  // Always zero for poisson equation, but that is done from alpha. 
+  data_ops::set_value(m_aco,       0.0);  // Always zero for poisson equation, but that is done from alpha. 
   data_ops::set_value(m_bco,       eps0); // Will override this later
   data_ops::set_value(m_bco_irreg, eps0); // Will override this later
 

@@ -31,11 +31,9 @@ mfdirichletconductivityebbc::~mfdirichletconductivityebbc(){
 
 }
 
-#if 1
 LayoutData<BaseIVFAB<VoFStencil> >* mfdirichletconductivityebbc::getFluxStencil(int ivar){
   return &m_irreg_stencils;
 }
-#endif
 
 void mfdirichletconductivityebbc::setOrder(int a_order){
   m_order = a_order;
@@ -66,9 +64,6 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     MayDay::Error("mfdirichletconductivityebbc::define - must call setCoef BEFORE calling define");
   }
   
-#if 0 // Fall back to dirichletconductivityebbc
-  DirichletConductivityEBBC::define(a_cfivs, a_factor);
-#else // This is where the new code goes.
   const int comp      = 0;
   const int num_comps = 1;
 
@@ -93,7 +88,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     irreg_ivs  = ebisbox.getIrregIVS(box);
     irreg_ivs |= ebisbox.getMultiCells(box);
 
-    diri_ivs  = irreg_ivs - m_ivs[dit()];
+    diri_ivs = irreg_ivs - m_ivs[dit()];
     match_ivs = m_ivs[dit()];
 
     m_irreg_weights[dit()].define(irreg_ivs,  ebgraph, num_comps);
@@ -103,19 +98,19 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     m_matching_stencils[dit()].define(match_ivs, ebgraph, num_comps);
 
     // Build stencils for pure Dirichlet type irreg cells
-#if 1 // This is what it is supposed to look like
+#if 0
     for (VoFIterator vofit(diri_ivs, ebgraph); vofit.ok(); ++vofit){
-#else // Define for all irreg, this should now emulate DirichletConductivityEBBC::define
+#else
       for (VoFIterator vofit(irreg_ivs, ebgraph); vofit.ok(); ++vofit){
 #endif
-      const VolIndex& vof = vofit();
+      const VolIndex& vof   = vofit();
+      const Real& area_frac = ebisbox.bndryArea(vof);
 
       Real& cur_weight        = m_irreg_weights[dit()](vof, comp);
       VoFStencil& cur_stencil = m_irreg_stencils[dit()](vof, comp);
 
       bool drop_order = false;
 
-      //m_order = 2;
       if(m_order == 2){
 	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
@@ -127,22 +122,21 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 	this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
 
-      // Stencil should be scaled by bco*beta. We can do this with the weight as well, as long
-      // as we remember to skip this during applyEBFlux. 
-      const Real factor = m_beta*(*m_bcoe)[dit()](vof, comp);
+      // Stencil should be scaled by bco*beta*area_frac*a_factor
+      const Real factor = m_beta*(*m_bcoe)[dit()](vof, comp)*area_frac*a_factor;
       cur_stencil *= factor;
-      cur_weight  *= factor;
     }
 
     // Stencils for matching cells
     for (VoFIterator vofit(match_ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+      const VolIndex& vof   = vofit();
+      const Real& area_frac = ebisbox.bndryArea(vof);
 
       Real& cur_weight        = m_matching_weights[dit()](vof, comp);
       VoFStencil& cur_stencil = m_matching_stencils[dit()](vof, comp);
 
       bool drop_order = false;
-	
+
       if(m_order == 2){
 	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
@@ -154,15 +148,14 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 	this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
 
-
-
-      // Should we also scale this stencil and weights? Not so sure....
-      const Real factor = m_beta*(*m_bcoe)[dit()](vof, comp);
+      // Stencil should be scaled by bco*beta*area_frac*a_factor
+#if 0
+      const Real factor = m_beta*(*m_bcoe)[dit()](vof, comp)*area_frac*a_factor;
       cur_stencil *= factor;
       cur_weight  *= factor;
+#endif
     }
   }
-#endif
 }
 
 bool mfdirichletconductivityebbc::get_second_order_sten(Real&             a_weight,
@@ -229,7 +222,6 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
   }
 }
 
-#if 0 // THIS IS OLD CODE
 void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
 					      const EBCellFAB&              a_phi,
 					      VoFIterator&                  a_vofit,
@@ -240,93 +232,51 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 					      const Real&                   a_factor,
 					      const bool&                   a_useHomogeneous,
 					      const Real&                   a_time){
+  
+  const int comp         = 0;
+  const EBISBox& ebisbox = a_phi.getEBISBox();
 
-  const BaseIVFAB<Real>& poissWeight = (m_bc.getFluxWeight())[a_dit];
-
-  Real value = 0.0;
-  const EBISBox&   ebisBox = a_phi.getEBISBox();
-
+  Real value = 1.0;
 #if 0
-  pout() << "mfidirichletconductivityebbc::applyEBFlux - homogeneous = " << a_useHomogeneous << endl;
+  // Do surface-matched cells
+  for (VoFIterator vofit(m_ivs[a_dit], ebisbox.getEBGraph()); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+      
+    //    const Real& value      = (*m_data)[a_dit](vof, comp);
+    const Real& beta       = m_beta;
+    const Real& bco        = (*m_bcoe)[a_dit](vof, comp);
+    const Real& area_frac  = ebisbox.bndryArea(vof);
+    const Real& weight     = m_matching_weights[a_dit](vof, comp);  
+    const VoFStencil& sten = m_matching_stencils[a_dit](vof, comp);
+
+    // "Homogeneous" part
+    Real flux = value*weight;
+
+    // "Inhomogeneous" part
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof = sten.vof(i);
+      const Real& iweight  = sten.weight(i);
+
+      flux += a_phi(ivof, comp)*iweight;
+    }
+
+    // Increment
+    a_lphi(vof, comp) += flux*beta*bco*area_frac*a_factor;
+  }
 #endif
 
-  // Homogeneous BCs are different for matching. We must use the supplied BC value through mfdirichletconductivityebbc
-  if(a_useHomogeneous){ 
+  if(!a_useHomogeneous){
     for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
       const VolIndex& vof = a_vofit();
 
-      if(m_dataBased){
-	if(m_ivs[a_dit].contains(vof.gridIndex())){
-	  value = (*m_data)[a_dit](vof, 0);  // Homogeneous version for variable-potential cells
-	}
-	else{
-	  value = 0.; // Homogeneous version for fixed-potential cells
-	}
+      const Real& value  = (*m_data)[a_dit](vof, comp);
+      const Real& beta       = m_beta;
+      const Real& bco        = (*m_bcoe)[a_dit](vof, comp);
+      const Real& area_frac  = ebisbox.bndryArea(vof);
+      const Real& weight     = m_irreg_weights[a_dit](vof, comp); 
+      const Real flux        = weight*value*beta*bco*area_frac*a_factor;
 
-	//	value = 0.;
-#if 0
-	if(Abs(value) > 1.E-4){
-	  pout() << "value = " << value << endl;
-	  MayDay::Abort("mfdirichletconductivityebbc::applyebflux - error");
-	}
-#endif
-	const Real poissWeightPt = poissWeight(vof, 0);
-	const Real& areaFrac     = ebisBox.bndryArea(vof);
-	const Real& bcoef        = (*m_bcoe)[a_dit](vof,0);
-	const Real flux          = poissWeightPt*value*areaFrac;
-	const Real compFactor    = a_factor*bcoef*m_beta;
-	a_lphi(vof,0)           += flux * compFactor;
-      }
-      else{
-	MayDay::Abort("error");
-      }
-    }
-  }
-  else { // Non-homogeneous boundary conditions. We can use DirichletConductivityEBBC as long as the BCs are updated correctly. 
-    DirichletConductivityEBBC::applyEBFlux(a_lphi,
-					   a_phi,
-					   a_vofit,
-					   a_cfivs,
-					   a_dit,
-					   a_probLo,
-					   a_dx,
-					   a_factor,
-					   a_useHomogeneous,
-					   a_time);
-  }
-}
-#else
-void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
-					      const EBCellFAB&              a_phi,
-					      VoFIterator&                  a_vofit,
-					      const LayoutData<IntVectSet>& a_cfivs,
-					      const DataIndex&              a_dit,
-					      const RealVect&               a_probLo,
-					      const RealVect&               a_dx,
-					      const Real&                   a_factor,
-					      const bool&                   a_useHomogeneous,
-					      const Real&                   a_time){
-  CH_assert(m_dataBased);
-  
-  const int comp = 0;
-  
-  if(a_useHomogeneous){
-    // Do nothing for now. This changes for matched cells. 
-  }
-  else{
-
-    const EBISBox& ebisbox = a_phi.getEBISBox();
-
-    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-      const VolIndex& vof = a_vofit();
-
-      const Real& value     = (*m_data)[a_dit](vof, comp);
-      const Real& weight    = m_irreg_weights[a_dit](vof, comp); // Already contains m_beta*m_bcoe
-      const Real& area_frac = ebisbox.bndryArea(vof);
-      const Real flux       = weight*value*area_frac;
-
-      a_lphi(vof, comp) += flux*a_factor;
+      a_lphi(vof, comp) += flux;
     }
   }
 }
-#endif
