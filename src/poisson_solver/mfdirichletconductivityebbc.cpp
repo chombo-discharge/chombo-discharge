@@ -14,7 +14,8 @@ mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_
 							 const EBISLayout&    a_ebisl,
 							 const RealVect&      a_dx,
 							 const IntVect*       a_phig,
-							 const IntVect*       a_rhsg) : DirichletConductivityEBBC(a_domain,
+							 const IntVect*       a_rhsg,
+							 const int            a_phase) : DirichletConductivityEBBC(a_domain,
 														  a_ebisl,
 														  a_dx,
 														  a_phig,
@@ -23,8 +24,8 @@ mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_
   m_domain = a_domain;
   m_ebisl  = a_ebisl;
   m_dx     = a_dx;
-
-  this->setOrder(1);
+  m_phase  = a_phase;
+  m_order  = 1;
 }
 
 mfdirichletconductivityebbc::~mfdirichletconductivityebbc(){
@@ -33,6 +34,10 @@ mfdirichletconductivityebbc::~mfdirichletconductivityebbc(){
 
 LayoutData<BaseIVFAB<VoFStencil> >* mfdirichletconductivityebbc::getFluxStencil(int ivar){
   return &m_irreg_stencils;
+}
+
+void mfdirichletconductivityebbc::set_jump_object(const RefCountedPtr<jump_bc> a_jumpbc){
+  m_jumpbc = a_jumpbc;
 }
 
 void mfdirichletconductivityebbc::setOrder(int a_order){

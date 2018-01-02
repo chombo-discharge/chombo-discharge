@@ -50,15 +50,19 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_bco.define(m_grids);
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
+  m_inhomo.define(m_grids);
 
   int num = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     MFInterfaceFAB<Real>& bco         = m_bco[dit()];
     MFInterfaceFAB<Real>& weights     = m_weights[dit()];
+    MFInterfaceFAB<Real>& inhomo      = m_inhomo[dit()];
     MFInterfaceFAB<VoFStencil>& stens = m_stencils[dit()];
+
 
     bco.define(m_mflg,     dit());
     weights.define(m_mflg, dit());
+    inhomo.define(m_mflg,   dit());
     stens.define(m_mflg,   dit());
 
     m_ivs[dit()] = bco.get_ivs();
@@ -68,6 +72,45 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   this->build_stencils();
 
   m_defined = true;
+}
+
+
+
+bool jump_bc::get_second_order_sten(Real&             a_weight,
+				    VoFStencil&       a_stencil,
+				    const VolIndex&   a_vof,
+				    const EBISBox&    a_ebisbox,
+				    const IntVectSet& a_cfivs){
+  CH_TIME("jump_bc::get_second_order_sten");
+
+  a_stencil.clear();
+  bool drop_order = false;
+
+  Vector<VoFStencil> point_stencils;
+  Vector<Real> distance_along_lines;
+  
+  EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, m_dx*RealVect::Unit, a_cfivs);
+  if(drop_order){
+    return true;
+  }
+
+  // If we got this far we have a stencil
+  CH_assert(distance_along_lines.size() >= 2);
+  CH_assert(point_stencils.size() >= 2);
+
+  const Real& x1   = distance_along_lines[0];
+  const Real& x2   = distance_along_lines[1];
+  const Real denom = x2*x2*x1 - x1*x1*x2;
+
+  VoFStencil& phi1Sten = point_stencils[0];
+  VoFStencil& phi2Sten = point_stencils[1];
+  
+  phi1Sten *= -x2*x2/denom;
+  phi2Sten *=  x1*x1/denom;
+
+  a_weight   = -x1*x1/denom + x2*x2/denom;
+  a_stencil +=  phi1Sten;
+  a_stencil +=  phi2Sten;
 }
 
 void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
@@ -130,43 +173,6 @@ void jump_bc::build_stencils(){
   }
 }
 
-bool jump_bc::get_second_order_sten(Real&             a_weight,
-				    VoFStencil&       a_stencil,
-				    const VolIndex&   a_vof,
-				    const EBISBox&    a_ebisbox,
-				    const IntVectSet& a_cfivs){
-  CH_TIME("jump_bc::get_second_order_sten");
-
-  a_stencil.clear();
-  bool drop_order = false;
-
-  Vector<VoFStencil> point_stencils;
-  Vector<Real> distance_along_lines;
-  
-  EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, m_dx*RealVect::Unit, a_cfivs);
-  if(drop_order){
-    return true;
-  }
-
-  // If we got this far we have a stencil
-  CH_assert(distance_along_lines.size() >= 2);
-  CH_assert(point_stencils.size() >= 2);
-
-  const Real& x1   = distance_along_lines[0];
-  const Real& x2   = distance_along_lines[1];
-  const Real denom = x2*x2*x1 - x1*x1*x2;
-
-  VoFStencil& phi1Sten = point_stencils[0];
-  VoFStencil& phi2Sten = point_stencils[1];
-  
-  phi1Sten *= -x2*x2/denom;
-  phi2Sten *=  x1*x1/denom;
-
-  a_weight   = -x1*x1/denom + x2*x2/denom;
-  a_stencil +=  phi1Sten;
-  a_stencil +=  phi2Sten;
-}
-
 void jump_bc::get_first_order_sten(Real&             a_weight,
 				   VoFStencil&       a_stencil,
 				   const VolIndex&   a_vof,
@@ -201,7 +207,7 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
   CH_TIME("jump_bc::match_bc(1)");
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
-    this->match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
+    this->match_bc(a_phibc[dit()], m_inhomo[dit()], a_jump[dit()], a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
   }
 }
 
@@ -215,11 +221,12 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real> zero(a_phibc[dit()].getIVS(), a_phibc[dit()].getEBGraph(), ncomp);
-    this->match_bc(a_phibc[dit()], zero, a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
+    this->match_bc(a_phibc[dit()], m_inhomo[dit()], zero, a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
   }
 }
 
 void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
+		       MFInterfaceFAB<Real>&             a_inhomo,
 		       const BaseIVFAB<Real>&            a_jump,
 		       const MFCellFAB&                  a_phi,
 		       const MFInterfaceFAB<Real>&       a_bco,
@@ -248,11 +255,17 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const EBGraph& graph1              = bco1.getEBGraph();
   const EBGraph& graph2              = bco2.getEBGraph();
 
+  BaseIVFAB<Real>& inhomo1 = a_inhomo.get_ivfab(phase1);
+  BaseIVFAB<Real>& inhomo2 = a_inhomo.get_ivfab(phase2);
+
   
   // Set phibc = a_jump
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
+
+    inhomo1(vof, comp) = a_jump(vof, comp);
+    inhomo2(vof, comp) = a_jump(vof, comp);
   }
 
   // First phase loop. Add first stencil stuff
@@ -264,6 +277,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       const VolIndex& ivof = sten.vof(i);
       const Real& iweight  = sten.weight(i);
       a_phibc(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
+
+      inhomo2(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
     }
   }
   
@@ -276,13 +291,19 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       const VolIndex& ivof = sten.vof(i);
       const Real& iweight  = sten.weight(i);
       a_phibc(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
+
+      inhomo1(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
     }
   }
   
   // Divide by weights
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-    a_phibc(vof, comp) *= 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+    const Real factor   = 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+    
+    a_phibc(vof, comp) *= factor;
+    inhomo1(vof, comp) *= factor;
+    inhomo2(vof, comp) *= factor;
   }
 }
 
@@ -340,4 +361,20 @@ void jump_bc::compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
 
     a_dphidn(vof, comp) = dphidn;
   }
+}
+
+LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_stencils(){
+  return m_stencils;
+}
+
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_weights(){
+  return m_weights;
+}
+
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_bco(){
+  return m_bco;
+}
+
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_inhomo(){
+  return m_inhomo;
 }

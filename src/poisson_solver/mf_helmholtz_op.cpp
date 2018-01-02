@@ -147,7 +147,8 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 												 ebisl,
 												 a_dx*RealVect::Unit,
 												 &a_ghost_phi,
-												 &a_ghost_rhs)),
+												 &a_ghost_rhs,
+												 iphase)),
 #else
       
       m_ebbc[iphase]        = RefCountedPtr<DirichletConductivityEBBC>    (new DirichletConductivityEBBC(a_domain,
@@ -157,8 +158,9 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 													 &a_ghost_rhs));
 #endif
 
+    m_ebbc[iphase]->set_jump_object(m_jumpbc);
     m_ebbc[iphase]->setValue(0.0);
-    m_ebbc[iphase]->setOrder(2);
+    m_ebbc[iphase]->setOrder(a_order_ebbc);
     m_ebbc[iphase]->define_ivs(a_mflg);
 
 

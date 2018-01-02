@@ -60,9 +60,6 @@ public:
 		      const int                     a_order,
 		      const LayoutData<IntVectSet>* a_cfivs);
 
-
-			      
-
   /*!
     @brief Match the boundary condition
   */
@@ -110,8 +107,25 @@ public:
 			      const DataIndex&       a_dit,
 			      const int              a_phase);
 
+  /*!
+    @brief Get stencils
+  */
+  virtual LayoutData<MFInterfaceFAB<VoFStencil> >& get_stencils();
 
+  /*!
+    @brief Get weights
+  */
+  virtual LayoutData<MFInterfaceFAB<Real> >& get_weights();
 
+  /*!
+    @brief Get b-coefficient on each side
+  */
+  virtual LayoutData<MFInterfaceFAB<Real> >& get_bco();
+
+  /*!
+    @brief Get inhomogeneous contribution on each side
+  */
+  virtual LayoutData<MFInterfaceFAB<Real> >& get_inhomo();
 
 
 protected:
@@ -168,6 +182,11 @@ protected:
   */
   LayoutData<MFInterfaceFAB<Real> > m_weights;
 
+    /*!
+    @brief Inhomogeneous contribution to bc
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_inhomo;
+
   /*!
     @brief Stencils on each side
   */
@@ -205,6 +224,7 @@ protected:
     @brief Match the boundary condition
   */
   virtual void match_bc(BaseIVFAB<Real>&                  a_phibc,
+			MFInterfaceFAB<Real>&             a_inhomo,
 			const BaseIVFAB<Real>&            a_jump,
 			const MFCellFAB&                  a_phi,
 			const MFInterfaceFAB<Real>&       a_bco,

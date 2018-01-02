@@ -11,6 +11,7 @@
 
 #include "MFLevelGrid.H"
 #include "mfis.H"
+#include "jump_bc.H"
 
 #include <DirichletConductivityEBBC.H>
 
@@ -28,7 +29,8 @@ public:
 			      const EBISLayout&    a_ebisl,
 			      const RealVect&      a_dx,
 			      const IntVect*       a_ghost_phi,
-			      const IntVect*       a_ghost_rhs);
+			      const IntVect*       a_ghost_rhs,
+			      const int            a_phase);
   
   /*!
     @brief Destructor
@@ -94,6 +96,11 @@ public:
   */
   virtual void setOrder(int a_order);
 
+  /*!
+    @brief Set the jump object. This is needed for extracting stencils
+  */
+  virtual void set_jump_object(const RefCountedPtr<jump_bc> a_jumpbc);
+
 
 #if 1 // As long as we overwrite this, we can not expect convergence unless EVERYTHING works
   /*!
@@ -104,6 +111,11 @@ public:
 
 
 protected:
+
+  /*!
+    @brief Boundary condition jump object
+  */
+  RefCountedPtr<jump_bc> m_jumpbc;
 
   /*!
     @brief Problem domain
@@ -124,6 +136,11 @@ protected:
     @brief Boundary condition order
   */
   int m_order;
+
+  /*!
+    @brief Which phase
+  */
+  int m_phase;
 
   /*!
     @brief Interface cells
