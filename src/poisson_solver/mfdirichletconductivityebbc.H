@@ -89,8 +89,13 @@ public:
 				    const EBISBox&    a_ebisbox,
 				    const IntVectSet& a_cfivs);
 
+  /*!
+    @brief Set bc order
+  */
+  virtual void setOrder(int a_order);
 
-#if 0 // As long as we overwrite this, we can not expect convergence unless EVERYTHING works
+
+#if 1 // As long as we overwrite this, we can not expect convergence unless EVERYTHING works
   /*!
     @brief Get stencils for computing the flux
   */

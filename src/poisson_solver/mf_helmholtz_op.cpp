@@ -158,7 +158,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
 #endif
 
     m_ebbc[iphase]->setValue(0.0);
-    m_ebbc[iphase]->setOrder(1);
+    m_ebbc[iphase]->setOrder(2);
     m_ebbc[iphase]->define_ivs(a_mflg);
 
 

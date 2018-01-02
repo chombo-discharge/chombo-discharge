@@ -23,20 +23,23 @@ mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_
   m_domain = a_domain;
   m_ebisl  = a_ebisl;
   m_dx     = a_dx;
+
+  this->setOrder(1);
 }
 
 mfdirichletconductivityebbc::~mfdirichletconductivityebbc(){
 
 }
 
-#if 0
+#if 1
 LayoutData<BaseIVFAB<VoFStencil> >* mfdirichletconductivityebbc::getFluxStencil(int ivar){
-#if 0 // Overwrite for compilation
-  return NULL;
-#endif
   return &m_irreg_stencils;
 }
 #endif
+
+void mfdirichletconductivityebbc::setOrder(int a_order){
+  m_order = a_order;
+}
 
 void mfdirichletconductivityebbc::define_ivs(const MFLevelGrid& a_mflg){
     
@@ -63,7 +66,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     MayDay::Error("mfdirichletconductivityebbc::define - must call setCoef BEFORE calling define");
   }
   
-#if 1 // Fall back to dirichletconductivityebbc
+#if 0 // Fall back to dirichletconductivityebbc
   DirichletConductivityEBBC::define(a_cfivs, a_factor);
 #else // This is where the new code goes.
   const int comp      = 0;
@@ -100,7 +103,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     m_matching_stencils[dit()].define(match_ivs, ebgraph, num_comps);
 
     // Build stencils for pure Dirichlet type irreg cells
-#if 0 // This is what it is supposed to look like
+#if 1 // This is what it is supposed to look like
     for (VoFIterator vofit(diri_ivs, ebgraph); vofit.ok(); ++vofit){
 #else // Define for all irreg, this should now emulate DirichletConductivityEBBC::define
       for (VoFIterator vofit(irreg_ivs, ebgraph); vofit.ok(); ++vofit){
@@ -111,7 +114,8 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       VoFStencil& cur_stencil = m_irreg_stencils[dit()](vof, comp);
 
       bool drop_order = false;
-	
+
+      //m_order = 2;
       if(m_order == 2){
 	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
@@ -124,7 +128,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       }
 
       // Stencil should be scaled by bco*beta. We can do this with the weight as well, as long
-      // as we remember to skip this during applyEBFlux
+      // as we remember to skip this during applyEBFlux. 
       const Real factor = m_beta*(*m_bcoe)[dit()](vof, comp);
       cur_stencil *= factor;
       cur_weight  *= factor;
@@ -150,6 +154,8 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 	this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
 
+
+
       // Should we also scale this stencil and weights? Not so sure....
       const Real factor = m_beta*(*m_bcoe)[dit()](vof, comp);
       cur_stencil *= factor;
@@ -172,7 +178,7 @@ bool mfdirichletconductivityebbc::get_second_order_sten(Real&             a_weig
   Vector<VoFStencil> point_stencils;
   Vector<Real> distance_along_lines;
   
-  EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, m_dx*RealVect::Unit, a_cfivs);
+  EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, m_dx, a_cfivs);
   if(drop_order){
     return true;
   }
@@ -207,7 +213,7 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
   const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
 
   if(s_quadrant_based){
-    EBArith::getLeastSquaresGradSten(a_stencil, a_weight, a_vof, a_ebisbox, m_dx*RealVect::Unit, m_domain, 0);
+    EBArith::getLeastSquaresGradSten(a_stencil, a_weight, a_vof, a_ebisbox, m_dx, m_domain, 0);
   }
   else{
     EBArith::getLeastSquaresGradStenAllVoFsRad(a_stencil,
@@ -223,7 +229,7 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
   }
 }
 
-#if 1 // THIS IS OLD CODE
+#if 0 // THIS IS OLD CODE
 void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
 					      const EBCellFAB&              a_phi,
 					      VoFIterator&                  a_vofit,
