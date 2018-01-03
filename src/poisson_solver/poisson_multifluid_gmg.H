@@ -16,6 +16,8 @@
 #include <EBConductivityOpFactory.H>
 #include <BaseDomainBC.H>
 #include <BaseEBBC.H>
+#include <MFSimpleSolver.H>
+#include <GMRESSolver.H>
 
 /*!
   @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
@@ -49,10 +51,10 @@ public:
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
 					 amrmg::which_mg a_gmg_type      = amrmg::vcycle,
 					 const int a_verbosity           = 100,
-					 const int a_pre_smooth          = 32,
-					 const int a_post_smooth         = 32,
-					 const int a_bot_smooth          = 32,
-					 const int a_max_iter            = 64,
+					 const int a_pre_smooth          = 24,
+					 const int a_post_smooth         = 24,
+					 const int a_bot_smooth          = 24,
+					 const int a_max_iter            = 128,
 					 const Real a_eps                = 1.E-30,
 					 const Real a_hang               = 1.E-20,
 					 const Real a_norm_thresh        = 1.E-30);
@@ -163,6 +165,11 @@ protected:
     @brief Conjugate gradient solver bottom MG level
   */
   BiCGStabSolver<LevelData<EBCellFAB> > m_cond_bicgstab;
+
+  /*!
+    @brief multi-fluid simple solver
+  */
+  MFSimpleSolver m_mfsolver;
 
   /*!
     @brief Set up the geometric multigrid solver 

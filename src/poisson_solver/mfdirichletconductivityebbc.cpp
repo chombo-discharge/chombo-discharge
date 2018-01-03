@@ -290,7 +290,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       const Real& weight     = m_irreg_weights[a_dit](vof, comp); 
       const Real flux        = weight*value*beta*bco*area_frac*a_factor;
 
-      if(!m_ivs[a_dit].contains(vof.gridIndex())){
+      if(!m_ivs[a_dit].contains(vof.gridIndex())){ // This should be optimized in a better way
 	a_lphi(vof, comp) += flux;
       }
     }

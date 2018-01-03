@@ -89,7 +89,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   }
 
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
-  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, 1, (a_mflg.get_eblg(0)).getCFIVS()));
+  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
 
   Vector<EBISLayout> layouts(num_phases);
   Vector<int> comps(num_phases);;
@@ -312,12 +312,12 @@ void mf_helmholtz_op::diagonalScale(LevelData<MFCellFAB>& a_rhs){
 #endif
 
   // // Operator diagonal scale
-  // for (int iphase = 0; iphase < m_phases; iphase++){
-  //   mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
 
-  //   m_ebops[iphase]->diagonalScale(*m_alias[0], true);
-  // }
-  MFLevelDataOps::kappaWeight(a_rhs); // This came from MFPoissonOp
+    m_ebops[iphase]->diagonalScale(*m_alias[0], true);
+  }
+  //  MFLevelDataOps::kappaWeight(a_rhs); // This came from MFPoissonOp
 }
 
 void mf_helmholtz_op::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
@@ -384,7 +384,10 @@ void mf_helmholtz_op::preCond(LevelData<MFCellFAB>&       a_correction,
 #if verb
   pout() << "mf_helmholtz_op::precond"<< endl;
 #endif
+#if 0
+
   this->relax(a_correction, a_residual, 40);
+#endif
 }
 
 void mf_helmholtz_op::applyOp(LevelData<MFCellFAB>&        a_lhs,
@@ -717,7 +720,9 @@ void mf_helmholtz_op::levelJacobi(LevelData<MFCellFAB>&       a_phi,
     mfalias::aliasMF(*m_alias[1], iphase, a_rhs);
     //    mfalias::aliasMF(*m_alias[2], iphase, resid);
     
-    m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
+    //    m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
+    //m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
+    m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
   }
 }
 
@@ -814,8 +819,11 @@ void mf_helmholtz_op::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 
     mf_helmholtz_op* finerOp = (mf_helmholtz_op*) a_finerOp;
 
+    //    pout() << "amroperator, phase = " << iphase << endl;
     m_ebops[iphase]->AMROperator(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_homogeneousBC, finerOp->m_ebops[iphase]);
+    //    pout() << "amroperator, phase = " << iphase << " done" << endl;
   }
+
 										 
   //    m_ebops[iphase]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
   //    m_ebops[iphase]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[iphase]);

@@ -22,7 +22,7 @@
 sphere_sphere_geometry::sphere_sphere_geometry(){
 
   Real eps0         = 1.0;
-  Real eps_mat      = 10.0;
+  Real eps_mat      = 10.;
   Real elec_rad     = 0.15;
   Real diel_rad     = 0.15;
   Real elec_noise   = 0.E-3;
@@ -31,7 +31,7 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   Real diel_persist = 0.5;
   
   RealVect elec_center     = -0.25*RealVect::Unit;
-  RealVect diel_center     =  0.1*RealVect::Unit;
+  RealVect diel_center     = 0.1*RealVect::Unit;
   RealVect elec_noise_freq = 400.*RealVect::Unit;
   RealVect diel_noise_freq = 400.*RealVect::Unit;
   
