@@ -182,7 +182,7 @@ void poisson_multifluid_gmg::set_face_perm(EBFluxFAB&                a_perm,
 	}
       }
 
-      a_perm[dir](face, comp) = a_dielectrics[closest].get_permittivity();
+      a_perm[dir](face, comp) = a_dielectrics[closest].get_permittivity(pos);
     }
   }
 }
@@ -218,7 +218,7 @@ void poisson_multifluid_gmg::set_eb_perm(BaseIVFAB<Real>&          a_perm,
       }
     }
 
-    a_perm(vof, comp) = a_dielectrics[closest].get_permittivity();
+    a_perm(vof, comp) = a_dielectrics[closest].get_permittivity(pos);
   }
 }
 
@@ -321,7 +321,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       1 + finest_level));
 
   m_opfact->set_relax_type(2);
-  m_opfact->set_bottom_drop(64);
+  m_opfact->set_bottom_drop(8);
   m_opfact->set_jump(0.0, 1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 }

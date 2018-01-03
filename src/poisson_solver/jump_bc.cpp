@@ -30,6 +30,43 @@ jump_bc::~jump_bc(){
   CH_TIME("jump_bc::~jump_bc(full)");
 }
 
+bool jump_bc::get_second_order_sten(Real&             a_weight,
+				    VoFStencil&       a_stencil,
+				    const VolIndex&   a_vof,
+				    const EBISBox&    a_ebisbox,
+				    const IntVectSet& a_cfivs){
+  CH_TIME("jump_bc::get_second_order_sten");
+
+  a_stencil.clear();
+  bool drop_order = false;
+
+  Vector<VoFStencil> point_stencils;
+  Vector<Real> distance_along_lines;
+  
+  EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, m_dx*RealVect::Unit, a_cfivs);
+  if(drop_order){
+    return true;
+  }
+
+  // If we got this far we have a stencil
+  CH_assert(distance_along_lines.size() >= 2);
+  CH_assert(point_stencils.size() >= 2);
+
+  const Real& x1   = distance_along_lines[0];
+  const Real& x2   = distance_along_lines[1];
+  const Real denom = x2*x2*x1 - x1*x1*x2;
+
+  VoFStencil& phi1Sten = point_stencils[0];
+  VoFStencil& phi2Sten = point_stencils[1];
+  
+  phi1Sten *= -x2*x2/denom;
+  phi2Sten *=  x1*x1/denom;
+
+  a_weight   = -x1*x1/denom + x2*x2/denom;
+  a_stencil +=  phi1Sten;
+  a_stencil +=  phi2Sten;
+}
+
 void jump_bc::define(const MFLevelGrid&            a_mflg,
 		     const LevelData<MFBaseIVFAB>& a_bco,
 		     const Real&                   a_dx,
@@ -72,45 +109,6 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   this->build_stencils();
 
   m_defined = true;
-}
-
-
-
-bool jump_bc::get_second_order_sten(Real&             a_weight,
-				    VoFStencil&       a_stencil,
-				    const VolIndex&   a_vof,
-				    const EBISBox&    a_ebisbox,
-				    const IntVectSet& a_cfivs){
-  CH_TIME("jump_bc::get_second_order_sten");
-
-  a_stencil.clear();
-  bool drop_order = false;
-
-  Vector<VoFStencil> point_stencils;
-  Vector<Real> distance_along_lines;
-  
-  EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, m_dx*RealVect::Unit, a_cfivs);
-  if(drop_order){
-    return true;
-  }
-
-  // If we got this far we have a stencil
-  CH_assert(distance_along_lines.size() >= 2);
-  CH_assert(point_stencils.size() >= 2);
-
-  const Real& x1   = distance_along_lines[0];
-  const Real& x2   = distance_along_lines[1];
-  const Real denom = x2*x2*x1 - x1*x1*x2;
-
-  VoFStencil& phi1Sten = point_stencils[0];
-  VoFStencil& phi2Sten = point_stencils[1];
-  
-  phi1Sten *= -x2*x2/denom;
-  phi2Sten *=  x1*x1/denom;
-
-  a_weight   = -x1*x1/denom + x2*x2/denom;
-  a_stencil +=  phi1Sten;
-  a_stencil +=  phi2Sten;
 }
 
 void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
@@ -207,7 +205,14 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
   CH_TIME("jump_bc::match_bc(1)");
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
-    this->match_bc(a_phibc[dit()], m_inhomo[dit()], a_jump[dit()], a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
+    this->match_bc(a_phibc[dit()],
+		   m_inhomo[dit()],
+		   a_jump[dit()],
+		   a_phi[dit()],
+		   m_bco[dit()],
+		   m_weights[dit()],
+		   m_stencils[dit()],
+		   a_homogeneous);
   }
 }
 
@@ -221,7 +226,14 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real> zero(a_phibc[dit()].getIVS(), a_phibc[dit()].getEBGraph(), ncomp);
-    this->match_bc(a_phibc[dit()], m_inhomo[dit()], zero, a_phi[dit()], m_bco[dit()], m_weights[dit()], m_stencils[dit()], a_homogeneous);
+    this->match_bc(a_phibc[dit()],
+		   m_inhomo[dit()],
+		   zero,
+		   a_phi[dit()],
+		   m_bco[dit()],
+		   m_weights[dit()],
+		   m_stencils[dit()],
+		   a_homogeneous);
   }
 }
 

@@ -17,13 +17,20 @@
 class dielectric {
 public:
 
-  //
+  /*!
+    @brief Weak constructor
+  */
   dielectric();
   
   /*!
     @brief Constructor. Calls define
   */
   dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
+
+  /*!
+    @brief Constructor, allows for spatially dependent permittivity
+  */
+  dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
 
   /*!
     @brief 
@@ -36,6 +43,11 @@ public:
   void define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
 
   /*!
+    @brief Define function for variable permittivity
+  */
+  void define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
+
+  /*!
     @brief Get level-set function
   */
   const RefCountedPtr<BaseIF>& get_function() const;
@@ -43,9 +55,17 @@ public:
   /*!
     @brief Get permittivity
   */
-  const Real& get_permittivity() const;
+  const Real get_permittivity(const RealVect a_pos) const;
 
 protected:
-  std::pair<RefCountedPtr<BaseIF>, Real> m_tuple;
+
+  RefCountedPtr<BaseIF> m_baseif;
+
+  Real m_permittivity;
+
+  Real (*m_variablepermittivity)(const RealVect a_pos);
+  
+  bool m_constant;
+
 };
 #endif

@@ -89,7 +89,7 @@ void mf_helmholtz_op::define(const RefCountedPtr<mfis>&                    a_mfi
   }
 
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
-  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.get_eblg(0)).getCFIVS()));
+  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, 1, (a_mflg.get_eblg(0)).getCFIVS()));
 
   Vector<EBISLayout> layouts(num_phases);
   Vector<int> comps(num_phases);;
@@ -384,7 +384,7 @@ void mf_helmholtz_op::preCond(LevelData<MFCellFAB>&       a_correction,
 #if verb
   pout() << "mf_helmholtz_op::precond"<< endl;
 #endif
-  this->relax(a_correction, a_residual, 10);
+  this->relax(a_correction, a_residual, 40);
 }
 
 void mf_helmholtz_op::applyOp(LevelData<MFCellFAB>&        a_lhs,
