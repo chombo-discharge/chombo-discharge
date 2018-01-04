@@ -194,7 +194,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 #if verb
     pout() << "mfconductivityop::creating factory" << endl;
 #endif
-    m_ebops[iphase] = RefCountedPtr<EBConductivityOp> (new EBConductivityOp(eblg_fine,
+    m_ebops[iphase] = RefCountedPtr<ebconductivityop> (new ebconductivityop(eblg_fine,
 									    eblg,
 									    eblg_coar,
 									    eblg_mg,
