@@ -26,31 +26,31 @@ mfconductivityop::~mfconductivityop(){
 }
 
 void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mfis,
-			     const RefCountedPtr<BaseDomainBC>&            a_dombc,
-			     const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
-			     const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
-			     const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
-			     const MFQuadCFInterp&                         a_quadcfi,
-			     const MFLevelGrid&                            a_mflg_fine,
-			     const MFLevelGrid&                            a_mflg,
-			     const MFLevelGrid&                            a_mflg_coar,
-			     const MFLevelGrid&                            a_mflg_coar_mg,
-			     const ProblemDomain&                          a_domain,
-			     const bool&                                   a_layout_changed,
-			     const bool&                                   a_has_mg,
-			     const bool&                                   a_has_fine,
-			     const bool&                                   a_has_coar,
-			     const int&                                    a_ref_to_fine,
-			     const int&                                    a_ref_to_coar,
-			     const int&                                    a_relax_type,
-			     const int&                                    a_order_ebbc,
-			     const IntVect&                                a_ghost_phi,
-			     const IntVect&                                a_ghost_rhs,
-			     const Real&                                   a_dx,
-			     const Real&                                   a_dx_coar,
-			     const Real&                                   a_alpha,
-			     const Real&                                   a_beta,
-			     const RealVect&                               a_origin){
+			      const RefCountedPtr<BaseDomainBC>&            a_dombc,
+			      const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
+			      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
+			      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
+			      const MFQuadCFInterp&                         a_quadcfi,
+			      const MFLevelGrid&                            a_mflg_fine,
+			      const MFLevelGrid&                            a_mflg,
+			      const MFLevelGrid&                            a_mflg_coar,
+			      const MFLevelGrid&                            a_mflg_coar_mg,
+			      const ProblemDomain&                          a_domain,
+			      const bool&                                   a_layout_changed,
+			      const bool&                                   a_has_mg,
+			      const bool&                                   a_has_fine,
+			      const bool&                                   a_has_coar,
+			      const int&                                    a_ref_to_fine,
+			      const int&                                    a_ref_to_coar,
+			      const int&                                    a_relax_type,
+			      const int&                                    a_order_ebbc,
+			      const IntVect&                                a_ghost_phi,
+			      const IntVect&                                a_ghost_rhs,
+			      const Real&                                   a_dx,
+			      const Real&                                   a_dx_coar,
+			      const Real&                                   a_alpha,
+			      const Real&                                   a_beta,
+			      const RealVect&                               a_origin){
 
 
   const int num_phases = a_mfis->num_phases();
@@ -335,7 +335,7 @@ void mfconductivityop::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
 }
 
 void mfconductivityop::applyOpNoBoundary(LevelData<MFCellFAB>&       a_opPhi,
-					const LevelData<MFCellFAB>& a_phi){
+					 const LevelData<MFCellFAB>& a_phi){
 #if verb
   pout() << "mfconductivityop::applyopnoboundary"<< endl;
 #endif
@@ -364,9 +364,9 @@ void mfconductivityop::setTime(Real a_oldTime, Real a_mu, Real a_dt){
 }
 
 void mfconductivityop::residual(LevelData<MFCellFAB>&        a_lhs,
-			       const LevelData<MFCellFAB>&  a_phi,
-			       const LevelData<MFCellFAB>&  a_rhs,
-			       bool                         a_homogeneous){
+				const LevelData<MFCellFAB>&  a_phi,
+				const LevelData<MFCellFAB>&  a_rhs,
+				bool                         a_homogeneous){
   CH_TIME("mfconductivityop::residual");
 #if verb
   pout() << "mfconductivityop::residual"<< endl;
@@ -381,7 +381,7 @@ void mfconductivityop::residual(LevelData<MFCellFAB>&        a_lhs,
 }
 
 void mfconductivityop::preCond(LevelData<MFCellFAB>&       a_correction,
-			      const LevelData<MFCellFAB>& a_residual){
+			       const LevelData<MFCellFAB>& a_residual){
   CH_TIME("mfconductivityop::preCond");
 #if verb
   pout() << "mfconductivityop::precond"<< endl;
@@ -393,8 +393,8 @@ void mfconductivityop::preCond(LevelData<MFCellFAB>&       a_correction,
 }
 
 void mfconductivityop::applyOp(LevelData<MFCellFAB>&        a_lhs,
-			      const LevelData<MFCellFAB>&  a_phi,
-			      bool                         a_homogeneous){
+			       const LevelData<MFCellFAB>&  a_phi,
+			       bool                         a_homogeneous){
   CH_TIME("mfconductivityop::applyOp");
 #if verb
   pout() << "mfconductivityop::applyop"<< endl;
@@ -414,7 +414,7 @@ void mfconductivityop::applyOp(LevelData<MFCellFAB>&        a_lhs,
 }
 
 void mfconductivityop::create(LevelData<MFCellFAB>&       a_lhs,
-			     const LevelData<MFCellFAB>& a_rhs) {
+			      const LevelData<MFCellFAB>& a_rhs) {
   CH_TIME("mfconductivityop::create");
 #if verb
   pout() << "mfconductivityop::create"<< endl;
@@ -423,8 +423,8 @@ void mfconductivityop::create(LevelData<MFCellFAB>&       a_lhs,
 }
 
 void mfconductivityop::createCoarsened(LevelData<MFCellFAB>&       a_lhs,
-				      const LevelData<MFCellFAB>& a_rhs,
-				      const int&                  a_refRat) {
+				       const LevelData<MFCellFAB>& a_rhs,
+				       const int&                  a_refRat) {
   CH_TIME("mfconductivityop::createCoarsened");
 #if verb
   pout() << "mfconductivityop::createCoarsened"<< endl;
@@ -460,7 +460,7 @@ void mfconductivityop::createCoarsened(LevelData<MFCellFAB>&       a_lhs,
 }
 
 void mfconductivityop::assign(LevelData<MFCellFAB>&       a_lhs,
-			     const LevelData<MFCellFAB>& a_rhs){
+			      const LevelData<MFCellFAB>& a_rhs){
 #if verb
   pout() << "mfconductivityop::assign"<< endl;
 #endif
@@ -472,7 +472,7 @@ void mfconductivityop::assign(LevelData<MFCellFAB>&       a_lhs,
 
 
 Real mfconductivityop::dotProduct(const LevelData<MFCellFAB>& a_data1,
-				 const LevelData<MFCellFAB>& a_data2){
+				  const LevelData<MFCellFAB>& a_data2){
 #if verb
   pout() << "mfconductivityop::dotproduct"<< endl;
 #endif
@@ -526,8 +526,8 @@ Real mfconductivityop::dotProduct(const LevelData<MFCellFAB>& a_data1,
 }
 
 void mfconductivityop::incr(LevelData<MFCellFAB>&       a_lhs,
-			   const LevelData<MFCellFAB>& a_rhs,
-			   Real                        a_scale){
+			    const LevelData<MFCellFAB>& a_rhs,
+			    Real                        a_scale){
 #if verb
   pout() << "mfconductivityop::incr"<< endl;
 #endif
@@ -540,10 +540,10 @@ void mfconductivityop::incr(LevelData<MFCellFAB>&       a_lhs,
 }
 
 void mfconductivityop::axby(LevelData<MFCellFAB>&       a_lhs,
-			   const LevelData<MFCellFAB>& a_x,
-			   const LevelData<MFCellFAB>& a_y,
-			   Real a,
-			   Real b){
+			    const LevelData<MFCellFAB>& a_x,
+			    const LevelData<MFCellFAB>& a_y,
+			    Real a,
+			    Real b){
 #if verb
   pout() << "mfconductivityop::axby"<< endl;
 #endif
@@ -576,8 +576,8 @@ Real mfconductivityop::norm(const LevelData<MFCellFAB>& a_x, int a_ord){
 }
 
 Real mfconductivityop::kappaNorm(Real&                       a_volume,
-				const LevelData<MFCellFAB>& a_data,
-				int                         a_p) const {
+				 const LevelData<MFCellFAB>& a_data,
+				 int                         a_p) const {
 
 #if verb
   pout() << "mfconductivityop::kappaNorm"<< endl;
@@ -677,8 +677,8 @@ void mfconductivityop::setToZero(LevelData<MFCellFAB>& a_x){
 }
 
 void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
-			    const LevelData<MFCellFAB>& a_residual,
-			    int                         iterations){
+			     const LevelData<MFCellFAB>& a_residual,
+			     int                         iterations){
   CH_TIME("mfconductivityop::relax");
 #if verb
   pout() << "mfconductivityop::relax"<< endl;
@@ -709,8 +709,8 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 }
 
 void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
-				  const LevelData<MFCellFAB>& a_rhs,
-				  const int                   a_iterations){
+				   const LevelData<MFCellFAB>& a_rhs,
+				   const int                   a_iterations){
   CH_TIME("mfconductivityop::levelJacobi");
   LevelData<MFCellFAB>& resid = m_tmp;
   bool homogeneous = true;
@@ -729,8 +729,8 @@ void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
 }
 
 void mfconductivityop::createCoarser(LevelData<MFCellFAB>&       a_coarse,
-				    const LevelData<MFCellFAB>& a_fine,
-				    bool                        ghosted){
+				     const LevelData<MFCellFAB>& a_fine,
+				     bool                        ghosted){
   CH_TIME("mfconductivityop::createCoarser");
 #if verb
   pout() << "mfconductivityop::createCoarser"<< endl;
@@ -749,8 +749,8 @@ void mfconductivityop::createCoarser(LevelData<MFCellFAB>&       a_coarse,
 }
 
 void mfconductivityop::restrictResidual(LevelData<MFCellFAB>&       a_resCoarse,
-				       LevelData<MFCellFAB>&       a_phiFine,
-				       const LevelData<MFCellFAB>& a_rhsFine){
+					LevelData<MFCellFAB>&       a_phiFine,
+					const LevelData<MFCellFAB>& a_rhsFine){
   CH_TIME("mfconductivityop::restrictResidual");
 #if verb
   pout() << "mfconductivityop::restrictResidual"<< endl;
@@ -765,7 +765,7 @@ void mfconductivityop::restrictResidual(LevelData<MFCellFAB>&       a_resCoarse,
 }
 
 void mfconductivityop::prolongIncrement(LevelData<MFCellFAB>&       a_phiThisLevel,
-				       const LevelData<MFCellFAB>& a_correctCoarse){
+					const LevelData<MFCellFAB>& a_correctCoarse){
   CH_TIME("mfconductivityop::prolongIncrement");
 #if verb
   pout() << "mfconductivityop::prolongIncrement"<< endl;
@@ -779,12 +779,12 @@ void mfconductivityop::prolongIncrement(LevelData<MFCellFAB>&       a_phiThisLev
 }
 
 void mfconductivityop::AMRResidual(LevelData<MFCellFAB>&       a_residual,
-				  const LevelData<MFCellFAB>& a_phiFine,
-				  const LevelData<MFCellFAB>& a_phi,
-				  const LevelData<MFCellFAB>& a_phiCoarse,
-				  const LevelData<MFCellFAB>& a_rhs,
-				  bool                        a_homogeneousBC,
-				  AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
+				   const LevelData<MFCellFAB>& a_phiFine,
+				   const LevelData<MFCellFAB>& a_phi,
+				   const LevelData<MFCellFAB>& a_phiCoarse,
+				   const LevelData<MFCellFAB>& a_rhs,
+				   bool                        a_homogeneousBC,
+				   AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
   CH_TIME("mfconductivityop::AMRResidual");
 #if verb
   pout() << "mfconductivityop::amrresidual"<< endl;
@@ -798,11 +798,11 @@ void mfconductivityop::AMRResidual(LevelData<MFCellFAB>&       a_residual,
 }
 
 void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
-				  const LevelData<MFCellFAB>& a_phiFine,
-				  const LevelData<MFCellFAB>& a_phi,
-				  const LevelData<MFCellFAB>& a_phiCoarse,
-				  bool                        a_homogeneousBC,
-				  AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
+				   const LevelData<MFCellFAB>& a_phiFine,
+				   const LevelData<MFCellFAB>& a_phi,
+				   const LevelData<MFCellFAB>& a_phiCoarse,
+				   bool                        a_homogeneousBC,
+				   AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
   CH_TIME("mfconductivityop::AMROperator");
 #if verb
   pout() << "mfconductivityop::amroperator" << endl;
@@ -836,11 +836,11 @@ void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 }
 
 void mfconductivityop::AMRResidualNC(LevelData<MFCellFAB>&       a_residual,
-				    const LevelData<MFCellFAB>& a_phiFine,
-				    const LevelData<MFCellFAB>& a_phi,
-				    const LevelData<MFCellFAB>& a_rhs,
-				    bool                        a_homogeneousBC,
-				    AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
+				     const LevelData<MFCellFAB>& a_phiFine,
+				     const LevelData<MFCellFAB>& a_phi,
+				     const LevelData<MFCellFAB>& a_rhs,
+				     bool                        a_homogeneousBC,
+				     AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp){
   CH_TIME("mfconductivityop::AMRResidualNC");
 #if verb
   pout() << "mfconductivityop::amrresidualnc"<< endl;
@@ -858,10 +858,10 @@ void mfconductivityop::AMRResidualNC(LevelData<MFCellFAB>&       a_residual,
 }
 
 void mfconductivityop::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
-				    const LevelData<MFCellFAB>& a_phiFine,
-				    const LevelData<MFCellFAB>& a_phi,
-				    bool                        a_homogeneousBC,
-				    AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp)
+				     const LevelData<MFCellFAB>& a_phiFine,
+				     const LevelData<MFCellFAB>& a_phi,
+				     bool                        a_homogeneousBC,
+				     AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp)
 {
   CH_TIME("mfconductivityop::AMROperatorNC");
 #if verb
@@ -893,10 +893,10 @@ void mfconductivityop::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
 
 
 void mfconductivityop::AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
-				    const LevelData<MFCellFAB>& a_phi,
-				    const LevelData<MFCellFAB>& a_phiCoarse,
-				    const LevelData<MFCellFAB>& a_rhs,
-				    bool                        a_homogeneousBC){
+				     const LevelData<MFCellFAB>& a_phi,
+				     const LevelData<MFCellFAB>& a_phiCoarse,
+				     const LevelData<MFCellFAB>& a_rhs,
+				     bool                        a_homogeneousBC){
   CH_TIME("mfconductivityop::AMRResidualNF");
 #if verb
   pout() << "mfconductivityop::amrresidualnf"<< endl;
@@ -910,9 +910,9 @@ void mfconductivityop::AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
 }
 
 void mfconductivityop::AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
-				    const LevelData<MFCellFAB>& a_phi,
-				    const LevelData<MFCellFAB>& a_phiCoarse,
-				    bool                        a_homogeneousBC){
+				     const LevelData<MFCellFAB>& a_phi,
+				     const LevelData<MFCellFAB>& a_phiCoarse,
+				     bool                        a_homogeneousBC){
   CH_TIME("mfconductivityop::AMROperatorNF");
 #if verb
   pout() << "mfconductivityop::amroperatornf"<< endl;
@@ -936,8 +936,8 @@ void mfconductivityop::AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
 
 
 void mfconductivityop::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
-					const LevelData<MFCellFAB>& a_correction,
-					const LevelData<MFCellFAB>& a_coarseCorrection){
+					 const LevelData<MFCellFAB>& a_correction,
+					 const LevelData<MFCellFAB>& a_coarseCorrection){
   CH_TIME("mfconductivityop::AMRUpdateResidual");
 #if verb
   pout() << "mfconductivityop::amrupdateresidual"<< endl;
@@ -958,10 +958,10 @@ void mfconductivityop::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
 }
 
 void mfconductivityop::AMRRestrict(LevelData<MFCellFAB>&       a_resCoarse,
-				  const LevelData<MFCellFAB>& a_residual,
-				  const LevelData<MFCellFAB>& a_correction,
-				  const LevelData<MFCellFAB>& a_coarseCorrection,
-				  bool                        a_skip_res){
+				   const LevelData<MFCellFAB>& a_residual,
+				   const LevelData<MFCellFAB>& a_correction,
+				   const LevelData<MFCellFAB>& a_coarseCorrection,
+				   bool                        a_skip_res){
   CH_TIME("mfconductivityop::AMRRestrict");
 #if verb
   pout() << "mfconductivityop::amrrestrict"<< endl;
@@ -978,7 +978,7 @@ void mfconductivityop::AMRRestrict(LevelData<MFCellFAB>&       a_resCoarse,
 }
 
 void mfconductivityop::AMRProlong(LevelData<MFCellFAB>&       a_correction,
-				 const LevelData<MFCellFAB>& a_coarseCorrection){
+				  const LevelData<MFCellFAB>& a_coarseCorrection){
   CH_TIME("mfconductivityop::AMRProlong");
 #if verb
   pout() << "mfconductivityop::amrprolong"<< endl;
@@ -995,9 +995,9 @@ void mfconductivityop::AMRProlong(LevelData<MFCellFAB>&       a_correction,
 
 
 Real mfconductivityop::AMRNorm(const LevelData<MFCellFAB>& a_coar_resid,
-			      const LevelData<MFCellFAB>& a_fine_resid,
-			      const int&                  a_ref_rat,
-			      const int&                  a_ord){
+			       const LevelData<MFCellFAB>& a_fine_resid,
+			       const int&                  a_ref_rat,
+			       const int&                  a_ord){
   CH_TIME("mf_helmholtzop::AMRNorm");
 #if verb
   pout() << "mfconductivityop::amrnorm"<< endl;

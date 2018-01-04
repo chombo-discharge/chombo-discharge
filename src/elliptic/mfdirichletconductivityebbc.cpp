@@ -9,8 +9,9 @@
 
 #define match 1
 
-bool mfdirichletconductivityebbc::s_quadrant_based = true;
-int  mfdirichletconductivityebbc::s_lsq_radius     = 2;
+bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
+bool mfdirichletconductivityebbc::s_quadrant_based   = true;
+int  mfdirichletconductivityebbc::s_lsq_radius       = 2;
 
 mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_domain,
 							 const EBISLayout&    a_ebisl,
@@ -137,8 +138,8 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 
       const Real& cur_weight      = m_irreg_weights[dit()](vof, comp);
       const Real& wp              = jumpweights.get_ivfab(m_phase)(vof, comp);
-      const Real& bp              = jump_coef.get_ivfab(m_phase)(vof, comp);
       const Real& wq              = jumpweights.get_ivfab(otherphase)(vof, comp);
+      const Real& bp              = jump_coef.get_ivfab(m_phase)(vof, comp);
       const Real& bq              = jump_coef.get_ivfab(otherphase)(vof, comp);
       const Real factor           = cur_weight*bp/(bp*wp + bq*wq);
       const VoFStencil& jump_sten = jumpstens.get_ivfab(m_phase)(vof, comp);
@@ -149,7 +150,6 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       addsten *= -1.0*factor;
 
       cur_stencil += addsten;
-
     }
 #endif
 
@@ -161,6 +161,18 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       
       VoFStencil& cur_stencil = m_irreg_stencils[dit()](vof, comp);
       cur_stencil *= factor;
+
+      if(mfdirichletconductivityebbc::s_areaFracWeighted){
+	//	cur_stencil *= ebisbox.areaFracScaling(vof);
+
+	Real area = ebisbox.bndryArea(vof);
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  area += ebisbox.sumArea(vof, dir, Side::Lo);
+	  area += ebisbox.sumArea(vof, dir, Side::Hi);
+	}
+
+	cur_stencil *= 1.0/area;
+      }
     }
   }
 }
@@ -262,6 +274,19 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     // "Homogeneous" part
     Real flux = weight*value*beta*bco*area_frac*a_factor;
 
+    if(mfdirichletconductivityebbc::s_areaFracWeighted){
+      //      flux *= ebisbox.areaFracScaling(vof);
+
+      Real area = ebisbox.bndryArea(vof);
+      for (int dir = 0; dir < SpaceDim; dir++){
+      	area += ebisbox.sumArea(vof, dir, Side::Lo);
+      	area += ebisbox.sumArea(vof, dir, Side::Hi);
+      }
+
+      flux *= 1./area;
+	
+    }
+
     // // "Inhomogeneous" part
     // for (int i = 0; i < sten.size(); i++){
     //   const VolIndex& ivof = sten.vof(i);
@@ -284,7 +309,19 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       const Real& bco        = (*m_bcoe)[a_dit](vof, comp);
       const Real& area_frac  = ebisbox.bndryArea(vof);
       const Real& weight     = m_irreg_weights[a_dit](vof, comp); 
-      const Real flux        = weight*value*beta*bco*area_frac*a_factor;
+      Real flux              = weight*value*beta*bco*area_frac*a_factor;
+
+      if(mfdirichletconductivityebbc::s_areaFracWeighted){
+	//	flux *= ebisbox.areaFracScaling(vof);
+
+	Real area = ebisbox.bndryArea(vof);
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  area += ebisbox.sumArea(vof, dir, Side::Lo);
+	  area += ebisbox.sumArea(vof, dir, Side::Hi);
+	}
+
+	flux *= 1./area;
+      }
 
       if(!m_ivs[a_dit].contains(vof.gridIndex())){ // This should be optimized in a better way
 	a_lphi(vof, comp) += flux;

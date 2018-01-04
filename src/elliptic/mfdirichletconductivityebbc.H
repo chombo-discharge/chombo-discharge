@@ -43,6 +43,11 @@ public:
   static bool s_quadrant_based;
 
   /*!
+    @brief Weight stencil by area fractions
+  */
+  static bool s_areaFracWeighted;
+
+  /*!
     @brief Radius for least squares stencils
   */
   static int s_lsq_radius;

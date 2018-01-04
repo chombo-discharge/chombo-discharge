@@ -494,6 +494,7 @@ protected:
 
   static bool                     s_turnOffBCs;
   static bool                     s_forceNoEBCF;
+  static bool                     s_areaFracWeighted;
   static IntVect                  s_ivDebug;
   void dumpFABPoint(const EBCellFAB& a_fab, const DataIndex& a_dit, const string& a_blab);
   void dumpLevelPoint(const LevelData<EBCellFAB>& a_res, const string& a_blab);

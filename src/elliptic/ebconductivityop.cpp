@@ -29,9 +29,11 @@
 #include "ParmParse.H"
 #include "CH_OpenMP.H"
 #include "NamespaceHeader.H"
+
 //IntVect ebconductivityop::s_ivDebug = IntVect(D_DECL(111, 124, 3));
-bool ebconductivityop::s_turnOffBCs = false; //REALLY needs to default to false
-bool ebconductivityop::s_forceNoEBCF = false; //REALLY needs to default to false
+bool ebconductivityop::s_turnOffBCs       = false; //REALLY needs to default to false
+bool ebconductivityop::s_forceNoEBCF      = false; //REALLY needs to default to false
+bool ebconductivityop::s_areaFracWeighted = false; // Precondition the system with area fractions
 
 //-----------------------------------------------------------------------
 ebconductivityop::
@@ -279,6 +281,18 @@ calculateAlphaWeight()
             Real volFrac = m_eblg.getEBISL()[dit[mybox]].volFrac(VoF);
             Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
             alphaWeight *= volFrac;
+	    if(s_areaFracWeighted){
+	      //	      alphaWeight *= m_eblg.getEBISL()[dit[mybox]].areaFracScaling(VoF);
+
+	      const EBISBox& ebisbox = m_eblg.getEBISL()[dit[mybox]];
+	      Real area = ebisbox.bndryArea(VoF);
+	      for (int dir = 0; dir < SpaceDim; dir++){
+	      	area += ebisbox.sumArea(VoF, dir, Side::Lo);
+	      	area += ebisbox.sumArea(VoF, dir, Side::Hi);
+	      }
+
+	      alphaWeight *= 1./area;
+	    }
 
             m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
           }
@@ -311,6 +325,18 @@ getDivFStencil(VoFStencil&      a_vofStencil,
             }
         }
     }
+
+  if(s_areaFracWeighted){
+    //    a_vofStencil *= ebisBox.areaFracScaling(a_vof);
+
+    Real area = ebisBox.bndryArea(a_vof);
+    for (int dir = 0; dir < SpaceDim; dir++){
+      area += ebisBox.sumArea(a_vof, dir, Side::Lo);
+      area += ebisBox.sumArea(a_vof, dir, Side::Hi);
+    }
+
+    a_vofStencil *= 1./area;
+  }
 }
 //-----------------------------------------------------------------------
 void
@@ -400,8 +426,10 @@ diagonalScale(LevelData<EBCellFAB> & a_rhs,
 
   CH_TIME("ebconductivityop::diagonalScale");
   //  dumpLevelPoint(a_rhs, string("ebconductivityop: diagonalScale: phi coming in = "));
-  if (a_kappaWeighted)
+  if (a_kappaWeighted) {
     EBLevelDataOps::kappaWeight(a_rhs);
+
+  }
 
   //  dumpLevelPoint(a_rhs, string("ebconductivityop: diagonalScale: kappa*phi = "));
 
@@ -415,6 +443,11 @@ diagonalScale(LevelData<EBCellFAB> & a_rhs,
       {
         a_rhs[dit[mybox]] *= (*m_acoef)[dit[mybox]];
       }
+  }
+
+  if(s_areaFracWeighted){
+    MayDay::Abort("ebconductivityop::diagonalScale - wrong scaling");
+    EBLevelDataOps::areaFracScalingWeight(a_rhs);
   }
   //  dumpLevelPoint(a_rhs, string("ebconductivityop: diagonalScale: acoef*kappa*phi = "));
 
@@ -636,6 +669,9 @@ defineStencils()
             Real volFrac = ebisBox.volFrac(VoF);
             Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
             alphaWeight *= volFrac;
+	    if(s_areaFracWeighted){
+	      alphaWeight *= ebisBox.areaFracScaling(VoF);
+	    }
 
             m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
             m_betaDiagWeight[dit[mybox]](VoF, 0)  = betaWeight;
@@ -1222,20 +1258,10 @@ applyOpIrregular(EBCellFAB&             a_lhs,
   m_opEBStencil[a_datInd]->apply(a_lhs, a_phi, m_alphaDiagWeight[a_datInd], m_alpha, m_beta, false);
 
   //  dumpFABPoint(a_lhs, a_datInd, string("ebconductivityop::applyopirr after  apply lhs="));
-#if 0 // Robert, change Dec. 19. This is the original code. It can be commented out for testing purposes. 
-  if (!a_homogeneous)
-    {
-      const Real factor = m_beta/m_dx; //beta and bcoef handled within applyEBFlux
-      m_ebBC->applyEBFlux(a_lhs, a_phi, m_vofIterIrreg[a_datInd], (*m_eblg.getCFIVS()),
-                          a_datInd, RealVect::Zero, vectDx, factor,
-                          a_homogeneous, 0.0);
-    }
-#else
   const Real factor = m_beta/m_dx; //beta and bcoef handled within applyEBFlux
   m_ebBC->applyEBFlux(a_lhs, a_phi, m_vofIterIrreg[a_datInd], (*m_eblg.getCFIVS()),
 		      a_datInd, RealVect::Zero, vectDx, factor,
 		      a_homogeneous, 0.0);
-#endif
   for (int idir = 0; idir < SpaceDim; idir++)
     {
       int comp = 0;
