@@ -59,7 +59,7 @@ void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_rela
   m_gmg_norm_thresh = a_norm_thresh;
 }
 
-void poisson_multifluid_gmg::solve(){
+void poisson_multifluid_gmg::solve(const bool a_zerophi){
   CH_TIME("poisson_multifluid_gmg::solve");
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::solve";
@@ -68,15 +68,17 @@ void poisson_multifluid_gmg::solve(){
 #if 1 // Remove this shit later
   m_amr->allocate(m_state,  1, 3);
   m_amr->allocate(m_source, 1, 3);
+  m_amr->allocate(m_resid,  1, 3);
 
   data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
+  data_ops::set_value(m_resid,  0.0);
 #endif
   
-  this->solve(m_state, m_source);
+  this->solve(m_state, m_source, a_zerophi);
 }
 
-void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& a_source){
+void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi){
   CH_TIME("poisson_multifluid_gmg::solve(mfamrcell, mfamrcell");
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
@@ -88,13 +90,18 @@ void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
 
   const int finest_level = m_amr->get_finest_level();
 
-  Vector<LevelData<MFCellFAB>* > phi_ptr, rhs_ptr;
+  Vector<LevelData<MFCellFAB>* > phi_ptr, rhs_ptr, res_ptr;
   for (int lvl = 0; lvl <= finest_level; lvl++){
     phi_ptr.push_back(&(*a_state[lvl]));
     rhs_ptr.push_back(&(*a_source[lvl]));
+    res_ptr.push_back(&(*m_resid[lvl]));
   }
 
-  m_gmg_solver.solve(phi_ptr, rhs_ptr, finest_level, 0);
+
+  //  m_gmg_solver.solve(phi_ptr, rhs_ptr, finest_level, 0);
+  m_gmg_solver.init(phi_ptr, rhs_ptr, finest_level, 0);
+  m_gmg_solver.solveNoInitResid(phi_ptr, res_ptr, rhs_ptr, finest_level, 0, a_zerophi);
+  m_gmg_solver.revert(phi_ptr, rhs_ptr, finest_level, 0);
 }
 
 void poisson_multifluid_gmg::set_coefficients(){
@@ -262,7 +269,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
     pout() << "poisson_multifluid_gmg::setup_operator_factory" << endl;
   }
 
-  // Set up the mf_helmholtz_opfactory
+  // Set up the mfconductivityopfactory
   const int finest_level                 = m_amr->get_finest_level();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
   const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
@@ -302,7 +309,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
   
 
-  m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
+  m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 									       mflg,
 									       mfquadcfi,
 									       refinement_ratios,
@@ -605,7 +612,7 @@ void poisson_multifluid_gmg::base_tests(){
     mfquadcfi[lvl].define(quadcfi_phases);
   }
 
-  // m_opfact = RefCountedPtr<mf_helmholtz_opfactory> (new mf_helmholtz_opfactory(m_mfis,
+  // m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
   // 									       mfeblg,
   // 									       mfquadcfi,
   // 									       refinement_ratios,

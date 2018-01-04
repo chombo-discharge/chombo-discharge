@@ -1,15 +1,15 @@
 /*!
-  @file mf_helmholtz_opfactory.H
+  @file mfconductivityopfactory.H
   @brief Factory class for creating multifluid helmholtz operators
   @author Robert Marskar
-  @todo Move implementations to mf_helmholtz_opfactory.H
+  @todo Move implementations to mfconductivityopfactory.H
 */
 
-#ifndef _MF_HELMHOLTZ_OPFACTORY_
-#define _MF_HELMHOLTZ_OPFACTORY_
+#ifndef _MFCONDUCTIVITYOPFACTORY_
+#define _MFCONDUCTIVITYOPFACTORY_
 
 #include "type_definitions.H"
-#include "mf_helmholtz_op.H"
+#include "mfconductivityop.H"
 #include "mfis.H"
 #include "mfalias.H"
 #include "MFLevelGrid.H"
@@ -30,14 +30,14 @@
 #include <MFCellFAB.H>
 
 /*!
-  @brief Factory class for generationg mf_helmholtz_op's. 
+  @brief Factory class for generationg mfconductivityop's. 
   @details The jump condition is of the Neumann type in the form
   \f[
   a\partial_n\phi_1 - b\partial_n\phi_2 = c\sigma,
   \f]
   where \f$a\f$, \f$b\f and \f$c\f$ are variables.  
 */
-class mf_helmholtz_opfactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
+class mfconductivityopfactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
   
   /*!
@@ -45,7 +45,7 @@ public:
     @note This class generates its own EBConductivityOps as well as it's own interpolation utilities. 
     @details This class only supports two-phase solutions with single components
   */
-  mf_helmholtz_opfactory(const RefCountedPtr<mfis>&                a_mfis,
+  mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
 			 const Vector<MFLevelGrid>&                a_mflg,
 			 const Vector<MFQuadCFInterp>&             a_mfquadcfi,
 			 const Vector<int>&                        a_ref_rat,
@@ -66,7 +66,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~mf_helmholtz_opfactory();
+  ~mfconductivityopfactory();
 
   /*!
     @brief Set when to drop to the bottom solver
@@ -136,7 +136,7 @@ public:
   /*!
     @brief Reclaim
   */
-  virtual void AMRreclaim(mf_helmholtz_op* a_reclaim);
+  virtual void AMRreclaim(mfconductivityop* a_reclaim);
 
   /*!
     @brief Define things for lower levels of multigrid
@@ -358,8 +358,8 @@ private:
   /*!
     @brief Disallowed weak constructor
   */
-  mf_helmholtz_opfactory(){
-    MayDay::Error("mf_helmholtz_opfactory:: invalid constructor");
+  mfconductivityopfactory(){
+    MayDay::Error("mfconductivityopfactory:: invalid constructor");
   }
 };
 

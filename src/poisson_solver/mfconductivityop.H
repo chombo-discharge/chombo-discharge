@@ -1,12 +1,12 @@
 /*!
-  @file mf_helmholtz_op.H
+  @file mfconductivityop.H
   @brief Declaration of multifluid helmholtz operator for embedment in AMRMultiGrid
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#ifndef _MF_HELMHOLTZ_OP_
-#define _MF_HELMHOLTZ_OP_
+#ifndef _MFCONDUCTIVITYOP_
+#define _MFCONDUCTIVITYOP_
 
 #include "type_definitions.H"
 #include "mfis.H"
@@ -29,19 +29,19 @@
 /*!
   @brief Operator class for solving the variable-coefficient Helmholtz equation with multigrid in two phases
 */
-class mf_helmholtz_op : public TGAHelmOp<LevelData<MFCellFAB> >{
+class mfconductivityop : public TGAHelmOp<LevelData<MFCellFAB> >{
 public:
 
   /*!
     @brief Constructor
   */
-  mf_helmholtz_op();
+  mfconductivityop();
   
 
   /*!
     @brief Destructor
   */
-  virtual ~mf_helmholtz_op();
+  virtual ~mfconductivityop();
 
   /*!
     @brief Define function

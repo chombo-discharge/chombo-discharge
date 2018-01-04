@@ -54,17 +54,17 @@ public:
   /*!
     @brief Solve Poisson equation
   */
-  virtual void solve();
+  virtual void solve(const bool a_zerophi = true);
 
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual void solve(MFAMRCellData& a_state);
+  virtual void solve(MFAMRCellData& a_state, const bool a_zerophi = true);
 
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source) = 0;
+  virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true) = 0;
 
   /*!
     @brief Set Dirichlet wall BC
@@ -179,6 +179,11 @@ protected:
     @brief State data (i.e. the 
   */
   MFAMRCellData m_source;
+
+  /*!
+    @brief Final residue
+  */
+  MFAMRCellData m_resid;
 
   /*!
     @brief State at Phase::Gas

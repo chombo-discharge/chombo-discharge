@@ -9,7 +9,7 @@
 #define _POISSON_MULTIFLUID_GMG_
 
 #include "poisson_solver.H"
-#include "mf_helmholtz_opfactory.H"
+#include "mfconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
@@ -38,12 +38,12 @@ public:
   /*!
     @brief Override this one for testing purposes. 
   */
-  virtual void solve();
+  virtual void solve(const bool a_zerophi = true);
 
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source);
+  virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true);
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 
@@ -54,7 +54,7 @@ public:
 					 const int a_pre_smooth          = 24,
 					 const int a_post_smooth         = 24,
 					 const int a_bot_smooth          = 24,
-					 const int a_max_iter            = 128,
+					 const int a_max_iter            = 12,
 					 const Real a_eps                = 1.E-30,
 					 const Real a_hang               = 1.E-20,
 					 const Real a_norm_thresh        = 1.E-30);
@@ -124,7 +124,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<mf_helmholtz_opfactory> m_opfact;
+  RefCountedPtr<mfconductivityopfactory> m_opfact;
 
   /*!
     @brief ConductivityOp operator factory
