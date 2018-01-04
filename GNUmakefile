@@ -23,6 +23,7 @@ base_dir = .
 src_dirs = ./src				\
 	./src/amr_mesh				\
 	./src/cdr_solver			\
+	./src/elliptic				\
 	./src/geometry				\
 	./src/global				\
 	./src/plasma_solver		 	\

@@ -17,11 +17,7 @@ mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_
 							 const RealVect&      a_dx,
 							 const IntVect*       a_phig,
 							 const IntVect*       a_rhsg,
-							 const int            a_phase) : DirichletConductivityEBBC(a_domain,
-														   a_ebisl,
-														   a_dx,
-														   a_phig,
-														   a_rhsg){
+							 const int            a_phase) {
 
   m_domain = a_domain;
   m_ebisl  = a_ebisl;

@@ -113,14 +113,6 @@ void poisson_solver::set_time(const Real a_time) {
   m_time = a_time;
 }
 
-void poisson_solver::alias_internals(){
-//   aliasMF(m_state_gas,   phase::gas,   m_state);
-//   aliasMF(m_state_solid, phase::solid, m_state);
-
-//   aliasMF(m_source_gas,   phase::gas,   m_source);
-//   aliasMF(m_source_solid, phase::solid, m_source);
-}
-
 void poisson_solver::sanity_check(){
   CH_TIME("poisson_solver::sanity_check");
   if(m_verbosity > 4){
@@ -254,34 +246,6 @@ MFAMRCellData& poisson_solver::get_source(){
   return m_source;
 }
 
-EBAMRCellData& poisson_solver::get_state_phase(phase::which_phase a_phase){
-  //  this->alias_internals();
-  
-  if(a_phase == phase::gas){
-    return m_state_gas;
-  }
-  else if(a_phase == phase::solid){
-    return m_state_solid;
-  }
-  else{
-    MayDay::Abort("poisson_solver::get_state_phase - unknown phase");
-  }
-}
-
-EBAMRCellData& poisson_solver::get_source_phase(phase::which_phase a_phase){
-  //  this->alias_internals();
-
-  if(a_phase == phase::gas){
-    return m_state_gas;
-  }
-  else if(a_phase == phase::solid){
-    return m_state_solid;
-  }
-  else{
-    MayDay::Abort("poisson_solver::get_source_phase - unknown phase");
-  }
-}
-
-EBAMRIVData& poisson_solver::get_jump(){
-  return m_jump;
+MFAMRCellData& poisson_solver::get_resid(){
+  return m_resid;
 }

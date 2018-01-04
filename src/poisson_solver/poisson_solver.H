@@ -109,19 +109,9 @@ public:
   MFAMRCellData& get_source();
 
   /*!
-    @brief Get state on specified phase. This uses aliasing
+    @brief Get the residue
   */
-  EBAMRCellData& get_state_phase(phase::which_phase a_phase);
-
-  /*!
-    @brief Get source on specified phase. This uses aliasing
-  */
-  EBAMRCellData& get_source_phase(phase::which_phase a_phase);
-
-  /*!
-    @brief Get the jump state
-  */
-  EBAMRIVData& get_jump();
+  MFAMRCellData& get_resid();
 
   /*!
     @brief Get current time
@@ -186,31 +176,6 @@ protected:
   MFAMRCellData m_resid;
 
   /*!
-    @brief State at Phase::Gas
-  */
-  EBAMRCellData m_state_gas;
-
-  /*!
-    @brief State at
-  */
-  EBAMRCellData m_state_solid;
-
-    /*!
-    @brief State at Phase::Gas
-  */
-  EBAMRCellData m_source_gas;
-
-  /*!
-    @brief State at
-  */
-  EBAMRCellData m_source_solid;
-  
-  /*!
-    @brief Jump state on interface - this gives the BC on the gas-solid interfaces
-  */
-  EBAMRIVData m_jump;
-
-  /*!
     @brief Function pointer to potential function - this gives the BC on EBs (where we have Dirichlet)
   */
   Real m_potential;
@@ -229,11 +194,6 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
-
-  /*!
-    @brief Alias internal states so ensure pointers point where they are supposed to
-  */
-  virtual void alias_internals();
 
   /*!
     @brief Set the mfis

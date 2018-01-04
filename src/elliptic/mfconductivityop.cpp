@@ -159,7 +159,6 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 #endif
 
     m_ebbc[iphase]->set_jump_object(m_jumpbc);
-    m_ebbc[iphase]->setValue(0.0);
     m_ebbc[iphase]->setOrder(a_order_ebbc);
     m_ebbc[iphase]->define_ivs(a_mflg);
 

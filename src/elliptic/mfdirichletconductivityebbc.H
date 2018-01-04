@@ -20,7 +20,7 @@
   boundary conditions.
   @details This is a simple class that essentially just ignores calls to homogeneous BCs on interface cells. 
 */
-class mfdirichletconductivityebbc : public DirichletConductivityEBBC {
+class mfdirichletconductivityebbc : public ConductivityBaseEBBC {
 public:
   /*!
     @brief Constructor. Implements DirichletConductivityEBBC
