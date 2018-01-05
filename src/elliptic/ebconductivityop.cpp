@@ -1498,10 +1498,40 @@ relax(LevelData<EBCellFAB>&       a_phi,
     }
 }
 
-void ebconductivityop::relax_mf(LevelData<EBCellFAB>& a_e, const LevelData<EBCellFAB>& a_res, const int a_iterations){
+void ebconductivityop::relax_mf(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, const int a_iterations){
   CH_TIME("ebconductivityop::relax_mf");
 
-  MayDay::Abort("ebconductivityop::error - does not work");
+  const bool homogeneous       = true;
+  const int ncomps             = a_phi.nComp();
+  const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
+  
+
+  // Apply domain flux
+  for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
+
+    Box dblbox(m_eblg.getDBL().get(dit()));
+    BaseFab<Real>& phifab = a_phi[dit()].getSingleValuedFAB();
+    Box lo_box[SpaceDim], hi_box[SpaceDim];
+    int has_lo[SpaceDim], has_hi[SpaceDim];
+    
+    // Apply the domain flux to phi
+    this->applyDomainFlux(lo_box, hi_box, has_lo, has_hi, dblbox, ncomps, phifab, homogeneous, dit());
+  }
+
+  // Red-black iteration
+  for (int redBlack = 0; redBlack <= 1; redBlack++){
+    a_phi.exchange();
+
+    if(m_hasCoar){
+      this->applyCFBCs(a_phi, NULL, true);
+    }
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& phi       = a_phi[dit()];
+      const EBCellFAB& rhs = a_rhs[dit()];
+    }
+  }
+  MayDay::Abort("ebconductivityop::relax_mf - stop here");
 }
 //-----------------------------------------------------------------------
 void

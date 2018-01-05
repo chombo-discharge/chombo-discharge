@@ -7,7 +7,7 @@
 
 #include "mfdirichletconductivityebbc.H"
 
-#define match 1
+#define opsten 1 // = 0 is currently wrong. Working on this..
 
 bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;
@@ -132,7 +132,6 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     }
 
 
-#if match    // Adjust stencils for matching cells
     for (VoFIterator vofit(match_ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof   = vofit();
 
@@ -149,9 +148,12 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       VoFStencil addsten(jump_sten);
       addsten *= -1.0*factor;
 
+#if opsten
       cur_stencil += addsten;
-    }
+#else
+      cur_stencil.clear();
 #endif
+    }
 
     // Scale stencils appropriately. They should be scaled by beta*bco*area_frac*a_factor
     for (VoFIterator vofit(irreg_ivs, ebgraph); vofit.ok(); ++vofit){
@@ -258,21 +260,38 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 
   const MFInterfaceFAB<Real>& inhomo = m_jumpbc->get_inhomo()[a_dit];
 
-#if match
   for (VoFIterator vofit(m_ivs[a_dit], ebisbox.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-      
-    //    const Real& value      = (*m_data)[a_dit](vof, comp);
-    const Real& value     = inhomo.get_ivfab(m_phase)(vof, comp);
-    const Real& beta      = m_beta;
-    const Real& bco       = (*m_bcoe)[a_dit](vof, comp);
-    const Real& area_frac = ebisbox.bndryArea(vof);
-    const Real& weight    = m_irreg_weights[a_dit](vof, comp);
-    // const Real& weight     = m_matching_weights[a_dit](vof, comp);  
-    // const VoFStencil& sten = m_matching_stencils[a_dit](vof, comp);
 
-    // "Homogeneous" part
+#if opsten
+    const Real& value      = inhomo.get_ivfab(m_phase)(vof, comp);
+#else
+    const Real& value      = (*m_data)[a_dit](vof, comp);
+#endif
+
+    const Real& beta       = m_beta;
+    const Real& bco        = (*m_bcoe)[a_dit](vof, comp);
+    const Real& area_frac  = ebisbox.bndryArea(vof);
+#if opsten
+    const Real& weight     = m_irreg_weights[a_dit](vof, comp);
+#else
+    const Real& weight     = m_matching_weights[a_dit](vof, comp);
+#endif
+    const VoFStencil& sten = m_matching_stencils[a_dit](vof, comp);
+
+    // "Homogeneous" part. Always goe sthrough. 
     Real flux = weight*value*beta*bco*area_frac*a_factor;
+
+#if opsten
+#else
+    // "Inhomogeneous" part
+    for (int i = 0; i < sten.size(); i++){
+      const VolIndex& ivof = sten.vof(i);
+      const Real& iweight  = sten.weight(i);
+
+      flux += a_phi(ivof, comp)*iweight*beta*bco*area_frac*a_factor;
+    }
+#endif
 
     if(mfdirichletconductivityebbc::s_areaFracWeighted){
       flux *= ebisbox.areaFracScaling(vof);
@@ -287,18 +306,11 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 	
     }
 
-    // // "Inhomogeneous" part
-    // for (int i = 0; i < sten.size(); i++){
-    //   const VolIndex& ivof = sten.vof(i);
-    //   const Real& iweight  = sten.weight(i);
 
-    //   flux += a_phi(ivof, comp)*iweight;
-    // }
 
     // Increment
     a_lphi(vof, comp) += flux;
   }
-#endif
 
   if(!a_useHomogeneous){
     for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
