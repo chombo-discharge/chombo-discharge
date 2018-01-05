@@ -1497,6 +1497,12 @@ relax(LevelData<EBCellFAB>&       a_phi,
       MayDay::Error("ebconductivityop::bogus relaxtype");
     }
 }
+
+void ebconductivityop::relax_mf(LevelData<EBCellFAB>& a_e, const LevelData<EBCellFAB>& a_res, const int a_iterations){
+  CH_TIME("ebconductivityop::relax_mf");
+
+  MayDay::Abort("ebconductivityop::error - does not work");
+}
 //-----------------------------------------------------------------------
 void
 ebconductivityop::

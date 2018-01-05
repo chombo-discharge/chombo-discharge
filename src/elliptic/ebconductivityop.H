@@ -338,6 +338,8 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
                              const LevelData<EBCellFAB>& a_residual,
                              int                         a_iterations);
 
+  virtual void relax_mf(LevelData<EBCellFAB>& a_e, const LevelData<EBCellFAB>& a_res, const int a_iterations);
+
   ///
   /**
      Calculate restricted residual:
