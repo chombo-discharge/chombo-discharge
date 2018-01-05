@@ -33,7 +33,7 @@
 //IntVect ebconductivityop::s_ivDebug = IntVect(D_DECL(111, 124, 3));
 bool ebconductivityop::s_turnOffBCs       = false; //REALLY needs to default to false
 bool ebconductivityop::s_forceNoEBCF      = false; //REALLY needs to default to false
-bool ebconductivityop::s_areaFracWeighted = true; // Precondition the system with area fractions
+bool ebconductivityop::s_areaFracWeighted = false; // Precondition the system with area fractions
 
 //-----------------------------------------------------------------------
 ebconductivityop::

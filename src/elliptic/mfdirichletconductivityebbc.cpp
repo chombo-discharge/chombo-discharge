@@ -9,7 +9,7 @@
 
 #define match 1
 
-bool mfdirichletconductivityebbc::s_areaFracWeighted = true;
+bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;
 int  mfdirichletconductivityebbc::s_lsq_radius       = 2;
 

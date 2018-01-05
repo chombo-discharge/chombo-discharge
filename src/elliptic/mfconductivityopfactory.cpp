@@ -336,11 +336,21 @@ void mfconductivityopfactory::define_jump_stuff(){
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     const EBLevelGrid& eblg  = m_mflg[lvl].get_eblg(main_phase);
     const EBISLayout& ebisl = eblg.getEBISL();
+#if 0
+    MayDay::Abort("mfconductivityopfactory::define_jump_stuff - this code is wrong");
     const IntVectSet interface_cells = m_mfis->interface_region(m_domains[lvl]);
+#endif
+
+
+
 
     m_jumpcells[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet> (m_grids[lvl]));
     for (DataIterator dit = m_jumpcells[lvl]->dataIterator(); dit.ok(); ++dit){
+#if 0 // old
       (*m_jumpcells[lvl])[dit()] = interface_cells & m_grids[lvl].get(dit());
+#else // new
+      (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interface_region(m_grids[lvl].get(dit()), dit());
+#endif
     }
 
     BaseIVFactory<Real> fact(ebisl, *m_jumpcells[lvl]);
@@ -477,9 +487,10 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   
 
   // All this shit must be set.
-  RefCountedPtr<LevelData<MFCellFAB> >   aco;
-  RefCountedPtr<LevelData<MFFluxFAB> >   bco;
-  RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg;
+  RefCountedPtr<LevelData<MFCellFAB> >        aco;
+  RefCountedPtr<LevelData<MFFluxFAB> >        bco;
+  RefCountedPtr<LevelData<MFBaseIVFAB> >      bco_irreg;
+  RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump;
 
   MFQuadCFInterp quadcfi;
   
@@ -523,10 +534,13 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
   pout() << "trying to define stuff" << endl;
 #endif
 
+  
+
   if(a_depth == 0){ // this is an AMR level
     aco       = m_aco[ref];
     bco       = m_bco[ref];
     bco_irreg = m_bco_irreg[ref];
+    jump      = m_jump[ref];
     quadcfi   = m_mfquadcfi[ref];
     mflg      = m_mflg[ref];
     domain    = m_domains[ref];
@@ -562,6 +576,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	aco       = m_aco_mg[ref][img];
 	bco       = m_bco_mg[ref][img];
 	bco_irreg = m_bco_irreg_mg[ref][img];
+	jump      = m_jump_mg[ref][img];
 	layout_changed = m_layout_changed_mg[ref][img];
 	dx = m_dx[ref]*Real(icoar);
 	has_mg = img + 1 < num_mg;
@@ -611,6 +626,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	       beta,             // Set to m_beta
 	       m_origin);        // Origin
 
+  oper->set_jump(jump);
   oper->set_electrodes(m_electrodes);
 
 #if verb
@@ -658,6 +674,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   RefCountedPtr<LevelData<MFCellFAB> >   aco       = m_aco[ref];
   RefCountedPtr<LevelData<MFFluxFAB> >   bco       = m_bco[ref];
   RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg = m_bco_irreg[ref];
+  RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump = m_jump[ref];
 
   MFQuadCFInterp quadcfi = m_mfquadcfi[ref];
   
@@ -746,6 +763,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 	       beta,
 	       m_origin);
 
+  oper->set_jump(jump);
   oper->set_electrodes(m_electrodes);
 
 #if 0 // Debug-stop

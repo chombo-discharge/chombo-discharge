@@ -246,12 +246,16 @@ void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes){
 }
 
 void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){
-#if 0
+#if verb
   pout() << "mfconductivityop::update_bc"<< endl;
 #endif
 
   this->set_bc_from_levelset();
   this->set_bc_from_matching(a_phi, a_homogeneous);
+
+#if verb
+  pout() << "mfconductivityop::update_bc - done" << endl;
+#endif
 }
 
 void mfconductivityop::set_bc_from_levelset(){
@@ -286,9 +290,18 @@ void mfconductivityop::set_bc_from_levelset(){
 }
 
 void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){
+  CH_TIME("mfconductivityop::set_bc_from_matching");
+#if verb
+  pout() << "mfconductivityop::set_bc_from_matching"<< endl;
+#endif
   for (int iphase = 0; iphase < m_phases; iphase++){
-    m_jumpbc->match_bc(*m_dirival[iphase], a_phi, a_homogeneous);
+    //    m_jumpbc->match_bc(*m_dirival[iphase], a_phi, a_homogeneous);
+    m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous);
   }
+
+#if verb
+  pout() << "mfconductivityop::set_bc_from_matching - done"<< endl;
+#endif
 }
 
 void mfconductivityop::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
