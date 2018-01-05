@@ -723,8 +723,8 @@ void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
     //    mfalias::aliasMF(*m_alias[2], iphase, resid);
     
     //    m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
-    //m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
-    m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
+    m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
+    //m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
   }
 }
 

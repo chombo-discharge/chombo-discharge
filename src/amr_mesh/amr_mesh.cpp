@@ -6,9 +6,12 @@
 */
 
 #include "amr_mesh.H"
+#include "mfalias.H"
 
 #include <BRMeshRefine.H>
 #include <EBEllipticLoadBalance.H>
+#include <EBLevelDataOps.H>
+#include <MFLevelDataOps.H>
 #include <EBArith.H>
 
 amr_mesh::amr_mesh(){
@@ -72,6 +75,8 @@ void amr_mesh::allocate(EBAMRCellData& a_data, phase::which_phase a_phase, const
 
     a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
       (new LevelData<EBCellFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+
+    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
 }
 
@@ -90,6 +95,8 @@ void amr_mesh::allocate(EBAMRFluxData& a_data, phase::which_phase a_phase, const
 
     a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> >
       (new LevelData<EBFluxFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+
+    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
 }
 
@@ -118,6 +125,8 @@ void amr_mesh::allocate(EBAMRIVData& a_data, phase::which_phase a_phase, const i
 
     a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
       (new LevelData<BaseIVFAB<Real> >(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+
+    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
 }
 
@@ -143,6 +152,8 @@ void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_gh
 
     a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> >
       (new LevelData<MFCellFAB>(m_grids[lvl], ignored, ghost*IntVect::Unit, factory));
+
+    MFLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
   
 }
@@ -388,6 +399,28 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi)
 	}
       }
     }
+  }
+}
+
+void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, MFAMRCellData& a_phi){
+  CH_TIME("amr_mesh::compute_gradient(mf)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::compute_gradient(mf)" << endl;
+  }
+
+  for (int iphase = 0; iphase < m_mfis->num_phases(); iphase++){
+    EBAMRCellData alias_grad(1 + m_finest_level);
+    EBAMRCellData alias_phi(1 + m_finest_level);
+
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      alias_grad[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      alias_phi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      
+      mfalias::aliasMF(*alias_grad[lvl], iphase, *a_gradient[lvl]);
+      mfalias::aliasMF(*alias_phi[lvl],  iphase, *a_phi[lvl]);
+    }
+
+    this->compute_gradient(alias_grad, alias_phi);
   }
 }
 
@@ -648,7 +681,7 @@ void amr_mesh::define_irreg_sten(){
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
   CH_TIME("amr_mesh::average_down");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(cell)" << endl;
+    pout() << "amr_mesh::average_down(ebcell)" << endl;
   }
 
   //
@@ -660,6 +693,27 @@ void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
 
     a_data[lvl]->exchange(interv);
   }
+}
+
+void amr_mesh::average_down(MFAMRCellData& a_data){
+  CH_TIME("amr_mesh::average_down");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::average_down(mf)" << endl;
+  }
+  
+  EBAMRCellData alias_g(1 + m_finest_level);
+  EBAMRCellData alias_s(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+    alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      
+    mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+  }
+
+  this->average_down(alias_g, phase::gas);
+  this->average_down(alias_s, phase::solid);
 }
 
 void amr_mesh::average_down(EBAMRFluxData& a_data, phase::which_phase a_phase){
@@ -710,6 +764,27 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
 
     a_data[lvl]->exchange(interv);
   }
+}
+
+void amr_mesh::interp_ghost(MFAMRCellData& a_data){
+  CH_TIME("amr_mesh::average_down");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::average_down(mf)" << endl;
+  }
+  
+  EBAMRCellData alias_g(1 + m_finest_level);
+  EBAMRCellData alias_s(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+    alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      
+    mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+  }
+
+  this->interp_ghost(alias_g, phase::gas);
+  this->interp_ghost(alias_s, phase::solid);
 }
 
 void amr_mesh::set_verbosity(const int a_verbosity){

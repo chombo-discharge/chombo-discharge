@@ -102,6 +102,9 @@ void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
   m_gmg_solver.init(phi_ptr, rhs_ptr, finest_level, 0);
   m_gmg_solver.solveNoInitResid(phi_ptr, res_ptr, rhs_ptr, finest_level, 0, a_zerophi);
   m_gmg_solver.revert(phi_ptr, rhs_ptr, finest_level, 0);
+
+  m_amr->average_down(a_state);
+  m_amr->interp_ghost(a_state);
 }
 
 void poisson_multifluid_gmg::set_coefficients(){
@@ -328,7 +331,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       1 + finest_level));
 
   m_opfact->set_relax_type(2);
-  m_opfact->set_bottom_drop(64);
+  m_opfact->set_bottom_drop(32);
   m_opfact->set_jump(0.0, 1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 }
@@ -342,7 +345,7 @@ void poisson_multifluid_gmg::setup_solver(){
   const int finest_level       = m_amr->get_finest_level();
   const ProblemDomain coar_dom = m_amr->get_domains()[0];
 
-#if 0
+#if 1
   m_gmg_solver.define(coar_dom, *m_opfact, &m_bicgstab, 1 + finest_level);
 #else
   m_gmg_solver.define(coar_dom, *m_opfact, &m_mfsolver, 1 + finest_level);

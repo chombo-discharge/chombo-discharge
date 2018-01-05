@@ -45,8 +45,6 @@ public:
     a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
   }
 
-  
-
 private:
   
   /*!

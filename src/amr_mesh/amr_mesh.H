@@ -56,6 +56,13 @@ public:
   */
   virtual void compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi);
 
+    /*!
+    @brief Compute cell-centered gradient. 
+    @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
+    nor are ghost cells updated. 
+  */
+  virtual void compute_gradient(MFAMRCellData& a_gradient, MFAMRCellData& a_phi);
+
   /*!
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
@@ -104,6 +111,11 @@ public:
   virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Average down both phases
+  */
+  virtual void average_down(MFAMRCellData& a_data);
+
+  /*!
     @brief Average down
   */
   virtual void average_down(EBAMRFluxData& a_data, phase::which_phase a_phase);
@@ -117,6 +129,11 @@ public:
     @brief Interpolate ghost vectors
   */
   virtual void interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase);
+
+  /*!
+    @brief Interpolate ghost cells
+  */
+  virtual void interp_ghost(MFAMRCellData& a_data);
   
   /*!
     @brief Set mfis

@@ -22,7 +22,7 @@
 sphere_sphere_geometry::sphere_sphere_geometry(){
 
   Real eps0         = 1.0;
-  Real eps_mat      = 10.;
+  Real eps_mat      = 5.0;
   Real elec_rad     = 0.15;
   Real diel_rad     = 0.15;
   Real elec_noise   = 0.E-3;
@@ -78,11 +78,9 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   m_electrodes[0].define(elec_sphere, live);
 }
 
-//
 sphere_sphere_geometry::~sphere_sphere_geometry(){
 }
 
-//
 void sphere_sphere_geometry::dumpScript(std::string a_filename){
 
 #ifdef CH_MPI

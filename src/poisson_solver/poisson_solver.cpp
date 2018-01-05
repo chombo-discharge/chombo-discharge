@@ -143,24 +143,37 @@ void poisson_solver::write_plot_file(const int a_step){
   sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", a_step, SpaceDim);
 
 
-  Vector<string> names(3);
+  Vector<string> names(5);
   names[0] = "potential";
-  names[1] = "source";
+  names[1] = "space charge density";
   names[2] = "residue";
+  names[3] = "x-Electric field";
+  names[4] = "y-Electric field";
 
+  // Compute the electric field. 
+  MFAMRCellData E;
+  m_amr->allocate(E, SpaceDim, 0);
+  m_amr->compute_gradient(E, m_state);
+
+
+
+  
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
-  m_amr->allocate(output, phase::gas, 3, 0);
+  m_amr->allocate(output, phase::gas, 5, 0);
+
   
   for (int lvl = 0; lvl < output.size(); lvl++){
-    LevelData<EBCellFAB> state_gas,  source_gas, resid_gas;
-    LevelData<EBCellFAB> state_sol,  source_sol, resid_sol;
-
+    LevelData<EBCellFAB> state_gas,  source_gas, E_gas, resid_gas;
+    LevelData<EBCellFAB> state_sol,  source_sol, E_sol, resid_sol;
 
     mfalias::aliasMF(state_gas,  phase::gas,   *m_state[lvl]);
     mfalias::aliasMF(source_gas, phase::gas,   *m_source[lvl]);
+    mfalias::aliasMF(E_gas,      phase::gas,   *E[lvl]);
     mfalias::aliasMF(resid_gas,  phase::gas,   *m_resid[lvl]);
+
     mfalias::aliasMF(state_sol,  phase::solid, *m_state[lvl]);
     mfalias::aliasMF(source_sol, phase::solid, *m_source[lvl]);
+    mfalias::aliasMF(E_sol,      phase::solid, *E[lvl]);
     mfalias::aliasMF(resid_sol,  phase::solid, *m_resid[lvl]);
 
 
@@ -172,10 +185,13 @@ void poisson_solver::write_plot_file(const int a_step){
       const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
 
       FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
-      FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
       FArrayBox& src_gas  = source_gas[dit()].getFArrayBox();
-      FArrayBox& src_sol  = source_sol[dit()].getFArrayBox();
+      FArrayBox& e_gas    = E_gas[dit()].getFArrayBox();
       FArrayBox& res_gas  = resid_gas[dit()].getFArrayBox();
+      
+      FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
+      FArrayBox& src_sol  = source_sol[dit()].getFArrayBox();
+      FArrayBox& e_sol    = E_sol[dit()].getFArrayBox();
       FArrayBox& res_sol  = resid_sol[dit()].getFArrayBox();
 
       for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
@@ -184,6 +200,9 @@ void poisson_solver::write_plot_file(const int a_step){
 	  data_gas(iv, 0) = data_sol(iv,0);
 	  src_gas(iv,0)   = src_sol(iv,0);
 	  res_gas(iv, 0)  = res_sol(iv, 0);
+	  for (int comp = 0; comp < SpaceDim; comp++){
+	    e_gas(iv,comp) = e_sol(iv, comp);
+	  }
 	}
 	if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
 	  data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
@@ -194,10 +213,12 @@ void poisson_solver::write_plot_file(const int a_step){
     state_gas.copyTo(Interval(0,0),  *output[lvl], Interval(0,0));
     source_gas.copyTo(Interval(0,0), *output[lvl], Interval(1,1));
     resid_gas.copyTo(Interval(0,0),  *output[lvl], Interval(2,2));
+    E_gas.copyTo(Interval(0,1),      *output[lvl], Interval(3, 4));
   }
 
 #if 0 // Can only do up to SpaceDim, need to rewrite this routine
   m_amr->average_down(output, phase::gas);
+  m_amr->interp_ghost(output, phase::gas);
 #endif
 
   Vector<LevelData<EBCellFAB>* > output_ptr;

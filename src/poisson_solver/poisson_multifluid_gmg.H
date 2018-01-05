@@ -51,16 +51,16 @@ public:
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
 					 amrmg::which_mg a_gmg_type      = amrmg::vcycle,
 					 const int a_verbosity           = 100,
-					 const int a_pre_smooth          = 32,
-					 const int a_post_smooth         = 32,
-					 const int a_bot_smooth          = 32,
-					 const int a_max_iter            = 128,
+					 const int a_pre_smooth          = 16,
+					 const int a_post_smooth         = 16,
+					 const int a_bot_smooth          = 16,
+					 const int a_max_iter            = 64,
 					 const Real a_eps                = 1.E-30,
 					 const Real a_hang               = 1.E-20,
 					 const Real a_norm_thresh        = 1.E-30);
 
   /*!
-    @brief 2 ghost cells. That's what we need. 
+    @brief Return require number of ghost cells. 
   */
   virtual int query_ghost() const;
   

@@ -33,7 +33,7 @@
 //IntVect ebconductivityop::s_ivDebug = IntVect(D_DECL(111, 124, 3));
 bool ebconductivityop::s_turnOffBCs       = false; //REALLY needs to default to false
 bool ebconductivityop::s_forceNoEBCF      = false; //REALLY needs to default to false
-bool ebconductivityop::s_areaFracWeighted = false; // Precondition the system with area fractions
+bool ebconductivityop::s_areaFracWeighted = true; // Precondition the system with area fractions
 
 //-----------------------------------------------------------------------
 ebconductivityop::
@@ -282,16 +282,16 @@ calculateAlphaWeight()
             Real alphaWeight = (*m_acoef)[dit[mybox]](VoF, 0);
             alphaWeight *= volFrac;
 	    if(s_areaFracWeighted){
-	      //	      alphaWeight *= m_eblg.getEBISL()[dit[mybox]].areaFracScaling(VoF);
+	      alphaWeight *= m_eblg.getEBISL()[dit[mybox]].areaFracScaling(VoF);
 
-	      const EBISBox& ebisbox = m_eblg.getEBISL()[dit[mybox]];
-	      Real area = ebisbox.bndryArea(VoF);
-	      for (int dir = 0; dir < SpaceDim; dir++){
-	      	area += ebisbox.sumArea(VoF, dir, Side::Lo);
-	      	area += ebisbox.sumArea(VoF, dir, Side::Hi);
-	      }
+	      // const EBISBox& ebisbox = m_eblg.getEBISL()[dit[mybox]];
+	      // Real area = ebisbox.bndryArea(VoF);
+	      // for (int dir = 0; dir < SpaceDim; dir++){
+	      // 	area += ebisbox.sumArea(VoF, dir, Side::Lo);
+	      // 	area += ebisbox.sumArea(VoF, dir, Side::Hi);
+	      // }
 
-	      alphaWeight *= 1./area;
+	      // alphaWeight *= 1./area;
 	    }
 
             m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
@@ -327,15 +327,15 @@ getDivFStencil(VoFStencil&      a_vofStencil,
     }
 
   if(s_areaFracWeighted){
-    //    a_vofStencil *= ebisBox.areaFracScaling(a_vof);
+    a_vofStencil *= ebisBox.areaFracScaling(a_vof);
 
-    Real area = ebisBox.bndryArea(a_vof);
-    for (int dir = 0; dir < SpaceDim; dir++){
-      area += ebisBox.sumArea(a_vof, dir, Side::Lo);
-      area += ebisBox.sumArea(a_vof, dir, Side::Hi);
-    }
+    // Real area = ebisBox.bndryArea(a_vof);
+    // for (int dir = 0; dir < SpaceDim; dir++){
+    //   area += ebisBox.sumArea(a_vof, dir, Side::Lo);
+    //   area += ebisBox.sumArea(a_vof, dir, Side::Hi);
+    // }
 
-    a_vofStencil *= 1./area;
+    // a_vofStencil *= 1./area;
   }
 }
 //-----------------------------------------------------------------------
@@ -1636,6 +1636,8 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
           }
         } // end pragma
     } //end red black
+
+
 }//end loop over iterations
 //-----------------------------------------------------------------------
 void

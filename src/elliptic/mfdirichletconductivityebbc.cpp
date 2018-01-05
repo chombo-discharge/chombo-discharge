@@ -9,7 +9,7 @@
 
 #define match 1
 
-bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
+bool mfdirichletconductivityebbc::s_areaFracWeighted = true;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;
 int  mfdirichletconductivityebbc::s_lsq_radius       = 2;
 
@@ -163,15 +163,15 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       cur_stencil *= factor;
 
       if(mfdirichletconductivityebbc::s_areaFracWeighted){
-	//	cur_stencil *= ebisbox.areaFracScaling(vof);
+	cur_stencil *= ebisbox.areaFracScaling(vof);
 
-	Real area = ebisbox.bndryArea(vof);
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  area += ebisbox.sumArea(vof, dir, Side::Lo);
-	  area += ebisbox.sumArea(vof, dir, Side::Hi);
-	}
+	// Real area = ebisbox.bndryArea(vof);
+	// for (int dir = 0; dir < SpaceDim; dir++){
+	//   area += ebisbox.sumArea(vof, dir, Side::Lo);
+	//   area += ebisbox.sumArea(vof, dir, Side::Hi);
+	// }
 
-	cur_stencil *= 1.0/area;
+	// cur_stencil *= 1.0/area;
       }
     }
   }
@@ -275,15 +275,15 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     Real flux = weight*value*beta*bco*area_frac*a_factor;
 
     if(mfdirichletconductivityebbc::s_areaFracWeighted){
-      //      flux *= ebisbox.areaFracScaling(vof);
+      flux *= ebisbox.areaFracScaling(vof);
 
-      Real area = ebisbox.bndryArea(vof);
-      for (int dir = 0; dir < SpaceDim; dir++){
-      	area += ebisbox.sumArea(vof, dir, Side::Lo);
-      	area += ebisbox.sumArea(vof, dir, Side::Hi);
-      }
+      // Real area = ebisbox.bndryArea(vof);
+      // for (int dir = 0; dir < SpaceDim; dir++){
+      // 	area += ebisbox.sumArea(vof, dir, Side::Lo);
+      // 	area += ebisbox.sumArea(vof, dir, Side::Hi);
+      // }
 
-      flux *= 1./area;
+      // flux *= 1./area;
 	
     }
 
@@ -312,15 +312,15 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       Real flux              = weight*value*beta*bco*area_frac*a_factor;
 
       if(mfdirichletconductivityebbc::s_areaFracWeighted){
-	//	flux *= ebisbox.areaFracScaling(vof);
+	flux *= ebisbox.areaFracScaling(vof);
 
-	Real area = ebisbox.bndryArea(vof);
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  area += ebisbox.sumArea(vof, dir, Side::Lo);
-	  area += ebisbox.sumArea(vof, dir, Side::Hi);
-	}
+	// Real area = ebisbox.bndryArea(vof);
+	// for (int dir = 0; dir < SpaceDim; dir++){
+	//   area += ebisbox.sumArea(vof, dir, Side::Lo);
+	//   area += ebisbox.sumArea(vof, dir, Side::Hi);
+	// }
 
-	flux *= 1./area;
+	// flux *= 1./area;
       }
 
       if(!m_ivs[a_dit].contains(vof.gridIndex())){ // This should be optimized in a better way
