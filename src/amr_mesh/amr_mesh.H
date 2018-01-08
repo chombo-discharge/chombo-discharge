@@ -223,7 +223,7 @@ public:
   /*!
     @brief Regrid function. Generate new grids. 
   */
-  virtual void regrid(const Vector<IntVectSet>& a_tags);
+  virtual void regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
@@ -521,7 +521,7 @@ protected:
   /*!
     @brief Build new grids. This also load balances. 
   */
-  virtual void build_grids(Vector<IntVectSet>& a_tags);
+  virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap = -1);
 
   /*!
     @brief Load balance grids

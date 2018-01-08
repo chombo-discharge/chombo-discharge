@@ -301,16 +301,16 @@ void amr_mesh::build_domains(){
   }
 }
 
-void amr_mesh::regrid(const Vector<IntVectSet>& a_tags){
+void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   CH_TIME("amr_mesh::regrid");
   if(m_verbosity > 3){
     pout() << "amr_mesh::regrid" << endl;
   }
 
-  if(a_tags.size() > 0){ // Not regridding if I don't get tags
+  if(a_tags.size() > 0 || m_max_amr_depth == 0){ // Not regridding if I don't get tags
 
     Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
-    this->build_grids(tags);  
+    this->build_grids(tags, a_hardcap);
 
     this->define_eblevelgrid(); // Define EBLevelGrid objects on both phases
     this->define_eb_coar_ave(); // Define EBCoarseAverage on both phases
@@ -321,26 +321,37 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags){
   }
 }
 
-void amr_mesh::build_grids(Vector<IntVectSet>& a_tags){
+void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
   CH_TIME("amr_mesh::build_grids");
   if(m_verbosity > 5){
     pout() << "amr_mesh::build_grids" << endl;
   }
 
-  const int base      = 0;                       // I don't want this level to change
-  const int top_level = a_tags.size() - 1;       // top_level is the finest level where we have tags
-  Vector<Vector<Box> > new_boxes(1 + top_level); // New boxes to be load balance
-  Vector<Vector<Box> > old_boxes(1 + top_level); // Old grids. 
+  const int base      = 0;                        // I don't want this level to change
+  const int top_level = a_tags.size() - 1;        // top_level is the finest level where we have tags
+  Vector<Vector<Box> > new_boxes(1 + top_level);  // New boxes to be load balance
+  Vector<Vector<Box> > old_boxes(1 + top_level);  // Old grids.
 
-  for (int lvl = 0; lvl <= top_level; lvl++){
-    old_boxes[lvl].push_back(m_domains[lvl].domainBox()); // Create old grids from scratch 
+  const int hardcap = a_hardcap == -1 ? m_max_amr_depth : a_hardcap;
+
+  if(m_max_amr_depth > 0 && a_hardcap > 0){
+    for (int lvl = 0; lvl <= top_level; lvl++){
+      old_boxes[lvl].push_back(m_domains[lvl].domainBox()); // Create old grids from scratch 
+    }
+    
+    // Berger-Rigoutsos grid generation
+    BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
+    int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
+    
+    m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
+    m_finest_level = Min(m_finest_level, a_hardcap);
   }
-
-  // Berger-Rigoutsos grid generation
-  BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
-  int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
-
-  m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
+  else{
+    new_boxes.resize(1);
+    domainSplit(m_domains[0], new_boxes[0], m_max_box_size, m_blocking_factor);
+    
+    m_finest_level = 0;
+  }
 
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){   // Generate DisjointBoxLayouts on each level

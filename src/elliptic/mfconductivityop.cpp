@@ -22,7 +22,9 @@ mfconductivityop::mfconductivityop(){
   
 
 mfconductivityop::~mfconductivityop(){
-  
+  for (int i = 0; i < 4; i++){
+    m_alias[i] = NULL;
+  }
 }
 
 void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mfis,

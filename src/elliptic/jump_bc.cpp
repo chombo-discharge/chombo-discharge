@@ -27,7 +27,7 @@ jump_bc::jump_bc(const MFLevelGrid&            a_mflg,
 }
 
 jump_bc::~jump_bc(){
-  CH_TIME("jump_bc::~jump_bc(full)");
+  CH_TIME("jump_bc::~jump_bc");
 }
 
 bool jump_bc::get_second_order_sten(Real&             a_weight,

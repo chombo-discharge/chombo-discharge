@@ -37,10 +37,10 @@ int main(int argc, char* argv[]){
   amr->set_coarsest_num_cells(64*IntVect::Unit);  // Set number of cells on coarsest level
   amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF. 
-  amr->set_refinement_ratio(4);                   // Set refinement ratio
+  amr->set_refinement_ratio(2);                   // Set refinement ratio
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
   amr->set_blocking_factor(8);                    // Set blocking factor
-  amr->set_buffer_size(2);                        // Set buffer size
+  amr->set_buffer_size(1);                        // Set buffer size
   amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]){
 											timestepper,
 											amr));
 
-  // Set up a Poisson solver
+  // Set up a multifluid Poisson solver
   //RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
   RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
   poisson->set_verbosity(10);
@@ -81,15 +81,13 @@ int main(int argc, char* argv[]){
 
   // Setup plasma engine
   engine->set_verbosity(10);
-  engine->set_geom_refinement_depth(3);
+  engine->set_geom_refinement_depth(1);
   engine->setup_fresh();
 
   // Poisson solver solves
   poisson->sanity_check();
   poisson->solve();
   poisson->write_plot_file();
-
-  pout() << "ending program" << endl;
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

@@ -107,8 +107,6 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     m_irreg_weights[dit()].define(irreg_ivs,  ebgraph, num_comps);
     m_irreg_stencils[dit()].define(irreg_ivs, ebgraph, num_comps);
 
-
-
     // Build stencils for pure Dirichlet type irreg cells
     for (VoFIterator vofit(irreg_ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof   = vofit();

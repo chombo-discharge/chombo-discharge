@@ -60,6 +60,22 @@ public:
 					 const Real a_norm_thresh        = 1.E-30);
 
   /*!
+    @brief Set the bottom solver.  
+    @param[in] a_which_solver Solver type. 0 = smoother, 1 = BiCGStab
+  */
+  virtual void set_bottom_solver(const int a_whichsolver);
+
+  /*!
+    @brief Set the depth for bottom drop
+  */
+  virtual void set_bottom_drop(const int a_bottom_drop);
+
+  /*!
+    @brief Set number of smoothing for the bottom solver (simplified solver only)
+  */
+  virtual void set_botsolver_smooth(const int a_smooth);
+
+  /*!
     @brief Return require number of ghost cells. 
   */
   virtual int query_ghost() const;
@@ -105,6 +121,21 @@ protected:
     @brief Maximum number of iterations
   */
   int m_gmg_max_iter;
+
+  /*!
+    @brief Bottom solver type
+  */
+  int m_bottomsolver;
+
+  /*!
+    @brief Number of smoothing for bottom solver
+  */
+  int m_numsmooth;
+
+  /*!
+    @brief Set bottom drop depth
+  */
+  int m_bottom_drop;
 
   /*!
     @brief 
@@ -212,11 +243,5 @@ protected:
     @brief Set up AMRMultiGrid
   */
   virtual void setup_solver();
-
-  // Putting this in a function of its own
-  virtual void base_tests();
-
-  // Test function, will be removed from final interface
-  virtual void do_ebcond_test();
 };
 #endif

@@ -67,7 +67,7 @@ public:
   /*!
     @brief Set geometric refinement depth
   */
-  virtual void set_geom_refinement_depth(const int a_depth);
+  virtual void set_geom_refinement_depth(const int a_depth = -1);
 
   /*!
     @brief Sanity check

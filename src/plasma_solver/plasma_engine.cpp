@@ -100,7 +100,10 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
     pout() << "plasma_engine::set_geom_refinement_depth" << endl;
   }
 
-  m_geom_tag_depth = a_depth;
+  const int max_depth = m_amr->get_max_amr_depth();
+  
+  m_geom_tag_depth = (a_depth == -1) ? max_depth : a_depth;
+  m_geom_tag_depth = Min(m_geom_tag_depth, max_depth); 
 }
 
 void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
@@ -137,45 +140,45 @@ void plasma_engine::setup_fresh(){
     m_amr->set_num_ghost(3);
   }
 
-  m_amr->regrid(m_geom_tags); // Regrid using geometric tags
+  m_amr->regrid(m_geom_tags, m_geom_tag_depth); // Regrid using geometric tags for now
 
 
-  // Write a plot file
-  const int finest = m_amr->get_finest_level();
-  const Vector<EBISLayout>& ebisl = m_amr->get_ebisl(phase::gas);
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
-  const Vector<ProblemDomain>& domains = m_amr->get_domains();
-  const Vector<Real>& dx = m_amr->get_dx();
-  EBAMRCellData data;
-  m_amr->allocate(data, phase::gas, 1);
-  m_amr->average_down(data, phase::gas);
-  m_amr->interp_ghost(data, phase::gas);
+  // // Write a plot file
+  // const int finest = m_amr->get_finest_level();
+  // const Vector<EBISLayout>& ebisl = m_amr->get_ebisl(phase::gas);
+  // const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  // const Vector<ProblemDomain>& domains = m_amr->get_domains();
+  // const Vector<Real>& dx = m_amr->get_dx();
+  // EBAMRCellData data;
+  // m_amr->allocate(data, phase::gas, 1);
+  // m_amr->average_down(data, phase::gas);
+  // m_amr->interp_ghost(data, phase::gas);
 
-  // Apply a centroid-interpolation stencil
-  //  irreg_amr_stencil<centroid_interp>& stencils = m_amr->get_centroid_interp_stencils(phase::gas);
-  irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(phase::gas);
-  stencils.apply(data);
+  // // Apply a centroid-interpolation stencil
+  // //  irreg_amr_stencil<centroid_interp>& stencils = m_amr->get_centroid_interp_stencils(phase::gas);
+  // irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(phase::gas);
+  // stencils.apply(data);
 
-  Vector<std::string> names(1);
-  Vector<Real> coveredVals;
+  // Vector<std::string> names(1);
+  // Vector<Real> coveredVals;
 
-  Vector<LevelData<EBCellFAB>* > data_write(data.size());
-  for (int lvl = 0; lvl <= finest; lvl++){
-    data_write[lvl] = &(*data[lvl]);
-  }
-  names[0] = "data";
-  writeEBHDF5("test.hdf5",
-	      grids,
-	      data_write,
-	      names,
-	      domains[0],
-	      dx[0],
-	      0.0,
-	      0.0,
-	      m_amr->get_ref_rat(),
-	      1 + finest,
-	      false,
-	      coveredVals);
+  // Vector<LevelData<EBCellFAB>* > data_write(data.size());
+  // for (int lvl = 0; lvl <= finest; lvl++){
+  //   data_write[lvl] = &(*data[lvl]);
+  // }
+  // names[0] = "data";
+  // writeEBHDF5("test.hdf5",
+  // 	      grids,
+  // 	      data_write,
+  // 	      names,
+  // 	      domains[0],
+  // 	      dx[0],
+  // 	      0.0,
+  // 	      0.0,
+  // 	      m_amr->get_ref_rat(),
+  // 	      1 + finest,
+  // 	      false,
+  // 	      coveredVals);
 	      
       
 }
@@ -272,5 +275,3 @@ void plasma_engine::get_geom_tags(){
     m_geom_tags[lvl].grow(2);
   }
 }
-
-
