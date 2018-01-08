@@ -19,7 +19,6 @@ mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_
 							 const IntVect*       a_phig,
 							 const IntVect*       a_rhsg,
 							 const int            a_phase) {
-
   m_domain = a_domain;
   m_ebisl  = a_ebisl;
   m_dx     = a_dx;
@@ -108,8 +107,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     m_irreg_weights[dit()].define(irreg_ivs,  ebgraph, num_comps);
     m_irreg_stencils[dit()].define(irreg_ivs, ebgraph, num_comps);
 
-    m_matching_weights[dit()].define(match_ivs,  ebgraph, num_comps);
-    m_matching_stencils[dit()].define(match_ivs, ebgraph, num_comps);
+
 
     // Build stencils for pure Dirichlet type irreg cells
     for (VoFIterator vofit(irreg_ivs, ebgraph); vofit.ok(); ++vofit){
@@ -131,7 +129,33 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       }
     }
 
+#if opsten
+#else // Build stencils for matching cells. 
+    
+    m_matching_weights[dit()].define(match_ivs,  ebgraph, num_comps);
+    m_matching_stencils[dit()].define(match_ivs, ebgraph, num_comps);
 
+    for (VoFIterator vofit(match_ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof   = vofit();
+
+      Real& cur_weight        = m_matching_weights[dit()](vof, comp);
+      VoFStencil& cur_stencil = m_matching_stencils[dit()](vof, comp);
+
+      bool drop_order = false;
+
+      if(m_order == 2){
+	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	if(drop_order){
+	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	}
+      }
+      else if(m_order == 1){
+	this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+      }
+    }
+#endif
+
+    // Adjust stencils for matching cells
     for (VoFIterator vofit(match_ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof   = vofit();
 
@@ -264,33 +288,30 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     const VolIndex& vof = vofit();
 
 #if opsten
-    const Real& value      = inhomo.get_ivfab(m_phase)(vof, comp);
+    const Real weight     = m_irreg_weights[a_dit](vof, comp);
+    const Real value      = inhomo.get_ivfab(m_phase)(vof, comp);
 #else
-    const Real& value      = (*m_data)[a_dit](vof, comp);
+    const Real weight     = m_matching_weights[a_dit](vof, comp);
+    const Real value      = (*m_data)[a_dit](vof, comp);
 #endif
+    const Real beta       = m_beta;
+    const Real bco        = (*m_bcoe)[a_dit](vof, comp);
+    const Real area_frac  = ebisbox.bndryArea(vof);
 
-    const Real& beta       = m_beta;
-    const Real& bco        = (*m_bcoe)[a_dit](vof, comp);
-    const Real& area_frac  = ebisbox.bndryArea(vof);
-#if opsten
-    const Real& weight     = m_irreg_weights[a_dit](vof, comp);
-#else
-    const Real& weight     = m_matching_weights[a_dit](vof, comp);
-#endif
-    const VoFStencil& sten = m_matching_stencils[a_dit](vof, comp);
-
-    // "Homogeneous" part. Always goe sthrough. 
+    // "Homogeneous" part. 
     Real flux = weight*value*beta*bco*area_frac*a_factor;
 
 #if opsten
 #else
     // "Inhomogeneous" part
+    const VoFStencil& sten = m_matching_stencils[a_dit](vof, comp);
     for (int i = 0; i < sten.size(); i++){
       const VolIndex& ivof = sten.vof(i);
       const Real& iweight  = sten.weight(i);
 
       flux += a_phi(ivof, comp)*iweight*beta*bco*area_frac*a_factor;
     }
+
 #endif
 
     if(mfdirichletconductivityebbc::s_areaFracWeighted){
@@ -305,8 +326,6 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       // flux *= 1./area;
 	
     }
-
-
 
     // Increment
     a_lphi(vof, comp) += flux;
@@ -335,7 +354,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 	// flux *= 1./area;
       }
 
-      if(!m_ivs[a_dit].contains(vof.gridIndex())){ // This should be optimized in a better way
+      if(!m_ivs[a_dit].contains(vof.gridIndex())){ // The multifluid cells have already been done. 
 	a_lphi(vof, comp) += flux;
       }
     }

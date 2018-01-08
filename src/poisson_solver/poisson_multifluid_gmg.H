@@ -56,7 +56,7 @@ public:
 					 const int a_bot_smooth          = 16,
 					 const int a_max_iter            = 32,
 					 const Real a_eps                = 1.E-30,
-					 const Real a_hang               = 1.E-20,
+					 const Real a_hang               = 0.2,
 					 const Real a_norm_thresh        = 1.E-30);
 
   /*!

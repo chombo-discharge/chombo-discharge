@@ -206,6 +206,8 @@ void poisson_solver::write_plot_file(const int a_step){
 	}
 	if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
 	  data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
+	  src_gas(iv, 0)  = 0.5*(src_gas(iv,0) + src_sol(iv,0));
+	  res_gas(iv, 0)  = 0.5*(res_gas(iv,0) + res_sol(iv,0));
 	}
       }
     }

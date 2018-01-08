@@ -331,7 +331,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       1 + finest_level));
 
   m_opfact->set_relax_type(2);
-  m_opfact->set_bottom_drop(32);
+  m_opfact->set_bottom_drop(64);
   m_opfact->set_jump(0.0, -1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 }
@@ -345,9 +345,10 @@ void poisson_multifluid_gmg::setup_solver(){
   const int finest_level       = m_amr->get_finest_level();
   const ProblemDomain coar_dom = m_amr->get_domains()[0];
 
-#if 1
+#if 0
   m_gmg_solver.define(coar_dom, *m_opfact, &m_bicgstab, 1 + finest_level);
 #else
+  m_mfsolver.setNumSmooths(32);
   m_gmg_solver.define(coar_dom, *m_opfact, &m_mfsolver, 1 + finest_level);
 #endif
   m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,

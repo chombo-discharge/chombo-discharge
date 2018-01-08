@@ -1072,7 +1072,6 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 #pragma omp parallel for
   for(int mybox=0; mybox<nbox; mybox++)
     {
-
       a_lhs[dit[mybox]].mult((*m_acoef)[dit[mybox]], 0, 0, 1);
 
       Box loBox[SpaceDim],hiBox[SpaceDim];
@@ -1840,57 +1839,58 @@ gsrbColor(LevelData<EBCellFAB>&       a_phi,
 #pragma omp for
         for( int mybox=0; mybox<nbox; mybox++)
           {
-            Box dblBox  = dbl.get(dit[mybox]);
-            BaseFab<Real>&       regPhi =     a_phi[dit[mybox]].getSingleValuedFAB();
-            const BaseFab<Real>& regLph =     a_lph[dit[mybox]].getSingleValuedFAB();
-            const BaseFab<Real>& regRhs =     a_rhs[dit[mybox]].getSingleValuedFAB();
-            IntVect loIV = dblBox.smallEnd();
-            IntVect hiIV = dblBox.bigEnd();
+	    const EBISBox& ebisbox = a_phi[dit[mybox]].getEBISBox();
+	      Box dblBox  = dbl.get(dit[mybox]);
+	      BaseFab<Real>&       regPhi =     a_phi[dit[mybox]].getSingleValuedFAB();
+	      const BaseFab<Real>& regLph =     a_lph[dit[mybox]].getSingleValuedFAB();
+	      const BaseFab<Real>& regRhs =     a_rhs[dit[mybox]].getSingleValuedFAB();
+	      IntVect loIV = dblBox.smallEnd();
+	      IntVect hiIV = dblBox.bigEnd();
             
-            for (int idir = 0; idir < SpaceDim; idir++)
-              {
-                if (loIV[idir] % 2 != a_color[idir])
-                  {
-                    loIV[idir]++;
-                  }
-              }
+	      for (int idir = 0; idir < SpaceDim; idir++)
+		{
+		  if (loIV[idir] % 2 != a_color[idir])
+		    {
+		      loIV[idir]++;
+		    }
+		}
             
-            const BaseFab<Real>& regRel = m_relCoef[dit[mybox]].getSingleValuedFAB();
-            if (loIV <= hiIV)
-              {
-                Box coloredBox(loIV, hiIV);
-                FORT_GSRBEBCO(CHF_FRA1(regPhi,0),
-                              CHF_CONST_FRA1(regLph,0),
-                              CHF_CONST_FRA1(regRhs,0),
-                              CHF_CONST_FRA1(regRel,0),
-                              CHF_BOX(coloredBox));
-              }
+	      const BaseFab<Real>& regRel = m_relCoef[dit[mybox]].getSingleValuedFAB();
+	      if (loIV <= hiIV)
+		{
+		  Box coloredBox(loIV, hiIV);
+		  FORT_GSRBEBCO(CHF_FRA1(regPhi,0),
+				CHF_CONST_FRA1(regLph,0),
+				CHF_CONST_FRA1(regRhs,0),
+				CHF_CONST_FRA1(regRel,0),
+				CHF_BOX(coloredBox));
+		}
             
-            for (m_vofIterMulti[dit[mybox]].reset(); m_vofIterMulti[dit[mybox]].ok(); ++m_vofIterMulti[dit[mybox]])
-              {
-                const VolIndex& vof = m_vofIterMulti[dit[mybox]]();
-                const IntVect& iv = vof.gridIndex();
+	      for (m_vofIterMulti[dit[mybox]].reset(); m_vofIterMulti[dit[mybox]].ok(); ++m_vofIterMulti[dit[mybox]])
+		{
+		  const VolIndex& vof = m_vofIterMulti[dit[mybox]]();
+		  const IntVect& iv = vof.gridIndex();
                 
-                bool doThisVoF = true;
-                for (int idir = 0; idir < SpaceDim; idir++)
-                  {
-                    if (iv[idir] % 2 != a_color[idir])
-                      {
-                        doThisVoF = false;
-                        break;
-                      }
-                  }
+		  bool doThisVoF = true;
+		  for (int idir = 0; idir < SpaceDim; idir++)
+		    {
+		      if (iv[idir] % 2 != a_color[idir])
+			{
+			  doThisVoF = false;
+			  break;
+			}
+		    }
                 
-                if (doThisVoF)
-                  {
-                    Real lph    = a_lph[dit[mybox]](vof, 0);
-                    Real rhs    = a_rhs[dit[mybox]](vof, 0);
-                    Real resid  = rhs - lph;
-                    Real lambda = m_relCoef[dit[mybox]](vof, 0);
-                    a_phi[dit[mybox]](vof, 0) += lambda*resid;
-                  }
-              }
-          }
+		  if (doThisVoF)
+		    {
+		      Real lph    = a_lph[dit[mybox]](vof, 0);
+		      Real rhs    = a_rhs[dit[mybox]](vof, 0);
+		      Real resid  = rhs - lph;
+		      Real lambda = m_relCoef[dit[mybox]](vof, 0);
+		      a_phi[dit[mybox]](vof, 0) += lambda*resid;
+		    }
+	    }
+	  }
       }// end pragma
 }
 //-----------------------------------------------------------------------

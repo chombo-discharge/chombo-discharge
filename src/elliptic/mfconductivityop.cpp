@@ -250,6 +250,9 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
   pout() << "mfconductivityop::update_bc"<< endl;
 #endif
 
+  LevelData<MFCellFAB>* phi = const_cast<LevelData<MFCellFAB>* > (&a_phi);
+  phi->exchange();
+
   this->set_bc_from_levelset();
   this->set_bc_from_matching(a_phi, a_homogeneous);
 
@@ -731,7 +734,7 @@ void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
     mfalias::aliasMF(*m_alias[0], iphase, a_phi);
     mfalias::aliasMF(*m_alias[1], iphase, a_rhs);
 
-#if 1
+#if 1 // This is the only way we can make it converge for now
     // m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
     m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
     // m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
@@ -834,9 +837,7 @@ void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 
     mfconductivityop* finerOp = (mfconductivityop*) a_finerOp;
 
-    //    pout() << "amroperator, phase = " << iphase << endl;
     m_ebops[iphase]->AMROperator(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_homogeneousBC, finerOp->m_ebops[iphase]);
-    //    pout() << "amroperator, phase = " << iphase << " done" << endl;
   }
 
 										 
