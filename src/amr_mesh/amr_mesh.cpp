@@ -37,29 +37,6 @@ amr_mesh::~amr_mesh(){
   
 }
 
-template<typename T> void amr_mesh::deallocate(Vector<T*>& a_data){
-  CH_TIME("amr_mesh::deallocate");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::deallocate" << endl;
-  }
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    delete a_data[lvl];
-  }
-}
-
-template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data){
-  CH_TIME("amr_mesh::alias");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::alias" << endl;
-  }
-
-  a_alias.resize(a_data.size());
-  
-  for (int lvl = 0; lvl < a_data.size(); lvl++){
-    a_alias[lvl] = &(*a_data[lvl]);
-  }
-}
-
 void amr_mesh::allocate(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(cell)");
   if(m_verbosity > 5){
@@ -239,7 +216,7 @@ void amr_mesh::allocate_interface(EBAMRIVData& a_data, phase::which_phase a_phas
 
 void amr_mesh::set_mfis(const RefCountedPtr<mfis>& a_mfis){
   CH_TIME("amr_mesh::set_mfis");
-  if(m_verbosity > 3){
+  if(m_verbosity > 5){
     pout() << "amr_mesh::set_mfis" << endl;
   }
 
@@ -247,12 +224,17 @@ void amr_mesh::set_mfis(const RefCountedPtr<mfis>& a_mfis){
 }
 
 void amr_mesh::build_domains(){
+  CH_TIME("amr_mesh::build_domains");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::build_domains" << endl;
+  }
+  pout() << "domain" << endl;
 
   const int nlevels = 1 + m_max_amr_depth;
   
   m_domains.resize(nlevels);
   m_dx.resize(nlevels);
-  m_ref_ratios.resize(nlevels, m_ref_ratio);
+  //  m_ref_ratios.resize(nlevels, m_ref_ratio);
   m_grids.resize(nlevels);
 
   m_eblg.resize(phase::num_phases);
@@ -295,9 +277,9 @@ void amr_mesh::build_domains(){
   m_domains[0] = ProblemDomain(IntVect::Zero, m_num_cells - IntVect::Unit);
 
   for (int lvl = 1; lvl <= m_max_amr_depth; lvl++){
-    m_dx[lvl]      = m_dx[lvl-1]/m_ref_ratio;
+    m_dx[lvl]      = m_dx[lvl-1]/m_ref_ratios[lvl-1];
     m_domains[lvl] = m_domains[lvl-1];
-    m_domains[lvl].refine(m_ref_ratio);
+    m_domains[lvl].refine(m_ref_ratios[lvl-1]);
   }
 }
 
@@ -447,13 +429,23 @@ void amr_mesh::define_eblevelgrid(){
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(!ebis_sol.isNull()){
-      m_eblg[phase::gas][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_ebghost, ebis_gas));
-      m_eblg[phase::gas][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl], ebis_gas);
+      m_eblg[phase::gas][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl],
+									     m_domains[lvl],
+									     m_ebghost,
+									     ebis_gas));
+      if(lvl > 0){
+	m_eblg[phase::gas][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl-1], ebis_gas);
+      }
       m_ebisl[phase::gas][lvl] = m_eblg[phase::gas][lvl]->getEBISL();
     }
     if(!ebis_sol.isNull()){
-      m_eblg[phase::solid][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_ebghost, ebis_sol));
-      m_eblg[phase::solid][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl], ebis_sol);
+      m_eblg[phase::solid][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl],
+									       m_domains[lvl],
+									       m_ebghost,
+									       ebis_sol));
+      if(lvl > 0){
+	m_eblg[phase::solid][lvl]->setMaxCoarseningRatio(m_ref_ratios[lvl-1], ebis_sol);
+      }
       m_ebisl[phase::solid][lvl] = m_eblg[phase::solid][lvl]->getEBISL();
     }
   }
@@ -819,7 +811,14 @@ void amr_mesh::set_ebcf(const bool a_ebcf){
 
 void amr_mesh::set_refinement_ratio(const int a_refinement_ratio){
   CH_TIME("amr_mesh::set_refinement_ratio");
-  m_ref_ratio = a_refinement_ratio;
+  m_ref_ratios.resize(1 + m_max_amr_depth);
+  for (int lvl = 0; lvl <= m_max_amr_depth; lvl++){
+    m_ref_ratios[lvl] = a_refinement_ratio;
+  }
+}
+
+void amr_mesh::set_refinement_ratios(const Vector<int> a_ref_ratios){
+  m_ref_ratios = a_ref_ratios;
 }
 
 void amr_mesh::set_fill_ratio(const Real a_fill_ratio){
@@ -876,8 +875,10 @@ void amr_mesh::sanity_check(){
   }
 
   CH_assert(m_max_amr_depth >= 0);
-  CH_assert(m_ref_ratio == 2 || m_ref_ratio == 4);
-  CH_assert(m_blocking_factor >= 4 && m_blocking_factor % m_ref_ratio == 0);
+  for (int lvl = 0; lvl < m_ref_ratios.size(); lvl++){
+    CH_assert(m_ref_ratios[lvl] == 2 || m_ref_ratios[lvl] == 4);
+    CH_assert(m_blocking_factor >= 4 && m_blocking_factor % m_ref_ratios[lvl] == 0);
+  }
   CH_assert(m_max_box_size >= 8 && m_max_box_size % m_blocking_factor == 0);
   CH_assert(m_fill_ratio > 0. && m_fill_ratio <= 1.0);
   CH_assert(m_buffer_size > 0);
@@ -900,7 +901,10 @@ int amr_mesh::get_max_amr_depth(){
 }
 
 int amr_mesh::get_refinement_ratio(){
+  MayDay::Warning("wtf");
+  pout() << "someone is getting it!" << endl;
   return m_ref_ratio;
+  
 }
 
 int amr_mesh::get_num_ghost(){

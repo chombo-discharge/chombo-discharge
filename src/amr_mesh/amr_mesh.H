@@ -176,6 +176,11 @@ public:
   virtual void set_refinement_ratio(const int a_refinement_ratio);
 
   /*!
+    @brief Set refinement ratios
+  */
+  virtual void set_refinement_ratios(const Vector<int> a_ref_ratios);
+
+  /*!
     @brief Set buffer size
   */
   virtual void set_buffer_size(const int a_buffer_size);
@@ -557,6 +562,10 @@ protected:
     @brief Define irregular stencils
   */
   virtual void define_irreg_sten();
+
+
 };
+
+#include "amr_meshI.H"
 
 #endif

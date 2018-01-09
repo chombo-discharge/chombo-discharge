@@ -291,25 +291,4 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       a_lphi(vof, comp) += flux;
     }
   }
-
-  // if(!a_useHomogeneous){
-  //   for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-  //     const VolIndex& vof = a_vofit();
-
-  //     const Real& value      = (*m_data)[a_dit](vof, comp);
-  //     const Real& beta       = m_beta;
-  //     const Real& bco        = (*m_bcoe)[a_dit](vof, comp);
-  //     const Real& area_frac  = ebisbox.bndryArea(vof);
-  //     const Real& weight     = m_irreg_weights[a_dit](vof, comp); 
-  //     Real flux              = weight*value*beta*bco*area_frac*a_factor;
-
-  //     if(mfdirichletconductivityebbc::s_areaFracWeighted){
-  // 	flux *= ebisbox.areaFracScaling(vof);
-  //     }
-
-  //     if(!m_ivs[a_dit].contains(vof.gridIndex())){ // The multifluid cells have already been done. 
-  // 	a_lphi(vof, comp) += flux;
-  //     }
-  //   }
-  // }
 }

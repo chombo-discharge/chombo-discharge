@@ -32,12 +32,19 @@ int main(int argc, char* argv[]){
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(NULL);
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 
+  Vector<int> refrat(5);
+  refrat[0] = 2;
+  refrat[1] = 2;
+  refrat[2] = 2;
+  refrat[3] = 2;
+  refrat[4] = 2;
+  
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit);  // Set number of cells on coarsest level
   amr->set_max_amr_depth(2);                      // Set max amr depth
-  amr->set_ebcf(false);                           // Tell amr to forget about EBCF. 
-  amr->set_refinement_ratio(4);                   // Set refinement ratio
+  amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
+  amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
   amr->set_blocking_factor(8);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
@@ -86,6 +93,7 @@ int main(int argc, char* argv[]){
 
   // Poisson solver solves
   poisson->sanity_check();
+  poisson->allocate_internals();
   poisson->solve();
   poisson->write_plot_file();
 

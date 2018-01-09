@@ -38,12 +38,12 @@ public:
   /*!
     @brief Override this one for testing purposes. 
   */
-  virtual void solve(const bool a_zerophi = true);
+  virtual bool solve(const bool a_zerophi = true);
 
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true);
+  virtual bool solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true);
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 
@@ -54,10 +54,11 @@ public:
 					 const int a_pre_smooth          = 16,
 					 const int a_post_smooth         = 16,
 					 const int a_bot_smooth          = 16,
-					 const int a_max_iter            = 32,
-					 const Real a_eps                = 1.E-30,
+					 const int a_max_iter            = 16,
+					 const int a_min_iter            = 5,
+					 const Real a_eps                = 1.E-8,
 					 const Real a_hang               = 0.2,
-					 const Real a_norm_thresh        = 1.E-30);
+					 const Real a_norm_thresh        = 1.E-99);
 
   /*!
     @brief Set the bottom solver.  
@@ -121,6 +122,11 @@ protected:
     @brief Maximum number of iterations
   */
   int m_gmg_max_iter;
+
+  /*!
+    @brief Minimum number of iterations
+  */
+  int m_gmg_min_iter;
 
   /*!
     @brief Bottom solver type

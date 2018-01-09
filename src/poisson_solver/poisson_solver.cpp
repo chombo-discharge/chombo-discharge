@@ -8,6 +8,7 @@
 #include "poisson_solver.H"
 #include "MFAliasFactory.H"
 #include "mfalias.H"
+#include "data_ops.H" 
 
 #include <MFAMRIO.H>
 #include <EBAMRIO.H>
@@ -24,6 +25,31 @@ poisson_solver::poisson_solver(){
 
 poisson_solver::~poisson_solver(){
   
+}
+
+bool poisson_solver::solve(const bool a_zerophi) {
+  this->solve(m_state, m_source, a_zerophi);
+}
+
+bool poisson_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
+  this->solve(a_state, m_source, a_zerophi);
+}
+
+void poisson_solver::allocate_internals(){
+  CH_TIME("poisson_solver::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::allocate_internals" << endl;
+  }
+
+  const int ncomp = 1;
+  
+  m_amr->allocate(m_state,  ncomp, query_ghost());
+  m_amr->allocate(m_source, ncomp, query_ghost());
+  m_amr->allocate(m_resid,  ncomp, query_ghost());
+
+  data_ops::set_value(m_state,  0.0);
+  data_ops::set_value(m_source, 0.0);
+  data_ops::set_value(m_resid,  0.0);
 }
 
 void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
@@ -101,13 +127,6 @@ void poisson_solver::set_verbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 }
 
-void poisson_solver::solve(const bool a_zerophi) {
-  this->solve(m_state, m_source, a_zerophi);
-}
-
-void poisson_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
-  this->solve(a_state, m_source, a_zerophi);
-}
 
 void poisson_solver::set_time(const Real a_time) {
   m_time = a_time;

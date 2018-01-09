@@ -37,6 +37,21 @@ public:
   virtual ~poisson_solver();
 
   /*!
+    @brief Solve Poisson equation
+  */
+  virtual bool solve(const bool a_zerophi = true);
+
+  /*!
+    @brief Solve Poisson onto state 
+  */
+  virtual bool solve(MFAMRCellData& a_state, const bool a_zerophi = true);
+
+  /*!
+    @brief Solve Poisson onto state 
+  */
+  virtual bool solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true) = 0;
+
+  /*!
     @brief Set the computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
@@ -52,19 +67,9 @@ public:
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
-    @brief Solve Poisson equation
+    @brief Allocate internal storage
   */
-  virtual void solve(const bool a_zerophi = true);
-
-  /*!
-    @brief Solve Poisson onto state 
-  */
-  virtual void solve(MFAMRCellData& a_state, const bool a_zerophi = true);
-
-  /*!
-    @brief Solve Poisson onto state 
-  */
-  virtual void solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true) = 0;
+  virtual void allocate_internals();
 
   /*!
     @brief Set Dirichlet wall BC

@@ -365,7 +365,7 @@ void mfconductivityopfactory::define_jump_stuff(){
     if(has_coar){
       const EBLevelGrid& eblg_fine = m_mflg[lvl].get_eblg(main_phase);
       const EBLevelGrid& eblg_coar = m_mflg[lvl-1].get_eblg(main_phase);
-      const int ref_ratio          = m_ref_rat[lvl];
+      const int ref_ratio          = m_ref_rat[lvl-1];
 	
       m_aveop[lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 									 eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
