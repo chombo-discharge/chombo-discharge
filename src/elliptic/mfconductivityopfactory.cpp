@@ -200,7 +200,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	  // Interface cells on MG level img. 
 	  LayoutData<IntVectSet> isect_cells (eblg_coar.getDBL());
 	  for (DataIterator dit = isect_cells.dataIterator(); dit.ok(); ++dit){
-	    isect_cells[dit()] = m_mfis->interface_region(eblg_coar.getDomain()) & eblg_coar.getDBL().get(dit());
+	    isect_cells[dit()] = mflg_coar.interface_region(grid_coar_mg[dit()], dit());
 	  }
 
 	  MFCellFactory      cellfact(ebisl_coar, comps);

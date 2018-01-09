@@ -281,13 +281,17 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
   const EBISBox& ebisbox = a_phi.getEBISBox();
 
   const MFInterfaceFAB<Real>& inhomo = m_jumpbc->get_inhomo()[a_dit];
+  const MFInterfaceFAB<Real>& homog  = m_jumpbc->get_homog()[a_dit];
 
   for (VoFIterator vofit(m_ivs[a_dit], ebisbox.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
 #if opsten
     const Real weight     = m_irreg_weights[a_dit](vof, comp);
-    const Real value      = inhomo.get_ivfab(m_phase)(vof, comp);
+    Real value      = inhomo.get_ivfab(m_phase)(vof, comp);
+    if(!a_useHomogeneous){
+      value += homog.get_ivfab(m_phase)(vof,comp);
+    }
 #else
     const Real weight     = m_matching_weights[a_dit](vof, comp);
     const Real value      = (*m_data)[a_dit](vof, comp);
@@ -296,7 +300,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     const Real bco        = (*m_bcoe)[a_dit](vof, comp);
     const Real area_frac  = ebisbox.bndryArea(vof);
 
-    // "Homogeneous" part. 
+    // "Homogeneous" part. This is not REALLY homogeneous since part of this stuff depends on the other side of the boundary. 
     Real flux = weight*value*beta*bco*area_frac*a_factor;
 
 #if opsten

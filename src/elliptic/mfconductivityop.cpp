@@ -300,8 +300,8 @@ void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, c
   pout() << "mfconductivityop::set_bc_from_matching"<< endl;
 #endif
   for (int iphase = 0; iphase < m_phases; iphase++){
-    //    m_jumpbc->match_bc(*m_dirival[iphase], a_phi, a_homogeneous);
-    m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous);
+    //m_jumpbc->match_bc(*m_dirival[iphase], a_phi, a_homogeneous);
+    m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous); 
   }
 
 #if verb

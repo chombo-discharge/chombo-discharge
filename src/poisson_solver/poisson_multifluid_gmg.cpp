@@ -23,8 +23,8 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
 
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
-  this->set_botsolver_smooth(32);
-  this->set_bottom_drop(32);
+  this->set_botsolver_smooth(64);
+  this->set_bottom_drop(16);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -123,8 +123,6 @@ void poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
     res_ptr.push_back(&(*m_resid[lvl]));
   }
 
-
-  //  m_gmg_solver.solve(phi_ptr, rhs_ptr, finest_level, 0);
   m_gmg_solver.init(phi_ptr, rhs_ptr, finest_level, 0);
   m_gmg_solver.solveNoInitResid(phi_ptr, res_ptr, rhs_ptr, finest_level, 0, a_zerophi);
   m_gmg_solver.revert(phi_ptr, rhs_ptr, finest_level, 0);
@@ -357,8 +355,8 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       1 + finest_level));
 
   m_opfact->set_relax_type(2);
-  m_opfact->set_bottom_drop(16);
-  m_opfact->set_jump(0.0, -1.0);
+  m_opfact->set_bottom_drop(m_bottom_drop);
+  m_opfact->set_jump(1.0, -1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 }
 
@@ -380,7 +378,7 @@ void poisson_multifluid_gmg::setup_solver(){
   else{
     botsolver = &m_bicgstab;
   }
-  
+
   m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
   m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
 				   m_gmg_post_smooth,

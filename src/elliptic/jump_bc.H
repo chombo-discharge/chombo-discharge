@@ -127,6 +127,11 @@ public:
   */
   virtual LayoutData<MFInterfaceFAB<Real> >& get_inhomo();
 
+  /*!
+    @brief Homogeneous contribution
+  */
+  virtual LayoutData<MFInterfaceFAB<Real> >& get_homog();
+
 
 protected:
 
@@ -182,10 +187,15 @@ protected:
   */
   LayoutData<MFInterfaceFAB<Real> > m_weights;
 
-    /*!
+  /*!
     @brief Inhomogeneous contribution to bc
   */
   LayoutData<MFInterfaceFAB<Real> > m_inhomo;
+
+  /*!
+    @brief Homogeneous contribution to bc
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_homog;
 
   /*!
     @brief Stencils on each side
@@ -225,6 +235,7 @@ protected:
   */
   virtual void match_bc(BaseIVFAB<Real>&                  a_phibc,
 			MFInterfaceFAB<Real>&             a_inhomo,
+			MFInterfaceFAB<Real>&             a_homog,
 			const BaseIVFAB<Real>&            a_jump,
 			const MFCellFAB&                  a_phi,
 			const MFInterfaceFAB<Real>&       a_bco,

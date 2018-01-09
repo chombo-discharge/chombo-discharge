@@ -88,18 +88,21 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_weights.define(m_grids);
   m_stencils.define(m_grids);
   m_inhomo.define(m_grids);
+  m_homog.define(m_grids);
 
   int num = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     MFInterfaceFAB<Real>& bco         = m_bco[dit()];
     MFInterfaceFAB<Real>& weights     = m_weights[dit()];
     MFInterfaceFAB<Real>& inhomo      = m_inhomo[dit()];
+    MFInterfaceFAB<Real>& homog       = m_homog[dit()];
     MFInterfaceFAB<VoFStencil>& stens = m_stencils[dit()];
 
 
     bco.define(m_mflg,     dit());
     weights.define(m_mflg, dit());
-    inhomo.define(m_mflg,   dit());
+    inhomo.define(m_mflg,  dit());
+    homog.define(m_mflg,   dit());
     stens.define(m_mflg,   dit());
 
     m_ivs[dit()] = bco.get_ivs();
@@ -207,6 +210,7 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
     this->match_bc(a_phibc[dit()],
 		   m_inhomo[dit()],
+		   m_homog[dit()],
 		   a_jump[dit()],
 		   a_phi[dit()],
 		   m_bco[dit()],
@@ -223,11 +227,11 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 
   const int ncomp = 1;
 
-
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real> zero(a_phibc[dit()].getIVS(), a_phibc[dit()].getEBGraph(), ncomp);
     this->match_bc(a_phibc[dit()],
 		   m_inhomo[dit()],
+		   m_homog[dit()],
 		   zero,
 		   a_phi[dit()],
 		   m_bco[dit()],
@@ -239,6 +243,7 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 
 void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       MFInterfaceFAB<Real>&             a_inhomo,
+		       MFInterfaceFAB<Real>&             a_homog,
 		       const BaseIVFAB<Real>&            a_jump,
 		       const MFCellFAB&                  a_phi,
 		       const MFInterfaceFAB<Real>&       a_bco,
@@ -269,14 +274,16 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
   BaseIVFAB<Real>& inhomo1 = a_inhomo.get_ivfab(phase1);
   BaseIVFAB<Real>& inhomo2 = a_inhomo.get_ivfab(phase2);
+  BaseIVFAB<Real>& homog1  = a_homog.get_ivfab(phase1);
+  BaseIVFAB<Real>& homog2  = a_homog.get_ivfab(phase2);
 
   
   // Set phibc = a_jump
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
-    inhomo1(vof, comp) = a_jump(vof, comp);
-    inhomo2(vof, comp) = a_jump(vof, comp);
+    homog1(vof, comp)  = a_jump(vof, comp);
+    homog2(vof, comp)  = a_jump(vof, comp);
   }
 
   // First phase loop. Add first stencil stuff
@@ -313,6 +320,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     a_phibc(vof, comp) *= factor;
     inhomo1(vof, comp) *= factor;
     inhomo2(vof, comp) *= factor;
+    homog1(vof, comp)  *= factor;
+    homog2(vof, comp)  *= factor;
   }
 }
 
@@ -386,4 +395,8 @@ LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_bco(){
 
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_inhomo(){
   return m_inhomo;
+}
+
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_homog(){
+  return m_homog;
 }

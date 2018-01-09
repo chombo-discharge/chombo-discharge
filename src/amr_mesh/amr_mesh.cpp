@@ -336,8 +336,8 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
 
   if(m_max_amr_depth > 0 && a_hardcap > 0){
     for (int lvl = 0; lvl <= top_level; lvl++){
-      old_boxes[lvl].push_back(m_domains[lvl].domainBox()); // Create old grids from scratch
-      //domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
+      //old_boxes[lvl].push_back(m_domains[lvl].domainBox()); // Create old grids from scratch
+      domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
     }
     
     // Berger-Rigoutsos grid generation
