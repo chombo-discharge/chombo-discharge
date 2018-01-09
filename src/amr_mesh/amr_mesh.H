@@ -12,6 +12,7 @@
 #include "computational_geometry.H"
 #include "mfis.H"
 #include "irreg_amr_stencil.H"
+#include "load_balance.H"
 
 #include <DisjointBoxLayout.H>
 #include <ProblemDomain.H>
@@ -139,6 +140,11 @@ public:
     @brief Set mfis
   */
   virtual void set_mfis(const RefCountedPtr<mfis>& a_mfis);
+
+  /*!
+    @brief Set load balance
+  */
+  virtual void set_balance(const load_balance::which_balance a_load);
 
   /*!
     @brief Build domains
@@ -369,6 +375,11 @@ protected:
   RefCountedPtr<physical_domain> m_physdom;
 
   /*!
+    @brief Load balance type
+  */
+  load_balance::which_balance m_which_balance;
+
+  /*!
     @brief Coarsest box where we compute
   */
   IntVect m_num_cells;
@@ -531,7 +542,7 @@ protected:
   /*!
     @brief Load balance grids
   */
-  virtual void load_balance(Vector<int>& a_proc_assign, Vector<Box>& a_boxes, const int a_lvl);
+  virtual void loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes);
 
   /*!
     @brief Define EBLevelGrid

@@ -46,22 +46,22 @@ public:
     @details This class only supports two-phase solutions with single components
   */
   mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
-			 const Vector<MFLevelGrid>&                a_mflg,
-			 const Vector<MFQuadCFInterp>&             a_mfquadcfi,
-			 const Vector<int>&                        a_ref_rat,
-			 const Vector<DisjointBoxLayout>&          a_grids,
-			 const MFAMRCellData&                      a_aco,
-			 const MFAMRFluxData&                      a_bco,
-			 const MFAMRIVData&                        a_bco_irreg,
-			 const Real&                               a_alpha,
-			 const Real&                               a_beta,
-			 const Real&                               a_coarsest_dx,
-			 const ProblemDomain&                      a_coarsest_domain,
-			 const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
-			 const RealVect&                           a_origin,
-			 const IntVect&                            a_ghost_phi,
-			 const IntVect&                            a_ghost_rhs,
-			 int                                       a_num_levels = -1);
+			  const Vector<MFLevelGrid>&                a_mflg,
+			  const Vector<MFQuadCFInterp>&             a_mfquadcfi,
+			  const Vector<int>&                        a_ref_rat,
+			  const Vector<DisjointBoxLayout>&          a_grids,
+			  const MFAMRCellData&                      a_aco,
+			  const MFAMRFluxData&                      a_bco,
+			  const MFAMRIVData&                        a_bco_irreg,
+			  const Real&                               a_alpha,
+			  const Real&                               a_beta,
+			  const Real&                               a_coarsest_dx,
+			  const ProblemDomain&                      a_coarsest_domain,
+			  const RefCountedPtr<BaseDomainBCFactory>& a_dombc,
+			  const RealVect&                           a_origin,
+			  const IntVect&                            a_ghost_phi,
+			  const IntVect&                            a_ghost_rhs,
+			  int                                       a_num_levels = -1);
 
   /*!
     @brief Destructor
@@ -148,7 +148,7 @@ public:
   */
   virtual void define_jump_stuff();
 
-    /*!
+  /*!
     @brief Factory method
   */
   virtual MGLevelOp<LevelData<MFCellFAB> >* MGnewOp(const ProblemDomain& a_domain_fine, int a_depth, bool a_homo_only = true);

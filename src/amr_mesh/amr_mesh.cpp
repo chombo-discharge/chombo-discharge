@@ -7,6 +7,7 @@
 
 #include "amr_mesh.H"
 #include "mfalias.H"
+#include "load_balance.H"
 
 #include <BRMeshRefine.H>
 #include <EBEllipticLoadBalance.H>
@@ -31,6 +32,8 @@ amr_mesh::amr_mesh(){
   this->set_eb_ghost(-4);
   this->set_irreg_sten_order(-1);
   this->set_irreg_sten_radius(-1);
+  this->set_balance(load_balance::knapsack);
+  
 }
 
 amr_mesh::~amr_mesh(){
@@ -223,6 +226,15 @@ void amr_mesh::set_mfis(const RefCountedPtr<mfis>& a_mfis){
   m_mfis = a_mfis;
 }
 
+void amr_mesh::set_balance(load_balance::which_balance a_load){
+  CH_TIME("amr_mesh::set_balance");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::set_balance" << endl;
+  }
+  
+  m_which_balance = a_load;
+}
+
 void amr_mesh::build_domains(){
   CH_TIME("amr_mesh::build_domains");
   if(m_verbosity > 5){
@@ -336,21 +348,39 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     m_finest_level = 0;
   }
 
+  // Do Morton ordering
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    mortonOrdering(new_boxes[lvl]);
+  }
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){   // Generate DisjointBoxLayouts on each level
-    Vector<int> proc_assign;
-    this->load_balance(proc_assign, new_boxes[lvl], lvl);             // Load balance, assign boxes to grids
-    m_grids[lvl].define(new_boxes[lvl], proc_assign, m_domains[lvl]); // Define grids
+  // Load balance boxes
+  Vector<Vector<int> > proc_assign(1 + m_finest_level);
+  this->loadbalance(proc_assign, new_boxes);
+
+  // Define grids
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){   
+    m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]); 
   }
 }
 
-void amr_mesh::load_balance(Vector<int>& a_proc_assign, Vector<Box>& a_boxes, const int a_lvl){
-  CH_TIME("amr_mesh::load_balance");
+void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes){
+  CH_TIME("amr_mesh::loadbalance");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::load_balance" << endl;
+    pout() << "amr_mesh::loadbalance" << endl;
   }
 
-  EBEllipticLoadBalance(a_proc_assign, a_boxes, m_domains[a_lvl], false, m_mfis->get_ebis(phase::gas)); // Loads for each box
+  // Level-by-level load balancing. This might change in the future. 
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    if(m_which_balance == load_balance::knapsack){
+      load_balance::balance_knapsack(a_procs[lvl], a_boxes[lvl]);
+    }
+    else if(m_which_balance == load_balance::elliptic){
+      load_balance::balance_elliptic(a_procs[lvl], a_boxes[lvl], m_mfis->get_ebis(phase::gas), m_domains[lvl], false);
+    }
+    else if(m_which_balance == load_balance::multifluid){
+      load_balance::balance_multifluid(a_procs[lvl], a_boxes[lvl], m_mfis, m_domains[lvl], false);
+    }
+  }
 }
 
 void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi){

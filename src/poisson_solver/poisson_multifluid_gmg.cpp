@@ -55,20 +55,14 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
 
   const int finest_level = m_amr->get_finest_level();
 
+  Vector<LevelData<MFCellFAB>* > phi, rhs, res;
+  m_amr->alias(phi, a_state);
+  m_amr->alias(rhs, a_source);
+  m_amr->alias(res, m_resid);
 
-  Vector<LevelData<MFCellFAB>* > phi_ptr, rhs_ptr, res_ptr;
-  m_amr->alias(phi_ptr, a_state);
-  m_amr->alias(rhs_ptr, a_source);
-  m_amr->alias(res_ptr, m_resid);
-  // for (int lvl = 0; lvl <= finest_level; lvl++){
-  //   phi_ptr.push_back(&(*a_state[lvl]));
-  //   rhs_ptr.push_back(&(*a_source[lvl]));
-  //   res_ptr.push_back(&(*m_resid[lvl]));
-  // }
-
-  m_gmg_solver.init(phi_ptr, rhs_ptr, finest_level, 0);
-  m_gmg_solver.solveNoInitResid(phi_ptr, res_ptr, rhs_ptr, finest_level, 0, a_zerophi);
-  m_gmg_solver.revert(phi_ptr, rhs_ptr, finest_level, 0);
+  m_gmg_solver.init(phi, rhs, finest_level, 0);
+  m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+  m_gmg_solver.revert(phi, rhs, finest_level, 0);
 
   m_amr->average_down(a_state);
   m_amr->interp_ghost(a_state);
@@ -329,12 +323,6 @@ void poisson_multifluid_gmg::setup_operator_factory(){
     
     mflg[lvl].define(m_mfis, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
-  }
-
-  for (int lvl = 1; lvl <= finest_level; lvl++){
-    for (int iphase = 0; iphase < 2; iphase++){
-      CH_assert(!(mfquadcfi[lvl]).get_quadcfi_ptr(iphase).isNull());
-    }
   }
 
   // Appropriate coefficients for poisson equation

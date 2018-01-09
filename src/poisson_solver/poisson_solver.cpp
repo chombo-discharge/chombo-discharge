@@ -127,7 +127,6 @@ void poisson_solver::set_verbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 }
 
-
 void poisson_solver::set_time(const Real a_time) {
   m_time = a_time;
 }
@@ -174,11 +173,8 @@ void poisson_solver::write_plot_file(const int a_step){
   m_amr->allocate(E, SpaceDim, 0);
   m_amr->compute_gradient(E, m_state);
 
-
-
-  
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
-  m_amr->allocate(output, phase::gas, 5, 0);
+  m_amr->allocate(output, phase::gas, 5, 1);
 
   
   for (int lvl = 0; lvl < output.size(); lvl++){
