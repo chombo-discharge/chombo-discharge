@@ -160,7 +160,7 @@ void rounded_box_if::buildBox3D(){
   isects.push_back(static_cast<BaseIF*> (new rod_if(c7 + c78, c8 + c78, m_curv, m_inside)));
 
   //
-  m_baseif = RefCountedPtr<BaseIF*> (new IntersectionIF(isects));
+  m_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(isects));
 
   // Delete all the stuff we just created
   for (int i = 0; i < unions.size(); i++){

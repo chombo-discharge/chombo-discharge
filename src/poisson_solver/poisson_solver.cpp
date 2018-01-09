@@ -160,13 +160,16 @@ void poisson_solver::write_plot_file(const int a_step){
   char file_char[1000];
   sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", a_step, SpaceDim);
 
-
-  Vector<string> names(5);
+  const int ncomps = 3 + SpaceDim;
+  Vector<string> names(ncomps);
   names[0] = "potential";
   names[1] = "space charge density";
   names[2] = "residue";
   names[3] = "x-Electric field";
   names[4] = "y-Electric field";
+  if(SpaceDim == 3){
+    names[5] = "z-Electric field";
+  }
 
   // Compute the electric field. 
   MFAMRCellData E;
@@ -174,7 +177,7 @@ void poisson_solver::write_plot_file(const int a_step){
   m_amr->compute_gradient(E, m_state);
 
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
-  m_amr->allocate(output, phase::gas, 5, 1);
+  m_amr->allocate(output, phase::gas, ncomps, 1);
 
   
   for (int lvl = 0; lvl < output.size(); lvl++){
@@ -227,10 +230,10 @@ void poisson_solver::write_plot_file(const int a_step){
       }
     }
 
-    state_gas.copyTo(Interval(0,0),  *output[lvl], Interval(0,0));
-    source_gas.copyTo(Interval(0,0), *output[lvl], Interval(1,1));
-    resid_gas.copyTo(Interval(0,0),  *output[lvl], Interval(2,2));
-    E_gas.copyTo(Interval(0,1),      *output[lvl], Interval(3, 4));
+    state_gas.copyTo(Interval(0,0),        *output[lvl], Interval(0,0));
+    source_gas.copyTo(Interval(0,0),       *output[lvl], Interval(1,1));
+    resid_gas.copyTo(Interval(0,0),        *output[lvl], Interval(2,2));
+    E_gas.copyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(3, 2 + SpaceDim));
   }
 
 #if 0 // Can only do up to SpaceDim, need to rewrite this routine
@@ -243,7 +246,7 @@ void poisson_solver::write_plot_file(const int a_step){
     output_ptr.push_back(&(*output[lvl]));
   }
 
-  Vector<Real> covered_values(3, 0.0);
+  Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
   writeEBHDF5(fname,
 	      m_amr->get_grids(),
