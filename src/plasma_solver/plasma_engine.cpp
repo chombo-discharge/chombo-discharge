@@ -101,9 +101,37 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
   }
 
   const int max_depth = m_amr->get_max_amr_depth();
+  const int depth     = (a_depth == -1) ? max_depth : a_depth;
   
-  m_geom_tag_depth = (a_depth == -1) ? max_depth : a_depth;
-  m_geom_tag_depth = Min(m_geom_tag_depth, max_depth); 
+  this->set_geom_refinement_depth(depth, depth, depth, depth, depth, depth);
+}
+void plasma_engine::set_geom_refinement_depth(const int a_depth1,
+					      const int a_depth2,
+					      const int a_depth3,
+					      const int a_depth4,
+					      const int a_depth5,
+					      const int a_depth6){
+  CH_TIME("plasma_engine::set_geom_refinement_depth(full");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_geom_refinement_depth(full)" << endl;
+  }
+  
+  const int max_depth = m_amr->get_max_amr_depth();
+
+  m_conductor_tag_depth                = Min(a_depth1, max_depth);
+  m_dielectric_tag_depth               = Min(a_depth2, max_depth);
+  m_gas_conductor_interface_tag_depth  = Min(a_depth3, max_depth);
+  m_gas_dielectric_interface_tag_depth = Min(a_depth4, max_depth);
+  m_gas_solid_interface_tag_depth      = Min(a_depth5, max_depth);
+  m_solid_solid_interface_tag_depth    = Min(a_depth6, max_depth);
+
+  m_geom_tag_depth = 0;
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth1);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth2);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth3);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth4);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth5);
+  m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
 }
 
 void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
@@ -255,19 +283,79 @@ void plasma_engine::get_geom_tags(){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  CH_assert(ebis_sol != NULL);
   CH_assert(ebis_gas != NULL);
 
   for (int lvl = 0; lvl < maxdepth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that. 
     const ProblemDomain& cur_dom = m_amr->get_domains()[lvl];
     const int which_level = ebis_gas->getLevel(cur_dom);
 
-    m_geom_tags[lvl].makeEmpty();
-    m_geom_tags[lvl] |= ebis_gas->irregCells(which_level);
-
-    if(!ebis_sol.isNull()){
-      m_geom_tags[lvl] |= ebis_sol->irregCells(which_level);
+    IntVectSet cond_tags;
+    IntVectSet diel_tags;
+    IntVectSet gas_tags;
+    IntVectSet solid_tags;
+    IntVectSet gas_diel_tags;
+    IntVectSet gas_solid_tags;
+    
+    // Conductor cells
+    if(m_conductor_tag_depth > lvl){ 
+      cond_tags = ebis_gas->irregCells(which_level);
+      if(!ebis_sol.isNull()){
+	cond_tags |= ebis_sol->irregCells(which_level);
+	cond_tags -= m_mfis->interface_region(cur_dom);
+      }
     }
+
+    // Dielectric cells
+    if(m_dielectric_tag_depth > lvl){ 
+      if(!ebis_sol.isNull()){
+	diel_tags = ebis_sol->irregCells(which_level);
+      }
+    }
+
+    // Gas-solid interface cells
+    if(m_gas_solid_interface_tag_depth > lvl){ 
+      if(!ebis_sol.isNull()){
+	gas_tags = ebis_gas->irregCells(which_level);
+      }
+    }
+
+     // Gas-dielectric interface cells
+    if(m_gas_dielectric_interface_tag_depth > lvl){
+      if(!ebis_sol.isNull()){
+	gas_diel_tags = m_mfis->interface_region(cur_dom);
+      }
+    }
+
+    // Gas-conductor interface cells
+    if(m_gas_conductor_interface_tag_depth > lvl){ 
+      gas_solid_tags = ebis_gas->irregCells(which_level);
+      if(!ebis_sol.isNull()){
+	gas_solid_tags -= m_mfis->interface_region(cur_dom);
+      }
+    }
+
+    // Solid-solid interfaces
+    if(m_solid_solid_interface_tag_depth > lvl){ 
+      if(!ebis_sol.isNull()){
+	solid_tags = ebis_sol->irregCells(which_level);
+
+	// Do the intersection with the conductor cells
+	IntVectSet tmp = ebis_gas->irregCells(which_level);
+	tmp |= ebis_sol->irregCells(which_level);
+	tmp -= m_mfis->interface_region(cur_dom);
+
+	solid_tags &= tmp;
+      }
+    }
+
+    m_geom_tags[lvl].makeEmpty();
+    m_geom_tags[lvl] |= diel_tags;
+    m_geom_tags[lvl] |= cond_tags;
+    m_geom_tags[lvl] |= gas_diel_tags;
+    m_geom_tags[lvl] |= gas_solid_tags;
+    m_geom_tags[lvl] |= gas_tags;
+    m_geom_tags[lvl] |= solid_tags;
+
   }
 
   // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs

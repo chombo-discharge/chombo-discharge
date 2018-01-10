@@ -70,6 +70,23 @@ public:
   virtual void set_geom_refinement_depth(const int a_depth = -1);
 
   /*!
+    @brief Set geometrical refinement depths. This provides a little more flexibility than the basic call. 
+    @param[in] a_depth1 Conductor tag depth
+    @param[in] a_depth2 Dielectric tag depth
+    @param[in] a_depth3 Conductor-gas interface tag depth
+    @param[in] a_depth4 Dielectric-gas interface tag depth
+    @param[in] a_depth5 Solid-gas interface tag depth
+    @param[in] a_depth6 Solid-solid interface tag depth
+  */
+  virtual void set_geom_refinement_depth(const int a_depth1,
+					 const int a_depth2,
+					 const int a_depth3,
+					 const int a_depth4,
+					 const int a_depth5,
+					 const int a_depth6);
+					 
+
+  /*!
     @brief Sanity check
   */
   virtual void sanity_check();
@@ -141,6 +158,7 @@ protected:
   */
   virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
 
+protected:
   /*!
     @brief Write a plot file
   */
@@ -180,6 +198,36 @@ protected:
     @brief Geometric tag depth
   */
   int m_geom_tag_depth;
+
+  /*!
+    @brief Geometric tag depth for dielectrics
+  */
+  int m_dielectric_tag_depth;
+
+  /*!
+    @brief Geometric tag depth for conductors
+  */
+  int m_conductor_tag_depth;
+
+  /*!
+    @brief Geometric tag depth for gas-solid interfaces
+  */
+  int m_gas_solid_interface_tag_depth;
+
+  /*!
+    @brief Geometry tag depth for solid-solid interfaces
+  */
+  int m_solid_solid_interface_tag_depth;
+
+  /*!
+    @brief Geometric tag depth for gas-dielectric interfaces
+  */
+  int m_gas_dielectric_interface_tag_depth;
+
+  /*!
+    @brief Geometric tag depth for gas-conductor interfaces
+  */
+  int m_gas_conductor_interface_tag_depth;
 
   /*!
     @brief Tags
