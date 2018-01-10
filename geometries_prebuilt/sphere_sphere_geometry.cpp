@@ -30,8 +30,8 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   Real elec_persist = 0.5;
   Real diel_persist = 0.5;
   
-  RealVect elec_center     = -0.25*RealVect::Unit;
-  RealVect diel_center     = 0.1*RealVect::Unit;
+  RealVect elec_center     = 0.5*RealVect::Unit;
+  RealVect diel_center     = -0.25*RealVect::Unit;
   RealVect elec_noise_freq = 400.*RealVect::Unit;
   RealVect diel_noise_freq = 400.*RealVect::Unit;
   

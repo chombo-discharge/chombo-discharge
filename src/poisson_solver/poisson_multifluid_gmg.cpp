@@ -12,7 +12,7 @@
 #include "jump_bc.H"
 #include "amr_mesh.H"
 #include "domain_bc.H"
-#include "poissonconductivitydomainbcfactory.H"
+#include "conductivitydomainbc_wrapper_factory.H"
 
 #include <Stencils.H>
 #include <MFCellFAB.H>
@@ -336,11 +336,10 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
   const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
 
-  poissonconductivitydomainbcfactory* bcfact = new poissonconductivitydomainbcfactory();
-  bcfact->set_value(0.0);
+  conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+  bcfact->set_wallbc(m_wallbc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
   
-
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 									       mflg,
 									       mfquadcfi,
@@ -359,7 +358,6 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 									       ghost_rhs,
 									       1 + finest_level));
 
-  m_opfact->set_relax_type(2);
   m_opfact->set_bottom_drop(m_bottom_drop);
   m_opfact->set_jump(0.0, -1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());

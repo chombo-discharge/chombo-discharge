@@ -1,13 +1,15 @@
 /*!
-  @file poissonconductivitydomainbc.H
+  @file conductivitydomainbc_wrapper.H
   @brief Declaration of a class that wraps boundary Dirichlet and Neumann boundary conditions on individual domain edges
   @author Robert Marskar
   @date Jan. 2018
   @todo Segregate implementation file
 */
 
-#ifndef _POISSONCONDUCTIVITYDOMAINBC_
-#define _POISSONCONDUCTIVITYDOMAINBC_
+#ifndef _CONDUCTIVITYDOMAINBC_WRAPPER_
+#define _CONDUCTIVITYDOMAINBC_WRAPPER_
+
+#include "wall_bc.H"
 
 #include <BaseDomainBC.H>
 #include <DirichletConductivityDomainBC.H>
@@ -18,17 +20,14 @@
   @details This class does not (currently) do Robin boundary conditions, although it can probably be extended to take care of 
   those cases as well. 
 */
-class poissonconductivitydomainbc : public ConductivityBaseDomainBC {
+class conductivitydomainbc_wrapper : public ConductivityBaseDomainBC {
 public:
   /*!
     @brief Constructor
   */
-  poissonconductivitydomainbc(){
+  conductivitydomainbc_wrapper(){
 
-    m_diri = RefCountedPtr<DirichletConductivityDomainBC> (new DirichletConductivityDomainBC());
-    m_neum = RefCountedPtr<NeumannConductivityDomainBC> (new NeumannConductivityDomainBC());
-
-    this->set_value(0.0);
+    m_bc.resize(2*SpaceDim);
 
     m_defined = false;
   }
@@ -36,32 +35,39 @@ public:
   /*!
     @brief Destructor
   */
-  ~poissonconductivitydomainbc(){}
+  ~conductivitydomainbc_wrapper(){}
 
   /*!
     @brief Dirichlet and Neumann need to know about bcoef
   */
   void set_coef(){
-    m_diri->setCoef(this->m_eblg, this->m_beta, this->m_bcoef);
-    m_neum->setCoef(this->m_eblg, this->m_beta, this->m_bcoef);
-    
+    for (int i = 0; i < m_bc.size(); i++){
+      m_bc[i]->setCoef(this->m_eblg, this->m_beta, this->m_bcoef);
+    }
     m_defined = true;
   }
 
   /*!
-    @brief Set function
+    @brief Set bc types. This should come through the factory. 
   */
-  virtual void set_function(RefCountedPtr<BaseBCFuncEval> a_func){
-    m_diri->setFunction(a_func);
-    m_neum->setFunction(a_func);
-  }
+  virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
+    for (int i = 0; i < a_wallbc.size(); i++){
+      const int dir             = a_wallbc[i]->direction();
+      const Side::LoHiSide side = a_wallbc[i]->side();
+      const int idx             = wall_bc::map_bc(dir, side);
+      
+      if(a_wallbc[i]->which_bc() == wallbc::dirichlet){
+	m_bc[idx] = RefCountedPtr<DirichletConductivityDomainBC> (new DirichletConductivityDomainBC());
+      }
+      else if(a_wallbc[i]->which_bc() == wallbc::neumann){
+	m_bc[idx] = RefCountedPtr<NeumannConductivityDomainBC> (new NeumannConductivityDomainBC());
+      }
+      else{
+	MayDay::Abort("conductivitydomainbc_wrapper::set_bc(wall) - unsupported bc type requested");
+      }
 
-  /*!
-    @brief Set value
-  */
-  virtual void set_value(Real a_value){
-    m_diri->setValue(a_value);
-    m_neum->setValue(a_value);
+      m_bc[idx]->setValue(a_wallbc[i]->get_value());
+    }
   }
 
   /*! 
@@ -79,15 +85,16 @@ public:
     if(!m_defined){
       this->set_coef(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
     }                   // allows me to do this at constructor level
-    m_diri->getFaceFlux(a_faceFlux,
-			a_phi,
-			a_probLo,
-			a_dx,
-			a_idir,
-			a_side,
-			a_dit,
-			a_time,
-			a_useHomogeneous);
+    const int idx = wall_bc::map_bc(a_idir, a_side);
+    m_bc[idx]->getFaceFlux(a_faceFlux,
+			  a_phi,
+			  a_probLo,
+			  a_dx,
+			  a_idir,
+			  a_side,
+			  a_dit,
+			  a_time,
+			  a_useHomogeneous);
   }
 
   /*! 
@@ -107,17 +114,18 @@ public:
     if(!m_defined){
       this->set_coef(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
     }                   // allows me to do this at constructor level
-    m_diri->getFaceFlux(a_faceFlux,
-			a_vof,
-			a_comp,
-			a_phi,
-			a_probLo,
-			a_dx,
-			a_idir,
-			a_side,
-			a_dit,
-			a_time,
-			a_useHomogeneous);
+    const int idx = wall_bc::map_bc(a_idir, a_side);
+    m_bc[idx]->getFaceFlux(a_faceFlux,
+			  a_vof,
+			  a_comp,
+			  a_phi,
+			  a_probLo,
+			  a_dx,
+			  a_idir,
+			  a_side,
+			  a_dit,
+			  a_time,
+			  a_useHomogeneous);
   }
 
 
@@ -140,7 +148,8 @@ public:
     if(!m_defined){
       this->set_coef(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
     }                   // allows me to do this at constructor level
-    m_diri->getFaceGradPhi(a_faceFlux,
+    const int idx = wall_bc::map_bc(a_idir, a_side);
+    m_bc[idx]->getFaceGradPhi(a_faceFlux,
 			   a_face,
 			   a_comp,
 			   a_phi,
@@ -158,14 +167,9 @@ public:
 protected:
 
   /*!
-    @brief Dirichlet boundary condition
+    @brief Individual stuff
   */
-  RefCountedPtr<DirichletConductivityDomainBC> m_diri;
-
-  /*!
-    @brief Neumann boundary condition
-  */
-  RefCountedPtr<NeumannConductivityDomainBC> m_neum;
+  Vector<RefCountedPtr<ConductivityBaseDomainBC> > m_bc;
 
   /*!
     @brief Is defined or not

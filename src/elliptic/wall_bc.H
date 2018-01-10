@@ -40,6 +40,10 @@ public:
   */
   static int map_bc(const int a_dir, const Side::LoHiSide a_side);
 
+  virtual int direction(){return m_dir;}
+
+  virtual Side::LoHiSide side(){return m_side;}
+
   /*!
     @brief Set value
   */

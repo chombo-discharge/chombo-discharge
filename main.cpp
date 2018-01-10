@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(32*IntVect::Unit);  // Set number of cells on coarsest level
+  amr->set_coarsest_num_cells(64*IntVect::Unit);  // Set number of cells on coarsest level
   amr->set_max_amr_depth(1);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]){
   poisson->set_physical_domain(physdom);
 
   if(SpaceDim == 2){
-    poisson->set_neumann_wall_bc(0,   Side::Lo, 1.0);                  
+    poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
     poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
     poisson->set_dirichlet_wall_bc(1, Side::Lo, potential::ground);
     poisson->set_dirichlet_wall_bc(1, Side::Hi, potential::live);
