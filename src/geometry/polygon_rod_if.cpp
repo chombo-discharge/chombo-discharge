@@ -70,26 +70,23 @@ polygon_rod_if::polygon_rod_if(const int&  a_nsides,
     delete planes[i];
   }
   for (int i = 0; i < parts.size(); i++){
-    delete parts[i];
+    //    delete parts[i];
   }
   delete unionIF;
 }
     
-//
 polygon_rod_if::polygon_rod_if(const polygon_rod_if& a_inputIF){
+  CH_assert(!a_inputIF.m_baseif.isNull());
   m_baseif = a_inputIF.m_baseif;
 }
 
-//
 polygon_rod_if::~polygon_rod_if(){
 }
 
-//
 Real polygon_rod_if::value(const RealVect& a_pos) const {
   return m_baseif->value(a_pos);
 }
 
-//
 BaseIF* polygon_rod_if::newImplicitFunction() const {
   return static_cast<BaseIF*> (new polygon_rod_if(*this));
 }
