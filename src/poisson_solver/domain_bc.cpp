@@ -8,8 +8,19 @@
 #include "domain_bc.H"
 
 domain_bc::domain_bc(Vector<RefCountedPtr<wall_bc> >& a_bc){
-  CH_TIME("domain_bc::domain_Bc");
-  this->define(m_bc = a_bc);
+  CH_TIME("domain_bc::domain_bc");
+  
+  this->define(a_bc);
+
+  m_values.resize(2*SpaceDim);
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const int which = wall_bc::map_bc(dir, sit());
+      m_values[which] = m_bc[which]->get_value();
+    }
+  }
+
+  
 }
 
 domain_bc::~domain_bc(){
@@ -32,7 +43,8 @@ void domain_bc::define(Vector<RefCountedPtr<wall_bc> >& a_bc){
 
 Real domain_bc::value(const RealVect& a_point, const RealVect& a_normal, const Real& a_time, const int& a_comp) const{
   CH_TIME("domain_bc::value(1)");
-  return 0.;
+
+  MayDay::Abort("domain_bc::value - how did you get here, this shouldn't be called anywhere!");
 }
 
 
@@ -45,8 +57,8 @@ Real domain_bc::value(const FaceIndex&      a_face,
 		      const int&            a_comp) const {
   CH_TIME("domain_bc::value(2)");
 
-  const int dir = a_face.direction();
-  const wall_bc& bc = *(m_bc[wall_bc::map_bc(dir, a_side)]);
-  
-  return 0.;
+  const int dir   = a_face.direction();
+  const int which = wall_bc::map_bc(dir, a_side);
+
+  return m_values[which];
 }

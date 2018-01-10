@@ -71,7 +71,7 @@ int main(int argc, char* argv[]){
   poisson->set_physical_domain(physdom);
 
   if(SpaceDim == 2){
-    poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
+    poisson->set_neumann_wall_bc(0,   Side::Lo, 1.0);                  
     poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
     poisson->set_dirichlet_wall_bc(1, Side::Lo, potential::ground);
     poisson->set_dirichlet_wall_bc(1, Side::Hi, potential::live);

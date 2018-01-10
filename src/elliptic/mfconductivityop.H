@@ -48,7 +48,7 @@ public:
     @brief Define function
   */
   virtual void define(const RefCountedPtr<mfis>&                    a_mfis,
-		      const RefCountedPtr<BaseDomainBC>&            a_dombc,
+		      const RefCountedPtr<BaseDomainBCFactory>&     a_dombc,
 		      const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
 		      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 		      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
@@ -401,16 +401,6 @@ protected:
     @brief Arithmetic multifluid operators
   */
   LevelDataOps<MFCellFAB> m_ops;
-
-  /*!
-    @brief Some extra storage
-  */
-  LevelData<MFCellFAB> m_tmp;
-
-  /*!
-    @brief Some extra storage
-  */
-  LevelData<MFCellFAB> m_weights;
   
   /*!
     @brief Class for computing BC matching
@@ -429,10 +419,8 @@ protected:
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_phibc;
 
   /*!
-    @brief Dirichlet conductivity bc for each phase
+    @brief Multifluid boundary conditions
   */
-  //  Vector<RefCountedPtr<DirichletConductivityEBBC> > m_ebbc;
-
   Vector<RefCountedPtr<mfdirichletconductivityebbc> > m_ebbc;
 
   /*!

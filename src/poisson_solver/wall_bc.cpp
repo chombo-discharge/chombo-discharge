@@ -26,6 +26,22 @@ void wall_bc::set_live(bool a_live){
   m_live = a_live;
 }
 
+Real wall_bc::get_value(){
+  Real value = 0.0;
+  
+  if(m_which == wallbc::dirichlet){
+    value = Real(m_live);
+  }
+  else if(m_which == wallbc::neumann){
+    value = m_value;
+  }
+  else if(m_which == wallbc::robin){
+    value = m_value;
+  }
+
+  return value;
+}
+
 wallbc::which_bc wall_bc::which_bc(){
   return m_which;
 }

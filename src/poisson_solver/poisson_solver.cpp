@@ -175,6 +175,7 @@ void poisson_solver::write_plot_file(const int a_step){
   MFAMRCellData E;
   m_amr->allocate(E, SpaceDim, 0);
   m_amr->compute_gradient(E, m_state);
+  data_ops::scale(E, -1.0);
 
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
   m_amr->allocate(output, phase::gas, ncomps, 1);

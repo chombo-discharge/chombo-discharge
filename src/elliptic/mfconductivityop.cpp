@@ -14,7 +14,7 @@
 #include <BaseIVFactory.H>
 #include <EBAMRDataOps.H>
 
-#define verb 0
+#define verb 1
 
 mfconductivityop::mfconductivityop(){
 
@@ -22,13 +22,13 @@ mfconductivityop::mfconductivityop(){
   
 
 mfconductivityop::~mfconductivityop(){
-  for (int i = 0; i < 4; i++){
+  for (int i = 0; i < m_alias.size(); i++){
     m_alias[i] = NULL;
   }
 }
 
 void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mfis,
-			      const RefCountedPtr<BaseDomainBC>&            a_dombc,
+			      const RefCountedPtr<BaseDomainBCFactory>&     a_dombc,
 			      const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
 			      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 			      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
@@ -59,9 +59,6 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 
 
 
-#if verb
-  MayDay::Warning("mfconductivityop::mfconductivityop - remember to check how many aliasing holders we need");
-#endif
   const int num_alias  = 4;
 
   m_mfis = a_mfis;
@@ -126,40 +123,23 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
       CH_assert(!quadcfi.isNull());
     }
 
-
+    // Coefficients
     m_acoeffs[iphase]     = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
     m_bcoeffs[iphase]     = RefCountedPtr<LevelData<EBFluxFAB> >        (new LevelData<EBFluxFAB>());
     m_bcoeffs_irr[iphase] = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >());
 
     
-#if 1 // In the long run, we will replace these with more general boundary conditions.
-#if verb
-    MayDay::Warning("mfconductivityop::mfconductivityop - fix up boundary conditions!");
-#endif
-    DirichletConductivityDomainBCFactory bcfact;
-    bcfact.setValue(0.0);
-    
-    RefCountedPtr<DirichletConductivityDomainBC> dombc = RefCountedPtr<DirichletConductivityDomainBC>
-      (bcfact.create(a_domain, ebisl, a_dx*RealVect::Unit));
+    // Domain BC
+    ConductivityBaseDomainBC* bc = (ConductivityBaseDomainBC*) a_dombc->create(a_domain, ebisl, a_dx*RealVect::Unit);
+    RefCountedPtr<ConductivityBaseDomainBC> dbc(bc);
 
-
-
-#if 1 // Testing
+    // EB BC
     m_ebbc[iphase] = RefCountedPtr<mfdirichletconductivityebbc> (new mfdirichletconductivityebbc(a_domain,
 												 ebisl,
 												 a_dx*RealVect::Unit,
 												 &a_ghost_phi,
 												 &a_ghost_rhs,
 												 iphase)),
-#else
-      
-      m_ebbc[iphase]        = RefCountedPtr<DirichletConductivityEBBC>    (new DirichletConductivityEBBC(a_domain,
-													 ebisl,
-													 a_dx*RealVect::Unit,
-													 &a_ghost_phi,
-													 &a_ghost_rhs));
-#endif
-
     m_ebbc[iphase]->set_jump_object(m_jumpbc);
     m_ebbc[iphase]->setOrder(a_order_ebbc);
     m_ebbc[iphase]->define_ivs(a_mflg);
@@ -178,9 +158,6 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     EBLevelDataOps::setVal(*m_dirival[iphase], 0.0);
     m_ebbc[iphase]->setData(m_dirival[iphase]);
 
-
-#endif
-
     mfalias::aliasMF(*m_acoeffs[iphase],     iphase, *a_aco);
     mfalias::aliasMF(*m_bcoeffs[iphase],     iphase, *a_bco);
     mfalias::aliasMF(*m_bcoeffs_irr[iphase], iphase, *a_bco_irreg);
@@ -194,14 +171,14 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     const Real beta  = a_beta;
 
 #if verb
-    pout() << "mfconductivityop::creating factory" << endl;
+    pout() << "mfconductivityop::creating oper" << endl;
 #endif
     m_ebops[iphase] = RefCountedPtr<ebconductivityop> (new ebconductivityop(eblg_fine,
 									    eblg,
 									    eblg_coar,
 									    eblg_mg,
 									    quadcfi,
-									    dombc,
+									    dbc,
 									    ebbc,
 									    a_dx,
 									    a_dx_coar,
@@ -220,17 +197,12 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 									    a_ghost_rhs,
 									    a_relax_type));
 #if verb
-    pout() << "mfconductivityop::done creating factory" << endl;
+    pout() << "mfconductivityop::done creating oper" << endl;
 #endif
   }
 
-
-
   MFCellFactory* factory = new MFCellFactory(layouts, comps);
   RefCountedPtr<DataFactory<MFCellFAB> > fac(factory);
-  m_tmp.define(a_mflg.get_grids(), m_ncomp, m_ghost_rhs, *factory);
-  m_weights.define(a_mflg.get_grids(), m_ncomp, m_ghost_phi, *factory);
-	       
   m_ops.define(fac);
 }
 
@@ -316,9 +288,6 @@ void mfconductivityop::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
 #endif
   for (int iphase = 0; iphase < m_phases; iphase++){
     m_ebops[iphase]->setAlphaAndBeta(a_alpha, a_beta);
-#if 0
-    MayDay::Warning("mfconductivityop::setAlphaAndBeta - MFPoisson multiplies by acoef, why?");
-#endif
   }
 }
 
@@ -375,10 +344,6 @@ void mfconductivityop::setTime(Real a_oldTime, Real a_mu, Real a_dt){
   for (int iphase=0; iphase < m_phases; iphase++){
     m_ebops[iphase]->setTime(a_oldTime, a_mu, a_dt);
   }
-
-#if verb
-  MayDay::Warning("mfconductivityop::setTime - jump bc should also be time dependent");
-#endif
 }
 
 void mfconductivityop::residual(LevelData<MFCellFAB>&        a_lhs,
@@ -404,10 +369,7 @@ void mfconductivityop::preCond(LevelData<MFCellFAB>&       a_correction,
 #if verb
   pout() << "mfconductivityop::precond"<< endl;
 #endif
-#if 0
-
   this->relax(a_correction, a_residual, 40);
-#endif
 }
 
 void mfconductivityop::applyOp(LevelData<MFCellFAB>&        a_lhs,
@@ -416,9 +378,6 @@ void mfconductivityop::applyOp(LevelData<MFCellFAB>&        a_lhs,
   CH_TIME("mfconductivityop::applyOp");
 #if verb
   pout() << "mfconductivityop::applyop"<< endl;
-#endif
-#if verb
-  MayDay::Warning("mfconductivityop::applyOp - the matching condition should be updated first");
 #endif
 
   this->update_bc(a_phi, a_homogeneous);
@@ -826,9 +785,6 @@ void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
   pout() << "mfconductivityop::amroperator" << endl;
 #endif
 
-#if verb
-  MayDay::Warning("mfconductivityop::AMROperator - must update BCfirst");
-#endif
   this->update_bc(a_phi, a_homogeneousBC);
 
   for (int iphase = 0; iphase < m_phases; iphase++){
@@ -883,9 +839,6 @@ void mfconductivityop::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
 #if verb
   pout() << "mfconductivityop::amroperatornc"<< endl;
 #endif
-#if verb
-  MayDay::Warning("mfconductivityop::AMROperatorNC - must update BCfirst");
-#endif
 
   this->update_bc(a_phi, a_homogeneousBC);
   
@@ -934,9 +887,6 @@ void mfconductivityop::AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
   pout() << "mfconductivityop::amroperatornf"<< endl;
 #endif
 
-#if verb
-  MayDay::Warning("mfconductivityop::AMROperatorNC - must update BCfirst");
-#endif
   this->update_bc(a_phi, a_homogeneousBC);
   
   for (int i=0; i<m_phases; i++){
@@ -959,9 +909,6 @@ void mfconductivityop::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
   pout() << "mfconductivityop::amrupdateresidual"<< endl;
 #endif
 
-#if verb
-  MayDay::Warning("mfconductivityop::applyOp - the matching condition should be updated first");
-#endif
   this->update_bc(a_correction, true);
 
   for (int i=0; i < m_phases; i++){

@@ -71,6 +71,11 @@ protected:
     @brief Boundary conditions
   */
   Vector<RefCountedPtr<wall_bc> > m_bc;
+
+  /*!
+    @brief Boundary condition values
+  */
+  Vector<Real> m_values;
   
 };
 

@@ -51,6 +51,11 @@ public:
   virtual void set_live(bool a_live);
 
   /*!
+    @brief Get value. 
+  */
+  virtual Real get_value();
+
+  /*!
     @brief Get BC type
   */
   virtual wallbc::which_bc which_bc();

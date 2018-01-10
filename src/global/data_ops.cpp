@@ -6,10 +6,18 @@
 */
 
 #include "data_ops.H"
+#include "EBLevelDataOps.H"
+#include "MFLevelDataOps.H"
 
 void data_ops::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     EBLevelDataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+  }
+}
+
+void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    MFLevelDataOps::scale(*a_lhs[lvl], a_scale);
   }
 }
 
