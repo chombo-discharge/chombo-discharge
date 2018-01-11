@@ -1,0 +1,16 @@
+*.ex
+*.hdf5
+*.png
+/o
+/f
+/p
+/d
+**/o/**
+**/f/**
+**/p/**
+**/d/**
+**/*.a
+**/*.o
+**/Chombo-3.2/lib/doc/doxygen/html/**
+pout.*
+time.table.*

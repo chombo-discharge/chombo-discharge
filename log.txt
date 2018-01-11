@@ -1,0 +1,11 @@
+/home/robertm/Projects/mf-chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/mf-chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+Depending ./src/elliptic/ebconductivityop.cpp ...
+/home/robertm/Projects/mf-chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/mf-chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+/home/robertm/Projects/mf-chombo/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/mf-chombo/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+/home/robertm/Projects/mf-chombo/lib/mk/Make.rules:468: recipe for target 'o/2d.Linux.64.mpicxx.gfortran.OPT.MPI/ebconductivityop.o' failed
+make[1]: *** [o/2d.Linux.64.mpicxx.gfortran.OPT.MPI/ebconductivityop.o] Interrupt
+/home/robertm/Projects/mf-chombo/lib/mk/Make.rules:393: recipe for target 'main' failed
+make: *** [main] Interrupt
