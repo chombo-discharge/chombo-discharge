@@ -1,5 +1,4 @@
 \relax 
-\Newlabel{sintef}{a}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Theory}{2}}
 \newlabel{sec:theory}{{2}{2}}
@@ -7,30 +6,67 @@
 \newlabel{subsec:electrodynamic}{{2.1}{2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Plasma-fluid equations}{2}}
 \newlabel{eq:cdr}{{2}{2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Radiative transfer}{3}}
-\newlabel{subsec:radiative_transfer}{{2.3}{3}}
-\newlabel{eq:RTE}{{3}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Radiative transfer}{2}}
+\newlabel{subsec:radiative_transfer}{{2.3}{2}}
+\newlabel{eq:RTE}{{3}{2}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}The multigroup approximation}{3}}
 \newlabel{eq:multigroup}{{4}{3}}
 \newlabel{eq:Enu}{{5a}{3}}
 \newlabel{eq:Fnu}{{5b}{3}}
 \newlabel{eq:eddingtonTensor}{{6}{3}}
 \newlabel{eq:diffFlux}{{7}{3}}
+\newlabel{eq:sp1}{{8}{3}}
+\newlabel{eq:robin}{{9}{3}}
+\newlabel{eq:photon_outflux}{{11}{3}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Surface charge conservation}{4}}
-\newlabel{eq:surfaceCons}{{11}{4}}
+\newlabel{eq:surfaceCons}{{12}{4}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Minimal plasma model}{4}}
-\newlabel{eq:minimal_plasma}{{12}{4}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Numerical method}{4}}
+\newlabel{eq:minimal_plasma}{{13}{4}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Numerical methods}{4}}
 \newlabel{sec:method}{{3}{4}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Spatial discretization}{4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Cut-cell discretization.}}{5}}
-\newlabel{fig:spatial_discretization}{{1}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Patch-based AMR. The figure shows two refined grids that hierarchically overlap a base grid. On each grid, boundary cells are cut by an external surface (shaded region).}}{5}}
+\newlabel{fig:patch_amr}{{1}{5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Spatial discretization}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Cut-cell discretization.}}{6}}
+\newlabel{fig:spatial_discretization}{{2}{6}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Poisson \& Eddington equations}{6}}
 \newlabel{sec:poisson}{{3.2}{6}}
-\newlabel{eq:poisson_operator}{{14}{6}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Multigrid solver}{6}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Boundary conditions}{7}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Numerical examples}{7}}
-\newlabel{sec:examples}{{4}{7}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Concluding remarks}{7}}
-\newlabel{sec:remarks}{{5}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Cut cell at domain face.}}{7}}
+\newlabel{fig:cut_cell}{{3}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Boundary conditions}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Ray casting at the EB for obtaining the normal gradient. }}{8}}
+\newlabel{fig:raycast}{{4}{8}}
+\@writefile{toc}{\contentsline {paragraph}{Least squares data reconstruction}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Example neighborhood for least squares data reconstruction.}}{9}}
+\newlabel{fig:lsq_neighborhood}{{5}{9}}
+\newlabel{eq:q2_example}{{27}{9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Multigrid solver}{10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Convection-Diffusion-Reaction equations}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Advective discretization}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Hybrid divergence}{10}}
+\newlabel{sec:hybrid}{{3.3.2}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.3}Refluxing and redistribution}{11}}
+\newlabel{sec:reflux}{{3.3.3}{11}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Temporal discretization}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Explicit 2nd order Runge-Kutta}{11}}
+\newlabel{eq:ode}{{39}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}4th order Runge-Kutta}{12}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Semi-implicit TGA scheme}{12}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Time step restrictions}{13}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Numerical examples}{13}}
+\newlabel{sec:examples}{{5}{13}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Simplified bulk plasma kinetics}{13}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Dielectric boundary conditions}{14}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Razor-blade gaps}{15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Triple-junction setups}{15}}
+\newlabel{sec:triple2d}{{5.3}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Geometry and initial field distribution for a ''triple-junction'' setup.}}{15}}
+\newlabel{fig:triplePoint2d}{{6}{15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Streamer propagation from non-smooth electrodes}{15}}
+\newlabel{sec:noise2d}{{5.4}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Perlin noise across a domain (-1, 1). The base frequency is $\bm  {k} = 5\left (\mathaccentV {hat}05E{\bm  {x}} + \mathaccentV {hat}05E{\bm  {y}}\right )$. Left: One octave. Middle: Two octaves. Right: Three octaves. }}{16}}
+\newlabel{fig:perlin}{{7}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Cylindrical rod with surface roughness. Left: Electric field magnitude over the full domain. }}{16}}
+\newlabel{fig:roughCylinder}{{8}{16}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Concluding remarks}{16}}
+\newlabel{sec:remarks}{{6}{16}}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.1.4)  31 JAN 2017 13:49
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.1.4)  7 NOV 2017 08:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -202,35 +202,96 @@ Package: bm 2014/10/28 v1.1c Bold Symbol Support (DPC/FMi)
 LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 141.
 LaTeX Info: Redefining \bm on input line 207.
 )
-\emailauthor{robert.marskar@sintef.no}{Robert Marskar}
+(/usr/share/texlive/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
+Package: algorithm2e 2013/01/06 v5.00 algorithms environments
+\c@AlgoLine=\count110
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
+)
+\algocf@hangindent=\skip50
+
+(/usr/share/texlive/texmf-dist/tex/latex/tools/xspace.sty
+Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/relsize/relsize.sty
+Package: relsize 2013/03/29 ver 4.1
+)
+********************************************************
+Package `algorithm2e' Release 5.1 -- october 19 2015 --
+- algorithm2e-announce@lirmm.fr mailing list for announcement about releases
+- algorithm2e-discussion@lirmm.fr mailing list for discussion about package
+subscribe by emailing sympa@lirmm.fr with 'subscribe <list> <firstname name>'
+- Author: Christophe Fiorio (christophe.fiorio@umontpellier.fr)
+********************************************************
+\skiptotal=\skip51
+\skiplinenumber=\skip52
+\skiprule=\skip53
+\skiphlne=\skip54
+\skiptext=\skip55
+\skiplength=\skip56
+\algomargin=\skip57
+\skipalgocfslide=\skip58
+\algowidth=\dimen126
+\inoutsize=\dimen127
+\inoutindent=\dimen128
+\interspacetitleruled=\dimen129
+\interspacealgoruled=\dimen130
+\interspacetitleboxruled=\dimen131
+\algocf@ruledwidth=\skip59
+\algocf@inoutbox=\box32
+\algocf@inputbox=\box33
+\AlCapSkip=\skip60
+\AlCapHSkip=\skip61
+\algoskipindent=\skip62
+\algocf@nlbox=\box34
+\algocf@hangingbox=\box35
+\algocf@untilbox=\box36
+\algocf@skipuntil=\skip63
+\algocf@capbox=\box37
+\algoheightruledefault=\skip64
+\algoheightrule=\skip65
+\algotitleheightruledefault=\skip66
+\algotitleheightrule=\skip67
+\c@algocfline=\count111
+\c@algocfproc=\count112
+\c@algocf=\count113
+\algocf@algoframe=\box38
+\algocf@algobox=\box39
+) (/usr/share/texlive/texmf-dist/tex/latex/units/nicefrac.sty
+Package: nicefrac 1998/08/04 v0.9b Nice fractions
+\L@UnitsRaiseDisplaystyle=\skip68
+\L@UnitsRaiseTextstyle=\skip69
+\L@UnitsRaiseScriptstyle=\skip70
+)
 (./manuscript.aux)
 \openout1 = `manuscript.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count110
-\scratchdimen=\dimen126
-\scratchbox=\box32
-\nofMPsegments=\count111
-\nofMParguments=\count112
+\scratchcounter=\count114
+\scratchdimen=\dimen132
+\scratchbox=\box40
+\nofMPsegments=\count115
+\nofMParguments=\count116
 \everyMPshowfont=\toks23
-\MPscratchCnt=\count113
-\MPscratchDim=\dimen127
-\MPnumerator=\count114
-\makeMPintoPDFobject=\count115
+\MPscratchCnt=\count117
+\MPscratchDim=\dimen133
+\MPnumerator=\count118
+\makeMPintoPDFobject=\count119
 \everyMPtoPDFconversion=\toks24
 ) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
@@ -312,60 +373,172 @@ e
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 17.
+LaTeX Font Info:    Try loading font information for U+msa on input line 24.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 17.
+LaTeX Font Info:    Try loading font information for U+msb on input line 24.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4]
-<./figures/spatial_discretization.pdf, id=31, 284.52296pt x 284.52296pt>
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
+Overfull \hbox (8.20639pt too wide) in paragraph at lines 88--91
+\OT1/cmr/m/n/10 where $\OML/cmm/m/it/10 E[] \OT1/cmr/m/n/10 = [][] \OML/cmm/m/i
+t/10 f[][]\OT1/cmr/m/n/10 
+$ is the ra-dia-tive den-sity, $\OML/cmm/b/it/10 F[] \OT1/cmr/m/n/10 = \OML/cmm
+/m/it/10 c [][] f[]\OT1/cmr/bx/n/10 
+[]\OT1/cmr/m/n/10 
+$ is the ra-dia-tive flux, and $^^E[] = \OML/cmm/m/it/10 c [][] f[]\OT1/cmr/m/n
+/10 
+[]
+[][]
+$
+ []
+
+[3] <./figures/amr2.pdf, id=24, 341.4326pt x 184.94295pt>
+File: ./figures/amr2.pdf Graphic file (type pdf)
+
+<use ./figures/amr2.pdf>
+Package pdftex.def Info: ./figures/amr2.pdf used on input line 159.
+(pdftex.def)             Requested size: 341.43176pt x 184.94247pt.
+ [4]
+<./figures/spatial_discretization.pdf, id=28, 284.52798pt x 199.1691pt>
 File: ./figures/spatial_discretization.pdf Graphic file (type pdf)
 
 <use ./figures/spatial_discretization.pdf>
 Package pdftex.def Info: ./figures/spatial_discretization.pdf used on input lin
-e 154.
-(pdftex.def)             Requested size: 284.52225pt x 284.52225pt.
- [5 <./figures/spatial_discretization.pdf>] [6] [7] (./manuscript.aux) ) 
+e 175.
+(pdftex.def)             Requested size: 284.52728pt x 199.1686pt.
+ [5 <./figures/amr2.pdf>]
+<./figures/cutCell.pdf, id=45, 227.62239pt x 204.85934pt>
+File: ./figures/cutCell.pdf Graphic file (type pdf)
+
+<use ./figures/cutCell.pdf>
+Package pdftex.def Info: ./figures/cutCell.pdf used on input line 204.
+(pdftex.def)             Requested size: 227.62183pt x 204.85884pt.
+ [6 <./figures/spatial_discretization.pdf>]
+<./figures/raycast.pdf, id=85, 216.24088pt x 150.79938pt>
+File: ./figures/raycast.pdf Graphic file (type pdf)
+
+<use ./figures/raycast.pdf>
+Package pdftex.def Info: ./figures/raycast.pdf used on input line 240.
+(pdftex.def)             Requested size: 216.24033pt x 150.799pt.
+ [7 <./figures/cutCell.pdf>] [8 <./figures/raycast.pdf>] <./figures/lsq_neighbo
+rhood.pdf, id=118, 256.07469pt x 156.48964pt>
+File: ./figures/lsq_neighborhood.pdf Graphic file (type pdf)
+
+<use ./figures/lsq_neighborhood.pdf>
+Package pdftex.def Info: ./figures/lsq_neighborhood.pdf used on input line 281.
+
+(pdftex.def)             Requested size: 256.07405pt x 156.48926pt.
+ [9 <./figures/lsq_neighborhood.pdf>]
+[10] [11] [12] [13]
+
+LaTeX Warning: Reference `fig:triplePoint2D' on page 14 undefined on input line
+ 569.
+
+<./figures/triplePoint2d/t0_big.png, id=136, 2055.68pt x 1947.275pt>
+File: ./figures/triplePoint2d/t0_big.png Graphic file (type png)
+
+<use ./figures/triplePoint2d/t0_big.png>
+Package pdftex.def Info: ./figures/triplePoint2d/t0_big.png used on input line 
+571.
+(pdftex.def)             Requested size: 210.59857pt x 199.49298pt.
+
+<./figures/triplePoint2d/t0_small.png, id=137, 2055.68pt x 1947.275pt>
+File: ./figures/triplePoint2d/t0_small.png Graphic file (type png)
+
+<use ./figures/triplePoint2d/t0_small.png>
+Package pdftex.def Info: ./figures/triplePoint2d/t0_small.png used on input lin
+e 573.
+(pdftex.def)             Requested size: 210.59857pt x 199.49298pt.
+ [14]
+<./figures/perlin1.png, id=141, 1027.84pt x 973.6375pt>
+File: ./figures/perlin1.png Graphic file (type png)
+
+<use ./figures/perlin1.png>
+Package pdftex.def Info: ./figures/perlin1.png used on input line 585.
+(pdftex.def)             Requested size: 140.40143pt x 132.99532pt.
+
+<./figures/perlin2.png, id=142, 1027.84pt x 973.6375pt>
+File: ./figures/perlin2.png Graphic file (type png)
+
+<use ./figures/perlin2.png>
+Package pdftex.def Info: ./figures/perlin2.png used on input line 587.
+(pdftex.def)             Requested size: 140.40143pt x 132.99532pt.
+File: ./figures/perlin2.png Graphic file (type png)
+ <use ./figures/perlin2.png>
+Package pdftex.def Info: ./figures/perlin2.png used on input line 589.
+(pdftex.def)             Requested size: 140.40143pt x 132.99532pt.
+
+<./figures/noisyCylinder/needle_big_t0.png, id=143, 2055.68pt x 1947.275pt>
+File: ./figures/noisyCylinder/needle_big_t0.png Graphic file (type png)
+
+<use ./figures/noisyCylinder/needle_big_t0.png>
+Package pdftex.def Info: ./figures/noisyCylinder/needle_big_t0.png used on inpu
+t line 597.
+(pdftex.def)             Requested size: 210.59857pt x 199.49298pt.
+
+<./figures/noisyCylinder/needle_small_t0.png, id=144, 2055.68pt x 1947.275pt>
+File: ./figures/noisyCylinder/needle_small_t0.png Graphic file (type png)
+
+<use ./figures/noisyCylinder/needle_small_t0.png>
+Package pdftex.def Info: ./figures/noisyCylinder/needle_small_t0.png used on in
+put line 599.
+(pdftex.def)             Requested size: 210.59857pt x 199.49298pt.
+ [15 <./figures/triplePoint2d/t0_big.png (PNG copy)> <./figures/triplePoint2d/t
+0_small.png (PNG copy)>]
+[16 <./figures/perlin1.png (PNG copy)> <./figures/perlin2.png (PNG copy)> <./fi
+gures/noisyCylinder/needle_big_t0.png (PNG copy)> <./figures/noisyCylinder/need
+le_small_t0.png (PNG copy)>] (./manuscript.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 3562 strings out of 493029
- 46237 string characters out of 6136235
- 124333 words of memory out of 5000000
- 7019 multiletter control sequences out of 15000+600000
- 15080 words of font info for 55 fonts, out of 8000000 for 9000
+ 4613 strings out of 493029
+ 63675 string characters out of 6136235
+ 150858 words of memory out of 5000000
+ 8042 multiletter control sequences out of 15000+600000
+ 14731 words of font info for 54 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 38i,12n,30p,2373b,211s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texlive/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmmib10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cmextra/cmmib5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
-sfonts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.
-pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/
-texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmti7.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmti8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
-sfonts/symbols/msam7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
-onts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/ut
-mr8a.pfb>
-Output written on manuscript.pdf (7 pages, 302373 bytes).
+ 38i,18n,30p,1713b,270s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share
+/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmmib10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cmextra/cmmib5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cmextra/cmmib6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
+sfonts/cmextra/cmmib8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cmextra/cmmib9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr
+/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/font
+s/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmti8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/ms
+am7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm
+10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
+Output written on manuscript.pdf (16 pages, 3525621 bytes).
 PDF statistics:
- 149 PDF objects out of 1000 (max. 8388607)
- 108 compressed objects within 2 object streams
+ 228 PDF objects out of 1000 (max. 8388607)
+ 168 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 56 words of extra memory for PDF output out of 10000 (max. 10000000)
 
