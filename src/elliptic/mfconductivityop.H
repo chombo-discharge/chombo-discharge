@@ -492,6 +492,11 @@ protected:
     @brief Has BC been set?
   */
   bool m_hasBC;
+
+  /*!
+    @brief Is this a multifluid solver?
+  */
+  bool m_multifluid;
   
 private:
   

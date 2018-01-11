@@ -55,9 +55,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 
 
   const int num_phases = a_mfis->num_phases();
-
-
-
+  
   const int num_alias  = 4;
 
   m_mfis = a_mfis;
@@ -77,6 +75,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   m_origin = a_origin;
   m_dx = a_dx;
   m_dirival.resize(num_phases);
+  m_multifluid = m_mfis->num_phases() > 1;
 
   if(a_has_mg){
     m_mflg_coar_mg = a_mflg_coar_mg;
@@ -270,9 +269,11 @@ void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, c
 #if verb
   pout() << "mfconductivityop::set_bc_from_matching"<< endl;
 #endif
-  for (int iphase = 0; iphase < m_phases; iphase++){
-    //m_jumpbc->match_bc(*m_dirival[iphase], a_phi, a_homogeneous);
-    m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous); 
+
+  if(m_multifluid){
+    for (int iphase = 0; iphase < m_phases; iphase++){
+      m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous); 
+    }
   }
 
 #if verb

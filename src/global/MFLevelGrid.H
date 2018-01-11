@@ -114,13 +114,19 @@ public:
 				      const int        a_phase1 = 0,
 				      const int        a_phase2 = 1) const {
 
-    const EBLevelGrid& eblg1 = this->get_eblg(a_phase1);
-    const EBLevelGrid& eblg2 = this->get_eblg(a_phase2);
+    IntVectSet ret;
+    
+    if(m_mfis->num_phases() == 2){
+      const EBLevelGrid& eblg1 = this->get_eblg(a_phase1);
+      const EBLevelGrid& eblg2 = this->get_eblg(a_phase2);
+      
+      const EBISBox& ebisbox1  = eblg1.getEBISL()[a_dit];
+      const EBISBox& ebisbox2  = eblg2.getEBISL()[a_dit];
 
-    const EBISBox& ebisbox1  = eblg1.getEBISL()[a_dit];
-    const EBISBox& ebisbox2  = eblg2.getEBISL()[a_dit];
+      ret = ebisbox1.getIrregIVS(a_box) & ebisbox2.getIrregIVS(a_box);
+    }
 
-    return ebisbox1.getIrregIVS(a_box) & ebisbox2.getIrregIVS(a_box);
+    return ret;
   }
   
 private:

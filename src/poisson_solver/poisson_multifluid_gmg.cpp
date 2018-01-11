@@ -27,7 +27,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(64);
-  this->set_bottom_drop(64);
+  this->set_bottom_drop(8);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -283,17 +283,6 @@ void poisson_multifluid_gmg::setup_gmg(){
   this->set_coefficients();       // Set coefficients
   this->setup_operator_factory(); // Set the operator factory
   this->setup_solver();           // Set up the AMR multigrid solver
-  
-#if 0 // Testing stuff
-  this->do_ebcond_test();
-#endif
-#if 0 // Testing stuff
-  this->base_tests();
-  MayDay::Abort("stop");
-#endif
-  
-
-
 }
 
 void poisson_multifluid_gmg::setup_operator_factory(){
@@ -302,6 +291,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
     pout() << "poisson_multifluid_gmg::setup_operator_factory" << endl;
   }
 
+  const int nphases                      = m_mfis->num_phases();
   const int finest_level                 = m_amr->get_finest_level();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
   const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
@@ -309,19 +299,25 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   const Vector<Real>& dx                 = m_amr->get_dx();
   const RealVect& origin                 = m_physdom->get_prob_lo();
 
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
   // This stuff is needed for the operator factory
   Vector<MFLevelGrid>    mflg(1 + finest_level);
   Vector<MFQuadCFInterp> mfquadcfi(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    Vector<EBLevelGrid>                    eblg_phases(phase::num_phases);
-    Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(phase::num_phases);
+    Vector<EBLevelGrid>                    eblg_phases(nphases);
+    Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);
 
     eblg_phases[phase::gas]   = *(m_amr->get_eblg(phase::gas)[lvl]);
-    eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
+    if(!ebis_sol.isNull()){
+      eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
+    }
 
     quadcfi_phases[phase::gas]   = (m_amr->get_old_quadcfi(phase::gas)[lvl]);
-    quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
+    if(!ebis_sol.isNull()){
+      quadcfi_phases[phase::solid] = (m_amr->get_old_quadcfi(phase::solid)[lvl]);
+    }
     
     mflg[lvl].define(m_mfis, eblg_phases);
     mfquadcfi[lvl].define(quadcfi_phases);
@@ -341,22 +337,22 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
   
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
-									       mflg,
-									       mfquadcfi,
-									       refinement_ratios,
-									       grids,
-									       m_aco,
-									       m_bco,
-									       m_bco_irreg,
-									       alpha,
-									       beta,
-									       dx[0],
-									       domains[0],
-									       domfact,
-									       origin,
-									       ghost_phi,
-									       ghost_rhs,
-									       1 + finest_level));
+										 mflg,
+										 mfquadcfi,
+										 refinement_ratios,
+										 grids,
+										 m_aco,
+										 m_bco,
+										 m_bco_irreg,
+										 alpha,
+										 beta,
+										 dx[0],
+										 domains[0],
+										 domfact,
+										 origin,
+										 ghost_phi,
+										 ghost_rhs,
+										 1 + finest_level));
 
   m_opfact->set_bottom_drop(m_bottom_drop);
   m_opfact->set_jump(0.0, -1.0);

@@ -27,7 +27,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 						 const IntVect&                            a_ghost_rhs,
 						 int                                       a_num_levels){
 
-  CH_assert(a_mflg[0].num_phases() == 2); // What, you don't like two-phase?
+  CH_assert(a_mflg[0].num_phases() <= 2); 
 
   m_num_levels = (a_num_levels > 0) ? a_num_levels : a_grids.size();
   m_mfis       = a_mfis;

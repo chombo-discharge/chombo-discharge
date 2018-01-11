@@ -54,7 +54,7 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
 
   // Create geometry
   this->set_eps0(eps0);
-  m_dielectrics.resize(1);
+  m_dielectrics.resize(0);
   m_electrodes.resize(1);
 
   //  RefCountedPtr<BaseIF> diel_sphere = RefCountedPtr<BaseIF> (new SphereIF(diel_rad, diel_center, 0));
@@ -74,7 +74,7 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   										  elec_persist,
   										  elec_octaves,
   										  false));
-  m_dielectrics[0].define(diel_sphere, eps_mat);
+  //m_dielectrics[0].define(diel_sphere, eps_mat);
   m_electrodes[0].define(elec_sphere, live);
 }
 

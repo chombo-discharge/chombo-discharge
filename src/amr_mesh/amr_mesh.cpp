@@ -118,15 +118,21 @@ void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_gh
 
   const int ghost   = (a_ghost == -1) ? m_num_ghost : a_ghost;
   const int ignored = a_ncomp;
+  const int nphases = m_mfis->num_phases();
 
   a_data.resize(1 + m_finest_level);
 
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    Vector<EBISLayout> ebisl(phase::num_phases);
-    Vector<int>        comps(phase::num_phases, a_ncomp);
+    Vector<EBISLayout> ebisl(nphases);
+    Vector<int>        comps(nphases, a_ncomp);
 
     ebisl[phase::gas]   = this->get_ebisl(phase::gas)[lvl];
-    ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    if(!ebis_sol.isNull()){ // Single phase
+      ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    }
     
     MFCellFactory factory(ebisl, comps);
 
@@ -145,16 +151,22 @@ void amr_mesh::allocate(MFAMRFluxData& a_data, const int a_ncomp, const int a_gh
   }
 
   const int ghost   = (a_ghost == -1) ? m_num_ghost : a_ghost;
-  const int ignored = 99;
+  const int ignored = a_ncomp;
+  const int nphases = m_mfis->num_phases();
 
   a_data.resize(1 + m_finest_level);
 
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    Vector<EBISLayout> ebisl(phase::num_phases);
-    Vector<int>        comps(phase::num_phases, a_ncomp);
+    Vector<EBISLayout> ebisl(nphases);
+    Vector<int>        comps(nphases, a_ncomp);
 
     ebisl[phase::gas]   = this->get_ebisl(phase::gas)[lvl];
-    ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    if(!ebis_sol.isNull()){
+      ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    }
     
     MFFluxFactory factory(ebisl, comps);
 
@@ -170,16 +182,22 @@ void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghos
   }
 
   const int ghost   = (a_ghost == -1) ? m_num_ghost : a_ghost;
-  const int ignored = 99;
+  const int ignored = a_ncomp;
+  const int nphases = m_mfis->num_phases();
 
   a_data.resize(1 + m_finest_level);
 
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    Vector<EBISLayout> ebisl(phase::num_phases);
-    Vector<int>        comps(phase::num_phases, a_ncomp);
+    Vector<EBISLayout> ebisl(nphases);
+    Vector<int>        comps(nphases, a_ncomp);
 
     ebisl[phase::gas]   = this->get_ebisl(phase::gas)[lvl];
-    ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    if(!ebis_sol.isNull()){
+      ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    }
     
     MFBaseIVFABFactory factory(ebisl, comps);
 
@@ -458,7 +476,7 @@ void amr_mesh::define_eblevelgrid(){
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    if(!ebis_sol.isNull()){
+    if(!ebis_gas.isNull()){
       m_eblg[phase::gas][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl],
 									     m_domains[lvl],
 									     m_ebghost,
@@ -498,24 +516,24 @@ void amr_mesh::define_eb_coar_ave(){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-	m_coarave[phase::gas][lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(m_grids[lvl],
-											 m_grids[lvl-1],
-											 m_ebisl[phase::gas][lvl],
-											 m_ebisl[phase::gas][lvl-1],
-											 m_domains[lvl-1],
-											 m_ref_ratios[lvl-1],
-											 comps,
-											 ebis_gas));
+      	m_coarave[phase::gas][lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(m_grids[lvl],
+      											 m_grids[lvl-1],
+      											 m_ebisl[phase::gas][lvl],
+      											 m_ebisl[phase::gas][lvl-1],
+      											 m_domains[lvl-1],
+      											 m_ref_ratios[lvl-1],
+      											 comps,
+      											 ebis_gas));
       }
       if(!ebis_sol.isNull()){
-	m_coarave[phase::solid][lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(m_grids[lvl],
-											   m_grids[lvl-1],
-											   m_ebisl[phase::solid][lvl],
-											   m_ebisl[phase::solid][lvl-1],
-											   m_domains[lvl-1],
-											   m_ref_ratios[lvl-1],
-											   comps,
-											   ebis_sol));
+      	m_coarave[phase::solid][lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(m_grids[lvl],
+      											   m_grids[lvl-1],
+      											   m_ebisl[phase::solid][lvl],
+      											   m_ebisl[phase::solid][lvl-1],
+      											   m_domains[lvl-1],
+      											   m_ref_ratios[lvl-1],
+      											   comps,
+      											   ebis_sol));
       }
     }
   }
@@ -699,17 +717,23 @@ void amr_mesh::define_irreg_sten(){
   const int order = m_irreg_sten_order;
   const int rad   = m_irreg_sten_radius;
 
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  m_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
-    (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[phase::gas], m_domains, m_dx, m_finest_level, order, rad));
-  m_eb_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
-    (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[phase::gas], m_domains, m_dx, m_finest_level, order, rad));
 
-  
-  m_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
-    (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[phase::solid], m_domains, m_dx, m_finest_level, order, rad));
-  m_eb_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
-    (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[phase::solid], m_domains, m_dx, m_finest_level, order, rad));
+  if(!ebis_gas.isNull()){
+    m_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
+      (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[phase::gas], m_domains, m_dx, m_finest_level, order, rad));
+    m_eb_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
+      (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[phase::gas], m_domains, m_dx, m_finest_level, order, rad));
+  }
+
+  if(!ebis_sol.isNull()){
+    m_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
+      (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[phase::solid], m_domains, m_dx, m_finest_level, order, rad));
+    m_eb_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
+      (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[phase::solid], m_domains, m_dx, m_finest_level, order, rad));
+  }
 }
 
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
@@ -738,16 +762,24 @@ void amr_mesh::average_down(MFAMRCellData& a_data){
   EBAMRCellData alias_g(1 + m_finest_level);
   EBAMRCellData alias_s(1 + m_finest_level);
 
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
     mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    if(!ebis_sol.isNull()){
+      mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    }
   }
 
   this->average_down(alias_g, phase::gas);
-  this->average_down(alias_s, phase::solid);
+  if(!ebis_sol.isNull()){
+    this->average_down(alias_s, phase::solid);
+  }
+  pout() << "done" << endl;
 }
 
 void amr_mesh::average_down(EBAMRFluxData& a_data, phase::which_phase a_phase){
@@ -801,24 +833,31 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
 }
 
 void amr_mesh::interp_ghost(MFAMRCellData& a_data){
-  CH_TIME("amr_mesh::average_down");
+  CH_TIME("amr_mesh::interp_ghost(mf)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(mf)" << endl;
+    pout() << "amr_mesh::interp_ghost(mf)" << endl;
   }
   
   EBAMRCellData alias_g(1 + m_finest_level);
   EBAMRCellData alias_s(1 + m_finest_level);
 
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
     mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    if(!ebis_sol.isNull()){
+      mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    }
   }
 
   this->interp_ghost(alias_g, phase::gas);
-  this->interp_ghost(alias_s, phase::solid);
+  if(!ebis_sol.isNull()){
+    this->interp_ghost(alias_s, phase::solid);
+  }
 }
 
 void amr_mesh::set_verbosity(const int a_verbosity){

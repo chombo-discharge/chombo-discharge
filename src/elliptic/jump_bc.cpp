@@ -81,8 +81,6 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_order  = a_order;
   m_cfivs  = a_cfivs;
 
-  CH_assert(m_mfis->num_phases() == 2); // Only two-phase
-
   m_ivs.define(m_grids);
   m_bco.define(m_grids);
   m_weights.define(m_grids);

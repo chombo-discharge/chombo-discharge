@@ -180,7 +180,9 @@ void poisson_solver::write_plot_file(const int a_step){
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
   m_amr->allocate(output, phase::gas, ncomps, 1);
 
-  
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+    
   for (int lvl = 0; lvl < output.size(); lvl++){
     LevelData<EBCellFAB> state_gas,  source_gas, E_gas, resid_gas;
     LevelData<EBCellFAB> state_sol,  source_sol, E_sol, resid_sol;
@@ -190,43 +192,47 @@ void poisson_solver::write_plot_file(const int a_step){
     mfalias::aliasMF(E_gas,      phase::gas,   *E[lvl]);
     mfalias::aliasMF(resid_gas,  phase::gas,   *m_resid[lvl]);
 
-    mfalias::aliasMF(state_sol,  phase::solid, *m_state[lvl]);
-    mfalias::aliasMF(source_sol, phase::solid, *m_source[lvl]);
-    mfalias::aliasMF(E_sol,      phase::solid, *E[lvl]);
-    mfalias::aliasMF(resid_sol,  phase::solid, *m_resid[lvl]);
+    if(!ebis_sol.isNull()){
+      mfalias::aliasMF(state_sol,  phase::solid, *m_state[lvl]);
+      mfalias::aliasMF(source_sol, phase::solid, *m_source[lvl]);
+      mfalias::aliasMF(E_sol,      phase::solid, *E[lvl]);
+      mfalias::aliasMF(resid_sol,  phase::solid, *m_resid[lvl]);
+    }
 
 
-    // Copy all covered cells 
-    for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
-      const Box box = state_sol.disjointBoxLayout().get(dit());
-      const IntVectSet ivs(box);
-      const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
-      const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
+    // Copy all covered cells from the other phase
+    if(!ebis_sol.isNull()){
+      for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
+	const Box box = state_sol.disjointBoxLayout().get(dit());
+	const IntVectSet ivs(box);
+	const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
+	const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
 
-      FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
-      FArrayBox& src_gas  = source_gas[dit()].getFArrayBox();
-      FArrayBox& e_gas    = E_gas[dit()].getFArrayBox();
-      FArrayBox& res_gas  = resid_gas[dit()].getFArrayBox();
-      
-      FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
-      FArrayBox& src_sol  = source_sol[dit()].getFArrayBox();
-      FArrayBox& e_sol    = E_sol[dit()].getFArrayBox();
-      FArrayBox& res_sol  = resid_sol[dit()].getFArrayBox();
+	FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
+	FArrayBox& src_gas  = source_gas[dit()].getFArrayBox();
+	FArrayBox& e_gas    = E_gas[dit()].getFArrayBox();
+	FArrayBox& res_gas  = resid_gas[dit()].getFArrayBox();
 
-      for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
-	const IntVect iv = ivsit();
-	if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	  data_gas(iv, 0) = data_sol(iv,0);
-	  src_gas(iv,0)   = src_sol(iv,0);
-	  res_gas(iv, 0)  = res_sol(iv, 0);
-	  for (int comp = 0; comp < SpaceDim; comp++){
-	    e_gas(iv,comp) = e_sol(iv, comp);
+	FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
+	FArrayBox& src_sol  = source_sol[dit()].getFArrayBox();
+	FArrayBox& e_sol    = E_sol[dit()].getFArrayBox();
+	FArrayBox& res_sol  = resid_sol[dit()].getFArrayBox();
+
+	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+	  const IntVect iv = ivsit();
+	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
+	    data_gas(iv, 0) = data_sol(iv,0);
+	    src_gas(iv,0)   = src_sol(iv,0);
+	    res_gas(iv, 0)  = res_sol(iv, 0);
+	    for (int comp = 0; comp < SpaceDim; comp++){
+	      e_gas(iv,comp) = e_sol(iv, comp);
+	    }
 	  }
-	}
-	if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	  data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
-	  src_gas(iv, 0)  = 0.5*(src_gas(iv,0) + src_sol(iv,0));
-	  res_gas(iv, 0)  = 0.5*(res_gas(iv,0) + res_sol(iv,0));
+	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
+	    data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
+	    src_gas(iv, 0)  = 0.5*(src_gas(iv,0) + src_sol(iv,0));
+	    res_gas(iv, 0)  = 0.5*(res_gas(iv,0) + res_sol(iv,0));
+	  }
 	}
       }
     }
@@ -261,10 +267,6 @@ void poisson_solver::write_plot_file(const int a_step){
 	      m_amr->get_finest_level() + 1,
 	      false,
 	      covered_values);
-
-
-  
-
 }
 #endif
 
