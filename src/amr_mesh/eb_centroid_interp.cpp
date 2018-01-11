@@ -6,12 +6,11 @@
 */
 
 #include "eb_centroid_interp.H"
-// #include "LeastSquares.hpp"
-// #include "StencilUtils.hpp"
 
 #include "EBArith.H"
 
-Real eb_centroid_interp::s_tolerance = 1.E-8;
+Real eb_centroid_interp::s_tolerance      = 1.E-8;
+bool eb_centroid_interp::s_quadrant_based = true;   // Use quadrant based stencils for least squares
 
 eb_centroid_interp::eb_centroid_interp() : irreg_stencil(){
   CH_TIME("eb_centroid_interp::eb_centroid_interp");
@@ -46,7 +45,7 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
   
   bool found_stencil = false;
   if(!found_stencil){
-    this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
   if(!found_stencil){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
@@ -104,20 +103,44 @@ bool eb_centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
   const int minStenSize = 7;
 #endif
 
+  a_sten.clear();
+    
   Real weight              = 0;
   const int comp           = 0;
   const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
   const RealVect normal    = centroid/centroid.vectorLength();
-  EBArith::getLeastSquaresGradStenAllVoFsRad(a_sten,               // Find a stencil for the gradient at the cell center
-					     weight,
-					     normal,
-					     RealVect::Zero,
-					     a_vof,
-					     a_ebisbox,
-					     a_dx*RealVect::Unit,
-					     a_domain,
-					     comp,
-					     m_radius);
+
+  // Find the quadrant that the normal points into
+  IntVect quadrant;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    quadrant[dir] = (normal[dir] < 0) ? -1 : 1;
+  }
+
+  // Quadrant or monotone-path based stencils
+  if(s_quadrant_based){
+    EBArith::getLeastSquaresGradSten(a_sten,               // Find a stencil for the gradient at the cell center
+				     weight,
+				     normal,
+				     RealVect::Zero,
+				     quadrant,
+				     a_vof,
+				     a_ebisbox,
+				     a_dx*RealVect::Unit,
+				     a_domain,
+				     comp);
+  }
+  else{
+    EBArith::getLeastSquaresGradStenAllVoFsRad(a_sten,               // Find a stencil for the gradient at the cell center
+					       weight,
+					       normal,
+					       RealVect::Zero,
+					       a_vof,
+					       a_ebisbox,
+					       a_dx*RealVect::Unit,
+					       a_domain,
+					       comp,
+					       m_radius);
+  }
 
   if(a_sten.size() >= minStenSize){         // Do a Taylor expansion phi_centroid = phi_cell + grad_cell*(x_centroid - x_cell)
     a_sten.add(a_vof, weight);

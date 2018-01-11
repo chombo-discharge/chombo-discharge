@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 
   Vector<int> refrat(5);
-  refrat[0] = 4;
+  refrat[0] = 2;
   refrat[1] = 2;
   refrat[2] = 2;
   refrat[3] = 2;

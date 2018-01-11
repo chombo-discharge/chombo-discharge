@@ -173,8 +173,10 @@ void poisson_solver::write_plot_file(const int a_step){
 
   // Compute the electric field. 
   MFAMRCellData E;
-  m_amr->allocate(E, SpaceDim, 0);
+  m_amr->allocate(E, SpaceDim, 3);
   m_amr->compute_gradient(E, m_state);
+  m_amr->interp_ghost(E);
+  m_amr->average_down(E);
   data_ops::scale(E, -1.0);
 
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
@@ -182,7 +184,9 @@ void poisson_solver::write_plot_file(const int a_step){
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-    
+
+  irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
+
   for (int lvl = 0; lvl < output.size(); lvl++){
     LevelData<EBCellFAB> state_gas,  source_gas, E_gas, resid_gas;
     LevelData<EBCellFAB> state_sol,  source_sol, E_sol, resid_sol;
@@ -192,12 +196,20 @@ void poisson_solver::write_plot_file(const int a_step){
     mfalias::aliasMF(E_gas,      phase::gas,   *E[lvl]);
     mfalias::aliasMF(resid_gas,  phase::gas,   *m_resid[lvl]);
 
+
+#if 1 // Transform to centroid-centered for irregular cells. 
+    sten.apply(state_gas, lvl);
+    sten.apply(E_gas, lvl);
+#endif
+
     if(!ebis_sol.isNull()){
       mfalias::aliasMF(state_sol,  phase::solid, *m_state[lvl]);
       mfalias::aliasMF(source_sol, phase::solid, *m_source[lvl]);
       mfalias::aliasMF(E_sol,      phase::solid, *E[lvl]);
       mfalias::aliasMF(resid_sol,  phase::solid, *m_resid[lvl]);
     }
+
+    
 
 
     // Copy all covered cells from the other phase
@@ -243,7 +255,7 @@ void poisson_solver::write_plot_file(const int a_step){
     E_gas.copyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(3, 2 + SpaceDim));
   }
 
-#if 0 // Can only do up to SpaceDim, need to rewrite this routine
+#if 0 // Can only do up to SpaceDim, need to rewrite this routine if we want this to work. 
   m_amr->average_down(output, phase::gas);
   m_amr->interp_ghost(output, phase::gas);
 #endif

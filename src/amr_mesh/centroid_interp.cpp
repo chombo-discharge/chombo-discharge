@@ -6,12 +6,11 @@
 */
 
 #include "centroid_interp.H"
-// #include "LeastSquares.hpp"
-// #include "StencilUtils.hpp"
 
 #include "EBArith.H"
 
-Real centroid_interp::s_tolerance = 1.E-8;
+Real centroid_interp::s_tolerance      = 1.E-8;
+bool centroid_interp::s_quadrant_based = true;   // Use quadrant based stencils for least squares
 
 centroid_interp::centroid_interp() : irreg_stencil(){
   CH_TIME("centroid_interp::centroid_interp");
@@ -46,14 +45,15 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
   
   bool found_stencil = false;
   if(!found_stencil){
-    this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
+
+
+  // Use least squares if we must. 
   if(!found_stencil){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
 
-
-  
   if(!found_stencil){ // Drop to zeroth order. 
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
@@ -69,7 +69,8 @@ bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
 					 const Real&              a_dx,
 					 const IntVectSet&        a_cfivs){
   CH_TIME("centroid_interp::get_taylor_stencil");
-  
+
+  m_order = 1;
   const int comp           = 0;
   const RealVect& centroid = a_ebisbox.centroid(a_vof);
   IntVectSet* cfivs        = const_cast<IntVectSet*>(&a_cfivs);
@@ -83,6 +84,7 @@ bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
   else {
     MayDay::Abort("centroid_inter::get_taylor_stencil - bad order requested. Only first and second order is supported");
   }
+
 
   return a_sten.size() > 0;
 
@@ -104,20 +106,44 @@ bool centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
   const int minStenSize = 7;
 #endif
 
+  a_sten.clear();
+    
   Real weight              = 0;
   const int comp           = 0;
   const RealVect& centroid = a_ebisbox.centroid(a_vof);
   const RealVect normal    = centroid/centroid.vectorLength();
-  EBArith::getLeastSquaresGradStenAllVoFsRad(a_sten,               // Find a stencil for the gradient at the cell center
-					     weight,
-					     normal,
-					     RealVect::Zero,
-					     a_vof,
-					     a_ebisbox,
-					     a_dx*RealVect::Unit,
-					     a_domain,
-					     comp,
-					     m_radius);
+
+  // Find the quadrant that the normal points into
+  IntVect quadrant;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    quadrant[dir] = (normal[dir] < 0) ? -1 : 1;
+  }
+
+  // Quadrant or monotone-path based stencils
+  if(s_quadrant_based){
+    EBArith::getLeastSquaresGradSten(a_sten,               // Find a stencil for the gradient at the cell center
+				     weight,
+				     normal,
+				     RealVect::Zero,
+				     quadrant,
+				     a_vof,
+				     a_ebisbox,
+				     a_dx*RealVect::Unit,
+				     a_domain,
+				     comp);
+  }
+  else{
+    EBArith::getLeastSquaresGradStenAllVoFsRad(a_sten,               // Find a stencil for the gradient at the cell center
+					       weight,
+					       normal,
+					       RealVect::Zero,
+					       a_vof,
+					       a_ebisbox,
+					       a_dx*RealVect::Unit,
+					       a_domain,
+					       comp,
+					       m_radius);
+  }
 
   if(a_sten.size() >= minStenSize){         // Do a Taylor expansion phi_centroid = phi_cell + grad_cell*(x_centroid - x_cell)
     a_sten.add(a_vof, weight);

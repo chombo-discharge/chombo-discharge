@@ -61,6 +61,8 @@ public:
 			  const RealVect&                           a_origin,
 			  const IntVect&                            a_ghost_phi,
 			  const IntVect&                            a_ghost_rhs,
+			  const int                                 a_ebbc_order,
+			  const int                                 a_drop_bottom = -1,
 			  int                                       a_num_levels = -1);
 
   /*!

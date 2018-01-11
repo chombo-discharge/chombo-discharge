@@ -27,7 +27,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(64);
-  this->set_bottom_drop(8);
+  this->set_bottom_drop(64);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -37,7 +37,7 @@ poisson_multifluid_gmg::~poisson_multifluid_gmg(){
 bool poisson_multifluid_gmg::solve(const bool a_zerophi){
   CH_TIME("poisson_multifluid_gmg::solve");
   if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::solve";
+    pout() << "poisson_multifluid_gmg::solve" << endl;
   }
   
   const bool converged = this->solve(m_state, m_source, a_zerophi);
@@ -352,9 +352,10 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 origin,
 										 ghost_phi,
 										 ghost_rhs,
+										 2,
+										 16,
 										 1 + finest_level));
 
-  m_opfact->set_bottom_drop(m_bottom_drop);
   m_opfact->set_jump(0.0, -1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
 

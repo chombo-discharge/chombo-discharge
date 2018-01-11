@@ -779,7 +779,6 @@ void amr_mesh::average_down(MFAMRCellData& a_data){
   if(!ebis_sol.isNull()){
     this->average_down(alias_s, phase::solid);
   }
-  pout() << "done" << endl;
 }
 
 void amr_mesh::average_down(EBAMRFluxData& a_data, phase::which_phase a_phase){
@@ -817,14 +816,16 @@ void amr_mesh::average_down(EBAMRIVData& a_data, phase::which_phase a_phase){
 }
 
 void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
-  CH_TIME("amr_mesh::interp_ghost");
+  CH_TIME("amr_mesh::interp_ghost(eb)");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::interp_ghost" << endl;
+    pout() << "amr_mesh::interp_ghost(eb)" << endl;
   }
 
   for (int lvl = m_finest_level; lvl > 0; lvl--){
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv(0, ncomps -1);
+
+    CH_assert(a_data[lvl]->ghostVect() == m_num_ghost*IntVect::Unit);
 
     m_quadcfi[a_phase][lvl]->coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
 

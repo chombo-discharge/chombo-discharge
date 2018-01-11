@@ -152,7 +152,6 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
       const VolIndex& vof       = vofit();
       const VoFStencil& vofSten = stencils(vof, 0);
 
-      //
       for (int comp = 0; comp < nComp; comp++){
     	data(vof, comp) = 0.;
 
@@ -161,7 +160,6 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>& a_data,
     	  const Real& iweight  = vofSten.weight(i);
     	  data(vof,comp) += cpy(ivof, comp)*iweight;
     	}
-
 
 	if(a_limit){ // Limit extrapolation
 	  const bool signChange = data(vof, comp)*cpy(vof, comp) < 0.;

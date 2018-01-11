@@ -26,10 +26,10 @@ mechanical_shaft::mechanical_shaft(){
   Real eps0         = 1.0;
   Real eps_mat      = 5.0;
 
-  Real inner_rad    = 0.3;
+  Real inner_rad    = 0.2;
   Real outer_rad    = 0.5;
   Real height       = 0.4;
-  Real curv         = 0.03;
+  Real curv         = 0.05;
   RealVect center   = RealVect(D_DECL(0., 0., 0.7));
 
   int nsides  = 6;
@@ -40,7 +40,7 @@ mechanical_shaft::mechanical_shaft(){
 
   // Create geometry
   this->set_eps0(eps0);
-  m_dielectrics.resize(0);
+  m_dielectrics.resize(1);
   m_electrodes.resize(1);
 
   RefCountedPtr<BaseIF> dielectric = RefCountedPtr<BaseIF> (new polygon_rod_if(nsides,
@@ -55,7 +55,7 @@ mechanical_shaft::mechanical_shaft(){
 										  curv,
 										  center,
 										  0));
-  //  m_dielectrics[0].define(dielectric, eps_mat);
+  m_dielectrics[0].define(dielectric, eps_mat);
   m_electrodes[0].define(electrode, live);
 }
 

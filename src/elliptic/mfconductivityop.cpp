@@ -234,7 +234,9 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
 }
 
 void mfconductivityop::set_bc_from_levelset(){
-  CH_TIME("mfconductivityop::set_bc_from_levelset");
+#if verb
+  pout() << "mfconductivityop::set_bc_from_levelset"<< endl;
+#endif
   
   for (int iphase = 0; iphase < m_phases; iphase++){
     LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
@@ -247,18 +249,20 @@ void mfconductivityop::set_bc_from_levelset(){
 	const VolIndex& vof = vofit();
 	const RealVect& pos = EBArith::getVofLocation(vof, m_dx, m_origin);
 
-	int  func = 0;
-	Real dist = m_electrodes[0].get_function()->value(pos);
+	if(m_electrodes.size() > 0){
+	  int  func = 0;
+	  Real dist = m_electrodes[0].get_function()->value(pos);
 
-	for (int i = 1; i < m_electrodes.size(); i++){
-	  Real cur_val = (m_electrodes[i].get_function())->value(pos);
-	  if(Abs(cur_val) < dist){
-	    func = i;
-	    dist  = cur_val;
+	  for (int i = 1; i < m_electrodes.size(); i++){
+	    Real cur_val = (m_electrodes[i].get_function())->value(pos);
+	    if(Abs(cur_val) < dist){
+	      func = i;
+	      dist  = cur_val;
+	    }
 	  }
-	}
 
-	val[dit()](vof, 0) = m_electrodes[func].is_live() ? 1 : 0;
+	  val[dit()](vof, 0) = m_electrodes[func].is_live() ? 1 : 0;
+	}
       }
     }
   }

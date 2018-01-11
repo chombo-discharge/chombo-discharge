@@ -3,6 +3,7 @@
   @brief Implementation of mfconductivityopfactory.H
   @author Robert Marskar
   @date Dec. 2017
+  @todo Boundary condition order and bottom drop should be constructor arguments
 */
 
 #include "mfconductivityopfactory.H"
@@ -25,6 +26,8 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 						 const RealVect&                           a_origin,
 						 const IntVect&                            a_ghost_phi,
 						 const IntVect&                            a_ghost_rhs,
+						 const int                                 a_order_ebbc,
+						 const int                                 a_drop_bottom,
 						 int                                       a_num_levels){
 
   CH_assert(a_mflg[0].num_phases() <= 2); 
@@ -44,6 +47,8 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   m_ghost_phi  = a_ghost_phi;
   m_ghost_rhs  = a_ghost_rhs;
   m_origin     = a_origin;
+  m_ebbc_order = a_order_ebbc;
+
     
   m_domains.resize(m_num_levels);
   m_dx.resize(m_num_levels);
@@ -59,17 +64,18 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
     m_domains[lvl].refine(m_ref_rat[lvl-1]);
   }
 
-  this->set_ebbc_order(2);        // Default is second order BCs
-  this->set_relax_type(2);        // Default relaxation type
-  this->set_bottom_drop(16);      // Default bottom drop
-  this->set_max_box_size(32);     // Default max box size
-  
-  this->define_jump_stuff();      // Define jump cell stuff
-  this->define_multigrid_stuff(); // Define things for lower levels of multigrid. Must happen after define_jump_stuff
-  this->set_jump(0.0, 1.0);       // Default, no surface charge. 
+  const int botdrop  = (a_drop_bottom == -1) ? a_coarsest_domain.size()[0]/4 : a_drop_bottom;
+
+  this->set_ebbc_order(m_ebbc_order); // Default is second order BCs
+  this->set_relax_type(2);            // Default relaxation type
+  this->set_bottom_drop(botdrop);     // Default bottom drop
+  this->set_max_box_size(32);         // Default max box size
+  this->define_jump_stuff();          // Define jump cell stuff
+  this->define_multigrid_stuff();     // Define things for lower levels of multigrid. Must happen after define_jump_stuff
+  this->set_jump(0.0, 1.0);           // Default, no surface charge. 
 
 
-#if 0 // Debugging hook
+#if verb // Debugging hook
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     pout() << "lvl = "  << lvl
 	   << "\t has MG objects = " << m_has_mg_objects[lvl]
@@ -413,6 +419,9 @@ void mfconductivityopfactory::average_down_mg(){
       }
     }
   }
+#if verb // DEBUG
+  pout() << "mfconductivityopfactory::average_down_mg - done " << endl;
+#endif
 
 }
 
@@ -423,8 +432,17 @@ void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale)
     data_ops::scale(*m_jump[lvl], a_sigma);
   }
 
+#if verb
+  pout() << "mfconductivityopfactory::set_jump - average down amr" << endl;
+#endif
   this->average_down_amr();
+#if verb
+  pout() << "mfconductivityopfactory::set_jump - average down mg" << endl;
+#endif
   this->average_down_mg();
+#if verb
+  pout() << "mfconductivityopfactory::set_jump - done" << endl;
+#endif
 }
 
 void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_scale){

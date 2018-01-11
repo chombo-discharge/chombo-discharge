@@ -48,6 +48,11 @@ public:
   */
   static Real s_tolerance;
 
+  /*!
+    @brief Use quadrant based stencils or not
+  */
+  static bool s_quadrant_based;
+
 protected:
   
   /*!
