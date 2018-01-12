@@ -342,21 +342,10 @@ void mfconductivityopfactory::define_jump_stuff(){
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     const EBLevelGrid& eblg  = m_mflg[lvl].get_eblg(main_phase);
     const EBISLayout& ebisl = eblg.getEBISL();
-#if 0
-    MayDay::Abort("mfconductivityopfactory::define_jump_stuff - this code is wrong");
-    const IntVectSet interface_cells = m_mfis->interface_region(m_domains[lvl]);
-#endif
-
-
-
 
     m_jumpcells[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet> (m_grids[lvl]));
     for (DataIterator dit = m_jumpcells[lvl]->dataIterator(); dit.ok(); ++dit){
-#if 0 // old
-      (*m_jumpcells[lvl])[dit()] = interface_cells & m_grids[lvl].get(dit());
-#else // new
       (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interface_region(m_grids[lvl].get(dit()), dit());
-#endif
     }
 
     BaseIVFactory<Real> fact(ebisl, *m_jumpcells[lvl]);
@@ -431,14 +420,10 @@ void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale)
     EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
     data_ops::scale(*m_jump[lvl], a_sigma);
   }
-
 #if verb
-  pout() << "mfconductivityopfactory::set_jump - average down amr" << endl;
+  pout() << "mfconductivityopfactory::set_jump" << endl;
 #endif
   this->average_down_amr();
-#if verb
-  pout() << "mfconductivityopfactory::set_jump - average down mg" << endl;
-#endif
   this->average_down_mg();
 #if verb
   pout() << "mfconductivityopfactory::set_jump - done" << endl;
@@ -447,11 +432,24 @@ void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale)
 
 void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a_scale){
   CH_TIME("mfconductivityopfactory::set_jump(data based)");
+#if verb
+  pout() << "mfconductivityopfactory::set_jump(data based)" << endl;
+#endif
 
+  // Note: copyTo is a little bit volatile since it drops to linearization functions. Going to copy directly instead.
   for (int lvl = 0; lvl < m_num_levels; lvl++){
-    a_sigma[lvl]->copyTo(*m_jump[lvl]);
-    data_ops::scale(*m_jump[lvl], a_scale);
+    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+      const Box box = m_grids[lvl].get(dit());
+      const Interval interv(0,0);
+      (*m_jump[lvl])[dit()].copy(box, interv, box, (*a_sigma[lvl])[dit()], interv);
+    }
+
+    m_jump[lvl]->exchange();
   }
+  
+#if verb
+  pout() << "mfconductivityopfactory::set_jump(data based) - done" << endl;
+#endif
 
   this->average_down_amr();
   this->average_down_mg();

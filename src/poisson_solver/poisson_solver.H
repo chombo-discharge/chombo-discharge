@@ -49,7 +49,10 @@ public:
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual bool solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true) = 0;
+  virtual bool solve(MFAMRCellData&       a_state,
+		     const MFAMRCellData& a_rho,
+		     const EBAMRIVData&   a_sigma,
+		     const bool           a_zerophi = true) = 0;
 
   /*!
     @brief Set the computational geometry
@@ -171,14 +174,20 @@ protected:
   MFAMRCellData m_state;
 
   /*!
-    @brief State data (i.e. the 
+    @brief State data 
   */
   MFAMRCellData m_source;
+
+  /*!
+    @brief Surface source
+  */
+  EBAMRIVData m_sigma;
 
   /*!
     @brief Final residue
   */
   MFAMRCellData m_resid;
+
 
   /*!
     @brief Function pointer to potential function - this gives the BC on EBs (where we have Dirichlet)

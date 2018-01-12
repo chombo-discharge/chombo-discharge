@@ -27,7 +27,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(64);
-  this->set_bottom_drop(64);
+  this->set_bottom_drop(32);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -40,12 +40,15 @@ bool poisson_multifluid_gmg::solve(const bool a_zerophi){
     pout() << "poisson_multifluid_gmg::solve" << endl;
   }
   
-  const bool converged = this->solve(m_state, m_source, a_zerophi);
+  const bool converged = this->solve(m_state, m_source, m_sigma, a_zerophi);
 
   return converged;
 }
 
-bool poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi){
+bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
+				   const MFAMRCellData& a_source,
+				   const EBAMRIVData&   a_sigma,
+				   const bool           a_zerophi){
   CH_TIME("poisson_multifluid_gmg::solve(mfamrcell, mfamrcell");
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
@@ -56,6 +59,8 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData& a_state, const MFAMRCellData& 
   }
 
   const int finest_level = m_amr->get_finest_level();
+
+  //  m_opfact->set_jump(a_sigma, 1.0);
 
   Vector<LevelData<MFCellFAB>* > phi, rhs, res;
   m_amr->alias(phi, a_state);
@@ -335,7 +340,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
   bcfact->set_wallbc(m_wallbc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
-  
+
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
 										 mfquadcfi,
@@ -353,7 +358,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 ghost_phi,
 										 ghost_rhs,
 										 2,
-										 16,
+										 m_bottom_drop,
 										 1 + finest_level));
 
   m_opfact->set_jump(0.0, -1.0);

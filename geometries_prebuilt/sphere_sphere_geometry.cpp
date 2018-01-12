@@ -24,14 +24,14 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   Real eps0         = 1.0;
   Real eps_mat      = 5.0;
   Real elec_rad     = 0.15;
-  Real diel_rad     = 0.35;
-  Real elec_noise   = 0.E-3;
-  Real diel_noise   = 0.E-3;
+  Real diel_rad     = 0.15;
+  Real elec_noise   = 0.E-2;
+  Real diel_noise   = 0.E-2;
   Real elec_persist = 0.5;
   Real diel_persist = 0.5;
   
-  RealVect elec_center     = -0.5*RealVect::Unit;
-  RealVect diel_center     =  0.5*RealVect::Unit;
+  RealVect elec_center     = -0.25*RealVect::Unit;
+  RealVect diel_center     =  0.25*RealVect::Unit;
   RealVect elec_noise_freq = 400.*RealVect::Unit;
   RealVect diel_noise_freq = 400.*RealVect::Unit;
   
@@ -54,7 +54,7 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
 
   // Create geometry
   this->set_eps0(eps0);
-  m_dielectrics.resize(0);
+  m_dielectrics.resize(1);
   m_electrodes.resize(1);
 
   //  RefCountedPtr<BaseIF> diel_sphere = RefCountedPtr<BaseIF> (new SphereIF(diel_rad, diel_center, 0));
@@ -74,7 +74,7 @@ sphere_sphere_geometry::sphere_sphere_geometry(){
   										  elec_persist,
   										  elec_octaves,
   										  false));
-  //m_dielectrics[0].define(diel_sphere, eps_mat);
+  m_dielectrics[0].define(diel_sphere, eps_mat);
   m_electrodes[0].define(elec_sphere, live);
 }
 

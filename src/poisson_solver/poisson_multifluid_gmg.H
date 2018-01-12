@@ -43,7 +43,10 @@ public:
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual bool solve(MFAMRCellData& a_state, const MFAMRCellData& a_source, const bool a_zerophi = true);
+  virtual bool solve(MFAMRCellData&       a_state,
+		     const MFAMRCellData& a_rho,
+		     const EBAMRIVData&   a_sigma,
+		     const bool           a_zerophi = true);
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 

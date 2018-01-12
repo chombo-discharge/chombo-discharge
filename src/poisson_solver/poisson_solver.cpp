@@ -46,9 +46,12 @@ void poisson_solver::allocate_internals(){
   m_amr->allocate(m_state,  ncomp, query_ghost());
   m_amr->allocate(m_source, ncomp, query_ghost());
   m_amr->allocate(m_resid,  ncomp, query_ghost());
+  m_amr->allocate(m_sigma,  phase::gas, ncomp, query_ghost());
+
 
   data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
+  data_ops::set_value(m_sigma,  0.0);
   data_ops::set_value(m_resid,  0.0);
 }
 

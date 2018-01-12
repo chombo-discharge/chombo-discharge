@@ -31,29 +31,32 @@ int main(int argc, char* argv[]){
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
-  //  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
+#if CH_SPACEDIM == 2
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
+#else
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
+#endif
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(NULL);
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(NULL);
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 
   Vector<int> refrat(5);
-  refrat[0] = 2;
-  refrat[1] = 2;
-  refrat[2] = 2;
+  refrat[0] = 4;
+  refrat[1] = 4;
+  refrat[2] = 4;
   refrat[3] = 2;
   refrat[4] = 2;
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(1);                      // Set max amr depth
+  amr->set_max_amr_depth(0);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
   amr->set_blocking_factor(8);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
-  amr->set_max_box_size(16);                      // Set max box size
+  amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
