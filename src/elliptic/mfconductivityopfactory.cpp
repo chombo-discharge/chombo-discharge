@@ -345,7 +345,13 @@ void mfconductivityopfactory::define_jump_stuff(){
 
     m_jumpcells[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet> (m_grids[lvl]));
     for (DataIterator dit = m_jumpcells[lvl]->dataIterator(); dit.ok(); ++dit){
-      (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interface_region(m_grids[lvl].get(dit()), dit());
+      Box box = m_grids[lvl][dit()];
+      box.grow(ghost);
+      box &= m_domains[lvl];
+      
+      (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interface_region(box, dit());
+
+      
     }
 
     BaseIVFactory<Real> fact(ebisl, *m_jumpcells[lvl]);

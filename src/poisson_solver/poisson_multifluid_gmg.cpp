@@ -27,7 +27,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(64);
-  this->set_bottom_drop(32);
+  this->set_bottom_drop(16);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -60,7 +60,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   const int finest_level = m_amr->get_finest_level();
 
-  //  m_opfact->set_jump(a_sigma, 1.0);
+  m_opfact->set_jump(a_sigma, 1.0);
 
   Vector<LevelData<MFCellFAB>* > phi, rhs, res;
   m_amr->alias(phi, a_state);
