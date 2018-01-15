@@ -12,7 +12,9 @@
 #include "ebconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
+#include <AMRTGA.H>
 #include <BiCGStabSolver.H>
+#include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
 #include <EBConductivityOpFactory.H>
 
@@ -74,6 +76,11 @@ public:
   virtual void set_botsolver_smooth(const int a_smooth);
 
   /*!
+    @brief Use tga for temporal integration
+  */
+  virtual void set_tga(const bool a_use_tga);
+
+  /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
   */
   virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state);
@@ -123,6 +130,11 @@ protected:
     @brief Needs setup
   */
   bool m_needs_setup;
+
+  /*!
+    @brief Use tga
+  */
+  bool m_use_tga;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -187,12 +199,22 @@ protected:
     /*!
     @brief Geometric multigrid solver
   */
-  AMRMultiGrid<LevelData<EBCellFAB> > m_gmg_solver;
+  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_gmg_solver;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
   */
   BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
+
+  /*!
+    @brief TGA solver
+  */
+  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgasolver;
+
+  /*!
+    @brief Euler solver
+  */
+  RefCountedPtr<EBBackwardEuler> m_eulersolver;
 
   /*!
     @brief Operator factory
@@ -263,6 +285,16 @@ protected:
     @brief Set the GMG solver
   */
   virtual void setup_multigrid();
+
+  /*!
+    @brief Set up the TGA solver
+  */
+  virtual void setup_tga();
+  
+  /*!
+    @brief Set up the Euler solver
+  */
+  virtual void setup_euler();
 };
 
 #endif

@@ -3,6 +3,7 @@
   @brief  Implementation of eddington_sp1.H
   @author Robert Marskar
   @date   Jan. 2018
+  @todo   Also plot kappa on output
 */
 
 #include "eddington_sp1.H"
@@ -17,10 +18,11 @@
 eddington_sp1::eddington_sp1() : rte_solver() {
   
   this->set_verbosity(-1);
-  this->set_stationary(true);
+  this->set_stationary(false);
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(1);
   this->set_bottom_drop(16);
+  this->set_tga(true);
 
   m_needs_setup = true;
 }
@@ -64,6 +66,15 @@ void eddington_sp1::set_bottom_drop(const int a_bottom_drop){
   m_bottom_drop = a_bottom_drop;
 }
 
+void eddington_sp1::set_tga(const bool a_use_tga){
+  CH_TIME("eddington_sp1::set_tga");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_tga" << endl;
+  }
+  
+  m_use_tga = a_use_tga;
+}
+
 void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
 					      amrmg::which_mg a_gmg_type,      
 					      const int a_verbosity,          
@@ -103,12 +114,9 @@ void eddington_sp1::allocate_internals(){
 
   m_amr->allocate(m_state,  m_phase, ncomp);
   m_amr->allocate(m_source, m_phase, ncomp);
+  m_amr->allocate(m_resid, m_phase, ncomp);
 
-  if(m_stationary){
-    m_amr->allocate(m_resid, m_phase, ncomp);
-    data_ops::set_value(m_resid, 0.0);
-  }
-
+  data_ops::set_value(m_resid, 0.0);
   data_ops::set_value(m_state, 0.0);
   data_ops::set_value(m_source, 0.0);
 }
@@ -121,27 +129,37 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
 
   const int finest_level = m_amr->get_finest_level();
 
+  if(m_needs_setup){
+    this->setup_gmg();
+  }
+
+  bool converged;
+
+  Vector<LevelData<EBCellFAB>* > phi, rhs, res;
+  m_amr->alias(phi, a_state);
+  m_amr->alias(rhs, a_source);
+  m_amr->alias(res, m_resid);
+
   if(m_stationary){
-    if(m_needs_setup){
-      this->setup_gmg();
-    }
-
-    Vector<LevelData<EBCellFAB>* > phi, rhs, res;
-    m_amr->alias(phi, a_state);
-    m_amr->alias(rhs, a_source);
-    m_amr->alias(res, m_resid);
-    
-    m_gmg_solver.init(phi, rhs, finest_level, 0);
-    m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
-    m_gmg_solver.revert(phi, rhs, finest_level, 0);
-
-    m_amr->average_down(a_state, m_phase);
-    m_amr->interp_ghost(a_state, m_phase);
-    
+    m_gmg_solver->init(phi, rhs, finest_level, 0);
+    m_gmg_solver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+    m_gmg_solver->revert(phi, rhs, finest_level, 0);
   }
   else{
-    MayDay::Abort("eddington_sp1::advance - transient computations not implemented (yet)");
+    m_tgasolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, 0.0);
+
+    data_ops::copy(a_state, m_resid);
   }
+
+  const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+  if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+    converged = true;
+  }
+
+  m_amr->average_down(a_state, m_phase);
+  m_amr->interp_ghost(a_state, m_phase);
+
+  return converged;
 }
 
 void eddington_sp1::setup_gmg(){
@@ -153,6 +171,15 @@ void eddington_sp1::setup_gmg(){
   this->set_coefficients();       // Set coefficients, kappa, aco, bco
   this->setup_operator_factory(); // Set the operator factory
   this->setup_multigrid();        // Set up the AMR multigrid solver
+
+  if(!m_stationary){
+    if(m_use_tga){
+      this->setup_tga();
+    }
+    else{
+      this->setup_euler();
+    }
+  }
 }
 
 void eddington_sp1::set_coefficients(){
@@ -267,8 +294,6 @@ void eddington_sp1::set_bco_eb(BaseIVFAB<Real>&          a_bco,
   }
 }
 
-  
-
 void eddington_sp1::setup_operator_factory(){
   CH_TIME("eddington_sp1::setup_operator_factory");
   if(m_verbosity > 5){
@@ -342,8 +367,9 @@ void eddington_sp1::setup_multigrid(){
     botsolver = &m_bicgstab;
   }
 
-  m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
-  m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
+  m_gmg_solver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
+  m_gmg_solver->define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
+  m_gmg_solver->setSolverParameters(m_gmg_pre_smooth,
 				   m_gmg_post_smooth,
 				   m_gmg_bot_smooth,
 				   m_gmg_type,
@@ -351,8 +377,35 @@ void eddington_sp1::setup_multigrid(){
 				   m_gmg_eps,
 				   m_gmg_hang,
 				   m_gmg_norm_thresh);
-  m_gmg_solver.m_imin = m_gmg_min_iter;
-  m_gmg_solver.m_verbosity = m_gmg_verbosity;
+  m_gmg_solver->m_imin = m_gmg_min_iter;
+  m_gmg_solver->m_verbosity = m_gmg_verbosity;
+}
+
+void eddington_sp1::setup_tga(){
+  CH_TIME("eddington_sp1::setup_tga");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setup_tga" << endl;
+  }
+  
+  const int finest_level       = m_amr->get_finest_level();
+  const ProblemDomain coar_dom = m_amr->get_domains()[0];
+  const Vector<int> ref_rat    = m_amr->get_ref_rat();
+
+  m_tgasolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
+    (new AMRTGA<LevelData<EBCellFAB> > (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+
+  // Must init gmg
+  Vector<LevelData<EBCellFAB>* > phi, rhs;
+  m_amr->alias(phi, m_state);
+  m_amr->alias(rhs, m_source);
+  m_gmg_solver->init(phi, rhs, finest_level, 0);
+}
+
+void eddington_sp1::setup_euler(){
+  CH_TIME("eddington_sp1::setup_euler");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setup_euler" << endl;
+  }
 }
 
 void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
@@ -372,6 +425,8 @@ void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_s
   }
 
   m_amr->compute_gradient(a_flux, a_state);
+
+  MayDay::Warning("eddington_sp1::compute_flux - this should be scaled by c/(3*kappa)");
 }
 
 

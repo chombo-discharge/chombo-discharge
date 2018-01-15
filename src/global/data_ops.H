@@ -20,6 +20,8 @@ public:
   
   static void incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale);
 
+  static void copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
+
   static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
 
   static void scale(EBAMRIVData& a_lhs, const Real& a_scale);

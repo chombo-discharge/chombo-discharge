@@ -96,7 +96,7 @@ int main(int argc, char* argv[]){
   }
 
       // Set up an eddington sp1 solver
-  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 2.E0));
+  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 1.E0));
   RefCountedPtr<rte_solver> rte = RefCountedPtr<rte_solver> (new eddington_sp1());
   rte->set_verbosity(10);
   rte->set_amr(amr);
@@ -119,8 +119,11 @@ int main(int argc, char* argv[]){
 
   // RTE solves
   rte->allocate_internals();
-  rte->advance(0.0);
-  rte->write_plot_file();
+  for (int i = 0; i < 50; i++){
+    rte->advance(1.E-3);
+    rte->write_plot_file(i);
+  }
+
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

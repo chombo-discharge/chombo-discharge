@@ -15,6 +15,14 @@ void data_ops::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real
   }
 }
 
+void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
+  for (int lvl = 0; lvl < a_dst.size(); lvl++){
+    if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
+      a_src[lvl]->copyTo(*a_dst[lvl]);
+    }
+  }
+}
+
 void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     MFLevelDataOps::scale(*a_lhs[lvl], a_scale);
