@@ -38,6 +38,11 @@ public:
   virtual ~eddington_sp1();
 
   /*!
+    @brief Advance RTE onto state a_state
+  */
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi);
+
+  /*!
     @brief Set solver parameters. These are normally good for this class. 
   */
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
@@ -67,11 +72,6 @@ public:
     @brief Set number of smoothing for the bottom solver (simplified solver only)
   */
   virtual void set_botsolver_smooth(const int a_smooth);
-
-  /*!
-    @brief Advance RTE onto state a_state
-  */
-  virtual void advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source);
 
   /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)

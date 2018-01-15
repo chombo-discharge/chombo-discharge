@@ -17,22 +17,26 @@ rte_solver::rte_solver(){
 rte_solver::~rte_solver(){
 }
 
-void rte_solver::advance(const Real a_dt){
+bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
   CH_TIME("rte_solver::advance");
   if(m_verbosity > 5){
     pout() << "rte_solver::advance" << endl;
   }
 
-  this->advance(a_dt, m_state, m_source);
+  const bool converged = this->advance(a_dt, m_state, m_source, a_zerophi);
+
+  return converged;
 }
 
-void rte_solver::advance(const Real a_dt, EBAMRCellData& a_state){
+bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi){
   CH_TIME("rte_solver::advance");
   if(m_verbosity > 5){
     pout() << "rte_solver::advance" << endl;
   }
 
-  this->advance(a_dt, a_state, m_source);
+  const bool converged = this->advance(a_dt, a_state, m_source, a_zerophi);
+
+  return converged;
 }
 
 void rte_solver::set_photon_group(const RefCountedPtr<photon_group> a_photon_group){

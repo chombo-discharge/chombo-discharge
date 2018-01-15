@@ -17,7 +17,7 @@
 #include "EBCoarseAverage.H"
 #include "NamespaceHeader.H"
 
-int ebconductivityopfactory::s_testRef = 2;
+int ebconductivityopfactory::s_testRef = 2; // Bogus
 int ebconductivityopfactory::s_maxBoxSize = 32;
 
 //-----------------------------------------------------------------------
@@ -104,6 +104,7 @@ ebconductivityopfactory(const Vector<EBLevelGrid>&                              
                         const IntVect&                                              a_ghostCellsPhi,
                         const IntVect&                                              a_ghostCellsRhs,
                         const int &                                                 a_relaxType,
+			const int&                                                  a_botdrop,
                         int a_numLevels)
 {
   CH_assert(a_eblgs.size() <= a_refRatio.size());
@@ -117,6 +118,7 @@ ebconductivityopfactory(const Vector<EBLevelGrid>&                              
   m_bcoefIrreg    = a_bcoefIrreg;
   m_alpha         = a_alpha;
   m_beta          = a_beta;
+  m_botdrop       = a_botdrop;
   if (a_numLevels > 0)
   {
     m_numLevels = a_numLevels;
@@ -151,7 +153,7 @@ ebconductivityopfactory(const Vector<EBLevelGrid>&                              
   {
     if ((ilev==0) || (m_refRatio[ilev] > 2))
     {
-      m_hasMGObjects[ilev] = (s_testRef<s_maxBoxSize);
+      m_hasMGObjects[ilev] = (m_botdrop<s_maxBoxSize);
 
       int mgRef = 2;
       m_eblgsMG[ilev]     .resize(0);
@@ -164,7 +166,7 @@ ebconductivityopfactory(const Vector<EBLevelGrid>&                              
       m_bcoefIrregMG[ilev].push_back(m_bcoefIrreg[ilev]);
 
       bool hasCoarser = true;
-      hasCoarser = (s_testRef<s_maxBoxSize);
+      hasCoarser = (m_botdrop<s_maxBoxSize);
       while (hasCoarser)
       {
         int imgsize = m_eblgsMG[ilev].size();
@@ -181,7 +183,7 @@ ebconductivityopfactory(const Vector<EBLevelGrid>&                              
                                                        eblgFine.getEBIS(),
                                                        s_maxBoxSize,
                                                        dumbool,
-                                                       s_testRef);
+                                                       m_botdrop);
 
         if (hasCoarser)
         {

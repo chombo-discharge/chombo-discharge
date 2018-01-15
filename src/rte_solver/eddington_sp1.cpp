@@ -113,7 +113,7 @@ void eddington_sp1::allocate_internals(){
   data_ops::set_value(m_source, 0.0);
 }
 
-void eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source){
+bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
   CH_TIME("eddington_sp1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
@@ -132,7 +132,7 @@ void eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     m_amr->alias(res, m_resid);
     
     m_gmg_solver.init(phi, rhs, finest_level, 0);
-    m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0);
+    m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
     m_gmg_solver.revert(phi, rhs, finest_level, 0);
 
     m_amr->average_down(a_state, m_phase);
@@ -319,7 +319,8 @@ void eddington_sp1::setup_operator_factory(){
 										 ebfact,
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
-										 1));
+										 m_gmg_relax_type,
+										 m_bottom_drop));
 }
 
 void eddington_sp1::setup_multigrid(){

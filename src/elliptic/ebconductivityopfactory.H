@@ -61,6 +61,7 @@ public:
                           const IntVect&                                              a_ghostCellsPhi,
                           const IntVect&                                              a_ghostCellsRhs,
                           const int&                                                  a_relaxType,
+			  const int&                                                  a_botdrop = 8,
                           int a_numLevels = -1);
 
 
@@ -153,6 +154,7 @@ protected:
   Vector< Vector< RefCountedPtr<LevelData<BaseIVFAB<Real> > > > > m_bcoefIrregMG;
 
   int                                                  m_relaxType;
+  int                                                  m_botdrop;
   Vector<EBLevelGrid>                                  m_eblgs;
   Vector<RefCountedPtr<EBQuadCFInterp> >               m_quadCFI;
   Real                                                 m_alpha;
