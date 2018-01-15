@@ -27,6 +27,18 @@ void data_ops::scale(EBAMRIVData& a_lhs, const Real& a_scale){
   }
 }
 
+void data_ops::scale(EBAMRCellData& a_lhs, const Real a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    EBLevelDataOps::scale(*a_lhs[lvl], a_scale);
+  }
+}
+
+void data_ops::scale(EBAMRFluxData& a_lhs, const Real a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    EBLevelDataOps::scale(*a_lhs[lvl], a_scale);
+  }
+}
+
 void data_ops::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real>& lhs = a_lhs[dit()];

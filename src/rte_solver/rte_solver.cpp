@@ -10,29 +10,143 @@
 
 
 rte_solver::rte_solver(){
-}
 
-rte_solver::rte_solver(const RefCountedPtr<computational_geometry> a_compgeom){
-  this->set_computational_geometry(a_compgeom);
+  this->set_phase();
 }
 
 rte_solver::~rte_solver(){
 }
 
+void rte_solver::advance(const Real a_dt){
+  CH_TIME("rte_solver::advance");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::advance" << endl;
+  }
+
+  this->advance(a_dt, m_state, m_source);
+}
+
+void rte_solver::advance(const Real a_dt, EBAMRCellData& a_state){
+  CH_TIME("rte_solver::advance");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::advance" << endl;
+  }
+
+  this->advance(a_dt, a_state, m_source);
+}
+
+void rte_solver::set_photon_group(const RefCountedPtr<photon_group> a_photon_group){
+  CH_TIME("rte_solver::set_photon_group");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_photon_group" << endl;
+  }
+
+  m_photon_group = a_photon_group;
+  m_name = m_photon_group->get_name();
+}
+
+void rte_solver::set_phase(const phase::which_phase a_phase){
+  CH_TIME("rte_solver::set_phase");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_phase" << endl;
+  }
+
+  m_phase = a_phase;
+}
+
+void rte_solver::sanity_check(){
+  CH_TIME("rte_solver::sanity_check");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::sanity_check" << endl;
+  }
+
+  CH_assert(!m_compgeom.isNull());
+  CH_assert(!m_physdom.isNull());
+  CH_assert(!m_amr.isNull());
+  CH_assert(!m_photon_group.isNull());
+  CH_assert(!m_ebis.isNull());
+
+  CH_assert(m_photon_group->is_defined()); 
+}
+
 void rte_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
+  CH_TIME("rte_solver::set_computational_geometry");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_computational_geometry" << endl;
+  }
+  
   m_compgeom = a_compgeom;
+
+  const RefCountedPtr<mfis> mfis = m_compgeom->get_mfis();
+  
+  this->set_ebis(mfis->get_ebis(m_phase));
+}
+
+void rte_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
+  CH_TIME("rte_solver::set_ebis");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_ebis" << endl;
+  }
+
+  m_ebis = a_ebis;
+}
+
+void rte_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
+  CH_TIME("rte_solver::set_physical_domain");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_physical_domain" << endl;
+  }
+
+  m_physdom = a_physdom;
+}
+
+void rte_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+  CH_TIME("rte_solver::set_amr");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_amr" << endl;
+  }
+
+  m_amr = a_amr;
 }
 
 void rte_solver::set_time(const Real a_time) {
+  CH_TIME("rte_solver::set_time");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_time" << endl;
+  }
+  
   m_time = a_time;
 }
 
+void rte_solver::set_stationary(const bool a_stationary) {
+  CH_TIME("rte_solver::set_stationary");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_stationry" << endl;
+  }
+  
+  m_stationary = a_stationary;
+}
+
+void rte_solver::set_verbosity(const int a_verbosity){
+  CH_TIME("rte_solver::set_verbosity");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_verbosity" << endl;
+  }
+  
+  m_verbosity = a_verbosity;
+}
+
 Real rte_solver::get_time() const{
+  CH_TIME("rte_solver::get_time");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::get_time" << endl;
+  }
+  
   return m_time;
 }
 
-EBAMRCellData& rte_solver::get_isotropic_state(){
-  return m_isotropic_state;
+EBAMRCellData& rte_solver::get_state(){
+  return m_state;
 }
 
 EBAMRCellData& rte_solver::get_source(){

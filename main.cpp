@@ -13,6 +13,7 @@
 #include "amr_mesh.H"
 #include "poisson_multifluid_gmg.H"
 #include "poisson_staircase_gmg.H"
+#include "eddington_sp1.H"
 
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(0);                      // Set max amr depth
+  amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -71,7 +72,6 @@ int main(int argc, char* argv[]){
 											amr));
 
   // Set up a multifluid Poisson solver
-  //RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_staircase_gmg());
   RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
   poisson->set_verbosity(10);
   poisson->set_amr(amr);
@@ -94,8 +94,18 @@ int main(int argc, char* argv[]){
     poisson->set_dirichlet_wall_bc(2, Side::Lo, potential::ground);
     poisson->set_dirichlet_wall_bc(2, Side::Hi, potential::live);
   }
-  
 
+      // Set up an eddington sp1 solver
+  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 2.E0));
+  RefCountedPtr<rte_solver> rte = RefCountedPtr<rte_solver> (new eddington_sp1());
+  rte->set_verbosity(10);
+  rte->set_amr(amr);
+  rte->set_computational_geometry(compgeom);
+  rte->set_physical_domain(physdom);
+  rte->set_photon_group(group);
+  rte->sanity_check();
+
+  
   // Setup plasma engine
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
@@ -106,6 +116,11 @@ int main(int argc, char* argv[]){
   poisson->allocate_internals();
   poisson->solve();
   poisson->write_plot_file();
+
+  // RTE solves
+  rte->allocate_internals();
+  rte->advance(0.0);
+  rte->write_plot_file();
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

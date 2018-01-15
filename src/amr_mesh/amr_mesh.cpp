@@ -401,7 +401,7 @@ void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& 
   }
 }
 
-void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi){
+void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi){
   CH_TIME("amr_mesh::compute_gradient");
   if(m_verbosity > 5){
     pout() << "amr_mesh::compute_gradient" << endl;

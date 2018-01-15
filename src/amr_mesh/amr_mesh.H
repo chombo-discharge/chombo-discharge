@@ -55,7 +55,7 @@ public:
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
-  virtual void compute_gradient(EBAMRCellData& a_gradient, EBAMRCellData& a_phi);
+  virtual void compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi);
 
     /*!
     @brief Compute cell-centered gradient. 

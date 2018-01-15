@@ -10,17 +10,20 @@
 
 #include "type_definitions.H"
 #include "computational_geometry.H"
+#include "amr_mesh.H"
+#include "physical_domain.H"
+#include "photon_group.H"
 
 /*!
   @brief Abstract RTE solver class. This is essentially just an interface. 
 */
 class rte_solver {
 public:
-
+  
   /*!
-    @brief Full constructor
+    @brief Constructor
   */
-  rte_solver(const RefCountedPtr<computational_geometry> a_compgeom);
+  rte_solver();
 
   /*!
     @brief Constructor
@@ -28,24 +31,94 @@ public:
   virtual ~rte_solver();
 
   /*!
+    @brief Set the photon group
+  */
+  virtual void set_photon_group(const RefCountedPtr<photon_group> a_photon_group);
+
+    /*!
+    @brief Set computational geometry
+  */
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+
+  /*!
+    @brief Set the physical domain
+  */
+  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
+  /*!
+    @brief Set the amr object
+  */
+  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+
+  /*!
+    @brief Set phase
+    @details This must be done BEFORE callilng set_computational_geometry
+  */
+  virtual void set_phase(phase::which_phase a_phase = phase::gas);
+
+    /*!
+    @brief Set verbosity.
+  */
+  virtual void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Get current time
+  */
+  virtual void set_time(const Real a_time);
+
+  /*!
+    @brief Set stationary solver or not
+  */
+  virtual void set_stationary(const bool a_stationary);
+
+  /*!
+    @brief Sanity check
+  */
+  virtual void sanity_check();
+
+  /*!
     @brief Advance equation one time step
   */
-  virtual void advance(const Real& a_dt) = 0;
+  virtual void advance(const Real a_dt);
 
   /*!
     @brief Advance RTE onto isotropic state a_state
   */
-  virtual void advance(const Real& a_dt, EBAMRCellData& a_state) = 0;
+  virtual void advance(const Real a_dt, EBAMRCellData& a_state);
 
   /*!
     @brief Advance RTE onto state a_state
   */
-  virtual void advance(const Real& a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source) = 0;
+  virtual void advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source) = 0;
 
   /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
   */
-  virtual void compute_boundary_flux(EBAMRIVData& a_bc_flux, const EBAMRCellData& a_state) = 0;
+  virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state) = 0;
+
+  /*!
+    @brief Compute the flux
+    @details For diffusive models, the flux will be something like grad(a_state). For higher-order models, the flux 
+    will be contained in a_state (somehow);
+  */
+  virtual void compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state) = 0;
+
+  /*!
+    @brief Get isotropic part. 
+  */
+  virtual void get_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state) = 0;
+
+  /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocate_internals() = 0;
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write plot file
+  */
+  virtual void write_plot_file(const int a_step = 0) = 0;
+#endif
 
   /*!
     @brief Return required number of ghost cells
@@ -53,9 +126,14 @@ public:
   virtual int query_ghost() const = 0;
 
   /*!
+    @brief Get time
+  */
+  virtual Real get_time() const;
+
+  /*!
     @brief Get multifluid state
   */
-  EBAMRCellData& get_isotropic_state();
+  EBAMRCellData& get_state();
 
   /*!
     @brief Get multifluid source
@@ -71,33 +149,18 @@ public:
     @brief Set the absorption coefficient on irregular EB faces
   */
   EBAMRIVData& get_kappa_eb();
-
-  /*!
-    @brief Get current time
-  */
-  Real get_time() const;
-
-  /*!
-    @brief Check if solver is stationary
-  */
-  bool is_stationary() const;
-
-  /*!
-    @brief Get current time
-  */
-  void set_time(const Real a_time);
   
 protected:
-  
-  /*!
-    @brief Constructor
-  */
-  rte_solver();
 
   /*!
-    @brief Set computational geometry
+    @brief Phase 
   */
-  void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+  RefCountedPtr<EBIndexSpace> m_ebis;
+
+  /*!
+    @brief Photon group
+  */
+  RefCountedPtr<photon_group> m_photon_group;
 
   /*!
     @brief Computational geometry. 
@@ -105,17 +168,41 @@ protected:
   RefCountedPtr<computational_geometry> m_compgeom;
 
   /*!
-    @brief Isotropic photon density
+    @brief Physical domain
   */
-  EBAMRCellData m_isotropic_state;
+  RefCountedPtr<physical_domain> m_physdom;
+
+  /*!
+    @brief AMR; needed for grid stuff
+  */
+  RefCountedPtr<amr_mesh> m_amr;
+
+  /*!
+    @brief Phase
+  */
+  phase::which_phase m_phase;
+
+  /*!
+    @brief Name
+  */
+  std::string m_name;
+
+  /*!
+    @brief Internal state. 
+    @details For diffusive models, this will only contain the isotropic density. For higher order models, this should also
+    include the flux, Eddigton tensor etc.
+  */
+  EBAMRCellData m_state;
 
   /*!
     @brief Source term 
+    @details For diffusive models, this will only contain the isotropic source. For higher order models, this should also 
+    include beam sources. 
   */
   EBAMRCellData m_source;
 
   /*!
-    @brief Absorption coefficient. I can't image anything else than storing this on faces. 
+    @brief Absorption coefficient. 
   */
   EBAMRFluxData m_kappa;
 
@@ -133,5 +220,16 @@ protected:
     @brief Stationary solver or not
   */
   bool m_stationary;
+
+  /*!
+    @brief
+  */
+  int m_verbosity;
+
+  /*!
+    @brief Set ebis
+  */
+  virtual void set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis);
+
 };
 #endif

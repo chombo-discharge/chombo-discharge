@@ -16,11 +16,17 @@
 */
 class data_ops {
 public:
+  template <typename T> static void set_value(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
+  
   static void incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale);
 
   static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
 
   static void scale(EBAMRIVData& a_lhs, const Real& a_scale);
+
+  static void scale(EBAMRCellData& a_lhs, const Real a_scale);
+
+  static void scale(EBAMRFluxData& a_lhs, const Real a_scale);
 
   static void scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale);
 
@@ -41,8 +47,6 @@ public:
   static void set_value(MFAMRIVData& a_lhs, const Real& a_value);
 
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
-
-  template <typename T> static void set_value(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
 
 };
 

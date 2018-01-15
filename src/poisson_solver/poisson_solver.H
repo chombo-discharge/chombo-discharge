@@ -59,7 +59,7 @@ public:
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
-    /*!
+  /*!
     @brief Set the physical domain
   */
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
@@ -97,9 +97,29 @@ public:
   virtual void sanity_check();
 
   /*!
+    @brief Get current time
+  */
+  virtual void set_time(const Real a_time);
+
+  /*!
+    @brief Set verbosity.
+  */
+  virtual void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Set potential at current time. 
+  */
+  virtual void set_potential(const Real a_potential);
+
+  /*!
     @brief Query the required number of ghost cells
   */
   virtual int query_ghost() const = 0;
+
+  /*!
+    @brief Get current time
+  */
+  virtual Real get_time() const;
 
   /*!
     @brief Get Poisson BC at specified domain wall
@@ -121,25 +141,6 @@ public:
   */
   MFAMRCellData& get_resid();
 
-  /*!
-    @brief Get current time
-  */
-  Real get_time() const;
-
-  /*!
-    @brief Get current time
-  */
-  void set_time(const Real a_time);
-
-  /*!
-    @brief Set verbosity.
-  */
-  void set_verbosity(const int a_verbosity);
-
-  /*!
-    @brief Set potential at current time. 
-  */
-  void set_potential(const Real a_potential);
   
 protected:
 
@@ -187,7 +188,6 @@ protected:
     @brief Final residue
   */
   MFAMRCellData m_resid;
-
 
   /*!
     @brief Function pointer to potential function - this gives the BC on EBs (where we have Dirichlet)
