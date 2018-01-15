@@ -8,10 +8,11 @@
 #include "eddington_sp1.H"
 #include "data_ops.H"
 #include "units.H"
+#include "dirichletconductivityebbc.H"
 
 #include <EBAMRIO.H>
 #include <DirichletConductivityDomainBC.H>
-#include <DirichletConductivityEBBC.H>
+
 
 eddington_sp1::eddington_sp1() : rte_solver() {
   
@@ -32,6 +33,10 @@ int eddington_sp1::query_ghost() const{
 }
 
 void eddington_sp1::set_bottom_solver(const int a_whichsolver){
+  CH_TIME("eddington_sp1::set_bottom_solver");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_bottom_solver" << endl;
+  }
   if(a_whichsolver == 0 || a_whichsolver == 1){
     m_bottomsolver = a_whichsolver;
   }
@@ -43,7 +48,7 @@ void eddington_sp1::set_bottom_solver(const int a_whichsolver){
 void eddington_sp1::set_botsolver_smooth(const int a_numsmooth){
   CH_TIME("eddington_sp1::set_botsolver_smooth");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_botsolver_smooth" << endl;
+    pout() << m_name + "::set_botsolver_smooth" << endl;
   }
   CH_assert(a_numsmooth > 0);
   
@@ -53,7 +58,7 @@ void eddington_sp1::set_botsolver_smooth(const int a_numsmooth){
 void eddington_sp1::set_bottom_drop(const int a_bottom_drop){
   CH_TIME("eddington_sp1::set_bottom_drop");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_bottom_drop" << endl;
+    pout() << m_name + "::set_bottom_drop" << endl;
   }
   
   m_bottom_drop = a_bottom_drop;
@@ -72,7 +77,7 @@ void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
 					      const Real a_norm_thresh){
   CH_TIME("eddington_sp1::set_gmg_solver_parameters");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_gmg_solver_parameters" << endl;
+    pout() << m_name + "::set_gmg_solver_parameters" << endl;
   }
 
   m_gmg_relax_type  = a_relax_type;
@@ -91,7 +96,7 @@ void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
 void eddington_sp1::allocate_internals(){
   CH_TIME("eddington_sp1::allocate_internals");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::allocate_internals" << endl;
+    pout() << m_name + "::allocate_internals" << endl;
   }
   
   const int ncomp = 1;
@@ -111,7 +116,7 @@ void eddington_sp1::allocate_internals(){
 void eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source){
   CH_TIME("eddington_sp1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::advance(ebamrcell, ebamrcell)" << endl;
+    pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
   }
 
   const int finest_level = m_amr->get_finest_level();
@@ -135,14 +140,14 @@ void eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     
   }
   else{
-    MayDay::Abort("eddington_sp1::advance - transient computations not implemented yet");
+    MayDay::Abort("eddington_sp1::advance - transient computations not implemented (yet)");
   }
 }
 
 void eddington_sp1::setup_gmg(){
   CH_TIME("eddington_sp1::setup_gmg");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::setup_gmg" << endl;
+    pout() << m_name + "::setup_gmg" << endl;
   }
   
   this->set_coefficients();       // Set coefficients, kappa, aco, bco
@@ -153,7 +158,7 @@ void eddington_sp1::setup_gmg(){
 void eddington_sp1::set_coefficients(){
   CH_TIME("eddington_sp1::set_coefficients");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_coefficients" << endl;
+    pout() << m_name + "::set_coefficients" << endl;
   }
 
   const int ncomp = 1;
@@ -169,7 +174,7 @@ void eddington_sp1::set_coefficients(){
 void eddington_sp1::set_aco_and_bco(){
   CH_TIME("eddington_sp1::set_aco_and_bco");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_aco_and_bco" << endl;
+    pout() << m_name + "::set_aco_and_bco" << endl;
   }
 
   const int finest_level = m_amr->get_finest_level();
@@ -199,7 +204,7 @@ void eddington_sp1::set_aco_and_bco(){
 void eddington_sp1::set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Real a_dx){
   CH_TIME("eddington_sp1::set_aco");
   if(m_verbosity > 10){
-    pout() << "eddington_sp1::set_aco" << endl;
+    pout() << m_name + "::set_aco" << endl;
   }
 
   const int comp = 0;
@@ -219,7 +224,7 @@ void eddington_sp1::set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Rea
 void eddington_sp1::set_bco_face(EBFluxFAB& a_bco, const RealVect a_origin, const Real a_dx){
   CH_TIME("eddington_sp1::set_bco_face");
   if(m_verbosity > 10){
-    pout() << "eddington_sp1::set_bco_face" << endl;
+    pout() << m_name + "::set_bco_face" << endl;
   }
 
   const int comp         = 0;
@@ -246,7 +251,7 @@ void eddington_sp1::set_bco_eb(BaseIVFAB<Real>&          a_bco,
 			       const Real               a_dx){
   CH_TIME("eddington_sp1::set_bco_eb");
   if(m_verbosity > 10){
-    pout() << "eddington_sp1::set_bco_eb" << endl;
+    pout() << m_name + "::set_bco_eb" << endl;
   }
   
   const int comp         = 0;
@@ -267,7 +272,7 @@ void eddington_sp1::set_bco_eb(BaseIVFAB<Real>&          a_bco,
 void eddington_sp1::setup_operator_factory(){
   CH_TIME("eddington_sp1::setup_operator_factory");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::setup_operator_factory" << endl;
+    pout() << m_name + "::setup_operator_factory" << endl;
   }
 
   const int finest_level                 = m_amr->get_finest_level();
@@ -285,23 +290,23 @@ void eddington_sp1::setup_operator_factory(){
     levelgrids.push_back(*(m_amr->get_eblg(m_phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
   }
 
-
   // Appropriate coefficients for stationary case. 
   const Real alpha =  1.0;
   const Real beta  = -1.0;
 
+
 #if 1 // Dirichlet for now, just for testing purposes. This will be Robin in the long term. 
   RefCountedPtr<DirichletConductivityDomainBCFactory> domfact = RefCountedPtr<DirichletConductivityDomainBCFactory>
     (new DirichletConductivityDomainBCFactory());
-  RefCountedPtr<DirichletConductivityEBBCFactory> ebfact = RefCountedPtr<DirichletConductivityEBBCFactory>
-    (new DirichletConductivityEBBCFactory());
+  RefCountedPtr<dirichletconductivityebbcfactory> ebfact = RefCountedPtr<dirichletconductivityebbcfactory>
+    (new dirichletconductivityebbcfactory());
   domfact->setValue(0.0);
   ebfact->setValue(1.0);
   ebfact->setOrder(2);
 #endif
-
+  
   // Create operator factory. 
-  m_opfact = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelgrids,
+  m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
 										 alpha,
 										 beta,
@@ -314,14 +319,13 @@ void eddington_sp1::setup_operator_factory(){
 										 ebfact,
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
-										 2));
-
+										 1));
 }
 
 void eddington_sp1::setup_multigrid(){
   CH_TIME("eddington_sp1::setup_multigrid");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::setup_multigrid" << endl;
+    pout() << m_name + "::setup_multigrid" << endl;
   }
 
   const int finest_level       = m_amr->get_finest_level();
@@ -353,7 +357,7 @@ void eddington_sp1::setup_multigrid(){
 void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
   CH_TIME("eddington_sp1::compute_boundary_flux");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::compute_boundary_flux" << endl;
+    pout() << m_name + "::compute_boundary_flux" << endl;
   }
 
   MayDay::Abort("eddington_sp1::compute_boundary_flux - not implemented");
@@ -363,7 +367,7 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
 void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state){
   CH_TIME("eddington_sp1::compute_flux");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::compute_flux" << endl;
+    pout() << m_name + "::compute_flux" << endl;
   }
 
   m_amr->compute_gradient(a_flux, a_state);
@@ -373,7 +377,7 @@ void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_s
 void eddington_sp1::get_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state){
   CH_TIME("eddington_sp1::get_density");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::get_density" << endl;
+    pout() << m_name + "::get_density" << endl;
   }
 
   MayDay::Abort("eddington_sp1::get_density - not implemented");
@@ -383,7 +387,7 @@ void eddington_sp1::get_density(EBAMRCellData& a_isotropic, const EBAMRCellData&
 void eddington_sp1::write_plot_file(const int a_step){
   CH_TIME("eddington_sp1::write_plot_file");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::write_plot_file" << endl;
+    pout() << m_name + "::write_plot_file" << endl;
   }
 
   char file_char[1000];

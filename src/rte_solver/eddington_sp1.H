@@ -9,6 +9,7 @@
 #define _EDDINGTON_SP1_
 
 #include "rte_solver.H"
+#include "ebconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
@@ -196,7 +197,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EBConductivityOpFactory> m_opfact;
+  RefCountedPtr<ebconductivityopfactory> m_opfact;
 
   /*!
     @brief multi-fluid simple solver
