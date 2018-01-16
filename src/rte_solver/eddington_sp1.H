@@ -10,6 +10,8 @@
 
 #include "rte_solver.H"
 #include "ebconductivityopfactory.H"
+#include "larsen_coefs.H"
+#include "robinconductivityebbcfactory.H"
 
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
@@ -79,6 +81,11 @@ public:
     @brief Use tga for temporal integration
   */
   virtual void set_tga(const bool a_use_tga);
+
+  /*!
+    @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
+  */
+  virtual void set_reflection_coefficients(const Real r1, const Real r2);
 
   /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
@@ -196,6 +203,16 @@ protected:
   */
   Real m_gmg_norm_thresh;
 
+  /*!
+    @brief Reflection coefficient
+  */
+  Real m_r1;
+
+  /*!
+    @brief Reflection coefficient
+  */
+  Real m_r2;
+
     /*!
     @brief Geometric multigrid solver
   */
@@ -220,6 +237,16 @@ protected:
     @brief Operator factory
   */
   RefCountedPtr<ebconductivityopfactory> m_opfact;
+
+  /*!
+    @brief Larsen coefficients for photon outflow bc
+  */
+  RefCountedPtr<larsen_coefs> m_robinco;
+
+  /*!
+    @brief Photon outflow boundary conditions
+  */
+  RefCountedPtr<robinconductivityebbcfactory> m_ebfact;
 
   /*!
     @brief multi-fluid simple solver
@@ -295,6 +322,6 @@ protected:
     @brief Set up the Euler solver
   */
   virtual void setup_euler();
-};
 
+};
 #endif

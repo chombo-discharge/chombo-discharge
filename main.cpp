@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(1);                      // Set max amr depth
+  amr->set_max_amr_depth(0);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]){
   }
 
       // Set up an eddington sp1 solver
-  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 1.E0));
+  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", .5));
   RefCountedPtr<rte_solver> rte = RefCountedPtr<rte_solver> (new eddington_sp1());
   rte->set_verbosity(10);
   rte->set_amr(amr);
@@ -119,10 +119,8 @@ int main(int argc, char* argv[]){
 
   // RTE solves
   rte->allocate_internals();
-  for (int i = 0; i < 50; i++){
-    rte->advance(1.E-3);
-    rte->write_plot_file(i);
-  }
+  rte->advance(0.0);
+  rte->write_plot_file(0);
 
 
 #ifdef CH_MPI

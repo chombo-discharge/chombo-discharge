@@ -59,6 +59,39 @@ void data_ops::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
   }
 }
 
+void data_ops::divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lcomp, const int a_rcomp){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::divide(*a_lhs[lvl], *a_rhs[lvl], a_lcomp, a_rcomp);
+  }
+}
+
+void data_ops::divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lcomp, const int a_rcomp){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs       = a_lhs[dit()];
+    const EBCellFAB& rhs = a_rhs[dit()];
+
+    lhs.divide(rhs, a_rcomp, a_lcomp, 1);
+  }
+}
+
+void data_ops::divide_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::divide_scalar(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+
+void data_ops::divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+  const int lcomps = a_lhs.nComp();
+  const int rcomps = a_rhs.nComp();
+  
+  CH_assert(a_rhs.nComp() == 1);
+  CH_assert(a_lhs.nComp() >= 1);
+
+  for (int comp = 0; comp < lcomps; comp++){
+    data_ops::divide(a_lhs, a_rhs, comp, 0);
+  }
+}
+
 void data_ops::set_value(EBAMRCellData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);

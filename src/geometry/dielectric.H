@@ -40,22 +40,22 @@ public:
   /*!
     @brief Define function
   */
-  void define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
+  virtual void define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
 
   /*!
     @brief Define function for variable permittivity
   */
-  void define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
+  virtual void define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
 
   /*!
     @brief Get level-set function
   */
-  const RefCountedPtr<BaseIF>& get_function() const;
+  virtual const RefCountedPtr<BaseIF>& get_function() const;
 
   /*!
     @brief Get permittivity
   */
-  const Real get_permittivity(const RealVect a_pos) const;
+  virtual const Real get_permittivity(const RealVect a_pos) const;
 
 protected:
 

@@ -32,6 +32,14 @@ public:
 
   static void scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale);
 
+  static void divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lcomp, const int a_rcomp);
+
+  static void divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lcomp, const int a_rcomp);
+
+  static void divide_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+  
+  static void divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+
   static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
 
   static void set_value(EBAMRFluxData& a_lhs, const Real& a_value);
@@ -49,7 +57,6 @@ public:
   static void set_value(MFAMRIVData& a_lhs, const Real& a_value);
 
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
-
 };
 
 #include "data_opsI.H"

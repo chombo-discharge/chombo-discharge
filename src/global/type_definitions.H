@@ -53,6 +53,15 @@ namespace amrmg {
   };
 };
 
+namespace stencil_type {
+  enum which_type {
+    linear = 0,
+    taylor = 1,
+    ray    = 2,
+    lsq    = 3,
+  };
+};
+
 
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;

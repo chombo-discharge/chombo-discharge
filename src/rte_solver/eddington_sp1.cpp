@@ -9,20 +9,19 @@
 #include "eddington_sp1.H"
 #include "data_ops.H"
 #include "units.H"
-#include "dirichletconductivityebbc.H"
 
 #include <EBAMRIO.H>
 #include <DirichletConductivityDomainBC.H>
 
-
 eddington_sp1::eddington_sp1() : rte_solver() {
   
   this->set_verbosity(-1);
-  this->set_stationary(false);
+  this->set_stationary(true);
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(1);
   this->set_bottom_drop(16);
-  this->set_tga(true);
+  this->set_tga(false);
+  this->set_reflection_coefficients(0., 0.);
 
   m_needs_setup = true;
 }
@@ -32,6 +31,13 @@ eddington_sp1::~eddington_sp1(){
 
 int eddington_sp1::query_ghost() const{
   return 2;
+}
+
+void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2){
+  m_r1 = a_r1;
+  m_r2 = a_r2;
+
+
 }
 
 void eddington_sp1::set_bottom_solver(const int a_whichsolver){
@@ -116,8 +122,8 @@ void eddington_sp1::allocate_internals(){
   m_amr->allocate(m_source, m_phase, ncomp);
   m_amr->allocate(m_resid, m_phase, ncomp);
 
-  data_ops::set_value(m_resid, 0.0);
-  data_ops::set_value(m_state, 0.0);
+  data_ops::set_value(m_resid,  0.0);
+  data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
 }
 
@@ -146,7 +152,12 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     m_gmg_solver->revert(phi, rhs, finest_level, 0);
   }
   else{
-    m_tgasolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, 0.0);
+    if(m_use_tga){
+      m_tgasolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, 0.0);
+    }
+    else{
+      m_eulersolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, 0.0);
+    }
 
     data_ops::copy(a_state, m_resid);
   }
@@ -323,12 +334,16 @@ void eddington_sp1::setup_operator_factory(){
 #if 1 // Dirichlet for now, just for testing purposes. This will be Robin in the long term. 
   RefCountedPtr<DirichletConductivityDomainBCFactory> domfact = RefCountedPtr<DirichletConductivityDomainBCFactory>
     (new DirichletConductivityDomainBCFactory());
-  RefCountedPtr<dirichletconductivityebbcfactory> ebfact = RefCountedPtr<dirichletconductivityebbcfactory>
-    (new dirichletconductivityebbcfactory());
-  domfact->setValue(0.0);
-  ebfact->setValue(1.0);
-  ebfact->setOrder(2);
+
+
+
 #endif
+
+  m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
+  m_robinco = RefCountedPtr<larsen_coefs> (new larsen_coefs(m_photon_group, m_r1, m_r2));
+
+  domfact->setValue(1.0);  
+  m_ebfact->set_coefs(m_robinco);
   
   // Create operator factory. 
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
@@ -341,7 +356,7 @@ void eddington_sp1::setup_operator_factory(){
 										 dx[0],
 										 refinement_ratios,
 										 domfact,
-										 ebfact,
+										 m_ebfact,
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
 										 m_gmg_relax_type,
@@ -406,6 +421,19 @@ void eddington_sp1::setup_euler(){
   if(m_verbosity > 5){
     pout() << m_name + "::setup_euler" << endl;
   }
+
+  const int finest_level       = m_amr->get_finest_level();
+  const ProblemDomain coar_dom = m_amr->get_domains()[0];
+  const Vector<int> ref_rat    = m_amr->get_ref_rat();
+
+  m_eulersolver = RefCountedPtr<EBBackwardEuler> 
+    (new EBBackwardEuler (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+
+  // Must init gmg
+  // Vector<LevelData<EBCellFAB>* > phi, rhs;
+  // m_amr->alias(phi, m_state);
+  // m_amr->alias(rhs, m_source);
+  // m_gmg_solver->init(phi, rhs, finest_level, 0);
 }
 
 void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
@@ -424,9 +452,12 @@ void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_s
     pout() << m_name + "::compute_flux" << endl;
   }
 
-  m_amr->compute_gradient(a_flux, a_state);
+  m_amr->compute_gradient(a_flux, a_state); // flux = grad(phi)
+  data_ops::divide_scalar(a_flux, m_aco);   // flux = grad(phi)/(c*kappa)
+  data_ops::scale(a_flux, -s_c0*s_c0/3.0);  // flux = -c*grad(phi)/3.
 
-  MayDay::Warning("eddington_sp1::compute_flux - this should be scaled by c/(3*kappa)");
+  m_amr->average_down(a_flux, m_phase);
+  m_amr->interp_ghost(a_flux, m_phase);
 }
 
 
