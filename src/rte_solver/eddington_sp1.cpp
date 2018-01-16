@@ -125,6 +125,29 @@ void eddington_sp1::allocate_internals(){
   data_ops::set_value(m_resid,  0.0);
   data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
+
+  const int finest_level = m_amr->get_finest_level();
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (DataIterator dit = m_source[lvl]->dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& source = (*m_source[lvl])[dit()];
+      const Box box = (m_source[lvl]->disjointBoxLayout())[dit()];
+      const EBISBox& ebisbox = source.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(box);
+      
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect pos = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl], m_physdom->get_prob_lo());
+	const RealVect x0 = RealVect(0.25, -0.25);
+	const Real R = 0.2;
+	if((pos-x0).vectorLength() < R){
+	  (*m_source[lvl])[dit()](vof, 0) = s_c0;
+	}
+      }
+    }
+  }
+  
 }
 
 bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
@@ -339,11 +362,13 @@ void eddington_sp1::setup_operator_factory(){
 
 #endif
 
+  m_domfact = RefCountedPtr<robinconductivitydomainbcfactory> (new robinconductivitydomainbcfactory());
   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
   m_robinco = RefCountedPtr<larsen_coefs> (new larsen_coefs(m_photon_group, m_r1, m_r2));
 
-  domfact->setValue(1.0);  
+  m_domfact->set_coefs(m_robinco);
   m_ebfact->set_coefs(m_robinco);
+  m_ebfact->set_type(stencil_type::taylor);
   
   // Create operator factory. 
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
@@ -355,7 +380,7 @@ void eddington_sp1::setup_operator_factory(){
 										 m_bco_irreg,
 										 dx[0],
 										 refinement_ratios,
-										 domfact,
+										 m_domfact,
 										 m_ebfact,
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,

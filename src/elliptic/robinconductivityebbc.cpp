@@ -52,12 +52,14 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
 	found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
       }
 
+      found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
+
+
       // Second last resort is least squares
       if(!found_stencil && m_type != stencil_type::lsq){
 	found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
       }
 
-      found_stencil = false;
 
       // Last resort is cell-centered value
       if(!found_stencil){
@@ -66,7 +68,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
       }
 
 
-      // dphi/dn = g - a*phi/b. So we must scale. We only want 
+      // dphi/dn = g/b - a*phi/b. So we must scale. We only want 
       Real aco, bco;
       if(m_const_coeff){
 	aco = m_aco;
@@ -180,7 +182,6 @@ void robinconductivityebbc::set_coefs(const RefCountedPtr<robin_coef> a_robinco)
 void robinconductivityebbc::set_coefs(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs){
-
   m_acodata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;

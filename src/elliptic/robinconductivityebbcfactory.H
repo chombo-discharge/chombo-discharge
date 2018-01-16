@@ -74,23 +74,11 @@ protected:
   
   Real m_rhs;
 
-  Real (*m_acofunc)(const RealVect a_pos);
-
-  Real (*m_bcofunc)(const RealVect a_pos);
-
-  Real (*m_rhsfunc)(const RealVect a_pos);
-
   EBAMRIVData m_acodata;
 
   EBAMRIVData m_bcodata;
   
   EBAMRIVData m_rhsdata;
-
-  bool m_const_rhs;
-
-  bool m_data_rhs;
-
-  bool m_func_rhs;
 
   bool m_const_coeff;
 

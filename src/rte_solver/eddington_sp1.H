@@ -12,6 +12,7 @@
 #include "ebconductivityopfactory.H"
 #include "larsen_coefs.H"
 #include "robinconductivityebbcfactory.H"
+#include "robinconductivitydomainbcfactory.H"
 
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
@@ -247,6 +248,11 @@ protected:
     @brief Photon outflow boundary conditions
   */
   RefCountedPtr<robinconductivityebbcfactory> m_ebfact;
+
+  /*!
+    @brief Photon outflow boundary conditions
+  */
+  RefCountedPtr<robinconductivitydomainbcfactory> m_domfact;
 
   /*!
     @brief multi-fluid simple solver
