@@ -44,7 +44,7 @@ public:
   /*!
     @brief Advance RTE onto state a_state
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 
@@ -57,9 +57,8 @@ public:
 					 const int a_bot_smooth          = 16,
 					 const int a_max_iter            = 16,
 					 const int a_min_iter            = 5,
-					 const Real a_eps                = 1.E-8,
-					 const Real a_hang               = 0.2,
-					 const Real a_norm_thresh        = 1.E-99);
+					 const Real a_eps                = 1.E-6,
+					 const Real a_hang               = 0.2);
 
   /*!
     @brief Set the bottom solver.  
@@ -197,11 +196,6 @@ protected:
     @brief 
   */
   Real m_gmg_hang;
-
-  /*!
-    @brief 
-  */
-  Real m_gmg_norm_thresh;
 
   /*!
     @brief Reflection coefficient

@@ -549,6 +549,7 @@ Real mfconductivityop::norm(const LevelData<MFCellFAB>& a_x, int a_ord){
 #if verb
   pout() << "mfconductivityop::norm"<< endl;
 #endif
+  this->update_bc(a_x, true);
   Real volume;
   Real rtn = this->kappaNorm(volume, a_x, a_ord);
 #if verb
@@ -685,7 +686,13 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
   const bool homogeneous = true;
   for (int i = 0; i < iterations; i++){
     this->update_bc(a_e, homogeneous);
-    this->levelJacobi(a_e, a_residual, iterations);
+
+    for (int iphase = 0; iphase < m_phases; iphase++){
+      mfalias::aliasMF(*m_alias[0], iphase, a_e);
+      mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+
+      m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+    }
   }
 #endif
 }
@@ -702,8 +709,8 @@ void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
 
 #if 1 // This is the only way we can make it converge for now
     // m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
-    //    m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
-    m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+    m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
+    //m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
     /// m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
 #else
     m_ebops[iphase]->relax_mf(*m_alias[0], *m_alias[1], 1);

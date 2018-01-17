@@ -90,8 +90,7 @@ void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
 					      const int          a_max_iter,
 					      const int          a_min_iter,
 					      const Real         a_eps,               
-					      const Real         a_hang,              
-					      const Real         a_norm_thresh){
+					      const Real         a_hang){
   CH_TIME("eddington_sp1::set_gmg_solver_parameters");
   if(m_verbosity > 5){
     pout() << m_name + "::set_gmg_solver_parameters" << endl;
@@ -107,7 +106,6 @@ void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
   m_gmg_min_iter    = a_min_iter;
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
-  m_gmg_norm_thresh = a_norm_thresh;
 }
 
 void eddington_sp1::allocate_internals(){
@@ -135,6 +133,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
   }
 
+  const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
   if(m_needs_setup){
@@ -143,14 +142,35 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
 
   bool converged;
 
-  Vector<LevelData<EBCellFAB>* > phi, rhs, res;
-  m_amr->alias(phi, a_state);
-  m_amr->alias(rhs, a_source);
-  m_amr->alias(res, m_resid);
+  // Must have a dummy for chekcing intiial residual
+  EBAMRCellData dummy;
+  m_amr->allocate(dummy, m_phase, ncomp);
+  data_ops::set_value(dummy, 0.0);
+
+  Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
+  m_amr->alias(phi,  a_state);
+  m_amr->alias(rhs,  a_source);
+  m_amr->alias(res,  m_resid);
+  m_amr->alias(zero, dummy);
 
   if(m_stationary){
     m_gmg_solver->init(phi, rhs, finest_level, 0);
-    m_gmg_solver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+
+    const Real phi_resid  = m_gmg_solver->computeAMRResidual(phi,  rhs, finest_level, 0); // Incoming residual
+    const Real zero_resid = m_gmg_solver->computeAMRResidual(zero, rhs, finest_level, 0); // Zero residual
+
+    if(phi_resid > zero_resid*m_gmg_eps){ 
+      m_gmg_solver->m_convergenceMetric = zero_resid;
+      m_gmg_solver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+
+      const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+      if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+	converged = true;
+      }
+    }
+    else{ // Solution is already good enough
+      converged = true;
+    }
     m_gmg_solver->revert(phi, rhs, finest_level, 0);
   }
   else{
@@ -160,13 +180,13 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     else{
       m_eulersolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, 0.0);
     }
+    
+    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+      converged = true;
+    }
 
     data_ops::copy(a_state, m_resid);
-  }
-
-  const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-  if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
-    converged = true;
   }
 
   m_amr->average_down(a_state, m_phase);
@@ -380,14 +400,14 @@ void eddington_sp1::setup_multigrid(){
   m_gmg_solver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
   m_gmg_solver->define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
   m_gmg_solver->setSolverParameters(m_gmg_pre_smooth,
-				   m_gmg_post_smooth,
-				   m_gmg_bot_smooth,
-				   m_gmg_type,
-				   m_gmg_max_iter,
-				   m_gmg_eps,
-				   m_gmg_hang,
-				   m_gmg_norm_thresh);
-  m_gmg_solver->m_imin = m_gmg_min_iter;
+				    m_gmg_post_smooth,
+				    m_gmg_bot_smooth,
+				    m_gmg_type,
+				    m_gmg_max_iter,
+				    m_gmg_eps,
+				    m_gmg_hang,
+				    1.E-99); // Residue set through other means
+  m_gmg_solver->m_imin    = m_gmg_min_iter;
   m_gmg_solver->m_verbosity = m_gmg_verbosity;
 }
 

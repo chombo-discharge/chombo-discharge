@@ -79,17 +79,17 @@ public:
   /*!
     @brief Advance equation one time step
   */
-  virtual bool advance(const Real a_dt, const bool a_zerophi = true);
+  virtual bool advance(const Real a_dt, const bool a_zerophi = false);
 
   /*!
     @brief Advance RTE onto isotropic state a_state
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = true);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = false);
 
   /*!
     @brief Advance RTE onto state a_state
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = true) = 0;
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
 
   /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)

@@ -54,32 +54,52 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
   }
 
+  bool converged = false;
+
   if(m_needs_setup){
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
-
-  const int finest_level = m_amr->get_finest_level();
-
+  
   m_opfact->set_jump(a_sigma, 1.0);
 
-  Vector<LevelData<MFCellFAB>* > phi, rhs, res;
-  m_amr->alias(phi, a_state);
-  m_amr->alias(rhs, a_source);
-  m_amr->alias(res, m_resid);
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
 
+  // Must have a dummy for checking initial residual
+  MFAMRCellData mfzero;
+  m_amr->allocate(mfzero, ncomp);
+  data_ops::set_value(mfzero, 0.0);
+
+  // Aliasing
+  Vector<LevelData<MFCellFAB>* > phi, rhs, res, zero;
+  m_amr->alias(phi,  a_state);
+  m_amr->alias(rhs,  a_source);
+  m_amr->alias(res,  m_resid);
+  m_amr->alias(zero, mfzero);
+
+  // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
   m_gmg_solver.init(phi, rhs, finest_level, 0);
-  m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
-  m_gmg_solver.revert(phi, rhs, finest_level, 0);
 
-  m_amr->average_down(a_state);
-  m_amr->interp_ghost(a_state);
+  const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
+  const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
 
-  bool converged = false;
+  if(phi_resid > zero_resid*m_gmg_eps){ // Residual is too large, recompute solution
+    m_gmg_solver.m_convergenceMetric = zero_resid;
+    m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
-  const int status = m_gmg_solver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
-  if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+    const int status = m_gmg_solver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
+    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+      converged = true;
+    }
+  }
+  else{ // Solution is already converged
     converged = true;
   }
+
+  m_gmg_solver.revert(phi, rhs, finest_level, 0);
+
+  m_amr->interp_ghost(a_state);
+  m_amr->average_down(a_state);
 
   return converged;
 }
@@ -112,16 +132,15 @@ void poisson_multifluid_gmg::set_bottom_drop(const int a_bottom_drop){
 }
 
 void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_relax_type,
-						       amrmg::which_mg a_gmg_type,      
-						       const int a_verbosity,          
-						       const int a_pre_smooth,         
-						       const int a_post_smooth,       
-						       const int a_bot_smooth,         
-						       const int a_max_iter,
-						       const int a_min_iter,
-						       const Real a_eps,               
-						       const Real a_hang,              
-						       const Real a_norm_thresh){
+						       amrmg::which_mg    a_gmg_type,      
+						       const int          a_verbosity,          
+						       const int          a_pre_smooth,         
+						       const int          a_post_smooth,       
+						       const int          a_bot_smooth,         
+						       const int          a_max_iter,
+						       const int          a_min_iter,
+						       const Real         a_eps,               
+						       const Real         a_hang){
   CH_TIME("poisson_multifluid_gmg::set_gmg_solver_parameters");
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::set_gmg_solver_parameters" << endl;
@@ -137,7 +156,6 @@ void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_rela
   m_gmg_min_iter    = a_min_iter;
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
-  m_gmg_norm_thresh = a_norm_thresh;
 }
 
 
@@ -272,22 +290,12 @@ void poisson_multifluid_gmg::setup_gmg(){
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
-  // const int finest_level = m_amr->get_finest_level();
-  
-  // for (int lvl = 0; lvl <= finest_level; lvl++){
-  //   const ProblemDomain dom = m_amr->get_domains()[lvl];
-  //   const RefCountedPtr<EBIndexSpace>& ebis1 = m_mfis->get_ebis(phase::gas);
-  //   const RefCountedPtr<EBIndexSpace>& ebis2 = m_mfis->get_ebis(phase::solid);
-  //   const int whichLev = ebis1->getLevel(dom);
-  //   pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis1 irreg = " << ebis1->irregCells(whichLev).numPts() << endl;
-  //   pout() << "level = " << lvl << "\t domain = " << dom << "\t ebis2 irreg = " << ebis2->irregCells(whichLev).numPts() << endl;
-  //   pout() << "level = " << lvl << "\t domain = " << dom << "\t isect_cells = " << m_mfis->interface_region(dom).numPts() << endl;
-  //   pout() << endl;
-  // }
   
   this->set_coefficients();       // Set coefficients
   this->setup_operator_factory(); // Set the operator factory
   this->setup_solver();           // Set up the AMR multigrid solver
+
+  m_needs_setup = false;
 }
 
 void poisson_multifluid_gmg::setup_operator_factory(){
@@ -394,7 +402,7 @@ void poisson_multifluid_gmg::setup_solver(){
 				   m_gmg_max_iter,
 				   m_gmg_eps,
 				   m_gmg_hang,
-				   m_gmg_norm_thresh);
+				   1.E-99); // Norm thresh will be set via eps
   m_gmg_solver.m_imin = m_gmg_min_iter;
   m_gmg_solver.m_verbosity = m_gmg_verbosity;
 }

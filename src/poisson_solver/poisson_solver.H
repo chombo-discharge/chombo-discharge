@@ -39,12 +39,12 @@ public:
   /*!
     @brief Solve Poisson equation
   */
-  virtual bool solve(const bool a_zerophi = true);
+  virtual bool solve(const bool a_zerophi = false);
 
   /*!
     @brief Solve Poisson onto state 
   */
-  virtual bool solve(MFAMRCellData& a_state, const bool a_zerophi = true);
+  virtual bool solve(MFAMRCellData& a_state, const bool a_zerophi = false);
 
   /*!
     @brief Solve Poisson onto state 
@@ -52,7 +52,7 @@ public:
   virtual bool solve(MFAMRCellData&       a_state,
 		     const MFAMRCellData& a_rho,
 		     const EBAMRIVData&   a_sigma,
-		     const bool           a_zerophi = true) = 0;
+		     const bool           a_zerophi = false) = 0;
 
   /*!
     @brief Set the computational geometry

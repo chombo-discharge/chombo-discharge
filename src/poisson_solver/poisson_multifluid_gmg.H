@@ -38,7 +38,7 @@ public:
   /*!
     @brief Override this one for testing purposes. 
   */
-  virtual bool solve(const bool a_zerophi = true);
+  virtual bool solve(const bool a_zerophi = false);
 
   /*!
     @brief Solve Poisson onto state 
@@ -46,7 +46,7 @@ public:
   virtual bool solve(MFAMRCellData&       a_state,
 		     const MFAMRCellData& a_rho,
 		     const EBAMRIVData&   a_sigma,
-		     const bool           a_zerophi = true);
+		     const bool           a_zerophi = false);
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 
@@ -60,8 +60,7 @@ public:
 					 const int a_max_iter            = 16,
 					 const int a_min_iter            = 5,
 					 const Real a_eps                = 1.E-8,
-					 const Real a_hang               = 0.2,
-					 const Real a_norm_thresh        = 1.E-99);
+					 const Real a_hang               = 0.2);
 
   /*!
     @brief Set the bottom solver.  
