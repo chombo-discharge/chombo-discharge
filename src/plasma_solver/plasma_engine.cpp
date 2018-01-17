@@ -43,8 +43,6 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   if(!m_celltagger.isNull()){ 
     m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
   }
-
-
 }
 
 plasma_engine::~plasma_engine(){

@@ -102,7 +102,6 @@ int main(int argc, char* argv[]){
   rte->set_physical_domain(physdom);
   rte->set_photon_group(group);
   rte->sanity_check();
-
   
   // Setup plasma engine
   engine->set_verbosity(10);
