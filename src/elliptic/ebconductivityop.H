@@ -228,7 +228,8 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
                        const LevelData<EBCellFAB>&       a_phi,
                        const LevelData<EBCellFAB>* const a_phiCoarse,
                        const bool&                       a_homogeneousPhysBC,
-                       const bool&                       a_homogeneousCFBC);
+                       const bool&                       a_homogeneousCFBC,
+		       const bool&                       a_doexchange = true);
 
   /// virtual function called by LevelTGA
   virtual void applyOpNoBoundary(LevelData<EBCellFAB>&        a_opPhi,
@@ -328,6 +329,13 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
   virtual void relaxGauSai(LevelData<EBCellFAB>&       a_e,
                           const LevelData<EBCellFAB>& a_residual,
                           int                         a_iterations);
+
+  /*!
+    @brief Single relaxation step multi-color Gauss-Seidel. Used for multifluid. 
+    @details Must call exchange before using this routine. 
+  */
+  virtual void lazyGauSai(LevelData<EBCellFAB>&       a_e,
+			  const LevelData<EBCellFAB>& a_residual);
 
   virtual void relaxPoiJac(LevelData<EBCellFAB>&       a_e,
                            const LevelData<EBCellFAB>& a_residual,

@@ -105,8 +105,9 @@ public:
 
   /*!
     @brief Get isotropic part. 
+    @details This is normally just a copy, but I need the function signature in order to have a clear plasma-coupling interface
   */
-  virtual void get_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state) = 0;
+  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state) = 0;
 
   /*!
     @brief Allocate internal storage

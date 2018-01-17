@@ -6,7 +6,6 @@
 
 #include <ParmParse.H>
 
-
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "rte_solver.H"
@@ -14,7 +13,6 @@
 #include "poisson_multifluid_gmg.H"
 #include "poisson_staircase_gmg.H"
 #include "eddington_sp1.H"
-
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
 
@@ -50,12 +48,12 @@ int main(int argc, char* argv[]){
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(256*IntVect::Unit); // Set number of cells on coarsest level
+  amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
   amr->set_max_amr_depth(0);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(8);                    // Set blocking factor
+  amr->set_blocking_factor(16);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
   amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
@@ -96,7 +94,7 @@ int main(int argc, char* argv[]){
   }
 
       // Set up an eddington sp1 solver
-  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", .5));
+  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 1.0));
   RefCountedPtr<rte_solver> rte = RefCountedPtr<rte_solver> (new eddington_sp1());
   rte->set_verbosity(10);
   rte->set_amr(amr);

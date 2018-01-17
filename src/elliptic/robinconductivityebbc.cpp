@@ -76,7 +76,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
       }
       else if(m_func_coeff){
 	aco = m_robinco->aco(pos);
-	bco = m_robinco->aco(pos);
+	bco = m_robinco->bco(pos);
       }
       else if(m_data_coeff){
 	aco = (*m_acodata)[dit](vof, comp);
@@ -86,7 +86,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
 	MayDay::Abort("robinconductivityebbc::define - must set coefficients before calling define");
       }
 
-      stencil *= -aco/bco; // Here, stencil => dphi/dn
+      stencil *= aco/bco; // Here, stencil => dphi/dn
 
       const Real area = ebisbox.bndryArea(vof);      
       const Real bcoe = (*m_bcoe)[dit()](vof, comp); 
@@ -219,7 +219,7 @@ void robinconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
     }
     else if(m_func_coeff){
       aco = m_robinco->aco(pos);
-      bco = m_robinco->aco(pos);
+      bco = m_robinco->bco(pos);
       rhs = m_robinco->rhs(pos);
     }
     else if(m_data_coeff){
@@ -231,7 +231,7 @@ void robinconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
     Real flux = rhs/bco;
 
     const Real area = ebisbox.bndryArea(vof);
-    const Real bcoe = (*m_bcoe)[a_dit](vof, comp);
+    const Real bcoe = (*m_bcoe)[a_dit](vof, comp); // bco from Helmholtz equation, not the one from Robin bc
 
     flux *= m_beta*bcoe*area;
 

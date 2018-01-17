@@ -89,7 +89,7 @@ void robinconductivitydomainbc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     }
     else if(m_func_coeff){
       aco = m_robinco->aco(pos);
-      bco = m_robinco->aco(pos);
+      bco = m_robinco->bco(pos);
       rhs = m_robinco->rhs(pos);
     }
     else if(m_data_coeff){
@@ -104,7 +104,7 @@ void robinconductivitydomainbc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     const Real xb = -0.5*iside*a_dx[a_idir];
     const Real yb = y0 + (y1-y0)/(x1-x0)*(xb-x0);// + ((y2-y1)/((x2-x0)*(x2-x1)) - (y1-y0)/((x2-x0)*(x1-x0)))*(xb-x0)*(xb-x1);
 
-    a_faceFlux(iv, comp) = rhs/bco + iside*aco*yb/bco; // dphi/dn = g/b - a*phi/b
+    a_faceFlux(iv, comp) = rhs/bco - iside*aco*yb/bco; // dphi/dn = g/b - a*phi/b
   }
 
 

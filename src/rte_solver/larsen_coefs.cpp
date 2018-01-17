@@ -22,8 +22,7 @@ larsen_coefs::~larsen_coefs(){
 Real larsen_coefs::aco(const RealVect a_pos) const {
 
   Real val = m_photon_group->get_kappa(a_pos)*m_photon_group->get_kappa(a_pos);
-  val *= 0.5;
-  val *= 1./3;
+  val *= 3.0/2.0;
   val *= (1 + 3*m_r2)/(1 - 2*m_r1);
 
   return val;

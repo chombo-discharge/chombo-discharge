@@ -218,6 +218,7 @@ void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes){
 }
 
 void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneous){
+  CH_TIME("mfconductivityop::update_bc");
 #if verb
   pout() << "mfconductivityop::update_bc"<< endl;
 #endif
@@ -701,8 +702,9 @@ void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
 
 #if 1 // This is the only way we can make it converge for now
     // m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
-    m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
-    // m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
+    //    m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
+    m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+    /// m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
 #else
     m_ebops[iphase]->relax_mf(*m_alias[0], *m_alias[1], 1);
 #endif

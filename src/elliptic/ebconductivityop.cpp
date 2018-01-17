@@ -1055,7 +1055,8 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
         const LevelData<EBCellFAB>&              a_phi,
         const LevelData<EBCellFAB>* const        a_phiCoar,
         const bool&                              a_homogeneousPhysBC,
-        const bool&                              a_homogeneousCFBC)
+        const bool&                              a_homogeneousCFBC,
+	const bool&                              a_doexchange)
 {
   CH_TIME("ebco::applyOp");
   LevelData<EBCellFAB>& phi = const_cast<LevelData<EBCellFAB>&>(a_phi);
@@ -1063,7 +1064,9 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
     {
       applyCFBCs(phi, a_phiCoar, a_homogeneousCFBC);
     }
-  phi.exchange(phi.interval());
+  if(a_doexchange){
+    phi.exchange(phi.interval());
+  }
 
   EBLevelDataOps::setToZero(a_lhs);
   incr( a_lhs, a_phi, m_alpha); //this multiplies by alpha
@@ -1085,6 +1088,8 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
       Box dblBox = m_eblg.getDBL()[dit[mybox]];
       int nComps = 1;
       Box curPhiBox = phiFAB.box();
+
+      const EBISBox& ebisbox = phi.getEBISBox();
 
       if (!s_turnOffBCs)
         {
@@ -1773,12 +1778,41 @@ relaxGauSai(LevelData<EBCellFAB>&       a_phi,
         {
           applyHomogeneousCFBCs(a_phi);
 
+
+
           //after this lphi = L(phi)
           //this call contains bcs and exchange
-          applyOp(  lphi,  a_phi, true);
+	  applyOp(  lphi,  a_phi, true);
           gsrbColor(a_phi, lphi, a_rhs, m_colors[icolor]);
         }
     }
+}
+
+void ebconductivityop::lazyGauSai(LevelData<EBCellFAB>&       a_phi,
+				  const LevelData<EBCellFAB>& a_rhs){
+  CH_TIME("ebconductivityop::lazyGauSai");
+
+  CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
+  CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
+
+  CH_assert(a_phi.nComp() == 1);
+  CH_assert(a_rhs.nComp() == 1);
+
+  LevelData<EBCellFAB> lphi;
+  create(lphi, a_rhs);
+
+  for (int icolor = 0; icolor < m_colors.size(); icolor++){
+    applyHomogeneousCFBCs(a_phi);
+
+
+    //after this lphi = L(phi)
+    applyOp(lphi, a_phi, NULL, true, true, false);
+    gsrbColor(a_phi, lphi, a_rhs, m_colors[icolor]);
+
+    if((icolor-1) % 2 == 0 && icolor - 1 < m_colors.size()){
+      a_phi.exchange();
+    }
+  }
 }
 //-----------------------------------------------------------------------
 void

@@ -28,7 +28,6 @@
   \frac{\partial E}{\partial t} + c\kappa E - \nabla\cdot\left[\frac{c}{\kappa}\nabla E\right] = \eta
   \f]
 */
-
 class eddington_sp1 : public rte_solver {
 public:
 
@@ -89,7 +88,7 @@ public:
   virtual void set_reflection_coefficients(const Real r1, const Real r2);
 
   /*!
-    @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
+    @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
   virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state);
 
@@ -103,7 +102,7 @@ public:
   /*!
     @brief Get isotropic part. 
   */
-  virtual void get_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
+  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
 
   /*!
     @brief Allocate internal storage

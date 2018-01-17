@@ -26,7 +26,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
 
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
-  this->set_botsolver_smooth(64);
+  this->set_botsolver_smooth(32);
   this->set_bottom_drop(16);
 }
 
