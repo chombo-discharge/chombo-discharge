@@ -21,6 +21,7 @@ poisson_solver::poisson_solver(){
   
   this->set_verbosity(-1);
   this->allocate_wall_bc();
+  this->set_time(0, 0., 0.);
 }
 
 poisson_solver::~poisson_solver(){
@@ -138,8 +139,10 @@ void poisson_solver::set_verbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 }
 
-void poisson_solver::set_time(const Real a_time) {
+void poisson_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
+  m_step = a_step;
   m_time = a_time;
+  m_dt   = a_dt;
 }
 
 void poisson_solver::sanity_check(){
@@ -162,14 +165,14 @@ void poisson_solver::sanity_check(){
 }
 
 #ifdef CH_USE_HDF5
-void poisson_solver::write_plot_file(const int a_step){
+void poisson_solver::write_plot_file(){
   CH_TIME("poisson_solver::write_plot_file");
   if(m_verbosity > 5){
     pout() << "poisson_solver::write_plot_file" << endl;
   }
 
   char file_char[1000];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", a_step, SpaceDim);
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", m_step, SpaceDim);
 
   const int ncomps = 3 + SpaceDim;
   Vector<string> names(ncomps);
@@ -196,7 +199,7 @@ void poisson_solver::write_plot_file(const int a_step){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
+
 
   for (int lvl = 0; lvl < output.size(); lvl++){
     LevelData<EBCellFAB> state_gas,  source_gas, E_gas, resid_gas;
@@ -206,12 +209,6 @@ void poisson_solver::write_plot_file(const int a_step){
     mfalias::aliasMF(source_gas, phase::gas,   *m_source[lvl]);
     mfalias::aliasMF(E_gas,      phase::gas,   *E[lvl]);
     mfalias::aliasMF(resid_gas,  phase::gas,   *m_resid[lvl]);
-
-
-#if 1 // Transform to centroid-centered for irregular cells. 
-    sten.apply(state_gas, lvl);
-    sten.apply(E_gas, lvl);
-#endif
 
     if(!ebis_sol.isNull()){
       mfalias::aliasMF(state_sol,  phase::solid, *m_state[lvl]);
@@ -266,10 +263,8 @@ void poisson_solver::write_plot_file(const int a_step){
     E_gas.copyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(3, 2 + SpaceDim));
   }
 
-#if 0 // Can only do up to SpaceDim, need to rewrite this routine if we want this to work. 
-  m_amr->average_down(output, phase::gas);
-  m_amr->interp_ghost(output, phase::gas);
-#endif
+  const irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
+  sten.apply(output);
 
   Vector<LevelData<EBCellFAB>* > output_ptr;
   for (int lvl = 0; lvl < m_state.size(); lvl++){
@@ -284,8 +279,8 @@ void poisson_solver::write_plot_file(const int a_step){
 	      names,
 	      m_amr->get_domains()[0].domainBox(),
 	      m_amr->get_dx()[0],
-	      0.0,
-	      0.0,
+	      m_dt,
+	      m_time,
 	      m_amr->get_ref_rat(),
 	      m_amr->get_finest_level() + 1,
 	      false,

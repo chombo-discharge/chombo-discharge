@@ -531,7 +531,7 @@ void eddington_sp1::write_plot_file(const int a_step){
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
   m_amr->allocate(output, m_phase, ncomps, 1);
 
-  irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
+
 
   for (int lvl = 0; lvl < output.size(); lvl++){
     LevelData<EBCellFAB>& state  = *m_state[lvl];
@@ -539,16 +539,15 @@ void eddington_sp1::write_plot_file(const int a_step){
     LevelData<EBCellFAB>& flx    = *flux[lvl];
     LevelData<EBCellFAB>& res    = *m_resid[lvl];
 
-    // Transform to centroid-centered
-    sten.apply(state, lvl);
-    sten.apply(source, lvl);
-    sten.apply(flx, lvl);
-
     state.copyTo(Interval(0,0),          *output[lvl], Interval(0,0));
     flx.copyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(1, SpaceDim));
     source.copyTo(Interval(0,0),         *output[lvl], Interval(1 + SpaceDim, 1 + SpaceDim));
     res.copyTo(Interval(0,0),            *output[lvl], Interval(2+SpaceDim, 2+SpaceDim));
   }
+
+  // Transform to centroid-centered
+  irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
+  sten.apply(output);
 
   // Alias this stuff
   Vector<LevelData<EBCellFAB>* > output_ptr;

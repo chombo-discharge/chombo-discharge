@@ -12,6 +12,7 @@
 #include "amr_mesh.H"
 #include "poisson_multifluid_gmg.H"
 #include "poisson_staircase_gmg.H"
+#include "cdr_solver.H"
 #include "eddington_sp1.H"
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
@@ -119,6 +120,30 @@ int main(int argc, char* argv[]){
   rte->advance(0.0);
   rte->write_plot_file(0);
 
+  // New cdr solver
+  RefCountedPtr<species> spec = RefCountedPtr<species> (new species());
+  cdr_solver* cdr = new cdr_solver();
+  cdr->set_species(spec);
+  cdr->set_verbosity(10);
+  cdr->set_amr(amr);
+  cdr->set_computational_geometry(compgeom);
+  cdr->set_physical_domain(physdom);
+  cdr->sanity_check();
+  cdr->allocate_internals();
+  cdr->initial_data();
+
+  // Compute the electric field from the poisson solver and set that to be the velocity
+  MFAMRCellData E;
+  EBAMRCellData E_gas;
+  amr->allocate(E, SpaceDim);
+  amr->allocate_ptr(E_gas);
+  amr->compute_gradient(E, poisson->get_state());
+  amr->alias(E_gas, phase::gas, E);
+  cdr->set_velocity(E_gas);
+  cdr->set_diffco(0.0);
+  cdr->set_source(0.0);
+  cdr->advance(0.1);
+  cdr->write_plot_file();
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

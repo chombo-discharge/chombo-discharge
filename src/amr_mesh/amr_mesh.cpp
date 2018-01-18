@@ -40,6 +40,30 @@ amr_mesh::~amr_mesh(){
   
 }
 
+void amr_mesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata){
+  CH_TIME("amr_mesh::alias");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::alias" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+  }
+}
+
+void amr_mesh::allocate_ptr(EBAMRCellData& a_data){
+  CH_TIME("amr_mesh::allocate_ptr");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate_ptr" << endl;
+  }
+
+  a_data.resize(1 + m_finest_level);
+  
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >(new LevelData<EBCellFAB>());
+  }
+}
+
 void amr_mesh::allocate(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(cell)");
   if(m_verbosity > 5){
@@ -962,19 +986,17 @@ void amr_mesh::sanity_check(){
   }
 }
 
+bool amr_mesh::get_ebcf(){
+  return m_ebcf;
+}
+  
+
 int amr_mesh::get_finest_level(){
   return m_finest_level;
 }
 
 int amr_mesh::get_max_amr_depth(){
   return m_max_amr_depth;
-}
-
-int amr_mesh::get_refinement_ratio(){
-  MayDay::Warning("wtf");
-  pout() << "someone is getting it!" << endl;
-  return m_ref_ratio;
-  
 }
 
 int amr_mesh::get_num_ghost(){

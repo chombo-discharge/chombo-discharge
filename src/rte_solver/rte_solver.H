@@ -35,7 +35,7 @@ public:
   */
   virtual void set_photon_group(const RefCountedPtr<photon_group> a_photon_group);
 
-    /*!
+  /*!
     @brief Set computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);

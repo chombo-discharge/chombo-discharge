@@ -10,17 +10,20 @@
 
 #include "type_definitions.H"
 #include "computational_geometry.H"
+#include "amr_mesh.H"
+#include "physical_domain.H"
+#include "species.H"
 
 /*!
   @brief Abstract class for cdr-equations. This is (almost) a whole solver. 
 */
 class cdr_solver {
 public:
-  
+
   /*!
-    @brief Full constructor. Subsequently calls define. 
+    @brief Default constructor. Stay away.
   */
-  cdr_solver(const RefCountedPtr<computational_geometry>& a_compgeom);
+  cdr_solver();
 
   /*!
     @brief Constructor
@@ -28,17 +31,98 @@ public:
   virtual ~cdr_solver();
 
   /*!
+    @brief Sanity check
+  */
+  virtual void sanity_check();
+
+  /*!
+    @brief Set species
+  */
+  virtual void set_species(const RefCountedPtr<species> a_species);
+  /*!
+    @brief Set computational geometry
+  */
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+
+  /*!
+    @brief Set the physical domain
+  */
+  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
+  /*!
+    @brief Set the amr object
+  */
+  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+
+  /*!
+    @brief Set phase
+    @details This must be done BEFORE callilng set_computational_geometry
+  */
+  virtual void set_phase(phase::which_phase a_phase = phase::gas);
+
+  /*!
+    @brief Set verbosity.
+  */
+  virtual void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Get current time
+  */
+  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+
+  /*!
+    @brief Set velocity
+  */
+  virtual void set_velocity(const EBAMRCellData& a_velo);
+
+  /*!
+    @brief Set constant velocity
+  */
+  virtual void set_velocity(const RealVect a_velo);
+
+  /*!
+    @brief Set diffusion coefficients
+  */
+  virtual void set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_diffco_eb);
+
+  /*!
+    @brief Set constant
+  */
+  virtual void set_diffco(const Real a_diffco);
+
+  /*!
+    @brief Set source terms
+  */
+  virtual void set_source(const EBAMRCellData& a_source);
+
+    /*!
+    @brief Set constant source terms
+  */
+  virtual void set_source(const Real a_source);
+
+  /*!
+    @brief Fill internal state with initial data
+  */
+  virtual void initial_data();
+
+  /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocate_internals();
+  
+  /*!
     @brief Advance method
   */
   virtual void advance(const Real& a_dt);
 
   /*!
-    @brief Advance state. The default is explicit Euler - overwrite it if you want. 
+    @brief Advance state. Current is explicit Euler.
+    @details Make the default RK2 for non-diffusive media and semi-implicit TGA for diffusive media. 
   */
   virtual void advance(EBAMRCellData& a_state, const Real& a_dt);
 
   /*!
-    @brief Compute right-hand side
+    @brief Compute right-hand side using the internal state.
   */
   virtual void compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt); 
 
@@ -47,98 +131,169 @@ public:
   */
   virtual void compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt);
 
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write plot file
+  */
+  virtual void write_plot_file();
+#endif
+
   /*!
     @brief Get the ghost cell requirement
   */
+#if 0
   virtual int query_ghost() const = 0;
+#else
+  virtual int query_ghost() const;
+#endif
 
   /*!
-    @brief Compute the CFL 
+    @brief Compute the largest possible stable time step. 
   */
   virtual Real compute_dt();
 
   /*!
     @brief Diffusive or not
   */
-  bool is_diffusive();
+  virtual bool is_diffusive();
   
   /*!
     @brief Get the internal state
-   */
-  EBAMRCellData& get_state();
+  */
+  virtual EBAMRCellData& get_state();
 
-    /*!
+  /*!
     @brief Get the source term
-   */
-  EBAMRCellData& get_source();
+  */
+  virtual EBAMRCellData& get_source();
 
   /*!
     @brief Get the face-centered velocities
-   */
-  EBAMRFluxData& get_velo_face();
+  */
+  virtual EBAMRFluxData& get_velo_face();
 
   /*!
     @brief Get the eb-centered velocities
   */
-  EBAMRIVData& get_velo_eb();
+  virtual EBAMRIVData& get_velo_eb();
 
   /*!
     @brief Get the face-centered diffusion coefficient
   */
-  EBAMRFluxData& get_diffco_face();
+  virtual EBAMRFluxData& get_diffco_face();
 
   /*!
     @brief Get the EB-centered diffusion coefficient
   */
-  EBAMRIVData& get_diffco_eb();  
+  virtual EBAMRIVData& get_diffco_eb();  
 
 
 protected:
+  
+  /*!
+    @brief Phase
+  */
+  RefCountedPtr<EBIndexSpace> m_ebis;
 
   /*!
-    @brief Default constructor. Stay away.
+    @brief Species
   */
-  cdr_solver();
+  RefCountedPtr<species> m_species;
+  
+  /*!
+    @brief Computational geometry
+  */
+  RefCountedPtr<computational_geometry> m_compgeom;
 
   /*!
-    @brief Set computational geometry
+    @brief Physical domain
   */
-  void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
+  RefCountedPtr<physical_domain> m_physdom;
 
   /*!
-    @brief Allocate a data holder
+    @brief AMR; needed for grid stuff
   */
-  virtual void allocate(EBAMRCellData& a_data);
+  RefCountedPtr<amr_mesh> m_amr;
 
   /*!
-    @brief Allocate a data holder
+    @brief Phase
   */
-  virtual void allocate(EBAMRFluxData& a_data);
+  phase::which_phase m_phase;
 
   /*!
-    @brief Allocate a data holder
+    @brief Name
   */
-  virtual void allocate(EBAMRIVData& a_data);
+  std::string m_name;
 
   /*!
-    @brief Deallocate a data holder
+    @brief State data (i.e. the ion density)
   */
-  virtual void deallocate(EBAMRCellData& a_data);
+  EBAMRCellData m_state;
 
   /*!
-    @brief Deallocate a data holder
+    @brief Source term 
   */
-  virtual void deallocate(EBAMRFluxData& a_data);
+  EBAMRCellData m_source;
 
-    /*!
-    @brief Deallocate a data holder
+  /*!
+    @brief Cell-centered velocities
   */
-  virtual void deallocate(EBAMRIVData& a_data);
+  EBAMRCellData m_velo_cell;
+
+  /*!
+    @brief Face-centered velocities (only normal components)
+  */
+  EBAMRFluxData m_velo_face;
+
+  /*!
+    @brief EB-centered velocities
+  */
+  EBAMRIVData m_velo_eb;
+
+  /*!
+    @brief Flux through the boundary
+  */
+  EBAMRIVData m_ebflux;
+
+  /*!
+    @brief Diffusion coefficients (can
+  */
+  EBAMRFluxData m_diffco;
+
+  /*!
+    @brief Diffusion coefficients (can
+  */
+  EBAMRIVData m_diffco_eb;
+
+  /*!
+    @brief Also solve for diffusion
+  */
+  bool m_diffusive;
+
+  /*!
+    @brief Verbosity
+  */
+  int m_verbosity;
+
+  /*!
+    @brief Time step
+  */
+  int m_step;
+
+  /*!
+    @brief Current time
+  */
+  Real m_time;
+
+  /*!
+    @brief Time step
+  */
+  Real m_dt;
 
   /*!
     @brief Compute advective derivative
   */
-  virtual void compute_advective_derivative(EBAMRCellData& a_adv_deriv, const EBAMRCellData& a_state);
+  virtual void compute_advective_derivative(EBAMRCellData& a_divF, const EBAMRCellData& a_state);
 
   /*!
     @brief Compute diffusion term
@@ -148,7 +303,16 @@ protected:
   /*!
     @brief Extrapolate state to faces. 
   */
+#if 0
   virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state) = 0;
+#else
+  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state);
+#endif
+
+  /*!
+    @brief Interpolate to centroids
+  */
+  virtual void interpolate_to_centroids(EBAMRFluxData& a_face_state);
 
   /*!
     @brief Compute the conservative divergence
@@ -159,14 +323,14 @@ protected:
   /*!
     @brief Compute the non-conservative divergence
   */
-  virtual void nonconservative_divergence(EBAMRIVData& a_noncons_div, const EBAMRCellData& a_cons_div);
+  virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF);
 
   /*!
     @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence
   */
-  virtual void hybrid_divergence(EBAMRCellData&     a_hybrid_div,
-				 EBAMRIVData&       a_mass_diff,
-				 const EBAMRIVData& a_noncons_div);
+  virtual void hybrid_divergence(EBAMRCellData&       a_divF,
+				 EBAMRIVData&         a_mass_diff,
+				 const EBAMRIVData&   a_noncons_div);
 
   /*!
     @brief Increment flux registers. 
@@ -186,16 +350,6 @@ protected:
 					 const EBAMRCellData& a_redist_weights);
 
   /*!
-    @brief Do the reflux-redist dance (only for EB x CF)
-  */
-  virtual void reflux_redist_dance(EBAMRCellData& a_del_vel_rho, const EBAMRCellData& a_redist_weights);
-
-  /*!
-    @brief Set weights for reflux-redist dance
-  */
-  virtual void set_weights(const EBAMRCellData& a_redist_weights);
-
-  /*!
     @brief Increment redistribution flux registers
   */
   virtual void increment_redist_flux();
@@ -205,50 +359,16 @@ protected:
   */
   virtual void coarse_fine_redistribution(EBAMRCellData& a_state);
 
-    /*!
+  /*!
     @brief Reflux state
   */
   virtual void reflux(EBAMRCellData& a_state);
-  
-  /*!
-    @brief Computational geometry
-  */
-  RefCountedPtr<computational_geometry> m_compgeom;
 
   /*!
-    @brief Also solve for diffusion
+    @brief Set ebis
   */
-  bool m_diffusive;
+  virtual void set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis);
 
-  /*!
-    @brief State data (i.e. the ion density)
-  */
-  EBAMRCellData m_state;
-
-  /*!
-    @brief Source term 
-  */
-  EBAMRCellData m_source;
-
-  /*!
-    @brief Face-centered velocities (only normal components)
-  */
-  EBAMRFluxData m_velo_face;
-
-  /*!
-    @brief EB-centered velocities
-  */
-  EBAMRIVData m_velo_eb;
-
-  /*!
-    @brief Diffusion coefficients (can
-  */
-  EBAMRFluxData m_diffco_face;
-
-  /*!
-    @brief Diffusion coefficients (can
-  */
-  EBAMRIVData m_diffco_eb;
 };
 
 #endif

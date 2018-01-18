@@ -41,6 +41,14 @@ public:
   static void divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
+  
+  static void set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);
+
+  static void set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp);
+
+  static void set_value(LevelData<EBFluxFAB>& a_lhs, const Real a_value);
+  
+  static void set_value(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value);
 
   static void set_value(EBAMRFluxData& a_lhs, const Real& a_value);
 

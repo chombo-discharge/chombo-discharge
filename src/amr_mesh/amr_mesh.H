@@ -51,6 +51,11 @@ public:
   template<typename T> void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
 
   /*!
+    @brief Alias an entire hierarchy of data
+  */
+  virtual void alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
+
+  /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
@@ -63,6 +68,11 @@ public:
     nor are ghost cells updated. 
   */
   virtual void compute_gradient(MFAMRCellData& a_gradient, MFAMRCellData& a_phi);
+
+  /*!
+    @brief Create pointers
+  */
+  virtual void allocate_ptr(EBAMRCellData& a_data);
 
   /*!
     @brief Allocate a data holder. 
@@ -241,6 +251,11 @@ public:
   */
   virtual void sanity_check();
 
+  /*!
+    @brief True if there is ebcf crossing
+  */
+  virtual bool get_ebcf();
+
     /*!
     @brief Get refinement ratios
   */
@@ -260,11 +275,6 @@ public:
     @brief Get maximum box size
   */
   virtual int get_max_box_size();
-
-  /*!
-    @brief Get refinement ratio
-  */
-  virtual int get_refinement_ratio();
 
   /*!
     @brief Get number of ghost cells

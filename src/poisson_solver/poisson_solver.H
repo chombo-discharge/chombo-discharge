@@ -88,7 +88,7 @@ public:
   /*!
     @brief Write plot file
   */
-  virtual void write_plot_file(const int a_step = 0);
+  virtual void write_plot_file();
 #endif
 
   /*!
@@ -99,7 +99,7 @@ public:
   /*!
     @brief Get current time
   */
-  virtual void set_time(const Real a_time);
+  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set verbosity.
@@ -189,10 +189,20 @@ protected:
   */
   MFAMRCellData m_resid;
 
-  /*!
-    @brief Function pointer to potential function - this gives the BC on EBs (where we have Dirichlet)
+    /*!
+    @brief Verbosity
   */
-  Real m_potential;
+  int m_verbosity;
+
+  /*!
+    @brief Time step
+  */
+  int m_step;
+
+  /*!
+    @brief Time step increment
+  */
+  Real m_dt;
 
   /*!
     @brief Time
@@ -200,14 +210,16 @@ protected:
   Real m_time;
 
   /*!
+    @brief Function pointer to potential function - this gives the BC on EBs (where we have Dirichlet)
+  */
+  Real m_potential;
+
+  /*!
     @brief Current potential. For passing into BC objects. 
   */
   Real m_current_potential;
 
-  /*!
-    @brief Verbosity
-  */
-  int m_verbosity;
+
 
   /*!
     @brief Set the mfis
