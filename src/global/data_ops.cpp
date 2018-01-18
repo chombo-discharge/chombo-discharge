@@ -9,6 +9,34 @@
 #include "EBLevelDataOps.H"
 #include "MFLevelDataOps.H"
 
+void data_ops::average_cell_to_face(EBAMRFluxData&               a_facedata,
+				    const EBAMRCellData&         a_celldata,
+				    const Vector<ProblemDomain>& a_domains){
+  for (int lvl = 0; lvl < a_facedata.size(); lvl++){
+    data_ops::average_cell_to_face(*a_facedata[lvl], *a_celldata[lvl], a_domains[lvl]);
+  }
+}
+
+void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
+				    const LevelData<EBCellFAB>& a_celldata,
+				    const ProblemDomain&        a_domain){
+
+  CH_assert(a_facedata.nComp() == 1);
+  CH_assert(a_celldata.nComp() == SpaceDim);
+  
+  for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
+    EBFluxFAB& flux_vel       = a_facedata[dit()];
+    const EBCellFAB& cell_vel = a_celldata[dit()];
+    const EBISBox& ebisbox    = cell_vel.getEBISBox();
+    const EBGraph& ebgraph    = ebisbox.getEBGraph();
+    const Box& box            = a_celldata.disjointBoxLayout().get(dit());
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBLevelDataOps::averageCellToFace(flux_vel[dir], cell_vel, ebgraph, box, dir, dir, a_domain, dir, 0);
+    }
+  }
+}
+
 void data_ops::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     EBLevelDataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);

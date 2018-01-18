@@ -49,8 +49,8 @@ int main(int argc, char* argv[]){
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(0);                      // Set max amr depth
+  amr->set_coarsest_num_cells(64*IntVect::Unit); // Set number of cells on coarsest level
+  amr->set_max_amr_depth(1);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -142,8 +142,8 @@ int main(int argc, char* argv[]){
   cdr->set_velocity(E_gas);
   cdr->set_diffco(0.0);
   cdr->set_source(0.0);
-  cdr->advance(0.1);
   cdr->write_plot_file();
+  cdr->advance(0.1);
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

@@ -301,6 +301,11 @@ protected:
   virtual void compute_diffusion_term(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
 
   /*!
+    @brief Average cell-centered velocities to face centers
+  */
+  virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
+
+  /*!
     @brief Extrapolate state to faces. 
   */
 #if 0

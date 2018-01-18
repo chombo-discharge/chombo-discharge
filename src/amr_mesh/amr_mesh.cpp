@@ -295,8 +295,9 @@ void amr_mesh::build_domains(){
   m_ebisl.resize(phase::num_phases);
   m_coarave.resize(phase::num_phases);
   m_quadcfi.resize(phase::num_phases);
-  m_old_quadcfi.resize(phase::num_phases);
   m_flux_reg.resize(phase::num_phases);
+  m_old_quadcfi.resize(phase::num_phases);
+  m_level_advect.resize(phase::num_phases);
   m_level_redist.resize(phase::num_phases);
   m_centroid_interp.resize(phase::num_phases);
   m_eb_centroid_interp.resize(phase::num_phases);
@@ -304,12 +305,14 @@ void amr_mesh::build_domains(){
   m_coar_to_coar_redist.resize(phase::num_phases);
   m_fine_to_coar_redist.resize(phase::num_phases);
 
+
   m_eblg[phase::gas].resize(nlevels);
   m_ebisl[phase::gas].resize(nlevels);
   m_coarave[phase::gas].resize(nlevels);
   m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
   m_old_quadcfi[phase::gas].resize(nlevels);
+  m_level_advect[phase::gas].resize(nlevels);
   m_level_redist[phase::gas].resize(nlevels);
   m_coar_to_fine_redist[phase::gas].resize(nlevels);
   m_coar_to_coar_redist[phase::gas].resize(nlevels);
@@ -321,6 +324,7 @@ void amr_mesh::build_domains(){
   m_quadcfi[phase::solid].resize(nlevels);
   m_flux_reg[phase::solid].resize(nlevels);
   m_old_quadcfi[phase::solid].resize(nlevels);
+  m_level_advect[phase::solid].resize(nlevels);
   m_level_redist[phase::solid].resize(nlevels);
   m_coar_to_fine_redist[phase::solid].resize(nlevels);
   m_coar_to_coar_redist[phase::solid].resize(nlevels);
@@ -348,12 +352,13 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
     Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
     this->build_grids(tags, a_hardcap);
 
-    this->define_eblevelgrid(); // Define EBLevelGrid objects on both phases
-    this->define_eb_coar_ave(); // Define EBCoarseAverage on both phases
-    this->define_eb_quad_cfi(); // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
-    this->define_flux_reg();    // Define flux register (phase::gas only)
-    this->define_redist_oper(); // Define redistribution (phase::gas only)
-    this->define_irreg_sten();  // Define irregular stencils
+    this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
+    this->define_eb_coar_ave();  // Define EBCoarseAverage on both phases
+    this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
+    this->define_flux_reg();     // Define flux register (phase::gas only)
+    this->define_redist_oper();  // Define redistribution (phase::gas only)
+    this->define_advect_level(); // Define advection 
+    this->define_irreg_sten();   // Define irregular stencils
   }
 }
 
@@ -372,7 +377,6 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
 
   if(m_max_amr_depth > 0 && a_hardcap > 0){
     for (int lvl = 0; lvl <= top_level; lvl++){
-      //old_boxes[lvl].push_back(m_domains[lvl].domainBox()); // Create old grids from scratch
       domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
     }
     
@@ -675,7 +679,7 @@ void amr_mesh::define_redist_oper(){
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
 
     const bool has_coar = lvl > 0;
-    const bool has_fine = lvl > m_finest_level;
+    const bool has_fine = lvl < m_finest_level;
 
     if(!ebis_gas.isNull()){
       m_level_redist[phase::gas][lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
@@ -728,6 +732,40 @@ void amr_mesh::define_redist_oper(){
 	  m_coar_to_coar_redist[phase::gas][lvl]->setToZero();
 	}
       }
+    }
+  }
+}
+
+void amr_mesh::define_advect_level(){
+  CH_TIME("amr_mesh::define_advect_level");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_advect_level" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < m_finest_level;
+
+
+    if(!ebis_gas.isNull()){
+      EBLevelGrid eblg_coar;
+      if(has_coar){
+	eblg_coar = *m_eblg[phase::gas][lvl-1];
+      }
+      m_level_advect[phase::gas][lvl] = RefCountedPtr<EBAdvectLevelIntegrator>
+	(new EBAdvectLevelIntegrator(*m_eblg[phase::gas][lvl],
+				     eblg_coar,
+				     m_ref_ratios[lvl],
+				     m_dx[lvl]*RealVect::Unit,
+				     has_coar,
+				     has_fine,
+				     m_ebcf,
+				     false,
+				     ebis_gas));
     }
   }
 }
@@ -989,7 +1027,6 @@ void amr_mesh::sanity_check(){
 bool amr_mesh::get_ebcf(){
   return m_ebcf;
 }
-  
 
 int amr_mesh::get_finest_level(){
   return m_finest_level;
@@ -1063,6 +1100,11 @@ Vector<RefCountedPtr<EBFastFR> >&  amr_mesh::get_flux_reg(phase::which_phase a_p
 Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(phase::which_phase a_phase){
   CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
   return m_level_redist[a_phase];
+}
+
+Vector<RefCountedPtr<EBAdvectLevelIntegrator> >& amr_mesh::get_level_advect(phase::which_phase a_phase){
+  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
+  return m_level_advect[a_phase];
 }
 
 Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(phase::which_phase a_phase){

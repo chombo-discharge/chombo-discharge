@@ -11,6 +11,10 @@
 #include <EBArith.H>
 #include <EBAMRIO.H>
 
+#if 1 // Move to cdr_gdnv
+#include <ExtrapAdvectBC.H>
+#endif
+
 cdr_solver::cdr_solver(){
 
   this->set_phase(phase::gas);
@@ -379,6 +383,7 @@ void cdr_solver::compute_advective_derivative(EBAMRCellData& a_divF, const EBAMR
   data_ops::set_value(mass_diff,  0.0);
 
   // Compute the advective derivative
+  this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
   this->extrapolate_to_faces(face_state, a_state);                  // Face extrapolation to cell-centered faces
   this->interpolate_to_centroids(face_state);                       // Interpolate to centroids
   this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
@@ -406,14 +411,61 @@ void cdr_solver::compute_diffusion_term(EBAMRCellData& a_diffusive_term, const E
   MayDay::Abort("cdr_solver::compute_diffusion_term - not implemented");
 }
 
+void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
+  CH_TIME("cdr_solver::average_velo_to_faces");
+  if(m_verbosity > 5){
+    pout() << m_name + "::average_velo_to_faces" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->get_domains()[lvl]);
+  }
+}
+
+#if 1 // This should be moved to cdr_gdnv
 void cdr_solver::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state){
   CH_TIME("cdr_solver::extrapolate_to_faces");
   if(m_verbosity > 5){
     pout() << m_name + "::extrapolate_to_faces" << endl;
   }
 
+  const int finest_level = m_amr->get_finest_level();
+
+  const int comp = 0;
+  
+  EBAdvectPatchIntegrator::setCurComp(0);
+  EBAdvectPatchIntegrator::setDoingVel(0);
+
+  RefCountedPtr<ExtrapAdvectBCFactory> bcfact = RefCountedPtr<ExtrapAdvectBCFactory>
+    (new ExtrapAdvectBCFactory());
+
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_amr->get_level_advect(m_phase)[lvl];
+    leveladvect->resetBCs(bcfact);
+    CH_assert(!leveladvect.isNull());
+    leveladvect->advectToFacesBCG(*a_face_state[lvl],
+				  *a_state[lvl],
+				  *m_velo_cell[lvl],
+				  *m_velo_face[lvl],
+				  a_state[lvl],// should be coarse
+				  a_state[lvl],// should be coars
+				  m_velo_cell[lvl],// should be coarse
+				  m_velo_cell[lvl],// should be coarse
+				  m_time,
+				  m_time,
+				  m_time,
+				  m_dt,
+				  m_source[lvl], 
+				  m_source[lvl],// should be coarsse
+				  m_source[lvl]);// should be coarsse
+  }
+						
+
   MayDay::Abort("cdr_solver::extrapolate_to_faces - not implemented");
 }
+#endif
 
 void cdr_solver::interpolate_to_centroids(EBAMRFluxData& a_face_state){
   CH_TIME("cdr_solver::interpolate_to_centroids");

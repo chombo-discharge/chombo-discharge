@@ -13,11 +13,13 @@
 #include "mfis.H"
 #include "irreg_amr_stencil.H"
 #include "load_balance.H"
+#include "nwoebquadcfinterp.H"
 
 #include <DisjointBoxLayout.H>
 #include <ProblemDomain.H>
 #include <EBCoarseAverage.H>
-#include <nwoebquadcfinterp.H>
+#include <EBAdvectLevelIntegrator.H>
+#include <EBFastFR.H>
 #include <EBFastFR.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>
@@ -347,6 +349,11 @@ public:
   virtual Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(phase::which_phase a_phase);
 
   /*!
+    @brief Get advection integrators
+  */
+  virtual Vector<RefCountedPtr<EBAdvectLevelIntegrator> >& get_level_advect(phase::which_phase a_phase);
+
+  /*!
     @brief Get coar-to-fine redistribution
   */
   virtual Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(phase::which_phase a_phase);
@@ -515,6 +522,11 @@ protected:
   Vector<Vector<RefCountedPtr<EBFastFR> > > m_flux_reg;
 
   /*!
+    @brief Level advector for Godunov
+  */
+  Vector<Vector<RefCountedPtr<EBAdvectLevelIntegrator> > > m_level_advect;
+
+  /*!
     @brief Level redistribution
   */
   Vector<Vector<RefCountedPtr<EBLevelRedist> > > m_level_redist;
@@ -573,6 +585,11 @@ protected:
     @brief Define redistribution operators
   */
   virtual void define_redist_oper();
+
+  /*!
+    @brief Define level advection operators
+  */
+  virtual void define_advect_level();
 
   /*!
     @brief Define flux registers
