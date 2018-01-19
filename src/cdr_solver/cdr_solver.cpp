@@ -7,6 +7,7 @@
 */
 
 #include "cdr_solver.H"
+#include "cdr_solverF_F.H"
 #include "data_ops.H"
 
 #include <EBArith.H>
@@ -283,6 +284,53 @@ void cdr_solver::allocate_internals(){
   data_ops::set_value(m_ebflux,     0.0);
   data_ops::set_value(m_diffco,     0.0);
   data_ops::set_value(m_diffco_eb,  0.0);
+
+  this->define_stencils();
+}
+
+void cdr_solver::define_stencils(){
+  CH_TIME("cdr_solver::define_stencils");
+  if(m_verbosity > 5){
+    pout() << m_name + "::define_stencils" << endl;
+  }
+
+  const int comp            = 0;
+  const int ncomp           = 1;
+  const int finest_level    = m_amr->get_finest_level();
+  FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    (m_stencils[dir]).resize(1 + finest_level);
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+      m_stencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > >
+	(new LayoutData<BaseIFFAB<FaceStencil> >(dbl));
+
+      LayoutData<IntVectSet> cfivs(dbl);
+      EBArith::defineCFIVS(cfivs, dbl, domain);
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	BaseIFFAB<FaceStencil>& sten = (*m_stencils[dir][lvl])[dit()];
+	const Box box          = dbl.get(dit());
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+	sten.define(ivs, ebisbox.getEBGraph(), dir, ncomp);
+	
+	for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+	  FaceStencil& facesten = sten(face,comp);
+
+	  facesten = EBArith::getInterpStencil(face, cfivs[dit()], ebisbox, domain.domainBox()); 
+	}
+      }
+    }
+  }
 }
 
 void cdr_solver::advance(const Real& a_dt){
@@ -345,7 +393,7 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state,
   }
 
   // Advective term
-  this->compute_advective_derivative(advective_term, a_state);
+  this->compute_divF(advective_term, a_state);
   data_ops::incr(a_rhs, advective_term, -1.0);
 
   // Diffusion term
@@ -361,10 +409,10 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state,
   m_amr->interp_ghost(a_rhs, m_phase);
 }
 
-void cdr_solver::compute_advective_derivative(EBAMRCellData& a_divF, const EBAMRCellData& a_state){
-  CH_TIME("cdr_solver::compute_advective_derivative(divF, state)");
+void cdr_solver::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state){
+  CH_TIME("cdr_solver::compute_divF(divF, state)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_advective_derivative(divF, state)" << endl;
+    pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
 
   const int comp  = 0;
@@ -386,7 +434,6 @@ void cdr_solver::compute_advective_derivative(EBAMRCellData& a_divF, const EBAMR
   // Compute the advective derivative
   this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
   this->extrapolate_to_faces(face_state, a_state);                  // Face extrapolation to cell-centered faces
-  this->interpolate_to_centroids(face_state);                       // Interpolate to centroids
   this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
   this->nonconservative_divergence(div_nc, a_divF);                 // Compute non-conservative divergence
   this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
@@ -446,36 +493,42 @@ void cdr_solver::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCe
     const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_amr->get_level_advect(m_phase)[lvl];
     leveladvect->resetBCs(bcfact);
     CH_assert(!leveladvect.isNull());
+
+    const bool has_coar = lvl > 0;
+    LevelData<EBCellFAB>* coarstate_old = NULL;
+    LevelData<EBCellFAB>* coarstate_new = NULL;
+    LevelData<EBCellFAB>* coarvel_old   = NULL;
+    LevelData<EBCellFAB>* coarvel_new   = NULL;
+    LevelData<EBCellFAB>* coarsrc_old   = NULL;
+    LevelData<EBCellFAB>* coarsrc_new   = NULL;
+
+    
+    if(has_coar){
+      coarstate_old = a_state[lvl-1];
+      coarstate_new = a_state[lvl-1];
+      coarvel_old   = m_velo_cell[lvl-1];
+      coarvel_new   = m_velo_cell[lvl-1];
+      coarsrc_old   = m_source[lvl-1];
+      coarsrc_new   = m_source[lvl-1];
+    }
     leveladvect->advectToFacesBCG(*a_face_state[lvl],
 				  *a_state[lvl],
 				  *m_velo_cell[lvl],
 				  *m_velo_face[lvl],
-				  a_state[lvl],// should be coarse
-				  a_state[lvl],// should be coars
-				  m_velo_cell[lvl],// should be coarse
-				  m_velo_cell[lvl],// should be coarse
+				  coarstate_old,
+				  coarstate_new,
+				  coarvel_old,
+				  coarvel_new,
 				  m_time,
 				  m_time,
 				  m_time,
 				  m_dt,
 				  m_source[lvl], 
-				  m_source[lvl],// should be coarsse
-				  m_source[lvl]);// should be coarsse
+				  coarsrc_old,
+				  coarsrc_new);
   }
-						
-
-  MayDay::Abort("cdr_solver::extrapolate_to_faces - not implemented");
 }
 #endif
-
-void cdr_solver::interpolate_to_centroids(EBAMRFluxData& a_face_state){
-  CH_TIME("cdr_solver::interpolate_to_centroids");
-  if(m_verbosity > 5){
-    pout() << m_name + "::interpolate_to_centroids" << endl;
-  }
-
-  MayDay::Abort("cdr_solver::interpolate_to_centroids - not implemented");
-}
 
 void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
 					 const EBAMRFluxData& a_face_vel,
@@ -485,7 +538,184 @@ void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
     pout() << m_name + "::conservative_divergence" << endl;
   }
 
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    
+    this->advective_derivative(*a_cons_div[lvl], *a_face_vel[lvl], *a_face_state[lvl], lvl); 
+
+    // Set up the flux interpolant, i.e. vel*state on every irregular cell face
+    LevelData<BaseIFFAB<Real> > face_flux[SpaceDim];
+    this->compute_flux_interpolant(face_flux, *a_face_state[lvl], *a_face_vel[lvl], lvl);
+
+    // Interpolate face-centered fluxes to face centroids
+    LevelData<BaseIFFAB<Real> > centroid_flux[SpaceDim];
+    this->interpolate_flux_to_centroids(centroid_flux, face_flux, lvl);
+
+
+    // Interpolate the flux to centroids
+    
+
+    // // Define the irregular set over which we compute the conservative divergence
+    // LayoutData<IntVectSet> irreg_sets(dbl);
+    // for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    //   const EBISBox& ebisbox = ebisl[dit()];
+    //   if(!ebisbox.isAllCovered()){
+    // 	irreg_sets[dit()] = ebisbox.getIrregIVS(dbl.get(dit()));
+    //   }
+    // }
+
+    // // Compute the conservative divergence everywhere
+    // for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    //   const EBISBox& ebisbox = ebisl[dit()];
+    //   const IntVectSet& ivs  = irreg_sets[dit()];
+
+    //   // Define storage for the centroid flux. 
+    //   BaseIFFAB<Real> centroid_flux[SpaceDim];
+    //   const BaseIFFAB<Real>* interpol[SpaceDim];
+    //   for (int dir = 0; dir < SpaceDim; dir++){
+    // 	interpol[dir] = &interpolant[dir][dit()];
+    // 	centroid_flux[dir].define(ivs, ebisbox.getEBGraph(), dir, ncomp);
+    //   }
+
+    //   // PatchAdvect interpolates to face centroids
+    //   EBAdvectPatchIntegator& patcher = leveladvect.getPatchAdvect(dit());
+    //   EBPatchGodunov& patchGod = patcher;
+    //   patcher.setTimeAndDt(0.0,0.0);
+    //   patchGod.interpolateFluxToCentroids(centroid_flux, interpol, ivs);
+
+    //   // Fill the conservative divergence (this fills consDiv with kappa*div(v*phi), including the EB flux )
+    //   BaseIVFAB<Real> consDiv(ivs, ebisBox.getEBGraph(), ncomp);
+    //   consDiv.setVal(0.0); 
+    //   patchGod.consUndividedDivergence(consDiv, centroidFlux, (*m_irregFlux[lvl])[dit()], curIVS);
+    // }
+  }
+  
+
   MayDay::Abort("cdr_solver::conservative_divergence - not implemented");
+}
+
+void cdr_solver::advective_derivative(LevelData<EBCellFAB>&       a_divF,
+				      const LevelData<EBFluxFAB>& a_vel,
+				      const LevelData<EBFluxFAB>& a_phi,
+				      const int                   a_lvl){
+
+  CH_TIME("cdr_solver::advective_derivative");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advective_derivative" << endl;
+  }
+
+  CH_assert(a_divF.nComp() == 1);
+  CH_assert(a_vel.nComp()  == 1);
+  CH_assert(a_phi.nComp()  == 1);
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  const DisjointBoxLayout dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain domain  = m_amr->get_domains()[a_lvl];
+  const Real dx               = m_amr->get_dx()[a_lvl];
+
+  for (DataIterator dit = a_divF.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& divF         = a_divF[dit()];
+    BaseFab<Real>& divF_fab = divF.getSingleValuedFAB();
+    const Box box = dbl.get(dit());
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      const EBFaceFAB& vel = a_vel[dit()][dir];
+      const EBFaceFAB& phi = a_phi[dit()][dir];
+
+      const BaseFab<Real>& vel_fab = vel.getSingleValuedFAB();
+      const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
+
+      FORT_ADVECTIVEDERIV(CHF_FRA1(divF_fab, comp),
+			  CHF_CONST_FRA1(vel_fab, comp),
+			  CHF_CONST_FRA1(phi_fab, comp),
+			  CHF_CONST_INT(dir),
+			  CHF_CONST_INT(ncomp),
+			  CHF_CONST_REAL(dx),
+			  CHF_BOX(box));;
+    }
+
+
+    // Reset irregular cells - these contain bogus values
+    const EBISBox& ebisbox = divF.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      divF(vof, comp) = 0.;
+    }
+  }
+}
+
+void cdr_solver::compute_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
+					  const LevelData<EBFluxFAB>&   a_vel,
+					  const LevelData<EBFluxFAB>&   a_state,
+					  const int                     a_lvl){
+
+  const int ncomp = 1;
+  const int comp  = 0;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    // Define interpolant
+    LayoutData<IntVectSet> grown_set;
+    EBArith::defineFluxInterpolant(a_interpolant[dir],
+				   grown_set,
+				   dbl,
+				   ebisl,
+				   domain,
+				   ncomp,
+				   dir);
+
+    // Compute interpolant
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      BaseIFFAB<Real>& interpol   = a_interpolant[dir][dit()];
+      const Box& box              = dbl.get(dit());
+      const EBISBox& ebisbox      = ebisl[dit()];
+      const EBGraph& ebgraph      = ebisbox.getEBGraph();
+      const EBFaceFAB& vel        = a_vel[dit()][dir];
+      const EBFaceFAB& phi        = a_state[dit()][dir];
+      const IntVectSet ivs        = grown_set[dit()] & box;
+      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
+
+      for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	const FaceIndex& face = faceit();
+	interpol(face, comp) = vel(face, comp)*phi(face, comp);
+      }
+    }
+  }
+}
+
+void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_centroidflux[SpaceDim],
+					       const LevelData<BaseIFFAB<Real> > a_faceflux[SpaceDim],
+					       const int                         a_lvl){
+  CH_TIME("cdr_solver::interpolate_flux_to_centroids");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolate_flux_to_centroids" << endl;
+  }
+  
+  const int comp = 0;
+  const int ncomp = 1;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box = dbl.get(dit());
+  }
+
 }
 
 void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF){

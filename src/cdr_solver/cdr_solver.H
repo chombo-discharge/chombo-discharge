@@ -216,6 +216,11 @@ protected:
   RefCountedPtr<amr_mesh> m_amr;
 
   /*!
+    @brief Stencils for interpolating flux to centroids
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > > m_stencils[SpaceDim];
+
+  /*!
     @brief Phase
   */
   phase::which_phase m_phase;
@@ -293,7 +298,7 @@ protected:
   /*!
     @brief Compute advective derivative
   */
-  virtual void compute_advective_derivative(EBAMRCellData& a_divF, const EBAMRCellData& a_state);
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state);
 
   /*!
     @brief Compute diffusion term
@@ -315,16 +320,28 @@ protected:
 #endif
 
   /*!
-    @brief Interpolate to centroids
-  */
-  virtual void interpolate_to_centroids(EBAMRFluxData& a_face_state);
-
-  /*!
     @brief Compute the conservative divergence
   */
   virtual void conservative_divergence(EBAMRCellData&       a_cons_div,
 				       const EBAMRFluxData& a_face_vel,
 				       const EBAMRFluxData& a_face_state);
+
+  /*!
+    @brief Compute the advective derivative. This computes the divF = sum_i(vel*phi) using cell centered data.
+  */
+  virtual void advective_derivative(LevelData<EBCellFAB>&       a_divF,
+				    const LevelData<EBFluxFAB>& a_vel,
+				    const LevelData<EBFluxFAB>& a_phi,
+				    const int                   a_lvl);
+
+  virtual void compute_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
+					const LevelData<EBFluxFAB>&   a_rho,
+					const LevelData<EBFluxFAB>&   a_vel,
+					const int                     a_lvl);
+
+  virtual void interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_centroidflux[SpaceDim],
+					     const LevelData<BaseIFFAB<Real> > a_faceflux[SpaceDim],
+					     const int                         a_lvl);
   /*!
     @brief Compute the non-conservative divergence
   */
@@ -373,6 +390,11 @@ protected:
     @brief Set ebis
   */
   virtual void set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis);
+
+  /*!
+    @brief Define stencils
+  */
+  virtual void define_stencils();
 
 };
 
