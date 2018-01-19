@@ -24,7 +24,18 @@ species::~species(){
 }
 
 const Real species::initial_data(const RealVect a_pos, const Real a_time) const{
-  return 0.;
+#if 0 
+  return 1.;
+#else // This is a test
+  const RealVect orig = 0.25*RealVect::Unit;
+
+  if((a_pos - orig).vectorLength() < 0.2){
+    return 1.;
+  }
+  else{
+    return 0.;
+  }
+#endif
 }
 
 const std::string species::get_name() const {

@@ -653,13 +653,11 @@ void amr_mesh::define_flux_reg(){
 
     if(!ebis_gas.isNull()){
       if(has_fine){
-	if(!ebis_gas.isNull()){
-	  m_flux_reg[phase::solid][lvl] = RefCountedPtr<EBFastFR> (new EBFastFR(*m_eblg[phase::gas][lvl+1],
-										*m_eblg[phase::gas][lvl],
-										m_ref_ratios[lvl],
-										comps,
-										!m_ebcf));
-	}
+	m_flux_reg[phase::gas][lvl] = RefCountedPtr<EBFastFR> (new EBFastFR(*m_eblg[phase::gas][lvl+1],
+									    *m_eblg[phase::gas][lvl],
+									    m_ref_ratios[lvl],
+									    comps,
+									    !m_ebcf));
       }
     }
   }

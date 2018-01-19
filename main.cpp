@@ -49,8 +49,8 @@ int main(int argc, char* argv[]){
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(64*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(1);                      // Set max amr depth
+  amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
+  amr->set_max_amr_depth(0);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -139,11 +139,25 @@ int main(int argc, char* argv[]){
   amr->allocate_ptr(E_gas);
   amr->compute_gradient(E, poisson->get_state());
   amr->alias(E_gas, phase::gas, E);
+  data_ops::scale(E_gas, -1.0);
+  cdr->initial_data();
   cdr->set_velocity(E_gas);
   cdr->set_diffco(0.0);
   cdr->set_source(0.0);
+  cdr->set_ebflux(0.0);
   cdr->write_plot_file();
-  cdr->advance(0.1);
+
+  Real cfl = 0.8;
+  cdr->set_verbosity(1);
+  amr->set_verbosity(0);
+  for (int i = 0; i < 1000; i++){
+    Real dt = cfl*cdr->compute_dt();
+    pout() << "step = " << i << "\t mass = " << cdr->compute_mass() << endl;
+    cdr->advance(dt);
+    if((i+1) % 10 == 0){
+      cdr->write_plot_file();
+    }
+  }
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

@@ -101,6 +101,16 @@ public:
   virtual void set_source(const Real a_source);
 
   /*!
+    @brief Set the EB flux
+  */
+  virtual void set_ebflux(const EBAMRIVData& a_ebflux);
+
+  /*!
+    @brief Set the EB flux
+  */
+  virtual void set_ebflux(const Real a_ebflux);
+
+  /*!
     @brief Fill internal state with initial data
   */
   virtual void initial_data();
@@ -151,6 +161,12 @@ public:
     @brief Compute the largest possible stable time step. 
   */
   virtual Real compute_dt();
+
+  
+  /*!
+    @brief Compute the total mass in m_state
+  */
+  virtual Real compute_mass();
 
   /*!
     @brief Diffusive or not
@@ -218,7 +234,12 @@ protected:
   /*!
     @brief Stencils for interpolating flux to centroids
   */
-  Vector<RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > > m_stencils[SpaceDim];
+  Vector<RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > > m_interp_stencils[SpaceDim];
+
+  /*!
+    @brief Stencils for computing the non-conservative divergence
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_stencils_nc;
 
   /*!
     @brief Phase
@@ -339,13 +360,22 @@ protected:
 					const LevelData<EBFluxFAB>&   a_vel,
 					const int                     a_lvl);
 
-  virtual void interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_centroidflux[SpaceDim],
-					     const LevelData<BaseIFFAB<Real> > a_faceflux[SpaceDim],
+  virtual void interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
 					     const int                         a_lvl);
+
+  /*!
+    @brief Compute div(F) on irregular cells
+  */
+  virtual void compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
+				  const LevelData<BaseIFFAB<Real> >  a_flux[SpaceDim],
+				  const LevelData<BaseIVFAB<Real> >& a_ebflux,
+				  const int                          a_lvl);
+				  
   /*!
     @brief Compute the non-conservative divergence
   */
   virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF);
+
 
   /*!
     @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence
@@ -377,6 +407,11 @@ protected:
   virtual void increment_redist_flux();
 
   /*!
+    @brief Increment redistribution objects with mass to be redistributed
+  */
+  virtual void increment_redist(const EBAMRIVData& a_mass_diff);
+
+  /*!
     @brief Do coarse-fine redistribution
   */
   virtual void coarse_fine_redistribution(EBAMRCellData& a_state);
@@ -394,8 +429,12 @@ protected:
   /*!
     @brief Define stencils
   */
-  virtual void define_stencils();
+  virtual void define_interp_stencils();
 
+  /*!
+    @brief Define stencils for computing the non-conservative divergence
+  */
+  virtual void define_divFnc_stencils();
 };
 
 #endif
