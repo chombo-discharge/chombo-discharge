@@ -13,6 +13,7 @@
 #include "poisson_multifluid_gmg.H"
 #include "poisson_staircase_gmg.H"
 #include "cdr_solver.H"
+#include "cdr_gdnv.H"
 #include "eddington_sp1.H"
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
@@ -123,7 +124,7 @@ int main(int argc, char* argv[]){
 
   // New cdr solver
   RefCountedPtr<species> spec = RefCountedPtr<species> (new species());
-  cdr_solver* cdr = new cdr_solver();
+  cdr_gdnv* cdr = new cdr_gdnv();
   cdr->set_species(spec);
   cdr->set_verbosity(10);
   cdr->set_amr(amr);

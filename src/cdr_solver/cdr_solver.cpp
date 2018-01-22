@@ -13,10 +13,6 @@
 #include <EBArith.H>
 #include <EBAMRIO.H>
 
-#if 1 // Move to cdr_gdnv
-#include <ExtrapAdvectBC.H>
-#endif
-
 cdr_solver::cdr_solver(){
 
   this->set_phase(phase::gas);
@@ -356,7 +352,7 @@ void cdr_solver::define_interp_stencils(){
 	  const FaceIndex& face = faceit();
 	  FaceStencil& facesten = sten(face,comp);
 
-	  facesten = EBArith::getInterpStencil(face, cfivs[dit()], ebisbox, domain.domainBox()); 
+	  facesten = EBArith::getInterpStencil(face, cfivs[dit()], ebisbox, domain.domainBox());
 	}
       }
     }
@@ -440,7 +436,6 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   m_amr->allocate(k2,  m_phase, ncomp);
   m_amr->allocate(phi, m_phase, ncomp);
 
-#if 1
   // Compute f(yn, tn);
   this->compute_rhs(k1, a_state, a_dt);
 
@@ -458,30 +453,6 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
     data_ops::incr(*a_state[lvl], *k1[lvl], 0.5*a_dt);
     data_ops::incr(*a_state[lvl], *k2[lvl], 0.5*a_dt);
   }
-#else
-  MayDay::Abort("cdr_solver::advance - review exponenents and stuff like that");
-  EBAMRCellData phi_new, phi_old, rhs;
-  m_amr->allocate(rhs    ,  m_phase, ncomp);
-  m_amr->allocate(phi_new,  m_phase, ncomp);
-  m_amr->allocate(phi_old,  m_phase, ncomp);
-
-  this->compute_rhs(rhs, a_state, a_dt);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_state[lvl]->copyTo(*phi_new[lvl]);
-    a_state[lvl]->copyTo(*phi_old[lvl]);
-
-    data_ops::ln(*phi_old[lvl]);
-    data_ops::ln(*phi_new[lvl]);
-
-    data_ops::multiply(*rhs[lvl], *phi_old[lvl]);
-    data_ops::incr(*phi_new[lvl], *rhs[lvl], 1.0*a_dt);
-    data_ops::exponentiate(*phi_new[lvl], 1.0);
-
-    phi_new[lvl]->copyTo(*a_state[lvl]);
-    
-  }
-#endif
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
@@ -600,7 +571,7 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
   }
 }
 
-#if 1 // This should be moved to cdr_gdnv
+#if 0 // This should be moved to cdr_gdnv
 void cdr_solver::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state){
   CH_TIME("cdr_solver::extrapolate_to_faces");
   if(m_verbosity > 5){
@@ -813,28 +784,19 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >      
       BaseIFFAB<Real>& flux = a_flux[dir][dit()];
       BaseIFFAB<Real> centroid_flux;
 
-      // Compute centroid flux
+      // Compute face centroid flux
       centroid_flux.define(ivs, ebgraph, dir, ncomp);
       for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	const FaceIndex& face  = faceit();
+	const FaceIndex& face   = faceit();
 	const FaceStencil& sten = (*m_interp_stencils[dir][a_lvl])[dit()](face, comp);
 
-#if 1 // This can probably be removed
-	if(sten.size() == 0){
-	  centroid_flux(face, comp) = flux(face, comp);
-	}
-	else{
-#endif
-	  centroid_flux(face, comp) = 0.;
-	  for (int i = 0; i < sten.size(); i++){
-	    const FaceIndex& iface = sten.face(i);
-	    const Real iweight     = sten.weight(i);
+	centroid_flux(face, comp) = 0.;
+	for (int i = 0; i < sten.size(); i++){
+	  const FaceIndex& iface = sten.face(i);
+	  const Real iweight     = sten.weight(i);
 	  
-	    centroid_flux(face, comp) += iweight*flux(iface, comp);
-	  }
-#if 1
+	  centroid_flux(face, comp) += iweight*flux(iface, comp);
 	}
-#endif
       }
 
       // Copy centroid flux into a_flux

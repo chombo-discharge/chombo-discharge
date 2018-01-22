@@ -151,11 +151,7 @@ public:
   /*!
     @brief Get the ghost cell requirement
   */
-#if 0
   virtual int query_ghost() const = 0;
-#else
-  virtual int query_ghost() const;
-#endif
 
   /*!
     @brief Compute the largest possible stable time step. 
@@ -334,11 +330,7 @@ protected:
   /*!
     @brief Extrapolate state to faces. 
   */
-#if 0
   virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state) = 0;
-#else
-  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state);
-#endif
 
   /*!
     @brief Compute the conservative divergence
