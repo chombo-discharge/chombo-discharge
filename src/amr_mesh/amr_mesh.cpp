@@ -30,6 +30,7 @@ amr_mesh::amr_mesh(){
   this->set_redist_rad(-1);
   this->set_num_ghost(-2);
   this->set_eb_ghost(-4);
+  this->set_irreg_sten_type(stencil_type::linear);
   this->set_irreg_sten_order(-1);
   this->set_irreg_sten_radius(-1);
   this->set_balance(load_balance::knapsack);
@@ -780,19 +781,47 @@ void amr_mesh::define_irreg_sten(){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-
   if(!ebis_gas.isNull()){
     m_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
-      (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[phase::gas], m_domains, m_dx, m_finest_level, order, rad));
+      (new irreg_amr_stencil<centroid_interp>(m_grids,
+					      m_ebisl[phase::gas],
+					      m_domains,
+					      m_dx,
+					      m_finest_level,
+					      order,
+					      rad,
+					      m_stencil_type));
     m_eb_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
-      (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[phase::gas], m_domains, m_dx, m_finest_level, order, rad));
+      (new irreg_amr_stencil<eb_centroid_interp>(m_grids,
+						 m_ebisl[phase::gas],
+						 m_domains,
+						 m_dx,
+						 m_finest_level,
+						 order,
+						 rad,
+						 m_stencil_type));
   }
+
 
   if(!ebis_sol.isNull()){
     m_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
-      (new irreg_amr_stencil<centroid_interp>(m_grids, m_ebisl[phase::solid], m_domains, m_dx, m_finest_level, order, rad));
+      (new irreg_amr_stencil<centroid_interp>(m_grids,
+					      m_ebisl[phase::solid],
+					      m_domains,
+					      m_dx,
+					      m_finest_level,
+					      order,
+					      rad,
+					      m_stencil_type));
     m_eb_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
-      (new irreg_amr_stencil<eb_centroid_interp>(m_grids, m_ebisl[phase::solid], m_domains, m_dx, m_finest_level, order, rad));
+      (new irreg_amr_stencil<eb_centroid_interp>(m_grids,
+						 m_ebisl[phase::solid],
+						 m_domains,
+						 m_dx,
+						 m_finest_level,
+						 order,
+						 rad,
+						 m_stencil_type));
   }
 }
 
@@ -982,6 +1011,11 @@ void amr_mesh::set_num_ghost(const int a_num_ghost){
 void amr_mesh::set_redist_rad(const int a_redist_rad){
   CH_TIME("amr_mesh::set_redist_rads");
   m_redist_rad = a_redist_rad;
+}
+
+void amr_mesh::set_irreg_sten_type(const stencil_type::which_type a_type){
+  CH_TIME("amr_mesh::set_irreg_sten_type");
+  m_stencil_type = a_type;
 }
 
 void amr_mesh::set_irreg_sten_order(const int a_irreg_sten_order){

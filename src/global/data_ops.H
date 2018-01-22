@@ -27,6 +27,8 @@ public:
 				   const ProblemDomain&        a_domain);
   
   static void incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale);
+  
+  static void incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale);
 
   static void copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
 
@@ -47,6 +49,10 @@ public:
   static void divide_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
   
   static void divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+
+  static void floor(EBAMRCellData& a_lhs, const Real a_value);
+
+  static void floor(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
   static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
   

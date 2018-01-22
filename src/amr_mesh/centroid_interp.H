@@ -31,12 +31,13 @@ public:
     @param[in] a_order Interpolation order
     @param[in] a_radius Radius for least squares
   */
-  centroid_interp(const DisjointBoxLayout& a_dbl,
-		  const EBISLayout&        a_ebisl,
-		  const ProblemDomain&     a_domain,
-		  const Real&              a_dx,
-		  const int                a_order,
-		  const int                a_radius);
+  centroid_interp(const DisjointBoxLayout&       a_dbl,
+		  const EBISLayout&              a_ebisl,
+		  const ProblemDomain&           a_domain,
+		  const Real&                    a_dx,
+		  const int                      a_order,
+		  const int                      a_radius,
+		  const stencil_type::which_type a_type);
 
   /*!
     @brief Destructor

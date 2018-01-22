@@ -39,8 +39,12 @@ void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
 
 void data_ops::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    EBLevelDataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
+}
+
+void data_ops::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale){
+  EBLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
 void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
@@ -117,6 +121,30 @@ void data_ops::divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
 
   for (int comp = 0; comp < lcomps; comp++){
     data_ops::divide(a_lhs, a_rhs, comp, 0);
+  }
+}
+
+void data_ops::floor(EBAMRCellData& a_lhs, const Real a_value){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::floor(*a_lhs[lvl], a_value);
+  }
+}
+
+void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs = a_lhs[dit()];
+    const Box box          = a_lhs.disjointBoxLayout().get(dit());
+    const EBISBox& ebisbox = lhs.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs(lhs.getRegion());
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int comp = 0; comp < a_lhs.nComp(); comp++){
+	const Real value = lhs(vof, comp);
+	lhs(vof, comp) = Max(value, a_value);
+      }
+    }
   }
 }
 

@@ -53,6 +53,9 @@ namespace amrmg {
   };
 };
 
+/*!
+  @brief Stencil types
+*/
 namespace stencil_type {
   enum which_type {
     linear = 0,

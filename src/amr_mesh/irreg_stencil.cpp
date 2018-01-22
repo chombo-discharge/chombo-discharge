@@ -5,7 +5,9 @@
   @date Nov. 2017
 */
 
+#include "type_definitions.H"
 #include "irreg_stencil.H"
+
 #include <EBArith.H>
 
 irreg_stencil::irreg_stencil(){
@@ -17,23 +19,25 @@ irreg_stencil::~irreg_stencil(){
 
 }
 
-irreg_stencil::irreg_stencil(const DisjointBoxLayout& a_dbl,
-			     const EBISLayout&        a_ebisl,
-			     const ProblemDomain&     a_domain,
-			     const Real&              a_dx,
-			     const int                a_order,
-			     const int                a_radius){
+irreg_stencil::irreg_stencil(const DisjointBoxLayout&       a_dbl,
+			     const EBISLayout&              a_ebisl,
+			     const ProblemDomain&           a_domain,
+			     const Real&                    a_dx,
+			     const int                      a_order,
+			     const int                      a_radius,
+			     const stencil_type::which_type a_type){
 
-  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius);
+  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
 }
 
 
-void irreg_stencil::define(const DisjointBoxLayout& a_dbl,
-			   const EBISLayout&        a_ebisl,
-			   const ProblemDomain&     a_domain,
-			   const Real&              a_dx,
-			   const int                a_order,
-			   const int                a_radius){
+void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
+			   const EBISLayout&              a_ebisl,
+			   const ProblemDomain&           a_domain,
+			   const Real&                    a_dx,
+			   const int                      a_order,
+			   const int                      a_radius,
+			   const stencil_type::which_type a_type){
 
   m_dbl    = a_dbl;
   m_ebisl  = a_ebisl;
@@ -41,6 +45,7 @@ void irreg_stencil::define(const DisjointBoxLayout& a_dbl,
   m_radius = a_radius;
   m_order  = a_order;
   m_stencils.define(m_dbl);
+  m_stencil_type = a_type;
 
   const int ncomp = 1;
 

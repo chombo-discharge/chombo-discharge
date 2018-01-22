@@ -32,24 +32,26 @@ public:
 		    const Vector<Real>&              a_dx,
 		    const int                        a_finest_level,
 		    const int                        a_order,
-		    const int                        a_radius);
+		    const int                        a_radius,
+		    const stencil_type::which_type   a_type);
 
   /*!
     @brief Destructor
   */
-  ~irreg_amr_stencil();
+  virtual ~irreg_amr_stencil();
   
 
   /*!
     @brief Define function
   */
-  void define(const Vector<DisjointBoxLayout>& a_grids,
-	      const Vector<EBISLayout>&        a_ebisl,
-	      const Vector<ProblemDomain>&     a_domains,
-	      const Vector<Real>&              a_dx,
-	      const int                        a_finest_level,
-	      const int                        a_order,
-	      const int                        a_radius);
+  virtual void define(const Vector<DisjointBoxLayout>& a_grids,
+		      const Vector<EBISLayout>&        a_ebisl,
+		      const Vector<ProblemDomain>&     a_domains,
+		      const Vector<Real>&              a_dx,
+		      const int                        a_finest_level,
+		      const int                        a_order,
+		      const int                        a_radius,
+		      const stencil_type::which_type   a_type);
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -59,10 +61,10 @@ public:
     @param[in]  a_lvl Level
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(LevelData<EBCellFAB>&       a_dst,
-	     const LevelData<EBCellFAB>& a_src,
-	     const int                   a_lvl,
-	     const bool                  a_limit = true) const;
+  virtual void apply(LevelData<EBCellFAB>&       a_dst,
+		     const LevelData<EBCellFAB>& a_src,
+		     const int                   a_lvl,
+		     const bool                  a_limit = true) const;
 
   /*!
     @brief Apply stencils to data holder. This replaces original data
@@ -70,9 +72,9 @@ public:
     @param[in]    a_lvl Level
     @param[in]    a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(LevelData<EBCellFAB>& a_data,
-	     const int             a_lvl,
-	     const bool            a_limit = true) const;
+  virtual void apply(LevelData<EBCellFAB>& a_data,
+		     const int             a_lvl,
+		     const bool            a_limit = true) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -82,10 +84,10 @@ public:
     @param[in]  a_lvl Level
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(LevelData<BaseIVFAB<Real> >& a_dst,
-	     const LevelData<EBCellFAB>&  a_src,
-	     const int                    a_lvl,
-	     const bool                   a_limit = true) const;
+  virtual void apply(LevelData<BaseIVFAB<Real> >& a_dst,
+		     const LevelData<EBCellFAB>&  a_src,
+		     const int                    a_lvl,
+		     const bool                   a_limit = true) const;
   
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -94,17 +96,17 @@ public:
     @param[in]  a_src Source data
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(EBAMRCellData&       a_dst,
-	     const EBAMRCellData& a_src,
-	     const bool         a_limit = true) const;
+  virtual void apply(EBAMRCellData&       a_dst,
+		     const EBAMRCellData& a_src,
+		     const bool         a_limit = true) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. This replaces original data.
     @param[inout] a_dst Data
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(EBAMRCellData& a_dst,
-	     const bool   a_limit = true) const;
+  virtual void apply(EBAMRCellData& a_dst,
+		     const bool   a_limit = true) const;
 
   /*!
     @brief Apply the stencils to an existing data holder
@@ -112,17 +114,17 @@ public:
     @param[in]  a_src Source data
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(EBAMRIVData&         a_dst,
-	     const EBAMRCellData& a_src,
-	     const bool         a_limit = true) const;
+  virtual void apply(EBAMRIVData&         a_dst,
+		     const EBAMRCellData& a_src,
+		     const bool         a_limit = true) const;
 
   /*!
     @brief Apply stencils to an existing data holders. This replaces original data
     @param[inout] a_data
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(Vector<EBAMRCellData*>& a_data,
-	     const bool            a_limit = true) const;
+  virtual void apply(Vector<EBAMRCellData*>& a_data,
+		     const bool            a_limit = true) const;
 
   /*!
     @brief Apply stencils to existing data holders
@@ -130,9 +132,9 @@ public:
     @param[in]  a_src Source data holders
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(Vector<EBAMRCellData*>&       a_dst,
-	     const Vector<EBAMRCellData*>& a_src,
-	     const bool                  a_limit = true) const;
+  virtual void apply(Vector<EBAMRCellData*>&       a_dst,
+		     const Vector<EBAMRCellData*>& a_src,
+		     const bool                  a_limit = true) const;
 
   /*!
     @brief Apply stencils to existing data holders
@@ -140,9 +142,9 @@ public:
     @param[in]  a_src Source data holders
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  void apply(Vector<EBAMRIVData*>&         a_dst,
-	     const Vector<EBAMRCellData*>& a_src,
-	     const bool                  a_limit = true) const;
+  virtual void apply(Vector<EBAMRIVData*>&         a_dst,
+		     const Vector<EBAMRCellData*>& a_src,
+		     const bool                  a_limit = true) const;
 
   /*!
     @brief Get the stencils over an AMR level
@@ -206,6 +208,11 @@ protected:
     @brief Finest level
   */
   int m_finest_level;
+
+  /*!
+    @brief Stencil type
+  */
+  stencil_type::which_type m_stencil_type;
 };
 
 #include "irreg_amr_stencilI.H"

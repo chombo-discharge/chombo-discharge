@@ -6,6 +6,7 @@
 */
 
 #include "centroid_interp.H"
+#include "stencil_ops.H"
 
 #include "EBArith.H"
 
@@ -16,16 +17,17 @@ centroid_interp::centroid_interp() : irreg_stencil(){
   CH_TIME("centroid_interp::centroid_interp");
 }
 
-centroid_interp::centroid_interp(const DisjointBoxLayout& a_dbl,
-				 const EBISLayout&        a_ebisl,
-				 const ProblemDomain&     a_domain,
-				 const Real&              a_dx,
-				 const int                a_order,
-				 const int                a_radius) : irreg_stencil(){
+centroid_interp::centroid_interp(const DisjointBoxLayout&       a_dbl,
+				 const EBISLayout&              a_ebisl,
+				 const ProblemDomain&           a_domain,
+				 const Real&                    a_dx,
+				 const int                      a_order,
+				 const int                      a_radius,
+				 const stencil_type::which_type a_type) : irreg_stencil(){
 
   CH_TIME("centroid_interp::centroid_interp");
 
-  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius);
+  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
 }
 
 centroid_interp::~centroid_interp(){
@@ -44,12 +46,27 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
 
   
   bool found_stencil = false;
+
+  // Find the preferred stencil type
+  if(m_stencil_type == stencil_type::linear){
+    const RealVect centroid = a_ebisbox.centroid(a_vof);
+    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+  }
+  else if(m_stencil_type == stencil_type::taylor){
+    found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+  else if(m_stencil_type == stencil_type::lsq){
+    found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+
+  // If we couldn't find a stencil, look for stencils in this preferred order:
+  if(!found_stencil){
+    const RealVect centroid = a_ebisbox.centroid(a_vof);
+    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+  }
   if(!found_stencil){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
-
-
-  // Use least squares if we must. 
   if(!found_stencil){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
@@ -70,7 +87,6 @@ bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
 					 const IntVectSet&        a_cfivs){
   CH_TIME("centroid_interp::get_taylor_stencil");
 
-  m_order = 1;
   const int comp           = 0;
   const RealVect& centroid = a_ebisbox.centroid(a_vof);
   IntVectSet* cfivs        = const_cast<IntVectSet*>(&a_cfivs);

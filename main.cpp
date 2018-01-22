@@ -60,7 +60,8 @@ int main(int argc, char* argv[]){
   amr->set_redist_rad(1);                         // Set redistribution radius
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
-  amr->set_irreg_sten_order(1);                   // Set extrapolation stencil order
+  amr->set_irreg_sten_type(stencil_type::linear); // Set preferred stencil type
+  amr->set_irreg_sten_order(1);                   // Set preferred stencil order
   amr->set_irreg_sten_radius(1);                  // Set extrapolation stencil radius
 
   // Set up plasma engine

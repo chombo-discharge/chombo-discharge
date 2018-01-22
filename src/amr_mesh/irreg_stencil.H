@@ -9,6 +9,8 @@
 #ifndef _IRREG_STENCIL_
 #define _IRREG_STENCIL_
 
+#include "type_definitions.H"
+
 #include <DisjointBoxLayout.H>
 #include <EBISLayout.H>
 #include <BaseIVFAB.H>
@@ -30,12 +32,13 @@ public:
   /*!
     @brief Full constructor
   */
-  irreg_stencil(const DisjointBoxLayout& a_dbl,
-		const EBISLayout&        a_ebisl,
-		const ProblemDomain&     a_domain,
-		const Real&              a_dx,
-		const int                a_order,
-		const int                a_radius);
+  irreg_stencil(const DisjointBoxLayout&       a_dbl,
+		const EBISLayout&              a_ebisl,
+		const ProblemDomain&           a_domain,
+		const Real&                    a_dx,
+		const int                      a_order,
+		const int                      a_radius,
+		const stencil_type::which_type a_type);
 
   /*!
     @brief Destructor
@@ -45,12 +48,13 @@ public:
   /*!
     @brief Define function
   */
-  void define(const DisjointBoxLayout& a_dbl,
-	      const EBISLayout&        a_ebisl,
-	      const ProblemDomain&     a_domain,
-  	      const Real&              a_dx,
-	      const int                a_order,
-	      const int                a_radius);
+  virtual void define(const DisjointBoxLayout&       a_dbl,
+		      const EBISLayout&              a_ebisl,
+		      const ProblemDomain&           a_domain,
+		      const Real&                    a_dx,
+		      const int                      a_order,
+		      const int                      a_radius,
+		      const stencil_type::which_type a_type);
 
   /*!
     @brief Get the stencils over a single box
@@ -95,10 +99,15 @@ protected:
   */
   int m_radius;
 
-    /*!
+  /*!
     @brief Stencil order
   */
   int m_order;
+
+  /*!
+    @brief Stencil type
+  */
+  stencil_type::which_type m_stencil_type;
 
   /*!
     @brief Domain
@@ -108,13 +117,13 @@ protected:
   /*!
     @brief Build the desired stencil
   */
-  virtual void build_stencil(VoFStencil& a_sten,
-			     const VolIndex& a_vof,
+  virtual void build_stencil(VoFStencil&              a_sten,
+			     const VolIndex&          a_vof,
 			     const DisjointBoxLayout& a_dbl,
-			     const ProblemDomain&   a_domain,
-			     const EBISBox& a_ebisbox,
-			     const Box& a_box,
-			     const Real& a_dx,
-			     const IntVectSet& a_cfivs) = 0;
+			     const ProblemDomain&     a_domain,
+			     const EBISBox&           a_ebisbox,
+			     const Box&               a_box,
+			     const Real&              a_dx,
+			     const IntVectSet&        a_cfivs) = 0;
 };
 #endif

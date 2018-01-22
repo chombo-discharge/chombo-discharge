@@ -5,7 +5,9 @@
   @date Nov. 2017
 */
 
+#include "type_definitions.H"
 #include "eb_centroid_interp.H"
+#include "stencil_ops.H"
 
 #include "EBArith.H"
 
@@ -16,16 +18,17 @@ eb_centroid_interp::eb_centroid_interp() : irreg_stencil(){
   CH_TIME("eb_centroid_interp::eb_centroid_interp");
 }
 
-eb_centroid_interp::eb_centroid_interp(const DisjointBoxLayout& a_dbl,
-				       const EBISLayout&        a_ebisl,
-				       const ProblemDomain&     a_domain,
-				       const Real&              a_dx,
-				       const int                a_order,
-				       const int                a_radius) : irreg_stencil(){
+eb_centroid_interp::eb_centroid_interp(const DisjointBoxLayout&       a_dbl,
+				       const EBISLayout&              a_ebisl,
+				       const ProblemDomain&           a_domain,
+				       const Real&                    a_dx,
+				       const int                      a_order,
+				       const int                      a_radius,
+				       const stencil_type::which_type a_type) : irreg_stencil(){
 
   CH_TIME("eb_centroid_interp::eb_centroid_interp");
 
-  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius);
+  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
 }
 
 eb_centroid_interp::~eb_centroid_interp(){
@@ -44,6 +47,24 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
 
   
   bool found_stencil = false;
+
+  // Find the preferred stencil type
+  if(m_stencil_type == stencil_type::linear){
+    const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
+    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+  }
+  else if(m_stencil_type == stencil_type::taylor){
+    found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+  else if(m_stencil_type == stencil_type::lsq){
+    found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+
+  // If we couldn't find a stencil, try other types in this order
+  if(!found_stencil){
+    const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
+    found_stencil = stencil_ops::get_linear_interp_stencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+  }
   if(!found_stencil){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
@@ -51,8 +72,6 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
 
-
-  found_stencil = false;
   if(!found_stencil){ // Drop to zeroth order. 
     a_sten.clear();
     a_sten.add(a_vof, 1.0);

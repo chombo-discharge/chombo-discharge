@@ -234,6 +234,11 @@ public:
   virtual void set_redist_rad(const int a_redist_rad);
 
   /*!
+    @brief Set preferred stencil type
+  */
+  virtual void set_irreg_sten_type(const stencil_type::which_type a_type);
+
+  /*!
     @brief Set irregular stencil order
   */
   virtual void set_irreg_sten_order(const int a_irreg_sten_order);
@@ -395,6 +400,11 @@ protected:
     @brief Load balance type
   */
   load_balance::which_balance m_which_balance;
+
+  /*!
+    @brief Stencil type
+  */
+  stencil_type::which_type m_stencil_type;
 
   /*!
     @brief Coarsest box where we compute

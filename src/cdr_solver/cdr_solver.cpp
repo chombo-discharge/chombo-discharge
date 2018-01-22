@@ -432,6 +432,7 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
 
   const int comp  = 0;
   const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
   
   // Compute right-hand-side
   EBAMRCellData rhs;
@@ -439,9 +440,10 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   this->compute_rhs(rhs, a_state, a_dt);
 
   // Increment. This is the explicit Euler method
-  data_ops::incr(a_state, rhs, a_dt);
-
-  MayDay::Warning("cdr_solver::advance - floor this shit");
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::incr(*a_state[lvl], *rhs[lvl], a_dt);
+    data_ops::floor(*a_state[lvl], 0.0);
+  }
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
@@ -919,8 +921,9 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH(vof, comp);
 	const Real dnc      = divNC(vof, comp);
-
+#if 0
 	MayDay::Warning("cdr_solver::hybrid_divergence - review kappa stuff");
+#endif
 #if 1
 	divH(vof, comp)   = kappa*dc + (1-kappa)*dnc;   // Adjust divergence, it is now the hybrid divergence
 	deltaM(vof, comp) = kappa*(1-kappa)*(dc - dnc); // Compute mass difference
@@ -1108,10 +1111,12 @@ void cdr_solver::write_plot_file(){
     names[4] = "y-velocity";
   }
 
+
   EBAMRCellData output;
   m_amr->allocate(output, m_phase, ncomps);
 
   for (int lvl = 0; lvl < output.size(); lvl++){
+    data_ops::floor(*m_state[lvl], 0.0);
     LevelData<EBCellFAB>& state  = *m_state[lvl];
     LevelData<EBCellFAB>& source = *m_source[lvl];
     LevelData<EBCellFAB>& velo   = *m_velo_cell[lvl];
@@ -1123,7 +1128,8 @@ void cdr_solver::write_plot_file(){
 
   // Transform to centroids
   irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
-  sten.apply(output);
+  sten.apply(output, true);
+
 
   Vector<LevelData<EBCellFAB>* > output_ptr;
   m_amr->alias(output_ptr, output);
@@ -1140,7 +1146,7 @@ void cdr_solver::write_plot_file(){
 	      m_time,
 	      m_amr->get_ref_rat(),
 	      m_amr->get_finest_level() + 1,
-	      false,
+	      true,
 	      covered_values);
 }
 #endif
@@ -1175,7 +1181,9 @@ Real cdr_solver::compute_dt(){
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex vof = vofit();
 
+#if 0
 	MayDay::Warning("cdr_solver::compute_dt - review CFL");
+#endif
 	const RealVect u  = RealVect(D_DECL(velo(vof, 0), velo(vof, 1), velo(vof, 2)));
 	const Real thisdt = dx/u.vectorLength();
 
@@ -1203,7 +1211,9 @@ Real cdr_solver::compute_mass(){
     pout() << m_name + "::compute_mass" << endl;
   }
 
+#if 0
   MayDay::Warning("cdr_solver::compute_mass - please review and get rid of EBLevelDataOps");
+#endif
 
   Real mass;
   const int which = 1;
