@@ -440,6 +440,7 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   m_amr->allocate(k2,  m_phase, ncomp);
   m_amr->allocate(phi, m_phase, ncomp);
 
+#if 1
   // Compute f(yn, tn);
   this->compute_rhs(k1, a_state, a_dt);
 
@@ -457,6 +458,30 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
     data_ops::incr(*a_state[lvl], *k1[lvl], 0.5*a_dt);
     data_ops::incr(*a_state[lvl], *k2[lvl], 0.5*a_dt);
   }
+#else
+  MayDay::Abort("cdr_solver::advance - review exponenents and stuff like that");
+  EBAMRCellData phi_new, phi_old, rhs;
+  m_amr->allocate(rhs    ,  m_phase, ncomp);
+  m_amr->allocate(phi_new,  m_phase, ncomp);
+  m_amr->allocate(phi_old,  m_phase, ncomp);
+
+  this->compute_rhs(rhs, a_state, a_dt);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_state[lvl]->copyTo(*phi_new[lvl]);
+    a_state[lvl]->copyTo(*phi_old[lvl]);
+
+    data_ops::ln(*phi_old[lvl]);
+    data_ops::ln(*phi_new[lvl]);
+
+    data_ops::multiply(*rhs[lvl], *phi_old[lvl]);
+    data_ops::incr(*phi_new[lvl], *rhs[lvl], 1.0*a_dt);
+    data_ops::exponentiate(*phi_new[lvl], 1.0);
+
+    phi_new[lvl]->copyTo(*a_state[lvl]);
+    
+  }
+#endif
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
