@@ -384,7 +384,6 @@ void cdr_solver::define_divFnc_stencils(){
     m_stencils_nc[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
@@ -392,15 +391,15 @@ void cdr_solver::define_divFnc_stencils(){
 
       BaseIVFAB<VoFStencil>& stens = (*m_stencils_nc[lvl])[dit()];
       stens.define(ivs, ebgraph, ncomp);
-
       
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	VoFStencil& sten = stens(vof, comp);
-
+	sten.clear();
+	
 	Real norm = 0.;
 	Vector<VolIndex> vofs;
-	EBArith::getAllVoFsWithinRadius(vofs, vof, ebisbox, rad);
+	EBArith::getAllVoFsInMonotonePath(vofs, vof, ebisbox, rad);
 	for (int i = 0; i < vofs.size(); i++){
 	  const VolIndex& ivof = vofs[i];
 	  const Real iweight   = ebisbox.volFrac(ivof);
@@ -435,14 +434,27 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   const int finest_level = m_amr->get_finest_level();
   
   // Compute right-hand-side
-  EBAMRCellData rhs;
-  m_amr->allocate(rhs, m_phase, ncomp);
-  this->compute_rhs(rhs, a_state, a_dt);
+  EBAMRCellData k1, k2, phi;
+  m_amr->allocate(k1,  m_phase, ncomp);
+  m_amr->allocate(k2,  m_phase, ncomp);
+  m_amr->allocate(phi, m_phase, ncomp);
 
-  // Increment. This is the explicit Euler method
+  // Compute f(yn, tn);
+  this->compute_rhs(k1, a_state, a_dt);
+
+  // Make phi(n+1) = phi(n) + dt*f(n)
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::incr(*a_state[lvl], *rhs[lvl], a_dt);
-    data_ops::floor(*a_state[lvl], 0.0);
+    a_state[lvl]->copyTo(*phi[lvl]);
+    data_ops::incr(*phi[lvl], *k1[lvl], a_dt);
+  }
+
+  // Compute f(n+1)
+  this->compute_rhs(k2, phi, a_dt);
+
+  // Make phi = phi(n) + 0.5*(f(n) + f(n+1))
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::incr(*a_state[lvl], *k1[lvl], 0.5*a_dt);
+    data_ops::incr(*a_state[lvl], *k2[lvl], 0.5*a_dt);
   }
 
   m_amr->average_down(a_state, m_phase);
@@ -638,7 +650,7 @@ void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
 
-    // Comptue div(F) on regular cells
+    // Compute div(F) on regular cells
     this->advective_derivative(*a_cons_div[lvl], *a_face_vel[lvl], *a_face_state[lvl], lvl); 
 
     // Interpolate fluxes to face centroids on irregular cells
@@ -779,12 +791,17 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >      
 	const FaceIndex& face  = faceit();
 	const FaceStencil& sten = (*m_interp_stencils[dir][a_lvl])[dit()](face, comp);
 
-	centroid_flux(face, comp) = 0.;
-	for (int i = 0; i < sten.size(); i++){
-	  const FaceIndex& iface = sten.face(i);
-	  const Real iweight     = sten.weight(i);
+	if(sten.size() == 0){
+	  centroid_flux(face, comp) = flux(face, comp);
+	}
+	else{
+	  centroid_flux(face, comp) = 0.;
+	  for (int i = 0; i < sten.size(); i++){
+	    const FaceIndex& iface = sten.face(i);
+	    const Real iweight     = sten.weight(i);
 	  
-	  centroid_flux(face, comp) += flux(iface, comp)*iweight;
+	    centroid_flux(face, comp) += iweight*flux(iface, comp);
+	  }
 	}
       }
 
@@ -844,7 +861,7 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
 	}
       }
 
-      // Scale divF by dx, because that's how this shit works.
+      // Scale divF by dx but not by kappa. 
       divF(vof, comp) *= dx_inv;
     }
   }
@@ -875,7 +892,7 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCe
       const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
+	const VolIndex& vof    = vofit();
 	const VoFStencil& sten = (*m_stencils_nc[lvl])[dit()](vof, comp);
 
 	div_nc(vof, comp) = 0.;
@@ -924,7 +941,7 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 #if 0
 	MayDay::Warning("cdr_solver::hybrid_divergence - review kappa stuff");
 #endif
-#if 1
+#if 0
 	divH(vof, comp)   = kappa*dc + (1-kappa)*dnc;   // Adjust divergence, it is now the hybrid divergence
 	deltaM(vof, comp) = kappa*(1-kappa)*(dc - dnc); // Compute mass difference
 #else
@@ -1030,10 +1047,9 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
-    level_redist.resetWeights(*a_redist_weights[lvl], comp);
-    level_redist.redistribute(*a_divF[lvl], interv, interv);
-
-    level_redist.setToZero(); // Reset
+    //    level_redist.resetWeights(*a_redist_weights[lvl], comp);
+    level_redist.redistribute(*a_divF[lvl], interv);
+    level_redist.setToZero(); 
   }
 }
 
@@ -1055,7 +1071,6 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
-    //
     if(has_fine){
       const Real scale = -1.0/dx;
       fluxreg[lvl]->reflux(*a_state[lvl], interv, scale);
@@ -1116,7 +1131,6 @@ void cdr_solver::write_plot_file(){
   m_amr->allocate(output, m_phase, ncomps);
 
   for (int lvl = 0; lvl < output.size(); lvl++){
-    data_ops::floor(*m_state[lvl], 0.0);
     LevelData<EBCellFAB>& state  = *m_state[lvl];
     LevelData<EBCellFAB>& source = *m_source[lvl];
     LevelData<EBCellFAB>& velo   = *m_velo_cell[lvl];
@@ -1126,13 +1140,19 @@ void cdr_solver::write_plot_file(){
     velo.copyTo(Interval(0,SpaceDim - 1), *output[lvl],  Interval(2, 2 + (SpaceDim-1)));
   }
 
+#if 0 // Possibly removed. 
   // Transform to centroids
   irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
   sten.apply(output, true);
+#endif
 
 
   Vector<LevelData<EBCellFAB>* > output_ptr;
   m_amr->alias(output_ptr, output);
+
+#if 0 // Should be removed
+  data_ops::floor(output, 0.0);
+#endif
   
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);

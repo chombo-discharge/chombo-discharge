@@ -32,6 +32,10 @@ public:
 
   static void copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
 
+  static void exponentiate(EBAMRCellData& a_lhs, const Real a_factor);
+
+  static void exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor);
+
   static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
 
   static void scale(EBAMRIVData& a_lhs, const Real& a_scale);

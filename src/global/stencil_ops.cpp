@@ -22,8 +22,9 @@ bool stencil_ops::get_linear_interp_stencil(VoFStencil&          a_stencil,
   }
 
   if(do_interp){
-#if CH_SPACEDIM == 2 
-    found_stencil = compute_interp_stencil_2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
+#if CH_SPACEDIM == 2
+    found_stencil = stencil_ops::compute_bilinear_stencil(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
+    //    found_stencil = compute_interp_stencil_2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
 #elif CH_SPACEDIM == 3
     found_stencil = compute_interp_stencil_3D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
 #endif
@@ -33,7 +34,73 @@ bool stencil_ops::get_linear_interp_stencil(VoFStencil&          a_stencil,
     a_stencil.clear();
     a_stencil.add(a_vof, 1.0);
   }
+
+
   
+  return found_stencil;
+}
+
+bool stencil_ops::compute_bilinear_stencil(VoFStencil&          a_stencil,
+					   const RealVect&      a_centroid,
+					   const VolIndex&      a_vof,
+					   const ProblemDomain& a_domain,
+					   const EBISBox&       a_ebisbox){
+
+  const int comp = 0;
+  
+  bool found_stencil = false;
+
+  // Get the quadrant and all the cells that are involved
+  IntVect quadrant;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(a_centroid[dir] > 0.){
+      quadrant[dir] = 1;
+    }
+    else{
+      quadrant[dir] = -1;
+    }
+  }
+
+  RealVect pos;
+  IntVect iv00, iv01, iv10, iv11;
+
+  // Relative positions
+  pos  = a_centroid;
+  iv00 = a_vof.gridIndex();
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(quadrant[dir] == -1){
+      pos[dir]  = 1 - pos[dir];
+      iv00[dir] = iv00[dir] - 1;
+    }
+  }
+  iv10 = iv00 + BASISV(0);
+  iv01 = iv00 + BASISV(1);
+  iv11 = iv00 + IntVect::Unit;
+
+
+  const VolIndex vof00(iv00, comp);
+  const VolIndex vof01(iv01, comp);
+  const VolIndex vof10(iv10, comp);
+  const VolIndex vof11(iv11, comp);
+
+  // Add vofs to stencil. Exit if any is covered.
+  const Real x = pos[0];
+  const Real y = pos[1];
+  
+  a_stencil.clear();
+  if(a_ebisbox.isCovered(iv00) || a_ebisbox.isCovered(iv10) || a_ebisbox.isCovered(iv01) || a_ebisbox.isCovered(iv11)){
+    found_stencil = false;
+  }
+  else{
+    a_stencil.add(vof00, (1-x)*(1-y));
+    a_stencil.add(vof10, x*(1-y));
+    a_stencil.add(vof01, (1-x)*y);
+    a_stencil.add(vof11, x*y);
+
+    found_stencil = true;
+  }
+
+
   return found_stencil;
 }
 

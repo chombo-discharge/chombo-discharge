@@ -55,6 +55,31 @@ void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
   }
 }
 
+void data_ops::exponentiate(EBAMRCellData& a_lhs, const Real a_factor){
+  for (int lvl = 0; lvl <= a_lhs.size(); lvl++){
+    data_ops::exponentiate(*a_lhs[lvl], a_factor);
+  }
+}
+
+void data_ops::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs         = a_lhs[dit()];
+    const Box box          = a_lhs.disjointBoxLayout().get(dit());
+    const EBISBox& ebisbox = lhs.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs(box);
+
+    
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int comp = 0; comp < lhs.nComp(); comp++){
+	const Real value = lhs(vof, comp);
+	lhs(vof,comp) = exp(a_factor*value);
+      }
+    }
+  }
+}
+
 void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     MFLevelDataOps::scale(*a_lhs[lvl], a_scale);

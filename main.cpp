@@ -148,14 +148,14 @@ int main(int argc, char* argv[]){
   cdr->set_ebflux(0.0);
   cdr->write_plot_file();
 
-  Real cfl = 0.8;
+  Real cfl = 0.1;
   cdr->set_verbosity(1);
   amr->set_verbosity(0);
-  for (int i = 0; i < 1000; i++){
+  for (int i = 0; i < 3000; i++){
     Real dt = cfl*cdr->compute_dt();
     pout() << "step = " << i << "\t mass = " << cdr->compute_mass() << endl;
     cdr->advance(dt);
-    if((i+1) % 10 == 0){
+    if((i+1) % 20 == 0){
       cdr->write_plot_file();
     }
   }

@@ -32,6 +32,15 @@ public:
   /*!
     @brief Compute a bilinear interpolation stencil
   */
+  static bool compute_bilinear_stencil(VoFStencil&          a_stencil,
+				       const RealVect&      a_centroid,
+				       const VolIndex&      a_vof,
+				       const ProblemDomain& a_domain,
+				       const EBISBox&       a_ebisbox);
+
+  /*!
+    @brief Compute a bilinear interpolation stencil
+  */
   static bool compute_interp_stencil_1D(VoFStencil&          a_stencil,
 					const RealVect&      a_centroid,
 					const VolIndex&      a_vof,
