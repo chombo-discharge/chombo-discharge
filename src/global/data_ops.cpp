@@ -173,6 +173,33 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
   }
 }
 
+void data_ops::kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
+
+
+  Real mass = 0.;
+
+  CH_assert(a_lhs.nComp() == 1);
+  
+  const int comp  = 0;
+  const int ncomp = 1;
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    const Box box          = a_lhs.disjointBoxLayout().get(dit());
+    const EBCellFAB& lhs   = a_lhs[dit()];
+    const EBISBox& ebisbox = lhs.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs(box);
+    
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      mass += ebisbox.volFrac(vof)*lhs(vof, comp);
+    }
+  }
+
+  a_mass = EBLevelDataOps::parallelSum(mass);
+}
+
 void data_ops::set_value(EBAMRCellData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);

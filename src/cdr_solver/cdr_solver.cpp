@@ -405,7 +405,7 @@ void cdr_solver::define_divFnc_stencils(){
 	  const Real iweight   = ebisbox.volFrac(ivof);
 
 	  norm += iweight;
-	  sten.add(ivof, 1.0);
+	  sten.add(ivof, iweight);
 	}
 
 	sten *= 1./norm;
@@ -455,10 +455,13 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::incr(*a_state[lvl], *k1[lvl], 0.5*a_dt);
     data_ops::incr(*a_state[lvl], *k2[lvl], 0.5*a_dt);
+    data_ops::floor(*a_state[lvl], 0.0);
   }
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
+
+
 
   m_time += a_dt;
   m_step++;
@@ -549,7 +552,7 @@ void cdr_solver::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_stat
   }
   else{
     this->hyperbolic_redistribution(a_divF, mass_diff, a_state);  // Redistribute mass into hybrid divergence
-    this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
+    //    this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
   }
 }
 
@@ -711,7 +714,7 @@ void cdr_solver::advective_derivative(LevelData<EBCellFAB>&       a_divF,
 
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
-      divF(vof, comp) = 0.;
+      //      divF(vof, comp) = 0.;
     }
   }
 }
@@ -755,6 +758,8 @@ void cdr_solver::compute_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interp
 	interpol(face, comp) = vel(face, comp)*phi(face, comp);
       }
     }
+
+    a_interpolant[dir].exchange();
   }
 }
 
@@ -791,10 +796,12 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >      
 	const FaceIndex& face  = faceit();
 	const FaceStencil& sten = (*m_interp_stencils[dir][a_lvl])[dit()](face, comp);
 
+#if 1 // This can probably be removed
 	if(sten.size() == 0){
 	  centroid_flux(face, comp) = flux(face, comp);
 	}
 	else{
+#endif
 	  centroid_flux(face, comp) = 0.;
 	  for (int i = 0; i < sten.size(); i++){
 	    const FaceIndex& iface = sten.face(i);
@@ -802,7 +809,9 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >      
 	  
 	    centroid_flux(face, comp) += iweight*flux(iface, comp);
 	  }
+#if 1
 	}
+#endif
       }
 
       // Copy centroid flux into a_flux
@@ -827,7 +836,7 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
   const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
-  const Real dx_inv            = 1./(m_amr->get_dx()[a_lvl]);
+  const Real dx                = m_amr->get_dx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box          = dbl.get(dit());
@@ -862,7 +871,7 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
       }
 
       // Scale divF by dx but not by kappa. 
-      divF(vof, comp) *= dx_inv;
+      divF(vof, comp) *= 1./dx;
     }
   }
 }
@@ -1045,11 +1054,11 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
+
   for (int lvl = 0; lvl <= finest_level; lvl++){
     EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
-    //    level_redist.resetWeights(*a_redist_weights[lvl], comp);
     level_redist.redistribute(*a_divF[lvl], interv);
-    level_redist.setToZero(); 
+    level_redist.setToZero();
   }
 }
 
@@ -1231,25 +1240,13 @@ Real cdr_solver::compute_mass(){
     pout() << m_name + "::compute_mass" << endl;
   }
 
-#if 0
-  MayDay::Warning("cdr_solver::compute_mass - please review and get rid of EBLevelDataOps");
-#endif
-
-  Real mass;
-  const int which = 1;
-  const int norm  = 1;
-
-  m_amr->average_down(m_state, m_phase);
-
+  Real mass = 0.;
   const int base = 0;
-  const Real base_dx                     = m_amr->get_dx()[base];
-  const DisjointBoxLayout& base_dbl      = m_amr->get_grids()[base];
-  const ProblemDomain& base_domain       = m_amr->get_domains()[base];
-  const LevelData<EBCellFAB>& base_state = *m_state[base];
-
-  EBLevelDataOps::kappaNorm(mass, base_state, 2, base_domain, 1);
-
-  mass *= pow(base_dx, SpaceDim);
+  const Real dx = m_amr->get_dx()[base];
+  m_amr->average_down(m_state, m_phase);
+  
+  data_ops::kappa_sum(mass, *m_state[base]);
+  mass *= pow(dx, SpaceDim);
   
   return mass;
 }

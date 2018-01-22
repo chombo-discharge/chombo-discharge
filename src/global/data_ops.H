@@ -58,6 +58,8 @@ public:
 
   static void floor(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
+  static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
+
   static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
   
   static void set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);
