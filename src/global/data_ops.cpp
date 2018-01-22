@@ -200,6 +200,18 @@ void data_ops::kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
   a_mass = EBLevelDataOps::parallelSum(mass);
 }
 
+void data_ops::multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::multiply(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+
+void data_ops::multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    a_lhs[dit()] *= a_rhs[dit()];
+  }
+}
+
 void data_ops::set_value(EBAMRCellData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);

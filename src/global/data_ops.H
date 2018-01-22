@@ -60,6 +60,10 @@ public:
 
   static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
 
+  static void multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+
+  static void multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+
   static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
   
   static void set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);

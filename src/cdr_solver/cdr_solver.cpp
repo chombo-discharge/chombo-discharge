@@ -405,7 +405,7 @@ void cdr_solver::define_divFnc_stencils(){
 	  const Real iweight   = ebisbox.volFrac(ivof);
 
 	  norm += iweight;
-	  sten.add(ivof, iweight);
+	  sten.add(ivof, 1.0);
 	}
 
 	sten *= 1./norm;
@@ -432,7 +432,8 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   const int comp  = 0;
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
-  
+
+
   // Compute right-hand-side
   EBAMRCellData k1, k2, phi;
   m_amr->allocate(k1,  m_phase, ncomp);
@@ -455,13 +456,10 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::incr(*a_state[lvl], *k1[lvl], 0.5*a_dt);
     data_ops::incr(*a_state[lvl], *k2[lvl], 0.5*a_dt);
-    data_ops::floor(*a_state[lvl], 0.0);
   }
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
-
-
 
   m_time += a_dt;
   m_step++;
@@ -714,7 +712,7 @@ void cdr_solver::advective_derivative(LevelData<EBCellFAB>&       a_divF,
 
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
-      //      divF(vof, comp) = 0.;
+      divF(vof, comp) = 0.;
     }
   }
 }
@@ -870,7 +868,7 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
 	}
       }
 
-      // Scale divF by dx but not by kappa. 
+      // Scale divF by dx but not by kappa.
       divF(vof, comp) *= 1./dx;
     }
   }
@@ -947,16 +945,9 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH(vof, comp);
 	const Real dnc      = divNC(vof, comp);
-#if 0
-	MayDay::Warning("cdr_solver::hybrid_divergence - review kappa stuff");
-#endif
-#if 0
-	divH(vof, comp)   = kappa*dc + (1-kappa)*dnc;   // Adjust divergence, it is now the hybrid divergence
-	deltaM(vof, comp) = kappa*(1-kappa)*(dc - dnc); // Compute mass difference
-#else
-	divH(vof, comp)   = dc + (1-kappa)*dnc;   // Adjust divergence, it is now the hybrid divergence
+
+	divH(vof, comp)   = (dc + (1-kappa)*dnc);          // On output, contains hybrid divergence
 	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
-#endif
       }
     }
   }
@@ -1209,10 +1200,6 @@ Real cdr_solver::compute_dt(){
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex vof = vofit();
-
-#if 0
-	MayDay::Warning("cdr_solver::compute_dt - review CFL");
-#endif
 	const RealVect u  = RealVect(D_DECL(velo(vof, 0), velo(vof, 1), velo(vof, 2)));
 	const Real thisdt = dx/u.vectorLength();
 

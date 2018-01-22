@@ -151,9 +151,11 @@ int main(int argc, char* argv[]){
   Real cfl = 0.6;
   cdr->set_verbosity(1);
   amr->set_verbosity(0);
-  for (int i = 0; i < 2000; i++){
+  poisson->set_verbosity(0);
+  const Real init_mass = cdr->compute_mass();
+  for (int i = 0; i < 500; i++){
     Real dt = cfl*cdr->compute_dt();
-    pout() << "step = " << i << "\t mass = " << cdr->compute_mass() << endl;
+    pout() << "step = " << i << "\t mass = " << cdr->compute_mass()/init_mass << endl;
     cdr->advance(dt);
     if((i+1) % 20 == 0){
       cdr->write_plot_file();
