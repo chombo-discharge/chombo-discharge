@@ -55,11 +55,11 @@ int main(int argc, char* argv[]){
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(32);                    // Set blocking factor
+  amr->set_blocking_factor(16);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
-  amr->set_max_box_size(64);                      // Set max box size
-  amr->set_redist_rad(1);                         // Set redistribution radius
-  amr->set_eb_ghost(4);                           // Set EB ghost vectors
+  amr->set_max_box_size(32);                      // Set max box size
+  amr->set_redist_rad(3);                         // Set redistribution radius
+  amr->set_eb_ghost(6);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
   amr->set_irreg_sten_type(stencil_type::linear); // Set preferred stencil type
   amr->set_irreg_sten_order(1);                   // Set preferred stencil order
@@ -149,12 +149,12 @@ int main(int argc, char* argv[]){
   cdr->set_ebflux(0.0);
   cdr->write_plot_file();
 
-  Real cfl = 0.6;
+  Real cfl = 0.8;
   cdr->set_verbosity(1);
   amr->set_verbosity(0);
   poisson->set_verbosity(0);
   const Real init_mass = cdr->compute_mass();
-  for (int i = 0; i < 500; i++){
+  for (int i = 0; i < 3600; i++){
     Real dt = cfl*cdr->compute_dt();
     pout() << "step = " << i << "\t mass = " << cdr->compute_mass()/init_mass << endl;
     cdr->advance(dt);

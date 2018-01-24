@@ -56,7 +56,7 @@ void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
 }
 
 void data_ops::exponentiate(EBAMRCellData& a_lhs, const Real a_factor){
-  for (int lvl = 0; lvl <= a_lhs.size(); lvl++){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::exponentiate(*a_lhs[lvl], a_factor);
   }
 }
@@ -94,8 +94,12 @@ void data_ops::scale(EBAMRIVData& a_lhs, const Real& a_scale){
 
 void data_ops::scale(EBAMRCellData& a_lhs, const Real a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    EBLevelDataOps::scale(*a_lhs[lvl], a_scale);
+    data_ops::scale(*a_lhs[lvl], a_scale);
   }
+}
+
+void data_ops::scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale){
+  EBLevelDataOps::scale(a_lhs, a_scale);
 }
 
 void data_ops::scale(EBAMRFluxData& a_lhs, const Real a_scale){

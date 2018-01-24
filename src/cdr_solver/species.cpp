@@ -27,9 +27,8 @@ const Real species::initial_data(const RealVect a_pos, const Real a_time) const{
 #if 0 
   return 1.;
 #else // This is a test
-  const RealVect orig = 0.25*RealVect::Unit;
+  const RealVect orig = RealVect::Zero;
 
-  //  if((a_pos - orig).vectorLength() < 0.2){
   Real R = 0.1;
   Real r = (a_pos-orig).vectorLength();
   

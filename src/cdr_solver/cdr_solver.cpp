@@ -429,7 +429,6 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
 
-
   // Compute right-hand-side
   EBAMRCellData k1, k2, phi;
   m_amr->allocate(k1,  m_phase, ncomp);
@@ -448,11 +447,21 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   // Compute f(n+1)
   this->compute_rhs(k2, phi, a_dt);
 
+#if 0
   // Make phi = phi(n) + 0.5*(f(n) + f(n+1))
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::incr(*a_state[lvl], *k1[lvl], 0.5*a_dt);
     data_ops::incr(*a_state[lvl], *k2[lvl], 0.5*a_dt);
+    data_ops::floor(*a_state[lvl], 0.0); // This removes mass!
   }
+#else
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::scale(*a_state[lvl], 0.5);
+    data_ops::incr(*a_state[lvl], *phi[lvl], 0.5);
+    data_ops::incr(*a_state[lvl], *k2[lvl], 0.5*a_dt);
+    data_ops::floor(*a_state[lvl], 0.0); // This removes mass!
+  }
+#endif
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
@@ -491,7 +500,7 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state,
   }
 
   // Advective term
-  this->compute_divF(advective_term, a_state);
+  this->compute_divF(advective_term, a_state, a_dt);
   data_ops::incr(a_rhs, advective_term, -1.0);
 
   // Diffusion term
@@ -507,36 +516,50 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state,
   m_amr->interp_ghost(a_rhs, m_phase);
 }
 
-void cdr_solver::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state){
+void cdr_solver::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_dt){
   CH_TIME("cdr_solver::compute_divF(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
+  const int comp       = 0;
+  const int ncomp      = 1;
+  const int redist_rad = m_amr->get_redist_rad();
 
   EBAMRFluxData face_state;
   EBAMRIVData   div_nc;
   EBAMRIVData   mass_diff;
+  EBAMRCellData weights;
 
   m_amr->allocate(face_state, m_phase, ncomp);
   m_amr->allocate(div_nc,     m_phase, ncomp);
   m_amr->allocate(mass_diff,  m_phase, ncomp);
+  m_amr->allocate(weights,    m_phase, ncomp, 2*redist_rad);
 
   data_ops::set_value(a_divF,     0.0); 
   data_ops::set_value(face_state, 0.0);
   data_ops::set_value(div_nc,     0.0);
   data_ops::set_value(mass_diff,  0.0);
+  data_ops::set_value(weights,    0.0);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    a_state[lvl]->copyTo(*weights[lvl]);
+  }
 
   // Compute the advective derivative
   this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
   this->extrapolate_to_faces(face_state, a_state);                  // Face extrapolation to cell-centered faces
   this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
-  this->nonconservative_divergence(div_nc, a_divF);                 // Compute non-conservative divergence
+  this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
   this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
   this->increment_flux_register(face_state, m_velo_face);           // Increment flux registers
   this->increment_redist(mass_diff);                                // Increment redistribution objects
+
+  // Mass weights.
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    data_ops::incr(*weights[lvl], *a_state[lvl], 1.0);
+    //    data_ops::incr(*weights[lvl], *a_divF[lvl], -a_dt);
+  }
 
   const bool ebcf = m_amr->get_ebcf();
   if(ebcf){ 
@@ -545,8 +568,8 @@ void cdr_solver::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_stat
     this->coarse_fine_redistribution(a_divF);   // Redistribute
   }
   else{
-    this->hyperbolic_redistribution(a_divF, mass_diff, a_state);  // Redistribute mass into hybrid divergence
-    //    this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
+    this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
+    this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
   }
 }
 
@@ -570,65 +593,6 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
     data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->get_domains()[lvl]);
   }
 }
-
-#if 0 // This should be moved to cdr_gdnv
-void cdr_solver::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state){
-  CH_TIME("cdr_solver::extrapolate_to_faces");
-  if(m_verbosity > 5){
-    pout() << m_name + "::extrapolate_to_faces" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  const int comp = 0;
-  
-  EBAdvectPatchIntegrator::setCurComp(0);
-  EBAdvectPatchIntegrator::setDoingVel(0);
-
-  RefCountedPtr<ExtrapAdvectBCFactory> bcfact = RefCountedPtr<ExtrapAdvectBCFactory>
-    (new ExtrapAdvectBCFactory());
-
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_amr->get_level_advect(m_phase)[lvl];
-    leveladvect->resetBCs(bcfact);
-    CH_assert(!leveladvect.isNull());
-
-    const bool has_coar = lvl > 0;
-    LevelData<EBCellFAB>* coarstate_old = NULL;
-    LevelData<EBCellFAB>* coarstate_new = NULL;
-    LevelData<EBCellFAB>* coarvel_old   = NULL;
-    LevelData<EBCellFAB>* coarvel_new   = NULL;
-    LevelData<EBCellFAB>* coarsrc_old   = NULL;
-    LevelData<EBCellFAB>* coarsrc_new   = NULL;
-
-    
-    if(has_coar){
-      coarstate_old = a_state[lvl-1];
-      coarstate_new = a_state[lvl-1];
-      coarvel_old   = m_velo_cell[lvl-1];
-      coarvel_new   = m_velo_cell[lvl-1];
-      coarsrc_old   = m_source[lvl-1];
-      coarsrc_new   = m_source[lvl-1];
-    }
-    leveladvect->advectToFacesBCG(*a_face_state[lvl],
-				  *a_state[lvl],
-				  *m_velo_cell[lvl],
-				  *m_velo_face[lvl],
-				  coarstate_old,
-				  coarstate_new,
-				  coarvel_old,
-				  coarvel_new,
-				  m_time,
-				  m_time,
-				  m_time,
-				  m_dt,
-				  m_source[lvl], 
-				  coarsrc_old,
-				  coarsrc_new);
-  }
-}
-#endif
 
 void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
 					 const EBAMRFluxData& a_face_vel,
@@ -697,7 +661,7 @@ void cdr_solver::advective_derivative(LevelData<EBCellFAB>&       a_divF,
 			  CHF_CONST_INT(dir),
 			  CHF_CONST_INT(ncomp),
 			  CHF_CONST_REAL(dx),
-			  CHF_BOX(box));;
+			  CHF_BOX(box));
     }
 
 
@@ -708,7 +672,7 @@ void cdr_solver::advective_derivative(LevelData<EBCellFAB>&       a_divF,
 
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
-      divF(vof, comp) = 0.;
+      divF(vof, comp) = 0.12345678E89;
     }
   }
 }
@@ -861,7 +825,9 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
   }
 }
 
-void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF){
+void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
+					    const EBAMRCellData& a_divF,
+					    const EBAMRFluxData& a_face_state){
   CH_TIME("cdr_solver::nonconservative_divergence");
   if(m_verbosity > 5){
     pout() << m_name + "::nonconservative_divergence" << endl;
@@ -933,7 +899,7 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	const Real dc       = divH(vof, comp);
 	const Real dnc      = divNC(vof, comp);
 
-	divH(vof, comp)   = (dc + (1-kappa)*dnc);          // On output, contains hybrid divergence
+	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
 	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
       }
     }
@@ -1035,6 +1001,9 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
+#if 1
+    level_redist.resetWeights(*a_redist_weights[lvl], comp);
+#endif
     level_redist.redistribute(*a_divF[lvl], interv);
     level_redist.setToZero();
   }

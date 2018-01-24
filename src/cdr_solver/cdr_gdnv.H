@@ -30,13 +30,75 @@ public:
     @brief Query number of ghost cells
   */
   virtual int query_ghost() const;
+
+  /*!
+    @brief Allocate internal stuff
+  */
+  virtual void allocate_internals();
   
 protected:
+
+  /*!
+    @brief Allocate covered stuff
+  */
+  virtual void allocate_covered();
+
+  /*!
+    @brief Extrapolate velocity to covered faces
+  */
+  virtual void extrapolate_vel_to_covered_faces();
 
   /*!
     @brief Godunov face extrapolation method
   */
   virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state);
+
+  /*!
+    @brief Non-conservative divergence
+  */
+  virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
+
+  /*!
+    @brief Covered faces on side Lo
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<Vector<VolIndex> > > > > m_covered_face_lo;
+
+  /*!
+    @brief Covered faces on side Hi
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<Vector<VolIndex> > > > > m_covered_face_hi;
+
+  /*!
+    @brief Holder for covered data. This is ugly, but the final Vector<IntVectSet> represents a SpaceDim vector holding
+    the grid indices of the VolIndexes which has a covered face on the Side::Lo side in direction dir=0,SpaceDim-1
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<IntVectSet> > > > m_covered_sets_lo;
+
+  /*!
+    @brief Holder for covered data. This is ugly, but the final Vector<IntVectSet> represents a SpaceDim vector holding
+    the grid indices of the VolIndexes which has a covered face on the Side::Hi side in direction dir=0,SpaceDim-1
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<IntVectSet> > > > m_covered_sets_hi;
+
+  /*!
+    @brief State on covered faces on side Lo 
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<BaseIVFAB<Real>* > > > > m_covered_phi_lo;
+
+  /*!
+    @brief State on covered faces on side Hi
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<BaseIVFAB<Real>* > > > > m_covered_phi_hi;
+
+  /*!
+    @brief Advective velocity on covered faces on side Lo 
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<BaseIVFAB<Real>* > > > > m_covered_velo_lo;
+
+  /*!
+    @brief Advective velocity on covered faces on side Hi
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<BaseIVFAB<Real>* > > > > m_covered_velo_hi;
 };
 
 #endif

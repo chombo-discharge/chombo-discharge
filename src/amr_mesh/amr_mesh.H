@@ -287,6 +287,11 @@ public:
     @brief Get number of ghost cells
   */
   virtual int get_num_ghost();
+
+  /*!
+    @brief Get redistribution radius
+  */
+  virtual int get_redist_rad();
   
   /*!
     @brief Get finest level

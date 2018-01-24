@@ -315,7 +315,7 @@ protected:
   /*!
     @brief Compute advective derivative
   */
-  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state);
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_dt);
 
   /*!
     @brief Compute diffusion term
@@ -366,7 +366,7 @@ protected:
   /*!
     @brief Compute the non-conservative divergence
   */
-  virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF);
+  virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
 
 
   /*!

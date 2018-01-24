@@ -42,6 +42,8 @@ public:
 
   static void scale(EBAMRCellData& a_lhs, const Real a_scale);
 
+  static void scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale);
+
   static void scale(EBAMRFluxData& a_lhs, const Real a_scale);
 
   static void scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale);

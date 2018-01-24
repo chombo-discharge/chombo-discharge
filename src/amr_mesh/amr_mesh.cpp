@@ -1072,6 +1072,10 @@ int amr_mesh::get_num_ghost(){
   return m_num_ghost;
 }
 
+int amr_mesh::get_redist_rad(){
+  return m_redist_rad;
+}
+
 int amr_mesh::get_blocking_factor(){
   return m_blocking_factor;
 }
