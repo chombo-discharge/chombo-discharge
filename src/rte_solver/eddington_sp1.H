@@ -207,7 +207,7 @@ protected:
   */
   Real m_r2;
 
-    /*!
+  /*!
     @brief Geometric multigrid solver
   */
   RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_gmg_solver;

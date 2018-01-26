@@ -35,6 +35,11 @@ public:
     @brief Allocate internal stuff
   */
   virtual void allocate_internals();
+
+  /*!
+    @brief Set the nonconservative divergence method. Use = 0 for div(F)_nc = sum(divF(c))/norm, 1 for covered face extrapolation.
+  */
+  virtual void set_divF_nc(const int a_which_divFnc);
   
 protected:
 
@@ -51,7 +56,7 @@ protected:
   /*!
     @brief Godunov face extrapolation method
   */
-  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state);
+  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
   /*!
     @brief Non-conservative divergence
@@ -99,6 +104,11 @@ protected:
     @brief Advective velocity on covered faces on side Hi
   */
   Vector<RefCountedPtr<LayoutData<Vector<BaseIVFAB<Real>* > > > > m_covered_velo_hi;
+
+  /*!
+    @brief Switch between Trebotich and Colella nonconservative divergence
+  */
+  int m_which_divFnc;
 };
 
 #endif

@@ -13,6 +13,13 @@
 #include "amr_mesh.H"
 #include "physical_domain.H"
 #include "species.H"
+#include "ebconductivityopfactory.H"
+
+#include <AMRMultiGrid.H>
+#include <AMRTGA.H>
+#include <BiCGStabSolver.H>
+#include <EBBackwardEuler.H>
+#include <EBSimpleSolver.H>
 
 /*!
   @brief Abstract class for cdr-equations. This is (almost) a whole solver. 
@@ -69,6 +76,41 @@ public:
     @brief Get current time
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+
+  /*!
+    @brief Set solver parameters. These are normally good for this class. 
+  */
+  virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
+					 amrmg::which_mg a_gmg_type      = amrmg::vcycle,
+					 const int a_verbosity           = -1,
+					 const int a_pre_smooth          = 16,
+					 const int a_post_smooth         = 16,
+					 const int a_bot_smooth          = 16,
+					 const int a_max_iter            = 16,
+					 const int a_min_iter            = 5,
+					 const Real a_eps                = 1.E-8,
+					 const Real a_hang               = 0.2);
+
+  /*!
+    @brief Set the bottom solver.  
+    @param[in] a_which_solver Solver type. 0 = smoother, 1 = BiCGStab
+  */
+  virtual void set_bottom_solver(const int a_whichsolver);
+
+  /*!
+    @brief Set the depth for bottom drop
+  */
+  virtual void set_bottom_drop(const int a_bottom_drop);
+
+  /*!
+    @brief Set number of smoothing for the bottom solver (simplified solver only)
+  */
+  virtual void set_botsolver_smooth(const int a_smooth);
+
+  /*!
+    @brief Use tga for temporal integration
+  */
+  virtual void set_tga(const bool a_use_tga);
 
   /*!
     @brief Set velocity
@@ -149,15 +191,24 @@ public:
 #endif
 
   /*!
+    @brief Use mass-weighted redistribution
+  */
+  virtual void set_mass_redist(const bool a_mass_redist);
+
+  /*!
     @brief Get the ghost cell requirement
   */
   virtual int query_ghost() const = 0;
 
   /*!
-    @brief Compute the largest possible stable time step. 
+    @brief Compute the largest possible advection time step (for explicit methods)
   */
-  virtual Real compute_dt();
+  virtual Real compute_cfl_dt();
 
+  /*!
+    @brief Compute the largest possible diffusive time step (for explicit methods)
+  */
+  virtual Real compute_diffusive_dt();
   
   /*!
     @brief Compute the total mass in m_state
@@ -228,6 +279,36 @@ protected:
   RefCountedPtr<amr_mesh> m_amr;
 
   /*!
+    @brief Geometric multigrid solver
+  */
+  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_gmg_solver;
+
+  /*!
+    @brief TGA solver
+  */
+  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgasolver;
+
+  /*!
+    @brief Euler solver
+  */
+  RefCountedPtr<EBBackwardEuler> m_eulersolver;
+
+  /*!
+    @brief Operator factory
+  */
+  RefCountedPtr<ebconductivityopfactory> m_opfact;
+
+  /*!
+    @brief Conjugate gradient solver bottom MG level
+  */
+  BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
+
+  /*!
+    @brief Simple solver
+  */
+  EBSimpleSolver m_simple_solver;
+
+  /*!
     @brief Stencils for interpolating flux to centroids
   */
   Vector<RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > > m_interp_stencils[SpaceDim];
@@ -248,6 +329,16 @@ protected:
   std::string m_name;
 
   /*!
+    @brief Relaxation type for gmg
+  */
+  relax::which_relax m_gmg_relax_type;
+
+  /*!
+    @brief GMG multigrid type
+  */
+  amrmg::which_mg m_gmg_type;
+
+    /*!
     @brief State data (i.e. the ion density)
   */
   EBAMRCellData m_state;
@@ -261,6 +352,11 @@ protected:
     @brief Cell-centered velocities
   */
   EBAMRCellData m_velo_cell;
+
+  /*!
+    @brief Scratch storage. 
+  */
+  EBAMRCellData m_scratch;
 
   /*!
     @brief Face-centered velocities (only normal components)
@@ -288,9 +384,54 @@ protected:
   EBAMRIVData m_diffco_eb;
 
   /*!
-    @brief Also solve for diffusion
+    @brief Verbosity for geometric multigrid
   */
-  bool m_diffusive;
+  int m_gmg_verbosity;
+
+  /*!
+    @brief Number of smoothings before averaging
+  */
+  int m_gmg_pre_smooth;
+
+  /*!
+    @brief Number of smoothings before averaging
+  */
+  int m_gmg_post_smooth;
+
+  /*!
+    @brief Number of smoothing before bottom solver
+  */
+  int m_gmg_bot_smooth;
+
+  /*!
+    @brief Maximum number of iterations
+  */
+  int m_gmg_max_iter;
+
+  /*!
+    @brief Minimum number of iterations
+  */
+  int m_gmg_min_iter;
+
+  /*!
+    @brief Bottom solver type
+  */
+  int m_bottomsolver;
+
+  /*!
+    @brief Number of smoothing for bottom solver
+  */
+  int m_numsmooth;
+
+  /*!
+    @brief Set bottom drop depth
+  */
+  int m_bottom_drop;
+
+  /*!
+    @brief Use tga
+  */
+  bool m_use_tga;
 
   /*!
     @brief Verbosity
@@ -313,9 +454,45 @@ protected:
   Real m_dt;
 
   /*!
+    @brief 
+  */
+  Real m_gmg_eps;
+  
+  /*!
+    @brief 
+  */
+  Real m_gmg_hang;
+
+
+  /*!
+    @brief Also solve for diffusion
+  */
+  bool m_diffusive;
+
+  /*!
+    @brief Use mass-weighted redistribution
+  */
+  bool m_mass_redist;
+
+  /*!
+    @brief Explicit RK2 advance
+  */
+  virtual void advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real a_alpha);
+
+  /*!
+    @brief TGA advancement algorithm
+  */
+  virtual void advance_tga(EBAMRCellData& a_state, const Real a_dt);
+
+  /*!
+    @brief Compute div(nv - D*grad(n))
+  */
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
+
+  /*!
     @brief Compute advective derivative
   */
-  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_dt);
+  virtual void compute_advection_term(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
   /*!
     @brief Compute diffusion term
@@ -330,10 +507,10 @@ protected:
   /*!
     @brief Extrapolate state to faces. 
   */
-  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state) = 0;
+  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
 
   /*!
-    @brief Compute the conservative divergence
+    @brief Compute the conservative divergence using face-centered states and velocities
   */
   virtual void conservative_divergence(EBAMRCellData&       a_cons_div,
 				       const EBAMRFluxData& a_face_vel,
@@ -427,6 +604,31 @@ protected:
     @brief Define stencils for computing the non-conservative divergence
   */
   virtual void define_divFnc_stencils();
+
+  /*!
+    @brief Set up geometric multigrid
+  */
+  virtual void setup_gmg();
+
+  /*!
+    @brief Setup the operator factory
+  */
+  virtual void setup_operator_factory();
+
+  /*!
+    @brief Setup multigrid
+  */
+  virtual void setup_multigrid();
+
+  /*!
+    @brief Setup the TGA solver
+  */
+  virtual void setup_tga();
+
+    /*!
+    @brief Setup the Euler solver
+  */
+  virtual void setup_euler();
 };
 
 #endif

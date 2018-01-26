@@ -22,7 +22,7 @@ eddington_sp1::eddington_sp1() : rte_solver() {
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(1);
   this->set_bottom_drop(16);
-  this->set_tga(false);
+  this->set_tga(true);
   this->set_reflection_coefficients(0., 0.);
 
   m_needs_setup = true;

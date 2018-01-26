@@ -12,6 +12,8 @@
 
 cdr_gdnv::cdr_gdnv() : cdr_solver() {
   m_name = "cdr_gdnv";
+
+  this->set_divF_nc(0);
 }
 
 
@@ -23,6 +25,12 @@ int cdr_gdnv::query_ghost() const {
   return 3;
 }
 
+void cdr_gdnv::set_divF_nc(const int a_which_divFnc){
+
+  CH_assert(a_which_divFnc == 0 || a_which_divFnc == 1);
+  m_which_divFnc = a_which_divFnc;
+}
+
 void cdr_gdnv::allocate_internals(){
   CH_TIME("cdr_solver::allocate_internals");
   if(m_verbosity > 5){
@@ -30,8 +38,10 @@ void cdr_gdnv::allocate_internals(){
   }
 
   cdr_solver::allocate_internals();
-  
-  this->allocate_covered();
+
+  if(m_which_divFnc == 1){
+    this->allocate_covered();
+  }
 }
 
 void cdr_gdnv::allocate_covered(){
@@ -182,15 +192,17 @@ void cdr_gdnv::extrapolate_vel_to_covered_faces(){
 }
   
 
-void cdr_gdnv::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state){
+void cdr_gdnv::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_gdnv::extrapolate_to_faces");
   if(m_verbosity > 5){
     pout() << m_name + "::extrapolate_to_faces" << endl;
   }
 
   // Extrapolate phi and vel to covered faces first
-  //  this->extrapolate_phi_to_covered_faces(a_face_state, a_state);
-  this->extrapolate_vel_to_covered_faces();
+
+  if(m_which_divFnc == 1){
+    this->extrapolate_vel_to_covered_faces();
+  }
 
   const int finest_level = m_amr->get_finest_level();
 
@@ -228,47 +240,53 @@ void cdr_gdnv::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCell
     }
 
     leveladvect->resetBCs(bcfact);
-#if 0
-    leveladvect->advectToFacesBCG(*a_face_state[lvl],
-				  *a_state[lvl],
-				  *m_velo_cell[lvl],
-				  *m_velo_face[lvl],
-				  coarstate_old,
-				  coarstate_new,
-				  coarvel_old,
-				  coarvel_new,
-				  m_time,
-				  m_time,
-				  m_time,
-				  m_dt,
-				  m_source[lvl], 
-				  coarsrc_old,
-				  coarsrc_new);
-#else
-    leveladvect->advectToFacesCol(*a_face_state[lvl],
-				  *m_covered_phi_lo[lvl],
-				  *m_covered_phi_hi[lvl],
-				  *m_covered_face_lo[lvl],
-				  *m_covered_face_hi[lvl],
-				  *m_covered_sets_lo[lvl],
-				  *m_covered_sets_hi[lvl],
-				  *a_state[lvl],
-				  *m_velo_cell[lvl],
-				  *m_velo_face[lvl],
-				  coarstate_old,
-				  coarstate_new,
-				  coarvel_old,
-				  coarvel_new,
-				  m_time,
-				  m_time,
-				  m_time,
-				  m_dt,
-				  m_source[lvl],
-				  coarsrc_old,
-				  coarsrc_new);
 
-    // Do not fall below 0
-#if 1
+    if(m_which_divFnc == 0){
+      leveladvect->advectToFacesBCG(*a_face_state[lvl],
+				    *a_state[lvl],
+				    *m_velo_cell[lvl],
+				    *m_velo_face[lvl],
+				    coarstate_old,
+				    coarstate_new,
+				    coarvel_old,
+				    coarvel_new,
+				    m_time,
+				    m_time,
+				    m_time,
+				    a_extrap_dt,
+				    m_source[lvl], 
+				    coarsrc_old,
+				    coarsrc_new);
+    }
+    else if(m_which_divFnc == 1){
+      leveladvect->advectToFacesCol(*a_face_state[lvl],
+				    *m_covered_phi_lo[lvl],
+				    *m_covered_phi_hi[lvl],
+				    *m_covered_face_lo[lvl],
+				    *m_covered_face_hi[lvl],
+				    *m_covered_sets_lo[lvl],
+				    *m_covered_sets_hi[lvl],
+				    *a_state[lvl],
+				    *m_velo_cell[lvl],
+				    *m_velo_face[lvl],
+				    coarstate_old,
+				    coarstate_new,
+				    coarvel_old,
+				    coarvel_new,
+				    m_time,
+				    m_time,
+				    m_time,
+				    a_extrap_dt,
+				    m_source[lvl],
+				    coarsrc_old,
+				    coarsrc_new);
+    }
+    else{
+      MayDay::Abort("cdr_gdnv::extrapolate_to_faces - unknown method requested");
+    }
+
+
+#if 0    // Do not fall below 0
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
@@ -302,8 +320,6 @@ void cdr_gdnv::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCell
       }
     }
 #endif
-
-#endif
   }
 }
 
@@ -313,42 +329,49 @@ void cdr_gdnv::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCell
     pout() << m_name + "::nonconservative_divergence" << endl;
   }
 
-  cdr_solver::nonconservative_divergence(a_div_nc, a_divF, a_face_state); return;
+  if(m_which_divFnc == 0){
+    cdr_solver::nonconservative_divergence(a_div_nc, a_divF, a_face_state);
+    return;
+  }
+  else if(m_which_divFnc == 1){
+    const int comp         = 0;
+    const int ncomp        = 1;
+    const int finest_level = m_amr->get_finest_level();
 
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl         = m_amr->get_grids()[lvl];
+      const EBISLayout& ebisl              = m_amr->get_ebisl(m_phase)[lvl];
+      EBAdvectLevelIntegrator& leveladvect = *(m_amr->get_level_advect(m_phase)[lvl]);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl         = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl              = m_amr->get_ebisl(m_phase)[lvl];
-    EBAdvectLevelIntegrator& leveladvect = *(m_amr->get_level_advect(m_phase)[lvl]);
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box box          = dbl.get(dit());
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
       
-      EBAdvectPatchIntegrator& patcher = leveladvect.getPatchAdvect(dit());
-      EBCellFAB divF(ebisbox, box, ncomp); // Temporary storage
+	EBAdvectPatchIntegrator& patcher = leveladvect.getPatchAdvect(dit());
+	EBCellFAB divF(ebisbox, box, ncomp); // Temporary storage
 
-      patcher.advectiveDerivative(divF,
-				  (*a_face_state[lvl])[dit()],
-				  (*m_velo_face[lvl])[dit()],
-				  (*m_covered_phi_lo[lvl])[dit()],
-				  (*m_covered_phi_hi[lvl])[dit()],
-				  (*m_covered_velo_lo[lvl])[dit()],
-				  (*m_covered_velo_hi[lvl])[dit()],
-				  (*m_covered_face_lo[lvl])[dit()],
-				  (*m_covered_face_hi[lvl])[dit()],
-				  box);
+	patcher.advectiveDerivative(divF,
+				    (*a_face_state[lvl])[dit()],
+				    (*m_velo_face[lvl])[dit()],
+				    (*m_covered_phi_lo[lvl])[dit()],
+				    (*m_covered_phi_hi[lvl])[dit()],
+				    (*m_covered_velo_lo[lvl])[dit()],
+				    (*m_covered_velo_hi[lvl])[dit()],
+				    (*m_covered_face_lo[lvl])[dit()],
+				    (*m_covered_face_hi[lvl])[dit()],
+				    box);
 
-      // Copy results for irregular cells over to a_div_nc
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	(*a_div_nc[lvl])[dit()](vof, comp) = divF(vof, comp);
+	// Copy results for irregular cells over to a_div_nc
+	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+	  (*a_div_nc[lvl])[dit()](vof, comp) = divF(vof, comp);
+	}
       }
     }
+  }
+  else{
+    MayDay::Abort("cdr_gdnv::nonconservative_divergence - unknown type for div(F)_nc");
   }
 }

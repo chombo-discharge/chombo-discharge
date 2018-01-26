@@ -144,20 +144,35 @@ int main(int argc, char* argv[]){
   data_ops::scale(E_gas, -1.0);
   cdr->initial_data();
   cdr->set_velocity(E_gas);
-  cdr->set_diffco(0.0);
+  cdr->set_velocity(RealVect::Zero);
+  cdr->set_diffco(0.2);
   cdr->set_source(0.0);
   cdr->set_ebflux(0.0);
   cdr->write_plot_file();
 
-  Real cfl = 0.8;
+  Real cfl = 10;
   cdr->set_verbosity(1);
   amr->set_verbosity(0);
   poisson->set_verbosity(0);
   const Real init_mass = cdr->compute_mass();
   for (int i = 0; i < 3600; i++){
-    Real dt = cfl*cdr->compute_dt();
-    pout() << "step = " << i << "\t mass = " << cdr->compute_mass()/init_mass << endl;
-    cdr->advance(dt);
+    const Real dt_cfl = cfl*cdr->compute_cfl_dt();
+    const Real dt_dif = cfl*cdr->compute_diffusive_dt();
+
+    Real dt;
+    //    if(dt_cfl < dt_dif){
+      dt = dt_cfl;
+      dt = dt_dif;
+      pout() << "step = " << i << "\t cfl dt = " << dt << "\t mass = " << cdr->compute_mass()/init_mass << endl;
+      cdr->advance(dt);
+    // }
+    // else{
+    //   dt = dt_dif;
+    //   pout() << "step = " << i << "\t diff dt = " << dt << "\t mass = " << cdr->compute_mass()/init_mass << endl;
+    //   cdr->advance(dt);
+    // }
+
+    
     if((i+1) % 20 == 0){
       cdr->write_plot_file();
     }

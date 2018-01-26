@@ -10,7 +10,7 @@
 species::species(){
   m_name      = "default_species";
   m_charge    = 0;
-  m_diffusive = false;
+  m_diffusive = true;
 }
 
 species::species(const std::string a_name, const int a_charge, const bool a_diffusive){
@@ -25,7 +25,7 @@ species::~species(){
 
 const Real species::initial_data(const RealVect a_pos, const Real a_time) const{
 #if 0 
-  return 1.;
+  return 0.;
 #else // This is a test
   const RealVect orig = RealVect::Zero;
 
