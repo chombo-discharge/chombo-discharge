@@ -192,10 +192,10 @@ void cdr_gdnv::extrapolate_vel_to_covered_faces(){
 }
   
 
-void cdr_gdnv::extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
-  CH_TIME("cdr_gdnv::extrapolate_to_faces");
+void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
+  CH_TIME("cdr_gdnv::advect_to_faces");
   if(m_verbosity > 5){
-    pout() << m_name + "::extrapolate_to_faces" << endl;
+    pout() << m_name + "::advect_to_faces" << endl;
   }
 
   // Extrapolate phi and vel to covered faces first

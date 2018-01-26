@@ -849,7 +849,7 @@ void cdr_solver::compute_advection_term(EBAMRCellData& a_divF, const EBAMRCellDa
 
   // Compute the advective derivative
   this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
-  this->extrapolate_to_faces(face_state, a_state, a_extrap_dt);     // Face extrapolation to cell-centered faces
+  this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
   this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
   this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
   this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.

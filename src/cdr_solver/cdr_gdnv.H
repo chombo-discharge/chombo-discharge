@@ -54,9 +54,16 @@ protected:
   virtual void extrapolate_vel_to_covered_faces();
 
   /*!
-    @brief Godunov face extrapolation method
+    @brief Godunov face extrapolation method for advection
   */
-  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
+  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
+
+  /*!
+    @brief Not used by this class. 
+  */
+  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
+    MayDay::Abort("cdr_gdnv::extrapolate_to_faces - this routine should not be callable for cdr_gdnv. How did you get here?");
+  }
 
   /*!
     @brief Non-conservative divergence

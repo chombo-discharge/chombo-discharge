@@ -505,7 +505,12 @@ protected:
   virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
 
   /*!
-    @brief Extrapolate state to faces. 
+    @brief Advection-only extrapolation to faces
+  */
+  virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+
+  /*!
+    @brief General extrapolation of state to faces. This should also include diffusion.
   */
   virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
 
