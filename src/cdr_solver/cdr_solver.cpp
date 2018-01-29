@@ -130,7 +130,6 @@ void cdr_solver::allocate_internals(){
 
   this->define_interp_stencils();
   this->define_divFnc_stencils();
-
 }
 
 void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
@@ -304,9 +303,6 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRF
 
     a_cons_div[lvl]->exchange();
   }
-
-  m_amr->average_down(a_cons_div, m_phase);
-  m_amr->interp_ghost(a_cons_div, m_phase);
 }
 
 void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
@@ -552,12 +548,7 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
       }
     }
-
-    a_hybrid_div[lvl]->exchange();
   }
-
-  m_amr->average_down(a_hybrid_div, m_phase);
-  m_amr->interp_ghost(a_hybrid_div, m_phase);
 }
 
 void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
@@ -719,7 +710,7 @@ void cdr_solver::increment_flux_register(const EBAMRFluxData& a_flux){
       const Box box          = dbl.get(dit());
       
       for (int dir = 0; dir < SpaceDim; dir++){
-	const Real scale      = 1.;
+	const Real scale      = 1.0;
 	const EBFaceFAB& flux = (*a_flux[lvl])[dit()][dir];
 
 	// Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse
@@ -813,7 +804,7 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
-  Vector<RefCountedPtr<EBFastFR > > fluxreg = m_amr->get_flux_reg(m_phase);
+  Vector<RefCountedPtr<EBFastFR > >& fluxreg = m_amr->get_flux_reg(m_phase);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx       = m_amr->get_dx()[lvl];
@@ -821,7 +812,7 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
     const bool has_fine = lvl < finest_level;
 
     if(has_fine){
-      const Real scale = 1./(dx);
+      const Real scale = 1.0/dx;
       
       fluxreg[lvl]->reflux(*a_state[lvl], interv, scale);
       fluxreg[lvl]->setToZero();
@@ -880,7 +871,7 @@ void cdr_solver::set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_
   m_amr->average_down(m_diffco_eb, m_phase);
 }
 
-void cdr_solver::set_diffco(const Real a_diffco){
+ void cdr_solver::set_diffco(const Real a_diffco){
   CH_TIME("cdr_solver::set_diffco");
   if(m_verbosity > 5){
     pout() << m_name + "::set_diffco" << endl;

@@ -57,11 +57,11 @@ void cdr_sg::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, c
 
   this->average_velo_to_faces(m_velo_face, m_velo_cell);       // Average cell-centered velocities to faces
   this->compute_sg_flux(flux, a_state, m_velo_face, m_diffco); // Compute Scharfetter-Gummel flux
-  this->increment_flux_register(flux);                         // Increment flux registers
   this->conservative_divergence(a_divJ, flux);                 // Compute conservative divergence
   this->nonconservative_divergence(div_nc, a_divJ, flux);      // Compute non-conservative divergence. Last argument is a dummy.
   this->hybrid_divergence(a_divJ, mass_diff, div_nc);          // Make divJ = hybrid divergence. Compute mass diff.
   this->increment_redist(mass_diff);                           // Increment redistribution objects
+  this->increment_flux_register(flux);                         // Increment flux registers
 
   // Mass weights
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -79,10 +79,6 @@ void cdr_sg::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, c
     this->reflux(a_divJ);                                         // Reflux into a_divJ at coarse-fine interfaces
   }
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    a_divJ[lvl]->exchange();
-  }
-
   m_amr->average_down(a_divJ, m_phase);
   m_amr->interp_ghost(a_divJ, m_phase);
 }
@@ -96,14 +92,18 @@ void cdr_sg::compute_sg_flux(EBAMRFluxData&       a_flux,
     pout() << m_name + "::compute_sg_flux" << endl;
   }
 
+  // I must have linearly interpolated ghost cells for this stuff. 
+  EBAMRCellData cpy;
+  m_amr->allocate(cpy, m_phase, 1);
+  data_ops::set_value(cpy, 0.0);
+  data_ops::incr(cpy, a_state, 1.0);
+  m_amr->interp_ghost_pwl(cpy, m_phase);
+
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    this->compute_sg_flux(*a_flux[lvl], *a_state[lvl], *a_velo[lvl], *a_diffco[lvl], lvl);
+    this->compute_sg_flux(*a_flux[lvl], *cpy[lvl], *a_velo[lvl], *a_diffco[lvl], lvl);
     this->compute_bndry_outflow(*a_flux[lvl], lvl);
-    a_flux[lvl]->exchange();
   }
-
-  m_amr->average_down(a_flux, m_phase);
 }
 
 void cdr_sg::compute_sg_flux(LevelData<EBFluxFAB>&       a_flux,
@@ -141,7 +141,7 @@ void cdr_sg::compute_sg_flux(LevelData<EBFluxFAB>&       a_flux,
 	const FaceIndex& face = faceit();
 	const VolIndex vof_lo = face.getVoF(Side::Lo);
 	const VolIndex vof_hi = face.getVoF(Side::Hi);
-	  
+
 	flux(face, comp) = 0.;
 
 	const Real n_lo     = state(vof_lo, comp);

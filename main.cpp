@@ -43,16 +43,16 @@ int main(int argc, char* argv[]){
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 
   Vector<int> refrat(5);
-  refrat[0] = 2;
-  refrat[1] = 2;
-  refrat[2] = 4;
+  refrat[0] = 4;
+  refrat[1] = 4;
+  refrat[2] = 2;
   refrat[3] = 2;
   refrat[4] = 2;
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(64*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(1);                      // Set max amr depth
+  amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -155,7 +155,7 @@ int main(int argc, char* argv[]){
   amr->set_verbosity(0);
   poisson->set_verbosity(0);
   const Real init_mass = cdr->compute_mass();
-  for (int i = 0; i < 200; i++){
+  for (int i = 0; i < 1000; i++){
     const Real dt_cfl = cfl*cdr->compute_cfl_dt();
     const Real dt_dif = cfl*cdr->compute_diffusive_dt();
 
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]){
     // }
 
     
-    if((i+1) % 20 == 0){
+    if((i+1) % 10 == 0){
       cdr->write_plot_file();
     }
   }

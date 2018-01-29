@@ -16,7 +16,7 @@
 #include "nwoebquadcfinterp.H"
 
 #include <DisjointBoxLayout.H>
-#include <ProblemDomain.H>
+#include <AggEBPWLFillPatch.H>
 #include <EBCoarseAverage.H>
 #include <EBAdvectLevelIntegrator.H>
 #include <EBFastFR.H>
@@ -25,6 +25,7 @@
 #include <EBCoarToFineRedist.H>
 #include <EBCoarToCoarRedist.H>
 #include <EBFineToCoarRedist.H>
+#include <ProblemDomain.H>
 
 /*!
   @brief Class for handling spatial operations for streamer equations.
@@ -147,6 +148,11 @@ public:
     @brief Interpolate ghost cells
   */
   virtual void interp_ghost(MFAMRCellData& a_data);
+
+  /*!
+    @brief Fill ghost cells using piecewise linear interpolation
+  */
+  virtual void interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase);
   
   /*!
     @brief Set mfis
@@ -349,6 +355,11 @@ public:
   virtual Vector<RefCountedPtr<EBQuadCFInterp> >& get_old_quadcfi(phase::which_phase a_phase);
 
   /*!
+    @brief Get piecewise linear ghost cell interpolator
+  */
+  virtual Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(phase::which_phase a_phase);
+
+  /*!
     @brief Get flux register
   */
   virtual Vector<RefCountedPtr<EBFastFR> >&  get_flux_reg(phase::which_phase a_phase);
@@ -529,7 +540,12 @@ protected:
   /*!
     @brief Old type quadcfi. Needed for EBConductivtyOps
   */
-  Vector<Vector<RefCountedPtr<EBQuadCFInterp> > > m_old_quadcfi; 
+  Vector<Vector<RefCountedPtr<EBQuadCFInterp> > > m_old_quadcfi;
+
+  /*!
+    @brief Patcher for piecewise linear interpolation (one ghost cell layer only)
+  */
+  Vector<Vector<RefCountedPtr<AggEBPWLFillPatch> > > m_pwl_fillpatch;
   
   /*!
     @brief Flux register
@@ -595,6 +611,11 @@ protected:
     @brief Define nwoebquadcfinterp
   */
   virtual void define_eb_quad_cfi();
+
+  /*!
+    @brief Define operators for piecewise linear interpolation of ghost cells
+  */
+  virtual void define_fillpatch();
 
   /*!
     @brief Define redistribution operators
