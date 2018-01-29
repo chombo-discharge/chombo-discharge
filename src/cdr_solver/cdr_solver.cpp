@@ -651,9 +651,6 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
     if(m_use_tga){
       this->advance_tga(a_state, a_dt);
     }
-    else{
-      MayDay::Abort("cdr_solver::advance - advance_euler is not implemented (yet)");
-    }
   }
   else{
     const Real midpoint = 0.5;
@@ -729,7 +726,7 @@ void cdr_solver::advance_tga(EBAMRCellData& a_state, const Real a_dt){
   data_ops::set_value(phi,  0.0);
   data_ops::set_value(divF, 0.0);
 
-  this->compute_advection_term(divF, a_state, 0.5*a_dt); // extrapolate div(n*v) to 0.5*a_dt and use it as a source term for TGA
+  this->compute_divF(divF, a_state, 0.5*a_dt, true); // extrapolate div(n*v) to 0.5*a_dt and use it as a source term for TGA
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::incr(*phi[lvl], *a_state[lvl],  1.0);
@@ -742,7 +739,6 @@ void cdr_solver::advance_tga(EBAMRCellData& a_state, const Real a_dt){
   m_amr->alias(new_state, phi);
   m_amr->alias(old_state, a_state);
   m_amr->alias(source,    src);
-  
 
   // Advance
   const Real alpha = 0.0;
@@ -807,20 +803,20 @@ void cdr_solver::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_stat
   }
 
   // Compute advective term
-  this->compute_advection_term(advective_term, a_state, 0.0);
+  this->compute_divF(advective_term, a_state, 0.0, true);
   data_ops::incr(a_divJ, advective_term, -1.0);
 
   // Add in diffusion term
   if(this->is_diffusive()){
-    this->compute_diffusion_term(diffusion_term, a_state);
+    this->compute_divD(diffusion_term, a_state); // This already does refluxing. 
     data_ops::incr(a_divJ, diffusion_term, 1.0);
   }
 }
 
-void cdr_solver::compute_advection_term(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt){
-  CH_TIME("cdr_solver::compute_advection_term(divF, state)");
+void cdr_solver::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist){
+  CH_TIME("cdr_solver::compute_divF(divF, state)");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_advection_term(divF, state)" << endl;
+    pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
 
   const int comp       = 0;
@@ -873,10 +869,10 @@ void cdr_solver::compute_advection_term(EBAMRCellData& a_divF, const EBAMRCellDa
   }
 }
 
-void cdr_solver::compute_diffusion_term(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){
-  CH_TIME("cdr_solver::compute_diffusion_term");
+void cdr_solver::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){
+  CH_TIME("cdr_solver::compute_divD");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_diffusion_term" << endl;
+    pout() << m_name + "::compute_divD" << endl;
   }
 
   const int ncomp        = 1;
@@ -909,7 +905,6 @@ void cdr_solver::compute_diffusion_term(EBAMRCellData& a_diffusive_term, const E
   data_ops::set_value(m_scratch, 0.0);
   m_gmg_solver->computeAMRResidual(res, phi, zero, finest_level, 0); // Computes res = L(phi) - zero
   data_ops::set_value(m_scratch, 0.0);
-
 }
 
 void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){

@@ -11,7 +11,7 @@
 #include "cdr_solver.H"
 
 /*!
-  @brief Abstract class for cdr-equations. This is (almost) a whole solver. 
+  @brief Godunov implementation for convection-diffusion-reaction equations. 
 */
 class cdr_gdnv : public cdr_solver {
 public:
@@ -57,6 +57,11 @@ protected:
     @brief Godunov face extrapolation method for advection
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
+
+  /*!
+    @brief Compute div(J)
+  */
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
   /*!
     @brief Not used by this class. 

@@ -144,7 +144,6 @@ int main(int argc, char* argv[]){
   data_ops::scale(E_gas, -1.0);
   cdr->initial_data();
   cdr->set_velocity(E_gas);
-  cdr->set_velocity(RealVect::Zero);
   cdr->set_diffco(0.2);
   cdr->set_source(0.0);
   cdr->set_ebflux(0.0);

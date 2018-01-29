@@ -487,17 +487,17 @@ protected:
   /*!
     @brief Compute div(nv - D*grad(n))
   */
-  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
 
   /*!
     @brief Compute advective derivative
   */
-  virtual void compute_advection_term(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt);
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
 
   /*!
     @brief Compute diffusion term
   */
-  virtual void compute_diffusion_term(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
+  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
 
   /*!
     @brief Average cell-centered velocities to face centers
@@ -529,11 +529,17 @@ protected:
 				    const LevelData<EBFluxFAB>& a_phi,
 				    const int                   a_lvl);
 
+  /*!
+    @brief Compute flux interpolant
+  */
   virtual void compute_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
 					const LevelData<EBFluxFAB>&   a_rho,
 					const LevelData<EBFluxFAB>&   a_vel,
 					const int                     a_lvl);
 
+  /*!
+    @brief Interpolate flux to centroids
+  */
   virtual void interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
 					     const int                         a_lvl);
 

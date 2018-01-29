@@ -31,6 +31,10 @@ void cdr_gdnv::set_divF_nc(const int a_which_divFnc){
   m_which_divFnc = a_which_divFnc;
 }
 
+void cdr_gdnv::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
+  cdr_solver::compute_divJ(a_divJ, a_state, a_extrap_dt);
+}
+
 void cdr_gdnv::allocate_internals(){
   CH_TIME("cdr_solver::allocate_internals");
   if(m_verbosity > 5){
@@ -191,7 +195,6 @@ void cdr_gdnv::extrapolate_vel_to_covered_faces(){
   }
 }
   
-
 void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_gdnv::advect_to_faces");
   if(m_verbosity > 5){
