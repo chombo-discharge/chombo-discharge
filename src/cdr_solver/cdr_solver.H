@@ -335,8 +335,6 @@ protected:
   */
   bool m_mass_redist;
 
-
-
   /*!
     @brief Compute div(nv - D*grad(n))
   */
@@ -374,22 +372,6 @@ protected:
   virtual void setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
 				      const LevelData<EBFluxFAB>&   a_flux,
 				      const int                     a_lvl);
-
-  /*!
-    @brief Compute the advective derivative. This computes the divF = sum_i(vel*phi) using cell centered data.
-  */
-  virtual void advective_derivative(LevelData<EBCellFAB>&       a_divF,
-				    const LevelData<EBFluxFAB>& a_vel,
-				    const LevelData<EBFluxFAB>& a_phi,
-				    const int                   a_lvl);
-
-  /*!
-    @brief Compute flux interpolant
-  */
-  virtual void compute_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
-					const LevelData<EBFluxFAB>&   a_rho,
-					const LevelData<EBFluxFAB>&   a_vel,
-					const int                     a_lvl);
 
   /*!
     @brief Interpolate flux to centroids

@@ -10,10 +10,8 @@
 #include "cdr_solverF_F.H"
 #include "data_ops.H"
 
-#include <EBArith.H>
 #include <EBAMRIO.H>
-#include <NeumannConductivityEBBC.H>
-#include <NeumannConductivityDomainBC.H>
+#include <EBArith.H>
 
 cdr_solver::cdr_solver(){
 
@@ -35,385 +33,6 @@ int cdr_solver::query_ghost() const {
   }
 
   return 3;
-}
-
-void cdr_solver::sanity_check(){
-  CH_TIME("cdr_solver::sanity_check");
-  if(m_verbosity > 5){
-    pout() << m_name + "::sanity_check" << endl;
-  }
-
-  CH_assert(!m_compgeom.isNull());
-  CH_assert(!m_physdom.isNull());
-  CH_assert(!m_amr.isNull());
-  CH_assert(!m_species.isNull());
-  CH_assert(!m_ebis.isNull());
-}
-
-void cdr_solver::set_species(const RefCountedPtr<species> a_species){
-  CH_TIME("cdr_solver::set_species");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_species" << endl;
-  }
-
-  m_species   = a_species;
-  m_name      = m_species->get_name();
-  m_diffusive = m_species->is_diffusive();
-}
-
-void cdr_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
-  CH_TIME("cdr_solver::set_computational_geometry");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_computational_geometry" << endl;
-  }
-  m_compgeom = a_compgeom;
-
-  const RefCountedPtr<mfis> mfis = m_compgeom->get_mfis();
-  
-  this->set_ebis(mfis->get_ebis(m_phase));
-}
-
-void cdr_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
-  CH_TIME("cdr_solver::set_ebis");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_ebis" << endl;
-  }
-
-  m_ebis = a_ebis;
-}
-
-void cdr_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("cdr_solver::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_physical_domain" << endl;
-  }
-
-  m_physdom = a_physdom;
-}
-
-void cdr_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
-  CH_TIME("cdr_solver::set_amr");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_amr" << endl;
-  }
-
-  m_amr = a_amr;
-}
-
-void cdr_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
-  CH_TIME("cdr_solver::set_time");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_time" << endl;
-  }
-
-  m_step = a_step;
-  m_time = a_time;
-  m_dt   = a_dt;
-}
-
-void cdr_solver::set_velocity(const EBAMRCellData& a_velo){
-  CH_TIME("cdr_solver::set_velocity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_velocity" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_velo[lvl]->copyTo(*m_velo_cell[lvl]);
-  }
-
-  m_amr->average_down(m_velo_cell, m_phase);
-  m_amr->interp_ghost(m_velo_cell, m_phase);
-}
-
-void cdr_solver::set_velocity(const RealVect a_velo){
-  CH_TIME("cdr_solver::set_velocity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_velocity" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    for (int dir = 0; dir < SpaceDim; dir++){
-      data_ops::set_value(*m_velo_cell[lvl], a_velo[dir], dir);
-    }
-  }
-
-  m_amr->average_down(m_velo_cell, m_phase);
-  m_amr->interp_ghost(m_velo_cell, m_phase);
-}
-
-void cdr_solver::set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_diffco_eb){
-  CH_TIME("cdr_solver::set_diffco");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_diffco" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_diffco[lvl]->copyTo(*m_diffco[lvl]);
-    a_diffco_eb[lvl]->copyTo(*m_diffco_eb[lvl]);
-  }
-
-  m_amr->average_down(m_diffco, m_phase);
-  m_amr->average_down(m_diffco_eb, m_phase);
-}
-
-void cdr_solver::set_diffco(const Real a_diffco){
-  CH_TIME("cdr_solver::set_diffco");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_diffco" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_diffco[lvl],    a_diffco);
-    data_ops::set_value(*m_diffco_eb[lvl], a_diffco);
-  }
-
-  m_amr->average_down(m_diffco, m_phase);
-  m_amr->average_down(m_diffco_eb, m_phase);
-}
-
-void cdr_solver::set_source(const EBAMRCellData& a_source){
-  CH_TIME("cdr_solver::set_source");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_source" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_source[lvl]->copyTo(*m_source[lvl]);
-  }
-
-  m_amr->average_down(m_source, m_phase);
-  m_amr->interp_ghost(m_source, m_phase);
-}
-
-void cdr_solver::set_source(const Real a_source){
-  CH_TIME("cdr_solver::set_source");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_source" << endl;
-  }
-
-  const int comp = 0;
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_source[lvl], a_source, comp);
-  }
-
-  m_amr->average_down(m_source, m_phase);
-  m_amr->interp_ghost(m_source, m_phase);
-}
-
-void cdr_solver::set_ebflux(const EBAMRIVData& a_ebflux){
-  CH_TIME("cdr_solver::set_ebflux(variable)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_ebflux(variable)" << endl;
-  }
-
-  const int comp         = 0;
-  const int finest_level = m_amr->get_finest_level();
-  const Interval interv(comp, comp);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_ebflux[lvl]->copyTo(interv, *m_ebflux[lvl], interv);
-  }
-}
-
-void cdr_solver::set_ebflux(const Real a_ebflux){
-  CH_TIME("cdr_solver::set_ebflux(constant)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_ebflux(constant)" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_ebflux[lvl], a_ebflux);
-  }
-}
-
-void cdr_solver::set_phase(const phase::which_phase a_phase){
-  CH_TIME("cdr_solver::set_phase");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_phase" << endl;
-  }
-
-  m_phase = a_phase;
-}
-
-void cdr_solver::set_verbosity(const int a_verbosity){
-  CH_TIME("cdr_solver::set_verbosity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_verbosity" << endl;
-  }
-  
-  m_verbosity = a_verbosity;
-}
-
-void cdr_solver::initial_data(){
-  CH_TIME("cdr_solver::initial_data");
-  if(m_verbosity > 5){
-    pout() << m_name + "::initial_data" << endl;
-  }
-
-  const RealVect origin  = m_physdom->get_prob_lo();
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& state       = (*m_state[lvl])[dit()];
-      const Box box          = m_state[lvl]->disjointBoxLayout().get(dit());
-      const EBISBox& ebisbox = state.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
-	
-	for (int comp = 0; comp < state.nComp(); comp++){
-	  state(vof, comp) = m_species->initial_data(pos, m_time);
-	}
-      }
-    }
-  }
-
-  m_amr->average_down(m_state, m_phase);
-}
-
-void cdr_solver::allocate_internals(){
-  CH_TIME("cdr_solver::allocate_internals");
-  if(m_verbosity > 5){
-    pout() << m_name + "::allocate_internals" << endl;
-  }
-
-  const int sca = 1;
-  const int vec = SpaceDim;
-
-  m_amr->allocate(m_state,      m_phase, sca);
-  m_amr->allocate(m_source,     m_phase, sca);
-  m_amr->allocate(m_velo_face,  m_phase, sca);
-  m_amr->allocate(m_velo_cell,  m_phase, vec); 
-  m_amr->allocate(m_ebflux,     m_phase, sca);
-  m_amr->allocate(m_diffco,     m_phase, sca);
-  m_amr->allocate(m_diffco_eb,  m_phase, sca);
-  m_amr->allocate(m_scratch,       m_phase, sca);
-
-  data_ops::set_value(m_state,      0.0);
-  data_ops::set_value(m_source,     0.0);
-  data_ops::set_value(m_velo_face,  0.0);
-  data_ops::set_value(m_velo_cell,  0.0);
-  data_ops::set_value(m_ebflux,     0.0);
-  data_ops::set_value(m_diffco,     0.0);
-  data_ops::set_value(m_diffco_eb,  0.0);
-  data_ops::set_value(m_scratch,       0.0);
-
-  this->define_interp_stencils();
-  this->define_divFnc_stencils();
-
-}
-
-void cdr_solver::define_interp_stencils(){
-  CH_TIME("cdr_solver::define_interp_stencils");
-  if(m_verbosity > 5){
-    pout() << m_name + "::define_interp_stencils" << endl;
-  }
-
-  const int comp            = 0;
-  const int ncomp           = 1;
-  const int finest_level    = m_amr->get_finest_level();
-  FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    (m_interp_stencils[dir]).resize(1 + finest_level);
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-      const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-      m_interp_stencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > >
-	(new LayoutData<BaseIFFAB<FaceStencil> >(dbl));
-
-      LayoutData<IntVectSet> cfivs(dbl);
-      EBArith::defineCFIVS(cfivs, dbl, domain);
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	BaseIFFAB<FaceStencil>& sten = (*m_interp_stencils[dir][lvl])[dit()];
-	const Box box          = dbl.get(dit());
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-	sten.define(ivs, ebisbox.getEBGraph(), dir, ncomp);
-	
-	for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  FaceStencil& facesten = sten(face,comp);
-
-	  facesten = EBArith::getInterpStencil(face, cfivs[dit()], ebisbox, domain.domainBox());
-	}
-      }
-    }
-  }
-}
-
-void cdr_solver::define_divFnc_stencils(){
-  CH_TIME("cdr_solver::define_divFnc_stencils");
-  if(m_verbosity > 5){
-    pout() << m_name + "::define_divFnc_stencils" << endl;
-  }
-
-  const int rad   = 1;
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  m_stencils_nc.resize(1 + finest_level);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    m_stencils_nc[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-      BaseIVFAB<VoFStencil>& stens = (*m_stencils_nc[lvl])[dit()];
-      stens.define(ivs, ebgraph, ncomp);
-      
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	VoFStencil& sten = stens(vof, comp);
-	sten.clear();
-	
-	Real norm = 0.;
-	Vector<VolIndex> vofs;
-	EBArith::getAllVoFsInMonotonePath(vofs, vof, ebisbox, rad);
-	for (int i = 0; i < vofs.size(); i++){
-	  const VolIndex& ivof = vofs[i];
-	  const Real iweight   = ebisbox.volFrac(ivof);
-
-	  norm += iweight;
-	  sten.add(ivof, 1.0);
-	}
-
-	sten *= 1./norm;
-      }
-    }
-  }
 }
 
 void cdr_solver::advance(const Real& a_dt){
@@ -481,26 +100,36 @@ void cdr_solver::advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real
   }
 }
 
-void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt){
-  CH_TIME("cdr_solver::compute_rhs(rhs, dt)");
+void cdr_solver::allocate_internals(){
+  CH_TIME("cdr_solver::allocate_internals");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_rhs(rhs, dt)" << endl;
+    pout() << m_name + "::allocate_internals" << endl;
   }
-  
-  this->compute_rhs(a_rhs, m_state, a_dt);
-}
 
-void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt){
-  CH_TIME("cdr_solver::compute_rhs(rhs, state, dt)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_rhs(rhs, state, dt)" << endl;
-  }
-  
-  this->compute_divJ(a_rhs, a_state, a_dt); // a_rhs = div(J)
-  data_ops::incr(a_rhs, m_source, 1.0);     // a_rhs = div(J) + S
+  const int sca = 1;
+  const int vec = SpaceDim;
 
-  m_amr->average_down(a_rhs, m_phase);
-  m_amr->interp_ghost(a_rhs, m_phase);
+  m_amr->allocate(m_state,      m_phase, sca);
+  m_amr->allocate(m_source,     m_phase, sca);
+  m_amr->allocate(m_velo_face,  m_phase, sca);
+  m_amr->allocate(m_velo_cell,  m_phase, vec); 
+  m_amr->allocate(m_ebflux,     m_phase, sca);
+  m_amr->allocate(m_diffco,     m_phase, sca);
+  m_amr->allocate(m_diffco_eb,  m_phase, sca);
+  m_amr->allocate(m_scratch,       m_phase, sca);
+
+  data_ops::set_value(m_state,      0.0);
+  data_ops::set_value(m_source,     0.0);
+  data_ops::set_value(m_velo_face,  0.0);
+  data_ops::set_value(m_velo_cell,  0.0);
+  data_ops::set_value(m_ebflux,     0.0);
+  data_ops::set_value(m_diffco,     0.0);
+  data_ops::set_value(m_diffco_eb,  0.0);
+  data_ops::set_value(m_scratch,    0.0);
+
+  this->define_interp_stencils();
+  this->define_divFnc_stencils();
+
 }
 
 void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
@@ -515,342 +144,22 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
   }
 }
 
-void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
-					 const EBAMRFluxData& a_face_vel,
-					 const EBAMRFluxData& a_face_state){
-  CH_TIME("cdr_solver::conservative_divergence");
+void cdr_solver::coarse_fine_increment(const EBAMRIVData& m_mass_diff){
+  CH_TIME("cdr_solver::coarse_fine_increment");
   if(m_verbosity > 5){
-    pout() << m_name + "::conservative_divergence" << endl;
+    pout() << m_name + "::coarse_fine_increment" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  // Use some transient storage
-  EBAMRFluxData flux;
-  m_amr->allocate(flux, m_phase, ncomp);
-
-  this->compute_flux(flux, a_face_vel, a_face_state);
-  this->conservative_divergence(a_cons_div, flux);
-
-#if 0
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    // Compute div(F) on regular cells
-    this->advective_derivative(*a_cons_div[lvl], *a_face_vel[lvl], *a_face_state[lvl], lvl); 
-
-    // Interpolate fluxes to face centroids on irregular cells
-    LevelData<BaseIFFAB<Real> > flux[SpaceDim];
-    this->compute_flux_interpolant(flux, *a_face_state[lvl], *a_face_vel[lvl], lvl);
-    this->interpolate_flux_to_centroids(flux, lvl);
-    this->compute_divF_irreg(*a_cons_div[lvl], flux, *m_ebflux[lvl], lvl);
-  }
+  MayDay::Abort("cdr_solver::coarse_fine_increment - not implemented");
 }
 
-void cdr_solver::compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_face_vel){
-  CH_TIME("cdr_solver::compute_flux");
+void cdr_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
+  CH_TIME("cdr_solver::coarse_fine_redistribution");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_flux" << endl;
+    pout() << m_name + "::coarse_fine_redistribution" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
-
-      for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& flx       = (*a_flux[lvl])[dit()][dir];
-	const EBFaceFAB& phi = (*a_face_state[lvl])[dit()][dir];
-	const EBFaceFAB& vel = (*a_face_vel[lvl])[dit()][dir];
-
-	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-	for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  flx(face, comp) = vel(face, comp)*phi(face, comp);
-	}
-      }
-    }
-  }
-						
-}
-
-void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRFluxData& a_flux){
-  CH_TIME("cdr_solver::conservative_divergence");
-  if(m_verbosity > 5){
-    pout() << m_name + "::conservative_divergence" << endl;
-  }
-
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    // Compute div(F) on regular cells
-    this->consdiv_regular(*a_cons_div[lvl], *a_flux[lvl], lvl);
-
-    LevelData<BaseIFFAB<Real> > flux[SpaceDim];
-    this->setup_flux_interpolant(flux, *a_flux[lvl], lvl);
-    this->interpolate_flux_to_centroids(flux, lvl);
-    this->compute_divF_irreg(*a_cons_div[lvl], flux, *m_ebflux[lvl], lvl);
-  }
-}
-
-void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
-  CH_TIME("cdr_solver::consdiv_regular");
-  if(m_verbosity > 5){
-    pout() << m_name + "::consdiv_regular" << endl;
-  }
-
-  CH_assert(a_divJ.nComp() == 1);
-  CH_assert(a_flux.nComp() == 1);
-
-  const int comp  = 0;
-  const int ncomp = 1;
-
-  const DisjointBoxLayout dbl = m_amr->get_grids()[a_lvl];
-  const ProblemDomain domain  = m_amr->get_domains()[a_lvl];
-  const Real dx               = m_amr->get_dx()[a_lvl];
-
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& divJ         = a_divJ[dit()];
-    BaseFab<Real>& divJ_fab = divJ.getSingleValuedFAB();
-    const Box box = dbl.get(dit());
-
-    for (int dir = 0; dir < SpaceDim; dir++){
-      const EBFaceFAB& flx         = a_flux[dit()][dir];
-      const BaseFab<Real>& flx_fab = flx.getSingleValuedFAB();
-
-      FORT_CONSDIV_REG(CHF_FRA1(divJ_fab, comp),
-		       CHF_CONST_FRA1(flx_fab, comp),
-		       CHF_CONST_INT(dir),
-		       CHF_CONST_INT(ncomp),
-		       CHF_CONST_REAL(dx),
-		       CHF_BOX(box));
-    }
-
-
-    // Reset irregular cells - these contain bogus values and will be set elsewhere. 
-    const EBISBox& ebisbox = divJ.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      divJ(vof, comp) = 0.12345678E89;
-    }
-  }
-}
-
-void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
-					const LevelData<EBFluxFAB>&   a_flux,
-					const int                     a_lvl){
-  CH_TIME("cdr_solver::setup_flux_interpolant");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setup_flux_interpolant" << endl;
-  }
-
-  const int ncomp = 1;
-  const int comp  = 0;
-  
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    // Define interpolant
-    LayoutData<IntVectSet> grown_set;
-    EBArith::defineFluxInterpolant(a_interpolant[dir],
-				   grown_set,
-				   dbl,
-				   ebisl,
-				   domain,
-				   ncomp,
-				   dir);
-
-    // Compute interpolant
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      BaseIFFAB<Real>& interpol   = a_interpolant[dir][dit()];
-      const Box& box              = dbl.get(dit());
-      const EBISBox& ebisbox      = ebisl[dit()];
-      const EBGraph& ebgraph      = ebisbox.getEBGraph();
-      const EBFaceFAB& flux       = a_flux[dit()][dir];
-      const IntVectSet ivs        = grown_set[dit()] & box;
-      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-
-      for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	const FaceIndex& face = faceit();
-	interpol(face, comp) = flux(face, comp);
-      }
-    }
-
-    a_interpolant[dir].exchange();
-  }
-}
-
-void cdr_solver::advective_derivative(LevelData<EBCellFAB>&       a_divF,
-				      const LevelData<EBFluxFAB>& a_vel,
-				      const LevelData<EBFluxFAB>& a_phi,
-				      const int                   a_lvl){
-
-  CH_TIME("cdr_solver::advective_derivative");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advective_derivative" << endl;
-  }
-
-  CH_assert(a_divF.nComp() == 1);
-  CH_assert(a_vel.nComp()  == 1);
-  CH_assert(a_phi.nComp()  == 1);
-
-  const int comp  = 0;
-  const int ncomp = 1;
-
-  const DisjointBoxLayout dbl = m_amr->get_grids()[a_lvl];
-  const ProblemDomain domain  = m_amr->get_domains()[a_lvl];
-  const Real dx               = m_amr->get_dx()[a_lvl];
-
-  for (DataIterator dit = a_divF.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& divF         = a_divF[dit()];
-    BaseFab<Real>& divF_fab = divF.getSingleValuedFAB();
-    const Box box = dbl.get(dit());
-
-    for (int dir = 0; dir < SpaceDim; dir++){
-      const EBFaceFAB& vel = a_vel[dit()][dir];
-      const EBFaceFAB& phi = a_phi[dit()][dir];
-
-      const BaseFab<Real>& vel_fab = vel.getSingleValuedFAB();
-      const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
-
-      FORT_ADVECTIVEDERIV(CHF_FRA1(divF_fab, comp),
-			  CHF_CONST_FRA1(vel_fab, comp),
-			  CHF_CONST_FRA1(phi_fab, comp),
-			  CHF_CONST_INT(dir),
-			  CHF_CONST_INT(ncomp),
-			  CHF_CONST_REAL(dx),
-			  CHF_BOX(box));
-    }
-
-
-    // Reset irregular cells - these contain bogus values
-    const EBISBox& ebisbox = divF.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      divF(vof, comp) = 0.12345678E89;
-    }
-  }
-}
-
-void cdr_solver::compute_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
-					  const LevelData<EBFluxFAB>&   a_vel,
-					  const LevelData<EBFluxFAB>&   a_state,
-					  const int                     a_lvl){
-
-  const int ncomp = 1;
-  const int comp  = 0;
-  
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    // Define interpolant
-    LayoutData<IntVectSet> grown_set;
-    EBArith::defineFluxInterpolant(a_interpolant[dir],
-				   grown_set,
-				   dbl,
-				   ebisl,
-				   domain,
-				   ncomp,
-				   dir);
-
-    // Compute interpolant
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      BaseIFFAB<Real>& interpol   = a_interpolant[dir][dit()];
-      const Box& box              = dbl.get(dit());
-      const EBISBox& ebisbox      = ebisl[dit()];
-      const EBGraph& ebgraph      = ebisbox.getEBGraph();
-      const EBFaceFAB& vel        = a_vel[dit()][dir];
-      const EBFaceFAB& phi        = a_state[dit()][dir];
-      const IntVectSet ivs        = grown_set[dit()] & box;
-      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-
-      for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	const FaceIndex& face = faceit();
-	interpol(face, comp) = vel(face, comp)*phi(face, comp);
-      }
-    }
-
-    a_interpolant[dir].exchange();
-  }
-}
-
-void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
-					       const int                         a_lvl){
-  CH_TIME("cdr_solver::interpolate_flux_to_centroids");
-  if(m_verbosity > 5){
-    pout() << m_name + "::interpolate_flux_to_centroids" << endl;
-  }
-  
-  const int comp  = 0;
-  const int ncomp = 1;
-  const Interval interv(comp, comp);
-  
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
-  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
-
-  const FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
-
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box box = dbl.get(dit());
-    const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-    
-    for (int dir = 0; dir < SpaceDim; dir++){
-      BaseIFFAB<Real>& flux = a_flux[dir][dit()];
-      BaseIFFAB<Real> centroid_flux;
-
-      // Compute face centroid flux
-      centroid_flux.define(ivs, ebgraph, dir, ncomp);
-      for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	const FaceIndex& face   = faceit();
-	const FaceStencil& sten = (*m_interp_stencils[dir][a_lvl])[dit()](face, comp);
-
-	centroid_flux(face, comp) = 0.;
-	for (int i = 0; i < sten.size(); i++){
-	  const FaceIndex& iface = sten.face(i);
-	  const Real iweight     = sten.weight(i);
-	  
-	  centroid_flux(face, comp) += iweight*flux(iface, comp);
-	}
-      }
-
-      // Copy centroid flux into a_flux
-      flux.setVal(0.0);
-      flux.copy(box, interv, box, centroid_flux, interv);
-    }
-  }
+  MayDay::Abort("cdr_solver::coarse_fine_redistribution - not implemented");
 }
 
 void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
@@ -908,12 +217,10 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
   }
 }
 
-void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
-					    const EBAMRCellData& a_divF,
-					    const EBAMRFluxData& a_face_state){
-  CH_TIME("cdr_solver::nonconservative_divergence");
+void cdr_solver::compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_face_vel){
+  CH_TIME("cdr_solver::compute_flux");
   if(m_verbosity > 5){
-    pout() << m_name + "::nonconservative_divergence" << endl;
+    pout() << m_name + "::compute_flux" << endl;
   }
 
   const int comp  = 0;
@@ -924,29 +231,277 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    
-    for (DataIterator dit = a_div_nc[lvl]->dataIterator(); dit.ok(); ++dit){
-      BaseIVFAB<Real>& div_nc = (*a_div_nc[lvl])[dit()];
-      EBCellFAB& divF         = (*a_divF[lvl])[dit()];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(box);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB& flx       = (*a_flux[lvl])[dit()][dir];
+	const EBFaceFAB& phi = (*a_face_state[lvl])[dit()][dir];
+	const EBFaceFAB& vel = (*a_face_vel[lvl])[dit()][dir];
+
+	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
+	for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+	  flx(face, comp) = vel(face, comp)*phi(face, comp);
+	}
+      }
+    }
+  }
+						
+}
+
+void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt){
+  CH_TIME("cdr_solver::compute_rhs(rhs, dt)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_rhs(rhs, dt)" << endl;
+  }
+  
+  this->compute_rhs(a_rhs, m_state, a_dt);
+}
+
+void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt){
+  CH_TIME("cdr_solver::compute_rhs(rhs, state, dt)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_rhs(rhs, state, dt)" << endl;
+  }
+  
+  this->compute_divJ(a_rhs, a_state, a_dt); // a_rhs = div(J)
+  data_ops::incr(a_rhs, m_source, 1.0);     // a_rhs = div(J) + S
+
+  m_amr->average_down(a_rhs, m_phase);
+  m_amr->interp_ghost(a_rhs, m_phase);
+}
+
+void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRFluxData& a_flux){
+  CH_TIME("cdr_solver::conservative_divergence");
+  if(m_verbosity > 5){
+    pout() << m_name + "::conservative_divergence" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+    // Compute div(F) on regular cells
+    this->consdiv_regular(*a_cons_div[lvl], *a_flux[lvl], lvl);
+
+    LevelData<BaseIFFAB<Real> > flux[SpaceDim];
+    this->setup_flux_interpolant(flux, *a_flux[lvl], lvl);
+    this->interpolate_flux_to_centroids(flux, lvl);
+    this->compute_divF_irreg(*a_cons_div[lvl], flux, *m_ebflux[lvl], lvl);
+  }
+}
+
+void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
+					 const EBAMRFluxData& a_face_vel,
+					 const EBAMRFluxData& a_face_state){
+  CH_TIME("cdr_solver::conservative_divergence");
+  if(m_verbosity > 5){
+    pout() << m_name + "::conservative_divergence" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  // Use some transient storage
+  EBAMRFluxData flux;
+  m_amr->allocate(flux, m_phase, ncomp);
+
+  this->compute_flux(flux, a_face_vel, a_face_state);
+  this->conservative_divergence(a_cons_div, flux);
+}
+
+void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
+  CH_TIME("cdr_solver::consdiv_regular");
+  if(m_verbosity > 5){
+    pout() << m_name + "::consdiv_regular" << endl;
+  }
+
+  CH_assert(a_divJ.nComp() == 1);
+  CH_assert(a_flux.nComp() == 1);
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  const DisjointBoxLayout dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain domain  = m_amr->get_domains()[a_lvl];
+  const Real dx               = m_amr->get_dx()[a_lvl];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& divJ         = a_divJ[dit()];
+    BaseFab<Real>& divJ_fab = divJ.getSingleValuedFAB();
+    const Box box = dbl.get(dit());
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      const EBFaceFAB& flx         = a_flux[dit()][dir];
+      const BaseFab<Real>& flx_fab = flx.getSingleValuedFAB();
+
+      FORT_CONSDIV_REG(CHF_FRA1(divJ_fab, comp),
+		       CHF_CONST_FRA1(flx_fab, comp),
+		       CHF_CONST_INT(dir),
+		       CHF_CONST_INT(ncomp),
+		       CHF_CONST_REAL(dx),
+		       CHF_BOX(box));
+    }
+
+
+    // Reset irregular cells - these contain bogus values and will be set elsewhere. 
+    const EBISBox& ebisbox = divJ.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      divJ(vof, comp) = 0.12345678E89;
+    }
+  }
+}
+
+void cdr_solver::define_divFnc_stencils(){
+  CH_TIME("cdr_solver::define_divFnc_stencils");
+  if(m_verbosity > 5){
+    pout() << m_name + "::define_divFnc_stencils" << endl;
+  }
+
+  const int rad   = 1;
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  m_stencils_nc.resize(1 + finest_level);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+    m_stencils_nc[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
+      BaseIVFAB<VoFStencil>& stens = (*m_stencils_nc[lvl])[dit()];
+      stens.define(ivs, ebgraph, ncomp);
+      
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof    = vofit();
-	const VoFStencil& sten = (*m_stencils_nc[lvl])[dit()](vof, comp);
+	const VolIndex& vof = vofit();
+	VoFStencil& sten = stens(vof, comp);
+	sten.clear();
+	
+	Real norm = 0.;
+	Vector<VolIndex> vofs;
+	EBArith::getAllVoFsInMonotonePath(vofs, vof, ebisbox, rad);
+	for (int i = 0; i < vofs.size(); i++){
+	  const VolIndex& ivof = vofs[i];
+	  const Real iweight   = ebisbox.volFrac(ivof);
 
-	div_nc(vof, comp) = 0.;
-	for (int i = 0; i < sten.size(); i++){
-	  const VolIndex& ivof = sten.vof(i);
-	  const Real& iweight  = sten.weight(i);
-	  div_nc(vof,comp) += iweight*divF(ivof, comp);
+	  norm += iweight;
+	  sten.add(ivof, 1.0);
+	}
+
+	sten *= 1./norm;
+      }
+    }
+  }
+}
+
+void cdr_solver::define_interp_stencils(){
+  CH_TIME("cdr_solver::define_interp_stencils");
+  if(m_verbosity > 5){
+    pout() << m_name + "::define_interp_stencils" << endl;
+  }
+
+  const int comp            = 0;
+  const int ncomp           = 1;
+  const int finest_level    = m_amr->get_finest_level();
+  FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    (m_interp_stencils[dir]).resize(1 + finest_level);
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+      m_interp_stencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > >
+	(new LayoutData<BaseIFFAB<FaceStencil> >(dbl));
+
+      LayoutData<IntVectSet> cfivs(dbl);
+      EBArith::defineCFIVS(cfivs, dbl, domain);
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	BaseIFFAB<FaceStencil>& sten = (*m_interp_stencils[dir][lvl])[dit()];
+	const Box box          = dbl.get(dit());
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+	sten.define(ivs, ebisbox.getEBGraph(), dir, ncomp);
+	
+	for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+	  FaceStencil& facesten = sten(face,comp);
+
+	  facesten = EBArith::getInterpStencil(face, cfivs[dit()], ebisbox, domain.domainBox());
 	}
       }
     }
   }
+}
+
+
+void cdr_solver::increment_redist_flux(){
+  CH_TIME("cdr_solver::increment_redist_flux");
+  if(m_verbosity > 5){
+    pout() << m_name + "::increment_redist_flux" << endl;
+  }
+
+  MayDay::Abort("cdr_solver::increment_redist_flux - not implemented");
+}
+
+void cdr_solver::initial_data(){
+  CH_TIME("cdr_solver::initial_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::initial_data" << endl;
+  }
+
+  const RealVect origin  = m_physdom->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& state       = (*m_state[lvl])[dit()];
+      const Box box          = m_state[lvl]->disjointBoxLayout().get(dit());
+      const EBISBox& ebisbox = state.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(box);
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
+	
+	for (int comp = 0; comp < state.nComp(); comp++){
+	  state(vof, comp) = m_species->initial_data(pos, m_time);
+	}
+      }
+    }
+  }
+
+  m_amr->average_down(m_state, m_phase);
 }
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
@@ -985,6 +540,79 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
 	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
       }
+    }
+  }
+}
+
+void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
+					   const EBAMRIVData&   a_mass_diff,
+					   const EBAMRCellData& a_redist_weights){
+  CH_TIME("cdr_solver::hyberbolic_redistribution");
+  if(m_verbosity > 5){
+    pout() << m_name + "::hyperbolic_redistribution" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
+    if(m_mass_redist){
+      level_redist.resetWeights(*a_redist_weights[lvl], comp);
+    }
+    level_redist.redistribute(*a_divF[lvl], interv);
+    level_redist.setToZero();
+  }
+}
+
+void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
+					       const int                         a_lvl){
+  CH_TIME("cdr_solver::interpolate_flux_to_centroids");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolate_flux_to_centroids" << endl;
+  }
+  
+  const int comp  = 0;
+  const int ncomp = 1;
+  const Interval interv(comp, comp);
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+
+  const FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box = dbl.get(dit());
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      BaseIFFAB<Real>& flux = a_flux[dir][dit()];
+      BaseIFFAB<Real> centroid_flux;
+
+      // Compute face centroid flux
+      centroid_flux.define(ivs, ebgraph, dir, ncomp);
+      for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
+	const FaceIndex& face   = faceit();
+	const FaceStencil& sten = (*m_interp_stencils[dir][a_lvl])[dit()](face, comp);
+
+	centroid_flux(face, comp) = 0.;
+	for (int i = 0; i < sten.size(); i++){
+	  const FaceIndex& iface = sten.face(i);
+	  const Real iweight     = sten.weight(i);
+	  
+	  centroid_flux(face, comp) += iweight*flux(iface, comp);
+	}
+      }
+
+      // Copy centroid flux into a_flux
+      flux.setVal(0.0);
+      flux.copy(box, interv, box, centroid_flux, interv);
     }
   }
 }
@@ -1068,27 +696,44 @@ void cdr_solver::increment_redist(const EBAMRIVData& a_mass_diff){
   }
 }
 
-void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
-					   const EBAMRIVData&   a_mass_diff,
-					   const EBAMRCellData& a_redist_weights){
-  CH_TIME("cdr_solver::hyberbolic_redistribution");
+void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
+					    const EBAMRCellData& a_divF,
+					    const EBAMRFluxData& a_face_state){
+  CH_TIME("cdr_solver::nonconservative_divergence");
   if(m_verbosity > 5){
-    pout() << m_name + "::hyperbolic_redistribution" << endl;
+    pout() << m_name + "::nonconservative_divergence" << endl;
   }
 
   const int comp  = 0;
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
-  const Interval interv(comp, comp);
-
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
-    if(m_mass_redist){
-      level_redist.resetWeights(*a_redist_weights[lvl], comp);
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    
+    for (DataIterator dit = a_div_nc[lvl]->dataIterator(); dit.ok(); ++dit){
+      BaseIVFAB<Real>& div_nc = (*a_div_nc[lvl])[dit()];
+      EBCellFAB& divF         = (*a_divF[lvl])[dit()];
+
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof    = vofit();
+	const VoFStencil& sten = (*m_stencils_nc[lvl])[dit()](vof, comp);
+
+	div_nc(vof, comp) = 0.;
+	for (int i = 0; i < sten.size(); i++){
+	  const VolIndex& ivof = sten.vof(i);
+	  const Real& iweight  = sten.weight(i);
+	  div_nc(vof,comp) += iweight*divF(ivof, comp);
+	}
+      }
     }
-    level_redist.redistribute(*a_divF[lvl], interv);
-    level_redist.setToZero();
   }
 }
 
@@ -1118,31 +763,279 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
   }
 }
 
-void cdr_solver::increment_redist_flux(){
-  CH_TIME("cdr_solver::increment_redist_flux");
+void cdr_solver::sanity_check(){
+  CH_TIME("cdr_solver::sanity_check");
   if(m_verbosity > 5){
-    pout() << m_name + "::increment_redist_flux" << endl;
+    pout() << m_name + "::sanity_check" << endl;
   }
 
-  MayDay::Abort("cdr_solver::increment_redist_flux - not implemented");
+  CH_assert(!m_compgeom.isNull());
+  CH_assert(!m_physdom.isNull());
+  CH_assert(!m_amr.isNull());
+  CH_assert(!m_species.isNull());
+  CH_assert(!m_ebis.isNull());
 }
 
-void cdr_solver::coarse_fine_increment(const EBAMRIVData& m_mass_diff){
-  CH_TIME("cdr_solver::coarse_fine_increment");
+void cdr_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+  CH_TIME("cdr_solver::set_amr");
   if(m_verbosity > 5){
-    pout() << m_name + "::coarse_fine_increment" << endl;
+    pout() << m_name + "::set_amr" << endl;
   }
 
-  MayDay::Abort("cdr_solver::coarse_fine_increment - not implemented");
+  m_amr = a_amr;
 }
 
-void cdr_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
-  CH_TIME("cdr_solver::coarse_fine_redistribution");
+void cdr_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
+  CH_TIME("cdr_solver::set_computational_geometry");
   if(m_verbosity > 5){
-    pout() << m_name + "::coarse_fine_redistribution" << endl;
+    pout() << m_name + "::set_computational_geometry" << endl;
+  }
+  m_compgeom = a_compgeom;
+
+  const RefCountedPtr<mfis> mfis = m_compgeom->get_mfis();
+  
+  this->set_ebis(mfis->get_ebis(m_phase));
+}
+
+void cdr_solver::set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_diffco_eb){
+  CH_TIME("cdr_solver::set_diffco");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_diffco" << endl;
   }
 
-  MayDay::Abort("cdr_solver::coarse_fine_redistribution - not implemented");
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_diffco[lvl]->copyTo(*m_diffco[lvl]);
+    a_diffco_eb[lvl]->copyTo(*m_diffco_eb[lvl]);
+  }
+
+  m_amr->average_down(m_diffco, m_phase);
+  m_amr->average_down(m_diffco_eb, m_phase);
+}
+
+void cdr_solver::set_diffco(const Real a_diffco){
+  CH_TIME("cdr_solver::set_diffco");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_diffco" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::set_value(*m_diffco[lvl],    a_diffco);
+    data_ops::set_value(*m_diffco_eb[lvl], a_diffco);
+  }
+
+  m_amr->average_down(m_diffco, m_phase);
+  m_amr->average_down(m_diffco_eb, m_phase);
+}
+
+void cdr_solver::set_ebflux(const EBAMRIVData& a_ebflux){
+  CH_TIME("cdr_solver::set_ebflux(variable)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_ebflux(variable)" << endl;
+  }
+
+  const int comp         = 0;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_ebflux[lvl]->copyTo(interv, *m_ebflux[lvl], interv);
+  }
+}
+
+void cdr_solver::set_ebflux(const Real a_ebflux){
+  CH_TIME("cdr_solver::set_ebflux(constant)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_ebflux(constant)" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::set_value(*m_ebflux[lvl], a_ebflux);
+  }
+}
+
+void cdr_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
+  CH_TIME("cdr_solver::set_ebis");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_ebis" << endl;
+  }
+
+  m_ebis = a_ebis;
+}
+
+void cdr_solver::set_mass_redist(const bool a_mass_redist){
+  CH_TIME("cdr_solver::set_mass_redist");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_mass_redist" << endl;
+  }
+
+  m_mass_redist = a_mass_redist;
+}
+
+void cdr_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
+  CH_TIME("cdr_solver::set_physical_domain");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_physical_domain" << endl;
+  }
+
+  m_physdom = a_physdom;
+}
+
+void cdr_solver::set_species(const RefCountedPtr<species> a_species){
+  CH_TIME("cdr_solver::set_species");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_species" << endl;
+  }
+
+  m_species   = a_species;
+  m_name      = m_species->get_name();
+  m_diffusive = m_species->is_diffusive();
+}
+
+void cdr_solver::set_source(const EBAMRCellData& a_source){
+  CH_TIME("cdr_solver::set_source");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_source" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_source[lvl]->copyTo(*m_source[lvl]);
+  }
+
+  m_amr->average_down(m_source, m_phase);
+  m_amr->interp_ghost(m_source, m_phase);
+}
+
+void cdr_solver::set_source(const Real a_source){
+  CH_TIME("cdr_solver::set_source");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_source" << endl;
+  }
+
+  const int comp = 0;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::set_value(*m_source[lvl], a_source, comp);
+  }
+
+  m_amr->average_down(m_source, m_phase);
+  m_amr->interp_ghost(m_source, m_phase);
+}
+
+void cdr_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("cdr_solver::set_time");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_time" << endl;
+  }
+
+  m_step = a_step;
+  m_time = a_time;
+  m_dt   = a_dt;
+}
+
+void cdr_solver::set_velocity(const EBAMRCellData& a_velo){
+  CH_TIME("cdr_solver::set_velocity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_velocity" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_velo[lvl]->copyTo(*m_velo_cell[lvl]);
+  }
+
+  m_amr->average_down(m_velo_cell, m_phase);
+  m_amr->interp_ghost(m_velo_cell, m_phase);
+}
+
+void cdr_solver::set_velocity(const RealVect a_velo){
+  CH_TIME("cdr_solver::set_velocity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_velocity" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (int dir = 0; dir < SpaceDim; dir++){
+      data_ops::set_value(*m_velo_cell[lvl], a_velo[dir], dir);
+    }
+  }
+
+  m_amr->average_down(m_velo_cell, m_phase);
+  m_amr->interp_ghost(m_velo_cell, m_phase);
+}
+
+void cdr_solver::set_phase(const phase::which_phase a_phase){
+  CH_TIME("cdr_solver::set_phase");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_phase" << endl;
+  }
+
+  m_phase = a_phase;
+}
+
+void cdr_solver::set_verbosity(const int a_verbosity){
+  CH_TIME("cdr_solver::set_verbosity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_verbosity" << endl;
+  }
+  
+  m_verbosity = a_verbosity;
+}
+
+void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
+					const LevelData<EBFluxFAB>&   a_flux,
+					const int                     a_lvl){
+  CH_TIME("cdr_solver::setup_flux_interpolant");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setup_flux_interpolant" << endl;
+  }
+
+  const int ncomp = 1;
+  const int comp  = 0;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    // Define interpolant
+    LayoutData<IntVectSet> grown_set;
+    EBArith::defineFluxInterpolant(a_interpolant[dir],
+				   grown_set,
+				   dbl,
+				   ebisl,
+				   domain,
+				   ncomp,
+				   dir);
+
+    // Compute interpolant
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      BaseIFFAB<Real>& interpol   = a_interpolant[dir][dit()];
+      const Box& box              = dbl.get(dit());
+      const EBISBox& ebisbox      = ebisl[dit()];
+      const EBGraph& ebgraph      = ebisbox.getEBGraph();
+      const EBFaceFAB& flux       = a_flux[dit()][dir];
+      const IntVectSet ivs        = grown_set[dit()] & box;
+      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
+
+      for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	const FaceIndex& face = faceit();
+	interpol(face, comp) = flux(face, comp);
+      }
+    }
+
+    a_interpolant[dir].exchange();
+  }
 }
 
 #ifdef CH_USE_HDF5
@@ -1209,15 +1102,6 @@ void cdr_solver::write_plot_file(){
 	      covered_values);
 }
 #endif
-
-void cdr_solver::set_mass_redist(const bool a_mass_redist){
-  CH_TIME("cdr_solver::set_mass_redist");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_mass_redist" << endl;
-  }
-
-  m_mass_redist = a_mass_redist;
-}
 
 Real cdr_solver::compute_cfl_dt(){
   CH_TIME("cdr_solver::compute_cfl_dt");
