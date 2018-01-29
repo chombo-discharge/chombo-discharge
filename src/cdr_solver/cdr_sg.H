@@ -1,0 +1,62 @@
+/*!
+  @file   cdr_sg.H
+  @brief  Declaration of a Scharfetter-Gummel implementation of cdr_solver
+  @author Robert Marskar
+  @date   Jan. 2018
+*/
+
+#include "cdr_solver.H"
+
+#ifndef _CDR_SG_
+#define _CDR_SG_
+
+class cdr_sg : public cdr_solver {
+public:
+
+  /*!
+    @brief Constructor
+  */
+  cdr_sg();
+
+  /*!
+    @brief Destructor
+  */
+  virtual ~cdr_sg();
+
+  /*!
+    @brief Required number of ghost cells
+  */
+  virtual int query_ghost() const;
+
+protected:
+  
+  /*!
+    @brief Compute div(nv - D*grad(n))
+  */
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
+
+  /*!
+    @brief Compute the Scharfetter-Gummel flux
+  */
+  virtual void compute_sg_flux(EBAMRFluxData&       a_flux,
+			       const EBAMRCellData& a_state,
+			       const EBAMRFluxData& a_velo,
+			       const EBAMRFluxData& a_diffco);
+
+  /*!
+    @brief Compute the Scharfetter-Gummel flux
+  */
+  virtual void compute_sg_flux(LevelData<EBFluxFAB>&       a_flux,
+			       const LevelData<EBCellFAB>& a_state,
+			       const LevelData<EBFluxFAB>& a_velo,
+			       const LevelData<EBFluxFAB>& a_diffco,
+			       const int                   a_lvl);
+
+  /*!
+    @brief Set boundary outflow flux
+  */
+  virtual void compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
+				     const int                   a_lvl);
+};
+
+#endif

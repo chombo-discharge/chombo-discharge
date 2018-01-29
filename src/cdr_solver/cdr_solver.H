@@ -39,6 +39,7 @@ public:
     @brief Set species
   */
   virtual void set_species(const RefCountedPtr<species> a_species);
+  
   /*!
     @brief Set computational geometry
   */
@@ -212,7 +213,6 @@ public:
   */
   virtual EBAMRIVData& get_diffco_eb();  
 
-
 protected:
   
   /*!
@@ -351,6 +351,7 @@ protected:
   virtual void conservative_divergence(EBAMRCellData&       a_cons_div,
 				       const EBAMRFluxData& a_face_vel,
 				       const EBAMRFluxData& a_face_state);
+  
   /*!
     @brief Set up flux
   */
@@ -404,6 +405,11 @@ protected:
     @brief Increment flux registers. 
   */
   virtual void increment_flux_register(const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_velo_face);
+
+  /*!
+    @brief Increment flux registers
+  */
+  virtual void increment_flux_register(const EBAMRFluxData& a_flux);
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)

@@ -14,6 +14,7 @@
 #include "poisson_staircase_gmg.H"
 #include "cdr_solver.H"
 #include "cdr_gdnv.H"
+#include "cdr_sg.H"
 #include "eddington_sp1.H"
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
@@ -55,11 +56,11 @@ int main(int argc, char* argv[]){
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(16);                    // Set blocking factor
+  amr->set_blocking_factor(16);                   // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
   amr->set_max_box_size(32);                      // Set max box size
-  amr->set_redist_rad(3);                         // Set redistribution radius
-  amr->set_eb_ghost(6);                           // Set EB ghost vectors
+  amr->set_redist_rad(1);                         // Set redistribution radius
+  amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
   amr->set_irreg_sten_type(stencil_type::linear); // Set preferred stencil type
   amr->set_irreg_sten_order(1);                   // Set preferred stencil order
@@ -124,7 +125,7 @@ int main(int argc, char* argv[]){
 
   // New cdr solver
   RefCountedPtr<species> spec = RefCountedPtr<species> (new species());
-  cdr_solver* cdr = static_cast<cdr_solver*> (new cdr_gdnv());
+  cdr_solver* cdr = static_cast<cdr_solver*> (new cdr_sg());
   cdr->set_species(spec);
   cdr->set_verbosity(10);
   cdr->set_amr(amr);
@@ -144,7 +145,7 @@ int main(int argc, char* argv[]){
   data_ops::scale(E_gas, -1.0);
   cdr->initial_data();
   cdr->set_velocity(E_gas);
-  cdr->set_diffco(0.2);
+  cdr->set_diffco(0.002);
   cdr->set_source(0.0);
   cdr->set_ebflux(0.0);
   cdr->write_plot_file();
@@ -154,7 +155,7 @@ int main(int argc, char* argv[]){
   amr->set_verbosity(0);
   poisson->set_verbosity(0);
   const Real init_mass = cdr->compute_mass();
-  for (int i = 0; i < 3600; i++){
+  for (int i = 0; i < 8000; i++){
     const Real dt_cfl = cfl*cdr->compute_cfl_dt();
     const Real dt_dif = cfl*cdr->compute_diffusive_dt();
 
@@ -162,6 +163,7 @@ int main(int argc, char* argv[]){
     //    if(dt_cfl < dt_dif){
       dt = dt_cfl;
       dt = dt_dif;
+      dt = Min(dt_cfl, dt_dif);
       pout() << "step = " << i << "\t cfl dt = " << dt << "\t mass = " << cdr->compute_mass()/init_mass << endl;
       cdr->advance(dt);
     // }

@@ -345,12 +345,12 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
 
   // Compute advective term
   this->compute_divF(advective_term, a_state, 0.0, true);
-  data_ops::incr(a_divJ, advective_term, -1.0);
+  data_ops::incr(a_divJ, advective_term, 1.0);
 
   // Add in diffusion term
   if(this->is_diffusive()){
     this->compute_divD(diffusion_term, a_state); // This already does refluxing. 
-    data_ops::incr(a_divJ, diffusion_term, 1.0);
+    data_ops::incr(a_divJ, diffusion_term, -1.0);
   }
 }
 

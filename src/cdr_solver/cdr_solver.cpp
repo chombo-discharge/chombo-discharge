@@ -3,7 +3,6 @@
   @brief Implementation of cdr_solver.H
   @author Robert Marskar
   @date Nov. 2017
-  @todo See if we can make EBAdvectLevelIntegrator a static in cdr_gdnv
 */
 
 #include "cdr_solver.H"
@@ -55,7 +54,9 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
 
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::floor(*a_state[lvl], 0.0); // This removes mass!
+    data_ops::floor(*a_state[lvl], 0.0); // This adds mass!
+
+    a_state[lvl]->exchange();
   }
   
   m_amr->average_down(a_state, m_phase);
@@ -141,6 +142,7 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->get_domains()[lvl]);
+    a_velo_face[lvl]->exchange();
   }
 }
 
@@ -270,6 +272,7 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state,
   }
   
   this->compute_divJ(a_rhs, a_state, a_dt); // a_rhs = div(J)
+  data_ops::scale(a_rhs, -1.0);             // a_rhs = -div(J)
   data_ops::incr(a_rhs, m_source, 1.0);     // a_rhs = div(J) + S
 
   m_amr->average_down(a_rhs, m_phase);
@@ -298,6 +301,8 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRF
     this->setup_flux_interpolant(flux, *a_flux[lvl], lvl);
     this->interpolate_flux_to_centroids(flux, lvl);
     this->compute_divF_irreg(*a_cons_div[lvl], flux, *m_ebflux[lvl], lvl);
+
+    a_cons_div[lvl]->exchange();
   }
 }
 
@@ -362,9 +367,11 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
 
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
-      divJ(vof, comp) = 0.12345678E89;
+      divJ(vof, comp) = 0.0;
     }
   }
+
+  a_divJ.exchange();
 }
 
 void cdr_solver::define_divFnc_stencils(){
@@ -541,6 +548,8 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
       }
     }
+
+    a_hybrid_div[lvl]->exchange();
   }
 }
 
@@ -656,6 +665,55 @@ void cdr_solver::increment_flux_register(const EBAMRFluxData& a_face_state, cons
 	flux.setVal(0.0);
 	flux += phi;
 	flux *= vel;
+
+	// Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse
+	if(has_fine){
+	  for (SideIterator sit; sit.ok(); ++sit){
+	    fluxreg[lvl]->incrementCoarseBoth(flux, scale, dit(), interv, dir, sit());
+	  }
+	}
+	if(has_coar){
+	  for (SideIterator sit; sit.ok(); ++sit){
+	    fluxreg[lvl-1]->incrementFineBoth(flux, scale, dit(), interv, dir, sit());
+	  }
+	}
+      }
+    }
+  }
+}
+
+void cdr_solver::increment_flux_register(const EBAMRFluxData& a_flux){
+  CH_TIME("cdr_solver::increment_flux_register(flux)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::increment_flux_register(flux)" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  Vector<RefCountedPtr<EBFastFR> >& fluxreg = m_amr->get_flux_reg(m_phase);
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
+
+    if(has_fine){
+      fluxreg[lvl]->setToZero();
+    }
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      const Box box          = dbl.get(dit());
+      
+      for (int dir = 0; dir < SpaceDim; dir++){
+	const Real scale      = 1.;
+	const EBFaceFAB& flux = (*a_flux[lvl])[dit()][dir];
 
 	// Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse
 	if(has_fine){
@@ -825,6 +883,8 @@ void cdr_solver::set_diffco(const Real a_diffco){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::set_value(*m_diffco[lvl],    a_diffco);
     data_ops::set_value(*m_diffco_eb[lvl], a_diffco);
+
+    m_diffco[lvl]->exchange();
   }
 
   m_amr->average_down(m_diffco, m_phase);
@@ -968,6 +1028,8 @@ void cdr_solver::set_velocity(const RealVect a_velo){
     for (int dir = 0; dir < SpaceDim; dir++){
       data_ops::set_value(*m_velo_cell[lvl], a_velo[dir], dir);
     }
+
+    m_velo_cell[lvl]->exchange();
   }
 
   m_amr->average_down(m_velo_cell, m_phase);
