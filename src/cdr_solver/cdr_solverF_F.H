@@ -45,6 +45,40 @@ inline void FORTRAN_NAME(inlineADVECTIVEDERIV, inlineADVECTIVEDERIV)(
 }
 #endif  // GUARDADVECTIVEDERIV 
 
+#ifndef GUARDCONSDIV_REG 
+#define GUARDCONSDIV_REG 
+// Prototype for Fortran procedure consdiv_reg ...
+//
+void FORTRAN_NAME( CONSDIV_REG ,consdiv_reg )(
+      CHFp_FRA1(udelrho)
+      ,CHFp_CONST_FRA1(faceflux)
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_CONST_INT(ncomp)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(dcalc) );
+
+#define FORT_CONSDIV_REG FORTRAN_NAME( inlineCONSDIV_REG, inlineCONSDIV_REG)
+#define FORTNT_CONSDIV_REG FORTRAN_NAME( CONSDIV_REG, consdiv_reg)
+
+inline void FORTRAN_NAME(inlineCONSDIV_REG, inlineCONSDIV_REG)(
+      CHFp_FRA1(udelrho)
+      ,CHFp_CONST_FRA1(faceflux)
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_CONST_INT(ncomp)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(dcalc) )
+{
+ CH_TIMELEAF("FORT_CONSDIV_REG");
+ FORTRAN_NAME( CONSDIV_REG ,consdiv_reg )(
+      CHFt_FRA1(udelrho)
+      ,CHFt_CONST_FRA1(faceflux)
+      ,CHFt_CONST_INT(facedir)
+      ,CHFt_CONST_INT(ncomp)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_BOX(dcalc) );
+}
+#endif  // GUARDCONSDIV_REG 
+
 }
 
 #endif

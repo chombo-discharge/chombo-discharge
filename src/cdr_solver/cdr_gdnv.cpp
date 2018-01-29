@@ -10,7 +10,7 @@
 #include <ExtrapAdvectBC.H>
 #include <EBArith.H>
 
-cdr_gdnv::cdr_gdnv() : cdr_solver() {
+cdr_gdnv::cdr_gdnv() : cdr_tga() {
   m_name = "cdr_gdnv";
 
   this->set_divF_nc(0);
@@ -32,7 +32,7 @@ void cdr_gdnv::set_divF_nc(const int a_which_divFnc){
 }
 
 void cdr_gdnv::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
-  cdr_solver::compute_divJ(a_divJ, a_state, a_extrap_dt);
+  cdr_tga::compute_divJ(a_divJ, a_state, a_extrap_dt);
 }
 
 void cdr_gdnv::allocate_internals(){

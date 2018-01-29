@@ -124,7 +124,7 @@ int main(int argc, char* argv[]){
 
   // New cdr solver
   RefCountedPtr<species> spec = RefCountedPtr<species> (new species());
-  cdr_gdnv* cdr = new cdr_gdnv();
+  cdr_solver* cdr = static_cast<cdr_solver*> (new cdr_gdnv());
   cdr->set_species(spec);
   cdr->set_verbosity(10);
   cdr->set_amr(amr);
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]){
   cdr->set_ebflux(0.0);
   cdr->write_plot_file();
 
-  Real cfl = 10;
+  Real cfl = 0.8;
   cdr->set_verbosity(1);
   amr->set_verbosity(0);
   poisson->set_verbosity(0);

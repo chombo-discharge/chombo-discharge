@@ -8,12 +8,12 @@
 #ifndef _CDR_GDNV_
 #define _CDR_GDNV_
 
-#include "cdr_solver.H"
+#include "cdr_tga.H"
 
 /*!
   @brief Godunov implementation for convection-diffusion-reaction equations. 
 */
-class cdr_gdnv : public cdr_solver {
+class cdr_gdnv : public cdr_tga {
 public:
 
   /*!
@@ -64,14 +64,7 @@ protected:
   virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
   /*!
-    @brief Not used by this class. 
-  */
-  virtual void extrapolate_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
-    MayDay::Abort("cdr_gdnv::extrapolate_to_faces - this routine should not be callable for cdr_gdnv. How did you get here?");
-  }
-
-  /*!
-    @brief Non-conservative divergence
+    @brief Non-conservative divergence. Overwriting because this class has two ways of doing this. 
   */
   virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
 

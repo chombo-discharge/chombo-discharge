@@ -36,3 +36,41 @@
 
       return
       end
+
+      subroutine consdiv_reg(
+     &     chf_fra1[udelrho],
+     &     chf_const_fra1[faceflux],
+     &     chf_const_int[facedir],
+     &     chf_const_int[ncomp],
+     &     chf_const_real[dx],
+     &     chf_box[dcalc],
+     &)
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ioff; joff; koff]
+      integer spacedim,iv
+      real_t  uave, rhodiff, hival, loval
+      chf_dterm[
+      ioff = chf_id(0,facedir);
+      joff = chf_id(1,facedir);
+      koff = chf_id(2,facedir)]
+
+      spacedim = CH_SPACEDIM
+
+         do iv = 0,ncomp - 1
+
+            chf_multido[dcalc;i;j;k]
+
+            hival = faceflux(chf_ix[i+ioff;j+joff;k+koff]);
+            loval = faceflux(chf_ix[i     ;j     ;k     ]);
+
+
+            udelrho(chf_ix[i;j;k]) = udelrho(chf_ix[i;j;k]) + (hival-loval)/dx
+
+            chf_enddo
+
+         enddo
+         ch_flops=ch_flops+CHF_POINTS[dcalc]*5*ncomp
+
+      return
+      end
