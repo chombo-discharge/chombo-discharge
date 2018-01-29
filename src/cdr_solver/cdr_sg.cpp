@@ -57,10 +57,10 @@ void cdr_sg::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, c
 
   this->average_velo_to_faces(m_velo_face, m_velo_cell);       // Average cell-centered velocities to faces
   this->compute_sg_flux(flux, a_state, m_velo_face, m_diffco); // Compute Scharfetter-Gummel flux
+  this->increment_flux_register(flux);                         // Increment flux registers
   this->conservative_divergence(a_divJ, flux);                 // Compute conservative divergence
   this->nonconservative_divergence(div_nc, a_divJ, flux);      // Compute non-conservative divergence. Last argument is a dummy.
   this->hybrid_divergence(a_divJ, mass_diff, div_nc);          // Make divJ = hybrid divergence. Compute mass diff.
-  this->increment_flux_register(flux);                         // Increment flux registers
   this->increment_redist(mass_diff);                           // Increment redistribution objects
 
   // Mass weights
@@ -76,12 +76,15 @@ void cdr_sg::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, c
   }
   else{
     this->hyperbolic_redistribution(a_divJ, mass_diff, weights);  // Redistribute mass into hybrid divergence
-    this->reflux(a_divJ);                                         // Reflux at coarse-fine interfaces
+    this->reflux(a_divJ);                                         // Reflux into a_divJ at coarse-fine interfaces
   }
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     a_divJ[lvl]->exchange();
   }
+
+  m_amr->average_down(a_divJ, m_phase);
+  m_amr->interp_ghost(a_divJ, m_phase);
 }
 
 void cdr_sg::compute_sg_flux(EBAMRFluxData&       a_flux,

@@ -304,6 +304,9 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRF
 
     a_cons_div[lvl]->exchange();
   }
+
+  m_amr->average_down(a_cons_div, m_phase);
+  m_amr->interp_ghost(a_cons_div, m_phase);
 }
 
 void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
@@ -509,6 +512,7 @@ void cdr_solver::initial_data(){
   }
 
   m_amr->average_down(m_state, m_phase);
+  m_amr->interp_ghost(m_state, m_phase);
 }
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
@@ -551,6 +555,9 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 
     a_hybrid_div[lvl]->exchange();
   }
+
+  m_amr->average_down(a_hybrid_div, m_phase);
+  m_amr->interp_ghost(a_hybrid_div, m_phase);
 }
 
 void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
@@ -814,7 +821,8 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
     const bool has_fine = lvl < finest_level;
 
     if(has_fine){
-      const Real scale = -1.0/dx;
+      const Real scale = 1./(dx);
+      
       fluxreg[lvl]->reflux(*a_state[lvl], interv, scale);
       fluxreg[lvl]->setToZero();
     }
