@@ -65,6 +65,13 @@ namespace stencil_type {
   };
 };
 
+namespace ghost_interpolation {
+  enum which_type {
+    pwl  = 0,
+    quad = 1,
+  };
+};
+
 
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;

@@ -150,6 +150,11 @@ public:
   virtual void interp_ghost(MFAMRCellData& a_data);
 
   /*!
+    @brief Fill ghost cells using quadratic interpolation
+  */
+  virtual void interp_ghost_quad(EBAMRCellData& a_data, phase::which_phase a_phase);
+
+  /*!
     @brief Fill ghost cells using piecewise linear interpolation
   */
   virtual void interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase);
@@ -163,6 +168,11 @@ public:
     @brief Set load balance
   */
   virtual void set_balance(const load_balance::which_balance a_load);
+
+  /*!
+    @brief Set ghost cell interpolation type. Either piecewise linear or quadratic. 
+  */
+  virtual void set_ghost_interpolation(const ghost_interpolation::which_type a_interp);
 
   /*!
     @brief Build domains
@@ -421,6 +431,11 @@ protected:
     @brief Stencil type
   */
   stencil_type::which_type m_stencil_type;
+
+  /*!
+    @brief Interpolation type
+  */
+  ghost_interpolation::which_type m_interp_type;
 
   /*!
     @brief Coarsest box where we compute

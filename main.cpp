@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
 
   Vector<int> refrat(5);
   refrat[0] = 4;
-  refrat[1] = 4;
+  refrat[1] = 2;
   refrat[2] = 2;
   refrat[3] = 2;
   refrat[4] = 2;
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]){
   
   // Setup plasma engine
   engine->set_verbosity(10);
-  engine->set_geom_refinement_depth(-1);
+  engine->set_geom_refinement_depth(1);
   engine->setup_fresh();
 
   // Poisson solver solves

@@ -30,10 +30,11 @@ amr_mesh::amr_mesh(){
   this->set_redist_rad(-1);
   this->set_num_ghost(-2);
   this->set_eb_ghost(-4);
-  this->set_irreg_sten_type(stencil_type::linear);
   this->set_irreg_sten_order(-1);
   this->set_irreg_sten_radius(-1);
   this->set_balance(load_balance::knapsack);
+  this->set_irreg_sten_type(stencil_type::linear);
+  this->set_ghost_interpolation(ghost_interpolation::pwl);
   
 }
 
@@ -276,6 +277,15 @@ void amr_mesh::set_balance(load_balance::which_balance a_load){
   }
   
   m_which_balance = a_load;
+}
+
+void amr_mesh::set_ghost_interpolation(const ghost_interpolation::which_type a_interp){
+  CH_TIME("amr_mesh::set_ghost_interpolation");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::set_ghost_interpolation" << endl;
+  }
+
+  m_interp_type = a_interp;
 }
 
 void amr_mesh::build_domains(){
@@ -627,14 +637,14 @@ void amr_mesh::define_eb_quad_cfi(){
 											       ebis_sol));
 	
 	m_old_quadcfi[phase::solid][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
-											   m_grids[lvl-1],
-											   m_ebisl[phase::solid][lvl],
-											   m_ebisl[phase::solid][lvl-1],
-											   m_domains[lvl-1],
-											   m_ref_ratios[lvl-1],
-											   1,
-											   cfivs,
-											   ebis_gas));
+											     m_grids[lvl-1],
+											     m_ebisl[phase::solid][lvl],
+											     m_ebisl[phase::solid][lvl-1],
+											     m_domains[lvl-1],
+											     m_ref_ratios[lvl-1],
+											     1,
+											     cfivs,
+											     ebis_gas));
       }
     }
   }
@@ -673,6 +683,20 @@ void amr_mesh::define_fillpatch(){
 												   ghost,
 												   !m_ebcf,
 												   ebis_gas));
+      }
+      if(!ebis_sol.isNull()){
+	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
+	m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
+												     m_grids[lvl-1],
+												     m_ebisl[phase::solid][lvl],
+												     m_ebisl[phase::solid][lvl-1],
+												     m_domains[lvl-1],
+												     m_ref_ratios[lvl-1],
+												     comps,
+												     radius,
+												     ghost,
+												     !m_ebcf,
+												     ebis_sol));
       }
     }
   }
@@ -962,19 +986,31 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
     pout() << "amr_mesh::interp_ghost(eb)" << endl;
   }
 
-  for (int lvl = m_finest_level; lvl > 0; lvl--){
-    const int ncomps = a_data[lvl]->nComp();
-    const Interval interv(0, ncomps -1);
+  // for (int lvl = m_finest_level; lvl > 0; lvl--){
+  //   const int ncomps = a_data[lvl]->nComp();
+  //   const Interval interv(0, ncomps -1);
 
-    CH_assert(a_data[lvl]->ghostVect() == m_num_ghost*IntVect::Unit);
+  //   CH_assert(a_data[lvl]->ghostVect() == m_num_ghost*IntVect::Unit);
 
-    m_quadcfi[a_phase][lvl]->coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
+  //   m_quadcfi[a_phase][lvl]->coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
+  // }
+
+  // for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  //   a_data[lvl]->exchange();
+  // }
+
+  if(m_interp_type == ghost_interpolation::pwl){
+    this->interp_ghost_pwl(a_data, a_phase);
   }
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    a_data[lvl]->exchange();
+  else if(m_interp_type == ghost_interpolation::quad){
+    this->interp_ghost_quad(a_data, a_phase);
+  }
+  else{
+    MayDay::Abort("amr_mesh::interp_ghost - unsupported interpolation type requested");
   }
 }
+
+
 
 void amr_mesh::interp_ghost(MFAMRCellData& a_data){
   CH_TIME("amr_mesh::interp_ghost(mf)");
@@ -1004,7 +1040,31 @@ void amr_mesh::interp_ghost(MFAMRCellData& a_data){
   }
 }
 
+void amr_mesh::interp_ghost_quad(EBAMRCellData& a_data, phase::which_phase a_phase){
+  CH_TIME("amr_mesh::interp_ghost(quad)");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::interp_ghost(quad)" << endl;
+  }
+
+  for (int lvl = m_finest_level; lvl > 0; lvl--){
+    const int ncomps = a_data[lvl]->nComp();
+    const Interval interv(0, ncomps -1);
+
+    CH_assert(a_data[lvl]->ghostVect() == m_num_ghost*IntVect::Unit);
+
+    m_quadcfi[a_phase][lvl]->coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
+  }
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    a_data[lvl]->exchange();
+  }
+}
+
 void amr_mesh::interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase){
+  CH_TIME("amr_mesh::interp_ghost(pwl)");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::interp_ghost(pwl)" << endl;
+  }
   
   for (int lvl = m_finest_level; lvl > 0; lvl--){
     const int ncomps = a_data[lvl]->nComp();
