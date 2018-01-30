@@ -651,8 +651,6 @@ protected:
     @brief Define irregular stencils
   */
   virtual void define_irreg_sten();
-
-
 };
 
 #include "amr_meshI.H"

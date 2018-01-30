@@ -150,7 +150,7 @@ int main(int argc, char* argv[]){
   cdr->set_ebflux(0.0);
   cdr->write_plot_file();
 
-  const Real cfl = 0.9;
+  const Real cfl = 0.8;
   cdr->set_verbosity(1);
   amr->set_verbosity(0);
   poisson->set_verbosity(0);
