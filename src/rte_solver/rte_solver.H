@@ -84,12 +84,7 @@ public:
   /*!
     @brief Advance RTE onto isotropic state a_state
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = false);
-
-  /*!
-    @brief Advance RTE onto state a_state
-  */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = false) = 0;
 
   /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
@@ -113,6 +108,16 @@ public:
     @brief Allocate internal storage
   */
   virtual void allocate_internals() = 0;
+
+  /*!
+    @brief Set source term
+  */
+  virtual void set_source(EBAMRCellData& a_source);
+
+  /*!
+    @brief Set source
+  */
+  virtual void set_source(const Real a_source);
 
 #ifdef CH_USE_HDF5
   /*!

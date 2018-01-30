@@ -27,6 +27,18 @@ public:
   */
   virtual ~cdr_layout();
 
+
+
+  /*!
+    @brief Allocate internal storage for solvers
+  */
+  virtual void allocate_internals();
+
+  /*!
+    @brief Initial data
+  */
+  virtual void initial_data();
+
   /*!
     @brief Set amr
   */
@@ -41,6 +53,11 @@ public:
     @brief Set the physical domain
   */
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
+  /*!
+    @brief Do a sanity check
+  */
+  virtual void sanity_check();
 
   /*!
     @brief Set phase
@@ -77,6 +94,71 @@ public:
     @brief Get species
   */
   virtual Vector<RefCountedPtr<species> >& get_species();
+
+  /*!
+    @brief Convenience function. Set velocity for all species. Mostly used for debugging.
+  */
+  virtual void set_velocity(const EBAMRCellData& a_velo);
+
+  /*!
+    @brief Convenience function. Set constant velocity for all species. Mostly used for debugging. 
+  */
+  virtual void set_velocity(const RealVect a_velo);
+
+  /*!
+    @brief Convenience function. Set diffusion coefficients for all species. Mostly used for debugging. 
+  */
+  virtual void set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_diffco_eb);
+
+  /*!
+    @brief Convenience function. Set constant diffusion coefficients for all species. Mostly used for debugging. 
+  */
+  virtual void set_diffco(const Real a_diffco);
+
+  /*!
+    @brief Convenience function. Set source terms for all species. Mostly used for debugging. 
+  */
+  virtual void set_source(const EBAMRCellData& a_source);
+
+  /*!
+    @brief Convenience function. Set constant source terms for all species. Mostly used for debugging. 
+  */
+  virtual void set_source(const Real a_source);
+
+  /*!
+    @brief Convenience function. Set the EB flux for all species. Mostly used for debugging. 
+  */
+  virtual void set_ebflux(const EBAMRIVData& a_ebflux);
+
+  /*!
+    @brief Convenience function.Set the EB flux for all species. Mostly used for debugging. 
+  */
+  virtual void set_ebflux(const Real a_ebflux);
+
+  /*!
+    @brief Convenience function. All solvers write plot files
+  */
+  virtual void write_plot_file();
+
+  /*!
+    @brief Convenience function. Call advance method for each solver
+  */
+  virtual void advance(const Real a_dt);
+
+  /*!
+    @brief Get largest possible time step for advection part
+  */
+  virtual Real compute_cfl_dt();
+
+  /*!
+    @brief Get largest possible time step for diffusion part
+  */
+  virtual Real compute_diffusive_dt();
+
+  /*!
+    @brief Compute total charge in computational region
+  */
+  virtual Real compute_Q();
 
 protected:
 

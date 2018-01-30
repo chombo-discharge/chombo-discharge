@@ -123,11 +123,9 @@ void eddington_sp1::allocate_internals(){
   data_ops::set_value(m_resid,  0.0);
   data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
-
-  data_ops::set_value(m_source, 1.0);
 }
 
-bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
+bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi){
   CH_TIME("eddington_sp1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
@@ -149,7 +147,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
 
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
   m_amr->alias(phi,  a_state);
-  m_amr->alias(rhs,  a_source);
+  m_amr->alias(rhs,  m_source);
   m_amr->alias(res,  m_resid);
   m_amr->alias(zero, dummy);
 
@@ -255,9 +253,9 @@ void eddington_sp1::set_aco_and_bco(){
     }
   }
 
-  data_ops::scale(m_aco,       s_c0);       // aco = c*kappa
-  data_ops::scale(m_bco,       s_c0/(3.0)); // bco = c/(3*kappa)
-  data_ops::scale(m_bco_irreg, s_c0/(3.0)); // bco = c/(3*kappa)
+  data_ops::scale(m_aco,       units::s_c0);       // aco = c*kappa
+  data_ops::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
+  data_ops::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
 }
 
 void eddington_sp1::set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Real a_dx){
@@ -462,7 +460,7 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
 
   m_amr->average_down(a_ebflux, m_phase);
 
-  data_ops::scale(a_ebflux, 0.5*s_c0);
+  data_ops::scale(a_ebflux, 0.5*units::s_c0);
 }
 
 
@@ -474,7 +472,7 @@ void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_s
 
   m_amr->compute_gradient(a_flux, a_state); // flux = grad(phi)
   data_ops::divide_scalar(a_flux, m_aco);   // flux = grad(phi)/(c*kappa)
-  data_ops::scale(a_flux, -s_c0*s_c0/3.0);  // flux = -c*grad(phi)/3.
+  data_ops::scale(a_flux, -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
 
   m_amr->average_down(a_flux, m_phase);
   m_amr->interp_ghost(a_flux, m_phase);
@@ -565,7 +563,7 @@ void eddington_sp1::write_plot_file(const int a_step){
 	      0.0,
 	      m_amr->get_ref_rat(),
 	      m_amr->get_finest_level() + 1,
-	      false,
+	      true,
 	      covered_values);
 }
 #endif

@@ -6,8 +6,7 @@
 */
 
 #include "rte_solver.H"
-#include "MFAliasFactory.H"
-
+#include "data_ops.H"
 
 rte_solver::rte_solver(){
 
@@ -23,18 +22,7 @@ bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
     pout() << "rte_solver::advance" << endl;
   }
 
-  const bool converged = this->advance(a_dt, m_state, m_source, a_zerophi);
-
-  return converged;
-}
-
-bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi){
-  CH_TIME("rte_solver::advance");
-  if(m_verbosity > 5){
-    pout() << "rte_solver::advance" << endl;
-  }
-
-  const bool converged = this->advance(a_dt, a_state, m_source, a_zerophi);
+  const bool converged = this->advance(a_dt, m_state, a_zerophi);
 
   return converged;
 }
@@ -138,6 +126,40 @@ void rte_solver::set_verbosity(const int a_verbosity){
   }
   
   m_verbosity = a_verbosity;
+}
+
+void rte_solver::set_source(EBAMRCellData& a_source){
+  CH_TIME("rte_solver::set_source(ebamrcell)");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_source(ebamrcell)" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_source[lvl]->copyTo(*m_source[lvl]);
+  }
+
+  m_amr->average_down(m_source, m_phase);
+  m_amr->interp_ghost(m_source, m_phase);
+}
+
+void rte_solver::set_source(const Real a_source){
+  CH_TIME("rte_solver::set_source(constant)");
+  if(m_verbosity > 5){
+    pout() << "rte_solver::set_source(constant)" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (int comp = 0; comp < m_source[lvl]->nComp(); comp++){
+      data_ops::set_value(*m_source[lvl], a_source, comp);
+    }
+  }
+
+  m_amr->average_down(m_source, m_phase);
+  m_amr->interp_ghost(m_source, m_phase);
 }
 
 Real rte_solver::get_time() const{

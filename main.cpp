@@ -104,17 +104,7 @@ int main(int argc, char* argv[]){
     poisson->set_dirichlet_wall_bc(2, Side::Hi, potential::live);
   }
 
-      // Set up an eddington sp1 solver
-  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 1.0));
-  RefCountedPtr<rte_solver> rte = RefCountedPtr<rte_solver> (new eddington_sp1());
-  rte->set_verbosity(10);
-  rte->set_amr(amr);
-  rte->set_computational_geometry(compgeom);
-  rte->set_physical_domain(physdom);
-  rte->set_photon_group(group);
-  rte->sanity_check();
-  
-  // Setup plasma engine
+  // Setup plasma engine. This must always be done. 
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(1);
   engine->setup_fresh();
@@ -125,13 +115,6 @@ int main(int argc, char* argv[]){
   poisson->solve();
   poisson->write_plot_file();
 
-  // RTE solves
-  rte->allocate_internals();
-  rte->advance(0.0);
-  rte->write_plot_file(0);
-
-  // Create a time stepper
-  time_stepper* ts = static_cast<time_stepper*> (new rk2());
 
   // New cdr solver
   RefCountedPtr<species> spec = RefCountedPtr<species> (new species());
@@ -160,7 +143,7 @@ int main(int argc, char* argv[]){
   cdr->set_ebflux(0.0);
   cdr->write_plot_file();
 
-  const Real cfl = 0.8;
+  const Real cfl = 0.4;
   cdr->set_verbosity(1);
   amr->set_verbosity(0);
   poisson->set_verbosity(0);
@@ -169,25 +152,59 @@ int main(int argc, char* argv[]){
     const Real dt_cfl = cfl*cdr->compute_cfl_dt();
     const Real dt_dif = cfl*cdr->compute_diffusive_dt();
 
-    Real dt;
-    //    if(dt_cfl < dt_dif){
-      dt = dt_cfl;
-      dt = dt_dif;
-      dt = Min(dt_cfl, dt_dif);
-      pout() << "step = " << i << "\t cfl dt = " << dt << "\t mass = " << cdr->compute_mass()/init_mass << endl;
-      cdr->advance(dt);
-    // }
-    // else{
-    //   dt = dt_dif;
-    //   pout() << "step = " << i << "\t diff dt = " << dt << "\t mass = " << cdr->compute_mass()/init_mass << endl;
-    //   cdr->advance(dt);
-    // }
-
+    const Real dt = Min(dt_cfl, dt_dif);
+    pout() << "step = " << i << "\t cfl dt = " << dt << "\t mass = " << cdr->compute_mass()/init_mass << endl;
+    cdr->advance(dt);
     
-    if((i+1) % 10 == 0){
+    if((i+1) % 5 == 0){
       cdr->write_plot_file();
     }
   }
+  
+  // Set up an eddington sp1 solver
+  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 1.0));
+  RefCountedPtr<rte_solver> rte = RefCountedPtr<rte_solver> (new eddington_sp1());
+  rte->set_verbosity(10);
+  rte->set_amr(amr);
+  rte->set_computational_geometry(compgeom);
+  rte->set_physical_domain(physdom);
+  rte->set_photon_group(group);
+  rte->sanity_check();
+
+  // RTE solves. Use cdr as source terms
+  rte->allocate_internals();
+  rte->set_source(cdr->get_state());
+  rte->advance(0.0);
+  rte->write_plot_file(0);
+
+#if CH_SPACEDIM == 2
+  // Advance a layout of cdr_solvers
+  RefCountedPtr<cdr_layout> cdr_solvers = RefCountedPtr<cdr_layout> (new cdr_layout(plaskin));
+  cdr_solvers->set_amr(amr);
+  cdr_solvers->set_computational_geometry(compgeom);
+  cdr_solvers->set_physical_domain(physdom);
+  cdr_solvers->sanity_check();
+  cdr_solvers->allocate_internals();
+  cdr_solvers->initial_data();
+  cdr_solvers->set_velocity(E_gas);
+  cdr_solvers->set_diffco(0.002);
+  cdr_solvers->set_source(0.0);
+  cdr_solvers->set_ebflux(0.0);
+  cdr_solvers->write_plot_file();
+  for (int i = 0; i < 15; i++){
+    const Real dt_cfl = cfl*cdr_solvers->compute_cfl_dt();
+    const Real dt_dif = cfl*cdr_solvers->compute_diffusive_dt();
+
+    const Real dt = Min(dt_cfl, dt_dif);
+    cdr_solvers->advance(dt);
+    if((i+1) % 20 == 0){
+      cdr_solvers->write_plot_file();
+    }
+
+    pout() << "step = " << i << "\t cfl dt = " << dt << "\t charge = " << cdr_solvers->compute_Q() << endl;
+    
+  }
+#endif
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

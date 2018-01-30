@@ -13,12 +13,11 @@
 #include <EBArith.H>
 
 cdr_solver::cdr_solver(){
-
+  m_name = "cdr_solver";
+  
   this->set_phase(phase::gas);
   this->set_time(0, 0., 0.);
   this->set_mass_redist(false);
-  
-  m_name = "cdr_solver";
 }
 
 cdr_solver::~cdr_solver(){

@@ -99,9 +99,9 @@ morrow_lowke::morrow_lowke(){
   pos->set_noise(m_perlin);
 
   // Convert to correct units and compute necessary things
-  m_p  *= s_atm2pascal;
-  m_pq *= s_atm2pascal;
-  m_N   = m_p*s_Na/(m_temp*s_R);
+  m_p  *= units::s_atm2pascal;
+  m_pq *= units::s_atm2pascal;
+  m_N   = m_p*units::s_Na/(m_temp*units::s_R);
 }
 
 morrow_lowke::~morrow_lowke(){
@@ -225,7 +225,7 @@ morrow_lowke::photon_one::photon_one(){
     pp.query("frac_O2",  O2_frac);
     pp.query("pressure", pressure);
   }
-  m_pO2 = pressure*O2_frac*s_atm2pascal;  
+  m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }
 
 morrow_lowke::photon_one::~photon_one(){
@@ -255,7 +255,7 @@ morrow_lowke::photon_two::photon_two(){
     pp.query("frac_O2",  O2_frac);
     pp.query("pressure", pressure);
   }
-  m_pO2 = pressure*O2_frac*s_atm2pascal;  
+  m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }
 
 morrow_lowke::photon_two::~photon_two(){
@@ -285,7 +285,7 @@ morrow_lowke::photon_three::photon_three(){
     pp.query("frac_O2",  O2_frac);
     pp.query("pressure", pressure);
   }
-  m_pO2 = pressure*O2_frac*s_atm2pascal;  
+  m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }
 
 morrow_lowke::photon_three::~photon_three(){
