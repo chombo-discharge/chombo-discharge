@@ -135,7 +135,7 @@ protected:
     /*!
       @brief Destructor
     */
-    ~electron();
+    virtual ~electron();
 
     /*!
       @brief Implementation of initial data
@@ -191,7 +191,7 @@ protected:
     /*!
       @brief Destructor
     */
-    ~positive_species();
+    virtual ~positive_species();
 
     /*!
       @brief Implementation of initial data
@@ -308,7 +308,7 @@ protected:
     /*!
       @brief Get the absorption coefficient
     */
-    const Real get_absorption_coeff(const RealVect& a_pos) const;
+    const Real get_kappa(const RealVect& a_pos) const;
 
     /*!
       @brief Get the lambda coefficient
@@ -366,7 +366,7 @@ protected:
     /*!
       @brief Get the absorption coefficient
     */
-    const Real get_absorption_coeff(const RealVect& a_pos) const;
+    const Real get_kappa(const RealVect& a_pos) const;
 
     /*!
       @brief Get the lambda coefficient
@@ -424,7 +424,7 @@ protected:
     /*!
       @brief Get the absorption coefficient
     */
-    const Real get_absorption_coeff(const RealVect& a_pos) const;
+    const Real get_kappa(const RealVect& a_pos) const;
 
     /*!
       @brief Get the lambda coefficient

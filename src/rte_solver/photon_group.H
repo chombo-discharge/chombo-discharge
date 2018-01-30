@@ -47,12 +47,7 @@ public:
   virtual std::string get_name() const;
 
   /*!
-    @brief Defined or nto
-  */
-  virtual bool is_defined() const;
-
-  /*!
-    @brief Get kappa at position
+    @brief Get kappa at position. 
   */
   virtual Real get_kappa(const RealVect a_pos) const; 
 	      
@@ -67,11 +62,6 @@ protected:
     @brief Constant kappa or not
   */
   bool m_constant;
-
-  /*!
-    @brief Is defined or not
-  */
-  bool m_defined;
 
   /*!
     @brief Constant kappa

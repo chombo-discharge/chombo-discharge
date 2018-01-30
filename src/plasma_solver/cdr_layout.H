@@ -12,7 +12,7 @@
 #include "cdr_solver.H"
 
 /*!
-  @brief Class for holding a set of cdr_solvers. Comes with an iterator
+  @brief Class for holding a set of cdr_solvers. 
 */
 class cdr_layout {
 public:
@@ -26,8 +26,6 @@ public:
     @brief Destructor
   */
   virtual ~cdr_layout();
-
-
 
   /*!
     @brief Allocate internal storage for solvers

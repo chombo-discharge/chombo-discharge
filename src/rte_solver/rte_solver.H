@@ -64,7 +64,7 @@ public:
   /*!
     @brief Get current time
   */
-  virtual void set_time(const Real a_time);
+  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set stationary solver or not
@@ -110,9 +110,14 @@ public:
   virtual void allocate_internals() = 0;
 
   /*!
+    @brief Regrid function
+  */
+  virtual void regrid() = 0;
+
+  /*!
     @brief Set source term
   */
-  virtual void set_source(EBAMRCellData& a_source);
+  virtual void set_source(const EBAMRCellData& a_source);
 
   /*!
     @brief Set source
@@ -223,6 +228,11 @@ protected:
   Real m_time;
 
   /*!
+    @brief Time increment
+  */
+  Real m_dt;
+
+  /*!
     @brief Stationary solver or not
   */
   bool m_stationary;
@@ -231,6 +241,11 @@ protected:
     @brief
   */
   int m_verbosity;
+
+  /*!
+    @brief Time step
+  */
+  int m_step;
 
   /*!
     @brief Set ebis

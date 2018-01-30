@@ -20,6 +20,7 @@
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
 #include "cdr_layout.H"
+#include "rte_layout.H"
 #include "morrow_lowke.H"
 
 int main(int argc, char* argv[]){
@@ -106,7 +107,7 @@ int main(int argc, char* argv[]){
 
   // Setup plasma engine. This must always be done. 
   engine->set_verbosity(10);
-  engine->set_geom_refinement_depth(1);
+  engine->set_geom_refinement_depth(-1);
   engine->setup_fresh();
 
   // Poisson solver solves
@@ -178,8 +179,9 @@ int main(int argc, char* argv[]){
   rte->write_plot_file(0);
 
 #if CH_SPACEDIM == 2
-  // Advance a layout of cdr_solvers
+  // Advance a layout of cdr and rte solvers
   RefCountedPtr<cdr_layout> cdr_solvers = RefCountedPtr<cdr_layout> (new cdr_layout(plaskin));
+
   cdr_solvers->set_amr(amr);
   cdr_solvers->set_computational_geometry(compgeom);
   cdr_solvers->set_physical_domain(physdom);
@@ -191,6 +193,15 @@ int main(int argc, char* argv[]){
   cdr_solvers->set_source(0.0);
   cdr_solvers->set_ebflux(0.0);
   cdr_solvers->write_plot_file();
+
+  RefCountedPtr<rte_layout> rte_solvers = RefCountedPtr<rte_layout> (new rte_layout(plaskin));
+  rte_solvers->set_amr(amr);
+  rte_solvers->set_computational_geometry(compgeom);
+  rte_solvers->set_physical_domain(physdom);
+  rte_solvers->sanity_check();
+  rte_solvers->allocate_internals();
+  rte_solvers->set_source(0.0);
+  rte_solvers->write_plot_file();
   for (int i = 0; i < 15; i++){
     const Real dt_cfl = cfl*cdr_solvers->compute_cfl_dt();
     const Real dt_dif = cfl*cdr_solvers->compute_diffusive_dt();

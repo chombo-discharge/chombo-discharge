@@ -57,8 +57,6 @@ void rte_solver::sanity_check(){
   CH_assert(!m_amr.isNull());
   CH_assert(!m_photon_group.isNull());
   CH_assert(!m_ebis.isNull());
-
-  CH_assert(m_photon_group->is_defined()); 
 }
 
 void rte_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
@@ -101,13 +99,15 @@ void rte_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr = a_amr;
 }
 
-void rte_solver::set_time(const Real a_time) {
+void rte_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
   CH_TIME("rte_solver::set_time");
   if(m_verbosity > 5){
     pout() << "rte_solver::set_time" << endl;
   }
-  
+
+  m_step = a_step;
   m_time = a_time;
+  m_dt   = a_dt;
 }
 
 void rte_solver::set_stationary(const bool a_stationary) {
@@ -128,7 +128,7 @@ void rte_solver::set_verbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 }
 
-void rte_solver::set_source(EBAMRCellData& a_source){
+void rte_solver::set_source(const EBAMRCellData& a_source){
   CH_TIME("rte_solver::set_source(ebamrcell)");
   if(m_verbosity > 5){
     pout() << "rte_solver::set_source(ebamrcell)" << endl;

@@ -231,7 +231,7 @@ morrow_lowke::photon_one::photon_one(){
 morrow_lowke::photon_one::~photon_one(){
 }
 
-const Real morrow_lowke::photon_one::get_absorption_coeff(const RealVect& a_pos) const {
+const Real morrow_lowke::photon_one::get_kappa(const RealVect& a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct. 
 }
 
@@ -261,7 +261,7 @@ morrow_lowke::photon_two::photon_two(){
 morrow_lowke::photon_two::~photon_two(){
 }
 
-const Real morrow_lowke::photon_two::get_absorption_coeff(const RealVect& a_pos) const {
+const Real morrow_lowke::photon_two::get_kappa(const RealVect& a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct. 
 }
 
@@ -291,6 +291,6 @@ morrow_lowke::photon_three::photon_three(){
 morrow_lowke::photon_three::~photon_three(){
 }
 
-const Real morrow_lowke::photon_three::get_absorption_coeff(const RealVect& a_pos) const {
+const Real morrow_lowke::photon_three::get_kappa(const RealVect& a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct. 
 }

@@ -108,6 +108,11 @@ public:
   */
   virtual void allocate_internals();
 
+  /*!
+    @brief Regrid function for this class
+  */
+  virtual void regrid();
+
 #ifdef CH_USE_HDF5
   /*!
     @brief Write plot file

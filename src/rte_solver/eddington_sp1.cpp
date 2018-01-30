@@ -116,6 +116,9 @@ void eddington_sp1::allocate_internals(){
   
   const int ncomp = 1;
 
+  m_amr->allocate(m_aco,        m_phase, ncomp);
+  m_amr->allocate(m_bco,        m_phase, ncomp);
+  m_amr->allocate(m_bco_irreg,  m_phase, ncomp);
   m_amr->allocate(m_state,  m_phase, ncomp);
   m_amr->allocate(m_source, m_phase, ncomp);
   m_amr->allocate(m_resid,  m_phase, ncomp);
@@ -123,6 +126,17 @@ void eddington_sp1::allocate_internals(){
   data_ops::set_value(m_resid,  0.0);
   data_ops::set_value(m_state,  0.0);
   data_ops::set_value(m_source, 0.0);
+
+  this->set_aco_and_bco();
+}
+
+void eddington_sp1::regrid(){
+  CH_TIME("eddington_sp1::regrid");
+  if(m_verbosity > 5){
+    pout() << m_name + "::regrid" << endl;
+  }
+
+  MayDay::Abort("eddington_sp1::regrid - not implemented");
 }
 
 bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi){
@@ -463,16 +477,19 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
   data_ops::scale(a_ebflux, 0.5*units::s_c0);
 }
 
-
 void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state){
   CH_TIME("eddington_sp1::compute_flux");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_flux" << endl;
   }
 
+  const int finest_level = m_amr->get_finest_level();
+
   m_amr->compute_gradient(a_flux, a_state); // flux = grad(phi)
-  data_ops::divide_scalar(a_flux, m_aco);   // flux = grad(phi)/(c*kappa)
-  data_ops::scale(a_flux, -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::divide_scalar(*a_flux[lvl], *m_aco[lvl]);   // flux = grad(phi)/(c*kappa)
+    data_ops::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
+  }
 
   m_amr->average_down(a_flux, m_phase);
   m_amr->interp_ghost(a_flux, m_phase);
@@ -520,15 +537,12 @@ void eddington_sp1::write_plot_file(const int a_step){
 
   // Compute the flux
   EBAMRCellData flux;
-  m_amr->allocate(flux, m_phase, SpaceDim, 3);
+  m_amr->allocate(flux, m_phase, SpaceDim);
   this->compute_flux(flux, m_state);
-  m_amr->average_down(flux, m_phase);
-  m_amr->interp_ghost(flux, m_phase);
 
   // Allocate output storage
   Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
   m_amr->allocate(output, m_phase, ncomps, 1);
-
 
 
   for (int lvl = 0; lvl < output.size(); lvl++){

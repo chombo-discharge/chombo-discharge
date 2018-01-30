@@ -17,11 +17,9 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
 
 
   for (int i = 0; i < a_plaskin->get_num_species(); i++){
-    pout() << "instantiating solver" << endl;
     m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_sg());
     m_solvers[i]->set_species(m_species[i]);
   }
-  pout() << "done instantiating" << endl;
 
   this->set_verbosity(-1);
 }

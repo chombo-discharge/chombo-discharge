@@ -8,7 +8,7 @@
 #include "photon_group.H"
 
 photon_group::photon_group(){
-  m_defined = false;
+  this->define("default_photon", 1.0);
 }
 
 photon_group::photon_group(const std::string a_name, const Real a_kappa){
@@ -24,7 +24,6 @@ void photon_group::define(const std::string a_name, const Real a_kappa){
   m_kappa = a_kappa;
 
   m_constant = true;
-  m_defined  = true;
 }
 
 void photon_group::define(const std::string a_name, Real (*a_kappa)(const RealVect a_pos)){
@@ -32,11 +31,6 @@ void photon_group::define(const std::string a_name, Real (*a_kappa)(const RealVe
   m_varkappa = a_kappa;
 
   m_constant = false;
-  m_defined  = true;
-}
-
-bool photon_group::is_defined() const {
-  return m_defined;
 }
 
 std::string photon_group::get_name() const{
