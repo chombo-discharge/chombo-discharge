@@ -16,14 +16,21 @@
 #include "cdr_gdnv.H"
 #include "cdr_sg.H"
 #include "eddington_sp1.H"
+#include "rk2.H"
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
+#include "cdr_layout.H"
+#include "morrow_lowke.H"
 
 int main(int argc, char* argv[]){
 
 #ifdef CH_MPI
   MPI_Init(&argc,&argv);
 #endif
+
+  // Build argument list from input file
+  char* inputFile = argv[1];
+  ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
   EBIndexSpace::s_useMemoryLoadBalance = false;
 
@@ -33,14 +40,14 @@ int main(int argc, char* argv[]){
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(new morrow_lowke());
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(NULL);
+  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 #if CH_SPACEDIM == 2
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
 #else
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
 #endif
-  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(NULL);
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(NULL);
-  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 
   Vector<int> refrat(5);
   refrat[0] = 4;
@@ -51,8 +58,8 @@ int main(int argc, char* argv[]){
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(64*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(2);                      // Set max amr depth
+  amr->set_coarsest_num_cells(128*IntVect::Unit);  // Set number of cells on coarsest level
+  amr->set_max_amr_depth(0);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -123,6 +130,9 @@ int main(int argc, char* argv[]){
   rte->advance(0.0);
   rte->write_plot_file(0);
 
+  // Create a time stepper
+  time_stepper* ts = static_cast<time_stepper*> (new rk2());
+
   // New cdr solver
   RefCountedPtr<species> spec = RefCountedPtr<species> (new species());
   cdr_solver* cdr = static_cast<cdr_solver*> (new cdr_sg());
@@ -155,7 +165,7 @@ int main(int argc, char* argv[]){
   amr->set_verbosity(0);
   poisson->set_verbosity(0);
   const Real init_mass = cdr->compute_mass();
-  for (int i = 0; i < 1000; i++){
+  for (int i = 0; i < 100; i++){
     const Real dt_cfl = cfl*cdr->compute_cfl_dt();
     const Real dt_dif = cfl*cdr->compute_diffusive_dt();
 

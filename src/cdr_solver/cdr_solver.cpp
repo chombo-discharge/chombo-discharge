@@ -793,6 +793,15 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
   }
 }
 
+void cdr_solver::regrid(){
+  CH_TIME("cdr_solver::regrid");
+  if(m_verbosity > 5){
+    pout() << m_name + "::regrid" << endl;
+  }
+
+  MayDay::Abort("cdr_solver::regrid - not implemented");
+}
+
 void cdr_solver::reflux(EBAMRCellData& a_state){
   CH_TIME("cdr_solver::reflux");
   if(m_verbosity > 5){
@@ -1116,7 +1125,7 @@ void cdr_solver::write_plot_file(){
   names[2] = "x-velocity";
   names[3] = "y-velocity";
   if(SpaceDim == 3){
-    names[4] = "y-velocity";
+    names[4] = "z-velocity";
   }
 
 

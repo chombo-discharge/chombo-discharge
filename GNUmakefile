@@ -29,6 +29,7 @@ src_dirs = ./src				\
 	./src/poisson_solver		 	\
 	./src/rte_solver		 	\
 	./geometries_prebuilt			\
+	./plasma_models 			\
 
 # Define rules to build everything
 include $(CHOMBO_HOME)/mk/Make.example

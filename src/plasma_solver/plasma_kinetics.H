@@ -11,8 +11,8 @@
 #include <RealVect.H>
 #include <RefCountedPtr.H>
 
-#include "ion.H"
-#include "photon.H"
+#include "species.H"
+#include "photon_group.H"
 
 /*!
   @brief Abstract base class for specifying plasma kinetics
@@ -44,9 +44,9 @@ public:
     @details The output vector should contain the right-hand sides of the various photon solvers in the order as m_ions. 
     The input vectors follow this order.
   */
-  virtual Vector<Real> compute_ion_source_terms(const Vector<Real>& a_densities, 
-						const Vector<Real>& a_intensities,
-						const RealVect&     a_E) const = 0;
+  virtual Vector<Real> compute_source_terms(const Vector<Real>& a_densities, 
+					    const Vector<Real>& a_intensities,
+					    const RealVect&     a_E) const = 0;
 
   /*!
     @brief Compute the source terms (right-hand sides) for RTE equations
@@ -55,7 +55,7 @@ public:
     @details The output vector should contain the right-hand sides of the various photon solvers in the order as m_photons.
     The input vectors follow this order. 
   */
-  virtual Vector<Real> compute_photon_source_terms(const Vector<Real>& a_densities, const RealVect& a_E) const = 0;
+  virtual Vector<Real> compute_rte_source_terms(const Vector<Real>& a_densities, const RealVect& a_E) const = 0;
 
   /*!
     @brief Compute the ion diffusion coefficient
@@ -74,14 +74,14 @@ public:
     @param[in] a_normal Normal vector (points into the gas phase)
     @param[in] a_time Time
   */
-  virtual Vector<Real> compute_ion_conductor_fluxes(const Vector<Real>& a_extrapolated_fluxes,
-						    const Vector<Real>& a_ion_densities,
-						    const Vector<Real>& a_ion_velocities,
-						    const Vector<Real>& a_photon_fluxes,
-						    const RealVect&     a_E,
-						    const RealVect&     a_pos,
-						    const RealVect&     a_normal,
-						    const Real&         a_time) const = 0;
+  virtual Vector<Real> compute_conductor_fluxes(const Vector<Real>& a_extrapolated_fluxes,
+						const Vector<Real>& a_ion_densities,
+						const Vector<Real>& a_ion_velocities,
+						const Vector<Real>& a_photon_fluxes,
+						const RealVect&     a_E,
+						const RealVect&     a_pos,
+						const RealVect&     a_normal,
+						const Real&         a_time) const = 0;
   /*!
     @brief Compute ion fluxes through dielectric-gas interfaces
     @param[in] a_extrapolated_fluxes Extrapolated fluxes from the gas-side. Useful for inflow/outflow BCs
@@ -93,14 +93,14 @@ public:
     @param[in] a_normal Normal vector (points into the gas phase)
     @param[in] a_time Time
   */
-  virtual Vector<Real> compute_ion_dielectric_fluxes(const Vector<Real>& a_extrapolated_fluxes,
-						     const Vector<Real>& a_ion_densities,
-						     const Vector<Real>& a_ion_velocities,
-						     const Vector<Real>& a_photon_fluxes,
-						     const RealVect&     a_E,
-						     const RealVect&     a_pos,
-						     const RealVect&     a_normal,
-						     const Real&         a_time) const = 0;
+  virtual Vector<Real> compute_dielectric_fluxes(const Vector<Real>& a_extrapolated_fluxes,
+						 const Vector<Real>& a_ion_densities,
+						 const Vector<Real>& a_ion_velocities,
+						 const Vector<Real>& a_photon_fluxes,
+						 const RealVect&     a_E,
+						 const RealVect&     a_pos,
+						 const RealVect&     a_normal,
+						 const Real&         a_time) const = 0;
 
   /*!
     @brief Set the initial surface charge
@@ -110,23 +110,23 @@ public:
 
   /*!
     @brief Get all ions
-   */
-  const Vector<RefCountedPtr<ion> >& get_ions() const { 
-    return m_ions; 
+  */
+  const Vector<RefCountedPtr<species> >& get_species() const { 
+    return m_species; 
   }
 
   /*!
     @brief Get all photons
   */
-  const Vector<RefCountedPtr<photon> >& get_photons() const {
+  const Vector<RefCountedPtr<photon_group> >& get_photons() const {
     return m_photons;
   }
 
   /*!
     @brief Return number of ion equations
   */
-  const int get_num_ions() const{
-    return m_ions.size();
+  const int get_num_species() const{
+    return m_species.size();
   }
 
   /*!
@@ -141,12 +141,12 @@ protected:
   /*!
     @brief List of species
   */
-  Vector<RefCountedPtr<ion> > m_ions;
+  Vector<RefCountedPtr<species> > m_species;
 
   /*!
     @brief List of optical transitions between species
   */
-  Vector<RefCountedPtr<photon> > m_photons;
+  Vector<RefCountedPtr<photon_group> > m_photons;
 };
 
 #endif

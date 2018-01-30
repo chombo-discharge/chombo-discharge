@@ -159,6 +159,11 @@ public:
   virtual void set_mass_redist(const bool a_mass_redist);
 
   /*!
+    @brief Regrid internals
+  */
+  virtual void regrid();
+
+  /*!
     @brief Get the ghost cell requirement
   */
   virtual int query_ghost() const = 0;
