@@ -128,7 +128,7 @@ public:
   /*!
     @brief Write plot file
   */
-  virtual void write_plot_file(const int a_step = 0) = 0;
+  virtual void write_plot_file() = 0;
 #endif
 
   /*!

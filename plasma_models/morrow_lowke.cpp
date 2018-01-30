@@ -225,14 +225,16 @@ morrow_lowke::photon_one::photon_one(){
     pp.query("frac_O2",  O2_frac);
     pp.query("pressure", pressure);
   }
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
+  
+  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+    
 }
 
 morrow_lowke::photon_one::~photon_one(){
 }
 
-const Real morrow_lowke::photon_one::get_kappa(const RealVect& a_pos) const {
-  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct. 
+Real morrow_lowke::photon_one::get_kappa(const RealVect a_pos) const {
+  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
 morrow_lowke::photon_two::photon_two(){
@@ -255,14 +257,14 @@ morrow_lowke::photon_two::photon_two(){
     pp.query("frac_O2",  O2_frac);
     pp.query("pressure", pressure);
   }
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
+  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
 morrow_lowke::photon_two::~photon_two(){
 }
 
-const Real morrow_lowke::photon_two::get_kappa(const RealVect& a_pos) const {
-  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct. 
+Real morrow_lowke::photon_two::get_kappa(const RealVect a_pos) const {
+  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
 morrow_lowke::photon_three::photon_three(){
@@ -291,6 +293,7 @@ morrow_lowke::photon_three::photon_three(){
 morrow_lowke::photon_three::~photon_three(){
 }
 
-const Real morrow_lowke::photon_three::get_kappa(const RealVect& a_pos) const {
-  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct. 
+Real morrow_lowke::photon_three::get_kappa(const RealVect a_pos) const {
+  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
+
 }

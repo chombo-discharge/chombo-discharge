@@ -14,6 +14,7 @@
 #include "irreg_amr_stencil.H"
 #include "load_balance.H"
 #include "nwoebquadcfinterp.H"
+#include "MFLevelGrid.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
@@ -345,6 +346,11 @@ public:
   virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(phase::which_phase a_phase);
 
   /*!
+    @brief Get the EBLevelGrid 
+  */
+  virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
+
+  /*!
     @brief Get the EBISLayouts
   */
   virtual Vector<EBISLayout>& get_ebisl(phase::which_phase a_phase);
@@ -537,6 +543,11 @@ protected:
   */
   Vector<Vector<RefCountedPtr<EBLevelGrid> > > m_eblg;
 
+  /*!
+    @brief MFLevelGrid objects. Cheap objects, and useful for getting interface region between EBIS'
+  */
+  Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
+
     /*!
     @brief EBIS layout. One for each phase.
   */
@@ -616,6 +627,11 @@ protected:
     @brief Define EBLevelGrid
   */
   virtual void define_eblevelgrid();
+
+  /*!
+    Define MFLevelGrid
+  */
+  virtual void define_mflevelgrid();
 
   /*!
     @brief Define EBCoarseAverage

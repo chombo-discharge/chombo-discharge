@@ -24,6 +24,7 @@ eddington_sp1::eddington_sp1() : rte_solver() {
   this->set_bottom_drop(16);
   this->set_tga(true);
   this->set_reflection_coefficients(0., 0.);
+  this->set_time(0, 0., 0.);
 
   m_needs_setup = true;
 }
@@ -511,14 +512,14 @@ void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellD
 }
 
 #ifdef CH_USE_HDF5
-void eddington_sp1::write_plot_file(const int a_step){
+void eddington_sp1::write_plot_file(){
   CH_TIME("eddington_sp1::write_plot_file");
   if(m_verbosity > 5){
     pout() << m_name + "::write_plot_file" << endl;
   }
 
   char file_char[1000];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", "eddington_sp1", a_step, SpaceDim);
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
 
   const int ncomps = 3 + SpaceDim;
   Vector<string> names(ncomps);
@@ -526,7 +527,7 @@ void eddington_sp1::write_plot_file(const int a_step){
   names[1] = "x-flux";
   names[2] = "y-flux";
   if(SpaceDim == 3){
-    names[3] = "y-flux";
+    names[3] = "z-flux";
     names[4] = "isotropic source";
     names[5] = "residue";
   }

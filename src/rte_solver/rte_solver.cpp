@@ -19,10 +19,13 @@ rte_solver::~rte_solver(){
 bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
   CH_TIME("rte_solver::advance");
   if(m_verbosity > 5){
-    pout() << "rte_solver::advance" << endl;
+    pout() << m_name + "::advance" << endl;
   }
 
   const bool converged = this->advance(a_dt, m_state, a_zerophi);
+
+  m_time += a_dt;
+  m_step++;
 
   return converged;
 }
@@ -30,7 +33,7 @@ bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
 void rte_solver::set_photon_group(const RefCountedPtr<photon_group> a_photon_group){
   CH_TIME("rte_solver::set_photon_group");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_photon_group" << endl;
+    pout() << m_name + "::set_photon_group" << endl;
   }
 
   m_photon_group = a_photon_group;
@@ -40,7 +43,7 @@ void rte_solver::set_photon_group(const RefCountedPtr<photon_group> a_photon_gro
 void rte_solver::set_phase(const phase::which_phase a_phase){
   CH_TIME("rte_solver::set_phase");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_phase" << endl;
+    pout() << m_name + "::set_phase" << endl;
   }
 
   m_phase = a_phase;
@@ -49,7 +52,7 @@ void rte_solver::set_phase(const phase::which_phase a_phase){
 void rte_solver::sanity_check(){
   CH_TIME("rte_solver::sanity_check");
   if(m_verbosity > 5){
-    pout() << "rte_solver::sanity_check" << endl;
+    pout() << m_name + "::sanity_check" << endl;
   }
 
   CH_assert(!m_compgeom.isNull());
@@ -62,7 +65,7 @@ void rte_solver::sanity_check(){
 void rte_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
   CH_TIME("rte_solver::set_computational_geometry");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_computational_geometry" << endl;
+    pout() << m_name + "::set_computational_geometry" << endl;
   }
   
   m_compgeom = a_compgeom;
@@ -75,7 +78,7 @@ void rte_solver::set_computational_geometry(const RefCountedPtr<computational_ge
 void rte_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
   CH_TIME("rte_solver::set_ebis");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_ebis" << endl;
+    pout() << m_name + "::set_ebis" << endl;
   }
 
   m_ebis = a_ebis;
@@ -84,7 +87,7 @@ void rte_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
 void rte_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
   CH_TIME("rte_solver::set_physical_domain");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_physical_domain" << endl;
+    pout() << m_name + "::set_physical_domain" << endl;
   }
 
   m_physdom = a_physdom;
@@ -93,7 +96,7 @@ void rte_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_phy
 void rte_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("rte_solver::set_amr");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_amr" << endl;
+    pout() << m_name + "::set_amr" << endl;
   }
 
   m_amr = a_amr;
@@ -102,7 +105,7 @@ void rte_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
 void rte_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
   CH_TIME("rte_solver::set_time");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_time" << endl;
+    pout() << m_name + "::set_time" << endl;
   }
 
   m_step = a_step;
@@ -113,7 +116,7 @@ void rte_solver::set_time(const int a_step, const Real a_time, const Real a_dt) 
 void rte_solver::set_stationary(const bool a_stationary) {
   CH_TIME("rte_solver::set_stationary");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_stationry" << endl;
+    pout() << m_name + "::set_stationry" << endl;
   }
   
   m_stationary = a_stationary;
@@ -122,7 +125,7 @@ void rte_solver::set_stationary(const bool a_stationary) {
 void rte_solver::set_verbosity(const int a_verbosity){
   CH_TIME("rte_solver::set_verbosity");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_verbosity" << endl;
+    pout() << m_name + "::set_verbosity" << endl;
   }
   
   m_verbosity = a_verbosity;
@@ -131,7 +134,7 @@ void rte_solver::set_verbosity(const int a_verbosity){
 void rte_solver::set_source(const EBAMRCellData& a_source){
   CH_TIME("rte_solver::set_source(ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_source(ebamrcell)" << endl;
+    pout() << m_name + "::set_source(ebamrcell)" << endl;
   }
 
   const int finest_level = m_amr->get_finest_level();
@@ -147,7 +150,7 @@ void rte_solver::set_source(const EBAMRCellData& a_source){
 void rte_solver::set_source(const Real a_source){
   CH_TIME("rte_solver::set_source(constant)");
   if(m_verbosity > 5){
-    pout() << "rte_solver::set_source(constant)" << endl;
+    pout() << m_name + "::set_source(constant)" << endl;
   }
 
   const int finest_level = m_amr->get_finest_level();
@@ -165,7 +168,7 @@ void rte_solver::set_source(const Real a_source){
 Real rte_solver::get_time() const{
   CH_TIME("rte_solver::get_time");
   if(m_verbosity > 5){
-    pout() << "rte_solver::get_time" << endl;
+    pout() << m_name + "::get_time" << endl;
   }
   
   return m_time;

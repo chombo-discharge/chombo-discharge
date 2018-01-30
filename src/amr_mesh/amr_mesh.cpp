@@ -238,6 +238,7 @@ void amr_mesh::allocate_interface(EBAMRIVData& a_data, phase::which_phase a_phas
     pout() << "amr_mesh::allocate_interface(baseiv)" << endl;
   }
 
+  MayDay::Abort("amr_mesh::allocate_interface - this is not the way to do it. Please use MFLevelGrid");
   const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
 
   a_data.resize(1 + m_finest_level);
@@ -301,6 +302,7 @@ void amr_mesh::build_domains(){
   m_dx.resize(nlevels);
   //  m_ref_ratios.resize(nlevels, m_ref_ratio);
   m_grids.resize(nlevels);
+  m_mflg.resize(nlevels);
 
   m_eblg.resize(phase::num_phases);
   m_ebisl.resize(phase::num_phases);
@@ -366,6 +368,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
     this->build_grids(tags, a_hardcap);
 
     this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
+    this->define_mflevelgrid();  // Define MFLevelGrid
     this->define_eb_coar_ave();  // Define EBCoarseAverage on both phases
     this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
     this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
@@ -538,6 +541,28 @@ void amr_mesh::define_eblevelgrid(){
       }
       m_ebisl[phase::solid][lvl] = m_eblg[phase::solid][lvl]->getEBISL();
     }
+  }
+}
+
+void amr_mesh::define_mflevelgrid(){
+  CH_TIME("amr_mesh::define_mflevelgrid");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_mflevelgrid" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    Vector<EBLevelGrid> eblgs;
+    if(!ebis_gas.isNull()){
+      eblgs.push_back(*m_eblg[phase::gas][lvl]);
+    }
+    if(!ebis_sol.isNull()){
+      eblgs.push_back(*m_eblg[phase::solid][lvl]);
+    }
+
+    m_mflg[lvl] = RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs));
   }
 }
 
@@ -1010,8 +1035,6 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
   }
 }
 
-
-
 void amr_mesh::interp_ghost(MFAMRCellData& a_data){
   CH_TIME("amr_mesh::interp_ghost(mf)");
   if(m_verbosity > 3){
@@ -1244,6 +1267,10 @@ Vector<EBISLayout>& amr_mesh::get_ebisl(phase::which_phase a_phase){
 
 Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(phase::which_phase a_phase){
   return m_eblg[a_phase];
+}
+
+Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(){
+  return m_mflg;
 }
 
 Vector<RefCountedPtr<EBCoarseAverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){

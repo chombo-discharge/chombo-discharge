@@ -1,0 +1,2 @@
+This test does advection-diffusion of a set of species in an electric field without any source terms. The RTE equations are solved
+by using the cdr densities as source terms at every time step.

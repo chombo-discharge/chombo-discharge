@@ -1,0 +1,217 @@
+/*!
+  @file   sigma_solver.cpp
+  @brief  Implementation of sigma_solver.H
+  @author Robert Marskar
+  @date   Jan. 2018
+*/
+
+#include "sigma_solver.H"
+
+#include <EBArith.H>
+
+sigma_solver::sigma_solver(){
+
+  this->set_verbosity(-1);
+  this->set_phase(phase::gas);
+}
+
+sigma_solver::~sigma_solver(){
+
+}
+
+void sigma_solver::advance(const Real a_dt){
+  CH_TIME("sigma_solver::advance(dt)");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::advance(dt)" << endl;
+  }
+
+  this->advance(m_state, a_dt);
+}
+
+void sigma_solver::advance(EBAMRIVData& a_state, const Real a_dt){
+  CH_TIME("sigma_solver::advance(state, dt)");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::advance(state, dt)" << endl;
+  }
+
+  const Real midpoint = 0.5;
+
+  this->advance_rk2(a_state, a_dt, midpoint);
+}
+
+void sigma_solver::advance_rk2(EBAMRIVData& a_state, const Real a_dt, const Real a_alpha){
+  CH_TIME("sigma_solver::advance_rk2");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::advance_rk2" << endl;
+  }
+
+  MayDay::Abort("sigma_solver::advance_rk2 - not implemented (yet)");
+}
+
+void sigma_solver::allocate_internals(){
+  CH_TIME("sigma_solver::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::allocate_internals" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  
+  m_amr->allocate(m_state, m_phase, ncomp);
+  m_amr->allocate(m_flux,  m_phase, ncomp);
+}
+
+void sigma_solver::initial_data(){
+  CH_TIME("sigma_solver::initial_data");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::initial_data" << endl;
+  }
+
+  const RealVect origin  = m_physdom->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    
+    for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
+      BaseIVFAB<Real>& state = (*m_state[lvl])[dit()];
+
+      const EBISBox& ebisbox = ebisl[dit()];
+      const IntVectSet& ivs  = state.getIVS();
+      const EBGraph& ebgraph = state.getEBGraph();
+      
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect pos  = origin + vof.gridIndex()*dx + ebisbox.bndryCentroid(vof)*dx;
+	
+	for (int comp = 0; comp < state.nComp(); comp++){
+	  state(vof, comp) = m_plaskin->initial_sigma(pos);
+	}
+      }
+    }
+  }
+}
+
+void sigma_solver::regrid(){
+  CH_TIME("sigma_solver::regrid");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::regrid" << endl;
+  }
+
+  MayDay::Abort("sigma_solver::regrid - not implemented. This should do conservative regridding!");
+}
+
+void sigma_solver::reset_cells(EBAMRIVData& a_data){
+  CH_TIME("sigma_solver::reset_cells");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::reset_cells" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    const MFLevelGrid& mflg      = *m_amr->get_mflg()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      
+    }
+  }
+  MayDay::Abort("sigma_solver::reset_cells - not implemented");
+
+
+}
+
+void sigma_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+  CH_TIME("sigma_solver::set_amr");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_amr" << endl;
+  }
+
+  m_amr = a_amr;
+}
+
+void sigma_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
+  CH_TIME("sigma_solver::set_computational_geometry");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_computational_geometry" << endl;
+  }
+
+  m_compgeom = a_compgeom;
+}
+
+void sigma_solver::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
+  CH_TIME("sigma_solver::set_plasma_kinetics");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_plasma_kinetics" << endl;
+  }
+
+  m_plaskin = a_plaskin;
+}
+
+void sigma_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
+  CH_TIME("sigma_solver::set_physical_domain");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_physical_domain" << endl;
+  }
+
+  m_physdom = a_physdom;
+}
+
+void sigma_solver::set_phase(phase::which_phase a_phase){
+  CH_TIME("sigma_solver::set_phase");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_phase" << endl;
+  }
+
+  m_phase = a_phase;
+}
+
+void sigma_solver::set_sigma(const EBAMRIVData& a_sigma){
+  CH_TIME("sigma_solver::set_sigma(ebamrivdata)");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_sigma(ebamrivdata)" << endl;
+  }
+  
+  MayDay::Abort("sigma_sover::set_sigma - not implemented");
+}
+
+void sigma_solver::set_sigma(const Real a_sigma){
+  CH_TIME("sigma_solver::set_sigma(constant)");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_sigma(constant)" << endl;
+  }
+
+  MayDay::Abort("sigma_sover::set_sigma - not implemented");
+}
+
+void sigma_solver::set_verbosity(const int a_verbosity){
+  CH_TIME("sigma_solver::set_verbosity");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_verbosity" << endl;
+  }
+  
+  m_verbosity = a_verbosity;
+}
+
+void sigma_solver::set_time(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("sigma_solver::set_time");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_time" << endl;
+  }
+  
+  m_step = a_step;
+  m_time = a_time;
+  m_dt   = a_dt;
+}
+
+EBAMRIVData& sigma_solver::get_state(){
+  return m_state;
+}
+
+EBAMRIVData& sigma_solver::get_flux(){
+  return m_flux;
+}

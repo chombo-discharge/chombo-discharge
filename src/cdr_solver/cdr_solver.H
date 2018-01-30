@@ -96,7 +96,7 @@ public:
   */
   virtual void set_source(const EBAMRCellData& a_source);
 
-    /*!
+  /*!
     @brief Set constant source terms
   */
   virtual void set_source(const Real a_source);
