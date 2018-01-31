@@ -71,11 +71,6 @@ public:
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
-    @brief Set computational geometry
-  */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
-
-  /*!
     @brief Set the physical domain
   */
   virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
@@ -124,19 +119,9 @@ public:
 protected:
 
   /*!
-    @brief EBIS
-  */
-  RefCountedPtr<EBIndexSpace> m_ebis;
-
-  /*!
     @brief Plasma kinetics
   */
   RefCountedPtr<plasma_kinetics> m_plaskin;
-
-  /*!
-    @brief Computational geometry
-  */
-  RefCountedPtr<computational_geometry> m_compgeom;
 
   /*!
     @brief Physical domain

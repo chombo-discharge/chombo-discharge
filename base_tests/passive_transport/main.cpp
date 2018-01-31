@@ -42,7 +42,7 @@ int main(int argc, char* argv[]){
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(new morrow_lowke());
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(NULL);
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>( new time_stepper());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 #if CH_SPACEDIM == 2
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());

@@ -155,58 +155,17 @@ void plasma_engine::setup_fresh(){
 			       m_amr->get_finest_dx(),
 			       m_amr->get_max_box_size());
 
-  this->get_geom_tags();       // Get geometric tags. 
+  this->get_geom_tags();       // Get geometric tags.
+  
+  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen. 
+  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
-  if(!m_timestepper.isNull()){ // Remove this later.
-    pout() << "plasma_engine::setup_fresh - remove this stuff when timestepper is finally instantiated" << endl;
-    m_timestepper->instantiate_solvers();
-    m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen. 
-  }
-  else {
-    m_amr->set_num_ghost(3);
-  }
-
-  m_amr->regrid(m_geom_tags, m_geom_tag_depth); // Regrid using geometric tags for now
-
-
-  // // Write a plot file
-  // const int finest = m_amr->get_finest_level();
-  // const Vector<EBISLayout>& ebisl = m_amr->get_ebisl(phase::gas);
-  // const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
-  // const Vector<ProblemDomain>& domains = m_amr->get_domains();
-  // const Vector<Real>& dx = m_amr->get_dx();
-  // EBAMRCellData data;
-  // m_amr->allocate(data, phase::gas, 1);
-  // m_amr->average_down(data, phase::gas);
-  // m_amr->interp_ghost(data, phase::gas);
-
-  // // Apply a centroid-interpolation stencil
-  // //  irreg_amr_stencil<centroid_interp>& stencils = m_amr->get_centroid_interp_stencils(phase::gas);
-  // irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(phase::gas);
-  // stencils.apply(data);
-
-  // Vector<std::string> names(1);
-  // Vector<Real> coveredVals;
-
-  // Vector<LevelData<EBCellFAB>* > data_write(data.size());
-  // for (int lvl = 0; lvl <= finest; lvl++){
-  //   data_write[lvl] = &(*data[lvl]);
-  // }
-  // names[0] = "data";
-  // writeEBHDF5("test.hdf5",
-  // 	      grids,
-  // 	      data_write,
-  // 	      names,
-  // 	      domains[0],
-  // 	      dx[0],
-  // 	      0.0,
-  // 	      0.0,
-  // 	      m_amr->get_ref_rat(),
-  // 	      1 + finest,
-  // 	      false,
-  // 	      coveredVals);
-	      
-      
+  m_timestepper->set_amr(m_amr);
+  m_timestepper->set_plasma_kinetics(m_plaskin);
+  m_timestepper->set_computational_geometry(m_compgeom);
+  m_timestepper->set_physical_domain(m_physdom);
+  m_timestepper->instantiate_solvers();                   // Instantiate sigma and cdr with initial data
+  m_timestepper->solve_poisson();                         // Solve Poisson equation by using initial data
 }
 
 void plasma_engine::setup_for_restart(const std::string a_restart_file){
@@ -238,6 +197,8 @@ void plasma_engine::sanity_check(){
   if(m_verbosity > 4){
     pout() << "plasma_engine::sanity_check" << endl;
   }
+
+  CH_assert(!m_timestepper.isNull());
 }
 
 void plasma_engine::regrid(){

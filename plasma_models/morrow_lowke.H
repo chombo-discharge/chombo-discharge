@@ -116,9 +116,7 @@ public:
     @brief Set the initial surface charge
     @param[in] a_pos Position
   */
-  virtual Real initial_sigma(const RealVect& a_pos) const{
-    MayDay::Abort("morrow_lowke::initial_sigma");
-  }
+  virtual Real initial_sigma(const RealVect& a_pos) const;
 
 protected:
 

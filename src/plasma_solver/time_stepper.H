@@ -8,7 +8,17 @@
 #ifndef _TIME_STEPPER_
 #define _TIME_STEPPER_
 
-#include "RealVect.H"
+#include "computational_geometry.H"
+#include "plasma_kinetics.H"
+#include "physical_domain.H"
+#include "amr_mesh.H"
+#include "mfis.H"
+#include "cdr_layout.H"
+#include "rte_layout.H"
+#include "poisson_solver.H"
+#include "sigma_solver.H"
+
+#include <RealVect.H>
 
 /*!
   @brief Abstract class for evolving in time across an amr mesh
@@ -31,23 +41,152 @@ public:
     @param[in] a_dt Time step
     @returns Actual time step used (can be different from a_dt for adaptive methods)
   */
-  virtual Real advance(const Real a_dt) = 0;
-
-  /*!
-    @brief Query about necessary number of ghost cells. This collects that from the individual solvers. 
-  */
-  virtual int query_ghost(){
-    return 2;
+  virtual Real advance(const Real a_dt){
+    
   }
 
   /*!
     @brief Instantiate solvers
   */
-  virtual void instantiate_solvers(){
+  virtual void instantiate_solvers();
 
-  }
+  /*!
+    @brief Do a sanity check
+  */
+  virtual void sanity_check();
+
+    /*!
+    @brief Set amr
+  */
+  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+
+  /*!
+    @brief Set the physical domain
+  */
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+
+  /*!
+    @brief Set the physical domain
+  */
+  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
+  /*!
+    @brief Set plasma kinetics
+  */
+  virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
+
+  /*!
+    @brief Verbosity
+  */
+  virtual void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Setup the cdr solvers
+  */
+  virtual void setup_cdr();
+
+  /*!
+    @brief Setup the poisson solver
+  */
+  virtual void setup_poisson();
+
+  /*!
+    @brief Setup the rte solvers
+  */
+  virtual void setup_rte();
+
+  /*!
+    @brief Instantiate the sigma solver
+  */
+  virtual void setup_sigma();
+
+  /*!
+    @brief Compute the cell-centered space charge density by using data inside cdr_layout. 
+    @details This assumes that the data contain in cdr_layout is cell-centered
+  */
+  virtual void compute_rho();
+
+  /*!
+    @brief Compute the centroid-centered space charge density
+    @details You have the option of specifying the centering for this computation. If the densities are cell-centered, we first 
+    compute the cell-centered space charge density and the interpolate to the cell centroid. 
+  */
+  virtual void compute_rho(MFAMRCellData&                a_rho,
+			   const Vector<EBAMRCellData*>  a_densities,
+			   const centering::which_center a_centering);
+
+  /*!
+    @brief Solve the poisson equation. This calls compute_rho() 
+    @details This assumes that the data contain in cdr_layout is cell-centered
+  */
+  virtual void solve_poisson();
+
+  /*!
+    @brief General poisson solver routine. 
+    @details You have the option of supplying storage for a right-hand side if you want to. The densities can be either cell-centered or centroid-centered, If they are cell-centered, we will extrapolate the right-hand side to the centroids first. 
+  */
+  virtual void solve_poisson(MFAMRCellData&                a_potential,
+			     MFAMRCellData*                a_rhs,
+			     const Vector<EBAMRCellData*>  a_densities,
+			     const EBAMRIVData&            a_sigma,
+			     const centering::which_center a_centering);
+
+    /*!
+    @brief Query about necessary number of ghost cells. This collects that from the individual solvers. 
+  */
+  virtual int query_ghost();
   
 protected:
+
+  /*!
+    @brief Index space
+  */
+  RefCountedPtr<mfis> m_mfis;
+
+  /*!
+    @brief AMR
+  */
+  RefCountedPtr<amr_mesh> m_amr;
+
+  /*!
+    @brief Plasma kinetics
+  */
+  RefCountedPtr<plasma_kinetics> m_plaskin;
+
+  /*!
+    @brief Physical domain
+  */
+  RefCountedPtr<physical_domain> m_physdom;
+
+  /*!
+    @brief Physical domain
+  */
+  RefCountedPtr<computational_geometry> m_compgeom;
+
+  /*!
+    @brief CDR solvers
+  */
+  RefCountedPtr<cdr_layout> m_cdr;
+
+  /*!
+    @brief Radiative transfer solvers
+  */
+  RefCountedPtr<rte_layout> m_rte;
+
+  /*!
+    @brief Poisson solver
+  */
+  RefCountedPtr<poisson_solver> m_poisson;
+
+  /*!
+    @brief Surface charge solver
+  */
+  RefCountedPtr<sigma_solver> m_sigma;
+
+  /*!
+    @brief Verbosity
+  */
+  int m_verbosity;
 
 };
 

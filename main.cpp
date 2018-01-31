@@ -22,6 +22,7 @@
 #include "cdr_layout.H"
 #include "rte_layout.H"
 #include "morrow_lowke.H"
+#include "sigma_solver.H"
 
 int main(int argc, char* argv[]){
 
@@ -42,7 +43,7 @@ int main(int argc, char* argv[]){
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(new morrow_lowke());
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(NULL);
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new time_stepper());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 #if CH_SPACEDIM == 2
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
@@ -50,6 +51,8 @@ int main(int argc, char* argv[]){
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
 #endif
 
+
+  // Refinement ratios
   Vector<int> refrat(5);
   refrat[0] = 4;
   refrat[1] = 2;
@@ -74,148 +77,17 @@ int main(int argc, char* argv[]){
   amr->set_irreg_sten_order(1);                   // Set preferred stencil order
   amr->set_irreg_sten_radius(1);                  // Set extrapolation stencil radius
 
-  // Set up plasma engine
+  // Set up the plasma engine
   RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 											compgeom,
 											plaskin,
 											timestepper,
 											amr));
 
-  // Set up a multifluid Poisson solver
-  RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
-  poisson->set_verbosity(10);
-  poisson->set_amr(amr);
-  poisson->set_computational_geometry(compgeom);
-  poisson->set_physical_domain(physdom);
-
-  if(SpaceDim == 2){
-    poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
-    poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    poisson->set_dirichlet_wall_bc(0, Side::Lo, potential::ground);
-    poisson->set_dirichlet_wall_bc(0, Side::Hi, potential::ground);
-    poisson->set_dirichlet_wall_bc(1, Side::Lo, potential::ground);
-    poisson->set_dirichlet_wall_bc(1, Side::Hi, potential::ground);
-  }
-  else if(SpaceDim == 3){
-    poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
-    poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    poisson->set_neumann_wall_bc(1,   Side::Lo, 0.0);                  
-    poisson->set_neumann_wall_bc(1,   Side::Hi, 0.0);
-    poisson->set_dirichlet_wall_bc(2, Side::Lo, potential::ground);
-    poisson->set_dirichlet_wall_bc(2, Side::Hi, potential::live);
-  }
-
-  // Setup plasma engine. This must always be done. 
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
   engine->setup_fresh();
 
-  // Poisson solver solves
-  poisson->sanity_check();
-  poisson->allocate_internals();
-  poisson->solve();
-  poisson->write_plot_file();
-
-
-  // New cdr solver
-  RefCountedPtr<species> spec = RefCountedPtr<species> (new species());
-  cdr_solver* cdr = static_cast<cdr_solver*> (new cdr_sg());
-  cdr->set_species(spec);
-  cdr->set_verbosity(10);
-  cdr->set_amr(amr);
-  cdr->set_computational_geometry(compgeom);
-  cdr->set_physical_domain(physdom);
-  cdr->sanity_check();
-  cdr->allocate_internals();
-  cdr->initial_data();
-
-  // Compute the electric field from the poisson solver and set that to be the velocity
-  MFAMRCellData E;
-  EBAMRCellData E_gas;
-  amr->allocate(E, SpaceDim);
-  amr->allocate_ptr(E_gas);
-  amr->compute_gradient(E, poisson->get_state());
-  amr->alias(E_gas, phase::gas, E);
-  data_ops::scale(E_gas, -1.0);
-  cdr->initial_data();
-  cdr->set_velocity(E_gas);
-  cdr->set_diffco(0.002);
-  cdr->set_source(0.0);
-  cdr->set_ebflux(0.0);
-  cdr->write_plot_file();
-
-  const Real cfl = 0.4;
-  cdr->set_verbosity(1);
-  amr->set_verbosity(0);
-  poisson->set_verbosity(0);
-  const Real init_mass = cdr->compute_mass();
-  for (int i = 0; i < 100; i++){
-    const Real dt_cfl = cfl*cdr->compute_cfl_dt();
-    const Real dt_dif = cfl*cdr->compute_diffusive_dt();
-
-    const Real dt = Min(dt_cfl, dt_dif);
-    pout() << "step = " << i << "\t cfl dt = " << dt << "\t mass = " << cdr->compute_mass()/init_mass << endl;
-    cdr->advance(dt);
-    
-    if((i+1) % 5 == 0){
-      cdr->write_plot_file();
-    }
-  }
-  
-  // Set up an eddington sp1 solver
-  RefCountedPtr<photon_group> group = RefCountedPtr<photon_group> (new photon_group("photon", 1.0));
-  RefCountedPtr<rte_solver> rte = RefCountedPtr<rte_solver> (new eddington_sp1());
-  rte->set_verbosity(10);
-  rte->set_amr(amr);
-  rte->set_computational_geometry(compgeom);
-  rte->set_physical_domain(physdom);
-  rte->set_photon_group(group);
-  rte->sanity_check();
-
-  // RTE solves. Use cdr as source terms
-  rte->allocate_internals();
-  rte->set_source(cdr->get_state());
-  rte->advance(0.0);
-  rte->write_plot_file(0);
-
-#if CH_SPACEDIM == 2
-  // Advance a layout of cdr and rte solvers
-  RefCountedPtr<cdr_layout> cdr_solvers = RefCountedPtr<cdr_layout> (new cdr_layout(plaskin));
-
-  cdr_solvers->set_amr(amr);
-  cdr_solvers->set_computational_geometry(compgeom);
-  cdr_solvers->set_physical_domain(physdom);
-  cdr_solvers->sanity_check();
-  cdr_solvers->allocate_internals();
-  cdr_solvers->initial_data();
-  cdr_solvers->set_velocity(E_gas);
-  cdr_solvers->set_diffco(0.002);
-  cdr_solvers->set_source(0.0);
-  cdr_solvers->set_ebflux(0.0);
-  cdr_solvers->write_plot_file();
-
-  RefCountedPtr<rte_layout> rte_solvers = RefCountedPtr<rte_layout> (new rte_layout(plaskin));
-  rte_solvers->set_amr(amr);
-  rte_solvers->set_computational_geometry(compgeom);
-  rte_solvers->set_physical_domain(physdom);
-  rte_solvers->sanity_check();
-  rte_solvers->allocate_internals();
-  rte_solvers->set_source(0.0);
-  rte_solvers->write_plot_file();
-  for (int i = 0; i < 15; i++){
-    const Real dt_cfl = cfl*cdr_solvers->compute_cfl_dt();
-    const Real dt_dif = cfl*cdr_solvers->compute_diffusive_dt();
-
-    const Real dt = Min(dt_cfl, dt_dif);
-    cdr_solvers->advance(dt);
-    if((i+1) % 20 == 0){
-      cdr_solvers->write_plot_file();
-    }
-
-    pout() << "step = " << i << "\t cfl dt = " << dt << "\t charge = " << cdr_solvers->compute_Q() << endl;
-    
-  }
-#endif
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

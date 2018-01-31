@@ -6,6 +6,7 @@
 */
 
 #include "sigma_solver.H"
+#include "data_ops.H"
 
 #include <EBArith.H>
 
@@ -92,6 +93,8 @@ void sigma_solver::initial_data(){
       }
     }
   }
+
+  m_amr->average_down(m_state, m_phase);
 }
 
 void sigma_solver::regrid(){
@@ -99,6 +102,8 @@ void sigma_solver::regrid(){
   if(m_verbosity > 5){
     pout() << "sigma_solver::regrid" << endl;
   }
+
+
 
   MayDay::Abort("sigma_solver::regrid - not implemented. This should do conservative regridding!");
 }
@@ -117,12 +122,21 @@ void sigma_solver::reset_cells(EBAMRIVData& a_data){
     const MFLevelGrid& mflg      = *m_amr->get_mflg()[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      BaseIVFAB<Real>& data  = (*a_data[lvl])[dit()];
+      IntVectSet ivs         = data.getIVS();
+      const EBGraph& ebgraph = data.getEBGraph();
       
+      ivs -= mflg.interface_region(box, dit());
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	for (int comp = 0; comp < data.nComp(); comp++){
+	  data(vof, comp) = 0.;
+	}
+      }
     }
   }
-  MayDay::Abort("sigma_solver::reset_cells - not implemented");
-
-
 }
 
 void sigma_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
@@ -132,15 +146,6 @@ void sigma_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   }
 
   m_amr = a_amr;
-}
-
-void sigma_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
-  CH_TIME("sigma_solver::set_computational_geometry");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::set_computational_geometry" << endl;
-  }
-
-  m_compgeom = a_compgeom;
 }
 
 void sigma_solver::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
@@ -175,8 +180,14 @@ void sigma_solver::set_sigma(const EBAMRIVData& a_sigma){
   if(m_verbosity > 5){
     pout() << "sigma_solver::set_sigma(ebamrivdata)" << endl;
   }
-  
-  MayDay::Abort("sigma_sover::set_sigma - not implemented");
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_sigma[lvl]->copyTo(*m_state[lvl]);
+  }
+
+  this->reset_cells(m_state);
 }
 
 void sigma_solver::set_sigma(const Real a_sigma){
@@ -185,7 +196,13 @@ void sigma_solver::set_sigma(const Real a_sigma){
     pout() << "sigma_solver::set_sigma(constant)" << endl;
   }
 
-  MayDay::Abort("sigma_sover::set_sigma - not implemented");
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::set_value(*m_state[lvl], a_sigma);
+  }
+
+  this->reset_cells(m_state);
 }
 
 void sigma_solver::set_verbosity(const int a_verbosity){

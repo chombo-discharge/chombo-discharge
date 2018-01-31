@@ -72,6 +72,14 @@ namespace ghost_interpolation {
   };
 };
 
+namespace centering {
+  enum which_center {
+    cell_center   = 0,
+    cell_centroid = 1,
+    eb_centroid   = 2,
+  };
+};
+
 
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;

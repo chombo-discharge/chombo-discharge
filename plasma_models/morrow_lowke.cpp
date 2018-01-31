@@ -108,6 +108,10 @@ morrow_lowke::~morrow_lowke(){
 
 }
 
+Real morrow_lowke::initial_sigma(const RealVect& a_pos) const{
+  return 0.;
+}
+
 morrow_lowke::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
