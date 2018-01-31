@@ -38,6 +38,8 @@ public:
 
   static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
 
+  static void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
+
   static void scale(EBAMRIVData& a_lhs, const Real& a_scale);
 
   static void scale(EBAMRCellData& a_lhs, const Real a_scale);
@@ -61,6 +63,10 @@ public:
   static void floor(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
   static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
+
+  static void kappa_scale(MFAMRCellData& a_data);
+
+  static void kappa_scale(LevelData<MFCellFAB>& a_data);
 
   static void ln(EBAMRCellData& a_lhs);
 

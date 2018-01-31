@@ -82,8 +82,12 @@ void data_ops::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
 
 void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    MFLevelDataOps::scale(*a_lhs[lvl], a_scale);
+    data_ops::scale(*a_lhs[lvl], a_scale);
   }
+}
+
+void data_ops::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale){
+  MFLevelDataOps::scale(a_lhs, a_scale);
 }
 
 void data_ops::scale(EBAMRIVData& a_lhs, const Real& a_scale){
@@ -202,6 +206,16 @@ void data_ops::kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
   }
 
   a_mass = EBLevelDataOps::parallelSum(mass);
+}
+
+void data_ops::kappa_scale(MFAMRCellData& a_data){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    data_ops::kappa_scale(*a_data[lvl]);
+  }
+}
+
+void data_ops::kappa_scale(LevelData<MFCellFAB>& a_data){
+  MFLevelDataOps::kappaWeight(a_data);
 }
 
 void data_ops::ln(EBAMRCellData& a_lhs){

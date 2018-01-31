@@ -8,7 +8,8 @@
 #include "time_stepper.H"
 #include "poisson_multifluid_gmg.H"
 #include "cdr_iterator.H"
-#include "rte_iterator.H" 
+#include "rte_iterator.H"
+#include "units.H"
 
 time_stepper::time_stepper(){
 
@@ -48,7 +49,34 @@ void time_stepper::compute_rho(MFAMRCellData&                a_rho,
   }
 
   data_ops::set_value(a_rho, 0.0);
-  MayDay::Warning("time_stepper::compute_rho(mfamrcell, vec(ebamrcell))");
+
+  EBAMRCellData rho_gas;
+  m_amr->allocate_ptr(rho_gas);
+  m_amr->alias(rho_gas, phase::gas, a_rho);
+
+  const int finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::set_value(rho_gas, 0.0);
+
+    // Add volumetric charge 
+    for (cdr_iterator solver_it(*m_cdr, a_densities); solver_it.ok(); ++solver_it){
+      const EBAMRCellData& density       = solver_it.get_data();
+      const RefCountedPtr<species>& spec = solver_it.get_species();
+
+      data_ops::incr(*rho_gas[lvl], *density[lvl], spec->get_charge());
+    }
+
+    // Scale by s_Qe/s_eps0
+    data_ops::scale(*a_rho[lvl], units::s_Qe);
+    data_ops::kappa_scale(*a_rho[lvl]);
+  }
+
+  // Transform to centroids
+  if(a_centering == centering::cell_center){
+    m_amr->interpolate_to_centroids(rho_gas, phase::gas);
+  }
+
+
 }
 
 void time_stepper::instantiate_solvers(){

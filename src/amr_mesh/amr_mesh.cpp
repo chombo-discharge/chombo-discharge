@@ -19,19 +19,19 @@ amr_mesh::amr_mesh(){
 
   // Default stuff will crash.
   this->set_verbosity(10);
-  this->set_coarsest_num_cells(IntVect::Zero);
-  this->set_max_amr_depth(-1);
-  this->set_refinement_ratio(-2);
-  this->set_blocking_factor(-8);
-  this->set_max_box_size(-32);
-  this->set_buffer_size(0);
+  this->set_coarsest_num_cells(128*IntVect::Unit);
+  this->set_max_amr_depth(0);
+  this->set_refinement_ratio(2);
+  this->set_blocking_factor(16);
+  this->set_max_box_size(32);
+  this->set_buffer_size(1);
   this->set_ebcf(true);
-  this->set_fill_ratio(-1.0);
-  this->set_redist_rad(-1);
-  this->set_num_ghost(-2);
-  this->set_eb_ghost(-4);
-  this->set_irreg_sten_order(-1);
-  this->set_irreg_sten_radius(-1);
+  this->set_fill_ratio(1.0);
+  this->set_redist_rad(1);
+  this->set_num_ghost(3);
+  this->set_eb_ghost(4);
+  this->set_irreg_sten_order(1);
+  this->set_irreg_sten_radius(1);
   this->set_balance(load_balance::knapsack);
   this->set_irreg_sten_type(stencil_type::linear);
   this->set_ghost_interpolation(ghost_interpolation::pwl);
@@ -1101,6 +1101,10 @@ void amr_mesh::interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phas
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     a_data[lvl]->exchange();
   }  
+}
+
+void amr_mesh::interpolate_to_centroids(EBAMRCellData& a_data, phase::which_phase a_phase){
+  m_centroid_interp[a_phase]->apply(a_data);
 }
 
 void amr_mesh::set_verbosity(const int a_verbosity){

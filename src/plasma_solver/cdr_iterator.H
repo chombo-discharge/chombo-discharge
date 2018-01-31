@@ -38,6 +38,22 @@ public:
   }
 
   /*!
+    @brief Full constructor, allows iteration through data
+  */
+  cdr_iterator(cdr_layout& a_layout, Vector<EBAMRCellData*> a_data){
+    CH_TIME("cdr_iterator::cdr_iterator");
+    
+    m_solvers  = a_layout.get_solvers();
+    m_species  = a_layout.get_species();
+    m_num      = m_solvers.size();
+    m_defined  = true;
+
+    m_celldata = a_data;
+
+    reset();
+  }
+
+  /*!
     @brief Get number of solvers
   */
   virtual int num_solvers(){
@@ -93,6 +109,15 @@ public:
     CH_assert(m_isolver < m_num);
     return m_species[m_isolver];
   }
+
+  /*!
+    @brief Get current data
+  */
+  virtual EBAMRCellData& get_data() {
+    CH_assert(m_defined == true);
+    CH_assert(m_isolver < m_num);
+    return *m_celldata[m_isolver];
+  }
   
 protected:
   
@@ -120,6 +145,11 @@ protected:
     @brief Ions
   */
   Vector<RefCountedPtr<species> > m_species;
+
+  /*!
+    @brief Cell-centered data
+  */
+  Vector<EBAMRCellData*> m_celldata;
 
 };
 #endif

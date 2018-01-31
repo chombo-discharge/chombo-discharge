@@ -159,6 +159,11 @@ public:
     @brief Fill ghost cells using piecewise linear interpolation
   */
   virtual void interp_ghost_pwl(EBAMRCellData& a_data, phase::which_phase a_phase);
+
+  /*!
+    @brief Interpolate data to centroids
+  */
+  virtual void interpolate_to_centroids(EBAMRCellData& a_data, phase::which_phase a_phase);
   
   /*!
     @brief Set mfis
