@@ -43,6 +43,8 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   if(!m_celltagger.isNull()){ 
     m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
   }
+
+  m_potential_set = false;
 }
 
 plasma_engine::~plasma_engine(){
@@ -103,6 +105,7 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
   
   this->set_geom_refinement_depth(depth, depth, depth, depth, depth, depth);
 }
+
 void plasma_engine::set_geom_refinement_depth(const int a_depth1,
 					      const int a_depth2,
 					      const int a_depth3,
@@ -142,6 +145,15 @@ void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr->set_mfis(m_compgeom->get_mfis());
 }
 
+void plasma_engine::set_potential(Real (*a_potential)(const Real a_time, const RealVect a_potential)){
+  CH_TIME("plasma_engine::set_potential");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_potential" << endl;
+  }
+  m_potential     = a_potential;
+  m_potential_set = true;
+}
+
 void plasma_engine::setup_fresh(){
   CH_TIME("plasma_engine::setup_fresh");
   if(m_verbosity > 5){
@@ -149,7 +161,7 @@ void plasma_engine::setup_fresh(){
   }
 
   this->sanity_check();                                    // Sanity check before doing anything expensive
-  
+
   m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
 			       m_amr->get_finest_domain(),
 			       m_amr->get_finest_dx(),
@@ -164,8 +176,12 @@ void plasma_engine::setup_fresh(){
   m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_computational_geometry(m_compgeom);
   m_timestepper->set_physical_domain(m_physdom);
+  m_timestepper->set_potential(m_potential);
   m_timestepper->instantiate_solvers();                   // Instantiate sigma and cdr with initial data
+
+#if 1 // This should be removed. 
   m_timestepper->solve_poisson();                         // Solve Poisson equation by using initial data
+#endif
 }
 
 void plasma_engine::setup_for_restart(const std::string a_restart_file){
@@ -199,6 +215,7 @@ void plasma_engine::sanity_check(){
   }
 
   CH_assert(!m_timestepper.isNull());
+  CH_assert(m_potential_set);
 }
 
 void plasma_engine::regrid(){

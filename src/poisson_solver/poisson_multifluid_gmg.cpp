@@ -346,8 +346,13 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
   const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
 
+  // Potential function
+
+
   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+  RefCountedPtr<potential_func> pot = RefCountedPtr<potential_func> (new potential_func(m_potential));
   bcfact->set_wallbc(m_wallbc);
+  bcfact->set_potential(pot);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
@@ -372,8 +377,6 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 
   m_opfact->set_jump(0.0, -1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes());
-
-  domain_bc dombc(m_wallbc);
 }
 
 void poisson_multifluid_gmg::setup_solver(){

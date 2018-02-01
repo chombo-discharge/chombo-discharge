@@ -42,6 +42,10 @@ Real wall_bc::get_value(){
   return value;
 }
 
+bool wall_bc::is_live(){
+  return m_live;
+}
+
 wallbc::which_bc wall_bc::which_bc(){
   return m_which;
 }

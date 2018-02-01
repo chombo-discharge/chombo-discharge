@@ -106,14 +106,10 @@ public:
   */
   virtual void set_jump_object(const RefCountedPtr<jump_bc> a_jumpbc);
 
-
-#if 1 // As long as we overwrite this, we can not expect convergence unless EVERYTHING works
   /*!
     @brief Get stencils for computing the flux
   */
   virtual LayoutData<BaseIVFAB<VoFStencil> >* getFluxStencil(int ivar);
-#endif
-
 
 protected:
 

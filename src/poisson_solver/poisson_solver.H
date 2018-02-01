@@ -15,8 +15,9 @@
 
 namespace potential {
   enum ground_live {
-    ground = false,
-    live   = true
+    ground = 0,
+    live   = 1,
+    mapped = 2, // Not currently supported. But it will. 
   };
 };
 
@@ -109,7 +110,7 @@ public:
   /*!
     @brief Set potential at current time. 
   */
-  virtual void set_potential(const Real a_potential);
+  virtual void set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos));
 
   /*!
     @brief Query the required number of ghost cells
@@ -210,16 +211,9 @@ protected:
   Real m_time;
 
   /*!
-    @brief Function pointer to potential function - this gives the BC on EBs (where we have Dirichlet)
+    @brief Set potential function pointer
   */
-  Real m_potential;
-
-  /*!
-    @brief Current potential. For passing into BC objects. 
-  */
-  Real m_current_potential;
-
-
+  Real (*m_potential)(const Real a_time, const RealVect a_pos);
 
   /*!
     @brief Set the mfis

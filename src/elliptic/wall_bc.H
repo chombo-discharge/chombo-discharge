@@ -40,9 +40,19 @@ public:
   */
   static int map_bc(const int a_dir, const Side::LoHiSide a_side);
 
-  virtual int direction(){return m_dir;}
+  /*!
+    @brief Direction
+  */
+  virtual int direction(){
+    return m_dir;
+  }
 
-  virtual Side::LoHiSide side(){return m_side;}
+  /*!
+    @brief Side
+  */
+  virtual Side::LoHiSide side(){
+    return m_side;
+  }
 
   /*!
     @brief Set value
@@ -53,6 +63,11 @@ public:
     @brief Set live or not
   */
   virtual void set_live(bool a_live);
+
+  /*!
+    @brief Check if domain wall is live or not
+  */
+  virtual bool is_live();
 
   /*!
     @brief Get value. 

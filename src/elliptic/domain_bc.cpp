@@ -19,8 +19,6 @@ domain_bc::domain_bc(Vector<RefCountedPtr<wall_bc> >& a_bc){
       m_values[which] = m_bc[which]->get_value();
     }
   }
-
-  
 }
 
 domain_bc::~domain_bc(){

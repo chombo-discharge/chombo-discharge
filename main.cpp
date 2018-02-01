@@ -24,6 +24,13 @@
 #include "morrow_lowke.H"
 #include "sigma_solver.H"
 
+/*!
+  @brief Potential
+*/
+Real potential_curve(const Real a_time, const RealVect a_pos){
+  return 100.0;
+}
+
 int main(int argc, char* argv[]){
 
 #ifdef CH_MPI
@@ -50,7 +57,6 @@ int main(int argc, char* argv[]){
 #else
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
 #endif
-
 
   // Refinement ratios
   Vector<int> refrat(5);
@@ -83,7 +89,7 @@ int main(int argc, char* argv[]){
 											plaskin,
 											timestepper,
 											amr));
-
+  engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
   engine->setup_fresh();

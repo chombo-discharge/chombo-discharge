@@ -36,15 +36,6 @@ bool poisson_solver::solve(MFAMRCellData& a_state, const bool a_zerophi){
   this->solve(a_state, m_source, a_zerophi);
 }
 
-void poisson_solver::set_potential(const Real a_potential){
-  CH_TIME("poisson_solver::set_potential");
-  if(m_verbosity > 5){
-    pout() << "poisson_solver::set_potential" << endl;
-  }
-
-  m_potential = a_potential;
-}
-
 void poisson_solver::allocate_internals(){
   CH_TIME("poisson_solver::allocate_internals");
   if(m_verbosity > 5){
@@ -135,6 +126,10 @@ void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side,
   m_wallbc[idx]->set_value(a_value);
 }
 
+void poisson_solver::set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos)){
+  m_potential = a_potential;
+}
+
 void poisson_solver::set_verbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 }
@@ -217,7 +212,6 @@ void poisson_solver::write_plot_file(){
       mfalias::aliasMF(resid_sol,  phase::solid, *m_resid[lvl]);
     }
 
-    
 
 
     // Copy all covered cells from the other phase

@@ -31,7 +31,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~conductivitydomainbc_wrapper_factory(){}
+  virtual ~conductivitydomainbc_wrapper_factory(){}
 
 
   /*!
@@ -41,6 +41,10 @@ public:
     m_wallbc = a_wallbc;
 
     m_hasbc = true;
+  }
+
+  virtual void set_potential(const RefCountedPtr<BaseBCFuncEval>& a_potential){
+    m_potential = a_potential;
   }
 
   /*!
@@ -53,6 +57,7 @@ public:
     
     conductivitydomainbc_wrapper* fresh = new conductivitydomainbc_wrapper();
 
+    fresh->set_potential(m_potential); 
     fresh->set_wallbc(m_wallbc);
     
     return fresh;
@@ -69,6 +74,11 @@ protected:
     @brief Wall boundary conditions
   */
   Vector<RefCountedPtr<wall_bc> > m_wallbc;
+
+  /*!
+    @brief Potential function
+  */
+  RefCountedPtr<BaseBCFuncEval> m_potential;
 
 };
 #endif

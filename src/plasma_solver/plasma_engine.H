@@ -84,6 +84,11 @@ public:
 					 const int a_depth4,
 					 const int a_depth5,
 					 const int a_depth6);
+
+  /*!
+    @brief Set potential function
+  */
+  virtual void set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos));
 					 
 
   /*!
@@ -152,6 +157,8 @@ protected:
     @brief Set physical domain
   */
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
+
 
   /*!
     @brief Set the cell tagger
@@ -243,5 +250,15 @@ protected:
     @brief Tag layouts
   */
   Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_layout_tags;
+
+  /*!
+    @brief Potential
+  */
+  Real (*m_potential)(const Real a_time, const RealVect a_pos);
+
+  /*!
+    @brief Potential has been set
+  */
+  bool m_potential_set;
 };
 #endif

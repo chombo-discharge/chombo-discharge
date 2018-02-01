@@ -35,16 +35,20 @@ public:
   /*!
     @brief Destructor
   */
-  ~conductivitydomainbc_wrapper(){}
+  virtual ~conductivitydomainbc_wrapper(){}
 
   /*!
     @brief Dirichlet and Neumann need to know about bcoef
   */
-  void set_coef(){
+  virtual void set_coef(){
     for (int i = 0; i < m_bc.size(); i++){
       m_bc[i]->setCoef(this->m_eblg, this->m_beta, this->m_bcoef);
     }
     m_defined = true;
+  }
+
+  virtual void set_potential(const RefCountedPtr<BaseBCFuncEval>& a_potential){
+    m_potential = a_potential;
   }
 
   /*!
@@ -58,15 +62,22 @@ public:
       
       if(a_wallbc[i]->which_bc() == wallbc::dirichlet){
 	m_bc[idx] = RefCountedPtr<DirichletConductivityDomainBC> (new DirichletConductivityDomainBC());
+
+	if(a_wallbc[i]->is_live()){
+	  m_bc[idx]->setFunction(m_potential);
+	}
+	else{
+	  m_bc[idx]->setValue(0.0);
+	}
       }
       else if(a_wallbc[i]->which_bc() == wallbc::neumann){
 	m_bc[idx] = RefCountedPtr<NeumannConductivityDomainBC> (new NeumannConductivityDomainBC());
+	m_bc[idx]->setValue(a_wallbc[i]->get_value());
       }
       else{
 	MayDay::Abort("conductivitydomainbc_wrapper::set_bc(wall) - unsupported bc type requested");
       }
 
-      m_bc[idx]->setValue(a_wallbc[i]->get_value());
     }
   }
 
@@ -170,6 +181,11 @@ protected:
     @brief Individual stuff
   */
   Vector<RefCountedPtr<ConductivityBaseDomainBC> > m_bc;
+
+  /*!
+    @brief Potential
+  */
+  RefCountedPtr<BaseBCFuncEval> m_potential;
 
   /*!
     @brief Is defined or not

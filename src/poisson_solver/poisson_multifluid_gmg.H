@@ -18,6 +18,7 @@
 #include <BaseEBBC.H>
 #include <MFSimpleSolver.H>
 #include <GMRESSolver.H>
+#include <BaseBCFuncEval.H>
 
 /*!
   @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
@@ -251,5 +252,38 @@ protected:
     @brief Set up AMRMultiGrid
   */
   virtual void setup_solver();
+
+private:
+
+  /*!
+    @brief Class for passing time and space dependent boundary conditions into the GMG boundary condition classes. 
+  */
+  class potential_func : public BaseBCFuncEval {
+  public:
+    
+    potential_func(Real (*a_potential)(const Real a_time, const RealVect a_pos)){
+      m_potential = a_potential;
+    }
+
+    virtual ~potential_func(){
+
+    }
+
+    virtual void set_time(const Real a_time){
+      m_time = a_time;
+    }
+
+    virtual Real value(const RealVect& a_point, const int& a_comp) const {
+      return m_potential(m_time, a_point);
+    }
+
+    virtual Real derivative(const RealVect& a_point, const int& a_comp, const int& a_dir) const {
+      MayDay::Abort("poisson_multifluid_gmg::potential_func::derivative - this should not be called. How did you get here?");
+    }
+  protected:
+    Real (*m_potential)(const Real a_time, const RealVect a_pos);
+
+    Real m_time;
+  };
 };
 #endif

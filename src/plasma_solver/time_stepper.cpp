@@ -12,8 +12,8 @@
 #include "units.H"
 
 time_stepper::time_stepper(){
-
   this->set_verbosity(10);
+
 }
 
 time_stepper::~time_stepper(){
@@ -114,6 +114,15 @@ void time_stepper::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr = a_amr;
 }
 
+void time_stepper::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+  CH_TIME("time_stepper::set_computational_geometry");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::set_computational_geometry" << endl;
+  }
+
+  m_compgeom = a_compgeom;
+}
+
 void time_stepper::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
   CH_TIME("time_stepper::set_plasma_kinetics");
   if(m_verbosity > 5){
@@ -132,13 +141,12 @@ void time_stepper::set_physical_domain(const RefCountedPtr<physical_domain>& a_p
   m_physdom = a_physdom;
 }
 
-void time_stepper::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("time_stepper::set_computational_geometry");
+void time_stepper::set_potential(Real (*a_potential)(const Real a_time, const RealVect a_potential)){
+  CH_TIME("time_stepper::set_potential");
   if(m_verbosity > 5){
-    pout() << "time_stepper::set_computational_geometry" << endl;
+    pout() << "time_stepper::set_potential" << endl;
   }
-
-  m_compgeom = a_compgeom;
+  m_potential     = a_potential;
 }
 
 void time_stepper::set_verbosity(const int a_verbosity){
@@ -175,15 +183,14 @@ void time_stepper::setup_poisson(){
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
   m_poisson->set_physical_domain(m_physdom);
+  m_poisson->set_potential(m_potential);
 
   // Boundary conditions, but these should definitely come through an input function. 
   if(SpaceDim == 2){
     m_poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
     m_poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    m_poisson->set_dirichlet_wall_bc(0, Side::Lo, potential::ground);
-    m_poisson->set_dirichlet_wall_bc(0, Side::Hi, potential::ground);
     m_poisson->set_dirichlet_wall_bc(1, Side::Lo, potential::ground);
-    m_poisson->set_dirichlet_wall_bc(1, Side::Hi, potential::ground);
+    m_poisson->set_dirichlet_wall_bc(1, Side::Hi, potential::live);
   }
   else if(SpaceDim == 3){
     m_poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
@@ -237,6 +244,8 @@ void time_stepper::solve_poisson(){
 		   m_poisson->get_source(),
 		   m_sigma->get_state(),
 		   false);
+
+  m_poisson->write_plot_file();
 }
 
 void time_stepper::solve_poisson(MFAMRCellData&                a_potential,

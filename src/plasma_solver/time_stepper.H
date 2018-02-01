@@ -116,6 +116,11 @@ public:
 			   const centering::which_center a_centering);
 
   /*!
+    @brief Set potential
+  */
+  virtual void set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos));
+
+  /*!
     @brief Solve the poisson equation. This calls compute_rho() 
     @details This assumes that the data contain in cdr_layout is cell-centered
   */
@@ -184,10 +189,14 @@ protected:
   RefCountedPtr<sigma_solver> m_sigma;
 
   /*!
+    @brief Set the potential
+  */
+  Real (*m_potential)(const Real a_time, const RealVect a_pos);
+
+  /*!
     @brief Verbosity
   */
   int m_verbosity;
-
 };
 
 #endif
