@@ -126,7 +126,7 @@ void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side,
   m_wallbc[idx]->set_value(a_value);
 }
 
-void poisson_solver::set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos)){
+void poisson_solver::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential = a_potential;
 }
 

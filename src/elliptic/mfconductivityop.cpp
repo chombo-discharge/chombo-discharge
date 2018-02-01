@@ -208,12 +208,13 @@ void mfconductivityop::set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > 
   m_jump = a_jump;
 }
 
-void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes){
+void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential){
 #if verb
   pout() << "mfconductivityop::set_electrodes"<< endl;
 #endif
 
   m_electrodes = a_electrodes;
+  m_potential  = a_potential;
   this->set_bc_from_levelset();
 }
 
@@ -238,6 +239,8 @@ void mfconductivityop::set_bc_from_levelset(){
 #if verb
   pout() << "mfconductivityop::set_bc_from_levelset"<< endl;
 #endif
+
+  const int comp = 0;
   
   for (int iphase = 0; iphase < m_phases; iphase++){
     LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
@@ -262,7 +265,14 @@ void mfconductivityop::set_bc_from_levelset(){
 	    }
 	  }
 
-	  val[dit()](vof, 0) = m_electrodes[func].is_live() ? 1 : 0;
+	  Real potential;
+	  if(m_electrodes[func].is_live()){
+	    potential = m_potential->value(pos, comp);
+	  }
+	  else{
+	    potential = 0.;
+	  }
+	  val[dit()](vof, comp) = potential;
 	}
       }
     }

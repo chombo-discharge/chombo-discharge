@@ -261,7 +261,7 @@ private:
   class potential_func : public BaseBCFuncEval {
   public:
     
-    potential_func(Real (*a_potential)(const Real a_time, const RealVect a_pos)){
+    potential_func(Real (*a_potential)(const Real a_time)){
       m_potential = a_potential;
     }
 
@@ -274,14 +274,14 @@ private:
     }
 
     virtual Real value(const RealVect& a_point, const int& a_comp) const {
-      return m_potential(m_time, a_point);
+      return m_potential(m_time);
     }
 
     virtual Real derivative(const RealVect& a_point, const int& a_comp, const int& a_dir) const {
       MayDay::Abort("poisson_multifluid_gmg::potential_func::derivative - this should not be called. How did you get here?");
     }
   protected:
-    Real (*m_potential)(const Real a_time, const RealVect a_pos);
+    Real (*m_potential)(const Real a_time);
 
     Real m_time;
   };

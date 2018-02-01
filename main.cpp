@@ -27,7 +27,7 @@
 /*!
   @brief Potential
 */
-Real potential_curve(const Real a_time, const RealVect a_pos){
+Real potential_curve(const Real a_time){
   return 100.0;
 }
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit);  // Set number of cells on coarsest level
-  amr->set_max_amr_depth(0);                      // Set max amr depth
+  amr->set_max_amr_depth(1);                      // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio

@@ -110,7 +110,7 @@ public:
   /*!
     @brief Set potential at current time. 
   */
-  virtual void set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos));
+  virtual void set_potential(Real (*a_potential)(const Real a_time));
 
   /*!
     @brief Query the required number of ghost cells
@@ -213,7 +213,7 @@ protected:
   /*!
     @brief Set potential function pointer
   */
-  Real (*m_potential)(const Real a_time, const RealVect a_pos);
+  Real (*m_potential)(const Real a_time);
 
   /*!
     @brief Set the mfis

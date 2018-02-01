@@ -118,7 +118,7 @@ public:
   /*!
     @brief Set potential
   */
-  virtual void set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos));
+  virtual void set_potential(Real (*a_potential)(const Real a_time));
 
   /*!
     @brief Solve the poisson equation. This calls compute_rho() 
@@ -191,7 +191,7 @@ protected:
   /*!
     @brief Set the potential
   */
-  Real (*m_potential)(const Real a_time, const RealVect a_pos);
+  Real (*m_potential)(const Real a_time);
 
   /*!
     @brief Verbosity

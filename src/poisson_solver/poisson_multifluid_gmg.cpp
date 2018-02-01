@@ -28,7 +28,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(32);
-  this->set_bottom_drop(16);
+  this->set_bottom_drop(8);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -376,7 +376,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 1 + finest_level));
 
   m_opfact->set_jump(0.0, -1.0);
-  m_opfact->set_electrodes(m_compgeom->get_electrodes());
+  m_opfact->set_electrodes(m_compgeom->get_electrodes(), pot);
 }
 
 void poisson_multifluid_gmg::setup_solver(){

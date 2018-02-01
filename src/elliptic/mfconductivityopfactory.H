@@ -118,7 +118,7 @@ public:
   /*!
     @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
   */
-  virtual void set_electrodes(const Vector<electrode>& a_electrodes);
+  virtual void set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> m_potential);
 
   /*!
     @brief Average down the surface charge on AMR levels
@@ -167,12 +167,15 @@ public:
 
 protected:
 
-
-
   /*!
-    @brief EBIndexSpaces
+    @brief Index spaces
   */
   RefCountedPtr<mfis> m_mfis;
+
+  /*!
+    @brief Potential function
+  */
+  RefCountedPtr<BaseBCFuncEval> m_potential;
 
   /*!
     @brief a-coefficients

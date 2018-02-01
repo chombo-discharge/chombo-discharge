@@ -461,10 +461,12 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
   this->average_down_mg();
 }
 
-void mfconductivityopfactory::set_electrodes(const Vector<electrode>& a_electrodes){
+void mfconductivityopfactory::set_electrodes(const Vector<electrode>&            a_electrodes,
+					     const RefCountedPtr<BaseBCFuncEval> a_potential){
   CH_TIME("mfconductivityopfactory::set_electrodes");
   
   m_electrodes = a_electrodes;
+  m_potential  = a_potential;
 }
 
 int mfconductivityopfactory::refToFiner(const ProblemDomain& a_domain) const{
@@ -649,7 +651,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	       m_origin);        // Origin
 
   oper->set_jump(jump);
-  oper->set_electrodes(m_electrodes);
+  oper->set_electrodes(m_electrodes, m_potential);
 
 #if verb
   pout() << "done defining oper" << endl;
@@ -786,7 +788,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 	       m_origin);
 
   oper->set_jump(jump);
-  oper->set_electrodes(m_electrodes);
+  oper->set_electrodes(m_electrodes, m_potential);
 
 #if 0 // Debug-stop
   MayDay::Abort("mfconductivityopfactory::AMRnewOp - implementation is not finished!");

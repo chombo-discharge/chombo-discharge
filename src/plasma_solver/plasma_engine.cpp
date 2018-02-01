@@ -145,7 +145,7 @@ void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr->set_mfis(m_compgeom->get_mfis());
 }
 
-void plasma_engine::set_potential(Real (*a_potential)(const Real a_time, const RealVect a_potential)){
+void plasma_engine::set_potential(Real (*a_potential)(const Real a_time)){
   CH_TIME("plasma_engine::set_potential");
   if(m_verbosity > 5){
     pout() << "plasma_engine::set_potential" << endl;

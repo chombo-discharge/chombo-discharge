@@ -88,7 +88,7 @@ public:
   /*!
     @brief Set potential function
   */
-  virtual void set_potential(Real (*a_potential)(const Real a_time, const RealVect a_pos));
+  virtual void set_potential(Real (*a_potential)(const Real a_time));
 					 
 
   /*!
@@ -254,7 +254,7 @@ protected:
   /*!
     @brief Potential
   */
-  Real (*m_potential)(const Real a_time, const RealVect a_pos);
+  Real (*m_potential)(const Real a_time);
 
   /*!
     @brief Potential has been set

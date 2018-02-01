@@ -84,7 +84,7 @@ public:
   /*!
     @brief Set the non-matched boundary conditions
   */
-  virtual void set_electrodes(const Vector<electrode>& a_electrodes);
+  virtual void set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential);
 
   /*!
     @brief Update boundary conditions before relaxation
@@ -361,6 +361,11 @@ protected:
     @brief Index spaces
   */
   RefCountedPtr<mfis> m_mfis;
+
+  /*!
+    @brief Potential function
+  */
+  RefCountedPtr<BaseBCFuncEval> m_potential;
 
   /*!
     @brief EB operators

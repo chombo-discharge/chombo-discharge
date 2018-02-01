@@ -141,7 +141,7 @@ void time_stepper::set_physical_domain(const RefCountedPtr<physical_domain>& a_p
   m_physdom = a_physdom;
 }
 
-void time_stepper::set_potential(Real (*a_potential)(const Real a_time, const RealVect a_potential)){
+void time_stepper::set_potential(Real (*a_potential)(const Real a_time)){
   CH_TIME("time_stepper::set_potential");
   if(m_verbosity > 5){
     pout() << "time_stepper::set_potential" << endl;
