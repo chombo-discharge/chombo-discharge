@@ -89,6 +89,11 @@ public:
   virtual void instantiate_solvers();
 
   /*!
+    @brief Fill all solvers with initial data
+  */
+  virtual void initial_data();
+
+  /*!
     @brief Do a sanity check
   */
   virtual void sanity_check();

@@ -51,7 +51,21 @@ plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
 }
 
+void plasma_engine::initial_regrids(const int a_init_regrids){
+  CH_TIME("plasma_engine::initia_regrids");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::initial_regrids" << endl;
+  }
 
+  // Only add one level at a time
+  for (int i = 0; i < a_init_regrids; i++){
+    const int finest_level = m_amr->get_finest_level();
+    Vector<IntVectSet> tags;
+    this->tag_cells(tags);
+
+    m_amr->regrid(tags, finest_level + 1); // amr_mesh regrids. Only add one level at a time. 
+  }
+}
 
 void plasma_engine::set_verbosity(const int a_verbosity){
   CH_TIME("plasma_engine::set_verbosity");
@@ -154,7 +168,7 @@ void plasma_engine::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential_set = true;
 }
 
-void plasma_engine::setup_fresh(){
+void plasma_engine::setup_fresh(const int a_init_regrids){
   CH_TIME("plasma_engine::setup_fresh");
   if(m_verbosity > 5){
     pout() << "plasma_engine::setup_fresh" << endl;
@@ -174,16 +188,21 @@ void plasma_engine::setup_fresh(){
 
   m_timestepper->set_amr(m_amr);
   m_timestepper->set_plasma_kinetics(m_plaskin);
-  m_timestepper->set_computational_geometry(m_compgeom);
-  m_timestepper->set_physical_domain(m_physdom);
-  m_timestepper->set_potential(m_potential);
+  m_timestepper->set_computational_geometry(m_compgeom);  // Set computational geometry
+  m_timestepper->set_physical_domain(m_physdom);          // Physical domain
+  m_timestepper->set_potential(m_potential);              // Potential
   m_timestepper->instantiate_solvers();                   // Instantiate sigma and cdr with initial data (and rte, if transient)
-  m_timestepper->solve_poisson();                         // Solve Poisson equation by using initial data
+  m_timestepper->initial_data();                          // Fill cdr and rte with initial data
 
-  if(m_timestepper->stationary_rte()){                    // Solve RTE equations by using initial data and electric field
-    const Real dummy_dt = 0.0;
-    m_timestepper->solve_rte(0.0);                        // Argument does not matter, it's a stationary solver.
+  if (a_init_regrids >= 0){
+    m_timestepper->solve_poisson();                         // Solve Poisson equation by using initial data
+    if(m_timestepper->stationary_rte()){                    // Solve RTE equations by using initial data and electric field
+      const Real dummy_dt = 0.0;
+      m_timestepper->solve_rte(0.0);                        // Argument does not matter, it's a stationary solver.
+    }    
   }
+
+  this->initial_regrids(a_init_regrids);
 }
 
 void plasma_engine::setup_for_restart(const std::string a_restart_file){
@@ -193,13 +212,25 @@ void plasma_engine::setup_for_restart(const std::string a_restart_file){
   }
 }
 
-void plasma_engine::initial_regrids(const int a_init_regrids){
-  CH_TIME("plasma_engine::initia_regrids");
+void plasma_engine::tag_cells(Vector<IntVectSet>& a_tags){
+  CH_TIME("plasma_engine::tag_cells");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::initial_regrids" << endl;
+    pout() << "plasma_engine::tag_cells" << endl;
   }
-}
 
+  const int finest_level = m_amr->get_finest_level();
+
+  if(!m_celltagger.isNull()){
+    m_celltagger->tag_cells(a_tags, m_layout_tags, finest_level);
+  }
+
+  // Add geometric tags
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_tags[lvl] |= m_geom_tags[lvl];
+  }
+
+  return tags;
+}
 
 
 void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){

@@ -40,19 +40,19 @@ public:
   ~plasma_engine();
 
   /*!
+    @brief Do initial regrids. This regrid method uses the initial data inside each solver. 
+  */
+  virtual void initial_regrids(const int a_init_regrids);
+
+  /*!
     @brief Setup function
   */
-  virtual void setup_fresh();
+  virtual void setup_fresh(const int a_init_regrids);
 
   /*!
     @brief Set for restart
   */
   virtual void setup_for_restart(const std::string a_restart_file);
-
-  /*!
-    @brief Do initial regrids
-  */
-  virtual void initial_regrids(const int a_init_regrids);
 
   /*!
     @brief Verbosity
@@ -158,12 +158,15 @@ protected:
   */
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
 
-
-
   /*!
     @brief Set the cell tagger
   */
   virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
+
+  /*!
+    @brief Tag cells for refinement. This includes cells from geometries and the cell tagger
+  */
+  virtual void tag_cells(Vector<IntVectSet>& a_ivs);
 
 protected:
   /*!
@@ -187,7 +190,8 @@ protected:
   virtual void get_geom_tags();
 
   /*!
-    @brief Do a regrid step
+    @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
+    whose solution is recomputed. The same goes for stationary RTE methods. 
   */
   virtual void regrid();
 

@@ -224,6 +224,19 @@ void time_stepper::instantiate_solvers(){
   this->setup_sigma();
 }
 
+void time_stepper::initial_data(){
+  CH_TIME("time_stepper::initial_data");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::initial_data" << endl;
+  }
+
+  m_cdr->initial_data();
+  if(!m_rte->is_stationary()){
+    m_rte->initial_data();
+  }
+  m_sigma->initial_data();
+}
+
 void time_stepper::sanity_check(){
   CH_TIME("time_stepper::sanity_check");
   if(m_verbosity > 5){
@@ -301,7 +314,6 @@ void time_stepper::setup_cdr(){
   m_cdr->set_physical_domain(m_physdom);
   m_cdr->sanity_check();
   m_cdr->allocate_internals();
-  m_cdr->initial_data();
 }
 
 void time_stepper::setup_poisson(){
@@ -348,10 +360,6 @@ void time_stepper::setup_rte(){
   m_rte->set_physical_domain(m_physdom);
   m_rte->sanity_check();
   m_rte->allocate_internals();
-
-  if(!m_rte->is_stationary()){
-    m_rte->initial_data();
-  }
 }
 
 void time_stepper::setup_sigma(){
@@ -365,7 +373,6 @@ void time_stepper::setup_sigma(){
   m_sigma->set_plasma_kinetics(m_plaskin);
   m_sigma->set_physical_domain(m_physdom);
   m_sigma->allocate_internals();
-  m_sigma->initial_data();
 }
 
 void time_stepper::solve_poisson(){
@@ -380,7 +387,9 @@ void time_stepper::solve_poisson(){
 		   m_sigma->get_state(),
 		   false);
 
+#if 1 // should be removed
   m_poisson->write_plot_file();
+#endif
 }
 
 void time_stepper::solve_poisson(MFAMRCellData&                a_potential,

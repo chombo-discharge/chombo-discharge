@@ -366,7 +366,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   if(a_tags.size() > 0 || m_max_amr_depth == 0){ // Not regridding if I don't get tags
 
     Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
-    this->build_grids(tags, m_max_sim_depth);
+    this->build_grids(tags, a_hardcap);
 
     this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
     this->define_mflevelgrid();  // Define MFLevelGrid
@@ -403,7 +403,9 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, 0, top_level, old_boxes);
     
     m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
+    m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
     m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
+
   }
   else{
     new_boxes.resize(1);

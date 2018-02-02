@@ -93,7 +93,7 @@ int main(int argc, char* argv[]){
   engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
-  engine->setup_fresh();
+  engine->setup_fresh(1);
 
 
 #ifdef CH_MPI
