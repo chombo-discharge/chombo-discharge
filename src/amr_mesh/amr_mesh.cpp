@@ -21,6 +21,7 @@ amr_mesh::amr_mesh(){
   this->set_verbosity(10);
   this->set_coarsest_num_cells(128*IntVect::Unit);
   this->set_max_amr_depth(0);
+  this->set_max_simulation_depth(-1);
   this->set_refinement_ratio(2);
   this->set_blocking_factor(16);
   this->set_max_box_size(32);
@@ -365,7 +366,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   if(a_tags.size() > 0 || m_max_amr_depth == 0){ // Not regridding if I don't get tags
 
     Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
-    this->build_grids(tags, a_hardcap);
+    this->build_grids(tags, m_max_sim_depth);
 
     this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
     this->define_mflevelgrid();  // Define MFLevelGrid
@@ -1119,6 +1120,10 @@ void amr_mesh::set_coarsest_num_cells(const IntVect a_num_cells){
 
 void amr_mesh::set_max_amr_depth(const int a_max_amr_depth){
   m_max_amr_depth = a_max_amr_depth;
+}
+
+void amr_mesh::set_max_simulation_depth(const int a_max_sim_depth){
+  m_max_sim_depth = a_max_sim_depth;
 }
 
 void amr_mesh::set_ebcf(const bool a_ebcf){

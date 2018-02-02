@@ -206,6 +206,11 @@ public:
   virtual void set_max_amr_depth(const int a_max_amr_depth);
 
   /*!
+    @brief Set maximum simulation depth. 
+  */
+  virtual void set_max_simulation_depth(const int a_max_sim_depth);
+
+  /*!
     @brief Tell amr_mesh to forget about ebcf (user must guarantee that this is the case)
   */
   virtual void set_ebcf(const bool a_ebcf);
@@ -477,6 +482,11 @@ protected:
     @brief Maximum amr depth
   */
   int m_max_amr_depth;
+
+  /*!
+    @brief Maximum allowed depth for simulation
+  */
+  int m_max_sim_depth;
 
   /*!
     @brief Max box size

@@ -147,6 +147,16 @@ protected:
     @brief List of optical transitions between species
   */
   Vector<RefCountedPtr<photon_group> > m_photons;
+
+  /*!
+    @brief Number of species
+  */
+  int m_num_species;
+
+  /*!
+    @brief Number of RTE groups
+  */
+  int m_num_photons;
 };
 
 #endif

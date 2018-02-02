@@ -85,8 +85,6 @@ public:
   */
   virtual void set_source(const Real a_source);
 
-
-
   /*!
     @brief Convenience function. All solvers write plot files
   */

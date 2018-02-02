@@ -32,9 +32,7 @@ public:
     @brief Compute the velocity for an ion
     @param[in] a_E Electric field strength
   */
-  virtual Vector<RealVect> compute_velocities(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_velocities");
-  }
+  virtual Vector<RealVect> compute_velocities(const RealVect& a_E) const;
 
   /*!
     @brief Compute the source terms for each charge-carrier species
@@ -46,9 +44,7 @@ public:
   */
   virtual Vector<Real> compute_source_terms(const Vector<Real>& a_densities, 
 					    const Vector<Real>& a_intensities,
-					    const RealVect&     a_E) const{
-    MayDay::Abort("morrow_lowke::compute_source_terms");
-  }
+					    const RealVect&     a_E) const;
 
   /*!
     @brief Compute the source terms (right-hand sides) for RTE equations
@@ -57,17 +53,13 @@ public:
     @details The output vector should contain the right-hand sides of the various photon solvers in the order as m_photons.
     The input vectors follow this order. 
   */
-  virtual Vector<Real> compute_rte_source_terms(const Vector<Real>& a_densities, const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_rte_source_terms");
-  }
+  virtual Vector<Real> compute_rte_source_terms(const Vector<Real>& a_densities, const RealVect& a_E) const;
 
   /*!
     @brief Compute the ion diffusion coefficient
     @param[in] a_E Electric field strength
   */
-  virtual Vector<Real> compute_diffusion_coefficients(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_diffusion_coefficients");
-  }
+  virtual Vector<Real> compute_diffusion_coefficients(const RealVect& a_E) const;
 
   /*!
     @brief Compute ion fluxes through conductor-gas interfaces
@@ -87,9 +79,8 @@ public:
 						const RealVect&     a_E,
 						const RealVect&     a_pos,
 						const RealVect&     a_normal,
-						const Real&         a_time) const{
-    MayDay::Abort("morrow_lowke::compute_conductor_fluxes");
-  }
+						const Real&         a_time) const;
+
   /*!
     @brief Compute ion fluxes through dielectric-gas interfaces
     @param[in] a_extrapolated_fluxes Extrapolated fluxes from the gas-side. Useful for inflow/outflow BCs
@@ -108,9 +99,7 @@ public:
 						 const RealVect&     a_E,
 						 const RealVect&     a_pos,
 						 const RealVect&     a_normal,
-						 const Real&         a_time) const{
-    MayDay::Abort("morrow_lowke::compute_dielectric_fluxes");
-  }
+						 const Real&         a_time) const;
 
   /*!
     @brief Set the initial surface charge
@@ -602,9 +591,7 @@ protected:
 					    const RealVect&     a_E,
 					    const RealVect&     a_pos,
 					    const RealVect&     a_normal,
-					    const Real&         a_time) const{
-    MayDay::Abort("morrow_lowke::compute_cathode_flux");
-  }
+					    const Real&         a_time) const;
 
   /*!
     @brief Compute the flux on the anode
@@ -616,73 +603,53 @@ protected:
 					  const RealVect&     a_E,
 					  const RealVect&     a_pos,
 					  const RealVect&     a_normal,
-					  const Real&         a_time) const{
-    MayDay::Abort("morrow_lowke::compute_anode_flux");
-  }
+					  const Real&         a_time) const;
 
 
   /*!
     @brief Compute \f$\alpha\f$-coefficient
   */
-  virtual Real compute_alpha(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_alpha");
-  }
+  virtual Real compute_alpha(const RealVect& a_E) const;
 
   /*!
     @brief Compute \f$\eta\f$ coefficient
   */
-  virtual Real compute_eta(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_eta");
-  }
+  virtual Real compute_eta(const RealVect& a_E) const;
 
   /*!
     @brief Compute \f$eta_2\f$-coefficient
   */
-  virtual Real compute_eta2(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_eta2");
-  }
+  virtual Real compute_eta2(const RealVect& a_E) const;
 
   /*!
     @brief Compute \f$eta_3\f$-coefficient
   */
-  virtual Real compute_eta3(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_eta3");
-  }
+  virtual Real compute_eta3(const RealVect& a_E) const;
 
   /*!
     @brief Compute beta-coefficient
   */
-  virtual Real compute_beta(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_beta");
-  }
+  virtual Real compute_beta(const RealVect& a_E) const;
 
   /*!
     @brief Compute electron diffusion coefficient
   */
-  virtual Real compute_De(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_De");
-  }
+  virtual Real compute_De(const RealVect& a_E) const;
 
   /*!
     @brief Compute electron velocity
   */
-  virtual RealVect compute_Ve(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_Ve");
-  }
+  virtual RealVect compute_ve(const RealVect& a_E) const;
 
   /*!
-    @brief Compute positive ion velocity
+    @brief Compute positive species velocity
   */
-  virtual RealVect compute_Vp(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_Vp");
-  }
+  virtual RealVect compute_vp(const RealVect& a_E) const;
 
   /*!
-    @brief Compute negative ion velocity
+    @brief Compute negative species velocity
   */
-  virtual RealVect compute_Vn(const RealVect& a_E) const{
-    MayDay::Abort("morrow_lowke::compute_Vn");
-  }
+  virtual RealVect compute_vn(const RealVect& a_E) const;
 
 };
 

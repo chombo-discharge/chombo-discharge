@@ -182,7 +182,7 @@ void plasma_engine::setup_fresh(){
 
   if(m_timestepper->stationary_rte()){                    // Solve RTE equations by using initial data and electric field
     const Real dummy_dt = 0.0;
-    m_timestepper->solve_rte(0.0);                        // Argument does not matter, it's a stationary solver. 
+    m_timestepper->solve_rte(0.0);                        // Argument does not matter, it's a stationary solver.
   }
 }
 
