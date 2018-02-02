@@ -71,7 +71,7 @@ public:
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
-  virtual void compute_gradient(MFAMRCellData& a_gradient, MFAMRCellData& a_phi);
+  virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi);
 
   /*!
     @brief Create pointers

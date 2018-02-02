@@ -16,13 +16,31 @@ rte_solver::rte_solver(){
 rte_solver::~rte_solver(){
 }
 
+bool rte_solver::is_stationary(){
+  return m_stationary;
+}
+
 bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
-  CH_TIME("rte_solver::advance");
+  CH_TIME("rte_solver::advance(dt)");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance" << endl;
+    pout() << m_name + "::advance(dt)" << endl;
   }
 
   const bool converged = this->advance(a_dt, m_state, a_zerophi);
+
+  m_time += a_dt;
+  m_step++;
+
+  return converged;
+}
+
+bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi){
+  CH_TIME("rte_solver::advance(dt, state)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance(dt, state)" << endl;
+  }
+
+  const bool converged = this->advance(a_dt, a_state, m_source, a_zerophi);
 
   m_time += a_dt;
   m_step++;
@@ -165,6 +183,15 @@ void rte_solver::set_source(const Real a_source){
   m_amr->interp_ghost(m_source, m_phase);
 }
 
+void rte_solver::initial_data() {
+  CH_TIME("rte_solver::initial_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::initial_data" << endl;
+  }
+  
+  data_ops::set_value(m_state, 0.0);
+}
+
 Real rte_solver::get_time() const{
   CH_TIME("rte_solver::get_time");
   if(m_verbosity > 5){
@@ -172,6 +199,15 @@ Real rte_solver::get_time() const{
   }
   
   return m_time;
+}
+
+phase::which_phase rte_solver::get_phase(){
+  CH_TIME("rte_solver::get_phase");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_phase" << endl;
+  }
+
+  return m_phase;
 }
 
 EBAMRCellData& rte_solver::get_state(){

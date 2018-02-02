@@ -46,6 +46,44 @@ public:
   }
 
   /*!
+    @brief Check if RTE solvers are stationary
+  */
+  virtual bool stationary_rte();
+
+  /*!
+    @brief Compute the cell-centered electric field on a specific phase
+  */
+  virtual void compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential);
+
+  /*!
+    @brief Compute the cell-centered electric field on both phases
+  */
+  virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
+
+  /*!
+    @brief Compute photon source terms. 
+  */
+  virtual void compute_photon_source_terms(Vector<EBAMRCellData*>        a_source,
+					   const Vector<EBAMRCellData*>& a_cdr_states,
+					   const EBAMRCellData&          a_E,
+					   const centering::which_center a_centering);
+
+  /*!
+    @brief Compute the cell-centered space charge density by using data inside cdr_layout. 
+    @details This assumes that the data contain in cdr_layout is cell-centered
+  */
+  virtual void compute_rho();
+
+  /*!
+    @brief Compute the centroid-centered space charge density
+    @details You have the option of specifying the centering for this computation. If the densities are cell-centered, we first 
+    compute the cell-centered space charge density and the interpolate to the cell centroid. 
+  */
+  virtual void compute_rho(MFAMRCellData&                a_rho,
+			   const Vector<EBAMRCellData*>  a_densities,
+			   const centering::which_center a_centering);
+
+  /*!
     @brief Instantiate solvers
   */
   virtual void instantiate_solvers();
@@ -101,21 +139,6 @@ public:
   virtual void setup_sigma();
 
   /*!
-    @brief Compute the cell-centered space charge density by using data inside cdr_layout. 
-    @details This assumes that the data contain in cdr_layout is cell-centered
-  */
-  virtual void compute_rho();
-
-  /*!
-    @brief Compute the centroid-centered space charge density
-    @details You have the option of specifying the centering for this computation. If the densities are cell-centered, we first 
-    compute the cell-centered space charge density and the interpolate to the cell centroid. 
-  */
-  virtual void compute_rho(MFAMRCellData&                a_rho,
-			   const Vector<EBAMRCellData*>  a_densities,
-			   const centering::which_center a_centering);
-
-  /*!
     @brief Set potential
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
@@ -136,7 +159,22 @@ public:
 			     const EBAMRIVData&            a_sigma,
 			     const centering::which_center a_centering);
 
-    /*!
+  /*!
+    @brief RTE solve using data existing in other solvers
+  */
+  virtual void solve_rte(const Real a_dt);
+
+  /*!
+    @brief General RTE solve routine
+  */
+  virtual void solve_rte(Vector<EBAMRCellData*>&       a_states,
+			 Vector<EBAMRCellData*>&       a_rhs,
+			 const Vector<EBAMRCellData*>& a_cdr_states,
+			 const EBAMRCellData&          a_E,
+			 const Real                    a_dt,
+			 const centering::which_center a_centering);
+
+  /*!
     @brief Query about necessary number of ghost cells. This collects that from the individual solvers. 
   */
   virtual int query_ghost();

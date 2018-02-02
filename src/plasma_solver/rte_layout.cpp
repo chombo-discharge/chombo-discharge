@@ -185,10 +185,87 @@ void rte_layout::advance(const Real a_dt){
   }
 }
 
+void rte_layout::initial_data(){
+  CH_TIME("rte_layout::initial_data");
+  if(m_verbosity > 6){
+    pout() << "rte_layout::initial_data" << endl;
+  }
+
+  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    solver->initial_data();
+  }
+}
+
+bool rte_layout::is_stationary(){
+  CH_TIME("rte_layout::is_stationary");
+  if(m_verbosity > 5){
+    pout() << "rte_layout::is_stationary" << endl;
+  }
+
+  bool stationary = true;
+
+  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+
+    if(solver->is_stationary() == false){
+      stationary = false;
+    }
+  }
+
+  return stationary;
+}
+
+
+phase::which_phase rte_layout::get_phase(){
+  CH_TIME("rte_layout::get_phase");
+  if(m_verbosity > 5){
+    pout() << "rte_layout::get_phase" << endl;
+  }
+  
+ for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+   RefCountedPtr<rte_solver>& solver = solver_it();
+   return solver->get_phase();
+ }
+}
+
 Vector<RefCountedPtr<rte_solver> >& rte_layout::get_solvers(){
   return m_solvers;
 }
 
 Vector<RefCountedPtr<photon_group> >& rte_layout::get_photons(){
   return m_photons;
+}
+
+Vector<EBAMRCellData*> rte_layout::get_sources(){
+  CH_TIME("rte_layout::get_sources");
+  if(m_verbosity > 5){
+    pout() << "rte_layout::get_sources" << endl;
+  }
+
+  Vector<EBAMRCellData*> sources;
+
+  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    sources.push_back(&(solver->get_source()));
+  }
+
+  return sources;
+}
+
+
+Vector<EBAMRCellData*> rte_layout::get_states(){
+  CH_TIME("rte_layout::get_states");
+  if(m_verbosity > 5){
+    pout() << "rte_layout::get_states" << endl;
+  }
+
+  Vector<EBAMRCellData*> states;
+
+  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    states.push_back(&(solver->get_state()));
+  }
+
+  return states;
 }

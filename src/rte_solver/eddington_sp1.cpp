@@ -140,7 +140,7 @@ void eddington_sp1::regrid(){
   MayDay::Abort("eddington_sp1::regrid - not implemented");
 }
 
-bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi){
+bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
   CH_TIME("eddington_sp1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
@@ -162,7 +162,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const bool 
 
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
   m_amr->alias(phi,  a_state);
-  m_amr->alias(rhs,  m_source);
+  m_amr->alias(rhs,  a_source);
   m_amr->alias(res,  m_resid);
   m_amr->alias(zero, dummy);
 

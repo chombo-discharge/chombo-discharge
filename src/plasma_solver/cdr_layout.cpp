@@ -345,3 +345,84 @@ Vector<RefCountedPtr<cdr_solver> >& cdr_layout::get_solvers(){
 Vector<RefCountedPtr<species> >& cdr_layout::get_species(){
   return m_species;
 }
+
+
+Vector<EBAMRCellData*> cdr_layout::get_states(){
+  CH_TIME("cdr_layout::get_states");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_states" << endl;
+  }
+
+  Vector<EBAMRCellData*> states;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    states.push_back(&(solver->get_state()));
+  }
+
+  return states;
+}
+
+Vector<EBAMRCellData*> cdr_layout::get_sources(){
+  CH_TIME("cdr_layout::get_sources");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_sources" << endl;
+  }
+
+  Vector<EBAMRCellData*> sources;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    sources.push_back(&(solver->get_source()));
+  }
+
+  return sources;
+}
+
+Vector<EBAMRCellData*> cdr_layout::get_velocities(){
+  CH_TIME("cdr_layout::get_velocities");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_velocities" << endl;
+  }
+
+  Vector<EBAMRCellData*> velocities;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    velocities.push_back(&(solver->get_velo_cell()));
+  }
+
+  return velocities;
+}
+
+Vector<EBAMRFluxData*> cdr_layout::get_diffco_face(){
+  CH_TIME("cdr_layout::get_diffco_face");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_diffco_face" << endl;
+  }
+
+  Vector<EBAMRFluxData*> diffco;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    diffco.push_back(&(solver->get_diffco_face()));
+  }
+
+  return diffco;
+}
+
+Vector<EBAMRIVData*> cdr_layout::get_diffco_eb(){
+  CH_TIME("cdr_layout::get_diffco_eb");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_diffco_eb" << endl;
+  }
+
+  Vector<EBAMRIVData*> diffco_eb;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    diffco_eb.push_back(&(solver->get_diffco_eb()));
+  }
+
+  return diffco_eb;
+}

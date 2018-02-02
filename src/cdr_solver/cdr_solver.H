@@ -199,6 +199,11 @@ public:
   virtual EBAMRCellData& get_source();
 
   /*!
+    @brief Get the cell-centered velocity
+  */
+  virtual EBAMRCellData& get_velo_cell();
+
+  /*!
     @brief Get the face-centered velocities
   */
   virtual EBAMRFluxData& get_velo_face();

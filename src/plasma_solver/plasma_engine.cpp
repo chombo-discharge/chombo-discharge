@@ -177,11 +177,13 @@ void plasma_engine::setup_fresh(){
   m_timestepper->set_computational_geometry(m_compgeom);
   m_timestepper->set_physical_domain(m_physdom);
   m_timestepper->set_potential(m_potential);
-  m_timestepper->instantiate_solvers();                   // Instantiate sigma and cdr with initial data
-
-#if 1 // This should be removed. 
+  m_timestepper->instantiate_solvers();                   // Instantiate sigma and cdr with initial data (and rte, if transient)
   m_timestepper->solve_poisson();                         // Solve Poisson equation by using initial data
-#endif
+
+  if(m_timestepper->stationary_rte()){                    // Solve RTE equations by using initial data and electric field
+    const Real dummy_dt = 0.0;
+    m_timestepper->solve_rte(0.0);                        // Argument does not matter, it's a stationary solver. 
+  }
 }
 
 void plasma_engine::setup_for_restart(const std::string a_restart_file){

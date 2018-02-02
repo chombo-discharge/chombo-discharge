@@ -44,7 +44,7 @@ public:
   /*!
     @brief Advance RTE onto state a_state
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 

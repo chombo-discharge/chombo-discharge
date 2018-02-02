@@ -1317,6 +1317,10 @@ EBAMRCellData& cdr_solver::get_source(){
   return m_source;
 }
 
+EBAMRCellData& cdr_solver::get_velo_cell(){
+  return m_velo_cell;
+}
+
 EBAMRFluxData& cdr_solver::get_velo_face(){
   return m_velo_face;
 }

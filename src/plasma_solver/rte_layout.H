@@ -32,6 +32,8 @@ public:
   */
   virtual void allocate_internals();
 
+
+
   /*!
     @brief Set amr
   */
@@ -74,16 +76,6 @@ public:
   virtual void regrid();
 
   /*!
-    @brief Get solvers
-  */
-  virtual Vector<RefCountedPtr<rte_solver> >& get_solvers();
-
-  /*!
-    @brief Get species
-  */
-  virtual Vector<RefCountedPtr<photon_group> >& get_photons();
-
-  /*!
     @brief Convenience function. Set source terms for all species. Mostly used for debugging. 
   */
   virtual void set_source(const EBAMRCellData& a_source);
@@ -92,6 +84,8 @@ public:
     @brief Convenience function. Set constant source terms for all species. Mostly used for debugging. 
   */
   virtual void set_source(const Real a_source);
+
+
 
   /*!
     @brief Convenience function. All solvers write plot files
@@ -102,6 +96,42 @@ public:
     @brief Convenience function. Call advance method for each solver
   */
   virtual void advance(const Real a_dt);
+
+  /*!
+    @brief Fill with initial data
+    @details Only relevant for transient solvers
+  */
+  virtual void initial_data();
+
+  /*!
+    @brief Check if solvers are stationary
+  */
+  virtual bool is_stationary();
+
+  /*!
+    @brief Get phase
+  */
+  virtual phase::which_phase get_phase();
+
+  /*!
+    @brief Get solvers
+  */
+  virtual Vector<RefCountedPtr<rte_solver> >& get_solvers();
+
+  /*!
+    @brief Get species
+  */
+  virtual Vector<RefCountedPtr<photon_group> >& get_photons();
+
+  /*!
+    @brief Get all source terms
+  */
+  virtual Vector<EBAMRCellData*> get_sources();
+
+  /*!
+    @brief Get all states
+  */
+  virtual Vector<EBAMRCellData*> get_states();
 
 protected:
 

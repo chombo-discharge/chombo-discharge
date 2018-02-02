@@ -23,6 +23,57 @@ int time_stepper::query_ghost(){
   return 3;
 }
 
+bool time_stepper::stationary_rte(){
+  CH_TIME("time_stepper::stationary_rte");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::stationary_rte" << endl;
+  }
+
+  return m_rte->is_stationary();
+}
+
+void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+  CH_TIME("time_stepper::compute_E(ebamrcell, phase, mfamrcell)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_E(ebamrcell, phase, mfamrcell)" << endl;
+  }
+
+  EBAMRCellData pot_gas;
+  m_amr->allocate_ptr(pot_gas);
+  m_amr->alias(pot_gas, a_phase, a_potential);
+
+  m_amr->compute_gradient(a_E, pot_gas);
+  data_ops::scale(a_E, -1.0);
+
+  m_amr->average_down(a_E, a_phase);
+  m_amr->interp_ghost(a_E, a_phase);
+}
+
+
+void time_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("time_stepper::compute_E(mfamrcell, mfamrcell)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_E(mfamrcell, mfamrcell)" << endl;
+  }
+
+  m_amr->compute_gradient(a_E, a_potential);
+  data_ops::scale(a_E, -1.0);
+
+  m_amr->average_down(a_E);
+  m_amr->interp_ghost(a_E);
+}
+
+void time_stepper::compute_photon_source_terms(Vector<EBAMRCellData*>        a_source,
+					       const Vector<EBAMRCellData*>& a_cdr_states,
+					       const EBAMRCellData&          a_E,
+					       const centering::which_center a_centering){
+  CH_TIME("time_stepper::compute_photon_source_terms(full)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_photon_source_terms(full)" << endl;
+  }
+  MayDay::Abort("stop");
+}
+
 void time_stepper::compute_rho(){
   CH_TIME("time_stepper::compute_rho()");
   if(m_verbosity > 5){
@@ -217,6 +268,10 @@ void time_stepper::setup_rte(){
   m_rte->set_physical_domain(m_physdom);
   m_rte->sanity_check();
   m_rte->allocate_internals();
+
+  if(!m_rte->is_stationary()){
+    m_rte->initial_data();
+  }
 }
 
 void time_stepper::setup_sigma(){
@@ -253,5 +308,63 @@ void time_stepper::solve_poisson(MFAMRCellData&                a_potential,
 				 const Vector<EBAMRCellData*>  a_densities,
 				 const EBAMRIVData&            a_sigma,
 				 const centering::which_center a_centering){
+  CH_TIME("time_stepper::solve_poisson(full)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::solve_poisson(full)" << endl;
+  }
+
+  const int ncomp = 1;
+  
+  MFAMRCellData* p_rhs;
+  MFAMRCellData rhs;
+  if(a_rhs == NULL){
+    m_amr->allocate(rhs, ncomp);
+    p_rhs = &rhs;
+  }
+  else {
+    p_rhs = a_rhs;
+  }
+
+  this->compute_rho(rhs, a_densities, a_centering);
+
+  m_poisson->solve(a_potential, *p_rhs, a_sigma, false);
+}
+
+void time_stepper::solve_rte(const Real a_dt){
+  CH_TIME("time_stepper::solve_rte()");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::solve_rte()" << endl;
+  }
+
+  const phase::which_phase rte_phase = m_rte->get_phase();
+
+  EBAMRCellData E;
+  m_amr->allocate(E, rte_phase, SpaceDim);
+  this->compute_E(E, rte_phase, m_poisson->get_state());
+
+  Vector<EBAMRCellData*> states     = m_rte->get_states();
+  Vector<EBAMRCellData*> rhs        = m_rte->get_sources();
+  Vector<EBAMRCellData*> cdr_states = m_cdr->get_states();
+
+  this->solve_rte(states, rhs, cdr_states, E, a_dt, centering::cell_center);
+}
+
+void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_states,
+			     Vector<EBAMRCellData*>&       a_rhs,
+			     const Vector<EBAMRCellData*>& a_cdr_states,
+			     const EBAMRCellData&          a_E,
+			     const Real                    a_dt,
+			     const centering::which_center a_centering){
+  CH_TIME("time_stepper::solve_rte(full)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::solve_rte(full)" << endl;
+  }
+
+  this->compute_photon_source_terms(a_rhs, a_cdr_states, a_E, a_centering);
+
+
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+  }
 
 }

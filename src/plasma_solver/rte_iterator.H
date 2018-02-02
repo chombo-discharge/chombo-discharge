@@ -38,6 +38,13 @@ public:
   }
 
   /*!
+    @brief Destructor
+  */
+  virtual ~rte_iterator(){
+
+  }
+
+  /*!
     @brief Get number of solvers
   */
   virtual int num_solvers(){
@@ -60,6 +67,7 @@ public:
     CH_assert(m_defined);
     m_isolver = 0;
   }
+
 
   /*!
     @brief Ok or not

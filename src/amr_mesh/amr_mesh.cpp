@@ -489,7 +489,7 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
   }
 }
 
-void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, MFAMRCellData& a_phi){
+void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi){
   CH_TIME("amr_mesh::compute_gradient(mf)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::compute_gradient(mf)" << endl;

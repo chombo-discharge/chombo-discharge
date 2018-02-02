@@ -83,15 +83,7 @@ public:
   */
   virtual void regrid();
 
-  /*!
-    @brief Get solvers
-  */
-  virtual Vector<RefCountedPtr<cdr_solver> >& get_solvers();
 
-  /*!
-    @brief Get species
-  */
-  virtual Vector<RefCountedPtr<species> >& get_species();
 
   /*!
     @brief Convenience function. Set velocity for all species. Mostly used for debugging.
@@ -157,6 +149,41 @@ public:
     @brief Compute total charge in computational region
   */
   virtual Real compute_Q();
+
+  /*!
+    @brief Get solvers
+  */
+  virtual Vector<RefCountedPtr<cdr_solver> >& get_solvers();
+
+  /*!
+    @brief Get species
+  */
+  virtual Vector<RefCountedPtr<species> >& get_species();
+
+  /*!
+    @brief Get all source terms
+  */
+  virtual Vector<EBAMRCellData*> get_sources();
+
+  /*!
+    @brief Get all states
+  */
+  virtual Vector<EBAMRCellData*> get_states();
+
+  /*!
+    @brief Get all velocities
+  */
+  virtual Vector<EBAMRCellData*> get_velocities();
+
+  /*!
+    @brief Get all diffusion coefficients
+  */
+  virtual Vector<EBAMRFluxData*> get_diffco_face();
+
+  /*!
+    @brief Get all diffusion coefficients
+  */
+  virtual Vector<EBAMRIVData*> get_diffco_eb();
 
 protected:
 

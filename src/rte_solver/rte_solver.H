@@ -30,6 +30,22 @@ public:
   */
   virtual ~rte_solver();
 
+  
+  /*!
+    @brief Advance equation one time step
+  */
+  virtual bool advance(const Real a_dt, const bool a_zerophi = false);
+
+  /*!
+    @brief Advance method
+  */
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = false);
+
+  /*!
+    @brief Advance RTE onto isotropic state a_state
+  */
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
+
   /*!
     @brief Set the photon group
   */
@@ -77,14 +93,10 @@ public:
   virtual void sanity_check();
 
   /*!
-    @brief Advance equation one time step
+    @brief Check if solver is stationary
   */
-  virtual bool advance(const Real a_dt, const bool a_zerophi = false);
+  virtual bool is_stationary();
 
-  /*!
-    @brief Advance RTE onto isotropic state a_state
-  */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const bool a_zerophi = false) = 0;
 
   /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
@@ -115,6 +127,12 @@ public:
   virtual void regrid() = 0;
 
   /*!
+    @brief Fill solver with initial data. By default, this sets internal data to zero. 
+    @details Only relevant for non-stationary solvers
+  */
+  virtual void initial_data();
+
+  /*!
     @brief Set source term
   */
   virtual void set_source(const EBAMRCellData& a_source);
@@ -142,24 +160,29 @@ public:
   virtual Real get_time() const;
 
   /*!
+    @brief Get the RTE phase
+  */
+  virtual phase::which_phase get_phase();
+
+  /*!
     @brief Get multifluid state
   */
-  EBAMRCellData& get_state();
+  virtual EBAMRCellData& get_state();
 
   /*!
     @brief Get multifluid source
   */
-  EBAMRCellData& get_source();
+  virtual EBAMRCellData& get_source();
 
   /*!
     @brief Set the absorption coefficient
   */
-  EBAMRFluxData& get_kappa();
+  virtual EBAMRFluxData& get_kappa();
 
   /*!
     @brief Set the absorption coefficient on irregular EB faces
   */
-  EBAMRIVData& get_kappa_eb();
+  virtual EBAMRIVData& get_kappa_eb();
   
 protected:
 
