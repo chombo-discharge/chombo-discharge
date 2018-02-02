@@ -68,12 +68,13 @@ int main(int argc, char* argv[]){
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(128*IntVect::Unit);  // Set number of cells on coarsest level
+  amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
   amr->set_max_amr_depth(1);                      // Set max amr depth
+  amr->set_max_simulation_depth(0);               // Set max amr depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(16);                   // Set blocking factor
+  amr->set_blocking_factor(8);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
   amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius

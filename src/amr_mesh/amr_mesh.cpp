@@ -391,9 +391,9 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
   Vector<Vector<Box> > new_boxes(1 + top_level);  // New boxes to be load balance
   Vector<Vector<Box> > old_boxes(1 + top_level);  // Old grids.
 
-  const int hardcap = a_hardcap == -1 ? m_max_amr_depth : a_hardcap;
+  const int hardcap = (a_hardcap == -1) ? m_max_amr_depth : a_hardcap;
 
-  if(m_max_amr_depth > 0 && a_hardcap > 0){
+  if(m_max_amr_depth > 0 && hardcap > 0){
     for (int lvl = 0; lvl <= top_level; lvl++){
       domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
     }
@@ -403,7 +403,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, 0, top_level, old_boxes);
     
     m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
-    m_finest_level = Min(m_finest_level, a_hardcap);
+    m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
   }
   else{
     new_boxes.resize(1);
