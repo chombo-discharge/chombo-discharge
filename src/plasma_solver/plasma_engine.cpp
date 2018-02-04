@@ -68,6 +68,15 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
   }
 }
 
+void plasma_engine::run(const Real a_time, const int a_max_steps){
+  CH_TIME("plasma_engine::run");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::run" << endl;
+  }
+
+  MayDay::Abort("plasma_engine::run - not implemented");
+}
+
 void plasma_engine::set_verbosity(const int a_verbosity){
   CH_TIME("plasma_engine::set_verbosity");
   if(m_verbosity > 5){
@@ -240,6 +249,18 @@ void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_
     pout() << "plasma_engine::set_physical_domain" << endl;
   }
   m_physdom = a_physdom;
+}
+
+void plasma_engine::set_regrid_interval(const int a_regrid_interval){
+  m_regrid_interval = a_regrid_interval;
+}
+
+void plasma_engine::set_plot_interval(const int a_plot_interval){
+  m_plot_interval = a_plot_interval;
+}
+
+void plasma_engine::set_checkpoint_interval(const int a_chk_interval){
+  m_chk_interval = a_chk_interval;
 }
 
 void plasma_engine::sanity_check(){

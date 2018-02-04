@@ -45,6 +45,11 @@ public:
   virtual void initial_regrids(const int a_init_regrids);
 
   /*!
+    @brief Run the solvers untils a_time or a_max_steps has been reached
+  */
+  virtual void run(const Real a_time, const int a_max_steps);
+
+  /*!
     @brief Setup function
   */
   virtual void setup_fresh(const int a_init_regrids);
@@ -89,6 +94,22 @@ public:
     @brief Set potential function
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
+
+  
+  /*!
+    @brief Set the regrid interval
+  */
+  virtual void set_regrid_interval(const int a_regrid_interval);
+
+  /*!
+    @brief Set the plot interval
+  */
+  virtual void set_plot_interval(const int a_plot_interval);
+
+  /*!
+    @brief Set the checkpoint interval
+  */
+  virtual void set_checkpoint_interval(const int a_chk_interval);
 					 
 
   /*!
@@ -163,6 +184,7 @@ protected:
   */
   virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
 
+
   /*!
     @brief Tag cells for refinement. This includes cells from geometries and the cell tagger
   */
@@ -204,6 +226,21 @@ protected:
     @brief Time step
    */
   int m_time_step;
+
+  /*!
+    @brief Regrid interval
+  */
+  int m_regrid_interval;
+
+  /*!
+    @brief Checkpoint interval
+  */
+  int m_chk_interval;
+
+  /*!
+    @brief Plot interval
+  */
+  int m_plot_interval;
 
   /*!
     @brief Geometric tag depth

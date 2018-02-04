@@ -94,6 +94,9 @@ int main(int argc, char* argv[]){
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
   engine->setup_fresh(1);
+  engine->set_regrid_interval(5);
+  engine->set_plot_interval(5);
+  engine->set_chk_interval(5);
 
 
 #ifdef CH_MPI
