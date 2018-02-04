@@ -57,13 +57,14 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
     pout() << "plasma_engine::initial_regrids" << endl;
   }
 
-  // Only add one level at a time
   for (int i = 0; i < a_init_regrids; i++){
-    const int finest_level = m_amr->get_finest_level();
-    Vector<IntVectSet> tags;
-    this->tag_cells(tags);
-
-    m_amr->regrid(tags, finest_level + 1); // amr_mesh regrids. Only add one level at a time. 
+    this->regrid();                       // Regrid base
+    m_timestepper->initial_data();        // Fill solvers with initial data
+    m_timestepper->solve_poisson();       // Re-solve Poisson equation
+    if(m_timestepper->stationary_rte()){  // Solve RTE equations by using initial data and electric field if its stationary
+      const Real dummy_dt = 0.0;
+      m_timestepper->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
+    }    
   }
 }
 
@@ -164,6 +165,7 @@ void plasma_engine::set_potential(Real (*a_potential)(const Real a_time)){
   if(m_verbosity > 5){
     pout() << "plasma_engine::set_potential" << endl;
   }
+  
   m_potential     = a_potential;
   m_potential_set = true;
 }
@@ -195,10 +197,10 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_timestepper->initial_data();                          // Fill cdr and rte with initial data
 
   if (a_init_regrids >= 0){
-    m_timestepper->solve_poisson();                         // Solve Poisson equation by using initial data
-    if(m_timestepper->stationary_rte()){                    // Solve RTE equations by using initial data and electric field
+    m_timestepper->solve_poisson();                       // Solve Poisson equation by using initial data
+    if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
       const Real dummy_dt = 0.0;
-      m_timestepper->solve_rte(0.0);                        // Argument does not matter, it's a stationary solver.
+      m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
     }    
   }
 
@@ -219,19 +221,18 @@ void plasma_engine::tag_cells(Vector<IntVectSet>& a_tags){
   }
 
   const int finest_level = m_amr->get_finest_level();
+  a_tags.resize(1 + finest_level);
 
+  // Add tags from tagger
   if(!m_celltagger.isNull()){
     m_celltagger->tag_cells(a_tags, m_layout_tags, finest_level);
   }
 
-  // Add geometric tags
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  // Add geometric tags. We don't add tags on the finest level because
+  for (int lvl = 0; lvl < finest_level; lvl++){
     a_tags[lvl] |= m_geom_tags[lvl];
   }
-
-  return tags;
 }
-
 
 void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
   CH_TIME("plasma_engine::set_physical_domain");
@@ -256,6 +257,16 @@ void plasma_engine::regrid(){
   if(m_verbosity > 2){
     pout() << "plasma_engine::regrid" << endl;
   }
+
+  Vector<IntVectSet> tags;
+
+  const int old_finest_level = m_amr->get_finest_level();
+  this->tag_cells(tags);
+  m_amr->regrid(tags, old_finest_level + 1); 
+  const int new_finest_level = m_amr->get_finest_level();
+  
+  m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
+  m_timestepper->regrid_internals();                                 // Regrid internal storage
 }
 
 void plasma_engine::write_plot_file(){
@@ -364,11 +375,10 @@ void plasma_engine::get_geom_tags(){
     m_geom_tags[lvl] |= gas_solid_tags;
     m_geom_tags[lvl] |= gas_tags;
     m_geom_tags[lvl] |= solid_tags;
-
   }
 
   // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
   for (int lvl = 0; lvl < maxdepth; lvl++){
-    m_geom_tags[lvl].grow(2);
+    m_geom_tags[lvl].grow(1);
   }
 }

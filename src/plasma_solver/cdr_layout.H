@@ -38,6 +38,11 @@ public:
   virtual void initial_data();
 
   /*!
+    @brief Regrid method. 
+  */
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
+
+  /*!
     @brief Set amr
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
@@ -77,11 +82,6 @@ public:
     @brief Use mass-weighted redistribution
   */
   virtual void set_mass_redist(const bool a_mass_redist);
-
-  /*!
-    @brief Regrid method. 
-  */
-  virtual void regrid();
 
 
 

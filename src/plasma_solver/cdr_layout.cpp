@@ -53,6 +53,18 @@ void cdr_layout::initial_data(){
   }
 }
 
+void cdr_layout::regrid(const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("cdr_layout::regrid");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::regrid" << endl;
+  }
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->regrid(a_old_finest_level, a_new_finest_level);
+  }
+}
+
 void cdr_layout::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("cdr_layout::set_amr");
   if(m_verbosity > 5){
@@ -148,18 +160,6 @@ void cdr_layout::set_time(const int a_step, const Real a_time, const Real a_dt) 
   for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     solver->set_time(a_step, a_time, a_dt);
-  }
-}
-
-void cdr_layout::regrid(){
-  CH_TIME("cdr_layout::regrid");
-  if(m_verbosity > 5){
-    pout() << "cdr_layout::regrid" << endl;
-  }
-
-  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->regrid();
   }
 }
 
@@ -283,7 +283,6 @@ void cdr_layout::advance(const Real a_dt){
   }
 }
 
-
 Real cdr_layout::compute_cfl_dt(){
   CH_TIME("cdr_layout::compute_cfl_dt");
   if(m_verbosity > 5){
@@ -345,7 +344,6 @@ Vector<RefCountedPtr<cdr_solver> >& cdr_layout::get_solvers(){
 Vector<RefCountedPtr<species> >& cdr_layout::get_species(){
   return m_species;
 }
-
 
 Vector<EBAMRCellData*> cdr_layout::get_states(){
   CH_TIME("cdr_layout::get_states");

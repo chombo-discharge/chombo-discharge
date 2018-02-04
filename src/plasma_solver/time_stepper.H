@@ -94,6 +94,21 @@ public:
   virtual void initial_data();
 
   /*!
+    @brief Regrid
+  */
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
+
+  /*!
+    @brief Regrid internal storage. This MUST be overwritten.
+  */
+  virtual void regrid_internals();
+
+  /*!
+    @brief Regrid individual solvers
+  */
+  virtual void regrid_solvers(const int a_old_finest_level, const int a_new_finest_level);
+
+  /*!
     @brief Do a sanity check
   */
   virtual void sanity_check();

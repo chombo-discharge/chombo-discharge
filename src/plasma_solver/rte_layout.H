@@ -32,7 +32,10 @@ public:
   */
   virtual void allocate_internals();
 
-
+  /*!
+    @brief Regrid method. 
+  */
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
     @brief Set amr
@@ -69,11 +72,6 @@ public:
     @brief Set time
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
-
-  /*!
-    @brief Regrid method. 
-  */
-  virtual void regrid();
 
   /*!
     @brief Convenience function. Set source terms for all species. Mostly used for debugging. 

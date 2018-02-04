@@ -26,6 +26,7 @@
 #include <EBCoarToFineRedist.H>
 #include <EBCoarToCoarRedist.H>
 #include <EBFineToCoarRedist.H>
+#include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
 
 /*!
@@ -386,6 +387,11 @@ public:
   virtual Vector<RefCountedPtr<AggEBPWLFillPatch> >& get_fillpatch(phase::which_phase a_phase);
 
   /*!
+    @brief Get interpolator 
+  */
+  virtual Vector<RefCountedPtr<EBPWLFineInterp> >& get_eb_pwl_interp(phase::which_phase a_phase);
+
+  /*!
     @brief Get flux register
   */
   virtual Vector<RefCountedPtr<EBFastFR> >&  get_flux_reg(phase::which_phase a_phase);
@@ -587,6 +593,11 @@ protected:
     @brief Patcher for piecewise linear interpolation (one ghost cell layer only)
   */
   Vector<Vector<RefCountedPtr<AggEBPWLFillPatch> > > m_pwl_fillpatch;
+
+  /*!
+    @brief Piecewise linear interpolation 
+  */
+  Vector<Vector<RefCountedPtr<EBPWLFineInterp> > > m_pwl_interp;
   
   /*!
     @brief Flux register
@@ -662,6 +673,11 @@ protected:
     @brief Define operators for piecewise linear interpolation of ghost cells
   */
   virtual void define_fillpatch();
+
+  /*!
+    @brief Define interpolator for regridding
+  */
+  virtual void define_ebpwl_interp();
 
   /*!
     @brief Define redistribution operators

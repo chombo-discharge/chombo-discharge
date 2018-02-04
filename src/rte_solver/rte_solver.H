@@ -124,7 +124,7 @@ public:
   /*!
     @brief Regrid function
   */
-  virtual void regrid() = 0;
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level) = 0;
 
   /*!
     @brief Fill solver with initial data. By default, this sets internal data to zero. 

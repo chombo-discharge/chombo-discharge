@@ -97,15 +97,97 @@ void sigma_solver::initial_data(){
   m_amr->average_down(m_state, m_phase);
 }
 
-void sigma_solver::regrid(){
+void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("sigma_solver::regrid");
   if(m_verbosity > 5){
     pout() << "sigma_solver::regrid" << endl;
   }
 
+  const RefCountedPtr<EBIndexSpace> ebis = m_mfis->get_ebis(m_phase);
+
+  const int ebghost = 4; // m_amr->get_eb_ghost();
+  const int comp  = 0;
+  const int ncomp = 1;
+  const Interval interv(comp, comp);
+
+  // Copy to scratch and reinitialize internals
+  EBAMRIVData scratch;
+  m_amr->allocate(scratch, m_phase, ncomp);
+
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+    m_state[lvl]->copyTo(*scratch[lvl]);
+  }
+  this->allocate_internals();
 
 
-  MayDay::Abort("sigma_solver::regrid - not implemented. This should do conservative regridding!");
+  // Regrid. Base level should never change
+  scratch[0]->copyTo(*m_state[0]); 
+  for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
+    const DisjointBoxLayout& fine_grid = m_amr->get_grids()[lvl];
+    const ProblemDomain& fine_domain   = m_amr->get_domains()[lvl];
+    const ProblemDomain& coar_domain   = m_amr->get_domains()[lvl-1];
+    const EBISLayout& fine_ebisl       = m_amr->get_ebisl(m_phase)[lvl];
+    const int nref                     = m_amr->get_ref_rat()[lvl-1];
+    
+    // Fill a coarsened grid and a coarsened ebisl
+    EBISLayout coar_ebisl;
+    DisjointBoxLayout coar_grid = DisjointBoxLayout();
+    coarsen(coar_grid, fine_grid, nref);
+    ebis->fillEBISLayout(coar_ebisl, coar_grid, coar_domain, ebghost);
+
+    // Need extra storage for coarse data
+    LayoutData<IntVectSet> sets(coar_grid);
+    for (DataIterator dit = coar_grid.dataIterator(); dit.ok(); ++dit){
+      Box box          = coar_grid.get(dit());
+      box.grow(3);
+      box &= coar_domain;
+      
+      const EBISBox& ebisbox = coar_ebisl[dit()];
+      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+      sets[dit()] = ivs;
+    }
+
+    // Allocate storage for coarsened data
+    BaseIVFactory<Real> ivfact(coar_ebisl, sets);
+    LevelData<BaseIVFAB<Real> > coarsened_fine_data(coar_grid, ncomp, m_state[0]->ghostVect(), ivfact);
+
+    //
+    m_state[lvl-1]->copyTo(coarsened_fine_data);
+
+
+    // Loop through coarse grid and interpolate to fine grid
+    for (DataIterator dit = coar_grid.dataIterator(); dit.ok(); ++dit){
+      BaseIVFAB<Real>& fine_state       = (*m_state[lvl])[dit()];
+      const BaseIVFAB<Real>& coar_state = coarsened_fine_data[dit()];
+      const EBISBox& coar_ebisbox       = coar_ebisl[dit()];
+      const EBISBox& fine_ebisbox       = fine_ebisl[dit()];
+
+      const IntVectSet ivs   = fine_state.getIVS();
+      const EBGraph& ebgraph = fine_state.getEBGraph();
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    	const VolIndex& fine_vof = vofit();
+    	const VolIndex  coar_vof = fine_ebisl.coarsen(fine_vof, nref, dit());
+
+    	// Get all the area fractions of the refine coar vof in order to find weighting fractions
+    	Vector<VolIndex> refined_vofs = coar_ebisl.refine(coar_vof, nref, dit());
+    	Real sumfrac = 0.0;
+    	for (int i = 0; i < refined_vofs.size(); i++){
+    	  //	  sumfrac += fine_ebisbox.bndryArea(refined_vofs[i]);
+    	}
+
+    	// Initialize conserved charge
+    	const Real coarFrac = coar_ebisbox.bndryArea(coar_vof);
+    	//	fine_state(fine_vof, comp) = coar_state(coar_vof, comp)*nref/sumfrac;
+      }
+    }
+
+    // If data already exists, it takes precedence
+    if (lvl <= a_old_finest_level){
+      scratch[lvl]->copyTo(*m_state[lvl]);
+    }
+  }
 }
 
 void sigma_solver::reset_cells(EBAMRIVData& a_data){
@@ -146,6 +228,16 @@ void sigma_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   }
 
   m_amr = a_amr;
+}
+
+void sigma_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+  CH_TIME("sigma_solver::set_computational_geometry");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_computational_geometry" << endl;
+  }
+
+  m_compgeom = a_compgeom;
+  m_mfis     = m_compgeom->get_mfis();
 }
 
 void sigma_solver::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){

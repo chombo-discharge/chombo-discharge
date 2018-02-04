@@ -131,13 +131,37 @@ void eddington_sp1::allocate_internals(){
   this->set_aco_and_bco();
 }
 
-void eddington_sp1::regrid(){
+
+void eddington_sp1::regrid(const int a_old_finest_level, const int a_new_finest_level) {
   CH_TIME("eddington_sp1::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
   }
 
-  MayDay::Abort("eddington_sp1::regrid - not implemented");
+  const int comp  = 0;
+  const int ncomp = 1;
+  const Interval interv(comp, comp);
+
+  // Copy to scratch storage and allocate internals again
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_phase, ncomp);
+  for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
+    m_state[lvl]->copyTo(*scratch[lvl]);
+  }
+  this->allocate_internals();
+
+  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_phase);
+
+  scratch[0]->copyTo(*m_state[0]); // Base level should never change. 
+  for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
+    interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
+
+    if(lvl <= a_old_finest_level){
+      scratch[lvl]->copyTo(*m_state[lvl]);
+    }
+  }
+
+  m_needs_setup = true;
 }
 
 bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
@@ -172,10 +196,10 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     const Real phi_resid  = m_gmg_solver->computeAMRResidual(phi,  rhs, finest_level, 0); // Incoming residual
     const Real zero_resid = m_gmg_solver->computeAMRResidual(zero, rhs, finest_level, 0); // Zero residual
 
-    if(phi_resid > zero_resid*m_gmg_eps){ 
+    if(phi_resid > zero_resid*m_gmg_eps){
       m_gmg_solver->m_convergenceMetric = zero_resid;
       m_gmg_solver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
-
+      
       const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
       if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
 	converged = true;

@@ -76,6 +76,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Regrid method. 
+  */
+  virtual void regrid(const int a_old_finest, const int a_new_finest);
+
+  /*!
     @brief Set Dirichlet wall BC
   */
   virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live);

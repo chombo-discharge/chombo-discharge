@@ -58,7 +58,7 @@ public:
   /*!
     @brief Regrid method
   */
-  virtual void regrid();
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
   
   /*!
     @brief Reset data holder on cells
@@ -69,6 +69,11 @@ public:
     @brief Set the amr object
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+
+  /*!
+    @brief Set computational geometry
+  */
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
   /*!
     @brief Set the physical domain
@@ -119,9 +124,19 @@ public:
 protected:
 
   /*!
+    @brief Index spaces
+  */
+  RefCountedPtr<mfis> m_mfis;
+
+  /*!
     @brief Plasma kinetics
   */
   RefCountedPtr<plasma_kinetics> m_plaskin;
+
+  /*!
+    @brief Computational geometry
+  */
+  RefCountedPtr<computational_geometry> m_compgeom;
 
   /*!
     @brief Physical domain

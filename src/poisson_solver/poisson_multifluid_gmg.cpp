@@ -55,6 +55,8 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
   }
 
+  m_verbosity = 10;
+
   bool converged = false;
 
   if(m_needs_setup){
@@ -107,6 +109,11 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
 int poisson_multifluid_gmg::query_ghost() const {
   return 3; // Need this many cells
+}
+
+void poisson_multifluid_gmg::regrid(const int a_old_finest_level, const int a_new_finest_level){
+  poisson_solver::regrid(a_old_finest_level, a_new_finest_level);
+  m_needs_setup = true;
 }
 
 void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){

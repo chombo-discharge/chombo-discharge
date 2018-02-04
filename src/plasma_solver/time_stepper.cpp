@@ -237,6 +237,39 @@ void time_stepper::initial_data(){
   m_sigma->initial_data();
 }
 
+void time_stepper::regrid(const int a_old_finest, const int a_new_finest){
+  CH_TIME("time_stepper::regrid");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::regrid" << endl;
+  }
+
+  this->regrid_solvers(a_old_finest, a_new_finest);
+  this->regrid_internals();
+}
+
+void time_stepper::regrid_internals(){
+  CH_TIME("time_stepper::regrid_internals");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::regrid_internals" << endl;
+  }
+
+  MayDay::Warning("time_stepper::regrid_internals - this routine should be PURE");
+}
+
+void time_stepper::regrid_solvers(const int a_old_finest, const int a_new_finest){
+  CH_TIME("time_stepper::regrid_solvers");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::regrid_solvers" << endl;
+  }
+
+  m_cdr->regrid(a_old_finest,     a_new_finest);
+  m_poisson->regrid(a_old_finest, a_new_finest);
+  m_rte->regrid(a_old_finest,     a_new_finest);
+  m_sigma->regrid(a_old_finest,   a_new_finest);
+
+  m_poisson->write_plot_file();
+}
+
 void time_stepper::sanity_check(){
   CH_TIME("time_stepper::sanity_check");
   if(m_verbosity > 5){
@@ -309,6 +342,7 @@ void time_stepper::setup_cdr(){
   }
 
   m_cdr = RefCountedPtr<cdr_layout> (new cdr_layout(m_plaskin));
+  m_cdr->set_verbosity(m_verbosity);
   m_cdr->set_amr(m_amr);
   m_cdr->set_computational_geometry(m_compgeom);
   m_cdr->set_physical_domain(m_physdom);
@@ -323,6 +357,7 @@ void time_stepper::setup_poisson(){
   }
 
   m_poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
+  m_poisson->set_verbosity(m_verbosity);
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
   m_poisson->set_physical_domain(m_physdom);
@@ -355,6 +390,7 @@ void time_stepper::setup_rte(){
   }
 
   m_rte = RefCountedPtr<rte_layout> (new rte_layout(m_plaskin));
+  m_rte->set_verbosity(m_verbosity);
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);
   m_rte->set_physical_domain(m_physdom);
@@ -370,6 +406,8 @@ void time_stepper::setup_sigma(){
 
   m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
   m_sigma->set_amr(m_amr);
+  m_sigma->set_verbosity(m_verbosity);
+  m_sigma->set_computational_geometry(m_compgeom);
   m_sigma->set_plasma_kinetics(m_plaskin);
   m_sigma->set_physical_domain(m_physdom);
   m_sigma->allocate_internals();

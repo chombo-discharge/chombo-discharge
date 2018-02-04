@@ -57,7 +57,7 @@ public:
 					 const int a_bot_smooth          = 16,
 					 const int a_max_iter            = 16,
 					 const int a_min_iter            = 5,
-					 const Real a_eps                = 1.E-6,
+					 const Real a_eps                = 1.E-8,
 					 const Real a_hang               = 0.2);
 
   /*!
@@ -111,7 +111,7 @@ public:
   /*!
     @brief Regrid function for this class
   */
-  virtual void regrid();
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
 
 #ifdef CH_USE_HDF5
   /*!

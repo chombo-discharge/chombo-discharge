@@ -295,13 +295,11 @@ void amr_mesh::build_domains(){
   if(m_verbosity > 5){
     pout() << "amr_mesh::build_domains" << endl;
   }
-  pout() << "domain" << endl;
 
   const int nlevels = 1 + m_max_amr_depth;
   
   m_domains.resize(nlevels);
   m_dx.resize(nlevels);
-  //  m_ref_ratios.resize(nlevels, m_ref_ratio);
   m_grids.resize(nlevels);
   m_mflg.resize(nlevels);
 
@@ -314,12 +312,12 @@ void amr_mesh::build_domains(){
   m_level_advect.resize(phase::num_phases);
   m_level_redist.resize(phase::num_phases);
   m_pwl_fillpatch.resize(phase::num_phases);
+  m_pwl_interp.resize(phase::num_phases);
   m_centroid_interp.resize(phase::num_phases);
   m_eb_centroid_interp.resize(phase::num_phases);
   m_coar_to_fine_redist.resize(phase::num_phases);
   m_coar_to_coar_redist.resize(phase::num_phases);
   m_fine_to_coar_redist.resize(phase::num_phases);
-
 
   m_eblg[phase::gas].resize(nlevels);
   m_ebisl[phase::gas].resize(nlevels);
@@ -330,6 +328,7 @@ void amr_mesh::build_domains(){
   m_level_advect[phase::gas].resize(nlevels);
   m_level_redist[phase::gas].resize(nlevels);
   m_pwl_fillpatch[phase::gas].resize(nlevels);
+  m_pwl_interp[phase::gas].resize(nlevels);
   m_coar_to_fine_redist[phase::gas].resize(nlevels);
   m_coar_to_coar_redist[phase::gas].resize(nlevels);
   m_fine_to_coar_redist[phase::gas].resize(nlevels);
@@ -343,6 +342,7 @@ void amr_mesh::build_domains(){
   m_level_advect[phase::solid].resize(nlevels);
   m_level_redist[phase::solid].resize(nlevels);
   m_pwl_fillpatch[phase::solid].resize(nlevels);
+  m_pwl_interp[phase::solid].resize(nlevels);
   m_coar_to_fine_redist[phase::solid].resize(nlevels);
   m_coar_to_coar_redist[phase::solid].resize(nlevels);
   m_fine_to_coar_redist[phase::solid].resize(nlevels);
@@ -373,6 +373,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
     this->define_eb_coar_ave();  // Define EBCoarseAverage on both phases
     this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
     this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
+    this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
     this->define_flux_reg();     // Define flux register (phase::gas only)
     this->define_redist_oper();  // Define redistribution (phase::gas only)
     this->define_advect_level(); // Define advection 
@@ -401,7 +402,6 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     // Berger-Rigoutsos grid generation
     BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
     int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, 0, top_level, old_boxes);
-    
     m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
     m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
     m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
@@ -424,8 +424,9 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
   this->loadbalance(proc_assign, new_boxes);
 
   // Define grids
+  m_grids.resize(1 + m_finest_level);
   for (int lvl = 0; lvl <= m_finest_level; lvl++){   
-    m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]); 
+    m_grids[lvl] = DisjointBoxLayout(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]); 
   }
 }
 
@@ -725,6 +726,50 @@ void amr_mesh::define_fillpatch(){
 												     ghost,
 												     !m_ebcf,
 												     ebis_sol));
+      }
+    }
+  }
+}
+
+void amr_mesh::define_ebpwl_interp(){
+  CH_TIME("amr_mesh::define_ebpwl_interp");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_ebpwl_interp" << endl;
+  }
+
+  const int comps     = SpaceDim;
+
+  // Should these be input somehow?
+  const int radius    = 1;
+  const IntVect ghost = m_num_ghost*IntVect::Unit;
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+
+    const bool has_coar = lvl > 0;
+
+    if(has_coar){
+      if(!ebis_gas.isNull()){
+	m_pwl_interp[phase::gas][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
+											    m_grids[lvl-1],
+											    m_ebisl[phase::gas][lvl],
+											    m_ebisl[phase::gas][lvl-1],
+											    m_domains[lvl-1],
+											    m_ref_ratios[lvl-1],
+											    comps,
+											    ebis_gas));
+      }
+      if(!ebis_sol.isNull()){
+	m_pwl_interp[phase::solid][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
+											      m_grids[lvl-1],
+											      m_ebisl[phase::solid][lvl],
+											      m_ebisl[phase::solid][lvl-1],
+											      m_domains[lvl-1],
+											      m_ref_ratios[lvl-1],
+											      comps,
+											      ebis_sol));
       }
     }
   }
@@ -1125,7 +1170,7 @@ void amr_mesh::set_max_amr_depth(const int a_max_amr_depth){
 }
 
 void amr_mesh::set_max_simulation_depth(const int a_max_sim_depth){
-  m_max_sim_depth = a_max_sim_depth;
+  m_max_sim_depth = a_max_sim_depth >= 0 ? a_max_sim_depth : 0;
 }
 
 void amr_mesh::set_ebcf(const bool a_ebcf){
@@ -1298,6 +1343,10 @@ Vector<RefCountedPtr<EBQuadCFInterp> >& amr_mesh::get_old_quadcfi(phase::which_p
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& amr_mesh::get_fillpatch(phase::which_phase a_phase){
   return m_pwl_fillpatch[a_phase];
+}
+
+Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(phase::which_phase a_phase){
+  return m_pwl_interp[a_phase];
 }
 
 Vector<RefCountedPtr<EBFastFR> >&  amr_mesh::get_flux_reg(phase::which_phase a_phase){
