@@ -265,6 +265,16 @@ void data_ops::multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>&
   }
 }
 
+void data_ops::set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::set_covered_value(*a_lhs[lvl], a_comp, a_value);
+  }
+}
+
+void data_ops::set_covered_value(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value){
+  EBLevelDataOps::setCoveredVal(a_lhs, a_comp, a_value);
+}
+
 void data_ops::set_value(EBAMRCellData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);

@@ -75,6 +75,30 @@ public:
   virtual void compute_J(EBAMRCellData& a_J);
 
   /*!
+    @brief Compute CDR source terms
+  */
+  virtual void compute_cdr_sources();
+
+  /*!
+    @brief Compute source terms for the cdr equations
+  */
+  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
+				   const Vector<EBAMRCellData*>&  a_cdr_densities,
+				   const Vector<EBAMRCellData*>&  a_rte_densities,
+				   const EBAMRCellData&           a_E,
+				   const centering::which_center  a_centering);
+
+  /*!
+    @brief Compute cdr velocities
+  */
+  virtual void compute_cdr_velocities();
+
+  /*!
+    @brief Compute cdr velocities
+  */
+  virtual void compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E);
+
+  /*!
     @brief Compute photon source terms. 
   */
   virtual void compute_photon_source_terms(Vector<EBAMRCellData*>        a_source,
@@ -202,6 +226,11 @@ public:
   virtual void setup_sigma();
 
   /*!
+    @brief Solver dumps data files
+  */
+  virtual void solver_dump();
+
+  /*!
     @brief Set potential
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
@@ -261,6 +290,26 @@ public:
 #endif
     return 1.E99;
   }
+
+  /*!
+    @brief Get cdr solvers
+  */
+  virtual RefCountedPtr<cdr_layout>& get_cdr();
+
+  /*!
+    @brief Get cdr solvers
+  */
+  virtual RefCountedPtr<poisson_solver>& get_poisson();
+  
+  /*!
+    @brief Get cdr solvers
+  */
+  virtual RefCountedPtr<rte_layout>& get_rte();
+
+  /*!
+    @brief Get sigma solver
+  */
+  virtual RefCountedPtr<sigma_solver>& get_sigma();
   
 protected:
 

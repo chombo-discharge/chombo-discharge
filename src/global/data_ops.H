@@ -80,6 +80,10 @@ public:
 
   static void multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
+  static void set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
+
+  static void set_covered_value(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
+
   static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
   
   static void set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);

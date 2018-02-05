@@ -186,7 +186,7 @@ RealVect morrow_lowke::compute_vn(const RealVect& a_E) const{
 
 Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_densities,
 						const Vector<Real>& a_photon_densities,
-						const RealVect&     a_E) const{
+						const RealVect&     a_E) const {
   const Vector<RealVect> vel = this->compute_velocities(a_E); // Does it's own conversion
 
   const Real alpha  = this->compute_alpha(a_E); // Ionization coefficient
@@ -217,7 +217,7 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_de
   Se = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np + Sph;
   Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
   Sn = eta*Ne*Ve   - beta*Np*Nn;
-  
+
   return source;
 }
 
@@ -500,7 +500,8 @@ const Real morrow_lowke::electron::initial_data(const RealVect a_pos, const Real
   const Real factor = (a_pos - m_seed_pos).vectorLength()/(m_seed_radius*m_seed_radius);
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
-    
+
+  return 0.;
   return seed + m_uniform_density + noise;
 }
 

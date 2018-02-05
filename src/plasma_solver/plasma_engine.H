@@ -109,7 +109,6 @@ public:
     @brief Set potential function
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
-
   
   /*!
     @brief Set the regrid interval
@@ -311,12 +310,57 @@ protected:
   /*!
     @brief Write a plot file
   */
-  virtual void write_plot_file(const output_mode::which_mode a_mode);
+  virtual void write_plot_file();
 
   /*!
     @brief Write a checkpoint file
   */
   virtual void write_checkpoint_file();
+
+  /*!
+    @brief Add potential to the output data holder
+  */
+  virtual void add_potential_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the electric field to the output data holder
+  */
+  virtual void add_electric_field_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the electric field to the output data holder
+  */
+  virtual void add_space_charge_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the surface charge to the output data holder
+  */
+  virtual void add_surface_charge_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the ion densities to the output data holder
+  */
+  virtual void add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the ion velocities to the output data holder
+  */
+  virtual void add_cdr_velocities_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the ion source terms to the output data holder
+  */
+  virtual void add_cdr_source_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the photon densities to the output data holder
+  */
+  virtual void add_rte_densities_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
+    @brief Add the photon source terms to the output data holder
+  */
+  virtual void add_rte_source_to_output(EBAMRCellData& a_output, const int a_curVar);
 
   /*!
     @brief Read checkpoint file
@@ -385,5 +429,10 @@ protected:
     @brief Tag cells for refinement. This includes cells from geometries and the cell tagger
   */
   virtual void tag_cells(Vector<IntVectSet>& a_ivs);
+
+  /*!
+    @brief Get output variable names for a given output mode
+  */
+  virtual Vector<string> get_output_variable_names();
 };
 #endif

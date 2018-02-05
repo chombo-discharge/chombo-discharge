@@ -97,6 +97,7 @@ int main(int argc, char* argv[]){
   engine->set_regrid_interval(5);         // Regrid every this intervals
   engine->set_plot_interval(5);           // Plot every this intervals
   engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals
+  engine->set_output_mode(output_mode::full);
 
   engine->set_verbosity(1);
   timestepper->set_verbosity(0);
