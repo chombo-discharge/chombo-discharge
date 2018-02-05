@@ -14,6 +14,7 @@
 time_stepper::time_stepper(){
   this->set_verbosity(10);
   this->set_cfl(0.8);
+  this->set_relax_time(2.0);
   this->set_min_dt(0.0);
   this->set_max_dt(1.E99);
 }
@@ -47,35 +48,44 @@ void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     dt = dt_cfl;
     a_timecode = time_code::cfl;
   }
+  pout() << dt << endl;
   
   const Real dt_dif = m_cfl*m_cdr->compute_diffusive_dt();
   if(dt_dif < dt){
     dt = dt_dif;
     a_timecode = time_code::diffusion;
-  }  
+  }
+  pout() << dt << endl;
 
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
+    pout() << dt_relax << endl;
     dt = dt_relax;
     a_timecode = time_code::relaxation_time;
   }
+  pout() << dt << endl;
 
   const Real dt_restrict = this->restrict_dt();
   if(dt_restrict < dt){
     dt = dt_restrict;
     a_timecode = time_code::restricted;
   }
+  pout() << dt << endl;
 
   if(dt < m_min_dt){
     dt = m_min_dt;
     a_timecode = time_code::hardcap;
   }
+  pout() << dt << endl;
 
   if(dt > m_max_dt){
     dt = m_max_dt;
     a_timecode = time_code::hardcap;
   }
-  
+  pout() << dt << endl;
+
+  CH_assert(dt > 0.0);
+  a_dt = dt;
 }
 
 void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
@@ -156,6 +166,10 @@ void time_stepper::compute_J(EBAMRCellData& a_J){
 
   m_amr->average_down(a_J, m_cdr->get_phase());
   m_amr->interp_ghost(a_J, m_cdr->get_phase());
+
+#if 1 // override
+  data_ops::set_value(a_J, 1.0);
+#endif
 }
 
 void time_stepper::compute_photon_source_terms(Vector<EBAMRCellData*>        a_source,
@@ -644,12 +658,14 @@ Real time_stepper::compute_relaxation_time(){
   }
 
   const int finest_level = 0;
-  const Real tolerance   = 1.E-4;
+  const Real tolerance   = 1.E-2;
 
   EBAMRCellData E, J, dt;
   m_amr->allocate(E,  m_cdr->get_phase(), SpaceDim);
   m_amr->allocate(J,  m_cdr->get_phase(), SpaceDim);
   m_amr->allocate(dt, m_cdr->get_phase(), SpaceDim);
+
+  data_ops::set_value(dt, 1.E99);
 
   this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
   this->compute_J(J);
@@ -661,8 +677,7 @@ Real time_stepper::compute_relaxation_time(){
     data_ops::get_max_min(max, min, E, dir);
     max_E[dir] = Max(Abs(max), Abs(min));
   }
-
-
+  
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
@@ -682,7 +697,6 @@ Real time_stepper::compute_relaxation_time(){
 	const VolIndex& vof = vofit();
 
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  dt_fab(vof, dir) = 1.E99;
 	  if(Abs(e(vof, dir)) > tolerance*max_E[dir]){
 	    dt_fab(vof, dir) = Abs(units::s_eps0*e(vof, dir)/j(vof,dir));
 	  }
@@ -690,9 +704,7 @@ Real time_stepper::compute_relaxation_time(){
       }
     }
   }
-
-  m_amr->average_down(dt, m_cdr->get_phase());
-
+  
   // Find the smallest dt
   Real min_dt = 1.E99;
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -710,6 +722,8 @@ Real time_stepper::compute_relaxation_time(){
   }
   min_dt = tmp;
 #endif
+
+  pout() << "returning " << min_dt << endl;
 
 
   return min_dt;

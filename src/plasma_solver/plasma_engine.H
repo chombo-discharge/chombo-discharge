@@ -170,7 +170,7 @@ protected:
 
   /*!
     @brief Set the cell tagger
-   */
+  */
   RefCountedPtr<cell_tagger> m_celltagger;
 
   /*!
@@ -183,7 +183,7 @@ protected:
   */
   output_mode::which_mode m_output_mode;
 
-    /*!
+  /*!
     @brief Output directory
   */
   std::string m_output_dir;
@@ -200,7 +200,7 @@ protected:
 
   /*!
     @brief Time step
-   */
+  */
   int m_step;
 
   /*!
@@ -327,6 +327,18 @@ protected:
     @brief Get geometric tags
   */
   virtual void get_geom_tags();
+
+  /*!
+    @brief Get boxes and points for everything
+  */
+  virtual void get_loads_and_boxes(long long& a_myPoints,
+				   long long& a_myPointsGhosts,
+				   long long& a_myBoxes,
+				   long long& a_totalPoints,
+				   long long& a_totalPointsGhosts,
+				   long long& a_totalBoxes,
+				   const int& a_finestLevel,
+				   const Vector<DisjointBoxLayout>& a_grids);
 
   /*!
     @brief Write a grid report

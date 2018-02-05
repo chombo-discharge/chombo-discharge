@@ -53,15 +53,128 @@ plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
 }
 
+void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
+					long long& a_myPointsGhosts,
+					long long& a_myBoxes,
+					long long& a_totalPoints,
+					long long& a_totalPointsGhosts,
+					long long& a_totalBoxes,
+					const int& a_finestLevel,
+					const Vector<DisjointBoxLayout>& a_grids){
+  CH_TIME("plasma_engine::get_loads_and_boxes");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::get_loads_and_boxes" << endl;
+  }
+
+  a_myPoints          = 0;
+  a_myPointsGhosts    = 0;
+  a_myBoxes           = 0;
+  a_totalPoints       = 0;
+  a_totalPointsGhosts = 0;
+  a_totalBoxes        = 0;
+
+  const int ghost = m_amr->get_num_ghost();
+
+    for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+    const DisjointBoxLayout& dbl = a_grids[lvl];
+    const Vector<Box> boxes      = dbl.boxArray();
+    const Vector<int> procs      = dbl.procIDs();
+    
+    // Find the total number of points and boxes for this level
+    long long pointsThisLevel       = 0;
+    long long pointsThisLevelGhosts = 0;
+    long long boxesThisLevel        = 0;
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit){
+      Box box      = dbl[lit()];
+      Box grownBox = dbl[lit()];
+      grownBox.grow(ghost);
+      
+      //
+      pointsThisLevel       += box.numPts();
+      pointsThisLevelGhosts += grownBox.numPts();
+      boxesThisLevel        += 1;
+    }
+
+    // Find the total number of points and boxes that this processor owns
+    long long myPointsLevel       = 0;
+    long long myPointsLevelGhosts = 0;
+    long long myBoxesLevel        = 0;
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      Box box      = dbl[dit()];
+      Box grownBox = dbl[dit()];
+      grownBox.grow(3);
+      
+      myPointsLevel       += box.numPts();
+      myPointsLevelGhosts += grownBox.numPts();
+      myBoxesLevel        += 1;
+    }
+
+    //
+    a_totalPoints       += pointsThisLevel;
+    a_totalPointsGhosts += pointsThisLevelGhosts;
+    a_totalBoxes        += boxesThisLevel;
+    a_myPoints          += myPointsLevel;
+    a_myPointsGhosts    += myPointsLevelGhosts;
+    a_myBoxes           += myBoxesLevel;
+  }
+}
+
 void plasma_engine::grid_report(){
   CH_TIME("plasma_engine::grid_report");
   if(m_verbosity > 5){
     pout() << "plasma_engine::grid_report" << endl;
   }
 
-#if warnings
-  MayDay::Warning("plasma_engine::grid_report - not implemented");
+  pout() << endl;
+
+  const int finest_level                 = m_amr->get_finest_level();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real> dx                  = m_amr->get_dx();
+
+  // Grid stuff goes into here
+  long long totPoints;
+  long long totPointsGhosts;
+  long long totBoxes;
+  long long myPoints;
+  long long myPointsGhosts;
+  long long myBoxes;
+
+  //
+  const long long uniformPoints = (domains[finest_level].domainBox()).numPts();
+
+  // Track memory
+#ifdef CH_USE_MEMORY_TRACKING
+  int BytesPerMB = 1024*1024;
+  long long curMem;
+  long long peakMem;
+  overallMemoryUsage(curMem, peakMem);
 #endif
+  
+  // Get loads and boxes
+  this->get_loads_and_boxes(myPoints, myPointsGhosts, myBoxes, totPoints, totPointsGhosts, totBoxes, finest_level, grids);
+
+  // Write a report
+  pout() << "-----------------------------------------------------------------------" << endl
+	 << "plasma_engine::Grid report - timestep = " << m_step << endl 
+	 << "\t\t\t        Finest level          = " << finest_level << endl
+    	 << "\t\t\t        Total number boxes    = " << totBoxes << endl
+    	 << "\t\t\t        Total number of cells = " << totPoints << endl
+	 << "\t\t\t               with ghosts = " << totPointsGhosts << endl
+	 << "\t\t\t        Grid sparsity         = " << 1.0*totPoints/uniformPoints << endl
+	 << "\t\t\t        Finest dx             = " << dx[finest_level] << endl
+	 << "\t\t\t        Number of cells       = " << myPoints << endl
+    	 << "\t\t\t            with ghosts       = " << myPointsGhosts << endl
+    	 << "\t\t\t        Num boxes             = " << myBoxes << endl
+#ifdef CH_USE_MEMORY_TRACKING
+	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
+    	 << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
+	 << "-----------------------------------------------------------------------" << endl
+
+#endif
+	 << endl;
+
+  pout() << endl;
 }
 
 void plasma_engine::initial_regrids(const int a_init_regrids){
@@ -71,13 +184,21 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
   }
 
   for (int i = 0; i < a_init_regrids; i++){
+    if(m_verbosity > 0){
+      pout() << "plasma_engine -- initial regrid # " << i + 1 << endl;
+    }
+    
     this->regrid();                       // Regrid base
     m_timestepper->initial_data();        // Fill solvers with initial data
     m_timestepper->solve_poisson();       // Re-solve Poisson equation
     if(m_timestepper->stationary_rte()){  // Solve RTE equations by using initial data and electric field if its stationary
       const Real dummy_dt = 0.0;
       m_timestepper->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
-    }    
+    }
+
+    if(m_verbosity > 0){
+      this->grid_report();
+    }
   }
 }
 
@@ -136,7 +257,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       }
 
       // Did the time step become too small?
-      if(m_dt < 1.5E-5*init_dt){
+      if(m_dt < 1.0E-5*init_dt){
 	m_step++;
 
 #ifdef CH_USE_HDF5
@@ -428,9 +549,127 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
     pout() << "plasma_engine::step_report" << endl;
   }
 
-#if warning
-  MayDay::Warning("plasma_engine::step_report - not implemented");
+  pout() << endl;
+  std::string str;
+  if(m_timecode == time_code::cfl){
+    str = " (Restricted by CFL)";
+  }
+  if(m_timecode == time_code::diffusion){
+    str = " (Restricted by diffusion)";
+  }
+  if(m_timecode == time_code::relaxation_time){
+    str = " (Restricted by relaxation time)";
+  }
+  if(m_timecode == time_code::restricted){
+    str = " (Restricted by time stepper)";
+  }
+  if(m_timecode == time_code::hardcap){
+    str = " (Restricted by a hardcap)";
+  }
+  pout() << "plasma_engine::Time step report -- Time step #" << m_step
+	 << "\t Time = " << m_time
+	 << "\t dt = " << m_dt 
+	 << str << endl;
+
+  // Get the total number of poitns across all levels
+  const int finest_level                 = m_amr->get_finest_level();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  long long totalPoints = 0;
+  long long uniformPoints = (domains[finest_level].domainBox()).numPts();
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    long long pointsThisLevel = 0;
+    for (LayoutIterator lit = grids[lvl].layoutIterator(); lit.ok(); ++lit){
+      pointsThisLevel += grids[lvl][lit()].numPts();
+    }
+    totalPoints += pointsThisLevel;
+  }
+  
+  // const Real sparsity = 1.0*totalPoints/uniformPoints;
+  // pout() << "                                             #" << m_step
+  // 	 << "\t Num cells = " << totalPoints          
+  // 	 << "\t Grid sparsity = " << sparsity
+  // 	 << "\t Finest dx = " << dx[finest_level]
+  // 	 << endl;
+
+
+  char metrics[300];
+  pout() << endl;
+
+  // Percentage completed of time steps
+  const Real percentStep = (1.0*m_step/a_max_steps)*100.;
+  sprintf(metrics,"%31c -- %5.2f percentage of time steps completed",' ', percentStep);
+  pout() << metrics << endl;
+
+  const Real percentTime = ((m_time - a_start_time)/(a_end_time - a_start_time))*100.;
+  sprintf(metrics,"%31c -- %5.2f percentage of simulation time completed",' ', percentTime);
+  pout() << metrics << endl;
+
+
+  // Hours, minutes, seconds and millisecond of the previous iteration
+  const Real elapsed   = m_wallclock2 - m_wallclock_start;
+  const int elapsedHrs = floor(elapsed/3600);
+  const int elapsedMin = floor((elapsed - 3600*elapsedHrs)/60);
+  const int elapsedSec = floor( elapsed - 3600*elapsedHrs - 60*elapsedMin);
+  const int elapsedMs  = floor((elapsed - elapsedSec)*1000);
+
+  // Write a string with total elapsed time
+  sprintf(metrics, 
+	  "%31c -- Elapsed time        : %3.3ih %2.2im %2.2is %3.3ims",
+	  ' ',
+	  elapsedHrs, 
+	  elapsedMin, 
+	  elapsedSec, 
+	  elapsedMs);
+  pout() << metrics << endl;
+
+  // Hours, minutes, seconds and millisecond of the previous iteration
+  const Real lastadv = m_wallclock2 - m_wallclock1;
+  const int advHrs = floor(lastadv/3600);
+  const int advMin = floor((lastadv - 3600*advHrs)/60);
+  const int advSec = floor( lastadv - 3600*advHrs - 60*advMin);
+  const int advMs  = floor((lastadv - advSec)*1000);
+
+  // Write a string with the previous iteration metrics
+  sprintf(metrics, 
+	  "%31c -- Last time step      : %3.3ih %2.2im %2.2is %3.3ims",
+	  ' ',
+	  advHrs, 
+	  advMin, 
+	  advSec, 
+	  advMs);
+  pout() << metrics << endl;
+
+  // This is the time remaining
+  const Real maxPercent = Max(percentTime, percentStep);
+  const Real remaining  = 100.*elapsed/maxPercent - elapsed;
+  const int remHrs = floor(remaining/3600);
+  const int remMin = floor((remaining - 3600*remHrs)/60);
+  const int remSec = floor( remaining - 3600*remHrs - 60*remMin);
+  const int remMs  = floor((remaining - remSec)*1000);
+
+  // Write a string with the previous iteration metrics
+  sprintf(metrics, 
+	  "%31c -- Estimated remaining : %3.3ih %2.2im %2.2is %3.3ims",
+	  ' ',
+	  remHrs, 
+	  remMin, 
+	  remSec, 
+	  remMs);
+  pout() << metrics << endl;
+
+  // Write memory usage
+#ifdef CH_USE_MEMORY_TRACKING
+  const int BytesPerMB = 1024*1024;
+  long long curMem;
+  long long peakMem;
+  overallMemoryUsage(curMem, peakMem);
+  pout() << "                               -- Unfreed memory      : " << curMem/BytesPerMB << "(MB)" << endl;
+  pout() << "                               -- Peak memory usage   : " << peakMem/BytesPerMB << "(MB)" << endl;
 #endif
+
 }
 
 void plasma_engine::regrid(){

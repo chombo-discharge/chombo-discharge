@@ -45,6 +45,8 @@ public:
 #if 0
     MayDay::Warning("time_stepper::advance - this should be PURE");
 #endif
+
+    return a_dt;
   }
 
   /*!
@@ -257,6 +259,7 @@ public:
 #if 0
     MayDay::Warning("time_stepper::restrict_dt - this routine should be PURE");
 #endif
+    return 1.E99;
   }
   
 protected:
