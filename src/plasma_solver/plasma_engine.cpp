@@ -483,6 +483,10 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen. 
   m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
+  if(m_verbosity > 0){
+    this->grid_report();
+  }
+
   m_timestepper->set_amr(m_amr);
   m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_computational_geometry(m_compgeom);  // Set computational geometry
@@ -505,7 +509,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   this->write_plot_file();
   m_restart = false;
 
-  MayDay::Abort("stop");
+  MayDay::Abort("plasma_engine::setup_fresh - stop before it gets crazy");
 
 }
 

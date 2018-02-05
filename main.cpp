@@ -67,15 +67,15 @@ int main(int argc, char* argv[]){
   Vector<int> refrat(5);
   refrat[0] = 4;
   refrat[1] = 4;
-  refrat[2] = 2;
+  refrat[2] = 4;
   refrat[3] = 2;
   refrat[4] = 2;
   
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(2);                      // Set max amr depth
-  amr->set_max_simulation_depth(2);               // Set maximum simulation depth
+  amr->set_coarsest_num_cells(64*IntVect::Unit); // Set number of cells on coarsest level
+  amr->set_max_amr_depth(0);                      // Set max amr depth
+  amr->set_max_simulation_depth(3);               // Set maximum simulation depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio

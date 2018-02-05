@@ -501,7 +501,7 @@ const Real morrow_lowke::electron::initial_data(const RealVect a_pos, const Real
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
 
-
+  return seed + m_uniform_density + noise;
 }
 
 void morrow_lowke::electron::set_noise(RefCountedPtr<perlin_if> a_perlin){

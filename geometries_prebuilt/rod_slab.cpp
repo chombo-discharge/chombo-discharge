@@ -42,8 +42,8 @@ rod_slab::rod_slab(){
   RealVect slab_lo = RealVect(-2.0123E-2, -2.0123E-2);
   RealVect slab_hi = RealVect(2.0123E-2,  -1.0123E-2);
 #else
-  RealVect slab_lo = RealVect(-1E-2, -1.E-2, -1.5E-2);
-  RealVect slab_hi = RealVect(-1E-2,  1E-2,  -1.0E-2);
+  RealVect slab_lo = RealVect(-1.0123E-2, -1.0123E-2,  -2.0123E-2);
+  RealVect slab_hi = RealVect( 1E0,        1.0123E-2,  -1.0123E-2);
 #endif
 
   //  RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(rod_center1, rod_center2, rod_radius, 0));
