@@ -233,10 +233,10 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
   if(m_verbosity > 0){
     pout() << "=================================" << endl;
     if(!m_restart){
-      pout() << "PlasmaEngine::run -- starting run" << endl;
+      pout() << "plasma_engine::run -- starting run" << endl;
     }
     else{
-      pout() << "PlasmaEngine::run -- restarting run" << endl;
+      pout() << "plasma_engine::run -- restarting run" << endl;
     }
   }
 
@@ -780,7 +780,7 @@ void plasma_engine::write_plot_file(){
 void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a_cur_var){
   CH_TIME("plasma_engine::add_potential_to_output");
   if(m_verbosity > 5){
-    pout() << "PlasmaEngine::add_potential_to_output" << endl;
+    pout() << "plasma_engine::add_potential_to_output" << endl;
   }
 
   const int comp         = 0;
@@ -842,7 +842,7 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
 void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const int a_cur_var){
   CH_TIME("plasma_engine::add_electric_field_to_output");
   if(m_verbosity > 5){
-    pout() << "PlasmaEngine::add_electric_field_to_output" << endl;
+    pout() << "plasma_engine::add_electric_field_to_output" << endl;
   }
 
   const int ncomp        = SpaceDim;
@@ -912,7 +912,7 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
 void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const int a_cur_var){
   CH_TIME("plasma_engine::add_space_charge_to_output");
   if(m_verbosity > 5){
-    pout() << "PlasmaEngine::add_space_charge_to_output" << endl;
+    pout() << "plasma_engine::add_space_charge_to_output" << endl;
   }
 
   const int comp         = 0;
@@ -961,6 +961,10 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
     pout() << "plasma_engine::add_cdr_densities_to_output" << endl;
   }
 
+#if 0
+  MayDay::Abort("plasma_engine::add_cdr_densities_to_output - there's a bug in here somewhere");
+#endif
+
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
@@ -968,36 +972,50 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
   RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
   const phase::which_phase cdr_phase = cdr->get_phase();
 
+  pout() << "allocate scratch" << endl;
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr_phase, 1);
+  m_amr->allocate(scratch, phase::gas, ncomp, 3);
+  pout() << "done allocate scratch" << endl;
 
+  MayDay::Abort("went beyond allocate");
+
+  return;
+  pout() << "entering iter" << endl;
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     const EBAMRCellData& state        = solver->get_state();
+
+    pout() << state.size() << "\t" << a_output.size() << "\t" << finest_level + 1 << endl;
     const int num                     = solver_it.get_solver();
 
+    pout() << "doing copy" << endl;
     for (int lvl = 0; lvl <= finest_level; lvl++){
       state[lvl]->copyTo(*scratch[lvl]);
     }
 
+    pout() << "interp" << endl;
     m_amr->average_down(scratch, cdr_phase);
     m_amr->interp_ghost(scratch, cdr_phase);
     m_amr->interpolate_to_centroids(scratch, phase::gas);
 
+    pout() << "copy" << endl;
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
       scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
 
+      pout() << "covered shit" << endl;
       data_ops::set_covered_value(*a_output[lvl], a_cur_var + num, 0.0);
     }
   }
+
+  pout() << "done" << endl;
 }
 
 void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_densities_to_output");
+  CH_TIME("plasma_engine::add_cdr_velocities_to_output");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::add_cdr_densities_to_output" << endl;
+    pout() << "plasma_engine::add_cdr_velocities_to_output" << endl;
   }
 
   const int comp         = 0;
@@ -1036,9 +1054,9 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
 }
 
 void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_densities_to_output");
+  CH_TIME("plasma_engine::add_cdr_source_to_output");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::add_cdr_densities_to_output" << endl;
+    pout() << "plasma_engine::add_cdr_source_to_output" << endl;
   }
   
   const int comp         = 0;
@@ -1115,9 +1133,9 @@ void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const i
 }
 
 void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
-    CH_TIME("plasma_engine::add_rte_densities_to_output");
+    CH_TIME("plasma_engine::add_rte_source_to_output");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::add_rte_densities_to_output" << endl;
+    pout() << "plasma_engine::add_rte_source_to_output" << endl;
   }
   
   const int comp         = 0;
@@ -1264,7 +1282,7 @@ void plasma_engine::get_geom_tags(){
 Vector<string> plasma_engine::get_output_variable_names(){
   CH_TIME("plasma_engine::get_output_variable_names");
   if(m_verbosity > 5){
-    pout() << "PlasmaEngine::get_output_variable_names" << endl;
+    pout() << "plasma_engine::get_output_variable_names" << endl;
   }
 
   // Handle to solvers

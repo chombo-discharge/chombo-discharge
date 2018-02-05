@@ -933,6 +933,8 @@ void amr_mesh::define_irreg_sten(){
 					      order,
 					      rad,
 					      m_stencil_type));
+
+    pout() << "getting eb centroid" << endl;
     m_eb_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
       (new irreg_amr_stencil<eb_centroid_interp>(m_grids,
 						 m_ebisl[phase::gas],
@@ -943,7 +945,6 @@ void amr_mesh::define_irreg_sten(){
 						 rad,
 						 m_stencil_type));
   }
-
 
   if(!ebis_sol.isNull()){
     m_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
@@ -966,6 +967,7 @@ void amr_mesh::define_irreg_sten(){
 						 m_stencil_type));
   }
 }
+
 
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
   CH_TIME("amr_mesh::average_down");

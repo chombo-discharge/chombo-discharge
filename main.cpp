@@ -17,12 +17,15 @@
 #include "cdr_sg.H"
 #include "eddington_sp1.H"
 #include "rk2.H"
-#include "sphere_sphere_geometry.H"
-#include "mechanical_shaft.H"
+
 #include "cdr_layout.H"
 #include "rte_layout.H"
 #include "morrow_lowke.H"
 #include "sigma_solver.H"
+
+#include "sphere_sphere_geometry.H"
+#include "mechanical_shaft.H"
+#include "rod_slab.H"
 
 /*!
   @brief Potential
@@ -44,8 +47,8 @@ int main(int argc, char* argv[]){
   EBIndexSpace::s_useMemoryLoadBalance = false;
 
   // Physical domain, geometry, time stepper, amr, and plasma kinetics
-  const RealVect probLo = -RealVect::Unit;
-  const RealVect probHi =  RealVect::Unit;
+  const RealVect probLo = -4.E-2*RealVect::Unit;
+  const RealVect probHi =  4.E-2*RealVect::Unit;
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
@@ -53,9 +56,11 @@ int main(int argc, char* argv[]){
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new time_stepper());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
 #if CH_SPACEDIM == 2
-  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
+  //  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_slab());
 #else
-  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
+  //  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_slab());
 #endif
 
   // Refinement ratios
@@ -69,8 +74,8 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(1);                      // Set max amr depth
-  amr->set_max_simulation_depth(1);               // Set maximum simulation depth
+  amr->set_max_amr_depth(2);                      // Set max amr depth
+  amr->set_max_simulation_depth(2);               // Set maximum simulation depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
@@ -80,7 +85,7 @@ int main(int argc, char* argv[]){
   amr->set_redist_rad(1);                         // Set redistribution radius
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
-  amr->set_irreg_sten_type(stencil_type::linear); // Set preferred stencil type
+  amr->set_irreg_sten_type(stencil_type::taylor); // Set preferred stencil type
   amr->set_irreg_sten_order(1);                   // Set preferred stencil order
   amr->set_irreg_sten_radius(1);                  // Set extrapolation stencil radius
 
@@ -93,7 +98,7 @@ int main(int argc, char* argv[]){
   engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
-  engine->setup_fresh(1);
+  engine->setup_fresh(0);
   engine->set_regrid_interval(5);         // Regrid every this intervals
   engine->set_plot_interval(5);           // Plot every this intervals
   engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals

@@ -27,8 +27,8 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
 
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
-  this->set_botsolver_smooth(32);
-  this->set_bottom_drop(8);
+  this->set_botsolver_smooth(64);
+  this->set_bottom_drop(32);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -54,8 +54,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
   }
-
-  m_verbosity = 10;
 
   bool converged = false;
 

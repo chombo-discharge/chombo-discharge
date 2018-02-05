@@ -21,12 +21,14 @@ bool stencil_ops::get_linear_interp_stencil(VoFStencil&          a_stencil,
     do_interp = false;
   }
 
+  MayDay::Abort("stencil_ops::get_linear_interp_stencil - this fucker crashes when eb x domain. Find this bug.");
+
   if(do_interp){
 #if CH_SPACEDIM == 2
     found_stencil = stencil_ops::compute_bilinear_stencil(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
     //    found_stencil = compute_interp_stencil_2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
 #elif CH_SPACEDIM == 3
-    found_stencil = compute_interp_stencil_3D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
+    found_stencil = stencil_ops::compute_interp_stencil_3D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
 #endif
   }
   else{ 
@@ -88,7 +90,8 @@ bool stencil_ops::compute_bilinear_stencil(VoFStencil&          a_stencil,
   const Real y = pos[1];
   
   a_stencil.clear();
-  if(a_ebisbox.isCovered(iv00) || a_ebisbox.isCovered(iv10) || a_ebisbox.isCovered(iv01) || a_ebisbox.isCovered(iv11)){
+  if(a_ebisbox.isCovered(iv00) || a_ebisbox.isCovered(iv10) || a_ebisbox.isCovered(iv01) || a_ebisbox.isCovered(iv11) ||
+     !a_domain.contains(iv00)  || !a_domain.contains(iv10)  || !a_domain.contains(iv01)  || !a_domain.contains(iv11)){
     found_stencil = false;
   }
   else{
