@@ -8,6 +8,7 @@
 #include "rounded_box_if.H"
 #include "box_if.H"
 #include "rod_if.H"
+#include "new_sphere_if.H"
 
 #include <IntersectionIF.H>
 #include <UnionIF.H>
@@ -15,9 +16,9 @@
 
 //
 rounded_box_if::rounded_box_if(const RealVect& a_loCorner,
-			   const RealVect& a_hiCorner,
-			   const Real&     a_curv,
-			   const bool&     a_inside){
+			       const RealVect& a_hiCorner,
+			       const Real&     a_curv,
+			       const bool&     a_inside){
  
   CH_assert(a_hiCorner > a_loCorner);
   CH_assert(a_hiCorner - a_loCorner > 2.0*a_curv*RealVect::Unit);
@@ -28,7 +29,7 @@ rounded_box_if::rounded_box_if(const RealVect& a_loCorner,
   m_curv     = a_curv;
   m_inside   = a_inside;
 
-    // Build the box in 2D
+  // Build the box in 2D
 #if CH_SPACEDIM == 2
   buildBox2D();
 #elif CH_SPACEDIM == 3
@@ -56,7 +57,7 @@ void rounded_box_if::buildBox2D(){
   const RealVect hiLeft  = RealVect(m_loCorner[0], m_hiCorner[1]);
   const RealVect loRight = RealVect(m_hiCorner[0], m_loCorner[1]);
 
-  // // We will subtract four boxes from each of the corners of a parent box by taking the union of their outsides
+  // We will subtract four boxes from each of the corners of a parent box by taking the union of their outsides
   Vector<BaseIF*> unions;
   unions.push_back(static_cast<BaseIF*>  (new box_if(m_loCorner,     m_hiCorner,      m_inside)));
   unions.push_back(static_cast<BaseIF*>  (new box_if(loLeft  - base, loLeft  + base, !m_inside)));
@@ -73,11 +74,10 @@ void rounded_box_if::buildBox2D(){
   const RealVect c3 = m_curv*RealVect( 1,-1);
   const RealVect c4 = m_curv*RealVect(-1, 1);
   isects.push_back(unionIF);
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(m_curv, loLeft  + c1, m_inside)));
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(m_curv, hiRight + c2, m_inside)));
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(m_curv, hiLeft  + c3, m_inside)));
-  isects.push_back(static_cast<BaseIF*> (new SphereIF(m_curv, loRight + c4, m_inside)));
-
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(loLeft  + c1, m_curv, m_inside)));
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(hiRight + c2, m_curv, m_inside)));
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(hiLeft  + c3, m_curv, m_inside)));
+  isects.push_back(static_cast<BaseIF*> (new new_sphere_if(loRight + c4, m_curv, m_inside)));
 
   // Now build our box
   m_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(isects));

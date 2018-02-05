@@ -501,6 +501,8 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     }    
   }
 
+  m_step = 0;
+
   this->initial_regrids(a_init_regrids);
   this->write_plot_file();
   m_restart = false;
@@ -762,6 +764,7 @@ void plasma_engine::write_plot_file(){
   Vector<LevelData<EBCellFAB>*> output_ptr(1 + finest_level);
   m_amr->alias(output_ptr, output);
 
+  std::cout << fname << std::endl;
   // Write HDF5 file
   writeEBHDF5(fname, 
 	      grids,
@@ -886,11 +889,6 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
 	      data_gas(iv, comp) = data_sol(iv,comp);
 	    }
 	  }
-	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	    for (int comp = 0; comp < ncomp; comp++){
-	      data_gas(iv, comp) = 0.5*(data_gas(iv, comp) + data_sol(iv, comp));
-	    }
-	  }
 	}
       }
     }
@@ -961,55 +959,37 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
     pout() << "plasma_engine::add_cdr_densities_to_output" << endl;
   }
 
-#if 0
-  MayDay::Abort("plasma_engine::add_cdr_densities_to_output - there's a bug in here somewhere");
-#endif
-
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
   RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
-  const phase::which_phase cdr_phase = cdr->get_phase();
 
-  pout() << "allocate scratch" << endl;
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp, 3);
-  pout() << "done allocate scratch" << endl;
-
-  MayDay::Abort("went beyond allocate");
 
   return;
-  pout() << "entering iter" << endl;
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     const EBAMRCellData& state        = solver->get_state();
 
-    pout() << state.size() << "\t" << a_output.size() << "\t" << finest_level + 1 << endl;
     const int num                     = solver_it.get_solver();
 
-    pout() << "doing copy" << endl;
     for (int lvl = 0; lvl <= finest_level; lvl++){
       state[lvl]->copyTo(*scratch[lvl]);
     }
 
-    pout() << "interp" << endl;
-    m_amr->average_down(scratch, cdr_phase);
-    m_amr->interp_ghost(scratch, cdr_phase);
+    m_amr->average_down(scratch, phase::gas);
+    m_amr->interp_ghost(scratch, phase::gas);
     m_amr->interpolate_to_centroids(scratch, phase::gas);
 
-    pout() << "copy" << endl;
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
       scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
 
-      pout() << "covered shit" << endl;
       data_ops::set_covered_value(*a_output[lvl], a_cur_var + num, 0.0);
     }
   }
-
-  pout() << "done" << endl;
 }
 
 void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const int a_cur_var){
@@ -1023,10 +1003,9 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
   const int finest_level = m_amr->get_finest_level();
 
   RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
-  const phase::which_phase cdr_phase = cdr->get_phase();
 
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr_phase, ncomp);
+  m_amr->allocate(scratch, phase::gas, ncomp);
 
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -1037,8 +1016,8 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
       velo[lvl]->copyTo(*scratch[lvl]);
     }
 
-    m_amr->average_down(scratch, cdr_phase);
-    m_amr->interp_ghost(scratch, cdr_phase);
+    m_amr->average_down(scratch, phase::gas);
+    m_amr->interp_ghost(scratch, phase::gas);
     m_amr->interpolate_to_centroids(scratch, phase::gas);
 
     const Interval src_interv(0, ncomp -1);
@@ -1064,10 +1043,9 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
   const int finest_level = m_amr->get_finest_level();
 
   RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
-  const phase::which_phase cdr_phase = cdr->get_phase();
 
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr_phase, 1);
+  m_amr->allocate(scratch, phase::gas, 1);
 
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -1078,9 +1056,9 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
       state[lvl]->copyTo(*scratch[lvl]);
     }
 
-    m_amr->average_down(scratch, cdr_phase);
-    m_amr->interp_ghost(scratch, cdr_phase);
-    m_amr->interpolate_to_centroids(scratch, cdr_phase);
+    m_amr->average_down(scratch, phase::gas);
+    m_amr->interp_ghost(scratch, phase::gas);
+    m_amr->interpolate_to_centroids(scratch, phase::gas);
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
