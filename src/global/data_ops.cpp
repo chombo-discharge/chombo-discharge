@@ -80,6 +80,16 @@ void data_ops::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
   }
 }
 
+void data_ops::get_max_min(Real& a_max, Real& a_min, EBAMRCellData& a_E, const int a_comp){
+  for (int lvl = 0; lvl < a_E.size(); lvl++){
+    data_ops::get_max_min(a_max, a_min, *a_E[lvl], a_comp);
+  }
+}
+
+void data_ops::get_max_min(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_E, const int a_comp){
+  EBLevelDataOps::getMaxMin(a_max, a_min, a_E, a_comp);
+}
+
 void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::scale(*a_lhs[lvl], a_scale);
@@ -269,6 +279,10 @@ void data_ops::set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_c
 
 void data_ops::set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp){
   EBLevelDataOps::setVal(a_lhs, a_value, a_comp);
+}
+
+void data_ops::set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value){
+  EBLevelDataOps::setVal(a_lhs, a_value);
 }
 
 void data_ops::set_value(LevelData<EBFluxFAB>& a_lhs, const Real a_value){

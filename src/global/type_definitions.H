@@ -80,6 +80,23 @@ namespace centering {
   };
 };
 
+namespace time_code {
+  enum which_code {
+    cfl             = 0,
+    diffusion       = 1,
+    relaxation_time = 2,
+    restricted      = 3,
+    hardcap         = 4,
+  };
+};
+
+namespace output_mode{
+  enum which_mode{
+    ultra_light = 0,
+    light       = 1,
+    full        = 2,
+  };
+};
 
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;

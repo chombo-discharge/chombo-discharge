@@ -13,7 +13,9 @@
 
 time_stepper::time_stepper(){
   this->set_verbosity(10);
-
+  this->set_cfl(0.8);
+  this->set_min_dt(0.0);
+  this->set_max_dt(1.E99);
 }
 
 time_stepper::~time_stepper(){
@@ -30,6 +32,50 @@ bool time_stepper::stationary_rte(){
   }
 
   return m_rte->is_stationary();
+}
+
+void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+  CH_TIME("time_stepper::compute_dt");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_dt" << endl;
+  }
+
+  Real dt = 1.E99;
+
+  const Real dt_cfl = m_cfl*m_cdr->compute_cfl_dt();
+  if(dt_cfl < dt){
+    dt = dt_cfl;
+    a_timecode = time_code::cfl;
+  }
+  
+  const Real dt_dif = m_cfl*m_cdr->compute_diffusive_dt();
+  if(dt_dif < dt){
+    dt = dt_dif;
+    a_timecode = time_code::diffusion;
+  }  
+
+  const Real dt_relax = m_relax_time*this->compute_relaxation_time();
+  if(dt_relax < dt){
+    dt = dt_relax;
+    a_timecode = time_code::relaxation_time;
+  }
+
+  const Real dt_restrict = this->restrict_dt();
+  if(dt_restrict < dt){
+    dt = dt_restrict;
+    a_timecode = time_code::restricted;
+  }
+
+  if(dt < m_min_dt){
+    dt = m_min_dt;
+    a_timecode = time_code::hardcap;
+  }
+
+  if(dt > m_max_dt){
+    dt = m_max_dt;
+    a_timecode = time_code::hardcap;
+  }
+  
 }
 
 void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
@@ -49,7 +95,6 @@ void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phas
   m_amr->interp_ghost(a_E, a_phase);
 }
 
-
 void time_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
   CH_TIME("time_stepper::compute_E(mfamrcell, mfamrcell)");
   if(m_verbosity > 5){
@@ -61,6 +106,56 @@ void time_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potentia
 
   m_amr->average_down(a_E);
   m_amr->interp_ghost(a_E);
+}
+
+void time_stepper::compute_J(EBAMRCellData& a_J){
+  CH_TIME("time_stepper::compute_J");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_J" << endl;
+  }
+
+  const int density_comp = 0;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
+
+    data_ops::set_value(*a_J[lvl], 0.0);
+
+    for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver> solver = solver_it();
+      RefCountedPtr<species> spec      = solver_it.get_species();
+
+      const int q                      = spec->get_charge();
+      const EBAMRCellData& density     = solver->get_state();
+      const EBAMRCellData& velo        = solver->get_velo_cell();
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box& box         = dbl.get(dit());
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet ivs(box);
+
+	EBCellFAB& J       = (*a_J[lvl])[dit()];
+	const EBCellFAB& n = (*density[lvl])[dit()];
+	const EBCellFAB& v = (*velo[lvl])[dit()];
+
+	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+
+	  for (int comp = 0; comp < SpaceDim; comp++){
+	    J(vof, comp) += q*n(vof,density_comp)*v(vof, comp);
+	  }
+	}
+      }
+    }
+
+    data_ops::scale(*a_J[lvl], units::s_Qe);
+  }
+
+  m_amr->average_down(a_J, m_cdr->get_phase());
+  m_amr->interp_ghost(a_J, m_cdr->get_phase());
 }
 
 void time_stepper::compute_photon_source_terms(Vector<EBAMRCellData*>        a_source,
@@ -247,15 +342,6 @@ void time_stepper::regrid(const int a_old_finest, const int a_new_finest){
   this->regrid_internals();
 }
 
-void time_stepper::regrid_internals(){
-  CH_TIME("time_stepper::regrid_internals");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::regrid_internals" << endl;
-  }
-
-  MayDay::Warning("time_stepper::regrid_internals - this routine should be PURE");
-}
-
 void time_stepper::regrid_solvers(const int a_old_finest, const int a_new_finest){
   CH_TIME("time_stepper::regrid_solvers");
   if(m_verbosity > 5){
@@ -333,6 +419,44 @@ void time_stepper::set_verbosity(const int a_verbosity){
   }
   
   m_verbosity = a_verbosity;
+
+
+}
+
+void time_stepper::set_solver_verbosity(const int a_verbosity){
+  CH_TIME("time_stepper::set_solver_verbosity");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::set_solver_verbosity" << endl;
+  }
+
+  if(!m_cdr.isNull()){
+    m_cdr->set_verbosity(a_verbosity);
+  }
+  if(!m_poisson.isNull()){
+    m_poisson->set_verbosity(a_verbosity);
+  }
+  if(!m_rte.isNull()){
+    m_rte->set_verbosity(a_verbosity);
+  }
+  if(!m_sigma.isNull()){
+    m_sigma->set_verbosity(a_verbosity);
+  }
+}
+
+void time_stepper::set_min_dt(const Real a_min_dt){
+  m_min_dt = Max(a_min_dt, 0.0);
+}
+
+void time_stepper::set_max_dt(const Real a_max_dt){
+  m_max_dt = Max(a_max_dt, 0.0);
+}
+
+void time_stepper::set_cfl(const Real a_cfl){
+  m_cfl = a_cfl;
+}
+
+void time_stepper::set_relax_time(const Real a_relax_time){
+  m_relax_time = a_relax_time;
 }
 
 void time_stepper::setup_cdr(){
@@ -499,4 +623,94 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_states,
     solver->advance(a_dt, state, rhs);
   }
 
+}
+
+void time_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("time_stepper::synchronize_solver_times");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::synchronize_solver_times" << endl;
+  }
+
+  m_cdr->set_time(a_step,     a_time, a_dt);
+  m_poisson->set_time(a_step, a_time, a_dt);
+  m_rte->set_time(a_step,     a_time, a_dt);
+  m_sigma->set_time(a_step,   a_time, a_dt);
+}
+
+Real time_stepper::compute_relaxation_time(){
+  CH_TIME("time_stepper::compute_relaxation_time");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_relaxation_time" << endl;
+  }
+
+  const int finest_level = 0;
+  const Real tolerance   = 1.E-4;
+
+  EBAMRCellData E, J, dt;
+  m_amr->allocate(E,  m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(J,  m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(dt, m_cdr->get_phase(), SpaceDim);
+
+  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_J(J);
+
+  // Find the largest electric field in each direction
+  Vector<Real> max_E(SpaceDim);
+  for (int dir = 0; dir < SpaceDim; dir++){
+    Real max, min;
+    data_ops::get_max_min(max, min, E, dir);
+    max_E[dir] = Max(Abs(max), Abs(min));
+  }
+
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box& box         = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(box);
+      
+      EBCellFAB& dt_fab  = (*dt[lvl])[dit()];
+      const EBCellFAB& e = (*E[lvl])[dit()];
+      const EBCellFAB& j = (*J[lvl])[dit()];
+
+      //
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  dt_fab(vof, dir) = 1.E99;
+	  if(Abs(e(vof, dir)) > tolerance*max_E[dir]){
+	    dt_fab(vof, dir) = Abs(units::s_eps0*e(vof, dir)/j(vof,dir));
+	  }
+	}
+      }
+    }
+  }
+
+  m_amr->average_down(dt, m_cdr->get_phase());
+
+  // Find the smallest dt
+  Real min_dt = 1.E99;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    Real max, min;
+    data_ops::get_max_min(max, min, dt, dir);
+    min_dt = Min(min_dt, min);
+  }
+
+  // Communicate the result
+#ifdef CH_MPI
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("time_stepper::compute_relaxation_time() - communication error on norm");
+  }
+  min_dt = tmp;
+#endif
+
+
+  return min_dt;
 }

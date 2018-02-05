@@ -28,6 +28,11 @@ public:
   virtual ~cdr_layout();
 
   /*!
+    @brief Get phase
+  */
+  virtual phase::which_phase get_phase() const;
+
+  /*!
     @brief Allocate internal storage for solvers
   */
   virtual void allocate_internals();
@@ -82,8 +87,6 @@ public:
     @brief Use mass-weighted redistribution
   */
   virtual void set_mass_redist(const bool a_mass_redist);
-
-
 
   /*!
     @brief Convenience function. Set velocity for all species. Mostly used for debugging.
@@ -201,6 +204,11 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
+
+  /*!
+    @brief phase
+  */
+  phase::which_phase m_phase;
 };
 
 #endif

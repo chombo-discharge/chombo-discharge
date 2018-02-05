@@ -28,6 +28,9 @@ cdr_layout::~cdr_layout(){
 
 }
 
+phase::which_phase cdr_layout::get_phase() const{
+  return m_phase;
+}
 
 void cdr_layout::allocate_internals(){
   CH_TIME("cdr_layout::allocate_internals");
@@ -94,6 +97,8 @@ void cdr_layout::set_phase(phase::which_phase a_phase){
   if(m_verbosity > 5){
     pout() << "cdr_layout::set_phase" << endl;
   }
+
+  m_phase = a_phase;
 
   for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();

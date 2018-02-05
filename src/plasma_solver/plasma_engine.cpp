@@ -12,6 +12,8 @@
 #include "EBAMRIO.H"
 #include "EBAMRDataOps.H"
 
+#define warnings 0
+
 plasma_engine::plasma_engine(){
   CH_TIME("plasma_engine::plasma_engine(weak)");
   if(m_verbosity > 5){
@@ -51,6 +53,17 @@ plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
 }
 
+void plasma_engine::grid_report(){
+  CH_TIME("plasma_engine::grid_report");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::grid_report" << endl;
+  }
+
+#if warnings
+  MayDay::Warning("plasma_engine::grid_report - not implemented");
+#endif
+}
+
 void plasma_engine::initial_regrids(const int a_init_regrids){
   CH_TIME("plasma_engine::initia_regrids");
   if(m_verbosity > 5){
@@ -68,13 +81,118 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
   }
 }
 
-void plasma_engine::run(const Real a_time, const int a_max_steps){
+void plasma_engine::run(const Real a_start_time, const Real a_end_time, const int a_max_steps){
   CH_TIME("plasma_engine::run");
   if(m_verbosity > 5){
     pout() << "plasma_engine::run" << endl;
   }
 
-  MayDay::Abort("plasma_engine::run - not implemented");
+  if(m_verbosity > 0){
+    pout() << "=================================" << endl;
+    if(!m_restart){
+      pout() << "PlasmaEngine::run -- starting run" << endl;
+    }
+    else{
+      pout() << "PlasmaEngine::run -- restarting run" << endl;
+    }
+  }
+
+  if(a_max_steps > 0){
+    if(!m_restart){
+      m_time = a_start_time;
+      m_step = 0;
+    }
+
+    m_timestepper->compute_dt(m_dt, m_timecode);
+    m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
+
+    bool first_step    = true;
+    const Real init_dt = m_dt;
+
+    if(m_verbosity > 0){
+      this->grid_report();
+    }
+
+    m_wallclock_start = MPI_Wtime();
+    while(m_time < a_end_time && m_step < a_max_steps){
+
+      const int max_sim_depth = m_amr->get_max_sim_depth();
+      const int max_amr_depth = m_amr->get_max_amr_depth();     
+      if(m_step%m_regrid_interval == 0 && m_regrid_interval > 0 && max_sim_depth > 0 && max_amr_depth > 0){
+	if(!first_step){
+	  this->regrid();
+	  if(m_verbosity > 0){
+	    this->grid_report();
+	  }
+	}
+      }
+
+      if(!first_step){
+	m_timestepper->compute_dt(m_dt, m_timecode);
+      }
+
+      if(first_step){
+	first_step = false;
+      }
+
+      // Did the time step become too small?
+      if(m_dt < 1.5E-5*init_dt){
+	m_step++;
+
+#ifdef CH_USE_HDF5
+	this->write_plot_file(m_output_mode);
+	this->write_checkpoint_file();
+#endif
+
+	MayDay::Abort("plasma_engine::run - the time step became too small");
+      }
+
+      // Last time step can be smaller than m_dt so that we end on a_end_time
+      if(m_time + m_dt > a_end_time){
+	m_dt = a_end_time - m_time;
+      }
+
+      // Time stepper advances solutions
+      m_wallclock1 = MPI_Wtime();
+      const Real actual_dt = m_timestepper->advance(m_dt);
+      m_wallclock2 = MPI_Wtime();
+
+      // Synchronize times
+      m_dt    = actual_dt;
+      m_time += actual_dt;
+      m_step += 1;
+      m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
+
+      if(m_verbosity > 0){
+	this->step_report(a_start_time, a_end_time, a_max_steps);
+      }
+
+
+#ifdef CH_USE_HDF5
+      if(m_step%m_plot_interval == 0 && m_plot_interval > 0){
+	if(m_verbosity > 1){
+	  pout() << "plasma_engine::run -- Writing plot file" << endl;
+	}
+	this->write_plot_file(m_output_mode);
+      }
+
+      // Write checkpoint file
+      if(m_step % m_chk_interval == 0 && m_chk_interval > 0){
+	if(m_verbosity > 1){
+	  pout() << "plasma_engine::run -- Writing checkpoint file" << endl;
+	}
+	this->write_checkpoint_file();
+      }
+#endif
+    }
+  }
+
+  if(m_verbosity > 0){
+    pout() << "==================================" << endl;
+    pout() << "plasma_engine::run -- ending run  " << endl;
+    pout() << "==================================" << endl;
+  }
+
 }
 
 void plasma_engine::set_verbosity(const int a_verbosity){
@@ -159,6 +277,33 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth1,
   m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
 }
 
+void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
+  CH_TIME("plasma_engine::set_output_mode");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_output_mode" << endl;
+  }
+
+  m_output_mode = a_mode;
+}
+
+void plasma_engine::set_output_directory(const std::string a_output_dir){
+  CH_TIME("plasma_engine::set_output_directory");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_output_directory" << endl;
+  }
+
+  m_output_dir = a_output_dir;
+}
+
+void plasma_engine::set_output_file_names(const std::string a_output_names){
+  CH_TIME("plasma_engine::set_output_names");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_output_names" << endl;
+  }
+
+  m_output_names = a_output_names;  
+}
+
 void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("plasma_engine::set_amr");
   if(m_verbosity > 5){
@@ -214,6 +359,8 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   }
 
   this->initial_regrids(a_init_regrids);
+
+  m_restart = false;
 }
 
 void plasma_engine::setup_for_restart(const std::string a_restart_file){
@@ -221,6 +368,8 @@ void plasma_engine::setup_for_restart(const std::string a_restart_file){
   if(m_verbosity > 5){
     pout() << "plasma_engine::setup_for_restart" << endl;
   }
+
+  m_restart = true;
 }
 
 void plasma_engine::tag_cells(Vector<IntVectSet>& a_tags){
@@ -273,6 +422,17 @@ void plasma_engine::sanity_check(){
   CH_assert(m_potential_set);
 }
 
+void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps){
+  CH_TIME("plasma_engine::step_report");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::step_report" << endl;
+  }
+
+#if warning
+  MayDay::Warning("plasma_engine::step_report - not implemented");
+#endif
+}
+
 void plasma_engine::regrid(){
   CH_TIME("plasma_engine::regrid");
   if(m_verbosity > 2){
@@ -290,7 +450,7 @@ void plasma_engine::regrid(){
   m_timestepper->regrid_internals();                                 // Regrid internal storage
 }
 
-void plasma_engine::write_plot_file(){
+void plasma_engine::write_plot_file(const output_mode::which_mode a_mode){
   CH_TIME("plasma_engine::write_plot_file");
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_plot_file" << endl;

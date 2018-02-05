@@ -301,6 +301,11 @@ public:
   */
   virtual int get_max_amr_depth();
 
+    /*!
+    @brief Get maximum simulation depth
+  */
+  virtual int get_max_sim_depth();
+
   /*!
     @brief Get blocking factor
   */

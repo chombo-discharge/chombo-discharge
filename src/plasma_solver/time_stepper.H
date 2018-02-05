@@ -42,13 +42,20 @@ public:
     @returns Actual time step used (can be different from a_dt for adaptive methods)
   */
   virtual Real advance(const Real a_dt){
-    
+#if 0
+    MayDay::Warning("time_stepper::advance - this should be PURE");
+#endif
   }
 
   /*!
     @brief Check if RTE solvers are stationary
   */
   virtual bool stationary_rte();
+
+  /*!
+    @brief Compute the time step and how it was restricted
+  */
+  virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
 
   /*!
     @brief Compute the cell-centered electric field on a specific phase
@@ -59,6 +66,11 @@ public:
     @brief Compute the cell-centered electric field on both phases
   */
   virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
+
+  /*!
+    @brief Compute the current density
+  */
+  virtual void compute_J(EBAMRCellData& a_J);
 
   /*!
     @brief Compute photon source terms. 
@@ -101,7 +113,11 @@ public:
   /*!
     @brief Regrid internal storage. This MUST be overwritten.
   */
-  virtual void regrid_internals();
+  virtual void regrid_internals(){
+#if 0
+    MayDay::Warning("time_stepper::regrid_internals - this routine should be PURE");
+#endif
+  }
 
   /*!
     @brief Regrid individual solvers
@@ -124,6 +140,26 @@ public:
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
   /*!
+    @brief Set hardcap on the time step
+  */
+  virtual void set_min_dt(const Real a_min_dt);
+
+    /*!
+    @brief Set hardcap on the time step
+  */
+  virtual void set_max_dt(const Real a_min_dt);
+
+  /*!
+    @brief Set CFL condition
+  */
+  virtual void set_cfl(const Real a_cfl);
+
+  /*!
+    @brief Set fudge factor for relaxation time
+  */
+  virtual void set_relax_time(const Real a_relax_time);
+
+  /*!
     @brief Set the physical domain
   */
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
@@ -137,6 +173,11 @@ public:
     @brief Verbosity
   */
   virtual void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Set solver verbosity
+  */
+  virtual void set_solver_verbosity(const int a_verbosity);
 
   /*!
     @brief Setup the cdr solvers
@@ -195,9 +236,28 @@ public:
 			 const centering::which_center a_centering);
 
   /*!
+    @brief Synchronize solver times
+  */
+  virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt);
+
+  /*!
     @brief Query about necessary number of ghost cells. This collects that from the individual solvers. 
   */
   virtual int query_ghost();
+
+  /*!
+    @brief Compute the relaxation time
+  */
+  virtual Real compute_relaxation_time();
+
+  /*!
+    @brief Restrict dt
+  */
+  virtual Real restrict_dt(){
+#if 0
+    MayDay::Warning("time_stepper::restrict_dt - this routine should be PURE");
+#endif
+  }
   
 protected:
 
@@ -250,6 +310,26 @@ protected:
     @brief Set the potential
   */
   Real (*m_potential)(const Real a_time);
+  
+  /*!
+    @brief Minimum allowed time step
+  */
+  Real m_min_dt;
+
+  /*!
+    @brief Maximum allowed time step
+  */
+  Real m_max_dt;
+
+  /*!
+    @brief CFL
+  */
+  Real m_cfl;
+
+  /*!
+    @brief Fudge factor for relaxation time
+  */
+  Real m_relax_time;
 
   /*!
     @brief Verbosity

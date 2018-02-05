@@ -1277,6 +1277,10 @@ int amr_mesh::get_max_amr_depth(){
   return m_max_amr_depth;
 }
 
+int amr_mesh::get_max_sim_depth(){
+  return m_max_sim_depth;
+}
+
 int amr_mesh::get_num_ghost(){
   return m_num_ghost;
 }

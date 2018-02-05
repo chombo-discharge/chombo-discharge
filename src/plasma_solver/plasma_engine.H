@@ -47,7 +47,7 @@ public:
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
   */
-  virtual void run(const Real a_time, const int a_max_steps);
+  virtual void run(const Real a_start_time, const Real a_end_time, const int a_max_steps);
 
   /*!
     @brief Setup function
@@ -91,6 +91,21 @@ public:
 					 const int a_depth6);
 
   /*!
+    @brief Set output mode
+  */
+  virtual void set_output_mode(const output_mode::which_mode a_mode);
+
+  /*!
+    @brief Set output directory
+  */
+  virtual void set_output_directory(const std::string a_output_dir);
+
+  /*!
+    @brief Set output file names
+  */
+  virtual void set_output_file_names(const std::string a_output_names);
+  
+  /*!
     @brief Set potential function
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
@@ -110,7 +125,6 @@ public:
     @brief Set the checkpoint interval
   */
   virtual void set_checkpoint_interval(const int a_chk_interval);
-					 
 
   /*!
     @brief Sanity check
@@ -160,62 +174,24 @@ protected:
   RefCountedPtr<cell_tagger> m_celltagger;
 
   /*!
-    @brief Set the computational geometry
+    @brief Time code
   */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+  time_code::which_code m_timecode;
 
   /*!
-    @brief Set the plasma kinetics
+    @brief Output mode
   */
-  virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
+  output_mode::which_mode m_output_mode;
 
-  /*!
-    @brief Set the time stepper
-  */
-  virtual void set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper);
-  
     /*!
-    @brief Set physical domain
+    @brief Output directory
   */
-  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+  std::string m_output_dir;
 
   /*!
-    @brief Set the cell tagger
+    @brief Output filenames
   */
-  virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
-
-
-  /*!
-    @brief Tag cells for refinement. This includes cells from geometries and the cell tagger
-  */
-  virtual void tag_cells(Vector<IntVectSet>& a_ivs);
-
-protected:
-  /*!
-    @brief Write a plot file
-  */
-  virtual void write_plot_file();
-
-  /*!
-    @brief Write a checkpoint file
-  */
-  virtual void write_checkpoint_file();
-
-  /*!
-    @brief Read checkpoint file
-  */
-  virtual void read_checkpoint_file();
-
-  /*!
-    @brief Get geometric tags
-  */
-  virtual void get_geom_tags();
-
-  /*!
-    @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
-    whose solution is recomputed. The same goes for stationary RTE methods. 
-  */
-  virtual void regrid();
+  std::string m_output_names;
 
   /*!
     @brief Verbosity
@@ -225,7 +201,7 @@ protected:
   /*!
     @brief Time step
    */
-  int m_time_step;
+  int m_step;
 
   /*!
     @brief Regrid interval
@@ -298,8 +274,104 @@ protected:
   Real (*m_potential)(const Real a_time);
 
   /*!
+    @brief Time increment
+  */
+  Real m_dt;
+
+  /*!
+    @brief Time
+  */
+  Real m_time;
+
+  /*!
+    @brief MPI timer
+  */
+  Real m_wallclock_start;
+  
+  /*!
+    @brief MPI timer
+  */
+  Real m_wallclock1;
+
+  /*!
+    @brief MPI timer
+  */
+  Real m_wallclock2;
+
+  /*!
     @brief Potential has been set
   */
   bool m_potential_set;
+
+  /*!
+    @brief Restart or not
+  */
+  bool m_restart;
+
+  /*!
+    @brief Write a plot file
+  */
+  virtual void write_plot_file(const output_mode::which_mode a_mode);
+
+  /*!
+    @brief Write a checkpoint file
+  */
+  virtual void write_checkpoint_file();
+
+  /*!
+    @brief Read checkpoint file
+  */
+  virtual void read_checkpoint_file();
+
+  /*!
+    @brief Get geometric tags
+  */
+  virtual void get_geom_tags();
+
+  /*!
+    @brief Write a grid report
+  */
+  virtual void grid_report();
+
+  /*!
+    @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
+    whose solution is recomputed. The same goes for stationary RTE methods. 
+  */
+  virtual void regrid();
+  
+  /*!
+    @brief Set the computational geometry
+  */
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+
+  /*!
+    @brief Set the plasma kinetics
+  */
+  virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
+
+  /*!
+    @brief Set the time stepper
+  */
+  virtual void set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper);
+  
+    /*!
+    @brief Set physical domain
+  */
+  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
+
+  /*!
+    @brief Set the cell tagger
+  */
+  virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
+
+  /*!
+    @brief Write a time step report
+  */
+  virtual void step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps);
+
+  /*!
+    @brief Tag cells for refinement. This includes cells from geometries and the cell tagger
+  */
+  virtual void tag_cells(Vector<IntVectSet>& a_ivs);
 };
 #endif

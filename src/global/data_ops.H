@@ -36,6 +36,10 @@ public:
 
   static void exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor);
 
+  static void get_max_min(Real& max, Real& min, EBAMRCellData& a_E, const int a_comp);
+
+  static void get_max_min(Real& max, Real& min, LevelData<EBCellFAB>& a_E, const int a_comp);
+
   static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
 
   static void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
@@ -81,6 +85,8 @@ public:
   static void set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);
 
   static void set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp);
+
+  static void set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
   static void set_value(LevelData<EBFluxFAB>& a_lhs, const Real a_value);
   

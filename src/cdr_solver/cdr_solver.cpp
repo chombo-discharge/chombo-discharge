@@ -814,11 +814,9 @@ void cdr_solver::regrid(const int a_old_finest_level, const int a_new_finest_lev
 
   scratch[0]->copyTo(*m_state[0]); // Base level should never change. 
   for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
-    pout() << "interpolate" << endl;
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
 
     if(lvl <= a_old_finest_level){
-      pout() << "scratch copy" << endl;
       scratch[lvl]->copyTo(*m_state[lvl]);
     }
   }
@@ -1297,7 +1295,7 @@ Real cdr_solver::compute_diffusive_dt(){
   Real tmp = 1.;
   int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("EBAMRAdvectDiffuse::computeAdvectiveDt() - communication error on norm");
+    MayDay::Error("cdr_solver::compute_diffusive_dt() - communication error on norm");
   }
   min_dt = tmp;
 #endif

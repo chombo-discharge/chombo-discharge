@@ -188,6 +188,8 @@ void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_l
       scratch[lvl]->copyTo(*m_state[lvl]);
     }
   }
+
+  this->reset_cells(m_state);
 }
 
 void sigma_solver::reset_cells(EBAMRIVData& a_data){
