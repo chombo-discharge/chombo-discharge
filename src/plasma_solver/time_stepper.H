@@ -99,12 +99,17 @@ public:
   virtual void compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E);
 
   /*!
+    @brief Compute RTE source terms
+  */
+  virtual void compute_rte_sources();
+
+  /*!
     @brief Compute photon source terms. 
   */
-  virtual void compute_photon_source_terms(Vector<EBAMRCellData*>        a_source,
-					   const Vector<EBAMRCellData*>& a_cdr_states,
-					   const EBAMRCellData&          a_E,
-					   const centering::which_center a_centering);
+  virtual void compute_rte_sources(Vector<EBAMRCellData*>        a_source,
+				   const Vector<EBAMRCellData*>& a_cdr_states,
+				   const EBAMRCellData&          a_E,
+				   const centering::which_center a_centering);
 
   /*!
     @brief Compute the cell-centered space charge density by using data inside cdr_layout. 
@@ -155,7 +160,7 @@ public:
   */
   virtual void sanity_check();
 
-    /*!
+  /*!
     @brief Set amr
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
@@ -170,7 +175,7 @@ public:
   */
   virtual void set_min_dt(const Real a_min_dt);
 
-    /*!
+  /*!
     @brief Set hardcap on the time step
   */
   virtual void set_max_dt(const Real a_min_dt);

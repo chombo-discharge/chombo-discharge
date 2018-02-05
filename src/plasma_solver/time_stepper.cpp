@@ -353,19 +353,40 @@ void time_stepper::compute_J(EBAMRCellData& a_J){
 
   m_amr->average_down(a_J, m_cdr->get_phase());
   m_amr->interp_ghost(a_J, m_cdr->get_phase());
-
-#if 1 // override
-  data_ops::set_value(a_J, 1.0);
-#endif
 }
 
-void time_stepper::compute_photon_source_terms(Vector<EBAMRCellData*>        a_source,
-					       const Vector<EBAMRCellData*>& a_cdr_states,
-					       const EBAMRCellData&          a_E,
-					       const centering::which_center a_centering){
-  CH_TIME("time_stepper::compute_photon_source_terms(full)");
+void time_stepper::compute_rte_sources(){
+  CH_TIME("time_stepper::compute_rte_sources(full)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_photon_source_terms(full)" << endl;
+    pout() << "time_stepper::compute_rte_sources(full)" << endl;
+  }
+
+  EBAMRCellData E;
+  m_amr->allocate(E, m_rte->get_phase(), SpaceDim);
+  this->compute_E(E, m_rte->get_phase(), m_poisson->get_state());
+
+  Vector<EBAMRCellData*> cdr_states;
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    cdr_states.push_back(&(solver->get_state()));
+  }
+  
+  Vector<EBAMRCellData*> sources;
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    sources.push_back(&(solver->get_source()));
+  }
+
+  this->compute_rte_sources(sources, cdr_states, E, centering::cell_center);
+}
+
+void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
+				       const Vector<EBAMRCellData*>& a_cdr_states,
+				       const EBAMRCellData&          a_E,
+				       const centering::which_center a_centering){
+  CH_TIME("time_stepper::compute_rte_sources(full)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_rte_sources(full)" << endl;
   }
 
   const phase::which_phase rte_phase = m_rte->get_phase();
@@ -815,7 +836,7 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_states,
     pout() << "time_stepper::solve_rte(full)" << endl;
   }
 
-  this->compute_photon_source_terms(a_rhs, a_cdr_states, a_E, a_centering);
+  this->compute_rte_sources(a_rhs, a_cdr_states, a_E, a_centering);
 
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){

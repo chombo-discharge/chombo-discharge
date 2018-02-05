@@ -52,7 +52,6 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
   LayoutData<IntVectSet> cfivs;
   EBArith::defineCFIVS(cfivs, m_dbl, m_domain);
 
-  
   for (DataIterator dit = m_dbl.dataIterator(); dit.ok(); ++dit){
     const Box&     box     = m_dbl.get(dit());
     const EBISBox& ebisbox = m_ebisl[dit()];
@@ -67,7 +66,7 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
       this->build_stencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[dit()]);
     }
 
-  }
+  }  
 
   m_defined = true;
 }

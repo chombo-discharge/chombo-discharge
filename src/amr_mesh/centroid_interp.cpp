@@ -43,7 +43,6 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
 				    const Real&              a_dx,
 				    const IntVectSet&        a_cfivs){
   CH_TIME("centroid_interp::build_stencil");
-
   
   bool found_stencil = false;
 
@@ -75,6 +74,7 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
   }
+
 }
 
 bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,

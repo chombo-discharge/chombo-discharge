@@ -21,8 +21,6 @@ bool stencil_ops::get_linear_interp_stencil(VoFStencil&          a_stencil,
     do_interp = false;
   }
 
-  MayDay::Abort("stencil_ops::get_linear_interp_stencil - this fucker crashes when eb x domain. Find this bug.");
-
   if(do_interp){
 #if CH_SPACEDIM == 2
     found_stencil = stencil_ops::compute_bilinear_stencil(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
@@ -36,8 +34,6 @@ bool stencil_ops::get_linear_interp_stencil(VoFStencil&          a_stencil,
     a_stencil.clear();
     a_stencil.add(a_vof, 1.0);
   }
-
-
   
   return found_stencil;
 }
@@ -79,7 +75,6 @@ bool stencil_ops::compute_bilinear_stencil(VoFStencil&          a_stencil,
   iv01 = iv00 + BASISV(1);
   iv11 = iv00 + IntVect::Unit;
 
-
   const VolIndex vof00(iv00, comp);
   const VolIndex vof01(iv01, comp);
   const VolIndex vof10(iv10, comp);
@@ -90,9 +85,28 @@ bool stencil_ops::compute_bilinear_stencil(VoFStencil&          a_stencil,
   const Real y = pos[1];
   
   a_stencil.clear();
-  if(a_ebisbox.isCovered(iv00) || a_ebisbox.isCovered(iv10) || a_ebisbox.isCovered(iv01) || a_ebisbox.isCovered(iv11) ||
-     !a_domain.contains(iv00)  || !a_domain.contains(iv10)  || !a_domain.contains(iv01)  || !a_domain.contains(iv11)){
+  if(!a_domain.contains(iv00)  || !a_domain.contains(iv10)  || !a_domain.contains(iv01)  || !a_domain.contains(iv11)){
     found_stencil = false;
+  }
+  else if(a_domain.contains(iv00)){
+    if(a_ebisbox.isCovered(iv00)){
+      found_stencil = false;
+    }
+  }
+  else if(a_domain.contains(iv10)){
+    if(a_ebisbox.isCovered(iv10)){
+      found_stencil = false;
+    }
+  }
+  else if(a_domain.contains(iv01)){
+    if(a_ebisbox.isCovered(iv01)){
+      found_stencil = false;
+    }
+  }
+  else if(a_domain.contains(iv11)){
+    if(a_ebisbox.isCovered(iv11)){
+      found_stencil = false;
+    }
   }
   else{
     a_stencil.add(vof00, (1-x)*(1-y));
@@ -102,7 +116,6 @@ bool stencil_ops::compute_bilinear_stencil(VoFStencil&          a_stencil,
 
     found_stencil = true;
   }
-
 
   return found_stencil;
 }
@@ -124,7 +137,7 @@ bool stencil_ops::compute_interp_stencil_1D(VoFStencil&          a_stencil,
   const Real x         = a_centroid[a_interp_dir]*HiLoInterp;   // Interpolation distance always positive
 
   if(a_domain.contains(iv0) && a_domain.contains(iv1)){
-    if(!a_ebisbox.isCovered(iv0) && !a_ebisbox.isCovered(iv1)){
+    if(!a_ebisbox.isCovered(iv0) && !a_ebisbox.isCovered(iv1) && a_domain.contains(iv0) && a_domain.contains(iv1)){
       found_stencil  = true;
       const VolIndex vof0 = VolIndex(iv0,0);
       const VolIndex vof1 = VolIndex(iv1,0);

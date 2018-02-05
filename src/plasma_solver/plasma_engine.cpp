@@ -16,8 +16,6 @@
 #include <EBAMRIO.H>
 #include <EBAMRDataOps.H>
 
-#define warnings 0
-
 plasma_engine::plasma_engine(){
   CH_TIME("plasma_engine::plasma_engine(weak)");
   if(m_verbosity > 5){
@@ -218,9 +216,9 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
     m_timestepper->compute_cdr_sources();    // Compute source terms for CDR equations
     m_timestepper->compute_cdr_velocities(); // Compute the cdr velocities
 
+#if 1 // This is for debugging
     m_timestepper->solver_dump();
-
-
+#endif
   }
 }
 
@@ -764,7 +762,6 @@ void plasma_engine::write_plot_file(){
   Vector<LevelData<EBCellFAB>*> output_ptr(1 + finest_level);
   m_amr->alias(output_ptr, output);
 
-  std::cout << fname << std::endl;
   // Write HDF5 file
   writeEBHDF5(fname, 
 	      grids,
@@ -966,8 +963,8 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
   RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
 
   EBAMRCellData scratch;
+  m_amr->allocate(scratch, phase::gas, ncomp);
 
-  return;
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     const EBAMRCellData& state        = solver->get_state();
@@ -997,6 +994,8 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
   if(m_verbosity > 5){
     pout() << "plasma_engine::add_cdr_velocities_to_output" << endl;
   }
+
+  m_timestepper->compute_cdr_velocities();
 
   const int comp         = 0;
   const int ncomp        = SpaceDim;
@@ -1037,6 +1036,8 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
   if(m_verbosity > 5){
     pout() << "plasma_engine::add_cdr_source_to_output" << endl;
   }
+
+  m_timestepper->compute_cdr_sources();
   
   const int comp         = 0;
   const int ncomp        = 1;

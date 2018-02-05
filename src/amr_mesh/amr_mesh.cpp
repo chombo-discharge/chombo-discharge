@@ -934,7 +934,6 @@ void amr_mesh::define_irreg_sten(){
 					      rad,
 					      m_stencil_type));
 
-    pout() << "getting eb centroid" << endl;
     m_eb_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
       (new irreg_amr_stencil<eb_centroid_interp>(m_grids,
 						 m_ebisl[phase::gas],

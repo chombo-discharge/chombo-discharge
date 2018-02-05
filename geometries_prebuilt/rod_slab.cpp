@@ -37,10 +37,10 @@ rod_slab::rod_slab(){
 
   //Slab
   Real eps_mat     = 5.0;
-  Real curv        = 2.E-3;
+  Real curv        = 200.E-6;
 #if CH_SPACEDIM == 2
-  RealVect slab_lo = RealVect(-1.0123E-1, -2.0123E-2);
-  RealVect slab_hi = RealVect(1.0123E-1,  -1.0123E-2);
+  RealVect slab_lo = RealVect(-2.0123E-2, -2.0123E-2);
+  RealVect slab_hi = RealVect(2.0123E-2,  -1.0123E-2);
 #else
   RealVect slab_lo = RealVect(-1E-2, -1.E-2, -1.5E-2);
   RealVect slab_hi = RealVect(-1E-2,  1E-2,  -1.0E-2);
@@ -49,8 +49,6 @@ rod_slab::rod_slab(){
   //  RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(rod_center1, rod_center2, rod_radius, 0));
   RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(rod_center1, rod_center2, rod_radius, 0));
   RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF> (new rounded_box_if(slab_lo, slab_hi, curv, 0));
-  //RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF> (new new_sphere_if(slab_lo, 5.E-3, false));
-
 
   m_electrodes[0].define(rod,   live);  
   m_dielectrics[0].define(slab, eps_mat);
