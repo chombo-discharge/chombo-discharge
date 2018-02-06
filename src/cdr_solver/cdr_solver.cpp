@@ -1357,3 +1357,7 @@ EBAMRFluxData& cdr_solver::get_diffco_face(){
 EBAMRIVData& cdr_solver::get_diffco_eb(){
   return m_diffco_eb;
 }
+
+EBAMRIVData& cdr_solver::get_ebflux(){
+  return m_ebflux;
+}

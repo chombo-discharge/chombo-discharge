@@ -62,6 +62,14 @@ void sigma_solver::allocate_internals(){
   m_amr->allocate(m_flux,  m_phase, ncomp);
 }
 
+
+void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl ++){
+    m_flux[lvl]->copyTo(*a_rhs[lvl]);
+  }
+}
+
 void sigma_solver::initial_data(){
   CH_TIME("sigma_solver::initial_data");
   if(m_verbosity > 5){

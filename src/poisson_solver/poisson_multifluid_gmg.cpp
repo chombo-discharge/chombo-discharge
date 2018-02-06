@@ -27,7 +27,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
 
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
-  this->set_botsolver_smooth(64);
+  this->set_botsolver_smooth(32);
   this->set_bottom_drop(8);
 }
 
@@ -62,6 +62,10 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   }
   
   m_opfact->set_jump(a_sigma, 1.0);
+  MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
+#if 1 // Debug
+  m_opfact->set_jump(0.0, 1.0);
+#endif
 
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();

@@ -59,6 +59,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   }
 
   m_potential_set = false;
+  m_step          = 0;
 }
 
 plasma_engine::~plasma_engine(){
@@ -205,7 +206,6 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
     if(m_verbosity > 0){
       this->grid_report();
     }
-    
     m_timestepper->initial_data();           // Re-fill solvers with initial data
     m_timestepper->solve_poisson();          // Re-solve Poisson equation
     if(m_timestepper->stationary_rte()){     // Solve RTE equations by using initial data and electric field if its stationary
@@ -215,10 +215,6 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
 
     m_timestepper->compute_cdr_sources();    // Compute source terms for CDR equations
     m_timestepper->compute_cdr_velocities(); // Compute the cdr velocities
-
-#if 1 // This is for debugging
-    m_timestepper->solver_dump();
-#endif
   }
 }
 
@@ -503,14 +499,11 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     }    
   }
 
-  m_step = 0;
-
   this->initial_regrids(a_init_regrids);
   this->write_plot_file();
   m_restart = false;
 
-  MayDay::Abort("plasma_engine::setup_fresh - stop before it gets crazy");
-
+  m_timestepper->regrid_internals();
 }
 
 void plasma_engine::setup_for_restart(const std::string a_restart_file){
@@ -518,6 +511,8 @@ void plasma_engine::setup_for_restart(const std::string a_restart_file){
   if(m_verbosity > 5){
     pout() << "plasma_engine::setup_for_restart" << endl;
   }
+
+  MayDay::Abort("plasma_engine::setup_for_restart - not implemented (yet)");
 
   m_restart = true;
 }
@@ -716,6 +711,13 @@ void plasma_engine::regrid(){
   
   m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
   m_timestepper->regrid_internals();                                 // Regrid internal storage
+
+  m_timestepper->compute_cdr_velocities();
+#if 0
+  m_timestepper->compute_cdr_diffusion(); // This one is missing
+#endif
+  m_timestepper->compute_cdr_sources();
+  m_timestepper->compute_rte_sources();
 }
 
 void plasma_engine::write_plot_file(){
@@ -728,7 +730,7 @@ void plasma_engine::write_plot_file(){
   const int num_output = names.size();
 
   EBAMRCellData output;
-  m_amr->allocate(output, phase::gas, num_output, 0);
+  m_amr->allocate(output, phase::gas, num_output);
   data_ops::set_value(output, 0.0);
 
   // Add data to output
@@ -964,24 +966,23 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
-  RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
+  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
 
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp);
+  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
 
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     const EBAMRCellData& state        = solver->get_state();
-
     const int num                     = solver_it.get_solver();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
       state[lvl]->copyTo(*scratch[lvl]);
     }
 
-    m_amr->average_down(scratch, phase::gas);
-    m_amr->interp_ghost(scratch, phase::gas);
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
+    m_amr->average_down(scratch, cdr->get_phase());
+    m_amr->interp_ghost(scratch, cdr->get_phase());
+    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
@@ -1008,7 +1009,7 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
   RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
 
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp);
+  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
 
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -1019,9 +1020,9 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
       velo[lvl]->copyTo(*scratch[lvl]);
     }
 
-    m_amr->average_down(scratch, phase::gas);
-    m_amr->interp_ghost(scratch, phase::gas);
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
+    m_amr->average_down(scratch, cdr->get_phase());
+    m_amr->interp_ghost(scratch, cdr->get_phase());
+    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
 
     const Interval src_interv(0, ncomp -1);
     const Interval dst_interv(a_cur_var + num*ncomp, a_cur_var + num*ncomp + ncomp -1);
@@ -1050,7 +1051,7 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
   RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
 
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, 1);
+  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
 
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -1061,9 +1062,9 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
       state[lvl]->copyTo(*scratch[lvl]);
     }
 
-    m_amr->average_down(scratch, phase::gas);
-    m_amr->interp_ghost(scratch, phase::gas);
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
+    m_amr->average_down(scratch, cdr->get_phase());
+    m_amr->interp_ghost(scratch, cdr->get_phase());
+    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
@@ -1103,7 +1104,7 @@ void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const i
 
     m_amr->average_down(scratch, rte_phase);
     m_amr->interp_ghost(scratch, rte_phase);
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
+    m_amr->interpolate_to_centroids(scratch, rte_phase);
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
@@ -1258,7 +1259,7 @@ void plasma_engine::get_geom_tags(){
 
   // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
   for (int lvl = 0; lvl < maxdepth; lvl++){
-    m_geom_tags[lvl].grow(1);
+    m_geom_tags[lvl].grow(2);
   }
 }
 

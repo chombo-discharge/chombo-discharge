@@ -214,8 +214,8 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_de
   Real& Sp = source[m_nplus_idx];
   Real& Sn = source[m_nminu_idx];
 
-  Se = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np + Sph;
-  Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
+  Se = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np;// + Sph;
+  Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np;// + Sph;
   Sn = eta*Ne*Ve   - beta*Np*Nn;
 
   return source;
@@ -460,7 +460,6 @@ Vector<Real> morrow_lowke::compute_rte_source_terms(const Vector<Real>& a_densit
   ret[m_photon2_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
   ret[m_photon3_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
 
-  ret.assign(1.0);
   return ret;
 }
 
@@ -471,7 +470,7 @@ Real morrow_lowke::initial_sigma(const RealVect& a_pos) const{
 morrow_lowke::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
-  m_diffusive = true;
+  m_diffusive = false;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;

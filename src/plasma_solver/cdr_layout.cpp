@@ -429,3 +429,19 @@ Vector<EBAMRIVData*> cdr_layout::get_diffco_eb(){
 
   return diffco_eb;
 }
+
+Vector<EBAMRIVData*> cdr_layout::get_ebflux(){
+  CH_TIME("cdr_layout::get_ebflux");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_ebflux" << endl;
+  }
+
+  Vector<EBAMRIVData*> ebflux;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    ebflux.push_back(&(solver->get_ebflux()));
+  }
+
+  return ebflux;
+}

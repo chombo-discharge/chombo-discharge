@@ -188,6 +188,11 @@ public:
   */
   virtual Vector<EBAMRIVData*> get_diffco_eb();
 
+  /*!
+    @brief Get the EB flux
+  */
+  virtual Vector<EBAMRIVData*> get_ebflux();
+
 protected:
 
   /*!

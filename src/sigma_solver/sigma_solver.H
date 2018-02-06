@@ -51,6 +51,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Compute the right-hand side
+  */
+  virtual void compute_rhs(EBAMRIVData& a_rhs);
+
+  /*!
     @brief Fill with initial data
   */
   virtual void initial_data();

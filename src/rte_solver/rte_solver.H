@@ -97,7 +97,6 @@ public:
   */
   virtual bool is_stationary();
 
-
   /*!
     @brief Compute the boundary flux given a state (a_state will be different for different RTE approximations)
   */

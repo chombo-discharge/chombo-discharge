@@ -25,10 +25,23 @@ public:
   static void average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
 				   const LevelData<EBCellFAB>& a_celldata,
 				   const ProblemDomain&        a_domain);
+
+  static void average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
+				   const LevelData<EBCellFAB>& a_celldata,
+				   const ProblemDomain&        a_domain,
+				   const int                   a_comp);
+
+  static void incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale);
+  
+  static void incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale);
   
   static void incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale);
   
   static void incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale);
+
+  static void incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale);
+
+  static void incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real& a_scale);
 
   static void copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
 
@@ -79,6 +92,8 @@ public:
   static void multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
   static void multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+
+  static void multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   static void set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
 

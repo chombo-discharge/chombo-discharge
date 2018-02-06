@@ -41,13 +41,7 @@ public:
     @param[in] a_dt Time step
     @returns Actual time step used (can be different from a_dt for adaptive methods)
   */
-  virtual Real advance(const Real a_dt){
-#if 0
-    MayDay::Warning("time_stepper::advance - this should be PURE");
-#endif
-
-    return a_dt;
-  }
+  virtual Real advance(const Real a_dt) = 0;
 
   /*!
     @brief Check if RTE solvers are stationary
@@ -60,14 +54,24 @@ public:
   virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
 
   /*!
+    @brief Compute the cell-centered electric field on both phases
+  */
+  virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
+
+  /*!
     @brief Compute the cell-centered electric field on a specific phase
   */
   virtual void compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential);
 
   /*!
-    @brief Compute the cell-centered electric field on both phases
+    @brief Compute the face-centered electric field (only normal components)
   */
-  virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
+  virtual void compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
+  
+  /*!
+    @brief Compute the face-centered electric field (only normal components)
+  */
+  virtual void compute_E(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
 
   /*!
     @brief Compute the current density
@@ -99,6 +103,42 @@ public:
   virtual void compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E);
 
   /*!
+    @brief Compute face-centered diffusion coefficients
+  */
+  virtual void compute_cdr_diffco_face(Vector<EBAMRFluxData*>& a_diffco_face, const EBAMRFluxData& a_E_face);
+
+    /*!
+    @brief Compute face-centered diffusion coefficients
+  */
+  virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, const EBAMRIVData& a_E_eb);
+
+  /*!
+    @brief Compute cdr fluxes
+  */
+  virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
+				  const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
+				  const EBAMRIVData&          a_field);
+
+  /*!
+    @brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
+  */
+  virtual void compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fluxes,
+					   const Vector<EBAMRCellData*> a_densities,
+					   const Vector<EBAMRCellData*> a_velocities,
+					   const phase::which_phase     a_phase);
+
+  /*!
+    @brief Compute flux
+  */
+  virtual void compute_flux(EBAMRCellData&       a_flux,
+			    const EBAMRCellData& a_density,
+			    const EBAMRCellData& a_velocity);
+
+
+  /*!
     @brief Compute RTE source terms
   */
   virtual void compute_rte_sources();
@@ -122,9 +162,21 @@ public:
     @details You have the option of specifying the centering for this computation. If the densities are cell-centered, we first 
     compute the cell-centered space charge density and the interpolate to the cell centroid. 
   */
-  virtual void compute_rho(MFAMRCellData&                a_rho,
-			   const Vector<EBAMRCellData*>  a_densities,
-			   const centering::which_center a_centering);
+  virtual void compute_rho(MFAMRCellData&                 a_rho,
+			   const Vector<EBAMRCellData*>&  a_densities,
+			   const centering::which_center  a_centering);
+
+  /*!
+    @brief Extrapolate data to EB centroid
+  */
+  virtual void extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
+
+  /*!
+    @brief Extrapolate data to EB centroid
+  */
+  virtual void extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
+				 const phase::which_phase      a_phase,
+				 const Vector<EBAMRCellData*>& a_data);
 
   /*!
     @brief Instantiate solvers
@@ -137,6 +189,11 @@ public:
   virtual void initial_data();
 
   /*!
+    @brief Extrapolated flux to EB and project it onto the normal
+  */
+  virtual void project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux);
+
+  /*!
     @brief Regrid
   */
   virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
@@ -144,11 +201,7 @@ public:
   /*!
     @brief Regrid internal storage. This MUST be overwritten.
   */
-  virtual void regrid_internals(){
-#if 0
-    MayDay::Warning("time_stepper::regrid_internals - this routine should be PURE");
-#endif
-  }
+  virtual void regrid_internals() = 0;
 
   /*!
     @brief Regrid individual solvers
@@ -169,6 +222,16 @@ public:
     @brief Set the physical domain
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+
+  /*!
+    @brief Set fast rte
+  */
+  virtual void set_fast_rte(const int a_fast_rte);
+
+  /*!
+    @brief Set fast rte
+  */
+  virtual void set_fast_poisson(const int a_fast_poisson);
 
   /*!
     @brief Set hardcap on the time step
@@ -251,7 +314,7 @@ public:
     @details You have the option of supplying storage for a right-hand side if you want to. The densities can be either cell-centered or centroid-centered, If they are cell-centered, we will extrapolate the right-hand side to the centroids first. 
   */
   virtual void solve_poisson(MFAMRCellData&                a_potential,
-			     MFAMRCellData*                a_rhs,
+			     MFAMRCellData&                a_rhs,
 			     const Vector<EBAMRCellData*>  a_densities,
 			     const EBAMRIVData&            a_sigma,
 			     const centering::which_center a_centering);
@@ -389,9 +452,29 @@ protected:
   Real m_relax_time;
 
   /*!
+    @brief TIme
+  */
+  Real m_time;
+
+  /*!
     @brief Verbosity
   */
   int m_verbosity;
+
+  /*!
+    @brief Fast RTE solver
+  */
+  int m_fast_rte;
+
+  /*!
+    @brief Fast RTE solver
+  */
+  int m_fast_poisson;
+
+  /*!
+    @brief Current step
+  */
+  int m_step;
 };
 
 #endif
