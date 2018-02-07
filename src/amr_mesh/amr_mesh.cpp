@@ -366,14 +366,8 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   this->build_grids(tags, a_hardcap);
 
   this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
-  //  this->define_mflevelgrid();  // Define MFLevelGrid
-  this->define_eb_coar_ave();  // Define EBCoarseAverage on both phases
-#if 1 // Debug test
-  MayDay::Warning("amr_mesh::regrid - debug test");
-  EBAMRCellData test;
-  this->allocate(test, phase::gas, SpaceDim);
-  this->average_down(test, phase::gas);
-#endif
+  this->define_mflevelgrid();  // Define MFLevelGrid
+  this->define_eb_coar_ave();  // Define ebcoarseaverage on both phases
   this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
   this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
@@ -381,9 +375,6 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   this->define_redist_oper();  // Define redistribution (phase::gas only)
   this->define_advect_level(); // Define advection 
   this->define_irreg_sten();   // Define irregular stencils
-
-
-
 }
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
@@ -593,7 +584,7 @@ void amr_mesh::define_eb_coar_ave(){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-      	m_coarave[phase::gas][lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(m_grids[lvl],
+      	m_coarave[phase::gas][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
       											 m_grids[lvl-1],
       											 m_ebisl[phase::gas][lvl],
       											 m_ebisl[phase::gas][lvl-1],
@@ -603,9 +594,8 @@ void amr_mesh::define_eb_coar_ave(){
       											 &(*ebis_gas)));
       }
 
-#if 0
       if(!ebis_sol.isNull()){
-      	m_coarave[phase::solid][lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(m_grids[lvl],
+      	m_coarave[phase::solid][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
       											   m_grids[lvl-1],
       											   m_ebisl[phase::solid][lvl],
       											   m_ebisl[phase::solid][lvl-1],
@@ -614,9 +604,6 @@ void amr_mesh::define_eb_coar_ave(){
       											   comps,
       											   ebis_sol));
       }
-#else
-      MayDay::Warning("amr_mesh::define_eb_coar_ave - debug mode");
-#endif
     }
   }
 }
@@ -1346,7 +1333,7 @@ Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(){
   return m_mflg;
 }
 
-Vector<RefCountedPtr<EBCoarseAverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
+Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
   return m_coarave[a_phase];
 }
 

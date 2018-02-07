@@ -177,6 +177,11 @@ public:
     @brief Compute the largest possible diffusive time step (for explicit methods)
   */
   virtual Real compute_diffusive_dt();
+
+  /*!
+    @brief Compute the largest possible source time step (for explicit methods
+  */
+  virtual Real compute_source_dt();
   
   /*!
     @brief Compute the total mass in m_state

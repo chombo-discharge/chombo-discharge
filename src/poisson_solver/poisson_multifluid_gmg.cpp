@@ -60,10 +60,10 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   if(m_needs_setup){
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
-  
+
   m_opfact->set_jump(a_sigma, 1.0);
 
-#if 1 // Debug
+#if 0 // Debug
   MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
   m_opfact->set_jump(0.0, 1.0);
 #endif
@@ -390,7 +390,6 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 m_bottom_drop,
 										 1 + finest_level));
 
-  m_opfact->set_jump(0.0, -1.0);
   m_opfact->set_electrodes(m_compgeom->get_electrodes(), pot);
 }
 

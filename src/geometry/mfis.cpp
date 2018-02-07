@@ -10,7 +10,6 @@
 
 mfis::mfis(){
   m_ebis.resize(phase::num_phases);
-  std::cout << m_ebis.size() << endl;
   for (int i = 0; i < m_ebis.size(); i++){
     m_ebis[i] = RefCountedPtr<EBIndexSpace> (new EBIndexSpace());
   }
@@ -36,17 +35,6 @@ void mfis::define(const Box                     & a_domain,
   else{
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
   }
-  m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace> (NULL);
-
-#if 0
-  MayDay::Warning("mfis::define - debug mode");
-  delete m_ebis[phase::solid];
-  std::cout << this->num_phases() << std::endl;
-  std::cout << phase::gas << std::endl;
-  std::cout << phase::solid << std::endl; 
-#endif
-
-
 
 }
   

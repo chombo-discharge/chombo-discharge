@@ -1234,7 +1234,7 @@ Real cdr_solver::compute_cfl_dt(){
   Real tmp = 1.;
   int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("EBAMRAdvectDiffuse::computeAdvectiveDt() - communication error on norm");
+    MayDay::Error("cdr_solver::compute_cfl_dt() - communication error on norm");
   }
   min_dt = tmp;
 #endif
@@ -1304,6 +1304,65 @@ Real cdr_solver::compute_diffusive_dt(){
 
 
   return min_dt;
+}
+
+Real cdr_solver::compute_source_dt(){
+  CH_TIME("cdr_solver::compute_source_dt");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_source_dt" << endl;
+  }
+
+  const Real tolerance = 1.E-6;
+  const int comp = 0;
+  Real max, min;
+  data_ops::get_max_min(max, min, m_state, comp);
+
+
+  Real min_dt = 1.E99;
+
+  if(max > 0.0){
+    const int finest_level = m_amr->get_finest_level();
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+      const Real dx                = m_amr->get_dx()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const EBCellFAB& state  = (*m_state[lvl])[dit()];
+	const EBCellFAB& source = (*m_source[lvl])[dit()];
+	const Box box           = dbl.get(dit());
+	const EBISBox& ebisbox  = ebisl[dit()];
+	const EBGraph& ebgraph  = ebisbox.getEBGraph();
+	const IntVectSet ivs(box);
+
+	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex vof = vofit();
+
+	  const Real phi = state(vof, comp);
+	  const Real src = source(vof, comp);
+
+	  Real thisdt = 1.E99;
+	  if(Abs(phi) > tolerance*max){
+	    thisdt = Abs(phi/src);
+	  }
+	  min_dt = Min(min_dt, thisdt);
+	}
+      }
+    }
+  }
+
+#ifdef CH_MPI
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("cdr_solver::compute_source_dt() - communication error on norm");
+  }
+  min_dt = tmp;
+#endif
+
+  
+  return min_dt;
+
 }
 
 Real cdr_solver::compute_mass(){

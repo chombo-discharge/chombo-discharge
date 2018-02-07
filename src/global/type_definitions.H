@@ -84,9 +84,10 @@ namespace time_code {
   enum which_code {
     cfl             = 0,
     diffusion       = 1,
-    relaxation_time = 2,
-    restricted      = 3,
-    hardcap         = 4,
+    source          = 2,
+    relaxation_time = 3,
+    restricted      = 4,
+    hardcap         = 5,
   };
 };
 

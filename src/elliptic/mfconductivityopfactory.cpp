@@ -8,7 +8,7 @@
 
 #include "mfconductivityopfactory.H"
 
-#define verb 1
+#define verb 0
 
 mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
 						 const Vector<MFLevelGrid>&                a_mflg,
@@ -72,7 +72,9 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   this->set_max_box_size(32);         // Default max box size
   this->define_jump_stuff();          // Define jump cell stuff
   this->define_multigrid_stuff();     // Define things for lower levels of multigrid. Must happen after define_jump_stuff
+#if 0
   this->set_jump(0.0, 1.0);           // Default, no surface charge.
+#endif
 
 
 #if verb // Debugging hook
@@ -139,8 +141,9 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       while(has_coarser){ 
 
 	int imgsize = m_grids_mg[lvl].size();
-	const DisjointBoxLayout& fine_grid = m_grids_mg[lvl][imgsize - 1]; // Finer grid for current MG level
-	const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1];  // Finer MFLevelGrid for current MG level
+	const DisjointBoxLayout& fine_grid = m_grids_mg[lvl][imgsize - 1];   // Finer grid for current MG level
+	const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1];    // Finer MFLevelGrid for current MG level
+	const ProblemDomain& domain_fine   = m_domains_mg[lvl][imgsize - 1]; // Finer domain for current MG level
 
 	DisjointBoxLayout grid_coar_mg;
 	ProblemDomain domain_coar_mg;
@@ -151,12 +154,45 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,   // Grid
 						 domain_coar_mg, // Domain  
 						 fine_grid,      // Fine level grid
-						 cur_domain,     // Current domain
+						 domain_fine, //cur_domain,     // Current domain
 						 mg_refi,        // Refinement factor
 						 m_max_box_size, // 
 						 layout_changed, //
 						 m_test_ref);    //
 
+
+	// For some reason getCoarserLayouts doesn't trigger correctly - I don't know what's wrong... :)
+	// Here is a resolution. 
+	if(fine_grid.coarsenable(2*mg_refi)){
+	  has_coarser = true;
+	}
+	else{
+	  has_coarser = false;
+	}
+
+#if verb
+	pout() << endl;
+	pout() << "===================" << endl;
+	pout() << "fine domain = " << domain_fine << endl;
+	int testref = m_test_ref*mg_refi;
+	ProblemDomain schme = coarsen(domain_fine, testref);
+	schme.refine(testref);
+	if(schme != domain_fine){
+	  pout() << "test 1 false" << endl;
+	}
+	else{
+	  pout() << "test 1 true" << endl;
+	}
+
+
+	pout() << "layout changed = " << layout_changed << endl;
+	
+	pout() << "fine grid = " << endl << fine_grid << endl;
+	pout() << "coar grid = " << endl << grid_coar_mg << endl;
+	pout() << "has coar = " << has_coarser << endl;
+	pout() << "===================" << endl;
+	pout() << endl;
+#endif
 
 	if(at_amr_lvl && !has_coarser){
 	  m_has_mg_objects[lvl] = false;
@@ -168,6 +204,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	}
 
 	if(has_coarser){
+
 	  m_grids_mg[lvl].push_back(grid_coar_mg);
 	  m_domains_mg[lvl].push_back(domain_coar_mg);
 	  m_layout_changed_mg[lvl].push_back(layout_changed);
@@ -200,11 +237,14 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	  const int main_phase = 0;
 	  const EBLevelGrid& eblg_fine = mflg_fine.get_eblg(main_phase);
 	  const EBLevelGrid& eblg_coar = mflg_coar.get_eblg(main_phase);
-	  RefCountedPtr<EBCoarseAverage> aveop(new EBCoarseAverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
+	  RefCountedPtr<ebcoarseaverage> aveop(new ebcoarseaverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 								   eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 								   eblg_coar.getDomain(), mg_refi, ncomp,
 								   eblg_coar.getEBIS()));
 
+#if verb
+	  //	  pout() << "AMR level = lvl " << "\tMG level = " << "\t coar domain = " << eblg_coar.getDomain() << endl;
+#endif
 	  // Interface cells on MG level img. 
 	  LayoutData<IntVectSet> isect_cells (eblg_coar.getDBL());
 	  for (DataIterator dit = isect_cells.dataIterator(); dit.ok(); ++dit){
@@ -276,7 +316,7 @@ void mfconductivityopfactory::coarsen_coefficients(LevelData<MFCellFAB>&        
     for (int i = 0; i < a_mflg_coar.num_phases(); i++){
       const EBLevelGrid& eblg_coar = a_mflg_coar.get_eblg(i);
       const EBLevelGrid& eblg_fine = a_mflg_fine.get_eblg(i);
-      EBCoarseAverage aveop(eblg_fine.getDBL(),    eblg_coar.getDBL(),
+      ebcoarseaverage aveop(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 			    eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 			    eblg_coar.getDomain(), a_ref_to_depth, ncomp,
 			    eblg_coar.getEBIS());
@@ -370,7 +410,7 @@ void mfconductivityopfactory::define_jump_stuff(){
       const EBLevelGrid& eblg_coar = m_mflg[lvl-1].get_eblg(main_phase);
       const int ref_ratio          = m_ref_rat[lvl-1];
 	
-      m_aveop[lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
+      m_aveop[lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 									 eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 									 eblg_coar.getDomain(), ref_ratio, ncomp,
 									 eblg_coar.getEBIS()));
@@ -410,16 +450,20 @@ void mfconductivityopfactory::average_down_mg(){
 #if verb // DEBUG
 	pout() << "mfconductivityopfactory::average_down_mg from AMR level = " << lvl
 	       << " from MG level = " << img-1
-	       << " to   MG level = " << img << endl;
+	       << " to   MG level = " << img 
+	       << " fine domain = " << m_domains_mg[lvl][img] 
+	       << endl;
 #endif
 	m_aveop_mg[lvl][img]->average(*jump_mg[img-1], *jump_mg[img], interv); // Average down onto level img
+#if verb
+	pout() << "mfconductivityopfactory::average_down_mg - done" << endl;
+#endif
       }
     }
   }
 #if verb // DEBUG
   pout() << "mfconductivityopfactory::average_down_mg - done " << endl;
 #endif
-
 }
 
 void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale){

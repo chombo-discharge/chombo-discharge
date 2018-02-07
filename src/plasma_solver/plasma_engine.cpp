@@ -581,6 +581,9 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   if(m_timecode == time_code::diffusion){
     str = " (Restricted by diffusion)";
   }
+  if(m_timecode == time_code::source){
+    str = " (Restricted by source term)";
+  }
   if(m_timecode == time_code::relaxation_time){
     str = " (Restricted by relaxation time)";
   }

@@ -254,6 +254,11 @@ public:
   virtual void set_relax_time(const Real a_relax_time);
 
   /*!
+    @brief Set source growth
+  */
+  virtual void set_source_growth(const Real a_src_growth);
+
+  /*!
     @brief Set the physical domain
   */
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
@@ -450,6 +455,11 @@ protected:
     @brief Fudge factor for relaxation time
   */
   Real m_relax_time;
+
+  /*!
+    @brief Source growth
+  */
+  Real m_src_growth;
 
   /*!
     @brief TIme

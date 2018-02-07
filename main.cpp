@@ -49,8 +49,8 @@ int main(int argc, char* argv[]){
 #endif
 
   // Physical domain, geometry, time stepper, amr, and plasma kinetics
-  const RealVect probLo = -4.E-2*RealVect::Unit;
-  const RealVect probHi =  4.E-2*RealVect::Unit;
+  const RealVect probLo = -2.E-2*RealVect::Unit;
+  const RealVect probHi =  2.E-2*RealVect::Unit;
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
@@ -67,8 +67,8 @@ int main(int argc, char* argv[]){
 
   // Refinement ratios
   Vector<int> refrat(5);
-  refrat[0] = 2;
-  refrat[1] = 2;
+  refrat[0] = 4;
+  refrat[1] = 4;
   refrat[2] = 2;
   refrat[3] = 2;
   refrat[4] = 2;
@@ -76,12 +76,12 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(1);                      // Set max amr depth
+  amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_max_simulation_depth(4);               // Set maximum simulation depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(8);                    // Set blocking factor
+  amr->set_blocking_factor(16);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
   amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
@@ -100,8 +100,8 @@ int main(int argc, char* argv[]){
   engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
-  engine->setup_fresh(-1);
-  engine->set_regrid_interval(10);        // Regrid every this intervals
+  engine->setup_fresh(0);
+  engine->set_regrid_interval(-1);        // Regrid every this intervals
   engine->set_plot_interval(1);           // Plot every this intervals
   engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals
   engine->set_output_mode(output_mode::full);
@@ -110,9 +110,9 @@ int main(int argc, char* argv[]){
   timestepper->set_verbosity(1);
   timestepper->set_solver_verbosity(0);
   timestepper->set_fast_rte(5);
-  timestepper->set_fast_poisson(1);
+  timestepper->set_fast_poisson(5);
   amr->set_verbosity(0);
-  //  engine->run(0.0, 10.0, 200);
+  engine->run(0.0, 10.0, 100);
 
 
 #ifdef CH_MPI

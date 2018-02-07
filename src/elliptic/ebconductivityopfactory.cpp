@@ -187,6 +187,7 @@ ebconductivityopfactory(const Vector<EBLevelGrid>&                              
 
         if (hasCoarser)
         {
+
           m_eblgsMG[ilev].push_back(EBLevelGrid(dblCoarMG, domainCoarMG, 4, eblgFine.getEBIS()));
           int img = m_eblgsMG[ilev].size() - 1;
           const EBLevelGrid& eblgCoar = m_eblgsMG[ilev][img  ];

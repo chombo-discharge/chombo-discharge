@@ -18,7 +18,7 @@
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
-#include <EBCoarseAverage.H>
+#include <ebcoarseaverage.H>
 #include <EBAdvectLevelIntegrator.H>
 #include <EBFastFR.H>
 #include <EBFastFR.H>
@@ -374,7 +374,7 @@ public:
   /*!
     @brief Get the coarsening utility
   */
-  virtual Vector<RefCountedPtr<EBCoarseAverage> >& get_coarave(phase::which_phase a_phase);
+  virtual Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cell interpolation utility
@@ -580,9 +580,9 @@ protected:
   Vector<Vector<EBISLayout> > m_ebisl;
 
   /*!
-    @brief EBCoarseAverage. One for each phase. 
+    @brief ebcoarseaverage. One for each phase. 
   */
-  Vector<Vector<RefCountedPtr<EBCoarseAverage> > > m_coarave;
+  Vector<Vector<RefCountedPtr<ebcoarseaverage> > > m_coarave;
 
   /*!
     @brief QuadCFInterp. One for each phase
@@ -665,7 +665,7 @@ protected:
   virtual void define_mflevelgrid();
 
   /*!
-    @brief Define EBCoarseAverage
+    @brief Define ebcoarseaverage
   */
   virtual void define_eb_coar_ave();
 

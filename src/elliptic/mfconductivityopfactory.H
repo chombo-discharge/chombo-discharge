@@ -20,7 +20,7 @@
 #include <EBLevelDataOps.H>
 #include <AMRMultiGrid.H>
 #include <MFAliasFactory.H>
-#include <EBCoarseAverage.H>
+#include <ebcoarseaverage.H>
 #include <BaseDomainBC.H>
 #include <BaseEBBC.H>
 #include <ProblemDomain.H>
@@ -240,12 +240,12 @@ protected:
   /*!
     @brief Averaging operator. 
   */
-  Vector<RefCountedPtr<EBCoarseAverage> > m_aveop;
+  Vector<RefCountedPtr<ebcoarseaverage> > m_aveop;
 
   /*!
     @brief Averaging operator for lower levels of multigrid. This is needed for coarsening data-based boundary conditions
   */
-  Vector<Vector<RefCountedPtr<EBCoarseAverage> > > m_aveop_mg;
+  Vector<Vector<RefCountedPtr<ebcoarseaverage> > > m_aveop_mg;
 
   /*!
     @brief Grids for multigrid

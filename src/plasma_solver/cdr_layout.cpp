@@ -325,6 +325,24 @@ Real cdr_layout::compute_diffusive_dt(){
   return dt;
 }
 
+Real cdr_layout::compute_source_dt(){
+  CH_TIME("cdr_layout::compute_source_dt");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::compute_source_dt" << endl;
+  }
+
+  Real dt = 1.E99;
+  
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const Real this_dt = solver->compute_source_dt();
+
+    dt = Min(dt, this_dt);
+  }
+
+  return dt;
+}
+
 Real cdr_layout::compute_Q(){
   CH_TIME("cdr_layout::compute_Q");
   if(m_verbosity > 5){

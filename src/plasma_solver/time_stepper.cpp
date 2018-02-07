@@ -17,6 +17,7 @@ time_stepper::time_stepper(){
   this->set_verbosity(10);
   this->set_cfl(0.8);
   this->set_relax_time(2.0);
+  this->set_source_growth(5.0);
   this->set_min_dt(0.0);
   this->set_max_dt(1.E99);
   this->set_fast_rte(1);
@@ -450,13 +451,7 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
       }
     }
   }
-
 }
-
-
-
-
-
 
 void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   CH_TIME("time_stepper::compute_dt");
@@ -478,9 +473,14 @@ void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::diffusion;
   }
 
+  const Real dt_src = m_src_growth*m_cdr->compute_source_dt();
+  if(dt_src < dt){
+    dt = dt_src;
+    a_timecode = time_code::source;
+  }
+
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
-    pout() << dt_relax << endl;
     dt = dt_relax;
     a_timecode = time_code::relaxation_time;
   }
@@ -713,7 +713,6 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const EBCellFAB& E     = (*a_E[lvl])[dit()];
 
-
       // Do all cells
       IntVectSet ivs(box);
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
@@ -738,22 +737,28 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 
-	  // Reset these and apply stencil
+	  // Compute CDR densities
+	  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+	    const int idx             = solver_it.get_solver();
+	    const VoFStencil& stencil = stencils[dit()](vof, comp);
+
+	    Real phi = 0.0;
+	    for (int i = 0; i < stencil.size(); i++){
+	      const VolIndex& ivof = stencil.vof(i);
+	      const Real& iweight  = stencil.weight(i);
+	      phi += (*(*a_cdr_states[idx])[lvl])[dit()](ivof, comp)*iweight;
+	    }
+	    cdr_densities[idx] = Max(0.0, phi);
+	  }
+
+	  // Compute E
 	  RealVect e = RealVect::Zero;
-	  cdr_densities.assign(0.0);
-	
 	  const VoFStencil& stencil = stencils[dit()](vof, comp);
 	  for (int i = 0; i < stencil.size(); i++){
 	    const VolIndex& ivof = stencil.vof(i);
-	    const Real iweight   = stencil.weight(i);
-
+	    const Real& iweight  = stencil.weight(i);
 	    for (int dir = 0; dir < SpaceDim; dir++){
-	      e[dir] = E(ivof, dir)*iweight;
-	    }
-	  
-	    for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-	      const int idx = solver_it.get_solver();
-	      cdr_densities[idx] = +(*(*a_cdr_states[idx])[lvl])[dit](ivof, comp)*iweight;
+	      e[dir] += E(ivof, dir)*iweight;
 	    }
 	  }
 
@@ -1067,6 +1072,10 @@ void time_stepper::set_relax_time(const Real a_relax_time){
   m_relax_time = a_relax_time;
 }
 
+void time_stepper::set_source_growth(const Real a_src_growth){
+  m_src_growth = a_src_growth;
+}
+
 void time_stepper::setup_cdr(){
   CH_TIME("time_stepper::setup_cdr");
   if(m_verbosity > 5){
@@ -1259,7 +1268,7 @@ Real time_stepper::compute_relaxation_time(){
   m_amr->allocate(J,  m_cdr->get_phase(), SpaceDim);
   m_amr->allocate(dt, m_cdr->get_phase(), SpaceDim);
 
-  data_ops::set_value(dt, 1.E99);
+  data_ops::set_value(dt, 1.234567E89);
 
   this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
   this->compute_J(J);
@@ -1290,21 +1299,26 @@ Real time_stepper::compute_relaxation_time(){
 	const VolIndex& vof = vofit();
 
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  if(Abs(e(vof, dir)) > tolerance*max_E[dir]){
+	  if(Abs(e(vof, dir)) > tolerance*max_E[dir] && Abs(j(vof, dir)) > 0.0){
 	    dt_fab(vof, dir) = Abs(units::s_eps0*e(vof, dir)/j(vof,dir));
 	  }
 	}
       }
     }
   }
+
+  m_amr->average_down(dt, m_cdr->get_phase());
   
   // Find the smallest dt
   Real min_dt = 1.E99;
   for (int dir = 0; dir < SpaceDim; dir++){
     Real max, min;
     data_ops::get_max_min(max, min, dt, dir);
+
     min_dt = Min(min_dt, min);
   }
+
+  return min_dt;
 
   // Communicate the result
 #ifdef CH_MPI
