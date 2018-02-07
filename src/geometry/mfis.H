@@ -34,18 +34,18 @@ public:
   /*!
     @brief Define function
   */
-  void define(const Box                     & a_domain,
-	      const RealVect                & a_origin,
-	      const Real                    & a_dx,
-	      const Vector<GeometryService*>& a_geoservers,
-	      int                             a_nCellMax                              = -1,
-	      int                             a_maxCoarsenings                        = -1,
-	      bool                            a_fixOnlyFirstPhaseRegNextToMultiValued = false);
+  virtual void define(const Box                     & a_domain,
+		      const RealVect                & a_origin,
+		      const Real                    & a_dx,
+		      const Vector<GeometryService*>& a_geoservers,
+		      int                             a_nCellMax                              = -1,
+		      int                             a_maxCoarsenings                        = -1,
+		      bool                            a_fixOnlyFirstPhaseRegNextToMultiValued = false);
 
   /*!
     @brief Get a particular ebis
   */
-  const RefCountedPtr<EBIndexSpace>& get_ebis(phase::which_phase a_whichEBIS) const;
+  const RefCountedPtr<EBIndexSpace>& get_ebis(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get a particular ebis

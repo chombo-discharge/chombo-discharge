@@ -64,8 +64,17 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
       const VolIndex& vof = vofit();
       VoFStencil& stencil = (*m_stencils[dit()])(vof, 0);
       this->build_stencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[dit()]);
-    }
 
+#if 1 // Safety test
+      Real sum = 0.0;
+      for (int i = 0; i < stencil.size(); i++){
+	sum += stencil.weight(i);
+      }
+      if(Abs(sum - 1.0) > 1.E-6){
+	MayDay::Abort("irreg_stencil::define - weights do not sum to 1. Something has gone wrong with one of your stencils");
+      }
+#endif
+    }
   }  
 
   m_defined = true;

@@ -476,7 +476,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
 
   this->get_geom_tags();       // Get geometric tags.
   
-  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen. 
+  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
   if(m_verbosity > 0){
@@ -713,6 +713,7 @@ void plasma_engine::regrid(){
   m_timestepper->regrid_internals();                                 // Regrid internal storage
 
   m_timestepper->compute_cdr_velocities();
+  MayDay::Warning("plasma_engine::regrid - compute_cdr_diffusion() routine is missing");
 #if 0
   m_timestepper->compute_cdr_diffusion(); // This one is missing
 #endif
@@ -944,6 +945,7 @@ void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const in
   m_amr->average_down(scratch, phase::gas);
   m_amr->interp_ghost(scratch, phase::gas);
   m_amr->interpolate_to_centroids(scratch, phase::gas);
+
 
   const Interval src_interv(comp, comp);
   const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);

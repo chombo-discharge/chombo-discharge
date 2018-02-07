@@ -106,6 +106,8 @@ void cdr_solver::allocate_internals(){
     pout() << m_name + "::allocate_internals" << endl;
   }
 
+  CH_assert(m_phase == phase::gas);
+
   const int sca = 1;
   const int vec = SpaceDim;
 

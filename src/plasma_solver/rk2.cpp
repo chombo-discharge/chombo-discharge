@@ -102,10 +102,11 @@ Real rk2::advance(const Real a_dt){
   this->compute_cdr_fluxes_at_start_of_time_step();
   this->compute_sigma_flux_at_start_of_time_step();
 
-  MayDay::Abort("rk2::advance - debug mode");
-#if 1 // Debug
+
+#if 0 // Debug
+  MayDay::Warning("rk2::advance - debug mode");
   this->solver_dump();
-  MayDay::Abort("stop");
+  MayDay::Abort("rk2::advance - debug stop");
 #endif
   // Do k1 advance
   this->advance_cdr_k1(a_dt);
@@ -325,18 +326,20 @@ void rk2::solve_poisson_k1(){
     pout() << "rk2::solve_poisson_k1" << endl;
   }
 
-  MFAMRCellData& potential = m_poisson_scratch->get_phi();
-  EBAMRIVData& sigma       = m_sigma_scratch->get_phi();
+  MFAMRCellData& scratch_pot = m_poisson_scratch->get_phi();
+  EBAMRIVData& sigma         = m_sigma_scratch->get_phi();
   Vector<EBAMRCellData*> cdr_densities;
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     cdr_densities.push_back(&(storage->get_phi()));
   }
 
-  data_ops::set_value(potential, 0.0);
-  data_ops::incr(potential, m_poisson->get_state(), 1.0);
+  data_ops::set_value(scratch_pot, 0.0);
+  data_ops::incr(scratch_pot, m_poisson->get_state(), 1.0);
 
-  this->solve_poisson(potential, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
+  if((m_step + 1) % m_fast_poisson == 0){
+    this->solve_poisson(scratch_pot, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
+  }
 }
 
 void rk2::compute_E_after_k1(){
@@ -577,17 +580,23 @@ void rk2::solve_poisson_k2(){
 
   // We computed the intermediate potential at time t_k + alpha*dt. Linearly extrapolate that result to the end of
   // the time step. The result for this is y_extrap = y_alpha/alpha - y_0*(1-alpha)/alpha. This (usually) brings the
-  // initial guess closer to the true solution. 
+  // initial guess closer to the true solution.
   MFAMRCellData& pot = m_poisson->get_state();
   MFAMRCellData& phi = m_poisson_scratch->get_phi();
-  data_ops::scale(pot, -(1.0 - m_alpha)/m_alpha);
-  data_ops::incr(pot, phi, 1./m_alpha);
+  if((m_step + 1) % m_fast_poisson == 0){
+    data_ops::scale(pot, -(1.0 - m_alpha)/m_alpha);
+    data_ops::incr(pot, phi, 1./m_alpha);
 
-  this->solve_poisson(pot,
-		      m_poisson->get_source(),
-		      m_cdr->get_states(),
-		      m_sigma->get_state(),
-		      centering::cell_center);
+    this->solve_poisson(pot,
+			m_poisson->get_source(),
+			m_cdr->get_states(),
+			m_sigma->get_state(),
+			centering::cell_center);
+  }
+  else{
+    data_ops::set_value(pot, 0.0);
+    data_ops::incr(pot, phi, 1.0);
+  }
 }
 
 void rk2::compute_E_after_k2(){

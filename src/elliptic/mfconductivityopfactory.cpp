@@ -8,7 +8,7 @@
 
 #include "mfconductivityopfactory.H"
 
-#define verb 0
+#define verb 1
 
 mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
 						 const Vector<MFLevelGrid>&                a_mflg,
@@ -72,7 +72,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   this->set_max_box_size(32);         // Default max box size
   this->define_jump_stuff();          // Define jump cell stuff
   this->define_multigrid_stuff();     // Define things for lower levels of multigrid. Must happen after define_jump_stuff
-  this->set_jump(0.0, 1.0);           // Default, no surface charge. 
+  this->set_jump(0.0, 1.0);           // Default, no surface charge.
 
 
 #if verb // Debugging hook
@@ -134,6 +134,8 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       bool has_coarser = true;
       bool at_amr_lvl  = true;
       ProblemDomain cur_domain = m_domains[lvl];
+
+      has_coarser = m_test_ref < m_max_box_size;
       while(has_coarser){ 
 
 	int imgsize = m_grids_mg[lvl].size();

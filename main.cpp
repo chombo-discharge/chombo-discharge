@@ -44,11 +44,13 @@ int main(int argc, char* argv[]){
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
-  EBIndexSpace::s_useMemoryLoadBalance = false;
+#if 1
+  EBIndexSpace::s_useMemoryLoadBalance = true;
+#endif
 
   // Physical domain, geometry, time stepper, amr, and plasma kinetics
-  const RealVect probLo = -3.E-2*RealVect::Unit;
-  const RealVect probHi =  3.E-2*RealVect::Unit;
+  const RealVect probLo = -4.E-2*RealVect::Unit;
+  const RealVect probHi =  4.E-2*RealVect::Unit;
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
@@ -65,9 +67,9 @@ int main(int argc, char* argv[]){
 
   // Refinement ratios
   Vector<int> refrat(5);
-  refrat[0] = 4;
-  refrat[1] = 4;
-  refrat[2] = 4;
+  refrat[0] = 2;
+  refrat[1] = 2;
+  refrat[2] = 2;
   refrat[3] = 2;
   refrat[4] = 2;
   
@@ -75,17 +77,17 @@ int main(int argc, char* argv[]){
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
   amr->set_max_amr_depth(1);                      // Set max amr depth
-  amr->set_max_simulation_depth(3);               // Set maximum simulation depth
+  amr->set_max_simulation_depth(4);               // Set maximum simulation depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(16);                    // Set blocking factor
+  amr->set_blocking_factor(8);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
   amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
   amr->set_eb_ghost(4);                           // Set EB ghost vectors
   amr->set_physical_domain(physdom);              // Set physical domain
-  amr->set_irreg_sten_type(stencil_type::taylor); // Set preferred stencil type
+  amr->set_irreg_sten_type(stencil_type::linear); // Set preferred stencil type
   amr->set_irreg_sten_order(1);                   // Set preferred stencil order
   amr->set_irreg_sten_radius(1);                  // Set extrapolation stencil radius
 
@@ -98,17 +100,19 @@ int main(int argc, char* argv[]){
   engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
-  engine->setup_fresh(0);
-  engine->set_regrid_interval(-1);        // Regrid every this intervals
+  engine->setup_fresh(-1);
+  engine->set_regrid_interval(10);        // Regrid every this intervals
   engine->set_plot_interval(1);           // Plot every this intervals
   engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals
   engine->set_output_mode(output_mode::full);
 
   engine->set_verbosity(1);
-  timestepper->set_verbosity(0);
+  timestepper->set_verbosity(1);
   timestepper->set_solver_verbosity(0);
+  timestepper->set_fast_rte(5);
+  timestepper->set_fast_poisson(1);
   amr->set_verbosity(0);
-  engine->run(0.0, 10.0, 20);
+  //  engine->run(0.0, 10.0, 200);
 
 
 #ifdef CH_MPI

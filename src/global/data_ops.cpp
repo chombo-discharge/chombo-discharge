@@ -37,23 +37,53 @@ void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
   }
 }
 
-void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
-				    const LevelData<EBCellFAB>& a_celldata,
-				    const ProblemDomain&        a_domain,
-				    const int                   a_comp){
+void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_facedata,
+					     const LevelData<EBCellFAB>& a_celldata,
+					     const ProblemDomain&        a_domain){
 
   CH_assert(a_facedata.nComp() == a_celldata.nComp());
-  CH_assert(a_comp < a_facedata.nComp());
+  
+  const int ncomp = a_facedata.nComp();
 
   for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
-    EBFluxFAB& flux_vel       = a_facedata[dit()];
-    const EBCellFAB& cell_vel = a_celldata[dit()];
-    const EBISBox& ebisbox    = cell_vel.getEBISBox();
+    EBFluxFAB& facedata       = a_facedata[dit()];
+    const EBCellFAB& celldata = a_celldata[dit()];
+    const EBISBox& ebisbox    = celldata.getEBISBox();
     const EBGraph& ebgraph    = ebisbox.getEBGraph();
     const Box& box            = a_celldata.disjointBoxLayout().get(dit());
-    
+    const IntVectSet ivs(box);
+
+    // Interior faces
+    FaceStop::WhichFaces stop_crit;
     for (int dir = 0; dir < SpaceDim; dir++){
-      EBLevelDataOps::faceCenteredAverageCellsToFaces(flux_vel[dir], cell_vel, box, ebisbox, a_domain, a_comp, a_comp, 1);
+
+      stop_crit = FaceStop::SurroundingWithBoundary;
+      for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+	const FaceIndex& face  = faceit();
+	const VolIndex& vof_lo = face.getVoF(Side::Lo);
+	const VolIndex& vof_hi = face.getVoF(Side::Hi);
+
+	if(!face.isBoundary()){
+	  for (int comp = 0; comp < ncomp; comp++){
+	    facedata[dir](face, comp) = 0.5*(celldata(vof_lo, comp) + celldata(vof_hi, comp));
+	  }
+	}
+	else{
+	  VolIndex vof;
+	  if(a_domain.contains(face.gridIndex(Side::Lo))){
+	    vof = face.getVoF(Side::Lo);
+	  }
+	  else if(a_domain.contains(face.gridIndex(Side::Hi))){
+	    vof = face.getVoF(Side::Hi);
+	  }
+	  else{
+	    MayDay::Error("data_ops::average_cell_to_face - logic bust in average cells to faces");
+	  }
+	  for (int comp = 0; comp < ncomp; comp++){
+	    facedata[dir](face, comp) = celldata(vof, comp);
+	  }
+	}
+      }
     }
   }
 }

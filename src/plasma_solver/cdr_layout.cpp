@@ -22,6 +22,7 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   }
 
   this->set_verbosity(-1);
+  this->set_phase(phase::gas);
 }
 
 cdr_layout::~cdr_layout(){

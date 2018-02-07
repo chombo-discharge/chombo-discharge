@@ -101,8 +101,9 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
   }
   else {
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
-
-    //    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
+#if 0
+    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
+#endif
     a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit));
   }
 }
@@ -136,8 +137,10 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     parts.push_back(&(*elec_baseif)); // Parts for intersection
     
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
-
-    //    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
+#if 0
+    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
+#endif
+    
     a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit));
   }
 }

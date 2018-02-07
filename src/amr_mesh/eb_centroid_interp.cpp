@@ -72,7 +72,7 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
 
-  if(!found_stencil){ // Drop to zeroth order. 
+  if(!found_stencil){ // Drop to zeroth order.
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
   }
@@ -99,7 +99,7 @@ bool eb_centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
     EBArith::getExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
   }
   else {
-    MayDay::Abort("centroid_inter::get_taylor_stencil - bad order requested. Only first and second order is supported");
+    MayDay::Abort("eb_centroid_interp::get_taylor_stencil - bad order requested. Only first and second order is supported");
   }
 
   return a_sten.size() > 0;

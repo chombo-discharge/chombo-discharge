@@ -36,7 +36,6 @@ amr_mesh::amr_mesh(){
   this->set_balance(load_balance::knapsack);
   this->set_irreg_sten_type(stencil_type::linear);
   this->set_ghost_interpolation(ghost_interpolation::pwl);
-  
 }
 
 amr_mesh::~amr_mesh(){
@@ -67,7 +66,7 @@ void amr_mesh::allocate_ptr(EBAMRCellData& a_data){
   }
 }
 
-void amr_mesh::allocate(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
+void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(cell)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(cell)" << endl;
@@ -87,7 +86,7 @@ void amr_mesh::allocate(EBAMRCellData& a_data, phase::which_phase a_phase, const
   }
 }
 
-void amr_mesh::allocate(EBAMRFluxData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
+void amr_mesh::allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(flux)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(flux)" << endl;
@@ -107,7 +106,7 @@ void amr_mesh::allocate(EBAMRFluxData& a_data, phase::which_phase a_phase, const
   }
 }
 
-void amr_mesh::allocate(EBAMRIVData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
+void amr_mesh::allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(baseiv)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(baseiv)" << endl;
@@ -363,22 +362,28 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
     pout() << "amr_mesh::regrid" << endl;
   }
 
-  if(a_tags.size() > 0 || m_max_amr_depth == 0){ // Not regridding if I don't get tags
+  Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
+  this->build_grids(tags, a_hardcap);
 
-    Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
-    this->build_grids(tags, a_hardcap);
+  this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
+  //  this->define_mflevelgrid();  // Define MFLevelGrid
+  this->define_eb_coar_ave();  // Define EBCoarseAverage on both phases
+#if 1 // Debug test
+  MayDay::Warning("amr_mesh::regrid - debug test");
+  EBAMRCellData test;
+  this->allocate(test, phase::gas, SpaceDim);
+  this->average_down(test, phase::gas);
+#endif
+  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
+  this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
+  this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
+  this->define_flux_reg();     // Define flux register (phase::gas only)
+  this->define_redist_oper();  // Define redistribution (phase::gas only)
+  this->define_advect_level(); // Define advection 
+  this->define_irreg_sten();   // Define irregular stencils
 
-    this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
-    this->define_mflevelgrid();  // Define MFLevelGrid
-    this->define_eb_coar_ave();  // Define EBCoarseAverage on both phases
-    this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
-    this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
-    this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
-    this->define_flux_reg();     // Define flux register (phase::gas only)
-    this->define_redist_oper();  // Define redistribution (phase::gas only)
-    this->define_advect_level(); // Define advection 
-    this->define_irreg_sten();   // Define irregular stencils
-  }
+
+
 }
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
@@ -405,7 +410,6 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
     m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
     m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
-
   }
   else{
     new_boxes.resize(1);
@@ -416,7 +420,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
 
   // Do Morton ordering
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    mortonOrdering(new_boxes[lvl]);
+    mortonOrdering((Vector<Box>&)new_boxes[lvl]);
   }
 
   // Load balance boxes
@@ -425,8 +429,10 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
 
   // Define grids
   m_grids.resize(1 + m_finest_level);
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){   
-    m_grids[lvl] = DisjointBoxLayout(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]); 
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_grids[lvl] = DisjointBoxLayout();
+    m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
+    m_grids[lvl].close();
   }
 }
 
@@ -521,8 +527,8 @@ void amr_mesh::define_eblevelgrid(){
     pout() << "amr_mesh::define_eblevelgrid" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(!ebis_gas.isNull()){
@@ -554,8 +560,8 @@ void amr_mesh::define_mflevelgrid(){
     pout() << "amr_mesh::define_mflevelgrid" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     Vector<EBLevelGrid> eblgs;
@@ -578,8 +584,8 @@ void amr_mesh::define_eb_coar_ave(){
 
   const int comps = SpaceDim;
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
 
@@ -594,8 +600,10 @@ void amr_mesh::define_eb_coar_ave(){
       											 m_domains[lvl-1],
       											 m_ref_ratios[lvl-1],
       											 comps,
-      											 ebis_gas));
+      											 &(*ebis_gas)));
       }
+
+#if 0
       if(!ebis_sol.isNull()){
       	m_coarave[phase::solid][lvl] = RefCountedPtr<EBCoarseAverage> (new EBCoarseAverage(m_grids[lvl],
       											   m_grids[lvl-1],
@@ -606,6 +614,9 @@ void amr_mesh::define_eb_coar_ave(){
       											   comps,
       											   ebis_sol));
       }
+#else
+      MayDay::Warning("amr_mesh::define_eb_coar_ave - debug mode");
+#endif
     }
   }
 }
@@ -967,23 +978,24 @@ void amr_mesh::define_irreg_sten(){
   }
 }
 
-
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
   CH_TIME("amr_mesh::average_down");
   if(m_verbosity > 3){
     pout() << "amr_mesh::average_down(ebcell)" << endl;
   }
+  const RefCountedPtr<EBIndexSpace>& ebis = m_mfis->get_ebis(a_phase);
 
-  for (int lvl = m_finest_level; lvl > 0; lvl--){
-    const int ncomps = a_data[lvl]->nComp();
-    const Interval interv (0, ncomps-1);
+  if(!ebis.isNull()){
+    for (int lvl = m_finest_level; lvl > 0; lvl--){
+      const int ncomps = a_data[lvl]->nComp();
+      const Interval interv (0, ncomps-1);
 
-    m_coarave[a_phase][lvl]->average(*a_data[lvl-1], *a_data[lvl], interv);
+      m_coarave[a_phase][lvl]->average(*a_data[lvl-1], *a_data[lvl], interv);
+    }
 
-  }
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    a_data[lvl]->exchange();
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      a_data[lvl]->exchange();
+    }
   }
 }
 

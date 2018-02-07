@@ -27,7 +27,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
 
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
-  this->set_botsolver_smooth(32);
+  this->set_botsolver_smooth(16);
   this->set_bottom_drop(8);
 }
 
@@ -62,8 +62,9 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   }
   
   m_opfact->set_jump(a_sigma, 1.0);
-  MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
+
 #if 1 // Debug
+  MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
   m_opfact->set_jump(0.0, 1.0);
 #endif
 
@@ -72,13 +73,18 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   // Must have a dummy for checking initial residual
   MFAMRCellData mfzero;
+  MFAMRCellData source;
   m_amr->allocate(mfzero, ncomp);
+  m_amr->allocate(source, ncomp);
   data_ops::set_value(mfzero, 0.0);
+  data_ops::set_value(source, 0.0);
+  data_ops::incr(source, a_source, 1.0);
+  data_ops::scale(source, 1./(units::s_eps0));
 
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, rhs, res, zero;
   m_amr->alias(phi,  a_state);
-  m_amr->alias(rhs,  a_source);
+  m_amr->alias(rhs,  source);
   m_amr->alias(res,  m_resid);
   m_amr->alias(zero, mfzero);
 

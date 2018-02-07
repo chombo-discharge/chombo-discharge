@@ -106,12 +106,14 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	// Set input arguments
 	const RealVect e = RealVect(D_DECL(E(vof, 0), E(vof, 1), E(vof, 2)));
 	for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-	  cdr_densities[idx] = (*(*a_cdr_densities[idx])[lvl])[dit](vof, comp);
+	  const int idx  = solver_it.get_solver();
+	  const Real phi = (*(*a_cdr_densities[idx])[lvl])[dit](vof, comp);
+	  cdr_densities[idx] = Max(0.0, phi);
 	}
 	for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
 	  const int idx = solver_it.get_solver();
-	  rte_densities[idx] = (*(*a_rte_densities[idx])[lvl])[dit](vof, comp);
+	  const Real phi = (*(*a_rte_densities[idx])[lvl])[dit](vof, comp);
+	  rte_densities[idx] = Max(0.0, phi);
 	}
 
 	Vector<Real> sources = m_plaskin->compute_source_terms(cdr_densities, rte_densities, e);
@@ -122,35 +124,49 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
       }
 
       // Do irregular cells
-      MayDay::Warning("time_stepper::compute_source_terms - debug mode");
-#if 0
       if(a_centering == centering::cell_center){
 	ivs = ebisbox.getIrregIVS(box);
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 
-	  // Reset these and apply stencil
+	  // Compute CDR densities
+	  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+	    const int idx             = solver_it.get_solver();
+	    const VoFStencil& stencil = stencils[dit()](vof, comp);
+
+	    Real phi = 0.0;
+	    for (int i = 0; i < stencil.size(); i++){
+	      const VolIndex& ivof = stencil.vof(i);
+	      const Real& iweight  = stencil.weight(i);
+	      phi += (*(*a_cdr_densities[idx])[lvl])[dit()](ivof, comp)*iweight;
+	    }
+	    cdr_densities[idx] = Max(0.0, phi);
+
+	    
+	  }
+
+	  // Compute RTE densities
+	  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+	    const int idx             = solver_it.get_solver();
+	    const VoFStencil& stencil = stencils[dit()](vof, comp);
+
+	    Real phi = 0.0;
+	    for (int i = 0; i < stencil.size(); i++){
+	      const VolIndex& ivof = stencil.vof(i);
+	      const Real& iweight  = stencil.weight(i);
+	      phi += (*(*a_rte_densities[idx])[lvl])[dit()](ivof, comp)*iweight;
+	      rte_densities[idx] = Max(0.0, phi);
+	    }
+	  }
+
+	  // Compute E
 	  RealVect e = RealVect::Zero;
-	  cdr_densities.assign(0.0);
-	  rte_densities.assign(0.0);
-	
 	  const VoFStencil& stencil = stencils[dit()](vof, comp);
 	  for (int i = 0; i < stencil.size(); i++){
 	    const VolIndex& ivof = stencil.vof(i);
-	    const Real iweight   = stencil.weight(i);
-
+	    const Real& iweight  = stencil.weight(i);
 	    for (int dir = 0; dir < SpaceDim; dir++){
-	      e[dir] = E(ivof, dir)*iweight;
-	    }
-	  
-	    for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-	      const int idx = solver_it.get_solver();
-	      cdr_densities[idx] = +(*(*a_cdr_densities[idx])[lvl])[dit](ivof, comp)*iweight;
-	    }
-
-	    for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-	      const int idx = solver_it.get_solver();
-	      rte_densities[idx] = +(*(*a_rte_densities[idx])[lvl])[dit](ivof, comp)*iweight;
+	      e[dir] += E(ivof, dir)*iweight;
 	    }
 	  }
 
@@ -161,7 +177,6 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	  }
 	}
       }
-#endif
     }
   }
 
@@ -520,9 +535,9 @@ void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phas
 }
 
 void time_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("time_stepper::compute_E(ebamrflux, mfamrcell)");
+  CH_TIME("time_stepper::compute_E(ebamrflux, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_E(ebamrflux, mfamrcell)" << endl;
+    pout() << "time_stepper::compute_E(ebamrflux, phase, ebamrcell)" << endl;
   }
 
   CH_assert(a_E_face[0]->nComp() == SpaceDim);
@@ -530,16 +545,14 @@ void time_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a
 
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    for (int comp = 0; comp < SpaceDim; comp++){
-      data_ops::average_cell_to_face(*a_E_face[lvl], *a_E_cell[lvl], m_amr->get_domains()[lvl], comp);
-    }
+    data_ops::average_cell_to_face_allcomps(*a_E_face[lvl], *a_E_cell[lvl], m_amr->get_domains()[lvl]);
   }
 }
 
 void time_stepper::compute_E(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("time_stepper::compute_E(ebamrflux, mfamrcell)");
+  CH_TIME("time_stepper::compute_E(ebamriv, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_E(ebamrflux, mfamrcell)" << endl;
+    pout() << "time_stepper::compute_E(ebamriv, phase, ebamrcell)" << endl;
   }
 
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
@@ -791,14 +804,13 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
 
   EBAMRCellData rho_gas;
   m_amr->allocate_ptr(rho_gas); 
-  m_amr->alias(rho_gas, phase::gas, a_rho); return;
-
+  m_amr->alias(rho_gas, phase::gas, a_rho); 
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
     // Add volumetric charge 
-    for (cdr_iterator solver_it(*m_cdr, a_densities); solver_it.ok(); ++solver_it){
-      const EBAMRCellData& density       = solver_it.get_data();
+    for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+      const EBAMRCellData& density       = *(a_densities[solver_it.get_solver()]);
       const RefCountedPtr<species>& spec = solver_it.get_species();
 
       data_ops::incr(*rho_gas[lvl], *density[lvl], spec->get_charge());
@@ -806,11 +818,11 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
 
     // Scale by s_Qe/s_eps0
     data_ops::scale(*a_rho[lvl], units::s_Qe);
-
   }
 
+
+#if 0 // Debug
   MayDay::Warning("time_stepper::compute_rho - debug mode");
-#if 1 // Debug
   data_ops::set_value(a_rho, 0.0);
 #endif
 
@@ -822,7 +834,9 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
     m_amr->interpolate_to_centroids(rho_gas, phase::gas);
   }
 
+#if 1 // Not sure if I should do this...
   data_ops::kappa_scale(a_rho);
+#endif
 
 
 }

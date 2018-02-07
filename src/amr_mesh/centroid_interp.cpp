@@ -53,6 +53,7 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
   }
   else if(m_stencil_type == stencil_type::taylor){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+    CH_assert(found_stencil);
   }
   else if(m_stencil_type == stencil_type::lsq){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
@@ -74,7 +75,6 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
   }
-
 }
 
 bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
@@ -87,23 +87,24 @@ bool centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,
 					 const IntVectSet&        a_cfivs){
   CH_TIME("centroid_interp::get_taylor_stencil");
 
+  const Real tol           = 1.E-6;
   const int comp           = 0;
   const RealVect& centroid = a_ebisbox.centroid(a_vof);
   IntVectSet* cfivs        = const_cast<IntVectSet*>(&a_cfivs);
-  
+
+
+  int order;               
   if(m_order == 1){
-    EBArith::getFirstOrderExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
+    order = EBArith::getFirstOrderExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
   }
   else if(m_order == 2){
-    EBArith::getExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
+    order = EBArith::getExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
   }
   else {
-    MayDay::Abort("centroid_inter::get_taylor_stencil - bad order requested. Only first and second order is supported");
+    MayDay::Abort("centroid_interp::get_taylor_stencil - bad order requested. Only first and second order is supported");
   }
 
-
-  return a_sten.size() > 0;
-
+  return order > 0;
 }
 
 bool centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,

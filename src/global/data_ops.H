@@ -26,10 +26,9 @@ public:
 				   const LevelData<EBCellFAB>& a_celldata,
 				   const ProblemDomain&        a_domain);
 
-  static void average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
-				   const LevelData<EBCellFAB>& a_celldata,
-				   const ProblemDomain&        a_domain,
-				   const int                   a_comp);
+  static void average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_facedata,
+					    const LevelData<EBCellFAB>& a_celldata,
+					    const ProblemDomain&        a_domain);
 
   static void incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale);
   

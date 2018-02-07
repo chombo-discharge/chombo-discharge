@@ -415,6 +415,7 @@ Vector<Real> morrow_lowke::compute_cathode_flux(const Vector<Real>& a_extrapolat
   for (int i = 0; i < m_num_species; i++){
     fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
+  return fluxes;
 
   // For electrons, we add ion bombardment of positive ions and the photoelectric effect
   fluxes[m_nelec_idx] = 0.;
