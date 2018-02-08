@@ -19,7 +19,7 @@ rte_layout::rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
     m_solvers[i]->set_photon_group(m_photons[i]);
   }
 
-  this->set_verbosity(10);
+  this->set_verbosity(-1);
   this->set_phase(phase::gas);
 }
 
@@ -89,11 +89,11 @@ void rte_layout::set_phase(phase::which_phase a_phase){
 
 void rte_layout::set_verbosity(const int a_verbosity){
   CH_TIME("rte_layout::set_verbosity");
+
+  m_verbosity = a_verbosity;
   if(m_verbosity > 5){
     pout() << "rte_layout::set_verbosity" << endl;
   }
-
-  m_verbosity = a_verbosity;
 
   for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();

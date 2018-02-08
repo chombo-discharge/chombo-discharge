@@ -21,7 +21,24 @@
 #include <BaseBCFuncEval.H>
 
 /*!
-  @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
+  @brief Implementation of poisson_solver which uses a two-phase geometric multigrid solver
+  @details 
+  
+  Class options
+  -------------
+
+      poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
+      poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
+      poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
+      poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
+      poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
+      poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
+      poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
+      poisson_multifluid.gmg_hang          = 0.2       # Solver hang
+      poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
+      poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+      poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+      
 */
 class poisson_multifluid_gmg : public poisson_solver {
 public:

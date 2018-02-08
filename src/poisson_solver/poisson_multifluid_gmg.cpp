@@ -21,6 +21,7 @@
 #include <MFLevelDataOps.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
+#include <ParmParse.H>
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
@@ -131,8 +132,23 @@ void poisson_multifluid_gmg::regrid(const int a_old_finest_level, const int a_ne
 }
 
 void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){
+  CH_TIME("poisson_multifluid_gmg::set_bottom_solver");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::set_bottom_solver" << endl;
+  }
+  
   if(a_whichsolver == 0 || a_whichsolver == 1){
     m_bottomsolver = a_whichsolver;
+
+    std::string str;
+    ParmParse pp("poisson_multifluid");
+    pp.query("gmg_bottom_solver", str);
+    if(str == "simple"){
+      m_bottomsolver = 0;
+    }
+    else if(str == "bicgstab"){
+      m_bottomsolver = 1;
+    }
   }
   else{
     MayDay::Abort("poisson_multifluid_gmg::set_bottom_solver - Unsupported solver type requested");
@@ -147,10 +163,24 @@ void poisson_multifluid_gmg::set_botsolver_smooth(const int a_numsmooth){
   CH_assert(a_numsmooth > 0);
   
   m_numsmooth = a_numsmooth;
+
+  ParmParse pp("poisson_multifluid");
+  pp.query("gmg_bottom_relax", m_numsmooth);
 }
 
 void poisson_multifluid_gmg::set_bottom_drop(const int a_bottom_drop){
+  CH_TIME("poisson_multifluid_gmg::set_bottom_drop");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::set_bottom_drop" << endl;
+  }
+  
   m_bottom_drop = a_bottom_drop;
+
+  ParmParse pp("poisson_multifluid");
+  pp.query("gmg_bottom_drop", m_bottom_drop);
+  if(m_bottom_drop < 2){
+    m_bottom_drop = 2;
+  }
 }
 
 void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_relax_type,
@@ -178,6 +208,22 @@ void poisson_multifluid_gmg::set_gmg_solver_parameters(relax::which_relax a_rela
   m_gmg_min_iter    = a_min_iter;
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
+
+  ParmParse pp("poisson_multifluid");
+
+  pp.query("gmg_verbosity",   m_gmg_verbosity);
+  pp.query("gmg_pre_smooth",  m_gmg_pre_smooth);
+  pp.query("gmg_post_smooth", m_gmg_post_smooth);
+  pp.query("gmg_bott_smooth", m_gmg_bot_smooth);
+  pp.query("gmg_max_iter",    m_gmg_max_iter);
+  pp.query("gmg_min_iter",    m_gmg_min_iter);
+  pp.query("gmg_tolerance",   m_gmg_eps);
+  pp.query("gmg_hang",        m_gmg_hang);
+
+#if 1 // Overriding these because this appears to be the only things that works with mfconductivityop
+  m_gmg_relax_type = relax::gsrb_fast;
+  m_gmg_type       = amrmg::vcycle;
+#endif
 }
 
 

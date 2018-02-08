@@ -340,7 +340,10 @@ void rk2::solve_poisson_k1(){
   data_ops::incr(scratch_pot, m_poisson->get_state(), 1.0);
 
   if((m_step + 1) % m_fast_poisson == 0){
-    this->solve_poisson(scratch_pot, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
+    bool converged = this->solve_poisson(scratch_pot, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
+    if(!converged){
+      pout() << "rk2::solve_poisson_k1 - solver did not converge at step = " << m_step << endl;
+    }
   }
 }
 
@@ -588,11 +591,14 @@ void rk2::solve_poisson_k2(){
     data_ops::scale(pot, -(1.0 - m_alpha)/m_alpha);
     data_ops::incr(pot, phi, 1./m_alpha);
 
-    this->solve_poisson(pot,
-			m_poisson->get_source(),
-			m_cdr->get_states(),
-			m_sigma->get_state(),
-			centering::cell_center);
+    const bool converged = this->solve_poisson(pot,
+					       m_poisson->get_source(),
+					       m_cdr->get_states(),
+					       m_sigma->get_state(),
+					       centering::cell_center);
+    if(!converged){
+      pout() << "rk2::solve_poisson_k2 - solver did not converge at step = " << m_step << endl;
+    }
   }
   else{
     data_ops::set_value(pot, 0.0);

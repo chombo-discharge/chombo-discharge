@@ -1,38 +1,27 @@
 /*!
-  @file main.cpp
-  @brief Main file for running the chombo-streamer code
+  @file  main.cpp
+  @brief Example main file for running the chombo-streamer code
   @author Robert Marskar
 */
 
-#include <ParmParse.H>
-
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
-#include "rte_solver.H"
-#include "amr_mesh.H"
-#include "poisson_multifluid_gmg.H"
-#include "poisson_staircase_gmg.H"
-#include "cdr_solver.H"
-#include "cdr_gdnv.H"
-#include "cdr_sg.H"
-#include "eddington_sp1.H"
 #include "rk2.H"
 #include "field_tagger.H"
 
-#include "cdr_layout.H"
-#include "rte_layout.H"
-#include "morrow_lowke.H"
-#include "sigma_solver.H"
 
+#include "morrow_lowke.H"
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
 #include "rod_slab.H"
+
+#include <ParmParse.H>
 
 /*!
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  return 3.E4;
+  return 1.E4;
 }
 
 int main(int argc, char* argv[]){
@@ -45,16 +34,12 @@ int main(int argc, char* argv[]){
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
-#if 1
+#if 0
   EBIndexSpace::s_useMemoryLoadBalance = true;
 #endif
 
-  // Physical domain, geometry, time stepper, amr, and plasma kinetics
-  const RealVect probLo = -1.E-2*RealVect::Unit;
-  const RealVect probHi =  1.E-2*RealVect::Unit;
 
-
-  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
+  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(new morrow_lowke());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
@@ -67,33 +52,8 @@ int main(int argc, char* argv[]){
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_slab());
 #endif
 
-  // Refinement ratios
-  Vector<int> refrat(5);
-  refrat[0] = 4;
-  refrat[1] = 4;
-  refrat[2] = 2;
-  refrat[3] = 2;
-  refrat[4] = 2;
-  
-  // Set up the amr strategey
-  amr->set_verbosity(10);                         // Set verbosity
-  amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(2);                      // Set max amr depth
-  amr->set_max_simulation_depth(4);               // Set maximum simulation depth
-  amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
-  amr->set_refinement_ratios(refrat);             // Set refinement ratios
-  amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(8);                    // Set blocking factor
-  amr->set_buffer_size(1);                        // Set buffer size
-  amr->set_max_box_size(32);                      // Set max box size
-  amr->set_redist_rad(1);                         // Set redistribution radius
-  amr->set_eb_ghost(4);                           // Set EB ghost vectors
-  amr->set_physical_domain(physdom);              // Set physical domain
-  amr->set_irreg_sten_type(stencil_type::linear); // Set preferred stencil type
-  amr->set_irreg_sten_order(1);                   // Set preferred stencil order
-  amr->set_irreg_sten_radius(1);                  // Set extrapolation stencil radius
 
-  // Set up the plasma engine
+  // Set up the plasma engine and run it
   RefCountedPtr<plasma_engine> engine = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 											compgeom,
 											plaskin,
@@ -101,21 +61,7 @@ int main(int argc, char* argv[]){
 											amr,
 											tagger));
   engine->set_potential(potential_curve);
-  engine->set_verbosity(10);
-  engine->set_geom_refinement_depth(-1);
-  engine->setup(0, false, "");
-  engine->set_regrid_interval(10);        // Regrid every this intervals
-  engine->set_plot_interval(1);           // Plot every this intervals
-  engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals
-  engine->set_output_mode(output_mode::full);
-
-  engine->set_verbosity(1);
-  timestepper->set_verbosity(1);
-  timestepper->set_solver_verbosity(0);
-  timestepper->set_fast_rte(1);
-  timestepper->set_fast_poisson(1);
-  amr->set_verbosity(0);
-  engine->run(0.0, 10.0, 100);
+  engine->setup_and_run();
 
 
 #ifdef CH_MPI

@@ -121,11 +121,11 @@ void cdr_layout::set_phase(phase::which_phase a_phase){
 
 void cdr_layout::set_verbosity(const int a_verbosity){
   CH_TIME("cdr_layout::set_verbosity");
+
+  m_verbosity = a_verbosity;
   if(m_verbosity > 5){
     pout() << "cdr_layout::set_verbosity" << endl;
   }
-
-  m_verbosity = a_verbosity;
 
   for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();

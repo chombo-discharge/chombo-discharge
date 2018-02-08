@@ -14,12 +14,14 @@
 #include <EBAMRIO.H>
 
 poisson_solver::poisson_solver(){
+  this->set_verbosity(-1);
+  
   CH_TIME("poisson_solver::poisson_solver");
   if(m_verbosity > 5){
     pout() << "poisson_solver::poisson_solver" << endl;
   }
   
-  this->set_verbosity(-1);
+
   this->allocate_wall_bc();
   this->set_time(0, 0., 0.);
 }
@@ -193,7 +195,12 @@ void poisson_solver::set_potential(Real (*a_potential)(const Real a_time)){
 }
 
 void poisson_solver::set_verbosity(const int a_verbosity){
+  CH_TIME("poisson_solver::set_verbosity");
   m_verbosity = a_verbosity;
+
+  if(m_verbosity > 4){
+    pout() << "poisson_solver::set_verbosity" << endl;
+  }
 }
 
 void poisson_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {

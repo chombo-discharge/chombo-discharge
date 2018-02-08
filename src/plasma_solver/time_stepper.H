@@ -21,7 +21,22 @@
 #include <RealVect.H>
 
 /*!
-  @brief Abstract class for evolving in time across an amr mesh
+  @brief Abstract class for evolving in time across an amr mesh. 
+  @details This class has default options relating
+  
+  Class options
+  -------------
+
+  time_stepper.verbosity        = 1     # Class verbosity
+  time_stepper.solver_verbosity = 0     # Individual solver verbosities
+  time_stepper.fast_rte         = 1     # Solve RTE every this time steps
+  time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
+  time_stepper.min_dt           = 0.    # Minimum permitted time step
+  time_stepper.min_dt           = 1.    # Maximum permitted time step
+  time_stepper.cfl              = 0.5   # CFL number
+  time_stepper.relax_time       = 1.0   # Relaxation time constant
+  time_stepper.source_growth    = 100.0 # Relaxation time constant
+
 */
 class time_stepper {
 public:
@@ -52,6 +67,22 @@ public:
     @brief Cache states
   */
   virtual void cache_states();
+
+  /*!
+    @brief Solve the poisson equation. This calls compute_rho() 
+    @details This assumes that the data contain in cdr_layout is cell-centered
+  */
+  virtual bool solve_poisson();
+
+  /*!
+    @brief General poisson solver routine. 
+    @details You have the option of supplying storage for a right-hand side if you want to. The densities can be either cell-centered or centroid-centered, If they are cell-centered, we will extrapolate the right-hand side to the centroids first. 
+  */
+  virtual bool solve_poisson(MFAMRCellData&                a_potential,
+			     MFAMRCellData&                a_rhs,
+			     const Vector<EBAMRCellData*>  a_densities,
+			     const EBAMRIVData&            a_sigma,
+			     const centering::which_center a_centering);
 
   /*!
     @brief Compute the time step and how it was restricted
@@ -329,28 +360,12 @@ public:
   virtual void set_potential(Real (*a_potential)(const Real a_time));
 
   /*!
-    @brief Solve the poisson equation. This calls compute_rho() 
-    @details This assumes that the data contain in cdr_layout is cell-centered
-  */
-  virtual void solve_poisson();
-
-  /*!
-    @brief General poisson solver routine. 
-    @details You have the option of supplying storage for a right-hand side if you want to. The densities can be either cell-centered or centroid-centered, If they are cell-centered, we will extrapolate the right-hand side to the centroids first. 
-  */
-  virtual void solve_poisson(MFAMRCellData&                a_potential,
-			     MFAMRCellData&                a_rhs,
-			     const Vector<EBAMRCellData*>  a_densities,
-			     const EBAMRIVData&            a_sigma,
-			     const centering::which_center a_centering);
-
-  /*!
-    @brief RTE solve using data existing in other solvers
+    @brief RTE advance using data existing in other solvers
   */
   virtual void solve_rte(const Real a_dt);
 
   /*!
-    @brief General RTE solve routine
+    @brief General RTE advance routine
   */
   virtual void solve_rte(Vector<EBAMRCellData*>&       a_states,
 			 Vector<EBAMRCellData*>&       a_rhs,
@@ -382,9 +397,7 @@ public:
   /*!
     @brief Return time
   */
-  virtual Real get_time(){
-    return m_time;
-  }
+  virtual Real get_time();
 
   /*!
     @brief Get cdr solvers
@@ -492,6 +505,11 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
+
+  /*!
+    @brief Verbosity for solvers
+  */
+  int m_solver_verbosity;
 
   /*!
     @brief Fast RTE solver

@@ -317,11 +317,13 @@ void sigma_solver::set_sigma(const Real a_sigma){
 
 void sigma_solver::set_verbosity(const int a_verbosity){
   CH_TIME("sigma_solver::set_verbosity");
+  m_verbosity = a_verbosity;
+  
   if(m_verbosity > 5){
     pout() << "sigma_solver::set_verbosity" << endl;
   }
   
-  m_verbosity = a_verbosity;
+
 }
 
 void sigma_solver::set_time(const int a_step, const Real a_time, const Real a_dt){

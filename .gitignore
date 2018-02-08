@@ -1,13 +1,12 @@
 *.ex
 *.hdf5
 *.png
-/doc
 /o
 /f
 /p
 /d
 **/o/**
-**/doc/**
+**/doc/doxygen/**
 **/f/**
 **/p/**
 **/d/**

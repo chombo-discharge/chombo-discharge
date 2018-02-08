@@ -9,8 +9,12 @@
 #include "data_ops.H"
 
 rte_solver::rte_solver(){
+  m_name = "rte_solver";
 
+  this->set_verbosity(-1);
   this->set_phase();
+
+
 }
 
 rte_solver::~rte_solver(){
@@ -142,11 +146,13 @@ void rte_solver::set_stationary(const bool a_stationary) {
 
 void rte_solver::set_verbosity(const int a_verbosity){
   CH_TIME("rte_solver::set_verbosity");
+
+  m_verbosity = a_verbosity;
   if(m_verbosity > 5){
     pout() << m_name + "::set_verbosity" << endl;
   }
   
-  m_verbosity = a_verbosity;
+
 }
 
 void rte_solver::set_source(const EBAMRCellData& a_source){

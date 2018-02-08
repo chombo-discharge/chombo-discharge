@@ -10,6 +10,18 @@
 
 #include <RealVect.H>
 
+/*!
+  @brief Basic class that describes a physical domain. This is just the two corners of a box
+  @details By default, this class computes on the unit cube. Domains are set through the alternative constructor or through
+  the input script.
+
+  Class options
+  -------------
+
+      physical_domain.lo_corner = -1 -1 -1
+      physical_domain.hi_corner =  1  1  1
+
+*/
 class physical_domain {
 public:
   /*!

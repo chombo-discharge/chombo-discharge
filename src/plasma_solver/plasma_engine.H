@@ -19,7 +19,26 @@
 #include "mfis.H"
 
 /*!
-  @brief Main class for time/space advancement of streamer equations
+  @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
+  regrid intervals etc. 
+
+  Class options
+  -------------
+
+      plasma_engine.verbosity            = 1             # Engine verbosity
+      plasma_engine.plot_interval        = 10            # Plot interval
+      plasma_engine.regrid_interval      = 10            # Regrid interval
+      plasma_engine.checkpoint_interval  = 10            # Checkpoint interval
+      plasma_engine.init_regrids         = 0             # Number of initial regrids
+      plasma_engine.start_time           = 0             # Start time (fresh simulations only)
+      plasma_engine.stop_time            = 1.0           # Stop time
+      plasma_engine.max_steps            = 100           # Maximum number of steps
+      plasma_engine.output_mode          = full          # Output mode
+      plasma_engine.output_directory     = ./            # Output directory
+      plasma_engine.output_names         = simulation    # Simulation output names
+      plasma_engine.restart              = false         # Do restart or not
+      plasma_engine.restart_file         = default_file  # Restart file
+
 */
 class plasma_engine {
 public:
@@ -43,6 +62,11 @@ public:
     @brief Do initial regrids. This regrid method uses the initial data inside each solver. 
   */
   virtual void initial_regrids(const int a_init_regrids);
+
+  /*!
+    @brief Setup and run simulations
+  */
+  virtual void setup_and_run();
 
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
@@ -119,6 +143,36 @@ public:
     @brief Set the checkpoint interval
   */
   virtual void set_checkpoint_interval(const int a_chk_interval);
+
+  /*!
+    @brief Set restart
+  */
+  virtual void set_restart(const bool a_restart);
+
+  /*!
+    @brief Restart step file
+  */
+  virtual void set_restart_step(const int a_restart_step);
+
+  /*!
+    @brief Set simulation start time
+  */
+  virtual void set_start_time(const Real a_start_time);
+
+  /*!
+    @brief Set simulation stop time
+  */
+  virtual void set_stop_time(const Real a_stop_time);
+
+  /*!
+    @brief Set maximum number of steps
+  */
+  virtual void set_max_steps(const int a_max_steps);
+
+  /*!
+    @brief Set number of initial regrids
+  */
+  virtual void set_init_regrids(const int a_init_regrids);
 
   /*!
     @brief Sanity check
@@ -248,6 +302,21 @@ protected:
   int m_gas_conductor_interface_tag_depth;
 
   /*!
+    @brief Maximum number of steps
+  */
+  int m_max_steps;
+
+  /*!
+    @brief Number of initial regrids
+  */
+  int m_init_regrids;
+
+  /*!
+    @brief Restart step
+  */
+  int m_restart_step;
+
+  /*!
     @brief Tags
   */
   Vector<IntVectSet> m_cell_tags;
@@ -266,6 +335,16 @@ protected:
     @brief Potential
   */
   Real (*m_potential)(const Real a_time);
+
+  /*!
+    @brief Simulation start time
+  */
+  Real m_start_time;
+
+  /*!
+    @brief Simulation stop time
+  */
+  Real m_stop_time;
 
   /*!
     @brief Time increment

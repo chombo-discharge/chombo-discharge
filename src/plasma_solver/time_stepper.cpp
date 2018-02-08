@@ -14,7 +14,7 @@
 #include <ParmParse.H>
 
 time_stepper::time_stepper(){
-  this->set_verbosity(10);
+  this->set_verbosity(1);
   this->set_cfl(0.8);
   this->set_relax_time(2.0);
   this->set_source_growth(1.E10);
@@ -22,6 +22,7 @@ time_stepper::time_stepper(){
   this->set_max_dt(1.E99);
   this->set_fast_rte(1);
   this->set_fast_poisson(1);
+  this->set_solver_verbosity(0);
 }
 
 time_stepper::~time_stepper(){
@@ -38,6 +39,38 @@ bool time_stepper::stationary_rte(){
   }
 
   return m_rte->is_stationary();
+}
+
+bool time_stepper::solve_poisson(){
+  CH_TIME("time_stepper::solve_poisson()");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::solve_poisson()" << endl;
+  }
+
+  this->compute_rho();
+  const bool converged = m_poisson->solve(m_poisson->get_state(),
+					  m_poisson->get_source(),
+					  m_sigma->get_state(),
+					  false);
+
+  return converged;
+}
+
+bool time_stepper::solve_poisson(MFAMRCellData&                a_potential,
+				 MFAMRCellData&                a_rhs,
+				 const Vector<EBAMRCellData*>  a_densities,
+				 const EBAMRIVData&            a_sigma,
+				 const centering::which_center a_centering){
+  CH_TIME("time_stepper::solve_poisson(full)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::solve_poisson(full)" << endl;
+  }
+
+  this->compute_rho(a_rhs, a_densities, a_centering);
+
+  const bool converged = m_poisson->solve(a_potential, a_rhs, a_sigma, false);
+
+  return converged;
 }
 
 void time_stepper::cache_states(){
@@ -960,6 +993,8 @@ void time_stepper::instantiate_solvers(){
   this->setup_rte();
   this->setup_poisson();
   this->setup_sigma();
+
+  this->set_solver_verbosity(m_solver_verbosity);
 }
 
 void time_stepper::initial_data(){
@@ -1091,12 +1126,15 @@ void time_stepper::set_potential(Real (*a_potential)(const Real a_time)){
 }
 
 void time_stepper::set_verbosity(const int a_verbosity){
-  CH_TIME("time_stepper::set_verbosity");
+  m_verbosity = a_verbosity;
+
+  ParmParse pp("time_stepper");
+  pp.query("verbosity", m_verbosity);
+
+    CH_TIME("time_stepper::set_verbosity");
   if(m_verbosity > 5){
     pout() << "time_stepper::set_verbosity" << endl;
   }
-  
-  m_verbosity = a_verbosity;
 }
 
 void time_stepper::set_solver_verbosity(const int a_verbosity){
@@ -1105,34 +1143,64 @@ void time_stepper::set_solver_verbosity(const int a_verbosity){
     pout() << "time_stepper::set_solver_verbosity" << endl;
   }
 
+  m_solver_verbosity = a_verbosity;
+  
+  ParmParse pp("time_stepper");
+  pp.query("solver_verbosity", m_solver_verbosity);
+
   if(!m_cdr.isNull()){
-    m_cdr->set_verbosity(a_verbosity);
+    m_cdr->set_verbosity(m_solver_verbosity);
   }
   if(!m_poisson.isNull()){
-    m_poisson->set_verbosity(a_verbosity);
+    m_poisson->set_verbosity(m_solver_verbosity);
   }
   if(!m_rte.isNull()){
-    m_rte->set_verbosity(a_verbosity);
+    m_rte->set_verbosity(m_solver_verbosity);
   }
   if(!m_sigma.isNull()){
-    m_sigma->set_verbosity(a_verbosity);
+    m_sigma->set_verbosity(m_solver_verbosity);
   }
 }
 
 void time_stepper::set_fast_rte(const int a_fast_rte){
   m_fast_rte = a_fast_rte;
+
+  ParmParse pp("time_stepper");
+  pp.query("fast_rte", m_fast_rte);
+  if(m_fast_rte <= 0){
+    m_fast_rte = a_fast_rte;
+  }
+
 }
 
 void time_stepper::set_fast_poisson(const int a_fast_poisson){
   m_fast_poisson = a_fast_poisson;
+
+  ParmParse pp("time_stepper");
+  pp.query("fast_poisson", m_fast_poisson);
+  if(m_fast_poisson <= 0){
+    m_fast_poisson = a_fast_poisson;
+  }
 }
 
 void time_stepper::set_min_dt(const Real a_min_dt){
   m_min_dt = Max(a_min_dt, 0.0);
+
+  ParmParse pp("time_stepper");
+  pp.query("min_dt", m_min_dt);
+  if(m_min_dt < 0.0){
+    m_min_dt = a_min_dt;
+  }
 }
 
 void time_stepper::set_max_dt(const Real a_max_dt){
   m_max_dt = Max(a_max_dt, 0.0);
+
+  ParmParse pp("time_stepper");
+  pp.query("max_dt", m_max_dt);
+  if(m_max_dt < 0.0){
+    m_max_dt = a_max_dt;
+  }
 }
 
 void time_stepper::set_cfl(const Real a_cfl){
@@ -1140,14 +1208,29 @@ void time_stepper::set_cfl(const Real a_cfl){
 
   ParmParse pp("time_stepper");
   pp.query("cfl", m_cfl);
+  if(m_cfl < 0.0){
+    m_cfl = a_cfl;
+  }
 }
 
 void time_stepper::set_relax_time(const Real a_relax_time){
   m_relax_time = a_relax_time;
+
+  ParmParse pp("time_stepper");
+  pp.query("relax_time", m_relax_time);
+  if(m_relax_time < 0.0){
+    m_relax_time = a_relax_time;
+  }
 }
 
 void time_stepper::set_source_growth(const Real a_src_growth){
   m_src_growth = a_src_growth;
+
+  ParmParse pp("time_stepper");
+  pp.query("source_growth", m_src_growth);
+  if(m_src_growth < 0.0){
+    m_src_growth = a_src_growth;
+  }
 }
 
 void time_stepper::setup_cdr(){
@@ -1157,7 +1240,7 @@ void time_stepper::setup_cdr(){
   }
 
   m_cdr = RefCountedPtr<cdr_layout> (new cdr_layout(m_plaskin));
-  m_cdr->set_verbosity(m_verbosity);
+  m_cdr->set_verbosity(m_solver_verbosity);
   m_cdr->set_amr(m_amr);
   m_cdr->set_computational_geometry(m_compgeom);
   m_cdr->set_physical_domain(m_physdom);
@@ -1173,7 +1256,7 @@ void time_stepper::setup_poisson(){
   }
 
   m_poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
-  m_poisson->set_verbosity(m_verbosity);
+  m_poisson->set_verbosity(m_solver_verbosity);
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
   m_poisson->set_physical_domain(m_physdom);
@@ -1207,7 +1290,7 @@ void time_stepper::setup_rte(){
 
   m_rte = RefCountedPtr<rte_layout> (new rte_layout(m_plaskin));
   m_rte->set_phase(phase::gas);
-  m_rte->set_verbosity(m_verbosity);
+  m_rte->set_verbosity(m_solver_verbosity);
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);
   m_rte->set_physical_domain(m_physdom);
@@ -1223,7 +1306,7 @@ void time_stepper::setup_sigma(){
 
   m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());
   m_sigma->set_amr(m_amr);
-  m_sigma->set_verbosity(m_verbosity);
+  m_sigma->set_verbosity(m_solver_verbosity);
   m_sigma->set_computational_geometry(m_compgeom);
   m_sigma->set_plasma_kinetics(m_plaskin);
   m_sigma->set_physical_domain(m_physdom);
@@ -1239,34 +1322,6 @@ void time_stepper::solver_dump(){
   m_cdr->write_plot_file();
   m_poisson->write_plot_file();
   m_rte->write_plot_file();
-}
-
-void time_stepper::solve_poisson(){
-  CH_TIME("time_stepper::solve_poisson()");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::solve_poisson()" << endl;
-  }
-
-  this->compute_rho();
-  m_poisson->solve(m_poisson->get_state(),
-		   m_poisson->get_source(),
-		   m_sigma->get_state(),
-		   false);
-}
-
-void time_stepper::solve_poisson(MFAMRCellData&                a_potential,
-				 MFAMRCellData&                a_rhs,
-				 const Vector<EBAMRCellData*>  a_densities,
-				 const EBAMRIVData&            a_sigma,
-				 const centering::which_center a_centering){
-  CH_TIME("time_stepper::solve_poisson(full)");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::solve_poisson(full)" << endl;
-  }
-
-  this->compute_rho(a_rhs, a_densities, a_centering);
-
-  m_poisson->solve(a_potential, a_rhs, a_sigma, false);
 }
 
 void time_stepper::solve_rte(const Real a_dt){
@@ -1407,6 +1462,9 @@ Real time_stepper::compute_relaxation_time(){
   return min_dt;
 }
 
+Real time_stepper::get_time(){
+  return m_time;
+}
 
 RefCountedPtr<cdr_layout>& time_stepper::get_cdr(){
   return m_cdr;

@@ -11,6 +11,7 @@
 #include "units.H"
 #include "dirichletconductivityebbc.H"
 
+#include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <DirichletConductivityDomainBC.H>
 
@@ -64,6 +65,17 @@ void eddington_sp1::set_bottom_solver(const int a_whichsolver){
   }
   if(a_whichsolver == 0 || a_whichsolver == 1){
     m_bottomsolver = a_whichsolver;
+
+    std::string str;
+    ParmParse pp("eddington_sp1");
+    pp.query("gmg_bottom_solver", str);
+    if(str == "simple"){
+      m_bottomsolver = 0;
+    }
+    else if(str == "bicgstab"){
+      m_bottomsolver = 1;
+    }
+    
   }
   else{
     MayDay::Abort("eddington_sp1::set_bottom_solver - Unsupported solver type requested");
@@ -78,6 +90,9 @@ void eddington_sp1::set_botsolver_smooth(const int a_numsmooth){
   CH_assert(a_numsmooth > 0);
   
   m_numsmooth = a_numsmooth;
+
+  ParmParse pp("eddington_sp1");
+  pp.query("gmg_bottom_relax", m_numsmooth);
 }
 
 void eddington_sp1::set_bottom_drop(const int a_bottom_drop){
@@ -87,6 +102,12 @@ void eddington_sp1::set_bottom_drop(const int a_bottom_drop){
   }
   
   m_bottom_drop = a_bottom_drop;
+
+  ParmParse pp("eddington_sp1");
+  pp.query("gmg_bottom_drop", m_bottom_drop);
+  if(m_bottom_drop < 2){
+    m_bottom_drop = 2;
+  }
 }
 
 void eddington_sp1::set_tga(const bool a_use_tga){
@@ -123,6 +144,17 @@ void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
   m_gmg_min_iter    = a_min_iter;
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
+
+  ParmParse pp("eddington_sp1");
+
+  pp.query("gmg_verbosity",   m_gmg_verbosity);
+  pp.query("gmg_pre_smooth",  m_gmg_pre_smooth);
+  pp.query("gmg_post_smooth", m_gmg_post_smooth);
+  pp.query("gmg_bott_smooth", m_gmg_bot_smooth);
+  pp.query("gmg_max_iter",    m_gmg_max_iter);
+  pp.query("gmg_min_iter",    m_gmg_min_iter);
+  pp.query("gmg_tolerance",   m_gmg_eps);
+  pp.query("gmg_hang",        m_gmg_hang);
 }
 
 void eddington_sp1::allocate_internals(){

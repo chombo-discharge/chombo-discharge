@@ -14,19 +14,23 @@
 #include <EBLevelDataOps.H>
 #include <MFLevelDataOps.H>
 #include <EBArith.H>
+#include <ParmParse.H>
 
 amr_mesh::amr_mesh(){
 
-  // Default stuff will crash.
   this->set_verbosity(10);
   this->set_coarsest_num_cells(128*IntVect::Unit);
   this->set_max_amr_depth(0);
-  this->set_max_simulation_depth(-1);
+  this->set_max_simulation_depth(0);
   this->set_refinement_ratio(2);
+#if CH_SPACEDIM == 2
+  this->set_blocking_factor(8);
+#elif CH_SPACEDIM==3
   this->set_blocking_factor(16);
+#endif
   this->set_max_box_size(32);
   this->set_buffer_size(1);
-  this->set_ebcf(true);
+  this->set_ebcf(false);
   this->set_fill_ratio(1.0);
   this->set_redist_rad(1);
   this->set_num_ghost(3);
@@ -278,6 +282,17 @@ void amr_mesh::set_balance(load_balance::which_balance a_load){
   }
   
   m_which_balance = a_load;
+
+  std::string balance;
+  ParmParse pp("amr");
+  pp.query("load_balance", balance);
+
+  if(balance == "knapsack"){
+    m_which_balance = load_balance::knapsack;
+  }
+  else if(balance == "elliptic"){
+    m_which_balance = load_balance::elliptic;
+  }
 }
 
 void amr_mesh::set_ghost_interpolation(const ghost_interpolation::which_type a_interp){
@@ -287,6 +302,16 @@ void amr_mesh::set_ghost_interpolation(const ghost_interpolation::which_type a_i
   }
 
   m_interp_type = a_interp;
+
+  std::string interp_type;
+  ParmParse pp("amr");
+  pp.query("ghost_interp", interp_type);
+  if(interp_type == "pwl"){
+    m_interp_type = ghost_interpolation::pwl;
+  }
+  else if(interp_type == "quad"){
+    m_interp_type = ghost_interpolation::quad;
+  }
 }
 
 void amr_mesh::build_domains(){
@@ -358,7 +383,7 @@ void amr_mesh::build_domains(){
 
 void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   CH_TIME("amr_mesh::regrid");
-  if(m_verbosity > 3){
+  if(m_verbosity > 1){
     pout() << "amr_mesh::regrid" << endl;
   }
 
@@ -379,7 +404,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
   CH_TIME("amr_mesh::build_grids");
-  if(m_verbosity > 5){
+  if(m_verbosity > 2){
     pout() << "amr_mesh::build_grids" << endl;
   }
 
@@ -911,7 +936,7 @@ void amr_mesh::define_advect_level(){
 
 void amr_mesh::define_irreg_sten(){
   CH_TIME("amr_mesh::define_irreg_sten");
-  if(m_verbosity > 3){
+  if(m_verbosity > 2){
     pout() << "amr_mesh::define_irreg_sten" << endl;
   }
 
@@ -1159,22 +1184,59 @@ void amr_mesh::set_verbosity(const int a_verbosity){
   CH_TIME("amr_mesh::set_verbosity");
 
   m_verbosity = a_verbosity;
+
+  ParmParse pp("amr");
+  pp.query("verbosity", m_verbosity);
 }
 
 void amr_mesh::set_coarsest_num_cells(const IntVect a_num_cells){
   m_num_cells = a_num_cells;
+
+  ParmParse pp("amr");
+  if(pp.contains("coarsest_domain")){
+    Vector<int> cells;
+    cells.resize(pp.countval("coarsest_domain"));
+    CH_assert(cells.size() >= SpaceDim);
+    pp.getarr("coarsest_domain", cells, 0, SpaceDim);
+
+    m_num_cells = IntVect(D_DECL(cells[0], cells[1], cells[2]));
+  }
 }
 
 void amr_mesh::set_max_amr_depth(const int a_max_amr_depth){
   m_max_amr_depth = a_max_amr_depth;
+
+  int depth;
+  ParmParse pp("amr");
+  pp.query("max_amr_depth", depth);
+  if(depth >= 0){
+    m_max_amr_depth = depth;
+  }
 }
 
 void amr_mesh::set_max_simulation_depth(const int a_max_sim_depth){
   m_max_sim_depth = a_max_sim_depth >= 0 ? a_max_sim_depth : 0;
+
+  int depth;
+  ParmParse pp("amr");
+  pp.query("max_sim_depth", depth);
+  if(depth >= 0){
+    m_max_sim_depth = depth;
+  }
 }
 
 void amr_mesh::set_ebcf(const bool a_ebcf){
   m_ebcf = a_ebcf;
+
+  std::string str;
+  ParmParse pp("amr");
+  pp.query("ebcf", str);
+  if(str == "true"){
+    m_ebcf = true;
+  }
+  else if(str == "false"){
+    m_ebcf = false;
+  }
 }
 
 void amr_mesh::set_refinement_ratio(const int a_refinement_ratio){
@@ -1183,6 +1245,16 @@ void amr_mesh::set_refinement_ratio(const int a_refinement_ratio){
   for (int lvl = 0; lvl <= m_max_amr_depth; lvl++){
     m_ref_ratios[lvl] = a_refinement_ratio;
   }
+
+  ParmParse pp("amr");
+  if(pp.contains("ref_rat")){
+    Vector<int> ratios;
+    ratios.resize(pp.countval("ref_rat"));
+    pp.getarr("ref_rat", ratios, 0, ratios.size());
+
+    m_ref_ratios = ratios;
+  }
+    
 }
 
 void amr_mesh::set_refinement_ratios(const Vector<int> a_ref_ratios){
@@ -1191,50 +1263,127 @@ void amr_mesh::set_refinement_ratios(const Vector<int> a_ref_ratios){
 
 void amr_mesh::set_fill_ratio(const Real a_fill_ratio){
   m_fill_ratio = a_fill_ratio;
+
+  Real fill_ratio;
+  ParmParse pp("amr");
+  pp.query("fill_ratio", fill_ratio);
+  if(fill_ratio > 0.0 && fill_ratio <= 1.0){
+    m_fill_ratio = fill_ratio;
+  }
 }
 
 void amr_mesh::set_max_box_size(const int a_max_box_size){
   CH_TIME("amr_mesh::set_max_box_size");
   m_max_box_size = a_max_box_size;
+
+  int box_size;
+  ParmParse pp("amr");
+  pp.query("max_box_size", box_size);
+  if(box_size >= 8 && box_size % 2 == 0){
+    m_max_box_size = box_size;
+  }
 }
 
 void amr_mesh::set_buffer_size(const int a_buffer_size){
   m_buffer_size = a_buffer_size;
+
+  int buffer;
+  ParmParse pp("amr");
+  pp.query("buffer_size", buffer);
+  if(buffer > 0){
+    m_buffer_size = buffer;
+  }
 }
 
 void amr_mesh::set_blocking_factor(const int a_blocking_factor){
   CH_TIME("amr_mesh::set_blocking_factor");
   m_blocking_factor = a_blocking_factor;
+
+  int blocking;
+  ParmParse pp("amr");
+  pp.query("blocking_factor", blocking);
+  if(blocking >= 8 && blocking % 2 == 0){
+    m_blocking_factor = blocking;
+  }
 }
 
 void amr_mesh::set_eb_ghost(const int a_ebghost){
   CH_TIME("amr_mesh:.set_eb_ghost");
   m_ebghost = a_ebghost;
+
+  int ebghost;
+  ParmParse pp("amr");
+  pp.query("eb_ghost", ebghost);
+  if(ebghost >= 2){
+    m_ebghost = ebghost;
+  }
 }
 
 void amr_mesh::set_num_ghost(const int a_num_ghost){
   CH_TIME("amr_mesh::set_num_ghost");
   m_num_ghost = a_num_ghost;
+
+  int ghost;
+  ParmParse pp("amr");
+  pp.query("num_ghost", ghost);
+  if(ghost >= 2){
+    m_num_ghost = a_num_ghost;
+  }
 }
 
 void amr_mesh::set_redist_rad(const int a_redist_rad){
   CH_TIME("amr_mesh::set_redist_rads");
   m_redist_rad = a_redist_rad;
+
+  int rad;
+  ParmParse pp("amr");
+  pp.query("redist_radius", rad);
+  if(rad == 1 || rad == 2){
+    m_redist_rad = a_redist_rad;
+  }
 }
 
 void amr_mesh::set_irreg_sten_type(const stencil_type::which_type a_type){
   CH_TIME("amr_mesh::set_irreg_sten_type");
   m_stencil_type = a_type;
+
+  
+  std::string str;
+  ParmParse pp("amr");
+  pp.query("stencil_type", str);
+  if(str == "linear"){
+    m_stencil_type = stencil_type::linear;
+  }
+  else if(str == "taylor"){
+    m_stencil_type = stencil_type::taylor;
+  }
+  else if(str == "lsq"){
+    m_stencil_type = stencil_type::lsq;
+  }
 }
 
 void amr_mesh::set_irreg_sten_order(const int a_irreg_sten_order){
   CH_TIME("amr_mesh::irreg_sten_order");
   m_irreg_sten_order = a_irreg_sten_order;
+
+  int order;
+  ParmParse pp("amr");
+  pp.query("stencil_order", order);
+  if(order == 1 || order == 2){
+    m_irreg_sten_order = order;
+  }
 }
 
 void amr_mesh::set_irreg_sten_radius(const int a_irreg_sten_radius){
   CH_TIME("amr_mesh::irreg_sten_radius");
   m_irreg_sten_radius = a_irreg_sten_radius;
+
+  int radius;
+  ParmParse pp("amr");
+  pp.query("stencil_radius", radius);
+  if(radius == 1 || radius == 2){
+    m_irreg_sten_radius = radius;
+  }
 }
 
 void amr_mesh::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
@@ -1259,6 +1408,7 @@ void amr_mesh::sanity_check(){
   CH_assert(m_irreg_sten_radius == 1 || m_irreg_sten_radius == 2);
 
   // Make sure that the isotropic constraint isn't violated
+  CH_assert(!m_physdom.isNull());
   const RealVect realbox = m_physdom->get_prob_hi() - m_physdom->get_prob_lo();
   for (int dir = 0; dir < SpaceDim - 1; dir++){
     CH_assert(realbox[dir]/m_num_cells[dir] == realbox[dir+1]/m_num_cells[dir+1]);

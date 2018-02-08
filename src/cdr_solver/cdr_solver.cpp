@@ -14,7 +14,8 @@
 
 cdr_solver::cdr_solver(){
   m_name = "cdr_solver";
-  
+
+  this->set_verbosity(-1);
   this->set_phase(phase::gas);
   this->set_time(0, 0., 0.);
   this->set_mass_redist(false);
@@ -1087,11 +1088,11 @@ void cdr_solver::set_phase(const phase::which_phase a_phase){
 
 void cdr_solver::set_verbosity(const int a_verbosity){
   CH_TIME("cdr_solver::set_verbosity");
+  m_verbosity = a_verbosity;
+  
   if(m_verbosity > 5){
     pout() << m_name + "::set_verbosity" << endl;
   }
-  
-  m_verbosity = a_verbosity;
 }
 
 void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],

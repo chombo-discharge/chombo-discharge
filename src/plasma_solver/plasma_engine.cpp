@@ -15,6 +15,7 @@
 #include <EBCellFAB.H>
 #include <EBAMRIO.H>
 #include <EBAMRDataOps.H>
+#include <ParmParse.H>
 
 plasma_engine::plasma_engine(){
   CH_TIME("plasma_engine::plasma_engine(weak)");
@@ -33,9 +34,12 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 			     const RefCountedPtr<amr_mesh>&               a_amr,
 			     const RefCountedPtr<cell_tagger>&            a_celltagger){
   CH_TIME("plasma_engine::plasma_engine(full)");
+
+  this->set_verbosity(1);
   if(m_verbosity > 5){
     pout() << "plasma_engine::plasma_engine(full)" << endl;
   }
+  
 
   this->set_physical_domain(a_physdom);         // Set physical domain
   this->set_computational_geometry(a_compgeom); // Set computational geometry
@@ -43,16 +47,25 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_time_stepper(a_timestepper);        // Set time stepper
   this->set_amr(a_amr);                         // Set amr
   this->set_cell_tagger(a_celltagger);          // Set cell tagger
+
+  this->set_geom_refinement_depth(-1);
   this->set_verbosity(1);
+  this->set_plot_interval(10);
+  this->set_checkpoint_interval(10);
+  this->set_regrid_interval(10);
   this->set_output_directory("./");
   this->set_output_file_names("simulation");
   this->set_output_mode(output_mode::full);
-  this->set_plot_interval(10);
-  this->set_checkpoint_interval(10);
-  this->set_regrid_interval(5);
+  this->set_init_regrids(0);
+  this->set_restart(false);
+  this->set_restart_step(0);
+  this->set_start_time(0.0);
+  this->set_stop_time(1.0);
+  this->set_max_steps(100);
 
-  m_amr->sanity_check();  // Sanity check, make sure everything is set up correctly
-  m_amr->build_domains(); // Build domains and resolutions, nothing else
+  m_amr->set_physical_domain(m_physdom); // Set physical domain
+  m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
+  m_amr->build_domains();                // Build domains and resolutions, nothing else
 
   if(!m_celltagger.isNull()){ 
     m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
@@ -218,6 +231,20 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
   }
 }
 
+void plasma_engine::setup_and_run(){
+  CH_TIME("plasma_engine::setup_and_run");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::setup_and_run" << endl;
+  }
+
+  char iter_str[100];
+  sprintf(iter_str, ".check%07d.%dd.hdf5", m_restart_step, SpaceDim);
+  const std::string restart_file = m_output_dir + "/" + m_output_names + std::string(iter_str);
+
+  this->setup(m_init_regrids, m_restart, restart_file);
+  this->run(m_start_time, m_stop_time, m_max_steps);
+}
+
 void plasma_engine::run(const Real a_start_time, const Real a_end_time, const int a_max_steps){
   CH_TIME("plasma_engine::run");
   if(m_verbosity > 5){
@@ -334,10 +361,16 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 
 void plasma_engine::set_verbosity(const int a_verbosity){
   CH_TIME("plasma_engine::set_verbosity");
+
+  
+  m_verbosity = a_verbosity;
+
+  ParmParse pp("plasma_engine");
+  pp.query("verbosity", m_verbosity);
+
   if(m_verbosity > 5){
     pout() << "plasma_engine::set_verbosity" << endl;
   }
-  m_verbosity = a_verbosity;
 }
 
 void plasma_engine::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
@@ -421,6 +454,16 @@ void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
   }
 
   m_output_mode = a_mode;
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.query("output_mode", str);
+  if(str == "full"){
+    m_output_mode = output_mode::full;
+  }
+  if(str == "light"){
+    m_output_mode = output_mode::light;
+  }
 }
 
 void plasma_engine::set_output_directory(const std::string a_output_dir){
@@ -430,6 +473,9 @@ void plasma_engine::set_output_directory(const std::string a_output_dir){
   }
 
   m_output_dir = a_output_dir;
+
+  ParmParse pp("plasma_engine");
+  pp.query("output_directory", m_output_dir);
 }
 
 void plasma_engine::set_output_file_names(const std::string a_output_names){
@@ -438,7 +484,10 @@ void plasma_engine::set_output_file_names(const std::string a_output_names){
     pout() << "plasma_engine::set_output_names" << endl;
   }
 
-  m_output_names = a_output_names;  
+  m_output_names = a_output_names;
+
+  ParmParse pp("plasma_engine");
+  pp.query("output_names", m_output_names);
 }
 
 void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
@@ -448,6 +497,7 @@ void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   }
 
   m_amr = a_amr;
+  m_amr->set_physical_domain(m_physdom);
   m_amr->set_mfis(m_compgeom->get_mfis());
 }
 
@@ -565,15 +615,124 @@ void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_
 }
 
 void plasma_engine::set_regrid_interval(const int a_regrid_interval){
+  CH_TIME("plasma_engine::set_regrid_interval");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_regrid_interval" << endl;
+  }
+  
   m_regrid_interval = a_regrid_interval;
+
+  ParmParse pp("plasma_engine");
+  pp.query("regrid_interval", m_regrid_interval);
 }
 
 void plasma_engine::set_plot_interval(const int a_plot_interval){
+  CH_TIME("plasma_engine::set_plot_interval");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_plot_interval" << endl;
+  }
+  
   m_plot_interval = a_plot_interval;
+
+  ParmParse pp("plasma_engine");
+  pp.query("plot_interval", m_plot_interval);
 }
 
 void plasma_engine::set_checkpoint_interval(const int a_chk_interval){
+  CH_TIME("plasma_engine::set_checkpoint_interval");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_checkpoint_interval" << endl;
+  }
+  
   m_chk_interval = a_chk_interval;
+
+  ParmParse pp("plasma_engine");
+  pp.query("checkpoint_interval", m_chk_interval);
+}
+
+void plasma_engine::set_restart(const bool a_restart){
+  CH_TIME("plasma_engine::set_restart");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_restart" << endl;
+  }
+  
+  m_restart = a_restart;
+
+  std::string str = "";
+  ParmParse pp("plasma_engine");
+  pp.query("restart", str);
+  if(str == "true"){
+    m_restart = true;
+  }
+  else if(str == "false"){
+    m_restart = false;
+  }
+}
+
+void plasma_engine::set_restart_step(const int a_restart_step){
+  CH_TIME("plasma_engine::set_restart_step");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_restart_step" << endl;
+  }
+  
+  m_restart_step = a_restart_step;
+
+  int step;
+  ParmParse pp("plasma_engine");
+  pp.query("restart_step", step);
+  if(step >= 0){
+    m_restart_step = step;
+  }
+}
+
+void plasma_engine::set_start_time(const Real a_start_time){
+  CH_TIME("plasma_engine::set_start_time");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_start_time" << endl;
+  }
+  
+  m_start_time = a_start_time;
+
+  ParmParse pp("plasma_engine");
+  pp.query("start_time", m_start_time);
+}
+
+void plasma_engine::set_stop_time(const Real a_stop_time){
+  CH_TIME("plasma_engine::set_stop_time");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_stop_time" << endl;
+  }
+  
+  m_stop_time = a_stop_time;
+  
+  ParmParse pp("plasma_engine");
+  pp.query("stop_time", m_stop_time);
+}
+
+void plasma_engine::set_max_steps(const int a_max_steps){
+  CH_TIME("plasma_engine::set_max_steps");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_max_steps" << endl;
+  }
+  
+  m_max_steps = a_max_steps;
+
+  ParmParse pp("plasma_engine");
+  pp.query("max_steps", m_max_steps);
+}
+
+void plasma_engine::set_init_regrids(const int a_init_regrids){
+  CH_TIME("plasma_engine::set_init_regrids");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_init_regrids" << endl;
+  }
+  
+  m_init_regrids = a_init_regrids;
+
+
+  ParmParse pp("plasma_engine");
+  pp.query("initial_regrids", m_init_regrids);
+
 }
 
 void plasma_engine::sanity_check(){
