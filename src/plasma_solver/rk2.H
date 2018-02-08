@@ -221,6 +221,11 @@ protected:
     @brief Compute transient RTE solutions onto final state
   */    
   virtual void advance_rte_k2_transient(const Real a_dt);
+
+  /*!
+    @brief Restrict dt
+  */
+  virtual Real restrict_dt();
   
 };
 

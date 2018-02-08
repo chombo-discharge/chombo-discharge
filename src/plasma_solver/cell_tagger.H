@@ -54,6 +54,16 @@ public:
   virtual void regrid();
 
   /*!
+    @brief Set phase
+  */
+  virtual void set_phase(const phase::which_phase a_phase);
+
+  /*!
+    @brief Set verbosity
+  */
+  virtual void set_verbosity(const int a_verbosity);
+
+  /*!
     @brief Tag cells for coarsening and refinement across an AMR hierarchy. This also does coarsening. 
   */
   virtual void tag_cells(Vector<IntVectSet>& a_tags,
@@ -65,7 +75,141 @@ public:
   */
   virtual Vector<EBAMRCellData>& get_tracer_fields();
 
-    /*!
+
+  
+protected:
+
+  /*!
+    @brief Plasma kinetics. 
+  */
+  RefCountedPtr<plasma_kinetics> m_plaskin;
+
+  /*!
+    @brief Time stepper
+  */
+  RefCountedPtr<time_stepper> m_timestepper;
+
+  /*!
+    @brief amr_mesh. Needed for computing tracer stuff
+  */
+  RefCountedPtr<amr_mesh> m_amr;
+
+  /*!
+    @brief Computational geometry. Needed for what exactly?
+  */
+  RefCountedPtr<computational_geometry> m_compgeom;
+
+  /*!
+    @brief Physical domain. 
+  */
+  RefCountedPtr<physical_domain> m_physdom;
+
+  /*!
+    @brief Phase
+  */
+  phase::which_phase m_phase;
+
+  /*!
+    @brief Set name
+  */
+  std::string m_name;
+
+  /*!
+    @brief Number of tracer fields
+  */
+  int m_num_tracers;
+
+  /*!
+    @brief Verbosity
+  */
+  int m_verbosity;
+  
+  /*!
+    @brief Tracer field
+  */
+  Vector<EBAMRCellData> m_tracer;
+
+  /*!
+    @brief Tracer field gradient
+  */
+  Vector<EBAMRCellData> m_grad_tracer;
+
+  /*!
+    @brief Scratch storage
+  */
+  EBAMRCellData m_scratch;
+
+  /*!
+    @brief Electric field
+  */
+  EBAMRCellData m_E;
+
+  /*!
+    @brief grad(|E|)
+  */
+  EBAMRCellData m_grad_E;
+
+  /*!
+    @brief Space charge density
+  */
+  EBAMRCellData m_rho;
+
+  /*!
+    @brief grad(rho)
+  */
+  EBAMRCellData m_grad_rho;
+
+  /*!
+    @brief
+  */
+  Vector<EBAMRCellData> m_cdr_densities;
+
+  /*!
+    @brief
+  */
+  Vector<EBAMRCellData> m_cdr_gradients;
+
+  /*!
+    @brief
+  */
+  Vector<EBAMRCellData> m_rte_densities;
+
+  /*!
+    @brief Allocate storage
+  */
+  virtual void allocate_storage();
+
+  /*!
+    @brief Compute gradient of tracer field
+  */
+  virtual void compute_tracer_gradient();
+
+  /*!
+    @brief Compute centroid-centered ion densities
+  */
+  virtual void compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities);
+
+  /*!
+    @brief Compute centroid-centered ion densities
+  */
+  virtual void compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients);
+
+  /*!
+    @brief Compute electric field and gradient of |E| at centroids
+  */
+  virtual void compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E);
+
+  /*!
+    @brief Compute space charge and its gardient
+  */
+  virtual void compute_rho(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho);
+
+  /*!
+    @brief Compute the rte densities
+  */
+  virtual void compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities);
+
+  /*!
     @brief Build tracer field
     @param[in] a_pos Position
     @param[in] a_time Time
@@ -115,7 +259,7 @@ public:
 			      const Vector<Real>&     a_max_ion_gradients,
 			      const Vector<Real>&     a_photon_densities,
 			      const Vector<Real>&     a_min_photon_densities,
-			      const Vector<Real>&     a_max_photon_densities);
+			      const Vector<Real>&     a_max_photon_densities) = 0;
 
   /*!
     @brief Coarsen a cell based on a tracer field
@@ -125,7 +269,7 @@ public:
 			    const Real&             a_dx,
 			    const int&              a_lvl,
 			    const Vector<Real>&     a_tracer,
-			    const Vector<RealVect>& a_grad_tracer);
+			    const Vector<RealVect>& a_grad_tracer) = 0;
 
   /*!
     @brief Refine a cell based on a tracer field
@@ -135,54 +279,7 @@ public:
 			   const Real&             a_dx,
 			   const int&              a_lvl,
 			   const Vector<Real>&     a_tracer,
-			   const Vector<RealVect>& a_grad_tracer);
-  
-protected:
-
-  /*!
-    @brief Plasma kinetics. 
-  */
-  RefCountedPtr<plasma_kinetics> m_plaskin;
-
-  /*!
-    @brief Time stepper
-  */
-  RefCountedPtr<time_stepper> m_timestepper;
-
-  /*!
-    @brief amr_mesh. Needed for computing tracer stuff
-  */
-  RefCountedPtr<amr_mesh> m_amr;
-
-  /*!
-    @brief Computational geometry. Needed for what exactly?
-  */
-  RefCountedPtr<computational_geometry> m_compgeom;
-
-  /*!
-    @brief Physical domain. 
-  */
-  RefCountedPtr<physical_domain> m_physdom;
-
-  /*!
-    @brief Number of tracer fields
-  */
-  int m_num_tracers;
-  
-  /*!
-    @brief Tracer field
-  */
-  Vector<EBAMRCellData> m_tracer;
-
-    /*!
-    @brief Tracer field gradient
-  */
-  Vector<EBAMRCellData> m_grad_tracer;
-
-  /*!
-    @brief Compute gradient of tracer field
-  */
-  virtual void compute_tracer_gradient();
+			   const Vector<RealVect>& a_grad_tracer) = 0;
 };
 
 #endif

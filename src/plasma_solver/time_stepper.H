@@ -59,6 +59,11 @@ public:
   virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
 
   /*!
+    @brief Compute the cell-centered electric field on a specific phase using whatever is available in m_poisson
+  */
+  virtual void compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase);
+
+  /*!
     @brief Compute the cell-centered electric field on a specific phase
   */
   virtual void compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential);
@@ -156,6 +161,11 @@ public:
     @details This assumes that the data contain in cdr_layout is cell-centered
   */
   virtual void compute_rho();
+
+  /*!
+    @brief Compute cell-centered space charge density on a specific phase using whatever is available in cdr_layout
+  */
+  virtual void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
 
   /*!
     @brief Compute the centroid-centered space charge density
@@ -357,11 +367,13 @@ public:
   /*!
     @brief Restrict dt
   */
-  virtual Real restrict_dt(){
-#if 0
-    MayDay::Warning("time_stepper::restrict_dt - this routine should be PURE");
-#endif
-    return 1.E99;
+  virtual Real restrict_dt() = 0;
+
+  /*!
+    @brief Return time
+  */
+  virtual Real get_time(){
+    return m_time;
   }
 
   /*!

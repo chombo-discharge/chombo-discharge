@@ -17,6 +17,7 @@
 #include "cdr_sg.H"
 #include "eddington_sp1.H"
 #include "rk2.H"
+#include "field_tagger.H"
 
 #include "cdr_layout.H"
 #include "rte_layout.H"
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(new morrow_lowke());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2(1.0));
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
 #if CH_SPACEDIM == 2
   //  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new sphere_sphere_geometry());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_slab());
@@ -76,12 +78,12 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(2);                      // Set max amr depth
+  amr->set_max_amr_depth(1);                      // Set max amr depth
   amr->set_max_simulation_depth(4);               // Set maximum simulation depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
   amr->set_fill_ratio(1.0);                       // Set grid fill ratio
-  amr->set_blocking_factor(16);                    // Set blocking factor
+  amr->set_blocking_factor(8);                    // Set blocking factor
   amr->set_buffer_size(1);                        // Set buffer size
   amr->set_max_box_size(32);                      // Set max box size
   amr->set_redist_rad(1);                         // Set redistribution radius
@@ -96,12 +98,13 @@ int main(int argc, char* argv[]){
 											compgeom,
 											plaskin,
 											timestepper,
-											amr));
+											amr,
+											tagger));
   engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
-  engine->setup_fresh(0);
-  engine->set_regrid_interval(-1);        // Regrid every this intervals
+  engine->setup(2, false, "");
+  engine->set_regrid_interval(10);        // Regrid every this intervals
   engine->set_plot_interval(1);           // Plot every this intervals
   engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals
   engine->set_output_mode(output_mode::full);
@@ -109,10 +112,10 @@ int main(int argc, char* argv[]){
   engine->set_verbosity(1);
   timestepper->set_verbosity(1);
   timestepper->set_solver_verbosity(0);
-  timestepper->set_fast_rte(5);
-  timestepper->set_fast_poisson(5);
+  timestepper->set_fast_rte(1);
+  timestepper->set_fast_poisson(1);
   amr->set_verbosity(0);
-  engine->run(0.0, 10.0, 100);
+  engine->run(0.0, 10.0, 1000);
 
 
 #ifdef CH_MPI

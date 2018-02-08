@@ -667,3 +667,7 @@ void rk2::advance_rte_k2_stationary(){
 void rk2::advance_rte_k2_transient(const Real a_dt){
   MayDay::Abort("rk2::advance_rte_k1_transient - not implemented (yet). Please use stationary approximations.");
 }
+
+Real rk2::restrict_dt(){
+  return 1.E99;
+}

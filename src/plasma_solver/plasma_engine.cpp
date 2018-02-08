@@ -461,6 +461,24 @@ void plasma_engine::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential_set = true;
 }
 
+void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
+  CH_TIME("plasma_engine::setup");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::setup" << endl;
+  }
+
+  if(!a_restart){
+    this->setup_fresh(a_init_regrids);
+  }
+  else{
+    this->setup_for_restart(a_init_regrids, a_restart_file);
+  }
+
+#ifdef CH_USE_HDF5
+  this->write_plot_file();
+#endif
+}
+
 void plasma_engine::setup_fresh(const int a_init_regrids){
   CH_TIME("plasma_engine::setup_fresh");
   if(m_verbosity > 5){
@@ -498,15 +516,16 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
       m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
     }    
   }
+  m_celltagger->regrid();
 
   this->initial_regrids(a_init_regrids);
-  this->write_plot_file();
   m_restart = false;
 
   m_timestepper->regrid_internals();
+  m_celltagger->regrid();
 }
 
-void plasma_engine::setup_for_restart(const std::string a_restart_file){
+void plasma_engine::setup_for_restart(const int a_init_regrids, const std::string a_restart_file){
   CH_TIME("plasma_engine::setup_for_restart");
   if(m_verbosity > 5){
     pout() << "plasma_engine::setup_for_restart" << endl;
@@ -693,8 +712,8 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   long long curMem;
   long long peakMem;
   overallMemoryUsage(curMem, peakMem);
-  pout() << "                               -- Unfreed memory      : " << curMem/BytesPerMB << "(MB)" << endl;
-  pout() << "                               -- Peak memory usage   : " << peakMem/BytesPerMB << "(MB)" << endl;
+  pout() << "                                -- Unfreed memory      : " << curMem/BytesPerMB << "(MB)" << endl;
+  pout() << "                                -- Peak memory usage   : " << peakMem/BytesPerMB << "(MB)" << endl;
 #endif
 
 }
@@ -707,14 +726,18 @@ void plasma_engine::regrid(){
 
   Vector<IntVectSet> tags;
 
+  // Regrid amr, find old and new finest levels
   const int old_finest_level = m_amr->get_finest_level();
   this->tag_cells(tags);
   m_amr->regrid(tags, old_finest_level + 1); 
   const int new_finest_level = m_amr->get_finest_level();
-  
+  pout() << "finest level = " << new_finest_level << endl;  
   m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
   m_timestepper->regrid_internals();                                 // Regrid internal storage
+  pout() << "regridding cell tagger" << endl;
+  m_celltagger->regrid();                                            // Regrid cell tagger
 
+  // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
   MayDay::Warning("plasma_engine::regrid - compute_cdr_diffusion() routine is missing");
 #if 0
@@ -722,6 +745,9 @@ void plasma_engine::regrid(){
 #endif
   m_timestepper->compute_cdr_sources();
   m_timestepper->compute_rte_sources();
+
+
+
 }
 
 void plasma_engine::write_plot_file(){

@@ -517,6 +517,15 @@ void time_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potentia
   m_amr->interp_ghost(a_E);
 }
 
+void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase){
+  CH_TIME("time_stepper::compute_E(ebamrcell, phase)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_E(ebamrcell, phase)" << endl;
+  }
+
+  this->compute_E(a_E, a_phase, m_poisson->get_state());
+}
+
 void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
   CH_TIME("time_stepper::compute_E(ebamrcell, phase, mfamrcell)");
   if(m_verbosity > 5){
@@ -794,6 +803,35 @@ void time_stepper::compute_rho(){
   this->compute_rho(m_poisson->get_source(),
 		    densities,
 		    centering::cell_center);
+}
+
+void time_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase){
+  CH_TIME("time_stepper::compute_rho(ebamrcelldata, phase)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_rho(ebamrcelldata, phase)" << endl;;
+  }
+
+  CH_assert(a_phase == m_cdr->get_phase());
+
+  data_ops::set_value(a_rho, 0.0);
+
+
+  Vector<EBAMRCellData*> densities = m_cdr->get_states(); // Get densities from solver
+  
+  const int finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    // Add volumetric charge 
+    for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+      const EBAMRCellData& density       = *(densities[solver_it.get_solver()]);
+      const RefCountedPtr<species>& spec = solver_it.get_species();
+
+      data_ops::incr(*a_rho[lvl], *density[lvl], spec->get_charge());
+    }
+
+    // Scale by s_Qe/s_eps0
+    data_ops::scale(*a_rho[lvl], units::s_Qe);
+  }
 }
 
 void time_stepper::compute_rho(MFAMRCellData&                 a_rho,

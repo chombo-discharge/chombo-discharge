@@ -112,7 +112,7 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
   }
   this->allocate_internals();
 
-
+  
   for (int i = 0; i < phase::num_phases; i++){
     phase::which_phase cur_phase;    
     if(i == 0){
@@ -121,23 +121,27 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
     else{
       cur_phase = phase::solid;
     }
+
+    const RefCountedPtr<EBIndexSpace>& ebis = m_mfis->get_ebis(cur_phase);
+
+    if(!ebis.isNull()){
     
-    EBAMRCellData scratch_phase;
-    EBAMRCellData state_phase;
+      EBAMRCellData scratch_phase;
+      EBAMRCellData state_phase;
 
-    m_amr->allocate_ptr(scratch_phase);
-    m_amr->allocate_ptr(state_phase);
-    m_amr->alias(state_phase,   cur_phase, m_state);
-    m_amr->alias(scratch_phase, cur_phase, scratch);
+      m_amr->allocate_ptr(scratch_phase);
+      m_amr->allocate_ptr(state_phase);
+      m_amr->alias(state_phase,   cur_phase, m_state);
+      m_amr->alias(scratch_phase, cur_phase, scratch);
 
-    Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(cur_phase);
+      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(cur_phase);
 
-    scratch_phase[0]->copyTo(*state_phase[0]); // Base level should never change. 
-    for (int lvl = 1; lvl <= a_new_finest; lvl++){
-      interpolator[lvl]->interpolate(*state_phase[lvl], *state_phase[lvl-1], interv);
-
-      if(lvl <= a_old_finest){
-	scratch_phase[lvl]->copyTo(*state_phase[lvl]);
+      scratch_phase[0]->copyTo(*state_phase[0]); // Base level should never change.
+      for (int lvl = 1; lvl <= a_new_finest; lvl++){
+	interpolator[lvl]->interpolate(*state_phase[lvl], *state_phase[lvl-1], interv);
+	if(lvl <= a_old_finest){
+	  scratch_phase[lvl]->copyTo(*state_phase[lvl]);
+	}
       }
     }
   }

@@ -44,28 +44,6 @@ public:
 
   static void copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
 
-  static void exponentiate(EBAMRCellData& a_lhs, const Real a_factor);
-
-  static void exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor);
-
-  static void get_max_min(Real& max, Real& min, EBAMRCellData& a_E, const int a_comp);
-
-  static void get_max_min(Real& max, Real& min, LevelData<EBCellFAB>& a_E, const int a_comp);
-
-  static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
-
-  static void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
-
-  static void scale(EBAMRIVData& a_lhs, const Real& a_scale);
-
-  static void scale(EBAMRCellData& a_lhs, const Real a_scale);
-
-  static void scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale);
-
-  static void scale(EBAMRFluxData& a_lhs, const Real a_scale);
-
-  static void scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale);
-
   static void divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lcomp, const int a_rcomp);
 
   static void divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lcomp, const int a_rcomp);
@@ -74,9 +52,23 @@ public:
   
   static void divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
+  static void exponentiate(EBAMRCellData& a_lhs, const Real a_factor);
+
+  static void exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor);
+
   static void floor(EBAMRCellData& a_lhs, const Real a_value);
 
   static void floor(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+
+  static void get_max_min(Real& max, Real& min, EBAMRCellData& a_E, const int a_comp);
+
+  static void get_max_min(Real& max, Real& min, LevelData<EBCellFAB>& a_E, const int a_comp);
+
+  static void get_max_min(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data);
+
+  static void get_max_min_norm(Real& a_max, Real& a_min, EBAMRCellData& data);
+
+  static void get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data);
 
   static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
 
@@ -93,6 +85,20 @@ public:
   static void multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   static void multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+
+  static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
+
+  static void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
+
+  static void scale(EBAMRIVData& a_lhs, const Real& a_scale);
+
+  static void scale(EBAMRCellData& a_lhs, const Real a_scale);
+
+  static void scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale);
+
+  static void scale(EBAMRFluxData& a_lhs, const Real a_scale);
+
+  static void scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale);
 
   static void set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
 
@@ -125,6 +131,10 @@ public:
   static void set_value(MFAMRIVData& a_lhs, const Real& a_value);
 
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
+
+  static void vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+
+  static void vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 };
 
 #include "data_opsI.H"

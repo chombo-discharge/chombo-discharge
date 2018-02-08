@@ -52,12 +52,7 @@ public:
   /*!
     @brief Setup function
   */
-  virtual void setup_fresh(const int a_init_regrids);
-
-  /*!
-    @brief Set for restart
-  */
-  virtual void setup_for_restart(const std::string a_restart_file);
+  virtual void setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
 
   /*!
     @brief Verbosity
@@ -419,6 +414,16 @@ protected:
     @brief Set the cell tagger
   */
   virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
+
+  /*!
+    @brief Setup function
+  */
+  virtual void setup_fresh(const int a_init_regrids);
+
+  /*!
+    @brief Set for restart
+  */
+  virtual void setup_for_restart(const int a_init_regrids, const std::string a_restart_file);
 
   /*!
     @brief Write a time step report

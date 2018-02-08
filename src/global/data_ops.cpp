@@ -176,6 +176,61 @@ void data_ops::get_max_min(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_E, 
   EBLevelDataOps::getMaxMin(a_max, a_min, a_E, a_comp);
 }
 
+void data_ops::get_max_min(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data){
+  a_max.resize(a_data.size(), -1.234567E89);
+  a_min.resize(a_data.size(),  1.234567E89);
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  
+  for (int i = 0; i < a_data.size(); i++){
+    CH_assert(a_data[i][0]->nComp() == ncomp);
+    data_ops::get_max_min(a_max[i], a_min[i], a_data[i], comp);
+  }
+}
+
+void data_ops::get_max_min_norm(Real& a_max, Real& a_min, EBAMRCellData& a_data){
+  a_max = -1.234567E89;
+  a_min =  1.234567E89;
+  
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    Real max, min;
+    data_ops::get_max_min_norm(max, min, *a_data[lvl]);
+
+    a_max = Max(a_max, max);
+    a_min = Min(a_min, min);
+			       
+  }
+}
+
+void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data){
+  a_max = -1.234567E89;
+  a_min =  1.234567E89;
+
+  const int ncomp = a_data.nComp();
+  
+  for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit){
+    const Box& box         = a_data.disjointBoxLayout().get(dit());
+    const EBCellFAB& data  = a_data[dit()];
+    const EBISBox& ebisbox = data.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs(box);
+    
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      Real cur = 0.0;
+      for (int comp = 0; comp < ncomp; comp++){
+	cur += data(vof, comp)*data(vof, comp);
+      }
+      cur = sqrt(cur);
+
+      a_max = Max(a_max, cur);
+      a_min = min(a_min, cur);
+    }
+  }
+}
+
 void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::scale(*a_lhs[lvl], a_scale);
@@ -449,5 +504,40 @@ void data_ops::set_value(MFAMRIVData& a_lhs, const Real& a_value){
 void data_ops::set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     a_lhs[dit()].setVal(a_value);
+  }
+}
+
+void data_ops::vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::vector_length(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+
+void data_ops::vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+  CH_assert(a_lhs.nComp() == 1);
+  CH_assert(a_rhs.nComp() == SpaceDim);
+
+  const int comp  = 0;
+  const int ncomp = a_rhs.nComp();
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs             = a_lhs[dit()];
+    const EBCellFAB& rhs       = a_rhs[dit()];
+    const EBISBox& ebisbox     = lhs.getEBISBox();
+    const EBGraph& ebgraph     = ebisbox.getEBGraph();
+
+    const IntVectSet ivs(a_lhs.disjointBoxLayout()[dit()]);
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      lhs(vof, comp) = 0.;
+
+      for (int i = 0; i < ncomp; i++){
+	lhs(vof, comp) += rhs(vof, i)*rhs(vof, i);
+      }
+
+      lhs(vof, comp) = sqrt(lhs(vof, comp));
+    }
   }
 }
