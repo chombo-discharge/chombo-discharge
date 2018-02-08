@@ -226,9 +226,27 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
       cur = sqrt(cur);
 
       a_max = Max(a_max, cur);
-      a_min = min(a_min, cur);
+      a_min = Min(a_min, cur);
     }
   }
+
+  // Communicate result
+#ifdef CH_MPI
+  int result;
+  Real tmp = 1.;
+  
+  result = MPI_Allreduce(&a_max, &tmp, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("data_ops::get_max_min_norm - communication error on norm");
+  }
+  a_max = tmp;
+  
+  result = MPI_Allreduce(&a_min, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("data_ops::get_max_min_norm - communication error on norm");
+  }
+  a_min = tmp;
+#endif
 }
 
 void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){

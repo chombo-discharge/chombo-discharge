@@ -78,7 +78,7 @@ int main(int argc, char* argv[]){
   // Set up the amr strategey
   amr->set_verbosity(10);                         // Set verbosity
   amr->set_coarsest_num_cells(128*IntVect::Unit); // Set number of cells on coarsest level
-  amr->set_max_amr_depth(1);                      // Set max amr depth
+  amr->set_max_amr_depth(2);                      // Set max amr depth
   amr->set_max_simulation_depth(4);               // Set maximum simulation depth
   amr->set_ebcf(false);                           // Tell amr to forget about EBCF.
   amr->set_refinement_ratios(refrat);             // Set refinement ratios
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]){
   engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
-  engine->setup(2, false, "");
+  engine->setup(1, false, "");
   engine->set_regrid_interval(10);        // Regrid every this intervals
   engine->set_plot_interval(1);           // Plot every this intervals
   engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]){
   timestepper->set_fast_rte(1);
   timestepper->set_fast_poisson(1);
   amr->set_verbosity(0);
-  engine->run(0.0, 10.0, 1000);
+  //  engine->run(0.0, 10.0, 1000);
 
 
 #ifdef CH_MPI

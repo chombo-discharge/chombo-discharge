@@ -307,10 +307,15 @@ void cell_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
   m_timestepper->compute_E(a_E, m_phase);
   data_ops::vector_length(m_scratch, a_E);
   m_amr->compute_gradient(a_grad_E, m_scratch);
+
+  m_amr->average_down(a_grad_E, m_phase);
+  m_amr->interp_ghost(a_grad_E, m_phase);
   
   // Interpolate to centroids
+#if 0
   m_amr->interpolate_to_centroids(a_E,      m_phase);
   m_amr->interpolate_to_centroids(a_grad_E, m_phase);
+#endif
 }
 
 void cell_tagger::compute_rho(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho){
