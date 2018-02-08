@@ -17,7 +17,7 @@ time_stepper::time_stepper(){
   this->set_verbosity(10);
   this->set_cfl(0.8);
   this->set_relax_time(2.0);
-  this->set_source_growth(5.0);
+  this->set_source_growth(1.E10);
   this->set_min_dt(0.0);
   this->set_max_dt(1.E99);
   this->set_fast_rte(1);
@@ -38,6 +38,18 @@ bool time_stepper::stationary_rte(){
   }
 
   return m_rte->is_stationary();
+}
+
+void time_stepper::cache_states(){
+  CH_TIME("time_stepper::cache_states");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::cache_states" << endl;
+  }
+
+  m_cdr->cache_states();
+  m_poisson->cache_state();
+  m_rte->cache_states();
+  m_sigma->cache_state();
 }
 
 void time_stepper::compute_cdr_sources(){
@@ -156,8 +168,8 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	      const VolIndex& ivof = stencil.vof(i);
 	      const Real& iweight  = stencil.weight(i);
 	      phi += (*(*a_rte_densities[idx])[lvl])[dit()](ivof, comp)*iweight;
-	      rte_densities[idx] = Max(0.0, phi);
 	    }
+	    rte_densities[idx] = Max(0.0, phi);
 	  }
 
 	  // Compute E
@@ -250,6 +262,30 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, 
       m_amr->interp_ghost(*a_velocities[idx], cdr_phase);
     }
   }
+}
+
+void time_stepper::compute_cdr_diffusion(){
+  CH_TIME("time_stepper::compute_cdr_diffusion");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_diffusion" << endl;
+  }
+
+  EBAMRCellData E_cell;
+  EBAMRFluxData E_face;
+  EBAMRIVData   E_eb;
+  m_amr->allocate(E_cell, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(E_face, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(E_eb,   m_cdr->get_phase(), SpaceDim);
+  
+  this->compute_E(E_cell, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_E(E_face, m_cdr->get_phase(), E_cell);
+  this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);
+
+  Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();
+  Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
+
+  this->compute_cdr_diffco_face(diffco_face, E_face);
+  this->compute_cdr_diffco_eb(diffco_eb, E_eb);
 }
 
 void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>& a_diffco_face, const EBAMRFluxData& a_E_face){

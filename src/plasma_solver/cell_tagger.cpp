@@ -449,8 +449,6 @@ void cell_tagger::tag_cells(Vector<IntVectSet>& a_tags,
       a_tags[lvl] |= refine_tags;
     }
   }
-
-  pout() << "done tagging cells" << endl;
 }
 
 Vector<EBAMRCellData>& cell_tagger::get_tracer_fields() {

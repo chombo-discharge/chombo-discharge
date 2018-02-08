@@ -86,7 +86,7 @@ bool field_tagger::refine_cell(const RealVect&         a_pos,
 			       const int&              a_lvl,
 			       const Vector<Real>&     a_tracer,
 			       const Vector<RealVect>& a_grad_tracer){
-  const bool refine = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv && a_tracer[0] > m_refi_mag;
+  const bool refine = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv || a_tracer[0] > m_refi_mag;
 
   return refine;
 }

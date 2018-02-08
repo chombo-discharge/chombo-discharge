@@ -56,6 +56,21 @@ public:
 		     const bool           a_zerophi = false) = 0;
 
   /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocate_internals();
+
+  /*!
+    @brief Cache state before regridding
+  */
+  virtual void cache_state();
+
+  /*!
+    @brief Regrid method. 
+  */
+  virtual void regrid(const int a_old_finest, const int a_new_finest);
+
+  /*!
     @brief Set the computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
@@ -69,16 +84,6 @@ public:
     @brief Set the amr object
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
-
-  /*!
-    @brief Allocate internal storage
-  */
-  virtual void allocate_internals();
-
-  /*!
-    @brief Regrid method. 
-  */
-  virtual void regrid(const int a_old_finest, const int a_new_finest);
 
   /*!
     @brief Set Dirichlet wall BC
@@ -174,6 +179,11 @@ protected:
     @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
   */
   Vector<RefCountedPtr<wall_bc> > m_wallbc;
+
+  /*!
+    @brief Cached state used for regridding. DO NOT TOUCH!
+  */
+  MFAMRCellData m_cache;
 
   /*!
     @brief State data (i.e. the potential)

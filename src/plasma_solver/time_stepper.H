@@ -49,6 +49,11 @@ public:
   virtual bool stationary_rte();
 
   /*!
+    @brief Cache states
+  */
+  virtual void cache_states();
+
+  /*!
     @brief Compute the time step and how it was restricted
   */
   virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
@@ -106,6 +111,11 @@ public:
     @brief Compute cdr velocities
   */
   virtual void compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E);
+
+  /*!
+    @brief Compute diffusion things
+  */
+  virtual void compute_cdr_diffusion();
 
   /*!
     @brief Compute face-centered diffusion coefficients

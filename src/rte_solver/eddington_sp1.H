@@ -45,6 +45,21 @@ public:
     @brief Advance RTE onto state a_state
   */
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
+  
+  /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocate_internals();
+  
+  /*!
+    @brief Cache state
+  */
+  virtual void cache_state();
+
+  /*!
+    @brief Regrid function for this class
+  */
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
     @brief Set solver parameters. These are normally good for this class. 
@@ -103,15 +118,6 @@ public:
   */
   virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
 
-  /*!
-    @brief Allocate internal storage
-  */
-  virtual void allocate_internals();
-
-  /*!
-    @brief Regrid function for this class
-  */
-  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
 
 #ifdef CH_USE_HDF5
   /*!

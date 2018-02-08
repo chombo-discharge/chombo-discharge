@@ -29,7 +29,6 @@ public:
     @brief Constructor
   */
   virtual ~rte_solver();
-
   
   /*!
     @brief Advance equation one time step
@@ -119,6 +118,11 @@ public:
     @brief Allocate internal storage
   */
   virtual void allocate_internals() = 0;
+
+  /*!
+    @brief Cache state
+  */
+  virtual void cache_state() = 0;
 
   /*!
     @brief Regrid function
@@ -219,6 +223,11 @@ protected:
     @brief Name
   */
   std::string m_name;
+
+  /*!
+    @brief Cached state used for regridding
+  */
+  EBAMRCellData m_cache;
 
   /*!
     @brief Internal state. 

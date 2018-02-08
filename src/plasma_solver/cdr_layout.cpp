@@ -45,6 +45,18 @@ void cdr_layout::allocate_internals(){
   }
 }
 
+void cdr_layout::cache_states(){
+  CH_TIME("cdr_layout::cache_states");
+  if(m_verbosity > 6){
+    pout() << "cdr_layout::cache_states" << endl;
+  }
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->cache_state();
+  }
+}
+
 void cdr_layout::initial_data(){
   CH_TIME("cdr_layout::initial_data");
   if(m_verbosity > 6){

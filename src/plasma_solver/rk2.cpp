@@ -19,11 +19,13 @@ typedef rk2::poisson_storage poisson_storage;
 typedef rk2::rte_storage     rte_storage;
 typedef rk2::sigma_storage   sigma_storage;
 
-rk2::rk2(const Real a_alpha) : time_stepper() {
-  m_alpha = a_alpha;
+rk2::rk2() : time_stepper() {
+  m_alpha = 1.0;
 
-  ParmParse pp("rk2");
-  pp.query("alpha", m_alpha);
+  {
+    ParmParse pp("rk2");
+    pp.query("alpha", m_alpha);
+  }
 }
 
 rk2::~rk2(){
@@ -453,7 +455,6 @@ void rk2::compute_cdr_sources_after_k1(){
   EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
   this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, centering::cell_center);
-
 }
 
 void rk2::compute_cdr_fluxes_after_k1(){
@@ -542,7 +543,7 @@ void rk2::advance_cdr_k2(const Real a_dt){
     EBAMRCellData& k2    = storage->get_k2();
     EBAMRCellData& phi   = storage->get_phi();
 
-    solver->compute_rhs(k1, phi, a_dt);
+    solver->compute_rhs(k2, phi, a_dt);
 
     EBAMRCellData& state = solver->get_state();
     data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));

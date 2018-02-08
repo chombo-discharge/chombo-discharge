@@ -26,7 +26,7 @@ rod_slab::rod_slab(){
 
   // Electrode
   bool live            = true;
-  Real rod_radius      = 1.E-3;
+  Real rod_radius      = 200.E-6;
   RealVect rod_center1 = RealVect::Zero;
 #if CH_SPACEDIM == 2
   RealVect rod_center2 = RealVect(0.0, 1.0);

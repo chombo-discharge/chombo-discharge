@@ -726,28 +726,23 @@ void plasma_engine::regrid(){
 
   Vector<IntVectSet> tags;
 
+  // Solvers must cache their internal states
+  m_timestepper->cache_states();
+
   // Regrid amr, find old and new finest levels
   const int old_finest_level = m_amr->get_finest_level();
   this->tag_cells(tags);
   m_amr->regrid(tags, old_finest_level + 1); 
   const int new_finest_level = m_amr->get_finest_level();
-  pout() << "finest level = " << new_finest_level << endl;  
   m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
   m_timestepper->regrid_internals();                                 // Regrid internal storage
-  pout() << "regridding cell tagger" << endl;
   m_celltagger->regrid();                                            // Regrid cell tagger
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
-  MayDay::Warning("plasma_engine::regrid - compute_cdr_diffusion() routine is missing");
-#if 0
   m_timestepper->compute_cdr_diffusion(); // This one is missing
-#endif
   m_timestepper->compute_cdr_sources();
   m_timestepper->compute_rte_sources();
-
-
-
 }
 
 void plasma_engine::write_plot_file(){

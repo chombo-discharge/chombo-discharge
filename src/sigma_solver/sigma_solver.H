@@ -51,6 +51,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Cache state for regridding
+  */
+  virtual void cache_state();
+
+  /*!
     @brief Compute the right-hand side
   */
   virtual void compute_rhs(EBAMRIVData& a_rhs);
@@ -157,6 +162,11 @@ protected:
     @brief State
   */
   EBAMRIVData m_state;
+
+  /*!
+    @brief Cached state for regridding. DO NOT TOUCH!
+  */
+  EBAMRIVData m_cache;
 
   /*!
     @brief Flux

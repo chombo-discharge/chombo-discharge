@@ -16,6 +16,11 @@
 
 /*!
   @brief Class for evolving plasma equations with a second order Runge-Kutta method
+  @details This class supports various types of Runge-Kutta through the RK2 tableu. 
+  Class options
+  -------------
+
+      rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
 */
 class rk2 : public time_stepper {
 public:
@@ -33,7 +38,7 @@ public:
   /*!
     @brief Constructor
   */
-  rk2(const Real a_alpha);
+  rk2();
 
   /*!
     @brief Destructor

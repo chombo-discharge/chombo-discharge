@@ -55,6 +55,21 @@ void poisson_solver::allocate_internals(){
   data_ops::set_value(m_resid,  0.0);
 }
 
+void poisson_solver::cache_state(){
+  CH_TIME("poisson_solver::cache_state");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::cache_state" << endl;
+  }
+
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  
+  m_amr->allocate(m_cache, ncomp);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    m_state[lvl]->copyTo(*m_cache[lvl]);
+  }
+}
+
 void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
   CH_TIME("poisson_solver::set_computational_geometry");
   if(m_verbosity > 5){
@@ -103,13 +118,6 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
   const int ncomp = 1;
   const Interval interv(comp, comp);
 
-  // Copy to scratch storage and allocate internals again
-  MFAMRCellData scratch;
-  m_amr->allocate(scratch, ncomp);
-
-  for (int lvl = 0; lvl <= Min(a_old_finest, a_new_finest); lvl++){
-    m_state[lvl]->copyTo(*scratch[lvl]);
-  }
   this->allocate_internals();
 
   
@@ -132,7 +140,7 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
       m_amr->allocate_ptr(scratch_phase);
       m_amr->allocate_ptr(state_phase);
       m_amr->alias(state_phase,   cur_phase, m_state);
-      m_amr->alias(scratch_phase, cur_phase, scratch);
+      m_amr->alias(scratch_phase, cur_phase, m_cache);
 
       Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(cur_phase);
 

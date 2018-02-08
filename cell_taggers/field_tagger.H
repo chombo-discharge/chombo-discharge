@@ -12,7 +12,7 @@
 
 /*!
   @brief Class that tags cells based on the relative curvature of the electric field
-  @details This class tets if \f$|\nabla E|\Delta x/|E| > \epsilon_{\textrm{curv}}\f$ AND \f$|E|/E_{\textrm{max}} > \epsilon_{\textrm{mag}}\f$ are fulfilled. If so, the cell is refined. The same test is used for coarsening, with different epsilons and opposite inequality sign. 
+  @details This class tets if \f$|\nabla E|\Delta x/|E| > \epsilon_{\textrm{curv}}\f$ OR \f$|E|/E_{\textrm{max}} > \epsilon_{\textrm{mag}}\f$ are fulfilled. If so, the cell is refined. The same tests is used for coarsening, with different epsilons and opposite inequality sign. However, for coarsening, both tests must be fulfilled. 
 
   Class options
   -------------

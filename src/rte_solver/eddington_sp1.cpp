@@ -36,6 +36,22 @@ int eddington_sp1::query_ghost() const{
   return 3;
 }
 
+void eddington_sp1::cache_state(){
+  CH_TIME("eddington_sp1::cache_state");
+  if(m_verbosity > 5){
+    pout() << m_name + "::cache_state" << endl;
+  }
+
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  m_amr->allocate(m_cache, m_phase, ncomp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    m_state[lvl]->copyTo(*m_cache[lvl]);
+  }
+}
+
 void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2){
   m_r1 = a_r1;
   m_r2 = a_r2;
@@ -142,22 +158,16 @@ void eddington_sp1::regrid(const int a_old_finest_level, const int a_new_finest_
   const int ncomp = 1;
   const Interval interv(comp, comp);
 
-  // Copy to scratch storage and allocate internals again
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_phase, ncomp);
-  for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
-    m_state[lvl]->copyTo(*scratch[lvl]);
-  }
   this->allocate_internals();
 
   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_phase);
 
-  scratch[0]->copyTo(*m_state[0]); // Base level should never change. 
+  m_cache[0]->copyTo(*m_state[0]); // Base level should never change. 
   for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
 
     if(lvl <= a_old_finest_level){
-      scratch[lvl]->copyTo(*m_state[lvl]);
+      m_cache[lvl]->copyTo(*m_state[lvl]);
     }
   }
 

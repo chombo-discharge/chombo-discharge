@@ -31,6 +31,19 @@
 
 /*!
   @brief Class for handling spatial operations for streamer equations.
+  @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
+
+  Class options
+  -------------
+  The following options control the behavior of this class. The arguments provided below are the default arguments. 
+
+      amr.verbosity       = 10          # Controls verbosity
+      amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+      amr.max_amr_depth   = 0           # Maximum amr depth
+      amr.max_sim_depth   = -1          # Maximum simulation depth
+      amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+      amr.blocking_factor = 8 (16)      # Default blocking factor (16 in 3D)
+      amr.max_box_size    = 32          # Maximum allowed box size
 */
 class amr_mesh {
 public:

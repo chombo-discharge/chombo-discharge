@@ -32,7 +32,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  return 1.E5;
+  return 3.E4;
 }
 
 int main(int argc, char* argv[]){
@@ -50,13 +50,13 @@ int main(int argc, char* argv[]){
 #endif
 
   // Physical domain, geometry, time stepper, amr, and plasma kinetics
-  const RealVect probLo = -2.E-2*RealVect::Unit;
-  const RealVect probHi =  2.E-2*RealVect::Unit;
+  const RealVect probLo = -1.E-2*RealVect::Unit;
+  const RealVect probHi =  1.E-2*RealVect::Unit;
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain(probLo, probHi));
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(new morrow_lowke());
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2(1.0));
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
 #if CH_SPACEDIM == 2
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]){
   engine->set_potential(potential_curve);
   engine->set_verbosity(10);
   engine->set_geom_refinement_depth(-1);
-  engine->setup(1, false, "");
+  engine->setup(0, false, "");
   engine->set_regrid_interval(10);        // Regrid every this intervals
   engine->set_plot_interval(1);           // Plot every this intervals
   engine->set_checkpoint_interval(5);     // Write checkpoint file every this intervals
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]){
   timestepper->set_fast_rte(1);
   timestepper->set_fast_poisson(1);
   amr->set_verbosity(0);
-  //  engine->run(0.0, 10.0, 1000);
+  engine->run(0.0, 10.0, 100);
 
 
 #ifdef CH_MPI

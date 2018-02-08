@@ -62,6 +62,22 @@ void sigma_solver::allocate_internals(){
   m_amr->allocate(m_flux,  m_phase, ncomp);
 }
 
+void sigma_solver::cache_state(){
+  CH_TIME("sigma_solver::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::allocate_internals" << endl;
+  }
+
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  
+  m_amr->allocate(m_cache, m_phase, ncomp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    m_state[lvl]->copyTo(*m_cache[lvl]);
+  }
+}
+
 
 void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
 
@@ -118,18 +134,10 @@ void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_l
   const int ncomp = 1;
   const Interval interv(comp, comp);
 
-  // Copy to scratch and reinitialize internals
-  EBAMRIVData scratch;
-  m_amr->allocate(scratch, m_phase, ncomp);
-
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
-    m_state[lvl]->copyTo(*scratch[lvl]);
-  }
   this->allocate_internals();
 
-
   // Regrid. Base level should never change
-  scratch[0]->copyTo(*m_state[0]); 
+  m_cache[0]->copyTo(*m_state[0]); 
   for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
     const DisjointBoxLayout& fine_grid = m_amr->get_grids()[lvl];
     const ProblemDomain& fine_domain   = m_amr->get_domains()[lvl];
@@ -193,7 +201,7 @@ void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_l
 
     // If data already exists, it takes precedence
     if (lvl <= a_old_finest_level){
-      scratch[lvl]->copyTo(*m_state[lvl]);
+      m_cache[lvl]->copyTo(*m_state[lvl]);
     }
   }
 

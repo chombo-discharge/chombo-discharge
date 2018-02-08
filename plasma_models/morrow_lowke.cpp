@@ -40,8 +40,8 @@ morrow_lowke::morrow_lowke(){
 
   // Default parameters. All of these can be changed through the command line or an input script.
   m_temp      = 300.;      // Gas temperature
-  m_fracN2    = 0.2;       // Gas composition
-  m_fracO2    = 0.8;       // Gas composition
+  m_fracN2    = 0.8;       // Gas composition
+  m_fracO2    = 0.2;       // Gas composition
   m_p         = 1.0;       // Gas pressure (in atm)
   m_pq        = 0.03947;   // Quenching pressure (in atm)
   m_exc_eff   = 0.6;       // Excitation efficient (excitations per collisions)
@@ -104,6 +104,7 @@ morrow_lowke::morrow_lowke(){
   // Convert to correct units and compute necessary things
   m_p  *= units::s_atm2pascal;
   m_pq *= units::s_atm2pascal;
+
   m_N   = m_p*units::s_Na/(m_temp*units::s_R);
 }
 
@@ -214,9 +215,15 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_de
   Real& Sp = source[m_nplus_idx];
   Real& Sn = source[m_nminu_idx];
 
-  Se = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np;// + Sph;
-  Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np;// + Sph;
+  Se = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np + Sph;
+  Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
   Sn = eta*Ne*Ve   - beta*Np*Nn;
+
+#if 0 // Debug
+  Se = 0.0;
+  Sp = 0.0;
+  Sn = 0.0;
+#endif
 
   return source;
 }
@@ -415,7 +422,6 @@ Vector<Real> morrow_lowke::compute_cathode_flux(const Vector<Real>& a_extrapolat
   for (int i = 0; i < m_num_species; i++){
     fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
-  return fluxes;
 
   // For electrons, we add ion bombardment of positive ions and the photoelectric effect
   fluxes[m_nelec_idx] = 0.;
@@ -497,7 +503,7 @@ morrow_lowke::electron::~electron(){
 }
 
 const Real morrow_lowke::electron::initial_data(const RealVect a_pos, const Real a_time) const {
-  const Real factor = (a_pos - m_seed_pos).vectorLength()/(m_seed_radius*m_seed_radius);
+  const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
 
@@ -537,7 +543,7 @@ morrow_lowke::positive_species::~positive_species(){
 }
 
 const Real morrow_lowke::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
-  const Real factor = (a_pos - m_seed_pos).vectorLength()/(m_seed_radius*m_seed_radius);
+  const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
   
@@ -587,7 +593,6 @@ morrow_lowke::photon_one::photon_one(){
   }
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
-    
 }
 
 morrow_lowke::photon_one::~photon_one(){

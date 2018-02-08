@@ -29,6 +29,11 @@ public:
     @brief Constructor
   */
   virtual ~cdr_solver();
+  
+  /*!
+    @brief Cache internal state
+  */
+  virtual void cache_state();
 
   /*!
     @brief Sanity check
@@ -301,6 +306,11 @@ protected:
   EBAMRCellData m_scratch;
 
   /*!
+    @brief Cached internal state. DO NOT TOUCH!
+  */
+  EBAMRCellData m_cache;
+
+  /*!
     @brief Face-centered velocities (only normal components)
   */
   EBAMRFluxData m_velo_face;
@@ -364,6 +374,7 @@ protected:
     @brief Average cell-centered velocities to face centers
   */
   virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
+
 
   /*!
     @brief Compute the conservative divergence using face-centered states and velocities
