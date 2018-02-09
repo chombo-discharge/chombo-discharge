@@ -223,12 +223,19 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
 
   // Must have a dummy for chekcing intiial residual
   EBAMRCellData dummy;
+  EBAMRCellData source;
   m_amr->allocate(dummy, m_phase, ncomp);
+  m_amr->allocate(source, m_phase, ncomp);
   data_ops::set_value(dummy, 0.0);
+
+  // Must kappa-weight source term
+  data_ops::set_value(source, 0.0);
+  data_ops::incr(source, a_source, 1.0);
+  data_ops::kappa_scale(source);
 
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
   m_amr->alias(phi,  a_state);
-  m_amr->alias(rhs,  a_source);
+  m_amr->alias(rhs,  source);
   m_amr->alias(res,  m_resid);
   m_amr->alias(zero, dummy);
 

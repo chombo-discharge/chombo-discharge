@@ -76,6 +76,10 @@ public:
 
   static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
 
+  static void kappa_scale(EBAMRCellData& a_data);
+
+  static void kappa_scale(LevelData<EBCellFAB>& a_data);
+
   static void kappa_scale(MFAMRCellData& a_data);
 
   static void kappa_scale(LevelData<MFCellFAB>& a_data);

@@ -884,7 +884,6 @@ void time_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_
 
   data_ops::set_value(a_rho, 0.0);
 
-
   Vector<EBAMRCellData*> densities = m_cdr->get_states(); // Get densities from solver
   
   const int finest_level = m_amr->get_finest_level();

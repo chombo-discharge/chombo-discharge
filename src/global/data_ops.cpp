@@ -404,6 +404,16 @@ void data_ops::kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
   a_mass = EBLevelDataOps::parallelSum(mass);
 }
 
+void data_ops::kappa_scale(EBAMRCellData& a_data){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    data_ops::kappa_scale(*a_data[lvl]);
+  }
+}
+
+void data_ops::kappa_scale(LevelData<EBCellFAB>& a_data){
+  EBLevelDataOps::kappaWeight(a_data);
+}
+
 void data_ops::kappa_scale(MFAMRCellData& a_data){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     data_ops::kappa_scale(*a_data[lvl]);
