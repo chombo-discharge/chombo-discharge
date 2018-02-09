@@ -71,6 +71,11 @@ public:
 			 const int a_finestLevel);
 
   /*!
+    @brief Tag cells
+  */
+  virtual void tag_cells(EBAMRTags& a_tags);
+
+  /*!
     @brief Tracer fields
   */
   virtual Vector<EBAMRCellData>& get_tracer_fields();

@@ -42,6 +42,10 @@ public:
 
   static void incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real& a_scale);
 
+  static void incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale);
+
+  static void incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real a_scale);
+
   static void copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
 
   static void divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lcomp, const int a_rcomp);

@@ -17,6 +17,7 @@
 #include "amr_mesh.H"
 #include "cell_tagger.H"
 #include "mfis.H"
+#include "tags.H"
 
 /*!
   @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
@@ -319,17 +320,22 @@ protected:
   /*!
     @brief Tags
   */
-  Vector<IntVectSet> m_cell_tags;
+  Vector<IntVectSet> m_geom_tags;
+
+  /*!
+    @brief Tagged cells on each box
+  */
+  Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_tagged_cells;
 
   /*!
     @brief Tags
   */
-  Vector<IntVectSet> m_geom_tags;
+  EBAMRTags m_tags;
 
   /*!
-    @brief Tag layouts
+    @brief Cached tags. Needed when we regrid and change box ownership.
   */
-  Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_layout_tags;
+  EBAMRTags m_cached_tags;
 
   /*!
     @brief Potential
@@ -382,14 +388,9 @@ protected:
   bool m_restart;
 
   /*!
-    @brief Write a plot file
+    @brief Allocate internals
   */
-  virtual void write_plot_file();
-
-  /*!
-    @brief Write a checkpoint file
-  */
-  virtual void write_checkpoint_file();
+  virtual void allocate_internals();
 
   /*!
     @brief Add potential to the output data holder
@@ -437,9 +438,9 @@ protected:
   virtual void add_rte_source_to_output(EBAMRCellData& a_output, const int a_curVar);
 
   /*!
-    @brief Read checkpoint file
+    @brief Cache tags
   */
-  virtual void read_checkpoint_file();
+  virtual void cache_tags(const EBAMRTags& a_tags);
 
   /*!
     @brief Get geometric tags
@@ -462,12 +463,22 @@ protected:
     @brief Write a grid report
   */
   virtual void grid_report();
+  
+  /*!
+    @brief Read checkpoint file
+  */
+  virtual void read_checkpoint_file();
 
   /*!
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
     whose solution is recomputed. The same goes for stationary RTE methods. 
   */
   virtual void regrid();
+
+  /*!
+    @brief Regrid internal storage for this class
+  */
+  virtual void regrid_internals(const int a_old_finest_level, const int a_new_finest_level);
   
   /*!
     @brief Set the computational geometry
@@ -513,6 +524,21 @@ protected:
     @brief Tag cells for refinement. This includes cells from geometries and the cell tagger
   */
   virtual void tag_cells(Vector<IntVectSet>& a_ivs);
+
+  /*!
+    @brief Tag cells
+  */
+  virtual void tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
+
+  /*!
+    @brief Write a plot file
+  */
+  virtual void write_plot_file();
+
+  /*!
+    @brief Write a checkpoint file
+  */
+  virtual void write_checkpoint_file();
 
   /*!
     @brief Get output variable names for a given output mode

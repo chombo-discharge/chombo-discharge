@@ -10,12 +10,15 @@
 #include "rte_iterator.H"
 #include "data_ops.H"
 #include "mfalias.H"
+#include "tags_factory.H"
 
 #include <LevelData.H>
 #include <EBCellFAB.H>
 #include <EBAMRIO.H>
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
+
+#define feature 1
 
 plasma_engine::plasma_engine(){
   CH_TIME("plasma_engine::plasma_engine(weak)");
@@ -77,6 +80,520 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 
 plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
+}
+
+void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_potential_to_output");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::add_potential_to_output" << endl;
+  }
+
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas   = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol   = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
+  const MFAMRCellData& potential               = poisson->get_state();
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, phase::gas, ncomp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    LevelData<EBCellFAB> state_gas, state_sol;
+
+    mfalias::aliasMF(state_gas, phase::gas,   *potential[lvl]);
+
+    // Copy all covered cells from the other phase
+    if(!ebis_sol.isNull()){
+      mfalias::aliasMF(state_sol, phase::solid, *potential[lvl]);
+      
+      for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
+	const Box box = state_sol.disjointBoxLayout().get(dit());
+	const IntVectSet ivs(box);
+	const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
+	const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
+
+	FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
+	FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
+
+	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+	  const IntVect iv = ivsit();
+	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
+	    data_gas(iv, 0) = data_sol(iv,0);
+	  }
+	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
+	    data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
+	  }
+	}
+      }
+    }
+
+    state_gas.copyTo(*scratch[lvl]);
+  }
+
+  m_amr->average_down(scratch, phase::gas);
+  m_amr->interp_ghost(scratch, phase::gas);
+  m_amr->interpolate_to_centroids(scratch, phase::gas);
+
+  const Interval src_interv(comp, comp);
+  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+}
+
+void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_electric_field_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_electric_field_to_output" << endl;
+  }
+
+  const int ncomp        = SpaceDim;
+  const int finest_level = m_amr->get_finest_level();
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas   = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol   = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
+  const MFAMRCellData& potential               = poisson->get_state();
+
+  MFAMRCellData E;
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, phase::gas, ncomp);
+  m_amr->allocate(E, ncomp);
+
+  m_amr->compute_gradient(E, poisson->get_state());
+  data_ops::scale(E, -1.0);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    LevelData<EBCellFAB> E_gas, E_sol;
+
+    mfalias::aliasMF(E_gas, phase::gas,*E[lvl]);
+
+    // Copy all covered cells from the other phase
+    if(!ebis_sol.isNull()){
+      mfalias::aliasMF(E_sol, phase::solid, *E[lvl]);
+      
+      for (DataIterator dit = E_sol.dataIterator(); dit.ok(); ++dit){
+	const Box box = E_sol.disjointBoxLayout().get(dit());
+	const IntVectSet ivs(box);
+	const EBISBox& ebisb_gas = E_gas[dit()].getEBISBox();
+	const EBISBox& ebisb_sol = E_sol[dit()].getEBISBox();
+
+	FArrayBox& data_gas = E_gas[dit()].getFArrayBox();
+	FArrayBox& data_sol = E_sol[dit()].getFArrayBox();
+
+	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+	  const IntVect iv = ivsit();
+	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
+	    for (int comp = 0; comp < ncomp; comp++){
+	      data_gas(iv, comp) = data_sol(iv,comp);
+	    }
+	  }
+	}
+      }
+    }
+
+    E_gas.copyTo(*scratch[lvl]);
+  }
+
+  m_amr->average_down(scratch, phase::gas);
+  m_amr->interp_ghost(scratch, phase::gas);
+  m_amr->interpolate_to_centroids(scratch, phase::gas);
+
+  const Interval src_interv(0, ncomp - 1);
+  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+}
+
+void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_space_charge_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_space_charge_to_output" << endl;
+  }
+
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  EBAMRCellData scratch;
+  MFAMRCellData rho;
+  m_amr->allocate(rho, ncomp);
+  m_amr->allocate(scratch, phase::gas, ncomp);
+
+  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
+  Vector<EBAMRCellData*> densities; 
+  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    densities.push_back(&(solver->get_state()));
+  }
+
+  m_timestepper->compute_rho(rho, densities, centering::cell_center);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    LevelData<EBCellFAB> rho_gas;
+    mfalias::aliasMF(rho_gas, phase::gas, *rho[lvl]);
+
+    rho_gas.copyTo(*scratch[lvl]);
+  }
+
+  m_amr->average_down(scratch, phase::gas);
+  m_amr->interp_ghost(scratch, phase::gas);
+  m_amr->interpolate_to_centroids(scratch, phase::gas);
+
+
+  const Interval src_interv(comp, comp);
+  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+
+    data_ops::set_covered_value(*a_output[lvl], a_cur_var, 0.0);
+  }
+}
+
+void plasma_engine::add_surface_charge_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_surface_charge_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_surface_charge_to_output" << endl;
+  }
+}
+
+void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_cdr_densities_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_cdr_densities_to_output" << endl;
+  }
+
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
+
+  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const EBAMRCellData& state        = solver->get_state();
+    const int num                     = solver_it.get_solver();
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      state[lvl]->copyTo(*scratch[lvl]);
+    }
+
+    m_amr->average_down(scratch, cdr->get_phase());
+    m_amr->interp_ghost(scratch, cdr->get_phase());
+    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+
+    const Interval src_interv(comp, comp);
+    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+
+      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num, 0.0);
+    }
+  }
+}
+
+void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_cdr_velocities_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_cdr_velocities_to_output" << endl;
+  }
+
+  m_timestepper->compute_cdr_velocities();
+
+  const int comp         = 0;
+  const int ncomp        = SpaceDim;
+  const int finest_level = m_amr->get_finest_level();
+
+  RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
+
+  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const EBAMRCellData& velo         = solver->get_velo_cell();
+    const int num                     = solver_it.get_solver();
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      velo[lvl]->copyTo(*scratch[lvl]);
+    }
+
+    m_amr->average_down(scratch, cdr->get_phase());
+    m_amr->interp_ghost(scratch, cdr->get_phase());
+    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+
+    const Interval src_interv(0, ncomp -1);
+    const Interval dst_interv(a_cur_var + num*ncomp, a_cur_var + num*ncomp + ncomp -1);
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+
+      for (int comp = 0; comp < SpaceDim; comp ++){
+	data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp + comp, 0.0);
+      }
+    }
+  }
+}
+
+void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_cdr_source_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_cdr_source_to_output" << endl;
+  }
+
+  m_timestepper->compute_cdr_sources();
+  
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
+
+  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const EBAMRCellData& state        = solver->get_source();
+    const int num                     = solver_it.get_solver();
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      state[lvl]->copyTo(*scratch[lvl]);
+    }
+
+    m_amr->average_down(scratch, cdr->get_phase());
+    m_amr->interp_ghost(scratch, cdr->get_phase());
+    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+
+    const Interval src_interv(comp, comp);
+    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+
+      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
+    }
+  }
+}
+
+void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_rte_densities_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_rte_densities_to_output" << endl;
+  }
+
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  RefCountedPtr<rte_layout>& rte     = m_timestepper->get_rte();
+  const phase::which_phase rte_phase = rte->get_phase();
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, rte_phase, 1);
+  data_ops::set_value(scratch, 0.0);
+
+  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    const EBAMRCellData& state        = solver->get_state();
+    const int num                     = solver_it.get_solver();
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      state[lvl]->copyTo(*scratch[lvl]);
+    }
+
+    m_amr->average_down(scratch, rte_phase);
+    m_amr->interp_ghost(scratch, rte_phase);
+    m_amr->interpolate_to_centroids(scratch, rte_phase);
+
+    const Interval src_interv(comp, comp);
+    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+
+      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
+    }
+  }
+}
+
+void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_rte_source_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_rte_source_to_output" << endl;
+  }
+  
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  RefCountedPtr<rte_layout>& rte     = m_timestepper->get_rte();
+  const phase::which_phase rte_phase = rte->get_phase();
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, rte_phase, 1);
+  data_ops::set_value(scratch, 0.0);
+
+  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    const EBAMRCellData& state        = solver->get_source();
+    const int num                     = solver_it.get_solver();
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      state[lvl]->copyTo(*scratch[lvl]);
+    }
+
+    m_amr->average_down(scratch, rte_phase);
+    m_amr->interp_ghost(scratch, rte_phase);
+    m_amr->interpolate_to_centroids(scratch, rte_phase);
+
+    const Interval src_interv(comp, comp);
+    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+
+      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
+    }
+  }
+}
+
+void plasma_engine::allocate_internals(){
+  CH_TIME("plasma_engine::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::allocate_internals" << endl;
+  }
+  
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const IntVect ghost    = IntVect::Zero;
+
+  m_tags.resize(1 + finest_level);
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    tags_factory fact = tags_factory();
+    m_tags[lvl] = RefCountedPtr<LevelData<tags> > (new LevelData<tags>(dbl, ncomp, ghost, fact));
+  }
+}
+
+void plasma_engine::cache_tags(const EBAMRTags& a_tags){
+  CH_TIME("plasma_engine::cache_tags");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::cache_tags" << endl;
+  }
+
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const IntVect ghost    = IntVect::Zero;
+
+  m_cached_tags.resize(1 + finest_level);
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    tags_factory fact = tags_factory();
+    m_cached_tags[lvl] = RefCountedPtr<LevelData<tags> > (new LevelData<tags>(dbl, ncomp, ghost, fact));
+
+    a_tags[lvl]->copyTo(*m_cached_tags[lvl]);
+  }
+}
+
+void plasma_engine::get_geom_tags(){
+  CH_TIME("plasma_engine::get_geom_tags");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::get_geom_tags" << endl;
+  }
+
+  const int maxdepth = m_amr->get_max_amr_depth();
+
+  m_geom_tags.resize(maxdepth);
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  CH_assert(ebis_gas != NULL);
+
+  for (int lvl = 0; lvl < maxdepth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that. 
+    const ProblemDomain& cur_dom = m_amr->get_domains()[lvl];
+    const int which_level = ebis_gas->getLevel(cur_dom);
+
+    IntVectSet cond_tags;
+    IntVectSet diel_tags;
+    IntVectSet gas_tags;
+    IntVectSet solid_tags;
+    IntVectSet gas_diel_tags;
+    IntVectSet gas_solid_tags;
+    
+    // Conductor cells
+    if(m_conductor_tag_depth > lvl){ 
+      cond_tags = ebis_gas->irregCells(which_level);
+      if(!ebis_sol.isNull()){
+	cond_tags |= ebis_sol->irregCells(which_level);
+	cond_tags -= m_mfis->interface_region(cur_dom);
+      }
+    }
+
+    // Dielectric cells
+    if(m_dielectric_tag_depth > lvl){ 
+      if(!ebis_sol.isNull()){
+	diel_tags = ebis_sol->irregCells(which_level);
+      }
+    }
+
+    // Gas-solid interface cells
+    if(m_gas_solid_interface_tag_depth > lvl){ 
+      if(!ebis_sol.isNull()){
+	gas_tags = ebis_gas->irregCells(which_level);
+      }
+    }
+
+     // Gas-dielectric interface cells
+    if(m_gas_dielectric_interface_tag_depth > lvl){
+      if(!ebis_sol.isNull()){
+	gas_diel_tags = m_mfis->interface_region(cur_dom);
+      }
+    }
+
+    // Gas-conductor interface cells
+    if(m_gas_conductor_interface_tag_depth > lvl){ 
+      gas_solid_tags = ebis_gas->irregCells(which_level);
+      if(!ebis_sol.isNull()){
+	gas_solid_tags -= m_mfis->interface_region(cur_dom);
+      }
+    }
+
+    // Solid-solid interfaces
+    if(m_solid_solid_interface_tag_depth > lvl){ 
+      if(!ebis_sol.isNull()){
+	solid_tags = ebis_sol->irregCells(which_level);
+
+	// Do the intersection with the conductor cells
+	IntVectSet tmp = ebis_gas->irregCells(which_level);
+	tmp |= ebis_sol->irregCells(which_level);
+	tmp -= m_mfis->interface_region(cur_dom);
+
+	solid_tags &= tmp;
+      }
+    }
+
+    m_geom_tags[lvl].makeEmpty();
+    m_geom_tags[lvl] |= diel_tags;
+    m_geom_tags[lvl] |= cond_tags;
+    m_geom_tags[lvl] |= gas_diel_tags;
+    m_geom_tags[lvl] |= gas_solid_tags;
+    m_geom_tags[lvl] |= gas_tags;
+    m_geom_tags[lvl] |= solid_tags;
+  }
+
+  // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
+  for (int lvl = 0; lvl < maxdepth; lvl++){
+    m_geom_tags[lvl].grow(2);
+  }
 }
 
 void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
@@ -219,6 +736,7 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
     if(m_verbosity > 0){
       this->grid_report();
     }
+
     m_timestepper->initial_data();           // Re-fill solvers with initial data
     m_timestepper->solve_poisson();          // Re-solve Poisson equation
     if(m_timestepper->stationary_rte()){     // Solve RTE equations by using initial data and electric field if its stationary
@@ -231,23 +749,69 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
   }
 }
 
-void plasma_engine::setup_and_run(){
-  CH_TIME("plasma_engine::setup_and_run");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::setup_and_run" << endl;
+void plasma_engine::read_checkpoint_file(){
+  CH_TIME("plasma_engine::read_checkpoint_file");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::read_checkpoint_file" << endl;
+  }  
+}
+
+void plasma_engine::regrid(){
+  CH_TIME("plasma_engine::regrid");
+  if(m_verbosity > 2){
+    pout() << "plasma_engine::regrid" << endl;
   }
 
-  char iter_str[100];
-  sprintf(iter_str, ".check%07d.%dd.hdf5", m_restart_step, SpaceDim);
-  const std::string restart_file = m_output_dir + "/" + m_output_names + std::string(iter_str);
+  Vector<IntVectSet> tags;
 
-  this->setup(m_init_regrids, m_restart, restart_file);
-  this->run(m_start_time, m_stop_time, m_max_steps);
+  // engine and solvers must cache their internal states
+  m_timestepper->cache_states();
+
+  // Tag cells and cache them
+#if feature // Not yet active
+  this->tag_cells(tags, m_tags); 
+  this->cache_tags(m_tags);      // Cache m_tags  because after regrid, ownership will change
+#else
+  this->tag_cells(tags);
+#endif
+
+  // Regrid base
+  const int old_finest_level = m_amr->get_finest_level();
+  m_amr->regrid(tags, old_finest_level + 1);
+
+  const int new_finest_level = m_amr->get_finest_level();
+#if feature // Not yet supported
+  this->regrid_internals(old_finest_level, new_finest_level);        // Regrid internals for plasma_engine
+#endif
+  m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
+  m_timestepper->regrid_internals();                                 // Regrid internal storage for time_stepper
+  m_celltagger->regrid();                                            // Regrid cell tagger
+
+
+  // Fill solvers with important stuff
+  m_timestepper->compute_cdr_velocities();
+  m_timestepper->compute_cdr_diffusion(); // This one is missing
+  m_timestepper->compute_cdr_sources();
+  m_timestepper->compute_rte_sources();
+}
+
+void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("plasma_engine::regrid_internals");
+  if(m_verbosity > 2){
+    pout() << "plasma_engine::regrid_internals" << endl;
+  }
+
+  this->allocate_internals();
+
+  // Copy cached tags back over to m_tags
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+    m_cached_tags[lvl]->copyTo(*m_tags[lvl]);
+  }
 }
 
 void plasma_engine::run(const Real a_start_time, const Real a_end_time, const int a_max_steps){
   CH_TIME("plasma_engine::run");
-  if(m_verbosity > 5){
+  if(m_verbosity > 1){
     pout() << "plasma_engine::run" << endl;
   }
 
@@ -357,6 +921,20 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     pout() << "==================================" << endl;
   }
 
+}
+
+void plasma_engine::setup_and_run(){
+  CH_TIME("plasma_engine::setup_and_run");
+  if(m_verbosity > 0){
+    pout() << "plasma_engine::setup_and_run" << endl;
+  }
+
+  char iter_str[100];
+  sprintf(iter_str, ".check%07d.%dd.hdf5", m_restart_step, SpaceDim);
+  const std::string restart_file = m_output_dir + "/" + m_output_names + std::string(iter_str);
+
+  this->setup(m_init_regrids, m_restart, restart_file);
+  this->run(m_start_time, m_stop_time, m_max_steps);
 }
 
 void plasma_engine::set_verbosity(const int a_verbosity){
@@ -547,6 +1125,10 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
+#if feature // Not yet supported
+  this->allocate_internals();
+#endif
+
   if(m_verbosity > 0){
     this->grid_report();
   }
@@ -582,28 +1164,6 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   }
 
   MayDay::Abort("plasma_engine::setup_for_restart - not implemented (yet)");
-
-  m_restart = true;
-}
-
-void plasma_engine::tag_cells(Vector<IntVectSet>& a_tags){
-  CH_TIME("plasma_engine::tag_cells");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::tag_cells" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-  a_tags.resize(1 + finest_level);
-
-  // Add tags from tagger
-  if(!m_celltagger.isNull()){
-    m_celltagger->tag_cells(a_tags, m_layout_tags, finest_level);
-  }
-
-  // Add geometric tags. We don't add tags on the finest level because
-  for (int lvl = 0; lvl < finest_level; lvl++){
-    a_tags[lvl] |= m_geom_tags[lvl];
-  }
 }
 
 void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
@@ -877,31 +1437,50 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
 
 }
 
-void plasma_engine::regrid(){
-  CH_TIME("plasma_engine::regrid");
-  if(m_verbosity > 2){
-    pout() << "plasma_engine::regrid" << endl;
+void plasma_engine::tag_cells(Vector<IntVectSet>& a_tags){
+  CH_TIME("plasma_engine::tag_cells");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::tag_cells" << endl;
   }
 
-  Vector<IntVectSet> tags;
+  const int finest_level = m_amr->get_finest_level();
+  a_tags.resize(1 + finest_level);
 
-  // Solvers must cache their internal states
-  m_timestepper->cache_states();
+  // Add tags from tagger
+  if(!m_celltagger.isNull()){
+    m_celltagger->tag_cells(a_tags, m_tagged_cells, finest_level);
+  }
 
-  // Regrid amr, find old and new finest levels
-  const int old_finest_level = m_amr->get_finest_level();
-  this->tag_cells(tags);
-  m_amr->regrid(tags, old_finest_level + 1); 
-  const int new_finest_level = m_amr->get_finest_level();
-  m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
-  m_timestepper->regrid_internals();                                 // Regrid internal storage
-  m_celltagger->regrid();                                            // Regrid cell tagger
+  // Add geometric tags. 
+  for (int lvl = 0; lvl < finest_level; lvl++){
+    a_tags[lvl] |= m_geom_tags[lvl];
+  }
+}
 
-  // Fill solvers with important stuff
-  m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion(); // This one is missing
-  m_timestepper->compute_cdr_sources();
-  m_timestepper->compute_rte_sources();
+void plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
+  CH_TIME("plasma_engine::tag_cells");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::tag_cells" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  a_all_tags.resize(1 + finest_level, IntVectSet());
+
+  if(!m_celltagger.isNull()){
+    m_celltagger->tag_cells(a_cell_tags);
+  }
+
+  // Gather tags from a_tags
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (DataIterator dit = a_cell_tags[lvl]->dataIterator(); dit.ok(); ++dit){
+      a_all_tags[lvl] |= IntVectSet((*a_cell_tags[lvl])[dit()].get_ivs());
+    }
+  }
+
+  // Add geometric tags. 
+  for (int lvl = 0; lvl < finest_level; lvl++){
+    a_all_tags[lvl] |= m_geom_tags[lvl];
+  }
 }
 
 void plasma_engine::write_plot_file(){
@@ -967,485 +1546,66 @@ void plasma_engine::write_plot_file(){
 	      covered_values);
 }
 
-void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_potential_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_potential_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas   = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol   = m_mfis->get_ebis(phase::solid);
-  const RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  const MFAMRCellData& potential               = poisson->get_state();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    LevelData<EBCellFAB> state_gas, state_sol;
-
-    mfalias::aliasMF(state_gas, phase::gas,   *potential[lvl]);
-
-    // Copy all covered cells from the other phase
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(state_sol, phase::solid, *potential[lvl]);
-      
-      for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
-	const Box box = state_sol.disjointBoxLayout().get(dit());
-	const IntVectSet ivs(box);
-	const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
-	const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
-
-	FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
-	FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
-
-	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
-	  const IntVect iv = ivsit();
-	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	    data_gas(iv, 0) = data_sol(iv,0);
-	  }
-	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	    data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
-	  }
-	}
-      }
-    }
-
-    state_gas.copyTo(*scratch[lvl]);
-  }
-
-  m_amr->average_down(scratch, phase::gas);
-  m_amr->interp_ghost(scratch, phase::gas);
-  m_amr->interpolate_to_centroids(scratch, phase::gas);
-
-  const Interval src_interv(comp, comp);
-  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-  }
-}
-
-void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_electric_field_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_electric_field_to_output" << endl;
-  }
-
-  const int ncomp        = SpaceDim;
-  const int finest_level = m_amr->get_finest_level();
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas   = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol   = m_mfis->get_ebis(phase::solid);
-  const RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  const MFAMRCellData& potential               = poisson->get_state();
-
-  MFAMRCellData E;
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp);
-  m_amr->allocate(E, ncomp);
-
-  m_amr->compute_gradient(E, poisson->get_state());
-  data_ops::scale(E, -1.0);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    LevelData<EBCellFAB> E_gas, E_sol;
-
-    mfalias::aliasMF(E_gas, phase::gas,*E[lvl]);
-
-    // Copy all covered cells from the other phase
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(E_sol, phase::solid, *E[lvl]);
-      
-      for (DataIterator dit = E_sol.dataIterator(); dit.ok(); ++dit){
-	const Box box = E_sol.disjointBoxLayout().get(dit());
-	const IntVectSet ivs(box);
-	const EBISBox& ebisb_gas = E_gas[dit()].getEBISBox();
-	const EBISBox& ebisb_sol = E_sol[dit()].getEBISBox();
-
-	FArrayBox& data_gas = E_gas[dit()].getFArrayBox();
-	FArrayBox& data_sol = E_sol[dit()].getFArrayBox();
-
-	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
-	  const IntVect iv = ivsit();
-	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	    for (int comp = 0; comp < ncomp; comp++){
-	      data_gas(iv, comp) = data_sol(iv,comp);
-	    }
-	  }
-	}
-      }
-    }
-
-    E_gas.copyTo(*scratch[lvl]);
-  }
-
-  m_amr->average_down(scratch, phase::gas);
-  m_amr->interp_ghost(scratch, phase::gas);
-  m_amr->interpolate_to_centroids(scratch, phase::gas);
-
-  const Interval src_interv(0, ncomp - 1);
-  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-  }
-}
-
-void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_space_charge_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_space_charge_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  EBAMRCellData scratch;
-  MFAMRCellData rho;
-  m_amr->allocate(rho, ncomp);
-  m_amr->allocate(scratch, phase::gas, ncomp);
-
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
-  Vector<EBAMRCellData*> densities; 
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    densities.push_back(&(solver->get_state()));
-  }
-
-  m_timestepper->compute_rho(rho, densities, centering::cell_center);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    LevelData<EBCellFAB> rho_gas;
-    mfalias::aliasMF(rho_gas, phase::gas, *rho[lvl]);
-
-    rho_gas.copyTo(*scratch[lvl]);
-  }
-
-  m_amr->average_down(scratch, phase::gas);
-  m_amr->interp_ghost(scratch, phase::gas);
-  m_amr->interpolate_to_centroids(scratch, phase::gas);
-
-
-  const Interval src_interv(comp, comp);
-  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-
-    data_ops::set_covered_value(*a_output[lvl], a_cur_var, 0.0);
-  }
-}
-
-void plasma_engine::add_surface_charge_to_output(EBAMRCellData& a_output, const int a_cur_var){}
-
-void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_densities_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_cdr_densities_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
-
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_state();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, cdr->get_phase());
-    m_amr->interp_ghost(scratch, cdr->get_phase());
-    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num, 0.0);
-    }
-  }
-}
-
-void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_velocities_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_cdr_velocities_to_output" << endl;
-  }
-
-  m_timestepper->compute_cdr_velocities();
-
-  const int comp         = 0;
-  const int ncomp        = SpaceDim;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
-
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& velo         = solver->get_velo_cell();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      velo[lvl]->copyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, cdr->get_phase());
-    m_amr->interp_ghost(scratch, cdr->get_phase());
-    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
-
-    const Interval src_interv(0, ncomp -1);
-    const Interval dst_interv(a_cur_var + num*ncomp, a_cur_var + num*ncomp + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-
-      for (int comp = 0; comp < SpaceDim; comp ++){
-	data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp + comp, 0.0);
-      }
-    }
-  }
-}
-
-void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_source_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_cdr_source_to_output" << endl;
-  }
-
-  m_timestepper->compute_cdr_sources();
-  
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
-
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_source();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, cdr->get_phase());
-    m_amr->interp_ghost(scratch, cdr->get_phase());
-    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
-    }
-  }
-}
-
-void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_rte_densities_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_rte_densities_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<rte_layout>& rte     = m_timestepper->get_rte();
-  const phase::which_phase rte_phase = rte->get_phase();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, rte_phase, 1);
-  data_ops::set_value(scratch, 0.0);
-
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_state();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, rte_phase);
-    m_amr->interp_ghost(scratch, rte_phase);
-    m_amr->interpolate_to_centroids(scratch, rte_phase);
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
-    }
-  }
-}
-
-void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
-    CH_TIME("plasma_engine::add_rte_source_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_rte_source_to_output" << endl;
-  }
-  
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<rte_layout>& rte     = m_timestepper->get_rte();
-  const phase::which_phase rte_phase = rte->get_phase();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, rte_phase, 1);
-  data_ops::set_value(scratch, 0.0);
-
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_source();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, rte_phase);
-    m_amr->interp_ghost(scratch, rte_phase);
-    m_amr->interpolate_to_centroids(scratch, rte_phase);
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
-    }
-  }
-}
-
 void plasma_engine::write_checkpoint_file(){
   CH_TIME("plasma_engine::write_checkpoint_file");
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_checkpoint_file" << endl;
   }
-}
 
-void plasma_engine::read_checkpoint_file(){
-  CH_TIME("plasma_engine::read_checkpoint_file");
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::read_checkpoint_file" << endl;
-  }  
-}
+  return; // Not finished
 
-void plasma_engine::get_geom_tags(){
-  CH_TIME("plasma_engine::get_geom_tags");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::get_geom_tags" << endl;
-  }
+  const int finest_level             = m_amr->get_finest_level();
+  const phase::which_phase cur_phase = phase::gas;
 
-  const int maxdepth = m_amr->get_max_amr_depth();
 
-  m_geom_tags.resize(maxdepth);
+  RefCountedPtr<cdr_layout>& cdr   = m_timestepper->get_cdr();
+  RefCountedPtr<rte_layout>& rte   = m_timestepper->get_rte();
+  RefCountedPtr<sigma_solver>& sig = m_timestepper->get_sigma();
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  HDF5HeaderData header;
+  header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
+  header.m_real["time"]        = m_time;
+  header.m_real["dt"]          = m_dt;
+  header.m_int["step"]         = m_step;
+  header.m_int["finest_level"] = finest_level;
 
-  CH_assert(ebis_gas != NULL);
+  // Storage for sigma and m_tags - these are things that can't be written directly
+  EBAMRCellData sigma, tags;
+  m_amr->allocate(sigma, cur_phase, 1);
+  m_amr->allocate(tags,  cur_phase, 1);
 
-  for (int lvl = 0; lvl < maxdepth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that. 
-    const ProblemDomain& cur_dom = m_amr->get_domains()[lvl];
-    const int which_level = ebis_gas->getLevel(cur_dom);
+  // Copy data from sigma solver to sigma
+  data_ops::set_value(sigma, 0.0);
+  data_ops::incr(sigma, sig->get_state(), 1.0);
 
-    IntVectSet cond_tags;
-    IntVectSet diel_tags;
-    IntVectSet gas_tags;
-    IntVectSet solid_tags;
-    IntVectSet gas_diel_tags;
-    IntVectSet gas_solid_tags;
+  // Set tagged cells = 1
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(cur_phase)[lvl];
     
-    // Conductor cells
-    if(m_conductor_tag_depth > lvl){ 
-      cond_tags = ebis_gas->irregCells(which_level);
-      if(!ebis_sol.isNull()){
-	cond_tags |= ebis_sol->irregCells(which_level);
-	cond_tags -= m_mfis->interface_region(cur_dom);
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet& ivs  = (*m_tagged_cells[lvl])[dit()];
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	(*tags[lvl])[dit()](vof, 0) = 1.;
       }
     }
-
-    // Dielectric cells
-    if(m_dielectric_tag_depth > lvl){ 
-      if(!ebis_sol.isNull()){
-	diel_tags = ebis_sol->irregCells(which_level);
-      }
-    }
-
-    // Gas-solid interface cells
-    if(m_gas_solid_interface_tag_depth > lvl){ 
-      if(!ebis_sol.isNull()){
-	gas_tags = ebis_gas->irregCells(which_level);
-      }
-    }
-
-     // Gas-dielectric interface cells
-    if(m_gas_dielectric_interface_tag_depth > lvl){
-      if(!ebis_sol.isNull()){
-	gas_diel_tags = m_mfis->interface_region(cur_dom);
-      }
-    }
-
-    // Gas-conductor interface cells
-    if(m_gas_conductor_interface_tag_depth > lvl){ 
-      gas_solid_tags = ebis_gas->irregCells(which_level);
-      if(!ebis_sol.isNull()){
-	gas_solid_tags -= m_mfis->interface_region(cur_dom);
-      }
-    }
-
-    // Solid-solid interfaces
-    if(m_solid_solid_interface_tag_depth > lvl){ 
-      if(!ebis_sol.isNull()){
-	solid_tags = ebis_sol->irregCells(which_level);
-
-	// Do the intersection with the conductor cells
-	IntVectSet tmp = ebis_gas->irregCells(which_level);
-	tmp |= ebis_sol->irregCells(which_level);
-	tmp -= m_mfis->interface_region(cur_dom);
-
-	solid_tags &= tmp;
-      }
-    }
-
-    m_geom_tags[lvl].makeEmpty();
-    m_geom_tags[lvl] |= diel_tags;
-    m_geom_tags[lvl] |= cond_tags;
-    m_geom_tags[lvl] |= gas_diel_tags;
-    m_geom_tags[lvl] |= gas_solid_tags;
-    m_geom_tags[lvl] |= gas_tags;
-    m_geom_tags[lvl] |= solid_tags;
   }
 
-  // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
-  for (int lvl = 0; lvl < maxdepth; lvl++){
-    m_geom_tags[lvl].grow(2);
-  }
+  // Output file name
+  char str[100];
+  const std::string prefix = m_output_dir + "/" + m_output_names;
+  sprintf(str, "%s.check%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+
+
+  HDF5Handle handle_out(str, HDF5Handle::CREATE);
+
+  header.writeToFile(handle_out);
+
+  // Now write data from cdr, rte, sigma, and tags
 }
 
 Vector<string> plasma_engine::get_output_variable_names(){

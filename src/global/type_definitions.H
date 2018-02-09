@@ -17,6 +17,7 @@
 #include <MFCellFAB.H>
 #include <MFFluxFAB.H>
 
+#include "tags.H"
 #include "MFBaseIVFAB.H"
 
 /*!
@@ -65,6 +66,9 @@ namespace stencil_type {
   };
 };
 
+/*!
+  @brief Ghost cell interpolation methods
+*/
 namespace ghost_interpolation {
   enum which_type {
     pwl  = 0,
@@ -72,6 +76,9 @@ namespace ghost_interpolation {
   };
 };
 
+/*!
+  @brief Namespace for various centerings
+*/
 namespace centering {
   enum which_center {
     cell_center   = 0,
@@ -80,6 +87,9 @@ namespace centering {
   };
 };
 
+/*!
+  @brief Time code for output
+*/
 namespace time_code {
   enum which_code {
     cfl             = 0,
@@ -91,6 +101,9 @@ namespace time_code {
   };
 };
 
+/*!
+  @brief Output mode for plasma_engine
+*/
 namespace output_mode{
   enum which_mode{
     ultra_light = 0,
@@ -106,5 +119,6 @@ typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >        EBAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        EBAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<EBFaceFAB> > >        EBAMRFaceData;
 typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;
+typedef Vector<RefCountedPtr<LevelData<tags> > >             EBAMRTags;
 
 #endif

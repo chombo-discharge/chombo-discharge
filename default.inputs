@@ -1,21 +1,21 @@
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ____________________________________________________________________________________________________
-physical_domain.lo_corner = -2E-3 -2E-3 -1E-3
-physical_domain.hi_corner =  2E-3  2E-3  1E-3
+physical_domain.lo_corner = -2E-3 -2E-3 -2E-3
+physical_domain.hi_corner =  2E-3  2E-3  2E-3
 # ____________________________________________________________________________________________________
 
 
 # ====================================================================================================
 # AMR SETTINGS
 # ____________________________________________________________________________________________________
-amr.verbosity       = 1           # Controls verbosity. 
+amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
 amr.max_amr_depth   = 1           # Maximum amr depth
 amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
-amr.buffer_size     = 2           # Number of cells between grid levels
-amr.blocking_factor = 8           # Default blocking factor (16 in 3D)
+amr.buffer_size     = 1           # Number of cells between grid levels
+amr.blocking_factor = 8          # Default blocking factor (16 in 3D)
 amr.max_box_size    = 32          # Maximum allowed box size
 amr.ref_rat         = 4 2 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
@@ -34,13 +34,13 @@ amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
 # PLASMA ENGINE SETTINGS
 # ____________________________________________________________________________________________________	
 plasma_engine.verbosity            = 1             # Engine verbosity
-plasma_engine.plot_interval        = 10            # Plot interval
+plasma_engine.plot_interval        = 1             # Plot interval
 plasma_engine.regrid_interval      = 10            # Regrid interval
 plasma_engine.checkpoint_interval  = 10            # Checkpoint interval
 plasma_engine.initial_regrids      = 1             # Number of initial regrids
 plasma_engine.start_time           = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time            = 1.0           # Stop time
-plasma_engine.max_steps            = 100           # Maximum number of steps
+plasma_engine.max_steps            = 500           # Maximum number of steps
 plasma_engine.output_mode          = full          # Output mode
 plasma_engine.output_directory     = ./            # Output directory
 plasma_engine.output_names         = simulation    # Simulation output names
@@ -52,9 +52,9 @@ plasma_engine.restart_step         = 0             # Restart step
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ____________________________________________________________________________________________________	
-time_stepper.verbosity        = 0     # Class verbosity
-time_stepper.solver_verbosity = 0     # Individual solver verbosities
-time_stepper.fast_rte         = 1     # Solve RTE every this time steps
+time_stepper.verbosity        = -1    # Class verbosity
+time_stepper.solver_verbosity = -1    # Individual solver verbosities
+time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
@@ -90,5 +90,5 @@ eddington_sp1.gmg_max_iter      = 32        # Maximum number of iterations
 eddington_sp1.gmg_tolerance     = 1.E-6     # Residue tolerance
 eddington_sp1.gmg_hang          = 0.2       # Solver hang
 eddington_sp1.gmg_bottom_drop   = 8         # Bottom drop
-eddington_sp1.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+eddington_sp1.gmg_bottom_solver = bicgtab   # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
