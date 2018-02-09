@@ -16,7 +16,7 @@
 #include <ParmParse.H>
 
 std::string air_bolsig::s_script_file  = "bolsig_inputs.";
-std::string air_bolsig::s_data_file    = "bolsig_outpouts.";
+std::string air_bolsig::s_data_file    = "bolsig_outputs.";
 std::string air_bolsig::s_bolsig_alpha = "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)";
 std::string air_bolsig::s_bolsig_mob   = "E/N (Td)	Mobility *N (1/m/V/s)";
 std::string air_bolsig::s_bolsig_diff  = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
@@ -111,14 +111,8 @@ air_bolsig::air_bolsig(){
   }
 
   // Compute transport data for electrons by calling BOLSIG
-  this->call_bolsig();
-  if(procID() == 0){
-    const std::string cmd = "rm bolsiglog.txt";
-    const int success = system(cmd.c_str());
-    if(success != 0){
-      MayDay::Abort("air_bolsig::air_bolsig - could not delete log file");
-    }
-  }
+  this->compute_transport_coefficients();
+
 }
 
 air_bolsig::~air_bolsig(){
@@ -173,7 +167,7 @@ Real air_bolsig::initial_sigma(const RealVect& a_pos) const {
 
 }
 
-void air_bolsig::call_bolsig(){
+void air_bolsig::compute_transport_coefficients(){
   pout() << "Computing transport data using BOLSIG- ..." << endl;
 
   std::stringstream ss;
@@ -184,24 +178,24 @@ void air_bolsig::call_bolsig(){
   m_local_script_file = s_script_file + ss.str();
   m_local_data_file   = s_data_file   + ss.str();
 
-  this->build_script();   // Build input script for BOLSIG
-  this->build_data();     // Call bolsigminus and output data
-  this->extract_data();   // Extract data
-  this->delete_data();    // Cleanup, delete file created by bolsigminus
-  this->delete_script();  // Cleanup, delete script
+  this->build_bolsig_script();   // Build input script for BOLSIG
+  this->call_bolsig();     // Call bolsigminus and output data
+  this->extract_bolsig_data();   // Extract data
+  this->delete_bolsig_data();    // Cleanup, delete file created by bolsigminus
+  this->delete_bolsig_script();  // Cleanup, delete script
 
   
   pout() << "Done computing transport data" << endl;
 }
 
-void air_bolsig::build_script(){
+void air_bolsig::build_bolsig_script(){
   // Get LxCat file
   int success;
   std::string cmd;
   cmd = "cp " + m_lxcat_path + "/" + m_lxcat_file + " ./" + m_local_lxcat_file;
   success = system(cmd.c_str());
   if(success != 0){
-    MayDay::Abort("air_bolsig::build_script - Could not get LXCat file");
+    MayDay::Abort("air_bolsig::build_bolsig_script - Could not get LXCat file");
   }
   
   // Open file
@@ -279,7 +273,7 @@ void air_bolsig::build_script(){
   file.close();
 }
 
-void air_bolsig::build_data(){
+void air_bolsig::call_bolsig(){
 
   int success;
   std::string cmd;
@@ -287,33 +281,42 @@ void air_bolsig::build_data(){
   cmd = "./" + m_bolsig_path + "/bolsigminus " + m_local_script_file;
   success = system(cmd.c_str());
   if(success != 0){
-    MayDay::Abort("air_bolsig::build_data - Could not call BOLSIG");
+    MayDay::Abort("air_bolsig::call_bolsig - Could not call BOLSIG");
   }
 
   // Delete the transient copy of the data base when we are done. 
   cmd = "rm " + m_local_lxcat_file;
   success = system(cmd.c_str());
   if(success != 0){
-    MayDay::Abort("AirBolsigPlasKin::build_data - Could not delete temporary file");
+    MayDay::Abort("AirBolsigPlasKin::call_bolsig - Could not delete temporary file");
+  }
+
+  // Delete the bolsig log file. 
+  if(procID() == 0){
+    const std::string cmd = "rm bolsiglog.txt";
+    const int success = system(cmd.c_str());
+    if(success != 0){
+      MayDay::Abort("air_bolsig::call_bolsig - could not delete log file");
+    }
   }
 }
 
-void air_bolsig::extract_data(){
+void air_bolsig::extract_bolsig_data(){
 
 }
 
-void air_bolsig::delete_data(){
+void air_bolsig::delete_bolsig_data(){
   const std::string cmd = "rm " + m_local_data_file;
   const int success = system(cmd.c_str());
   if(success != 0){
-    MayDay::Abort("air_bolsig::delete_script - Could not delete script file");
+    MayDay::Abort("air_bolsig::delete_bolsig_script - Could not delete script file");
   }
 }
 
-void air_bolsig::delete_script(){
+void air_bolsig::delete_bolsig_script(){
   const std::string cmd = "rm " + m_local_script_file;
   const int success = system(cmd.c_str());
   if(success != 0){
-    MayDay::Abort("air_bolsig::delete_script - Could not delete script file");
+    MayDay::Abort("air_bolsig::delete_bolsig_script - Could not delete script file");
   }
 }

@@ -329,32 +329,32 @@ protected:
   /*!
     @brief Call BOLSIG in order to read in electron transport data
   */
-  virtual void call_bolsig();
+  virtual void compute_transport_coefficients();
 
   /*!
     @brief Build the BOLSIG input script
   */
-  virtual void build_script();
+  virtual void build_bolsig_script();
 
   /*!
     @brief Let BOLSIG build the input script
   */
-  virtual void build_data();
+  virtual void call_bolsig();
 
   /*!
     @brief Extract necessary data from BOLSIG output file
   */
-  virtual void extract_data();
+  virtual void extract_bolsig_data();
 
   /*!
     @brief Delete the BOLSIG output file
   */
-  virtual void delete_data();
+  virtual void delete_bolsig_data();
 
   /*!
     @brief Delete the BOLSIG script
   */
-  virtual void delete_script();
+  virtual void delete_bolsig_script();
 
 };
 #endif
