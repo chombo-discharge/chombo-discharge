@@ -18,8 +18,6 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
-#define feature 1
-
 plasma_engine::plasma_engine(){
   CH_TIME("plasma_engine::plasma_engine(weak)");
   if(m_verbosity > 5){
@@ -768,21 +766,15 @@ void plasma_engine::regrid(){
   m_timestepper->cache_states();
 
   // Tag cells and cache them
-#if feature // Not yet active
   this->tag_cells(tags, m_tags); 
   this->cache_tags(m_tags);      // Cache m_tags  because after regrid, ownership will change
-#else
-  this->tag_cells(tags);
-#endif
 
   // Regrid base
   const int old_finest_level = m_amr->get_finest_level();
   m_amr->regrid(tags, old_finest_level + 1);
 
   const int new_finest_level = m_amr->get_finest_level();
-#if feature // Not yet supported
   this->regrid_internals(old_finest_level, new_finest_level);        // Regrid internals for plasma_engine
-#endif
   m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
   m_timestepper->regrid_internals();                                 // Regrid internal storage for time_stepper
   m_celltagger->regrid();                                            // Regrid cell tagger
@@ -806,6 +798,14 @@ void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_n
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_cached_tags[lvl]->copyTo(*m_tags[lvl]);
+
+#if 1 // For some reason this needs to happen, but I don't really see how the DenseIntVectSet leaks over
+      // when I copy from the old grids to the new. Anyways, this fixes it (somehow).
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      (*m_tags[lvl])[dit()].get_ivs() &= dbl.get(dit());
+    }
+#endif
   }
 }
 
@@ -1125,9 +1125,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
-#if feature // Not yet supported
   this->allocate_internals();
-#endif
 
   if(m_verbosity > 0){
     this->grid_report();
@@ -1435,26 +1433,6 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   pout() << "                                -- Peak memory usage   : " << peakMem/BytesPerMB << "(MB)" << endl;
 #endif
 
-}
-
-void plasma_engine::tag_cells(Vector<IntVectSet>& a_tags){
-  CH_TIME("plasma_engine::tag_cells");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::tag_cells" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-  a_tags.resize(1 + finest_level);
-
-  // Add tags from tagger
-  if(!m_celltagger.isNull()){
-    m_celltagger->tag_cells(a_tags, m_tagged_cells, finest_level);
-  }
-
-  // Add geometric tags. 
-  for (int lvl = 0; lvl < finest_level; lvl++){
-    a_tags[lvl] |= m_geom_tags[lvl];
-  }
 }
 
 void plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){

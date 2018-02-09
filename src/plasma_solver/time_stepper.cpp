@@ -945,12 +945,6 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
   if(a_centering == centering::cell_center){
     m_amr->interpolate_to_centroids(rho_gas, phase::gas);
   }
-
-#if 1 // Not sure if I should do this...
-  data_ops::kappa_scale(a_rho);
-#endif
-
-
 }
 
 void time_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data){

@@ -75,7 +75,7 @@ bool field_tagger::coarsen_cell(const RealVect&         a_pos,
 				const Vector<RealVect>& a_grad_tracer){
 
   const bool coarsen = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] < m_coar_curv && a_tracer[0] < m_coar_mag;
-
+  
   return coarsen;
 }
 

@@ -81,6 +81,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   data_ops::set_value(source, 0.0);
   data_ops::incr(source, a_source, 1.0);
   data_ops::scale(source, 1./(units::s_eps0));
+  data_ops::kappa_scale(source);
 
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, rhs, res, zero;

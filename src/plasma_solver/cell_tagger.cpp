@@ -376,11 +376,9 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
       const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
       const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
-      
-
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box box = dbl.get(dit());
+	const Box box          = dbl.get(dit());
 	const EBISBox& ebisbox = ebisl[dit()];
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
 
@@ -391,7 +389,7 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
 	DenseIntVectSet refine_tags(box, false);
 
 	// Coarsening loop - do not coarsen irregular cells that have been tagged previously (we consider them to be too important)
-	const IntVectSet coarsen_ivs = irreg_ivs - prev_tags;
+	const IntVectSet coarsen_ivs = (prev_tags - irreg_ivs); 
 	for (VoFIterator vofit(coarsen_ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
@@ -402,8 +400,8 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
 	  for (int itracer = 0; itracer < m_num_tracers; itracer++){
 	    tracers[itracer]     = (*m_tracer[itracer][lvl])[dit()](vof, 0);
 	    grad_tracers[itracer] = RealVect(D_DECL((*m_grad_tracer[itracer][lvl])[dit()](vof, 0),
-						   (*m_grad_tracer[itracer][lvl])[dit()](vof, 1),
-						   (*m_grad_tracer[itracer][lvl])[dit()](vof, 2)));
+						    (*m_grad_tracer[itracer][lvl])[dit()](vof, 1),
+						    (*m_grad_tracer[itracer][lvl])[dit()](vof, 2)));
 	  }
 	  const bool coarsen = this->coarsen_cell(pos,
 						  time,
@@ -411,6 +409,7 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
 						  lvl,
 						  tracers,
 						  grad_tracers);
+
 	  if(coarsen){
 	    coarsen_tags |= vof.gridIndex();
 	  }
@@ -446,98 +445,8 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
 	DenseIntVectSet& tags = (*a_tags[lvl])[dit()].get_ivs();
 	tags -= coarsen_tags;
 	tags |= refine_tags;
+	tags &= box;
       }
-    }
-  }
-}
-
-void cell_tagger::tag_cells(Vector<IntVectSet>& a_tags,
-			    const Vector<RefCountedPtr<LayoutData<IntVectSet> > >& a_layout_tags, 
-			    const int a_finest_level){
-
-  if(m_num_tracers > 0){
-
-    const RealVect origin = m_physdom->get_prob_lo();
-    const Real time       = m_timestepper->get_time();
-
-    this->compute_tracers(); // Compute tracer fields
-
-    for (int lvl = 0; lvl <= a_finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-      const Real dx                = m_amr->get_dx()[lvl];
-      
-      IntVectSet coarsen_tags;
-      IntVectSet refine_tags;
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box box = dbl.get(dit());
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-#if 0
-	const IntVectSet irreg_ivs = ebisbox.getIrregIVS(box);
-	const IntVectSet prev_tags = (*a_layout_tags[lvl])[dit()];
-
-	// Coarsening loop - do not coarsen irregular cells that have been tagged previously (we consider them to be too important)
-	const IntVectSet coarsen_ivs = irreg_ivs - prev_tags;
-	for (VoFIterator vofit(coarsen_ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
-
-	  Vector<Real> tracers(m_num_tracers);
-	  Vector<RealVect> grad_tracers(m_num_tracers);
-	  
-	  for (int itracer = 0; itracer < m_num_tracers; itracer++){
-	    tracers[itracer]     = (*m_tracer[itracer][lvl])[dit()](vof, 0);
-	    grad_tracers[itracer] = RealVect(D_DECL((*m_grad_tracer[itracer][lvl])[dit()](vof, 0),
-						   (*m_grad_tracer[itracer][lvl])[dit()](vof, 1),
-						   (*m_grad_tracer[itracer][lvl])[dit()](vof, 2)));
-	  }
-	  const bool coarsen = this->coarsen_cell(pos,
-						  time,
-						  dx,
-						  lvl,
-						  tracers,
-						  grad_tracers);
-	  if(coarsen){
-	    coarsen_tags |= vof.gridIndex();
-	  }
-	}
-#else
-	MayDay::Warning("cell_tagger::tag_cells - coarsening has been turned off while waiting on an optimization");
-#endif
-
-	// Refinement loop
-	const IntVectSet refine_ivs(box);
-	for (VoFIterator vofit(refine_ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
-
-	  Vector<Real> tracers(m_num_tracers);
-	  Vector<RealVect> grad_tracers(m_num_tracers);
-	  
-	  for (int itracer = 0; itracer < m_num_tracers; itracer++){
-	    tracers[itracer]     = (*m_tracer[itracer][lvl])[dit()](vof, 0);
-	    grad_tracers[itracer] = RealVect(D_DECL((*m_grad_tracer[itracer][lvl])[dit()](vof, 0),
-						    (*m_grad_tracer[itracer][lvl])[dit()](vof, 1),
-						    (*m_grad_tracer[itracer][lvl])[dit()](vof, 2)));
-	  }
-	  const bool refine = this->refine_cell(pos,
-						time,
-						dx,
-						lvl,
-						tracers,
-						grad_tracers);
-
-	  if(refine){
-	    refine_tags |= vof.gridIndex();
-	  }
-	}
-      }
-
-      a_tags[lvl] -= coarsen_tags;
-      a_tags[lvl] |= refine_tags;
     }
   }
 }

@@ -521,12 +521,7 @@ protected:
   virtual void step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps);
 
   /*!
-    @brief Tag cells for refinement. This includes cells from geometries and the cell tagger
-  */
-  virtual void tag_cells(Vector<IntVectSet>& a_ivs);
-
-  /*!
-    @brief Tag cells
+    @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
   */
   virtual void tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
 

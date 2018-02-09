@@ -64,13 +64,6 @@ public:
   virtual void set_verbosity(const int a_verbosity);
 
   /*!
-    @brief Tag cells for coarsening and refinement across an AMR hierarchy. This also does coarsening. 
-  */
-  virtual void tag_cells(Vector<IntVectSet>& a_tags,
-			 const Vector<RefCountedPtr<LayoutData<IntVectSet> > >& a_layout_tags,
-			 const int a_finestLevel);
-
-  /*!
     @brief Tag cells
   */
   virtual void tag_cells(EBAMRTags& a_tags);

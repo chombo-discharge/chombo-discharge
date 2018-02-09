@@ -37,18 +37,14 @@ void tags::copy(const Box&        a_region_from,
   CH_assert(a_src_interval == Interval(0,0));
   CH_assert(a_region_from  == a_region_to);
 
-  m_ivs = a_src.get_ivs();
+  m_ivs = a_src.m_ivs;
 }
 
 const int tags::preAllocatable(){
-  return 2;
+  return 2; // Dynamic object
 }
 
 int tags::size(const Box& a_box, const Interval& a_comps) const{
-  return this->linearSize();
-}
-
-int tags::linearSize() const {
   return m_ivs.linearSize();
 }
 

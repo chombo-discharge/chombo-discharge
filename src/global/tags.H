@@ -64,11 +64,6 @@ public:
   int size(const Box& a_box, const Interval& a_comps) const;
 
   /*!
-    @brief Return size of object
-  */
-  int linearSize() const;
-
-  /*!
     @brief Linearization function
   */
   void linearIn(const void* const a_in_buffer, const Box& R, const Interval& a_comps);
