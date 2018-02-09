@@ -1,23 +1,23 @@
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ____________________________________________________________________________________________________
-physical_domain.lo_corner = -2E-3 -2E-3 -2E-3
-physical_domain.hi_corner =  2E-3  2E-3  2E-3
-# ____________________________________________________________________________________________________
+physical_domain.lo_corner = -1E-3 -1E-3 -1E-3
+physical_domain.hi_corner =  1E-3  1E-3  1E-3
+# ----------------------------------------------------------------------------------------------------			
 
 
 # ====================================================================================================
 # AMR SETTINGS
-# ____________________________________________________________________________________________________
+# ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
-amr.max_sim_depth   = 2           # Maximum simulation depth
+amr.max_amr_depth   = 1           # Maximum amr depth
+amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
-amr.blocking_factor = 8           # Blocking factor
+amr.blocking_factor = 16          # Blocking factor
 amr.max_box_size    = 32          # Maximum allowed box size
-amr.ref_rat         = 4 2 2 2 2 2 # Refinement ratios. 
+amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
@@ -27,12 +27,12 @@ amr.sten_type       = taylor      # Default stencil type. Valid options are 'lin
 amr.ghost_interp    = quad        # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
 amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
-# ____________________________________________________________________________________________________	
+# ----------------------------------------------------------------------------------------------------		
 
 
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
-# ____________________________________________________________________________________________________	
+# ----------------------------------------------------------------------------------------------------	
 plasma_engine.verbosity            = 1             # Engine verbosity
 plasma_engine.plot_interval        = 1             # Plot interval
 plasma_engine.regrid_interval      = 10            # Regrid interval
@@ -46,12 +46,12 @@ plasma_engine.output_directory     = ./            # Output directory
 plasma_engine.output_names         = simulation    # Simulation output names
 plasma_engine.restart              = false         # Do restart or not
 plasma_engine.restart_step         = 0             # Restart step
-# ____________________________________________________________________________________________________
+# ----------------------------------------------------------------------------------------------------
 
 
 # ====================================================================================================
 # TIME STEPPER SETTINGS
-# ____________________________________________________________________________________________________	
+# ----------------------------------------------------------------------------------------------------			
 time_stepper.verbosity        = -1    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
@@ -61,11 +61,11 @@ time_stepper.max_dt           = 1.    # Maximum permitted time step
 time_stepper.cfl              = 0.5   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 100.0 # Maximum permissible growth due to source term
-# ____________________________________________________________________________________________________	
+# ----------------------------------------------------------------------------------------------------			
 
 # ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
-# ____________________________________________________________________________________________________	
+# ----------------------------------------------------------------------------------------------------			
 poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
 poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
@@ -80,7 +80,7 @@ poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bott
 
 # ====================================================================================================
 # EDDINGTON SP1 GEOMETRIC MULTIGRID SETTINGS
-# ____________________________________________________________________________________________________	
+# ----------------------------------------------------------------------------------------------------			
 eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
 eddington_sp1.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 eddington_sp1.gmg_post_smooth   = 16        # Number of relaxations in upsweep
