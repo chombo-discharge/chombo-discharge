@@ -112,6 +112,28 @@ namespace output_mode{
   };
 };
 
+/*!
+  @brief Potential types on domain edges (faces). 
+*/
+namespace potential {
+  enum ground_live {
+    ground = 0,
+    live   = 1,
+    mapped = 2, // Not currently supported. But it will. 
+  };
+};
+
+/*!
+  @brief Types of wall boundary conditions for Poisson equation
+*/
+namespace wallbc {
+  enum which_bc {
+    dirichlet = 0,
+    neumann   = 1,
+    robin     = 2,
+  };
+};
+
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >      MFAMRIVData;

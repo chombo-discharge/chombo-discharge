@@ -8,16 +8,10 @@
 #ifndef _WALL_BC_
 #define _WALL_BC_
 
+#include "type_definitions.H"
+
 #include <LoHiSide.H>
 #include <RealVect.H>
-
-namespace wallbc {
-  enum which_bc {
-    dirichlet = 0,
-    neumann = 1,
-    robin = 2,
-  };
-};
 
 /*!
   @brief Indexing class of BCs on domain edges. Very lightweight stuff.

@@ -13,14 +13,6 @@
 #include "amr_mesh.H"
 #include "wall_bc.H"
 
-namespace potential {
-  enum ground_live {
-    ground = 0,
-    live   = 1,
-    mapped = 2, // Not currently supported. But it will. 
-  };
-};
-
 /*!
   @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
 */

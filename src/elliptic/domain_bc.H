@@ -12,6 +12,7 @@
 #include <BaseBCValue.H>
 
 #include "wall_bc.H"
+#include "type_definitions.H"
 
 /*!
   @brief Class for setting Dirichlet or Neumann conditions on individual faces

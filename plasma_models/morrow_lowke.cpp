@@ -1,5 +1,5 @@
 /*!
-  @file   morrow_lowke.H
+  @file   morrow_lowke.cpp
   @brief  Implementation of morrow_lowke.H
   @author Robert Marskar
   @date   Jan. 2018

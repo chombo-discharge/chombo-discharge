@@ -8,6 +8,9 @@
 #ifndef _UNITS_
 #define _UNITS_
 
+/*!
+  @brief Various SI units
+*/
 namespace units {
 
   /*!
