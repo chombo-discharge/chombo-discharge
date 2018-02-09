@@ -10,6 +10,7 @@
 #include "field_tagger.H"
 
 
+#include "air_bolsig.H"
 #include "morrow_lowke.H"
 #include "sphere_sphere_geometry.H"
 #include "mechanical_shaft.H"
@@ -37,6 +38,8 @@ int main(int argc, char* argv[]){
 #if 0
   EBIndexSpace::s_useMemoryLoadBalance = true;
 #endif
+
+  RefCountedPtr<plasma_kinetics> airbol = RefCountedPtr<plasma_kinetics> (new air_bolsig());
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
