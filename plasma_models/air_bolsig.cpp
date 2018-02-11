@@ -117,10 +117,10 @@ air_bolsig::air_bolsig(){
   this->compute_transport_coefficients();
 
   // Normalize things that come out of BOLSIG.
-  m_alpha.scale(m_N);
-  m_eta.scale(m_N);
-  m_electron_mobility.scale(1./m_N);
-  m_electron_diffusion.scale(1./m_N);
+  m_alpha.scale_y(m_N);
+  m_eta.scale_y(m_N);
+  m_electron_mobility.scale_y(1./m_N);
+  m_electron_diffusion.scale_y(1./m_N);
 
   m_num_species = 3;
   m_species.resize(m_num_species);

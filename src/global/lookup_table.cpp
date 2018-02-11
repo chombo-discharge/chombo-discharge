@@ -17,6 +17,14 @@ lookup_table::lookup_table(){
 lookup_table::~lookup_table(){
 }
 
+
+lookup_table::lookup_table(const lookup_table& a_table){
+  m_dx = a_table.m_dx;
+  m_num_entries = a_table.m_num_entries;
+  m_x = a_table.m_x;
+  m_y = a_table.m_y;
+}
+
 void lookup_table::add_entry(const Real& a_x, const Real& a_y){
   m_x.push_back(a_x);
   m_y.push_back(a_y);
@@ -30,7 +38,13 @@ void lookup_table::add_entry(const Real& a_x, const Real& a_y){
   }
 }
 
-void lookup_table::scale(const Real& a_scale){
+void lookup_table::scale_x(const Real& a_scale){
+  for (int i = 0; i < m_x.size(); i++){
+    m_x[i] *= a_scale;
+  }
+}
+
+void lookup_table::scale_y(const Real& a_scale){
   for (int i = 0; i < m_y.size(); i++){
     m_y[i] *= a_scale;
   }
@@ -39,6 +53,18 @@ void lookup_table::scale(const Real& a_scale){
 void lookup_table::dump_table(){
   for (int i = 0; i < m_y.size(); i++){
     pout() << m_x[i] << "\t" << m_y[i] << endl;
+  }
+}
+
+void lookup_table::operator+=(const lookup_table& a_table){
+  for (int i = 0; i < m_y.size(); i++){
+    m_y[i] += a_table.m_y[i];
+  }
+}
+
+void lookup_table::operator-=(const lookup_table& a_table){
+  for (int i = 0; i < m_y.size(); i++){
+    m_y[i] -= a_table.m_y[i];
   }
 }
 

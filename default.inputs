@@ -54,7 +54,7 @@ plasma_engine.restart_step         = 0             # Restart step
 # ----------------------------------------------------------------------------------------------------			
 time_stepper.verbosity        = -1    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
-time_stepper.fast_rte         = 5     # Solve RTE every this time steps
+time_stepper.fast_rte         = 1     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step

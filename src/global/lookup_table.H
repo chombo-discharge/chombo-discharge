@@ -27,17 +27,22 @@ public:
   /*!
     @brief Copy constructor with scalability
    */
-  lookup_table(const lookup_table* const a_table, const Real a_scale = 1.);
+  lookup_table(const lookup_table& a_table);
 
   /*!
     @brief Destructor
   */
-  ~lookup_table();
+  virtual ~lookup_table();
 
   /*!
-    @brief Scale table entries
+    @brief Scale x values
   */
-  virtual void scale(const Real& a_scale);
+  virtual void scale_x(const Real& a_scale);
+
+  /*!
+    @brief Scale y values
+  */
+  virtual void scale_y(const Real& a_scale);
   
   /*!
     @brief Add entry
@@ -59,6 +64,16 @@ public:
   */
   virtual const Real get_entry(const Real a_x) const;
 
+  /*!
+    @brief Add a table to this one
+  */
+  void operator+=(const lookup_table& a_table);
+
+  /*!
+    @brief Subtract a table from this one
+  */
+  void operator-=(const lookup_table& a_table);
+
 protected:
 
   /*!
@@ -70,11 +85,6 @@ protected:
     @brief Number of entries in reaction table
   */
   int m_num_entries;
-
-  /*!
-    @brief Look up order, will be set automatically depending on the number of entries you put in
-  */
-  int m_order;
   
   /*!
     @brief Towsend field
