@@ -1,8 +1,8 @@
 /*!
-  @file plasma_engine.cpp
-  @brief Implementation of plasma_engine.H
+  @file   plasma_engine.cpp
+  @brief  Implementation of plasma_engine.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #include "plasma_engine.H"
@@ -49,20 +49,20 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_amr(a_amr);                         // Set amr
   this->set_cell_tagger(a_celltagger);          // Set cell tagger
 
-  this->set_geom_refinement_depth(-1);
-  this->set_verbosity(1);
-  this->set_plot_interval(10);
-  this->set_checkpoint_interval(10);
-  this->set_regrid_interval(10);
-  this->set_output_directory("./");
-  this->set_output_file_names("simulation");
-  this->set_output_mode(output_mode::full);
-  this->set_init_regrids(0);
-  this->set_restart(false);
-  this->set_restart_step(0);
-  this->set_start_time(0.0);
-  this->set_stop_time(1.0);
-  this->set_max_steps(100);
+  this->set_geom_refinement_depth(-1);          // Set geometric refinement depths
+  this->set_verbosity(1);                       // Set verbosity
+  this->set_plot_interval(10);                  // Set plot interval
+  this->set_checkpoint_interval(10);            // Set checkpoint interval
+  this->set_regrid_interval(10);                // Set regrid interval
+  this->set_output_directory("./");             // Set output directory
+  this->set_output_file_names("simulation");    // Set output file names
+  this->set_output_mode(output_mode::full);     // Set output mode
+  this->set_init_regrids(0);                    // Number of initial regrids
+  this->set_restart(false);                     // Restart mode
+  this->set_restart_step(0);                    // Restart from this step
+  this->set_start_time(0.0);                    // Start time
+  this->set_stop_time(1.0);                     // Stop time
+  this->set_max_steps(100);                     // Max number of steps
 
   m_amr->set_physical_domain(m_physdom); // Set physical domain
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
@@ -743,15 +743,122 @@ void plasma_engine::initial_regrids(const int a_init_regrids){
     }
 
     m_timestepper->compute_cdr_sources();    // Compute source terms for CDR equations
+    m_timestepper->compute_cdr_diffusion();  // Diffusive stuff for CDR
     m_timestepper->compute_cdr_velocities(); // Compute the cdr velocities
   }
 }
 
-void plasma_engine::read_checkpoint_file(){
+void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
   CH_TIME("plasma_engine::read_checkpoint_file");
   if(m_verbosity > 3){
     pout() << "plasma_engine::read_checkpoint_file" << endl;
-  }  
+  }
+
+  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
+  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
+  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
+  RefCountedPtr<sigma_solver>& sigma     = m_timestepper->get_sigma();
+
+  HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
+  HDF5HeaderData header;
+  header.readFromFile(handle_in);
+
+  // Base resolution should not have changed. If it did, issue an error
+  const Real coarsest_dx = header.m_real["coarsest_dx"];
+  if(!coarsest_dx == m_amr->get_dx()[0]){
+    MayDay::Abort("plasma_engine::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
+  }
+
+  m_time       = header.m_real["time"];
+  m_dt         = header.m_real["dt"];
+  m_step       = header.m_int["step"];
+  
+  int finest_level = header.m_int["finest_level"];
+
+  // Read in grids
+  Vector<Vector<Box> > boxes(1 + finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    handle_in.setGroupToLevel(lvl);
+
+    const int status = read(handle_in, boxes[lvl]);
+
+    if(status != 0){
+      MayDay::Error("plasma_engine::read_checkpoint_file - file has no grids");
+    }
+  }
+
+  m_amr->set_finest_level(finest_level); // Set finest level
+  m_amr->set_grids(boxes);               // Set up amr
+  m_timestepper->instantiate_solvers();  // Instantiate solvrs, they can now be filled with data
+  this->allocate_internals();            // Allocate internal storage which also needs to be filled
+
+
+  // Transient storage
+  EBAMRCellData sig, tags;
+  m_amr->allocate(sig, phase::gas, 1);
+  m_amr->allocate(tags, phase::gas, 1);
+  data_ops::set_value(sig, 0.0);
+  data_ops::set_value(tags,  0.0);
+
+  finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    handle_in.setGroupToLevel(lvl);
+
+    // CDR solver
+    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver = solver_it();
+      EBAMRCellData& solver_state       = solver->get_state();
+      const std::string solver_name     = solver->get_name();
+
+      read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
+    }
+
+    // RTE solvers
+    if(!m_timestepper->stationary_rte()){
+      for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+	RefCountedPtr<rte_solver>& solver = solver_it();
+	EBAMRCellData& solver_state       = solver->get_state();
+	const std::string solver_name     = solver->get_name();
+
+	read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
+      }
+    }
+
+    // Read in sigma and tags
+    read<EBCellFAB>(handle_in, *sig[lvl],  "sigma", dbl, Interval(), false);
+    read<EBCellFAB>(handle_in, *tags[lvl], "tags",  dbl, Interval(), false);
+  }
+
+  // Copy data to sigma solver
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::incr(sigma->get_state(), sig, 1.0);
+  }
+
+  // Instantiate m_tags
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBCellFAB& tmp   = (*tags[lvl])[dit()];
+      const EBISBox& ebisbox = tmp.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(box);
+
+      DenseIntVectSet& tagged_cells = (*m_tags[lvl])[dit()].get_ivs();
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	if(tmp(vof, 0) >= 0.9999){
+	  tagged_cells |= vof.gridIndex();
+	}
+      }
+    }
+  }
+
+
+  handle_in.close();
 }
 
 void plasma_engine::regrid(){
@@ -779,10 +886,17 @@ void plasma_engine::regrid(){
   m_timestepper->regrid_internals();                                 // Regrid internal storage for time_stepper
   m_celltagger->regrid();                                            // Regrid cell tagger
 
+  // Solve the elliptic parts
+  m_timestepper->solve_poisson();
+  if(m_timestepper->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
+    const Real dummy_dt = 0.0;
+    m_timestepper->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
+  }
+
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion(); // This one is missing
+  m_timestepper->compute_cdr_diffusion(); 
   m_timestepper->compute_cdr_sources();
   m_timestepper->compute_rte_sources();
 }
@@ -1100,6 +1214,20 @@ void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const 
   }
   else{
     this->setup_for_restart(a_init_regrids, a_restart_file);
+
+    for (int i = 0; i < a_init_regrids; i++){
+      if(m_verbosity > 0){
+	pout() << "plasma_engine -- initial regrid # " << i + 1 << endl;
+      }
+      
+      this->regrid();
+
+      if(m_verbosity > 0){
+	this->grid_report();
+      }
+    }
+
+    MayDay::Abort("stop");
   }
 
 #ifdef CH_USE_HDF5
@@ -1149,7 +1277,6 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_celltagger->regrid();
 
   this->initial_regrids(a_init_regrids);
-  m_restart = false;
 
   m_timestepper->regrid_internals();
   m_celltagger->regrid();
@@ -1161,7 +1288,32 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
     pout() << "plasma_engine::setup_for_restart" << endl;
   }
 
-  MayDay::Abort("plasma_engine::setup_for_restart - not implemented (yet)");
+  this->sanity_check();                                    // Sanity check before doing anything expensive
+
+  m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
+			       m_amr->get_finest_domain(),
+			       m_amr->get_finest_dx(),
+			       m_amr->get_max_box_size());
+
+  this->get_geom_tags();       // Get geometric tags.
+
+  m_timestepper->set_amr(m_amr);                         // Set amr
+  m_timestepper->set_plasma_kinetics(m_plaskin);         // Set plasma kinetics
+  m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
+  m_timestepper->set_physical_domain(m_physdom);         // Physical domain
+  m_timestepper->set_potential(m_potential);             // Potential
+  m_amr->set_num_ghost(m_timestepper->query_ghost());    // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+
+  this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
+  
+  m_timestepper->solve_poisson();                       // Solve Poisson equation by 
+  if(m_timestepper->stationary_rte()){                  // Solve RTE equations if stationary solvers
+    const Real dummy_dt = 0.0;
+    m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
+  }
+  m_timestepper->regrid_internals(); // Prepare internal storage for time stepper
+  m_celltagger->regrid();            // Prepare internal storage for cell tagger
+
 }
 
 void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
@@ -1530,8 +1682,6 @@ void plasma_engine::write_checkpoint_file(){
     pout() << "plasma_engine::write_checkpoint_file" << endl;
   }
 
-  return; // Not finished
-
   const int finest_level             = m_amr->get_finest_level();
   const phase::which_phase cur_phase = phase::gas;
 
@@ -1564,7 +1714,7 @@ void plasma_engine::write_checkpoint_file(){
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& ivs  = (*m_tagged_cells[lvl])[dit()];
+      const IntVectSet ivs   = IntVectSet((*m_tags[lvl])[dit()].get_ivs());
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
@@ -1580,10 +1730,37 @@ void plasma_engine::write_checkpoint_file(){
 
 
   HDF5Handle handle_out(str, HDF5Handle::CREATE);
-
   header.writeToFile(handle_out);
 
-  // Now write data from cdr, rte, sigma, and tags
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    handle_out.setGroupToLevel(lvl);
+    write(handle_out, dbl);
+
+    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+      const RefCountedPtr<cdr_solver>& solver = solver_it();
+      const EBAMRCellData& state              = solver->get_state();
+      const std::string name                  = solver->get_name();
+
+      write(handle_out, *state[lvl], name);
+    }
+
+    if(!m_timestepper->stationary_rte()){ // Must write RTE data if the solvers are transient
+      for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+	const RefCountedPtr<rte_solver>& solver = solver_it();
+	const EBAMRCellData& state              = solver->get_state();
+	const std::string name                  = solver->get_name();
+	
+	write(handle_out, *state[lvl], name);
+      }
+    }
+
+    write(handle_out, *sigma[lvl], "sigma");
+    write(handle_out, *tags[lvl],  "tags");
+  }
+
+  
+  handle_out.close();
 }
 
 Vector<string> plasma_engine::get_output_variable_names(){
@@ -1689,3 +1866,4 @@ Vector<string> plasma_engine::get_output_variable_names(){
 
   return names;
 }
+ 

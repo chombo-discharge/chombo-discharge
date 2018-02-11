@@ -1272,6 +1272,43 @@ void amr_mesh::set_fill_ratio(const Real a_fill_ratio){
   }
 }
 
+void amr_mesh::set_finest_level(const int a_finest_level){
+  m_finest_level = a_finest_level;
+  m_finest_level = Min(m_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
+  m_finest_level = Min(m_finest_level, m_max_sim_depth); // Don't exceed maximum simulation depth
+}
+
+void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes){
+
+  // Do Morton ordering
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    mortonOrdering((Vector<Box>&)a_boxes[lvl]);
+  }
+
+  // Load balance boxes
+  Vector<Vector<int> > proc_assign(1 + m_finest_level);
+  this->loadbalance(proc_assign, a_boxes);
+
+  // Define grids
+  m_grids.resize(1 + m_finest_level);
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_grids[lvl] = DisjointBoxLayout();
+    m_grids[lvl].define(a_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
+    m_grids[lvl].close();
+  }
+
+  this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
+  this->define_mflevelgrid();  // Define MFLevelGrid
+  this->define_eb_coar_ave();  // Define ebcoarseaverage on both phases
+  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
+  this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
+  this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
+  this->define_flux_reg();     // Define flux register (phase::gas only)
+  this->define_redist_oper();  // Define redistribution (phase::gas only)
+  this->define_advect_level(); // Define advection 
+  this->define_irreg_sten();   // Define irregular stencils
+}
+
 void amr_mesh::set_max_box_size(const int a_max_box_size){
   CH_TIME("amr_mesh::set_max_box_size");
   m_max_box_size = a_max_box_size;

@@ -323,11 +323,6 @@ protected:
   Vector<IntVectSet> m_geom_tags;
 
   /*!
-    @brief Tagged cells on each box
-  */
-  Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_tagged_cells;
-
-  /*!
     @brief Tags
   */
   EBAMRTags m_tags;
@@ -467,7 +462,7 @@ protected:
   /*!
     @brief Read checkpoint file
   */
-  virtual void read_checkpoint_file();
+  virtual void read_checkpoint_file(const std::string& a_restart_file);
 
   /*!
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver

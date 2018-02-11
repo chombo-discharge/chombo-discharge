@@ -358,6 +358,17 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>& a_diffco_face
       }
     }
   }
+
+#if 0 // Maybe...
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    EBAMRFlux& diffco = solver->get_diffco_face();
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      diffco[lvl]->exchange();
+    }
+  }
+#endif
 }
 
 void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, const EBAMRIVData& a_E_eb){
@@ -624,6 +635,8 @@ void time_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::average_cell_to_face_allcomps(*a_E_face[lvl], *a_E_cell[lvl], m_amr->get_domains()[lvl]);
+
+    a_E_face[lvl]->exchange();
   }
 }
 

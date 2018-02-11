@@ -261,6 +261,16 @@ public:
   virtual void set_fill_ratio(const Real a_fill_ratio);
 
   /*!
+    @brief Set the finest level
+  */
+  virtual void set_finest_level(const int a_finest_level);
+
+  /*!
+    @brief Set grids on level
+  */
+  virtual void set_grids(Vector<Vector<Box> >& boxes);
+
+  /*!
     @brief Set the maximum box size
   */
   virtual void set_max_box_size(const int a_max_box_size);

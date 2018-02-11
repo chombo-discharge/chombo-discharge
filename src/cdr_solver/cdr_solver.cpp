@@ -25,6 +25,10 @@ cdr_solver::~cdr_solver(){
 
 }
 
+std::string cdr_solver::get_name(){
+  return m_name;
+}
+
 int cdr_solver::query_ghost() const {
   CH_TIME("cdr_solver::query_ghost");
   if(m_verbosity > 5){

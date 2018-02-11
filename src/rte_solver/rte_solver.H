@@ -29,6 +29,11 @@ public:
     @brief Constructor
   */
   virtual ~rte_solver();
+
+  /*!
+    @brief Get solver name
+  */
+  virtual std::string get_name();
   
   /*!
     @brief Advance equation one time step

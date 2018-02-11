@@ -102,7 +102,7 @@ air_bolsig::air_bolsig(){
     pp.query("noise_persistence", m_noise_persistence);
     if(pp.contains("noise_frequency")){
       Vector<Real> freq(SpaceDim);
-      pp.getarr("noise_frequency", freq, 0, SpaceDim);
+      pp.queryarr("noise_frequency", freq, 0, SpaceDim);
       m_noise_frequency = RealVect(D_DECL(freq[0], freq[1], freq[2]));
     }
   }
@@ -112,15 +112,6 @@ air_bolsig::air_bolsig(){
     m_pq *= units::s_atm2pascal;
     m_N   = m_p*units::s_Na/(m_gas_temp*units::s_R);
   }
-
-  // Compute transport data for electrons by calling BOLSIG
-  this->compute_transport_coefficients();
-
-  // Normalize things that come out of BOLSIG.
-  m_alpha.scale_y(m_N);
-  m_eta.scale_y(m_N);
-  m_electron_mobility.scale_y(1./m_N);
-  m_electron_diffusion.scale_y(1./m_N);
 
   m_num_species = 3;
   m_species.resize(m_num_species);
@@ -139,6 +130,15 @@ air_bolsig::air_bolsig(){
   m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new air_bolsig::photon_one());
   m_photons[m_photon2_idx]  = RefCountedPtr<photon_group> (new air_bolsig::photon_two());
   m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new air_bolsig::photon_three());
+
+  // Compute transport data for electrons by calling BOLSIG
+  this->compute_transport_coefficients();
+
+  // Normalize things that come out of BOLSIG.
+  m_alpha.scale_y(m_N);
+  m_eta.scale_y(m_N);
+  m_electron_mobility.scale_y(1./m_N);
+  m_electron_diffusion.scale_y(1./m_N);
 
   // Instantiate noise function and pass it down to electron and positive species classes
   m_perlin = RefCountedPtr<perlin_if> (new perlin_if(1.0, m_noise_frequency, m_noise_persistence, m_noise_octaves));
@@ -630,7 +630,7 @@ void air_bolsig::delete_bolsig_script(){
 air_bolsig::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
-  m_diffusive = false;
+  m_diffusive = true;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -640,10 +640,18 @@ air_bolsig::electron::electron(){
 
   { // Get from input script or command line
     ParmParse pp("air_bolsig");
+    std::string str;
     pp.query("uniform_density", m_uniform_density);
     pp.query("seed_density",    m_seed_density);
     pp.query("seed_radius",     m_seed_radius);
-    pp.query("noise_density",     m_noise_density);
+    pp.query("noise_amplitude", m_noise_density);
+    pp.query("electron_diffusion", str);
+    if(str == "true"){
+      m_diffusive = true;
+    }
+    else if(str == "false"){
+      m_diffusive = false;
+    }
     if(pp.contains("seed_position")){
       Vector<Real> pos(SpaceDim);
       pp.queryarr("seed_position", pos, 0, SpaceDim);
@@ -683,7 +691,7 @@ air_bolsig::positive_species::positive_species(){
     pp.query("uniform_density", m_uniform_density);
     pp.query("seed_density",    m_seed_density);
     pp.query("seed_radius",     m_seed_radius);
-    pp.query("noise_density",     m_noise_density);
+    pp.query("noise_amplitude",     m_noise_density);
     if(pp.contains("seed_position")){
       Vector<Real> pos(SpaceDim);
       pp.queryarr("seed_position", pos, 0, SpaceDim);
@@ -731,9 +739,9 @@ air_bolsig::photon_one::photon_one(){
   m_lambda = 4.15E-2;
 
   { // Parameters
-    ParmParse pp("photon_one");
-    pp.query("A_coeff",      m_A);
-    pp.query("lambda_coeff", m_lambda);
+    ParmParse pp("air_bolsig");
+    pp.query("photon1_A_coeff",      m_A);
+    pp.query("photon1_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
@@ -741,7 +749,7 @@ air_bolsig::photon_one::photon_one(){
   Real pressure = 1.0;
   {
     ParmParse pp("air_bolsig");
-    pp.query("gas_frac_O2",  O2_frac);
+    pp.query("gas_O2_frac",  O2_frac);
     pp.query("gas_pressure", pressure);
   }
   
@@ -763,9 +771,9 @@ air_bolsig::photon_two::photon_two(){
   m_lambda = 1.09E-1;
 
   { // Parameters
-    ParmParse pp("photon_two");
-    pp.query("A_coeff",      m_A);
-    pp.query("lambda_coeff", m_lambda);
+    ParmParse pp("air_bolsig");
+    pp.query("photon2_A_coeff",      m_A);
+    pp.query("photon2_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
@@ -773,7 +781,7 @@ air_bolsig::photon_two::photon_two(){
   Real pressure = 1.0;
   {
     ParmParse pp("air_bolsig");
-    pp.query("gas_frac_O2",  O2_frac);
+    pp.query("gas_O2_frac",  O2_frac);
     pp.query("gas_pressure", pressure);
   }
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
@@ -793,9 +801,9 @@ air_bolsig::photon_three::photon_three(){
   m_lambda = 6.69E-1;
 
   { // Parameters
-    ParmParse pp("photon_three");
-    pp.query("A_coeff",      m_A);
-    pp.query("lambda_coeff", m_lambda);
+    ParmParse pp("air_bolsig");
+    pp.query("photon3_A_coeff",      m_A);
+    pp.query("photon3_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
@@ -803,7 +811,7 @@ air_bolsig::photon_three::photon_three(){
   Real pressure = 1.0;
   {
     ParmParse pp("air_bolsig");
-    pp.query("gas_frac_O2",  O2_frac);
+    pp.query("gas_O2_frac",  O2_frac);
     pp.query("gas_pressure", pressure);
   }
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;  

@@ -59,34 +59,30 @@ morrow_lowke::morrow_lowke(){
   m_noise_octaves = 1;
 
   { // Gas composition
-    ParmParse pp("gas");
-    pp.query("temperature",        m_temp);
-    pp.query("frac_N2",            m_fracN2);
-    pp.query("frac_O2",            m_fracO2);
-    pp.query("pressure",           m_p);
-    pp.query("quenching_pressure", m_pq);
-    pp.query("excitation_eff",     m_exc_eff);
-    pp.query("photo_eff",          m_photo_eff);
+    ParmParse pp("morrow_lowke");
+    pp.query("gas_temperature",            m_temp);
+    pp.query("gas_N2_frac",                m_fracN2);
+    pp.query("gas_O2_frac",                m_fracO2);
+    pp.query("gas_pressure",               m_p);
+    pp.query("gas_quenching_pressure",     m_pq);
+    pp.query("excitation_efficiency",      m_exc_eff);
+    pp.query("photoionization_efficiency", m_photo_eff);
   }
 
   { // Electrode things
-    ParmParse pp("electrode");
-    pp.query("townsend_coeff", m_townsend2_conductor);
-    pp.query("quantum_eff",    m_electrode_yield);
-  }
-
-  { // Dielectric things
-    ParmParse pp("dielectric");
-    pp.query("townsend_coeff", m_townsend2_dielectric);
-    pp.query("quantum_eff",    m_dielectric_yield);
-    pp.query("work_function",  m_dielectric_work);
+    ParmParse pp("morrow_lowke");
+    pp.query("electrode_townsend2",           m_townsend2_conductor);
+    pp.query("electrode_quantum_efficiency",  m_electrode_yield);
+    pp.query("dielectric_townsend2",          m_townsend2_dielectric);
+    pp.query("dielectric_quantum_efficiency", m_dielectric_yield);
+    pp.query("dielectric_work_function",      m_dielectric_work);
   }
 
   { // Noise parameters for initial dat
-    ParmParse pp("init_data");
-    pp.query("noise_amplitude", m_noise_amp);
-    pp.query("noise_octaves",   m_noise_octaves);
-    pp.query("noise_persist",   m_noise_persist);
+    ParmParse pp("morrow_lowke");
+    pp.query("noise_amplitude",   m_noise_amp);
+    pp.query("noise_octaves",     m_noise_octaves);
+    pp.query("noise_persistence", m_noise_persist);
     if(pp.contains("noise_frequency")){
       Vector<Real> freq(SpaceDim);
       pp.queryarr("noise_frequency", freq, 0, SpaceDim);
@@ -477,7 +473,7 @@ Real morrow_lowke::initial_sigma(const RealVect& a_pos) const{
 morrow_lowke::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
-  m_diffusive = false;
+  m_diffusive = true;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -486,12 +482,20 @@ morrow_lowke::electron::electron(){
   m_seed_pos        = RealVect::Zero;
 
   { // Get from input script or command line
-    ParmParse pp("init_data");
-    pp.query("uniform_density", m_uniform_density);
-    pp.query("seed_density",    m_seed_density);
-    pp.query("seed_radius",     m_seed_radius);
-    pp.query("noise_density",     m_noise_density);
+    ParmParse pp("morrow_lowke");
+    std::string str;
+    pp.query("uniform_density",    m_uniform_density);
+    pp.query("seed_density",       m_seed_density);
+    pp.query("seed_radius",        m_seed_radius);
+    pp.query("noise_amplitude",    m_noise_density);
+    pp.query("electron_diffusion", str);
     if(pp.contains("seed_position")){
+      if(str == "true"){
+	m_diffusive = true;
+      }
+      else if(str == "false"){
+	m_diffusive = false;
+      }
       Vector<Real> pos(SpaceDim);
       pp.queryarr("seed_position", pos, 0, SpaceDim);
       m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
@@ -526,11 +530,11 @@ morrow_lowke::positive_species::positive_species(){
   m_seed_pos        = RealVect::Zero;
   
   { // Get from input script or command line
-    ParmParse pp("init_data");
-    pp.query("uniform_density", m_uniform_density);
-    pp.query("seed_density",    m_seed_density);
-    pp.query("seed_radius",     m_seed_radius);
-    pp.query("noise_density",     m_noise_density);
+    ParmParse pp("morrow_lowke");
+    pp.query("uniform_density",  m_uniform_density);
+    pp.query("seed_density",     m_seed_density);
+    pp.query("seed_radius",      m_seed_radius);
+    pp.query("noise_amplitude",  m_noise_density);
     if(pp.contains("seed_position")){
       Vector<Real> pos(SpaceDim);
       pp.queryarr("seed_position", pos, 0, SpaceDim);
@@ -578,18 +582,18 @@ morrow_lowke::photon_one::photon_one(){
   m_lambda = 4.15E-2;
 
   { // Parameters
-    ParmParse pp("photon_one");
-    pp.query("A_coeff",      m_A);
-    pp.query("lambda_coeff", m_lambda);
+    ParmParse pp("morrow_lowke");
+    pp.query("photon1_A_coeff",      m_A);
+    pp.query("photon1_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
-  Real O2_frac  = 0.8;
+  Real O2_frac  = 0.2;
   Real pressure = 1.0;
   {
-    ParmParse pp("gas");
-    pp.query("frac_O2",  O2_frac);
-    pp.query("pressure", pressure);
+    ParmParse pp("morrow_lowke");
+    pp.query("gas_O2_frac",  O2_frac);
+    pp.query("gas_pressure", pressure);
   }
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
@@ -610,18 +614,18 @@ morrow_lowke::photon_two::photon_two(){
   m_lambda = 1.09E-1;
 
   { // Parameters
-    ParmParse pp("photon_two");
-    pp.query("A_coeff",      m_A);
-    pp.query("lambda_coeff", m_lambda);
+    ParmParse pp("morrow_lowke");
+    pp.query("photon2_A_coeff",      m_A);
+    pp.query("photon2_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
-  Real O2_frac  = 0.8;
+  Real O2_frac  = 0.2;
   Real pressure = 1.0;
   {
-    ParmParse pp("gas");
-    pp.query("frac_O2",  O2_frac);
-    pp.query("pressure", pressure);
+    ParmParse pp("morrow_lowke");
+    pp.query("gas_O2_frac",  O2_frac);
+    pp.query("gas_pressure", pressure);
   }
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
@@ -640,18 +644,18 @@ morrow_lowke::photon_three::photon_three(){
   m_lambda = 6.69E-1;
 
   { // Parameters
-    ParmParse pp("photon_three");
-    pp.query("A_coeff",      m_A);
-    pp.query("lambda_coeff", m_lambda);
+    ParmParse pp("morrow_lowke");
+    pp.query("photon3_A_coeff",      m_A);
+    pp.query("photon3_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
-  Real O2_frac  = 0.8;
+  Real O2_frac  = 0.2;
   Real pressure = 1.0;
   {
-    ParmParse pp("gas");
-    pp.query("frac_O2",  O2_frac);
-    pp.query("pressure", pressure);
+    ParmParse pp("morrow_lowke");
+    pp.query("gas_O2_frac",  O2_frac);
+    pp.query("gas_pressure", pressure);
   }
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }

@@ -160,6 +160,29 @@ void data_ops::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real>
   }
 }
 
+void data_ops::incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+  }
+}
+
+void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale){
+  const int ncomp = a_lhs.nComp();
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    BaseIVFAB<Real>& lhs = a_lhs[dit()];
+    const EBCellFAB& rhs = a_rhs[dit()];
+
+    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      for (int comp = 0; comp < ncomp; comp++){
+	lhs(vof, comp) += rhs(vof, comp)*a_scale;
+      }
+    }
+  }
+}
+
 void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){

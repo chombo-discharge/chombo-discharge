@@ -128,8 +128,6 @@ void poisson_multifluid_gmg::regrid(const int a_old_finest_level, const int a_ne
   }
   poisson_solver::regrid(a_old_finest_level, a_new_finest_level);
   m_needs_setup = true;
-
-
 }
 
 void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){

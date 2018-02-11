@@ -18,6 +18,11 @@ rte_solver::rte_solver(){
 }
 
 rte_solver::~rte_solver(){
+  
+}
+
+std::string rte_solver::get_name(){
+  return m_name;
 }
 
 bool rte_solver::is_stationary(){

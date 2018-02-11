@@ -169,6 +169,11 @@ public:
   virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
+    @brief Get solver name
+  */
+  virtual std::string get_name();
+
+  /*!
     @brief Get the ghost cell requirement
   */
   virtual int query_ghost() const = 0;
