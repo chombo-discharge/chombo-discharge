@@ -22,7 +22,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  return 1.E4;
+  return 8.E3;
 }
 
 int main(int argc, char* argv[]){
@@ -39,11 +39,13 @@ int main(int argc, char* argv[]){
   EBIndexSpace::s_useMemoryLoadBalance = true;
 #endif
 
-  RefCountedPtr<plasma_kinetics> airbol = RefCountedPtr<plasma_kinetics> (new air_bolsig());
-
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
+#if 0
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics>(new morrow_lowke());
+#else
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_bolsig());
+#endif
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());

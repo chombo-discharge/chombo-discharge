@@ -9,6 +9,8 @@
 #define _AIR_BOLSIG_
 
 #include "plasma_kinetics.H"
+#include "lookup_table.H"
+#include "perlin_if.H"
 
 /*!
   @brief BOLSIG-based kinetic model for air. Transport coefficients for electrons are taken by calls to BOLSIG+. 
@@ -19,9 +21,9 @@
 
   By default, the gas is electrically neutral with initial data supplied through an equal mixture of electrons and positive ions. The class supports uniform distributions, seeds, and random distributions of the initial ionization. Some kinetic things that are not accessible through BOLSIG can be controlled directly here. The following options are available for this class:
 
-      air_bolsig.bolsig_path                  = ./
-      air_bolsig.lxcat_path                   = ./
-      air_bolsig.lxcat_file                   = LXCat-June2013.txt
+      air_bolsig.bolsig_path                  = ./                    # Path to BOLSIG
+      air_bolsig.lxcat_path                   = ./                    # Path to LXCat file
+      air_bolsig.lxcat_file                   = LXCat-June2013.txt    # Name of LXCat file
       air_bolsig.grid_points                  = 1000                  # Number of grid points for BOLSIG call
       air_bolsig.min_townsend                 = 0.0                   # Transport coefficient computation limit (low)
       air_bolsig.max_townsend                 = 2000                  # Transport coefficient computation limit (low)
@@ -54,15 +56,6 @@
 */
 class air_bolsig : public plasma_kinetics {
 public:
-
-  class electron;
-  class positive_species;
-  class negative_species;
-
-  class photon_one;
-  class photon_two;
-  class photon_three;
-
   /*!
     @brief Constructor
   */
@@ -161,7 +154,7 @@ protected:
   */
   static std::string s_bolsig_kex23;
 
-    /*!
+  /*!
     @brief String that we use to identify electron excitation rate e + N2 -> N2_ex(13eV) + e
   */
   static std::string s_bolsig_kex24;
@@ -196,6 +189,71 @@ protected:
   */
   std::string m_local_data_file;
 
+  /*!
+    @brief Noise function
+  */
+  RefCountedPtr<perlin_if> m_perlin;
+  
+  /*!
+    @brief Electron mobility
+  */
+  lookup_table m_electron_mobility;
+
+  /*!
+    @brief Electron mobility
+  */
+  lookup_table m_electron_diffusion;
+
+  /*!
+    @brief Impact ionization coefficient
+  */
+  lookup_table m_alpha;
+
+  /*!
+    @brief Impact attachment coefficient
+  */
+  lookup_table m_eta;
+
+  /*!
+    @brief Electron excitation rate e + N2 -> N2^*(12.25eV) + e
+  */
+  lookup_table m_kex23;
+
+  /*!
+    @brief Electron excitation rate e + N2 -> N2^*(13eV) + e
+  */
+  lookup_table m_kex24;
+
+  /*!
+    @brief electron index 
+  */
+  int m_nelec_idx;
+
+  /*!
+    @brief Positive species index
+  */
+  int m_nplus_idx;
+
+  /*!
+    @brief Negative species index
+  */
+  int m_nminu_idx;
+
+  /*!
+    @brief photon_one index
+  */
+  int m_photon1_idx;
+
+  /*!
+    @brief photon_two index
+  */
+  int m_photon2_idx;
+
+  /*!
+    @brief photon_three index
+  */
+  int m_photon3_idx;
+  
   /*!
     @brief Number of grid points to use for BOLSIG computation
   */
@@ -321,7 +379,7 @@ protected:
   */
   Real m_noise_persistence;
 
-    /*!
+  /*!
     @brief Perlin noise frequency for initial data
   */
   RealVect m_noise_frequency;
@@ -355,6 +413,373 @@ protected:
     @brief Delete the BOLSIG script
   */
   virtual void delete_bolsig_script();
+
+    /*!
+    @brief Compute the flux on the cathode
+  */
+  virtual Vector<Real> compute_cathode_flux(const Vector<Real>& a_extrapolated_fluxes,
+					    const Vector<Real>& a_ion_densities,
+					    const Vector<Real>& a_ion_velocities,
+					    const Vector<Real>& a_photon_fluxes,
+					    const RealVect&     a_E,
+					    const RealVect&     a_pos,
+					    const RealVect&     a_normal,
+					    const Real&         a_time) const;
+
+  /*!
+    @brief Compute the flux on the anode
+  */
+  virtual Vector<Real> compute_anode_flux(const Vector<Real>& a_extrapolated_fluxes,
+					  const Vector<Real>& a_ion_densities,
+					  const Vector<Real>& a_ion_velocities,
+					  const Vector<Real>& a_photon_fluxes,
+					  const RealVect&     a_E,
+					  const RealVect&     a_pos,
+					  const RealVect&     a_normal,
+					  const Real&         a_time) const;
+
+
+  /*!
+    @brief Implementation of electron for this class
+  */
+  class electron : public species {
+  public:
+    /*!
+      @brief Constructor
+    */
+    electron();
+
+    /*!
+      @brief Destructor
+    */
+    virtual ~electron();
+
+    /*!
+      @brief Implementation of initial data
+    */
+    virtual const Real initial_data(const RealVect a_pos, const Real a_time) const;
+
+    /*!
+      @brief Set the noise function
+    */
+    virtual void set_noise(RefCountedPtr<perlin_if> a_noisePtr);
+
+    /*!
+      @brief Noise function
+    */
+    RefCountedPtr<perlin_if> m_perlin;
+
+    /*!
+      @brief Uniform plasma density
+    */
+    Real m_uniform_density;
+    
+    /*!
+      @brief Plasma seed density
+    */
+    Real m_seed_density;
+
+    /*!
+      @brief Plasma seed radius
+    */
+    Real m_seed_radius;
+
+    /*!
+      @brief Plasma seed radius
+    */
+    Real m_noise_density;
+
+    /*!
+      @brief Plasma seed position
+    */
+    RealVect m_seed_pos;
+  };
+
+  /*!
+    @brief Implementation of electron for this class
+  */
+  class positive_species : public species {
+  public:
+    /*!
+      @brief Constructor
+    */
+    positive_species();
+
+    /*!
+      @brief Destructor
+    */
+    virtual ~positive_species();
+
+    /*!
+      @brief Implementation of initial data
+    */
+    virtual const Real initial_data(const RealVect a_pos, const Real a_time) const;
+
+    /*!
+      @brief Set the noise function
+    */
+    virtual void set_noise(RefCountedPtr<perlin_if> a_noisePtr);
+
+    /*!
+      @brief Noise function
+    */
+    RefCountedPtr<perlin_if> m_perlin;
+
+    /*!
+      @brief Uniform plasma density
+    */
+    Real m_uniform_density;
+    
+    /*!
+      @brief Plasma seed density
+    */
+    Real m_seed_density;
+
+    /*!
+      @brief Plasma seed radius
+    */
+    Real m_seed_radius;
+
+    /*!
+      @brief Plasma seed radius
+    */
+    Real m_noise_density;
+
+    /*!
+      @brief Plasma seed position
+    */
+    RealVect m_seed_pos;
+  };
+
+  /*!
+    @brief Implementation of the negative species for the Morrow-Lowke model
+  */
+  class negative_species : public species {
+  public:
+    /*!
+      @brief Constructor
+    */
+    negative_species();
+
+    /*!
+      @brief Destructor
+    */
+    ~negative_species();
+
+    /*!
+      @brief Implementation of initial data
+    */
+    virtual const Real initial_data(const RealVect a_pos, const Real a_time) const;
+
+    /*!
+      @brief Set the noise function
+    */
+    virtual void set_noise(RefCountedPtr<perlin_if> a_noisePtr);
+
+    /*!
+      @brief Noise function
+    */
+    RefCountedPtr<perlin_if> m_perlin;
+
+    /*!
+      @brief Uniform plasma density
+    */
+    Real m_uniform_density;
+    
+    /*!
+      @brief Plasma seed density
+    */
+    Real m_seed_density;
+
+    /*!
+      @brief Plasma seed radius
+    */
+    Real m_seed_radius;
+
+    /*!
+      @brief Plasma seed radius
+    */
+    Real m_noise_density;
+
+    /*!
+      @brief Plasma seed position
+    */
+    RealVect m_seed_pos;
+  };
+
+  /*!
+    @brief Implementation of a single photon transition
+  */
+  class photon_one : public photon_group {
+  public:
+    /*!
+      @brief Constructor
+    */
+    photon_one();
+
+    /*!
+      @brief Destructor
+    */
+    ~photon_one();
+
+    /*!
+      @brief Get the absorption coefficient
+    */
+    virtual Real get_kappa(const RealVect a_pos) const;
+
+    /*!
+      @brief Get the lambda coefficient
+    */
+    const Real get_lambda() const {
+      return m_lambda;
+    }
+
+    /*!
+      @brief Get the A-coefficient
+    */
+    const Real get_A() const {
+      return m_A;
+    }
+
+    /*!
+      @brief Get the partial oxygen pressure
+    */
+    const Real get_pO2() const {
+      return m_pO2;
+    }
+
+  protected:
+    /*!
+      @brief Lambda-coefficient
+    */
+    Real m_lambda;
+
+    /*!
+      @brief A-coefficient
+    */
+    Real m_A;
+
+    /*!
+      @brief O2-fraction
+    */
+    Real m_pO2;
+  };
+
+  /*!
+    @brief Implementation of a single photon transition
+  */
+  class photon_two : public photon_group {
+  public:
+    /*!
+      @brief Constructor
+    */
+    photon_two();
+
+    /*!
+      @brief Destructor
+    */
+    ~photon_two();
+
+    /*!
+      @brief Get the absorption coefficient
+    */
+    virtual Real get_kappa(const RealVect a_pos) const;
+
+    /*!
+      @brief Get the lambda coefficient
+    */
+    const Real get_lambda() const {
+      return m_lambda;
+    }
+
+    /*!
+      @brief Get the A-coefficient
+    */
+    const Real get_A() const {
+      return m_A;
+    }
+
+    /*!
+      @brief Get the partial oxygen pressure
+    */
+    const Real get_pO2() const {
+      return m_pO2;
+    }
+
+  protected:
+    /*!
+      @brief Lambda-coefficient
+    */
+    Real m_lambda;
+
+    /*!
+      @brief A-coefficient
+    */
+    Real m_A;
+
+    /*!
+      @brief O2-fraction
+    */
+    Real m_pO2;
+  };
+
+  /*!
+    @brief Implementation of a single photon transition
+  */
+  class photon_three : public photon_group {
+  public:
+    /*!
+      @brief Constructor
+    */
+    photon_three();
+
+    /*!
+      @brief Destructor
+    */
+    ~photon_three();
+
+    /*!
+      @brief Get the absorption coefficient
+    */
+    virtual Real get_kappa(const RealVect a_pos) const;
+
+    /*!
+      @brief Get the lambda coefficient
+    */
+    const Real get_lambda() const {
+      return m_lambda;
+    }
+
+    /*!
+      @brief Get the A-coefficient
+    */
+    const Real get_A() const {
+      return m_A;
+    }
+
+    /*!
+      @brief Get the partial oxygen pressure
+    */
+    const Real get_pO2() const {
+      return m_pO2;
+    }
+
+  protected:
+    /*!
+      @brief Lambda-coefficient
+    */
+    Real m_lambda;
+
+    /*!
+      @brief A-coefficient
+    */
+    Real m_A;
+
+    /*!
+      @brief O2-fraction
+    */
+    Real m_pO2;
+  };
 
 };
 #endif
