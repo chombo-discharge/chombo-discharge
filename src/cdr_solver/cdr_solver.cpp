@@ -1262,56 +1262,58 @@ Real cdr_solver::compute_diffusive_dt(){
 
   Real min_dt = 1.E99;
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-  const Interval interv(comp, comp);
+  if(m_diffusive){
+    const int comp  = 0;
+    const int ncomp = 1;
+    const int finest_level = m_amr->get_finest_level();
+    const Interval interv(comp, comp);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+      const Real dx                = m_amr->get_dx()[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBCellFAB& velo     = (*m_velo_cell[lvl])[dit()];
-      const Box box             = dbl.get(dit());
-      const EBISBox& ebisbox    = ebisl[dit()];
-      const EBGraph& ebgraph    = ebisbox.getEBGraph();
-      const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
-      FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
-      const IntVectSet norm_ivs(box);
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const EBCellFAB& velo     = (*m_velo_cell[lvl])[dit()];
+	const Box box             = dbl.get(dit());
+	const EBISBox& ebisbox    = ebisl[dit()];
+	const EBGraph& ebgraph    = ebisbox.getEBGraph();
+	const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
+	FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
+	const IntVectSet norm_ivs(box);
 
-      // Regular faces
-      for (int dir = 0; dir < SpaceDim; dir++){
-	const EBFaceFAB& diffco = (*m_diffco[lvl])[dit()][dir];
+	// Regular faces
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  const EBFaceFAB& diffco = (*m_diffco[lvl])[dit()][dir];
 
-	for (FaceIterator faceit(norm_ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  const Real thisdt = dx*dx/(2*SpaceDim*diffco(face, comp));
+	  for (FaceIterator faceit(norm_ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
+	    const FaceIndex& face = faceit();
+	    const Real thisdt = dx*dx/(2*SpaceDim*diffco(face, comp));
 
-	  min_dt = Min(thisdt, min_dt);
+	    min_dt = Min(thisdt, min_dt);
+	  }
+	}
+
+	// Irregular faces
+	const BaseIVFAB<Real>& diffco = (*m_diffco_eb[lvl])[dit()];
+	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex vof = vofit();
+	  const Real thisdt = dx*dx/(2*SpaceDim*diffco(vof, comp));
+
+	  min_dt = Min(min_dt, thisdt);
 	}
       }
-
-      // Irregular faces
-      const BaseIVFAB<Real>& diffco = (*m_diffco_eb[lvl])[dit()];
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      	const VolIndex vof = vofit();
-	const Real thisdt = dx*dx/(2*SpaceDim*diffco(vof, comp));
-
-      	min_dt = Min(min_dt, thisdt);
-      }
     }
-  }
   
 #ifdef CH_MPI
-  Real tmp = 1.;
-  int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("cdr_solver::compute_diffusive_dt() - communication error on norm");
-  }
-  min_dt = tmp;
+    Real tmp = 1.;
+    int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    if(result != MPI_SUCCESS){
+      MayDay::Error("cdr_solver::compute_diffusive_dt() - communication error on norm");
+    }
+    min_dt = tmp;
 #endif
+  }
 
 
   return min_dt;

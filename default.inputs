@@ -23,8 +23,8 @@ amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
 amr.sten_order      = 1           # Order for interpolation/extrapolation stencils. Must be 1 or 2
 amr.sten_radius     = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
-amr.sten_type       = taylor      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
-amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr.sten_type       = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
+amr.ghost_interp    = quad        # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
 amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
 # ----------------------------------------------------------------------------------------------------		
