@@ -27,8 +27,6 @@ Real potential_curve(const Real a_time){
 
 int main(int argc, char* argv[]){
 
-  MayDay::Warning("General warning - there seems to be something odd on patch boundaries - see if there is an extra place where we shoudl have interpolated ghost cells");
-
 #ifdef CH_MPI
   MPI_Init(&argc,&argv);
 #endif

@@ -60,11 +60,6 @@ public:
   ~plasma_engine();
 
   /*!
-    @brief Do initial regrids. This regrid method uses the initial data inside each solver. 
-  */
-  virtual void initial_regrids(const int a_init_regrids);
-
-  /*!
     @brief Setup and run simulations
   */
   virtual void setup_and_run();
@@ -468,7 +463,7 @@ protected:
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
     whose solution is recomputed. The same goes for stationary RTE methods. 
   */
-  virtual void regrid();
+  virtual void regrid(const bool a_use_initial_data);
 
   /*!
     @brief Regrid internal storage for this class

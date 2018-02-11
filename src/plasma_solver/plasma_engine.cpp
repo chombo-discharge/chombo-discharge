@@ -718,36 +718,6 @@ void plasma_engine::grid_report(){
   pout() << endl;
 }
 
-void plasma_engine::initial_regrids(const int a_init_regrids){
-  CH_TIME("plasma_engine::initia_regrids");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::initial_regrids" << endl;
-  }
-
-  for (int i = 0; i < a_init_regrids; i++){
-    if(m_verbosity > 0){
-      pout() << "plasma_engine -- initial regrid # " << i + 1 << endl;
-    }
-
-    // Regrid base
-    this->regrid(); 
-    if(m_verbosity > 0){
-      this->grid_report();
-    }
-
-    m_timestepper->initial_data();           // Re-fill solvers with initial data
-    m_timestepper->solve_poisson();          // Re-solve Poisson equation
-    if(m_timestepper->stationary_rte()){     // Solve RTE equations by using initial data and electric field if its stationary
-      const Real dummy_dt = 0.0;
-      m_timestepper->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
-    }
-
-    m_timestepper->compute_cdr_sources();    // Compute source terms for CDR equations
-    m_timestepper->compute_cdr_diffusion();  // Diffusive stuff for CDR
-    m_timestepper->compute_cdr_velocities(); // Compute the cdr velocities
-  }
-}
-
 void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
   CH_TIME("plasma_engine::read_checkpoint_file");
   if(m_verbosity > 3){
@@ -861,7 +831,7 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
   handle_in.close();
 }
 
-void plasma_engine::regrid(){
+void plasma_engine::regrid(const bool a_use_initial_data){
   CH_TIME("plasma_engine::regrid");
   if(m_verbosity > 2){
     pout() << "plasma_engine::regrid" << endl;
@@ -885,6 +855,10 @@ void plasma_engine::regrid(){
   m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
   m_timestepper->regrid_internals();                                 // Regrid internal storage for time_stepper
   m_celltagger->regrid();                                            // Regrid cell tagger
+
+  if(a_use_initial_data){
+    m_timestepper->initial_data();
+  }
 
   // Solve the elliptic parts
   m_timestepper->solve_poisson();
@@ -962,7 +936,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       const int max_amr_depth = m_amr->get_max_amr_depth();     
       if(m_step%m_regrid_interval == 0 && m_regrid_interval > 0 && max_sim_depth > 0 && max_amr_depth > 0){
 	if(!first_step){
-	  this->regrid();
+	  this->regrid(false);
 	  if(m_verbosity > 0){
 	    this->grid_report();
 	  }
@@ -1214,20 +1188,6 @@ void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const 
   }
   else{
     this->setup_for_restart(a_init_regrids, a_restart_file);
-
-    for (int i = 0; i < a_init_regrids; i++){
-      if(m_verbosity > 0){
-	pout() << "plasma_engine -- initial regrid # " << i + 1 << endl;
-      }
-      
-      this->regrid();
-
-      if(m_verbosity > 0){
-	this->grid_report();
-      }
-    }
-
-    MayDay::Abort("stop");
   }
 
 #ifdef CH_USE_HDF5
@@ -1276,10 +1236,18 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   }
   m_celltagger->regrid();
 
-  this->initial_regrids(a_init_regrids);
+  // Initial regrids
+  for (int i = 0; i < a_init_regrids; i++){
+    if(m_verbosity > 5){
+      pout() << "plasma_engine::initial_regrids" << endl;
+    }
+    
+    this->regrid(true);
 
-  m_timestepper->regrid_internals();
-  m_celltagger->regrid();
+    if(m_verbosity > 0){
+      this->grid_report();
+    }
+  }
 }
 
 void plasma_engine::setup_for_restart(const int a_init_regrids, const std::string a_restart_file){
@@ -1314,6 +1282,19 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_timestepper->regrid_internals(); // Prepare internal storage for time stepper
   m_celltagger->regrid();            // Prepare internal storage for cell tagger
 
+
+  // Initial regrids
+  for (int i = 0; i < a_init_regrids; i++){
+    if(m_verbosity > 0){
+      pout() << "plasma_engine -- initial regrid # " << i + 1 << endl;
+    }
+      
+    this->regrid(false);
+
+    if(m_verbosity > 0){
+      this->grid_report();
+    }
+  }
 }
 
 void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){

@@ -33,18 +33,18 @@ amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------	
-plasma_engine.verbosity            = 10            # Engine verbosity
-plasma_engine.plot_interval        = 1             # Plot interval
-plasma_engine.regrid_interval      = 5             # Regrid interval
-plasma_engine.checkpoint_interval  = 1             # Checkpoint interval
+plasma_engine.verbosity            = 1             # Engine verbosity
+plasma_engine.plot_interval        = 10            # Plot interval
+plasma_engine.regrid_interval      = 10            # Regrid interval
+plasma_engine.checkpoint_interval  = 5             # Checkpoint interval
 plasma_engine.initial_regrids      = 3             # Number of initial regrids
 plasma_engine.start_time           = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time            = 1.0           # Stop time
 plasma_engine.max_steps            = 500           # Maximum number of steps
-plasma_engine.output_mode          = full          # Output mode
+plasma_engine.output_mode          = light         # Output mode
 plasma_engine.output_directory     = ./            # Output directory
 plasma_engine.output_names         = simulation    # Simulation output names
-plasma_engine.restart              = true          # Do restart or not
+plasma_engine.restart              = false         # Do restart or not
 plasma_engine.restart_step         = 1             # Restart step. 
 # ----------------------------------------------------------------------------------------------------
 
@@ -99,7 +99,7 @@ eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom so
 air_bolsig.bolsig_path                   = ./plasma_models/bolsigplus032016-linux
 air_bolsig.lxcat_path                    = ./plasma_models/bolsigplus032016-linux
 air_bolsig.lxcat_file                    = LXCat-June2013.txt    # Where to find database file (LXCat)
-air_bolsig.grid_points                   = 10                   # Number of grid points for BOLSIG call
+air_bolsig.grid_points                   = 200                   # Number of grid points for BOLSIG call
 air_bolsig.min_townsend                  = 0.0                   # Transport coefficient computation limit (low)
 air_bolsig.max_townsend                  = 2000                  # Transport coefficient computation limit (low)
 air_bolsig.gas_temperature               = 300                   # Gas temperature (K)
