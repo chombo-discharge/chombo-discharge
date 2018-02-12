@@ -12,6 +12,7 @@
 #include "units.H"
 
 #include <ParmParse.H>
+#include <EBLevelDataOps.H>
 
 time_stepper::time_stepper(){
   this->set_verbosity(1);
@@ -715,12 +716,12 @@ void time_stepper::compute_J(EBAMRCellData& a_J){
     data_ops::set_value(*a_J[lvl], 0.0);
 
     for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver> solver = solver_it();
-      RefCountedPtr<species> spec      = solver_it.get_species();
+      RefCountedPtr<cdr_solver>& solver = solver_it();
+      RefCountedPtr<species>& spec      = solver_it.get_species();
 
-      const int q                      = spec->get_charge();
-      const EBAMRCellData& density     = solver->get_state();
-      const EBAMRCellData& velo        = solver->get_velo_cell();
+      const int q                       = spec->get_charge();
+      const EBAMRCellData& density      = solver->get_state();
+      const EBAMRCellData& velo         = solver->get_velo_cell();
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box& box         = dbl.get(dit());
@@ -913,6 +914,9 @@ void time_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_
     // Scale by s_Qe/s_eps0
     data_ops::scale(*a_rho[lvl], units::s_Qe);
   }
+
+  m_amr->average_down(a_rho, a_phase);
+  m_amr->interp_ghost(a_rho, a_phase);
 }
 
 void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
@@ -1453,8 +1457,7 @@ Real time_stepper::compute_relaxation_time(){
     min_dt = Min(min_dt, min);
   }
 
-  return min_dt;
-
+#if 0 // Unecessary
   // Communicate the result
 #ifdef CH_MPI
   Real tmp = 1.;
@@ -1463,6 +1466,7 @@ Real time_stepper::compute_relaxation_time(){
     MayDay::Error("time_stepper::compute_relaxation_time() - communication error on norm");
   }
   min_dt = tmp;
+#endif
 #endif
 
   return min_dt;

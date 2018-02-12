@@ -1,70 +1,0 @@
-R15   1474. Td    22.9 eV                                       
-R17   1684. Td    25.8 eV                                       
-R17   1684. Td    25.8 eV                                       
-R10   947. Td    15.9 eV                                        
-R19   1895. Td    28.7 eV                                       
-R16   1579. Td    24.3 eV                                       
-R16   1579. Td    24.3 eV                                       
-R18   1789. Td    27.2 eV                                       
-R17   1684. Td    25.8 eV                                       
-R17   1684. Td    25.8 eV                                       
-R18   1789. Td    27.2 eV                                       
-R18   1789. Td    27.2 eV                                       
-R18   1789. Td    27.2 eV                                       
-R19   1895. Td    28.7 eV                                       
-R11   1053. Td    17.3 eV                                       
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.6
-FINISHED
-R16   1579. Td    24.3 eV                                       
-R19   1895. Td    28.7 eV                                       
-R19   1895. Td    28.7 eV                                       
-R19   1895. Td    28.7 eV                                       
-R18   1789. Td    27.2 eV                                       
-R18   1789. Td    27.2 eV                                       
-R12   1158. Td    18.7 eV                                       
-R17   1684. Td    25.8 eV                                       
-R19   1895. Td    28.7 eV                                       
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.5
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.4
-FINISHED
-R19   1895. Td    28.7 eV                                       
-FINISHED
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.1
-FINISHED
-R13   1263. Td    20.1 eV                                       
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.2
-FINISHED
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.8
-FINISHED
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.9
-FINISHED
-R14   1368. Td    21.5 eV                                       
-R18   1789. Td    27.2 eV                                       
-R19   1895. Td    28.7 eV                                       
-R15   1474. Td    22.9 eV                                       
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.3
-FINISHED
-R16   1579. Td    24.3 eV                                       
-R17   1684. Td    25.8 eV                                       
-R18   1789. Td    27.2 eV                                       
-R19   1895. Td    28.7 eV                                       
-R20   2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.7
-FINISHED

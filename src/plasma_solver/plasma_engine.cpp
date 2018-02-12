@@ -75,6 +75,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 
   m_potential_set = false;
   m_step          = 0;
+  m_time          = 0.0;
 }
 
 plasma_engine::~plasma_engine(){

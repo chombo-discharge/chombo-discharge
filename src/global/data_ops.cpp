@@ -217,8 +217,15 @@ void data_ops::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
 }
 
 void data_ops::get_max_min(Real& a_max, Real& a_min, EBAMRCellData& a_E, const int a_comp){
+  a_max = -1.E99;
+  a_min =  1.E99;
   for (int lvl = 0; lvl < a_E.size(); lvl++){
-    data_ops::get_max_min(a_max, a_min, *a_E[lvl], a_comp);
+    Real lvl_max = -1.E99;
+    Real lvl_min =  1.E99;
+    data_ops::get_max_min(lvl_max, lvl_min, *a_E[lvl], a_comp);
+
+    a_max = Max(a_max, lvl_max);
+    a_min = Min(a_min, lvl_min);
   }
 }
 
@@ -249,7 +256,6 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, EBAMRCellData& a_data)
 
     a_max = Max(a_max, max);
     a_min = Min(a_min, min);
-			       
   }
 }
 

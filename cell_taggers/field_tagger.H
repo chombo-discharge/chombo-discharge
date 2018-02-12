@@ -21,6 +21,7 @@
       field_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
       field_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
       field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+
 */
 class field_tagger : public cell_tagger {
 public:

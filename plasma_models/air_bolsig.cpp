@@ -68,6 +68,10 @@ air_bolsig::air_bolsig(){
     pp.query("grid_points",  m_grid_points);
     pp.query("min_townsend", m_min_townsend);
     pp.query("max_townsend", m_max_townsend);
+
+    if(m_grid_points > 1000){
+      MayDay::Abort("air_bolsig::air_bolsig - it appears that BOLSIG+ has a hardcap at 1000 grid points. Adjust accordingly");
+    }
   }
 
   { // Get gas parameters
@@ -428,7 +432,7 @@ void air_bolsig::compute_transport_coefficients(){
   this->call_bolsig();     // Call bolsigminus and output data
   this->extract_bolsig_data();   // Extract data
   this->delete_bolsig_data();    // Cleanup, delete file created by bolsigminus
-  this->delete_bolsig_script();  // Cleanup, delete script
+  //  this->delete_bolsig_script();  // Cleanup, delete script
 
   
   pout() << "Done computing transport data" << endl;
@@ -524,7 +528,7 @@ void air_bolsig::call_bolsig(){
   int success;
   std::string cmd;
 
-  cmd = "./" + m_bolsig_path + "/bolsigminus " + m_local_script_file;
+  cmd = m_bolsig_path + "/bolsigminus " + m_local_script_file;
   success = system(cmd.c_str());
   if(success != 0){
     MayDay::Abort("air_bolsig::call_bolsig - Could not call BOLSIG");
