@@ -72,7 +72,8 @@ void cdr_sg::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, c
   if(ebcf){ 
     this->coarse_fine_increment(mass_diff);     // Increment the coarse-fine redistribution objects
     this->increment_redist_flux();              // Increment flux registers with the redistribution stuff
-    this->coarse_fine_redistribution(a_divJ);   // Redistribute
+    this->coarse_fine_redistribution(a_divJ);   // Redistribute and reflux
+    this->reflux(a_divJ);                       // Reflux
   }
   else{
     this->hyperbolic_redistribution(a_divJ, mass_diff, weights);  // Redistribute mass into hybrid divergence

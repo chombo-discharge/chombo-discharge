@@ -10,7 +10,6 @@
 #include <ParmParse.H>
 
 field_tagger::field_tagger(){
-
   m_num_tracers = 1;
 
   m_coar_curv = 0.1;

@@ -5,7 +5,6 @@ physical_domain.lo_corner = -2E-2 -2E-2 -2E-2
 physical_domain.hi_corner =  2E-2  2E-2  2E-2
 # ----------------------------------------------------------------------------------------------------				
 
-
 # ====================================================================================================
 # MECHANICAL SHAFT GEOMETRY
 # ----------------------------------------------------------------------------------------------------				
@@ -23,7 +22,6 @@ mechanical_shaft.dielectric_rod_sides      = 6               # Number of sides
 mechanical_shaft.dielectric_rod_radius     = 5.E-3           # Dielectric rod radius
 mechanical_shaft.dielectric_rod_length     = 4.E-2           # Dielectric rod length
 # ----------------------------------------------------------------------------------------------------				
-
 
 # ====================================================================================================
 # AMR SETTINGS
@@ -46,28 +44,56 @@ amr.sten_type       = linear      # Default stencil type. Valid options are 'lin
 amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
 amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
-# ----------------------------------------------------------------------------------------------------		
+# ----------------------------------------------------------------------------------------------------
 
+# ====================================================================================================
+# FIELD REFINEMENT
+# ----------------------------------------------------------------------------------------------------	
+field_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
+field_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+field_tagger.refine_curvature  = 0.1    # Sets eps_curv for refinement
+field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+# ----------------------------------------------------------------------------------------------------	
 
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------	
-plasma_engine.verbosity            = 10            # Engine verbosity
-plasma_engine.plot_interval        = 10            # Plot interval
-plasma_engine.regrid_interval      = 10            # Regrid interval
-plasma_engine.checkpoint_interval  = 5             # Checkpoint interval
-plasma_engine.initial_regrids      = -1            # Number of initial regrids
-plasma_engine.geometry_only        = true          # Special option that ONLY plots the geometry	
-plasma_engine.start_time           = 0             # Start time (fresh simulations only)
-plasma_engine.stop_time            = 1.0           # Stop time
-plasma_engine.max_steps            = 0             # Maximum number of steps
-plasma_engine.output_mode          = full          # Output mode
-plasma_engine.output_directory     = ./            # Output directory
-plasma_engine.output_names         = simulation    # Simulation output names
-plasma_engine.restart              = false         # Do restart or not
-plasma_engine.restart_step         = 1             # Restart step. 
+plasma_engine.verbosity                       = 10            # Engine verbosity
+plasma_engine.plot_interval                   = 10            # Plot interval
+plasma_engine.regrid_interval                 = 10            # Regrid interval
+plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
+plasma_engine.initial_regrids                 = -1            # Number of initial regrids
+plasma_engine.geometry_only                   = true          # Special option that ONLY plots the geometry	
+plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
+plasma_engine.stop_time                       = 1.0           # Stop time
+plasma_engine.max_steps                       = 0             # Maximum number of steps
+plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.output_directory                = ./            # Output directory
+plasma_engine.output_names                    = simulation    # Simulation output names
+plasma_engine.restart                         = false         # Do restart or not
+plasma_engine.restart_step                    = 1             # Restart step.
+plasma_engine.verbosity                       = 10            # Engine verbosity
+plasma_engine.plot_interval                   = 5             # Plot interval
+plasma_engine.regrid_interval                 = 10            # Regrid interval
+plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
+plasma_engine.initial_regrids                 = 0             # Number of initial regrids
+plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
+plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
+plasma_engine.stop_time                       = 1.0           # Stop time
+plasma_engine.max_steps                       = 500           # Maximum number of steps
+plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.output_directory                = ./            # Output directory
+plasma_engine.output_names                    = simulation    # Simulation output names
+plasma_engine.restart                         = true          # Do restart or not
+plasma_engine.restart_step                    = 25            # Restart step.
+plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
 # ----------------------------------------------------------------------------------------------------
-
 
 # ====================================================================================================
 # TIME STEPPER SETTINGS

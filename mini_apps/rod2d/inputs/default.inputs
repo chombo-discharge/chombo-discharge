@@ -6,8 +6,8 @@ rod2d_main.potential = 6.E3
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -1E-2 -1E-2
-physical_domain.hi_corner =  1E-2  1E-2
+physical_domain.lo_corner = -1E-3 -1E-3
+physical_domain.hi_corner =  1E-3  1E-3
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -28,15 +28,15 @@ rod_slab.dielectric_corner_hi      =  1.0  1.0  1.0                   # Hi corne
 # ====================================================================================================
 # AMR SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-amr.verbosity       = -1          # Controls verbosity. 
+amr.verbosity       = 10          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 3           # Maximum amr depth
+amr.max_amr_depth   = 1           # Maximum amr depth
 amr.max_sim_depth   = 3           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
 amr.max_box_size    = 32          # Maximum allowed box size
-amr.ref_rat         = 4 4 2 2 2 2 # Refinement ratios. 
+amr.ref_rat         = 2 4 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
@@ -59,29 +59,35 @@ field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
-# ----------------------------------------------------------------------------------------------------	
-plasma_engine.verbosity            = 1             # Engine verbosity
-plasma_engine.plot_interval        = 5             # Plot interval
-plasma_engine.regrid_interval      = 5             # Regrid interval
-plasma_engine.checkpoint_interval  = 5             # Checkpoint interval
-plasma_engine.initial_regrids      = 0             # Number of initial regrids
-plasma_engine.geometry_only        = false         # Special option that ONLY plots the geometry	
-plasma_engine.start_time           = 0             # Start time (fresh simulations only)
-plasma_engine.stop_time            = 1.0           # Stop time
-plasma_engine.max_steps            = 500           # Maximum number of steps
-plasma_engine.output_mode          = full          # Output mode
-plasma_engine.output_directory     = ./            # Output directory
-plasma_engine.output_names         = simulation    # Simulation output names
-plasma_engine.restart              = false         # Do restart or not
-plasma_engine.restart_step         = 200           # Restart step. 
 # ----------------------------------------------------------------------------------------------------
-
+plasma_engine.verbosity                       = 1             # Engine verbosity
+plasma_engine.plot_interval                   = 5             # Plot interval
+plasma_engine.regrid_interval                 = 5             # Regrid interval
+plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
+plasma_engine.initial_regrids                 = 1             # Number of initial regrids
+plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
+plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
+plasma_engine.stop_time                       = 1.0           # Stop time
+plasma_engine.max_steps                       = 100           # Maximum number of steps
+plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.output_directory                = ./            # Output directory
+plasma_engine.output_names                    = simulation    # Simulation output names
+plasma_engine.restart                         = false         # Do restart or not
+plasma_engine.restart_step                    = 200           # Restart step.
+plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
+# ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-time_stepper.verbosity        = -1    # Class verbosity
-time_stepper.solver_verbosity = -1    # Individual solver verbosities
+time_stepper.verbosity        = 10    # Class verbosity
+time_stepper.solver_verbosity = 10    # Individual solver verbosities
 time_stepper.fast_rte         = 1     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step

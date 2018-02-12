@@ -16,6 +16,8 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
+#define advect_level_on 1
+
 amr_mesh::amr_mesh(){
 
   this->set_verbosity(10);
@@ -412,7 +414,9 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
   this->define_flux_reg();     // Define flux register (phase::gas only)
   this->define_redist_oper();  // Define redistribution (phase::gas only)
-  this->define_advect_level(); // Define advection 
+#if advect_level_on
+  this->define_advect_level(); // Define advection
+#endif
   this->define_irreg_sten();   // Define irregular stencils
 }
 
@@ -829,11 +833,14 @@ void amr_mesh::define_flux_reg(){
 
     if(!ebis_gas.isNull()){
       if(has_fine){
-	m_flux_reg[phase::gas][lvl] = RefCountedPtr<EBFastFR> (new EBFastFR(*m_eblg[phase::gas][lvl+1],
-									    *m_eblg[phase::gas][lvl],
-									    m_ref_ratios[lvl],
-									    comps,
-									    !m_ebcf));
+	m_flux_reg[phase::gas][lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
+											m_grids[lvl],
+											m_ebisl[phase::gas][lvl+1],
+											m_ebisl[phase::gas][lvl],
+											m_domains[lvl].domainBox(),
+											m_ref_ratios[lvl],
+											comps,
+											ebis_gas));
       }
     }
   }
@@ -1554,7 +1561,7 @@ Vector<RefCountedPtr<EBPWLFineInterp> >& amr_mesh::get_eb_pwl_interp(phase::whic
   return m_pwl_interp[a_phase];
 }
 
-Vector<RefCountedPtr<EBFastFR> >&  amr_mesh::get_flux_reg(phase::which_phase a_phase){
+Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(phase::which_phase a_phase){
   CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
   return m_flux_reg[a_phase];
 }
@@ -1566,7 +1573,11 @@ Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(phase::which_p
 
 Vector<RefCountedPtr<EBAdvectLevelIntegrator> >& amr_mesh::get_level_advect(phase::which_phase a_phase){
   CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
+#if advect_level_on
   return m_level_advect[a_phase];
+#else
+  MayDay::Abort("amr_mesh::get_level_advect - AdvectLevelIntegrator has been turned off since it will be moved into cdr_gdnv");
+#endif
 }
 
 Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(phase::which_phase a_phase){

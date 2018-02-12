@@ -7,6 +7,8 @@
 
 #include "lookup_table.H"
 
+#define lookup_table_verbose_warnings 0
+
 lookup_table::lookup_table(){
 
   m_num_entries = 0;
@@ -80,6 +82,7 @@ Real lookup_table::get_entry(const Real a_x){
     // Find entry
     int i = floor((a_x - m_x[0])/m_dx);
 
+#if lookup_table_verbose_warnings
     if(i < 0){
       i = 0;
       pout() << "lookup_table::get_entry - entry excceds range (low end)" << endl;
@@ -88,6 +91,7 @@ Real lookup_table::get_entry(const Real a_x){
       i = m_num_entries - 2;
       pout() << "lookup_table::get_entry - entry excceds range (high end)" << endl;
     }
+#endif
 
     const int i_hi = i + 1;
     const Real x0  = m_x[i];

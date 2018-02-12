@@ -167,13 +167,47 @@ void cdr_solver::cache_state(){
 
 }
 
-void cdr_solver::coarse_fine_increment(const EBAMRIVData& m_mass_diff){
+void cdr_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
   CH_TIME("cdr_solver::coarse_fine_increment");
   if(m_verbosity > 5){
     pout() << m_name + "::coarse_fine_increment" << endl;
   }
 
-  MayDay::Abort("cdr_solver::coarse_fine_increment - not implemented");
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(0,0);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_phase)[lvl];
+
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < 0;
+
+    if(has_coar){
+      fine2coar_redist->setToZero();
+
+    }
+    if(has_fine){
+      coar2fine_redist->setToZero();
+      coar2coar_redist->setToZero();
+    }
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      if(has_coar){
+	fine2coar_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+      }
+
+      if(has_fine){
+	coar2fine_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+	coar2coar_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+      }
+    }
+  }
 }
 
 void cdr_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
@@ -182,7 +216,33 @@ void cdr_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
     pout() << m_name + "::coarse_fine_redistribution" << endl;
   }
 
-  MayDay::Abort("cdr_solver::coarse_fine_redistribution - not implemented");
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx       = m_amr->get_dx()[lvl];
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
+
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_phase)[lvl];
+    
+    if(has_coar){
+      fine2coar_redist->redistribute(*a_state[lvl-1], interv);
+      fine2coar_redist->setToZero();
+    }
+
+    if(has_fine){
+      coar2fine_redist->redistribute(*a_state[lvl+1], interv);
+      coar2coar_redist->redistribute(*a_state[lvl],   interv);
+
+      coar2fine_redist->setToZero();
+      coar2coar_redist->setToZero();
+    }
+  }
 }
 
 void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
@@ -497,7 +557,28 @@ void cdr_solver::increment_redist_flux(){
     pout() << m_name + "::increment_redist_flux" << endl;
   }
 
-  MayDay::Abort("cdr_solver::increment_redist_flux - not implemented");
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx       = m_amr->get_dx()[lvl];
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
+    
+    if(has_fine){
+      RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->get_flux_reg(m_phase)[lvl];
+      RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_phase)[lvl];
+      RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_phase)[lvl];
+      
+      const Real scale = -dx;
+
+      fluxreg->incrementRedistRegister(*coar2fine_redist, interv, scale);
+      fluxreg->incrementRedistRegister(*coar2coar_redist, interv, scale);
+
+    }
+  }
 }
 
 void cdr_solver::initial_data(){
@@ -656,7 +737,7 @@ void cdr_solver::increment_flux_register(const EBAMRFluxData& a_face_state, cons
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
-  Vector<RefCountedPtr<EBFastFR> >& fluxreg = m_amr->get_flux_reg(m_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->get_flux_reg(m_phase);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -712,7 +793,7 @@ void cdr_solver::increment_flux_register(const EBAMRFluxData& a_flux){
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
-  Vector<RefCountedPtr<EBFastFR> >& fluxreg = m_amr->get_flux_reg(m_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->get_flux_reg(m_phase);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -850,7 +931,7 @@ void cdr_solver::reflux(EBAMRCellData& a_state){
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
-  Vector<RefCountedPtr<EBFastFR > >& fluxreg = m_amr->get_flux_reg(m_phase);
+  Vector<RefCountedPtr<EBFluxRegister > >& fluxreg = m_amr->get_flux_reg(m_phase);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx       = m_amr->get_dx()[lvl];

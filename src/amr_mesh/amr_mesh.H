@@ -20,8 +20,8 @@
 #include <AggEBPWLFillPatch.H>
 #include <ebcoarseaverage.H>
 #include <EBAdvectLevelIntegrator.H>
-#include <EBFastFR.H>
-#include <EBFastFR.H>
+#include <EBFluxRegister.H>
+#include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>
 #include <EBCoarToCoarRedist.H>
@@ -451,7 +451,7 @@ public:
   /*!
     @brief Get flux register
   */
-  virtual Vector<RefCountedPtr<EBFastFR> >&  get_flux_reg(phase::which_phase a_phase);
+  virtual Vector<RefCountedPtr<EBFluxRegister> >&  get_flux_reg(phase::which_phase a_phase);
 
   /*!
     @brief Get redistribution
@@ -659,7 +659,7 @@ protected:
   /*!
     @brief Flux register
   */
-  Vector<Vector<RefCountedPtr<EBFastFR> > > m_flux_reg;
+  Vector<Vector<RefCountedPtr<EBFluxRegister> > > m_flux_reg;
 
   /*!
     @brief Level advector for Godunov

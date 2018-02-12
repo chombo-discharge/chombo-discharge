@@ -21,7 +21,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  Real potential = 4.E4;
+  Real potential = 4.E3;
 
   return potential;
 }

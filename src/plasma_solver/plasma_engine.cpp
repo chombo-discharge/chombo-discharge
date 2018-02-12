@@ -1084,7 +1084,44 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
   }
 
   const int max_depth = m_amr->get_max_amr_depth();
-  const int depth     = (a_depth == -1) ? max_depth : a_depth;
+  
+  int depth     = (a_depth < 0) ? max_depth : a_depth;
+  int depth1    = depth;
+  int depth2    = depth;
+  int depth3    = depth;
+  int depth4    = depth;
+  int depth5    = depth;
+  int depth6    = depth;
+
+  { // Get parameter from input script
+    ParmParse pp("plasma_engine");
+    pp.query("refine_geometry", depth);
+    depth  = (depth < 0) ? max_depth : a_depth;
+    depth1 = depth;
+    depth2 = depth;
+    depth3 = depth;
+    depth4 = depth;
+    depth5 = depth;
+    depth6 = depth;
+  }
+
+  { // Get fine controls from input script
+    ParmParse pp("plasma_engine");
+    pp.query("refine_electrodes",               depth1);
+    pp.query("refine_dielectrics",              depth2);
+    pp.query("refine_electrode_gas_interface",  depth3);
+    pp.query("refine_dielectric_gas_interface", depth4);
+    pp.query("refine_solid_gas_interface",      depth5);
+    pp.query("refine_solid_solid_interface",    depth6);
+
+    depth1 = (depth1 < 0) ? depth : depth1;
+    depth2 = (depth2 < 0) ? depth : depth2;
+    depth3 = (depth3 < 0) ? depth : depth3;
+    depth4 = (depth4 < 0) ? depth : depth4;
+    depth5 = (depth5 < 0) ? depth : depth5;
+    depth6 = (depth6 < 0) ? depth : depth6;
+  }
+    
   
   this->set_geom_refinement_depth(depth, depth, depth, depth, depth, depth);
 }
