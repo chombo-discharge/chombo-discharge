@@ -58,6 +58,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_output_file_names("simulation");    // Set output file names
   this->set_output_mode(output_mode::full);     // Set output mode
   this->set_init_regrids(0);                    // Number of initial regrids
+  this->set_geom_only(false);                   // Only plot geometry
   this->set_restart(false);                     // Restart mode
   this->set_restart_step(0);                    // Restart from this step
   this->set_start_time(0.0);                    // Start time
@@ -590,7 +591,7 @@ void plasma_engine::get_geom_tags(){
 
   // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
   for (int lvl = 0; lvl < maxdepth; lvl++){
-    m_geom_tags[lvl].grow(2);
+    m_geom_tags[lvl].grow(1);
   }
 }
 
@@ -1022,7 +1023,10 @@ void plasma_engine::setup_and_run(){
   const std::string restart_file = m_output_dir + "/" + m_output_names + std::string(iter_str);
 
   this->setup(m_init_regrids, m_restart, restart_file);
-  this->run(m_start_time, m_stop_time, m_max_steps);
+
+  if(!m_geometry_only){
+    this->run(m_start_time, m_stop_time, m_max_steps);
+  }
 }
 
 void plasma_engine::set_verbosity(const int a_verbosity){
@@ -1183,16 +1187,50 @@ void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const 
     pout() << "plasma_engine::setup" << endl;
   }
 
-  if(!a_restart){
-    this->setup_fresh(a_init_regrids);
+  if(m_geometry_only){
+    this->setup_geometry_only();
   }
   else{
-    this->setup_for_restart(a_init_regrids, a_restart_file);
-  }
+    if(!a_restart){
+      this->setup_fresh(a_init_regrids);
+    }
+    else{
+      this->setup_for_restart(a_init_regrids, a_restart_file);
+    }
 
 #ifdef CH_USE_HDF5
-  this->write_plot_file();
+    this->write_plot_file();
 #endif
+  }
+}
+
+void plasma_engine::setup_geometry_only(){
+  CH_TIME("plasma_engine::setup_geometry_only");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::setup_geometry_only" << endl;
+  }
+
+  this->sanity_check();
+
+  m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
+			       m_amr->get_finest_domain(),
+			       m_amr->get_finest_dx(),
+			       m_amr->get_max_box_size());
+
+  this->get_geom_tags();       // Get geometric tags.
+  
+  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  
+  Vector<IntVectSet> tags = m_geom_tags;
+  m_amr->build_grids(tags, m_geom_tag_depth);
+  m_amr->define_eblevelgrid();
+  //  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
+
+  if(m_verbosity > 0){
+    this->grid_report();
+  }
+
+  this->write_geometry();                             // Write geometry only
 }
 
 void plasma_engine::setup_fresh(const int a_init_regrids){
@@ -1235,6 +1273,13 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     }    
   }
   m_celltagger->regrid();
+  m_timestepper->regrid_internals();
+
+  // Fill solvers with important stuff
+  m_timestepper->compute_cdr_velocities();
+  m_timestepper->compute_cdr_diffusion(); 
+  m_timestepper->compute_cdr_sources();
+  m_timestepper->compute_rte_sources();
 
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
@@ -1281,6 +1326,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   }
   m_timestepper->regrid_internals(); // Prepare internal storage for time stepper
   m_celltagger->regrid();            // Prepare internal storage for cell tagger
+
 
 
   // Initial regrids
@@ -1357,6 +1403,27 @@ void plasma_engine::set_restart(const bool a_restart){
   }
   else if(str == "false"){
     m_restart = false;
+  }
+}
+
+void plasma_engine::set_geom_only(const bool a_geom_only){
+  CH_TIME("plasma_engine::set_geom_only");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_geom_only" << endl;
+  }
+
+  m_geometry_only = a_geom_only;
+
+  { // Get parameter from input file
+    std::string str;
+    ParmParse pp("plasma_engine");
+    pp.query("geometry_only", str);
+    if(str == "true"){
+      m_geometry_only = true;
+    }
+    else if(str == "false"){
+      m_geometry_only = false;
+    }
   }
 }
 
@@ -1594,6 +1661,49 @@ void plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
   }
 }
 
+void plasma_engine::write_geometry(){
+  CH_TIME("plasma_engine::write_geometry");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_geometry" << endl;
+  }
+
+  EBAMRCellData output;
+  m_amr->allocate(output, phase::gas, 1);
+  data_ops::set_value(output, 0.0);
+  Vector<std::string> names(1, "dummy_data");
+
+  const int finest_level                 = m_amr->get_finest_level();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
+
+  bool replace_covered = false;
+  Vector<Real> covered_values;
+
+  Vector<LevelData<EBCellFAB>*> output_ptr(1 + finest_level);
+  m_amr->alias(output_ptr, output);
+
+  // Dummy file name
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/" + m_output_names;
+  sprintf(file_char, "%s.geometry.step%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+  string fname(file_char);
+
+  writeEBHDF5(fname, 
+	      grids,
+	      output_ptr,
+	      names, 
+	      domains[0],
+	      dx[0], 
+	      m_dt,
+	      m_time,
+	      ref_rat,
+	      finest_level + 1,
+	      replace_covered,
+	      covered_values);
+}
+
 void plasma_engine::write_plot_file(){
   CH_TIME("plasma_engine::write_plot_file");
   if(m_verbosity > 3){
@@ -1643,6 +1753,9 @@ void plasma_engine::write_plot_file(){
   m_amr->alias(output_ptr, output);
 
   // Write HDF5 file
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_plot_file - writing plot file..." << endl;
+  }
   writeEBHDF5(fname, 
 	      grids,
 	      output_ptr,
@@ -1655,6 +1768,9 @@ void plasma_engine::write_plot_file(){
 	      finest_level + 1,
 	      replace_covered,
 	      covered_values);
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_plot_file - writing plot file... DONE!" << endl;
+  }
 }
 
 void plasma_engine::write_checkpoint_file(){

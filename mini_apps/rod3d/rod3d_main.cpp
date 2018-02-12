@@ -1,6 +1,6 @@
 /*!
-  @file   mechshaft_main.cpp
-  @brief  Main file for the mechanical shaft simulations. 
+  @file  main.cpp
+  @brief Example main file for running the chombo-streamer code
   @author Robert Marskar
 */
 
@@ -8,9 +8,12 @@
 #include "plasma_kinetics.H"
 #include "rk2.H"
 #include "field_tagger.H"
+
+
 #include "air_bolsig.H"
 #include "morrow_lowke.H"
-#include "mechanical_shaft.H"
+#include "sphere_sphere_geometry.H"
+#include "rod_slab.H"
 
 #include <ParmParse.H>
 
@@ -18,7 +21,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  return 8.E3;
+  return 6.E3;
 }
 
 int main(int argc, char* argv[]){
@@ -37,15 +40,13 @@ int main(int argc, char* argv[]){
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
-  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_slab());
   RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 												   compgeom,
 												   plaskin,
 												   timestepper,
 												   amr,
 												   tagger));
-
-  // Run plasma engine
   engine->set_potential(potential_curve);
   engine->setup_and_run();
 

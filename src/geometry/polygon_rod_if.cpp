@@ -36,7 +36,7 @@ polygon_rod_if::polygon_rod_if(const int&  a_nsides,
   const Real b = sin(beta);              // Triangle factor, opposite external angle
   const Real r = a_curvrad;              // 
   const Real R = a_radius - r + r/b;     // Radius accounts for curvature
-  const Real c = R - r/b;        // Sphere center for rounding
+  const Real c = R - r/b;                // Sphere center for rounding
 
   
   // Add sides
@@ -68,8 +68,8 @@ polygon_rod_if::polygon_rod_if(const int&  a_nsides,
     const Real theta  = iside*dTheta;
     const RealVect n  = RealVect(D_DECL(cos(theta), sin(theta), 0.));
     const RealVect p  = c*n;
-    const RealVect c1 = p - 0.5*a_length*BASISV(SpaceDim - 1);
-    const RealVect c2 = p + 0.5*a_length*BASISV(SpaceDim - 1);
+    const RealVect c1 = p - 0.5*a_length*RealVect(D_DECL(0.0, 0.0, 1.0));
+    const RealVect c2 = p + 0.5*a_length*RealVect(D_DECL(0.0, 0.0, 1.0));
 
     corners.push_back(static_cast<BaseIF*> (new cylinder_if(c1, c2, r, a_inside)));
   }

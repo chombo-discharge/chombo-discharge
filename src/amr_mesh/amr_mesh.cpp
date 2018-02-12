@@ -46,6 +46,20 @@ amr_mesh::~amr_mesh(){
   
 }
 
+void amr_mesh::alias(EBAMRCellData&           a_data,
+		     const phase::which_phase a_phase,
+		     const MFAMRCellData&     a_mfdata,
+		     const int                a_finest_level){
+  CH_TIME("amr_mesh::alias(hardcap)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::alias(hardcap)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= a_finest_level; lvl++){
+    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+  }
+}
+
 void amr_mesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata){
   CH_TIME("amr_mesh::alias");
   if(m_verbosity > 5){

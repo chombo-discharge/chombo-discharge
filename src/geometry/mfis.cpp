@@ -35,7 +35,6 @@ void mfis::define(const Box                     & a_domain,
   else{
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
   }
-
 }
   
 const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const phase::which_phase a_phase) const {

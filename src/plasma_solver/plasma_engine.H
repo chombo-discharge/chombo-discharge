@@ -34,6 +34,7 @@
       plasma_engine.start_time           = 0             # Start time (fresh simulations only)
       plasma_engine.stop_time            = 1.0           # Stop time
       plasma_engine.max_steps            = 100           # Maximum number of steps
+      plasma_engine.geometry_only        = true          # Special option that ONLY plots the geometry
       plasma_engine.output_mode          = full          # Output mode
       plasma_engine.output_directory     = ./            # Output directory
       plasma_engine.output_names         = simulation    # Simulation output names
@@ -144,6 +145,11 @@ public:
     @brief Set restart
   */
   virtual void set_restart(const bool a_restart);
+
+  /*!
+    @brief Only geometry
+  */
+  virtual void set_geom_only(const bool a_geom_only);
 
   /*!
     @brief Restart step file
@@ -378,6 +384,11 @@ protected:
   bool m_restart;
 
   /*!
+    @brief Geometry only
+  */
+  bool m_geometry_only;
+
+  /*!
     @brief Allocate internals
   */
   virtual void allocate_internals();
@@ -506,6 +517,11 @@ protected:
   virtual void setup_for_restart(const int a_init_regrids, const std::string a_restart_file);
 
   /*!
+    @brief Set up for geometry only
+  */
+  virtual void setup_geometry_only();
+
+  /*!
     @brief Write a time step report
   */
   virtual void step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps);
@@ -524,6 +540,11 @@ protected:
     @brief Write a checkpoint file
   */
   virtual void write_checkpoint_file();
+
+  /*!
+    @brief Write the geometry only
+  */
+  virtual void write_geometry();
 
   /*!
     @brief Get output variable names for a given output mode

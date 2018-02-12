@@ -225,7 +225,6 @@ void robinconductivitydomainbc::getFaceGradPhi(Real&                 a_faceFlux,
   const IntVect iv        = vof.gridIndex();
   const IntVect iv_near   = iv + iside*BASISV(a_idir);
   const VolIndex vof_near = VolIndex(iv_near, comp); // Dangerous stuff if that is a multicell....
-  CH_assert(!ebisbox.isMultiValued(iv_near));        // Warn about this. 
 
   // Linear extrapolation
   const Real x0 =  0.0;

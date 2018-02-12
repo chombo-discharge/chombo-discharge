@@ -14,6 +14,7 @@
 
 cell_tagger::cell_tagger(const int a_num_tracers){
   CH_TIME("cell_tagger::cell_tagger");
+  this->set_verbosity(-1);
   if(m_verbosity > 5){
     pout() << "cell_tagger::cell_tagger" << endl;
   }
@@ -21,7 +22,7 @@ cell_tagger::cell_tagger(const int a_num_tracers){
   m_num_tracers = a_num_tracers;
   m_name        = "cell_tagger";
 
-  this->set_verbosity(-1);
+
   this->set_phase(phase::gas);
 }
 
@@ -110,11 +111,11 @@ void cell_tagger::set_phase(const phase::which_phase a_phase){
 
 void cell_tagger::set_verbosity(const int a_verbosity){
   CH_TIME("cell_tagger::set_verbosity");
+  m_verbosity = a_verbosity;
+  
   if(m_verbosity > 5){
     pout() << m_name + "::set_verbosity" << endl;
   }
-  
-  m_verbosity = a_verbosity;
 }
 
 void cell_tagger::compute_tracers(){

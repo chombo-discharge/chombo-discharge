@@ -1,0 +1,33 @@
+# This is a work in progress...
+
+CHOMBO_HOME := /home/robertm/Projects/mf-chombo/lib
+STREAMER_HOME := /home/robertm/Projects/chombo-streamer
+HDF5_HOME := /usr/local/lbi/phdf5
+DIM := 2
+
+INCLUDES = -I .			 \
+	-I$(CHOMBO_HOME)/include \
+	-I$(HDF5_HOME)/include   \
+
+CHOMBO_OPTIONS = $DCH_SPACE
+.PHONY: all lib
+
+src_dirs = ./src/amr_mesh		\
+	./src/cdr_solver		\
+	./src/elliptic			\
+	./src/geometry			\
+	./src/global			\
+	./src/plasma_solver		\			
+	./src/poisson_solver		\
+	./src/rte_solver		\			
+	./src/sigma_solver		\
+	./cell_taggers			\
+	./geometries_prebuilt		\
+	./plasma_models			\
+
+all: main.o
+	mpicxx main.cpp
+
+%.o : %.cpp
+	mpicxx {$INCLUDES]
+

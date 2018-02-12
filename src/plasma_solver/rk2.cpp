@@ -149,7 +149,7 @@ void rk2::compute_E_at_start_of_time_step(){
   if(m_verbosity > 5){
     pout() << "rk2::compute_E_at_start_of_time_step" << endl;
   }
-  
+
   EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
   EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
   EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();

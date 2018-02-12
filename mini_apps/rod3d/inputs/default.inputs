@@ -1,39 +1,34 @@
 # ====================================================================================================
 # PHYSICAL DOMAIN
-# ____________________________________________________________________________________________________
-physical_domain.lo_corner = -2E-2 -2E-2 -2E-2
-physical_domain.hi_corner =  2E-2  2E-2  2E-2
-# ----------------------------------------------------------------------------------------------------				
-
+# ----------------------------------------------------------------------------------------------------			
+physical_domain.lo_corner = -2E-3 -2E-3 -2E-3
+physical_domain.hi_corner =  2E-3  2E-3  2E-3
+# ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
-# MECHANICAL SHAFT GEOMETRY
-# ----------------------------------------------------------------------------------------------------				
-mechanical_shaft.eps0                      = 1               # Background permittivity
-mechanical_shaft.corner_curvatures         = 200.E-6         # Corner curvatures
-mechanical_shaft.turn_off_electrode        = false           # Turn on/off electrode
-mechanical_shaft.turn_off_dielectric       = false           # Turn on/off dielectric
-mechanical_shaft.electrode_live            = true            # Live electrode or not
-mechanical_shaft.electrode_inner_radius    = 6.E-3           # Electrode inner radius
-mechanical_shaft.electrode_outer_radius    = 1.E-2           # Electrode outer radius
-mechanical_shaft.electrode_height          = 2.E-2           # Electrode height
-mechanical_shaft.electrode_center          = 0.0 0.0 1.E-2   # Electrode center
-mechanical_shaft.dielectric_permittivity   = 4.0             # Dielectric permittivity
-mechanical_shaft.dielectric_rod_sides      = 6               # Number of sides
-mechanical_shaft.dielectric_rod_radius     = 5.E-3           # Dielectric rod radius
-mechanical_shaft.dielectric_rod_length     = 4.E-2           # Dielectric rod length
-# ----------------------------------------------------------------------------------------------------				
-
+# ROD SLAB GEOMETRY PARAMETRIZATION
+# ----------------------------------------------------------------------------------------------------			
+rod_slab.eps0                      = 1                                # Background permittivity
+rod_slab.corner_curvatures         = 200.E-6                          # Corner curvatures
+rod_slab.turn_off_electrode        = false                            # Turn on/off electrode
+rod_slab.turn_off_dielectric       = true                             # Turn on/off dielectric
+rod_slab.electrode_live            = true                             # Live electrode or not
+rod_slab.electrode_radius          = 250.E-6                          # Electrode inner radius
+rod_slab.electrode_center1         = 0.0 0.0 1E-2                     # Center 1
+rod_slab.electrode_center2         = 0.0 0.0 0E-2                     # Center 2
+rod_slab.dielectric_permittivity   = 4.0                              # Dielectric permittivity
+rod_slab.dielectric_corner_lo      = -1.0 -1.0 -1.0                   # Lo corner
+rod_slab.dielectric_corner_hi      =  1.0  1.0  1.0                   # Hi corner
 
 # ====================================================================================================
 # AMR SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr.verbosity       = 10          # Controls verbosity. 
+amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
 amr.max_amr_depth   = 1           # Maximum amr depth
-amr.max_sim_depth   = 1           # Maximum simulation depth
+amr.max_sim_depth   = 2           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
-amr.buffer_size     = 1           # Number of cells between grid levels
+amr.buffer_size     = 2           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
 amr.max_box_size    = 32          # Maximum allowed box size
 amr.ref_rat         = 4 2 2 2 2 2 # Refinement ratios. 
@@ -53,19 +48,19 @@ amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------	
 plasma_engine.verbosity            = 10            # Engine verbosity
-plasma_engine.plot_interval        = 10            # Plot interval
+plasma_engine.plot_interval        = 5             # Plot interval
 plasma_engine.regrid_interval      = 10            # Regrid interval
 plasma_engine.checkpoint_interval  = 5             # Checkpoint interval
-plasma_engine.initial_regrids      = -1            # Number of initial regrids
-plasma_engine.geometry_only        = true          # Special option that ONLY plots the geometry	
+plasma_engine.initial_regrids      = 0             # Number of initial regrids
+plasma_engine.geometry_only        = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time           = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time            = 1.0           # Stop time
-plasma_engine.max_steps            = 0             # Maximum number of steps
+plasma_engine.max_steps            = 500           # Maximum number of steps
 plasma_engine.output_mode          = full          # Output mode
 plasma_engine.output_directory     = ./            # Output directory
 plasma_engine.output_names         = simulation    # Simulation output names
-plasma_engine.restart              = false         # Do restart or not
-plasma_engine.restart_step         = 1             # Restart step. 
+plasma_engine.restart              = true          # Do restart or not
+plasma_engine.restart_step         = 25            # Restart step. 
 # ----------------------------------------------------------------------------------------------------
 
 
@@ -73,14 +68,14 @@ plasma_engine.restart_step         = 1             # Restart step.
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 time_stepper.verbosity        = 10    # Class verbosity
-time_stepper.solver_verbosity = -1    # Individual solver verbosities
+time_stepper.solver_verbosity = 10    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
-time_stepper.cfl              = 0.5   # CFL number
+time_stepper.cfl              = 0.4   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
-time_stepper.source_growth    = 2.0   # Maximum permissible growth due to source term
+time_stepper.source_growth    = 200.0   # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------			
 
 # ====================================================================================================
@@ -94,7 +89,7 @@ poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.2       # Solver hang
-poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
+poisson_multifluid.gmg_bottom_drop   = 16        # Bottom drop
 poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 
@@ -117,9 +112,9 @@ eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom so
 # AIR_BOLSIG INPUTS
 # ----------------------------------------------------------------------------------------------------			
 air_bolsig.bolsig_path                   = ../../plasma_models/bolsigplus032016-linux
-air_bolsig.lxcat_path                    = ../..//plasma_models/bolsigplus032016-linux
+air_bolsig.lxcat_path                    = ../../plasma_models/bolsigplus032016-linux
 air_bolsig.lxcat_file                    = LXCat-June2013.txt    # Where to find database file (LXCat)
-air_bolsig.grid_points                   = 20                    # Number of grid points for BOLSIG call
+air_bolsig.grid_points                   = 200                   # Number of grid points for BOLSIG call
 air_bolsig.min_townsend                  = 0.0                   # Transport coefficient computation limit (low)
 air_bolsig.max_townsend                  = 2000                  # Transport coefficient computation limit (low)
 air_bolsig.gas_temperature               = 300                   # Gas temperature (K)

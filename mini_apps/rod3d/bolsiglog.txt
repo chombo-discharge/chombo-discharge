@@ -1,0 +1,17 @@
+R187  1869. Td    28.3 eV                                       
+R188  1879. Td    28.5 eV                                       
+R189  1889. Td    28.6 eV                                       
+R190  1899. Td    28.7 eV                                       
+R191  1910. Td    28.9 eV                                       
+R192  1920. Td    29.0 eV                                       
+R193  1930. Td    29.2 eV                                       
+R194  1940. Td    29.3 eV                                       
+R195  1950. Td    29.5 eV                                       
+R196  1960. Td    29.6 eV                                       
+R197  1970. Td    29.7 eV                                       
+R198  1980. Td    29.9 eV                                       
+R199  1990. Td    30.0 eV                                       
+R200  2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.8
+FINISHED

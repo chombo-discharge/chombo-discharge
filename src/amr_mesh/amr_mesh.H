@@ -79,6 +79,14 @@ public:
   */
   template<typename T> void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
 
+    /*!
+    @brief Alias an entire hierarchy of data. 
+  */
+  virtual void alias(EBAMRCellData&           a_data,
+		     const phase::which_phase a_phase,
+		     const MFAMRCellData&     a_mfdata,
+		     const int                a_finest_level);
+
   /*!
     @brief Alias an entire hierarchy of data
   */
@@ -164,6 +172,16 @@ public:
     @brief Average down
   */
   virtual void average_down(EBAMRIVData& a_data, phase::which_phase a_phase);
+
+  /*!
+    @brief Build new grids. This also load balances. 
+  */
+  virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap = -1);
+  
+  /*!
+    @brief Define EBLevelGrid
+  */
+  virtual void define_eblevelgrid();
 
   /*!
     @brief Interpolate ghost vectors
@@ -679,19 +697,9 @@ protected:
   Vector<RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> > > m_eb_centroid_interp;
 
   /*!
-    @brief Build new grids. This also load balances. 
-  */
-  virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap = -1);
-
-  /*!
     @brief Load balance grids
   */
   virtual void loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes);
-
-  /*!
-    @brief Define EBLevelGrid
-  */
-  virtual void define_eblevelgrid();
 
   /*!
     Define MFLevelGrid

@@ -162,13 +162,15 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 
 
 	// For some reason getCoarserLayouts doesn't trigger correctly - I don't know what's wrong... :)
-	// Here is a resolution. 
+	// Here is a (bad) solution
+#if 0
 	if(fine_grid.coarsenable(2*mg_refi)){
 	  has_coarser = true;
 	}
 	else{
 	  has_coarser = false;
 	}
+#endif
 
 #if verb
 	pout() << endl;
