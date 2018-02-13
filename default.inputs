@@ -108,6 +108,12 @@ eddington_sp1.gmg_bottom_solver = bicgtab   # Bottom solver type. Valid options 
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 
 # ====================================================================================================
+# CDR_SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_layout.which_solver = godunov         # Solver type, available options are "scharfetter-gummel" and "godunov"
+cdr_gdnv.divF_nc        = covered_face    # Valid options are "covered_face" and "conservative_average"  
+
+# ====================================================================================================
 # AIR_BOLSIG INPUTS
 # ----------------------------------------------------------------------------------------------------			
 air_bolsig.bolsig_path                   = ./plasma_models/bolsigplus032016-linux

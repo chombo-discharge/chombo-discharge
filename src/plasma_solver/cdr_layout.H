@@ -13,6 +13,13 @@
 
 /*!
   @brief Class for holding a set of cdr_solvers. 
+
+  @details The user may select between the available types of solvers
+  
+  Class options
+  -------------
+
+      cdr_layout.which_solver = godunov    # Solver type, available options are "scharfetter-gummel" and "godunov"
 */
 class cdr_layout {
 public:

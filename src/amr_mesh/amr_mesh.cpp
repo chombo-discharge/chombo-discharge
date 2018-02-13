@@ -349,7 +349,6 @@ void amr_mesh::build_domains(){
   m_quadcfi.resize(phase::num_phases);
   m_flux_reg.resize(phase::num_phases);
   m_old_quadcfi.resize(phase::num_phases);
-  m_level_advect.resize(phase::num_phases);
   m_level_redist.resize(phase::num_phases);
   m_pwl_fillpatch.resize(phase::num_phases);
   m_pwl_interp.resize(phase::num_phases);
@@ -365,7 +364,6 @@ void amr_mesh::build_domains(){
   m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
   m_old_quadcfi[phase::gas].resize(nlevels);
-  m_level_advect[phase::gas].resize(nlevels);
   m_level_redist[phase::gas].resize(nlevels);
   m_pwl_fillpatch[phase::gas].resize(nlevels);
   m_pwl_interp[phase::gas].resize(nlevels);
@@ -379,7 +377,6 @@ void amr_mesh::build_domains(){
   m_quadcfi[phase::solid].resize(nlevels);
   m_flux_reg[phase::solid].resize(nlevels);
   m_old_quadcfi[phase::solid].resize(nlevels);
-  m_level_advect[phase::solid].resize(nlevels);
   m_level_redist[phase::solid].resize(nlevels);
   m_pwl_fillpatch[phase::solid].resize(nlevels);
   m_pwl_interp[phase::solid].resize(nlevels);
@@ -405,18 +402,14 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
 
   Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
   this->build_grids(tags, a_hardcap);
-
   this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
   this->define_mflevelgrid();  // Define MFLevelGrid
   this->define_eb_coar_ave();  // Define ebcoarseaverage on both phases
-  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
+  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. 
   this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
   this->define_flux_reg();     // Define flux register (phase::gas only)
   this->define_redist_oper();  // Define redistribution (phase::gas only)
-#if advect_level_on
-  this->define_advect_level(); // Define advection
-#endif
   this->define_irreg_sten();   // Define irregular stencils
 }
 
@@ -917,44 +910,6 @@ void amr_mesh::define_redist_oper(){
   }
 }
 
-void amr_mesh::define_advect_level(){
-  CH_TIME("amr_mesh::define_advect_level");
-  if(m_verbosity > 2){
-    pout() << "amr_mesh::define_advect_level" << endl;
-  }
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < m_finest_level;
-
-
-    if(!ebis_gas.isNull()){
-      int ref_rat = 1;
-      EBLevelGrid eblg_coar;
-      if(has_coar){
-	eblg_coar = *m_eblg[phase::gas][lvl-1];
-	ref_rat   = m_ref_ratios[lvl-1];
-      }
-
-
-      m_level_advect[phase::gas][lvl] = RefCountedPtr<EBAdvectLevelIntegrator>
-	(new EBAdvectLevelIntegrator(*m_eblg[phase::gas][lvl],
-				     eblg_coar,
-				     ref_rat,
-				     m_dx[lvl]*RealVect::Unit,
-				     has_coar,
-				     has_fine,
-				     m_ebcf,
-				     false,
-				     ebis_gas));
-    }
-  }
-}
-
 void amr_mesh::define_irreg_sten(){
   CH_TIME("amr_mesh::define_irreg_sten");
   if(m_verbosity > 2){
@@ -1321,12 +1276,11 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes){
   this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
   this->define_mflevelgrid();  // Define MFLevelGrid
   this->define_eb_coar_ave();  // Define ebcoarseaverage on both phases
-  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases. This crashes for ref_rat = 4
+  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases.
   this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
   this->define_flux_reg();     // Define flux register (phase::gas only)
   this->define_redist_oper();  // Define redistribution (phase::gas only)
-  this->define_advect_level(); // Define advection 
   this->define_irreg_sten();   // Define irregular stencils
 }
 
@@ -1569,15 +1523,6 @@ Vector<RefCountedPtr<EBFluxRegister> >&  amr_mesh::get_flux_reg(phase::which_pha
 Vector<RefCountedPtr<EBLevelRedist> >& amr_mesh::get_level_redist(phase::which_phase a_phase){
   CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
   return m_level_redist[a_phase];
-}
-
-Vector<RefCountedPtr<EBAdvectLevelIntegrator> >& amr_mesh::get_level_advect(phase::which_phase a_phase){
-  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
-#if advect_level_on
-  return m_level_advect[a_phase];
-#else
-  MayDay::Abort("amr_mesh::get_level_advect - AdvectLevelIntegrator has been turned off since it will be moved into cdr_gdnv");
-#endif
 }
 
 Vector<RefCountedPtr<EBCoarToFineRedist> >&  amr_mesh::get_coar_to_fine_redist(phase::which_phase a_phase){

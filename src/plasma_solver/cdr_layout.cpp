@@ -11,13 +11,30 @@
 #include "cdr_gdnv.H"
 #include "units.H"
 
+#include <ParmParse.H>
+
 cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_species = a_plaskin->get_species();
   m_solvers.resize(m_species.size());
 
+  
+  std::string str = "scharfetter-gummel"; // Default
+  
+  { // Get solver type from input script
+    ParmParse pp("cdr_layout");
+    pp.query("which_solver", str);
+  }
 
   for (int i = 0; i < a_plaskin->get_num_species(); i++){
-    m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_sg());
+    if(str == "scharfetter-gummel"){
+      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_sg());
+    }
+    else if(str == "godunov"){
+      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_gdnv());
+    }
+    else {
+      MayDay::Abort("cdr_layout::cdr_layout - unknown cdr solver type requested");
+    }
     m_solvers[i]->set_species(m_species[i]);
   }
 

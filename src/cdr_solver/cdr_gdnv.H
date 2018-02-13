@@ -10,8 +10,17 @@
 
 #include "cdr_tga.H"
 
+#include <EBAdvectLevelIntegrator.H>
+
 /*!
   @brief Godunov implementation for convection-diffusion-reaction equations. 
+
+  @details Options that are available for this class
+  
+  Class options
+  -------------
+
+      cdr_gdnv.divF_nc = covered    # Valid options are "covered_face" and "conservative_average"
 */
 class cdr_gdnv : public cdr_tga {
 public:
@@ -109,6 +118,11 @@ protected:
     @brief Advective velocity on covered faces on side Hi
   */
   Vector<RefCountedPtr<LayoutData<Vector<BaseIVFAB<Real>* > > > > m_covered_velo_hi;
+
+  /*!
+    @brief Level advect integrator
+  */
+  Vector<RefCountedPtr<EBAdvectLevelIntegrator> > m_level_advect;
 
   /*!
     @brief Switch between Trebotich and Colella nonconservative divergence

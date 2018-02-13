@@ -19,7 +19,6 @@
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
 #include <ebcoarseaverage.H>
-#include <EBAdvectLevelIntegrator.H>
 #include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
@@ -459,11 +458,6 @@ public:
   virtual Vector<RefCountedPtr<EBLevelRedist> >&  get_level_redist(phase::which_phase a_phase);
 
   /*!
-    @brief Get advection integrators
-  */
-  virtual Vector<RefCountedPtr<EBAdvectLevelIntegrator> >& get_level_advect(phase::which_phase a_phase);
-
-  /*!
     @brief Get coar-to-fine redistribution
   */
   virtual Vector<RefCountedPtr<EBCoarToFineRedist> >&  get_coar_to_fine_redist(phase::which_phase a_phase);
@@ -662,11 +656,6 @@ protected:
   Vector<Vector<RefCountedPtr<EBFluxRegister> > > m_flux_reg;
 
   /*!
-    @brief Level advector for Godunov
-  */
-  Vector<Vector<RefCountedPtr<EBAdvectLevelIntegrator> > > m_level_advect;
-
-  /*!
     @brief Level redistribution
   */
   Vector<Vector<RefCountedPtr<EBLevelRedist> > > m_level_redist;
@@ -731,10 +720,6 @@ protected:
   */
   virtual void define_redist_oper();
 
-  /*!
-    @brief Define level advection operators
-  */
-  virtual void define_advect_level();
 
   /*!
     @brief Define flux registers

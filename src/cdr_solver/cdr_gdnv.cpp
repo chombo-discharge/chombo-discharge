@@ -9,11 +9,31 @@
 
 #include <ExtrapAdvectBC.H>
 #include <EBArith.H>
+#include <ParmParse.H>
 
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
   m_name = "cdr_gdnv";
 
-  this->set_divF_nc(0);
+  std::string str = "conservative_average";
+  int which = 0;
+
+  // Get options from input script
+  {
+    ParmParse pp("cdr_gdnv");
+    pp.query("divF_nc", str);
+    if(str == "conservative_average"){
+      which = 0;
+    }
+    else if(str == "covered_face"){
+      which = 1;
+    }
+    else {
+      MayDay::Abort("cdr_gdnv::cdr_gdnv - unknown non-conservative divergence type requested");
+    }
+  }
+  
+  
+  this->set_divF_nc(which);
 }
 
 
@@ -45,6 +65,40 @@ void cdr_gdnv::allocate_internals(){
 
   if(m_which_divFnc == 1){
     this->allocate_covered();
+  }
+  if(m_diffusive){
+    this->setup_gmg();
+  }
+
+  const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->get_eblg(m_phase);
+  const Vector<DisjointBoxLayout>& grids           = m_amr->get_grids();
+  const Vector<int>& ref_ratios                    = m_amr->get_ref_rat();
+  const Vector<Real>& dx                           = m_amr->get_dx();
+  const int finest_level                           = m_amr->get_finest_level();
+  const bool ebcf                                  = m_amr->get_ebcf();
+  m_level_advect.resize(1 + finest_level);
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
+
+    int ref_rat = 1;
+    EBLevelGrid eblg_coar;
+    if(has_coar){
+      eblg_coar = *eblgs[lvl-1];
+      ref_rat   = ref_ratios[lvl-1];
+    }
+    
+    m_level_advect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator> (new EBAdvectLevelIntegrator(*eblgs[lvl],
+											      eblg_coar,
+											      ref_rat,
+											      dx[lvl]*RealVect::Unit,
+											      has_coar,
+											      has_fine,
+											      ebcf,
+											      false,
+											      m_ebis));
   }
 }
 
@@ -160,7 +214,7 @@ void cdr_gdnv::extrapolate_vel_to_covered_faces(){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl         = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl              = m_amr->get_ebisl(m_phase)[lvl];
-    EBAdvectLevelIntegrator& leveladvect = *(m_amr->get_level_advect(m_phase)[lvl]);
+    EBAdvectLevelIntegrator& leveladvect = *m_level_advect[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
@@ -218,7 +272,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     (new ExtrapAdvectBCFactory());
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_amr->get_level_advect(m_phase)[lvl];
+    const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_level_advect[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
 
@@ -344,7 +398,7 @@ void cdr_gdnv::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCell
     for (int lvl = 0; lvl <= finest_level; lvl++){
       const DisjointBoxLayout& dbl         = m_amr->get_grids()[lvl];
       const EBISLayout& ebisl              = m_amr->get_ebisl(m_phase)[lvl];
-      EBAdvectLevelIntegrator& leveladvect = *(m_amr->get_level_advect(m_phase)[lvl]);
+      EBAdvectLevelIntegrator& leveladvect = *(m_level_advect[lvl]);
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box box          = dbl.get(dit());
