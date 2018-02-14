@@ -330,6 +330,11 @@ public:
   virtual void set_solver_verbosity(const int a_verbosity);
 
   /*!
+    @brief Set stationary/nonstationary RTE
+  */
+  virtual void set_stationary_rte(const bool a_stationary);
+
+  /*!
     @brief Setup the cdr solvers
   */
   virtual void setup_cdr();

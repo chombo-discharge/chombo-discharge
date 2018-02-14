@@ -1172,6 +1172,13 @@ void time_stepper::set_solver_verbosity(const int a_verbosity){
   }
 }
 
+void time_stepper::set_stationary_rte(const bool a_stationary){
+  CH_TIME("time_stepper::set_stationary_rte");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::set_stationary_rte" << endl;
+  }
+}
+
 void time_stepper::set_fast_rte(const int a_fast_rte){
   m_fast_rte = a_fast_rte;
 

@@ -89,6 +89,11 @@ public:
   virtual void set_source(const Real a_source);
 
   /*!
+    @brief Turn on/off stationary
+  */
+  virtual void set_stationary(const bool a_stationary);
+
+  /*!
     @brief Convenience function. All solvers write plot files
   */
   virtual void write_plot_file();

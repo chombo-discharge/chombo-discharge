@@ -1,12 +1,13 @@
 # Chombo library directory
-CHOMBO_HOME   := /home/robertm/Projects/mf-chombo/lib
-STREAMER_HOME := /home/robertm/Projects/chombo-streamer
+CHOMBO_HOME   := /home/marskar/Projects/mf-chombo/lib
+STREAMER_HOME := /home/marskar/chombo-streamer
 
 # Make rules
 include $(CHOMBO_HOME)/mk/Make.defs
 
 USE_EB=TRUE
 USE_MF=TRUE
+DIM=2
 
 # Base file containing int main()
 ebase := rod2d_main

@@ -1308,7 +1308,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
       const Real dummy_dt = 0.0;
       m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
-    }    
+    }
   }
   m_celltagger->regrid();
   m_timestepper->regrid_internals();

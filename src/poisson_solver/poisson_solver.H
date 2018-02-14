@@ -14,7 +14,7 @@
 #include "wall_bc.H"
 
 /*!
-  @brief Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.
+  @brief Abstract Poisson solver class. Boundary conditions are passed through this class. 
 */
 class poisson_solver {
 public:

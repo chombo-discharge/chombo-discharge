@@ -9,12 +9,11 @@
 #include "eddington_sp1.H"
 #include "data_ops.H"
 #include "units.H"
-#include "dirichletconductivityebbc.H"
 
 #include <ParmParse.H>
 #include <EBAMRIO.H>
-#include <DirichletConductivityDomainBC.H>
 
+#define eddington_sp1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics. 
 
 eddington_sp1::eddington_sp1() : rte_solver() {
   
@@ -228,12 +227,17 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
   m_amr->allocate(source, m_phase, ncomp);
   data_ops::set_value(dummy, 0.0);
 
-  // Must kappa-weight source term before solving for stationary solves. 
+  // Various source term manipulations. 
   data_ops::set_value(source, 0.0);
   data_ops::incr(source, a_source, 1.0);
-  if(m_stationary){
+#if eddington_sp1_feature
+  data_ops::scale(source, 1./units::s_c0); // Source should be scaled by 1./c0
+#endif
+  if(m_stationary){ // Should kappa-scale for transient solvres
     data_ops::kappa_scale(source);
   }
+
+
 
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
   m_amr->alias(phi,  a_state);
@@ -247,7 +251,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     const Real phi_resid  = m_gmg_solver->computeAMRResidual(phi,  rhs, finest_level, 0); // Incoming residual
     const Real zero_resid = m_gmg_solver->computeAMRResidual(zero, rhs, finest_level, 0); // Zero residual
 
-    if(phi_resid > zero_resid*m_gmg_eps){
+    if(phi_resid > zero_resid*m_gmg_eps){ // Residual is too large
       m_gmg_solver->m_convergenceMetric = zero_resid;
       m_gmg_solver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
       
@@ -263,10 +267,18 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
   }
   else{
     if(m_use_tga){
-      m_tgasolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, 0.0);
+#if eddington_sp1_feature
+      m_tgasolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, m_time);
+#else
+      m_tgasolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, m_time);
+#endif
     }
     else{
-      m_eulersolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, 0.0);
+#if eddington_sp1_feature
+      m_eulersolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, false);
+#else
+      m_eulersolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, false);
+#endif
     }
     
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
@@ -346,9 +358,15 @@ void eddington_sp1::set_aco_and_bco(){
     }
   }
 
+#if eddington_sp1_feature // Different scaling for the RTE
+  data_ops::scale(m_aco,       1.0);       // aco = c*kappa
+  data_ops::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
+  data_ops::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
+#else // Original code before different scaling
   data_ops::scale(m_aco,       units::s_c0);       // aco = c*kappa
   data_ops::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
   data_ops::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
+#endif
 }
 
 void eddington_sp1::set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Real a_dx){
@@ -449,7 +467,7 @@ void eddington_sp1::setup_operator_factory(){
   m_domfact->set_coefs(m_robinco);
   m_ebfact->set_coefs(m_robinco);
   m_ebfact->set_type(stencil_type::taylor);
-  
+
   // Create operator factory. 
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
@@ -651,8 +669,8 @@ void eddington_sp1::write_plot_file(){
 	      names,
 	      m_amr->get_domains()[0].domainBox(),
 	      m_amr->get_dx()[0],
-	      0.0,
-	      0.0,
+	      m_dt,
+	      m_time,
 	      m_amr->get_ref_rat(),
 	      m_amr->get_finest_level() + 1,
 	      true,

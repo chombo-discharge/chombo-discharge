@@ -198,6 +198,18 @@ void rte_layout::set_source(const Real a_source){
   }
 }
 
+void rte_layout::set_stationary(const bool a_stationary){
+  CH_TIME("rte_layout::set_stationary");
+  if(m_verbosity > 5){ 
+    pout() << "rte_layout::set_stationary" << endl;
+  }
+
+  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    solver->set_stationary(a_stationary);
+  }
+}
+
 void rte_layout::write_plot_file(){
   CH_TIME("rte_layout::write_plot_file");
   if(m_verbosity > 5){
