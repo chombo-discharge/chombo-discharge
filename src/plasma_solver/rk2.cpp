@@ -104,12 +104,6 @@ Real rk2::advance(const Real a_dt){
   this->compute_cdr_fluxes_at_start_of_time_step();
   this->compute_sigma_flux_at_start_of_time_step();
 
-
-#if 0 // Debug
-  MayDay::Warning("rk2::advance - debug mode");
-  this->solver_dump();
-  MayDay::Abort("rk2::advance - debug stop");
-#endif
   // Do k1 advance
   this->advance_cdr_k1(a_dt);
   this->advance_sigma_k1(a_dt);
@@ -121,6 +115,11 @@ Real rk2::advance(const Real a_dt){
   else{
     this->advance_rte_k1_transient(a_dt);
   }
+
+#if 0
+  MayDay::Warning("rk2::advance - debug mode");
+  this->solver_dump();
+#endif
 
   // Recompute things in order to do k2 advance
   this->compute_cdr_velo_after_k1();
@@ -318,6 +317,8 @@ void rk2::advance_sigma_k1(const Real a_dt){
   data_ops::incr(phi, state, 1.0);
   data_ops::incr(phi, k1,    m_alpha*a_dt);
 
+  m_amr->average_down(phi, m_cdr->get_phase());
+  
   m_sigma->reset_cells(k1);
   m_sigma->reset_cells(phi);
 }
@@ -384,7 +385,7 @@ void rk2::advance_rte_k1_stationary(){
 
     data_ops::set_value(phi, 0.0);
     data_ops::incr(phi, state, 1.0);
-    
+
     rte_states.push_back(&(phi));
     rte_sources.push_back(&(source));
   }
@@ -403,7 +404,67 @@ void rk2::advance_rte_k1_stationary(){
 }
 
 void rk2::advance_rte_k1_transient(const Real a_dt){
-  MayDay::Abort("rk2::advance_rte_k1_transient - not implemented (yet). Please use stationary approximations.");
+  CH_TIME("rk2::compute_rte_k1_transient");
+  if(m_verbosity > 5){
+    pout() << "rk2::compute_k1_transient" << endl;
+  }
+
+  MayDay::Abort("rk2::advance_rte_k1_transient - there be bugs in eddington_sp1::advance (probably)");
+
+  Vector<EBAMRCellData*> rte_states;
+  Vector<EBAMRCellData*> rte_sources;
+  Vector<EBAMRCellData*> cdr_states;
+
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    
+    EBAMRCellData& phi    = storage->get_phi();
+    EBAMRCellData& state  = solver->get_state();
+    EBAMRCellData& source = solver->get_source();
+
+    data_ops::set_value(phi, 0.0);
+    data_ops::incr(phi, state, 1.0);
+    
+    rte_states.push_back(&(phi));
+    rte_sources.push_back(&(source));
+  }
+
+  // Source term must be centered between time tn and the intermediate time
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    
+    const EBAMRCellData& state = solver->get_state();
+    const EBAMRCellData& phi   = storage->get_phi();
+
+    EBAMRCellData& scratch = storage->get_scratch();
+
+    data_ops::set_value(scratch, 0.0);
+    data_ops::incr(scratch, state, 0.5);
+    data_ops::incr(scratch, phi,   0.5);
+
+    cdr_states.push_back(&(scratch));
+  }
+
+  
+  // Compute E at half time steps
+  const MFAMRCellData& state = m_poisson->get_state();
+  const MFAMRCellData& phi   = m_poisson_scratch->get_phi();
+  
+  MFAMRCellData& scratch_phi = m_poisson_scratch->get_scratch_phi();
+  EBAMRCellData& scratch_E   = m_poisson_scratch->get_scratch_E();
+
+  data_ops::set_value(scratch_phi, 0.0);
+  data_ops::incr(scratch_phi, state, 0.5);
+  data_ops::incr(scratch_phi, phi, 0.5);
+
+  m_amr->average_down(scratch_phi);
+  m_amr->interp_ghost(scratch_phi);
+
+  this->compute_E(scratch_E, m_cdr->get_phase(), scratch_phi);
+
+  this->solve_rte(rte_states, rte_sources, cdr_states, scratch_E, m_alpha*a_dt, centering::cell_center);
 }
 
 void rk2::compute_cdr_velo_after_k1(){
@@ -542,13 +603,22 @@ void rk2::advance_cdr_k2(const Real a_dt){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-    EBAMRCellData& k1    = storage->get_k1();
-    EBAMRCellData& k2    = storage->get_k2();
-    EBAMRCellData& phi   = storage->get_phi();
+    EBAMRCellData& state   = solver->get_state();
+    EBAMRCellData& k1      = storage->get_k1();
+    EBAMRCellData& k2      = storage->get_k2();
+    EBAMRCellData& phi     = storage->get_phi();
+    EBAMRCellData& scratch = storage->get_scratch();
 
     solver->compute_rhs(k2, phi, a_dt);
 
-    EBAMRCellData& state = solver->get_state();
+    // For transient RTE solvers I need the source term at half time steps. Since the internal state
+    // inside the solver will be overwritten, I take a backup into rk2_storage.scratch
+    if(!m_rte->is_stationary()){
+      data_ops::set_value(scratch,   0.0);
+      data_ops::incr(scratch, state, 1.0);
+    }
+
+
     data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
     data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
 
@@ -585,8 +655,17 @@ void rk2::solve_poisson_k2(){
   // We computed the intermediate potential at time t_k + alpha*dt. Linearly extrapolate that result to the end of
   // the time step. The result for this is y_extrap = y_alpha/alpha - y_0*(1-alpha)/alpha. This (usually) brings the
   // initial guess closer to the true solution.
-  MFAMRCellData& pot = m_poisson->get_state();
-  MFAMRCellData& phi = m_poisson_scratch->get_phi();
+  MFAMRCellData& pot     = m_poisson->get_state();
+  MFAMRCellData& phi     = m_poisson_scratch->get_phi();
+  MFAMRCellData& scratch = m_poisson_scratch->get_scratch_phi();
+
+  // For transient RTE solvers I need the source term at half time steps. Since the internal state
+  // inside the solver will be overwritten, I take a backup into poisson_storage.scratch_phi
+  if(!m_rte->is_stationary()){
+    data_ops::set_value(scratch, 0.0);
+    data_ops::incr(scratch, pot, 1.0); // Factor 0.5 is because we will take phi(middle) = 0.5*[phi(begin) + phi(end)]
+  }
+
   if((m_step + 1) % m_fast_poisson == 0){
     data_ops::scale(pot, -(1.0 - m_alpha)/m_alpha);
     data_ops::incr(pot, phi, 1./m_alpha);
@@ -672,7 +751,65 @@ void rk2::advance_rte_k2_stationary(){
 }
 
 void rk2::advance_rte_k2_transient(const Real a_dt){
-  MayDay::Abort("rk2::advance_rte_k1_transient - not implemented (yet). Please use stationary approximations.");
+  CH_TIME("rk2::compute_rte_k1_transient");
+  if(m_verbosity > 5){
+    pout() << "rk2::compute_k1_transient" << endl;
+  }
+
+
+  // If we made it here, the old potential lies in m_poisson_scratch->scratch and the old cdr solutions
+  // lie in cdr_storage->m_scratch. 
+
+  Vector<EBAMRCellData*> rte_states;
+  Vector<EBAMRCellData*> rte_sources;
+  Vector<EBAMRCellData*> cdr_states;
+
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    
+    EBAMRCellData& state  = solver->get_state();  // This has been unaffected so far because we solved onto scratch storage
+    EBAMRCellData& source = solver->get_source(); // in the k1-stage. 
+
+    rte_states.push_back(&(state));
+    rte_sources.push_back(&(source));
+  }
+
+    
+  // Source term must be centered between time tn and the intermediate time
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    
+    const EBAMRCellData& state   = solver->get_state();
+    const EBAMRCellData& scratch = storage->get_scratch();
+
+    EBAMRCellData& phi = storage->get_phi();
+
+    data_ops::set_value(phi, 0.0);
+    data_ops::incr(phi, scratch, 0.5);
+    data_ops::incr(phi, phi,     0.5);
+
+    cdr_states.push_back(&(phi));
+  }
+  
+  // Compute E at the half time step
+  const MFAMRCellData& state       = m_poisson->get_state();
+  const MFAMRCellData& scratch_phi = m_poisson_scratch->get_scratch_phi();
+
+  MFAMRCellData& phi   = m_poisson_scratch->get_phi();
+  EBAMRCellData& scratch_E   = m_poisson_scratch->get_scratch_E();
+
+  data_ops::set_value(phi, 0.0);
+  data_ops::incr(phi, state, 0.5);
+  data_ops::incr(phi, scratch_phi, 0.5);
+
+  m_amr->average_down(phi);
+  m_amr->interp_ghost(phi);
+
+  this->compute_E(scratch_E, m_cdr->get_phase(), phi);
+
+  this->solve_rte(rte_states, rte_sources, cdr_states, scratch_E, a_dt, centering::cell_center);
 }
 
 Real rk2::restrict_dt(){

@@ -72,7 +72,7 @@ plasma_engine.max_steps                       = 500           # Maximum number o
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
-plasma_engine.restart                         = true          # Do restart or not
+plasma_engine.restart                         = false         # Do restart or not
 plasma_engine.restart_step                    = 100           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
@@ -86,8 +86,8 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-time_stepper.verbosity        = -1    # Class verbosity
-time_stepper.solver_verbosity = -1    # Individual solver verbosities
+time_stepper.verbosity        = 10    # Class verbosity
+time_stepper.solver_verbosity = 10    # Individual solver verbosities
 time_stepper.fast_rte         = 1     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
@@ -95,7 +95,24 @@ time_stepper.max_dt           = 1.    # Maximum permitted time step
 time_stepper.cfl              = 0.3   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 200.0   # Maximum permissible growth due to source term
-# ----------------------------------------------------------------------------------------------------			
+# ----------------------------------------------------------------------------------------------------
+
+# ====================================================================================================
+# POISSON SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
+
+# ====================================================================================================
+# CDR_SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_layout.which_solver = godunov              # Solver type, available options are "scharfetter-gummel" and "godunov"
+cdr_gdnv.divF_nc        = conservative_average # Valid options are "covered_face" and "conservative_average"  
+
+# ====================================================================================================
+# RTE_SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+rte_layout.which_solver = eddington_sp1          # Solver type, available option is "eddington_sp1"
+rte_layout.stationary   = true                   # Stationary solver
 
 # ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
@@ -106,16 +123,16 @@ poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsw
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
+poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.2       # Solver hang
-poisson_multifluid.gmg_bottom_drop   = 16        # Bottom drop
+poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
 poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 
 # ====================================================================================================
 # EDDINGTON SP1 GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
+eddington_sp1.gmg_verbosity     = 10        # GMG verbosity
 eddington_sp1.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 eddington_sp1.gmg_post_smooth   = 16        # Number of relaxations in upsweep
 eddington_sp1.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
@@ -128,18 +145,12 @@ eddington_sp1.gmg_bottom_solver = bicgtab   # Bottom solver type. Valid options 
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 
 # ====================================================================================================
-# CDR_SOLVER SETTINGS
-# ----------------------------------------------------------------------------------------------------
-cdr_layout.which_solver = godunov              # Solver type, available options are "scharfetter-gummel" and "godunov"
-cdr_gdnv.divF_nc        = conservative_average # Valid options are "covered_face" and "conservative_average"  
-
-# ====================================================================================================
 # AIR_BOLSIG INPUTS
 # ----------------------------------------------------------------------------------------------------			
 air_bolsig.bolsig_path                   = ../../plasma_models/bolsigplus032016-linux
 air_bolsig.lxcat_path                    = ../../plasma_models/bolsigplus032016-linux
 air_bolsig.lxcat_file                    = LXCat-June2013.txt    # Where to find database file (LXCat)
-air_bolsig.grid_points                   = 100                  # Number of grid points for BOLSIG call
+air_bolsig.grid_points                   = 200                   # Number of grid points for BOLSIG call
 air_bolsig.min_townsend                  = 0.0                   # Transport coefficient computation limit (low)
 air_bolsig.max_townsend                  = 1000                  # Transport coefficient computation limit (low)
 air_bolsig.gas_temperature               = 300                   # Gas temperature (K)

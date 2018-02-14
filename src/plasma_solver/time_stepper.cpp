@@ -1353,8 +1353,8 @@ void time_stepper::solve_rte(const Real a_dt){
   this->solve_rte(states, rhs, cdr_states, E, a_dt, centering::cell_center);
 }
 
-void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_states,
-			     Vector<EBAMRCellData*>&       a_rhs,
+void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
+			     Vector<EBAMRCellData*>&       a_rte_sources,
 			     const Vector<EBAMRCellData*>& a_cdr_states,
 			     const EBAMRCellData&          a_E,
 			     const Real                    a_dt,
@@ -1364,15 +1364,14 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_states,
     pout() << "time_stepper::solve_rte(full)" << endl;
   }
 
-  this->compute_rte_sources(a_rhs, a_cdr_states, a_E, a_centering);
-
+  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_centering);
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     
     RefCountedPtr<rte_solver>& solver = solver_it();
-    EBAMRCellData& state              = *a_states[idx];
-    EBAMRCellData& rhs                = *a_rhs[idx];
+    EBAMRCellData& state              = *a_rte_states[idx];
+    EBAMRCellData& rhs                = *a_rte_sources[idx];
     solver->advance(a_dt, state, rhs);
   }
 

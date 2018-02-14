@@ -49,6 +49,13 @@ public:
   }
 
   /*!
+    @brief Scratch state
+  */
+  virtual EBAMRCellData& get_scratch(){
+    return m_scratch;
+  }
+
+  /*!
     @brief Get k1
   */
   virtual EBAMRCellData& get_k1(){
@@ -104,6 +111,11 @@ protected:
     @brief Intermediate state
   */
   EBAMRCellData m_phi;
+
+  /*!
+    @brief Extra storage required for transient RTE solvers
+  */
+  EBAMRCellData m_scratch;
 
   /*!
     @brief k1
@@ -166,6 +178,20 @@ public:
   }
 
   /*!
+    @brief Get scratch storage
+  */
+  virtual MFAMRCellData& get_scratch_phi(){
+    return m_scratch_phi;
+  }
+
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRCellData& get_scratch_E(){
+    return m_scratch_E;
+  }
+
+  /*!
     @brief Get the electric field storage
   */
   virtual EBAMRCellData& get_E_cell(){
@@ -207,6 +233,16 @@ protected:
     @brief Intermediate state
   */
   MFAMRCellData m_phi;
+
+  /*!
+    @brief Scratch phi. Only used for transient RTE solvers
+  */
+  MFAMRCellData m_scratch_phi;
+
+  /*!
+    @brief Scratch E. Only used for transient RTE solvers
+  */
+  EBAMRCellData m_scratch_E;
 
   /*!
     @brief Intermediate field

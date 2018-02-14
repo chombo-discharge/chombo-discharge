@@ -30,6 +30,8 @@ void rk2::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratchIV1,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV3,  m_phase, m_ncomp);
+
+  m_amr->allocate(m_scratch, m_phase, m_ncomp); 
 }
 
 rk2::poisson_storage::poisson_storage(){
@@ -52,6 +54,10 @@ void rk2::poisson_storage::allocate_storage(){
   m_amr->allocate(m_E_cell, m_phase, SpaceDim);
   m_amr->allocate(m_E_face, m_phase, SpaceDim);
   m_amr->allocate(m_E_eb,   m_phase, SpaceDim);
+
+
+  m_amr->allocate(m_scratch_phi, m_ncomp);
+  m_amr->allocate(m_scratch_E,   m_phase, SpaceDim);
 }
 
 rk2::rte_storage::rte_storage(){

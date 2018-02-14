@@ -228,10 +228,12 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
   m_amr->allocate(source, m_phase, ncomp);
   data_ops::set_value(dummy, 0.0);
 
-  // Must kappa-weight source term
+  // Must kappa-weight source term before solving for stationary solves. 
   data_ops::set_value(source, 0.0);
   data_ops::incr(source, a_source, 1.0);
-  data_ops::kappa_scale(source);
+  if(m_stationary){
+    data_ops::kappa_scale(source);
+  }
 
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
   m_amr->alias(phi,  a_state);
@@ -272,11 +274,14 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
       converged = true;
     }
 
+    // We solve onto res, copy back to state
     data_ops::copy(a_state, m_resid);
   }
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
+
+  data_ops::floor(a_state, 0.0);
 
   return converged;
 }
@@ -436,7 +441,6 @@ void eddington_sp1::setup_operator_factory(){
   // Appropriate coefficients. 
   const Real alpha =  1.0;
   const Real beta  = -1.0;
-
 
   m_domfact = RefCountedPtr<robinconductivitydomainbcfactory> (new robinconductivitydomainbcfactory());
   m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));

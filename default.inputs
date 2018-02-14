@@ -78,6 +78,23 @@ time_stepper.source_growth    = 2.0   # Maximum permissible growth due to source
 # ----------------------------------------------------------------------------------------------------			
 
 # ====================================================================================================
+# POISSON SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
+
+# ====================================================================================================
+# CDR_SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_layout.which_solver = godunov              # Solver type, available options are "scharfetter-gummel" and "godunov"
+cdr_gdnv.divF_nc        = conservative_average # Valid options are "covered_face" and "conservative_average"  
+
+# ====================================================================================================
+# RTE_SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+rte_layout.which_solver = eddington_sp1          # Solver type, available option is "eddington_sp1"
+rte_layout.stationary   = true                   # Stationary solver
+
+# ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
@@ -86,7 +103,7 @@ poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsw
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid.gmg_tolerance     = 1.E-8    # Residue tolerance
+poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.2       # Solver hang
 poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
 poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
@@ -106,12 +123,6 @@ eddington_sp1.gmg_hang          = 0.2       # Solver hang
 eddington_sp1.gmg_bottom_drop   = 8         # Bottom drop
 eddington_sp1.gmg_bottom_solver = bicgtab   # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
-
-# ====================================================================================================
-# CDR_SOLVER SETTINGS
-# ----------------------------------------------------------------------------------------------------
-cdr_layout.which_solver = godunov         # Solver type, available options are "scharfetter-gummel" and "godunov"
-cdr_gdnv.divF_nc        = covered_face    # Valid options are "covered_face" and "conservative_average"  
 
 # ====================================================================================================
 # AIR_BOLSIG INPUTS
