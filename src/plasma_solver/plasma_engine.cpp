@@ -105,6 +105,8 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
 
     mfalias::aliasMF(state_gas, phase::gas,   *potential[lvl]);
 
+    state_gas.copyTo(*scratch[lvl]);
+    
     // Copy all covered cells from the other phase
     if(!ebis_sol.isNull()){
       mfalias::aliasMF(state_sol, phase::solid, *potential[lvl]);
@@ -115,22 +117,21 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
 	const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
 	const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
 
-	FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
-	FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
+	FArrayBox& scratch_gas    = (*scratch[lvl])[dit()].getFArrayBox();
+	const FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
+	const FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
 
 	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
 	  const IntVect iv = ivsit();
 	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	    data_gas(iv, 0) = data_sol(iv,0);
+	    scratch_gas(iv, comp) = data_sol(iv, comp);
 	  }
 	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	    data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
+	    scratch_gas(iv, comp) = 0.5*(data_gas(iv, comp) + data_sol(iv, comp));
 	  }
 	}
       }
     }
-
-    state_gas.copyTo(*scratch[lvl]);
   }
 
   m_amr->average_down(scratch, phase::gas);
@@ -261,7 +262,26 @@ void plasma_engine::add_surface_charge_to_output(EBAMRCellData& a_output, const 
     pout() << "plasma_engine::add_surface_charge_to_output" << endl;
   }
 
-  MayDay::Warning("plasma_engine::add_surface_charge_to_output - not implemented");
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  RefCountedPtr<sigma_solver>& sigma = m_timestepper->get_sigma();
+  EBAMRIVData& data = sigma->get_state();
+  sigma->reset_cells(data);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (DataIterator dit = data[lvl]->dataIterator(); dit.ok(); ++dit){
+      BaseIVFAB<Real>& sig   = (*data[lvl])[dit()];
+      const EBGraph& ebgraph = sig.getEBGraph();
+      const IntVectSet& ivs  = sig.getIVS();
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	(*a_output[lvl])[dit()](vof, a_cur_var) = sig(vof, comp);
+      }
+    }
+  }
 }
 
 void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){

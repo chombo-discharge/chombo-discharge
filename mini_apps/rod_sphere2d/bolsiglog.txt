@@ -1,33 +1,36 @@
-R4    1500. Td    23.3 eV                                       
-R5    2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.8
+R985  2955. Td    44.2 eV                                       
+R988  2964. Td    44.3 eV                                       
+R986  2958. Td    44.2 eV                                       
+R989  2967. Td    44.4 eV                                       
+R987  2961. Td    44.3 eV                                       
+R990  2970. Td    44.4 eV                                       
+R988  2964. Td    44.3 eV                                       
 FINISHED
-R5    2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.5
-FINISHED
-R5    2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.7
-FINISHED
-R5    2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.1
-FINISHED
-R5    2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.6
-FINISHED
-R5    2000. Td    30.2 eV                                       
+R991  2973. Td    44.5 eV                                       
+R989  2967. Td    44.4 eV                                       
+R992  2976. Td    44.5 eV                                       
+R990  2970. Td    44.4 eV                                       
+R993  2979. Td    44.6 eV                                       
+R991  2973. Td    44.5 eV                                       
+R994  2982. Td    44.6 eV                                       
+R992  2976. Td    44.5 eV                                       
+R995  2985. Td    44.7 eV                                       
+R993  2979. Td    44.6 eV                                       
+R996  2988. Td    44.7 eV                                       
+R994  2982. Td    44.6 eV                                       
+R997  2991. Td    44.8 eV                                       
+R995  2985. Td    44.7 eV                                       
+R996  2988. Td    44.7 eV                                       
+R998  2994. Td    44.8 eV                                       
+R997  2991. Td    44.8 eV                                       
+R998  2994. Td    44.8 eV                                       
+R999  2997. Td    44.8 eV                                       
+R999  2997. Td    44.8 eV                                       
+R***  3000. Td    44.9 eV                                       
 SAVERESULTS
 bolsig_outputs.9
-FINISHED
-R5    2000. Td    30.2 eV                                       
+R***  3000. Td    44.9 eV                                       
 SAVERESULTS
 bolsig_outputs.4
 FINISHED
-R5    2000. Td    30.2 eV                                       
-SAVERESULTS
-bolsig_outputs.3
 FINISHED

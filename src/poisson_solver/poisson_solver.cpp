@@ -362,6 +362,8 @@ void poisson_solver::write_plot_file(){
 
 
     // Copy all covered cells from the other phase
+#if 0 // This code segment is really shit - it changes the potential at irregular cells which it really shouldn't do...
+    // Fix this if you really need this functionality. 
     if(!ebis_sol.isNull()){
       for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
 	const Box box = state_sol.disjointBoxLayout().get(dit());
@@ -397,6 +399,7 @@ void poisson_solver::write_plot_file(){
 	}
       }
     }
+#endif
 
     state_gas.copyTo(Interval(0,0),        *output[lvl], Interval(0,0));
     source_gas.copyTo(Interval(0,0),       *output[lvl], Interval(1,1));

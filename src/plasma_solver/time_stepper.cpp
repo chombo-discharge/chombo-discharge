@@ -1390,7 +1390,7 @@ Real time_stepper::compute_relaxation_time(){
   }
 
   const int finest_level = 0;
-  const Real tolerance   = 1.E-2;
+  const Real tolerance   = 1.E-4;
 
   EBAMRCellData E, J, dt;
   m_amr->allocate(E,  m_cdr->get_phase(), SpaceDim);

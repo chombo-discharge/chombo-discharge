@@ -65,6 +65,8 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
   a_weight   = -x1*x1/denom + x2*x2/denom;
   a_stencil +=  phi1Sten;
   a_stencil +=  phi2Sten;
+
+  return false;
 }
 
 void jump_bc::define(const MFLevelGrid&            a_mflg,

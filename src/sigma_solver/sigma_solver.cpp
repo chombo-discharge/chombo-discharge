@@ -78,9 +78,11 @@ void sigma_solver::cache_state(){
   }
 }
 
-
 void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
-
+  CH_TIME("sigma_solver::compute_rhs");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::compute_rhs" << endl;
+  }
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl ++){
     m_flux[lvl]->copyTo(*a_rhs[lvl]);
   }
@@ -119,6 +121,7 @@ void sigma_solver::initial_data(){
   }
 
   m_amr->average_down(m_state, m_phase);
+  this->reset_cells(m_state);
 }
 
 void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_level){

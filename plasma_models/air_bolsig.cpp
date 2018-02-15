@@ -155,7 +155,6 @@ air_bolsig::air_bolsig(){
   m_alpha.dump_table();
   MayDay::Abort("stop");
 #endif
-  
 }
 
 air_bolsig::~air_bolsig(){
@@ -392,19 +391,23 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
   pout() << "air_bolsig::compute_dielectric_fluxes" << endl;
 #endif  
   // Outflux of species
-  Vector<Real> fluxes(m_num_species);
-  for (int i = 0; i < m_num_species; i++){ // Set outflow first
-    fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
+  Vector<Real> fluxes(m_num_species, 0.0);
+  
+  if(PolyGeom::dot(a_E, a_normal) > 0.0){
+    fluxes[m_nelec_idx] = a_extrapolated_fluxes[m_nelec_idx]; // Outflow for electrons
+    fluxes[m_nminu_idx] = a_extrapolated_fluxes[m_nminu_idx]; // Outflow for negative species
+  }
+  else if(PolyGeom::dot(a_E, a_normal) < 0.0){
+    fluxes[m_nplus_idx] = a_extrapolated_fluxes[m_nplus_idx]; // Outflow for positive species
   }
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
-  if(PolyGeom::dot(a_E, a_normal) <= 0.){
+  if(PolyGeom::dot(a_E, a_normal) < 0.){
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_dielectric_quantum_efficiency;
+    fluxes[m_nelec_idx] += -a_extrapolated_fluxes[m_nplus_idx]*m_townsend2_dielectric;
   }
-  
-  fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
 
 #if air_bolsig_debug
   pout() << "air_bolsig::compute_dielectric_fluxes - done" << endl;
@@ -418,7 +421,7 @@ Real air_bolsig::initial_sigma(const RealVect& a_pos) const {
 }
 
 void air_bolsig::compute_transport_coefficients(){
-  pout() << "Computing transport data using BOLSIG- ..." << endl;
+  pout() << "air_bolsig::compute_transport_coefficients - Computing transport data using BOLSIG- ..." << endl;
 
   std::stringstream ss;
 
@@ -435,7 +438,7 @@ void air_bolsig::compute_transport_coefficients(){
   this->delete_bolsig_script();  // Cleanup, delete script
 
   
-  pout() << "Done computing transport data" << endl;
+  pout() << "air_bolsig::compute_transport_coefficients - Done computing transport data" << endl;
 }
 
 void air_bolsig::build_bolsig_script(){
@@ -665,6 +668,7 @@ air_bolsig::electron::electron(){
 }
 
 air_bolsig::electron::~electron(){
+  
 }
 
 const Real air_bolsig::electron::initial_data(const RealVect a_pos, const Real a_time) const {

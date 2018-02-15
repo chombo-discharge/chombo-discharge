@@ -472,7 +472,7 @@ void mfconductivityopfactory::set_jump(const Real& a_sigma, const Real& a_scale)
   CH_TIME("mfconductivityopfactory::set_jump(scalar)");
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
-    data_ops::scale(*m_jump[lvl], a_sigma);
+    data_ops::scale(*m_jump[lvl], a_scale);
   }
 #if verb
   pout() << "mfconductivityopfactory::set_jump" << endl;
@@ -497,6 +497,8 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
       const Interval interv(0,0);
       (*m_jump[lvl])[dit()].copy(box, interv, box, (*a_sigma[lvl])[dit()], interv);
     }
+
+    data_ops::scale(*m_jump[lvl], a_scale);
 
     m_jump[lvl]->exchange();
   }
