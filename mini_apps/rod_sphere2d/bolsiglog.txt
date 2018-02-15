@@ -1,0 +1,33 @@
+R4    1500. Td    23.3 eV                                       
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.8
+FINISHED
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.5
+FINISHED
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.7
+FINISHED
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.1
+FINISHED
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.6
+FINISHED
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.9
+FINISHED
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.4
+FINISHED
+R5    2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.3
+FINISHED

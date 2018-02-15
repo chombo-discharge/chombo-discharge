@@ -429,10 +429,10 @@ void air_bolsig::compute_transport_coefficients(){
   m_local_data_file   = s_data_file   + ss.str();
 
   this->build_bolsig_script();   // Build input script for BOLSIG
-  this->call_bolsig();     // Call bolsigminus and output data
+  this->call_bolsig();           // Call bolsigminus and generate output data
   this->extract_bolsig_data();   // Extract data
   this->delete_bolsig_data();    // Cleanup, delete file created by bolsigminus
-  //  this->delete_bolsig_script();  // Cleanup, delete script
+  this->delete_bolsig_script();  // Cleanup, delete script
 
   
   pout() << "Done computing transport data" << endl;

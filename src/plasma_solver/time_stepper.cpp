@@ -1279,22 +1279,6 @@ void time_stepper::setup_poisson(){
   m_poisson->set_physical_domain(m_physdom);
   m_poisson->set_potential(m_potential);
 
-  // Boundary conditions, but these should definitely come through an input function. 
-  if(SpaceDim == 2){
-    m_poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
-    m_poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    m_poisson->set_dirichlet_wall_bc(1, Side::Lo, potential::ground);
-    m_poisson->set_dirichlet_wall_bc(1, Side::Hi, potential::live);
-  }
-  else if(SpaceDim == 3){
-    m_poisson->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
-    m_poisson->set_neumann_wall_bc(0,   Side::Hi, 0.0);
-    m_poisson->set_neumann_wall_bc(1,   Side::Lo, 0.0);                  
-    m_poisson->set_neumann_wall_bc(1,   Side::Hi, 0.0);
-    m_poisson->set_dirichlet_wall_bc(2, Side::Lo, potential::ground);
-    m_poisson->set_dirichlet_wall_bc(2, Side::Hi, potential::live);
-  }
-
   m_poisson->sanity_check();
   m_poisson->allocate_internals();
 }

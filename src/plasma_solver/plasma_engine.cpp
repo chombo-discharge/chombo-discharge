@@ -163,6 +163,7 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
   m_amr->allocate(scratch, phase::gas, ncomp);
   m_amr->allocate(E, ncomp);
 
+  m_timestepper->compute_E(E, potential);
   m_amr->compute_gradient(E, poisson->get_state());
   data_ops::scale(E, -1.0);
 
@@ -259,6 +260,8 @@ void plasma_engine::add_surface_charge_to_output(EBAMRCellData& a_output, const 
   if(m_verbosity > 10){
     pout() << "plasma_engine::add_surface_charge_to_output" << endl;
   }
+
+  MayDay::Warning("plasma_engine::add_surface_charge_to_output - not implemented");
 }
 
 void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){

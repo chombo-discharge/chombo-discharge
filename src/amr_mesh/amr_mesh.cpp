@@ -513,7 +513,7 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
 	  grad(vof, dir) = 0.;
 
 	  VoFStencil sten;
-	  EBArith::getFirstDerivStencil(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
+	  EBArith::getFirstDerivStencilWidthOne(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
 	  for (int i = 0; i < sten.size(); i++){
 	    const VolIndex& ivof = sten.vof(i);
 	    const Real& iweight  = sten.weight(i);
@@ -987,10 +987,38 @@ void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
   }
 }
 
+void amr_mesh::average_down(MFAMRFluxData& a_data){
+  CH_TIME("amr_mesh::average_down");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::average_down(mfflux)" << endl;
+  }
+
+  EBAMRFluxData alias_g(1 + m_finest_level);
+  EBAMRFluxData alias_s(1 + m_finest_level);
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    alias_g[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
+    alias_s[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
+      
+    mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()){
+      mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    }
+  }
+
+  this->average_down(alias_g, phase::gas);
+  if(!ebis_sol.isNull()){
+    this->average_down(alias_s, phase::solid);
+  }
+}
+
 void amr_mesh::average_down(MFAMRCellData& a_data){
   CH_TIME("amr_mesh::average_down");
   if(m_verbosity > 3){
-    pout() << "amr_mesh::average_down(mf)" << endl;
+    pout() << "amr_mesh::average_down(mfcell)" << endl;
   }
   
   EBAMRCellData alias_g(1 + m_finest_level);

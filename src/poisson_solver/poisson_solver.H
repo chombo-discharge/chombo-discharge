@@ -15,6 +15,21 @@
 
 /*!
   @brief Abstract Poisson solver class. Boundary conditions are passed through this class. 
+
+  @details 
+
+  Class options
+  -------------
+  Boundary conditions are passed through this class. Currently, we supported live/ground Dirichlet and Neumann. However, only
+  homogeneous Neumann is available through the input scripts.
+
+        poisson_solver.bc_x_low  = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+        poisson_solver.bc_x_high = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+        poisson_solver.bc_y_low  = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+        poisson_solver.bc_y_high = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+        poisson_solver.bc_z_low  = dirichlet_ground      # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+        poisson_solver.bc_z_low  = dirichlet_live        # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+
 */
 class poisson_solver {
 public:

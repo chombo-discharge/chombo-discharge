@@ -153,6 +153,11 @@ public:
   virtual void allocate_interface(EBAMRIVData& a_data, phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
+    @brief Average down both phases
+  */
+  virtual void average_down(MFAMRCellData& a_data);
+
+  /*!
     @brief Average down
   */
   virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase);
@@ -160,7 +165,7 @@ public:
   /*!
     @brief Average down both phases
   */
-  virtual void average_down(MFAMRCellData& a_data);
+  virtual void average_down(MFAMRFluxData& a_data);
 
   /*!
     @brief Average down

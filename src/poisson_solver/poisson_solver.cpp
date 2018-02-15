@@ -10,6 +10,8 @@
 #include "mfalias.H"
 #include "data_ops.H" 
 
+#include <iostream>
+#include <ParmParse.H>
 #include <MFAMRIO.H>
 #include <EBAMRIO.H>
 
@@ -20,10 +22,87 @@ poisson_solver::poisson_solver(){
   if(m_verbosity > 5){
     pout() << "poisson_solver::poisson_solver" << endl;
   }
-  
 
   this->allocate_wall_bc();
   this->set_time(0, 0., 0.);
+
+  if(SpaceDim == 2){
+    this->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
+    this->set_neumann_wall_bc(0,   Side::Hi, 0.0);
+    this->set_dirichlet_wall_bc(1, Side::Lo, potential::ground);
+    this->set_dirichlet_wall_bc(1, Side::Hi, potential::live);
+  }
+  else if(SpaceDim == 3){
+    this->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
+    this->set_neumann_wall_bc(0,   Side::Hi, 0.0);
+    this->set_neumann_wall_bc(1,   Side::Lo, 0.0);                  
+    this->set_neumann_wall_bc(1,   Side::Hi, 0.0);
+    this->set_dirichlet_wall_bc(2, Side::Lo, potential::ground);
+    this->set_dirichlet_wall_bc(2, Side::Hi, potential::live);
+  }
+
+  { // Get parameters from input script
+    ParmParse pp("poisson_solver");
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	const Side::LoHiSide side = sit();
+	
+	std::string str_dir;
+	if(dir == 0){
+	  str_dir = "x";
+	}
+	else if(dir == 1){
+	  str_dir = "y";
+	}
+	else if(dir == 2){
+	  str_dir = "z";
+	}
+
+
+	if(side == Side::Lo){
+	  std::string type;
+	  std::string bc_string = "bc_" + str_dir + "_low";
+	  if(pp.contains(bc_string.c_str())){
+	    pp.get(bc_string.c_str(), type);
+	    if(type == "dirichlet_ground"){
+	      this->set_dirichlet_wall_bc(dir, Side::Lo, potential::ground);
+	    }
+	    else if(type == "dirichlet_live"){
+	      this->set_dirichlet_wall_bc(dir, Side::Lo, potential::live);
+	    }
+	    else if(type == "neumann"){
+	      this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
+	    }
+	  }
+	  else {
+	    std::string error = "poisson_solver::poisson_solver - unknown bc requested for " + bc_string;
+	    MayDay::Abort(error.c_str());
+	  }
+	}
+	else if(side == Side::Hi){
+	  std::string type;
+	  std::string bc_string = "bc_" + str_dir + "_high";
+	  if(pp.contains(bc_string.c_str())){
+	    pp.get(bc_string.c_str(), type);
+	    if(type == "dirichlet_ground"){
+	      this->set_dirichlet_wall_bc(dir, Side::Hi, potential::ground);
+	    }
+	    else if(type == "dirichlet_live"){
+	      this->set_dirichlet_wall_bc(dir, Side::Hi, potential::live);
+	    }
+	    else if(type == "neumann"){
+	      this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
+	    }
+	    else {
+	      std::string error = "poisson_solver::poisson_solver - unknown bc requested for " + bc_string;
+	      MayDay::Abort(error.c_str());
+	    }
+	  }
+	}
+      }
+    }
+  }
 }
 
 poisson_solver::~poisson_solver(){

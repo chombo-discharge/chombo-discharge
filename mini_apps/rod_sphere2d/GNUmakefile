@@ -10,7 +10,7 @@ USE_MF=TRUE
 DIM=2
 
 # Base file containing int main()
-ebase := rod2d_main
+ebase := main
 
 # Requires libraries
 LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTools AMRElliptic AMRTools \

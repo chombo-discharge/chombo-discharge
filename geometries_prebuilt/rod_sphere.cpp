@@ -1,11 +1,11 @@
 /*!
-  @file rod_slab_geometry.cpp
-  @brief Implementation of rod_slab_geometry.H
+  @file rod_sphere_geometry.cpp
+  @brief Implementation of rod_sphere_geometry.H
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#include "rod_slab.H"
+#include "rod_sphere.H"
 
 #include <string>
 #include <iostream>
@@ -19,23 +19,21 @@
 #include "rod_if.H"
 #include "new_sphere_if.H"
 
-rod_slab::rod_slab(){
+rod_sphere::rod_sphere(){
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
-
+  
   Real eps0        = 1.0;
-  Real corner_curv = 1.E-3;
   {
-    ParmParse pp("rod_slab");
-    pp.get("eps0",              eps0);
-    pp.get("corner_curvatures", corner_curv);
+    ParmParse pp("rod_sphere");
+    pp.query("eps0",              eps0);
   }
   this->set_eps0(eps0);
   
   // Electrode parameters
   bool live          = true;
   bool has_electrode = true;
-  Real radius        = 1.E-2;
+  Real elec_radius   = 1.E-2;
   RealVect center1   = RealVect::Zero;
 #if CH_SPACEDIM == 2
   RealVect center2   = RealVect(0.0, 1.0);
@@ -44,10 +42,10 @@ rod_slab::rod_slab(){
 #endif
 
   { // Get parameterse for electrode rod
-    ParmParse pp("rod_slab");
+    ParmParse pp("rod_sphere");
     std::string str;
     Vector<Real> vec(SpaceDim);
-    pp.get("electrode_radius", radius);
+    pp.query("electrode_radius", elec_radius);
     if(pp.contains("electrode_center1")){
       pp.getarr("electrode_center1", vec, 0, SpaceDim);
       center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
@@ -56,14 +54,14 @@ rod_slab::rod_slab(){
       pp.getarr("electrode_center2", vec, 0, SpaceDim);
       center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
     }
-    pp.get("turn_off_electrode", str);
+    pp.query("turn_off_electrode", str);
     if(str == "true"){
       has_electrode = false;
     }
     else if(str == "false"){
       has_electrode = true;
     }
-    pp.get("electrode_live", str);
+    pp.query("electrode_live", str);
     if(str == "true"){
       live = true;
     }
@@ -71,31 +69,25 @@ rod_slab::rod_slab(){
       live = false;
     }
   }
-  //Slab
+  
+  //Dielectric sphere
   bool has_dielectric = true;
   Real dielectric_permittivity = 5.0;
-#if CH_SPACEDIM == 2
-  RealVect slab_lo = RealVect(-2.0123E-2, -2.0123E-2);
-  RealVect slab_hi = RealVect(2.0123E-2,  -1.0123E-2);
-#else
-  RealVect slab_lo = RealVect(-1.0123E-2, -2.0123E-2,  -2.0123E-2);
-  RealVect slab_hi = RealVect( 1E0,        2.0123E-2,  -1.5123E-2);
-#endif
+  Real radius = 1.0;
+  RealVect center = RealVect::Zero;
 
   {
-    ParmParse pp("rod_slab");
+    ParmParse pp("rod_sphere");
     Vector<Real> vec(SpaceDim);
     std::string str;
-    pp.get("dielectric_permittivity", dielectric_permittivity);
-    if(pp.contains("dielectric_corner_lo")){
-      pp.getarr("dielectric_corner_lo", vec, 0, SpaceDim);
-      slab_lo = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+    pp.query("dielectric_permittivity", dielectric_permittivity);
+
+    if(pp.contains("dielectric_center")){
+      pp.getarr("dielectric_center", vec, 0, SpaceDim);
+      center = RealVect(D_DECL(vec[0], vec[1], vec[2]));
     }
-    if(pp.contains("dielectric_corner_hi")){
-      pp.getarr("dielectric_corner_hi", vec, 0, SpaceDim);
-      slab_hi = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
-    pp.get("turn_off_dielectric", str);
+    pp.query("dielectric_radius", radius);
+    pp.query("turn_off_dielectric", str);
     if(str == "true"){
       has_dielectric = false;
     }
@@ -106,15 +98,16 @@ rod_slab::rod_slab(){
 
   if(has_electrode){
     m_electrodes.resize(1);
-    RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(center1, center2, radius, false));
+    RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(center1, center2, elec_radius, false));
     m_electrodes[0].define(rod,   live);
   }
   if(has_dielectric){
     m_dielectrics.resize(1);
-    RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF> (new rounded_box_if(slab_lo, slab_hi, corner_curv, false));
+    RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF> (new new_sphere_if(center, radius, false));
     m_dielectrics[0].define(slab, dielectric_permittivity);
   }
 }
 
-rod_slab::~rod_slab(){
+rod_sphere::~rod_sphere(){
 }
+

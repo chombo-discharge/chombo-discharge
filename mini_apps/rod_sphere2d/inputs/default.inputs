@@ -11,19 +11,19 @@ physical_domain.hi_corner =  1E-3  1E-3
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
-# ROD SLAB GEOMETRY PARAMETRIZATION
-# ----------------------------------------------------------------------------------------------------			
-rod_slab.eps0                      = 1                                # Background permittivity
-rod_slab.corner_curvatures         = 200.E-6                          # Corner curvatures
-rod_slab.turn_off_electrode        = false                            # Turn on/off electrode
-rod_slab.turn_off_dielectric       = true                             # Turn on/off dielectric
-rod_slab.electrode_live            = true                             # Live electrode or not
-rod_slab.electrode_radius          = 250.E-6                          # Electrode inner radius
-rod_slab.electrode_center1         = 0.0 0.0                          # Center 1
-rod_slab.electrode_center2         = 0.0 2E-2                         # Center 2
-rod_slab.dielectric_permittivity   = 4.0                              # Dielectric permittivity
-rod_slab.dielectric_corner_lo      = -1.0 -1.0 -1.0                   # Lo corner
-rod_slab.dielectric_corner_hi      =  1.0  1.0  1.0                   # Hi corner
+# ROD SPHERE GEOMETRY PARAMETRIZATION
+# ----------------------------------------------------------------------------------------------------
+rod_sphere.eps0                      = 1                                # Background permittivity
+rod_sphere.turn_off_electrode        = false                            # Turn on/off electrode
+rod_sphere.turn_off_dielectric       = false                            # Turn on/off dielectric
+rod_sphere.electrode_live            = true                             # Live electrode or not
+rod_sphere.electrode_radius          = 200.E-6                          # Electrode radius
+rod_sphere.electrode_center1         = 0.0 0.0 0E-2                     # Center 1
+rod_sphere.electrode_center2         = 0.0 1.0 0E-2                     # Center 2
+rod_sphere.dielectric_permittivity   = 5.0                             # Dielectric permittivity
+rod_sphere.dielectric_center         = 0.0 -700.E-6 0.0                 # Dielectric center
+rod_sphere.dielectric_radius         = 200E-6                           # Dielectric radius
+
 
 # ====================================================================================================
 # AMR SETTINGS
@@ -36,7 +36,7 @@ amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
 amr.max_box_size    = 32          # Maximum allowed box size
-amr.ref_rat         = 2 4 2 2 2 2 # Refinement ratios. 
+amr.ref_rat         = 4 2 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
@@ -68,7 +68,7 @@ plasma_engine.initial_regrids                 = 0             # Number of initia
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 200           # Maximum number of steps
+plasma_engine.max_steps                       = 0             # Maximum number of steps
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
@@ -86,8 +86,8 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-time_stepper.verbosity        = 10    # Class verbosity
-time_stepper.solver_verbosity = 10    # Individual solver verbosities
+time_stepper.verbosity        = -1    # Class verbosity
+time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
@@ -102,8 +102,8 @@ time_stepper.source_growth    = 200.0   # Maximum permissible growth due to sour
 # ----------------------------------------------------------------------------------------------------
 poisson_solver.bc_x_low  = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
 poisson_solver.bc_x_high = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
-poisson_solver.bc_y_low  = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
-poisson_solver.bc_y_high = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+poisson_solver.bc_y_low  = dirichlet_ground      # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+poisson_solver.bc_y_high = dirichlet_live        # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
 poisson_solver.bc_z_low  = dirichlet_ground      # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
 poisson_solver.bc_z_high = dirichlet_live	 # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
 # ----------------------------------------------------------------------------------------------------
@@ -123,13 +123,13 @@ rte_layout.stationary   = true                   # Stationary solver or not. "fa
 # ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
+poisson_multifluid.gmg_verbosity     = 1        # GMG verbosity
 poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
+poisson_multifluid.gmg_tolerance     = 1.E-12     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.2       # Solver hang
 poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
 poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
@@ -138,7 +138,7 @@ poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bott
 # ====================================================================================================
 # EDDINGTON SP1 GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-eddington_sp1.gmg_verbosity     = 10        # GMG verbosity
+eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
 eddington_sp1.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 eddington_sp1.gmg_post_smooth   = 16        # Number of relaxations in upsweep
 eddington_sp1.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
@@ -156,9 +156,9 @@ eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom so
 air_bolsig.bolsig_path                   = ../../plasma_models/bolsigplus032016-linux
 air_bolsig.lxcat_path                    = ../../plasma_models/bolsigplus032016-linux
 air_bolsig.lxcat_file                    = LXCat-June2013.txt    # Where to find database file (LXCat)
-air_bolsig.grid_points                   = 100                   # Number of grid points for BOLSIG call
+air_bolsig.grid_points                   = 200                   # Number of grid points for BOLSIG call
 air_bolsig.min_townsend                  = 0.0                   # Transport coefficient computation limit (low)
-air_bolsig.max_townsend                  = 1000                  # Transport coefficient computation limit (low)
+air_bolsig.max_townsend                  = 2000                  # Transport coefficient computation limit (low)
 air_bolsig.gas_temperature               = 300                   # Gas temperature (K)
 air_bolsig.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
 air_bolsig.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen

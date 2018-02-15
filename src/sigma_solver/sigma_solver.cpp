@@ -190,12 +190,12 @@ void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_l
     	Vector<VolIndex> refined_vofs = coar_ebisl.refine(coar_vof, nref, dit());
     	Real sumfrac = 0.0;
     	for (int i = 0; i < refined_vofs.size(); i++){
-    	  //	  sumfrac += fine_ebisbox.bndryArea(refined_vofs[i]);
+	  sumfrac += fine_ebisbox.bndryArea(refined_vofs[i]);
     	}
 
     	// Initialize conserved charge
     	const Real coarFrac = coar_ebisbox.bndryArea(coar_vof);
-    	//	fine_state(fine_vof, comp) = coar_state(coar_vof, comp)*nref/sumfrac;
+	fine_state(fine_vof, comp) = coar_state(coar_vof, comp)*nref/sumfrac;
       }
     }
 
@@ -232,7 +232,7 @@ void sigma_solver::reset_cells(EBAMRIVData& a_data){
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	for (int comp = 0; comp < data.nComp(); comp++){
-	  data(vof, comp) = 0.;
+	  data(vof, comp) = 0.0;
 	}
       }
     }
