@@ -481,7 +481,7 @@ void rk2::compute_cdr_velo_after_k1(){
 void rk2::compute_cdr_diffco_after_k1(){
   CH_TIME("rk2::compute_cdr_diffco_after_k1");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_diffco_after_k1";
+    pout() << "rk2::compute_cdr_diffco_after_k1" << endl;
   }
   
   Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();

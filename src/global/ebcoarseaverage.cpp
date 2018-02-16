@@ -474,11 +474,15 @@ ebcoarseaverage::averageFAB(BaseIVFAB<Real>&       a_coar,
                     }
                 }
             }
+#if 1 // Original code
           if (numVoFs > 1)
             {
               dataVal /= Real(numVoFs);
             }
           a_coar(coarVoF, ivar) = dataVal;
+#else // How it's actually supposed to be done, but it can lead to division by zero... :(
+	  a_coar(coarVoF, ivar) = dataVal/(m_refRat*ebisBoxCoar.bndryArea(coarVoF));
+#endif
         }
     }
 }

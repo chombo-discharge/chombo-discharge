@@ -15,6 +15,7 @@
 #include "load_balance.H"
 #include "nwoebquadcfinterp.H"
 #include "MFLevelGrid.H"
+#include "ebcoarseaverage.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>

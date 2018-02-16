@@ -381,7 +381,7 @@ void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, cons
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
-
+  
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl  = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
@@ -392,6 +392,7 @@ void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, cons
       const EBGraph& ebgraph   = ebisbox.getEBGraph();
       const IntVectSet ivs     = ebisbox.getIrregIVS(box);
       const BaseIVFAB<Real>& E = (*a_E_eb[lvl])[dit()];
+      CH_assert(E.nComp() == SpaceDim);
       
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
@@ -1481,4 +1482,3 @@ RefCountedPtr<rte_layout>& time_stepper::get_rte(){
 RefCountedPtr<sigma_solver>& time_stepper::get_sigma(){
   return m_sigma;
 }
-

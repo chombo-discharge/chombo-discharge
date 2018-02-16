@@ -62,7 +62,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-  m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
+  m_opfact->set_jump(a_sigma, 0.0/units::s_eps0);
 
 #if 0 // Debug
   MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
@@ -92,7 +92,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
   m_gmg_solver.init(phi, rhs, finest_level, 0);
-
   const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
 

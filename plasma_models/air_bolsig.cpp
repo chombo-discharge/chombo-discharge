@@ -271,7 +271,7 @@ Vector<Real> air_bolsig::compute_diffusion_coefficients(const RealVect& a_E) con
 
 #if air_bolsig_debug
   pout() << "air_bolsig::compute_diffusion_coefficients - done" << endl;
-#endif  
+#endif
 
   return diffCo;
 }

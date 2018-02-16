@@ -82,16 +82,20 @@ Real lookup_table::get_entry(const Real a_x){
     // Find entry
     int i = floor((a_x - m_x[0])/m_dx);
 
-#if lookup_table_verbose_warnings
+
     if(i < 0){
       i = 0;
+#if lookup_table_verbose_warnings
       pout() << "lookup_table::get_entry - entry excceds range (low end)" << endl;
+#endif
     }
     else if(i >= m_num_entries - 1){
       i = m_num_entries - 2;
+#if lookup_table_verbose_warnings
       pout() << "lookup_table::get_entry - entry excceds range (high end)" << endl;
-    }
 #endif
+    }
+
 
     const int i_hi = i + 1;
     const Real x0  = m_x[i];
@@ -118,14 +122,20 @@ const Real lookup_table::get_entry(const Real a_x) const {
     // Find entry
     int i = floor((a_x - m_x[0])/m_dx);
 
+
     if(i < 0){
       i = 0;
+#if lookup_table_verbose_warnings
       pout() << "lookup_table::get_entry - entry excceds range (low end)" << endl;
+#endif
     }
     else if(i >= m_num_entries - 1){
       i = m_num_entries - 2;
+#if lookup_table_verbose_warnings
       pout() << "lookup_table::get_entry - entry excceds range (high end)" << endl;
+#endif
     }
+
 
     const int i_hi = i + 1;
     const Real x0  = m_x[i];
