@@ -62,7 +62,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-  m_opfact->set_jump(a_sigma, 0.0/units::s_eps0);
+  m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
 
 #if 0 // Debug
   MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");

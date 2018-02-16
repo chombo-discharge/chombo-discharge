@@ -32,6 +32,7 @@ src_dirs = ./src				\
 	./cell_taggers				\
 	./geometries_prebuilt			\
 	./plasma_models 			\
+	./time_steppers				\
 
 # Define rules to build everything
 include $(CHOMBO_HOME)/mk/Make.example

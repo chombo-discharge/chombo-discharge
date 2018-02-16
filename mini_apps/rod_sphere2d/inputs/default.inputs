@@ -6,8 +6,8 @@ rod2d_main.potential = 6.E3
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -1E-3 -1E-3
-physical_domain.hi_corner =  1E-3  1E-3
+physical_domain.lo_corner = -3E-3 -3E-3
+physical_domain.hi_corner =  3E-3  3E-3
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -22,7 +22,7 @@ rod_sphere.electrode_center1         = 0.0 0.0 0E-2                     # Center
 rod_sphere.electrode_center2         = 0.0 1.0 0E-2                     # Center 2
 rod_sphere.dielectric_permittivity   = 5.0                              # Dielectric permittivity
 rod_sphere.dielectric_center         = 0.0 -500.E-6 0.0                 # Dielectric center
-rod_sphere.dielectric_radius         = 200E-6                           # Dielectric radius
+rod_sphere.dielectric_radius         = 300E-6                           # Dielectric radius
 
 # ====================================================================================================
 # AMR SETTINGS
@@ -30,12 +30,12 @@ rod_sphere.dielectric_radius         = 200E-6                           # Dielec
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
 amr.max_amr_depth   = 2           # Maximum amr depth
-amr.max_sim_depth   = 2           # Maximum simulation depth
+amr.max_sim_depth   = 3           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
-amr.blocking_factor = 8           # Blocking factor
+amr.blocking_factor = 16          # Blocking factor
 amr.max_box_size    = 32          # Maximum allowed box size
-amr.ref_rat         = 4 2 2 2 2 2 # Refinement ratios. 
+amr.ref_rat         = 4 4 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
@@ -72,7 +72,7 @@ plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.restart                         = false         # Do restart or not
-plasma_engine.restart_step                    = 265           # Restart step.
+plasma_engine.restart_step                    = 170           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -87,11 +87,11 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ----------------------------------------------------------------------------------------------------			
 time_stepper.verbosity        = -1    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
-time_stepper.fast_rte         = 5     # Solve RTE every this time steps
+time_stepper.fast_rte         = 1     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
-time_stepper.cfl              = 0.4   # CFL number
+time_stepper.cfl              = 0.5   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 200.0   # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------
@@ -110,8 +110,8 @@ poisson_solver.bc_z_high = dirichlet_live	 # BC type. Valid options are "neumann
 # ====================================================================================================
 # CDR_SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-cdr_layout.which_solver = godunov      # Solver type, available options are "scharfetter-gummel" and "godunov"
-cdr_gdnv.divF_nc        = covered_face # Valid options are "covered_face" and "conservative_average"  
+cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
+cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"  
 
 # ====================================================================================================
 # RTE_SOLVER SETTINGS
@@ -130,7 +130,7 @@ poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.8       # Solver hang
-poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
+poisson_multifluid.gmg_bottom_drop   = 16        # Bottom drop
 poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 
@@ -157,7 +157,7 @@ air_bolsig.lxcat_path                    = ../../plasma_models/bolsigplus032016-
 air_bolsig.lxcat_file                    = LXCat-June2013.txt    # Where to find database file (LXCat)
 air_bolsig.grid_points                   = 1000                  # Number of grid points for BOLSIG call
 air_bolsig.min_townsend                  = 0.0                   # Transport coefficient computation limit (low)
-air_bolsig.max_townsend                  = 4000                  # Transport coefficient computation limit (low)
+air_bolsig.max_townsend                  = 2000                  # Transport coefficient computation limit (low)
 air_bolsig.gas_temperature               = 300                   # Gas temperature (K)
 air_bolsig.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
 air_bolsig.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
@@ -174,8 +174,9 @@ air_bolsig.excitation_efficiency         = 0.6                   # Impact excita
 air_bolsig.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
 air_bolsig.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
 air_bolsig.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
-air_bolsig.dielectric_townsend2          = 1.E-4                 # Townsend coefficient on dielectrics
-air_bolsig.dielectric_quantum_efficiency = 1.E-4                 # Quantum efficiency on dielectrics
+air_bolsig.dielectric_townsend2          = 1.E-7                 # Townsend coefficient on dielectrics
+air_bolsig.dielectric_quantum_efficiency = 1.E-7                 # Quantum efficiency on dielectrics
+air_bolsig.dielectric_work_function      = 2.0                   # Dielectric work function (ev)		
 air_bolsig.uniform_density               = 1.E10                 # Initial background ionization
 air_bolsig.seed_density                  = 0.E16                 # Initial seed ionization
 air_bolsig.seed_radius                   = 1E-3                  # Initial seed radius

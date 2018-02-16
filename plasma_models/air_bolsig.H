@@ -45,6 +45,7 @@
       air_bolsig.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
       air_bolsig.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
       air_bolsig.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
+      air_bolsig.dielectric_work_function      = 2.0                   # Dielectric work function (ev)
       air_bolsig.uniform_density               = 1.E10                 # Initial background ionization
       air_bolsig.seed_density                  = 0.E16                 # Initial seed ionization
       air_bolsig.seed_radius                   = 1E-3                  # Initial seed radius
@@ -335,6 +336,11 @@ protected:
     @brief Quantum efficiency on dielectric surfaces
   */
   Real m_dielectric_quantum_efficiency;
+
+  /*!
+    @brief Work function for dielectric
+  */
+  Real m_dielectric_work;
 
   /*!
     @brief Uniform background density

@@ -53,6 +53,7 @@ air_bolsig::air_bolsig(){
   m_townsend2_dielectric          = 1.E-6;
   m_electrode_quantum_efficiency  = 1.E-4;
   m_dielectric_quantum_efficiency = 1.E-6;
+  m_dielectric_work               = 3.0;
 
   m_noise_amplitude   = 0.0;
   m_noise_octaves     = 1;
@@ -97,6 +98,7 @@ air_bolsig::air_bolsig(){
     pp.query("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
     pp.query("dielectric_townsend2"       ,   m_townsend2_dielectric);
     pp.query("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
+    pp.query("dielectric_work",               m_dielectric_work);
   }
 
   { // Noise things. Noise function is passed by pointer to species since it must be unique
@@ -389,24 +391,41 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
 						   const Real&         a_time) const{
 #if air_bolsig_debug
   pout() << "air_bolsig::compute_dielectric_fluxes" << endl;
-#endif  
+#endif
+
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0);
-  
-  if(PolyGeom::dot(a_E, a_normal) > 0.0){
-    fluxes[m_nelec_idx] = a_extrapolated_fluxes[m_nelec_idx]; // Outflow for electrons
-    fluxes[m_nminu_idx] = a_extrapolated_fluxes[m_nminu_idx]; // Outflow for negative species
+
+#if 1 // Debug test
+  for (int i = 0; i < fluxes.size(); i++){
+    fluxes[i] = a_extrapolated_fluxes[i];
   }
-  else if(PolyGeom::dot(a_E, a_normal) < 0.0){
-    fluxes[m_nplus_idx] = a_extrapolated_fluxes[m_nplus_idx]; // Outflow for positive species
+  return fluxes;
+#endif
+  
+  if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
+    fluxes[m_nelec_idx] = Max(0.0, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons
+    fluxes[m_nminu_idx] = Max(0.0, a_extrapolated_fluxes[m_nminu_idx]); // Outflow for negative species
+  }
+  else if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
+    fluxes[m_nplus_idx] = Max(0.0, a_extrapolated_fluxes[m_nplus_idx]); // Outflow for positive species
   }
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
-  if(PolyGeom::dot(a_E, a_normal) < 0.){
+  if(PolyGeom::dot(a_E, a_normal) <= 0.){ // Field points into dielectric
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_dielectric_quantum_efficiency;
-    fluxes[m_nelec_idx] += -a_extrapolated_fluxes[m_nplus_idx]*m_townsend2_dielectric;
+    fluxes[m_nelec_idx] += -Max(0., a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
+  }
+
+  // Also add Schottky emission
+  if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
+    const Real W = m_dielectric_work*units::s_eV;
+    const Real dW = sqrt(units::s_Qe*units::s_Qe*units::s_Qe*a_E.vectorLength()/(4.0*units::s_pi*units::s_eps0));
+    const Real T  = m_gas_temp;
+    const Real A  = 1200000;
+    fluxes[m_nelec_idx] += -A*T*T*exp(-(W-dW)/(units::s_kb*T))/units::s_Qe;
   }
 
 #if air_bolsig_debug

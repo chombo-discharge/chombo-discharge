@@ -60,7 +60,6 @@ void rk2::allocate_poisson_storage(){
 }
 
 void rk2::allocate_rte_storage(){
-
   const int ncomp       = 1;
   const int num_photons = m_plaskin->get_num_photons();
   m_rte_scratch.resize(num_photons);
@@ -664,7 +663,7 @@ void rk2::solve_poisson_k2(){
   // inside the solver will be overwritten, I take a backup into poisson_storage.scratch_phi
   if(!m_rte->is_stationary()){
     data_ops::set_value(scratch, 0.0);
-    data_ops::incr(scratch, pot, 1.0); // Factor 0.5 is because we will take phi(middle) = 0.5*[phi(begin) + phi(end)]
+    data_ops::incr(scratch, pot, 1.0); 
   }
 
   if((m_step + 1) % m_fast_poisson == 0){

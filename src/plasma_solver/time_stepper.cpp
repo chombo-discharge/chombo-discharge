@@ -440,7 +440,6 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
     const MFLevelGrid& mflg       = *(m_amr->get_mflg()[lvl]);
     const RealVect origin         = m_physdom->get_prob_lo();
 
-
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box& box              = dbl.get(dit());
       const EBISBox& ebisbox      = ebisl[dit()];
@@ -664,6 +663,7 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
     pout() << "time_stepper::compute_extrapolated_fluxes" << endl;
   }
 
+#if 0 // Original code
   EBAMRCellData cell_flux;
   EBAMRIVData   eb_flux;
 
@@ -680,6 +680,31 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
     
     this->project_flux(*a_fluxes[i], eb_flux);
   }
+#else // New way of doing this. Extrapolate everything to the BC first. Then compute the flux and project it.
+  EBAMRIVData eb_flx; 
+  EBAMRIVData eb_vel;
+  EBAMRIVData eb_phi;
+
+
+  m_amr->allocate(eb_flx, a_phase, SpaceDim);
+  m_amr->allocate(eb_vel, a_phase, SpaceDim);
+  m_amr->allocate(eb_phi, a_phase, 1);
+
+  for (int i = 0; i < a_fluxes.size(); i++){
+    const irreg_amr_stencil<eb_centroid_interp>& interp_stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
+
+    interp_stencils.apply(eb_vel, *a_velocities[i]);
+    interp_stencils.apply(eb_phi, *a_densities[i]);
+
+    data_ops::set_value(eb_flx, 0.0);
+    data_ops::incr(eb_flx, eb_vel, 1.0);
+    data_ops::multiply_scalar(eb_flx, eb_phi);
+
+    this->project_flux(*a_fluxes[i], eb_flx);
+
+    m_amr->average_down(*a_fluxes[i], a_phase);
+  }
+#endif
 }
 
 void time_stepper::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_density, const EBAMRCellData& a_velocity){

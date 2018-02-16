@@ -98,6 +98,10 @@ public:
 
   static void multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
+  static void multiply_scalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
+  
+  static void multiply_scalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs);
+
   static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
 
   static void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);

@@ -503,6 +503,33 @@ void data_ops::multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCe
   }
 }
 
+void data_ops::multiply_scalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::multiply_scalar(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+  
+void data_ops::multiply_scalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs){
+  CH_assert(a_rhs.nComp() == 1);
+
+  const int ncomp = a_lhs.nComp();
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    BaseIVFAB<Real>& lhs       = a_lhs[dit()];
+    const BaseIVFAB<Real>& rhs = a_rhs[dit()];
+    const EBGraph& ebgraph     = lhs.getEBGraph();
+    const IntVectSet& ivs      = lhs.getIVS();
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      for (int comp = 0; comp < ncomp; comp++){
+	lhs(vof, comp) *= rhs(vof, 0);
+      }
+    }
+  }
+}
+
 void data_ops::set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::set_covered_value(*a_lhs[lvl], a_comp, a_value);

@@ -38,7 +38,7 @@
       morrow_lowke.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
       morrow_lowke.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
       morrow_lowke.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
-      morrow_lowke.dielectric_work_function      = 1.E-6                 # Dielectric work function
+      morrow_lowke.dielectric_work_function      = 1.E-6                 # Dielectric work function (ev)
       morrow_lowke.uniform_density               = 1.E10                 # Initial background ionization
       morrow_lowke.seed_density                  = 0.E16                 # Initial seed ionization
       morrow_lowke.seed_radius                   = 1E-3                  # Initial seed radius
