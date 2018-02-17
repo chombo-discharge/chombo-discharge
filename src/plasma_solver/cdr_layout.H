@@ -19,7 +19,7 @@
   Class options
   -------------
 
-      cdr_layout.which_solver = godunov    # Solver type, available options are "scharfetter-gummel" and "godunov"
+      cdr_layout.which_solver = godunov    # Solver type, available options are "scharfetter-gummel", "godunov", "muscl"
 */
 class cdr_layout {
 public:

@@ -12,4 +12,8 @@ template <typename T> void data_ops::set_value(LevelData<MFInterfaceFAB<T> >& a_
   }
 }
 
+template <typename T> int data_ops::sgn(const T a_value){
+  return ((a_value > 0.0) - (a_value < 0.0));
+}
+
 #endif

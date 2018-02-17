@@ -9,6 +9,7 @@
 #include "cdr_iterator.H"
 #include "cdr_sg.H"
 #include "cdr_gdnv.H"
+#include "cdr_muscl.H"
 #include "units.H"
 
 #include <ParmParse.H>
@@ -31,6 +32,9 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
     }
     else if(str == "godunov"){
       m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_gdnv());
+    }
+    else if(str == "muscl"){
+      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_muscl());
     }
     else {
       MayDay::Abort("cdr_layout::cdr_layout - unknown cdr solver type requested");

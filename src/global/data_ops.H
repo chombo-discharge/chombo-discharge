@@ -18,6 +18,8 @@ class data_ops {
 public:
   template <typename T> static void set_value(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
 
+  template <typename T> static int sgn(const T a_value);
+
   static void average_cell_to_face(EBAMRFluxData&               a_facedata,
 				   const EBAMRCellData&         a_celldata,
 				   const Vector<ProblemDomain>& a_domains);
