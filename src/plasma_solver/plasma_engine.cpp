@@ -284,6 +284,32 @@ void plasma_engine::add_surface_charge_to_output(EBAMRCellData& a_output, const 
   }
 }
 
+void plasma_engine::add_current_density_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_current_density_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_current_density_to_output" << endl;
+  }
+
+  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
+
+  const int comp         = 0;
+  const int ncomp        = SpaceDim;
+  const int finest_level = m_amr->get_finest_level();
+
+  // Allocate and compute on centroids
+  EBAMRCellData J;
+  m_amr->allocate(J, cdr->get_phase(), SpaceDim);
+  m_timestepper->compute_J(J);
+  m_amr->interpolate_to_centroids(J, cdr->get_phase());
+
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Interval src_interv(0, ncomp - 1);
+    const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
+    J[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+}
+
 void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){
   CH_TIME("plasma_engine::add_cdr_densities_to_output");
   if(m_verbosity > 10){
@@ -1784,6 +1810,9 @@ void plasma_engine::write_plot_file(){
   this->add_electric_field_to_output(output, cur_var); cur_var += SpaceDim;
   this->add_space_charge_to_output(output,   cur_var); cur_var += 1;
   this->add_surface_charge_to_output(output, cur_var); cur_var += 1;
+  if(m_output_mode == output_mode::full){
+    this->add_current_density_to_output(output, cur_var); cur_var += SpaceDim;
+  }
   this->add_cdr_densities_to_output(output,  cur_var); cur_var += m_plaskin->get_num_species();;
   if(m_output_mode == output_mode::full){
     this->add_cdr_velocities_to_output(output, cur_var); cur_var += m_plaskin->get_num_species()*SpaceDim;
@@ -1949,6 +1978,13 @@ Vector<string> plasma_engine::get_output_variable_names(){
   }
   names.push_back("Space charge density"); cur_name++; num_vars++;
   names.push_back("Surface charge density"); cur_name++; num_vars++;
+  if(m_output_mode == output_mode::full){
+    names.push_back("x-Current density"); cur_name++; num_vars++;
+    names.push_back("y-Current density"); cur_name++; num_vars++;
+    if(SpaceDim == 3){
+      names.push_back("z-Current density"); cur_name++; num_vars++;
+    }
+  }
 
   // Ion densities
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){

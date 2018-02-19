@@ -421,6 +421,11 @@ protected:
   virtual void add_surface_charge_to_output(EBAMRCellData& a_output, const int a_curVar);
 
   /*!
+    @brief Add the current density to output
+  */
+  virtual void add_current_density_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
     @brief Add the ion densities to the output data holder
   */
   virtual void add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_curVar);

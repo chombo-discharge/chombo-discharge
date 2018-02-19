@@ -67,7 +67,7 @@ protected:
   */
   RefCountedPtr<sigma_storage> m_sigma_scratch;
 
-    /*!
+  /*!
     @brief Get storage
   */
   virtual RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);

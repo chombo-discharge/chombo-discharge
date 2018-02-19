@@ -7,6 +7,7 @@
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "rk2.H"
+#include "splitstep_euler_f.H"
 #include "field_tagger.H"
 
 
@@ -20,7 +21,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  Real potential = 1.E4;
+  Real potential = 1.5E4;
 
   return potential;
 }

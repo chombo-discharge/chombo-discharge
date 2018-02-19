@@ -396,7 +396,7 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0);
 
-#if 1 // Debug test
+#if 1 // Debug test, extrapolated inflow/outflow
   for (int i = 0; i < fluxes.size(); i++){
     fluxes[i] = a_extrapolated_fluxes[i];
   }
@@ -420,6 +420,7 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
   }
 
   // Also add Schottky emission
+#if 0
   if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
     const Real W = m_dielectric_work*units::s_eV;
     const Real dW = sqrt(units::s_Qe*units::s_Qe*units::s_Qe*a_E.vectorLength()/(4.0*units::s_pi*units::s_eps0));
@@ -427,6 +428,7 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
     const Real A  = 1200000;
     fluxes[m_nelec_idx] += -A*T*T*exp(-(W-dW)/(units::s_kb*T))/units::s_Qe;
   }
+#endif
 
 #if air_bolsig_debug
   pout() << "air_bolsig::compute_dielectric_fluxes - done" << endl;

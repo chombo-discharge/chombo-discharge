@@ -122,13 +122,11 @@ Vector<RealVect> morrow_lowke::compute_velocities(const RealVect& a_E) const{
 RealVect morrow_lowke::compute_ve(const RealVect& a_E) const{
   RealVect ve = RealVect::Zero;
 
-  //
   const RealVect E = a_E*1.E-2;          // Morrow-Lowke wants E in V/cm
   const Real Emag  = E.vectorLength();   //
   const Real N     = m_N*1.E-6;          // Morrow-Lowke wants N in cm^3
   const Real EbyN  = Emag/N;             //
 
-  //
   const Real lim0 = 2.6E-17;
   const Real lim1 = 1.E-16;
   const Real lim2 = 2.0E-15;
@@ -146,9 +144,7 @@ RealVect morrow_lowke::compute_ve(const RealVect& a_E) const{
     ve = -E/Emag*(7.4E21*EbyN + 7.1E6);
   }
 
-  // 
   ve *= 0.01; // Morrow-Lowke expressions are in cm/s
-
   return ve;
 }
 
@@ -177,7 +173,6 @@ RealVect morrow_lowke::compute_vn(const RealVect& a_E) const{
   }
 
   vn *= 0.01; // Morrow-Lowke expression is in cm/s
-
   return vn;
 }
 
@@ -323,7 +318,7 @@ Real morrow_lowke::compute_De(const RealVect& a_E) const{
 
 Vector<Real> morrow_lowke::compute_diffusion_coefficients(const RealVect& a_E) const {
 
-  Vector<Real> diffCo(m_num_species);
+  Vector<Real> diffCo(m_num_species, 0.0);
   diffCo[m_nelec_idx] = this->compute_De(a_E);
   diffCo[m_nplus_idx] = 0.;
   diffCo[m_nminu_idx] = 0.;
@@ -340,7 +335,7 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
 						     const RealVect&     a_normal,
 						     const Real&         a_time) const{
   // Outflux of species
-  Vector<Real> fluxes(m_num_species);
+  Vector<Real> fluxes(m_num_species, 0.0); 
   for (int i = 0; i < m_num_species; i++){ // Set outflow first
     fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
@@ -350,9 +345,11 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon1_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon2_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon3_idx]*m_dielectric_yield;
+    fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
-  fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
 
+
+#if 0 // This currently does not work.. why?
   // Also add in Schottky emission
   if(PolyGeom::dot(a_E, a_normal) <= 0.){
     const Real W  = m_dielectric_work*units::s_eV;
@@ -361,6 +358,7 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
     const Real A  = 1200000;
     fluxes[m_nelec_idx] += -A*T*T*exp(-(W-dW)/(units::s_kb*T))/units::s_Qe;
   }
+#endif
 
 
   return fluxes;

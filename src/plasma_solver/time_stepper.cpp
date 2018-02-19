@@ -1415,13 +1415,14 @@ Real time_stepper::compute_relaxation_time(){
     pout() << "time_stepper::compute_relaxation_time" << endl;
   }
 
+  const int comp         = 0;
   const int finest_level = 0;
-  const Real tolerance   = 1.E-4;
+  const Real tolerance   = 1.E-6;
 
   EBAMRCellData E, J, dt;
   m_amr->allocate(E,  m_cdr->get_phase(), SpaceDim);
   m_amr->allocate(J,  m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(dt, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(dt, m_cdr->get_phase(), 1);
 
   data_ops::set_value(dt, 1.234567E89);
 
@@ -1431,6 +1432,7 @@ Real time_stepper::compute_relaxation_time(){
   // Find the largest electric field in each direction
   Vector<Real> max_E(SpaceDim);
   for (int dir = 0; dir < SpaceDim; dir++){
+
     Real max, min;
     data_ops::get_max_min(max, min, E, dir);
     max_E[dir] = Max(Abs(max), Abs(min));
@@ -1452,38 +1454,19 @@ Real time_stepper::compute_relaxation_time(){
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
+	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
+	const RealVect jj = RealVect(D_DECL(j(vof, 0), j(vof, 1), j(vof, 2)));
 
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  if(Abs(e(vof, dir)) > tolerance*max_E[dir] && Abs(j(vof, dir)) > 0.0){
-	    dt_fab(vof, dir) = Abs(units::s_eps0*e(vof, dir)/j(vof,dir));
-	  }
-	}
+	dt_fab(vof, comp) = Abs(units::s_eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
       }
     }
   }
-
-  m_amr->average_down(dt, m_cdr->get_phase());
   
   // Find the smallest dt
   Real min_dt = 1.E99;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    Real max, min;
-    data_ops::get_max_min(max, min, dt, dir);
-
-    min_dt = Min(min_dt, min);
-  }
-
-#if 0 // Unecessary
-  // Communicate the result
-#ifdef CH_MPI
-  Real tmp = 1.;
-  int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("time_stepper::compute_relaxation_time() - communication error on norm");
-  }
-  min_dt = tmp;
-#endif
-#endif
+  Real max, min;
+  data_ops::get_max_min(max, min, dt, comp);
+  min_dt = Min(min_dt, min);
 
   return min_dt;
 }

@@ -103,6 +103,12 @@ Real rk2::advance(const Real a_dt){
   this->compute_cdr_fluxes_at_start_of_time_step();
   this->compute_sigma_flux_at_start_of_time_step();
 
+#if 0
+  MayDay::Warning("rk2::advance - debug mode");
+  this->solver_dump();
+  MayDay::Abort("rk2::advance - stop");
+#endif
+
   // Do k1 advance
   this->advance_cdr_k1(a_dt);
   this->advance_sigma_k1(a_dt);
@@ -122,6 +128,7 @@ Real rk2::advance(const Real a_dt){
   this->compute_cdr_fluxes_after_k1();
   this->compute_sigma_flux_after_k1();
 
+  
   // Do k2 advance
   this->advance_cdr_k2(a_dt);
   this->advance_sigma_k2(a_dt);
@@ -134,11 +141,7 @@ Real rk2::advance(const Real a_dt){
     this->advance_rte_k2_transient(a_dt);
   }
 
-#if 0
-  MayDay::Warning("rk2::advance - debug mode");
-  this->solver_dump();
-  MayDay::Abort("rk2::advance - stop");
-#endif
+
   
   return a_dt;
 }

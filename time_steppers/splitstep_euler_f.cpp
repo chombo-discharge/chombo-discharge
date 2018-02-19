@@ -53,7 +53,7 @@ Real splitstep_euler_f::advance(const Real a_dt){
   this->compute_cdr_fluxes_at_start_of_time_step();      // Compute cdr fluxes
   this->compute_sigma_flux_at_start_of_time_step();      // Compute sigma fluxes
   this->set_cdr_source_to_zero_at_start_of_time_step();  // Set source term to zero
-
+  
   this->advance_cdr_transport(a_dt);             // Forward Euler method for transport step
   this->advance_sigma_transport(a_dt);           // Forward Euler method for the transport step
   this->solve_poisson_transport();               // Poisson solve after transport step
@@ -66,12 +66,10 @@ Real splitstep_euler_f::advance(const Real a_dt){
   }
 
   // Source step
-
   this->compute_cdr_source_after_transport();     // Compute source term
-  
   this->advance_cdr_source(a_dt);                 // Advance with source terms
   this->advance_sigma_source(a_dt);               // Advance with source terms
-  this->solve_poisson_source();                   // Recompute Poisson equation
+  this->solve_poisson_source();                   // Recompute Poisson equation. 
   this->compute_E_after_source();                 // Recompute electric fields
   if(m_rte->is_stationary()){
     this->advance_rte_transport_stationary();     // Stationary RTE solve
@@ -80,6 +78,7 @@ Real splitstep_euler_f::advance(const Real a_dt){
     this->advance_rte_transport_transient(a_dt);  // Advance transiently using a zero source
   }
 
+  return a_dt;
 }
 
 void splitstep_euler_f::regrid_internals(){
@@ -319,13 +318,15 @@ void splitstep_euler_f::solve_poisson_transport(){
     cdr_densities.push_back(&(storage->get_phi()));
   }
 
-  // Copy solver state into phi
+  // Copy so we don't iterate from scratch
   data_ops::set_value(scratch_pot, 0.0);
   data_ops::incr(scratch_pot, m_poisson->get_state(), 1.0);
 
+
   // Solve
   if((m_step + 1) % m_fast_poisson == 0){
-    bool converged = this->solve_poisson(scratch_pot, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
+    const bool converged = this->solve_poisson(scratch_pot, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
+    
     if(!converged){
       pout() << "splitstep_euler_f::solve_poisson_transport - solver did not converge at step = " << m_step << endl;
     }
