@@ -71,8 +71,8 @@ plasma_engine.max_steps                       = 500           # Maximum number o
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
-plasma_engine.restart                         = false         # Do restart or not
-plasma_engine.restart_step                    = 100           # Restart step.
+plasma_engine.restart                         = true          # Do restart or not
+plasma_engine.restart_step                    = 300           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -168,14 +168,14 @@ air_bolsig.electron_diffusion            = true                  # Electron diff
 air_bolsig.electron_recombination        = 5.E-14                # Electron recombination rate
 air_bolsig.electron_detachment           = 1.E-18                # Electron detachment rate
 air_bolsig.ion_recombination             = 2.07E-12              # Ion recombination rate
-air_bolsig.positive_species_mobility     = 2.E-4                 # Positive species mobility
-air_bolsig.negative_species_mobility     = 2.E-4                 # Negative species mobility
+air_bolsig.positive_species_mobility     = 2.E-3                 # Positive species mobility
+air_bolsig.negative_species_mobility     = 2.E-3                 # Negative species mobility
 air_bolsig.excitation_efficiency         = 0.6                   # Impact excitation efficiency
 air_bolsig.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
 air_bolsig.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
 air_bolsig.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
-air_bolsig.dielectric_townsend2          = 1.E-3                 # Townsend coefficient on dielectrics
-air_bolsig.dielectric_quantum_efficiency = 1.E-7                 # Quantum efficiency on dielectrics
+air_bolsig.dielectric_townsend2          = 1.E-12                # Townsend coefficient on dielectrics
+air_bolsig.dielectric_quantum_efficiency = 1.E-12                # Quantum efficiency on dielectrics
 air_bolsig.dielectric_work_function      = 2.0                   # Dielectric work function (ev)		
 air_bolsig.uniform_density               = 1.E10                 # Initial background ionization
 air_bolsig.seed_density                  = 0.E16                 # Initial seed ionization

@@ -395,13 +395,6 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
 
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0);
-
-#if 1 // Debug test, extrapolated inflow/outflow
-  for (int i = 0; i < fluxes.size(); i++){
-    fluxes[i] = a_extrapolated_fluxes[i];
-  }
-  return fluxes;
-#endif
   
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
     fluxes[m_nelec_idx] = Max(0.0, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons
