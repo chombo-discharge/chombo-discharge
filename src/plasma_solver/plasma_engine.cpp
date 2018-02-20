@@ -1990,9 +1990,10 @@ Vector<string> plasma_engine::get_output_variable_names(){
   for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     RefCountedPtr<species>& spec      = solver_it.get_species();
-    const std::string& name = spec->get_name();
+    const std::string name = spec->get_name();
+    const std::string unit = spec->get_unit();
 
-    names.push_back(name + " density"); cur_name++; num_vars++;
+    names.push_back(name + " ." + unit + "."); cur_name++; num_vars++;
   }
 
   // Ion velocities

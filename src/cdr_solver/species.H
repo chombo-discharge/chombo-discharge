@@ -42,6 +42,11 @@ public:
   */
   virtual const std::string get_name() const;
 
+    /*!
+    @brief Return unit
+  */
+  virtual const std::string get_unit() const;
+
   /*!
     @brief Return charge
   */
@@ -58,6 +63,11 @@ protected:
     @brief Species name
   */
   std::string m_name;
+
+  /*!
+    @brief Unit
+  */
+  std::string m_unit;
   
   /*!
     @brief Charge

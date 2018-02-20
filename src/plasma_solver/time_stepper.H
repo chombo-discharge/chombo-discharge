@@ -194,62 +194,6 @@ public:
 				   const Real&                   a_time,
 				   const centering::which_center a_centering);
 
-
-// ====================================================================================================
-// OLD SIGNATURES
-
-#if 0 // Remove this when you're ready
-    /*!
-    @brief Compute face-centered diffusion coefficients
-  */
-  virtual void compute_cdr_diffco_face(Vector<EBAMRFluxData*>& a_diffco_face, const EBAMRFluxData& a_E_face);
-
-  /*!
-    @brief Compute face-centered diffusion coefficients
-  */
-  virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, const EBAMRIVData& a_E_eb);
-
-  /*!
-    @brief Compute cdr fluxes
-  */
-  virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
-				  const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
-				  const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
-				  const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
-				  const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
-				  const EBAMRIVData&          a_field);
-
-  /*!
-    @brief Compute cdr velocities
-  */
-  virtual void compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E);
-
-  
-  /*!
-    @brief Compute source terms for the cdr equations
-  */
-#endif
-  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
-				   const Vector<EBAMRCellData*>&  a_cdr_densities,
-				   const Vector<EBAMRCellData*>&  a_rte_densities,
-				   const EBAMRCellData&           a_E,
-				   const centering::which_center  a_centering);
-
-    /*!
-    @brief Compute photon source terms. 
-  */
-#if 1
-  virtual void compute_rte_sources(Vector<EBAMRCellData*>        a_source,
-				   const Vector<EBAMRCellData*>& a_cdr_states,
-				   const EBAMRCellData&          a_E,
-				   const centering::which_center a_centering);
-#endif
-
-
-// OLD SIGNATURES END
-// ====================================================================================================
-
-
   /*!
     @brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
   */

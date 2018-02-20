@@ -9,6 +9,7 @@
 
 species::species(){
   m_name      = "default_species";
+  m_unit      = "default_unit";
   m_charge    = 0;
   m_diffusive = true;
 }
@@ -29,6 +30,10 @@ const Real species::initial_data(const RealVect a_pos, const Real a_time) const{
 
 const std::string species::get_name() const {
   return m_name;
+}
+
+const std::string species::get_unit() const {
+  return m_unit;
 }
 
 const int species::get_charge() const {
