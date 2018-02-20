@@ -74,6 +74,84 @@ public:
   */
   virtual ~air_bolsig();
 
+// ====================================================================================================
+// NEW FUNCTION SIGNATURES
+
+  virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
+							  const RealVect&     a_pos,
+							  const RealVect&     a_E,
+							  const Vector<Real>& a_cdr_densities) const {
+    MayDay::Abort("air_bolsig::compute_cdr_diffusion_coefficients (new) - error");
+  }
+  
+  virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
+						  const RealVect&     a_pos,
+						  const RealVect&     a_E,
+						  const Vector<Real>& a_cdr_densities) const {
+    return this->compute_velocities(a_E);
+  }
+
+  virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
+						const RealVect&         a_pos,
+						const RealVect&         a_E,
+						const RealVect&         a_gradE,
+						const Vector<Real>&     a_cdr_densities,
+						const Vector<Real>&     a_rte_densities,
+						const Vector<RealVect>& a_grad_cdr) const {
+
+    return this->compute_source_terms(a_cdr_densities, a_rte_densities, a_E);
+  }
+
+  virtual Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
+						    const RealVect&     a_pos,
+						    const RealVect&     a_normal,
+						    const RealVect&     a_E,
+						    const Vector<Real>& a_cdr_densities,
+						    const Vector<Real>& a_cdr_velocities,
+						    const Vector<Real>& a_rte_fluxes,
+						    const Vector<Real>& a_extrap_cdr_fluxes) const {
+    return this->compute_conductor_fluxes(a_extrap_cdr_fluxes,
+					  a_cdr_densities,
+					  a_cdr_velocities,
+					  a_rte_fluxes,
+					  a_E,
+					  a_pos,
+					  a_normal,
+					  a_time);
+  }
+
+  virtual Vector<Real> compute_cdr_dielectric_fluxes(const Real&         a_time,
+						     const RealVect&     a_pos,
+						     const RealVect&     a_normal,
+						     const RealVect&     a_E,
+						     const Vector<Real>& a_cdr_densities,
+						     const Vector<Real>& a_cdr_velocities,
+						     const Vector<Real>& a_rte_fluxes,
+						     const Vector<Real>& a_extrap_cdr_fluxes) const {
+    return this->compute_dielectric_fluxes(a_extrap_cdr_fluxes,
+					   a_cdr_densities,
+					   a_cdr_velocities,
+					   a_rte_fluxes,
+					   a_E,
+					   a_pos,
+					   a_normal,
+					   a_time);
+  }
+
+  /*!
+    @brief Compute the isotropic source terms for the RTE
+  */
+  virtual Vector<Real> compute_rte_source_terms(const Real&         a_time,
+						const RealVect&     a_pos,
+						const RealVect&     a_E,
+						const Vector<Real>& a_cdr_densities) const {
+    return this->compute_rte_source_terms(a_cdr_densities, a_E);
+  }
+
+
+// NEW FUNCTION SIGNATURES END
+// ====================================================================================================
+
   /*!
     @brief Compute the velocity for an ion
   */

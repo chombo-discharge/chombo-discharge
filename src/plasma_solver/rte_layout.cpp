@@ -52,6 +52,10 @@ rte_layout::~rte_layout(){
 
 }
 
+rte_iterator rte_layout::iterator(){
+  return rte_iterator(*this);
+}
+
 void rte_layout::allocate_internals(){
   CH_TIME("rte_layout::allocate_internals");
   if(m_verbosity > 6){

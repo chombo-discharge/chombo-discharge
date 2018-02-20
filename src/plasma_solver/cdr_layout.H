@@ -11,6 +11,8 @@
 #include "plasma_kinetics.H"
 #include "cdr_solver.H"
 
+class cdr_iterator;
+
 /*!
   @brief Class for holding a set of cdr_solvers. 
 
@@ -38,6 +40,11 @@ public:
     @brief Get phase
   */
   virtual phase::which_phase get_phase() const;
+
+  /*!
+    @brief Get the iterator
+  */
+  virtual cdr_iterator iterator();
 
   /*!
     @brief Allocate internal storage for solvers

@@ -54,6 +54,10 @@ phase::which_phase cdr_layout::get_phase() const{
   return m_phase;
 }
 
+cdr_iterator cdr_layout::iterator() {
+  return cdr_iterator(*this);
+}
+
 void cdr_layout::allocate_internals(){
   CH_TIME("cdr_layout::allocate_internals");
   if(m_verbosity > 6){

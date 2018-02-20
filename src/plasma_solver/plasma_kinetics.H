@@ -29,12 +29,119 @@ public:
     @brief Destructor
   */
   virtual ~plasma_kinetics(){}
+
+  /*!
+    @brief Compute velocities for the CDR equations
+    @param[in] a_pos Position
+    @param[in] a_time Time
+    @param[in] a_E Electric field
+    @param[in] a_cdr_densites CDR densities
+  */
+  virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
+						  const RealVect&     a_pos,
+						  const RealVect&     a_E,
+						  const Vector<Real>& a_cdr_densities) const = 0;
+
+    /*!
+    @brief Compute the cdr diffusion coefficients
+    @param[in] a_time Time
+    @param[in] a_pos Position
+    @param[in] a_E Electric field
+    @param[in] a_cdr_densites CDR densities
+  */
+  virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
+							  const RealVect&     a_pos,
+							  const RealVect&     a_E,
+							  const Vector<Real>& a_cdr_densities) const = 0;
+
+  /*!
+    @brief Compute source terms for the cdr equations
+    @param[in] a_time Time
+    @param[in] a_pos Position
+    @param[in] a_E Electric field
+    @param[in] a_gradE \f$\nabla|\mathbf{E}|\f$
+    @param[in] a_cdr_densities CDR densities
+    @param[in] a_rte_densities RTE densities (isotropic terms)
+    @param[in] a_grad_cdr Gradients of cdr densities
+  */
+  virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
+						const RealVect&         a_pos,
+						const RealVect&         a_E,
+						const RealVect&         a_gradE,
+						const Vector<Real>&     a_cdr_densities,
+						const Vector<Real>&     a_rte_densities,
+						const Vector<RealVect>& a_grad_cdr) const = 0;
+  /*!
+    @brief Compute cdr fluxes through electrode-gas interfaces
+    @param[in] a_time Time
+    @param[in] a_pos Position
+    @param[in] a_normal Normal vector, points into the gas phase. 
+    @param[in] a_E Electric field
+    @param[in] a_cdr_velocities CDR velocities. Normal component only. 
+    @param[in] a_cdr_densities CDR densities. 
+    @param[in] a_rte_fluxes RTE fluxes (normal component only)
+    @param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
+  */
+  virtual Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
+						    const RealVect&     a_pos,
+						    const RealVect&     a_normal,
+						    const RealVect&     a_E,
+						    const Vector<Real>& a_cdr_densities,
+						    const Vector<Real>& a_cdr_velocities,
+						    const Vector<Real>& a_rte_fluxes,
+						    const Vector<Real>& a_extrap_cdr_fluxes) const = 0;
+
+  /*!
+    @brief Compute cdr fluxes through dielectric-gas interfaces
+    @param[in] a_time Time
+    @param[in] a_pos Position
+    @param[in] a_normal Normal vector, points into the gas phase. 
+    @param[in] a_E Electric field
+    @param[in] a_cdr_velocities CDR velocities. Normal component only. 
+    @param[in] a_cdr_densities CDR densities. 
+    @param[in] a_rte_fluxes RTE fluxes (normal component only)
+    @param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
+  */
+  virtual Vector<Real> compute_cdr_dielectric_fluxes(const Real&         a_time,
+						     const RealVect&     a_pos,
+						     const RealVect&     a_normal,
+						     const RealVect&     a_E,
+						     const Vector<Real>& a_cdr_densities,
+						     const Vector<Real>& a_cdr_velocities,
+						     const Vector<Real>& a_rte_fluxes,
+						     const Vector<Real>& a_extrap_cdr_fluxes) const = 0;
+
+  /*!
+    @brief Compute the isotropic source terms for the RTE
+  */
+  virtual Vector<Real> compute_rte_source_terms(const Real&         a_time,
+						const RealVect&     a_pos,
+						const RealVect&     a_E,
+						const Vector<Real>& a_cdr_densities) const = 0;
+
+  /*!
+    @brief Set the initial surface charge
+    @param[in] a_time Time
+    @param[in] a_pos Position
+  */
+  virtual Real initial_sigma(const Real      a_time,
+			     const RealVect& a_pos) const {};
+
+  
+  // ====================================================================================================
+  // BELOW HERE IS THE OLD STUFF
+  // ====================================================================================================
+
+  virtual Vector<Real> compute_diffusion_coefficients(const RealVect& a_E) const = 0;
+  
   
   /*!
     @brief Compute the velocity for an ion
     @param[in] a_E Electric field strength
   */
   virtual Vector<RealVect> compute_velocities(const RealVect& a_E) const = 0;
+
+
 
   /*!
     @brief Compute the source terms for each charge-carrier species
@@ -57,11 +164,7 @@ public:
   */
   virtual Vector<Real> compute_rte_source_terms(const Vector<Real>& a_densities, const RealVect& a_E) const = 0;
 
-  /*!
-    @brief Compute the ion diffusion coefficient
-    @param[in] a_E Electric field strength
-  */
-  virtual Vector<Real> compute_diffusion_coefficients(const RealVect& a_E) const = 0;
+
 
   /*!
     @brief Compute ion fluxes through conductor-gas interfaces

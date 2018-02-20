@@ -120,17 +120,53 @@ public:
   virtual void compute_J(EBAMRCellData& a_J);
 
   /*!
+    @brief Compute diffusion things using whatever is available in the solvers
+  */
+  virtual void compute_cdr_diffusion();
+
+  /*!
+    @brief Compute diffusion coefficients
+    @details The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that
+    onto cell faces. 
+  */
+  virtual void compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffco_face,
+				       const Vector<EBAMRCellData*>& a_cdr_densities,
+				       const EBAMRCellData&          a_E,
+				       const Real&                   a_time);
+
+  /*!
+    @brief Compute diffusion coefficients on the EB. 
+  */
+  virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffco_face,
+				     const Vector<EBAMRIVData*>& a_cdr_densities,
+				     const EBAMRIVData&          a_E,
+				     const Real&                 a_time);
+
+  /*!
+    @brief Compute cdr fluxes
+  */
+  virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
+				  const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
+				  const EBAMRIVData&          a_field,
+				  const Real&                 a_time);
+
+  /*!
     @brief Compute CDR source terms
   */
   virtual void compute_cdr_sources();
 
+
   /*!
-    @brief Compute source terms for the cdr equations
+    @brief Compute cdr source terms
   */
   virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				   const Vector<EBAMRCellData*>&  a_cdr_densities,
 				   const Vector<EBAMRCellData*>&  a_rte_densities,
 				   const EBAMRCellData&           a_E,
+				   const Real&                    a_time,
 				   const centering::which_center  a_centering);
 
   /*!
@@ -139,21 +175,32 @@ public:
   virtual void compute_cdr_velocities();
 
   /*!
-    @brief Compute cdr velocities
+    @brief Compute the cell-centered cdr velocities
   */
-  virtual void compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E);
+  virtual void compute_cdr_velocities(Vector<EBAMRCellData*>&       a_velocities,
+				      const Vector<EBAMRCellData*>& a_cdr_densities,
+				      const EBAMRCellData&          a_E,
+				      const Real&                   a_time);
 
   /*!
-    @brief Compute diffusion things
+    @brief Compute photon source terms. 
   */
-  virtual void compute_cdr_diffusion();
+  virtual void compute_rte_sources(Vector<EBAMRCellData*>        a_source,
+				   const Vector<EBAMRCellData*>& a_cdr_states,
+				   const EBAMRCellData&          a_E,
+				   const Real&                   a_time,
+				   const centering::which_center a_centering);
 
-  /*!
+
+// ====================================================================================================
+// OLD SIGNATURES
+
+    /*!
     @brief Compute face-centered diffusion coefficients
   */
   virtual void compute_cdr_diffco_face(Vector<EBAMRFluxData*>& a_diffco_face, const EBAMRFluxData& a_E_face);
 
-    /*!
+  /*!
     @brief Compute face-centered diffusion coefficients
   */
   virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, const EBAMRIVData& a_E_eb);
@@ -167,6 +214,26 @@ public:
 				  const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
 				  const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
 				  const EBAMRIVData&          a_field);
+
+  /*!
+    @brief Compute cdr velocities
+  */
+  virtual void compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E);
+
+  
+  /*!
+    @brief Compute source terms for the cdr equations
+  */
+  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
+				   const Vector<EBAMRCellData*>&  a_cdr_densities,
+				   const Vector<EBAMRCellData*>&  a_rte_densities,
+				   const EBAMRCellData&           a_E,
+				   const centering::which_center  a_centering);
+
+
+// OLD SIGNATURES END
+// ====================================================================================================
+
 
   /*!
     @brief Compute the cell-centered fluxes and extrapolate these to the EB centroid

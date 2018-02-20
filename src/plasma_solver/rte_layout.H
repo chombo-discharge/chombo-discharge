@@ -11,6 +11,8 @@
 #include "plasma_kinetics.H"
 #include "rte_solver.H"
 
+class rte_iterator;
+
 /*!
   @brief Class for holding a set of rte_solvers. 
 */
@@ -28,11 +30,16 @@ public:
   virtual ~rte_layout();
 
   /*!
+    @brief Get iterator
+  */
+  virtual rte_iterator iterator();
+
+  /*!
     @brief Allocate internal storage for solvers
   */
   virtual void allocate_internals();
 
-    /*!
+  /*!
     @brief Cache states before regrid step
   */
   virtual void cache_states();
