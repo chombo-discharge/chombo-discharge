@@ -429,7 +429,7 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
   return fluxes;
 }
 
-Real air_bolsig::initial_sigma(const RealVect& a_pos) const {
+Real air_bolsig::initial_sigma(const Real a_time, const RealVect& a_pos) const {
   return 0.0;
 }
 

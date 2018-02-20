@@ -200,7 +200,7 @@ public:
   /*!
     @brief Set the initial surface charge
   */
-  virtual Real initial_sigma(const RealVect& a_pos) const; 
+  virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const; 
 
 protected:
 

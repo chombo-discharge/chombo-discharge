@@ -114,7 +114,7 @@ void sigma_solver::initial_data(){
 	const RealVect pos  = origin + vof.gridIndex()*dx + ebisbox.bndryCentroid(vof)*dx;
 	
 	for (int comp = 0; comp < state.nComp(); comp++){
-	  state(vof, comp) = m_plaskin->initial_sigma(pos);
+	  state(vof, comp) = m_plaskin->initial_sigma(m_time, pos);
 	}
       }
     }
