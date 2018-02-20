@@ -24,22 +24,26 @@ species::~species(){
 
 }
 
-const Real species::initial_data(const RealVect a_pos, const Real a_time) const{
+Real species::initial_data(const RealVect a_pos, const Real a_time) const{
   return 0.;
 }
 
-const std::string species::get_name() const {
+std::string species::get_name() const {
   return m_name;
 }
 
-const std::string species::get_unit() const {
+std::string species::get_unit() const {
   return m_unit;
 }
 
-const int species::get_charge() const {
+int species::get_charge() const {
   return m_charge;
 }
 
-const bool species::is_diffusive() const {
+bool species::is_diffusive() const {
   return m_diffusive;
+}
+
+bool species::output_species() const {
+  return m_output_species;
 }

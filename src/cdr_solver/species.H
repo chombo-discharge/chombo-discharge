@@ -28,34 +28,39 @@ public:
   /*!
     @brief Destructor
   */
-  ~species();
+  virtual ~species();
 
   /*!
     @brief Initial data. You really should overwrite this one. 
     @param[in] a_pos Positspecies
     @param[in] a_time Time
   */
-  virtual const Real initial_data(const RealVect a_pos, const Real a_time) const;
+  virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
 
   /*!
     @brief Return name
   */
-  virtual const std::string get_name() const;
+  virtual std::string get_name() const;
 
     /*!
     @brief Return unit
   */
-  virtual const std::string get_unit() const;
+  virtual std::string get_unit() const;
 
   /*!
     @brief Return charge
   */
-  virtual const int get_charge() const;
+  virtual int get_charge() const;
     
   /*!
     @brief Return diffusive or not
   */
-  virtual const bool is_diffusive() const;
+  virtual bool is_diffusive() const;
+
+  /*!
+    @brief Flag species for output to the plasma solver
+  */
+  virtual bool output_species() const;
 
 protected:
 
@@ -78,6 +83,11 @@ protected:
     @brief Diffusive species or not
   */
   bool m_diffusive;
+
+  /*!
+    @brief Send species to output
+  */
+  bool m_output_species;
 };
 
 #endif
