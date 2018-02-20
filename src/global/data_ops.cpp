@@ -37,6 +37,14 @@ void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
   }
 }
 
+void data_ops::average_cell_to_face_allcomps(EBAMRFluxData& a_face_data,
+					     const EBAMRCellData& a_cell_data,
+					     const Vector<ProblemDomain>& a_domains){
+  for (int lvl = 0; lvl < a_face_data.size(); lvl++){
+    data_ops::average_cell_to_face_allcomps(*a_face_data[lvl], *a_cell_data[lvl], a_domains[lvl]);
+  }
+}
+
 void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_facedata,
 					     const LevelData<EBCellFAB>& a_celldata,
 					     const ProblemDomain&        a_domain){

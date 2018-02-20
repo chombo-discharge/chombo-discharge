@@ -98,7 +98,6 @@ Real rk2::advance(const Real a_dt){
   // Prepare for k1 advance
   this->compute_E_at_start_of_time_step();
   this->compute_cdr_velo_at_start_of_time_step();
-  this->compute_cdr_eb_states_at_start_of_time_step();
   this->compute_cdr_diffco_at_start_of_time_step();
   this->compute_cdr_sources_at_start_of_time_step();
   this->compute_cdr_fluxes_at_start_of_time_step();
@@ -116,18 +115,17 @@ Real rk2::advance(const Real a_dt){
   this->solve_poisson_k1();
   this->compute_E_after_k1();
   if(m_rte->is_stationary()){
-    this->advance_rte_k1_stationary(a_dt);
+    this->advance_rte_k1_stationary();
   }
   else{
     this->advance_rte_k1_transient(a_dt);
   }
 
   // Recompute things in order to do k2 advance
-  this->compute_cdr_eb_states_after_k1();
-  this->compute_cdr_velo_after_k1(a_dt);
-  this->compute_cdr_diffco_after_k1(a_dt);
-  this->compute_cdr_sources_after_k1(a_dt);
-  this->compute_cdr_fluxes_after_k1(a_dt);
+  this->compute_cdr_velo_after_k1();
+  this->compute_cdr_diffco_after_k1();
+  this->compute_cdr_sources_after_k1();
+  this->compute_cdr_fluxes_after_k1();
   this->compute_sigma_flux_after_k1();
 
   
@@ -137,12 +135,14 @@ Real rk2::advance(const Real a_dt){
   this->solve_poisson_k2();
   this->compute_E_after_k2();
   if(m_rte->is_stationary()){
-    this->advance_rte_k2_stationary(a_dt);
+    this->advance_rte_k2_stationary();
   }
   else{
     this->advance_rte_k2_transient(a_dt);
   }
 
+
+  
   return a_dt;
 }
 
@@ -168,30 +168,9 @@ void rk2::compute_cdr_velo_at_start_of_time_step(){
   if(m_verbosity > 5){
     pout() << "rk2::compute_cdr_velo_at_start_of_time_step" << endl;
   }
-
-
-  Vector<EBAMRCellData*> states     = m_cdr->get_states();
+  
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  this->compute_cdr_velocities(velocities, states, m_poisson_scratch->get_E_cell(), m_time);
-}
-
-void rk2::compute_cdr_eb_states_at_start_of_time_step(){
-  CH_TIME("rk2::compute_cdr_eb_states_at_start_of_time_step");
-  if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_eb_states_at_start_of_time_step" << endl;
-  }
-
-  const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& state              = solver->get_state();
-
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    EBAMRIVData& cdr_eb = storage->get_eb_state();
-
-    stencil.apply(cdr_eb, state);
-  }
-
+  this->compute_cdr_velocities(velocities, m_poisson_scratch->get_E_cell());
 }
 
 void rk2::compute_cdr_diffco_at_start_of_time_step(){
@@ -199,26 +178,15 @@ void rk2::compute_cdr_diffco_at_start_of_time_step(){
   if(m_verbosity > 5){
     pout() << "rk2::compute_cdr_diffco_at_start_of_time_step" << endl;
   }
-
-  const int num_species = m_plaskin->get_num_species();
-
-  Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
+  
   Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
 
-  const EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
+  const EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
   const EBAMRIVData& E_eb     = m_poisson_scratch->get_E_eb();
-
-  // Get extrapolated states
-  Vector<EBAMRIVData*> eb_states(num_species);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    eb_states[idx] = &(storage->get_eb_state());
-  }
   
-  this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
-  this->compute_cdr_diffco_eb(diffco_eb,     eb_states,  E_eb,   m_time);
+  this->compute_cdr_diffco_face(diffco_face, E_face);
+  this->compute_cdr_diffco_eb(diffco_eb,     E_eb);
 }
 
 void rk2::compute_cdr_sources_at_start_of_time_step(){
@@ -232,7 +200,7 @@ void rk2::compute_cdr_sources_at_start_of_time_step(){
   Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
   EBAMRCellData& E                   = m_poisson_scratch->get_E_cell();
 
-  this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, m_time, centering::cell_center);
+  this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, centering::cell_center);
 }
 
 void rk2::compute_cdr_fluxes_at_start_of_time_step(){
@@ -265,7 +233,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
   Vector<EBAMRCellData*> cdr_densities = m_cdr->get_states();
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
   this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // Already been done, no?
+  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities);
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
 
   // Compute RTE flux on the boundary
@@ -285,8 +253,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
 			   extrap_cdr_densities,
 			   extrap_cdr_velocities,
 			   extrap_rte_fluxes,
-			   E,
-			   m_time);
+			   E);
 }
 
 void rk2::compute_sigma_flux_at_start_of_time_step(){
@@ -401,13 +368,11 @@ void rk2::compute_E_after_k1(){
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 }
 
-void rk2::advance_rte_k1_stationary(const Real a_dt){
+void rk2::advance_rte_k1_stationary(){
   CH_TIME("rk2::compute_rte_k1_stationary");
   if(m_verbosity > 5){
     pout() << "rk2::compute_k1_stationary" << endl;
   }
-
-  const Real time = m_time + m_alpha*a_dt;
 
   Vector<EBAMRCellData*> rte_states;
   Vector<EBAMRCellData*> rte_sources;
@@ -437,7 +402,7 @@ void rk2::advance_rte_k1_stationary(const Real a_dt){
 
   if((m_step + 1) % m_fast_rte == 0){
     const Real dummy_dt = 0.0;
-    this->solve_rte(rte_states, rte_sources, cdr_states, E, time, dummy_dt, centering::cell_center);
+    this->solve_rte(rte_states, rte_sources, cdr_states, E, dummy_dt, centering::cell_center);
   }
 }
 
@@ -446,8 +411,6 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
   if(m_verbosity > 5){
     pout() << "rk2::compute_k1_transient" << endl;
   }
-
-  const Real time = m_time + 0.5*m_alpha*a_dt; // Source terms are now centered on the half time step
 
   Vector<EBAMRCellData*> rte_states;
   Vector<EBAMRCellData*> rte_sources;
@@ -503,84 +466,41 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
     this->compute_E(scratch_E, m_cdr->get_phase(), scratch_phi);
   
 
-    this->solve_rte(rte_states, rte_sources, cdr_states, scratch_E, time, m_alpha*a_dt, centering::cell_center);
+    this->solve_rte(rte_states, rte_sources, cdr_states, scratch_E, m_alpha*a_dt, centering::cell_center);
   }
 }
 
-void rk2::compute_cdr_eb_states_after_k1(){
-  CH_TIME("rk2::compute_cdr_eb_states_after_k1");
-  if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_eb_states_after_k1" << endl;
-  }
-
-  const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    EBAMRCellData& cdr_state = storage->get_phi();
-    EBAMRIVData& cdr_eb      = storage->get_eb_state();
-
-    stencil.apply(cdr_eb, cdr_state);
-  }
-}
-
-void rk2::compute_cdr_velo_after_k1(const Real a_dt){
+void rk2::compute_cdr_velo_after_k1(){
   CH_TIME("rk2::compute_cdr_velo_after_k1");
   if(m_verbosity > 5){
     pout() << "rk2::compute_cdr_velo_after_k1";
   }
   
-  const int num_species = m_plaskin->get_num_species();
-  
-  const Real time = m_time + m_alpha*a_dt;
-  
-  Vector<EBAMRCellData*> states(num_species);
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    const int idx = solver_it.get_solver();
-    states[idx] = &(storage->get_phi());
-  }
-  
-  this->compute_cdr_velocities(velocities, states, m_poisson_scratch->get_E_cell(), time);
+  this->compute_cdr_velocities(velocities, m_poisson_scratch->get_E_cell());
 }
 
-void rk2::compute_cdr_diffco_after_k1(const Real a_dt){
+void rk2::compute_cdr_diffco_after_k1(){
   CH_TIME("rk2::compute_cdr_diffco_after_k1");
   if(m_verbosity > 5){
     pout() << "rk2::compute_cdr_diffco_after_k1" << endl;
   }
-
-  const int num_species = m_plaskin->get_num_species();
-
-  const Real time = m_time + m_alpha*a_dt;
   
   Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
 
-  const EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
+  const EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
   const EBAMRIVData& E_eb     = m_poisson_scratch->get_E_eb();
-
-  Vector<EBAMRCellData*> states(num_species);
-  Vector<EBAMRIVData*> eb_states(num_species);
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    const int idx  = solver_it.get_solver();
-    states[idx]    = &(storage->get_phi());
-    eb_states[idx] = &(storage->get_eb_state());
-  }
   
-  this->compute_cdr_diffco_face(diffco_face, states,    E_cell, time);
-  this->compute_cdr_diffco_eb(diffco_eb,     eb_states, E_eb,   time);
+  this->compute_cdr_diffco_face(diffco_face, E_face);
+  this->compute_cdr_diffco_eb(diffco_eb,     E_eb);
 }
 
-void rk2::compute_cdr_sources_after_k1(const Real a_dt){
+void rk2::compute_cdr_sources_after_k1(){
   CH_TIME("rk2::compute_cdr_sources_after_k1");
   if(m_verbosity > 5){
     pout() << "rk2::compute_cdr_sources_after_k1" << endl;
   }
-
-  const Real time = m_time + m_alpha*a_dt;
 
   Vector<EBAMRCellData*> cdr_sources;
   Vector<EBAMRCellData*> cdr_states;
@@ -601,17 +521,10 @@ void rk2::compute_cdr_sources_after_k1(const Real a_dt){
 
   EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
-  this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, time, centering::cell_center);
+  this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, centering::cell_center);
 }
 
-void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
-  CH_TIME("rk2::compute_cdr_fluxes_after_k1");
-  if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_fluxes_after_k1" << endl;
-  }
-
-  const Real time = m_time + m_alpha*a_dt;
-  
+void rk2::compute_cdr_fluxes_after_k1(){
   Vector<EBAMRIVData*> cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_densities;
@@ -640,7 +553,7 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
   this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // This has already been done, no?
+  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities);
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
 
   // Compute RTE flux on the boundary
@@ -660,8 +573,7 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
 			   extrap_cdr_densities,
 			   extrap_cdr_velocities,
 			   extrap_rte_fluxes,
-			   E,
-			   time);
+			   E);
 }
 
 void rk2::compute_sigma_flux_after_k1(){
@@ -709,7 +621,7 @@ void rk2::advance_cdr_k2(const Real a_dt){
       data_ops::incr(scratch, state, 1.0);
     }
 
-    
+
     data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
     data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
 
@@ -793,13 +705,11 @@ void rk2::compute_E_after_k2(){
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 }
 
-void rk2::advance_rte_k2_stationary(const Real a_dt){
+void rk2::advance_rte_k2_stationary(){
   CH_TIME("rk2::compute_rte_k2_stationary");
   if(m_verbosity > 5){
     pout() << "rk2::compute_rte_k2_stationary" << endl;
   }
-
-  const Real time = m_time + a_dt; // Source terms centered on the end of the time step
 
   Vector<EBAMRCellData*> rte_states;
   Vector<EBAMRCellData*> rte_sources;
@@ -839,7 +749,7 @@ void rk2::advance_rte_k2_stationary(const Real a_dt){
 
   if((m_step + 1) % m_fast_rte == 0){
     const Real dummy_dt = 0.0;
-    this->solve_rte(rte_states, rte_sources, cdr_states, E, time, dummy_dt, centering::cell_center);
+    this->solve_rte(rte_states, rte_sources, cdr_states, E, dummy_dt, centering::cell_center);
   }
 }
 
@@ -848,8 +758,6 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
   if(m_verbosity > 5){
     pout() << "rk2::compute_k1_transient" << endl;
   }
-
-  const Real time = m_time + 0.5*a_dt; // Source terms centered on the half time step
 
   // If we made it here, the old potential lies in m_poisson_scratch->scratch and the old cdr solutions
   // lie in cdr_storage->m_scratch. The internal state inside the solver is unaffected by anything done previously
@@ -903,7 +811,7 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
     
     this->compute_E(scratch_E, m_cdr->get_phase(), phi);
     
-    this->solve_rte(rte_states, rte_sources, cdr_states, scratch_E, time, a_dt, centering::cell_center);
+    this->solve_rte(rte_states, rte_sources, cdr_states, scratch_E, a_dt, centering::cell_center);
   }
 }
 

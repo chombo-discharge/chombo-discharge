@@ -125,11 +125,6 @@ protected:
   virtual void compute_cdr_velo_at_start_of_time_step();
 
   /*!
-    @brief Compute the cdr states at the EB at the start of the time step
-  */
-  virtual void compute_cdr_eb_states_at_start_of_time_step();
-
-  /*!
     @brief Compute the diffusion coefficients at the start of the time step
   */
   virtual void compute_cdr_diffco_at_start_of_time_step();
@@ -172,7 +167,7 @@ protected:
   /*!
     @brief Compute stationary solution of RTE equations by using intermediate states
   */
-  virtual void advance_rte_k1_stationary(const Real a_dt);
+  virtual void advance_rte_k1_stationary();
 
   /*!
     @brief Compute transient solution of RTE equations onto intermediate state
@@ -180,29 +175,24 @@ protected:
   virtual void advance_rte_k1_transient(const Real a_dt);
 
   /*!
-    @brief Compute the states at the EB after the k1 advance
-  */
-  virtual void compute_cdr_eb_states_after_k1();
-
-  /*!
     @brief Compute the cdr velocities after doing the k1 advance
   */  
-  virtual void compute_cdr_velo_after_k1(const Real a_dt);
+  virtual void compute_cdr_velo_after_k1();
 
   /*!
     @brief Compute the cdr diffusion coefficients after doing the k1 advance
   */  
-  virtual void compute_cdr_diffco_after_k1(const Real a_dt);
+  virtual void compute_cdr_diffco_after_k1();
   
   /*!
     @brief Compute the cdr sources after doing the k1 advance
   */  
-  virtual void compute_cdr_sources_after_k1(const Real a_dt);
+  virtual void compute_cdr_sources_after_k1();
 
   /*!
     @brief Compute the cdr fluxes after doing the k1 advance
   */  
-  virtual void compute_cdr_fluxes_after_k1(const Real a_dt);
+  virtual void compute_cdr_fluxes_after_k1();
 
   /*!
     @brief Compute the cdr fluxes after doing the k1 advance
@@ -232,7 +222,7 @@ protected:
   /*!
     @brief Compute stationary RTE solutions by using final states
   */    
-  virtual void advance_rte_k2_stationary(const Real a_dt);
+  virtual void advance_rte_k2_stationary();
 
   /*!
     @brief Compute transient RTE solutions onto final state

@@ -74,9 +74,6 @@ bool time_stepper::solve_poisson(MFAMRCellData&                a_potential,
   return converged;
 }
 
-// ====================================================================================================
-// BEGIN IMPLEMENTATIONS HERE
-
 void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffco_face,
 					   const Vector<EBAMRCellData*>& a_cdr_densities,
 					   const EBAMRCellData&          a_E,
@@ -85,8 +82,6 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffc
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_cdr_diffco_face(full)" << endl;
   }
-
-  MayDay::Warning("time_stepper::compute_cdr_diffco_face - routine has not been bug tested");
 
   const int comp         = 0;
   const int ncomp        = 1;
@@ -149,7 +144,7 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffc
       m_amr->average_down(diffco[idx], m_cdr->get_phase());
       m_amr->interp_ghost(diffco[idx], m_cdr->get_phase());
 
-      data_ops::average_cell_to_face(*a_diffco_face[idx], diffco[idx], m_amr->get_domains());
+      data_ops::average_cell_to_face_allcomps(*a_diffco_face[idx], diffco[idx], m_amr->get_domains());
     }
     else { // Just set this to something for non-diffusive species
       data_ops::set_value(*a_diffco_face[idx], 0.0);
@@ -165,8 +160,6 @@ void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffco_eb
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_cdr_diffco_eb(full)" << endl;
   }
-
-  MayDay::Warning("time_stepper::compute_cdr_diffco_eb - routine has not been bug tested");
 
   const int comp         = 0;
   const int ncomp        = 1;
@@ -228,8 +221,6 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_cdr_fluxes(full)" << endl;
   }
-
-  MayDay::Warning("time_stepper::compute_cdr_fluxes - routine has not been bug tested");
 
   const int num_species  = m_plaskin->get_num_species();
   const int num_photons  = m_plaskin->get_num_species();
@@ -355,8 +346,6 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     pout() << "time_stepper::compute_cdr_sources(full)" << endl;
   }
 
-  MayDay::Warning("time_stepper::compute_cdr_velocities - routine has not been tested");
-
   const int num_photons  = m_plaskin->get_num_photons();
   const int num_species  = m_plaskin->get_num_species();
 
@@ -374,7 +363,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 
 
   Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); solver_it.ok()){
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     grad_cdr[idx] = new EBAMRCellData();
     m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);   // Allocate
@@ -456,12 +445,14 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	  
 	  pos = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 
-	  e = RealVect::Zero;
+	  e      = RealVect::Zero;
+	  grad_e = RealVect::Zero;
 	  for (int i = 0; i < stencil.size(); i++){
 	    const VolIndex& ivof = stencil.vof(i);
 	    const Real& iweight  = stencil.weight(i);
 	    for (int dir = 0; dir < SpaceDim; dir++){
 	      e[dir] += E(ivof, dir)*iweight;
+	      grad_e[dir] += gradE(ivof, dir)*iweight;
 	    }
 	  }
 
@@ -477,7 +468,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	      
 	      phi += (*(*a_cdr_densities[idx])[lvl])[dit()](ivof, 0)*iweight;
 	      for (int dir = 0; dir < SpaceDim; dir++){
-		grad[dir] += (*(*grad_cdr[idx])[lvl])[dit()](vof, dir);
+		grad[dir] += (*(*grad_cdr[idx])[lvl])[dit()](ivof, dir);
 	      }
 	    }
 	    cdr_densities[idx] = Max(0.0, phi);
@@ -518,6 +509,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->average_down(*a_sources[idx], m_cdr->get_phase());
+    m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
   }
 }
 
@@ -529,8 +521,6 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_cdr_velocities(full)" << endl;
   }
-
-  MayDay::Warning("time_stepper::compute_cdr_velocities - routine has not been tested");
   
   const phase::which_phase cdr_phase = m_cdr->get_phase();
   const int finest_level             = m_amr->get_finest_level();
@@ -642,13 +632,13 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 	ivs = ebisbox.getIrregIVS(box);
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
-
+	  const VoFStencil& stencil = stencils[dit()](vof, comp);
+	  
 	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 
 	  // Compute CDR densities
 	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	    const int idx             = solver_it.get_solver();
-	    const VoFStencil& stencil = stencils[dit()](vof, comp);
 
 	    Real phi = 0.0;
 	    for (int i = 0; i < stencil.size(); i++){
@@ -661,7 +651,6 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 
 	  // Compute E
 	  RealVect e = RealVect::Zero;
-	  const VoFStencil& stencil = stencils[dit()](vof, comp);
 	  for (int i = 0; i < stencil.size(); i++){
 	    const VolIndex& ivof = stencil.vof(i);
 	    const Real& iweight  = stencil.weight(i);
@@ -685,10 +674,6 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
     m_amr->average_down(*a_source[idx], rte_phase);
   }
 }
-
-
-// END IMPLEMENTATIONS HERE
-// ====================================================================================================
 
 void time_stepper::cache_states(){
   CH_TIME("time_stepper::cache_states");
@@ -725,9 +710,10 @@ void time_stepper::compute_cdr_sources(){
     rte_densities.push_back(&(solver->get_state()));
   }
 
-  this->compute_cdr_sources(sources, cdr_densities, rte_densities, E, centering::cell_center);
+  this->compute_cdr_sources(sources, cdr_densities, rte_densities, E, m_time, centering::cell_center);
 }
 
+#if 1 // Deprecated signature
 void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				       const Vector<EBAMRCellData*>&  a_cdr_densities,
 				       const Vector<EBAMRCellData*>&  a_rte_densities,
@@ -849,6 +835,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     m_amr->interp_ghost(*a_sources[idx], cdr_phase);
   }
 }
+#endif
 
 void time_stepper::compute_cdr_velocities(){
   CH_TIME("time_stepper::compute_cdr_velocities()");
@@ -856,20 +843,18 @@ void time_stepper::compute_cdr_velocities(){
     pout() << "time_stepper::compute_cdr_velocities()" << endl;
   }
 
-  Vector<EBAMRCellData*> velocities;
+  // Compute the electric field (again)
   EBAMRCellData E;
-
   m_amr->allocate(E, m_cdr->get_phase(), SpaceDim);
   this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    velocities.push_back(&(solver->get_velo_cell()));
-  }
+  Vector<EBAMRCellData*> states     = m_cdr->get_states();
+  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
 
-  this->compute_cdr_velocities(velocities, E);
+  this->compute_cdr_velocities(velocities, states, E, m_time);
 }
 
+#if 0 // Deprecated signature
 void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, const EBAMRCellData& a_E){
   CH_TIME("time_stepper::compute_cdr_velocities(full)");
   if(m_verbosity > 5){
@@ -913,6 +898,7 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>& a_velocities, 
     }
   }
 }
+#endif
 
 void time_stepper::compute_cdr_diffusion(){
   CH_TIME("time_stepper::compute_cdr_diffusion");
@@ -920,24 +906,38 @@ void time_stepper::compute_cdr_diffusion(){
     pout() << "time_stepper::compute_cdr_diffusion" << endl;
   }
 
+  const int ncomp       = 1;
+  const int num_species = m_plaskin->get_num_species();
+
   EBAMRCellData E_cell;
-  EBAMRFluxData E_face;
   EBAMRIVData   E_eb;
   m_amr->allocate(E_cell, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(E_face, m_cdr->get_phase(), SpaceDim);
   m_amr->allocate(E_eb,   m_cdr->get_phase(), SpaceDim);
   
   this->compute_E(E_cell, m_cdr->get_phase(), m_poisson->get_state());
-  this->compute_E(E_face, m_cdr->get_phase(), E_cell);
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);
 
+  Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
+
+  // Extrapolate states to the EB
+  Vector<EBAMRIVData*> cdr_extrap(num_species);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    cdr_extrap[idx] = new EBAMRIVData();
+    m_amr->allocate(*cdr_extrap[idx], m_cdr->get_phase(), ncomp);
+
+    const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
+    stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
+  }
+  
   Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
 
-  this->compute_cdr_diffco_face(diffco_face, E_face);
-  this->compute_cdr_diffco_eb(diffco_eb, E_eb);
+  this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
+  this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, E_eb,   m_time);
 }
 
+#if 0 // Deprecated signature
 void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>& a_diffco_face, const EBAMRFluxData& a_E_face){
   CH_TIME("time_stepper::compute_cdr_diffco_face");
   if(m_verbosity > 5){
@@ -987,7 +987,9 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>& a_diffco_face
   }
 #endif
 }
+#endif
 
+#if 0 // Deprecated signature
 void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, const EBAMRIVData& a_E_eb){
   CH_TIME("time_stepper::compute_cdr_diffco_eb");
   if(m_verbosity > 5){
@@ -1024,7 +1026,9 @@ void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>& a_diffco_eb, cons
     }
   }
 }
+#endif
 
+#if 0 // Deprecated signature
 void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
 				      const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
 				      const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
@@ -1089,14 +1093,14 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
 	  extrap_rte_fluxes[idx] = (*(*a_extrap_rte_fluxes[idx])[lvl])[dit()](vof,comp);
 	}
 
-	Vector<Real> fluxes = m_plaskin->compute_conductor_fluxes(extrap_cdr_fluxes,
-								  extrap_cdr_densities,
-								  extrap_cdr_velocities,
-								  extrap_rte_fluxes,
-								  e,
-								  pos,
-								  normal,
-								  time);
+	const Vector<Real> fluxes = m_plaskin->compute_conductor_fluxes(extrap_cdr_fluxes,
+									extrap_cdr_densities,
+									extrap_cdr_velocities,
+									extrap_rte_fluxes,
+									e,
+									pos,
+									normal,
+									time);
 	
 	// Put the fluxes in their respective place
 	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -1131,14 +1135,14 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
 	  extrap_rte_fluxes[idx] = (*(*a_extrap_rte_fluxes[idx])[lvl])[dit()](vof,comp);
 	}
 
-	Vector<Real> fluxes = m_plaskin->compute_dielectric_fluxes(extrap_cdr_fluxes,
-								   extrap_cdr_densities,
-								   extrap_cdr_velocities,
-								   extrap_rte_fluxes,
-								   e,
-								   pos,
-								   normal,
-								   time);
+	const Vector<Real> fluxes = m_plaskin->compute_dielectric_fluxes(extrap_cdr_fluxes,
+									 extrap_cdr_densities,
+									 extrap_cdr_velocities,
+									 extrap_rte_fluxes,
+									 e,
+									 pos,
+									 normal,
+									 time);
 	
 	// Put the fluxes in their respective place
 	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -1149,6 +1153,7 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
     }
   }
 }
+#endif
 
 void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   CH_TIME("time_stepper::compute_dt");
@@ -1417,6 +1422,7 @@ void time_stepper::compute_rte_sources(){
   this->compute_rte_sources(sources, cdr_states, E, centering::cell_center);
 }
 
+#if 1 // Deprecated signature
 void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 				       const Vector<EBAMRCellData*>& a_cdr_states,
 				       const EBAMRCellData&          a_E,
@@ -1512,6 +1518,7 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
     m_amr->interp_ghost(*a_source[idx], rte_phase);
   }
 }
+#endif
 
 void time_stepper::compute_rho(){
   CH_TIME("time_stepper::compute_rho()");
@@ -1983,13 +1990,14 @@ void time_stepper::solve_rte(const Real a_dt){
   Vector<EBAMRCellData*> rhs        = m_rte->get_sources();
   Vector<EBAMRCellData*> cdr_states = m_cdr->get_states();
 
-  this->solve_rte(states, rhs, cdr_states, E, a_dt, centering::cell_center);
+  this->solve_rte(states, rhs, cdr_states, E, m_time, a_dt, centering::cell_center);
 }
 
 void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
 			     Vector<EBAMRCellData*>&       a_rte_sources,
 			     const Vector<EBAMRCellData*>& a_cdr_states,
 			     const EBAMRCellData&          a_E,
+			     const Real                    a_time,
 			     const Real                    a_dt,
 			     const centering::which_center a_centering){
   CH_TIME("time_stepper::solve_rte(full)");
@@ -1997,7 +2005,7 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     pout() << "time_stepper::solve_rte(full)" << endl;
   }
 
-  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_centering);
+  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();

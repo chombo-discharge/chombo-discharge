@@ -28,6 +28,10 @@ public:
 				   const LevelData<EBCellFAB>& a_celldata,
 				   const ProblemDomain&        a_domain);
 
+  static void average_cell_to_face_allcomps(EBAMRFluxData& a_face_data,
+					    const EBAMRCellData& a_cell_data,
+					    const Vector<ProblemDomain>& a_domains);
+
   static void average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_facedata,
 					    const LevelData<EBCellFAB>& a_celldata,
 					    const ProblemDomain&        a_domain);

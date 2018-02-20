@@ -119,6 +119,9 @@ public:
   */
   virtual void compute_J(EBAMRCellData& a_J);
 
+// ====================================================================================================
+// NEW SIGNATURES BEGIN
+  
   /*!
     @brief Compute diffusion things using whatever is available in the solvers
   */
@@ -195,6 +198,7 @@ public:
 // ====================================================================================================
 // OLD SIGNATURES
 
+#if 0 // Remove this when you're ready
     /*!
     @brief Compute face-centered diffusion coefficients
   */
@@ -224,11 +228,22 @@ public:
   /*!
     @brief Compute source terms for the cdr equations
   */
+#endif
   virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				   const Vector<EBAMRCellData*>&  a_cdr_densities,
 				   const Vector<EBAMRCellData*>&  a_rte_densities,
 				   const EBAMRCellData&           a_E,
 				   const centering::which_center  a_centering);
+
+    /*!
+    @brief Compute photon source terms. 
+  */
+#if 1
+  virtual void compute_rte_sources(Vector<EBAMRCellData*>        a_source,
+				   const Vector<EBAMRCellData*>& a_cdr_states,
+				   const EBAMRCellData&          a_E,
+				   const centering::which_center a_centering);
+#endif
 
 
 // OLD SIGNATURES END
@@ -256,13 +271,7 @@ public:
   */
   virtual void compute_rte_sources();
 
-  /*!
-    @brief Compute photon source terms. 
-  */
-  virtual void compute_rte_sources(Vector<EBAMRCellData*>        a_source,
-				   const Vector<EBAMRCellData*>& a_cdr_states,
-				   const EBAMRCellData&          a_E,
-				   const centering::which_center a_centering);
+
 
   /*!
     @brief Compute the cell-centered space charge density by using data inside cdr_layout. 
@@ -438,11 +447,13 @@ public:
 
   /*!
     @brief General RTE advance routine
+    @details This computes the source terms at the specified time and then advances the solution
   */
   virtual void solve_rte(Vector<EBAMRCellData*>&       a_states,
 			 Vector<EBAMRCellData*>&       a_rhs,
 			 const Vector<EBAMRCellData*>& a_cdr_states,
 			 const EBAMRCellData&          a_E,
+			 const Real                    a_time,
 			 const Real                    a_dt,
 			 const centering::which_center a_centering);
 

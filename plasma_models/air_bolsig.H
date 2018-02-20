@@ -81,7 +81,7 @@ public:
 							  const RealVect&     a_pos,
 							  const RealVect&     a_E,
 							  const Vector<Real>& a_cdr_densities) const {
-    MayDay::Abort("air_bolsig::compute_cdr_diffusion_coefficients (new) - error");
+    return this->compute_diffusion_coefficients(a_E);
   }
   
   virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
@@ -98,7 +98,6 @@ public:
 						const Vector<Real>&     a_cdr_densities,
 						const Vector<Real>&     a_rte_densities,
 						const Vector<RealVect>& a_grad_cdr) const {
-
     return this->compute_source_terms(a_cdr_densities, a_rte_densities, a_E);
   }
 

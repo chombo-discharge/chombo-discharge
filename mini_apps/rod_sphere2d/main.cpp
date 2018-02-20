@@ -7,7 +7,6 @@
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "rk2.H"
-#include "splitstep_euler_f.H"
 #include "field_tagger.H"
 
 

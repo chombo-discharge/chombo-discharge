@@ -29,7 +29,7 @@ rod_sphere.dielectric_radius         = 300E-6                           # Dielec
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
+amr.max_amr_depth   = 1           # Maximum amr depth
 amr.max_sim_depth   = 2           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
@@ -67,11 +67,11 @@ plasma_engine.initial_regrids                 = 1             # Number of initia
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 500           # Maximum number of steps
+plasma_engine.max_steps                       = 50            # Maximum number of steps
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
-plasma_engine.restart                         = true          # Do restart or not
+plasma_engine.restart                         = false         # Do restart or not
 plasma_engine.restart_step                    = 300           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
@@ -122,7 +122,7 @@ rte_layout.stationary   = true                   # Stationary solver or not. "fa
 # ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-poisson_multifluid.gmg_verbosity     = 10        # GMG verbosity
+poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
 poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
@@ -157,19 +157,19 @@ air_bolsig.lxcat_path                    = ../../plasma_models/bolsigplus032016-
 air_bolsig.lxcat_file                    = LXCat-June2013.txt    # Where to find database file (LXCat)
 air_bolsig.grid_points                   = 1000                  # Number of grid points for BOLSIG call
 air_bolsig.min_townsend                  = 0.0                   # Transport coefficient computation limit (low)
-air_bolsig.max_townsend                  = 3000                  # Transport coefficient computation limit (low)
+air_bolsig.max_townsend                  = 1500                  # Transport coefficient computation limit (low)
 air_bolsig.gas_temperature               = 300                   # Gas temperature (K)
 air_bolsig.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
 air_bolsig.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
 air_bolsig.gas_pressure                  = 1.0                   # Gas pressure
 air_bolsig.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission
 air_bolsig.ionization_rate               = 1.E9                  # Background ionization (events/s)
-air_bolsig.electron_diffusion            = true                  # Electron diffusion on. Options are true/false	
+air_bolsig.electron_diffusion            = false                 # Electron diffusion on. Options are true/false	
 air_bolsig.electron_recombination        = 5.E-14                # Electron recombination rate
 air_bolsig.electron_detachment           = 1.E-18                # Electron detachment rate
 air_bolsig.ion_recombination             = 2.07E-12              # Ion recombination rate
-air_bolsig.positive_species_mobility     = 2.E-3                 # Positive species mobility
-air_bolsig.negative_species_mobility     = 2.E-3                 # Negative species mobility
+air_bolsig.positive_species_mobility     = 2.E-4                 # Positive species mobility
+air_bolsig.negative_species_mobility     = 2.E-4                 # Negative species mobility
 air_bolsig.excitation_efficiency         = 0.6                   # Impact excitation efficiency
 air_bolsig.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
 air_bolsig.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
