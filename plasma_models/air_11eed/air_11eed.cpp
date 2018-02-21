@@ -80,10 +80,14 @@ air_11eed::~air_11eed(){
 
 void air_11eed::get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac){
     ParmParse pp("air_11eed");
-    pp.get("gas_temperature", a_Tg);
-    pp.get("gas_pressure", a_p);
-    pp.get("gas_O2_frac", a_O2frac);
-    pp.get("gas_N2_frac", a_N2frac);
+    pp.query("gas_temperature", a_Tg);
+    pp.query("gas_pressure", a_p);
+    pp.query("gas_O2_frac", a_O2frac);
+    pp.query("gas_N2_frac", a_N2frac);
+
+    a_Tg = 300.;
+    a_O2frac = 0.21;
+    a_N2frac = 0.21; 
 
     const Real tot_frac = a_O2frac + a_N2frac; 
     a_p      = a_p*units::s_atm2pascal;
@@ -97,7 +101,25 @@ Vector<Real> air_11eed::compute_cdr_diffusion_coefficients(const Real&         a
 							   const RealVect&     a_E,
 							   const Vector<Real>& a_cdr_densities) const {
 
-  return Vector<Real>(m_num_species, 0.0);
+  Vector<Real> diffco(m_num_species, 0.0);
+
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E-20 + a_cdr_densities[m_electron_idx]);
+  const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
+  const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
+  
+  diffco[m_eed_idx]      = this->compute_eed_diffco(electron_energy, N);
+  diffco[m_electron_idx] = this->compute_electron_diffco(electron_energy, N);
+  diffco[m_N2_idx]       = this->compute_N2_diffco();
+  diffco[m_O2_idx]       = this->compute_O2_diffco();
+  diffco[m_N2plus_idx]   = this->compute_N2plus_diffco();
+  diffco[m_N4plus_idx]   = this->compute_N4plus_diffco();
+  diffco[m_O2plus_idx]   = this->compute_O2plus_diffco();
+  diffco[m_O4plus_idx]   = this->compute_O4plus_diffco();
+  diffco[m_O2plusN2_idx] = this->compute_O2plusN2_diffco();
+  diffco[m_O2minus_idx]  = this->compute_O2minus_diffco();
+  diffco[m_Ominus_idx]   = this->compute_Ominus_diffco();
+
+  return diffco;
 }
 
 Vector<RealVect> air_11eed::compute_cdr_velocities(const Real&         a_time,
@@ -111,8 +133,8 @@ Vector<RealVect> air_11eed::compute_cdr_velocities(const Real&         a_time,
   const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
   const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
 
-  velocities[m_eed_idx]      = (5.0/3.0)*this->compute_electron_mobility(electron_energy, N)*a_E;
-  velocities[m_electron_idx] = -1.0*this->compute_electron_mobility(electron_energy, N)*a_E;
+  velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy, N)*a_E;
+  velocities[m_electron_idx] = this->compute_electron_mobility(electron_energy, N)*(-a_E);
   velocities[m_N2_idx]       = RealVect::Zero;
   velocities[m_O2_idx]       = RealVect::Zero;
   velocities[m_N2plus_idx]   = this->compute_N2plus_mobility(EbyN)*a_E;
@@ -120,8 +142,8 @@ Vector<RealVect> air_11eed::compute_cdr_velocities(const Real&         a_time,
   velocities[m_O2plus_idx]   = this->compute_O2plus_mobility(EbyN)*a_E;
   velocities[m_O4plus_idx]   = this->compute_O4plus_mobility(EbyN)*a_E;
   velocities[m_O2plusN2_idx] = this->compute_O2plusN2_mobility(EbyN)*a_E;
-  velocities[m_O2minus_idx]  = -1.0*this->compute_O2minus_mobility(EbyN)*a_E;
-  velocities[m_Ominus_idx]   = -1.0*this->compute_Ominus_mobility(EbyN)*a_E;
+  velocities[m_O2minus_idx]  = this->compute_O2minus_mobility(EbyN)*(-a_E);
+  velocities[m_Ominus_idx]   = this->compute_Ominus_mobility(EbyN)*(-a_E);
 
   return velocities;
 }
@@ -169,13 +191,17 @@ Real air_11eed::initial_sigma(const Real a_time, const RealVect& a_pos) const {
   return 0.0;
 }
 
+Real air_11eed::compute_eed_mobility(const Real a_energy, const Real a_N) const {
+  return (5.0/3.0)*this->compute_electron_mobility(a_energy, a_N);
+}
+
 Real air_11eed::compute_electron_mobility(const Real a_energy, const Real a_N) const {
 
   Real mobility;
 
   // These are the valid ranges from the BOLSIG call
   const Real min_energy     = 1.E-2;
-  const Real max_energy     = 20.;
+  const Real max_energy     = 30.;
   const Real min_energy_mob = 0.148E27;
   const Real max_energy_mob = 0.537E24;
   
@@ -188,7 +214,7 @@ Real air_11eed::compute_electron_mobility(const Real a_energy, const Real a_N) c
   else {
     const Real A =  55.93;
     const Real B = -0.3830;
-    const Real C =  0.2688;
+    const Real C =  0.2677;
     const Real D = -0.1298E-1;
     const Real E = -0.1056E-3;
 
@@ -227,4 +253,51 @@ Real air_11eed::compute_O2minus_mobility(const Real a_EbyN) const {
 
 Real air_11eed::compute_Ominus_mobility(const Real a_EbyN) const {
   return 2.E-4;
+}
+
+Real air_11eed::compute_eed_diffco(const Real a_energy, const Real a_N) const{
+  return (5.0/3.0)*this->compute_electron_diffco(a_energy, a_N);
+}
+
+Real air_11eed::compute_electron_diffco(const Real a_energy, const Real a_N) const{
+
+  const Real Te = (2.0*a_energy*units::s_Qe)/(3.0*units::s_kb);
+
+  return (2.0/3.0)*a_energy*this->compute_electron_mobility(a_energy, a_N);
+}
+
+Real air_11eed::compute_N2_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_O2_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_N2plus_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_N4plus_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_O2plus_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_O4plus_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_O2plusN2_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_O2minus_diffco() const {
+  return 0.0;
+}
+
+Real air_11eed::compute_Ominus_diffco() const {
+  return 0.0;
 }

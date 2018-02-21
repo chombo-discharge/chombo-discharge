@@ -1,0 +1,12 @@
+R92   1838. Td    27.9 eV                                       
+R93   1859. Td    28.2 eV                                       
+R94   1879. Td    28.5 eV                                       
+R95   1899. Td    28.7 eV                                       
+R96   1919. Td    29.0 eV                                       
+R97   1939. Td    29.3 eV                                       
+R98   1960. Td    29.6 eV                                       
+R99   1980. Td    29.9 eV                                       
+R100  2000. Td    30.2 eV                                       
+SAVERESULTS
+bolsig_outputs.6
+FINISHED

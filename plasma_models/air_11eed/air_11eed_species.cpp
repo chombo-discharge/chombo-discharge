@@ -12,9 +12,10 @@
 #include <ParmParse.H>
 
 air_11eed::eed::eed(){
-  m_name = "electron energy density";
-  m_unit = "eVm-3";
-  m_charge = 0;
+  m_name      = "electron energy density";
+  m_unit      = "eVm-3";
+  m_charge    = 0;
+  m_diffusive = true;
 
   // Get gas parameters
   Real Tg, p, N, O2frac, N2frac;
@@ -38,6 +39,7 @@ air_11eed::electron::electron(){
   m_name   = "electron density";
   m_unit   = "m-3";
   m_charge = -1;
+  m_diffusive = true;
 
   {// Get initial parameter
     ParmParse pp("air_11eed");
@@ -53,6 +55,7 @@ air_11eed::O2::O2(){
   m_name   = "O2";
   m_unit   = "m-3";
   m_charge = 0;
+  m_diffusive = false;
 
   Real Tg, p, N, O2frac, N2frac;
   air_11eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -67,6 +70,7 @@ air_11eed::N2::N2(){
   m_name   = "N2";
   m_unit   = "m-3";
   m_charge = 0.;
+  m_diffusive = false;
 
   Real Tg, p, N, O2frac, N2frac;
   air_11eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -81,6 +85,7 @@ air_11eed::N2plus::N2plus() {
   m_name   = "N2plus";
   m_unit   = "m-3";
   m_charge = 1;
+  m_diffusive = false;
 
   Real Tg, p, N, O2frac, N2frac;
   air_11eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -97,6 +102,7 @@ air_11eed::N4plus::N4plus(){
   m_name   = "N4plus";
   m_unit   = "m-3";
   m_charge = 1;
+  m_diffusive = false;
 }
 
 air_11eed::N4plus::~N4plus(){
@@ -107,6 +113,7 @@ air_11eed::O2plus::O2plus(){
   m_name   = "O2plus";
   m_unit   = "m-3";
   m_charge = 1;
+  m_diffusive = false;
 
   Real Tg, p, N, O2frac, N2frac;
   air_11eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
@@ -123,6 +130,7 @@ air_11eed::O4plus::O4plus(){
   m_name   = "O4plus";
   m_unit   = "m-3";
   m_charge = 1;
+  m_diffusive = false;
 }
 
 air_11eed::O4plus::~O4plus(){
@@ -133,6 +141,7 @@ air_11eed::O2plusN2::O2plusN2() {
   m_name   = "O2plusN2";
   m_unit   = "m-3";
   m_charge = 1;
+  m_diffusive = false;
 }
 
 air_11eed::O2plusN2::~O2plusN2(){
@@ -143,6 +152,7 @@ air_11eed::O2minus::O2minus(){
   m_name   = "O2minus";
   m_unit   = "m-3";
   m_charge = -1;
+  m_diffusive = false;
 }
 
 air_11eed::O2minus::~O2minus(){
@@ -153,6 +163,7 @@ air_11eed::Ominus::Ominus(){
   m_name   = "Ominus";
   m_unit   = "m-3";
   m_charge = -1;
+  m_diffusive = false;
 }
 
 air_11eed::Ominus::~Ominus(){
@@ -163,6 +174,7 @@ air_11eed::O::O(){
   m_name   = "O";
   m_unit   = "m-3";
   m_charge = 0;
+  m_diffusive = false;
 }
 
 air_11eed::O::~O(){

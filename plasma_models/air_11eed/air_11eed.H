@@ -192,6 +192,11 @@ protected:
   /*!
     @brief Compute electron mobility
   */
+  Real compute_eed_mobility(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Compute electron mobility
+  */
   Real compute_electron_mobility(const Real a_energy, const Real a_N) const;
 
   /*!
@@ -227,7 +232,62 @@ protected:
   /*!
     @brief Compute Ominus mobility
   */
-  Real compute_Ominus_mobility(const Real a_EbyN) const;  
+  Real compute_Ominus_mobility(const Real a_EbyN) const;
+
+    /*!
+    @brief Compute electron diffusion coefficient
+  */
+  Real compute_eed_diffco(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Compute electron diffusion coefficient
+  */
+  Real compute_electron_diffco(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Compute N2 diffusion coefficient
+  */
+  Real compute_N2_diffco() const;
+
+  /*!
+    @brief Compute O2 diffusion coefficient
+  */
+  Real compute_O2_diffco() const;
+
+  /*!
+    @brief Compute N2plus diffusion coefficient
+  */
+  Real compute_N2plus_diffco() const;
+
+  /*!
+    @brief Compute N4plus diffusion coefficient
+  */
+  Real compute_N4plus_diffco() const;
+
+    /*!
+    @brief Compute O2plus diffco
+  */
+  Real compute_O2plus_diffco() const;
+
+  /*!
+    @brief Compute O4plus diffco
+  */
+  Real compute_O4plus_diffco() const;
+
+  /*!
+    @brief Compute O2plusN2 diffco
+  */
+  Real compute_O2plusN2_diffco() const;
+
+  /*!
+    @brief Compute O2minus diffco
+  */
+  Real compute_O2minus_diffco() const;
+
+  /*!
+    @brief Compute Ominus diffco
+  */
+  Real compute_Ominus_diffco() const;
 };
 
 #endif
