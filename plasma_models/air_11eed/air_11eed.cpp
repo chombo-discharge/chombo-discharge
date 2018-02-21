@@ -103,7 +103,7 @@ Vector<Real> air_11eed::compute_cdr_diffusion_coefficients(const Real&         a
 
   Vector<Real> diffco(m_num_species, 0.0);
 
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E-20 + a_cdr_densities[m_electron_idx]);
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E10 + a_cdr_densities[m_electron_idx]);
   const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
   const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
   
@@ -129,7 +129,7 @@ Vector<RealVect> air_11eed::compute_cdr_velocities(const Real&         a_time,
   Vector<RealVect> velocities(m_num_species, RealVect::Zero);
 
 
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E-20 + a_cdr_densities[m_electron_idx]);
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E10 + a_cdr_densities[m_electron_idx]);
   const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
   const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
 
