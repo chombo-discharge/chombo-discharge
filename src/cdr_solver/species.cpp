@@ -8,10 +8,11 @@
 #include "species.H"
 
 species::species(){
-  m_name      = "default_species";
-  m_unit      = "default_unit";
-  m_charge    = 0;
-  m_diffusive = true;
+  m_name         = "default_species";
+  m_unit         = "default_unit";
+  m_charge       = 0;
+  m_diffusive    = true;
+  m_force_output = false;
 }
 
 species::species(const std::string a_name, const int a_charge, const bool a_diffusive){
@@ -44,6 +45,6 @@ bool species::is_diffusive() const {
   return m_diffusive;
 }
 
-bool species::output_species() const {
-  return m_output_species;
+bool species::force_output() const {
+  return m_force_output;
 }

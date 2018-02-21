@@ -60,7 +60,7 @@ public:
   /*!
     @brief Flag species for output to the plasma solver
   */
-  virtual bool output_species() const;
+  virtual bool force_output() const;
 
 protected:
 
@@ -85,9 +85,9 @@ protected:
   bool m_diffusive;
 
   /*!
-    @brief Send species to output
+    @brief Force output of species. This is relevant for plasma_engine only. 
   */
-  bool m_output_species;
+  bool m_force_output;
 };
 
 #endif

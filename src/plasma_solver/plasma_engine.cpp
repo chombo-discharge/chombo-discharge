@@ -1218,8 +1218,11 @@ void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
   if(str == "full"){
     m_output_mode = output_mode::full;
   }
-  if(str == "light"){
+  else if(str == "light"){
     m_output_mode = output_mode::light;
+  }
+  else if(str == "ultra_light"){
+    m_output_mode = output_mode::light; // Ultra_light not yet supported
   }
 }
 
