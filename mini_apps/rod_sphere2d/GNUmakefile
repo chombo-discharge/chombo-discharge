@@ -1,6 +1,6 @@
 # Chombo library directory
-CHOMBO_HOME   := /home/robertm/Projects/mf-chombo/lib
-STREAMER_HOME := /home/robertm/Projects/chombo-streamer
+CHOMBO_HOME   := /home/marskar/Projects/mf-chombo/lib
+STREAMER_HOME := /home/marskar/chombo-streamer
 
 # Make rules
 include $(CHOMBO_HOME)/mk/Make.defs

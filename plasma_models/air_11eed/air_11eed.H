@@ -288,6 +288,77 @@ protected:
     @brief Compute Ominus diffco
   */
   Real compute_Ominus_diffco() const;
+
+  /*!
+    @brief Compute rate constant \f$e + N_2 \rightarrow 2e + N_2^+\f$
+  */
+  Real compute_electron_N2_impact_ionization(const Real a_energy, const Real a_N);
+
+  /*!
+    @brief Compute rate constant \f$e + O_2 \rightarrow 2e + O_2^+\f$
+  */
+  Real compute_electron_O2_impact_ionization(const Real a_energy, const Real a_N);
+
+  /*!
+    @brief Rate constant for \f$N_2^+ + N_2 + M \rightarrow N_4^+ + M\f$
+  */
+  Real compute_N2plus_N2_M_to_N4plus_M();
+
+  /*!
+    @brief Rate constant for \f$N_4^+ + O_2 \rightarrow O_2^+ + 2N_2\f$
+  */
+  Real compute_N4plus_O2_to_O2_2N2();
+
+  /*!
+    @brief Rate konstant for \f$N2^+ + O_2 \rightarrow O_2^+ + N2\f$
+    @param[in] a_Tg Gas temperature
+  */
+  Real compute_N2plus_O2_to_O2plus_N2(const Real a_Tg);
+
+  /*!
+    @brief Rate constant for \f$O_2^+ + 2N_2 \rightarrow O_2^+N_2 + N_2\f$
+    @param[in] a_Tg Gas temperature
+  */
+  Real compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg);
+
+  /*!
+    @brief Rate constant for \f$O_2^+N_2 + N_2 \rightarrow O_2^+ + 2_N2\f$
+  */
+  Real compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg);
+
+  /*!
+    @brief Rate constant for \f$O_2^+N_2 + N_2 \rightarrow O_2^+ + 2_N2\f$
+  */
+  Real compute_O2plusN2_O2_to_O4plus_N2();
+
+  /*!
+    @brief Rate constant for \f$O_2^+ O_2 + M \rightarrow O_4^+ + M\f$.
+    @param[in] a_Tg Gas temperature
+  */
+  Real compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg);
+
+  /*!
+    @brief Rate constant for \f$e + O4plus \rightarrow 2O_2\f$
+    @param[in] a_Tg Gas temperature
+  */
+  Real compute_e_O4plus_to_2O2(const Real a_Te);
+
+  /*!
+    @brief Rate constant for \f$e + O_2^+ \rightarrow O_2\f$
+    @param[in] a_Tg Gas temperature
+  */
+  Real compute_e_O2plus_to_O2(const Real a_Te);
+
+  /*!
+    @brief Rate constant for \f$e + 2O_2 \rightarrow O_2^- + O_2\f$
+    @param[in] a_Tg Gas temperature
+  */
+  Real compute_e_2O2_to_O2minus_O2(const Real a_Te);
+
+  /*!
+    @brief Rate constant for \f$O_2^- + O4^+ \rightarrow 3O_2\f$
+   */
+  Real compute_O2minus_O4plus_to_3O2();
 };
 
 #endif

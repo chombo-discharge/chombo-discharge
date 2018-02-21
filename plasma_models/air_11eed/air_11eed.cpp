@@ -301,3 +301,105 @@ Real air_11eed::compute_O2minus_diffco() const {
 Real air_11eed::compute_Ominus_diffco() const {
   return 0.0;
 }
+
+Real air_11eed::compute_electron_N2_impact_ionization(const Real a_energy, const Real a_N){
+
+  Real k_c25;
+  
+  const Real min_energy       = 1.E-2;
+  const Real max_energy       = 30.;
+  const Real min_energy_coeff = 0.0;
+  const Real max_energy_coeff = 0.3522E-13;
+
+  if(a_energy < min_energy){ // Outside lower end
+    k_c25 = min_energy_coeff;
+  }
+  else if(a_energy > max_energy){
+    k_c25 = max_energy_coeff;
+  }
+  else {
+    const Real A = -31.80;
+    const Real B =  0.5467;
+    const Real C = -28.64;
+    const Real D =  10.28;
+    const Real E = -7.002;
+
+    const Real x = a_energy;
+    k_c25 = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  return k_c25;
+}
+
+Real air_11eed::compute_electron_O2_impact_ionization(const Real a_energy, const Real a_N){
+
+  Real k_c42;;
+  
+  const Real min_energy       = 1.E-2;
+  const Real max_energy       = 30.;
+  const Real min_energy_coeff = 0.0;
+  const Real max_energy_coeff = 0.3522E-13;
+
+  if(a_energy < min_energy){ // Outside lower end
+    k_c42 = min_energy_coeff;
+  }
+  else if(a_energy > max_energy){
+    k_c42 = max_energy_coeff;
+  }
+  else {
+    const Real A = -33.44;
+    const Real B =  0.9346;
+    const Real C = -21.60;
+    const Real D =  7.002;
+    const Real E = -4.018;
+
+    const Real x = a_energy;
+    k_c42 = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  return k_c42;
+}
+
+Real air_11eed::compute_N2plus_N2_M_to_N4plus_M(){
+  return 5.E-41;
+}
+
+Real air_11eed::compute_N4plus_O2_to_O2_2N2(){
+  return 2.5E-16;
+}
+
+Real air_11eed::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg){
+  return 1.05E-15/sqrt(a_Tg);
+}
+
+Real air_11eed::compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg){
+  return 8.1E-38/(a_Tg*a_Tg);
+}
+
+Real air_11eed::compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg){
+  return 14.8*pow(a_Tg, -5.3)*exp(-2357/a_Tg);
+}
+
+Real air_11eed::compute_O2plusN2_O2_to_O4plus_N2(){
+  return 1.E-15;
+}
+
+Real air_11eed::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg){
+  return 2.03E-34*pow(a_Tg, -3.2);
+}
+
+Real air_11eed::compute_e_O4plus_to_2O2(const Real a_Te){
+  return 2.42E-11/(sqrt(a_Te));
+}
+
+Real air_11eed::compute_e_O2plus_to_O2(const Real a_Te){
+  return 6.E-11/a_Te;
+}
+
+Real air_11eed::compute_e_2O2_to_O2minus_O2(const Real a_Te){
+  return 6E-39/a_Te;
+}
+
+Real air_11eed::compute_O2minus_O4plus_to_3O2(){
+  return 1.E-13;
+}
