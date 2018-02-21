@@ -162,6 +162,7 @@ air_11eed::O::~O(){
 }
 
 air_11eed::photon_one::photon_one(){
+  m_name   = "photon_one";
   m_A      = 1.12E-4; // Default parameters
   m_lambda = 4.15E-2;
 
@@ -182,6 +183,7 @@ air_11eed::photon_one::~photon_one(){
 }
 
 air_11eed::photon_two::photon_two(){
+  m_name   = "photon_two";
   m_A      = 2.88E-3; // Default parameters
   m_lambda = 1.09E-1;
 
@@ -202,6 +204,7 @@ air_11eed::photon_two::~photon_two(){
 }
 
 air_11eed::photon_three::photon_three(){
+  m_name   = "photon_three";
   m_A      = 2.76E-1;
   m_lambda = 6.69E-1;
 

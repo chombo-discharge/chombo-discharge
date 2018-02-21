@@ -12,15 +12,24 @@
 
 /*!
   @brief 11-species plasma model for air. 
+
+  @details 
+
+  Class options
+  -------------
+
+  Optional options:
+
+
 */
 class air_11eed : public plasma_kinetics {
 public:
 
   // Forward declaration of cdr species
   class eed;      // Electron energy distribution
-  class electron; 
-  class O2;       
+  class electron;
   class N2;       
+  class O2;       
   class N2plus;   
   class N4plus;   
   class O2plus;
@@ -117,6 +126,67 @@ public:
   virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const; 
 
 protected:
+
+  int m_eed_idx;
+  int m_electron_idx;
+  int m_N2_idx;
+  int m_O2_idx;
+  int m_N2plus_idx;
+  int m_N4plus_idx;
+  int m_O2plus_idx;
+  int m_O4plus_idx;
+  int m_O2plusN2_idx;
+  int m_O2minus_idx;
+  int m_Ominus_idx;
+  int m_O_idx;
+  int m_photon1_idx;
+  int m_photon2_idx;
+  int m_photon3_idx;
+
+  /*!
+    @brief Background gas temperature
+  */
+  Real m_Tg;
+
+  /*!
+    @brief Background gas pressure
+  */
+  Real m_p;
+
+  /*!
+    @brief Background gas density
+  */
+  Real m_N;
+
+  /*!
+    @brief O2 fraction of gas
+  */
+  Real m_O2frac;
+
+  /*!
+    @brief N2 fraction of gas
+  */
+  Real m_N2frac;
+
+  /*!
+    @brief Second Townsend coefficient for conductors
+  */
+  Real m_townsend2_electrode;
+
+  /*!
+    @brief Second Townsend coefficient for dielectrics
+  */
+  Real m_townsend2_dielectric;
+
+  /*!
+    @brief Quantum efficiency on electrodes
+  */
+  Real m_electrode_quantum_efficiency;
+
+  /*!
+    @brief Quantum efficiency on dielectric surfaces
+  */
+  Real m_dielectric_quantum_efficiency;
 
 };
 
