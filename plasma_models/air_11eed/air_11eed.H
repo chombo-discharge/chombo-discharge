@@ -1,19 +1,19 @@
 /*!
-  @file   air_11.H
+  @file   air_11eed.H
   @brief  Declaration of a BOLSIG-based transport model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#ifndef _AIR_11_
-#define _AIR_11_
+#ifndef _AIR_11EED_
+#define _AIR_11EED_
 
 #include "plasma_kinetics.H"
 
 /*!
   @brief 11-species plasma model for air. 
 */
-class air_11 : public plasma_kinetics {
+class air_11eed : public plasma_kinetics {
 public:
 
   // Forward declaration of cdr species
@@ -35,16 +35,21 @@ public:
   class photon_one;
   class photon_two;
   class photon_three;
+
+  /*!
+    @brief Get gas temperature, pressure, density, and molecular fractions
+  */
+  static void get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac);
   
   /*!
     @brief Constructor
   */
-  air_11();
+  air_11eed();
 
   /*!
     @brief Destructor
   */
-  virtual ~air_11();
+  virtual ~air_11eed();
 
 
   /*!

@@ -1,19 +1,19 @@
 /*!
-  @file   air_11.H
+  @file   air_11eed.H
   @brief  Declaration of species for the BOLSIG-based 11-species air model
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#include "air_11.H"
+#include "air_11eed.H"
 
-#ifndef _AIR_11_SPECIES_
-#define _AIR_11_SPECIES_
+#ifndef _AIR_11EED_SPECIES_
+#define _AIR_11EED_SPECIES_
 
 /*!
   @brief Electron energy distribution
 */
-class air_11::eed : public species {
+class air_11eed::eed : public species {
 public:
 
   /*!
@@ -32,12 +32,17 @@ public:
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
 protected:
+
+  /*!
+    @brief Gas temperature
+  */
+  Real m_init_energy;
 };
 
 /*!
   @brief Electron class
 */
-class air_11::electron : public species {
+class air_11eed::electron : public species {
 public:
 
   /*!
@@ -56,12 +61,18 @@ public:
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
 protected:
+
+  /*!
+    @brief Initial ionization level
+  */
+  Real m_initial_ionization;
+  
 };
 
 /*!
   @brief O2 class
 */
-class air_11::O2 : public species {
+class air_11eed::O2 : public species {
 public:
 
   /*!
@@ -80,12 +91,14 @@ public:
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
 protected:
+  
+  Real m_initial_density;
 };
 
 /*!
   @brief N2 class
 */
-class air_11::N2 : public species {
+class air_11eed::N2 : public species {
 public:
 
   /*!
@@ -104,12 +117,14 @@ public:
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
 protected:
+  
+  Real m_initial_density;
 };
 
 /*!
   @brief N2plus class
 */
-class air_11::N2plus : public species {
+class air_11eed::N2plus : public species {
 public:
 
   /*!
@@ -128,12 +143,14 @@ public:
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
 protected:
+
+  Real m_initial_ionization;
 };
 
 /*!
   @brief N4plus class
 */
-class air_11::N4plus : public species {
+class air_11eed::N4plus : public species {
 public:
 
   /*!
@@ -157,7 +174,7 @@ protected:
 /*!
   @brief O2plus class
 */
-class air_11::O2plus : public species {
+class air_11eed::O2plus : public species {
 public:
 
   /*!
@@ -176,12 +193,14 @@ public:
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
   
 protected:
+
+  Real m_initial_ionization;
 };
 
 /*!
   @brief O4plus class
 */
-class air_11::O4plus : public species {
+class air_11eed::O4plus : public species {
 public:
 
   /*!
@@ -205,7 +224,7 @@ protected:
 /*!
   @brief O2plusN2 class
 */
-class air_11::O2plusN2 : public species {
+class air_11eed::O2plusN2 : public species {
 public:
 
   /*!
@@ -229,7 +248,7 @@ protected:
 /*!
   @brief O2minus class
 */
-class air_11::O2minus : public species {
+class air_11eed::O2minus : public species {
 public:
 
   /*!
@@ -253,7 +272,7 @@ protected:
 /*!
   @brief Ominus class
 */
-class air_11::Ominus : public species {
+class air_11eed::Ominus : public species {
 public:
 
   /*!
@@ -277,7 +296,7 @@ protected:
 /*!
   @brief O class
 */
-class air_11::O : public species {
+class air_11eed::O : public species {
 public:
 
   /*!
@@ -301,7 +320,7 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air_11::photon_one : public photon_group {
+class air_11eed::photon_one : public photon_group {
 public:
   /*!
     @brief Constructor
@@ -321,23 +340,17 @@ public:
   /*!
     @brief Get the lambda coefficient
   */
-  const Real get_lambda() const {
-    return m_lambda;
-  }
+  virtual Real get_lambda() const;
 
   /*!
     @brief Get the A-coefficient
   */
-  const Real get_A() const {
-    return m_A;
-  }
+  virtual Real get_A() const;
 
   /*!
     @brief Get the partial oxygen pressure
   */
-  const Real get_pO2() const {
-    return m_pO2;
-  }
+  virtual Real get_pO2() const;
 
 protected:
   /*!
@@ -359,7 +372,7 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air_11::photon_two : public photon_group {
+class air_11eed::photon_two : public photon_group {
 public:
   /*!
     @brief Constructor
@@ -379,23 +392,17 @@ public:
   /*!
     @brief Get the lambda coefficient
   */
-  const Real get_lambda() const {
-    return m_lambda;
-  }
+  virtual Real get_lambda() const;
 
   /*!
     @brief Get the A-coefficient
   */
-  const Real get_A() const {
-    return m_A;
-  }
+  virtual Real get_A() const;
 
   /*!
     @brief Get the partial oxygen pressure
   */
-  const Real get_pO2() const {
-    return m_pO2;
-  }
+  virtual Real get_pO2() const;
 
 protected:
   /*!
@@ -417,7 +424,7 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air_11::photon_three : public photon_group {
+class air_11eed::photon_three : public photon_group {
 public:
   /*!
     @brief Constructor
@@ -437,23 +444,17 @@ public:
   /*!
     @brief Get the lambda coefficient
   */
-  const Real get_lambda() const {
-    return m_lambda;
-  }
+  virtual Real get_lambda() const;
 
   /*!
     @brief Get the A-coefficient
   */
-  const Real get_A() const {
-    return m_A;
-  }
+  virtual Real get_A() const;
 
   /*!
     @brief Get the partial oxygen pressure
   */
-  const Real get_pO2() const {
-    return m_pO2;
-  }
+  virtual Real get_pO2() const;
 
 protected:
   /*!

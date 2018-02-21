@@ -11,7 +11,7 @@
 
 
 #include "air_bolsig.H"
-#include "air_11.H"
+#include "air_11eed.H"
 #include "rod_sphere.H"
 
 #include <ParmParse.H>
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
-  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_11());
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_11eed());
   
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
