@@ -11,15 +11,16 @@
 #include "plasma_kinetics.H"
 
 /*!
-  @brief 11-species plasma model for air. 
+  @brief 11-species plasma model for air (79/21 N2/O2 ratio) at 300K
 
   @details 
+
+  This class uses functions from BOLSIG+ to compute ionization and transport coefficients for air at room temperature. BOLSIG+ has been pre-run for an electron energy range of \f$[10^{-3}\textrm{eV}, 20\textrm{eV}]\f$ which corresponds to electron temperatures in the range of 1K to 170000K. If you need transport data for other mixing ratios and gas temperatures, you should really, really re-run BOLSIG before running the kinetics in this program. 
 
   Class options
   -------------
 
-  Optional options:
-
+  @todo If anyone finds the time, please improve the ion mobilities. 
 
 */
 class air_11eed : public plasma_kinetics {
@@ -188,6 +189,45 @@ protected:
   */
   Real m_dielectric_quantum_efficiency;
 
+  /*!
+    @brief Compute electron mobility
+  */
+  Real compute_electron_mobility(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Compute N2plus mobility
+  */
+  Real compute_N2plus_mobility(const Real a_EbyN) const;
+
+  /*!
+    @brief Compute N4plus mobility
+  */
+  Real compute_N4plus_mobility(const Real a_EbyN) const;
+
+  /*!
+    @brief Compute O2plus mobility
+  */
+  Real compute_O2plus_mobility(const Real a_EbyN) const;
+
+  /*!
+    @brief Compute O4plus mobility
+  */
+  Real compute_O4plus_mobility(const Real a_EbyN) const;
+
+  /*!
+    @brief Compute O2plusN2 mobility
+  */
+  Real compute_O2plusN2_mobility(const Real a_EbyN) const;
+
+  /*!
+    @brief Compute O2minus mobility
+  */
+  Real compute_O2minus_mobility(const Real a_EbyN) const;
+
+  /*!
+    @brief Compute Ominus mobility
+  */
+  Real compute_Ominus_mobility(const Real a_EbyN) const;  
 };
 
 #endif

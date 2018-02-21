@@ -12,14 +12,22 @@
 #include <ParmParse.H>
 
 air_11eed::eed::eed(){
-  m_name = "electron energy distribution";
-  m_unit = "eV";
+  m_name = "electron energy density";
+  m_unit = "eVm-3";
   m_charge = 0;
 
   // Get gas parameters
   Real Tg, p, N, O2frac, N2frac;
   air_11eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
-  m_init_energy = 1.5*units::s_kb*Tg/units::s_Qe;
+
+  { // Get initial energy
+    Real init_ionization;
+    ParmParse pp("air_11eed");
+    pp.get("initial_electron_energy", m_init_energy);
+    pp.get("initial_ionization", init_ionization);
+
+    m_init_energy *= init_ionization;
+  }
 }
 
 air_11eed::eed::~eed(){

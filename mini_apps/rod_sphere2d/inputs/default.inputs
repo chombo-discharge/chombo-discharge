@@ -68,7 +68,7 @@ plasma_engine.geometry_only                   = false         # Special option t
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
 plasma_engine.max_steps                       = 0             # Maximum number of steps
-plasma_engine.output_mode                     = light         # Output mode
+plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.restart                         = false         # Do restart or not
@@ -152,8 +152,9 @@ eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom so
 # ====================================================================================================
 # AIR_11EED INPUTS (11-species air model, eed equation, 3-term RTE solvers)	
 # ----------------------------------------------------------------------------------------------------			
-air_11eed.gas_temperature    = 300          # Gas temperature (K)
-air_11eed.gas_pressure       = 1            # Gas pressure (atm)
-air_11eed.gas_O2_frac        = 0.19         # Molecular fraction of O2
-air_11eed.gas_N2_frac        = 0.81         # Molecular fraction of N2
-air_11eed.initial_ionization = 1.E10        # Initial ionization level
+air_11eed.gas_temperature         = 300          # Gas temperature (K)
+air_11eed.gas_pressure            = 1            # Gas pressure (atm)
+air_11eed.gas_O2_frac             = 0.19         # Molecular fraction of O2
+air_11eed.gas_N2_frac             = 0.81         # Molecular fraction of N2
+air_11eed.initial_ionization      = 1.E10        # Initial ionization level
+air_11eed.initial_electron_energy = 8           # Initial electron energy (8eV)

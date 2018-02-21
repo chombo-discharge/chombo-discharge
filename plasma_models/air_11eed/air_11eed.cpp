@@ -104,7 +104,26 @@ Vector<RealVect> air_11eed::compute_cdr_velocities(const Real&         a_time,
 						   const RealVect&     a_pos,
 						   const RealVect&     a_E,
 						   const Vector<Real>& a_cdr_densities) const {
-  return Vector<RealVect>(m_num_species, RealVect::Zero);
+  Vector<RealVect> velocities(m_num_species, RealVect::Zero);
+
+
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E-20 + a_cdr_densities[m_electron_idx]);
+  const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
+  const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
+
+  velocities[m_eed_idx]      = (5.0/3.0)*this->compute_electron_mobility(electron_energy, N)*a_E;
+  velocities[m_electron_idx] = -1.0*this->compute_electron_mobility(electron_energy, N)*a_E;
+  velocities[m_N2_idx]       = RealVect::Zero;
+  velocities[m_O2_idx]       = RealVect::Zero;
+  velocities[m_N2plus_idx]   = this->compute_N2plus_mobility(EbyN)*a_E;
+  velocities[m_N4plus_idx]   = this->compute_N4plus_mobility(EbyN)*a_E;
+  velocities[m_O2plus_idx]   = this->compute_O2plus_mobility(EbyN)*a_E;
+  velocities[m_O4plus_idx]   = this->compute_O4plus_mobility(EbyN)*a_E;
+  velocities[m_O2plusN2_idx] = this->compute_O2plusN2_mobility(EbyN)*a_E;
+  velocities[m_O2minus_idx]  = -1.0*this->compute_O2minus_mobility(EbyN)*a_E;
+  velocities[m_Ominus_idx]   = -1.0*this->compute_Ominus_mobility(EbyN)*a_E;
+
+  return velocities;
 }
   
 Vector<Real> air_11eed::compute_cdr_source_terms(const Real              a_time,
@@ -148,4 +167,64 @@ Vector<Real> air_11eed::compute_rte_source_terms(const Real&         a_time,
 
 Real air_11eed::initial_sigma(const Real a_time, const RealVect& a_pos) const {
   return 0.0;
+}
+
+Real air_11eed::compute_electron_mobility(const Real a_energy, const Real a_N) const {
+
+  Real mobility;
+
+  // These are the valid ranges from the BOLSIG call
+  const Real min_energy     = 1.E-2;
+  const Real max_energy     = 20.;
+  const Real min_energy_mob = 0.148E27;
+  const Real max_energy_mob = 0.537E24;
+  
+  if(a_energy < min_energy){ // Outside lower end
+    mobility = min_energy_mob;
+  }
+  else if(a_energy > max_energy){
+    mobility = max_energy_mob;
+  }
+  else {
+    const Real A =  55.93;
+    const Real B = -0.3830;
+    const Real C =  0.2688;
+    const Real D = -0.1298E-1;
+    const Real E = -0.1056E-3;
+
+    const Real x = a_energy;
+    mobility = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  mobility *= 1./a_N;
+
+  return mobility;
+}
+
+Real air_11eed::compute_N2plus_mobility(const Real a_EbyN) const {
+  return 2.E-4;
+}
+
+Real air_11eed::compute_N4plus_mobility(const Real a_EbyN) const {
+  return 2.E-4;
+}
+
+Real air_11eed::compute_O2plus_mobility(const Real a_EbyN) const {
+  return 2.E-4;
+}
+
+Real air_11eed::compute_O4plus_mobility(const Real a_EbyN) const {
+  return 2.E-4;
+}
+
+Real air_11eed::compute_O2plusN2_mobility(const Real a_EbyN) const {
+  return 2.E-4;
+}
+
+Real air_11eed::compute_O2minus_mobility(const Real a_EbyN) const {
+  return 2.E-4;
+}
+
+Real air_11eed::compute_Ominus_mobility(const Real a_EbyN) const {
+  return 2.E-4;
 }
