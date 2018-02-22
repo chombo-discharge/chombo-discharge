@@ -37,6 +37,16 @@ public:
   */
   virtual void advance(EBAMRCellData& a_state, const Real& a_dt);
 
+  /*!
+    @brief Advective advance. This must be implemented by the solver. 
+  */
+  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt) = 0;
+
+  /*!
+    @brief Diffusion advance
+  */
+  virtual void advance_diffusion(EBAMRCellData& a_state, const Real a_dt);
+
     /*!
     @brief Set solver parameters. These are normally good for this class. 
   */

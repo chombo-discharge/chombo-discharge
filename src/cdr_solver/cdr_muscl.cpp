@@ -48,6 +48,15 @@ int cdr_muscl::query_ghost() const {
   return 3;
 }
 
+void cdr_muscl::advance_advect(EBAMRCellData& a_state, const Real a_dt){
+  CH_TIME("cdr_muscl::advance_advect");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_advect" << endl;
+  }
+
+  MayDay::Abort("cdr_muscl::advance_advect - not implemented (yet)");
+}
+
 void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_muscl::advect_to_faces");
   if(m_verbosity > 5){

@@ -403,3 +403,15 @@ Real air_11eed::compute_e_2O2_to_O2minus_O2(const Real a_Te){
 Real air_11eed::compute_O2minus_O4plus_to_3O2(){
   return 1.E-13;
 }
+
+Real air_11eed::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg){
+  return 3.12E-31*pow(a_Tg, -2.5);
+}
+
+Real air_11eed::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg){
+  return 3.12E-31*pow(a_Tg, -2.5);
+}
+
+Real air_11eed::compute_e_O2_to_e_2O(const Real a_Te, const Real a_N){
+  return 0.0;
+}

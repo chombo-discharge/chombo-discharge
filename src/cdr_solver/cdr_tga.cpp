@@ -59,6 +59,57 @@ void cdr_tga::advance(EBAMRCellData& a_state, const Real& a_dt){
   m_step++;
 }
 
+void cdr_tga::advance_diffusion(EBAMRCellData& a_state, const Real a_dt){
+  CH_TIME("cdr_tga::advance_diffusion");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_diffusion" << endl;
+  }
+
+  if(m_diffusive){
+    bool converged = false;
+
+    const int comp         = 0;
+    const int ncomp        = 1;
+    const int finest_level = m_amr->get_finest_level();
+
+    // Create a source term = S = 0.0;
+    EBAMRCellData src, phi, divF;
+    m_amr->allocate(src,  m_phase, ncomp);
+    m_amr->allocate(phi,  m_phase, ncomp); 
+
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      data_ops::set_value(*src[lvl],  0.0);
+      data_ops::set_value(*phi[lvl],  0.0);
+      data_ops::incr(*phi[lvl], *a_state[lvl], 1.0);
+    }
+
+    // Do the aliasing stuff
+    Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
+    m_amr->alias(new_state, phi);
+    m_amr->alias(old_state, a_state);
+    m_amr->alias(source,    src);
+
+    const Real alpha = 0.0;
+    const Real beta  = 1.0;
+
+    if(m_use_tga){
+      m_tgasolver->resetAlphaAndBeta(alpha, beta);
+      m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    }
+    else{
+      m_eulersolver->resetAlphaAndBeta(alpha, beta);
+      m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level);
+    }
+
+    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+      converged = true;
+    }
+
+    data_ops::copy(a_state, phi);
+  }
+}
+
 void cdr_tga::advance_tga(EBAMRCellData& a_state, const Real a_dt){
   CH_TIME("cdr_tga::advance_tga");
   if(m_verbosity > 5){

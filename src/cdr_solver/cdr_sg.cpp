@@ -29,6 +29,24 @@ int cdr_sg::query_ghost() const {
   return 3;
 }
 
+void cdr_sg::advance_advect(EBAMRCellData& a_state, const Real a_dt){
+  CH_TIME("cdr_sg::advance_advect");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_advect" << endl;
+  }
+
+  MayDay::Abort("cdr_sg::advance_advect - error. Scharfetter-Gummel currently only works with MOL methods");
+}
+
+void cdr_sg::advance_diffusion(EBAMRCellData& a_state, const Real a_dt){
+  CH_TIME("cdr_sg::advance_diffusion");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_diffusion" << endl;
+  }
+
+  MayDay::Abort("cdr_sg::advance_diffusion - error. Scharfetter-Gummel currently only works with MOL methods");
+}
+
 void cdr_sg::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_sg::compute_divJ");
   if(m_verbosity > 5){

@@ -41,6 +41,11 @@ public:
   virtual int query_ghost() const;
 
   /*!
+    @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.
+  */
+  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
+
+  /*!
     @brief MUSCL advection to faces
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);

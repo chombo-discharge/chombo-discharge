@@ -137,6 +137,16 @@ public:
   virtual void advance(EBAMRCellData& a_state, const Real& a_dt);
 
   /*!
+    @brief Pure advective advance. I.e. advance with D = 0 and S = 0
+  */
+  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt) = 0;
+
+  /*!
+    @brief Pure diffusion advance. I.e. advance with div(nv) = 0 and S = 0
+  */
+  virtual void advance_diffusion(EBAMRCellData& a_state, const Real a_dt) = 0;
+
+  /*!
     @brief Explicit RK2 advance
   */
   virtual void advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real a_alpha);
@@ -147,7 +157,8 @@ public:
   virtual void compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt); 
 
   /*!
-    @brief Compute the right-hand side using supplied solution
+    @brief Compute the right-hand side using supplied solution. This is the basic function that is required for using the method
+    of lines (MOL)
   */
   virtual void compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt);
 

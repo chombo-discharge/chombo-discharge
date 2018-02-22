@@ -6,8 +6,8 @@ rod2d_main.potential = 6.E3
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -3E-3 -3E-3
-physical_domain.hi_corner =  3E-3  3E-3
+physical_domain.lo_corner = -2E-3 -2E-3
+physical_domain.hi_corner =  2E-3  2E-3
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -20,8 +20,8 @@ rod_sphere.electrode_live            = true                             # Live e
 rod_sphere.electrode_radius          = 200.E-6                          # Electrode radius
 rod_sphere.electrode_center1         = 0.0 0.0 0E-2                     # Center 1
 rod_sphere.electrode_center2         = 0.0 1.0 0E-2                     # Center 2
-rod_sphere.dielectric_permittivity   = 5.0                              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0.0 -1.E-3 0.0                 # Dielectric center
+rod_sphere.dielectric_permittivity   = 2.0                              # Dielectric permittivity
+rod_sphere.dielectric_center         = 0.0 -500.E-6 0.0                 # Dielectric center
 rod_sphere.dielectric_radius         = 300E-6                           # Dielectric radius
 
 # ====================================================================================================

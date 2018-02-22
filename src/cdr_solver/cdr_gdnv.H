@@ -36,6 +36,11 @@ public:
   virtual ~cdr_gdnv();
 
   /*!
+    @brief Advective advance
+  */
+  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
+
+  /*!
     @brief Query number of ghost cells
   */
   virtual int query_ghost() const;

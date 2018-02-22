@@ -356,9 +356,25 @@ protected:
   Real compute_e_2O2_to_O2minus_O2(const Real a_Te);
 
   /*!
-    @brief Rate constant for \f$O_2^- + O4^+ \rightarrow 3O_2\f$
+    @brief Rate constant for \f$O_2^- + O_4^+ \rightarrow 3O_2\f$
    */
   Real compute_O2minus_O4plus_to_3O2();
+
+  /*!
+    @brief Rate constant for \f$O_2^- + O_4^+ + M \rightarrow 3O_2 + M\f$
+  */
+  Real compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg);
+
+  /*!
+    @brief Rate constant for \f$O_2^- + O_2^+ + M \rightarrow 2O_2 + M\f$
+  */
+  Real compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg);
+
+  /*!
+    @brief Rate constant for \f$e + O_2 \rightarrow e + 2O + M\f$
+    @todo Function is not implemented (i.e. returns 0)
+  */
+  Real compute_e_O2_to_e_2O(const Real a_Te, const Real a_N);
 };
 
 #endif

@@ -6,6 +6,7 @@
 */
 
 #include "cdr_gdnv.H"
+#include "data_ops.H"
 
 #include <ExtrapAdvectBC.H>
 #include <EBArith.H>
@@ -43,6 +44,29 @@ cdr_gdnv::~cdr_gdnv(){
 
 int cdr_gdnv::query_ghost() const {
   return 3;
+}
+
+void cdr_gdnv::advance_advect(EBAMRCellData& a_state, const Real a_dt){
+  CH_TIME("cdr_solver::advance_advect");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_advect" << endl;
+  }
+
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+  
+  EBAMRCellData divF;
+  m_amr->allocate(divF, m_phase, ncomp);
+
+  
+  this->compute_divF(divF, a_state, 0.5*a_dt, true); // Compute div(n*v). Use semi-implicit extrapolation to half time steps
+  data_ops::incr(a_state, divF, a_dt);               // phi_new = phi_old + dt*divF
+
+  m_amr->average_down(a_state, m_phase);
+  m_amr->interp_ghost(a_state, m_phase);
+
+  data_ops::floor(a_state, 0.0);
 }
 
 void cdr_gdnv::set_divF_nc(const int a_which_divFnc){
