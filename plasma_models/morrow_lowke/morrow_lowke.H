@@ -25,11 +25,6 @@
       morrow_lowke.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
       morrow_lowke.gas_pressure                  = 1.0                   # Gas pressure
       morrow_lowke.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission
-      morrow_lowke.ionization_rate               = 1.E9                  # Background ionization (events/s)
-      morrow_lowke.electron_diffusion            = true                  # Electron diffusion on. Options are true/false	
-      morrow_lowke.electron_recombination        = 5.E-14                # Electron recombination rate
-      morrow_lowke.electron_detachment           = 1.E-18                # Electron detachment rate
-      morrow_lowke.ion_recombination             = 2.07E-12              # Ion recombination rate
       morrow_lowke.positive_species_mobility     = 2.E-4                 # Positive species mobility
       morrow_lowke.negative_species_mobility     = 2.E-4                 # Negative species mobility
       morrow_lowke.excitation_efficiency         = 0.6                   # Impact excitation efficiency
@@ -67,6 +62,79 @@ public:
     @brief Destructor
   */
   virtual ~morrow_lowke();
+
+  // ====================================================================================================
+// NEW FUNCTION SIGNATURES
+
+  virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
+							  const RealVect&     a_pos,
+							  const RealVect&     a_E,
+							  const Vector<Real>& a_cdr_densities) const {
+    return this->compute_diffusion_coefficients(a_E);
+  }
+  
+  virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
+						  const RealVect&     a_pos,
+						  const RealVect&     a_E,
+						  const Vector<Real>& a_cdr_densities) const {
+    return this->compute_velocities(a_E);
+  }
+
+  virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
+						const RealVect&         a_pos,
+						const RealVect&         a_E,
+						const RealVect&         a_gradE,
+						const Vector<Real>&     a_cdr_densities,
+						const Vector<Real>&     a_rte_densities,
+						const Vector<RealVect>& a_grad_cdr) const {
+    return this->compute_source_terms(a_cdr_densities, a_rte_densities, a_E);
+  }
+
+  virtual Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
+						    const RealVect&     a_pos,
+						    const RealVect&     a_normal,
+						    const RealVect&     a_E,
+						    const Vector<Real>& a_cdr_densities,
+						    const Vector<Real>& a_cdr_velocities,
+						    const Vector<Real>& a_rte_fluxes,
+						    const Vector<Real>& a_extrap_cdr_fluxes) const {
+    return this->compute_conductor_fluxes(a_extrap_cdr_fluxes,
+					  a_cdr_densities,
+					  a_cdr_velocities,
+					  a_rte_fluxes,
+					  a_E,
+					  a_pos,
+					  a_normal,
+					  a_time);
+  }
+
+  virtual Vector<Real> compute_cdr_dielectric_fluxes(const Real&         a_time,
+						     const RealVect&     a_pos,
+						     const RealVect&     a_normal,
+						     const RealVect&     a_E,
+						     const Vector<Real>& a_cdr_densities,
+						     const Vector<Real>& a_cdr_velocities,
+						     const Vector<Real>& a_rte_fluxes,
+						     const Vector<Real>& a_extrap_cdr_fluxes) const {
+    return this->compute_dielectric_fluxes(a_extrap_cdr_fluxes,
+					   a_cdr_densities,
+					   a_cdr_velocities,
+					   a_rte_fluxes,
+					   a_E,
+					   a_pos,
+					   a_normal,
+					   a_time);
+  }
+
+  /*!
+    @brief Compute the isotropic source terms for the RTE
+  */
+  virtual Vector<Real> compute_rte_source_terms(const Real&         a_time,
+						const RealVect&     a_pos,
+						const RealVect&     a_E,
+						const Vector<Real>& a_cdr_densities) const {
+    return this->compute_rte_source_terms(a_cdr_densities, a_E);
+  }
 
   /*!
     @brief Compute the velocity for an ion
@@ -145,7 +213,7 @@ public:
     @brief Set the initial surface charge
     @param[in] a_pos Position
   */
-  virtual Real initial_sigma(const RealVect& a_pos) const;
+  virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const;
 
 protected:
 
@@ -167,7 +235,7 @@ protected:
     /*!
       @brief Implementation of initial data
     */
-    virtual const Real initial_data(const RealVect a_pos, const Real a_time) const;
+    virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
 
     /*!
       @brief Set the noise function
@@ -223,7 +291,7 @@ protected:
     /*!
       @brief Implementation of initial data
     */
-    virtual const Real initial_data(const RealVect a_pos, const Real a_time) const;
+    virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
 
     /*!
       @brief Set the noise function
@@ -279,7 +347,7 @@ protected:
     /*!
       @brief Implementation of initial data
     */
-    virtual const Real initial_data(const RealVect a_pos, const Real a_time) const;
+    virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
 
     /*!
       @brief Set the noise function

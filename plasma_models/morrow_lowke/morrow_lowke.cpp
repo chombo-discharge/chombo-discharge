@@ -337,7 +337,7 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0); 
   for (int i = 0; i < m_num_species; i++){ // Set outflow first
-    fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
+    //    fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
@@ -345,7 +345,7 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon1_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon2_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon3_idx]*m_dielectric_yield;
-    fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
+    //    fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
 
 
@@ -464,7 +464,7 @@ Vector<Real> morrow_lowke::compute_rte_source_terms(const Vector<Real>& a_densit
   return ret;
 }
 
-Real morrow_lowke::initial_sigma(const RealVect& a_pos) const{
+Real morrow_lowke::initial_sigma(const Real a_time, const RealVect& a_pos) const{
   return 0.;
 }
 
@@ -472,6 +472,7 @@ morrow_lowke::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
   m_diffusive = true;
+  m_unit      = "m-3";
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -504,7 +505,7 @@ morrow_lowke::electron::electron(){
 morrow_lowke::electron::~electron(){
 }
 
-const Real morrow_lowke::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_lowke::electron::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
@@ -520,6 +521,7 @@ morrow_lowke::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
   m_diffusive = false;
+  m_unit      = "m-3";
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -544,7 +546,7 @@ morrow_lowke::positive_species::positive_species(){
 morrow_lowke::positive_species::~positive_species(){
 }
 
-const Real morrow_lowke::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_lowke::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
@@ -560,12 +562,13 @@ morrow_lowke::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
   m_diffusive = false;
+  m_unit      = "m-3";
 }
 
 morrow_lowke::negative_species::~negative_species(){
 }
 
-const Real morrow_lowke::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_lowke::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 
