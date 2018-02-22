@@ -339,13 +339,21 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
   for (int i = 0; i < m_num_species; i++){ // Set outflow first
     //    fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
+
+  if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
+    fluxes[m_nelec_idx] = Max(0.0, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons
+    fluxes[m_nminu_idx] = Max(0.0, a_extrapolated_fluxes[m_nminu_idx]); // Outflow for negative species
+  }
+  else if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
+    fluxes[m_nplus_idx] = Max(0.0, a_extrapolated_fluxes[m_nplus_idx]); // Outflow for positive species
+  }
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
   if(PolyGeom::dot(a_E, a_normal) <= 0.){
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon1_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon2_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon3_idx]*m_dielectric_yield;
-    //    fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
+    fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
 
 

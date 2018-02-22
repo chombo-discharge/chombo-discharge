@@ -316,6 +316,8 @@ void eddington_sp1::setup_gmg(){
       this->setup_euler();
     }
   }
+
+  m_needs_setup = false;
 }
 
 void eddington_sp1::set_coefficients(){
