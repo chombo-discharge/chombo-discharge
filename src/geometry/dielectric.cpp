@@ -39,7 +39,7 @@ const RefCountedPtr<BaseIF>& dielectric::get_function() const {
   return m_baseif;
 }
   
-const Real dielectric::get_permittivity(const RealVect a_pos) const {
+Real dielectric::get_permittivity(const RealVect a_pos) const {
   if(m_constant){
     return m_permittivity;
   }

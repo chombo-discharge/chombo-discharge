@@ -58,7 +58,7 @@ public:
   /*!
     @brief Number of phases
   */
-  virtual const int num_phases() const {
+  virtual int num_phases() const {
     return m_eblg.size();
   }
 

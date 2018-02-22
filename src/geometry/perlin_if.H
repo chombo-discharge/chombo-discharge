@@ -103,32 +103,32 @@ protected:
     @param[in] a_y Position
     @param[in] a_z Position
   */
-  const double noise(const double a_x, const double a_y, const double a_z) const;
+  double noise(const double a_x, const double a_y, const double a_z) const;
 
   /*!
     @brief Chombo interface to Perlin noise function
   */
-  const Real noise(const RealVect& a_pos) const;
+  Real noise(const RealVect& a_pos) const;
   
   /*!
     @brief Octave noise function
   */
-  const Real octaveNoise(const RealVect& a_pos) const;
+  Real octaveNoise(const RealVect& a_pos) const;
   
   /*!
     @brief Interpolation function
   */
-  const Real lerp(const Real t, const Real a, const Real b) const;
+  Real lerp(const Real t, const Real a, const Real b) const;
 
   /*!
     @brief Fade function
   */
-  const Real fade(const Real t) const;
+  Real fade(const Real t) const;
 
   /*!
     @brief Gradient function using hash table lookup
   */
-  const Real grad(const int hash, const double x, const double y, const double z) const;
+  Real grad(const int hash, const double x, const double y, const double z) const;
 };
 
 

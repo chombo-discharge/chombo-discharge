@@ -56,7 +56,7 @@ public:
   /*!
     @brief preAllocatable memory or not
   */
-  const static int preAllocatable();
+  static int preAllocatable();
 
   /*!
     @brief Return size in bytes

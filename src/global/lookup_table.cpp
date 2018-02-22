@@ -70,47 +70,7 @@ void lookup_table::operator-=(const lookup_table& a_table){
   }
 }
 
-Real lookup_table::get_entry(const Real a_x){
-
-  Real value;
-  
-  if(m_num_entries == 1){
-    value = m_y[0];
-  }
-  else {
-
-    // Find entry
-    int i = floor((a_x - m_x[0])/m_dx);
-
-
-    if(i < 0){
-      i = 0;
-#if lookup_table_verbose_warnings
-      pout() << "lookup_table::get_entry - entry excceds range (low end)" << endl;
-#endif
-    }
-    else if(i >= m_num_entries - 1){
-      i = m_num_entries - 2;
-#if lookup_table_verbose_warnings
-      pout() << "lookup_table::get_entry - entry excceds range (high end)" << endl;
-#endif
-    }
-
-
-    const int i_hi = i + 1;
-    const Real x0  = m_x[i];
-    const Real x1  = m_x[i_hi];
-    const Real y0  = m_y[i];
-    const Real y1  = m_y[i_hi];
-
-    value = y0 + ((y1-y0)/(x1-x0))*(a_x-x0);
-
-  }
-
-  return value;
-}
-
-const Real lookup_table::get_entry(const Real a_x) const {
+Real lookup_table::get_entry(const Real a_x) const {
 
   Real value;
   

@@ -144,14 +144,14 @@ public:
   /*!
     @brief Return number of ion equations
   */
-  const int get_num_species() const{
+  int get_num_species() const{
     return m_species.size();
   }
 
   /*!
     @brief Return number of RTE equations
   */
-  const int get_num_photons() const {
+  int get_num_photons() const {
     return m_photons.size();
   }
   

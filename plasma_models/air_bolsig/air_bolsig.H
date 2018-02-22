@@ -720,21 +720,21 @@ protected:
     /*!
       @brief Get the lambda coefficient
     */
-    const Real get_lambda() const {
+    Real get_lambda() const {
       return m_lambda;
     }
 
     /*!
       @brief Get the A-coefficient
     */
-    const Real get_A() const {
+    Real get_A() const {
       return m_A;
     }
 
     /*!
       @brief Get the partial oxygen pressure
     */
-    const Real get_pO2() const {
+    Real get_pO2() const {
       return m_pO2;
     }
 
@@ -778,21 +778,21 @@ protected:
     /*!
       @brief Get the lambda coefficient
     */
-    const Real get_lambda() const {
+    Real get_lambda() const {
       return m_lambda;
     }
 
     /*!
       @brief Get the A-coefficient
     */
-    const Real get_A() const {
+    Real get_A() const {
       return m_A;
     }
 
     /*!
       @brief Get the partial oxygen pressure
     */
-    const Real get_pO2() const {
+    Real get_pO2() const {
       return m_pO2;
     }
 
@@ -836,21 +836,21 @@ protected:
     /*!
       @brief Get the lambda coefficient
     */
-    const Real get_lambda() const {
+    Real get_lambda() const {
       return m_lambda;
     }
 
     /*!
       @brief Get the A-coefficient
     */
-    const Real get_A() const {
+    Real get_A() const {
       return m_A;
     }
 
     /*!
       @brief Get the partial oxygen pressure
     */
-    const Real get_pO2() const {
+    Real get_pO2() const {
       return m_pO2;
     }
 

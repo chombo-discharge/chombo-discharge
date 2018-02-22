@@ -35,7 +35,7 @@ public:
   /*!
     @brief 
   */
-  ~dielectric();
+  virtual ~dielectric();
 
   /*!
     @brief Define function
@@ -55,7 +55,7 @@ public:
   /*!
     @brief Get permittivity
   */
-  virtual const Real get_permittivity(const RealVect a_pos) const;
+  virtual Real get_permittivity(const RealVect a_pos) const;
 
 protected:
 

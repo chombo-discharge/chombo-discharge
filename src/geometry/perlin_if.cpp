@@ -120,8 +120,7 @@ void perlin_if::reseed(){
   }
 }
 
-//
-const double perlin_if::noise(const double a_x, const double a_y, const double a_z) const {
+double perlin_if::noise(const double a_x, const double a_y, const double a_z) const {
 
   // Lower cube corner
   const int X = (int) std::floor(a_x) & 255;
@@ -157,8 +156,7 @@ const double perlin_if::noise(const double a_x, const double a_y, const double a
 			         grad(p[BB+1], x-1, y-1, z-1 ))));
 }
 
-//
-const Real perlin_if::noise(const RealVect& a_pos) const {
+Real perlin_if::noise(const RealVect& a_pos) const {
 
   Real x, y, z;
   x = a_pos[0];
@@ -173,8 +171,7 @@ const Real perlin_if::noise(const RealVect& a_pos) const {
   return 0.5*noise(x, y, z) + 0.5;
 }
 
-//
-const Real perlin_if::octaveNoise(const RealVect& a_pos) const {
+Real perlin_if::octaveNoise(const RealVect& a_pos) const {
   Real result = 0.0;
 
   //
@@ -197,18 +194,15 @@ const Real perlin_if::octaveNoise(const RealVect& a_pos) const {
   return result;
 }
 
-//
-const Real perlin_if::lerp(const Real t, const Real a, const Real b) const {
+Real perlin_if::lerp(const Real t, const Real a, const Real b) const {
   return a + t * (b - a);
 }
 
-//
-const Real perlin_if::fade(const Real t) const {
+Real perlin_if::fade(const Real t) const {
   return t * t * t * (t * (t * 6 - 15) + 10); 
 }
 
-//
-const Real perlin_if::grad(const int hash, const double x, const double y, const double z) const {
+Real perlin_if::grad(const int hash, const double x, const double y, const double z) const {
   const int h    = hash & 15;
   const double u = h < 8 ? x : y;
   const double v = h < 4 ? y : h == 12 || h == 14 ? x : y;

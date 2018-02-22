@@ -57,12 +57,7 @@ public:
   /*!
     @brief Get entry
   */
-  virtual Real get_entry(const Real a_x);
-
-  /*!
-    @brief Get entry
-  */
-  virtual const Real get_entry(const Real a_x) const;
+  virtual Real get_entry(const Real a_x) const;
 
   /*!
     @brief Add a table to this one

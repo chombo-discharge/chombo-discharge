@@ -405,7 +405,7 @@ void eddington_sp1::set_bco_face(EBFluxFAB& a_bco, const RealVect a_origin, cons
     for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
       const FaceIndex& face  = faceit();
       const IntVect iv       = face.gridIndex(Side::Lo);
-      const RealVect pos     = a_origin + a_dx*iv + 0.5*a_dx*BASISV(dir);
+      const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
 
       const Real kappa = m_photon_group->get_kappa(pos);
       

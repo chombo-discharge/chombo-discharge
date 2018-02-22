@@ -40,7 +40,7 @@ void tags::copy(const Box&        a_region_from,
   m_ivs = a_src.m_ivs;
 }
 
-const int tags::preAllocatable(){
+int tags::preAllocatable(){
   return 2; // Dynamic object
 }
 
