@@ -19,7 +19,7 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_solvers.resize(m_species.size());
 
   
-  std::string str = "scharfetter-gummel"; // Default
+  std::string str = "godunov"; // Default
   
   { // Get solver type from input script
     ParmParse pp("cdr_layout");

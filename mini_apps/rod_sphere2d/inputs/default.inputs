@@ -71,8 +71,8 @@ plasma_engine.max_steps                       = 500           # Maximum number o
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
-plasma_engine.restart                         = false          # Do restart or not
-plasma_engine.restart_step                    = 90            # Restart step.
+plasma_engine.restart                         = true          # Do restart or not
+plasma_engine.restart_step                    = 160           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry

@@ -15,7 +15,7 @@
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
   m_name = "cdr_gdnv";
 
-  std::string str = "conservative_average";
+  std::string str = "covered_face";
   int which = 0;
 
   // Get options from input script
