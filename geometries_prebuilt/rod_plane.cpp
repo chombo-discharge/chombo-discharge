@@ -86,7 +86,7 @@ rod_plane::rod_plane(){
   bool noise_reseed        = false;           // Reseed
     
 
-  {
+  { // Get parameters
     ParmParse pp("rod_plane");
     Vector<Real> vec(SpaceDim);
     std::string str;

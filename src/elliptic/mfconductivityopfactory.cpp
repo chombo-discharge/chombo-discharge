@@ -100,12 +100,12 @@ void mfconductivityopfactory::define_multigrid_stuff(){
   m_grids_mg.resize(m_num_levels);
   m_aveop_mg.resize(m_num_levels);
   m_domains_mg.resize(m_num_levels);
-  m_has_mg_objects.resize(m_num_levels);
+  m_has_mg_objects.resize(m_num_levels, false);
   m_layout_changed.resize(m_num_levels);
   m_layout_changed_mg.resize(m_num_levels);
   m_aveop_mg.resize(m_num_levels);
   m_jump_mg.resize(m_num_levels);
-    
+
   for (int lvl = 0; lvl < m_num_levels; lvl++){
     if(lvl == 0 || m_ref_rat[lvl] > 2) { // Must be able to generate MultiGrid objects for bottom level and if ref > 2
 	
@@ -138,6 +138,10 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       ProblemDomain cur_domain = m_domains[lvl];
 
       has_coarser = m_test_ref < m_max_box_size;
+
+      if(!has_coarser){
+	m_has_mg_objects[lvl] = false;
+      }
       while(has_coarser){ 
 
 	int imgsize = m_grids_mg[lvl].size();
@@ -466,7 +470,7 @@ void mfconductivityopfactory::average_down_mg(){
     }
   }
 #if verb // DEBUG
-  pout() << "mfconductivityopfactory::average_down_mg - done " << endl;
+  pout() << "mfconductivityopfactory::average_down_mg - done exit " << endl;
 #endif
 }
 
@@ -504,13 +508,13 @@ void mfconductivityopfactory::set_jump(const EBAMRIVData& a_sigma, const Real& a
 
     m_jump[lvl]->exchange();
   }
-  
-#if verb
-  pout() << "mfconductivityopfactory::set_jump(data based) - done" << endl;
-#endif
 
   this->average_down_amr();
   this->average_down_mg();
+
+  #if verb
+  pout() << "mfconductivityopfactory::set_jump(data based) - done" << endl;
+#endif
 }
 
 void mfconductivityopfactory::set_electrodes(const Vector<electrode>&            a_electrodes,
@@ -673,6 +677,10 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
     }
   }
 
+#if verb
+  pout() << "creating oper" << endl;
+#endif
+
   mfconductivityop* oper = new mfconductivityop();
 
   oper->define(m_mfis,           // Set from factory
@@ -793,6 +801,9 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 
 
   if(has_coar){
+#if verb
+    pout() << "setting coarse stuff" << endl;
+#endif
     const int coar_lvl = ref - 1;
     mflg_coar   = m_mflg[coar_lvl];
     ref_to_coar = m_ref_rat[coar_lvl];
@@ -800,16 +811,24 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
   }
 
   if(has_fine){
+#if verb
+    pout() << "setting fine stuff" << endl;
+#endif
     mflg_fine   = m_mflg[ref + 1];
     ref_to_fine = m_ref_rat[ref];
   }
 
   if(has_mg){
+#if verb
+    pout() << "setting mg stuff" << endl;
+#endif
     const int next_coarser = 1;
     mflg_coar_mg = m_mflg_mg[ref][next_coarser];  // Coarser state 
   }
-  
 
+#if verb
+  pout() << "creating oper" << endl;
+#endif
   mfconductivityop* oper = new mfconductivityop();
 
   oper->define(m_mfis,
@@ -838,7 +857,9 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 	       alpha,
 	       beta,
 	       m_origin);
-
+#if verb
+  pout() << "setting jump" << endl;
+#endif
   oper->set_jump(jump);
   oper->set_electrodes(m_electrodes, m_potential);
 

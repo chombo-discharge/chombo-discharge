@@ -817,8 +817,13 @@ void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
     mfalias::aliasMF(*m_alias[3], iphase, a_phiCoarse);
 
     mfconductivityop* finerOp = (mfconductivityop*) a_finerOp;
-
+#if verb
+    pout() << "mfconductivityop::AMROperator - apply ebconductivityops" << endl;
+#endif
     m_ebops[iphase]->AMROperator(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_homogeneousBC, finerOp->m_ebops[iphase]);
+#if verb
+    pout() << "mfconductivityop::AMROperator - apply ebconductivityops - done" << endl;
+#endif
   }
 
 										 
