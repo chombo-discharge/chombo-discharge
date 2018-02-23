@@ -365,8 +365,8 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    grad_cdr[idx] = new EBAMRCellData();
-    m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);   // Allocate
+    grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
+    m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);  // Allocate
 
     m_amr->compute_gradient(*grad_cdr[idx], *a_cdr_densities[idx]); // Compute grad()
     m_amr->average_down(*grad_cdr[idx], m_cdr->get_phase());        // Average down
@@ -503,6 +503,12 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	}
       }
     }
+  }
+
+  // Delete extra storage - didn't use smart pointers for this...
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    delete grad_cdr[idx];
   }
 
   // Average down
@@ -753,7 +759,7 @@ void time_stepper::compute_cdr_diffusion(){
   Vector<EBAMRIVData*> cdr_extrap(num_species);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    cdr_extrap[idx] = new EBAMRIVData();
+    cdr_extrap[idx] = new EBAMRIVData();  // This must be delete
     m_amr->allocate(*cdr_extrap[idx], m_cdr->get_phase(), ncomp);
 
     const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
@@ -765,6 +771,11 @@ void time_stepper::compute_cdr_diffusion(){
 
   this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
   this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, E_eb,   m_time);
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    delete cdr_extrap[idx];
+  }
 }
 
 void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){

@@ -1375,7 +1375,7 @@ void amr_mesh::set_redist_rad(const int a_redist_rad){
   CH_TIME("amr_mesh::set_redist_rads");
   m_redist_rad = a_redist_rad;
 
-  int rad;
+  int rad = 1;
   ParmParse pp("amr");
   pp.query("redist_radius", rad);
   if(rad == 1 || rad == 2){
@@ -1388,7 +1388,7 @@ void amr_mesh::set_irreg_sten_type(const stencil_type::which_type a_type){
   m_stencil_type = a_type;
 
   
-  std::string str;
+  std::string str = "taylor";
   ParmParse pp("amr");
   pp.query("stencil_type", str);
   if(str == "linear"){
@@ -1406,7 +1406,7 @@ void amr_mesh::set_irreg_sten_order(const int a_irreg_sten_order){
   CH_TIME("amr_mesh::irreg_sten_order");
   m_irreg_sten_order = a_irreg_sten_order;
 
-  int order;
+  int order = 1;
   ParmParse pp("amr");
   pp.query("stencil_order", order);
   if(order == 1 || order == 2){
@@ -1418,7 +1418,7 @@ void amr_mesh::set_irreg_sten_radius(const int a_irreg_sten_radius){
   CH_TIME("amr_mesh::irreg_sten_radius");
   m_irreg_sten_radius = a_irreg_sten_radius;
 
-  int radius;
+  int radius = 1;
   ParmParse pp("amr");
   pp.query("stencil_radius", radius);
   if(radius == 1 || radius == 2){

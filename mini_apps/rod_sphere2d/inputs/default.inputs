@@ -28,14 +28,14 @@ rod_sphere.dielectric_radius         = 200E-6                           # Dielec
 # AMR SETTINGS
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
-amr.max_sim_depth   = 2           # Maximum simulation depth
+amr.coarsest_domain = 32 32 32    # Number of cells on coarsest domain
+amr.max_amr_depth   = 1           # Maximum amr depth
+amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8          # Blocking factor
-amr.max_box_size    = 32          # Maximum allowed box size
-amr.ref_rat         = 4 4 2 2 2 2 # Refinement ratios. 
+amr.max_box_size    = 16          # Maximum allowed box size
+amr.ref_rat         = 2 4 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws

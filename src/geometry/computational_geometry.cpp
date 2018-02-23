@@ -79,6 +79,12 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
 		 geoservers,
 		 a_nCellMax,
 		 a_maxCoarsen);
+
+  for (int i = 0; i < 2; i++){
+    if(geoservers[i] != NULL){
+      delete geoservers[i];
+    }
+  }
 }
 
 void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,

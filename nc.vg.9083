@@ -1,0 +1,206 @@
+==9083== Memcheck, a memory error detector
+==9083== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==9083== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==9083== Command: ./main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex inputs/default.inputs
+==9083== Parent PID: 9081
+==9083== 
+==9083== Syscall param write(buf) points to uninitialised byte(s)
+==9083==    at 0x5FFA4BD: ??? (syscall-template.S:84)
+==9083==    by 0x1B7DC0C3: ADIOI_GEN_WriteContig (in /usr/lib/openmpi/lib/openmpi/mca_io_romio.so)
+==9083==    by 0x1B7C27C4: MPIOI_File_write (in /usr/lib/openmpi/lib/openmpi/mca_io_romio.so)
+==9083==    by 0x1B7C3190: mca_io_romio_dist_MPI_File_write_at (in /usr/lib/openmpi/lib/openmpi/mca_io_romio.so)
+==9083==    by 0x54EC8B4: PMPI_File_write_at (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0xA9DE65: H5FD_mpio_write (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xA9A979: H5FD_write (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xA8CC7B: H5F__accum_write (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xA8DC71: H5F_block_write (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xBFA987: H5D__contig_writevv_cb (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xBD09D9: H5VM_opvv (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xBFA631: H5D__contig_writevv (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==  Address 0x1893f031 is 17 bytes inside a block of size 80 alloc'd
+==9083==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x86765D: std::vector<Box, std::allocator<Box> >::_M_default_append(unsigned long) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x869EE9: Vector<Box>::resize(unsigned int) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x962754: write(HDF5Handle&, BoxLayout const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x994434: int writeLevel<LevelData<FArrayBox> >(HDF5Handle&, int const&, LevelData<FArrayBox> const&, double const&, double const&, double const&, Box const&, int const&, IntVect const&, Interval const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x9871B4: WriteAMRHierarchyHDF5(HDF5Handle&, Vector<DisjointBoxLayout> const&, Vector<LevelData<FArrayBox>*> const&, Vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > const&, Box const&, double const&, double const&, double const&, Vector<int> const&, int const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x98770F: WriteAMRHierarchyHDF5(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Vector<DisjointBoxLayout> const&, Vector<LevelData<FArrayBox>*> const&, Vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > const&, Box const&, double const&, double const&, double const&, Vector<int> const&, int const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x789B70: writeEBHDF5(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Vector<DisjointBoxLayout> const&, Vector<LevelData<EBCellFAB>*> const*, Vector<LevelData<EBCellFAB>*> const*, Vector<LevelData<FArrayBox>*> const*, Vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > const&, ProblemDomain const&, double const&, double const&, double const&, Vector<int> const&, int const&, bool const&, Vector<double> const&, IntVect) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x789EF0: writeEBHDF5(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Vector<DisjointBoxLayout> const&, Vector<LevelData<EBCellFAB>*> const&, Vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > const&, ProblemDomain const&, double const&, double const&, double const&, Vector<int> const&, int const&, bool const&, Vector<double> const&, IntVect) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x62FF75: plasma_engine::write_plot_file() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x622FC8: plasma_engine::setup(int, bool, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x624EE4: plasma_engine::setup_and_run() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 
+==9083== Process terminating with default action of signal 15 (SIGTERM)
+==9083==    at 0x6301B5D: ??? (syscall-template.S:84)
+==9083==    by 0x6AB9E57: ??? (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6AB06FA: opal_libevent2021_event_base_loop (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6814B8D: ??? (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x5FF16B9: start_thread (pthread_create.c:333)
+==9083==    by 0x630D82C: clone (clone.S:109)
+==9083== 
+==9083== HEAP SUMMARY:
+==9083==     in use at exit: 24,019,542 bytes in 171,009 blocks
+==9083==   total heap usage: 5,832,864 allocs, 5,661,855 frees, 355,729,588 bytes allocated
+==9083== 
+==9083== 2 bytes in 1 blocks are definitely lost in loss record 1,083 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x62918D9: strdup (strdup.c:42)
+==9083==    by 0x9786655: ??? (in /usr/lib/openmpi/lib/openmpi/mca_db_hash.so)
+==9083==    by 0x6AABCC6: opal_db_base_store (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x680C424: orte_util_decode_pidmap (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x680CA96: orte_util_nidmap_init (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x8759536: ??? (in /usr/lib/openmpi/lib/openmpi/mca_ess_env.so)
+==9083==    by 0x67F3605: orte_init (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x54B3A5E: ompi_mpi_init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54D254C: PMPI_Init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x40EA12: main (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 2 bytes in 1 blocks are definitely lost in loss record 1,084 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x62918D9: strdup (strdup.c:42)
+==9083==    by 0x97874C1: ??? (in /usr/lib/openmpi/lib/openmpi/mca_db_hash.so)
+==9083==    by 0x6AABF09: opal_db_base_fetch (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x54B086C: ompi_proc_set_locality (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54B0913: ompi_proc_complete_init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54B40B4: ompi_mpi_init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54D254C: PMPI_Init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x40EA12: main (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 16 bytes in 1 blocks are definitely lost in loss record 9,767 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x9787463: ??? (in /usr/lib/openmpi/lib/openmpi/mca_db_hash.so)
+==9083==    by 0x6AABF09: opal_db_base_fetch (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x55024FC: ompi_rte_db_fetch (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54B6610: ompi_modex_recv (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0xB7E6B0F: ??? (in /usr/lib/openmpi/lib/openmpi/mca_btl_vader.so)
+==9083==    by 0xB5E16B2: ??? (in /usr/lib/openmpi/lib/openmpi/mca_bml_r2.so)
+==9083==    by 0xC8E3C19: mca_pml_ob1_add_procs (in /usr/lib/openmpi/lib/openmpi/mca_pml_ob1.so)
+==9083==    by 0x54B4108: ompi_mpi_init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54D254C: PMPI_Init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x40EA12: main (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 16 bytes in 1 blocks are definitely lost in loss record 9,768 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x9787463: ??? (in /usr/lib/openmpi/lib/openmpi/mca_db_hash.so)
+==9083==    by 0x6AABF09: opal_db_base_fetch (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x55024FC: ompi_rte_db_fetch (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54B6610: ompi_modex_recv (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0xB9F50F4: mca_btl_tcp_proc_create (in /usr/lib/openmpi/lib/openmpi/mca_btl_tcp.so)
+==9083==    by 0xB9F01BE: mca_btl_tcp_del_procs (in /usr/lib/openmpi/lib/openmpi/mca_btl_tcp.so)
+==9083==    by 0xB5E180D: ??? (in /usr/lib/openmpi/lib/openmpi/mca_bml_r2.so)
+==9083==    by 0xC8E3C19: mca_pml_ob1_add_procs (in /usr/lib/openmpi/lib/openmpi/mca_pml_ob1.so)
+==9083==    by 0x54B4108: ompi_mpi_init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54D254C: PMPI_Init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x40EA12: main (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 16 bytes in 2 blocks are definitely lost in loss record 9,769 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x1B7BCEA5: ??? (in /usr/lib/openmpi/lib/openmpi/mca_io_romio.so)
+==9083==    by 0x54F7778: mca_io_base_file_select (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54AB8EB: ompi_file_open (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54E9EE8: PMPI_File_open (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0xA9E8C8: H5FD_mpio_open (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xA94C05: H5FD_open (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xA8A4C7: H5F_open (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0xA84F46: H5Fcreate (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x95F146: HDF5Handle::open(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, HDF5Handle::mode, char const*) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x95F581: HDF5Handle::HDF5Handle(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, HDF5Handle::mode, char const*) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x98768E: WriteAMRHierarchyHDF5(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Vector<DisjointBoxLayout> const&, Vector<LevelData<FArrayBox>*> const&, Vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > const&, Box const&, double const&, double const&, double const&, Vector<int> const&, int const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 40 (16 direct, 24 indirect) bytes in 1 blocks are definitely lost in loss record 15,753 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x9787463: ??? (in /usr/lib/openmpi/lib/openmpi/mca_db_hash.so)
+==9083==    by 0x6AABF09: opal_db_base_fetch (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x55024FC: ompi_rte_db_fetch (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54B6610: ompi_modex_recv (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0xB9F50F4: mca_btl_tcp_proc_create (in /usr/lib/openmpi/lib/openmpi/mca_btl_tcp.so)
+==9083==    by 0xB9F0A4E: mca_btl_tcp_add_procs (in /usr/lib/openmpi/lib/openmpi/mca_btl_tcp.so)
+==9083==    by 0xB5E16B2: ??? (in /usr/lib/openmpi/lib/openmpi/mca_bml_r2.so)
+==9083==    by 0xC8E3C19: mca_pml_ob1_add_procs (in /usr/lib/openmpi/lib/openmpi/mca_pml_ob1.so)
+==9083==    by 0x54B4108: ompi_mpi_init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54D254C: PMPI_Init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x40EA12: main (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 127 bytes in 3 blocks are definitely lost in loss record 22,765 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x6A7F614: opal_dss_copy_value (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x978722F: ??? (in /usr/lib/openmpi/lib/openmpi/mca_db_hash.so)
+==9083==    by 0x6AAC079: opal_db_base_fetch_multiple (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6818B62: orte_grpcomm_base_pack_modex_entries (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x6819165: orte_grpcomm_base_modex (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x6AB0D18: opal_libevent2021_event_base_loop (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6814B8D: ??? (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x5FF16B9: start_thread (pthread_create.c:333)
+==9083==    by 0x630D82C: clone (clone.S:109)
+==9083== 
+==9083== 127 bytes in 3 blocks are definitely lost in loss record 22,766 of 30,429
+==9083==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x6A84E7F: opal_dss_unpack_value (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6A821BE: opal_dss_unpack_buffer (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6A830DD: opal_dss_unpack (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x68189A8: orte_grpcomm_base_store_modex (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x681992C: ??? (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x68351F0: orte_rml_base_process_msg (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x6AB0D18: opal_libevent2021_event_base_loop (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6814B8D: ??? (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x5FF16B9: start_thread (pthread_create.c:333)
+==9083==    by 0x630D82C: clone (clone.S:109)
+==9083== 
+==9083== 304 bytes in 1 blocks are possibly lost in loss record 26,288 of 30,429
+==9083==    at 0x4C2FB55: calloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x40136D4: allocate_dtv (dl-tls.c:322)
+==9083==    by 0x40136D4: _dl_allocate_tls (dl-tls.c:539)
+==9083==    by 0x5FF226E: allocate_stack (allocatestack.c:588)
+==9083==    by 0x5FF226E: pthread_create@@GLIBC_2.2.5 (pthread_create.c:539)
+==9083==    by 0x6A7E8B5: opal_thread_start (in /usr/lib/openmpi/lib/libopen-pal.so.13.0.2)
+==9083==    by 0x6815088: orte_ess_base_app_setup (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x8759529: ??? (in /usr/lib/openmpi/lib/openmpi/mca_ess_env.so)
+==9083==    by 0x67F3605: orte_init (in /usr/lib/openmpi/lib/libopen-rte.so.12.0.2)
+==9083==    by 0x54B3A5E: ompi_mpi_init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x54D254C: PMPI_Init (in /usr/lib/openmpi/lib/libmpi.so.12.0.2)
+==9083==    by 0x40EA12: main (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 13,300 (8,512 direct, 4,788 indirect) bytes in 8 blocks are definitely lost in loss record 30,101 of 30,429
+==9083==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x5B2477: mfconductivityop::define(RefCountedPtr<mfis, RCPPointerPolicy> const&, RefCountedPtr<BaseDomainBCFactory, RCPPointerPolicy> const&, RefCountedPtr<LevelData<MFCellFAB>, RCPPointerPolicy> const&, RefCountedPtr<LevelData<MFFluxFAB>, RCPPointerPolicy> const&, RefCountedPtr<LevelData<MFBaseIVFAB>, RCPPointerPolicy> const&, MFQuadCFInterp const&, MFLevelGrid const&, MFLevelGrid const&, MFLevelGrid const&, MFLevelGrid const&, ProblemDomain const&, bool const&, bool const&, bool const&, bool const&, int const&, int const&, int const&, int const&, IntVect const&, IntVect const&, double const&, double const&, double const&, double const&, RealVect const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x5673BA: mfconductivityopfactory::AMRnewOp(ProblemDomain const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x676817: AMRMultiGrid<LevelData<MFCellFAB> >::define(ProblemDomain const&, AMRLevelOpFactory<LevelData<MFCellFAB> >&, LinearSolver<LevelData<MFCellFAB> >*, int) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x663D83: poisson_multifluid_gmg::setup_solver() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x65D15D: poisson_multifluid_gmg::setup_gmg() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x65F1DA: poisson_multifluid_gmg::solve(Vector<RefCountedPtr<LevelData<MFCellFAB>, RCPPointerPolicy> >&, Vector<RefCountedPtr<LevelData<MFCellFAB>, RCPPointerPolicy> > const&, Vector<RefCountedPtr<LevelData<BaseIVFAB<double> >, RCPPointerPolicy> > const&, bool) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x5FDC26: time_stepper::solve_poisson() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x620193: plasma_engine::setup_fresh(int) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x62300B: plasma_engine::setup(int, bool, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x624EE4: plasma_engine::setup_and_run() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x40EDB2: main (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== 34,688 (21,280 direct, 13,408 indirect) bytes in 20 blocks are definitely lost in loss record 30,302 of 30,429
+==9083==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==9083==    by 0x5B2477: mfconductivityop::define(RefCountedPtr<mfis, RCPPointerPolicy> const&, RefCountedPtr<BaseDomainBCFactory, RCPPointerPolicy> const&, RefCountedPtr<LevelData<MFCellFAB>, RCPPointerPolicy> const&, RefCountedPtr<LevelData<MFFluxFAB>, RCPPointerPolicy> const&, RefCountedPtr<LevelData<MFBaseIVFAB>, RCPPointerPolicy> const&, MFQuadCFInterp const&, MFLevelGrid const&, MFLevelGrid const&, MFLevelGrid const&, MFLevelGrid const&, ProblemDomain const&, bool const&, bool const&, bool const&, bool const&, int const&, int const&, int const&, int const&, IntVect const&, IntVect const&, double const&, double const&, double const&, double const&, RealVect const&) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x5687CD: mfconductivityopfactory::MGnewOp(ProblemDomain const&, int, bool) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x67504A: MultiGrid<LevelData<MFCellFAB> >::define(MGLevelOpFactory<LevelData<MFCellFAB> >&, LinearSolver<LevelData<MFCellFAB> >*, ProblemDomain const&, int, MGLevelOp<LevelData<MFCellFAB> >*) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x676880: AMRMultiGrid<LevelData<MFCellFAB> >::define(ProblemDomain const&, AMRLevelOpFactory<LevelData<MFCellFAB> >&, LinearSolver<LevelData<MFCellFAB> >*, int) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x663D83: poisson_multifluid_gmg::setup_solver() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x65D15D: poisson_multifluid_gmg::setup_gmg() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x65F1DA: poisson_multifluid_gmg::solve(Vector<RefCountedPtr<LevelData<MFCellFAB>, RCPPointerPolicy> >&, Vector<RefCountedPtr<LevelData<MFCellFAB>, RCPPointerPolicy> > const&, Vector<RefCountedPtr<LevelData<BaseIVFAB<double> >, RCPPointerPolicy> > const&, bool) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x5FDC26: time_stepper::solve_poisson() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x620193: plasma_engine::setup_fresh(int) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x62300B: plasma_engine::setup(int, bool, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083==    by 0x624EE4: plasma_engine::setup_and_run() (in /home/robertm/Projects/chombo-streamer/mini_apps/rod_sphere2d/main2d.Linux.64.mpicxx.gfortran.OPT.MPI.ex)
+==9083== 
+==9083== LEAK SUMMARY:
+==9083==    definitely lost: 30,114 bytes in 41 blocks
+==9083==    indirectly lost: 18,220 bytes in 1,059 blocks
+==9083==      possibly lost: 304 bytes in 1 blocks
+==9083==    still reachable: 23,970,904 bytes in 169,908 blocks
+==9083==                       of which reachable via heuristic:
+==9083==                         newarray           : 5,896 bytes in 167 blocks
+==9083==         suppressed: 0 bytes in 0 blocks
+==9083== Reachable blocks (those to which a pointer was found) are not shown.
+==9083== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==9083== 
+==9083== For counts of detected and suppressed errors, rerun with: -v
+==9083== Use --track-origins=yes to see where uninitialised values come from
+==9083== ERROR SUMMARY: 17 errors from 12 contexts (suppressed: 0 from 0)

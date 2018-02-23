@@ -88,6 +88,7 @@ void cdr_gdnv::allocate_internals(){
   cdr_solver::allocate_internals();
 
   if(m_which_divFnc == 1){
+    //    this->delete_covered();
     this->allocate_covered();
   }
   if(m_diffusive){
@@ -216,6 +217,35 @@ void cdr_gdnv::allocate_covered(){
 	(*m_covered_velo_hi[lvl])[dit()][dir]->setVal(0.0);
 	(*m_covered_phi_lo[lvl])[dit()][dir]->setVal(0.0);
 	(*m_covered_phi_hi[lvl])[dit()][dir]->setVal(0.0);
+      }
+    }
+  }
+}
+
+void cdr_gdnv::delete_covered(){
+  CH_TIME("cdr_solver::delete_covered");
+  if(m_verbosity > 5){
+    pout() << m_name + "::delete_covered" << endl;
+  }
+
+  for (int lvl = 0; lvl < m_covered_velo_lo.size(); lvl++){
+    const BoxLayout& dbl = m_covered_velo_lo[lvl]->boxLayout();
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      for (int dir = 0; dir < SpaceDim; dir++){
+
+	if((*m_covered_velo_lo[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_velo_lo[lvl])[dit()][dir];
+	}
+	if((*m_covered_velo_hi[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_velo_hi[lvl])[dit()][dir];
+	}
+	if((*m_covered_phi_lo[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_phi_lo[lvl])[dit()][dir];
+	}
+	if((*m_covered_phi_hi[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_phi_hi[lvl])[dit()][dir];
+	}
       }
     }
   }
@@ -404,7 +434,9 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   }
 }
 
-void cdr_gdnv::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state){
+void cdr_gdnv::nonconservative_divergence(EBAMRIVData&         a_div_nc,
+					  const EBAMRCellData& a_divF,
+					  const EBAMRFluxData& a_face_state){
   CH_TIME("cdr_gdnv::nonconservative_divergence");
   if(m_verbosity > 5){
     pout() << m_name + "::nonconservative_divergence" << endl;
@@ -455,4 +487,15 @@ void cdr_gdnv::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCell
   else{
     MayDay::Abort("cdr_gdnv::nonconservative_divergence - unknown type for div(F)_nc");
   }
+}
+
+void cdr_gdnv::regrid(const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("cdr_gdnv::regrid");
+  if(m_verbosity > 5){
+    pout() << m_name + "::regrid" << endl;
+  }
+
+  this->delete_covered();
+
+  cdr_solver::regrid(a_old_finest_level, a_new_finest_level);
 }

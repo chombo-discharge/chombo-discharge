@@ -54,6 +54,11 @@ public:
     @brief Set the nonconservative divergence method. Use = 0 for div(F)_nc = sum(divF(c))/norm, 1 for covered face extrapolation.
   */
   virtual void set_divF_nc(const int a_which_divFnc);
+
+  /*!
+    @brief Regrid internals
+  */
+  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
   
 protected:
 
@@ -61,6 +66,11 @@ protected:
     @brief Allocate covered stuff
   */
   virtual void allocate_covered();
+
+  /*!
+    @brief Delete covered storage
+  */
+  virtual void delete_covered();
 
   /*!
     @brief Extrapolate velocity to covered faces
