@@ -492,6 +492,16 @@ protected:
     @brief Regrid internal storage for this class
   */
   virtual void regrid_internals(const int a_old_finest_level, const int a_new_finest_level);
+
+  /*!
+    @brief Write a regrid report
+  */
+  virtual void regrid_report(const Real a_total_time,
+			     const Real a_tag_time,
+			     const Real a_base_regrid_time,
+			     const Real a_solver_regrid_time,
+			     const Real a_elliptic_solve_time,
+			     const Real a_solver_filling_time);
   
   /*!
     @brief Set the computational geometry

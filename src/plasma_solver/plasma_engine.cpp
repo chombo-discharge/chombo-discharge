@@ -890,16 +890,23 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   Vector<IntVectSet> tags;
 
+  const Real start_time = MPI_Wtime();
   // engine and solvers must cache their internal states
   m_timestepper->cache_states();
 
   // Tag cells and cache them
   this->tag_cells(tags, m_tags); 
   this->cache_tags(m_tags);      // Cache m_tags  because after regrid, ownership will change
+  
+  const Real cell_tags = MPI_Wtime();
 
   // Regrid base
   const int old_finest_level = m_amr->get_finest_level();
   m_amr->regrid(tags, old_finest_level + 1);
+  
+  const Real base_regrid = MPI_Wtime(); // Base regrid time
+
+  Vector<long int> num_tags(1 + old_finest_level);
 
   const int new_finest_level = m_amr->get_finest_level();
   this->regrid_internals(old_finest_level, new_finest_level);        // Regrid internals for plasma_engine
@@ -911,6 +918,8 @@ void plasma_engine::regrid(const bool a_use_initial_data){
     m_timestepper->initial_data();
   }
 
+  const Real solver_regrid = MPI_Wtime(); // Solver regrid time
+
   // Solve the elliptic parts
   m_timestepper->solve_poisson();
   if(m_timestepper->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
@@ -918,12 +927,27 @@ void plasma_engine::regrid(const bool a_use_initial_data){
     m_timestepper->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
   }
 
+  const Real elliptic_solve = MPI_Wtime(); // Elliptic solve time
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
   m_timestepper->compute_cdr_diffusion(); 
   m_timestepper->compute_cdr_sources();
   m_timestepper->compute_rte_sources();
+
+  const Real solver_filling = MPI_Wtime();
+
+
+  const Real stop_time = MPI_Wtime();
+
+  if(m_verbosity > 1){
+    this->regrid_report(stop_time - start_time,
+			cell_tags - start_time,
+			base_regrid - cell_tags,
+			solver_regrid - base_regrid,
+			elliptic_solve - solver_regrid,
+			solver_filling - elliptic_solve);
+  }
 }
 
 void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_new_finest_level){
@@ -946,6 +970,41 @@ void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_n
     }
 #endif
   }
+}
+
+void plasma_engine::regrid_report(const Real a_total_time,
+				  const Real a_tag_time,
+				  const Real a_base_regrid_time,
+				  const Real a_solver_regrid_time,
+				  const Real a_elliptic_solve_time,
+				  const Real a_solver_filling_time){
+  CH_TIME("plasma_engine::regrid_report");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::regrid_report" << endl;
+  }
+
+  const Real elapsed    = a_total_time;
+  const int elapsed_hrs = floor(elapsed/3600);
+  const int elapsed_min = floor((elapsed - 3600*elapsed_hrs)/60);
+  const int elapsed_sec = floor( elapsed - 3600*elapsed_hrs - 60*elapsed_min);
+  const int elapsed_ms  = floor((elapsed - 3600*elapsed_hrs - 60*elapsed_min - elapsed_sec)*1000.);
+
+  char metrics[30];
+  sprintf(metrics, "%3.3ih %2.2im %2.2is %3.3ims",
+	  elapsed_hrs, 
+	  elapsed_min, 
+	  elapsed_sec, 
+	  elapsed_ms);
+
+  pout() << "-----------------------------------------------------------------------" << endl
+	 << "plasma_engine::regrid_report breakdown - Time step #" << m_step << endl
+	 << "\t\t\t" << "Total regrid time : " << metrics << endl
+	 << "\t\t\t" << "Cell tagging      : " << 100.*(a_tag_time/a_total_time) << "%" << endl
+    	 << "\t\t\t" << "Base regrid       : " << 100.*(a_base_regrid_time/a_total_time) << "%" << endl
+	 << "\t\t\t" << "Solver regrid     : " << 100.*(a_solver_regrid_time/a_total_time) << "%" << endl
+    	 << "\t\t\t" << "Elliptic solve    : " << 100.*(a_elliptic_solve_time/a_total_time) << "%" << endl
+	 << "\t\t\t" << "Solver filling    : " << 100.*(a_solver_filling_time/a_total_time) << "%" << endl
+	 << "-----------------------------------------------------------------------" << endl;
 }
 
 void plasma_engine::run(const Real a_start_time, const Real a_end_time, const int a_max_steps){
@@ -1037,7 +1096,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 
 #ifdef CH_USE_HDF5
       if(m_step%m_plot_interval == 0 && m_plot_interval > 0){
-	if(m_verbosity > 1){
+	if(m_verbosity > 2){
 	  pout() << "plasma_engine::run -- Writing plot file" << endl;
 	}
 	this->write_plot_file();
@@ -1045,7 +1104,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 
       // Write checkpoint file
       if(m_step % m_chk_interval == 0 && m_chk_interval > 0){
-	if(m_verbosity > 1){
+	if(m_verbosity > 2){
 	  pout() << "plasma_engine::run -- Writing checkpoint file" << endl;
 	}
 	this->write_checkpoint_file();
@@ -1701,7 +1760,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   const int remHrs = floor(remaining/3600);
   const int remMin = floor((remaining - 3600*remHrs)/60);
   const int remSec = floor( remaining - 3600*remHrs - 60*remMin);
-  const int remMs  = floor((remaining - remSec)*1000);
+  const int remMs  = floor((remaining - 3600*remHrs - 60*remMin - remSec)*1000);
 
   // Write a string with the previous iteration metrics
   sprintf(metrics, 

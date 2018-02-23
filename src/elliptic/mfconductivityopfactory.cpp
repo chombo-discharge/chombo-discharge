@@ -151,10 +151,10 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	bool layout_changed;
 
 	// Check if we have coarser stuff
-	has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,   // Grid
-						 domain_coar_mg, // Domain  
-						 fine_grid,      // Fine level grid
-						 domain_fine, //cur_domain,     // Current domain
+	has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,   // Coarsened grid
+						 domain_coar_mg, // Coarsened domain  
+						 fine_grid,      // Fine/current level
+						 domain_fine,    // Fine/current domain
 						 mg_refi,        // Refinement factor
 						 m_max_box_size, // 
 						 layout_changed, //
@@ -163,12 +163,14 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 
 	// For some reason getCoarserLayouts doesn't trigger correctly - I don't know what's wrong... :)
 	// Here is a (bad) solution
-#if 0
-	if(fine_grid.coarsenable(2*mg_refi)){
-	  has_coarser = true;
-	}
-	else{
-	  has_coarser = false;
+#if 1
+	if(has_coarser){
+	  if(fine_grid.coarsenable(2*mg_refi)){
+	    has_coarser = true;
+	  }
+	  else{
+	    has_coarser = false;
+	  }
 	}
 #endif
 
