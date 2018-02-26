@@ -45,7 +45,7 @@ rk2::poisson_storage::poisson_storage(const RefCountedPtr<amr_mesh>& a_amr, cons
 }
 
 rk2::poisson_storage::~poisson_storage(){
-
+  
 }
 
 void rk2::poisson_storage::allocate_storage(){

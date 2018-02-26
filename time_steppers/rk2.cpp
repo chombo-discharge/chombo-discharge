@@ -29,7 +29,7 @@ rk2::rk2() : time_stepper() {
 }
 
 rk2::~rk2(){
-
+  
 }
 
 RefCountedPtr<cdr_storage>& rk2::get_cdr_storage(const cdr_iterator& a_solverit){

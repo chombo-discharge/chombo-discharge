@@ -233,19 +233,10 @@ void cdr_gdnv::delete_covered(){
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       for (int dir = 0; dir < SpaceDim; dir++){
-
-	if((*m_covered_velo_lo[lvl])[dit()][dir] != NULL){
-	  delete (*m_covered_velo_lo[lvl])[dit()][dir];
-	}
-	if((*m_covered_velo_hi[lvl])[dit()][dir] != NULL){
-	  delete (*m_covered_velo_hi[lvl])[dit()][dir];
-	}
-	if((*m_covered_phi_lo[lvl])[dit()][dir] != NULL){
-	  delete (*m_covered_phi_lo[lvl])[dit()][dir];
-	}
-	if((*m_covered_phi_hi[lvl])[dit()][dir] != NULL){
-	  delete (*m_covered_phi_hi[lvl])[dit()][dir];
-	}
+	delete (*m_covered_velo_lo[lvl])[dit()][dir];
+	delete (*m_covered_velo_hi[lvl])[dit()][dir];
+	delete (*m_covered_phi_lo[lvl])[dit()][dir];
+	delete (*m_covered_phi_hi[lvl])[dit()][dir];
       }
     }
   }
