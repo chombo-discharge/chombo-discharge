@@ -118,9 +118,6 @@ public:
     @brief Compute the current density
   */
   virtual void compute_J(EBAMRCellData& a_J);
-
-// ====================================================================================================
-// NEW SIGNATURES BEGIN
   
   /*!
     @brief Compute diffusion things using whatever is available in the solvers

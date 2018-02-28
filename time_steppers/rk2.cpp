@@ -169,7 +169,6 @@ void rk2::compute_cdr_velo_at_start_of_time_step(){
     pout() << "rk2::compute_cdr_velo_at_start_of_time_step" << endl;
   }
 
-
   Vector<EBAMRCellData*> states     = m_cdr->get_states();
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
   this->compute_cdr_velocities(velocities, states, m_poisson_scratch->get_E_cell(), m_time);

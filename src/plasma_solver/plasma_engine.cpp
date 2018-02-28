@@ -338,6 +338,8 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
     m_amr->interp_ghost(scratch, cdr->get_phase());
     m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
 
+    data_ops::floor(scratch, 0.0);
+
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
