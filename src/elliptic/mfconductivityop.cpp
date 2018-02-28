@@ -14,7 +14,7 @@
 #include <BaseIVFactory.H>
 #include <EBAMRDataOps.H>
 
-#define verb 0
+#define verb 1
 
 mfconductivityop::mfconductivityop(){
 }

@@ -1344,14 +1344,13 @@ void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const 
   else{
     if(!a_restart){
       this->setup_fresh(a_init_regrids);
+#ifdef CH_USE_HDF5
+      this->write_plot_file();
+#endif
     }
     else{
       this->setup_for_restart(a_init_regrids, a_restart_file);
     }
-
-#ifdef CH_USE_HDF5
-    this->write_plot_file();
-#endif
   }
 }
 
@@ -1469,7 +1468,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_amr->set_num_ghost(m_timestepper->query_ghost());    // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
 
   this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
-  
+
   m_timestepper->solve_poisson();                       // Solve Poisson equation by 
   if(m_timestepper->stationary_rte()){                  // Solve RTE equations if stationary solvers
     const Real dummy_dt = 0.0;

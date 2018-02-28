@@ -22,9 +22,7 @@ public:
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  MFLevelGrid(){
-
-  }
+  MFLevelGrid();
 
   /*!
     @brief Full constructor. Does full allocation
@@ -32,79 +30,52 @@ public:
   MFLevelGrid(const DisjointBoxLayout&          a_dbl,
 	      const ProblemDomain&              a_domain,
 	      const int                         a_ebghost,
-	      const RefCountedPtr<mfis>&        a_mfis){
-    m_mfis = a_mfis;
-    m_eblg.resize(0);
-    for (int i = 0; i < a_mfis->num_phases(); i++){
-      m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_mfis->get_ebis(i)));
-    }
-  }
+	      const RefCountedPtr<mfis>&        a_mfis);
 
   /*!
     @brief Alternative full constructor - RefCounted storage so no allocation here
   */
-  MFLevelGrid(const RefCountedPtr<mfis>& a_mfis,
-	      const Vector<EBLevelGrid>& a_eblg){
-    this->define(a_mfis, a_eblg);
-  }
+  MFLevelGrid(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
 
   /*!
     @brief Destructor
   */
-  ~MFLevelGrid(){
-
-  }
+  ~MFLevelGrid();
 
   /*!
     @brief Number of phases
   */
-  virtual int num_phases() const {
-    return m_eblg.size();
-  }
+  virtual int num_phases() const;
 
   /*!
     @brief Define function
   */
-  virtual void define(const RefCountedPtr<mfis>& a_mfis,
-		      const Vector<EBLevelGrid>& a_eblg){
-    m_mfis = a_mfis;
-    m_eblg = a_eblg;
-  }
+  virtual void define(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
 
   /*!
     @brief Get the index space
   */
-  virtual const RefCountedPtr<mfis>& get_mfis() const {
-    return m_mfis;
-  }
+  virtual const RefCountedPtr<mfis>& get_mfis() const;
 
   /*!
     @brief Get the problem domain
   */
-  virtual ProblemDomain get_domain() const {
-    return m_eblg[0].getDomain();
-  }
+  virtual ProblemDomain get_domain() const;
 
   /*!
     @brief Get the grids
   */
-  virtual const DisjointBoxLayout get_grids() const {
-    return m_eblg[0].getDBL();
-  }
+  virtual DisjointBoxLayout get_grids() const;
+    
+  /*!
+    @brief Get phase
+  */
+  virtual EBLevelGrid& get_eblg(int a_phase);
 
   /*!
     @brief Get phase
   */
-  virtual EBLevelGrid& get_eblg(int a_phase){
-    return m_eblg[a_phase];
-  }
-
-  /*!
-    @brief Get phase
-  */
-  virtual const EBLevelGrid& get_eblg(int a_phase) const {
-    return m_eblg[a_phase];
-  }
+  virtual const EBLevelGrid& get_eblg(int a_phase) const;
 
   /*!
     @brief Get interface region between two phases.
@@ -112,23 +83,17 @@ public:
   virtual IntVectSet interface_region(const Box&       a_box,
 				      const DataIndex& a_dit,
 				      const int        a_phase1 = 0,
-				      const int        a_phase2 = 1) const {
+				      const int        a_phase2 = 1) const;
 
-    IntVectSet ret;
-    
-    if(m_mfis->num_phases() == 2){
-      const EBLevelGrid& eblg1 = this->get_eblg(a_phase1);
-      const EBLevelGrid& eblg2 = this->get_eblg(a_phase2);
-      
-      const EBISBox& ebisbox1  = eblg1.getEBISL()[a_dit];
-      const EBISBox& ebisbox2  = eblg2.getEBISL()[a_dit];
-
-      ret = ebisbox1.getIrregIVS(a_box) & ebisbox2.getIrregIVS(a_box);
-    }
-
-    return ret;
-  }
-  
+  /*!
+    @brief Get the interface IntVect on the other side of the EB. Useful for when EB aligns with cell face
+  */
+  virtual bool interface_pair(IntVect& a_iv,
+			      const IntVect&   a_iv_in,
+			      const Box&       a_box,
+			      const DataIndex& a_dit,
+			      const int        a_phase1 = 0,
+			      const int        a_phase2 = 1) const;
 private:
 
   RefCountedPtr<mfis> m_mfis;
