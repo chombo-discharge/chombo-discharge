@@ -103,63 +103,71 @@ void rounded_box_if::buildBox3D(){
   // This is the thickness of the boxes we subtract
   const RealVect base    = m_curv*RealVect::Unit;
 
+  const Real x = m_loCorner[0];
+  const Real y = m_loCorner[1];
+  const Real z = m_loCorner[2];
+
+  const Real X = m_hiCorner[0];
+  const Real Y = m_hiCorner[1];
+  const Real Z = m_hiCorner[2];
+
   // Corners of the box
-  const RealVect c1 = RealVect(m_loCorner[0], m_loCorner[1], m_loCorner[2]);
-  const RealVect c2 = RealVect(m_loCorner[0], m_hiCorner[1], m_loCorner[2]);
-  const RealVect c3 = RealVect(m_hiCorner[1], m_loCorner[1], m_loCorner[2]);
-  const RealVect c4 = RealVect(m_hiCorner[1], m_hiCorner[1], m_loCorner[2]);
-  const RealVect c5 = RealVect(m_loCorner[0], m_loCorner[1], m_hiCorner[2]);
-  const RealVect c6 = RealVect(m_loCorner[0], m_hiCorner[1], m_hiCorner[2]);
-  const RealVect c7 = RealVect(m_hiCorner[1], m_loCorner[1], m_hiCorner[2]);
-  const RealVect c8 = RealVect(m_hiCorner[1], m_hiCorner[1], m_hiCorner[2]);
+  const RealVect c1 = RealVect(x, y, z);
+  const RealVect c2 = RealVect(x, y, Z);
+  const RealVect c3 = RealVect(X, y, Z);
+  const RealVect c4 = RealVect(X, y, z);
+  const RealVect c5 = RealVect(x, Y, z);
+  const RealVect c6 = RealVect(x, Y, Z);
+  const RealVect c7 = RealVect(X, Y, Z);
+  const RealVect c8 = RealVect(X, Y, z);
 
 
   // We will now subtract a base box from each edge
   Vector<BaseIF*> unions;
+
   unions.push_back(static_cast<BaseIF*> (new box_if(m_loCorner, m_hiCorner, m_inside))); // Base box
   unions.push_back(static_cast<BaseIF*> (new box_if(c1 - base, c2 + base, !m_inside)));
+  unions.push_back(static_cast<BaseIF*> (new box_if(c1 - base, c4 + base, !m_inside)));
   unions.push_back(static_cast<BaseIF*> (new box_if(c1 - base, c5 + base, !m_inside)));
-  unions.push_back(static_cast<BaseIF*> (new box_if(c1 - base, c3 + base, !m_inside)));
-  unions.push_back(static_cast<BaseIF*> (new box_if(c2 - base, c4 + base, !m_inside)));
+  unions.push_back(static_cast<BaseIF*> (new box_if(c2 - base, c3 + base, !m_inside)));
   unions.push_back(static_cast<BaseIF*> (new box_if(c2 - base, c6 + base, !m_inside)));
-  unions.push_back(static_cast<BaseIF*> (new box_if(c3 - base, c4 + base, !m_inside)));
+  unions.push_back(static_cast<BaseIF*> (new box_if(c4 - base, c3 + base, !m_inside)));
   unions.push_back(static_cast<BaseIF*> (new box_if(c3 - base, c7 + base, !m_inside)));
   unions.push_back(static_cast<BaseIF*> (new box_if(c4 - base, c8 + base, !m_inside)));
   unions.push_back(static_cast<BaseIF*> (new box_if(c5 - base, c6 + base, !m_inside)));
-  unions.push_back(static_cast<BaseIF*> (new box_if(c5 - base, c7 + base, !m_inside)));
-  unions.push_back(static_cast<BaseIF*> (new box_if(c6 - base, c8 + base, !m_inside)));
-  unions.push_back(static_cast<BaseIF*> (new box_if(c7 - base, c8 + base, !m_inside)));
+  unions.push_back(static_cast<BaseIF*> (new box_if(c5 - base, c8 + base, !m_inside)));
+  unions.push_back(static_cast<BaseIF*> (new box_if(c6 - base, c7 + base, !m_inside)));
+  unions.push_back(static_cast<BaseIF*> (new box_if(c8 - base, c7 + base, !m_inside)));
   BaseIF* unionIF = static_cast<BaseIF*> (new UnionIF(unions));
 
   // Add in a rod_if on each edge
   Vector<BaseIF*> isects;
   isects.push_back(unionIF);
-  const RealVect c12 = m_curv*RealVect( 1, 0, 1);
-  const RealVect c13 = m_curv*RealVect( 0, 1, 1);
-  const RealVect c15 = m_curv*RealVect( 1, 1, 0);
-  const RealVect c24 = m_curv*RealVect( 0,-1, 1);
-  const RealVect c26 = m_curv*RealVect( 1,-1, 0);
-  const RealVect c34 = m_curv*RealVect(-1, 0, 1);
-  const RealVect c37 = m_curv*RealVect(-1, 1, 0);
-  const RealVect c48 = m_curv*RealVect(-1,-1, 0);
-  const RealVect c56 = m_curv*RealVect( 1, 0,-1);
-  const RealVect c57 = m_curv*RealVect( 0, 1,-1);
-  const RealVect c68 = m_curv*RealVect( 0,-1,-1);
-  const RealVect c78 = m_curv*RealVect(-1, 0,-1);
+  const RealVect c12 = m_curv*RealVect( 1,  1,  0);
+  const RealVect c14 = m_curv*RealVect( 0,  1,  1);
+  const RealVect c15 = m_curv*RealVect( 1,  0,  1);
+  const RealVect c23 = m_curv*RealVect( 0,  1, -1);
+  const RealVect c26 = m_curv*RealVect( 1,  0, -1);
+  const RealVect c34 = m_curv*RealVect(-1,  1,  0);
+  const RealVect c37 = m_curv*RealVect(-1,  0, -1);
+  const RealVect c48 = m_curv*RealVect(-1,  0,  1);
+  const RealVect c56 = m_curv*RealVect( 1, -1,  0);
+  const RealVect c58 = m_curv*RealVect( 0, -1,  1);
+  const RealVect c67 = m_curv*RealVect( 0, -1, -1);
+  const RealVect c78 = m_curv*RealVect(-1, -1,  0);
   isects.push_back(static_cast<BaseIF*> (new rod_if(c1 + c12, c2 + c12, m_curv, m_inside)));
-  isects.push_back(static_cast<BaseIF*> (new rod_if(c1 + c13, c3 + c13, m_curv, m_inside)));
+  isects.push_back(static_cast<BaseIF*> (new rod_if(c1 + c14, c4 + c14, m_curv, m_inside)));
   isects.push_back(static_cast<BaseIF*> (new rod_if(c1 + c15, c5 + c15, m_curv, m_inside)));
-  isects.push_back(static_cast<BaseIF*> (new rod_if(c2 + c24, c4 + c24, m_curv, m_inside)));
+  isects.push_back(static_cast<BaseIF*> (new rod_if(c2 + c23, c3 + c23, m_curv, m_inside)));
   isects.push_back(static_cast<BaseIF*> (new rod_if(c2 + c26, c6 + c26, m_curv, m_inside)));
   isects.push_back(static_cast<BaseIF*> (new rod_if(c3 + c34, c4 + c34, m_curv, m_inside)));
   isects.push_back(static_cast<BaseIF*> (new rod_if(c3 + c37, c7 + c37, m_curv, m_inside)));
   isects.push_back(static_cast<BaseIF*> (new rod_if(c4 + c48, c8 + c48, m_curv, m_inside)));
   isects.push_back(static_cast<BaseIF*> (new rod_if(c5 + c56, c6 + c56, m_curv, m_inside)));
-  isects.push_back(static_cast<BaseIF*> (new rod_if(c5 + c57, c7 + c57, m_curv, m_inside)));
-  isects.push_back(static_cast<BaseIF*> (new rod_if(c6 + c68, c8 + c68, m_curv, m_inside)));
+  isects.push_back(static_cast<BaseIF*> (new rod_if(c5 + c58, c8 + c58, m_curv, m_inside)));
+  isects.push_back(static_cast<BaseIF*> (new rod_if(c6 + c67, c7 + c67, m_curv, m_inside)));
   isects.push_back(static_cast<BaseIF*> (new rod_if(c7 + c78, c8 + c78, m_curv, m_inside)));
-
-  //
+  
   m_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(isects));
 
   // Delete all the stuff we just created
