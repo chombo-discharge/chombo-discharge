@@ -8,7 +8,7 @@
 
 #include "mfconductivityopfactory.H"
 
-#define verb 1
+#define verb 0
 
 mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
 						 const Vector<MFLevelGrid>&                a_mflg,

@@ -30,12 +30,13 @@ rod_slab.dielectric_corner_hi      =  5.00E-3  0.0
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128     # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
+amr.max_amr_depth   = 3           # Maximum amr depth
 amr.max_sim_depth   = 3           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
-amr.max_box_size    = 32          # Maximum allowed box size
+amr.max_box_size    = 16          # Maximum allowed box size
+amr.max_ebis_box    = 64          # Maximum allowed box size for EBIS generation		    
 amr.ref_rat         = 4 4 4 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
@@ -60,20 +61,21 @@ field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------
-plasma_engine.verbosity                       = 10            # Engine verbosity
-plasma_engine.plot_interval                   = 20            # Plot interval
+plasma_engine.verbosity                       = 1             # Engine verbosity
+plasma_engine.plot_interval                   = 1             # Plot interval
 plasma_engine.regrid_interval                 = 5             # Regrid interval
-plasma_engine.checkpoint_interval             = 10            # Checkpoint interval
+plasma_engine.checkpoint_interval             = 1             # Checkpoint interval
 plasma_engine.initial_regrids                 = 0             # Number of initial regrids
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 0             # Maximum number of steps
+plasma_engine.max_steps                       = 4             # Maximum number of steps
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
-plasma_engine.restart                         = false         # Do restart or not
-plasma_engine.restart_step                    = 100           # Restart step.
+plasma_engine.restart                         = true          # Do restart or not
+plasma_engine.restart_step                    = 3             # Restart step.
+plasma_engine.restart_mode                    = full          # Surface charge only
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -86,8 +88,8 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-time_stepper.verbosity        = 10    # Class verbosity
-time_stepper.solver_verbosity = 10    # Individual solver verbosities
+time_stepper.verbosity        = -1    # Class verbosity
+time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
@@ -162,11 +164,11 @@ morrow_lowke.positive_species_mobility     = 2.E-4                 # Positive sp
 morrow_lowke.negative_species_mobility     = 2.E-4                 # Negative species mobility
 morrow_lowke.excitation_efficiency         = 0.6                   # Impact excitation efficiency
 morrow_lowke.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
-morrow_lowke.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
-morrow_lowke.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
+morrow_lowke.electrode_townsend2           = 0.1                   # Townsend coefficient on electrodes
+morrow_lowke.electrode_quantum_efficiency  = 0.1                   # Quantum efficiency on electrodes
 morrow_lowke.dielectric_townsend2          = 0.1                   # Townsend coefficient on dielectrics
-morrow_lowke.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
-morrow_lowke.dielectric_work_function      = 1.E-6                 # Dielectric work function (ev)
+morrow_lowke.dielectric_quantum_efficiency = 0.1                   # Quantum efficiency on dielectrics
+morrow_lowke.dielectric_work_function      = 6                     # Dielectric work function (ev)
 morrow_lowke.uniform_density               = 1.E10                 # Initial background ionization
 morrow_lowke.seed_density                  = 0.E16                 # Initial seed ionization
 morrow_lowke.seed_radius                   = 1E-3                  # Initial seed radius

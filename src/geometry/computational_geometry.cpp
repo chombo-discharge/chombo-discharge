@@ -66,8 +66,6 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
 					      const int&             a_nCellMax,
 					      const int&             a_maxCoarsen){
 
-
-  
   // Build geoservers
   Vector<GeometryService*> geoservers(2, NULL);
   this->build_gas_geoserv(geoservers[phase::gas],     a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);

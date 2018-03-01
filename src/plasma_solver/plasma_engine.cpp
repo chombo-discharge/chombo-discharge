@@ -57,6 +57,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_output_directory("./");             // Set output directory
   this->set_output_file_names("simulation");    // Set output file names
   this->set_output_mode(output_mode::full);     // Set output mode
+  this->set_restart_mode(restart_mode::full);   // Set restart mode
   this->set_init_regrids(0);                    // Number of initial regrids
   this->set_geom_only(false);                   // Only plot geometry
   this->set_restart(false);                     // Restart mode
@@ -834,7 +835,9 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
       EBAMRCellData& solver_state       = solver->get_state();
       const std::string solver_name     = solver->get_name();
 
-      read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
+      if(m_restart_mode != restart_mode::surface_charge_only){
+	read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
+      }
     }
 
     // RTE solvers
@@ -854,9 +857,11 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
   }
 
   // Copy data to sigma solver
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  data_ops::set_value(sigma->get_state(), 0.0);
+  if(m_restart_mode != restart_mode::volume_charge_only){
     data_ops::incr(sigma->get_state(), sig, 1.0);
   }
+  sigma->reset_cells(sigma->get_state());
 
   // Instantiate m_tags
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1287,6 +1292,28 @@ void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
   }
 }
 
+void plasma_engine::set_restart_mode(const restart_mode::which_mode a_mode){
+  CH_TIME("plasma_engine::set_restart_mode");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_restart_mode" << endl;
+  }
+
+  m_restart_mode = a_mode;
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.query("restart_mode", str);
+  if(str == "full"){
+    m_restart_mode = restart_mode::full;
+  }
+  else if(str == "surface_only"){
+    m_restart_mode = restart_mode::surface_charge_only;
+  }
+  else if(str == "volume_only"){
+    m_restart_mode = restart_mode::volume_charge_only; 
+  }
+}
+
 void plasma_engine::set_output_directory(const std::string a_output_dir){
   CH_TIME("plasma_engine::set_output_directory");
   if(m_verbosity > 5){
@@ -1365,7 +1392,7 @@ void plasma_engine::setup_geometry_only(){
   m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
 			       m_amr->get_finest_domain(),
 			       m_amr->get_finest_dx(),
-			       m_amr->get_max_box_size());
+			       m_amr->get_max_ebis_box_size());
 
   this->get_geom_tags();       // Get geometric tags.
   
@@ -1394,7 +1421,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
 			       m_amr->get_finest_domain(),
 			       m_amr->get_finest_dx(),
-			       m_amr->get_max_box_size());
+			       m_amr->get_max_ebis_box_size());
 
   this->get_geom_tags();       // Get geometric tags.
   
@@ -1456,7 +1483,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
 			       m_amr->get_finest_domain(),
 			       m_amr->get_finest_dx(),
-			       m_amr->get_max_box_size());
+			       m_amr->get_max_ebis_box_size());
 
   this->get_geom_tags();       // Get geometric tags.
 
@@ -1477,6 +1504,11 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_timestepper->regrid_internals(); // Prepare internal storage for time stepper
   m_celltagger->regrid();            // Prepare internal storage for cell tagger
 
+  // Fill solvers with important stuff
+  m_timestepper->compute_cdr_velocities();
+  m_timestepper->compute_cdr_diffusion(); 
+  m_timestepper->compute_cdr_sources();
+  m_timestepper->compute_rte_sources();
 
 
   // Initial regrids

@@ -134,6 +134,14 @@ namespace wallbc {
   };
 };
 
+namespace restart_mode {
+  enum which_mode {
+    full                = 0,
+    surface_charge_only = 1,
+    volume_charge_only  = 2,
+  };
+};
+
 typedef Vector<RefCountedPtr<LevelData<MFCellFAB> > >        MFAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<MFFluxFAB> > >        MFAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >      MFAMRIVData;

@@ -31,6 +31,7 @@ amr_mesh::amr_mesh(){
   this->set_blocking_factor(16);
 #endif
   this->set_max_box_size(32);
+  this->set_max_ebis_box_size(m_max_box_size); 
   this->set_buffer_size(1);
   this->set_ebcf(false);
   this->set_fill_ratio(1.0);
@@ -1324,6 +1325,19 @@ void amr_mesh::set_max_box_size(const int a_max_box_size){
   }
 }
 
+void amr_mesh::set_max_ebis_box_size(const int a_max_box_size){
+  CH_TIME("amr_mesh::set_max_box_size");
+  
+  m_max_ebis_box_size = a_max_box_size;
+
+  int box_size;
+  ParmParse pp("amr");
+  pp.query("max_ebis_box", box_size);
+  if(box_size >= 8 && box_size % 2 == 0){
+    m_max_ebis_box_size = box_size;
+  }
+}
+
 void amr_mesh::set_buffer_size(const int a_buffer_size){
   m_buffer_size = a_buffer_size;
 
@@ -1485,6 +1499,10 @@ int amr_mesh::get_blocking_factor(){
 
 int amr_mesh::get_max_box_size(){
   return m_max_box_size;
+}
+
+int amr_mesh::get_max_ebis_box_size(){
+  return m_max_ebis_box_size;
 }
 
 ProblemDomain amr_mesh::get_finest_domain(){

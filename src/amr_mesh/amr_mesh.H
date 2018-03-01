@@ -299,6 +299,11 @@ public:
   virtual void set_max_box_size(const int a_max_box_size);
 
   /*!
+    @brief Set the maximum EBIS generation box size
+  */
+  virtual void set_max_ebis_box_size(const int a_max_ebis_box_size);
+
+  /*!
     @brief Set the blocking factor
   */
   virtual void set_blocking_factor(const int a_blocking_factor);
@@ -372,6 +377,11 @@ public:
     @brief Get maximum box size
   */
   virtual int get_max_box_size();
+
+  /*!
+    @brief Get maximum box size for EBIS generation
+  */
+  virtual int get_max_ebis_box_size();
 
   /*!
     @brief Get number of ghost cells
@@ -555,6 +565,11 @@ protected:
     @brief Max box size
   */
   int m_max_box_size;
+
+  /*!
+    @brief Maximum box size for EBIS generation
+  */
+  int m_max_ebis_box_size;
 
   /*!
     @brief Set buffer size

@@ -40,6 +40,7 @@
       plasma_engine.output_names                    = simulation    # Simulation output names
       plasma_engine.restart                         = false         # Do restart or not
       plasma_engine.restart_file                    = default_file  # Restart file
+      plasma_engine.restart_mode                    = full          # Restart mode. 
       plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
       plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
       plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -117,6 +118,11 @@ public:
     @brief Set output mode
   */
   virtual void set_output_mode(const output_mode::which_mode a_mode);
+
+  /*!
+    @brief Set restart mode
+  */
+  virtual void set_restart_mode(const restart_mode::which_mode a_mode);
 
   /*!
     @brief Set output directory
@@ -239,6 +245,11 @@ protected:
     @brief Output mode
   */
   output_mode::which_mode m_output_mode;
+
+  /*!
+    @brief Restart mode
+  */
+  restart_mode::which_mode m_restart_mode;
 
   /*!
     @brief Output directory
