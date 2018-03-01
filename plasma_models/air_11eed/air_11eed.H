@@ -190,6 +190,16 @@ protected:
   Real m_dielectric_quantum_efficiency;
 
   /*!
+    @brief Photoionization efficiency
+  */
+  Real m_photoionization_efficiency;
+
+  /*!
+    @brief Excitation efficiency
+  */
+  Real m_excitation_efficiency;
+
+  /*!
     @brief Compute electron mobility
   */
   Real compute_eed_mobility(const Real a_energy, const Real a_N) const;
@@ -292,89 +302,164 @@ protected:
   /*!
     @brief Compute rate constant \f$e + N_2 \rightarrow 2e + N_2^+\f$
   */
-  Real compute_electron_N2_impact_ionization(const Real a_energy, const Real a_N);
+  Real compute_electron_N2_impact_ionization(const Real a_energy, const Real a_N) const;
 
   /*!
     @brief Compute rate constant \f$e + O_2 \rightarrow 2e + O_2^+\f$
   */
-  Real compute_electron_O2_impact_ionization(const Real a_energy, const Real a_N);
+  Real compute_electron_O2_impact_ionization(const Real a_energy, const Real a_N) const;
 
   /*!
     @brief Rate constant for \f$N_2^+ + N_2 + M \rightarrow N_4^+ + M\f$
   */
-  Real compute_N2plus_N2_M_to_N4plus_M();
+  Real compute_N2plus_N2_M_to_N4plus_M() const;
 
   /*!
     @brief Rate constant for \f$N_4^+ + O_2 \rightarrow O_2^+ + 2N_2\f$
   */
-  Real compute_N4plus_O2_to_O2_2N2();
+  Real compute_N4plus_O2_to_O2_2N2() const;
 
   /*!
     @brief Rate konstant for \f$N2^+ + O_2 \rightarrow O_2^+ + N2\f$
     @param[in] a_Tg Gas temperature
   */
-  Real compute_N2plus_O2_to_O2plus_N2(const Real a_Tg);
+  Real compute_N2plus_O2_to_O2plus_N2(const Real a_Tg) const;
 
   /*!
     @brief Rate constant for \f$O_2^+ + 2N_2 \rightarrow O_2^+N_2 + N_2\f$
     @param[in] a_Tg Gas temperature
   */
-  Real compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg);
+  Real compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg) const;
 
   /*!
     @brief Rate constant for \f$O_2^+N_2 + N_2 \rightarrow O_2^+ + 2_N2\f$
   */
-  Real compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg);
+  Real compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg) const;
 
   /*!
     @brief Rate constant for \f$O_2^+N_2 + N_2 \rightarrow O_2^+ + 2_N2\f$
   */
-  Real compute_O2plusN2_O2_to_O4plus_N2();
+  Real compute_O2plusN2_O2_to_O4plus_N2() const;
 
   /*!
     @brief Rate constant for \f$O_2^+ O_2 + M \rightarrow O_4^+ + M\f$.
     @param[in] a_Tg Gas temperature
   */
-  Real compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg);
+  Real compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg) const;
 
   /*!
     @brief Rate constant for \f$e + O4plus \rightarrow 2O_2\f$
     @param[in] a_Tg Gas temperature
   */
-  Real compute_e_O4plus_to_2O2(const Real a_Te);
+  Real compute_e_O4plus_to_2O2(const Real a_Te) const;
 
   /*!
     @brief Rate constant for \f$e + O_2^+ \rightarrow O_2\f$
     @param[in] a_Tg Gas temperature
   */
-  Real compute_e_O2plus_to_O2(const Real a_Te);
+  Real compute_e_O2plus_to_O2(const Real a_Te) const;
 
   /*!
     @brief Rate constant for \f$e + 2O_2 \rightarrow O_2^- + O_2\f$
     @param[in] a_Tg Gas temperature
   */
-  Real compute_e_2O2_to_O2minus_O2(const Real a_Te);
+  Real compute_e_2O2_to_O2minus_O2(const Real a_Te) const;
 
   /*!
     @brief Rate constant for \f$O_2^- + O_4^+ \rightarrow 3O_2\f$
    */
-  Real compute_O2minus_O4plus_to_3O2();
+  Real compute_O2minus_O4plus_to_3O2() const;
 
   /*!
     @brief Rate constant for \f$O_2^- + O_4^+ + M \rightarrow 3O_2 + M\f$
   */
-  Real compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg);
+  Real compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg) const;
 
   /*!
     @brief Rate constant for \f$O_2^- + O_2^+ + M \rightarrow 2O_2 + M\f$
   */
-  Real compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg);
+  Real compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const;
 
   /*!
-    @brief Rate constant for \f$e + O_2 \rightarrow e + 2O + M\f$
-    @todo Function is not implemented (i.e. returns 0)
+    @brief Rate constant for \f$e + O_2 \rightarrow e + 2O\f$. 
+    @details This is the contribution at 5.58eV
   */
-  Real compute_e_O2_to_e_2O(const Real a_Te, const Real a_N);
+  Real compute_e_O2_to_e_2O_c1(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Rate constant for \f$e + O_2 \rightarrow e + 2O\f$
+    @details This is the contribution at 8.4eV
+  */
+  Real compute_e_O2_to_e_2O_c2(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Rate constant for \f$e + O_2 \rightarrow O^- + O\f$
+  */
+  Real compute_e_O2_to_Ominus_O(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Rate constant for \f$O^- + O_2^+ \rightarrow O + O_2\f$
+  */
+  Real compute_Oplus_O2_to_O_O2(const Real a_Tg) const;
+
+  /*!
+    @brief Compute the energy loss \f$e + N_2 \rightarrow e + N_2\f$
+  */
+  Real compute_e_N2_to_e_N2(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Compute the energy loss \f$e + N_2 \rightarrow e + N_2\f$
+  */
+  Real compute_e_O2_to_e_O2(const Real a_energy, const Real a_N) const;
+
+  /*!
+    @brief Energy loss for impact ionization of nitrogen. Returns 15.6 eV
+  */
+  Real compute_e_N2_ionization_loss() const;
+
+  /*!
+    @brief Energy loss for impact ionization of oxygen. Returns 12.07 eV
+  */
+  Real compute_e_O2_ionization_loss() const;
+
+  /*!
+    @brief Compute energy loss for the \f$e + O_2\rightarrow e + 2O\f$ dissociation.
+    @details This is the one at 5.58eV
+  */
+  Real compute_e_O2_dissociation_loss_c1() const;
+
+    /*!
+    @brief Compute energy loss for the \f$e + O_2\rightarrow e + 2O\f$ dissociation.
+    @details This is the one at 8.4eV
+  */
+  Real compute_e_O2_dissociation_loss_c2() const;
+
+  /*!
+    @brief Compute the energy loss for the \f$e + O_2 \rightarrow O^- + O\f$ reaction. 
+  */
+  Real compute_e_O2_dissociative_attachment_loss() const;
+
+  /*!
+    @brief Compute the energy loss term for the \f$e + O_2\f$ inelastic collisisons
+  */
+  Real compute_e_O2_scattering_loss() const;
+
+  /*!
+    @brief Compute the energy loss term for the \f$e + N_2\f$ inelastic collisisons
+  */
+  Real compute_e_N2_scattering_loss() const;
+
+  /*!
+    @brief Compute fluxes at the anode
+  */
+  Vector<Real> compute_anode_fluxes(const Real&         a_time,
+				    const RealVect&     a_pos,
+				    const RealVect&     a_normal,
+				    const RealVect&     a_E,
+				    const Vector<Real>& a_cdr_densities,
+				    const Vector<Real>& a_cdr_velocities,
+				    const Vector<Real>& a_rte_fluxes,
+				    const Vector<Real>& a_extrap_cdr_fluxes) const;
 };
 
 #endif

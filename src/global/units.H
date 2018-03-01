@@ -63,5 +63,10 @@ namespace units {
   */
   const static Real s_pi = 3.14159265359;
 
+  /*!
+    @brief Electron mass
+  */
+  const static Real s_me = 9.109383E-31;
+
 }
 #endif
