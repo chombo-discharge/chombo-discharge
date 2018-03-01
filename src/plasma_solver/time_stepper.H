@@ -257,6 +257,21 @@ public:
   virtual void initial_data();
 
   /*!
+    @brief Fill initial cdr data
+  */
+  virtual void initial_cdr_data();
+
+  /*!
+    @brief Fill initial rte data
+  */
+  virtual void initial_rte_data();
+
+  /*!
+    @brief Fill initial sigma data
+  */
+  virtual void initial_sigma_data();
+
+  /*!
     @brief Extrapolated flux to EB and project it onto the normal
   */
   virtual void project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux);

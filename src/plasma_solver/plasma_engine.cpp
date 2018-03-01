@@ -1496,6 +1496,13 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
 
   this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
 
+  if(m_restart_mode == restart_mode::surface_charge_only){
+    m_timestepper->initial_cdr_data();
+    if(!m_timestepper->stationary_rte()){
+      m_timestepper->initial_rte_data();
+    }
+  }
+
   m_timestepper->solve_poisson();                       // Solve Poisson equation by 
   if(m_timestepper->stationary_rte()){                  // Solve RTE equations if stationary solvers
     const Real dummy_dt = 0.0;

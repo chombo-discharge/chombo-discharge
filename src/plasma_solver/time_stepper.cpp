@@ -1194,6 +1194,32 @@ void time_stepper::initial_data(){
   m_sigma->initial_data();
 }
 
+void time_stepper::initial_cdr_data(){
+  CH_TIME("time_stepper::initial_cdr_data");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::initial_cdr_data" << endl;
+  }
+}
+
+void time_stepper::initial_rte_data(){
+  CH_TIME("time_stepper::initial_rte_data");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::initial_rte_data" << endl;
+  }
+
+  m_rte->initial_data();
+}
+
+void time_stepper::initial_sigma_data(){
+  CH_TIME("time_stepper::initial_sigma_data");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::initial_sigma_data" << endl;
+  }
+
+  m_sigma->initial_data();
+}
+
+
 void time_stepper::project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux){
   CH_TIME("time_stepper::project_flux");
   if(m_verbosity > 5){
