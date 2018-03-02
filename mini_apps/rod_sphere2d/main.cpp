@@ -7,6 +7,7 @@
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "rk2.H"
+#include "rk3.H"
 #include "euler_f.H"
 #include "splitstep_euler_f.H"
 #include "field_tagger.H"
@@ -41,9 +42,7 @@ int main(int argc, char* argv[]){
   //  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_11eed());
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
-  //  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
-  //  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new euler_f());
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new splitstep_euler_f());
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_sphere());
