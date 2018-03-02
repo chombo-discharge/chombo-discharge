@@ -143,17 +143,8 @@ public:
 				     const Real&                 a_time);
 
   /*!
-    @brief Compute cdr fluxes
+    @brief Compute cdr_fluxes
   */
-  virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
-				  const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
-				  const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
-				  const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
-				  const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
-				  const EBAMRIVData&          a_field,
-				  const Real&                 a_time);
-
-  // New signature
   virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
 				  const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
 				  const Vector<EBAMRIVData*>& a_extrap_cdr_densities,

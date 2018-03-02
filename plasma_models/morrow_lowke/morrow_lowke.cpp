@@ -336,9 +336,6 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
 						     const Real&         a_time) const{
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0); 
-  for (int i = 0; i < m_num_species; i++){ // Set outflow first
-    //    fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
-  }
 
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
     fluxes[m_nelec_idx] = Max(0.0, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons

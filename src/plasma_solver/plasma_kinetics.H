@@ -88,6 +88,7 @@ public:
 						    const RealVect&     a_E,
 						    const Vector<Real>& a_cdr_densities,
 						    const Vector<Real>& a_cdr_velocities,
+						    const Vector<Real>& a_cdr_gradients,
 						    const Vector<Real>& a_rte_fluxes,
 						    const Vector<Real>& a_extrap_cdr_fluxes) const = 0;
 
@@ -108,6 +109,7 @@ public:
 						     const RealVect&     a_E,
 						     const Vector<Real>& a_cdr_densities,
 						     const Vector<Real>& a_cdr_velocities,
+						     const Vector<Real>& a_cdr_gradients,
 						     const Vector<Real>& a_rte_fluxes,
 						     const Vector<Real>& a_extrap_cdr_fluxes) const = 0;
 

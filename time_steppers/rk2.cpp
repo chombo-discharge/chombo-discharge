@@ -104,12 +104,6 @@ Real rk2::advance(const Real a_dt){
   this->compute_cdr_fluxes_at_start_of_time_step();
   this->compute_sigma_flux_at_start_of_time_step();
 
-#if 0
-  MayDay::Warning("rk2::advance - debug mode");
-  this->solver_dump();
-  MayDay::Abort("rk2::advance - stop");
-#endif
-
   // Do k1 advance
   this->advance_cdr_k1(a_dt);
   this->advance_sigma_k1(a_dt);
@@ -250,6 +244,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
   Vector<EBAMRIVData*> extrap_cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_densities;
   Vector<EBAMRIVData*> extrap_cdr_velocities;
+  Vector<EBAMRIVData*> extrap_cdr_gradients;
   Vector<EBAMRIVData*> extrap_rte_fluxes;
 
   cdr_fluxes = m_cdr->get_ebflux();
@@ -260,18 +255,20 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
     EBAMRIVData& dens_eb = storage->get_eb_state();
     EBAMRIVData& velo_eb = storage->get_eb_velo();
     EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& grad_eb = storage->get_eb_grad();
 
-    extrap_cdr_densities.push_back(&dens_eb);
+    extrap_cdr_densities.push_back(&dens_eb);  // Already been computed
     extrap_cdr_velocities.push_back(&velo_eb);
     extrap_cdr_fluxes.push_back(&flux_eb);
+    extrap_cdr_gradients.push_back(&grad_eb);  // Already been computed
   }
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_densities = m_cdr->get_states();
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
   this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // Already been done, no?
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  //  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // Already been done, no?
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -289,6 +286,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
 			   extrap_cdr_fluxes,
 			   extrap_cdr_densities,
 			   extrap_cdr_velocities,
+			   extrap_cdr_gradients,
 			   extrap_rte_fluxes,
 			   E,
 			   m_time);
@@ -626,6 +624,7 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
   Vector<EBAMRIVData*> extrap_cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_densities;
   Vector<EBAMRIVData*> extrap_cdr_velocities;
+  Vector<EBAMRIVData*> extrap_cdr_gradients;
   Vector<EBAMRIVData*> extrap_rte_fluxes;
   
   Vector<EBAMRCellData*> cdr_densities;
@@ -640,18 +639,20 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
     EBAMRIVData& dens_eb = storage->get_eb_state();
     EBAMRIVData& velo_eb = storage->get_eb_velo();
     EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& grad_eb = storage->get_eb_grad();
 
     cdr_densities.push_back(&dens);
-    extrap_cdr_densities.push_back(&dens_eb);
-    extrap_cdr_velocities.push_back(&velo_eb);
-    extrap_cdr_fluxes.push_back(&flux_eb);
+    extrap_cdr_densities.push_back(&dens_eb);  // This has already been extrapolated to the EB
+    extrap_cdr_velocities.push_back(&velo_eb); // This has not.
+    extrap_cdr_fluxes.push_back(&flux_eb);     // This hasn't either. 
+    extrap_cdr_gradients.push_back(&grad_eb);  // This has already been extrapolated to the EB
   }
 
-  // Extrapolate densities, velocities, and fluxes
+  // Extrapolate the flux and the velocity
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
   this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // This has already been done, no?
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  //  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // This has already been done, no?
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -663,12 +664,14 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
+
   const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
 
   this->compute_cdr_fluxes(cdr_fluxes,
 			   extrap_cdr_fluxes,
 			   extrap_cdr_densities,
 			   extrap_cdr_velocities,
+			   extrap_cdr_gradients, 
 			   extrap_rte_fluxes,
 			   E,
 			   time);
