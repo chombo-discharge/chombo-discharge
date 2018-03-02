@@ -180,22 +180,16 @@ void rk2::compute_cdr_eb_states_at_start_of_time_step(){
     pout() << "rk2::compute_cdr_eb_states_at_start_of_time_step" << endl;
   }
 
-  Vector<EBAMRIVData*>   eb_gradients;
-  Vector<EBAMRIVData*>   eb_states;
-  Vector<EBAMRCellData*> cdr_states;
-  
+  const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const EBAMRCellData& state              = solver->get_state();
+
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    EBAMRIVData& cdr_eb = storage->get_eb_state();
 
-
-    cdr_states.push_back(&(solver->get_state()));
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
+    stencil.apply(cdr_eb, state);
   }
-
-  this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
-  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
 
 }
 
@@ -518,19 +512,14 @@ void rk2::compute_cdr_eb_states_after_k1(){
     pout() << "rk2::compute_cdr_eb_states_after_k1" << endl;
   }
 
-  Vector<EBAMRIVData*>   eb_gradients;
-  Vector<EBAMRIVData*>   eb_states;
-  Vector<EBAMRCellData*> cdr_states;
-  
+  const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_states.push_back(&(storage->get_phi()));
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-  }
+    EBAMRCellData& cdr_state = storage->get_phi();
+    EBAMRIVData& cdr_eb      = storage->get_eb_state();
 
-  this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
-  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+    stencil.apply(cdr_eb, cdr_state);
+  }
 }
 
 void rk2::compute_cdr_velo_after_k1(const Real a_dt){

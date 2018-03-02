@@ -153,6 +153,23 @@ public:
 				  const EBAMRIVData&          a_field,
 				  const Real&                 a_time);
 
+  // New signature
+  virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
+				  const Vector<EBAMRIVData*>& a_extrap_cdr_gradients,
+				  const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
+				  const EBAMRIVData&          a_field,
+				  const Real&                 a_time);
+
+  /*!
+    @brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
+  */
+  virtual void compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
+				       const phase::which_phase&     a_phase,
+				       const Vector<EBAMRCellData*>& a_phi);
+
   /*!
     @brief Compute CDR source terms
   */
