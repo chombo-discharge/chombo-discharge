@@ -60,6 +60,13 @@ public:
     return m_scratchIV3;
   }
 
+    /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRIVData& get_eb_grad(){
+    return m_scratchIV4;
+  }
+
 protected:
 
   /*!
@@ -91,6 +98,11 @@ protected:
     @brief Scratch
   */
   EBAMRIVData m_scratchIV3;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRIVData m_scratchIV4;
 };
 
 /*!

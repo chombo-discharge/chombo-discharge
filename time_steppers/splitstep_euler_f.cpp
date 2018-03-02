@@ -48,21 +48,22 @@ Real splitstep_euler_f::advance(const Real a_dt){
 
   // Transport step
   this->compute_E_at_start_of_time_step();               // Compute E from previous solution
+  this->compute_cdr_eb_states_at_start_of_time_step();   // Compute densities and gradients on the EB
   this->compute_cdr_velo_at_start_of_time_step();        // Compute cdr velocities
   this->compute_cdr_diffco_at_start_of_time_step();      // Compute cdr diffusion coefficients
   this->compute_cdr_fluxes_at_start_of_time_step();      // Compute cdr fluxes
   this->compute_sigma_flux_at_start_of_time_step();      // Compute sigma fluxes
   this->set_cdr_source_to_zero_at_start_of_time_step();  // Set source term to zero
   
-  this->advance_cdr_transport(a_dt);             // Forward Euler method for transport step
-  this->advance_sigma_transport(a_dt);           // Forward Euler method for the transport step
-  this->solve_poisson_transport();               // Poisson solve after transport step
-  this->compute_E_after_transport();             // Compute a new E for the source term advance
+  this->advance_cdr_transport(a_dt);              // Forward Euler method for transport step
+  this->advance_sigma_transport(a_dt);            // Forward Euler method for the transport step
+  this->solve_poisson_transport();                // Poisson solve after transport step
+  this->compute_E_after_transport();              // Compute a new E for the source term advance
   if(m_rte->is_stationary()){
-    this->advance_rte_transport_stationary();    // Stationary RTE solve
+    this->advance_rte_transport_stationary(a_dt); // Stationary RTE solve
   }
   else{
-    this->advance_rte_transport_transient(a_dt); // Advance transiently using a zero source
+    this->advance_rte_transport_transient(a_dt);  // Advance transiently using a zero source
   }
 
   // Source step
@@ -72,7 +73,7 @@ Real splitstep_euler_f::advance(const Real a_dt){
   this->solve_poisson_source();                   // Recompute Poisson equation. 
   this->compute_E_after_source();                 // Recompute electric fields
   if(m_rte->is_stationary()){
-    this->advance_rte_transport_stationary();     // Stationary RTE solve
+    this->advance_rte_transport_stationary(a_dt); // Stationary RTE solve
   }
   else{
     this->advance_rte_transport_transient(a_dt);  // Advance transiently using a zero source
@@ -146,14 +147,39 @@ void splitstep_euler_f::compute_E_at_start_of_time_step(){
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 }
 
+void splitstep_euler_f::compute_cdr_eb_states_at_start_of_time_step(){
+  CH_TIME("splitstep_euler_f::compute_cdr_eb_states_at_start_of_time_step");
+  if(m_verbosity > 5){
+    pout() << "splitstep_euler_f::compute_cdr_eb_states_at_start_of_time_step" << endl;
+  }
+
+  Vector<EBAMRIVData*>   eb_gradients;
+  Vector<EBAMRIVData*>   eb_states;
+  Vector<EBAMRCellData*> cdr_states;
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+
+    cdr_states.push_back(&(solver->get_state()));
+    eb_states.push_back(&(storage->get_eb_state()));
+    eb_gradients.push_back(&(storage->get_eb_grad()));
+  }
+
+  this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
+  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+}
+
 void splitstep_euler_f::compute_cdr_velo_at_start_of_time_step(){
   CH_TIME("splitstep_euler_f::compute_cdr_velo_at_start_of_time_step");
   if(m_verbosity > 5){
     pout() << "splitstep_euler_f::compute_cdr_velo_at_start_of_time_step" << endl;
   }
 
+  Vector<EBAMRCellData*> states     = m_cdr->get_states();
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  this->compute_cdr_velocities(velocities, m_poisson_scratch->get_E_cell());
+  this->compute_cdr_velocities(velocities, states, m_poisson_scratch->get_E_cell(), m_time);
 }
 
 void splitstep_euler_f::compute_cdr_diffco_at_start_of_time_step(){
@@ -162,14 +188,25 @@ void splitstep_euler_f::compute_cdr_diffco_at_start_of_time_step(){
     pout() << "splitstep_euler_f::compute_cdr_diffco_at_start_of_time_step" << endl;
   }
 
+  const int num_species = m_plaskin->get_num_species();
+
+  Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
   Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
 
-  const EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
+  const EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
   const EBAMRIVData& E_eb     = m_poisson_scratch->get_E_eb();
+
+  // Get extrapolated states
+  Vector<EBAMRIVData*> eb_states(num_species);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    eb_states[idx] = &(storage->get_eb_state());
+  }
   
-  this->compute_cdr_diffco_face(diffco_face, E_face);
-  this->compute_cdr_diffco_eb(diffco_eb,     E_eb);
+  this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
+  this->compute_cdr_diffco_eb(diffco_eb,     eb_states,  E_eb,   m_time);
 }
 
 void splitstep_euler_f::compute_cdr_fluxes_at_start_of_time_step(){
@@ -182,6 +219,7 @@ void splitstep_euler_f::compute_cdr_fluxes_at_start_of_time_step(){
   Vector<EBAMRIVData*> extrap_cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_densities;
   Vector<EBAMRIVData*> extrap_cdr_velocities;
+  Vector<EBAMRIVData*> extrap_cdr_gradients;
   Vector<EBAMRIVData*> extrap_rte_fluxes;
 
   cdr_fluxes = m_cdr->get_ebflux();
@@ -192,10 +230,12 @@ void splitstep_euler_f::compute_cdr_fluxes_at_start_of_time_step(){
     EBAMRIVData& dens_eb = storage->get_eb_state();
     EBAMRIVData& velo_eb = storage->get_eb_velo();
     EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& grad_eb = storage->get_eb_flux();
 
     extrap_cdr_densities.push_back(&dens_eb);
     extrap_cdr_velocities.push_back(&velo_eb);
     extrap_cdr_fluxes.push_back(&flux_eb);
+    extrap_cdr_gradients.push_back(&grad_eb);
   }
 
   // Extrapolate densities, velocities, and fluxes
@@ -221,8 +261,10 @@ void splitstep_euler_f::compute_cdr_fluxes_at_start_of_time_step(){
 			   extrap_cdr_fluxes,
 			   extrap_cdr_densities,
 			   extrap_cdr_velocities,
+			   extrap_cdr_gradients,
 			   extrap_rte_fluxes,
-			   E);
+			   E,
+			   m_time);
 }
 
 void splitstep_euler_f::compute_sigma_flux_at_start_of_time_step(){
@@ -333,7 +375,7 @@ void splitstep_euler_f::solve_poisson_transport(){
   }
 }
 
-void splitstep_euler_f::advance_rte_transport_stationary(){
+void splitstep_euler_f::advance_rte_transport_stationary(const Real a_dt){
   CH_TIME("splitstep_euler_f::advance_rte_transport_stationary");
   if(m_verbosity > 5){
     pout() << "splitstep_euler_f::advance_rte_transport_stationary" << endl;
@@ -368,9 +410,13 @@ void splitstep_euler_f::advance_rte_transport_stationary(){
 
   EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
+  
+
+
   if((m_step + 1) % m_fast_rte == 0){
+    const Real time = m_time + a_dt;
     const Real dummy_dt = 0.0;
-    this->solve_rte(rte_states, rte_sources, cdr_states, E, dummy_dt, centering::cell_center);
+    this->solve_rte(rte_states, rte_sources, cdr_states, E, time, dummy_dt, centering::cell_center);
   }
 }
 
@@ -428,7 +474,7 @@ void splitstep_euler_f::compute_cdr_source_after_transport(){
 
   EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
-  this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, centering::cell_center);
+  this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, m_time, centering::cell_center);
 }
 
 void splitstep_euler_f::advance_cdr_source(const Real a_dt){
@@ -528,7 +574,7 @@ void splitstep_euler_f::compute_E_after_source(){
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 }
 
-void splitstep_euler_f::advance_rte_source_stationary(){
+void splitstep_euler_f::advance_rte_source_stationary(const Real a_dt){
   CH_TIME("splitstep_euler_f::advance_rte_source_stationary");
   if(m_verbosity > 5){
     pout() << "splitstep_euler_f::advance_rte_source_stationary";
@@ -568,8 +614,9 @@ void splitstep_euler_f::advance_rte_source_stationary(){
   EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
   if((m_step + 1) % m_fast_rte == 0){
+    const Real time     = m_time + a_dt;
     const Real dummy_dt = 0.0;
-    this->solve_rte(rte_states, rte_sources, cdr_states, E, dummy_dt, centering::cell_center);
+    this->solve_rte(rte_states, rte_sources, cdr_states, E, time, dummy_dt, centering::cell_center);
   }
 }
 

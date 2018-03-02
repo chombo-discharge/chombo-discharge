@@ -30,6 +30,7 @@ void splitstep_euler_f::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratchIV1,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV3,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV4,  m_phase, m_ncomp);
 
   m_amr->allocate(m_scratch, m_phase, m_ncomp); 
 }

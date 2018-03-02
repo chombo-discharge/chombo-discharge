@@ -134,16 +134,22 @@ void euler_f::compute_cdr_eb_states_at_start_of_time_step(){
     pout() << "euler_f::compute_cdr_eb_states_at_start_of_time_step" << endl;
   }
 
-  const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
+  Vector<EBAMRIVData*>   eb_gradients;
+  Vector<EBAMRIVData*>   eb_states;
+  Vector<EBAMRCellData*> cdr_states;
+  
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& state              = solver->get_state();
-
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    EBAMRIVData& cdr_eb = storage->get_eb_state();
 
-    stencil.apply(cdr_eb, state);
+
+    cdr_states.push_back(&(solver->get_state()));
+    eb_states.push_back(&(storage->get_eb_state()));
+    eb_gradients.push_back(&(storage->get_eb_grad()));
   }
+
+  this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
+  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
 }
 
 void euler_f::compute_cdr_velo_at_start_of_time_step(){
@@ -208,6 +214,7 @@ void euler_f::compute_cdr_fluxes_at_start_of_time_step(){
   Vector<EBAMRIVData*> extrap_cdr_fluxes;
   Vector<EBAMRIVData*> extrap_cdr_densities;
   Vector<EBAMRIVData*> extrap_cdr_velocities;
+  Vector<EBAMRIVData*> extrap_cdr_gradients;
   Vector<EBAMRIVData*> extrap_rte_fluxes;
 
   cdr_fluxes = m_cdr->get_ebflux();
@@ -218,10 +225,12 @@ void euler_f::compute_cdr_fluxes_at_start_of_time_step(){
     EBAMRIVData& dens_eb = storage->get_eb_state();
     EBAMRIVData& velo_eb = storage->get_eb_velo();
     EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& grad_eb = storage->get_eb_grad();
 
     extrap_cdr_densities.push_back(&dens_eb);
     extrap_cdr_velocities.push_back(&velo_eb);
     extrap_cdr_fluxes.push_back(&flux_eb);
+    extrap_cdr_gradients.push_back(&grad_eb);
   }
 
   // Extrapolate densities, velocities, and fluxes
@@ -247,6 +256,7 @@ void euler_f::compute_cdr_fluxes_at_start_of_time_step(){
 			   extrap_cdr_fluxes,
 			   extrap_cdr_densities,
 			   extrap_cdr_velocities,
+			   extrap_cdr_gradients,
 			   extrap_rte_fluxes,
 			   E,
 			   m_time);

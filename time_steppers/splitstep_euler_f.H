@@ -103,6 +103,11 @@ protected:
   virtual void compute_E_at_start_of_time_step();
 
   /*!
+    @brief Compute the cdr densities and gradient at the start of the time step
+  */
+  virtual void compute_cdr_eb_states_at_start_of_time_step();
+
+  /*!
     @brief Compute the cdr velocities at the start of the times step
   */
   virtual void compute_cdr_velo_at_start_of_time_step();
@@ -145,7 +150,7 @@ protected:
   /*!
     @brief Solve the RTE equations for the transport step
   */
-  virtual void advance_rte_transport_stationary();
+  virtual void advance_rte_transport_stationary(const Real a_dt);
 
   /*!
     @brief Solve the transient RTE equations
@@ -185,7 +190,7 @@ protected:
   /*!
     @brief Recompute Poisson after source term step
   */
-  virtual void advance_rte_source_stationary();
+  virtual void advance_rte_source_stationary(const Real a_dt);
 
   /*!
     @brief Recompute Poisson after source term step
