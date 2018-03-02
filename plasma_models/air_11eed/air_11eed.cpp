@@ -427,6 +427,9 @@ Vector<Real> air_11eed::compute_anode_fluxes(const Real&         a_time,
   // eed boundary condition. F = Outflow + vth
   fluxes[m_eed_idx] = Max(0.0, a_extrap_cdr_fluxes[m_eed_idx]);
 
+  // Electron outflow
+  fluxes[m_electron_idx] = Max(0.0, a_extrap_cdr_fluxes[m_electron_idx]);
+
   return fluxes;
 }
 
