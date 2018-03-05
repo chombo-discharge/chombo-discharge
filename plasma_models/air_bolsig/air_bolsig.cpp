@@ -153,7 +153,7 @@ air_bolsig::air_bolsig(){
   electron->set_noise(m_perlin);
   pos->set_noise(m_perlin);
 
-#if 0
+#if 1
   m_alpha.dump_table();
   MayDay::Abort("stop");
 #endif

@@ -1284,6 +1284,9 @@ void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
   if(str == "full"){
     m_output_mode = output_mode::full;
   }
+  else if(str == "medium"){
+    m_output_mode = output_mode::medium;
+  }
   else if(str == "light"){
     m_output_mode = output_mode::light;
   }
@@ -1918,10 +1921,12 @@ void plasma_engine::write_plot_file(){
   this->add_cdr_densities_to_output(output,  cur_var); cur_var += m_plaskin->get_num_species();;
   if(m_output_mode == output_mode::full){
     this->add_cdr_velocities_to_output(output, cur_var); cur_var += m_plaskin->get_num_species()*SpaceDim;
+  }
+  if(m_output_mode == output_mode::medium || m_output_mode == output_mode::full){
     this->add_cdr_source_to_output(output,     cur_var); cur_var += m_plaskin->get_num_species();
   }
   this->add_rte_densities_to_output(output, cur_var); cur_var += m_plaskin->get_num_photons();
-  if(m_output_mode == output_mode::full){
+  if(m_output_mode == output_mode::medium || m_output_mode == output_mode::full){
     this->add_rte_source_to_output(output, cur_var); cur_var += m_plaskin->get_num_photons();
   }
 
@@ -2114,7 +2119,7 @@ Vector<string> plasma_engine::get_output_variable_names(){
   }
 
   // Ion source terms
-  if(m_output_mode == output_mode::full){
+  if(m_output_mode == output_mode::full || m_output_mode == output_mode::medium){
     for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
       RefCountedPtr<cdr_solver>& solver = solver_it();
       RefCountedPtr<species>& spec      = solver_it.get_species();
@@ -2134,7 +2139,7 @@ Vector<string> plasma_engine::get_output_variable_names(){
   }
 
     // Photon solvers' stuff. Photon density and source term => (2 + SpaceDim)
-  if(m_output_mode == output_mode::full){
+  if(m_output_mode == output_mode::full || m_output_mode == output_mode::medium){
     for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
       RefCountedPtr<rte_solver>& solver   = solver_it();
       RefCountedPtr<photon_group>& photon = solver_it.get_photon();

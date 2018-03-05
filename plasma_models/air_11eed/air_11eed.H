@@ -99,6 +99,7 @@ public:
 						    const RealVect&     a_E,
 						    const Vector<Real>& a_cdr_densities,
 						    const Vector<Real>& a_cdr_velocities,
+						    const Vector<Real>& a_cdr_gradients,
 						    const Vector<Real>& a_rte_fluxes,
 						    const Vector<Real>& a_extrap_cdr_fluxes) const;
 
@@ -111,6 +112,7 @@ public:
 						     const RealVect&     a_E,
 						     const Vector<Real>& a_cdr_densities,
 						     const Vector<Real>& a_cdr_velocities,
+						     const Vector<Real>& a_cdr_gradients,
 						     const Vector<Real>& a_rte_fluxes,
 						     const Vector<Real>& a_extrap_cdr_fluxes) const;
   /*!
@@ -153,6 +155,11 @@ protected:
     @brief Background gas pressure
   */
   Real m_p;
+
+  /*!
+    @brief Quenching pressure
+  */
+  Real m_pq;
 
   /*!
     @brief Background gas density
@@ -450,16 +457,19 @@ protected:
   Real compute_e_N2_scattering_loss() const;
 
   /*!
-    @brief Compute fluxes at the anode
+    @brief Common function for dielectric and electrode fluxes, only difference is the secondary emission coefficients
   */
-  Vector<Real> compute_anode_fluxes(const Real&         a_time,
-				    const RealVect&     a_pos,
-				    const RealVect&     a_normal,
-				    const RealVect&     a_E,
-				    const Vector<Real>& a_cdr_densities,
-				    const Vector<Real>& a_cdr_velocities,
-				    const Vector<Real>& a_rte_fluxes,
-				    const Vector<Real>& a_extrap_cdr_fluxes) const;
+  Vector<Real> compute_cdr_fluxes(const Real&         a_time,
+				  const RealVect&     a_pos,
+				  const RealVect&     a_normal,
+				  const RealVect&     a_E,
+				  const Vector<Real>& a_cdr_densities,
+				  const Vector<Real>& a_cdr_velocities,
+				  const Vector<Real>& a_cdr_gradients,
+				  const Vector<Real>& a_rte_fluxes,
+				  const Vector<Real>& a_extrap_cdr_fluxes,
+				  const Real&         a_townsend2,
+				  const Real&         a_quantum_efficiency) const;
 };
 
 #endif

@@ -107,6 +107,7 @@ public:
 						    const RealVect&     a_E,
 						    const Vector<Real>& a_cdr_densities,
 						    const Vector<Real>& a_cdr_velocities,
+						    const Vector<Real>& a_cdr_gradients,
 						    const Vector<Real>& a_rte_fluxes,
 						    const Vector<Real>& a_extrap_cdr_fluxes) const {
     return this->compute_conductor_fluxes(a_extrap_cdr_fluxes,
@@ -125,6 +126,7 @@ public:
 						     const RealVect&     a_E,
 						     const Vector<Real>& a_cdr_densities,
 						     const Vector<Real>& a_cdr_velocities,
+						     const Vector<Real>& a_cdr_gradients,
 						     const Vector<Real>& a_rte_fluxes,
 						     const Vector<Real>& a_extrap_cdr_fluxes) const {
     return this->compute_dielectric_fluxes(a_extrap_cdr_fluxes,

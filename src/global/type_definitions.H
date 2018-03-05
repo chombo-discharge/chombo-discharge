@@ -108,7 +108,8 @@ namespace output_mode{
   enum which_mode{
     ultra_light = 0,
     light       = 1,
-    full        = 2,
+    medium      = 2,
+    full        = 3,
   };
 };
 

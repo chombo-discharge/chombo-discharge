@@ -13,6 +13,7 @@
 #include "field_tagger.H"
 
 
+#include "air3.H"
 #include "air_bolsig.H"
 #include "air_11eed.H"
 #include "morrow_lowke.H"
@@ -24,7 +25,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  Real potential = 1.3E4;
+  Real potential = 1.2E4;
 
   return potential;
 }
@@ -39,8 +40,9 @@ int main(int argc, char* argv[]){
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
-  //  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_11eed());
-  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air3());
+  //RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_bolsig());
+  //  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());

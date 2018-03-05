@@ -8,12 +8,15 @@
 #include "air_11eed.H"
 #include "air_11eed_species.H"
 #include "units.H"
+#include "data_ops.H"
 
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
 air_11eed::air_11eed(){
 
+  MayDay::Abort("air_11eed::air_11eed - This is a development class. It is numerically stiff and requires (semi-) implicit integration. Please stay away.");
+  
   m_num_species = 12; // 11 reactive ones plus the eed
   m_num_photons = 3;  // Bourdon model for photons
 
@@ -36,6 +39,14 @@ air_11eed::air_11eed(){
     pp.query("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
     pp.query("photoionization_efficiency",    m_photoionization_efficiency);
     pp.query("excitation_efficiency",         m_excitation_efficiency);
+  }
+
+  { // Quenching pressure
+    m_pq        = 0.03947; 
+    ParmParse pp("air_11eed");
+    pp.query("quenching_pressure", m_pq);
+    
+    m_pq *= units::s_atm2pascal;
   }
 
   
@@ -138,7 +149,7 @@ Vector<RealVect> air_11eed::compute_cdr_velocities(const Real&         a_time,
   const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
   const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
 
-  velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy, N)*a_E;
+  velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy, N)*(-a_E);
   velocities[m_electron_idx] = this->compute_electron_mobility(electron_energy, N)*(-a_E);
   velocities[m_N2_idx]       = RealVect::Zero;
   velocities[m_O2_idx]       = RealVect::Zero;
@@ -162,10 +173,11 @@ Vector<Real> air_11eed::compute_cdr_source_terms(const Real              a_time,
 						 const Vector<RealVect>& a_grad_cdr) const {
   Vector<Real> source(m_num_species, 0.0);
 
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]);
-  const Real Te              = 2.0*electron_energy/(3.0*units::s_kb);
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
+  const Real Te              = 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb);  // Kelvin
   const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
   const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
+
 
   // Room for improvement: The best thing would be to store the rate coefficients as matrices and then do S = K*n
   
@@ -237,9 +249,9 @@ Vector<Real> air_11eed::compute_cdr_source_terms(const Real              a_time,
   loss     = dE_k2; 
   products = k2 * n_e * n_O2;
   source[m_eed_idx]      -= products*loss;
+  source[m_O2_idx]       -= products;
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
-  source[m_O2_idx]       -= products;
 
   // k3 reaction. 
   products = k3 * n_N2p * n_N2 * (n_N2 + n_O2);
@@ -354,12 +366,12 @@ Vector<Real> air_11eed::compute_cdr_source_terms(const Real              a_time,
 
   // k20 reaction
   loss     = dE_k20;
-  products = 0.0; // Don't know how to do this one yet
+  products = k20 * n_e * n_N2;
   source[m_eed_idx] -= products*loss;
 
   // k21 reaction
   loss     = dE_k21;
-  products = 0.0; // Don't know how to do this one yet
+  products = k21 * n_e * n_O2;
   source[m_eed_idx] -= products*loss;
 
   // Photoionization gamma + O2 -> e + O2+
@@ -369,6 +381,10 @@ Vector<Real> air_11eed::compute_cdr_source_terms(const Real              a_time,
   products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
 								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
 								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+
+#if 1 // Override for now
+  products = 0.0;
+#endif
   source[m_O2_idx]       -= products;
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
@@ -377,60 +393,110 @@ Vector<Real> air_11eed::compute_cdr_source_terms(const Real              a_time,
   return source;
 }
 
+Vector<Real> air_11eed::compute_cdr_fluxes(const Real&         a_time,
+					   const RealVect&     a_pos,
+					   const RealVect&     a_normal,
+					   const RealVect&     a_E,
+					   const Vector<Real>& a_cdr_densities,
+					   const Vector<Real>& a_cdr_velocities,
+					   const Vector<Real>& a_cdr_gradients,
+					   const Vector<Real>& a_rte_fluxes,
+					   const Vector<Real>& a_extrap_cdr_fluxes,
+					   const Real&         a_townsend2,
+					   const Real&         a_quantum_efficiency) const {
+
+  Vector<Real> fluxes(m_num_species, 0.0); 
+
+  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
+  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
+  
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
+  const Real Te              = 2.0*electron_energy*units::s_Qe/(3.0*units::s_kb);
+  const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
+  const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
+  const Real ion_mass        = 2.65E-26; // kg
+  const Real vth_g           = sqrt(units::s_kb*m_Tg/(units::s_pi*ion_mass));  // Ion thermal velocity
+  const Real vth_e           = sqrt(units::s_kb*Te/(units::s_pi*units::s_me)); // Electron thermal velocity
+
+
+  // Switch for setting drift flux to zero for charge species
+  Vector<Real> aj(m_num_species, 0.0);
+  for (int i = 0; i < m_num_species; i++){
+    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+      aj[i] = 1.0;
+    }
+    else {
+      aj[i] = 0.0;
+    }
+  }
+
+
+  // Drift outflow 
+  for (int i = 0; i < m_num_species; i++){
+    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];   
+  }
+  
+  // Thermal outflow
+  for (int i = 0; i < m_num_species; i++){
+    if(i == m_electron_idx){
+      fluxes[m_electron_idx] += 0.25*vth_e*a_cdr_densities[m_electron_idx];
+    }
+    else {
+      fluxes[i] += 0.25*vth_g*a_cdr_densities[i];
+    }
+  }
+
+  // Secondary emission of electrons due to ion bombardment and photoemission. Only do this on the cathode. 
+  Real ion_bombardment_fluxes    = 0.0;
+  Real photon_bombardment_fluxes = 0.0;
+  if(cathode){
+    ion_bombardment_fluxes += fluxes[m_N2plus_idx];
+    ion_bombardment_fluxes += fluxes[m_N4plus_idx];
+    ion_bombardment_fluxes += fluxes[m_O4plus_idx];
+
+    photon_bombardment_fluxes += a_rte_fluxes[m_photon1_idx];
+    photon_bombardment_fluxes += a_rte_fluxes[m_photon2_idx];
+    photon_bombardment_fluxes += a_rte_fluxes[m_photon3_idx];
+  }
+
+  ion_bombardment_fluxes    *= a_townsend2;
+  photon_bombardment_fluxes *= a_quantum_efficiency;
+
+  // Electron energy flux BC. 
+  const Real eps_ge = 2.0; 
+  const Real eps_w  = 2.0*units::s_kb*Te/(units::s_Qe); // Make this into eV
+  fluxes[m_eed_idx] = eps_w*fluxes[m_electron_idx];      // Electron energy outflow due to electron outflow
+  if(cathode){
+    fluxes[m_eed_idx] -= eps_ge*ion_bombardment_fluxes;    // Energy inflow due to ion bombardment
+    fluxes[m_eed_idx] -= eps_ge*photon_bombardment_fluxes; // Energy inflow due to photon bombardment
+  }
+
+  // Add secondary emission to electons
+  if(cathode){
+    fluxes[m_electron_idx] -= ion_bombardment_fluxes;
+    fluxes[m_electron_idx] -= photon_bombardment_fluxes;
+  }
+
+
+  // Charge species return to parent molecules. This is not implemented (yet)
+  fluxes[m_N2_idx] = 0.0;
+  fluxes[m_O2_idx] = 0.0;
+  
+  return fluxes;
+}
+
 Vector<Real> air_11eed::compute_cdr_electrode_fluxes(const Real&         a_time,
 						     const RealVect&     a_pos,
 						     const RealVect&     a_normal,
 						     const RealVect&     a_E,
 						     const Vector<Real>& a_cdr_densities,
 						     const Vector<Real>& a_cdr_velocities,
+						     const Vector<Real>& a_cdr_gradients,
 						     const Vector<Real>& a_rte_fluxes,
 						     const Vector<Real>& a_extrap_cdr_fluxes) const {
-  Vector<Real> fluxes(m_num_species, 0.0);
 
-  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
-  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
-
-  if(cathode){
-
-  }
-  else if(anode){
-    fluxes = this->compute_anode_fluxes(a_time,
-					a_pos,
-					a_normal,
-					a_E,
-					a_cdr_densities,
-					a_cdr_velocities,
-					a_rte_fluxes,
-					a_extrap_cdr_fluxes);
-  }
-  
-  return fluxes;
-}
-
-Vector<Real> air_11eed::compute_anode_fluxes(const Real&         a_time,
-					     const RealVect&     a_pos,
-					     const RealVect&     a_normal,
-					     const RealVect&     a_E,
-					     const Vector<Real>& a_cdr_densities,
-					     const Vector<Real>& a_cdr_velocities,
-					     const Vector<Real>& a_rte_fluxes,
-					     const Vector<Real>& a_extrap_cdr_fluxes) const {
-  Vector<Real> fluxes(m_num_species, 0.0);
-
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]);
-  const Real Te              = 2.0*electron_energy/(3.0*units::s_kb);
-  const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
-  const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
-
-  const Real vth_e = sqrt(units::s_kb*Te/(units::s_pi*units::s_me)); // Electron thermal velocity
-  
-  // eed boundary condition. F = Outflow + vth
-  fluxes[m_eed_idx] = Max(0.0, a_extrap_cdr_fluxes[m_eed_idx]);
-
-  // Electron outflow
-  fluxes[m_electron_idx] = Max(0.0, a_extrap_cdr_fluxes[m_electron_idx]);
-
-  return fluxes;
+  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
+				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
 Vector<Real> air_11eed::compute_cdr_dielectric_fluxes(const Real&         a_time,
@@ -439,16 +505,35 @@ Vector<Real> air_11eed::compute_cdr_dielectric_fluxes(const Real&         a_time
 						      const RealVect&     a_E,
 						      const Vector<Real>& a_cdr_densities,
 						      const Vector<Real>& a_cdr_velocities,
+						      const Vector<Real>& a_cdr_gradients,
 						      const Vector<Real>& a_rte_fluxes,
 						      const Vector<Real>& a_extrap_cdr_fluxes) const {
-  return Vector<Real>(m_num_species, 0.0);
+  
+  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
+				   a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
 Vector<Real> air_11eed::compute_rte_source_terms(const Real&         a_time,
 						 const RealVect&     a_pos,
 						 const RealVect&     a_E,
 						 const Vector<Real>& a_cdr_densities) const {
-  return Vector<Real>(m_num_photons, 0.0);
+
+  // We take the source terms as Se = alpha*Ne*ve
+
+  Vector<Real> ret(m_num_photons, 0.0);
+
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
+  const Real Te              = 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb);  // Kelvin
+  const Real N               = a_cdr_densities[m_O2_idx] + a_cdr_densities[m_N2_idx];
+  const Real EbyN            = (a_E/N*units::s_Td).vectorLength();
+  const Real k1              = this->compute_electron_N2_impact_ionization(electron_energy, N); 
+  const Real Se              = k1*a_cdr_densities[m_electron_idx]*a_cdr_densities[m_N2_idx];
+
+  ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+
+  return ret;
 }
 
 Real air_11eed::initial_sigma(const Real a_time, const RealVect& a_pos) const {
@@ -464,9 +549,9 @@ Real air_11eed::compute_electron_mobility(const Real a_energy, const Real a_N) c
   Real mobility;
 
   // These are the valid ranges from the BOLSIG call
-  const Real min_energy     = 1.E-2;
+  const Real min_energy     = 1.0;
   const Real max_energy     = 30.;
-  const Real min_energy_mob = 0.148E27;
+  const Real min_energy_mob = 0.26E25;
   const Real max_energy_mob = 0.537E24;
   
   if(a_energy < min_energy){ // Outside lower end
@@ -476,11 +561,11 @@ Real air_11eed::compute_electron_mobility(const Real a_energy, const Real a_N) c
     mobility = max_energy_mob;
   }
   else {
-    const Real A =  55.93;
-    const Real B = -0.3830;
-    const Real C =  0.2677;
-    const Real D = -0.1298E-1;
-    const Real E = -0.1056E-3;
+    const Real A =  56.39;
+    const Real B = -0.5427;
+    const Real C =  0.9931;
+    const Real D = -0.8968;
+    const Real E = -0.6925E-1;
 
     const Real x = a_energy;
     mobility = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
@@ -570,10 +655,10 @@ Real air_11eed::compute_electron_N2_impact_ionization(const Real a_energy, const
 
   Real k_c25;
   
-  const Real min_energy       = 1.E-2;
+  const Real min_energy       = 1.0;
   const Real max_energy       = 30.;
-  const Real min_energy_coeff = 0.0;
-  const Real max_energy_coeff = 0.3522E-13;
+  const Real min_energy_coeff = 0.6104E-25;
+  const Real max_energy_coeff = 0.3229E-13;
 
   if(a_energy < min_energy) { // Outside lower end
     k_c25 = min_energy_coeff;
@@ -582,11 +667,11 @@ Real air_11eed::compute_electron_N2_impact_ionization(const Real a_energy, const
     k_c25 = max_energy_coeff;
   }
   else {
-    const Real A = -31.80;
-    const Real B =  0.5467;
-    const Real C = -28.64;
-    const Real D =  10.28;
-    const Real E = -7.002;
+    const Real A = -31.36;
+    const Real B =  0.3924;
+    const Real C = -31.78;
+    const Real D =  17.54;
+    const Real E = -12.46;;
 
     const Real x = a_energy;
     k_c25 = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
@@ -599,10 +684,10 @@ Real air_11eed::compute_electron_O2_impact_ionization(const Real a_energy, const
 
   Real k_c42;;
   
-  const Real min_energy       = 1.E-2;
+  const Real min_energy       = 1.0;
   const Real max_energy       = 30.;
-  const Real min_energy_coeff = 0.0;
-  const Real max_energy_coeff = 0.3522E-13;
+  const Real min_energy_coeff = 0.2882E-22;
+  const Real max_energy_coeff = 0.4195E-13;
 
   if(a_energy < min_energy){ // Outside lower end
     k_c42 = min_energy_coeff;
@@ -611,11 +696,11 @@ Real air_11eed::compute_electron_O2_impact_ionization(const Real a_energy, const
     k_c42 = max_energy_coeff;
   }
   else {
-    const Real A = -33.44;
-    const Real B =  0.9346;
-    const Real C = -21.60;
-    const Real D =  7.002;
-    const Real E = -4.018;
+    const Real A = -32.74;
+    const Real B =  0.7901;
+    const Real C = -22.68;
+    const Real D =  7.334;
+    const Real E = -3.815;
 
     const Real x = a_energy;
     k_c42 = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
@@ -676,28 +761,149 @@ Real air_11eed::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const {
   return 3.12E-31*pow(a_Tg, -2.5);
 }
 
-Real air_11eed::compute_e_O2_to_e_2O_c1(const Real a_Te, const Real a_N) const {
-  return 0.0;
+Real air_11eed::compute_e_O2_to_e_2O_c1(const Real a_energy, const Real a_N) const {
+  Real k = 0.0;
+  
+  const Real min_energy       = 1.0;
+  const Real max_energy       = 30.;
+  const Real min_energy_coeff = 0.6937E-18;
+  const Real max_energy_coeff = 0.8357E-14;
+
+  if(a_energy < min_energy) { // Outside lower end
+    k = min_energy_coeff;
+  }
+  else if(a_energy > max_energy){
+    k = max_energy_coeff;
+  }
+  else {
+    const Real A = -29.04;
+    const Real B =  0.8249;
+    const Real C = -17.40;
+    const Real D =  7.278;
+    const Real E = -2.656;
+
+    const Real x = a_energy;
+    k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  return k;
 }
 
-Real air_11eed::compute_e_O2_to_e_2O_c2(const Real a_Te, const Real a_N) const {
-  return 0.0;
+Real air_11eed::compute_e_O2_to_e_2O_c2(const Real a_energy, const Real a_N) const {
+  Real k = 0.0;
+    
+  const Real min_energy       = 1.0;
+  const Real max_energy       = 30.;
+  const Real min_energy_coeff = 0.1149E-17;
+  const Real max_energy_coeff = 0.2596E-12;
+
+  if(a_energy < min_energy) { // Outside lower end
+    k = min_energy_coeff;
+  }
+  else if(a_energy > max_energy){
+    k = max_energy_coeff;
+  }
+  else {
+    const Real A = -29.54;
+    const Real B =  0.2660;
+    const Real C = -10.13;
+    const Real D = -2.733;
+    const Real E =  1.101;
+
+    const Real x = a_energy;
+    k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  return k;
 }
 
-Real air_11eed::compute_e_O2_to_Ominus_O(const Real a_Te, const Real a_N) const {
-  return 0.0;
+Real air_11eed::compute_e_O2_to_Ominus_O(const Real a_energy, const Real a_N) const {
+  Real k = 0.0;
+  
+  const Real min_energy       = 1.0;
+  const Real max_energy       = 30.;
+  const Real min_energy_coeff = 0.1456E-17;
+  const Real max_energy_coeff = 0.3192E-15;
+
+  if(a_energy < min_energy) { // Outside lower end
+    k = min_energy_coeff;
+  }
+  else if(a_energy > max_energy){
+    k = max_energy_coeff;
+  }
+  else {
+    const Real A = -37.26;
+    const Real B =  0.4130;
+    const Real C =  5.960;
+    const Real D = -19.30;
+    const Real E =  9.528;
+
+    const Real x = a_energy;
+    k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  return k;
 }
 
 Real air_11eed::compute_Oplus_O2_to_O_O2(const Real a_Tg) const {
   return 3.46E-12/sqrt(a_Tg);
 }
 
-Real air_11eed::compute_e_N2_to_e_N2(const Real a_Te, const Real a_N) const {
-  return 0.0;
+Real air_11eed::compute_e_N2_to_e_N2(const Real a_energy, const Real a_N) const {
+
+  Real k = 0.0;
+  
+  const Real min_energy       = 1.0;
+  const Real max_energy       = 30.;
+  const Real min_energy_coeff = 0.4298e-17;
+  const Real max_energy_coeff = 0.3746e-15;
+
+  if(a_energy < min_energy) { // Outside lower end
+    k = min_energy_coeff;
+  }
+  else if(a_energy > max_energy){
+    k = max_energy_coeff;
+  }
+  else {
+    const Real A = -39.56;
+    const Real B =  1.204;
+    const Real C = -1.689;
+    const Real D =  3.688;
+    const Real E = -2.424;
+
+    const Real x = a_energy;
+    k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  return k;
 }
 
-Real air_11eed::compute_e_O2_to_e_O2(const Real a_Te, const Real a_N) const {
-  return 0.0;
+Real air_11eed::compute_e_O2_to_e_O2(const Real a_energy, const Real a_N) const {
+  Real k = 0.0;
+  
+  const Real min_energy       = 1.0;
+  const Real max_energy       = 30.;
+  const Real min_energy_coeff = 0.1561E-17;
+  const Real max_energy_coeff = 0.3645E-15;
+
+  if(a_energy < min_energy) { // Outside lower end
+    k = min_energy_coeff;
+  }
+  else if(a_energy > max_energy){
+    k = max_energy_coeff;
+  }
+  else {
+    const Real A = -40.17;
+    const Real B =  1.390;
+    const Real C = -3.345;
+    const Real D =  4.603;
+    const Real E = -2.090;
+
+    const Real x = a_energy;
+    k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  return k;
 }
 
 Real air_11eed::compute_e_N2_ionization_loss() const {
