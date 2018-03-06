@@ -147,9 +147,11 @@ Vector<Real> air3::compute_cdr_source_terms(const Real              a_time,
 
   const Real ET = a_E.vectorLength()/(m_N*units::s_Td);
 
-  const Real ve    = this->compute_electron_mobility(ET)*a_E.vectorLength();
-  const Real alpha = this->compute_townsend_ionization(ET);
-  const Real eta   = this->compute_townsend_attachment(ET);
+  const RealVect vele = -1.0*this->compute_electron_mobility(ET)*a_E;
+  const Real ve       = vele.vectorLength();
+  const Real De       = this->compute_electron_diffusion(ET);
+  const Real alpha    = this->compute_townsend_ionization(ET);
+  const Real eta      = this->compute_townsend_attachment(ET);
 
   const Real bep  = m_electron_recombination;
   const Real bpn  = m_ion_recombination;
@@ -164,10 +166,10 @@ Vector<Real> air3::compute_cdr_source_terms(const Real              a_time,
   const air3::photon_three* photon3 = static_cast<air3::photon_three*> (&(*m_photons[m_photon3_idx]));
 
   const Real Sph = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-									  + photon3->get_A()*a_rte_densities[m_photon1_idx]
-									  + photon2->get_A()*a_rte_densities[m_photon1_idx]);
+							         	  + photon2->get_A()*a_rte_densities[m_photon2_idx]
+									  + photon3->get_A()*a_rte_densities[m_photon3_idx]);
 
-
+  const Real alpha_corr = alpha*(1 - PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + Ne)*PolyGeom::dot(vele, a_E)));
   Real& Se = source[m_electron_idx];
   Real& Sp = source[m_positive_idx];
   Real& Sn = source[m_negative_idx];

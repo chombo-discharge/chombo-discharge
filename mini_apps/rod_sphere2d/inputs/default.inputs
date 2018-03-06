@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL
 # ----------------------------------------------------------------------------------------------------			
-rod2d_main.potential = 6.E3
+rod2d_main.potential = 6.E3x
 
 # ====================================================================================================
 # PHYSICAL DOMAIN
@@ -28,13 +28,13 @@ rod_sphere.dielectric_radius         = 200E-6                           # Dielec
 # AMR SETTINGS
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
+amr.coarsest_domain = 256 256 128 # Number of cells on coarsest domain
+amr.max_amr_depth   = 1           # Maximum amr depth
 amr.max_sim_depth   = 2           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
-amr.max_box_size    = 16          # Maximum allowed box size
+amr.max_box_size    = 32          # Maximum allowed box size
 amr.ref_rat         = 4 4 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
@@ -60,19 +60,19 @@ field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------
 plasma_engine.verbosity                       = 2             # Engine verbosity
-plasma_engine.plot_interval                   = 10            # Plot interval
+plasma_engine.plot_interval                   = 1             # Plot interval
 plasma_engine.regrid_interval                 = 5             # Regrid interval
-plasma_engine.checkpoint_interval             = 10             # Checkpoint interval
+plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
 plasma_engine.initial_regrids                 = 0             # Number of initial regrids
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 500           # Maximum number of steps
-plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.max_steps                       = 1000           # Maximum number of steps
+plasma_engine.output_mode                     = medium        # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
-plasma_engine.restart                         = true         # Do restart or not
-plasma_engine.restart_step                    = 220           # Restart step.
+plasma_engine.restart                         = false         # Do restart or not
+plasma_engine.restart_step                    = 100           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -93,7 +93,7 @@ time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
 time_stepper.cfl              = 0.8   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
-time_stepper.source_growth    = 200.0 # Maximum permissible growth due to source term
+time_stepper.source_growth    = 1.E10 # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -130,9 +130,9 @@ poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsw
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
-poisson_multifluid.gmg_hang          = 0.8       # Solver hang
-poisson_multifluid.gmg_bottom_drop   = 4         # Bottom drop
+poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
+poisson_multifluid.gmg_hang          = 0.2       # Solver hang
+poisson_multifluid.gmg_bottom_drop   = 16        # Bottom drop
 poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 # ----------------------------------------------------------------------------------------------------			
