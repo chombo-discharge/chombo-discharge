@@ -23,7 +23,7 @@ eddington_sp1::eddington_sp1() : rte_solver() {
   this->set_bottom_solver(1);
   this->set_bottom_drop(16);
   this->set_tga(true);
-  this->set_reflection_coefficients(0., 0.);
+  this->set_reflectivity(0.0);
   this->set_time(0, 0., 0.);
 
   m_needs_setup = true;
@@ -52,7 +52,30 @@ void eddington_sp1::cache_state(){
   }
 }
 
+void eddington_sp1::set_reflectivity(const Real a_reflectivity){
+  CH_TIME("eddington_sp1::set_reflectivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_reflectivity" << endl;
+  }
+
+  Real r = a_reflectivity;
+
+  { // Get from input script
+    ParmParse pp("eddington_sp1");
+    pp.query("reflectivity", r);
+  }
+
+  m_r1 = r/(2.0);
+  m_r2 = r/(3.0);
+  
+}
+
 void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2){
+  CH_TIME("eddington_sp1::set_reflection_coefficients");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_reflection_coefficients" << endl;
+  }
+  
   m_r1 = a_r1;
   m_r2 = a_r2;
 }

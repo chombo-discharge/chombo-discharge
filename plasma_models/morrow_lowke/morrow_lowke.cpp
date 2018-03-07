@@ -49,7 +49,7 @@ morrow_lowke::morrow_lowke(){
   
   m_townsend2_conductor  = 1.E-4; // Second Townsend coefficient on conductor surfaces
   m_townsend2_dielectric = 1.E-4; // Second Townsend coefficient on dielectric surfaces
-  m_electrode_yield      = 1.E-3; // Photo-emission yield on conductor surfaces
+  m_electrode_yield      = 1.E-6; // Photo-emission yield on conductor surfaces
   m_dielectric_yield     = 1.E-6; // Photo-emission yield on dielectric surfaces
   m_dielectric_work      = 3.0;   // Dielectric work function (in eV)
 
@@ -479,7 +479,7 @@ morrow_lowke::electron::electron(){
   m_diffusive = true;
   m_unit      = "m-3";
 
-  m_uniform_density = 1.0;
+  m_uniform_density = 1.E10;
   m_seed_density    = 0.0;
   m_seed_radius     = 1.0;
   m_noise_density   = 0.0;
@@ -528,7 +528,7 @@ morrow_lowke::positive_species::positive_species(){
   m_diffusive = false;
   m_unit      = "m-3";
 
-  m_uniform_density = 1.0;
+  m_uniform_density = 1.E10;
   m_seed_density    = 0.0;
   m_seed_radius     = 1.0;
   m_noise_density   = 0.0;

@@ -183,3 +183,4 @@ morrow_lowke.photon2_A_coeff               = 2.88E-2               # Parameters 
 morrow_lowke.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
 morrow_lowke.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
 morrow_lowke.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+# ----------------------------------------------------------------------------------------------------			

@@ -31,6 +31,7 @@
   Class options
   -------------
 
+      eddington_sp1.reflectivity      = 1.E-4     # Reflectivity
       eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
       eddington_sp1.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
       eddington_sp1.gmg_post_smooth   = 16        # Number of relaxations in upsweep
@@ -111,6 +112,11 @@ public:
     @brief Use tga for temporal integration
   */
   virtual void set_tga(const bool a_use_tga);
+
+  /*!
+    @brief Set reflectivity
+  */
+  virtual void set_reflectivity(const Real a_reflectivity);
 
   /*!
     @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.

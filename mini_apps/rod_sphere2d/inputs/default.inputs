@@ -28,8 +28,8 @@ rod_sphere.dielectric_radius         = 200E-6                           # Dielec
 # AMR SETTINGS
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 256 256 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 1           # Maximum amr depth
+amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr.max_amr_depth   = 2           # Maximum amr depth
 amr.max_sim_depth   = 2           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
@@ -72,7 +72,7 @@ plasma_engine.output_mode                     = medium        # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.restart                         = false         # Do restart or not
-plasma_engine.restart_step                    = 100           # Restart step.
+plasma_engine.restart_step                    = 180           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -91,7 +91,7 @@ time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
-time_stepper.cfl              = 0.8   # CFL number
+time_stepper.cfl              = 0.4   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 1.E10 # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------
@@ -119,7 +119,8 @@ cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_fa
 # ----------------------------------------------------------------------------------------------------
 rte_layout.which_solver = eddington_sp1          # Solver type, available option is "eddington_sp1"
 rte_layout.stationary   = true                   # Stationary solver or not. "false" => transient RTE
-# ----------------------------------------------------------------------------------------------------			
+eddington_sp1.reflectivity = 0.0		 # Reflectivity
+# ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
@@ -163,8 +164,8 @@ air3.photoionization_efficiency    = 0.1                   # Photo-ionization ef
 air3.electrode_townsend2           = 1.E-2                 # Townsend coefficient on electrodes
 air3.electrode_quantum_efficiency  = 1.E-2                 # Quantum efficiency on electrodes
 air3.dielectric_townsend2          = 1.E-1                 # Townsend coefficient on dielectrics
-air3.dielectric_quantum_efficiency = 1.E-1                 # Quantum efficiency on dielectrics
-air3.initial_ionization            = 1.E10                 # Initial background ionization
+air3.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
+air3.initial_ionization            = 1.E14                 # Initial background ionization
 air3.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
 air3.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
 air3.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
@@ -174,4 +175,37 @@ air3.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bou
 air3.electron_recombination        = 5.E-14                # Electron-ion recombination rate
 air3.ion_recombination             = 2.E-12                # Ion-ion recombination rate
 air3.electron_detachment           = 1.E-18                # Electron detachment rate
+# ----------------------------------------------------------------------------------------------------
+
+# ====================================================================================================
+# MORROW LOWKE INPUTS
+# ----------------------------------------------------------------------------------------------------			
+morrow_lowke.gas_temperature               = 300                   # Gas temperature (K)
+morrow_lowke.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
+morrow_lowke.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
+morrow_lowke.gas_pressure                  = 1.0                   # Gas pressure
+morrow_lowke.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission
+morrow_lowke.positive_species_mobility     = 2.E-4                 # Positive species mobility
+morrow_lowke.negative_species_mobility     = 2.E-4                 # Negative species mobility
+morrow_lowke.excitation_efficiency         = 0.6                   # Impact excitation efficiency
+morrow_lowke.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
+morrow_lowke.electrode_townsend2           = 0.1                   # Townsend coefficient on electrodes
+morrow_lowke.electrode_quantum_efficiency  = 0.1                   # Quantum efficiency on electrodes
+morrow_lowke.dielectric_townsend2          = 0.1                   # Townsend coefficient on dielectrics
+morrow_lowke.dielectric_quantum_efficiency = 0.1                   # Quantum efficiency on dielectrics
+morrow_lowke.dielectric_work_function      = 6                     # Dielectric work function (ev)
+morrow_lowke.uniform_density               = 1.E10                 # Initial background ionization
+morrow_lowke.seed_density                  = 0.E16                 # Initial seed ionization
+morrow_lowke.seed_radius                   = 1E-3                  # Initial seed radius
+morrow_lowke.seed_position                 = 0. 0. 0.              # Initial seed position
+morrow_lowke.noise_amplitude               = 0.0                   # Initial noise amplitude
+morrow_lowke.noise_octaves                 = 1                     # Initial noise octaves
+morrow_lowke.noise_persistence             = 0.5                   # Reduction factor between each noise octave
+morrow_lowke.noise_frequency               = 1.0 1.0 1.0           # Spatial noise frequency
+morrow_lowke.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
+morrow_lowke.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
+morrow_lowke.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
+morrow_lowke.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
+morrow_lowke.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
+morrow_lowke.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
 # ----------------------------------------------------------------------------------------------------			

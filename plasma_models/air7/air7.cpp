@@ -21,10 +21,10 @@ air7::air7(){
   air7::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac);
 
   { // Emission coefficients at boundaries. Can be overridden from input script.
-    m_townsend2_electrode           = 1.E-2;
-    m_townsend2_dielectric          = 1.E-2;
+    m_townsend2_electrode           = 1.E-1;
+    m_townsend2_dielectric          = 1.E-1;
     m_electrode_quantum_efficiency  = 1.E-1;
-    m_dielectric_quantum_efficiency = 1.E-1;
+    m_dielectric_quantum_efficiency = 1.E-6;
     m_photoionization_efficiency    = 0.1;
     m_excitation_efficiency         = 0.6;
 
@@ -203,11 +203,10 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   source[m_N4plus_idx] -= S;
   source[m_O2plus_idx] += S;
 
-#if 0
   // k5 reaction
   S = k5 * n_N2p * n_O2;
   source[m_N2plus_idx] -= S;
-  source[m_O2plus_idx] -= S;
+  source[m_O2plus_idx] += S;
 
   // k6 reaction
   S = k6 * n_O2p * n_N2 * n_N2;
@@ -233,7 +232,6 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   S = k10 * n_Ne * n_O4p;
   source[m_electron_idx] -= S;
   source[m_O4plus_idx]   -= S;
-#endif
   
   // k11 reaction
   S = k11 * n_Ne * n_O2p;
@@ -246,7 +244,7 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   source[m_O2minus_idx]  += S;
 
   // k13 reaction
-  S = n_O2m * n_O4p;
+  S = k13 * n_O2m * n_O4p;
   source[m_O2minus_idx] -= S;
   source[m_O4plus_idx]  -= S;
 
@@ -270,8 +268,8 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   							         	  + photon2->get_A()*a_rte_densities[m_photon2_idx]
   									  + photon3->get_A()*a_rte_densities[m_photon3_idx]);
 
-  //  source[m_electron_idx] += Sph;
-  //  source[m_O2plus_idx]   += Sph;
+  source[m_electron_idx] += Sph;
+  source[m_O2plus_idx]   += Sph;
 
   return source;
 }
@@ -319,8 +317,10 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
 
   const Real ET  = a_E.vectorLength()/(m_N*units::s_Td);;
   const Real Te  = this->compute_electron_temperature(ET);
+  const Real De  = this->compute_electron_diffusion(ET);
   const Real Tg  = m_Tg;
   const Real mO2 = 2.65E-26;
+
 
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
@@ -355,6 +355,11 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
       vth = vth_g;
     }
     fluxes[i] += 0.25*vth*a_cdr_densities[i];
+  }
+
+  // Diffusive electron flux
+  if(a_cdr_gradients[m_electron_idx] > 0.0){
+    fluxes[m_electron_idx] += 0.5*De*a_cdr_gradients[m_electron_idx];
   }
 
 
@@ -502,7 +507,7 @@ Real air7::compute_townsend_ionization_N2(const Real a_EbyN) const {
   
   const Real minE = 10.0;
   const Real maxE = 3000.;
-  const Real min_k = 0.4537E-25;
+  const Real min_k = 0.1721E-98;
   const Real max_k = 0.6042E-13;
   
   if(a_EbyN < minE){
@@ -544,7 +549,7 @@ Real air7::compute_townsend_ionization_O2(const Real a_EbyN) const {
     const Real B =  1.309;
     const Real C = -543.6;
     const Real D =  2091;
-    const Real E = -0.3810E6;
+    const Real E = -0.3810E5;
 
     const Real x = a_EbyN;
     k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
