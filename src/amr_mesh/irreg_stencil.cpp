@@ -71,7 +71,8 @@ void irreg_stencil::define(const DisjointBoxLayout&       a_dbl,
 	sum += stencil.weight(i);
       }
       if(Abs(sum - 1.0) > 1.E-6){
-	MayDay::Abort("irreg_stencil::define - weights do not sum to 1. Something has gone wrong with one of your stencils");
+	MayDay::Warning("irreg_stencil::define - weights do not sum to 1. Something has gone wrong with one of your stencils");
+	stencil *= 1./sum;
       }
 #endif
     }

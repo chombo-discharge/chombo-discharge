@@ -53,7 +53,6 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
   }
   else if(m_stencil_type == stencil_type::taylor){
     found_stencil = this->get_taylor_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
-    CH_assert(found_stencil);
   }
   else if(m_stencil_type == stencil_type::lsq){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);

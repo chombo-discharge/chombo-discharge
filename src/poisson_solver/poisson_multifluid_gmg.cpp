@@ -64,11 +64,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
 
-#if 0 // Debug
-  MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
-  m_opfact->set_jump(0.0, 1.0);
-#endif
-
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
@@ -79,26 +74,34 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   m_amr->allocate(source, ncomp);
   data_ops::set_value(mfzero, 0.0);
   data_ops::set_value(source, 0.0);
-  data_ops::incr(source, a_source, 1.0);
+  data_ops::incr(source,     a_source, 1.0);
   data_ops::scale(source, 1./(units::s_eps0));
   data_ops::kappa_scale(source);
+  
+#if 0 // Debug
+  MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
+  m_opfact->set_jump(0.0, 1.0);
+  data_ops::set_value(source, 0.0);
+#endif
 
   // Aliasing
-  Vector<LevelData<MFCellFAB>* > phi, rhs, res, zero;
-  m_amr->alias(phi,  a_state);
-  m_amr->alias(rhs,  source);
-  m_amr->alias(res,  m_resid);
-  m_amr->alias(zero, mfzero);
+  Vector<LevelData<MFCellFAB>* > phi, cpy, rhs, res, zero;
+  m_amr->alias(phi,     a_state);
+  m_amr->alias(rhs,     source);
+  m_amr->alias(res,     m_resid);
+  m_amr->alias(zero,    mfzero);
 
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
   m_gmg_solver.init(phi, rhs, finest_level, 0);
   const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
 
-
+  
   if(phi_resid > zero_resid*m_gmg_eps){ // Residual is too large, recompute solution
     m_gmg_solver.m_convergenceMetric = zero_resid;
     m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+
+
 
     const int status = m_gmg_solver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -107,12 +110,19 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   }
   else{ // Solution is already converged
     converged = true;
+
   }
+
+#if 1 // Why is this required??? Is it because of op->zeroCovered()????
+  const Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
+#endif
+
 
   m_gmg_solver.revert(phi, rhs, finest_level, 0);
 
   m_amr->interp_ghost(a_state);
   m_amr->average_down(a_state);
+
 
   return converged;
 }

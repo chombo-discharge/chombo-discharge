@@ -123,7 +123,6 @@ Real rk2::advance(const Real a_dt){
   this->compute_cdr_sources_after_k1(a_dt);
   this->compute_cdr_fluxes_after_k1(a_dt);
   this->compute_sigma_flux_after_k1();
-
   
   // Do k2 advance
   this->advance_cdr_k2(a_dt);
@@ -380,7 +379,7 @@ void rk2::solve_poisson_k1(){
   data_ops::incr(scratch_pot, m_poisson->get_state(), 1.0);
 
   if((m_step + 1) % m_fast_poisson == 0){
-    bool converged = this->solve_poisson(scratch_pot, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
+    const bool converged = this->solve_poisson(scratch_pot, m_poisson->get_source(), cdr_densities, sigma, centering::cell_center);
     if(!converged){
       pout() << "rk2::solve_poisson_k1 - solver did not converge at step = " << m_step << endl;
     }
@@ -734,9 +733,9 @@ void rk2::advance_cdr_k2(const Real a_dt){
 }
 
 void rk2::advance_sigma_k2(const Real a_dt){
-  CH_TIME("rk2::advance_sigma_k1");
+  CH_TIME("rk2::advance_sigma_k2");
   if(m_verbosity > 5){
-    pout() << "rk2::advance_sigma_k1" << endl;
+    pout() << "rk2::advance_sigma_k2" << endl;
   }
   
   EBAMRIVData& k1  = m_sigma_scratch->get_k1();
@@ -779,6 +778,7 @@ void rk2::solve_poisson_k2(){
 					       m_cdr->get_states(),
 					       m_sigma->get_state(),
 					       centering::cell_center);
+
     if(!converged){
       pout() << "rk2::solve_poisson_k2 - solver did not converge at step = " << m_step << endl;
     }
@@ -790,9 +790,9 @@ void rk2::solve_poisson_k2(){
 }
 
 void rk2::compute_E_after_k2(){
-  CH_TIME("rk2::compute_E_at_start_of_time_step");
+  CH_TIME("rk2::compute_E_at_after_k2");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_E_at_start_of_time_step" << endl;
+    pout() << "rk2::compute_E_after_k2" << endl;
   }
   
   EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();

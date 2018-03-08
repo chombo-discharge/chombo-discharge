@@ -20,28 +20,28 @@ rod_plane.turn_off_dielectric       = false                            # Turn on
 rod_plane.electrode_live            = true                             # Live electrode or not
 rod_plane.electrode_radius          = 100.E-6                          # Electrode inner radius
 rod_plane.electrode_center1         = 0.0 0.0                          # Center 1
-rod_plane.electrode_center2         = 0.0 1.E-2  2                     # Center 2
+rod_plane.electrode_center2         = 0.0 2.E-2  2                     # Center 2
 
 rod_plane.dielectric_permittivity   = 5.0                              # Dielectric permittivity
-rod_plane.plane_normal              = 0.0 1.0                          # Plane normal
-rod_plane.plane_point               = 0.0 -1.E-3                       # Point on plane
-rod_plane.noise_amplitude           = 100.E-6                           # Surface roughness base amplitude
-rod_plane.noise_frequency           = 1.1E4 1.1E4                        # Surface roughness frequency
+rod_plane.plane_normal              = 1.0 0.0                          # Plane normal
+rod_plane.plane_point               = -299.000123E-6 0.0                     # Point on plane
+rod_plane.noise_amplitude           = 50.E-6                           # Surface roughness base amplitude
+rod_plane.noise_frequency           = 1.E4 1.E4                        # Surface roughness frequency
 rod_plane.noise_persistence         = 0.5                              # Drop-off factor between each octave
 rod_plane.noise_octaves             = 2                                # Number of octaves
-rod_plane.noise_reseed              = true                             # Reseed the RNG
+rod_plane.noise_reseed              = false                            # Reseed the RNG
 
 # ====================================================================================================
 # AMR SETTINGS
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 256 256     # Number of cells on coarsest domain
+amr.coarsest_domain = 128 128     # Number of cells on coarsest domain
 amr.max_amr_depth   = 2           # Maximum amr depth
 amr.max_sim_depth   = 2           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
-amr.blocking_factor = 16          # Blocking factor
-amr.max_box_size    = 64          # Maximum allowed box size
+amr.blocking_factor = 8          # Blocking factor
+amr.max_box_size    = 32          # Maximum allowed box size
 amr.ref_rat         = 4 4 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
@@ -66,16 +66,16 @@ field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------
-plasma_engine.verbosity                       = 1             # Engine verbosity
-plasma_engine.plot_interval                   = 1             # Plot interval
+plasma_engine.verbosity                       = 2             # Engine verbosity
+plasma_engine.plot_interval                   = 10             # Plot interval
 plasma_engine.regrid_interval                 = 5             # Regrid interval
-plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
+plasma_engine.checkpoint_interval             = 50            # Checkpoint interval
 plasma_engine.initial_regrids                 = 0             # Number of initial regrids
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 100           # Maximum number of steps
-plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.max_steps                       = 1             # Maximum number of steps
+plasma_engine.output_mode                     = light         # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.restart                         = false         # Do restart or not
@@ -92,13 +92,13 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-time_stepper.verbosity        = -1    # Class verbosity
+time_stepper.verbosity        = 10    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
-time_stepper.cfl              = 0.5   # CFL number
+time_stepper.cfl              = 0.8   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 200.0   # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bott
 # ====================================================================================================
 # EDDINGTON SP1 GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-eddington_sp1.gmg_verbosity     = 10        # GMG verbosity
+eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
 eddington_sp1.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 eddington_sp1.gmg_post_smooth   = 16        # Number of relaxations in upsweep
 eddington_sp1.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
