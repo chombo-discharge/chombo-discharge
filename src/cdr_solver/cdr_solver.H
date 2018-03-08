@@ -35,6 +35,21 @@ public:
   */
   virtual void cache_state();
 
+    /*!
+    @brief Compute div(nv - D*grad(n))
+  */
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+
+  /*!
+    @brief Compute advective derivative
+  */
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist) = 0;
+
+  /*!
+    @brief Compute diffusion term
+  */
+  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state) = 0;
+
   /*!
     @brief Sanity check
   */
@@ -137,9 +152,19 @@ public:
   virtual void advance(EBAMRCellData& a_state, const Real& a_dt);
 
   /*!
+    @brief Advective advance on internal data holder
+  */
+  virtual void advance_advect(const Real a_dt);
+
+  /*!
     @brief Pure advective advance. I.e. advance with D = 0 and S = 0
   */
   virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt) = 0;
+  
+  /*!
+    @brief Diffusion advance on internal data holder
+  */
+  virtual void advance_diffusion(const Real a_dt);
 
   /*!
     @brief Pure diffusion advance. I.e. advance with div(nv) = 0 and S = 0
@@ -381,10 +406,7 @@ protected:
   */
   bool m_mass_redist;
 
-  /*!
-    @brief Compute div(nv - D*grad(n))
-  */
-  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+
 
   /*!
     @brief Average cell-centered velocities to face centers

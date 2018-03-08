@@ -38,6 +38,16 @@ public:
   */
   virtual void advance_diffusion(EBAMRCellData& a_state, const Real a_dt);
 
+  /*!
+    @brief Compute advective derivative. Calling this is an error - SG currently only works with MOL methods. 
+  */
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
+
+  /*!
+    @brief Compute diffusion term. Calling this is an error - SG currently only works with MOL methods. 
+  */
+  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
+
 protected:
   
   /*!

@@ -47,6 +47,25 @@ void cdr_sg::advance_diffusion(EBAMRCellData& a_state, const Real a_dt){
   MayDay::Abort("cdr_sg::advance_diffusion - error. Scharfetter-Gummel currently only works with MOL methods");
 }
 
+
+void cdr_sg::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist){
+  CH_TIME("cdr_sg::compute_divF");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_divF" << endl;
+  }
+
+  MayDay::Abort("cdr_sg::compute_divF - error. Scharfetter-Gummel currently only works with MOL methods");
+}
+
+void cdr_sg::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){
+  CH_TIME("cdr_sg::compute_divD");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_divD" << endl;
+  }
+
+  MayDay::Abort("cdr_sg::compute_divD - error. Scharfetter-Gummel currently only works with MOL methods");
+}
+
 void cdr_sg::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_sg::compute_divJ");
   if(m_verbosity > 5){

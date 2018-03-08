@@ -191,7 +191,23 @@ void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFA
   }
 }
 
+void data_ops::copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src){
+  for (int lvl = 0; lvl < a_dst.size(); lvl++){
+    if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
+      a_src[lvl]->copyTo(*a_dst[lvl]);
+    }
+  }
+}
+
 void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
+  for (int lvl = 0; lvl < a_dst.size(); lvl++){
+    if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
+      a_src[lvl]->copyTo(*a_dst[lvl]);
+    }
+  }
+}
+
+void data_ops::copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
       a_src[lvl]->copyTo(*a_dst[lvl]);

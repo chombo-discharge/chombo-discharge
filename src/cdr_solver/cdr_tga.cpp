@@ -9,6 +9,7 @@
 #include "cdr_tga.H"
 #include "data_ops.H"
 
+#include <ParmParse.H>
 #include <EBArith.H>
 #include <EBAMRIO.H>
 #include <NeumannConductivityEBBC.H>
@@ -207,6 +208,18 @@ void cdr_tga::set_tga(const bool a_use_tga){
   }
   
   m_use_tga = a_use_tga;
+
+  ParmParse pp("cdr_tga");
+  std::string str;
+  if(pp.contains("use_tga")){
+    pp.get("use_tga", str);
+    if(str == "true"){
+      m_use_tga = true;
+    }
+    else if(str == "false"){
+      m_use_tga = false;
+    }
+  }
 }
 
 void cdr_tga::set_gmg_solver_parameters(relax::which_relax a_relax_type,

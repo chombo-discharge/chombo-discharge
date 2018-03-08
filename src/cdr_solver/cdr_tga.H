@@ -18,6 +18,29 @@
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
 
+/*!
+  @brief Extension class of cdr_solver that uses ebconductivityop for diffusion part. This class also has a multigrid
+  solver for implicit diffusion
+
+  @details 
+
+  Class options
+  -------------
+
+      cdr_tga.use_tga           = true      # Use TGA or not. Valid options are "true" (use TGA) or "false" (use backward Euler)
+      cdr_tga.gmg_verbosity     = -1        # GMG verbosity
+      cdr_tga.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
+      cdr_tga.gmg_post_smooth   = 16        # Number of relaxations in upsweep
+      cdr_tga.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
+      cdr_tga.gmg_min_iter      = 5         # Minimum number of iterations
+      cdr_tga.gmg_max_iter      = 32        # Maximum number of iterations
+      cdr_tga.gmg_tolerance     = 1.E-6     # Residue tolerance
+      cdr_tga.gmg_hang          = 0.2       # Solver hang
+      cdr_tga.gmg_bottom_drop   = 8         # Bottom drop
+      cdr_tga.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+      cdr_tga.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+
+*/
 class cdr_tga : public cdr_solver {
 public:
 
@@ -47,7 +70,22 @@ public:
   */
   virtual void advance_diffusion(EBAMRCellData& a_state, const Real a_dt);
 
-    /*!
+  /*!
+    @brief Compute div(nv - D*grad(n))
+  */
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
+
+  /*!
+    @brief Compute advective derivative
+  */
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
+
+  /*!
+    @brief Compute diffusion term
+  */
+  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
+
+  /*!
     @brief Set solver parameters. These are normally good for this class. 
   */
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
@@ -129,7 +167,7 @@ protected:
   */
   EBSimpleSolver m_simple_solver;
 
-    /*!
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_gmg_verbosity;
@@ -179,7 +217,7 @@ protected:
   */
   bool m_use_tga;
 
-    /*!
+  /*!
     @brief 
   */
   Real m_gmg_eps;
@@ -198,21 +236,6 @@ protected:
     @brief Advection-only extrapolation to faces
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
-
-  /*!
-    @brief Compute div(nv - D*grad(n))
-  */
-  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
-
-  /*!
-    @brief Compute advective derivative
-  */
-  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
-
-  /*!
-    @brief Compute diffusion term
-  */
-  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
 
   /*!
     @brief Set up geometric multigrid

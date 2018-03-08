@@ -70,6 +70,24 @@ void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
   m_step++;
 }
 
+void cdr_solver::advance_advect(const Real a_dt){
+  CH_TIME("cdr_solver::advance_advect(dt)");
+  if(m_verbosity > 1){
+    pout() << m_name + "::advance_advect(dt)" << endl;
+  }
+
+  this->advance_advect(m_state, a_dt);
+}
+
+void cdr_solver::advance_diffusion(const Real a_dt){
+  CH_TIME("cdr_solver::advance_diffusion(dt)");
+  if(m_verbosity > 1){
+    pout() << m_name + "::advance_diffusion(dt)" << endl;
+  }
+  
+  this->advance_diffusion(m_state, a_dt);
+}
+
 void cdr_solver::advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real a_alpha){
   CH_TIME("cdr_solver::advance_rk2");
   if(m_verbosity > 5){
@@ -354,7 +372,7 @@ void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state,
   
   this->compute_divJ(a_rhs, a_state, a_dt); // a_rhs = div(J)
   data_ops::scale(a_rhs, -1.0);             // a_rhs = -div(J)
-  data_ops::incr(a_rhs, m_source, 1.0);     // a_rhs = div(J) + S
+  data_ops::incr(a_rhs, m_source, 1.0);     // a_rhs = -div(J) + S
 
   m_amr->average_down(a_rhs, m_phase);
   m_amr->interp_ghost(a_rhs, m_phase);
