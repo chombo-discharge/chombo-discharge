@@ -753,13 +753,17 @@ void splitstep_tga::advance_diffusion(const Real a_dt){
   // Set source terms and velocity to zero. Then compute diffusion coefficients
   m_cdr->set_source(0.0);
   m_cdr->set_velocity(RealVect::Zero);
-  
+
+  // Diffusive advance for all cdr equations
   this->compute_cdr_diffusion();
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
 
-    solver->advance_diffusion(a_dt);
+    //    solver->advance_diffusion(a_dt);
   }
+
+  // Update poisson equation afterwards
+  this->solve_poisson();
 }
 
 void splitstep_tga::advance_sources(const Real a_dt){
