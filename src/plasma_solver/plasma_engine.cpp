@@ -654,6 +654,8 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
 					long long& a_totalPoints,
 					long long& a_totalPointsGhosts,
 					long long& a_totalBoxes,
+					Vector<long long>& a_my_level_boxes,
+					Vector<long long>& a_total_level_boxes,
 					const int& a_finestLevel,
 					const Vector<DisjointBoxLayout>& a_grids){
   CH_TIME("plasma_engine::get_loads_and_boxes");
@@ -667,6 +669,9 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
   a_totalPoints       = 0;
   a_totalPointsGhosts = 0;
   a_totalBoxes        = 0;
+
+  a_my_level_boxes.resize(1 + a_finestLevel);
+  a_total_level_boxes.resize(1 + a_finestLevel);
 
   const int ghost = m_amr->get_num_ghost();
 
@@ -689,6 +694,8 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
       pointsThisLevelGhosts += grownBox.numPts();
       boxesThisLevel        += 1;
     }
+    a_total_level_boxes[lvl] = boxesThisLevel;
+    
 
     // Find the total number of points and boxes that this processor owns
     long long myPointsLevel       = 0;
@@ -703,14 +710,17 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
       myPointsLevelGhosts += grownBox.numPts();
       myBoxesLevel        += 1;
     }
+    a_my_level_boxes[lvl] = myBoxesLevel;
 
-    //
-    a_totalPoints       += pointsThisLevel;
-    a_totalPointsGhosts += pointsThisLevelGhosts;
-    a_totalBoxes        += boxesThisLevel;
-    a_myPoints          += myPointsLevel;
-    a_myPointsGhosts    += myPointsLevelGhosts;
-    a_myBoxes           += myBoxesLevel;
+    // Total for this level
+    a_totalPoints           += pointsThisLevel;
+    a_totalPointsGhosts     += pointsThisLevelGhosts;
+    a_totalBoxes            += boxesThisLevel;
+    a_myPoints              += myPointsLevel;
+    a_myPointsGhosts        += myPointsLevelGhosts;
+    a_myBoxes               += myBoxesLevel;
+    a_my_level_boxes[lvl]    = myBoxesLevel;
+    a_total_level_boxes[lvl] = boxesThisLevel;
   }
 }
 
@@ -734,6 +744,8 @@ void plasma_engine::grid_report(){
   long long myPoints;
   long long myPointsGhosts;
   long long myBoxes;
+  Vector<long long> my_level_boxes;
+  Vector<long long> total_level_boxes;
 
   //
   const long long uniformPoints = (domains[finest_level].domainBox()).numPts();
@@ -747,7 +759,16 @@ void plasma_engine::grid_report(){
 #endif
   
   // Get loads and boxes
-  this->get_loads_and_boxes(myPoints, myPointsGhosts, myBoxes, totPoints, totPointsGhosts, totBoxes, finest_level, grids);
+  this->get_loads_and_boxes(myPoints,
+			    myPointsGhosts,
+			    myBoxes,
+			    totPoints,
+			    totPointsGhosts,
+			    totBoxes,
+			    my_level_boxes,
+			    total_level_boxes,
+			    finest_level,
+			    grids);
 
   // Write a report
   pout() << "-----------------------------------------------------------------------" << endl
@@ -755,6 +776,8 @@ void plasma_engine::grid_report(){
 	 << "\t\t\t        Finest level          = " << finest_level << endl
     	 << "\t\t\t        Total number boxes    = " << totBoxes << endl
     	 << "\t\t\t        Total number of cells = " << totPoints << endl
+	 << "\t\t\t        Total boxes per level = " << total_level_boxes << endl
+    	 << "\t\t\t        Proc. boxes per level = " << my_level_boxes << endl
 	 << "\t\t\t               with ghosts = " << totPointsGhosts << endl
 	 << "\t\t\t        Grid sparsity         = " << 1.0*totPoints/uniformPoints << endl
 	 << "\t\t\t        Finest dx             = " << dx[finest_level] << endl
