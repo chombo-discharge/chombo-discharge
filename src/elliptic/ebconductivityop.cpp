@@ -1075,41 +1075,46 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 #pragma omp parallel for
   for(int mybox=0; mybox<nbox; mybox++)
     {
-      a_lhs[dit[mybox]].mult((*m_acoef)[dit[mybox]], 0, 0, 1);
-
-      Box loBox[SpaceDim],hiBox[SpaceDim];
-      int hasLo[SpaceDim],hasHi[SpaceDim];
       EBCellFAB      & phi = (EBCellFAB&)(a_phi[dit[mybox]]);
-      EBCellFAB      & lph = a_lhs[dit[mybox]];
-      //phi.setCoveredCellVal(0.0, 0);
-
-      const BaseFab<Real>  & phiFAB = phi.getSingleValuedFAB();
-      BaseFab<Real>        & lphFAB = lph.getSingleValuedFAB();
-      Box dblBox = m_eblg.getDBL()[dit[mybox]];
-      int nComps = 1;
-      Box curPhiBox = phiFAB.box();
-
       const EBISBox& ebisbox = phi.getEBISBox();
 
-      if (!s_turnOffBCs)
-        {
-          incrOpRegularAllDirs( loBox, hiBox, hasLo, hasHi,
-                                dblBox, curPhiBox, nComps,
-                                lphFAB,
-                                phiFAB,
-                                a_homogeneousPhysBC,
-                                dit[mybox]);
-        }
-      else
-        {
-          //the all dirs code is wrong for no bcs = true
-          for (int idir = 0; idir < SpaceDim; idir++)
-            {
-              incrOpRegularDir(a_lhs[dit[mybox]], a_phi[dit[mybox]], a_homogeneousPhysBC, idir, dit[mybox]);
-            }
-        }
+      if(!ebisbox.isAllCovered()){
+	a_lhs[dit[mybox]].mult((*m_acoef)[dit[mybox]], 0, 0, 1);
 
-      applyOpIrregular(a_lhs[dit[mybox]], a_phi[dit[mybox]], a_homogeneousPhysBC, dit[mybox]);
+	Box loBox[SpaceDim],hiBox[SpaceDim];
+	int hasLo[SpaceDim],hasHi[SpaceDim];
+
+	EBCellFAB      & lph = a_lhs[dit[mybox]];
+	//phi.setCoveredCellVal(0.0, 0);
+
+	const BaseFab<Real>  & phiFAB = phi.getSingleValuedFAB();
+	BaseFab<Real>        & lphFAB = lph.getSingleValuedFAB();
+	Box dblBox = m_eblg.getDBL()[dit[mybox]];
+	int nComps = 1;
+	Box curPhiBox = phiFAB.box();
+
+
+
+	if (!s_turnOffBCs)
+	  {
+	    incrOpRegularAllDirs( loBox, hiBox, hasLo, hasHi,
+				  dblBox, curPhiBox, nComps,
+				  lphFAB,
+				  phiFAB,
+				  a_homogeneousPhysBC,
+				  dit[mybox]);
+	  }
+	else
+	  {
+	    //the all dirs code is wrong for no bcs = true
+	    for (int idir = 0; idir < SpaceDim; idir++)
+	      {
+		incrOpRegularDir(a_lhs[dit[mybox]], a_phi[dit[mybox]], a_homogeneousPhysBC, idir, dit[mybox]);
+	      }
+	  }
+
+	applyOpIrregular(a_lhs[dit[mybox]], a_phi[dit[mybox]], a_homogeneousPhysBC, dit[mybox]);
+      }
     }
 }
 //-----------------------------------------------------------------------
@@ -1927,6 +1932,83 @@ gsrbColor(LevelData<EBCellFAB>&       a_phi,
 	  }
       }// end pragma
 }
+
+void
+ebconductivityop::nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
+				const LevelData<EBCellFAB>& a_lph,
+				const LevelData<EBCellFAB>& a_rhs,
+				const IntVect&              a_color){
+  CH_TIME("ebconductivityop::nwo_gsrbColor");
+
+  const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    this->gsrbColor(a_phi[dit()], a_lph[dit()], a_rhs[dit()], dbl.get(dit()), dit(), a_color);
+  }
+
+}
+
+void ebconductivityop::gsrbColor(EBCellFAB&       a_phi,
+				 const EBCellFAB& a_lph,
+				 const EBCellFAB& a_rhs,
+				 const Box&       a_box,
+				 const DataIndex& a_dit,
+				 const IntVect&   a_color){
+  CH_TIME("ebconductivityop::gsrbColor (ebcellfabs)");
+
+  const EBISBox& ebisbox = a_phi.getEBISBox();
+  Box dblBox  = a_box;
+  BaseFab<Real>&       regPhi =     a_phi.getSingleValuedFAB();
+  const BaseFab<Real>& regLph =     a_lph.getSingleValuedFAB();
+  const BaseFab<Real>& regRhs =     a_rhs.getSingleValuedFAB();
+  IntVect loIV = dblBox.smallEnd();
+  IntVect hiIV = dblBox.bigEnd();
+            
+  for (int idir = 0; idir < SpaceDim; idir++)
+    {
+      if (loIV[idir] % 2 != a_color[idir])
+	{
+	  loIV[idir]++;
+	}
+    }
+            
+  const BaseFab<Real>& regRel = m_relCoef[a_dit].getSingleValuedFAB();
+  if (loIV <= hiIV)
+    {
+      Box coloredBox(loIV, hiIV);
+      FORT_GSRBEBCO(CHF_FRA1(regPhi,0),
+		    CHF_CONST_FRA1(regLph,0),
+		    CHF_CONST_FRA1(regRhs,0),
+		    CHF_CONST_FRA1(regRel,0),
+		    CHF_BOX(coloredBox));
+    }
+            
+  for (m_vofIterMulti[a_dit].reset(); m_vofIterMulti[a_dit].ok(); ++m_vofIterMulti[a_dit])
+    {
+      const VolIndex& vof = m_vofIterMulti[a_dit]();
+      const IntVect& iv = vof.gridIndex();
+                
+      bool doThisVoF = true;
+      for (int idir = 0; idir < SpaceDim; idir++)
+	{
+	  if (iv[idir] % 2 != a_color[idir])
+	    {
+	      doThisVoF = false;
+	      break;
+	    }
+	}
+                
+      if (doThisVoF)
+	{
+	  Real lph    = a_lph(vof, 0);
+	  Real rhs    = a_rhs(vof, 0);
+	  Real resid  = rhs - lph;
+	  Real lambda = m_relCoef[a_dit](vof, 0);
+	  a_phi(vof, 0) += lambda*resid;
+	}
+    }
+}
+
 //-----------------------------------------------------------------------
 void ebconductivityop::
 restrictResidual(LevelData<EBCellFAB>&       a_resCoar,

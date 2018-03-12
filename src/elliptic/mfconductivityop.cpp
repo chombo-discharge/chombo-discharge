@@ -57,7 +57,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 
   const int num_phases = a_mfis->num_phases();
   
-  const int num_alias  = 4;
+  const int num_alias  = 6;
 
   m_mfis = a_mfis;
   m_ncomp = 1;
@@ -314,7 +314,7 @@ void mfconductivityop::diagonalScale(LevelData<MFCellFAB>& a_rhs){
 #if verb
   pout() << "mfconductivityop::setdiagonalscale"<< endl;
 #endif
-  MayDay::Abort("where did i get called?");
+  MayDay::Abort("mfconductivityop::DiagonalScale - where did i get called?");
 
   // // Operator diagonal scale
   for (int iphase = 0; iphase < m_phases; iphase++){
@@ -746,35 +746,73 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 	m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
       }
     }
-#else // Optimized code
+#else // Place to put optimized code
     const DisjointBoxLayout& dbl = a_e.disjointBoxLayout();
     
     LevelData<MFCellFAB> lphi;
     this->create(lphi, a_residual);
     
     const bool homogeneous = true;
+
+    mfalias::aliasMF(*m_alias[0], 0, a_e);        
+    mfalias::aliasMF(*m_alias[1], 0, a_residual);
+    mfalias::aliasMF(*m_alias[2], 0, lphi);
+    mfalias::aliasMF(*m_alias[3], 1, a_e);
+    mfalias::aliasMF(*m_alias[4], 1, a_residual);
+    mfalias::aliasMF(*m_alias[5], 1, lphi);
+
+    
     for (int i = 0; i < a_iterations; i++){
       this->update_bc(a_e, homogeneous);
 
       for (int icolor = 0; icolor < m_colors.size(); icolor++){
 
 	// Apply homogeneous CFBCs
-	for (int iphase = 0; iphase < m_phases; iphase++){
-	  mfalias::aliasMF(*m_alias[0], iphase, a_e);
-	  mfalias::aliasMF(*m_alias[1], iphase, a_residual);
-	  mfalias::aliasMF(*m_alias[2], iphase, lphi);
 
-	  m_ebops[iphase]->applyHomogeneousCFBCs(*m_alias[0]);
-	  m_ebops[iphase]->applyOp(*m_alias[2], *m_alias[0], NULL, true, true, false);
-	  m_ebops[iphase]->gsrbColor(*m_alias[0], *m_alias[2], *m_alias[1], m_colors[icolor]);
+	  // Get coarse-fine boundary conditions
+	  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      for (SideIterator sit; sit.ok(); sit.next()){
+		m_ebops[0]->applyHomogeneousCFBCs((*m_alias[0])[dit()], dit(), dir, sit());
+		m_ebops[1]->applyHomogeneousCFBCs((*m_alias[3])[dit()], dit(), dir, sit());
+	      }
+	    }
+	  }
+
+	  m_ebops[0]->applyOp(*m_alias[2], *m_alias[0], NULL, true, true, false);
+	  m_ebops[1]->applyOp(*m_alias[5], *m_alias[3], NULL, true, true, false);
+
+
+	  // Don't relax covered boxes. This implies that only intersection boxes will be relaxed twice. Can't avoid this. 
+	  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	    const EBISBox& ebisbox0 = (*m_alias[0])[dit()].getEBISBox();
+	    if(!ebisbox0.isAllCovered()){
+	      m_ebops[0]->gsrbColor((*m_alias[0])[dit()],
+				    (*m_alias[2])[dit()],
+				    (*m_alias[1])[dit()],
+				    dbl.get(dit()),
+				    dit(),
+				    m_colors[icolor]);
+	    }
+
+	    // Check if box is covered. Relax if its not
+	    const EBISBox& ebisbox1 = (*m_alias[3])[dit()].getEBISBox();
+	    if(!ebisbox1.isAllCovered()){
+	      m_ebops[1]->gsrbColor((*m_alias[3])[dit()],
+				    (*m_alias[5])[dit()],
+				    (*m_alias[4])[dit()],
+				    dbl.get(dit()),
+				    dit(),
+				    m_colors[icolor]);
+	    }
+	  }
 
 	  if((icolor-1) % 2 == 0 && icolor - 1 < m_colors.size()){
 	    m_alias[0]->exchange();
+	    m_alias[3]->exchange();
 	  }
 	}
       }
-    }
-
 #endif
   }
 }

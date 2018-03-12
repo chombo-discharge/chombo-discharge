@@ -1,0 +1,98 @@
+  LoadBalance  sizes: a_computeLoads=1024 a_boxes=1024 a_LBnumProc=2
+minload=512 on rank:0  maxload=512 on rank:0
+loadbalance efficiency = 1  Nboxes=1024
+average number of boxes per proc = 512
+rank0  load=512 boxes(512)=rank1  load=512 boxes(512)=
+
+  LoadBalance  sizes: a_computeLoads=256 a_boxes=256 a_LBnumProc=2
+minload=128 on rank:0  maxload=128 on rank:0
+loadbalance efficiency = 1  Nboxes=256
+average number of boxes per proc = 128
+rank0  load=128 boxes(128)=rank1  load=128 boxes(128)=
+
+  LoadBalance  sizes: a_computeLoads=64 a_boxes=64 a_LBnumProc=2
+minload=32 on rank:0  maxload=32 on rank:0
+loadbalance efficiency = 1  Nboxes=64
+average number of boxes per proc = 32
+rank0  load=32 boxes(32)=rank1  load=32 boxes(32)=
+
+  LoadBalance  sizes: a_computeLoads=16 a_boxes=16 a_LBnumProc=2
+minload=8 on rank:0  maxload=8 on rank:0
+loadbalance efficiency = 1  Nboxes=16
+average number of boxes per proc = 8
+rank0  load=8 boxes(8)=rank1  load=8 boxes(8)=
+
+  LoadBalance  sizes: a_computeLoads=4 a_boxes=4 a_LBnumProc=2
+minload=2 on rank:0  maxload=2 on rank:0
+loadbalance efficiency = 1  Nboxes=4
+average number of boxes per proc = 2
+rank0  load=2 boxes(2)=rank1  load=2 boxes(2)=
+
+  LoadBalance  sizes: a_computeLoads=1024 a_boxes=1024 a_LBnumProc=2
+minload=512 on rank:0  maxload=512 on rank:0
+loadbalance efficiency = 1  Nboxes=1024
+average number of boxes per proc = 512
+rank0  load=512 boxes(512)=rank1  load=512 boxes(512)=
+
+  LoadBalance  sizes: a_computeLoads=256 a_boxes=256 a_LBnumProc=2
+minload=128 on rank:0  maxload=128 on rank:0
+loadbalance efficiency = 1  Nboxes=256
+average number of boxes per proc = 128
+rank0  load=128 boxes(128)=rank1  load=128 boxes(128)=
+
+  LoadBalance  sizes: a_computeLoads=64 a_boxes=64 a_LBnumProc=2
+minload=32 on rank:0  maxload=32 on rank:0
+loadbalance efficiency = 1  Nboxes=64
+average number of boxes per proc = 32
+rank0  load=32 boxes(32)=rank1  load=32 boxes(32)=
+
+  LoadBalance  sizes: a_computeLoads=16 a_boxes=16 a_LBnumProc=2
+minload=8 on rank:0  maxload=8 on rank:0
+loadbalance efficiency = 1  Nboxes=16
+average number of boxes per proc = 8
+rank0  load=8 boxes(8)=rank1  load=8 boxes(8)=
+
+  LoadBalance  sizes: a_computeLoads=4 a_boxes=4 a_LBnumProc=2
+minload=2 on rank:0  maxload=2 on rank:0
+loadbalance efficiency = 1  Nboxes=4
+average number of boxes per proc = 2
+rank0  load=2 boxes(2)=rank1  load=2 boxes(2)=
+
+  LoadBalance  sizes: a_computeLoads=4 a_boxes=4 a_LBnumProc=2
+minload=2048 on rank:0  maxload=2048 on rank:0
+loadbalance efficiency = 1  Nboxes=4
+average number of boxes per proc = 2
+rank0  load=2048 boxes(2)=rank1  load=2048 boxes(2)=
+
+  LoadBalance  sizes: a_computeLoads=4 a_boxes=4 a_LBnumProc=2
+minload=20106 on rank:1  maxload=21438 on rank:0
+loadbalance efficiency = 0.967938  Nboxes=4
+average number of boxes per proc = 2
+rank0  load=21438 boxes(2)=rank1  load=20106 boxes(2)=
+
+  LoadBalance  sizes: a_computeLoads=18 a_boxes=18 a_LBnumProc=2
+minload=3072 on rank:1  maxload=3584 on rank:0
+loadbalance efficiency = 0.923077  Nboxes=18
+average number of boxes per proc = 9
+rank0  load=3584 boxes(11)=rank1  load=3072 boxes(7)=
+
+  LoadBalance  sizes: a_computeLoads=18 a_boxes=18 a_LBnumProc=2
+minload=79771 on rank:1  maxload=82378 on rank:0
+loadbalance efficiency = 0.983922  Nboxes=18
+average number of boxes per proc = 9
+rank0  load=82378 boxes(10)=rank1  load=79771 boxes(8)=
+
+  LoadBalance  sizes: a_computeLoads=86 a_boxes=86 a_LBnumProc=2
+minload=11840 on rank:0  maxload=12224 on rank:1
+loadbalance efficiency = 0.984043  Nboxes=86
+average number of boxes per proc = 43
+rank0  load=11840 boxes(57)=rank1  load=12224 boxes(29)=
+
+  LoadBalance  sizes: a_computeLoads=86 a_boxes=86 a_LBnumProc=2
+minload=397638 on rank:0  maxload=398711 on rank:1
+loadbalance efficiency = 0.998653  Nboxes=86
+average number of boxes per proc = 43
+rank0  load=397638 boxes(45)=rank1  load=398711 boxes(41)=
+
+
+

@@ -444,6 +444,18 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
                  const LevelData<EBCellFAB>& a_rhs,
                  const IntVect&              a_color);
 
+  void nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
+                 const LevelData<EBCellFAB>& a_lph,
+                 const LevelData<EBCellFAB>& a_rhs,
+                 const IntVect&              a_color);
+  
+  void gsrbColor(EBCellFAB&       a_phi,
+		 const EBCellFAB& a_lph,
+		 const EBCellFAB& a_rhs,
+		 const Box&       a_box,
+		 const DataIndex& a_dit,
+		 const IntVect&   a_color);
+
   void getDivFStencil(VoFStencil&      a_vofStencil,
                       const VolIndex&  a_vof,
                       const DataIndex& a_dit);

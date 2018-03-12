@@ -472,13 +472,15 @@ void poisson_multifluid_gmg::setup_solver(){
   }
   else{
     botsolver = &m_bicgstab;
+#if 1
     if(m_mfis->num_phases() == 2){ // BiCGStab doesn't work with multifluid (yet)
       botsolver = &m_mfsolver;
-
+      
       if(m_verbosity > 0){
 	pout() << "poisson_multifluid_gmg::poisson_multifluid_gmg - BiCGStab not supported for multifluid" << endl;
       }
     }
+#endif
   }
   m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
   m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
