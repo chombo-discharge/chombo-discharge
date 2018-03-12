@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL
 # ----------------------------------------------------------------------------------------------------			
-rod2d_main.potential = 6.E3x
+rod2d_main.potential = 6.E3
 
 # ====================================================================================================
 # PHYSICAL DOMAIN
@@ -131,11 +131,11 @@ poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsw
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
+poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.2       # Solver hang
-poisson_multifluid.gmg_bottom_drop   = 16        # Bottom drop
-poisson_multifluid.gmg_bottom_solver = bicgstab   # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-poisson_multifluid.gmg_bottom_relax  = 16        # Number of relaxations in bottom solve ('simple' solver only)
+poisson_multifluid.gmg_bottom_drop   = 4         # Bottom drop
+poisson_multifluid.gmg_bottom_solver = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+poisson_multifluid.gmg_bottom_relax  = 8         # Number of relaxations in bottom solve ('simple' solver only)
 # ----------------------------------------------------------------------------------------------------			
 
 # ====================================================================================================

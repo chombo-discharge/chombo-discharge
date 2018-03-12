@@ -472,7 +472,7 @@ void poisson_multifluid_gmg::setup_solver(){
   }
   else{
     botsolver = &m_bicgstab;
-    if(m_mfis->num_phases() == 2){ // 
+    if(m_mfis->num_phases() == 2){ // BiCGStab doesn't work with multifluid (yet)
       botsolver = &m_mfsolver;
 
       if(m_verbosity > 0){

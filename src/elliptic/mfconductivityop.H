@@ -398,6 +398,11 @@ protected:
   Vector<LevelData<EBCellFAB>* > m_alias;
 
   /*!
+    @brief Colors for relaxation
+  */
+  Vector<IntVect> m_colors;
+
+  /*!
     @brief Surface potential
   */
   LevelData<BaseIVFAB<Real> > m_surfpot;

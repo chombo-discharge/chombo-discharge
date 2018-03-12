@@ -55,12 +55,17 @@ void THIS_IS_AN_ERROR_MESSAGE(void)
 }
 #endif
 
+class mfconductivityop;
+
 //! \class ebconductivityop
 //! This class implements an operator that solves the equation
 //! (alpha a + beta div (b grad) )phi = rhs
 //! using the AMRLevelOp interface.
 class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
 {
+
+  friend mfconductivityop;
+  
   public:
 
 #ifdef CH_USE_HDF5

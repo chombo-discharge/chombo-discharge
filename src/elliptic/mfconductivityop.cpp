@@ -9,6 +9,7 @@
 #include "mfconductivityop.H"
 #include "mfalias.H"
 
+#include <EBArith.H>
 #include <DirichletConductivityDomainBC.H>
 #include <MFLevelDataOps.H>
 #include <BaseIVFactory.H>
@@ -202,6 +203,8 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   MFCellFactory* factory = new MFCellFactory(layouts, comps);
   RefCountedPtr<DataFactory<MFCellFAB> > fac(factory);
   m_ops.define(fac);
+
+  EBArith::getMultiColors(m_colors);
 }
 
 void mfconductivityop::set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
@@ -708,19 +711,31 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 
   const bool homogeneous = true;
   
-  if(!m_multifluid){
+  if(!m_multifluid){ // Single-fluid code
     for (int iphase = 0; iphase < m_phases; iphase++){
       mfalias::aliasMF(*m_alias[0], iphase, a_e);
       mfalias::aliasMF(*m_alias[1], iphase, a_residual);
 
       for (int i = 0; i < a_iterations; i++){
 	this->update_bc(a_e, homogeneous);
-	m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
-	//m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+	if(m_relax == 0){
+	  m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
+
+	}
+	else if(m_relax == 1){
+	  m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
+	}
+	else if(m_relax == 2){
+	  m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
+	}
+	else {
+	  MayDay::Abort("mfconductivityop::relax - unknown relaxation type requested");
+	}
       }
     }
   }
   else { // Multifluid code
+#if 0 // Original code
     for (int i = 0; i < a_iterations; i++){
       this->update_bc(a_e, homogeneous);
 
@@ -731,20 +746,37 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 	m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
       }
     }
-  }
-  
-#if 0
-  const DisjointBoxLayout& dbl = a_e.dataIterator();
+#else // Optimized code
+    const DisjointBoxLayout& dbl = a_e.disjointBoxLayout();
+    
+    LevelData<MFCellFAB> lphi;
+    this->create(lphi, a_residual);
+    
+    const bool homogeneous = true;
+    for (int i = 0; i < a_iterations; i++){
+      this->update_bc(a_e, homogeneous);
 
-  const bool homogeneous = true;
-  for (int i = 0; i < a_iterations; i++){
-    this->update_bc(a_e, homogeneous);
+      for (int icolor = 0; icolor < m_colors.size(); icolor++){
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      
+	// Apply homogeneous CFBCs
+	for (int iphase = 0; iphase < m_phases; iphase++){
+	  mfalias::aliasMF(*m_alias[0], iphase, a_e);
+	  mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+	  mfalias::aliasMF(*m_alias[2], iphase, lphi);
+
+	  m_ebops[iphase]->applyHomogeneousCFBCs(*m_alias[0]);
+	  m_ebops[iphase]->applyOp(*m_alias[2], *m_alias[0], NULL, true, true, false);
+	  m_ebops[iphase]->gsrbColor(*m_alias[0], *m_alias[2], *m_alias[1], m_colors[icolor]);
+
+	  if((icolor-1) % 2 == 0 && icolor - 1 < m_colors.size()){
+	    m_alias[0]->exchange();
+	  }
+	}
+      }
     }
-  }
+
 #endif
+  }
 }
 
 void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
