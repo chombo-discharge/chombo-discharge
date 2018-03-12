@@ -671,37 +671,77 @@ void mfconductivityop::setToZero(LevelData<MFCellFAB>& a_x){
 
 void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 			     const LevelData<MFCellFAB>& a_residual,
-			     int                         iterations){
+			     int                         a_iterations){
   CH_TIME("mfconductivityop::relax");
 #if verb
   pout() << "mfconductivityop::relax"<< endl;
 #endif
 
-#if 0
-  for (int i=0; i < iterations; i++){
-    if (m_relax == 0){
-      this->levelJacobi(a_e, a_residual);
-    }
-    else if (m_relax == 1){
-      this->levelMulticolorGS(a_e, a_residual);
-    }
-    else if (m_relax == 2){
-      this->levelGSRB(a_e, a_residual);
-    }
-    else{
-      MayDay::Error("mfconductivityop: Invalid relaxation type");
-    }
-  }
-#else
-  const bool homogeneous = true;
-  for (int i = 0; i < iterations; i++){
-    this->update_bc(a_e, homogeneous);
+// #if 0
+//   for (int i=0; i < a_iterations; i++){
+//     if (m_relax == 0){
+//       this->levelJacobi(a_e, a_residual);
+//     }
+//     else if (m_relax == 1){
+//       this->levelMulticolorGS(a_e, a_residual);
+//     }
+//     else if (m_relax == 2){
+//       this->levelGSRB(a_e, a_residual);
+//     }
+//     else{
+//       MayDay::Error("mfconductivityop: Invalid relaxation type");
+//     }
+//   }
+// #else
+//   const bool homogeneous = true;
+//   for (int i = 0; i < a_iterations; i++){
+//     this->update_bc(a_e, homogeneous);
 
+//     for (int iphase = 0; iphase < m_phases; iphase++){
+//       mfalias::aliasMF(*m_alias[0], iphase, a_e);
+//       mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+
+//       m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+//     }
+//   }
+// #endif
+
+  const bool homogeneous = true;
+  
+  if(!m_multifluid){
     for (int iphase = 0; iphase < m_phases; iphase++){
       mfalias::aliasMF(*m_alias[0], iphase, a_e);
       mfalias::aliasMF(*m_alias[1], iphase, a_residual);
 
-      m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+      for (int i = 0; i < a_iterations; i++){
+	this->update_bc(a_e, homogeneous);
+	m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
+	//m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+      }
+    }
+  }
+  else { // Multifluid code
+    for (int i = 0; i < a_iterations; i++){
+      this->update_bc(a_e, homogeneous);
+
+      for (int iphase = 0; iphase < m_phases; iphase++){
+	mfalias::aliasMF(*m_alias[0], iphase, a_e);
+	mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+
+	m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+      }
+    }
+  }
+  
+#if 0
+  const DisjointBoxLayout& dbl = a_e.dataIterator();
+
+  const bool homogeneous = true;
+  for (int i = 0; i < a_iterations; i++){
+    this->update_bc(a_e, homogeneous);
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      
     }
   }
 #endif

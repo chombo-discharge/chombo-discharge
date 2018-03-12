@@ -29,6 +29,9 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 						 const int                                 a_order_ebbc,
 						 const int                                 a_drop_bottom,
 						 int                                       a_num_levels){
+#if verb
+  pout() << "mfconductivityopfactory::mfconductivityopfactory" << endl;
+#endif
 
   CH_assert(a_mflg[0].num_phases() <= 2); 
 

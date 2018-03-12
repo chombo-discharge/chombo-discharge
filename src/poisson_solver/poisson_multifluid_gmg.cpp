@@ -26,6 +26,8 @@
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
 
+  m_verbosity = 10;
+
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(16);
@@ -470,8 +472,14 @@ void poisson_multifluid_gmg::setup_solver(){
   }
   else{
     botsolver = &m_bicgstab;
-  }
+    if(m_mfis->num_phases() == 2){ // 
+      botsolver = &m_mfsolver;
 
+      if(m_verbosity > 0){
+	pout() << "poisson_multifluid_gmg::poisson_multifluid_gmg - BiCGStab not supported for multifluid" << endl;
+      }
+    }
+  }
   m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
   m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
 				   m_gmg_post_smooth,
