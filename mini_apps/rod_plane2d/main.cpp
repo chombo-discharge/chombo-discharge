@@ -10,7 +10,7 @@
 #include "field_tagger.H"
 #include "splitstep_tga.H"
 
-#include "morrow_lowke.H"
+#include "air7.H"
 #include "rod_plane.H"
 
 #include <ParmParse.H>
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
-  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air7());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   //  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new splitstep_tga());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
