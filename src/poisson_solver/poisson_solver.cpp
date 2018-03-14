@@ -74,10 +74,10 @@ poisson_solver::poisson_solver(){
 	    else if(type == "neumann"){
 	      this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
 	    }
-	  }
-	  else {
-	    std::string error = "poisson_solver::poisson_solver - unknown bc requested for " + bc_string;
-	    MayDay::Abort(error.c_str());
+	    else {
+	      std::string error = "poisson_solver::poisson_solver - unknown bc requested for " + bc_string;
+	      MayDay::Abort(error.c_str());
+	    }
 	  }
 	}
 	else if(side == Side::Hi){

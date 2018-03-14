@@ -1,0 +1,123 @@
+/*!
+  @file   rod3d_tagger.H
+  @brief  Declaration of a cell tagger for mesh reduction in the rod3D geometry
+  @author Robert Marskar
+  @date   Feb. 2018
+*/
+
+#ifndef _ROD3D_TAGGER_
+#define _ROD3D_TAGGER_
+
+#include "cell_tagger.H"
+
+/*!
+  @brief Class that tags cells based on the relative curvature of the electric field
+  @details This class tets if \f$|\nabla E|\Delta x/|E| > \epsilon_{\textrm{curv}}\f$ OR \f$|E|/E_{\textrm{max}} > \epsilon_{\textrm{mag}}\f$ are fulfilled. If so, the cell is refined. The same tests is used for coarsening, with different epsilons and opposite inequality sign. However, for coarsening, both tests must be fulfilled. 
+
+  Class options
+  -------------
+
+      rod3d_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
+      rod3d_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+      rod3d_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
+      rod3d_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+
+*/
+class rod3d_tagger : public cell_tagger {
+public:
+  
+  /*!
+    @brief Constructor
+  */
+  rod3d_tagger();
+
+  /*!
+    @brief Destructor
+  */
+  virtual ~rod3d_tagger();
+
+  /*!
+    @brief Return tracer field
+  */
+  virtual Vector<Real> tracer(const RealVect&         a_pos,
+			      const Real&             a_time,
+			      const Real&             a_dx,
+			      const RealVect&         a_E,
+			      const Real&             a_min_E,
+			      const Real&             a_max_E,
+			      const RealVect&         a_grad_E,
+			      const Real&             a_min_grad_E,
+			      const Real&             a_max_grad_E,
+			      const Real&             a_rho,
+			      const Real&             a_min_rho,
+			      const Real&             a_max_rho,
+			      const RealVect&         a_grad_rho,
+			      const Real&             a_min_grad_rho,
+			      const Real&             a_max_grad_rho,
+			      const Vector<Real>&     a_ion_densities,
+			      const Vector<Real>&     a_min_ion_densities,
+			      const Vector<Real>&     a_max_ion_densities,
+			      const Vector<RealVect>& a_ion_gradients,
+			      const Vector<Real>&     a_min_ion_gradients,
+			      const Vector<Real>&     a_max_ion_gradients,
+			      const Vector<Real>&     a_photon_densities,
+			      const Vector<Real>&     a_min_photon_densities,
+			      const Vector<Real>&     a_max_photon_densities);
+
+  /*!
+    @brief Return coarsening criterion. 
+  */
+  virtual bool coarsen_cell(const RealVect&         a_pos,
+			    const Real&             a_time,
+			    const Real&             a_dx,
+			    const int&              a_lvl,
+			    const Vector<Real>&     a_tracer,
+			    const Vector<RealVect>& a_grad_tracer);
+
+  /*!
+    @brief Return refinement criterion. 
+  */
+  virtual bool refine_cell(const RealVect&         a_pos,
+			   const Real&             a_time,
+			   const Real&             a_dx,
+			   const int&              a_lvl,
+			   const Vector<Real>&     a_tracer,
+			   const Vector<RealVect>& a_grad_tracer);
+protected:
+
+  /*!
+    @brief Threshold for coarsening based on curvature
+  */
+  Real m_coar_curv;
+
+  /*!
+    @brief Threshold for coarsening based on magnitude
+  */
+  Real m_coar_mag;
+
+  /*!
+    @brief Threshold for refinement based on curvature
+  */
+  Real m_refi_curv;
+  
+  /*!
+    @brief Threshold for coarsening based on magnitude
+  */
+  Real m_refi_mag;
+
+  /*!
+    @brief Rod radius
+  */
+  Real m_rod_radius;
+
+  /*!
+    @brief Rod center
+  */
+  RealVect m_rod_center;
+
+  /*!
+    @brief Cylinder axis
+  */
+  RealVect m_axis;
+};
+#endif

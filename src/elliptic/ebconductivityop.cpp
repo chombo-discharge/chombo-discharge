@@ -30,6 +30,8 @@
 #include "CH_OpenMP.H"
 #include "NamespaceHeader.H"
 
+#define verb 0
+
 //IntVect ebconductivityop::s_ivDebug = IntVect(D_DECL(111, 124, 3));
 bool ebconductivityop::s_turnOffBCs       = false; //REALLY needs to default to false
 bool ebconductivityop::s_forceNoEBCF      = false; //REALLY needs to default to false
@@ -2324,7 +2326,14 @@ AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
 
   //apply the operator between this and the next coarser level.
   CH_START(t1);
+
+#if verb
+  pout() << "ebconductivityop::amroperator - begin applyOp" << endl;
+#endif
   applyOp(a_LofPhi, a_phi, &a_phiCoar,  a_homogeneousPhysBC, false);
+#if verb
+  pout() << "ebconductivityop::amroperator - end applyOp" << endl;
+#endif
   CH_STOP(t1);
 
   //  dumpLevelPoint(a_LofPhi, string("ebconductivityop: AMROperator: pre-reflux lphi = "));
@@ -2333,8 +2342,13 @@ AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
     {
       CH_assert(a_finerOp != NULL);
       CH_START(t2);
-
+#if verb
+      pout() << "ebconductivityop::amroperator - begin reflux" << endl;
+#endif
       reflux(a_LofPhi, a_phiFine, a_phi, a_finerOp);
+#if verb
+      pout() << "ebconductivityop::amroperator - end reflux" << endl;
+#endif
 
       CH_STOP(t2);
     }
@@ -2359,11 +2373,23 @@ reflux(LevelData<EBCellFAB>& a_residual,
   m_fastFR.setToZero();
   CH_STOP(t2);
   CH_START(t3);
+#if verb
+  pout() << "ebconductivityop::reflux - increment coar" << endl;
+#endif
   incrementFRCoar(m_fastFR, a_phiFine, a_phi);
+#if verb
+  pout() << "ebconductivityop::reflux - done increment coar" << endl;
+#endif
   CH_STOP(t3);
 
   CH_START(t4);
+#if verb
+  pout() << "ebconductivityop::reflux - increment fine" << endl;
+#endif
   incrementFRFine(m_fastFR, a_phiFine, a_phi, a_finerOp);
+#if verb
+  pout() << "ebconductivityop::reflux - done increment fine" << endl;
+#endif
   CH_STOP(t4);
   CH_START(t5);
 

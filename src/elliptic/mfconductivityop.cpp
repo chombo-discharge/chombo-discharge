@@ -18,6 +18,7 @@
 #define verb 0
 
 mfconductivityop::mfconductivityop(){
+  
 }
   
 
@@ -931,14 +932,15 @@ void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
     pout() << "mfconductivityop::AMROperator - apply ebconductivityops" << endl;
 #endif
     m_ebops[iphase]->AMROperator(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_homogeneousBC, finerOp->m_ebops[iphase]);
+    // m_ebops[iphase]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
+    // m_ebops[iphase]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[iphase]);
 #if verb
     pout() << "mfconductivityop::AMROperator - apply ebconductivityops - done" << endl;
 #endif
   }
 
 										 
-  //    m_ebops[iphase]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
-  //    m_ebops[iphase]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[iphase]);
+
 
 #if verb
   pout() << "mfconductivityop::amroperator - done" << endl;

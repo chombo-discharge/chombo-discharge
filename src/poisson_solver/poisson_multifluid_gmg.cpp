@@ -26,8 +26,6 @@
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
 
-  m_verbosity = 10;
-
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(16);
@@ -97,7 +95,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   m_gmg_solver.init(phi, rhs, finest_level, 0);
   const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
-
   
   if(phi_resid > zero_resid*m_gmg_eps){ // Residual is too large, recompute solution
     m_gmg_solver.m_convergenceMetric = zero_resid;

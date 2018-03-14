@@ -13,6 +13,7 @@
 #include <GeometryService.H>
 #include <EBIndexSpace.H>
 #include <RealVect.H>
+#include <MFIndexSpace.H>
 
 /*!
   @brief Two-fluid index space
@@ -69,6 +70,11 @@ protected:
     @brief EBIndexSpaces
   */
   Vector<RefCountedPtr<EBIndexSpace> > m_ebis;
+
+  /*!
+    @brief MFIndexSpace
+  */
+  RefCountedPtr<MFIndexSpace> m_mfis;
 };
 
 #endif
