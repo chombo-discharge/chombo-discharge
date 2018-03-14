@@ -27,6 +27,7 @@ void mfis::define(const Box                     & a_domain,
 		  bool                            a_fix_phase){
 
 
+#if 1
   m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
 
   if(a_geoservers[phase::solid] == NULL){
@@ -35,6 +36,16 @@ void mfis::define(const Box                     & a_domain,
   else{
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
   }
+#else
+  pout() << "defining MFIndexSpace" << endl;
+  m_mfis = RefCountedPtr<MFIndexSpace> (new MFIndexSpace());
+  m_mfis->define(a_domain, a_origin, a_dx, a_geoservers, a_max_coar, false);
+
+  m_ebis[phase::gas] = RefCountedPtr<EBIndexSpace> (const_cast<EBIndexSpace*> (m_mfis->EBIS(phase::gas)));
+  m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace> (const_cast<EBIndexSpace*> (m_mfis->EBIS(phase::solid)));
+
+  pout() << "done defining MFIndexSpace" << endl;
+#endif
 }
   
 const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const phase::which_phase a_phase) const {

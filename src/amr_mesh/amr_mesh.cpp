@@ -33,6 +33,7 @@ amr_mesh::amr_mesh(){
   this->set_max_box_size(32);
   this->set_max_ebis_box_size(m_max_box_size); 
   this->set_buffer_size(1);
+  this->set_irreg_growth(2);
   this->set_ebcf(false);
   this->set_fill_ratio(1.0);
   this->set_redist_rad(1);
@@ -1349,6 +1350,17 @@ void amr_mesh::set_buffer_size(const int a_buffer_size){
   }
 }
 
+void amr_mesh::set_irreg_growth(const int a_irreg_growth){
+  m_irreg_growth = a_irreg_growth;
+
+  int buffer;
+  ParmParse pp("amr");
+  pp.query("irreg_growth", buffer);
+  if(buffer > 0){
+    m_irreg_growth = buffer;
+  }
+}
+
 void amr_mesh::set_blocking_factor(const int a_blocking_factor){
   CH_TIME("amr_mesh::set_blocking_factor");
   m_blocking_factor = a_blocking_factor;
@@ -1475,6 +1487,10 @@ bool amr_mesh::get_ebcf(){
 
 int amr_mesh::get_finest_level(){
   return m_finest_level;
+}
+
+int amr_mesh::get_irreg_growth(){
+  return m_irreg_growth;
 }
 
 int amr_mesh::get_max_amr_depth(){

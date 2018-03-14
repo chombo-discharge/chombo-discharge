@@ -42,6 +42,7 @@
       amr.max_amr_depth   = 0           # Maximum amr depth
       amr.max_sim_depth   = -1          # Maximum simulation depth
       amr.fill_ratio      = 1.0         # Fill ratio for grid generation
+      amr.irreg_growth    = 2           # How much to grow irregular tagged cells
       amr.buffer_size     = 2           # Number of cells between grid levels
       amr.blocking_factor = 8 (16)      # Default blocking factor (16 in 3D)
       amr.max_box_size    = 32          # Maximum allowed box size
@@ -279,6 +280,11 @@ public:
   virtual void set_buffer_size(const int a_buffer_size);
 
   /*!
+    @brief Set irregular growth
+  */
+  virtual void set_irreg_growth(const int a_irreg_growth);
+
+  /*!
     @brief Set fill ratio
   */
   virtual void set_fill_ratio(const Real a_fill_ratio);
@@ -357,6 +363,11 @@ public:
     @brief Get refinement ratios
   */
   virtual int get_finest_level();
+
+  /*!
+    @brief Get irregular cell growth
+  */
+  virtual int get_irreg_growth();
 
   /*!
     @brief Get maximum amr depth
@@ -575,6 +586,11 @@ protected:
     @brief Set buffer size
   */
   int m_buffer_size;
+
+  /*!
+    @brief How much to grow irregular cells
+  */
+  int m_irreg_growth;
 
   /*!
     @brief Blocking factor

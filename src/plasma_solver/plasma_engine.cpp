@@ -570,7 +570,7 @@ void plasma_engine::get_geom_tags(){
 
   CH_assert(ebis_gas != NULL);
 
-  for (int lvl = 0; lvl < maxdepth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that. 
+  for (int lvl = 0; lvl < maxdepth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that.
     const ProblemDomain& cur_dom = m_amr->get_domains()[lvl];
     const int which_level = ebis_gas->getLevel(cur_dom);
 
@@ -643,9 +643,12 @@ void plasma_engine::get_geom_tags(){
   }
 
   // Grow tags by 2, this is an ad-hoc fix that prevents ugly grid near EBs
+
+  const int growth = Max(2, m_amr->get_irreg_growth());
   for (int lvl = 0; lvl < maxdepth; lvl++){
-    m_geom_tags[lvl].grow(1);
+    m_geom_tags[lvl].grow(growth);
   }
+
 }
 
 void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
