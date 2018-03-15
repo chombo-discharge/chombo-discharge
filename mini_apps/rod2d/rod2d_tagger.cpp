@@ -1,16 +1,16 @@
 /*!
-  @file   rod3d_tagger.cpp
-  @brief  Implementation rod3d_tagger.cpp
+  @file   rod2d_tagger.cpp
+  @brief  Implementation rod2d_tagger.cpp
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#include "rod3d_tagger.H"
+#include "rod2d_tagger.H"
 
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-rod3d_tagger::rod3d_tagger(){
+rod2d_tagger::rod2d_tagger(){
   m_num_tracers = 1;
 
   m_coar_curv  = 0.1;
@@ -42,16 +42,17 @@ rod3d_tagger::rod3d_tagger(){
     
     m_axis       = (c1 - c2)/(c1-c2).vectorLength();
     m_rod_center = c2 + 0.5*m_axis*m_rod_radius; // Point between the tip and the center of the sphere
+    
   }
 }
 
 
-rod3d_tagger::~rod3d_tagger(){
+rod2d_tagger::~rod2d_tagger(){
 
 }
 
 
-Vector<Real> rod3d_tagger::tracer(const RealVect&         a_pos,
+Vector<Real> rod2d_tagger::tracer(const RealVect&         a_pos,
 				  const Real&             a_time,
 				  const Real&             a_dx,
 				  const RealVect&         a_E,
@@ -83,7 +84,7 @@ Vector<Real> rod3d_tagger::tracer(const RealVect&         a_pos,
 }
 
 
-bool rod3d_tagger::coarsen_cell(const RealVect&         a_pos,
+bool rod2d_tagger::coarsen_cell(const RealVect&         a_pos,
 				const Real&             a_time,
 				const Real&             a_dx,
 				const int&              a_lvl,
@@ -96,7 +97,7 @@ bool rod3d_tagger::coarsen_cell(const RealVect&         a_pos,
 }
 
 
-bool rod3d_tagger::refine_cell(const RealVect&         a_pos,
+bool rod2d_tagger::refine_cell(const RealVect&         a_pos,
 			       const Real&             a_time,
 			       const Real&             a_dx,
 			       const int&              a_lvl,
@@ -107,7 +108,7 @@ bool rod3d_tagger::refine_cell(const RealVect&         a_pos,
   const RealVect refine_lo   = m_rod_center - m_radius_fac*m_rod_radius;
   const RealVect refine_hi   = m_rod_center + m_radius_fac*m_rod_radius;
   const bool refine_geom     = a_pos > refine_lo && a_pos < refine_hi;
-  const bool refine_restrict = PolyGeom::dot(a_pos - m_rod_center, m_axis) < 2*m_radius_fac*m_rod_radius;
+  const bool refine_restrict = PolyGeom::dot(a_pos - m_rod_center, m_axis) < m_radius_fac*m_rod_radius;
 
   return (refine_tag || refine_geom) && refine_restrict;
 }

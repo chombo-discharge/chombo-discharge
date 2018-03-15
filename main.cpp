@@ -22,7 +22,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  return 8.E3;
+  return 15.E4;
 }
 
 int main(int argc, char* argv[]){

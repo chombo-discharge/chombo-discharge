@@ -1,12 +1,12 @@
 /*!
-  @file   rod3d_tagger.H
-  @brief  Declaration of a cell tagger for mesh reduction in the rod3D geometry
+  @file   rod2d_tagger.H
+  @brief  Declaration of a cell tagger for mesh reduction in the rod2d geometry
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#ifndef _ROD3D_TAGGER_
-#define _ROD3D_TAGGER_
+#ifndef _ROD2D_TAGGER_
+#define _ROD2D_TAGGER_
 
 #include "cell_tagger.H"
 
@@ -17,24 +17,24 @@
   Class options
   -------------
 
-      rod3d_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
-      rod3d_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-      rod3d_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
-      rod3d_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+      rod2d_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
+      rod2d_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+      rod2d_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
+      rod2d_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 
 */
-class rod3d_tagger : public cell_tagger {
+class rod2d_tagger : public cell_tagger {
 public:
   
   /*!
     @brief Constructor
   */
-  rod3d_tagger();
+  rod2d_tagger();
 
   /*!
     @brief Destructor
   */
-  virtual ~rod3d_tagger();
+  virtual ~rod2d_tagger();
 
   /*!
     @brief Return tracer field

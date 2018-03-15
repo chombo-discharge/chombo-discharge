@@ -100,8 +100,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     m_gmg_solver.m_convergenceMetric = zero_resid;
     m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
-
-
     const int status = m_gmg_solver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
       converged = true;
@@ -119,9 +117,8 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   m_gmg_solver.revert(phi, rhs, finest_level, 0);
 
-  m_amr->interp_ghost(a_state);
   m_amr->average_down(a_state);
-
+  m_amr->interp_ghost(a_state);
 
   return converged;
 }

@@ -580,7 +580,7 @@ void plasma_engine::get_geom_tags(){
     IntVectSet solid_tags;
     IntVectSet gas_diel_tags;
     IntVectSet gas_solid_tags;
-    
+
     // Conductor cells
     if(m_conductor_tag_depth > lvl){ 
       cond_tags = ebis_gas->irregCells(which_level);
@@ -1237,7 +1237,6 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
   { // Get parameter from input script
     ParmParse pp("plasma_engine");
     pp.query("refine_geometry", depth);
-    depth  = (depth < 0) ? max_depth : a_depth;
     depth1 = depth;
     depth2 = depth;
     depth3 = depth;
@@ -1264,7 +1263,7 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
   }
     
   
-  this->set_geom_refinement_depth(depth, depth, depth, depth, depth, depth);
+  this->set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
 }
 
 void plasma_engine::set_geom_refinement_depth(const int a_depth1,
@@ -1286,6 +1285,7 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth1,
   m_gas_dielectric_interface_tag_depth = Min(a_depth4, max_depth);
   m_gas_solid_interface_tag_depth      = Min(a_depth5, max_depth);
   m_solid_solid_interface_tag_depth    = Min(a_depth6, max_depth);
+
 
   m_geom_tag_depth = 0;
   m_geom_tag_depth = Max(m_geom_tag_depth, a_depth1);

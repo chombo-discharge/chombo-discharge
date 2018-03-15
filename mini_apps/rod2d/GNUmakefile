@@ -7,10 +7,9 @@ include $(CHOMBO_HOME)/mk/Make.defs
 
 USE_EB=TRUE
 USE_MF=TRUE
-DIM=2
 
 # Base file containing int main()
-ebase := rod2d_main
+ebase := main
 
 # Requires libraries
 LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTools AMRElliptic AMRTools \
@@ -34,6 +33,8 @@ src_dirs = $(STREAMER_HOME)/src					\
 	$(STREAMER_HOME)/cell_taggers				\
 	$(STREAMER_HOME)/geometries_prebuilt			\
 	$(STREAMER_HOME)/plasma_models	 			\
+	$(STREAMER_HOME)/time_steppers	 			\
+	$(STREAMER_HOME)/plasma_models/air7 			\
 
 # Define rules to build everything
 include $(CHOMBO_HOME)/mk/Make.example

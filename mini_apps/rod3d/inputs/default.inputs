@@ -33,9 +33,9 @@ rod3d_tagger.refine_magnitude  = 0.8    # Sets eps_mag for refinement
 # AMR SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 1           # Maximum amr depth
-amr.max_sim_depth   = 3           # Maximum simulation depth
+amr.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr.max_amr_depth   = 4           # Maximum amr depth
+amr.max_sim_depth   = 4           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 2           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
@@ -60,7 +60,7 @@ plasma_engine.verbosity                       = 10            # Engine verbosity
 plasma_engine.plot_interval                   = 5             # Plot interval
 plasma_engine.regrid_interval                 = 10            # Regrid interval
 plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
-plasma_engine.initial_regrids                 = 3             # Number of initial regrids
+plasma_engine.initial_regrids                 = 4             # Number of initial regrids
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
