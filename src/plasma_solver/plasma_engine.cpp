@@ -1509,6 +1509,8 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     
     this->regrid(true);
 
+    m_timestepper->solver_dump();
+
     if(m_verbosity > 0){
       this->grid_report();
     }

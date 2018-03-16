@@ -185,6 +185,11 @@ protected:
   int m_bottom_drop;
 
   /*!
+    @brief Target residue. If they residue is greater than this, we have a problematic cell. 
+  */
+  Real m_converged_resid;
+
+  /*!
     @brief 
   */
   Real m_gmg_eps;
