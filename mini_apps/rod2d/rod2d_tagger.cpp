@@ -108,6 +108,7 @@ bool rod2d_tagger::refine_cell(const RealVect&         a_pos,
   const RealVect refine_lo   = m_rod_center - m_radius_fac*m_rod_radius;
   const RealVect refine_hi   = m_rod_center + m_radius_fac*m_rod_radius;
   const bool refine_geom     = a_pos > refine_lo && a_pos < refine_hi;
+  //const bool refine_geom     = (a_pos - m_rod_center).vectorLength() < m_radius_fac*m_rod_radius;
   const bool refine_restrict = PolyGeom::dot(a_pos - m_rod_center, m_axis) < m_radius_fac*m_rod_radius;
 
   return (refine_tag || refine_geom) && refine_restrict;

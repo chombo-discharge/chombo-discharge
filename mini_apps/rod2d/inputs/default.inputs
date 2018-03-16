@@ -14,8 +14,8 @@ rod_slab.turn_off_electrode        = false                            # Turn on/
 rod_slab.turn_off_dielectric       = true                             # Turn on/off dielectric
 rod_slab.electrode_live            = true                             # Live electrode or not
 rod_slab.electrode_radius          = 500.E-6                          # Electrode inner radius
-rod_slab.electrode_center1         = 0.0 3E-2 0E-2                    # Center 1
-rod_slab.electrode_center2         = 0.0 0.0 0E-2                     # Center 2
+rod_slab.electrode_center1         = 100.E-6 3E-2 0E-2                    # Center 1
+rod_slab.electrode_center2         = 100.E-6 0.0 0E-2                     # Center 2
 rod_slab.dielectric_permittivity   = 4.0                              # Dielectric permittivity
 rod_slab.dielectric_corner_lo      = -1.0 -1.0 -1.0                   # Lo corner
 rod_slab.dielectric_corner_hi      =  1.0  1.0  1.0                   # Hi corner
@@ -34,15 +34,15 @@ rod2d_tagger.refine_radius     = 1.1    # Sets eps_mag for refinement
 # AMR SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 256 256 256 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
-amr.max_sim_depth   = 2           # Maximum simulation depth
+amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr.max_amr_depth   = 4           # Maximum amr depth
+amr.max_sim_depth   = 4           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 2           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
 amr.max_box_size    = 32          # Maximum allowed box size
 amr.max_ebis_box    = 32          # Maximum allowed box size	
-amr.ref_rat         = 4 4 2 2 2 2      # Refinement ratios. 
+amr.ref_rat         = 2 2 2 2 2 2      # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
@@ -51,14 +51,14 @@ amr.sten_radius     = 1           # Radius for interpolation/extrapolation stenc
 amr.sten_type       = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
 amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
-amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
+amr.ebcf            = true        # Tell amr to forget about ebcf crossings.
 # ----------------------------------------------------------------------------------------------------
 
 
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------	
-plasma_engine.verbosity                       = 10            # Engine verbosity
+plasma_engine.verbosity                       = 2             # Engine verbosity
 plasma_engine.plot_interval                   = 5             # Plot interval
 plasma_engine.regrid_interval                 = 10            # Regrid interval
 plasma_engine.checkpoint_interval             = 25            # Checkpoint interval
@@ -66,7 +66,7 @@ plasma_engine.initial_regrids                 = 2             # Number of initia
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 200           # Maximum number of steps
+plasma_engine.max_steps                       = 0             # Maximum number of steps
 plasma_engine.output_mode                     = light         # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names

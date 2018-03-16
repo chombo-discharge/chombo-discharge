@@ -1066,7 +1066,7 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
     {
       applyCFBCs(phi, a_phiCoar, a_homogeneousCFBC);
     }
-  if(a_doexchange){
+  if(true){////a_doexchange){
     phi.exchange(phi.interval());
   }
 

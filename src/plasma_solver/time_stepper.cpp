@@ -1533,6 +1533,7 @@ void time_stepper::setup_rte(){
   m_rte->set_physical_domain(m_physdom);
   m_rte->sanity_check();
   m_rte->allocate_internals();
+
 }
 
 void time_stepper::setup_sigma(){

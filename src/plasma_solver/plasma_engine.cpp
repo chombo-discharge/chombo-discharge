@@ -962,7 +962,7 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
     if(!converged){
       if(m_verbosity > 0){
-	pout() << "plasma_engine::regrid - Poisson solver failed to converge" << endl;
+  	pout() << "plasma_engine::regrid - Poisson solver failed to converge" << endl;
       }
     }
   }
@@ -1248,7 +1248,7 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
   { // Get parameter from input script
     ParmParse pp("plasma_engine");
     pp.query("refine_geometry", depth);
-    depth  = (a_depth < 0) ? max_depth : a_depth;
+    depth  = (depth < 0) ? max_depth : depth;
     depth1 = depth;
     depth2 = depth;
     depth3 = depth;
