@@ -10,6 +10,7 @@
 
 #include "poisson_solver.H"
 #include "mfconductivityopfactory.H"
+#include "nwomfconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>

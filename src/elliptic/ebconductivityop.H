@@ -56,6 +56,7 @@ void THIS_IS_AN_ERROR_MESSAGE(void)
 #endif
 
 class mfconductivityop;
+class nwomfconductivityop;
 
 //! \class ebconductivityop
 //! This class implements an operator that solves the equation
@@ -65,6 +66,7 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
 {
 
   friend mfconductivityop;
+  friend nwomfconductivityop;
   
   public:
 
