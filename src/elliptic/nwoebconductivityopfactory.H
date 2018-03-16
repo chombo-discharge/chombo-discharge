@@ -35,7 +35,7 @@
 #include "PolyGeom.H"
 #include "EBAMRPoissonOp.H"
 #include "EBLevelGrid.H"
-#include "NWOEBQuadCFInterp.H"
+#include "nwoebquadcfinterp.H"
 #include "NamespaceHeader.H"
 
 
@@ -49,7 +49,7 @@ public:
   //! Constructs a factory that builds nwoebconductivityops with time-independent
   //! A and B coefficients.
   nwoebconductivityopfactory(const Vector<EBLevelGrid>&                                  a_eblgs,
-                             const Vector<RefCountedPtr<NWOEBQuadCFInterp> >&             a_quadCFI,
+                             const Vector<RefCountedPtr<nwoebquadcfinterp> >&             a_quadCFI,
                              const Real&                                                 a_alpha,
                              const Real                                         &        a_beta,
                              const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
@@ -155,7 +155,7 @@ protected:
 
   int                                                  m_relaxType;
   Vector<EBLevelGrid>                                  m_eblgs;
-  Vector<RefCountedPtr<NWOEBQuadCFInterp> >            m_quadCFI;
+  Vector<RefCountedPtr<nwoebquadcfinterp> >            m_quadCFI;
   Real                                                 m_alpha;
   Real                                                 m_beta;
 

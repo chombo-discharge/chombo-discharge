@@ -117,7 +117,7 @@ void nwomfconductivityop::define(const RefCountedPtr<mfis>&                    a
     }
 
 
-    RefCountedPtr<NWOEBQuadCFInterp> quadcfi;
+    RefCountedPtr<nwoebquadcfinterp> quadcfi;
     if(a_has_coar){
       quadcfi = a_quadcfi.get_quadcfi_ptr(iphase);
       CH_assert(!quadcfi.isNull());
@@ -173,7 +173,6 @@ void nwomfconductivityop::define(const RefCountedPtr<mfis>&                    a
 #if verb
     pout() << "nwomfconductivityop::creating oper" << endl;
 #endif
-#if 0
     m_ebops[iphase] = RefCountedPtr<nwoebconductivityop> (new nwoebconductivityop(eblg_fine,
 									    eblg,
 									    eblg_coar,
@@ -197,7 +196,6 @@ void nwomfconductivityop::define(const RefCountedPtr<mfis>&                    a
 									    a_ghost_phi,
 									    a_ghost_rhs,
 									    a_relax_type));
-#endif
 #if verb
     pout() << "nwomfconductivityop::done creating oper" << endl;
 #endif
@@ -676,12 +674,23 @@ void nwomfconductivityop::setToZero(LevelData<MFCellFAB>& a_x){
 }
 
 void nwomfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
-			     const LevelData<MFCellFAB>& a_residual,
-			     int                         a_iterations){
+				const LevelData<MFCellFAB>& a_residual,
+				int                         a_iterations){
   CH_TIME("nwomfconductivityop::relax");
 #if verb
   pout() << "nwomfconductivityop::relax"<< endl;
 #endif
+
+  const bool homogeneous = true;
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    mfalias::aliasMF(*m_alias[0], iphase, a_e);
+    mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+
+    for (int i = 0; i < a_iterations; i++){
+      this->update_bc(a_e, homogeneous);
+      m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
+    }
+  }
 #if 0
 // #if 0
 //   for (int i=0; i < a_iterations; i++){

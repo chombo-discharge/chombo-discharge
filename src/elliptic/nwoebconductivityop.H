@@ -35,7 +35,7 @@
 #include "EBMGAverage.H"
 #include "EBMGInterp.H"
 #include "PolyGeom.H"
-#include "NWOEBQuadCFInterp.H"
+#include "nwoebquadcfinterp.H"
 #include "EBLevelGrid.H"
 #include "AMRTGA.H"
 #include "AMRPoissonOp.H"
@@ -82,7 +82,7 @@ class nwoebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB
                    const EBLevelGrid &                                  a_eblg,
                    const EBLevelGrid &                                  a_eblgCoar,
                    const EBLevelGrid &                                  a_eblgCoarMG,
-                   const RefCountedPtr<NWOEBQuadCFInterp>&              a_quadCFI,
+                   const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
                    const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
                    const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
                    const Real    &                                      a_dx,
@@ -509,7 +509,7 @@ protected:
   const IntVect                   m_ghostPhi;
   const IntVect                   m_ghostRHS;
 
-  RefCountedPtr<NWOEBQuadCFInterp>  m_interpWithCoarser;
+  RefCountedPtr<nwoebquadcfinterp>  m_interpWithCoarser;
 
   EBLevelGrid                     m_eblg;
   EBLevelGrid                     m_eblgFine;

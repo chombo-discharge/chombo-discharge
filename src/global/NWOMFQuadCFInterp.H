@@ -10,10 +10,10 @@
 #define _NWOMFQUADCFINTERP_
 
 #include <RefCountedPtr.H>
-#include <NWOEBQuadCFInterp.H>
+#include <nwoebquadcfinterp.H>
 
 /*!
-  @brief Class for filling ghost cells alà NWOEBQuadCFInterp for multiphase
+  @brief Class for filling ghost cells alà nwoebquadcfinterp for multiphase
 */
 class NWOMFQuadCFInterp {
 public:
@@ -35,35 +35,35 @@ public:
   /*!
     @brief Full constructor. Calls define
   */
-  NWOMFQuadCFInterp(const Vector<RefCountedPtr<NWOEBQuadCFInterp> >& a_quadcfi){
+  NWOMFQuadCFInterp(const Vector<RefCountedPtr<nwoebquadcfinterp> >& a_quadcfi){
     this->define(a_quadcfi);
   }
 
   /*!
     @brief Define function
   */
-  void define(const Vector<RefCountedPtr<NWOEBQuadCFInterp> >& a_quadcfi){
+  void define(const Vector<RefCountedPtr<nwoebquadcfinterp> >& a_quadcfi){
     m_quadcfi = a_quadcfi;
   }
 
   /*!
     @brief Get interpolation utility
   */
-  const RefCountedPtr<NWOEBQuadCFInterp>& get_quadcfi_ptr(const int a_phase) const {
+  const RefCountedPtr<nwoebquadcfinterp>& get_quadcfi_ptr(const int a_phase) const {
     return m_quadcfi[a_phase];
   }
 
   /*!
     @brief get interpolation utility for phase
   */
-  NWOEBQuadCFInterp& get_quadcfi(const int a_phase) {
+  nwoebquadcfinterp& get_quadcfi(const int a_phase) {
     return *m_quadcfi[a_phase];
   }
 
   /*!
     @brief get interpolation utility for phase
   */
-  const NWOEBQuadCFInterp& get_quadcfi(const int a_phase) const {
+  const nwoebquadcfinterp& get_quadcfi(const int a_phase) const {
     return *m_quadcfi[a_phase];
   }
   
@@ -73,7 +73,7 @@ protected:
   /*!
     @brief Interpolation for each phase. 
   */
-  Vector<RefCountedPtr<NWOEBQuadCFInterp> > m_quadcfi;
+  Vector<RefCountedPtr<nwoebquadcfinterp> > m_quadcfi;
   
 };
 

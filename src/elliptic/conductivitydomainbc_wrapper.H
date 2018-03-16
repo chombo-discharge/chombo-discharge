@@ -175,6 +175,44 @@ public:
 			   a_useHomogeneous);
   }
 
+  /*!
+    @brief Ghost filling. This is for NWO.
+  */
+  virtual void fillPhiGhost(FArrayBox&     a_phi,
+			    const Box&     a_valid,
+			    const Box&     a_domain,
+			    Real           a_dx,
+			    bool           a_homogeneous){
+    Box grownBox = a_valid;
+    grownBox.grow(1);
+
+    for (int idir=0; idir<CH_SPACEDIM; ++idir)
+      {
+        for(SideIterator sit; sit.ok(); ++sit)
+          {
+            Box choppedBox = grownBox;
+            choppedBox.grow(idir,-1);
+            Box toRegion = adjCellBox(choppedBox, idir, sit(), 1);
+
+            if(!a_domain.contains(toRegion))
+              {
+                for (BoxIterator bit(toRegion); bit.ok(); ++bit)
+                  {
+                    const IntVect& iv = bit();
+                    //fake vof just to get the location
+                    VolIndex vof(iv, 0);
+                    RealVect loc = EBArith::getVoFLocation(vof, a_dx, RealVect::Zero);
+                    int isign = sign(sit());
+                    IntVect ivneigh = iv - isign*BASISV(idir);
+                    Real value = bcvaluefunc(loc, idir, sit());
+                    if(a_homogeneous) value = 0;
+                    a_phi(iv, 0) = a_phi(ivneigh, 0)  + a_dx*value;
+                  }
+              }
+          } 
+      }//end loop over directions
+  }
+
 protected:
 
   /*!

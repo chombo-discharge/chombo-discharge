@@ -39,7 +39,7 @@ nwoebconductivityop(const EBLevelGrid &                                  a_eblgF
                     const EBLevelGrid &                                  a_eblg,
                     const EBLevelGrid &                                  a_eblgCoar,
                     const EBLevelGrid &                                  a_eblgCoarMG,
-                    const RefCountedPtr<NWOEBQuadCFInterp>&              a_quadCFI,
+                    const RefCountedPtr<nwoebquadcfinterp>&              a_quadCFI,
                     const RefCountedPtr<ConductivityBaseDomainBC>&       a_domainBC,
                     const RefCountedPtr<ConductivityBaseEBBC>&           a_ebBC,
                     const Real    &                                      a_dx,
@@ -865,14 +865,12 @@ applyOpIrregular(EBCellFAB&             a_lhs,
 
   m_opEBStencil[a_datInd]->apply(a_lhs, a_phi, m_alphaDiagWeight[a_datInd], m_alpha, m_beta, 0, false);
   
-  if (!a_homogeneous)
-    {
-      const Real factor = m_beta/m_dx;
-      m_ebBC->applyEBFlux(a_lhs, a_phi, m_vofIterIrreg[a_datInd], (*m_eblg.getCFIVS()),
-                          a_datInd, RealVect::Zero, vectDx, factor,
-                          a_homogeneous, 0.0);
-    }
 
+  const Real factor = m_beta/m_dx;
+  m_ebBC->applyEBFlux(a_lhs, a_phi, m_vofIterIrreg[a_datInd], (*m_eblg.getCFIVS()),
+		      a_datInd, RealVect::Zero, vectDx, factor,
+		      a_homogeneous, 0.0);
+      
   for (int idir = 0; idir < SpaceDim; idir++)
     {
       int comp = 0;

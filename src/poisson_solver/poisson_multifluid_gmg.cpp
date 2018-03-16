@@ -30,6 +30,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(16);
   this->set_bottom_drop(8);
+  this->set_nwo(false);
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -62,7 +63,14 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-  m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
+  if(m_use_nwo){
+    m_nwo_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
+  }
+  else{
+    m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
+  }
+
+
 
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
@@ -91,10 +99,12 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   m_amr->alias(res,     m_resid);
   m_amr->alias(zero,    mfzero);
 
+
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
   m_gmg_solver.init(phi, rhs, finest_level, 0);
   const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
+
   
   if(phi_resid > zero_resid*m_gmg_eps){ // Residual is too large, recompute solution
     m_gmg_solver.m_convergenceMetric = zero_resid;
@@ -125,6 +135,21 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
 int poisson_multifluid_gmg::query_ghost() const {
   return 3; // Need this many cells
+}
+
+void poisson_multifluid_gmg::set_nwo(const bool a_use_nwo){
+  m_use_nwo = a_use_nwo;
+
+  { // Get parameter from input script
+    std::string str;
+    ParmParse pp("poisson_multifluid_gmg");
+    if(pp.contains("use_nwo")){
+      pp.get("use_nwo", str);
+      if(str == "true"){
+	m_use_nwo = true;
+      }
+    }
+  }
 }
 
 
@@ -428,7 +453,12 @@ void poisson_multifluid_gmg::setup_gmg(){
   }
   
   this->set_coefficients();       // Set coefficients
-  this->setup_operator_factory(); // Set the operator factory
+  if(m_use_nwo){
+    this->setup_nwo_operator_factory(); // Set the operator factory
+  }
+  else{
+    this->setup_operator_factory(); // Set the NWO operator factory
+  }
   this->setup_solver();           // Set up the AMR multigrid solver
 
   m_needs_setup = false;
@@ -513,6 +543,85 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   m_opfact->set_electrodes(m_compgeom->get_electrodes(), pot);
 }
 
+void poisson_multifluid_gmg::setup_nwo_operator_factory(){
+  CH_TIME("poisson_multifluid_gmg::setup_nwo_operator_factory");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::setup_nwo_operator_factory" << endl;
+  }
+
+  const int nphases                      = m_mfis->num_phases();
+  const int finest_level                 = m_amr->get_finest_level();
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  const RealVect& origin                 = m_physdom->get_prob_lo();
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  // This stuff is needed for the operator factory
+  Vector<MFLevelGrid>    mflg(1 + finest_level);
+  Vector<NWOMFQuadCFInterp> mfquadcfi(1 + finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    Vector<EBLevelGrid>                    eblg_phases(nphases);
+    Vector<RefCountedPtr<nwoebquadcfinterp> > quadcfi_phases(nphases);
+
+    eblg_phases[phase::gas]   = *(m_amr->get_eblg(phase::gas)[lvl]);
+    if(!ebis_sol.isNull()){
+      eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
+    }
+
+    quadcfi_phases[phase::gas]   = (m_amr->get_quadcfi(phase::gas)[lvl]);
+    if(!ebis_sol.isNull()){
+      quadcfi_phases[phase::solid] = (m_amr->get_quadcfi(phase::solid)[lvl]);
+    }
+    
+    mflg[lvl].define(m_mfis, eblg_phases);
+    mfquadcfi[lvl].define(quadcfi_phases);
+  }
+
+  // Appropriate coefficients for poisson equation
+  const Real alpha =  0.0;
+  const Real beta  = -1.0;
+
+  RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
+
+  const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
+  const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
+
+  // Potential function
+
+
+  conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
+  RefCountedPtr<potential_func> pot = RefCountedPtr<potential_func> (new potential_func(m_potential));
+  bcfact->set_wallbc(m_wallbc);
+  bcfact->set_potential(pot);
+  domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
+
+  m_nwo_opfact = RefCountedPtr<nwomfconductivityopfactory> (new nwomfconductivityopfactory(m_mfis,
+											   mflg,
+											   mfquadcfi,
+											   refinement_ratios,
+											   grids,
+											   m_aco,
+											   m_bco,
+											   m_bco_irreg,
+											   alpha,
+											   beta,
+											   dx[0],
+											   domains[0],
+											   domfact,
+											   origin,
+											   ghost_phi,
+											   ghost_rhs,
+											   2,
+											   m_bottom_drop,
+											   1 + finest_level));
+
+  m_nwo_opfact->set_electrodes(m_compgeom->get_electrodes(), pot);
+}
+
 void poisson_multifluid_gmg::setup_solver(){
   CH_TIME("poisson_multifluid_gmg::setup_solver");
   if(m_verbosity > 5){
@@ -540,7 +649,13 @@ void poisson_multifluid_gmg::setup_solver(){
     }
 #endif
   }
-  m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
+
+  if(m_use_nwo){
+    m_gmg_solver.define(coar_dom, *m_nwo_opfact, botsolver, 1 + finest_level);
+  }
+  else{
+    m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
+  }
   m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
 				   m_gmg_post_smooth,
 				   m_gmg_bot_smooth,

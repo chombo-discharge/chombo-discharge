@@ -93,7 +93,7 @@ refToFiner(const ProblemDomain& a_domain) const
 //-----------------------------------------------------------------------
 nwoebconductivityopfactory::
 nwoebconductivityopfactory(const Vector<EBLevelGrid>&                               a_eblgs,
-                        const Vector<RefCountedPtr<NWOEBQuadCFInterp> >&            a_quadCFI,
+                        const Vector<RefCountedPtr<nwoebquadcfinterp> >&            a_quadCFI,
                         const Real&                                                 a_alpha,
                         const Real&                                                 a_beta,
                         const Vector<RefCountedPtr<LevelData<EBCellFAB> > >&        a_acoef,
@@ -269,7 +269,7 @@ MGnewOp(const ProblemDomain& a_domainFine,
   Real          dxMGLevel;
   EBLevelGrid eblgMGLevel;
   EBLevelGrid eblgCoarMG;
-  RefCountedPtr<NWOEBQuadCFInterp> quadCFI; //only defined if on an amr level
+  RefCountedPtr<nwoebquadcfinterp> quadCFI; //only defined if on an amr level
   Real dxCoar = 1.0;
   dxCoar *= -1.0;
   //  int refToDepth = 1;

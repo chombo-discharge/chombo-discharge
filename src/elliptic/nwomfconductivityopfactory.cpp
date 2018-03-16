@@ -12,7 +12,7 @@
 
 nwomfconductivityopfactory::nwomfconductivityopfactory(const RefCountedPtr<mfis>&                a_mfis,
 						       const Vector<MFLevelGrid>&                a_mflg,
-						       const Vector<NWOMFQuadCFInterp>&             a_mfquadcfi,
+						       const Vector<NWOMFQuadCFInterp>&          a_mfquadcfi,
 						       const Vector<int>&                        a_ref_rat,
 						       const Vector<DisjointBoxLayout>&          a_grids,
 						       const MFAMRCellData&                      a_aco,
@@ -88,6 +88,7 @@ nwomfconductivityopfactory::nwomfconductivityopfactory(const RefCountedPtr<mfis>
 	   << endl;
   }
 #endif
+
 }
 
 nwomfconductivityopfactory::~nwomfconductivityopfactory(){

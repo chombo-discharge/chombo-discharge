@@ -108,6 +108,11 @@ public:
   virtual void set_botsolver_smooth(const int a_smooth);
 
   /*!
+    @brief Use nwo factory or not
+  */
+  virtual void set_nwo(const bool a_use_nwo);
+
+  /*!
     @brief Return require number of ghost cells. 
   */
   virtual int query_ghost() const;
@@ -128,6 +133,11 @@ protected:
     @brief Needs setup
   */
   bool m_needs_setup;
+
+  /*!
+    @brief Use nwo or not
+  */
+  bool m_use_nwo;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -195,10 +205,10 @@ protected:
   RefCountedPtr<mfconductivityopfactory> m_opfact;
 
   /*!
-    @brief ConductivityOp operator factory
+    @brief Operator factory
   */
-  RefCountedPtr<EBConductivityOpFactory> m_cond_op_fact;
-
+  RefCountedPtr<nwomfconductivityopfactory> m_nwo_opfact;
+  
   /*!
     @brief b-coefficient
   */
@@ -275,6 +285,10 @@ protected:
   */
   virtual void setup_operator_factory();
 
+  /*!
+    @brief Set nwo operator factory
+  */
+  virtual void setup_nwo_operator_factory();
 
   /*!
     @brief Set up AMRMultiGrid
