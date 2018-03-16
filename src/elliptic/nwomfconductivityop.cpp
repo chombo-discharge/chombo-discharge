@@ -174,7 +174,7 @@ void nwomfconductivityop::define(const RefCountedPtr<mfis>&                    a
     pout() << "nwomfconductivityop::creating oper" << endl;
 #endif
 #if 0
-    m_ebops[iphase] = RefCountedPtr<ebconductivityop> (new ebconductivityop(eblg_fine,
+    m_ebops[iphase] = RefCountedPtr<nwoebconductivityop> (new nwoebconductivityop(eblg_fine,
 									    eblg,
 									    eblg_coar,
 									    eblg_mg,
@@ -682,7 +682,7 @@ void nwomfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 #if verb
   pout() << "nwomfconductivityop::relax"<< endl;
 #endif
-
+#if 0
 // #if 0
 //   for (int i=0; i < a_iterations; i++){
 //     if (m_relax == 0){
@@ -721,19 +721,7 @@ void nwomfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 
       for (int i = 0; i < a_iterations; i++){
 	this->update_bc(a_e, homogeneous);
-	if(m_relax == 0){
-	  m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
-
-	}
-	else if(m_relax == 1){
-	  m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
-	}
-	else if(m_relax == 2){
-	  m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
-	}
-	else {
-	  MayDay::Abort("nwomfconductivityop::relax - unknown relaxation type requested");
-	}
+	m_ebops[iphase]->relax(*m_alias[0], *m_alias[1], 1);
       }
     }
   }
@@ -818,6 +806,7 @@ void nwomfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
       }
 #endif
   }
+#endif
 }
 
 void nwomfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
@@ -832,7 +821,7 @@ void nwomfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,
 
 #if 1 // This is the only way we can make it converge for now
     // m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
-    m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
+    //    m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
     //m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
     /// m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
 #else
@@ -931,13 +920,13 @@ void nwomfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 
     nwomfconductivityop* finerOp = (nwomfconductivityop*) a_finerOp;
 #if verb
-    pout() << "nwomfconductivityop::AMROperator - apply ebconductivityops" << endl;
+    pout() << "nwomfconductivityop::AMROperator - apply nwoebconductivityops" << endl;
 #endif
     m_ebops[iphase]->AMROperator(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_homogeneousBC, finerOp->m_ebops[iphase]);
     // m_ebops[iphase]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
     // m_ebops[iphase]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[iphase]);
 #if verb
-    pout() << "nwomfconductivityop::AMROperator - apply ebconductivityops - done" << endl;
+    pout() << "nwomfconductivityop::AMROperator - apply nwoebconductivityops - done" << endl;
 #endif
   }
 

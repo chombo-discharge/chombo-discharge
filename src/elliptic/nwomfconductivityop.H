@@ -14,7 +14,7 @@
 #include "MFLevelGrid.H"
 #include "electrode.H"
 #include "NWOMFQuadCFInterp.H"
-#include "ebconductivityop.H"
+#include "nwoebconductivityop.H"
 #include "mfdirichletconductivityebbc.H"
 
 #include <LevelDataOps.H>
@@ -23,7 +23,6 @@
 #include <MFFluxFAB.H>
 #include <BaseDomainBC.H>
 #include <BaseEBBC.H>
-//#include <EBConductivityOp.H>
 #include <DirichletConductivityEBBC.H>
 #include <AMRTGA.H>
 
@@ -370,7 +369,7 @@ protected:
   /*!
     @brief EB operators
   */
-  Vector<RefCountedPtr<ebconductivityop> > m_ebops;
+  Vector<RefCountedPtr<nwoebconductivityop> > m_ebops;
 
   /*!
     @brief a-coefficients for each phase
