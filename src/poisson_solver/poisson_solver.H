@@ -68,6 +68,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Automatic tuning of solver
+  */
+  virtual void auto_tune() = 0;
+
+  /*!
     @brief Cache state before regridding
   */
   virtual void cache_state();
@@ -212,7 +217,12 @@ protected:
   */
   MFAMRCellData m_resid;
 
-    /*!
+  /*!
+    @brief Automatic tuning
+  */
+  bool m_autotune;
+
+  /*!
     @brief Verbosity
   */
   int m_verbosity;

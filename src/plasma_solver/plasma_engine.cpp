@@ -954,7 +954,18 @@ void plasma_engine::regrid(const bool a_use_initial_data){
   const Real solver_regrid = MPI_Wtime(); // Solver regrid time
 
   // Solve the elliptic parts
-  m_timestepper->solve_poisson();
+  bool converged = m_timestepper->solve_poisson();
+  if(!converged){ // If we don't converge, try new solver settings
+    RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
+    poisson->auto_tune();
+    converged = m_timestepper->solve_poisson();
+
+    if(!converged){
+      if(m_verbosity > 0){
+	pout() << "plasma_engine::regrid - Poisson solver failed to converge" << endl;
+      }
+    }
+  }
   if(m_timestepper->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
     const Real dummy_dt = 0.0;
     m_timestepper->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
@@ -1237,6 +1248,7 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
   { // Get parameter from input script
     ParmParse pp("plasma_engine");
     pp.query("refine_geometry", depth);
+    depth  = (a_depth < 0) ? max_depth : a_depth;
     depth1 = depth;
     depth2 = depth;
     depth3 = depth;
@@ -1261,7 +1273,6 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth){
     depth5 = (depth5 < 0) ? depth : depth5;
     depth6 = (depth6 < 0) ? depth : depth6;
   }
-    
   
   this->set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
 }
@@ -1472,11 +1483,14 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_timestepper->initial_data();                          // Fill cdr and rte with initial data
 
   if (a_init_regrids >= 0){
+    RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
+    poisson->auto_tune();
     m_timestepper->solve_poisson();                       // Solve Poisson equation by using initial data
     if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
       const Real dummy_dt = 0.0;
       m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
     }
+    
   }
   m_celltagger->regrid();
   m_timestepper->regrid_internals();

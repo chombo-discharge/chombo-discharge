@@ -67,6 +67,11 @@ public:
 		     const bool           a_zerophi = false);
 
   /*!
+    @brief Automatic tuning of the Poisson solver
+  */
+  virtual void auto_tune();
+
+  /*!
     @brief Regrid function
   */
   virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);

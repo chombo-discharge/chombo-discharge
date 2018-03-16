@@ -26,6 +26,19 @@ poisson_solver::poisson_solver(){
   this->allocate_wall_bc();
   this->set_time(0, 0., 0.);
 
+  m_autotune = false;
+  { // Check if we should use auto-tuning of the solver
+    std::string str;
+    ParmParse pp("poisson_solver");
+    if(pp.contains("auto_tune")){
+      pp.get("auto_tune", str);
+      if(str == "true"){
+	m_autotune = true;
+      }
+    }
+  }
+    
+
   if(SpaceDim == 2){
     this->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
     this->set_neumann_wall_bc(0,   Side::Hi, 0.0);

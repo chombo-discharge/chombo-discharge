@@ -127,6 +127,70 @@ int poisson_multifluid_gmg::query_ghost() const {
   return 3; // Need this many cells
 }
 
+
+void poisson_multifluid_gmg::auto_tune(){
+  CH_TIME("poisson_multifluid_gmg::auto_tune");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::auto_tune" << endl;
+  }
+
+  if(m_autotune){
+    const ProblemDomain coarsest = m_amr->get_domains()[0];
+
+    if(m_verbosity > 2){
+      pout() << "poisson_multifluid_gmg - autotuning solver parameters (bottom drop only)" << endl;
+    }
+      
+      
+    Real best_time;
+    int best_drop;
+    int best_relax;
+    
+    best_time = 1.E99;
+    for (int drop = 2; drop <= coarsest.size(0)/2; drop *= 2){
+      this->set_bottom_drop(drop);
+      const Real t1 = MPI_Wtime();
+      data_ops::set_value(m_state, 0.0);
+      this->solve(true);
+      const Real t2 = MPI_Wtime();
+
+      if(t2 - t1 < best_time){
+	best_time = t2 - t1;
+	best_drop = drop;
+      }
+    }
+
+    this->set_bottom_drop(best_drop);
+
+#if 0 // This is very dangerous because it might overestimate the necessary number of relaxations
+    best_time = 1.E99;
+    for (int relax = 8; relax <= 32; relax += 4){
+      this->set_gmg_solver_parameters(m_gmg_relax_type,
+				      m_gmg_type,
+				      m_gmg_verbosity,
+				      relax,
+				      relax,
+				      relax,
+				      m_gmg_max_iter,
+				      m_gmg_min_iter,
+				      m_gmg_eps,
+				      m_gmg_hang);
+
+      data_ops::set_value(m_state, 0.0);
+      const Real t1 = MPI_Wtime();
+      this->solve(true);
+      const Real t2 = MPI_Wtime();
+      pout() << t2 - t1 << endl;
+
+      if(t2 - t1 < best_time){
+	best_time = t2 - t1;
+	best_relax = relax;
+      }
+    }
+#endif
+  }
+}
+
 void poisson_multifluid_gmg::regrid(const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("poisson_multifluid_gmg::regrid");
   if(m_verbosity > 5){
