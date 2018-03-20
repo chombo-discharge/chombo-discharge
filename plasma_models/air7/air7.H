@@ -35,6 +35,7 @@
       air7.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
       air7.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
       air7.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+      air7.simple_cathode_bc             = true                  # Use simpiflied BC on electrode cathodes
 
 */
 class air7 : public plasma_kinetics {
@@ -155,6 +156,11 @@ protected:
   int m_photon1_idx;
   int m_photon2_idx;
   int m_photon3_idx;
+
+  /*!
+    @brief Simple cathode (electrode) boundary condition
+  */
+  bool m_simple_cathode;
 
   /*!
     @brief Background gas temperature
@@ -339,6 +345,7 @@ protected:
 				  const Vector<Real>& a_rte_fluxes,
 				  const Vector<Real>& a_extrap_cdr_fluxes,
 				  const Real&         a_townsend,
-				  const Real&         a_quantum_efficiency) const;
+				  const Real&         a_quantum_efficiency,
+				  const bool&         a_extrap_electrons) const;
 };
 #endif

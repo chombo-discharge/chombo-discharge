@@ -82,6 +82,11 @@ public:
   virtual void set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
 
   /*!
+    @brief Set time
+  */
+  virtual void set_time(Real* a_time);
+
+  /*!
     @brief Set the non-matched boundary conditions
   */
   virtual void set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential);
@@ -477,6 +482,11 @@ protected:
     @brief Number of ghost cells
   */
   IntVect m_ghost_phi;
+
+  /*!
+    @brief Time. Passed by pointer from factory
+  */
+  Real* m_time;
 
   /*!
     @brief Level resolution

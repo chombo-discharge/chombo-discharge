@@ -7,6 +7,7 @@
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "rk2.H"
+#include "splitstep_tga.H"
 #include "rod2d_tagger.H"
 #include "air7.H"
 #include "rod_slab.H"
@@ -16,11 +17,12 @@
 /*!
   @brief Potential
 */
+Real g_potential_start = -3E4;        // Start voltage
+Real g_potential_rise  = -0E3/1.E-9;  // Rise time
 Real potential_curve(const Real a_time){
-  Real potential = 8.E4;
-  
-  return potential;
+  return g_potential_start + a_time*g_potential_rise;
 }
+
 
 int main(int argc, char* argv[]){
 

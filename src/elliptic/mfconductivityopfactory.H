@@ -151,6 +151,11 @@ public:
   virtual void define_jump_stuff();
 
   /*!
+    @brief Set time
+  */
+  virtual void set_time(Real* a_time);
+
+  /*!
     @brief Factory method
   */
   virtual MGLevelOp<LevelData<MFCellFAB> >* MGnewOp(const ProblemDomain& a_domain_fine, int a_depth, bool a_homo_only = true);
@@ -351,6 +356,11 @@ protected:
     @brief beta-coefficient
   */
   Real m_beta;
+
+  /*!
+    @brief Current time. This is passed by pointer down to the operators
+  */
+  Real* m_time;
 
   /*!
     @brief Origin

@@ -42,7 +42,11 @@
       
 */
 class poisson_multifluid_gmg : public poisson_solver {
+  class potential_func;
+  
 public:
+
+
 
   /*!
     @brief Constructor
@@ -71,6 +75,11 @@ public:
     @brief Automatic tuning of the Poisson solver
   */
   virtual void auto_tune();
+
+  /*!
+    @brief Set potential
+  */
+  virtual void set_potential(Real (*a_potential)(const Real a_time));
 
   /*!
     @brief Regrid function
@@ -255,9 +264,19 @@ protected:
   MFSimpleSolver m_mfsolver;
 
   /*!
+    @brief Potential function
+  */
+  RefCountedPtr<potential_func> m_bcfunc;
+
+  /*!
     @brief Set up the geometric multigrid solver 
   */
   virtual void setup_gmg();
+
+  /*!
+    @brief Need to override this in order to pass in the correct time to boundary conditions
+  */
+  virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set coefficients

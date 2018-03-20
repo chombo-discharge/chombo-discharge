@@ -18,6 +18,19 @@ air7::air7(){
   m_num_species = 7;
   m_num_photons = 3;
 
+
+  { // Use simple BC on cathode electrode
+    m_simple_cathode = true;
+    ParmParse pp("air7");
+    if(pp.contains("simple_cathode")){
+      std::string str;
+      pp.get("simple_cathode", str);
+      if(str == "false");{
+	m_simple_cathode = false;
+      }
+    }
+  }
+
   air7::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac);
 
   { // Emission coefficients at boundaries. Can be overridden from input script.
@@ -311,8 +324,9 @@ Vector<Real> air7::compute_cdr_electrode_fluxes(const Real&         a_time,
 						const Vector<Real>& a_cdr_gradients,
 						const Vector<Real>& a_rte_fluxes,
 						const Vector<Real>& a_extrap_cdr_fluxes) const {
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
-				  a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities,
+				  a_cdr_gradients, a_rte_fluxes, a_extrap_cdr_fluxes,
+				  m_townsend2_electrode, m_electrode_quantum_efficiency, m_simple_cathode);
 }
 
 Vector<Real> air7::compute_cdr_dielectric_fluxes(const Real&         a_time,
@@ -325,8 +339,9 @@ Vector<Real> air7::compute_cdr_dielectric_fluxes(const Real&         a_time,
 						 const Vector<Real>& a_rte_fluxes,
 						 const Vector<Real>& a_extrap_cdr_fluxes) const {
 
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
-				  a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
+  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities,
+				  a_cdr_gradients, a_rte_fluxes, a_extrap_cdr_fluxes,
+				  m_townsend2_dielectric, m_dielectric_quantum_efficiency, false);
 }
 
 Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
@@ -339,7 +354,8 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
 				      const Vector<Real>& a_rte_fluxes,
 				      const Vector<Real>& a_extrap_cdr_fluxes,
 				      const Real&         a_townsend,
-				      const Real&         a_quantum_efficiency) const {
+				      const Real&         a_quantum_efficiency,
+				      const bool&         a_extrap_electrons) const {
 
   Vector<Real> fluxes(m_num_species, 0.0);
 
@@ -390,8 +406,7 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
     fluxes[m_electron_idx] += 0.5*De*a_cdr_gradients[m_electron_idx];
   }
 
-
-#if 1 // Secondary emission
+  // Secondary emission
   if(cathode){
     Real ion_bombardment    = 0.0;
     Real photon_bombardment = 0.0;
@@ -409,7 +424,11 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
     fluxes[m_electron_idx] -= ion_bombardment*a_townsend;
     fluxes[m_electron_idx] -= photon_bombardment*a_quantum_efficiency;
   }
-#endif
+
+  // Use a simple BC for electron; extrapolate from the interior
+  if(a_extrap_electrons){
+    fluxes[m_electron_idx] = a_extrap_cdr_fluxes[m_electron_idx];
+  }
   
   return fluxes;
 }

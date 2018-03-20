@@ -104,7 +104,6 @@ template<class T> void irreg_amr_stencil<T>::apply(LevelData<EBCellFAB>&       a
       const VolIndex& vof       = vofit();
       const VoFStencil& vofSten = stencils(vof, 0);
 
-      //
       for (int comp = 0; comp < nComp; comp++){
     	dst_fab(vof, comp) = 0.;
 

@@ -212,6 +212,10 @@ void mfconductivityop::set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > 
   m_jump = a_jump;
 }
 
+void mfconductivityop::set_time(Real* a_time){
+  m_time = a_time;
+}
+
 void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes, const RefCountedPtr<BaseBCFuncEval> a_potential){
 #if verb
   pout() << "mfconductivityop::set_electrodes"<< endl;
@@ -243,6 +247,8 @@ void mfconductivityop::set_bc_from_levelset(){
 #if verb
   pout() << "mfconductivityop::set_bc_from_levelset"<< endl;
 #endif
+
+  //  std::cout << *m_time << std::endl;
 
   const int comp = 0;
   

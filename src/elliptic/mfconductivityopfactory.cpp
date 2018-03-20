@@ -369,6 +369,10 @@ void mfconductivityopfactory::set_relax_type(const int a_relax_type){
   m_relax_type = a_relax_type;
 }
 
+void mfconductivityopfactory::set_time(Real* a_time){
+  m_time = a_time;
+}
+
 void mfconductivityopfactory::set_max_box_size(const int a_max_box_size){
   m_max_box_size = a_max_box_size;
 }
@@ -713,6 +717,7 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 	       beta,             // Set to m_beta
 	       m_origin);        // Origin
 
+  oper->set_time(m_time);
   oper->set_jump(jump);
   oper->set_electrodes(m_electrodes, m_potential);
 
@@ -863,6 +868,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::AMRnewOp(const Probl
 #if verb
   pout() << "setting jump" << endl;
 #endif
+  oper->set_time(m_time);
   oper->set_jump(jump);
   oper->set_electrodes(m_electrodes, m_potential);
 
