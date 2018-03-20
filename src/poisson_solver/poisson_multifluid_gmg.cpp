@@ -521,6 +521,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   bcfact->set_potential(pot);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
+  const int bc_order = 2;
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
 										 mfquadcfi,
@@ -537,7 +538,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 origin,
 										 ghost_phi,
 										 ghost_rhs,
-										 2,
+										 bc_order,
 										 m_bottom_drop,
 										 1 + finest_level));
 

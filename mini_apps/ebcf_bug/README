@@ -1,0 +1,7 @@
+This mini-app is for developers only, and is intended for bug testing ebconductivityop. 
+
+The app has been set up so that there are no finer cells between the boundary and the EBCF interface - this implies that
+the fine-level cells are update through ghost cells only, which appears to break the code completely.
+
+Incidentally, multigrid does converge in the sense that the residual is sufficiently reduced, but the converged solution is obviously
+nonphysical. 

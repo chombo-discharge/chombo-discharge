@@ -2434,7 +2434,7 @@ incrementFRCoar(EBFastFR&             a_fluxReg,
 
           //old way
           //getFlux(coarflux, coarfab, ghostedBox, box, m_eblg.getDomain(), ebisBox, m_dx, dit[mybox], idir);
-
+	  
           // new way
           getFluxRegOnly(coarflux, coarfab, ghostedBox, m_dx, dit[mybox], idir);
           for (SideIterator sit; sit.ok(); ++sit)
@@ -2447,7 +2447,7 @@ incrementFRCoar(EBFastFR&             a_fluxReg,
                   faceit  = &( m_faceitCoar[index][dit[mybox]]);
                   stencil = &(m_stencilCoar[index][dit[mybox]]);
                 }
-              getFluxEBCF(coarflux, coarfab, ghostedBox, *faceit, *stencil);
+	      getFluxEBCF(coarflux, coarfab, ghostedBox, *faceit, *stencil);
             }
 
           //          dumpFlux(coarflux, idir,  string("incrementFRCoar: flux = "));
@@ -2458,6 +2458,7 @@ incrementFRCoar(EBFastFR&             a_fluxReg,
             }
         }
     }
+
 }
 //-----------------------------------------------------------------------
 void
@@ -2480,6 +2481,7 @@ getFluxEBCF(EBFaceFAB&                    a_flux,
           const FaceIndex& face =     a_faceitEBCF[iface];
           const VoFStencil& stencil   = a_stenEBCF[iface];
           Real fluxval = 0;
+
           for (int isten = 0; isten < stencil.size(); isten++)
             {
               fluxval += stencil.weight(isten)*(a_phi(stencil.vof(isten), 0));

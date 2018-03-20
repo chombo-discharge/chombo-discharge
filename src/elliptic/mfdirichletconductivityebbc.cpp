@@ -243,6 +243,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
   const MFInterfaceFAB<Real>& inhomo = m_jumpbc->get_inhomo()[a_dit];
   const MFInterfaceFAB<Real>& homog  = m_jumpbc->get_homog()[a_dit];
 
+  // Multi-fluid cells
   for (VoFIterator vofit(m_ivs[a_dit], ebisbox.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof   = vofit();
     const Real weight     = m_irreg_weights[a_dit](vof, comp);
@@ -265,6 +266,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 
     // Increment
     a_lphi(vof, comp) += flux;
+
   }
 
   // Pure Dirichlet irregular cells
