@@ -51,6 +51,24 @@ air7::air7(){
     pp.query("ion_mobility", m_ion_mobility);
   }
 
+  { // Noise parameters for Perlin noise
+    m_noise_amp     = 0.0;
+    m_noise_freq    = RealVect::Unit;
+    m_noise_persist = 0.5;
+    m_noise_octaves = 1;
+
+    ParmParse pp("air7");
+    pp.query("initial_noise", m_noise_amp);
+    pp.query("initial_noise_peristence", m_noise_persist);
+    pp.query("initial_noise_octaves", m_noise_octaves);
+    if(pp.contains("initial_noise_frequency")){
+      Vector<Real> vec(SpaceDim);
+      pp.getarr("initial_noise_frequency", vec, 0, SpaceDim);
+      m_noise_freq = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+    }
+  }
+
+
   // Instantiate species
   m_species.resize(m_num_species);
   m_electron_idx = 0;
@@ -77,6 +95,16 @@ air7::air7(){
   m_photons[m_photon1_idx] = RefCountedPtr<photon_group> (new air7::photon_one());
   m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air7::photon_two());
   m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air7::photon_three());
+
+  // Instantiate noise function and give it to initial conditions
+  m_perlin = RefCountedPtr<perlin_if> (new perlin_if(1.0, m_noise_freq, m_noise_persist, m_noise_octaves));
+  air7::electron* electr = static_cast<air7::electron*> (&(*m_species[m_electron_idx]));
+  air7::N2plus* N2p_spec = static_cast<air7::N2plus*>   (&(*m_species[m_N2plus_idx]));
+  air7::O2plus* O2p_spec = static_cast<air7::O2plus*>   (&(*m_species[m_O2plus_idx]));
+
+  electr->set_initial_noise(m_noise_amp, m_perlin);
+  N2p_spec->set_initial_noise(m_noise_amp, m_perlin);
+  O2p_spec->set_initial_noise(m_noise_amp, m_perlin);
 }
 
 air7::~air7(){

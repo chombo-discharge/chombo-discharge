@@ -9,6 +9,7 @@
 #define _AIR7_
 
 #include "plasma_kinetics.H"
+#include "perlin_if.H"
 
 /*!
   @brief 7-species BOLSIG-based transport model for air at 1atm and 300K. 
@@ -133,6 +134,15 @@ public:
   virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const; 
 
 protected:
+
+  /*!
+    @brief Noise function. Used for random initial conditions.
+  */
+  RefCountedPtr<perlin_if> m_perlin;
+  Real m_noise_amp;      // Noise amplitude for Perlin noise
+  RealVect m_noise_freq; // Noise frequency for Perlin noise
+  Real m_noise_persist;  // Persistence for Perlin noise
+  int m_noise_octaves;   // Number of octaves for Perlin noise
 
   int m_electron_idx;
   int m_N2plus_idx;

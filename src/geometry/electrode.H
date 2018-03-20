@@ -23,17 +23,17 @@ public:
   /*!
     @brief Constructor. Calls define
   */
-  electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live);
+  electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
 
   /*!
     @brief 
   */
-  ~electrode();
+  virtual ~electrode();
 
   /*!
     @brief Define function
   */
-  virtual void define(RefCountedPtr<BaseIF> a_baseif, bool a_live);
+  virtual void define(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
 
   /*!
     @brief Get implicit function
@@ -45,8 +45,18 @@ public:
   */
   virtual const bool& is_live() const;
 
+  /*!
+    @brief Get fraction
+  */
+  virtual const Real& get_fraction() const;
+
 protected:
   std::pair<RefCountedPtr<BaseIF>, bool> m_tuple;
+
+  /*!
+    @brief Fraction of the live potential
+  */
+  Real m_fraction;
 };
 
 #endif

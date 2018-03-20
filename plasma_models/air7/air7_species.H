@@ -5,10 +5,13 @@
   @date   Feb. 2018
 */
 
-#include "air7.H"
+
 
 #ifndef _AIR7_SPECIES_
 #define _AIR7_SPECIES_
+
+#include "air7.H"
+#include "perlin_if.H"
 
 /*!
   @brief Electron class
@@ -30,6 +33,11 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+
+  /*!
+    @brief Set noise function
+  */
+  virtual void set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func);
   
 protected:
 
@@ -37,7 +45,16 @@ protected:
     @brief Initial ionization level
   */
   Real m_initial_ionization;
-  
+
+  /*!
+    @brief Initial noise level
+  */
+  Real m_initial_noise;
+
+  /*!
+    @brief Noise function
+  */
+  RefCountedPtr<perlin_if> m_noise_func;
 };
 
 /*!
@@ -60,10 +77,30 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+
+  /*!
+    @brief Set noise function
+  */
+  virtual void set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func);
   
 protected:
   
   Real m_initial_ionization;
+
+  /*!
+    @brief N2 fraction
+  */
+  Real m_N2frac;
+  
+  /*!
+    @brief Initial noise level
+  */
+  Real m_initial_noise;
+
+  /*!
+    @brief Noise function
+  */
+  RefCountedPtr<perlin_if> m_noise_func;
 };
 
 /*!
@@ -86,10 +123,30 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+
+  /*!
+    @brief Set noise function
+  */
+  virtual void set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func);
   
 protected:
   
   Real m_initial_ionization;
+
+  /*!
+    @brief O2 fraction
+  */
+  Real m_O2frac;
+
+  /*!
+    @brief Initial noise level
+  */
+  Real m_initial_noise;
+  
+  /*!
+    @brief Noise function
+  */
+  RefCountedPtr<perlin_if> m_noise_func;
 };
 
 /*!

@@ -41,14 +41,12 @@ air7::N2plus::N2plus(){
   m_diffusive = false;
 
   Real Tg, p, N, O2frac, N2frac;
-  air7::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air7::get_gas_parameters(Tg, p, N, O2frac, m_N2frac);
 
   {
     ParmParse pp("air7");
     m_initial_ionization = 1.E10;
     pp.query("initial_ionization", m_initial_ionization);
-
-    m_initial_ionization *= N2frac;
   }
 }
 
@@ -63,14 +61,12 @@ air7::O2plus::O2plus(){
   m_diffusive = false;
 
   Real Tg, p, N, O2frac, N2frac;
-  air7::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air7::get_gas_parameters(Tg, p, N, m_O2frac, N2frac);
 
   {
     ParmParse pp("air7");
     m_initial_ionization = 1.E10;
     pp.query("initial_ionization", m_initial_ionization);
-
-    m_initial_ionization *= O2frac;
   }
 }
 
@@ -185,16 +181,34 @@ air7::photon_three::~photon_three(){
 
 }
 
+void air7::electron::set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func){
+  m_initial_noise = a_noise_amp;
+  m_noise_func    = a_noise_func;
+}
+
+void air7::N2plus::set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func){
+  m_initial_noise = a_noise_amp;
+  m_noise_func    = a_noise_func;
+}
+
+void air7::O2plus::set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func){
+  m_initial_noise = a_noise_amp;
+  m_noise_func    = a_noise_func;
+}
+
 Real air7::electron::initial_data(const RealVect a_pos, const Real a_time) const {
-  return m_initial_ionization;
+  const Real noise = m_initial_noise*pow(m_noise_func->value(a_pos), 10);
+  return m_initial_ionization + noise;
 }
 
 Real air7::N2plus::initial_data(const RealVect a_pos, const Real a_time) const {
-  return m_initial_ionization;
+  const Real noise = m_initial_noise*pow(m_noise_func->value(a_pos), 10);
+  return m_N2frac*(m_initial_ionization + noise);
 }
 
 Real air7::O2plus::initial_data(const RealVect a_pos, const Real a_time) const {
-  return m_initial_ionization;
+  const Real noise = m_initial_noise*pow(m_noise_func->value(a_pos), 10);
+  return m_O2frac*(m_initial_ionization + noise);
 }
 
 Real air7::N4plus::initial_data(const RealVect a_pos, const Real a_time) const {

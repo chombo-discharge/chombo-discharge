@@ -255,7 +255,7 @@ void mfconductivityop::set_bc_from_levelset(){
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
-	const RealVect& pos = EBArith::getVofLocation(vof, m_dx, m_origin);
+	const RealVect pos  = EBArith::getVofLocation(vof, m_dx, m_origin);
 
 	if(m_electrodes.size() > 0){
 	  int  func = 0;
@@ -263,15 +263,17 @@ void mfconductivityop::set_bc_from_levelset(){
 
 	  for (int i = 1; i < m_electrodes.size(); i++){
 	    Real cur_val = (m_electrodes[i].get_function())->value(pos);
-	    if(Abs(cur_val) < dist){
-	      func = i;
+	    if(Abs(cur_val) < Abs(dist)){
+	      func  = i;
 	      dist  = cur_val;
 	    }
 	  }
 
+
 	  Real potential;
 	  if(m_electrodes[func].is_live()){
 	    potential = m_potential->value(pos, comp);
+	    potential *= m_electrodes[func].get_fraction();
 	  }
 	  else{
 	    potential = 0.;
