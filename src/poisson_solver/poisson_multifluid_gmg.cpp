@@ -121,7 +121,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   }
 
-#if 1 // Why is this required??? Is it because of op->zeroCovered()????
+#if 0 // Why is this required??? Is it because of op->zeroCovered()????
   const Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
 #endif
 

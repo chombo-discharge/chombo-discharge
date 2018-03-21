@@ -1,0 +1,129 @@
+/*!
+  @file   wire_wire_tagger.H
+  @brief  Declaration of a cell tagger for mesh reduction in the rod2d geometry
+  @author Robert Marskar
+  @date   Feb. 2018
+*/
+
+#ifndef _WIRE_WIRE_TAGGER_
+#define _WIRE_WIRE_TAGGER_
+
+#include "cell_tagger.H"
+
+/*!
+  @brief Class that tags cells based on the relative curvature of the electric field
+  @details This class tets if \f$|\nabla E|\Delta x/|E| > \epsilon_{\textrm{curv}}\f$ OR \f$|E|/E_{\textrm{max}} > \epsilon_{\textrm{mag}}\f$ are fulfilled. If so, the cell is refined. The same tests is used for coarsening, with different epsilons and opposite inequality sign. However, for coarsening, both tests must be fulfilled. 
+
+  Class options
+  -------------
+
+      wire_wire_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
+      wire_wire_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+      wire_wire_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
+      wire_wire_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+      wire_wire_tagger.refine_geom_depth = 2      # Number of levels to refine based on geometry
+
+*/
+class wire_wire_tagger : public cell_tagger {
+public:
+  
+  /*!
+    @brief Constructor
+  */
+  wire_wire_tagger();
+
+  /*!
+    @brief Destructor
+  */
+  virtual ~wire_wire_tagger();
+
+  /*!
+    @brief Return tracer field
+  */
+  virtual Vector<Real> tracer(const RealVect&         a_pos,
+			      const Real&             a_time,
+			      const Real&             a_dx,
+			      const RealVect&         a_E,
+			      const Real&             a_min_E,
+			      const Real&             a_max_E,
+			      const RealVect&         a_grad_E,
+			      const Real&             a_min_grad_E,
+			      const Real&             a_max_grad_E,
+			      const Real&             a_rho,
+			      const Real&             a_min_rho,
+			      const Real&             a_max_rho,
+			      const RealVect&         a_grad_rho,
+			      const Real&             a_min_grad_rho,
+			      const Real&             a_max_grad_rho,
+			      const Vector<Real>&     a_ion_densities,
+			      const Vector<Real>&     a_min_ion_densities,
+			      const Vector<Real>&     a_max_ion_densities,
+			      const Vector<RealVect>& a_ion_gradients,
+			      const Vector<Real>&     a_min_ion_gradients,
+			      const Vector<Real>&     a_max_ion_gradients,
+			      const Vector<Real>&     a_photon_densities,
+			      const Vector<Real>&     a_min_photon_densities,
+			      const Vector<Real>&     a_max_photon_densities);
+
+  /*!
+    @brief Return coarsening criterion. 
+  */
+  virtual bool coarsen_cell(const RealVect&         a_pos,
+			    const Real&             a_time,
+			    const Real&             a_dx,
+			    const int&              a_lvl,
+			    const Vector<Real>&     a_tracer,
+			    const Vector<RealVect>& a_grad_tracer);
+
+  /*!
+    @brief Return refinement criterion. 
+  */
+  virtual bool refine_cell(const RealVect&         a_pos,
+			   const Real&             a_time,
+			   const Real&             a_dx,
+			   const int&              a_lvl,
+			   const Vector<Real>&     a_tracer,
+			   const Vector<RealVect>& a_grad_tracer);
+protected:
+
+  /*!
+    @brief Threshold for coarsening based on curvature
+  */
+  Real m_coar_curv;
+
+  /*!
+    @brief Threshold for coarsening based on magnitude
+  */
+  Real m_coar_mag;
+
+  /*!
+    @brief Threshold for refinement based on curvature
+  */
+  Real m_refi_curv;
+  
+  /*!
+    @brief Threshold for coarsening based on magnitude
+  */
+  Real m_refi_mag;
+
+  /*!
+    @brief Growth factor
+  */
+  Real m_radius_fac;
+
+  /*!
+    @brief Lo corner
+  */
+  RealVect m_lo;
+
+  /*!
+    @brief Hi corner
+  */
+  RealVect m_hi;
+
+  /*!
+    @brief Geometrical refinement depth
+  */
+  int m_geom_refine_depth;
+};
+#endif

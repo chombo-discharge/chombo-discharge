@@ -24,8 +24,8 @@ wire_wire_geometry::wire_wire_geometry(){
   Real eps0            = 1.0;
   Real wire1_radius    = 0.1;
   Real wire2_radius    = 0.2;
-  Real wire1_potential = 0.5;
-  Real wire2_potential = -0.5;
+  Real wire1_potential = -0.5;
+  Real wire2_potential = 0.5;
 
 #if CH_SPACEDIM == 2
   RealVect wire1_center1 = RealVect(-1.0, 0.0);

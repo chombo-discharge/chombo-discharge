@@ -1,8 +1,8 @@
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -1E-2 -1E-2 -1E-2
-physical_domain.hi_corner =  1E-2  1E-2  1E-2
+physical_domain.lo_corner = -5E-3 -5E-3 -1E-2
+physical_domain.hi_corner =  5E-3  5E-3  1E-2
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -13,7 +13,7 @@ rod_slab.corner_curvatures         = 200.E-6                          # Corner c
 rod_slab.turn_off_electrode        = false                            # Turn on/off electrode
 rod_slab.turn_off_dielectric       = true                             # Turn on/off dielectric
 rod_slab.electrode_live            = true                             # Live electrode or not
-rod_slab.electrode_radius          = 500.E-6                          # Electrode inner radius
+rod_slab.electrode_radius          = 250.E-6                          # Electrode inner radius
 rod_slab.electrode_center1         = 0.E-6 3E-2 0E-2                  # Center 1
 rod_slab.electrode_center2         = 0.E-6 0.0 0E-2                   # Center 2
 rod_slab.dielectric_permittivity   = 4.0                              # Dielectric permittivity
@@ -27,7 +27,7 @@ rod2d_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
 rod2d_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
 rod2d_tagger.refine_curvature  = 0.3    # Sets eps_curv for refinement
 rod2d_tagger.refine_magnitude  = 0.8    # Sets eps_mag for refinement
-rod2d_tagger.refine_radius     = 0.7    # Sets eps_mag for refinement	
+rod2d_tagger.refine_radius     = 1.5    # Sets eps_mag for refinement	
 # ----------------------------------------------------------------------------------------------------	
 
 # ====================================================================================================
@@ -35,14 +35,14 @@ rod2d_tagger.refine_radius     = 0.7    # Sets eps_mag for refinement
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
-amr.max_sim_depth   = 2           # Maximum simulation depth
+amr.max_amr_depth   = 3           # Maximum amr depth
+amr.max_sim_depth   = 3           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 2           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
 amr.max_box_size    = 16          # Maximum allowed box size
 amr.max_ebis_box    = 32          # Maximum allowed box size	
-amr.ref_rat         = 4 4 4 4      # Refinement ratios. 
+amr.ref_rat         = 4 4 2 2 2 2 2       # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
@@ -61,8 +61,8 @@ amr.ebcf            = true        # Tell amr to forget about ebcf crossings.
 plasma_engine.verbosity                       = 2             # Engine verbosity
 plasma_engine.plot_interval                   = 5             # Plot interval
 plasma_engine.regrid_interval                 = 5             # Regrid interval
-plasma_engine.checkpoint_interval             = 50            # Checkpoint interval
-plasma_engine.initial_regrids                 = 4             # Number of initial regrids
+plasma_engine.checkpoint_interval             = 25            # Checkpoint interval
+plasma_engine.initial_regrids                 = 0             # Number of initial regrids
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
@@ -72,7 +72,7 @@ plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.restart                         = false         # Do restart or not
 plasma_engine.restart_step                    = 25            # Restart step.
-plasma_engine.refine_geometry                 = 0             # Refine geometry, -1 => Refine all the way down
+plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
@@ -90,7 +90,7 @@ time_stepper.fast_rte         = 1     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
-time_stepper.cfl              = 0.4   # CFL number
+time_stepper.cfl              = 0.2   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 200.0   # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------
@@ -98,10 +98,10 @@ time_stepper.source_growth    = 200.0   # Maximum permissible growth due to sour
 # ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-poisson_multifluid.gmg_verbosity     = 10        # GMG verbosity
-poisson_multifluid.gmg_pre_smooth    = 128        # Number of relaxations in downsweep
-poisson_multifluid.gmg_post_smooth   = 128        # Number of relaxations in upsweep
-poisson_multifluid.gmg_bott_smooth   = 128        # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
+poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
+poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
+poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
@@ -113,10 +113,10 @@ poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bott
 # ====================================================================================================
 # EDDINGTON SP1 GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-eddington_sp1.gmg_verbosity     = 10        # GMG verbosity
-eddington_sp1.gmg_pre_smooth    = 8         # Number of relaxations in downsweep
-eddington_sp1.gmg_post_smooth   = 8         # Number of relaxations in upsweep
-eddington_sp1.gmg_bott_smooth   = 8         # NUmber of relaxations before dropping to bottom solver
+eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
+eddington_sp1.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
+eddington_sp1.gmg_post_smooth   = 12        # Number of relaxations in upsweep
+eddington_sp1.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
 eddington_sp1.gmg_min_iter      = 5         # Minimum number of iterations
 eddington_sp1.gmg_max_iter      = 32        # Maximum number of iterations
 eddington_sp1.gmg_tolerance     = 1.E-8     # Residue tolerance
@@ -129,6 +129,7 @@ eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom so
 # EDDINGTON SP1 GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 air7.electron_diffusion            = true                  # Turn off electron diffusion (debugging only)
+air7.simple_cathode                = false
 air7.excitation_efficiency         = 0.6                   # Impact excitation efficiency
 air7.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
 air7.electrode_townsend2           = 0.1                   # Townsend coefficient on electrodes

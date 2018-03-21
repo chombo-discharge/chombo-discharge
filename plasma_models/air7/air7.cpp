@@ -185,7 +185,7 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
 					    const Vector<RealVect>& a_grad_cdr) const {
   Vector<Real> source(m_num_species, 0.0);
 
-  const Real ET       = a_E.vectorLength()/(m_N*units::s_Td);
+  const Real ET       = a_E.vectorLength()/(m_N*(1+m_perlin->value(a_pos)*m_noise_amp)*units::s_Td);
   const Real Te       = this->compute_electron_temperature(ET);
   const RealVect vele = -1.0*this->compute_electron_mobility(ET)*(a_E);
   const Real De       = this->compute_electron_diffusion(ET);

@@ -7,7 +7,7 @@
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "splitstep_tga.H"
-#include "field_tagger.H"
+#include "wire_wire_tagger.H"
 #include "wire_wire_geometry.H"
 #include "air7.H"
 
@@ -17,7 +17,7 @@
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  Real potential = 8.E4;
+  Real potential = 6.E4;
   
   return potential;
 }
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new splitstep_tga());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
+  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new wire_wire_tagger());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new wire_wire_geometry());
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air7());
   RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
