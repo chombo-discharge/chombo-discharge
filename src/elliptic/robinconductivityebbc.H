@@ -30,6 +30,16 @@ public:
   ~robinconductivityebbc();
 
   /*!
+    @brief Quadrant based stencil or not
+  */
+  static bool s_quadrant_based;
+
+  /*!
+    @brief Radius for least squares
+  */
+  static int s_lsq_radius;
+
+  /*!
     @brief Set bc order
   */
   virtual void set_type(const stencil_type::which_type a_type);

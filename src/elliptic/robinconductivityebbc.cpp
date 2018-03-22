@@ -7,6 +7,9 @@
 
 #include "robinconductivityebbc.H"
 
+bool robinconductivityebbc::s_quadrant_based = false;
+int  robinconductivityebbc::s_lsq_radius     = 1;
+
 robinconductivityebbc::robinconductivityebbc(const RealVect a_dx, const RealVect a_origin){
   m_dx     = a_dx;
   m_origin = a_origin;
@@ -52,10 +55,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
 	found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
       }
 
-      found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
-
-
-      // Second last resort is least squares
+      // Second last resort is least squares, but if we've already tried this, skip it. 
       if(!found_stencil && m_type != stencil_type::lsq){
 	found_stencil = this->get_lsq_sten(stencil, vof, ebisbox, domain);
       }
@@ -125,16 +125,21 @@ bool robinconductivityebbc::get_lsq_sten(VoFStencil&          a_stencil,
 
   Real weight;
   const RealVect dist = a_ebisbox.bndryCentroid(a_vof);
-  EBArith::getLeastSquaresGradStenAllVoFsRad(a_stencil,
-					     weight,
-					     dist,
-					     RealVect::Zero,
-					     a_vof,
-					     a_ebisbox,
-					     m_dx,
-					     a_domain,
-					     0,
-					     1);
+  if(s_quadrant_based){
+    EBArith::getLeastSquaresGradSten(a_stencil, weight, a_vof, a_ebisbox, m_dx, a_domain, 0);
+  }
+  else{
+    EBArith::getLeastSquaresGradStenAllVoFsRad(a_stencil,
+					       weight,
+					       dist,
+					       RealVect::Zero,
+					       a_vof,
+					       a_ebisbox,
+					       m_dx,
+					       a_domain,
+					       0,
+					       s_lsq_radius);
+  }
   
   if(a_stencil.size() < minStenSize){
     found_stencil = false;

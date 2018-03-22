@@ -491,7 +491,7 @@ void eddington_sp1::setup_operator_factory(){
 
   m_domfact->set_coefs(m_robinco);
   m_ebfact->set_coefs(m_robinco);
-  m_ebfact->set_type(stencil_type::taylor);
+  m_ebfact->set_type(stencil_type::lsq);
 
   // Create operator factory. 
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
