@@ -1,8 +1,9 @@
 /*!
-  @file cdr_solver.cpp
-  @brief Implementation of cdr_solver.H
+  @file   cdr_solver.cpp
+  @brief  Implementation of cdr_solver.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
+  @todo   The dt computations use vofiterators over the full box. This should be replaced by fortran routines (or internal ebcell fab functions)
 */
 
 #include "cdr_solver.H"

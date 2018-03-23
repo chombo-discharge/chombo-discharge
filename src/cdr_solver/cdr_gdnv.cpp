@@ -14,7 +14,7 @@
 
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
   m_name = "cdr_gdnv";
-
+  m_slopelim = true;
   std::string str = "covered_face";
   int which = 0;
 
@@ -31,8 +31,17 @@ cdr_gdnv::cdr_gdnv() : cdr_tga() {
     else {
       MayDay::Abort("cdr_gdnv::cdr_gdnv - unknown non-conservative divergence type requested");
     }
+
+    if(pp.contains("limit_slopes")){
+      pp.get("limit_slopes", str);
+      if(str == "true"){
+	m_slopelim = true;
+      }
+      else if(str == "false"){
+	m_slopelim = false;
+      }
+    }
   }
-  
   
   this->set_divF_nc(which);
 }
@@ -122,7 +131,7 @@ void cdr_gdnv::allocate_internals(){
 											      has_coar,
 											      has_fine,
 											      ebcf,
-											      false,
+											      m_slopelim,
 											      m_ebis));
   }
 }

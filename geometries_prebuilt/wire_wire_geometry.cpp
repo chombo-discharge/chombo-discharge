@@ -113,7 +113,7 @@ wire_wire_geometry::wire_wire_geometry(){
 #if CH_SPACEDIM == 2
     RefCountedPtr<BaseIF> wire1 = RefCountedPtr<BaseIF> (new new_sphere_if(wire1_center1, wire1_radius, false));
 #elif CH_SPACEDIM == 3
-    RefCountedPtr<BaseIF> wire1 = RefCountedPtr<BaseIF> (new new_sphere_if(wire1_center1, wire1_center2, wire1_radius, false));
+    RefCountedPtr<BaseIF> wire1 = RefCountedPtr<BaseIF> (new cylinder_if(wire1_center1, wire1_center2, wire1_radius, false));
 #endif
     m_electrodes.push_back(electrode(wire1, wire1_live, wire1_potential));
 
@@ -123,7 +123,7 @@ wire_wire_geometry::wire_wire_geometry(){
 #if CH_SPACEDIM == 2
     RefCountedPtr<BaseIF> wire2 = RefCountedPtr<BaseIF> (new new_sphere_if(wire2_center1, wire2_radius, false));
 #elif CH_SPACEDIM == 3
-    RefCountedPtr<BaseIF> wire2 = RefCountedPtr<BaseIF> (new new_sphere_if(wire2_center1, wire2_center2, wire2_radius, false));
+    RefCountedPtr<BaseIF> wire2 = RefCountedPtr<BaseIF> (new cylinder_if(wire2_center1, wire2_center2, wire2_radius, false));
 #endif
     m_electrodes.push_back(electrode(wire2, wire2_live, wire2_potential));
   }

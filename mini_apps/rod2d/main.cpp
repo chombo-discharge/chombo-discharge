@@ -17,7 +17,7 @@
 /*!
   @brief Potential
 */
-Real g_potential_start = -3E4;        // Start voltage
+Real g_potential_start =  3E4;        // Start voltage
 Real g_potential_rise  = -0E3/1.E-9;  // Rise time
 Real potential_curve(const Real a_time){
   return g_potential_start + a_time*g_potential_rise;

@@ -48,7 +48,7 @@ amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
 amr.sten_order      = 1           # Order for interpolation/extrapolation stencils. Must be 1 or 2
 amr.sten_radius     = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
-amr.sten_type       = taylor      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
+amr.sten_type       = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
 amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
 amr.ebcf            = true        # Tell amr to forget about ebcf crossings.
@@ -71,7 +71,7 @@ plasma_engine.output_mode                     = medium        # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.restart                         = false         # Do restart or not
-plasma_engine.restart_step                    = 25            # Restart step.
+plasma_engine.restart_step                    = 200           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -86,11 +86,11 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ----------------------------------------------------------------------------------------------------			
 time_stepper.verbosity        = -1    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
-time_stepper.fast_rte         = 1     # Solve RTE every this time steps
+time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
-time_stepper.cfl              = 0.2   # CFL number
+time_stepper.cfl              = 0.4   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 200.0   # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------
@@ -137,6 +137,10 @@ air7.electrode_quantum_efficiency  = 0.1                   # Quantum efficiency 
 air7.dielectric_townsend2          = 0.1                   # Townsend coefficient on dielectrics
 air7.dielectric_quantum_efficiency = 0.1                   # Quantum efficiency on dielectrics
 air7.initial_ionization            = 1.E10                 # Initial background ionization
+air7.initial_noise                 = 1.E0                  # Initial noise density
+air7.initial_noise_frequency       = 1.E4 1.E4 1.E4        # Initial noise frequency
+air7.initial_noise_persistence     = 0.5                   # Initial noise persistence
+air7.initial_noise_octaves         = 2                     # Number of noise octaves
 air7.quenching_pressure            = 0.03947               # Quenching pressure for photo-emission
 air7.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
 air7.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model

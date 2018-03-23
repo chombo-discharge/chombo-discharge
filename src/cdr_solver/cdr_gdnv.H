@@ -144,6 +144,11 @@ protected:
     @brief Switch between Trebotich and Colella nonconservative divergence
   */
   int m_which_divFnc;
+
+  /*!
+    @brief Turn on/off slope limiting
+  */
+  bool m_slopelim;
 };
 
 #endif
