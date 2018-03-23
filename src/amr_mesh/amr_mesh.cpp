@@ -1212,36 +1212,50 @@ void amr_mesh::set_coarsest_num_cells(const IntVect a_num_cells){
 void amr_mesh::set_max_amr_depth(const int a_max_amr_depth){
   m_max_amr_depth = a_max_amr_depth;
 
-  int depth;
-  ParmParse pp("amr");
-  pp.query("max_amr_depth", depth);
-  if(depth >= 0){
-    m_max_amr_depth = depth;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("max_amr_depth")){
+      int depth;
+      pp.get("max_amr_depth", depth);
+      if(depth >= 0){
+	m_max_amr_depth = depth;
+      }
+    }
   }
 }
 
 void amr_mesh::set_max_simulation_depth(const int a_max_sim_depth){
   m_max_sim_depth = a_max_sim_depth >= 0 ? a_max_sim_depth : 0;
 
-  int depth;
-  ParmParse pp("amr");
-  pp.query("max_sim_depth", depth);
-  if(depth >= 0){
-    m_max_sim_depth = depth;
+
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("max_sim_depth")){
+      int depth;
+      pp.get("max_sim_depth", depth);
+      if(depth >= 0){
+	m_max_sim_depth = depth;
+      }
+    }
   }
 }
 
 void amr_mesh::set_ebcf(const bool a_ebcf){
   m_ebcf = a_ebcf;
 
-  std::string str;
-  ParmParse pp("amr");
-  pp.query("ebcf", str);
-  if(str == "true"){
-    m_ebcf = true;
-  }
-  else if(str == "false"){
-    m_ebcf = false;
+
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("ebcf")){
+      std::string str;
+      pp.get("ebcf", str);
+      if(str == "true"){
+	m_ebcf = true;
+      }
+      else if(str == "false"){
+	m_ebcf = false;
+      }
+    }
   }
 }
 
@@ -1252,15 +1266,16 @@ void amr_mesh::set_refinement_ratio(const int a_refinement_ratio){
     m_ref_ratios[lvl] = a_refinement_ratio;
   }
 
-  ParmParse pp("amr");
-  if(pp.contains("ref_rat")){
-    Vector<int> ratios;
-    ratios.resize(pp.countval("ref_rat"));
-    pp.getarr("ref_rat", ratios, 0, ratios.size());
-
-    m_ref_ratios = ratios;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("ref_rat")){
+      Vector<int> ratios;
+      ratios.resize(pp.countval("ref_rat"));
+      pp.getarr("ref_rat", ratios, 0, ratios.size());
+      
+      m_ref_ratios = ratios;
+    }
   }
-    
 }
 
 void amr_mesh::set_refinement_ratios(const Vector<int> a_ref_ratios){
@@ -1270,11 +1285,15 @@ void amr_mesh::set_refinement_ratios(const Vector<int> a_ref_ratios){
 void amr_mesh::set_fill_ratio(const Real a_fill_ratio){
   m_fill_ratio = a_fill_ratio;
 
-  Real fill_ratio;
-  ParmParse pp("amr");
-  pp.query("fill_ratio", fill_ratio);
-  if(fill_ratio > 0.0 && fill_ratio <= 1.0){
-    m_fill_ratio = fill_ratio;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("fill_ratio")){
+      Real fill_ratio;
+      pp.get("fill_ratio", fill_ratio);
+      if(fill_ratio > 0.0 && fill_ratio <= 1.0){
+	m_fill_ratio = fill_ratio;
+      }
+    }
   }
 }
 
@@ -1318,11 +1337,15 @@ void amr_mesh::set_max_box_size(const int a_max_box_size){
   CH_TIME("amr_mesh::set_max_box_size");
   m_max_box_size = a_max_box_size;
 
-  int box_size;
-  ParmParse pp("amr");
-  pp.query("max_box_size", box_size);
-  if(box_size >= 8 && box_size % 2 == 0){
-    m_max_box_size = box_size;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("max_box_size")){
+      int box_size;
+      pp.get("max_box_size", box_size);
+      if(box_size >= 8 && box_size % 2 == 0){
+	m_max_box_size = box_size;
+      }
+    }
   }
 }
 
@@ -1331,33 +1354,45 @@ void amr_mesh::set_max_ebis_box_size(const int a_max_box_size){
   
   m_max_ebis_box_size = a_max_box_size;
 
-  int box_size;
-  ParmParse pp("amr");
-  pp.query("max_ebis_box", box_size);
-  if(box_size >= 8 && box_size % 2 == 0){
-    m_max_ebis_box_size = box_size;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("max_ebis_box")){
+      int box_size;
+      pp.get("max_ebis_box", box_size);
+      if(box_size >= 8 && box_size % 2 == 0){
+	m_max_ebis_box_size = box_size;
+      }
+    }
   }
 }
 
 void amr_mesh::set_buffer_size(const int a_buffer_size){
   m_buffer_size = a_buffer_size;
 
-  int buffer;
-  ParmParse pp("amr");
-  pp.query("buffer_size", buffer);
-  if(buffer > 0){
-    m_buffer_size = buffer;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("buffer_size")){
+      int buffer;
+      pp.get("buffer_size", buffer);
+      if(buffer > 0){
+	m_buffer_size = buffer;
+      }
+    }
   }
 }
 
 void amr_mesh::set_irreg_growth(const int a_irreg_growth){
   m_irreg_growth = a_irreg_growth;
 
-  int buffer;
-  ParmParse pp("amr");
-  pp.query("irreg_growth", buffer);
-  if(buffer > 0){
-    m_irreg_growth = buffer;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("irreg_growth")){
+      int buffer;
+      pp.get("irreg_growth", buffer);
+      if(buffer > 0){
+	m_irreg_growth = buffer;
+      }
+    }
   }
 }
 
@@ -1365,11 +1400,15 @@ void amr_mesh::set_blocking_factor(const int a_blocking_factor){
   CH_TIME("amr_mesh::set_blocking_factor");
   m_blocking_factor = a_blocking_factor;
 
-  int blocking;
-  ParmParse pp("amr");
-  pp.query("blocking_factor", blocking);
-  if(blocking >= 8 && blocking % 2 == 0){
-    m_blocking_factor = blocking;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("blocking_factor")){
+      int blocking;
+      pp.get("blocking_factor", blocking);
+      if(blocking >= 8 && blocking % 2 == 0){
+	m_blocking_factor = blocking;
+      }
+    }
   }
 }
 
@@ -1377,11 +1416,15 @@ void amr_mesh::set_eb_ghost(const int a_ebghost){
   CH_TIME("amr_mesh:.set_eb_ghost");
   m_ebghost = a_ebghost;
 
-  int ebghost;
-  ParmParse pp("amr");
-  pp.query("eb_ghost", ebghost);
-  if(ebghost >= 2){
-    m_ebghost = ebghost;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("eb_ghost")){
+      int ebghost;
+      pp.get("eb_ghost", ebghost);
+      if(ebghost >= 2){
+	m_ebghost = ebghost;
+      }
+    }
   }
 }
 
@@ -1389,11 +1432,15 @@ void amr_mesh::set_num_ghost(const int a_num_ghost){
   CH_TIME("amr_mesh::set_num_ghost");
   m_num_ghost = a_num_ghost;
 
-  int ghost;
-  ParmParse pp("amr");
-  pp.query("num_ghost", ghost);
-  if(ghost >= 2){
-    m_num_ghost = a_num_ghost;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("num_ghost")){
+      int ghost;
+      pp.get("num_ghost", ghost);
+      if(ghost >= 2){
+	m_num_ghost = a_num_ghost;
+      }
+    }
   }
 }
 
@@ -1401,11 +1448,15 @@ void amr_mesh::set_redist_rad(const int a_redist_rad){
   CH_TIME("amr_mesh::set_redist_rads");
   m_redist_rad = a_redist_rad;
 
-  int rad = 1;
-  ParmParse pp("amr");
-  pp.query("redist_radius", rad);
-  if(rad == 1 || rad == 2){
-    m_redist_rad = a_redist_rad;
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("redist_radius")){
+      int rad = 1;
+      pp.get("redist_radius", rad);
+      if(rad == 1 || rad == 2){
+	m_redist_rad = a_redist_rad;
+      }
+    }
   }
 }
 
@@ -1432,8 +1483,8 @@ void amr_mesh::set_irreg_sten_order(const int a_irreg_sten_order){
   CH_TIME("amr_mesh::irreg_sten_order");
   m_irreg_sten_order = a_irreg_sten_order;
 
-  int order = 1;
   ParmParse pp("amr");
+  int order = 1;
   pp.query("stencil_order", order);
   if(order == 1 || order == 2){
     m_irreg_sten_order = order;
