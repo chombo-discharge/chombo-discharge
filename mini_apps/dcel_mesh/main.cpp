@@ -53,22 +53,22 @@ int main(int argc, char* argv[]){
   dcel_poly* p3 = static_cast<dcel_poly*> (new dcel_triangle());  // "Diagonal" triangle
 
 
-  // Define vertices, forget normal vector
+  // Define vertices. The edge is an outgoing edge. 
   v0->define(x0, e1);
   v1->define(x1, e0);
   v2->define(x2, e2);
-  v3->define(x3, e7);
+  v3->define(x3, e5);
 
   // Define half edges, forget normal vector for now
   e0->define(v0,  e3,   e1,  e2);
-  e1->define(v2,  e10,  e2,  e0);
+  e1->define(v2,  e8,   e2,  e0);
   e2->define(v1,  e10,  e0,  e1);
   e3->define(v1,  e0,   e4,  e5);
   e4->define(v3,  e9,   e5,  e3);
   e5->define(v0,  e6,   e3,  e4);
   e6->define(v3,  e5,   e7,  e8);
   e7->define(v2,  e11,  e8,  e6);
-  e8->define(v2,  e1,   e6,  e7);
+  e8->define(v0,  e1,   e6,  e7);
   e9->define(v1,  e4,   e10, e11);
   e10->define(v2, e2,   e11, e9);
   e11->define(v3, e7,   e9,  e10);
@@ -109,8 +109,13 @@ int main(int argc, char* argv[]){
   // Create poly mesh and find the distance to a point
 
   dcel_mesh* mesh = new dcel_mesh(polygons, edges, vertices);
-  const RealVect t0 = -RealVect(BASISV(0));
+  const RealVect t0 = RealVect(0.1, 0.1, 0.1); // This lies inside everything
+  mesh->reconcile_polygons();
   pout() << mesh->signed_distance(t0) << endl;
+  //pout() << p1->signed_distance(t0) << endl;
+  // pout() << p1->signed_distance(t0) << endl;
+  // pout() << p2->signed_distance(t0) << endl;
+  // pout() << p3->signed_distance(t0) << endl;
 
 #ifdef CH_MPI
   MPI_Finalize();

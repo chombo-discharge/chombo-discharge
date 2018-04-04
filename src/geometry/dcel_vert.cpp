@@ -8,6 +8,7 @@
 #include "dcel_vert.H"
 #include "dcel_edge.H"
 #include "dcel_poly.H"
+#include "dcel_iterator.H"
 
 dcel_vert::dcel_vert(){
   m_pos    = RealVect::Zero;
@@ -23,6 +24,19 @@ void dcel_vert::define(const RealVect a_pos, const dcel_edge* const a_edge, cons
   m_pos    = a_pos;
   m_normal = a_normal;
   m_edge   = a_edge;
+}
+
+void dcel_vert::set_normal(const RealVect a_normal){
+  m_normal = a_normal;
+}
+
+Vector<const dcel_poly*> dcel_vert::get_polygons() const{
+  Vector<const dcel_poly*> polygons;
+  for (edge_iterator iter(this); iter.ok(); ++iter){
+    polygons.push_back(iter()->get_poly());
+  }
+
+  return polygons;
 }
 
 const dcel_edge* dcel_vert::get_edge() const{

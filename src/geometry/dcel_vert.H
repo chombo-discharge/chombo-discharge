@@ -35,9 +35,19 @@ public:
   virtual void define(const RealVect m_pos, const dcel_edge* const a_edge, const RealVect a_normal = RealVect::Zero);
 
   /*!
+    @brief Set normal vector
+  */
+  virtual void set_normal(const RealVect a_normal);
+
+  /*!
     @brief Get vertex
   */
   virtual const dcel_edge* get_edge() const;
+
+  /*!
+    @brief Get all polygons connected to this vertex
+  */
+  virtual Vector<const dcel_poly*> get_polygons() const;
 
   /*!
     @brief Get position

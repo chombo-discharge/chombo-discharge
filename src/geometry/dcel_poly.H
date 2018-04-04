@@ -35,14 +35,34 @@ public:
   virtual void define(const RealVect a_normal, const dcel_edge* const a_edge);
 
   /*!
+    @brief Compute polygon area
+  */
+  virtual void compute_area() = 0;
+
+  /*!
     @brief Get edge
   */
   virtual const dcel_edge* get_edge() const;
 
   /*!
+    @brief Get all vertices
+  */
+  virtual Vector<const dcel_vert*> get_vertices() const;
+
+  /*!
+    @brief Get all edges
+  */
+  virtual Vector<const dcel_edge*> get_edges() const;
+
+  /*!
     @brief Get face normal vector
   */
   virtual RealVect get_normal() const;
+
+  /*!
+    @brief Get polygon area
+  */
+  virtual Real get_area() const;
 
   /*!
     @brief Signed distance. This should be pure in order to do general polygons. 
@@ -60,6 +80,11 @@ protected:
     @brief Face normal
   */
   RealVect m_normal;
+
+  /*!
+    @brief Polygon area
+  */
+  Real m_area;
 };
 
 #endif

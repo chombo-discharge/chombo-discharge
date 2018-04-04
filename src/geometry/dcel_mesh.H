@@ -41,11 +41,19 @@ public:
   virtual void define(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges, Vector<dcel_vert*> a_vertices);
 
   /*!
+    @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the polygon
+    area
+  */
+  virtual void reconcile_polygons();
+
+  /*!
     @brief Compute signed distance
   */
   virtual Real signed_distance(const RealVect a_x0);
 
 protected:
+
+  bool m_reconciled;
 
   /*!
     @brief Mesh polygons
@@ -61,5 +69,15 @@ protected:
     @brief Mesh vertices
   */
   Vector<dcel_vert*> m_vertices;
+
+  /*!
+    @brief Compute vertex normals
+  */
+  virtual void compute_vertex_normals();
+
+  /*!
+    @brief Compute edge normals
+  */
+  virtual void compute_edge_normals();
 };
 #endif

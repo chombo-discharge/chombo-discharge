@@ -39,6 +39,16 @@ public:
 		      const RealVect         a_normal = RealVect::Zero);
 
   /*!
+    @brief Set polygon
+  */
+  virtual void set_poly(const dcel_poly* const a_poly);
+
+  /*!
+    @brief Set normal vector
+  */
+  virtual void set_normal(const RealVect a_normal);
+  
+  /*!
     @brief Get vertex
   */
   virtual const dcel_vert* get_vert() const;
@@ -63,6 +73,11 @@ public:
   */
   virtual const dcel_edge* get_next() const;
 
+  /*!
+    @brief Get polygon
+  */
+  virtual const dcel_poly* get_poly() const;
+  
   /*!
     @brief Get pseudo-normal
   */
@@ -99,70 +114,11 @@ protected:
     @brief Next edge
   */
   const dcel_edge* m_next;
-};
-
-/*!
-  @brief Class that iterates over edges
-*/
-class edge_iterator {
-public:
 
   /*!
-    @brief Weak constructor
+    @brief Reference to polygon
   */
-  edge_iterator();
-  
-  /*!
-    @brief Iterator for all half edges of a polygon
-  */
-  edge_iterator(const dcel_poly* const a_poly);
-
-  /*!
-    @brief Iterator for half edges that end on the input vertex
-  */
-  edge_iterator(const dcel_vert* const a_vert);
-
-  /*!
-    @brief Get edge
-  */
-  virtual const dcel_edge* operator() ();
-
-  /*!
-    @brief Reset iterator
-  */
-  virtual void reset();
-
-  /*!
-    @brief Increment edge
-  */
-  virtual void operator ++();
-
-  /*!
-    @brief Check if ok or not
-  */
-  virtual bool ok();
-  
-protected:
-
-  /*!
-    @brief Flag for encapsulating hwo we iterator
-  */
-  bool m_polymode;
-
-  /*!
-    @brief Check if this is the first iteration
-  */
-  bool m_full_loop;
-  
-  /*!
-    @brief Starting edge
-  */
-  const dcel_edge* m_begin;
-
-  /*!
-    @brief Current edge
-  */
-  const dcel_edge* m_current;
+  const dcel_poly* m_poly;
 };
 
 #endif
