@@ -10,14 +10,28 @@
 #include "dcel_mesh.H"
 #include "dcel_triangle.H"
 
+#include "plasma_engine.H"
+#include "plasma_kinetics.H"
+#include "rk2.H"
+#include "field_tagger.H"
+#include "air7.H"
+#include "dcel_geometry.H"
+
 #include <ParmParse.H>
 
+Real potential_curve(const Real a_time){
+  return 0.0;
+}
 
 int main(int argc, char* argv[]){
 
 #ifdef CH_MPI
   MPI_Init(&argc,&argv);
 #endif
+
+  // Build argument list from input file
+  char* inputFile = argv[1];
+  ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
   const RealVect x0 = RealVect::Zero;
   const RealVect x1 = RealVect(BASISV(0));
@@ -111,12 +125,28 @@ int main(int argc, char* argv[]){
   dcel_mesh* mesh = new dcel_mesh(polygons, edges, vertices);
   const RealVect t0 = RealVect(0.1, 0.1, 0.1); // This lies inside everything
   mesh->reconcile_polygons();
-  pout() << mesh->signed_distance(t0) << endl;
+  //  pout() << mesh->signed_distance(t0) << endl;
   //pout() << p1->signed_distance(t0) << endl;
   // pout() << p1->signed_distance(t0) << endl;
   // pout() << p2->signed_distance(t0) << endl;
   // pout() << p3->signed_distance(t0) << endl;
 
+  //  dcel_geometry* geom = new dcel_geometry(mesh);
+
+  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
+  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new dcel_geometry(mesh));
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air7());
+  RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
+												   compgeom,
+												   plaskin,
+												   timestepper,
+												   amr,
+												   tagger));
+  engine->set_potential(potential_curve);
+  engine->setup_and_run();
 #ifdef CH_MPI
   MPI_Finalize();
 #endif

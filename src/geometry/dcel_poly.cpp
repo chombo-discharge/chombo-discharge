@@ -24,6 +24,10 @@ void dcel_poly::define(const RealVect a_normal, const dcel_edge* const a_edge){
   m_edge   = a_edge;
 }
 
+void dcel_poly::normalize(){
+  m_normal *= 1./m_normal.vectorLength();
+}
+
 Vector<const dcel_vert*> dcel_poly::get_vertices() const{
   Vector<const dcel_vert*> vertices;
 

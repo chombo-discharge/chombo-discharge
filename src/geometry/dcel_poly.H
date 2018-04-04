@@ -65,6 +65,11 @@ public:
   virtual Real get_area() const;
 
   /*!
+    @brief Normalize normal vector
+  */
+  virtual void normalize();
+
+  /*!
     @brief Signed distance. This should be pure in order to do general polygons. 
   */
   virtual Real signed_distance(const RealVect a_x0) const = 0;

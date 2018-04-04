@@ -52,9 +52,9 @@ Real dcel_triangle::signed_distance(const RealVect a_x0) const {
   const Real alpha = PolyGeom::dot(PolyGeom::cross(u,w), n)/PolyGeom::dot(n, n);
   const Real beta  = PolyGeom::dot(PolyGeom::cross(w,v), n)/PolyGeom::dot(n, n);
   const Real gamma = 1.0 - alpha - beta;
-  if(alpha > 0.0 && alpha < 1.0){
-    if(beta > 0.0 && beta < 1.0){
-      if(gamma > 0.0 && gamma < 1.0){
+  if(alpha >= 0.0 && alpha <= 1.0){
+    if(beta >= 0.0 && beta <= 1.0){
+      if(gamma >= 0.0 && gamma <= 1.0){
 	inside = true;
       }
     }
@@ -67,7 +67,7 @@ Real dcel_triangle::signed_distance(const RealVect a_x0) const {
     Vector<const dcel_edge*> edges = this->get_edges();
     for (int i = 0; i < edges.size(); i++){
       const Real cur_dist = edges[i]->signed_distance(a_x0);
-      if(Abs(cur_dist) < retval){
+      if(Abs(cur_dist) < Abs(retval)){
 	retval = cur_dist;
       }
     }

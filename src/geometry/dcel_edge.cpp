@@ -96,10 +96,12 @@ Real dcel_edge::signed_distance(const RealVect a_x0) const {
     p = xp;
     n = m_normal;
   }
-  
-  const Real dot = PolyGeom::dot(n, (a_x0 - p));
-  const int sgn = (dot > 0.0) - (dot < 0.0);
-  retval = (a_x0-xp).vectorLength()*sgn;
+
+  const Real dot = PolyGeom::dot(n, (a_x0 - p)); // Determine sign from projection. However, I don't think this is a good way of
+  const int sgn = (dot > 0.0) - (dot < 0.0);     // doing it since the normal vector might be orthogonal to x0-p. 
+
+  //  retval = (a_x0-xp).vectorLength()*sgn;
+  retval = (a_x0-xp).vectorLength();
 
   return retval;
 }
