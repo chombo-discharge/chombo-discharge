@@ -19,6 +19,12 @@ dcel_vert::~dcel_vert(){
 
 }
 
+void dcel_vert::define(const RealVect a_pos, const dcel_edge* const a_edge, const RealVect a_normal){
+  m_pos    = a_pos;
+  m_normal = a_normal;
+  m_edge   = a_edge;
+}
+
 const dcel_edge* dcel_vert::get_edge() const{
   return m_edge;
 }

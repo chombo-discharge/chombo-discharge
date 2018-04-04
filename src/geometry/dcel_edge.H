@@ -30,6 +30,15 @@ public:
   ~dcel_edge();
 
   /*!
+    @brief Define function
+  */
+  virtual void define(const dcel_vert* const a_vert,
+		      const dcel_edge* const a_pair,
+		      const dcel_edge* const a_next,
+		      const dcel_edge* const a_prev,
+		      const RealVect         a_normal = RealVect::Zero);
+
+  /*!
     @brief Get vertex
   */
   virtual const dcel_vert* get_vert() const;
@@ -74,22 +83,22 @@ protected:
   /*!
     @brief Vertex at end of edge
   */
-  dcel_vert* m_vert; 
+  const dcel_vert* m_vert; 
 
   /*!
     @brief Edge pair
   */
-  dcel_edge* m_pair;
+  const dcel_edge* m_pair;
 
   /*!
     @brief Previous edge
   */
-  dcel_edge* m_prev; 
+  const dcel_edge* m_prev; 
 
   /*!
     @brief Next edge
   */
-  dcel_edge* m_next;
+  const dcel_edge* m_next;
 };
 
 /*!
@@ -139,6 +148,11 @@ protected:
     @brief Flag for encapsulating hwo we iterator
   */
   bool m_polymode;
+
+  /*!
+    @brief Check if this is the first iteration
+  */
+  bool m_full_loop;
   
   /*!
     @brief Starting edge

@@ -30,6 +30,11 @@ public:
   ~dcel_poly();
 
   /*!
+    @brief Define edge
+  */
+  virtual void define(const RealVect a_normal, const dcel_edge* const a_edge);
+
+  /*!
     @brief Get edge
   */
   virtual const dcel_edge* get_edge() const;
@@ -40,16 +45,16 @@ public:
   virtual RealVect get_normal() const;
 
   /*!
-    @brief Signed distance
+    @brief Signed distance. This should be pure in order to do general polygons. 
   */
-  virtual Real signed_distance(const RealVect a_x0) const ;
+  virtual Real signed_distance(const RealVect a_x0) const = 0;
   
 protected:
 
   /*!
     @brief One of the edges of the polygon
   */
-  dcel_edge* m_edge;
+  const dcel_edge* m_edge;
 
   /*!
     @brief Face normal

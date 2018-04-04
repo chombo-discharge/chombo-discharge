@@ -30,6 +30,11 @@ public:
   ~dcel_vert();
 
   /*!
+    @brief Define function
+  */
+  virtual void define(const RealVect m_pos, const dcel_edge* const a_edge, const RealVect a_normal = RealVect::Zero);
+
+  /*!
     @brief Get vertex
   */
   virtual const dcel_edge* get_edge() const;
@@ -64,6 +69,6 @@ protected:
   /*!
     @brief One of the half-edges in the mesh
   */
-  dcel_edge* m_edge;
+  const dcel_edge* m_edge;
 };
 #endif
