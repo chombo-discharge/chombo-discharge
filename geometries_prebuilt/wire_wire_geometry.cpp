@@ -19,6 +19,7 @@
 #include "perlin_sphere_if.H"
 #include "box_if.H"
 #include "new_sphere_if.H"
+#include "cylinder_if.H"
 
 wire_wire_geometry::wire_wire_geometry(){
 
