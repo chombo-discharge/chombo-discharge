@@ -62,8 +62,11 @@ void dcel_mesh::compute_vertex_normals(){
     // Compute area-weighted normal vector
     RealVect normal = RealVect::Zero;
     for (int i = 0; i < polygons.size(); i++){
-      //      normal += polygons[i]->get_area()*polygons[i]->get_normal();
+#if DCEL_ANGLE_WEIGHTED
+      normal += polygons[i]->get_area()*polygons[i]->get_normal();
+#else
       normal += polygons[i]->get_normal();
+#endif
     }
     normal *= 1./normal.vectorLength();
 
@@ -84,12 +87,7 @@ void dcel_mesh::compute_edge_normals(){
 
     const RealVect n1 = poly->get_normal();
     const RealVect n2 = pair_poly->get_normal();
-
-
-    //    const RealVect n = (n1+n2)/(n1+n2).vectorLength();
-    RealVect n = n1+n2;
-    n *= 1./n.vectorLength();
-
+    const RealVect n  = (n1+n2)/(n1+n2).vectorLength();
 
     dcel_edge* e = const_cast<dcel_edge*> (edge);
     e->set_normal(n);
