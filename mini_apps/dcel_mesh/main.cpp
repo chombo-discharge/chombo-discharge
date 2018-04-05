@@ -120,7 +120,6 @@ int main(int argc, char* argv[]){
   vertices.push_back(v3);
 
   // Create poly mesh and find the distance to a point
-
   dcel_mesh* mesh = new dcel_mesh(polygons, edges, vertices);
   mesh->reconcile_polygons();
 

@@ -82,27 +82,6 @@ void dcel_poly::compute_normal(){
   }
 }
 
-Vector<const dcel_vert*> dcel_poly::get_vertices() const{
-  Vector<const dcel_vert*> vertices;
-
-  for (edge_iterator iter(this); iter.ok(); ++iter){
-    const dcel_edge* edge = iter();
-    vertices.push_back(edge->get_vert());
-  }
-
-  return vertices;
-}
-
-Vector<const dcel_edge*> dcel_poly::get_edges() const{
-  Vector<const dcel_edge*> edges;
-
-  for (edge_iterator iter(this); iter.ok(); ++iter){
-    edges.push_back(iter());
-  }
-
-  return edges;
-}
-
 Real dcel_poly::get_area() const{
   return m_area;
 }
@@ -163,4 +142,27 @@ RealVect dcel_poly::get_normal() const {
   return m_normal;
 }
 
+RealVect dcel_poly::get_centroid() const {
+  return m_centroid;
+}
 
+Vector<const dcel_vert*> dcel_poly::get_vertices() const{
+  Vector<const dcel_vert*> vertices;
+
+  for (edge_iterator iter(this); iter.ok(); ++iter){
+    const dcel_edge* edge = iter();
+    vertices.push_back(edge->get_vert());
+  }
+
+  return vertices;
+}
+
+Vector<const dcel_edge*> dcel_poly::get_edges() const{
+  Vector<const dcel_edge*> edges;
+
+  for (edge_iterator iter(this); iter.ok(); ++iter){
+    edges.push_back(iter());
+  }
+
+  return edges;
+}

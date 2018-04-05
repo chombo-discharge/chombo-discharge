@@ -10,6 +10,7 @@
 
 #include "Vector.H"
 
+#include "ritter_sphere.H"
 #include "dcel_poly.H"
 #include "dcel_edge.H" 
 #include "dcel_vert.H"
@@ -47,6 +48,8 @@ public:
   */
   virtual void reconcile_polygons(const bool a_area_weighted = true);
 
+
+
   /*!
     @brief Compute signed distance
   */
@@ -55,6 +58,11 @@ public:
 protected:
 
   bool m_reconciled;
+
+  /*!
+    @brief Bounding sphere
+  */
+  ritter_sphere m_sphere;
 
   /*!
     @brief Mesh polygons
@@ -80,5 +88,10 @@ protected:
     @brief Compute edge normals
   */
   virtual void compute_edge_normals();
+
+  /*!
+    @brief Compute bounding sphere for mesh
+  */
+  virtual void compute_bounding_sphere();
 };
 #endif

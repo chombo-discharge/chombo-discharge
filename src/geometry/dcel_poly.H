@@ -71,6 +71,11 @@ public:
   virtual Vector<const dcel_edge*> get_edges() const;
 
   /*!
+    @brief Get centroid
+  */
+  virtual RealVect get_centroid() const;
+  
+  /*!
     @brief Get face normal vector
   */
   virtual RealVect get_normal() const;

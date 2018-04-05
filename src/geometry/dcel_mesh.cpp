@@ -30,6 +30,15 @@ void dcel_mesh::define(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges
   m_vertices = a_vertices;
 }
 
+void dcel_mesh::compute_bounding_sphere(){
+  Vector<RealVect> pos;
+  for (int i = 0; i < m_vertices.size(); i++){
+    pos.push_back(m_vertices[i]->get_pos());
+  }
+  
+  m_sphere.define(pos);
+}
+
 void dcel_mesh::reconcile_polygons(const bool a_area_weighted){
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
@@ -50,6 +59,7 @@ void dcel_mesh::reconcile_polygons(const bool a_area_weighted){
   // Compute pseudonormals for vertices and edges. 
   this->compute_vertex_normals(a_area_weighted);
   this->compute_edge_normals();
+  this->compute_bounding_sphere();
 
   m_reconciled = true;
 }
@@ -100,13 +110,18 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
   
   Real min_dist = 1.E99;
 
-  // This is a very slow version of doing this; this should be accelerated by using a BVH-tree or kD-tree, but that'll have to wait
-  // until we get the basics right. 
-  for (int i = 0; i < m_polygons.size(); i++){
-    const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
-    if(Abs(cur_dist) < Abs(min_dist)){
-      min_dist = cur_dist;
+  if(m_sphere.inside(a_x0)){
+    // This is a very slow version of doing this; this should be accelerated by using a BVH-tree or kD-tree, but that'll
+    // have to wait a little bit.
+    for (int i = 0; i < m_polygons.size(); i++){
+      const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
+      if(Abs(cur_dist) < Abs(min_dist)){
+	min_dist = cur_dist;
+      }
     }
+  }
+  else{
+    min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
   }
 
   return min_dist;
