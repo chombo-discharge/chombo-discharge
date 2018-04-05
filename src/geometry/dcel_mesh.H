@@ -41,10 +41,11 @@ public:
   virtual void define(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges, Vector<dcel_vert*> a_vertices);
 
   /*!
-    @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the polygon
-    area
+    @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
+    polygon area
+    @param[in] a_area_weighted Use area weighted vertex normals
   */
-  virtual void reconcile_polygons();
+  virtual void reconcile_polygons(const bool a_area_weighted = true);
 
   /*!
     @brief Compute signed distance
@@ -73,7 +74,7 @@ protected:
   /*!
     @brief Compute vertex normals
   */
-  virtual void compute_vertex_normals();
+  virtual void compute_vertex_normals(const bool a_area_weighted);
 
   /*!
     @brief Compute edge normals

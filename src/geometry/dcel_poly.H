@@ -37,7 +37,23 @@ public:
   /*!
     @brief Compute polygon area
   */
-  virtual void compute_area() = 0;
+  virtual void compute_area();
+
+  /*!
+    @brief Normalize normal vector
+  */
+  virtual void normalize();
+
+  /*!
+    @brief Compute centroid. 
+    @note This currently computes the point centroid and not the mass centroid. This probably doesn't matter for performance. 
+  */
+  virtual void compute_centroid();
+
+  /*!
+    @brief Compute normal vector from vertices
+  */
+  virtual void compute_normal();
 
   /*!
     @brief Get edge
@@ -65,14 +81,9 @@ public:
   virtual Real get_area() const;
 
   /*!
-    @brief Normalize normal vector
+    @brief Signed distance. 
   */
-  virtual void normalize();
-
-  /*!
-    @brief Signed distance. This should be pure in order to do general polygons. 
-  */
-  virtual Real signed_distance(const RealVect a_x0) const = 0;
+  virtual Real signed_distance(const RealVect a_x0) const;
   
 protected:
 
@@ -87,9 +98,16 @@ protected:
   RealVect m_normal;
 
   /*!
+    @brief Polygon centroid
+  */
+  RealVect m_centroid;
+
+  /*!
     @brief Polygon area
   */
   Real m_area;
+
+  
 };
 
 #endif

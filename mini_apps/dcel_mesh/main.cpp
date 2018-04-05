@@ -8,7 +8,6 @@
 #include "dcel_edge.H"
 #include "dcel_poly.H"
 #include "dcel_mesh.H"
-#include "dcel_triangle.H"
 
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
@@ -61,10 +60,10 @@ int main(int argc, char* argv[]){
   dcel_edge* e10 = new dcel_edge(); // Inside p3, points towards v2, next=e11, prev=e9,  pair=e2
   dcel_edge* e11 = new dcel_edge(); // Inside p3, points towards v3, next=e9,  prev=e10, pair=e7
 
-  dcel_poly* p0 = static_cast<dcel_poly*> (new dcel_triangle());  // Triangle in xy-plane
-  dcel_poly* p1 = static_cast<dcel_poly*> (new dcel_triangle());  // Triangle in xz plane
-  dcel_poly* p2 = static_cast<dcel_poly*> (new dcel_triangle());  // Triangle in yz-plane
-  dcel_poly* p3 = static_cast<dcel_poly*> (new dcel_triangle());  // "Diagonal" triangle
+  dcel_poly* p0 = new dcel_poly(); // Triangle in xy-plane
+  dcel_poly* p1 = new dcel_poly(); // Triangle in xz plane
+  dcel_poly* p2 = new dcel_poly(); // Triangle in yz-plane
+  dcel_poly* p3 = new dcel_poly(); // "Diagonal" triangle
 
 
   // Define vertices. The edge is an outgoing edge. 
@@ -123,15 +122,7 @@ int main(int argc, char* argv[]){
   // Create poly mesh and find the distance to a point
 
   dcel_mesh* mesh = new dcel_mesh(polygons, edges, vertices);
-  const RealVect t0 = RealVect(0.1, 0.1, 0.1); // This lies inside everything
   mesh->reconcile_polygons();
-  //  pout() << mesh->signed_distance(t0) << endl;
-  //pout() << p1->signed_distance(t0) << endl;
-  // pout() << p1->signed_distance(t0) << endl;
-  // pout() << p2->signed_distance(t0) << endl;
-  // pout() << p3->signed_distance(t0) << endl;
-
-  //  dcel_geometry* geom = new dcel_geometry(mesh);
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());

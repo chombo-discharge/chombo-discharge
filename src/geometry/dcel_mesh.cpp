@@ -30,7 +30,7 @@ void dcel_mesh::define(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges
   m_vertices = a_vertices;
 }
 
-void dcel_mesh::reconcile_polygons(){
+void dcel_mesh::reconcile_polygons(const bool a_area_weighted){
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
   // to their polygons
@@ -42,18 +42,19 @@ void dcel_mesh::reconcile_polygons(){
       dcel_edge* edge = const_cast<dcel_edge*> (iter());
       edge->set_poly(poly);
     }
+    poly->compute_normal();
     poly->compute_area();
     poly->normalize();
   }
 
   // Compute pseudonormals for vertices and edges. 
-  this->compute_vertex_normals();
+  this->compute_vertex_normals(a_area_weighted);
   this->compute_edge_normals();
 
   m_reconciled = true;
 }
 
-void dcel_mesh::compute_vertex_normals(){
+void dcel_mesh::compute_vertex_normals(const bool a_area_weighted){
   for (int i = 0; i < m_vertices.size(); i++){
     Vector<const dcel_poly*> polygons = m_vertices[i]->get_polygons();
 
@@ -62,15 +63,14 @@ void dcel_mesh::compute_vertex_normals(){
     // Compute area-weighted normal vector
     RealVect normal = RealVect::Zero;
     for (int i = 0; i < polygons.size(); i++){
-#if DCEL_ANGLE_WEIGHTED
-      normal += polygons[i]->get_area()*polygons[i]->get_normal();
-#else
-      normal += polygons[i]->get_normal();
-#endif
+      if(a_area_weighted){
+	normal += polygons[i]->get_area()*polygons[i]->get_normal();
+      }
+      else{
+	normal += polygons[i]->get_normal();
+      }
     }
     normal *= 1./normal.vectorLength();
-
-    //    pout() << normal << endl;
 
     m_vertices[i]->set_normal(normal);
   }
