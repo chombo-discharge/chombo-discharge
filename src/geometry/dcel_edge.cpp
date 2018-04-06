@@ -19,22 +19,44 @@ dcel_edge::~dcel_edge(){
 
 }
 
-
-
 void dcel_edge::define(const dcel_vert* const a_vert,
 		       const dcel_edge* const a_pair,
 		       const dcel_edge* const a_next,
 		       const dcel_edge* const a_prev,
 		       const RealVect         a_normal){
+  this->set_vert(a_vert);
+  this->set_pair(a_pair);
+  this->set_next(a_next);
+  this->set_prev(a_prev);
+  this->set_normal(a_normal);
+
+#if 0
   m_vert   = a_vert;
   m_pair   = a_pair;
   m_next   = a_next;
   m_prev   = a_prev;
   m_normal = a_normal;
+#endif
 }
 
 void dcel_edge::set_poly(const dcel_poly* const a_poly){
   m_poly = a_poly;
+}
+
+void dcel_edge::set_vert(const dcel_vert* const a_vert){
+  m_vert = a_vert;
+}
+
+void dcel_edge::set_pair(const dcel_edge* const a_pair){
+  m_pair = a_pair;
+}
+
+void dcel_edge::set_next(const dcel_edge* const a_next){
+  m_next = a_next;
+}
+
+void dcel_edge::set_prev(const dcel_edge* const a_prev){
+  m_prev = a_prev;
 }
 
 void dcel_edge::set_normal(const RealVect a_normal){

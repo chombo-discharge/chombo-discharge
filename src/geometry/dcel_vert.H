@@ -25,6 +25,11 @@ public:
   dcel_vert();
 
   /*!
+    @brief Constructor. No information about edge
+  */
+  dcel_vert(const RealVect a_pos);
+
+  /*!
     @brief Destructor
   */
   ~dcel_vert();
@@ -35,9 +40,24 @@ public:
   virtual void define(const RealVect m_pos, const dcel_edge* const a_edge, const RealVect a_normal = RealVect::Zero);
 
   /*!
+    @brief Set position
+  */
+  virtual void set_pos(const RealVect a_pos);
+
+  /*!
     @brief Set normal vector
   */
   virtual void set_normal(const RealVect a_normal);
+
+  /*!
+    @brief Set edge
+  */
+  virtual void set_edge(const dcel_edge* const a_edge);
+
+  /*!
+    @brief Get reference to polygon
+  */
+  virtual void add_polygon(const dcel_poly* const a_poly);
 
   /*!
     @brief Get vertex
@@ -48,6 +68,11 @@ public:
     @brief Get all polygons connected to this vertex
   */
   virtual Vector<const dcel_poly*> get_polygons() const;
+
+  /*!
+    @brief Get all cached polygons
+  */
+  virtual Vector<const dcel_poly*> get_polycache() const;
 
   /*!
     @brief Get position
@@ -80,5 +105,10 @@ protected:
     @brief One of the half-edges in the mesh
   */
   const dcel_edge* m_edge;
+
+  /*!
+    @brief Reference to polygons
+  */
+  Vector<const dcel_poly*> m_polycache;
 };
 #endif

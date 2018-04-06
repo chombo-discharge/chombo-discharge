@@ -1,8 +1,8 @@
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -0.5 -0.5 -0.5
-physical_domain.hi_corner =  1.5  1.5  1.5
+physical_domain.lo_corner = -10 -10 -10
+physical_domain.hi_corner =  10  10  10
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -34,9 +34,9 @@ rod2d_tagger.refine_radius     = 1.5    # Sets eps_mag for refinement
 # AMR SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
 amr.max_amr_depth   = 0           # Maximum amr depth
-amr.max_sim_depth   = 0           # Maximum simulation depth
+amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 2           # Number of cells between grid levels
 amr.blocking_factor = 16           # Blocking factor

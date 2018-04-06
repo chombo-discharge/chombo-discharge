@@ -37,6 +37,11 @@ public:
   ~dcel_mesh();
 
   /*!
+    @brief Check that mesh is OK
+  */
+  virtual bool sanity_check() const;
+
+  /*!
     @brief Define a mesh from existing polygons and edges
   */
   virtual void define(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges, Vector<dcel_vert*> a_vertices);
@@ -48,12 +53,26 @@ public:
   */
   virtual void reconcile_polygons(const bool a_area_weighted = true);
 
-
-
   /*!
     @brief Compute signed distance
   */
   virtual Real signed_distance(const RealVect a_x0);
+
+  /*!
+    @brief Get vertices
+  */
+  virtual Vector<dcel_vert*>& get_vertices();
+
+  /*!
+    @brief Get edges
+  */
+  virtual Vector<dcel_edge*>& get_edges();
+
+  /*!
+    @brief Get polygons
+  */
+  virtual Vector<dcel_poly*>& get_polygons();
+
 
 protected:
 

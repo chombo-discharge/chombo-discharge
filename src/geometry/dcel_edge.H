@@ -38,11 +38,32 @@ public:
 		      const dcel_edge* const a_prev,
 		      const RealVect         a_normal = RealVect::Zero);
 
-  /*!
+
+    /*!
     @brief Set polygon
   */
   virtual void set_poly(const dcel_poly* const a_poly);
 
+  /*!
+    @brief Set vertex
+  */
+  virtual void set_vert(const dcel_vert* const a_vert);
+
+  /*!
+    @brief Set pair
+  */
+  virtual void set_pair(const dcel_edge* const a_pair);
+
+  /*!
+    @brief Set next edge
+  */
+  virtual void set_next(const dcel_edge* const a_next);
+
+  /*!
+    @brief Set previous
+  */
+  virtual void set_prev(const dcel_edge* const a_prev);
+  
   /*!
     @brief Set normal vector
   */

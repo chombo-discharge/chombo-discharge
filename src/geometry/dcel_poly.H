@@ -35,6 +35,16 @@ public:
   virtual void define(const RealVect a_normal, const dcel_edge* const a_edge);
 
   /*!
+    @brief Set edge
+  */
+  virtual void set_edge(const dcel_edge* const a_edge);
+
+    /*!
+    @brief Set normal vector
+  */
+  virtual void set_normal(const RealVect a_normal);
+
+  /*!
     @brief Compute polygon area
   */
   virtual void compute_area();

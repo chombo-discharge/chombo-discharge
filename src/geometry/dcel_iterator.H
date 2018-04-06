@@ -31,7 +31,7 @@ public:
   edge_iterator(const dcel_poly* const a_poly);
 
   /*!
-    @brief Iterator for half edges that end on the input vertex
+    @brief Iterator for outgoing half edges from the vertex
   */
   edge_iterator(const dcel_vert* const a_vert);
 

@@ -8,6 +8,7 @@
 #include "dcel_edge.H"
 #include "dcel_poly.H"
 #include "dcel_mesh.H"
+#include "ply_reader.H" 
 
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
@@ -123,11 +124,15 @@ int main(int argc, char* argv[]){
   dcel_mesh* mesh = new dcel_mesh(polygons, edges, vertices);
   mesh->reconcile_polygons();
 
+  dcel_mesh* plymesh = new dcel_mesh();
+  ply_reader::read_ascii(*plymesh, "cube.ply");
+  plymesh->reconcile_polygons();
+
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
-  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new dcel_geometry(mesh));
+  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new dcel_geometry(plymesh));
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air7());
   RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 												   compgeom,
@@ -137,6 +142,7 @@ int main(int argc, char* argv[]){
 												   tagger));
   engine->set_potential(potential_curve);
   engine->setup_and_run();
+
 #ifdef CH_MPI
   MPI_Finalize();
 #endif

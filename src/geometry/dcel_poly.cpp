@@ -29,8 +29,22 @@ const dcel_edge* dcel_poly::get_edge() const{
 }
 
 void dcel_poly::define(const RealVect a_normal, const dcel_edge* const a_edge){
+  this->set_normal(a_normal);
+  this->set_edge(a_edge);
+
+#if 0
   m_normal = a_normal;
   m_edge   = a_edge;
+#endif
+  
+}
+
+void dcel_poly::set_edge(const dcel_edge* const a_edge){
+  m_edge = a_edge;
+}
+
+void dcel_poly::set_normal(const RealVect a_normal){
+  m_normal = a_normal;
 }
 
 void dcel_poly::normalize(){

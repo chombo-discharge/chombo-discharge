@@ -24,6 +24,43 @@ dcel_mesh::dcel_mesh(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges, 
   this->define(a_polygons, a_edges, a_vertices);
 }
 
+bool dcel_mesh::sanity_check() const {
+
+  for (int i = 0; i < m_edges.size(); i++){
+    if(m_edges[i] == NULL){
+      MayDay::Abort("dcel_mesh::sanity_check - edge is NULL");
+    }
+    else{
+      const dcel_edge* const edge = m_edges[i];
+    
+      if(edge->get_pair() == NULL){
+	MayDay::Abort("dcel_mesh::sanity_check - pair edge is NULL");
+      }
+      else if(edge->get_next() == NULL){
+	MayDay::Abort("dcel_mesh::sanity_check - next edge is NULL");
+      }
+      else if(edge->get_prev() == NULL){
+	MayDay::Abort("dcel_mesh::sanity_check - prev edge is NULL");
+      }
+      else if(edge->get_vert() == NULL){
+	MayDay::Abort("dcel_mesh::sanity_check - vertex is NULL");
+      }
+    }
+  }
+
+  for (int i = 0; i < m_vertices.size(); i++){
+    if(m_vertices[i] == NULL){
+      MayDay::Abort("dcel_mesh::sanity_check - m_vertices[i] is NULL");
+    }
+    else{
+      const dcel_vert* const vertex = m_vertices[i];
+      if(vertex->get_edge() == NULL){
+	MayDay::Abort("dcel_mesh::sanity_check - vertex edge is NULL");
+      }
+    }
+  }
+}
+
 void dcel_mesh::define(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges, Vector<dcel_vert*> a_vertices){
   m_polygons = a_polygons;
   m_edges    = a_edges;
@@ -68,8 +105,6 @@ void dcel_mesh::compute_vertex_normals(const bool a_area_weighted){
   for (int i = 0; i < m_vertices.size(); i++){
     Vector<const dcel_poly*> polygons = m_vertices[i]->get_polygons();
 
-    CH_assert(polygons.size() == 3);
-
     // Compute area-weighted normal vector
     RealVect normal = RealVect::Zero;
     for (int i = 0; i < polygons.size(); i++){
@@ -105,12 +140,13 @@ void dcel_mesh::compute_edge_normals(){
 }
 
 
+
 Real dcel_mesh::signed_distance(const RealVect a_x0){
   CH_assert(m_reconciled);
   
   Real min_dist = 1.E99;
 
-  if(m_sphere.inside(a_x0)){
+  //  if(m_sphere.inside(a_x0)){
     // This is a very slow version of doing this; this should be accelerated by using a BVH-tree or kD-tree, but that'll
     // have to wait a little bit.
     for (int i = 0; i < m_polygons.size(); i++){
@@ -119,10 +155,23 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 	min_dist = cur_dist;
       }
     }
-  }
-  else{
-    min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
-  }
+  // }
+  // else{
+  //   min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
+  // }
 
   return min_dist;
+}
+
+
+Vector<dcel_vert*>& dcel_mesh::get_vertices(){
+  return m_vertices;
+}
+
+Vector<dcel_edge*>& dcel_mesh::get_edges(){
+  return m_edges;
+}
+
+Vector<dcel_poly*>& dcel_mesh::get_polygons(){
+  return m_polygons;
 }

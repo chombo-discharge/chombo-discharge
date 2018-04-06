@@ -14,6 +14,14 @@ dcel_vert::dcel_vert(){
   m_pos    = RealVect::Zero;
   m_normal = RealVect::Zero;
   m_edge   = NULL;
+
+  m_polycache.resize(0);
+}
+
+dcel_vert::dcel_vert(const RealVect a_pos){
+  m_pos    = a_pos;
+  m_edge   = NULL;
+  m_normal = RealVect::Zero;
 }
 
 dcel_vert::~dcel_vert(){
@@ -21,13 +29,32 @@ dcel_vert::~dcel_vert(){
 }
 
 void dcel_vert::define(const RealVect a_pos, const dcel_edge* const a_edge, const RealVect a_normal){
+  this->set_pos(a_pos);
+  this->set_edge(a_edge);
+  this->set_normal(a_normal);
+#if 0
   m_pos    = a_pos;
   m_normal = a_normal;
   m_edge   = a_edge;
+#endif
+}
+
+
+void dcel_vert::set_pos(const RealVect a_pos){
+  m_pos = a_pos;
+}
+
+
+void dcel_vert::set_edge(const dcel_edge* const a_edge){
+  m_edge = a_edge;
 }
 
 void dcel_vert::set_normal(const RealVect a_normal){
   m_normal = a_normal;
+}
+
+void dcel_vert::add_polygon(const dcel_poly* const a_poly){
+  m_polycache.push_back(a_poly);
 }
 
 Vector<const dcel_poly*> dcel_vert::get_polygons() const{
@@ -37,6 +64,10 @@ Vector<const dcel_poly*> dcel_vert::get_polygons() const{
   }
 
   return polygons;
+}
+
+Vector<const dcel_poly*> dcel_vert::get_polycache() const{
+  return m_polycache;
 }
 
 const dcel_edge* dcel_vert::get_edge() const{
