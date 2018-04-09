@@ -9,6 +9,7 @@
 #define _DCEL_EDGE_
 
 #include "RealVect.H"
+#include "RefCountedPtr.H"
 
 class dcel_vert;
 class dcel_poly;
@@ -32,37 +33,37 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(const dcel_vert* const a_vert,
-		      const dcel_edge* const a_pair,
-		      const dcel_edge* const a_next,
-		      const dcel_edge* const a_prev,
-		      const RealVect         a_normal = RealVect::Zero);
+  virtual void define(const RefCountedPtr<dcel_vert>& a_vert,
+		      const RefCountedPtr<dcel_edge>& a_pair,
+		      const RefCountedPtr<dcel_edge>& a_next,
+		      const RefCountedPtr<dcel_edge>& a_prev,
+		      const RealVect                  a_normal = RealVect::Zero);
 
 
     /*!
     @brief Set polygon
   */
-  virtual void set_poly(const dcel_poly* const a_poly);
+  virtual void set_poly(const RefCountedPtr<dcel_poly>& a_poly);
 
   /*!
     @brief Set vertex
   */
-  virtual void set_vert(const dcel_vert* const a_vert);
+  virtual void set_vert(const RefCountedPtr<dcel_vert>& a_vert);
 
   /*!
     @brief Set pair
   */
-  virtual void set_pair(const dcel_edge* const a_pair);
+  virtual void set_pair(const RefCountedPtr<dcel_edge>& a_pair);
 
   /*!
     @brief Set next edge
   */
-  virtual void set_next(const dcel_edge* const a_next);
+  virtual void set_next(const RefCountedPtr<dcel_edge>& a_next);
 
   /*!
     @brief Set previous
   */
-  virtual void set_prev(const dcel_edge* const a_prev);
+  virtual void set_prev(const RefCountedPtr<dcel_edge>& a_prev);
   
   /*!
     @brief Set normal vector
@@ -72,32 +73,62 @@ public:
   /*!
     @brief Get vertex
   */
-  virtual const dcel_vert* get_vert() const;
+  virtual const RefCountedPtr<dcel_vert>& get_vert() const;
+
+    /*!
+    @brief Get vertex
+  */
+  virtual  RefCountedPtr<dcel_vert>& get_vert();
 
   /*!
     @brief Get other vertex
   */
-  virtual const dcel_vert* get_other_vert() const;
+  virtual const RefCountedPtr<dcel_vert>& get_other_vert() const;
+
+  /*!
+    @brief Get other vertex
+  */
+  virtual RefCountedPtr<dcel_vert>& get_other_vert();
 
   /*!
     @brief Get the other half edge
   */
-  virtual const dcel_edge* get_pair() const;
+  virtual const RefCountedPtr<dcel_edge>& get_pair() const;
+
+  /*!
+    @brief Get the other half edge
+  */
+  virtual RefCountedPtr<dcel_edge>& get_pair();
 
   /*!
     @brief Get the previous half edge
   */
-  virtual const dcel_edge* get_prev() const;
+  virtual const RefCountedPtr<dcel_edge>& get_prev() const;
+
+    /*!
+    @brief Get the previous half edge
+  */
+  virtual RefCountedPtr<dcel_edge>& get_prev();
 
   /*!
     @brief Get the next half edge
   */
-  virtual const dcel_edge* get_next() const;
+  virtual const RefCountedPtr<dcel_edge>& get_next() const;
+
+  /*!
+    @brief Get the next half edge
+  */
+  virtual RefCountedPtr<dcel_edge>& get_next();
 
   /*!
     @brief Get polygon
   */
-  virtual const dcel_poly* get_poly() const;
+  virtual const RefCountedPtr<dcel_poly>& get_poly() const;
+
+  /*!
+    @brief Get polygon
+  */
+  virtual RefCountedPtr<dcel_poly>& get_poly();
   
   /*!
     @brief Get pseudo-normal
@@ -119,27 +150,27 @@ protected:
   /*!
     @brief Vertex at end of edge
   */
-  const dcel_vert* m_vert; 
+  RefCountedPtr<dcel_vert> m_vert; 
 
   /*!
     @brief Edge pair
   */
-  const dcel_edge* m_pair;
+  RefCountedPtr<dcel_edge> m_pair;
 
   /*!
     @brief Previous edge
   */
-  const dcel_edge* m_prev; 
+  RefCountedPtr<dcel_edge> m_prev; 
 
   /*!
     @brief Next edge
   */
-  const dcel_edge* m_next;
+  RefCountedPtr<dcel_edge> m_next;
 
   /*!
     @brief Reference to polygon
   */
-  const dcel_poly* m_poly;
+  RefCountedPtr<dcel_poly> m_poly;
 };
 
 #endif

@@ -8,7 +8,8 @@
 #ifndef _DCEL_POLY_
 #define _DCEL_POLY_
 
-#include "RealVect.H" 
+#include "RealVect.H"
+#include "RefCountedPtr.H"
 
 class dcel_vert;
 class dcel_edge;
@@ -32,12 +33,12 @@ public:
   /*!
     @brief Define edge
   */
-  virtual void define(const RealVect a_normal, const dcel_edge* const a_edge);
+  virtual void define(const RealVect a_normal, const RefCountedPtr<dcel_edge>& a_edge);
 
   /*!
     @brief Set edge
   */
-  virtual void set_edge(const dcel_edge* const a_edge);
+  virtual void set_edge(const RefCountedPtr<dcel_edge>& a_edge);
 
     /*!
     @brief Set normal vector
@@ -63,22 +64,27 @@ public:
   /*!
     @brief Compute normal vector from vertices
   */
-  virtual void compute_normal();
+  virtual void compute_normal(const bool a_outward_normal);
 
   /*!
     @brief Get edge
   */
-  virtual const dcel_edge* get_edge() const;
+  virtual const RefCountedPtr<dcel_edge>& get_edge() const;
+
+  /*!
+    @brief Get edge
+  */
+  virtual RefCountedPtr<dcel_edge>& get_edge();
 
   /*!
     @brief Get all vertices
   */
-  virtual Vector<const dcel_vert*> get_vertices() const;
+  virtual Vector<RefCountedPtr<dcel_vert> > get_vertices();
 
   /*!
     @brief Get all edges
   */
-  virtual Vector<const dcel_edge*> get_edges() const;
+  virtual Vector<RefCountedPtr<dcel_edge> > get_edges();
 
   /*!
     @brief Get centroid
@@ -98,14 +104,19 @@ public:
   /*!
     @brief Signed distance. 
   */
+#if 0 // This is the actual signature
   virtual Real signed_distance(const RealVect a_x0) const;
+#else // Just so that I can make things compile
+  virtual Real signed_distance(const RealVect a_x0);
+#endif
+  
   
 protected:
 
   /*!
     @brief One of the edges of the polygon
   */
-  const dcel_edge* m_edge;
+  RefCountedPtr<dcel_edge> m_edge;
 
   /*!
     @brief Face normal

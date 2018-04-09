@@ -1,8 +1,8 @@
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -10 -10 -10
-physical_domain.hi_corner =  10  10  10
+physical_domain.lo_corner = -1 -1 -1
+physical_domain.hi_corner =  1  1  1
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -34,7 +34,7 @@ rod2d_tagger.refine_radius     = 1.5    # Sets eps_mag for refinement
 # AMR SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr.coarsest_domain = 256 256 256 # Number of cells on coarsest domain
 amr.max_amr_depth   = 0           # Maximum amr depth
 amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -69,7 +69,7 @@ plasma_engine.stop_time                       = 1.0           # Stop time
 plasma_engine.max_steps                       = 400           # Maximum number of steps
 plasma_engine.output_mode                     = medium        # Output mode
 plasma_engine.output_directory                = ./            # Output directory
-plasma_engine.output_names       x             = simulation    # Simulation output names
+plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.restart                         = false         # Do restart or not
 plasma_engine.restart_step                    = 200           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down

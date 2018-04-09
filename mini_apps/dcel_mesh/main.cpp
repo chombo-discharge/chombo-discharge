@@ -33,6 +33,7 @@ int main(int argc, char* argv[]){
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
+#if 0
   const RealVect x0 = RealVect::Zero;
   const RealVect x1 = RealVect(BASISV(0));
   const RealVect x2 = RealVect(BASISV(1));
@@ -121,14 +122,13 @@ int main(int argc, char* argv[]){
   vertices.push_back(v3);
 
   // Create poly mesh and find the distance to a point
-#if 0
   dcel_mesh* mesh = new dcel_mesh(polygons, edges, vertices);
   mesh->reconcile_polygons();
 #endif
 
   dcel_mesh* plymesh = new dcel_mesh();
-  ply_reader::read_ascii(*plymesh, "cube.ply");
-  plymesh->reconcile_polygons();
+  ply_reader::read_ascii(*plymesh, "dodecahedron.ply");
+  plymesh->reconcile_polygons(false, false);
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());

@@ -9,6 +9,7 @@
 #define _DCEL_ITERATOR_
 
 #include "RealVect.H"
+#include "RefCountedPtr.H"
 
 class dcel_vert;
 class dcel_edge;
@@ -28,17 +29,17 @@ public:
   /*!
     @brief Iterator for all half edges of a polygon
   */
-  edge_iterator(const dcel_poly* const a_poly);
+  edge_iterator(dcel_poly& a_poly);
 
   /*!
     @brief Iterator for outgoing half edges from the vertex
   */
-  edge_iterator(const dcel_vert* const a_vert);
+  edge_iterator(dcel_vert& a_vert);
 
   /*!
     @brief Get edge
   */
-  virtual const dcel_edge* operator() ();
+  virtual RefCountedPtr<dcel_edge>& operator() ();
 
   /*!
     @brief Reset iterator
@@ -62,7 +63,7 @@ protected:
   */
   bool m_polymode;
 
-  /*!
+ /*!
     @brief Check if this is the first iteration
   */
   bool m_full_loop;
@@ -70,12 +71,12 @@ protected:
   /*!
     @brief Starting edge
   */
-  const dcel_edge* m_begin;
+  RefCountedPtr<dcel_edge> m_begin;
 
   /*!
     @brief Current edge
   */
-  const dcel_edge* m_current;
+  RefCountedPtr<dcel_edge> m_current;
 };
 
 #endif

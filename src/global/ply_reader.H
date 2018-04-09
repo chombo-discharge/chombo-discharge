@@ -41,16 +41,18 @@ protected:
   /*!
     @brief Read ASCII vertices. The next getline() from inputstream must read the first vertex (i.e. don't rewind the stream)
   */
-  static void read_ascii_vertices(Vector<dcel_vert*>& vertices, const int a_num_vertices, std::ifstream& a_inputstream);
+  static void read_ascii_vertices(Vector<RefCountedPtr<dcel_vert> >& vertices,
+				  const int a_num_vertices,
+				  std::ifstream& a_inputstream);
 
   /*!
     @brief Read ASCII polygons and create mesh connectivity. The next getline() from inputstream must read the first polygon,
     i.e. we assume that read_ascii_vertices was called IMMEDIATELY before this function. That function will center the fstream 
     on the correct line
   */
-  static void read_ascii_polygons(Vector<dcel_poly*>& a_polygons,
-				  Vector<dcel_edge*>& a_edges,
-				  Vector<dcel_vert*>& a_vertices,
+  static void read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
+				  Vector<RefCountedPtr<dcel_edge> >& a_edges,
+				  Vector<RefCountedPtr<dcel_vert> >& a_vertices,
 				  const int a_num_polygons,
 				  std::ifstream& a_inputstream);
 };

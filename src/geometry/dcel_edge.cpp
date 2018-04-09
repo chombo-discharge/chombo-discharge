@@ -19,11 +19,11 @@ dcel_edge::~dcel_edge(){
 
 }
 
-void dcel_edge::define(const dcel_vert* const a_vert,
-		       const dcel_edge* const a_pair,
-		       const dcel_edge* const a_next,
-		       const dcel_edge* const a_prev,
-		       const RealVect         a_normal){
+void dcel_edge::define(const RefCountedPtr<dcel_vert>& a_vert,
+		       const RefCountedPtr<dcel_edge>& a_pair,
+		       const RefCountedPtr<dcel_edge>& a_next,
+		       const RefCountedPtr<dcel_edge>& a_prev,
+		       const RealVect                  a_normal){
   this->set_vert(a_vert);
   this->set_pair(a_pair);
   this->set_next(a_next);
@@ -39,23 +39,23 @@ void dcel_edge::define(const dcel_vert* const a_vert,
 #endif
 }
 
-void dcel_edge::set_poly(const dcel_poly* const a_poly){
+void dcel_edge::set_poly(const RefCountedPtr<dcel_poly>& a_poly){
   m_poly = a_poly;
 }
 
-void dcel_edge::set_vert(const dcel_vert* const a_vert){
+void dcel_edge::set_vert(const RefCountedPtr<dcel_vert>& a_vert){
   m_vert = a_vert;
 }
 
-void dcel_edge::set_pair(const dcel_edge* const a_pair){
+void dcel_edge::set_pair(const RefCountedPtr<dcel_edge>& a_pair){
   m_pair = a_pair;
 }
 
-void dcel_edge::set_next(const dcel_edge* const a_next){
+void dcel_edge::set_next(const RefCountedPtr<dcel_edge>& a_next){
   m_next = a_next;
 }
 
-void dcel_edge::set_prev(const dcel_edge* const a_prev){
+void dcel_edge::set_prev(const RefCountedPtr<dcel_edge>& a_prev){
   m_prev = a_prev;
 }
 
@@ -63,27 +63,51 @@ void dcel_edge::set_normal(const RealVect a_normal){
   m_normal = a_normal;
 }
 
-const dcel_vert* dcel_edge::get_vert() const {
+const RefCountedPtr<dcel_vert>& dcel_edge::get_vert() const {
   return m_vert;
 }
 
-const dcel_vert* dcel_edge::get_other_vert() const {
+RefCountedPtr<dcel_vert>& dcel_edge::get_vert() {
+  return m_vert;
+}
+
+const RefCountedPtr<dcel_vert>& dcel_edge::get_other_vert() const {
   return m_pair->get_vert();
 }
 
-const dcel_edge* dcel_edge::get_pair() const {
+RefCountedPtr<dcel_vert>& dcel_edge::get_other_vert(){
+  return m_pair->get_vert();
+}
+
+const RefCountedPtr<dcel_edge>& dcel_edge::get_pair() const {
   return m_pair;
 }
 
-const dcel_edge* dcel_edge::get_prev() const {
+RefCountedPtr<dcel_edge>& dcel_edge::get_pair(){
+  return m_pair;
+}
+
+const RefCountedPtr<dcel_edge>& dcel_edge::get_prev() const {
   return m_prev;
 }
 
-const dcel_edge* dcel_edge::get_next() const {
+RefCountedPtr<dcel_edge>& dcel_edge::get_prev() {
+  return m_prev;
+}
+
+const RefCountedPtr<dcel_edge>& dcel_edge::get_next() const {
   return m_next;
 }
 
-const dcel_poly* dcel_edge::get_poly() const{
+RefCountedPtr<dcel_edge>& dcel_edge::get_next(){
+  return m_next;
+}
+
+const RefCountedPtr<dcel_poly>& dcel_edge::get_poly() const{
+  return m_poly;
+}
+
+RefCountedPtr<dcel_poly>& dcel_edge::get_poly(){
   return m_poly;
 }
 

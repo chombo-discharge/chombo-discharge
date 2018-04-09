@@ -14,21 +14,21 @@ edge_iterator::edge_iterator(){
 
 }
 
-edge_iterator::edge_iterator(const dcel_poly* const a_poly){
+edge_iterator::edge_iterator(dcel_poly& a_poly){
   m_polymode  = true;
-  m_begin     = a_poly->get_edge();
+  m_begin     = a_poly.get_edge();
   m_current   = m_begin;
   m_full_loop = false;
 }
 
-edge_iterator::edge_iterator(const dcel_vert* const a_vert){
+edge_iterator::edge_iterator(dcel_vert& a_vert){
   m_polymode  = false;
-  m_begin     = a_vert->get_edge();
+  m_begin     = a_vert.get_edge();
   m_current   = m_begin;
   m_full_loop = false;
 }
 
-const dcel_edge* edge_iterator::operator() (){
+RefCountedPtr<dcel_edge>& edge_iterator::operator() (){
   return m_current;
 }
 

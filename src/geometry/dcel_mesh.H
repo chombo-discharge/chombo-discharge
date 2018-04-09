@@ -8,12 +8,13 @@
 #ifndef _DCEL_MESH_
 #define _DCEL_MESH_
 
-#include "Vector.H"
-
 #include "ritter_sphere.H"
 #include "dcel_poly.H"
 #include "dcel_edge.H" 
 #include "dcel_vert.H"
+
+#include <Vector.H>
+#include <RefCountedPtr.H>
 
 /*!
   @brief Class for handling surface tesselations
@@ -29,7 +30,9 @@ public:
   /*!
     @brief Full constructor
   */
-  dcel_mesh(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges, Vector<dcel_vert*> a_vertices);
+  dcel_mesh(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
+	    Vector<RefCountedPtr<dcel_edge> >& a_edges,
+	    Vector<RefCountedPtr<dcel_vert> >& a_vertices);
 
   /*!
     @brief Destructor
@@ -44,14 +47,16 @@ public:
   /*!
     @brief Define a mesh from existing polygons and edges
   */
-  virtual void define(Vector<dcel_poly*> a_polygons, Vector<dcel_edge*> a_edges, Vector<dcel_vert*> a_vertices);
+  virtual void define(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
+		      Vector<RefCountedPtr<dcel_edge> >& a_edges,
+		      Vector<RefCountedPtr<dcel_vert> >& a_vertices);
 
   /*!
     @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
     polygon area
     @param[in] a_area_weighted Use area weighted vertex normals
   */
-  virtual void reconcile_polygons(const bool a_area_weighted = false);
+  virtual void reconcile_polygons(const bool a_area_weighted, const bool a_outward_normal);
 
   /*!
     @brief Compute signed distance
@@ -61,17 +66,17 @@ public:
   /*!
     @brief Get vertices
   */
-  virtual Vector<dcel_vert*>& get_vertices();
+  virtual Vector<RefCountedPtr<dcel_vert> >& get_vertices();
 
   /*!
     @brief Get edges
   */
-  virtual Vector<dcel_edge*>& get_edges();
+  virtual Vector<RefCountedPtr<dcel_edge> >& get_edges();
 
   /*!
     @brief Get polygons
   */
-  virtual Vector<dcel_poly*>& get_polygons();
+  virtual Vector<RefCountedPtr<dcel_poly> >& get_polygons();
 
 
 protected:
@@ -86,17 +91,17 @@ protected:
   /*!
     @brief Mesh polygons
   */
-  Vector<dcel_poly*> m_polygons;
+  Vector<RefCountedPtr<dcel_poly> > m_polygons;
 
   /*!
     @brief Mesh edges
   */
-  Vector<dcel_edge*> m_edges;
+  Vector<RefCountedPtr<dcel_edge> > m_edges;
 
   /*!
     @brief Mesh vertices
   */
-  Vector<dcel_vert*> m_vertices;
+  Vector<RefCountedPtr<dcel_vert> > m_vertices;
 
   /*!
     @brief Compute vertex normals
