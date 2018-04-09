@@ -128,8 +128,9 @@ int main(int argc, char* argv[]){
 
   dcel_mesh* plymesh = new dcel_mesh();
   ply_reader::read_ascii(*plymesh, "dodecahedron.ply");
-  plymesh->reconcile_polygons(false, false);
+  plymesh->reconcile_polygons(false);
 
+#if 1
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
@@ -144,6 +145,7 @@ int main(int argc, char* argv[]){
 												   tagger));
   engine->set_potential(potential_curve);
   engine->setup_and_run();
+#endif
 
 #ifdef CH_MPI
   MPI_Finalize();

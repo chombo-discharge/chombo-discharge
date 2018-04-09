@@ -22,6 +22,8 @@
 class dcel_mesh {
 public:
 
+  static bool s_angle_weighted;
+
   /*!
     @brief Constructor
   */
@@ -56,7 +58,7 @@ public:
     polygon area
     @param[in] a_area_weighted Use area weighted vertex normals
   */
-  virtual void reconcile_polygons(const bool a_area_weighted, const bool a_outward_normal);
+  virtual void reconcile_polygons(const bool a_outward_normal);
 
   /*!
     @brief Compute signed distance
@@ -106,7 +108,7 @@ protected:
   /*!
     @brief Compute vertex normals
   */
-  virtual void compute_vertex_normals(const bool a_area_weighted);
+  virtual void compute_vertex_normals();
 
   /*!
     @brief Compute edge normals

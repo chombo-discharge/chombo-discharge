@@ -29,14 +29,6 @@ void dcel_edge::define(const RefCountedPtr<dcel_vert>& a_vert,
   this->set_next(a_next);
   this->set_prev(a_prev);
   this->set_normal(a_normal);
-
-#if 0
-  m_vert   = a_vert;
-  m_pair   = a_pair;
-  m_next   = a_next;
-  m_prev   = a_prev;
-  m_normal = a_normal;
-#endif
 }
 
 void dcel_edge::set_poly(const RefCountedPtr<dcel_poly>& a_poly){

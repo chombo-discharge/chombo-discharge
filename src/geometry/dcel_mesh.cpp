@@ -8,9 +8,13 @@
 #include "dcel_mesh.H"
 #include "dcel_iterator.H"
 
+#include <PolyGeom.H>
+
 #if 1
 #include <ParmParse.H>
 #endif
+
+bool dcel_mesh::s_angle_weighted = true; // Use angle-weighted vertex normal vectors
 
 dcel_mesh::dcel_mesh(){
   m_reconciled = false;
@@ -27,7 +31,7 @@ dcel_mesh::dcel_mesh(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
 }
 
 bool dcel_mesh::sanity_check() const {
-
+  return true;
   for (int i = 0; i < m_edges.size(); i++){
     if(m_edges[i].isNull()){
       MayDay::Abort("dcel_mesh::sanity_check - edge is NULL");
@@ -79,7 +83,7 @@ void dcel_mesh::compute_bounding_sphere(){
   m_sphere.define(pos);
 }
 
-void dcel_mesh::reconcile_polygons(const bool a_area_weighted, const bool a_outward_normal){
+void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
   // to their polygons
@@ -98,30 +102,51 @@ void dcel_mesh::reconcile_polygons(const bool a_area_weighted, const bool a_outw
 
 
   // Compute pseudonormals for vertices and edges. 
-  this->compute_vertex_normals(a_area_weighted);
+  this->compute_vertex_normals();
   this->compute_edge_normals();
   this->compute_bounding_sphere();
 
   m_reconciled = true;
 }
 
-void dcel_mesh::compute_vertex_normals(const bool a_area_weighted){
+void dcel_mesh::compute_vertex_normals(){
   for (int i = 0; i < m_vertices.size(); i++){
     const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
 
     // Compute area-weighted normal vector
-    RealVect normal = RealVect::Zero;
-    for (int i = 0; i < polygons.size(); i++){
-      if(a_area_weighted){
-	normal += polygons[i]->get_area()*polygons[i]->get_normal();
-      }
-      else{
-	normal += polygons[i]->get_normal();
-      }
-    }
-    normal *= 1./normal.vectorLength();
 
-    m_vertices[i]->set_normal(normal);
+    if(!s_angle_weighted){
+      RealVect normal = RealVect::Zero;
+      for (int i = 0; i < polygons.size(); i++){
+	//normal += polygons[i]->get_area()*polygons[i]->get_normal(); // Area weighted
+	normal += polygons[i]->get_normal(); // Mean
+      }
+      normal *= 1./normal.vectorLength();
+      m_vertices[i]->set_normal(normal);
+    }
+    else {
+      RealVect normal = RealVect::Zero;
+      for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){
+	const RefCountedPtr<dcel_edge>& outgoing = iter();
+	const RefCountedPtr<dcel_edge>& incoming = outgoing->get_prev();
+
+	const RealVect origin = incoming->get_vert()->get_pos();
+	const RealVect x2     = outgoing->get_vert()->get_pos();
+	const RealVect x1     = incoming->get_other_vert()->get_pos();
+	const Real len1       = (x1-origin).vectorLength();
+	const Real len2       = (x2-origin).vectorLength();
+      
+	const Real alpha = asin(PolyGeom::cross(x2-origin, x1-origin).vectorLength()/(len1*len2));
+	RealVect norm = PolyGeom::cross(x2-origin, x1-origin);
+	norm *= 1./norm.vectorLength();
+
+	normal += alpha*norm;
+      
+      }
+      normal *= 1./normal.vectorLength();
+
+      m_vertices[i]->set_normal(normal);
+    }
   }
 }
 
