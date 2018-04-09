@@ -94,6 +94,7 @@ void dcel_mesh::reconcile_polygons(const bool a_area_weighted, const bool a_outw
     poly->compute_normal(a_outward_normal);
     poly->compute_area();
     poly->normalize();
+    poly->compute_bbox();
   }
 
 

@@ -12,6 +12,7 @@
 #include "dcel_poly.H"
 #include "dcel_edge.H" 
 #include "dcel_vert.H"
+#include "kd_tree.H"
 
 #include <Vector.H>
 #include <RefCountedPtr.H>
