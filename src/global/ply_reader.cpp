@@ -202,8 +202,9 @@ void ply_reader::read_ascii_polygons(Vector<dcel_poly*>& a_polygons,
     if(counter == a_num_polygons){
       break;
     }
-
   }
+
+
 }
 
 void ply_reader::read_binary(dcel_mesh& a_mesh, const std::string a_filename){

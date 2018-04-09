@@ -121,8 +121,10 @@ int main(int argc, char* argv[]){
   vertices.push_back(v3);
 
   // Create poly mesh and find the distance to a point
+#if 0
   dcel_mesh* mesh = new dcel_mesh(polygons, edges, vertices);
   mesh->reconcile_polygons();
+#endif
 
   dcel_mesh* plymesh = new dcel_mesh();
   ply_reader::read_ascii(*plymesh, "cube.ply");

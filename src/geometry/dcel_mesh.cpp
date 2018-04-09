@@ -93,6 +93,7 @@ void dcel_mesh::reconcile_polygons(const bool a_area_weighted){
     poly->normalize();
   }
 
+
   // Compute pseudonormals for vertices and edges. 
   this->compute_vertex_normals(a_area_weighted);
   this->compute_edge_normals();

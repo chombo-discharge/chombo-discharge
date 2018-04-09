@@ -94,6 +94,9 @@ void dcel_poly::compute_normal(){
   else{
     m_normal = m_normal/m_normal.vectorLength();
   }
+
+  m_normal = -m_normal;
+
 }
 
 Real dcel_poly::get_area() const{
@@ -134,6 +137,9 @@ Real dcel_poly::signed_distance(const RealVect a_x0) const {
   if(Abs(anglesum - TWOPI) < EPSILON){
     inside = true;
   }
+#if 0
+  inside = true;
+#endif
 
   // If projection is inside, shortest distance is the normal component of the point
   if(inside){
@@ -142,6 +148,7 @@ Real dcel_poly::signed_distance(const RealVect a_x0) const {
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
     Vector<const dcel_edge*> edges = this->get_edges();
     for (int i = 0; i < edges.size(); i++){
+
       const Real cur_dist = edges[i]->signed_distance(a_x0);
       if(Abs(cur_dist) < Abs(retval)){
 	retval = cur_dist;

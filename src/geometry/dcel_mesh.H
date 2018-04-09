@@ -51,7 +51,7 @@ public:
     polygon area
     @param[in] a_area_weighted Use area weighted vertex normals
   */
-  virtual void reconcile_polygons(const bool a_area_weighted = true);
+  virtual void reconcile_polygons(const bool a_area_weighted = false);
 
   /*!
     @brief Compute signed distance
