@@ -128,7 +128,8 @@ int main(int argc, char* argv[]){
 
   dcel_mesh* plymesh = new dcel_mesh();
   ply_reader::read_ascii(*plymesh, "dodecahedron.ply");
-  plymesh->reconcile_polygons(false);
+  plymesh->reconcile_polygons(true);
+  plymesh->build_tree();
 
 #if 1
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());

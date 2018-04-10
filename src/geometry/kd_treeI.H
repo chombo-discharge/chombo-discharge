@@ -17,6 +17,10 @@ template<typename T> kd_tree<T>::kd_tree(const Vector<RefCountedPtr<T> >& a_data
   this->build_tree(a_data, a_max_depth, a_max_elements);
 }
 
+template<typename T> kd_tree<T>::~kd_tree(){
+
+}
+
 template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >& a_data,
 						 const int                      a_max_depth,
 						 const int                      a_max_elements){
@@ -29,8 +33,7 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
 
     m_root->set_data(a_data);
     m_root->set_leaf(true);
-    m_root->set_bbox_lo(lo);
-    m_root->set_bbox_lo(hi);
+    m_root->set_bbox(lo, hi);
 
     m_nodes.push_back(m_root);
   }

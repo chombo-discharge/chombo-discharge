@@ -9,10 +9,10 @@
 #define _DCEL_MESH_
 
 #include "ritter_sphere.H"
+#include "kd_tree.H"
 #include "dcel_poly.H"
 #include "dcel_edge.H" 
 #include "dcel_vert.H"
-#include "kd_tree.H"
 
 #include <Vector.H>
 #include <RefCountedPtr.H>
@@ -62,6 +62,11 @@ public:
   virtual void reconcile_polygons(const bool a_outward_normal);
 
   /*!
+    @brief Build kd-tree
+  */
+  virtual void build_tree();
+
+  /*!
     @brief Compute signed distance
   */
   virtual Real signed_distance(const RealVect a_x0);
@@ -81,15 +86,27 @@ public:
   */
   virtual Vector<RefCountedPtr<dcel_poly> >& get_polygons();
 
-
 protected:
 
+  /*!
+    @brief Reconciled polygons or not
+  */
   bool m_reconciled;
+
+  /*!
+    @brief Use kd-tree for searching
+  */
+  bool m_use_tree;
 
   /*!
     @brief Bounding sphere
   */
   ritter_sphere m_sphere;
+
+  /*!
+    @brief kd-tree for fast polysearch
+  */
+  RefCountedPtr<kd_tree<dcel_poly> > m_tree;
 
   /*!
     @brief Mesh polygons

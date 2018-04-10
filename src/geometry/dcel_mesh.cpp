@@ -14,10 +14,11 @@
 #include <ParmParse.H>
 #endif
 
-bool dcel_mesh::s_angle_weighted = true; // Use angle-weighted vertex normal vectors
+bool dcel_mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors
 
 dcel_mesh::dcel_mesh(){
   m_reconciled = false;
+  m_use_tree   = false;
 }
 
 dcel_mesh::~dcel_mesh(){
@@ -27,11 +28,13 @@ dcel_mesh::~dcel_mesh(){
 dcel_mesh::dcel_mesh(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
 		     Vector<RefCountedPtr<dcel_edge> >& a_edges,
 		     Vector<RefCountedPtr<dcel_vert> >& a_vertices){
+  m_reconciled = false;
+  m_use_tree   = false;
+  
   this->define(a_polygons, a_edges, a_vertices);
 }
 
 bool dcel_mesh::sanity_check() const {
-  return true;
   for (int i = 0; i < m_edges.size(); i++){
     if(m_edges[i].isNull()){
       MayDay::Abort("dcel_mesh::sanity_check - edge is NULL");
@@ -112,10 +115,13 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
 
 void dcel_mesh::compute_vertex_normals(){
   for (int i = 0; i < m_vertices.size(); i++){
+#if 0 // This doesn't work, why?!?
     const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
+#else
+    const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polycache();
+#endif
 
-    // Compute area-weighted normal vector
-
+    // Mean or area weighted
     if(!s_angle_weighted){
       RealVect normal = RealVect::Zero;
       for (int i = 0; i < polygons.size(); i++){
@@ -125,7 +131,7 @@ void dcel_mesh::compute_vertex_normals(){
       normal *= 1./normal.vectorLength();
       m_vertices[i]->set_normal(normal);
     }
-    else {
+    else { // Angle-weighted normal vector
       RealVect normal = RealVect::Zero;
       for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){
 	const RefCountedPtr<dcel_edge>& outgoing = iter();
@@ -136,10 +142,9 @@ void dcel_mesh::compute_vertex_normals(){
 	const RealVect x1     = incoming->get_other_vert()->get_pos();
 	const Real len1       = (x1-origin).vectorLength();
 	const Real len2       = (x2-origin).vectorLength();
-      
-	const Real alpha = asin(PolyGeom::cross(x2-origin, x1-origin).vectorLength()/(len1*len2));
-	RealVect norm = PolyGeom::cross(x2-origin, x1-origin);
-	norm *= 1./norm.vectorLength();
+
+	const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
+	const Real alpha = asin(norm.vectorLength());
 
 	normal += alpha*norm;
       
@@ -168,30 +173,50 @@ void dcel_mesh::compute_edge_normals(){
   }
 }
 
-
+void dcel_mesh::build_tree(){
+  m_tree = RefCountedPtr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>());
+  m_use_tree = true;
+}
 
 Real dcel_mesh::signed_distance(const RealVect a_x0){
   CH_assert(m_reconciled);
   
   Real min_dist = 1.E99;
 
-  if(m_sphere.inside(a_x0)){
-    // This is a very slow version of doing this; this should be accelerated by using a BVH-tree or kD-tree, but that'll
-    // have to wait a little bit.
-    for (int i = 0; i < m_polygons.size(); i++){
-      const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
-      if(Abs(cur_dist) < Abs(min_dist)){
-	min_dist = cur_dist;
+  if(m_use_tree){ // Fast kd-tree search
+    Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
+
+    if(candidates.size() > 0){
+      for (int i = 0; i < candidates.size(); i++){
+	const Real cur_dist = candidates[i]->signed_distance(a_x0);
+	if(Abs(cur_dist) < Abs(min_dist)){
+	  min_dist = cur_dist;
+	}
       }
     }
+    else{ // We are outside every bounding box, we can use any triangle
+      min_dist = m_polygons[0]->signed_distance(a_x0);
+    }
+
+    MayDay::Abort("dcel_mesh::signed_distance - stop");
+	
   }
-  else{
-    min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
+  else{ // Brute force search
+    if(m_sphere.inside(a_x0)){
+      for (int i = 0; i < m_polygons.size(); i++){
+	const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
+	if(Abs(cur_dist) < Abs(min_dist)){
+	  min_dist = cur_dist;
+	}
+      }
+       }
+      else{
+        min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
+      }
   }
 
   return min_dist;
 }
-
 
 Vector<RefCountedPtr<dcel_vert> >& dcel_mesh::get_vertices(){
   return m_vertices;

@@ -92,7 +92,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
     m_normal = m_normal/m_normal.vectorLength();
   }
 
-  if(!a_outward_normal){
+  if(!a_outward_normal){ // If normal points inwards, make it point outwards
     m_normal = -m_normal;
   }
 
@@ -140,7 +140,7 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 
   Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
 
-  // Compute projection of x0 on the plane
+  // Compute projection of x0 on the polygon plane
   const RealVect x1 = vertices[0]->get_pos();
   const RealVect xp = a_x0 - PolyGeom::dot(m_normal, a_x0 - x1)*m_normal;
 
@@ -154,7 +154,7 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
     const Real m1 = p1.vectorLength();
     const Real m2 = p2.vectorLength();
 
-    if(m1*m2 <= EPSILON) {// Projected point hits a vertex or edge, return early. 
+    if(m1*m2 <= EPSILON) {// Projected point hits a vertex, return early. 
       anglesum = 0.;
       break;
     }
@@ -166,12 +166,9 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 
   // Projected point is inside if angles sum to 2*pi
   bool inside = false;
-  if(Abs(anglesum - TWOPI) < EPSILON){
+  if(Abs(Abs(anglesum) - TWOPI) < EPSILON){
     inside = true;
   }
-#if 0
-  inside = true;
-#endif
 
   // If projection is inside, shortest distance is the normal component of the point
   if(inside){
