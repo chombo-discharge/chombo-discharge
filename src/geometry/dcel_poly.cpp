@@ -98,6 +98,39 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
 
 }
 
+void dcel_poly::compute_bbox(){
+  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+  Vector<RealVect> coords;
+
+  for (int i = 0; i < vertices.size(); i++){
+    coords.push_back(vertices[i]->get_pos());
+  }
+
+  m_lo =  1.23456E89*RealVect::Unit;
+  m_hi = -1.23456E89*RealVect::Unit;
+
+  for (int i = 0; i < coords.size(); i++){
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(coords[i][dir] < m_lo[dir]){
+	m_lo[dir] = coords[i][dir];
+      }
+      if(coords[i][dir] > m_hi[dir]){
+	m_hi[dir] = coords[i][dir];
+      }
+    }
+  }
+
+  Real widest = 0;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    const Real cur = m_hi[dir] - m_lo[dir];
+    widest = (cur > widest) ? cur : widest;
+  }
+
+  // Grow box by 1% in each direction
+  m_hi += 1.E-2*widest*RealVect::Unit;
+  m_lo -= 1.E-2*widest*RealVect::Unit;
+}
+
 Real dcel_poly::get_area() const{
   return m_area;
 }
@@ -164,6 +197,18 @@ RealVect dcel_poly::get_normal() const {
 
 RealVect dcel_poly::get_centroid() const {
   return m_centroid;
+}
+
+RealVect dcel_poly::get_coord() const {
+  return m_centroid;
+}
+
+RealVect dcel_poly::get_bbox_lo() const {
+  return m_lo;
+}
+
+RealVect dcel_poly::get_bbox_hi() const {
+  return m_hi;
 }
 
 Vector<RefCountedPtr<dcel_vert> > dcel_poly::get_vertices(){

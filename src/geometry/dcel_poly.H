@@ -67,6 +67,11 @@ public:
   virtual void compute_normal(const bool a_outward_normal);
 
   /*!
+    @brief Compute bounding box
+  */
+  virtual void compute_bbox();
+
+  /*!
     @brief Get edge
   */
   virtual const RefCountedPtr<dcel_edge>& get_edge() const;
@@ -90,6 +95,21 @@ public:
     @brief Get centroid
   */
   virtual RealVect get_centroid() const;
+
+  /*!
+    @brief Get the centroid
+  */
+  virtual RealVect get_coord() const;
+
+  /*!
+    @brief Get lower corner of bounding box
+  */
+  virtual RealVect get_bbox_lo() const;
+
+    /*!
+    @brief Get high corner of bounding box
+  */
+  virtual RealVect get_bbox_hi() const;
   
   /*!
     @brief Get face normal vector
@@ -133,7 +153,15 @@ protected:
   */
   Real m_area;
 
-  
+  /*!
+    @brief Bounding box low corner
+  */
+  RealVect m_lo;
+
+  /*!
+    @brief Bounding box high corner
+  */
+  RealVect m_hi;
 };
 
 #endif
