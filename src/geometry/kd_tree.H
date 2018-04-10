@@ -66,13 +66,19 @@ protected:
   virtual RealVect compute_bbox_hi(const Vector<RefCountedPtr<T> >& a_data);
 
   /*!
-    @brief Check if data should be moved to the left branch
-    @param[in] a_data Data
-    @param[in] a_pos  Position on the hyper-plane
-    @param[in] a_dir  Hyperplane normal
-    @return True if the object belongs to the left side of the plane
+    @brief Recursive search down the tree starting from a_parent
   */
-  virtual bool left(const RefCountedPtr<T>& a_data, const RealVect a_pos, const int a_dir);
+  virtual void tree_search(Vector<RefCountedPtr<T> >&        a_data,
+			   const RefCountedPtr<kd_node<T> >& a_parent,
+			   const RealVect                    a_x0);
+
+  /*!
+    @brief Recursive search down the tree starting from a_parent
+  */
+  virtual void tree_search2(Vector<RefCountedPtr<T> >&        a_data,
+			    Real&                             a_shortest,
+			    const RefCountedPtr<kd_node<T> >& a_node,
+			    const RealVect                    a_x0);
 };
 
 #include "kd_treeI.H"

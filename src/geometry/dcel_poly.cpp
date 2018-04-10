@@ -76,10 +76,35 @@ void dcel_poly::compute_centroid() {
 void dcel_poly::compute_normal(const bool a_outward_normal){
   
   // We assume that the normal is defined by right-hand rule where the rotation direction is along the half edges
+
+
+  bool found_normal = false;
+  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+  const int n = vertices.size();
+  for (int i = 0; i < n; i++){
+    const RealVect x0 = vertices[i]->get_pos();
+    const RealVect x1 = vertices[(i+1)%n]->get_pos();
+    const RealVect x2 = vertices[(i+2)%n]->get_pos();
+
+    m_normal = PolyGeom::cross(x2-x1, x1-x0);
+    if(m_normal.vectorLength() > EPSILON){
+      found_normal = true;
+      break;
+    }
+  }
+
+  if(!found_normal){
+    MayDay::Abort("dcel_poly::compute_normal - Cannot compute normal vector. The polygon is probably degenerate");
+  }
+  else{
+    m_normal *= 1./m_normal.vectorLength();
+  }
+
+#if 0
   const RefCountedPtr<dcel_vert>& v0 = m_edge->get_prev()->get_vert();
   const RefCountedPtr<dcel_vert>& v1 = m_edge->get_vert();
   const RefCountedPtr<dcel_vert>& v2 = m_edge->get_next()->get_vert();
-
+  
   const RealVect x0 = v0->get_pos();
   const RealVect x1 = v1->get_pos();
   const RealVect x2 = v2->get_pos();
@@ -91,6 +116,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   else{
     m_normal = m_normal/m_normal.vectorLength();
   }
+#endif
 
   if(!a_outward_normal){ // If normal points inwards, make it point outwards
     m_normal = -m_normal;
@@ -120,15 +146,18 @@ void dcel_poly::compute_bbox(){
     }
   }
 
+#if 0 // Disabled because I want a tight-fitting box
   Real widest = 0;
   for (int dir = 0; dir < SpaceDim; dir++){
     const Real cur = m_hi[dir] - m_lo[dir];
     widest = (cur > widest) ? cur : widest;
   }
 
-  // Grow box by 1% in each direction
-  m_hi += 1.E-2*widest*RealVect::Unit;
-  m_lo -= 1.E-2*widest*RealVect::Unit;
+
+  // Grow box by 5% in each direction
+  m_hi += 5.E-2*widest*RealVect::Unit;
+  m_lo -= 5.E-2*widest*RealVect::Unit;
+#endif
 }
 
 Real dcel_poly::get_area() const{

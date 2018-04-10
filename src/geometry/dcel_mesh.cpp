@@ -34,6 +34,18 @@ dcel_mesh::dcel_mesh(Vector<RefCountedPtr<dcel_poly> >& a_polygons,
   this->define(a_polygons, a_edges, a_vertices);
 }
 
+Vector<RefCountedPtr<dcel_vert> >& dcel_mesh::get_vertices(){
+  return m_vertices;
+}
+
+Vector<RefCountedPtr<dcel_edge> >& dcel_mesh::get_edges(){
+  return m_edges;
+}
+
+Vector<RefCountedPtr<dcel_poly> >& dcel_mesh::get_polygons(){
+  return m_polygons;
+}
+
 bool dcel_mesh::sanity_check() const {
   for (int i = 0; i < m_edges.size(); i++){
     if(m_edges[i].isNull()){
@@ -99,6 +111,7 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
       edge->set_poly(poly);
     }
     poly->compute_normal(a_outward_normal);
+    poly->compute_centroid();
     poly->compute_area();
     poly->normalize();
     poly->compute_bbox();
@@ -174,7 +187,7 @@ void dcel_mesh::compute_edge_normals(){
 }
 
 void dcel_mesh::build_tree(){
-  m_tree = RefCountedPtr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>());
+  m_tree     = RefCountedPtr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, 20, 1));
   m_use_tree = true;
 }
 
@@ -183,49 +196,35 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
   
   Real min_dist = 1.E99;
 
-  if(m_use_tree){ // Fast kd-tree search
-    Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
 
-    if(candidates.size() > 0){
-      for (int i = 0; i < candidates.size(); i++){
-	const Real cur_dist = candidates[i]->signed_distance(a_x0);
-	if(Abs(cur_dist) < Abs(min_dist)){
-	  min_dist = cur_dist;
+  if(m_sphere.inside(a_x0)){ // Bounding sphere contains point
+    if(m_use_tree){ // Fast kd-tree search
+      Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
+
+      if(candidates.size() > 0){
+	for (int i = 0; i < candidates.size(); i++){
+	  const Real cur_dist = candidates[i]->signed_distance(a_x0);
+	  if(Abs(cur_dist) < Abs(min_dist)){
+	    min_dist = cur_dist;
+	  }
 	}
       }
+      else { // I think we can use any triangle for this
+	//	return m_polygons[0]->signed_distance(a_x0);
+      }
     }
-    else{ // We are outside every bounding box, we can use any triangle
-      min_dist = m_polygons[0]->signed_distance(a_x0);
-    }
-
-    MayDay::Abort("dcel_mesh::signed_distance - stop");
-	
-  }
-  else{ // Brute force search
-    if(m_sphere.inside(a_x0)){
+    else{ // Brute force search
       for (int i = 0; i < m_polygons.size(); i++){
 	const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
 	if(Abs(cur_dist) < Abs(min_dist)){
 	  min_dist = cur_dist;
 	}
       }
-       }
-      else{
-        min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
-      }
+    }
+  }
+  else{ // We are outside every bounding box, simply return the distance to the bounding sphere
+    min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
   }
 
   return min_dist;
-}
-
-Vector<RefCountedPtr<dcel_vert> >& dcel_mesh::get_vertices(){
-  return m_vertices;
-}
-
-Vector<RefCountedPtr<dcel_edge> >& dcel_mesh::get_edges(){
-  return m_edges;
-}
-
-Vector<RefCountedPtr<dcel_poly> >& dcel_mesh::get_polygons(){
-  return m_polygons;
 }

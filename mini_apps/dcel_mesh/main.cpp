@@ -127,7 +127,7 @@ int main(int argc, char* argv[]){
 #endif
 
   dcel_mesh* plymesh = new dcel_mesh();
-  ply_reader::read_ascii(*plymesh, "dodecahedron.ply");
+  ply_reader::read_ascii(*plymesh, "sphere.ply");
   plymesh->reconcile_polygons(true);
   plymesh->build_tree();
 

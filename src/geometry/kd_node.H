@@ -27,7 +27,7 @@ public:
   /*!
     @brief Full constructor
   */
-  kd_node(const RefCountedPtr<kd_node<T> >& a_root);
+  kd_node(const RefCountedPtr<kd_node<T> >& a_parent);
 
   /*!
     @brief Destructor
@@ -45,14 +45,44 @@ public:
   virtual bool inside(const RealVect a_x0) const;
 
   /*!
+    @brief Get node depth
+  */
+  virtual int get_depth();
+
+  /*!
+    @brief Get number of data elements
+  */
+  virtual int get_num_elements();
+
+  /*!
+    @brief Compute distance to bounding box
+  */
+  virtual Real dist(const RealVect a_x0) const;
+
+  /*!
+    @brief Get low end of bounding box
+  */
+  virtual RealVect get_bbox_lo() const;
+
+  /*!
+    @brief Get high end of bounding box
+  */
+  virtual RealVect get_bbox_hi() const;
+
+  /*!
+    @brief Compute bounding box
+  */
+  virtual void compute_bbox();
+
+  /*!
     @brief Set leaf or not
   */
   virtual void set_leaf(const bool a_leaf);
 
   /*!
-    @brief Set root
+    @brief Set parent
   */
-  virtual void set_root(const RefCountedPtr<kd_node<T> >& a_root);
+  virtual void set_parent(const RefCountedPtr<kd_node<T> >& a_parent);
 
   /*!
     @brief Set left
@@ -80,9 +110,24 @@ public:
   virtual void clear_data();
 
   /*!
+    @brief Split data in left/right parts of hyperplane
+  */
+  virtual void split_data(const RealVect a_pos, const int      a_dir);
+
+  /*!
+    @brief Split data
+  */
+  virtual void split_data();
+
+  /*!
+    @brief Return data
+  */
+  virtual Vector<RefCountedPtr<T> >& get_data();
+
+  /*!
     @brief Get root
   */
-  virtual const RefCountedPtr<kd_node<T> >& get_root() const;
+  virtual const RefCountedPtr<kd_node<T> >& get_parent() const;
 
   /*!
     @brief Get left branch
@@ -99,7 +144,7 @@ protected:
   /*!
     @brief Root node
   */
-  RefCountedPtr<kd_node<T> > m_root;
+  RefCountedPtr<kd_node<T> > m_parent;
 
   /*!
     @brief Left branch
