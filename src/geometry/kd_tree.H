@@ -79,7 +79,13 @@ protected:
 			    Real&                             a_shortest,
 			    const RefCountedPtr<kd_node<T> >& a_node,
 			    const RealVect                    a_x0);
-};
+  
+  virtual void tree_search3(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
+			    Vector<Real>&                        a_distances,
+			    Real&                                a_shortest,
+			    const RefCountedPtr<kd_node<T> >&    a_node,
+			    const RealVect                       a_x0);
+  };
 
 #include "kd_treeI.H"
 

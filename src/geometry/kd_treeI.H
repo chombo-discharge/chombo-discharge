@@ -170,12 +170,38 @@ template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::get_candidates(const 
   }
 
   // Search through nodes in which a_x0 is inside the bbox
+#if 0
   data.resize(0);
   Real shortest = 1.E99;
   this->tree_search2(data, shortest, m_root, a_x0);
 
-#if 0
-  pout() << "num candidates = " << data.size() << endl;
+#else // This appears to be the fastest method by far
+  data.resize(0);
+  Real shortest = 1.E99;
+  Vector<RefCountedPtr<kd_node<T> > > candidates;
+  Vector<Real> distances;
+  this->tree_search3(candidates, distances, shortest, m_root, a_x0);
+
+  // Do another filtering
+  Real min = 1.E99;
+
+  for (int i = 0; i < distances.size(); i++){
+    if(distances[i] < min){
+      min = distances[i];
+    }
+  }
+
+  Vector<RefCountedPtr<kd_node<T> > > new_candidates;
+  for (int i = 0; i < candidates.size(); i++){
+    if(distances[i] <= min){
+      new_candidates.push_back(candidates[i]);
+
+    }
+  }
+
+  for(int i = 0; i < new_candidates.size(); i++){
+    data.append(new_candidates[i]->get_data());
+  }
 #endif
 
   return data;
@@ -228,6 +254,41 @@ template<typename T> void kd_tree<T>::tree_search2(Vector<RefCountedPtr<T> >&   
   else{
     if(a_node->is_leaf()){
       a_data.append(a_node->get_data());
+    }
+  }
+
+  return;
+}
+
+template<typename T> void kd_tree<T>::tree_search3(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
+						   Vector<Real>&                        a_distances,
+						   Real&                                a_shortest,
+						   const RefCountedPtr<kd_node<T> >&    a_node,
+						   const RealVect                       a_x0){
+
+  const Real len = a_node->dist(a_x0);
+
+  if(len <= a_shortest){
+    if(a_node->is_leaf()){
+      a_shortest = len;
+      a_candidates.push_back(a_node);
+      a_distances.push_back(len);
+    }
+    else{
+      RefCountedPtr<kd_node<T> > left  = a_node->get_left();
+      RefCountedPtr<kd_node<T> > right = a_node->get_right();
+
+
+      const Real l_len = left->dist(a_x0);
+      const Real r_len = right->dist(a_x0);
+      const Real min   = Min(l_len, r_len);
+      
+      if(l_len <= min){
+	this->tree_search3(a_candidates, a_distances, a_shortest, left,  a_x0);
+      }
+      if (r_len <= min){
+	this->tree_search3(a_candidates, a_distances, a_shortest, right, a_x0);
+      }
     }
   }
 

@@ -55,27 +55,27 @@ bool dcel_mesh::sanity_check() const {
       const RefCountedPtr<dcel_edge>& edge = m_edges[i];
     
       if(edge->get_pair().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - pair edge is NULL");
+	MayDay::Abort("dcel_mesh::sanity_check - pair edge is NULL, your geometry probably isn't watertight.");
       }
       else if(edge->get_next().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - next edge is NULL");
+	MayDay::Abort("dcel_mesh::sanity_check - next edge is NULL, something has gone wrong with edge generation.");
       }
       else if(edge->get_prev().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - prev edge is NULL");
+	MayDay::Abort("dcel_mesh::sanity_check - prev edge is NULL, something has gone wrong with edge generation.");
       }
       else if(edge->get_vert().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - vertex is NULL");
+	MayDay::Abort("dcel_mesh::sanity_check - vertex is NULL, something has gone wrong with edge generation.");
       }
     }
   }
 
   for (int i = 0; i < m_vertices.size(); i++){
     if(m_vertices[i].isNull()){
-      MayDay::Abort("dcel_mesh::sanity_check - m_vertices[i] is NULL");
+      MayDay::Abort("dcel_mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.");
     }
     else{
       if(m_vertices[i]->get_edge().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - vertex edge is NULL");
+	MayDay::Abort("dcel_mesh::sanity_check - vertex edge is NULL, something has gone wrong with edge generation.");
       }
     }
   }
@@ -186,8 +186,8 @@ void dcel_mesh::compute_edge_normals(){
   }
 }
 
-void dcel_mesh::build_tree(){
-  m_tree     = RefCountedPtr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, 20, 1));
+void dcel_mesh::build_tree(const int a_max_depth, const int a_max_elements){
+  m_tree     = RefCountedPtr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements));
   m_use_tree = true;
 }
 
@@ -196,10 +196,14 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
   
   Real min_dist = 1.E99;
 
+  Real t0, t1, t2, t3, t4;
+  t0 = MPI_Wtime();
 
   if(m_sphere.inside(a_x0)){ // Bounding sphere contains point
     if(m_use_tree){ // Fast kd-tree search
+      t1 = MPI_Wtime();
       Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
+      t2 = MPI_Wtime();
 
       if(candidates.size() > 0){
 	for (int i = 0; i < candidates.size(); i++){
@@ -209,9 +213,9 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 	  }
 	}
       }
-      else { // I think we can use any triangle for this
-	//	return m_polygons[0]->signed_distance(a_x0);
-      }
+      t3 = MPI_Wtime();
+
+
     }
     else{ // Brute force search
       for (int i = 0; i < m_polygons.size(); i++){
@@ -225,6 +229,8 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
   else{ // We are outside every bounding box, simply return the distance to the bounding sphere
     min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
   }
+  t4 = MPI_Wtime();
+  //  pout() << "Search time = " << t2 - t1 << "\t Compute time = " << t3 - t2 << endl;
 
   return min_dist;
 }

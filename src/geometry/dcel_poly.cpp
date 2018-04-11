@@ -80,6 +80,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
 
   bool found_normal = false;
   Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+  CH_assert(vertices.size() > 2);
   const int n = vertices.size();
   for (int i = 0; i < n; i++){
     const RealVect x0 = vertices[i]->get_pos();
@@ -87,13 +88,19 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
     const RealVect x2 = vertices[(i+2)%n]->get_pos();
 
     m_normal = PolyGeom::cross(x2-x1, x1-x0);
-    if(m_normal.vectorLength() > EPSILON){
+    if(m_normal.vectorLength() > 0.0){
       found_normal = true;
       break;
     }
   }
 
   if(!found_normal){
+    pout() << "dcel_poly::compute_normal - vertex vectors:" << endl;
+    for (int i = 0; i < vertices.size(); i++){
+      pout() << "\t" << vertices[i]->get_pos() << endl;
+    }
+    pout() << "dcel_poly::compute_normal - From this I computed n = " << m_normal << endl;
+    pout() << "dcel_poly::compute_normal - Aborting..." << endl;
     MayDay::Abort("dcel_poly::compute_normal - Cannot compute normal vector. The polygon is probably degenerate");
   }
   else{
@@ -110,7 +117,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   const RealVect x2 = v2->get_pos();
   
   m_normal = PolyGeom::cross(x2-x1,x1-x0);
-  if(m_normal.vectorLength() < EPSILON){
+  if(m_normal.vectorLength() < 1.E-40){
     MayDay::Abort("dcel_poly::compute_normal - vertices lie on a line. Cannot compute normal vector");
   }
   else{
@@ -122,6 +129,9 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
     m_normal = -m_normal;
   }
 
+  if(!found_normal){
+
+  }
 }
 
 void dcel_poly::compute_bbox(){

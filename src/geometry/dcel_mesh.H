@@ -64,7 +64,7 @@ public:
   /*!
     @brief Build kd-tree
   */
-  virtual void build_tree();
+  virtual void build_tree(const int a_max_depth, const int a_max_elements);
 
   /*!
     @brief Compute signed distance
