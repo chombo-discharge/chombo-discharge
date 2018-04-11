@@ -14,7 +14,7 @@
 #include <ParmParse.H>
 #endif
 
-bool dcel_mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors
+bool dcel_mesh::s_angle_weighted = false; // Use angle-weighted vertex normal vectors. This currently breaks. 
 
 dcel_mesh::dcel_mesh(){
   m_reconciled = false;
@@ -98,6 +98,23 @@ void dcel_mesh::compute_bounding_sphere(){
   m_sphere.define(pos);
 }
 
+void dcel_mesh::compute_bounding_box(){
+  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+
+  m_lo =  1.234567E89*RealVect::Unit;
+  m_hi = -1.234567E89*RealVect::Unit;
+  for (int i = 0; i < vertices.size(); i++){
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(vertices[i]->get_pos()[dir] < m_lo[dir]){
+	m_lo[dir] = vertices[i]->get_pos()[dir];
+      }
+      if(vertices[i]->get_pos()[dir] > m_hi[dir]){
+	m_hi[dir] = vertices[i]->get_pos()[dir];
+      }
+    }
+  }
+}
+
 void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
@@ -122,11 +139,17 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
   this->compute_vertex_normals();
   this->compute_edge_normals();
   this->compute_bounding_sphere();
+  this->compute_bounding_box();
 
   m_reconciled = true;
 }
 
 void dcel_mesh::compute_vertex_normals(){
+#define debug_func 0
+
+#if debug_func
+  pout() << "starting computation" << endl;
+#endif
   for (int i = 0; i < m_vertices.size(); i++){
 #if 0 // This doesn't work, why?!?
     const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
@@ -141,12 +164,16 @@ void dcel_mesh::compute_vertex_normals(){
 	//normal += polygons[i]->get_area()*polygons[i]->get_normal(); // Area weighted
 	normal += polygons[i]->get_normal(); // Mean
       }
+      CH_assert(normal.vectorLength() > 0.0);
       normal *= 1./normal.vectorLength();
       m_vertices[i]->set_normal(normal);
     }
     else { // Angle-weighted normal vector
       RealVect normal = RealVect::Zero;
-      for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){
+#if debug_func
+      int num = 0;
+#endif
+      for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){ 
 	const RefCountedPtr<dcel_edge>& outgoing = iter();
 	const RefCountedPtr<dcel_edge>& incoming = outgoing->get_prev();
 
@@ -160,13 +187,23 @@ void dcel_mesh::compute_vertex_normals(){
 	const Real alpha = asin(norm.vectorLength());
 
 	normal += alpha*norm;
-      
+#if debug_func
+	num++;
+	pout() << num << endl;
+
+	if(num > 200){
+	  pout() << "problem vertex = " << m_vertices[i]->get_pos() << endl;
+	  MayDay::Abort("dcel_compute_vertex_normals - stop");
+	}
+#endif
       }
       normal *= 1./normal.vectorLength();
 
       m_vertices[i]->set_normal(normal);
     }
   }
+
+  pout() << "done computing vertex vectors" << endl;
 }
 
 void dcel_mesh::compute_edge_normals(){
@@ -180,9 +217,10 @@ void dcel_mesh::compute_edge_normals(){
 
     const RealVect n1 = poly->get_normal();
     const RealVect n2 = pair_poly->get_normal();
-    const RealVect n  = (n1+n2)/(n1+n2).vectorLength();
-
-    cur_edge->set_normal(n);
+    RealVect normal = (n1 + n2);
+    normal = normal/normal.vectorLength();
+    
+    cur_edge->set_normal(normal);
   }
 }
 
@@ -191,46 +229,67 @@ void dcel_mesh::build_tree(const int a_max_depth, const int a_max_elements){
   m_use_tree = true;
 }
 
-Real dcel_mesh::signed_distance(const RealVect a_x0){
-  CH_assert(m_reconciled);
-  
-  Real min_dist = 1.E99;
+Real dcel_mesh::bbox_dist(const RealVect a_x0) const{
 
+  RealVect delta;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    delta[dir] = Max(m_lo[dir] - a_x0[dir], Max(0.0, a_x0[dir] - m_hi[dir]));
+  }
+
+  return delta.vectorLength();
+}
+
+Real dcel_mesh::signed_distance(const RealVect a_x0){
+#define print_time 0
+
+#if print_time
   Real t0, t1, t2, t3, t4;
   t0 = MPI_Wtime();
+#endif
 
-  if(m_sphere.inside(a_x0)){ // Bounding sphere contains point
+  Real min_dist = 1.E99;
+  if(m_sphere.inside(a_x0)){
     if(m_use_tree){ // Fast kd-tree search
+#if print_time
       t1 = MPI_Wtime();
+#endif
       Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
+#if print_time
       t2 = MPI_Wtime();
-
-      if(candidates.size() > 0){
-	for (int i = 0; i < candidates.size(); i++){
-	  const Real cur_dist = candidates[i]->signed_distance(a_x0);
-	  if(Abs(cur_dist) < Abs(min_dist)){
-	    min_dist = cur_dist;
-	  }
-	}
-      }
-      t3 = MPI_Wtime();
-
-
-    }
-    else{ // Brute force search
-      for (int i = 0; i < m_polygons.size(); i++){
-	const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
+#endif
+      for (int i = 0; i < candidates.size(); i++){
+	const Real cur_dist = candidates[i]->signed_distance(a_x0);
 	if(Abs(cur_dist) < Abs(min_dist)){
 	  min_dist = cur_dist;
 	}
       }
+#if print_time
+      t3 = MPI_Wtime();
+#endif
+    }
+    else{ // Brute force search
+      for (int i = 0; i < m_polygons.size(); i++){
+      	const Real cur_dist = m_polygons[i]->signed_distance(a_x0);
+      	if(Abs(cur_dist) < Abs(min_dist)){
+      	  min_dist = cur_dist;
+      	}
+      }
     }
   }
   else{ // We are outside every bounding box, simply return the distance to the bounding sphere
+#if print_time
+    t1 = MPI_Wtime();
+    t2 = t1;
+#endif
     min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
+#if print_time
+    t3 = MPI_Wtime();
+#endif
   }
+#if print_time
   t4 = MPI_Wtime();
-  //  pout() << "Search time = " << t2 - t1 << "\t Compute time = " << t3 - t2 << endl;
+  pout() << "Search time = " << t2 - t1 << "\t Compute time = " << t3 - t2 << "\t Fraction = " << (t2 - t1)/(t3-t2) << endl;
+#endif
 
   return min_dist;
 }

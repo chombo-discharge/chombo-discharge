@@ -137,9 +137,10 @@ Real dcel_edge::signed_distance(const RealVect a_x0) const {
     n = m_normal;
   }
 
+
   const Real dot = PolyGeom::dot(n, (a_x0 - p)); // Determine sign from projection. If the point is orthogonal to the normal,
 #if 1
-  const int sgn = dot > 0.0 ? 1 : -1;            // it must (I think) be outside
+  const int sgn = dot >= 0.0 ? 1 : -1;            // it must (I think) be outside
 #else
   //  const int sgn = 1;
 

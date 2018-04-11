@@ -128,10 +128,6 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   if(!a_outward_normal){ // If normal points inwards, make it point outwards
     m_normal = -m_normal;
   }
-
-  if(!found_normal){
-
-  }
 }
 
 void dcel_poly::compute_bbox(){
@@ -180,8 +176,10 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
   Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
 
   // Compute projection of x0 on the polygon plane
+
   const RealVect x1 = vertices[0]->get_pos();
-  const RealVect xp = a_x0 - PolyGeom::dot(m_normal, a_x0 - x1)*m_normal;
+  const Real ncomp  = PolyGeom::dot(a_x0-x1, m_normal);
+  const RealVect xp = a_x0 - ncomp*m_normal;
 
   // Use angle rule to check if projected point lies inside the polygon
   Real anglesum = 0.0;
@@ -211,12 +209,11 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 
   // If projection is inside, shortest distance is the normal component of the point
   if(inside){
-    retval = PolyGeom::dot(a_x0-x1, m_normal);
+    retval = ncomp;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
     const Vector<RefCountedPtr<dcel_edge> > edges = this->get_edges();
     for (int i = 0; i < edges.size(); i++){
-
       const Real cur_dist = edges[i]->signed_distance(a_x0);
       if(Abs(cur_dist) < Abs(retval)){
 	retval = cur_dist;

@@ -44,11 +44,21 @@ protected:
     @brief Root node
   */
   RefCountedPtr<kd_node<T> > m_root;
+
+  /*!
+    @brief One of the leaf nodes
+  */
+  RefCountedPtr<kd_node<T> > m_leaf;
   
   /*!
     @brief Nodes
   */
   Vector<RefCountedPtr<kd_node<T> > > m_nodes;
+
+  /*!
+    @brief Leaves
+  */
+  Vector<RefCountedPtr<kd_node<T> > > m_leaves;
 
   /*!
     @brief Depth

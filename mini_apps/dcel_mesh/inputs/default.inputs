@@ -1,8 +1,8 @@
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -10  -10  -10
-physical_domain.hi_corner =  10   10   10 
+physical_domain.lo_corner = -0.1 -0.05 -0.1
+physical_domain.hi_corner =  0.1  0.15  0.1
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -35,14 +35,14 @@ rod2d_tagger.refine_radius     = 1.5    # Sets eps_mag for refinement
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-amr.max_amr_depth   = 0           # Maximum amr depth
-amr.max_sim_depth   = 1           # Maximum simulation depth
+amr.max_amr_depth   = 1           # Maximum amr depth
+amr.max_sim_depth   = 2           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 2           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
 amr.max_box_size    = 16          # Maximum allowed box size
 amr.max_ebis_box    = 32          # Maximum allowed box size	
-amr.ref_rat         = 2 4 2 2 2 2 2       # Refinement ratios. 
+amr.ref_rat         = 2 2 2 2 2 2 2       # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
