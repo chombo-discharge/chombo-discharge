@@ -108,7 +108,6 @@ RealVect dcel_edge::get_normal() const {
 }
 
 Real dcel_edge::signed_distance(const RealVect a_x0) const {
-
   Real retval = 1.234567E89;
   
   // Involved vertices
@@ -122,13 +121,17 @@ Real dcel_edge::signed_distance(const RealVect a_x0) const {
   const RealVect xp = a_x0 + PolyGeom::dot(x1-a_x0,r)*r;
   const Real t      = PolyGeom::dot(xp-x1,x2-x1)/PolyGeom::dot(x2-x1, x2-x1);
 
+  if(PolyGeom::cross(xp-x1, x2-x1).vectorLength() > 1.E-8){
+    MayDay::Abort("stop");
+  }
+
   RealVect p;
   RealVect n;
-  if(t <= 0.0){ // Closest to x1, vertex normal takes precedence.
+  if(t < 0.0){ // Closest to x1, vertex normal takes precedence.
     p = x1;
     n = this->get_other_vert()->get_normal();
   }
-  else if (t >= 1.0){ // Closest to x2, vertex normal takes precedence
+  else if (t > 1.0){ // Closest to x2, vertex normal takes precedence
     p = x2;
     n = m_vert->get_normal();
   }
@@ -139,18 +142,10 @@ Real dcel_edge::signed_distance(const RealVect a_x0) const {
 
 
   const Real dot = PolyGeom::dot(n, (a_x0 - p)); // Determine sign from projection. If the point is orthogonal to the normal,
-#if 1
   const int sgn = dot >= 0.0 ? 1 : -1;            // it must (I think) be outside
-#else
-  //  const int sgn = 1;
 
-  const int sgn = (dot > 0.0) - (dot < 0.0);
-#endif
+  CH_assert((n.vectorLength() - 1.0) < 1.E-6);
 
-  if(sgn == 0){
-    //    MayDay::Abort("shouldn't happen from what I can tell");
-  }
-  
   retval = (a_x0-p).vectorLength()*sgn;
 
   return retval;

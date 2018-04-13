@@ -77,7 +77,6 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
   
   // We assume that the normal is defined by right-hand rule where the rotation direction is along the half edges
 
-
   bool found_normal = false;
   Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
   CH_assert(vertices.size() > 2);
@@ -87,7 +86,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
     const RealVect x1 = vertices[(i+1)%n]->get_pos();
     const RealVect x2 = vertices[(i+2)%n]->get_pos();
 
-    m_normal = PolyGeom::cross(x2-x1, x1-x0);
+    m_normal = PolyGeom::cross(x2-x1, x2-x0);
     if(m_normal.vectorLength() > 0.0){
       found_normal = true;
       break;
@@ -152,6 +151,18 @@ void dcel_poly::compute_bbox(){
     }
   }
 
+#if 1 // Debug test
+  for (int i = 0; i < vertices.size(); i++){
+    const RealVect pos = vertices[i]->get_pos();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(pos[dir] < m_lo[dir] || pos[dir] > m_hi[dir]){
+	pout() << "pos = " << pos << "\t Lo = " << m_lo << "\t Hi = " << m_hi << endl;
+	MayDay::Abort("dcel_poly::compute_bbox - Box does not contain vertices");
+      }
+    }
+  }
+#endif
+
 #if 0 // Disabled because I want a tight-fitting box
   Real widest = 0;
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -175,11 +186,20 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 
   Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
 
-  // Compute projection of x0 on the polygon plane
+#if 1 // Debug, return shortest distance to vertex
+  Real min = 1.E99;
+  for (int i = 0; i < vertices.size(); i++){
+    const Real d = (a_x0 - vertices[i]->get_pos()).vectorLength();
+    min = d < min ? d : min;
+  }
 
+#endif
+
+  // Compute projection of x0 on the polygon plane
   const RealVect x1 = vertices[0]->get_pos();
   const Real ncomp  = PolyGeom::dot(a_x0-x1, m_normal);
   const RealVect xp = a_x0 - ncomp*m_normal;
+
 
   // Use angle rule to check if projected point lies inside the polygon
   Real anglesum = 0.0;
@@ -209,9 +229,13 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 
   // If projection is inside, shortest distance is the normal component of the point
   if(inside){
+#if 1
+    CH_assert(Abs(ncomp) <= min);
+#endif
     retval = ncomp;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
+    return 1.E99;
     const Vector<RefCountedPtr<dcel_edge> > edges = this->get_edges();
     for (int i = 0; i < edges.size(); i++){
       const Real cur_dist = edges[i]->signed_distance(a_x0);
@@ -244,6 +268,17 @@ RealVect dcel_poly::get_bbox_hi() const {
   return m_hi;
 }
 
+Vector<RealVect> dcel_poly::get_points(){
+  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
+
+  Vector<RealVect> pos;
+  for (int i = 0; i < vertices.size(); i++){
+    pos.push_back(vertices[i]->get_pos());
+  }
+
+  return pos;
+}
+
 Vector<RefCountedPtr<dcel_vert> > dcel_poly::get_vertices(){
   Vector<RefCountedPtr<dcel_vert> > vertices;
 
@@ -261,6 +296,10 @@ Vector<RefCountedPtr<dcel_edge> > dcel_poly::get_edges(){
   for (edge_iterator iter(*this); iter.ok(); ++iter){
     edges.push_back(iter());
   }
+
+#if 1 // Debug test
+  CH_assert(edges.size() == 3);
+#endif
 
   return edges;
 }

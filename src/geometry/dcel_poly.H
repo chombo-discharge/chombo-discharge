@@ -82,6 +82,11 @@ public:
   virtual RefCountedPtr<dcel_edge>& get_edge();
 
   /*!
+    Get all positions
+  */
+  virtual Vector<RealVect> get_points();
+
+  /*!
     @brief Get all vertices
   */
   virtual Vector<RefCountedPtr<dcel_vert> > get_vertices();

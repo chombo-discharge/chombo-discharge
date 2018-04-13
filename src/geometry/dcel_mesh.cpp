@@ -160,9 +160,9 @@ void dcel_mesh::compute_vertex_normals(){
     // Mean or area weighted
     if(!s_angle_weighted){
       RealVect normal = RealVect::Zero;
-      for (int i = 0; i < polygons.size(); i++){
+      for (int j = 0; j < polygons.size(); j++){
 	//normal += polygons[i]->get_area()*polygons[i]->get_normal(); // Area weighted
-	normal += polygons[i]->get_normal(); // Mean
+	normal += polygons[j]->get_normal(); // Mean
       }
       CH_assert(normal.vectorLength() > 0.0);
       normal *= 1./normal.vectorLength();
@@ -184,9 +184,11 @@ void dcel_mesh::compute_vertex_normals(){
 	const Real len2       = (x2-origin).vectorLength();
 
 	const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
-	const Real alpha = asin(norm.vectorLength());
+	//	const Real alpha = asin(norm.vectorLength());
 
-	normal += alpha*norm;
+	const Real alpha = acos(PolyGeom::dot(x2-origin, x1-origin)/len1*len2);
+
+	normal += alpha*norm/norm.vectorLength();
 #if debug_func
 	num++;
 	pout() << num << endl;
@@ -203,7 +205,9 @@ void dcel_mesh::compute_vertex_normals(){
     }
   }
 
+#if debug_func
   pout() << "done computing vertex vectors" << endl;
+#endif
 }
 
 void dcel_mesh::compute_edge_normals(){
@@ -214,6 +218,8 @@ void dcel_mesh::compute_edge_normals(){
 
     const RefCountedPtr<dcel_poly>& poly      = cur_edge->get_poly();
     const RefCountedPtr<dcel_poly>& pair_poly = pair_edge->get_poly();
+
+    CH_assert(pair_edge->get_pair() == cur_edge);
 
     const RealVect n1 = poly->get_normal();
     const RealVect n2 = pair_poly->get_normal();
@@ -241,7 +247,6 @@ Real dcel_mesh::bbox_dist(const RealVect a_x0) const{
 
 Real dcel_mesh::signed_distance(const RealVect a_x0){
 #define print_time 0
-
 #if print_time
   Real t0, t1, t2, t3, t4;
   t0 = MPI_Wtime();

@@ -41,7 +41,8 @@ void edge_iterator::operator++(){
     m_current = m_current->get_next();
   }
   else{
-    m_current = m_current->get_pair()->get_next();
+    m_current = m_current->get_prev()->get_pair();
+    //    m_current = m_current->get_pair()->get_next();
   }
 
   // Signal a full loop around the polygon. 

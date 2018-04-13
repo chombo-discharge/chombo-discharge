@@ -71,13 +71,23 @@ template<typename T> int kd_node<T>::get_num_elements(){
 }
 
 template<typename T> Real kd_node<T>::dist(const RealVect a_x0) const{
-
+#if 0
+  RealVect delta;
+  RealVect schme = m_hi - m_lo;
+  const RealVect center = 0.5*(m_lo + m_hi);
+  for (int dir = 0; dir < SpaceDim; dir++){
+    delta[dir] = Max(Abs(a_x0[dir] - center[dir]) - 0.5*schme[dir], 0.0);
+  }
+  return delta.vectorLength();
+#else
   RealVect delta;
   for (int dir = 0; dir < SpaceDim; dir++){
     delta[dir] = Max(m_lo[dir] - a_x0[dir], Max(0.0, a_x0[dir] - m_hi[dir]));
   }
 
   return delta.vectorLength();
+#endif
+  
 }
 
 template<typename T> RealVect kd_node<T>::get_bbox_lo() const {
@@ -89,7 +99,6 @@ template<typename T> RealVect kd_node<T>::get_bbox_hi() const {
 }
 
 template<typename T> void kd_node<T>::compute_bbox(){
-
   RealVect lo =  1.234567E89*RealVect::Unit;
   RealVect hi = -1.234567E89*RealVect::Unit;
 
@@ -108,6 +117,24 @@ template<typename T> void kd_node<T>::compute_bbox(){
   }
 
   this->set_bbox(lo, hi);
+
+#if 1 // Safety test, not part of final code
+  for (int dir = 0; dir < SpaceDim; dir++){
+    CH_assert(lo[dir] <= hi[dir]);
+  }
+
+  for (int i = 0; i < m_data.size(); i++){
+    Vector<RealVect> points = m_data[i]->get_points();
+
+    for (int j = 0; j < points.size(); j++){
+      for (int dir = 0; dir < SpaceDim; dir++){
+	if(points[j][dir] < lo[dir] || points[j][dir] > hi[dir]){
+	  MayDay::Abort("kd_node<T>::compute_bbox - points are not contained in bbox. Something is wrong.");
+	}
+      }
+    }
+  }
+#endif
 }
 
 template<typename T> void kd_node<T>::set_bbox(const RealVect a_lo, const RealVect a_hi){
@@ -131,7 +158,7 @@ template<typename T> void kd_node<T>::set_right(const RefCountedPtr<kd_node>& a_
   m_right = a_right;
 }
 
-template<typename T> void kd_node<T>::set_data(const Vector<RefCountedPtr<T> >& a_data){
+template<typename T> void kd_node<T>::set_data(const Vector<RefCountedPtr<T> > a_data){
   m_data = a_data;
 }
 
@@ -170,9 +197,12 @@ template<typename T> void kd_node<T>::split_data(const RealVect a_pos,
 }
 
 template <typename T> void kd_node<T>::split_data(){
+  CH_assert(m_leaf);
+  
   Vector<RefCountedPtr<T> > data_right;
   Vector<RefCountedPtr<T> > data_left;
 
+  // Find maximum and minimum coordinates (i.e. the bounding box of the data centroids)
   Vector<RealVect> coords;
   for (int i = 0; i < m_data.size(); i++){
     coords.push_back(m_data[i]->get_coord());
@@ -191,11 +221,12 @@ template <typename T> void kd_node<T>::split_data(){
     }
   }
 
-  // Find the longest
+  // Find the longest dimension
   Real longest_len = 0.0;
-  int longest_dir;
+  int longest_dir = 0;
   for (int dir = 0; dir < SpaceDim; dir++){
     const Real cur_longest = max_coord[dir] - min_coord[dir];
+    CH_assert(cur_longest >= 0.0);
     if(cur_longest > longest_len){
       longest_len = cur_longest;
       longest_dir = dir;
@@ -217,9 +248,15 @@ template <typename T> void kd_node<T>::split_data(){
     m_left->set_data(data_left);
     m_left->compute_bbox();
   }
+  else{
+    MayDay::Abort("kd_node<T>::split_data - left is NULL");
+  }
   if(!m_right.isNull()){
     m_right->set_data(data_right);
     m_right->compute_bbox();
+  }
+  else{
+    MayDay::Abort("kd_node<T>::split_data - right is NULL");
   }
 
 #if 0

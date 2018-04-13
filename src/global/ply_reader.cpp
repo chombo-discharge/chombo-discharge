@@ -36,12 +36,13 @@ void ply_reader::read_ascii(dcel_mesh& a_mesh, const std::string a_filename){
     a_mesh.sanity_check();
   
     filestream.close();
-
   }
   else{
     const std::string error = "ply_reader::read_ascii - ERROR! Could not open file " + a_filename;
     MayDay::Abort(error.c_str());
   }
+
+
 }
 
 void ply_reader::read_ascii_header(int& a_first_vertex,
@@ -122,6 +123,8 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
 				     Vector<RefCountedPtr<dcel_vert> >& a_vertices,
 				     const int a_num_polygons,
 				     std::ifstream& a_inputstream){
+
+  MayDay::Warning("ply_reader::read_ascii_polygons - implement degenerate polygon check!");
   int num_vert;
   Vector<int> which_vertices;
 
@@ -165,9 +168,11 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
 
     // Set edges emanating from vertices if that hasn't been done already
     for (int i = 0; i < poly_vertices.size(); i++){
-      //      if(poly_vertices[i]->get_edge() == NULL){
-	CH_assert(poly_edges[i]->get_prev() != NULL);
-	poly_vertices[i]->set_edge(poly_edges[i]->get_prev());
+      if(poly_vertices[i]->get_edge().isNull()){
+	//	CH_assert(poly_edges[i]->get_prev() != NULL);
+	//	poly_vertices[i]->set_edge(poly_edges[i]->get_prev());
+	poly_vertices[i]->set_edge(poly_edges[i]);
+      }
 	//      }
     }
 
@@ -181,10 +186,10 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
       // Get all polygons connected to the current vertex and look for edge pairs
       Vector<RefCountedPtr<dcel_poly> >& polygons = vert->get_polycache();
 
-      for (int i = 0; i < polygons.size(); i++){
-	RefCountedPtr<dcel_edge>& other_polygon_edge = polygons[i]->get_edge();
+      for (int j = 0; j < polygons.size(); j++){
+	RefCountedPtr<dcel_edge>& other_polygon_edge = polygons[j]->get_edge();
 
-	for (edge_iterator iter(*polygons[i]); iter.ok(); ++iter){
+	for (edge_iterator iter(*polygons[j]); iter.ok(); ++iter){
 	  RefCountedPtr<dcel_edge>& other_polygon_edge = iter();
 
 	  if(other_polygon_edge->get_vert() == edge->get_prev()->get_vert()){

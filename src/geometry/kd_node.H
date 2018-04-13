@@ -102,7 +102,7 @@ public:
   /*!
     @brief Set data
   */
-  virtual void set_data(const Vector<RefCountedPtr<T> >& a_data);
+  virtual void set_data(const Vector<RefCountedPtr<T> > a_data);
 
   /*!
     @brief Clear data

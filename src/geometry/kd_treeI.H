@@ -26,16 +26,15 @@ template<typename T> kd_tree<T>::~kd_tree(){
 template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >& a_data,
 						 const int                      a_max_depth,
 						 const int                      a_max_elements){
+
+  int datasize = a_data.size();
   if(m_root.isNull()){ // Create root
     m_root  = RefCountedPtr<kd_node<T> > (new kd_node<T>());
     m_depth = 0;
-
-    const RealVect lo = this->compute_bbox_lo(a_data);
-    const RealVect hi = this->compute_bbox_hi(a_data);
     
     m_root->set_data(a_data);
     m_root->set_leaf(true);
-    m_root->set_bbox(lo, hi);
+    m_root->compute_bbox();
 
     m_nodes.push_back(m_root);
   }
@@ -66,7 +65,7 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
 	// Create children and divide up data
 	node->set_left(left);
 	node->set_right(right);
-	node->split_data(); // This also computes bounding boxes
+	node->split_data(); // This also computes bounding boxes for children
 	node->clear_data();
 
 	// Update who is the leaf
@@ -86,10 +85,9 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
     }
 
     // After each pass, append children to list of nodes
-    for (int i = 0; i < children.size(); i++){
-      m_nodes.push_back(children[i]);
-    }
+    m_nodes.append(children);
   }
+  pout() << "num nodes = " << m_nodes.size() << endl;
 
 
   // Make sure that we find a leaf
@@ -100,11 +98,19 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
     }
   }
 
+  int dataleaf = 0;
   for (int i = 0; i < m_nodes.size(); i++){
     if(m_nodes[i]->is_leaf()){
       m_leaves.push_back(m_nodes[i]);
     }
   }
+  pout() << "num leaves = " << m_leaves.size() << endl;
+
+  for (int i = 0; i < m_leaves.size(); i++){
+    dataleaf += m_leaves[i]->get_data().size();
+  }
+
+  CH_assert(dataleaf = datasize);
 }
 
 template<typename T> RealVect kd_tree<T>::compute_bbox_lo(const Vector<RefCountedPtr<T> >& a_data){
@@ -140,30 +146,36 @@ template<typename T> RealVect kd_tree<T>::compute_bbox_hi(const Vector<RefCounte
 template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::get_candidates(const RealVect a_x0){
 #define print_time 0
 #define check_all 0
-  Vector<RefCountedPtr<T> > data;
+#define test_shortest 0
+  Vector<RefCountedPtr<T> > data(0);
 
-  Real shortest = m_leaf->dist(a_x0);
-  shortest = 1.E99;
+  Real shortest = 1.E99;
   Vector<RefCountedPtr<kd_node<T> > > candidates;
   Vector<Real> distances;
 
 #if check_all
-  // Look through all leaves
+ // Look through all leaves
   shortest = 1.E99;
-  data.resize(0);
   for(int i = 0; i < m_leaves.size(); i++){
-    if(m_leaves[i]->dist(a_x0) <= shortest){
+    if(Abs(m_leaves[i]->dist(a_x0)) <= shortest){
       shortest = m_leaves[i]->dist(a_x0);
     }
   }
 
   data.resize(0);
   for (int i = 0; i < m_leaves.size(); i++){
-    if(m_leaves[i]->dist(a_x0) <= shortest){
+    const Real cur_dist = m_leaves[i]->dist(a_x0);
+    pout() << "shortest dist = " << shortest << "\tleaf dist = " << cur_dist << endl;
+    if(Abs(cur_dist - shortest) <= 1.E-8){
       data.append(m_leaves[i]->get_data());
     }
+    for (int j = 0; j < m_leaves[i]->get_data().size(); j++){ // This always be true!!!. Either cur_dist is wrong or signed distance is wrong!
+      CH_assert(cur_dist <= Abs(m_leaves[i]->get_data()[j]->signed_distance(a_x0)));
+    }
   }
-#else
+  pout() << endl;
+  
+#else // Tree search
 #if print_time
   const Real t1 = MPI_Wtime();
 #endif
@@ -173,18 +185,50 @@ template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::get_candidates(const 
 #endif
 
   // shortest might have changed, eliminate further candidates
+#if 1
   for (int i = 0; i < distances.size(); i++){
     if(candidates[i]->dist(a_x0) <= shortest){
       data.append(candidates[i]->get_data());
     }
   }
+#endif
+
+#endif
+
+#if test_shortest
+  Real short1 = 1.E99;
+  for (int i = 0; i < data.size(); i++){
+    const Real cur_dist = data[i]->signed_distance(a_x0);
+    if(Abs(cur_dist) < Abs(short1)){
+      short1 = Abs(cur_dist);
+    }
+  }
+
+  Real short2 = 1.E99;
+  for (int i = 0; i < m_leaves.size(); i++){
+    Vector<RefCountedPtr<T> > leafdata = m_leaves[i]->get_data();
+    for (int j = 0; j < leafdata.size(); j++){
+      const Real cur_dist = leafdata[j]->signed_distance(a_x0);
+      if(Abs(cur_dist) < Abs(short2)){
+	short2 = Abs(cur_dist);
+      }
+    }
+  }
+
+  if(Abs(short2) < Abs(short1)){
+    pout() << "Shortest by leaf iteration = " << short2 << endl;
+    pout() << "Shortest by tree filtering = " << short1 << endl;
+    pout() << endl;
+    MayDay::Warning("kd_tree<T>::get_candidates - safety test failed");
+  }
+#endif // End test_shortest
   
 #if print_time
   const Real t3 = MPI_Wtime();
   pout() << "total time = << t4 - t1 " << "\tsearch time = " << t2-t1 << "\t filter time = " << t3-t2 << endl;
 #endif
 
-#endif
+
 
   return data;
 }
@@ -265,6 +309,4 @@ template<typename T> void kd_tree<T>::tree_search3(Vector<RefCountedPtr<kd_node<
       this->tree_search3(a_candidates, a_distances, a_shortest, right, a_x0); // Returns immediately if right->dist() > a_shortest
     }
   }
-
-  return;
 }
