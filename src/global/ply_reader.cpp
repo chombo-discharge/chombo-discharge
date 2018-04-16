@@ -41,8 +41,6 @@ void ply_reader::read_ascii(dcel_mesh& a_mesh, const std::string a_filename){
     const std::string error = "ply_reader::read_ascii - ERROR! Could not open file " + a_filename;
     MayDay::Abort(error.c_str());
   }
-
-
 }
 
 void ply_reader::read_ascii_header(int& a_first_vertex,

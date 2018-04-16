@@ -38,6 +38,11 @@ public:
   */
   virtual Vector<RefCountedPtr<T> > get_candidates(const RealVect a_x0);
 
+  /*!
+    @brief Find closest data 
+  */
+  virtual Vector<RefCountedPtr<T> > find_closest(const RealVect a_x0);
+
 protected:
 
   /*!
@@ -66,35 +71,35 @@ protected:
   int m_depth;
 
   /*!
-    @brief Compute low corner for bounding box
+    @brief Tree search
   */
-  virtual RealVect compute_bbox_lo(const Vector<RefCountedPtr<T> >& a_data);
-
-  /*!
-    @brief Compute high corner for bounding box
-  */
-  virtual RealVect compute_bbox_hi(const Vector<RefCountedPtr<T> >& a_data);
-
-  /*!
-    @brief Recursive search down the tree starting from a_parent
-  */
-  virtual void tree_search(Vector<RefCountedPtr<T> >&        a_data,
-			   const RefCountedPtr<kd_node<T> >& a_parent,
-			   const RealVect                    a_x0);
-
-  /*!
-    @brief Recursive search down the tree starting from a_parent
-  */
-  virtual void tree_search2(Vector<RefCountedPtr<T> >&        a_data,
-			    Real&                             a_shortest,
-			    const RefCountedPtr<kd_node<T> >& a_node,
-			    const RealVect                    a_x0);
-  
-  virtual void tree_search3(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
+  virtual void tree_search(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
 			    Vector<Real>&                        a_distances,
 			    Real&                                a_shortest,
 			    const RefCountedPtr<kd_node<T> >&    a_node,
 			    const RealVect                       a_x0);
+
+  virtual void tree_search2(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
+			   Vector<Real>&                        a_distances,
+			   Real&                                a_shortest,
+			   const RefCountedPtr<kd_node<T> >&    a_node,
+			   const RealVect                       a_x0);
+
+  virtual void tree_search3(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
+			    Vector<Real>&                        a_distances,
+			    const RealVect                       a_x0);
+
+  /*!
+    @brief Insertion sort
+  */
+  virtual void insertion_sort(Vector<RefCountedPtr<kd_node<T> > >& a_queue,
+			      Vector<Real>&                        a_distances);
+
+  /*!
+    @brief Trim Vector
+  */
+  virtual void trim(Vector<RefCountedPtr<kd_node<T> > >& a_queue, Vector<Real>& a_distances, const int max_elem);
+		    
   };
 
 #include "kd_treeI.H"

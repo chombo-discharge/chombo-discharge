@@ -161,8 +161,8 @@ void dcel_mesh::compute_vertex_normals(){
     if(!s_angle_weighted){
       RealVect normal = RealVect::Zero;
       for (int j = 0; j < polygons.size(); j++){
-	//normal += polygons[i]->get_area()*polygons[i]->get_normal(); // Area weighted
-	normal += polygons[j]->get_normal(); // Mean
+	normal += polygons[j]->get_area()*polygons[j]->get_normal(); // Area weighted
+	//	normal += polygons[j]->get_normal(); // Mean
       }
       CH_assert(normal.vectorLength() > 0.0);
       normal *= 1./normal.vectorLength();
@@ -258,7 +258,8 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 #if print_time
       t1 = MPI_Wtime();
 #endif
-      Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
+      //      Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
+      Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->find_closest(a_x0);
 #if print_time
       t2 = MPI_Wtime();
 #endif

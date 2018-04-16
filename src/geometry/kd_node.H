@@ -55,9 +55,19 @@ public:
   virtual int get_num_elements();
 
   /*!
-    @brief Compute distance to bounding box
+    @brief Compute distance. This is the bounding box distance if node, and data distance if leaf
   */
   virtual Real dist(const RealVect a_x0) const;
+
+  /*!
+    @brief Compute distance to bounding box
+  */
+  virtual Real aabb_dist(const RealVect a_x0) const;
+
+  /*!
+    @brief Compute distance to data
+  */
+  virtual Real data_dist(const RealVect a_x0) const;
 
   /*!
     @brief Get low end of bounding box
@@ -102,17 +112,12 @@ public:
   /*!
     @brief Set data
   */
-  virtual void set_data(const Vector<RefCountedPtr<T> > a_data);
+  virtual void set_data(const Vector<RefCountedPtr<T> >& a_data);
 
   /*!
     @brief Clear data
   */
   virtual void clear_data();
-
-  /*!
-    @brief Split data in left/right parts of hyperplane
-  */
-  virtual void split_data(const RealVect a_pos, const int      a_dir);
 
   /*!
     @brief Split data

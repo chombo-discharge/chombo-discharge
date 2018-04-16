@@ -7,6 +7,8 @@
 
 #include "ritter_sphere.H"
 
+#include <ParmParse.H>
+
 ritter_sphere::ritter_sphere(){
   m_radius = 0.0;
   m_center = RealVect::Zero;
@@ -26,15 +28,18 @@ void ritter_sphere::define(const Vector<RealVect>& a_points){
 
 
   // INITIAL PASS
-  Vector<RealVect> min_coord(SpaceDim, a_points[0]);
+  Vector<RealVect> min_coord(SpaceDim, a_points[0]); // [0] = Minimum x, [1] = Minimum y, [2] = Minimum z
   Vector<RealVect> max_coord(SpaceDim, a_points[0]);
   for (int i = 1; i < a_points.size(); i++){
     for (int dir = 0; dir < SpaceDim; dir++){
-      if(a_points[i][dir] < min_coord[dir][dir]){
-	min_coord[dir] = a_points[i];
+      RealVect& min = min_coord[dir];
+      RealVect& max = max_coord[dir];
+      
+      if(a_points[i][dir] < min[dir]){
+	min = a_points[i];
       }
-      if(a_points[i][dir] > max_coord[dir][dir]){
-	max_coord[dir] = a_points[i];
+      if(a_points[i][dir] > max[dir]){
+	max = a_points[i];
       }
     }
   }
@@ -46,7 +51,7 @@ void ritter_sphere::define(const Vector<RealVect>& a_points){
     if(len > dist ){
       dist = len;
       p1 = min_coord[dir];
-      p2 = min_coord[dir];
+      p2 = max_coord[dir];
     }
   }
 
@@ -56,15 +61,29 @@ void ritter_sphere::define(const Vector<RealVect>& a_points){
 
   // SECOND PASS
   for (int i = 0; i < a_points.size(); i++){
-    const Real dist = (a_points[i]-m_center).vectorLength() - m_radius; // This could be sped up by using a squared distance test
+    const Real dist = (a_points[i]-m_center).vectorLength() - m_radius; 
     if(dist > 0){ // Point lies outside
+      const RealVect v  = a_points[i] - m_center;
       const RealVect p1 = a_points[i];
-      const RealVect p2 = m_center - m_radius*(a_points[i]-m_center)/(a_points[i]-m_center).vectorLength();
+      const RealVect p2 = m_center - m_radius*v/v.vectorLength();
 
       m_center = 0.5*(p2+p1);
       m_radius = 0.5*(p2-p1).vectorLength();
     }
   }
+
+  // Safety
+  m_radius *= (1.0 + 1.E-10);
+
+#if 1 // Debug
+  for (int i = 0; i < a_points.size(); i++){
+    const Real dist = (a_points[i] - m_center).vectorLength() - m_radius;
+    if(dist > 0.0){
+      pout() << "point = " << a_points[i] << endl;
+      MayDay::Abort("ritter_sphere::define - point lies outside sphere!");
+    }
+  }
+#endif
 }
 
 bool ritter_sphere::inside(const RealVect a_x0) const{
@@ -73,6 +92,10 @@ bool ritter_sphere::inside(const RealVect a_x0) const{
 
 Real ritter_sphere::get_radius() const {
   return m_radius;
+}
+
+Real ritter_sphere::dist(const RealVect a_x0) const{
+  return (a_x0 - m_center).vectorLength() - m_radius;
 }
 
 RealVect ritter_sphere::get_center() const {

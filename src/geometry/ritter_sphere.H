@@ -43,6 +43,11 @@ public:
   virtual bool inside(const RealVect a_x0) const;
 
   /*!
+    @brief Get distance to ritter sphere
+  */
+  virtual Real dist(const RealVect a_x0) const;
+
+  /*!
     @brief Get radius
   */
   virtual Real get_radius() const;

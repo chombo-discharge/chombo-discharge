@@ -8,6 +8,8 @@
 #ifndef _DCEL_POLY_
 #define _DCEL_POLY_
 
+#include <ritter_sphere.H>
+
 #include "RealVect.H"
 #include "RefCountedPtr.H"
 
@@ -137,7 +139,7 @@ public:
   
   
 protected:
-
+  
   /*!
     @brief One of the edges of the polygon
   */
@@ -167,6 +169,11 @@ protected:
     @brief Bounding box high corner
   */
   RealVect m_hi;
+
+  /*!
+    @brief Ritter sphere
+  */
+  ritter_sphere m_ritter;
 };
 
 #endif

@@ -151,6 +151,9 @@ void dcel_poly::compute_bbox(){
     }
   }
 
+  // Define ritter sphere
+  m_ritter.define(coords);
+
 #if 1 // Debug test
   for (int i = 0; i < vertices.size(); i++){
     const RealVect pos = vertices[i]->get_pos();
@@ -182,17 +185,20 @@ Real dcel_poly::get_area() const{
 }
 
 Real dcel_poly::signed_distance(const RealVect a_x0) {
+#define bug_check 0
   Real retval = 1.234567E89;
 
   Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
 
-#if 1 // Debug, return shortest distance to vertex
+#if bug_check // Debug, return shortest distance to vertex
+  CH_assert(vertices.size() > 0);
   Real min = 1.E99;
   for (int i = 0; i < vertices.size(); i++){
     const Real d = (a_x0 - vertices[i]->get_pos()).vectorLength();
-    min = d < min ? d : min;
+    min = (d < min) ? d : min;
   }
 
+  return min;
 #endif
 
   // Compute projection of x0 on the polygon plane
@@ -229,13 +235,12 @@ Real dcel_poly::signed_distance(const RealVect a_x0) {
 
   // If projection is inside, shortest distance is the normal component of the point
   if(inside){
-#if 1
+#if bug_check
     CH_assert(Abs(ncomp) <= min);
 #endif
     retval = ncomp;
   }
   else{ // The projected point lies outside the triangle. Check distance to edges/vertices
-    return 1.E99;
     const Vector<RefCountedPtr<dcel_edge> > edges = this->get_edges();
     for (int i = 0; i < edges.size(); i++){
       const Real cur_dist = edges[i]->signed_distance(a_x0);
