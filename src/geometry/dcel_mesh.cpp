@@ -98,23 +98,6 @@ void dcel_mesh::compute_bounding_sphere(){
   m_sphere.define(pos);
 }
 
-void dcel_mesh::compute_bounding_box(){
-  Vector<RefCountedPtr<dcel_vert> > vertices = this->get_vertices();
-
-  m_lo =  1.234567E89*RealVect::Unit;
-  m_hi = -1.234567E89*RealVect::Unit;
-  for (int i = 0; i < vertices.size(); i++){
-    for (int dir = 0; dir < SpaceDim; dir++){
-      if(vertices[i]->get_pos()[dir] < m_lo[dir]){
-	m_lo[dir] = vertices[i]->get_pos()[dir];
-      }
-      if(vertices[i]->get_pos()[dir] > m_hi[dir]){
-	m_hi[dir] = vertices[i]->get_pos()[dir];
-      }
-    }
-  }
-}
-
 void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
@@ -139,7 +122,6 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
   this->compute_vertex_normals();
   this->compute_edge_normals();
   this->compute_bounding_sphere();
-  this->compute_bounding_box();
 
   m_reconciled = true;
 }
@@ -233,16 +215,6 @@ void dcel_mesh::compute_edge_normals(){
 void dcel_mesh::build_tree(const int a_max_depth, const int a_max_elements){
   m_tree     = RefCountedPtr<kd_tree<dcel_poly> > (new kd_tree<dcel_poly>(m_polygons, a_max_depth, a_max_elements));
   m_use_tree = true;
-}
-
-Real dcel_mesh::bbox_dist(const RealVect a_x0) const{
-
-  RealVect delta;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    delta[dir] = Max(m_lo[dir] - a_x0[dir], Max(0.0, a_x0[dir] - m_hi[dir]));
-  }
-
-  return delta.vectorLength();
 }
 
 Real dcel_mesh::signed_distance(const RealVect a_x0){

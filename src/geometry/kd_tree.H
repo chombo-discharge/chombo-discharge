@@ -34,11 +34,6 @@ public:
   virtual void build_tree(const Vector<RefCountedPtr<T> >& a_data, const int a_max_depth, const int a_max_elements);
 
   /*!
-    @brief Get candidates from tree search
-  */
-  virtual Vector<RefCountedPtr<T> > get_candidates(const RealVect a_x0);
-
-  /*!
     @brief Find closest data 
   */
   virtual Vector<RefCountedPtr<T> > find_closest(const RealVect a_x0);
@@ -74,20 +69,8 @@ protected:
     @brief Tree search
   */
   virtual void tree_search(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
-			    Vector<Real>&                        a_distances,
-			    Real&                                a_shortest,
-			    const RefCountedPtr<kd_node<T> >&    a_node,
-			    const RealVect                       a_x0);
-
-  virtual void tree_search2(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
 			   Vector<Real>&                        a_distances,
-			   Real&                                a_shortest,
-			   const RefCountedPtr<kd_node<T> >&    a_node,
 			   const RealVect                       a_x0);
-
-  virtual void tree_search3(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
-			    Vector<Real>&                        a_distances,
-			    const RealVect                       a_x0);
 
   /*!
     @brief Insertion sort

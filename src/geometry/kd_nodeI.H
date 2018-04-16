@@ -99,14 +99,6 @@ template<typename T> Real kd_node<T>::data_dist(const RealVect a_x0) const {
   return dist;
 }
 
-template<typename T> RealVect kd_node<T>::get_bbox_lo() const {
-  return m_lo;
-}
-
-template<typename T> RealVect kd_node<T>::get_bbox_hi() const {
-  return m_hi;
-}
-
 template<typename T> void kd_node<T>::compute_bbox(){
 
   // Compute AABB (axis-aligned bounding box)
@@ -149,11 +141,6 @@ template<typename T> void kd_node<T>::compute_bbox(){
     }
   }
 #endif
-}
-
-template<typename T> void kd_node<T>::set_bbox(const RealVect a_lo, const RealVect a_hi){
-  m_lo = a_lo;
-  m_hi = a_hi;
 }
 
 template<typename T> void kd_node<T>::set_leaf(const bool a_leaf){

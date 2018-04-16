@@ -70,16 +70,6 @@ public:
   virtual Real data_dist(const RealVect a_x0) const;
 
   /*!
-    @brief Get low end of bounding box
-  */
-  virtual RealVect get_bbox_lo() const;
-
-  /*!
-    @brief Get high end of bounding box
-  */
-  virtual RealVect get_bbox_hi() const;
-
-  /*!
     @brief Compute bounding box
   */
   virtual void compute_bbox();
@@ -103,11 +93,6 @@ public:
     @brief Set right
   */
   virtual void set_right(const RefCountedPtr<kd_node<T> >& a_right);
-
-  /*!
-    @brief Set bounding box
-  */
-  virtual void set_bbox(const RealVect a_lo, const RealVect a_hi);
 
   /*!
     @brief Set data

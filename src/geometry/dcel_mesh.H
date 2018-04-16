@@ -104,16 +104,6 @@ protected:
   ritter_sphere m_sphere;
 
   /*!
-    @brief Bounding box
-  */
-  RealVect m_lo;
-
-  /*!
-    @brief Bounding box
-  */
-  RealVect m_hi;
-
-  /*!
     @brief kd-tree for fast polysearch
   */
   RefCountedPtr<kd_tree<dcel_poly> > m_tree;
@@ -147,15 +137,5 @@ protected:
     @brief Compute bounding sphere for mesh
   */
   virtual void compute_bounding_sphere();
-
-  /*!
-    @brief Compute bounding box
-  */
-  virtual void compute_bounding_box();
-
-  /*!
-    @brief Compute distance to bounding box. Return 0 if point is inside box
-  */
-  virtual Real bbox_dist(const RealVect a_x0) const;
 };
 #endif

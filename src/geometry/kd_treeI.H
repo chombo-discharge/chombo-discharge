@@ -111,107 +111,6 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
   CH_assert(dataleaf == datasize);
 }
 
-template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::get_candidates(const RealVect a_x0){
-#define check_all 1
-#define test_shortest 1
-  Vector<RefCountedPtr<T> > data(0);
-
-  Real shortest = 1.E99;
-  Vector<RefCountedPtr<kd_node<T> > > candidates;
-  Vector<Real> distances;
-
-#if check_all
-  {
-    // Look through all leaves, find shortest distance
-    shortest = 1.E99;
-    for(int i = 0; i < m_leaves.size(); i++){
-      const Real dist = m_leaves[i]->aabb_dist(a_x0);
-      if(dist - shortest <= 0.0){
-	shortest = dist;
-      }
-    }
-
-
-    // Find the 10 closest bounding boxes
-    data.resize(0);
-    if(shortest < TREE_EPSILON){
-      for (int i = 0; i < m_leaves.size(); i++){
-	const Real cur_dist = m_leaves[i]->aabb_dist(a_x0); // This will be zero if point is on or inside the AABB
-	const Real delta    = cur_dist - shortest;
-	if(Abs(delta) < TREE_EPSILON || Abs(cur_dist) < TREE_EPSILON || delta <= TREE_EPSILON){
-	  data.append(m_leaves[i]->get_data());
-	}
-
-#if 1 // Bug check
-	{
-	  if(cur_dist > TREE_EPSILON){ // Point is outside the bounding box. The stuff below should always be true, right!?
-	    const Vector<RefCountedPtr<T> > leafdata = m_leaves[i]->get_data();
-	    for (int j = 0; j < leafdata.size(); j++){
-	      const Real sdist = leafdata[j]->signed_distance(a_x0);
-	      const Real delta = Abs(sdist) - Abs(cur_dist);
-	      if(delta < 0.0 && Abs(delta) > 0.0){//TREE_EPSILON){
-		pout() << "delta = " << Abs(sdist) - Abs(cur_dist)
-		       << "\t cur dist = " << Abs(cur_dist)
-		       << "\t sdist = " << Abs(sdist)
-		       << endl;
-		MayDay::Abort("kd_tree<T>::get_candidates - shouldn't happen");
-	      }
-	    }
-	  }
-	}
-#endif // End bug check
-      }
-    }
-    else { // Do all of them
-      for (int i = 0; i < m_leaves.size(); i++){
-	data.append(m_leaves[i]->get_data());
-      }
-    }
-  }
-  
-#else // Tree search
-  candidates.resize(0);
-  data.resize(0);
-  this->tree_search2(candidates, distances, shortest, m_root, a_x0); // Tree traversal
-  for (int i = 0; i < candidates.size(); i++){
-    data.append(candidates[i]->get_data());
-  }
-
-#endif // End check all
-
-#if test_shortest // test_shortest
-  {
-    Real short1 = 1.E99; // Look through filtered data
-    for (int i = 0; i < data.size(); i++){
-      const Real cur_dist = data[i]->signed_distance(a_x0);
-      if(Abs(cur_dist) < Abs(short1)){
-	short1 = Abs(cur_dist);
-      }
-    }
-
-    Real short2 = 1.E99; // Look through all leaves
-    for (int i = 0; i < m_leaves.size(); i++){
-      Vector<RefCountedPtr<T> > leafdata = m_leaves[i]->get_data();
-      for (int j = 0; j < leafdata.size(); j++){
-	const Real cur_dist = leafdata[j]->signed_distance(a_x0);
-	if(Abs(cur_dist) < Abs(short2)){
-	  short2 = Abs(cur_dist);
-	}
-      }
-    }
-
-    if(Abs(short2) < Abs(short1)){
-      pout() << "Shortest by data filtering = " << short1 << endl;
-      pout() << "Shortest by leaf iteration = " << short2 << endl;
-      pout() << endl;
-      MayDay::Warning("kd_tree<T>::get_candidates - safety test failed");
-    }
-  }
-#endif // End test_shortest
-
-  return data;
-}
-
 template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::find_closest(const RealVect a_x0){
 
   Vector<RefCountedPtr<kd_node<T> > > queue;
@@ -220,65 +119,17 @@ template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::find_closest(const Re
   queue.push_back(m_root);
   dist.push_back(m_root->dist(a_x0));
 
-  this->tree_search3(queue, dist, a_x0);
-
-  //  pout() << dist << endl;
+  this->tree_search(queue, dist, a_x0);
 
   return queue[0]->get_data();
 }
 
-template<typename T> void kd_tree<T>::tree_search(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
-						  Vector<Real>&                        a_distances,
-						  Real&                                a_shortest,
-						  const RefCountedPtr<kd_node<T> >&    a_node,
-						  const RealVect                       a_x0){
-
-  const Real len   = a_node->aabb_dist(a_x0);
-  const Real delta = len - a_shortest;
-  if(delta <= TREE_EPSILON || Abs(delta) < TREE_EPSILON || Abs(len) < TREE_EPSILON){
-    if(a_node->is_leaf()){
-      a_shortest = (delta < 0.0) ? len : a_shortest;
-      a_candidates.push_back(a_node);
-      a_distances.push_back(len);
-    }
-    else{
-      RefCountedPtr<kd_node<T> > left  = a_node->get_left();
-      RefCountedPtr<kd_node<T> > right = a_node->get_right();
-
-      this->tree_search(a_candidates, a_distances, a_shortest, left,  a_x0); // Returns immediately if left->dist()  > a_shortest
-      this->tree_search(a_candidates, a_distances, a_shortest, right, a_x0); // Returns immediately if right->dist() > a_shortest
-    }
-  }
-}
-
-template<typename T> void kd_tree<T>::tree_search2(Vector<RefCountedPtr<kd_node<T> > >& a_candidates,
-						   Vector<Real>&                        a_distances,
-						   Real&                                a_shortest,
-						   const RefCountedPtr<kd_node<T> >&    a_node,
-						   const RealVect                       a_x0){
-
-  const Real len = a_node->aabb_dist(a_x0);
-  if(Abs(len) < TREE_EPSILON){ // Keep searching
-    if(a_node->is_leaf()){ // Add leaf as candidate
-      a_shortest = (len < a_shortest) ? len : a_shortest;
-      a_candidates.push_back(a_node); 
-      a_distances.push_back(len);
-    }
-    else{ // Keep going for the otherse
-      RefCountedPtr<kd_node<T> > left  = a_node->get_left();
-      RefCountedPtr<kd_node<T> > right = a_node->get_right();
-
-      this->tree_search(a_candidates, a_distances, a_shortest, left,  a_x0); // Returns immediately if left->dist()  > a_shortest
-      this->tree_search(a_candidates, a_distances, a_shortest, right, a_x0); // Returns immediately if right->dist() > a_shortest
-    }
-  }
-}
-
-template<typename T> void kd_tree<T>::tree_search3(Vector<RefCountedPtr<kd_node<T> > >& a_queue,
+template<typename T> void kd_tree<T>::tree_search(Vector<RefCountedPtr<kd_node<T> > >& a_queue,
 						   Vector<Real>&                        a_distances,
 						   const RealVect                       a_x0){
 
   // We assume that a_queue and a_distances is sorted on the way in
+  const int Qmax = 20;
 
   if(!a_queue[0]->is_leaf()){ // Examine children
     RefCountedPtr<kd_node<T> > left  = a_queue[0]->get_left();
@@ -303,13 +154,13 @@ template<typename T> void kd_tree<T>::tree_search3(Vector<RefCountedPtr<kd_node<
     a_distances.pop_back();
     
     this->insertion_sort(a_queue, a_distances);
-    //    this->trim(a_queue, a_distances, 10);
+    this->trim(a_queue, a_distances, Qmax);
     
 
     // After sorting, if the first element is a node, we need to keep going
     // There's more to this because there can be multiple nodes/leaves with the same priority
     if(!a_queue[0]->is_leaf()){
-      this->tree_search3(a_queue, a_distances, a_x0);
+      this->tree_search(a_queue, a_distances, a_x0);
     }
   }
 }
