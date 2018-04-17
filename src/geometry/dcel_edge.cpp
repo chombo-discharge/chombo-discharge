@@ -111,8 +111,6 @@ Real dcel_edge::signed_distance(const RealVect a_x0) const {
   Real retval = 1.234567E89;
   
   // Involved vertices
-  //  const RealVect x1 = m_vert->get_pos();
-  //  const RealVect x2 = this->get_other_vert()->get_pos();
   const RealVect x1 = this->get_other_vert()->get_pos();
   const RealVect x2 = m_vert->get_pos();
 
@@ -121,9 +119,6 @@ Real dcel_edge::signed_distance(const RealVect a_x0) const {
   const RealVect xp = a_x0 + PolyGeom::dot(x1-a_x0,r)*r;
   const Real t      = PolyGeom::dot(xp-x1,x2-x1)/PolyGeom::dot(x2-x1, x2-x1);
 
-  if(PolyGeom::cross(xp-x1, x2-x1).vectorLength() > 1.E-8){
-    MayDay::Abort("stop");
-  }
 
   RealVect p;
   RealVect n;
@@ -140,11 +135,8 @@ Real dcel_edge::signed_distance(const RealVect a_x0) const {
     n = m_normal;
   }
 
-
   const Real dot = PolyGeom::dot(n, (a_x0 - p)); // Determine sign from projection. If the point is orthogonal to the normal,
-  const int sgn = dot >= 0.0 ? 1 : -1;            // it must (I think) be outside
-
-  //  CH_assert(n.vectorLength() > 0.0);
+  const int sgn = dot >= 0.0 ? 1 : -1;           // it must (I think) be outside
 
   retval = (a_x0-p).vectorLength()*sgn;
 

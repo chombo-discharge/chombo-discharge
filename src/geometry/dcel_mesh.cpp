@@ -3,6 +3,7 @@
   @brief  Implementation of dcel_mesh.H
   @author Robert Marskar
   @date   Apr. 2018
+  @todo   Bugs in compute_vertex_normals. 
 */
 
 #include "dcel_mesh.H"

@@ -26,8 +26,8 @@
   splitstep_tga.turn_off_advection = false
   splitstep_tga.turn_off_diffusion = false
   splitstep_tga.turn_off_source    = false
-  splitstep_tga.turn_off_poisson   = false;
-  splitstep_tga.turn_off_rte       = false;
+  splitstep_tga.turn_off_poisson   = false
+  splitstep_tga.turn_off_rte       = false
 
 */
 class splitstep_tga : public time_stepper {
