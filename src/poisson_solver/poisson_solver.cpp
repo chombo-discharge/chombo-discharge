@@ -149,6 +149,17 @@ void poisson_solver::allocate_internals(){
   data_ops::set_value(m_resid,  0.0);
 }
 
+void poisson_solver::deallocate_internals(){
+  CH_TIME("poisson_solver::deallocate_internals");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::deallocate_internals" << endl;
+  }
+  m_amr->deallocate(m_state);
+  m_amr->deallocate(m_source);
+  m_amr->deallocate(m_resid);
+  m_amr->deallocate(m_sigma);
+}
+
 void poisson_solver::cache_state(){
   CH_TIME("poisson_solver::cache_state");
   if(m_verbosity > 5){

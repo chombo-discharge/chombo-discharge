@@ -88,6 +88,16 @@ void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
   }
 }
 
+void sigma_solver::deallocate_internals(){
+  CH_TIME("sigma_solver::deallocate_internals");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::deallocate_internals" << endl;
+  }
+  
+  m_amr->deallocate(m_state);
+  m_amr->deallocate(m_flux);
+}
+
 void sigma_solver::initial_data(){
   CH_TIME("sigma_solver::initial_data");
   if(m_verbosity > 5){

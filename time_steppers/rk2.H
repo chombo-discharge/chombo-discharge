@@ -56,6 +56,11 @@ public:
     @brief Regrid internals
   */
   virtual void regrid_internals();
+
+  /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
   
 protected:
 

@@ -16,8 +16,6 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
-#define advect_level_on 1
-
 amr_mesh::amr_mesh(){
 
   this->set_verbosity(10);

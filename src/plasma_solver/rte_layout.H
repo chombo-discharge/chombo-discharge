@@ -44,6 +44,11 @@ public:
   */
   virtual void cache_states();
 
+    /*!
+    @brief Deallocate internal storage for solvers
+  */
+  virtual void deallocate_internals();
+
   /*!
     @brief Regrid method. 
   */

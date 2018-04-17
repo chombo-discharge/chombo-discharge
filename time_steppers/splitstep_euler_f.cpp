@@ -94,6 +94,26 @@ void splitstep_euler_f::regrid_internals(){
   this->allocate_sigma_storage();
 }
 
+void splitstep_euler_f::deallocate_internals(){
+  CH_TIME("splitstep_euler_f::deallocate_internals");
+  if(m_verbosity > 5){
+    pout() << "splitstep_euler_f::deallocate_internals" << endl;
+  }
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_cdr_scratch[idx]->deallocate_storage();
+  }
+  
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_rte_scratch[idx]->deallocate_storage();
+  }
+
+  m_poisson_scratch->deallocate_storage();
+  m_sigma_scratch->deallocate_storage();
+}
+
 void splitstep_euler_f::allocate_cdr_storage(){
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();

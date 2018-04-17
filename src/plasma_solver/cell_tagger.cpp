@@ -65,6 +65,34 @@ void cell_tagger::allocate_storage(){
   }
 }
 
+void cell_tagger::deallocate_storage(){
+  CH_TIME("cell_tagger::deallocate_storage");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deallocate_storage" << endl;
+  }
+
+
+  RefCountedPtr<cdr_layout> cdr = m_timestepper->get_cdr();
+  RefCountedPtr<rte_layout> rte = m_timestepper->get_rte();
+
+  m_amr->deallocate(m_scratch);
+  m_amr->deallocate(m_E);
+  m_amr->deallocate(m_grad_E);
+  m_amr->deallocate(m_rho);
+  m_amr->deallocate(m_grad_rho);
+
+  for(cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->deallocate(m_cdr_densities[idx]);
+    m_amr->deallocate(m_cdr_gradients[idx]);
+  }
+
+  for(rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->deallocate(m_rte_densities[idx]);
+  }
+}
+
 void cell_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 			 const RefCountedPtr<time_stepper>&           a_timestepper,
 			 const RefCountedPtr<amr_mesh>&               a_amr,
@@ -123,6 +151,8 @@ void cell_tagger::compute_tracers(){
   if(m_verbosity > 5){
     pout() << m_name + "::compute_tracers" << endl;
   }
+
+  this->allocate_storage();
   
   const RealVect origin = m_physdom->get_prob_lo();
   const Real time       = m_timestepper->get_time();
@@ -132,7 +162,6 @@ void cell_tagger::compute_tracers(){
   RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
   RefCountedPtr<rte_layout>& rte = m_timestepper->get_rte();
 
-  this->allocate_storage();
 
   // This is all computes on volumetric centroids
   this->compute_cdr_densities(m_cdr_densities);
@@ -258,6 +287,8 @@ void cell_tagger::compute_tracers(){
     m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i]);
     m_amr->average_down(m_grad_tracer[i], m_phase);
   }
+
+  this->deallocate_storage(); // No reason to keep the extra storage lying around...
 }
 
 void cell_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
@@ -371,7 +402,7 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
     const Real time        = m_timestepper->get_time();
     const int finest_level = m_amr->get_finest_level();
 
-    this->compute_tracers(); // Compute tracer fields
+    this->compute_tracers(); 
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];

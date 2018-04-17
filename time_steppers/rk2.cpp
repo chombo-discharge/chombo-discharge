@@ -77,6 +77,28 @@ void rk2::allocate_sigma_storage(){
   m_sigma_scratch->allocate_storage();
 }
 
+void rk2::deallocate_internals(){
+  CH_TIME("rk2::deallocate_internals");
+  if(m_verbosity > 5){
+    pout() << "rk2::deallocate_internals" << endl;
+  }
+
+  m_poisson_scratch->deallocate_storage();
+  m_sigma_scratch->deallocate_storage();
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_cdr_scratch[idx]->deallocate_storage();
+  }
+
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_rte_scratch[idx]->deallocate_storage();
+  }
+
+
+}
+
 void rk2::regrid_internals(){
   CH_TIME("rk2::regrid_internals");
   if(m_verbosity > 5){

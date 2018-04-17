@@ -178,6 +178,11 @@ protected:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage. 
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Compute gradient of tracer field
   */
   virtual void compute_tracer_gradient();

@@ -125,6 +125,11 @@ public:
   virtual void allocate_internals() = 0;
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals() = 0;
+
+  /*!
     @brief Cache state
   */
   virtual void cache_state() = 0;

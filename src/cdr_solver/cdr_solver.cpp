@@ -157,6 +157,23 @@ void cdr_solver::allocate_internals(){
   this->define_divFnc_stencils();
 }
 
+void cdr_solver::deallocate_internals(){
+  CH_TIME("cdr_solver::deallocate_internals");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deallocate_internals" << endl;
+  }
+
+
+  m_amr->deallocate(m_state);
+  m_amr->deallocate(m_source);
+  m_amr->deallocate(m_velo_face);
+  m_amr->deallocate(m_velo_cell);
+  m_amr->deallocate(m_ebflux);
+  m_amr->deallocate(m_diffco);
+  m_amr->deallocate(m_diffco_eb);
+  m_amr->deallocate(m_scratch);
+}
+
 void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
   CH_TIME("cdr_solver::average_velo_to_faces");
   if(m_verbosity > 5){
@@ -183,7 +200,6 @@ void cdr_solver::cache_state(){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     m_state[lvl]->copyTo(*m_cache[lvl]);
   }
-
 }
 
 void cdr_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){

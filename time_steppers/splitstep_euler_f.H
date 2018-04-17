@@ -42,6 +42,11 @@ public:
   virtual Real advance(const Real a_dt);
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Regrid internals
   */
   virtual void regrid_internals();

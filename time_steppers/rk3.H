@@ -16,13 +16,6 @@
 
 /*!
   @brief Class for evolving plasma equations with a second order Runge-Kutta method
-  @details This class supports various types of Runge-Kutta through the RK3 tableu. 
-
-  Class options
-  -------------
-
-      rk3.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
-
 */
 class rk3 : public time_stepper {
 public:
@@ -53,9 +46,15 @@ public:
   virtual Real advance(const Real a_dt);
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Regrid internals
   */
   virtual void regrid_internals();
+
   
 protected:
 

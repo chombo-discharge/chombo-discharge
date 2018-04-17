@@ -42,6 +42,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Allocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get phi
   */
   virtual EBAMRCellData& get_phi(){
@@ -195,6 +200,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Allocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get intermediate state
   */
   virtual MFAMRCellData& get_phi(){
@@ -229,7 +239,7 @@ public:
     return m_E_face;
   }
 
-    /*!
+  /*!
     @brief Get the electric field storage
   */
   virtual EBAMRIVData& get_E_eb(){
@@ -312,6 +322,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Allocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get phi
   */
   virtual EBAMRCellData& get_phi(){
@@ -372,6 +387,11 @@ public:
     @brief Allocate storage
   */
   virtual void allocate_storage();
+
+  /*!
+    @brief Allocate storage
+  */
+  virtual void deallocate_storage();
 
   /*!
     @brief Get phi

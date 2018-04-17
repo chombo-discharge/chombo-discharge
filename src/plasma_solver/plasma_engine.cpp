@@ -555,6 +555,15 @@ void plasma_engine::cache_tags(const EBAMRTags& a_tags){
   }
 }
 
+void plasma_engine::deallocate_internals(){
+  CH_TIME("plasma_engine::deallocate_internals");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::deallocate_internals" << endl;
+  }
+
+  //  m_amr->deallocate(m_tags);
+}
+
 void plasma_engine::get_geom_tags(){
   CH_TIME("plasma_engine::get_geom_tags");
   if(m_verbosity > 5){
@@ -921,25 +930,40 @@ void plasma_engine::regrid(const bool a_use_initial_data){
     pout() << "plasma_engine::regrid" << endl;
   }
 
+  // We need to be careful with memory allocations here. Therefore we do:
+  // --------------------------------------------------------------------
+  // 1.  Deallocate internal storage for the time_stepper - this frees up a bunch of memory that
+  //     we don't need since we won't advance until after regridding anyways. 
+  // 2.  Tag cells, this calls cell_tagger which allocates and deallocate its own storage so 
+  //     there's a peak in memory consumption here. We have to eat this one because we
+  //     potentially need all the solver data for tagging, so that data can't be touched. 
+  // 3.  Cache tags, this doubles up on the memory for m_tags but that shouldn't matter.
+  // 4.  Free up m_tags for safety because it will be regridded anyways. 
+  // 5.  Cache solver states
+  // 6.  Deallocate internal storage for solver. This should free up a bunch of memory. 
+  // 7.  Regrid amr_mesh - this shouldn't cause any extra memory issues
+  // 8.  Regrid plasma_engine - this
+  // 9.  Regrid the cell tagger. I'm not explicitly releasing storage from here since it's so small.
+  // 10. Solve elliptic equations and fill solvers
+
   Vector<IntVectSet> tags;
 
-  const Real start_time = MPI_Wtime();
-  // engine and solvers must cache their internal states
-  m_timestepper->cache_states();
+  const Real start_time = MPI_Wtime();   // Timer
 
-  // Tag cells and cache them
-  this->tag_cells(tags, m_tags); 
-  this->cache_tags(m_tags);      // Cache m_tags  because after regrid, ownership will change
+  m_timestepper->deallocate_internals(); // Deallocate internal storage for the time stepper. 
+  this->tag_cells(tags, m_tags);         // Tag cells
+  this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
+  this->deallocate_internals();          // Deallocate internal storage for plasma_engine
+
+  m_timestepper->cache_states();                // Cache solver states
+  m_timestepper->deallocate_solver_internals(); // Deallocate solver internals
   
-  const Real cell_tags = MPI_Wtime();
+  const Real cell_tags = MPI_Wtime();    // Timer
 
   // Regrid base
   const int old_finest_level = m_amr->get_finest_level();
   m_amr->regrid(tags, old_finest_level + 1);
-  
   const Real base_regrid = MPI_Wtime(); // Base regrid time
-
-  Vector<long int> num_tags(1 + old_finest_level);
 
   const int new_finest_level = m_amr->get_finest_level();
   this->regrid_internals(old_finest_level, new_finest_level);        // Regrid internals for plasma_engine
@@ -951,7 +975,7 @@ void plasma_engine::regrid(const bool a_use_initial_data){
     m_timestepper->initial_data();
   }
 
-  const Real solver_regrid = MPI_Wtime(); // Solver regrid time
+  const Real solver_regrid = MPI_Wtime(); // Timer
 
   // Solve the elliptic parts
   bool converged = m_timestepper->solve_poisson();
@@ -1412,7 +1436,9 @@ void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const 
     if(!a_restart){
       this->setup_fresh(a_init_regrids);
 #ifdef CH_USE_HDF5
-      this->write_plot_file();
+      if(m_plot_interval > 0){
+	this->write_plot_file();
+      }
 #endif
     }
     else{
@@ -1492,6 +1518,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     }
     
   }
+
   m_celltagger->regrid();
   m_timestepper->regrid_internals();
 

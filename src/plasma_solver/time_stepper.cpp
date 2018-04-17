@@ -1174,6 +1174,18 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
   }
 }
 
+void time_stepper::deallocate_solver_internals(){
+  CH_TIME("time_stepper::deallocate_solver_internals");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::deallocate_solver_internals" << endl;
+  }
+
+  m_cdr->deallocate_internals();
+  m_rte->deallocate_internals();
+  m_poisson->deallocate_internals();
+  m_sigma->deallocate_internals();
+}
+
 void time_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data){
   CH_TIME("time_stepper::extrapolate_to_eb");
   if(m_verbosity > 5){

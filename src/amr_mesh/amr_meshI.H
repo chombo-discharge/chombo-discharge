@@ -15,6 +15,20 @@ template<typename T> void amr_mesh::deallocate(Vector<T*>& a_data){
   }
 }
 
+template<typename T> void amr_mesh::deallocate(Vector<RefCountedPtr<T> >& a_data){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    //    delete &a_data[lvl];
+    a_data[lvl] = RefCountedPtr<T>(0);
+#if 0
+    if(!a_data[lvl].isNull()){
+      delete &(*a_data[lvl]);
+      a_data[lvl] = RefCountedPtr<T> (NULL);
+    }
+
+#endif
+  }
+}
+
 template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data){
   CH_TIME("amr_mesh::alias");
   if(m_verbosity > 5){

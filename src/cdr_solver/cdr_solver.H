@@ -51,6 +51,11 @@ public:
   virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state) = 0;
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Sanity check
   */
   virtual void sanity_check();

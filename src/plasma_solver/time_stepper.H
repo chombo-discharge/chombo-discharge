@@ -243,6 +243,16 @@ public:
 			   const centering::which_center  a_centering);
 
   /*!
+    @brief Deallocate internals
+  */
+  virtual void deallocate_internals(){}
+  
+  /*!
+    @brief Deallocate internal solver storages
+  */
+  virtual void deallocate_solver_internals();
+
+  /*!
     @brief Extrapolate data to EB centroid
   */
   virtual void extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);

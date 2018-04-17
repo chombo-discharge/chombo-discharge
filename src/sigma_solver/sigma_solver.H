@@ -61,6 +61,11 @@ public:
   virtual void compute_rhs(EBAMRIVData& a_rhs);
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Fill with initial data
   */
   virtual void initial_data();

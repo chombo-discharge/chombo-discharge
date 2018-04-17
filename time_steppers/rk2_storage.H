@@ -42,6 +42,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get phi
   */
   virtual EBAMRCellData& get_phi(){
@@ -183,6 +188,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get intermediate state
   */
   virtual MFAMRCellData& get_phi(){
@@ -300,6 +310,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get phi
   */
   virtual EBAMRCellData& get_phi(){
@@ -360,6 +375,11 @@ public:
     @brief Allocate storage
   */
   virtual void allocate_storage();
+  
+  /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
 
   /*!
     @brief Get phi

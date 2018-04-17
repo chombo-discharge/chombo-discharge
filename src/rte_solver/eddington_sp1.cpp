@@ -201,6 +201,14 @@ void eddington_sp1::allocate_internals(){
   this->set_aco_and_bco();
 }
 
+void eddington_sp1::deallocate_internals(){
+  m_amr->deallocate(m_aco);
+  m_amr->deallocate(m_bco);
+  m_amr->deallocate(m_bco_irreg);
+  m_amr->deallocate(m_state);
+  m_amr->deallocate(m_source);
+  m_amr->deallocate(m_resid);
+}
 
 void eddington_sp1::regrid(const int a_old_finest_level, const int a_new_finest_level) {
   CH_TIME("eddington_sp1::regrid");

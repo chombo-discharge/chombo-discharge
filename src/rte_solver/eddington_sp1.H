@@ -74,6 +74,11 @@ public:
   virtual void cache_state();
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Regrid function for this class
   */
   virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);

@@ -29,6 +29,13 @@ void euler_f::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratchIV4,  m_phase, m_ncomp);
 }
 
+void euler_f::cdr_storage::deallocate_storage(){
+  m_amr->deallocate(m_scratchIV1);
+  m_amr->deallocate(m_scratchIV2);
+  m_amr->deallocate(m_scratchIV3);
+  m_amr->deallocate(m_scratchIV4);
+}
+
 euler_f::poisson_storage::poisson_storage(){
 
 }
@@ -51,6 +58,12 @@ void euler_f::poisson_storage::allocate_storage(){
   m_amr->allocate(m_E_eb,   m_phase, SpaceDim);
 }
 
+void euler_f::poisson_storage::deallocate_storage(){
+  m_amr->deallocate(m_E_cell);
+  m_amr->deallocate(m_E_face);
+  m_amr->deallocate(m_E_eb);
+}
+
 euler_f::rte_storage::rte_storage(){
 
 }
@@ -69,6 +82,10 @@ void euler_f::rte_storage::allocate_storage(){
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
 }
 
+void euler_f::rte_storage::deallocate_storage(){
+  m_amr->deallocate(m_scratchIV);
+}
+
 euler_f::sigma_storage::sigma_storage(){
 
 }
@@ -85,4 +102,8 @@ euler_f::sigma_storage::~sigma_storage(){
 
 void euler_f::sigma_storage::allocate_storage(){
   m_amr->allocate(m_rhs,  m_phase, m_ncomp);
+}
+
+void euler_f::sigma_storage::deallocate_storage(){
+  m_amr->deallocate(m_rhs);
 }

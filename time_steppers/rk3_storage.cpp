@@ -36,6 +36,20 @@ void rk3::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratch, m_phase, m_ncomp); 
 }
 
+void rk3::cdr_storage::deallocate_storage(){
+  m_amr->deallocate(m_phi);
+  m_amr->deallocate(m_k1);
+  m_amr->deallocate(m_k2);
+  m_amr->deallocate(m_k3);
+
+  m_amr->deallocate(m_scratchIV1);
+  m_amr->deallocate(m_scratchIV2);
+  m_amr->deallocate(m_scratchIV3);
+  m_amr->deallocate(m_scratchIV4);
+
+  m_amr->deallocate(m_scratch);
+}
+
 rk3::poisson_storage::poisson_storage(){
 
 }
@@ -61,6 +75,17 @@ void rk3::poisson_storage::allocate_storage(){
   m_amr->allocate(m_scratch_E,   m_phase, SpaceDim);
 }
 
+void rk3::poisson_storage::deallocate_storage(){
+  m_amr->deallocate(m_phi);
+  
+  m_amr->deallocate(m_E_cell);
+  m_amr->deallocate(m_E_face);
+  m_amr->deallocate(m_E_eb);
+
+  m_amr->deallocate(m_scratch_phi);
+  m_amr->deallocate(m_scratch_E);
+}
+
 rk3::rte_storage::rte_storage(){
 
 }
@@ -78,6 +103,11 @@ rk3::rte_storage::~rte_storage(){
 void rk3::rte_storage::allocate_storage(){
   m_amr->allocate(m_phi,        m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
+}
+
+void rk3::rte_storage::deallocate_storage(){
+  m_amr->deallocate(m_phi);
+  m_amr->deallocate(m_scratchIV);
 }
 
 rk3::sigma_storage::sigma_storage(){
@@ -98,4 +128,11 @@ void rk3::sigma_storage::allocate_storage(){
   m_amr->allocate(m_k1,  m_phase, m_ncomp);
   m_amr->allocate(m_k2,  m_phase, m_ncomp);
   m_amr->allocate(m_k3,  m_phase, m_ncomp);
+}
+
+void rk3::sigma_storage::deallocate_storage(){
+  m_amr->deallocate(m_phi);
+  m_amr->deallocate(m_k1);
+  m_amr->deallocate(m_k2);
+  m_amr->deallocate(m_k3);
 }

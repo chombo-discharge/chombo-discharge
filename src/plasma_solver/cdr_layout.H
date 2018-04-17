@@ -52,6 +52,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Deallocate solver internals
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Cache states before regrid step
   */
   virtual void cache_states();

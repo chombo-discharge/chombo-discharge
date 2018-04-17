@@ -36,6 +36,19 @@ void splitstep_tga::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratchIV4,  m_phase, m_ncomp);
 }
 
+
+void splitstep_tga::cdr_storage::deallocate_storage(){
+  m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_phi);
+  m_amr->deallocate(m_k1);
+  m_amr->deallocate(m_k2);
+
+  m_amr->deallocate(m_scratchIV1);
+  m_amr->deallocate(m_scratchIV2);
+  m_amr->deallocate(m_scratchIV3);
+  m_amr->deallocate(m_scratchIV4);
+}
+
 splitstep_tga::poisson_storage::poisson_storage(){
 
 }
@@ -60,6 +73,14 @@ void splitstep_tga::poisson_storage::allocate_storage(){
   m_amr->allocate(m_E_eb,   m_phase, SpaceDim);
 }
 
+void splitstep_tga::poisson_storage::deallocate_storage(){
+  m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_phi);
+  m_amr->deallocate(m_E_cell);
+  m_amr->deallocate(m_E_face);
+  m_amr->deallocate(m_E_eb);
+}
+
 splitstep_tga::rte_storage::rte_storage(){
 
 }
@@ -82,6 +103,12 @@ void splitstep_tga::rte_storage::allocate_storage(){
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
 }
 
+void splitstep_tga::rte_storage::deallocate_storage(){
+  m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_phi);
+  m_amr->deallocate(m_scratchIV);
+}
+
 splitstep_tga::sigma_storage::sigma_storage(){
 
 }
@@ -102,4 +129,11 @@ void splitstep_tga::sigma_storage::allocate_storage(){
   m_amr->allocate(m_phi,   m_phase, m_ncomp);
   m_amr->allocate(m_k1,    m_phase, m_ncomp);
   m_amr->allocate(m_k2,    m_phase, m_ncomp);
+}
+
+void splitstep_tga::sigma_storage::deallocate_storage(){
+  m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_phi);
+  m_amr->deallocate(m_k1);
+  m_amr->deallocate(m_k2);
 }

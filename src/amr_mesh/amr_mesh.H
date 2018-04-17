@@ -76,6 +76,11 @@ public:
   template<typename T> void deallocate(Vector<T*>& a_data);
 
   /*!
+    @brief Deallocate data
+  */
+  template<typename T> void deallocate(Vector<RefCountedPtr<T> >& a_data);
+
+  /*!
     @brief Turn smart-pointer data structure into regular-pointer data structure
   */
   template<typename T> void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);

@@ -467,6 +467,11 @@ protected:
   virtual void cache_tags(const EBAMRTags& a_tags);
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Get geometric tags
   */
   virtual void get_geom_tags();

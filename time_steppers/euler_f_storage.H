@@ -40,6 +40,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get scratch storage
   */
   virtual EBAMRIVData& get_eb_state(){
@@ -60,7 +65,7 @@ public:
     return m_scratchIV3;
   }
 
-    /*!
+  /*!
     @brief Get scratch storage
   */
   virtual EBAMRIVData& get_eb_grad(){
@@ -132,6 +137,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get the electric field storage
   */
   virtual EBAMRCellData& get_E_cell(){
@@ -145,7 +155,7 @@ public:
     return m_E_face;
   }
 
-    /*!
+  /*!
     @brief Get the electric field storage
   */
   virtual EBAMRIVData& get_E_eb(){
@@ -212,6 +222,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get scratch storage
   */
   virtual EBAMRIVData& get_eb_flux(){
@@ -263,6 +278,11 @@ public:
     @brief Allocate storage
   */
   virtual void allocate_storage();
+
+  /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
 
   /*!
     @brief Get scratch storage

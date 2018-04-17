@@ -78,6 +78,11 @@ public:
   virtual void cache_state();
 
   /*!
+    @brief Deallocate internal storage
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Regrid method. 
   */
   virtual void regrid(const int a_old_finest, const int a_new_finest);

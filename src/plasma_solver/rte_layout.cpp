@@ -80,6 +80,18 @@ void rte_layout::cache_states(){
   }
 }
 
+void rte_layout::deallocate_internals(){
+  CH_TIME("rte_layout::deallocate_internals");
+  if(m_verbosity > 6){
+    pout() << "rte_layout::deallocate_internals" << endl;
+  }
+
+  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    //    solver->deallocate_internals();
+  }
+}
+
 void rte_layout::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("rte_layout::set_amr");
   if(m_verbosity > 5){

@@ -40,6 +40,11 @@ public:
     @brief Allocate storage
   */
   virtual void allocate_storage();
+  
+  /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
 
   /*!
     @brief Get cached solution
@@ -183,6 +188,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get cached state
   */
   virtual MFAMRCellData& get_cache(){
@@ -288,6 +298,11 @@ public:
   virtual void allocate_storage();
 
   /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
+
+  /*!
     @brief Get cached solution
   */
   virtual EBAMRCellData& get_cache(){
@@ -360,6 +375,11 @@ public:
     @brief Allocate storage
   */
   virtual void allocate_storage();
+
+  /*!
+    @brief Deallocate storage
+  */
+  virtual void deallocate_storage();
 
   /*!
     @brief Get cached solution
