@@ -71,11 +71,12 @@ bool dcel_mesh::sanity_check() const {
 
   for (int i = 0; i < m_vertices.size(); i++){
     if(m_vertices[i].isNull()){
-      MayDay::Abort("dcel_mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.");
+      MayDay::Warning("dcel_mesh::sanity_check - m_vertices[i] is NULL, something has gone wrong with vertex generation.");
     }
     else{
       if(m_vertices[i]->get_edge().isNull()){
-	MayDay::Abort("dcel_mesh::sanity_check - vertex edge is NULL, something has gone wrong with edge generation.");
+	CH_assert(m_vertices[i]->get_polycache().size() == 0);
+	pout() << "dcel_mesh::sanity_check - vertex edge is NULL, you may have an unreferenced vertex." << endl;
       }
     }
   }
@@ -127,69 +128,85 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
 }
 
 void dcel_mesh::compute_vertex_normals(){
-#define debug_func 0
+#define debug_func 1
 
 #if debug_func
   pout() << "starting computation" << endl;
 #endif
   for (int i = 0; i < m_vertices.size(); i++){
-#if 0 // This doesn't work, why?!?
-    const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
+    if(!m_vertices[i]->get_edge().isNull()){
+#if 1 // This doesn't work, why?!?
+      const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polygons();
 #else
-    const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polycache();
+      const Vector<RefCountedPtr<dcel_poly> > polygons = m_vertices[i]->get_polycache();
 #endif
 
-    // Mean or area weighted
-    if(!s_angle_weighted){
-      RealVect normal = RealVect::Zero;
-      for (int j = 0; j < polygons.size(); j++){
-	normal += polygons[j]->get_area()*polygons[j]->get_normal(); // Area weighted
-	//	normal += polygons[j]->get_normal(); // Mean
-      }
-      CH_assert(normal.vectorLength() > 0.0);
-      normal *= 1./normal.vectorLength();
-      m_vertices[i]->set_normal(normal);
-    }
-    else { // Angle-weighted normal vector
-      RealVect normal = RealVect::Zero;
-#if debug_func
-      int num = 0;
-#endif
-      for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){ 
-	const RefCountedPtr<dcel_edge>& outgoing = iter();
-	const RefCountedPtr<dcel_edge>& incoming = outgoing->get_prev();
-
-	const RealVect origin = incoming->get_vert()->get_pos();
-	const RealVect x2     = outgoing->get_vert()->get_pos();
-	const RealVect x1     = incoming->get_other_vert()->get_pos();
-	const Real len1       = (x1-origin).vectorLength();
-	const Real len2       = (x2-origin).vectorLength();
-
-	const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
-	//	const Real alpha = asin(norm.vectorLength());
-
-	const Real alpha = acos(PolyGeom::dot(x2-origin, x1-origin)/len1*len2);
-
-	normal += alpha*norm/norm.vectorLength();
-#if debug_func
-	num++;
-	pout() << num << endl;
-
-	if(num > 200){
-	  pout() << "problem vertex = " << m_vertices[i]->get_pos() << endl;
-	  MayDay::Abort("dcel_compute_vertex_normals - stop");
+      // Mean or area weighted
+      CH_assert(polygons.size() >= 3);
+      if(!s_angle_weighted){
+	RealVect normal = RealVect::Zero;
+	for (int j = 0; j < polygons.size(); j++){
+	  //normal += polygons[j]->get_area()*polygons[j]->get_normal(); // Area weighted
+	  normal += polygons[j]->get_normal(); // Mean
 	}
-#endif
-      }
-      normal *= 1./normal.vectorLength();
 
-      m_vertices[i]->set_normal(normal);
-    }
-  }
+	// Set normal
+	if(normal.vectorLength() > 0.0){
+	  normal *= 1./normal.vectorLength();
+	  m_vertices[i]->set_normal(normal);
+	}
+	else{
+	  normal = polygons[1]->get_normal();
+	  m_vertices[i]->set_normal(normal);
+	}
+      }
+      else { // Angle-weighted normal vector
+	RealVect normal = RealVect::Zero;
+#if debug_func
+	int num = 0;
+#endif
+	for (edge_iterator iter(*m_vertices[i]); iter.ok(); ++iter){ 
+	  const RefCountedPtr<dcel_edge>& outgoing = iter();
+	  const RefCountedPtr<dcel_edge>& incoming = outgoing->get_prev();
+
+	  const RealVect origin = incoming->get_vert()->get_pos();
+	  const RealVect x2     = outgoing->get_vert()->get_pos();
+	  const RealVect x1     = incoming->get_other_vert()->get_pos();
+	  const Real len1       = (x1-origin).vectorLength();
+	  const Real len2       = (x2-origin).vectorLength();
+
+	  const RealVect norm = PolyGeom::cross(x2-origin, x1-origin)/(len1*len2);
 
 #if debug_func
-  pout() << "done computing vertex vectors" << endl;
+	  CH_assert(len1 > 0.0);
+	  CH_assert(len2 > 0.0);
+	  CH_assert(norm.vectorLength() > 0.0);
 #endif
+	  //	const Real alpha = asin(norm.vectorLength());
+
+	  const Real alpha = acos(PolyGeom::dot(x2-origin, x1-origin)/len1*len2);
+
+	  normal += alpha*norm/norm.vectorLength();
+#if debug_func
+	  num++;
+	  pout() << num << endl;
+
+	  if(num > 20){
+	    pout() << "problem vertex = " << m_vertices[i]->get_pos() << endl;
+	    MayDay::Abort("dcel_compute_vertex_normals - stop");
+	  }
+#endif
+	}
+	normal *= 1./normal.vectorLength();
+
+	m_vertices[i]->set_normal(normal);
+      }
+    }
+
+#if debug_func
+    pout() << "done computing vertex vectors" << endl;
+#endif
+  }
 }
 
 void dcel_mesh::compute_edge_normals(){

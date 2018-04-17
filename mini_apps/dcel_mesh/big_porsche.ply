@@ -1,11 +1,12 @@
 ply
 format ascii 1.0
+comment VCGLIB generated
 element vertex 5247
-property float32 x
-property float32 y
-property float32 z
-element face 10474
-property list uint8 int32 vertex_indices
+property float x
+property float y
+property float z
+element face 10472
+property list uchar int vertex_indices
 end_header
 -6.66398 -0.589207 -1.55762 
 -6.69456 -0.57465 -0.592481 
@@ -6586,8 +6587,6 @@ end_header
 3 902 923 919 
 3 921 924 925 
 3 921 925 922 
-3 921 926 927 
-3 921 927 928 
 3 921 928 924 
 3 924 928 929 
 3 924 929 930 
@@ -7210,8 +7209,6 @@ end_header
 3 661 1444 1445 
 3 662 571 1365 
 3 662 1365 1368 
-3 921 1022 927 
-3 921 927 926 
 3 1022 921 902 
 3 1253 1244 1446 
 3 1253 1446 1200 
@@ -15728,3 +15725,5 @@ end_header
 3 4952 5227 5228 
 3 5232 5231 4962 
 3 5232 4962 4964 
+3 921 1022 927 
+3 927 928 921 

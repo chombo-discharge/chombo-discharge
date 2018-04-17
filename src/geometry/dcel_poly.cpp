@@ -93,6 +93,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
     }
   }
 
+  
   if(!found_normal){
     pout() << "dcel_poly::compute_normal - vertex vectors:" << endl;
     for (int i = 0; i < vertices.size(); i++){
@@ -100,7 +101,7 @@ void dcel_poly::compute_normal(const bool a_outward_normal){
     }
     pout() << "dcel_poly::compute_normal - From this I computed n = " << m_normal << endl;
     pout() << "dcel_poly::compute_normal - Aborting..." << endl;
-    MayDay::Abort("dcel_poly::compute_normal - Cannot compute normal vector. The polygon is probably degenerate");
+    MayDay::Warning("dcel_poly::compute_normal - Cannot compute normal vector. The polygon is probably degenerate");
   }
   else{
     m_normal *= 1./m_normal.vectorLength();

@@ -56,7 +56,7 @@ Vector<RefCountedPtr<dcel_poly> > dcel_vert::get_polygons() {
     polygons.push_back(iter()->get_poly());
   }
 
-  MayDay::Abort("dcel_vert::get_polygons - this routine has crashed in the past and probably contains some bug.");
+  //  MayDay::Abort("dcel_vert::get_polygons - this routine has crashed in the past and probably contains some bug.");
 
   return polygons;
 }

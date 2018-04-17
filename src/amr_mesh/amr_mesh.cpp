@@ -1405,7 +1405,7 @@ void amr_mesh::set_blocking_factor(const int a_blocking_factor){
     if(pp.contains("blocking_factor")){
       int blocking;
       pp.get("blocking_factor", blocking);
-      if(blocking >= 8 && blocking % 2 == 0){
+      if(blocking >= 4 && blocking % 2 == 0){
 	m_blocking_factor = blocking;
       }
     }

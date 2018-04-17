@@ -161,7 +161,6 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
       //      pout() << "i = " << i << "\t i+1 = " << (i+1)%num_vert << endl;
       poly_edges[i]->set_next(poly_edges[(i+1)%num_vert]);
       poly_edges[(i+1)%num_vert]->set_prev(poly_edges[i]);
-
     }
 
     // Set edges emanating from vertices if that hasn't been done already
