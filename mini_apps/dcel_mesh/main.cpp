@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
   pp.get("max_elem", max_elem);
   dcel_mesh* plymesh = new dcel_mesh();
   ply_reader::read_ascii(*plymesh, str);
-  plymesh->reconcile_polygons(true);
+  plymesh->reconcile_polygons(true, false);
   plymesh->build_tree(tree_depth, max_elem);
 
 

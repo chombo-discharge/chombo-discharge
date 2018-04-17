@@ -99,7 +99,7 @@ void dcel_mesh::compute_bounding_sphere(){
   m_sphere.define(pos);
 }
 
-void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
+void dcel_mesh::reconcile_polygons(const bool a_outward_normal, const bool a_recompute_vnormal){
 
   // Reconcile polygons; compute polygon area and provide edges explicit access
   // to their polygons
@@ -119,8 +119,11 @@ void dcel_mesh::reconcile_polygons(const bool a_outward_normal){
   }
 
 
-  // Compute pseudonormals for vertices and edges. 
-  this->compute_vertex_normals();
+  // Compute pseudonormals for vertices and edges.
+  if(a_recompute_vnormal){
+    MayDay::Warning("dcel_mesh::reconcile_polygons - there is probably a bug in the vertex normal computation somewhere");
+    this->compute_vertex_normals();
+  }
   this->compute_edge_normals();
   this->compute_bounding_sphere();
 

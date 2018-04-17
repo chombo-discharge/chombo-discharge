@@ -59,7 +59,7 @@ public:
     polygon area
     @param[in] a_area_weighted Use area weighted vertex normals
   */
-  virtual void reconcile_polygons(const bool a_outward_normal);
+  virtual void reconcile_polygons(const bool a_outward_normal, const bool recompute_vnormal);
 
   /*!
     @brief Build kd-tree

@@ -18,11 +18,6 @@ public:
   */
   static void read_ascii(dcel_mesh& a_mesh, const std::string a_filename);
 
-  /*!
-    @brief Read a binary .ply file and put it in a mesh. 
-  */
-  static void read_binary(dcel_mesh& a_mesh, const std::string a_filename);
-
 protected:
 
   /*!
@@ -32,14 +27,13 @@ protected:
     @param[out] a_num_vertices  Number of vertices
     @param[out] a_num_polygons  Number of polygons
   */
-  static void read_ascii_header(int& a_first_vertex,
-				int& a_first_polygon,
-				int& a_num_vertices,
+  static void read_ascii_header(int& a_num_vertices,
 				int& a_num_polygons,
 				std::ifstream& a_inputstream);
 
   /*!
-    @brief Read ASCII vertices. The next getline() from inputstream must read the first vertex (i.e. don't rewind the stream)
+    @brief Read ASCII vertices. The next getline() from inputstream must read the first vertex (i.e. don't rewind the stream
+    before entering this routine)
   */
   static void read_ascii_vertices(Vector<RefCountedPtr<dcel_vert> >& vertices,
 				  const int a_num_vertices,

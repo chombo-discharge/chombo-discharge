@@ -24,12 +24,10 @@ void ply_reader::read_ascii(dcel_mesh& a_mesh, const std::string a_filename){
     edges.resize(0);
     polygons.resize(0);
 
-    int first_vertex;  // Line number containing the first vertex
-    int first_polygon; // Line number containing the first polygon
     int num_vertices;  // Number of vertices
     int num_polygons;  // Number of polygons
 
-    ply_reader::read_ascii_header(first_vertex, first_polygon, num_vertices, num_polygons, filestream); 
+    ply_reader::read_ascii_header(num_vertices, num_polygons, filestream); 
     ply_reader::read_ascii_vertices(vertices, num_vertices, filestream);
     ply_reader::read_ascii_polygons(polygons, edges, vertices, num_polygons, filestream);
 
@@ -43,9 +41,7 @@ void ply_reader::read_ascii(dcel_mesh& a_mesh, const std::string a_filename){
   }
 }
 
-void ply_reader::read_ascii_header(int& a_first_vertex,
-				   int& a_first_polygon,
-				   int& a_num_vertices,
+void ply_reader::read_ascii_header(int& a_num_vertices,
 				   int& a_num_polygons,
 				   std::ifstream& a_inputstream){
 
@@ -75,22 +71,16 @@ void ply_reader::read_ascii_header(int& a_first_vertex,
     }
   }
 
-  // Find the line # containing "end_header"
+  // Find the line # containing "end_header" halt the input stream there
   a_inputstream.clear();
   a_inputstream.seekg(0);
-  a_first_vertex = 0;
   while (getline(a_inputstream, line)){
-    a_first_vertex++;
     std::stringstream sstream(line);
     sstream >> str1;
     if(str1 == "end_header"){
-      a_first_vertex++;
       break;
     }
   }
-
-  // The first polygon is on a_first_vertex + a_num_vertices
-  a_first_polygon = a_first_vertex + a_num_vertices;
 }
 
 void ply_reader::read_ascii_vertices(Vector<RefCountedPtr<dcel_vert> >& a_vertices,
@@ -101,6 +91,11 @@ void ply_reader::read_ascii_vertices(Vector<RefCountedPtr<dcel_vert> >& a_vertic
   Real& x = pos[0];
   Real& y = pos[1];
   Real& z = pos[2];
+
+  RealVect norm;
+  Real& nx = norm[0];
+  Real& ny = norm[1];
+  Real& nz = norm[2];
   
   int num = 0;
 
@@ -108,8 +103,11 @@ void ply_reader::read_ascii_vertices(Vector<RefCountedPtr<dcel_vert> >& a_vertic
   while(std::getline(a_inputstream, line)){
     num++;
     std::stringstream sstream(line);
-    sstream >> x >> y >> z;
-    a_vertices.push_back(RefCountedPtr<dcel_vert> (new dcel_vert(pos)));
+    sstream >> x >> y >> z >> nx >> ny >> nz;
+
+    RefCountedPtr<dcel_vert> vert = RefCountedPtr<dcel_vert> (new dcel_vert(pos));
+    vert->set_normal(norm);
+    a_vertices.push_back(vert);
     if(num == a_num_vertices){
       break;
     }
@@ -121,8 +119,6 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
 				     Vector<RefCountedPtr<dcel_vert> >& a_vertices,
 				     const int a_num_polygons,
 				     std::ifstream& a_inputstream){
-
-  MayDay::Warning("ply_reader::read_ascii_polygons - implement degenerate polygon check!");
   int num_vert;
   Vector<int> which_vertices;
 
@@ -148,7 +144,7 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
       poly_vertices[i] = a_vertices[which_vertices[i]];
     }
 
-    // Build inside edges
+    // Build inside edges. Polygon gets a reference to the edge
     Vector<RefCountedPtr<dcel_edge> > poly_edges(num_vert);
     for (int i = 0; i < num_vert; i++){
       poly_edges[i] = RefCountedPtr<dcel_edge> (new dcel_edge());
@@ -158,7 +154,6 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
 
     // Associate prev/next
     for (int i = 0; i < num_vert; i++){
-      //      pout() << "i = " << i << "\t i+1 = " << (i+1)%num_vert << endl;
       poly_edges[i]->set_next(poly_edges[(i+1)%num_vert]);
       poly_edges[(i+1)%num_vert]->set_prev(poly_edges[i]);
     }
@@ -166,13 +161,9 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
     // Set edges emanating from vertices if that hasn't been done already
     for (int i = 0; i < poly_vertices.size(); i++){
       if(poly_vertices[i]->get_edge().isNull()){
-	//	CH_assert(poly_edges[i]->get_prev() != NULL);
-	//	poly_vertices[i]->set_edge(poly_edges[i]->get_prev());
 	poly_vertices[i]->set_edge(poly_edges[i]);
       }
-	//      }
     }
-
 
     // Check for pairs
     for (int i = 0; i < poly_edges.size(); i++){
@@ -197,13 +188,13 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
       }
     }
 
-
     // Add reference to newly created polygon
     for (int i = 0; i < poly_vertices.size(); i++){
       poly_vertices[i]->add_polygon(polygon);
       CH_assert(!poly_vertices[i]->get_edge().isNull());
     }
 
+    // Add edges and polygons
     for (int i = 0; i < poly_edges.size(); i++){
       a_edges.push_back(poly_edges[i]);
     }
@@ -213,10 +204,4 @@ void ply_reader::read_ascii_polygons(Vector<RefCountedPtr<dcel_poly> >& a_polygo
       break;
     }
   }
-}
-
-void ply_reader::read_binary(dcel_mesh& a_mesh, const std::string a_filename){
-
-
-    
 }
