@@ -4,6 +4,7 @@
   @author Robert Marskar
   @date   Nov. 2017
   @todo   The dt computations use vofiterators over the full box. This should be replaced by fortran routines (or internal ebcell fab functions)
+  @todo   The set_velocity(RealVect) function breaks sometimes when I have multicells. We should figure out why. 
 */
 
 #include "cdr_solver.H"
