@@ -20,7 +20,8 @@
   Class options
   -------------
 
-      cdr_gdnv.divF_nc = covered    # Valid options are "covered_face" and "conservative_average"
+      cdr_gdnv.divF_nc      = covered_face    # Valid options are "covered_face" and "conservative_average"
+      cdr_gdnv.limit_slopes = false           # Use van Leer slope limiter or not (default is false)
 
 */
 class cdr_gdnv : public cdr_tga {

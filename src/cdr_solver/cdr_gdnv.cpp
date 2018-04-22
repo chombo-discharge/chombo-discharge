@@ -14,7 +14,7 @@
 
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
   m_name = "cdr_gdnv";
-  m_slopelim = true;
+  m_slopelim = false;
   std::string str = "covered_face";
   int which = 0;
 
