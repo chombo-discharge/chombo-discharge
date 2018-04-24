@@ -935,6 +935,23 @@ void time_stepper::compute_E(EBAMRIVData& a_E_eb, const phase::which_phase a_pha
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
+void time_stepper::compute_Emax(Real& a_Emax, const phase::which_phase a_phase){
+  CH_TIME("time_stepper::compute_Emax(Real, phase)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_Emax(Real, phase)" << endl;
+  }
+
+  EBAMRCellData E;
+  m_amr->allocate(E, a_phase, SpaceDim);
+
+  this->compute_E(E, a_phase, m_poisson->get_state());
+
+  Real max, min;
+  data_ops::get_max_min_norm(max, min, E);
+
+  a_Emax = max;
+}
+
 void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fluxes,
 					       const Vector<EBAMRCellData*> a_densities,
 					       const Vector<EBAMRCellData*> a_velocities,
@@ -1211,6 +1228,28 @@ void time_stepper::extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
 
   for (int i = 0; i < a_extrap.size(); i++){
     this->extrapolate_to_eb(*a_extrap[i], a_phase, *a_data[i]);
+  }
+}
+
+void time_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name){
+  CH_TIME("time_stepper::get_cdr_max");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::get_cdr_max" << endl;
+  }
+
+  const int comp = 0;
+  
+  a_cdr_max = 0.0;
+  a_solver_name = "invalid solver";
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    Real max, min;
+    data_ops::get_max_min(max, min, solver->get_state(), comp);
+
+    if(max > a_cdr_max){
+      a_cdr_max     = max;
+      a_solver_name = solver->get_name();
+    }
   }
 }
 

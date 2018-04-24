@@ -115,6 +115,11 @@ public:
   virtual void compute_E(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
 
   /*!
+    @brief Compute the maximum of the electric field
+  */
+  virtual void compute_Emax(Real& a_Emax, const phase::which_phase a_phase);
+
+  /*!
     @brief Compute the current density
   */
   virtual void compute_J(EBAMRCellData& a_J);
@@ -263,6 +268,11 @@ public:
   virtual void extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
 				 const phase::which_phase      a_phase,
 				 const Vector<EBAMRCellData*>& a_data);
+
+  /*!
+    @brief Get maximum value of the cdr solver stuff
+  */
+  virtual void get_cdr_max(Real& a_cdr_max, std::string& a_solver_name);
 
   /*!
     @brief Instantiate solvers

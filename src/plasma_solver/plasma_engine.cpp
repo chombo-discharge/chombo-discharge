@@ -1768,6 +1768,15 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
     pout() << "plasma_engine::step_report" << endl;
   }
 
+  // Compute the maximum electric field
+  Real Emax;
+  m_timestepper->compute_Emax(Emax, phase::gas);
+
+  //
+  Real nmax;
+  std::string solver_max;
+  m_timestepper->get_cdr_max(nmax, solver_max);
+
   pout() << endl;
   std::string str;
   if(m_timecode == time_code::cfl){
@@ -1788,10 +1797,11 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   if(m_timecode == time_code::hardcap){
     str = " (Restricted by a hardcap)";
   }
-  pout() << "plasma_engine::Time step report -- Time step #" << m_step
-	 << "\t Time = " << m_time
-	 << "\t dt = " << m_dt 
-	 << str << endl;
+  pout() << "plasma_engine::Time step report -- Time step #" << m_step << endl
+	 << "                                   Time  = " << m_time << endl
+	 << "                                   dt    = " << m_dt << str << endl
+	 << "                                   Emax  = " << Emax << endl
+	 << "                                   n_max = " << nmax << "(" + solver_max + ")" << endl;
 
   // Get the total number of poitns across all levels
   const int finest_level                 = m_amr->get_finest_level();
@@ -1808,14 +1818,6 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
     }
     totalPoints += pointsThisLevel;
   }
-  
-  // const Real sparsity = 1.0*totalPoints/uniformPoints;
-  // pout() << "                                             #" << m_step
-  // 	 << "\t Num cells = " << totalPoints          
-  // 	 << "\t Grid sparsity = " << sparsity
-  // 	 << "\t Finest dx = " << dx[finest_level]
-  // 	 << endl;
-
 
   char metrics[300];
   pout() << endl;
