@@ -67,7 +67,7 @@ plasma_engine.initial_regrids                 = 0             # Number of initia
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 100           # Maximum number of steps
+plasma_engine.max_steps                       = 1             # Maximum number of steps
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
@@ -85,7 +85,7 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-time_stepper.verbosity        = -1    # Class verbosity
+time_stepper.verbosity        = 10    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
