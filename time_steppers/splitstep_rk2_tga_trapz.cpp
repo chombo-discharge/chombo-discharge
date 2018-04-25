@@ -519,7 +519,7 @@ void splitstep_rk2_tga_trapz::compute_trapz_rhs(const Real a_dt){
 
     EBAMRCellData& rhs = storage->get_k1();
     data_ops::copy(rhs, state);
-    data_ops::incr(rhs, source, -0.5*a_dt);
+    data_ops::incr(rhs, source, 0.5*a_dt);
     
   }
 }
