@@ -22,12 +22,12 @@
   Class options
   -------------
 
-  splitstep_tga.rk2_alpha          = 1.0 # Set alpha. 1.0 = Heuns method, 0.5 = Midpoint method
-  splitstep_tga.turn_off_advection = false
-  splitstep_tga.turn_off_diffusion = false
-  splitstep_tga.turn_off_source    = false
-  splitstep_tga.turn_off_poisson   = false
-  splitstep_tga.turn_off_rte       = false
+  splitstep_tga.rk2_alpha          = 1.0    # Set alpha. 1.0 = Heuns method, 0.5 = Midpoint method
+  splitstep_tga.turn_off_advection = false  # Turn off advection, debugging only
+  splitstep_tga.turn_off_diffusion = false  # Turn off diffusion, debugging only
+  splitstep_tga.turn_off_source    = false  # Turn off source term, debugging only
+  splitstep_tga.turn_off_poisson   = false  # Turn off Poisson, debugging only
+  splitstep_tga.turn_off_rte       = false  # Turn off RTE, debugging only
 
 */
 class splitstep_tga : public time_stepper {

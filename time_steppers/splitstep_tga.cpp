@@ -128,13 +128,13 @@ Real splitstep_tga::advance(const Real a_dt){
   this->cache_solutions(); // Cache old solutions. Not used for anything (yet), but derived classes might. 
 
   if(m_do_advection){
-    this->advance_advection(a_dt); // Advective advance. After this, solvers contain the advected states.
-  }
+    this->advance_advection(a_dt); // Advective advance. After this, solvers contain the advected states. The poisson 
+  }                                // solver contains the potential after advection
   if(m_do_diffusion){
     this->advance_diffusion(a_dt); // Diffusion advance. After this, solvers contain the diffused advected states.
   }
   if(m_do_source){
-    this->advance_sources(a_dt);   // Source term advance. Source term advancement
+    this->advance_sources(a_dt);   // Source term advance. 
   }
 
   // Put solver back in useable state so that we can reliably compute the next time step. 

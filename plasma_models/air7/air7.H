@@ -22,6 +22,8 @@
 
       air7.electron_diffusion            = true                  # Turn off electron diffusion (debugging only)
       air7.excitation_efficiency         = 0.6                   # Impact excitation efficiency
+      air7.thermal_outflow               = false                 # Thermal outflow on/off
+      air7.diffusive_outflow             = false                 # Diffusive outflow on/off
       air7.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
       air7.electrode_townsend2           = 1.E-2                 # Townsend coefficient on electrodes
       air7.electrode_quantum_efficiency  = 1.E-2                 # Quantum efficiency on electrodes
@@ -161,6 +163,16 @@ protected:
     @brief Simple cathode (electrode) boundary condition
   */
   bool m_simple_cathode;
+
+  /*!
+    @brief Thermal outflow on/off
+  */
+  bool m_thermal_outflow;
+
+  /*!
+    @brief Diffusive outflow on/off
+  */
+  bool m_diffusive_outflow;
 
   /*!
     @brief Background gas temperature

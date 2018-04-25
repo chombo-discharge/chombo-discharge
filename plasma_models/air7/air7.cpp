@@ -31,6 +31,27 @@ air7::air7(){
     }
   }
 
+  {
+    m_thermal_outflow   = false;
+    m_diffusive_outflow = false;
+
+    ParmParse pp("air7");
+    if(pp.contains("thermal_outflow")){
+      std::string str;
+      pp.get("thermal_outflow", str);
+      if(str == "true"){
+	m_thermal_outflow = true;
+      }
+    }
+    if(pp.contains("diffusive_outflow")){
+      std::string str;
+      pp.get("diffusive_outflow", str);
+      if(str == "true"){
+	m_diffusive_outflow = true;
+      }
+    }
+  }
+
   air7::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac);
 
   { // Emission coefficients at boundaries. Can be overridden from input script.
@@ -389,22 +410,26 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
   }
 
   // Thermal outflow
-  const Real vth_g = sqrt(8.0*units::s_kb*Te/(units::s_pi*mO2));
-  const Real vth_e = sqrt(8.0*units::s_kb*Te/(units::s_pi*units::s_me));
-  for (int i = 0; i < m_num_species; i++){
-    Real vth = 0.0;
-    if(i == m_electron_idx){
-      vth = vth_e;
+  if(m_thermal_outflow){
+    const Real vth_g = sqrt(8.0*units::s_kb*Te/(units::s_pi*mO2));
+    const Real vth_e = sqrt(8.0*units::s_kb*Te/(units::s_pi*units::s_me));
+    for (int i = 0; i < m_num_species; i++){
+      Real vth = 0.0;
+      if(i == m_electron_idx){
+	vth = vth_e;
+      }
+      else{
+	vth = vth_g;
+      }
+      fluxes[i] += 0.25*vth*a_cdr_densities[i];
     }
-    else{
-      vth = vth_g;
-    }
-    fluxes[i] += 0.25*vth*a_cdr_densities[i];
   }
 
   // Diffusive electron flux
-  if(a_cdr_gradients[m_electron_idx] > 0.0){
-    fluxes[m_electron_idx] += 0.5*De*a_cdr_gradients[m_electron_idx];
+  if(m_diffusive_outflow){
+    if(a_cdr_gradients[m_electron_idx] > 0.0){
+      fluxes[m_electron_idx] += 0.5*De*a_cdr_gradients[m_electron_idx];
+    }
   }
 
   // Secondary emission
