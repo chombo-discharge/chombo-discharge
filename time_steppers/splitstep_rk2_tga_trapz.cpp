@@ -221,7 +221,7 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 
   // Preparation for Newton iteration
   this->compute_epsj();                      // Get tolerances for the finite difference evaluation 
-  this->advance_semi_implicit_newton(a_dt);  // Advance cdr semi-implicitly. Initial guess in cdr_storage->phi. Updates source term
+  this->advance_semi_implicit_newton(a_dt);  // Update sources and advance cdr explicitly. Initial guess in cdr_storage->m_phi.
   this->compute_trapz_rhs(a_dt);             // Compute the right-hand side for the trapezoidal discretization. Uses source term. 
   if(m_do_poisson){
     this->compute_semi_implicit_potential(); // Poisson solve using semi-implicitly advanced states
@@ -270,8 +270,8 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
       m_amr->interp_ghost(*grad_cdr[idx], m_cdr->get_phase()); // Interpolate ghost cells
     }
 
-    // Compute cell-centered grad(E), grad(n)
 
+    // Level & grid loops
     const int finest_level = m_amr->get_finest_level();
     for (int lvl = 0; lvl <= finest_level; lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -305,6 +305,7 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	for (VoFIterator vofit(ivs_reg, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 
+	  // Position and electric field
 	  pos   = EBArith::getVofLocation(vof, dx*RealVect::Unit, m_physdom->get_prob_lo());
 	  E     = RealVect(D_DECL((*E_cell[lvl])[dit()](vof, 0),
 				  (*E_cell[lvl])[dit()](vof, 1),
@@ -314,6 +315,7 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 				  (*grad_E[lvl])[dit()](vof, 2)));
 
 
+	  // Get previous iterate, the gradients and the right-hand side of the trapezoidal equation in the current cell
 	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	    const int idx = solver_it.get_solver();
 	    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -326,6 +328,7 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	    rhs[idx] = (*RHS[lvl])[dit()](vof, 0);
 	  }
 
+	  // Get isotropic photon densities
 	  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	    const int idx = solver_it.get_solver();
 	    RefCountedPtr<rte_solver>& solver = solver_it();
@@ -334,7 +337,7 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	    rte_densities[idx] = Max(0.0, (*state[lvl])[dit()](vof, 0));
 	  }
 
-	  // Newton solve
+	  // Newton solve for correction => p
 	  this->newton_point_trapz(p, rhs, x, cdr_gradients, E, Egrad, rte_densities, pos, time, a_dt);
 
 	  // Increment. 
@@ -566,7 +569,7 @@ void splitstep_rk2_tga_trapz::advance_semi_implicit_newton(const Real a_dt){
     const EBAMRCellData& source    = solver->get_source();
 
     data_ops::copy(adv_state, old_state);
-    //    data_ops::incr(adv_state, source, a_dt);
+    data_ops::incr(adv_state, source, a_dt);
 
     m_amr->average_down(adv_state, m_cdr->get_phase());
     m_amr->interp_ghost(adv_state, m_cdr->get_phase());
@@ -663,11 +666,6 @@ void splitstep_rk2_tga_trapz::newton_point_trapz(Vector<Real>&           a_p,
   Vector<Real> S = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, a_x, a_rte, a_gradx);
   for (int i = 0; i < N; i++){
     F[i] = a_x[i] - 0.5*a_dt*S[i] - a_rhs[i];
-  }
-  
-  Vector<Vector<Real> > jac(N);
-  for (int i = 0; i < N; i++){
-    jac[i].resize(N);
   }
 
   // Compute Jacobian. This must be done in Fortran major order
