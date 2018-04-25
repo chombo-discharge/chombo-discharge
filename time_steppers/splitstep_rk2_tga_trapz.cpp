@@ -15,7 +15,7 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
-extern "C" void newton_point_trapz_fort(int *i);
+extern "C" void FORT_SOLVE_LU(int* N, double* J, double* F, int* INFO);
 
 typedef splitstep_rk2_tga_trapz::cdr_storage     cdr_storage;
 typedef splitstep_rk2_tga_trapz::poisson_storage poisson_storage;
@@ -211,6 +211,13 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
     m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);  
   }
 
+  // This is where the iterates are/goes
+  Vector<EBAMRCellData*> iterates;
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    iterates.push_back(&(storage->get_phi()));
+  }
+
 
   // Preparation for Newton iteration
   this->compute_epsj();                      // Get tolerances for the finite difference evaluation 
@@ -236,14 +243,10 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
   // rte_solver->m_state:      RTE solutions (implicit or semi-implicit)
 
 
-
-
   int iter = 0;           // Number of iterations
   bool converged = false; // Convergence track
 
-  
   while(!converged && iter < m_max_iter){
-
     Vector<Real> x(num_species); // Newton solution
     Vector<Real> p(num_species); // Increment
     const EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
@@ -292,6 +295,12 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	Vector<Real> rte_densities(num_photons);
 	Vector<RealVect> cdr_gradients(num_species);
 
+	// Irregular cells. These require more since the source term must be extrapolated. We MUST do these
+	// before regular cells because if we overwrite the regular cells the extrapolations become fuzzy
+	for (VoFIterator vofit(ivs_irr, ebgraph); vofit.ok(); ++vofit){
+
+	}
+
 	// Regular cells. Straightforward stuff
 	for (VoFIterator vofit(ivs_reg, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
@@ -325,12 +334,14 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	    rte_densities[idx] = Max(0.0, (*state[lvl])[dit()](vof, 0));
 	  }
 
+	  // Newton solve
 	  this->newton_point_trapz(p, rhs, x, cdr_gradients, E, Egrad, rte_densities, pos, time, a_dt);
-	}
 
-	// Irregular cells. These require more since the source term must be extrapolated
-	for (VoFIterator vofit(ivs_irr, ebgraph); vofit.ok(); ++vofit){
-
+	  // Increment. 
+	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	    const int idx = solver_it.get_solver();
+	    (*(*iterates[idx])[lvl])[dit()](vof, 0) += p[idx];
+	  }
 	}
       }
     }
@@ -342,7 +353,6 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
     
 
     iter++;
-    converged = true;
   }
 
   // Delete grad_cdr. It didn't use smart pointers. 
@@ -350,6 +360,19 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
     const int idx = solver_it.get_solver();
     delete grad_cdr[idx];
   }
+
+  // Copy iterates
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+
+    const EBAMRCellData& iterate = storage->get_phi();
+
+    EBAMRCellData state = solver->get_state();
+
+    data_ops::copy(state, iterate);
+  }
+  
 }
 
 void splitstep_rk2_tga_trapz::allocate_cdr_storage(){
@@ -543,9 +566,10 @@ void splitstep_rk2_tga_trapz::advance_semi_implicit_newton(const Real a_dt){
     const EBAMRCellData& source    = solver->get_source();
 
     data_ops::copy(adv_state, old_state);
-    data_ops::incr(adv_state, source, a_dt);
+    //    data_ops::incr(adv_state, source, a_dt);
 
     m_amr->average_down(adv_state, m_cdr->get_phase());
+    m_amr->interp_ghost(adv_state, m_cdr->get_phase());
 
     data_ops::floor(adv_state, 0.0);
   }
@@ -632,38 +656,62 @@ void splitstep_rk2_tga_trapz::newton_point_trapz(Vector<Real>&           a_p,
 						 const Real&             a_time,
 						 const Real&             a_dt){
 
-  const int num_species = a_p.size();
-  const int num_photons = a_rte.size();
+  int N = a_p.size();
 
   // Compute Fi
-  Vector<Real> F(num_species, 0.0);
+  double F[N];
   Vector<Real> S = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, a_x, a_rte, a_gradx);
-  for (int i = 0; i < num_species; i++){
+  for (int i = 0; i < N; i++){
     F[i] = a_x[i] - 0.5*a_dt*S[i] - a_rhs[i];
   }
   
-  Vector<Vector<Real> > jac(num_species);
-  for (int i = 0; i < num_species; i++){
-    jac[i].resize(num_species);
+  Vector<Vector<Real> > jac(N);
+  for (int i = 0; i < N; i++){
+    jac[i].resize(N);
   }
 
-  // Compute Jacobian
-  for (int i = 0; i < num_species; i++){
+  // Compute Jacobian. This must be done in Fortran major order
+  double J[N*N];
+  for (int i = 0; i < N; i++){
     const Real Fi = F[i];
     
-    for (int j = 0; j < num_species; j++){
+    for (int j = 0; j < N; j++){
+      const int n = i + j*N;
       Vector<Real> xj = a_x;
-      xj[j] += m_epsj;
+      
 
-      Vector<Real> Sj = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, xj, a_rte, a_gradx);
-      const Real Fii = xj[i] - 0.5*a_dt*Sj[i] - a_rhs[i];
-      jac[i][j] = (Fii - Fi)/m_epsj;
+      Vector<Real> xp = a_x;
+      Vector<Real> xm = a_x;
+      xp[j] += m_epsj;
+      xm[j] -= m_epsj;
+      Vector<Real> Sp = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, xp, a_rte, a_gradx);
+      Vector<Real> Sm = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, xm, a_rte, a_gradx);
+
+      const Real Fp = xp[i] - 0.5*a_dt*Sp[i] - a_rhs[i];
+      const Real Fm = xm[i] - 0.5*a_dt*Sm[i] - a_rhs[i];
+
+      
+      J[n] = (Fp - Fm)/(2.0*m_epsj); // Centered difference Jacobian
     }
   }
 
-  
+  int info;
+  FORT_SOLVE_LU(&N, J, F, &info);
+  if(info != 0){
+    MayDay::Abort("splitstep_rks_tga_trapz::newton_point_trapz - LU decomposition solver failed");
+  }
 
-  MayDay::Abort("splitstep_rk2_tga_trapz::newton_point_trapz - not implemented");
+#if 0
+  pout() << "dt = " << a_dt << endl;
+  for (int i = 0; i < N; i++){
+    pout() << F[i] << endl;
+  }
+#endif
+
+  for (int i = 0; i < N; i++){
+    a_p[i] = F[i];
+  }
+
 }
 
 void splitstep_rk2_tga_trapz::recompute_newton_E(){
