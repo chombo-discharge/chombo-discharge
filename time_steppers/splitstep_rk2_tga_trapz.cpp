@@ -260,6 +260,9 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
     Real maxF = 0.0;  // Error bound
     Real maxX = 0.0;  // Error bound
 
+    // Extrapolation stencils
+    const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
+
     // Level & grid loops
     const int finest_level = m_amr->get_finest_level();
     for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -272,8 +275,8 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	const EBISBox& ebisbox   = ebisl[dit()];
 	const EBGraph& ebgraph   = ebisbox.getEBGraph();
 	const IntVectSet ivs_irr = ebisbox.getIrregIVS(box);
-	const IntVectSet ivs_reg = IntVectSet(box);// - ivs_irr;
-	
+	const IntVectSet ivs_reg = IntVectSet(box) - ivs_irr;
+
 	RealVect pos;
 	RealVect E;
 	RealVect Egrad;
@@ -287,8 +290,82 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	// before regular cells because if we overwrite the regular cells the extrapolations become fuzzy
 	for (VoFIterator vofit(ivs_irr, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
-
+	  const VoFStencil& stencil = interp_stencils[lvl][dit()](vof, 0);
+	  
 	  pos   = EBArith::getVofLocation(vof, dx*RealVect::Unit, m_physdom->get_prob_lo());
+
+	  E     = RealVect::Zero;
+	  Egrad = RealVect::Zero;
+	  for (int i = 0; i < stencil.size(); i++){
+	    const VolIndex& ivof = stencil.vof(i);
+	    const Real& iweight  = stencil.weight(i);
+
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      E[dir] += (*E_cell[lvl])[dit()](ivof, dir)*iweight;
+	      Egrad[dir] += (*grad_E[lvl])[dit()](ivof, dir)*iweight;
+	    }
+	  }
+
+	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	    const int idx = solver_it.get_solver();
+	    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+	    EBAMRCellData& RHS = storage->get_k1();
+
+	    Real phi = 0.0;
+	    Real cur_rhs = 0.0;
+	    RealVect grad = RealVect::Zero;
+
+
+	    for (int i = 0; i < stencil.size(); i++){
+	      const VolIndex& ivof = stencil.vof(i);
+	      const Real& iweight  = stencil.weight(i);
+
+	      phi += (*(*iterates[idx])[lvl])[dit()](ivof, 0)*iweight;
+
+	      for (int dir = 0; dir < SpaceDim; dir++){
+		grad[dir] += (*(*grad_cdr[idx])[lvl])[dit()](ivof, 0)*iweight;
+	      }
+	    }
+
+	    x[idx] = (*(*iterates[idx])[lvl])[dit()](vof, 0);
+	    cdr_gradients[idx] = grad;
+	    rhs[idx] = (*RHS[lvl])[dit()](vof, 0);
+	  }
+
+	  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	    const int idx = solver_it.get_solver();
+	    RefCountedPtr<rte_solver>& solver = solver_it();
+	    const EBAMRCellData& state = solver->get_state();
+
+	    Real phi = 0.0;
+	    for (int i = 0; i < stencil.size(); i++){
+	      const VolIndex& ivof = stencil.vof(i);
+	      const Real& iweight  = stencil.weight(i);
+
+	      phi += (*state[lvl])[dit()](ivof, 0)*iweight;
+	    }
+
+	    rte_densities[idx] = Max(phi, 0.0);
+	  }
+
+	  // Newton solve for correction => p
+	  const Real sumF = this->newton_point_trapz(p, rhs, x, cdr_gradients, E, Egrad, rte_densities, pos, time, a_dt);
+	  
+	  // Increment data. 
+	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	    const int idx = solver_it.get_solver();
+	    (*(*iterates[idx])[lvl])[dit()](vof, 0) += p[idx];
+	  }
+
+	  // Errors
+	  Real sumX = 0.0;
+	  for (int i = 0; i < p.size(); i++){
+	    sumX += Abs(p[i]);
+	  }
+	  maxF = Max(sumF, maxF);
+	  maxX = Max(maxX, sumX);
+
+
 	}
 
 	// Regular cells. Straightforward stuff
