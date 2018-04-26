@@ -24,8 +24,9 @@ typedef splitstep_rk2_tga_trapz::sigma_storage   sigma_storage;
 
 splitstep_rk2_tga_trapz::splitstep_rk2_tga_trapz(){
   m_alpha    = 1.0;
-  m_tol_x    = 1.E-6;
-  m_tol_f    = 1.E-6;
+  m_tol_x    = 1.E-8;
+  m_tol_f    = 1.E-8;
+  m_EPS      = 1.E-3;
   m_max_iter = 10;
   m_simpi    = true;
 
@@ -53,6 +54,7 @@ splitstep_rk2_tga_trapz::splitstep_rk2_tga_trapz(){
       }
       else if(str == "implicit"){
 	m_simpi = false;
+	MayDay::Abort("splitstep_rk2_tga_trapz::splitstep_rk2_tga_trapz - fully implicit not yet supported");
       }
     }
 
@@ -142,12 +144,9 @@ Real splitstep_rk2_tga_trapz::advance(const Real a_dt){
   if(m_do_diffusion){              // Rules for diffusion advance: cdr solvers contain the advected AND diffused states,
     this->advance_diffusion(a_dt); // the poisson solver contains the potential after this. Nothing happens to sigma
   }                                // and RTE. Scratch storage contains nothing but junk.
-
   
-  this->compute_E_at_start_of_time_step(); // Compute the electric field using the advected/diffused states. This is
-                                           // needed for both the RTE update and the first source term iteration
+  this->compute_E_into_scratch(); // Compute the electric field using the advected/diffused states. This is needed for the RTE and cdr updates
 
-#if 0 // Todo
   if(m_do_rte){ // Must be implemented. 
     if(m_rte->is_stationary()){              // Rules for RTE update: After this advance, the RTE solvers contain
       this->solve_rte_using_solver_states(); // the solution by using the 
@@ -156,11 +155,12 @@ Real splitstep_rk2_tga_trapz::advance(const Real a_dt){
       MayDay::Abort("splitstep_rk2_tga_trapz::advance - transient RTE is not supported for this time stepper");
     }
   }
-#endif
 
   if(m_do_source){
     this->advance_sources(a_dt);   // Source term advance. 
   }
+
+  pout() << "sources done" << endl;
 
   // Put solver back in useable state so that we can reliably compute the next time step. 
   this->compute_cdr_velocities();
@@ -211,47 +211,33 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
     m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);  
   }
 
-  // This is where the iterates are/goes
+  // Prepare for Newton iteration
   Vector<EBAMRCellData*> iterates;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    iterates.push_back(&(storage->get_phi()));
-  }
+  this->compute_dnj();                        // Get tolerances for the finite difference evaluation 
+  this->setup_newton_iterates(iterates);       // Set up target iterates. This iterates directly in the solver
+  this->compute_E_into_scratch();              // Compute electric field at time step k
+  this->compute_cdr_sources_for_newton_pred(); // Compute source terms at time step k
+  this->compute_trapz_rhs(a_dt);               // Compute the right-hand side for the trapezoidal discretization = n_k + 0.5*dt*S_k
+  this->explicit_euler_predict_newton(a_dt);   // Explicit Euler advance as initial guess
 
-
-  // Preparation for Newton iteration
-  this->compute_epsj();                      // Get tolerances for the finite difference evaluation 
-  this->advance_semi_implicit_newton(a_dt);  // Update sources and advance cdr explicitly. Initial guess in cdr_storage->m_phi.
-  this->compute_trapz_rhs(a_dt);             // Compute the right-hand side for the trapezoidal discretization. Uses source term. 
   if(m_do_poisson){
-    this->compute_semi_implicit_potential(); // Poisson solve using semi-implicitly advanced states
-    this->compute_E_at_start_of_time_step(); // Recompute field by using the semi-implicit Poisson advance
+    this->solve_poisson();          // Solve Poisson equation with explicit Euler data. Updated potential lies in solver.
+    this->compute_E_into_scratch(); // Recompute field by using the semi-implicit Poisson advance
   }
   if(m_do_rte){
-    this->compute_semi_implicit_rte(a_dt);   // RTE solve by using semi-implictly advances states
+    const Real dummy_dt = 0.0;  
+    this->solve_rte(dummy_dt); // Update the RTE equations. 
   }
-
-
-  // Here, we have advanced the cdr states explictly recomputed the electric field and RTE solutions in a semi-implicit way
-  // so that we have estimates for all variables at time (k+1). We can now start Newton iteration using.
-  // 
-  // RULES: Here is where storage should go
-  // cdr_storage->m_phi:       Newton iterates
-  // cdr_storage->m_k1:        RHS of the trapezoidal discretization (i.e. n_k - 0.5*dt_S_k)
-  // poisson_solver->m_phi:    Electric field updates (implicit or semi-implicit)
-  // poisson_scratch->E_cell:  Electric field (implicit or semi-implicit)
-  // rte_solver->m_state:      RTE solutions (implicit or semi-implicit)
 
 
   int iter = 0;           // Number of iterations
   bool converged = false; // Convergence track
+  Real preF = 0.0;
 
   while(!converged && iter < m_max_iter){
-    Vector<Real> x(num_species); // Newton solution
-    Vector<Real> p(num_species); // Increment
-    const EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
 
-    // Compute grad(|E|)
+    // Compute grad(|E|). This is needed for source term computation. 
+    const EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
     data_ops::vector_length(E_norm, E_cell);          // Compute |E|
     m_amr->average_down(E_norm, m_cdr->get_phase());  // Average down
     m_amr->interp_ghost(E_norm, m_cdr->get_phase());  // Interpolate ghost cells
@@ -259,17 +245,20 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
     m_amr->average_down(grad_E, m_cdr->get_phase());  // Average down gradient
     m_amr->interp_ghost(grad_E, m_cdr->get_phase());  // Interpolate gradient ghost cells
 
-    // Compute grad(n)
+    // Compute grad(n). This is needed for source term computation. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      const RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-      const EBAMRCellData& iter_state = storage->get_phi();
+      const RefCountedPtr<cdr_solver>& solver = solver_it();
+      const EBAMRCellData& iter_state = solver->get_state();
       
       m_amr->compute_gradient(*grad_cdr[idx], iter_state);     // Compute grad()
       m_amr->average_down(*grad_cdr[idx], m_cdr->get_phase()); // Average down
       m_amr->interp_ghost(*grad_cdr[idx], m_cdr->get_phase()); // Interpolate ghost cells
     }
 
+    converged = true; // Set to false if point ODEs don't converge.
+    Real maxF = 0.0;  // Error bound
+    Real maxX = 0.0;  // Error bound
 
     // Level & grid loops
     const int finest_level = m_amr->get_finest_level();
@@ -283,8 +272,7 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	const EBISBox& ebisbox   = ebisl[dit()];
 	const EBGraph& ebgraph   = ebisbox.getEBGraph();
 	const IntVectSet ivs_irr = ebisbox.getIrregIVS(box);
-	const IntVectSet ivs_reg = IntVectSet(box) - ivs_irr;
-
+	const IntVectSet ivs_reg = IntVectSet(box);// - ivs_irr;
 	
 	RealVect pos;
 	RealVect E;
@@ -298,7 +286,9 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	// Irregular cells. These require more since the source term must be extrapolated. We MUST do these
 	// before regular cells because if we overwrite the regular cells the extrapolations become fuzzy
 	for (VoFIterator vofit(ivs_irr, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
 
+	  pos   = EBArith::getVofLocation(vof, dx*RealVect::Unit, m_physdom->get_prob_lo());
 	}
 
 	// Regular cells. Straightforward stuff
@@ -318,8 +308,9 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	  // Get previous iterate, the gradients and the right-hand side of the trapezoidal equation in the current cell
 	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	    const int idx = solver_it.get_solver();
+	    RefCountedPtr<cdr_solver>& solver   = solver_it();
 	    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-	    EBAMRCellData& phi = storage->get_phi();
+	    EBAMRCellData& phi = solver->get_state();
 	    EBAMRCellData& RHS = storage->get_k1();
 	    x[idx] = Max(0.0, (*phi[lvl])[dit()](vof, 0));
 	    cdr_gradients[idx] = RealVect(D_DECL((*(*grad_cdr[idx])[lvl])[dit()](vof, 0),
@@ -338,24 +329,62 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
 	  }
 
 	  // Newton solve for correction => p
-	  this->newton_point_trapz(p, rhs, x, cdr_gradients, E, Egrad, rte_densities, pos, time, a_dt);
-
-	  // Increment. 
+	  const Real sumF = this->newton_point_trapz(p, rhs, x, cdr_gradients, E, Egrad, rte_densities, pos, time, a_dt);
+	  
+	  // Increment data. 
 	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	    const int idx = solver_it.get_solver();
 	    (*(*iterates[idx])[lvl])[dit()](vof, 0) += p[idx];
 	  }
+
+	  // Errors
+	  Real sumX = 0.0;
+	  for (int i = 0; i < p.size(); i++){
+	    sumX += Abs(p[i]);
+	  }
+	  maxF = Max(sumF, maxF);
+	  maxX = Max(maxX, sumX);
 	}
       }
     }
 
-    if(!m_simpi){ // Update E after Newton iteration
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      m_amr->interp_ghost(*iterates[idx], m_cdr->get_phase());
+    }
+
+#ifdef CH_MPI
+    Real lmaxF = maxF;
+    Real lmaxX = maxX;
+    int result  = MPI_Allreduce(&lmaxF, &maxF, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+    int result2 = MPI_Allreduce(&lmaxX, &maxX, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+    if(result != MPI_SUCCESS || result2 != MPI_SUCCESS){
+      MayDay::Error("splitstep_rk2_tga_trapz::advance_sources - communication error in advance_sources");
+    }
+#endif
+
+    converged = (maxF < m_tol_f*m_nmax) || (maxX < m_tol_x*m_nmax);
+
+    if( iter == 0){
+      preF = maxF;
+    }
+    if(m_verbosity > 0){
+      pout() << "splitstep_rk2_tga_trapz::advance_sources - Newton iteration " << iter
+	     << "\t Converged = " << converged
+	     << "\t Error_F = " << maxF
+	     << "\t Error_x = " << maxX
+	     << "\t Rate = " << preF/maxF
+	     << endl;
+    }
+
+    // Prepare for next iteration
+    preF = maxF;
+    iter = iter + 1;
+
+    if(!m_simpi && !converged){ // Update E after Newton iteration
       this->recompute_newton_E();   // Update the electric field
       this->recompute_newton_rte(); // Update the RTE equations
     }
-    
-
-    iter++;
   }
 
   // Delete grad_cdr. It didn't use smart pointers. 
@@ -363,19 +392,6 @@ void splitstep_rk2_tga_trapz::advance_sources(const Real a_dt){
     const int idx = solver_it.get_solver();
     delete grad_cdr[idx];
   }
-
-  // Copy iterates
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-
-    const EBAMRCellData& iterate = storage->get_phi();
-
-    EBAMRCellData state = solver->get_state();
-
-    data_ops::copy(state, iterate);
-  }
-  
 }
 
 void splitstep_rk2_tga_trapz::allocate_cdr_storage(){
@@ -488,10 +504,10 @@ void splitstep_rk2_tga_trapz::compute_dt(Real& a_dt, time_code::which_code& a_ti
   a_dt = dt;
 }
 
-void splitstep_rk2_tga_trapz::compute_cdr_sources_for_simp_newt(){
-  CH_TIME("splitstep_rk2_tga_trapz::compute_cdr_sources_for_simp_newt");
+void splitstep_rk2_tga_trapz::compute_cdr_sources_for_newton_pred(){
+  CH_TIME("splitstep_rk2_tga_trapz::compute_cdr_sources_for_newton_pred");
   if(m_verbosity > 5){
-    pout() << "splitstep_rk2_tga_trapz::compute_cdr_sources_for_simp_newt" << endl;
+    pout() << "splitstep_rk2_tga_trapz::compute_cdr_sources_for_newton_pred" << endl;
   }
   
   // The solvers contain the advected/diffused states
@@ -520,23 +536,41 @@ void splitstep_rk2_tga_trapz::compute_trapz_rhs(const Real a_dt){
     EBAMRCellData& rhs = storage->get_k1();
     data_ops::copy(rhs, state);
     data_ops::incr(rhs, source, 0.5*a_dt);
+
+    m_amr->average_down(rhs, m_cdr->get_phase());
+    m_amr->interp_ghost(rhs, m_cdr->get_phase());
+  }
+}
+
+void splitstep_rk2_tga_trapz::compute_dnj(){
+  CH_TIME("splitstep_rk2_tga_trapz::compute_dnj");
+  if(m_verbosity > 5){
+    pout() << "splitstep_rk2_tga_trapz::compute_dnj" << endl;
+  }
+
+  int comp = 0;
+
+  m_nmax = 0.0;
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    EBAMRCellData& state = solver_it()->get_state();
+
+    Real cur_max;
+    Real cur_min;
     
-  }
-}
+    data_ops::get_max_min(cur_max, cur_min, state, comp);
 
-void splitstep_rk2_tga_trapz::compute_epsj(){
-  CH_TIME("splitstep_rk2_tga_trapz::compute_epsj");
-  if(m_verbosity > 5){
-    pout() << "splitstep_rk2_tga_trapz::compute_epsj" << endl;
+    m_nmax = Max(cur_max, m_nmax);
   }
 
-  m_epsj = 1.E6;
+  m_dnj = m_EPS*m_nmax;
+  if(m_nmax == 0.0) m_dnj = m_EPS;
+
 }
 
-void splitstep_rk2_tga_trapz::compute_E_at_start_of_time_step(){
-  CH_TIME("splitstep_rk2_tga_trapz::compute_E_at_start_of_time_step");
+void splitstep_rk2_tga_trapz::compute_E_into_scratch(){
+  CH_TIME("splitstep_rk2_tga_trapz::compute_E_into_scratch");
   if(m_verbosity > 5){
-    pout() << "splitstep_rk2_tga_trapz::compute_E_at_start_of_time_step" << endl;
+    pout() << "splitstep_rk2_tga_trapz::compute_E_into_scratch" << endl;
   }
   
   EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
@@ -548,84 +582,6 @@ void splitstep_rk2_tga_trapz::compute_E_at_start_of_time_step(){
   this->compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
   this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
-}
-
-void splitstep_rk2_tga_trapz::advance_semi_implicit_newton(const Real a_dt){
-  CH_TIME("splitstep_rk2_tga_trapz::advance_semi_implicit_newton");
-  if(m_verbosity > 5){
-    pout() << "splitstep_rk2_tga_trapz::advance_semi_implicit_newton" << endl;
-  }
-
-  this->compute_E_at_start_of_time_step();   // Compute the electric field using the available cdr/sigma solver states
-  this->compute_cdr_sources_for_simp_newt(); // Compute cdr sources for semi-implicit newton advance
-
-  // Explicit Euler advance
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-    EBAMRCellData& adv_state       = storage->get_phi();
-    const EBAMRCellData& old_state = solver->get_state();
-    const EBAMRCellData& source    = solver->get_source();
-
-    data_ops::copy(adv_state, old_state);
-    data_ops::incr(adv_state, source, a_dt);
-
-    m_amr->average_down(adv_state, m_cdr->get_phase());
-    m_amr->interp_ghost(adv_state, m_cdr->get_phase());
-
-    data_ops::floor(adv_state, 0.0);
-  }
-}
-
-void splitstep_rk2_tga_trapz::compute_semi_implicit_potential(){
-  CH_TIME("splitstep_rk2_tga_trapz::compute_semi_implicit_potential");
-  if(m_verbosity > 5){
-    pout() << "splitstep_rk2_tga_trapz::compute_semi_implicit_potential" << endl;
-  }
-
-  // TLDR: This routine solves the Poisson equation by using the semi-implicitly advanced cdr states and the sigma solver
-    
-  Vector<EBAMRCellData*> cdr_densities;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_densities.push_back(&(storage->get_phi()));
-  }
-  
-
-  bool converged = this->solve_poisson(m_poisson->get_state(),
-				       m_poisson->get_source(),
-				       cdr_densities,
-				       m_sigma->get_state(),
-				       centering::cell_center);
-  if(!converged){
-    pout() << "spltistep_rk2_tga_trapz - compute_semi_implicit_potential - solver did not converge at step " << m_step << endl;
-  }
-}
-
-void splitstep_rk2_tga_trapz::compute_semi_implicit_rte(const Real a_dt){
-  CH_TIME("splitstep_rk2_tga_trapz::compute_semi_implicit_rte");
-  if(m_verbosity > 5){
-    pout() << "splitstep_rk2_tga_trapz::compute_semi_implicit_rte" << endl;
-  }
-
-  const Real time = m_time + a_dt;
-
-  Vector<EBAMRCellData*> rte_states = m_rte->get_states();
-  Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
-  Vector<EBAMRCellData*> cdr_states;
-
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_states.push_back(&(storage->get_phi()));
-  }
-
-  EBAMRCellData& E = m_poisson_scratch->get_E_cell();
-
-  if((m_step + 1) % m_fast_rte == 0){
-    const Real dummy_dt = 0.0;
-    this->solve_rte(rte_states, rte_sources, cdr_states, E, time, dummy_dt, centering::cell_center);
-  }
 }
 
 void splitstep_rk2_tga_trapz::deallocate_internals(){
@@ -648,7 +604,29 @@ void splitstep_rk2_tga_trapz::deallocate_internals(){
   m_sigma_scratch->deallocate_storage();
 }
 
-void splitstep_rk2_tga_trapz::newton_point_trapz(Vector<Real>&           a_p,
+void splitstep_rk2_tga_trapz::explicit_euler_predict_newton(const Real a_dt){
+  CH_TIME("splitstep_rk2_tga_trapz::explicit_euler_predict_newton");
+  if(m_verbosity > 5){
+    pout() << "splitstep_rk2_tga_trapz::explicit_euler_predict_newton" << endl;
+  }
+
+  // Explicit Euler advance over dt
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+
+    EBAMRCellData& state        = solver->get_state();
+    const EBAMRCellData& source = solver->get_source();
+
+    data_ops::incr(state, source, a_dt);
+
+    m_amr->average_down(state, m_cdr->get_phase());
+    m_amr->interp_ghost(state, m_cdr->get_phase());
+
+    data_ops::floor(state, 0.0);
+  }
+}
+
+Real splitstep_rk2_tga_trapz::newton_point_trapz(Vector<Real>&           a_p,
 						 const Vector<Real>&     a_rhs,
 						 const Vector<Real>&     a_x,
 						 const Vector<RealVect>& a_gradx,
@@ -662,34 +640,32 @@ void splitstep_rk2_tga_trapz::newton_point_trapz(Vector<Real>&           a_p,
   int N = a_p.size();
 
   // Compute Fi
+  Real sumF = 0.0;
   double F[N];
   Vector<Real> S = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, a_x, a_rte, a_gradx);
   for (int i = 0; i < N; i++){
     F[i] = a_x[i] - 0.5*a_dt*S[i] - a_rhs[i];
+    sumF += Abs(F[i]);
   }
 
   // Compute Jacobian. This must be done in Fortran major order
   double J[N*N];
   for (int i = 0; i < N; i++){
-    const Real Fi = F[i];
-    
     for (int j = 0; j < N; j++){
       const int n = i + j*N;
-      Vector<Real> xj = a_x;
       
-
       Vector<Real> xp = a_x;
       Vector<Real> xm = a_x;
-      xp[j] += m_epsj;
-      xm[j] -= m_epsj;
+      xp[j] += m_dnj;
+      xm[j] -= m_dnj;
       Vector<Real> Sp = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, xp, a_rte, a_gradx);
-      Vector<Real> Sm = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, xm, a_rte, a_gradx);
+      //      Vector<Real> Sm = m_plaskin->compute_cdr_source_terms(a_time, a_pos, a_E, a_grad_E, xm, a_rte, a_gradx);
 
       const Real Fp = xp[i] - 0.5*a_dt*Sp[i] - a_rhs[i];
-      const Real Fm = xm[i] - 0.5*a_dt*Sm[i] - a_rhs[i];
+      //      const Real Fm = xm[i] - 0.5*a_dt*Sm[i] - a_rhs[i];
 
       
-      J[n] = (Fp - Fm)/(2.0*m_epsj); // Centered difference Jacobian
+      J[n] = (Fp - F[i])/(m_dnj); // Centered difference Jacobian
     }
   }
 
@@ -699,17 +675,11 @@ void splitstep_rk2_tga_trapz::newton_point_trapz(Vector<Real>&           a_p,
     MayDay::Abort("splitstep_rks_tga_trapz::newton_point_trapz - LU decomposition solver failed");
   }
 
-#if 0
-  pout() << "dt = " << a_dt << endl;
-  for (int i = 0; i < N; i++){
-    pout() << F[i] << endl;
-  }
-#endif
-
   for (int i = 0; i < N; i++){
     a_p[i] = F[i];
   }
 
+  return sumF;
 }
 
 void splitstep_rk2_tga_trapz::recompute_newton_E(){
@@ -740,4 +710,21 @@ void splitstep_rk2_tga_trapz::regrid_internals(){
   this->allocate_poisson_storage();
   this->allocate_rte_storage();
   this->allocate_sigma_storage();
+}
+
+void splitstep_rk2_tga_trapz::setup_newton_iterates(Vector<EBAMRCellData*>& a_iterates){
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    a_iterates.push_back(&(solver->get_state()));
+  }
+}
+
+void splitstep_rk2_tga_trapz::solve_rte_using_solver_states(){
+  CH_TIME("rk2::solve_rte_using_solver_states");
+  if(m_verbosity > 5){
+    pout() << "rk2::solve_rte_using_solver_states" << endl;
+  }
+
+  const Real dummy_dt = 0.0;
+  this->solve_rte(dummy_dt);
 }

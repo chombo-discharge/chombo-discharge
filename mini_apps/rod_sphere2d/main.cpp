@@ -24,13 +24,12 @@
 
 #include <ParmParse.H>
 
+Real g_potential;
 /*!
   @brief Potential
 */
 Real potential_curve(const Real a_time){
-  Real potential = 1.2E4;
-
-  return potential;
+  return g_potential;
 }
 
 int main(int argc, char* argv[]){
@@ -43,9 +42,14 @@ int main(int argc, char* argv[]){
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
 
-  //RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air7());
+  {
+    ParmParse pp("rod_sphere2d");
+    pp.get("potential", g_potential);
+  }
+
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air7());
   //RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_bolsig());
-  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
+  //  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   //  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new splitstep_rk2_tga_trapz());

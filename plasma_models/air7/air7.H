@@ -37,7 +37,7 @@
       air7.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
       air7.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
       air7.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
-      air7.simple_cathode_bc             = true                  # Use simpiflied BC on electrode cathodes
+      air7.simple_cathode_bc             = false                 # Use simpiflied BC on electrode cathodes
 
 */
 class air7 : public plasma_kinetics {
