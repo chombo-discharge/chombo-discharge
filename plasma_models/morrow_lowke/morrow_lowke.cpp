@@ -211,9 +211,9 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_de
   Sn = eta*Ne*Ve   - beta*Np*Nn;
 
 #if 0 // Debug
-  Se = 0.0;
-  Sp = 0.0;
-  Sn = 0.0;
+  Se = 1.E10;
+  Sp = 1.E10;
+  Sn = 1.E10;
 #endif
 
   return source;

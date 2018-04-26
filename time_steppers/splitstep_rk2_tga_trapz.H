@@ -118,7 +118,17 @@ protected:
   /*!
     @brief Finite difference step for computing the Jacobian
   */
-  Real m_epsj;
+  Real m_dnj;
+
+  /*!
+    @brief Maximum value. Used for error estimation
+  */
+  Real m_nmax;
+
+  /*!
+    @brief Fudge factor for computing Jacobian using finite differences
+   */
+  Real m_EPS;
 
   /*!
     @brief Semi-implicit or fully explicit coupling
@@ -178,7 +188,7 @@ protected:
   /*!
     @brief Semi-implicit Newton advance
   */
-  virtual void advance_semi_implicit_newton(const Real a_dt);
+  virtual void explicit_euler_predict_newton(const Real a_dt);
 
   /*!
     @brief Allocate storage
@@ -201,11 +211,6 @@ protected:
   virtual void allocate_sigma_storage();
 
   /*!
-    @brief Restrict dt
-  */
-  virtual Real restrict_dt();
-
-  /*!
     @brief Backup solutions. Must do this in case the time step is rejected. 
   */
   virtual void cache_solutions();
@@ -213,7 +218,7 @@ protected:
   /*!
     @brief Compute step size for finite-difference evaluation of the Jacobian
   */
-  virtual void compute_epsj();
+  virtual void compute_dnj();
 
   /*!
     @briefCompute the right-hand side for the trapezoidal discretization
@@ -223,22 +228,12 @@ protected:
     /*!
     @brief Compute electric field at start of time step
   */
-  virtual void compute_E_at_start_of_time_step();
+  virtual void compute_E_into_scratch();
 
   /*!
     @brief Compute sources for semi-implicit newton advance
   */
-  virtual void compute_cdr_sources_for_simp_newt();
-
-  /*!
-    @brief Compute the semi-implicitly advanced electric field
-  */
-  virtual void compute_semi_implicit_potential();
-
-  /*!
-    @brief Solve the stationary RTE equations by using the semi-implicitly advanced cdr states
-  */
-  virtual void compute_semi_implicit_rte(const Real a_dt);
+  virtual void compute_cdr_sources_for_newton_pred();
 
   /*!
     @brief Recompute the E-field by using the updated Newton values
@@ -249,6 +244,16 @@ protected:
     @brief Recompute the RTE equations by using the updated Newton values
   */
   virtual void recompute_newton_rte();
+
+  /*!
+   @brief Setup the newton iterates
+  */
+  virtual void setup_newton_iterates(Vector<EBAMRCellData*>& a_iterates);
+
+  /*!
+    @brief Solve the RTE equations by using what is available in the solvers
+  */
+  virtual void solve_rte_using_solver_states();
 
   /*!
     @brief Perform point-wise Newton iteration by using the implicit trapezoidal rule
@@ -262,9 +267,9 @@ protected:
     @param[in]  a_rte    RTE densities
     @param[in]  a_pos    Position
     @param[in]  a_time   Time
-
+    @return Equation error \f$\sum_i |F_i|\f$
   */
-  virtual void newton_point_trapz(Vector<Real>&           a_p,
+  virtual Real newton_point_trapz(Vector<Real>&           a_p,
 				  const Vector<Real>&     a_rhs,
 				  const Vector<Real>&     a_x,
 				  const Vector<RealVect>& a_gradx,
@@ -274,6 +279,11 @@ protected:
 				  const RealVect&         a_pos,
 				  const Real&             a_time,
 				  const Real&             a_dt);
+
+    /*!
+    @brief Restrict dt
+  */
+  virtual Real restrict_dt();
   
 };
 #endif
