@@ -154,7 +154,7 @@ void air7::get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, 
     //    pp.query("gas_O2_frac", a_O2frac);
     //    pp.query("gas_N2_frac", a_N2frac);
 
-    a_Tg = 300.;
+    a_Tg     = 300.;
     a_O2frac = 0.21;
     a_N2frac = 0.79; 
 
@@ -490,9 +490,9 @@ Real air7::compute_electron_temperature(const Real a_EbyN) const {
 
   const Real safety = 1.0; // To avoid division by zero
   const Real minE   = 10;
-  const Real maxE   = 3000;
-  const Real min_eV = 0.9632;
-  const Real max_eV = 42.19;
+  const Real maxE   = 6000;
+  const Real min_eV = 0.9559;
+  const Real max_eV = 91.06;
 
   if(a_EbyN < minE){
     temp = min_eV;
@@ -501,11 +501,11 @@ Real air7::compute_electron_temperature(const Real a_EbyN) const {
     temp = max_eV;
   }
   else {
-    const Real A = -2.689;
-    const Real B =  0.8036;
-    const Real C = -8.165;
-    const Real D =  338.6;
-    const Real E = -1768;
+    const Real A = -3.920;
+    const Real B =  0.9681;
+    const Real C =  62.01;
+    const Real D = -1517;
+    const Real E =  0.1062E5;
 
     const Real x = a_EbyN;
     temp = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
@@ -523,9 +523,9 @@ Real air7::compute_electron_mobility(const Real a_EbyN) const {
   Real mobility = 0.0;
   
   const Real minE = 10.0;
-  const Real maxE = 3000.;
-  const Real min_mob = 0.311E25;
-  const Real max_mob = 0.7172E24;
+  const Real maxE = 6000.;
+  const Real min_mob = 0.2038E25;
+  const Real max_mob = 0.3675E24;
   
   if(a_EbyN < minE){
     mobility = min_mob;
@@ -534,11 +534,11 @@ Real air7::compute_electron_mobility(const Real a_EbyN) const {
     mobility = max_mob;
   }
   else {
-    const Real A =  57.39;
-    const Real B = -0.3072;
-    const Real C = -15.73;
-    const Real D =  298.4;
-    const Real E = -1701.0;
+    const Real A =  57.15;
+    const Real B = -0.3315;
+    const Real C = -22.21;
+    const Real D =  423.7;
+    const Real E = -2428;
 
     const Real x = a_EbyN;
     mobility = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
@@ -551,9 +551,9 @@ Real air7::compute_electron_diffusion(const Real a_EbyN) const {
   Real diffCo = 0.0;
   
   const Real minE = 10.0;
-  const Real maxE = 3000.;
-  const Real min_diffco = 0.1887E25;
-  const Real max_diffco = 0.1318E26;
+  const Real maxE = 6000.;
+  const Real min_diffco = 0.1899E25;
+  const Real max_diffco = 0.2245E26;
   
   if(a_EbyN < minE){
     diffCo = min_diffco;
@@ -562,11 +562,11 @@ Real air7::compute_electron_diffusion(const Real a_EbyN) const {
     diffCo = max_diffco;
   }
   else {
-    const Real A =  54.05;
-    const Real B =  0.4732;
-    const Real C = -0.5350;
-    const Real D =  246.8;
-    const Real E = -1659.0;
+    const Real A =  52.85;
+    const Real B =  0.6332;
+    const Real C =  66.86;
+    const Real D = -1502.0;
+    const Real E =  9928.0;
 
     const Real x = a_EbyN;
     diffCo = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
@@ -579,9 +579,9 @@ Real air7::compute_townsend_ionization_N2(const Real a_EbyN) const {
   Real k = 0.0;
   
   const Real minE = 10.0;
-  const Real maxE = 3000.;
-  const Real min_k = 0.1721E-98;
-  const Real max_k = 0.6042E-13;
+  const Real maxE = 6000.;
+  const Real min_k = 0.0;
+  const Real max_k = 0.1159E-12;
   
   if(a_EbyN < minE){
     k = min_k;
@@ -590,11 +590,11 @@ Real air7::compute_townsend_ionization_N2(const Real a_EbyN) const {
     k = max_k;
   }
   else {
-    const Real A = -38.34;
-    const Real B =  1.023;
-    const Real C = -888.1;
-    const Real D =  8400;
-    const Real E = -0.1866E6;
+    const Real A = -36.71;
+    const Real B =  0.8155;
+    const Real C = -1050.0;
+    const Real D =  0.1902E5;
+    const Real E = -0.3950E6;
 
     const Real x = a_EbyN;
     k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
@@ -607,9 +607,9 @@ Real air7::compute_townsend_ionization_O2(const Real a_EbyN) const {
   Real k = 0.0;
   
   const Real minE = 10.0;
-  const Real maxE = 3000.;
-  const Real min_k = 0.3627E-47;
-  const Real max_k = 0.6268E-13;
+  const Real maxE = 6000.;
+  const Real min_k = 0.0;
+  const Real max_k = 0.1279E-12;
   
   if(a_EbyN < minE){
     k = min_k;
@@ -618,11 +618,11 @@ Real air7::compute_townsend_ionization_O2(const Real a_EbyN) const {
     k = max_k;
   }
   else {
-    const Real A = -40.70;
-    const Real B =  1.309;
-    const Real C = -543.6;
-    const Real D =  2091;
-    const Real E = -0.3810E5;
+    const Real A = -38.73;
+    const Real B =  1.053;
+    const Real C = -700.4;
+    const Real D =  9351.0;
+    const Real E = -0.1345E6;
 
     const Real x = a_EbyN;
     k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
