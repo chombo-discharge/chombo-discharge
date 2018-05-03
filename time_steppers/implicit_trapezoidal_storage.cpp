@@ -72,27 +72,45 @@ implicit_trapezoidal::sigma_storage::~sigma_storage(){
 }
 
 void implicit_trapezoidal::cdr_storage::allocate_storage(){
-  m_amr->allocate(m_cache, m_phase, m_ncomp);
+  m_amr->allocate(m_cache,       m_phase, m_ncomp);
+  m_amr->allocate(m_scratch1,    m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV1,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV3,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV4,  m_phase, m_ncomp);
 }
 
 void implicit_trapezoidal::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_scratch1);
+  m_amr->deallocate(m_scratchIV1);
+  m_amr->deallocate(m_scratchIV2);
+  m_amr->deallocate(m_scratchIV3);
+  m_amr->deallocate(m_scratchIV4);
 }
 
 void implicit_trapezoidal::rte_storage::allocate_storage(){
-  m_amr->allocate(m_cache, m_phase, m_ncomp);
+  m_amr->allocate(m_cache,      m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
 }
 
 void implicit_trapezoidal::rte_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_scratchIV);
 }
 
 void implicit_trapezoidal::poisson_storage::allocate_storage(){
-  m_amr->allocate(m_cache, m_ncomp);
+  m_amr->allocate(m_cache,  m_ncomp);
+  m_amr->allocate(m_E_cell, m_phase, SpaceDim);
+  m_amr->allocate(m_E_face, m_phase, SpaceDim);
+  m_amr->allocate(m_E_eb,   m_phase, SpaceDim);
 }
 
 void implicit_trapezoidal::poisson_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_E_cell);
+  m_amr->deallocate(m_E_face);
+  m_amr->deallocate(m_E_eb);
 }
 
 void implicit_trapezoidal::sigma_storage::allocate_storage(){

@@ -51,6 +51,41 @@ public:
     return m_cache;
   }
 
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRCellData& get_scratch1(){
+    return m_scratch1;
+  }
+
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRIVData& get_eb_state(){
+    return m_scratchIV1;
+  }
+
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRIVData& get_eb_velo(){
+    return m_scratchIV2;
+  }
+
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRIVData& get_eb_flux(){
+    return m_scratchIV3;
+  }
+
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRIVData& get_eb_grad(){
+    return m_scratchIV4;
+  }
+
 protected:
 
   /*!
@@ -72,6 +107,31 @@ protected:
     @brief Cached state
   */
   EBAMRCellData m_cache;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRCellData m_scratch1;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRIVData m_scratchIV1;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRIVData m_scratchIV2;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRIVData m_scratchIV3;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRIVData m_scratchIV4;
 };
 
 /*!
@@ -112,6 +172,13 @@ public:
     return m_cache;
   }
 
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRIVData& get_eb_flux(){
+    return m_scratchIV;
+  }
+
 protected:
 
   /*!
@@ -133,6 +200,11 @@ protected:
     @brief Cached state
   */
   EBAMRCellData m_cache;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRIVData m_scratchIV;
 };
 
 /*!
@@ -173,6 +245,27 @@ public:
     return m_cache;
   }
 
+  /*!
+    @brief Get cell-centered field storage
+  */
+  virtual EBAMRCellData& get_E_cell(){
+    return m_E_cell;
+  }
+
+  /*!
+    @brief Get face-centered field storage
+  */
+  virtual EBAMRFluxData& get_E_face(){
+    return m_E_face;
+  }
+
+  /*!
+    @brief Get EB-centered field storage
+  */
+  virtual EBAMRIVData& get_E_eb(){
+    return m_E_eb;
+  }
+
 protected:
 
   /*!
@@ -194,6 +287,21 @@ protected:
     @brief Cached state
   */
   MFAMRCellData m_cache;
+
+  /*!
+    @brief Intermediate field
+  */
+  EBAMRCellData m_E_cell;
+
+  /*!
+    @brief Field on face centers
+  */
+  EBAMRFluxData m_E_face;
+
+  /*!
+    @brief Field on the EB
+  */
+  EBAMRIVData m_E_eb;
 };
 
 /*!

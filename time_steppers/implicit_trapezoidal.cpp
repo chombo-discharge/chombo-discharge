@@ -176,6 +176,8 @@ Real implicit_trapezoidal::advance(const Real a_dt){
   return dt;
 }
 
+
+
 void implicit_trapezoidal::allocate_cdr_storage(){
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();
@@ -210,6 +212,21 @@ void implicit_trapezoidal::allocate_sigma_storage(){
   const int ncomp = 1;
   m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->get_phase(), ncomp));
   m_sigma_scratch->allocate_storage();
+}
+
+void implicit_trapezoidal::compute_E_into_scratch(const MFAMRCellData& a_phi){
+  CH_TIME("splitstep_tga::compute_E_into_scratch");
+  if(m_verbosity > 5){
+    pout() << "splitstep_tga::compute_E_into_scratch" << endl;
+  }
+  
+  EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
+  EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
+  EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
+  
+  this->compute_E(E_cell, m_cdr->get_phase(), a_phi);   // Compute cell-centered field
+  this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
+  this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 }
 
 void implicit_trapezoidal::store_states(){
@@ -328,7 +345,98 @@ void implicit_trapezoidal::restore_states(){
     EBAMRIVData& cache = m_sigma_scratch->get_cache();
     data_ops::copy(m_sigma->get_state(), cache);
   }
+}
+
+void implicit_trapezoidal::predictor_convection(const Real a_dt){
+  CH_TIME("implicit_trapezoidal::predictor_convection");
+  if(m_verbosity > 2){
+    pout() << "implicit_trapezoidal::predictor_convection" << endl;
+  }
+
+  m_cdr->set_source(0.0);
+  m_cdr->set_diffco(0.0);
+
+
+  Vector<EBAMRCellData*> cdr_states;
+  Vector<EBAMRCellData*> cdr_velocities;
+  Vector<EBAMRIVData*>   cdr_fluxes;
+  Vector<EBAMRIVData*>   extrap_cdr_states;
+  Vector<EBAMRIVData*>   extrap_cdr_velo;
+  Vector<EBAMRIVData*>   extrap_cdr_gradients;
+  Vector<EBAMRIVData*>   extrap_cdr_fluxes;
+  Vector<EBAMRIVData*>   extrap_rte_fluxes;
+
+  cdr_fluxes = m_cdr->get_ebflux();
   
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver> solver   = solver_it();
+    RefCountedPtr<cdr_storage> storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& velo  = solver->get_velo_cell();
+
+    EBAMRIVData& dens_eb = storage->get_eb_state();
+    EBAMRIVData& velo_eb = storage->get_eb_velo();
+    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& grad_eb = storage->get_eb_grad();
+
+    cdr_states.push_back(&state);
+    cdr_velocities.push_back(&velo);
+
+    extrap_cdr_states.push_back(&dens_eb);
+    extrap_cdr_velo.push_back(&velo_eb);
+    extrap_cdr_gradients.push_back(&flux_eb);
+    extrap_cdr_fluxes.push_back(&grad_eb);
+  }
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    solver->compute_boundary_flux(flux_eb, solver->get_state());
+    extrap_rte_fluxes.push_back(&flux_eb);
+  }
+
+  // Compute cdr fluxes at the boundary
+  this->compute_E_into_scratch(m_poisson->get_state()); 
+  this->compute_cdr_velocities(cdr_velocities,         cdr_states,         m_poisson_scratch->get_E_cell(), m_time);
+  this->extrapolate_to_eb(extrap_cdr_states,           m_cdr->get_phase(), cdr_states);
+  this->extrapolate_to_eb(extrap_cdr_velo,             m_cdr->get_phase(), cdr_velocities);
+  this->compute_gradients_at_eb(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_states);
+  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_states,         cdr_velocities, m_cdr->get_phase());
+  this->compute_cdr_fluxes(cdr_fluxes, 
+			   extrap_cdr_fluxes,
+			   extrap_cdr_states,
+			   extrap_cdr_velo,
+			   extrap_cdr_gradients,
+			   extrap_rte_fluxes,
+			   m_poisson_scratch->get_E_eb(),
+			   m_time);
+  this->compute_charge_flux(m_sigma->get_flux(), cdr_fluxes);
+
+  // Euler advance. Store -0.5*dt*div(nv)^k in scratch storage. Solver contains explicitly advanced state
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_old = storage->get_cache();
+    EBAMRCellData& rhs     = storage->get_scratch1();
+    EBAMRCellData& phi_new = solver->get_state();
+
+    solver->compute_divF(rhs, phi_old, 0.0, true);
+    data_ops::scale(rhs, -0.5*a_dt);
+    data_ops::incr(phi_new, rhs, 2.0);
+
+    m_amr->average_down(phi_new, m_cdr->get_phase());
+    m_amr->interp_ghost(phi_new, m_cdr->get_phase());
+
+    data_ops::floor(phi_new, 0.0);
+  }
+
+
+  // Euler advance for sigma
+  MayDay::Abort("implicit_trapezoidal::predictor_convection - missing Euler advance for sigma");
 }
 
 bool implicit_trapezoidal::advance_convection(const Real a_dt){
@@ -336,6 +444,10 @@ bool implicit_trapezoidal::advance_convection(const Real a_dt){
   if(m_verbosity > 2){
     pout() << "implicit_trapezoidal::advance_convection" << endl;
   }
+
+  bool converged = true;
+
+  this->predictor_convection(a_dt);
 
   return false;
 }

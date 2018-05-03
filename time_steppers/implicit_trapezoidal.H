@@ -191,6 +191,16 @@ protected:
   virtual void allocate_sigma_storage();
 
   /*!
+    @brief Compute electric field into scratch storage
+  */
+  virtual void compute_E_into_scratch(const MFAMRCellData& a_phi);
+
+  /*!
+    @brief Explicit Euler prediction for convection step
+  */
+  virtual void predictor_convection(const Real a_dt);
+
+  /*!
     @brief Cache states
   */
   virtual void store_states();

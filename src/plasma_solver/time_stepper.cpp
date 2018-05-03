@@ -952,6 +952,25 @@ void time_stepper::compute_Emax(Real& a_Emax, const phase::which_phase a_phase){
   a_Emax = max;
 }
 
+void time_stepper::compute_charge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_fluxes){
+  CH_TIME("time_stepper::compute_charge_flux");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_charge_flux" << endl;
+  }
+
+  data_ops::set_value(a_flux, 0.0);
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const EBAMRIVData& solver_flux          = *a_cdr_fluxes[solver_it.get_solver()];
+
+    data_ops::incr(a_flux, solver_flux, spec->get_charge()*units::s_Qe);
+  }
+
+  m_sigma->reset_cells(a_flux);
+}
+
 void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fluxes,
 					       const Vector<EBAMRCellData*> a_densities,
 					       const Vector<EBAMRCellData*> a_velocities,

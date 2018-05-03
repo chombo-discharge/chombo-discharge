@@ -219,6 +219,10 @@ public:
 			    const EBAMRCellData& a_density,
 			    const EBAMRCellData& a_velocity);
 
+  /*!
+    @brief Compute charge flux
+  */
+  virtual void compute_charge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
 
   /*!
     @brief Compute RTE source terms
