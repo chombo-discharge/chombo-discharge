@@ -95,8 +95,6 @@ void rk2::deallocate_internals(){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
   }
-
-
 }
 
 void rk2::regrid_internals(){
