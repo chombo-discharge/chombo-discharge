@@ -149,15 +149,15 @@ void poisson_solver::allocate_internals(){
   data_ops::set_value(m_resid,  0.0);
 }
 
-void poisson_solver::deallocate_internals(){
-  CH_TIME("poisson_solver::deallocate_internals");
+void poisson_solver::allocate_wall_bc(){
+  CH_TIME("poisson_solver::poisson_solver(full)");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::deallocate_internals" << endl;
+    pout() << "poisson_solver::poisson_solver(full)" << endl;
   }
-  m_amr->deallocate(m_state);
-  m_amr->deallocate(m_source);
-  m_amr->deallocate(m_resid);
-  m_amr->deallocate(m_sigma);
+  m_wallbc.resize(2*SpaceDim);
+  for (int i = 0; i < 2*SpaceDim; i++){
+    m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
+  }
 }
 
 void poisson_solver::cache_state(){
@@ -175,42 +175,15 @@ void poisson_solver::cache_state(){
   }
 }
 
-void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("poisson_solver::set_computational_geometry");
+void poisson_solver::deallocate_internals(){
+  CH_TIME("poisson_solver::deallocate_internals");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::set_computational_geometry" << endl;
+    pout() << "poisson_solver::deallocate_internals" << endl;
   }
-
-  m_compgeom = a_compgeom;
-
-  this->set_mfis(m_compgeom->get_mfis());
-}
-
-void poisson_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("poisson_solver::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << "poisson_solver::set_physical_domain" << endl;
-  }
-
-  m_physdom = a_physdom;
-}
-
-void poisson_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
-  CH_TIME("poisson_solver::set_mfis");
-  if(m_verbosity > 5){
-    pout() << "poisson_solver::set_mfis" << endl;
-  }
-
-  m_mfis = a_mfis;
-}
-
-void poisson_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
-  CH_TIME("poisson_solver::set_amr");
-  if(m_verbosity > 5){
-    pout() << "poisson_solver::set_amr" << endl;
-  }
-
-  m_amr = a_amr;
+  m_amr->deallocate(m_state);
+  m_amr->deallocate(m_source);
+  m_amr->deallocate(m_resid);
+  m_amr->deallocate(m_sigma);
 }
 
 void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
@@ -259,15 +232,61 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
   }
 }
 
-void poisson_solver::allocate_wall_bc(){
-  CH_TIME("poisson_solver::poisson_solver(full)");
+void poisson_solver::sanity_check(){
+  CH_TIME("poisson_solver::sanity_check");
+  if(m_verbosity > 4){
+    pout() << "poisson_solver::sanity_check" << endl;
+  }
+
+  CH_assert(!m_compgeom.isNull());
+  CH_assert(!m_physdom.isNull());
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sideit; sideit.ok(); ++sideit){
+      if(m_wallbc[wall_bc::map_bc(dir, sideit())].isNull()){
+	pout() << "poisson_solver::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
+  	MayDay::Abort("poisson_solver::sanity_check() failed. Wall BC has not been set properly");
+      }
+    }
+  }
+}
+
+void poisson_solver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+  CH_TIME("poisson_solver::set_computational_geometry");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::poisson_solver(full)" << endl;
+    pout() << "poisson_solver::set_computational_geometry" << endl;
   }
-  m_wallbc.resize(2*SpaceDim);
-  for (int i = 0; i < 2*SpaceDim; i++){
-    m_wallbc[i] = RefCountedPtr<wall_bc> (NULL);
+
+  m_compgeom = a_compgeom;
+
+  this->set_mfis(m_compgeom->get_mfis());
+}
+
+void poisson_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
+  CH_TIME("poisson_solver::set_physical_domain");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_physical_domain" << endl;
   }
+
+  m_physdom = a_physdom;
+}
+
+void poisson_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
+  CH_TIME("poisson_solver::set_mfis");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_mfis" << endl;
+  }
+
+  m_mfis = a_mfis;
+}
+
+void poisson_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+  CH_TIME("poisson_solver::set_amr");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_amr" << endl;
+  }
+
+  m_amr = a_amr;
 }
 
 void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live){
@@ -311,20 +330,56 @@ void poisson_solver::set_time(const int a_step, const Real a_time, const Real a_
   m_dt   = a_dt;
 }
 
-void poisson_solver::sanity_check(){
-  CH_TIME("poisson_solver::sanity_check");
-  if(m_verbosity > 4){
-    pout() << "poisson_solver::sanity_check" << endl;
+void poisson_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time){
+  CH_TIME("poisson_solver::set_covered_potential");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_covered_potential" << endl;
   }
 
-  CH_assert(!m_compgeom.isNull());
-  CH_assert(!m_physdom.isNull());
 
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sideit; sideit.ok(); ++sideit){
-      if(m_wallbc[wall_bc::map_bc(dir, sideit())].isNull()){
-	pout() << "poisson_solver::sanity_check() - bc is null at coord = " << dir << ", side = " << sideit() << endl;
-  	MayDay::Abort("poisson_solver::sanity_check() failed. Wall BC has not been set properly");
+  const Vector<electrode>& electrodes = m_compgeom->get_electrodes();
+
+  if(electrodes.size() > 0){
+    const int finest_level = m_amr->get_finest_level();
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const EBISLayout& ebisl_gas  = m_amr->get_ebisl(phase::gas)[lvl];
+      const EBISLayout& ebisl_sol  = m_amr->get_ebisl(phase::solid)[lvl];
+      const Real dx                = m_amr->get_dx()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	EBCellFAB& phi = (*a_phi[lvl])[dit()];
+	const EBISBox& ebisbox_gas = ebisl_gas[dit()];
+	const EBISBox& ebisbox_sol = ebisl_sol[dit()];
+
+	if(!ebisbox_gas.isAllRegular() && !ebisbox_sol.isAllRegular()){
+	  const Box box = dbl.get(dit());
+	  FArrayBox& fbox = (*a_phi[lvl])[dit()].getFArrayBox();
+
+	  for (BoxIterator bit(box); bit.ok(); ++bit){
+	    const IntVect& iv  = bit();
+	    const RealVect pos = m_physdom->get_prob_lo() + dx*RealVect(iv)*RealVect::Unit;
+
+	    if(ebisbox_gas.isCovered(iv) && ebisbox_sol.isCovered(iv)){
+	      int closest;
+	      Real dist = 1.E99;
+	      for (int i = 0; i < electrodes.size(); i++){
+		const Real cur_dist = electrodes[i].get_function()->value(pos);
+		if(Abs(cur_dist) < dist){
+		  dist = Abs(cur_dist);
+		  closest = i;
+		}
+	      }
+
+	      if(electrodes[closest].is_live()){
+		fbox(iv, a_comp) = electrodes[closest].get_fraction()*m_potential(a_time);
+	      }
+	      else{
+		fbox(iv, a_comp) = 0.0;
+	      }
+	    }
+	  }
+	}
       }
     }
   }

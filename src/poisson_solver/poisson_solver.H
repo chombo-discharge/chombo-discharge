@@ -140,6 +140,11 @@ public:
   virtual void set_potential(Real (*a_potential)(const Real a_time));
 
   /*!
+    @brief Set potential in covered electrode cells
+  */
+  virtual void set_covered_potential(EBAMRCellData& a_phi, const int a_comp, const Real a_time);
+
+  /*!
     @brief Query the required number of ghost cells
   */
   virtual int query_ghost() const = 0;

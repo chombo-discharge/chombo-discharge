@@ -144,6 +144,9 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
   for (int lvl = 0; lvl <= finest_level; lvl++){
     scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
   }
+
+  // Set covered potential
+  poisson->set_covered_potential(a_output, a_cur_var, m_time);
 }
 
 void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const int a_cur_var){
