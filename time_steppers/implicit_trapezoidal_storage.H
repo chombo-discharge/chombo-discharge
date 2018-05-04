@@ -61,6 +61,20 @@ public:
   /*!
     @brief Get scratch storage
   */
+  virtual EBAMRCellData& get_scratch2(){
+    return m_scratch2;
+  }
+
+  /*!
+    @brief Get scratch storage
+  */
+  virtual EBAMRCellData& get_scratch3(){
+    return m_scratch3;
+  }
+
+  /*!
+    @brief Get scratch storage
+  */
   virtual EBAMRIVData& get_eb_state(){
     return m_scratchIV1;
   }
@@ -112,6 +126,16 @@ protected:
     @brief Scratch
   */
   EBAMRCellData m_scratch1;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRCellData m_scratch2;
+
+  /*!
+    @brief Scratch
+  */
+  EBAMRCellData m_scratch3;
 
   /*!
     @brief Scratch
@@ -341,6 +365,13 @@ public:
   virtual EBAMRIVData& get_cache(){
     return m_cache;
   }
+
+  /*!
+    @brief Get scratch
+  */
+  virtual EBAMRIVData& get_scratch1(){
+    return m_scratch1;
+  }
   
 protected:
 
@@ -363,6 +394,11 @@ protected:
     @brief Cached solution
   */
   EBAMRIVData m_cache;
+
+  /*!
+    @brief Scratch storage
+  */
+  EBAMRIVData m_scratch1;
   
 };
 #endif

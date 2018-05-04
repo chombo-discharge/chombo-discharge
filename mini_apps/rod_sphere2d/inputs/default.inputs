@@ -33,8 +33,8 @@ amr.max_amr_depth   = 1           # Maximum amr depth
 amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
-amr.blocking_factor = 8           # Blocking factor
-amr.max_box_size    = 16          # Maximum allowed box size
+amr.blocking_factor = 16          # Blocking factor
+amr.max_box_size    = 32          # Maximum allowed box size
 amr.ref_rat         = 4 4 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
@@ -42,8 +42,8 @@ amr.redist_rad      = 1           # Redistribution radius for hyperbolic conserv
 amr.sten_order      = 1           # Order for interpolation/extrapolation stencils. Must be 1 or 2
 amr.sten_radius     = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
 amr.sten_type       = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
-amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-amr.load_balance    = elliptic    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
+amr.ghost_interp    = quad        # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
 amr.ebcf            = false       # Tell amr to forget about ebcf crossings.
 # ----------------------------------------------------------------------------------------------------
 
@@ -85,13 +85,13 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 # TIME STEPPER SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-time_stepper.verbosity        = 10    # Class verbosity
+time_stepper.verbosity        = 0     # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.    # Maximum permitted time step
-time_stepper.cfl              = 0.4  # CFL number
+time_stepper.cfl              = 2.0   # CFL number
 time_stepper.relax_time       = 1.0   # Relaxation time constant
 time_stepper.source_growth    = 1.E10 # Maximum permissible growth due to source term
 # ----------------------------------------------------------------------------------------------------
@@ -113,6 +113,7 @@ poisson_solver.bc_z_high = dirichlet_live	 # BC type. Valid options are "neumann
 # ----------------------------------------------------------------------------------------------------
 cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
 cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"
+cdr_gdnv.limit_slopes   = true                   # Valid options are "covered_face" and "conservative_average"
 # ----------------------------------------------------------------------------------------------------			
 
 # ====================================================================================================
@@ -195,7 +196,7 @@ morrow_lowke.electrode_quantum_efficiency  = 0.1                   # Quantum eff
 morrow_lowke.dielectric_townsend2          = 0.1                   # Townsend coefficient on dielectrics
 morrow_lowke.dielectric_quantum_efficiency = 0.1                   # Quantum efficiency on dielectrics
 morrow_lowke.dielectric_work_function      = 6                     # Dielectric work function (ev)
-morrow_lowke.uniform_density               = 1.E0                 # Initial background ionization
+morrow_lowke.uniform_density               = 1.E0                  # Initial background ionization
 morrow_lowke.seed_density                  = 0.E14                 # Initial seed ionization
 morrow_lowke.seed_radius                   = 100E-6                  # Initial seed radius
 morrow_lowke.seed_position                 = 0. -100E-6 0.              # Initial seed position

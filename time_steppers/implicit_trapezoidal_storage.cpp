@@ -74,6 +74,8 @@ implicit_trapezoidal::sigma_storage::~sigma_storage(){
 void implicit_trapezoidal::cdr_storage::allocate_storage(){
   m_amr->allocate(m_cache,       m_phase, m_ncomp);
   m_amr->allocate(m_scratch1,    m_phase, m_ncomp);
+  m_amr->allocate(m_scratch2,    m_phase, m_ncomp);
+  m_amr->allocate(m_scratch3,    m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV1,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV3,  m_phase, m_ncomp);
@@ -83,6 +85,8 @@ void implicit_trapezoidal::cdr_storage::allocate_storage(){
 void implicit_trapezoidal::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_scratch1);
+  m_amr->deallocate(m_scratch2);
+  m_amr->deallocate(m_scratch3);
   m_amr->deallocate(m_scratchIV1);
   m_amr->deallocate(m_scratchIV2);
   m_amr->deallocate(m_scratchIV3);
@@ -114,9 +118,11 @@ void implicit_trapezoidal::poisson_storage::deallocate_storage(){
 }
 
 void implicit_trapezoidal::sigma_storage::allocate_storage(){
-  m_amr->allocate(m_cache, m_phase, m_ncomp);  
+  m_amr->allocate(m_cache,    m_phase, m_ncomp);
+  m_amr->allocate(m_scratch1, m_phase, m_ncomp);  
 }
 
 void implicit_trapezoidal::sigma_storage::deallocate_storage(){
-  m_amr->deallocate(m_cache);  
+  m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_scratch1);  
 }

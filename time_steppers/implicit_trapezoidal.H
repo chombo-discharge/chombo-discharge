@@ -198,7 +198,23 @@ protected:
   /*!
     @brief Explicit Euler prediction for convection step
   */
-  virtual void predictor_convection(const Real a_dt);
+  virtual void convection_predictor(const Real a_dt);
+
+  /*!
+    @brief Corrector for convection step
+  */
+  virtual void convection_corrector(Real& a_max_F, Real& a_max_X, const Real a_dt);
+
+  /*!
+    @brief Compute discretization errors for the implicit trapezoidal method for a single species
+  */
+  virtual void compute_trapz_error(Real& a_err_F,
+				   Real& a_err_X,
+				   const Vector<EBAMRCellData*>& a_corrector,
+				   const Vector<EBAMRCellData*>& a_predictor,
+				   const Vector<EBAMRCellData*>& a_phi_old,
+				   const Vector<EBAMRCellData*>& a_rhs_old,
+				   const Vector<EBAMRCellData*>& a_rhs_new);
 
   /*!
     @brief Cache states

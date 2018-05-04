@@ -377,7 +377,7 @@ Vector<Real> morrow_lowke::compute_conductor_fluxes(const Vector<Real>& a_extrap
 						    const RealVect&     a_pos,
 						    const RealVect&     a_normal,
 						    const Real&         a_time) const{
-  Vector<Real> fluxes(m_num_species, 0.0);
+  Vector<Real> fluxes(m_num_species, 0.0); 
 
   // Treat anode and cathode differently
   const bool is_cathode = PolyGeom::dot(a_E, a_normal) < 0.;

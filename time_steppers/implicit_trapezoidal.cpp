@@ -176,8 +176,6 @@ Real implicit_trapezoidal::advance(const Real a_dt){
   return dt;
 }
 
-
-
 void implicit_trapezoidal::allocate_cdr_storage(){
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();
@@ -347,15 +345,11 @@ void implicit_trapezoidal::restore_states(){
   }
 }
 
-void implicit_trapezoidal::predictor_convection(const Real a_dt){
-  CH_TIME("implicit_trapezoidal::predictor_convection");
+void implicit_trapezoidal::convection_predictor(const Real a_dt){
+  CH_TIME("implicit_trapezoidal::convection_predictor");
   if(m_verbosity > 2){
-    pout() << "implicit_trapezoidal::predictor_convection" << endl;
+    pout() << "implicit_trapezoidal::convection_predictor" << endl;
   }
-
-  m_cdr->set_source(0.0);
-  m_cdr->set_diffco(0.0);
-
 
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_velocities;
@@ -415,7 +409,7 @@ void implicit_trapezoidal::predictor_convection(const Real a_dt){
 			   m_time);
   this->compute_charge_flux(m_sigma->get_flux(), cdr_fluxes);
 
-  // Euler advance. Store -0.5*dt*div(nv)^k in scratch storage. Solver contains explicitly advanced state
+  // CDR explicit Euler advance. Store -0.5*dt*div(nv)^k in scratch storage. Solver contains explicitly advanced state
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -426,17 +420,226 @@ void implicit_trapezoidal::predictor_convection(const Real a_dt){
 
     solver->compute_divF(rhs, phi_old, 0.0, true);
     data_ops::scale(rhs, -0.5*a_dt);
-    data_ops::incr(phi_new, rhs, 2.0);
+    data_ops::incr(phi_new, rhs, 2.0); // Can do this directly because phi_new = phi_old
 
     m_amr->average_down(phi_new, m_cdr->get_phase());
     m_amr->interp_ghost(phi_new, m_cdr->get_phase());
 
     data_ops::floor(phi_new, 0.0);
   }
+  
+
+  // Sigma explicit Euler advance. Storage -0.5*dt*F^k in scratch storage. After this, solver contains Euler advanced state
+  EBAMRIVData& phi_old = m_sigma_scratch->get_cache();
+  EBAMRIVData& rhs     = m_sigma_scratch->get_scratch1();
+  EBAMRIVData& phi_new = m_sigma->get_state();
+
+  m_sigma->compute_rhs(rhs);
+  data_ops::scale(rhs, -0.5*a_dt);
+  data_ops::incr(phi_new, rhs, 2.0); // Can do this directly because phi_new = phi_old
+  m_amr->average_down(phi_new, m_cdr->get_phase());
+  m_sigma->reset_cells(phi_new);
+  m_sigma->reset_cells(rhs);
+  
+
+  // Poisson and RTE solve with explicitly advanced Euler states
+  if(m_do_poisson){
+    this->solve_poisson();
+  }
+  if(m_do_rte){
+    if((m_step + 1) % m_fast_rte == 0){
+      this->solve_rte(a_dt);
+    }
+  }
+}
+
+void implicit_trapezoidal::convection_corrector(Real& a_error_F, Real& a_error_X, const Real a_dt){
+  CH_TIME("implicit_trapezoidal::convection_corrector");
+  if(m_verbosity > 2){
+    pout() << "implicit_trapezoidal::convection_corrector" << endl;
+  }
+
+  Vector<EBAMRCellData*> cdr_states;
+  Vector<EBAMRCellData*> cdr_velocities;
+  Vector<EBAMRIVData*>   cdr_fluxes;
+  Vector<EBAMRIVData*>   extrap_cdr_states;
+  Vector<EBAMRIVData*>   extrap_cdr_velo;
+  Vector<EBAMRIVData*>   extrap_cdr_gradients;
+  Vector<EBAMRIVData*>   extrap_cdr_fluxes;
+  Vector<EBAMRIVData*>   extrap_rte_fluxes;
+
+  cdr_fluxes = m_cdr->get_ebflux();
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver> solver   = solver_it();
+    RefCountedPtr<cdr_storage> storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& pred  = solver->get_state(); // Predictor has been stored here. I will use it for BCs
+    EBAMRCellData& velo  = solver->get_velo_cell();
+
+    EBAMRIVData& dens_eb = storage->get_eb_state();
+    EBAMRIVData& velo_eb = storage->get_eb_velo();
+    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& grad_eb = storage->get_eb_grad();
+
+    cdr_states.push_back(&pred);
+    cdr_velocities.push_back(&velo);
+
+    extrap_cdr_states.push_back(&dens_eb);
+    extrap_cdr_velo.push_back(&velo_eb);
+    extrap_cdr_gradients.push_back(&flux_eb);
+    extrap_cdr_fluxes.push_back(&grad_eb);
+  }
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    solver->compute_boundary_flux(flux_eb, solver->get_state());
+    extrap_rte_fluxes.push_back(&flux_eb);
+  }
+
+  // Compute cdr fluxes at the boundary
+  this->compute_E_into_scratch(m_poisson->get_state());
+  this->compute_cdr_velocities(cdr_velocities,         cdr_states,         m_poisson_scratch->get_E_cell(), m_time + a_dt);
+  this->extrapolate_to_eb(extrap_cdr_states,           m_cdr->get_phase(), cdr_states);
+  this->extrapolate_to_eb(extrap_cdr_velo,             m_cdr->get_phase(), cdr_velocities);
+  this->compute_gradients_at_eb(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_states);
+  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_states,         cdr_velocities, m_cdr->get_phase());
+  this->compute_cdr_fluxes(cdr_fluxes, 
+			   extrap_cdr_fluxes,
+			   extrap_cdr_states,
+			   extrap_cdr_velo,
+			   extrap_cdr_gradients,
+			   extrap_rte_fluxes,
+			   m_poisson_scratch->get_E_eb(),
+			   m_time + a_dt);
+  this->compute_charge_flux(m_sigma->get_flux(), cdr_fluxes);
 
 
-  // Euler advance for sigma
-  MayDay::Abort("implicit_trapezoidal::predictor_convection - missing Euler advance for sigma");
+  // Implicit trapezoidal rule. Evaluate errors at end.
+  Vector<EBAMRCellData*> correctors; // Correctors
+  Vector<EBAMRCellData*> predictors; // Predictors
+  Vector<EBAMRCellData*> old_states; // phi^k
+  Vector<EBAMRCellData*> old_rhs;    // -0.5*dt*divF^k
+  Vector<EBAMRCellData*> new_rhs;    // -0.5*dt*divF^(k+1)
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+
+    EBAMRCellData& pred     = solver->get_state();
+    EBAMRCellData& phi_old  = storage->get_cache();
+    EBAMRCellData& divF_old = storage->get_scratch1();
+    EBAMRCellData& divF_new = storage->get_scratch2();
+    EBAMRCellData& corr     = storage->get_scratch3();
+
+    // Compute -0.5*dt*div(n*v)^(k+1)
+    solver->compute_divF(divF_new, pred, 0.0, false);
+    data_ops::scale(divF_new, -0.5*a_dt);
+
+    // Compute corrector
+    data_ops::set_value(corr, 0.0);
+    data_ops::incr(corr, phi_old,  1.0); // n^k
+    data_ops::incr(corr, divF_old, 1.0); // -0.5*dt*divF^k
+    data_ops::incr(corr, divF_new, 1.0); // -0.5*dt*divF^(k+1)
+    data_ops::floor(corr, 0.0);
+
+    // Interpolate ghost cells
+    m_amr->average_down(corr, m_cdr->get_phase());
+    m_amr->interp_ghost(corr, m_cdr->get_phase());
+
+
+    // Aggregate stuff
+    correctors.push_back(&corr);
+    predictors.push_back(&pred);
+    old_states.push_back(&phi_old);
+    old_rhs.push_back(&divF_old);
+    new_rhs.push_back(&divF_new);
+  }
+
+  // Compute point-wise sum of errors
+  this->compute_trapz_error(a_error_F, a_error_X, correctors, predictors, old_states, old_rhs, new_rhs);
+
+  // Copy corrector to predictor
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+
+    EBAMRCellData& pred     = solver->get_state();
+    EBAMRCellData& corr     = storage->get_scratch3();
+
+    data_ops::set_value(pred,  0.0);
+    data_ops::incr(pred, corr, 1.0);
+  }
+}
+
+void implicit_trapezoidal::compute_trapz_error(Real& a_err_F,
+					       Real& a_err_X,
+					       const Vector<EBAMRCellData*>& a_corrector,
+					       const Vector<EBAMRCellData*>& a_predictor,
+					       const Vector<EBAMRCellData*>& a_phi_old,
+					       const Vector<EBAMRCellData*>& a_rhs_old,
+					       const Vector<EBAMRCellData*>& a_rhs_new){
+  CH_TIME("implicit_trapezoidal::compute_trapz_error");
+  if(m_verbosity > 2){
+    pout() << "implicit_trapezoidal::compute_trapz_error" << endl;
+  }
+
+
+  Real maxF = 0.0;
+  Real maxX = 0.0;
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = IntVectSet(box);
+      
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+
+	Real sumF = 0.0;
+	Real sumX = 0.0;
+	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	  const int idx = solver_it.get_solver();
+	  
+	  const EBCellFAB& corrector = (*(*a_corrector[idx])[lvl])[dit()];
+	  const EBCellFAB& predictor = (*(*a_predictor[idx])[lvl])[dit()];
+	  const EBCellFAB& phi_old = (*(*a_phi_old[idx])[lvl])[dit()];
+	  const EBCellFAB& rhs_old = (*(*a_rhs_old[idx])[lvl])[dit()];
+	  const EBCellFAB& rhs_new = (*(*a_rhs_new[idx])[lvl])[dit()];
+	  
+	  const Real cur_F = corrector(vof, 0) - phi_old(vof, 0) - rhs_old(vof,0) - rhs_new(vof, 0);
+	  const Real cur_X = corrector(vof, 0) - predictor(vof, 0);
+
+	  sumF += Abs(cur_F);
+	  sumX += Abs(sumX);
+	}
+
+	maxF = Max(sumF, maxF);
+	maxX = Max(sumF, maxX);
+      }
+    }
+  }
+
+#ifdef CH_MPI
+  Real lmaxF = maxF;
+  Real lmaxX = maxX;
+  
+  int result  = MPI_Allreduce(&lmaxF, &maxF, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  int result2 = MPI_Allreduce(&lmaxX, &maxX, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS || result2 != MPI_SUCCESS){
+    MayDay::Error("implicit_trapezoidal::convection_corrector - communication error");
+  }
+#endif
+
+  a_err_F = maxF;
+  a_err_X = maxX;
 }
 
 bool implicit_trapezoidal::advance_convection(const Real a_dt){
@@ -445,11 +648,46 @@ bool implicit_trapezoidal::advance_convection(const Real a_dt){
     pout() << "implicit_trapezoidal::advance_convection" << endl;
   }
 
-  bool converged = true;
+  int iter = 0;
+  bool converged = false;
 
-  this->predictor_convection(a_dt);
 
-  return false;
+  this->convection_predictor(a_dt);
+
+  Real pre_F = 0.0;
+  Real max_F = 0.0;
+  Real max_X = 0.0;
+  while (iter < m_max_pc_iter && !converged){
+    iter++;
+    this->convection_corrector(max_F, max_X, a_dt);
+
+    if(m_verbosity >= 0){
+      pre_F = (iter == 0) ? max_F : pre_F;
+      pout() << "implicit_trapezoidal::advance_convection - PC iteration " << iter
+	     << "\t Converged = " << converged
+	     << "\t Error F = " << max_F
+	     << "\t Error X = " << max_X
+	     << "\t Rate = " << pre_F/max_F
+	     << endl;
+    }
+	
+
+    // Implicit correction of Poisson and RTE equations
+    if(!m_semi_implicit){
+      if(m_do_poisson){
+	this->solve_poisson();
+      }
+      if(m_do_rte){
+	if((m_step + 1) % m_fast_rte == 0){
+	  this->solve_rte(a_dt);
+	}
+      }
+    }
+
+    pre_F = max_F;
+  }
+
+  return converged;
 }
 
 bool implicit_trapezoidal::advance_diffusion(const Real a_dt){
