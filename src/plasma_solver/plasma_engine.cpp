@@ -60,6 +60,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_restart_mode(restart_mode::full);   // Set restart mode
   this->set_init_regrids(0);                    // Number of initial regrids
   this->set_geom_only(false);                   // Only plot geometry
+  this->set_ebis_memory_load_balance(true);     // Set load balance for EBIS generation
   this->set_restart(false);                     // Restart mode
   this->set_restart_step(0);                    // Restart from this step
   this->set_start_time(0.0);                    // Start time
@@ -1458,6 +1459,13 @@ void plasma_engine::setup_geometry_only(){
 
   this->sanity_check();
 
+  if(m_ebis_memory_load_balance){
+    EBIndexSpace::s_useMemoryLoadBalance = true;
+  }
+  else {
+    EBIndexSpace::s_useMemoryLoadBalance = false;
+  }
+
   m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
 			       m_amr->get_finest_domain(),
 			       m_amr->get_finest_dx(),
@@ -1486,6 +1494,13 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   }
 
   this->sanity_check();                                    // Sanity check before doing anything expensive
+
+  if(m_ebis_memory_load_balance){
+    EBIndexSpace::s_useMemoryLoadBalance = true;
+  }
+  else {
+    EBIndexSpace::s_useMemoryLoadBalance = false;
+  }
 
   m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
 			       m_amr->get_finest_domain(),
@@ -1665,6 +1680,27 @@ void plasma_engine::set_restart(const bool a_restart){
   }
   else if(str == "false"){
     m_restart = false;
+  }
+}
+
+void plasma_engine::set_ebis_memory_load_balance(const bool a_balance){
+  CH_TIME("plasma_engine::set_ebis_memory_load_balance");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_ebis_memory_load_balance" << endl;
+  }
+
+  m_ebis_memory_load_balance = a_balance;
+
+  { // get parameter from input script
+    std::string str;
+    ParmParse pp("plasma_engine");
+    pp.query("ebis_memory_load_balance", str);
+    if(str == "true"){
+      m_ebis_memory_load_balance = true;
+    }
+    else if(str == "false"){
+      m_ebis_memory_load_balance = false;
+    }
   }
 }
 

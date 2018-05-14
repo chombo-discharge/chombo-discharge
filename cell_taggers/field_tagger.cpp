@@ -42,22 +42,7 @@ Vector<Real> field_tagger::tracer(const RealVect&         a_pos,
 				  const Real&             a_max_E,
 				  const RealVect&         a_grad_E,
 				  const Real&             a_min_grad_E,
-				  const Real&             a_max_grad_E,
-				  const Real&             a_rho,
-				  const Real&             a_min_rho,
-				  const Real&             a_max_rho,
-				  const RealVect&         a_grad_rho,
-				  const Real&             a_min_grad_rho,
-				  const Real&             a_max_grad_rho,
-				  const Vector<Real>&     a_ion_densities,
-				  const Vector<Real>&     a_min_ion_densities,
-				  const Vector<Real>&     a_max_ion_densities,
-				  const Vector<RealVect>& a_ion_gradients,
-				  const Vector<Real>&     a_min_ion_gradients,
-				  const Vector<Real>&     a_max_ion_gradients,
-				  const Vector<Real>&     a_photon_densities,
-				  const Vector<Real>&     a_min_photon_densities,
-				  const Vector<Real>&     a_max_photon_densities){
+				  const Real&             a_max_grad_E){
 
   Vector<Real> tracers(m_num_tracers);
   tracers[0] = a_E.vectorLength()/a_max_E;

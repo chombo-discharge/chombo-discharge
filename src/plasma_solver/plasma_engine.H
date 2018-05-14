@@ -160,6 +160,11 @@ public:
   virtual void set_restart(const bool a_restart);
 
   /*!
+    @brief Set load balance for memory
+  */
+  virtual void set_ebis_memory_load_balance(const bool a_balance);
+  
+  /*!
     @brief Only geometry
   */
   virtual void set_geom_only(const bool a_geom_only);
@@ -405,6 +410,11 @@ protected:
     @brief Geometry only
   */
   bool m_geometry_only;
+
+  /*!
+    @brief Use memory as load balance for EBIS
+  */
+  bool m_ebis_memory_load_balance;
 
   /*!
     @brief Allocate internals
