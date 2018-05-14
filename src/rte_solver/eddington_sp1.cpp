@@ -251,7 +251,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
 
   bool converged;
 
-  // Must have a dummy for chekcing intiial residual
+  // Must have a dummy for checking initial residual
   EBAMRCellData dummy;
   EBAMRCellData source;
   m_amr->allocate(dummy, m_phase, ncomp);
