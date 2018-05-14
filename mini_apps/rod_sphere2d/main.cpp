@@ -48,14 +48,9 @@ int main(int argc, char* argv[]){
     pp.get("potential", g_potential);
   }
 
-  //RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air7());
-  //RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_bolsig());
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
-  //  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
-  //RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new splitstep_rk2_tga_trapz());
-  //RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new splitstep_tga());
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new implicit_trapezoidal());
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_sphere());

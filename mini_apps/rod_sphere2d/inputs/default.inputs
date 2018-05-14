@@ -61,13 +61,13 @@ field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 # ----------------------------------------------------------------------------------------------------
 plasma_engine.verbosity                       = 2             # Engine verbosity
 plasma_engine.plot_interval                   = 1             # Plot interval
-plasma_engine.regrid_interval                 = 5             # Regrid interval
+plasma_engine.regrid_interval                 = 2             # Regrid interval
 plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
 plasma_engine.initial_regrids                 = 0             # Number of initial regrids
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 1             # Maximum number of steps
+plasma_engine.max_steps                       = 10            # Maximum number of steps
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
