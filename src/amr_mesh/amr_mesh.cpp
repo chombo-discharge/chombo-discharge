@@ -650,6 +650,8 @@ void amr_mesh::define_eb_quad_cfi(){
     pout() << "amr_mesh::define_eb_quad_cfi" << endl;
   }
 
+
+    
   const int comps = SpaceDim;
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
@@ -662,17 +664,19 @@ void amr_mesh::define_eb_quad_cfi(){
     if(has_coar){
       if(!ebis_gas.isNull()){
 	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-	m_quadcfi[phase::gas][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
-											     m_grids[lvl-1],
-											     m_ebisl[phase::gas][lvl],
-											     m_ebisl[phase::gas][lvl-1],
-											     m_domains[lvl-1],
-											     m_ref_ratios[lvl-1],
-											     comps,
-											     m_dx[lvl],
-											     m_num_ghost,
-											     cfivs,
-											     ebis_gas));
+	if(m_interp_type == ghost_interpolation::quad){
+	  m_quadcfi[phase::gas][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
+											       m_grids[lvl-1],
+											       m_ebisl[phase::gas][lvl],
+											       m_ebisl[phase::gas][lvl-1],
+											       m_domains[lvl-1],
+											       m_ref_ratios[lvl-1],
+											       comps,
+											       m_dx[lvl],
+											       m_num_ghost,
+											       cfivs,
+											       ebis_gas));
+	}
 
 	m_old_quadcfi[phase::gas][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
 											   m_grids[lvl-1],
@@ -687,17 +691,19 @@ void amr_mesh::define_eb_quad_cfi(){
       }
       if(!ebis_sol.isNull()){
 	LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	m_quadcfi[phase::solid][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
-											       m_grids[lvl-1],
-											       m_ebisl[phase::solid][lvl],
-											       m_ebisl[phase::solid][lvl-1],
-											       m_domains[lvl-1],
-											       m_ref_ratios[lvl-1],
-											       comps,
-											       m_dx[lvl],
-											       m_num_ghost,
-											       cfivs,
-											       ebis_sol));
+	if(m_interp_type == ghost_interpolation::quad){
+	  m_quadcfi[phase::solid][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
+												 m_grids[lvl-1],
+												 m_ebisl[phase::solid][lvl],
+												 m_ebisl[phase::solid][lvl-1],
+												 m_domains[lvl-1],
+												 m_ref_ratios[lvl-1],
+												 comps,
+												 m_dx[lvl],
+												 m_num_ghost,
+												 cfivs,
+												 ebis_sol));
+	}
 	
 	m_old_quadcfi[phase::solid][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
 											     m_grids[lvl-1],
@@ -719,47 +725,50 @@ void amr_mesh::define_fillpatch(){
     pout() << "amr_mesh::define_fillpatch" << endl;
   }
 
-  const int comps     = SpaceDim;
+  if(m_interp_type == ghost_interpolation::pwl){
 
-  // Should these be input somehow?
-  const int radius    = 1;
-  const IntVect ghost = m_num_ghost*IntVect::Unit;
+    const int comps     = SpaceDim;
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+    // Should these be input somehow?
+    const int radius    = 1;
+    const IntVect ghost = m_num_ghost*IntVect::Unit;
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+    const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-    const bool has_coar = lvl > 0;
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
 
-    if(has_coar){
-      if(!ebis_gas.isNull()){
-	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-	m_pwl_fillpatch[phase::gas][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
-												   m_grids[lvl-1],
-												   m_ebisl[phase::gas][lvl],
-												   m_ebisl[phase::gas][lvl-1],
-												   m_domains[lvl-1],
-												   m_ref_ratios[lvl-1],
-												   comps,
-												   radius,
-												   ghost,
-												   !m_ebcf,
-												   ebis_gas));
-      }
-      if(!ebis_sol.isNull()){
-	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
+      const bool has_coar = lvl > 0;
+
+      if(has_coar){
+	if(!ebis_gas.isNull()){
+	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
+	  m_pwl_fillpatch[phase::gas][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
 												     m_grids[lvl-1],
-												     m_ebisl[phase::solid][lvl],
-												     m_ebisl[phase::solid][lvl-1],
+												     m_ebisl[phase::gas][lvl],
+												     m_ebisl[phase::gas][lvl-1],
 												     m_domains[lvl-1],
 												     m_ref_ratios[lvl-1],
 												     comps,
 												     radius,
 												     ghost,
 												     !m_ebcf,
-												     ebis_sol));
+												     ebis_gas));
+	}
+	if(!ebis_sol.isNull()){
+	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
+	  m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
+												       m_grids[lvl-1],
+												       m_ebisl[phase::solid][lvl],
+												       m_ebisl[phase::solid][lvl-1],
+												       m_domains[lvl-1],
+												       m_ref_ratios[lvl-1],
+												       comps,
+												       radius,
+												       ghost,
+												       !m_ebcf,
+												       ebis_sol));
+	}
       }
     }
   }
@@ -1087,19 +1096,6 @@ void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
   if(m_verbosity > 3){
     pout() << "amr_mesh::interp_ghost(eb)" << endl;
   }
-
-  // for (int lvl = m_finest_level; lvl > 0; lvl--){
-  //   const int ncomps = a_data[lvl]->nComp();
-  //   const Interval interv(0, ncomps -1);
-
-  //   CH_assert(a_data[lvl]->ghostVect() == m_num_ghost*IntVect::Unit);
-
-  //   m_quadcfi[a_phase][lvl]->coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
-  // }
-
-  // for (int lvl = 0; lvl <= m_finest_level; lvl++){
-  //   a_data[lvl]->exchange();
-  // }
 
   if(m_interp_type == ghost_interpolation::pwl){
     this->interp_ghost_pwl(a_data, a_phase);

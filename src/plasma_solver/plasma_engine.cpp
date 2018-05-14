@@ -535,6 +535,7 @@ void plasma_engine::allocate_internals(){
     tags_factory fact = tags_factory();
     m_tags[lvl] = RefCountedPtr<LevelData<tags> > (new LevelData<tags>(dbl, ncomp, ghost, fact));
   }
+
 }
 
 void plasma_engine::cache_tags(const EBAMRTags& a_tags){
@@ -975,6 +976,8 @@ void plasma_engine::regrid(const bool a_use_initial_data){
   m_timestepper->regrid_internals();                                 // Regrid internal storage for time_stepper
   m_celltagger->regrid();                                            // Regrid cell tagger
 
+
+
   if(a_use_initial_data){
     m_timestepper->initial_data();
   }
@@ -984,13 +987,17 @@ void plasma_engine::regrid(const bool a_use_initial_data){
   // Solve the elliptic parts
   bool converged = m_timestepper->solve_poisson();
   if(!converged){ // If we don't converge, try new solver settings
+    if(m_verbosity > 0){
+      pout() << "plasma_engine::regrid - Poisson solver failed to converge. Trying to auto-tune new settings." << endl;
+    }
+	  
     RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
     poisson->auto_tune();
     converged = m_timestepper->solve_poisson();
 
     if(!converged){
       if(m_verbosity > 0){
-  	pout() << "plasma_engine::regrid - Poisson solver failed to converge" << endl;
+  	pout() << "plasma_engine::regrid - Poisson solver fails to converge" << endl;
       }
     }
   }
