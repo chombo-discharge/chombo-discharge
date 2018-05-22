@@ -18,7 +18,7 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
-#define ENGINE_MEMORY_DEBUG 1
+#define ENGINE_MEMORY_DEBUG 0
 
 plasma_engine::plasma_engine(){
   CH_TIME("plasma_engine::plasma_engine(weak)");

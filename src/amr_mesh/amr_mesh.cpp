@@ -16,7 +16,7 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
-#define amr_regrid_timer 0
+#define AMR_MESH_DEBUG 1
 
 amr_mesh::amr_mesh(){
 
@@ -404,53 +404,85 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
 
   Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
 
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t0 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before build_grids" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->build_grids(tags, a_hardcap);
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t1 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_eblevelgrid" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t2 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_mflevelgrid" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_mflevelgrid();  // Define MFLevelGrid
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t3 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_ebcoarave" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_eb_coar_ave();  // Define ebcoarseaverage on both phases
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t4 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_ebquadcfi" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases.
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t5 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_fillpatch" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t6 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_ebpwl_interp" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t7 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_flux_reg" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_flux_reg();     // Define flux register (phase::gas only)
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t8 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_redist_oper" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_redist_oper();  // Define redistribution (phase::gas only)
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t9 = MPI_Wtime();
+  pout() << "amr_mesh::regrid - memory before define_irreg_sten" << endl;
+  overallMemoryUsage();
+  pout() << endl;
 #endif
   this->define_irreg_sten();   // Define irregular stencils
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   const Real t10 = MPI_Wtime();
 #endif
 
 
-#if amr_regrid_timer
+#if AMR_MESH_DEBUG
   pout() << "amr_mesh::regrid breakdown" << endl;
+  pout() << "overall memory usage" << endl;
+  overallMemoryUsage();
   pout() << "build grids = " << t1-t0  << "\t % =  " << 100.*(t1-t0)/(t10-t0) << endl;
   pout() << "eblevelgrid = " << t2-t1  << "\t % =  " << 100.*(t2-t1)/(t10-t0) << endl;
   pout() << "mflevelgrid = " << t3-t2  << "\t % =  " << 100.*(t3-t2)/(t10-t0) << endl;
