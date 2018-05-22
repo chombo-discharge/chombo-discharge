@@ -18,6 +18,8 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
+#define ENGINE_MEMORY_DEBUG 1
+
 plasma_engine::plasma_engine(){
   CH_TIME("plasma_engine::plasma_engine(weak)");
   if(m_verbosity > 5){
@@ -42,30 +44,31 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   }
   
 
-  this->set_physical_domain(a_physdom);         // Set physical domain
-  this->set_computational_geometry(a_compgeom); // Set computational geometry
-  this->set_plasma_kinetics(a_plaskin);         // Set plasma kinetics
-  this->set_time_stepper(a_timestepper);        // Set time stepper
-  this->set_amr(a_amr);                         // Set amr
-  this->set_cell_tagger(a_celltagger);          // Set cell tagger
+  this->set_physical_domain(a_physdom);                      // Set physical domain
+  this->set_computational_geometry(a_compgeom);              // Set computational geometry
+  this->set_plasma_kinetics(a_plaskin);                      // Set plasma kinetics
+  this->set_time_stepper(a_timestepper);                     // Set time stepper
+  this->set_amr(a_amr);                                      // Set amr
+  this->set_cell_tagger(a_celltagger);                       // Set cell tagger
 
-  this->set_geom_refinement_depth(-1);          // Set geometric refinement depths
-  this->set_verbosity(1);                       // Set verbosity
-  this->set_plot_interval(10);                  // Set plot interval
-  this->set_checkpoint_interval(10);            // Set checkpoint interval
-  this->set_regrid_interval(10);                // Set regrid interval
-  this->set_output_directory("./");             // Set output directory
-  this->set_output_file_names("simulation");    // Set output file names
-  this->set_output_mode(output_mode::full);     // Set output mode
-  this->set_restart_mode(restart_mode::full);   // Set restart mode
-  this->set_init_regrids(0);                    // Number of initial regrids
-  this->set_geom_only(false);                   // Only plot geometry
-  this->set_ebis_memory_load_balance(true);     // Set load balance for EBIS generation
-  this->set_restart(false);                     // Restart mode
-  this->set_restart_step(0);                    // Restart from this step
-  this->set_start_time(0.0);                    // Start time
-  this->set_stop_time(1.0);                     // Stop time
-  this->set_max_steps(100);                     // Max number of steps
+  this->set_geom_refinement_depth(-1);                       // Set geometric refinement depths
+  this->set_verbosity(1);                                    // Set verbosity
+  this->set_plot_interval(10);                               // Set plot interval
+  this->set_checkpoint_interval(10);                         // Set checkpoint interval
+  this->set_regrid_interval(10);                             // Set regrid interval
+  this->set_output_directory("./");                          // Set output directory
+  this->set_output_file_names("simulation");                 // Set output file names
+  this->set_output_mode(output_mode::full);                  // Set output mode
+  this->set_restart_mode(restart_mode::full);                // Set restart mode
+  this->set_memory_report_mode(memory_report_mode::overall); // Set memory report mode
+  this->set_init_regrids(0);                                 // Number of initial regrids
+  this->set_geom_only(false);                                // Only plot geometry
+  this->set_ebis_memory_load_balance(true);                  // Set load balance for EBIS generation
+  this->set_restart(false);                                  // Restart mode
+  this->set_restart_step(0);                                 // Restart from this step
+  this->set_start_time(0.0);                                 // Start time
+  this->set_stop_time(1.0);                                  // Stop time
+  this->set_max_steps(100);                                  // Max number of steps
 
   m_amr->set_physical_domain(m_physdom); // Set physical domain
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
@@ -618,7 +621,7 @@ void plasma_engine::get_geom_tags(){
       }
     }
 
-     // Gas-dielectric interface cells
+    // Gas-dielectric interface cells
     if(m_gas_dielectric_interface_tag_depth > lvl){
       if(!ebis_sol.isNull()){
 	gas_diel_tags = m_mfis->interface_region(cur_dom);
@@ -692,7 +695,7 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
 
   const int ghost = m_amr->get_num_ghost();
 
-    for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = a_grids[lvl];
     const Vector<Box> boxes      = dbl.boxArray();
     const Vector<int> procs      = dbl.procIDs();
@@ -810,6 +813,26 @@ void plasma_engine::grid_report(){
 	 << endl;
 
   pout() << endl;
+}
+
+void plasma_engine::memory_report(const memory_report_mode::which_mode a_mode){
+#ifdef CH_USE_MEMORY_TRACKING
+  CH_TIME("plasma_engine::grid_report");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::grid_report" << endl;
+  }
+
+  if(a_mode == memory_report_mode::overall){
+    overallMemoryUsage();
+  }
+  else if(a_mode == memory_report_mode::unfreed){
+    ReportUnfreedMemory(pout());
+  }
+  else if(a_mode == memory_report_mode::allocated){
+    ReportAllocatedMemory(pout());
+  }
+  pout() << endl;
+#endif
 }
 
 void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
@@ -955,29 +978,77 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   const Real start_time = MPI_Wtime();   // Timer
 
-  m_timestepper->deallocate_internals(); // Deallocate internal storage for the time stepper. 
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before timestepper->deallocate_internals()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
+  m_timestepper->deallocate_internals(); // Deallocate internal storage for the time stepper.
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before this->tag_cells()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   this->tag_cells(tags, m_tags);         // Tag cells
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before this->cache_tags()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before this->deallocate_internals()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   this->deallocate_internals();          // Deallocate internal storage for plasma_engine
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before timestepper->cache_states()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
 
   m_timestepper->cache_states();                // Cache solver states
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before this->deallocate_solver_internals()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   m_timestepper->deallocate_solver_internals(); // Deallocate solver internals
   
   const Real cell_tags = MPI_Wtime();    // Timer
 
   // Regrid base
   const int old_finest_level = m_amr->get_finest_level();
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before amr->regrid()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   m_amr->regrid(tags, old_finest_level + 1);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   const int new_finest_level = m_amr->get_finest_level();
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before this->regrid_internals()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   this->regrid_internals(old_finest_level, new_finest_level);        // Regrid internals for plasma_engine
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before timestepper->regrid_solvers()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before timestepper->regrid_internals()" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   m_timestepper->regrid_internals();                                 // Regrid internal storage for time_stepper
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before celltagger->regrid()" << endl;
+  this->memory_report(m_memory_mode);
+
+#endif
   m_celltagger->regrid();                                            // Regrid cell tagger
 
 
-
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory before elliptic solves" << endl;
+  this->memory_report(m_memory_mode);
+#endif
   if(a_use_initial_data){
     m_timestepper->initial_data();
   }
@@ -1027,6 +1098,11 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 			elliptic_solve - solver_regrid,
 			solver_filling - elliptic_solve);
   }
+
+#if ENGINE_MEMORY_DEBUG
+  pout() << "memory at end" << endl;
+  this->memory_report(m_memory_mode);
+#endif
 }
 
 void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_new_finest_level){
@@ -1386,6 +1462,28 @@ void plasma_engine::set_restart_mode(const restart_mode::which_mode a_mode){
   }
   else if(str == "volume_only"){
     m_restart_mode = restart_mode::volume_charge_only; 
+  }
+}
+
+void plasma_engine::set_memory_report_mode(const memory_report_mode::which_mode a_memory_mode){
+  CH_TIME("plasma_engine::set_memory_report_mode");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_memory_report_mode" << endl;
+  }
+
+  m_memory_mode = a_memory_mode;
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.query("memory_report_mode", str);
+  if(str == "overall"){
+    m_memory_mode = memory_report_mode::overall;
+  }
+  else if(str == "unfreed"){
+    m_memory_mode = memory_report_mode::unfreed;
+  }
+  else if(str == "allocated"){
+    m_memory_mode = memory_report_mode::allocated;
   }
 }
 

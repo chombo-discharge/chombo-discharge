@@ -16,7 +16,7 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
-#define amr_regrid_timer 1
+#define amr_regrid_timer 0
 
 amr_mesh::amr_mesh(){
 

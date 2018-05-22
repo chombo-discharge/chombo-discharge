@@ -125,6 +125,11 @@ public:
   virtual void set_restart_mode(const restart_mode::which_mode a_mode);
 
   /*!
+    @brief Set memory report mode
+  */
+  virtual void set_memory_report_mode(const memory_report_mode::which_mode a_memory_mode);
+
+  /*!
     @brief Set output directory
   */
   virtual void set_output_directory(const std::string a_output_dir);
@@ -255,6 +260,11 @@ protected:
     @brief Restart mode
   */
   restart_mode::which_mode m_restart_mode;
+
+  /*!
+    @brief Memory report mode
+  */
+  memory_report_mode::which_mode m_memory_mode;
 
   /*!
     @brief Output directory
@@ -504,6 +514,11 @@ protected:
     @brief Write a grid report
   */
   virtual void grid_report();
+
+  /*!
+    @brief Memory report
+  */
+  virtual void memory_report(const memory_report_mode::which_mode a_mode);
   
   /*!
     @brief Read checkpoint file

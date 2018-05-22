@@ -135,11 +135,22 @@ namespace wallbc {
   };
 };
 
+/*!
+  @brief Restart modes
+*/
 namespace restart_mode {
   enum which_mode {
     full                = 0,
     surface_charge_only = 1,
     volume_charge_only  = 2,
+  };
+};
+
+namespace memory_report_mode {
+  enum which_mode {
+    overall   = 0,
+    unfreed   = 1,
+    allocated = 2,
   };
 };
 
