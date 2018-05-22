@@ -150,7 +150,7 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
   }
 
   // Set covered potential
-  poisson->set_covered_potential(a_output, a_cur_var, m_time);
+  //  poisson->set_covered_potential(a_output, a_cur_var, m_time);
 }
 
 void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const int a_cur_var){
@@ -547,9 +547,9 @@ void plasma_engine::cache_tags(const EBAMRTags& a_tags){
     pout() << "plasma_engine::cache_tags" << endl;
   }
 
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-  const IntVect ghost    = IntVect::Zero;
+  const int ncomp         = 1;
+  const int finest_level  = m_amr->get_finest_level();
+  const IntVect ghost     = IntVect::Zero;
 
   m_cached_tags.resize(1 + finest_level);
   
@@ -2046,11 +2046,17 @@ void plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
     pout() << "plasma_engine::tag_cells" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+  const int finest_level  = m_amr->get_finest_level();
   a_all_tags.resize(1 + finest_level, IntVectSet());
 
   if(!m_celltagger.isNull()){
     m_celltagger->tag_cells(a_cell_tags);
+    
+#if 1 // Debug - if this fails, you have tags on m_amr->m_max_amr_depth and something has gone wrong. 
+    if(finest_level == m_amr->get_max_amr_depth()){
+      CH_assert(a_all_tags[finest_level].isEmpty());
+    }
+#endif
   }
 
   // Gather tags from a_tags

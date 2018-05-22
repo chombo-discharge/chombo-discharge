@@ -16,7 +16,7 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
-#define AMR_MESH_DEBUG 1
+#define AMR_MESH_DEBUG 0
 
 amr_mesh::amr_mesh(){
 
@@ -503,10 +503,13 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     pout() << "amr_mesh::build_grids" << endl;
   }
 
-  const int base      = 0;                        // I don't want this level to change
-  const int top_level = a_tags.size() - 1;        // top_level is the finest level where we have tags
+  const int base      = 0;                                    // Base level never changes. 
+  const int top_level = (m_finest_level == m_max_amr_depth) ? // top_level is the finest level where we have tags. We should never
+    m_finest_level - 1 : a_tags.size() - 1;                   // have tags on max_amr_depth, and we make that restriction here. 
   Vector<Vector<Box> > new_boxes(1 + top_level);  // New boxes to be load balance
   Vector<Vector<Box> > old_boxes(1 + top_level);  // Old grids.
+
+
 
   const int hardcap = (a_hardcap == -1) ? m_max_amr_depth : a_hardcap;
 

@@ -1,8 +1,9 @@
 /*!
-  @file poisson_solver.cpp
-  @brief Implementation of poisson_solver.H
+  @file   poisson_solver.cpp
+  @brief  Implementation of poisson_solver.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
+  @todo   set_covered_potential is buggy and breaks when we don't have dielectrics. Fix this. 
 */
 
 #include "poisson_solver.H"

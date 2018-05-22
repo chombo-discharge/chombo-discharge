@@ -89,13 +89,15 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
 
   if(m_num_tracers > 0){
     
-    const RealVect origin  = m_physdom->get_prob_lo();
-    const Real time        = m_timestepper->get_time();
-    const int finest_level = m_amr->get_finest_level();
+    const RealVect origin      = m_physdom->get_prob_lo();
+    const Real time            = m_timestepper->get_time();
+    const int finest_level     = m_amr->get_finest_level();
+    const int max_depth        = m_amr->get_max_amr_depth();
+    const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth
 
     this->compute_tracers();
 
-    for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (int lvl = 0; lvl <= finest_tag_level; lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
       const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
       const Real dx                = m_amr->get_dx()[lvl];
