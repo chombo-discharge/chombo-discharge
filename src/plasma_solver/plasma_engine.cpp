@@ -2051,12 +2051,6 @@ void plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
 
   if(!m_celltagger.isNull()){
     m_celltagger->tag_cells(a_cell_tags);
-    
-#if 1 // Debug - if this fails, you have tags on m_amr->m_max_amr_depth and something has gone wrong. 
-    if(finest_level == m_amr->get_max_amr_depth()){
-      CH_assert(a_all_tags[finest_level].isEmpty());
-    }
-#endif
   }
 
   // Gather tags from a_tags
@@ -2070,6 +2064,15 @@ void plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
   for (int lvl = 0; lvl < finest_level; lvl++){
     a_all_tags[lvl] |= m_geom_tags[lvl];
   }
+
+#if 0 // Debug - if this fails, you have tags on m_amr->m_max_amr_depth and something has gone wrong. 
+  if(finest_level == m_amr->get_max_amr_depth()){
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      pout() << "level = " << lvl << "\t num_pts = " << a_all_tags[lvl].numPts() << endl;
+    }
+    CH_assert(a_all_tags[finest_level].isEmpty());
+  }
+#endif
 }
 
 void plasma_engine::write_geometry(){

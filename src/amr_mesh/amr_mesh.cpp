@@ -509,7 +509,12 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
   Vector<Vector<Box> > new_boxes(1 + top_level);  // New boxes to be load balance
   Vector<Vector<Box> > old_boxes(1 + top_level);  // Old grids.
 
-
+#if 0 // Debug
+  pout() << "amr_mesh::build_grids - " << "finest_level = " << m_finest_level
+	 << "\t max_depth = " << m_max_amr_depth
+    	 << "\t top_level = " << top_level
+	 << endl;
+#endif
 
   const int hardcap = (a_hardcap == -1) ? m_max_amr_depth : a_hardcap;
 
