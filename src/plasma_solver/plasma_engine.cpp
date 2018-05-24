@@ -63,7 +63,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_memory_report_mode(memory_report_mode::overall); // Set memory report mode
   this->set_init_regrids(0);                                 // Number of initial regrids
   this->set_geom_only(false);                                // Only plot geometry
-  this->set_ebis_memory_load_balance(true);                  // Set load balance for EBIS generation
+  this->set_ebis_memory_load_balance(false);                 // Set load balance for EBIS generation
   this->set_restart(false);                                  // Restart mode
   this->set_restart_step(0);                                 // Restart from this step
   this->set_start_time(0.0);                                 // Start time
