@@ -9,7 +9,7 @@ Load modules by
     module load gcc/4.9.1
     module load mpt/2.10
 
-The configuration file for vilje is found here. Store it as <chombo_root>/lib/mk/Make.defs.local
+The configuration file for vilje is found here. Store it as chombo_root/lib/mk/Make.defs.local
 
 Loading the modules
 -------------------

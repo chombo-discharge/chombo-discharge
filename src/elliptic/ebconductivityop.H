@@ -89,25 +89,6 @@ class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
   //! ebconductivityopFactory to generate these objects. Really.
   //! Ghost cell arguments are there for caching reasons. Once you set them,
   //! an error is thrown if you send in data that does not match.
-  //! \param a_eblgFine grid at finer  level
-  //! \param a_eblg grid at this  level
-  //! \param a_eblgCoar grid at coarser level
-  //! \param a_eblgCoarMG grid at intermediate multigrid level
-  //! \param a_domainBC domain boundary conditions at this level
-  //! \param a_ebBC eb boundary conditions at this level
-  //! \param a_dx grid spacing at this level
-  //! \param a_origin offset to lowest corner of the domain
-  //! \param a_refToFine refinement ratio to finer level
-  //! \param a_refToCoar refinement ratio to coarser level
-  //! \param a_hasFiner true if there is a finer AMR level, false otherwise.
-  //! \param a_hasCoarser true if there is a coarser AMR level.
-  //! \param a_hasCoarserMG true if there is a coarser MultiGrid level.
-  //! \param a_preCondIters number of iterations to do for pre-conditioning
-  //! \param a_relaxType 0 means point Jacobi, 1 is Gauss-Seidel.
-  //! \param a_acoef coefficent of identity
-  //! \param a_bcoef coefficient of gradient.
-  //! \param a_ghostCellsPhi Number of ghost cells in phi, correction
-  //! \param a_ghostCellsRhs Number of ghost cells in RHS, residual, lphi
   ebconductivityop(const EBLevelGrid &                                  a_eblgFine,
                    const EBLevelGrid &                                  a_eblg,
                    const EBLevelGrid &                                  a_eblgCoar,

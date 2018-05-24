@@ -57,7 +57,6 @@ public:
   /*!
     @brief Reconcile polygon edges. This gives each edge a reference to the polygon they circulate, and also computes the 
     polygon area
-    @param[in] a_area_weighted Use area weighted vertex normals
   */
   virtual void reconcile_polygons(const bool a_outward_normal, const bool recompute_vnormal);
 

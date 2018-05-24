@@ -1,9 +1,9 @@
 /*!
-  @file poisson_staircase_gmgs.cpp
-  @brief Implementation of poisson_staircase_gmg.H
+  @file   poisson_staircase_gmg.cpp
+  @brief  Implementation of poisson_staircase_gmg.H
   @author Robert Marskar
-  @date Nov. 2017
-  @todo Map boundary conditions onto computational_geometry and plasma_engine. 
+  @date   Nov. 2017
+  @todo   Map boundary conditions onto computational_geometry and plasma_engine. 
 */
 
 #include "poisson_staircase_gmg.H"

@@ -10,6 +10,10 @@
 
 #include "dcel_mesh.H"
 
+/*!
+  @class ply_reader
+  @brief Class for generation a dcel_mesh from the Stanford PLY file format
+*/
 class ply_reader {
 public:
 
@@ -22,10 +26,9 @@ protected:
 
   /*!
     @brief Read an ASCII header
-    @param[out] a_first_vertex  The line number containing the first vertex
-    @param[out] a_first_polygon The line number containing the first polygon
-    @param[out] a_num_vertices  Number of vertices
-    @param[out] a_num_polygons  Number of polygons
+    @param[out]   a_num_vertices  Number of vertices
+    @param[out]   a_num_polygons  Number of polygons
+    @param[inout] a_inputstream File
   */
   static void read_ascii_header(int& a_num_vertices,
 				int& a_num_polygons,

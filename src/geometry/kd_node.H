@@ -14,7 +14,7 @@
 #include <Vector.H>
 
 /*!
-  @brief Node class for kd_tree. This should probably be a template class. 
+  @brief Template class for kd-trees
 */
 template<typename T> class kd_node {
 public:

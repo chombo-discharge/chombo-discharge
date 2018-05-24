@@ -1,8 +1,8 @@
 /*!
-  @file graded_perlin_sphere_if.hpp
-  @brief Implementation of graded_perlin_sphere_if.hpp
+  @file   graded_perlin_sphere_if.cpp
+  @brief  Implementation of graded_perlin_sphere_if.H
   @author Robert Marskar
-  @date Oct. 2017
+  @date   Oct. 2017
 */
 
 #include <math.h>

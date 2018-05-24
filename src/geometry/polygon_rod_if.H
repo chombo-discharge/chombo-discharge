@@ -22,6 +22,7 @@ public:
     @param[in] a_nsides Number of sides of polygon
     @param[in] a_radius Rod radius
     @param[in] a_length Rod length
+    @param[in] a_cornerCurv Rounding radius on corners
     @param[in] a_inside Domain on inside (true) or outside (false)
   */
   polygon_rod_if(const int&  a_nsides,

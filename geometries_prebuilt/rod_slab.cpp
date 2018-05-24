@@ -1,8 +1,8 @@
 /*!
-  @file rod_slab_geometry.cpp
-  @brief Implementation of rod_slab_geometry.H
+  @file   rod_slab.cpp
+  @brief  Implementation of rod_slab.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #include "rod_slab.H"

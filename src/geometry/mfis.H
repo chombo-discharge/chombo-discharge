@@ -1,8 +1,8 @@
 /*!
-  @file mfindexspace.H
-  @brief Multi-fluid index space
+  @file   mfis.H
+  @brief  Multi-fluid index space
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #ifndef _mfindexspace_

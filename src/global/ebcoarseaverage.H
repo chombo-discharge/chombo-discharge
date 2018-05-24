@@ -51,15 +51,6 @@ public:
   /**
      Defining constructor.  Constructs a valid object.
      Equivalent to default construction followed by define().
-
-     {\bf Arguments:}\\
-     dblFine, dblCoar: The fine and coarse layouts
-     of the data.\\
-     ebislFine, ebislCoar: The fine and coarse layouts
-     of the geometric description.\\
-     nref: The refinement ratio between the two levels. \\
-     nvar: The number of variables contained in the data
-     at each VoF.
   */
   ebcoarseaverage(const DisjointBoxLayout& dblFine,
                   const DisjointBoxLayout& dblCoar,
@@ -74,12 +65,6 @@ public:
   /**
      Defining constructor.  Constructs a valid object.
      Equivalent to default construction followed by define().
-
-     {\bf Arguments:}\\
-     eblgFine, eblgCoar: The fine and coarse EBLevelGrids \\
-     nref: The refinement ratio between the two levels. \\
-     nvar: The number of variables contained in the data
-     at each VoF.
   */
   ebcoarseaverage(const EBLevelGrid& a_eblgFine,
                   const EBLevelGrid& a_eblgCoar,
@@ -90,14 +75,6 @@ public:
   /**
      Defines this object.  Existing information is overriden.
 
-     {\bf Arguments:}\\
-     dblFine, dblCoar: The fine and coarse layouts
-     of the data.\\
-     ebislFine, ebislCoar: The fine and coarse layouts
-     of the geometric description.\\
-     nref: The refinement ratio between the two levels. \\
-     nvar: The number of variables contained in the data
-     at each VoF.
   */
   void define(const DisjointBoxLayout& dblFine,
               const DisjointBoxLayout& dblCoar,
@@ -112,11 +89,6 @@ public:
   /**
      Defines this object.  Existing information is overriden.
 
-     {\bf Arguments:}\\
-     eblgFine, eblgCoar: The fine and coarse EBLevelGrids \\
-     nref: The refinement ratio between the two levels. \\
-     nvar: The number of variables contained in the data
-     at each VoF.
   */
   void define(const EBLevelGrid& a_eblgFine,
               const EBLevelGrid& a_eblgCoar,
@@ -142,14 +114,6 @@ public:
      should have the same number of components specified in the most
      recent call to define().
 
-     {\bf Arguments:}\\
-     coarData: The data over the coarse layout.\\
-     fineData: The data over the fine layout.  \\
-     Fine and coarse data must
-     have the same number of variables.\\
-     variables:  The variables to average.  Those not
-     in this range will be left alone.   This range of variables
-     must be in both the coarse and fine data.
   */
   void
   average(LevelData<EBCellFAB>&       a_coarData,

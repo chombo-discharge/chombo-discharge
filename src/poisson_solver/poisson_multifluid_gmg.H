@@ -104,7 +104,7 @@ public:
     @brief Set the bottom solver.  
     @param[in] a_which_solver Solver type. 0 = smoother, 1 = BiCGStab
   */
-  virtual void set_bottom_solver(const int a_whichsolver);
+  virtual void set_bottom_solver(const int a_which_solver);
 
   /*!
     @brief Set the depth for bottom drop

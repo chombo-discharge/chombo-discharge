@@ -1,8 +1,8 @@
 /*!
-  @file rte_iterator.hpp
-  @brief Iterator class for rte_layout
+  @file   rte_iterator.H
+  @brief  Iterator class for rte_layout
   @author Robert Marskar
-  @date June 2016
+  @date   June 2016
 */
 
 #ifndef _RTE_ITERATOR_

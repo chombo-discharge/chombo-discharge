@@ -34,9 +34,11 @@ public:
 
   /*!
     @brief Define function
-    @param[in] a_plasKin     Plasma kinetics
-    @param[in] a_amrParams   AMR parameters
-    @param[in] a_timeStepper Time stepper
+    @param[in] a_plaskin     Plasma kinetics
+    @param[in] a_timestepper Time stepper
+    @param[in] a_amr         amr_mesh instance
+    @param[in] a_compgeom    Computational geometry
+    @param[in] a_physdom     Physical domain
   */
   virtual void define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 		      const RefCountedPtr<time_stepper>&           a_timestepper,

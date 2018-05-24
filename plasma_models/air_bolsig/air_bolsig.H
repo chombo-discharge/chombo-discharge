@@ -1,6 +1,6 @@
 /*!
   @file   air_bolsig.H
-  @brief  Declaration of a BOLSIG-based transport model for air
+  @brief  Declaration of a BOLSIG based transport model for air
   @author Robert Marskar
   @date   Jan. 2018
 */
@@ -13,6 +13,7 @@
 #include "perlin_if.H"
 
 /*!
+  @class air_bolsig 
   @brief BOLSIG-based kinetic model for air. Transport coefficients for electrons are taken by calls to BOLSIG+. 
   @details 
 
@@ -77,13 +78,19 @@ public:
 // ====================================================================================================
 // NEW FUNCTION SIGNATURES
 
+  /*!
+    @brief Compute cdr diffusion coefficients
+  */
   virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
 							  const RealVect&     a_pos,
 							  const RealVect&     a_E,
 							  const Vector<Real>& a_cdr_densities) const {
     return this->compute_diffusion_coefficients(a_E);
   }
-  
+
+  /*!
+    @brief Compute cdr velocities
+  */
   virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
 						  const RealVect&     a_pos,
 						  const RealVect&     a_E,
@@ -91,6 +98,9 @@ public:
     return this->compute_velocities(a_E);
   }
 
+  /*!
+    @brief Compute cdr source terms
+  */
   virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
 						const RealVect&         a_pos,
 						const RealVect&         a_E,
@@ -101,6 +111,9 @@ public:
     return this->compute_source_terms(a_cdr_densities, a_rte_densities, a_E);
   }
 
+  /*!
+    @brief Compute electrode fluxes
+  */
   virtual Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
 						    const RealVect&     a_pos,
 						    const RealVect&     a_normal,
@@ -120,6 +133,9 @@ public:
 					  a_time);
   }
 
+  /*!
+    @brief Compute dielectric fluxes
+  */
   virtual Vector<Real> compute_cdr_dielectric_fluxes(const Real&         a_time,
 						     const RealVect&     a_pos,
 						     const RealVect&     a_normal,

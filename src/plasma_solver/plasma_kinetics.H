@@ -32,10 +32,10 @@ public:
 
   /*!
     @brief Compute velocities for the CDR equations
-    @param[in] a_pos Position
     @param[in] a_time Time
+    @param[in] a_pos Position
     @param[in] a_E Electric field
-    @param[in] a_cdr_densites CDR densities
+    @param[in] a_cdr_densities CDR densities
   */
   virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
 						  const RealVect&     a_pos,
@@ -47,7 +47,7 @@ public:
     @param[in] a_time Time
     @param[in] a_pos Position
     @param[in] a_E Electric field
-    @param[in] a_cdr_densites CDR densities
+    @param[in] a_cdr_densities CDR densities
   */
   virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
 							  const RealVect&     a_pos,
@@ -79,6 +79,7 @@ public:
     @param[in] a_E Electric field
     @param[in] a_cdr_velocities CDR velocities. Normal component only. 
     @param[in] a_cdr_densities CDR densities. 
+    @param[in] a_cdr_gradients Normal gradients of cdr densities
     @param[in] a_rte_fluxes RTE fluxes (normal component only)
     @param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
   */
@@ -98,8 +99,9 @@ public:
     @param[in] a_pos Position
     @param[in] a_normal Normal vector, points into the gas phase. 
     @param[in] a_E Electric field
-    @param[in] a_cdr_velocities CDR velocities. Normal component only. 
     @param[in] a_cdr_densities CDR densities. 
+    @param[in] a_cdr_velocities CDR velocities. Normal component only. 
+    @param[in] a_cdr_gradients Normal gradients of cdr densities
     @param[in] a_rte_fluxes RTE fluxes (normal component only)
     @param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
   */

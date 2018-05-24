@@ -1,8 +1,8 @@
 /*!
-  @file rod_plane_geometry.cpp
-  @brief Implementation of rod_plane_geometry.H
+  @file   rod_plane.cpp
+  @brief  Implementation of rod_plane.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #include "rod_plane.H"

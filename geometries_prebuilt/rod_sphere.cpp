@@ -1,8 +1,8 @@
 /*!
-  @file rod_sphere_geometry.cpp
-  @brief Implementation of rod_sphere_geometry.H
+  @file   rod_sphere.cpp
+  @brief  Implementation of rod_sphere.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #include "rod_sphere.H"

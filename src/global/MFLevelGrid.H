@@ -1,9 +1,9 @@
 /*!
-  @file MFLevelGrid
-  @brief Declaration of a wrapper for wrapping multifluid EBLevelGrids
+  @file   MFLevelGrid.H
+  @brief  Declaration of a wrapper for wrapping multifluid EBLevelGrids
   @author Robert Marskar
-  @date Dec. 2017
-  @todo Segregate header and implementation files
+  @date   Dec. 2017
+  @todo   Segregate header and implementation files
 */
 
 #ifndef _MFLEVELGRID_

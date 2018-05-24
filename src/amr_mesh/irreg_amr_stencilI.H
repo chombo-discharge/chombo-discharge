@@ -1,6 +1,6 @@
 /*!
-  @file irreg_amr_stencilI.hpp
-  @brief Implementation of irreg_amr_stencil
+  @file irreg_amr_stencilI.H
+  @brief Implementation of irreg_amr_stencil.H
   @author Robert Marskar
   @date Aug. 207
 */

@@ -1,8 +1,8 @@
 /*!
-  @file photon.hpp
-  @brief Declaration of a class that holds information about optical transitions
+  @file   photon.H
+  @brief  Declaration of a class that holds information about optical transitions
   @author Robert Marskar
-  @date June 2016
+  @date   June 2016
 */
 
 #ifndef _PHOTON_

@@ -221,7 +221,7 @@ protected:
   virtual void compute_dnj();
 
   /*!
-    @briefCompute the right-hand side for the trapezoidal discretization
+    @brief Compute the right-hand side for the trapezoidal discretization
   */
   virtual void compute_trapz_rhs(const Real a_dt); 
 
@@ -263,10 +263,10 @@ protected:
     @param[in]  a_x      Previous iterate
     @param[in]  a_gradx  Gradient of the previous iterate
     @param[in]  a_E      Electric field
-    @param[in]  a_gradE  Gradient of electric field
     @param[in]  a_rte    RTE densities
     @param[in]  a_pos    Position
     @param[in]  a_time   Time
+    @param[in]  a_dt     Time increment
     @return Equation error \f$\sum_i |F_i|\f$
   */
   virtual Real newton_point_trapz(Vector<Real>&           a_p,

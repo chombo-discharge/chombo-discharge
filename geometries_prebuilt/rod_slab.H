@@ -1,8 +1,8 @@
 /*!
-  @file rod_slab_geometry.H
-  @brief Sphere-sphere geometry (one dielectric sphere and one electrode)
+  @file   rod_slab.H
+  @brief  Sphere-sphere geometry (one dielectric sphere and one electrode)
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #ifndef _ROD_SLAB_GEOM_

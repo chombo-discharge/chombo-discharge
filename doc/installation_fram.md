@@ -7,7 +7,7 @@ Load the modules by
 
     module load intel/2017a
 
-The configuration file for fram.sigma2.no can be found here. Store it as <chombo_root>/lib/mk/Make.defs.local
+The configuration file for fram.sigma2.no can be found here. Store it as chombo_root/lib/mk/Make.defs.local
 
 Loading the modules
 -------------------

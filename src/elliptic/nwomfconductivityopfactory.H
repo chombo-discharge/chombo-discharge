@@ -35,7 +35,7 @@
   \f[
   a\partial_n\phi_1 - b\partial_n\phi_2 = c\sigma,
   \f]
-  where \f$a\f$, \f$b\f and \f$c\f$ are variables.  
+  where \f$a\f$, \f$b\f$ and \f$c\f$ are variables.  
 */
 class nwomfconductivityopfactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:

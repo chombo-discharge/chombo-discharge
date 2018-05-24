@@ -1,8 +1,8 @@
 /*!
-  @file mfindexspace.cpp
-  @brief Implementation of mfis.H
+  @file   mfis.cpp
+  @brief  Implementation of mfis.H
   @author Robert Marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 #include "mfis.H"

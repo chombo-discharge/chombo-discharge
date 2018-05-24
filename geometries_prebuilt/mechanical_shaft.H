@@ -1,5 +1,5 @@
 /*!
-  @file   mechanical_shaft_geometry.H
+  @file   mechanical_shaft.H
   @brief  Declaration of the mechanical shaft geometry (ABB problem)
   @author Robert Marskar
   @date   Nov. 2017

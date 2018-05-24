@@ -115,26 +115,26 @@ protected:
     @param[in] a_time Time
     @param[in] a_dx Level resolution
     @param[in] a_E Electric field
-    @param[in] a_minE Minimum electric field in domain
-    @param[in] a_maxE Maximum electric field in domain
-    @param[in] a_gradE grad(|E|)
-    @param[in] a_maxGradE Maximum grad(|E|)
-    @param[in] a_minGradE Maximum grad(|E|)
+    @param[in] a_min_E Minimum electric field in domain
+    @param[in] a_max_E Maximum electric field in domain
+    @param[in] a_grad_E grad(|E|)
+    @param[in] a_max_grad_E Maximum grad(|E|)
+    @param[in] a_min_grad_E Maximum grad(|E|)
     @param[in] a_rho Space charge density
-    @param[in] a_maxRho Maximum rho
-    @param[in] a_minRho Minimum  rho
-    @param[in] a_gradRho grad(rho)
-    @param[in] a_maxGradRho Maximum grad(rho)
-    @param[in] a_minGradRho Minimum  grad(rho)
-    @param[in] a_ionDensities Ion densities
-    @param[in] a_minIonDensities Lowest densities in domain
-    @param[in] a_maxIonDensities Highest
-    @param[in] a_ionGradients Ion gradients
-    @param[in] a_minIonGradients Smallest ion gradients in domain
-    @param[in] a_maxIonGradients Largest ion gradients in domain
-    @param[in] a_photonDensities Photon densities
-    @param[in] a_minPhotonDensities Minium photon densities in domain
-    @param[in] a_maxPhotonDensities Maximum photon densities in domain
+    @param[in] a_min_rho Minimum rho
+    @param[in] a_max_rho Maximum rho
+    @param[in] a_grad_rho grad(rho)
+    @param[in] a_max_grad_rho Maximum grad(rho)
+    @param[in] a_min_grad_rho Minimum  grad(rho)
+    @param[in] a_ion_densities Ion densities
+    @param[in] a_min_ion_densities Lowest densities in domain
+    @param[in] a_max_ion_densities Highest
+    @param[in] a_ion_gradients Ion gradients
+    @param[in] a_min_ion_gradients Smallest ion gradients in domain
+    @param[in] a_max_ion_gradients Largest ion gradients in domain
+    @param[in] a_photon_densities Photon densities
+    @param[in] a_min_photon_densities Minium photon densities in domain
+    @param[in] a_max_photon_densities Maximum photon densities in domain
   */
   virtual Vector<Real> tracer(const RealVect&         a_pos,
 			      const Real&             a_time,

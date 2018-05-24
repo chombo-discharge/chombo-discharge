@@ -1,5 +1,5 @@
 /*!
-  @file   kd_node.cpp
+  @file   kd_nodeI.H
   @brief  Implementation of kd_node.H
   @author Robert Marskar
   @date   Apr. 2018
@@ -12,7 +12,7 @@ template<typename T> kd_node<T>::kd_node(){
   this->set_leaf(true);
 }
 
-template<typename T> kd_node<T>::kd_node(const RefCountedPtr<kd_node>& a_parent){
+template<typename T> kd_node<T>::kd_node(const RefCountedPtr<kd_node<T> >& a_parent){
   this->set_leaf(true);
   this->set_parent(a_parent);
 }

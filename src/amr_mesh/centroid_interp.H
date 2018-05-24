@@ -30,6 +30,7 @@ public:
     @param[in] a_dx Resolutions
     @param[in] a_order Interpolation order
     @param[in] a_radius Radius for least squares
+    @param[in] a_type Stencil type
   */
   centroid_interp(const DisjointBoxLayout&       a_dbl,
 		  const EBISLayout&              a_ebisl,

@@ -66,13 +66,19 @@ public:
   // ====================================================================================================
 // NEW FUNCTION SIGNATURES
 
+  /*!
+    @brief Compute diffusion coefficients
+  */
   virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
 							  const RealVect&     a_pos,
 							  const RealVect&     a_E,
 							  const Vector<Real>& a_cdr_densities) const {
     return this->compute_diffusion_coefficients(a_E);
   }
-  
+
+  /*!
+    @brief Compute velocities
+  */
   virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
 						  const RealVect&     a_pos,
 						  const RealVect&     a_E,
@@ -80,6 +86,9 @@ public:
     return this->compute_velocities(a_E);
   }
 
+  /*!
+    @brief Compute source terms
+  */
   virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
 						const RealVect&         a_pos,
 						const RealVect&         a_E,
@@ -90,6 +99,9 @@ public:
     return this->compute_source_terms(a_cdr_densities, a_rte_densities, a_E);
   }
 
+  /*!
+    @brief Compute electrode fluxes
+  */
   virtual Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
 						    const RealVect&     a_pos,
 						    const RealVect&     a_normal,
@@ -109,6 +121,9 @@ public:
 					  a_time);
   }
 
+  /*!
+    @brief Compute dielectric flxues
+  */
   virtual Vector<Real> compute_cdr_dielectric_fluxes(const Real&         a_time,
 						     const RealVect&     a_pos,
 						     const RealVect&     a_normal,
@@ -213,7 +228,6 @@ public:
 
   /*!
     @brief Set the initial surface charge
-    @param[in] a_pos Position
   */
   virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const;
 

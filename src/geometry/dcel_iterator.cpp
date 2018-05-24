@@ -1,6 +1,6 @@
 /*!
-  @file   dcel_edge_iterator.cpp
-  @brief  Implementation of dcel_edge_iterator.H
+  @file   dcel_iterator.cpp
+  @brief  Implementation of dcel_iterator.H
   @author Robert Marskar
   @date   Apr. 2018
 */

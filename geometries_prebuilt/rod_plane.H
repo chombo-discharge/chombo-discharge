@@ -1,5 +1,5 @@
 /*!
-  @file   rod_plane_geometry.H
+  @file   rod_plane.H
   @brief  Rod-plane geometry. The dielectric plane can have surface roughness
   @author Robert Marskar
   @date   Feb. 2018

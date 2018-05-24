@@ -34,7 +34,7 @@ public:
     @brief Do elliptic load-balancing using EBAMRPoissonOp
     @param[out] a_procs   Processor ownership of boxes
     @param[in]  a_boxes   Boxes (Remember to order them by using space filling curves first!)
-    @param[in]  a_mfis    EBIndex-spaces
+    @param[in]  a_ebis    Index space
     @param[in]  a_domain  Problem domain
     @param[in]  a_verbose Verbose
   */
