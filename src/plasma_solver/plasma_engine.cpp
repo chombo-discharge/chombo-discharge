@@ -1998,7 +1998,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   const int advHrs = floor(lastadv/3600);
   const int advMin = floor((lastadv - 3600*advHrs)/60);
   const int advSec = floor( lastadv - 3600*advHrs - 60*advMin);
-  const int advMs  = floor((lastadv - advSec)*1000);
+  const int advMs  = floor((lastadv - 3600*advHrs - 60*advMin - advSec)*1000);
 
   // Write a string with the previous iteration metrics
   sprintf(metrics, 
