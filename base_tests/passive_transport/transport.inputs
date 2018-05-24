@@ -1,4 +1,0 @@
-init_data.seed_position   = 0. 0.5 0.0
-init_data.seed_radius     = 0.5
-init_data.uniform_density = 0.0
-init_data.seed_density    = 1.0
