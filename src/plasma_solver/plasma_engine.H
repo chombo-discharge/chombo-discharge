@@ -34,7 +34,8 @@
       plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
       plasma_engine.stop_time                       = 1.0           # Stop time
       plasma_engine.max_steps                       = 100           # Maximum number of steps
-      plasma_engine.geometry_only                   = true          # Special option that ONLY plots the geometry
+      plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry
+      plasma_engine.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
       plasma_engine.output_mode                     = full          # Output mode
       plasma_engine.output_directory                = ./            # Output directory
       plasma_engine.output_names                    = simulation    # Simulation output names

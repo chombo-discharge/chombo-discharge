@@ -1,0 +1,6 @@
+# ====================================================================================================
+# CDR_LAYOUT SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
+cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"
+cdr_gdnv.limit_slopes   = true                   # Valid options are "covered_face" and "conservative_average"

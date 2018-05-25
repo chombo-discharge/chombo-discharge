@@ -1,0 +1,5 @@
+# ====================================================================================================
+# RTE_LAYOUT CLASS OPTIONS
+# ====================================================================================================
+rte_layout.which_solver = eddington_sp1 # Solver type. Available option is "eddington_sp1"
+rte_layout.stationary   = true          # Stationary solver ot no.

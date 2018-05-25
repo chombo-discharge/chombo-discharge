@@ -1,0 +1,26 @@
+# ====================================================================================================
+# PLASMA_ENGINE OPTIONS
+# ====================================================================================================
+plasma_engine.verbosity                       = 2             # Engine verbosity
+plasma_engine.plot_interval                   = 10            # Plot interval
+plasma_engine.regrid_interval                 = 10            # Regrid interval
+plasma_engine.checkpoint_interval             = 10            # Checkpoint interval
+plasma_engine.init_regrids                    = 0             # Number of initial regrids
+plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
+plasma_engine.stop_time                       = 1.0           # Stop time
+plasma_engine.max_steps                       = 100           # Maximum number of steps
+plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry
+plasma_engine.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation	
+plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.output_directory                = ./            # Output directory
+plasma_engine.output_names                    = simulation    # Simulation output names
+plasma_engine.restart                         = false         # Do restart or not
+plasma_engine.restart_file                    = default_file  # Restart file
+plasma_engine.restart_mode                    = full          # Restart mode. 
+plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----

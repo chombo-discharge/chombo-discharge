@@ -15,6 +15,15 @@ class rte_iterator;
 
 /*!
   @brief Class for holding a set of rte_solvers. 
+
+  @details 
+
+  Class options
+  -------------
+
+      rte_layout.which_solver = eddington_sp1 # Solver type. Available option is "eddington_sp1"
+      rte_layout.stationary   = true          # Stationary solver ot no.
+
 */
 class rte_layout {
 public:

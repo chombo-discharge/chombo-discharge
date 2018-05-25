@@ -44,8 +44,9 @@
       amr.fill_ratio      = 1.0         # Fill ratio for grid generation
       amr.irreg_growth    = 2           # How much to grow irregular tagged cells
       amr.buffer_size     = 2           # Number of cells between grid levels
-      amr.blocking_factor = 8 (16)      # Default blocking factor (16 in 3D)
-      amr.max_box_size    = 32          # Maximum allowed box size
+      amr.blocking_factor = 8           # Default blocking factor (16 in 3D)
+      amr.max_box_size    = 16          # Maximum allowed box size
+      amr.max_ebis_box    = 32          # Maximum allowed box size
       amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
       amr.num_ghost       = 3           # Number of ghost cells. Default is 3
       amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff

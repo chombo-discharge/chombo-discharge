@@ -4,7 +4,10 @@ import os
 # Get arguments from input script
 parser = argparse.ArgumentParser();
 parser.add_argument('-dim',             type=int,  help='Dimension', default=2)
+parser.add_argument('-procs',           type=int,  help='Processors to use when building executable', default=1)
 parser.add_argument('-use_mpi',         type=bool, help='MPI enabled (default true)', default=True)
+parser.add_argument('-build',           type=bool, help='Build executable at end', default=False)
+parser.add_argument('-silent',          type=bool, help='Silent build of executable', default=False)
 parser.add_argument('-chombo_home',     type=str,  help="Chombo source code base directory", default=os.getcwd())
 parser.add_argument('-streamer_home',   type=str,  help="Source code base directory", default=os.getcwd())
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
@@ -156,3 +159,35 @@ makef.write('include $(CHOMBO_HOME)/mk/Make.example\n')
 makef.write('\n')
 
 makef.close()
+
+
+# Write an options file. This should be a separate routine
+options_filename = app_dir + "/template.inputs"
+optf = open(options_filename, 'w')
+
+# Write plasma kinetics options
+optf.write("# ====================================================================================================\n")
+optf.write('# POTENTIAL CURVE\n')
+optf.write("# ====================================================================================================\n")
+optf.write(args.app_name + ".potential = 1\n")
+optf.write('\n')
+options_files = [args.streamer_home + "/src/geometry/physical_domain.options", \
+                 args.streamer_home + "/geometries_prebuilt/" + args.geometry + ".options", \
+                 args.streamer_home + "/src/amr_mesh/amr_mesh.options", \
+                 args.streamer_home + "/src/plasma_solver/plasma_engine.options", \
+                 args.streamer_home + "/src/plasma_solver/time_stepper.options", \
+                 args.streamer_home + "/src/poisson_solver/poisson_solver.options", \
+                 args.streamer_home + "/src/poisson_solver/poisson_multifluid_gmg.options", \
+                 args.streamer_home + "/src/plasma_solver/cdr_layout.options", \
+                 args.streamer_home + "/src/plasma_solver/rte_layout.options", \
+                 args.streamer_home + "/src/rte_solver/eddington_sp1.options", \
+                 args.streamer_home + "/plasma_models/" + args.plasma_kinetics + "/" + args.plasma_kinetics + ".options"]
+for opt in options_files:
+    if os.path.exists(opt):
+        with open(opt) as f:
+            lines = f.readlines()
+            optf.writelines(lines)
+            optf.write('\n\n')
+    else:
+        print 'Could not find options file ' + opt
+optf.close()
