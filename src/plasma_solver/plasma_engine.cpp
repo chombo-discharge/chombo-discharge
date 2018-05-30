@@ -65,6 +65,8 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_geom_only(false);                                // Only plot geometry
   this->set_ebis_memory_load_balance(false);                 // Set load balance for EBIS generation
   this->set_restart(false);                                  // Restart mode
+  this->set_write_ebis(false);                               // Write EBIS
+  this->set_read_ebis(false);                                // Read EBIS when restarting simulation
   this->set_restart_step(0);                                 // Restart from this step
   this->set_start_time(0.0);                                 // Start time
   this->set_stop_time(1.0);                                  // Stop time
@@ -570,6 +572,29 @@ void plasma_engine::deallocate_internals(){
   }
 
   //  m_amr->deallocate(m_tags);
+}
+
+void plasma_engine::write_ebis(){
+  CH_TIME("plasma_engine::write_ebis");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::write_ebis" << endl;
+  }
+
+  const std::string path_gas = m_output_dir + "/gas_ebis.hdf5";
+  const std::string path_sol = m_output_dir + "/sol_ebis.hdf5";
+  
+  HDF5Handle gas_handle(path_gas.c_str(), HDF5Handle::CREATE);
+  HDF5Handle sol_handle(path_sol.c_str(), HDF5Handle::CREATE);
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  if(!ebis_gas.isNull()){
+    ebis_gas->writeAllLevels(gas_handle);
+  }
+  if(!ebis_sol.isNull()){
+    ebis_sol->writeAllLevels(sol_handle);
+  }
 }
 
 void plasma_engine::get_geom_tags(){
@@ -1612,6 +1637,9 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
 			       m_amr->get_finest_dx(),
 			       m_amr->get_max_ebis_box_size());
 
+  if(m_write_ebis){
+    this->write_ebis();        // Write EBIndexSpace's for later use
+  }
   this->get_geom_tags();       // Get geometric tags.
   
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
@@ -1805,6 +1833,48 @@ void plasma_engine::set_ebis_memory_load_balance(const bool a_balance){
     }
     else if(str == "false"){
       m_ebis_memory_load_balance = false;
+    }
+  }
+}
+
+void plasma_engine::set_write_ebis(const bool a_write_ebis){
+  CH_TIME("plasma_engine::set_write_ebis");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_write_ebis" << endl;
+  }
+
+  m_write_ebis = a_write_ebis;
+
+  { // get parameter from input script
+    std::string str;
+    ParmParse pp("plasma_engine");
+    pp.query("write_ebis", str);
+    if(str == "true"){
+      m_write_ebis = true;
+    }
+    else if(str == "false"){
+      m_write_ebis = false;
+    }
+  }
+}
+
+void plasma_engine::set_read_ebis(const bool a_read_ebis){
+  CH_TIME("plasma_engine::set_read_ebis");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_read_ebis" << endl;
+  }
+
+  m_read_ebis = a_read_ebis;
+
+  { // get parameter from input script
+    std::string str;
+    ParmParse pp("plasma_engine");
+    pp.query("read_ebis", str);
+    if(str == "true"){
+      m_read_ebis = true;
+    }
+    else if(str == "false"){
+      m_read_ebis = false;
     }
   }
 }

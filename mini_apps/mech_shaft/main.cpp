@@ -8,7 +8,7 @@
 #include "plasma_kinetics.H"
 #include "rk2.H"
 #include "field_tagger.H"
-#include "air_bolsig.H"
+#include "morrow_lowke.H"
 #include "morrow_lowke.H"
 #include "mechanical_shaft.H"
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
-  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new air_bolsig());
+  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());

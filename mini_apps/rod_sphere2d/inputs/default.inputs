@@ -15,7 +15,7 @@ physical_domain.hi_corner =  2E-3  2E-3
 # ----------------------------------------------------------------------------------------------------
 rod_sphere.eps0                      = 1.0                              # Background permittivity
 rod_sphere.turn_off_electrode        = false                            # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = true                             # Turn on/off dielectric
+rod_sphere.turn_off_dielectric       = false                            # Turn on/off dielectric
 rod_sphere.electrode_live            = true                             # Live electrode or not
 rod_sphere.electrode_radius          = 200.E-6                          # Electrode radius
 rod_sphere.electrode_center1         = 0.0 0.0 0E-2                     # Center 1
@@ -72,6 +72,7 @@ plasma_engine.max_steps                       = 500           # Maximum number o
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
+plasma_engine.write_ebis                      = false         # Write geometry to an HDF5 file. 
 plasma_engine.restart                         = false         # Do restart or not
 plasma_engine.restart_step                    = 180           # Restart step.
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine everything all the way down
@@ -128,7 +129,7 @@ eddington_sp1.reflectivity = 0.0		 # Reflectivity
 # ====================================================================================================
 # MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
 # ----------------------------------------------------------------------------------------------------			
-poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
+poisson_multifluid.gmg_verbosity     = 10        # GMG verbosity
 poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver

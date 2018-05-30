@@ -34,7 +34,7 @@ src_dirs = $(STREAMER_HOME)/src					\
 	$(STREAMER_HOME)/cell_taggers				\
 	$(STREAMER_HOME)/geometries_prebuilt			\
 	$(STREAMER_HOME)/plasma_models	 			\
-	$(STREAMER_HOME)/plasma_models/air7			\
+	$(STREAMER_HOME)/plasma_models/morrow_lowke		\
 	$(STREAMER_HOME)/time_steppers	 			\
 
 # Define rules to build everything

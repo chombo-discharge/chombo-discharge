@@ -6,8 +6,8 @@ rod2d_main.potential = 6.E3
 # ====================================================================================================
 # PHYSICAL DOMAIN
 # ----------------------------------------------------------------------------------------------------			
-physical_domain.lo_corner = -2E-2 -2E-2 
-physical_domain.hi_corner =  2E-2  2E-2
+physical_domain.lo_corner = -5E-3 -5E-3
+physical_domain.hi_corner =  5E-3  5E-3
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
@@ -35,14 +35,14 @@ rod_plane.noise_reseed              = false                            # Reseed 
 # AMR SETTINGS
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 256 256     # Number of cells on coarsest domain
-amr.max_amr_depth   = 5           # Maximum amr depth
-amr.max_sim_depth   = 5           # Maximum simulation depth
+amr.coarsest_domain = 128 128     # Number of cells on coarsest domain
+amr.max_amr_depth   = 3           # Maximum amr depth
+amr.max_sim_depth   = 3           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
-amr.max_box_size    = 32          # Maximum allowed box size
+amr.max_box_size    = 16          # Maximum allowed box size
 amr.max_ebis_box    = 32          # Maximum allowed box size for EBIS generation
 amr.ref_rat         = 2 2 2 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
@@ -141,7 +141,7 @@ poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.0       # Solver hang
-poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
+poisson_multifluid.gmg_bottom_drop   = 2         # Bottom drop
 poisson_multifluid.gmg_bottom_solver = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 poisson_multifluid.gmg_bottom_relax  = 16        # Number of relaxations in bottom solve ('simple' solver only)
 # ----------------------------------------------------------------------------------------------------			
@@ -157,7 +157,7 @@ eddington_sp1.gmg_min_iter      = 5         # Minimum number of iterations
 eddington_sp1.gmg_max_iter      = 32        # Maximum number of iterations
 eddington_sp1.gmg_tolerance     = 1.E-8     # Residue tolerance
 eddington_sp1.gmg_hang          = 0.2       # Solver hang
-eddington_sp1.gmg_bottom_drop   = 4         # Bottom drop
+eddington_sp1.gmg_bottom_drop   = 16        # Bottom drop
 eddington_sp1.gmg_bottom_solver = bicgtab   # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 # ----------------------------------------------------------------------------------------------------			

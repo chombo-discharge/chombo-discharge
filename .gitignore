@@ -1,6 +1,8 @@
 *.ex
 *.hdf5
 *.png
+*.pyc
+**/app_builder/*.pyc
 /o
 /f
 /p

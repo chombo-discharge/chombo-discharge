@@ -130,6 +130,8 @@ public:
   */
   virtual void set_memory_report_mode(const memory_report_mode::which_mode a_memory_mode);
 
+  
+
   /*!
     @brief Set output directory
   */
@@ -169,6 +171,16 @@ public:
     @brief Set load balance for memory
   */
   virtual void set_ebis_memory_load_balance(const bool a_balance);
+
+  /*!
+    @brief Write EBIS to HDF5
+  */
+  virtual void set_write_ebis(const bool a_write_ebis);
+
+    /*!
+    @brief Read EBIS to HDF5
+  */
+  virtual void set_read_ebis(const bool a_read_ebis);
   
   /*!
     @brief Only geometry
@@ -428,6 +440,16 @@ protected:
   bool m_ebis_memory_load_balance;
 
   /*!
+    @brief Write EBIS to HDF5. Might be useful for restarting simulations
+  */
+  bool m_write_ebis;
+
+  /*!
+    @brief Read EBIS file from HDF5. Useful for restarting simulation.
+  */
+  bool m_read_ebis;
+
+  /*!
     @brief Allocate internals
   */
   virtual void allocate_internals();
@@ -491,6 +513,11 @@ protected:
     @brief Deallocate internal storage
   */
   virtual void deallocate_internals();
+
+  /*!
+    @brief Write the geometry to file
+  */
+  virtual void write_ebis();
 
   /*!
     @brief Get geometric tags
@@ -581,6 +608,7 @@ protected:
     @brief Set for restart
   */
   virtual void setup_for_restart(const int a_init_regrids, const std::string a_restart_file);
+
 
   /*!
     @brief Set up for geometry only
