@@ -15,10 +15,10 @@ physical_domain.hi_corner =  2E-3  2E-3
 # ----------------------------------------------------------------------------------------------------
 rod_sphere.eps0                      = 1.0                              # Background permittivity
 rod_sphere.turn_off_electrode        = false                            # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = false                            # Turn on/off dielectric
+rod_sphere.turn_off_dielectric       = true                             # Turn on/off dielectric
 rod_sphere.electrode_live            = true                             # Live electrode or not
 rod_sphere.electrode_radius          = 200.E-6                          # Electrode radius
-rod_sphere.electrode_center1         = 0.0 0.0 0E-2                     # Center 1
+rod_sphere.electrode_center1         = 0.0 1E-3 0E-2                     # Center 1
 rod_sphere.electrode_center2         = 0.0 1.0 0E-2                     # Center 2
 rod_sphere.dielectric_permittivity   = 5.0                              # Dielectric permittivity
 rod_sphere.dielectric_center         = 0.0 -500.E-6 0.0                 # Dielectric center
@@ -29,8 +29,8 @@ rod_sphere.dielectric_radius         = 200E-6                           # Dielec
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
-amr.max_sim_depth   = 2           # Maximum simulation depth
+amr.max_amr_depth   = 0           # Maximum amr depth
+amr.max_sim_depth   = 0           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
@@ -61,14 +61,14 @@ field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------
 plasma_engine.verbosity                       = 2             # Engine verbosity
-plasma_engine.plot_interval                   = 1             # Plot interval
+plasma_engine.plot_interval                   = 5             # Plot interval
 plasma_engine.regrid_interval                 = 5             # Regrid interval
 plasma_engine.checkpoint_interval             = 100           # Checkpoint interval
 plasma_engine.initial_regrids                 = 0             # Number of initial regrids
 plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry	
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 500           # Maximum number of steps
+plasma_engine.max_steps                       = 100           # Maximum number of steps
 plasma_engine.output_mode                     = full          # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
@@ -198,10 +198,10 @@ morrow_lowke.electrode_quantum_efficiency  = 0.1                   # Quantum eff
 morrow_lowke.dielectric_townsend2          = 0.1                   # Townsend coefficient on dielectrics
 morrow_lowke.dielectric_quantum_efficiency = 0.1                   # Quantum efficiency on dielectrics
 morrow_lowke.dielectric_work_function      = 6                     # Dielectric work function (ev)
-morrow_lowke.uniform_density               = 1.E0                  # Initial background ionization
-morrow_lowke.seed_density                  = 0.E14                 # Initial seed ionization
-morrow_lowke.seed_radius                   = 100E-6                  # Initial seed radius
-morrow_lowke.seed_position                 = 0. -100E-6 0.              # Initial seed position
+morrow_lowke.uniform_density               = 1.E10                 # Initial background ionization
+morrow_lowke.seed_density                  = 0.E0                  # Initial seed ionization
+morrow_lowke.seed_radius                   = 1.E-3                 # Initial seed radius
+morrow_lowke.seed_position                 = 0. -2E-3 0            # Initial seed position
 morrow_lowke.noise_amplitude               = 0.0                   # Initial noise amplitude
 morrow_lowke.noise_octaves                 = 1                     # Initial noise octaves
 morrow_lowke.noise_persistence             = 0.5                   # Reduction factor between each noise octave
@@ -212,27 +212,4 @@ morrow_lowke.photon2_A_coeff               = 2.88E-2               # Parameters 
 morrow_lowke.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
 morrow_lowke.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
 morrow_lowke.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
-# ----------------------------------------------------------------------------------------------------
-
-# ====================================================================================================
-# AIR7 PLASMA INPUTS
-# ----------------------------------------------------------------------------------------------------			
-air7.electron_diffusion            = true                  # Turn off electron diffusion (debugging only)
-air7.excitation_efficiency         = 0.6                   # Impact excitation efficiency
-air7.thermal_outflow               = false                 # Thermal outflow on/off
-air7.diffusive_outflow             = false                 # Diffusive outflow on/off
-air7.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
-air7.electrode_townsend2           = 1.E-2                 # Townsend coefficient on electrodes
-air7.electrode_quantum_efficiency  = 1.E-2                 # Quantum efficiency on electrodes
-air7.dielectric_townsend2          = 1.E-1                 # Townsend coefficient on dielectrics
-air7.dielectric_quantum_efficiency = 1.E-1                 # Quantum efficiency on dielectrics
-air7.initial_ionization            = 1.E10                 # Initial background ionization
-air7.quenching_pressure            = 0.03947               # Quenching pressure for photo-emission
-air7.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
-air7.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
-air7.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
-air7.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
-air7.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
-air7.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
-air7.simple_cathode_bc             = false                 # Use simpiflied BC on electrode cathodes
 # ----------------------------------------------------------------------------------------------------

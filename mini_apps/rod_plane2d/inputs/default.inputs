@@ -68,7 +68,7 @@ field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS
 # ----------------------------------------------------------------------------------------------------
-plasma_engine.verbosity                       = 2             # Engine verbosity
+plasma_engine.verbosity                       = 20            # Engine verbosity
 plasma_engine.plot_interval                   = 10            # Plot interval
 plasma_engine.regrid_interval                 = 5             # Regrid interval
 plasma_engine.checkpoint_interval             = 50            # Checkpoint interval
