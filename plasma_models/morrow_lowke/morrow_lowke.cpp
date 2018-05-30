@@ -210,7 +210,7 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_de
   Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
   Sn = eta*Ne*Ve   - beta*Np*Nn;
 
-#if 1 // Debug
+#if 0 // Debug
   Se = 0.E10;
   Sp = 0.E10;
   Sn = 0.E10;

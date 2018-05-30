@@ -58,7 +58,7 @@ int cdr_gdnv::query_ghost() const {
 }
 
 void cdr_gdnv::advance_advect(EBAMRCellData& a_state, const Real a_dt){
-  CH_TIME("cdr_solver::advance_advect");
+  CH_TIME("cdr_gdnv::advance_advect");
   if(m_verbosity > 5){
     pout() << m_name + "::advance_advect" << endl;
   }
@@ -78,6 +78,64 @@ void cdr_gdnv::advance_advect(EBAMRCellData& a_state, const Real a_dt){
   m_amr->interp_ghost(a_state, m_phase);
 
   data_ops::floor(a_state, 0.0);
+}
+
+void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
+  CH_TIME("cdr_gdnv::average_velo_to_faces");
+  if(m_verbosity > 5){
+    pout() << m_name + "::average_velo_to_faces" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    data_ops::average_cell_to_face(*a_velo_face[lvl], *a_velo_cell[lvl], m_amr->get_domains()[lvl]);
+    a_velo_face[lvl]->exchange();
+  }
+
+
+  // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for cdr_gdnv
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+      EBFluxFAB& velo = (*a_velo_face[lvl])[dit()];
+      for (int dir = 0; dir < SpaceDim; dir++){
+	for (SideIterator sit; sit.ok(); ++sit){
+	  Box box   = dbl.get(dit());
+	  box &= domain;
+	  box.surroundingNodes(dir); // Convert to facebox
+
+	  const int isign = sign(sit());
+
+	  Box cell_box = box;
+	  cell_box.shiftHalf(dir, isign);
+	  
+	  if(!domain.contains(cell_box)){
+	    cell_box &= domain;
+
+	    Box bndry_box = adjCellBox(cell_box, dir, sit(), 1);
+	    bndry_box.shift(dir, -isign);
+
+	    IntVectSet ivs(bndry_box);
+	    for (VoFIterator vofit(ivs, ebisl[dit()].getEBGraph()); vofit.ok(); ++vofit){
+	      const VolIndex& vof = vofit();
+	      Vector<FaceIndex> faces = ebisl[dit()].getFaces(vof, dir, sit());
+
+	      for (int iface = 0; iface < faces.size(); iface++){
+		const FaceIndex& face = faces[iface];
+
+		if(velo[dir](face, 0)*isign < 0.0){
+		  velo[dir](face, 0) = 0.0;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
 }
 
 void cdr_gdnv::set_divF_nc(const int a_which_divFnc){

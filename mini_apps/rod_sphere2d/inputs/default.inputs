@@ -15,10 +15,10 @@ physical_domain.hi_corner =  2E-3  2E-3
 # ----------------------------------------------------------------------------------------------------
 rod_sphere.eps0                      = 1.0                              # Background permittivity
 rod_sphere.turn_off_electrode        = false                            # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = true                             # Turn on/off dielectric
+rod_sphere.turn_off_dielectric       = false                            # Turn on/off dielectric
 rod_sphere.electrode_live            = true                             # Live electrode or not
 rod_sphere.electrode_radius          = 200.E-6                          # Electrode radius
-rod_sphere.electrode_center1         = 0.0 1E-3 0E-2                     # Center 1
+rod_sphere.electrode_center1         = 0.0 0.0 0E-2                     # Center 1
 rod_sphere.electrode_center2         = 0.0 1.0 0E-2                     # Center 2
 rod_sphere.dielectric_permittivity   = 5.0                              # Dielectric permittivity
 rod_sphere.dielectric_center         = 0.0 -500.E-6 0.0                 # Dielectric center
@@ -29,13 +29,13 @@ rod_sphere.dielectric_radius         = 200E-6                           # Dielec
 # ---------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 0           # Maximum amr depth
-amr.max_sim_depth   = 0           # Maximum simulation depth
+amr.max_amr_depth   = 2           # Maximum amr depth
+amr.max_sim_depth   = 2           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.blocking_factor = 8           # Blocking factor
 amr.max_box_size    = 16          # Maximum allowed box size
-amr.max_ebis_box    = 64          # Maximum allowed EBIS box size
+amr.max_ebis_box    = 32          # Maximum allowed EBIS box size
 amr.ref_rat         = 4 4 2 2 2 2 # Refinement ratios. 
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
@@ -114,8 +114,8 @@ poisson_solver.bc_z_high = dirichlet_live	 # BC type. Valid options are "neumann
 # CDR_SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
 cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
-cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"
-cdr_gdnv.limit_slopes   = true                   # Valid options are "covered_face" and "conservative_average"
+cdr_gdnv.divF_nc        = conservative_average   # Valid options are "covered_face" and "conservative_average"
+cdr_gdnv.limit_slopes   = false                  # Valid options are "covered_face" and "conservative_average"
 # ----------------------------------------------------------------------------------------------------			
 
 # ====================================================================================================

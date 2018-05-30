@@ -70,6 +70,11 @@ protected:
   virtual void allocate_covered();
 
   /*!
+    @brief Call parent function: Then fix no influx
+  */
+  virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
+
+  /*!
     @brief Delete covered storage
   */
   virtual void delete_covered();
