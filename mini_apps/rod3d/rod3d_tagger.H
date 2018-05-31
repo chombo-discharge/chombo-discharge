@@ -8,7 +8,7 @@
 #ifndef _ROD3D_TAGGER_
 #define _ROD3D_TAGGER_
 
-#include "cell_tagger.H"
+#include "ultralw_tagger.H"
 
 /*!
   @brief Class that tags cells based on the relative curvature of the electric field
@@ -23,7 +23,7 @@
       rod3d_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 
 */
-class rod3d_tagger : public cell_tagger {
+class rod3d_tagger : public ultralw_tagger {
 public:
   
   /*!
@@ -47,22 +47,7 @@ public:
 			      const Real&             a_max_E,
 			      const RealVect&         a_grad_E,
 			      const Real&             a_min_grad_E,
-			      const Real&             a_max_grad_E,
-			      const Real&             a_rho,
-			      const Real&             a_min_rho,
-			      const Real&             a_max_rho,
-			      const RealVect&         a_grad_rho,
-			      const Real&             a_min_grad_rho,
-			      const Real&             a_max_grad_rho,
-			      const Vector<Real>&     a_ion_densities,
-			      const Vector<Real>&     a_min_ion_densities,
-			      const Vector<Real>&     a_max_ion_densities,
-			      const Vector<RealVect>& a_ion_gradients,
-			      const Vector<Real>&     a_min_ion_gradients,
-			      const Vector<Real>&     a_max_ion_gradients,
-			      const Vector<Real>&     a_photon_densities,
-			      const Vector<Real>&     a_min_photon_densities,
-			      const Vector<Real>&     a_max_photon_densities);
+			      const Real&             a_max_grad_E);
 
   /*!
     @brief Return coarsening criterion. 
