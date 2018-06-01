@@ -1212,6 +1212,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     m_timestepper->compute_dt(m_dt, m_timecode);
     m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
 
+    bool last_step     = false;
     bool first_step    = true;
     const Real init_dt = m_dt;
 
@@ -1256,6 +1257,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       // Last time step can be smaller than m_dt so that we end on a_end_time
       if(m_time + m_dt > a_end_time){
 	m_dt = a_end_time - m_time;
+	last_step = true;
       }
 
       // Time stepper advances solutions
@@ -1275,7 +1277,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 
 
 #ifdef CH_USE_HDF5
-      if(m_step%m_plot_interval == 0 && m_plot_interval > 0){
+      if(m_step%m_plot_interval == 0 && m_plot_interval > 0 || last_step == true && m_plot_interval > 0){
 	if(m_verbosity > 2){
 	  pout() << "plasma_engine::run -- Writing plot file" << endl;
 	}
@@ -1283,7 +1285,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       }
 
       // Write checkpoint file
-      if(m_step % m_chk_interval == 0 && m_chk_interval > 0){
+      if(m_step % m_chk_interval == 0 && m_chk_interval > 0 || last_step == true && m_chk_interval > 0){
 	if(m_verbosity > 2){
 	  pout() << "plasma_engine::run -- Writing checkpoint file" << endl;
 	}
@@ -2171,7 +2173,7 @@ void plasma_engine::write_geometry(){
   // Dummy file name
   char file_char[1000];
   const std::string prefix = m_output_dir + "/" + m_output_names;
-  sprintf(file_char, "%s.geometry.step%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+  sprintf(file_char, "%s.geometry.%dd.hdf5", prefix.c_str(), SpaceDim);
   string fname(file_char);
 
   writeEBHDF5(fname, 

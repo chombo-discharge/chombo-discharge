@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-my_first_application.potential = 1.2E4
+rod_sphere2d.potential = 1.2E4
 
 # ====================================================================================================
 # PHYSICAL_DOMAIN CLASS OPTIONS
@@ -28,8 +28,8 @@ rod_sphere.dielectric_radius         = 200.E-6                         # Dielect
 # ====================================================================================================
 amr.verbosity       = -1          # Controls verbosity. 
 amr.coarsest_domain = 128 128     # Number of cells on coarsest domain
-amr.max_amr_depth   = 3           # Maximum amr depth
-amr.max_sim_depth   = 3           # Maximum simulation depth
+amr.max_amr_depth   = 4           # Maximum amr depth
+amr.max_sim_depth   = 4           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr.buffer_size     = 1           # Number of cells between grid levels
@@ -81,7 +81,7 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 time_stepper.verbosity        = -1    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
-time_stepper.fast_rte         = 5     # Solve RTE every this time steps
+time_stepper.fast_rte         = 1     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
 time_stepper.max_dt           = 1.E99 # Maximum permitted time step
@@ -100,10 +100,10 @@ poisson_solver.bc_y_high = dirichlet_live        # BC type. Valid options are "n
 # ====================================================================================================
 # POISSON_MULTIFLUID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-poisson_multifluid.gmg_verbosity     = 10        # GMG verbosity
-poisson_multifluid.gmg_pre_smooth    = 8         # Number of relaxations in downsweep
-poisson_multifluid.gmg_post_smooth   = 8         # Number of relaxations in upsweep
-poisson_multifluid.gmg_bott_smooth   = 8         # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid.gmg_verbosity     = -10       # GMG verbosity
+poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
+poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
+poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
@@ -129,7 +129,7 @@ rte_layout.stationary   = true          # Stationary solver ot no.
 # EDDINGTON_SP1 CLASS OPTIONS
 # ====================================================================================================
 eddington_sp1.reflectivity      = 0.        # Reflectivity
-eddington_sp1.gmg_verbosity     = 10        # GMG verbosity
+eddington_sp1.gmg_verbosity     = -10       # GMG verbosity
 eddington_sp1.gmg_pre_smooth    = 6         # Number of relaxations in downsweep
 eddington_sp1.gmg_post_smooth   = 6         # Number of relaxations in upsweep
 eddington_sp1.gmg_bott_smooth   = 6         # NUmber of relaxations before dropping to bottom solver
@@ -144,7 +144,15 @@ eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom so
 # ====================================================================================================
 # RK2 CLASS OPTIONS
 # ====================================================================================================
-rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method		
+rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
+
+# ====================================================================================================
+# FIELD_TAGGER CLASS OPTIONS
+# ====================================================================================================
+field_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
+field_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+field_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
+field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 
 # ====================================================================================================
 # MORROW_LOWKE CLASS OPTIONS

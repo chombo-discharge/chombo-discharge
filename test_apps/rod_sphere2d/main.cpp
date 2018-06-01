@@ -22,7 +22,7 @@ int main(int argc, char* argv[]){
   ParmParse pp(argc-2, argv+2, NULL, input_file);
 
   { // Get potential from input script 
-    ParmParse pp("my_first_application");
+    ParmParse pp("rod_sphere2d");
     pp.get("potential", g_potential);
   }
 
