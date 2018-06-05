@@ -18,7 +18,9 @@
 #define verb 0
 
 mfconductivityop::mfconductivityop(){
-  
+#if verb
+  pout() << "mfconductivityop::mfconductivityop" << endl;
+#endif
 }
   
 

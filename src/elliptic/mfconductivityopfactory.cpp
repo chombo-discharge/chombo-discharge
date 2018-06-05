@@ -690,6 +690,9 @@ MGLevelOp<LevelData<MFCellFAB> >* mfconductivityopfactory::MGnewOp(const Problem
 
   mfconductivityop* oper = new mfconductivityop();
 
+#if verb
+  pout() << "defining oper" << endl;
+#endif
   oper->define(m_mfis,           // Set from factory
 	       m_dombc,          // Set from factory
 	       aco,              // Set to m_aco[ref] (for AMR) or m_aco_mg[ref][img] for MG

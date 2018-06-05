@@ -106,7 +106,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
 
   m_converged_resid = zero_resid*m_gmg_eps;
-  
+
   if(phi_resid > m_converged_resid){ // Residual is too large, recompute solution
     m_gmg_solver.m_convergenceMetric = zero_resid;
     m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
@@ -121,8 +121,18 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   }
 
-#if 0 // Why is this required??? Is it because of op->zeroCovered()????
-  const Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
+#if 1 // Why is this required??? Is it because of op->zeroCovered()????
+  Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
+  new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
+
+  //  pout() << "target residual = " << m_converged_resid << endl;
+  //  pout() << "phi_resid = " << phi_resid << endl;
+  //  pout() << "new residual = " << new_resid << endl;
+#endif
+
+  
+#if 0 // Debug. Solve again
+  m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 #endif
 
 
@@ -674,6 +684,7 @@ void poisson_multifluid_gmg::setup_solver(){
   }
 
   if(m_use_nwo){
+    //    CH_assert(false);
     m_gmg_solver.define(coar_dom, *m_nwo_opfact, botsolver, 1 + finest_level);
   }
   else{
