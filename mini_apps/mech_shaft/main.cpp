@@ -17,8 +17,9 @@
 /*!
   @brief Potential
 */
+Real g_potential;
 Real potential_curve(const Real a_time){
-  return 8.E3;
+  return g_potential;
 }
 
 int main(int argc, char* argv[]){
@@ -30,6 +31,11 @@ int main(int argc, char* argv[]){
   // Build argument list from input file
   char* inputFile = argv[1];
   ParmParse PP(argc-2,argv+2,NULL,inputFile);
+
+  {
+    ParmParse pp("mech_shaft");
+    pp.get("potential", g_potential);
+  }
 
 
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());

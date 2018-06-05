@@ -2053,7 +2053,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   const int elapsedHrs = floor(elapsed/3600);
   const int elapsedMin = floor((elapsed - 3600*elapsedHrs)/60);
   const int elapsedSec = floor( elapsed - 3600*elapsedHrs - 60*elapsedMin);
-  const int elapsedMs  = floor((elapsed - elapsedSec)*1000);
+  const int elapsedMs  = floor((elapsed - 3600*elapsedHrs - 60*elapsedMin - elapsedSec)*1000);
 
   // Write a string with total elapsed time
   sprintf(metrics, 
