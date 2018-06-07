@@ -71,6 +71,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_start_time(0.0);                                 // Start time
   this->set_stop_time(1.0);                                  // Stop time
   this->set_max_steps(100);                                  // Max number of steps
+  this->set_max_plot_depth(-1);                              // Set maximum plot depth.
 
   m_amr->set_physical_domain(m_physdom); // Set physical domain
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
@@ -1954,6 +1955,20 @@ void plasma_engine::set_max_steps(const int a_max_steps){
   pp.query("max_steps", m_max_steps);
 }
 
+void plasma_engine::set_max_plot_depth(const int a_max_plot_depth){
+  CH_TIME("plasma_engine::set_max_steps");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_max_steps" << endl;
+  }
+
+  m_max_plot_depth = a_max_plot_depth;
+
+  {
+    ParmParse pp("plasma_engine");
+    pp.query("max_plot_depth", m_max_plot_depth);
+  }
+}
+
 void plasma_engine::set_init_regrids(const int a_init_regrids){
   CH_TIME("plasma_engine::set_init_regrids");
   if(m_verbosity > 5){
@@ -2247,6 +2262,11 @@ void plasma_engine::write_plot_file(){
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_plot_file - writing plot file..." << endl;
   }
+
+  int plot_depth = Min(m_max_plot_depth, finest_level);
+  if(m_max_plot_depth < 0){
+    plot_depth = finest_level;
+  }
   writeEBHDF5(fname, 
 	      grids,
 	      output_ptr,
@@ -2256,7 +2276,7 @@ void plasma_engine::write_plot_file(){
 	      m_dt,
 	      m_time,
 	      ref_rat,
-	      finest_level + 1,
+	      plot_depth + 1,
 	      replace_covered,
 	      covered_values);
   if(m_verbosity > 3){

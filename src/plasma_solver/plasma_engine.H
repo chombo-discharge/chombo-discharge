@@ -94,6 +94,7 @@ public:
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
+
   /*!
     @brief Set geometric refinement depth
   */
@@ -206,6 +207,11 @@ public:
     @brief Set maximum number of steps
   */
   virtual void set_max_steps(const int a_max_steps);
+  
+  /*!
+    @brief Set the maximum plot depth
+  */
+  virtual void set_max_plot_depth(const int a_max_plot_depth);
 
   /*!
     @brief Set number of initial regrids
@@ -353,6 +359,11 @@ protected:
     @brief Maximum number of steps
   */
   int m_max_steps;
+
+  /*!
+    @brief Maximum plot depth
+  */
+  int m_max_plot_depth;
 
   /*!
     @brief Number of initial regrids
