@@ -71,7 +71,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   }
 
 
-
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
@@ -99,13 +98,13 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   m_amr->alias(res,     m_resid);
   m_amr->alias(zero,    mfzero);
 
-
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
   m_gmg_solver.init(phi, rhs, finest_level, 0);
   const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
 
   m_converged_resid = zero_resid*m_gmg_eps;
+
 
   if(phi_resid > m_converged_resid){ // Residual is too large, recompute solution
     m_gmg_solver.m_convergenceMetric = zero_resid;
@@ -124,10 +123,6 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 #if 1 // Why is this required??? Is it because of op->zeroCovered()????
   Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
   new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
-
-  //  pout() << "target residual = " << m_converged_resid << endl;
-  //  pout() << "phi_resid = " << phi_resid << endl;
-  //  pout() << "new residual = " << new_resid << endl;
 #endif
 
   
@@ -682,6 +677,7 @@ void poisson_multifluid_gmg::setup_solver(){
     }
 #endif
   }
+
 
   if(m_use_nwo){
     //    CH_assert(false);

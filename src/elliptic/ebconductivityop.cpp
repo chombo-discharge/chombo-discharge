@@ -2394,7 +2394,14 @@ reflux(LevelData<EBCellFAB>& a_residual,
   CH_START(t5);
 
   Real scale = 1.0/m_dx;
+#if verb
+  pout() << "ebconductivityop::refluxing" << endl;
+#endif
   m_fastFR.reflux(a_residual, interv, scale);
+
+#if verb
+  pout() << "ebconductivityop::reflux - done reflux" << endl;
+#endif
 
   CH_STOP(t5);
 }
@@ -2654,10 +2661,17 @@ incrementFRFine(EBFastFR&             a_fluxReg,
   Interval interv(0,0);
   ebconductivityop& finerEBAMROp = (ebconductivityop& )(*a_finerOp);
 
+#if verb
+  pout() << "ebconductivityop::filling ghosts" << endl;
+#endif
   //ghost cells of phiFine need to be filled
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&) a_phiFine;
   finerEBAMROp.m_quadCFIWithCoar->interpolate(phiFine, a_phi, interv);
   phiFine.exchange(interv);
+
+#if verb
+  pout() << "ebconductivityop::done interpolate" << endl;
+#endif
 
  DataIterator ditf = a_phiFine.dataIterator();
  int nbox = ditf.size();

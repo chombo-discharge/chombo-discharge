@@ -805,7 +805,7 @@ void amr_mesh::define_eb_quad_cfi(){
 											     m_ref_ratios[lvl-1],
 											     1,
 											     cfivs,
-											     ebis_gas));
+											     ebis_sol));
       }
     }
   }
