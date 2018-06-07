@@ -716,7 +716,7 @@ void plasma_engine::get_geom_tags(){
 	      const RealVect hi = coarsen_boxes[ibox].get_hi();
 
 
-	      if(pos > lo && pos < hi && lvl >= coarsen_level[lvl]){
+	      if(pos > lo && pos < hi && lvl >= coarsen_level[ibox]){
 		m_geom_tags[lvl] -= iv;
 	      }
 	    }
