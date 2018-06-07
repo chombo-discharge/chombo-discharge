@@ -18,6 +18,7 @@
 #include "cell_tagger.H"
 #include "mfis.H"
 #include "tags.H"
+#include "geo_coarsener.H"
 
 /*!
   @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
@@ -62,7 +63,8 @@ public:
 		const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 		const RefCountedPtr<time_stepper>&           a_timestepper,
 		const RefCountedPtr<amr_mesh>&               a_amr,
-		const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL));
+		const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL),
+		const RefCountedPtr<geo_coarsener>&          a_geocoarsen = RefCountedPtr<geo_coarsener>(NULL));
 
   /*!
     @brief Constructor
@@ -256,14 +258,19 @@ protected:
   RefCountedPtr<physical_domain> m_physdom;
 
   /*!
-    @brief Time stpeper
+    @brief Time stepper
   */
   RefCountedPtr<time_stepper> m_timestepper;
 
   /*!
-    @brief Set the cell tagger
+    @brief Cell tagger
   */
   RefCountedPtr<cell_tagger> m_celltagger;
+
+    /*!
+    @brief Geometric coarsener
+  */
+  RefCountedPtr<geo_coarsener> m_geocoarsen;
 
   /*!
     @brief Time code
@@ -609,6 +616,11 @@ protected:
     @brief Set the cell tagger
   */
   virtual void set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger);
+
+  /*!
+    @brief Set the geo coarsener
+  */
+  virtual void set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen);
 
   /*!
     @brief Setup function

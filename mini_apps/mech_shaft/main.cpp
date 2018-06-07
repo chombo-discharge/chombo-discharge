@@ -11,6 +11,7 @@
 #include "morrow_lowke.H"
 #include "morrow_lowke.H"
 #include "mechanical_shaft.H"
+#include "mechshaft_coarsen.H"
 
 #include <ParmParse.H>
 
@@ -42,14 +43,16 @@ int main(int argc, char* argv[]){
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
+  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
+  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new mechshaft_coarsen());
   RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 												   compgeom,
 												   plaskin,
 												   timestepper,
 												   amr,
-												   tagger));
+												   tagger,
+												   geocoarsen));
 
   // Run plasma engine
   engine->set_potential(potential_curve);

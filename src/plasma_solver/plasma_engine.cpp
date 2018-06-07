@@ -35,7 +35,8 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 			     const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 			     const RefCountedPtr<time_stepper>&           a_timestepper,
 			     const RefCountedPtr<amr_mesh>&               a_amr,
-			     const RefCountedPtr<cell_tagger>&            a_celltagger){
+			     const RefCountedPtr<cell_tagger>&            a_celltagger,
+			     const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
   CH_TIME("plasma_engine::plasma_engine(full)");
 
   this->set_verbosity(1);
@@ -50,6 +51,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_time_stepper(a_timestepper);                     // Set time stepper
   this->set_amr(a_amr);                                      // Set amr
   this->set_cell_tagger(a_celltagger);                       // Set cell tagger
+  this->set_geo_coarsen(a_geocoarsen);
 
   this->set_geom_refinement_depth(-1);                       // Set geometric refinement depths
   this->set_verbosity(1);                                    // Set verbosity
@@ -685,6 +687,45 @@ void plasma_engine::get_geom_tags(){
     m_geom_tags[lvl] |= solid_tags;
   }
 
+  // Remove tags using the geocoarsener if we have it
+  if(!m_geocoarsen.isNull()){
+    const Vector<real_box> coarsen_boxes = m_geocoarsen->get_coarsen_boxes();
+    const Vector<int>      coarsen_level = m_geocoarsen->get_coarsen_levels();
+
+
+    if(!(coarsen_boxes.size() == coarsen_level.size())){
+      if(m_verbosity > 2){
+	pout() << "plasma_engine::get_geom_tags - m_geocoarsen is not well defined. Skipping the coarsening step" << endl;
+      }
+    }
+    else{
+      if(coarsen_boxes.size() > 0){
+
+	const RealVect origin = m_physdom->get_prob_lo();
+	for (int lvl = 0; lvl < maxdepth; lvl++){
+	  const Real dx         = m_amr->get_dx()[lvl];
+	  const int num_coarsen = coarsen_boxes.size();
+
+	  const IntVectSet tmp = m_geom_tags[lvl];
+
+	  for (IVSIterator it(tmp); it.ok(); ++it){
+	    const IntVect iv   = it();
+	    const RealVect pos = origin + RealVect(iv)*dx;
+	    for (int ibox = 0; ibox < num_coarsen; ibox++){
+	      const RealVect lo = coarsen_boxes[ibox].get_lo();
+	      const RealVect hi = coarsen_boxes[ibox].get_hi();
+
+
+	      if(pos > lo && pos < hi && lvl >= coarsen_level[lvl]){
+		m_geom_tags[lvl] -= iv;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
   // for elliptic equations)
@@ -838,11 +879,9 @@ void plasma_engine::grid_report(){
     	 << "\t\t\t        Total number of cells = " << totPoints << " (" << totPointsGhosts << ")" << endl
 	 << "\t\t\t        Total boxes per level = " << total_level_boxes << endl
     	 << "\t\t\t        Proc. boxes per level = " << my_level_boxes << endl
-	 << "\t\t\t               with ghosts = " << totPointsGhosts << endl
 	 << "\t\t\t        Grid sparsity         = " << 1.0*totPoints/uniformPoints << endl
 	 << "\t\t\t        Finest dx             = " << dx[finest_level] << endl
-	 << "\t\t\t        Number of cells       = " << myPoints << endl
-    	 << "\t\t\t            with ghosts       = " << myPointsGhosts << endl
+	 << "\t\t\t        Number of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
     	 << "\t\t\t        Num boxes             = " << myBoxes << endl
 #ifdef CH_USE_MEMORY_TRACKING
 	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
@@ -1383,6 +1422,14 @@ void plasma_engine::set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagg
     pout() << "plasma_engine::set_cell_tagger" << endl;
   }
   m_celltagger = a_celltagger;
+}
+
+void plasma_engine::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
+  CH_TIME("plasma_engine::set_geo_coarsen");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_geo_coarsen" << endl;
+  }
+  m_geocoarsen = a_geocoarsen;
 }
 
 void plasma_engine::set_geom_refinement_depth(const int a_depth){
