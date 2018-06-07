@@ -802,7 +802,20 @@ void plasma_engine::grid_report(){
   long long curMem;
   long long peakMem;
   overallMemoryUsage(curMem, peakMem);
+
+#ifdef CH_MPI
+  int unfreed_mem = curMem;
+  int peak_mem    = peakMem;
+
+  int max_unfreed_mem;
+  int max_peak_mem;
+
+  int result1 = MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  int result2 = MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
 #endif
+#endif
+
+
   
   // Get loads and boxes
   this->get_loads_and_boxes(myPoints,
@@ -821,7 +834,7 @@ void plasma_engine::grid_report(){
 	 << "plasma_engine::Grid report - timestep = " << m_step << endl 
 	 << "\t\t\t        Finest level          = " << finest_level << endl
     	 << "\t\t\t        Total number boxes    = " << totBoxes << endl
-    	 << "\t\t\t        Total number of cells = " << totPoints << endl
+    	 << "\t\t\t        Total number of cells = " << totPoints << " (" << totPointsGhosts << ")" << endl
 	 << "\t\t\t        Total boxes per level = " << total_level_boxes << endl
     	 << "\t\t\t        Proc. boxes per level = " << my_level_boxes << endl
 	 << "\t\t\t               with ghosts = " << totPointsGhosts << endl
@@ -833,8 +846,11 @@ void plasma_engine::grid_report(){
 #ifdef CH_USE_MEMORY_TRACKING
 	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
     	 << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
-	 << "-----------------------------------------------------------------------" << endl
-
+#ifdef CH_MPI
+    	 << "\t\t\t        Max unfreed memory    = " << max_unfreed_mem/BytesPerMB << " (MB)" << endl
+	 << "\t\t\t        Max peak memory       = " << max_peak_mem/BytesPerMB << " (MB)" << endl
+#endif
+    	 << "-----------------------------------------------------------------------" << endl
 #endif
 	 << endl;
 
@@ -2072,7 +2088,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
 
   // Write a string with total elapsed time
   sprintf(metrics, 
-	  "%31c -- Elapsed time        : %3.3ih %2.2im %2.2is %3.3ims",
+	  "%31c -- Elapsed time          : %3.3ih %2.2im %2.2is %3.3ims",
 	  ' ',
 	  elapsedHrs, 
 	  elapsedMin, 
@@ -2089,7 +2105,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
 
   // Write a string with the previous iteration metrics
   sprintf(metrics, 
-	  "%31c -- Last time step      : %3.3ih %2.2im %2.2is %3.3ims",
+	  "%31c -- Last time step        : %3.3ih %2.2im %2.2is %3.3ims",
 	  ' ',
 	  advHrs, 
 	  advMin, 
@@ -2107,7 +2123,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
 
   // Write a string with the previous iteration metrics
   sprintf(metrics, 
-	  "%31c -- Estimated remaining : %3.3ih %2.2im %2.2is %3.3ims",
+	  "%31c -- Estimated remaining   : %3.3ih %2.2im %2.2is %3.3ims",
 	  ' ',
 	  remHrs, 
 	  remMin, 
@@ -2121,8 +2137,22 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   long long curMem;
   long long peakMem;
   overallMemoryUsage(curMem, peakMem);
-  pout() << "                                -- Unfreed memory      : " << curMem/BytesPerMB << "(MB)" << endl;
-  pout() << "                                -- Peak memory usage   : " << peakMem/BytesPerMB << "(MB)" << endl;
+
+  pout() << "                                -- Unfreed memory        : " << curMem/BytesPerMB << "(MB)" << endl;
+  pout() << "                                -- Peak memory usage     : " << peakMem/BytesPerMB << "(MB)" << endl;
+
+#ifdef CH_MPI
+  int unfreed_mem = curMem;
+  int peak_mem    = peakMem;
+
+  int max_unfreed_mem;
+  int max_peak_mem;
+
+  int result1 = MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  int result2 = MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  pout() << "                                -- Max unfreed memory    : " << max_unfreed_mem/BytesPerMB << "(MB)" << endl;
+  pout() << "                                -- Max peak memory usage : " << max_peak_mem/BytesPerMB << "(MB)" << endl;
+#endif
 #endif
 
 }
