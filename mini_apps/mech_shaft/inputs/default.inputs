@@ -38,7 +38,19 @@ mechshaft_coarsen.box1_lo_corner           = -1 -1 -1           # Lo corner for 
 mechshaft_coarsen.box1_hi_corner           =  1  1 0.6E-2       # Hi corner for box1 coarsening
 mechshaft_coarsen.box2_lo_corner           = -1 -1 1.2E-2       # Lo corner for box2 coarsening
 mechshaft_coarsen.box2_hi_corner           =  1  1 1            # Hi corner for box2 corsening
-# ----------------------------------------------------------------------------------------------------					
+# ----------------------------------------------------------------------------------------------------
+
+# ====================================================================================================
+# MECHSHAFT_TAGGER CLASS OPTIONS
+# ----------------------------------------------------------------------------------------------------	
+mechshaft_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
+mechshaft_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+mechshaft_tagger.refine_curvature  = 0.1    # Sets eps_curv for refinement
+mechshaft_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+
+mechshaft_tagger.tagbox_lo = -1 -1 0.6E-2   # Low corner for tag box (only allow tagging inside this box)
+mechshaft_tagger.tagbox_hi =  1  1 1.2E-2   # High corner for tag box (only allow tagging inside this box)
+# ----------------------------------------------------------------------------------------------------	
 
 # ====================================================================================================
 # AMR SETTINGS
@@ -65,17 +77,7 @@ amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 
 amr.ebcf            = true        # Tell amr to forget about ebcf crossings.
 # ----------------------------------------------------------------------------------------------------
 
-# ====================================================================================================
-# MECHSHAFT_TAGGER CLASS OPTIONS
-# ----------------------------------------------------------------------------------------------------	
-mechshaft_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
-mechshaft_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-mechshaft_tagger.refine_curvature  = 0.1    # Sets eps_curv for refinement
-mechshaft_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
 
-mechshaft_tagger.tagbox_lo = -1 -1 0.6E-2;  # Low corner for tag box (only allow tagging inside this box)
-mechshaft_tagger.tagbox_hi =  1  1 1.2E-2;  # High corner for tag box (only allow tagging inside this box)
-# ----------------------------------------------------------------------------------------------------	
 
 # ====================================================================================================
 # PLASMA ENGINE SETTINGS

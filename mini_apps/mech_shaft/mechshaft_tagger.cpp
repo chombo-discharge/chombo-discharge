@@ -36,8 +36,8 @@ mechshaft_tagger::mechshaft_tagger(){
     pp.queryarr("tagbox_lo", vec1, 0, SpaceDim);
     pp.queryarr("tagbox_hi", vec2, 0, SpaceDim);
     
-    const RealVect m_lo = RealVect(D_DECL(vec1[0], vec1[1], vec1[2]));
-    const RealVect m_hi = RealVect(D_DECL(vec2[0], vec2[1], vec2[2]));
+    m_lo = RealVect(D_DECL(vec1[0], vec1[1], vec1[2]));
+    m_hi = RealVect(D_DECL(vec2[0], vec2[1], vec2[2]));
   }
 }
 
@@ -85,7 +85,8 @@ bool mechshaft_tagger::refine_cell(const RealVect&         a_pos,
 				   const Vector<RealVect>& a_grad_tracer){
   
   const bool refine_tag      = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv || a_tracer[0] > m_refi_mag;
-  const bool refine_geom     = a_pos > m_lo && a_pos < m_hi;
+  //  const bool refine_geom     = a_pos > m_lo && a_pos < m_hi;
+  const bool refine_geom     = a_pos < m_hi;
 
-  return (refine_tag && refine_geom);
+  return refine_tag && refine_geom;
 }
