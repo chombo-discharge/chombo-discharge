@@ -7,7 +7,7 @@
 #include "plasma_engine.H"
 #include "plasma_kinetics.H"
 #include "rk2.H"
-#include "field_tagger.H"
+#include "mechshaft_tagger.H"
 #include "morrow_lowke.H"
 #include "morrow_lowke.H"
 #include "mechanical_shaft.H"
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new field_tagger());
+  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new mechshaft_tagger());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new mechshaft_coarsen());
   RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
 												   compgeom,

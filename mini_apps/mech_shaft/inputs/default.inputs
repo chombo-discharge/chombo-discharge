@@ -44,9 +44,9 @@ mechshaft_coarsen.box2_hi_corner           =  1  1 1            # Hi corner for 
 # AMR SETTINGS
 # ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 2           # Maximum amr depth
-amr.max_sim_depth   = 2           # Maximum simulation depth
+amr.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr.max_amr_depth   = 1           # Maximum amr depth
+amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.buffer_size     = 1           # Number of cells between grid levels
 amr.irreg_tag_grow  = 1           # Growth factor for irregular cells
@@ -66,12 +66,15 @@ amr.ebcf            = true        # Tell amr to forget about ebcf crossings.
 # ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
-# FIELD REFINEMENT
+# MECHSHAFT_TAGGER CLASS OPTIONS
 # ----------------------------------------------------------------------------------------------------	
-field_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
-field_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-field_tagger.refine_curvature  = 0.1    # Sets eps_curv for refinement
-field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+mechshaft_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
+mechshaft_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+mechshaft_tagger.refine_curvature  = 0.1    # Sets eps_curv for refinement
+mechshaft_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+
+mechshaft_tagger.tagbox_lo = -1 -1 0.6E-2;  # Low corner for tag box (only allow tagging inside this box)
+mechshaft_tagger.tagbox_hi =  1  1 1.2E-2;  # High corner for tag box (only allow tagging inside this box)
 # ----------------------------------------------------------------------------------------------------	
 
 # ====================================================================================================
