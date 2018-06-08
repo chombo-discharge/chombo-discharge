@@ -22,7 +22,7 @@ mechshaft_tagger::mechshaft_tagger(){
 
   // Get input parameters if we have them
   {
-    ParmParse pp("mechshaft3d_tagger");
+    ParmParse pp("mechshaft_tagger");
 
     pp.query("coarsen_curvature", m_coar_curv);
     pp.query("coarsen_magnitude", m_coar_mag);
@@ -32,7 +32,7 @@ mechshaft_tagger::mechshaft_tagger(){
 
   { // Geometrical inputs
     Vector<Real> vec1, vec2;
-    ParmParse pp("mechshaft3d");
+    ParmParse pp("mechshaft_tagger");
     pp.queryarr("tagbox_lo", vec1, 0, SpaceDim);
     pp.queryarr("tagbox_hi", vec2, 0, SpaceDim);
     
