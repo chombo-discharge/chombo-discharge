@@ -231,7 +231,6 @@ public:
   */
   virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const;
 
-protected:
 
   /*!
     @brief Implementation of electron for this class

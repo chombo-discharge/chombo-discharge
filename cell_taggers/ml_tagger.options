@@ -1,0 +1,7 @@
+# ====================================================================================================
+# ML_TAGGER CLASS OPTIONS
+# ====================================================================================================
+ml_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
+ml_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+ml_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
+ml_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
