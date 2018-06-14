@@ -37,6 +37,7 @@
       plasma_engine.max_steps                       = 100           # Maximum number of steps
       plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry
       plasma_engine.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+      plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
       plasma_engine.output_mode                     = full          # Output mode
       plasma_engine.output_directory                = ./            # Output directory
       plasma_engine.output_names                    = simulation    # Simulation output names
@@ -164,6 +165,11 @@ public:
     @brief Set the checkpoint interval
   */
   virtual void set_checkpoint_interval(const int a_chk_interval);
+
+  /*!
+    @brief Set number of ghost cells to plot
+  */
+  virtual void set_num_plot_ghost(const int a_num_plot_ghost);
 
   /*!
     @brief Set restart
@@ -376,6 +382,11 @@ protected:
     @brief Number of initial regrids
   */
   int m_init_regrids;
+
+  /*!
+    @brief Number of ghost cells to plot
+  */
+  int m_num_plot_ghost;
 
   /*!
     @brief Restart step
@@ -631,7 +642,6 @@ protected:
     @brief Set for restart
   */
   virtual void setup_for_restart(const int a_init_regrids, const std::string a_restart_file);
-
 
   /*!
     @brief Set up for geometry only

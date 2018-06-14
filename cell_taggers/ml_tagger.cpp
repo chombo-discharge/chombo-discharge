@@ -13,9 +13,9 @@
 ml_tagger::ml_tagger(){
   m_num_tracers = 2;
 
-  m_coar_curv  = 0.1;
+  m_coar_curv  = 0.05;
   m_refi_curv  = 0.1;
-  m_refi_alpha = 1.2;
+  m_refi_alpha = 5.0;
   m_refi_fudge = 1.0;
 
   // Get input parameters if we have them
@@ -81,12 +81,14 @@ bool ml_tagger::refine_cell(const RealVect&         a_pos,
 			    const Vector<RealVect>& a_grad_tracer){
   //  const bool refine1 = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv || a_tracer[0] > m_refi_mag;
   const int max_depth = m_amr->get_max_amr_depth();
-  const Real factor   = (max_depth > 0) ? pow(1 - 1./max_depth, a_lvl) : 1;
+  //  const Real factor   = (max_depth > 0) ? pow(1 - 1./max_depth, a_lvl) : 1;
+  //  const Real factor   = (max_depth > 0) ? pow(0.7, a_lvl) : 1;
+  const Real factor   = (max_depth > 0) ? pow(m_refi_fudge, a_lvl) : 1;
   const bool refine1  = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv;
   const bool refine2  = a_tracer[1]*a_dx > m_refi_alpha*factor;
     
   if(a_pos[1] < 2E-3){
-    return refine1 || refine2;
+    return refine1;// || refine2;
   }
   else{
     return false;

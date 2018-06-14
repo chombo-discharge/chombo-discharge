@@ -12,6 +12,7 @@
 #include "mfalias.H"
 #include "tags_factory.H"
 
+#include <EBAlias.H>
 #include <LevelData.H>
 #include <EBCellFAB.H>
 #include <EBAMRIO.H>
@@ -57,6 +58,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_verbosity(1);                                    // Set verbosity
   this->set_plot_interval(10);                               // Set plot interval
   this->set_checkpoint_interval(10);                         // Set checkpoint interval
+  this->set_num_plot_ghost(0);                               // Set number of ghost cells in plots
   this->set_regrid_interval(10);                             // Set regrid interval
   this->set_output_directory("./");                          // Set output directory
   this->set_output_file_names("simulation");                 // Set output file names
@@ -150,8 +152,9 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
 
   const Interval src_interv(comp, comp);
   const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
+
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
   }
 
   // Set covered potential
@@ -220,7 +223,7 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
   const Interval src_interv(0, ncomp - 1);
   const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
   }
 }
 
@@ -263,7 +266,7 @@ void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const in
   const Interval src_interv(comp, comp);
   const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
 
     data_ops::set_covered_value(*a_output[lvl], a_cur_var, 0.0);
   }
@@ -319,7 +322,7 @@ void plasma_engine::add_current_density_to_output(EBAMRCellData& a_output, const
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Interval src_interv(0, ncomp - 1);
     const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-    J[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    J[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
   }
 }
 
@@ -356,7 +359,7 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
 
       data_ops::set_covered_value(*a_output[lvl], a_cur_var + num, 0.0);
     }
@@ -396,7 +399,7 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
     const Interval src_interv(0, ncomp -1);
     const Interval dst_interv(a_cur_var + num*ncomp, a_cur_var + num*ncomp + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
 
       for (int comp = 0; comp < SpaceDim; comp ++){
 	data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp + comp, 0.0);
@@ -438,7 +441,7 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
 
       data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
     }
@@ -478,7 +481,7 @@ void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const i
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
 
       data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
     }
@@ -518,7 +521,7 @@ void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
 
       data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
     }
@@ -1864,6 +1867,22 @@ void plasma_engine::set_checkpoint_interval(const int a_chk_interval){
   pp.query("checkpoint_interval", m_chk_interval);
 }
 
+void plasma_engine::set_num_plot_ghost(const int a_num_plot_ghost){
+  CH_TIME("plasma_engine::set_num_plot_ghost");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_num_plot_ghost" << endl;
+  }
+  
+  m_num_plot_ghost = a_num_plot_ghost;
+
+
+  ParmParse pp("plasma_engine");
+  pp.query("num_plot_ghost", m_num_plot_ghost);
+
+  m_num_plot_ghost = (m_num_plot_ghost < 0) ? 0 : m_num_plot_ghost;
+  m_num_plot_ghost = (m_num_plot_ghost > 3) ? 3 : m_num_plot_ghost;
+}
+
 void plasma_engine::set_restart(const bool a_restart){
   CH_TIME("plasma_engine::set_restart");
   if(m_verbosity > 5){
@@ -2280,7 +2299,8 @@ void plasma_engine::write_geometry(){
 	      ref_rat,
 	      finest_level + 1,
 	      replace_covered,
-	      covered_values);
+	      covered_values,
+	      m_num_plot_ghost*IntVect::Unit);
 }
 
 void plasma_engine::write_plot_file(){
@@ -2333,7 +2353,7 @@ void plasma_engine::write_plot_file(){
   bool replace_covered = false;
   Vector<Real> covered_values;
 
-  Vector<LevelData<EBCellFAB>*> output_ptr(1 + finest_level);
+  Vector<LevelData<EBCellFAB>* > output_ptr(1 + finest_level);
   m_amr->alias(output_ptr, output);
 
   // Write HDF5 file
@@ -2345,6 +2365,7 @@ void plasma_engine::write_plot_file(){
   if(m_max_plot_depth < 0){
     plot_depth = finest_level;
   }
+
   writeEBHDF5(fname, 
 	      grids,
 	      output_ptr,
@@ -2356,7 +2377,9 @@ void plasma_engine::write_plot_file(){
 	      ref_rat,
 	      plot_depth + 1,
 	      replace_covered,
-	      covered_values);
+	      covered_values,
+	      m_num_plot_ghost*IntVect::Unit);
+  
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_plot_file - writing plot file... DONE!" << endl;
   }
@@ -2560,4 +2583,3 @@ Vector<string> plasma_engine::get_output_variable_names(){
 
   return names;
 }
- 

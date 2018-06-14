@@ -17,6 +17,7 @@ plasma_engine.output_mode                     = medium        # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
+plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 plasma_engine.restart                         = false         # Do restart or not
 plasma_engine.restart_step                    = 0             # Restart step
 plasma_engine.restart_mode                    = full          # Restart mode. 
