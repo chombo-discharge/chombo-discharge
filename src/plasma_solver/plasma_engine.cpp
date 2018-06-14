@@ -528,6 +528,15 @@ void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int 
   }
 }
 
+void plasma_engine::add_tracer_fields_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_tracer_fields_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_tracer_fields_to_output" << endl;
+  }
+
+  // Not implemented
+}
+
 void plasma_engine::allocate_internals(){
   CH_TIME("plasma_engine::allocate_internals");
   if(m_verbosity > 5){
@@ -2335,6 +2344,9 @@ void plasma_engine::write_plot_file(){
   this->add_rte_densities_to_output(output, cur_var); cur_var += m_plaskin->get_num_photons();
   if(m_output_mode == output_mode::medium || m_output_mode == output_mode::full){
     this->add_rte_source_to_output(output, cur_var); cur_var += m_plaskin->get_num_photons();
+  }
+  if(m_output_mode == output_mode::full){
+    this->add_tracer_fields_to_output(output, cur_var); cur_var += m_celltagger->get_num_tracers();
   }
 
   // Filename

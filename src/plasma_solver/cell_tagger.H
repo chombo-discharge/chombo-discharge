@@ -53,6 +53,11 @@ public:
   virtual void compute_tracers() = 0;
 
   /*!
+    @brief Get number of tracer fields
+  */
+  int get_num_tracers();
+
+  /*!
     @brief Regrid storage for tracer field
   */
   void regrid();

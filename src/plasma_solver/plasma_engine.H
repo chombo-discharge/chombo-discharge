@@ -534,6 +534,11 @@ protected:
   virtual void add_rte_source_to_output(EBAMRCellData& a_output, const int a_curVar);
 
   /*!
+    @brief Add tracer fields to output data holder
+  */
+  virtual void add_tracer_fields_to_output(EBAMRCellData& a_output, const int a_curVar);
+
+  /*!
     @brief Cache tags
   */
   virtual void cache_tags(const EBAMRTags& a_tags);

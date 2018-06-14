@@ -30,6 +30,10 @@ cell_tagger::~cell_tagger(){
 
 }
 
+int cell_tagger::get_num_tracers(){
+  return m_num_tracers;
+}
+
 void cell_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 			 const RefCountedPtr<time_stepper>&           a_timestepper,
 			 const RefCountedPtr<amr_mesh>&               a_amr,

@@ -162,10 +162,10 @@ rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
 # ====================================================================================================
 # ML_TAGGER CLASS OPTIONS
 # ====================================================================================================
-ml_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
-ml_tagger.refine_curvature  = 0.05   # Sets eps_curv for refinement
-ml_tagger.refine_alpha      = 4.0    # Alpha refine
-ml_tagger.refine_fudge      = 0.7    # Fudge refine
+ml_tagger.coarsen_curvature = 0.1   # Sets eps_curv for coarsening
+ml_tagger.refine_curvature  = 0.1   # Sets eps_curv for refinement
+ml_tagger.refine_alpha      = 3.5   # Alpha refine
+ml_tagger.refine_fudge      = 0.65   # Fudge refine
 
 # ====================================================================================================
 # MORROW_LOWKE CLASS OPTIONS

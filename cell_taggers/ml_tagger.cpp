@@ -53,13 +53,11 @@ Vector<Real> ml_tagger::tracer(const RealVect&         a_pos,
   
   Vector<Real> tracers(m_num_tracers);
   tracers[0] = a_E.vectorLength()/a_max_E;
-  tracers[1] = (eta > 0) ?  (alpha-eta) : 0.0;
+  tracers[1] = (eta > 0) ?  (alpha-eta) : 1.0;
 
 
   return tracers;
 }
-
-
 bool ml_tagger::coarsen_cell(const RealVect&         a_pos,
 			     const Real&             a_time,
 			     const Real&             a_dx,
@@ -79,16 +77,12 @@ bool ml_tagger::refine_cell(const RealVect&         a_pos,
 			    const int&              a_lvl,
 			    const Vector<Real>&     a_tracer,
 			    const Vector<RealVect>& a_grad_tracer){
-  //  const bool refine1 = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv || a_tracer[0] > m_refi_mag;
-  const int max_depth = m_amr->get_max_amr_depth();
-  //  const Real factor   = (max_depth > 0) ? pow(1 - 1./max_depth, a_lvl) : 1;
-  //  const Real factor   = (max_depth > 0) ? pow(0.7, a_lvl) : 1;
-  const Real factor   = (max_depth > 0) ? pow(m_refi_fudge, a_lvl) : 1;
+  const Real factor   = pow(m_refi_fudge, a_lvl);
   const bool refine1  = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv;
-  const bool refine2  = a_tracer[1]*a_dx > m_refi_alpha*factor;
+  const bool refine2 = a_tracer[1]*a_dx > m_refi_alpha*factor;
     
   if(a_pos[1] < 2E-3){
-    return refine1;// || refine2;
+    return refine1 || refine2;
   }
   else{
     return false;
