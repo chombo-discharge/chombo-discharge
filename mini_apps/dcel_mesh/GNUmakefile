@@ -35,6 +35,7 @@ src_dirs = $(STREAMER_HOME)/src					\
 	$(STREAMER_HOME)/plasma_models	 			\
 	$(STREAMER_HOME)/time_steppers	 			\
 	$(STREAMER_HOME)/plasma_models/air7 			\
+	$(STREAMER_HOME)/plasma_models/morrow_lowke
 
 # Define rules to build everything
 include $(CHOMBO_HOME)/mk/Make.example
