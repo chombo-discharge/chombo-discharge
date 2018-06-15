@@ -26,6 +26,7 @@ def write_template(args):
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "plasma_engine.H"\n')
+    mainf.write('#include "geo_coarsener.H"\n')
     mainf.write('#include "' + args.plasma_kinetics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.time_stepper + '.H"\n')
@@ -68,7 +69,8 @@ def write_template(args):
     mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "());\n")
     mainf.write("  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());\n")
     mainf.write("  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());\n")
-    mainf.write("  RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom, compgeom, plaskin, timestepper, amr, tagger));\n")
+    mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")
+    mainf.write("  RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom, compgeom, plaskin, timestepper, amr, tagger, geocoarsen));\n")
     mainf.write("\n")
     mainf.write("  // Run the plasma engine\n")
     mainf.write("  engine->set_potential(potential_curve);\n");

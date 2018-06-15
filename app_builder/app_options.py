@@ -24,7 +24,9 @@ def write_template(args):
                      args.streamer_home + "/src/plasma_solver/rte_layout.options", \
                      args.streamer_home + "/src/rte_solver/eddington_sp1.options", \
                      args.streamer_home + "/time_steppers/" + args.time_stepper + ".options", \
+                     args.streamer_home + "/src/plasma_solver/cell_tagger.options", \
                      args.streamer_home + "/cell_taggers/" + args.cell_tagger + ".options", \
+                     args.streamer_home + "/src/plasma_solver/geo_coarsener.options", \
                      args.streamer_home + "/plasma_models/" + args.plasma_kinetics + "/" + args.plasma_kinetics + ".options"]
     for opt in options_files:
         if os.path.exists(opt):
