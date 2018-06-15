@@ -11,6 +11,7 @@
 #include "data_ops.H"
 
 #include <EBArith.H>
+#include <ParmParse.H>
 
 cell_tagger::cell_tagger(const int a_num_tracers){
   CH_TIME("cell_tagger::cell_tagger");
@@ -18,12 +19,49 @@ cell_tagger::cell_tagger(const int a_num_tracers){
   if(m_verbosity > 5){
     pout() << "cell_tagger::cell_tagger" << endl;
   }
-  
+
+  m_tagboxes.resize(0);
   m_num_tracers = a_num_tracers;
   m_name        = "cell_tagger";
 
 
   this->set_phase(phase::gas);
+
+  { // Get options from input script
+    ParmParse pp("cell_tagger");
+
+    int num_boxes = 0;
+    pp.query("num_boxes", num_boxes);
+
+    if(num_boxes > 0){
+      m_tagboxes.resize(num_boxes);
+
+      const int ndigits = (int) log10((double) num_boxes) + 1;
+      
+      for (int ibox = 0; ibox < num_boxes; ibox++){
+	char* cstr = new char[ndigits];
+	sprintf(cstr, "%d", 1+ibox);
+
+	std::string str1 = "box" + std::string(cstr) + "_lo";
+	std::string str2 = "box" + std::string(cstr) + "_hi";
+
+	Vector<Real> corner_lo(SpaceDim);
+	Vector<Real> corner_hi(SpaceDim);
+
+	pp.getarr(str1.c_str(), corner_lo, 0, SpaceDim);
+	pp.getarr(str2.c_str(), corner_hi, 0, SpaceDim);
+
+	const RealVect c1 = RealVect(D_DECL(corner_lo[0], corner_lo[1], corner_lo[2]));
+	const RealVect c2 = RealVect(D_DECL(corner_hi[0], corner_hi[1], corner_hi[2]));
+
+	m_tagboxes[ibox] = real_box(c1,c2);
+	
+	delete cstr;
+      }
+    }
+  }
+  
+
 }
 
 cell_tagger::~cell_tagger(){
@@ -166,7 +204,17 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
 						tracers,
 						grad_tracers);
 
-	  if(refine){
+	  bool do_this_refine = (m_tagboxes.size() > 0) ? false : true;
+	  for (int ibox = 0; ibox < m_tagboxes.size(); ibox++){
+	    const RealVect lo = m_tagboxes[ibox].get_lo();
+	    const RealVect hi = m_tagboxes[ibox].get_hi();
+
+	    if(pos >= lo && pos <= hi){
+	      do_this_refine = true;
+	    }
+	  }
+
+	  if(refine && do_this_refine){
 	    refine_tags |= vof.gridIndex();
 	  }
 	}

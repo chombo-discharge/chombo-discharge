@@ -15,6 +15,7 @@
 #include "time_stepper.H"
 #include "plasma_kinetics.H"
 #include "amr_mesh.H"
+#include "real_box.H"
 
 /*!
   @brief Abstract class for tagging cells across an AMR hierarchy
@@ -138,6 +139,11 @@ protected:
     @brief Gradient of tracer fields
   */
   Vector<EBAMRCellData> m_grad_tracer;
+
+  /*!
+    @brief Boxes used for tagging
+  */
+  Vector<real_box> m_tagboxes;
 
   /*!
     @brief Coarsen a cell based on a tracer field

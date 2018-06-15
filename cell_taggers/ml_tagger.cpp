@@ -81,10 +81,5 @@ bool ml_tagger::refine_cell(const RealVect&         a_pos,
   const bool refine1  = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv;
   const bool refine2 = a_tracer[1]*a_dx > m_refi_alpha*factor;
     
-  if(a_pos[1] < 2E-3){
-    return refine1 || refine2;
-  }
-  else{
-    return false;
-  }
+  return refine1 || refine2;
 }
