@@ -1,2 +1,0 @@
-This mini-app simulates a discharge initiating from a mechanical shaft geometry in 3D. The kinetic scheme is a BOLSIG-based kinetic
-for air. The user may modify the behavior of this program by modifying the input files. 

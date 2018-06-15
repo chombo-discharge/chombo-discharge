@@ -1,21 +1,19 @@
 # ====================================================================================================
-# POTENTIAL
+# POTENTIAL CURVE
 # ====================================================================================================
-mech_shaft.potential = 1.0
-# ----------------------------------------------------------------------------------------------------				
+new_mechshaft.potential = 1
 
 # ====================================================================================================
-# PHYSICAL DOMAIN
-# ____________________________________________________________________________________________________
-physical_domain.lo_corner = -2E-2 -2E-2 -2E-2
-physical_domain.hi_corner =  2E-2  2E-2  2E-2
-# ----------------------------------------------------------------------------------------------------				
+# PHYSICAL_DOMAIN CLASS OPTIONS
+# ====================================================================================================
+physical_domain.lo_corner = -2E-2 -2E-2 -2E-2    # Low corner of problem domain
+physical_domain.hi_corner =  2E-2  2E-2  2E-2    # High corner of problem domain
 
 # ====================================================================================================
-# MECHANICAL SHAFT GEOMETRY
-# ----------------------------------------------------------------------------------------------------				
+# MECHANICAL_SHAFT CLASS OPTIONS
+# ====================================================================================================
 mechanical_shaft.eps0                      = 1               # Background permittivity
-mechanical_shaft.corner_curvatures         = 200.E-6         # Corner curvatures
+mechanical_shaft.corner_curvatures         = 500E-6          # Corner curvatures
 mechanical_shaft.turn_off_electrode        = false           # Turn on/off electrode
 mechanical_shaft.turn_off_dielectric       = false           # Turn on/off dielectric
 mechanical_shaft.electrode_live            = true            # Live electrode or not
@@ -25,77 +23,56 @@ mechanical_shaft.electrode_height          = 2.E-2           # Electrode height
 mechanical_shaft.electrode_center          = 0.0 0.0 1.E-2   # Electrode center
 mechanical_shaft.dielectric_permittivity   = 4.0             # Dielectric permittivity
 mechanical_shaft.dielectric_rod_sides      = 6               # Number of sides
-mechanical_shaft.dielectric_rod_radius     = 5.E-3           # Dielectric rod radius
-mechanical_shaft.dielectric_rod_length     = 4.E-2           # Dielectric rod length
-# ----------------------------------------------------------------------------------------------------
+mechanical_shaft.dielectric_rod_radius     = 5E-3            # Dielectric rod radius
+mechanical_shaft.dielectric_rod_length     = 1.0             # Dielectric rod length
 
 # ====================================================================================================
-# MECHANICAL SHAFT GEOMETRY COARSENING
-# ----------------------------------------------------------------------------------------------------				
-mechshaft_coarsen.enable_coarsening        = true               # Enable coarsening
-mechshaft_coarsen.finest_level             = 0                  # Finest level produced inside coarsening boxes
-mechshaft_coarsen.box1_lo_corner           = -1 -1 -1           # Lo corner for box1 coarsening
-mechshaft_coarsen.box1_hi_corner           =  1  1 0.6E-2       # Hi corner for box1 coarsening
-mechshaft_coarsen.box2_lo_corner           = -1 -1 1.2E-2       # Lo corner for box2 coarsening
-mechshaft_coarsen.box2_hi_corner           =  1  1 1            # Hi corner for box2 corsening
-# ----------------------------------------------------------------------------------------------------
-
+# AMR_MESH OPTIONS
 # ====================================================================================================
-# MECHSHAFT_TAGGER CLASS OPTIONS
-# ----------------------------------------------------------------------------------------------------	
-mechshaft_tagger.coarsen_curvature = 0.05   # Sets eps_curv for coarsening
-mechshaft_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-mechshaft_tagger.refine_curvature  = 0.1    # Sets eps_curv for refinement
-mechshaft_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
-
-mechshaft_tagger.tagbox_lo = -1 -1 0.6E-2   # Low corner for tag box (only allow tagging inside this box)
-mechshaft_tagger.tagbox_hi =  1  1 1.2E-2   # High corner for tag box (only allow tagging inside this box)
-# ----------------------------------------------------------------------------------------------------	
-
-# ====================================================================================================
-# AMR SETTINGS
-# ----------------------------------------------------------------------------------------------------			
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
 amr.max_amr_depth   = 1           # Maximum amr depth
 amr.max_sim_depth   = 1           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
+amr.irreg_growth    = 1           # How much to grow irregular tagged cells
 amr.buffer_size     = 1           # Number of cells between grid levels
-amr.irreg_tag_grow  = 1           # Growth factor for irregular cells
-amr.blocking_factor = 8           # Blocking factor
+amr.blocking_factor = 8           # Default blocking factor (16 in 3D)
 amr.max_box_size    = 16          # Maximum allowed box size
-amr.max_ebis_box    = 16          # Maximum allowed box size
-amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios. 
+amr.max_ebis_box    = 64          # Maximum allowed box size
+amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
 amr.num_ghost       = 3           # Number of ghost cells. Default is 3
 amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
-amr.redist_rad      = 1           # Redistribution radius for hyperbolic conservation laws
-amr.sten_order      = 1           # Order for interpolation/extrapolation stencils. Must be 1 or 2
-amr.sten_radius     = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
-amr.sten_type       = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
+amr.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
+amr.stencil_order   = 1           # Order for interpolation/extrapolation stencils. Must be 1 or 2
+amr.stencil_radius  = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
+amr.stencil_type    = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
 amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
-amr.ebcf            = true        # Tell amr to forget about ebcf crossings.
-# ----------------------------------------------------------------------------------------------------
-
-
+amr.ebcf            = false       # Tell amr to ignore EBCF-related code. 
 
 # ====================================================================================================
-# PLASMA ENGINE SETTINGS
-# ----------------------------------------------------------------------------------------------------	
+# PLASMA_ENGINE OPTIONS
+# ====================================================================================================
 plasma_engine.verbosity                       = 2             # Engine verbosity
 plasma_engine.plot_interval                   = 10            # Plot interval
 plasma_engine.regrid_interval                 = 10            # Regrid interval
-plasma_engine.checkpoint_interval             = 5             # Checkpoint interval
-plasma_engine.initial_regrids                 = 1             # Number of initial regrids
-plasma_engine.geometry_only                   = true          # Special option that ONLY plots the geometry	
+plasma_engine.checkpoint_interval             = 10            # Checkpoint interval
+plasma_engine.initial_regrids                 = 0             # Number of initial regrids
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
-plasma_engine.max_steps                       = 0             # Maximum number of steps
-plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.max_steps                       = 100           # Maximum number of steps
+plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry
+plasma_engine.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+plasma_engine.write_ebis                      = false         # Write geometry to an HDF5 file (buggy, leave as false)
+plasma_engine.read_ebis                       = false         # Read EBIS when restarting a simulation
+plasma_engine.output_mode                     = medium        # Output mode
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
+plasma_engine.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
+plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 plasma_engine.restart                         = false         # Do restart or not
-plasma_engine.restart_step                    = 1             # Restart step.
+plasma_engine.restart_step                    = 0             # Restart step
+plasma_engine.restart_mode                    = full          # Restart mode. 
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -103,26 +80,34 @@ plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode
 plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
 plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
 plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
-# ----------------------------------------------------------------------------------------------------
 
 # ====================================================================================================
-# TIME STEPPER SETTINGS
-# ----------------------------------------------------------------------------------------------------			
+# TIME_STEPPER OPTIONS
+# ====================================================================================================
 time_stepper.verbosity        = -1    # Class verbosity
 time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 5     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
-time_stepper.max_dt           = 1.    # Maximum permitted time step
+time_stepper.max_dt           = 1.E99 # Maximum permitted time step
 time_stepper.cfl              = 0.5   # CFL number
-time_stepper.relax_time       = 1.0   # Relaxation time constant
-time_stepper.source_growth    = 2.0   # Maximum permissible growth due to source term
-# ----------------------------------------------------------------------------------------------------			
+time_stepper.relax_time       = 10.0  # Relaxation time constant
+time_stepper.source_growth    = 1.E99 # Relaxation time constant
 
 # ====================================================================================================
-# MULTIFLUID POISSON GEOMETRIC MULTIGRID SETTINGS
-# ----------------------------------------------------------------------------------------------------			
-poisson_multifluid.gmg_verbosity     = 10        # GMG verbosity
+# POISSON_SOLVER CLASS OPTIONS
+# ====================================================================================================
+poisson_solver.bc_x_low  = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+poisson_solver.bc_x_high = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+poisson_solver.bc_y_low  = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+poisson_solver.bc_y_high = neumann               # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+poisson_solver.bc_z_low  = dirichlet_ground      # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+poisson_solver.bc_z_high = dirichlet_live        # BC type. Valid options are "neumann", "dirichlet_ground", and "dirichlet_live"
+
+# ====================================================================================================
+# POISSON_MULTIFLUID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+# ====================================================================================================
+poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
 poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
 poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
 poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
@@ -131,23 +116,65 @@ poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
 poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.2       # Solver hang
 poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
-poisson_multifluid.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+poisson_multifluid.gmg_bottom_solver = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 
 # ====================================================================================================
-# EDDINGTON SP1 GEOMETRIC MULTIGRID SETTINGS
-# ----------------------------------------------------------------------------------------------------			
+# CDR_LAYOUT SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
+cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"
+cdr_gdnv.limit_slopes   = true                   # Valid options are "covered_face" and "conservative_average"
+
+# ====================================================================================================
+# RTE_LAYOUT CLASS OPTIONS
+# ====================================================================================================
+rte_layout.which_solver = eddington_sp1 # Solver type. Available option is "eddington_sp1"
+rte_layout.stationary   = true          # Stationary solver ot no.
+
+# ====================================================================================================
+# EDDINGTON_SP1 CLASS OPTIONS
+# ====================================================================================================
+eddington_sp1.reflectivity      = 0.        # Reflectivity
 eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
-eddington_sp1.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
-eddington_sp1.gmg_post_smooth   = 16        # Number of relaxations in upsweep
-eddington_sp1.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
+eddington_sp1.gmg_pre_smooth    = 6         # Number of relaxations in downsweep
+eddington_sp1.gmg_post_smooth   = 6         # Number of relaxations in upsweep
+eddington_sp1.gmg_bott_smooth   = 6         # NUmber of relaxations before dropping to bottom solver
 eddington_sp1.gmg_min_iter      = 5         # Minimum number of iterations
 eddington_sp1.gmg_max_iter      = 32        # Maximum number of iterations
-eddington_sp1.gmg_tolerance     = 1.E-8     # Residue tolerance
+eddington_sp1.gmg_tolerance     = 1.E-6     # Residue tolerance
 eddington_sp1.gmg_hang          = 0.2       # Solver hang
 eddington_sp1.gmg_bottom_drop   = 8         # Bottom drop
-eddington_sp1.gmg_bottom_solver = bicgtab   # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+eddington_sp1.gmg_bottom_solver = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+
+# ====================================================================================================
+# RK2 CLASS OPTIONS
+# ====================================================================================================
+rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method		
+
+# ====================================================================================================
+# CELL_TAGGER CLASS OPTIONS
+# ====================================================================================================
+cell_tagger.num_boxes   = 0            # Number of allowed tag boxes
+cell_tagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
+cell_tagger.box1_hi     = 0.0 0.0 0.0  # these two corners
+
+# ====================================================================================================
+# ML_TAGGER CLASS OPTIONS
+# ====================================================================================================
+ml_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
+ml_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
+ml_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
+ml_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
+
+# ====================================================================================================
+# GEO_COARSENER CLASS OPTIONS
+# ====================================================================================================
+geo_coarsener.num_boxes   = 0            # Number of coarsening boxes
+geo_coarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
+geo_coarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
+geo_coarsener.box1_lvl    = 0            # up to this level
 
 # ====================================================================================================
 # MORROW_LOWKE CLASS OPTIONS
@@ -180,3 +207,4 @@ morrow_lowke.photon2_A_coeff               = 2.88E-2               # Parameters 
 morrow_lowke.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
 morrow_lowke.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
 morrow_lowke.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+

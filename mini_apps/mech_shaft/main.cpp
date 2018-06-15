@@ -1,23 +1,12 @@
-/*!
-  @file   mechshaft_main.cpp
-  @brief  Main file for the mechanical shaft simulations. 
-  @author Robert Marskar
-*/
-
 #include "plasma_engine.H"
-#include "plasma_kinetics.H"
-#include "rk2.H"
-#include "mechshaft_tagger.H"
-#include "morrow_lowke.H"
+#include "geo_coarsener.H"
 #include "morrow_lowke.H"
 #include "mechanical_shaft.H"
-#include "mechshaft_coarsen.H"
+#include "rk2.H"
+#include "ml_tagger.H"
+#include "ParmParse.H"
 
-#include <ParmParse.H>
-
-/*!
-  @brief Potential
-*/
+// This is the potential curve (constant in this case). Modify it if you want to.
 Real g_potential;
 Real potential_curve(const Real a_time){
   return g_potential;
@@ -26,38 +15,31 @@ Real potential_curve(const Real a_time){
 int main(int argc, char* argv[]){
 
 #ifdef CH_MPI
-  MPI_Init(&argc,&argv);
+  MPI_Init(&argc, &argv);
 #endif
 
-  // Build argument list from input file
-  char* inputFile = argv[1];
-  ParmParse PP(argc-2,argv+2,NULL,inputFile);
+  // Build class options from input script and command line options
+  char* input_file = argv[1];
+  ParmParse pp(argc-2, argv+2, NULL, input_file);
 
-  {
-    ParmParse pp("mech_shaft");
+  { // Get potential from input script 
+    ParmParse pp("new_mechshaft");
     pp.get("potential", g_potential);
   }
 
-
-  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
+  // Set up everything 
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new morrow_lowke());
-  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper>(new rk2());
-  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new mechshaft_tagger());
-  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new mechshaft_coarsen());
-  RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
-												   compgeom,
-												   plaskin,
-												   timestepper,
-												   amr,
-												   tagger,
-												   geocoarsen));
+  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper> (new rk2());
+  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new ml_tagger());
+  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
+  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
+  RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom, compgeom, plaskin, timestepper, amr, tagger, geocoarsen));
 
-  // Run plasma engine
+  // Run the plasma engine
   engine->set_potential(potential_curve);
   engine->setup_and_run();
-
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();
