@@ -13,9 +13,9 @@
 ml_tagger::ml_tagger(){
   m_num_tracers = 2;
 
-  m_coar_curv  = 0.05;
+  m_coar_curv  = 0.1;
   m_refi_curv  = 0.1;
-  m_refi_alpha = 5.0;
+  m_refi_alpha = 1.0;
   m_refi_fudge = 1.0;
 
   // Get input parameters if we have them
