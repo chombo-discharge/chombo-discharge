@@ -14,8 +14,8 @@ parser.add_argument('-procs',           type=int,  help='Processors to use when 
 parser.add_argument('-use_mpi',         type=bool, help='MPI enabled (default true)', default=True)
 parser.add_argument('-build',           type=bool, help='Build executable at end', default=False)
 parser.add_argument('-silent',          type=bool, help='Silent build of executable', default=False)
-parser.add_argument('-chombo_home',     type=str,  help="Chombo source code base directory", default=os.getcwd())
-parser.add_argument('-streamer_home',   type=str,  help="Source code base directory", default=os.getcwd())
+parser.add_argument('-chombo_home',     type=str,  help="Chombo source code base directory", default=os.environ.get('CHOMBO_HOME', os.getcwd()))
+parser.add_argument('-streamer_home',   type=str,  help="Source code base directory", default=os.environ.get('STREAMER_HOME', os.getcwd()))
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
@@ -24,6 +24,7 @@ parser.add_argument('-geometry',        type=str,  help="Geometry class", defaul
 parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="")
 parser.add_argument('-cell_tagger',     type=str,  help="Cell tagging method", default="")
 args = parser.parse_args()
+
 
 app_main.write_template(args)
 app_make.write_template(args)
