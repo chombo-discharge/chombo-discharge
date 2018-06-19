@@ -1614,7 +1614,7 @@ void amr_mesh::sanity_check(){
   CH_assert(!m_physdom.isNull());
   const RealVect realbox = m_physdom->get_prob_hi() - m_physdom->get_prob_lo();
   for (int dir = 0; dir < SpaceDim - 1; dir++){
-    CH_assert(realbox[dir]/m_num_cells[dir] == realbox[dir+1]/m_num_cells[dir+1]);
+    //    CH_assert(realbox[dir]/m_num_cells[dir] == realbox[dir+1]/m_num_cells[dir+1]);
   }
 }
 

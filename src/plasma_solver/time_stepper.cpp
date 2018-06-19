@@ -1306,6 +1306,8 @@ void time_stepper::initial_cdr_data(){
   if(m_verbosity > 5){
     pout() << "time_stepper::initial_cdr_data" << endl;
   }
+
+  m_cdr->initial_data();
 }
 
 void time_stepper::initial_rte_data(){
