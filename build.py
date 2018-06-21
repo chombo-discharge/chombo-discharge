@@ -21,8 +21,8 @@ parser.add_argument('-app_name',        type=str,  help="Mini app name. An error
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
 parser.add_argument('-plasma_kinetics', type=str,  help="Plasma kinetics class", default="")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="")
-parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="")
-parser.add_argument('-cell_tagger',     type=str,  help="Cell tagging method", default="")
+parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="rk2")
+parser.add_argument('-cell_tagger',     type=str,  help="Cell tagging method", default="field_tagger")
 args = parser.parse_args()
 
 
