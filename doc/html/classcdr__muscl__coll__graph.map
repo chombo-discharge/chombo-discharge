@@ -1,0 +1,4 @@
+<map id="cdr_muscl" name="cdr_muscl">
+<area shape="rect" id="node2" href="$classcdr__tga.html" title="Extension class of cdr_solver that uses ebconductivityop for diffusion part. This class also has a mu..." alt="" coords="14,80,79,107"/>
+<area shape="rect" id="node3" href="$classcdr__solver.html" title="Abstract class for cdr&#45;equations. This is (almost) a whole solver. " alt="" coords="5,5,88,32"/>
+</map>

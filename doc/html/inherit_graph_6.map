@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classcomputational__geometry.html" title="Abstract base class for geometries. " alt="" coords="5,132,169,159"/>
+<area shape="rect" id="node2" href="$classdouble__rod.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="244,5,329,32"/>
+<area shape="rect" id="node3" href="$classmechanical__shaft.html" title="Mechanical shaft class. " alt="" coords="225,56,349,83"/>
+<area shape="rect" id="node4" href="$classrod__plane.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="247,107,326,133"/>
+<area shape="rect" id="node5" href="$classrod__slab.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="251,157,322,184"/>
+<area shape="rect" id="node6" href="$classrod__sphere.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="243,208,330,235"/>
+<area shape="rect" id="node7" href="$classwire__wire__geometry.html" title="This is a class that defines a wire&#45;wire geometry. " alt="" coords="217,259,356,285"/>
+</map>

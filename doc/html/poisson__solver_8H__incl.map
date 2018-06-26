@@ -1,0 +1,20 @@
+<map id="src/poisson_solver/poisson_solver.H" name="src/poisson_solver/poisson_solver.H">
+<area shape="rect" id="node2" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="2483,319,2609,345"/>
+<area shape="rect" id="node19" href="$computational__geometry_8H.html" title="Declaration of an abstract base class for defining geometries. " alt="" coords="171,169,350,196"/>
+<area shape="rect" id="node30" href="$amr__mesh_8H.html" title="Declaration of a class that holds grids and useful EBAMR operators (for both phases) ..." alt="" coords="1393,95,1491,121"/>
+<area shape="rect" id="node49" href="$wall__bc_8H.html" title="Indexing class for BCs on domain edges. " alt="" coords="39,244,119,271"/>
+<area shape="rect" id="node11" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="2730,393,2791,420"/>
+<area shape="rect" id="node15" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="3176,393,3300,420"/>
+<area shape="rect" id="node24" href="$dielectric_8H.html" title="dielectric struct " alt="" coords="351,244,439,271"/>
+<area shape="rect" id="node25" href="$electrode_8H.html" title="electrode struct " alt="" coords="515,244,604,271"/>
+<area shape="rect" id="node26" href="$physical__domain_8H.html" title="Physical domain class. Very lightweight stuff. " alt="" coords="194,244,327,271"/>
+<area shape="rect" id="node27" href="$mfis_8H.html" title="Multi&#45;fluid index space. " alt="" coords="730,244,791,271"/>
+<area shape="rect" id="node31" href="$irreg__amr__stencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy. " alt="" coords="2301,169,2436,196"/>
+<area shape="rect" id="node35" href="$load__balance_8H.html" title="Declaration of various load&#45;balancing routines. " alt="" coords="561,169,673,196"/>
+<area shape="rect" id="node36" href="$nwoebquadcfinterp_8H.html" title="nwoebquadcfinterp.H" alt="" coords="1951,319,2096,345"/>
+<area shape="rect" id="node39" href="$MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids. " alt="" coords="375,169,485,196"/>
+<area shape="rect" id="node40" href="$ebcoarseaverage_8H.html" title="ebcoarseaverage.H" alt="" coords="2229,319,2364,345"/>
+<area shape="rect" id="node48" href="$amr__meshI_8H.html" title="Implementation of template functions in amr_mesh:H. " alt="" coords="1897,169,1998,196"/>
+<area shape="rect" id="node32" href="$irreg__stencil_8H.html" title="Abstract class for holding stencils on irregular cells over a single AMR level. " alt="" coords="2225,244,2331,271"/>
+<area shape="rect" id="node34" href="$irreg__amr__stencilI_8H.html" title="Implementation of irreg_amr_stencil.H. " alt="" coords="2406,244,2545,271"/>
+</map>

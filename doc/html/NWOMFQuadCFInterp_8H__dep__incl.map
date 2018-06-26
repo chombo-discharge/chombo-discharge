@@ -1,0 +1,5 @@
+<map id="src/global/NWOMFQuadCFInterp.H" name="src/global/NWOMFQuadCFInterp.H">
+<area shape="rect" id="node2" href="$nwomfconductivityop_8H.html" title="Declaration of multifluid helmholtz operator for embedment in AMRMultiGrid. " alt="" coords="5,80,228,107"/>
+<area shape="rect" id="node3" href="$nwomfconductivityopfactory_8H.html" title="Factory class for creating multifluid helmholtz operators. " alt="" coords="59,155,321,181"/>
+<area shape="rect" id="node4" href="$poisson__multifluid__gmg_8H.html" title="Geometric multigrid multifluid poisson solver. " alt="" coords="102,229,278,271"/>
+</map>

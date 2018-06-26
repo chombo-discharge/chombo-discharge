@@ -1,0 +1,51 @@
+<map id="src/global/tags.H" name="src/global/tags.H">
+<area shape="rect" id="node2" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="1373,80,1560,107"/>
+<area shape="rect" id="node10" href="$plasma__engine_8H.html" title="Declaration of the main class for time/space advancement of streamer equations. " alt="" coords="2117,780,2291,821"/>
+<area shape="rect" id="node50" href="$tags__factory_8H.html" title="Declaration of a class for generating tags objects. " alt="" coords="1584,80,1752,107"/>
+<area shape="rect" id="node3" href="$amr__mesh_8H.html" title="Declaration of a class that holds grids and useful EBAMR operators (for both phases) ..." alt="" coords="2857,341,3041,367"/>
+<area shape="rect" id="node4" href="$cdr__solver_8H.html" title="Declaration of an abstract class for evolving cdr equations. " alt="" coords="2807,423,2934,464"/>
+<area shape="rect" id="node9" href="$cell__tagger_8H.html" title="Class for tagging cells across an AMR hierarchy. " alt="" coords="2184,691,2336,732"/>
+<area shape="rect" id="node11" href="$euler__f_8H.html" title="Declaration of a backward Euler method for advancing the plasma equations. " alt="" coords="3401,698,3562,725"/>
+<area shape="rect" id="node13" href="$rk2_8H.html" title="Declaration of a second order Runge&#45;Kutta methods for advancing plasma equations. ..." alt="" coords="3689,698,3829,725"/>
+<area shape="rect" id="node15" href="$rk3_8H.html" title="Declaration of a second order Runge&#45;Kutta methods for advancing plasma equations. ..." alt="" coords="3919,698,4059,725"/>
+<area shape="rect" id="node17" href="$splitstep__euler__f_8H.html" title="Declaration of a split step forward Euler method. " alt="" coords="3219,691,3376,732"/>
+<area shape="rect" id="node19" href="$splitstep__rk2__tga__trapz_8H.html" title="Declaration of a RK2/TGA/Trapezoidal split&#45;step method for advancing plasma equations. " alt="" coords="2411,691,2568,732"/>
+<area shape="rect" id="node21" href="$splitstep__tga_8H.html" title="Declaration of a split&#45;step method for advancing plasma equations. " alt="" coords="2955,691,3112,732"/>
+<area shape="rect" id="node23" href="$poisson__solver_8H.html" title="Abstract multi&#45;phase Poisson solver. " alt="" coords="2297,423,2428,464"/>
+<area shape="rect" id="node25" href="$rte__solver_8H.html" title="Abstract multi&#45;phase Poisson solver. " alt="" coords="2052,423,2172,464"/>
+<area shape="rect" id="node27" href="$sigma__solver_8H.html" title="Declaration of a surface charge solver. " alt="" coords="3596,423,3756,464"/>
+<area shape="rect" id="node29" href="$irreg__stencil_8H.html" title="Abstract class for holding stencils on irregular cells over a single AMR level. " alt="" coords="550,155,685,196"/>
+<area shape="rect" id="node30" href="$irreg__amr__stencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy. " alt="" coords="675,244,810,285"/>
+<area shape="rect" id="node33" href="$eb__centroid__interp_8H.html" title="Implementation of irreg_stencil that interpolates from cell centers to cell centroids. " alt="" coords="296,244,472,285"/>
+<area shape="rect" id="node34" href="$wall__bc_8H.html" title="Indexing class for BCs on domain edges. " alt="" coords="1395,162,1538,189"/>
+<area shape="rect" id="node36" href="$domain__bc_8H.html" title="Declaration of class for setting boundary conditions on individual faces. " alt="" coords="1175,251,1337,278"/>
+<area shape="rect" id="node37" href="$mfconductivityop_8H.html" title="Declaration of multifluid helmholtz operator for embedment in AMRMultiGrid. " alt="" coords="1533,430,1731,457"/>
+<area shape="rect" id="node38" href="$mfconductivityopfactory_8H.html" title="Factory class for creating multifluid helmholtz operators. " alt="" coords="1326,519,1565,546"/>
+<area shape="rect" id="node39" href="$nwomfconductivityop_8H.html" title="Declaration of multifluid helmholtz operator for embedment in AMRMultiGrid. " alt="" coords="1755,430,1978,457"/>
+<area shape="rect" id="node40" href="$nwomfconductivityopfactory_8H.html" title="Factory class for creating multifluid helmholtz operators. " alt="" coords="1662,519,1925,546"/>
+<area shape="rect" id="node41" href="$robinconductivitydomainbcfactory_8H.html" title="Declaration of a factory class for Robin boundary conditions on domain faces. " alt="" coords="144,341,437,367"/>
+<area shape="rect" id="node42" href="$robinconductivityebbc_8H.html" title="Declaration of a Robin type EB boundary condition class for ebconductivityop. " alt="" coords="875,162,1101,189"/>
+<area shape="rect" id="node43" href="$robinconductivityebbcfactory_8H.html" title="src/elliptic/robinconductivityebbcfactory.H" alt="" coords="834,251,1099,278"/>
+<area shape="rect" id="node44" href="$mfis_8H.html" title="Multi&#45;fluid index space. " alt="" coords="1940,162,2081,189"/>
+<area shape="rect" id="node49" href="$data__ops_8H.html" title="Agglomeration of useful data operations. " alt="" coords="1259,430,1408,457"/>
+<area shape="rect" id="node8" href="$time__stepper_8H.html" title="Declaration of a time_stepper, an abstract class for evolving in time across an amr mesh..." alt="" coords="3119,601,3276,643"/>
+<area shape="rect" id="node12" href="$euler__f__storage_8H.html" title="Declaration of scratch storage for euler_f. " alt="" coords="3436,780,3572,821"/>
+<area shape="rect" id="node14" href="$rk2__storage_8H.html" title="Declaration of scratch storage for rk2. " alt="" coords="3619,787,3810,814"/>
+<area shape="rect" id="node16" href="$rk3__storage_8H.html" title="Declaration of scratch storage for rk3. " alt="" coords="3947,787,4138,814"/>
+<area shape="rect" id="node18" href="$splitstep__euler__f__storage_8H.html" title="Declaration of scratch storage for splitstep_euler_f. " alt="" coords="3160,780,3317,821"/>
+<area shape="rect" id="node20" href="$splitstep__rk2__tga__trapz__storage_8H.html" title="Declaration of scratch storage for splitstep_rk2_tga_trapz. " alt="" coords="2461,780,2633,821"/>
+<area shape="rect" id="node22" href="$splitstep__tga__storage_8H.html" title="Declaration of scratch storage for splitstep_tga. " alt="" coords="2819,780,2976,821"/>
+<area shape="rect" id="node28" href="$implicit__trapezoidal__storage_8H.html" title="Declaration of scratch storage for implicit_trapezoidal. " alt="" coords="3061,423,3217,464"/>
+<area shape="rect" id="node5" href="$cdr__tga_8H.html" title="Extensions of cdr_solver which use ebconductivityop and TGA for diffusion parts. " alt="" coords="2947,512,3074,553"/>
+<area shape="rect" id="node6" href="$cdr__sg_8H.html" title="Declaration of a Scharfetter&#45;Gummel implementation of cdr_solver. " alt="" coords="2762,519,2923,546"/>
+<area shape="rect" id="node7" href="$cdr__layout_8H.html" title="Declaration of a class that holds a set of cdr_solvers. " alt="" coords="3098,512,3249,553"/>
+<area shape="rect" id="node24" href="$poisson__multifluid__gmg_8H.html" title="Geometric multigrid multifluid poisson solver. " alt="" coords="1705,601,1881,643"/>
+<area shape="rect" id="node26" href="$eddington__sp1_8H.html" title="Declaration of a first order Eddington solver. " alt="" coords="886,512,1047,553"/>
+<area shape="rect" id="node32" href="$centroid__interp_8H.html" title="Implementation of irreg_stencil that interpolates from cell centers to cell centroids. " alt="" coords="496,244,651,285"/>
+<area shape="rect" id="node31" href="$irreg__amr__stencilI_8H.html" title="Implementation of irreg_amr_stencil.H. " alt="" coords="619,333,754,375"/>
+<area shape="rect" id="node35" href="$conductivitydomainbc__wrapper_8H.html" title="Declaration of a class that wraps boundary Dirichlet and Neumann boundary conditions on individual do..." alt="" coords="1361,244,1572,285"/>
+<area shape="rect" id="node45" href="$load__balance_8H.html" title="Declaration of various load&#45;balancing routines. " alt="" coords="2534,251,2733,278"/>
+<area shape="rect" id="node46" href="$jump__bc_8H.html" title="Declaration of a multifluid boundary condition class for the poisson equation. " alt="" coords="1799,251,1947,278"/>
+<area shape="rect" id="node47" href="$mfdirichletconductivityebbc_8H.html" title="Declaration of a boundary condition class for doing convential Dirichlet BCs as well as multifluid ma..." alt="" coords="1639,341,1897,367"/>
+<area shape="rect" id="node48" href="$computational__geometry_8H.html" title="Declaration of an abstract base class for defining geometries. " alt="" coords="2277,244,2459,285"/>
+</map>

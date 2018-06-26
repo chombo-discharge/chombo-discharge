@@ -1,0 +1,20 @@
+<map id="src/cdr_solver/cdr_solver.H" name="src/cdr_solver/cdr_solver.H">
+<area shape="rect" id="node2" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="2511,319,2637,345"/>
+<area shape="rect" id="node19" href="$computational__geometry_8H.html" title="Declaration of an abstract base class for defining geometries. " alt="" coords="195,169,374,196"/>
+<area shape="rect" id="node26" href="$physical__domain_8H.html" title="Physical domain class. Very lightweight stuff. " alt="" coords="63,244,197,271"/>
+<area shape="rect" id="node30" href="$amr__mesh_8H.html" title="Declaration of a class that holds grids and useful EBAMR operators (for both phases) ..." alt="" coords="1467,95,1564,121"/>
+<area shape="rect" id="node50" href="$species_8H.html" title="Declaration of a species class that passes in names and initial data to the cdr_solver. " alt="" coords="5,95,87,121"/>
+<area shape="rect" id="node11" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="2651,393,2713,420"/>
+<area shape="rect" id="node15" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="3047,393,3171,420"/>
+<area shape="rect" id="node24" href="$dielectric_8H.html" title="dielectric struct " alt="" coords="538,244,626,271"/>
+<area shape="rect" id="node25" href="$electrode_8H.html" title="electrode struct " alt="" coords="323,244,412,271"/>
+<area shape="rect" id="node27" href="$mfis_8H.html" title="Multi&#45;fluid index space. " alt="" coords="931,244,993,271"/>
+<area shape="rect" id="node31" href="$irreg__amr__stencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy. " alt="" coords="2325,169,2460,196"/>
+<area shape="rect" id="node35" href="$load__balance_8H.html" title="Declaration of various load&#45;balancing routines. " alt="" coords="1961,169,2073,196"/>
+<area shape="rect" id="node36" href="$nwoebquadcfinterp_8H.html" title="nwoebquadcfinterp.H" alt="" coords="1513,319,1659,345"/>
+<area shape="rect" id="node40" href="$MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids. " alt="" coords="449,169,560,196"/>
+<area shape="rect" id="node41" href="$ebcoarseaverage_8H.html" title="ebcoarseaverage.H" alt="" coords="2177,319,2312,345"/>
+<area shape="rect" id="node49" href="$amr__meshI_8H.html" title="Implementation of template functions in amr_mesh:H. " alt="" coords="1785,169,1886,196"/>
+<area shape="rect" id="node32" href="$irreg__stencil_8H.html" title="Abstract class for holding stencils on irregular cells over a single AMR level. " alt="" coords="2249,244,2355,271"/>
+<area shape="rect" id="node34" href="$irreg__amr__stencilI_8H.html" title="Implementation of irreg_amr_stencil.H. " alt="" coords="2430,244,2569,271"/>
+</map>

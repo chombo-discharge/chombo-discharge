@@ -1,0 +1,5 @@
+<map id="src/geometry/dcel_edge.H" name="src/geometry/dcel_edge.H">
+<area shape="rect" id="node2" href="$dcel__mesh_8H.html" title="Declaration of a dcel_mesh class for handling surface tesselations. " alt="" coords="88,80,267,107"/>
+<area shape="rect" id="node3" href="$dcel__if_8H.html" title="Declaration of an implicit&#45;function class that gets its value function from a DCEL surface tesselatio..." alt="" coords="5,155,160,181"/>
+<area shape="rect" id="node4" href="$ply__reader_8H.html" title="Static class for reading .ply&#45;files and putting them in the half&#45;edge mesh data structure. " alt="" coords="184,155,360,181"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="src/geometry/kd_treeI.H" name="src/geometry/kd_treeI.H">
+<area shape="rect" id="node2" href="$kd__tree_8H.html" title="Declaration of a kd&#45;tree space partitioning class for fast polygon search. " alt="" coords="365,80,444,107"/>
+<area shape="rect" id="node3" href="$kd__node_8H.html" title="Declaration of a kd&#45;node for space partioning. " alt="" coords="306,155,391,181"/>
+<area shape="rect" id="node4" href="$dcel__poly_8H.html" title="Declaration of a polygon class for DCEL surface tesselations. " alt="" coords="110,229,201,256"/>
+<area shape="rect" id="node9" href="$kd__nodeI_8H.html" title="Implementation of kd_node.H. " alt="" coords="383,229,472,256"/>
+<area shape="rect" id="node5" href="$ritter__sphere_8H.html" title="Declaration of class that uses Ritter&#39;s method for computing a bounding sphere for a set of points..." alt="" coords="5,304,113,331"/>
+</map>

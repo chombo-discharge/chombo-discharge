@@ -1,0 +1,14 @@
+<map id="src/cdr_solver/cdr_muscl.H" name="src/cdr_solver/cdr_muscl.H">
+<area shape="rect" id="node2" href="$cdr__tga_8H.html" title="Extensions of cdr_solver which use ebconductivityop and TGA for diffusion parts. " alt="" coords="3817,95,3895,121"/>
+<area shape="rect" id="node3" href="$cdr__solver_8H.html" title="Declaration of an abstract class for evolving cdr equations. " alt="" coords="703,169,799,196"/>
+<area shape="rect" id="node26" href="$ebconductivityopfactory_8H.html" title="ebconductivityopfactory.H" alt="" coords="3051,244,3226,271"/>
+<area shape="rect" id="node4" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="1162,319,1289,345"/>
+<area shape="rect" id="node16" href="$computational__geometry_8H.html" title="Declaration of an abstract base class for defining geometries. " alt="" coords="368,319,547,345"/>
+<area shape="rect" id="node22" href="$physical__domain_8H.html" title="Physical domain class. Very lightweight stuff. " alt="" coords="5,393,139,420"/>
+<area shape="rect" id="node23" href="$amr__mesh_8H.html" title="Declaration of a class that holds grids and useful EBAMR operators (for both phases) ..." alt="" coords="758,244,855,271"/>
+<area shape="rect" id="node25" href="$species_8H.html" title="Declaration of a species class that passes in names and initial data to the cdr_solver. " alt="" coords="653,244,734,271"/>
+<area shape="rect" id="node13" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="1675,393,1736,420"/>
+<area shape="rect" id="node15" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="782,393,906,420"/>
+<area shape="rect" id="node21" href="$dielectric_8H.html" title="dielectric struct " alt="" coords="413,393,501,420"/>
+<area shape="rect" id="node34" href="$ebconductivityop_8H.html" title="ebconductivityop.H" alt="" coords="3177,319,3311,345"/>
+</map>

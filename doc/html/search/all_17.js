@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['what_20is_20plasmac_3f',['What is PlasmaC?',['../index.html',1,'']]],
+  ['wall_5fbc',['wall_bc',['../classwall__bc.html',1,'wall_bc'],['../classwall__bc.html#af46f1060c8dbe2f4fbd36dc3d6ec86ca',1,'wall_bc::wall_bc()']]],
+  ['wall_5fbc_2eh',['wall_bc.H',['../wall__bc_8H.html',1,'']]],
+  ['wallbc',['wallbc',['../namespacewallbc.html',1,'']]],
+  ['which_5fbalance',['which_balance',['../classload__balance.html#aeda8ae1759629dfa65e6691678d0b3b9',1,'load_balance']]],
+  ['which_5fbc',['which_bc',['../classwall__bc.html#ac604341bc91e99347a72118606a383ed',1,'wall_bc::which_bc()'],['../namespacewallbc.html#ac79598e478fbcdc07082173cc75d4d99',1,'wallbc::which_bc()']]],
+  ['which_5fcenter',['which_center',['../namespacecentering.html#a2cba3891fbdab30a214ce001478b0c00',1,'centering']]],
+  ['which_5fcode',['which_code',['../namespacetime__code.html#a92eaf5cbf7ef106eae01fd0d702e36bf',1,'time_code']]],
+  ['which_5fmg',['which_mg',['../namespaceamrmg.html#aa3e75c1253c968e52106305f762a7952',1,'amrmg']]],
+  ['which_5fmode',['which_mode',['../namespaceoutput__mode.html#ad0fdcb2c9bc1b66e01306939b1bf5cf7',1,'output_mode::which_mode()'],['../namespacerestart__mode.html#aa9c13b092e65386120f08a8862e576ee',1,'restart_mode::which_mode()'],['../namespacememory__report__mode.html#a7a376e3e2cdf985fc8a6d33aa68c6f44',1,'memory_report_mode::which_mode()']]],
+  ['which_5fphase',['which_phase',['../namespacephase.html#a23c76f548a5eb1955ed8c929c541108b',1,'phase']]],
+  ['which_5frelax',['which_relax',['../namespacerelax.html#a1b017edf55c06d103aa5b61e015fe219',1,'relax']]],
+  ['which_5fspecies',['which_species',['../namespacespecies__iteration.html#a3384cfe7d9c1a8fa3dbc0c75efc8fb7e',1,'species_iteration']]],
+  ['which_5ftype',['which_type',['../namespacestencil__type.html#a1ffed19935b7289b50e8dcc017ee99c8',1,'stencil_type::which_type()'],['../namespaceghost__interpolation.html#a2e226123d3c841dd1034c7e62db3468c',1,'ghost_interpolation::which_type()']]],
+  ['whichbc',['whichBC',['../classdirichletconductivityebbc.html#ab877198c222f5cbf6d5cac40e62396ec',1,'dirichletconductivityebbc']]],
+  ['wire_5fwire_5fgeometry',['wire_wire_geometry',['../classwire__wire__geometry.html',1,'wire_wire_geometry'],['../classwire__wire__geometry.html#a6757f1bcb9ec02c15efc7522987666fa',1,'wire_wire_geometry::wire_wire_geometry()']]],
+  ['wire_5fwire_5fgeometry_2eh',['wire_wire_geometry.H',['../wire__wire__geometry_8H.html',1,'']]],
+  ['worked_20example',['Worked example',['../worked-example.html',1,'']]],
+  ['worked_5fexample_2emd',['worked_example.md',['../worked__example_8md.html',1,'']]],
+  ['write_5fcheckpoint_5ffile',['write_checkpoint_file',['../classplasma__engine.html#a05d1e58e504f183436f35b5c6bfe64ca',1,'plasma_engine']]],
+  ['write_5febis',['write_ebis',['../classplasma__engine.html#ac8cd9c616150a0573e768cf7e387c719',1,'plasma_engine']]],
+  ['write_5fgeometry',['write_geometry',['../classplasma__engine.html#a6442f4080571f3298fce1d59d7932885',1,'plasma_engine']]],
+  ['write_5fplot_5ffile',['write_plot_file',['../classcdr__layout.html#a3ee29c0f0bbdb06169bc6db1aed99371',1,'cdr_layout::write_plot_file()'],['../classplasma__engine.html#ab420eec8bd62cdf197329171b8d545df',1,'plasma_engine::write_plot_file()'],['../classrte__layout.html#adad75a7761cb90f915fb72caa904a2a2',1,'rte_layout::write_plot_file()']]]
+];

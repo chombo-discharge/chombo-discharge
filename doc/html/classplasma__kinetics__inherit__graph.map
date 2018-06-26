@@ -1,0 +1,4 @@
+<map id="plasma_kinetics" name="plasma_kinetics">
+<area shape="rect" id="node2" href="$classair__bolsig.html" title="BOLSIG&#45;based kinetic model for air. Transport coefficients for electrons are taken by calls to BOLSIG..." alt="" coords="5,80,83,107"/>
+<area shape="rect" id="node3" href="$classmorrow__lowke.html" title="Class that implements the Morrow&#45;Lowke discharge model for air. " alt="" coords="107,80,213,107"/>
+</map>

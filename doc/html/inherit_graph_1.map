@@ -1,0 +1,19 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node2" href="$classbox__if.html" title="Class for defining a two&#45; or three&#45;dimensional box with arbitrary centroid and orientation. " alt="" coords="164,5,221,32"/>
+<area shape="rect" id="node3" href="$classcylinder__if.html" title="Declaration of a cylinder IF class. " alt="" coords="152,56,233,83"/>
+<area shape="rect" id="node4" href="$classdcel__if.html" title="Class that gets it&#39;s value function from a surface tesselation. " alt="" coords="163,107,223,133"/>
+<area shape="rect" id="node5" href="$classhollow__cylinder__cross__sec__if.html" title="The class describes a 2D a rectangle with curved corners (lower left and right). This class is used b..." alt="" coords="117,158,268,199"/>
+<area shape="rect" id="node6" href="$classhollow__cylinder__if.html" title="This class is used to generate a hollow cylinder. The edges on the base of the cylinder are rounded..." alt="" coords="130,224,255,251"/>
+<area shape="rect" id="node7" href="$classhyperboloid__if.html" title="Declaration of a two&#45;sheet hyperboloid. " alt="" coords="141,275,244,301"/>
+<area shape="rect" id="node8" href="$classhyperboloid__one__if.html" title="Declaration of a one&#45;sheet hyperboloid. " alt="" coords="127,325,258,352"/>
+<area shape="rect" id="node9" href="$classhyperboloid__two__if.html" title="Declaration of a two&#45;sheet hyperboloid. " alt="" coords="127,376,258,403"/>
+<area shape="rect" id="node10" href="$classnew__sphere__if.html" title="Declaration of a hemispheric rod IF class. " alt="" coords="139,427,246,453"/>
+<area shape="rect" id="node11" href="$classperlin__if.html" title="Class that implements an improved Perlin noise function. " alt="" coords="159,477,226,504"/>
+<area shape="rect" id="node12" href="$classperlin__plane__if.html" title="perlin_plane_if function " alt="" coords="140,528,245,555"/>
+<area shape="rect" id="node13" href="$classperlin__sphere__if.html" title="perlin_sphere_if function " alt="" coords="136,579,249,605"/>
+<area shape="rect" id="node16" href="$classpolygon__rod__if.html" title="Implicit function class describing a hexagonal rod. " alt="" coords="139,629,246,656"/>
+<area shape="rect" id="node17" href="$classrod__if.html" title="Declaration of a cylinder with rounded caps. " alt="" coords="165,680,220,707"/>
+<area shape="rect" id="node18" href="$classrounded__box__if.html" title="A box with rounded corners and edges. " alt="" coords="137,731,248,757"/>
+<area shape="rect" id="node14" href="$classgraded__perlin__sphere__if.html" title="graded_perlin_sphere_if function " alt="" coords="316,553,475,580"/>
+<area shape="rect" id="node15" href="$classperlin__rod__if.html" title="perlin_rod_if function " alt="" coords="349,604,441,631"/>
+</map>

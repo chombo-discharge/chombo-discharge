@@ -1,5 +1,5 @@
 /*!
-  @file   dcel_poly.cpp
+  @file   dcel_poly.H
   @brief  Declaration of a polygon class for DCEL surface tesselations
   @author Robert Marskar
   @date   Apr. 2018

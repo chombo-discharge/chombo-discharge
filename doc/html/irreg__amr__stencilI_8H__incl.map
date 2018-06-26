@@ -1,0 +1,9 @@
+<map id="src/amr_mesh/irreg_amr_stencilI.H" name="src/amr_mesh/irreg_amr_stencilI.H">
+<area shape="rect" id="node2" href="$irreg__amr__stencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy. " alt="" coords="989,95,1123,121"/>
+<area shape="rect" id="node25" href="$centroid__interp_8H.html" title="Implementation of irreg_stencil that interpolates from cell centers to cell centroids. " alt="" coords="1314,95,1435,121"/>
+<area shape="rect" id="node26" href="$eb__centroid__interp_8H.html" title="Implementation of irreg_stencil that interpolates from cell centers to cell centroids. " alt="" coords="1147,95,1290,121"/>
+<area shape="rect" id="node3" href="$irreg__stencil_8H.html" title="Abstract class for holding stencils on irregular cells over a single AMR level. " alt="" coords="1321,169,1428,196"/>
+<area shape="rect" id="node4" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="902,244,1029,271"/>
+<area shape="rect" id="node13" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="175,319,236,345"/>
+<area shape="rect" id="node17" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="519,319,643,345"/>
+</map>

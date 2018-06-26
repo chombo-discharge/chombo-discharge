@@ -1,0 +1,4 @@
+<map id="field_tagger" name="field_tagger">
+<area shape="rect" id="node2" href="$classultralw__tagger.html" title="Lightweight tagging class. Only tags cells based on cdr densities and field magnitude. " alt="" coords="5,80,108,107"/>
+<area shape="rect" id="node3" href="$classcell__tagger.html" title="Abstract class for tagging cells across an AMR hierarchy. " alt="" coords="14,5,99,32"/>
+</map>

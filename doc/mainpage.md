@@ -14,6 +14,6 @@ PlasmaC is build on top of Chombo, and therefore features
   * Excellent scalability to hundres of thousands of cores
 </td>
 <td valign="top">
-\image html electrons_raytrace2.png "Volume-rendering of streamer branches near an anode"
+\image html electrons_raytrace.png 
 </td>
 </table>

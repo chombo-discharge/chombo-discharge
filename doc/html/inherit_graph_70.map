@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classrobin__coef.html" title="Abstract base class for supplying function&#45;based coefficients to the Robin boundary condition classes..." alt="" coords="5,5,88,32"/>
+<area shape="rect" id="node2" href="$classlarsen__coefs.html" title="Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition..." alt="" coords="136,5,232,32"/>
+</map>

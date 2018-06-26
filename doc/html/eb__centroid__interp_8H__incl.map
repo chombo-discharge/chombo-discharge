@@ -1,0 +1,6 @@
+<map id="src/amr_mesh/eb_centroid_interp.H" name="src/amr_mesh/eb_centroid_interp.H">
+<area shape="rect" id="node2" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="612,169,739,196"/>
+<area shape="rect" id="node19" href="$irreg__stencil_8H.html" title="Abstract class for holding stencils on irregular cells over a single AMR level. " alt="" coords="369,95,475,121"/>
+<area shape="rect" id="node11" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="1289,244,1350,271"/>
+<area shape="rect" id="node15" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="904,244,1028,271"/>
+</map>

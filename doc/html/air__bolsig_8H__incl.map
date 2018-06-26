@@ -1,0 +1,7 @@
+<map id="plasma_models/air_bolsig/air_bolsig.H" name="plasma_models/air_bolsig/air_bolsig.H">
+<area shape="rect" id="node2" href="$plasma__kinetics_8H.html" title="Declarationof the plasma kinetics class. " alt="" coords="150,95,280,121"/>
+<area shape="rect" id="node7" href="$lookup__table_8H.html" title="Declaration of a table for looking up coefficients etc. " alt="" coords="452,95,562,121"/>
+<area shape="rect" id="node10" href="$perlin__if_8H.html" title="Declaration of a perlin_if function. " alt="" coords="693,95,774,121"/>
+<area shape="rect" id="node5" href="$species_8H.html" title="Declaration of a species class that passes in names and initial data to the cdr_solver. " alt="" coords="174,169,256,196"/>
+<area shape="rect" id="node6" href="$photon__group_8H.html" title="Declaration of a photon&#45;group class. " alt="" coords="280,169,395,196"/>
+</map>

@@ -1,0 +1,30 @@
+<map id="src/plasma_solver/plasma_engine.H" name="src/plasma_solver/plasma_engine.H">
+<area shape="rect" id="node3" href="$computational__geometry_8H.html" title="Declaration of an abstract base class for defining geometries. " alt="" coords="2248,468,2427,495"/>
+<area shape="rect" id="node11" href="$physical__domain_8H.html" title="Physical domain class. Very lightweight stuff. " alt="" coords="2781,543,2915,569"/>
+<area shape="rect" id="node12" href="$mfis_8H.html" title="Multi&#45;fluid index space. " alt="" coords="551,543,612,569"/>
+<area shape="rect" id="node16" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="2600,692,2661,719"/>
+<area shape="rect" id="node21" href="$plasma__kinetics_8H.html" title="Declarationof the plasma kinetics class. " alt="" coords="2893,319,3024,345"/>
+<area shape="rect" id="node24" href="$time__stepper_8H.html" title="Declaration of a time_stepper, an abstract class for evolving in time across an amr mesh..." alt="" coords="2633,169,2743,196"/>
+<area shape="rect" id="node25" href="$amr__mesh_8H.html" title="Declaration of a class that holds grids and useful EBAMR operators (for both phases) ..." alt="" coords="1255,393,1353,420"/>
+<area shape="rect" id="node47" href="$cell__tagger_8H.html" title="Class for tagging cells across an AMR hierarchy. " alt="" coords="2571,95,2669,121"/>
+<area shape="rect" id="node49" href="$geo__coarsener_8H.html" title="Declaration of a utility class for removing geometrically tagged cells. " alt="" coords="3123,95,3245,121"/>
+<area shape="rect" id="node9" href="$dielectric_8H.html" title="dielectric struct " alt="" coords="2619,543,2707,569"/>
+<area shape="rect" id="node10" href="$electrode_8H.html" title="electrode struct " alt="" coords="2454,543,2543,569"/>
+<area shape="rect" id="node13" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="2046,617,2173,644"/>
+<area shape="rect" id="node22" href="$species_8H.html" title="Declaration of a species class that passes in names and initial data to the cdr_solver. " alt="" coords="2945,393,3026,420"/>
+<area shape="rect" id="node23" href="$photon__group_8H.html" title="Declaration of a photon&#45;group class. " alt="" coords="2805,393,2920,420"/>
+<area shape="rect" id="node40" href="$cdr__layout_8H.html" title="Declaration of a class that holds a set of cdr_solvers. " alt="" coords="2800,244,2896,271"/>
+<area shape="rect" id="node42" href="$rte__layout_8H.html" title="Declaration of a class that holds a set of rte_solvers. " alt="" coords="2683,244,2776,271"/>
+<area shape="rect" id="node44" href="$poisson__solver_8H.html" title="Abstract multi&#45;phase Poisson solver. " alt="" coords="1947,319,2069,345"/>
+<area shape="rect" id="node46" href="$sigma__solver_8H.html" title="Declaration of a surface charge solver. " alt="" coords="2358,244,2471,271"/>
+<area shape="rect" id="node26" href="$irreg__amr__stencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy. " alt="" coords="1431,543,1566,569"/>
+<area shape="rect" id="node27" href="$load__balance_8H.html" title="Declaration of various load&#45;balancing routines. " alt="" coords="296,468,408,495"/>
+<area shape="rect" id="node28" href="$nwoebquadcfinterp_8H.html" title="nwoebquadcfinterp.H" alt="" coords="154,617,299,644"/>
+<area shape="rect" id="node30" href="$MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids. " alt="" coords="433,468,543,495"/>
+<area shape="rect" id="node31" href="$ebcoarseaverage_8H.html" title="ebcoarseaverage.H" alt="" coords="885,617,1019,644"/>
+<area shape="rect" id="node39" href="$amr__meshI_8H.html" title="Implementation of template functions in amr_mesh:H. " alt="" coords="1920,468,2021,495"/>
+<area shape="rect" id="node41" href="$cdr__solver_8H.html" title="Declaration of an abstract class for evolving cdr equations. " alt="" coords="2533,319,2629,345"/>
+<area shape="rect" id="node43" href="$rte__solver_8H.html" title="Abstract multi&#45;phase Poisson solver. " alt="" coords="2416,319,2509,345"/>
+<area shape="rect" id="node45" href="$wall__bc_8H.html" title="Indexing class for BCs on domain edges. " alt="" coords="2248,543,2328,569"/>
+<area shape="rect" id="node48" href="$real__box_8H.html" title="Declaration of a rectangular box. " alt="" coords="3123,169,3208,196"/>
+</map>

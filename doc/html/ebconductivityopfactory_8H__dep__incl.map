@@ -1,0 +1,6 @@
+<map id="src/elliptic/ebconductivityopfactory.H" name="src/elliptic/ebconductivityopfactory.H">
+<area shape="rect" id="node2" href="$cdr__tga_8H.html" title="Extensions of cdr_solver which use ebconductivityop and TGA for diffusion parts. " alt="" coords="80,80,207,121"/>
+<area shape="rect" id="node5" href="$eddington__sp1_8H.html" title="Declaration of a first order Eddington solver. " alt="" coords="231,80,392,121"/>
+<area shape="rect" id="node3" href="$cdr__gdnv_8H.html" title="Godunov solver for CDR equations. " alt="" coords="5,169,132,211"/>
+<area shape="rect" id="node4" href="$cdr__muscl_8H.html" title="Declaration of a muscl class for the convection diffusion reaction equations. " alt="" coords="156,169,283,211"/>
+</map>

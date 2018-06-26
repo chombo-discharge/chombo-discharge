@@ -1,0 +1,28 @@
+<map id="cell_taggers/field_tagger.H" name="cell_taggers/field_tagger.H">
+<area shape="rect" id="node2" href="$ultralw__tagger_8H.html" title="Declaration of a memory&#45;lightweight tagging class. " alt="" coords="556,95,673,121"/>
+<area shape="rect" id="node3" href="$cell__tagger_8H.html" title="Class for tagging cells across an AMR hierarchy. " alt="" coords="565,169,664,196"/>
+<area shape="rect" id="node4" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="2749,617,2875,644"/>
+<area shape="rect" id="node18" href="$computational__geometry_8H.html" title="Declaration of an abstract base class for defining geometries. " alt="" coords="656,468,835,495"/>
+<area shape="rect" id="node25" href="$physical__domain_8H.html" title="Physical domain class. Very lightweight stuff. " alt="" coords="501,543,635,569"/>
+<area shape="rect" id="node27" href="$time__stepper_8H.html" title="Declaration of a time_stepper, an abstract class for evolving in time across an amr mesh..." alt="" coords="559,244,670,271"/>
+<area shape="rect" id="node28" href="$plasma__kinetics_8H.html" title="Declarationof the plasma kinetics class. " alt="" coords="253,393,384,420"/>
+<area shape="rect" id="node31" href="$amr__mesh_8H.html" title="Declaration of a class that holds grids and useful EBAMR operators (for both phases) ..." alt="" coords="1654,393,1751,420"/>
+<area shape="rect" id="node50" href="$real__box_8H.html" title="Declaration of a rectangular box. " alt="" coords="5,244,91,271"/>
+<area shape="rect" id="node13" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="2769,692,2831,719"/>
+<area shape="rect" id="node17" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="2855,692,2979,719"/>
+<area shape="rect" id="node23" href="$dielectric_8H.html" title="dielectric struct " alt="" coords="709,543,797,569"/>
+<area shape="rect" id="node24" href="$electrode_8H.html" title="electrode struct " alt="" coords="873,543,962,569"/>
+<area shape="rect" id="node26" href="$mfis_8H.html" title="Multi&#45;fluid index space. " alt="" coords="1139,543,1200,569"/>
+<area shape="rect" id="node46" href="$cdr__layout_8H.html" title="Declaration of a class that holds a set of cdr_solvers. " alt="" coords="165,319,261,345"/>
+<area shape="rect" id="node47" href="$rte__layout_8H.html" title="Declaration of a class that holds a set of rte_solvers. " alt="" coords="285,319,379,345"/>
+<area shape="rect" id="node48" href="$poisson__solver_8H.html" title="Abstract multi&#45;phase Poisson solver. " alt="" coords="1319,319,1441,345"/>
+<area shape="rect" id="node49" href="$sigma__solver_8H.html" title="Declaration of a surface charge solver. " alt="" coords="606,319,719,345"/>
+<area shape="rect" id="node29" href="$species_8H.html" title="Declaration of a species class that passes in names and initial data to the cdr_solver. " alt="" coords="155,543,237,569"/>
+<area shape="rect" id="node30" href="$photon__group_8H.html" title="Declaration of a photon&#45;group class. " alt="" coords="261,543,376,569"/>
+<area shape="rect" id="node32" href="$irreg__amr__stencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy. " alt="" coords="2651,543,2786,569"/>
+<area shape="rect" id="node33" href="$load__balance_8H.html" title="Declaration of various load&#45;balancing routines. " alt="" coords="909,468,1021,495"/>
+<area shape="rect" id="node34" href="$nwoebquadcfinterp_8H.html" title="nwoebquadcfinterp.H" alt="" coords="2023,617,2169,644"/>
+<area shape="rect" id="node36" href="$MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids. " alt="" coords="1345,468,1455,495"/>
+<area shape="rect" id="node37" href="$ebcoarseaverage_8H.html" title="ebcoarseaverage.H" alt="" coords="2306,617,2441,644"/>
+<area shape="rect" id="node45" href="$amr__meshI_8H.html" title="Implementation of template functions in amr_mesh:H. " alt="" coords="2352,468,2453,495"/>
+</map>
