@@ -659,11 +659,6 @@ protected:
   virtual void step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps);
 
   /*!
-    @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
-  */
-  virtual void tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
-
-  /*!
     @brief Write a plot file
   */
   virtual void write_plot_file();
@@ -677,6 +672,11 @@ protected:
     @brief Write the geometry only
   */
   virtual void write_geometry();
+
+  /*!
+    @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
+  */
+  virtual bool tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
 
   /*!
     @brief Get output variable names for a given output mode

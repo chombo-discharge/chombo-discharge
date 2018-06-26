@@ -123,11 +123,13 @@ void cell_tagger::set_verbosity(const int a_verbosity){
   }
 }
 
-void cell_tagger::tag_cells(EBAMRTags& a_tags){
+bool cell_tagger::tag_cells(EBAMRTags& a_tags){
   CH_TIME("cell_tagger::tag_cells");
   if(m_verbosity > 5){
     pout() << m_name + "::tag_cells" << endl;
   }
+
+  bool got_new_tags = false;
 
   if(m_num_tracers > 0){
     
@@ -219,13 +221,33 @@ void cell_tagger::tag_cells(EBAMRTags& a_tags){
 	  }
 	}
 
-	DenseIntVectSet& tags = (*a_tags[lvl])[dit()].get_ivs();
+
+	DenseIntVectSet& tags    = (*a_tags[lvl])[dit()].get_ivs();
+	DenseIntVectSet cpy1 = tags;
 	tags -= coarsen_tags;
 	tags |= refine_tags;
+	DenseIntVectSet cpy2 = tags;
+
+	cpy2 -= cpy1; // = new tags minus old tags. If nonzero, we got some new tags. 
+	cpy1 -= tags; // = old_tags minus new tags. If nonzero, we got some new tags
+	if(cpy1.numPts() != 0 || cpy2.numPts() != 0){
+	  got_new_tags = true;
+	}
 	tags &= box;
       }
     }
   }
+
+#ifdef CH_MPI
+  int glo = 1;
+  int loc = got_new_tags ? 1 : 0;
+
+  const int result = MPI_Allreduce(&loc, &glo, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+
+  got_new_tags = (glo == 1) ? true : false;
+#endif
+
+  return got_new_tags;
 }
 
 Vector<EBAMRCellData>& cell_tagger::get_tracer_fields() {

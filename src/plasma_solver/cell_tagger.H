@@ -64,11 +64,6 @@ public:
   void regrid();
 
   /*!
-    @brief Tag cells
-  */
-  void tag_cells(EBAMRTags& a_tags);
-
-  /*!
     @brief Set phase
   */
   void set_phase(const phase::which_phase a_phase);
@@ -77,6 +72,11 @@ public:
     @brief Set verbosity
   */
   void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Tag cells
+  */
+  bool tag_cells(EBAMRTags& a_tags);
 
   /*!
     @brief Tracer fields
