@@ -103,14 +103,24 @@ public:
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
-    @brief Set Dirichlet wall BC
+    @brief Set const value Dirichlet wall BC
   */
   virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live);
 
   /*!
-    @brief Set Neumann wall BC
+    @brief Set Dirichlet wall BC (potential distribution)
+  */
+  virtual void set_dirichlet_map_bc(const int a_dir, Side::LoHiSide a_side);
+
+  /*!
+    @brief Set constant value Neumann wall BC
   */
   virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+
+    /*!
+    @brief Set constant value Neumann wall BC
+  */
+  virtual void set_neumann_map_bc(const int a_dir, Side::LoHiSide a_side);
 
 #ifdef CH_USE_HDF5
   /*!
@@ -138,6 +148,11 @@ public:
     @brief Set potential at current time. 
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
+
+  /*!
+    @brief Set wall potential distribution. This is efffective for dirichlet_map only
+  */
+  virtual void set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
 
   /*!
     @brief Set potential in covered electrode cells
@@ -256,6 +271,36 @@ protected:
     @brief Set potential function pointer
   */
   Real (*m_potential)(const Real a_time);
+
+  /*!
+    @brief Function pointer for potential on domain walls (dirichlet)
+  */
+  Real (*m_wall_func_x_lo)(const RealVect a_pos);
+
+  /*!
+    @brief Function pointer for potential on domain walls (dirichlet)
+  */
+  Real (*m_wall_func_x_hi)(const RealVect a_pos);
+
+    /*!
+    @brief Function pointer for potential on domain walls (dirichlet)
+  */
+  Real (*m_wall_func_y_lo)(const RealVect a_pos);
+
+  /*!
+    @brief Function pointer for potential on domain walls (dirichlet)
+  */
+  Real (*m_wall_func_y_hi)(const RealVect a_pos);
+
+    /*!
+    @brief Function pointer for potential on domain walls (dirichlet)
+  */
+  Real (*m_wall_func_z_lo)(const RealVect a_pos);
+
+  /*!
+    @brief Function pointer for potential on domain walls (dirichlet)
+  */
+  Real (*m_wall_func_z_hi)(const RealVect a_pos);
 
   /*!
     @brief Set the mfis

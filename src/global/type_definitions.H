@@ -129,9 +129,12 @@ namespace potential {
 */
 namespace wallbc {
   enum which_bc {
-    dirichlet = 0,
-    neumann   = 1,
-    robin     = 2,
+    dirichlet     = 0,
+    dirichlet_map = 1,
+    neumann       = 2,
+    neumann_map   = 3,
+    robin         = 4,
+    robin_map     = 5,
   };
 };
 

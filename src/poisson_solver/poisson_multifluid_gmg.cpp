@@ -11,7 +11,6 @@
 #include "MFInterfaceFAB.H"
 #include "jump_bc.H"
 #include "amr_mesh.H"
-#include "domain_bc.H"
 #include "conductivitydomainbc_wrapper_factory.H"
 #include "units.H"
 

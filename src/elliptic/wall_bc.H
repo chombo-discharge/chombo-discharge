@@ -59,6 +59,11 @@ public:
   virtual void set_live(bool a_live);
 
   /*!
+    @brief Set function
+  */
+  virtual void set_function(Real (*m_func)(const RealVect a_pos));
+
+  /*!
     @brief Check if domain wall is live or not
   */
   virtual bool is_live();
@@ -94,6 +99,11 @@ protected:
     @brief Live or not. This is for Dirichlet.
   */
   bool m_live;
+
+  /*!
+    @brief Function based. This is for both Dirichlet and Neumann
+  */
+  Real (*m_func)(const RealVect a_pos);
 
   /*!
     @brief BC type

@@ -26,6 +26,11 @@ void wall_bc::set_live(bool a_live){
   m_live = a_live;
 }
 
+
+void wall_bc::set_function(Real (*a_func)(const RealVect a_pos)){
+  m_func = a_func;
+}
+
 Real wall_bc::get_value(){
   Real value = 0.0;
   
