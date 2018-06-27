@@ -35,11 +35,11 @@ public:
     @brief Dirichlet and Neumann need to know about bcoef
   */
   virtual void set_coef();
-
+  
   /*!
-    @brief Set the potential function
+    @brief Set the potential functions
   */
-  virtual void set_potential(const RefCountedPtr<BaseBCFuncEval>& a_potential);
+  virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
 
   /*!
     @brief Set bc types. This should come through the factory. 
@@ -108,9 +108,9 @@ protected:
   Vector<RefCountedPtr<ConductivityBaseDomainBC> > m_bc;
 
   /*!
-    @brief Potential
+    @brief Potentials
   */
-  RefCountedPtr<BaseBCFuncEval> m_potential;
+  Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;
 
   /*!
     @brief Is defined or not

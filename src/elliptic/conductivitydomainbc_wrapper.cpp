@@ -24,8 +24,8 @@ void conductivitydomainbc_wrapper::set_coef(){
   m_defined = true;
 }
 
-void conductivitydomainbc_wrapper::set_potential(const RefCountedPtr<BaseBCFuncEval>& a_potential){
-  m_potential = a_potential;
+void conductivitydomainbc_wrapper::set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials){
+  m_potentials = a_potentials;
 }
 
 void conductivitydomainbc_wrapper::set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
@@ -38,7 +38,7 @@ void conductivitydomainbc_wrapper::set_wallbc(const Vector<RefCountedPtr<wall_bc
       m_bc[idx] = RefCountedPtr<DirichletConductivityDomainBC> (new DirichletConductivityDomainBC());
 
       if(a_wallbc[i]->is_live()){
-	m_bc[idx]->setFunction(m_potential);
+	m_bc[idx]->setFunction(m_potentials[i]);
       }
       else{
 	m_bc[idx]->setValue(0.0);

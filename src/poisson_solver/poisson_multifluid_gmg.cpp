@@ -6,6 +6,7 @@
 */
 
 #include "poisson_multifluid_gmg.H"
+#include "potential_func.H"
 #include "data_ops.H"
 #include "MFQuadCFInterp.H"
 #include "MFInterfaceFAB.H"
@@ -160,6 +161,12 @@ void poisson_multifluid_gmg::set_nwo(const bool a_use_nwo){
 void poisson_multifluid_gmg::set_potential(Real (*a_potential)(const Real a_time)){
   poisson_solver::set_potential(a_potential);
   m_bcfunc = RefCountedPtr<potential_func> (new potential_func(m_potential));
+
+  m_map_bcfunc.resize(2*SpaceDim);
+  for (int i = 0; i < 2*SpaceDim; i++){
+    m_map_bcfunc[i] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential));
+  }
+
 }
 
 void poisson_multifluid_gmg::set_time(const int a_step, const Real a_time, const Real a_dt){
@@ -543,7 +550,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
   RefCountedPtr<potential_func> pot = RefCountedPtr<potential_func> (new potential_func(m_potential));
   bcfact->set_wallbc(m_wallbc);
-  bcfact->set_potential(m_bcfunc);
+  bcfact->set_potentials(m_map_bcfunc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
   const int bc_order = 2;
@@ -623,7 +630,7 @@ void poisson_multifluid_gmg::setup_nwo_operator_factory(){
   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
   RefCountedPtr<potential_func> pot = RefCountedPtr<potential_func> (new potential_func(m_potential));
   bcfact->set_wallbc(m_wallbc);
-  bcfact->set_potential(pot);
+  bcfact->set_potentials(m_map_bcfunc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
   m_nwo_opfact = RefCountedPtr<nwomfconductivityopfactory> (new nwomfconductivityopfactory(m_mfis,

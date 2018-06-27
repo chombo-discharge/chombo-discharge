@@ -11,6 +11,7 @@
 #include "poisson_solver.H"
 #include "mfconductivityopfactory.H"
 #include "nwomfconductivityopfactory.H"
+#include "potential_func.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
@@ -42,11 +43,7 @@
       
 */
 class poisson_multifluid_gmg : public poisson_solver {
-  class potential_func;
-  
 public:
-
-
 
   /*!
     @brief Constructor
@@ -269,6 +266,11 @@ protected:
   RefCountedPtr<potential_func> m_bcfunc;
 
   /*!
+    @brief Mapped potentials 
+  */
+  Vector<RefCountedPtr<BaseBCFuncEval> > m_map_bcfunc;
+
+  /*!
     @brief Set up the geometric multigrid solver 
   */
   virtual void setup_gmg();
@@ -321,35 +323,5 @@ protected:
 
 private:
 
-  /*!
-    @brief Class for passing time and space dependent boundary conditions into the GMG boundary condition classes. 
-  */
-  class potential_func : public BaseBCFuncEval {
-  public:
-    
-    potential_func(Real (*a_potential)(const Real a_time)){
-      m_potential = a_potential;
-    }
-
-    virtual ~potential_func(){
-
-    }
-
-    virtual void set_time(const Real a_time){
-      m_time = a_time;
-    }
-
-    virtual Real value(const RealVect& a_point, const int& a_comp) const {
-      return m_potential(m_time);
-    }
-
-    virtual Real derivative(const RealVect& a_point, const int& a_comp, const int& a_dir) const {
-      MayDay::Abort("poisson_multifluid_gmg::potential_func::derivative - this should not be called. How did you get here?");
-    }
-  protected:
-    Real (*m_potential)(const Real a_time);
-
-    Real m_time;
-  };
 };
 #endif

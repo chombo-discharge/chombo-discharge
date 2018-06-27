@@ -1,9 +1,8 @@
 /*!
-  @file conductivitydomainbc_wrapper_factory.H
-  @brief Declaration of a factory class for conductivitydomainbc_wrapper
+  @file   conductivitydomainbc_wrapper_factory.H
+  @brief  Declaration of a factory class for conductivitydomainbc_wrapper
   @author Robert Marskar
-  @date Jan. 2018
-  @todo Segregate implementation file
+  @date   Jan. 2018
 */
 
 #ifndef _CONDUCTIVITYDOMAINBC_WRAPPER_FACTORY_
@@ -24,44 +23,29 @@ public:
   /*!
     @brief Constructor
   */
-  conductivitydomainbc_wrapper_factory(){
-    m_hasbc = false;
-  }
+  conductivitydomainbc_wrapper_factory();
 
   /*!
     @brief Destructor
   */
-  virtual ~conductivitydomainbc_wrapper_factory(){}
-
+  virtual ~conductivitydomainbc_wrapper_factory();
 
   /*!
     @brief Set wall bc
   */
-  virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
-    m_wallbc = a_wallbc;
+  virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
 
-    m_hasbc = true;
-  }
-
-  virtual void set_potential(const RefCountedPtr<BaseBCFuncEval>& a_potential){
-    m_potential = a_potential;
-  }
+  /*!
+    @brief Set potentials
+  */
+  virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
 
   /*!
     @brief Factory method
   */
   virtual conductivitydomainbc_wrapper* create(const ProblemDomain& a_domain,
 					       const EBISLayout&    a_ebisl,
-					       const RealVect&      a_dx){
-    CH_assert(m_hasbc);
-    
-    conductivitydomainbc_wrapper* fresh = new conductivitydomainbc_wrapper();
-
-    fresh->set_potential(m_potential); 
-    fresh->set_wallbc(m_wallbc);
-    
-    return fresh;
-  }
+					       const RealVect&      a_dx);
   
 protected:
 
@@ -78,7 +62,7 @@ protected:
   /*!
     @brief Potential function
   */
-  RefCountedPtr<BaseBCFuncEval> m_potential;
+  Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;
 
 };
 #endif
