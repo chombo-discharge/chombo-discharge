@@ -301,44 +301,6 @@ void poisson_solver::set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_sid
   m_wallbc[idx]->set_live(a_live);
 }
 
-void poisson_solver::set_dirichlet_map_bc(const int a_dir, Side::LoHiSide a_side){
-  CH_TIME("poisson_solver::set_dirichlet_map_bc");
-  if(m_verbosity > 5){
-    pout() << "poisson_solver::set_dirichlet_map_bc" << endl;
-  }
-
-  const int idx = wall_bc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::dirichlet_map));
-
-  // Associate function
-  if(a_dir == 0){
-    if(a_side == Side::Lo){
-      m_wallbc[idx]->set_function(m_wall_func_x_lo);
-    }
-    else if(a_side = Side::Hi){
-      m_wallbc[idx]->set_function(m_wall_func_x_hi);
-    }
-  }
-  else if(a_dir == 1){
-    if(a_side == Side::Lo){
-      m_wallbc[idx]->set_function(m_wall_func_y_lo);
-    }
-    else if(a_side = Side::Hi){
-      m_wallbc[idx]->set_function(m_wall_func_y_hi);
-    }
-  }
-#if CH_SPACEDIM==3
-  else if(a_dir == 2){
-    if(a_side == Side::Lo){
-      m_wallbc[idx]->set_function(m_wall_func_z_lo);
-    }
-    else if(a_side = Side::Hi){
-      m_wallbc[idx]->set_function(m_wall_func_z_hi);
-    }
-  }
-#endif
-}
-
 void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
   CH_TIME("poisson_solver::set_neumann_wall_bc");
   if(m_verbosity > 5){
@@ -350,21 +312,14 @@ void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side,
   m_wallbc[idx]->set_value(a_value);
 }
 
-void poisson_solver::set_neumann_map_bc(const int a_dir, Side::LoHiSide a_side){
-  CH_TIME("poisson_solver::set_dirichlet_map_bc");
-  if(m_verbosity > 5){
-    pout() << "poisson_solver::set_dirichlet_map_bc" << endl;
-  }
-}
-
 void poisson_solver::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential = a_potential;
 }
 
-void poisson_solver::set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("poisson_solver::set_wall_func");
+void poisson_solver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("poisson_solver::set_poisson_wall_func");
   if(m_verbosity > 4){
-    pout() << "poisson_solver::set_wall_func" << endl;
+    pout() << "poisson_solver::set_poisson_wall_func" << endl;
   }
 
   if(a_dir == 0){

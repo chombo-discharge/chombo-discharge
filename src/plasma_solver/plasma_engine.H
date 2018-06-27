@@ -152,12 +152,12 @@ public:
   /*!
     @brief Set wall potential distribution on domain faces
   */
-  virtual void set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
+  virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
 
   /*!
     @brief Set wall function
   */
-  virtual void set_wall_func(Real (*a_func)(const RealVect a_pos));
+  virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
   
   /*!
     @brief Set the regrid interval

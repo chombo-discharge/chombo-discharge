@@ -1443,10 +1443,10 @@ void time_stepper::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential     = a_potential;
 }
 
-void time_stepper::set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("time_stepper::set_wall_func(dir, side, func)");
+void time_stepper::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("time_stepper::set_poisson_wall_func(dir, side, func)");
   if(m_verbosity > 4){
-    pout() << "time_stepper::set_wall_func(dir, side, func)" << endl;
+    pout() << "time_stepper::set_poisson_wall_func(dir, side, func)" << endl;
   }
 
   if(a_dir == 0){
@@ -1620,15 +1620,15 @@ void time_stepper::setup_poisson(){
   m_poisson->set_computational_geometry(m_compgeom);
   m_poisson->set_physical_domain(m_physdom);
 
-  m_poisson->set_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_poisson->set_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_poisson->set_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_poisson->set_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
+  m_poisson->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
+  m_poisson->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
+  m_poisson->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
+  m_poisson->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
 #if CH_SPACEDIM==3
-  m_poisson->set_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_poisson->set_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
+  m_poisson->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
+  m_poisson->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
 #endif
-  m_poisson->set_potential(m_potential); // Needs to happen AFTER set_wall_func
+  m_poisson->set_potential(m_potential); // Needs to happen AFTER set_poisson_wall_func
 
   m_poisson->sanity_check();
   m_poisson->allocate_internals();

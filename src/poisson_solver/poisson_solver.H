@@ -108,19 +108,9 @@ public:
   virtual void set_dirichlet_wall_bc(const int a_dir, Side::LoHiSide a_side, const potential::ground_live a_live);
 
   /*!
-    @brief Set Dirichlet wall BC (potential distribution)
-  */
-  virtual void set_dirichlet_map_bc(const int a_dir, Side::LoHiSide a_side);
-
-  /*!
     @brief Set constant value Neumann wall BC
   */
   virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-    /*!
-    @brief Set constant value Neumann wall BC
-  */
-  virtual void set_neumann_map_bc(const int a_dir, Side::LoHiSide a_side);
 
 #ifdef CH_USE_HDF5
   /*!
@@ -152,7 +142,7 @@ public:
   /*!
     @brief Set wall potential distribution. This is efffective for dirichlet_map only
   */
-  virtual void set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
+  virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
 
   /*!
     @brief Set potential in covered electrode cells

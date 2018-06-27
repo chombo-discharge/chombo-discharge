@@ -55,7 +55,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_amr(a_amr);                                      // Set amr
   this->set_cell_tagger(a_celltagger);                       // Set cell tagger
   this->set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
-  this->set_wall_func(s_constant_one);                       // Set wall function
+  this->set_poisson_wall_func(s_constant_one);                       // Set wall function
 
   this->set_geom_refinement_depth(-1);                       // Set geometric refinement depths
   this->set_verbosity(1);                                    // Set verbosity
@@ -1598,10 +1598,10 @@ void plasma_engine::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential_set = true;
 }
 
-void plasma_engine::set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("plasma_engine::set_wall_func(dir, side, func)");
+void plasma_engine::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("plasma_engine::set_poisson_wall_func(dir, side, func)");
   if(m_verbosity > 4){
-    pout() << "plasma_engine::set_wall_func(dir, side, func)" << endl;
+    pout() << "plasma_engine::set_poisson_wall_func(dir, side, func)" << endl;
   }
 
   if(a_dir == 0){
@@ -1632,15 +1632,15 @@ void plasma_engine::set_wall_func(const int a_dir, const Side::LoHiSide a_side, 
 #endif
 }
 
-void plasma_engine::set_wall_func(Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("plasma_engine::set_wall_func(func)");
+void plasma_engine::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("plasma_engine::set_poisson_wall_func(func)");
   if(m_verbosity > 4){
-    pout() << "plasma_engine::set_wall_func(func)" << endl;
+    pout() << "plasma_engine::set_poisson_wall_func(func)" << endl;
   }
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      this->set_wall_func(dir, sit(), a_func);
+      this->set_poisson_wall_func(dir, sit(), a_func);
     }
   }
 }
@@ -1744,13 +1744,13 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
   m_timestepper->set_physical_domain(m_physdom);               // Physical domain
   m_timestepper->set_potential(m_potential);                   // Potential
-  m_timestepper->set_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_timestepper->set_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_timestepper->set_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_timestepper->set_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
+  m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
+  m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
+  m_timestepper->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
+  m_timestepper->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
 #if CH_SPACEDIM==3
-  m_timestepper->set_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_timestepper->set_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
+  m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
+  m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
 #endif
   m_timestepper->instantiate_solvers();                   // Instantiate sigma and cdr with initial data (and rte if transient)
   m_timestepper->initial_data();                          // Fill cdr and rte with initial data
@@ -1809,13 +1809,13 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
   m_timestepper->set_physical_domain(m_physdom);         // Physical domain
   m_timestepper->set_potential(m_potential);             // Potential
-  m_timestepper->set_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_timestepper->set_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_timestepper->set_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_timestepper->set_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
+  m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
+  m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
+  m_timestepper->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
+  m_timestepper->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
 #if CH_SPACEDIM==3
-  m_timestepper->set_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_timestepper->set_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
+  m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
+  m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
 #endif
   m_amr->set_num_ghost(m_timestepper->query_ghost());    // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
 

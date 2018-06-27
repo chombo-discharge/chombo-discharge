@@ -180,23 +180,22 @@ void poisson_multifluid_gmg::set_potential(Real (*a_potential)(const Real a_time
   const int izhi = wall_bc::map_bc(2, Side::Hi);
 #endif
 
-  m_map_bcfunc.resize(2*SpaceDim);
-  m_map_bcfunc[ixlo] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_x_lo, origin));
-  m_map_bcfunc[ixhi] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_x_hi, origin));
-  m_map_bcfunc[iylo] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_y_lo, origin));
-  m_map_bcfunc[iyhi] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_y_hi, origin));
+  m_wall_bcfunc.resize(2*SpaceDim);
+  m_wall_bcfunc[ixlo] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_x_lo, origin));
+  m_wall_bcfunc[ixhi] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_x_hi, origin));
+  m_wall_bcfunc[iylo] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_y_lo, origin));
+  m_wall_bcfunc[iyhi] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_y_hi, origin));
 #if CH_SPACEDIM==3
-  m_map_bcfunc[izlo] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_z_lo, origin));
-  m_map_bcfunc[izhi] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_z_hi, origin));
+  m_wall_bcfunc[izlo] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_z_lo, origin));
+  m_wall_bcfunc[izhi] = RefCountedPtr<BaseBCFuncEval>(new potential_func(m_potential, m_wall_func_z_hi, origin));
 #endif
-
 }
 
 void poisson_multifluid_gmg::set_time(const int a_step, const Real a_time, const Real a_dt){
   poisson_solver::set_time(a_step, a_time, a_dt);
   m_bcfunc->set_time(a_time);
-  for (int i = 0; i < m_map_bcfunc.size(); i++){
-    potential_func* func = static_cast<potential_func*> (&(*m_map_bcfunc[i]));
+  for (int i = 0; i < m_wall_bcfunc.size(); i++){
+    potential_func* func = static_cast<potential_func*> (&(*m_wall_bcfunc[i]));
     func->set_time(a_time);
   }
   if(m_use_nwo){
@@ -577,7 +576,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 											s_constant_one,
 											RealVect::Zero));
   bcfact->set_wallbc(m_wallbc);
-  bcfact->set_potentials(m_map_bcfunc);
+  bcfact->set_potentials(m_wall_bcfunc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
   const int bc_order = 2;
@@ -659,7 +658,7 @@ void poisson_multifluid_gmg::setup_nwo_operator_factory(){
 											s_constant_one,
 											RealVect::Zero));
   bcfact->set_wallbc(m_wallbc);
-  bcfact->set_potentials(m_map_bcfunc);
+  bcfact->set_potentials(m_wall_bcfunc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
   m_nwo_opfact = RefCountedPtr<nwomfconductivityopfactory> (new nwomfconductivityopfactory(m_mfis,

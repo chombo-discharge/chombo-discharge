@@ -431,7 +431,7 @@ public:
   /*!
     @brief Set wall function for Poisson equation boundary conditions
   */
-  virtual void set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
+  virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
 
   /*!
     @brief RTE advance using data existing in other solvers

@@ -273,7 +273,7 @@ protected:
   /*!
     @brief Mapped potential functions
   */
-  Vector<RefCountedPtr<BaseBCFuncEval> > m_map_bcfunc;
+  Vector<RefCountedPtr<BaseBCFuncEval> > m_wall_bcfunc;
 
   /*!
     @brief Set up the geometric multigrid solver 
