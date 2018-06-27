@@ -136,6 +136,11 @@ protected:
   amrmg::which_mg m_gmg_type;
 
   /*!
+    @brief Returns one. Used for mapping boundary conditions
+  */
+  static Real s_constant_one(const RealVect a_pos);
+
+  /*!
     @brief Needs setup
   */
   bool m_needs_setup;
@@ -266,7 +271,7 @@ protected:
   RefCountedPtr<potential_func> m_bcfunc;
 
   /*!
-    @brief Mapped potentials 
+    @brief Mapped potential functions
   */
   Vector<RefCountedPtr<BaseBCFuncEval> > m_map_bcfunc;
 

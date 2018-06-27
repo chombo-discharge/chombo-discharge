@@ -134,8 +134,6 @@ public:
   */
   virtual void set_memory_report_mode(const memory_report_mode::which_mode a_memory_mode);
 
-  
-
   /*!
     @brief Set output directory
   */
@@ -150,6 +148,16 @@ public:
     @brief Set potential function
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
+
+  /*!
+    @brief Set wall potential distribution on domain faces
+  */
+  virtual void set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
+
+  /*!
+    @brief Set wall function
+  */
+  virtual void set_wall_func(Real (*a_func)(const RealVect a_pos));
   
   /*!
     @brief Set the regrid interval
@@ -237,6 +245,11 @@ protected:
     @brief Constructor
   */
   plasma_engine();
+
+  /*!
+    @brief Default function that is passed to mapped boundary conditions
+  */
+  static Real s_constant_one(const RealVect a_pos);
 
   /*!
     @brief Index space
@@ -412,6 +425,38 @@ protected:
     @brief Potential
   */
   Real (*m_potential)(const Real a_time);
+
+  /*!
+    @brief Function pointer for Poisson BC on domain walls
+  */
+  Real (*m_wall_func_x_lo)(const RealVect a_pos);
+
+    /*!
+    @brief Function pointer for Poisson BC on domain walls
+  */
+  Real (*m_wall_func_x_hi)(const RealVect a_pos);
+
+    /*!
+    @brief Function pointer for Poisson BC on domain walls
+  */
+  Real (*m_wall_func_y_lo)(const RealVect a_pos);
+
+  /*!
+    @brief Function pointer for Poisson BC on domain walls
+  */
+  Real (*m_wall_func_y_hi)(const RealVect a_pos);
+
+#if CH_SPACEDIM==3
+  /*!
+    @brief Function pointer for Poisson BC on domain walls
+  */
+  Real (*m_wall_func_z_lo)(const RealVect a_pos);
+
+  /*!
+    @brief Function pointer for Poisson BC on domain walls
+  */
+  Real (*m_wall_func_z_hi)(const RealVect a_pos);
+#endif
 
   /*!
     @brief Simulation start time

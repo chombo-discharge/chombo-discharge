@@ -7,14 +7,12 @@
 
 #include "potential_func.H"
 
-potential_func::potential_func(Real (*a_potential)(const Real a_time)){
+potential_func::potential_func(Real (*a_potential)(const Real a_time),
+			       Real (*a_func)(const RealVect a_pos),
+			       const RealVect a_origin){
   m_potential = a_potential;
-  m_func = NULL;
-}
-
-
-potential_func::potential_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos)){
-  m_potential = a_potential;
+  m_func      = a_func;
+  m_origin    = a_origin;
 }
 
 potential_func::~potential_func(){
@@ -26,12 +24,8 @@ void potential_func::set_time(const Real a_time){
 }
 
 Real potential_func::value(const RealVect& a_point, const int& a_comp) const {
-  if(m_func == NULL){
-    return m_potential(m_time);
-  }
-  else {
-    return m_func(a_point)*m_potential(m_time);
-  }
+  // m_func wants physical coordinates but a_point is the computational coordinate
+  return m_func(a_point + m_origin)*m_potential(m_time);
 }
 
 Real potential_func::derivative(const RealVect& a_point, const int& a_comp, const int& a_dir) const {

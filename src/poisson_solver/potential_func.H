@@ -18,14 +18,9 @@ class potential_func : public BaseBCFuncEval {
 public:
 
   /*!
-    @brief Old constructor
-  */
-  potential_func(Real (*a_potential)(const Real a_time));
-
-  /*!
     @brief New constructor
   */
-  potential_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos));
+  potential_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos), const RealVect a_origin);
 
   /*!
     @brief Destructor
@@ -63,6 +58,11 @@ protected:
     @brief Time
   */
   Real m_time;
+
+  /*!
+    @brief Physical origin (the value function is called with computational coordinates)
+  */
+  RealVect m_origin;
 };
 
 #endif

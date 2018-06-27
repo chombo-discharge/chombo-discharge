@@ -1443,6 +1443,40 @@ void time_stepper::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential     = a_potential;
 }
 
+void time_stepper::set_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("time_stepper::set_wall_func(dir, side, func)");
+  if(m_verbosity > 4){
+    pout() << "time_stepper::set_wall_func(dir, side, func)" << endl;
+  }
+
+  if(a_dir == 0){
+    if(a_side == Side::Lo){
+      m_wall_func_x_lo = a_func;
+    }
+    else if(a_side == Side::Hi){
+      m_wall_func_x_hi = a_func;
+    }
+  }
+  else if(a_dir == 1){
+    if(a_side == Side::Lo){
+      m_wall_func_y_lo = a_func;
+    }
+    else if(a_side == Side::Hi){
+      m_wall_func_y_hi = a_func;
+    }
+  }
+#if CH_SPACEDIM==3
+  else if(a_dir == 2){
+    if(a_side == Side::Lo){
+      m_wall_func_z_lo = a_func;
+    }
+    else if(a_side == Side::Hi){
+      m_wall_func_z_hi = a_func;
+    }
+  }
+#endif
+}
+
 void time_stepper::set_verbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 
@@ -1585,7 +1619,16 @@ void time_stepper::setup_poisson(){
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
   m_poisson->set_physical_domain(m_physdom);
-  m_poisson->set_potential(m_potential);
+
+  m_poisson->set_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
+  m_poisson->set_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
+  m_poisson->set_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
+  m_poisson->set_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
+#if CH_SPACEDIM==3
+  m_poisson->set_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
+  m_poisson->set_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
+#endif
+  m_poisson->set_potential(m_potential); // Needs to happen AFTER set_wall_func
 
   m_poisson->sanity_check();
   m_poisson->allocate_internals();
