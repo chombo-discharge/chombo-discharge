@@ -1,6 +1,6 @@
 *.ex
 *.hdf5
-*.png
+/doc/html/**
 *.pyc
 **/app_builder/*.pyc
 /o
@@ -15,6 +15,5 @@
 **/d/**
 **/*.a
 **/*.o
-**/Chombo-3.2/lib/doc/doxygen/html/**
 pout.*
 time.table.*
