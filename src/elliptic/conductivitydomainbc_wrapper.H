@@ -42,6 +42,11 @@ public:
   virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
 
   /*!
+    @brief Set the potential functions
+  */
+  virtual void set_neumann(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_neumann_bc);
+
+  /*!
     @brief Set bc types. This should come through the factory. 
   */
   virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
