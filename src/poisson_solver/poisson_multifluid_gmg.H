@@ -11,7 +11,7 @@
 #include "poisson_solver.H"
 #include "mfconductivityopfactory.H"
 #include "nwomfconductivityopfactory.H"
-#include "potential_func.H"
+#include "dirichlet_func.H"
 
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
@@ -268,7 +268,7 @@ protected:
   /*!
     @brief Potential function
   */
-  RefCountedPtr<potential_func> m_bcfunc;
+  RefCountedPtr<dirichlet_func> m_bcfunc;
 
   /*!
     @brief Mapped potential functions

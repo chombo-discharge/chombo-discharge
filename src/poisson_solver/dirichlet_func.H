@@ -1,31 +1,31 @@
 /*!
-  @file    potential_func.H
+  @file    dirichlet_func.H
   @brief   Declaration of a potential function class 
   @details This is the class that poisson_multifluid_gmg uses to pass boundary conditions to AMRMultiGrid
   @author  Robert Marskar
   @date    June 2018
 */
 
-#ifndef _POTENTIAL_FUNC_
-#define _POTENTIAL_FUNC_
+#ifndef _DIRICHLET_FUNC_
+#define _DIRICHLET_FUNC_
 
 #include <BaseBCFuncEval.H>
 
 /*!
   @brief Class for passing time and space dependent boundary conditions into the GMG boundary condition classes. 
 */
-class potential_func : public BaseBCFuncEval {
+class dirichlet_func : public BaseBCFuncEval {
 public:
 
   /*!
     @brief New constructor
   */
-  potential_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos), const RealVect a_origin);
+  dirichlet_func(Real (*a_potential)(const Real a_time), Real (*a_func)(const RealVect a_pos), const RealVect a_origin);
 
   /*!
     @brief Destructor
   */
-  virtual ~potential_func();
+  virtual ~dirichlet_func();
 
   /*!
     @brief Update the time
