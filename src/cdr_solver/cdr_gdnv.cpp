@@ -164,35 +164,37 @@ void cdr_gdnv::allocate_internals(){
     this->setup_gmg();
   }
 
-  const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->get_eblg(m_phase);
-  const Vector<DisjointBoxLayout>& grids           = m_amr->get_grids();
-  const Vector<int>& ref_ratios                    = m_amr->get_ref_rat();
-  const Vector<Real>& dx                           = m_amr->get_dx();
-  const int finest_level                           = m_amr->get_finest_level();
-  const bool ebcf                                  = m_amr->get_ebcf();
-  m_level_advect.resize(1 + finest_level);
+  if(m_mobile){
+    const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->get_eblg(m_phase);
+    const Vector<DisjointBoxLayout>& grids           = m_amr->get_grids();
+    const Vector<int>& ref_ratios                    = m_amr->get_ref_rat();
+    const Vector<Real>& dx                           = m_amr->get_dx();
+    const int finest_level                           = m_amr->get_finest_level();
+    const bool ebcf                                  = m_amr->get_ebcf();
+    m_level_advect.resize(1 + finest_level);
   
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (int lvl = 0; lvl <= finest_level; lvl++){
 
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < finest_level;
 
-    int ref_rat = 1;
-    EBLevelGrid eblg_coar;
-    if(has_coar){
-      eblg_coar = *eblgs[lvl-1];
-      ref_rat   = ref_ratios[lvl-1];
-    }
+      int ref_rat = 1;
+      EBLevelGrid eblg_coar;
+      if(has_coar){
+	eblg_coar = *eblgs[lvl-1];
+	ref_rat   = ref_ratios[lvl-1];
+      }
     
-    m_level_advect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator> (new EBAdvectLevelIntegrator(*eblgs[lvl],
-											      eblg_coar,
-											      ref_rat,
-											      dx[lvl]*RealVect::Unit,
-											      has_coar,
-											      has_fine,
-											      ebcf,
-											      m_slopelim,
-											      m_ebis));
+      m_level_advect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator> (new EBAdvectLevelIntegrator(*eblgs[lvl],
+												eblg_coar,
+												ref_rat,
+												dx[lvl]*RealVect::Unit,
+												has_coar,
+												has_fine,
+												ebcf,
+												m_slopelim,
+												m_ebis));
+    }
   }
 }
 
@@ -370,7 +372,6 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   }
 
   // Extrapolate phi and vel to covered faces first
-
   if(m_which_divFnc == 1){
     this->extrapolate_vel_to_covered_faces();
   }

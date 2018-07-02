@@ -477,6 +477,7 @@ morrow_lowke::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
   m_diffusive = true;
+  m_mobile    = true;
   m_unit      = "m-3";
 
   m_uniform_density = 1.E10;
@@ -526,6 +527,7 @@ morrow_lowke::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
   m_diffusive = false;
+  m_mobile    = true;
   m_unit      = "m-3";
 
   m_uniform_density = 1.E10;
@@ -544,6 +546,15 @@ morrow_lowke::positive_species::positive_species(){
       Vector<Real> pos(SpaceDim);
       pp.queryarr("seed_position", pos, 0, SpaceDim);
       m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
+    }
+
+    // Turn off ion mobility
+    std::string str = "false";
+    if(pp.contains("turn_off_ion_mobility")){
+      pp.get("turn_off_ion_mobility", str);
+      if(str == "true"){
+	m_mobile = false;
+      }
     }
   }
 }
@@ -567,7 +578,21 @@ morrow_lowke::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
   m_diffusive = false;
+  m_mobile    = true;
   m_unit      = "m-3";
+
+  { // Get parameter from input script
+    ParmParse pp("morrow_lowke");
+    
+    // Turn off ion mobility
+    std::string str = "false";
+    if(pp.contains("turn_off_ion_mobility")){
+      pp.get("turn_off_ion_mobility", str);
+      if(str == "true"){
+	m_mobile = false;
+      }
+    }
+  }
 }
 
 morrow_lowke::negative_species::~negative_species(){

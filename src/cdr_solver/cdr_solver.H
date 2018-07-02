@@ -243,6 +243,11 @@ public:
     @brief Diffusive or not
   */
   virtual bool is_diffusive();
+
+  /*!
+    @brief Mobile or not
+  */
+  virtual bool is_mobile();
   
   /*!
     @brief Get the internal state
@@ -407,11 +412,14 @@ protected:
   bool m_diffusive;
 
   /*!
+    @brief Also solve for advection/convection
+  */
+  bool m_mobile;
+
+  /*!
     @brief Use mass-weighted redistribution
   */
   bool m_mass_redist;
-
-
 
   /*!
     @brief Average cell-centered velocities to face centers

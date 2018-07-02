@@ -23,7 +23,7 @@ public:
   /*!
     @brief Full constructor
   */
-  species(const std::string a_name, const int a_charge, const bool a_diffusive);
+  species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
 
   /*!
     @brief Destructor
@@ -58,6 +58,11 @@ public:
   virtual bool is_diffusive() const;
 
   /*!
+    @brief Mobile species or not
+  */
+  virtual bool is_mobile() const;
+
+  /*!
     @brief Flag species for output to the plasma solver
   */
   virtual bool force_output() const;
@@ -83,6 +88,11 @@ protected:
     @brief Diffusive species or not
   */
   bool m_diffusive;
+
+  /*!
+    @brief Mobile species or not
+  */
+  bool m_mobile;
 
   /*!
     @brief Force output of species. This is relevant for plasma_engine only. 

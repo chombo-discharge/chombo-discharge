@@ -1115,6 +1115,7 @@ void cdr_solver::set_species(const RefCountedPtr<species> a_species){
   m_species   = a_species;
   m_name      = m_species->get_name();
   m_diffusive = m_species->is_diffusive();
+  m_mobile    = m_species->is_mobile();
 }
 
 void cdr_solver::set_source(const EBAMRCellData& a_source){
@@ -1522,6 +1523,15 @@ bool cdr_solver::is_diffusive(){
   }
   
   return m_diffusive;
+}
+
+bool cdr_solver::is_mobile(){
+  CH_TIME("cdr_solver::is_mobile");
+  if(m_verbosity > 5){
+    pout() << m_name + "::is_mobile" << endl;
+  }
+  
+  return m_mobile;
 }
 
 EBAMRCellData& cdr_solver::get_state(){

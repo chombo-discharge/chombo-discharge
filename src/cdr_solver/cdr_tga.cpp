@@ -408,8 +408,10 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
   }
 
   // Compute advective term
-  this->compute_divF(advective_term, a_state, 0.0, true);
-  data_ops::incr(a_divJ, advective_term, 1.0);
+  if(this->is_mobile()){
+    this->compute_divF(advective_term, a_state, 0.0, true);
+    data_ops::incr(a_divJ, advective_term, 1.0);
+  }
 
   // Add in diffusion term
   if(this->is_diffusive()){
@@ -423,7 +425,7 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
-
+  
   const int comp       = 0;
   const int ncomp      = 1;
   const int redist_rad = m_amr->get_redist_rad();

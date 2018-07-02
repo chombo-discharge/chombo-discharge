@@ -12,12 +12,14 @@ species::species(){
   m_unit         = "default_unit";
   m_charge       = 0;
   m_diffusive    = true;
+  m_mobile       = true;
   m_force_output = false;
 }
 
-species::species(const std::string a_name, const int a_charge, const bool a_diffusive){
+species::species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive){
   m_name      = a_name;
   m_charge    = a_charge;
+  m_mobile    = a_mobile;
   m_diffusive = a_diffusive;
 }
 
@@ -43,6 +45,10 @@ int species::get_charge() const {
 
 bool species::is_diffusive() const {
   return m_diffusive;
+}
+
+bool species::is_mobile() const {
+  return m_mobile;
 }
 
 bool species::force_output() const {
