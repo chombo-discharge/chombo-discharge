@@ -1,7 +1,0 @@
-<map id="src/plasma_solver/cell_tagger.H" name="src/plasma_solver/cell_tagger.H">
-<area shape="rect" id="node2" href="$full__tagger_8H.html" title="Class for tagging cells across an AMR hierarchy. " alt="" coords="5,95,155,136"/>
-<area shape="rect" id="node3" href="$plasma__engine_8H.html" title="Declaration of the main class for time/space advancement of streamer equations. " alt="" coords="179,95,354,136"/>
-<area shape="rect" id="node4" href="$ultralw__tagger_8H.html" title="Declaration of a memory&#45;lightweight tagging class. " alt="" coords="379,95,549,136"/>
-<area shape="rect" id="node5" href="$field__tagger_8H.html" title="Implementation of cell_tagger that tags cells based on the gradient of the electric field..." alt="" coords="320,184,440,225"/>
-<area shape="rect" id="node6" href="$ml__tagger_8H.html" title="Implementation of cell_tagger that tags cells based on the gradient of the electric field..." alt="" coords="465,191,631,218"/>
-</map>

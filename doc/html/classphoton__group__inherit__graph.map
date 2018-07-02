@@ -1,8 +1,0 @@
-<map id="photon_group" name="photon_group">
-<area shape="rect" id="node2" href="$classair__bolsig_1_1photon__one.html" title="Implementation of a single photon transition. " alt="" coords="168,5,320,32"/>
-<area shape="rect" id="node3" href="$classair__bolsig_1_1photon__three.html" title="Implementation of a single photon transition. " alt="" coords="182,57,306,98"/>
-<area shape="rect" id="node4" href="$classair__bolsig_1_1photon__two.html" title="Implementation of a single photon transition. " alt="" coords="168,123,320,149"/>
-<area shape="rect" id="node5" href="$classmorrow__lowke_1_1photon__one.html" title="Implementation of a single photon transition. " alt="" coords="153,173,335,200"/>
-<area shape="rect" id="node6" href="$classmorrow__lowke_1_1photon__three.html" title="Implementation of a single photon transition. " alt="" coords="167,225,321,266"/>
-<area shape="rect" id="node7" href="$classmorrow__lowke_1_1photon__two.html" title="Implementation of a single photon transition. " alt="" coords="153,291,335,317"/>
-</map>

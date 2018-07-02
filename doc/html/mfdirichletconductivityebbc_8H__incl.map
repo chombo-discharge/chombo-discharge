@@ -1,9 +1,0 @@
-<map id="src/elliptic/mfdirichletconductivityebbc.H" name="src/elliptic/mfdirichletconductivityebbc.H">
-<area shape="rect" id="node2" href="$MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids. " alt="" coords="752,229,863,256"/>
-<area shape="rect" id="node3" href="$mfis_8H.html" title="Multi&#45;fluid index space. " alt="" coords="805,304,866,331"/>
-<area shape="rect" id="node26" href="$jump__bc_8H.html" title="Declaration of a multifluid boundary condition class for the poisson equation. " alt="" coords="889,80,974,107"/>
-<area shape="rect" id="node4" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="489,379,616,405"/>
-<area shape="rect" id="node13" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="529,453,590,480"/>
-<area shape="rect" id="node17" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="1115,453,1239,480"/>
-<area shape="rect" id="node27" href="$MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases..." alt="" coords="1011,155,1143,181"/>
-</map>

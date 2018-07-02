@@ -1,5 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classpoisson__solver.html" title="Abstract Poisson solver class. Boundary conditions are passed through this class. ..." alt="" coords="5,31,115,57"/>
-<area shape="rect" id="node2" href="$classpoisson__multifluid__gmg.html" title="Implementation of poisson_solver which uses a two&#45;phase geometric multigrid solver. " alt="" coords="163,5,321,32"/>
-<area shape="rect" id="node3" href="$classpoisson__staircase__gmg.html" title="Abstract Poisson solver class. Just an interface, so pretty lightweight stuff. " alt="" coords="163,56,321,83"/>
-</map>

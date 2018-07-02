@@ -1,7 +1,0 @@
-<map id="src/global/MFInterfaceFAB.H" name="src/global/MFInterfaceFAB.H">
-<area shape="rect" id="node2" href="$mfis_8H.html" title="Multi&#45;fluid index space. " alt="" coords="593,155,654,181"/>
-<area shape="rect" id="node24" href="$MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids. " alt="" coords="568,80,679,107"/>
-<area shape="rect" id="node3" href="$type__definitions_8H.html" title="Typedefs, useful shortcuts. " alt="" coords="972,229,1099,256"/>
-<area shape="rect" id="node12" href="$tags_8H.html" title="Declaration of a class that holds tags that can be communicated (unlike IntVectSet) ..." alt="" coords="1181,304,1242,331"/>
-<area shape="rect" id="node16" href="$MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB. " alt="" coords="220,304,344,331"/>
-</map>

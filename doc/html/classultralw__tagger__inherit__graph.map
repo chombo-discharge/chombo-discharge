@@ -1,5 +1,0 @@
-<map id="ultralw_tagger" name="ultralw_tagger">
-<area shape="rect" id="node3" href="$classfield__tagger.html" title="Class that tags cells based on the relative curvature of the electric field. " alt="" coords="5,155,95,181"/>
-<area shape="rect" id="node4" href="$classml__tagger.html" title="Class that tags cells based on the relative curvature of the electric field and on the impact ionizat..." alt="" coords="119,155,197,181"/>
-<area shape="rect" id="node2" href="$classcell__tagger.html" title="Abstract class for tagging cells across an AMR hierarchy. " alt="" coords="61,5,146,32"/>
-</map>

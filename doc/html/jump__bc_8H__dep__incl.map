@@ -1,8 +1,0 @@
-<map id="src/elliptic/jump_bc.H" name="src/elliptic/jump_bc.H">
-<area shape="rect" id="node2" href="$mfconductivityop_8H.html" title="Declaration of multifluid helmholtz operator for embedment in AMRMultiGrid. " alt="" coords="25,155,224,181"/>
-<area shape="rect" id="node5" href="$mfdirichletconductivityebbc_8H.html" title="Declaration of a boundary condition class for doing convential Dirichlet BCs as well as multifluid ma..." alt="" coords="133,80,391,107"/>
-<area shape="rect" id="node6" href="$nwomfconductivityop_8H.html" title="Declaration of multifluid helmholtz operator for embedment in AMRMultiGrid. " alt="" coords="288,155,511,181"/>
-<area shape="rect" id="node3" href="$mfconductivityopfactory_8H.html" title="Factory class for creating multifluid helmholtz operators. " alt="" coords="5,229,244,256"/>
-<area shape="rect" id="node4" href="$poisson__multifluid__gmg_8H.html" title="Geometric multigrid multifluid poisson solver. " alt="" coords="174,304,350,345"/>
-<area shape="rect" id="node7" href="$nwomfconductivityopfactory_8H.html" title="Factory class for creating multifluid helmholtz operators. " alt="" coords="268,229,531,256"/>
-</map>

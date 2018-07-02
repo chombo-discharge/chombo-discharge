@@ -1,9 +1,0 @@
-<map id="src/global/real_box.H" name="src/global/real_box.H">
-<area shape="rect" id="node2" href="$cell__tagger_8H.html" title="Class for tagging cells across an AMR hierarchy. " alt="" coords="193,80,345,121"/>
-<area shape="rect" id="node8" href="$geo__coarsener_8H.html" title="Declaration of a utility class for removing geometrically tagged cells. " alt="" coords="379,80,533,121"/>
-<area shape="rect" id="node3" href="$full__tagger_8H.html" title="Class for tagging cells across an AMR hierarchy. " alt="" coords="5,169,155,211"/>
-<area shape="rect" id="node4" href="$plasma__engine_8H.html" title="Declaration of the main class for time/space advancement of streamer equations. " alt="" coords="374,169,549,211"/>
-<area shape="rect" id="node5" href="$ultralw__tagger_8H.html" title="Declaration of a memory&#45;lightweight tagging class. " alt="" coords="179,169,349,211"/>
-<area shape="rect" id="node6" href="$field__tagger_8H.html" title="Implementation of cell_tagger that tags cells based on the gradient of the electric field..." alt="" coords="120,259,240,300"/>
-<area shape="rect" id="node7" href="$ml__tagger_8H.html" title="Implementation of cell_tagger that tags cells based on the gradient of the electric field..." alt="" coords="265,266,431,293"/>
-</map>

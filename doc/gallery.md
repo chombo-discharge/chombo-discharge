@@ -13,6 +13,16 @@
 </tr>
 
 <tr>
+<td> \image html spacecharge_black.png Space charge around a branching positive streamer
+<td> \image html mechshaft_charge_red_black.png Positive coronal and dielectric space charge layers
+</tr>
+
+<tr>
+<td> \image html field.png Field stress on a dielectric slab after it is hit by a positive streamer
+<td> \image html surface_charge.png Surface charge deposted on a dielectric slab when it is hit by a streamer
+</tr>
+
+<tr>
 <td> \image html rod_sphere500.png Two-dimensional surface streamers around droplets
 <td> \image html complex_patches.png Two-dimensional patch-based mesh generation around complex surfaces
 </tr>

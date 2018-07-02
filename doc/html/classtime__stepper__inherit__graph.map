@@ -1,9 +1,0 @@
-<map id="time_stepper" name="time_stepper">
-<area shape="rect" id="node2" href="$classeuler__f.html" title="Class for evolving plasma equations with a second order Runge&#45;Kutta method. " alt="" coords="199,5,260,32"/>
-<area shape="rect" id="node3" href="$classimplicit__trapezoidal.html" title="Implicit solver class for advancing the plasma equations with the implicit trapezoidal rule for the c..." alt="" coords="163,56,296,83"/>
-<area shape="rect" id="node4" href="$classrk2.html" title="Class for evolving plasma equations with a second order Runge&#45;Kutta method. " alt="" coords="209,107,249,133"/>
-<area shape="rect" id="node5" href="$classrk3.html" title="Class for evolving plasma equations with a second order Runge&#45;Kutta method. " alt="" coords="209,157,249,184"/>
-<area shape="rect" id="node6" href="$classsplitstep__euler__f.html" title="Class for evolving plasma equations with a second order Runge&#45;Kutta method. " alt="" coords="171,208,288,235"/>
-<area shape="rect" id="node7" href="$classsplitstep__rk2__tga__trapz.html" title="Class for evolvinv plasma equations with a split&#45;step RK2/TGA/Trapezoidal method. ..." alt="" coords="151,259,308,285"/>
-<area shape="rect" id="node8" href="$classsplitstep__tga.html" title="Class for evolving plasma equations with a split&#45;step RK2/TGA method. " alt="" coords="181,309,277,336"/>
-</map>

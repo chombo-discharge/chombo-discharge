@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classcell__tagger.html" title="Abstract class for tagging cells across an AMR hierarchy. " alt="" coords="5,31,91,57"/>
-<area shape="rect" id="node2" href="$classfull__tagger.html" title="Abstract class for tagging cells across an AMR hierarchy. " alt="" coords="149,5,231,32"/>
-<area shape="rect" id="node3" href="$classultralw__tagger.html" title="Lightweight tagging class. Only tags cells based on cdr densities and field magnitude. " alt="" coords="139,56,241,83"/>
-<area shape="rect" id="node4" href="$classfield__tagger.html" title="Class that tags cells based on the relative curvature of the electric field. " alt="" coords="289,31,379,57"/>
-<area shape="rect" id="node5" href="$classml__tagger.html" title="Class that tags cells based on the relative curvature of the electric field and on the impact ionizat..." alt="" coords="295,81,373,108"/>
-</map>

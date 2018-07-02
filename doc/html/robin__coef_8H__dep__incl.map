@@ -1,8 +1,0 @@
-<map id="src/elliptic/robin_coef.H" name="src/elliptic/robin_coef.H">
-<area shape="rect" id="node2" href="$robinconductivitydomainbc_8H.html" title="Declaration of a Robin boundary condition class for domain faces. " alt="" coords="21,95,275,121"/>
-<area shape="rect" id="node3" href="$robinconductivitydomainbcfactory_8H.html" title="Declaration of a factory class for Robin boundary conditions on domain faces. " alt="" coords="5,177,299,203"/>
-<area shape="rect" id="node5" href="$robinconductivityebbc_8H.html" title="Declaration of a Robin type EB boundary condition class for ebconductivityop. " alt="" coords="349,95,574,121"/>
-<area shape="rect" id="node7" href="$larsen__coefs_8H.html" title="Declaration of a class that holds coefficients for photon outflow boundary conditions. " alt="" coords="613,169,753,211"/>
-<area shape="rect" id="node4" href="$eddington__sp1_8H.html" title="Declaration of a first order Eddington solver. " alt="" coords="375,259,537,300"/>
-<area shape="rect" id="node6" href="$robinconductivityebbcfactory_8H.html" title="src/elliptic/robinconductivityebbcfactory.H" alt="" coords="323,177,589,203"/>
-</map>

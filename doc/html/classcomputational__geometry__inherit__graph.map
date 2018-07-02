@@ -1,8 +1,0 @@
-<map id="computational_geometry" name="computational_geometry">
-<area shape="rect" id="node2" href="$classdouble__rod.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="5,80,91,107"/>
-<area shape="rect" id="node3" href="$classmechanical__shaft.html" title="Mechanical shaft class. " alt="" coords="115,80,239,107"/>
-<area shape="rect" id="node4" href="$classrod__plane.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="263,80,342,107"/>
-<area shape="rect" id="node5" href="$classrod__slab.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="366,80,437,107"/>
-<area shape="rect" id="node6" href="$classrod__sphere.html" title="This is a class that defines one electrode sphere and a dielectric slab. Both can be turned off throu..." alt="" coords="461,80,547,107"/>
-<area shape="rect" id="node7" href="$classwire__wire__geometry.html" title="This is a class that defines a wire&#45;wire geometry. " alt="" coords="572,80,711,107"/>
-</map>

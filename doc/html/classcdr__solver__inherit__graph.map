@@ -1,6 +1,0 @@
-<map id="cdr_solver" name="cdr_solver">
-<area shape="rect" id="node2" href="$classcdr__sg.html" title="cdr_sg" alt="" coords="5,80,67,107"/>
-<area shape="rect" id="node3" href="$classcdr__tga.html" title="Extension class of cdr_solver that uses ebconductivityop for diffusion part. This class also has a mu..." alt="" coords="91,80,157,107"/>
-<area shape="rect" id="node4" href="$classcdr__gdnv.html" title="Godunov implementation for convection&#45;diffusion&#45;reaction equations. " alt="" coords="36,155,111,181"/>
-<area shape="rect" id="node5" href="$classcdr__muscl.html" title="Class that uses MUSCL discretization for the advective term in the cdr equation. " alt="" coords="135,155,217,181"/>
-</map>

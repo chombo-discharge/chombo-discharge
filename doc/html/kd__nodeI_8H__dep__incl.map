@@ -1,8 +1,0 @@
-<map id="src/geometry/kd_nodeI.H" name="src/geometry/kd_nodeI.H">
-<area shape="rect" id="node2" href="$kd__node_8H.html" title="Declaration of a kd&#45;node for space partioning. " alt="" coords="289,80,455,107"/>
-<area shape="rect" id="node3" href="$kd__tree_8H.html" title="Declaration of a kd&#45;tree space partitioning class for fast polygon search. " alt="" coords="293,155,451,181"/>
-<area shape="rect" id="node4" href="$dcel__mesh_8H.html" title="Declaration of a dcel_mesh class for handling surface tesselations. " alt="" coords="88,229,267,256"/>
-<area shape="rect" id="node7" href="$kd__treeI_8H.html" title="Implementation of kd_tree.H. " alt="" coords="291,229,453,256"/>
-<area shape="rect" id="node5" href="$dcel__if_8H.html" title="Declaration of an implicit&#45;function class that gets its value function from a DCEL surface tesselatio..." alt="" coords="5,304,160,331"/>
-<area shape="rect" id="node6" href="$ply__reader_8H.html" title="Static class for reading .ply&#45;files and putting them in the half&#45;edge mesh data structure. " alt="" coords="184,304,360,331"/>
-</map>

@@ -1,6 +1,9 @@
 *.ex
 *.hdf5
+/doc/html/*.html
 /doc/html/**
+/doc/html/*
+**/doc/html/**
 *.pyc
 **/app_builder/*.pyc
 /o
