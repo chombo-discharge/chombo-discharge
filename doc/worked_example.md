@@ -223,7 +223,7 @@ The first step to running new mini-apps is usually to inspect the geometry and i
 where the option plasma_engine.geometry_only overrides whatever this option is set to in the input script. When you run the application, it will write a file called simulation.geometry.2d.hdf5. Note that you can call your simulation whatever you want, and have the data dump to a folder of your choice. This is controlled through plasma_engine.output_names and plasma_engine.output_directory. Modify them as you see fit. In addition, you will get a number of pout.# files. These files are the output of every process through which you can monitor mesh size, resolution, time step size, elapsed time and so on. Let us investigate the geometry file. Open the file in VisIt and plot the Filled Boundary and Mesh. You should see something like this (exact plots vary with VisIt versions):
 
 
-<img src="./simulation_geometry.png" alt="Initial geometry and mesh" style="width: 1024px;"/>
+\image html simulation_geometry.png Initial geometry and mesh
 
 That is our initial mesh and geometry, which looks what we want. Next, we will perform some screening simulations of this geometry. The current input script uses a resolution of about 2 microns and a CFL number of 0.1. Before we look for grid convergence, we attempt to resolve the simulation using larger spatial and temporal steps, at least for a short time. 
 
@@ -234,7 +234,7 @@ The option amr.max_sim_depth=3 restricts to a maximum number of 3 AMR levels; th
 
 When the program has finished running, it will have executed 86 time steps. You will find plotfiles and checkpoint files in your specified directory. In our input script, we've specified that these should be written every 10 timesteps. This is controlled through plasma_engine.plot_interval and plasma_engine.checkpoint_interval. The first and final timesteps are always written, as long as plasma_engine.plot_interval > 0. Note that there is also an option plasma_engine.regrid_interval which specifies how often one should regrid. After 86 time steps, we examine the plasma (electron density):
 
-<img src="./plasma_density_500ps.png" alt="plasma density" style="width: 1024px;"/>
+\image html plasma_density_500ps.png Plasma density
 
 Here, we've plotted the data on a logarithmic scale. Realizing that we might need better resolution when the streamer starts propagating, we will simulate the next 0.5ns by using a finer mesh with 2 micron resolution and a CFL number of 0.4. We will restart from where we left off, time step 86:
 

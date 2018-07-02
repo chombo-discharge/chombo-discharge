@@ -1,21 +1,21 @@
 Program description {#program-structure}
 ==============================
 
-chombo-streamer is a program for performing Cartesian 2D and 3D transient simulations of fluid plasmas in complex geometries. The code is flexible with regards to geometries and plasma kinetics, and is thus applicable to a comparatively broad range of research fields. chombo-streamer is built on top of the Chombo platform, and therefore has AMR capabilities. However, subcycling in time is not supported. Because chombo-streamer is a large source code, most of the code documentation resides in the source code itself, which cannot be discussed in full. Instead, we provide an outline to the structure of chombo-streamer below. In broad strokes, we require that the user
+PlasmaC is a program for performing Cartesian 2D and 3D transient simulations of fluid plasmas in complex geometries. The code is flexible with regards to geometries and plasma kinetics, and is thus applicable to a comparatively broad range of research fields. PlasmaC is built on top of the Chombo platform, and therefore has AMR capabilities. However, subcycling in time is not supported. Because PlasmaC is a large source code, most of the code documentation resides in the source code itself, which cannot be discussed in full. Instead, we provide an outline to the structure of PlasmaC below. In broad strokes, we require that the user
 
 * Builds an executable
 * Provides options to this executable when it is run. 
 
-We do have a @ref worked-example, but we strongly recommend that you finish reading this page before working your way through that example. 
+We do have a [worked example](@ref worked-example), but we strongly recommend that you finish reading this page before working your way through that example. 
 
-The typical use of chombo-streamer consists of building and running mini-applications (i.e. executables) which obtain simulation options through an input script or the command line. These applications consist of a main file that instantiates various C++ implementations of important base classes, and the must therefore be built by the user. Because the main-file is almost identical across mini-apps, we do have a python script that automates the generation of the main file; the makefile, and a default options file through which the user controls his application. The main file always contains instantiation of the following important classes:
+The typical use of PlasmaC consists of building and running mini-applications (i.e. executables) which obtain simulation options through an input script or the command line. These applications consist of a main file that instantiates various C++ implementations of important base classes, and the must therefore be built by the user. Because the main-files are almost identical across mini-apps, we have a python script that automates the generation of the main file; the makefile, and a default options file through which the user controls his application. The main file always contains instantiation of the following important classes:
 
 * plasma_kinetics An abstract class that defines the overall kinetics; this includes description of source terms, velocities, diffusion coefficients, surface kinetics (e.g. secondary emission) and so on. Currently, we only have kinetic models for \f$\textrm{N}_2-\textrm{O}_2\f$ mixtures. 
 * computational_geometry An implementation of the geometry that will be simulated. Various implementation of this class exist, which you may immediately use. Descriptions of new geometries must be done by the user by either implementing a new computational_geometry class, or use the scripted geometry class. 
 * physical_domain The physical domain to be simulated. This is a very lightweight class that only describes the axis-aligned box that you wish to simulate. There is no need to reimplement this class. 
 * time_stepper The temporal integrator; the class includes an implementation of the time stepping scheme. Implementation of new integration schemes is time consuming, and additional implementations of this class is a developer task. Currently, we support some implicit-explicit schemes and Runge-Kutta schemes. Most users will find the second order Runge-Kutta scheme to be sufficient. This class owns all the individual solvers, and has access to amr_mesh.
 * cell_tagger Class that is responsible for refinement and coarsening decision. 
-* amr_mesh The AMR mesh engine. This class includes grid generators, coarsening operators, ghost cell interpolation operators and so on. This class the most important base class, and is responsible for orchestratic all spatial operations.
+* amr_mesh The AMR mesh engine. This class includes grid generators, coarsening operators, ghost cell interpolation operators and so on. This class is one of the most important base class, and is responsible for orchestratic all spatial operations.
 
 The above classes are used to instantiate another class
 

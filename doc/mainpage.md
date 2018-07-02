@@ -4,7 +4,11 @@
 <table bgcolor="#FFFFFF" align="top">
 <tr>
 <td valign="top">
-PlasmaC is a scalable computer code for two- and three-dimensional low-temperature fluid plasmas in complex geometries. The current version of the code solves for coupled systems of Poisson's equation, convection-diffusion-reaction equations, and diffusive radiative transport solvers.
+PlasmaC is a scalable computer code for two- and three-dimensional low-temperature fluid plasmas in complex geometries. We currently support
+
+  * Multi-material Poisson solvers
+  * Diffusive radiate transport
+  * Convection-diffusion reaction systems
 
 PlasmaC is build on top of Chombo, and therefore features
 
@@ -13,15 +17,20 @@ PlasmaC is build on top of Chombo, and therefore features
   * Patch-based adaptive mesh refinement
   * Excellent scalability to hundres of thousands of cores
 
-You can obtain the code from here:
+Please see the [gallery] (@ref gallery) for a selection of results
+
+To get started, go [here](@ref doxy-contents)
+
+You can obtain the PlasmaC from here:
 
       git clone ssh://git@git.code.sintef.no/~robertm/chombo-streamer
+
+If you do not have MFChombo installed, it can be pulled from here:
+
+      git clone ssh://git@git.code.sintef.no/~robertm/mf-chombo
 </td>
 <td valign="top">
-\image html electrons_raytrace.png 
+\image html spacecharge_black.png
+\image html mechshaft_charge_red_white.png
 </td>
 </table>
-
-
-
-
