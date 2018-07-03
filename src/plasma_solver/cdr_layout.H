@@ -183,6 +183,11 @@ public:
   virtual Real compute_Q();
 
   /*!
+    @brief Compute mass for every species
+  */
+  virtual Vector<Real> compute_mass();
+
+  /*!
     @brief Get solvers
   */
   virtual Vector<RefCountedPtr<cdr_solver> >& get_solvers();

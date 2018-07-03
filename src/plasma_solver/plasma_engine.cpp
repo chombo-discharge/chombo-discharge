@@ -19,6 +19,12 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
+#define write_mass 1
+#if write_mass
+#include <iostream>
+#include <fstream>
+#endif
+
 Real plasma_engine::s_constant_one(const RealVect a_pos){
   return 1.0;
 }
@@ -62,6 +68,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_plot_interval(10);                               // Set plot interval
   this->set_checkpoint_interval(10);                         // Set checkpoint interval
   this->set_num_plot_ghost(0);                               // Set number of ghost cells in plots
+  this->set_grow_tags(0);                                    // Grow tagged cells
   this->set_regrid_interval(10);                             // Set regrid interval
   this->set_output_directory("./");                          // Set output directory
   this->set_output_file_names("simulation");                 // Set output file names
@@ -748,7 +755,6 @@ void plasma_engine::get_geom_tags(){
   for (int lvl = 0; lvl < maxdepth; lvl++){
     m_geom_tags[lvl].grow(growth);
   }
-
 }
 
 void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
@@ -1079,6 +1085,7 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   const bool got_new_tags = this->tag_cells(tags, m_tags);         // Tag cells
 
+
   if(!got_new_tags){
     if(a_use_initial_data){
       m_timestepper->initial_data();
@@ -1234,6 +1241,8 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     }
   }
 
+
+
   if(a_max_steps > 0){
     if(!m_restart){
       m_time = a_start_time;
@@ -1252,6 +1261,13 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     }
 
     m_wallclock_start = MPI_Wtime();
+
+#if write_mass
+    ofstream my_file;
+    if(procID() == 0){
+      my_file.open("mass.txt");
+    }
+#endif
     while(m_time < a_end_time && m_step < a_max_steps){
 
       const int max_sim_depth = m_amr->get_max_sim_depth();
@@ -1264,6 +1280,13 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	  }
 	}
       }
+
+#if write_mass
+      const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
+      if(procID() == 0){
+	my_file << m_time << "\t" << masses[0] << endl;
+      }
+#endif
 
       if(!first_step){
 	m_timestepper->compute_dt(m_dt, m_timecode);
@@ -1324,6 +1347,12 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       }
 #endif
     }
+
+#if write_mass
+    if (procID() == 0){
+      my_file.close();
+    }
+#endif
   }
 
   if(m_verbosity > 0){
@@ -1766,7 +1795,9 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     
   }
 
-  m_celltagger->regrid();
+  if(!m_celltagger.isNull()){
+    m_celltagger->regrid();
+  }
   m_timestepper->regrid_internals();
 
   // Fill solvers with important stuff
@@ -2100,6 +2131,20 @@ void plasma_engine::set_init_regrids(const int a_init_regrids){
 
 }
 
+void plasma_engine::set_grow_tags(const int a_grow_tags){
+  CH_TIME("plasma_engine::set_grow_tags");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_grow_tags" << endl;
+  }
+  
+  m_grow_tags = a_grow_tags;
+
+  ParmParse pp("plasma_engine");
+  pp.query("grow_tags", m_grow_tags);
+
+  m_grow_tags = Max(0, m_grow_tags);
+}
+
 void plasma_engine::sanity_check(){
   CH_TIME("plasma_engine::sanity_check");
   if(m_verbosity > 4){
@@ -2282,6 +2327,7 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
 
   // Add geometric tags. 
   for (int lvl = 0; lvl < finest_level; lvl++){
+    a_all_tags[lvl].grow(m_grow_tags);
     a_all_tags[lvl] |= m_geom_tags[lvl];
   }
 

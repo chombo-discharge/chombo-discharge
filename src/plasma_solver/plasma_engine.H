@@ -235,6 +235,11 @@ public:
   virtual void set_init_regrids(const int a_init_regrids);
 
   /*!
+    @brief Set tag growth
+  */
+  virtual void set_grow_tags(const int a_grow_tags);
+
+  /*!
     @brief Sanity check
   */
   virtual void sanity_check();
@@ -405,6 +410,11 @@ protected:
     @brief Restart step
   */
   int m_restart_step;
+
+  /*!
+    @brief Grow tagged cells
+  */
+  int m_grow_tags;
 
   /*!
     @brief Tags

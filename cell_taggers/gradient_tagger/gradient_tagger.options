@@ -1,0 +1,6 @@
+# ====================================================================================================
+# GRADIENT_TAGGER CLASS OPTIONS
+# ====================================================================================================
+gradient_tagger.coarsen_curvature = 0.1
+gradient_tagger.refine_curvature  = 0.2
+gradient_tagger.relative_cutoff   = 1.E-6

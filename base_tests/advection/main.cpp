@@ -3,6 +3,7 @@
 #include "advection_kinetics.H"
 #include "regular_geometry.H"
 #include "rk2.H"
+#include "gradient_tagger.H"
 #include "ParmParse.H"
 
 // This is the potential curve (constant in this case). Modify it if you want to.
@@ -30,7 +31,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new advection_kinetics());
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new regular_geometry());
   RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper> (new rk2());
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
+  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new gradient_tagger());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());

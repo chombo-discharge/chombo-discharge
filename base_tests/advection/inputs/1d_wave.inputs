@@ -13,13 +13,13 @@ physical_domain.hi_corner =  1  1  1    # High corner of problem domain
 # AMR_MESH OPTIONS
 # ====================================================================================================
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-amr.max_amr_depth   = 0           # Maximum amr depth
-amr.max_sim_depth   = -1          # Maximum simulation depth
+amr.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
+amr.max_amr_depth   = 3           # Maximum amr depth
+amr.max_sim_depth   = 3           # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
 amr.irreg_growth    = 2           # How much to grow irregular tagged cells
 amr.buffer_size     = 2           # Number of cells between grid levels
-amr.blocking_factor = 16          # Default blocking factor (16 in 3D)
+amr.blocking_factor = 8           # Default blocking factor (16 in 3D)
 amr.max_box_size    = 16          # Maximum allowed box size
 amr.max_ebis_box    = 32          # Maximum allowed box size
 amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
@@ -36,11 +36,11 @@ amr.ebcf            = false       # Tell amr to ignore EBCF-related code.
 # ====================================================================================================
 # PLASMA_ENGINE OPTIONS
 # ====================================================================================================
-plasma_engine.verbosity                       = 20            # Engine verbosity
+plasma_engine.verbosity                       = 2             # Engine verbosity
 plasma_engine.plot_interval                   = 10            # Plot interval
-plasma_engine.regrid_interval                 = 10            # Regrid interval
+plasma_engine.regrid_interval                 = 2             # Regrid interval
 plasma_engine.checkpoint_interval             = 10            # Checkpoint interval
-plasma_engine.initial_regrids                 = 0             # Number of initial regrids
+plasma_engine.initial_regrids                 = 2             # Number of initial regrids
 plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
 plasma_engine.stop_time                       = 1.0           # Stop time
 plasma_engine.max_steps                       = 100           # Maximum number of steps
@@ -49,6 +49,7 @@ plasma_engine.ebis_memory_load_balance        = false         # Use memory as lo
 plasma_engine.write_ebis                      = false         # Write geometry to an HDF5 file (buggy, leave as false)
 plasma_engine.read_ebis                       = false         # Read EBIS when restarting a simulation
 plasma_engine.output_mode                     = medium        # Output mode
+plasma_engine.grow_tags                       = 0             # Grow tags
 plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
@@ -67,8 +68,8 @@ plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-sol
 # ====================================================================================================
 # TIME_STEPPER OPTIONS
 # ====================================================================================================
-time_stepper.verbosity        = 10    # Class verbosity
-time_stepper.solver_verbosity = 10    # Individual solver verbosities
+time_stepper.verbosity        = -1    # Class verbosity
+time_stepper.solver_verbosity = -1    # Individual solver verbosities
 time_stepper.fast_rte         = 1     # Solve RTE every this time steps
 time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
 time_stepper.min_dt           = 0.    # Minimum permitted time step
@@ -105,7 +106,7 @@ poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bott
 # ----------------------------------------------------------------------------------------------------
 cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
 cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"
-cdr_gdnv.limit_slopes   = true                   # Valid options are "covered_face" and "conservative_average"
+cdr_gdnv.limit_slopes   = true                   # MUST be true for things to make sense. 
 
 # ====================================================================================================
 # RTE_LAYOUT CLASS OPTIONS
@@ -156,7 +157,13 @@ rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
 # ====================================================================================================
 # ADVECTION_KINETICS CLASS OPTIONS
 # ====================================================================================================
-advection_kinetics.square_center = 0.0  0.0  0.0  # Center of square wave pulse
-advection_kinetics.square_width  = 0.1  0.1  0.1  # Total width of square wave pulse
+advection_kinetics.square_center = 0.0  0.5 0.0  # Center of square wave pulse
+advection_kinetics.square_width  = 10.  0.2 0.1  # Total width of square wave pulse
 advection_kinetics.mobile        = true           # Turn on (true) or off (false) mobility
 
+# ====================================================================================================
+# GRADIENT_TAGGER CLASS OPTIONS
+# ====================================================================================================
+gradient_tagger.coarsen_curvature = 0.5
+gradient_tagger.refine_curvature  = 0.5
+gradient_tagger.relative_cutoff   = 1.E-6

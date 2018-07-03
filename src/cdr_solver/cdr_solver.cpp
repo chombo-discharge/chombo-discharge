@@ -622,10 +622,13 @@ void cdr_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
+
+
   const RealVect origin  = m_physdom->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
+
     for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
       EBCellFAB& state       = (*m_state[lvl])[dit()];
       const Box box          = m_state[lvl]->disjointBoxLayout().get(dit());
@@ -1493,7 +1496,6 @@ Real cdr_solver::compute_source_dt(){
   }
   min_dt = tmp;
 #endif
-
   
   return min_dt;
 

@@ -410,6 +410,22 @@ Real cdr_layout::compute_Q(){
   return Q;
 }
 
+Vector<Real> cdr_layout::compute_mass(){
+  CH_TIME("cdr_layout::compute_mass");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::compute_mass" << endl;
+  }
+
+  Vector<Real> mass;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    mass.push_back(solver->compute_mass());
+  }
+
+  return mass;
+}
+
 Vector<RefCountedPtr<cdr_solver> >& cdr_layout::get_solvers(){
   return m_solvers;
 }

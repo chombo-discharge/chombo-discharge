@@ -35,7 +35,7 @@ public:
     @param[in] a_pos Positspecies
     @param[in] a_time Time
   */
-  virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  virtual Real initial_data(const RealVect a_pos, const Real a_time) const = 0;
 
   /*!
     @brief Return name

@@ -712,7 +712,9 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
     }
   }
 
+
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    MayDay::Abort("stop");
     const int idx = solver_it.get_solver();
     m_amr->average_down(*a_source[idx], rte_phase);
   }
@@ -1258,7 +1260,7 @@ void time_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name){
 
   const int comp = 0;
   
-  a_cdr_max = 0.0;
+  a_cdr_max = -1.E99;
   a_solver_name = "invalid solver";
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -1648,13 +1650,12 @@ void time_stepper::setup_rte(){
   m_rte->set_physical_domain(m_physdom);
   m_rte->sanity_check();
   m_rte->allocate_internals();
-
 }
 
 void time_stepper::setup_sigma(){
-  CH_TIME("time_stepper::setup_poisson");
+  CH_TIME("time_stepper::setup_sigma");
   if(m_verbosity > 5){
-    pout() << "time_stepper::setup_poisson" << endl;
+    pout() << "time_stepper::setup_sigma" << endl;
   }
 
   m_sigma = RefCountedPtr<sigma_solver> (new sigma_solver());

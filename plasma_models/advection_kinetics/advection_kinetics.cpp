@@ -10,7 +10,6 @@
 #include <ParmParse.H>
 
 advection_kinetics::advection_kinetics(){
-
   m_num_species = 1;
   m_num_photons = 0;
 
@@ -94,6 +93,7 @@ advection_kinetics::phi_advect::phi_advect() {
   m_unit      = "m-3";
   m_diffusive = false;
   m_mobile    = true;
+  m_charge    = 0;
   
   // Get parameters from input script
   {
@@ -122,16 +122,16 @@ advection_kinetics::phi_advect::~phi_advect() {
 
 }
 
-Real advection_kinetics::phi_advect::initial_data(const RealVect a_pos, const Real a_time) {
+Real advection_kinetics::phi_advect::initial_data(const RealVect a_pos, const Real a_time) const {
+
   const RealVect new_pos = a_pos - m_center;
 
   Real ret = 1.0;
   for (int dir = 0; dir < SpaceDim; dir++){
-    if(new_pos[dir] - m_width[dir] > 0.0 || m_width[dir] - new_pos[dir] > 0.0){
+    if(new_pos[dir] > 0.5*m_width[dir] || new_pos[dir] < -0.5*m_width[dir]){
       ret = 0.0;
     }
   }
 
   return ret;
-
 }

@@ -107,7 +107,7 @@ poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bott
 # ----------------------------------------------------------------------------------------------------
 cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
 cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"
-cdr_gdnv.limit_slopes   = true                   # Valid options are "covered_face" and "conservative_average"
+cdr_gdnv.limit_slopes   = true                   # MUST equals true for things to make sense. 
 
 # ====================================================================================================
 # RTE_LAYOUT CLASS OPTIONS
@@ -161,4 +161,10 @@ rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method
 advection_kinetics.square_center = 0.0  0.0  0.0  # Center of square wave pulse
 advection_kinetics.square_width  = 0.1  0.1  0.1  # Total width of square wave pulse
 advection_kinetics.mobile        = true           # Turn on (true) or off (false) mobility
+
+# ====================================================================================================
+# GRADIENT_TAGGER CLASS OPTIONS
+# ====================================================================================================
+gradient_tagger.coarsen_curvature = 0.1
+gradient_tagger.refine_curvature  = 0.2
 
