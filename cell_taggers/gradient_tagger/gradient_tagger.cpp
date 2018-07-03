@@ -88,8 +88,6 @@ bool gradient_tagger::coarsen_cell(const RealVect&         a_pos,
     }
   }
 
-  return true;
-
   return coarsen;  
 }
 
