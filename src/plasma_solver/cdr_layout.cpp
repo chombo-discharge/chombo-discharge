@@ -426,6 +426,22 @@ Vector<Real> cdr_layout::compute_mass(){
   return mass;
 }
 
+Vector<std::string> cdr_layout::get_names() {
+  CH_TIME("cdr_layout::get_names");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_names" << endl;
+  }
+
+  Vector<std::string> names;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    names.push_back(solver->get_name());
+  }
+
+  return names;
+}
+
 Vector<RefCountedPtr<cdr_solver> >& cdr_layout::get_solvers(){
   return m_solvers;
 }

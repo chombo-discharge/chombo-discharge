@@ -20,6 +20,9 @@
 #include "tags.H"
 #include "geo_coarsener.H"
 
+#include <iostream>
+#include <fstream>
+
 /*!
   @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
   regrid intervals etc. 
@@ -238,6 +241,11 @@ public:
     @brief Set tag growth
   */
   virtual void set_grow_tags(const int a_grow_tags);
+
+  /*!
+    @brief Dump mass for cdr solvers
+  */
+  virtual void set_dump_mass(const bool a_dump_mass);
 
   /*!
     @brief Sanity check
@@ -534,6 +542,11 @@ protected:
   bool m_read_ebis;
 
   /*!
+    @brief Dump total mass (or charge) for every cdr solver at every time_step
+  */
+  bool m_dump_mass;
+
+  /*!
     @brief Allocate internals
   */
   virtual void allocate_internals();
@@ -727,6 +740,21 @@ protected:
     @brief Write the geometry only
   */
   virtual void write_geometry();
+  
+  /*!
+    @brief Open file for mass dump
+  */
+  virtual void open_mass_dump_file(ofstream& a_file);
+
+  /*!
+    @brief Dump mass
+  */
+  virtual void dump_mass(ofstream& a_file);
+
+  /*!
+    @brief Close file for mass dump
+  */
+  virtual void close_mass_dump_file(ofstream& a_file);
 
   /*!
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);

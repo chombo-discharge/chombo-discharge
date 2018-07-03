@@ -162,6 +162,7 @@ public:
   */
   virtual void advance(const Real a_dt);
 
+
   /*!
     @brief Get largest possible time step for advection part
   */
@@ -186,6 +187,11 @@ public:
     @brief Compute mass for every species
   */
   virtual Vector<Real> compute_mass();
+
+  /*!
+    @brief Get all names
+  */
+  virtual Vector<std::string> get_names();
 
   /*!
     @brief Get solvers

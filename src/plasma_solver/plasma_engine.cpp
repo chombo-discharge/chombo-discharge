@@ -19,12 +19,6 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
-#define write_mass 1
-#if write_mass
-#include <iostream>
-#include <fstream>
-#endif
-
 Real plasma_engine::s_constant_one(const RealVect a_pos){
   return 1.0;
 }
@@ -77,6 +71,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_memory_report_mode(memory_report_mode::overall); // Set memory report mode
   this->set_init_regrids(0);                                 // Number of initial regrids
   this->set_geom_only(false);                                // Only plot geometry
+  this->set_dump_mass(false);                                // Dump mass to file
   this->set_ebis_memory_load_balance(false);                 // Set load balance for EBIS generation
   this->set_restart(false);                                  // Restart mode
   this->set_write_ebis(false);                               // Write EBIS
@@ -1262,12 +1257,12 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 
     m_wallclock_start = MPI_Wtime();
 
-#if write_mass
-    ofstream my_file;
-    if(procID() == 0){
-      my_file.open("mass.txt");
+    // This is actually a debugging
+    ofstream dump_file;
+    if(m_dump_mass){
+      this->open_mass_dump_file(dump_file);
     }
-#endif
+
     while(m_time < a_end_time && m_step < a_max_steps){
 
       const int max_sim_depth = m_amr->get_max_sim_depth();
@@ -1281,12 +1276,10 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	}
       }
 
-#if write_mass
-      const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
-      if(procID() == 0){
-	my_file << m_time << "\t" << masses[0] << endl;
+      if(m_dump_mass){
+	this->dump_mass(dump_file);
       }
-#endif
+
 
       if(!first_step){
 	m_timestepper->compute_dt(m_dt, m_timecode);
@@ -1348,11 +1341,9 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 #endif
     }
 
-#if write_mass
-    if (procID() == 0){
-      my_file.close();
+    if(m_dump_mass){
+      this->close_mass_dump_file(dump_file);
     }
-#endif
   }
 
   if(m_verbosity > 0){
@@ -2030,6 +2021,27 @@ void plasma_engine::set_read_ebis(const bool a_read_ebis){
   }
 }
 
+void plasma_engine::set_dump_mass(const bool a_dump_mass){
+  CH_TIME("plasma_engine::set_dump_mass");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_dump_mass" << endl;
+  }
+
+  m_dump_mass = a_dump_mass;
+
+  { // get parameter from input script
+    std::string str;
+    ParmParse pp("plasma_engine");
+    pp.query("dump_mass", str);
+    if(str == "true"){
+      m_dump_mass = true;
+    }
+    else if(str == "false"){
+      m_dump_mass = false;
+    }
+  }
+}
+
 void plasma_engine::set_geom_only(const bool a_geom_only){
   CH_TIME("plasma_engine::set_geom_only");
   if(m_verbosity > 5){
@@ -2559,6 +2571,38 @@ void plasma_engine::write_checkpoint_file(){
   handle_out.close();
 }
 
+void plasma_engine::open_mass_dump_file(ofstream& a_file){
+  if(procID() == 0){
+    const std::string prefix = m_output_dir + "/" + "mass_dump.txt";
+    a_file.open(prefix);
+
+    const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
+
+    a_file << "# time step" << "\t" << "time";
+    for (int i = 0; i < names.size(); i++){
+      a_file << "\t" << names[i];
+    }
+    a_file << endl;
+  }
+}
+
+void plasma_engine::dump_mass(ofstream& a_file){
+  const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
+  if(procID() == 0){
+    a_file << m_step << "\t" << m_time;
+    for (int i = 0; i < masses.size(); i++){
+      a_file << "\t" << masses[i];
+    }
+    a_file << endl;
+  }
+}
+
+void plasma_engine::close_mass_dump_file(ofstream& a_file){
+  if(procID() == 0){
+    a_file.close();
+  }
+}
+
 Vector<string> plasma_engine::get_output_variable_names(){
   CH_TIME("plasma_engine::get_output_variable_names");
   if(m_verbosity > 5){
@@ -2640,7 +2684,7 @@ Vector<string> plasma_engine::get_output_variable_names(){
     names.push_back(name + " density"); cur_name++; num_vars++;
   }
 
-    // Photon solvers' stuff. Photon density and source term => (2 + SpaceDim)
+  // Photon solvers' stuff. Photon density and source term => (2 + SpaceDim)
   if(m_output_mode == output_mode::full || m_output_mode == output_mode::medium){
     for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
       RefCountedPtr<rte_solver>& solver   = solver_it();

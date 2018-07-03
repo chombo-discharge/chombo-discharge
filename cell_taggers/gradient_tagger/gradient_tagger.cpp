@@ -81,7 +81,7 @@ bool gradient_tagger::coarsen_cell(const RealVect&         a_pos,
 
   bool coarsen = false;
   for (int i = 0; i < a_tracer.size(); i++){
-    const bool test = a_grad_tracer[i].vectorLength()*a_dx/a_tracer[i] < m_coar_curv;;
+    const bool test = a_grad_tracer[i].vectorLength()*a_dx/a_tracer[i] < m_coar_curv || a_tracer[i] <= 0.0;
 
     if(test){
       coarsen = true;
