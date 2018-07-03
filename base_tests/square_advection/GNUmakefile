@@ -31,8 +31,8 @@ src_dirs = $(STREAMER_HOME)/src \
 	$(STREAMER_HOME)/src/rte_solver \
 	$(STREAMER_HOME)/src/sigma_solver \
 	$(STREAMER_HOME)/geometries_prebuilt \
-	$(STREAMER_HOME)/cell_taggers \
-	$(STREAMER_HOME)/time_steppers \
+	$(STREAMER_HOME)/cell_taggers/field_tagger\
+	$(STREAMER_HOME)/time_steppers/rk2\
 	$(STREAMER_HOME)/plasma_models/advection_kinetics
 
 

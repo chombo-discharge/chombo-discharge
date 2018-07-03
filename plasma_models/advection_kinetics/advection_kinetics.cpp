@@ -35,7 +35,7 @@ Vector<RealVect> advection_kinetics::compute_cdr_velocities(const Real&         
 							    const RealVect&     a_E,
 							    const Vector<Real>& a_cdr_densities) const {
   Vector<RealVect> velo(m_num_species);
-  velo[0] = a_E*m_mobility;
+  velo[0] = a_E;
   return velo;
 }
 
