@@ -1,0 +1,2 @@
+This mini-app is intended as a base test for checking advection solvers (yes, without diffusion and source terms). It should
+ship with the main repository so that we can re-run this in the future in case we change things in the cdr solvers. 
