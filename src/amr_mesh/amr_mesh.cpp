@@ -1322,6 +1322,9 @@ void amr_mesh::set_max_simulation_depth(const int a_max_sim_depth){
       if(depth >= 0){
 	m_max_sim_depth = depth;
       }
+      else {
+	m_max_sim_depth = m_max_amr_depth;
+      }
     }
   }
 }
