@@ -156,14 +156,6 @@ cell_tagger.box1_hi     = 0.0 0.0 0.0  # these two corners
 rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method		
 
 # ====================================================================================================
-# FIELD_TAGGER CLASS OPTIONS
-# ====================================================================================================
-field_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
-field_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-field_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
-field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
-
-# ====================================================================================================
 # ADVECTION_KINETICS CLASS OPTIONS
 # ====================================================================================================
 advection_kinetics.square_center = 0.0  0.0  0.0  # Center of square wave pulse

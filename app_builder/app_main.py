@@ -14,7 +14,7 @@ def write_template(args):
         print 'Could not find ' + tsfile
     if not os.path.exists(kinfile):
         print 'Could not find ' + kinfile
-    if not os.path.exists(tagfile):
+    if not os.path.exists(tagfile) and args.cell_tagger != "none":
         print 'Could not find ' + tagfile
                     
     # Create app directory if it does not exist
@@ -30,7 +30,8 @@ def write_template(args):
     mainf.write('#include "' + args.plasma_kinetics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.time_stepper + '.H"\n')
-    mainf.write('#include "' + args.cell_tagger + '.H"\n')
+    if not args.cell_tagger == "none":
+        mainf.write('#include "' + args.cell_tagger + '.H"\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
     
@@ -66,7 +67,10 @@ def write_template(args):
     mainf.write("  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new " + args.plasma_kinetics + "());\n")
     mainf.write("  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new " + args.geometry + "());\n")
     mainf.write("  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper> (new " + args.time_stepper + "());\n")
-    mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "());\n")
+    if args.cell_tagger != "none":
+        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "());\n")
+    else:
+        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);\n")
     mainf.write("  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());\n")
     mainf.write("  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());\n")
     mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")

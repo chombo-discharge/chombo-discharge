@@ -26,8 +26,11 @@ def write_template(args):
                      args.streamer_home + "/src/plasma_solver/cell_tagger.options", \
                      args.streamer_home + "/geometries_prebuilt/" + args.geometry + "/" + args.geometry + ".options", \
                      args.streamer_home + "/time_steppers/" + args.time_stepper + "/" + args.time_stepper + ".options", \
-                     args.streamer_home + "/cell_taggers/" + args.cell_tagger + "/" + args.cell_tagger + ".options", \
                      args.streamer_home + "/plasma_models/" + args.plasma_kinetics + "/" + args.plasma_kinetics + ".options"]
+
+    if not args.cell_tagger == "none":
+        options_files.append(args.streamer_home + "/cell_taggers/" + args.cell_tagger + "/" + args.cell_tagger + ".options")
+        
     for opt in options_files:
         if os.path.exists(opt):
             f = open(opt, 'r')

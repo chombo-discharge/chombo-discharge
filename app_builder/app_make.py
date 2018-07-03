@@ -48,7 +48,8 @@ def write_template(args):
     makef.write('\t$(STREAMER_HOME)/src/rte_solver \\\n')
     makef.write('\t$(STREAMER_HOME)/src/sigma_solver \\\n')
     makef.write('\t$(STREAMER_HOME)/geometries_prebuilt/' + args.geometry + '\\\n')
-    makef.write('\t$(STREAMER_HOME)/cell_taggers/'  + args.cell_tagger + '\\\n')
+    if not args.cell_tagger == "none":
+        makef.write('\t$(STREAMER_HOME)/cell_taggers/'  + args.cell_tagger + '\\\n')
     makef.write('\t$(STREAMER_HOME)/time_steppers/' + args.time_stepper + '\\\n')
     makef.write('\t$(STREAMER_HOME)/plasma_models/' + args.plasma_kinetics + '\n')
     makef.write('\n')
