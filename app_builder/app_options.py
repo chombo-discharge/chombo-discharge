@@ -14,7 +14,6 @@ def write_template(args):
     optf.write(args.app_name + ".potential = 1\n")
     optf.write('\n')
     options_files = [args.streamer_home + "/src/geometry/physical_domain.options", \
-                     args.streamer_home + "/geometries_prebuilt/" + args.geometry + ".options", \
                      args.streamer_home + "/src/amr_mesh/amr_mesh.options", \
                      args.streamer_home + "/src/plasma_solver/plasma_engine.options", \
                      args.streamer_home + "/src/plasma_solver/time_stepper.options", \
@@ -23,10 +22,11 @@ def write_template(args):
                      args.streamer_home + "/src/plasma_solver/cdr_layout.options", \
                      args.streamer_home + "/src/plasma_solver/rte_layout.options", \
                      args.streamer_home + "/src/rte_solver/eddington_sp1.options", \
-                     args.streamer_home + "/time_steppers/" + args.time_stepper + "/" + args.time_stepper + ".options", \
-                     args.streamer_home + "/src/plasma_solver/cell_tagger.options", \
-                     args.streamer_home + "/cell_taggers/" + args.cell_tagger + "/" + args.cell_tagger + ".options", \
                      args.streamer_home + "/src/plasma_solver/geo_coarsener.options", \
+                     args.streamer_home + "/src/plasma_solver/cell_tagger.options", \
+                     args.streamer_home + "/geometries_prebuilt/" + args.geometry + "/" + args.geometry + ".options", \
+                     args.streamer_home + "/time_steppers/" + args.time_stepper + "/" + args.time_stepper + ".options", \
+                     args.streamer_home + "/cell_taggers/" + args.cell_tagger + "/" + args.cell_tagger + ".options", \
                      args.streamer_home + "/plasma_models/" + args.plasma_kinetics + "/" + args.plasma_kinetics + ".options"]
     for opt in options_files:
         if os.path.exists(opt):

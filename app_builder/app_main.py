@@ -4,7 +4,7 @@ import sys
 def write_template(args):
     # Make sure that every class can be found where they should
     app_dir = args.base_dir + "/" + args.app_name
-    geofile = args.streamer_home + "/geometries_prebuilt" + "/" + args.geometry + ".H"
+    geofile = args.streamer_home + "/geometries_prebuilt" + "/" + args.geometry + "/" + args.geometry + ".H"
     tsfile  = args.streamer_home + "/time_steppers" + "/" + args.time_stepper + "/" + args.time_stepper + ".H"
     kinfile = args.streamer_home + "/plasma_models" + "/" + args.plasma_kinetics + "/" + args.plasma_kinetics + ".H"
     tagfile = args.streamer_home + "/cell_taggers" +  "/" + args.cell_tagger + "/" + args.cell_tagger + ".H"

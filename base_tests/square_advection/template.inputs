@@ -10,10 +10,6 @@ physical_domain.lo_corner = -1 -1 -1    # Low corner of problem domain
 physical_domain.hi_corner =  1  1  1    # High corner of problem domain
 
 # ====================================================================================================
-# REGULAR_GEOMETRY CLASS OPTIONS
-# ====================================================================================================
-
-# ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
 amr.verbosity       = -1          # Controls verbosity. 
@@ -136,9 +132,12 @@ eddington_sp1.gmg_bottom_solver = bicgstab  # Bottom solver type. Valid options 
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 
 # ====================================================================================================
-# RK2 CLASS OPTIONS
+# GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method		
+geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
+geo_coarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
+geo_coarsener.box1_lvl    = 0            # up to this level
 
 # ====================================================================================================
 # CELL_TAGGER CLASS OPTIONS
@@ -148,20 +147,21 @@ cell_tagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
 cell_tagger.box1_hi     = 0.0 0.0 0.0  # these two corners
 
 # ====================================================================================================
+# REGULAR_GEOMETRY CLASS OPTIONS
+# ====================================================================================================
+
+# ====================================================================================================
+# RK2 CLASS OPTIONS
+# ====================================================================================================
+rk2.alpha = 0.5 # Set alpha. 0.5 = Heuns method, 1.0 = Midpoint method		
+
+# ====================================================================================================
 # FIELD_TAGGER CLASS OPTIONS
 # ====================================================================================================
 field_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
 field_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
 field_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
 field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
-
-# ====================================================================================================
-# GEO_COARSENER CLASS OPTIONS
-# ====================================================================================================
-geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-geo_coarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-geo_coarsener.box1_lvl    = 0            # up to this level
 
 # ====================================================================================================
 # ADVECTION_KINETICS CLASS OPTIONS
