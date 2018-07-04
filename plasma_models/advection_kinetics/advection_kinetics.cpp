@@ -15,6 +15,26 @@ advection_kinetics::advection_kinetics(){
 
   m_species.resize(m_num_species);
   m_species[0] = RefCountedPtr<species> (new advection_kinetics::phi_advect());
+
+  m_outflow = false;
+
+  { // Get parameters from input script
+    ParmParse pp("advection_kinetics");
+    std::string str;
+
+    if(pp.contains("which_ebbc")){
+      pp.get("which_ebbc", str);
+      if(str == "wall"){
+	m_outflow = false;
+      }
+      else if(str == "outflow"){
+	m_outflow = true;
+      }
+      else {
+	MayDay::Abort("advection_kinetics::advection_kinetics - unknown ebbc type requested");
+      }
+    }
+  }
 }
 
 advection_kinetics::~advection_kinetics(){
@@ -59,6 +79,8 @@ Vector<Real> advection_kinetics::compute_cdr_electrode_fluxes(const Real&       
 							      const Vector<Real>& a_rte_fluxes,
 							      const Vector<Real>& a_extrap_cdr_fluxes) const {
   Vector<Real> flux(m_num_species, 0.0);
+
+  flux[0] = m_outflow ? a_extrap_cdr_fluxes[0] : 0.0;
   return flux;
 }
 
@@ -72,6 +94,7 @@ Vector<Real> advection_kinetics::compute_cdr_dielectric_fluxes(const Real&      
 							       const Vector<Real>& a_rte_fluxes,
 							       const Vector<Real>& a_extrap_cdr_fluxes) const {
   Vector<Real> flux(m_num_species, 0.0);
+  flux[0] = m_outflow ? a_extrap_cdr_fluxes[0] : 0.0;
   return flux;
 }
 
@@ -93,7 +116,7 @@ advection_kinetics::phi_advect::phi_advect() {
   m_unit      = "m-3";
   m_diffusive = false;
   m_mobile    = true;
-  m_charge    = 0;
+  m_charge    = 1;
   
   // Get parameters from input script
   {

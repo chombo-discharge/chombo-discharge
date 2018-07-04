@@ -84,6 +84,10 @@ public:
     RealVect m_width;
     
   };
+
+protected:
+
+  bool m_outflow;
 };
 
 #endif
