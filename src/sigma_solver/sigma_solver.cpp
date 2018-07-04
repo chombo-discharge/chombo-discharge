@@ -350,6 +350,40 @@ void sigma_solver::set_time(const int a_step, const Real a_time, const Real a_dt
   m_dt   = a_dt;
 }
 
+Real sigma_solver::compute_charge(){
+  CH_TIME("sigma_solver::compute_charge");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::compute_charge" << endl;
+  }
+
+  m_amr->average_down(m_state, m_phase);
+
+  Real charge = 0.0;
+
+  const int comp               = 0;
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[0];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[0];
+  const Real dx                = m_amr->get_dx()[0];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box box          = dbl.get(dit());
+    const IntVectSet irreg = ebisbox.getIrregIVS(box);
+
+    for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const Real& area    = ebisbox.bndryArea(vof);
+
+      charge += area*(*m_state[0])[dit()](vof, comp);
+    }
+  }
+
+  data_ops::sum(charge); // Parallell sum
+  
+  return charge*dx;
+}
+
 EBAMRIVData& sigma_solver::get_state(){
   return m_state;
 }

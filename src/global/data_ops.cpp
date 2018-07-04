@@ -642,6 +642,20 @@ void data_ops::set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value){
   }
 }
 
+void data_ops::sum(Real& a_value){
+
+#ifdef CH_MPI
+  Real cur = a_value;
+  Real tmp = a_value;
+  int result = MPI_Allreduce(&cur, &tmp, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Abort("data_ops::sum - communication error on Allreduce");
+  }
+
+  a_value = tmp;
+#endif
+}
+
 void data_ops::vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::vector_length(*a_lhs[lvl], *a_rhs[lvl]);

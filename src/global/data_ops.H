@@ -158,6 +158,8 @@ public:
 
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
 
+  static void sum(Real& a_value);
+
   static void vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
   static void vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);

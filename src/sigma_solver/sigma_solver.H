@@ -127,6 +127,11 @@ public:
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
+    @brief Compute total charge
+  */
+  virtual Real compute_charge();
+
+  /*!
     @brief Get internal state
   */
   virtual EBAMRIVData& get_state();

@@ -11,6 +11,7 @@
 #include "data_ops.H"
 #include "mfalias.H"
 #include "tags_factory.H"
+#include "units.H"
 
 #include <EBAlias.H>
 #include <LevelData.H>
@@ -2582,17 +2583,20 @@ void plasma_engine::open_mass_dump_file(ofstream& a_file){
     for (int i = 0; i < names.size(); i++){
       a_file << "\t" << names[i];
     }
+    a_file << "\t" << "surface charge" << endl;
     a_file << endl;
   }
 }
 
 void plasma_engine::dump_mass(ofstream& a_file){
+  const Real surface_charge = m_timestepper->get_sigma()->compute_charge();
   const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
   if(procID() == 0){
     a_file << m_step << "\t" << m_time;
     for (int i = 0; i < masses.size(); i++){
       a_file << "\t" << masses[i];
     }
+    a_file << "\t" << surface_charge/units::s_Qe;
     a_file << endl;
   }
 }
