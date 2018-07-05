@@ -166,14 +166,14 @@ protected:
   virtual RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
 
   /*!
+    @brief Advance source
+  */
+  virtual bool advance_sources(const Real a_dt);
+
+  /*!
     @brief Advection advance
   */
   virtual void advance_advection_diffusion(const Real a_dt);
-
-  /*!
-    @brief Advance source
-  */
-  virtual void advance_sources(const Real a_dt);
 
   /*!
     @brief Semi-implicit Newton advance
@@ -241,9 +241,55 @@ protected:
   virtual void setup_newton_iterates(Vector<EBAMRCellData*>& a_iterates);
 
   /*!
-    @brief Solve the RTE equations by using what is available in the solvers
+    @brief Set cdr source terms to zero
   */
-  virtual void solve_rte_using_solver_states();
+  virtual void set_cdr_sources_to_zero();              
+
+  /*!
+    @brief Compute the cdr velocities. This assumes that E is updated and resides in m_poisson_scratch
+  */
+  virtual void compute_cdr_velo();
+
+  /*!
+    @brief Compute the extrapolated things on the EB. This assumes E is updated, and that velocities have been updated
+  */
+  virtual void compute_cdr_eb_states();
+
+  /*!
+    @brief Compute diffusion coefficients. This assumes that E has been updated
+  */
+  virtual void compute_cdr_diffco();
+
+  /*!
+    @brief Compute the boundary conditions on the EB. This assumes that we've extrapolated velocities, densities, and fluxes
+    to the EB
+  */
+  virtual void compute_cdr_fluxes();
+
+  /*!
+    @brief Compute the sigma flux as the sum of ion fluxes. 
+  */
+  virtual void compute_sigma_flux();
+
+  /*!
+    @brief Do the k1-advance for the cdr equations. This computes k1 and places the temporary solution right in the solver
+  */
+  virtual void advance_cdr_k1(const Real a_dt);
+
+  /*!
+    @brief Do the k1 advance for the sigma equation. This computes k1 and places the temporary solution right in the solver
+  */
+  virtual void advance_sigma_k1(const Real a_dt);
+
+  /*!
+    @brief Compute the k2 advance for cdr equations. This computes k2 and places the advanced solution into the solver
+  */
+  virtual void advance_cdr_k2(const Real a_dt);
+
+  /*!
+    @brrief Compute the k2 advance for sigma. This computse k2 and places the advanced solution into the solver. 
+  */
+  virtual void advance_sigma_k2(const Real a_dt);
 
   /*!
     @brief Perform point-wise Newton iteration by using the implicit trapezoidal rule

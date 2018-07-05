@@ -129,21 +129,10 @@ Real rk2_stiff::advance(const Real a_dt){
   if(m_do_adv_diff) {                         // Rules for advective advance: After this, cdr solvers contain the advected/diffused
     this->advance_advection_diffusion(a_dt);  // states, and the poisson solver contains the updated potential after advection.
   }                                           // The sigma solver is also updated, while scratch storage contains junk.
-  
-  this->compute_E_into_scratch(); // Compute the electric field using the advected/diffused states. This is needed for solving 
-                                  // the RTE, which is needed for doing the source terms. 
 
-  if(m_do_rte){                              // Must be implemented. 
-    if(m_rte->is_stationary()){              // Rules for RTE update: After this advance, the RTE solvers contain
-      this->solve_rte_using_solver_states(); // the solution by using the 
-    }
-    else{
-      MayDay::Abort("rk2_stiff::advance - transient RTE is not supported for this time stepper");
-    }
-  }
-
+  bool converged_source = true;
   if(m_do_source){
-    this->advance_sources(a_dt);   // Source term advance. 
+    converged_source = this->advance_sources(a_dt);   // Source term advance. 
   }
 
   // Put solver back in useable state so that we can reliably compute the next time step. 
@@ -154,14 +143,7 @@ Real rk2_stiff::advance(const Real a_dt){
   return a_dt;
 }
 
-void rk2_stiff::advance_advection_diffusion(const Real a_dt){
-  CH_TIME("rk2_stiff::advance_advection_diffusion");
-  if(m_verbosity > 2){
-    pout() << "rk2_stiff::advance_advection_diffusion" << endl;
-  }
-}
-
-void rk2_stiff::advance_sources(const Real a_dt){
+bool rk2_stiff::advance_sources(const Real a_dt){
   CH_TIME("rk2_stiff::advance_sources");
   if(m_verbosity > 2){
     pout() << "rk2_stiff::advance_sources" << endl;
@@ -442,6 +424,92 @@ void rk2_stiff::advance_sources(const Real a_dt){
     const int idx = solver_it.get_solver();
     delete grad_cdr[idx];
   }
+
+  return converged;
+}
+
+void rk2_stiff::advance_advection_diffusion(const Real a_dt){
+  CH_TIME("rk2_stiff::advance_advection_diffusion");
+  if(m_verbosity > 2){
+    pout() << "rk2_stiff::advance_advection_diffusion" << endl;
+  }
+
+  this->set_cdr_sources_to_zero();              // Set cdr sources to zero
+
+  // Prepare for k1 advance
+  this->compute_E_into_scratch();                       // Compute E into scratch storage by using m_poisson->m_state
+  this->compute_cdr_velo();       // Compute cdr velocities using what is available in solvers and E_scratch
+  this->compute_cdr_eb_states();  // Compute cdr EB states using what is available in solvers and E_scratch
+  this->compute_cdr_diffco();     // Compute cdr diffusion coefficients using what is available in solvers..
+  this->compute_cdr_fluxes();     // Compute cdr fluxes. Call plasma_kinetics and update boundary conditions
+  this->compute_sigma_flux();     // Compute sigma flux. Does the sum of cdr_fluxes
+
+  // Do the k1-advance into scratch storages
+  this->advance_cdr_k1(a_dt);     // First Runge Kutta stage. This computes k1 into scratch and a temporary state into the solver
+  this->advance_sigma_k1(a_dt);   // First Runge Kutta stage. This computes k1 into scratch and a temporary state into the solver
+  this->solve_poisson();          // Solve Poisson equation using the intermediately advanced states (reside in solvers)
+  this->compute_E_into_scratch(); // Compute E using the potential that we got. Put the result in scratch. 
+  if(m_do_rte){
+    if(m_rte->is_stationary()){
+      const Real dummy = 0.0;
+      this->solve_rte(dummy);      // Compute RTE equations after the k1 advance
+    }
+    else{
+      MayDay::Abort("rk2_stiff::advance_advection_diffusion - transient RTE is not supported for this time_stepper");
+    }
+  }
+
+  // Do the same shit all over again, but do the k2 advance at the end
+  this->compute_cdr_velo();
+  this->compute_cdr_diffco();
+  this->compute_cdr_eb_states();
+  this->compute_cdr_fluxes();
+  this->compute_sigma_flux();
+  
+  // Do the k2 advance back into solver states. 
+  this->advance_cdr_k2(a_dt);
+  this->advance_sigma_k2(a_dt);
+  this->solve_poisson();
+  this->compute_E_into_scratch();
+  if(m_do_rte){
+    if(m_rte->is_stationary()){
+      const Real dummy = 0.0;
+      this->solve_rte(dummy); // Compute RTE equations after the k2 advance
+    }
+    else{
+      MayDay::Abort("rk2_stiff::advance_advection_diffusion - transient RTE is not supported for this time_stepper");
+    }
+  }
+}
+
+void rk2_stiff::set_cdr_sources_to_zero(){
+}
+
+void rk2_stiff::compute_cdr_velo(){
+}
+
+void rk2_stiff::compute_cdr_eb_states(){
+}
+
+void rk2_stiff::compute_cdr_diffco(){
+}
+
+void rk2_stiff::compute_cdr_fluxes(){
+}
+
+void rk2_stiff::compute_sigma_flux(){
+}
+
+void rk2_stiff::advance_cdr_k1(const Real a_dt){
+}
+
+void rk2_stiff::advance_sigma_k1(const Real a_dt){
+}
+
+void rk2_stiff::advance_cdr_k2(const Real a_dt){
+}
+
+void rk2_stiff::advance_sigma_k2(const Real a_dt){
 }
 
 void rk2_stiff::allocate_cdr_storage(){
@@ -677,15 +745,15 @@ void rk2_stiff::explicit_euler_predict_newton(const Real a_dt){
 }
 
 Real rk2_stiff::newton_point_trapz(Vector<Real>&           a_p,
-						 const Vector<Real>&     a_rhs,
-						 const Vector<Real>&     a_x,
-						 const Vector<RealVect>& a_gradx,
-						 const RealVect&         a_E,
-						 const RealVect&         a_grad_E,
-						 const Vector<Real>&     a_rte,
-						 const RealVect&         a_pos,
-						 const Real&             a_time,
-						 const Real&             a_dt){
+				   const Vector<Real>&     a_rhs,
+				   const Vector<Real>&     a_x,
+				   const Vector<RealVect>& a_gradx,
+				   const RealVect&         a_E,
+				   const RealVect&         a_grad_E,
+				   const Vector<Real>&     a_rte,
+				   const RealVect&         a_pos,
+				   const Real&             a_time,
+				   const Real&             a_dt){
 
   int N = a_p.size();
 
@@ -747,7 +815,7 @@ void rk2_stiff::recompute_newton_rte(){
     pout() << "rk2_stiff::recompute_newton_rte" << endl;
   }
 
-    MayDay::Abort("rk2_stiff::recompute_newton_rte - not implemented");
+  MayDay::Abort("rk2_stiff::recompute_newton_rte - not implemented");
 }
 
 void rk2_stiff::regrid_internals(){
@@ -767,14 +835,4 @@ void rk2_stiff::setup_newton_iterates(Vector<EBAMRCellData*>& a_iterates){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     a_iterates.push_back(&(solver->get_state()));
   }
-}
-
-void rk2_stiff::solve_rte_using_solver_states(){
-  CH_TIME("rk2::solve_rte_using_solver_states");
-  if(m_verbosity > 5){
-    pout() << "rk2::solve_rte_using_solver_states" << endl;
-  }
-
-  const Real dummy_dt = 0.0;
-  this->solve_rte(dummy_dt);
 }
