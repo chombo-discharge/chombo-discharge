@@ -392,10 +392,10 @@ Real cdr_layout::compute_source_dt(){
   return dt;
 }
 
-Real cdr_layout::compute_Q(){
-  CH_TIME("cdr_layout::compute_Q");
+Real cdr_layout::compute_total_charge(){
+  CH_TIME("cdr_layout::compute_total_charge");
   if(m_verbosity > 5){
-    pout() << "cdr_layout::compute_Q" << endl;
+    pout() << "cdr_layout::compute_total_charge" << endl;
   }
 
   Real Q = 0.;
@@ -424,6 +424,22 @@ Vector<Real> cdr_layout::compute_mass(){
   }
 
   return mass;
+}
+
+Vector<Real> cdr_layout::compute_charge(){
+  CH_TIME("cdr_layout::compute_charge");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::compute_charge" << endl;
+  }
+
+  Vector<Real> charge;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    charge.push_back(solver->compute_charge()*units::s_Qe);
+  }
+
+  return charge;
 }
 
 Vector<std::string> cdr_layout::get_names() {

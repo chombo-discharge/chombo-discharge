@@ -240,6 +240,11 @@ public:
   virtual Real compute_mass();
 
   /*!
+    @brief Compute the total charge in m_state
+  */
+  virtual Real compute_charge();
+
+  /*!
     @brief Diffusive or not
   */
   virtual bool is_diffusive();

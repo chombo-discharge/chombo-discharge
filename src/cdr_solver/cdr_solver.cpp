@@ -1518,6 +1518,17 @@ Real cdr_solver::compute_mass(){
   return mass;
 }
 
+Real cdr_solver::compute_charge(){
+  CH_TIME("cdr_solver::compute_charge");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_charge" << endl;
+  }
+
+  const Real Q = this->compute_mass()*m_species->get_charge();
+
+  return Q;
+}
+
 bool cdr_solver::is_diffusive(){
   CH_TIME("cdr_solver::is_diffusive");
   if(m_verbosity > 5){

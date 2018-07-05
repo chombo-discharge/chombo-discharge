@@ -162,7 +162,6 @@ public:
   */
   virtual void advance(const Real a_dt);
 
-
   /*!
     @brief Get largest possible time step for advection part
   */
@@ -181,12 +180,17 @@ public:
   /*!
     @brief Compute total charge in computational region
   */
-  virtual Real compute_Q();
+  virtual Real compute_total_charge();
 
   /*!
     @brief Compute mass for every species
   */
   virtual Vector<Real> compute_mass();
+
+  /*!
+    @brief Compute charge for each species
+  */
+  virtual Vector<Real> compute_charge();
 
   /*!
     @brief Get all names

@@ -73,6 +73,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_init_regrids(0);                                 // Number of initial regrids
   this->set_geom_only(false);                                // Only plot geometry
   this->set_dump_mass(false);                                // Dump mass to file
+  this->set_dump_charge(false);                              // Dump charges to file
   this->set_ebis_memory_load_balance(false);                 // Set load balance for EBIS generation
   this->set_restart(false);                                  // Restart mode
   this->set_write_ebis(false);                               // Write EBIS
@@ -1259,9 +1260,13 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     m_wallclock_start = MPI_Wtime();
 
     // This is actually a debugging
-    ofstream dump_file;
+    ofstream mass_dump_file;
+    ofstream charge_dump_file;
     if(m_dump_mass){
-      this->open_mass_dump_file(dump_file);
+      this->open_mass_dump_file(mass_dump_file);
+    }
+    if(m_dump_charge){
+      this->open_charge_dump_file(charge_dump_file);
     }
 
     while(m_time < a_end_time && m_step < a_max_steps){
@@ -1278,7 +1283,10 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       }
 
       if(m_dump_mass){
-	this->dump_mass(dump_file);
+	this->dump_mass(mass_dump_file);
+      }
+      if(m_dump_charge){
+	this->dump_charge(charge_dump_file);
       }
 
 
@@ -1343,7 +1351,10 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     }
 
     if(m_dump_mass){
-      this->close_mass_dump_file(dump_file);
+      this->close_mass_dump_file(mass_dump_file);
+    }
+    if(m_dump_charge){
+      this->close_charge_dump_file(charge_dump_file);
     }
   }
 
@@ -2043,6 +2054,27 @@ void plasma_engine::set_dump_mass(const bool a_dump_mass){
   }
 }
 
+void plasma_engine::set_dump_charge(const bool a_dump_charge){
+  CH_TIME("plasma_engine::set_dump_charge");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_dump_charge" << endl;
+  }
+
+  m_dump_charge = a_dump_charge;
+
+  { // get parameter from input script
+    std::string str;
+    ParmParse pp("plasma_engine");
+    pp.query("dump_charge", str);
+    if(str == "true"){
+      m_dump_charge = true;
+    }
+    else if(str == "false"){
+      m_dump_charge = false;
+    }
+  }
+}
+
 void plasma_engine::set_geom_only(const bool a_geom_only){
   CH_TIME("plasma_engine::set_geom_only");
   if(m_verbosity > 5){
@@ -2583,18 +2615,44 @@ void plasma_engine::open_mass_dump_file(ofstream& a_file){
     for (int i = 0; i < names.size(); i++){
       a_file << "\t" << names[i];
     }
+    a_file << endl;
+  }
+}
+
+void plasma_engine::open_charge_dump_file(ofstream& a_file){
+  if(procID() == 0){
+    const std::string prefix = m_output_dir + "/" + "charge_dump.txt";
+    a_file.open(prefix);
+
+    const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
+
+    a_file << "# time step" << "\t" << "time";
+    for (int i = 0; i < names.size(); i++){
+      a_file << "\t" << names[i];
+    }
     a_file << "\t" << "surface charge" << endl;
     a_file << endl;
   }
 }
 
 void plasma_engine::dump_mass(ofstream& a_file){
-  const Real surface_charge = m_timestepper->get_sigma()->compute_charge();
   const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
   if(procID() == 0){
     a_file << m_step << "\t" << m_time;
     for (int i = 0; i < masses.size(); i++){
       a_file << "\t" << masses[i];
+    }
+    a_file << endl;
+  }
+}
+
+void plasma_engine::dump_charge(ofstream& a_file){
+  const Real surface_charge  = m_timestepper->get_sigma()->compute_charge();
+  const Vector<Real> charges = m_timestepper->get_cdr()->compute_charge();
+  if(procID() == 0){
+    a_file << m_step << "\t" << m_time;
+    for (int i = 0; i < charges.size(); i++){
+      a_file << "\t" << charges[i]/units::s_Qe;
     }
     a_file << "\t" << surface_charge/units::s_Qe;
     a_file << endl;
@@ -2602,6 +2660,12 @@ void plasma_engine::dump_mass(ofstream& a_file){
 }
 
 void plasma_engine::close_mass_dump_file(ofstream& a_file){
+  if(procID() == 0){
+    a_file.close();
+  }
+}
+
+void plasma_engine::close_charge_dump_file(ofstream& a_file){
   if(procID() == 0){
     a_file.close();
   }
