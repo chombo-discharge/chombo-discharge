@@ -248,28 +248,28 @@ protected:
   /*!
     @brief Compute the cdr velocities. This assumes that E is updated and resides in m_poisson_scratch
   */
-  virtual void compute_cdr_velo();
+  virtual void compute_cdr_velo_using_solver_states(const Real a_time);
 
   /*!
     @brief Compute the extrapolated things on the EB. This assumes E is updated, and that velocities have been updated
   */
-  virtual void compute_cdr_eb_states();
+  virtual void compute_cdr_eb_states_using_solver_states();
 
   /*!
     @brief Compute diffusion coefficients. This assumes that E has been updated
   */
-  virtual void compute_cdr_diffco();
+  virtual void compute_cdr_diffco_using_solver_states(const Real a_time);
 
   /*!
     @brief Compute the boundary conditions on the EB. This assumes that we've extrapolated velocities, densities, and fluxes
     to the EB
   */
-  virtual void compute_cdr_fluxes();
+  virtual void compute_cdr_fluxes_using_solver_states(const Real a_time);
 
   /*!
     @brief Compute the sigma flux as the sum of ion fluxes. 
   */
-  virtual void compute_sigma_flux();
+  virtual void compute_sigma_flux_using_solver_states();
 
   /*!
     @brief Do the k1-advance for the cdr equations. This computes k1 and places the temporary solution right in the solver

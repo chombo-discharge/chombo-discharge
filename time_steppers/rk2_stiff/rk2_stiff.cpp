@@ -437,12 +437,12 @@ void rk2_stiff::advance_advection_diffusion(const Real a_dt){
   this->set_cdr_sources_to_zero();              // Set cdr sources to zero
 
   // Prepare for k1 advance
-  this->compute_E_into_scratch();                       // Compute E into scratch storage by using m_poisson->m_state
-  this->compute_cdr_velo();       // Compute cdr velocities using what is available in solvers and E_scratch
-  this->compute_cdr_eb_states();  // Compute cdr EB states using what is available in solvers and E_scratch
-  this->compute_cdr_diffco();     // Compute cdr diffusion coefficients using what is available in solvers..
-  this->compute_cdr_fluxes();     // Compute cdr fluxes. Call plasma_kinetics and update boundary conditions
-  this->compute_sigma_flux();     // Compute sigma flux. Does the sum of cdr_fluxes
+  this->compute_E_into_scratch();   // Compute E into scratch storage by using m_poisson->m_state
+  this->compute_cdr_velo_using_solver_states(m_time);   // Compute cdr velocities using what is available in solvers and E_scratch
+  this->compute_cdr_eb_states_using_solver_states();    // Compute cdr EB states using what is available in solvers and E_scratch
+  this->compute_cdr_diffco_using_solver_states(m_time); // Compute cdr diffusion coefficients using what is available in solvers..
+  this->compute_cdr_fluxes_using_solver_states(m_time); // Compute cdr fluxes. Call plasma_kinetics and update boundary conditions
+  this->compute_sigma_flux_using_solver_states();       // Compute sigma flux. Does the sum of cdr_fluxes
 
   // Do the k1-advance into scratch storages
   this->advance_cdr_k1(a_dt);     // First Runge Kutta stage. This computes k1 into scratch and a temporary state into the solver
@@ -459,12 +459,14 @@ void rk2_stiff::advance_advection_diffusion(const Real a_dt){
     }
   }
 
-  // Do the same shit all over again, but do the k2 advance at the end
-  this->compute_cdr_velo();
-  this->compute_cdr_diffco();
-  this->compute_cdr_eb_states();
-  this->compute_cdr_fluxes();
-  this->compute_sigma_flux();
+  // Do the same shit all over again, but solvers now contain the intermediately advanced states. Also, we
+  // need to take the remainder of the time step. 
+  const Real time_k1 = m_time + m_alpha*a_dt;
+  this->compute_cdr_velo_using_solver_states(time_k1);
+  this->compute_cdr_diffco_using_solver_states(time_k1);
+  this->compute_cdr_eb_states_using_solver_states();
+  this->compute_cdr_fluxes_using_solver_states(time_k1);
+  this->compute_sigma_flux_using_solver_states();
   
   // Do the k2 advance back into solver states. 
   this->advance_cdr_k2(a_dt);
@@ -483,21 +485,153 @@ void rk2_stiff::advance_advection_diffusion(const Real a_dt){
 }
 
 void rk2_stiff::set_cdr_sources_to_zero(){
+  CH_TIME("rk2_stiff::set_cdr_sources_to_zero");
+  if(m_verbosity > 2){
+    pout() << "rk2_stiff::set_cdr_sources_to_zero" << endl;
+  }
+  
+  m_cdr->set_source(0.0);
 }
 
-void rk2_stiff::compute_cdr_velo(){
+void rk2_stiff::compute_cdr_velo_using_solver_states(const Real a_time){
+  CH_TIME("rk2_stiff::compute_cdr_velo_using_solver_states");
+  if(m_verbosity > 2){
+    pout() << "rk2_stiff::compute_cdr_velo_using_solver_states" << endl;
+  }
+
+  Vector<EBAMRCellData*> states     = m_cdr->get_states();
+  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
+  this->compute_cdr_velocities(velocities, states, m_poisson_scratch->get_E_cell(), a_time);
 }
 
-void rk2_stiff::compute_cdr_eb_states(){
+void rk2_stiff::compute_cdr_eb_states_using_solver_states(){
+  CH_TIME("rk2_stiff::compute_cdr_eb_states_using_solver_states");
+  if(m_verbosity > 5){
+    pout() << "rk2_stiff::compute_cdr_eb_states_using_solver_states" << endl;
+  }
+
+  Vector<EBAMRIVData*>   eb_gradients;
+  Vector<EBAMRIVData*>   eb_states;
+  Vector<EBAMRCellData*> cdr_states;
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+
+    cdr_states.push_back(&(solver->get_state()));
+    eb_states.push_back(&(storage->get_eb_state()));
+    eb_gradients.push_back(&(storage->get_eb_grad()));
+  }
+
+  this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
+  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+
 }
 
-void rk2_stiff::compute_cdr_diffco(){
+void rk2_stiff::compute_cdr_diffco_using_solver_states(const Real a_time){
+  CH_TIME("rk2::compute_cdr_diffco_using_solver_states");
+  if(m_verbosity > 5){
+    pout() << "rk2::compute_cdr_diffco_using_solver_states" << endl;
+  }
+
+  const int num_species = m_plaskin->get_num_species();
+
+  Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
+  Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();
+  Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
+
+  const EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
+  const EBAMRIVData& E_eb     = m_poisson_scratch->get_E_eb();
+
+  // Get extrapolated states
+  Vector<EBAMRIVData*> eb_states(num_species);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    eb_states[idx] = &(storage->get_eb_state());
+  }
+  
+  this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, a_time);
+  this->compute_cdr_diffco_eb(diffco_eb,     eb_states,  E_eb,   a_time);
 }
 
-void rk2_stiff::compute_cdr_fluxes(){
+void rk2_stiff::compute_cdr_fluxes_using_solver_states(const Real a_time){
+    CH_TIME("rk2::compute_cdr_fluxes_using_solver_states");
+  if(m_verbosity > 5){
+    pout() << "rk2::compute_cdr_fluxes_using_solver_states" << endl;
+  }
+  
+  Vector<EBAMRIVData*> cdr_fluxes;
+  Vector<EBAMRIVData*> extrap_cdr_fluxes;
+  Vector<EBAMRIVData*> extrap_cdr_densities;
+  Vector<EBAMRIVData*> extrap_cdr_velocities;
+  Vector<EBAMRIVData*> extrap_cdr_gradients;
+  Vector<EBAMRIVData*> extrap_rte_fluxes;
+
+  cdr_fluxes = m_cdr->get_ebflux();
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRIVData& dens_eb = storage->get_eb_state();
+    EBAMRIVData& velo_eb = storage->get_eb_velo();
+    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& grad_eb = storage->get_eb_grad();
+
+    extrap_cdr_densities.push_back(&dens_eb);  // Already been computed
+    extrap_cdr_velocities.push_back(&velo_eb);
+    extrap_cdr_fluxes.push_back(&flux_eb);
+    extrap_cdr_gradients.push_back(&grad_eb);  // Already been computed
+  }
+
+  // Extrapolate densities, velocities, and fluxes
+  Vector<EBAMRCellData*> cdr_densities = m_cdr->get_states();
+  Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
+  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->get_phase());
+  this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  //  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // Already been done, no?
+
+  // Compute RTE flux on the boundary
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    solver->compute_boundary_flux(flux_eb, solver->get_state());
+    extrap_rte_fluxes.push_back(&flux_eb);
+  }
+
+  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+
+  this->compute_cdr_fluxes(cdr_fluxes,
+			   extrap_cdr_fluxes,
+			   extrap_cdr_densities,
+			   extrap_cdr_velocities,
+			   extrap_cdr_gradients,
+			   extrap_rte_fluxes,
+			   E,
+			   a_time);
 }
 
-void rk2_stiff::compute_sigma_flux(){
+void rk2_stiff::compute_sigma_flux_using_solver_states(){
+  CH_TIME("rk2::compute_sigma_flux_using_solver_states");
+  if(m_verbosity > 5){
+    pout() << "rk2::compute_sigma_flux_using_solver_states" << endl;
+  }
+
+  EBAMRIVData& flux = m_sigma->get_flux();
+  data_ops::set_value(flux, 0.0);
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const EBAMRIVData& solver_flux          = solver->get_ebflux();
+
+    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+  }
+
+  m_sigma->reset_cells(flux);
 }
 
 void rk2_stiff::advance_cdr_k1(const Real a_dt){
