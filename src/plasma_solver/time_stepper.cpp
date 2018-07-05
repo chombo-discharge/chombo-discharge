@@ -714,7 +714,6 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    MayDay::Abort("stop");
     const int idx = solver_it.get_solver();
     m_amr->average_down(*a_source[idx], rte_phase);
   }
