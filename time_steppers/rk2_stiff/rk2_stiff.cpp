@@ -15,6 +15,8 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
+#define debug_source 0
+
 extern "C" void FORT_SOLVE_LU(int* N, double* J, double* F, int* INFO);
 
 typedef rk2_stiff::cdr_storage     cdr_storage;
@@ -126,7 +128,7 @@ Real rk2_stiff::advance(const Real a_dt){
 
   this->cache_solutions(); // Cache old solutions. Used in case the time step is rejected. 
 
-  if(m_do_adv_diff) {                         // Rules for advective advance: After this, cdr solvers contain the advected/diffused
+  if(m_do_adv_diff) {                         // Rules for advective advance: 
     this->advance_advection_diffusion(a_dt);  // states, and the poisson solver contains the updated potential after advection.
   }                                           // The sigma solver is also updated, while scratch storage contains junk.
 
@@ -172,7 +174,7 @@ bool rk2_stiff::advance_sources(const Real a_dt){
   this->setup_newton_iterates(iterates);       // Set up target iterates. This iterates directly in the solver
   this->compute_E_into_scratch();              // Compute electric field at time step k
   this->compute_cdr_sources_for_newton_pred(); // Compute source terms at time step k
-  this->compute_trapz_rhs(a_dt);               // Compute the right-hand side for the trapezoidal discretization = n_k + 0.5*dt*S_k
+  this->compute_trapz_rhs(a_dt);               // Compute the right-hand side for the trapezoid rule = n_k + 0.5*dt*S_k
   this->explicit_euler_predict_newton(a_dt);   // Explicit Euler advance as initial guess
 
   if(m_do_poisson){
@@ -243,6 +245,7 @@ bool rk2_stiff::advance_sources(const Real a_dt){
 
 	// Irregular cells. These require more since the source term must be extrapolated. We MUST do these
 	// before regular cells because if we overwrite the regular cells the extrapolations become fuzzy
+#if debug_source
 	for (VoFIterator vofit(ivs_irr, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	  const VoFStencil& stencil = interp_stencils[lvl][dit()](vof, 0);
@@ -323,6 +326,8 @@ bool rk2_stiff::advance_sources(const Real a_dt){
 
 	}
 
+#endif
+
 	// Regular cells. Straightforward stuff
 	for (VoFIterator vofit(ivs_reg, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
@@ -402,10 +407,10 @@ bool rk2_stiff::advance_sources(const Real a_dt){
     }
     if(m_verbosity > 0){
       pout() << "rk2_stiff::advance_sources - Newton iteration " << iter
-	     << "\t Converged = " << converged
-	     << "\t Error_F = " << maxF
-	     << "\t Error_x = " << maxX
-	     << "\t Rate = " << preF/maxF
+	     << " \t Converged = " << converged
+	     << " \t Error_F = " << maxF
+	     << " \t Error_x = " << maxX
+	     << " \t Rate = " << preF/maxF
 	     << endl;
     }
 
@@ -635,15 +640,102 @@ void rk2_stiff::compute_sigma_flux_using_solver_states(){
 }
 
 void rk2_stiff::advance_cdr_k1(const Real a_dt){
+  CH_TIME("rk2_stiff::advance_cdr_k1");
+  if(m_verbosity > 5){
+    pout() << "rk2_stiff::advance_cdr_k1" << endl;
+  }
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& k1          = storage->get_k1();
+    EBAMRCellData& phi         = solver->get_state();
+    const EBAMRCellData& state = storage->get_cache();
+
+    data_ops::set_value(k1, 0.0);
+    solver->compute_rhs(k1, state, a_dt);
+
+    data_ops::set_value(phi, 0.0);
+    data_ops::incr(phi, state, 1.0);
+    data_ops::incr(phi, k1,    m_alpha*a_dt);
+
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+    data_ops::floor(phi, 0.0);
+  }
 }
 
 void rk2_stiff::advance_sigma_k1(const Real a_dt){
+    CH_TIME("rk2_stiff::advance_sigma_k1");
+  if(m_verbosity > 5){
+    pout() << "rk2_stiff::advance_sigma_k1" << endl;
+  }
+
+  const EBAMRIVData& state = m_sigma_scratch->get_cache();
+  
+  EBAMRIVData& k1  = m_sigma_scratch->get_k1();
+  EBAMRIVData& phi = m_sigma->get_state();
+  m_sigma->compute_rhs(k1);
+  data_ops::set_value(phi,   0.0);
+  data_ops::incr(phi, state, 1.0);
+  data_ops::incr(phi, k1,    m_alpha*a_dt);
+
+  m_amr->average_down(phi, m_cdr->get_phase());
+  
+  m_sigma->reset_cells(k1);
+  m_sigma->reset_cells(phi);
 }
 
 void rk2_stiff::advance_cdr_k2(const Real a_dt){
+  CH_TIME("rk2::advance_cdr_k2");
+  if(m_verbosity > 5){
+    pout() << "rk2::advance_cdr_k2" << endl;
+  }
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& state   = storage->get_cache();    // Old solution
+    EBAMRCellData& k1      = storage->get_k1();       // k1
+    EBAMRCellData& k2      = storage->get_k2();       // k2
+    EBAMRCellData& phi     = solver->get_state();     // Intermediate state, stored in solver
+
+    solver->compute_rhs(k2, phi, a_dt);               // Compute k2
+
+    // Copy old solution into solver state and do the Runge-Kutta advance
+    data_ops::set_value(phi, 1.0);
+    data_ops::incr(phi, state, 1.0);                  
+    data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha))); 
+    data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));       
+
+    m_amr->average_down(state, m_cdr->get_phase());
+    m_amr->interp_ghost(state, m_cdr->get_phase());
+
+    data_ops::floor(phi, 0.0);
+  }
 }
 
 void rk2_stiff::advance_sigma_k2(const Real a_dt){
+  CH_TIME("rk2_stiff::advance_sigma_k2");
+  if(m_verbosity > 5){
+    pout() << "rk2_stiff::advance_sigma_k2" << endl;
+  }
+  
+  EBAMRIVData& k1  = m_sigma_scratch->get_k1();
+  EBAMRIVData& k2  = m_sigma_scratch->get_k2();
+  m_sigma->compute_rhs(k2);
+
+  EBAMRIVData& phi   = m_sigma->get_state();
+  EBAMRIVData& state = m_sigma_scratch->get_cache();
+  data_ops::set_value(phi, 0.0);
+  data_ops::incr(phi, state, 1.0);
+  data_ops::incr(phi, k1, a_dt*(1 - 1./(2.*m_alpha)));
+  data_ops::incr(phi, k2, a_dt*1./(2.*m_alpha));
+
+  m_sigma->reset_cells(phi);
 }
 
 void rk2_stiff::allocate_cdr_storage(){
@@ -707,8 +799,19 @@ void rk2_stiff::cache_solutions(){
   if(m_verbosity > 2){
     pout() << "rk2_stiff::cache_solutions" << endl;
   }
+  return;
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-  // Not implemented...
+    const EBAMRCellData& state = solver->get_state();
+    EBAMRCellData cache = storage->get_cache();
+
+    data_ops::set_value(cache, 0.0);
+    data_ops::incr(cache, state, 1.0);
+  }
+
+  //  MayDay::Abort("rk2_stiff::cache solutions - really need to copy everything over into the respective caches...");
 }
 
 void rk2_stiff::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
