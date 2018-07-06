@@ -232,7 +232,7 @@ public:
   /*!
     @brief Compute the largest possible source time step (for explicit methods
   */
-  virtual Real compute_source_dt();
+  virtual Real compute_source_dt(const Real a_max, const Real a_tolerance);
   
   /*!
     @brief Compute the total mass in m_state

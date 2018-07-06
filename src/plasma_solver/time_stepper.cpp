@@ -17,8 +17,10 @@
 time_stepper::time_stepper(){
   this->set_verbosity(1);
   this->set_cfl(0.8);
-  this->set_relax_time(2.0);
+  this->set_relax_time(1.0);
   this->set_source_growth(1.E10);
+  this->set_source_growth_tolerance(0.1);
+  this->set_source_growth_elec_only(true);
   this->set_min_dt(0.0);
   this->set_max_dt(1.E99);
   this->set_fast_rte(1);
@@ -836,7 +838,7 @@ void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::diffusion;
   }
 
-  const Real dt_src = m_src_growth*m_cdr->compute_source_dt();
+  const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
   if(dt_src < dt){
     dt = dt_src;
     a_timecode = time_code::source;
@@ -1590,6 +1592,35 @@ void time_stepper::set_source_growth(const Real a_src_growth){
   pp.query("source_growth", m_src_growth);
   if(m_src_growth < 0.0){
     m_src_growth = a_src_growth;
+  }
+}
+
+void time_stepper::set_source_growth_tolerance(const Real a_src_tolerance){
+  m_src_tolerance = a_src_tolerance;
+
+  ParmParse pp("time_stepper");
+  pp.query("source_tolerance", m_src_tolerance);
+  if(m_src_tolerance < 0.0){
+    m_src_tolerance = a_src_tolerance;
+  }
+}
+
+void time_stepper::set_source_growth_elec_only(const bool a_src_elec_only){
+  m_src_elec_only = a_src_elec_only;
+
+  ParmParse pp("time_stepper");
+  std::string str;
+  if(pp.contains("source_elec_only")){
+    pp.get("source_elec_only", str);
+    if(str == "true"){
+      m_src_elec_only = true;
+    }
+    else if(str == "false"){
+      m_src_elec_only = false;
+    }
+    else{
+      MayDay::Abort("time_stepper::set_source_growth_elec_only - ParmParse can't get 'source_elec_only'");
+    }
   }
 }
 

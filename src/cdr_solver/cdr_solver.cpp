@@ -1443,21 +1443,17 @@ Real cdr_solver::compute_diffusive_dt(){
   return min_dt;
 }
 
-Real cdr_solver::compute_source_dt(){
+Real cdr_solver::compute_source_dt(const Real a_max, const Real a_tolerance){
   CH_TIME("cdr_solver::compute_source_dt");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_source_dt" << endl;
   }
 
-  const Real tolerance = 1.E-6;
   const int comp = 0;
-  Real max, min;
-  data_ops::get_max_min(max, min, m_state, comp);
-
-
+  
   Real min_dt = 1.E99;
 
-  if(max > 0.0){
+  if(a_max > 0.0){
     const int finest_level = m_amr->get_finest_level();
     for (int lvl = 0; lvl <= finest_level; lvl++){
       const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -1479,7 +1475,7 @@ Real cdr_solver::compute_source_dt(){
 	  const Real src = source(vof, comp);
 
 	  Real thisdt = 1.E99;
-	  if(Abs(phi) > tolerance*max){
+	  if(Abs(phi) > a_tolerance*a_max && src > 0.0){
 	    thisdt = Abs(phi/src);
 	  }
 	  min_dt = Min(min_dt, thisdt);

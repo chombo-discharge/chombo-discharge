@@ -175,7 +175,7 @@ public:
   /*!
     @brief Get largest possible time step for source term
   */
-  virtual Real compute_source_dt();
+  virtual Real compute_source_dt(const Real a_tolerance, const bool a_elec_only);
 
   /*!
     @brief Compute total charge in computational region

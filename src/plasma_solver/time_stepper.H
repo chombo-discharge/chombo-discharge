@@ -374,6 +374,16 @@ public:
   virtual void set_source_growth(const Real a_src_growth);
 
   /*!
+    @brief Set source growth
+  */
+  virtual void set_source_growth_tolerance(const Real a_src_tolerance);
+
+  /*!
+    @brief Set source growth
+  */
+  virtual void set_source_growth_elec_only(const bool a_src_elec_only);
+
+  /*!
     @brief Set the physical domain
   */
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
@@ -610,6 +620,11 @@ protected:
   Real m_time;
 
   /*!
+    @brief Tolerance for source term growth
+  */
+  Real m_src_tolerance;
+
+  /*!
     @brief Verbosity
   */
   int m_verbosity;
@@ -633,6 +648,13 @@ protected:
     @brief Current step
   */
   int m_step;
+
+  /*!
+    @brief Do source term time step restriction only for electrons
+    @details If this one is true, compute_dt passes information down the toolchain to only compute the source term
+    restriction time for the first species defined in the plasma kinetics
+  */
+  bool m_src_elec_only;
 };
 
 #endif

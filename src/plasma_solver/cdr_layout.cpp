@@ -11,6 +11,7 @@
 #include "cdr_gdnv.H"
 #include "cdr_muscl.H"
 #include "units.H"
+#include "data_ops.H"
 
 #include <ParmParse.H>
 
@@ -374,19 +375,35 @@ Real cdr_layout::compute_diffusive_dt(){
   return dt;
 }
 
-Real cdr_layout::compute_source_dt(){
+Real cdr_layout::compute_source_dt(const Real a_tolerance, const bool a_elec_only){
   CH_TIME("cdr_layout::compute_source_dt");
   if(m_verbosity > 5){
     pout() << "cdr_layout::compute_source_dt" << endl;
+  }
+
+  const int comp = 0;
+  
+  Real max = 0.0;
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    Real cur_max, cur_min;
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    data_ops::get_max_min(cur_max, cur_min, solver->get_state(), comp);
+    max = Max(max, cur_max);
+    if(a_elec_only){
+      break;
+    }
   }
 
   Real dt = 1.E99;
   
   for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    const Real this_dt = solver->compute_source_dt();
+    const Real this_dt = solver->compute_source_dt(max, a_tolerance);
 
     dt = Min(dt, this_dt);
+    if(a_elec_only){
+      break;
+    }
   }
 
   return dt;
