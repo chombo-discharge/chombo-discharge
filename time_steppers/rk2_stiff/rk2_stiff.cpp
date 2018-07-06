@@ -28,7 +28,7 @@ rk2_stiff::rk2_stiff(){
   m_alpha    = 1.0;
   m_tol_x    = 1.E-8;
   m_tol_f    = 1.E-8;
-  m_EPS      = 1.E-3;
+  m_EPS      = 1.E-6;
   m_max_iter = 10;
   m_simpi    = true;
 
@@ -47,6 +47,7 @@ rk2_stiff::rk2_stiff(){
     pp.query("solution_tolerance",    m_tol_x);
     pp.query("function_tolerance",    m_tol_f);
     pp.query("max_newton_iter",       m_max_iter);
+    pp.query("fdiff_eps",             m_EPS);
     
     if(pp.contains("coupling")){
       pp.query("coupling", str);
@@ -126,16 +127,19 @@ Real rk2_stiff::advance(const Real a_dt){
     pout() << "rk2_stiff::advance" << endl;
   }
 
-  this->cache_solutions(); // Cache old solutions. Used in case the time step is rejected. 
+  this->cache_solutions(); // Cache old solutions. Used in case the time step is rejected.
 
-  if(m_do_adv_diff) {                         // Rules for advective advance: 
-    this->advance_advection_diffusion(a_dt);  // states, and the poisson solver contains the updated potential after advection.
-  }                                           // The sigma solver is also updated, while scratch storage contains junk.
-
+  // Source term advancement always comes first, because this is the only one
+  // that might require adjustments to the time step
   bool converged_source = true;
   if(m_do_source){
     converged_source = this->advance_sources(a_dt);   // Source term advance. 
   }
+
+  // Advection-diffusion dance
+  if(m_do_adv_diff) {   
+    this->advance_advection_diffusion(a_dt);  
+  }                                           
 
   // Put solver back in useable state so that we can reliably compute the next time step. 
   this->compute_cdr_velocities();
@@ -170,7 +174,7 @@ bool rk2_stiff::advance_sources(const Real a_dt){
 
   // Prepare for Newton iteration
   Vector<EBAMRCellData*> iterates;
-  this->compute_dnj();                        // Get tolerances for the finite difference evaluation 
+  this->compute_dnj();                         // Get tolerances for the finite difference evaluation 
   this->setup_newton_iterates(iterates);       // Set up target iterates. This iterates directly in the solver
   this->compute_E_into_scratch();              // Compute electric field at time step k
   this->compute_cdr_sources_for_newton_pred(); // Compute source terms at time step k
@@ -442,7 +446,7 @@ void rk2_stiff::advance_advection_diffusion(const Real a_dt){
   this->set_cdr_sources_to_zero();              // Set cdr sources to zero
 
   // Prepare for k1 advance
-  this->compute_E_into_scratch();   // Compute E into scratch storage by using m_poisson->m_state
+  this->compute_E_into_scratch();                       // Compute E into scratch storage by using m_poisson->m_state
   this->compute_cdr_velo_using_solver_states(m_time);   // Compute cdr velocities using what is available in solvers and E_scratch
   this->compute_cdr_eb_states_using_solver_states();    // Compute cdr EB states using what is available in solvers and E_scratch
   this->compute_cdr_diffco_using_solver_states(m_time); // Compute cdr diffusion coefficients using what is available in solvers..
@@ -456,8 +460,10 @@ void rk2_stiff::advance_advection_diffusion(const Real a_dt){
   this->compute_E_into_scratch(); // Compute E using the potential that we got. Put the result in scratch. 
   if(m_do_rte){
     if(m_rte->is_stationary()){
-      const Real dummy = 0.0;
-      this->solve_rte(dummy);      // Compute RTE equations after the k1 advance
+      if((m_step + 1) % m_fast_rte == 0){
+	const Real dummy = 0.0;
+	this->solve_rte(dummy);      // Compute RTE equations after the k1 advance
+      }
     }
     else{
       MayDay::Abort("rk2_stiff::advance_advection_diffusion - transient RTE is not supported for this time_stepper");
@@ -472,7 +478,7 @@ void rk2_stiff::advance_advection_diffusion(const Real a_dt){
   this->compute_cdr_eb_states_using_solver_states();
   this->compute_cdr_fluxes_using_solver_states(time_k1);
   this->compute_sigma_flux_using_solver_states();
-  
+
   // Do the k2 advance back into solver states. 
   this->advance_cdr_k2(a_dt);
   this->advance_sigma_k2(a_dt);
@@ -480,8 +486,10 @@ void rk2_stiff::advance_advection_diffusion(const Real a_dt){
   this->compute_E_into_scratch();
   if(m_do_rte){
     if(m_rte->is_stationary()){
-      const Real dummy = 0.0;
-      this->solve_rte(dummy); // Compute RTE equations after the k2 advance
+      if((m_step + 1) % m_fast_rte == 0){
+	const Real dummy = 0.0;
+	this->solve_rte(dummy); // Compute RTE equations after the k2 advance
+      }
     }
     else{
       MayDay::Abort("rk2_stiff::advance_advection_diffusion - transient RTE is not supported for this time_stepper");
@@ -705,14 +713,15 @@ void rk2_stiff::advance_cdr_k2(const Real a_dt){
 
     solver->compute_rhs(k2, phi, a_dt);               // Compute k2
 
-    // Copy old solution into solver state and do the Runge-Kutta advance
-    data_ops::set_value(phi, 1.0);
-    data_ops::incr(phi, state, 1.0);                  
-    data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha))); 
-    data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));       
 
-    m_amr->average_down(state, m_cdr->get_phase());
-    m_amr->interp_ghost(state, m_cdr->get_phase());
+    // Copy old solution into solver state and do the Runge-Kutta advance
+    data_ops::set_value(phi, 0.0);
+    data_ops::incr(phi, state, 1.0);                  
+    data_ops::incr(phi, k1, a_dt*(1 - 1./(2.*m_alpha))); 
+    data_ops::incr(phi, k2, a_dt*1./(2.*m_alpha));       
+
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_amr->interp_ghost(phi, m_cdr->get_phase());
 
     data_ops::floor(phi, 0.0);
   }
@@ -799,7 +808,7 @@ void rk2_stiff::cache_solutions(){
   if(m_verbosity > 2){
     pout() << "rk2_stiff::cache_solutions" << endl;
   }
-  return;
+
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
