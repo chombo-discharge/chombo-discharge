@@ -133,6 +133,7 @@ Real rk2_stiff::advance(const Real a_dt){
   // that might require adjustments to the time step
   bool converged_source = true;
   if(m_do_source){
+    MayDay::Abort("rk2_stiff::advance - This class has been parked (we need a globally convergent Newton method)");
     converged_source = this->advance_sources(a_dt);   // Source term advance. 
   }
 
