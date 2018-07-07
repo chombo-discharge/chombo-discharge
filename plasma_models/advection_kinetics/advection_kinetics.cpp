@@ -117,6 +117,7 @@ advection_kinetics::phi_advect::phi_advect() {
   m_diffusive = false;
   m_mobile    = true;
   m_charge    = 1;
+  m_pulse     = "square";
   
   // Get parameters from input script
   {
@@ -138,6 +139,15 @@ advection_kinetics::phi_advect::phi_advect() {
 	m_mobile = false;
       }
     }
+    if(pp.contains("pulse_shape")){
+      pp.get("pulse_shape", str);
+      if(str == "square"){
+	m_pulse = "square";
+      }
+      if(str == "gaussian"){
+	m_pulse = "gaussian";
+      }
+    }
   }
 }
 
@@ -149,11 +159,19 @@ Real advection_kinetics::phi_advect::initial_data(const RealVect a_pos, const Re
 
   const RealVect new_pos = a_pos - m_center;
 
-  Real ret = 1.0;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(new_pos[dir] > 0.5*m_width[dir] || new_pos[dir] < -0.5*m_width[dir]){
-      ret = 0.0;
+  Real ret;
+  if(m_pulse == "square"){
+    ret = 1.0;
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(new_pos[dir] > 0.5*m_width[dir] || new_pos[dir] < -0.5*m_width[dir]){
+	ret = 0.0;
+      }
     }
+  }
+  else if(m_pulse == "gaussian"){
+    const RealVect factor = new_pos.vectorLength()/m_width;
+    const Real flen = factor.vectorLength();
+    ret = exp(-0.5*flen*flen);
   }
 
   return ret;

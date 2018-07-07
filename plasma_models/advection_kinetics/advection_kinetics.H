@@ -80,6 +80,8 @@ public:
     
   protected:
 
+    std::string m_pulse;
+
     RealVect m_center;
     RealVect m_width;
     

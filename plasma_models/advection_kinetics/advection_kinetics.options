@@ -4,3 +4,4 @@
 advection_kinetics.square_center = 0.0  0.0  0.0  # Center of square wave pulse
 advection_kinetics.square_width  = 0.1  0.1  0.1  # Total width of square wave pulse
 advection_kinetics.mobile        = true           # Turn on (true) or off (false) mobility
+advection_kinetics.pulse_shape   = square         # 'square' or 'gaussian'
