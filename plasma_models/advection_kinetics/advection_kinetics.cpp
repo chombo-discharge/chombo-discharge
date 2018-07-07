@@ -169,7 +169,9 @@ Real advection_kinetics::phi_advect::initial_data(const RealVect a_pos, const Re
     }
   }
   else if(m_pulse == "gaussian"){
-    const RealVect factor = new_pos.vectorLength()/m_width;
+    const RealVect v1 = new_pos;
+    const RealVect v2 = m_width;
+    const RealVect factor = RealVect(D_DECL(v1[0]/v2[0], v1[1]/v2[1], v1[2]/v2[2]));
     const Real flen = factor.vectorLength();
     ret = exp(-0.5*flen*flen);
   }
