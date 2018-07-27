@@ -4,6 +4,7 @@
 /doc/html/**
 /doc/html/*
 **/doc/html/**
+**/doc/sphinx/build/html/**
 *.pyc
 **/app_builder/*.pyc
 /o
