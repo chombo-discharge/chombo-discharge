@@ -30,6 +30,7 @@ import os
 # ones.
 extensions = [
     'sphinx.ext.mathjax',
+    'sphinx.ext.extlinks',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -84,7 +85,7 @@ exclude_patterns = []
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-#show_authors = False
+show_authors = True
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -258,3 +259,8 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+extlinks = {'doxy': ('/home/marskar/plasmac/doc/doxygen/html/%s.html', None) }
+sys.path.append(os.path.abspath("/home/marskar/plasmac"))
+def setup(app):
+    app.add_stylesheet('my_theme.css')

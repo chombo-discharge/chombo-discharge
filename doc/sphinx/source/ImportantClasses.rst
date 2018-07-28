@@ -1,44 +1,26 @@
 .. _Chap:ImportantClasses:
 
-Important classes
-==================
+User API
+========
 
-.. _Chap:plasma_kinetics:
+Here, we discuss the base classes that makes up the foundation of PlasmaC.
 
-plasma_kinetics
----------------
+PlasmaC uses a division-of-labor between physical and numerical modules. For a brief introduction to these, see :ref:`Chap:Interface`. The full, internal workings of PlasmaC are too complex to provide in detail, but we attempt to provide an overview here, as well as providing a summary of the input variables for the most important base classes.
 
-.. _Chap:plasma_engine:
+If you want to view the code in full, please see the :doxy:`Doxygen API <index>`.
 
-plasma_engine
--------------
+Here are the base modules for PlasmaC, note that :ref:`Chap:plasma_kinetics`, :ref:`Chap:time_stepper`, :ref:`Chap:computational_geometry`, and :ref:`Chap:cell_tagger` are abstract, and require top-level implementation. 
 
-.. _Chap:physical_domain:
+.. toctree::
+  :maxdepth: 1
 
-physical_domain
----------------
-
-.. _Chap:amr_mesh:
-
-amr_mesh
---------
-
-.. _Chap:time_stepper:
-
-time_stepper
-------------
-
-.. _Chap:computational_geometry:
-
-computational_geometry
-----------------------
-
-.. _Chap:cell_tagger:
-
-cell_tagger
------------
-
-.. _Chap:geo_coarsener:
-
-geo_coarsener
--------------
+  PlasmaEngine
+  PlasmaKinetics
+  AmrMesh
+  PhysicalDomain
+  TimeStepper
+  ComputationalGeometry
+  CellTagger
+  GeoCoarsener
+  Species
+  Photons

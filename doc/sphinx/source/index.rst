@@ -5,7 +5,7 @@
 
 Welcome to PlasmaC's user documentation!
 ========================================
-
+	      
 PlasmaC is a scalable computer code for two- and three-dimensional simulations of low-temperature fluid plasmas in complex geometries. PlasmaC supports
 
 * Multi-material Poisson solvers
@@ -20,15 +20,15 @@ PlasmaC is built on top of Chombo, and therefore additionally features
 
 Take a look at the gallery for some examples. 
 
-This documentation is the user documentation for usage and examples on how to use PlasmaC. There is a separate doxygen API documentation of the source code. 
+This documentation is the user documentation for usage and examples on how to use PlasmaC. There is a separate :doxy:`Doxygen API <index>` documentation of the source code. 
 
 .. toctree::
    :maxdepth: 1
 
    Introduction
-   WorkedExample
+   NewSimulations
+   RunningSimulations
    Interface
-   CodeStructure
    ImportantClasses
    Gallery
 
@@ -38,3 +38,8 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Contact us
+==========
+
+Send us an email at robert.marskar@sintef.no

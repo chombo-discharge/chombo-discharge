@@ -1,14 +1,14 @@
 .. _Chap:WorkedExample:
 
 Worked Example
-==============
+--------------
 
 Once you have set up PlasmaC, it is much easier to use. The coding style in PlasmaC allows user to create simulation applications from existing modules. In this section we show to to build mini-apps using a Python interface that autogenerates the missing implementation pieces, sets up a simulation directory, and a makefile.
 
 We will simulate a positive streamer discharge from a needle in a :math:`(1\textrm{cm})^2` domain. In this particular case, we will use the following
 
 Setting up the simulation case
-------------------------------
+______________________________
 
 1. The Morrow-Lowke plasma model for air, which resides in $(PLASMAC_HOME)/plasma_models
 2. A prebuilt geometry describing a cylindrical rod for electrode, which resides in $(PLASMAC_HOME)/geometries_prebuilt
@@ -28,7 +28,7 @@ This little Python script is responsible for setting up mini-app. The flags that
 
 
 Compiling the mini-app
-----------------------
+______________________
 
 The compilation of the mini-app is normally straightforward: You simply navigate to the location of wherever you installed your mini-app and compile::
 
@@ -38,7 +38,7 @@ If everything is set up correctly, this will compile your application. Here, we'
 
 If your application did not compile, something has gone wrong. Typically, there are a ton of things that can go wrong during the compilation stage; for example missing compilers, no HDF5 library (or wrong path specified). To troubleshoot miscompilations, you should make sure that
 
-1. Chombo has a well-defined Make.defs.local file. See :ref:`GettingStarted`.
+1. Chombo has a well-defined Make.defs.local file. See :ref:`Chap:GettingStarted`. 
 2. HDF5 is installed with MPI
 3. Your PLASMAC_HOME and CHOMBO_HOME variables are set up correctly.
 
@@ -46,7 +46,7 @@ Usually, once these three things are asserted, compilation is normally successfu
 
 
 Defining the simulation case
-----------------------------
+____________________________
 
 When one uses the Python script for setting up simulation cases, all input parameters for every class that is a part of the simulation case are copied to a template file called template.inputs. This file contains all the input variables that the developer has made available for your implementation classes. Usually, there are hundreds of parameters that can be tuned. 
 
@@ -77,4 +77,6 @@ For our simulation, we will only modify the computational domain, the geometry, 
 
   
 Running the simulation
-----------------------
+______________________
+
+Not written yet
