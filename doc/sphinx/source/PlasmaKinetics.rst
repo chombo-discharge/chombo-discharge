@@ -8,10 +8,10 @@ plasma_kinetics
 There are no default input parameters for :ref:`Chap:plasma_kinetics`, as users must generally implement their own kinetics. A successful implementation of :ref:`Chap:plasma_kinetics` has the following:
 
 * Instantiated :ref:`Chap:species`
-* Instantiated :ref:`Chap:photons`
+* Instantiated :ref:`Chap:photon`
 * Implemented the core functionality
 
-Based on these three points, PlasmaC will automatically allocate the specified numbers of convection-diffusion-reaction and radiative transport solvers. For information on how to interface into the CDR solvers, see :ref:`Chap:species`. Likewise, see :ref:`Chap:photons` for how to interface into the RTE solvers. 
+Based on these three points, PlasmaC will automatically allocate the specified numbers of convection-diffusion-reaction and radiative transport solvers. For information on how to interface into the CDR solvers, see :ref:`Chap:species`. Likewise, see :ref:`Chap:photon` for how to interface into the RTE solvers. 
 
 Implementation of the core functionality is comparatively straightforward. In the constructor, the user should fetch his input parameters (if he has any) and **must** instantiate all species and photons in the internal containers. When the class is used by PlasmaC later on, all arguments in the core functions follow that ordering. The core functionality is given by the following functions: 
 

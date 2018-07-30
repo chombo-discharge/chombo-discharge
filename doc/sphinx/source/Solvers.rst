@@ -1,6 +1,6 @@
-.. _Chap:photons:
+.. _Chap:Solvers:
 
-photons
+Solvers
 -------
 
 Not written yet
