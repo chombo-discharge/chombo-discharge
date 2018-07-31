@@ -31,9 +31,9 @@ Table of contents
    :maxdepth: 3
 
    Introduction
+   Interface
    NewSimulations
    RunningSimulations
-   Interface
    ImportantClasses
    Solvers
    Visualization
