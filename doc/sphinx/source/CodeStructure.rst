@@ -3,4 +3,11 @@
 Code Structure
 --------------
 
-This is not written yet
+Here, we provide an overview of the PlasmaC directories and coding styles.
+
+.. toctree::
+  :maxdepth: 3
+
+  Directories
+  InputVariables
+  Chombo

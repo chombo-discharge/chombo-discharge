@@ -11,10 +11,10 @@ Welcome to PlasmaC's user documentation!
 PlasmaC is a scalable computer code for two- and three-dimensional simulations of low-temperature fluid plasmas in complex geometries. PlasmaC supports
 
 * Multi-material Poisson solvers
-* Diffusion radiation transpor tsolvers
+* Diffusion radiation transport
 * Convection diffusion reaction systems
 
-PlasmaC is built on top of Chombo, and therefore additionally features
+PlasmaC is built on top of `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_, and therefore additionally features
 
 * Cut-cell representation of multi-material geometries
 * Patch based adaptive mesh refinement
