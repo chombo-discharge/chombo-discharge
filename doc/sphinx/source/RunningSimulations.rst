@@ -1,7 +1,7 @@
 .. _Chap:RunningSimulations:
 
-Running your simulations
-========================
+Running simulations
+===================
 
 This is not written yet...
 

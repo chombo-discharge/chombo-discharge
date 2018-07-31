@@ -1,0 +1,246 @@
+\hypertarget{classultralw__tagger}{}\section{ultralw\+\_\+tagger Class Reference}
+\label{classultralw__tagger}\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+
+
+Lightweight tagging class. Only tags cells based on cdr densities and field magnitude.  
+
+
+
+
+{\ttfamily \#include $<$ultralw\+\_\+tagger.\+H$>$}
+
+
+
+Inheritance diagram for ultralw\+\_\+tagger\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=157pt]{classultralw__tagger__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for ultralw\+\_\+tagger\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=157pt]{classultralw__tagger__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classultralw__tagger_a34a0b2c7d905916ed62eff37d92b2a6d}{ultralw\+\_\+tagger} (const int a\+\_\+num\+\_\+tracers=0)
+\begin{DoxyCompactList}\small\item\em Weak constructor, must subsequently call define. \end{DoxyCompactList}\item 
+\hyperlink{classultralw__tagger_a3c4cacd0603ce2a60664b7878307917c}{$\sim$ultralw\+\_\+tagger} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+void \hyperlink{classultralw__tagger_a82fe9b2986b96a46de5a05db97d5c5c6}{compute\+\_\+tracers} ()
+\begin{DoxyCompactList}\small\item\em Compute tracer fields. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classultralw__tagger_a02e5799e731a8f70f850ce6f8edcd4c7}{allocate\+\_\+storage} ()
+\begin{DoxyCompactList}\small\item\em Allocate memory. \end{DoxyCompactList}\item 
+void \hyperlink{classultralw__tagger_ac5d862d05081de45291c2c26889d2d69}{deallocate\+\_\+storage} ()
+\begin{DoxyCompactList}\small\item\em Deallocate memory. \end{DoxyCompactList}\item 
+void \hyperlink{classultralw__tagger_a25955e67cc69befa0a946a747ee7008c}{compute\+\_\+E} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+grad\+\_\+E)
+\begin{DoxyCompactList}\small\item\em Compute electric field. \end{DoxyCompactList}\item 
+virtual Vector$<$ Real $>$ \hyperlink{classultralw__tagger_a86b0554ce21cd8a1be6ed08d4a6d1132}{tracer} (const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const Real\+Vect \&a\+\_\+E, const Real \&a\+\_\+min\+\_\+E, const Real \&a\+\_\+max\+\_\+E, const Real\+Vect \&a\+\_\+grad\+\_\+E, const Real \&a\+\_\+min\+\_\+grad\+\_\+E, const Real \&a\+\_\+max\+\_\+grad\+\_\+E)=0
+\begin{DoxyCompactList}\small\item\em Compute tracer field. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classultralw__tagger_a8b1c65a9b152a34432d4a21f0ec0cfb9}{coarsen\+\_\+cell} (const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0
+\begin{DoxyCompactList}\small\item\em Coarsen a cell based on a tracer field. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classultralw__tagger_aad21e13154dcd792f68543a2eced5d4c}{refine\+\_\+cell} (const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0
+\begin{DoxyCompactList}\small\item\em Refine a cell based on a tracer field. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \hyperlink{classultralw__tagger_a3eb79609d58f9214f49644e75f7ddae2}{m\+\_\+scratch}
+\begin{DoxyCompactList}\small\item\em Scratch storage. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \hyperlink{classultralw__tagger_acae6221149779a9a0001e32f7b582057}{m\+\_\+E}
+\begin{DoxyCompactList}\small\item\em Storage for electric field. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \hyperlink{classultralw__tagger_a525b4c1b6d58c0d3139f38cffed07fac}{m\+\_\+grad\+\_\+E}
+\begin{DoxyCompactList}\small\item\em Storage for electric field. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Lightweight tagging class. Only tags cells based on cdr densities and field magnitude. 
+
+Definition at line 16 of file ultralw\+\_\+tagger.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{ultralw\+\_\+tagger(const int a\+\_\+num\+\_\+tracers=0)}{ultralw_tagger(const int a_num_tracers=0)}}]{\setlength{\rightskip}{0pt plus 5cm}ultralw\+\_\+tagger\+::ultralw\+\_\+tagger (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+num\+\_\+tracers = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}\hypertarget{classultralw__tagger_a34a0b2c7d905916ed62eff37d92b2a6d}{}\label{classultralw__tagger_a34a0b2c7d905916ed62eff37d92b2a6d}
+
+
+Weak constructor, must subsequently call define. 
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!````~ultralw\+\_\+tagger@{$\sim$ultralw\+\_\+tagger}}
+\index{````~ultralw\+\_\+tagger@{$\sim$ultralw\+\_\+tagger}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{$\sim$ultralw\+\_\+tagger()}{~ultralw_tagger()}}]{\setlength{\rightskip}{0pt plus 5cm}ultralw\+\_\+tagger\+::$\sim$ultralw\+\_\+tagger (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classultralw__tagger_a3c4cacd0603ce2a60664b7878307917c}{}\label{classultralw__tagger_a3c4cacd0603ce2a60664b7878307917c}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!allocate\+\_\+storage@{allocate\+\_\+storage}}
+\index{allocate\+\_\+storage@{allocate\+\_\+storage}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{allocate\+\_\+storage()}{allocate_storage()}}]{\setlength{\rightskip}{0pt plus 5cm}void ultralw\+\_\+tagger\+::allocate\+\_\+storage (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classultralw__tagger_a02e5799e731a8f70f850ce6f8edcd4c7}{}\label{classultralw__tagger_a02e5799e731a8f70f850ce6f8edcd4c7}
+
+
+Allocate memory. 
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!coarsen\+\_\+cell@{coarsen\+\_\+cell}}
+\index{coarsen\+\_\+cell@{coarsen\+\_\+cell}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{coarsen\+\_\+cell(const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0}{coarsen_cell(const RealVect &a_pos, const Real &a_time, const Real &a_dx, const int &a_lvl, const Vector< Real > &a_tracer, const Vector< RealVect > &a_grad_tracer)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool ultralw\+\_\+tagger\+::coarsen\+\_\+cell (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos, }
+\item[{const Real \&}]{a\+\_\+time, }
+\item[{const Real \&}]{a\+\_\+dx, }
+\item[{const int \&}]{a\+\_\+lvl, }
+\item[{const Vector$<$ Real $>$ \&}]{a\+\_\+tracer, }
+\item[{const Vector$<$ Real\+Vect $>$ \&}]{a\+\_\+grad\+\_\+tracer}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [pure virtual]}}\hypertarget{classultralw__tagger_a8b1c65a9b152a34432d4a21f0ec0cfb9}{}\label{classultralw__tagger_a8b1c65a9b152a34432d4a21f0ec0cfb9}
+
+
+Coarsen a cell based on a tracer field. 
+
+
+
+Implements \hyperlink{classcell__tagger_ae4b0418cb42a96bcfbcdc2a02323880e}{cell\+\_\+tagger}.
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!compute\+\_\+E@{compute\+\_\+E}}
+\index{compute\+\_\+E@{compute\+\_\+E}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+E(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+grad\+\_\+\+E)}{compute_E(EBAMRCellData &a_E, EBAMRCellData &a_grad_E)}}]{\setlength{\rightskip}{0pt plus 5cm}void ultralw\+\_\+tagger\+::compute\+\_\+E (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+grad\+\_\+E}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classultralw__tagger_a25955e67cc69befa0a946a747ee7008c}{}\label{classultralw__tagger_a25955e67cc69befa0a946a747ee7008c}
+
+
+Compute electric field. 
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!compute\+\_\+tracers@{compute\+\_\+tracers}}
+\index{compute\+\_\+tracers@{compute\+\_\+tracers}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{compute\+\_\+tracers()}{compute_tracers()}}]{\setlength{\rightskip}{0pt plus 5cm}void ultralw\+\_\+tagger\+::compute\+\_\+tracers (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classultralw__tagger_a82fe9b2986b96a46de5a05db97d5c5c6}{}\label{classultralw__tagger_a82fe9b2986b96a46de5a05db97d5c5c6}
+
+
+Compute tracer fields. 
+
+
+
+Implements \hyperlink{classcell__tagger_a29584dad2d4156e946859447dc9eac4c}{cell\+\_\+tagger}.
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!deallocate\+\_\+storage@{deallocate\+\_\+storage}}
+\index{deallocate\+\_\+storage@{deallocate\+\_\+storage}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{deallocate\+\_\+storage()}{deallocate_storage()}}]{\setlength{\rightskip}{0pt plus 5cm}void ultralw\+\_\+tagger\+::deallocate\+\_\+storage (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classultralw__tagger_ac5d862d05081de45291c2c26889d2d69}{}\label{classultralw__tagger_ac5d862d05081de45291c2c26889d2d69}
+
+
+Deallocate memory. 
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!refine\+\_\+cell@{refine\+\_\+cell}}
+\index{refine\+\_\+cell@{refine\+\_\+cell}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{refine\+\_\+cell(const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0}{refine_cell(const RealVect &a_pos, const Real &a_time, const Real &a_dx, const int &a_lvl, const Vector< Real > &a_tracer, const Vector< RealVect > &a_grad_tracer)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool ultralw\+\_\+tagger\+::refine\+\_\+cell (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos, }
+\item[{const Real \&}]{a\+\_\+time, }
+\item[{const Real \&}]{a\+\_\+dx, }
+\item[{const int \&}]{a\+\_\+lvl, }
+\item[{const Vector$<$ Real $>$ \&}]{a\+\_\+tracer, }
+\item[{const Vector$<$ Real\+Vect $>$ \&}]{a\+\_\+grad\+\_\+tracer}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [pure virtual]}}\hypertarget{classultralw__tagger_aad21e13154dcd792f68543a2eced5d4c}{}\label{classultralw__tagger_aad21e13154dcd792f68543a2eced5d4c}
+
+
+Refine a cell based on a tracer field. 
+
+
+
+Implements \hyperlink{classcell__tagger_afb51f91684b877164e2616bf205453b4}{cell\+\_\+tagger}.
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!tracer@{tracer}}
+\index{tracer@{tracer}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{tracer(const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const Real\+Vect \&a\+\_\+\+E, const Real \&a\+\_\+min\+\_\+\+E, const Real \&a\+\_\+max\+\_\+\+E, const Real\+Vect \&a\+\_\+grad\+\_\+\+E, const Real \&a\+\_\+min\+\_\+grad\+\_\+\+E, const Real \&a\+\_\+max\+\_\+grad\+\_\+\+E)=0}{tracer(const RealVect &a_pos, const Real &a_time, const Real &a_dx, const RealVect &a_E, const Real &a_min_E, const Real &a_max_E, const RealVect &a_grad_E, const Real &a_min_grad_E, const Real &a_max_grad_E)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Vector$<$Real$>$ ultralw\+\_\+tagger\+::tracer (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos, }
+\item[{const Real \&}]{a\+\_\+time, }
+\item[{const Real \&}]{a\+\_\+dx, }
+\item[{const Real\+Vect \&}]{a\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+min\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+max\+\_\+E, }
+\item[{const Real\+Vect \&}]{a\+\_\+grad\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+min\+\_\+grad\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+max\+\_\+grad\+\_\+E}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [pure virtual]}}\hypertarget{classultralw__tagger_a86b0554ce21cd8a1be6ed08d4a6d1132}{}\label{classultralw__tagger_a86b0554ce21cd8a1be6ed08d4a6d1132}
+
+
+Compute tracer field. 
+
+
+
+\subsection{Member Data Documentation}
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!m\+\_\+E@{m\+\_\+E}}
+\index{m\+\_\+E@{m\+\_\+E}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+E}{m_E}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Cell\+Data} ultralw\+\_\+tagger\+::m\+\_\+E\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classultralw__tagger_acae6221149779a9a0001e32f7b582057}{}\label{classultralw__tagger_acae6221149779a9a0001e32f7b582057}
+
+
+Storage for electric field. 
+
+
+
+Definition at line 44 of file ultralw\+\_\+tagger.\+H.
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!m\+\_\+grad\+\_\+E@{m\+\_\+grad\+\_\+E}}
+\index{m\+\_\+grad\+\_\+E@{m\+\_\+grad\+\_\+E}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+grad\+\_\+E}{m_grad_E}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Cell\+Data} ultralw\+\_\+tagger\+::m\+\_\+grad\+\_\+E\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classultralw__tagger_a525b4c1b6d58c0d3139f38cffed07fac}{}\label{classultralw__tagger_a525b4c1b6d58c0d3139f38cffed07fac}
+
+
+Storage for electric field. 
+
+
+
+Definition at line 49 of file ultralw\+\_\+tagger.\+H.
+
+\index{ultralw\+\_\+tagger@{ultralw\+\_\+tagger}!m\+\_\+scratch@{m\+\_\+scratch}}
+\index{m\+\_\+scratch@{m\+\_\+scratch}!ultralw\+\_\+tagger@{ultralw\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+scratch}{m_scratch}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Cell\+Data} ultralw\+\_\+tagger\+::m\+\_\+scratch\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classultralw__tagger_a3eb79609d58f9214f49644e75f7ddae2}{}\label{classultralw__tagger_a3eb79609d58f9214f49644e75f7ddae2}
+
+
+Scratch storage. 
+
+
+
+Definition at line 39 of file ultralw\+\_\+tagger.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/plasma\+\_\+solver/\hyperlink{ultralw__tagger_8H}{ultralw\+\_\+tagger.\+H}\end{DoxyCompactItemize}

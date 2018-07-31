@@ -1,0 +1,303 @@
+\hypertarget{classnwoebquadcfinterp}{}\section{nwoebquadcfinterp Class Reference}
+\label{classnwoebquadcfinterp}\index{nwoebquadcfinterp@{nwoebquadcfinterp}}
+
+
+Quadratic coarse-\/fine interpolation utility.  
+
+
+
+
+{\ttfamily \#include $<$nwoebquadcfinterp.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classnwoebquadcfinterp_ac5eb63519aa37060c58a858839f864e4}{nwoebquadcfinterp} (const Disjoint\+Box\+Layout \&a\+\_\+grids\+Fine, const Disjoint\+Box\+Layout \&a\+\_\+grids\+Coar, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl\+Fine, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl\+Coar, const Problem\+Domain \&a\+\_\+domain\+Coar, const int \&a\+\_\+nref, const int \&a\+\_\+nvar, const Real \&a\+\_\+dx\+Fine, const int \&a\+\_\+ghost, const Layout\+Data$<$ Int\+Vect\+Set $>$ \&a\+\_\+cfivs, const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&a\+\_\+ebis\+Ptr)
+\item 
+\hyperlink{classnwoebquadcfinterp_aebfb5a1081caa673fc4f8f4edbf77520}{$\sim$nwoebquadcfinterp} ()
+\item 
+void \hyperlink{classnwoebquadcfinterp_a0a306934ca707e2169290c1abfca604b}{coarse\+Fine\+Interp} (Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&a\+\_\+phif, const Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&a\+\_\+phic, int isrc, int idst, int inco)
+\item 
+void \hyperlink{classnwoebquadcfinterp_abb9e257dd6cd62da78c013bae7f9d7fb}{coarse\+Fine\+InterpH} (Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&a\+\_\+phif, int isrc, int idst, int inco)
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classnwoebquadcfinterp_a4d7ff4af578ff192d0169bd2a398e712}{define\+Internals} (const Layout\+Data$<$ Int\+Vect\+Set $>$ \&a\+\_\+cfivs, const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&a\+\_\+ebis\+Ptr)
+\item 
+void \hyperlink{classnwoebquadcfinterp_ad035a7960482fcc092f4a25c6561151d}{define\+Stencils} (const Layout\+Data$<$ Int\+Vect\+Set $>$ \&a\+\_\+cfivs)
+\item 
+void \hyperlink{classnwoebquadcfinterp_ac4adae5d3819feb3e59508a3a9b32700}{get\+Stencils} (Vector$<$ Ref\+Counted\+Ptr$<$ Base\+Stencil $>$ $>$ \&a\+\_\+stencils, Vector$<$ Ref\+Counted\+Ptr$<$ Base\+Index $>$ $>$ \&a\+\_\+base\+Dst\+Vo\+Fs, const Int\+Vect\+Set \&a\+\_\+cfivs, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Fine, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Co\+Fi, const Data\+Index \&a\+\_\+dit)
+\item 
+void \hyperlink{classnwoebquadcfinterp_a11fe842512397b8d869cfddd5af6398a}{get\+Stencil} (Vo\+F\+Stencil \&a\+\_\+stencil, const Vol\+Index \&a\+\_\+vof\+Fine, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Fine, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Co\+Fi, const Data\+Index \&a\+\_\+dit)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Disjoint\+Box\+Layout \hyperlink{classnwoebquadcfinterp_ac3ef73d072197f116ce498bec5d28637}{m\+\_\+grids\+Fine}
+\item 
+Disjoint\+Box\+Layout \hyperlink{classnwoebquadcfinterp_a48916b7af00c345229f5c41b5382c91f}{m\+\_\+grids\+Coar}
+\item 
+Disjoint\+Box\+Layout \hyperlink{classnwoebquadcfinterp_aab63ef9fc22a60ffecb74f7f916e2422}{m\+\_\+grids\+Co\+Fi}
+\item 
+E\+B\+I\+S\+Layout \hyperlink{classnwoebquadcfinterp_ad8747e5d6dcb3613235df12c5a72f51a}{m\+\_\+ebisl\+Fine}
+\item 
+E\+B\+I\+S\+Layout \hyperlink{classnwoebquadcfinterp_a49d4a5fcaf4fcf12714009d2c7eec3ac}{m\+\_\+ebisl\+Coar}
+\item 
+E\+B\+I\+S\+Layout \hyperlink{classnwoebquadcfinterp_a1af61857678e74133a95ec8fa9dcf49d}{m\+\_\+ebisl\+Co\+Fi}
+\item 
+Problem\+Domain \hyperlink{classnwoebquadcfinterp_a81c6feda61f3f2a1cd0f6b3c42b5e513}{m\+\_\+domain\+Coar}
+\item 
+int \hyperlink{classnwoebquadcfinterp_a2814bffc586d7cb9913d241379896025}{m\+\_\+nref}
+\item 
+int \hyperlink{classnwoebquadcfinterp_a36ee80e85ed928375f0ba2162ffe8511}{m\+\_\+nvar}
+\item 
+Real \hyperlink{classnwoebquadcfinterp_a92a63d0a83b16426c81b74f32c39629c}{m\+\_\+dx\+Fine}
+\item 
+int \hyperlink{classnwoebquadcfinterp_aa7bee9c12e43c2d6c435b6be497c1b22}{m\+\_\+ghost}
+\item 
+Layout\+Data$<$ Ref\+Counted\+Ptr$<$ Agg\+Stencil$<$ E\+B\+Cell\+F\+AB, E\+B\+Cell\+F\+AB $>$ $>$ $>$ \hyperlink{classnwoebquadcfinterp_a5b74c7be12aa17afebf582bb78ffadbc}{m\+\_\+stencil}
+\item 
+Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \hyperlink{classnwoebquadcfinterp_a04df0f05122e309194e9fb1d70912a04}{m\+\_\+buffer\+Co\+Fi}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classnwoebquadcfinterp_a3d4a579e4e9af73233d35d4e2b949ec0}{nwoebquadcfinterp} ()
+\item 
+\hyperlink{classnwoebquadcfinterp_ad4eee57df2c0f5d7022c1590f529ba05}{nwoebquadcfinterp} (\hyperlink{classnwoebquadcfinterp}{nwoebquadcfinterp} \&a\+\_\+input)
+\item 
+void \hyperlink{classnwoebquadcfinterp_a03a8b6a2374a9072469fc5c1b81fd36d}{operator=} (\hyperlink{classnwoebquadcfinterp}{nwoebquadcfinterp} \&a\+\_\+input)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Quadratic coarse-\/fine interpolation utility. 
+
+Definition at line 46 of file nwoebquadcfinterp.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{nwoebquadcfinterp(const Disjoint\+Box\+Layout \&a\+\_\+grids\+Fine, const Disjoint\+Box\+Layout \&a\+\_\+grids\+Coar, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl\+Fine, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl\+Coar, const Problem\+Domain \&a\+\_\+domain\+Coar, const int \&a\+\_\+nref, const int \&a\+\_\+nvar, const Real \&a\+\_\+dx\+Fine, const int \&a\+\_\+ghost, const Layout\+Data$<$ Int\+Vect\+Set $>$ \&a\+\_\+cfivs, const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&a\+\_\+ebis\+Ptr)}{nwoebquadcfinterp(const DisjointBoxLayout &a_gridsFine, const DisjointBoxLayout &a_gridsCoar, const EBISLayout &a_ebislFine, const EBISLayout &a_ebislCoar, const ProblemDomain &a_domainCoar, const int &a_nref, const int &a_nvar, const Real &a_dxFine, const int &a_ghost, const LayoutData< IntVectSet > &a_cfivs, const RefCountedPtr< EBIndexSpace > &a_ebisPtr)}}]{\setlength{\rightskip}{0pt plus 5cm}nwoebquadcfinterp\+::nwoebquadcfinterp (
+\begin{DoxyParamCaption}
+\item[{const Disjoint\+Box\+Layout \&}]{a\+\_\+grids\+Fine, }
+\item[{const Disjoint\+Box\+Layout \&}]{a\+\_\+grids\+Coar, }
+\item[{const E\+B\+I\+S\+Layout \&}]{a\+\_\+ebisl\+Fine, }
+\item[{const E\+B\+I\+S\+Layout \&}]{a\+\_\+ebisl\+Coar, }
+\item[{const Problem\+Domain \&}]{a\+\_\+domain\+Coar, }
+\item[{const int \&}]{a\+\_\+nref, }
+\item[{const int \&}]{a\+\_\+nvar, }
+\item[{const Real \&}]{a\+\_\+dx\+Fine, }
+\item[{const int \&}]{a\+\_\+ghost, }
+\item[{const Layout\+Data$<$ Int\+Vect\+Set $>$ \&}]{a\+\_\+cfivs, }
+\item[{const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&}]{a\+\_\+ebis\+Ptr}
+\end{DoxyParamCaption}
+)}\hypertarget{classnwoebquadcfinterp_ac5eb63519aa37060c58a858839f864e4}{}\label{classnwoebquadcfinterp_ac5eb63519aa37060c58a858839f864e4}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!````~nwoebquadcfinterp@{$\sim$nwoebquadcfinterp}}
+\index{````~nwoebquadcfinterp@{$\sim$nwoebquadcfinterp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{$\sim$nwoebquadcfinterp()}{~nwoebquadcfinterp()}}]{\setlength{\rightskip}{0pt plus 5cm}nwoebquadcfinterp\+::$\sim$nwoebquadcfinterp (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{classnwoebquadcfinterp_aebfb5a1081caa673fc4f8f4edbf77520}{}\label{classnwoebquadcfinterp_aebfb5a1081caa673fc4f8f4edbf77520}
+
+
+Definition at line 64 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{nwoebquadcfinterp()}{nwoebquadcfinterp()}}]{\setlength{\rightskip}{0pt plus 5cm}nwoebquadcfinterp\+::nwoebquadcfinterp (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classnwoebquadcfinterp_a3d4a579e4e9af73233d35d4e2b949ec0}{}\label{classnwoebquadcfinterp_a3d4a579e4e9af73233d35d4e2b949ec0}
+
+
+Definition at line 125 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{nwoebquadcfinterp(nwoebquadcfinterp \&a\+\_\+input)}{nwoebquadcfinterp(nwoebquadcfinterp &a_input)}}]{\setlength{\rightskip}{0pt plus 5cm}nwoebquadcfinterp\+::nwoebquadcfinterp (
+\begin{DoxyParamCaption}
+\item[{{\bf nwoebquadcfinterp} \&}]{a\+\_\+input}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classnwoebquadcfinterp_ad4eee57df2c0f5d7022c1590f529ba05}{}\label{classnwoebquadcfinterp_ad4eee57df2c0f5d7022c1590f529ba05}
+
+
+Definition at line 131 of file nwoebquadcfinterp.\+H.
+
+
+
+\subsection{Member Function Documentation}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!coarse\+Fine\+Interp@{coarse\+Fine\+Interp}}
+\index{coarse\+Fine\+Interp@{coarse\+Fine\+Interp}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{coarse\+Fine\+Interp(\+Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ \&a\+\_\+phif, const Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ \&a\+\_\+phic, int isrc, int idst, int inco)}{coarseFineInterp(LevelData< EBCellFAB > &a_phif, const LevelData< EBCellFAB > &a_phic, int isrc, int idst, int inco)}}]{\setlength{\rightskip}{0pt plus 5cm}void nwoebquadcfinterp\+::coarse\+Fine\+Interp (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&}]{a\+\_\+phif, }
+\item[{const Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&}]{a\+\_\+phic, }
+\item[{int}]{isrc, }
+\item[{int}]{idst, }
+\item[{int}]{inco}
+\end{DoxyParamCaption}
+)}\hypertarget{classnwoebquadcfinterp_a0a306934ca707e2169290c1abfca604b}{}\label{classnwoebquadcfinterp_a0a306934ca707e2169290c1abfca604b}
+Coarse / Fine interpolation operator. \index{nwoebquadcfinterp@{nwoebquadcfinterp}!coarse\+Fine\+InterpH@{coarse\+Fine\+InterpH}}
+\index{coarse\+Fine\+InterpH@{coarse\+Fine\+InterpH}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{coarse\+Fine\+Interp\+H(\+Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ \&a\+\_\+phif, int isrc, int idst, int inco)}{coarseFineInterpH(LevelData< EBCellFAB > &a_phif, int isrc, int idst, int inco)}}]{\setlength{\rightskip}{0pt plus 5cm}void nwoebquadcfinterp\+::coarse\+Fine\+InterpH (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&}]{a\+\_\+phif, }
+\item[{int}]{isrc, }
+\item[{int}]{idst, }
+\item[{int}]{inco}
+\end{DoxyParamCaption}
+)}\hypertarget{classnwoebquadcfinterp_abb9e257dd6cd62da78c013bae7f9d7fb}{}\label{classnwoebquadcfinterp_abb9e257dd6cd62da78c013bae7f9d7fb}
+Coarse-\/fine interpolation operator with homogeneous B\+Cs. Does same interpolation as coarse\+Fine\+Interp function, but with all coarse-\/level data set to 0. \index{nwoebquadcfinterp@{nwoebquadcfinterp}!define\+Internals@{define\+Internals}}
+\index{define\+Internals@{define\+Internals}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{define\+Internals(const Layout\+Data$<$ Int\+Vect\+Set $>$ \&a\+\_\+cfivs, const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&a\+\_\+ebis\+Ptr)}{defineInternals(const LayoutData< IntVectSet > &a_cfivs, const RefCountedPtr< EBIndexSpace > &a_ebisPtr)}}]{\setlength{\rightskip}{0pt plus 5cm}void nwoebquadcfinterp\+::define\+Internals (
+\begin{DoxyParamCaption}
+\item[{const Layout\+Data$<$ Int\+Vect\+Set $>$ \&}]{a\+\_\+cfivs, }
+\item[{const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&}]{a\+\_\+ebis\+Ptr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a4d7ff4af578ff192d0169bd2a398e712}{}\label{classnwoebquadcfinterp_a4d7ff4af578ff192d0169bd2a398e712}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!define\+Stencils@{define\+Stencils}}
+\index{define\+Stencils@{define\+Stencils}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{define\+Stencils(const Layout\+Data$<$ Int\+Vect\+Set $>$ \&a\+\_\+cfivs)}{defineStencils(const LayoutData< IntVectSet > &a_cfivs)}}]{\setlength{\rightskip}{0pt plus 5cm}void nwoebquadcfinterp\+::define\+Stencils (
+\begin{DoxyParamCaption}
+\item[{const Layout\+Data$<$ Int\+Vect\+Set $>$ \&}]{a\+\_\+cfivs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_ad035a7960482fcc092f4a25c6561151d}{}\label{classnwoebquadcfinterp_ad035a7960482fcc092f4a25c6561151d}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!get\+Stencil@{get\+Stencil}}
+\index{get\+Stencil@{get\+Stencil}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{get\+Stencil(\+Vo\+F\+Stencil \&a\+\_\+stencil, const Vol\+Index \&a\+\_\+vof\+Fine, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Fine, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Co\+Fi, const Data\+Index \&a\+\_\+dit)}{getStencil(VoFStencil &a_stencil, const VolIndex &a_vofFine, const EBISBox &a_ebisFine, const EBISBox &a_ebisCoFi, const DataIndex &a_dit)}}]{\setlength{\rightskip}{0pt plus 5cm}void nwoebquadcfinterp\+::get\+Stencil (
+\begin{DoxyParamCaption}
+\item[{Vo\+F\+Stencil \&}]{a\+\_\+stencil, }
+\item[{const Vol\+Index \&}]{a\+\_\+vof\+Fine, }
+\item[{const E\+B\+I\+S\+Box \&}]{a\+\_\+ebis\+Fine, }
+\item[{const E\+B\+I\+S\+Box \&}]{a\+\_\+ebis\+Co\+Fi, }
+\item[{const Data\+Index \&}]{a\+\_\+dit}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a11fe842512397b8d869cfddd5af6398a}{}\label{classnwoebquadcfinterp_a11fe842512397b8d869cfddd5af6398a}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!get\+Stencils@{get\+Stencils}}
+\index{get\+Stencils@{get\+Stencils}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{get\+Stencils(\+Vector$<$ Ref\+Counted\+Ptr$<$ Base\+Stencil $>$ $>$ \&a\+\_\+stencils, Vector$<$ Ref\+Counted\+Ptr$<$ Base\+Index $>$ $>$ \&a\+\_\+base\+Dst\+Vo\+Fs, const Int\+Vect\+Set \&a\+\_\+cfivs, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Fine, const E\+B\+I\+S\+Box \&a\+\_\+ebis\+Co\+Fi, const Data\+Index \&a\+\_\+dit)}{getStencils(Vector< RefCountedPtr< BaseStencil > > &a_stencils, Vector< RefCountedPtr< BaseIndex > > &a_baseDstVoFs, const IntVectSet &a_cfivs, const EBISBox &a_ebisFine, const EBISBox &a_ebisCoFi, const DataIndex &a_dit)}}]{\setlength{\rightskip}{0pt plus 5cm}void nwoebquadcfinterp\+::get\+Stencils (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ Base\+Stencil $>$ $>$ \&}]{a\+\_\+stencils, }
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ Base\+Index $>$ $>$ \&}]{a\+\_\+base\+Dst\+Vo\+Fs, }
+\item[{const Int\+Vect\+Set \&}]{a\+\_\+cfivs, }
+\item[{const E\+B\+I\+S\+Box \&}]{a\+\_\+ebis\+Fine, }
+\item[{const E\+B\+I\+S\+Box \&}]{a\+\_\+ebis\+Co\+Fi, }
+\item[{const Data\+Index \&}]{a\+\_\+dit}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_ac4adae5d3819feb3e59508a3a9b32700}{}\label{classnwoebquadcfinterp_ac4adae5d3819feb3e59508a3a9b32700}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!operator=@{operator=}}
+\index{operator=@{operator=}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{operator=(nwoebquadcfinterp \&a\+\_\+input)}{operator=(nwoebquadcfinterp &a_input)}}]{\setlength{\rightskip}{0pt plus 5cm}void nwoebquadcfinterp\+::operator= (
+\begin{DoxyParamCaption}
+\item[{{\bf nwoebquadcfinterp} \&}]{a\+\_\+input}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classnwoebquadcfinterp_a03a8b6a2374a9072469fc5c1b81fd36d}{}\label{classnwoebquadcfinterp_a03a8b6a2374a9072469fc5c1b81fd36d}
+
+
+Definition at line 137 of file nwoebquadcfinterp.\+H.
+
+
+
+\subsection{Member Data Documentation}
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+buffer\+Co\+Fi@{m\+\_\+buffer\+Co\+Fi}}
+\index{m\+\_\+buffer\+Co\+Fi@{m\+\_\+buffer\+Co\+Fi}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+buffer\+Co\+Fi}{m_bufferCoFi}}]{\setlength{\rightskip}{0pt plus 5cm}Level\+Data$<$E\+B\+Cell\+F\+AB$>$ nwoebquadcfinterp\+::m\+\_\+buffer\+Co\+Fi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a04df0f05122e309194e9fb1d70912a04}{}\label{classnwoebquadcfinterp_a04df0f05122e309194e9fb1d70912a04}
+
+
+Definition at line 120 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+domain\+Coar@{m\+\_\+domain\+Coar}}
+\index{m\+\_\+domain\+Coar@{m\+\_\+domain\+Coar}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+domain\+Coar}{m_domainCoar}}]{\setlength{\rightskip}{0pt plus 5cm}Problem\+Domain nwoebquadcfinterp\+::m\+\_\+domain\+Coar\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a81c6feda61f3f2a1cd0f6b3c42b5e513}{}\label{classnwoebquadcfinterp_a81c6feda61f3f2a1cd0f6b3c42b5e513}
+
+
+Definition at line 114 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+dx\+Fine@{m\+\_\+dx\+Fine}}
+\index{m\+\_\+dx\+Fine@{m\+\_\+dx\+Fine}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+dx\+Fine}{m_dxFine}}]{\setlength{\rightskip}{0pt plus 5cm}Real nwoebquadcfinterp\+::m\+\_\+dx\+Fine\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a92a63d0a83b16426c81b74f32c39629c}{}\label{classnwoebquadcfinterp_a92a63d0a83b16426c81b74f32c39629c}
+
+
+Definition at line 117 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+ebisl\+Coar@{m\+\_\+ebisl\+Coar}}
+\index{m\+\_\+ebisl\+Coar@{m\+\_\+ebisl\+Coar}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebisl\+Coar}{m_ebislCoar}}]{\setlength{\rightskip}{0pt plus 5cm}E\+B\+I\+S\+Layout nwoebquadcfinterp\+::m\+\_\+ebisl\+Coar\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a49d4a5fcaf4fcf12714009d2c7eec3ac}{}\label{classnwoebquadcfinterp_a49d4a5fcaf4fcf12714009d2c7eec3ac}
+
+
+Definition at line 112 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+ebisl\+Co\+Fi@{m\+\_\+ebisl\+Co\+Fi}}
+\index{m\+\_\+ebisl\+Co\+Fi@{m\+\_\+ebisl\+Co\+Fi}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebisl\+Co\+Fi}{m_ebislCoFi}}]{\setlength{\rightskip}{0pt plus 5cm}E\+B\+I\+S\+Layout nwoebquadcfinterp\+::m\+\_\+ebisl\+Co\+Fi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a1af61857678e74133a95ec8fa9dcf49d}{}\label{classnwoebquadcfinterp_a1af61857678e74133a95ec8fa9dcf49d}
+
+
+Definition at line 113 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+ebisl\+Fine@{m\+\_\+ebisl\+Fine}}
+\index{m\+\_\+ebisl\+Fine@{m\+\_\+ebisl\+Fine}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebisl\+Fine}{m_ebislFine}}]{\setlength{\rightskip}{0pt plus 5cm}E\+B\+I\+S\+Layout nwoebquadcfinterp\+::m\+\_\+ebisl\+Fine\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_ad8747e5d6dcb3613235df12c5a72f51a}{}\label{classnwoebquadcfinterp_ad8747e5d6dcb3613235df12c5a72f51a}
+
+
+Definition at line 111 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+ghost@{m\+\_\+ghost}}
+\index{m\+\_\+ghost@{m\+\_\+ghost}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+ghost}{m_ghost}}]{\setlength{\rightskip}{0pt plus 5cm}int nwoebquadcfinterp\+::m\+\_\+ghost\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_aa7bee9c12e43c2d6c435b6be497c1b22}{}\label{classnwoebquadcfinterp_aa7bee9c12e43c2d6c435b6be497c1b22}
+
+
+Definition at line 118 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+grids\+Coar@{m\+\_\+grids\+Coar}}
+\index{m\+\_\+grids\+Coar@{m\+\_\+grids\+Coar}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+grids\+Coar}{m_gridsCoar}}]{\setlength{\rightskip}{0pt plus 5cm}Disjoint\+Box\+Layout nwoebquadcfinterp\+::m\+\_\+grids\+Coar\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a48916b7af00c345229f5c41b5382c91f}{}\label{classnwoebquadcfinterp_a48916b7af00c345229f5c41b5382c91f}
+
+
+Definition at line 109 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+grids\+Co\+Fi@{m\+\_\+grids\+Co\+Fi}}
+\index{m\+\_\+grids\+Co\+Fi@{m\+\_\+grids\+Co\+Fi}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+grids\+Co\+Fi}{m_gridsCoFi}}]{\setlength{\rightskip}{0pt plus 5cm}Disjoint\+Box\+Layout nwoebquadcfinterp\+::m\+\_\+grids\+Co\+Fi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_aab63ef9fc22a60ffecb74f7f916e2422}{}\label{classnwoebquadcfinterp_aab63ef9fc22a60ffecb74f7f916e2422}
+
+
+Definition at line 110 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+grids\+Fine@{m\+\_\+grids\+Fine}}
+\index{m\+\_\+grids\+Fine@{m\+\_\+grids\+Fine}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+grids\+Fine}{m_gridsFine}}]{\setlength{\rightskip}{0pt plus 5cm}Disjoint\+Box\+Layout nwoebquadcfinterp\+::m\+\_\+grids\+Fine\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_ac3ef73d072197f116ce498bec5d28637}{}\label{classnwoebquadcfinterp_ac3ef73d072197f116ce498bec5d28637}
+
+
+Definition at line 108 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+nref@{m\+\_\+nref}}
+\index{m\+\_\+nref@{m\+\_\+nref}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+nref}{m_nref}}]{\setlength{\rightskip}{0pt plus 5cm}int nwoebquadcfinterp\+::m\+\_\+nref\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a2814bffc586d7cb9913d241379896025}{}\label{classnwoebquadcfinterp_a2814bffc586d7cb9913d241379896025}
+
+
+Definition at line 115 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+nvar@{m\+\_\+nvar}}
+\index{m\+\_\+nvar@{m\+\_\+nvar}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+nvar}{m_nvar}}]{\setlength{\rightskip}{0pt plus 5cm}int nwoebquadcfinterp\+::m\+\_\+nvar\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a36ee80e85ed928375f0ba2162ffe8511}{}\label{classnwoebquadcfinterp_a36ee80e85ed928375f0ba2162ffe8511}
+
+
+Definition at line 116 of file nwoebquadcfinterp.\+H.
+
+\index{nwoebquadcfinterp@{nwoebquadcfinterp}!m\+\_\+stencil@{m\+\_\+stencil}}
+\index{m\+\_\+stencil@{m\+\_\+stencil}!nwoebquadcfinterp@{nwoebquadcfinterp}}
+\subsubsection[{\texorpdfstring{m\+\_\+stencil}{m_stencil}}]{\setlength{\rightskip}{0pt plus 5cm}Layout\+Data$<$Ref\+Counted\+Ptr$<$ Agg\+Stencil$<$E\+B\+Cell\+F\+AB, E\+B\+Cell\+F\+AB$>$ $>$ $>$ nwoebquadcfinterp\+::m\+\_\+stencil\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwoebquadcfinterp_a5b74c7be12aa17afebf582bb78ffadbc}{}\label{classnwoebquadcfinterp_a5b74c7be12aa17afebf582bb78ffadbc}
+
+
+Definition at line 119 of file nwoebquadcfinterp.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/amr\+\_\+mesh/\hyperlink{nwoebquadcfinterp_8H}{nwoebquadcfinterp.\+H}\end{DoxyCompactItemize}

@@ -3,7 +3,18 @@
 PlasmaC modules
 ---------------
 
-PlasmaC is a modular framework that allows reuse or reimplementation of many classes without affecting the underlying code. In PlasmaC, an entire simulation is run by an object called :ref:`Chap:plasma_engine` . The responsibility of this object is essentially to set up a simulation, run a simulation, and write output files. In fact, the mini-application system in PlasmaC requires the user to construct the plasma_engine object by supplying sufficient supplementary classes through its constructor. 
+PlasmaC is a modular framework that allows reuse or reimplementation of many classes without affecting the underlying code. In PlasmaC, an entire simulation is run by an object called :ref:`Chap:plasma_engine` . The responsibility of this object is essentially to set up a simulation, run a simulation, and write output files. In fact, the mini-application system in PlasmaC requires the user to construct the plasma_engine object by supplying sufficient supplementary classes through its constructor.
+
+To facilitate code reuse, PlasmaC is set up such that a class :ref:`Chap:plasma_engine` takes as its input a number of modules:
+
+.. figure:: figures/plasma_engine.png
+   :width: 480px
+   :align: center
+
+   PlasmaC modules.
+
+In the above, the various modules represent
+
 
 * :ref:`Chap:plasma_kinetics` An abstract class that defines the physical coupling kinetics. This includes specifying the number of convected species, the number of RTE solvers, and well as specifiying the coupling between all of these. 
 * :ref:`Chap:computational_geometry` An implementation of the geometry that will be simulated. Various implementation of this class exist, which you may immediately use. Descriptions of new geometries must be done by the user by either implementing a new computational_geometry class. 

@@ -1,0 +1,164 @@
+\hypertarget{classdirichlet__func}{}\section{dirichlet\+\_\+func Class Reference}
+\label{classdirichlet__func}\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+
+
+Class for passing time and space dependent boundary conditions into the G\+MG boundary condition classes.  
+
+
+
+
+{\ttfamily \#include $<$dirichlet\+\_\+func.\+H$>$}
+
+
+
+Inherits Base\+B\+C\+Func\+Eval.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdirichlet__func_a2911e9b88feb8927159a8e9e3e654086}{dirichlet\+\_\+func} (Real($\ast$a\+\_\+potential)(const Real a\+\_\+time), Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos), const Real\+Vect a\+\_\+origin)
+\begin{DoxyCompactList}\small\item\em New constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classdirichlet__func_a8e6d60b5b42aee0e6c8a62c29a8d1c9e}{$\sim$dirichlet\+\_\+func} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdirichlet__func_aa1bde58fbf9d535693077cf803c300a7}{set\+\_\+time} (const Real a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Update the time. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classdirichlet__func_abdd1b80efa098e40591d5eeca5a23696}{value} (const Real\+Vect \&a\+\_\+point, const int \&a\+\_\+comp) const 
+\begin{DoxyCompactList}\small\item\em Value function. Called by BC classes in A\+M\+R\+Multi\+Grid. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classdirichlet__func_af3cf912bfb0faef5f6f18c08fda3b180}{derivative} (const Real\+Vect \&a\+\_\+point, const int \&a\+\_\+comp, const int \&a\+\_\+dir) const 
+\begin{DoxyCompactList}\small\item\em Should never be called. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Real($\ast$ \hyperlink{classdirichlet__func_a54f22d2f89cebff2809deea1b770dcc3}{m\+\_\+potential} )(const Real a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Potential as function of time. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classdirichlet__func_a337973800d112cdce7b5e5ea1cce7357}{m\+\_\+func} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Spatial distribution. \end{DoxyCompactList}\item 
+Real \hyperlink{classdirichlet__func_a955c8356798afbbb218ac6a11f6b1444}{m\+\_\+time}
+\begin{DoxyCompactList}\small\item\em Time. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classdirichlet__func_aac22852ea9503a4204f34585c0aaf6b7}{m\+\_\+origin}
+\begin{DoxyCompactList}\small\item\em Physical origin (the value function is called with computational coordinates) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class for passing time and space dependent boundary conditions into the G\+MG boundary condition classes. 
+
+Definition at line 17 of file dirichlet\+\_\+func.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{dirichlet\+\_\+func(\+Real($\ast$a\+\_\+potential)(const Real a\+\_\+time), Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos), const Real\+Vect a\+\_\+origin)}{dirichlet_func(Real(*a_potential)(const Real a_time), Real(*a_func)(const RealVect a_pos), const RealVect a_origin)}}]{\setlength{\rightskip}{0pt plus 5cm}dirichlet\+\_\+func\+::dirichlet\+\_\+func (
+\begin{DoxyParamCaption}
+\item[{Real($\ast$)(const Real a\+\_\+time)}]{a\+\_\+potential, }
+\item[{Real($\ast$)(const Real\+Vect a\+\_\+pos)}]{a\+\_\+func, }
+\item[{const Real\+Vect}]{a\+\_\+origin}
+\end{DoxyParamCaption}
+)}\hypertarget{classdirichlet__func_a2911e9b88feb8927159a8e9e3e654086}{}\label{classdirichlet__func_a2911e9b88feb8927159a8e9e3e654086}
+
+
+New constructor. 
+
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!````~dirichlet\+\_\+func@{$\sim$dirichlet\+\_\+func}}
+\index{````~dirichlet\+\_\+func@{$\sim$dirichlet\+\_\+func}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{$\sim$dirichlet\+\_\+func()}{~dirichlet_func()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual dirichlet\+\_\+func\+::$\sim$dirichlet\+\_\+func (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdirichlet__func_a8e6d60b5b42aee0e6c8a62c29a8d1c9e}{}\label{classdirichlet__func_a8e6d60b5b42aee0e6c8a62c29a8d1c9e}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!derivative@{derivative}}
+\index{derivative@{derivative}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{derivative(const Real\+Vect \&a\+\_\+point, const int \&a\+\_\+comp, const int \&a\+\_\+dir) const }{derivative(const RealVect &a_point, const int &a_comp, const int &a_dir) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real dirichlet\+\_\+func\+::derivative (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+point, }
+\item[{const int \&}]{a\+\_\+comp, }
+\item[{const int \&}]{a\+\_\+dir}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdirichlet__func_af3cf912bfb0faef5f6f18c08fda3b180}{}\label{classdirichlet__func_af3cf912bfb0faef5f6f18c08fda3b180}
+
+
+Should never be called. 
+
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!set\+\_\+time@{set\+\_\+time}}
+\index{set\+\_\+time@{set\+\_\+time}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{set\+\_\+time(const Real a\+\_\+time)}{set_time(const Real a_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dirichlet\+\_\+func\+::set\+\_\+time (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdirichlet__func_aa1bde58fbf9d535693077cf803c300a7}{}\label{classdirichlet__func_aa1bde58fbf9d535693077cf803c300a7}
+
+
+Update the time. 
+
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!value@{value}}
+\index{value@{value}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{value(const Real\+Vect \&a\+\_\+point, const int \&a\+\_\+comp) const }{value(const RealVect &a_point, const int &a_comp) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real dirichlet\+\_\+func\+::value (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+point, }
+\item[{const int \&}]{a\+\_\+comp}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdirichlet__func_abdd1b80efa098e40591d5eeca5a23696}{}\label{classdirichlet__func_abdd1b80efa098e40591d5eeca5a23696}
+
+
+Value function. Called by BC classes in A\+M\+R\+Multi\+Grid. 
+
+
+
+\subsection{Member Data Documentation}
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!m\+\_\+func@{m\+\_\+func}}
+\index{m\+\_\+func@{m\+\_\+func}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{m\+\_\+func}{m_func}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ dirichlet\+\_\+func\+::m\+\_\+func) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdirichlet__func_a337973800d112cdce7b5e5ea1cce7357}{}\label{classdirichlet__func_a337973800d112cdce7b5e5ea1cce7357}
+
+
+Spatial distribution. 
+
+
+
+Definition at line 55 of file dirichlet\+\_\+func.\+H.
+
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!m\+\_\+origin@{m\+\_\+origin}}
+\index{m\+\_\+origin@{m\+\_\+origin}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{m\+\_\+origin}{m_origin}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect dirichlet\+\_\+func\+::m\+\_\+origin\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdirichlet__func_aac22852ea9503a4204f34585c0aaf6b7}{}\label{classdirichlet__func_aac22852ea9503a4204f34585c0aaf6b7}
+
+
+Physical origin (the value function is called with computational coordinates) 
+
+
+
+Definition at line 65 of file dirichlet\+\_\+func.\+H.
+
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!m\+\_\+potential@{m\+\_\+potential}}
+\index{m\+\_\+potential@{m\+\_\+potential}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{m\+\_\+potential}{m_potential}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ dirichlet\+\_\+func\+::m\+\_\+potential) (const Real a\+\_\+time)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdirichlet__func_a54f22d2f89cebff2809deea1b770dcc3}{}\label{classdirichlet__func_a54f22d2f89cebff2809deea1b770dcc3}
+
+
+Potential as function of time. 
+
+
+
+Definition at line 50 of file dirichlet\+\_\+func.\+H.
+
+\index{dirichlet\+\_\+func@{dirichlet\+\_\+func}!m\+\_\+time@{m\+\_\+time}}
+\index{m\+\_\+time@{m\+\_\+time}!dirichlet\+\_\+func@{dirichlet\+\_\+func}}
+\subsubsection[{\texorpdfstring{m\+\_\+time}{m_time}}]{\setlength{\rightskip}{0pt plus 5cm}Real dirichlet\+\_\+func\+::m\+\_\+time\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdirichlet__func_a955c8356798afbbb218ac6a11f6b1444}{}\label{classdirichlet__func_a955c8356798afbbb218ac6a11f6b1444}
+
+
+Time. 
+
+
+
+Definition at line 60 of file dirichlet\+\_\+func.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/poisson\+\_\+solver/\hyperlink{dirichlet__func_8H}{dirichlet\+\_\+func.\+H}\end{DoxyCompactItemize}

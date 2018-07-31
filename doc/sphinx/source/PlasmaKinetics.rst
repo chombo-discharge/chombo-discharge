@@ -3,7 +3,7 @@
 plasma_kinetics
 ---------------
 
-:ref:`Chap:plasma_kinetics` is the physics module of PlasmaC. The entire class is an interface, whose implementations run deep into :ref:`Chap:time_stepper` which contains much of the low-level functionality that couples the schemes. See the :doxy:`Doxygen API <plasma_kinetics>` for details. By far, :ref:`Chap:plasma_kinetics` is the most time-consuming tasks of implementing new plasma schemes. The reason for this is that we need to maintain a certain level of abstraction in order to cover a broad spectrum of plasma phenomena. 
+:ref:`Chap:plasma_kinetics` is the physics module of PlasmaC. The entire class is an interface, whose implementations run deep into :ref:`Chap:time_stepper` which contains much of the low-level functionality that couples the schemes. See the :doxy:`Doxygen API <classplasma__kinetics>` for details. By far, :ref:`Chap:plasma_kinetics` is the most time-consuming tasks of implementing new plasma schemes. The reason for this is that we need to maintain a certain level of abstraction in order to cover a broad spectrum of plasma phenomena. 
 
 There are no default input parameters for :ref:`Chap:plasma_kinetics`, as users must generally implement their own kinetics. A successful implementation of :ref:`Chap:plasma_kinetics` has the following:
 

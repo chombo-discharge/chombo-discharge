@@ -1,0 +1,757 @@
+\hypertarget{classrte__solver}{}\section{rte\+\_\+solver Class Reference}
+\label{classrte__solver}\index{rte\+\_\+solver@{rte\+\_\+solver}}
+
+
+Abstract R\+TE solver class. This is essentially just an interface.  
+
+
+
+
+{\ttfamily \#include $<$rte\+\_\+solver.\+H$>$}
+
+
+
+Inheritance diagram for rte\+\_\+solver\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=160pt]{classrte__solver__inherit__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classrte__solver_addf0d30585fa187b6f95e8070e07660b}{rte\+\_\+solver} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classrte__solver_a72c639dd6494bb99d3085272ce8bd1f7}{$\sim$rte\+\_\+solver} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual std\+::string \hyperlink{classrte__solver_a2c9a338bee0708080568aa0e43cd3738}{get\+\_\+name} ()
+\begin{DoxyCompactList}\small\item\em Get solver name. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classrte__solver_a6e064bf8ce5339137cfd74e3610f5b70}{advance} (const Real a\+\_\+dt, const bool a\+\_\+zerophi=false)
+\begin{DoxyCompactList}\small\item\em Advance equation one time step. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classrte__solver_adf0731e61e6e23e3f31d2ae511124e47}{advance} (const Real a\+\_\+dt, \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const bool a\+\_\+zerophi=false)
+\begin{DoxyCompactList}\small\item\em Advance method. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classrte__solver_a37c1915c42384c89ae8f1d0b805e6c59}{advance} (const Real a\+\_\+dt, \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+source, const bool a\+\_\+zerophi=false)=0
+\begin{DoxyCompactList}\small\item\em Advance R\+TE onto isotropic state a\+\_\+state. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a825df4451deefb078c827de9f717ed3e}{set\+\_\+photon\+\_\+group} (const Ref\+Counted\+Ptr$<$ \hyperlink{classphoton__group}{photon\+\_\+group} $>$ a\+\_\+photon\+\_\+group)
+\begin{DoxyCompactList}\small\item\em Set the photon group. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a473af1c14d01c15f0a3d68cccb0a12bd}{set\+\_\+computational\+\_\+geometry} (const Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ a\+\_\+compgeom)
+\begin{DoxyCompactList}\small\item\em Set computational geometry. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_af233bf45e20ae09f9cc517292cb0dd82}{set\+\_\+physical\+\_\+domain} (const Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \&a\+\_\+physdom)
+\begin{DoxyCompactList}\small\item\em Set the physical domain. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a2472b5b649c82fdc1ad7085103596e39}{set\+\_\+amr} (const Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \&a\+\_\+amr)
+\begin{DoxyCompactList}\small\item\em Set the amr object. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_ac29835abfb26e51c1cccd2daf9a2fac4}{set\+\_\+phase} (\hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase=\hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108bad0a7c1eb8fd916c8b7ec85be0fd23b38}{phase\+::gas})
+\begin{DoxyCompactList}\small\item\em Set phase. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a33385e364a63497f27aba219891c21b6}{set\+\_\+verbosity} (const int a\+\_\+verbosity)
+\begin{DoxyCompactList}\small\item\em Set verbosity. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a451cdec585ea4445e62dbfe59add6a29}{set\+\_\+time} (const int a\+\_\+step, const Real a\+\_\+time, const Real a\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Get current time. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_acb5161cdcc45d2c05d9be77b33e227cf}{set\+\_\+stationary} (const bool a\+\_\+stationary)
+\begin{DoxyCompactList}\small\item\em Set stationary solver or not. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_ac3e775fdbe76ebb3f82d81dcee33e3eb}{sanity\+\_\+check} ()
+\begin{DoxyCompactList}\small\item\em Sanity check. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classrte__solver_a02191b6bfb6554bfb0c97ec7a7de8257}{is\+\_\+stationary} ()
+\begin{DoxyCompactList}\small\item\em Check if solver is stationary. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_ad972a3283a579644e6c8caf9479f448d}{compute\+\_\+boundary\+\_\+flux} (\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+ebflux, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state)=0
+\begin{DoxyCompactList}\small\item\em Compute the boundary flux given a state (a\+\_\+state will be different for different R\+TE approximations) \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_aaddf204457acb74cb46c346fc78fd1d5}{compute\+\_\+flux} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+flux, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state)=0
+\begin{DoxyCompactList}\small\item\em Compute the flux. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_abfb550c8b2618bb605c97128c9eab063}{compute\+\_\+density} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+isotropic, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state)=0
+\begin{DoxyCompactList}\small\item\em Get isotropic part. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_ab2f545c1fcc0a9eacf4b4e4293483fa5}{allocate\+\_\+internals} ()=0
+\begin{DoxyCompactList}\small\item\em Allocate internal storage. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_ade3c59ae1a6d9fcf49babf8bfc8b40d5}{deallocate\+\_\+internals} ()=0
+\begin{DoxyCompactList}\small\item\em Deallocate internal storage. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a9cbd338f663f07b4a0d03fa2c7553733}{cache\+\_\+state} ()=0
+\begin{DoxyCompactList}\small\item\em Cache state. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a0a821a26bdd992981eb24da414bf94a7}{regrid} (const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)=0
+\begin{DoxyCompactList}\small\item\em Regrid function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a60e30eb2467f042e9417a2b0a87981f4}{initial\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Fill solver with initial data. By default, this sets internal data to zero. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_a3b3e3140a930015e82b107b1c042a6b3}{set\+\_\+source} (const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+source)
+\begin{DoxyCompactList}\small\item\em Set source term. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrte__solver_aaf29812f6e521d9e0198eeb66485ec42}{set\+\_\+source} (const Real a\+\_\+source)
+\begin{DoxyCompactList}\small\item\em Set source. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classrte__solver_a5f99f7de12f29d35cd5c34b4f7034a47}{query\+\_\+ghost} () const =0
+\begin{DoxyCompactList}\small\item\em Return required number of ghost cells. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classrte__solver_af9731409dd7c598299b17af24d10220f}{get\+\_\+time} () const 
+\begin{DoxyCompactList}\small\item\em Get time. \end{DoxyCompactList}\item 
+virtual \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} \hyperlink{classrte__solver_a061ff24e668e77255566fe2fbb7cd424}{get\+\_\+phase} ()
+\begin{DoxyCompactList}\small\item\em Get the R\+TE phase. \end{DoxyCompactList}\item 
+virtual \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \& \hyperlink{classrte__solver_aebe53823e39bb3020620dd0018fd0e25}{get\+\_\+state} ()
+\begin{DoxyCompactList}\small\item\em Get multifluid state. \end{DoxyCompactList}\item 
+virtual \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \& \hyperlink{classrte__solver_a0b8941dedf4059c614e4a94a76801b4b}{get\+\_\+source} ()
+\begin{DoxyCompactList}\small\item\em Get multifluid source. \end{DoxyCompactList}\item 
+virtual \hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \& \hyperlink{classrte__solver_a85322c6f79f48e329c758d7b6ec1cbe2}{get\+\_\+kappa} ()
+\begin{DoxyCompactList}\small\item\em Set the absorption coefficient. \end{DoxyCompactList}\item 
+virtual \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \& \hyperlink{classrte__solver_a964bd4e647d0222c2b4d101c51bea088}{get\+\_\+kappa\+\_\+eb} ()
+\begin{DoxyCompactList}\small\item\em Set the absorption coefficient on irregular EB faces. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classrte__solver_a6ac3a2da294f7c2af1970a3a0ac113c8}{set\+\_\+ebis} (const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&a\+\_\+ebis)
+\begin{DoxyCompactList}\small\item\em Set ebis. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \hyperlink{classrte__solver_a3f5fa6388034fcf229f3a0b347a4fd54}{m\+\_\+ebis}
+\begin{DoxyCompactList}\small\item\em Phase. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classphoton__group}{photon\+\_\+group} $>$ \hyperlink{classrte__solver_a9d63be064a2ade825fa898d6d86f1e22}{m\+\_\+photon\+\_\+group}
+\begin{DoxyCompactList}\small\item\em Photon group. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \hyperlink{classrte__solver_adab5bbc90842bd7625e85f9bab4c8a99}{m\+\_\+compgeom}
+\begin{DoxyCompactList}\small\item\em Computational geometry. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \hyperlink{classrte__solver_aeef61202054631e0f0ad0fe33a081dfe}{m\+\_\+physdom}
+\begin{DoxyCompactList}\small\item\em Physical domain. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \hyperlink{classrte__solver_af873b7673b52e2648885422254de3715}{m\+\_\+amr}
+\begin{DoxyCompactList}\small\item\em A\+MR; needed for grid stuff. \end{DoxyCompactList}\item 
+\hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} \hyperlink{classrte__solver_aeb46ac9c37dbbb8eb87e603136f841ec}{m\+\_\+phase}
+\begin{DoxyCompactList}\small\item\em Phase. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{classrte__solver_ae382b783ea69f9ce1a90a5bbe5b62724}{m\+\_\+name}
+\begin{DoxyCompactList}\small\item\em Name. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \hyperlink{classrte__solver_a5502293d351adb187fc81c62413e731a}{m\+\_\+cache}
+\begin{DoxyCompactList}\small\item\em Cached state used for regridding. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \hyperlink{classrte__solver_ae4fc24d6160537699f84c3c6a89a926e}{m\+\_\+state}
+\begin{DoxyCompactList}\small\item\em Internal state. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \hyperlink{classrte__solver_a377bc1e257c98a965b5faf951ae79f09}{m\+\_\+source}
+\begin{DoxyCompactList}\small\item\em Source term. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \hyperlink{classrte__solver_ae5cfc01b0a14fe67e896cbeddb172771}{m\+\_\+kappa}
+\begin{DoxyCompactList}\small\item\em Absorption coefficient. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \hyperlink{classrte__solver_ab0c0eea8bb4b68fced66198a4535a199}{m\+\_\+kappa\+\_\+eb}
+\begin{DoxyCompactList}\small\item\em Absorption coefficient on EB faces. \end{DoxyCompactList}\item 
+Real \hyperlink{classrte__solver_af312dbcc4214dbe8ab2cb341326e8730}{m\+\_\+time}
+\begin{DoxyCompactList}\small\item\em Time. \end{DoxyCompactList}\item 
+Real \hyperlink{classrte__solver_a80b5c9a5be3629ebcff3e30c9b3af3e9}{m\+\_\+dt}
+\begin{DoxyCompactList}\small\item\em Time increment. \end{DoxyCompactList}\item 
+bool \hyperlink{classrte__solver_ae32e57e3b2a45d0f7f1e8185ba45555c}{m\+\_\+stationary}
+\begin{DoxyCompactList}\small\item\em Stationary solver or not. \end{DoxyCompactList}\item 
+int \hyperlink{classrte__solver_a0e3aca30e263c405bcc3753dda26aebf}{m\+\_\+verbosity}
+\item 
+int \hyperlink{classrte__solver_aa6d238b5717c812569053af3665bfd07}{m\+\_\+step}
+\begin{DoxyCompactList}\small\item\em Time step. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Abstract R\+TE solver class. This is essentially just an interface. 
+
+Definition at line 20 of file rte\+\_\+solver.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{rte\+\_\+solver@{rte\+\_\+solver}!rte\+\_\+solver@{rte\+\_\+solver}}
+\index{rte\+\_\+solver@{rte\+\_\+solver}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{rte\+\_\+solver()}{rte_solver()}}]{\setlength{\rightskip}{0pt plus 5cm}rte\+\_\+solver\+::rte\+\_\+solver (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classrte__solver_addf0d30585fa187b6f95e8070e07660b}{}\label{classrte__solver_addf0d30585fa187b6f95e8070e07660b}
+
+
+Constructor. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!````~rte\+\_\+solver@{$\sim$rte\+\_\+solver}}
+\index{````~rte\+\_\+solver@{$\sim$rte\+\_\+solver}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{$\sim$rte\+\_\+solver()}{~rte_solver()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual rte\+\_\+solver\+::$\sim$rte\+\_\+solver (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a72c639dd6494bb99d3085272ce8bd1f7}{}\label{classrte__solver_a72c639dd6494bb99d3085272ce8bd1f7}
+
+
+Constructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{rte\+\_\+solver@{rte\+\_\+solver}!advance@{advance}}
+\index{advance@{advance}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{advance(const Real a\+\_\+dt, const bool a\+\_\+zerophi=false)}{advance(const Real a_dt, const bool a_zerophi=false)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool rte\+\_\+solver\+::advance (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+dt, }
+\item[{const bool}]{a\+\_\+zerophi = {\ttfamily false}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a6e064bf8ce5339137cfd74e3610f5b70}{}\label{classrte__solver_a6e064bf8ce5339137cfd74e3610f5b70}
+
+
+Advance equation one time step. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!advance@{advance}}
+\index{advance@{advance}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{advance(const Real a\+\_\+dt, E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const bool a\+\_\+zerophi=false)}{advance(const Real a_dt, EBAMRCellData &a_state, const bool a_zerophi=false)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool rte\+\_\+solver\+::advance (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+dt, }
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const bool}]{a\+\_\+zerophi = {\ttfamily false}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_adf0731e61e6e23e3f31d2ae511124e47}{}\label{classrte__solver_adf0731e61e6e23e3f31d2ae511124e47}
+
+
+Advance method. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!advance@{advance}}
+\index{advance@{advance}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{advance(const Real a\+\_\+dt, E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+source, const bool a\+\_\+zerophi=false)=0}{advance(const Real a_dt, EBAMRCellData &a_state, const EBAMRCellData &a_source, const bool a_zerophi=false)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool rte\+\_\+solver\+::advance (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+dt, }
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+source, }
+\item[{const bool}]{a\+\_\+zerophi = {\ttfamily false}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_a37c1915c42384c89ae8f1d0b805e6c59}{}\label{classrte__solver_a37c1915c42384c89ae8f1d0b805e6c59}
+
+
+Advance R\+TE onto isotropic state a\+\_\+state. 
+
+
+
+Implemented in \hyperlink{classeddington__sp1_a867d44eea0818e4c70f770bf0475ad33}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!allocate\+\_\+internals@{allocate\+\_\+internals}}
+\index{allocate\+\_\+internals@{allocate\+\_\+internals}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{allocate\+\_\+internals()=0}{allocate_internals()=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::allocate\+\_\+internals (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_ab2f545c1fcc0a9eacf4b4e4293483fa5}{}\label{classrte__solver_ab2f545c1fcc0a9eacf4b4e4293483fa5}
+
+
+Allocate internal storage. 
+
+
+
+Implemented in \hyperlink{classeddington__sp1_aad56467469b1a5ca0951bb4ef62b9371}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!cache\+\_\+state@{cache\+\_\+state}}
+\index{cache\+\_\+state@{cache\+\_\+state}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{cache\+\_\+state()=0}{cache_state()=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::cache\+\_\+state (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_a9cbd338f663f07b4a0d03fa2c7553733}{}\label{classrte__solver_a9cbd338f663f07b4a0d03fa2c7553733}
+
+
+Cache state. 
+
+
+
+Implemented in \hyperlink{classeddington__sp1_afd239af8589fd6540539a78ae9566b2c}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!compute\+\_\+boundary\+\_\+flux@{compute\+\_\+boundary\+\_\+flux}}
+\index{compute\+\_\+boundary\+\_\+flux@{compute\+\_\+boundary\+\_\+flux}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{compute\+\_\+boundary\+\_\+flux(\+E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+ebflux, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state)=0}{compute_boundary_flux(EBAMRIVData &a_ebflux, const EBAMRCellData &a_state)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::compute\+\_\+boundary\+\_\+flux (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+ebflux, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_ad972a3283a579644e6c8caf9479f448d}{}\label{classrte__solver_ad972a3283a579644e6c8caf9479f448d}
+
+
+Compute the boundary flux given a state (a\+\_\+state will be different for different R\+TE approximations) 
+
+
+
+Implemented in \hyperlink{classeddington__sp1_a455c8dbab4307361220674bc0f6835c4}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!compute\+\_\+density@{compute\+\_\+density}}
+\index{compute\+\_\+density@{compute\+\_\+density}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{compute\+\_\+density(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+isotropic, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state)=0}{compute_density(EBAMRCellData &a_isotropic, const EBAMRCellData &a_state)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::compute\+\_\+density (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+isotropic, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_abfb550c8b2618bb605c97128c9eab063}{}\label{classrte__solver_abfb550c8b2618bb605c97128c9eab063}
+
+
+Get isotropic part. 
+
+This is normally just a copy, but I need the function signature in order to have a clear plasma-\/coupling interface 
+
+Implemented in \hyperlink{classeddington__sp1_a55ce6a698fcea55c1a025d01a61e42e8}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!compute\+\_\+flux@{compute\+\_\+flux}}
+\index{compute\+\_\+flux@{compute\+\_\+flux}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{compute\+\_\+flux(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+flux, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state)=0}{compute_flux(EBAMRCellData &a_flux, const EBAMRCellData &a_state)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::compute\+\_\+flux (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+flux, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_aaddf204457acb74cb46c346fc78fd1d5}{}\label{classrte__solver_aaddf204457acb74cb46c346fc78fd1d5}
+
+
+Compute the flux. 
+
+For diffusive models, the flux will be something like grad(a\+\_\+state). For higher-\/order models, the flux will be contained in a\+\_\+state (somehow); 
+
+Implemented in \hyperlink{classeddington__sp1_af6d7ca2f75f1175062c3f9b37d6ec757}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!deallocate\+\_\+internals@{deallocate\+\_\+internals}}
+\index{deallocate\+\_\+internals@{deallocate\+\_\+internals}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{deallocate\+\_\+internals()=0}{deallocate_internals()=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::deallocate\+\_\+internals (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_ade3c59ae1a6d9fcf49babf8bfc8b40d5}{}\label{classrte__solver_ade3c59ae1a6d9fcf49babf8bfc8b40d5}
+
+
+Deallocate internal storage. 
+
+
+
+Implemented in \hyperlink{classeddington__sp1_ab501afc538facf8794c08f2828fe86d2}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!get\+\_\+kappa@{get\+\_\+kappa}}
+\index{get\+\_\+kappa@{get\+\_\+kappa}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{get\+\_\+kappa()}{get_kappa()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf E\+B\+A\+M\+R\+Flux\+Data}\& rte\+\_\+solver\+::get\+\_\+kappa (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a85322c6f79f48e329c758d7b6ec1cbe2}{}\label{classrte__solver_a85322c6f79f48e329c758d7b6ec1cbe2}
+
+
+Set the absorption coefficient. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!get\+\_\+kappa\+\_\+eb@{get\+\_\+kappa\+\_\+eb}}
+\index{get\+\_\+kappa\+\_\+eb@{get\+\_\+kappa\+\_\+eb}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{get\+\_\+kappa\+\_\+eb()}{get_kappa_eb()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf E\+B\+A\+M\+R\+I\+V\+Data}\& rte\+\_\+solver\+::get\+\_\+kappa\+\_\+eb (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a964bd4e647d0222c2b4d101c51bea088}{}\label{classrte__solver_a964bd4e647d0222c2b4d101c51bea088}
+
+
+Set the absorption coefficient on irregular EB faces. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!get\+\_\+name@{get\+\_\+name}}
+\index{get\+\_\+name@{get\+\_\+name}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{get\+\_\+name()}{get_name()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual std\+::string rte\+\_\+solver\+::get\+\_\+name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a2c9a338bee0708080568aa0e43cd3738}{}\label{classrte__solver_a2c9a338bee0708080568aa0e43cd3738}
+
+
+Get solver name. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!get\+\_\+phase@{get\+\_\+phase}}
+\index{get\+\_\+phase@{get\+\_\+phase}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{get\+\_\+phase()}{get_phase()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf phase\+::which\+\_\+phase} rte\+\_\+solver\+::get\+\_\+phase (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a061ff24e668e77255566fe2fbb7cd424}{}\label{classrte__solver_a061ff24e668e77255566fe2fbb7cd424}
+
+
+Get the R\+TE phase. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!get\+\_\+source@{get\+\_\+source}}
+\index{get\+\_\+source@{get\+\_\+source}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{get\+\_\+source()}{get_source()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf E\+B\+A\+M\+R\+Cell\+Data}\& rte\+\_\+solver\+::get\+\_\+source (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a0b8941dedf4059c614e4a94a76801b4b}{}\label{classrte__solver_a0b8941dedf4059c614e4a94a76801b4b}
+
+
+Get multifluid source. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!get\+\_\+state@{get\+\_\+state}}
+\index{get\+\_\+state@{get\+\_\+state}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{get\+\_\+state()}{get_state()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf E\+B\+A\+M\+R\+Cell\+Data}\& rte\+\_\+solver\+::get\+\_\+state (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_aebe53823e39bb3020620dd0018fd0e25}{}\label{classrte__solver_aebe53823e39bb3020620dd0018fd0e25}
+
+
+Get multifluid state. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!get\+\_\+time@{get\+\_\+time}}
+\index{get\+\_\+time@{get\+\_\+time}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{get\+\_\+time() const }{get_time() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real rte\+\_\+solver\+::get\+\_\+time (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_af9731409dd7c598299b17af24d10220f}{}\label{classrte__solver_af9731409dd7c598299b17af24d10220f}
+
+
+Get time. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!initial\+\_\+data@{initial\+\_\+data}}
+\index{initial\+\_\+data@{initial\+\_\+data}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{initial\+\_\+data()}{initial_data()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::initial\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a60e30eb2467f042e9417a2b0a87981f4}{}\label{classrte__solver_a60e30eb2467f042e9417a2b0a87981f4}
+
+
+Fill solver with initial data. By default, this sets internal data to zero. 
+
+Only relevant for non-\/stationary solvers \index{rte\+\_\+solver@{rte\+\_\+solver}!is\+\_\+stationary@{is\+\_\+stationary}}
+\index{is\+\_\+stationary@{is\+\_\+stationary}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{is\+\_\+stationary()}{is_stationary()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool rte\+\_\+solver\+::is\+\_\+stationary (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a02191b6bfb6554bfb0c97ec7a7de8257}{}\label{classrte__solver_a02191b6bfb6554bfb0c97ec7a7de8257}
+
+
+Check if solver is stationary. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!query\+\_\+ghost@{query\+\_\+ghost}}
+\index{query\+\_\+ghost@{query\+\_\+ghost}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{query\+\_\+ghost() const =0}{query_ghost() const =0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual int rte\+\_\+solver\+::query\+\_\+ghost (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_a5f99f7de12f29d35cd5c34b4f7034a47}{}\label{classrte__solver_a5f99f7de12f29d35cd5c34b4f7034a47}
+
+
+Return required number of ghost cells. 
+
+
+
+Implemented in \hyperlink{classeddington__sp1_af4664b17d9e08ab51a6569e85531d05c}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!regrid@{regrid}}
+\index{regrid@{regrid}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{regrid(const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)=0}{regrid(const int a_old_finest_level, const int a_new_finest_level)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::regrid (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+old\+\_\+finest\+\_\+level, }
+\item[{const int}]{a\+\_\+new\+\_\+finest\+\_\+level}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrte__solver_a0a821a26bdd992981eb24da414bf94a7}{}\label{classrte__solver_a0a821a26bdd992981eb24da414bf94a7}
+
+
+Regrid function. 
+
+
+
+Implemented in \hyperlink{classeddington__sp1_ad63cd7683c0e57a993e91212d9f1efe6}{eddington\+\_\+sp1}.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!sanity\+\_\+check@{sanity\+\_\+check}}
+\index{sanity\+\_\+check@{sanity\+\_\+check}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{sanity\+\_\+check()}{sanity_check()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::sanity\+\_\+check (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_ac3e775fdbe76ebb3f82d81dcee33e3eb}{}\label{classrte__solver_ac3e775fdbe76ebb3f82d81dcee33e3eb}
+
+
+Sanity check. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+amr@{set\+\_\+amr}}
+\index{set\+\_\+amr@{set\+\_\+amr}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+amr(const Ref\+Counted\+Ptr$<$ amr\+\_\+mesh $>$ \&a\+\_\+amr)}{set_amr(const RefCountedPtr< amr_mesh > &a_amr)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+amr (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf amr\+\_\+mesh} $>$ \&}]{a\+\_\+amr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a2472b5b649c82fdc1ad7085103596e39}{}\label{classrte__solver_a2472b5b649c82fdc1ad7085103596e39}
+
+
+Set the amr object. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+computational\+\_\+geometry@{set\+\_\+computational\+\_\+geometry}}
+\index{set\+\_\+computational\+\_\+geometry@{set\+\_\+computational\+\_\+geometry}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+computational\+\_\+geometry(const Ref\+Counted\+Ptr$<$ computational\+\_\+geometry $>$ a\+\_\+compgeom)}{set_computational_geometry(const RefCountedPtr< computational_geometry > a_compgeom)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+computational\+\_\+geometry (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf computational\+\_\+geometry} $>$}]{a\+\_\+compgeom}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a473af1c14d01c15f0a3d68cccb0a12bd}{}\label{classrte__solver_a473af1c14d01c15f0a3d68cccb0a12bd}
+
+
+Set computational geometry. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+ebis@{set\+\_\+ebis}}
+\index{set\+\_\+ebis@{set\+\_\+ebis}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+ebis(const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&a\+\_\+ebis)}{set_ebis(const RefCountedPtr< EBIndexSpace > &a_ebis)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+ebis (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \&}]{a\+\_\+ebis}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classrte__solver_a6ac3a2da294f7c2af1970a3a0ac113c8}{}\label{classrte__solver_a6ac3a2da294f7c2af1970a3a0ac113c8}
+
+
+Set ebis. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+phase@{set\+\_\+phase}}
+\index{set\+\_\+phase@{set\+\_\+phase}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+phase(phase\+::which\+\_\+phase a\+\_\+phase=phase\+::gas)}{set_phase(phase::which_phase a_phase=phase::gas)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+phase (
+\begin{DoxyParamCaption}
+\item[{{\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase = {\ttfamily {\bf phase\+::gas}}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_ac29835abfb26e51c1cccd2daf9a2fac4}{}\label{classrte__solver_ac29835abfb26e51c1cccd2daf9a2fac4}
+
+
+Set phase. 
+
+This must be done B\+E\+F\+O\+RE callilng set\+\_\+computational\+\_\+geometry \index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+photon\+\_\+group@{set\+\_\+photon\+\_\+group}}
+\index{set\+\_\+photon\+\_\+group@{set\+\_\+photon\+\_\+group}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+photon\+\_\+group(const Ref\+Counted\+Ptr$<$ photon\+\_\+group $>$ a\+\_\+photon\+\_\+group)}{set_photon_group(const RefCountedPtr< photon_group > a_photon_group)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+photon\+\_\+group (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf photon\+\_\+group} $>$}]{a\+\_\+photon\+\_\+group}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a825df4451deefb078c827de9f717ed3e}{}\label{classrte__solver_a825df4451deefb078c827de9f717ed3e}
+
+
+Set the photon group. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+physical\+\_\+domain@{set\+\_\+physical\+\_\+domain}}
+\index{set\+\_\+physical\+\_\+domain@{set\+\_\+physical\+\_\+domain}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+physical\+\_\+domain(const Ref\+Counted\+Ptr$<$ physical\+\_\+domain $>$ \&a\+\_\+physdom)}{set_physical_domain(const RefCountedPtr< physical_domain > &a_physdom)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+physical\+\_\+domain (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf physical\+\_\+domain} $>$ \&}]{a\+\_\+physdom}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_af233bf45e20ae09f9cc517292cb0dd82}{}\label{classrte__solver_af233bf45e20ae09f9cc517292cb0dd82}
+
+
+Set the physical domain. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+source@{set\+\_\+source}}
+\index{set\+\_\+source@{set\+\_\+source}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+source(const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+source)}{set_source(const EBAMRCellData &a_source)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+source (
+\begin{DoxyParamCaption}
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+source}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a3b3e3140a930015e82b107b1c042a6b3}{}\label{classrte__solver_a3b3e3140a930015e82b107b1c042a6b3}
+
+
+Set source term. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+source@{set\+\_\+source}}
+\index{set\+\_\+source@{set\+\_\+source}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+source(const Real a\+\_\+source)}{set_source(const Real a_source)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+source (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+source}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_aaf29812f6e521d9e0198eeb66485ec42}{}\label{classrte__solver_aaf29812f6e521d9e0198eeb66485ec42}
+
+
+Set source. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+stationary@{set\+\_\+stationary}}
+\index{set\+\_\+stationary@{set\+\_\+stationary}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+stationary(const bool a\+\_\+stationary)}{set_stationary(const bool a_stationary)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+stationary (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+stationary}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_acb5161cdcc45d2c05d9be77b33e227cf}{}\label{classrte__solver_acb5161cdcc45d2c05d9be77b33e227cf}
+
+
+Set stationary solver or not. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+time@{set\+\_\+time}}
+\index{set\+\_\+time@{set\+\_\+time}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+time(const int a\+\_\+step, const Real a\+\_\+time, const Real a\+\_\+dt)}{set_time(const int a_step, const Real a_time, const Real a_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+time (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+step, }
+\item[{const Real}]{a\+\_\+time, }
+\item[{const Real}]{a\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a451cdec585ea4445e62dbfe59add6a29}{}\label{classrte__solver_a451cdec585ea4445e62dbfe59add6a29}
+
+
+Get current time. 
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!set\+\_\+verbosity@{set\+\_\+verbosity}}
+\index{set\+\_\+verbosity@{set\+\_\+verbosity}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{set\+\_\+verbosity(const int a\+\_\+verbosity)}{set_verbosity(const int a_verbosity)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void rte\+\_\+solver\+::set\+\_\+verbosity (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+verbosity}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrte__solver_a33385e364a63497f27aba219891c21b6}{}\label{classrte__solver_a33385e364a63497f27aba219891c21b6}
+
+
+Set verbosity. 
+
+
+
+\subsection{Member Data Documentation}
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+amr@{m\+\_\+amr}}
+\index{m\+\_\+amr@{m\+\_\+amr}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+amr}{m_amr}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf amr\+\_\+mesh}$>$ rte\+\_\+solver\+::m\+\_\+amr\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_af873b7673b52e2648885422254de3715}{}\label{classrte__solver_af873b7673b52e2648885422254de3715}
+
+
+A\+MR; needed for grid stuff. 
+
+
+
+Definition at line 225 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+cache@{m\+\_\+cache}}
+\index{m\+\_\+cache@{m\+\_\+cache}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+cache}{m_cache}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Cell\+Data} rte\+\_\+solver\+::m\+\_\+cache\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_a5502293d351adb187fc81c62413e731a}{}\label{classrte__solver_a5502293d351adb187fc81c62413e731a}
+
+
+Cached state used for regridding. 
+
+
+
+Definition at line 240 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+compgeom@{m\+\_\+compgeom}}
+\index{m\+\_\+compgeom@{m\+\_\+compgeom}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+compgeom}{m_compgeom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf computational\+\_\+geometry}$>$ rte\+\_\+solver\+::m\+\_\+compgeom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_adab5bbc90842bd7625e85f9bab4c8a99}{}\label{classrte__solver_adab5bbc90842bd7625e85f9bab4c8a99}
+
+
+Computational geometry. 
+
+
+
+Definition at line 215 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+dt@{m\+\_\+dt}}
+\index{m\+\_\+dt@{m\+\_\+dt}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+dt}{m_dt}}]{\setlength{\rightskip}{0pt plus 5cm}Real rte\+\_\+solver\+::m\+\_\+dt\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_a80b5c9a5be3629ebcff3e30c9b3af3e9}{}\label{classrte__solver_a80b5c9a5be3629ebcff3e30c9b3af3e9}
+
+
+Time increment. 
+
+
+
+Definition at line 274 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+ebis@{m\+\_\+ebis}}
+\index{m\+\_\+ebis@{m\+\_\+ebis}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebis}{m_ebis}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$E\+B\+Index\+Space$>$ rte\+\_\+solver\+::m\+\_\+ebis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_a3f5fa6388034fcf229f3a0b347a4fd54}{}\label{classrte__solver_a3f5fa6388034fcf229f3a0b347a4fd54}
+
+
+Phase. 
+
+
+
+Definition at line 205 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+kappa@{m\+\_\+kappa}}
+\index{m\+\_\+kappa@{m\+\_\+kappa}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+kappa}{m_kappa}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Flux\+Data} rte\+\_\+solver\+::m\+\_\+kappa\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_ae5cfc01b0a14fe67e896cbeddb172771}{}\label{classrte__solver_ae5cfc01b0a14fe67e896cbeddb172771}
+
+
+Absorption coefficient. 
+
+
+
+Definition at line 259 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+kappa\+\_\+eb@{m\+\_\+kappa\+\_\+eb}}
+\index{m\+\_\+kappa\+\_\+eb@{m\+\_\+kappa\+\_\+eb}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+kappa\+\_\+eb}{m_kappa_eb}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+I\+V\+Data} rte\+\_\+solver\+::m\+\_\+kappa\+\_\+eb\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_ab0c0eea8bb4b68fced66198a4535a199}{}\label{classrte__solver_ab0c0eea8bb4b68fced66198a4535a199}
+
+
+Absorption coefficient on EB faces. 
+
+
+
+Definition at line 264 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+name@{m\+\_\+name}}
+\index{m\+\_\+name@{m\+\_\+name}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+name}{m_name}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string rte\+\_\+solver\+::m\+\_\+name\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_ae382b783ea69f9ce1a90a5bbe5b62724}{}\label{classrte__solver_ae382b783ea69f9ce1a90a5bbe5b62724}
+
+
+Name. 
+
+
+
+Definition at line 235 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+phase@{m\+\_\+phase}}
+\index{m\+\_\+phase@{m\+\_\+phase}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+phase}{m_phase}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf phase\+::which\+\_\+phase} rte\+\_\+solver\+::m\+\_\+phase\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_aeb46ac9c37dbbb8eb87e603136f841ec}{}\label{classrte__solver_aeb46ac9c37dbbb8eb87e603136f841ec}
+
+
+Phase. 
+
+
+
+Definition at line 230 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+photon\+\_\+group@{m\+\_\+photon\+\_\+group}}
+\index{m\+\_\+photon\+\_\+group@{m\+\_\+photon\+\_\+group}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+photon\+\_\+group}{m_photon_group}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf photon\+\_\+group}$>$ rte\+\_\+solver\+::m\+\_\+photon\+\_\+group\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_a9d63be064a2ade825fa898d6d86f1e22}{}\label{classrte__solver_a9d63be064a2ade825fa898d6d86f1e22}
+
+
+Photon group. 
+
+
+
+Definition at line 210 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+physdom@{m\+\_\+physdom}}
+\index{m\+\_\+physdom@{m\+\_\+physdom}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+physdom}{m_physdom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf physical\+\_\+domain}$>$ rte\+\_\+solver\+::m\+\_\+physdom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_aeef61202054631e0f0ad0fe33a081dfe}{}\label{classrte__solver_aeef61202054631e0f0ad0fe33a081dfe}
+
+
+Physical domain. 
+
+
+
+Definition at line 220 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+source@{m\+\_\+source}}
+\index{m\+\_\+source@{m\+\_\+source}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+source}{m_source}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Cell\+Data} rte\+\_\+solver\+::m\+\_\+source\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_a377bc1e257c98a965b5faf951ae79f09}{}\label{classrte__solver_a377bc1e257c98a965b5faf951ae79f09}
+
+
+Source term. 
+
+For diffusive models, this will only contain the isotropic source. For higher order models, this should also include beam sources. 
+
+Definition at line 254 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+state@{m\+\_\+state}}
+\index{m\+\_\+state@{m\+\_\+state}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+state}{m_state}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Cell\+Data} rte\+\_\+solver\+::m\+\_\+state\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_ae4fc24d6160537699f84c3c6a89a926e}{}\label{classrte__solver_ae4fc24d6160537699f84c3c6a89a926e}
+
+
+Internal state. 
+
+For diffusive models, this will only contain the isotropic density. For higher order models, this should also include the flux, Eddigton tensor etc. 
+
+Definition at line 247 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+stationary@{m\+\_\+stationary}}
+\index{m\+\_\+stationary@{m\+\_\+stationary}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+stationary}{m_stationary}}]{\setlength{\rightskip}{0pt plus 5cm}bool rte\+\_\+solver\+::m\+\_\+stationary\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_ae32e57e3b2a45d0f7f1e8185ba45555c}{}\label{classrte__solver_ae32e57e3b2a45d0f7f1e8185ba45555c}
+
+
+Stationary solver or not. 
+
+
+
+Definition at line 279 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+step@{m\+\_\+step}}
+\index{m\+\_\+step@{m\+\_\+step}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+step}{m_step}}]{\setlength{\rightskip}{0pt plus 5cm}int rte\+\_\+solver\+::m\+\_\+step\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_aa6d238b5717c812569053af3665bfd07}{}\label{classrte__solver_aa6d238b5717c812569053af3665bfd07}
+
+
+Time step. 
+
+
+
+Definition at line 289 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+time@{m\+\_\+time}}
+\index{m\+\_\+time@{m\+\_\+time}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+time}{m_time}}]{\setlength{\rightskip}{0pt plus 5cm}Real rte\+\_\+solver\+::m\+\_\+time\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_af312dbcc4214dbe8ab2cb341326e8730}{}\label{classrte__solver_af312dbcc4214dbe8ab2cb341326e8730}
+
+
+Time. 
+
+
+
+Definition at line 269 of file rte\+\_\+solver.\+H.
+
+\index{rte\+\_\+solver@{rte\+\_\+solver}!m\+\_\+verbosity@{m\+\_\+verbosity}}
+\index{m\+\_\+verbosity@{m\+\_\+verbosity}!rte\+\_\+solver@{rte\+\_\+solver}}
+\subsubsection[{\texorpdfstring{m\+\_\+verbosity}{m_verbosity}}]{\setlength{\rightskip}{0pt plus 5cm}int rte\+\_\+solver\+::m\+\_\+verbosity\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrte__solver_a0e3aca30e263c405bcc3753dda26aebf}{}\label{classrte__solver_a0e3aca30e263c405bcc3753dda26aebf}
+
+
+Definition at line 284 of file rte\+\_\+solver.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/rte\+\_\+solver/\hyperlink{rte__solver_8H}{rte\+\_\+solver.\+H}\end{DoxyCompactItemize}

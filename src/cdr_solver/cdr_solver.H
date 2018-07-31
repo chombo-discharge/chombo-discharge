@@ -35,7 +35,7 @@ public:
   */
   virtual void cache_state();
 
-    /*!
+  /*!
     @brief Compute div(nv - D*grad(n))
   */
   virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;

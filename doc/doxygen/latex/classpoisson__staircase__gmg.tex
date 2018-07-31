@@ -1,0 +1,464 @@
+\hypertarget{classpoisson__staircase__gmg}{}\section{poisson\+\_\+staircase\+\_\+gmg Class Reference}
+\label{classpoisson__staircase__gmg}\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+
+
+Abstract Poisson solver class. Just an interface, so pretty lightweight stuff.  
+
+
+
+
+{\ttfamily \#include $<$poisson\+\_\+staircase\+\_\+gmg.\+H$>$}
+
+
+
+Inheritance diagram for poisson\+\_\+staircase\+\_\+gmg\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=199pt]{classpoisson__staircase__gmg__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for poisson\+\_\+staircase\+\_\+gmg\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=199pt]{classpoisson__staircase__gmg__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classpoisson__staircase__gmg_a27a401c7f01af98004a0df448621bb36}{poisson\+\_\+staircase\+\_\+gmg} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classpoisson__staircase__gmg_a0836d81e083077e620f921d2b3a8c5c3}{$\sim$poisson\+\_\+staircase\+\_\+gmg} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classpoisson__staircase__gmg_aba5d2df92bec25833275a99cdd33ef26}{solve} ()
+\begin{DoxyCompactList}\small\item\em Override this one for testing purposes. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classpoisson__staircase__gmg_a0b3110624d363a4177c7dd1685908bac}{solve} (\hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const \hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+source)
+\begin{DoxyCompactList}\small\item\em Solve Poisson onto state. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classpoisson__staircase__gmg_a5743fab82b42072fb1bbd4a738cbb561}{set\+\_\+gmg\+\_\+solver\+\_\+parameters} (\hyperlink{namespacerelax_a1b017edf55c06d103aa5b61e015fe219}{relax\+::which\+\_\+relax} a\+\_\+relax\+\_\+type=\hyperlink{namespacerelax_a1b017edf55c06d103aa5b61e015fe219a9f7cf3af97cc2038d3aceba1dbd02c7b}{relax\+::gsrb\+\_\+fast}, \hyperlink{namespaceamrmg_aa3e75c1253c968e52106305f762a7952}{amrmg\+::which\+\_\+mg} a\+\_\+gmg\+\_\+type=\hyperlink{namespaceamrmg_aa3e75c1253c968e52106305f762a7952abcef3ebc4ac4f095d5cf0e2e2b35c23e}{amrmg\+::vcycle}, const int a\+\_\+verbosity=10, const int a\+\_\+pre\+\_\+smooth=16, const int a\+\_\+post\+\_\+smooth=16, const int a\+\_\+bot\+\_\+smooth=16, const int a\+\_\+max\+\_\+iter=50, const Real a\+\_\+eps=1.E-\/30, const Real a\+\_\+hang=0.\+2, const Real a\+\_\+norm\+\_\+thresh=1.E-\/30)
+\begin{DoxyCompactList}\small\item\em Set solver parameters. These are normally good for this class. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classpoisson__staircase__gmg_a79497b4800df4af179e99402552222dd}{query\+\_\+ghost} () const 
+\begin{DoxyCompactList}\small\item\em Return 2, this is the minimum ghost cells we need. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classpoisson__staircase__gmg_a77d02bd6525bb6129d26072814476dc7}{setup\+\_\+gmg} ()
+\begin{DoxyCompactList}\small\item\em Set up the geometric multigrid solver. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classpoisson__staircase__gmg_a035669fdc5e8d0bd2f1bf01fd629e418}{define\+\_\+coefficients} ()
+\begin{DoxyCompactList}\small\item\em Set coefficients. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classpoisson__staircase__gmg_a7bcf740cd539f62c5810e351f60938c0}{setup\+\_\+bc} ()
+\begin{DoxyCompactList}\small\item\em BC. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{namespacerelax_a1b017edf55c06d103aa5b61e015fe219}{relax\+::which\+\_\+relax} \hyperlink{classpoisson__staircase__gmg_a7b9efb21f3dcd4a5919ad438899cfec4}{m\+\_\+gmg\+\_\+relax\+\_\+type}
+\begin{DoxyCompactList}\small\item\em Relaxation type for gmg. \end{DoxyCompactList}\item 
+\hyperlink{namespaceamrmg_aa3e75c1253c968e52106305f762a7952}{amrmg\+::which\+\_\+mg} \hyperlink{classpoisson__staircase__gmg_a91d80909dcc02b14adc86a7df9bc89bd}{m\+\_\+gmg\+\_\+type}
+\begin{DoxyCompactList}\small\item\em G\+MG multigrid type. \end{DoxyCompactList}\item 
+bool \hyperlink{classpoisson__staircase__gmg_a9516ac18769fabd57336395b1edac878}{m\+\_\+needs\+\_\+setup}
+\begin{DoxyCompactList}\small\item\em Needs setup. \end{DoxyCompactList}\item 
+int \hyperlink{classpoisson__staircase__gmg_ab584ed696824702de480e2cb9fd11eb1}{m\+\_\+gmg\+\_\+verbosity}
+\begin{DoxyCompactList}\small\item\em Verbosity for geometric multigrid. \end{DoxyCompactList}\item 
+int \hyperlink{classpoisson__staircase__gmg_ab808d62e409de3509aa98b3503ed4169}{m\+\_\+gmg\+\_\+pre\+\_\+smooth}
+\begin{DoxyCompactList}\small\item\em Number of smoothings before averaging. \end{DoxyCompactList}\item 
+int \hyperlink{classpoisson__staircase__gmg_a043aadcdfe43ebf64be4e1394a75e0f9}{m\+\_\+gmg\+\_\+post\+\_\+smooth}
+\begin{DoxyCompactList}\small\item\em Number of smoothings before averaging. \end{DoxyCompactList}\item 
+int \hyperlink{classpoisson__staircase__gmg_ab2e0db3c965eed182c0ad088786a7100}{m\+\_\+gmg\+\_\+bot\+\_\+smooth}
+\begin{DoxyCompactList}\small\item\em Number of smoothing before bottom solver. \end{DoxyCompactList}\item 
+int \hyperlink{classpoisson__staircase__gmg_afedb31be654bbc19fa7c3777cf840b5d}{m\+\_\+gmg\+\_\+max\+\_\+iter}
+\begin{DoxyCompactList}\small\item\em Maximum number of iterations. \end{DoxyCompactList}\item 
+Real \hyperlink{classpoisson__staircase__gmg_a59be10814772bb99a719f46267d25f67}{m\+\_\+gmg\+\_\+eps}
+\item 
+Real \hyperlink{classpoisson__staircase__gmg_aa02bed6a84cff8c4de9f5d957b7973ef}{m\+\_\+gmg\+\_\+hang}
+\item 
+Real \hyperlink{classpoisson__staircase__gmg_a11491c446a1b7d03132a1235e159c273}{m\+\_\+gmg\+\_\+norm\+\_\+thresh}
+\item 
+Real \hyperlink{classpoisson__staircase__gmg_a693bc415824ca16c316da68a5d49e908}{m\+\_\+alpha}
+\begin{DoxyCompactList}\small\item\em alpha-\/coefficient for E\+B\+Conductivity\+Op \end{DoxyCompactList}\item 
+Real \hyperlink{classpoisson__staircase__gmg_ad371381d12898451a9e71b71211c44a4}{m\+\_\+beta}
+\begin{DoxyCompactList}\small\item\em beta-\/coefficient for E\+B\+Conductivity\+Op \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \hyperlink{classpoisson__staircase__gmg_ad6ec5c9ecaa6f9c1e1ccbae02edc0eae}{m\+\_\+aco}
+\begin{DoxyCompactList}\small\item\em a coefficient \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ \hyperlink{classpoisson__staircase__gmg_a9e2cb700c8b327765f39297acad466c8}{m\+\_\+bco}
+\begin{DoxyCompactList}\small\item\em b-\/coefficient on face centers \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \hyperlink{classpoisson__staircase__gmg_a6c24e1d569a22ce6114b94261ca1b017}{m\+\_\+bco\+\_\+irreg}
+\begin{DoxyCompactList}\small\item\em b-\/coefficient on eb centroids \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \hyperlink{classpoisson__staircase__gmg_ad41c6e5a1c27a79ab4c843032951e21b}{m\+\_\+domain\+\_\+bc\+\_\+factory}
+\begin{DoxyCompactList}\small\item\em Domain bc factory. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ Base\+E\+B\+B\+C\+Factory $>$ \hyperlink{classpoisson__staircase__gmg_a842d2c9d88838b82c44d6bda6cce4e98}{m\+\_\+eb\+\_\+bc\+\_\+factory}
+\begin{DoxyCompactList}\small\item\em Embedded boundary BC factory. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ E\+B\+Conductivity\+Op\+Factory $>$ \hyperlink{classpoisson__staircase__gmg_ab6d3d107ddcc3afea9e798b9cc1aecd8}{m\+\_\+cond\+\_\+op\+\_\+fact}
+\begin{DoxyCompactList}\small\item\em Operator factory for A\+M\+R\+Multi\+Grid. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ Linear\+Solver$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \hyperlink{classpoisson__staircase__gmg_a90c313cc0603bbad78492a6d20853cd5}{m\+\_\+bottom\+\_\+solver}
+\begin{DoxyCompactList}\small\item\em Bottom solver. \end{DoxyCompactList}\item 
+A\+M\+R\+Multi\+Grid$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ \hyperlink{classpoisson__staircase__gmg_a324f584aa293a111287561d4e0287cca}{m\+\_\+gmg\+\_\+solver}
+\begin{DoxyCompactList}\small\item\em Geometric multigrid solver. \end{DoxyCompactList}\item 
+Bi\+C\+G\+Stab\+Solver$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ \hyperlink{classpoisson__staircase__gmg_aeee3ab11fb84f1bf675bf40af8ba748d}{m\+\_\+bicgstab}
+\begin{DoxyCompactList}\small\item\em Conjugate gradient solver for coarsest level. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Abstract Poisson solver class. Just an interface, so pretty lightweight stuff. 
+
+Definition at line 23 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{poisson\+\_\+staircase\+\_\+gmg()}{poisson_staircase_gmg()}}]{\setlength{\rightskip}{0pt plus 5cm}poisson\+\_\+staircase\+\_\+gmg\+::poisson\+\_\+staircase\+\_\+gmg (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classpoisson__staircase__gmg_a27a401c7f01af98004a0df448621bb36}{}\label{classpoisson__staircase__gmg_a27a401c7f01af98004a0df448621bb36}
+
+
+Constructor. 
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!````~poisson\+\_\+staircase\+\_\+gmg@{$\sim$poisson\+\_\+staircase\+\_\+gmg}}
+\index{````~poisson\+\_\+staircase\+\_\+gmg@{$\sim$poisson\+\_\+staircase\+\_\+gmg}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{$\sim$poisson\+\_\+staircase\+\_\+gmg()}{~poisson_staircase_gmg()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual poisson\+\_\+staircase\+\_\+gmg\+::$\sim$poisson\+\_\+staircase\+\_\+gmg (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_a0836d81e083077e620f921d2b3a8c5c3}{}\label{classpoisson__staircase__gmg_a0836d81e083077e620f921d2b3a8c5c3}
+
+
+Constructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!define\+\_\+coefficients@{define\+\_\+coefficients}}
+\index{define\+\_\+coefficients@{define\+\_\+coefficients}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{define\+\_\+coefficients()}{define_coefficients()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void poisson\+\_\+staircase\+\_\+gmg\+::define\+\_\+coefficients (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_a035669fdc5e8d0bd2f1bf01fd629e418}{}\label{classpoisson__staircase__gmg_a035669fdc5e8d0bd2f1bf01fd629e418}
+
+
+Set coefficients. 
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!query\+\_\+ghost@{query\+\_\+ghost}}
+\index{query\+\_\+ghost@{query\+\_\+ghost}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{query\+\_\+ghost() const }{query_ghost() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual int poisson\+\_\+staircase\+\_\+gmg\+::query\+\_\+ghost (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_a79497b4800df4af179e99402552222dd}{}\label{classpoisson__staircase__gmg_a79497b4800df4af179e99402552222dd}
+
+
+Return 2, this is the minimum ghost cells we need. 
+
+
+
+Implements \hyperlink{classpoisson__solver_a44ea16773ef8b62ae504e8d215e48bc0}{poisson\+\_\+solver}.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!set\+\_\+gmg\+\_\+solver\+\_\+parameters@{set\+\_\+gmg\+\_\+solver\+\_\+parameters}}
+\index{set\+\_\+gmg\+\_\+solver\+\_\+parameters@{set\+\_\+gmg\+\_\+solver\+\_\+parameters}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{set\+\_\+gmg\+\_\+solver\+\_\+parameters(relax\+::which\+\_\+relax a\+\_\+relax\+\_\+type=relax\+::gsrb\+\_\+fast, amrmg\+::which\+\_\+mg a\+\_\+gmg\+\_\+type=amrmg\+::vcycle, const int a\+\_\+verbosity=10, const int a\+\_\+pre\+\_\+smooth=16, const int a\+\_\+post\+\_\+smooth=16, const int a\+\_\+bot\+\_\+smooth=16, const int a\+\_\+max\+\_\+iter=50, const Real a\+\_\+eps=1.\+E-\/30, const Real a\+\_\+hang=0.\+2, const Real a\+\_\+norm\+\_\+thresh=1.\+E-\/30)}{set_gmg_solver_parameters(relax::which_relax a_relax_type=relax::gsrb_fast, amrmg::which_mg a_gmg_type=amrmg::vcycle, const int a_verbosity=10, const int a_pre_smooth=16, const int a_post_smooth=16, const int a_bot_smooth=16, const int a_max_iter=50, const Real a_eps=1.E-30, const Real a_hang=0.2, const Real a_norm_thresh=1.E-30)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void poisson\+\_\+staircase\+\_\+gmg\+::set\+\_\+gmg\+\_\+solver\+\_\+parameters (
+\begin{DoxyParamCaption}
+\item[{{\bf relax\+::which\+\_\+relax}}]{a\+\_\+relax\+\_\+type = {\ttfamily {\bf relax\+::gsrb\+\_\+fast}}, }
+\item[{{\bf amrmg\+::which\+\_\+mg}}]{a\+\_\+gmg\+\_\+type = {\ttfamily {\bf amrmg\+::vcycle}}, }
+\item[{const int}]{a\+\_\+verbosity = {\ttfamily 10}, }
+\item[{const int}]{a\+\_\+pre\+\_\+smooth = {\ttfamily 16}, }
+\item[{const int}]{a\+\_\+post\+\_\+smooth = {\ttfamily 16}, }
+\item[{const int}]{a\+\_\+bot\+\_\+smooth = {\ttfamily 16}, }
+\item[{const int}]{a\+\_\+max\+\_\+iter = {\ttfamily 50}, }
+\item[{const Real}]{a\+\_\+eps = {\ttfamily 1.E-\/30}, }
+\item[{const Real}]{a\+\_\+hang = {\ttfamily 0.2}, }
+\item[{const Real}]{a\+\_\+norm\+\_\+thresh = {\ttfamily 1.E-\/30}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_a5743fab82b42072fb1bbd4a738cbb561}{}\label{classpoisson__staircase__gmg_a5743fab82b42072fb1bbd4a738cbb561}
+
+
+Set solver parameters. These are normally good for this class. 
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!setup\+\_\+bc@{setup\+\_\+bc}}
+\index{setup\+\_\+bc@{setup\+\_\+bc}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{setup\+\_\+bc()}{setup_bc()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void poisson\+\_\+staircase\+\_\+gmg\+::setup\+\_\+bc (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_a7bcf740cd539f62c5810e351f60938c0}{}\label{classpoisson__staircase__gmg_a7bcf740cd539f62c5810e351f60938c0}
+
+
+BC. 
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!setup\+\_\+gmg@{setup\+\_\+gmg}}
+\index{setup\+\_\+gmg@{setup\+\_\+gmg}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{setup\+\_\+gmg()}{setup_gmg()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void poisson\+\_\+staircase\+\_\+gmg\+::setup\+\_\+gmg (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_a77d02bd6525bb6129d26072814476dc7}{}\label{classpoisson__staircase__gmg_a77d02bd6525bb6129d26072814476dc7}
+
+
+Set up the geometric multigrid solver. 
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!solve@{solve}}
+\index{solve@{solve}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{solve()}{solve()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void poisson\+\_\+staircase\+\_\+gmg\+::solve (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_aba5d2df92bec25833275a99cdd33ef26}{}\label{classpoisson__staircase__gmg_aba5d2df92bec25833275a99cdd33ef26}
+
+
+Override this one for testing purposes. 
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!solve@{solve}}
+\index{solve@{solve}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{solve(\+M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+source)}{solve(MFAMRCellData &a_state, const MFAMRCellData &a_source)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void poisson\+\_\+staircase\+\_\+gmg\+::solve (
+\begin{DoxyParamCaption}
+\item[{{\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const {\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+source}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classpoisson__staircase__gmg_a0b3110624d363a4177c7dd1685908bac}{}\label{classpoisson__staircase__gmg_a0b3110624d363a4177c7dd1685908bac}
+
+
+Solve Poisson onto state. 
+
+
+
+\subsection{Member Data Documentation}
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+aco@{m\+\_\+aco}}
+\index{m\+\_\+aco@{m\+\_\+aco}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+aco}{m_aco}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ $>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+aco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_ad6ec5c9ecaa6f9c1e1ccbae02edc0eae}{}\label{classpoisson__staircase__gmg_ad6ec5c9ecaa6f9c1e1ccbae02edc0eae}
+
+
+a coefficient 
+
+
+
+Definition at line 135 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+alpha@{m\+\_\+alpha}}
+\index{m\+\_\+alpha@{m\+\_\+alpha}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+alpha}{m_alpha}}]{\setlength{\rightskip}{0pt plus 5cm}Real poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+alpha\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a693bc415824ca16c316da68a5d49e908}{}\label{classpoisson__staircase__gmg_a693bc415824ca16c316da68a5d49e908}
+
+
+alpha-\/coefficient for E\+B\+Conductivity\+Op 
+
+
+
+Definition at line 125 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+bco@{m\+\_\+bco}}
+\index{m\+\_\+bco@{m\+\_\+bco}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+bco}{m_bco}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Flux\+F\+AB$>$ $>$ $>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+bco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a9e2cb700c8b327765f39297acad466c8}{}\label{classpoisson__staircase__gmg_a9e2cb700c8b327765f39297acad466c8}
+
+
+b-\/coefficient on face centers 
+
+
+
+Definition at line 140 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+bco\+\_\+irreg@{m\+\_\+bco\+\_\+irreg}}
+\index{m\+\_\+bco\+\_\+irreg@{m\+\_\+bco\+\_\+irreg}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+bco\+\_\+irreg}{m_bco_irreg}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ $>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+bco\+\_\+irreg\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a6c24e1d569a22ce6114b94261ca1b017}{}\label{classpoisson__staircase__gmg_a6c24e1d569a22ce6114b94261ca1b017}
+
+
+b-\/coefficient on eb centroids 
+
+
+
+Definition at line 145 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+beta@{m\+\_\+beta}}
+\index{m\+\_\+beta@{m\+\_\+beta}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+beta}{m_beta}}]{\setlength{\rightskip}{0pt plus 5cm}Real poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+beta\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_ad371381d12898451a9e71b71211c44a4}{}\label{classpoisson__staircase__gmg_ad371381d12898451a9e71b71211c44a4}
+
+
+beta-\/coefficient for E\+B\+Conductivity\+Op 
+
+
+
+Definition at line 130 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+bicgstab@{m\+\_\+bicgstab}}
+\index{m\+\_\+bicgstab@{m\+\_\+bicgstab}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+bicgstab}{m_bicgstab}}]{\setlength{\rightskip}{0pt plus 5cm}Bi\+C\+G\+Stab\+Solver$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+bicgstab\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_aeee3ab11fb84f1bf675bf40af8ba748d}{}\label{classpoisson__staircase__gmg_aeee3ab11fb84f1bf675bf40af8ba748d}
+
+
+Conjugate gradient solver for coarsest level. 
+
+
+
+Definition at line 175 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+bottom\+\_\+solver@{m\+\_\+bottom\+\_\+solver}}
+\index{m\+\_\+bottom\+\_\+solver@{m\+\_\+bottom\+\_\+solver}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+bottom\+\_\+solver}{m_bottom_solver}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Linear\+Solver$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ $>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+bottom\+\_\+solver\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a90c313cc0603bbad78492a6d20853cd5}{}\label{classpoisson__staircase__gmg_a90c313cc0603bbad78492a6d20853cd5}
+
+
+Bottom solver. 
+
+
+
+Definition at line 165 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+cond\+\_\+op\+\_\+fact@{m\+\_\+cond\+\_\+op\+\_\+fact}}
+\index{m\+\_\+cond\+\_\+op\+\_\+fact@{m\+\_\+cond\+\_\+op\+\_\+fact}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+cond\+\_\+op\+\_\+fact}{m_cond_op_fact}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$E\+B\+Conductivity\+Op\+Factory$>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+cond\+\_\+op\+\_\+fact\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_ab6d3d107ddcc3afea9e798b9cc1aecd8}{}\label{classpoisson__staircase__gmg_ab6d3d107ddcc3afea9e798b9cc1aecd8}
+
+
+Operator factory for A\+M\+R\+Multi\+Grid. 
+
+
+
+Definition at line 160 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+domain\+\_\+bc\+\_\+factory@{m\+\_\+domain\+\_\+bc\+\_\+factory}}
+\index{m\+\_\+domain\+\_\+bc\+\_\+factory@{m\+\_\+domain\+\_\+bc\+\_\+factory}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+domain\+\_\+bc\+\_\+factory}{m_domain_bc_factory}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Base\+Domain\+B\+C\+Factory$>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+domain\+\_\+bc\+\_\+factory\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_ad41c6e5a1c27a79ab4c843032951e21b}{}\label{classpoisson__staircase__gmg_ad41c6e5a1c27a79ab4c843032951e21b}
+
+
+Domain bc factory. 
+
+
+
+Definition at line 150 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+eb\+\_\+bc\+\_\+factory@{m\+\_\+eb\+\_\+bc\+\_\+factory}}
+\index{m\+\_\+eb\+\_\+bc\+\_\+factory@{m\+\_\+eb\+\_\+bc\+\_\+factory}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+eb\+\_\+bc\+\_\+factory}{m_eb_bc_factory}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Base\+E\+B\+B\+C\+Factory$>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+eb\+\_\+bc\+\_\+factory\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a842d2c9d88838b82c44d6bda6cce4e98}{}\label{classpoisson__staircase__gmg_a842d2c9d88838b82c44d6bda6cce4e98}
+
+
+Embedded boundary BC factory. 
+
+
+
+Definition at line 155 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+bot\+\_\+smooth@{m\+\_\+gmg\+\_\+bot\+\_\+smooth}}
+\index{m\+\_\+gmg\+\_\+bot\+\_\+smooth@{m\+\_\+gmg\+\_\+bot\+\_\+smooth}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+bot\+\_\+smooth}{m_gmg_bot_smooth}}]{\setlength{\rightskip}{0pt plus 5cm}int poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+bot\+\_\+smooth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_ab2e0db3c965eed182c0ad088786a7100}{}\label{classpoisson__staircase__gmg_ab2e0db3c965eed182c0ad088786a7100}
+
+
+Number of smoothing before bottom solver. 
+
+
+
+Definition at line 100 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+eps@{m\+\_\+gmg\+\_\+eps}}
+\index{m\+\_\+gmg\+\_\+eps@{m\+\_\+gmg\+\_\+eps}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+eps}{m_gmg_eps}}]{\setlength{\rightskip}{0pt plus 5cm}Real poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+eps\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a59be10814772bb99a719f46267d25f67}{}\label{classpoisson__staircase__gmg_a59be10814772bb99a719f46267d25f67}
+
+
+Definition at line 110 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+hang@{m\+\_\+gmg\+\_\+hang}}
+\index{m\+\_\+gmg\+\_\+hang@{m\+\_\+gmg\+\_\+hang}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+hang}{m_gmg_hang}}]{\setlength{\rightskip}{0pt plus 5cm}Real poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+hang\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_aa02bed6a84cff8c4de9f5d957b7973ef}{}\label{classpoisson__staircase__gmg_aa02bed6a84cff8c4de9f5d957b7973ef}
+
+
+Definition at line 115 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+max\+\_\+iter@{m\+\_\+gmg\+\_\+max\+\_\+iter}}
+\index{m\+\_\+gmg\+\_\+max\+\_\+iter@{m\+\_\+gmg\+\_\+max\+\_\+iter}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+max\+\_\+iter}{m_gmg_max_iter}}]{\setlength{\rightskip}{0pt plus 5cm}int poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+max\+\_\+iter\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_afedb31be654bbc19fa7c3777cf840b5d}{}\label{classpoisson__staircase__gmg_afedb31be654bbc19fa7c3777cf840b5d}
+
+
+Maximum number of iterations. 
+
+
+
+Definition at line 105 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+norm\+\_\+thresh@{m\+\_\+gmg\+\_\+norm\+\_\+thresh}}
+\index{m\+\_\+gmg\+\_\+norm\+\_\+thresh@{m\+\_\+gmg\+\_\+norm\+\_\+thresh}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+norm\+\_\+thresh}{m_gmg_norm_thresh}}]{\setlength{\rightskip}{0pt plus 5cm}Real poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+norm\+\_\+thresh\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a11491c446a1b7d03132a1235e159c273}{}\label{classpoisson__staircase__gmg_a11491c446a1b7d03132a1235e159c273}
+
+
+Definition at line 120 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+post\+\_\+smooth@{m\+\_\+gmg\+\_\+post\+\_\+smooth}}
+\index{m\+\_\+gmg\+\_\+post\+\_\+smooth@{m\+\_\+gmg\+\_\+post\+\_\+smooth}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+post\+\_\+smooth}{m_gmg_post_smooth}}]{\setlength{\rightskip}{0pt plus 5cm}int poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+post\+\_\+smooth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a043aadcdfe43ebf64be4e1394a75e0f9}{}\label{classpoisson__staircase__gmg_a043aadcdfe43ebf64be4e1394a75e0f9}
+
+
+Number of smoothings before averaging. 
+
+
+
+Definition at line 95 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+pre\+\_\+smooth@{m\+\_\+gmg\+\_\+pre\+\_\+smooth}}
+\index{m\+\_\+gmg\+\_\+pre\+\_\+smooth@{m\+\_\+gmg\+\_\+pre\+\_\+smooth}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+pre\+\_\+smooth}{m_gmg_pre_smooth}}]{\setlength{\rightskip}{0pt plus 5cm}int poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+pre\+\_\+smooth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_ab808d62e409de3509aa98b3503ed4169}{}\label{classpoisson__staircase__gmg_ab808d62e409de3509aa98b3503ed4169}
+
+
+Number of smoothings before averaging. 
+
+
+
+Definition at line 90 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+relax\+\_\+type@{m\+\_\+gmg\+\_\+relax\+\_\+type}}
+\index{m\+\_\+gmg\+\_\+relax\+\_\+type@{m\+\_\+gmg\+\_\+relax\+\_\+type}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+relax\+\_\+type}{m_gmg_relax_type}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf relax\+::which\+\_\+relax} poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+relax\+\_\+type\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a7b9efb21f3dcd4a5919ad438899cfec4}{}\label{classpoisson__staircase__gmg_a7b9efb21f3dcd4a5919ad438899cfec4}
+
+
+Relaxation type for gmg. 
+
+
+
+Definition at line 70 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+solver@{m\+\_\+gmg\+\_\+solver}}
+\index{m\+\_\+gmg\+\_\+solver@{m\+\_\+gmg\+\_\+solver}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+solver}{m_gmg_solver}}]{\setlength{\rightskip}{0pt plus 5cm}A\+M\+R\+Multi\+Grid$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+solver\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a324f584aa293a111287561d4e0287cca}{}\label{classpoisson__staircase__gmg_a324f584aa293a111287561d4e0287cca}
+
+
+Geometric multigrid solver. 
+
+
+
+Definition at line 170 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+type@{m\+\_\+gmg\+\_\+type}}
+\index{m\+\_\+gmg\+\_\+type@{m\+\_\+gmg\+\_\+type}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+type}{m_gmg_type}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf amrmg\+::which\+\_\+mg} poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+type\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a91d80909dcc02b14adc86a7df9bc89bd}{}\label{classpoisson__staircase__gmg_a91d80909dcc02b14adc86a7df9bc89bd}
+
+
+G\+MG multigrid type. 
+
+
+
+Definition at line 75 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+gmg\+\_\+verbosity@{m\+\_\+gmg\+\_\+verbosity}}
+\index{m\+\_\+gmg\+\_\+verbosity@{m\+\_\+gmg\+\_\+verbosity}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+gmg\+\_\+verbosity}{m_gmg_verbosity}}]{\setlength{\rightskip}{0pt plus 5cm}int poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+gmg\+\_\+verbosity\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_ab584ed696824702de480e2cb9fd11eb1}{}\label{classpoisson__staircase__gmg_ab584ed696824702de480e2cb9fd11eb1}
+
+
+Verbosity for geometric multigrid. 
+
+
+
+Definition at line 85 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+\index{poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}!m\+\_\+needs\+\_\+setup@{m\+\_\+needs\+\_\+setup}}
+\index{m\+\_\+needs\+\_\+setup@{m\+\_\+needs\+\_\+setup}!poisson\+\_\+staircase\+\_\+gmg@{poisson\+\_\+staircase\+\_\+gmg}}
+\subsubsection[{\texorpdfstring{m\+\_\+needs\+\_\+setup}{m_needs_setup}}]{\setlength{\rightskip}{0pt plus 5cm}bool poisson\+\_\+staircase\+\_\+gmg\+::m\+\_\+needs\+\_\+setup\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classpoisson__staircase__gmg_a9516ac18769fabd57336395b1edac878}{}\label{classpoisson__staircase__gmg_a9516ac18769fabd57336395b1edac878}
+
+
+Needs setup. 
+
+
+
+Definition at line 80 of file poisson\+\_\+staircase\+\_\+gmg.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/poisson\+\_\+solver/\hyperlink{poisson__staircase__gmg_8H}{poisson\+\_\+staircase\+\_\+gmg.\+H}\end{DoxyCompactItemize}

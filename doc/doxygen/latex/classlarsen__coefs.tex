@@ -1,0 +1,162 @@
+\hypertarget{classlarsen__coefs}{}\section{larsen\+\_\+coefs Class Reference}
+\label{classlarsen__coefs}\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+
+
+Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition.  
+
+
+
+
+{\ttfamily \#include $<$larsen\+\_\+coefs.\+H$>$}
+
+
+
+Inheritance diagram for larsen\+\_\+coefs\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=152pt]{classlarsen__coefs__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for larsen\+\_\+coefs\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=152pt]{classlarsen__coefs__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classlarsen__coefs_a5874fbd8e58313686e30a92656abd56d}{larsen\+\_\+coefs} (const Ref\+Counted\+Ptr$<$ \hyperlink{classphoton__group}{photon\+\_\+group} $>$ \&a\+\_\+photon\+\_\+group, const Real a\+\_\+r1, const Real a\+\_\+r2)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classlarsen__coefs_a10c0d53ea7426e5afcd62a06c48c8c67}{$\sim$larsen\+\_\+coefs} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classlarsen__coefs_a35095b0563cc502bc0918f8038bc9200}{aco} (const Real\+Vect a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em aco. Equal to 0.\+5$\ast$3$\ast$kappa$\ast$kappa$\ast$(1 + 3$\ast$r2)/(1 -\/ 2$\ast$r1) \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classlarsen__coefs_a659244c51aac28ff1ac08fa4e3079b32}{bco} (const Real\+Vect a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em bco. Equal to -\/kappa \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classlarsen__coefs_a7976331f3f90664ed7a4b522894f1d08}{rhs} (const Real\+Vect a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em Surface source term. Return zero. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classphoton__group}{photon\+\_\+group} $>$ \hyperlink{classlarsen__coefs_a11303e097f21193469950443e9503702}{m\+\_\+photon\+\_\+group}
+\item 
+Real \hyperlink{classlarsen__coefs_a4fb7d88061de16fd8e62eca52d9575ed}{m\+\_\+r1}
+\item 
+Real \hyperlink{classlarsen__coefs_af298f1540fa42112562e7005ac8c7553}{m\+\_\+r2}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition. 
+
+Definition at line 19 of file larsen\+\_\+coefs.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{larsen\+\_\+coefs(const Ref\+Counted\+Ptr$<$ photon\+\_\+group $>$ \&a\+\_\+photon\+\_\+group, const Real a\+\_\+r1, const Real a\+\_\+r2)}{larsen_coefs(const RefCountedPtr< photon_group > &a_photon_group, const Real a_r1, const Real a_r2)}}]{\setlength{\rightskip}{0pt plus 5cm}larsen\+\_\+coefs\+::larsen\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf photon\+\_\+group} $>$ \&}]{a\+\_\+photon\+\_\+group, }
+\item[{const Real}]{a\+\_\+r1, }
+\item[{const Real}]{a\+\_\+r2}
+\end{DoxyParamCaption}
+)}\hypertarget{classlarsen__coefs_a5874fbd8e58313686e30a92656abd56d}{}\label{classlarsen__coefs_a5874fbd8e58313686e30a92656abd56d}
+
+
+Constructor. 
+
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!````~larsen\+\_\+coefs@{$\sim$larsen\+\_\+coefs}}
+\index{````~larsen\+\_\+coefs@{$\sim$larsen\+\_\+coefs}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{$\sim$larsen\+\_\+coefs()}{~larsen_coefs()}}]{\setlength{\rightskip}{0pt plus 5cm}larsen\+\_\+coefs\+::$\sim$larsen\+\_\+coefs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classlarsen__coefs_a10c0d53ea7426e5afcd62a06c48c8c67}{}\label{classlarsen__coefs_a10c0d53ea7426e5afcd62a06c48c8c67}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!aco@{aco}}
+\index{aco@{aco}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{aco(const Real\+Vect a\+\_\+pos) const }{aco(const RealVect a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real larsen\+\_\+coefs\+::aco (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classlarsen__coefs_a35095b0563cc502bc0918f8038bc9200}{}\label{classlarsen__coefs_a35095b0563cc502bc0918f8038bc9200}
+
+
+aco. Equal to 0.\+5$\ast$3$\ast$kappa$\ast$kappa$\ast$(1 + 3$\ast$r2)/(1 -\/ 2$\ast$r1) 
+
+
+
+Implements \hyperlink{classrobin__coef_a0770f01660699dcbc7c610e7d851e9e5}{robin\+\_\+coef}.
+
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!bco@{bco}}
+\index{bco@{bco}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{bco(const Real\+Vect a\+\_\+pos) const }{bco(const RealVect a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real larsen\+\_\+coefs\+::bco (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classlarsen__coefs_a659244c51aac28ff1ac08fa4e3079b32}{}\label{classlarsen__coefs_a659244c51aac28ff1ac08fa4e3079b32}
+
+
+bco. Equal to -\/kappa 
+
+
+
+Implements \hyperlink{classrobin__coef_a1bc117783a16f2e97e2a146bcfea1318}{robin\+\_\+coef}.
+
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!rhs@{rhs}}
+\index{rhs@{rhs}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{rhs(const Real\+Vect a\+\_\+pos) const }{rhs(const RealVect a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real larsen\+\_\+coefs\+::rhs (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classlarsen__coefs_a7976331f3f90664ed7a4b522894f1d08}{}\label{classlarsen__coefs_a7976331f3f90664ed7a4b522894f1d08}
+
+
+Surface source term. Return zero. 
+
+
+
+Implements \hyperlink{classrobin__coef_a42b98d3d26ec08dd3a8d9b7539445f93}{robin\+\_\+coef}.
+
+
+
+\subsection{Member Data Documentation}
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!m\+\_\+photon\+\_\+group@{m\+\_\+photon\+\_\+group}}
+\index{m\+\_\+photon\+\_\+group@{m\+\_\+photon\+\_\+group}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{m\+\_\+photon\+\_\+group}{m_photon_group}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf photon\+\_\+group}$>$ larsen\+\_\+coefs\+::m\+\_\+photon\+\_\+group\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classlarsen__coefs_a11303e097f21193469950443e9503702}{}\label{classlarsen__coefs_a11303e097f21193469950443e9503702}
+
+
+Definition at line 51 of file larsen\+\_\+coefs.\+H.
+
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!m\+\_\+r1@{m\+\_\+r1}}
+\index{m\+\_\+r1@{m\+\_\+r1}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{m\+\_\+r1}{m_r1}}]{\setlength{\rightskip}{0pt plus 5cm}Real larsen\+\_\+coefs\+::m\+\_\+r1\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classlarsen__coefs_a4fb7d88061de16fd8e62eca52d9575ed}{}\label{classlarsen__coefs_a4fb7d88061de16fd8e62eca52d9575ed}
+
+
+Definition at line 53 of file larsen\+\_\+coefs.\+H.
+
+\index{larsen\+\_\+coefs@{larsen\+\_\+coefs}!m\+\_\+r2@{m\+\_\+r2}}
+\index{m\+\_\+r2@{m\+\_\+r2}!larsen\+\_\+coefs@{larsen\+\_\+coefs}}
+\subsubsection[{\texorpdfstring{m\+\_\+r2}{m_r2}}]{\setlength{\rightskip}{0pt plus 5cm}Real larsen\+\_\+coefs\+::m\+\_\+r2\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classlarsen__coefs_af298f1540fa42112562e7005ac8c7553}{}\label{classlarsen__coefs_af298f1540fa42112562e7005ac8c7553}
+
+
+Definition at line 55 of file larsen\+\_\+coefs.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/rte\+\_\+solver/\hyperlink{larsen__coefs_8H}{larsen\+\_\+coefs.\+H}\end{DoxyCompactItemize}

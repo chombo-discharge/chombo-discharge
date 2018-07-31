@@ -1,0 +1,189 @@
+\hypertarget{classtags}{}\section{tags Class Reference}
+\label{classtags}\index{tags@{tags}}
+
+
+Class that holds an Int\+Vect\+Set that can be communicated.  
+
+
+
+
+{\ttfamily \#include $<$tags.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classtags_a1ec0a0a1ae4c9929b04c2d7e5600919c}{tags} ()
+\begin{DoxyCompactList}\small\item\em Null constructor. \end{DoxyCompactList}\item 
+\hyperlink{classtags_a974da8fd26e453e0df90cb9c2de73f9c}{tags} (const Box \&a\+\_\+box)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classtags_a23cb123df97cf735a1f4bb17d8ee1f8a}{$\sim$tags} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+Dense\+Int\+Vect\+Set \& \hyperlink{classtags_a03216e6a41c41b1b1f87bda34534b996}{get\+\_\+ivs} ()
+\begin{DoxyCompactList}\small\item\em Get I\+VS. \end{DoxyCompactList}\item 
+const Dense\+Int\+Vect\+Set \& \hyperlink{classtags_adc92583ea93b1bdc03b11ca580581eb1}{get\+\_\+ivs} () const 
+\begin{DoxyCompactList}\small\item\em Get I\+VS. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtags_a02c95fe16aa32524ccd9f752bd087b73}{copy} (const Box \&a\+\_\+region\+\_\+from, const Interval \&a\+\_\+dst\+\_\+interval, const Box \&a\+\_\+region\+\_\+to, const \hyperlink{classtags}{tags} \&a\+\_\+src, const Interval \&a\+\_\+src\+\_\+interval)
+\begin{DoxyCompactList}\small\item\em Copy function. \end{DoxyCompactList}\item 
+int \hyperlink{classtags_a98c24b24e837fa4175e4a74c5d1b73e9}{size} (const Box \&a\+\_\+box, const Interval \&a\+\_\+comps) const 
+\begin{DoxyCompactList}\small\item\em Return size in bytes. \end{DoxyCompactList}\item 
+void \hyperlink{classtags_a8fcae89bd0c1818fd4a8e410c4610162}{linear\+In} (const void $\ast$const a\+\_\+in\+\_\+buffer, const Box \&R, const Interval \&a\+\_\+comps)
+\begin{DoxyCompactList}\small\item\em Linearization function. \end{DoxyCompactList}\item 
+void \hyperlink{classtags_a5d4649f91787b915e41a2f275e90dbe1}{linear\+Out} (void $\ast$const a\+\_\+out\+\_\+buffer, const Box \&R, const Interval \&a\+\_\+comps) const 
+\begin{DoxyCompactList}\small\item\em Linearization function. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static int \hyperlink{classtags_a9842e4d3ac8966027a87959815252392}{pre\+Allocatable} ()
+\begin{DoxyCompactList}\small\item\em pre\+Allocatable memory or not \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Dense\+Int\+Vect\+Set \hyperlink{classtags_a0ebb666b1ee378c0b162b31f3486a7c9}{m\+\_\+ivs}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class that holds an Int\+Vect\+Set that can be communicated. 
+
+Definition at line 19 of file tags.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{tags@{tags}!tags@{tags}}
+\index{tags@{tags}!tags@{tags}}
+\subsubsection[{\texorpdfstring{tags()}{tags()}}]{\setlength{\rightskip}{0pt plus 5cm}tags\+::tags (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classtags_a1ec0a0a1ae4c9929b04c2d7e5600919c}{}\label{classtags_a1ec0a0a1ae4c9929b04c2d7e5600919c}
+
+
+Null constructor. 
+
+\index{tags@{tags}!tags@{tags}}
+\index{tags@{tags}!tags@{tags}}
+\subsubsection[{\texorpdfstring{tags(const Box \&a\+\_\+box)}{tags(const Box &a_box)}}]{\setlength{\rightskip}{0pt plus 5cm}tags\+::tags (
+\begin{DoxyParamCaption}
+\item[{const Box \&}]{a\+\_\+box}
+\end{DoxyParamCaption}
+)}\hypertarget{classtags_a974da8fd26e453e0df90cb9c2de73f9c}{}\label{classtags_a974da8fd26e453e0df90cb9c2de73f9c}
+
+
+Constructor. 
+
+\index{tags@{tags}!````~tags@{$\sim$tags}}
+\index{````~tags@{$\sim$tags}!tags@{tags}}
+\subsubsection[{\texorpdfstring{$\sim$tags()}{~tags()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual tags\+::$\sim$tags (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtags_a23cb123df97cf735a1f4bb17d8ee1f8a}{}\label{classtags_a23cb123df97cf735a1f4bb17d8ee1f8a}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{tags@{tags}!copy@{copy}}
+\index{copy@{copy}!tags@{tags}}
+\subsubsection[{\texorpdfstring{copy(const Box \&a\+\_\+region\+\_\+from, const Interval \&a\+\_\+dst\+\_\+interval, const Box \&a\+\_\+region\+\_\+to, const tags \&a\+\_\+src, const Interval \&a\+\_\+src\+\_\+interval)}{copy(const Box &a_region_from, const Interval &a_dst_interval, const Box &a_region_to, const tags &a_src, const Interval &a_src_interval)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void tags\+::copy (
+\begin{DoxyParamCaption}
+\item[{const Box \&}]{a\+\_\+region\+\_\+from, }
+\item[{const Interval \&}]{a\+\_\+dst\+\_\+interval, }
+\item[{const Box \&}]{a\+\_\+region\+\_\+to, }
+\item[{const {\bf tags} \&}]{a\+\_\+src, }
+\item[{const Interval \&}]{a\+\_\+src\+\_\+interval}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtags_a02c95fe16aa32524ccd9f752bd087b73}{}\label{classtags_a02c95fe16aa32524ccd9f752bd087b73}
+
+
+Copy function. 
+
+\index{tags@{tags}!get\+\_\+ivs@{get\+\_\+ivs}}
+\index{get\+\_\+ivs@{get\+\_\+ivs}!tags@{tags}}
+\subsubsection[{\texorpdfstring{get\+\_\+ivs()}{get_ivs()}}]{\setlength{\rightskip}{0pt plus 5cm}Dense\+Int\+Vect\+Set\& tags\+::get\+\_\+ivs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classtags_a03216e6a41c41b1b1f87bda34534b996}{}\label{classtags_a03216e6a41c41b1b1f87bda34534b996}
+
+
+Get I\+VS. 
+
+\index{tags@{tags}!get\+\_\+ivs@{get\+\_\+ivs}}
+\index{get\+\_\+ivs@{get\+\_\+ivs}!tags@{tags}}
+\subsubsection[{\texorpdfstring{get\+\_\+ivs() const }{get_ivs() const }}]{\setlength{\rightskip}{0pt plus 5cm}const Dense\+Int\+Vect\+Set\& tags\+::get\+\_\+ivs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\hypertarget{classtags_adc92583ea93b1bdc03b11ca580581eb1}{}\label{classtags_adc92583ea93b1bdc03b11ca580581eb1}
+
+
+Get I\+VS. 
+
+\index{tags@{tags}!linear\+In@{linear\+In}}
+\index{linear\+In@{linear\+In}!tags@{tags}}
+\subsubsection[{\texorpdfstring{linear\+In(const void $\ast$const a\+\_\+in\+\_\+buffer, const Box \&\+R, const Interval \&a\+\_\+comps)}{linearIn(const void *const a_in_buffer, const Box &R, const Interval &a_comps)}}]{\setlength{\rightskip}{0pt plus 5cm}void tags\+::linear\+In (
+\begin{DoxyParamCaption}
+\item[{const void $\ast$const}]{a\+\_\+in\+\_\+buffer, }
+\item[{const Box \&}]{R, }
+\item[{const Interval \&}]{a\+\_\+comps}
+\end{DoxyParamCaption}
+)}\hypertarget{classtags_a8fcae89bd0c1818fd4a8e410c4610162}{}\label{classtags_a8fcae89bd0c1818fd4a8e410c4610162}
+
+
+Linearization function. 
+
+\index{tags@{tags}!linear\+Out@{linear\+Out}}
+\index{linear\+Out@{linear\+Out}!tags@{tags}}
+\subsubsection[{\texorpdfstring{linear\+Out(void $\ast$const a\+\_\+out\+\_\+buffer, const Box \&\+R, const Interval \&a\+\_\+comps) const }{linearOut(void *const a_out_buffer, const Box &R, const Interval &a_comps) const }}]{\setlength{\rightskip}{0pt plus 5cm}void tags\+::linear\+Out (
+\begin{DoxyParamCaption}
+\item[{void $\ast$const}]{a\+\_\+out\+\_\+buffer, }
+\item[{const Box \&}]{R, }
+\item[{const Interval \&}]{a\+\_\+comps}
+\end{DoxyParamCaption}
+) const}\hypertarget{classtags_a5d4649f91787b915e41a2f275e90dbe1}{}\label{classtags_a5d4649f91787b915e41a2f275e90dbe1}
+
+
+Linearization function. 
+
+\index{tags@{tags}!pre\+Allocatable@{pre\+Allocatable}}
+\index{pre\+Allocatable@{pre\+Allocatable}!tags@{tags}}
+\subsubsection[{\texorpdfstring{pre\+Allocatable()}{preAllocatable()}}]{\setlength{\rightskip}{0pt plus 5cm}static int tags\+::pre\+Allocatable (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classtags_a9842e4d3ac8966027a87959815252392}{}\label{classtags_a9842e4d3ac8966027a87959815252392}
+
+
+pre\+Allocatable memory or not 
+
+\index{tags@{tags}!size@{size}}
+\index{size@{size}!tags@{tags}}
+\subsubsection[{\texorpdfstring{size(const Box \&a\+\_\+box, const Interval \&a\+\_\+comps) const }{size(const Box &a_box, const Interval &a_comps) const }}]{\setlength{\rightskip}{0pt plus 5cm}int tags\+::size (
+\begin{DoxyParamCaption}
+\item[{const Box \&}]{a\+\_\+box, }
+\item[{const Interval \&}]{a\+\_\+comps}
+\end{DoxyParamCaption}
+) const}\hypertarget{classtags_a98c24b24e837fa4175e4a74c5d1b73e9}{}\label{classtags_a98c24b24e837fa4175e4a74c5d1b73e9}
+
+
+Return size in bytes. 
+
+
+
+\subsection{Member Data Documentation}
+\index{tags@{tags}!m\+\_\+ivs@{m\+\_\+ivs}}
+\index{m\+\_\+ivs@{m\+\_\+ivs}!tags@{tags}}
+\subsubsection[{\texorpdfstring{m\+\_\+ivs}{m_ivs}}]{\setlength{\rightskip}{0pt plus 5cm}Dense\+Int\+Vect\+Set tags\+::m\+\_\+ivs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtags_a0ebb666b1ee378c0b162b31f3486a7c9}{}\label{classtags_a0ebb666b1ee378c0b162b31f3486a7c9}
+
+
+Definition at line 78 of file tags.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/global/\hyperlink{tags_8H}{tags.\+H}\end{DoxyCompactItemize}

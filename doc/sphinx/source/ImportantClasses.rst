@@ -1,7 +1,7 @@
 .. _Chap:ImportantClasses:
 
-User API
-========
+Class API
+=========
 
 Here, we discuss the base classes that makes up the foundation of PlasmaC.
 

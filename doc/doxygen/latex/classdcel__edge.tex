@@ -1,0 +1,419 @@
+\hypertarget{classdcel__edge}{}\section{dcel\+\_\+edge Class Reference}
+\label{classdcel__edge}\index{dcel\+\_\+edge@{dcel\+\_\+edge}}
+
+
+Edge class for handling surface tesselations with D\+C\+EL meshes.  
+
+
+
+
+{\ttfamily \#include $<$dcel\+\_\+edge.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdcel__edge_a4c8276de8892c1bea38d7263a75bddbd}{dcel\+\_\+edge} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classdcel__edge_ab5af1cf4c154e120197cd32b6c8a3b81}{$\sim$dcel\+\_\+edge} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__edge_a2b50803846b893b6ab98f7d2b7a165d8}{define} (const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ \&a\+\_\+vert, const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+pair, const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+next, const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+prev, const Real\+Vect a\+\_\+normal=Real\+Vect\+::\+Zero)
+\begin{DoxyCompactList}\small\item\em Define function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__edge_a8699d7d225c0d51d61f8a00fb336ced1}{set\+\_\+poly} (const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__poly}{dcel\+\_\+poly} $>$ \&a\+\_\+poly)
+\begin{DoxyCompactList}\small\item\em Set polygon. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__edge_a92c86314c8c7b4cc0bf3e41d14939eb2}{set\+\_\+vert} (const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ \&a\+\_\+vert)
+\begin{DoxyCompactList}\small\item\em Set vertex. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__edge_aaa39e43107bd004221aafc4b8709a8a2}{set\+\_\+pair} (const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+pair)
+\begin{DoxyCompactList}\small\item\em Set pair. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__edge_a24a8fa1a96dc8d99db81dd046e317cdd}{set\+\_\+next} (const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+next)
+\begin{DoxyCompactList}\small\item\em Set next edge. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__edge_ac195585b718a1f640fbcac48af6dbbe6}{set\+\_\+prev} (const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+prev)
+\begin{DoxyCompactList}\small\item\em Set previous. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__edge_a826bc0a0a2fc27ee5e7868c970d702ed}{set\+\_\+normal} (const Real\+Vect a\+\_\+normal)
+\begin{DoxyCompactList}\small\item\em Set normal vector. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ \& \hyperlink{classdcel__edge_a8b97c67c2ba83058004886bb0f4b07f3}{get\+\_\+vert} () const 
+\begin{DoxyCompactList}\small\item\em Get vertex. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ \& \hyperlink{classdcel__edge_a01970e877a80c62c44a163c468620c05}{get\+\_\+vert} ()
+\begin{DoxyCompactList}\small\item\em Get vertex. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ \& \hyperlink{classdcel__edge_a34913e7f8996eaf6bbfbd8fd0ca85fef}{get\+\_\+other\+\_\+vert} () const 
+\begin{DoxyCompactList}\small\item\em Get other vertex. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ \& \hyperlink{classdcel__edge_a88308d8ca4d06fac08c56642cbfae96a}{get\+\_\+other\+\_\+vert} ()
+\begin{DoxyCompactList}\small\item\em Get other vertex. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__edge_afe4d7c0659f545e042ed610d0fd0c616}{get\+\_\+pair} () const 
+\begin{DoxyCompactList}\small\item\em Get the other half edge. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__edge_a058f603ed8cd5981fbcdbc7c28b9da7f}{get\+\_\+pair} ()
+\begin{DoxyCompactList}\small\item\em Get the other half edge. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__edge_a24095ab3967b4932de94d376b653e749}{get\+\_\+prev} () const 
+\begin{DoxyCompactList}\small\item\em Get the previous half edge. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__edge_a66652ca4333ebf46645387c282e9f40e}{get\+\_\+prev} ()
+\begin{DoxyCompactList}\small\item\em Get the previous half edge. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__edge_aba6969e9ef8fb37e7ad513a1e664bef0}{get\+\_\+next} () const 
+\begin{DoxyCompactList}\small\item\em Get the next half edge. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__edge_abe52e9664a1ad5fc5b371e4acc3f19ba}{get\+\_\+next} ()
+\begin{DoxyCompactList}\small\item\em Get the next half edge. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__poly}{dcel\+\_\+poly} $>$ \& \hyperlink{classdcel__edge_a13066704c4128ef6628aa01049765555}{get\+\_\+poly} () const 
+\begin{DoxyCompactList}\small\item\em Get polygon. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__poly}{dcel\+\_\+poly} $>$ \& \hyperlink{classdcel__edge_a804a1d0a6f7727c3f2d01219b9b70d7e}{get\+\_\+poly} ()
+\begin{DoxyCompactList}\small\item\em Get polygon. \end{DoxyCompactList}\item 
+virtual Real\+Vect \hyperlink{classdcel__edge_a8806928fd1edcd7cee053c647f60ef23}{get\+\_\+normal} () const 
+\begin{DoxyCompactList}\small\item\em Get pseudo-\/normal. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classdcel__edge_a750175015cf570ff805d238bd6d5cb64}{signed\+\_\+distance} (const Real\+Vect a\+\_\+x0) const 
+\begin{DoxyCompactList}\small\item\em Get the signed distance between this edge and a point. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Real\+Vect \hyperlink{classdcel__edge_afcc9b6837856744b4f74639431820d54}{m\+\_\+normal}
+\begin{DoxyCompactList}\small\item\em Edge pseudo-\/normal. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ \hyperlink{classdcel__edge_ad4b3ec662a3dd8290f0514577605577d}{m\+\_\+vert}
+\begin{DoxyCompactList}\small\item\em Vertex at end of edge. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \hyperlink{classdcel__edge_a63193774b8173e4538f6301971377d35}{m\+\_\+pair}
+\begin{DoxyCompactList}\small\item\em Edge pair. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \hyperlink{classdcel__edge_a768565a1f3996c8c5d2db6a66203669b}{m\+\_\+prev}
+\begin{DoxyCompactList}\small\item\em Previous edge. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \hyperlink{classdcel__edge_a7a847adf0cc11c2a66fcdca1a3bdb941}{m\+\_\+next}
+\begin{DoxyCompactList}\small\item\em Next edge. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__poly}{dcel\+\_\+poly} $>$ \hyperlink{classdcel__edge_a2a7745d9e39c1162ad5d8af1f16c9b57}{m\+\_\+poly}
+\begin{DoxyCompactList}\small\item\em Reference to polygon. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Edge class for handling surface tesselations with D\+C\+EL meshes. 
+
+Definition at line 20 of file dcel\+\_\+edge.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{dcel\+\_\+edge()}{dcel_edge()}}]{\setlength{\rightskip}{0pt plus 5cm}dcel\+\_\+edge\+::dcel\+\_\+edge (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classdcel__edge_a4c8276de8892c1bea38d7263a75bddbd}{}\label{classdcel__edge_a4c8276de8892c1bea38d7263a75bddbd}
+
+
+Constructor. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!````~dcel\+\_\+edge@{$\sim$dcel\+\_\+edge}}
+\index{````~dcel\+\_\+edge@{$\sim$dcel\+\_\+edge}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{$\sim$dcel\+\_\+edge()}{~dcel_edge()}}]{\setlength{\rightskip}{0pt plus 5cm}dcel\+\_\+edge\+::$\sim$dcel\+\_\+edge (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classdcel__edge_ab5af1cf4c154e120197cd32b6c8a3b81}{}\label{classdcel__edge_ab5af1cf4c154e120197cd32b6c8a3b81}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!define@{define}}
+\index{define@{define}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{define(const Ref\+Counted\+Ptr$<$ dcel\+\_\+vert $>$ \&a\+\_\+vert, const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+pair, const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+next, const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+prev, const Real\+Vect a\+\_\+normal=\+Real\+Vect\+::\+Zero)}{define(const RefCountedPtr< dcel_vert > &a_vert, const RefCountedPtr< dcel_edge > &a_pair, const RefCountedPtr< dcel_edge > &a_next, const RefCountedPtr< dcel_edge > &a_prev, const RealVect a_normal=RealVect::Zero)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+edge\+::define (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+vert} $>$ \&}]{a\+\_\+vert, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+pair, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+next, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+prev, }
+\item[{const Real\+Vect}]{a\+\_\+normal = {\ttfamily RealVect\+:\+:Zero}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a2b50803846b893b6ab98f7d2b7a165d8}{}\label{classdcel__edge_a2b50803846b893b6ab98f7d2b7a165d8}
+
+
+Define function. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+next@{get\+\_\+next}}
+\index{get\+\_\+next@{get\+\_\+next}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+next() const }{get_next() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+edge\+::get\+\_\+next (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_aba6969e9ef8fb37e7ad513a1e664bef0}{}\label{classdcel__edge_aba6969e9ef8fb37e7ad513a1e664bef0}
+
+
+Get the next half edge. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+next@{get\+\_\+next}}
+\index{get\+\_\+next@{get\+\_\+next}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+next()}{get_next()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+edge\+::get\+\_\+next (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_abe52e9664a1ad5fc5b371e4acc3f19ba}{}\label{classdcel__edge_abe52e9664a1ad5fc5b371e4acc3f19ba}
+
+
+Get the next half edge. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+normal@{get\+\_\+normal}}
+\index{get\+\_\+normal@{get\+\_\+normal}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+normal() const }{get_normal() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real\+Vect dcel\+\_\+edge\+::get\+\_\+normal (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a8806928fd1edcd7cee053c647f60ef23}{}\label{classdcel__edge_a8806928fd1edcd7cee053c647f60ef23}
+
+
+Get pseudo-\/normal. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+other\+\_\+vert@{get\+\_\+other\+\_\+vert}}
+\index{get\+\_\+other\+\_\+vert@{get\+\_\+other\+\_\+vert}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+other\+\_\+vert() const }{get_other_vert() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf dcel\+\_\+vert}$>$\& dcel\+\_\+edge\+::get\+\_\+other\+\_\+vert (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a34913e7f8996eaf6bbfbd8fd0ca85fef}{}\label{classdcel__edge_a34913e7f8996eaf6bbfbd8fd0ca85fef}
+
+
+Get other vertex. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+other\+\_\+vert@{get\+\_\+other\+\_\+vert}}
+\index{get\+\_\+other\+\_\+vert@{get\+\_\+other\+\_\+vert}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+other\+\_\+vert()}{get_other_vert()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf dcel\+\_\+vert}$>$\& dcel\+\_\+edge\+::get\+\_\+other\+\_\+vert (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a88308d8ca4d06fac08c56642cbfae96a}{}\label{classdcel__edge_a88308d8ca4d06fac08c56642cbfae96a}
+
+
+Get other vertex. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+pair@{get\+\_\+pair}}
+\index{get\+\_\+pair@{get\+\_\+pair}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+pair() const }{get_pair() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+edge\+::get\+\_\+pair (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_afe4d7c0659f545e042ed610d0fd0c616}{}\label{classdcel__edge_afe4d7c0659f545e042ed610d0fd0c616}
+
+
+Get the other half edge. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+pair@{get\+\_\+pair}}
+\index{get\+\_\+pair@{get\+\_\+pair}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+pair()}{get_pair()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+edge\+::get\+\_\+pair (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a058f603ed8cd5981fbcdbc7c28b9da7f}{}\label{classdcel__edge_a058f603ed8cd5981fbcdbc7c28b9da7f}
+
+
+Get the other half edge. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+poly@{get\+\_\+poly}}
+\index{get\+\_\+poly@{get\+\_\+poly}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+poly() const }{get_poly() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf dcel\+\_\+poly}$>$\& dcel\+\_\+edge\+::get\+\_\+poly (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a13066704c4128ef6628aa01049765555}{}\label{classdcel__edge_a13066704c4128ef6628aa01049765555}
+
+
+Get polygon. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+poly@{get\+\_\+poly}}
+\index{get\+\_\+poly@{get\+\_\+poly}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+poly()}{get_poly()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf dcel\+\_\+poly}$>$\& dcel\+\_\+edge\+::get\+\_\+poly (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a804a1d0a6f7727c3f2d01219b9b70d7e}{}\label{classdcel__edge_a804a1d0a6f7727c3f2d01219b9b70d7e}
+
+
+Get polygon. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+prev@{get\+\_\+prev}}
+\index{get\+\_\+prev@{get\+\_\+prev}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+prev() const }{get_prev() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+edge\+::get\+\_\+prev (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a24095ab3967b4932de94d376b653e749}{}\label{classdcel__edge_a24095ab3967b4932de94d376b653e749}
+
+
+Get the previous half edge. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+prev@{get\+\_\+prev}}
+\index{get\+\_\+prev@{get\+\_\+prev}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+prev()}{get_prev()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+edge\+::get\+\_\+prev (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a66652ca4333ebf46645387c282e9f40e}{}\label{classdcel__edge_a66652ca4333ebf46645387c282e9f40e}
+
+
+Get the previous half edge. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+vert@{get\+\_\+vert}}
+\index{get\+\_\+vert@{get\+\_\+vert}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+vert() const }{get_vert() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf dcel\+\_\+vert}$>$\& dcel\+\_\+edge\+::get\+\_\+vert (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a8b97c67c2ba83058004886bb0f4b07f3}{}\label{classdcel__edge_a8b97c67c2ba83058004886bb0f4b07f3}
+
+
+Get vertex. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!get\+\_\+vert@{get\+\_\+vert}}
+\index{get\+\_\+vert@{get\+\_\+vert}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{get\+\_\+vert()}{get_vert()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf dcel\+\_\+vert}$>$\& dcel\+\_\+edge\+::get\+\_\+vert (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a01970e877a80c62c44a163c468620c05}{}\label{classdcel__edge_a01970e877a80c62c44a163c468620c05}
+
+
+Get vertex. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!set\+\_\+next@{set\+\_\+next}}
+\index{set\+\_\+next@{set\+\_\+next}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{set\+\_\+next(const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+next)}{set_next(const RefCountedPtr< dcel_edge > &a_next)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+edge\+::set\+\_\+next (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+next}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a24a8fa1a96dc8d99db81dd046e317cdd}{}\label{classdcel__edge_a24a8fa1a96dc8d99db81dd046e317cdd}
+
+
+Set next edge. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!set\+\_\+normal@{set\+\_\+normal}}
+\index{set\+\_\+normal@{set\+\_\+normal}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{set\+\_\+normal(const Real\+Vect a\+\_\+normal)}{set_normal(const RealVect a_normal)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+edge\+::set\+\_\+normal (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+normal}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a826bc0a0a2fc27ee5e7868c970d702ed}{}\label{classdcel__edge_a826bc0a0a2fc27ee5e7868c970d702ed}
+
+
+Set normal vector. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!set\+\_\+pair@{set\+\_\+pair}}
+\index{set\+\_\+pair@{set\+\_\+pair}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{set\+\_\+pair(const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+pair)}{set_pair(const RefCountedPtr< dcel_edge > &a_pair)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+edge\+::set\+\_\+pair (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+pair}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_aaa39e43107bd004221aafc4b8709a8a2}{}\label{classdcel__edge_aaa39e43107bd004221aafc4b8709a8a2}
+
+
+Set pair. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!set\+\_\+poly@{set\+\_\+poly}}
+\index{set\+\_\+poly@{set\+\_\+poly}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{set\+\_\+poly(const Ref\+Counted\+Ptr$<$ dcel\+\_\+poly $>$ \&a\+\_\+poly)}{set_poly(const RefCountedPtr< dcel_poly > &a_poly)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+edge\+::set\+\_\+poly (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+poly} $>$ \&}]{a\+\_\+poly}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a8699d7d225c0d51d61f8a00fb336ced1}{}\label{classdcel__edge_a8699d7d225c0d51d61f8a00fb336ced1}
+
+
+Set polygon. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!set\+\_\+prev@{set\+\_\+prev}}
+\index{set\+\_\+prev@{set\+\_\+prev}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{set\+\_\+prev(const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+prev)}{set_prev(const RefCountedPtr< dcel_edge > &a_prev)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+edge\+::set\+\_\+prev (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+prev}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_ac195585b718a1f640fbcac48af6dbbe6}{}\label{classdcel__edge_ac195585b718a1f640fbcac48af6dbbe6}
+
+
+Set previous. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!set\+\_\+vert@{set\+\_\+vert}}
+\index{set\+\_\+vert@{set\+\_\+vert}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{set\+\_\+vert(const Ref\+Counted\+Ptr$<$ dcel\+\_\+vert $>$ \&a\+\_\+vert)}{set_vert(const RefCountedPtr< dcel_vert > &a_vert)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+edge\+::set\+\_\+vert (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+vert} $>$ \&}]{a\+\_\+vert}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a92c86314c8c7b4cc0bf3e41d14939eb2}{}\label{classdcel__edge_a92c86314c8c7b4cc0bf3e41d14939eb2}
+
+
+Set vertex. 
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!signed\+\_\+distance@{signed\+\_\+distance}}
+\index{signed\+\_\+distance@{signed\+\_\+distance}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{signed\+\_\+distance(const Real\+Vect a\+\_\+x0) const }{signed_distance(const RealVect a_x0) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real dcel\+\_\+edge\+::signed\+\_\+distance (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__edge_a750175015cf570ff805d238bd6d5cb64}{}\label{classdcel__edge_a750175015cf570ff805d238bd6d5cb64}
+
+
+Get the signed distance between this edge and a point. 
+
+
+
+\subsection{Member Data Documentation}
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!m\+\_\+next@{m\+\_\+next}}
+\index{m\+\_\+next@{m\+\_\+next}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{m\+\_\+next}{m_next}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$ dcel\+\_\+edge\+::m\+\_\+next\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__edge_a7a847adf0cc11c2a66fcdca1a3bdb941}{}\label{classdcel__edge_a7a847adf0cc11c2a66fcdca1a3bdb941}
+
+
+Next edge. 
+
+
+
+Definition at line 168 of file dcel\+\_\+edge.\+H.
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!m\+\_\+normal@{m\+\_\+normal}}
+\index{m\+\_\+normal@{m\+\_\+normal}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{m\+\_\+normal}{m_normal}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect dcel\+\_\+edge\+::m\+\_\+normal\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__edge_afcc9b6837856744b4f74639431820d54}{}\label{classdcel__edge_afcc9b6837856744b4f74639431820d54}
+
+
+Edge pseudo-\/normal. 
+
+
+
+Definition at line 148 of file dcel\+\_\+edge.\+H.
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!m\+\_\+pair@{m\+\_\+pair}}
+\index{m\+\_\+pair@{m\+\_\+pair}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{m\+\_\+pair}{m_pair}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$ dcel\+\_\+edge\+::m\+\_\+pair\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__edge_a63193774b8173e4538f6301971377d35}{}\label{classdcel__edge_a63193774b8173e4538f6301971377d35}
+
+
+Edge pair. 
+
+
+
+Definition at line 158 of file dcel\+\_\+edge.\+H.
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!m\+\_\+poly@{m\+\_\+poly}}
+\index{m\+\_\+poly@{m\+\_\+poly}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{m\+\_\+poly}{m_poly}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf dcel\+\_\+poly}$>$ dcel\+\_\+edge\+::m\+\_\+poly\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__edge_a2a7745d9e39c1162ad5d8af1f16c9b57}{}\label{classdcel__edge_a2a7745d9e39c1162ad5d8af1f16c9b57}
+
+
+Reference to polygon. 
+
+
+
+Definition at line 173 of file dcel\+\_\+edge.\+H.
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!m\+\_\+prev@{m\+\_\+prev}}
+\index{m\+\_\+prev@{m\+\_\+prev}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{m\+\_\+prev}{m_prev}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$ dcel\+\_\+edge\+::m\+\_\+prev\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__edge_a768565a1f3996c8c5d2db6a66203669b}{}\label{classdcel__edge_a768565a1f3996c8c5d2db6a66203669b}
+
+
+Previous edge. 
+
+
+
+Definition at line 163 of file dcel\+\_\+edge.\+H.
+
+\index{dcel\+\_\+edge@{dcel\+\_\+edge}!m\+\_\+vert@{m\+\_\+vert}}
+\index{m\+\_\+vert@{m\+\_\+vert}!dcel\+\_\+edge@{dcel\+\_\+edge}}
+\subsubsection[{\texorpdfstring{m\+\_\+vert}{m_vert}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf dcel\+\_\+vert}$>$ dcel\+\_\+edge\+::m\+\_\+vert\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__edge_ad4b3ec662a3dd8290f0514577605577d}{}\label{classdcel__edge_ad4b3ec662a3dd8290f0514577605577d}
+
+
+Vertex at end of edge. 
+
+
+
+Definition at line 153 of file dcel\+\_\+edge.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{dcel__edge_8H}{dcel\+\_\+edge.\+H}\end{DoxyCompactItemize}

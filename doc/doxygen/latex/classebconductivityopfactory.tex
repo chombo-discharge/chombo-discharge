@@ -1,0 +1,515 @@
+\hypertarget{classebconductivityopfactory}{}\section{ebconductivityopfactory Class Reference}
+\label{classebconductivityopfactory}\index{ebconductivityopfactory@{ebconductivityopfactory}}
+
+
+{\ttfamily \#include $<$ebconductivityopfactory.\+H$>$}
+
+
+
+Inherits A\+M\+R\+Level\+Op\+Factory$<$ Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ $>$.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classebconductivityopfactory_a2c3aeb45fe38f6623b04051a4e43dfe8}{ebconductivityopfactory} (const Vector$<$ E\+B\+Level\+Grid $>$ \&a\+\_\+eblgs, const Vector$<$ Ref\+Counted\+Ptr$<$ E\+B\+Quad\+C\+F\+Interp $>$ $>$ \&a\+\_\+quad\+C\+FI, const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \&a\+\_\+acoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ \&a\+\_\+bcoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \&a\+\_\+bcoef\+Irreg, const Real \&a\+\_\+dx\+Coarse, const Vector$<$ int $>$ \&a\+\_\+ref\+Ratio, const Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \&a\+\_\+domain\+B\+C\+Factory, const Ref\+Counted\+Ptr$<$ Base\+E\+B\+B\+C\+Factory $>$ \&a\+\_\+eb\+Bc\+Factory, const Int\+Vect \&a\+\_\+ghost\+Cells\+Phi, const Int\+Vect \&a\+\_\+ghost\+Cells\+Rhs, const int \&a\+\_\+relax\+Type, const int \&a\+\_\+botdrop=8, int a\+\_\+num\+Levels=-\/1)
+\item 
+virtual \hyperlink{classebconductivityopfactory_a82cb78e6696b2a60351ca09650a12ba0}{$\sim$ebconductivityopfactory} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classebconductivityopfactory_ab70ab2f9cfcea51fbcb9a58a5a91038d}{set\+Data} (Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \&a\+\_\+data)
+\item 
+virtual \hyperlink{classebconductivityop}{ebconductivityop} $\ast$ \hyperlink{classebconductivityopfactory_a2f87611c5524f4dd0ee6d693f125d33d}{M\+Gnew\+Op} (const Problem\+Domain \&a\+\_\+\+Fineindex\+Space, int a\+\_\+depth, bool a\+\_\+homo\+Only=true)
+\item 
+\hyperlink{classebconductivityop}{ebconductivityop} $\ast$ \hyperlink{classebconductivityopfactory_a705a3b0bbaa846e7ca7a199a016bf245}{create\+Operator} (const E\+B\+Level\+Grid \&a\+\_\+eblg\+M\+G\+Level, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Coar\+MG, const bool \&a\+\_\+has\+M\+G\+Objects, const Real\+Vect \&a\+\_\+dx\+M\+G\+Level, const Real\+Vect \&a\+\_\+dx\+Coar, const int \&a\+\_\+which\+Level)
+\item 
+virtual void \hyperlink{classebconductivityopfactory_a0e98d91e4c39fdd82947a9ebffaea6f6}{reclaim} (M\+G\+Level\+Op$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $\ast$a\+\_\+reclaim)
+\item 
+virtual \hyperlink{classebconductivityop}{ebconductivityop} $\ast$ \hyperlink{classebconductivityopfactory_a2e7ceeb14a059d9f779ffe66a75c5b4e}{A\+M\+Rnew\+Op} (const Problem\+Domain \&a\+\_\+\+Fineindex\+Space)
+\item 
+virtual void \hyperlink{classebconductivityopfactory_a9a016c0b1c409d899d5d033aca0ab636}{A\+M\+Rreclaim} (\hyperlink{classebconductivityop}{ebconductivityop} $\ast$a\+\_\+reclaim)
+\item 
+virtual int \hyperlink{classebconductivityopfactory_a40a2eaf9ccf73ef1fa0c2570e43c181c}{ref\+To\+Finer} (const Problem\+Domain \&a\+\_\+domain) const 
+\item 
+void \hyperlink{classebconductivityopfactory_a3a4a129fc39c5c8bde6f48c469983864}{reset\+Coefficients} (const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \&a\+\_\+acoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ \&a\+\_\+bcoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \&a\+\_\+bcoef\+Irreg)
+\begin{DoxyCompactList}\small\item\em Reset the coefficients for the conductivity operator (time-\/independent). \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classebconductivityopfactory_a4f8108fd7b218196ea34e4d59f58a0fb}{set\+Test\+Ref} (int a\+\_\+test\+Ref)
+\item 
+static void \hyperlink{classebconductivityopfactory_a119ddf8e4ae4b096e124d83a178b2102}{set\+Max\+Box\+Size} (int a\+\_\+max\+Box\+Size)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static int \hyperlink{classebconductivityopfactory_a2134292a04afa30addd39cc3d6de32dd}{s\+\_\+test\+Ref}
+\item 
+static int \hyperlink{classebconductivityopfactory_ae6d0a228afd27b407c42efa67044dd6b}{s\+\_\+max\+Box\+Size}
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_a0df40ee7927f95bc042ecf2b52308322}{m\+\_\+data}
+\item 
+bool \hyperlink{classebconductivityopfactory_a68181d10f867f265218ab116beecae62}{m\+\_\+data\+Based}
+\item 
+Vector$<$ Vector$<$ E\+B\+Level\+Grid $>$ $>$ \hyperlink{classebconductivityopfactory_afbf167416b0176ba62a44cd422bd6091}{m\+\_\+eblgs\+MG}
+\item 
+Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_a1e52dfc92627a55ce1545f8c102f5934}{m\+\_\+acoef\+MG}
+\begin{DoxyCompactList}\small\item\em Time-\/independent A multigrid coefficients. \end{DoxyCompactList}\item 
+Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_ad70974a6e0452217180c0e48ef5a0e00}{m\+\_\+acoef\+M\+G0}
+\begin{DoxyCompactList}\small\item\em Beginning-\/of-\/step (time-\/dependent) A multigrid coefficients. \end{DoxyCompactList}\item 
+Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_a6dad0d6e61b5543b7a74ea161ca921c6}{m\+\_\+acoef\+M\+G1}
+\begin{DoxyCompactList}\small\item\em End-\/of-\/step (time-\/dependent) A multigrid coefficients. \end{DoxyCompactList}\item 
+Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_a477e84ef1342b8deb6f11ab6e9d7de34}{m\+\_\+bcoef\+MG}
+\item 
+Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_af604655376de3ff931775817509fe6f3}{m\+\_\+bcoef\+Irreg\+MG}
+\item 
+int \hyperlink{classebconductivityopfactory_af8fcc1b1b9ef706bcfd3d37f0d0a7258}{m\+\_\+relax\+Type}
+\item 
+int \hyperlink{classebconductivityopfactory_a1e14eecee77214710d8ec698e02189be}{m\+\_\+botdrop}
+\item 
+Vector$<$ E\+B\+Level\+Grid $>$ \hyperlink{classebconductivityopfactory_a665c08edd2bb8ff2c9bde58b2801b239}{m\+\_\+eblgs}
+\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ E\+B\+Quad\+C\+F\+Interp $>$ $>$ \hyperlink{classebconductivityopfactory_a41977ee60489c87d03ed26a040869820}{m\+\_\+quad\+C\+FI}
+\item 
+Real \hyperlink{classebconductivityopfactory_a5eb1cba3b9bab4962dbc60c83a3da7d7}{m\+\_\+alpha}
+\item 
+Real \hyperlink{classebconductivityopfactory_abd680a52f1deeb0ef1ac89b0b8e0c64e}{m\+\_\+beta}
+\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_a23f4d00bdc78370950afe18828166105}{m\+\_\+acoef}
+\begin{DoxyCompactList}\small\item\em Time-\/independent A coefficients. \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_a5f8b23e2129e54a5a726d87610d84499}{m\+\_\+bcoef}
+\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \hyperlink{classebconductivityopfactory_a65ca5d13540ca15c8c06e23f91b26b2d}{m\+\_\+bcoef\+Irreg}
+\item 
+Real \hyperlink{classebconductivityopfactory_aae199eebff435387cb02af0819293806}{m\+\_\+dx\+Coarse}
+\item 
+Vector$<$ int $>$ \hyperlink{classebconductivityopfactory_a0de01e8b37fa846cbdc45d5caa923438}{m\+\_\+ref\+Ratio}
+\item 
+Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \hyperlink{classebconductivityopfactory_a56a9491fa97b715ae7ade7d01e20cf25}{m\+\_\+domain\+B\+C\+Factory}
+\item 
+Ref\+Counted\+Ptr$<$ Base\+E\+B\+B\+C\+Factory $>$ \hyperlink{classebconductivityopfactory_aba737252beaa8db65a305ecf7b11ec75}{m\+\_\+eb\+B\+C\+Factory}
+\item 
+Int\+Vect \hyperlink{classebconductivityopfactory_a1d2e588bf687d5ba9baf9f093b7c519d}{m\+\_\+ghost\+Cells\+Phi}
+\item 
+Int\+Vect \hyperlink{classebconductivityopfactory_ad37221eae09485be07cc91246559ee22}{m\+\_\+ghost\+Cells\+Rhs}
+\item 
+int \hyperlink{classebconductivityopfactory_ac09d05c802f2612ef917c83290baa331}{m\+\_\+num\+Levels}
+\item 
+std\+::vector$<$ bool $>$ \hyperlink{classebconductivityopfactory_a237047b2d5f2b0cd5e48578ff13f1b85}{m\+\_\+has\+M\+G\+Objects}
+\item 
+Vector$<$ Real $>$ \hyperlink{classebconductivityopfactory_ace1375add529e30e75d78dc6436dbf94}{m\+\_\+dx}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classebconductivityopfactory_a71ff5b1871c7784f5d2727c9df0ab26f}{ebconductivityopfactory} ()
+\begin{DoxyCompactList}\small\item\em weak construction bad \end{DoxyCompactList}\item 
+\hyperlink{classebconductivityopfactory_a63ea98a0f1b12f87c67de409666d4851}{ebconductivityopfactory} (const \hyperlink{classebconductivityopfactory}{ebconductivityopfactory} \&a\+\_\+opin)
+\item 
+void \hyperlink{classebconductivityopfactory_a2bced74da1143015dd13dccc586f8df7}{operator=} (const \hyperlink{classebconductivityopfactory}{ebconductivityopfactory} \&a\+\_\+opin)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Factory class to generate ebconductivityops. This follows the A\+M\+R\+Level\+Op\+Factory interface. 
+
+Definition at line 44 of file ebconductivityopfactory.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{ebconductivityopfactory(const Vector$<$ E\+B\+Level\+Grid $>$ \&a\+\_\+eblgs, const Vector$<$ Ref\+Counted\+Ptr$<$ E\+B\+Quad\+C\+F\+Interp $>$ $>$ \&a\+\_\+quad\+C\+F\+I, const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ $>$ $>$ \&a\+\_\+acoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ $>$ $>$ \&a\+\_\+bcoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+A\+B$<$ Real $>$ $>$ $>$ $>$ \&a\+\_\+bcoef\+Irreg, const Real \&a\+\_\+dx\+Coarse, const Vector$<$ int $>$ \&a\+\_\+ref\+Ratio, const Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \&a\+\_\+domain\+B\+C\+Factory, const Ref\+Counted\+Ptr$<$ Base\+E\+B\+B\+C\+Factory $>$ \&a\+\_\+eb\+Bc\+Factory, const Int\+Vect \&a\+\_\+ghost\+Cells\+Phi, const Int\+Vect \&a\+\_\+ghost\+Cells\+Rhs, const int \&a\+\_\+relax\+Type, const int \&a\+\_\+botdrop=8, int a\+\_\+num\+Levels=-\/1)}{ebconductivityopfactory(const Vector< EBLevelGrid > &a_eblgs, const Vector< RefCountedPtr< EBQuadCFInterp > > &a_quadCFI, const Real &a_alpha, const Real &a_beta, const Vector< RefCountedPtr< LevelData< EBCellFAB > > > &a_acoef, const Vector< RefCountedPtr< LevelData< EBFluxFAB > > > &a_bcoef, const Vector< RefCountedPtr< LevelData< BaseIVFAB< Real > > > > &a_bcoefIrreg, const Real &a_dxCoarse, const Vector< int > &a_refRatio, const RefCountedPtr< BaseDomainBCFactory > &a_domainBCFactory, const RefCountedPtr< BaseEBBCFactory > &a_ebBcFactory, const IntVect &a_ghostCellsPhi, const IntVect &a_ghostCellsRhs, const int &a_relaxType, const int &a_botdrop=8, int a_numLevels=-1)}}]{\setlength{\rightskip}{0pt plus 5cm}ebconductivityopfactory\+::ebconductivityopfactory (
+\begin{DoxyParamCaption}
+\item[{const Vector$<$ E\+B\+Level\+Grid $>$ \&}]{a\+\_\+eblgs, }
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ E\+B\+Quad\+C\+F\+Interp $>$ $>$ \&}]{a\+\_\+quad\+C\+FI, }
+\item[{const Real \&}]{a\+\_\+alpha, }
+\item[{const Real \&}]{a\+\_\+beta, }
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \&}]{a\+\_\+acoef, }
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ \&}]{a\+\_\+bcoef, }
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \&}]{a\+\_\+bcoef\+Irreg, }
+\item[{const Real \&}]{a\+\_\+dx\+Coarse, }
+\item[{const Vector$<$ int $>$ \&}]{a\+\_\+ref\+Ratio, }
+\item[{const Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \&}]{a\+\_\+domain\+B\+C\+Factory, }
+\item[{const Ref\+Counted\+Ptr$<$ Base\+E\+B\+B\+C\+Factory $>$ \&}]{a\+\_\+eb\+Bc\+Factory, }
+\item[{const Int\+Vect \&}]{a\+\_\+ghost\+Cells\+Phi, }
+\item[{const Int\+Vect \&}]{a\+\_\+ghost\+Cells\+Rhs, }
+\item[{const int \&}]{a\+\_\+relax\+Type, }
+\item[{const int \&}]{a\+\_\+botdrop = {\ttfamily 8}, }
+\item[{int}]{a\+\_\+num\+Levels = {\ttfamily -\/1}}
+\end{DoxyParamCaption}
+)}\hypertarget{classebconductivityopfactory_a2c3aeb45fe38f6623b04051a4e43dfe8}{}\label{classebconductivityopfactory_a2c3aeb45fe38f6623b04051a4e43dfe8}
+Constructs a factory that builds ebconductivityops with time-\/independent A and B coefficients. \index{ebconductivityopfactory@{ebconductivityopfactory}!````~ebconductivityopfactory@{$\sim$ebconductivityopfactory}}
+\index{````~ebconductivityopfactory@{$\sim$ebconductivityopfactory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{$\sim$ebconductivityopfactory()}{~ebconductivityopfactory()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual ebconductivityopfactory\+::$\sim$ebconductivityopfactory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classebconductivityopfactory_a82cb78e6696b2a60351ca09650a12ba0}{}\label{classebconductivityopfactory_a82cb78e6696b2a60351ca09650a12ba0}
+
+
+Destructor. 
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{ebconductivityopfactory()}{ebconductivityopfactory()}}]{\setlength{\rightskip}{0pt plus 5cm}ebconductivityopfactory\+::ebconductivityopfactory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classebconductivityopfactory_a71ff5b1871c7784f5d2727c9df0ab26f}{}\label{classebconductivityopfactory_a71ff5b1871c7784f5d2727c9df0ab26f}
+
+
+weak construction bad 
+
+
+
+Definition at line 180 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{ebconductivityopfactory(const ebconductivityopfactory \&a\+\_\+opin)}{ebconductivityopfactory(const ebconductivityopfactory &a_opin)}}]{\setlength{\rightskip}{0pt plus 5cm}ebconductivityopfactory\+::ebconductivityopfactory (
+\begin{DoxyParamCaption}
+\item[{const {\bf ebconductivityopfactory} \&}]{a\+\_\+opin}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classebconductivityopfactory_a63ea98a0f1b12f87c67de409666d4851}{}\label{classebconductivityopfactory_a63ea98a0f1b12f87c67de409666d4851}
+
+
+Definition at line 186 of file ebconductivityopfactory.\+H.
+
+
+
+\subsection{Member Function Documentation}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!A\+M\+Rnew\+Op@{A\+M\+Rnew\+Op}}
+\index{A\+M\+Rnew\+Op@{A\+M\+Rnew\+Op}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{A\+M\+Rnew\+Op(const Problem\+Domain \&a\+\_\+\+Fineindex\+Space)}{AMRnewOp(const ProblemDomain &a_FineindexSpace)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf ebconductivityop}$\ast$ ebconductivityopfactory\+::\+A\+M\+Rnew\+Op (
+\begin{DoxyParamCaption}
+\item[{const Problem\+Domain \&}]{a\+\_\+\+Fineindex\+Space}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classebconductivityopfactory_a2e7ceeb14a059d9f779ffe66a75c5b4e}{}\label{classebconductivityopfactory_a2e7ceeb14a059d9f779ffe66a75c5b4e}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!A\+M\+Rreclaim@{A\+M\+Rreclaim}}
+\index{A\+M\+Rreclaim@{A\+M\+Rreclaim}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{A\+M\+Rreclaim(ebconductivityop $\ast$a\+\_\+reclaim)}{AMRreclaim(ebconductivityop *a_reclaim)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void ebconductivityopfactory\+::\+A\+M\+Rreclaim (
+\begin{DoxyParamCaption}
+\item[{{\bf ebconductivityop} $\ast$}]{a\+\_\+reclaim}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classebconductivityopfactory_a9a016c0b1c409d899d5d033aca0ab636}{}\label{classebconductivityopfactory_a9a016c0b1c409d899d5d033aca0ab636}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!create\+Operator@{create\+Operator}}
+\index{create\+Operator@{create\+Operator}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{create\+Operator(const E\+B\+Level\+Grid \&a\+\_\+eblg\+M\+G\+Level, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Coar\+M\+G, const bool \&a\+\_\+has\+M\+G\+Objects, const Real\+Vect \&a\+\_\+dx\+M\+G\+Level, const Real\+Vect \&a\+\_\+dx\+Coar, const int \&a\+\_\+which\+Level)}{createOperator(const EBLevelGrid &a_eblgMGLevel, const EBLevelGrid &a_eblgCoarMG, const bool &a_hasMGObjects, const RealVect &a_dxMGLevel, const RealVect &a_dxCoar, const int &a_whichLevel)}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ebconductivityop}$\ast$ ebconductivityopfactory\+::create\+Operator (
+\begin{DoxyParamCaption}
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+M\+G\+Level, }
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+Coar\+MG, }
+\item[{const bool \&}]{a\+\_\+has\+M\+G\+Objects, }
+\item[{const Real\+Vect \&}]{a\+\_\+dx\+M\+G\+Level, }
+\item[{const Real\+Vect \&}]{a\+\_\+dx\+Coar, }
+\item[{const int \&}]{a\+\_\+which\+Level}
+\end{DoxyParamCaption}
+)}\hypertarget{classebconductivityopfactory_a705a3b0bbaa846e7ca7a199a016bf245}{}\label{classebconductivityopfactory_a705a3b0bbaa846e7ca7a199a016bf245}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!M\+Gnew\+Op@{M\+Gnew\+Op}}
+\index{M\+Gnew\+Op@{M\+Gnew\+Op}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{M\+Gnew\+Op(const Problem\+Domain \&a\+\_\+\+Fineindex\+Space, int a\+\_\+depth, bool a\+\_\+homo\+Only=true)}{MGnewOp(const ProblemDomain &a_FineindexSpace, int a_depth, bool a_homoOnly=true)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf ebconductivityop}$\ast$ ebconductivityopfactory\+::\+M\+Gnew\+Op (
+\begin{DoxyParamCaption}
+\item[{const Problem\+Domain \&}]{a\+\_\+\+Fineindex\+Space, }
+\item[{int}]{a\+\_\+depth, }
+\item[{bool}]{a\+\_\+homo\+Only = {\ttfamily true}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classebconductivityopfactory_a2f87611c5524f4dd0ee6d693f125d33d}{}\label{classebconductivityopfactory_a2f87611c5524f4dd0ee6d693f125d33d}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!operator=@{operator=}}
+\index{operator=@{operator=}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{operator=(const ebconductivityopfactory \&a\+\_\+opin)}{operator=(const ebconductivityopfactory &a_opin)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebconductivityopfactory\+::operator= (
+\begin{DoxyParamCaption}
+\item[{const {\bf ebconductivityopfactory} \&}]{a\+\_\+opin}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classebconductivityopfactory_a2bced74da1143015dd13dccc586f8df7}{}\label{classebconductivityopfactory_a2bced74da1143015dd13dccc586f8df7}
+
+
+Definition at line 192 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!reclaim@{reclaim}}
+\index{reclaim@{reclaim}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{reclaim(\+M\+G\+Level\+Op$<$ Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ $>$ $\ast$a\+\_\+reclaim)}{reclaim(MGLevelOp< LevelData< EBCellFAB > > *a_reclaim)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void ebconductivityopfactory\+::reclaim (
+\begin{DoxyParamCaption}
+\item[{M\+G\+Level\+Op$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $\ast$}]{a\+\_\+reclaim}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classebconductivityopfactory_a0e98d91e4c39fdd82947a9ebffaea6f6}{}\label{classebconductivityopfactory_a0e98d91e4c39fdd82947a9ebffaea6f6}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!ref\+To\+Finer@{ref\+To\+Finer}}
+\index{ref\+To\+Finer@{ref\+To\+Finer}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{ref\+To\+Finer(const Problem\+Domain \&a\+\_\+domain) const }{refToFiner(const ProblemDomain &a_domain) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual int ebconductivityopfactory\+::ref\+To\+Finer (
+\begin{DoxyParamCaption}
+\item[{const Problem\+Domain \&}]{a\+\_\+domain}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classebconductivityopfactory_a40a2eaf9ccf73ef1fa0c2570e43c181c}{}\label{classebconductivityopfactory_a40a2eaf9ccf73ef1fa0c2570e43c181c}
+Refinement ratio between this level and coarser level. Returns 1 when there are no coarser A\+M\+R\+Level\+Op objects \index{ebconductivityopfactory@{ebconductivityopfactory}!reset\+Coefficients@{reset\+Coefficients}}
+\index{reset\+Coefficients@{reset\+Coefficients}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{reset\+Coefficients(const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ $>$ $>$ \&a\+\_\+acoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ $>$ $>$ \&a\+\_\+bcoef, const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+A\+B$<$ Real $>$ $>$ $>$ $>$ \&a\+\_\+bcoef\+Irreg)}{resetCoefficients(const Real &a_alpha, const Real &a_beta, const Vector< RefCountedPtr< LevelData< EBCellFAB > > > &a_acoef, const Vector< RefCountedPtr< LevelData< EBFluxFAB > > > &a_bcoef, const Vector< RefCountedPtr< LevelData< BaseIVFAB< Real > > > > &a_bcoefIrreg)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebconductivityopfactory\+::reset\+Coefficients (
+\begin{DoxyParamCaption}
+\item[{const Real \&}]{a\+\_\+alpha, }
+\item[{const Real \&}]{a\+\_\+beta, }
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \&}]{a\+\_\+acoef, }
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ \&}]{a\+\_\+bcoef, }
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \&}]{a\+\_\+bcoef\+Irreg}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{classebconductivityopfactory_a3a4a129fc39c5c8bde6f48c469983864}{}\label{classebconductivityopfactory_a3a4a129fc39c5c8bde6f48c469983864}
+
+
+Reset the coefficients for the conductivity operator (time-\/independent). 
+
+
+
+Definition at line 124 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!set\+Data@{set\+Data}}
+\index{set\+Data@{set\+Data}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{set\+Data(\+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+A\+B$<$ Real $>$ $>$ $>$ $>$ \&a\+\_\+data)}{setData(Vector< RefCountedPtr< LevelData< BaseIVFAB< Real > > > > &a_data)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void ebconductivityopfactory\+::set\+Data (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \&}]{a\+\_\+data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classebconductivityopfactory_ab70ab2f9cfcea51fbcb9a58a5a91038d}{}\label{classebconductivityopfactory_ab70ab2f9cfcea51fbcb9a58a5a91038d}
+
+
+Definition at line 72 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!set\+Max\+Box\+Size@{set\+Max\+Box\+Size}}
+\index{set\+Max\+Box\+Size@{set\+Max\+Box\+Size}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{set\+Max\+Box\+Size(int a\+\_\+max\+Box\+Size)}{setMaxBoxSize(int a_maxBoxSize)}}]{\setlength{\rightskip}{0pt plus 5cm}static void ebconductivityopfactory\+::set\+Max\+Box\+Size (
+\begin{DoxyParamCaption}
+\item[{int}]{a\+\_\+max\+Box\+Size}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}\hypertarget{classebconductivityopfactory_a119ddf8e4ae4b096e124d83a178b2102}{}\label{classebconductivityopfactory_a119ddf8e4ae4b096e124d83a178b2102}
+
+
+Definition at line 115 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!set\+Test\+Ref@{set\+Test\+Ref}}
+\index{set\+Test\+Ref@{set\+Test\+Ref}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{set\+Test\+Ref(int a\+\_\+test\+Ref)}{setTestRef(int a_testRef)}}]{\setlength{\rightskip}{0pt plus 5cm}static void ebconductivityopfactory\+::set\+Test\+Ref (
+\begin{DoxyParamCaption}
+\item[{int}]{a\+\_\+test\+Ref}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}\hypertarget{classebconductivityopfactory_a4f8108fd7b218196ea34e4d59f58a0fb}{}\label{classebconductivityopfactory_a4f8108fd7b218196ea34e4d59f58a0fb}
+test\+Ref is the size of the coarsest domain allowed in multigrid. If test\+Ref=2, then the coarsest domain in multigrid will be 2x2(x2) 
+
+Definition at line 110 of file ebconductivityopfactory.\+H.
+
+
+
+\subsection{Member Data Documentation}
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+acoef@{m\+\_\+acoef}}
+\index{m\+\_\+acoef@{m\+\_\+acoef}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+acoef}{m_acoef}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+acoef\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a23f4d00bdc78370950afe18828166105}{}\label{classebconductivityopfactory_a23f4d00bdc78370950afe18828166105}
+
+
+Time-\/independent A coefficients. 
+
+
+
+Definition at line 164 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+acoef\+MG@{m\+\_\+acoef\+MG}}
+\index{m\+\_\+acoef\+MG@{m\+\_\+acoef\+MG}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+acoef\+MG}{m_acoefMG}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+acoef\+MG\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a1e52dfc92627a55ce1545f8c102f5934}{}\label{classebconductivityopfactory_a1e52dfc92627a55ce1545f8c102f5934}
+
+
+Time-\/independent A multigrid coefficients. 
+
+
+
+Definition at line 145 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+acoef\+M\+G0@{m\+\_\+acoef\+M\+G0}}
+\index{m\+\_\+acoef\+M\+G0@{m\+\_\+acoef\+M\+G0}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+acoef\+M\+G0}{m_acoefMG0}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+acoef\+M\+G0\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_ad70974a6e0452217180c0e48ef5a0e00}{}\label{classebconductivityopfactory_ad70974a6e0452217180c0e48ef5a0e00}
+
+
+Beginning-\/of-\/step (time-\/dependent) A multigrid coefficients. 
+
+
+
+Definition at line 148 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+acoef\+M\+G1@{m\+\_\+acoef\+M\+G1}}
+\index{m\+\_\+acoef\+M\+G1@{m\+\_\+acoef\+M\+G1}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+acoef\+M\+G1}{m_acoefMG1}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+acoef\+M\+G1\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a6dad0d6e61b5543b7a74ea161ca921c6}{}\label{classebconductivityopfactory_a6dad0d6e61b5543b7a74ea161ca921c6}
+
+
+End-\/of-\/step (time-\/dependent) A multigrid coefficients. 
+
+
+
+Definition at line 151 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+alpha@{m\+\_\+alpha}}
+\index{m\+\_\+alpha@{m\+\_\+alpha}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+alpha}{m_alpha}}]{\setlength{\rightskip}{0pt plus 5cm}Real ebconductivityopfactory\+::m\+\_\+alpha\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a5eb1cba3b9bab4962dbc60c83a3da7d7}{}\label{classebconductivityopfactory_a5eb1cba3b9bab4962dbc60c83a3da7d7}
+
+
+Definition at line 160 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+bcoef@{m\+\_\+bcoef}}
+\index{m\+\_\+bcoef@{m\+\_\+bcoef}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcoef}{m_bcoef}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Flux\+F\+AB$>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+bcoef\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a5f8b23e2129e54a5a726d87610d84499}{}\label{classebconductivityopfactory_a5f8b23e2129e54a5a726d87610d84499}
+
+
+Definition at line 167 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+bcoef\+Irreg@{m\+\_\+bcoef\+Irreg}}
+\index{m\+\_\+bcoef\+Irreg@{m\+\_\+bcoef\+Irreg}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcoef\+Irreg}{m_bcoefIrreg}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+bcoef\+Irreg\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a65ca5d13540ca15c8c06e23f91b26b2d}{}\label{classebconductivityopfactory_a65ca5d13540ca15c8c06e23f91b26b2d}
+
+
+Definition at line 168 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+bcoef\+Irreg\+MG@{m\+\_\+bcoef\+Irreg\+MG}}
+\index{m\+\_\+bcoef\+Irreg\+MG@{m\+\_\+bcoef\+Irreg\+MG}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcoef\+Irreg\+MG}{m_bcoefIrregMG}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+bcoef\+Irreg\+MG\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_af604655376de3ff931775817509fe6f3}{}\label{classebconductivityopfactory_af604655376de3ff931775817509fe6f3}
+
+
+Definition at line 154 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+bcoef\+MG@{m\+\_\+bcoef\+MG}}
+\index{m\+\_\+bcoef\+MG@{m\+\_\+bcoef\+MG}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcoef\+MG}{m_bcoefMG}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$ Vector$<$ Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Flux\+F\+AB$>$ $>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+bcoef\+MG\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a477e84ef1342b8deb6f11ab6e9d7de34}{}\label{classebconductivityopfactory_a477e84ef1342b8deb6f11ab6e9d7de34}
+
+
+Definition at line 153 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+beta@{m\+\_\+beta}}
+\index{m\+\_\+beta@{m\+\_\+beta}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+beta}{m_beta}}]{\setlength{\rightskip}{0pt plus 5cm}Real ebconductivityopfactory\+::m\+\_\+beta\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_abd680a52f1deeb0ef1ac89b0b8e0c64e}{}\label{classebconductivityopfactory_abd680a52f1deeb0ef1ac89b0b8e0c64e}
+
+
+Definition at line 161 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+botdrop@{m\+\_\+botdrop}}
+\index{m\+\_\+botdrop@{m\+\_\+botdrop}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+botdrop}{m_botdrop}}]{\setlength{\rightskip}{0pt plus 5cm}int ebconductivityopfactory\+::m\+\_\+botdrop\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a1e14eecee77214710d8ec698e02189be}{}\label{classebconductivityopfactory_a1e14eecee77214710d8ec698e02189be}
+
+
+Definition at line 157 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+data@{m\+\_\+data}}
+\index{m\+\_\+data@{m\+\_\+data}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+data}{m_data}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ $>$ ebconductivityopfactory\+::m\+\_\+data\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a0df40ee7927f95bc042ecf2b52308322}{}\label{classebconductivityopfactory_a0df40ee7927f95bc042ecf2b52308322}
+
+
+Definition at line 140 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+data\+Based@{m\+\_\+data\+Based}}
+\index{m\+\_\+data\+Based@{m\+\_\+data\+Based}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+data\+Based}{m_dataBased}}]{\setlength{\rightskip}{0pt plus 5cm}bool ebconductivityopfactory\+::m\+\_\+data\+Based\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a68181d10f867f265218ab116beecae62}{}\label{classebconductivityopfactory_a68181d10f867f265218ab116beecae62}
+
+
+Definition at line 141 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+domain\+B\+C\+Factory@{m\+\_\+domain\+B\+C\+Factory}}
+\index{m\+\_\+domain\+B\+C\+Factory@{m\+\_\+domain\+B\+C\+Factory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+domain\+B\+C\+Factory}{m_domainBCFactory}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Base\+Domain\+B\+C\+Factory$>$ ebconductivityopfactory\+::m\+\_\+domain\+B\+C\+Factory\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a56a9491fa97b715ae7ade7d01e20cf25}{}\label{classebconductivityopfactory_a56a9491fa97b715ae7ade7d01e20cf25}
+
+
+Definition at line 171 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+dx@{m\+\_\+dx}}
+\index{m\+\_\+dx@{m\+\_\+dx}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+dx}{m_dx}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Real$>$ ebconductivityopfactory\+::m\+\_\+dx\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_ace1375add529e30e75d78dc6436dbf94}{}\label{classebconductivityopfactory_ace1375add529e30e75d78dc6436dbf94}
+
+
+Definition at line 177 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+dx\+Coarse@{m\+\_\+dx\+Coarse}}
+\index{m\+\_\+dx\+Coarse@{m\+\_\+dx\+Coarse}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+dx\+Coarse}{m_dxCoarse}}]{\setlength{\rightskip}{0pt plus 5cm}Real ebconductivityopfactory\+::m\+\_\+dx\+Coarse\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_aae199eebff435387cb02af0819293806}{}\label{classebconductivityopfactory_aae199eebff435387cb02af0819293806}
+
+
+Definition at line 169 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+eb\+B\+C\+Factory@{m\+\_\+eb\+B\+C\+Factory}}
+\index{m\+\_\+eb\+B\+C\+Factory@{m\+\_\+eb\+B\+C\+Factory}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+eb\+B\+C\+Factory}{m_ebBCFactory}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Base\+E\+B\+B\+C\+Factory$>$ ebconductivityopfactory\+::m\+\_\+eb\+B\+C\+Factory\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_aba737252beaa8db65a305ecf7b11ec75}{}\label{classebconductivityopfactory_aba737252beaa8db65a305ecf7b11ec75}
+
+
+Definition at line 172 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+eblgs@{m\+\_\+eblgs}}
+\index{m\+\_\+eblgs@{m\+\_\+eblgs}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+eblgs}{m_eblgs}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$E\+B\+Level\+Grid$>$ ebconductivityopfactory\+::m\+\_\+eblgs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a665c08edd2bb8ff2c9bde58b2801b239}{}\label{classebconductivityopfactory_a665c08edd2bb8ff2c9bde58b2801b239}
+
+
+Definition at line 158 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+eblgs\+MG@{m\+\_\+eblgs\+MG}}
+\index{m\+\_\+eblgs\+MG@{m\+\_\+eblgs\+MG}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+eblgs\+MG}{m_eblgsMG}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$ Vector$<$E\+B\+Level\+Grid$>$ $>$ ebconductivityopfactory\+::m\+\_\+eblgs\+MG\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_afbf167416b0176ba62a44cd422bd6091}{}\label{classebconductivityopfactory_afbf167416b0176ba62a44cd422bd6091}
+
+
+Definition at line 142 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+ghost\+Cells\+Phi@{m\+\_\+ghost\+Cells\+Phi}}
+\index{m\+\_\+ghost\+Cells\+Phi@{m\+\_\+ghost\+Cells\+Phi}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+ghost\+Cells\+Phi}{m_ghostCellsPhi}}]{\setlength{\rightskip}{0pt plus 5cm}Int\+Vect ebconductivityopfactory\+::m\+\_\+ghost\+Cells\+Phi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a1d2e588bf687d5ba9baf9f093b7c519d}{}\label{classebconductivityopfactory_a1d2e588bf687d5ba9baf9f093b7c519d}
+
+
+Definition at line 173 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+ghost\+Cells\+Rhs@{m\+\_\+ghost\+Cells\+Rhs}}
+\index{m\+\_\+ghost\+Cells\+Rhs@{m\+\_\+ghost\+Cells\+Rhs}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+ghost\+Cells\+Rhs}{m_ghostCellsRhs}}]{\setlength{\rightskip}{0pt plus 5cm}Int\+Vect ebconductivityopfactory\+::m\+\_\+ghost\+Cells\+Rhs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_ad37221eae09485be07cc91246559ee22}{}\label{classebconductivityopfactory_ad37221eae09485be07cc91246559ee22}
+
+
+Definition at line 174 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+has\+M\+G\+Objects@{m\+\_\+has\+M\+G\+Objects}}
+\index{m\+\_\+has\+M\+G\+Objects@{m\+\_\+has\+M\+G\+Objects}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+has\+M\+G\+Objects}{m_hasMGObjects}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ bool $>$ ebconductivityopfactory\+::m\+\_\+has\+M\+G\+Objects\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a237047b2d5f2b0cd5e48578ff13f1b85}{}\label{classebconductivityopfactory_a237047b2d5f2b0cd5e48578ff13f1b85}
+
+
+Definition at line 176 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+num\+Levels@{m\+\_\+num\+Levels}}
+\index{m\+\_\+num\+Levels@{m\+\_\+num\+Levels}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+num\+Levels}{m_numLevels}}]{\setlength{\rightskip}{0pt plus 5cm}int ebconductivityopfactory\+::m\+\_\+num\+Levels\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_ac09d05c802f2612ef917c83290baa331}{}\label{classebconductivityopfactory_ac09d05c802f2612ef917c83290baa331}
+
+
+Definition at line 175 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+quad\+C\+FI@{m\+\_\+quad\+C\+FI}}
+\index{m\+\_\+quad\+C\+FI@{m\+\_\+quad\+C\+FI}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+quad\+C\+FI}{m_quadCFI}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$E\+B\+Quad\+C\+F\+Interp$>$ $>$ ebconductivityopfactory\+::m\+\_\+quad\+C\+FI\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a41977ee60489c87d03ed26a040869820}{}\label{classebconductivityopfactory_a41977ee60489c87d03ed26a040869820}
+
+
+Definition at line 159 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+ref\+Ratio@{m\+\_\+ref\+Ratio}}
+\index{m\+\_\+ref\+Ratio@{m\+\_\+ref\+Ratio}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+ref\+Ratio}{m_refRatio}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$int$>$ ebconductivityopfactory\+::m\+\_\+ref\+Ratio\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_a0de01e8b37fa846cbdc45d5caa923438}{}\label{classebconductivityopfactory_a0de01e8b37fa846cbdc45d5caa923438}
+
+
+Definition at line 170 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!m\+\_\+relax\+Type@{m\+\_\+relax\+Type}}
+\index{m\+\_\+relax\+Type@{m\+\_\+relax\+Type}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+relax\+Type}{m_relaxType}}]{\setlength{\rightskip}{0pt plus 5cm}int ebconductivityopfactory\+::m\+\_\+relax\+Type\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebconductivityopfactory_af8fcc1b1b9ef706bcfd3d37f0d0a7258}{}\label{classebconductivityopfactory_af8fcc1b1b9ef706bcfd3d37f0d0a7258}
+
+
+Definition at line 156 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!s\+\_\+max\+Box\+Size@{s\+\_\+max\+Box\+Size}}
+\index{s\+\_\+max\+Box\+Size@{s\+\_\+max\+Box\+Size}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{s\+\_\+max\+Box\+Size}{s_maxBoxSize}}]{\setlength{\rightskip}{0pt plus 5cm}int ebconductivityopfactory\+::s\+\_\+max\+Box\+Size\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classebconductivityopfactory_ae6d0a228afd27b407c42efa67044dd6b}{}\label{classebconductivityopfactory_ae6d0a228afd27b407c42efa67044dd6b}
+
+
+Definition at line 121 of file ebconductivityopfactory.\+H.
+
+\index{ebconductivityopfactory@{ebconductivityopfactory}!s\+\_\+test\+Ref@{s\+\_\+test\+Ref}}
+\index{s\+\_\+test\+Ref@{s\+\_\+test\+Ref}!ebconductivityopfactory@{ebconductivityopfactory}}
+\subsubsection[{\texorpdfstring{s\+\_\+test\+Ref}{s_testRef}}]{\setlength{\rightskip}{0pt plus 5cm}int ebconductivityopfactory\+::s\+\_\+test\+Ref\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classebconductivityopfactory_a2134292a04afa30addd39cc3d6de32dd}{}\label{classebconductivityopfactory_a2134292a04afa30addd39cc3d6de32dd}
+
+
+Definition at line 120 of file ebconductivityopfactory.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/elliptic/\hyperlink{ebconductivityopfactory_8H}{ebconductivityopfactory.\+H}\end{DoxyCompactItemize}

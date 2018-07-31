@@ -1,0 +1,249 @@
+\hypertarget{classrobinconductivityebbcfactory}{}\section{robinconductivityebbcfactory Class Reference}
+\label{classrobinconductivityebbcfactory}\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+
+
+Factory class for generating Robin boundary conditions $a\phi + b\partial_n\phi = g$, where $n$ is the EB unit normal.  
+
+
+
+
+{\ttfamily \#include $<$robinconductivityebbcfactory.\+H$>$}
+
+
+
+Inherits Base\+E\+B\+B\+C\+Factory.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classrobinconductivityebbcfactory_a3dcabdfb6e4d3319697ac15ea7658b80}{robinconductivityebbcfactory} (const Real\+Vect a\+\_\+origin)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classrobinconductivityebbcfactory_a5454eeb59d780397a572dc8ba25d6eb2}{$\sim$robinconductivityebbcfactory} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrobinconductivityebbcfactory_a15451b6084edde96eca821012e91406b}{set\+\_\+type} (const \hyperlink{namespacestencil__type_a1ffed19935b7289b50e8dcc017ee99c8}{stencil\+\_\+type\+::which\+\_\+type} a\+\_\+type)
+\begin{DoxyCompactList}\small\item\em Set bc order. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrobinconductivityebbcfactory_aec376af2b9e36531ce68d2ad4e8b2356}{set\+\_\+coefs} (Ref\+Counted\+Ptr$<$ \hyperlink{classrobin__coef}{robin\+\_\+coef} $>$ a\+\_\+robinco)
+\begin{DoxyCompactList}\small\item\em Function based coefficients and right hand sides. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrobinconductivityebbcfactory_a5c6af50feb50b8945942fce91d4f8f26}{set\+\_\+coefs} (const Real a\+\_\+aco, const Real b\+\_\+bco, const Real a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em Set constant coefficients. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrobinconductivityebbcfactory_aa699cabaa6c9496a6eb5e78fdbaebee6}{set\+\_\+coefs} (const \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+aco, const \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+bco, const \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em Set data-\/based coefficients. \end{DoxyCompactList}\item 
+\hyperlink{classrobinconductivityebbc}{robinconductivityebbc} $\ast$ \hyperlink{classrobinconductivityebbcfactory_a4d62ab0fccb81f328f0e935d2eef1bbf}{create} (const Problem\+Domain \&a\+\_\+domain, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl, const Real\+Vect \&a\+\_\+dx, const Int\+Vect $\ast$a\+\_\+ghost\+\_\+phi=0, const Int\+Vect $\ast$a\+\_\+ghost\+\_\+rhs=0)
+\begin{DoxyCompactList}\small\item\em Create Robin type boundary condition. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{namespacestencil__type_a1ffed19935b7289b50e8dcc017ee99c8}{stencil\+\_\+type\+::which\+\_\+type} \hyperlink{classrobinconductivityebbcfactory_abaf68b0f5590d6a643df52fd6518fb91}{m\+\_\+type}
+\item 
+Real\+Vect \hyperlink{classrobinconductivityebbcfactory_a27b41e2e6403d51fcecd5164cf116b51}{m\+\_\+origin}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classrobin__coef}{robin\+\_\+coef} $>$ \hyperlink{classrobinconductivityebbcfactory_a7b45b109f2deedfeeb5c56b0d71a4241}{m\+\_\+robinco}
+\item 
+Real \hyperlink{classrobinconductivityebbcfactory_aaccd7f7c96f393e7835a4b816d6503b3}{m\+\_\+aco}
+\item 
+Real \hyperlink{classrobinconductivityebbcfactory_acd5793e2a3d30e094a16ea223ac11340}{m\+\_\+bco}
+\item 
+Real \hyperlink{classrobinconductivityebbcfactory_a809f7d59a8ae38ed5ce8f3d0608180e5}{m\+\_\+rhs}
+\item 
+\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \hyperlink{classrobinconductivityebbcfactory_a8f8bf4f650071f7ee009d08574dcc107}{m\+\_\+acodata}
+\item 
+\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \hyperlink{classrobinconductivityebbcfactory_a99480bfa78988fc3e45649bfb648872f}{m\+\_\+bcodata}
+\item 
+\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \hyperlink{classrobinconductivityebbcfactory_ad7c849e5bb478b3cf0e80ac542354fda}{m\+\_\+rhsdata}
+\item 
+bool \hyperlink{classrobinconductivityebbcfactory_a4f8bf8e60ffae2d9a86da0de037c6a2c}{m\+\_\+const\+\_\+coeff}
+\item 
+bool \hyperlink{classrobinconductivityebbcfactory_ad83f951b9867ad280be2dd2fc2e834a3}{m\+\_\+data\+\_\+coeff}
+\item 
+bool \hyperlink{classrobinconductivityebbcfactory_a98069b7633cc317b2dcd1a7dfebd344e}{m\+\_\+func\+\_\+coeff}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Factory class for generating Robin boundary conditions $a\phi + b\partial_n\phi = g$, where $n$ is the EB unit normal. 
+
+Definition at line 19 of file robinconductivityebbcfactory.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{robinconductivityebbcfactory(const Real\+Vect a\+\_\+origin)}{robinconductivityebbcfactory(const RealVect a_origin)}}]{\setlength{\rightskip}{0pt plus 5cm}robinconductivityebbcfactory\+::robinconductivityebbcfactory (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+origin}
+\end{DoxyParamCaption}
+)}\hypertarget{classrobinconductivityebbcfactory_a3dcabdfb6e4d3319697ac15ea7658b80}{}\label{classrobinconductivityebbcfactory_a3dcabdfb6e4d3319697ac15ea7658b80}
+
+
+Constructor. 
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!````~robinconductivityebbcfactory@{$\sim$robinconductivityebbcfactory}}
+\index{````~robinconductivityebbcfactory@{$\sim$robinconductivityebbcfactory}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{$\sim$robinconductivityebbcfactory()}{~robinconductivityebbcfactory()}}]{\setlength{\rightskip}{0pt plus 5cm}robinconductivityebbcfactory\+::$\sim$robinconductivityebbcfactory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classrobinconductivityebbcfactory_a5454eeb59d780397a572dc8ba25d6eb2}{}\label{classrobinconductivityebbcfactory_a5454eeb59d780397a572dc8ba25d6eb2}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!create@{create}}
+\index{create@{create}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{create(const Problem\+Domain \&a\+\_\+domain, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl, const Real\+Vect \&a\+\_\+dx, const Int\+Vect $\ast$a\+\_\+ghost\+\_\+phi=0, const Int\+Vect $\ast$a\+\_\+ghost\+\_\+rhs=0)}{create(const ProblemDomain &a_domain, const EBISLayout &a_ebisl, const RealVect &a_dx, const IntVect *a_ghost_phi=0, const IntVect *a_ghost_rhs=0)}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf robinconductivityebbc}$\ast$ robinconductivityebbcfactory\+::create (
+\begin{DoxyParamCaption}
+\item[{const Problem\+Domain \&}]{a\+\_\+domain, }
+\item[{const E\+B\+I\+S\+Layout \&}]{a\+\_\+ebisl, }
+\item[{const Real\+Vect \&}]{a\+\_\+dx, }
+\item[{const Int\+Vect $\ast$}]{a\+\_\+ghost\+\_\+phi = {\ttfamily 0}, }
+\item[{const Int\+Vect $\ast$}]{a\+\_\+ghost\+\_\+rhs = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}\hypertarget{classrobinconductivityebbcfactory_a4d62ab0fccb81f328f0e935d2eef1bbf}{}\label{classrobinconductivityebbcfactory_a4d62ab0fccb81f328f0e935d2eef1bbf}
+
+
+Create Robin type boundary condition. 
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!set\+\_\+coefs@{set\+\_\+coefs}}
+\index{set\+\_\+coefs@{set\+\_\+coefs}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{set\+\_\+coefs(\+Ref\+Counted\+Ptr$<$ robin\+\_\+coef $>$ a\+\_\+robinco)}{set_coefs(RefCountedPtr< robin_coef > a_robinco)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void robinconductivityebbcfactory\+::set\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ {\bf robin\+\_\+coef} $>$}]{a\+\_\+robinco}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivityebbcfactory_aec376af2b9e36531ce68d2ad4e8b2356}{}\label{classrobinconductivityebbcfactory_aec376af2b9e36531ce68d2ad4e8b2356}
+
+
+Function based coefficients and right hand sides. 
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!set\+\_\+coefs@{set\+\_\+coefs}}
+\index{set\+\_\+coefs@{set\+\_\+coefs}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{set\+\_\+coefs(const Real a\+\_\+aco, const Real b\+\_\+bco, const Real a\+\_\+rhs)}{set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void robinconductivityebbcfactory\+::set\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+aco, }
+\item[{const Real}]{b\+\_\+bco, }
+\item[{const Real}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivityebbcfactory_a5c6af50feb50b8945942fce91d4f8f26}{}\label{classrobinconductivityebbcfactory_a5c6af50feb50b8945942fce91d4f8f26}
+
+
+Set constant coefficients. 
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!set\+\_\+coefs@{set\+\_\+coefs}}
+\index{set\+\_\+coefs@{set\+\_\+coefs}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{set\+\_\+coefs(const E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+aco, const E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+bco, const E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+rhs)}{set_coefs(const EBAMRIVData &a_aco, const EBAMRIVData &a_bco, const EBAMRIVData &a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void robinconductivityebbcfactory\+::set\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{const {\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+aco, }
+\item[{const {\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+bco, }
+\item[{const {\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivityebbcfactory_aa699cabaa6c9496a6eb5e78fdbaebee6}{}\label{classrobinconductivityebbcfactory_aa699cabaa6c9496a6eb5e78fdbaebee6}
+
+
+Set data-\/based coefficients. 
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!set\+\_\+type@{set\+\_\+type}}
+\index{set\+\_\+type@{set\+\_\+type}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{set\+\_\+type(const stencil\+\_\+type\+::which\+\_\+type a\+\_\+type)}{set_type(const stencil_type::which_type a_type)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void robinconductivityebbcfactory\+::set\+\_\+type (
+\begin{DoxyParamCaption}
+\item[{const {\bf stencil\+\_\+type\+::which\+\_\+type}}]{a\+\_\+type}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivityebbcfactory_a15451b6084edde96eca821012e91406b}{}\label{classrobinconductivityebbcfactory_a15451b6084edde96eca821012e91406b}
+
+
+Set bc order. 
+
+
+
+\subsection{Member Data Documentation}
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+aco@{m\+\_\+aco}}
+\index{m\+\_\+aco@{m\+\_\+aco}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+aco}{m_aco}}]{\setlength{\rightskip}{0pt plus 5cm}Real robinconductivityebbcfactory\+::m\+\_\+aco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_aaccd7f7c96f393e7835a4b816d6503b3}{}\label{classrobinconductivityebbcfactory_aaccd7f7c96f393e7835a4b816d6503b3}
+
+
+Definition at line 71 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+acodata@{m\+\_\+acodata}}
+\index{m\+\_\+acodata@{m\+\_\+acodata}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+acodata}{m_acodata}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+I\+V\+Data} robinconductivityebbcfactory\+::m\+\_\+acodata\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_a8f8bf4f650071f7ee009d08574dcc107}{}\label{classrobinconductivityebbcfactory_a8f8bf4f650071f7ee009d08574dcc107}
+
+
+Definition at line 77 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+bco@{m\+\_\+bco}}
+\index{m\+\_\+bco@{m\+\_\+bco}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bco}{m_bco}}]{\setlength{\rightskip}{0pt plus 5cm}Real robinconductivityebbcfactory\+::m\+\_\+bco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_acd5793e2a3d30e094a16ea223ac11340}{}\label{classrobinconductivityebbcfactory_acd5793e2a3d30e094a16ea223ac11340}
+
+
+Definition at line 73 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+bcodata@{m\+\_\+bcodata}}
+\index{m\+\_\+bcodata@{m\+\_\+bcodata}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcodata}{m_bcodata}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+I\+V\+Data} robinconductivityebbcfactory\+::m\+\_\+bcodata\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_a99480bfa78988fc3e45649bfb648872f}{}\label{classrobinconductivityebbcfactory_a99480bfa78988fc3e45649bfb648872f}
+
+
+Definition at line 79 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+const\+\_\+coeff@{m\+\_\+const\+\_\+coeff}}
+\index{m\+\_\+const\+\_\+coeff@{m\+\_\+const\+\_\+coeff}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+const\+\_\+coeff}{m_const_coeff}}]{\setlength{\rightskip}{0pt plus 5cm}bool robinconductivityebbcfactory\+::m\+\_\+const\+\_\+coeff\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_a4f8bf8e60ffae2d9a86da0de037c6a2c}{}\label{classrobinconductivityebbcfactory_a4f8bf8e60ffae2d9a86da0de037c6a2c}
+
+
+Definition at line 83 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+data\+\_\+coeff@{m\+\_\+data\+\_\+coeff}}
+\index{m\+\_\+data\+\_\+coeff@{m\+\_\+data\+\_\+coeff}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+data\+\_\+coeff}{m_data_coeff}}]{\setlength{\rightskip}{0pt plus 5cm}bool robinconductivityebbcfactory\+::m\+\_\+data\+\_\+coeff\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_ad83f951b9867ad280be2dd2fc2e834a3}{}\label{classrobinconductivityebbcfactory_ad83f951b9867ad280be2dd2fc2e834a3}
+
+
+Definition at line 85 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+func\+\_\+coeff@{m\+\_\+func\+\_\+coeff}}
+\index{m\+\_\+func\+\_\+coeff@{m\+\_\+func\+\_\+coeff}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+func\+\_\+coeff}{m_func_coeff}}]{\setlength{\rightskip}{0pt plus 5cm}bool robinconductivityebbcfactory\+::m\+\_\+func\+\_\+coeff\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_a98069b7633cc317b2dcd1a7dfebd344e}{}\label{classrobinconductivityebbcfactory_a98069b7633cc317b2dcd1a7dfebd344e}
+
+
+Definition at line 87 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+origin@{m\+\_\+origin}}
+\index{m\+\_\+origin@{m\+\_\+origin}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+origin}{m_origin}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect robinconductivityebbcfactory\+::m\+\_\+origin\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_a27b41e2e6403d51fcecd5164cf116b51}{}\label{classrobinconductivityebbcfactory_a27b41e2e6403d51fcecd5164cf116b51}
+
+
+Definition at line 67 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+rhs@{m\+\_\+rhs}}
+\index{m\+\_\+rhs@{m\+\_\+rhs}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+rhs}{m_rhs}}]{\setlength{\rightskip}{0pt plus 5cm}Real robinconductivityebbcfactory\+::m\+\_\+rhs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_a809f7d59a8ae38ed5ce8f3d0608180e5}{}\label{classrobinconductivityebbcfactory_a809f7d59a8ae38ed5ce8f3d0608180e5}
+
+
+Definition at line 75 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+rhsdata@{m\+\_\+rhsdata}}
+\index{m\+\_\+rhsdata@{m\+\_\+rhsdata}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+rhsdata}{m_rhsdata}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+I\+V\+Data} robinconductivityebbcfactory\+::m\+\_\+rhsdata\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_ad7c849e5bb478b3cf0e80ac542354fda}{}\label{classrobinconductivityebbcfactory_ad7c849e5bb478b3cf0e80ac542354fda}
+
+
+Definition at line 81 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+robinco@{m\+\_\+robinco}}
+\index{m\+\_\+robinco@{m\+\_\+robinco}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+robinco}{m_robinco}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf robin\+\_\+coef}$>$ robinconductivityebbcfactory\+::m\+\_\+robinco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_a7b45b109f2deedfeeb5c56b0d71a4241}{}\label{classrobinconductivityebbcfactory_a7b45b109f2deedfeeb5c56b0d71a4241}
+
+
+Definition at line 69 of file robinconductivityebbcfactory.\+H.
+
+\index{robinconductivityebbcfactory@{robinconductivityebbcfactory}!m\+\_\+type@{m\+\_\+type}}
+\index{m\+\_\+type@{m\+\_\+type}!robinconductivityebbcfactory@{robinconductivityebbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+type}{m_type}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf stencil\+\_\+type\+::which\+\_\+type} robinconductivityebbcfactory\+::m\+\_\+type\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivityebbcfactory_abaf68b0f5590d6a643df52fd6518fb91}{}\label{classrobinconductivityebbcfactory_abaf68b0f5590d6a643df52fd6518fb91}
+
+
+Definition at line 65 of file robinconductivityebbcfactory.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/elliptic/\hyperlink{robinconductivityebbcfactory_8H}{robinconductivityebbcfactory.\+H}\end{DoxyCompactItemize}

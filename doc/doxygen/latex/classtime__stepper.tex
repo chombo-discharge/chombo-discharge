@@ -1,0 +1,1528 @@
+\hypertarget{classtime__stepper}{}\section{time\+\_\+stepper Class Reference}
+\label{classtime__stepper}\index{time\+\_\+stepper@{time\+\_\+stepper}}
+
+
+Abstract class for evolving in time across an amr mesh.  
+
+
+
+
+{\ttfamily \#include $<$time\+\_\+stepper.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classtime__stepper_a3a1387578d5b160e001705939c315788}{time\+\_\+stepper} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classtime__stepper_a05c1e1fa8670b4e2eacc842e258ab75e}{$\sim$time\+\_\+stepper} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classtime__stepper_a278c88ce2e4d14be574357ce6b586187}{advance} (const Real a\+\_\+dt)=0
+\begin{DoxyCompactList}\small\item\em Advance method, advances equations. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classtime__stepper_ade56248667134c40f3299b850621e7ad}{stationary\+\_\+rte} ()
+\begin{DoxyCompactList}\small\item\em Check if R\+TE solvers are stationary. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a8b2cd650662608bb02fc4179c7ecbeed}{cache\+\_\+states} ()
+\begin{DoxyCompactList}\small\item\em Cache states. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classtime__stepper_a85d99adc714844c64799ae8fffdd2db8}{solve\+\_\+poisson} ()
+\begin{DoxyCompactList}\small\item\em Solve the poisson equation. This calls \hyperlink{classtime__stepper_a8aff9e5ba857c3f49f719def02ebfc83}{compute\+\_\+rho()} \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classtime__stepper_a6bbd9e38c7170b96a3b2164a209847b5}{solve\+\_\+poisson} (\hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+potential, \hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+rhs, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ a\+\_\+densities, const \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+sigma, const \hyperlink{namespacecentering_a2cba3891fbdab30a214ce001478b0c00}{centering\+::which\+\_\+center} a\+\_\+centering)
+\begin{DoxyCompactList}\small\item\em General poisson solver routine. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a1aca2ee15cde9d0f0183f5d2807fda90}{compute\+\_\+dt} (Real \&a\+\_\+dt, \hyperlink{namespacetime__code_a92eaf5cbf7ef106eae01fd0d702e36bf}{time\+\_\+code\+::which\+\_\+code} \&a\+\_\+timecode)
+\begin{DoxyCompactList}\small\item\em Compute the time step and how it was restricted. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_aaeed2df5aec944cd499c10f8b7036ea4}{compute\+\_\+E} (\hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const \hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+potential)
+\begin{DoxyCompactList}\small\item\em Compute the cell-\/centered electric field on both phases. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a2468feba3a29655050375d8b693f9115}{compute\+\_\+E} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Compute the cell-\/centered electric field on a specific phase using whatever is available in m\+\_\+poisson. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ae4a39911e42a45fd2ac42d9ff6596918}{compute\+\_\+E} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase, const \hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+potential)
+\begin{DoxyCompactList}\small\item\em Compute the cell-\/centered electric field on a specific phase. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a1e13d9e56615820aa1be3a1298d703f0}{compute\+\_\+E} (\hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \&a\+\_\+\+E\+\_\+face, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+\+E\+\_\+cell)
+\begin{DoxyCompactList}\small\item\em Compute the face-\/centered electric field (only normal components) \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_af1bf44be1dcd5fc880a8cbdcb1af6f4a}{compute\+\_\+E} (\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+\+E\+\_\+eb, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+\+E\+\_\+cell)
+\begin{DoxyCompactList}\small\item\em Compute the face-\/centered electric field (only normal components) \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ab7aab82f224bd74e3d5da651feeda805}{compute\+\_\+\+Emax} (Real \&a\+\_\+\+Emax, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Compute the maximum of the electric field. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_af95b3e224961dc31f0cbfac6ff7063e1}{compute\+\_\+J} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+J)
+\begin{DoxyCompactList}\small\item\em Compute the current density. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_aa8ae8f71e0ab42184e07d0822b28004c}{compute\+\_\+cdr\+\_\+diffusion} ()
+\begin{DoxyCompactList}\small\item\em Compute diffusion things using whatever is available in the solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a978973f70bb5bd725b7c3406f3d7e8c5}{compute\+\_\+cdr\+\_\+diffco\+\_\+face} (Vector$<$ \hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} $\ast$ $>$ \&a\+\_\+diffco\+\_\+face, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const Real \&a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Compute diffusion coefficients. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a34c2c569e2e3b7e1d25c13d460ca10dc}{compute\+\_\+cdr\+\_\+diffco\+\_\+eb} (Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+diffco\+\_\+face, const Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+E, const Real \&a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Compute diffusion coefficients on the EB. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a860500ae7f8fb3042a5482469155a5f8}{compute\+\_\+cdr\+\_\+fluxes} (Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+fluxes, const Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+fluxes, const Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+densities, const Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+velocities, const Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+gradients, const Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+extrap\+\_\+rte\+\_\+fluxes, const \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+field, const Real \&a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Compute cdr\+\_\+fluxes. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a4f3e6ec2e018094d0f5ca4da6895b0c2}{compute\+\_\+gradients\+\_\+at\+\_\+eb} (Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+grad, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} \&a\+\_\+phase, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+phi)
+\begin{DoxyCompactList}\small\item\em Compute the gradient at the boundary (we also take the dot product w.\+r.\+t. to the normal vector) \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a2b13c5e1077d86409d7fb28890386d74}{compute\+\_\+cdr\+\_\+sources} ()
+\begin{DoxyCompactList}\small\item\em Compute C\+DR source terms. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a8d068d4c6e7aee6e33e5df345a8b6fd9}{compute\+\_\+cdr\+\_\+sources} (Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+sources, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+rte\+\_\+densities, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const Real \&a\+\_\+time, const \hyperlink{namespacecentering_a2cba3891fbdab30a214ce001478b0c00}{centering\+::which\+\_\+center} a\+\_\+centering)
+\begin{DoxyCompactList}\small\item\em Compute cdr source terms. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a417749a28f2243056e4aafa57b19b77b}{compute\+\_\+cdr\+\_\+velocities} ()
+\begin{DoxyCompactList}\small\item\em Compute cdr velocities. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a549b3ddb60d7b4890f220c7616702ab9}{compute\+\_\+cdr\+\_\+velocities} (Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+velocities, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const Real \&a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Compute the cell-\/centered cdr velocities. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_aa14114d0dd6e48773f54e3f9f2fcfb73}{compute\+\_\+rte\+\_\+sources} (Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ a\+\_\+source, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+cdr\+\_\+states, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const Real \&a\+\_\+time, const \hyperlink{namespacecentering_a2cba3891fbdab30a214ce001478b0c00}{centering\+::which\+\_\+center} a\+\_\+centering)
+\begin{DoxyCompactList}\small\item\em Compute photon source terms. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a96dd4c1d811d24f74a11b6b704d0d9d9}{compute\+\_\+extrapolated\+\_\+fluxes} (Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+fluxes, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ a\+\_\+densities, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ a\+\_\+velocities, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Compute the cell-\/centered fluxes and extrapolate these to the EB centroid. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_af8ed4d64d7d8b2d927de176fbb9a1774}{compute\+\_\+flux} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+flux, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+density, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+velocity)
+\begin{DoxyCompactList}\small\item\em Compute flux. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a3eb72bb3d6615fcb2ad255eb5518b082}{compute\+\_\+charge\+\_\+flux} (\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+flux, Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+cdr\+\_\+flxues)
+\begin{DoxyCompactList}\small\item\em Compute charge flux. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ac587da897b0dc5a165d22eb6c0cb528d}{compute\+\_\+rte\+\_\+sources} ()
+\begin{DoxyCompactList}\small\item\em Compute R\+TE source terms. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a8aff9e5ba857c3f49f719def02ebfc83}{compute\+\_\+rho} ()
+\begin{DoxyCompactList}\small\item\em Compute the cell-\/centered space charge density by using data inside \hyperlink{classcdr__layout}{cdr\+\_\+layout}. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_acfbcca9dd193580f3bed9dd43b1eabbc}{compute\+\_\+rho} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+rho, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Compute cell-\/centered space charge density on a specific phase using whatever is available in \hyperlink{classcdr__layout}{cdr\+\_\+layout}. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ae55e02489f3d7a1af414a0532278efa0}{compute\+\_\+rho} (\hyperlink{type__definitions_8H_aced885351d40daa466564acbee4042d3}{M\+F\+A\+M\+R\+Cell\+Data} \&a\+\_\+rho, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+densities, const \hyperlink{namespacecentering_a2cba3891fbdab30a214ce001478b0c00}{centering\+::which\+\_\+center} a\+\_\+centering)
+\begin{DoxyCompactList}\small\item\em Compute the centroid-\/centered space charge density. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ae8c1849a79999d879aa243779efe013e}{deallocate\+\_\+internals} ()
+\begin{DoxyCompactList}\small\item\em Deallocate internals. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a23ffd539aed706255765cfe14443195a}{deallocate\+\_\+solver\+\_\+internals} ()
+\begin{DoxyCompactList}\small\item\em Deallocate internal solver storages. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_aef015bc787fa4af1698665c7c3c096e3}{extrapolate\+\_\+to\+\_\+eb} (\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+extrap, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Extrapolate data to EB centroid. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a1ad1903ce4f7d2478c31eedf7e35ab51}{extrapolate\+\_\+to\+\_\+eb} (Vector$<$ \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&a\+\_\+extrap, const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Extrapolate data to EB centroid. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a6bac172529a0585fac66354753a88914}{get\+\_\+cdr\+\_\+max} (Real \&a\+\_\+cdr\+\_\+max, std\+::string \&a\+\_\+solver\+\_\+name)
+\begin{DoxyCompactList}\small\item\em Get maximum value of the cdr solver stuff. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a072f8c98c88aba9917a5e78007301713}{instantiate\+\_\+solvers} ()
+\begin{DoxyCompactList}\small\item\em Instantiate solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a184ee525a253c774398949d4e6526625}{initial\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Fill all solvers with initial data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a548cc3bf38cbf47fc0166927ffcc5475}{initial\+\_\+cdr\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Fill initial cdr data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a9d41a3b04d410de2d7f000ad9007497a}{initial\+\_\+rte\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Fill initial rte data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a57b20a0060e1a38983752ba625e6a515}{initial\+\_\+sigma\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Fill initial sigma data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a04a1233962d7be86ec511dfcad3180b6}{project\+\_\+flux} (\hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+projected\+\_\+flux, const \hyperlink{type__definitions_8H_a6b8fa905d55cbb491b52180386f0e0c1}{E\+B\+A\+M\+R\+I\+V\+Data} \&a\+\_\+flux)
+\begin{DoxyCompactList}\small\item\em Extrapolated flux to EB and project it onto the normal. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a851ca4f6c6303f89aa43ca46e2b0c993}{regrid} (const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)
+\begin{DoxyCompactList}\small\item\em Regrid. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a52a437edbc252b67ae72522c69ec9bc6}{regrid\+\_\+internals} ()=0
+\begin{DoxyCompactList}\small\item\em Regrid internal storage. This M\+U\+ST be overwritten. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a35eb07117ba6f556d4cacfe8be3fc4a5}{regrid\+\_\+solvers} (const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)
+\begin{DoxyCompactList}\small\item\em Regrid individual solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a6f176a71d27d81c5f46ee6c27de48084}{sanity\+\_\+check} ()
+\begin{DoxyCompactList}\small\item\em Do a sanity check. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_afd82c36647cd14a8362b2e24dc5d16bb}{set\+\_\+amr} (const Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \&a\+\_\+amr)
+\begin{DoxyCompactList}\small\item\em Set amr. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_aacd2b52725a336defa0ee80b79145ffc}{set\+\_\+computational\+\_\+geometry} (const Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \&a\+\_\+compgeom)
+\begin{DoxyCompactList}\small\item\em Set the physical domain. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a8847d9da77783f7471d15ae43d390969}{set\+\_\+fast\+\_\+rte} (const int a\+\_\+fast\+\_\+rte)
+\begin{DoxyCompactList}\small\item\em Set fast rte. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a958cb4e0b186b13abe2f6c172d7a49fd}{set\+\_\+fast\+\_\+poisson} (const int a\+\_\+fast\+\_\+poisson)
+\begin{DoxyCompactList}\small\item\em Set fast rte. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ac603f5f8b6d4481d24b77210f33b2394}{set\+\_\+min\+\_\+dt} (const Real a\+\_\+min\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Set hardcap on the time step. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a564af894688cbc30f6cf5fb51283dc09}{set\+\_\+max\+\_\+dt} (const Real a\+\_\+min\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Set hardcap on the time step. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a060293fa551134661a8799a4fb9e3a57}{set\+\_\+cfl} (const Real a\+\_\+cfl)
+\begin{DoxyCompactList}\small\item\em Set C\+FL condition. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a183d152677a4702d91556693cfd75d4f}{set\+\_\+relax\+\_\+time} (const Real a\+\_\+relax\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Set fudge factor for relaxation time. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a67cd551ab8a561553961239886f7de0d}{set\+\_\+source\+\_\+growth} (const Real a\+\_\+src\+\_\+growth)
+\begin{DoxyCompactList}\small\item\em Set source growth. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a6a4dd286b2bea591c18e27a8422a95e7}{set\+\_\+source\+\_\+growth\+\_\+tolerance} (const Real a\+\_\+src\+\_\+tolerance)
+\begin{DoxyCompactList}\small\item\em Set source growth. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a8fc4a6732e13a142feb45eca360f2e1b}{set\+\_\+source\+\_\+growth\+\_\+elec\+\_\+only} (const bool a\+\_\+src\+\_\+elec\+\_\+only)
+\begin{DoxyCompactList}\small\item\em Set source growth. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a8d09d76edafd510ae60833eebcc24e10}{set\+\_\+physical\+\_\+domain} (const Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \&a\+\_\+physdom)
+\begin{DoxyCompactList}\small\item\em Set the physical domain. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_aac84b19b8b7055f97fb2c0215c546e2d}{set\+\_\+plasma\+\_\+kinetics} (const Ref\+Counted\+Ptr$<$ \hyperlink{classplasma__kinetics}{plasma\+\_\+kinetics} $>$ \&a\+\_\+plaskin)
+\begin{DoxyCompactList}\small\item\em Set plasma kinetics. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a11205c272eaabf397637a3a3c29d1b44}{set\+\_\+verbosity} (const int a\+\_\+verbosity)
+\begin{DoxyCompactList}\small\item\em Verbosity. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a3b47b16fff18ede0aad932454fc54cae}{set\+\_\+solver\+\_\+verbosity} (const int a\+\_\+verbosity)
+\begin{DoxyCompactList}\small\item\em Set solver verbosity. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_af5ecb8eea37968ce045d49a3bf903f2f}{set\+\_\+stationary\+\_\+rte} (const bool a\+\_\+stationary)
+\begin{DoxyCompactList}\small\item\em Set stationary/nonstationary R\+TE. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a35bf1379bc29fc821e90172f1e053f67}{setup\+\_\+cdr} ()
+\begin{DoxyCompactList}\small\item\em Setup the cdr solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_afb043dcafc4d1a6554c26a8a5ec81a0a}{setup\+\_\+poisson} ()
+\begin{DoxyCompactList}\small\item\em Setup the poisson solver. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a312a7def7e73d0e68d28e304fafb7ac2}{setup\+\_\+rte} ()
+\begin{DoxyCompactList}\small\item\em Setup the rte solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a481326a9d61f88b18c78034239fd52b2}{setup\+\_\+sigma} ()
+\begin{DoxyCompactList}\small\item\em Instantiate the sigma solver. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ad8e1679b0a90f7acf6f4349da2299ecb}{solver\+\_\+dump} ()
+\begin{DoxyCompactList}\small\item\em Solver dumps data files. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a1a87be490eeae1b459d81499f10e8304}{set\+\_\+potential} (Real($\ast$a\+\_\+potential)(const Real a\+\_\+time))
+\begin{DoxyCompactList}\small\item\em Set potential. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a8a998a61bbd18a33ad22b7411681e4e6}{set\+\_\+poisson\+\_\+wall\+\_\+func} (const int a\+\_\+dir, const Side\+::\+Lo\+Hi\+Side a\+\_\+side, Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos))
+\begin{DoxyCompactList}\small\item\em Set wall function for Poisson equation boundary conditions. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a1246e40615f329e64c0acecbc3efc391}{solve\+\_\+rte} (const Real a\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em R\+TE advance using data existing in other solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_ac393f6db09ac092352138877d9790214}{solve\+\_\+rte} (Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+states, Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+rhs, const Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&a\+\_\+cdr\+\_\+states, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+E, const Real a\+\_\+time, const Real a\+\_\+dt, const \hyperlink{namespacecentering_a2cba3891fbdab30a214ce001478b0c00}{centering\+::which\+\_\+center} a\+\_\+centering)
+\begin{DoxyCompactList}\small\item\em General R\+TE advance routine. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classtime__stepper_a567d04b98302f443428d465b2a0e57db}{synchronize\+\_\+solver\+\_\+times} (const int a\+\_\+step, const Real a\+\_\+time, const Real a\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Synchronize solver times. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classtime__stepper_a41cf4b02f8e06f73c2c636d211c9602d}{query\+\_\+ghost} ()
+\begin{DoxyCompactList}\small\item\em Query about necessary number of ghost cells. This collects that from the individual solvers. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classtime__stepper_afcb6e29bb009384b02aa541eece52699}{compute\+\_\+relaxation\+\_\+time} ()
+\begin{DoxyCompactList}\small\item\em Compute the relaxation time. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classtime__stepper_a97f9bb068982c782ac06d8e83451e5b5}{restrict\+\_\+dt} ()=0
+\begin{DoxyCompactList}\small\item\em Restrict dt. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classtime__stepper_ac5952aa21b8023002d879e3bf2323d7c}{get\+\_\+time} ()
+\begin{DoxyCompactList}\small\item\em Return time. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classcdr__layout}{cdr\+\_\+layout} $>$ \& \hyperlink{classtime__stepper_ad21847354c19d435c1637a589352e3f7}{get\+\_\+cdr} ()
+\begin{DoxyCompactList}\small\item\em Get cdr solvers. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classpoisson__solver}{poisson\+\_\+solver} $>$ \& \hyperlink{classtime__stepper_aa3c122d919a7be5315bc191528d7f29c}{get\+\_\+poisson} ()
+\begin{DoxyCompactList}\small\item\em Get cdr solvers. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classrte__layout}{rte\+\_\+layout} $>$ \& \hyperlink{classtime__stepper_a65c0d74efbd14a275e8443cf37e637b4}{get\+\_\+rte} ()
+\begin{DoxyCompactList}\small\item\em Get cdr solvers. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classsigma__solver}{sigma\+\_\+solver} $>$ \& \hyperlink{classtime__stepper_a7028973370d71e725efdc459f786fa54}{get\+\_\+sigma} ()
+\begin{DoxyCompactList}\small\item\em Get sigma solver. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \hyperlink{classtime__stepper_ac45b323d83c4085b3f704bf8ee7b9056}{m\+\_\+mfis}
+\begin{DoxyCompactList}\small\item\em Index space. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \hyperlink{classtime__stepper_a2ff2fb25e4e79b742d10d490d4296b6a}{m\+\_\+amr}
+\begin{DoxyCompactList}\small\item\em A\+MR. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classplasma__kinetics}{plasma\+\_\+kinetics} $>$ \hyperlink{classtime__stepper_aa6ac2a0f6cb3c0dcda12cc9cdb6c8cc3}{m\+\_\+plaskin}
+\begin{DoxyCompactList}\small\item\em Plasma kinetics. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \hyperlink{classtime__stepper_a055b9f785dc998fdc4d9a9d6b5896a0b}{m\+\_\+physdom}
+\begin{DoxyCompactList}\small\item\em Physical domain. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \hyperlink{classtime__stepper_a3d0709bd478ebd891e89894c55c5253f}{m\+\_\+compgeom}
+\begin{DoxyCompactList}\small\item\em Physical domain. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classcdr__layout}{cdr\+\_\+layout} $>$ \hyperlink{classtime__stepper_a21f779561ea34ed6f6785fc25d8934d0}{m\+\_\+cdr}
+\begin{DoxyCompactList}\small\item\em C\+DR solvers. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classrte__layout}{rte\+\_\+layout} $>$ \hyperlink{classtime__stepper_ace365dde5918ec979d191d19519afc1f}{m\+\_\+rte}
+\begin{DoxyCompactList}\small\item\em Radiative transfer solvers. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classpoisson__solver}{poisson\+\_\+solver} $>$ \hyperlink{classtime__stepper_a86109da74846f40cabe5a940bf6ef360}{m\+\_\+poisson}
+\begin{DoxyCompactList}\small\item\em Poisson solver. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classsigma__solver}{sigma\+\_\+solver} $>$ \hyperlink{classtime__stepper_aec0c61822a3a3bb1b4cdc06a6eaf1d5d}{m\+\_\+sigma}
+\begin{DoxyCompactList}\small\item\em Surface charge solver. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classtime__stepper_a53923894761481d4f6fc1d226cd359b5}{m\+\_\+potential} )(const Real a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Set the potential. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classtime__stepper_a54c0d0fabecde28d2ff02ff25385bf43}{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classtime__stepper_ad48ff9f55719c7412afeb182af186d7a}{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classtime__stepper_a18f009db00a27df1b1a0acfbf61df35f}{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classtime__stepper_a6bb898a547668fa17298cf85602f4391}{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real \hyperlink{classtime__stepper_abe8383e525fee7b34f17634d20b8dc7b}{m\+\_\+min\+\_\+dt}
+\begin{DoxyCompactList}\small\item\em Minimum allowed time step. \end{DoxyCompactList}\item 
+Real \hyperlink{classtime__stepper_a0b4bb843a6ab96d3876aec7668d8ef31}{m\+\_\+max\+\_\+dt}
+\begin{DoxyCompactList}\small\item\em Maximum allowed time step. \end{DoxyCompactList}\item 
+Real \hyperlink{classtime__stepper_a0a66eaadfed367bc8745e9214acce772}{m\+\_\+cfl}
+\begin{DoxyCompactList}\small\item\em C\+FL. \end{DoxyCompactList}\item 
+Real \hyperlink{classtime__stepper_a895f7fd304fc34a7ec783b25492143df}{m\+\_\+relax\+\_\+time}
+\begin{DoxyCompactList}\small\item\em Fudge factor for relaxation time. \end{DoxyCompactList}\item 
+Real \hyperlink{classtime__stepper_a06ffa5dffab8e8cacef26bc640f4a265}{m\+\_\+src\+\_\+growth}
+\begin{DoxyCompactList}\small\item\em Source growth. \end{DoxyCompactList}\item 
+Real \hyperlink{classtime__stepper_a491c3c35019477c00296450933ca8bb4}{m\+\_\+time}
+\begin{DoxyCompactList}\small\item\em T\+Ime. \end{DoxyCompactList}\item 
+Real \hyperlink{classtime__stepper_a19f732138cbbb2be42a8d5486aa4208f}{m\+\_\+src\+\_\+tolerance}
+\begin{DoxyCompactList}\small\item\em Tolerance for source term growth. \end{DoxyCompactList}\item 
+int \hyperlink{classtime__stepper_a9af86e24658bec33326091ab5012a924}{m\+\_\+verbosity}
+\begin{DoxyCompactList}\small\item\em Verbosity. \end{DoxyCompactList}\item 
+int \hyperlink{classtime__stepper_a0f30ea8c9bc55972e9a28d9e5d4881f8}{m\+\_\+solver\+\_\+verbosity}
+\begin{DoxyCompactList}\small\item\em Verbosity for solvers. \end{DoxyCompactList}\item 
+int \hyperlink{classtime__stepper_ae6674f68d4df3b6b1d1f4700893d63e6}{m\+\_\+fast\+\_\+rte}
+\begin{DoxyCompactList}\small\item\em Fast R\+TE solver. \end{DoxyCompactList}\item 
+int \hyperlink{classtime__stepper_a8b9bbcec948740cc5de4fd749f7b1aca}{m\+\_\+fast\+\_\+poisson}
+\begin{DoxyCompactList}\small\item\em Fast R\+TE solver. \end{DoxyCompactList}\item 
+int \hyperlink{classtime__stepper_a5a4bd274325d52eef716b6c465cc3a9d}{m\+\_\+step}
+\begin{DoxyCompactList}\small\item\em Current step. \end{DoxyCompactList}\item 
+bool \hyperlink{classtime__stepper_a86913b145d2b6ad0442b6341e39f754d}{m\+\_\+src\+\_\+elec\+\_\+only}
+\begin{DoxyCompactList}\small\item\em Do source term time step restriction only for electrons. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Abstract class for evolving in time across an amr mesh. 
+
+This class has default options relating
+
+\subsubsection*{Class options }
+
+time\+\_\+stepper.\+verbosity = 1 \# Class verbosity time\+\_\+stepper.\+solver\+\_\+verbosity = 0 \# Individual solver verbosities time\+\_\+stepper.\+fast\+\_\+rte = 1 \# Solve R\+TE every this time steps time\+\_\+stepper.\+fast\+\_\+poisson = 1 \# Solve Poisson every this time steps time\+\_\+stepper.\+min\+\_\+dt = 0. \# Minimum permitted time step time\+\_\+stepper.\+min\+\_\+dt = 1. \# Maximum permitted time step time\+\_\+stepper.\+cfl = 0.\+5 \# C\+FL number time\+\_\+stepper.\+relax\+\_\+time = 1.\+0 \# Relaxation time constant time\+\_\+stepper.\+source\+\_\+growth = 100.\+0 \# Relaxation time constant 
+
+Definition at line 41 of file time\+\_\+stepper.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{time\+\_\+stepper@{time\+\_\+stepper}!time\+\_\+stepper@{time\+\_\+stepper}}
+\index{time\+\_\+stepper@{time\+\_\+stepper}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{time\+\_\+stepper()}{time_stepper()}}]{\setlength{\rightskip}{0pt plus 5cm}time\+\_\+stepper\+::time\+\_\+stepper (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classtime__stepper_a3a1387578d5b160e001705939c315788}{}\label{classtime__stepper_a3a1387578d5b160e001705939c315788}
+
+
+Constructor. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!````~time\+\_\+stepper@{$\sim$time\+\_\+stepper}}
+\index{````~time\+\_\+stepper@{$\sim$time\+\_\+stepper}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{$\sim$time\+\_\+stepper()}{~time_stepper()}}]{\setlength{\rightskip}{0pt plus 5cm}time\+\_\+stepper\+::$\sim$time\+\_\+stepper (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classtime__stepper_a05c1e1fa8670b4e2eacc842e258ab75e}{}\label{classtime__stepper_a05c1e1fa8670b4e2eacc842e258ab75e}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{time\+\_\+stepper@{time\+\_\+stepper}!advance@{advance}}
+\index{advance@{advance}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{advance(const Real a\+\_\+dt)=0}{advance(const Real a_dt)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real time\+\_\+stepper\+::advance (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classtime__stepper_a278c88ce2e4d14be574357ce6b586187}{}\label{classtime__stepper_a278c88ce2e4d14be574357ce6b586187}
+
+
+Advance method, advances equations. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+dt} & Time step \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Actual time step used (can be different from a\+\_\+dt for adaptive methods) 
+\end{DoxyReturn}
+\index{time\+\_\+stepper@{time\+\_\+stepper}!cache\+\_\+states@{cache\+\_\+states}}
+\index{cache\+\_\+states@{cache\+\_\+states}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{cache\+\_\+states()}{cache_states()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::cache\+\_\+states (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a8b2cd650662608bb02fc4179c7ecbeed}{}\label{classtime__stepper_a8b2cd650662608bb02fc4179c7ecbeed}
+
+
+Cache states. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+diffco\+\_\+eb@{compute\+\_\+cdr\+\_\+diffco\+\_\+eb}}
+\index{compute\+\_\+cdr\+\_\+diffco\+\_\+eb@{compute\+\_\+cdr\+\_\+diffco\+\_\+eb}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+diffco\+\_\+eb(\+Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+diffco\+\_\+face, const Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+\+E, const Real \&a\+\_\+time)}{compute_cdr_diffco_eb(Vector< EBAMRIVData * > &a_diffco_face, const Vector< EBAMRIVData * > &a_cdr_densities, const EBAMRIVData &a_E, const Real &a_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+diffco\+\_\+eb (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+diffco\+\_\+face, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+cdr\+\_\+densities, }
+\item[{const {\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a34c2c569e2e3b7e1d25c13d460ca10dc}{}\label{classtime__stepper_a34c2c569e2e3b7e1d25c13d460ca10dc}
+
+
+Compute diffusion coefficients on the EB. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+diffco\+\_\+face@{compute\+\_\+cdr\+\_\+diffco\+\_\+face}}
+\index{compute\+\_\+cdr\+\_\+diffco\+\_\+face@{compute\+\_\+cdr\+\_\+diffco\+\_\+face}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+diffco\+\_\+face(\+Vector$<$ E\+B\+A\+M\+R\+Flux\+Data $\ast$ $>$ \&a\+\_\+diffco\+\_\+face, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const Real \&a\+\_\+time)}{compute_cdr_diffco_face(Vector< EBAMRFluxData * > &a_diffco_face, const Vector< EBAMRCellData * > &a_cdr_densities, const EBAMRCellData &a_E, const Real &a_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+diffco\+\_\+face (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+Flux\+Data} $\ast$ $>$ \&}]{a\+\_\+diffco\+\_\+face, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+cdr\+\_\+densities, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a978973f70bb5bd725b7c3406f3d7e8c5}{}\label{classtime__stepper_a978973f70bb5bd725b7c3406f3d7e8c5}
+
+
+Compute diffusion coefficients. 
+
+The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that onto cell faces. \index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+diffusion@{compute\+\_\+cdr\+\_\+diffusion}}
+\index{compute\+\_\+cdr\+\_\+diffusion@{compute\+\_\+cdr\+\_\+diffusion}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+diffusion()}{compute_cdr_diffusion()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+diffusion (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_aa8ae8f71e0ab42184e07d0822b28004c}{}\label{classtime__stepper_aa8ae8f71e0ab42184e07d0822b28004c}
+
+
+Compute diffusion things using whatever is available in the solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+fluxes@{compute\+\_\+cdr\+\_\+fluxes}}
+\index{compute\+\_\+cdr\+\_\+fluxes@{compute\+\_\+cdr\+\_\+fluxes}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+fluxes(\+Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+fluxes, const Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+fluxes, const Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+densities, const Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+velocities, const Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+extrap\+\_\+cdr\+\_\+gradients, const Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+extrap\+\_\+rte\+\_\+fluxes, const E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+field, const Real \&a\+\_\+time)}{compute_cdr_fluxes(Vector< EBAMRIVData * > &a_fluxes, const Vector< EBAMRIVData * > &a_extrap_cdr_fluxes, const Vector< EBAMRIVData * > &a_extrap_cdr_densities, const Vector< EBAMRIVData * > &a_extrap_cdr_velocities, const Vector< EBAMRIVData * > &a_extrap_cdr_gradients, const Vector< EBAMRIVData * > &a_extrap_rte_fluxes, const EBAMRIVData &a_field, const Real &a_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+fluxes (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+fluxes, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+extrap\+\_\+cdr\+\_\+fluxes, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+extrap\+\_\+cdr\+\_\+densities, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+extrap\+\_\+cdr\+\_\+velocities, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+extrap\+\_\+cdr\+\_\+gradients, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+extrap\+\_\+rte\+\_\+fluxes, }
+\item[{const {\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+field, }
+\item[{const Real \&}]{a\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a860500ae7f8fb3042a5482469155a5f8}{}\label{classtime__stepper_a860500ae7f8fb3042a5482469155a5f8}
+
+
+Compute cdr\+\_\+fluxes. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+sources@{compute\+\_\+cdr\+\_\+sources}}
+\index{compute\+\_\+cdr\+\_\+sources@{compute\+\_\+cdr\+\_\+sources}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+sources()}{compute_cdr_sources()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+sources (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a2b13c5e1077d86409d7fb28890386d74}{}\label{classtime__stepper_a2b13c5e1077d86409d7fb28890386d74}
+
+
+Compute C\+DR source terms. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+sources@{compute\+\_\+cdr\+\_\+sources}}
+\index{compute\+\_\+cdr\+\_\+sources@{compute\+\_\+cdr\+\_\+sources}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+sources(\+Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+sources, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+rte\+\_\+densities, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const Real \&a\+\_\+time, const centering\+::which\+\_\+center a\+\_\+centering)}{compute_cdr_sources(Vector< EBAMRCellData * > &a_sources, const Vector< EBAMRCellData * > &a_cdr_densities, const Vector< EBAMRCellData * > &a_rte_densities, const EBAMRCellData &a_E, const Real &a_time, const centering::which_center a_centering)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+sources (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+sources, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+cdr\+\_\+densities, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+rte\+\_\+densities, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+time, }
+\item[{const {\bf centering\+::which\+\_\+center}}]{a\+\_\+centering}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a8d068d4c6e7aee6e33e5df345a8b6fd9}{}\label{classtime__stepper_a8d068d4c6e7aee6e33e5df345a8b6fd9}
+
+
+Compute cdr source terms. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+velocities@{compute\+\_\+cdr\+\_\+velocities}}
+\index{compute\+\_\+cdr\+\_\+velocities@{compute\+\_\+cdr\+\_\+velocities}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+velocities()}{compute_cdr_velocities()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+velocities (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a417749a28f2243056e4aafa57b19b77b}{}\label{classtime__stepper_a417749a28f2243056e4aafa57b19b77b}
+
+
+Compute cdr velocities. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+cdr\+\_\+velocities@{compute\+\_\+cdr\+\_\+velocities}}
+\index{compute\+\_\+cdr\+\_\+velocities@{compute\+\_\+cdr\+\_\+velocities}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+cdr\+\_\+velocities(\+Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+velocities, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+cdr\+\_\+densities, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const Real \&a\+\_\+time)}{compute_cdr_velocities(Vector< EBAMRCellData * > &a_velocities, const Vector< EBAMRCellData * > &a_cdr_densities, const EBAMRCellData &a_E, const Real &a_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+cdr\+\_\+velocities (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+velocities, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+cdr\+\_\+densities, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a549b3ddb60d7b4890f220c7616702ab9}{}\label{classtime__stepper_a549b3ddb60d7b4890f220c7616702ab9}
+
+
+Compute the cell-\/centered cdr velocities. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+charge\+\_\+flux@{compute\+\_\+charge\+\_\+flux}}
+\index{compute\+\_\+charge\+\_\+flux@{compute\+\_\+charge\+\_\+flux}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+charge\+\_\+flux(\+E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+flux, Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+cdr\+\_\+flxues)}{compute_charge_flux(EBAMRIVData &a_flux, Vector< EBAMRIVData * > &a_cdr_flxues)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+charge\+\_\+flux (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+flux, }
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+cdr\+\_\+flxues}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a3eb72bb3d6615fcb2ad255eb5518b082}{}\label{classtime__stepper_a3eb72bb3d6615fcb2ad255eb5518b082}
+
+
+Compute charge flux. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+dt@{compute\+\_\+dt}}
+\index{compute\+\_\+dt@{compute\+\_\+dt}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+dt(\+Real \&a\+\_\+dt, time\+\_\+code\+::which\+\_\+code \&a\+\_\+timecode)}{compute_dt(Real &a_dt, time_code::which_code &a_timecode)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+dt (
+\begin{DoxyParamCaption}
+\item[{Real \&}]{a\+\_\+dt, }
+\item[{{\bf time\+\_\+code\+::which\+\_\+code} \&}]{a\+\_\+timecode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a1aca2ee15cde9d0f0183f5d2807fda90}{}\label{classtime__stepper_a1aca2ee15cde9d0f0183f5d2807fda90}
+
+
+Compute the time step and how it was restricted. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+E@{compute\+\_\+E}}
+\index{compute\+\_\+E@{compute\+\_\+E}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+E(\+M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+potential)}{compute_E(MFAMRCellData &a_E, const MFAMRCellData &a_potential)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+E (
+\begin{DoxyParamCaption}
+\item[{{\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const {\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+potential}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_aaeed2df5aec944cd499c10f8b7036ea4}{}\label{classtime__stepper_aaeed2df5aec944cd499c10f8b7036ea4}
+
+
+Compute the cell-\/centered electric field on both phases. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+E@{compute\+\_\+E}}
+\index{compute\+\_\+E@{compute\+\_\+E}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+E(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const phase\+::which\+\_\+phase a\+\_\+phase)}{compute_E(EBAMRCellData &a_E, const phase::which_phase a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+E (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a2468feba3a29655050375d8b693f9115}{}\label{classtime__stepper_a2468feba3a29655050375d8b693f9115}
+
+
+Compute the cell-\/centered electric field on a specific phase using whatever is available in m\+\_\+poisson. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+E@{compute\+\_\+E}}
+\index{compute\+\_\+E@{compute\+\_\+E}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+E(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const phase\+::which\+\_\+phase a\+\_\+phase, const M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+potential)}{compute_E(EBAMRCellData &a_E, const phase::which_phase a_phase, const MFAMRCellData &a_potential)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+E (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase, }
+\item[{const {\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+potential}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ae4a39911e42a45fd2ac42d9ff6596918}{}\label{classtime__stepper_ae4a39911e42a45fd2ac42d9ff6596918}
+
+
+Compute the cell-\/centered electric field on a specific phase. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+E@{compute\+\_\+E}}
+\index{compute\+\_\+E@{compute\+\_\+E}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+E(\+E\+B\+A\+M\+R\+Flux\+Data \&a\+\_\+\+E\+\_\+face, const phase\+::which\+\_\+phase a\+\_\+phase, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E\+\_\+cell)}{compute_E(EBAMRFluxData &a_E_face, const phase::which_phase a_phase, const EBAMRCellData &a_E_cell)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+E (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Flux\+Data} \&}]{a\+\_\+\+E\+\_\+face, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+\+E\+\_\+cell}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a1e13d9e56615820aa1be3a1298d703f0}{}\label{classtime__stepper_a1e13d9e56615820aa1be3a1298d703f0}
+
+
+Compute the face-\/centered electric field (only normal components) 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+E@{compute\+\_\+E}}
+\index{compute\+\_\+E@{compute\+\_\+E}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+E(\+E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+\+E\+\_\+eb, const phase\+::which\+\_\+phase a\+\_\+phase, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E\+\_\+cell)}{compute_E(EBAMRIVData &a_E_eb, const phase::which_phase a_phase, const EBAMRCellData &a_E_cell)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+E (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+\+E\+\_\+eb, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+\+E\+\_\+cell}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_af1bf44be1dcd5fc880a8cbdcb1af6f4a}{}\label{classtime__stepper_af1bf44be1dcd5fc880a8cbdcb1af6f4a}
+
+
+Compute the face-\/centered electric field (only normal components) 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+\+Emax@{compute\+\_\+\+Emax}}
+\index{compute\+\_\+\+Emax@{compute\+\_\+\+Emax}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+Emax(\+Real \&a\+\_\+\+Emax, const phase\+::which\+\_\+phase a\+\_\+phase)}{compute_Emax(Real &a_Emax, const phase::which_phase a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+\+Emax (
+\begin{DoxyParamCaption}
+\item[{Real \&}]{a\+\_\+\+Emax, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ab7aab82f224bd74e3d5da651feeda805}{}\label{classtime__stepper_ab7aab82f224bd74e3d5da651feeda805}
+
+
+Compute the maximum of the electric field. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+extrapolated\+\_\+fluxes@{compute\+\_\+extrapolated\+\_\+fluxes}}
+\index{compute\+\_\+extrapolated\+\_\+fluxes@{compute\+\_\+extrapolated\+\_\+fluxes}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+extrapolated\+\_\+fluxes(\+Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+fluxes, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ a\+\_\+densities, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ a\+\_\+velocities, const phase\+::which\+\_\+phase a\+\_\+phase)}{compute_extrapolated_fluxes(Vector< EBAMRIVData * > &a_fluxes, const Vector< EBAMRCellData * > a_densities, const Vector< EBAMRCellData * > a_velocities, const phase::which_phase a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+extrapolated\+\_\+fluxes (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+fluxes, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$}]{a\+\_\+densities, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$}]{a\+\_\+velocities, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a96dd4c1d811d24f74a11b6b704d0d9d9}{}\label{classtime__stepper_a96dd4c1d811d24f74a11b6b704d0d9d9}
+
+
+Compute the cell-\/centered fluxes and extrapolate these to the EB centroid. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+flux@{compute\+\_\+flux}}
+\index{compute\+\_\+flux@{compute\+\_\+flux}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+flux(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+flux, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+density, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+velocity)}{compute_flux(EBAMRCellData &a_flux, const EBAMRCellData &a_density, const EBAMRCellData &a_velocity)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+flux (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+flux, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+density, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+velocity}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_af8ed4d64d7d8b2d927de176fbb9a1774}{}\label{classtime__stepper_af8ed4d64d7d8b2d927de176fbb9a1774}
+
+
+Compute flux. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+gradients\+\_\+at\+\_\+eb@{compute\+\_\+gradients\+\_\+at\+\_\+eb}}
+\index{compute\+\_\+gradients\+\_\+at\+\_\+eb@{compute\+\_\+gradients\+\_\+at\+\_\+eb}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+gradients\+\_\+at\+\_\+eb(\+Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+grad, const phase\+::which\+\_\+phase \&a\+\_\+phase, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+phi)}{compute_gradients_at_eb(Vector< EBAMRIVData * > &a_grad, const phase::which_phase &a_phase, const Vector< EBAMRCellData * > &a_phi)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+gradients\+\_\+at\+\_\+eb (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+grad, }
+\item[{const {\bf phase\+::which\+\_\+phase} \&}]{a\+\_\+phase, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+phi}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a4f3e6ec2e018094d0f5ca4da6895b0c2}{}\label{classtime__stepper_a4f3e6ec2e018094d0f5ca4da6895b0c2}
+
+
+Compute the gradient at the boundary (we also take the dot product w.\+r.\+t. to the normal vector) 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+J@{compute\+\_\+J}}
+\index{compute\+\_\+J@{compute\+\_\+J}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+\+J(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+J)}{compute_J(EBAMRCellData &a_J)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+J (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+J}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_af95b3e224961dc31f0cbfac6ff7063e1}{}\label{classtime__stepper_af95b3e224961dc31f0cbfac6ff7063e1}
+
+
+Compute the current density. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+relaxation\+\_\+time@{compute\+\_\+relaxation\+\_\+time}}
+\index{compute\+\_\+relaxation\+\_\+time@{compute\+\_\+relaxation\+\_\+time}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+relaxation\+\_\+time()}{compute_relaxation_time()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real time\+\_\+stepper\+::compute\+\_\+relaxation\+\_\+time (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_afcb6e29bb009384b02aa541eece52699}{}\label{classtime__stepper_afcb6e29bb009384b02aa541eece52699}
+
+
+Compute the relaxation time. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+rho@{compute\+\_\+rho}}
+\index{compute\+\_\+rho@{compute\+\_\+rho}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+rho()}{compute_rho()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+rho (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a8aff9e5ba857c3f49f719def02ebfc83}{}\label{classtime__stepper_a8aff9e5ba857c3f49f719def02ebfc83}
+
+
+Compute the cell-\/centered space charge density by using data inside \hyperlink{classcdr__layout}{cdr\+\_\+layout}. 
+
+This assumes that the data contain in \hyperlink{classcdr__layout}{cdr\+\_\+layout} is cell-\/centered \index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+rho@{compute\+\_\+rho}}
+\index{compute\+\_\+rho@{compute\+\_\+rho}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+rho(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+rho, const phase\+::which\+\_\+phase a\+\_\+phase)}{compute_rho(EBAMRCellData &a_rho, const phase::which_phase a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+rho (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+rho, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_acfbcca9dd193580f3bed9dd43b1eabbc}{}\label{classtime__stepper_acfbcca9dd193580f3bed9dd43b1eabbc}
+
+
+Compute cell-\/centered space charge density on a specific phase using whatever is available in \hyperlink{classcdr__layout}{cdr\+\_\+layout}. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+rho@{compute\+\_\+rho}}
+\index{compute\+\_\+rho@{compute\+\_\+rho}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+rho(\+M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+rho, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+densities, const centering\+::which\+\_\+center a\+\_\+centering)}{compute_rho(MFAMRCellData &a_rho, const Vector< EBAMRCellData * > &a_densities, const centering::which_center a_centering)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+rho (
+\begin{DoxyParamCaption}
+\item[{{\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+rho, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+densities, }
+\item[{const {\bf centering\+::which\+\_\+center}}]{a\+\_\+centering}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ae55e02489f3d7a1af414a0532278efa0}{}\label{classtime__stepper_ae55e02489f3d7a1af414a0532278efa0}
+
+
+Compute the centroid-\/centered space charge density. 
+
+You have the option of specifying the centering for this computation. If the densities are cell-\/centered, we first compute the cell-\/centered space charge density and the interpolate to the cell centroid. \index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+rte\+\_\+sources@{compute\+\_\+rte\+\_\+sources}}
+\index{compute\+\_\+rte\+\_\+sources@{compute\+\_\+rte\+\_\+sources}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+rte\+\_\+sources(\+Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ a\+\_\+source, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+cdr\+\_\+states, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const Real \&a\+\_\+time, const centering\+::which\+\_\+center a\+\_\+centering)}{compute_rte_sources(Vector< EBAMRCellData * > a_source, const Vector< EBAMRCellData * > &a_cdr_states, const EBAMRCellData &a_E, const Real &a_time, const centering::which_center a_centering)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+rte\+\_\+sources (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$}]{a\+\_\+source, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+cdr\+\_\+states, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const Real \&}]{a\+\_\+time, }
+\item[{const {\bf centering\+::which\+\_\+center}}]{a\+\_\+centering}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_aa14114d0dd6e48773f54e3f9f2fcfb73}{}\label{classtime__stepper_aa14114d0dd6e48773f54e3f9f2fcfb73}
+
+
+Compute photon source terms. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!compute\+\_\+rte\+\_\+sources@{compute\+\_\+rte\+\_\+sources}}
+\index{compute\+\_\+rte\+\_\+sources@{compute\+\_\+rte\+\_\+sources}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{compute\+\_\+rte\+\_\+sources()}{compute_rte_sources()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::compute\+\_\+rte\+\_\+sources (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ac587da897b0dc5a165d22eb6c0cb528d}{}\label{classtime__stepper_ac587da897b0dc5a165d22eb6c0cb528d}
+
+
+Compute R\+TE source terms. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!deallocate\+\_\+internals@{deallocate\+\_\+internals}}
+\index{deallocate\+\_\+internals@{deallocate\+\_\+internals}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{deallocate\+\_\+internals()}{deallocate_internals()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::deallocate\+\_\+internals (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classtime__stepper_ae8c1849a79999d879aa243779efe013e}{}\label{classtime__stepper_ae8c1849a79999d879aa243779efe013e}
+
+
+Deallocate internals. 
+
+
+
+Definition at line 257 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!deallocate\+\_\+solver\+\_\+internals@{deallocate\+\_\+solver\+\_\+internals}}
+\index{deallocate\+\_\+solver\+\_\+internals@{deallocate\+\_\+solver\+\_\+internals}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{deallocate\+\_\+solver\+\_\+internals()}{deallocate_solver_internals()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::deallocate\+\_\+solver\+\_\+internals (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a23ffd539aed706255765cfe14443195a}{}\label{classtime__stepper_a23ffd539aed706255765cfe14443195a}
+
+
+Deallocate internal solver storages. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!extrapolate\+\_\+to\+\_\+eb@{extrapolate\+\_\+to\+\_\+eb}}
+\index{extrapolate\+\_\+to\+\_\+eb@{extrapolate\+\_\+to\+\_\+eb}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{extrapolate\+\_\+to\+\_\+eb(\+E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+extrap, const phase\+::which\+\_\+phase a\+\_\+phase, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+data)}{extrapolate_to_eb(EBAMRIVData &a_extrap, const phase::which_phase a_phase, const EBAMRCellData &a_data)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::extrapolate\+\_\+to\+\_\+eb (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+extrap, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_aef015bc787fa4af1698665c7c3c096e3}{}\label{classtime__stepper_aef015bc787fa4af1698665c7c3c096e3}
+
+
+Extrapolate data to EB centroid. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!extrapolate\+\_\+to\+\_\+eb@{extrapolate\+\_\+to\+\_\+eb}}
+\index{extrapolate\+\_\+to\+\_\+eb@{extrapolate\+\_\+to\+\_\+eb}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{extrapolate\+\_\+to\+\_\+eb(\+Vector$<$ E\+B\+A\+M\+R\+I\+V\+Data $\ast$ $>$ \&a\+\_\+extrap, const phase\+::which\+\_\+phase a\+\_\+phase, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+data)}{extrapolate_to_eb(Vector< EBAMRIVData * > &a_extrap, const phase::which_phase a_phase, const Vector< EBAMRCellData * > &a_data)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::extrapolate\+\_\+to\+\_\+eb (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+I\+V\+Data} $\ast$ $>$ \&}]{a\+\_\+extrap, }
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a1ad1903ce4f7d2478c31eedf7e35ab51}{}\label{classtime__stepper_a1ad1903ce4f7d2478c31eedf7e35ab51}
+
+
+Extrapolate data to EB centroid. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!get\+\_\+cdr@{get\+\_\+cdr}}
+\index{get\+\_\+cdr@{get\+\_\+cdr}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{get\+\_\+cdr()}{get_cdr()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf cdr\+\_\+layout}$>$\& time\+\_\+stepper\+::get\+\_\+cdr (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ad21847354c19d435c1637a589352e3f7}{}\label{classtime__stepper_ad21847354c19d435c1637a589352e3f7}
+
+
+Get cdr solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!get\+\_\+cdr\+\_\+max@{get\+\_\+cdr\+\_\+max}}
+\index{get\+\_\+cdr\+\_\+max@{get\+\_\+cdr\+\_\+max}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{get\+\_\+cdr\+\_\+max(\+Real \&a\+\_\+cdr\+\_\+max, std\+::string \&a\+\_\+solver\+\_\+name)}{get_cdr_max(Real &a_cdr_max, std::string &a_solver_name)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::get\+\_\+cdr\+\_\+max (
+\begin{DoxyParamCaption}
+\item[{Real \&}]{a\+\_\+cdr\+\_\+max, }
+\item[{std\+::string \&}]{a\+\_\+solver\+\_\+name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a6bac172529a0585fac66354753a88914}{}\label{classtime__stepper_a6bac172529a0585fac66354753a88914}
+
+
+Get maximum value of the cdr solver stuff. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!get\+\_\+poisson@{get\+\_\+poisson}}
+\index{get\+\_\+poisson@{get\+\_\+poisson}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{get\+\_\+poisson()}{get_poisson()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf poisson\+\_\+solver}$>$\& time\+\_\+stepper\+::get\+\_\+poisson (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_aa3c122d919a7be5315bc191528d7f29c}{}\label{classtime__stepper_aa3c122d919a7be5315bc191528d7f29c}
+
+
+Get cdr solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!get\+\_\+rte@{get\+\_\+rte}}
+\index{get\+\_\+rte@{get\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{get\+\_\+rte()}{get_rte()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf rte\+\_\+layout}$>$\& time\+\_\+stepper\+::get\+\_\+rte (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a65c0d74efbd14a275e8443cf37e637b4}{}\label{classtime__stepper_a65c0d74efbd14a275e8443cf37e637b4}
+
+
+Get cdr solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!get\+\_\+sigma@{get\+\_\+sigma}}
+\index{get\+\_\+sigma@{get\+\_\+sigma}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{get\+\_\+sigma()}{get_sigma()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf sigma\+\_\+solver}$>$\& time\+\_\+stepper\+::get\+\_\+sigma (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a7028973370d71e725efdc459f786fa54}{}\label{classtime__stepper_a7028973370d71e725efdc459f786fa54}
+
+
+Get sigma solver. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!get\+\_\+time@{get\+\_\+time}}
+\index{get\+\_\+time@{get\+\_\+time}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{get\+\_\+time()}{get_time()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real time\+\_\+stepper\+::get\+\_\+time (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ac5952aa21b8023002d879e3bf2323d7c}{}\label{classtime__stepper_ac5952aa21b8023002d879e3bf2323d7c}
+
+
+Return time. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!initial\+\_\+cdr\+\_\+data@{initial\+\_\+cdr\+\_\+data}}
+\index{initial\+\_\+cdr\+\_\+data@{initial\+\_\+cdr\+\_\+data}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{initial\+\_\+cdr\+\_\+data()}{initial_cdr_data()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::initial\+\_\+cdr\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a548cc3bf38cbf47fc0166927ffcc5475}{}\label{classtime__stepper_a548cc3bf38cbf47fc0166927ffcc5475}
+
+
+Fill initial cdr data. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!initial\+\_\+data@{initial\+\_\+data}}
+\index{initial\+\_\+data@{initial\+\_\+data}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{initial\+\_\+data()}{initial_data()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::initial\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a184ee525a253c774398949d4e6526625}{}\label{classtime__stepper_a184ee525a253c774398949d4e6526625}
+
+
+Fill all solvers with initial data. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!initial\+\_\+rte\+\_\+data@{initial\+\_\+rte\+\_\+data}}
+\index{initial\+\_\+rte\+\_\+data@{initial\+\_\+rte\+\_\+data}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{initial\+\_\+rte\+\_\+data()}{initial_rte_data()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::initial\+\_\+rte\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a9d41a3b04d410de2d7f000ad9007497a}{}\label{classtime__stepper_a9d41a3b04d410de2d7f000ad9007497a}
+
+
+Fill initial rte data. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!initial\+\_\+sigma\+\_\+data@{initial\+\_\+sigma\+\_\+data}}
+\index{initial\+\_\+sigma\+\_\+data@{initial\+\_\+sigma\+\_\+data}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{initial\+\_\+sigma\+\_\+data()}{initial_sigma_data()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::initial\+\_\+sigma\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a57b20a0060e1a38983752ba625e6a515}{}\label{classtime__stepper_a57b20a0060e1a38983752ba625e6a515}
+
+
+Fill initial sigma data. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!instantiate\+\_\+solvers@{instantiate\+\_\+solvers}}
+\index{instantiate\+\_\+solvers@{instantiate\+\_\+solvers}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{instantiate\+\_\+solvers()}{instantiate_solvers()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::instantiate\+\_\+solvers (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a072f8c98c88aba9917a5e78007301713}{}\label{classtime__stepper_a072f8c98c88aba9917a5e78007301713}
+
+
+Instantiate solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!project\+\_\+flux@{project\+\_\+flux}}
+\index{project\+\_\+flux@{project\+\_\+flux}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{project\+\_\+flux(\+E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+projected\+\_\+flux, const E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+flux)}{project_flux(EBAMRIVData &a_projected_flux, const EBAMRIVData &a_flux)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::project\+\_\+flux (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+projected\+\_\+flux, }
+\item[{const {\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+flux}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a04a1233962d7be86ec511dfcad3180b6}{}\label{classtime__stepper_a04a1233962d7be86ec511dfcad3180b6}
+
+
+Extrapolated flux to EB and project it onto the normal. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!query\+\_\+ghost@{query\+\_\+ghost}}
+\index{query\+\_\+ghost@{query\+\_\+ghost}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{query\+\_\+ghost()}{query_ghost()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual int time\+\_\+stepper\+::query\+\_\+ghost (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a41cf4b02f8e06f73c2c636d211c9602d}{}\label{classtime__stepper_a41cf4b02f8e06f73c2c636d211c9602d}
+
+
+Query about necessary number of ghost cells. This collects that from the individual solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!regrid@{regrid}}
+\index{regrid@{regrid}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{regrid(const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)}{regrid(const int a_old_finest_level, const int a_new_finest_level)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::regrid (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+old\+\_\+finest\+\_\+level, }
+\item[{const int}]{a\+\_\+new\+\_\+finest\+\_\+level}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a851ca4f6c6303f89aa43ca46e2b0c993}{}\label{classtime__stepper_a851ca4f6c6303f89aa43ca46e2b0c993}
+
+
+Regrid. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!regrid\+\_\+internals@{regrid\+\_\+internals}}
+\index{regrid\+\_\+internals@{regrid\+\_\+internals}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{regrid\+\_\+internals()=0}{regrid_internals()=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::regrid\+\_\+internals (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classtime__stepper_a52a437edbc252b67ae72522c69ec9bc6}{}\label{classtime__stepper_a52a437edbc252b67ae72522c69ec9bc6}
+
+
+Regrid internal storage. This M\+U\+ST be overwritten. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!regrid\+\_\+solvers@{regrid\+\_\+solvers}}
+\index{regrid\+\_\+solvers@{regrid\+\_\+solvers}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{regrid\+\_\+solvers(const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)}{regrid_solvers(const int a_old_finest_level, const int a_new_finest_level)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::regrid\+\_\+solvers (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+old\+\_\+finest\+\_\+level, }
+\item[{const int}]{a\+\_\+new\+\_\+finest\+\_\+level}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a35eb07117ba6f556d4cacfe8be3fc4a5}{}\label{classtime__stepper_a35eb07117ba6f556d4cacfe8be3fc4a5}
+
+
+Regrid individual solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!restrict\+\_\+dt@{restrict\+\_\+dt}}
+\index{restrict\+\_\+dt@{restrict\+\_\+dt}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{restrict\+\_\+dt()=0}{restrict_dt()=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real time\+\_\+stepper\+::restrict\+\_\+dt (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classtime__stepper_a97f9bb068982c782ac06d8e83451e5b5}{}\label{classtime__stepper_a97f9bb068982c782ac06d8e83451e5b5}
+
+
+Restrict dt. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!sanity\+\_\+check@{sanity\+\_\+check}}
+\index{sanity\+\_\+check@{sanity\+\_\+check}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{sanity\+\_\+check()}{sanity_check()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::sanity\+\_\+check (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a6f176a71d27d81c5f46ee6c27de48084}{}\label{classtime__stepper_a6f176a71d27d81c5f46ee6c27de48084}
+
+
+Do a sanity check. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+amr@{set\+\_\+amr}}
+\index{set\+\_\+amr@{set\+\_\+amr}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+amr(const Ref\+Counted\+Ptr$<$ amr\+\_\+mesh $>$ \&a\+\_\+amr)}{set_amr(const RefCountedPtr< amr_mesh > &a_amr)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+amr (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf amr\+\_\+mesh} $>$ \&}]{a\+\_\+amr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_afd82c36647cd14a8362b2e24dc5d16bb}{}\label{classtime__stepper_afd82c36647cd14a8362b2e24dc5d16bb}
+
+
+Set amr. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+cfl@{set\+\_\+cfl}}
+\index{set\+\_\+cfl@{set\+\_\+cfl}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+cfl(const Real a\+\_\+cfl)}{set_cfl(const Real a_cfl)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+cfl (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+cfl}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a060293fa551134661a8799a4fb9e3a57}{}\label{classtime__stepper_a060293fa551134661a8799a4fb9e3a57}
+
+
+Set C\+FL condition. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+computational\+\_\+geometry@{set\+\_\+computational\+\_\+geometry}}
+\index{set\+\_\+computational\+\_\+geometry@{set\+\_\+computational\+\_\+geometry}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+computational\+\_\+geometry(const Ref\+Counted\+Ptr$<$ computational\+\_\+geometry $>$ \&a\+\_\+compgeom)}{set_computational_geometry(const RefCountedPtr< computational_geometry > &a_compgeom)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+computational\+\_\+geometry (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf computational\+\_\+geometry} $>$ \&}]{a\+\_\+compgeom}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_aacd2b52725a336defa0ee80b79145ffc}{}\label{classtime__stepper_aacd2b52725a336defa0ee80b79145ffc}
+
+
+Set the physical domain. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+fast\+\_\+poisson@{set\+\_\+fast\+\_\+poisson}}
+\index{set\+\_\+fast\+\_\+poisson@{set\+\_\+fast\+\_\+poisson}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+fast\+\_\+poisson(const int a\+\_\+fast\+\_\+poisson)}{set_fast_poisson(const int a_fast_poisson)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+fast\+\_\+poisson (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+fast\+\_\+poisson}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a958cb4e0b186b13abe2f6c172d7a49fd}{}\label{classtime__stepper_a958cb4e0b186b13abe2f6c172d7a49fd}
+
+
+Set fast rte. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+fast\+\_\+rte@{set\+\_\+fast\+\_\+rte}}
+\index{set\+\_\+fast\+\_\+rte@{set\+\_\+fast\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+fast\+\_\+rte(const int a\+\_\+fast\+\_\+rte)}{set_fast_rte(const int a_fast_rte)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+fast\+\_\+rte (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+fast\+\_\+rte}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a8847d9da77783f7471d15ae43d390969}{}\label{classtime__stepper_a8847d9da77783f7471d15ae43d390969}
+
+
+Set fast rte. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+max\+\_\+dt@{set\+\_\+max\+\_\+dt}}
+\index{set\+\_\+max\+\_\+dt@{set\+\_\+max\+\_\+dt}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+max\+\_\+dt(const Real a\+\_\+min\+\_\+dt)}{set_max_dt(const Real a_min_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+max\+\_\+dt (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+min\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a564af894688cbc30f6cf5fb51283dc09}{}\label{classtime__stepper_a564af894688cbc30f6cf5fb51283dc09}
+
+
+Set hardcap on the time step. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+min\+\_\+dt@{set\+\_\+min\+\_\+dt}}
+\index{set\+\_\+min\+\_\+dt@{set\+\_\+min\+\_\+dt}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+min\+\_\+dt(const Real a\+\_\+min\+\_\+dt)}{set_min_dt(const Real a_min_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+min\+\_\+dt (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+min\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ac603f5f8b6d4481d24b77210f33b2394}{}\label{classtime__stepper_ac603f5f8b6d4481d24b77210f33b2394}
+
+
+Set hardcap on the time step. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+physical\+\_\+domain@{set\+\_\+physical\+\_\+domain}}
+\index{set\+\_\+physical\+\_\+domain@{set\+\_\+physical\+\_\+domain}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+physical\+\_\+domain(const Ref\+Counted\+Ptr$<$ physical\+\_\+domain $>$ \&a\+\_\+physdom)}{set_physical_domain(const RefCountedPtr< physical_domain > &a_physdom)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+physical\+\_\+domain (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf physical\+\_\+domain} $>$ \&}]{a\+\_\+physdom}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a8d09d76edafd510ae60833eebcc24e10}{}\label{classtime__stepper_a8d09d76edafd510ae60833eebcc24e10}
+
+
+Set the physical domain. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+plasma\+\_\+kinetics@{set\+\_\+plasma\+\_\+kinetics}}
+\index{set\+\_\+plasma\+\_\+kinetics@{set\+\_\+plasma\+\_\+kinetics}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+plasma\+\_\+kinetics(const Ref\+Counted\+Ptr$<$ plasma\+\_\+kinetics $>$ \&a\+\_\+plaskin)}{set_plasma_kinetics(const RefCountedPtr< plasma_kinetics > &a_plaskin)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+plasma\+\_\+kinetics (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf plasma\+\_\+kinetics} $>$ \&}]{a\+\_\+plaskin}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_aac84b19b8b7055f97fb2c0215c546e2d}{}\label{classtime__stepper_aac84b19b8b7055f97fb2c0215c546e2d}
+
+
+Set plasma kinetics. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+poisson\+\_\+wall\+\_\+func@{set\+\_\+poisson\+\_\+wall\+\_\+func}}
+\index{set\+\_\+poisson\+\_\+wall\+\_\+func@{set\+\_\+poisson\+\_\+wall\+\_\+func}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+poisson\+\_\+wall\+\_\+func(const int a\+\_\+dir, const Side\+::\+Lo\+Hi\+Side a\+\_\+side, Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos))}{set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real(*a_func)(const RealVect a_pos))}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+poisson\+\_\+wall\+\_\+func (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+dir, }
+\item[{const Side\+::\+Lo\+Hi\+Side}]{a\+\_\+side, }
+\item[{Real($\ast$)(const Real\+Vect a\+\_\+pos)}]{a\+\_\+func}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a8a998a61bbd18a33ad22b7411681e4e6}{}\label{classtime__stepper_a8a998a61bbd18a33ad22b7411681e4e6}
+
+
+Set wall function for Poisson equation boundary conditions. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+potential@{set\+\_\+potential}}
+\index{set\+\_\+potential@{set\+\_\+potential}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+potential(\+Real($\ast$a\+\_\+potential)(const Real a\+\_\+time))}{set_potential(Real(*a_potential)(const Real a_time))}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+potential (
+\begin{DoxyParamCaption}
+\item[{Real($\ast$)(const Real a\+\_\+time)}]{a\+\_\+potential}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a1a87be490eeae1b459d81499f10e8304}{}\label{classtime__stepper_a1a87be490eeae1b459d81499f10e8304}
+
+
+Set potential. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+relax\+\_\+time@{set\+\_\+relax\+\_\+time}}
+\index{set\+\_\+relax\+\_\+time@{set\+\_\+relax\+\_\+time}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+relax\+\_\+time(const Real a\+\_\+relax\+\_\+time)}{set_relax_time(const Real a_relax_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+relax\+\_\+time (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+relax\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a183d152677a4702d91556693cfd75d4f}{}\label{classtime__stepper_a183d152677a4702d91556693cfd75d4f}
+
+
+Set fudge factor for relaxation time. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+solver\+\_\+verbosity@{set\+\_\+solver\+\_\+verbosity}}
+\index{set\+\_\+solver\+\_\+verbosity@{set\+\_\+solver\+\_\+verbosity}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+solver\+\_\+verbosity(const int a\+\_\+verbosity)}{set_solver_verbosity(const int a_verbosity)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+solver\+\_\+verbosity (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+verbosity}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a3b47b16fff18ede0aad932454fc54cae}{}\label{classtime__stepper_a3b47b16fff18ede0aad932454fc54cae}
+
+
+Set solver verbosity. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+source\+\_\+growth@{set\+\_\+source\+\_\+growth}}
+\index{set\+\_\+source\+\_\+growth@{set\+\_\+source\+\_\+growth}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+source\+\_\+growth(const Real a\+\_\+src\+\_\+growth)}{set_source_growth(const Real a_src_growth)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+source\+\_\+growth (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+src\+\_\+growth}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a67cd551ab8a561553961239886f7de0d}{}\label{classtime__stepper_a67cd551ab8a561553961239886f7de0d}
+
+
+Set source growth. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+source\+\_\+growth\+\_\+elec\+\_\+only@{set\+\_\+source\+\_\+growth\+\_\+elec\+\_\+only}}
+\index{set\+\_\+source\+\_\+growth\+\_\+elec\+\_\+only@{set\+\_\+source\+\_\+growth\+\_\+elec\+\_\+only}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+source\+\_\+growth\+\_\+elec\+\_\+only(const bool a\+\_\+src\+\_\+elec\+\_\+only)}{set_source_growth_elec_only(const bool a_src_elec_only)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+source\+\_\+growth\+\_\+elec\+\_\+only (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+src\+\_\+elec\+\_\+only}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a8fc4a6732e13a142feb45eca360f2e1b}{}\label{classtime__stepper_a8fc4a6732e13a142feb45eca360f2e1b}
+
+
+Set source growth. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+source\+\_\+growth\+\_\+tolerance@{set\+\_\+source\+\_\+growth\+\_\+tolerance}}
+\index{set\+\_\+source\+\_\+growth\+\_\+tolerance@{set\+\_\+source\+\_\+growth\+\_\+tolerance}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+source\+\_\+growth\+\_\+tolerance(const Real a\+\_\+src\+\_\+tolerance)}{set_source_growth_tolerance(const Real a_src_tolerance)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+source\+\_\+growth\+\_\+tolerance (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+src\+\_\+tolerance}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a6a4dd286b2bea591c18e27a8422a95e7}{}\label{classtime__stepper_a6a4dd286b2bea591c18e27a8422a95e7}
+
+
+Set source growth. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+stationary\+\_\+rte@{set\+\_\+stationary\+\_\+rte}}
+\index{set\+\_\+stationary\+\_\+rte@{set\+\_\+stationary\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+stationary\+\_\+rte(const bool a\+\_\+stationary)}{set_stationary_rte(const bool a_stationary)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+stationary\+\_\+rte (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+stationary}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_af5ecb8eea37968ce045d49a3bf903f2f}{}\label{classtime__stepper_af5ecb8eea37968ce045d49a3bf903f2f}
+
+
+Set stationary/nonstationary R\+TE. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!set\+\_\+verbosity@{set\+\_\+verbosity}}
+\index{set\+\_\+verbosity@{set\+\_\+verbosity}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{set\+\_\+verbosity(const int a\+\_\+verbosity)}{set_verbosity(const int a_verbosity)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::set\+\_\+verbosity (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+verbosity}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a11205c272eaabf397637a3a3c29d1b44}{}\label{classtime__stepper_a11205c272eaabf397637a3a3c29d1b44}
+
+
+Verbosity. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!setup\+\_\+cdr@{setup\+\_\+cdr}}
+\index{setup\+\_\+cdr@{setup\+\_\+cdr}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{setup\+\_\+cdr()}{setup_cdr()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::setup\+\_\+cdr (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a35bf1379bc29fc821e90172f1e053f67}{}\label{classtime__stepper_a35bf1379bc29fc821e90172f1e053f67}
+
+
+Setup the cdr solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!setup\+\_\+poisson@{setup\+\_\+poisson}}
+\index{setup\+\_\+poisson@{setup\+\_\+poisson}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{setup\+\_\+poisson()}{setup_poisson()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::setup\+\_\+poisson (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_afb043dcafc4d1a6554c26a8a5ec81a0a}{}\label{classtime__stepper_afb043dcafc4d1a6554c26a8a5ec81a0a}
+
+
+Setup the poisson solver. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!setup\+\_\+rte@{setup\+\_\+rte}}
+\index{setup\+\_\+rte@{setup\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{setup\+\_\+rte()}{setup_rte()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::setup\+\_\+rte (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a312a7def7e73d0e68d28e304fafb7ac2}{}\label{classtime__stepper_a312a7def7e73d0e68d28e304fafb7ac2}
+
+
+Setup the rte solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!setup\+\_\+sigma@{setup\+\_\+sigma}}
+\index{setup\+\_\+sigma@{setup\+\_\+sigma}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{setup\+\_\+sigma()}{setup_sigma()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::setup\+\_\+sigma (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a481326a9d61f88b18c78034239fd52b2}{}\label{classtime__stepper_a481326a9d61f88b18c78034239fd52b2}
+
+
+Instantiate the sigma solver. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!solve\+\_\+poisson@{solve\+\_\+poisson}}
+\index{solve\+\_\+poisson@{solve\+\_\+poisson}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{solve\+\_\+poisson()}{solve_poisson()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool time\+\_\+stepper\+::solve\+\_\+poisson (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a85d99adc714844c64799ae8fffdd2db8}{}\label{classtime__stepper_a85d99adc714844c64799ae8fffdd2db8}
+
+
+Solve the poisson equation. This calls \hyperlink{classtime__stepper_a8aff9e5ba857c3f49f719def02ebfc83}{compute\+\_\+rho()} 
+
+This assumes that the data contain in \hyperlink{classcdr__layout}{cdr\+\_\+layout} is cell-\/centered \index{time\+\_\+stepper@{time\+\_\+stepper}!solve\+\_\+poisson@{solve\+\_\+poisson}}
+\index{solve\+\_\+poisson@{solve\+\_\+poisson}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{solve\+\_\+poisson(\+M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+potential, M\+F\+A\+M\+R\+Cell\+Data \&a\+\_\+rhs, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ a\+\_\+densities, const E\+B\+A\+M\+R\+I\+V\+Data \&a\+\_\+sigma, const centering\+::which\+\_\+center a\+\_\+centering)}{solve_poisson(MFAMRCellData &a_potential, MFAMRCellData &a_rhs, const Vector< EBAMRCellData * > a_densities, const EBAMRIVData &a_sigma, const centering::which_center a_centering)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool time\+\_\+stepper\+::solve\+\_\+poisson (
+\begin{DoxyParamCaption}
+\item[{{\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+potential, }
+\item[{{\bf M\+F\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+rhs, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$}]{a\+\_\+densities, }
+\item[{const {\bf E\+B\+A\+M\+R\+I\+V\+Data} \&}]{a\+\_\+sigma, }
+\item[{const {\bf centering\+::which\+\_\+center}}]{a\+\_\+centering}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a6bbd9e38c7170b96a3b2164a209847b5}{}\label{classtime__stepper_a6bbd9e38c7170b96a3b2164a209847b5}
+
+
+General poisson solver routine. 
+
+You have the option of supplying storage for a right-\/hand side if you want to. The densities can be either cell-\/centered or centroid-\/centered, If they are cell-\/centered, we will extrapolate the right-\/hand side to the centroids first. \index{time\+\_\+stepper@{time\+\_\+stepper}!solve\+\_\+rte@{solve\+\_\+rte}}
+\index{solve\+\_\+rte@{solve\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{solve\+\_\+rte(const Real a\+\_\+dt)}{solve_rte(const Real a_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::solve\+\_\+rte (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a1246e40615f329e64c0acecbc3efc391}{}\label{classtime__stepper_a1246e40615f329e64c0acecbc3efc391}
+
+
+R\+TE advance using data existing in other solvers. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!solve\+\_\+rte@{solve\+\_\+rte}}
+\index{solve\+\_\+rte@{solve\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{solve\+\_\+rte(\+Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+states, Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+rhs, const Vector$<$ E\+B\+A\+M\+R\+Cell\+Data $\ast$ $>$ \&a\+\_\+cdr\+\_\+states, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+\+E, const Real a\+\_\+time, const Real a\+\_\+dt, const centering\+::which\+\_\+center a\+\_\+centering)}{solve_rte(Vector< EBAMRCellData * > &a_states, Vector< EBAMRCellData * > &a_rhs, const Vector< EBAMRCellData * > &a_cdr_states, const EBAMRCellData &a_E, const Real a_time, const Real a_dt, const centering::which_center a_centering)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::solve\+\_\+rte (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+states, }
+\item[{Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+rhs, }
+\item[{const Vector$<$ {\bf E\+B\+A\+M\+R\+Cell\+Data} $\ast$ $>$ \&}]{a\+\_\+cdr\+\_\+states, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+E, }
+\item[{const Real}]{a\+\_\+time, }
+\item[{const Real}]{a\+\_\+dt, }
+\item[{const {\bf centering\+::which\+\_\+center}}]{a\+\_\+centering}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ac393f6db09ac092352138877d9790214}{}\label{classtime__stepper_ac393f6db09ac092352138877d9790214}
+
+
+General R\+TE advance routine. 
+
+This computes the source terms at the specified time and then advances the solution \index{time\+\_\+stepper@{time\+\_\+stepper}!solver\+\_\+dump@{solver\+\_\+dump}}
+\index{solver\+\_\+dump@{solver\+\_\+dump}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{solver\+\_\+dump()}{solver_dump()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::solver\+\_\+dump (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ad8e1679b0a90f7acf6f4349da2299ecb}{}\label{classtime__stepper_ad8e1679b0a90f7acf6f4349da2299ecb}
+
+
+Solver dumps data files. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!stationary\+\_\+rte@{stationary\+\_\+rte}}
+\index{stationary\+\_\+rte@{stationary\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{stationary\+\_\+rte()}{stationary_rte()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool time\+\_\+stepper\+::stationary\+\_\+rte (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_ade56248667134c40f3299b850621e7ad}{}\label{classtime__stepper_ade56248667134c40f3299b850621e7ad}
+
+
+Check if R\+TE solvers are stationary. 
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!synchronize\+\_\+solver\+\_\+times@{synchronize\+\_\+solver\+\_\+times}}
+\index{synchronize\+\_\+solver\+\_\+times@{synchronize\+\_\+solver\+\_\+times}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{synchronize\+\_\+solver\+\_\+times(const int a\+\_\+step, const Real a\+\_\+time, const Real a\+\_\+dt)}{synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void time\+\_\+stepper\+::synchronize\+\_\+solver\+\_\+times (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+step, }
+\item[{const Real}]{a\+\_\+time, }
+\item[{const Real}]{a\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classtime__stepper_a567d04b98302f443428d465b2a0e57db}{}\label{classtime__stepper_a567d04b98302f443428d465b2a0e57db}
+
+
+Synchronize solver times. 
+
+
+
+\subsection{Member Data Documentation}
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+amr@{m\+\_\+amr}}
+\index{m\+\_\+amr@{m\+\_\+amr}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+amr}{m_amr}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf amr\+\_\+mesh}$>$ time\+\_\+stepper\+::m\+\_\+amr\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a2ff2fb25e4e79b742d10d490d4296b6a}{}\label{classtime__stepper_a2ff2fb25e4e79b742d10d490d4296b6a}
+
+
+A\+MR. 
+
+
+
+Definition at line 518 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+cdr@{m\+\_\+cdr}}
+\index{m\+\_\+cdr@{m\+\_\+cdr}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+cdr}{m_cdr}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf cdr\+\_\+layout}$>$ time\+\_\+stepper\+::m\+\_\+cdr\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a21f779561ea34ed6f6785fc25d8934d0}{}\label{classtime__stepper_a21f779561ea34ed6f6785fc25d8934d0}
+
+
+C\+DR solvers. 
+
+
+
+Definition at line 538 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+cfl@{m\+\_\+cfl}}
+\index{m\+\_\+cfl@{m\+\_\+cfl}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+cfl}{m_cfl}}]{\setlength{\rightskip}{0pt plus 5cm}Real time\+\_\+stepper\+::m\+\_\+cfl\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a0a66eaadfed367bc8745e9214acce772}{}\label{classtime__stepper_a0a66eaadfed367bc8745e9214acce772}
+
+
+C\+FL. 
+
+
+
+Definition at line 605 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+compgeom@{m\+\_\+compgeom}}
+\index{m\+\_\+compgeom@{m\+\_\+compgeom}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+compgeom}{m_compgeom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf computational\+\_\+geometry}$>$ time\+\_\+stepper\+::m\+\_\+compgeom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a3d0709bd478ebd891e89894c55c5253f}{}\label{classtime__stepper_a3d0709bd478ebd891e89894c55c5253f}
+
+
+Physical domain. 
+
+
+
+Definition at line 533 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+fast\+\_\+poisson@{m\+\_\+fast\+\_\+poisson}}
+\index{m\+\_\+fast\+\_\+poisson@{m\+\_\+fast\+\_\+poisson}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+fast\+\_\+poisson}{m_fast_poisson}}]{\setlength{\rightskip}{0pt plus 5cm}int time\+\_\+stepper\+::m\+\_\+fast\+\_\+poisson\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a8b9bbcec948740cc5de4fd749f7b1aca}{}\label{classtime__stepper_a8b9bbcec948740cc5de4fd749f7b1aca}
+
+
+Fast R\+TE solver. 
+
+
+
+Definition at line 645 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+fast\+\_\+rte@{m\+\_\+fast\+\_\+rte}}
+\index{m\+\_\+fast\+\_\+rte@{m\+\_\+fast\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+fast\+\_\+rte}{m_fast_rte}}]{\setlength{\rightskip}{0pt plus 5cm}int time\+\_\+stepper\+::m\+\_\+fast\+\_\+rte\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_ae6674f68d4df3b6b1d1f4700893d63e6}{}\label{classtime__stepper_ae6674f68d4df3b6b1d1f4700893d63e6}
+
+
+Fast R\+TE solver. 
+
+
+
+Definition at line 640 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+max\+\_\+dt@{m\+\_\+max\+\_\+dt}}
+\index{m\+\_\+max\+\_\+dt@{m\+\_\+max\+\_\+dt}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+max\+\_\+dt}{m_max_dt}}]{\setlength{\rightskip}{0pt plus 5cm}Real time\+\_\+stepper\+::m\+\_\+max\+\_\+dt\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a0b4bb843a6ab96d3876aec7668d8ef31}{}\label{classtime__stepper_a0b4bb843a6ab96d3876aec7668d8ef31}
+
+
+Maximum allowed time step. 
+
+
+
+Definition at line 600 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+mfis@{m\+\_\+mfis}}
+\index{m\+\_\+mfis@{m\+\_\+mfis}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+mfis}{m_mfis}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf mfis}$>$ time\+\_\+stepper\+::m\+\_\+mfis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_ac45b323d83c4085b3f704bf8ee7b9056}{}\label{classtime__stepper_ac45b323d83c4085b3f704bf8ee7b9056}
+
+
+Index space. 
+
+
+
+Definition at line 513 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+min\+\_\+dt@{m\+\_\+min\+\_\+dt}}
+\index{m\+\_\+min\+\_\+dt@{m\+\_\+min\+\_\+dt}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+min\+\_\+dt}{m_min_dt}}]{\setlength{\rightskip}{0pt plus 5cm}Real time\+\_\+stepper\+::m\+\_\+min\+\_\+dt\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_abe8383e525fee7b34f17634d20b8dc7b}{}\label{classtime__stepper_abe8383e525fee7b34f17634d20b8dc7b}
+
+
+Minimum allowed time step. 
+
+
+
+Definition at line 595 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+physdom@{m\+\_\+physdom}}
+\index{m\+\_\+physdom@{m\+\_\+physdom}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+physdom}{m_physdom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf physical\+\_\+domain}$>$ time\+\_\+stepper\+::m\+\_\+physdom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a055b9f785dc998fdc4d9a9d6b5896a0b}{}\label{classtime__stepper_a055b9f785dc998fdc4d9a9d6b5896a0b}
+
+
+Physical domain. 
+
+
+
+Definition at line 528 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+plaskin@{m\+\_\+plaskin}}
+\index{m\+\_\+plaskin@{m\+\_\+plaskin}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+plaskin}{m_plaskin}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf plasma\+\_\+kinetics}$>$ time\+\_\+stepper\+::m\+\_\+plaskin\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_aa6ac2a0f6cb3c0dcda12cc9cdb6c8cc3}{}\label{classtime__stepper_aa6ac2a0f6cb3c0dcda12cc9cdb6c8cc3}
+
+
+Plasma kinetics. 
+
+
+
+Definition at line 523 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+poisson@{m\+\_\+poisson}}
+\index{m\+\_\+poisson@{m\+\_\+poisson}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+poisson}{m_poisson}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf poisson\+\_\+solver}$>$ time\+\_\+stepper\+::m\+\_\+poisson\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a86109da74846f40cabe5a940bf6ef360}{}\label{classtime__stepper_a86109da74846f40cabe5a940bf6ef360}
+
+
+Poisson solver. 
+
+
+
+Definition at line 548 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+potential@{m\+\_\+potential}}
+\index{m\+\_\+potential@{m\+\_\+potential}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+potential}{m_potential}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ time\+\_\+stepper\+::m\+\_\+potential) (const Real a\+\_\+time)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a53923894761481d4f6fc1d226cd359b5}{}\label{classtime__stepper_a53923894761481d4f6fc1d226cd359b5}
+
+
+Set the potential. 
+
+
+
+Definition at line 558 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+relax\+\_\+time@{m\+\_\+relax\+\_\+time}}
+\index{m\+\_\+relax\+\_\+time@{m\+\_\+relax\+\_\+time}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+relax\+\_\+time}{m_relax_time}}]{\setlength{\rightskip}{0pt plus 5cm}Real time\+\_\+stepper\+::m\+\_\+relax\+\_\+time\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a895f7fd304fc34a7ec783b25492143df}{}\label{classtime__stepper_a895f7fd304fc34a7ec783b25492143df}
+
+
+Fudge factor for relaxation time. 
+
+
+
+Definition at line 610 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+rte@{m\+\_\+rte}}
+\index{m\+\_\+rte@{m\+\_\+rte}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+rte}{m_rte}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf rte\+\_\+layout}$>$ time\+\_\+stepper\+::m\+\_\+rte\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_ace365dde5918ec979d191d19519afc1f}{}\label{classtime__stepper_ace365dde5918ec979d191d19519afc1f}
+
+
+Radiative transfer solvers. 
+
+
+
+Definition at line 543 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+sigma@{m\+\_\+sigma}}
+\index{m\+\_\+sigma@{m\+\_\+sigma}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+sigma}{m_sigma}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf sigma\+\_\+solver}$>$ time\+\_\+stepper\+::m\+\_\+sigma\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_aec0c61822a3a3bb1b4cdc06a6eaf1d5d}{}\label{classtime__stepper_aec0c61822a3a3bb1b4cdc06a6eaf1d5d}
+
+
+Surface charge solver. 
+
+
+
+Definition at line 553 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+solver\+\_\+verbosity@{m\+\_\+solver\+\_\+verbosity}}
+\index{m\+\_\+solver\+\_\+verbosity@{m\+\_\+solver\+\_\+verbosity}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+solver\+\_\+verbosity}{m_solver_verbosity}}]{\setlength{\rightskip}{0pt plus 5cm}int time\+\_\+stepper\+::m\+\_\+solver\+\_\+verbosity\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a0f30ea8c9bc55972e9a28d9e5d4881f8}{}\label{classtime__stepper_a0f30ea8c9bc55972e9a28d9e5d4881f8}
+
+
+Verbosity for solvers. 
+
+
+
+Definition at line 635 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+src\+\_\+elec\+\_\+only@{m\+\_\+src\+\_\+elec\+\_\+only}}
+\index{m\+\_\+src\+\_\+elec\+\_\+only@{m\+\_\+src\+\_\+elec\+\_\+only}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+src\+\_\+elec\+\_\+only}{m_src_elec_only}}]{\setlength{\rightskip}{0pt plus 5cm}bool time\+\_\+stepper\+::m\+\_\+src\+\_\+elec\+\_\+only\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a86913b145d2b6ad0442b6341e39f754d}{}\label{classtime__stepper_a86913b145d2b6ad0442b6341e39f754d}
+
+
+Do source term time step restriction only for electrons. 
+
+If this one is true, compute\+\_\+dt passes information down the toolchain to only compute the source term restriction time for the first species defined in the plasma kinetics 
+
+Definition at line 657 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+src\+\_\+growth@{m\+\_\+src\+\_\+growth}}
+\index{m\+\_\+src\+\_\+growth@{m\+\_\+src\+\_\+growth}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+src\+\_\+growth}{m_src_growth}}]{\setlength{\rightskip}{0pt plus 5cm}Real time\+\_\+stepper\+::m\+\_\+src\+\_\+growth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a06ffa5dffab8e8cacef26bc640f4a265}{}\label{classtime__stepper_a06ffa5dffab8e8cacef26bc640f4a265}
+
+
+Source growth. 
+
+
+
+Definition at line 615 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+src\+\_\+tolerance@{m\+\_\+src\+\_\+tolerance}}
+\index{m\+\_\+src\+\_\+tolerance@{m\+\_\+src\+\_\+tolerance}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+src\+\_\+tolerance}{m_src_tolerance}}]{\setlength{\rightskip}{0pt plus 5cm}Real time\+\_\+stepper\+::m\+\_\+src\+\_\+tolerance\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a19f732138cbbb2be42a8d5486aa4208f}{}\label{classtime__stepper_a19f732138cbbb2be42a8d5486aa4208f}
+
+
+Tolerance for source term growth. 
+
+
+
+Definition at line 625 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+step@{m\+\_\+step}}
+\index{m\+\_\+step@{m\+\_\+step}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+step}{m_step}}]{\setlength{\rightskip}{0pt plus 5cm}int time\+\_\+stepper\+::m\+\_\+step\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a5a4bd274325d52eef716b6c465cc3a9d}{}\label{classtime__stepper_a5a4bd274325d52eef716b6c465cc3a9d}
+
+
+Current step. 
+
+
+
+Definition at line 650 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+time@{m\+\_\+time}}
+\index{m\+\_\+time@{m\+\_\+time}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+time}{m_time}}]{\setlength{\rightskip}{0pt plus 5cm}Real time\+\_\+stepper\+::m\+\_\+time\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a491c3c35019477c00296450933ca8bb4}{}\label{classtime__stepper_a491c3c35019477c00296450933ca8bb4}
+
+
+T\+Ime. 
+
+
+
+Definition at line 620 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+verbosity@{m\+\_\+verbosity}}
+\index{m\+\_\+verbosity@{m\+\_\+verbosity}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+verbosity}{m_verbosity}}]{\setlength{\rightskip}{0pt plus 5cm}int time\+\_\+stepper\+::m\+\_\+verbosity\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a9af86e24658bec33326091ab5012a924}{}\label{classtime__stepper_a9af86e24658bec33326091ab5012a924}
+
+
+Verbosity. 
+
+
+
+Definition at line 630 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi}}
+\index{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi}{m_wall_func_x_hi}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ time\+\_\+stepper\+::m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_ad48ff9f55719c7412afeb182af186d7a}{}\label{classtime__stepper_ad48ff9f55719c7412afeb182af186d7a}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 568 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo}}
+\index{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo}{m_wall_func_x_lo}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ time\+\_\+stepper\+::m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a54c0d0fabecde28d2ff02ff25385bf43}{}\label{classtime__stepper_a54c0d0fabecde28d2ff02ff25385bf43}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 563 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi}}
+\index{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi}{m_wall_func_y_hi}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ time\+\_\+stepper\+::m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a6bb898a547668fa17298cf85602f4391}{}\label{classtime__stepper_a6bb898a547668fa17298cf85602f4391}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 578 of file time\+\_\+stepper.\+H.
+
+\index{time\+\_\+stepper@{time\+\_\+stepper}!m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo}}
+\index{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo}!time\+\_\+stepper@{time\+\_\+stepper}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo}{m_wall_func_y_lo}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ time\+\_\+stepper\+::m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classtime__stepper_a18f009db00a27df1b1a0acfbf61df35f}{}\label{classtime__stepper_a18f009db00a27df1b1a0acfbf61df35f}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 573 of file time\+\_\+stepper.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/plasma\+\_\+solver/\hyperlink{time__stepper_8H}{time\+\_\+stepper.\+H}\end{DoxyCompactItemize}

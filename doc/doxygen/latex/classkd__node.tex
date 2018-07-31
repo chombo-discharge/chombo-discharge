@@ -1,0 +1,507 @@
+\hypertarget{classkd__node}{}\section{kd\+\_\+node$<$ T $>$ Class Template Reference}
+\label{classkd__node}\index{kd\+\_\+node$<$ T $>$@{kd\+\_\+node$<$ T $>$}}
+
+
+Template class for kd-\/trees.  
+
+
+
+
+{\ttfamily \#include $<$kd\+\_\+node.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classkd__node_ab69cc4f5b607e2bc50b0d82a66079147}{kd\+\_\+node} ()
+\begin{DoxyCompactList}\small\item\em Weak constructor. \end{DoxyCompactList}\item 
+\hyperlink{classkd__node_aae825256234f07dd904028c1942a5206}{kd\+\_\+node} (const Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \&a\+\_\+parent)
+\begin{DoxyCompactList}\small\item\em Full constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classkd__node_a0d92a2689bbd09ea17a723d1f31c895f}{$\sim$kd\+\_\+node} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classkd__node_a3f1fbbd5e54f04b0a9d553668e0542ff}{is\+\_\+leaf} () const 
+\begin{DoxyCompactList}\small\item\em Check if node is leaf. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classkd__node_a989bfd0c33bca190537bfcc51385ae32}{inside} (const Real\+Vect a\+\_\+x0) const 
+\begin{DoxyCompactList}\small\item\em Check if point intersects with bounding box. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classkd__node_a96c582473680b65e223f2e3d8239b764}{get\+\_\+depth} ()
+\begin{DoxyCompactList}\small\item\em Get node depth. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classkd__node_a9a240255649e278f40342eda80dd9b54}{get\+\_\+num\+\_\+elements} ()
+\begin{DoxyCompactList}\small\item\em Get number of data elements. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classkd__node_a2650fb7bd82b8251771f691b11a7b1a3}{dist} (const Real\+Vect a\+\_\+x0) const 
+\begin{DoxyCompactList}\small\item\em Compute distance. This is the bounding box distance if node, and data distance if leaf. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classkd__node_a91bcfcae80c64e3111681bd03e25dde3}{aabb\+\_\+dist} (const Real\+Vect a\+\_\+x0) const 
+\begin{DoxyCompactList}\small\item\em Compute distance to bounding box. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classkd__node_acad1b1246d729f722fe9101b05df3585}{data\+\_\+dist} (const Real\+Vect a\+\_\+x0) const 
+\begin{DoxyCompactList}\small\item\em Compute distance to data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_a553d600845a25f2516d4043e046d8a4a}{compute\+\_\+bbox} ()
+\begin{DoxyCompactList}\small\item\em Compute bounding box. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_a8b52b113338f2b2f5c46e75c6e93f00d}{set\+\_\+leaf} (const bool a\+\_\+leaf)
+\begin{DoxyCompactList}\small\item\em Set leaf or not. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_a0a65b6741e55ad6dbbcdd6af4cf17947}{set\+\_\+parent} (const Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \&a\+\_\+parent)
+\begin{DoxyCompactList}\small\item\em Set parent. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_ad982e9f9e559fb23076a29119de3414c}{set\+\_\+left} (const Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \&a\+\_\+left)
+\begin{DoxyCompactList}\small\item\em Set left. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_a324a2ca467fc9f7fce6305f47147385c}{set\+\_\+right} (const Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \&a\+\_\+right)
+\begin{DoxyCompactList}\small\item\em Set right. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_a9120d3dc6c0b81d8eac9ddc05a04c0f2}{set\+\_\+data} (const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&a\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Set data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_a3e190f289ebf2240df2c80917ea6bb97}{clear\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Clear data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__node_ae401e6fa3f0d199f02eb1d16f38c7a6e}{split\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Split data. \end{DoxyCompactList}\item 
+virtual Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \& \hyperlink{classkd__node_a4e6184887b06cb8c7318c31d73dfcf41}{get\+\_\+data} ()
+\begin{DoxyCompactList}\small\item\em Return data. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \& \hyperlink{classkd__node_a251cbbb84e32c1fc8b8c0afe35ce0528}{get\+\_\+parent} () const 
+\begin{DoxyCompactList}\small\item\em Get root. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \& \hyperlink{classkd__node_ac62910738bcef306dbd0c5c560a43bf1}{get\+\_\+left} () const 
+\begin{DoxyCompactList}\small\item\em Get left branch. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \& \hyperlink{classkd__node_ac9495174451bf8a56c56aa94b972b442}{get\+\_\+right} () const 
+\begin{DoxyCompactList}\small\item\em Get left branch. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \hyperlink{classkd__node_a2e506cc45509a5238060430ccf0f24ca}{m\+\_\+parent}
+\begin{DoxyCompactList}\small\item\em Root node. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \hyperlink{classkd__node_ae7f6e2c3ae60c874e1dae4dc51bc404c}{m\+\_\+left}
+\begin{DoxyCompactList}\small\item\em Left branch. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \hyperlink{classkd__node_a5aec903a3bbfc430b1a801e05d8f5b6c}{m\+\_\+right}
+\begin{DoxyCompactList}\small\item\em Right branch. \end{DoxyCompactList}\item 
+bool \hyperlink{classkd__node_adeb75a3c3913331b6fc9a7fba623243f}{m\+\_\+leaf}
+\begin{DoxyCompactList}\small\item\em Set leaf or not. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classkd__node_a8218b763208b296d1d74117bbac74a64}{m\+\_\+lo}
+\begin{DoxyCompactList}\small\item\em Low corner of bounding box. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classkd__node_ad471be790fdc008625da736b924df21d}{m\+\_\+hi}
+\begin{DoxyCompactList}\small\item\em High corner of bounding box. \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \hyperlink{classkd__node_af7746a3e33a2bc58128efbe830e6681b}{m\+\_\+data}
+\begin{DoxyCompactList}\small\item\em Leaf data. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T$>$\\*
+class kd\+\_\+node$<$ T $>$}
+
+Template class for kd-\/trees. 
+
+Definition at line 19 of file kd\+\_\+node.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{kd\+\_\+node@{kd\+\_\+node}!kd\+\_\+node@{kd\+\_\+node}}
+\index{kd\+\_\+node@{kd\+\_\+node}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{kd\+\_\+node()}{kd_node()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ {\bf kd\+\_\+node}$<$ T $>$\+::{\bf kd\+\_\+node} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classkd__node_ab69cc4f5b607e2bc50b0d82a66079147}{}\label{classkd__node_ab69cc4f5b607e2bc50b0d82a66079147}
+
+
+Weak constructor. 
+
+
+
+Definition at line 11 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!kd\+\_\+node@{kd\+\_\+node}}
+\index{kd\+\_\+node@{kd\+\_\+node}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{kd\+\_\+node(const Ref\+Counted\+Ptr$<$ kd\+\_\+node$<$ T $>$ $>$ \&a\+\_\+parent)}{kd_node(const RefCountedPtr< kd_node< T > > &a_parent)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ {\bf kd\+\_\+node}$<$ T $>$\+::{\bf kd\+\_\+node} (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ \&}]{a\+\_\+parent}
+\end{DoxyParamCaption}
+)}\hypertarget{classkd__node_aae825256234f07dd904028c1942a5206}{}\label{classkd__node_aae825256234f07dd904028c1942a5206}
+
+
+Full constructor. 
+
+
+
+Definition at line 15 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!````~kd\+\_\+node@{$\sim$kd\+\_\+node}}
+\index{````~kd\+\_\+node@{$\sim$kd\+\_\+node}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{$\sim$kd\+\_\+node()}{~kd_node()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ {\bf kd\+\_\+node}$<$ T $>$\+::$\sim${\bf kd\+\_\+node} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a0d92a2689bbd09ea17a723d1f31c895f}{}\label{classkd__node_a0d92a2689bbd09ea17a723d1f31c895f}
+
+
+Destructor. 
+
+
+
+Definition at line 20 of file kd\+\_\+node\+I.\+H.
+
+
+
+\subsection{Member Function Documentation}
+\index{kd\+\_\+node@{kd\+\_\+node}!aabb\+\_\+dist@{aabb\+\_\+dist}}
+\index{aabb\+\_\+dist@{aabb\+\_\+dist}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{aabb\+\_\+dist(const Real\+Vect a\+\_\+x0) const }{aabb_dist(const RealVect a_x0) const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Real {\bf kd\+\_\+node}$<$ T $>$\+::aabb\+\_\+dist (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a91bcfcae80c64e3111681bd03e25dde3}{}\label{classkd__node_a91bcfcae80c64e3111681bd03e25dde3}
+
+
+Compute distance to bounding box. 
+
+
+
+Definition at line 82 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!clear\+\_\+data@{clear\+\_\+data}}
+\index{clear\+\_\+data@{clear\+\_\+data}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{clear\+\_\+data()}{clear_data()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::clear\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a3e190f289ebf2240df2c80917ea6bb97}{}\label{classkd__node_a3e190f289ebf2240df2c80917ea6bb97}
+
+
+Clear data. 
+
+
+
+Definition at line 166 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!compute\+\_\+bbox@{compute\+\_\+bbox}}
+\index{compute\+\_\+bbox@{compute\+\_\+bbox}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{compute\+\_\+bbox()}{compute_bbox()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::compute\+\_\+bbox (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a553d600845a25f2516d4043e046d8a4a}{}\label{classkd__node_a553d600845a25f2516d4043e046d8a4a}
+
+
+Compute bounding box. 
+
+
+
+Definition at line 102 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!data\+\_\+dist@{data\+\_\+dist}}
+\index{data\+\_\+dist@{data\+\_\+dist}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{data\+\_\+dist(const Real\+Vect a\+\_\+x0) const }{data_dist(const RealVect a_x0) const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Real {\bf kd\+\_\+node}$<$ T $>$\+::data\+\_\+dist (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_acad1b1246d729f722fe9101b05df3585}{}\label{classkd__node_acad1b1246d729f722fe9101b05df3585}
+
+
+Compute distance to data. 
+
+
+
+Definition at line 91 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!dist@{dist}}
+\index{dist@{dist}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{dist(const Real\+Vect a\+\_\+x0) const }{dist(const RealVect a_x0) const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Real {\bf kd\+\_\+node}$<$ T $>$\+::dist (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a2650fb7bd82b8251771f691b11a7b1a3}{}\label{classkd__node_a2650fb7bd82b8251771f691b11a7b1a3}
+
+
+Compute distance. This is the bounding box distance if node, and data distance if leaf. 
+
+
+
+Definition at line 73 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!get\+\_\+data@{get\+\_\+data}}
+\index{get\+\_\+data@{get\+\_\+data}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{get\+\_\+data()}{get_data()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \& {\bf kd\+\_\+node}$<$ T $>$\+::get\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a4e6184887b06cb8c7318c31d73dfcf41}{}\label{classkd__node_a4e6184887b06cb8c7318c31d73dfcf41}
+
+
+Return data. 
+
+
+
+Definition at line 24 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!get\+\_\+depth@{get\+\_\+depth}}
+\index{get\+\_\+depth@{get\+\_\+depth}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{get\+\_\+depth()}{get_depth()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ int {\bf kd\+\_\+node}$<$ T $>$\+::get\+\_\+depth (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a96c582473680b65e223f2e3d8239b764}{}\label{classkd__node_a96c582473680b65e223f2e3d8239b764}
+
+
+Get node depth. 
+
+
+
+Definition at line 56 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!get\+\_\+left@{get\+\_\+left}}
+\index{get\+\_\+left@{get\+\_\+left}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{get\+\_\+left() const }{get_left() const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ const Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ \& {\bf kd\+\_\+node}$<$ T $>$\+::get\+\_\+left (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_ac62910738bcef306dbd0c5c560a43bf1}{}\label{classkd__node_ac62910738bcef306dbd0c5c560a43bf1}
+
+
+Get left branch. 
+
+
+
+Definition at line 32 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!get\+\_\+num\+\_\+elements@{get\+\_\+num\+\_\+elements}}
+\index{get\+\_\+num\+\_\+elements@{get\+\_\+num\+\_\+elements}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{get\+\_\+num\+\_\+elements()}{get_num_elements()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ int {\bf kd\+\_\+node}$<$ T $>$\+::get\+\_\+num\+\_\+elements (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a9a240255649e278f40342eda80dd9b54}{}\label{classkd__node_a9a240255649e278f40342eda80dd9b54}
+
+
+Get number of data elements. 
+
+
+
+Definition at line 69 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!get\+\_\+parent@{get\+\_\+parent}}
+\index{get\+\_\+parent@{get\+\_\+parent}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{get\+\_\+parent() const }{get_parent() const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ const Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ \& {\bf kd\+\_\+node}$<$ T $>$\+::get\+\_\+parent (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a251cbbb84e32c1fc8b8c0afe35ce0528}{}\label{classkd__node_a251cbbb84e32c1fc8b8c0afe35ce0528}
+
+
+Get root. 
+
+
+
+Definition at line 28 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!get\+\_\+right@{get\+\_\+right}}
+\index{get\+\_\+right@{get\+\_\+right}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{get\+\_\+right() const }{get_right() const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ const Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ \& {\bf kd\+\_\+node}$<$ T $>$\+::get\+\_\+right (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_ac9495174451bf8a56c56aa94b972b442}{}\label{classkd__node_ac9495174451bf8a56c56aa94b972b442}
+
+
+Get left branch. 
+
+
+
+Definition at line 36 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!inside@{inside}}
+\index{inside@{inside}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{inside(const Real\+Vect a\+\_\+x0) const }{inside(const RealVect a_x0) const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ bool {\bf kd\+\_\+node}$<$ T $>$\+::inside (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a989bfd0c33bca190537bfcc51385ae32}{}\label{classkd__node_a989bfd0c33bca190537bfcc51385ae32}
+
+
+Check if point intersects with bounding box. 
+
+
+
+Definition at line 44 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!is\+\_\+leaf@{is\+\_\+leaf}}
+\index{is\+\_\+leaf@{is\+\_\+leaf}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{is\+\_\+leaf() const }{is_leaf() const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ bool {\bf kd\+\_\+node}$<$ T $>$\+::is\+\_\+leaf (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a3f1fbbd5e54f04b0a9d553668e0542ff}{}\label{classkd__node_a3f1fbbd5e54f04b0a9d553668e0542ff}
+
+
+Check if node is leaf. 
+
+
+
+Definition at line 40 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!set\+\_\+data@{set\+\_\+data}}
+\index{set\+\_\+data@{set\+\_\+data}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{set\+\_\+data(const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&a\+\_\+data)}{set_data(const Vector< RefCountedPtr< T > > &a_data)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::set\+\_\+data (
+\begin{DoxyParamCaption}
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&}]{a\+\_\+data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a9120d3dc6c0b81d8eac9ddc05a04c0f2}{}\label{classkd__node_a9120d3dc6c0b81d8eac9ddc05a04c0f2}
+
+
+Set data. 
+
+
+
+Definition at line 162 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!set\+\_\+leaf@{set\+\_\+leaf}}
+\index{set\+\_\+leaf@{set\+\_\+leaf}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{set\+\_\+leaf(const bool a\+\_\+leaf)}{set_leaf(const bool a_leaf)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::set\+\_\+leaf (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+leaf}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a8b52b113338f2b2f5c46e75c6e93f00d}{}\label{classkd__node_a8b52b113338f2b2f5c46e75c6e93f00d}
+
+
+Set leaf or not. 
+
+
+
+Definition at line 146 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!set\+\_\+left@{set\+\_\+left}}
+\index{set\+\_\+left@{set\+\_\+left}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{set\+\_\+left(const Ref\+Counted\+Ptr$<$ kd\+\_\+node$<$ T $>$ $>$ \&a\+\_\+left)}{set_left(const RefCountedPtr< kd_node< T > > &a_left)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::set\+\_\+left (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ \&}]{a\+\_\+left}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_ad982e9f9e559fb23076a29119de3414c}{}\label{classkd__node_ad982e9f9e559fb23076a29119de3414c}
+
+
+Set left. 
+
+
+
+Definition at line 154 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!set\+\_\+parent@{set\+\_\+parent}}
+\index{set\+\_\+parent@{set\+\_\+parent}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{set\+\_\+parent(const Ref\+Counted\+Ptr$<$ kd\+\_\+node$<$ T $>$ $>$ \&a\+\_\+parent)}{set_parent(const RefCountedPtr< kd_node< T > > &a_parent)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::set\+\_\+parent (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ \&}]{a\+\_\+parent}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a0a65b6741e55ad6dbbcdd6af4cf17947}{}\label{classkd__node_a0a65b6741e55ad6dbbcdd6af4cf17947}
+
+
+Set parent. 
+
+
+
+Definition at line 150 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!set\+\_\+right@{set\+\_\+right}}
+\index{set\+\_\+right@{set\+\_\+right}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{set\+\_\+right(const Ref\+Counted\+Ptr$<$ kd\+\_\+node$<$ T $>$ $>$ \&a\+\_\+right)}{set_right(const RefCountedPtr< kd_node< T > > &a_right)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::set\+\_\+right (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ \&}]{a\+\_\+right}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_a324a2ca467fc9f7fce6305f47147385c}{}\label{classkd__node_a324a2ca467fc9f7fce6305f47147385c}
+
+
+Set right. 
+
+
+
+Definition at line 158 of file kd\+\_\+node\+I.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!split\+\_\+data@{split\+\_\+data}}
+\index{split\+\_\+data@{split\+\_\+data}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{split\+\_\+data()}{split_data()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+node}$<$ T $>$\+::split\+\_\+data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__node_ae401e6fa3f0d199f02eb1d16f38c7a6e}{}\label{classkd__node_ae401e6fa3f0d199f02eb1d16f38c7a6e}
+
+
+Split data. 
+
+
+
+Definition at line 170 of file kd\+\_\+node\+I.\+H.
+
+
+
+\subsection{Member Data Documentation}
+\index{kd\+\_\+node@{kd\+\_\+node}!m\+\_\+data@{m\+\_\+data}}
+\index{m\+\_\+data@{m\+\_\+data}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{m\+\_\+data}{m_data}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Vector$<$Ref\+Counted\+Ptr$<$T$>$ $>$ {\bf kd\+\_\+node}$<$ T $>$\+::m\+\_\+data\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__node_af7746a3e33a2bc58128efbe830e6681b}{}\label{classkd__node_af7746a3e33a2bc58128efbe830e6681b}
+
+
+Leaf data. 
+
+
+
+Definition at line 167 of file kd\+\_\+node.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!m\+\_\+hi@{m\+\_\+hi}}
+\index{m\+\_\+hi@{m\+\_\+hi}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{m\+\_\+hi}{m_hi}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Real\+Vect {\bf kd\+\_\+node}$<$ T $>$\+::m\+\_\+hi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__node_ad471be790fdc008625da736b924df21d}{}\label{classkd__node_ad471be790fdc008625da736b924df21d}
+
+
+High corner of bounding box. 
+
+
+
+Definition at line 162 of file kd\+\_\+node.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!m\+\_\+leaf@{m\+\_\+leaf}}
+\index{m\+\_\+leaf@{m\+\_\+leaf}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{m\+\_\+leaf}{m_leaf}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ bool {\bf kd\+\_\+node}$<$ T $>$\+::m\+\_\+leaf\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__node_adeb75a3c3913331b6fc9a7fba623243f}{}\label{classkd__node_adeb75a3c3913331b6fc9a7fba623243f}
+
+
+Set leaf or not. 
+
+
+
+Definition at line 152 of file kd\+\_\+node.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!m\+\_\+left@{m\+\_\+left}}
+\index{m\+\_\+left@{m\+\_\+left}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{m\+\_\+left}{m_left}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Ref\+Counted\+Ptr$<${\bf kd\+\_\+node}$<$T$>$ $>$ {\bf kd\+\_\+node}$<$ T $>$\+::m\+\_\+left\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__node_ae7f6e2c3ae60c874e1dae4dc51bc404c}{}\label{classkd__node_ae7f6e2c3ae60c874e1dae4dc51bc404c}
+
+
+Left branch. 
+
+
+
+Definition at line 142 of file kd\+\_\+node.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!m\+\_\+lo@{m\+\_\+lo}}
+\index{m\+\_\+lo@{m\+\_\+lo}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{m\+\_\+lo}{m_lo}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Real\+Vect {\bf kd\+\_\+node}$<$ T $>$\+::m\+\_\+lo\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__node_a8218b763208b296d1d74117bbac74a64}{}\label{classkd__node_a8218b763208b296d1d74117bbac74a64}
+
+
+Low corner of bounding box. 
+
+
+
+Definition at line 157 of file kd\+\_\+node.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!m\+\_\+parent@{m\+\_\+parent}}
+\index{m\+\_\+parent@{m\+\_\+parent}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{m\+\_\+parent}{m_parent}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Ref\+Counted\+Ptr$<${\bf kd\+\_\+node}$<$T$>$ $>$ {\bf kd\+\_\+node}$<$ T $>$\+::m\+\_\+parent\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__node_a2e506cc45509a5238060430ccf0f24ca}{}\label{classkd__node_a2e506cc45509a5238060430ccf0f24ca}
+
+
+Root node. 
+
+
+
+Definition at line 137 of file kd\+\_\+node.\+H.
+
+\index{kd\+\_\+node@{kd\+\_\+node}!m\+\_\+right@{m\+\_\+right}}
+\index{m\+\_\+right@{m\+\_\+right}!kd\+\_\+node@{kd\+\_\+node}}
+\subsubsection[{\texorpdfstring{m\+\_\+right}{m_right}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Ref\+Counted\+Ptr$<${\bf kd\+\_\+node}$<$T$>$ $>$ {\bf kd\+\_\+node}$<$ T $>$\+::m\+\_\+right\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__node_a5aec903a3bbfc430b1a801e05d8f5b6c}{}\label{classkd__node_a5aec903a3bbfc430b1a801e05d8f5b6c}
+
+
+Right branch. 
+
+
+
+Definition at line 147 of file kd\+\_\+node.\+H.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{kd__node_8H}{kd\+\_\+node.\+H}\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{kd__nodeI_8H}{kd\+\_\+node\+I.\+H}\end{DoxyCompactItemize}

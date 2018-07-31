@@ -1,0 +1,102 @@
+\hypertarget{classply__reader}{}\section{ply\+\_\+reader Class Reference}
+\label{classply__reader}\index{ply\+\_\+reader@{ply\+\_\+reader}}
+
+
+Class for generation a \hyperlink{classdcel__mesh}{dcel\+\_\+mesh} from the Stanford P\+LY file format.  
+
+
+
+
+{\ttfamily \#include $<$ply\+\_\+reader.\+H$>$}
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classply__reader_a16116d5ea8da15cccbe769848e7a5da7}{read\+\_\+ascii} (\hyperlink{classdcel__mesh}{dcel\+\_\+mesh} \&a\+\_\+mesh, const std\+::string a\+\_\+filename)
+\begin{DoxyCompactList}\small\item\em Read an A\+S\+C\+II .ply file and put it in a mesh. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classply__reader_a4df2c2596716dd223730166c56eb7187}{read\+\_\+ascii\+\_\+header} (int \&a\+\_\+num\+\_\+vertices, int \&a\+\_\+num\+\_\+polygons, std\+::ifstream \&a\+\_\+inputstream)
+\begin{DoxyCompactList}\small\item\em Read an A\+S\+C\+II header. \end{DoxyCompactList}\item 
+static void \hyperlink{classply__reader_af69d8ccc7ce2f31a26eb68efc20b9824}{read\+\_\+ascii\+\_\+vertices} (Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ $>$ \&vertices, const int a\+\_\+num\+\_\+vertices, std\+::ifstream \&a\+\_\+inputstream)
+\begin{DoxyCompactList}\small\item\em Read A\+S\+C\+II vertices. The next getline() from inputstream must read the first vertex (i.\+e. don\textquotesingle{}t rewind the stream before entering this routine) \end{DoxyCompactList}\item 
+static void \hyperlink{classply__reader_acdc4d3c6133daa172fb7752d49ced5b4}{read\+\_\+ascii\+\_\+polygons} (Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__poly}{dcel\+\_\+poly} $>$ $>$ \&a\+\_\+polygons, Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ $>$ \&a\+\_\+edges, Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ $>$ \&a\+\_\+vertices, const int a\+\_\+num\+\_\+polygons, std\+::ifstream \&a\+\_\+inputstream)
+\begin{DoxyCompactList}\small\item\em Read A\+S\+C\+II polygons and create mesh connectivity. The next getline() from inputstream must read the first polygon, i.\+e. we assume that read\+\_\+ascii\+\_\+vertices was called I\+M\+M\+E\+D\+I\+A\+T\+E\+LY before this function. That function will center the fstream on the correct line. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class for generation a \hyperlink{classdcel__mesh}{dcel\+\_\+mesh} from the Stanford P\+LY file format. 
+
+Definition at line 17 of file ply\+\_\+reader.\+H.
+
+
+
+\subsection{Member Function Documentation}
+\index{ply\+\_\+reader@{ply\+\_\+reader}!read\+\_\+ascii@{read\+\_\+ascii}}
+\index{read\+\_\+ascii@{read\+\_\+ascii}!ply\+\_\+reader@{ply\+\_\+reader}}
+\subsubsection[{\texorpdfstring{read\+\_\+ascii(dcel\+\_\+mesh \&a\+\_\+mesh, const std\+::string a\+\_\+filename)}{read_ascii(dcel_mesh &a_mesh, const std::string a_filename)}}]{\setlength{\rightskip}{0pt plus 5cm}static void ply\+\_\+reader\+::read\+\_\+ascii (
+\begin{DoxyParamCaption}
+\item[{{\bf dcel\+\_\+mesh} \&}]{a\+\_\+mesh, }
+\item[{const std\+::string}]{a\+\_\+filename}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classply__reader_a16116d5ea8da15cccbe769848e7a5da7}{}\label{classply__reader_a16116d5ea8da15cccbe769848e7a5da7}
+
+
+Read an A\+S\+C\+II .ply file and put it in a mesh. 
+
+\index{ply\+\_\+reader@{ply\+\_\+reader}!read\+\_\+ascii\+\_\+header@{read\+\_\+ascii\+\_\+header}}
+\index{read\+\_\+ascii\+\_\+header@{read\+\_\+ascii\+\_\+header}!ply\+\_\+reader@{ply\+\_\+reader}}
+\subsubsection[{\texorpdfstring{read\+\_\+ascii\+\_\+header(int \&a\+\_\+num\+\_\+vertices, int \&a\+\_\+num\+\_\+polygons, std\+::ifstream \&a\+\_\+inputstream)}{read_ascii_header(int &a_num_vertices, int &a_num_polygons, std::ifstream &a_inputstream)}}]{\setlength{\rightskip}{0pt plus 5cm}static void ply\+\_\+reader\+::read\+\_\+ascii\+\_\+header (
+\begin{DoxyParamCaption}
+\item[{int \&}]{a\+\_\+num\+\_\+vertices, }
+\item[{int \&}]{a\+\_\+num\+\_\+polygons, }
+\item[{std\+::ifstream \&}]{a\+\_\+inputstream}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\hypertarget{classply__reader_a4df2c2596716dd223730166c56eb7187}{}\label{classply__reader_a4df2c2596716dd223730166c56eb7187}
+
+
+Read an A\+S\+C\+II header. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt out}  & {\em a\+\_\+num\+\_\+vertices} & Number of vertices \\
+\hline
+\mbox{\tt out}  & {\em a\+\_\+num\+\_\+polygons} & Number of polygons \\
+\hline
+\mbox{\tt in,out}  & {\em a\+\_\+inputstream} & File \\
+\hline
+\end{DoxyParams}
+\index{ply\+\_\+reader@{ply\+\_\+reader}!read\+\_\+ascii\+\_\+polygons@{read\+\_\+ascii\+\_\+polygons}}
+\index{read\+\_\+ascii\+\_\+polygons@{read\+\_\+ascii\+\_\+polygons}!ply\+\_\+reader@{ply\+\_\+reader}}
+\subsubsection[{\texorpdfstring{read\+\_\+ascii\+\_\+polygons(\+Vector$<$ Ref\+Counted\+Ptr$<$ dcel\+\_\+poly $>$ $>$ \&a\+\_\+polygons, Vector$<$ Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ $>$ \&a\+\_\+edges, Vector$<$ Ref\+Counted\+Ptr$<$ dcel\+\_\+vert $>$ $>$ \&a\+\_\+vertices, const int a\+\_\+num\+\_\+polygons, std\+::ifstream \&a\+\_\+inputstream)}{read_ascii_polygons(Vector< RefCountedPtr< dcel_poly > > &a_polygons, Vector< RefCountedPtr< dcel_edge > > &a_edges, Vector< RefCountedPtr< dcel_vert > > &a_vertices, const int a_num_polygons, std::ifstream &a_inputstream)}}]{\setlength{\rightskip}{0pt plus 5cm}static void ply\+\_\+reader\+::read\+\_\+ascii\+\_\+polygons (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+poly} $>$ $>$ \&}]{a\+\_\+polygons, }
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ $>$ \&}]{a\+\_\+edges, }
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+vert} $>$ $>$ \&}]{a\+\_\+vertices, }
+\item[{const int}]{a\+\_\+num\+\_\+polygons, }
+\item[{std\+::ifstream \&}]{a\+\_\+inputstream}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\hypertarget{classply__reader_acdc4d3c6133daa172fb7752d49ced5b4}{}\label{classply__reader_acdc4d3c6133daa172fb7752d49ced5b4}
+
+
+Read A\+S\+C\+II polygons and create mesh connectivity. The next getline() from inputstream must read the first polygon, i.\+e. we assume that read\+\_\+ascii\+\_\+vertices was called I\+M\+M\+E\+D\+I\+A\+T\+E\+LY before this function. That function will center the fstream on the correct line. 
+
+\index{ply\+\_\+reader@{ply\+\_\+reader}!read\+\_\+ascii\+\_\+vertices@{read\+\_\+ascii\+\_\+vertices}}
+\index{read\+\_\+ascii\+\_\+vertices@{read\+\_\+ascii\+\_\+vertices}!ply\+\_\+reader@{ply\+\_\+reader}}
+\subsubsection[{\texorpdfstring{read\+\_\+ascii\+\_\+vertices(\+Vector$<$ Ref\+Counted\+Ptr$<$ dcel\+\_\+vert $>$ $>$ \&vertices, const int a\+\_\+num\+\_\+vertices, std\+::ifstream \&a\+\_\+inputstream)}{read_ascii_vertices(Vector< RefCountedPtr< dcel_vert > > &vertices, const int a_num_vertices, std::ifstream &a_inputstream)}}]{\setlength{\rightskip}{0pt plus 5cm}static void ply\+\_\+reader\+::read\+\_\+ascii\+\_\+vertices (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+vert} $>$ $>$ \&}]{vertices, }
+\item[{const int}]{a\+\_\+num\+\_\+vertices, }
+\item[{std\+::ifstream \&}]{a\+\_\+inputstream}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\hypertarget{classply__reader_af69d8ccc7ce2f31a26eb68efc20b9824}{}\label{classply__reader_af69d8ccc7ce2f31a26eb68efc20b9824}
+
+
+Read A\+S\+C\+II vertices. The next getline() from inputstream must read the first vertex (i.\+e. don\textquotesingle{}t rewind the stream before entering this routine) 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{ply__reader_8H}{ply\+\_\+reader.\+H}\end{DoxyCompactItemize}

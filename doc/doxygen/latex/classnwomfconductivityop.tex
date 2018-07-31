@@ -1,0 +1,1085 @@
+\hypertarget{classnwomfconductivityop}{}\section{nwomfconductivityop Class Reference}
+\label{classnwomfconductivityop}\index{nwomfconductivityop@{nwomfconductivityop}}
+
+
+Operator class for solving the variable-\/coefficient Helmholtz equation with multigrid in two phases.  
+
+
+
+
+{\ttfamily \#include $<$nwomfconductivityop.\+H$>$}
+
+
+
+Inherits T\+G\+A\+Helm\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ $>$.
+
+
+
+Collaboration diagram for nwomfconductivityop\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=214pt]{classnwomfconductivityop__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classnwomfconductivityop_a070eb87e79a413a7d49be5360cbc3a27}{nwomfconductivityop} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classnwomfconductivityop_af1436fb06078087cd228c14728d0ecd6}{$\sim$nwomfconductivityop} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a3286b4c191b38e71527af64aaf40f612}{define} (const Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \&a\+\_\+mfis, const Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \&a\+\_\+dombc, const Ref\+Counted\+Ptr$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ \&a\+\_\+aco, const Ref\+Counted\+Ptr$<$ Level\+Data$<$ M\+F\+Flux\+F\+AB $>$ $>$ \&a\+\_\+bco, const Ref\+Counted\+Ptr$<$ Level\+Data$<$ \hyperlink{classMFBaseIVFAB}{M\+F\+Base\+I\+V\+F\+AB} $>$ $>$ \&a\+\_\+bco\+\_\+irreg, const \hyperlink{classNWOMFQuadCFInterp}{N\+W\+O\+M\+F\+Quad\+C\+F\+Interp} \&a\+\_\+quadcfi, const \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} \&a\+\_\+mflg\+\_\+fine, const \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} \&a\+\_\+mflg, const \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} \&a\+\_\+mflg\+\_\+coar, const \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} \&a\+\_\+mflg\+\_\+coar\+\_\+mg, const Problem\+Domain \&a\+\_\+domain, const bool \&a\+\_\+layout\+\_\+changed, const bool \&a\+\_\+has\+\_\+mg\+\_\+objects, const bool \&a\+\_\+has\+\_\+fine, const bool \&a\+\_\+has\+\_\+coar, const int \&a\+\_\+ref\+\_\+to\+\_\+fine, const int \&a\+\_\+ref\+\_\+to\+\_\+coar, const int \&a\+\_\+relax\+\_\+type, const int \&a\+\_\+order\+\_\+ebbc, const Int\+Vect \&a\+\_\+ghost\+\_\+phi, const Int\+Vect \&a\+\_\+ghost\+\_\+rhs, const Real \&a\+\_\+dx, const Real \&a\+\_\+dx\+\_\+coar, const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta, const Real\+Vect \&a\+\_\+origin)
+\begin{DoxyCompactList}\small\item\em Define function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_aa34cdce0d0bb999f4ec6fe1d3b3690dc}{set\+\_\+jump} (const Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ \&a\+\_\+jump)
+\begin{DoxyCompactList}\small\item\em Set jump condition. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a74d2d5f6afd37b00f944b31cab019515}{set\+\_\+electrodes} (const Vector$<$ \hyperlink{classelectrode}{electrode} $>$ \&a\+\_\+electrodes, const Ref\+Counted\+Ptr$<$ Base\+B\+C\+Func\+Eval $>$ a\+\_\+potential)
+\begin{DoxyCompactList}\small\item\em Set the non-\/matched boundary conditions. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a7e633740393f4fbcac8e68619046cbd2}{update\+\_\+bc} (const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const bool a\+\_\+homogeneous)
+\begin{DoxyCompactList}\small\item\em Update boundary conditions before relaxation. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a3cdc08636b20034c77febba1799f9907}{set\+Alpha\+And\+Beta} (const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta)
+\begin{DoxyCompactList}\small\item\em Reset for T\+GA. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a76c65e3b381604c624d9478611f9fc4e}{diagonal\+Scale} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em Set diagonal scale of the operator. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a531dee8c364721b218b9f04ada813f66}{divide\+By\+Identity\+Coef} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em T\+GA --no op in this case. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a5a7d697e505ee7466d76f647e3e983a5}{apply\+Op\+No\+Boundary} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+op\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi)
+\begin{DoxyCompactList}\small\item\em Apply operator without any boundary or coarse-\/fine. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a98da85128a6c64ed7508313c4b77325b}{set\+Time} (Real a\+\_\+old\+Time, Real a\+\_\+mu, Real a\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Set time. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a9fcd1570197851fe78ffec6389e19d49}{residual} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous=false)
+\begin{DoxyCompactList}\small\item\em Compute residual. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a031574f96d2c9d0a0e06d0deff6540f5}{pre\+Cond} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+residual)
+\begin{DoxyCompactList}\small\item\em Apply preconditioner. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a8683634cfe73ceb92d9811733a75fd08}{apply\+Op} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, bool a\+\_\+homogeneous=false)
+\begin{DoxyCompactList}\small\item\em Apply operator. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a0d3f616e163de466e2a6b394b4d83b1d}{create} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em Create a clone of this operator. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_ae8d0f4376c7ca6aaa354d73e45abe813}{create\+Coarsened} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs, const int \&a\+\_\+ref\+Rat)
+\begin{DoxyCompactList}\small\item\em Create a coarsened version of this operator. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_af846ef4b565e4ad591ef26f59d2b6787}{assign} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em Assign operator. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classnwomfconductivityop_a344feaf9a38cfbd26ce9c37361b73fd3}{dot\+Product} (const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+1, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+2)
+\begin{DoxyCompactList}\small\item\em Dot product. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a65fccfefed9880ac4b2859d8d9d6a626}{incr} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+x, Real a\+\_\+scale)
+\begin{DoxyCompactList}\small\item\em Incremetn. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a8880c69b8fcb491ebd3a4b75ce4c3b5b}{axby} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+x, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+y, Real a, Real b)
+\begin{DoxyCompactList}\small\item\em Multiply. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_ae1f01e06961ccc7dd3e73c3da66efe11}{scale} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+lhs, const Real \&a\+\_\+scale)
+\begin{DoxyCompactList}\small\item\em Scale. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classnwomfconductivityop_a33d396f8f08cd465c2582052d8c6d71b}{norm} (const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+x, int a\+\_\+ord)
+\begin{DoxyCompactList}\small\item\em Compute norm. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a03b091425b126b996e60c142d1acbda8}{set\+To\+Zero} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+x)
+\begin{DoxyCompactList}\small\item\em Set to zero. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_aaef6a1c69ff6baae34bfa9d6390c9152}{relax} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+e, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+residual, int iterations)
+\begin{DoxyCompactList}\small\item\em Relax. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_af3f9e9e501a6eb143c02798b7c20872c}{create\+Coarser} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+coarse, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+fine, bool ghosted)
+\begin{DoxyCompactList}\small\item\em Create a coarsened data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_ae3a5f485606ead3895d75b925e506b99}{restrict\+Residual} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+res\+Coarse, Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs\+Fine)
+\begin{DoxyCompactList}\small\item\em Calculate restricted residual. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_ad4acd8f35f8ab8fe9c50c733f2b74dc4}{prolong\+Increment} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+This\+Level, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+correct\+Coarse)
+\begin{DoxyCompactList}\small\item\em Correct the fine solution based on coarse correction. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classnwomfconductivityop_a6b4322420b5006f9ef47bb6cdba14df3}{ref\+To\+Coarser} ()
+\begin{DoxyCompactList}\small\item\em Returns 1 when there are no coarser A\+M\+R\+Level\+Op objects. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_acf54a68fb590c03cf35443c122cc37b1}{A\+M\+R\+Residual} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Coarse, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous\+BC, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$a\+\_\+finer\+Op)
+\begin{DoxyCompactList}\small\item\em Compute residual. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a6a6d01e9e10e75c45115ae05e300c7c1}{A\+M\+R\+Residual\+NC} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous\+BC, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$a\+\_\+finer\+Op)
+\begin{DoxyCompactList}\small\item\em Compute residual assuming no more coarser A\+MR levels. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a04e33f978c1a286aab7284cf96f429a7}{A\+M\+R\+Residual\+NF} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Coarse, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous\+BC)
+\begin{DoxyCompactList}\small\item\em Compute residual assuming no finer A\+MR levels. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_ac50945d44a9145f7a436e62c08668b3b}{A\+M\+R\+Operator\+NC} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+\+Lof\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, bool a\+\_\+homogeneous\+BC, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$a\+\_\+finer\+Op)
+\begin{DoxyCompactList}\small\item\em A\+MR operator assuming no more coarser A\+MR levels. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a0000d49efcbc3205f53f839d8443b78e}{A\+M\+R\+Operator\+NF} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+\+Lof\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Coarse, bool a\+\_\+homogeneous\+BC)
+\begin{DoxyCompactList}\small\item\em A\+MR operator assuming no finer level. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_abb2d483bb03f9fb90593db92efc80424}{A\+M\+R\+Operator} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+\+Lof\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi\+Coarse, bool a\+\_\+homogeneous\+BC, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$a\+\_\+finer\+Op)
+\begin{DoxyCompactList}\small\item\em Apply A\+MR operator, including coarse-\/fine matching conditions. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a8d7211891c8b78056e2f6a508f71280b}{A\+M\+R\+Restrict} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+res\+Coarse, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+coarse\+Correction, bool a\+\_\+skip\+\_\+res)
+\begin{DoxyCompactList}\small\item\em Restrict residual. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_ae4fbaa61ea23396223a196612bac0d76}{A\+M\+R\+Prolong} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+coarse\+Correction)
+\begin{DoxyCompactList}\small\item\em Prologn residual. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a3df781ffc579d605266d3a34d679fe08}{A\+M\+R\+Update\+Residual} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+coarse\+Correction)
+\begin{DoxyCompactList}\small\item\em Update the A\+MR residual. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_ae83dce7f621aad99f685edf59c976018}{level\+Jacobi} (Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+rhs, const int a\+\_\+iterations)
+\begin{DoxyCompactList}\small\item\em Jacobi iteration. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_a4d371141dfefc636d09e8283e3a8f27f}{set\+\_\+bc\+\_\+from\+\_\+levelset} ()
+\begin{DoxyCompactList}\small\item\em Set BC from level set functions. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classnwomfconductivityop_aa8fd01faaa6573464258446d17b6c595}{set\+\_\+bc\+\_\+from\+\_\+matching} (const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+phi, const bool a\+\_\+homogeneous)
+\begin{DoxyCompactList}\small\item\em Set BC from matching criteria. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classnwomfconductivityop_a30c1845582d5a91873e7ef5337b238a9}{A\+M\+R\+Norm} (const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+coar\+\_\+resid, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+fine\+\_\+resid, const int \&a\+\_\+ref\+\_\+rat, const int \&a\+\_\+ord)
+\begin{DoxyCompactList}\small\item\em Get the norm. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classnwomfconductivityop_a4f06bdad22ae718c91d014d4337eb806}{kappa\+Norm} (Real \&a\+\_\+volume, const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&a\+\_\+data, int a\+\_\+p) const 
+\begin{DoxyCompactList}\small\item\em Compute kappa norm. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \hyperlink{classnwomfconductivityop_acce8fedb84d502e40cb99bb82019fa55}{m\+\_\+mfis}
+\begin{DoxyCompactList}\small\item\em Index spaces. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ Base\+B\+C\+Func\+Eval $>$ \hyperlink{classnwomfconductivityop_a9e47bf000bacf30039a4ac16c57f4462}{m\+\_\+potential}
+\begin{DoxyCompactList}\small\item\em Potential function. \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classnwoebconductivityop}{nwoebconductivityop} $>$ $>$ \hyperlink{classnwomfconductivityop_a2e24efc817e0570afda1d8b103bddc36}{m\+\_\+ebops}
+\begin{DoxyCompactList}\small\item\em EB operators. \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $>$ $>$ \hyperlink{classnwomfconductivityop_a5c8391dce6ff744cd80a1d8fd6c83230}{m\+\_\+acoeffs}
+\begin{DoxyCompactList}\small\item\em a-\/coefficients for each phase \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ $>$ $>$ \hyperlink{classnwomfconductivityop_a3db3b15e614b2ab9e8d1ddfa6b1bde93}{m\+\_\+bcoeffs}
+\begin{DoxyCompactList}\small\item\em b-\/coefficients for each phase \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \hyperlink{classnwomfconductivityop_ae8a7be66f4b90c63b1da9319cd9c188e}{m\+\_\+bcoeffs\+\_\+irr}
+\begin{DoxyCompactList}\small\item\em b-\/coefficients for each phase \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ $>$ \hyperlink{classnwomfconductivityop_a31ec9f563da2ff8d96b8bfb7ed666af6}{m\+\_\+dirival}
+\item 
+Vector$<$ Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ $\ast$ $>$ \hyperlink{classnwomfconductivityop_a9560594cff54a70feef15260535ed83f}{m\+\_\+alias}
+\begin{DoxyCompactList}\small\item\em Aliasing stuff. \end{DoxyCompactList}\item 
+Vector$<$ Int\+Vect $>$ \hyperlink{classnwomfconductivityop_a215e6ce66663e176127a862002d2d5ab}{m\+\_\+colors}
+\begin{DoxyCompactList}\small\item\em Colors for relaxation. \end{DoxyCompactList}\item 
+Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ \hyperlink{classnwomfconductivityop_a6482955f92eebf55beae4895d1d48f30}{m\+\_\+surfpot}
+\begin{DoxyCompactList}\small\item\em Surface potential. \end{DoxyCompactList}\item 
+Level\+Data\+Ops$<$ M\+F\+Cell\+F\+AB $>$ \hyperlink{classnwomfconductivityop_ae3c702945e77489bf909d10be7f14cb5}{m\+\_\+ops}
+\begin{DoxyCompactList}\small\item\em Arithmetic multifluid operators. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classjump__bc}{jump\+\_\+bc} $>$ \hyperlink{classnwomfconductivityop_a5a38584a144ef9dffa3c8e0c67dd1ca0}{m\+\_\+jumpbc}
+\begin{DoxyCompactList}\small\item\em Class for computing BC matching. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ \hyperlink{classnwomfconductivityop_a094701273aec439e9e0965cedbc348a9}{m\+\_\+jump}
+\begin{DoxyCompactList}\small\item\em Jump condition. Comes in through factory. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ \hyperlink{classnwomfconductivityop_a48cc4f2bd26e375295184057f3a2bbba}{m\+\_\+phibc}
+\begin{DoxyCompactList}\small\item\em Dirichlet boundary conditions on embedded boundaries. \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classmfdirichletconductivityebbc}{mfdirichletconductivityebbc} $>$ $>$ \hyperlink{classnwomfconductivityop_aa31a3b685e2e5714a2654c3e8f192275}{m\+\_\+ebbc}
+\begin{DoxyCompactList}\small\item\em Multifluid boundary conditions. \end{DoxyCompactList}\item 
+Vector$<$ \hyperlink{classelectrode}{electrode} $>$ \hyperlink{classnwomfconductivityop_a8033bcd5f84abedfd4647538f3a1422f}{m\+\_\+electrodes}
+\begin{DoxyCompactList}\small\item\em Electrodes. \end{DoxyCompactList}\item 
+Problem\+Domain \hyperlink{classnwomfconductivityop_a50ab53648a2fe88ecac4ba4eb701f232}{m\+\_\+domain}
+\begin{DoxyCompactList}\small\item\em Problem domain. \end{DoxyCompactList}\item 
+\hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} \hyperlink{classnwomfconductivityop_af7c39316fba3146e24103e340836afa0}{m\+\_\+mflg\+\_\+coar\+\_\+mg}
+\begin{DoxyCompactList}\small\item\em Coarser \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} for MG. \end{DoxyCompactList}\item 
+int \hyperlink{classnwomfconductivityop_a2c1f4411cb7f77c9b2a3f4a9b4792c16}{m\+\_\+phases}
+\begin{DoxyCompactList}\small\item\em Number of phases. \end{DoxyCompactList}\item 
+int \hyperlink{classnwomfconductivityop_a199f8baac17dbcc13ea649c6bde933b3}{m\+\_\+ncomp}
+\begin{DoxyCompactList}\small\item\em Number of components. \end{DoxyCompactList}\item 
+int \hyperlink{classnwomfconductivityop_a106ae6d195e5b5cb4a5f3afe5e7786d1}{m\+\_\+relax}
+\begin{DoxyCompactList}\small\item\em Relaxation type. \end{DoxyCompactList}\item 
+int \hyperlink{classnwomfconductivityop_a0027b126df3299719608e457ab0ac22d}{m\+\_\+ref\+\_\+to\+\_\+coarser}
+\begin{DoxyCompactList}\small\item\em Refinement factor to coarser level. \end{DoxyCompactList}\item 
+Int\+Vect \hyperlink{classnwomfconductivityop_a398ed6241b4306f2aba557b1853f112f}{m\+\_\+ghost\+\_\+rhs}
+\begin{DoxyCompactList}\small\item\em Number of ghost cells. \end{DoxyCompactList}\item 
+Int\+Vect \hyperlink{classnwomfconductivityop_a46d6b000f62dc6a02da0a4c191534946}{m\+\_\+ghost\+\_\+phi}
+\begin{DoxyCompactList}\small\item\em Number of ghost cells. \end{DoxyCompactList}\item 
+Real \hyperlink{classnwomfconductivityop_af68ef11597075bdc23e41a769d19f8ec}{m\+\_\+dx}
+\begin{DoxyCompactList}\small\item\em Level resolution. \end{DoxyCompactList}\item 
+Real \hyperlink{classnwomfconductivityop_ad40e16f1014bc48ea34cd421cc6d924a}{m\+\_\+alpha}
+\begin{DoxyCompactList}\small\item\em alpha coefficient \end{DoxyCompactList}\item 
+Real \hyperlink{classnwomfconductivityop_acbd1939899583be5c9a159612649221e}{m\+\_\+beta}
+\begin{DoxyCompactList}\small\item\em beta-\/coefficient \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classnwomfconductivityop_a52affc53f755c6175791dc4af2da1a6b}{m\+\_\+origin}
+\begin{DoxyCompactList}\small\item\em Origin. \end{DoxyCompactList}\item 
+bool \hyperlink{classnwomfconductivityop_a7720528788de57c5737c585e400fc31a}{m\+\_\+has\+BC}
+\begin{DoxyCompactList}\small\item\em Has BC been set? \end{DoxyCompactList}\item 
+bool \hyperlink{classnwomfconductivityop_a9082df3aa4ce17ad08b929dd7c9ca4dc}{m\+\_\+multifluid}
+\begin{DoxyCompactList}\small\item\em Is this a multifluid solver? \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Operator class for solving the variable-\/coefficient Helmholtz equation with multigrid in two phases. 
+
+Definition at line 32 of file nwomfconductivityop.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{nwomfconductivityop@{nwomfconductivityop}!nwomfconductivityop@{nwomfconductivityop}}
+\index{nwomfconductivityop@{nwomfconductivityop}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{nwomfconductivityop()}{nwomfconductivityop()}}]{\setlength{\rightskip}{0pt plus 5cm}nwomfconductivityop\+::nwomfconductivityop (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classnwomfconductivityop_a070eb87e79a413a7d49be5360cbc3a27}{}\label{classnwomfconductivityop_a070eb87e79a413a7d49be5360cbc3a27}
+
+
+Constructor. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!````~nwomfconductivityop@{$\sim$nwomfconductivityop}}
+\index{````~nwomfconductivityop@{$\sim$nwomfconductivityop}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{$\sim$nwomfconductivityop()}{~nwomfconductivityop()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual nwomfconductivityop\+::$\sim$nwomfconductivityop (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_af1436fb06078087cd228c14728d0ecd6}{}\label{classnwomfconductivityop_af1436fb06078087cd228c14728d0ecd6}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Norm@{A\+M\+R\+Norm}}
+\index{A\+M\+R\+Norm@{A\+M\+R\+Norm}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Norm(const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+coar\+\_\+resid, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+fine\+\_\+resid, const int \&a\+\_\+ref\+\_\+rat, const int \&a\+\_\+ord)}{AMRNorm(const LevelData< MFCellFAB > &a_coar_resid, const LevelData< MFCellFAB > &a_fine_resid, const int &a_ref_rat, const int &a_ord)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real nwomfconductivityop\+::\+A\+M\+R\+Norm (
+\begin{DoxyParamCaption}
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+coar\+\_\+resid, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+fine\+\_\+resid, }
+\item[{const int \&}]{a\+\_\+ref\+\_\+rat, }
+\item[{const int \&}]{a\+\_\+ord}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a30c1845582d5a91873e7ef5337b238a9}{}\label{classnwomfconductivityop_a30c1845582d5a91873e7ef5337b238a9}
+
+
+Get the norm. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Operator@{A\+M\+R\+Operator}}
+\index{A\+M\+R\+Operator@{A\+M\+R\+Operator}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Operator(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+\+Lof\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Coarse, bool a\+\_\+homogeneous\+B\+C, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ $>$ $\ast$a\+\_\+finer\+Op)}{AMROperator(LevelData< MFCellFAB > &a_LofPhi, const LevelData< MFCellFAB > &a_phiFine, const LevelData< MFCellFAB > &a_phi, const LevelData< MFCellFAB > &a_phiCoarse, bool a_homogeneousBC, AMRLevelOp< LevelData< MFCellFAB > > *a_finerOp)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Operator (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+\+Lof\+Phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Fine, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Coarse, }
+\item[{bool}]{a\+\_\+homogeneous\+BC, }
+\item[{A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$}]{a\+\_\+finer\+Op}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_abb2d483bb03f9fb90593db92efc80424}{}\label{classnwomfconductivityop_abb2d483bb03f9fb90593db92efc80424}
+
+
+Apply A\+MR operator, including coarse-\/fine matching conditions. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Operator\+NC@{A\+M\+R\+Operator\+NC}}
+\index{A\+M\+R\+Operator\+NC@{A\+M\+R\+Operator\+NC}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Operator\+N\+C(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+\+Lof\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, bool a\+\_\+homogeneous\+B\+C, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ $>$ $\ast$a\+\_\+finer\+Op)}{AMROperatorNC(LevelData< MFCellFAB > &a_LofPhi, const LevelData< MFCellFAB > &a_phiFine, const LevelData< MFCellFAB > &a_phi, bool a_homogeneousBC, AMRLevelOp< LevelData< MFCellFAB > > *a_finerOp)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Operator\+NC (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+\+Lof\+Phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Fine, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{bool}]{a\+\_\+homogeneous\+BC, }
+\item[{A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$}]{a\+\_\+finer\+Op}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_ac50945d44a9145f7a436e62c08668b3b}{}\label{classnwomfconductivityop_ac50945d44a9145f7a436e62c08668b3b}
+
+
+A\+MR operator assuming no more coarser A\+MR levels. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Operator\+NF@{A\+M\+R\+Operator\+NF}}
+\index{A\+M\+R\+Operator\+NF@{A\+M\+R\+Operator\+NF}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Operator\+N\+F(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+\+Lof\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Coarse, bool a\+\_\+homogeneous\+B\+C)}{AMROperatorNF(LevelData< MFCellFAB > &a_LofPhi, const LevelData< MFCellFAB > &a_phi, const LevelData< MFCellFAB > &a_phiCoarse, bool a_homogeneousBC)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Operator\+NF (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+\+Lof\+Phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Coarse, }
+\item[{bool}]{a\+\_\+homogeneous\+BC}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a0000d49efcbc3205f53f839d8443b78e}{}\label{classnwomfconductivityop_a0000d49efcbc3205f53f839d8443b78e}
+
+
+A\+MR operator assuming no finer level. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Prolong@{A\+M\+R\+Prolong}}
+\index{A\+M\+R\+Prolong@{A\+M\+R\+Prolong}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Prolong(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+coarse\+Correction)}{AMRProlong(LevelData< MFCellFAB > &a_correction, const LevelData< MFCellFAB > &a_coarseCorrection)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Prolong (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+correction, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+coarse\+Correction}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_ae4fbaa61ea23396223a196612bac0d76}{}\label{classnwomfconductivityop_ae4fbaa61ea23396223a196612bac0d76}
+
+
+Prologn residual. 
+
+a\+\_\+correction += I\mbox{[}h-\/$>$h\mbox{]}(a\+\_\+coarse\+Correction) \index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Residual@{A\+M\+R\+Residual}}
+\index{A\+M\+R\+Residual@{A\+M\+R\+Residual}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Residual(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Coarse, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous\+B\+C, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ $>$ $\ast$a\+\_\+finer\+Op)}{AMRResidual(LevelData< MFCellFAB > &a_residual, const LevelData< MFCellFAB > &a_phiFine, const LevelData< MFCellFAB > &a_phi, const LevelData< MFCellFAB > &a_phiCoarse, const LevelData< MFCellFAB > &a_rhs, bool a_homogeneousBC, AMRLevelOp< LevelData< MFCellFAB > > *a_finerOp)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Residual (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+residual, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Fine, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Coarse, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs, }
+\item[{bool}]{a\+\_\+homogeneous\+BC, }
+\item[{A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$}]{a\+\_\+finer\+Op}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_acf54a68fb590c03cf35443c122cc37b1}{}\label{classnwomfconductivityop_acf54a68fb590c03cf35443c122cc37b1}
+
+
+Compute residual. 
+
+a\+\_\+residual = a\+\_\+rhs -\/ L(a\+\_\+phi, a\+\_\+phi\+Fine, a\+\_\+phi\+Coarse) \index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Residual\+NC@{A\+M\+R\+Residual\+NC}}
+\index{A\+M\+R\+Residual\+NC@{A\+M\+R\+Residual\+NC}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Residual\+N\+C(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous\+B\+C, A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ $>$ $\ast$a\+\_\+finer\+Op)}{AMRResidualNC(LevelData< MFCellFAB > &a_residual, const LevelData< MFCellFAB > &a_phiFine, const LevelData< MFCellFAB > &a_phi, const LevelData< MFCellFAB > &a_rhs, bool a_homogeneousBC, AMRLevelOp< LevelData< MFCellFAB > > *a_finerOp)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Residual\+NC (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+residual, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Fine, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs, }
+\item[{bool}]{a\+\_\+homogeneous\+BC, }
+\item[{A\+M\+R\+Level\+Op$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ $\ast$}]{a\+\_\+finer\+Op}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a6a6d01e9e10e75c45115ae05e300c7c1}{}\label{classnwomfconductivityop_a6a6d01e9e10e75c45115ae05e300c7c1}
+
+
+Compute residual assuming no more coarser A\+MR levels. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Residual\+NF@{A\+M\+R\+Residual\+NF}}
+\index{A\+M\+R\+Residual\+NF@{A\+M\+R\+Residual\+NF}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Residual\+N\+F(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Coarse, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous\+B\+C)}{AMRResidualNF(LevelData< MFCellFAB > &a_residual, const LevelData< MFCellFAB > &a_phi, const LevelData< MFCellFAB > &a_phiCoarse, const LevelData< MFCellFAB > &a_rhs, bool a_homogeneousBC)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Residual\+NF (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+residual, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Coarse, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs, }
+\item[{bool}]{a\+\_\+homogeneous\+BC}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a04e33f978c1a286aab7284cf96f429a7}{}\label{classnwomfconductivityop_a04e33f978c1a286aab7284cf96f429a7}
+
+
+Compute residual assuming no finer A\+MR levels. 
+
+a\+\_\+residual = a\+\_\+rhs -\/ L(a\+\_\+phi, a\+\_\+phi\+Coarse) \index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Restrict@{A\+M\+R\+Restrict}}
+\index{A\+M\+R\+Restrict@{A\+M\+R\+Restrict}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Restrict(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+res\+Coarse, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+coarse\+Correction, bool a\+\_\+skip\+\_\+res)}{AMRRestrict(LevelData< MFCellFAB > &a_resCoarse, const LevelData< MFCellFAB > &a_residual, const LevelData< MFCellFAB > &a_correction, const LevelData< MFCellFAB > &a_coarseCorrection, bool a_skip_res)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Restrict (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+res\+Coarse, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+residual, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+correction, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+coarse\+Correction, }
+\item[{bool}]{a\+\_\+skip\+\_\+res}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a8d7211891c8b78056e2f6a508f71280b}{}\label{classnwomfconductivityop_a8d7211891c8b78056e2f6a508f71280b}
+
+
+Restrict residual. 
+
+a\+\_\+res\+Coarse = I\mbox{[}h-\/2h\mbox{]}( a\+\_\+residual -\/ L(a\+\_\+correction, a\+\_\+coarse\+Correction)) it is assumed that a\+\_\+res\+Coarse has already been filled in with the coarse version of A\+M\+R\+Residual\+NF and that this operation is free to overwrite in the overlap regions. \index{nwomfconductivityop@{nwomfconductivityop}!A\+M\+R\+Update\+Residual@{A\+M\+R\+Update\+Residual}}
+\index{A\+M\+R\+Update\+Residual@{A\+M\+R\+Update\+Residual}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{A\+M\+R\+Update\+Residual(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+residual, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+coarse\+Correction)}{AMRUpdateResidual(LevelData< MFCellFAB > &a_residual, const LevelData< MFCellFAB > &a_correction, const LevelData< MFCellFAB > &a_coarseCorrection)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::\+A\+M\+R\+Update\+Residual (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+residual, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+correction, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+coarse\+Correction}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a3df781ffc579d605266d3a34d679fe08}{}\label{classnwomfconductivityop_a3df781ffc579d605266d3a34d679fe08}
+
+
+Update the A\+MR residual. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!apply\+Op@{apply\+Op}}
+\index{apply\+Op@{apply\+Op}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{apply\+Op(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, bool a\+\_\+homogeneous=false)}{applyOp(LevelData< MFCellFAB > &a_lhs, const LevelData< MFCellFAB > &a_phi, bool a_homogeneous=false)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::apply\+Op (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{bool}]{a\+\_\+homogeneous = {\ttfamily false}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a8683634cfe73ceb92d9811733a75fd08}{}\label{classnwomfconductivityop_a8683634cfe73ceb92d9811733a75fd08}
+
+
+Apply operator. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!apply\+Op\+No\+Boundary@{apply\+Op\+No\+Boundary}}
+\index{apply\+Op\+No\+Boundary@{apply\+Op\+No\+Boundary}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{apply\+Op\+No\+Boundary(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+op\+Phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi)}{applyOpNoBoundary(LevelData< MFCellFAB > &a_opPhi, const LevelData< MFCellFAB > &a_phi)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::apply\+Op\+No\+Boundary (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+op\+Phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a5a7d697e505ee7466d76f647e3e983a5}{}\label{classnwomfconductivityop_a5a7d697e505ee7466d76f647e3e983a5}
+
+
+Apply operator without any boundary or coarse-\/fine. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!assign@{assign}}
+\index{assign@{assign}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{assign(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs)}{assign(LevelData< MFCellFAB > &a_lhs, const LevelData< MFCellFAB > &a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::assign (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_af846ef4b565e4ad591ef26f59d2b6787}{}\label{classnwomfconductivityop_af846ef4b565e4ad591ef26f59d2b6787}
+
+
+Assign operator. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!axby@{axby}}
+\index{axby@{axby}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{axby(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+x, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+y, Real a, Real b)}{axby(LevelData< MFCellFAB > &a_lhs, const LevelData< MFCellFAB > &a_x, const LevelData< MFCellFAB > &a_y, Real a, Real b)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::axby (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+x, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+y, }
+\item[{Real}]{a, }
+\item[{Real}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a8880c69b8fcb491ebd3a4b75ce4c3b5b}{}\label{classnwomfconductivityop_a8880c69b8fcb491ebd3a4b75ce4c3b5b}
+
+
+Multiply. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!create@{create}}
+\index{create@{create}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{create(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs)}{create(LevelData< MFCellFAB > &a_lhs, const LevelData< MFCellFAB > &a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::create (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a0d3f616e163de466e2a6b394b4d83b1d}{}\label{classnwomfconductivityop_a0d3f616e163de466e2a6b394b4d83b1d}
+
+
+Create a clone of this operator. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!create\+Coarsened@{create\+Coarsened}}
+\index{create\+Coarsened@{create\+Coarsened}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{create\+Coarsened(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs, const int \&a\+\_\+ref\+Rat)}{createCoarsened(LevelData< MFCellFAB > &a_lhs, const LevelData< MFCellFAB > &a_rhs, const int &a_refRat)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::create\+Coarsened (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs, }
+\item[{const int \&}]{a\+\_\+ref\+Rat}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_ae8d0f4376c7ca6aaa354d73e45abe813}{}\label{classnwomfconductivityop_ae8d0f4376c7ca6aaa354d73e45abe813}
+
+
+Create a coarsened version of this operator. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!create\+Coarser@{create\+Coarser}}
+\index{create\+Coarser@{create\+Coarser}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{create\+Coarser(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+coarse, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+fine, bool ghosted)}{createCoarser(LevelData< MFCellFAB > &a_coarse, const LevelData< MFCellFAB > &a_fine, bool ghosted)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::create\+Coarser (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+coarse, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+fine, }
+\item[{bool}]{ghosted}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_af3f9e9e501a6eb143c02798b7c20872c}{}\label{classnwomfconductivityop_af3f9e9e501a6eb143c02798b7c20872c}
+
+
+Create a coarsened data holder. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!define@{define}}
+\index{define@{define}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{define(const Ref\+Counted\+Ptr$<$ mfis $>$ \&a\+\_\+mfis, const Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \&a\+\_\+dombc, const Ref\+Counted\+Ptr$<$ Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ $>$ \&a\+\_\+aco, const Ref\+Counted\+Ptr$<$ Level\+Data$<$ M\+F\+Flux\+F\+A\+B $>$ $>$ \&a\+\_\+bco, const Ref\+Counted\+Ptr$<$ Level\+Data$<$ M\+F\+Base\+I\+V\+F\+A\+B $>$ $>$ \&a\+\_\+bco\+\_\+irreg, const N\+W\+O\+M\+F\+Quad\+C\+F\+Interp \&a\+\_\+quadcfi, const M\+F\+Level\+Grid \&a\+\_\+mflg\+\_\+fine, const M\+F\+Level\+Grid \&a\+\_\+mflg, const M\+F\+Level\+Grid \&a\+\_\+mflg\+\_\+coar, const M\+F\+Level\+Grid \&a\+\_\+mflg\+\_\+coar\+\_\+mg, const Problem\+Domain \&a\+\_\+domain, const bool \&a\+\_\+layout\+\_\+changed, const bool \&a\+\_\+has\+\_\+mg\+\_\+objects, const bool \&a\+\_\+has\+\_\+fine, const bool \&a\+\_\+has\+\_\+coar, const int \&a\+\_\+ref\+\_\+to\+\_\+fine, const int \&a\+\_\+ref\+\_\+to\+\_\+coar, const int \&a\+\_\+relax\+\_\+type, const int \&a\+\_\+order\+\_\+ebbc, const Int\+Vect \&a\+\_\+ghost\+\_\+phi, const Int\+Vect \&a\+\_\+ghost\+\_\+rhs, const Real \&a\+\_\+dx, const Real \&a\+\_\+dx\+\_\+coar, const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta, const Real\+Vect \&a\+\_\+origin)}{define(const RefCountedPtr< mfis > &a_mfis, const RefCountedPtr< BaseDomainBCFactory > &a_dombc, const RefCountedPtr< LevelData< MFCellFAB > > &a_aco, const RefCountedPtr< LevelData< MFFluxFAB > > &a_bco, const RefCountedPtr< LevelData< MFBaseIVFAB > > &a_bco_irreg, const NWOMFQuadCFInterp &a_quadcfi, const MFLevelGrid &a_mflg_fine, const MFLevelGrid &a_mflg, const MFLevelGrid &a_mflg_coar, const MFLevelGrid &a_mflg_coar_mg, const ProblemDomain &a_domain, const bool &a_layout_changed, const bool &a_has_mg_objects, const bool &a_has_fine, const bool &a_has_coar, const int &a_ref_to_fine, const int &a_ref_to_coar, const int &a_relax_type, const int &a_order_ebbc, const IntVect &a_ghost_phi, const IntVect &a_ghost_rhs, const Real &a_dx, const Real &a_dx_coar, const Real &a_alpha, const Real &a_beta, const RealVect &a_origin)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::define (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf mfis} $>$ \&}]{a\+\_\+mfis, }
+\item[{const Ref\+Counted\+Ptr$<$ Base\+Domain\+B\+C\+Factory $>$ \&}]{a\+\_\+dombc, }
+\item[{const Ref\+Counted\+Ptr$<$ Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ $>$ \&}]{a\+\_\+aco, }
+\item[{const Ref\+Counted\+Ptr$<$ Level\+Data$<$ M\+F\+Flux\+F\+AB $>$ $>$ \&}]{a\+\_\+bco, }
+\item[{const Ref\+Counted\+Ptr$<$ Level\+Data$<$ {\bf M\+F\+Base\+I\+V\+F\+AB} $>$ $>$ \&}]{a\+\_\+bco\+\_\+irreg, }
+\item[{const {\bf N\+W\+O\+M\+F\+Quad\+C\+F\+Interp} \&}]{a\+\_\+quadcfi, }
+\item[{const {\bf M\+F\+Level\+Grid} \&}]{a\+\_\+mflg\+\_\+fine, }
+\item[{const {\bf M\+F\+Level\+Grid} \&}]{a\+\_\+mflg, }
+\item[{const {\bf M\+F\+Level\+Grid} \&}]{a\+\_\+mflg\+\_\+coar, }
+\item[{const {\bf M\+F\+Level\+Grid} \&}]{a\+\_\+mflg\+\_\+coar\+\_\+mg, }
+\item[{const Problem\+Domain \&}]{a\+\_\+domain, }
+\item[{const bool \&}]{a\+\_\+layout\+\_\+changed, }
+\item[{const bool \&}]{a\+\_\+has\+\_\+mg\+\_\+objects, }
+\item[{const bool \&}]{a\+\_\+has\+\_\+fine, }
+\item[{const bool \&}]{a\+\_\+has\+\_\+coar, }
+\item[{const int \&}]{a\+\_\+ref\+\_\+to\+\_\+fine, }
+\item[{const int \&}]{a\+\_\+ref\+\_\+to\+\_\+coar, }
+\item[{const int \&}]{a\+\_\+relax\+\_\+type, }
+\item[{const int \&}]{a\+\_\+order\+\_\+ebbc, }
+\item[{const Int\+Vect \&}]{a\+\_\+ghost\+\_\+phi, }
+\item[{const Int\+Vect \&}]{a\+\_\+ghost\+\_\+rhs, }
+\item[{const Real \&}]{a\+\_\+dx, }
+\item[{const Real \&}]{a\+\_\+dx\+\_\+coar, }
+\item[{const Real \&}]{a\+\_\+alpha, }
+\item[{const Real \&}]{a\+\_\+beta, }
+\item[{const Real\+Vect \&}]{a\+\_\+origin}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a3286b4c191b38e71527af64aaf40f612}{}\label{classnwomfconductivityop_a3286b4c191b38e71527af64aaf40f612}
+
+
+Define function. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!diagonal\+Scale@{diagonal\+Scale}}
+\index{diagonal\+Scale@{diagonal\+Scale}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{diagonal\+Scale(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs)}{diagonalScale(LevelData< MFCellFAB > &a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::diagonal\+Scale (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a76c65e3b381604c624d9478611f9fc4e}{}\label{classnwomfconductivityop_a76c65e3b381604c624d9478611f9fc4e}
+
+
+Set diagonal scale of the operator. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!divide\+By\+Identity\+Coef@{divide\+By\+Identity\+Coef}}
+\index{divide\+By\+Identity\+Coef@{divide\+By\+Identity\+Coef}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{divide\+By\+Identity\+Coef(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs)}{divideByIdentityCoef(LevelData< MFCellFAB > &a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::divide\+By\+Identity\+Coef (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a531dee8c364721b218b9f04ada813f66}{}\label{classnwomfconductivityop_a531dee8c364721b218b9f04ada813f66}
+
+
+T\+GA --no op in this case. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!dot\+Product@{dot\+Product}}
+\index{dot\+Product@{dot\+Product}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{dot\+Product(const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+1, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+2)}{dotProduct(const LevelData< MFCellFAB > &a_1, const LevelData< MFCellFAB > &a_2)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real nwomfconductivityop\+::dot\+Product (
+\begin{DoxyParamCaption}
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+1, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+2}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a344feaf9a38cfbd26ce9c37361b73fd3}{}\label{classnwomfconductivityop_a344feaf9a38cfbd26ce9c37361b73fd3}
+
+
+Dot product. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!incr@{incr}}
+\index{incr@{incr}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{incr(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+x, Real a\+\_\+scale)}{incr(LevelData< MFCellFAB > &a_lhs, const LevelData< MFCellFAB > &a_x, Real a_scale)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::incr (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+x, }
+\item[{Real}]{a\+\_\+scale}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a65fccfefed9880ac4b2859d8d9d6a626}{}\label{classnwomfconductivityop_a65fccfefed9880ac4b2859d8d9d6a626}
+
+
+Incremetn. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!kappa\+Norm@{kappa\+Norm}}
+\index{kappa\+Norm@{kappa\+Norm}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{kappa\+Norm(\+Real \&a\+\_\+volume, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+data, int a\+\_\+p) const }{kappaNorm(Real &a_volume, const LevelData< MFCellFAB > &a_data, int a_p) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real nwomfconductivityop\+::kappa\+Norm (
+\begin{DoxyParamCaption}
+\item[{Real \&}]{a\+\_\+volume, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+data, }
+\item[{int}]{a\+\_\+p}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a4f06bdad22ae718c91d014d4337eb806}{}\label{classnwomfconductivityop_a4f06bdad22ae718c91d014d4337eb806}
+
+
+Compute kappa norm. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!level\+Jacobi@{level\+Jacobi}}
+\index{level\+Jacobi@{level\+Jacobi}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{level\+Jacobi(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs, const int a\+\_\+iterations)}{levelJacobi(LevelData< MFCellFAB > &a_phi, const LevelData< MFCellFAB > &a_rhs, const int a_iterations)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::level\+Jacobi (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs, }
+\item[{const int}]{a\+\_\+iterations}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_ae83dce7f621aad99f685edf59c976018}{}\label{classnwomfconductivityop_ae83dce7f621aad99f685edf59c976018}
+
+
+Jacobi iteration. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!norm@{norm}}
+\index{norm@{norm}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{norm(const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+x, int a\+\_\+ord)}{norm(const LevelData< MFCellFAB > &a_x, int a_ord)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real nwomfconductivityop\+::norm (
+\begin{DoxyParamCaption}
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+x, }
+\item[{int}]{a\+\_\+ord}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a33d396f8f08cd465c2582052d8c6d71b}{}\label{classnwomfconductivityop_a33d396f8f08cd465c2582052d8c6d71b}
+
+
+Compute norm. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!pre\+Cond@{pre\+Cond}}
+\index{pre\+Cond@{pre\+Cond}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{pre\+Cond(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+correction, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+residual)}{preCond(LevelData< MFCellFAB > &a_correction, const LevelData< MFCellFAB > &a_residual)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::pre\+Cond (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+correction, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+residual}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a031574f96d2c9d0a0e06d0deff6540f5}{}\label{classnwomfconductivityop_a031574f96d2c9d0a0e06d0deff6540f5}
+
+
+Apply preconditioner. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!prolong\+Increment@{prolong\+Increment}}
+\index{prolong\+Increment@{prolong\+Increment}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{prolong\+Increment(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+This\+Level, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+correct\+Coarse)}{prolongIncrement(LevelData< MFCellFAB > &a_phiThisLevel, const LevelData< MFCellFAB > &a_correctCoarse)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::prolong\+Increment (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+This\+Level, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+correct\+Coarse}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_ad4acd8f35f8ab8fe9c50c733f2b74dc4}{}\label{classnwomfconductivityop_ad4acd8f35f8ab8fe9c50c733f2b74dc4}
+
+
+Correct the fine solution based on coarse correction. 
+
+a\+\_\+phi\+This\+Level += I\mbox{[}2h-\/$>$h\mbox{]}(a\+\_\+correct\+Coarse) \index{nwomfconductivityop@{nwomfconductivityop}!ref\+To\+Coarser@{ref\+To\+Coarser}}
+\index{ref\+To\+Coarser@{ref\+To\+Coarser}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{ref\+To\+Coarser()}{refToCoarser()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual int nwomfconductivityop\+::ref\+To\+Coarser (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a6b4322420b5006f9ef47bb6cdba14df3}{}\label{classnwomfconductivityop_a6b4322420b5006f9ef47bb6cdba14df3}
+
+
+Returns 1 when there are no coarser A\+M\+R\+Level\+Op objects. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!relax@{relax}}
+\index{relax@{relax}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{relax(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+e, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+residual, int iterations)}{relax(LevelData< MFCellFAB > &a_e, const LevelData< MFCellFAB > &a_residual, int iterations)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::relax (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+e, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+residual, }
+\item[{int}]{iterations}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_aaef6a1c69ff6baae34bfa9d6390c9152}{}\label{classnwomfconductivityop_aaef6a1c69ff6baae34bfa9d6390c9152}
+
+
+Relax. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!residual@{residual}}
+\index{residual@{residual}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{residual(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs, bool a\+\_\+homogeneous=false)}{residual(LevelData< MFCellFAB > &a_lhs, const LevelData< MFCellFAB > &a_phi, const LevelData< MFCellFAB > &a_rhs, bool a_homogeneous=false)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::residual (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs, }
+\item[{bool}]{a\+\_\+homogeneous = {\ttfamily false}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a9fcd1570197851fe78ffec6389e19d49}{}\label{classnwomfconductivityop_a9fcd1570197851fe78ffec6389e19d49}
+
+
+Compute residual. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!restrict\+Residual@{restrict\+Residual}}
+\index{restrict\+Residual@{restrict\+Residual}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{restrict\+Residual(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+res\+Coarse, Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi\+Fine, const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+rhs\+Fine)}{restrictResidual(LevelData< MFCellFAB > &a_resCoarse, LevelData< MFCellFAB > &a_phiFine, const LevelData< MFCellFAB > &a_rhsFine)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::restrict\+Residual (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+res\+Coarse, }
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi\+Fine, }
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+rhs\+Fine}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_ae3a5f485606ead3895d75b925e506b99}{}\label{classnwomfconductivityop_ae3a5f485606ead3895d75b925e506b99}
+
+
+Calculate restricted residual. 
+
+a\+\_\+res\+Coarse\mbox{[}2h\mbox{]} = I\mbox{[}h-\/$>$2h\mbox{]} (rhs\+Fine\mbox{[}h\mbox{]} -\/ L\mbox{[}h\mbox{]}(phi\+Fine\mbox{[}h\mbox{]}) \index{nwomfconductivityop@{nwomfconductivityop}!scale@{scale}}
+\index{scale@{scale}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{scale(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+lhs, const Real \&a\+\_\+scale)}{scale(LevelData< MFCellFAB > &a_lhs, const Real &a_scale)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::scale (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+lhs, }
+\item[{const Real \&}]{a\+\_\+scale}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_ae1f01e06961ccc7dd3e73c3da66efe11}{}\label{classnwomfconductivityop_ae1f01e06961ccc7dd3e73c3da66efe11}
+
+
+Scale. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!set\+\_\+bc\+\_\+from\+\_\+levelset@{set\+\_\+bc\+\_\+from\+\_\+levelset}}
+\index{set\+\_\+bc\+\_\+from\+\_\+levelset@{set\+\_\+bc\+\_\+from\+\_\+levelset}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{set\+\_\+bc\+\_\+from\+\_\+levelset()}{set_bc_from_levelset()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::set\+\_\+bc\+\_\+from\+\_\+levelset (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a4d371141dfefc636d09e8283e3a8f27f}{}\label{classnwomfconductivityop_a4d371141dfefc636d09e8283e3a8f27f}
+
+
+Set BC from level set functions. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!set\+\_\+bc\+\_\+from\+\_\+matching@{set\+\_\+bc\+\_\+from\+\_\+matching}}
+\index{set\+\_\+bc\+\_\+from\+\_\+matching@{set\+\_\+bc\+\_\+from\+\_\+matching}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{set\+\_\+bc\+\_\+from\+\_\+matching(const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const bool a\+\_\+homogeneous)}{set_bc_from_matching(const LevelData< MFCellFAB > &a_phi, const bool a_homogeneous)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::set\+\_\+bc\+\_\+from\+\_\+matching (
+\begin{DoxyParamCaption}
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const bool}]{a\+\_\+homogeneous}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_aa8fd01faaa6573464258446d17b6c595}{}\label{classnwomfconductivityop_aa8fd01faaa6573464258446d17b6c595}
+
+
+Set BC from matching criteria. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!set\+\_\+electrodes@{set\+\_\+electrodes}}
+\index{set\+\_\+electrodes@{set\+\_\+electrodes}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{set\+\_\+electrodes(const Vector$<$ electrode $>$ \&a\+\_\+electrodes, const Ref\+Counted\+Ptr$<$ Base\+B\+C\+Func\+Eval $>$ a\+\_\+potential)}{set_electrodes(const Vector< electrode > &a_electrodes, const RefCountedPtr< BaseBCFuncEval > a_potential)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::set\+\_\+electrodes (
+\begin{DoxyParamCaption}
+\item[{const Vector$<$ {\bf electrode} $>$ \&}]{a\+\_\+electrodes, }
+\item[{const Ref\+Counted\+Ptr$<$ Base\+B\+C\+Func\+Eval $>$}]{a\+\_\+potential}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a74d2d5f6afd37b00f944b31cab019515}{}\label{classnwomfconductivityop_a74d2d5f6afd37b00f944b31cab019515}
+
+
+Set the non-\/matched boundary conditions. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!set\+\_\+jump@{set\+\_\+jump}}
+\index{set\+\_\+jump@{set\+\_\+jump}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{set\+\_\+jump(const Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+A\+B$<$ Real $>$ $>$ $>$ \&a\+\_\+jump)}{set_jump(const RefCountedPtr< LevelData< BaseIVFAB< Real > > > &a_jump)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::set\+\_\+jump (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ $>$ \&}]{a\+\_\+jump}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_aa34cdce0d0bb999f4ec6fe1d3b3690dc}{}\label{classnwomfconductivityop_aa34cdce0d0bb999f4ec6fe1d3b3690dc}
+
+
+Set jump condition. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!set\+Alpha\+And\+Beta@{set\+Alpha\+And\+Beta}}
+\index{set\+Alpha\+And\+Beta@{set\+Alpha\+And\+Beta}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{set\+Alpha\+And\+Beta(const Real \&a\+\_\+alpha, const Real \&a\+\_\+beta)}{setAlphaAndBeta(const Real &a_alpha, const Real &a_beta)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::set\+Alpha\+And\+Beta (
+\begin{DoxyParamCaption}
+\item[{const Real \&}]{a\+\_\+alpha, }
+\item[{const Real \&}]{a\+\_\+beta}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a3cdc08636b20034c77febba1799f9907}{}\label{classnwomfconductivityop_a3cdc08636b20034c77febba1799f9907}
+
+
+Reset for T\+GA. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!set\+Time@{set\+Time}}
+\index{set\+Time@{set\+Time}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{set\+Time(\+Real a\+\_\+old\+Time, Real a\+\_\+mu, Real a\+\_\+dt)}{setTime(Real a_oldTime, Real a_mu, Real a_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::set\+Time (
+\begin{DoxyParamCaption}
+\item[{Real}]{a\+\_\+old\+Time, }
+\item[{Real}]{a\+\_\+mu, }
+\item[{Real}]{a\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a98da85128a6c64ed7508313c4b77325b}{}\label{classnwomfconductivityop_a98da85128a6c64ed7508313c4b77325b}
+
+
+Set time. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!set\+To\+Zero@{set\+To\+Zero}}
+\index{set\+To\+Zero@{set\+To\+Zero}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{set\+To\+Zero(\+Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+x)}{setToZero(LevelData< MFCellFAB > &a_x)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::set\+To\+Zero (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+x}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a03b091425b126b996e60c142d1acbda8}{}\label{classnwomfconductivityop_a03b091425b126b996e60c142d1acbda8}
+
+
+Set to zero. 
+
+\index{nwomfconductivityop@{nwomfconductivityop}!update\+\_\+bc@{update\+\_\+bc}}
+\index{update\+\_\+bc@{update\+\_\+bc}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{update\+\_\+bc(const Level\+Data$<$ M\+F\+Cell\+F\+A\+B $>$ \&a\+\_\+phi, const bool a\+\_\+homogeneous)}{update_bc(const LevelData< MFCellFAB > &a_phi, const bool a_homogeneous)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void nwomfconductivityop\+::update\+\_\+bc (
+\begin{DoxyParamCaption}
+\item[{const Level\+Data$<$ M\+F\+Cell\+F\+AB $>$ \&}]{a\+\_\+phi, }
+\item[{const bool}]{a\+\_\+homogeneous}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classnwomfconductivityop_a7e633740393f4fbcac8e68619046cbd2}{}\label{classnwomfconductivityop_a7e633740393f4fbcac8e68619046cbd2}
+
+
+Update boundary conditions before relaxation. 
+
+
+
+\subsection{Member Data Documentation}
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+acoeffs@{m\+\_\+acoeffs}}
+\index{m\+\_\+acoeffs@{m\+\_\+acoeffs}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+acoeffs}{m_acoeffs}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$ $>$ $>$ nwomfconductivityop\+::m\+\_\+acoeffs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a5c8391dce6ff744cd80a1d8fd6c83230}{}\label{classnwomfconductivityop_a5c8391dce6ff744cd80a1d8fd6c83230}
+
+
+a-\/coefficients for each phase 
+
+
+
+Definition at line 377 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+alias@{m\+\_\+alias}}
+\index{m\+\_\+alias@{m\+\_\+alias}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+alias}{m_alias}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Level\+Data$<$E\+B\+Cell\+F\+AB$>$$\ast$ $>$ nwomfconductivityop\+::m\+\_\+alias\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a9560594cff54a70feef15260535ed83f}{}\label{classnwomfconductivityop_a9560594cff54a70feef15260535ed83f}
+
+
+Aliasing stuff. 
+
+
+
+Definition at line 397 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+alpha@{m\+\_\+alpha}}
+\index{m\+\_\+alpha@{m\+\_\+alpha}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+alpha}{m_alpha}}]{\setlength{\rightskip}{0pt plus 5cm}Real nwomfconductivityop\+::m\+\_\+alpha\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_ad40e16f1014bc48ea34cd421cc6d924a}{}\label{classnwomfconductivityop_ad40e16f1014bc48ea34cd421cc6d924a}
+
+
+alpha coefficient 
+
+
+
+Definition at line 488 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+bcoeffs@{m\+\_\+bcoeffs}}
+\index{m\+\_\+bcoeffs@{m\+\_\+bcoeffs}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcoeffs}{m_bcoeffs}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$E\+B\+Flux\+F\+AB$>$ $>$ $>$ nwomfconductivityop\+::m\+\_\+bcoeffs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a3db3b15e614b2ab9e8d1ddfa6b1bde93}{}\label{classnwomfconductivityop_a3db3b15e614b2ab9e8d1ddfa6b1bde93}
+
+
+b-\/coefficients for each phase 
+
+
+
+Definition at line 382 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+bcoeffs\+\_\+irr@{m\+\_\+bcoeffs\+\_\+irr}}
+\index{m\+\_\+bcoeffs\+\_\+irr@{m\+\_\+bcoeffs\+\_\+irr}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcoeffs\+\_\+irr}{m_bcoeffs_irr}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ $>$ nwomfconductivityop\+::m\+\_\+bcoeffs\+\_\+irr\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_ae8a7be66f4b90c63b1da9319cd9c188e}{}\label{classnwomfconductivityop_ae8a7be66f4b90c63b1da9319cd9c188e}
+
+
+b-\/coefficients for each phase 
+
+
+
+Definition at line 387 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+beta@{m\+\_\+beta}}
+\index{m\+\_\+beta@{m\+\_\+beta}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+beta}{m_beta}}]{\setlength{\rightskip}{0pt plus 5cm}Real nwomfconductivityop\+::m\+\_\+beta\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_acbd1939899583be5c9a159612649221e}{}\label{classnwomfconductivityop_acbd1939899583be5c9a159612649221e}
+
+
+beta-\/coefficient 
+
+
+
+Definition at line 493 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+colors@{m\+\_\+colors}}
+\index{m\+\_\+colors@{m\+\_\+colors}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+colors}{m_colors}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Int\+Vect$>$ nwomfconductivityop\+::m\+\_\+colors\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a215e6ce66663e176127a862002d2d5ab}{}\label{classnwomfconductivityop_a215e6ce66663e176127a862002d2d5ab}
+
+
+Colors for relaxation. 
+
+
+
+Definition at line 402 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+dirival@{m\+\_\+dirival}}
+\index{m\+\_\+dirival@{m\+\_\+dirival}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+dirival}{m_dirival}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ $>$ nwomfconductivityop\+::m\+\_\+dirival\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a31ec9f563da2ff8d96b8bfb7ed666af6}{}\label{classnwomfconductivityop_a31ec9f563da2ff8d96b8bfb7ed666af6}
+
+
+Definition at line 392 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+domain@{m\+\_\+domain}}
+\index{m\+\_\+domain@{m\+\_\+domain}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+domain}{m_domain}}]{\setlength{\rightskip}{0pt plus 5cm}Problem\+Domain nwomfconductivityop\+::m\+\_\+domain\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a50ab53648a2fe88ecac4ba4eb701f232}{}\label{classnwomfconductivityop_a50ab53648a2fe88ecac4ba4eb701f232}
+
+
+Problem domain. 
+
+
+
+Definition at line 443 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+dx@{m\+\_\+dx}}
+\index{m\+\_\+dx@{m\+\_\+dx}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+dx}{m_dx}}]{\setlength{\rightskip}{0pt plus 5cm}Real nwomfconductivityop\+::m\+\_\+dx\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_af68ef11597075bdc23e41a769d19f8ec}{}\label{classnwomfconductivityop_af68ef11597075bdc23e41a769d19f8ec}
+
+
+Level resolution. 
+
+
+
+Definition at line 483 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+ebbc@{m\+\_\+ebbc}}
+\index{m\+\_\+ebbc@{m\+\_\+ebbc}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebbc}{m_ebbc}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<${\bf mfdirichletconductivityebbc}$>$ $>$ nwomfconductivityop\+::m\+\_\+ebbc\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_aa31a3b685e2e5714a2654c3e8f192275}{}\label{classnwomfconductivityop_aa31a3b685e2e5714a2654c3e8f192275}
+
+
+Multifluid boundary conditions. 
+
+
+
+Definition at line 433 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+ebops@{m\+\_\+ebops}}
+\index{m\+\_\+ebops@{m\+\_\+ebops}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebops}{m_ebops}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<${\bf nwoebconductivityop}$>$ $>$ nwomfconductivityop\+::m\+\_\+ebops\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a2e24efc817e0570afda1d8b103bddc36}{}\label{classnwomfconductivityop_a2e24efc817e0570afda1d8b103bddc36}
+
+
+EB operators. 
+
+
+
+Definition at line 372 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+electrodes@{m\+\_\+electrodes}}
+\index{m\+\_\+electrodes@{m\+\_\+electrodes}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+electrodes}{m_electrodes}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<${\bf electrode}$>$ nwomfconductivityop\+::m\+\_\+electrodes\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a8033bcd5f84abedfd4647538f3a1422f}{}\label{classnwomfconductivityop_a8033bcd5f84abedfd4647538f3a1422f}
+
+
+Electrodes. 
+
+
+
+Definition at line 438 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+ghost\+\_\+phi@{m\+\_\+ghost\+\_\+phi}}
+\index{m\+\_\+ghost\+\_\+phi@{m\+\_\+ghost\+\_\+phi}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+ghost\+\_\+phi}{m_ghost_phi}}]{\setlength{\rightskip}{0pt plus 5cm}Int\+Vect nwomfconductivityop\+::m\+\_\+ghost\+\_\+phi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a46d6b000f62dc6a02da0a4c191534946}{}\label{classnwomfconductivityop_a46d6b000f62dc6a02da0a4c191534946}
+
+
+Number of ghost cells. 
+
+
+
+Definition at line 478 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+ghost\+\_\+rhs@{m\+\_\+ghost\+\_\+rhs}}
+\index{m\+\_\+ghost\+\_\+rhs@{m\+\_\+ghost\+\_\+rhs}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+ghost\+\_\+rhs}{m_ghost_rhs}}]{\setlength{\rightskip}{0pt plus 5cm}Int\+Vect nwomfconductivityop\+::m\+\_\+ghost\+\_\+rhs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a398ed6241b4306f2aba557b1853f112f}{}\label{classnwomfconductivityop_a398ed6241b4306f2aba557b1853f112f}
+
+
+Number of ghost cells. 
+
+
+
+Definition at line 473 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+has\+BC@{m\+\_\+has\+BC}}
+\index{m\+\_\+has\+BC@{m\+\_\+has\+BC}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+has\+BC}{m_hasBC}}]{\setlength{\rightskip}{0pt plus 5cm}bool nwomfconductivityop\+::m\+\_\+has\+BC\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a7720528788de57c5737c585e400fc31a}{}\label{classnwomfconductivityop_a7720528788de57c5737c585e400fc31a}
+
+
+Has BC been set? 
+
+
+
+Definition at line 503 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+jump@{m\+\_\+jump}}
+\index{m\+\_\+jump@{m\+\_\+jump}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+jump}{m_jump}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ nwomfconductivityop\+::m\+\_\+jump\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a094701273aec439e9e0965cedbc348a9}{}\label{classnwomfconductivityop_a094701273aec439e9e0965cedbc348a9}
+
+
+Jump condition. Comes in through factory. 
+
+
+
+Definition at line 422 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+jumpbc@{m\+\_\+jumpbc}}
+\index{m\+\_\+jumpbc@{m\+\_\+jumpbc}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+jumpbc}{m_jumpbc}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf jump\+\_\+bc}$>$ nwomfconductivityop\+::m\+\_\+jumpbc\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a5a38584a144ef9dffa3c8e0c67dd1ca0}{}\label{classnwomfconductivityop_a5a38584a144ef9dffa3c8e0c67dd1ca0}
+
+
+Class for computing BC matching. 
+
+
+
+Definition at line 417 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+mfis@{m\+\_\+mfis}}
+\index{m\+\_\+mfis@{m\+\_\+mfis}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+mfis}{m_mfis}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf mfis}$>$ nwomfconductivityop\+::m\+\_\+mfis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_acce8fedb84d502e40cb99bb82019fa55}{}\label{classnwomfconductivityop_acce8fedb84d502e40cb99bb82019fa55}
+
+
+Index spaces. 
+
+
+
+Definition at line 362 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+mflg\+\_\+coar\+\_\+mg@{m\+\_\+mflg\+\_\+coar\+\_\+mg}}
+\index{m\+\_\+mflg\+\_\+coar\+\_\+mg@{m\+\_\+mflg\+\_\+coar\+\_\+mg}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+mflg\+\_\+coar\+\_\+mg}{m_mflg_coar_mg}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf M\+F\+Level\+Grid} nwomfconductivityop\+::m\+\_\+mflg\+\_\+coar\+\_\+mg\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_af7c39316fba3146e24103e340836afa0}{}\label{classnwomfconductivityop_af7c39316fba3146e24103e340836afa0}
+
+
+Coarser \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} for MG. 
+
+
+
+Definition at line 448 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+multifluid@{m\+\_\+multifluid}}
+\index{m\+\_\+multifluid@{m\+\_\+multifluid}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+multifluid}{m_multifluid}}]{\setlength{\rightskip}{0pt plus 5cm}bool nwomfconductivityop\+::m\+\_\+multifluid\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a9082df3aa4ce17ad08b929dd7c9ca4dc}{}\label{classnwomfconductivityop_a9082df3aa4ce17ad08b929dd7c9ca4dc}
+
+
+Is this a multifluid solver? 
+
+
+
+Definition at line 508 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+ncomp@{m\+\_\+ncomp}}
+\index{m\+\_\+ncomp@{m\+\_\+ncomp}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+ncomp}{m_ncomp}}]{\setlength{\rightskip}{0pt plus 5cm}int nwomfconductivityop\+::m\+\_\+ncomp\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a199f8baac17dbcc13ea649c6bde933b3}{}\label{classnwomfconductivityop_a199f8baac17dbcc13ea649c6bde933b3}
+
+
+Number of components. 
+
+
+
+Definition at line 458 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+ops@{m\+\_\+ops}}
+\index{m\+\_\+ops@{m\+\_\+ops}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+ops}{m_ops}}]{\setlength{\rightskip}{0pt plus 5cm}Level\+Data\+Ops$<$M\+F\+Cell\+F\+AB$>$ nwomfconductivityop\+::m\+\_\+ops\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_ae3c702945e77489bf909d10be7f14cb5}{}\label{classnwomfconductivityop_ae3c702945e77489bf909d10be7f14cb5}
+
+
+Arithmetic multifluid operators. 
+
+
+
+Definition at line 412 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+origin@{m\+\_\+origin}}
+\index{m\+\_\+origin@{m\+\_\+origin}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+origin}{m_origin}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect nwomfconductivityop\+::m\+\_\+origin\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a52affc53f755c6175791dc4af2da1a6b}{}\label{classnwomfconductivityop_a52affc53f755c6175791dc4af2da1a6b}
+
+
+Origin. 
+
+
+
+Definition at line 498 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+phases@{m\+\_\+phases}}
+\index{m\+\_\+phases@{m\+\_\+phases}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+phases}{m_phases}}]{\setlength{\rightskip}{0pt plus 5cm}int nwomfconductivityop\+::m\+\_\+phases\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a2c1f4411cb7f77c9b2a3f4a9b4792c16}{}\label{classnwomfconductivityop_a2c1f4411cb7f77c9b2a3f4a9b4792c16}
+
+
+Number of phases. 
+
+
+
+Definition at line 453 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+phibc@{m\+\_\+phibc}}
+\index{m\+\_\+phibc@{m\+\_\+phibc}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+phibc}{m_phibc}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ $>$ nwomfconductivityop\+::m\+\_\+phibc\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a48cc4f2bd26e375295184057f3a2bbba}{}\label{classnwomfconductivityop_a48cc4f2bd26e375295184057f3a2bbba}
+
+
+Dirichlet boundary conditions on embedded boundaries. 
+
+\begin{DoxyNote}{Note}
+Not sure if this can be used directly for both phases; might need a separate for each 
+\end{DoxyNote}
+
+
+Definition at line 428 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+potential@{m\+\_\+potential}}
+\index{m\+\_\+potential@{m\+\_\+potential}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+potential}{m_potential}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Base\+B\+C\+Func\+Eval$>$ nwomfconductivityop\+::m\+\_\+potential\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a9e47bf000bacf30039a4ac16c57f4462}{}\label{classnwomfconductivityop_a9e47bf000bacf30039a4ac16c57f4462}
+
+
+Potential function. 
+
+
+
+Definition at line 367 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+ref\+\_\+to\+\_\+coarser@{m\+\_\+ref\+\_\+to\+\_\+coarser}}
+\index{m\+\_\+ref\+\_\+to\+\_\+coarser@{m\+\_\+ref\+\_\+to\+\_\+coarser}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+ref\+\_\+to\+\_\+coarser}{m_ref_to_coarser}}]{\setlength{\rightskip}{0pt plus 5cm}int nwomfconductivityop\+::m\+\_\+ref\+\_\+to\+\_\+coarser\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a0027b126df3299719608e457ab0ac22d}{}\label{classnwomfconductivityop_a0027b126df3299719608e457ab0ac22d}
+
+
+Refinement factor to coarser level. 
+
+
+
+Definition at line 468 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+relax@{m\+\_\+relax}}
+\index{m\+\_\+relax@{m\+\_\+relax}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+relax}{m_relax}}]{\setlength{\rightskip}{0pt plus 5cm}int nwomfconductivityop\+::m\+\_\+relax\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a106ae6d195e5b5cb4a5f3afe5e7786d1}{}\label{classnwomfconductivityop_a106ae6d195e5b5cb4a5f3afe5e7786d1}
+
+
+Relaxation type. 
+
+
+
+Definition at line 463 of file nwomfconductivityop.\+H.
+
+\index{nwomfconductivityop@{nwomfconductivityop}!m\+\_\+surfpot@{m\+\_\+surfpot}}
+\index{m\+\_\+surfpot@{m\+\_\+surfpot}!nwomfconductivityop@{nwomfconductivityop}}
+\subsubsection[{\texorpdfstring{m\+\_\+surfpot}{m_surfpot}}]{\setlength{\rightskip}{0pt plus 5cm}Level\+Data$<$Base\+I\+V\+F\+AB$<$Real$>$ $>$ nwomfconductivityop\+::m\+\_\+surfpot\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classnwomfconductivityop_a6482955f92eebf55beae4895d1d48f30}{}\label{classnwomfconductivityop_a6482955f92eebf55beae4895d1d48f30}
+
+
+Surface potential. 
+
+
+
+Definition at line 407 of file nwomfconductivityop.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/elliptic/\hyperlink{nwomfconductivityop_8H}{nwomfconductivityop.\+H}\end{DoxyCompactItemize}

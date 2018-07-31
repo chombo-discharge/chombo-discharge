@@ -1,0 +1,238 @@
+\hypertarget{classMFLevelGrid}{}\section{M\+F\+Level\+Grid Class Reference}
+\label{classMFLevelGrid}\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+
+
+Wrapper class for holding multifluid E\+B\+Level\+Grids.  
+
+
+
+
+{\ttfamily \#include $<$M\+F\+Level\+Grid.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMFLevelGrid_a922574db896fe47e94ba202590807c5e}{M\+F\+Level\+Grid} ()
+\begin{DoxyCompactList}\small\item\em Weak constructor, must subsequently call define. \end{DoxyCompactList}\item 
+\hyperlink{classMFLevelGrid_a9a72139bdf5df512aded6478ab67af3d}{M\+F\+Level\+Grid} (const Disjoint\+Box\+Layout \&a\+\_\+dbl, const Problem\+Domain \&a\+\_\+domain, const int a\+\_\+ebghost, const Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \&a\+\_\+mfis)
+\begin{DoxyCompactList}\small\item\em Full constructor. Does full allocation. \end{DoxyCompactList}\item 
+\hyperlink{classMFLevelGrid_a7301906465ddf8e2319c5dbc38e4eb1d}{M\+F\+Level\+Grid} (const Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \&a\+\_\+mfis, const Vector$<$ E\+B\+Level\+Grid $>$ \&a\+\_\+eblg)
+\begin{DoxyCompactList}\small\item\em Alternative full constructor -\/ Ref\+Counted storage so no allocation here. \end{DoxyCompactList}\item 
+\hyperlink{classMFLevelGrid_aab55f4793d3f2ca0ab94c1527d96769f}{$\sim$\+M\+F\+Level\+Grid} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classMFLevelGrid_aa734d454aa492ca0d1a7ab1f0f7fbc58}{num\+\_\+phases} () const 
+\begin{DoxyCompactList}\small\item\em Number of phases. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classMFLevelGrid_ae7cb324811b71bd16b4aa374c5fce1f9}{define} (const Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \&a\+\_\+mfis, const Vector$<$ E\+B\+Level\+Grid $>$ \&a\+\_\+eblg)
+\begin{DoxyCompactList}\small\item\em Define function. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \& \hyperlink{classMFLevelGrid_ac09adf47fdbff03d6eb3ae309212de44}{get\+\_\+mfis} () const 
+\begin{DoxyCompactList}\small\item\em Get the index space. \end{DoxyCompactList}\item 
+virtual Problem\+Domain \hyperlink{classMFLevelGrid_a43e3fce3f68c0ba93e67241928b2ba51}{get\+\_\+domain} () const 
+\begin{DoxyCompactList}\small\item\em Get the problem domain. \end{DoxyCompactList}\item 
+virtual Disjoint\+Box\+Layout \hyperlink{classMFLevelGrid_a44d383bf46d85ee02067ed2a986cb4a1}{get\+\_\+grids} () const 
+\begin{DoxyCompactList}\small\item\em Get the grids. \end{DoxyCompactList}\item 
+virtual E\+B\+Level\+Grid \& \hyperlink{classMFLevelGrid_a624af39657d18a1843277742e71740ca}{get\+\_\+eblg} (int a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Get phase. \end{DoxyCompactList}\item 
+virtual const E\+B\+Level\+Grid \& \hyperlink{classMFLevelGrid_a8e14340d6455e8736ab665639a18a3e4}{get\+\_\+eblg} (int a\+\_\+phase) const 
+\begin{DoxyCompactList}\small\item\em Get phase. \end{DoxyCompactList}\item 
+virtual Int\+Vect\+Set \hyperlink{classMFLevelGrid_a5f4ddfdb106fe19ef30e045c488181b8}{interface\+\_\+region} (const Box \&a\+\_\+box, const Data\+Index \&a\+\_\+dit, const int a\+\_\+phase1=0, const int a\+\_\+phase2=1) const 
+\begin{DoxyCompactList}\small\item\em Get interface region between two phases. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classMFLevelGrid_adac4f13ec2a1e5c866cc034f3a658f82}{interface\+\_\+pair} (Int\+Vect \&a\+\_\+iv, const Int\+Vect \&a\+\_\+iv\+\_\+in, const Box \&a\+\_\+box, const Data\+Index \&a\+\_\+dit, const int a\+\_\+phase1=0, const int a\+\_\+phase2=1) const 
+\begin{DoxyCompactList}\small\item\em Get the interface Int\+Vect on the other side of the EB. Useful for when EB aligns with cell face. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \hyperlink{classMFLevelGrid_a236b8cb59955d47b72138d7a7c752f3c}{m\+\_\+mfis}
+\item 
+Vector$<$ E\+B\+Level\+Grid $>$ \hyperlink{classMFLevelGrid_ac3adaee76caee008f240f1088422691b}{m\+\_\+eblg}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Wrapper class for holding multifluid E\+B\+Level\+Grids. 
+
+Definition at line 19 of file M\+F\+Level\+Grid.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{M\+F\+Level\+Grid()}{MFLevelGrid()}}]{\setlength{\rightskip}{0pt plus 5cm}M\+F\+Level\+Grid\+::\+M\+F\+Level\+Grid (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classMFLevelGrid_a922574db896fe47e94ba202590807c5e}{}\label{classMFLevelGrid_a922574db896fe47e94ba202590807c5e}
+
+
+Weak constructor, must subsequently call define. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{M\+F\+Level\+Grid(const Disjoint\+Box\+Layout \&a\+\_\+dbl, const Problem\+Domain \&a\+\_\+domain, const int a\+\_\+ebghost, const Ref\+Counted\+Ptr$<$ mfis $>$ \&a\+\_\+mfis)}{MFLevelGrid(const DisjointBoxLayout &a_dbl, const ProblemDomain &a_domain, const int a_ebghost, const RefCountedPtr< mfis > &a_mfis)}}]{\setlength{\rightskip}{0pt plus 5cm}M\+F\+Level\+Grid\+::\+M\+F\+Level\+Grid (
+\begin{DoxyParamCaption}
+\item[{const Disjoint\+Box\+Layout \&}]{a\+\_\+dbl, }
+\item[{const Problem\+Domain \&}]{a\+\_\+domain, }
+\item[{const int}]{a\+\_\+ebghost, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf mfis} $>$ \&}]{a\+\_\+mfis}
+\end{DoxyParamCaption}
+)}\hypertarget{classMFLevelGrid_a9a72139bdf5df512aded6478ab67af3d}{}\label{classMFLevelGrid_a9a72139bdf5df512aded6478ab67af3d}
+
+
+Full constructor. Does full allocation. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{M\+F\+Level\+Grid(const Ref\+Counted\+Ptr$<$ mfis $>$ \&a\+\_\+mfis, const Vector$<$ E\+B\+Level\+Grid $>$ \&a\+\_\+eblg)}{MFLevelGrid(const RefCountedPtr< mfis > &a_mfis, const Vector< EBLevelGrid > &a_eblg)}}]{\setlength{\rightskip}{0pt plus 5cm}M\+F\+Level\+Grid\+::\+M\+F\+Level\+Grid (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf mfis} $>$ \&}]{a\+\_\+mfis, }
+\item[{const Vector$<$ E\+B\+Level\+Grid $>$ \&}]{a\+\_\+eblg}
+\end{DoxyParamCaption}
+)}\hypertarget{classMFLevelGrid_a7301906465ddf8e2319c5dbc38e4eb1d}{}\label{classMFLevelGrid_a7301906465ddf8e2319c5dbc38e4eb1d}
+
+
+Alternative full constructor -\/ Ref\+Counted storage so no allocation here. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!````~M\+F\+Level\+Grid@{$\sim$\+M\+F\+Level\+Grid}}
+\index{````~M\+F\+Level\+Grid@{$\sim$\+M\+F\+Level\+Grid}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{$\sim$\+M\+F\+Level\+Grid()}{~MFLevelGrid()}}]{\setlength{\rightskip}{0pt plus 5cm}M\+F\+Level\+Grid\+::$\sim$\+M\+F\+Level\+Grid (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classMFLevelGrid_aab55f4793d3f2ca0ab94c1527d96769f}{}\label{classMFLevelGrid_aab55f4793d3f2ca0ab94c1527d96769f}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!define@{define}}
+\index{define@{define}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{define(const Ref\+Counted\+Ptr$<$ mfis $>$ \&a\+\_\+mfis, const Vector$<$ E\+B\+Level\+Grid $>$ \&a\+\_\+eblg)}{define(const RefCountedPtr< mfis > &a_mfis, const Vector< EBLevelGrid > &a_eblg)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void M\+F\+Level\+Grid\+::define (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf mfis} $>$ \&}]{a\+\_\+mfis, }
+\item[{const Vector$<$ E\+B\+Level\+Grid $>$ \&}]{a\+\_\+eblg}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_ae7cb324811b71bd16b4aa374c5fce1f9}{}\label{classMFLevelGrid_ae7cb324811b71bd16b4aa374c5fce1f9}
+
+
+Define function. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!get\+\_\+domain@{get\+\_\+domain}}
+\index{get\+\_\+domain@{get\+\_\+domain}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{get\+\_\+domain() const }{get_domain() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Problem\+Domain M\+F\+Level\+Grid\+::get\+\_\+domain (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_a43e3fce3f68c0ba93e67241928b2ba51}{}\label{classMFLevelGrid_a43e3fce3f68c0ba93e67241928b2ba51}
+
+
+Get the problem domain. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!get\+\_\+eblg@{get\+\_\+eblg}}
+\index{get\+\_\+eblg@{get\+\_\+eblg}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{get\+\_\+eblg(int a\+\_\+phase)}{get_eblg(int a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual E\+B\+Level\+Grid\& M\+F\+Level\+Grid\+::get\+\_\+eblg (
+\begin{DoxyParamCaption}
+\item[{int}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_a624af39657d18a1843277742e71740ca}{}\label{classMFLevelGrid_a624af39657d18a1843277742e71740ca}
+
+
+Get phase. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!get\+\_\+eblg@{get\+\_\+eblg}}
+\index{get\+\_\+eblg@{get\+\_\+eblg}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{get\+\_\+eblg(int a\+\_\+phase) const }{get_eblg(int a_phase) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const E\+B\+Level\+Grid\& M\+F\+Level\+Grid\+::get\+\_\+eblg (
+\begin{DoxyParamCaption}
+\item[{int}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_a8e14340d6455e8736ab665639a18a3e4}{}\label{classMFLevelGrid_a8e14340d6455e8736ab665639a18a3e4}
+
+
+Get phase. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!get\+\_\+grids@{get\+\_\+grids}}
+\index{get\+\_\+grids@{get\+\_\+grids}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{get\+\_\+grids() const }{get_grids() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Disjoint\+Box\+Layout M\+F\+Level\+Grid\+::get\+\_\+grids (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_a44d383bf46d85ee02067ed2a986cb4a1}{}\label{classMFLevelGrid_a44d383bf46d85ee02067ed2a986cb4a1}
+
+
+Get the grids. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!get\+\_\+mfis@{get\+\_\+mfis}}
+\index{get\+\_\+mfis@{get\+\_\+mfis}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{get\+\_\+mfis() const }{get_mfis() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf mfis}$>$\& M\+F\+Level\+Grid\+::get\+\_\+mfis (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_ac09adf47fdbff03d6eb3ae309212de44}{}\label{classMFLevelGrid_ac09adf47fdbff03d6eb3ae309212de44}
+
+
+Get the index space. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!interface\+\_\+pair@{interface\+\_\+pair}}
+\index{interface\+\_\+pair@{interface\+\_\+pair}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{interface\+\_\+pair(\+Int\+Vect \&a\+\_\+iv, const Int\+Vect \&a\+\_\+iv\+\_\+in, const Box \&a\+\_\+box, const Data\+Index \&a\+\_\+dit, const int a\+\_\+phase1=0, const int a\+\_\+phase2=1) const }{interface_pair(IntVect &a_iv, const IntVect &a_iv_in, const Box &a_box, const DataIndex &a_dit, const int a_phase1=0, const int a_phase2=1) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool M\+F\+Level\+Grid\+::interface\+\_\+pair (
+\begin{DoxyParamCaption}
+\item[{Int\+Vect \&}]{a\+\_\+iv, }
+\item[{const Int\+Vect \&}]{a\+\_\+iv\+\_\+in, }
+\item[{const Box \&}]{a\+\_\+box, }
+\item[{const Data\+Index \&}]{a\+\_\+dit, }
+\item[{const int}]{a\+\_\+phase1 = {\ttfamily 0}, }
+\item[{const int}]{a\+\_\+phase2 = {\ttfamily 1}}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_adac4f13ec2a1e5c866cc034f3a658f82}{}\label{classMFLevelGrid_adac4f13ec2a1e5c866cc034f3a658f82}
+
+
+Get the interface Int\+Vect on the other side of the EB. Useful for when EB aligns with cell face. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!interface\+\_\+region@{interface\+\_\+region}}
+\index{interface\+\_\+region@{interface\+\_\+region}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{interface\+\_\+region(const Box \&a\+\_\+box, const Data\+Index \&a\+\_\+dit, const int a\+\_\+phase1=0, const int a\+\_\+phase2=1) const }{interface_region(const Box &a_box, const DataIndex &a_dit, const int a_phase1=0, const int a_phase2=1) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Int\+Vect\+Set M\+F\+Level\+Grid\+::interface\+\_\+region (
+\begin{DoxyParamCaption}
+\item[{const Box \&}]{a\+\_\+box, }
+\item[{const Data\+Index \&}]{a\+\_\+dit, }
+\item[{const int}]{a\+\_\+phase1 = {\ttfamily 0}, }
+\item[{const int}]{a\+\_\+phase2 = {\ttfamily 1}}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_a5f4ddfdb106fe19ef30e045c488181b8}{}\label{classMFLevelGrid_a5f4ddfdb106fe19ef30e045c488181b8}
+
+
+Get interface region between two phases. 
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!num\+\_\+phases@{num\+\_\+phases}}
+\index{num\+\_\+phases@{num\+\_\+phases}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{num\+\_\+phases() const }{num_phases() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual int M\+F\+Level\+Grid\+::num\+\_\+phases (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classMFLevelGrid_aa734d454aa492ca0d1a7ab1f0f7fbc58}{}\label{classMFLevelGrid_aa734d454aa492ca0d1a7ab1f0f7fbc58}
+
+
+Number of phases. 
+
+
+
+\subsection{Member Data Documentation}
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!m\+\_\+eblg@{m\+\_\+eblg}}
+\index{m\+\_\+eblg@{m\+\_\+eblg}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{m\+\_\+eblg}{m_eblg}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$E\+B\+Level\+Grid$>$ M\+F\+Level\+Grid\+::m\+\_\+eblg\hspace{0.3cm}{\ttfamily [private]}}\hypertarget{classMFLevelGrid_ac3adaee76caee008f240f1088422691b}{}\label{classMFLevelGrid_ac3adaee76caee008f240f1088422691b}
+
+
+Definition at line 101 of file M\+F\+Level\+Grid.\+H.
+
+\index{M\+F\+Level\+Grid@{M\+F\+Level\+Grid}!m\+\_\+mfis@{m\+\_\+mfis}}
+\index{m\+\_\+mfis@{m\+\_\+mfis}!M\+F\+Level\+Grid@{M\+F\+Level\+Grid}}
+\subsubsection[{\texorpdfstring{m\+\_\+mfis}{m_mfis}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf mfis}$>$ M\+F\+Level\+Grid\+::m\+\_\+mfis\hspace{0.3cm}{\ttfamily [private]}}\hypertarget{classMFLevelGrid_a236b8cb59955d47b72138d7a7c752f3c}{}\label{classMFLevelGrid_a236b8cb59955d47b72138d7a7c752f3c}
+
+
+Definition at line 99 of file M\+F\+Level\+Grid.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/global/\hyperlink{MFLevelGrid_8H}{M\+F\+Level\+Grid.\+H}\end{DoxyCompactItemize}

@@ -1,0 +1,424 @@
+\hypertarget{classdcel__poly}{}\section{dcel\+\_\+poly Class Reference}
+\label{classdcel__poly}\index{dcel\+\_\+poly@{dcel\+\_\+poly}}
+
+
+Abstract class for declaring polygons with D\+C\+EL surface tesselations.  
+
+
+
+
+{\ttfamily \#include $<$dcel\+\_\+poly.\+H$>$}
+
+
+
+Collaboration diagram for dcel\+\_\+poly\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=153pt]{classdcel__poly__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdcel__poly_a920aab2af3168cc15894d4e979bfad30}{dcel\+\_\+poly} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classdcel__poly_a879eef335197883ebd496d2ec61b8163}{$\sim$dcel\+\_\+poly} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_a6435ac13d4ed3727bcd7144e3798d0d3}{define} (const Real\+Vect a\+\_\+normal, const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+edge)
+\begin{DoxyCompactList}\small\item\em Define edge. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_ac90f809c7c8336f73ef2e34c5c55f90d}{set\+\_\+edge} (const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \&a\+\_\+edge)
+\begin{DoxyCompactList}\small\item\em Set edge. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_a9d65d1c2a34d9acc4af0f313885a5787}{set\+\_\+normal} (const Real\+Vect a\+\_\+normal)
+\begin{DoxyCompactList}\small\item\em Set normal vector. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_a022eb4f41cfe67df0a6a3ea4de338562}{compute\+\_\+area} ()
+\begin{DoxyCompactList}\small\item\em Compute polygon area. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_a65ccd781dd4ec9c946a1d52ffcf826a3}{normalize} ()
+\begin{DoxyCompactList}\small\item\em Normalize normal vector. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_aced82b45b505feb23bbd559916631d7b}{compute\+\_\+centroid} ()
+\begin{DoxyCompactList}\small\item\em Compute centroid. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_a1880b7566efe535e71e0e6fa0bc76111}{compute\+\_\+normal} (const bool a\+\_\+outward\+\_\+normal)
+\begin{DoxyCompactList}\small\item\em Compute normal vector from vertices. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdcel__poly_a8acc8df2344ad21505a8b9c83f56f411}{compute\+\_\+bbox} ()
+\begin{DoxyCompactList}\small\item\em Compute bounding box. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__poly_a7b3ebff6a83b762892c8da0a796df587}{get\+\_\+edge} () const 
+\begin{DoxyCompactList}\small\item\em Get edge. \end{DoxyCompactList}\item 
+virtual Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \& \hyperlink{classdcel__poly_a67cc2fb9af5e316b231c34c82a957dd1}{get\+\_\+edge} ()
+\begin{DoxyCompactList}\small\item\em Get edge. \end{DoxyCompactList}\item 
+virtual Vector$<$ Real\+Vect $>$ \hyperlink{classdcel__poly_a6e6072f31cfd0714f968e7f3b5014535}{get\+\_\+points} ()
+\item 
+virtual Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__vert}{dcel\+\_\+vert} $>$ $>$ \hyperlink{classdcel__poly_a319f91c4df2500dbafa99be81538102f}{get\+\_\+vertices} ()
+\begin{DoxyCompactList}\small\item\em Get all vertices. \end{DoxyCompactList}\item 
+virtual Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ $>$ \hyperlink{classdcel__poly_a436b0e3d22a9998b940c00be3d13e8a9}{get\+\_\+edges} ()
+\begin{DoxyCompactList}\small\item\em Get all edges. \end{DoxyCompactList}\item 
+virtual Real\+Vect \hyperlink{classdcel__poly_a1da003a8bbe8321c07fddcf5ea4fb359}{get\+\_\+centroid} () const 
+\begin{DoxyCompactList}\small\item\em Get centroid. \end{DoxyCompactList}\item 
+virtual Real\+Vect \hyperlink{classdcel__poly_a249aa5de9c218e0b77fccbb4d3be3674}{get\+\_\+coord} () const 
+\begin{DoxyCompactList}\small\item\em Get the centroid. \end{DoxyCompactList}\item 
+virtual Real\+Vect \hyperlink{classdcel__poly_a01512cdff4bc2666acf7589f37c61e87}{get\+\_\+bbox\+\_\+lo} () const 
+\begin{DoxyCompactList}\small\item\em Get lower corner of bounding box. \end{DoxyCompactList}\item 
+virtual Real\+Vect \hyperlink{classdcel__poly_a7ed74c2b8f55ad807f72eb5d5ca06c24}{get\+\_\+bbox\+\_\+hi} () const 
+\begin{DoxyCompactList}\small\item\em Get high corner of bounding box. \end{DoxyCompactList}\item 
+virtual Real\+Vect \hyperlink{classdcel__poly_aaa9d83dc16a33aadcb6dc07ecb8de953}{get\+\_\+normal} () const 
+\begin{DoxyCompactList}\small\item\em Get face normal vector. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classdcel__poly_ab30552f7c156a39a21fd8b0573e79e17}{get\+\_\+area} () const 
+\begin{DoxyCompactList}\small\item\em Get polygon area. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classdcel__poly_a15e0edd225bb5ba2cfb232a0dfc7e0b1}{signed\+\_\+distance} (const Real\+Vect a\+\_\+x0)
+\begin{DoxyCompactList}\small\item\em Signed distance. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classdcel__edge}{dcel\+\_\+edge} $>$ \hyperlink{classdcel__poly_aa1869c7861c45b372ea5b93ff2e601e1}{m\+\_\+edge}
+\begin{DoxyCompactList}\small\item\em One of the edges of the polygon. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classdcel__poly_ac11d42f1a19dc3d289aea11c8d7ce360}{m\+\_\+normal}
+\begin{DoxyCompactList}\small\item\em Face normal. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classdcel__poly_a747a508bdf30fb3883200564ac0b6b26}{m\+\_\+centroid}
+\begin{DoxyCompactList}\small\item\em Polygon centroid. \end{DoxyCompactList}\item 
+Real \hyperlink{classdcel__poly_abb8df85ed097283a0ec41841cc5e596c}{m\+\_\+area}
+\begin{DoxyCompactList}\small\item\em Polygon area. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classdcel__poly_acfbac42d8308ca183ac0b9b67f0994d7}{m\+\_\+lo}
+\begin{DoxyCompactList}\small\item\em Bounding box low corner. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classdcel__poly_a3015b73d27f5ff15a9f58438816c4e9b}{m\+\_\+hi}
+\begin{DoxyCompactList}\small\item\em Bounding box high corner. \end{DoxyCompactList}\item 
+\hyperlink{classritter__sphere}{ritter\+\_\+sphere} \hyperlink{classdcel__poly_a10ce12ac725d513f47a8ca90c63b24d3}{m\+\_\+ritter}
+\begin{DoxyCompactList}\small\item\em Ritter sphere. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Abstract class for declaring polygons with D\+C\+EL surface tesselations. 
+
+Definition at line 22 of file dcel\+\_\+poly.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{dcel\+\_\+poly()}{dcel_poly()}}]{\setlength{\rightskip}{0pt plus 5cm}dcel\+\_\+poly\+::dcel\+\_\+poly (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classdcel__poly_a920aab2af3168cc15894d4e979bfad30}{}\label{classdcel__poly_a920aab2af3168cc15894d4e979bfad30}
+
+
+Constructor. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!````~dcel\+\_\+poly@{$\sim$dcel\+\_\+poly}}
+\index{````~dcel\+\_\+poly@{$\sim$dcel\+\_\+poly}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{$\sim$dcel\+\_\+poly()}{~dcel_poly()}}]{\setlength{\rightskip}{0pt plus 5cm}dcel\+\_\+poly\+::$\sim$dcel\+\_\+poly (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classdcel__poly_a879eef335197883ebd496d2ec61b8163}{}\label{classdcel__poly_a879eef335197883ebd496d2ec61b8163}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!compute\+\_\+area@{compute\+\_\+area}}
+\index{compute\+\_\+area@{compute\+\_\+area}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{compute\+\_\+area()}{compute_area()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::compute\+\_\+area (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a022eb4f41cfe67df0a6a3ea4de338562}{}\label{classdcel__poly_a022eb4f41cfe67df0a6a3ea4de338562}
+
+
+Compute polygon area. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!compute\+\_\+bbox@{compute\+\_\+bbox}}
+\index{compute\+\_\+bbox@{compute\+\_\+bbox}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{compute\+\_\+bbox()}{compute_bbox()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::compute\+\_\+bbox (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a8acc8df2344ad21505a8b9c83f56f411}{}\label{classdcel__poly_a8acc8df2344ad21505a8b9c83f56f411}
+
+
+Compute bounding box. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!compute\+\_\+centroid@{compute\+\_\+centroid}}
+\index{compute\+\_\+centroid@{compute\+\_\+centroid}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{compute\+\_\+centroid()}{compute_centroid()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::compute\+\_\+centroid (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_aced82b45b505feb23bbd559916631d7b}{}\label{classdcel__poly_aced82b45b505feb23bbd559916631d7b}
+
+
+Compute centroid. 
+
+\begin{DoxyNote}{Note}
+This currently computes the point centroid and not the mass centroid. This probably doesn\textquotesingle{}t matter for performance. 
+\end{DoxyNote}
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!compute\+\_\+normal@{compute\+\_\+normal}}
+\index{compute\+\_\+normal@{compute\+\_\+normal}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{compute\+\_\+normal(const bool a\+\_\+outward\+\_\+normal)}{compute_normal(const bool a_outward_normal)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::compute\+\_\+normal (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+outward\+\_\+normal}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a1880b7566efe535e71e0e6fa0bc76111}{}\label{classdcel__poly_a1880b7566efe535e71e0e6fa0bc76111}
+
+
+Compute normal vector from vertices. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!define@{define}}
+\index{define@{define}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{define(const Real\+Vect a\+\_\+normal, const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+edge)}{define(const RealVect a_normal, const RefCountedPtr< dcel_edge > &a_edge)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::define (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+normal, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+edge}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a6435ac13d4ed3727bcd7144e3798d0d3}{}\label{classdcel__poly_a6435ac13d4ed3727bcd7144e3798d0d3}
+
+
+Define edge. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+area@{get\+\_\+area}}
+\index{get\+\_\+area@{get\+\_\+area}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+area() const }{get_area() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real dcel\+\_\+poly\+::get\+\_\+area (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_ab30552f7c156a39a21fd8b0573e79e17}{}\label{classdcel__poly_ab30552f7c156a39a21fd8b0573e79e17}
+
+
+Get polygon area. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+bbox\+\_\+hi@{get\+\_\+bbox\+\_\+hi}}
+\index{get\+\_\+bbox\+\_\+hi@{get\+\_\+bbox\+\_\+hi}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+bbox\+\_\+hi() const }{get_bbox_hi() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real\+Vect dcel\+\_\+poly\+::get\+\_\+bbox\+\_\+hi (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a7ed74c2b8f55ad807f72eb5d5ca06c24}{}\label{classdcel__poly_a7ed74c2b8f55ad807f72eb5d5ca06c24}
+
+
+Get high corner of bounding box. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+bbox\+\_\+lo@{get\+\_\+bbox\+\_\+lo}}
+\index{get\+\_\+bbox\+\_\+lo@{get\+\_\+bbox\+\_\+lo}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+bbox\+\_\+lo() const }{get_bbox_lo() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real\+Vect dcel\+\_\+poly\+::get\+\_\+bbox\+\_\+lo (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a01512cdff4bc2666acf7589f37c61e87}{}\label{classdcel__poly_a01512cdff4bc2666acf7589f37c61e87}
+
+
+Get lower corner of bounding box. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+centroid@{get\+\_\+centroid}}
+\index{get\+\_\+centroid@{get\+\_\+centroid}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+centroid() const }{get_centroid() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real\+Vect dcel\+\_\+poly\+::get\+\_\+centroid (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a1da003a8bbe8321c07fddcf5ea4fb359}{}\label{classdcel__poly_a1da003a8bbe8321c07fddcf5ea4fb359}
+
+
+Get centroid. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+coord@{get\+\_\+coord}}
+\index{get\+\_\+coord@{get\+\_\+coord}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+coord() const }{get_coord() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real\+Vect dcel\+\_\+poly\+::get\+\_\+coord (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a249aa5de9c218e0b77fccbb4d3be3674}{}\label{classdcel__poly_a249aa5de9c218e0b77fccbb4d3be3674}
+
+
+Get the centroid. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+edge@{get\+\_\+edge}}
+\index{get\+\_\+edge@{get\+\_\+edge}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+edge() const }{get_edge() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+poly\+::get\+\_\+edge (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a7b3ebff6a83b762892c8da0a796df587}{}\label{classdcel__poly_a7b3ebff6a83b762892c8da0a796df587}
+
+
+Get edge. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+edge@{get\+\_\+edge}}
+\index{get\+\_\+edge@{get\+\_\+edge}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+edge()}{get_edge()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$\& dcel\+\_\+poly\+::get\+\_\+edge (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a67cc2fb9af5e316b231c34c82a957dd1}{}\label{classdcel__poly_a67cc2fb9af5e316b231c34c82a957dd1}
+
+
+Get edge. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+edges@{get\+\_\+edges}}
+\index{get\+\_\+edges@{get\+\_\+edges}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+edges()}{get_edges()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Vector$<$Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$ $>$ dcel\+\_\+poly\+::get\+\_\+edges (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a436b0e3d22a9998b940c00be3d13e8a9}{}\label{classdcel__poly_a436b0e3d22a9998b940c00be3d13e8a9}
+
+
+Get all edges. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+normal@{get\+\_\+normal}}
+\index{get\+\_\+normal@{get\+\_\+normal}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+normal() const }{get_normal() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real\+Vect dcel\+\_\+poly\+::get\+\_\+normal (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_aaa9d83dc16a33aadcb6dc07ecb8de953}{}\label{classdcel__poly_aaa9d83dc16a33aadcb6dc07ecb8de953}
+
+
+Get face normal vector. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+points@{get\+\_\+points}}
+\index{get\+\_\+points@{get\+\_\+points}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+points()}{get_points()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Vector$<$Real\+Vect$>$ dcel\+\_\+poly\+::get\+\_\+points (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a6e6072f31cfd0714f968e7f3b5014535}{}\label{classdcel__poly_a6e6072f31cfd0714f968e7f3b5014535}
+Get all positions \index{dcel\+\_\+poly@{dcel\+\_\+poly}!get\+\_\+vertices@{get\+\_\+vertices}}
+\index{get\+\_\+vertices@{get\+\_\+vertices}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{get\+\_\+vertices()}{get_vertices()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Vector$<$Ref\+Counted\+Ptr$<${\bf dcel\+\_\+vert}$>$ $>$ dcel\+\_\+poly\+::get\+\_\+vertices (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a319f91c4df2500dbafa99be81538102f}{}\label{classdcel__poly_a319f91c4df2500dbafa99be81538102f}
+
+
+Get all vertices. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!normalize@{normalize}}
+\index{normalize@{normalize}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{normalize()}{normalize()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::normalize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a65ccd781dd4ec9c946a1d52ffcf826a3}{}\label{classdcel__poly_a65ccd781dd4ec9c946a1d52ffcf826a3}
+
+
+Normalize normal vector. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!set\+\_\+edge@{set\+\_\+edge}}
+\index{set\+\_\+edge@{set\+\_\+edge}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{set\+\_\+edge(const Ref\+Counted\+Ptr$<$ dcel\+\_\+edge $>$ \&a\+\_\+edge)}{set_edge(const RefCountedPtr< dcel_edge > &a_edge)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::set\+\_\+edge (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf dcel\+\_\+edge} $>$ \&}]{a\+\_\+edge}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_ac90f809c7c8336f73ef2e34c5c55f90d}{}\label{classdcel__poly_ac90f809c7c8336f73ef2e34c5c55f90d}
+
+
+Set edge. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!set\+\_\+normal@{set\+\_\+normal}}
+\index{set\+\_\+normal@{set\+\_\+normal}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{set\+\_\+normal(const Real\+Vect a\+\_\+normal)}{set_normal(const RealVect a_normal)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dcel\+\_\+poly\+::set\+\_\+normal (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+normal}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a9d65d1c2a34d9acc4af0f313885a5787}{}\label{classdcel__poly_a9d65d1c2a34d9acc4af0f313885a5787}
+
+
+Set normal vector. 
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!signed\+\_\+distance@{signed\+\_\+distance}}
+\index{signed\+\_\+distance@{signed\+\_\+distance}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{signed\+\_\+distance(const Real\+Vect a\+\_\+x0)}{signed_distance(const RealVect a_x0)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real dcel\+\_\+poly\+::signed\+\_\+distance (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdcel__poly_a15e0edd225bb5ba2cfb232a0dfc7e0b1}{}\label{classdcel__poly_a15e0edd225bb5ba2cfb232a0dfc7e0b1}
+
+
+Signed distance. 
+
+
+
+\subsection{Member Data Documentation}
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!m\+\_\+area@{m\+\_\+area}}
+\index{m\+\_\+area@{m\+\_\+area}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{m\+\_\+area}{m_area}}]{\setlength{\rightskip}{0pt plus 5cm}Real dcel\+\_\+poly\+::m\+\_\+area\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__poly_abb8df85ed097283a0ec41841cc5e596c}{}\label{classdcel__poly_abb8df85ed097283a0ec41841cc5e596c}
+
+
+Polygon area. 
+
+
+
+Definition at line 161 of file dcel\+\_\+poly.\+H.
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!m\+\_\+centroid@{m\+\_\+centroid}}
+\index{m\+\_\+centroid@{m\+\_\+centroid}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{m\+\_\+centroid}{m_centroid}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect dcel\+\_\+poly\+::m\+\_\+centroid\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__poly_a747a508bdf30fb3883200564ac0b6b26}{}\label{classdcel__poly_a747a508bdf30fb3883200564ac0b6b26}
+
+
+Polygon centroid. 
+
+
+
+Definition at line 156 of file dcel\+\_\+poly.\+H.
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!m\+\_\+edge@{m\+\_\+edge}}
+\index{m\+\_\+edge@{m\+\_\+edge}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{m\+\_\+edge}{m_edge}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf dcel\+\_\+edge}$>$ dcel\+\_\+poly\+::m\+\_\+edge\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__poly_aa1869c7861c45b372ea5b93ff2e601e1}{}\label{classdcel__poly_aa1869c7861c45b372ea5b93ff2e601e1}
+
+
+One of the edges of the polygon. 
+
+
+
+Definition at line 146 of file dcel\+\_\+poly.\+H.
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!m\+\_\+hi@{m\+\_\+hi}}
+\index{m\+\_\+hi@{m\+\_\+hi}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{m\+\_\+hi}{m_hi}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect dcel\+\_\+poly\+::m\+\_\+hi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__poly_a3015b73d27f5ff15a9f58438816c4e9b}{}\label{classdcel__poly_a3015b73d27f5ff15a9f58438816c4e9b}
+
+
+Bounding box high corner. 
+
+
+
+Definition at line 171 of file dcel\+\_\+poly.\+H.
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!m\+\_\+lo@{m\+\_\+lo}}
+\index{m\+\_\+lo@{m\+\_\+lo}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{m\+\_\+lo}{m_lo}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect dcel\+\_\+poly\+::m\+\_\+lo\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__poly_acfbac42d8308ca183ac0b9b67f0994d7}{}\label{classdcel__poly_acfbac42d8308ca183ac0b9b67f0994d7}
+
+
+Bounding box low corner. 
+
+
+
+Definition at line 166 of file dcel\+\_\+poly.\+H.
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!m\+\_\+normal@{m\+\_\+normal}}
+\index{m\+\_\+normal@{m\+\_\+normal}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{m\+\_\+normal}{m_normal}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect dcel\+\_\+poly\+::m\+\_\+normal\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__poly_ac11d42f1a19dc3d289aea11c8d7ce360}{}\label{classdcel__poly_ac11d42f1a19dc3d289aea11c8d7ce360}
+
+
+Face normal. 
+
+
+
+Definition at line 151 of file dcel\+\_\+poly.\+H.
+
+\index{dcel\+\_\+poly@{dcel\+\_\+poly}!m\+\_\+ritter@{m\+\_\+ritter}}
+\index{m\+\_\+ritter@{m\+\_\+ritter}!dcel\+\_\+poly@{dcel\+\_\+poly}}
+\subsubsection[{\texorpdfstring{m\+\_\+ritter}{m_ritter}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ritter\+\_\+sphere} dcel\+\_\+poly\+::m\+\_\+ritter\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdcel__poly_a10ce12ac725d513f47a8ca90c63b24d3}{}\label{classdcel__poly_a10ce12ac725d513f47a8ca90c63b24d3}
+
+
+Ritter sphere. 
+
+
+
+Definition at line 176 of file dcel\+\_\+poly.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{dcel__poly_8H}{dcel\+\_\+poly.\+H}\end{DoxyCompactItemize}

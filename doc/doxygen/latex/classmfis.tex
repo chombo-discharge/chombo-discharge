@@ -1,0 +1,161 @@
+\hypertarget{classmfis}{}\section{mfis Class Reference}
+\label{classmfis}\index{mfis@{mfis}}
+
+
+Two-\/fluid index space.  
+
+
+
+
+{\ttfamily \#include $<$mfis.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classmfis_a5b4e7d53155c1f1064cd0ee5f51aba3e}{mfis} ()
+\begin{DoxyCompactList}\small\item\em Weak constructor. Must call define later. \end{DoxyCompactList}\item 
+\hyperlink{classmfis_a6b7710bd3761c281fa94d6d24a43e3c0}{$\sim$mfis} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classmfis_a2ed1cd36b0747c70082430817403d28c}{define} (const Box \&a\+\_\+domain, const Real\+Vect \&a\+\_\+origin, const Real \&a\+\_\+dx, const Vector$<$ Geometry\+Service $\ast$ $>$ \&a\+\_\+geoservers, int a\+\_\+n\+Cell\+Max=-\/1, int a\+\_\+max\+Coarsenings=-\/1, bool a\+\_\+fix\+Only\+First\+Phase\+Reg\+Next\+To\+Multi\+Valued=false)
+\begin{DoxyCompactList}\small\item\em Define function. \end{DoxyCompactList}\item 
+const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \& \hyperlink{classmfis_a2d7079c2d8e71a73d1e8e894f3d3efc7}{get\+\_\+ebis} (const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase) const 
+\begin{DoxyCompactList}\small\item\em Get a particular ebis. \end{DoxyCompactList}\item 
+const Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ \& \hyperlink{classmfis_abddce4105d8507ce09fcc4703d30c53f}{get\+\_\+ebis} (const int a\+\_\+phase) const 
+\begin{DoxyCompactList}\small\item\em Get a particular ebis. \end{DoxyCompactList}\item 
+Int\+Vect\+Set \hyperlink{classmfis_aa05265b0fe60b3eea478dfccd9facb5c}{interface\+\_\+region} (const Problem\+Domain \&a\+\_\+domain) const 
+\begin{DoxyCompactList}\small\item\em Get the interface region. This is defined as the intersection between the irregular cells of the gas phase and the other phases. \end{DoxyCompactList}\item 
+int \hyperlink{classmfis_af37ce52fdf3ca1e02946a14ed84f0519}{num\+\_\+phases} () const 
+\begin{DoxyCompactList}\small\item\em Get number of phases. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ E\+B\+Index\+Space $>$ $>$ \hyperlink{classmfis_af4f5f4f5369510dd59ee0e417b9049da}{m\+\_\+ebis}
+\begin{DoxyCompactList}\small\item\em E\+B\+Index\+Spaces. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ M\+F\+Index\+Space $>$ \hyperlink{classmfis_a3a34f577f423a088458d19ec1c37737d}{m\+\_\+mfis}
+\begin{DoxyCompactList}\small\item\em M\+F\+Index\+Space. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Two-\/fluid index space. 
+
+Definition at line 21 of file mfis.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{mfis@{mfis}!mfis@{mfis}}
+\index{mfis@{mfis}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{mfis()}{mfis()}}]{\setlength{\rightskip}{0pt plus 5cm}mfis\+::mfis (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classmfis_a5b4e7d53155c1f1064cd0ee5f51aba3e}{}\label{classmfis_a5b4e7d53155c1f1064cd0ee5f51aba3e}
+
+
+Weak constructor. Must call define later. 
+
+\index{mfis@{mfis}!````~mfis@{$\sim$mfis}}
+\index{````~mfis@{$\sim$mfis}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{$\sim$mfis()}{~mfis()}}]{\setlength{\rightskip}{0pt plus 5cm}mfis\+::$\sim$mfis (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classmfis_a6b7710bd3761c281fa94d6d24a43e3c0}{}\label{classmfis_a6b7710bd3761c281fa94d6d24a43e3c0}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{mfis@{mfis}!define@{define}}
+\index{define@{define}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{define(const Box \&a\+\_\+domain, const Real\+Vect \&a\+\_\+origin, const Real \&a\+\_\+dx, const Vector$<$ Geometry\+Service $\ast$ $>$ \&a\+\_\+geoservers, int a\+\_\+n\+Cell\+Max=-\/1, int a\+\_\+max\+Coarsenings=-\/1, bool a\+\_\+fix\+Only\+First\+Phase\+Reg\+Next\+To\+Multi\+Valued=false)}{define(const Box &a_domain, const RealVect &a_origin, const Real &a_dx, const Vector< GeometryService * > &a_geoservers, int a_nCellMax=-1, int a_maxCoarsenings=-1, bool a_fixOnlyFirstPhaseRegNextToMultiValued=false)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void mfis\+::define (
+\begin{DoxyParamCaption}
+\item[{const Box \&}]{a\+\_\+domain, }
+\item[{const Real\+Vect \&}]{a\+\_\+origin, }
+\item[{const Real \&}]{a\+\_\+dx, }
+\item[{const Vector$<$ Geometry\+Service $\ast$ $>$ \&}]{a\+\_\+geoservers, }
+\item[{int}]{a\+\_\+n\+Cell\+Max = {\ttfamily -\/1}, }
+\item[{int}]{a\+\_\+max\+Coarsenings = {\ttfamily -\/1}, }
+\item[{bool}]{a\+\_\+fix\+Only\+First\+Phase\+Reg\+Next\+To\+Multi\+Valued = {\ttfamily false}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classmfis_a2ed1cd36b0747c70082430817403d28c}{}\label{classmfis_a2ed1cd36b0747c70082430817403d28c}
+
+
+Define function. 
+
+\index{mfis@{mfis}!get\+\_\+ebis@{get\+\_\+ebis}}
+\index{get\+\_\+ebis@{get\+\_\+ebis}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{get\+\_\+ebis(const phase\+::which\+\_\+phase a\+\_\+phase) const }{get_ebis(const phase::which_phase a_phase) const }}]{\setlength{\rightskip}{0pt plus 5cm}const Ref\+Counted\+Ptr$<$E\+B\+Index\+Space$>$\& mfis\+::get\+\_\+ebis (
+\begin{DoxyParamCaption}
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+) const}\hypertarget{classmfis_a2d7079c2d8e71a73d1e8e894f3d3efc7}{}\label{classmfis_a2d7079c2d8e71a73d1e8e894f3d3efc7}
+
+
+Get a particular ebis. 
+
+\index{mfis@{mfis}!get\+\_\+ebis@{get\+\_\+ebis}}
+\index{get\+\_\+ebis@{get\+\_\+ebis}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{get\+\_\+ebis(const int a\+\_\+phase) const }{get_ebis(const int a_phase) const }}]{\setlength{\rightskip}{0pt plus 5cm}const Ref\+Counted\+Ptr$<$E\+B\+Index\+Space$>$\& mfis\+::get\+\_\+ebis (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+) const}\hypertarget{classmfis_abddce4105d8507ce09fcc4703d30c53f}{}\label{classmfis_abddce4105d8507ce09fcc4703d30c53f}
+
+
+Get a particular ebis. 
+
+\index{mfis@{mfis}!interface\+\_\+region@{interface\+\_\+region}}
+\index{interface\+\_\+region@{interface\+\_\+region}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{interface\+\_\+region(const Problem\+Domain \&a\+\_\+domain) const }{interface_region(const ProblemDomain &a_domain) const }}]{\setlength{\rightskip}{0pt plus 5cm}Int\+Vect\+Set mfis\+::interface\+\_\+region (
+\begin{DoxyParamCaption}
+\item[{const Problem\+Domain \&}]{a\+\_\+domain}
+\end{DoxyParamCaption}
+) const}\hypertarget{classmfis_aa05265b0fe60b3eea478dfccd9facb5c}{}\label{classmfis_aa05265b0fe60b3eea478dfccd9facb5c}
+
+
+Get the interface region. This is defined as the intersection between the irregular cells of the gas phase and the other phases. 
+
+\index{mfis@{mfis}!num\+\_\+phases@{num\+\_\+phases}}
+\index{num\+\_\+phases@{num\+\_\+phases}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{num\+\_\+phases() const }{num_phases() const }}]{\setlength{\rightskip}{0pt plus 5cm}int mfis\+::num\+\_\+phases (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\hypertarget{classmfis_af37ce52fdf3ca1e02946a14ed84f0519}{}\label{classmfis_af37ce52fdf3ca1e02946a14ed84f0519}
+
+
+Get number of phases. 
+
+
+
+\subsection{Member Data Documentation}
+\index{mfis@{mfis}!m\+\_\+ebis@{m\+\_\+ebis}}
+\index{m\+\_\+ebis@{m\+\_\+ebis}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebis}{m_ebis}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Ref\+Counted\+Ptr$<$E\+B\+Index\+Space$>$ $>$ mfis\+::m\+\_\+ebis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classmfis_af4f5f4f5369510dd59ee0e417b9049da}{}\label{classmfis_af4f5f4f5369510dd59ee0e417b9049da}
+
+
+E\+B\+Index\+Spaces. 
+
+
+
+Definition at line 72 of file mfis.\+H.
+
+\index{mfis@{mfis}!m\+\_\+mfis@{m\+\_\+mfis}}
+\index{m\+\_\+mfis@{m\+\_\+mfis}!mfis@{mfis}}
+\subsubsection[{\texorpdfstring{m\+\_\+mfis}{m_mfis}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$M\+F\+Index\+Space$>$ mfis\+::m\+\_\+mfis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classmfis_a3a34f577f423a088458d19ec1c37737d}{}\label{classmfis_a3a34f577f423a088458d19ec1c37737d}
+
+
+M\+F\+Index\+Space. 
+
+
+
+Definition at line 77 of file mfis.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{mfis_8H}{mfis.\+H}\end{DoxyCompactItemize}

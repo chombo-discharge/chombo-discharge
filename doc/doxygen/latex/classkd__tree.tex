@@ -1,0 +1,251 @@
+\hypertarget{classkd__tree}{}\section{kd\+\_\+tree$<$ T $>$ Class Template Reference}
+\label{classkd__tree}\index{kd\+\_\+tree$<$ T $>$@{kd\+\_\+tree$<$ T $>$}}
+
+
+Class for generating k-\/D binary search trees for fast polygon search.  
+
+
+
+
+{\ttfamily \#include $<$kd\+\_\+tree.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classkd__tree_a8bd69fa548e21c25e6f6e89535ca2d2f}{kd\+\_\+tree} ()
+\item 
+\hyperlink{classkd__tree_a1897d70dcc164bcfecdc9b373345ba48}{kd\+\_\+tree} (const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&a\+\_\+data, const int a\+\_\+max\+\_\+depth, const int a\+\_\+max\+\_\+elements)
+\begin{DoxyCompactList}\small\item\em Full constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classkd__tree_ad3f1855f2938bac1c6c11956b43e9a46}{$\sim$kd\+\_\+tree} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__tree_a02ce4dee1ea72279f420fd764100722b}{build\+\_\+tree} (const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&a\+\_\+data, const int a\+\_\+max\+\_\+depth, const int a\+\_\+max\+\_\+elements)
+\begin{DoxyCompactList}\small\item\em Build kd-\/tree. \end{DoxyCompactList}\item 
+virtual Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \hyperlink{classkd__tree_a55820dd7252935f6328fc6c0e174bb0b}{find\+\_\+closest} (const Real\+Vect a\+\_\+x0)
+\begin{DoxyCompactList}\small\item\em Find closest data. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classkd__tree_a617e9406e70bed7741e9d62ad3711ef8}{tree\+\_\+search} (Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ $>$ \&a\+\_\+candidates, Vector$<$ Real $>$ \&a\+\_\+distances, const Real\+Vect a\+\_\+x0)
+\begin{DoxyCompactList}\small\item\em Tree search. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__tree_a28e0be57e6dba76caeb1c949648d65ab}{insertion\+\_\+sort} (Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ $>$ \&a\+\_\+queue, Vector$<$ Real $>$ \&a\+\_\+distances)
+\begin{DoxyCompactList}\small\item\em Insertion sort. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classkd__tree_afe9722d1876a1a9707cffa5a382e52f7}{trim} (Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ $>$ \&a\+\_\+queue, Vector$<$ Real $>$ \&a\+\_\+distances, const int max\+\_\+elem)
+\begin{DoxyCompactList}\small\item\em Trim Vector. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \hyperlink{classkd__tree_a690081f36464e477e7a670131413e90a}{m\+\_\+root}
+\begin{DoxyCompactList}\small\item\em Root node. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ \hyperlink{classkd__tree_a9c9ee020f19e2bc6e092c720dec17876}{m\+\_\+leaf}
+\begin{DoxyCompactList}\small\item\em One of the leaf nodes. \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ $>$ \hyperlink{classkd__tree_a81a614de43db81a4975595c15bb50449}{m\+\_\+nodes}
+\begin{DoxyCompactList}\small\item\em Nodes. \end{DoxyCompactList}\item 
+Vector$<$ Ref\+Counted\+Ptr$<$ \hyperlink{classkd__node}{kd\+\_\+node}$<$ T $>$ $>$ $>$ \hyperlink{classkd__tree_ab0e027509eb1151fc13e3e4d54d21f08}{m\+\_\+leaves}
+\begin{DoxyCompactList}\small\item\em Leaves. \end{DoxyCompactList}\item 
+int \hyperlink{classkd__tree_a587276a40678198a1f08ce0dfda12ded}{m\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Depth. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T$>$\\*
+class kd\+\_\+tree$<$ T $>$}
+
+Class for generating k-\/D binary search trees for fast polygon search. 
+
+Definition at line 16 of file kd\+\_\+tree.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{kd\+\_\+tree@{kd\+\_\+tree}!kd\+\_\+tree@{kd\+\_\+tree}}
+\index{kd\+\_\+tree@{kd\+\_\+tree}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{kd\+\_\+tree()}{kd_tree()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::{\bf kd\+\_\+tree} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classkd__tree_a8bd69fa548e21c25e6f6e89535ca2d2f}{}\label{classkd__tree_a8bd69fa548e21c25e6f6e89535ca2d2f}
+
+
+Definition at line 14 of file kd\+\_\+tree\+I.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!kd\+\_\+tree@{kd\+\_\+tree}}
+\index{kd\+\_\+tree@{kd\+\_\+tree}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{kd\+\_\+tree(const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&a\+\_\+data, const int a\+\_\+max\+\_\+depth, const int a\+\_\+max\+\_\+elements)}{kd_tree(const Vector< RefCountedPtr< T > > &a_data, const int a_max_depth, const int a_max_elements)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::{\bf kd\+\_\+tree} (
+\begin{DoxyParamCaption}
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&}]{a\+\_\+data, }
+\item[{const int}]{a\+\_\+max\+\_\+depth, }
+\item[{const int}]{a\+\_\+max\+\_\+elements}
+\end{DoxyParamCaption}
+)}\hypertarget{classkd__tree_a1897d70dcc164bcfecdc9b373345ba48}{}\label{classkd__tree_a1897d70dcc164bcfecdc9b373345ba48}
+
+
+Full constructor. 
+
+
+
+Definition at line 18 of file kd\+\_\+tree\+I.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!````~kd\+\_\+tree@{$\sim$kd\+\_\+tree}}
+\index{````~kd\+\_\+tree@{$\sim$kd\+\_\+tree}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{$\sim$kd\+\_\+tree()}{~kd_tree()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::$\sim${\bf kd\+\_\+tree} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__tree_ad3f1855f2938bac1c6c11956b43e9a46}{}\label{classkd__tree_ad3f1855f2938bac1c6c11956b43e9a46}
+
+
+Destructor. 
+
+
+
+Definition at line 24 of file kd\+\_\+tree\+I.\+H.
+
+
+
+\subsection{Member Function Documentation}
+\index{kd\+\_\+tree@{kd\+\_\+tree}!build\+\_\+tree@{build\+\_\+tree}}
+\index{build\+\_\+tree@{build\+\_\+tree}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{build\+\_\+tree(const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&a\+\_\+data, const int a\+\_\+max\+\_\+depth, const int a\+\_\+max\+\_\+elements)}{build_tree(const Vector< RefCountedPtr< T > > &a_data, const int a_max_depth, const int a_max_elements)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+tree}$<$ T $>$\+::build\+\_\+tree (
+\begin{DoxyParamCaption}
+\item[{const Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ \&}]{a\+\_\+data, }
+\item[{const int}]{a\+\_\+max\+\_\+depth, }
+\item[{const int}]{a\+\_\+max\+\_\+elements}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__tree_a02ce4dee1ea72279f420fd764100722b}{}\label{classkd__tree_a02ce4dee1ea72279f420fd764100722b}
+
+
+Build kd-\/tree. 
+
+
+
+Definition at line 28 of file kd\+\_\+tree\+I.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!find\+\_\+closest@{find\+\_\+closest}}
+\index{find\+\_\+closest@{find\+\_\+closest}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{find\+\_\+closest(const Real\+Vect a\+\_\+x0)}{find_closest(const RealVect a_x0)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Vector$<$ Ref\+Counted\+Ptr$<$ T $>$ $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::find\+\_\+closest (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classkd__tree_a55820dd7252935f6328fc6c0e174bb0b}{}\label{classkd__tree_a55820dd7252935f6328fc6c0e174bb0b}
+
+
+Find closest data. 
+
+
+
+Definition at line 114 of file kd\+\_\+tree\+I.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!insertion\+\_\+sort@{insertion\+\_\+sort}}
+\index{insertion\+\_\+sort@{insertion\+\_\+sort}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{insertion\+\_\+sort(\+Vector$<$ Ref\+Counted\+Ptr$<$ kd\+\_\+node$<$ T $>$ $>$ $>$ \&a\+\_\+queue, Vector$<$ Real $>$ \&a\+\_\+distances)}{insertion_sort(Vector< RefCountedPtr< kd_node< T > > > &a_queue, Vector< Real > &a_distances)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+tree}$<$ T $>$\+::insertion\+\_\+sort (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ $>$ \&}]{a\+\_\+queue, }
+\item[{Vector$<$ Real $>$ \&}]{a\+\_\+distances}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classkd__tree_a28e0be57e6dba76caeb1c949648d65ab}{}\label{classkd__tree_a28e0be57e6dba76caeb1c949648d65ab}
+
+
+Insertion sort. 
+
+
+
+Definition at line 168 of file kd\+\_\+tree\+I.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!tree\+\_\+search@{tree\+\_\+search}}
+\index{tree\+\_\+search@{tree\+\_\+search}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{tree\+\_\+search(\+Vector$<$ Ref\+Counted\+Ptr$<$ kd\+\_\+node$<$ T $>$ $>$ $>$ \&a\+\_\+candidates, Vector$<$ Real $>$ \&a\+\_\+distances, const Real\+Vect a\+\_\+x0)}{tree_search(Vector< RefCountedPtr< kd_node< T > > > &a_candidates, Vector< Real > &a_distances, const RealVect a_x0)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+tree}$<$ T $>$\+::tree\+\_\+search (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ $>$ \&}]{a\+\_\+candidates, }
+\item[{Vector$<$ Real $>$ \&}]{a\+\_\+distances, }
+\item[{const Real\+Vect}]{a\+\_\+x0}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classkd__tree_a617e9406e70bed7741e9d62ad3711ef8}{}\label{classkd__tree_a617e9406e70bed7741e9d62ad3711ef8}
+
+
+Tree search. 
+
+
+
+Definition at line 127 of file kd\+\_\+tree\+I.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!trim@{trim}}
+\index{trim@{trim}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{trim(\+Vector$<$ Ref\+Counted\+Ptr$<$ kd\+\_\+node$<$ T $>$ $>$ $>$ \&a\+\_\+queue, Vector$<$ Real $>$ \&a\+\_\+distances, const int max\+\_\+elem)}{trim(Vector< RefCountedPtr< kd_node< T > > > &a_queue, Vector< Real > &a_distances, const int max_elem)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ void {\bf kd\+\_\+tree}$<$ T $>$\+::trim (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Ref\+Counted\+Ptr$<$ {\bf kd\+\_\+node}$<$ T $>$ $>$ $>$ \&}]{a\+\_\+queue, }
+\item[{Vector$<$ Real $>$ \&}]{a\+\_\+distances, }
+\item[{const int}]{max\+\_\+elem}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classkd__tree_afe9722d1876a1a9707cffa5a382e52f7}{}\label{classkd__tree_afe9722d1876a1a9707cffa5a382e52f7}
+
+
+Trim Vector. 
+
+
+
+Definition at line 195 of file kd\+\_\+tree\+I.\+H.
+
+
+
+\subsection{Member Data Documentation}
+\index{kd\+\_\+tree@{kd\+\_\+tree}!m\+\_\+depth@{m\+\_\+depth}}
+\index{m\+\_\+depth@{m\+\_\+depth}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{m\+\_\+depth}{m_depth}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ int {\bf kd\+\_\+tree}$<$ T $>$\+::m\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__tree_a587276a40678198a1f08ce0dfda12ded}{}\label{classkd__tree_a587276a40678198a1f08ce0dfda12ded}
+
+
+Depth. 
+
+
+
+Definition at line 66 of file kd\+\_\+tree.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!m\+\_\+leaf@{m\+\_\+leaf}}
+\index{m\+\_\+leaf@{m\+\_\+leaf}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{m\+\_\+leaf}{m_leaf}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Ref\+Counted\+Ptr$<${\bf kd\+\_\+node}$<$T$>$ $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::m\+\_\+leaf\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__tree_a9c9ee020f19e2bc6e092c720dec17876}{}\label{classkd__tree_a9c9ee020f19e2bc6e092c720dec17876}
+
+
+One of the leaf nodes. 
+
+
+
+Definition at line 51 of file kd\+\_\+tree.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!m\+\_\+leaves@{m\+\_\+leaves}}
+\index{m\+\_\+leaves@{m\+\_\+leaves}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{m\+\_\+leaves}{m_leaves}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Vector$<$Ref\+Counted\+Ptr$<${\bf kd\+\_\+node}$<$T$>$ $>$ $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::m\+\_\+leaves\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__tree_ab0e027509eb1151fc13e3e4d54d21f08}{}\label{classkd__tree_ab0e027509eb1151fc13e3e4d54d21f08}
+
+
+Leaves. 
+
+
+
+Definition at line 61 of file kd\+\_\+tree.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!m\+\_\+nodes@{m\+\_\+nodes}}
+\index{m\+\_\+nodes@{m\+\_\+nodes}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{m\+\_\+nodes}{m_nodes}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Vector$<$Ref\+Counted\+Ptr$<${\bf kd\+\_\+node}$<$T$>$ $>$ $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::m\+\_\+nodes\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__tree_a81a614de43db81a4975595c15bb50449}{}\label{classkd__tree_a81a614de43db81a4975595c15bb50449}
+
+
+Nodes. 
+
+
+
+Definition at line 56 of file kd\+\_\+tree.\+H.
+
+\index{kd\+\_\+tree@{kd\+\_\+tree}!m\+\_\+root@{m\+\_\+root}}
+\index{m\+\_\+root@{m\+\_\+root}!kd\+\_\+tree@{kd\+\_\+tree}}
+\subsubsection[{\texorpdfstring{m\+\_\+root}{m_root}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ Ref\+Counted\+Ptr$<${\bf kd\+\_\+node}$<$T$>$ $>$ {\bf kd\+\_\+tree}$<$ T $>$\+::m\+\_\+root\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classkd__tree_a690081f36464e477e7a670131413e90a}{}\label{classkd__tree_a690081f36464e477e7a670131413e90a}
+
+
+Root node. 
+
+
+
+Definition at line 46 of file kd\+\_\+tree.\+H.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{kd__tree_8H}{kd\+\_\+tree.\+H}\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{kd__treeI_8H}{kd\+\_\+tree\+I.\+H}\end{DoxyCompactItemize}

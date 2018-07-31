@@ -1,0 +1,1915 @@
+\hypertarget{classplasma__engine}{}\section{plasma\+\_\+engine Class Reference}
+\label{classplasma__engine}\index{plasma\+\_\+engine@{plasma\+\_\+engine}}
+
+
+Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, regrid intervals etc.  
+
+
+
+
+{\ttfamily \#include $<$plasma\+\_\+engine.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classplasma__engine_a74b17d921e89f1e0b90af3a46e1445fa}{plasma\+\_\+engine} (const Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \&a\+\_\+physdom, const Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \&a\+\_\+compgeom, const Ref\+Counted\+Ptr$<$ \hyperlink{classplasma__kinetics}{plasma\+\_\+kinetics} $>$ \&a\+\_\+plaskin, const Ref\+Counted\+Ptr$<$ \hyperlink{classtime__stepper}{time\+\_\+stepper} $>$ \&a\+\_\+timestepper, const Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \&a\+\_\+amr, const Ref\+Counted\+Ptr$<$ \hyperlink{classcell__tagger}{cell\+\_\+tagger} $>$ \&a\+\_\+celltagger=Ref\+Counted\+Ptr$<$ \hyperlink{classcell__tagger}{cell\+\_\+tagger} $>$(N\+U\+LL), const Ref\+Counted\+Ptr$<$ \hyperlink{classgeo__coarsener}{geo\+\_\+coarsener} $>$ \&a\+\_\+geocoarsen=Ref\+Counted\+Ptr$<$ \hyperlink{classgeo__coarsener}{geo\+\_\+coarsener} $>$(N\+U\+LL))
+\begin{DoxyCompactList}\small\item\em Full constructor. \end{DoxyCompactList}\item 
+\hyperlink{classplasma__engine_a33d729240035443c60db98693c70307b}{$\sim$plasma\+\_\+engine} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aa534f8694480ce60bbc19ee2fb4d4b33}{setup\+\_\+and\+\_\+run} ()
+\begin{DoxyCompactList}\small\item\em Setup and run simulations. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a2dcfd5e472e7066fd576b16bee63ddbc}{run} (const Real a\+\_\+start\+\_\+time, const Real a\+\_\+end\+\_\+time, const int a\+\_\+max\+\_\+steps)
+\begin{DoxyCompactList}\small\item\em Run the solvers untils a\+\_\+time or a\+\_\+max\+\_\+steps has been reached. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a487f33cc288aac0b5f2fde263ee55f61}{setup} (const int a\+\_\+init\+\_\+regrids, const bool a\+\_\+restart, const std\+::string a\+\_\+restart\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Setup function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a2063be18a94443139957a48c426c2acb}{set\+\_\+verbosity} (const int a\+\_\+verbosity)
+\begin{DoxyCompactList}\small\item\em Verbosity. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a7f445d7883abc938ebb05cb16d4c7d4b}{set\+\_\+amr} (const Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \&a\+\_\+amr)
+\begin{DoxyCompactList}\small\item\em Set amr. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a97c9b09d3600d3b2866f2a9e6ad6cbff}{set\+\_\+geom\+\_\+refinement\+\_\+depth} (const int a\+\_\+depth=-\/1)
+\begin{DoxyCompactList}\small\item\em Set geometric refinement depth. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ad085dbdfcc2b15bcdc5e409f30794b0a}{set\+\_\+geom\+\_\+refinement\+\_\+depth} (const int a\+\_\+depth1, const int a\+\_\+depth2, const int a\+\_\+depth3, const int a\+\_\+depth4, const int a\+\_\+depth5, const int a\+\_\+depth6)
+\begin{DoxyCompactList}\small\item\em Set geometrical refinement depths. This provides a little more flexibility than the basic call. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a97a5d75fe34ac3fb765cc6bbcb8c9d51}{set\+\_\+output\+\_\+mode} (const \hyperlink{namespaceoutput__mode_ad0fdcb2c9bc1b66e01306939b1bf5cf7}{output\+\_\+mode\+::which\+\_\+mode} a\+\_\+mode)
+\begin{DoxyCompactList}\small\item\em Set output mode. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aad30424dd9a3ed192e62f1684fae7e2c}{set\+\_\+restart\+\_\+mode} (const \hyperlink{namespacerestart__mode_aa9c13b092e65386120f08a8862e576ee}{restart\+\_\+mode\+::which\+\_\+mode} a\+\_\+mode)
+\begin{DoxyCompactList}\small\item\em Set restart mode. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aeea53dac8294171ca41eeb6a5f75a7cf}{set\+\_\+memory\+\_\+report\+\_\+mode} (const \hyperlink{namespacememory__report__mode_a7a376e3e2cdf985fc8a6d33aa68c6f44}{memory\+\_\+report\+\_\+mode\+::which\+\_\+mode} a\+\_\+memory\+\_\+mode)
+\begin{DoxyCompactList}\small\item\em Set memory report mode. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a29357d71e74cd49d43c8bacf98923904}{set\+\_\+output\+\_\+directory} (const std\+::string a\+\_\+output\+\_\+dir)
+\begin{DoxyCompactList}\small\item\em Set output directory. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aef72a257f4992f1a6abd61bb439500b8}{set\+\_\+output\+\_\+file\+\_\+names} (const std\+::string a\+\_\+output\+\_\+names)
+\begin{DoxyCompactList}\small\item\em Set output file names. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a7a9707958e922b3c5dc43ecb284ca2a4}{set\+\_\+potential} (Real($\ast$a\+\_\+potential)(const Real a\+\_\+time))
+\begin{DoxyCompactList}\small\item\em Set potential function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a7a575594478c4332a8d44600c7081111}{set\+\_\+poisson\+\_\+wall\+\_\+func} (const int a\+\_\+dir, const Side\+::\+Lo\+Hi\+Side a\+\_\+side, Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos))
+\begin{DoxyCompactList}\small\item\em Set wall potential distribution on domain faces. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_acd39bad4bdf884abbf929784ae226a10}{set\+\_\+poisson\+\_\+wall\+\_\+func} (Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos))
+\begin{DoxyCompactList}\small\item\em Set wall function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a17b810c41e8a630199bcd0ff22969dde}{set\+\_\+regrid\+\_\+interval} (const int a\+\_\+regrid\+\_\+interval)
+\begin{DoxyCompactList}\small\item\em Set the regrid interval. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ac908f64ffb2e8adb84a1415d7dfa82d0}{set\+\_\+plot\+\_\+interval} (const int a\+\_\+plot\+\_\+interval)
+\begin{DoxyCompactList}\small\item\em Set the plot interval. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a5e2ee7a101954dee592129a3915739fd}{set\+\_\+checkpoint\+\_\+interval} (const int a\+\_\+chk\+\_\+interval)
+\begin{DoxyCompactList}\small\item\em Set the checkpoint interval. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ae0f51b5046c218eb0805fcee939422fb}{set\+\_\+num\+\_\+plot\+\_\+ghost} (const int a\+\_\+num\+\_\+plot\+\_\+ghost)
+\begin{DoxyCompactList}\small\item\em Set number of ghost cells to plot. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aaadc8e4842483fe19dc9261e974aeb72}{set\+\_\+restart} (const bool a\+\_\+restart)
+\begin{DoxyCompactList}\small\item\em Set restart. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a13b2847b614b558dc0362076343c3dcf}{set\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance} (const bool a\+\_\+balance)
+\begin{DoxyCompactList}\small\item\em Set load balance for memory. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a539a354caf0758b7f0927f33b303abd8}{set\+\_\+write\+\_\+ebis} (const bool a\+\_\+write\+\_\+ebis)
+\begin{DoxyCompactList}\small\item\em Write E\+B\+IS to H\+D\+F5. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_afed60e3d7df97f68b25514c4c7f7848d}{set\+\_\+read\+\_\+ebis} (const bool a\+\_\+read\+\_\+ebis)
+\begin{DoxyCompactList}\small\item\em Read E\+B\+IS to H\+D\+F5. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aa1ca616d8fa13d09af2e9b7290e9b541}{set\+\_\+geom\+\_\+only} (const bool a\+\_\+geom\+\_\+only)
+\begin{DoxyCompactList}\small\item\em Only geometry. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a8387551a25bce6793cbc5d27b61616e2}{set\+\_\+restart\+\_\+step} (const int a\+\_\+restart\+\_\+step)
+\begin{DoxyCompactList}\small\item\em Restart step file. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aaeb6dae0d41de4d47b74351156d1eb4f}{set\+\_\+start\+\_\+time} (const Real a\+\_\+start\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Set simulation start time. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a9323854fc79186855715001a73248337}{set\+\_\+stop\+\_\+time} (const Real a\+\_\+stop\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Set simulation stop time. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a096bf36a3cadb7eab8f82259d124fe8a}{set\+\_\+max\+\_\+steps} (const int a\+\_\+max\+\_\+steps)
+\begin{DoxyCompactList}\small\item\em Set maximum number of steps. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aa9f1f590fe23eef47acdc47020bb52da}{set\+\_\+max\+\_\+plot\+\_\+depth} (const int a\+\_\+max\+\_\+plot\+\_\+depth)
+\begin{DoxyCompactList}\small\item\em Set the maximum plot depth. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_abbde563745b8e34265915dab3ec4bd38}{set\+\_\+init\+\_\+regrids} (const int a\+\_\+init\+\_\+regrids)
+\begin{DoxyCompactList}\small\item\em Set number of initial regrids. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ab4ca62fcbf0e30c40cc89a40c670bf92}{set\+\_\+grow\+\_\+tags} (const int a\+\_\+grow\+\_\+tags)
+\begin{DoxyCompactList}\small\item\em Set tag growth. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a724021f3241d58c68ca7028ac393b674}{set\+\_\+dump\+\_\+mass} (const bool a\+\_\+dump\+\_\+mass)
+\begin{DoxyCompactList}\small\item\em Dump mass for cdr solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a6db9fb70a497250ccbaa427a86ac83e3}{set\+\_\+dump\+\_\+charge} (const bool a\+\_\+dump\+\_\+charge)
+\begin{DoxyCompactList}\small\item\em Dump charge for cdr and sigma solvers. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a10af946b51b86a92476ae3e4f6a28ebe}{sanity\+\_\+check} ()
+\begin{DoxyCompactList}\small\item\em Sanity check. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classplasma__engine_a5de6e7c844a468810a056b2b923bb625}{plasma\+\_\+engine} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a186feb938f8d800da45243488b01c8f8}{allocate\+\_\+internals} ()
+\begin{DoxyCompactList}\small\item\em Allocate internals. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a586535d16064e18ed326bb8ff496c17c}{add\+\_\+potential\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add potential to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a182c57c276c74bfd984c07c182b2d1f9}{add\+\_\+electric\+\_\+field\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the electric field to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a8f380f62b13bf66208bf581e79bc6103}{add\+\_\+space\+\_\+charge\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the electric field to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a5708897bd238a9bfc8b84895166a47c9}{add\+\_\+surface\+\_\+charge\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the surface charge to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a32eba0b567f5e8c6ec66e5d30a6526f4}{add\+\_\+current\+\_\+density\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the current density to output. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a55a0ecaee91ef9856abdbf3555af8e1a}{add\+\_\+cdr\+\_\+densities\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the ion densities to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a68bfca5e0d6a6b01ac635b9fe41782fd}{add\+\_\+cdr\+\_\+velocities\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the ion velocities to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a1f4b7ca68631d79b733f7dff09f7d673}{add\+\_\+cdr\+\_\+source\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the ion source terms to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a1fab167c435924d4155b37b1f44546e6}{add\+\_\+rte\+\_\+densities\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the photon densities to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ae94010829fc59e7aa66b09114f5d23b4}{add\+\_\+rte\+\_\+source\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add the photon source terms to the output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a3be0bf1e7249c716985b1ad669a1f44f}{add\+\_\+tracer\+\_\+fields\+\_\+to\+\_\+output} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+output, const int a\+\_\+cur\+Var)
+\begin{DoxyCompactList}\small\item\em Add tracer fields to output data holder. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ab1d6de35b2b234615b1069189e686f50}{cache\+\_\+tags} (const \hyperlink{type__definitions_8H_a4eb540da9eb275c3e4225830ae526113}{E\+B\+A\+M\+R\+Tags} \&a\+\_\+tags)
+\begin{DoxyCompactList}\small\item\em Cache tags. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a7652167ce63a28ec78b9a839073df955}{deallocate\+\_\+internals} ()
+\begin{DoxyCompactList}\small\item\em Deallocate internal storage. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ac8cd9c616150a0573e768cf7e387c719}{write\+\_\+ebis} ()
+\begin{DoxyCompactList}\small\item\em Write the geometry to file. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ad1827c25fc1639c87e6f5580e12a358b}{get\+\_\+geom\+\_\+tags} ()
+\begin{DoxyCompactList}\small\item\em Get geometric tags. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ad4994e67f25fa78de4db3907ce7b5a8b}{get\+\_\+loads\+\_\+and\+\_\+boxes} (long long \&a\+\_\+my\+Points, long long \&a\+\_\+my\+Points\+Ghosts, long long \&a\+\_\+my\+Boxes, long long \&a\+\_\+total\+Points, long long \&a\+\_\+total\+Points\+Ghosts, long long \&a\+\_\+total\+Boxes, Vector$<$ long long $>$ \&a\+\_\+my\+\_\+level\+\_\+boxes, Vector$<$ long long $>$ \&a\+\_\+total\+\_\+level\+\_\+boxes, const int \&a\+\_\+finest\+Level, const Vector$<$ Disjoint\+Box\+Layout $>$ \&a\+\_\+grids)
+\begin{DoxyCompactList}\small\item\em Get boxes and points for everything. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a13348e3606d54aacc1e1e2262d15c48e}{grid\+\_\+report} ()
+\begin{DoxyCompactList}\small\item\em Write a grid report. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a0138ae855d87e78774cc9ce98580bcb6}{memory\+\_\+report} (const \hyperlink{namespacememory__report__mode_a7a376e3e2cdf985fc8a6d33aa68c6f44}{memory\+\_\+report\+\_\+mode\+::which\+\_\+mode} a\+\_\+mode)
+\begin{DoxyCompactList}\small\item\em Memory report. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a8dbde2bc9ec4952216412eaa62141253}{read\+\_\+checkpoint\+\_\+file} (const std\+::string \&a\+\_\+restart\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Read checkpoint file. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a7972f104f52c53ea2e3844f2f79997c5}{regrid} (const bool a\+\_\+use\+\_\+initial\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver whose solution is recomputed. The same goes for stationary R\+TE methods. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_af339c842a8be34680c7688136654c72b}{regrid\+\_\+internals} (const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)
+\begin{DoxyCompactList}\small\item\em Regrid internal storage for this class. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aa74f36a5bf45f2fd794178387ab08c09}{regrid\+\_\+report} (const Real a\+\_\+total\+\_\+time, const Real a\+\_\+tag\+\_\+time, const Real a\+\_\+base\+\_\+regrid\+\_\+time, const Real a\+\_\+solver\+\_\+regrid\+\_\+time, const Real a\+\_\+elliptic\+\_\+solve\+\_\+time, const Real a\+\_\+solver\+\_\+filling\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Write a regrid report. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ab4e2910083762bc6df65d874cd58a755}{set\+\_\+computational\+\_\+geometry} (const Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \&a\+\_\+compgeom)
+\begin{DoxyCompactList}\small\item\em Set the computational geometry. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a1f719ebc774758c4711ea60c0bf0e96a}{set\+\_\+plasma\+\_\+kinetics} (const Ref\+Counted\+Ptr$<$ \hyperlink{classplasma__kinetics}{plasma\+\_\+kinetics} $>$ \&a\+\_\+plaskin)
+\begin{DoxyCompactList}\small\item\em Set the plasma kinetics. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a9ff9d0097866de39efbca5a73d60f890}{set\+\_\+time\+\_\+stepper} (const Ref\+Counted\+Ptr$<$ \hyperlink{classtime__stepper}{time\+\_\+stepper} $>$ \&a\+\_\+timestepper)
+\begin{DoxyCompactList}\small\item\em Set the time stepper. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ad9bb2d32b6dadde3d3721a0c47144e9b}{set\+\_\+physical\+\_\+domain} (const Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \&a\+\_\+physdom)
+\begin{DoxyCompactList}\small\item\em Set physical domain. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a8b9c650665023a59885a0849cff18a18}{set\+\_\+cell\+\_\+tagger} (const Ref\+Counted\+Ptr$<$ \hyperlink{classcell__tagger}{cell\+\_\+tagger} $>$ \&a\+\_\+celltagger)
+\begin{DoxyCompactList}\small\item\em Set the cell tagger. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a79f083f21ef475ebcb338e5bcda58f2a}{set\+\_\+geo\+\_\+coarsen} (const Ref\+Counted\+Ptr$<$ \hyperlink{classgeo__coarsener}{geo\+\_\+coarsener} $>$ \&a\+\_\+geocoarsen)
+\begin{DoxyCompactList}\small\item\em Set the geo coarsener. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aa05c10204653e7141173918da7874a10}{setup\+\_\+fresh} (const int a\+\_\+init\+\_\+regrids)
+\begin{DoxyCompactList}\small\item\em Setup function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_acb4383dc638b9f0a47d419d502207c76}{setup\+\_\+for\+\_\+restart} (const int a\+\_\+init\+\_\+regrids, const std\+::string a\+\_\+restart\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Set for restart. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a3456034bbb7f416598d38535aad94aec}{setup\+\_\+geometry\+\_\+only} ()
+\begin{DoxyCompactList}\small\item\em Set up for geometry only. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_aadb4d6377979d1ec576e6c665fcff966}{step\+\_\+report} (const Real a\+\_\+start\+\_\+time, const Real a\+\_\+end\+\_\+time, const int a\+\_\+max\+\_\+steps)
+\begin{DoxyCompactList}\small\item\em Write a time step report. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_ab420eec8bd62cdf197329171b8d545df}{write\+\_\+plot\+\_\+file} ()
+\begin{DoxyCompactList}\small\item\em Write a plot file. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a05d1e58e504f183436f35b5c6bfe64ca}{write\+\_\+checkpoint\+\_\+file} ()
+\begin{DoxyCompactList}\small\item\em Write a checkpoint file. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a6442f4080571f3298fce1d59d7932885}{write\+\_\+geometry} ()
+\begin{DoxyCompactList}\small\item\em Write the geometry only. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a07281bc7b590514f6b9ae15cbbb56b65}{open\+\_\+mass\+\_\+dump\+\_\+file} (ofstream \&a\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Open file for mass dump. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_abf08e98071d6d27593d4f92335447c92}{open\+\_\+charge\+\_\+dump\+\_\+file} (ofstream \&a\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Open file for mass dump. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a967647acdc28b5121d12bfea474320ac}{dump\+\_\+mass} (ofstream \&a\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Dump mass. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_abfa5a30c36fc78e0b5c49324e348b749}{dump\+\_\+charge} (ofstream \&a\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Dump charge. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_afabc9281a9a32b3dfcb8023abc7a7870}{close\+\_\+mass\+\_\+dump\+\_\+file} (ofstream \&a\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Close file for mass dump. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classplasma__engine_a04142baed7daf7645ea6b24a348322b1}{close\+\_\+charge\+\_\+dump\+\_\+file} (ofstream \&a\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Close file for mass dump. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classplasma__engine_a6e1e034eceaefc352efc1a0570e77827}{tag\+\_\+cells} (Vector$<$ Int\+Vect\+Set $>$ \&a\+\_\+all\+\_\+tags, \hyperlink{type__definitions_8H_a4eb540da9eb275c3e4225830ae526113}{E\+B\+A\+M\+R\+Tags} \&a\+\_\+cell\+\_\+tags)
+\begin{DoxyCompactList}\small\item\em Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);. \end{DoxyCompactList}\item 
+virtual Vector$<$ string $>$ \hyperlink{classplasma__engine_ac0e853ddf9b8c261daf97d0c31e8d454}{get\+\_\+output\+\_\+variable\+\_\+names} ()
+\begin{DoxyCompactList}\small\item\em Get output variable names for a given output mode. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static Real \hyperlink{classplasma__engine_a478da7696c3939e3e104202ac3d7a8f0}{s\+\_\+constant\+\_\+one} (const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Default function that is passed to mapped boundary conditions. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classmfis}{mfis} $>$ \hyperlink{classplasma__engine_a585df123a78ab10b23c68209f2d36e7d}{m\+\_\+mfis}
+\begin{DoxyCompactList}\small\item\em Index space. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \hyperlink{classplasma__engine_a3d5c4695671cd62e79500a40572d14e2}{m\+\_\+amr}
+\begin{DoxyCompactList}\small\item\em A\+MR. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \hyperlink{classplasma__engine_a40573f0fdf8bba99f48842dbf8ccefc8}{m\+\_\+compgeom}
+\begin{DoxyCompactList}\small\item\em Geometry. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classplasma__kinetics}{plasma\+\_\+kinetics} $>$ \hyperlink{classplasma__engine_ab5ad9d483a1b69f5cc7640fd0ad6bdd2}{m\+\_\+plaskin}
+\begin{DoxyCompactList}\small\item\em Plasma kinetics. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \hyperlink{classplasma__engine_a9a74dc0c212ba3df4eca3bf3e86692bb}{m\+\_\+physdom}
+\begin{DoxyCompactList}\small\item\em Physical domain. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classtime__stepper}{time\+\_\+stepper} $>$ \hyperlink{classplasma__engine_a1ddf5178d9bd09d9844e0c8c7486e9b3}{m\+\_\+timestepper}
+\begin{DoxyCompactList}\small\item\em Time stepper. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classcell__tagger}{cell\+\_\+tagger} $>$ \hyperlink{classplasma__engine_aa461442fa00ec1752e3947baae8c9762}{m\+\_\+celltagger}
+\begin{DoxyCompactList}\small\item\em Cell tagger. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classgeo__coarsener}{geo\+\_\+coarsener} $>$ \hyperlink{classplasma__engine_a23492fa5ea4b57fe3a9e9ee647fd4814}{m\+\_\+geocoarsen}
+\begin{DoxyCompactList}\small\item\em Geometric coarsener. \end{DoxyCompactList}\item 
+\hyperlink{namespacetime__code_a92eaf5cbf7ef106eae01fd0d702e36bf}{time\+\_\+code\+::which\+\_\+code} \hyperlink{classplasma__engine_a0dafd26d0f8608c5f17148817a75a004}{m\+\_\+timecode}
+\begin{DoxyCompactList}\small\item\em Time code. \end{DoxyCompactList}\item 
+\hyperlink{namespaceoutput__mode_ad0fdcb2c9bc1b66e01306939b1bf5cf7}{output\+\_\+mode\+::which\+\_\+mode} \hyperlink{classplasma__engine_aed0bb2dd44f49be95fde9dd8d2952ed6}{m\+\_\+output\+\_\+mode}
+\begin{DoxyCompactList}\small\item\em Output mode. \end{DoxyCompactList}\item 
+\hyperlink{namespacerestart__mode_aa9c13b092e65386120f08a8862e576ee}{restart\+\_\+mode\+::which\+\_\+mode} \hyperlink{classplasma__engine_a71668180ba2568d17a8bce82321ffcc3}{m\+\_\+restart\+\_\+mode}
+\begin{DoxyCompactList}\small\item\em Restart mode. \end{DoxyCompactList}\item 
+\hyperlink{namespacememory__report__mode_a7a376e3e2cdf985fc8a6d33aa68c6f44}{memory\+\_\+report\+\_\+mode\+::which\+\_\+mode} \hyperlink{classplasma__engine_aa19df07c387c3eb81c8ed8c00735389c}{m\+\_\+memory\+\_\+mode}
+\begin{DoxyCompactList}\small\item\em Memory report mode. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{classplasma__engine_ab12f31677d50f5edd0077b0f41dbb6aa}{m\+\_\+output\+\_\+dir}
+\begin{DoxyCompactList}\small\item\em Output directory. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{classplasma__engine_a8af0830c8c4262753dad80b8879d3f3d}{m\+\_\+output\+\_\+names}
+\begin{DoxyCompactList}\small\item\em Output filenames. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a763a8e4ae0a147f53b9a42e975ad57bc}{m\+\_\+verbosity}
+\begin{DoxyCompactList}\small\item\em Verbosity. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a3aa7457ef6831689de8a12559195c8c7}{m\+\_\+step}
+\begin{DoxyCompactList}\small\item\em Time step. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a7b2c464f655a22bd9968255e3161fb33}{m\+\_\+regrid\+\_\+interval}
+\begin{DoxyCompactList}\small\item\em Regrid interval. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_aeb4e9f7e160f2b7cbd62571e4fbd4573}{m\+\_\+chk\+\_\+interval}
+\begin{DoxyCompactList}\small\item\em Checkpoint interval. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_ad61988b7cf22b7589b95afdbbf17fd38}{m\+\_\+plot\+\_\+interval}
+\begin{DoxyCompactList}\small\item\em Plot interval. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_af4cedda8e4d0f803d4816476c3be422c}{m\+\_\+geom\+\_\+tag\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Geometric tag depth. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_abac909f41b439212638b57c8b9508278}{m\+\_\+dielectric\+\_\+tag\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Geometric tag depth for dielectrics. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a91e626546a2d136de4cbca5237cd80b2}{m\+\_\+conductor\+\_\+tag\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Geometric tag depth for conductors. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a39a131afa18a9d5eb80b02ea8ebd51bc}{m\+\_\+gas\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Geometric tag depth for gas-\/solid interfaces. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a646e86d966b6937ca34f9c14650ae348}{m\+\_\+solid\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Geometry tag depth for solid-\/solid interfaces. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_af44aeef40ef6338b229d04dbb3f4287b}{m\+\_\+gas\+\_\+dielectric\+\_\+interface\+\_\+tag\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Geometric tag depth for gas-\/dielectric interfaces. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_abc3299bed546c07295273a0196d11c3b}{m\+\_\+gas\+\_\+conductor\+\_\+interface\+\_\+tag\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Geometric tag depth for gas-\/conductor interfaces. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_afaaa457cd8ff2b654a5331743b97d37c}{m\+\_\+max\+\_\+steps}
+\begin{DoxyCompactList}\small\item\em Maximum number of steps. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_ad3a3fcecf93110523dee8e00b517e801}{m\+\_\+max\+\_\+plot\+\_\+depth}
+\begin{DoxyCompactList}\small\item\em Maximum plot depth. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_abcf41488b5025036ef0ea7628c51335a}{m\+\_\+init\+\_\+regrids}
+\begin{DoxyCompactList}\small\item\em Number of initial regrids. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a2afdfef0059dc396540d1da383358474}{m\+\_\+num\+\_\+plot\+\_\+ghost}
+\begin{DoxyCompactList}\small\item\em Number of ghost cells to plot. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a7323b9b5c2fd0bbb24b6ed7025054abe}{m\+\_\+restart\+\_\+step}
+\begin{DoxyCompactList}\small\item\em Restart step. \end{DoxyCompactList}\item 
+int \hyperlink{classplasma__engine_a7710549e3587cbc4f27690370d22a7fb}{m\+\_\+grow\+\_\+tags}
+\begin{DoxyCompactList}\small\item\em Grow tagged cells. \end{DoxyCompactList}\item 
+Vector$<$ Int\+Vect\+Set $>$ \hyperlink{classplasma__engine_a1a1df7d26332af8f1b3407faa3276ed5}{m\+\_\+geom\+\_\+tags}
+\begin{DoxyCompactList}\small\item\em Tags. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a4eb540da9eb275c3e4225830ae526113}{E\+B\+A\+M\+R\+Tags} \hyperlink{classplasma__engine_afc8dad643656a8476b83195aab88cddb}{m\+\_\+tags}
+\begin{DoxyCompactList}\small\item\em Tags. \end{DoxyCompactList}\item 
+\hyperlink{type__definitions_8H_a4eb540da9eb275c3e4225830ae526113}{E\+B\+A\+M\+R\+Tags} \hyperlink{classplasma__engine_a8fd339d48f37250240744ea9bd878a42}{m\+\_\+cached\+\_\+tags}
+\begin{DoxyCompactList}\small\item\em Cached tags. Needed when we regrid and change box ownership. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classplasma__engine_ae28be73a1922c65e933ef0b616444991}{m\+\_\+potential} )(const Real a\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Potential. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classplasma__engine_a65dc20ba9e36ce880f4992012280ca06}{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classplasma__engine_a76d3c3e77919786c165e39dafd4b3779}{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classplasma__engine_a738cb5077366493ba56b7e5f7359d695}{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real($\ast$ \hyperlink{classplasma__engine_a6378af218871a41120b3ffd3b13b13eb}{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi} )(const Real\+Vect a\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em Function pointer for Poisson BC on domain walls. \end{DoxyCompactList}\item 
+Real \hyperlink{classplasma__engine_a8f99fe79d7b66c655eb11ed3fdac5e2b}{m\+\_\+start\+\_\+time}
+\begin{DoxyCompactList}\small\item\em Simulation start time. \end{DoxyCompactList}\item 
+Real \hyperlink{classplasma__engine_a148b332ad9c1d35b25b9479771502d3c}{m\+\_\+stop\+\_\+time}
+\begin{DoxyCompactList}\small\item\em Simulation stop time. \end{DoxyCompactList}\item 
+Real \hyperlink{classplasma__engine_ad747d24a60aec6bc61464941358f2a5e}{m\+\_\+dt}
+\begin{DoxyCompactList}\small\item\em Time increment. \end{DoxyCompactList}\item 
+Real \hyperlink{classplasma__engine_a6b74f07948066166ac42b087b2fa3fba}{m\+\_\+time}
+\begin{DoxyCompactList}\small\item\em Time. \end{DoxyCompactList}\item 
+Real \hyperlink{classplasma__engine_a91803bbb045ae9087c61744acde5e6a4}{m\+\_\+wallclock\+\_\+start}
+\begin{DoxyCompactList}\small\item\em M\+PI timer. \end{DoxyCompactList}\item 
+Real \hyperlink{classplasma__engine_adab190b38ee0eded079742d947bc04b7}{m\+\_\+wallclock1}
+\begin{DoxyCompactList}\small\item\em M\+PI timer. \end{DoxyCompactList}\item 
+Real \hyperlink{classplasma__engine_ae1d14f86a6556e643d8295a337b7578f}{m\+\_\+wallclock2}
+\begin{DoxyCompactList}\small\item\em M\+PI timer. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_ae8e57104b6f7135420f594840d6ec371}{m\+\_\+potential\+\_\+set}
+\begin{DoxyCompactList}\small\item\em Potential has been set. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_a3c9c6832efb6b89c27bb87f9b3c78709}{m\+\_\+restart}
+\begin{DoxyCompactList}\small\item\em Restart or not. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_a6f0dc470c441ce1d444fbe82659fb164}{m\+\_\+geometry\+\_\+only}
+\begin{DoxyCompactList}\small\item\em Geometry only. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_a9072ce05c25ffeb433a1522e5d5ec97e}{m\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance}
+\begin{DoxyCompactList}\small\item\em Use memory as load balance for E\+B\+IS. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_af9bb6854312d5fd2e8fbf131c0b596a9}{m\+\_\+write\+\_\+ebis}
+\begin{DoxyCompactList}\small\item\em Write E\+B\+IS to H\+D\+F5. Might be useful for restarting simulations. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_a4b1d92e7235153f99ca04250c83bdf91}{m\+\_\+read\+\_\+ebis}
+\begin{DoxyCompactList}\small\item\em Read E\+B\+IS file from H\+D\+F5. Useful for restarting simulation. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_a00b0755dc18e1d98253b9cbde39bd699}{m\+\_\+dump\+\_\+mass}
+\begin{DoxyCompactList}\small\item\em Dump total mass (or charge) for every cdr solver at every time\+\_\+step. \end{DoxyCompactList}\item 
+bool \hyperlink{classplasma__engine_aaec10f075374d29e0e11b6ce051349c7}{m\+\_\+dump\+\_\+charge}
+\begin{DoxyCompactList}\small\item\em Dump charge for cdr and surface charge solvers at every time step. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, regrid intervals etc. 
+
+\subsubsection*{Class options }
+
+\begin{DoxyVerb}plasma_engine.verbosity                       = 1             # Engine verbosity
+plasma_engine.plot_interval                   = 10            # Plot interval
+plasma_engine.regrid_interval                 = 10            # Regrid interval
+plasma_engine.checkpoint_interval             = 10            # Checkpoint interval
+plasma_engine.init_regrids                    = 0             # Number of initial regrids
+plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
+plasma_engine.stop_time                       = 1.0           # Stop time
+plasma_engine.max_steps                       = 100           # Maximum number of steps
+plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry
+plasma_engine.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+plasma_engine.output_mode                     = full          # Output mode
+plasma_engine.output_directory                = ./            # Output directory
+plasma_engine.output_names                    = simulation    # Simulation output names
+plasma_engine.restart                         = false         # Do restart or not
+plasma_engine.restart_file                    = default_file  # Restart file
+plasma_engine.restart_mode                    = full          # Restart mode. 
+plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----\end{DoxyVerb}
+ 
+
+Definition at line 59 of file plasma\+\_\+engine.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{plasma\+\_\+engine(const Ref\+Counted\+Ptr$<$ physical\+\_\+domain $>$ \&a\+\_\+physdom, const Ref\+Counted\+Ptr$<$ computational\+\_\+geometry $>$ \&a\+\_\+compgeom, const Ref\+Counted\+Ptr$<$ plasma\+\_\+kinetics $>$ \&a\+\_\+plaskin, const Ref\+Counted\+Ptr$<$ time\+\_\+stepper $>$ \&a\+\_\+timestepper, const Ref\+Counted\+Ptr$<$ amr\+\_\+mesh $>$ \&a\+\_\+amr, const Ref\+Counted\+Ptr$<$ cell\+\_\+tagger $>$ \&a\+\_\+celltagger=\+Ref\+Counted\+Ptr$<$ cell\+\_\+tagger $>$(\+N\+U\+L\+L), const Ref\+Counted\+Ptr$<$ geo\+\_\+coarsener $>$ \&a\+\_\+geocoarsen=\+Ref\+Counted\+Ptr$<$ geo\+\_\+coarsener $>$(\+N\+U\+L\+L))}{plasma_engine(const RefCountedPtr< physical_domain > &a_physdom, const RefCountedPtr< computational_geometry > &a_compgeom, const RefCountedPtr< plasma_kinetics > &a_plaskin, const RefCountedPtr< time_stepper > &a_timestepper, const RefCountedPtr< amr_mesh > &a_amr, const RefCountedPtr< cell_tagger > &a_celltagger=RefCountedPtr< cell_tagger >(NULL), const RefCountedPtr< geo_coarsener > &a_geocoarsen=RefCountedPtr< geo_coarsener >(NULL))}}]{\setlength{\rightskip}{0pt plus 5cm}plasma\+\_\+engine\+::plasma\+\_\+engine (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf physical\+\_\+domain} $>$ \&}]{a\+\_\+physdom, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf computational\+\_\+geometry} $>$ \&}]{a\+\_\+compgeom, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf plasma\+\_\+kinetics} $>$ \&}]{a\+\_\+plaskin, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf time\+\_\+stepper} $>$ \&}]{a\+\_\+timestepper, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf amr\+\_\+mesh} $>$ \&}]{a\+\_\+amr, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf cell\+\_\+tagger} $>$ \&}]{a\+\_\+celltagger = {\ttfamily RefCountedPtr$<$~{\bf cell\+\_\+tagger}~$>$(NULL)}, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf geo\+\_\+coarsener} $>$ \&}]{a\+\_\+geocoarsen = {\ttfamily RefCountedPtr$<$~{\bf geo\+\_\+coarsener}~$>$(NULL)}}
+\end{DoxyParamCaption}
+)}\hypertarget{classplasma__engine_a74b17d921e89f1e0b90af3a46e1445fa}{}\label{classplasma__engine_a74b17d921e89f1e0b90af3a46e1445fa}
+
+
+Full constructor. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!````~plasma\+\_\+engine@{$\sim$plasma\+\_\+engine}}
+\index{````~plasma\+\_\+engine@{$\sim$plasma\+\_\+engine}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{$\sim$plasma\+\_\+engine()}{~plasma_engine()}}]{\setlength{\rightskip}{0pt plus 5cm}plasma\+\_\+engine\+::$\sim$plasma\+\_\+engine (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classplasma__engine_a33d729240035443c60db98693c70307b}{}\label{classplasma__engine_a33d729240035443c60db98693c70307b}
+
+
+Constructor. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{plasma\+\_\+engine()}{plasma_engine()}}]{\setlength{\rightskip}{0pt plus 5cm}plasma\+\_\+engine\+::plasma\+\_\+engine (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a5de6e7c844a468810a056b2b923bb625}{}\label{classplasma__engine_a5de6e7c844a468810a056b2b923bb625}
+
+
+Constructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+cdr\+\_\+densities\+\_\+to\+\_\+output@{add\+\_\+cdr\+\_\+densities\+\_\+to\+\_\+output}}
+\index{add\+\_\+cdr\+\_\+densities\+\_\+to\+\_\+output@{add\+\_\+cdr\+\_\+densities\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+cdr\+\_\+densities\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_cdr_densities_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+cdr\+\_\+densities\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a55a0ecaee91ef9856abdbf3555af8e1a}{}\label{classplasma__engine_a55a0ecaee91ef9856abdbf3555af8e1a}
+
+
+Add the ion densities to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+cdr\+\_\+source\+\_\+to\+\_\+output@{add\+\_\+cdr\+\_\+source\+\_\+to\+\_\+output}}
+\index{add\+\_\+cdr\+\_\+source\+\_\+to\+\_\+output@{add\+\_\+cdr\+\_\+source\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+cdr\+\_\+source\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_cdr_source_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+cdr\+\_\+source\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a1f4b7ca68631d79b733f7dff09f7d673}{}\label{classplasma__engine_a1f4b7ca68631d79b733f7dff09f7d673}
+
+
+Add the ion source terms to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+cdr\+\_\+velocities\+\_\+to\+\_\+output@{add\+\_\+cdr\+\_\+velocities\+\_\+to\+\_\+output}}
+\index{add\+\_\+cdr\+\_\+velocities\+\_\+to\+\_\+output@{add\+\_\+cdr\+\_\+velocities\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+cdr\+\_\+velocities\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_cdr_velocities_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+cdr\+\_\+velocities\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a68bfca5e0d6a6b01ac635b9fe41782fd}{}\label{classplasma__engine_a68bfca5e0d6a6b01ac635b9fe41782fd}
+
+
+Add the ion velocities to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+current\+\_\+density\+\_\+to\+\_\+output@{add\+\_\+current\+\_\+density\+\_\+to\+\_\+output}}
+\index{add\+\_\+current\+\_\+density\+\_\+to\+\_\+output@{add\+\_\+current\+\_\+density\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+current\+\_\+density\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_current_density_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+current\+\_\+density\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a32eba0b567f5e8c6ec66e5d30a6526f4}{}\label{classplasma__engine_a32eba0b567f5e8c6ec66e5d30a6526f4}
+
+
+Add the current density to output. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+electric\+\_\+field\+\_\+to\+\_\+output@{add\+\_\+electric\+\_\+field\+\_\+to\+\_\+output}}
+\index{add\+\_\+electric\+\_\+field\+\_\+to\+\_\+output@{add\+\_\+electric\+\_\+field\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+electric\+\_\+field\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_electric_field_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+electric\+\_\+field\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a182c57c276c74bfd984c07c182b2d1f9}{}\label{classplasma__engine_a182c57c276c74bfd984c07c182b2d1f9}
+
+
+Add the electric field to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+potential\+\_\+to\+\_\+output@{add\+\_\+potential\+\_\+to\+\_\+output}}
+\index{add\+\_\+potential\+\_\+to\+\_\+output@{add\+\_\+potential\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+potential\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_potential_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+potential\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a586535d16064e18ed326bb8ff496c17c}{}\label{classplasma__engine_a586535d16064e18ed326bb8ff496c17c}
+
+
+Add potential to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+rte\+\_\+densities\+\_\+to\+\_\+output@{add\+\_\+rte\+\_\+densities\+\_\+to\+\_\+output}}
+\index{add\+\_\+rte\+\_\+densities\+\_\+to\+\_\+output@{add\+\_\+rte\+\_\+densities\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+rte\+\_\+densities\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_rte_densities_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+rte\+\_\+densities\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a1fab167c435924d4155b37b1f44546e6}{}\label{classplasma__engine_a1fab167c435924d4155b37b1f44546e6}
+
+
+Add the photon densities to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+rte\+\_\+source\+\_\+to\+\_\+output@{add\+\_\+rte\+\_\+source\+\_\+to\+\_\+output}}
+\index{add\+\_\+rte\+\_\+source\+\_\+to\+\_\+output@{add\+\_\+rte\+\_\+source\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+rte\+\_\+source\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_rte_source_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+rte\+\_\+source\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ae94010829fc59e7aa66b09114f5d23b4}{}\label{classplasma__engine_ae94010829fc59e7aa66b09114f5d23b4}
+
+
+Add the photon source terms to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+space\+\_\+charge\+\_\+to\+\_\+output@{add\+\_\+space\+\_\+charge\+\_\+to\+\_\+output}}
+\index{add\+\_\+space\+\_\+charge\+\_\+to\+\_\+output@{add\+\_\+space\+\_\+charge\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+space\+\_\+charge\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_space_charge_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+space\+\_\+charge\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a8f380f62b13bf66208bf581e79bc6103}{}\label{classplasma__engine_a8f380f62b13bf66208bf581e79bc6103}
+
+
+Add the electric field to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+surface\+\_\+charge\+\_\+to\+\_\+output@{add\+\_\+surface\+\_\+charge\+\_\+to\+\_\+output}}
+\index{add\+\_\+surface\+\_\+charge\+\_\+to\+\_\+output@{add\+\_\+surface\+\_\+charge\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+surface\+\_\+charge\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_surface_charge_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+surface\+\_\+charge\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a5708897bd238a9bfc8b84895166a47c9}{}\label{classplasma__engine_a5708897bd238a9bfc8b84895166a47c9}
+
+
+Add the surface charge to the output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!add\+\_\+tracer\+\_\+fields\+\_\+to\+\_\+output@{add\+\_\+tracer\+\_\+fields\+\_\+to\+\_\+output}}
+\index{add\+\_\+tracer\+\_\+fields\+\_\+to\+\_\+output@{add\+\_\+tracer\+\_\+fields\+\_\+to\+\_\+output}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{add\+\_\+tracer\+\_\+fields\+\_\+to\+\_\+output(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+output, const int a\+\_\+cur\+Var)}{add_tracer_fields_to_output(EBAMRCellData &a_output, const int a_curVar)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::add\+\_\+tracer\+\_\+fields\+\_\+to\+\_\+output (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+output, }
+\item[{const int}]{a\+\_\+cur\+Var}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a3be0bf1e7249c716985b1ad669a1f44f}{}\label{classplasma__engine_a3be0bf1e7249c716985b1ad669a1f44f}
+
+
+Add tracer fields to output data holder. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!allocate\+\_\+internals@{allocate\+\_\+internals}}
+\index{allocate\+\_\+internals@{allocate\+\_\+internals}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{allocate\+\_\+internals()}{allocate_internals()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::allocate\+\_\+internals (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a186feb938f8d800da45243488b01c8f8}{}\label{classplasma__engine_a186feb938f8d800da45243488b01c8f8}
+
+
+Allocate internals. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!cache\+\_\+tags@{cache\+\_\+tags}}
+\index{cache\+\_\+tags@{cache\+\_\+tags}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{cache\+\_\+tags(const E\+B\+A\+M\+R\+Tags \&a\+\_\+tags)}{cache_tags(const EBAMRTags &a_tags)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::cache\+\_\+tags (
+\begin{DoxyParamCaption}
+\item[{const {\bf E\+B\+A\+M\+R\+Tags} \&}]{a\+\_\+tags}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ab1d6de35b2b234615b1069189e686f50}{}\label{classplasma__engine_ab1d6de35b2b234615b1069189e686f50}
+
+
+Cache tags. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!close\+\_\+charge\+\_\+dump\+\_\+file@{close\+\_\+charge\+\_\+dump\+\_\+file}}
+\index{close\+\_\+charge\+\_\+dump\+\_\+file@{close\+\_\+charge\+\_\+dump\+\_\+file}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{close\+\_\+charge\+\_\+dump\+\_\+file(ofstream \&a\+\_\+file)}{close_charge_dump_file(ofstream &a_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::close\+\_\+charge\+\_\+dump\+\_\+file (
+\begin{DoxyParamCaption}
+\item[{ofstream \&}]{a\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a04142baed7daf7645ea6b24a348322b1}{}\label{classplasma__engine_a04142baed7daf7645ea6b24a348322b1}
+
+
+Close file for mass dump. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!close\+\_\+mass\+\_\+dump\+\_\+file@{close\+\_\+mass\+\_\+dump\+\_\+file}}
+\index{close\+\_\+mass\+\_\+dump\+\_\+file@{close\+\_\+mass\+\_\+dump\+\_\+file}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{close\+\_\+mass\+\_\+dump\+\_\+file(ofstream \&a\+\_\+file)}{close_mass_dump_file(ofstream &a_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::close\+\_\+mass\+\_\+dump\+\_\+file (
+\begin{DoxyParamCaption}
+\item[{ofstream \&}]{a\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_afabc9281a9a32b3dfcb8023abc7a7870}{}\label{classplasma__engine_afabc9281a9a32b3dfcb8023abc7a7870}
+
+
+Close file for mass dump. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!deallocate\+\_\+internals@{deallocate\+\_\+internals}}
+\index{deallocate\+\_\+internals@{deallocate\+\_\+internals}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{deallocate\+\_\+internals()}{deallocate_internals()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::deallocate\+\_\+internals (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a7652167ce63a28ec78b9a839073df955}{}\label{classplasma__engine_a7652167ce63a28ec78b9a839073df955}
+
+
+Deallocate internal storage. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!dump\+\_\+charge@{dump\+\_\+charge}}
+\index{dump\+\_\+charge@{dump\+\_\+charge}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{dump\+\_\+charge(ofstream \&a\+\_\+file)}{dump_charge(ofstream &a_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::dump\+\_\+charge (
+\begin{DoxyParamCaption}
+\item[{ofstream \&}]{a\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_abfa5a30c36fc78e0b5c49324e348b749}{}\label{classplasma__engine_abfa5a30c36fc78e0b5c49324e348b749}
+
+
+Dump charge. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!dump\+\_\+mass@{dump\+\_\+mass}}
+\index{dump\+\_\+mass@{dump\+\_\+mass}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{dump\+\_\+mass(ofstream \&a\+\_\+file)}{dump_mass(ofstream &a_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::dump\+\_\+mass (
+\begin{DoxyParamCaption}
+\item[{ofstream \&}]{a\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a967647acdc28b5121d12bfea474320ac}{}\label{classplasma__engine_a967647acdc28b5121d12bfea474320ac}
+
+
+Dump mass. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!get\+\_\+geom\+\_\+tags@{get\+\_\+geom\+\_\+tags}}
+\index{get\+\_\+geom\+\_\+tags@{get\+\_\+geom\+\_\+tags}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{get\+\_\+geom\+\_\+tags()}{get_geom_tags()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::get\+\_\+geom\+\_\+tags (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ad1827c25fc1639c87e6f5580e12a358b}{}\label{classplasma__engine_ad1827c25fc1639c87e6f5580e12a358b}
+
+
+Get geometric tags. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!get\+\_\+loads\+\_\+and\+\_\+boxes@{get\+\_\+loads\+\_\+and\+\_\+boxes}}
+\index{get\+\_\+loads\+\_\+and\+\_\+boxes@{get\+\_\+loads\+\_\+and\+\_\+boxes}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{get\+\_\+loads\+\_\+and\+\_\+boxes(long long \&a\+\_\+my\+Points, long long \&a\+\_\+my\+Points\+Ghosts, long long \&a\+\_\+my\+Boxes, long long \&a\+\_\+total\+Points, long long \&a\+\_\+total\+Points\+Ghosts, long long \&a\+\_\+total\+Boxes, Vector$<$ long long $>$ \&a\+\_\+my\+\_\+level\+\_\+boxes, Vector$<$ long long $>$ \&a\+\_\+total\+\_\+level\+\_\+boxes, const int \&a\+\_\+finest\+Level, const Vector$<$ Disjoint\+Box\+Layout $>$ \&a\+\_\+grids)}{get_loads_and_boxes(long long &a_myPoints, long long &a_myPointsGhosts, long long &a_myBoxes, long long &a_totalPoints, long long &a_totalPointsGhosts, long long &a_totalBoxes, Vector< long long > &a_my_level_boxes, Vector< long long > &a_total_level_boxes, const int &a_finestLevel, const Vector< DisjointBoxLayout > &a_grids)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::get\+\_\+loads\+\_\+and\+\_\+boxes (
+\begin{DoxyParamCaption}
+\item[{long long \&}]{a\+\_\+my\+Points, }
+\item[{long long \&}]{a\+\_\+my\+Points\+Ghosts, }
+\item[{long long \&}]{a\+\_\+my\+Boxes, }
+\item[{long long \&}]{a\+\_\+total\+Points, }
+\item[{long long \&}]{a\+\_\+total\+Points\+Ghosts, }
+\item[{long long \&}]{a\+\_\+total\+Boxes, }
+\item[{Vector$<$ long long $>$ \&}]{a\+\_\+my\+\_\+level\+\_\+boxes, }
+\item[{Vector$<$ long long $>$ \&}]{a\+\_\+total\+\_\+level\+\_\+boxes, }
+\item[{const int \&}]{a\+\_\+finest\+Level, }
+\item[{const Vector$<$ Disjoint\+Box\+Layout $>$ \&}]{a\+\_\+grids}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ad4994e67f25fa78de4db3907ce7b5a8b}{}\label{classplasma__engine_ad4994e67f25fa78de4db3907ce7b5a8b}
+
+
+Get boxes and points for everything. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!get\+\_\+output\+\_\+variable\+\_\+names@{get\+\_\+output\+\_\+variable\+\_\+names}}
+\index{get\+\_\+output\+\_\+variable\+\_\+names@{get\+\_\+output\+\_\+variable\+\_\+names}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{get\+\_\+output\+\_\+variable\+\_\+names()}{get_output_variable_names()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Vector$<$string$>$ plasma\+\_\+engine\+::get\+\_\+output\+\_\+variable\+\_\+names (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ac0e853ddf9b8c261daf97d0c31e8d454}{}\label{classplasma__engine_ac0e853ddf9b8c261daf97d0c31e8d454}
+
+
+Get output variable names for a given output mode. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!grid\+\_\+report@{grid\+\_\+report}}
+\index{grid\+\_\+report@{grid\+\_\+report}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{grid\+\_\+report()}{grid_report()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::grid\+\_\+report (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a13348e3606d54aacc1e1e2262d15c48e}{}\label{classplasma__engine_a13348e3606d54aacc1e1e2262d15c48e}
+
+
+Write a grid report. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!memory\+\_\+report@{memory\+\_\+report}}
+\index{memory\+\_\+report@{memory\+\_\+report}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{memory\+\_\+report(const memory\+\_\+report\+\_\+mode\+::which\+\_\+mode a\+\_\+mode)}{memory_report(const memory_report_mode::which_mode a_mode)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::memory\+\_\+report (
+\begin{DoxyParamCaption}
+\item[{const {\bf memory\+\_\+report\+\_\+mode\+::which\+\_\+mode}}]{a\+\_\+mode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a0138ae855d87e78774cc9ce98580bcb6}{}\label{classplasma__engine_a0138ae855d87e78774cc9ce98580bcb6}
+
+
+Memory report. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!open\+\_\+charge\+\_\+dump\+\_\+file@{open\+\_\+charge\+\_\+dump\+\_\+file}}
+\index{open\+\_\+charge\+\_\+dump\+\_\+file@{open\+\_\+charge\+\_\+dump\+\_\+file}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{open\+\_\+charge\+\_\+dump\+\_\+file(ofstream \&a\+\_\+file)}{open_charge_dump_file(ofstream &a_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::open\+\_\+charge\+\_\+dump\+\_\+file (
+\begin{DoxyParamCaption}
+\item[{ofstream \&}]{a\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_abf08e98071d6d27593d4f92335447c92}{}\label{classplasma__engine_abf08e98071d6d27593d4f92335447c92}
+
+
+Open file for mass dump. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!open\+\_\+mass\+\_\+dump\+\_\+file@{open\+\_\+mass\+\_\+dump\+\_\+file}}
+\index{open\+\_\+mass\+\_\+dump\+\_\+file@{open\+\_\+mass\+\_\+dump\+\_\+file}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{open\+\_\+mass\+\_\+dump\+\_\+file(ofstream \&a\+\_\+file)}{open_mass_dump_file(ofstream &a_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::open\+\_\+mass\+\_\+dump\+\_\+file (
+\begin{DoxyParamCaption}
+\item[{ofstream \&}]{a\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a07281bc7b590514f6b9ae15cbbb56b65}{}\label{classplasma__engine_a07281bc7b590514f6b9ae15cbbb56b65}
+
+
+Open file for mass dump. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!read\+\_\+checkpoint\+\_\+file@{read\+\_\+checkpoint\+\_\+file}}
+\index{read\+\_\+checkpoint\+\_\+file@{read\+\_\+checkpoint\+\_\+file}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{read\+\_\+checkpoint\+\_\+file(const std\+::string \&a\+\_\+restart\+\_\+file)}{read_checkpoint_file(const std::string &a_restart_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::read\+\_\+checkpoint\+\_\+file (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{a\+\_\+restart\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a8dbde2bc9ec4952216412eaa62141253}{}\label{classplasma__engine_a8dbde2bc9ec4952216412eaa62141253}
+
+
+Read checkpoint file. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!regrid@{regrid}}
+\index{regrid@{regrid}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{regrid(const bool a\+\_\+use\+\_\+initial\+\_\+data)}{regrid(const bool a_use_initial_data)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::regrid (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+use\+\_\+initial\+\_\+data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a7972f104f52c53ea2e3844f2f79997c5}{}\label{classplasma__engine_a7972f104f52c53ea2e3844f2f79997c5}
+
+
+Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver whose solution is recomputed. The same goes for stationary R\+TE methods. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!regrid\+\_\+internals@{regrid\+\_\+internals}}
+\index{regrid\+\_\+internals@{regrid\+\_\+internals}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{regrid\+\_\+internals(const int a\+\_\+old\+\_\+finest\+\_\+level, const int a\+\_\+new\+\_\+finest\+\_\+level)}{regrid_internals(const int a_old_finest_level, const int a_new_finest_level)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::regrid\+\_\+internals (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+old\+\_\+finest\+\_\+level, }
+\item[{const int}]{a\+\_\+new\+\_\+finest\+\_\+level}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_af339c842a8be34680c7688136654c72b}{}\label{classplasma__engine_af339c842a8be34680c7688136654c72b}
+
+
+Regrid internal storage for this class. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!regrid\+\_\+report@{regrid\+\_\+report}}
+\index{regrid\+\_\+report@{regrid\+\_\+report}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{regrid\+\_\+report(const Real a\+\_\+total\+\_\+time, const Real a\+\_\+tag\+\_\+time, const Real a\+\_\+base\+\_\+regrid\+\_\+time, const Real a\+\_\+solver\+\_\+regrid\+\_\+time, const Real a\+\_\+elliptic\+\_\+solve\+\_\+time, const Real a\+\_\+solver\+\_\+filling\+\_\+time)}{regrid_report(const Real a_total_time, const Real a_tag_time, const Real a_base_regrid_time, const Real a_solver_regrid_time, const Real a_elliptic_solve_time, const Real a_solver_filling_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::regrid\+\_\+report (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+total\+\_\+time, }
+\item[{const Real}]{a\+\_\+tag\+\_\+time, }
+\item[{const Real}]{a\+\_\+base\+\_\+regrid\+\_\+time, }
+\item[{const Real}]{a\+\_\+solver\+\_\+regrid\+\_\+time, }
+\item[{const Real}]{a\+\_\+elliptic\+\_\+solve\+\_\+time, }
+\item[{const Real}]{a\+\_\+solver\+\_\+filling\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_aa74f36a5bf45f2fd794178387ab08c09}{}\label{classplasma__engine_aa74f36a5bf45f2fd794178387ab08c09}
+
+
+Write a regrid report. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!run@{run}}
+\index{run@{run}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{run(const Real a\+\_\+start\+\_\+time, const Real a\+\_\+end\+\_\+time, const int a\+\_\+max\+\_\+steps)}{run(const Real a_start_time, const Real a_end_time, const int a_max_steps)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::run (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+start\+\_\+time, }
+\item[{const Real}]{a\+\_\+end\+\_\+time, }
+\item[{const int}]{a\+\_\+max\+\_\+steps}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a2dcfd5e472e7066fd576b16bee63ddbc}{}\label{classplasma__engine_a2dcfd5e472e7066fd576b16bee63ddbc}
+
+
+Run the solvers untils a\+\_\+time or a\+\_\+max\+\_\+steps has been reached. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!s\+\_\+constant\+\_\+one@{s\+\_\+constant\+\_\+one}}
+\index{s\+\_\+constant\+\_\+one@{s\+\_\+constant\+\_\+one}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{s\+\_\+constant\+\_\+one(const Real\+Vect a\+\_\+pos)}{s_constant_one(const RealVect a_pos)}}]{\setlength{\rightskip}{0pt plus 5cm}static Real plasma\+\_\+engine\+::s\+\_\+constant\+\_\+one (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\hypertarget{classplasma__engine_a478da7696c3939e3e104202ac3d7a8f0}{}\label{classplasma__engine_a478da7696c3939e3e104202ac3d7a8f0}
+
+
+Default function that is passed to mapped boundary conditions. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!sanity\+\_\+check@{sanity\+\_\+check}}
+\index{sanity\+\_\+check@{sanity\+\_\+check}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{sanity\+\_\+check()}{sanity_check()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::sanity\+\_\+check (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a10af946b51b86a92476ae3e4f6a28ebe}{}\label{classplasma__engine_a10af946b51b86a92476ae3e4f6a28ebe}
+
+
+Sanity check. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+amr@{set\+\_\+amr}}
+\index{set\+\_\+amr@{set\+\_\+amr}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+amr(const Ref\+Counted\+Ptr$<$ amr\+\_\+mesh $>$ \&a\+\_\+amr)}{set_amr(const RefCountedPtr< amr_mesh > &a_amr)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+amr (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf amr\+\_\+mesh} $>$ \&}]{a\+\_\+amr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a7f445d7883abc938ebb05cb16d4c7d4b}{}\label{classplasma__engine_a7f445d7883abc938ebb05cb16d4c7d4b}
+
+
+Set amr. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+cell\+\_\+tagger@{set\+\_\+cell\+\_\+tagger}}
+\index{set\+\_\+cell\+\_\+tagger@{set\+\_\+cell\+\_\+tagger}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+cell\+\_\+tagger(const Ref\+Counted\+Ptr$<$ cell\+\_\+tagger $>$ \&a\+\_\+celltagger)}{set_cell_tagger(const RefCountedPtr< cell_tagger > &a_celltagger)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+cell\+\_\+tagger (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf cell\+\_\+tagger} $>$ \&}]{a\+\_\+celltagger}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a8b9c650665023a59885a0849cff18a18}{}\label{classplasma__engine_a8b9c650665023a59885a0849cff18a18}
+
+
+Set the cell tagger. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+checkpoint\+\_\+interval@{set\+\_\+checkpoint\+\_\+interval}}
+\index{set\+\_\+checkpoint\+\_\+interval@{set\+\_\+checkpoint\+\_\+interval}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+checkpoint\+\_\+interval(const int a\+\_\+chk\+\_\+interval)}{set_checkpoint_interval(const int a_chk_interval)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+checkpoint\+\_\+interval (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+chk\+\_\+interval}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a5e2ee7a101954dee592129a3915739fd}{}\label{classplasma__engine_a5e2ee7a101954dee592129a3915739fd}
+
+
+Set the checkpoint interval. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+computational\+\_\+geometry@{set\+\_\+computational\+\_\+geometry}}
+\index{set\+\_\+computational\+\_\+geometry@{set\+\_\+computational\+\_\+geometry}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+computational\+\_\+geometry(const Ref\+Counted\+Ptr$<$ computational\+\_\+geometry $>$ \&a\+\_\+compgeom)}{set_computational_geometry(const RefCountedPtr< computational_geometry > &a_compgeom)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+computational\+\_\+geometry (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf computational\+\_\+geometry} $>$ \&}]{a\+\_\+compgeom}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ab4e2910083762bc6df65d874cd58a755}{}\label{classplasma__engine_ab4e2910083762bc6df65d874cd58a755}
+
+
+Set the computational geometry. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+dump\+\_\+charge@{set\+\_\+dump\+\_\+charge}}
+\index{set\+\_\+dump\+\_\+charge@{set\+\_\+dump\+\_\+charge}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+dump\+\_\+charge(const bool a\+\_\+dump\+\_\+charge)}{set_dump_charge(const bool a_dump_charge)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+dump\+\_\+charge (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+dump\+\_\+charge}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a6db9fb70a497250ccbaa427a86ac83e3}{}\label{classplasma__engine_a6db9fb70a497250ccbaa427a86ac83e3}
+
+
+Dump charge for cdr and sigma solvers. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+dump\+\_\+mass@{set\+\_\+dump\+\_\+mass}}
+\index{set\+\_\+dump\+\_\+mass@{set\+\_\+dump\+\_\+mass}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+dump\+\_\+mass(const bool a\+\_\+dump\+\_\+mass)}{set_dump_mass(const bool a_dump_mass)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+dump\+\_\+mass (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+dump\+\_\+mass}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a724021f3241d58c68ca7028ac393b674}{}\label{classplasma__engine_a724021f3241d58c68ca7028ac393b674}
+
+
+Dump mass for cdr solvers. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance@{set\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance}}
+\index{set\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance@{set\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance(const bool a\+\_\+balance)}{set_ebis_memory_load_balance(const bool a_balance)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+balance}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a13b2847b614b558dc0362076343c3dcf}{}\label{classplasma__engine_a13b2847b614b558dc0362076343c3dcf}
+
+
+Set load balance for memory. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+geo\+\_\+coarsen@{set\+\_\+geo\+\_\+coarsen}}
+\index{set\+\_\+geo\+\_\+coarsen@{set\+\_\+geo\+\_\+coarsen}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+geo\+\_\+coarsen(const Ref\+Counted\+Ptr$<$ geo\+\_\+coarsener $>$ \&a\+\_\+geocoarsen)}{set_geo_coarsen(const RefCountedPtr< geo_coarsener > &a_geocoarsen)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+geo\+\_\+coarsen (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf geo\+\_\+coarsener} $>$ \&}]{a\+\_\+geocoarsen}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a79f083f21ef475ebcb338e5bcda58f2a}{}\label{classplasma__engine_a79f083f21ef475ebcb338e5bcda58f2a}
+
+
+Set the geo coarsener. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+geom\+\_\+only@{set\+\_\+geom\+\_\+only}}
+\index{set\+\_\+geom\+\_\+only@{set\+\_\+geom\+\_\+only}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+geom\+\_\+only(const bool a\+\_\+geom\+\_\+only)}{set_geom_only(const bool a_geom_only)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+geom\+\_\+only (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+geom\+\_\+only}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aa1ca616d8fa13d09af2e9b7290e9b541}{}\label{classplasma__engine_aa1ca616d8fa13d09af2e9b7290e9b541}
+
+
+Only geometry. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+geom\+\_\+refinement\+\_\+depth@{set\+\_\+geom\+\_\+refinement\+\_\+depth}}
+\index{set\+\_\+geom\+\_\+refinement\+\_\+depth@{set\+\_\+geom\+\_\+refinement\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+geom\+\_\+refinement\+\_\+depth(const int a\+\_\+depth=-\/1)}{set_geom_refinement_depth(const int a_depth=-1)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+geom\+\_\+refinement\+\_\+depth (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+depth = {\ttfamily -\/1}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a97c9b09d3600d3b2866f2a9e6ad6cbff}{}\label{classplasma__engine_a97c9b09d3600d3b2866f2a9e6ad6cbff}
+
+
+Set geometric refinement depth. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+geom\+\_\+refinement\+\_\+depth@{set\+\_\+geom\+\_\+refinement\+\_\+depth}}
+\index{set\+\_\+geom\+\_\+refinement\+\_\+depth@{set\+\_\+geom\+\_\+refinement\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+geom\+\_\+refinement\+\_\+depth(const int a\+\_\+depth1, const int a\+\_\+depth2, const int a\+\_\+depth3, const int a\+\_\+depth4, const int a\+\_\+depth5, const int a\+\_\+depth6)}{set_geom_refinement_depth(const int a_depth1, const int a_depth2, const int a_depth3, const int a_depth4, const int a_depth5, const int a_depth6)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+geom\+\_\+refinement\+\_\+depth (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+depth1, }
+\item[{const int}]{a\+\_\+depth2, }
+\item[{const int}]{a\+\_\+depth3, }
+\item[{const int}]{a\+\_\+depth4, }
+\item[{const int}]{a\+\_\+depth5, }
+\item[{const int}]{a\+\_\+depth6}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_ad085dbdfcc2b15bcdc5e409f30794b0a}{}\label{classplasma__engine_ad085dbdfcc2b15bcdc5e409f30794b0a}
+
+
+Set geometrical refinement depths. This provides a little more flexibility than the basic call. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+depth1} & Conductor tag depth \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+depth2} & Dielectric tag depth \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+depth3} & Conductor-\/gas interface tag depth \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+depth4} & Dielectric-\/gas interface tag depth \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+depth5} & Solid-\/gas interface tag depth \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+depth6} & Solid-\/solid interface tag depth \\
+\hline
+\end{DoxyParams}
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+grow\+\_\+tags@{set\+\_\+grow\+\_\+tags}}
+\index{set\+\_\+grow\+\_\+tags@{set\+\_\+grow\+\_\+tags}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+grow\+\_\+tags(const int a\+\_\+grow\+\_\+tags)}{set_grow_tags(const int a_grow_tags)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+grow\+\_\+tags (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+grow\+\_\+tags}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_ab4ca62fcbf0e30c40cc89a40c670bf92}{}\label{classplasma__engine_ab4ca62fcbf0e30c40cc89a40c670bf92}
+
+
+Set tag growth. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+init\+\_\+regrids@{set\+\_\+init\+\_\+regrids}}
+\index{set\+\_\+init\+\_\+regrids@{set\+\_\+init\+\_\+regrids}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+init\+\_\+regrids(const int a\+\_\+init\+\_\+regrids)}{set_init_regrids(const int a_init_regrids)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+init\+\_\+regrids (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+init\+\_\+regrids}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_abbde563745b8e34265915dab3ec4bd38}{}\label{classplasma__engine_abbde563745b8e34265915dab3ec4bd38}
+
+
+Set number of initial regrids. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+max\+\_\+plot\+\_\+depth@{set\+\_\+max\+\_\+plot\+\_\+depth}}
+\index{set\+\_\+max\+\_\+plot\+\_\+depth@{set\+\_\+max\+\_\+plot\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+max\+\_\+plot\+\_\+depth(const int a\+\_\+max\+\_\+plot\+\_\+depth)}{set_max_plot_depth(const int a_max_plot_depth)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+max\+\_\+plot\+\_\+depth (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+max\+\_\+plot\+\_\+depth}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aa9f1f590fe23eef47acdc47020bb52da}{}\label{classplasma__engine_aa9f1f590fe23eef47acdc47020bb52da}
+
+
+Set the maximum plot depth. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+max\+\_\+steps@{set\+\_\+max\+\_\+steps}}
+\index{set\+\_\+max\+\_\+steps@{set\+\_\+max\+\_\+steps}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+max\+\_\+steps(const int a\+\_\+max\+\_\+steps)}{set_max_steps(const int a_max_steps)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+max\+\_\+steps (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+max\+\_\+steps}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a096bf36a3cadb7eab8f82259d124fe8a}{}\label{classplasma__engine_a096bf36a3cadb7eab8f82259d124fe8a}
+
+
+Set maximum number of steps. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+memory\+\_\+report\+\_\+mode@{set\+\_\+memory\+\_\+report\+\_\+mode}}
+\index{set\+\_\+memory\+\_\+report\+\_\+mode@{set\+\_\+memory\+\_\+report\+\_\+mode}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+memory\+\_\+report\+\_\+mode(const memory\+\_\+report\+\_\+mode\+::which\+\_\+mode a\+\_\+memory\+\_\+mode)}{set_memory_report_mode(const memory_report_mode::which_mode a_memory_mode)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+memory\+\_\+report\+\_\+mode (
+\begin{DoxyParamCaption}
+\item[{const {\bf memory\+\_\+report\+\_\+mode\+::which\+\_\+mode}}]{a\+\_\+memory\+\_\+mode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aeea53dac8294171ca41eeb6a5f75a7cf}{}\label{classplasma__engine_aeea53dac8294171ca41eeb6a5f75a7cf}
+
+
+Set memory report mode. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+num\+\_\+plot\+\_\+ghost@{set\+\_\+num\+\_\+plot\+\_\+ghost}}
+\index{set\+\_\+num\+\_\+plot\+\_\+ghost@{set\+\_\+num\+\_\+plot\+\_\+ghost}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+num\+\_\+plot\+\_\+ghost(const int a\+\_\+num\+\_\+plot\+\_\+ghost)}{set_num_plot_ghost(const int a_num_plot_ghost)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+num\+\_\+plot\+\_\+ghost (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+num\+\_\+plot\+\_\+ghost}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_ae0f51b5046c218eb0805fcee939422fb}{}\label{classplasma__engine_ae0f51b5046c218eb0805fcee939422fb}
+
+
+Set number of ghost cells to plot. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+output\+\_\+directory@{set\+\_\+output\+\_\+directory}}
+\index{set\+\_\+output\+\_\+directory@{set\+\_\+output\+\_\+directory}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+output\+\_\+directory(const std\+::string a\+\_\+output\+\_\+dir)}{set_output_directory(const std::string a_output_dir)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+output\+\_\+directory (
+\begin{DoxyParamCaption}
+\item[{const std\+::string}]{a\+\_\+output\+\_\+dir}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a29357d71e74cd49d43c8bacf98923904}{}\label{classplasma__engine_a29357d71e74cd49d43c8bacf98923904}
+
+
+Set output directory. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+output\+\_\+file\+\_\+names@{set\+\_\+output\+\_\+file\+\_\+names}}
+\index{set\+\_\+output\+\_\+file\+\_\+names@{set\+\_\+output\+\_\+file\+\_\+names}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+output\+\_\+file\+\_\+names(const std\+::string a\+\_\+output\+\_\+names)}{set_output_file_names(const std::string a_output_names)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+output\+\_\+file\+\_\+names (
+\begin{DoxyParamCaption}
+\item[{const std\+::string}]{a\+\_\+output\+\_\+names}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aef72a257f4992f1a6abd61bb439500b8}{}\label{classplasma__engine_aef72a257f4992f1a6abd61bb439500b8}
+
+
+Set output file names. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+output\+\_\+mode@{set\+\_\+output\+\_\+mode}}
+\index{set\+\_\+output\+\_\+mode@{set\+\_\+output\+\_\+mode}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+output\+\_\+mode(const output\+\_\+mode\+::which\+\_\+mode a\+\_\+mode)}{set_output_mode(const output_mode::which_mode a_mode)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+output\+\_\+mode (
+\begin{DoxyParamCaption}
+\item[{const {\bf output\+\_\+mode\+::which\+\_\+mode}}]{a\+\_\+mode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a97a5d75fe34ac3fb765cc6bbcb8c9d51}{}\label{classplasma__engine_a97a5d75fe34ac3fb765cc6bbcb8c9d51}
+
+
+Set output mode. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+physical\+\_\+domain@{set\+\_\+physical\+\_\+domain}}
+\index{set\+\_\+physical\+\_\+domain@{set\+\_\+physical\+\_\+domain}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+physical\+\_\+domain(const Ref\+Counted\+Ptr$<$ physical\+\_\+domain $>$ \&a\+\_\+physdom)}{set_physical_domain(const RefCountedPtr< physical_domain > &a_physdom)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+physical\+\_\+domain (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf physical\+\_\+domain} $>$ \&}]{a\+\_\+physdom}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ad9bb2d32b6dadde3d3721a0c47144e9b}{}\label{classplasma__engine_ad9bb2d32b6dadde3d3721a0c47144e9b}
+
+
+Set physical domain. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+plasma\+\_\+kinetics@{set\+\_\+plasma\+\_\+kinetics}}
+\index{set\+\_\+plasma\+\_\+kinetics@{set\+\_\+plasma\+\_\+kinetics}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+plasma\+\_\+kinetics(const Ref\+Counted\+Ptr$<$ plasma\+\_\+kinetics $>$ \&a\+\_\+plaskin)}{set_plasma_kinetics(const RefCountedPtr< plasma_kinetics > &a_plaskin)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+plasma\+\_\+kinetics (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf plasma\+\_\+kinetics} $>$ \&}]{a\+\_\+plaskin}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a1f719ebc774758c4711ea60c0bf0e96a}{}\label{classplasma__engine_a1f719ebc774758c4711ea60c0bf0e96a}
+
+
+Set the plasma kinetics. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+plot\+\_\+interval@{set\+\_\+plot\+\_\+interval}}
+\index{set\+\_\+plot\+\_\+interval@{set\+\_\+plot\+\_\+interval}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+plot\+\_\+interval(const int a\+\_\+plot\+\_\+interval)}{set_plot_interval(const int a_plot_interval)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+plot\+\_\+interval (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+plot\+\_\+interval}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_ac908f64ffb2e8adb84a1415d7dfa82d0}{}\label{classplasma__engine_ac908f64ffb2e8adb84a1415d7dfa82d0}
+
+
+Set the plot interval. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+poisson\+\_\+wall\+\_\+func@{set\+\_\+poisson\+\_\+wall\+\_\+func}}
+\index{set\+\_\+poisson\+\_\+wall\+\_\+func@{set\+\_\+poisson\+\_\+wall\+\_\+func}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+poisson\+\_\+wall\+\_\+func(const int a\+\_\+dir, const Side\+::\+Lo\+Hi\+Side a\+\_\+side, Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos))}{set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real(*a_func)(const RealVect a_pos))}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+poisson\+\_\+wall\+\_\+func (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+dir, }
+\item[{const Side\+::\+Lo\+Hi\+Side}]{a\+\_\+side, }
+\item[{Real($\ast$)(const Real\+Vect a\+\_\+pos)}]{a\+\_\+func}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a7a575594478c4332a8d44600c7081111}{}\label{classplasma__engine_a7a575594478c4332a8d44600c7081111}
+
+
+Set wall potential distribution on domain faces. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+poisson\+\_\+wall\+\_\+func@{set\+\_\+poisson\+\_\+wall\+\_\+func}}
+\index{set\+\_\+poisson\+\_\+wall\+\_\+func@{set\+\_\+poisson\+\_\+wall\+\_\+func}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+poisson\+\_\+wall\+\_\+func(\+Real($\ast$a\+\_\+func)(const Real\+Vect a\+\_\+pos))}{set_poisson_wall_func(Real(*a_func)(const RealVect a_pos))}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+poisson\+\_\+wall\+\_\+func (
+\begin{DoxyParamCaption}
+\item[{Real($\ast$)(const Real\+Vect a\+\_\+pos)}]{a\+\_\+func}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_acd39bad4bdf884abbf929784ae226a10}{}\label{classplasma__engine_acd39bad4bdf884abbf929784ae226a10}
+
+
+Set wall function. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+potential@{set\+\_\+potential}}
+\index{set\+\_\+potential@{set\+\_\+potential}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+potential(\+Real($\ast$a\+\_\+potential)(const Real a\+\_\+time))}{set_potential(Real(*a_potential)(const Real a_time))}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+potential (
+\begin{DoxyParamCaption}
+\item[{Real($\ast$)(const Real a\+\_\+time)}]{a\+\_\+potential}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a7a9707958e922b3c5dc43ecb284ca2a4}{}\label{classplasma__engine_a7a9707958e922b3c5dc43ecb284ca2a4}
+
+
+Set potential function. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+read\+\_\+ebis@{set\+\_\+read\+\_\+ebis}}
+\index{set\+\_\+read\+\_\+ebis@{set\+\_\+read\+\_\+ebis}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+read\+\_\+ebis(const bool a\+\_\+read\+\_\+ebis)}{set_read_ebis(const bool a_read_ebis)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+read\+\_\+ebis (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+read\+\_\+ebis}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_afed60e3d7df97f68b25514c4c7f7848d}{}\label{classplasma__engine_afed60e3d7df97f68b25514c4c7f7848d}
+
+
+Read E\+B\+IS to H\+D\+F5. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+regrid\+\_\+interval@{set\+\_\+regrid\+\_\+interval}}
+\index{set\+\_\+regrid\+\_\+interval@{set\+\_\+regrid\+\_\+interval}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+regrid\+\_\+interval(const int a\+\_\+regrid\+\_\+interval)}{set_regrid_interval(const int a_regrid_interval)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+regrid\+\_\+interval (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+regrid\+\_\+interval}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a17b810c41e8a630199bcd0ff22969dde}{}\label{classplasma__engine_a17b810c41e8a630199bcd0ff22969dde}
+
+
+Set the regrid interval. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+restart@{set\+\_\+restart}}
+\index{set\+\_\+restart@{set\+\_\+restart}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+restart(const bool a\+\_\+restart)}{set_restart(const bool a_restart)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+restart (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+restart}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aaadc8e4842483fe19dc9261e974aeb72}{}\label{classplasma__engine_aaadc8e4842483fe19dc9261e974aeb72}
+
+
+Set restart. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+restart\+\_\+mode@{set\+\_\+restart\+\_\+mode}}
+\index{set\+\_\+restart\+\_\+mode@{set\+\_\+restart\+\_\+mode}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+restart\+\_\+mode(const restart\+\_\+mode\+::which\+\_\+mode a\+\_\+mode)}{set_restart_mode(const restart_mode::which_mode a_mode)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+restart\+\_\+mode (
+\begin{DoxyParamCaption}
+\item[{const {\bf restart\+\_\+mode\+::which\+\_\+mode}}]{a\+\_\+mode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aad30424dd9a3ed192e62f1684fae7e2c}{}\label{classplasma__engine_aad30424dd9a3ed192e62f1684fae7e2c}
+
+
+Set restart mode. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+restart\+\_\+step@{set\+\_\+restart\+\_\+step}}
+\index{set\+\_\+restart\+\_\+step@{set\+\_\+restart\+\_\+step}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+restart\+\_\+step(const int a\+\_\+restart\+\_\+step)}{set_restart_step(const int a_restart_step)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+restart\+\_\+step (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+restart\+\_\+step}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a8387551a25bce6793cbc5d27b61616e2}{}\label{classplasma__engine_a8387551a25bce6793cbc5d27b61616e2}
+
+
+Restart step file. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+start\+\_\+time@{set\+\_\+start\+\_\+time}}
+\index{set\+\_\+start\+\_\+time@{set\+\_\+start\+\_\+time}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+start\+\_\+time(const Real a\+\_\+start\+\_\+time)}{set_start_time(const Real a_start_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+start\+\_\+time (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+start\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aaeb6dae0d41de4d47b74351156d1eb4f}{}\label{classplasma__engine_aaeb6dae0d41de4d47b74351156d1eb4f}
+
+
+Set simulation start time. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+stop\+\_\+time@{set\+\_\+stop\+\_\+time}}
+\index{set\+\_\+stop\+\_\+time@{set\+\_\+stop\+\_\+time}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+stop\+\_\+time(const Real a\+\_\+stop\+\_\+time)}{set_stop_time(const Real a_stop_time)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+stop\+\_\+time (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+stop\+\_\+time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a9323854fc79186855715001a73248337}{}\label{classplasma__engine_a9323854fc79186855715001a73248337}
+
+
+Set simulation stop time. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+time\+\_\+stepper@{set\+\_\+time\+\_\+stepper}}
+\index{set\+\_\+time\+\_\+stepper@{set\+\_\+time\+\_\+stepper}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+time\+\_\+stepper(const Ref\+Counted\+Ptr$<$ time\+\_\+stepper $>$ \&a\+\_\+timestepper)}{set_time_stepper(const RefCountedPtr< time_stepper > &a_timestepper)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+time\+\_\+stepper (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf time\+\_\+stepper} $>$ \&}]{a\+\_\+timestepper}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a9ff9d0097866de39efbca5a73d60f890}{}\label{classplasma__engine_a9ff9d0097866de39efbca5a73d60f890}
+
+
+Set the time stepper. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+verbosity@{set\+\_\+verbosity}}
+\index{set\+\_\+verbosity@{set\+\_\+verbosity}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+verbosity(const int a\+\_\+verbosity)}{set_verbosity(const int a_verbosity)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+verbosity (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+verbosity}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a2063be18a94443139957a48c426c2acb}{}\label{classplasma__engine_a2063be18a94443139957a48c426c2acb}
+
+
+Verbosity. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!set\+\_\+write\+\_\+ebis@{set\+\_\+write\+\_\+ebis}}
+\index{set\+\_\+write\+\_\+ebis@{set\+\_\+write\+\_\+ebis}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{set\+\_\+write\+\_\+ebis(const bool a\+\_\+write\+\_\+ebis)}{set_write_ebis(const bool a_write_ebis)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::set\+\_\+write\+\_\+ebis (
+\begin{DoxyParamCaption}
+\item[{const bool}]{a\+\_\+write\+\_\+ebis}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a539a354caf0758b7f0927f33b303abd8}{}\label{classplasma__engine_a539a354caf0758b7f0927f33b303abd8}
+
+
+Write E\+B\+IS to H\+D\+F5. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!setup@{setup}}
+\index{setup@{setup}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{setup(const int a\+\_\+init\+\_\+regrids, const bool a\+\_\+restart, const std\+::string a\+\_\+restart\+\_\+file)}{setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::setup (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+init\+\_\+regrids, }
+\item[{const bool}]{a\+\_\+restart, }
+\item[{const std\+::string}]{a\+\_\+restart\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_a487f33cc288aac0b5f2fde263ee55f61}{}\label{classplasma__engine_a487f33cc288aac0b5f2fde263ee55f61}
+
+
+Setup function. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!setup\+\_\+and\+\_\+run@{setup\+\_\+and\+\_\+run}}
+\index{setup\+\_\+and\+\_\+run@{setup\+\_\+and\+\_\+run}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{setup\+\_\+and\+\_\+run()}{setup_and_run()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::setup\+\_\+and\+\_\+run (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classplasma__engine_aa534f8694480ce60bbc19ee2fb4d4b33}{}\label{classplasma__engine_aa534f8694480ce60bbc19ee2fb4d4b33}
+
+
+Setup and run simulations. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!setup\+\_\+for\+\_\+restart@{setup\+\_\+for\+\_\+restart}}
+\index{setup\+\_\+for\+\_\+restart@{setup\+\_\+for\+\_\+restart}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{setup\+\_\+for\+\_\+restart(const int a\+\_\+init\+\_\+regrids, const std\+::string a\+\_\+restart\+\_\+file)}{setup_for_restart(const int a_init_regrids, const std::string a_restart_file)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::setup\+\_\+for\+\_\+restart (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+init\+\_\+regrids, }
+\item[{const std\+::string}]{a\+\_\+restart\+\_\+file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_acb4383dc638b9f0a47d419d502207c76}{}\label{classplasma__engine_acb4383dc638b9f0a47d419d502207c76}
+
+
+Set for restart. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!setup\+\_\+fresh@{setup\+\_\+fresh}}
+\index{setup\+\_\+fresh@{setup\+\_\+fresh}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{setup\+\_\+fresh(const int a\+\_\+init\+\_\+regrids)}{setup_fresh(const int a_init_regrids)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::setup\+\_\+fresh (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+init\+\_\+regrids}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_aa05c10204653e7141173918da7874a10}{}\label{classplasma__engine_aa05c10204653e7141173918da7874a10}
+
+
+Setup function. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!setup\+\_\+geometry\+\_\+only@{setup\+\_\+geometry\+\_\+only}}
+\index{setup\+\_\+geometry\+\_\+only@{setup\+\_\+geometry\+\_\+only}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{setup\+\_\+geometry\+\_\+only()}{setup_geometry_only()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::setup\+\_\+geometry\+\_\+only (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a3456034bbb7f416598d38535aad94aec}{}\label{classplasma__engine_a3456034bbb7f416598d38535aad94aec}
+
+
+Set up for geometry only. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!step\+\_\+report@{step\+\_\+report}}
+\index{step\+\_\+report@{step\+\_\+report}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{step\+\_\+report(const Real a\+\_\+start\+\_\+time, const Real a\+\_\+end\+\_\+time, const int a\+\_\+max\+\_\+steps)}{step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::step\+\_\+report (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+start\+\_\+time, }
+\item[{const Real}]{a\+\_\+end\+\_\+time, }
+\item[{const int}]{a\+\_\+max\+\_\+steps}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_aadb4d6377979d1ec576e6c665fcff966}{}\label{classplasma__engine_aadb4d6377979d1ec576e6c665fcff966}
+
+
+Write a time step report. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!tag\+\_\+cells@{tag\+\_\+cells}}
+\index{tag\+\_\+cells@{tag\+\_\+cells}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{tag\+\_\+cells(\+Vector$<$ Int\+Vect\+Set $>$ \&a\+\_\+all\+\_\+tags, E\+B\+A\+M\+R\+Tags \&a\+\_\+cell\+\_\+tags)}{tag_cells(Vector< IntVectSet > &a_all_tags, EBAMRTags &a_cell_tags)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool plasma\+\_\+engine\+::tag\+\_\+cells (
+\begin{DoxyParamCaption}
+\item[{Vector$<$ Int\+Vect\+Set $>$ \&}]{a\+\_\+all\+\_\+tags, }
+\item[{{\bf E\+B\+A\+M\+R\+Tags} \&}]{a\+\_\+cell\+\_\+tags}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a6e1e034eceaefc352efc1a0570e77827}{}\label{classplasma__engine_a6e1e034eceaefc352efc1a0570e77827}
+
+
+Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!write\+\_\+checkpoint\+\_\+file@{write\+\_\+checkpoint\+\_\+file}}
+\index{write\+\_\+checkpoint\+\_\+file@{write\+\_\+checkpoint\+\_\+file}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{write\+\_\+checkpoint\+\_\+file()}{write_checkpoint_file()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::write\+\_\+checkpoint\+\_\+file (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a05d1e58e504f183436f35b5c6bfe64ca}{}\label{classplasma__engine_a05d1e58e504f183436f35b5c6bfe64ca}
+
+
+Write a checkpoint file. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!write\+\_\+ebis@{write\+\_\+ebis}}
+\index{write\+\_\+ebis@{write\+\_\+ebis}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{write\+\_\+ebis()}{write_ebis()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::write\+\_\+ebis (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ac8cd9c616150a0573e768cf7e387c719}{}\label{classplasma__engine_ac8cd9c616150a0573e768cf7e387c719}
+
+
+Write the geometry to file. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!write\+\_\+geometry@{write\+\_\+geometry}}
+\index{write\+\_\+geometry@{write\+\_\+geometry}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{write\+\_\+geometry()}{write_geometry()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::write\+\_\+geometry (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_a6442f4080571f3298fce1d59d7932885}{}\label{classplasma__engine_a6442f4080571f3298fce1d59d7932885}
+
+
+Write the geometry only. 
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!write\+\_\+plot\+\_\+file@{write\+\_\+plot\+\_\+file}}
+\index{write\+\_\+plot\+\_\+file@{write\+\_\+plot\+\_\+file}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{write\+\_\+plot\+\_\+file()}{write_plot_file()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void plasma\+\_\+engine\+::write\+\_\+plot\+\_\+file (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classplasma__engine_ab420eec8bd62cdf197329171b8d545df}{}\label{classplasma__engine_ab420eec8bd62cdf197329171b8d545df}
+
+
+Write a plot file. 
+
+
+
+\subsection{Member Data Documentation}
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+amr@{m\+\_\+amr}}
+\index{m\+\_\+amr@{m\+\_\+amr}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+amr}{m_amr}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf amr\+\_\+mesh}$>$ plasma\+\_\+engine\+::m\+\_\+amr\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a3d5c4695671cd62e79500a40572d14e2}{}\label{classplasma__engine_a3d5c4695671cd62e79500a40572d14e2}
+
+
+A\+MR. 
+
+
+
+Definition at line 280 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+cached\+\_\+tags@{m\+\_\+cached\+\_\+tags}}
+\index{m\+\_\+cached\+\_\+tags@{m\+\_\+cached\+\_\+tags}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+cached\+\_\+tags}{m_cached_tags}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Tags} plasma\+\_\+engine\+::m\+\_\+cached\+\_\+tags\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a8fd339d48f37250240744ea9bd878a42}{}\label{classplasma__engine_a8fd339d48f37250240744ea9bd878a42}
+
+
+Cached tags. Needed when we regrid and change box ownership. 
+
+
+
+Definition at line 445 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+celltagger@{m\+\_\+celltagger}}
+\index{m\+\_\+celltagger@{m\+\_\+celltagger}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+celltagger}{m_celltagger}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf cell\+\_\+tagger}$>$ plasma\+\_\+engine\+::m\+\_\+celltagger\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_aa461442fa00ec1752e3947baae8c9762}{}\label{classplasma__engine_aa461442fa00ec1752e3947baae8c9762}
+
+
+Cell tagger. 
+
+
+
+Definition at line 305 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+chk\+\_\+interval@{m\+\_\+chk\+\_\+interval}}
+\index{m\+\_\+chk\+\_\+interval@{m\+\_\+chk\+\_\+interval}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+chk\+\_\+interval}{m_chk_interval}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+chk\+\_\+interval\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_aeb4e9f7e160f2b7cbd62571e4fbd4573}{}\label{classplasma__engine_aeb4e9f7e160f2b7cbd62571e4fbd4573}
+
+
+Checkpoint interval. 
+
+
+
+Definition at line 360 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+compgeom@{m\+\_\+compgeom}}
+\index{m\+\_\+compgeom@{m\+\_\+compgeom}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+compgeom}{m_compgeom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf computational\+\_\+geometry}$>$ plasma\+\_\+engine\+::m\+\_\+compgeom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a40573f0fdf8bba99f48842dbf8ccefc8}{}\label{classplasma__engine_a40573f0fdf8bba99f48842dbf8ccefc8}
+
+
+Geometry. 
+
+
+
+Definition at line 285 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+conductor\+\_\+tag\+\_\+depth@{m\+\_\+conductor\+\_\+tag\+\_\+depth}}
+\index{m\+\_\+conductor\+\_\+tag\+\_\+depth@{m\+\_\+conductor\+\_\+tag\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+conductor\+\_\+tag\+\_\+depth}{m_conductor_tag_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+conductor\+\_\+tag\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a91e626546a2d136de4cbca5237cd80b2}{}\label{classplasma__engine_a91e626546a2d136de4cbca5237cd80b2}
+
+
+Geometric tag depth for conductors. 
+
+
+
+Definition at line 380 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+dielectric\+\_\+tag\+\_\+depth@{m\+\_\+dielectric\+\_\+tag\+\_\+depth}}
+\index{m\+\_\+dielectric\+\_\+tag\+\_\+depth@{m\+\_\+dielectric\+\_\+tag\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+dielectric\+\_\+tag\+\_\+depth}{m_dielectric_tag_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+dielectric\+\_\+tag\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_abac909f41b439212638b57c8b9508278}{}\label{classplasma__engine_abac909f41b439212638b57c8b9508278}
+
+
+Geometric tag depth for dielectrics. 
+
+
+
+Definition at line 375 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+dt@{m\+\_\+dt}}
+\index{m\+\_\+dt@{m\+\_\+dt}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+dt}{m_dt}}]{\setlength{\rightskip}{0pt plus 5cm}Real plasma\+\_\+engine\+::m\+\_\+dt\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ad747d24a60aec6bc61464941358f2a5e}{}\label{classplasma__engine_ad747d24a60aec6bc61464941358f2a5e}
+
+
+Time increment. 
+
+
+
+Definition at line 497 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+dump\+\_\+charge@{m\+\_\+dump\+\_\+charge}}
+\index{m\+\_\+dump\+\_\+charge@{m\+\_\+dump\+\_\+charge}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+dump\+\_\+charge}{m_dump_charge}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+dump\+\_\+charge\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_aaec10f075374d29e0e11b6ce051349c7}{}\label{classplasma__engine_aaec10f075374d29e0e11b6ce051349c7}
+
+
+Dump charge for cdr and surface charge solvers at every time step. 
+
+
+
+Definition at line 557 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+dump\+\_\+mass@{m\+\_\+dump\+\_\+mass}}
+\index{m\+\_\+dump\+\_\+mass@{m\+\_\+dump\+\_\+mass}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+dump\+\_\+mass}{m_dump_mass}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+dump\+\_\+mass\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a00b0755dc18e1d98253b9cbde39bd699}{}\label{classplasma__engine_a00b0755dc18e1d98253b9cbde39bd699}
+
+
+Dump total mass (or charge) for every cdr solver at every time\+\_\+step. 
+
+
+
+Definition at line 552 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance@{m\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance}}
+\index{m\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance@{m\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance}{m_ebis_memory_load_balance}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+ebis\+\_\+memory\+\_\+load\+\_\+balance\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a9072ce05c25ffeb433a1522e5d5ec97e}{}\label{classplasma__engine_a9072ce05c25ffeb433a1522e5d5ec97e}
+
+
+Use memory as load balance for E\+B\+IS. 
+
+
+
+Definition at line 537 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+gas\+\_\+conductor\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+gas\+\_\+conductor\+\_\+interface\+\_\+tag\+\_\+depth}}
+\index{m\+\_\+gas\+\_\+conductor\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+gas\+\_\+conductor\+\_\+interface\+\_\+tag\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+gas\+\_\+conductor\+\_\+interface\+\_\+tag\+\_\+depth}{m_gas_conductor_interface_tag_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+gas\+\_\+conductor\+\_\+interface\+\_\+tag\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_abc3299bed546c07295273a0196d11c3b}{}\label{classplasma__engine_abc3299bed546c07295273a0196d11c3b}
+
+
+Geometric tag depth for gas-\/conductor interfaces. 
+
+
+
+Definition at line 400 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+gas\+\_\+dielectric\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+gas\+\_\+dielectric\+\_\+interface\+\_\+tag\+\_\+depth}}
+\index{m\+\_\+gas\+\_\+dielectric\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+gas\+\_\+dielectric\+\_\+interface\+\_\+tag\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+gas\+\_\+dielectric\+\_\+interface\+\_\+tag\+\_\+depth}{m_gas_dielectric_interface_tag_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+gas\+\_\+dielectric\+\_\+interface\+\_\+tag\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_af44aeef40ef6338b229d04dbb3f4287b}{}\label{classplasma__engine_af44aeef40ef6338b229d04dbb3f4287b}
+
+
+Geometric tag depth for gas-\/dielectric interfaces. 
+
+
+
+Definition at line 395 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+gas\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+gas\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}}
+\index{m\+\_\+gas\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+gas\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+gas\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}{m_gas_solid_interface_tag_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+gas\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a39a131afa18a9d5eb80b02ea8ebd51bc}{}\label{classplasma__engine_a39a131afa18a9d5eb80b02ea8ebd51bc}
+
+
+Geometric tag depth for gas-\/solid interfaces. 
+
+
+
+Definition at line 385 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+geocoarsen@{m\+\_\+geocoarsen}}
+\index{m\+\_\+geocoarsen@{m\+\_\+geocoarsen}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+geocoarsen}{m_geocoarsen}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf geo\+\_\+coarsener}$>$ plasma\+\_\+engine\+::m\+\_\+geocoarsen\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a23492fa5ea4b57fe3a9e9ee647fd4814}{}\label{classplasma__engine_a23492fa5ea4b57fe3a9e9ee647fd4814}
+
+
+Geometric coarsener. 
+
+
+
+Definition at line 310 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+geom\+\_\+tag\+\_\+depth@{m\+\_\+geom\+\_\+tag\+\_\+depth}}
+\index{m\+\_\+geom\+\_\+tag\+\_\+depth@{m\+\_\+geom\+\_\+tag\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+geom\+\_\+tag\+\_\+depth}{m_geom_tag_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+geom\+\_\+tag\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_af4cedda8e4d0f803d4816476c3be422c}{}\label{classplasma__engine_af4cedda8e4d0f803d4816476c3be422c}
+
+
+Geometric tag depth. 
+
+
+
+Definition at line 370 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+geom\+\_\+tags@{m\+\_\+geom\+\_\+tags}}
+\index{m\+\_\+geom\+\_\+tags@{m\+\_\+geom\+\_\+tags}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+geom\+\_\+tags}{m_geom_tags}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<$Int\+Vect\+Set$>$ plasma\+\_\+engine\+::m\+\_\+geom\+\_\+tags\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a1a1df7d26332af8f1b3407faa3276ed5}{}\label{classplasma__engine_a1a1df7d26332af8f1b3407faa3276ed5}
+
+
+Tags. 
+
+
+
+Definition at line 435 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+geometry\+\_\+only@{m\+\_\+geometry\+\_\+only}}
+\index{m\+\_\+geometry\+\_\+only@{m\+\_\+geometry\+\_\+only}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+geometry\+\_\+only}{m_geometry_only}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+geometry\+\_\+only\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a6f0dc470c441ce1d444fbe82659fb164}{}\label{classplasma__engine_a6f0dc470c441ce1d444fbe82659fb164}
+
+
+Geometry only. 
+
+
+
+Definition at line 532 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+grow\+\_\+tags@{m\+\_\+grow\+\_\+tags}}
+\index{m\+\_\+grow\+\_\+tags@{m\+\_\+grow\+\_\+tags}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+grow\+\_\+tags}{m_grow_tags}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+grow\+\_\+tags\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a7710549e3587cbc4f27690370d22a7fb}{}\label{classplasma__engine_a7710549e3587cbc4f27690370d22a7fb}
+
+
+Grow tagged cells. 
+
+
+
+Definition at line 430 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+init\+\_\+regrids@{m\+\_\+init\+\_\+regrids}}
+\index{m\+\_\+init\+\_\+regrids@{m\+\_\+init\+\_\+regrids}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+init\+\_\+regrids}{m_init_regrids}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+init\+\_\+regrids\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_abcf41488b5025036ef0ea7628c51335a}{}\label{classplasma__engine_abcf41488b5025036ef0ea7628c51335a}
+
+
+Number of initial regrids. 
+
+
+
+Definition at line 415 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+max\+\_\+plot\+\_\+depth@{m\+\_\+max\+\_\+plot\+\_\+depth}}
+\index{m\+\_\+max\+\_\+plot\+\_\+depth@{m\+\_\+max\+\_\+plot\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+max\+\_\+plot\+\_\+depth}{m_max_plot_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+max\+\_\+plot\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ad3a3fcecf93110523dee8e00b517e801}{}\label{classplasma__engine_ad3a3fcecf93110523dee8e00b517e801}
+
+
+Maximum plot depth. 
+
+
+
+Definition at line 410 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+max\+\_\+steps@{m\+\_\+max\+\_\+steps}}
+\index{m\+\_\+max\+\_\+steps@{m\+\_\+max\+\_\+steps}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+max\+\_\+steps}{m_max_steps}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+max\+\_\+steps\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_afaaa457cd8ff2b654a5331743b97d37c}{}\label{classplasma__engine_afaaa457cd8ff2b654a5331743b97d37c}
+
+
+Maximum number of steps. 
+
+
+
+Definition at line 405 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+memory\+\_\+mode@{m\+\_\+memory\+\_\+mode}}
+\index{m\+\_\+memory\+\_\+mode@{m\+\_\+memory\+\_\+mode}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+memory\+\_\+mode}{m_memory_mode}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf memory\+\_\+report\+\_\+mode\+::which\+\_\+mode} plasma\+\_\+engine\+::m\+\_\+memory\+\_\+mode\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_aa19df07c387c3eb81c8ed8c00735389c}{}\label{classplasma__engine_aa19df07c387c3eb81c8ed8c00735389c}
+
+
+Memory report mode. 
+
+
+
+Definition at line 330 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+mfis@{m\+\_\+mfis}}
+\index{m\+\_\+mfis@{m\+\_\+mfis}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+mfis}{m_mfis}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf mfis}$>$ plasma\+\_\+engine\+::m\+\_\+mfis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a585df123a78ab10b23c68209f2d36e7d}{}\label{classplasma__engine_a585df123a78ab10b23c68209f2d36e7d}
+
+
+Index space. 
+
+
+
+Definition at line 275 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+num\+\_\+plot\+\_\+ghost@{m\+\_\+num\+\_\+plot\+\_\+ghost}}
+\index{m\+\_\+num\+\_\+plot\+\_\+ghost@{m\+\_\+num\+\_\+plot\+\_\+ghost}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+num\+\_\+plot\+\_\+ghost}{m_num_plot_ghost}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+num\+\_\+plot\+\_\+ghost\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a2afdfef0059dc396540d1da383358474}{}\label{classplasma__engine_a2afdfef0059dc396540d1da383358474}
+
+
+Number of ghost cells to plot. 
+
+
+
+Definition at line 420 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+output\+\_\+dir@{m\+\_\+output\+\_\+dir}}
+\index{m\+\_\+output\+\_\+dir@{m\+\_\+output\+\_\+dir}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+output\+\_\+dir}{m_output_dir}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string plasma\+\_\+engine\+::m\+\_\+output\+\_\+dir\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ab12f31677d50f5edd0077b0f41dbb6aa}{}\label{classplasma__engine_ab12f31677d50f5edd0077b0f41dbb6aa}
+
+
+Output directory. 
+
+
+
+Definition at line 335 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+output\+\_\+mode@{m\+\_\+output\+\_\+mode}}
+\index{m\+\_\+output\+\_\+mode@{m\+\_\+output\+\_\+mode}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+output\+\_\+mode}{m_output_mode}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf output\+\_\+mode\+::which\+\_\+mode} plasma\+\_\+engine\+::m\+\_\+output\+\_\+mode\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_aed0bb2dd44f49be95fde9dd8d2952ed6}{}\label{classplasma__engine_aed0bb2dd44f49be95fde9dd8d2952ed6}
+
+
+Output mode. 
+
+
+
+Definition at line 320 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+output\+\_\+names@{m\+\_\+output\+\_\+names}}
+\index{m\+\_\+output\+\_\+names@{m\+\_\+output\+\_\+names}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+output\+\_\+names}{m_output_names}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string plasma\+\_\+engine\+::m\+\_\+output\+\_\+names\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a8af0830c8c4262753dad80b8879d3f3d}{}\label{classplasma__engine_a8af0830c8c4262753dad80b8879d3f3d}
+
+
+Output filenames. 
+
+
+
+Definition at line 340 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+physdom@{m\+\_\+physdom}}
+\index{m\+\_\+physdom@{m\+\_\+physdom}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+physdom}{m_physdom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf physical\+\_\+domain}$>$ plasma\+\_\+engine\+::m\+\_\+physdom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a9a74dc0c212ba3df4eca3bf3e86692bb}{}\label{classplasma__engine_a9a74dc0c212ba3df4eca3bf3e86692bb}
+
+
+Physical domain. 
+
+
+
+Definition at line 295 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+plaskin@{m\+\_\+plaskin}}
+\index{m\+\_\+plaskin@{m\+\_\+plaskin}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+plaskin}{m_plaskin}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf plasma\+\_\+kinetics}$>$ plasma\+\_\+engine\+::m\+\_\+plaskin\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ab5ad9d483a1b69f5cc7640fd0ad6bdd2}{}\label{classplasma__engine_ab5ad9d483a1b69f5cc7640fd0ad6bdd2}
+
+
+Plasma kinetics. 
+
+
+
+Definition at line 290 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+plot\+\_\+interval@{m\+\_\+plot\+\_\+interval}}
+\index{m\+\_\+plot\+\_\+interval@{m\+\_\+plot\+\_\+interval}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+plot\+\_\+interval}{m_plot_interval}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+plot\+\_\+interval\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ad61988b7cf22b7589b95afdbbf17fd38}{}\label{classplasma__engine_ad61988b7cf22b7589b95afdbbf17fd38}
+
+
+Plot interval. 
+
+
+
+Definition at line 365 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+potential@{m\+\_\+potential}}
+\index{m\+\_\+potential@{m\+\_\+potential}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+potential}{m_potential}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ plasma\+\_\+engine\+::m\+\_\+potential) (const Real a\+\_\+time)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ae28be73a1922c65e933ef0b616444991}{}\label{classplasma__engine_ae28be73a1922c65e933ef0b616444991}
+
+
+Potential. 
+
+
+
+Definition at line 450 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+potential\+\_\+set@{m\+\_\+potential\+\_\+set}}
+\index{m\+\_\+potential\+\_\+set@{m\+\_\+potential\+\_\+set}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+potential\+\_\+set}{m_potential_set}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+potential\+\_\+set\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ae8e57104b6f7135420f594840d6ec371}{}\label{classplasma__engine_ae8e57104b6f7135420f594840d6ec371}
+
+
+Potential has been set. 
+
+
+
+Definition at line 522 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+read\+\_\+ebis@{m\+\_\+read\+\_\+ebis}}
+\index{m\+\_\+read\+\_\+ebis@{m\+\_\+read\+\_\+ebis}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+read\+\_\+ebis}{m_read_ebis}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+read\+\_\+ebis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a4b1d92e7235153f99ca04250c83bdf91}{}\label{classplasma__engine_a4b1d92e7235153f99ca04250c83bdf91}
+
+
+Read E\+B\+IS file from H\+D\+F5. Useful for restarting simulation. 
+
+
+
+Definition at line 547 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+regrid\+\_\+interval@{m\+\_\+regrid\+\_\+interval}}
+\index{m\+\_\+regrid\+\_\+interval@{m\+\_\+regrid\+\_\+interval}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+regrid\+\_\+interval}{m_regrid_interval}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+regrid\+\_\+interval\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a7b2c464f655a22bd9968255e3161fb33}{}\label{classplasma__engine_a7b2c464f655a22bd9968255e3161fb33}
+
+
+Regrid interval. 
+
+
+
+Definition at line 355 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+restart@{m\+\_\+restart}}
+\index{m\+\_\+restart@{m\+\_\+restart}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+restart}{m_restart}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+restart\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a3c9c6832efb6b89c27bb87f9b3c78709}{}\label{classplasma__engine_a3c9c6832efb6b89c27bb87f9b3c78709}
+
+
+Restart or not. 
+
+
+
+Definition at line 527 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+restart\+\_\+mode@{m\+\_\+restart\+\_\+mode}}
+\index{m\+\_\+restart\+\_\+mode@{m\+\_\+restart\+\_\+mode}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+restart\+\_\+mode}{m_restart_mode}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf restart\+\_\+mode\+::which\+\_\+mode} plasma\+\_\+engine\+::m\+\_\+restart\+\_\+mode\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a71668180ba2568d17a8bce82321ffcc3}{}\label{classplasma__engine_a71668180ba2568d17a8bce82321ffcc3}
+
+
+Restart mode. 
+
+
+
+Definition at line 325 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+restart\+\_\+step@{m\+\_\+restart\+\_\+step}}
+\index{m\+\_\+restart\+\_\+step@{m\+\_\+restart\+\_\+step}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+restart\+\_\+step}{m_restart_step}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+restart\+\_\+step\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a7323b9b5c2fd0bbb24b6ed7025054abe}{}\label{classplasma__engine_a7323b9b5c2fd0bbb24b6ed7025054abe}
+
+
+Restart step. 
+
+
+
+Definition at line 425 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+solid\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+solid\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}}
+\index{m\+\_\+solid\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth@{m\+\_\+solid\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+solid\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth}{m_solid_solid_interface_tag_depth}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+solid\+\_\+solid\+\_\+interface\+\_\+tag\+\_\+depth\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a646e86d966b6937ca34f9c14650ae348}{}\label{classplasma__engine_a646e86d966b6937ca34f9c14650ae348}
+
+
+Geometry tag depth for solid-\/solid interfaces. 
+
+
+
+Definition at line 390 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+start\+\_\+time@{m\+\_\+start\+\_\+time}}
+\index{m\+\_\+start\+\_\+time@{m\+\_\+start\+\_\+time}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+start\+\_\+time}{m_start_time}}]{\setlength{\rightskip}{0pt plus 5cm}Real plasma\+\_\+engine\+::m\+\_\+start\+\_\+time\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a8f99fe79d7b66c655eb11ed3fdac5e2b}{}\label{classplasma__engine_a8f99fe79d7b66c655eb11ed3fdac5e2b}
+
+
+Simulation start time. 
+
+
+
+Definition at line 487 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+step@{m\+\_\+step}}
+\index{m\+\_\+step@{m\+\_\+step}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+step}{m_step}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+step\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a3aa7457ef6831689de8a12559195c8c7}{}\label{classplasma__engine_a3aa7457ef6831689de8a12559195c8c7}
+
+
+Time step. 
+
+
+
+Definition at line 350 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+stop\+\_\+time@{m\+\_\+stop\+\_\+time}}
+\index{m\+\_\+stop\+\_\+time@{m\+\_\+stop\+\_\+time}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+stop\+\_\+time}{m_stop_time}}]{\setlength{\rightskip}{0pt plus 5cm}Real plasma\+\_\+engine\+::m\+\_\+stop\+\_\+time\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a148b332ad9c1d35b25b9479771502d3c}{}\label{classplasma__engine_a148b332ad9c1d35b25b9479771502d3c}
+
+
+Simulation stop time. 
+
+
+
+Definition at line 492 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+tags@{m\+\_\+tags}}
+\index{m\+\_\+tags@{m\+\_\+tags}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+tags}{m_tags}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Tags} plasma\+\_\+engine\+::m\+\_\+tags\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_afc8dad643656a8476b83195aab88cddb}{}\label{classplasma__engine_afc8dad643656a8476b83195aab88cddb}
+
+
+Tags. 
+
+
+
+Definition at line 440 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+time@{m\+\_\+time}}
+\index{m\+\_\+time@{m\+\_\+time}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+time}{m_time}}]{\setlength{\rightskip}{0pt plus 5cm}Real plasma\+\_\+engine\+::m\+\_\+time\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a6b74f07948066166ac42b087b2fa3fba}{}\label{classplasma__engine_a6b74f07948066166ac42b087b2fa3fba}
+
+
+Time. 
+
+
+
+Definition at line 502 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+timecode@{m\+\_\+timecode}}
+\index{m\+\_\+timecode@{m\+\_\+timecode}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+timecode}{m_timecode}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf time\+\_\+code\+::which\+\_\+code} plasma\+\_\+engine\+::m\+\_\+timecode\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a0dafd26d0f8608c5f17148817a75a004}{}\label{classplasma__engine_a0dafd26d0f8608c5f17148817a75a004}
+
+
+Time code. 
+
+
+
+Definition at line 315 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+timestepper@{m\+\_\+timestepper}}
+\index{m\+\_\+timestepper@{m\+\_\+timestepper}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+timestepper}{m_timestepper}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf time\+\_\+stepper}$>$ plasma\+\_\+engine\+::m\+\_\+timestepper\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a1ddf5178d9bd09d9844e0c8c7486e9b3}{}\label{classplasma__engine_a1ddf5178d9bd09d9844e0c8c7486e9b3}
+
+
+Time stepper. 
+
+
+
+Definition at line 300 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+verbosity@{m\+\_\+verbosity}}
+\index{m\+\_\+verbosity@{m\+\_\+verbosity}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+verbosity}{m_verbosity}}]{\setlength{\rightskip}{0pt plus 5cm}int plasma\+\_\+engine\+::m\+\_\+verbosity\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a763a8e4ae0a147f53b9a42e975ad57bc}{}\label{classplasma__engine_a763a8e4ae0a147f53b9a42e975ad57bc}
+
+
+Verbosity. 
+
+
+
+Definition at line 345 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi}}
+\index{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi}{m_wall_func_x_hi}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ plasma\+\_\+engine\+::m\+\_\+wall\+\_\+func\+\_\+x\+\_\+hi) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a76d3c3e77919786c165e39dafd4b3779}{}\label{classplasma__engine_a76d3c3e77919786c165e39dafd4b3779}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 460 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo}}
+\index{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo}{m_wall_func_x_lo}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ plasma\+\_\+engine\+::m\+\_\+wall\+\_\+func\+\_\+x\+\_\+lo) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a65dc20ba9e36ce880f4992012280ca06}{}\label{classplasma__engine_a65dc20ba9e36ce880f4992012280ca06}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 455 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi}}
+\index{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi}{m_wall_func_y_hi}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ plasma\+\_\+engine\+::m\+\_\+wall\+\_\+func\+\_\+y\+\_\+hi) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a6378af218871a41120b3ffd3b13b13eb}{}\label{classplasma__engine_a6378af218871a41120b3ffd3b13b13eb}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 470 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo}}
+\index{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo@{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo}{m_wall_func_y_lo}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ plasma\+\_\+engine\+::m\+\_\+wall\+\_\+func\+\_\+y\+\_\+lo) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a738cb5077366493ba56b7e5f7359d695}{}\label{classplasma__engine_a738cb5077366493ba56b7e5f7359d695}
+
+
+Function pointer for Poisson BC on domain walls. 
+
+
+
+Definition at line 465 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+wallclock1@{m\+\_\+wallclock1}}
+\index{m\+\_\+wallclock1@{m\+\_\+wallclock1}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+wallclock1}{m_wallclock1}}]{\setlength{\rightskip}{0pt plus 5cm}Real plasma\+\_\+engine\+::m\+\_\+wallclock1\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_adab190b38ee0eded079742d947bc04b7}{}\label{classplasma__engine_adab190b38ee0eded079742d947bc04b7}
+
+
+M\+PI timer. 
+
+
+
+Definition at line 512 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+wallclock2@{m\+\_\+wallclock2}}
+\index{m\+\_\+wallclock2@{m\+\_\+wallclock2}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+wallclock2}{m_wallclock2}}]{\setlength{\rightskip}{0pt plus 5cm}Real plasma\+\_\+engine\+::m\+\_\+wallclock2\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_ae1d14f86a6556e643d8295a337b7578f}{}\label{classplasma__engine_ae1d14f86a6556e643d8295a337b7578f}
+
+
+M\+PI timer. 
+
+
+
+Definition at line 517 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+wallclock\+\_\+start@{m\+\_\+wallclock\+\_\+start}}
+\index{m\+\_\+wallclock\+\_\+start@{m\+\_\+wallclock\+\_\+start}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+wallclock\+\_\+start}{m_wallclock_start}}]{\setlength{\rightskip}{0pt plus 5cm}Real plasma\+\_\+engine\+::m\+\_\+wallclock\+\_\+start\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_a91803bbb045ae9087c61744acde5e6a4}{}\label{classplasma__engine_a91803bbb045ae9087c61744acde5e6a4}
+
+
+M\+PI timer. 
+
+
+
+Definition at line 507 of file plasma\+\_\+engine.\+H.
+
+\index{plasma\+\_\+engine@{plasma\+\_\+engine}!m\+\_\+write\+\_\+ebis@{m\+\_\+write\+\_\+ebis}}
+\index{m\+\_\+write\+\_\+ebis@{m\+\_\+write\+\_\+ebis}!plasma\+\_\+engine@{plasma\+\_\+engine}}
+\subsubsection[{\texorpdfstring{m\+\_\+write\+\_\+ebis}{m_write_ebis}}]{\setlength{\rightskip}{0pt plus 5cm}bool plasma\+\_\+engine\+::m\+\_\+write\+\_\+ebis\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classplasma__engine_af9bb6854312d5fd2e8fbf131c0b596a9}{}\label{classplasma__engine_af9bb6854312d5fd2e8fbf131c0b596a9}
+
+
+Write E\+B\+IS to H\+D\+F5. Might be useful for restarting simulations. 
+
+
+
+Definition at line 542 of file plasma\+\_\+engine.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/plasma\+\_\+solver/\hyperlink{plasma__engine_8H}{plasma\+\_\+engine.\+H}\end{DoxyCompactItemize}

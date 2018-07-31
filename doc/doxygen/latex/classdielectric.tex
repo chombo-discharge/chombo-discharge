@@ -1,0 +1,178 @@
+\hypertarget{classdielectric}{}\section{dielectric Class Reference}
+\label{classdielectric}\index{dielectric@{dielectric}}
+
+
+dielectric class. Simple tuple.  
+
+
+
+
+{\ttfamily \#include $<$dielectric.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classdielectric_af25a09c31bbbc8361f922fc8f375093d}{dielectric} ()
+\begin{DoxyCompactList}\small\item\em Weak constructor. \end{DoxyCompactList}\item 
+\hyperlink{classdielectric_ad89af9651fcf444ab987dbd4e0a5c903}{dielectric} (Ref\+Counted\+Ptr$<$ Base\+IF $>$ a\+\_\+baseif, Real a\+\_\+permittivity)
+\begin{DoxyCompactList}\small\item\em Constructor. Calls define. \end{DoxyCompactList}\item 
+\hyperlink{classdielectric_aa08f72845db134cf2c528cad2cb4521d}{dielectric} (Ref\+Counted\+Ptr$<$ Base\+IF $>$ a\+\_\+baseif, Real($\ast$a\+\_\+permittivity)(const Real\+Vect a\+\_\+pos))
+\begin{DoxyCompactList}\small\item\em Constructor, allows for spatially dependent permittivity. \end{DoxyCompactList}\item 
+virtual \hyperlink{classdielectric_aa62aa4ce1d097f80d36bb55bedbf4cd6}{$\sim$dielectric} ()
+\item 
+virtual void \hyperlink{classdielectric_a597943ba2632cf2cae5154ed325b62aa}{define} (Ref\+Counted\+Ptr$<$ Base\+IF $>$ a\+\_\+baseif, Real a\+\_\+permittivity)
+\begin{DoxyCompactList}\small\item\em Define function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classdielectric_af0a67e0632c71c2b59193a7d321e101d}{define} (Ref\+Counted\+Ptr$<$ Base\+IF $>$ a\+\_\+baseif, Real($\ast$a\+\_\+permittivity)(const Real\+Vect a\+\_\+pos))
+\begin{DoxyCompactList}\small\item\em Define function for variable permittivity. \end{DoxyCompactList}\item 
+virtual const Ref\+Counted\+Ptr$<$ Base\+IF $>$ \& \hyperlink{classdielectric_a49edb1d3d7a0efb7d9fe7d8b8f734679}{get\+\_\+function} () const 
+\begin{DoxyCompactList}\small\item\em Get level-\/set function. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classdielectric_aa17d4ad46482b5d5694a0da99f0e664d}{get\+\_\+permittivity} (const Real\+Vect a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em Get permittivity. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ Base\+IF $>$ \hyperlink{classdielectric_ad6e1c1ec1679d5dd0d49fc0089aed731}{m\+\_\+baseif}
+\item 
+Real \hyperlink{classdielectric_a99db20e801c9230a3c428d4e6e646801}{m\+\_\+permittivity}
+\item 
+Real($\ast$ \hyperlink{classdielectric_a8ea94535dc7db4c14c844d9807ea62bc}{m\+\_\+variablepermittivity} )(const Real\+Vect a\+\_\+pos)
+\item 
+bool \hyperlink{classdielectric_a4cd612354ef95a10f47357320ec96fc5}{m\+\_\+constant}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+dielectric class. Simple tuple. 
+
+Definition at line 17 of file dielectric.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{dielectric@{dielectric}!dielectric@{dielectric}}
+\index{dielectric@{dielectric}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{dielectric()}{dielectric()}}]{\setlength{\rightskip}{0pt plus 5cm}dielectric\+::dielectric (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classdielectric_af25a09c31bbbc8361f922fc8f375093d}{}\label{classdielectric_af25a09c31bbbc8361f922fc8f375093d}
+
+
+Weak constructor. 
+
+\index{dielectric@{dielectric}!dielectric@{dielectric}}
+\index{dielectric@{dielectric}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{dielectric(\+Ref\+Counted\+Ptr$<$ Base\+I\+F $>$ a\+\_\+baseif, Real a\+\_\+permittivity)}{dielectric(RefCountedPtr< BaseIF > a_baseif, Real a_permittivity)}}]{\setlength{\rightskip}{0pt plus 5cm}dielectric\+::dielectric (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ Base\+IF $>$}]{a\+\_\+baseif, }
+\item[{Real}]{a\+\_\+permittivity}
+\end{DoxyParamCaption}
+)}\hypertarget{classdielectric_ad89af9651fcf444ab987dbd4e0a5c903}{}\label{classdielectric_ad89af9651fcf444ab987dbd4e0a5c903}
+
+
+Constructor. Calls define. 
+
+\index{dielectric@{dielectric}!dielectric@{dielectric}}
+\index{dielectric@{dielectric}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{dielectric(\+Ref\+Counted\+Ptr$<$ Base\+I\+F $>$ a\+\_\+baseif, Real($\ast$a\+\_\+permittivity)(const Real\+Vect a\+\_\+pos))}{dielectric(RefCountedPtr< BaseIF > a_baseif, Real(*a_permittivity)(const RealVect a_pos))}}]{\setlength{\rightskip}{0pt plus 5cm}dielectric\+::dielectric (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ Base\+IF $>$}]{a\+\_\+baseif, }
+\item[{Real($\ast$)(const Real\+Vect a\+\_\+pos)}]{a\+\_\+permittivity}
+\end{DoxyParamCaption}
+)}\hypertarget{classdielectric_aa08f72845db134cf2c528cad2cb4521d}{}\label{classdielectric_aa08f72845db134cf2c528cad2cb4521d}
+
+
+Constructor, allows for spatially dependent permittivity. 
+
+\index{dielectric@{dielectric}!````~dielectric@{$\sim$dielectric}}
+\index{````~dielectric@{$\sim$dielectric}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{$\sim$dielectric()}{~dielectric()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual dielectric\+::$\sim$dielectric (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdielectric_aa62aa4ce1d097f80d36bb55bedbf4cd6}{}\label{classdielectric_aa62aa4ce1d097f80d36bb55bedbf4cd6}
+
+
+\subsection{Member Function Documentation}
+\index{dielectric@{dielectric}!define@{define}}
+\index{define@{define}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{define(\+Ref\+Counted\+Ptr$<$ Base\+I\+F $>$ a\+\_\+baseif, Real a\+\_\+permittivity)}{define(RefCountedPtr< BaseIF > a_baseif, Real a_permittivity)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dielectric\+::define (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ Base\+IF $>$}]{a\+\_\+baseif, }
+\item[{Real}]{a\+\_\+permittivity}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdielectric_a597943ba2632cf2cae5154ed325b62aa}{}\label{classdielectric_a597943ba2632cf2cae5154ed325b62aa}
+
+
+Define function. 
+
+\index{dielectric@{dielectric}!define@{define}}
+\index{define@{define}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{define(\+Ref\+Counted\+Ptr$<$ Base\+I\+F $>$ a\+\_\+baseif, Real($\ast$a\+\_\+permittivity)(const Real\+Vect a\+\_\+pos))}{define(RefCountedPtr< BaseIF > a_baseif, Real(*a_permittivity)(const RealVect a_pos))}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void dielectric\+::define (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ Base\+IF $>$}]{a\+\_\+baseif, }
+\item[{Real($\ast$)(const Real\+Vect a\+\_\+pos)}]{a\+\_\+permittivity}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdielectric_af0a67e0632c71c2b59193a7d321e101d}{}\label{classdielectric_af0a67e0632c71c2b59193a7d321e101d}
+
+
+Define function for variable permittivity. 
+
+\index{dielectric@{dielectric}!get\+\_\+function@{get\+\_\+function}}
+\index{get\+\_\+function@{get\+\_\+function}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{get\+\_\+function() const }{get_function() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Ref\+Counted\+Ptr$<$Base\+IF$>$\& dielectric\+::get\+\_\+function (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdielectric_a49edb1d3d7a0efb7d9fe7d8b8f734679}{}\label{classdielectric_a49edb1d3d7a0efb7d9fe7d8b8f734679}
+
+
+Get level-\/set function. 
+
+\index{dielectric@{dielectric}!get\+\_\+permittivity@{get\+\_\+permittivity}}
+\index{get\+\_\+permittivity@{get\+\_\+permittivity}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{get\+\_\+permittivity(const Real\+Vect a\+\_\+pos) const }{get_permittivity(const RealVect a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real dielectric\+::get\+\_\+permittivity (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classdielectric_aa17d4ad46482b5d5694a0da99f0e664d}{}\label{classdielectric_aa17d4ad46482b5d5694a0da99f0e664d}
+
+
+Get permittivity. 
+
+
+
+\subsection{Member Data Documentation}
+\index{dielectric@{dielectric}!m\+\_\+baseif@{m\+\_\+baseif}}
+\index{m\+\_\+baseif@{m\+\_\+baseif}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{m\+\_\+baseif}{m_baseif}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Base\+IF$>$ dielectric\+::m\+\_\+baseif\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdielectric_ad6e1c1ec1679d5dd0d49fc0089aed731}{}\label{classdielectric_ad6e1c1ec1679d5dd0d49fc0089aed731}
+
+
+Definition at line 62 of file dielectric.\+H.
+
+\index{dielectric@{dielectric}!m\+\_\+constant@{m\+\_\+constant}}
+\index{m\+\_\+constant@{m\+\_\+constant}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{m\+\_\+constant}{m_constant}}]{\setlength{\rightskip}{0pt plus 5cm}bool dielectric\+::m\+\_\+constant\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdielectric_a4cd612354ef95a10f47357320ec96fc5}{}\label{classdielectric_a4cd612354ef95a10f47357320ec96fc5}
+
+
+Definition at line 68 of file dielectric.\+H.
+
+\index{dielectric@{dielectric}!m\+\_\+permittivity@{m\+\_\+permittivity}}
+\index{m\+\_\+permittivity@{m\+\_\+permittivity}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{m\+\_\+permittivity}{m_permittivity}}]{\setlength{\rightskip}{0pt plus 5cm}Real dielectric\+::m\+\_\+permittivity\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdielectric_a99db20e801c9230a3c428d4e6e646801}{}\label{classdielectric_a99db20e801c9230a3c428d4e6e646801}
+
+
+Definition at line 64 of file dielectric.\+H.
+
+\index{dielectric@{dielectric}!m\+\_\+variablepermittivity@{m\+\_\+variablepermittivity}}
+\index{m\+\_\+variablepermittivity@{m\+\_\+variablepermittivity}!dielectric@{dielectric}}
+\subsubsection[{\texorpdfstring{m\+\_\+variablepermittivity}{m_variablepermittivity}}]{\setlength{\rightskip}{0pt plus 5cm}Real($\ast$ dielectric\+::m\+\_\+variablepermittivity) (const Real\+Vect a\+\_\+pos)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classdielectric_a8ea94535dc7db4c14c844d9807ea62bc}{}\label{classdielectric_a8ea94535dc7db4c14c844d9807ea62bc}
+
+
+Definition at line 66 of file dielectric.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{dielectric_8H}{dielectric.\+H}\end{DoxyCompactItemize}

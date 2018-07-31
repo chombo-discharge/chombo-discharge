@@ -1,0 +1,162 @@
+\hypertarget{classbox__if}{}\section{box\+\_\+if Class Reference}
+\label{classbox__if}\index{box\+\_\+if@{box\+\_\+if}}
+
+
+Class for defining a two-\/ or three-\/dimensional box with arbitrary centroid and orientation.  
+
+
+
+
+{\ttfamily \#include $<$box\+\_\+if.\+H$>$}
+
+
+
+Inherits Base\+IF.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbox__if_ab3b47b80c0de1f2de1ffd4c95fae0920}{box\+\_\+if} (const Real\+Vect \&a\+\_\+lo\+Corner, const Real\+Vect \&a\+\_\+hi\+Corner, const bool \&a\+\_\+inside)
+\begin{DoxyCompactList}\small\item\em Base constructor. \end{DoxyCompactList}\item 
+\hyperlink{classbox__if_a93a65c4006175eb30cce9e57e4910bb3}{box\+\_\+if} (const \hyperlink{classbox__if}{box\+\_\+if} \&a\+\_\+input\+IF)
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classbox__if_a38fc4b461bbb53751245deff6f4c55a9}{$\sim$box\+\_\+if} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classbox__if_a900fdd2475884c1677917d9ee971049b}{value} (const Real\+Vect \&a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em Test if object is on inside or outside. \end{DoxyCompactList}\item 
+virtual Base\+IF $\ast$ \hyperlink{classbox__if_a0207b5e85a13f448a449c32425370318}{new\+Implicit\+Function} () const 
+\begin{DoxyCompactList}\small\item\em IF Factory method. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Real\+Vect \hyperlink{classbox__if_aeb61bce3522cf63e7a7e20e1830e9462}{m\+\_\+lo\+Corner}
+\begin{DoxyCompactList}\small\item\em Lower left corner. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classbox__if_a1015601bb617eb72ee027588cafe549f}{m\+\_\+hi\+Corner}
+\begin{DoxyCompactList}\small\item\em Upper right corner. \end{DoxyCompactList}\item 
+bool \hyperlink{classbox__if_a92b4241e4c315e99505720c5aa4cba9a}{m\+\_\+inside}
+\begin{DoxyCompactList}\small\item\em Domain on inside or outside. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class for defining a two-\/ or three-\/dimensional box with arbitrary centroid and orientation. 
+
+Definition at line 17 of file box\+\_\+if.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{box\+\_\+if@{box\+\_\+if}!box\+\_\+if@{box\+\_\+if}}
+\index{box\+\_\+if@{box\+\_\+if}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{box\+\_\+if(const Real\+Vect \&a\+\_\+lo\+Corner, const Real\+Vect \&a\+\_\+hi\+Corner, const bool \&a\+\_\+inside)}{box_if(const RealVect &a_loCorner, const RealVect &a_hiCorner, const bool &a_inside)}}]{\setlength{\rightskip}{0pt plus 5cm}box\+\_\+if\+::box\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+lo\+Corner, }
+\item[{const Real\+Vect \&}]{a\+\_\+hi\+Corner, }
+\item[{const bool \&}]{a\+\_\+inside}
+\end{DoxyParamCaption}
+)}\hypertarget{classbox__if_ab3b47b80c0de1f2de1ffd4c95fae0920}{}\label{classbox__if_ab3b47b80c0de1f2de1ffd4c95fae0920}
+
+
+Base constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+lo\+Corner} & Lower left corner \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+hi\+Corner} & Upper right corner \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+inside} & Object on inside or outside \\
+\hline
+\end{DoxyParams}
+\index{box\+\_\+if@{box\+\_\+if}!box\+\_\+if@{box\+\_\+if}}
+\index{box\+\_\+if@{box\+\_\+if}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{box\+\_\+if(const box\+\_\+if \&a\+\_\+input\+I\+F)}{box_if(const box_if &a_inputIF)}}]{\setlength{\rightskip}{0pt plus 5cm}box\+\_\+if\+::box\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const {\bf box\+\_\+if} \&}]{a\+\_\+input\+IF}
+\end{DoxyParamCaption}
+)}\hypertarget{classbox__if_a93a65c4006175eb30cce9e57e4910bb3}{}\label{classbox__if_a93a65c4006175eb30cce9e57e4910bb3}
+
+
+Copy constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+input\+IF} & Another \hyperlink{classbox__if}{box\+\_\+if} \\
+\hline
+\end{DoxyParams}
+\index{box\+\_\+if@{box\+\_\+if}!````~box\+\_\+if@{$\sim$box\+\_\+if}}
+\index{````~box\+\_\+if@{$\sim$box\+\_\+if}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{$\sim$box\+\_\+if()}{~box_if()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual box\+\_\+if\+::$\sim$box\+\_\+if (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classbox__if_a38fc4b461bbb53751245deff6f4c55a9}{}\label{classbox__if_a38fc4b461bbb53751245deff6f4c55a9}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{box\+\_\+if@{box\+\_\+if}!new\+Implicit\+Function@{new\+Implicit\+Function}}
+\index{new\+Implicit\+Function@{new\+Implicit\+Function}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{new\+Implicit\+Function() const }{newImplicitFunction() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Base\+IF$\ast$ box\+\_\+if\+::new\+Implicit\+Function (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classbox__if_a0207b5e85a13f448a449c32425370318}{}\label{classbox__if_a0207b5e85a13f448a449c32425370318}
+
+
+IF Factory method. 
+
+\index{box\+\_\+if@{box\+\_\+if}!value@{value}}
+\index{value@{value}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{value(const Real\+Vect \&a\+\_\+pos) const }{value(const RealVect &a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real box\+\_\+if\+::value (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classbox__if_a900fdd2475884c1677917d9ee971049b}{}\label{classbox__if_a900fdd2475884c1677917d9ee971049b}
+
+
+Test if object is on inside or outside. 
+
+
+
+\subsection{Member Data Documentation}
+\index{box\+\_\+if@{box\+\_\+if}!m\+\_\+hi\+Corner@{m\+\_\+hi\+Corner}}
+\index{m\+\_\+hi\+Corner@{m\+\_\+hi\+Corner}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+hi\+Corner}{m_hiCorner}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect box\+\_\+if\+::m\+\_\+hi\+Corner\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classbox__if_a1015601bb617eb72ee027588cafe549f}{}\label{classbox__if_a1015601bb617eb72ee027588cafe549f}
+
+
+Upper right corner. 
+
+
+
+Definition at line 61 of file box\+\_\+if.\+H.
+
+\index{box\+\_\+if@{box\+\_\+if}!m\+\_\+inside@{m\+\_\+inside}}
+\index{m\+\_\+inside@{m\+\_\+inside}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+inside}{m_inside}}]{\setlength{\rightskip}{0pt plus 5cm}bool box\+\_\+if\+::m\+\_\+inside\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classbox__if_a92b4241e4c315e99505720c5aa4cba9a}{}\label{classbox__if_a92b4241e4c315e99505720c5aa4cba9a}
+
+
+Domain on inside or outside. 
+
+
+
+Definition at line 66 of file box\+\_\+if.\+H.
+
+\index{box\+\_\+if@{box\+\_\+if}!m\+\_\+lo\+Corner@{m\+\_\+lo\+Corner}}
+\index{m\+\_\+lo\+Corner@{m\+\_\+lo\+Corner}!box\+\_\+if@{box\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+lo\+Corner}{m_loCorner}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect box\+\_\+if\+::m\+\_\+lo\+Corner\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classbox__if_aeb61bce3522cf63e7a7e20e1830e9462}{}\label{classbox__if_aeb61bce3522cf63e7a7e20e1830e9462}
+
+
+Lower left corner. 
+
+
+
+Definition at line 56 of file box\+\_\+if.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{box__if_8H}{box\+\_\+if.\+H}\end{DoxyCompactItemize}

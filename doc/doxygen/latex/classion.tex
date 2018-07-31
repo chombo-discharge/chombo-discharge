@@ -1,0 +1,175 @@
+\hypertarget{classion}{}\section{ion Class Reference}
+\label{classion}\index{ion@{ion}}
+
+
+Abstract class that describes an electron or ion.  
+
+
+
+
+{\ttfamily \#include $<$ion.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classion_a6c62c25fa4268e0db86a8925f5d2884e}{ion} ()
+\begin{DoxyCompactList}\small\item\em Weak construction with default parameters. \end{DoxyCompactList}\item 
+\hyperlink{classion_a170608b858a949f9c31273d95a2dce30}{$\sim$ion} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual const Real \hyperlink{classion_a8184bc1cec016e19bb68eff30cd987fc}{initial\+\_\+data} (const Real\+Vect a\+\_\+pos, const Real a\+\_\+time) const =0
+\begin{DoxyCompactList}\small\item\em Initial data. Must be set. \end{DoxyCompactList}\item 
+virtual const std\+::string \hyperlink{classion_a4e50942aafc71ee65ceb809c78e899d7}{get\+\_\+name} () const 
+\begin{DoxyCompactList}\small\item\em Return name. \end{DoxyCompactList}\item 
+virtual const int \hyperlink{classion_adefb6df3bda4405d398c079f1450d00d}{get\+\_\+charge} () const 
+\begin{DoxyCompactList}\small\item\em Return charge. \end{DoxyCompactList}\item 
+virtual const bool \hyperlink{classion_a92d25bdc15addbec8cb6e5d5d99676bf}{is\+\_\+diffusive} () const 
+\begin{DoxyCompactList}\small\item\em Return diffusive or not. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{classion_a768ee32274571c46880883d7abc0abcd}{m\+\_\+name}
+\begin{DoxyCompactList}\small\item\em Ion name. \end{DoxyCompactList}\item 
+int \hyperlink{classion_ad1b2bff942b774400f0ad2e41f5cc118}{m\+\_\+charge}
+\begin{DoxyCompactList}\small\item\em Charge. \end{DoxyCompactList}\item 
+bool \hyperlink{classion_a45d87675332227c92456b24c19c4d781}{m\+\_\+diffusive}
+\begin{DoxyCompactList}\small\item\em Diffusive species or not. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Abstract class that describes an electron or ion. 
+
+Definition at line 16 of file ion.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ion@{ion}!ion@{ion}}
+\index{ion@{ion}!ion@{ion}}
+\subsubsection[{\texorpdfstring{ion()}{ion()}}]{\setlength{\rightskip}{0pt plus 5cm}ion\+::ion (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classion_a6c62c25fa4268e0db86a8925f5d2884e}{}\label{classion_a6c62c25fa4268e0db86a8925f5d2884e}
+
+
+Weak construction with default parameters. 
+
+\index{ion@{ion}!````~ion@{$\sim$ion}}
+\index{````~ion@{$\sim$ion}!ion@{ion}}
+\subsubsection[{\texorpdfstring{$\sim$ion()}{~ion()}}]{\setlength{\rightskip}{0pt plus 5cm}ion\+::$\sim$ion (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classion_a170608b858a949f9c31273d95a2dce30}{}\label{classion_a170608b858a949f9c31273d95a2dce30}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{ion@{ion}!get\+\_\+charge@{get\+\_\+charge}}
+\index{get\+\_\+charge@{get\+\_\+charge}!ion@{ion}}
+\subsubsection[{\texorpdfstring{get\+\_\+charge() const }{get_charge() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const int ion\+::get\+\_\+charge (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classion_adefb6df3bda4405d398c079f1450d00d}{}\label{classion_adefb6df3bda4405d398c079f1450d00d}
+
+
+Return charge. 
+
+
+
+Definition at line 45 of file ion.\+H.
+
+\index{ion@{ion}!get\+\_\+name@{get\+\_\+name}}
+\index{get\+\_\+name@{get\+\_\+name}!ion@{ion}}
+\subsubsection[{\texorpdfstring{get\+\_\+name() const }{get_name() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const std\+::string ion\+::get\+\_\+name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classion_a4e50942aafc71ee65ceb809c78e899d7}{}\label{classion_a4e50942aafc71ee65ceb809c78e899d7}
+
+
+Return name. 
+
+
+
+Definition at line 38 of file ion.\+H.
+
+\index{ion@{ion}!initial\+\_\+data@{initial\+\_\+data}}
+\index{initial\+\_\+data@{initial\+\_\+data}!ion@{ion}}
+\subsubsection[{\texorpdfstring{initial\+\_\+data(const Real\+Vect a\+\_\+pos, const Real a\+\_\+time) const =0}{initial_data(const RealVect a_pos, const Real a_time) const =0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual const Real ion\+::initial\+\_\+data (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos, }
+\item[{const Real}]{a\+\_\+time}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classion_a8184bc1cec016e19bb68eff30cd987fc}{}\label{classion_a8184bc1cec016e19bb68eff30cd987fc}
+
+
+Initial data. Must be set. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+pos} & Position \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+time} & Time \\
+\hline
+\end{DoxyParams}
+\index{ion@{ion}!is\+\_\+diffusive@{is\+\_\+diffusive}}
+\index{is\+\_\+diffusive@{is\+\_\+diffusive}!ion@{ion}}
+\subsubsection[{\texorpdfstring{is\+\_\+diffusive() const }{is_diffusive() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual const bool ion\+::is\+\_\+diffusive (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classion_a92d25bdc15addbec8cb6e5d5d99676bf}{}\label{classion_a92d25bdc15addbec8cb6e5d5d99676bf}
+
+
+Return diffusive or not. 
+
+
+
+Definition at line 52 of file ion.\+H.
+
+
+
+\subsection{Member Data Documentation}
+\index{ion@{ion}!m\+\_\+charge@{m\+\_\+charge}}
+\index{m\+\_\+charge@{m\+\_\+charge}!ion@{ion}}
+\subsubsection[{\texorpdfstring{m\+\_\+charge}{m_charge}}]{\setlength{\rightskip}{0pt plus 5cm}int ion\+::m\+\_\+charge\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classion_ad1b2bff942b774400f0ad2e41f5cc118}{}\label{classion_ad1b2bff942b774400f0ad2e41f5cc118}
+
+
+Charge. 
+
+
+
+Definition at line 66 of file ion.\+H.
+
+\index{ion@{ion}!m\+\_\+diffusive@{m\+\_\+diffusive}}
+\index{m\+\_\+diffusive@{m\+\_\+diffusive}!ion@{ion}}
+\subsubsection[{\texorpdfstring{m\+\_\+diffusive}{m_diffusive}}]{\setlength{\rightskip}{0pt plus 5cm}bool ion\+::m\+\_\+diffusive\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classion_a45d87675332227c92456b24c19c4d781}{}\label{classion_a45d87675332227c92456b24c19c4d781}
+
+
+Diffusive species or not. 
+
+
+
+Definition at line 71 of file ion.\+H.
+
+\index{ion@{ion}!m\+\_\+name@{m\+\_\+name}}
+\index{m\+\_\+name@{m\+\_\+name}!ion@{ion}}
+\subsubsection[{\texorpdfstring{m\+\_\+name}{m_name}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string ion\+::m\+\_\+name\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classion_a768ee32274571c46880883d7abc0abcd}{}\label{classion_a768ee32274571c46880883d7abc0abcd}
+
+
+Ion name. 
+
+
+
+Definition at line 61 of file ion.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/plasma\+\_\+solver/\hyperlink{ion_8H}{ion.\+H}\end{DoxyCompactItemize}

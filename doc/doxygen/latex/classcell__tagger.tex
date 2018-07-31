@@ -1,0 +1,401 @@
+\hypertarget{classcell__tagger}{}\section{cell\+\_\+tagger Class Reference}
+\label{classcell__tagger}\index{cell\+\_\+tagger@{cell\+\_\+tagger}}
+
+
+Abstract class for tagging cells across an A\+MR hierarchy.  
+
+
+
+
+{\ttfamily \#include $<$cell\+\_\+tagger.\+H$>$}
+
+
+
+Inheritance diagram for cell\+\_\+tagger\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=238pt]{classcell__tagger__inherit__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classcell__tagger_a60e688c08bd9156e3f875a5df4243e4d}{cell\+\_\+tagger} (const int a\+\_\+num\+\_\+tracers=0)
+\begin{DoxyCompactList}\small\item\em Weak constructor, must subsequently call define. \end{DoxyCompactList}\item 
+virtual \hyperlink{classcell__tagger_a5c2b0d29e31c31ae982017ec48007dec}{$\sim$cell\+\_\+tagger} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcell__tagger_aba186789a22860d4dec3b92b261e99b7}{define} (const Ref\+Counted\+Ptr$<$ \hyperlink{classplasma__kinetics}{plasma\+\_\+kinetics} $>$ \&a\+\_\+plaskin, const Ref\+Counted\+Ptr$<$ \hyperlink{classtime__stepper}{time\+\_\+stepper} $>$ \&a\+\_\+timestepper, const Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \&a\+\_\+amr, const Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \&a\+\_\+compgeom, const Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \&a\+\_\+physdom)
+\begin{DoxyCompactList}\small\item\em Define function. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcell__tagger_a29584dad2d4156e946859447dc9eac4c}{compute\+\_\+tracers} ()=0
+\begin{DoxyCompactList}\small\item\em Compute tracer fields. \end{DoxyCompactList}\item 
+int \hyperlink{classcell__tagger_ac2c735c0746c381c2bc56817b88c0a05}{get\+\_\+num\+\_\+tracers} ()
+\begin{DoxyCompactList}\small\item\em Get number of tracer fields. \end{DoxyCompactList}\item 
+void \hyperlink{classcell__tagger_a63d13b47b42107a44c4087bb1b1961b2}{regrid} ()
+\begin{DoxyCompactList}\small\item\em Regrid storage for tracer field. \end{DoxyCompactList}\item 
+void \hyperlink{classcell__tagger_af7ff4270108c5d6bf6a6eab1a6827f59}{set\+\_\+phase} (const \hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Set phase. \end{DoxyCompactList}\item 
+void \hyperlink{classcell__tagger_af66222ac0e75f1a29362795c58d1b5d9}{set\+\_\+verbosity} (const int a\+\_\+verbosity)
+\begin{DoxyCompactList}\small\item\em Set verbosity. \end{DoxyCompactList}\item 
+bool \hyperlink{classcell__tagger_a5fb636f53318de05f0889d4e2aca0bae}{tag\+\_\+cells} (\hyperlink{type__definitions_8H_a4eb540da9eb275c3e4225830ae526113}{E\+B\+A\+M\+R\+Tags} \&a\+\_\+tags)
+\begin{DoxyCompactList}\small\item\em Tag cells. \end{DoxyCompactList}\item 
+Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $>$ \& \hyperlink{classcell__tagger_a96bbcfa8bd9e64a72a3e16f754b7dd1f}{get\+\_\+tracer\+\_\+fields} ()
+\begin{DoxyCompactList}\small\item\em Tracer fields. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \hyperlink{classcell__tagger_ae4b0418cb42a96bcfbcdc2a02323880e}{coarsen\+\_\+cell} (const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0
+\begin{DoxyCompactList}\small\item\em Coarsen a cell based on a tracer field. \end{DoxyCompactList}\item 
+virtual bool \hyperlink{classcell__tagger_afb51f91684b877164e2616bf205453b4}{refine\+\_\+cell} (const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0
+\begin{DoxyCompactList}\small\item\em Refine a cell based on a tracer field. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classplasma__kinetics}{plasma\+\_\+kinetics} $>$ \hyperlink{classcell__tagger_a1075ac078698fb7abb5c011a06f32a5c}{m\+\_\+plaskin}
+\begin{DoxyCompactList}\small\item\em Plasma kinetics. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classtime__stepper}{time\+\_\+stepper} $>$ \hyperlink{classcell__tagger_a6cb59731dd7aee8369318cfe5fb6823a}{m\+\_\+timestepper}
+\begin{DoxyCompactList}\small\item\em Time stepper. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classamr__mesh}{amr\+\_\+mesh} $>$ \hyperlink{classcell__tagger_aa407e73dc8492c49793be861259ea53e}{m\+\_\+amr}
+\begin{DoxyCompactList}\small\item\em \hyperlink{classamr__mesh}{amr\+\_\+mesh}. Needed for computing tracer stuff \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classcomputational__geometry}{computational\+\_\+geometry} $>$ \hyperlink{classcell__tagger_a2942ec128b7fb96be3d02219054bd451}{m\+\_\+compgeom}
+\begin{DoxyCompactList}\small\item\em Computational geometry. Needed for what exactly? \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classphysical__domain}{physical\+\_\+domain} $>$ \hyperlink{classcell__tagger_ad176575b6ece539b8131a1aa12e4f2f7}{m\+\_\+physdom}
+\begin{DoxyCompactList}\small\item\em Physical domain. \end{DoxyCompactList}\item 
+\hyperlink{namespacephase_a23c76f548a5eb1955ed8c929c541108b}{phase\+::which\+\_\+phase} \hyperlink{classcell__tagger_a1495ba566a901891655afcc35ac05a3f}{m\+\_\+phase}
+\begin{DoxyCompactList}\small\item\em Phase. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{classcell__tagger_a9efdcde4e1d4bfbe8b6b59b91875efd5}{m\+\_\+name}
+\begin{DoxyCompactList}\small\item\em Set name. \end{DoxyCompactList}\item 
+int \hyperlink{classcell__tagger_a23a211cfbb88bf78e7d61b7df4bd53f1}{m\+\_\+num\+\_\+tracers}
+\begin{DoxyCompactList}\small\item\em Number of tracer fields. \end{DoxyCompactList}\item 
+int \hyperlink{classcell__tagger_a0d980aba108e7b024f89d94232657f5e}{m\+\_\+verbosity}
+\begin{DoxyCompactList}\small\item\em Verbosity. \end{DoxyCompactList}\item 
+Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $>$ \hyperlink{classcell__tagger_a09cfda8cf8ca974f39a56ce5ab5e1829}{m\+\_\+tracer}
+\begin{DoxyCompactList}\small\item\em Tracer fields. \end{DoxyCompactList}\item 
+Vector$<$ \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} $>$ \hyperlink{classcell__tagger_a8ca300677503a1e619104a5eef82c21c}{m\+\_\+grad\+\_\+tracer}
+\begin{DoxyCompactList}\small\item\em Gradient of tracer fields. \end{DoxyCompactList}\item 
+Vector$<$ \hyperlink{classreal__box}{real\+\_\+box} $>$ \hyperlink{classcell__tagger_a3f66147925775902886212b74e51c3d2}{m\+\_\+tagboxes}
+\begin{DoxyCompactList}\small\item\em Boxes used for tagging. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Abstract class for tagging cells across an A\+MR hierarchy. 
+
+Definition at line 23 of file cell\+\_\+tagger.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{cell\+\_\+tagger(const int a\+\_\+num\+\_\+tracers=0)}{cell_tagger(const int a_num_tracers=0)}}]{\setlength{\rightskip}{0pt plus 5cm}cell\+\_\+tagger\+::cell\+\_\+tagger (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+num\+\_\+tracers = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}\hypertarget{classcell__tagger_a60e688c08bd9156e3f875a5df4243e4d}{}\label{classcell__tagger_a60e688c08bd9156e3f875a5df4243e4d}
+
+
+Weak constructor, must subsequently call define. 
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!````~cell\+\_\+tagger@{$\sim$cell\+\_\+tagger}}
+\index{````~cell\+\_\+tagger@{$\sim$cell\+\_\+tagger}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{$\sim$cell\+\_\+tagger()}{~cell_tagger()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual cell\+\_\+tagger\+::$\sim$cell\+\_\+tagger (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcell__tagger_a5c2b0d29e31c31ae982017ec48007dec}{}\label{classcell__tagger_a5c2b0d29e31c31ae982017ec48007dec}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!coarsen\+\_\+cell@{coarsen\+\_\+cell}}
+\index{coarsen\+\_\+cell@{coarsen\+\_\+cell}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{coarsen\+\_\+cell(const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0}{coarsen_cell(const RealVect &a_pos, const Real &a_time, const Real &a_dx, const int &a_lvl, const Vector< Real > &a_tracer, const Vector< RealVect > &a_grad_tracer)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool cell\+\_\+tagger\+::coarsen\+\_\+cell (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos, }
+\item[{const Real \&}]{a\+\_\+time, }
+\item[{const Real \&}]{a\+\_\+dx, }
+\item[{const int \&}]{a\+\_\+lvl, }
+\item[{const Vector$<$ Real $>$ \&}]{a\+\_\+tracer, }
+\item[{const Vector$<$ Real\+Vect $>$ \&}]{a\+\_\+grad\+\_\+tracer}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [pure virtual]}}\hypertarget{classcell__tagger_ae4b0418cb42a96bcfbcdc2a02323880e}{}\label{classcell__tagger_ae4b0418cb42a96bcfbcdc2a02323880e}
+
+
+Coarsen a cell based on a tracer field. 
+
+
+
+Implemented in \hyperlink{classfull__tagger_aa4270040b0a8ce3ce536583deb1ddd33}{full\+\_\+tagger}, and \hyperlink{classultralw__tagger_a8b1c65a9b152a34432d4a21f0ec0cfb9}{ultralw\+\_\+tagger}.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!compute\+\_\+tracers@{compute\+\_\+tracers}}
+\index{compute\+\_\+tracers@{compute\+\_\+tracers}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{compute\+\_\+tracers()=0}{compute_tracers()=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cell\+\_\+tagger\+::compute\+\_\+tracers (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classcell__tagger_a29584dad2d4156e946859447dc9eac4c}{}\label{classcell__tagger_a29584dad2d4156e946859447dc9eac4c}
+
+
+Compute tracer fields. 
+
+
+
+Implemented in \hyperlink{classfull__tagger_a5de0bb96ae96a30240997f429e6f9652}{full\+\_\+tagger}, and \hyperlink{classultralw__tagger_a82fe9b2986b96a46de5a05db97d5c5c6}{ultralw\+\_\+tagger}.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!define@{define}}
+\index{define@{define}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{define(const Ref\+Counted\+Ptr$<$ plasma\+\_\+kinetics $>$ \&a\+\_\+plaskin, const Ref\+Counted\+Ptr$<$ time\+\_\+stepper $>$ \&a\+\_\+timestepper, const Ref\+Counted\+Ptr$<$ amr\+\_\+mesh $>$ \&a\+\_\+amr, const Ref\+Counted\+Ptr$<$ computational\+\_\+geometry $>$ \&a\+\_\+compgeom, const Ref\+Counted\+Ptr$<$ physical\+\_\+domain $>$ \&a\+\_\+physdom)}{define(const RefCountedPtr< plasma_kinetics > &a_plaskin, const RefCountedPtr< time_stepper > &a_timestepper, const RefCountedPtr< amr_mesh > &a_amr, const RefCountedPtr< computational_geometry > &a_compgeom, const RefCountedPtr< physical_domain > &a_physdom)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cell\+\_\+tagger\+::define (
+\begin{DoxyParamCaption}
+\item[{const Ref\+Counted\+Ptr$<$ {\bf plasma\+\_\+kinetics} $>$ \&}]{a\+\_\+plaskin, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf time\+\_\+stepper} $>$ \&}]{a\+\_\+timestepper, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf amr\+\_\+mesh} $>$ \&}]{a\+\_\+amr, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf computational\+\_\+geometry} $>$ \&}]{a\+\_\+compgeom, }
+\item[{const Ref\+Counted\+Ptr$<$ {\bf physical\+\_\+domain} $>$ \&}]{a\+\_\+physdom}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcell__tagger_aba186789a22860d4dec3b92b261e99b7}{}\label{classcell__tagger_aba186789a22860d4dec3b92b261e99b7}
+
+
+Define function. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+plaskin} & Plasma kinetics \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+timestepper} & Time stepper \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+amr} & \hyperlink{classamr__mesh}{amr\+\_\+mesh} instance \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+compgeom} & Computational geometry \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+physdom} & Physical domain \\
+\hline
+\end{DoxyParams}
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!get\+\_\+num\+\_\+tracers@{get\+\_\+num\+\_\+tracers}}
+\index{get\+\_\+num\+\_\+tracers@{get\+\_\+num\+\_\+tracers}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{get\+\_\+num\+\_\+tracers()}{get_num_tracers()}}]{\setlength{\rightskip}{0pt plus 5cm}int cell\+\_\+tagger\+::get\+\_\+num\+\_\+tracers (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classcell__tagger_ac2c735c0746c381c2bc56817b88c0a05}{}\label{classcell__tagger_ac2c735c0746c381c2bc56817b88c0a05}
+
+
+Get number of tracer fields. 
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!get\+\_\+tracer\+\_\+fields@{get\+\_\+tracer\+\_\+fields}}
+\index{get\+\_\+tracer\+\_\+fields@{get\+\_\+tracer\+\_\+fields}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{get\+\_\+tracer\+\_\+fields()}{get_tracer_fields()}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<${\bf E\+B\+A\+M\+R\+Cell\+Data}$>$\& cell\+\_\+tagger\+::get\+\_\+tracer\+\_\+fields (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classcell__tagger_a96bbcfa8bd9e64a72a3e16f754b7dd1f}{}\label{classcell__tagger_a96bbcfa8bd9e64a72a3e16f754b7dd1f}
+
+
+Tracer fields. 
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!refine\+\_\+cell@{refine\+\_\+cell}}
+\index{refine\+\_\+cell@{refine\+\_\+cell}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{refine\+\_\+cell(const Real\+Vect \&a\+\_\+pos, const Real \&a\+\_\+time, const Real \&a\+\_\+dx, const int \&a\+\_\+lvl, const Vector$<$ Real $>$ \&a\+\_\+tracer, const Vector$<$ Real\+Vect $>$ \&a\+\_\+grad\+\_\+tracer)=0}{refine_cell(const RealVect &a_pos, const Real &a_time, const Real &a_dx, const int &a_lvl, const Vector< Real > &a_tracer, const Vector< RealVect > &a_grad_tracer)=0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual bool cell\+\_\+tagger\+::refine\+\_\+cell (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos, }
+\item[{const Real \&}]{a\+\_\+time, }
+\item[{const Real \&}]{a\+\_\+dx, }
+\item[{const int \&}]{a\+\_\+lvl, }
+\item[{const Vector$<$ Real $>$ \&}]{a\+\_\+tracer, }
+\item[{const Vector$<$ Real\+Vect $>$ \&}]{a\+\_\+grad\+\_\+tracer}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [pure virtual]}}\hypertarget{classcell__tagger_afb51f91684b877164e2616bf205453b4}{}\label{classcell__tagger_afb51f91684b877164e2616bf205453b4}
+
+
+Refine a cell based on a tracer field. 
+
+
+
+Implemented in \hyperlink{classfull__tagger_abdf06de73c8f54f062949f2519655981}{full\+\_\+tagger}, and \hyperlink{classultralw__tagger_aad21e13154dcd792f68543a2eced5d4c}{ultralw\+\_\+tagger}.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!regrid@{regrid}}
+\index{regrid@{regrid}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{regrid()}{regrid()}}]{\setlength{\rightskip}{0pt plus 5cm}void cell\+\_\+tagger\+::regrid (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classcell__tagger_a63d13b47b42107a44c4087bb1b1961b2}{}\label{classcell__tagger_a63d13b47b42107a44c4087bb1b1961b2}
+
+
+Regrid storage for tracer field. 
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!set\+\_\+phase@{set\+\_\+phase}}
+\index{set\+\_\+phase@{set\+\_\+phase}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{set\+\_\+phase(const phase\+::which\+\_\+phase a\+\_\+phase)}{set_phase(const phase::which_phase a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}void cell\+\_\+tagger\+::set\+\_\+phase (
+\begin{DoxyParamCaption}
+\item[{const {\bf phase\+::which\+\_\+phase}}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)}\hypertarget{classcell__tagger_af7ff4270108c5d6bf6a6eab1a6827f59}{}\label{classcell__tagger_af7ff4270108c5d6bf6a6eab1a6827f59}
+
+
+Set phase. 
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!set\+\_\+verbosity@{set\+\_\+verbosity}}
+\index{set\+\_\+verbosity@{set\+\_\+verbosity}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{set\+\_\+verbosity(const int a\+\_\+verbosity)}{set_verbosity(const int a_verbosity)}}]{\setlength{\rightskip}{0pt plus 5cm}void cell\+\_\+tagger\+::set\+\_\+verbosity (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+verbosity}
+\end{DoxyParamCaption}
+)}\hypertarget{classcell__tagger_af66222ac0e75f1a29362795c58d1b5d9}{}\label{classcell__tagger_af66222ac0e75f1a29362795c58d1b5d9}
+
+
+Set verbosity. 
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!tag\+\_\+cells@{tag\+\_\+cells}}
+\index{tag\+\_\+cells@{tag\+\_\+cells}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{tag\+\_\+cells(\+E\+B\+A\+M\+R\+Tags \&a\+\_\+tags)}{tag_cells(EBAMRTags &a_tags)}}]{\setlength{\rightskip}{0pt plus 5cm}bool cell\+\_\+tagger\+::tag\+\_\+cells (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Tags} \&}]{a\+\_\+tags}
+\end{DoxyParamCaption}
+)}\hypertarget{classcell__tagger_a5fb636f53318de05f0889d4e2aca0bae}{}\label{classcell__tagger_a5fb636f53318de05f0889d4e2aca0bae}
+
+
+Tag cells. 
+
+
+
+\subsection{Member Data Documentation}
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+amr@{m\+\_\+amr}}
+\index{m\+\_\+amr@{m\+\_\+amr}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+amr}{m_amr}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf amr\+\_\+mesh}$>$ cell\+\_\+tagger\+::m\+\_\+amr\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_aa407e73dc8492c49793be861259ea53e}{}\label{classcell__tagger_aa407e73dc8492c49793be861259ea53e}
+
+
+\hyperlink{classamr__mesh}{amr\+\_\+mesh}. Needed for computing tracer stuff 
+
+
+
+Definition at line 101 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+compgeom@{m\+\_\+compgeom}}
+\index{m\+\_\+compgeom@{m\+\_\+compgeom}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+compgeom}{m_compgeom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf computational\+\_\+geometry}$>$ cell\+\_\+tagger\+::m\+\_\+compgeom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a2942ec128b7fb96be3d02219054bd451}{}\label{classcell__tagger_a2942ec128b7fb96be3d02219054bd451}
+
+
+Computational geometry. Needed for what exactly? 
+
+
+
+Definition at line 106 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+grad\+\_\+tracer@{m\+\_\+grad\+\_\+tracer}}
+\index{m\+\_\+grad\+\_\+tracer@{m\+\_\+grad\+\_\+tracer}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+grad\+\_\+tracer}{m_grad_tracer}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<${\bf E\+B\+A\+M\+R\+Cell\+Data}$>$ cell\+\_\+tagger\+::m\+\_\+grad\+\_\+tracer\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a8ca300677503a1e619104a5eef82c21c}{}\label{classcell__tagger_a8ca300677503a1e619104a5eef82c21c}
+
+
+Gradient of tracer fields. 
+
+
+
+Definition at line 141 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+name@{m\+\_\+name}}
+\index{m\+\_\+name@{m\+\_\+name}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+name}{m_name}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string cell\+\_\+tagger\+::m\+\_\+name\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a9efdcde4e1d4bfbe8b6b59b91875efd5}{}\label{classcell__tagger_a9efdcde4e1d4bfbe8b6b59b91875efd5}
+
+
+Set name. 
+
+
+
+Definition at line 121 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+num\+\_\+tracers@{m\+\_\+num\+\_\+tracers}}
+\index{m\+\_\+num\+\_\+tracers@{m\+\_\+num\+\_\+tracers}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+num\+\_\+tracers}{m_num_tracers}}]{\setlength{\rightskip}{0pt plus 5cm}int cell\+\_\+tagger\+::m\+\_\+num\+\_\+tracers\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a23a211cfbb88bf78e7d61b7df4bd53f1}{}\label{classcell__tagger_a23a211cfbb88bf78e7d61b7df4bd53f1}
+
+
+Number of tracer fields. 
+
+
+
+Definition at line 126 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+phase@{m\+\_\+phase}}
+\index{m\+\_\+phase@{m\+\_\+phase}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+phase}{m_phase}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf phase\+::which\+\_\+phase} cell\+\_\+tagger\+::m\+\_\+phase\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a1495ba566a901891655afcc35ac05a3f}{}\label{classcell__tagger_a1495ba566a901891655afcc35ac05a3f}
+
+
+Phase. 
+
+
+
+Definition at line 116 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+physdom@{m\+\_\+physdom}}
+\index{m\+\_\+physdom@{m\+\_\+physdom}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+physdom}{m_physdom}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf physical\+\_\+domain}$>$ cell\+\_\+tagger\+::m\+\_\+physdom\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_ad176575b6ece539b8131a1aa12e4f2f7}{}\label{classcell__tagger_ad176575b6ece539b8131a1aa12e4f2f7}
+
+
+Physical domain. 
+
+
+
+Definition at line 111 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+plaskin@{m\+\_\+plaskin}}
+\index{m\+\_\+plaskin@{m\+\_\+plaskin}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+plaskin}{m_plaskin}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf plasma\+\_\+kinetics}$>$ cell\+\_\+tagger\+::m\+\_\+plaskin\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a1075ac078698fb7abb5c011a06f32a5c}{}\label{classcell__tagger_a1075ac078698fb7abb5c011a06f32a5c}
+
+
+Plasma kinetics. 
+
+
+
+Definition at line 91 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+tagboxes@{m\+\_\+tagboxes}}
+\index{m\+\_\+tagboxes@{m\+\_\+tagboxes}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+tagboxes}{m_tagboxes}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<${\bf real\+\_\+box}$>$ cell\+\_\+tagger\+::m\+\_\+tagboxes\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a3f66147925775902886212b74e51c3d2}{}\label{classcell__tagger_a3f66147925775902886212b74e51c3d2}
+
+
+Boxes used for tagging. 
+
+
+
+Definition at line 146 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+timestepper@{m\+\_\+timestepper}}
+\index{m\+\_\+timestepper@{m\+\_\+timestepper}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+timestepper}{m_timestepper}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf time\+\_\+stepper}$>$ cell\+\_\+tagger\+::m\+\_\+timestepper\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a6cb59731dd7aee8369318cfe5fb6823a}{}\label{classcell__tagger_a6cb59731dd7aee8369318cfe5fb6823a}
+
+
+Time stepper. 
+
+
+
+Definition at line 96 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+tracer@{m\+\_\+tracer}}
+\index{m\+\_\+tracer@{m\+\_\+tracer}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+tracer}{m_tracer}}]{\setlength{\rightskip}{0pt plus 5cm}Vector$<${\bf E\+B\+A\+M\+R\+Cell\+Data}$>$ cell\+\_\+tagger\+::m\+\_\+tracer\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a09cfda8cf8ca974f39a56ce5ab5e1829}{}\label{classcell__tagger_a09cfda8cf8ca974f39a56ce5ab5e1829}
+
+
+Tracer fields. 
+
+
+
+Definition at line 136 of file cell\+\_\+tagger.\+H.
+
+\index{cell\+\_\+tagger@{cell\+\_\+tagger}!m\+\_\+verbosity@{m\+\_\+verbosity}}
+\index{m\+\_\+verbosity@{m\+\_\+verbosity}!cell\+\_\+tagger@{cell\+\_\+tagger}}
+\subsubsection[{\texorpdfstring{m\+\_\+verbosity}{m_verbosity}}]{\setlength{\rightskip}{0pt plus 5cm}int cell\+\_\+tagger\+::m\+\_\+verbosity\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classcell__tagger_a0d980aba108e7b024f89d94232657f5e}{}\label{classcell__tagger_a0d980aba108e7b024f89d94232657f5e}
+
+
+Verbosity. 
+
+
+
+Definition at line 131 of file cell\+\_\+tagger.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/plasma\+\_\+solver/\hyperlink{cell__tagger_8H}{cell\+\_\+tagger.\+H}\end{DoxyCompactItemize}

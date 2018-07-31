@@ -1,0 +1,67 @@
+\subsection*{T\+L\+DR }
+
+Load modules by \begin{DoxyVerb}module load intelcomp/15.0.1
+module load gcc/4.9.1
+module load mpt/2.10
+\end{DoxyVerb}
+
+
+The configuration file for vilje is found here. Store it as chombo\+\_\+root/lib/mk/\+Make.\+defs.\+local
+
+\subsection*{Loading the modules }
+
+To compile the system on the {\itshape vilje} supercomputer, you need to load compilers and libraries before compiling the code. We recommend that you use intel compilers by loading \begin{DoxyVerb}module load intelcomp/15.0.1
+\end{DoxyVerb}
+
+
+which will load Intel compilers for Fortran and C/\+C++ (version 15.\+0.\+1). An updated version of gcc is loaded by \begin{DoxyVerb}module load gcc/4.9.1
+\end{DoxyVerb}
+
+
+M\+PI libraries are loaded by \begin{DoxyVerb}module load mpt/2.10
+\end{DoxyVerb}
+
+
+and H\+D\+F5 is loaded by \begin{DoxyVerb}module load hdf5/1.8.14
+\end{DoxyVerb}
+
+
+\subsection*{Modifying the configuration file }
+
+It is likely possible to load newer versions of compilers, M\+PI, and H\+D\+F5 (but we haven\textquotesingle{}t tried). Once the libraries are loaded, the code may be compiled as usual. It will be necessary to update C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME and supply the library path to the Chombo makefiles. C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME is simply updated to the folder in which Chombo is installed. H\+D\+F5 paths are found by typing \begin{DoxyVerb}module disp hdf5/1.8.14
+\end{DoxyVerb}
+
+
+which will display the library paths to H\+D\+F5. The typical output is \begin{DoxyVerb}/sw/sdev/modulefiles/hdf5/1.8.14:
+
+module-whatis    general purpose library and file format for storing scientific data 
+prereq   intelcomp/15.0.1 
+prereq   mpt/2.10 
+prepend-path     PATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/bin 
+prepend-path     CPATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+prepend-path     FPATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+prepend-path     LIBRARY_PATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib 
+prepend-path     LD_LIBRARY_PATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib 
+prepend-path     PYTHONPATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib/python2.7/site-packages 
+setenv           HDF5_DIR /sw/sdev/Modules/hdf5/hdf5-1.8.14 
+
+Loads HDF5 version 1.8.14
+\end{DoxyVerb}
+
+
+To use Intel\textquotesingle{}s Fortran and C/\+C++ compilers, please specify \begin{DoxyVerb} FC  = ifort
+ CXX = icpc
+\end{DoxyVerb}
+
+
+in Make.\+defs.\+local. Likewise, update Make.\+defs.\+local so that it finds the H\+D\+F5 libraries and include files. For this version of H\+D\+F5, they are located in \begin{DoxyVerb} /sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+ /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib 
+\end{DoxyVerb}
+
+
+With these paths, the appropriate flags in Make.\+defs.\+local are \begin{DoxyVerb}HDFINCFLAGS    = -I/sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+HDFLIBFLAGS    = -L/sw/sdev/Modules/hdf5/hdf5-1.8.14/lib -lhdf5 -lz 
+
+HDFMPIINCFLAGS = -I/sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+HDFMPILIBFLAGS = -L/sw/sdev/Modules/hdf5/hdf5-1.8.14/lib -lhdf5 -lz \end{DoxyVerb}
+ 

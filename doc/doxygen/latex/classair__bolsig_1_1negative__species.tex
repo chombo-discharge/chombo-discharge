@@ -1,0 +1,192 @@
+\hypertarget{classair__bolsig_1_1negative__species}{}\section{air\+\_\+bolsig\+:\+:negative\+\_\+species Class Reference}
+\label{classair__bolsig_1_1negative__species}\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+
+
+Implementation of the negative species for the Morrow-\/\+Lowke model.  
+
+
+
+
+{\ttfamily \#include $<$air\+\_\+bolsig.\+H$>$}
+
+
+
+Inheritance diagram for air\+\_\+bolsig\+:\+:negative\+\_\+species\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=181pt]{classair__bolsig_1_1negative__species__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for air\+\_\+bolsig\+:\+:negative\+\_\+species\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=181pt]{classair__bolsig_1_1negative__species__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classair__bolsig_1_1negative__species_aaa47ac55634e85e1f21bae4b635b8946}{negative\+\_\+species} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classair__bolsig_1_1negative__species_abc10d268ca3dcc859d037b1c676c6592}{$\sim$negative\+\_\+species} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classair__bolsig_1_1negative__species_a609f505dd536dfb73ce66f5793fea8bc}{initial\+\_\+data} (const Real\+Vect a\+\_\+pos, const Real a\+\_\+time) const 
+\begin{DoxyCompactList}\small\item\em Implementation of initial data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classair__bolsig_1_1negative__species_a6b7641c7841608031fa6415cb1edf668}{set\+\_\+noise} (Ref\+Counted\+Ptr$<$ \hyperlink{classperlin__if}{perlin\+\_\+if} $>$ a\+\_\+noise\+Ptr)
+\begin{DoxyCompactList}\small\item\em Set the noise function. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classperlin__if}{perlin\+\_\+if} $>$ \hyperlink{classair__bolsig_1_1negative__species_a56d3117c1a055e223b4970bc8c2b3dcb}{m\+\_\+perlin}
+\begin{DoxyCompactList}\small\item\em Noise function. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1negative__species_a4621b1fd5e10bc71a7021896b0c886e5}{m\+\_\+uniform\+\_\+density}
+\begin{DoxyCompactList}\small\item\em Uniform plasma density. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1negative__species_a8166e39c6bbedb5db5898b09b5aa454a}{m\+\_\+seed\+\_\+density}
+\begin{DoxyCompactList}\small\item\em Plasma seed density. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1negative__species_a4eaf4b68c487fab16bb70560aee7fad4}{m\+\_\+seed\+\_\+radius}
+\begin{DoxyCompactList}\small\item\em Plasma seed radius. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1negative__species_a55c57ca62a44d454c78c4d732a3699c5}{m\+\_\+noise\+\_\+density}
+\begin{DoxyCompactList}\small\item\em Plasma seed radius. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classair__bolsig_1_1negative__species_a57ce5977481f0a5d97bec53fcc34cdfa}{m\+\_\+seed\+\_\+pos}
+\begin{DoxyCompactList}\small\item\em Plasma seed position. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+Implementation of the negative species for the Morrow-\/\+Lowke model. 
+
+Definition at line 665 of file air\+\_\+bolsig.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!negative\+\_\+species@{negative\+\_\+species}}
+\index{negative\+\_\+species@{negative\+\_\+species}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{negative\+\_\+species()}{negative_species()}}]{\setlength{\rightskip}{0pt plus 5cm}air\+\_\+bolsig\+::negative\+\_\+species\+::negative\+\_\+species (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classair__bolsig_1_1negative__species_aaa47ac55634e85e1f21bae4b635b8946}{}\label{classair__bolsig_1_1negative__species_aaa47ac55634e85e1f21bae4b635b8946}
+
+
+Constructor. 
+
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!````~negative\+\_\+species@{$\sim$negative\+\_\+species}}
+\index{````~negative\+\_\+species@{$\sim$negative\+\_\+species}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{$\sim$negative\+\_\+species()}{~negative_species()}}]{\setlength{\rightskip}{0pt plus 5cm}air\+\_\+bolsig\+::negative\+\_\+species\+::$\sim$negative\+\_\+species (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classair__bolsig_1_1negative__species_abc10d268ca3dcc859d037b1c676c6592}{}\label{classair__bolsig_1_1negative__species_abc10d268ca3dcc859d037b1c676c6592}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!initial\+\_\+data@{initial\+\_\+data}}
+\index{initial\+\_\+data@{initial\+\_\+data}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{initial\+\_\+data(const Real\+Vect a\+\_\+pos, const Real a\+\_\+time) const }{initial_data(const RealVect a_pos, const Real a_time) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real air\+\_\+bolsig\+::negative\+\_\+species\+::initial\+\_\+data (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos, }
+\item[{const Real}]{a\+\_\+time}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classair__bolsig_1_1negative__species_a609f505dd536dfb73ce66f5793fea8bc}{}\label{classair__bolsig_1_1negative__species_a609f505dd536dfb73ce66f5793fea8bc}
+
+
+Implementation of initial data. 
+
+
+
+Implements \hyperlink{classspecies_a1c492560bb220c62985aaf6b20ff8ec2}{species}.
+
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!set\+\_\+noise@{set\+\_\+noise}}
+\index{set\+\_\+noise@{set\+\_\+noise}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{set\+\_\+noise(\+Ref\+Counted\+Ptr$<$ perlin\+\_\+if $>$ a\+\_\+noise\+Ptr)}{set_noise(RefCountedPtr< perlin_if > a_noisePtr)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void air\+\_\+bolsig\+::negative\+\_\+species\+::set\+\_\+noise (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ {\bf perlin\+\_\+if} $>$}]{a\+\_\+noise\+Ptr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classair__bolsig_1_1negative__species_a6b7641c7841608031fa6415cb1edf668}{}\label{classair__bolsig_1_1negative__species_a6b7641c7841608031fa6415cb1edf668}
+
+
+Set the noise function. 
+
+
+
+\subsection{Member Data Documentation}
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!m\+\_\+noise\+\_\+density@{m\+\_\+noise\+\_\+density}}
+\index{m\+\_\+noise\+\_\+density@{m\+\_\+noise\+\_\+density}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{m\+\_\+noise\+\_\+density}{m_noise_density}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::negative\+\_\+species\+::m\+\_\+noise\+\_\+density}\hypertarget{classair__bolsig_1_1negative__species_a55c57ca62a44d454c78c4d732a3699c5}{}\label{classair__bolsig_1_1negative__species_a55c57ca62a44d454c78c4d732a3699c5}
+
+
+Plasma seed radius. 
+
+
+
+Definition at line 710 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!m\+\_\+perlin@{m\+\_\+perlin}}
+\index{m\+\_\+perlin@{m\+\_\+perlin}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{m\+\_\+perlin}{m_perlin}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf perlin\+\_\+if}$>$ air\+\_\+bolsig\+::negative\+\_\+species\+::m\+\_\+perlin}\hypertarget{classair__bolsig_1_1negative__species_a56d3117c1a055e223b4970bc8c2b3dcb}{}\label{classair__bolsig_1_1negative__species_a56d3117c1a055e223b4970bc8c2b3dcb}
+
+
+Noise function. 
+
+
+
+Definition at line 690 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!m\+\_\+seed\+\_\+density@{m\+\_\+seed\+\_\+density}}
+\index{m\+\_\+seed\+\_\+density@{m\+\_\+seed\+\_\+density}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{m\+\_\+seed\+\_\+density}{m_seed_density}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::negative\+\_\+species\+::m\+\_\+seed\+\_\+density}\hypertarget{classair__bolsig_1_1negative__species_a8166e39c6bbedb5db5898b09b5aa454a}{}\label{classair__bolsig_1_1negative__species_a8166e39c6bbedb5db5898b09b5aa454a}
+
+
+Plasma seed density. 
+
+
+
+Definition at line 700 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!m\+\_\+seed\+\_\+pos@{m\+\_\+seed\+\_\+pos}}
+\index{m\+\_\+seed\+\_\+pos@{m\+\_\+seed\+\_\+pos}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{m\+\_\+seed\+\_\+pos}{m_seed_pos}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect air\+\_\+bolsig\+::negative\+\_\+species\+::m\+\_\+seed\+\_\+pos}\hypertarget{classair__bolsig_1_1negative__species_a57ce5977481f0a5d97bec53fcc34cdfa}{}\label{classair__bolsig_1_1negative__species_a57ce5977481f0a5d97bec53fcc34cdfa}
+
+
+Plasma seed position. 
+
+
+
+Definition at line 715 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!m\+\_\+seed\+\_\+radius@{m\+\_\+seed\+\_\+radius}}
+\index{m\+\_\+seed\+\_\+radius@{m\+\_\+seed\+\_\+radius}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{m\+\_\+seed\+\_\+radius}{m_seed_radius}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::negative\+\_\+species\+::m\+\_\+seed\+\_\+radius}\hypertarget{classair__bolsig_1_1negative__species_a4eaf4b68c487fab16bb70560aee7fad4}{}\label{classair__bolsig_1_1negative__species_a4eaf4b68c487fab16bb70560aee7fad4}
+
+
+Plasma seed radius. 
+
+
+
+Definition at line 705 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}!m\+\_\+uniform\+\_\+density@{m\+\_\+uniform\+\_\+density}}
+\index{m\+\_\+uniform\+\_\+density@{m\+\_\+uniform\+\_\+density}!air\+\_\+bolsig\+::negative\+\_\+species@{air\+\_\+bolsig\+::negative\+\_\+species}}
+\subsubsection[{\texorpdfstring{m\+\_\+uniform\+\_\+density}{m_uniform_density}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::negative\+\_\+species\+::m\+\_\+uniform\+\_\+density}\hypertarget{classair__bolsig_1_1negative__species_a4621b1fd5e10bc71a7021896b0c886e5}{}\label{classair__bolsig_1_1negative__species_a4621b1fd5e10bc71a7021896b0c886e5}
+
+
+Uniform plasma density. 
+
+
+
+Definition at line 695 of file air\+\_\+bolsig.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/plasma\+\_\+models/air\+\_\+bolsig/\hyperlink{air__bolsig_8H}{air\+\_\+bolsig.\+H}\end{DoxyCompactItemize}

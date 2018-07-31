@@ -1,0 +1,153 @@
+\section*{Building the documentation }
+
+Before proceeding further, please install doxygen and build the code documentation. This requires that doxygen is installed on your computer, but it does not require a working installation of the code. To build the documentation, please type \begin{DoxyVerb}doxygen doxyfile 
+\end{DoxyVerb}
+
+
+in your shell (from the main folder). This will compile the documentation of the code in which you will find installation instructions. After building the documentation, please proceed ../chombo-\/streamer/doc/doxygen/html/index.html and navigate to installation instructions.
+
+\section*{Installation instructions }
+
+\subsection*{Prerequisites }
+
+The numerical code is written in C++ using the \href{https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations}{\tt M\+F\+Chombo} library and can be compiled on U\+N\+IX systems (both workstations and clusters). Compilation requires the following prerequisites to be in place\+:
+
+
+\begin{DoxyEnumerate}
+\item A C++ compiler (e.\+g. g++, icpc)
+\item A Fortran compiler (e.\+g. gfortran, ifort)
+\item An M\+PI compiler (e.\+g. Open\+M\+PI)
+\item A working H\+D\+F5 installations, both parallel and serial.
+\end{DoxyEnumerate}
+
+Compilers can be installed straightforwardly on U\+N\+IX systems; for users of Ubuntu-\/like systems we recommend that you install g++ (and gcc), gfortran, and Open\+M\+PI.
+
+\subsection*{H\+D\+F5 installation }
+
+Before attempting to install H\+D\+F5, please make sure that C++, Fortran, and M\+PI compilers are in place.
+
+H\+D\+F5 (Hierarchical Data Format) is a portable, binary data file with parallel support and is used to reduce I/O bottlenecks in simulations. H\+D\+F5 can be obtained from \href{https://support.hdfgroup.org/HDF5/}{\tt here}.
+
+While it is possible to compile our code for serial execution only, we generally recommend that the user installs both serial and parallel versions of H\+D\+F5. The two versions should {\itshape not} be installed in the same directory. For versions of H\+D\+F5 newer than 1.\+6, we require that the user configures H\+D\+F5 with the 1.\+6 A\+PI version.
+
+
+\begin{DoxyEnumerate}
+\item Compile and install zlib (a compression library). zlib can be obtained through \begin{DoxyVerb} sudo apt-get install zlib1g-dev
+\end{DoxyVerb}
+
+\item Download and install H\+D\+F5 for {\itshape serial execution}. \begin{DoxyVerb} ./configure --prefix=/usr/local/hdf5 --enable-production --enable-cxx --enable-fortran --with-default-api-version=v16
+ make
+ make install
+\end{DoxyVerb}
+
+
+This will install a serial version of H\+D\+F5 in /usr/local/hdf5 (if you want to install
+\item Install H\+D\+F5 for {\itshape parallel execution} \begin{DoxyVerb} ./configure --prefix=/usr/local/phdf5 --enable-production --enable-fortran --with-default-api-version=v16 --enable-parallel
+ make
+ make install
+\end{DoxyVerb}
+
+
+This will install a parallel version of H\+D\+F5 in /usr/local/phdf5
+\end{DoxyEnumerate}
+
+\subsection*{Building the source code }
+
+Once sequential and parallel versions of H\+D\+F5 are installed, the source code may be built. The source is built by inheriting a set of makefiles from Chombo. By default, a version of Chombo-\/3.\+2 is shipped with this code. To build the source code, you must ensure that the makefile finds the Chombo library by modifying the G\+N\+Umakefile which lies at the top directory in the code. Modify this file so that {\ttfamily C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME} points to the correct location (a full path specification may be necessary). For example, if the code is in the home folder of a user {\ttfamily example\+User}, {\ttfamily C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME} should be \begin{DoxyVerb}CHOMBO_HOME := /home/exampleUser/FluidAMRStreamer/Chombo-3.2/lib
+\end{DoxyVerb}
+
+
+Specification of default settings for Chombo are necessary for compiling both the Chombo library and the source code. You should modify Make.\+defs.\+local which lies in Chombo-\/3.\+2/lib/mk/ for specification of compilers and path to the serial and parallel H\+D\+F5 installations. If you installed H\+D\+F5 in /usr/local/hdf5 and /usr/local/phdf5, the default settings in Make.\+defs.\+local are (probably) sufficient.
+
+The streamer code can be compiled for two-\/dimensional and three-\/dimensional executation on Cartesian grids (default is 2D). To compile the code, it should be sufficient to navigate to one of the plasma models and then execute \begin{DoxyVerb}make "model"
+\end{DoxyVerb}
+
+
+where \char`\"{}model\char`\"{} is replaced by the model name. If you want to silence G\+N\+Umake during the compilation stage, include a flag -\/s. I.\+e. \begin{DoxyVerb}make -s "model"
+\end{DoxyVerb}
+
+
+This will inherit a set of makefiles\+: Chombo source codes are compiled first and the streamer code is compiled second. To execute for three-\/dimensional execution, either make appropriate changes to Make.\+defs.\+local (D\+IM=3), or run \begin{DoxyVerb}make DIM=3 "model"
+\end{DoxyVerb}
+
+
+By default, the executable will be named according to the specifications in Make.\+defs.\+local. For example, if the code was compiled for optimized three-\/dimensional execution using M\+PI (mpi\+CC as compiler) gfortran on a Linux system, the executable is named \begin{DoxyVerb}plasma3d.Linux.64.mpiCC.gfortran.OPT.MPI.ex
+\end{DoxyVerb}
+
+
+The code has compiled successfully if this file is created.
+
+\section*{Compilation on vilje }
+
+To compile the system on the {\itshape vilje} supercomputer, you need to load compilers and libraries before compiling the code. We recommend that you use intel compilers by loading \begin{DoxyVerb}module load intelcomp/15.0.1
+\end{DoxyVerb}
+
+
+which will load Intel compilers for Fortran and C/\+C++ (version 15.\+0.\+1). M\+PI libraries are loaded by \begin{DoxyVerb}module load mpt/2.10
+\end{DoxyVerb}
+
+
+and H\+D\+F5 is loaded by \begin{DoxyVerb}module load hdf5/1.8.14
+\end{DoxyVerb}
+
+
+It is likely possible to load newer versions of compilers, M\+PI, and H\+D\+F5 (but we haven\textquotesingle{}t tried). Once the libraries are loaded, the code may be compiled as usual. It will be necessary to update C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME and supply the library path to the Chombo makefiles. C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME is simply updated to the folder in which Chombo is installed. H\+D\+F5 paths are found by typing \begin{DoxyVerb}module disp hdf5/1.8.14
+\end{DoxyVerb}
+
+
+which will display the library paths to H\+D\+F5. The typical output is \begin{DoxyVerb}/sw/sdev/modulefiles/hdf5/1.8.14:
+
+module-whatis    general purpose library and file format for storing scientific data 
+prereq   intelcomp/15.0.1 
+prereq   mpt/2.10 
+prepend-path     PATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/bin 
+prepend-path     CPATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+prepend-path     FPATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+prepend-path     LIBRARY_PATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib 
+prepend-path     LD_LIBRARY_PATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib 
+prepend-path     PYTHONPATH /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib/python2.7/site-packages 
+setenv           HDF5_DIR /sw/sdev/Modules/hdf5/hdf5-1.8.14 
+
+Loads HDF5 version 1.8.14
+\end{DoxyVerb}
+
+
+To use Intel\textquotesingle{}s Fortran and C/\+C++ compilers, please specify \begin{DoxyVerb} FC  = ifort
+ CXX = icpc
+\end{DoxyVerb}
+
+
+in Make.\+defs.\+local. Likewise, update Make.\+defs.\+local so that it finds the H\+D\+F5 libraries and include files. For this version of H\+D\+F5, they are located in \begin{DoxyVerb} /sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+ /sw/sdev/Modules/hdf5/hdf5-1.8.14/lib 
+\end{DoxyVerb}
+
+
+With these paths, the appropriate flags in Make.\+defs.\+local are \begin{DoxyVerb}HDFINCFLAGS    = -I/sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+HDFLIBFLAGS    = -L/sw/sdev/Modules/hdf5/hdf5-1.8.14/lib -lhdf5 -lz 
+
+HDFMPIINCFLAGS = -I/sw/sdev/Modules/hdf5/hdf5-1.8.14/include 
+HDFMPILIBFLAGS = -L/sw/sdev/Modules/hdf5/hdf5-1.8.14/lib -lhdf5 -lz
+\end{DoxyVerb}
+
+
+\section*{Compilation on fram }
+
+To compile the system on the {\itshape fram} supercomputer, you need to load compilers and libraries before compiling the code. The intel compiler toochain is loaded by \begin{DoxyVerb}module load intel/2017a
+\end{DoxyVerb}
+
+
+which will load Intel compilers for Fortran and C/\+C++, as well as Intel M\+PI. The code may be compiled as usual. It will be necessary to update C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME and supply the library path to the Chombo makefiles. C\+H\+O\+M\+B\+O\+\_\+\+H\+O\+ME is simply updated to the folder in which Chombo is installed. H\+D\+F5 paths are found by typing \begin{DoxyVerb}module disp HDF5/1.10.1-intel-2017a
+\end{DoxyVerb}
+
+
+which will display the library paths to H\+D\+F5.
+
+To use Intel\textquotesingle{}s Fortran and C/\+C++ compilers, please specify \begin{DoxyVerb} MPICXX = mpiicpc
+ FC     = ifort
+ CXX    = icpc
+\end{DoxyVerb}
+
+
+in Make.\+defs.\+local. Likewise, update Make.\+defs.\+local so that it finds the H\+D\+F5 libraries and include files.
+
+We also recommend that you compile with -\/x\+C\+O\+R\+E-\/\+A\+V\+X2 (put it in cxxoptflags and foptflags) to enable advanced vector extensions. 

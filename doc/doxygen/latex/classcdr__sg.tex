@@ -1,0 +1,232 @@
+\hypertarget{classcdr__sg}{}\section{cdr\+\_\+sg Class Reference}
+\label{classcdr__sg}\index{cdr\+\_\+sg@{cdr\+\_\+sg}}
+
+
+{\ttfamily \#include $<$cdr\+\_\+sg.\+H$>$}
+
+
+
+Inheritance diagram for cdr\+\_\+sg\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=142pt]{classcdr__sg__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for cdr\+\_\+sg\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=142pt]{classcdr__sg__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classcdr__sg_a713c1b0970e68f90ddd7215e846f69a8}{cdr\+\_\+sg} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classcdr__sg_a507b966f96d85af4cc84c1f7e81f5f1a}{$\sim$cdr\+\_\+sg} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classcdr__sg_abecf3d6b57505ca18e33bbbe25ad4de1}{query\+\_\+ghost} () const 
+\begin{DoxyCompactList}\small\item\em Required number of ghost cells. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcdr__sg_a3471b189df0a8a66e795b53426d6253f}{advance\+\_\+advect} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const Real a\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Pure advective advance. Calling this is an error -\/ SG currently only works with M\+OL methods. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcdr__sg_a2c035c0a7591cb050e23babe7becba87}{advance\+\_\+diffusion} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const Real a\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Pure diffusion advance. Calling this is an error -\/ SG currently only works with M\+OL methods. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcdr__sg_adbd13053682e21dd46a161d326e81a2d}{compute\+\_\+divF} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+divF, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const Real a\+\_\+extrap\+\_\+dt, const bool a\+\_\+redist)
+\begin{DoxyCompactList}\small\item\em Compute advective derivative. Calling this is an error -\/ SG currently only works with M\+OL methods. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcdr__sg_af01c3d0917c74904d53f73faa6892f57}{compute\+\_\+divD} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+diffusive\+\_\+term, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state)
+\begin{DoxyCompactList}\small\item\em Compute diffusion term. Calling this is an error -\/ SG currently only works with M\+OL methods. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classcdr__sg_a4f49be22dc76424a07db3043a73e0a51}{compute\+\_\+divJ} (\hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+divJ, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const Real a\+\_\+extrap\+\_\+dt)
+\begin{DoxyCompactList}\small\item\em Compute div(nv -\/ D$\ast$grad(n)) \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcdr__sg_a76d7d15c951064e163188f88576a5d2d}{compute\+\_\+sg\+\_\+flux} (\hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \&a\+\_\+flux, const \hyperlink{type__definitions_8H_a7e610f301989e5e07781c5e338bdb7c3}{E\+B\+A\+M\+R\+Cell\+Data} \&a\+\_\+state, const \hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \&a\+\_\+velo, const \hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \&a\+\_\+diffco)
+\begin{DoxyCompactList}\small\item\em Compute the Scharfetter-\/\+Gummel flux. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcdr__sg_aab3209fe4c39539e830ddf410d632e61}{compute\+\_\+sg\+\_\+flux} (Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&a\+\_\+flux, const Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&a\+\_\+state, const Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&a\+\_\+velo, const Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&a\+\_\+diffco, const int a\+\_\+lvl)
+\begin{DoxyCompactList}\small\item\em Compute the Scharfetter-\/\+Gummel flux. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classcdr__sg_a192188507a4cd99340449b611469f8dc}{compute\+\_\+bndry\+\_\+outflow} (Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&a\+\_\+flux, const int a\+\_\+lvl)
+\begin{DoxyCompactList}\small\item\em Set boundary outflow flux. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 13 of file cdr\+\_\+sg.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{cdr\+\_\+sg()}{cdr_sg()}}]{\setlength{\rightskip}{0pt plus 5cm}cdr\+\_\+sg\+::cdr\+\_\+sg (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classcdr__sg_a713c1b0970e68f90ddd7215e846f69a8}{}\label{classcdr__sg_a713c1b0970e68f90ddd7215e846f69a8}
+
+
+Constructor. 
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!````~cdr\+\_\+sg@{$\sim$cdr\+\_\+sg}}
+\index{````~cdr\+\_\+sg@{$\sim$cdr\+\_\+sg}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{$\sim$cdr\+\_\+sg()}{~cdr_sg()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual cdr\+\_\+sg\+::$\sim$cdr\+\_\+sg (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcdr__sg_a507b966f96d85af4cc84c1f7e81f5f1a}{}\label{classcdr__sg_a507b966f96d85af4cc84c1f7e81f5f1a}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!advance\+\_\+advect@{advance\+\_\+advect}}
+\index{advance\+\_\+advect@{advance\+\_\+advect}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{advance\+\_\+advect(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const Real a\+\_\+dt)}{advance_advect(EBAMRCellData &a_state, const Real a_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::advance\+\_\+advect (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const Real}]{a\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcdr__sg_a3471b189df0a8a66e795b53426d6253f}{}\label{classcdr__sg_a3471b189df0a8a66e795b53426d6253f}
+
+
+Pure advective advance. Calling this is an error -\/ SG currently only works with M\+OL methods. 
+
+
+
+Implements \hyperlink{classcdr__solver_abb8cb84e1649377889efdb3baa1efb4e}{cdr\+\_\+solver}.
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!advance\+\_\+diffusion@{advance\+\_\+diffusion}}
+\index{advance\+\_\+diffusion@{advance\+\_\+diffusion}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{advance\+\_\+diffusion(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const Real a\+\_\+dt)}{advance_diffusion(EBAMRCellData &a_state, const Real a_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::advance\+\_\+diffusion (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const Real}]{a\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcdr__sg_a2c035c0a7591cb050e23babe7becba87}{}\label{classcdr__sg_a2c035c0a7591cb050e23babe7becba87}
+
+
+Pure diffusion advance. Calling this is an error -\/ SG currently only works with M\+OL methods. 
+
+
+
+Implements \hyperlink{classcdr__solver_ae6ce5499fc64edf148c37123dfe4da84}{cdr\+\_\+solver}.
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!compute\+\_\+bndry\+\_\+outflow@{compute\+\_\+bndry\+\_\+outflow}}
+\index{compute\+\_\+bndry\+\_\+outflow@{compute\+\_\+bndry\+\_\+outflow}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{compute\+\_\+bndry\+\_\+outflow(\+Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ \&a\+\_\+flux, const int a\+\_\+lvl)}{compute_bndry_outflow(LevelData< EBFluxFAB > &a_flux, const int a_lvl)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::compute\+\_\+bndry\+\_\+outflow (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&}]{a\+\_\+flux, }
+\item[{const int}]{a\+\_\+lvl}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classcdr__sg_a192188507a4cd99340449b611469f8dc}{}\label{classcdr__sg_a192188507a4cd99340449b611469f8dc}
+
+
+Set boundary outflow flux. 
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!compute\+\_\+divD@{compute\+\_\+divD}}
+\index{compute\+\_\+divD@{compute\+\_\+divD}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{compute\+\_\+div\+D(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+diffusive\+\_\+term, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state)}{compute_divD(EBAMRCellData &a_diffusive_term, const EBAMRCellData &a_state)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::compute\+\_\+divD (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+diffusive\+\_\+term, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcdr__sg_af01c3d0917c74904d53f73faa6892f57}{}\label{classcdr__sg_af01c3d0917c74904d53f73faa6892f57}
+
+
+Compute diffusion term. Calling this is an error -\/ SG currently only works with M\+OL methods. 
+
+
+
+Implements \hyperlink{classcdr__solver_aa21107774b821fa8c522623d0fa88794}{cdr\+\_\+solver}.
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!compute\+\_\+divF@{compute\+\_\+divF}}
+\index{compute\+\_\+divF@{compute\+\_\+divF}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{compute\+\_\+div\+F(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+div\+F, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const Real a\+\_\+extrap\+\_\+dt, const bool a\+\_\+redist)}{compute_divF(EBAMRCellData &a_divF, const EBAMRCellData &a_state, const Real a_extrap_dt, const bool a_redist)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::compute\+\_\+divF (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+divF, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const Real}]{a\+\_\+extrap\+\_\+dt, }
+\item[{const bool}]{a\+\_\+redist}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcdr__sg_adbd13053682e21dd46a161d326e81a2d}{}\label{classcdr__sg_adbd13053682e21dd46a161d326e81a2d}
+
+
+Compute advective derivative. Calling this is an error -\/ SG currently only works with M\+OL methods. 
+
+
+
+Implements \hyperlink{classcdr__solver_a0543358b07bbdd24dc5d6944a2522858}{cdr\+\_\+solver}.
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!compute\+\_\+divJ@{compute\+\_\+divJ}}
+\index{compute\+\_\+divJ@{compute\+\_\+divJ}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{compute\+\_\+div\+J(\+E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+div\+J, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const Real a\+\_\+extrap\+\_\+dt)}{compute_divJ(EBAMRCellData &a_divJ, const EBAMRCellData &a_state, const Real a_extrap_dt)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::compute\+\_\+divJ (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+divJ, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const Real}]{a\+\_\+extrap\+\_\+dt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classcdr__sg_a4f49be22dc76424a07db3043a73e0a51}{}\label{classcdr__sg_a4f49be22dc76424a07db3043a73e0a51}
+
+
+Compute div(nv -\/ D$\ast$grad(n)) 
+
+
+
+Implements \hyperlink{classcdr__solver_a33a7c33663066833a4f248b41eff7909}{cdr\+\_\+solver}.
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!compute\+\_\+sg\+\_\+flux@{compute\+\_\+sg\+\_\+flux}}
+\index{compute\+\_\+sg\+\_\+flux@{compute\+\_\+sg\+\_\+flux}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{compute\+\_\+sg\+\_\+flux(\+E\+B\+A\+M\+R\+Flux\+Data \&a\+\_\+flux, const E\+B\+A\+M\+R\+Cell\+Data \&a\+\_\+state, const E\+B\+A\+M\+R\+Flux\+Data \&a\+\_\+velo, const E\+B\+A\+M\+R\+Flux\+Data \&a\+\_\+diffco)}{compute_sg_flux(EBAMRFluxData &a_flux, const EBAMRCellData &a_state, const EBAMRFluxData &a_velo, const EBAMRFluxData &a_diffco)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::compute\+\_\+sg\+\_\+flux (
+\begin{DoxyParamCaption}
+\item[{{\bf E\+B\+A\+M\+R\+Flux\+Data} \&}]{a\+\_\+flux, }
+\item[{const {\bf E\+B\+A\+M\+R\+Cell\+Data} \&}]{a\+\_\+state, }
+\item[{const {\bf E\+B\+A\+M\+R\+Flux\+Data} \&}]{a\+\_\+velo, }
+\item[{const {\bf E\+B\+A\+M\+R\+Flux\+Data} \&}]{a\+\_\+diffco}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classcdr__sg_a76d7d15c951064e163188f88576a5d2d}{}\label{classcdr__sg_a76d7d15c951064e163188f88576a5d2d}
+
+
+Compute the Scharfetter-\/\+Gummel flux. 
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!compute\+\_\+sg\+\_\+flux@{compute\+\_\+sg\+\_\+flux}}
+\index{compute\+\_\+sg\+\_\+flux@{compute\+\_\+sg\+\_\+flux}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{compute\+\_\+sg\+\_\+flux(\+Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ \&a\+\_\+flux, const Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ \&a\+\_\+state, const Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ \&a\+\_\+velo, const Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ \&a\+\_\+diffco, const int a\+\_\+lvl)}{compute_sg_flux(LevelData< EBFluxFAB > &a_flux, const LevelData< EBCellFAB > &a_state, const LevelData< EBFluxFAB > &a_velo, const LevelData< EBFluxFAB > &a_diffco, const int a_lvl)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void cdr\+\_\+sg\+::compute\+\_\+sg\+\_\+flux (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&}]{a\+\_\+flux, }
+\item[{const Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&}]{a\+\_\+state, }
+\item[{const Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&}]{a\+\_\+velo, }
+\item[{const Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&}]{a\+\_\+diffco, }
+\item[{const int}]{a\+\_\+lvl}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classcdr__sg_aab3209fe4c39539e830ddf410d632e61}{}\label{classcdr__sg_aab3209fe4c39539e830ddf410d632e61}
+
+
+Compute the Scharfetter-\/\+Gummel flux. 
+
+\index{cdr\+\_\+sg@{cdr\+\_\+sg}!query\+\_\+ghost@{query\+\_\+ghost}}
+\index{query\+\_\+ghost@{query\+\_\+ghost}!cdr\+\_\+sg@{cdr\+\_\+sg}}
+\subsubsection[{\texorpdfstring{query\+\_\+ghost() const }{query_ghost() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual int cdr\+\_\+sg\+::query\+\_\+ghost (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classcdr__sg_abecf3d6b57505ca18e33bbbe25ad4de1}{}\label{classcdr__sg_abecf3d6b57505ca18e33bbbe25ad4de1}
+
+
+Required number of ghost cells. 
+
+
+
+Implements \hyperlink{classcdr__solver_af78d9b0b357fda0bfb33ef1640f9cbde}{cdr\+\_\+solver}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/cdr\+\_\+solver/\hyperlink{cdr__sg_8H}{cdr\+\_\+sg.\+H}\end{DoxyCompactItemize}

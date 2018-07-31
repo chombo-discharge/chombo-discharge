@@ -1,0 +1,317 @@
+\hypertarget{classebcoarseaverage}{}\section{ebcoarseaverage Class Reference}
+\label{classebcoarseaverage}\index{ebcoarseaverage@{ebcoarseaverage}}
+
+
+replaces coarse level data with an average of fine level data.  
+
+
+
+
+{\ttfamily \#include $<$ebcoarseaverage.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classebcoarseaverage_a59bde2cf9d859508d9911b46249e2c5f}{ebcoarseaverage} ()
+\item 
+\hyperlink{classebcoarseaverage_a983b54e242e5921ceea70180e071fcad}{$\sim$ebcoarseaverage} ()
+\item 
+\hyperlink{classebcoarseaverage_aba950e21b3e35499852ab8354b94cb92}{ebcoarseaverage} (const Disjoint\+Box\+Layout \&dbl\+Fine, const Disjoint\+Box\+Layout \&dbl\+Coar, const E\+B\+I\+S\+Layout \&ebisl\+Fine, const E\+B\+I\+S\+Layout \&ebisl\+Coar, const Problem\+Domain \&domain\+Coar, const int \&nref, const int \&nvar, const E\+B\+Index\+Space $\ast$ebis\+Ptr)
+\item 
+\hyperlink{classebcoarseaverage_a650af26ba0aabde837e7de3af7515d60}{ebcoarseaverage} (const E\+B\+Level\+Grid \&a\+\_\+eblg\+Fine, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Coar, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Co\+Fi, const int \&nref, const int \&nvar)
+\item 
+void \hyperlink{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{define} (const Disjoint\+Box\+Layout \&dbl\+Fine, const Disjoint\+Box\+Layout \&dbl\+Coar, const E\+B\+I\+S\+Layout \&ebisl\+Fine, const E\+B\+I\+S\+Layout \&ebisl\+Coar, const Problem\+Domain \&domain\+Coar, const int \&nref, const int \&nvar, const E\+B\+Index\+Space $\ast$ebis\+Ptr)
+\item 
+void \hyperlink{classebcoarseaverage_a56b505f100cf448c34c5c88683726826}{define} (const E\+B\+Level\+Grid \&a\+\_\+eblg\+Fine, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Coar, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Co\+Fi, const int \&nref, const int \&nvar)
+\item 
+bool \hyperlink{classebcoarseaverage_aa24e8bc584a2ab09114e3fc6921a4df0}{is\+Defined} () const 
+\item 
+void \hyperlink{classebcoarseaverage_aad6c03f62bb8b6472e4b096485fb81d0}{average} (Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&a\+\_\+coar\+Data, const Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&a\+\_\+fine\+Data, const Interval \&a\+\_\+variables)
+\item 
+void \hyperlink{classebcoarseaverage_a6fc2e9d81edcf8f259a7322ed5d55a92}{average} (Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&a\+\_\+coar\+Data, const Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&a\+\_\+fine\+Data, const Interval \&a\+\_\+variables)
+\item 
+void \hyperlink{classebcoarseaverage_ac1fa3fe078ac28419ca6c411f17f504e}{average} (Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ \&a\+\_\+coar\+Data, const Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ \&a\+\_\+fine\+Data, const Interval \&a\+\_\+variables)
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classebcoarseaverage_a22eb7a4058ce8760cede7edfee2cf784}{average\+F\+AB} (E\+B\+Cell\+F\+AB \&a\+\_\+coar, const E\+B\+Cell\+F\+AB \&a\+\_\+fine, const Data\+Index \&a\+\_\+dat\+Ind, const Interval \&a\+\_\+variables) const 
+\item 
+void \hyperlink{classebcoarseaverage_a79dcdba12abe46e813bb1b7c8566b956}{average\+F\+AB} (E\+B\+Face\+F\+AB \&a\+\_\+coar, const E\+B\+Face\+F\+AB \&a\+\_\+fine, const Data\+Index \&a\+\_\+dat\+Ind, const Interval \&a\+\_\+variables, const int \&a\+\_\+dir) const 
+\item 
+void \hyperlink{classebcoarseaverage_af608292f8deccf5a15e362780fdeed08}{average\+F\+AB} (Base\+I\+V\+F\+AB$<$ Real $>$ \&a\+\_\+coar, const Base\+I\+V\+F\+AB$<$ Real $>$ \&a\+\_\+fine, const Data\+Index \&a\+\_\+dat\+Ind, const Interval \&a\+\_\+variables) const 
+\item 
+void \hyperlink{classebcoarseaverage_a260863f7d3f08799bdd2c7257098d1d1}{set\+Default\+Values} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classebcoarseaverage_a80db48bc49eb02c6d7dd169e4bc7400d}{m\+\_\+is\+Defined}
+\item 
+bool \hyperlink{classebcoarseaverage_aeae7e54b795c68ca2f679cf60a3ea0ea}{m\+\_\+use\+Fine\+Buffer}
+\item 
+E\+B\+Level\+Grid \hyperlink{classebcoarseaverage_aec18fdc27c15bea5560da5cce4c42f87}{m\+\_\+eblg\+Coar}
+\item 
+E\+B\+Level\+Grid \hyperlink{classebcoarseaverage_af7e65f929aae040988853c33135a3300}{m\+\_\+eblg\+Fine}
+\item 
+E\+B\+Level\+Grid \hyperlink{classebcoarseaverage_a0ed63122d2561d5763ae10d02575bcf3}{m\+\_\+eblg\+Co\+Fi}
+\item 
+Layout\+Data$<$ Int\+Vect\+Set $>$ \hyperlink{classebcoarseaverage_a680dafd1a2f432720739a6c5ad9ddc2b}{m\+\_\+irreg\+Sets\+Co\+Fi}
+\item 
+Layout\+Data$<$ Int\+Vect\+Set $>$ \hyperlink{classebcoarseaverage_ae97f5983187a015c9cff6c8554ca1230}{m\+\_\+irreg\+Sets\+Fine}
+\item 
+int \hyperlink{classebcoarseaverage_a8c01e0a7b7cd67731ef4f98b008f50ca}{m\+\_\+ref\+Rat}
+\item 
+int \hyperlink{classebcoarseaverage_a628edd68230cc8bae2f17f677678b6db}{m\+\_\+n\+Comp}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classebcoarseaverage_a48c02fbd1764a3c283f115b8ac563a63}{ebcoarseaverage} (const \hyperlink{classebcoarseaverage}{ebcoarseaverage} \&ebcin)
+\item 
+void \hyperlink{classebcoarseaverage_a3b1c5bc95d9407be7bf086ac88f4143d}{operator=} (const \hyperlink{classebcoarseaverage}{ebcoarseaverage} \&fabin)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+replaces coarse level data with an average of fine level data. 
+
+This class replaces data at a coarse level of refinement with an average of data at a finer level of refinement, in areas where fine data is present. Coarse level data is not modified where fine level data is not present. 
+
+Definition at line 38 of file ebcoarseaverage.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{ebcoarseaverage()}{ebcoarseaverage()}}]{\setlength{\rightskip}{0pt plus 5cm}ebcoarseaverage\+::ebcoarseaverage (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_a59bde2cf9d859508d9911b46249e2c5f}{}\label{classebcoarseaverage_a59bde2cf9d859508d9911b46249e2c5f}
+Default constructor. User must subsequently call \hyperlink{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{define()}. \index{ebcoarseaverage@{ebcoarseaverage}!````~ebcoarseaverage@{$\sim$ebcoarseaverage}}
+\index{````~ebcoarseaverage@{$\sim$ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{$\sim$ebcoarseaverage()}{~ebcoarseaverage()}}]{\setlength{\rightskip}{0pt plus 5cm}ebcoarseaverage\+::$\sim$ebcoarseaverage (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_a983b54e242e5921ceea70180e071fcad}{}\label{classebcoarseaverage_a983b54e242e5921ceea70180e071fcad}
+\index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{ebcoarseaverage(const Disjoint\+Box\+Layout \&dbl\+Fine, const Disjoint\+Box\+Layout \&dbl\+Coar, const E\+B\+I\+S\+Layout \&ebisl\+Fine, const E\+B\+I\+S\+Layout \&ebisl\+Coar, const Problem\+Domain \&domain\+Coar, const int \&nref, const int \&nvar, const E\+B\+Index\+Space $\ast$ebis\+Ptr)}{ebcoarseaverage(const DisjointBoxLayout &dblFine, const DisjointBoxLayout &dblCoar, const EBISLayout &ebislFine, const EBISLayout &ebislCoar, const ProblemDomain &domainCoar, const int &nref, const int &nvar, const EBIndexSpace *ebisPtr)}}]{\setlength{\rightskip}{0pt plus 5cm}ebcoarseaverage\+::ebcoarseaverage (
+\begin{DoxyParamCaption}
+\item[{const Disjoint\+Box\+Layout \&}]{dbl\+Fine, }
+\item[{const Disjoint\+Box\+Layout \&}]{dbl\+Coar, }
+\item[{const E\+B\+I\+S\+Layout \&}]{ebisl\+Fine, }
+\item[{const E\+B\+I\+S\+Layout \&}]{ebisl\+Coar, }
+\item[{const Problem\+Domain \&}]{domain\+Coar, }
+\item[{const int \&}]{nref, }
+\item[{const int \&}]{nvar, }
+\item[{const E\+B\+Index\+Space $\ast$}]{ebis\+Ptr}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_aba950e21b3e35499852ab8354b94cb92}{}\label{classebcoarseaverage_aba950e21b3e35499852ab8354b94cb92}
+Defining constructor. Constructs a valid object. Equivalent to default construction followed by \hyperlink{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{define()}. \index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{ebcoarseaverage(const E\+B\+Level\+Grid \&a\+\_\+eblg\+Fine, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Coar, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Co\+Fi, const int \&nref, const int \&nvar)}{ebcoarseaverage(const EBLevelGrid &a_eblgFine, const EBLevelGrid &a_eblgCoar, const EBLevelGrid &a_eblgCoFi, const int &nref, const int &nvar)}}]{\setlength{\rightskip}{0pt plus 5cm}ebcoarseaverage\+::ebcoarseaverage (
+\begin{DoxyParamCaption}
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+Fine, }
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+Coar, }
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+Co\+Fi, }
+\item[{const int \&}]{nref, }
+\item[{const int \&}]{nvar}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_a650af26ba0aabde837e7de3af7515d60}{}\label{classebcoarseaverage_a650af26ba0aabde837e7de3af7515d60}
+Defining constructor. Constructs a valid object. Equivalent to default construction followed by \hyperlink{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{define()}. \index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\index{ebcoarseaverage@{ebcoarseaverage}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{ebcoarseaverage(const ebcoarseaverage \&ebcin)}{ebcoarseaverage(const ebcoarseaverage &ebcin)}}]{\setlength{\rightskip}{0pt plus 5cm}ebcoarseaverage\+::ebcoarseaverage (
+\begin{DoxyParamCaption}
+\item[{const {\bf ebcoarseaverage} \&}]{ebcin}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classebcoarseaverage_a48c02fbd1764a3c283f115b8ac563a63}{}\label{classebcoarseaverage_a48c02fbd1764a3c283f115b8ac563a63}
+
+
+Definition at line 176 of file ebcoarseaverage.\+H.
+
+
+
+\subsection{Member Function Documentation}
+\index{ebcoarseaverage@{ebcoarseaverage}!average@{average}}
+\index{average@{average}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{average(\+Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ \&a\+\_\+coar\+Data, const Level\+Data$<$ E\+B\+Cell\+F\+A\+B $>$ \&a\+\_\+fine\+Data, const Interval \&a\+\_\+variables)}{average(LevelData< EBCellFAB > &a_coarData, const LevelData< EBCellFAB > &a_fineData, const Interval &a_variables)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::average (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&}]{a\+\_\+coar\+Data, }
+\item[{const Level\+Data$<$ E\+B\+Cell\+F\+AB $>$ \&}]{a\+\_\+fine\+Data, }
+\item[{const Interval \&}]{a\+\_\+variables}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_aad6c03f62bb8b6472e4b096485fb81d0}{}\label{classebcoarseaverage_aad6c03f62bb8b6472e4b096485fb81d0}
+Replaces a\+\_\+coarse\+\_\+data with the average of a\+\_\+fine\+\_\+data within the coarsening of the domain of the fine level. Elsewhere, the coarse data is unchanged. It is an error to call if not this-\/$>$\hyperlink{classebcoarseaverage_aa24e8bc584a2ab09114e3fc6921a4df0}{is\+Defined()}. The domain of a\+\_\+fine\+\_\+data should be the same as the fine domain specified in the most recent call to \hyperlink{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{define()}. It is expected that the coarse and fine level\textquotesingle{}s domains are properly nested. Both a\+\_\+coarse\+\_\+data and a\+\_\+fine\+\_\+data should have the same number of components specified in the most recent call to \hyperlink{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{define()}. \index{ebcoarseaverage@{ebcoarseaverage}!average@{average}}
+\index{average@{average}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{average(\+Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ \&a\+\_\+coar\+Data, const Level\+Data$<$ E\+B\+Flux\+F\+A\+B $>$ \&a\+\_\+fine\+Data, const Interval \&a\+\_\+variables)}{average(LevelData< EBFluxFAB > &a_coarData, const LevelData< EBFluxFAB > &a_fineData, const Interval &a_variables)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::average (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&}]{a\+\_\+coar\+Data, }
+\item[{const Level\+Data$<$ E\+B\+Flux\+F\+AB $>$ \&}]{a\+\_\+fine\+Data, }
+\item[{const Interval \&}]{a\+\_\+variables}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_a6fc2e9d81edcf8f259a7322ed5d55a92}{}\label{classebcoarseaverage_a6fc2e9d81edcf8f259a7322ed5d55a92}
+\index{ebcoarseaverage@{ebcoarseaverage}!average@{average}}
+\index{average@{average}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{average(\+Level\+Data$<$ Base\+I\+V\+F\+A\+B$<$ Real $>$ $>$ \&a\+\_\+coar\+Data, const Level\+Data$<$ Base\+I\+V\+F\+A\+B$<$ Real $>$ $>$ \&a\+\_\+fine\+Data, const Interval \&a\+\_\+variables)}{average(LevelData< BaseIVFAB< Real > > &a_coarData, const LevelData< BaseIVFAB< Real > > &a_fineData, const Interval &a_variables)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::average (
+\begin{DoxyParamCaption}
+\item[{Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ \&}]{a\+\_\+coar\+Data, }
+\item[{const Level\+Data$<$ Base\+I\+V\+F\+AB$<$ Real $>$ $>$ \&}]{a\+\_\+fine\+Data, }
+\item[{const Interval \&}]{a\+\_\+variables}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_ac1fa3fe078ac28419ca6c411f17f504e}{}\label{classebcoarseaverage_ac1fa3fe078ac28419ca6c411f17f504e}
+\index{ebcoarseaverage@{ebcoarseaverage}!average\+F\+AB@{average\+F\+AB}}
+\index{average\+F\+AB@{average\+F\+AB}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{average\+F\+A\+B(\+E\+B\+Cell\+F\+A\+B \&a\+\_\+coar, const E\+B\+Cell\+F\+A\+B \&a\+\_\+fine, const Data\+Index \&a\+\_\+dat\+Ind, const Interval \&a\+\_\+variables) const }{averageFAB(EBCellFAB &a_coar, const EBCellFAB &a_fine, const DataIndex &a_datInd, const Interval &a_variables) const }}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::average\+F\+AB (
+\begin{DoxyParamCaption}
+\item[{E\+B\+Cell\+F\+AB \&}]{a\+\_\+coar, }
+\item[{const E\+B\+Cell\+F\+AB \&}]{a\+\_\+fine, }
+\item[{const Data\+Index \&}]{a\+\_\+dat\+Ind, }
+\item[{const Interval \&}]{a\+\_\+variables}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a22eb7a4058ce8760cede7edfee2cf784}{}\label{classebcoarseaverage_a22eb7a4058ce8760cede7edfee2cf784}
+\index{ebcoarseaverage@{ebcoarseaverage}!average\+F\+AB@{average\+F\+AB}}
+\index{average\+F\+AB@{average\+F\+AB}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{average\+F\+A\+B(\+E\+B\+Face\+F\+A\+B \&a\+\_\+coar, const E\+B\+Face\+F\+A\+B \&a\+\_\+fine, const Data\+Index \&a\+\_\+dat\+Ind, const Interval \&a\+\_\+variables, const int \&a\+\_\+dir) const }{averageFAB(EBFaceFAB &a_coar, const EBFaceFAB &a_fine, const DataIndex &a_datInd, const Interval &a_variables, const int &a_dir) const }}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::average\+F\+AB (
+\begin{DoxyParamCaption}
+\item[{E\+B\+Face\+F\+AB \&}]{a\+\_\+coar, }
+\item[{const E\+B\+Face\+F\+AB \&}]{a\+\_\+fine, }
+\item[{const Data\+Index \&}]{a\+\_\+dat\+Ind, }
+\item[{const Interval \&}]{a\+\_\+variables, }
+\item[{const int \&}]{a\+\_\+dir}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a79dcdba12abe46e813bb1b7c8566b956}{}\label{classebcoarseaverage_a79dcdba12abe46e813bb1b7c8566b956}
+\index{ebcoarseaverage@{ebcoarseaverage}!average\+F\+AB@{average\+F\+AB}}
+\index{average\+F\+AB@{average\+F\+AB}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{average\+F\+A\+B(\+Base\+I\+V\+F\+A\+B$<$ Real $>$ \&a\+\_\+coar, const Base\+I\+V\+F\+A\+B$<$ Real $>$ \&a\+\_\+fine, const Data\+Index \&a\+\_\+dat\+Ind, const Interval \&a\+\_\+variables) const }{averageFAB(BaseIVFAB< Real > &a_coar, const BaseIVFAB< Real > &a_fine, const DataIndex &a_datInd, const Interval &a_variables) const }}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::average\+F\+AB (
+\begin{DoxyParamCaption}
+\item[{Base\+I\+V\+F\+AB$<$ Real $>$ \&}]{a\+\_\+coar, }
+\item[{const Base\+I\+V\+F\+AB$<$ Real $>$ \&}]{a\+\_\+fine, }
+\item[{const Data\+Index \&}]{a\+\_\+dat\+Ind, }
+\item[{const Interval \&}]{a\+\_\+variables}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_af608292f8deccf5a15e362780fdeed08}{}\label{classebcoarseaverage_af608292f8deccf5a15e362780fdeed08}
+\index{ebcoarseaverage@{ebcoarseaverage}!define@{define}}
+\index{define@{define}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{define(const Disjoint\+Box\+Layout \&dbl\+Fine, const Disjoint\+Box\+Layout \&dbl\+Coar, const E\+B\+I\+S\+Layout \&ebisl\+Fine, const E\+B\+I\+S\+Layout \&ebisl\+Coar, const Problem\+Domain \&domain\+Coar, const int \&nref, const int \&nvar, const E\+B\+Index\+Space $\ast$ebis\+Ptr)}{define(const DisjointBoxLayout &dblFine, const DisjointBoxLayout &dblCoar, const EBISLayout &ebislFine, const EBISLayout &ebislCoar, const ProblemDomain &domainCoar, const int &nref, const int &nvar, const EBIndexSpace *ebisPtr)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::define (
+\begin{DoxyParamCaption}
+\item[{const Disjoint\+Box\+Layout \&}]{dbl\+Fine, }
+\item[{const Disjoint\+Box\+Layout \&}]{dbl\+Coar, }
+\item[{const E\+B\+I\+S\+Layout \&}]{ebisl\+Fine, }
+\item[{const E\+B\+I\+S\+Layout \&}]{ebisl\+Coar, }
+\item[{const Problem\+Domain \&}]{domain\+Coar, }
+\item[{const int \&}]{nref, }
+\item[{const int \&}]{nvar, }
+\item[{const E\+B\+Index\+Space $\ast$}]{ebis\+Ptr}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{}\label{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}
+Defines this object. Existing information is overriden. \index{ebcoarseaverage@{ebcoarseaverage}!define@{define}}
+\index{define@{define}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{define(const E\+B\+Level\+Grid \&a\+\_\+eblg\+Fine, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Coar, const E\+B\+Level\+Grid \&a\+\_\+eblg\+Co\+Fi, const int \&nref, const int \&nvar)}{define(const EBLevelGrid &a_eblgFine, const EBLevelGrid &a_eblgCoar, const EBLevelGrid &a_eblgCoFi, const int &nref, const int &nvar)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::define (
+\begin{DoxyParamCaption}
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+Fine, }
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+Coar, }
+\item[{const E\+B\+Level\+Grid \&}]{a\+\_\+eblg\+Co\+Fi, }
+\item[{const int \&}]{nref, }
+\item[{const int \&}]{nvar}
+\end{DoxyParamCaption}
+)}\hypertarget{classebcoarseaverage_a56b505f100cf448c34c5c88683726826}{}\label{classebcoarseaverage_a56b505f100cf448c34c5c88683726826}
+Defines this object. Existing information is overriden. \index{ebcoarseaverage@{ebcoarseaverage}!is\+Defined@{is\+Defined}}
+\index{is\+Defined@{is\+Defined}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{is\+Defined() const }{isDefined() const }}]{\setlength{\rightskip}{0pt plus 5cm}bool ebcoarseaverage\+::is\+Defined (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\hypertarget{classebcoarseaverage_aa24e8bc584a2ab09114e3fc6921a4df0}{}\label{classebcoarseaverage_aa24e8bc584a2ab09114e3fc6921a4df0}
+Returns true if this object was created with the defining constructor or if \hyperlink{classebcoarseaverage_a85160d432dc1caf01226b488dcf003ed}{define()} has been called. \index{ebcoarseaverage@{ebcoarseaverage}!operator=@{operator=}}
+\index{operator=@{operator=}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{operator=(const ebcoarseaverage \&fabin)}{operator=(const ebcoarseaverage &fabin)}}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::operator= (
+\begin{DoxyParamCaption}
+\item[{const {\bf ebcoarseaverage} \&}]{fabin}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\hypertarget{classebcoarseaverage_a3b1c5bc95d9407be7bf086ac88f4143d}{}\label{classebcoarseaverage_a3b1c5bc95d9407be7bf086ac88f4143d}
+
+
+Definition at line 180 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!set\+Default\+Values@{set\+Default\+Values}}
+\index{set\+Default\+Values@{set\+Default\+Values}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{set\+Default\+Values()}{setDefaultValues()}}]{\setlength{\rightskip}{0pt plus 5cm}void ebcoarseaverage\+::set\+Default\+Values (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a260863f7d3f08799bdd2c7257098d1d1}{}\label{classebcoarseaverage_a260863f7d3f08799bdd2c7257098d1d1}
+
+
+\subsection{Member Data Documentation}
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+eblg\+Coar@{m\+\_\+eblg\+Coar}}
+\index{m\+\_\+eblg\+Coar@{m\+\_\+eblg\+Coar}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+eblg\+Coar}{m_eblgCoar}}]{\setlength{\rightskip}{0pt plus 5cm}E\+B\+Level\+Grid ebcoarseaverage\+::m\+\_\+eblg\+Coar\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_aec18fdc27c15bea5560da5cce4c42f87}{}\label{classebcoarseaverage_aec18fdc27c15bea5560da5cce4c42f87}
+
+
+Definition at line 163 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+eblg\+Co\+Fi@{m\+\_\+eblg\+Co\+Fi}}
+\index{m\+\_\+eblg\+Co\+Fi@{m\+\_\+eblg\+Co\+Fi}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+eblg\+Co\+Fi}{m_eblgCoFi}}]{\setlength{\rightskip}{0pt plus 5cm}E\+B\+Level\+Grid ebcoarseaverage\+::m\+\_\+eblg\+Co\+Fi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a0ed63122d2561d5763ae10d02575bcf3}{}\label{classebcoarseaverage_a0ed63122d2561d5763ae10d02575bcf3}
+
+
+Definition at line 165 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+eblg\+Fine@{m\+\_\+eblg\+Fine}}
+\index{m\+\_\+eblg\+Fine@{m\+\_\+eblg\+Fine}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+eblg\+Fine}{m_eblgFine}}]{\setlength{\rightskip}{0pt plus 5cm}E\+B\+Level\+Grid ebcoarseaverage\+::m\+\_\+eblg\+Fine\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_af7e65f929aae040988853c33135a3300}{}\label{classebcoarseaverage_af7e65f929aae040988853c33135a3300}
+
+
+Definition at line 164 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+irreg\+Sets\+Co\+Fi@{m\+\_\+irreg\+Sets\+Co\+Fi}}
+\index{m\+\_\+irreg\+Sets\+Co\+Fi@{m\+\_\+irreg\+Sets\+Co\+Fi}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+irreg\+Sets\+Co\+Fi}{m_irregSetsCoFi}}]{\setlength{\rightskip}{0pt plus 5cm}Layout\+Data$<$Int\+Vect\+Set$>$ ebcoarseaverage\+::m\+\_\+irreg\+Sets\+Co\+Fi\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a680dafd1a2f432720739a6c5ad9ddc2b}{}\label{classebcoarseaverage_a680dafd1a2f432720739a6c5ad9ddc2b}
+
+
+Definition at line 166 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+irreg\+Sets\+Fine@{m\+\_\+irreg\+Sets\+Fine}}
+\index{m\+\_\+irreg\+Sets\+Fine@{m\+\_\+irreg\+Sets\+Fine}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+irreg\+Sets\+Fine}{m_irregSetsFine}}]{\setlength{\rightskip}{0pt plus 5cm}Layout\+Data$<$Int\+Vect\+Set$>$ ebcoarseaverage\+::m\+\_\+irreg\+Sets\+Fine\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_ae97f5983187a015c9cff6c8554ca1230}{}\label{classebcoarseaverage_ae97f5983187a015c9cff6c8554ca1230}
+
+
+Definition at line 169 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+is\+Defined@{m\+\_\+is\+Defined}}
+\index{m\+\_\+is\+Defined@{m\+\_\+is\+Defined}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+is\+Defined}{m_isDefined}}]{\setlength{\rightskip}{0pt plus 5cm}bool ebcoarseaverage\+::m\+\_\+is\+Defined\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a80db48bc49eb02c6d7dd169e4bc7400d}{}\label{classebcoarseaverage_a80db48bc49eb02c6d7dd169e4bc7400d}
+
+
+Definition at line 158 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+n\+Comp@{m\+\_\+n\+Comp}}
+\index{m\+\_\+n\+Comp@{m\+\_\+n\+Comp}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+n\+Comp}{m_nComp}}]{\setlength{\rightskip}{0pt plus 5cm}int ebcoarseaverage\+::m\+\_\+n\+Comp\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a628edd68230cc8bae2f17f677678b6db}{}\label{classebcoarseaverage_a628edd68230cc8bae2f17f677678b6db}
+
+
+Definition at line 172 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+ref\+Rat@{m\+\_\+ref\+Rat}}
+\index{m\+\_\+ref\+Rat@{m\+\_\+ref\+Rat}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+ref\+Rat}{m_refRat}}]{\setlength{\rightskip}{0pt plus 5cm}int ebcoarseaverage\+::m\+\_\+ref\+Rat\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_a8c01e0a7b7cd67731ef4f98b008f50ca}{}\label{classebcoarseaverage_a8c01e0a7b7cd67731ef4f98b008f50ca}
+
+
+Definition at line 171 of file ebcoarseaverage.\+H.
+
+\index{ebcoarseaverage@{ebcoarseaverage}!m\+\_\+use\+Fine\+Buffer@{m\+\_\+use\+Fine\+Buffer}}
+\index{m\+\_\+use\+Fine\+Buffer@{m\+\_\+use\+Fine\+Buffer}!ebcoarseaverage@{ebcoarseaverage}}
+\subsubsection[{\texorpdfstring{m\+\_\+use\+Fine\+Buffer}{m_useFineBuffer}}]{\setlength{\rightskip}{0pt plus 5cm}bool ebcoarseaverage\+::m\+\_\+use\+Fine\+Buffer\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classebcoarseaverage_aeae7e54b795c68ca2f679cf60a3ea0ea}{}\label{classebcoarseaverage_aeae7e54b795c68ca2f679cf60a3ea0ea}
+
+
+Definition at line 162 of file ebcoarseaverage.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/global/\hyperlink{ebcoarseaverage_8H}{ebcoarseaverage.\+H}\end{DoxyCompactItemize}

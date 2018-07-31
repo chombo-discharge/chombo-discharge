@@ -1,0 +1,183 @@
+\hypertarget{classhollow__cylinder__cross__sec__if}{}\section{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if Class Reference}
+\label{classhollow__cylinder__cross__sec__if}\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+
+
+The class describes a 2D a rectangle with curved corners (lower left and right). This class is used by Hollow\+Cylinder\+IF to produce a hollow cylinder with rounded bottom edges.  
+
+
+
+
+{\ttfamily \#include $<$hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if.\+H$>$}
+
+
+
+Inherits Base\+IF.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classhollow__cylinder__cross__sec__if_a427059402673eb18f5c7c2cadf3b9258}{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if} (const Real\+Vect \&a\+\_\+hi\+Corner, const Real\+Vect \&a\+\_\+lo\+Corner, const Real \&a\+\_\+radius\+Of\+Curvature, const bool \&a\+\_\+inside)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classhollow__cylinder__cross__sec__if_a1148ccfc2300d87ac7a9ad243a514001}{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if} (const \hyperlink{classhollow__cylinder__cross__sec__if}{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if} \&a\+\_\+input\+IF)
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classhollow__cylinder__cross__sec__if_a41e7cf00eeb56e36f7dbddb530473157}{$\sim$hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classhollow__cylinder__cross__sec__if_a704bfbc9b2674118502b719fb553ac68}{value} (const Real\+Vect \&a\+\_\+point) const 
+\begin{DoxyCompactList}\small\item\em Test whether inside or not. \end{DoxyCompactList}\item 
+virtual Base\+IF $\ast$ \hyperlink{classhollow__cylinder__cross__sec__if_af3b1c7934c249b89b1db3bca83299aaa}{new\+Implicit\+Function} () const 
+\begin{DoxyCompactList}\small\item\em IF factory method. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Real\+Vect \hyperlink{classhollow__cylinder__cross__sec__if_ad8cda4b5de6b4cf6759769a688f72473}{m\+\_\+hi\+Corner}
+\begin{DoxyCompactList}\small\item\em Upper right corner of the cross section. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classhollow__cylinder__cross__sec__if_a7b1dc3ee2b9591d48a83d7a83435d742}{m\+\_\+lo\+Corner}
+\begin{DoxyCompactList}\small\item\em Lower left corner of the cross section. \end{DoxyCompactList}\item 
+Real \hyperlink{classhollow__cylinder__cross__sec__if_afe1e4c0fcec88ded0114b68ba91f7580}{m\+\_\+rad\+Of\+Curv}
+\begin{DoxyCompactList}\small\item\em Radius of curvature of the rounded edges on the cylinder base. \end{DoxyCompactList}\item 
+bool \hyperlink{classhollow__cylinder__cross__sec__if_aaa2a47d30acdc5f7f386e206100fa2b8}{m\+\_\+inside}
+\begin{DoxyCompactList}\small\item\em Inside or outside domain. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The class describes a 2D a rectangle with curved corners (lower left and right). This class is used by Hollow\+Cylinder\+IF to produce a hollow cylinder with rounded bottom edges. 
+
+Definition at line 18 of file hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if(const Real\+Vect \&a\+\_\+hi\+Corner, const Real\+Vect \&a\+\_\+lo\+Corner, const Real \&a\+\_\+radius\+Of\+Curvature, const bool \&a\+\_\+inside)}{hollow_cylinder_cross_sec_if(const RealVect &a_hiCorner, const RealVect &a_loCorner, const Real &a_radiusOfCurvature, const bool &a_inside)}}]{\setlength{\rightskip}{0pt plus 5cm}hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+hi\+Corner, }
+\item[{const Real\+Vect \&}]{a\+\_\+lo\+Corner, }
+\item[{const Real \&}]{a\+\_\+radius\+Of\+Curvature, }
+\item[{const bool \&}]{a\+\_\+inside}
+\end{DoxyParamCaption}
+)}\hypertarget{classhollow__cylinder__cross__sec__if_a427059402673eb18f5c7c2cadf3b9258}{}\label{classhollow__cylinder__cross__sec__if_a427059402673eb18f5c7c2cadf3b9258}
+
+
+Constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+hi\+Corner} & Upper right corner of the object \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+lo\+Corner} & Lower left corner of the object \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+radius\+Of\+Curvature} & Radius of curvature of the rounded edges on the object base \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+inside} & Domain on inside or outside \\
+\hline
+\end{DoxyParams}
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if(const hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if \&a\+\_\+input\+I\+F)}{hollow_cylinder_cross_sec_if(const hollow_cylinder_cross_sec_if &a_inputIF)}}]{\setlength{\rightskip}{0pt plus 5cm}hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const {\bf hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if} \&}]{a\+\_\+input\+IF}
+\end{DoxyParamCaption}
+)}\hypertarget{classhollow__cylinder__cross__sec__if_a1148ccfc2300d87ac7a9ad243a514001}{}\label{classhollow__cylinder__cross__sec__if_a1148ccfc2300d87ac7a9ad243a514001}
+
+
+Copy constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+input\+IF} & Input hollow cylinder cross section \\
+\hline
+\end{DoxyParams}
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!````~hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{$\sim$hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\index{````~hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{$\sim$hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{$\sim$hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if()}{~hollow_cylinder_cross_sec_if()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::$\sim$hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classhollow__cylinder__cross__sec__if_a41e7cf00eeb56e36f7dbddb530473157}{}\label{classhollow__cylinder__cross__sec__if_a41e7cf00eeb56e36f7dbddb530473157}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!new\+Implicit\+Function@{new\+Implicit\+Function}}
+\index{new\+Implicit\+Function@{new\+Implicit\+Function}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{new\+Implicit\+Function() const }{newImplicitFunction() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Base\+IF$\ast$ hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::new\+Implicit\+Function (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classhollow__cylinder__cross__sec__if_af3b1c7934c249b89b1db3bca83299aaa}{}\label{classhollow__cylinder__cross__sec__if_af3b1c7934c249b89b1db3bca83299aaa}
+
+
+IF factory method. 
+
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!value@{value}}
+\index{value@{value}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{value(const Real\+Vect \&a\+\_\+point) const }{value(const RealVect &a_point) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::value (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+point}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classhollow__cylinder__cross__sec__if_a704bfbc9b2674118502b719fb553ac68}{}\label{classhollow__cylinder__cross__sec__if_a704bfbc9b2674118502b719fb553ac68}
+
+
+Test whether inside or not. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+point} & Physical position. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!m\+\_\+hi\+Corner@{m\+\_\+hi\+Corner}}
+\index{m\+\_\+hi\+Corner@{m\+\_\+hi\+Corner}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+hi\+Corner}{m_hiCorner}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::m\+\_\+hi\+Corner\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhollow__cylinder__cross__sec__if_ad8cda4b5de6b4cf6759769a688f72473}{}\label{classhollow__cylinder__cross__sec__if_ad8cda4b5de6b4cf6759769a688f72473}
+
+
+Upper right corner of the cross section. 
+
+
+
+Definition at line 62 of file hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if.\+H.
+
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!m\+\_\+inside@{m\+\_\+inside}}
+\index{m\+\_\+inside@{m\+\_\+inside}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+inside}{m_inside}}]{\setlength{\rightskip}{0pt plus 5cm}bool hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::m\+\_\+inside\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhollow__cylinder__cross__sec__if_aaa2a47d30acdc5f7f386e206100fa2b8}{}\label{classhollow__cylinder__cross__sec__if_aaa2a47d30acdc5f7f386e206100fa2b8}
+
+
+Inside or outside domain. 
+
+
+
+Definition at line 77 of file hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if.\+H.
+
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!m\+\_\+lo\+Corner@{m\+\_\+lo\+Corner}}
+\index{m\+\_\+lo\+Corner@{m\+\_\+lo\+Corner}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+lo\+Corner}{m_loCorner}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::m\+\_\+lo\+Corner\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhollow__cylinder__cross__sec__if_a7b1dc3ee2b9591d48a83d7a83435d742}{}\label{classhollow__cylinder__cross__sec__if_a7b1dc3ee2b9591d48a83d7a83435d742}
+
+
+Lower left corner of the cross section. 
+
+
+
+Definition at line 67 of file hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if.\+H.
+
+\index{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}!m\+\_\+rad\+Of\+Curv@{m\+\_\+rad\+Of\+Curv}}
+\index{m\+\_\+rad\+Of\+Curv@{m\+\_\+rad\+Of\+Curv}!hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if@{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+rad\+Of\+Curv}{m_radOfCurv}}]{\setlength{\rightskip}{0pt plus 5cm}Real hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if\+::m\+\_\+rad\+Of\+Curv\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhollow__cylinder__cross__sec__if_afe1e4c0fcec88ded0114b68ba91f7580}{}\label{classhollow__cylinder__cross__sec__if_afe1e4c0fcec88ded0114b68ba91f7580}
+
+
+Radius of curvature of the rounded edges on the cylinder base. 
+
+
+
+Definition at line 72 of file hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{hollow__cylinder__cross__sec__if_8H}{hollow\+\_\+cylinder\+\_\+cross\+\_\+sec\+\_\+if.\+H}\end{DoxyCompactItemize}

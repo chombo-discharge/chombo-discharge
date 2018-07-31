@@ -1,0 +1,182 @@
+\hypertarget{classhyperboloid__if}{}\section{hyperboloid\+\_\+if Class Reference}
+\label{classhyperboloid__if}\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+
+
+Declaration of a two-\/sheet hyperboloid.  
+
+
+
+
+{\ttfamily \#include $<$hyperboloid\+\_\+if.\+H$>$}
+
+
+
+Inherits Base\+IF.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classhyperboloid__if_a49a8d1de1c8f9b266c585cb8b217c807}{hyperboloid\+\_\+if} (const Real\+Vect \&a\+\_\+radii, const Real\+Vect \&a\+\_\+center, const bool \&a\+\_\+inside)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classhyperboloid__if_a72a3a80d39136b2e70cc058fd23dcdc0}{hyperboloid\+\_\+if} (const \hyperlink{classhyperboloid__if}{hyperboloid\+\_\+if} \&a\+\_\+input\+IF)
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classhyperboloid__if_ad58dd680fd0b7718d367871a006b0925}{value} (const Real\+Vect \&a\+\_\+point) const 
+\begin{DoxyCompactList}\small\item\em Test whether inside or not. \end{DoxyCompactList}\item 
+virtual Base\+IF $\ast$ \hyperlink{classhyperboloid__if_a40cb40607196cb3342795cb36c7d6662}{new\+Implicit\+Function} () const 
+\begin{DoxyCompactList}\small\item\em IF factory method. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Real\+Vect \hyperlink{classhyperboloid__if_a40f58c885e633e217051a5f0f544189f}{m\+\_\+radii}
+\begin{DoxyCompactList}\small\item\em Hyperboloid radii. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classhyperboloid__if_aa173c15f1175222e2f8bf91ddb335df7}{m\+\_\+radii2}
+\begin{DoxyCompactList}\small\item\em Hyperboloid radii squared. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classhyperboloid__if_a48189ee705661052674df1e7745edc3f}{m\+\_\+sign}
+\begin{DoxyCompactList}\small\item\em Holder for sign convention. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classhyperboloid__if_aa5a7c54cb7bba001787b06a01c9d3d2c}{m\+\_\+center}
+\begin{DoxyCompactList}\small\item\em Hyperboloid center. \end{DoxyCompactList}\item 
+bool \hyperlink{classhyperboloid__if_a7ec285cac539bcb1e7bdecdcac6ffa7c}{m\+\_\+inside}
+\begin{DoxyCompactList}\small\item\em Inside or outside domain. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Declaration of a two-\/sheet hyperboloid. 
+
+The implicit function used for the single sheet is \[ \frac{z}{c} - \sqrt{1 + \frac{x^2}{a^2} + \frac{y^2}{b^2}} = 0 \] 
+
+Definition at line 21 of file hyperboloid\+\_\+if.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{hyperboloid\+\_\+if(const Real\+Vect \&a\+\_\+radii, const Real\+Vect \&a\+\_\+center, const bool \&a\+\_\+inside)}{hyperboloid_if(const RealVect &a_radii, const RealVect &a_center, const bool &a_inside)}}]{\setlength{\rightskip}{0pt plus 5cm}hyperboloid\+\_\+if\+::hyperboloid\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+radii, }
+\item[{const Real\+Vect \&}]{a\+\_\+center, }
+\item[{const bool \&}]{a\+\_\+inside}
+\end{DoxyParamCaption}
+)}\hypertarget{classhyperboloid__if_a49a8d1de1c8f9b266c585cb8b217c807}{}\label{classhyperboloid__if_a49a8d1de1c8f9b266c585cb8b217c807}
+
+
+Constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+radii} & Hyperboloid radii \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+center} & Hyperboloid center \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+inside} & Domain on inside or outside \\
+\hline
+\end{DoxyParams}
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{hyperboloid\+\_\+if(const hyperboloid\+\_\+if \&a\+\_\+input\+I\+F)}{hyperboloid_if(const hyperboloid_if &a_inputIF)}}]{\setlength{\rightskip}{0pt plus 5cm}hyperboloid\+\_\+if\+::hyperboloid\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const {\bf hyperboloid\+\_\+if} \&}]{a\+\_\+input\+IF}
+\end{DoxyParamCaption}
+)}\hypertarget{classhyperboloid__if_a72a3a80d39136b2e70cc058fd23dcdc0}{}\label{classhyperboloid__if_a72a3a80d39136b2e70cc058fd23dcdc0}
+
+
+Copy constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+input\+IF} & Input one-\/sheeted hyperboloid \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!new\+Implicit\+Function@{new\+Implicit\+Function}}
+\index{new\+Implicit\+Function@{new\+Implicit\+Function}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{new\+Implicit\+Function() const }{newImplicitFunction() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Base\+IF$\ast$ hyperboloid\+\_\+if\+::new\+Implicit\+Function (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classhyperboloid__if_a40cb40607196cb3342795cb36c7d6662}{}\label{classhyperboloid__if_a40cb40607196cb3342795cb36c7d6662}
+
+
+IF factory method. 
+
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!value@{value}}
+\index{value@{value}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{value(const Real\+Vect \&a\+\_\+point) const }{value(const RealVect &a_point) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real hyperboloid\+\_\+if\+::value (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+point}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classhyperboloid__if_ad58dd680fd0b7718d367871a006b0925}{}\label{classhyperboloid__if_ad58dd680fd0b7718d367871a006b0925}
+
+
+Test whether inside or not. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+point} & Physical position. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!m\+\_\+center@{m\+\_\+center}}
+\index{m\+\_\+center@{m\+\_\+center}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+center}{m_center}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect hyperboloid\+\_\+if\+::m\+\_\+center\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhyperboloid__if_aa5a7c54cb7bba001787b06a01c9d3d2c}{}\label{classhyperboloid__if_aa5a7c54cb7bba001787b06a01c9d3d2c}
+
+
+Hyperboloid center. 
+
+
+
+Definition at line 68 of file hyperboloid\+\_\+if.\+H.
+
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!m\+\_\+inside@{m\+\_\+inside}}
+\index{m\+\_\+inside@{m\+\_\+inside}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+inside}{m_inside}}]{\setlength{\rightskip}{0pt plus 5cm}bool hyperboloid\+\_\+if\+::m\+\_\+inside\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhyperboloid__if_a7ec285cac539bcb1e7bdecdcac6ffa7c}{}\label{classhyperboloid__if_a7ec285cac539bcb1e7bdecdcac6ffa7c}
+
+
+Inside or outside domain. 
+
+
+
+Definition at line 73 of file hyperboloid\+\_\+if.\+H.
+
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!m\+\_\+radii@{m\+\_\+radii}}
+\index{m\+\_\+radii@{m\+\_\+radii}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+radii}{m_radii}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect hyperboloid\+\_\+if\+::m\+\_\+radii\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhyperboloid__if_a40f58c885e633e217051a5f0f544189f}{}\label{classhyperboloid__if_a40f58c885e633e217051a5f0f544189f}
+
+
+Hyperboloid radii. 
+
+
+
+Definition at line 53 of file hyperboloid\+\_\+if.\+H.
+
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!m\+\_\+radii2@{m\+\_\+radii2}}
+\index{m\+\_\+radii2@{m\+\_\+radii2}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+radii2}{m_radii2}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect hyperboloid\+\_\+if\+::m\+\_\+radii2\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhyperboloid__if_aa173c15f1175222e2f8bf91ddb335df7}{}\label{classhyperboloid__if_aa173c15f1175222e2f8bf91ddb335df7}
+
+
+Hyperboloid radii squared. 
+
+
+
+Definition at line 58 of file hyperboloid\+\_\+if.\+H.
+
+\index{hyperboloid\+\_\+if@{hyperboloid\+\_\+if}!m\+\_\+sign@{m\+\_\+sign}}
+\index{m\+\_\+sign@{m\+\_\+sign}!hyperboloid\+\_\+if@{hyperboloid\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+sign}{m_sign}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect hyperboloid\+\_\+if\+::m\+\_\+sign\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classhyperboloid__if_a48189ee705661052674df1e7745edc3f}{}\label{classhyperboloid__if_a48189ee705661052674df1e7745edc3f}
+
+
+Holder for sign convention. 
+
+
+
+Definition at line 63 of file hyperboloid\+\_\+if.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{hyperboloid__if_8H}{hyperboloid\+\_\+if.\+H}\end{DoxyCompactItemize}

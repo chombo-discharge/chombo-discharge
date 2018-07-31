@@ -1,0 +1,118 @@
+\hypertarget{classrobin__coef}{}\section{robin\+\_\+coef Class Reference}
+\label{classrobin__coef}\index{robin\+\_\+coef@{robin\+\_\+coef}}
+
+
+Abstract base class for supplying function-\/based coefficients to the Robin boundary condition classes. Because Base\+B\+C\+Value is not enough.  
+
+
+
+
+{\ttfamily \#include $<$robin\+\_\+coef.\+H$>$}
+
+
+
+Inheritance diagram for robin\+\_\+coef\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=152pt]{classrobin__coef__inherit__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classrobin__coef_abb8fb6513875f78f5abbbe19ad23e75f}{robin\+\_\+coef} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classrobin__coef_a146613c83e1507cb2e18303191d78679}{$\sim$robin\+\_\+coef} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classrobin__coef_a0770f01660699dcbc7c610e7d851e9e5}{aco} (const Real\+Vect a\+\_\+pos) const =0
+\begin{DoxyCompactList}\small\item\em Get a-\/coefficient. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classrobin__coef_a1bc117783a16f2e97e2a146bcfea1318}{bco} (const Real\+Vect a\+\_\+pos) const =0
+\begin{DoxyCompactList}\small\item\em Get b-\/coefficient. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classrobin__coef_a42b98d3d26ec08dd3a8d9b7539445f93}{rhs} (const Real\+Vect a\+\_\+pos) const =0
+\begin{DoxyCompactList}\small\item\em Get right-\/hand side. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Abstract base class for supplying function-\/based coefficients to the Robin boundary condition classes. Because Base\+B\+C\+Value is not enough. 
+
+Definition at line 16 of file robin\+\_\+coef.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{robin\+\_\+coef@{robin\+\_\+coef}!robin\+\_\+coef@{robin\+\_\+coef}}
+\index{robin\+\_\+coef@{robin\+\_\+coef}!robin\+\_\+coef@{robin\+\_\+coef}}
+\subsubsection[{\texorpdfstring{robin\+\_\+coef()}{robin_coef()}}]{\setlength{\rightskip}{0pt plus 5cm}robin\+\_\+coef\+::robin\+\_\+coef (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classrobin__coef_abb8fb6513875f78f5abbbe19ad23e75f}{}\label{classrobin__coef_abb8fb6513875f78f5abbbe19ad23e75f}
+
+
+Constructor. 
+
+\index{robin\+\_\+coef@{robin\+\_\+coef}!````~robin\+\_\+coef@{$\sim$robin\+\_\+coef}}
+\index{````~robin\+\_\+coef@{$\sim$robin\+\_\+coef}!robin\+\_\+coef@{robin\+\_\+coef}}
+\subsubsection[{\texorpdfstring{$\sim$robin\+\_\+coef()}{~robin_coef()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual robin\+\_\+coef\+::$\sim$robin\+\_\+coef (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobin__coef_a146613c83e1507cb2e18303191d78679}{}\label{classrobin__coef_a146613c83e1507cb2e18303191d78679}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{robin\+\_\+coef@{robin\+\_\+coef}!aco@{aco}}
+\index{aco@{aco}!robin\+\_\+coef@{robin\+\_\+coef}}
+\subsubsection[{\texorpdfstring{aco(const Real\+Vect a\+\_\+pos) const =0}{aco(const RealVect a_pos) const =0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real robin\+\_\+coef\+::aco (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrobin__coef_a0770f01660699dcbc7c610e7d851e9e5}{}\label{classrobin__coef_a0770f01660699dcbc7c610e7d851e9e5}
+
+
+Get a-\/coefficient. 
+
+
+
+Implemented in \hyperlink{classlarsen__coefs_a35095b0563cc502bc0918f8038bc9200}{larsen\+\_\+coefs}.
+
+\index{robin\+\_\+coef@{robin\+\_\+coef}!bco@{bco}}
+\index{bco@{bco}!robin\+\_\+coef@{robin\+\_\+coef}}
+\subsubsection[{\texorpdfstring{bco(const Real\+Vect a\+\_\+pos) const =0}{bco(const RealVect a_pos) const =0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real robin\+\_\+coef\+::bco (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrobin__coef_a1bc117783a16f2e97e2a146bcfea1318}{}\label{classrobin__coef_a1bc117783a16f2e97e2a146bcfea1318}
+
+
+Get b-\/coefficient. 
+
+
+
+Implemented in \hyperlink{classlarsen__coefs_a659244c51aac28ff1ac08fa4e3079b32}{larsen\+\_\+coefs}.
+
+\index{robin\+\_\+coef@{robin\+\_\+coef}!rhs@{rhs}}
+\index{rhs@{rhs}!robin\+\_\+coef@{robin\+\_\+coef}}
+\subsubsection[{\texorpdfstring{rhs(const Real\+Vect a\+\_\+pos) const =0}{rhs(const RealVect a_pos) const =0}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real robin\+\_\+coef\+::rhs (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [pure virtual]}}\hypertarget{classrobin__coef_a42b98d3d26ec08dd3a8d9b7539445f93}{}\label{classrobin__coef_a42b98d3d26ec08dd3a8d9b7539445f93}
+
+
+Get right-\/hand side. 
+
+
+
+Implemented in \hyperlink{classlarsen__coefs_a7976331f3f90664ed7a4b522894f1d08}{larsen\+\_\+coefs}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/elliptic/\hyperlink{robin__coef_8H}{robin\+\_\+coef.\+H}\end{DoxyCompactItemize}

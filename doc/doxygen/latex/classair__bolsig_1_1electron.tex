@@ -1,0 +1,192 @@
+\hypertarget{classair__bolsig_1_1electron}{}\section{air\+\_\+bolsig\+:\+:electron Class Reference}
+\label{classair__bolsig_1_1electron}\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+
+
+Implementation of electron for this class.  
+
+
+
+
+{\ttfamily \#include $<$air\+\_\+bolsig.\+H$>$}
+
+
+
+Inheritance diagram for air\+\_\+bolsig\+:\+:electron\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=178pt]{classair__bolsig_1_1electron__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for air\+\_\+bolsig\+:\+:electron\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=178pt]{classair__bolsig_1_1electron__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classair__bolsig_1_1electron_a92e4c067780a4c788ac8c4333473612c}{electron} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classair__bolsig_1_1electron_af64ba24f60db41052054948676596c5c}{$\sim$electron} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classair__bolsig_1_1electron_a2025cd5cc5802fd11f299c01f5ef8d8f}{initial\+\_\+data} (const Real\+Vect a\+\_\+pos, const Real a\+\_\+time) const 
+\begin{DoxyCompactList}\small\item\em Implementation of initial data. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classair__bolsig_1_1electron_abf93b1dc29b27adfd9bf5e4f96ffb3c2}{set\+\_\+noise} (Ref\+Counted\+Ptr$<$ \hyperlink{classperlin__if}{perlin\+\_\+if} $>$ a\+\_\+noise\+Ptr)
+\begin{DoxyCompactList}\small\item\em Set the noise function. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classperlin__if}{perlin\+\_\+if} $>$ \hyperlink{classair__bolsig_1_1electron_a133dbcaca57cd676331cedd747d58b21}{m\+\_\+perlin}
+\begin{DoxyCompactList}\small\item\em Noise function. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1electron_abc1d0d05de7a65ddefea9b375bc48c87}{m\+\_\+uniform\+\_\+density}
+\begin{DoxyCompactList}\small\item\em Uniform plasma density. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1electron_ab1b60d6f55fa34c1253a3f48dc80fbc3}{m\+\_\+seed\+\_\+density}
+\begin{DoxyCompactList}\small\item\em Plasma seed density. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1electron_a470e47d3516c19ffdeb132ff749b4aa8}{m\+\_\+seed\+\_\+radius}
+\begin{DoxyCompactList}\small\item\em Plasma seed radius. \end{DoxyCompactList}\item 
+Real \hyperlink{classair__bolsig_1_1electron_a1bc877e409899ca12fcdf3eeec33dc49}{m\+\_\+noise\+\_\+density}
+\begin{DoxyCompactList}\small\item\em Plasma seed radius. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classair__bolsig_1_1electron_a6fc1ec1a6c64fcc89922f03bcb298ee2}{m\+\_\+seed\+\_\+pos}
+\begin{DoxyCompactList}\small\item\em Plasma seed position. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+Implementation of electron for this class. 
+
+Definition at line 553 of file air\+\_\+bolsig.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!electron@{electron}}
+\index{electron@{electron}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{electron()}{electron()}}]{\setlength{\rightskip}{0pt plus 5cm}air\+\_\+bolsig\+::electron\+::electron (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classair__bolsig_1_1electron_a92e4c067780a4c788ac8c4333473612c}{}\label{classair__bolsig_1_1electron_a92e4c067780a4c788ac8c4333473612c}
+
+
+Constructor. 
+
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!````~electron@{$\sim$electron}}
+\index{````~electron@{$\sim$electron}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{$\sim$electron()}{~electron()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual air\+\_\+bolsig\+::electron\+::$\sim$electron (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classair__bolsig_1_1electron_af64ba24f60db41052054948676596c5c}{}\label{classair__bolsig_1_1electron_af64ba24f60db41052054948676596c5c}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!initial\+\_\+data@{initial\+\_\+data}}
+\index{initial\+\_\+data@{initial\+\_\+data}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{initial\+\_\+data(const Real\+Vect a\+\_\+pos, const Real a\+\_\+time) const }{initial_data(const RealVect a_pos, const Real a_time) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real air\+\_\+bolsig\+::electron\+::initial\+\_\+data (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect}]{a\+\_\+pos, }
+\item[{const Real}]{a\+\_\+time}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classair__bolsig_1_1electron_a2025cd5cc5802fd11f299c01f5ef8d8f}{}\label{classair__bolsig_1_1electron_a2025cd5cc5802fd11f299c01f5ef8d8f}
+
+
+Implementation of initial data. 
+
+
+
+Implements \hyperlink{classspecies_a1c492560bb220c62985aaf6b20ff8ec2}{species}.
+
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!set\+\_\+noise@{set\+\_\+noise}}
+\index{set\+\_\+noise@{set\+\_\+noise}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{set\+\_\+noise(\+Ref\+Counted\+Ptr$<$ perlin\+\_\+if $>$ a\+\_\+noise\+Ptr)}{set_noise(RefCountedPtr< perlin_if > a_noisePtr)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void air\+\_\+bolsig\+::electron\+::set\+\_\+noise (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ {\bf perlin\+\_\+if} $>$}]{a\+\_\+noise\+Ptr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classair__bolsig_1_1electron_abf93b1dc29b27adfd9bf5e4f96ffb3c2}{}\label{classair__bolsig_1_1electron_abf93b1dc29b27adfd9bf5e4f96ffb3c2}
+
+
+Set the noise function. 
+
+
+
+\subsection{Member Data Documentation}
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!m\+\_\+noise\+\_\+density@{m\+\_\+noise\+\_\+density}}
+\index{m\+\_\+noise\+\_\+density@{m\+\_\+noise\+\_\+density}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{m\+\_\+noise\+\_\+density}{m_noise_density}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::electron\+::m\+\_\+noise\+\_\+density}\hypertarget{classair__bolsig_1_1electron_a1bc877e409899ca12fcdf3eeec33dc49}{}\label{classair__bolsig_1_1electron_a1bc877e409899ca12fcdf3eeec33dc49}
+
+
+Plasma seed radius. 
+
+
+
+Definition at line 598 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!m\+\_\+perlin@{m\+\_\+perlin}}
+\index{m\+\_\+perlin@{m\+\_\+perlin}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{m\+\_\+perlin}{m_perlin}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf perlin\+\_\+if}$>$ air\+\_\+bolsig\+::electron\+::m\+\_\+perlin}\hypertarget{classair__bolsig_1_1electron_a133dbcaca57cd676331cedd747d58b21}{}\label{classair__bolsig_1_1electron_a133dbcaca57cd676331cedd747d58b21}
+
+
+Noise function. 
+
+
+
+Definition at line 578 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!m\+\_\+seed\+\_\+density@{m\+\_\+seed\+\_\+density}}
+\index{m\+\_\+seed\+\_\+density@{m\+\_\+seed\+\_\+density}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{m\+\_\+seed\+\_\+density}{m_seed_density}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::electron\+::m\+\_\+seed\+\_\+density}\hypertarget{classair__bolsig_1_1electron_ab1b60d6f55fa34c1253a3f48dc80fbc3}{}\label{classair__bolsig_1_1electron_ab1b60d6f55fa34c1253a3f48dc80fbc3}
+
+
+Plasma seed density. 
+
+
+
+Definition at line 588 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!m\+\_\+seed\+\_\+pos@{m\+\_\+seed\+\_\+pos}}
+\index{m\+\_\+seed\+\_\+pos@{m\+\_\+seed\+\_\+pos}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{m\+\_\+seed\+\_\+pos}{m_seed_pos}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect air\+\_\+bolsig\+::electron\+::m\+\_\+seed\+\_\+pos}\hypertarget{classair__bolsig_1_1electron_a6fc1ec1a6c64fcc89922f03bcb298ee2}{}\label{classair__bolsig_1_1electron_a6fc1ec1a6c64fcc89922f03bcb298ee2}
+
+
+Plasma seed position. 
+
+
+
+Definition at line 603 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!m\+\_\+seed\+\_\+radius@{m\+\_\+seed\+\_\+radius}}
+\index{m\+\_\+seed\+\_\+radius@{m\+\_\+seed\+\_\+radius}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{m\+\_\+seed\+\_\+radius}{m_seed_radius}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::electron\+::m\+\_\+seed\+\_\+radius}\hypertarget{classair__bolsig_1_1electron_a470e47d3516c19ffdeb132ff749b4aa8}{}\label{classair__bolsig_1_1electron_a470e47d3516c19ffdeb132ff749b4aa8}
+
+
+Plasma seed radius. 
+
+
+
+Definition at line 593 of file air\+\_\+bolsig.\+H.
+
+\index{air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}!m\+\_\+uniform\+\_\+density@{m\+\_\+uniform\+\_\+density}}
+\index{m\+\_\+uniform\+\_\+density@{m\+\_\+uniform\+\_\+density}!air\+\_\+bolsig\+::electron@{air\+\_\+bolsig\+::electron}}
+\subsubsection[{\texorpdfstring{m\+\_\+uniform\+\_\+density}{m_uniform_density}}]{\setlength{\rightskip}{0pt plus 5cm}Real air\+\_\+bolsig\+::electron\+::m\+\_\+uniform\+\_\+density}\hypertarget{classair__bolsig_1_1electron_abc1d0d05de7a65ddefea9b375bc48c87}{}\label{classair__bolsig_1_1electron_abc1d0d05de7a65ddefea9b375bc48c87}
+
+
+Uniform plasma density. 
+
+
+
+Definition at line 583 of file air\+\_\+bolsig.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/plasma\+\_\+models/air\+\_\+bolsig/\hyperlink{air__bolsig_8H}{air\+\_\+bolsig.\+H}\end{DoxyCompactItemize}

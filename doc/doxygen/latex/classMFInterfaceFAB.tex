@@ -1,0 +1,227 @@
+\hypertarget{classMFInterfaceFAB}{}\section{M\+F\+Interface\+F\+AB$<$ T $>$ Class Template Reference}
+\label{classMFInterfaceFAB}\index{M\+F\+Interface\+F\+A\+B$<$ T $>$@{M\+F\+Interface\+F\+A\+B$<$ T $>$}}
+
+
+Class for holding Base\+I\+V\+F\+A\+B$<$\+T$>$ on the interface between two phases.  
+
+
+
+
+{\ttfamily \#include $<$M\+F\+Interface\+F\+A\+B.\+H$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMFInterfaceFAB_a0c1665a8fb77aac838aab83eaf8e379e}{M\+F\+Interface\+F\+AB} ()
+\begin{DoxyCompactList}\small\item\em Constructor. Must subsequently call define. \end{DoxyCompactList}\item 
+\hyperlink{classMFInterfaceFAB_a9e9773180f04247c742b4fba03c82bf2}{M\+F\+Interface\+F\+AB} (const \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} \&a\+\_\+mflg, const Data\+Index \&a\+\_\+dit)
+\begin{DoxyCompactList}\small\item\em Full constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classMFInterfaceFAB_abe1fc32723df554f115e66b0230ad74e}{$\sim$\+M\+F\+Interface\+F\+AB} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classMFInterfaceFAB_a7633295f84a0b37e340139db18dc3247}{define} (const \hyperlink{classMFLevelGrid}{M\+F\+Level\+Grid} \&a\+\_\+mflg, const Data\+Index \&a\+\_\+dit)
+\begin{DoxyCompactList}\small\item\em Define function. \end{DoxyCompactList}\item 
+virtual const Int\+Vect\+Set \& \hyperlink{classMFInterfaceFAB_a02673762a18520cc038a492136c4bf35}{get\+\_\+ivs} () const 
+\item 
+virtual Base\+I\+V\+F\+AB$<$ T $>$ \& \hyperlink{classMFInterfaceFAB_a269af754b7786f75a3e3cdca5c2f262b}{get\+\_\+ivfab} (const int a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Get Base\+I\+V\+F\+AB for phase. \end{DoxyCompactList}\item 
+virtual const Base\+I\+V\+F\+AB$<$ T $>$ \& \hyperlink{classMFInterfaceFAB_aa9f44560befd3191d279009d32f70636}{get\+\_\+ivfab} (const int a\+\_\+phase) const 
+\begin{DoxyCompactList}\small\item\em Get Base\+I\+V\+F\+AB for phase. \end{DoxyCompactList}\item 
+virtual Base\+I\+V\+F\+AB$<$ T $>$ $\ast$ \hyperlink{classMFInterfaceFAB_a3d01e30ea3f5398fae210e0b39082e64}{get\+\_\+phase\+\_\+ptr} (int a\+\_\+phase)
+\begin{DoxyCompactList}\small\item\em Get Base\+I\+V\+F\+AB for phase. \end{DoxyCompactList}\item 
+virtual int \hyperlink{classMFInterfaceFAB_a019badcc5ee03dce92467c523e5471c7}{num\+\_\+phases} ()
+\begin{DoxyCompactList}\small\item\em Get number of phases. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classMFInterfaceFAB_a4d256626080c52a65be0c6b35e8fee17}{set\+Val} (const T \&a\+\_\+value)
+\begin{DoxyCompactList}\small\item\em Set value. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Vector$<$ Base\+I\+V\+F\+AB$<$ T $>$ $\ast$ $>$ \hyperlink{classMFInterfaceFAB_a1db6bd48d72b77110541b3193c3741fa}{m\+\_\+phase}
+\item 
+Int\+Vect\+Set \hyperlink{classMFInterfaceFAB_a82646e4c1c0583f76fd9e3eb5d78d9fc}{m\+\_\+ivs}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$class T$>$\\*
+class M\+F\+Interface\+F\+A\+B$<$ T $>$}
+
+Class for holding Base\+I\+V\+F\+A\+B$<$\+T$>$ on the interface between two phases. 
+
+Definition at line 22 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{M\+F\+Interface\+F\+A\+B()}{MFInterfaceFAB()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::{\bf M\+F\+Interface\+F\+AB} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{classMFInterfaceFAB_a0c1665a8fb77aac838aab83eaf8e379e}{}\label{classMFInterfaceFAB_a0c1665a8fb77aac838aab83eaf8e379e}
+
+
+Constructor. Must subsequently call define. 
+
+
+
+Definition at line 28 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{M\+F\+Interface\+F\+A\+B(const M\+F\+Level\+Grid \&a\+\_\+mflg, const Data\+Index \&a\+\_\+dit)}{MFInterfaceFAB(const MFLevelGrid &a_mflg, const DataIndex &a_dit)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::{\bf M\+F\+Interface\+F\+AB} (
+\begin{DoxyParamCaption}
+\item[{const {\bf M\+F\+Level\+Grid} \&}]{a\+\_\+mflg, }
+\item[{const Data\+Index \&}]{a\+\_\+dit}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{classMFInterfaceFAB_a9e9773180f04247c742b4fba03c82bf2}{}\label{classMFInterfaceFAB_a9e9773180f04247c742b4fba03c82bf2}
+
+
+Full constructor. 
+
+
+
+Definition at line 34 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!````~M\+F\+Interface\+F\+AB@{$\sim$\+M\+F\+Interface\+F\+AB}}
+\index{````~M\+F\+Interface\+F\+AB@{$\sim$\+M\+F\+Interface\+F\+AB}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{$\sim$\+M\+F\+Interface\+F\+A\+B()}{~MFInterfaceFAB()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::$\sim${\bf M\+F\+Interface\+F\+AB} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_abe1fc32723df554f115e66b0230ad74e}{}\label{classMFInterfaceFAB_abe1fc32723df554f115e66b0230ad74e}
+
+
+Destructor. 
+
+
+
+Definition at line 41 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+
+
+\subsection{Member Function Documentation}
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!define@{define}}
+\index{define@{define}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{define(const M\+F\+Level\+Grid \&a\+\_\+mflg, const Data\+Index \&a\+\_\+dit)}{define(const MFLevelGrid &a_mflg, const DataIndex &a_dit)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual void {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::define (
+\begin{DoxyParamCaption}
+\item[{const {\bf M\+F\+Level\+Grid} \&}]{a\+\_\+mflg, }
+\item[{const Data\+Index \&}]{a\+\_\+dit}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_a7633295f84a0b37e340139db18dc3247}{}\label{classMFInterfaceFAB_a7633295f84a0b37e340139db18dc3247}
+
+
+Define function. 
+
+
+
+Definition at line 50 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!get\+\_\+ivfab@{get\+\_\+ivfab}}
+\index{get\+\_\+ivfab@{get\+\_\+ivfab}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{get\+\_\+ivfab(const int a\+\_\+phase)}{get_ivfab(const int a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual Base\+I\+V\+F\+AB$<$T$>$\& {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::get\+\_\+ivfab (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_a269af754b7786f75a3e3cdca5c2f262b}{}\label{classMFInterfaceFAB_a269af754b7786f75a3e3cdca5c2f262b}
+
+
+Get Base\+I\+V\+F\+AB for phase. 
+
+
+
+Definition at line 74 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!get\+\_\+ivfab@{get\+\_\+ivfab}}
+\index{get\+\_\+ivfab@{get\+\_\+ivfab}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{get\+\_\+ivfab(const int a\+\_\+phase) const }{get_ivfab(const int a_phase) const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual const Base\+I\+V\+F\+AB$<$T$>$\& {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::get\+\_\+ivfab (
+\begin{DoxyParamCaption}
+\item[{const int}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_aa9f44560befd3191d279009d32f70636}{}\label{classMFInterfaceFAB_aa9f44560befd3191d279009d32f70636}
+
+
+Get Base\+I\+V\+F\+AB for phase. 
+
+
+
+Definition at line 81 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!get\+\_\+ivs@{get\+\_\+ivs}}
+\index{get\+\_\+ivs@{get\+\_\+ivs}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{get\+\_\+ivs() const }{get_ivs() const }}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual const Int\+Vect\+Set\& {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::get\+\_\+ivs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_a02673762a18520cc038a492136c4bf35}{}\label{classMFInterfaceFAB_a02673762a18520cc038a492136c4bf35}
+
+
+Definition at line 67 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!get\+\_\+phase\+\_\+ptr@{get\+\_\+phase\+\_\+ptr}}
+\index{get\+\_\+phase\+\_\+ptr@{get\+\_\+phase\+\_\+ptr}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{get\+\_\+phase\+\_\+ptr(int a\+\_\+phase)}{get_phase_ptr(int a_phase)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual Base\+I\+V\+F\+AB$<$T$>$$\ast$ {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::get\+\_\+phase\+\_\+ptr (
+\begin{DoxyParamCaption}
+\item[{int}]{a\+\_\+phase}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_a3d01e30ea3f5398fae210e0b39082e64}{}\label{classMFInterfaceFAB_a3d01e30ea3f5398fae210e0b39082e64}
+
+
+Get Base\+I\+V\+F\+AB for phase. 
+
+
+
+Definition at line 88 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!num\+\_\+phases@{num\+\_\+phases}}
+\index{num\+\_\+phases@{num\+\_\+phases}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{num\+\_\+phases()}{num_phases()}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual int {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::num\+\_\+phases (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_a019badcc5ee03dce92467c523e5471c7}{}\label{classMFInterfaceFAB_a019badcc5ee03dce92467c523e5471c7}
+
+
+Get number of phases. 
+
+
+
+Definition at line 95 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!set\+Val@{set\+Val}}
+\index{set\+Val@{set\+Val}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{set\+Val(const T \&a\+\_\+value)}{setVal(const T &a_value)}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ virtual void {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::set\+Val (
+\begin{DoxyParamCaption}
+\item[{const T \&}]{a\+\_\+value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}\hypertarget{classMFInterfaceFAB_a4d256626080c52a65be0c6b35e8fee17}{}\label{classMFInterfaceFAB_a4d256626080c52a65be0c6b35e8fee17}
+
+
+Set value. 
+
+
+
+Definition at line 102 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+
+
+\subsection{Member Data Documentation}
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!m\+\_\+ivs@{m\+\_\+ivs}}
+\index{m\+\_\+ivs@{m\+\_\+ivs}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{m\+\_\+ivs}{m_ivs}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ Int\+Vect\+Set {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::m\+\_\+ivs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classMFInterfaceFAB_a82646e4c1c0583f76fd9e3eb5d78d9fc}{}\label{classMFInterfaceFAB_a82646e4c1c0583f76fd9e3eb5d78d9fc}
+
+
+Definition at line 113 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+\index{M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}!m\+\_\+phase@{m\+\_\+phase}}
+\index{m\+\_\+phase@{m\+\_\+phase}!M\+F\+Interface\+F\+AB@{M\+F\+Interface\+F\+AB}}
+\subsubsection[{\texorpdfstring{m\+\_\+phase}{m_phase}}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T$>$ Vector$<$Base\+I\+V\+F\+AB$<$T$>$$\ast$ $>$ {\bf M\+F\+Interface\+F\+AB}$<$ T $>$\+::m\+\_\+phase\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classMFInterfaceFAB_a1db6bd48d72b77110541b3193c3741fa}{}\label{classMFInterfaceFAB_a1db6bd48d72b77110541b3193c3741fa}
+
+
+Definition at line 111 of file M\+F\+Interface\+F\+A\+B.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/global/\hyperlink{MFInterfaceFAB_8H}{M\+F\+Interface\+F\+A\+B.\+H}\end{DoxyCompactItemize}

@@ -1,0 +1,343 @@
+\hypertarget{classperlin__if}{}\section{perlin\+\_\+if Class Reference}
+\label{classperlin__if}\index{perlin\+\_\+if@{perlin\+\_\+if}}
+
+
+Class that implements an improved Perlin noise function.  
+
+
+
+
+{\ttfamily \#include $<$perlin\+\_\+if.\+H$>$}
+
+
+
+Inherits Base\+IF.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classperlin__if_a5e48bce0228769be9ac6a836a2a80f8e}{perlin\+\_\+if} (const Real \&a\+\_\+noise\+Amp, const Real\+Vect \&a\+\_\+noise\+Freq, const Real \&a\+\_\+persistence, const int \&a\+\_\+octaves, const bool \&a\+\_\+reseed=false)
+\begin{DoxyCompactList}\small\item\em Full constructor. \end{DoxyCompactList}\item 
+\hyperlink{classperlin__if_af26c930d5d28302871b44329da831cb8}{perlin\+\_\+if} (const \hyperlink{classperlin__if}{perlin\+\_\+if} \&a\+\_\+input\+IF)
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classperlin__if_a3141688307c223fcbc4cd768ce1e67af}{$\sim$perlin\+\_\+if} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classperlin__if_a20d94fc8c5ae6b54b5ff80e0972a4ee1}{value} (const Real\+Vect \&a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em Level-\/set function. \end{DoxyCompactList}\item 
+virtual Base\+IF $\ast$ \hyperlink{classperlin__if_a4e3d16955c3420401a05b35554eb4d46}{new\+Implicit\+Function} () const 
+\begin{DoxyCompactList}\small\item\em Factory method. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static int \hyperlink{classperlin__if_af846fefa8cb40e741296c12521ec5508}{random} (const int i)
+\begin{DoxyCompactList}\small\item\em Random number generator. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classperlin__if_a26a4c6c866b19a8495f003c266159174}{reseed} ()
+\begin{DoxyCompactList}\small\item\em Reseed function. \end{DoxyCompactList}\item 
+double \hyperlink{classperlin__if_a88ad58e2e891b8402af937a343a94f2b}{noise} (const double a\+\_\+x, const double a\+\_\+y, const double a\+\_\+z) const 
+\begin{DoxyCompactList}\small\item\em Ken Perlin\textquotesingle{}s 3D noise function. \end{DoxyCompactList}\item 
+Real \hyperlink{classperlin__if_acec0e7b8b48b22a0094b620743bcc1b3}{noise} (const Real\+Vect \&a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em Chombo interface to Perlin noise function. \end{DoxyCompactList}\item 
+Real \hyperlink{classperlin__if_aba9271ab3017eeb212d8a4bb5212990c}{octave\+Noise} (const Real\+Vect \&a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em Octave noise function. \end{DoxyCompactList}\item 
+Real \hyperlink{classperlin__if_af77a158cd6c60ceaf5c7779b62d11b16}{lerp} (const Real t, const Real a, const Real b) const 
+\begin{DoxyCompactList}\small\item\em Interpolation function. \end{DoxyCompactList}\item 
+Real \hyperlink{classperlin__if_a8fd23bab717fe28009908ec0fd2efaed}{fade} (const Real t) const 
+\begin{DoxyCompactList}\small\item\em Fade function. \end{DoxyCompactList}\item 
+Real \hyperlink{classperlin__if_a21ad029122632390b045a51d136a3c7e}{grad} (const int hash, const double x, const double y, const double z) const 
+\begin{DoxyCompactList}\small\item\em Gradient function using hash table lookup. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Real\+Vect \hyperlink{classperlin__if_a191064c64ba2b9e10d0700b2267e3b08}{m\+\_\+noise\+Freq}
+\begin{DoxyCompactList}\small\item\em Perlin noise frequency. \end{DoxyCompactList}\item 
+Real \hyperlink{classperlin__if_a493e56c484dbde6929507ed826f5aa2a}{m\+\_\+noise\+Amp}
+\begin{DoxyCompactList}\small\item\em Perlin noise amplitude. \end{DoxyCompactList}\item 
+Real \hyperlink{classperlin__if_af7f483571f4b422f2d738cfd22ef9939}{m\+\_\+persistence}
+\begin{DoxyCompactList}\small\item\em Perlin octave fade factor. \end{DoxyCompactList}\item 
+int \hyperlink{classperlin__if_a145abad7a7e328ac2443bc018a70c161}{m\+\_\+octaves}
+\begin{DoxyCompactList}\small\item\em Number of octaves to use for noise. \end{DoxyCompactList}\item 
+double \hyperlink{classperlin__if_a4779b048464aa65904c54a5507dd873d}{p} \mbox{[}512\mbox{]}
+\begin{DoxyCompactList}\small\item\em Permutation table. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static int \hyperlink{classperlin__if_a2a43aaafd08ae4216f9e89cf4d560e64}{s\+\_\+perlin} \mbox{[}$\,$\mbox{]}
+\begin{DoxyCompactList}\small\item\em Ken Perlin\textquotesingle{}s original permutation arary. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class that implements an improved Perlin noise function. 
+
+Typically, you will use this function to displace a level-\/set function by using Sum\+IF. 
+
+Definition at line 19 of file perlin\+\_\+if.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!perlin\+\_\+if@{perlin\+\_\+if}}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{perlin\+\_\+if(const Real \&a\+\_\+noise\+Amp, const Real\+Vect \&a\+\_\+noise\+Freq, const Real \&a\+\_\+persistence, const int \&a\+\_\+octaves, const bool \&a\+\_\+reseed=false)}{perlin_if(const Real &a_noiseAmp, const RealVect &a_noiseFreq, const Real &a_persistence, const int &a_octaves, const bool &a_reseed=false)}}]{\setlength{\rightskip}{0pt plus 5cm}perlin\+\_\+if\+::perlin\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const Real \&}]{a\+\_\+noise\+Amp, }
+\item[{const Real\+Vect \&}]{a\+\_\+noise\+Freq, }
+\item[{const Real \&}]{a\+\_\+persistence, }
+\item[{const int \&}]{a\+\_\+octaves, }
+\item[{const bool \&}]{a\+\_\+reseed = {\ttfamily false}}
+\end{DoxyParamCaption}
+)}\hypertarget{classperlin__if_a5e48bce0228769be9ac6a836a2a80f8e}{}\label{classperlin__if_a5e48bce0228769be9ac6a836a2a80f8e}
+
+
+Full constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+noise\+Amp} & Noise amplitude \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+noise\+Freq} & Base frequency \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+octaves} & Number of octaves to use for Perlin noise \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+persistence} & Reduction factor for each octave \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+reseed} & Reseed permutation vector (true) or use Ken Perlin\textquotesingle{}s original one (false) \\
+\hline
+\end{DoxyParams}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!perlin\+\_\+if@{perlin\+\_\+if}}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{perlin\+\_\+if(const perlin\+\_\+if \&a\+\_\+input\+I\+F)}{perlin_if(const perlin_if &a_inputIF)}}]{\setlength{\rightskip}{0pt plus 5cm}perlin\+\_\+if\+::perlin\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const {\bf perlin\+\_\+if} \&}]{a\+\_\+input\+IF}
+\end{DoxyParamCaption}
+)}\hypertarget{classperlin__if_af26c930d5d28302871b44329da831cb8}{}\label{classperlin__if_af26c930d5d28302871b44329da831cb8}
+
+
+Copy constructor. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+input\+IF} & Input \hyperlink{classperlin__if}{perlin\+\_\+if} \\
+\hline
+\end{DoxyParams}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!````~perlin\+\_\+if@{$\sim$perlin\+\_\+if}}
+\index{````~perlin\+\_\+if@{$\sim$perlin\+\_\+if}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{$\sim$perlin\+\_\+if()}{~perlin_if()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual perlin\+\_\+if\+::$\sim$perlin\+\_\+if (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classperlin__if_a3141688307c223fcbc4cd768ce1e67af}{}\label{classperlin__if_a3141688307c223fcbc4cd768ce1e67af}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!fade@{fade}}
+\index{fade@{fade}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{fade(const Real t) const }{fade(const Real t) const }}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+if\+::fade (
+\begin{DoxyParamCaption}
+\item[{const Real}]{t}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_a8fd23bab717fe28009908ec0fd2efaed}{}\label{classperlin__if_a8fd23bab717fe28009908ec0fd2efaed}
+
+
+Fade function. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!grad@{grad}}
+\index{grad@{grad}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{grad(const int hash, const double x, const double y, const double z) const }{grad(const int hash, const double x, const double y, const double z) const }}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+if\+::grad (
+\begin{DoxyParamCaption}
+\item[{const int}]{hash, }
+\item[{const double}]{x, }
+\item[{const double}]{y, }
+\item[{const double}]{z}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_a21ad029122632390b045a51d136a3c7e}{}\label{classperlin__if_a21ad029122632390b045a51d136a3c7e}
+
+
+Gradient function using hash table lookup. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!lerp@{lerp}}
+\index{lerp@{lerp}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{lerp(const Real t, const Real a, const Real b) const }{lerp(const Real t, const Real a, const Real b) const }}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+if\+::lerp (
+\begin{DoxyParamCaption}
+\item[{const Real}]{t, }
+\item[{const Real}]{a, }
+\item[{const Real}]{b}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_af77a158cd6c60ceaf5c7779b62d11b16}{}\label{classperlin__if_af77a158cd6c60ceaf5c7779b62d11b16}
+
+
+Interpolation function. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!new\+Implicit\+Function@{new\+Implicit\+Function}}
+\index{new\+Implicit\+Function@{new\+Implicit\+Function}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{new\+Implicit\+Function() const }{newImplicitFunction() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Base\+IF$\ast$ perlin\+\_\+if\+::new\+Implicit\+Function (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classperlin__if_a4e3d16955c3420401a05b35554eb4d46}{}\label{classperlin__if_a4e3d16955c3420401a05b35554eb4d46}
+
+
+Factory method. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!noise@{noise}}
+\index{noise@{noise}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{noise(const double a\+\_\+x, const double a\+\_\+y, const double a\+\_\+z) const }{noise(const double a_x, const double a_y, const double a_z) const }}]{\setlength{\rightskip}{0pt plus 5cm}double perlin\+\_\+if\+::noise (
+\begin{DoxyParamCaption}
+\item[{const double}]{a\+\_\+x, }
+\item[{const double}]{a\+\_\+y, }
+\item[{const double}]{a\+\_\+z}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_a88ad58e2e891b8402af937a343a94f2b}{}\label{classperlin__if_a88ad58e2e891b8402af937a343a94f2b}
+
+
+Ken Perlin\textquotesingle{}s 3D noise function. 
+
+For 2D, we use Ken Perlin\textquotesingle{}s function with z = 0 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+x} & Position \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+y} & Position \\
+\hline
+\mbox{\tt in}  & {\em a\+\_\+z} & Position \\
+\hline
+\end{DoxyParams}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!noise@{noise}}
+\index{noise@{noise}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{noise(const Real\+Vect \&a\+\_\+pos) const }{noise(const RealVect &a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+if\+::noise (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_acec0e7b8b48b22a0094b620743bcc1b3}{}\label{classperlin__if_acec0e7b8b48b22a0094b620743bcc1b3}
+
+
+Chombo interface to Perlin noise function. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!octave\+Noise@{octave\+Noise}}
+\index{octave\+Noise@{octave\+Noise}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{octave\+Noise(const Real\+Vect \&a\+\_\+pos) const }{octaveNoise(const RealVect &a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+if\+::octave\+Noise (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_aba9271ab3017eeb212d8a4bb5212990c}{}\label{classperlin__if_aba9271ab3017eeb212d8a4bb5212990c}
+
+
+Octave noise function. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!random@{random}}
+\index{random@{random}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{random(const int i)}{random(const int i)}}]{\setlength{\rightskip}{0pt plus 5cm}static int perlin\+\_\+if\+::random (
+\begin{DoxyParamCaption}
+\item[{const int}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classperlin__if_af846fefa8cb40e741296c12521ec5508}{}\label{classperlin__if_af846fefa8cb40e741296c12521ec5508}
+
+
+Random number generator. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!reseed@{reseed}}
+\index{reseed@{reseed}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{reseed()}{reseed()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void perlin\+\_\+if\+::reseed (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}\hypertarget{classperlin__if_a26a4c6c866b19a8495f003c266159174}{}\label{classperlin__if_a26a4c6c866b19a8495f003c266159174}
+
+
+Reseed function. 
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!value@{value}}
+\index{value@{value}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{value(const Real\+Vect \&a\+\_\+pos) const }{value(const RealVect &a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real perlin\+\_\+if\+::value (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classperlin__if_a20d94fc8c5ae6b54b5ff80e0972a4ee1}{}\label{classperlin__if_a20d94fc8c5ae6b54b5ff80e0972a4ee1}
+
+
+Level-\/set function. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em a\+\_\+pos} & Position \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\index{perlin\+\_\+if@{perlin\+\_\+if}!m\+\_\+noise\+Amp@{m\+\_\+noise\+Amp}}
+\index{m\+\_\+noise\+Amp@{m\+\_\+noise\+Amp}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+noise\+Amp}{m_noiseAmp}}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+if\+::m\+\_\+noise\+Amp\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_a493e56c484dbde6929507ed826f5aa2a}{}\label{classperlin__if_a493e56c484dbde6929507ed826f5aa2a}
+
+
+Perlin noise amplitude. 
+
+
+
+Definition at line 77 of file perlin\+\_\+if.\+H.
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!m\+\_\+noise\+Freq@{m\+\_\+noise\+Freq}}
+\index{m\+\_\+noise\+Freq@{m\+\_\+noise\+Freq}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+noise\+Freq}{m_noiseFreq}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect perlin\+\_\+if\+::m\+\_\+noise\+Freq\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_a191064c64ba2b9e10d0700b2267e3b08}{}\label{classperlin__if_a191064c64ba2b9e10d0700b2267e3b08}
+
+
+Perlin noise frequency. 
+
+
+
+Definition at line 72 of file perlin\+\_\+if.\+H.
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!m\+\_\+octaves@{m\+\_\+octaves}}
+\index{m\+\_\+octaves@{m\+\_\+octaves}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+octaves}{m_octaves}}]{\setlength{\rightskip}{0pt plus 5cm}int perlin\+\_\+if\+::m\+\_\+octaves\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_a145abad7a7e328ac2443bc018a70c161}{}\label{classperlin__if_a145abad7a7e328ac2443bc018a70c161}
+
+
+Number of octaves to use for noise. 
+
+
+
+Definition at line 87 of file perlin\+\_\+if.\+H.
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!m\+\_\+persistence@{m\+\_\+persistence}}
+\index{m\+\_\+persistence@{m\+\_\+persistence}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+persistence}{m_persistence}}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+if\+::m\+\_\+persistence\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_af7f483571f4b422f2d738cfd22ef9939}{}\label{classperlin__if_af7f483571f4b422f2d738cfd22ef9939}
+
+
+Perlin octave fade factor. 
+
+
+
+Definition at line 82 of file perlin\+\_\+if.\+H.
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!p@{p}}
+\index{p@{p}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{p}{p}}]{\setlength{\rightskip}{0pt plus 5cm}double perlin\+\_\+if\+::p\mbox{[}512\mbox{]}\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__if_a4779b048464aa65904c54a5507dd873d}{}\label{classperlin__if_a4779b048464aa65904c54a5507dd873d}
+
+
+Permutation table. 
+
+
+
+Definition at line 92 of file perlin\+\_\+if.\+H.
+
+\index{perlin\+\_\+if@{perlin\+\_\+if}!s\+\_\+perlin@{s\+\_\+perlin}}
+\index{s\+\_\+perlin@{s\+\_\+perlin}!perlin\+\_\+if@{perlin\+\_\+if}}
+\subsubsection[{\texorpdfstring{s\+\_\+perlin}{s_perlin}}]{\setlength{\rightskip}{0pt plus 5cm}int perlin\+\_\+if\+::s\+\_\+perlin\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}\hypertarget{classperlin__if_a2a43aaafd08ae4216f9e89cf4d560e64}{}\label{classperlin__if_a2a43aaafd08ae4216f9e89cf4d560e64}
+
+
+Ken Perlin\textquotesingle{}s original permutation arary. 
+
+
+
+Definition at line 67 of file perlin\+\_\+if.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{perlin__if_8H}{perlin\+\_\+if.\+H}\end{DoxyCompactItemize}

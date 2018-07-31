@@ -1,0 +1,192 @@
+\hypertarget{classperlin__sphere__if}{}\section{perlin\+\_\+sphere\+\_\+if Class Reference}
+\label{classperlin__sphere__if}\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+
+
+\hyperlink{classperlin__sphere__if}{perlin\+\_\+sphere\+\_\+if} function  
+
+
+
+
+{\ttfamily \#include $<$perlin\+\_\+sphere\+\_\+if.\+H$>$}
+
+
+
+Inheritance diagram for perlin\+\_\+sphere\+\_\+if\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=286pt]{classperlin__sphere__if__inherit__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classperlin__sphere__if_a621084f4451f2b1ce913c30934c47aac}{perlin\+\_\+sphere\+\_\+if} ()
+\item 
+\hyperlink{classperlin__sphere__if_a8e146896f2468d440f53cdc838368eb1}{perlin\+\_\+sphere\+\_\+if} (const Real \&a\+\_\+rad, const Real\+Vect \&a\+\_\+center, const bool \&a\+\_\+inside, const Real \&a\+\_\+noise\+Amp, const Real\+Vect \&a\+\_\+noise\+Freq, const Real \&a\+\_\+persistence, const int \&a\+\_\+octaves, const bool \&a\+\_\+reseed=false)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classperlin__sphere__if_a5ede857f290cff3fe939fb8f3a4df912}{perlin\+\_\+sphere\+\_\+if} (const \hyperlink{classperlin__sphere__if}{perlin\+\_\+sphere\+\_\+if} \&a\+\_\+input\+IF)
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+virtual \hyperlink{classperlin__sphere__if_a76d08f8f552bde47ac7bdfc0fb4680d5}{$\sim$perlin\+\_\+sphere\+\_\+if} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual Real \hyperlink{classperlin__sphere__if_a7e9900b9eb61080db8a884685ef2c9ab}{value} (const Real\+Vect \&a\+\_\+pos) const 
+\begin{DoxyCompactList}\small\item\em Value function. \end{DoxyCompactList}\item 
+virtual Base\+IF $\ast$ \hyperlink{classperlin__sphere__if_a1feafe792ec06d7d8ee009dbd34ae9bc}{new\+Implicit\+Function} () const 
+\begin{DoxyCompactList}\small\item\em Factory function. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Real \hyperlink{classperlin__sphere__if_a85022e4151bf46031f3e04b25b6ad8b1}{m\+\_\+rad}
+\begin{DoxyCompactList}\small\item\em Radius. \end{DoxyCompactList}\item 
+Real\+Vect \hyperlink{classperlin__sphere__if_ab57fb2ddeecb83775ea2663d766b7314}{m\+\_\+center}
+\begin{DoxyCompactList}\small\item\em Center. \end{DoxyCompactList}\item 
+bool \hyperlink{classperlin__sphere__if_ad768b4a9ceca76fe0d598abda41d5f60}{m\+\_\+inside}
+\begin{DoxyCompactList}\small\item\em Inside/outside. \end{DoxyCompactList}\item 
+Ref\+Counted\+Ptr$<$ Base\+IF $>$ \hyperlink{classperlin__sphere__if_ad4dd515e2ecefce15080869da1ce670d}{m\+\_\+perlin\+IF}
+\begin{DoxyCompactList}\small\item\em Noise function. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{classperlin__sphere__if}{perlin\+\_\+sphere\+\_\+if} function 
+
+Definition at line 19 of file perlin\+\_\+sphere\+\_\+if.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{perlin\+\_\+sphere\+\_\+if()}{perlin_sphere_if()}}]{\setlength{\rightskip}{0pt plus 5cm}perlin\+\_\+sphere\+\_\+if\+::perlin\+\_\+sphere\+\_\+if (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\hypertarget{classperlin__sphere__if_a621084f4451f2b1ce913c30934c47aac}{}\label{classperlin__sphere__if_a621084f4451f2b1ce913c30934c47aac}
+
+
+Definition at line 24 of file perlin\+\_\+sphere\+\_\+if.\+H.
+
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{perlin\+\_\+sphere\+\_\+if(const Real \&a\+\_\+rad, const Real\+Vect \&a\+\_\+center, const bool \&a\+\_\+inside, const Real \&a\+\_\+noise\+Amp, const Real\+Vect \&a\+\_\+noise\+Freq, const Real \&a\+\_\+persistence, const int \&a\+\_\+octaves, const bool \&a\+\_\+reseed=false)}{perlin_sphere_if(const Real &a_rad, const RealVect &a_center, const bool &a_inside, const Real &a_noiseAmp, const RealVect &a_noiseFreq, const Real &a_persistence, const int &a_octaves, const bool &a_reseed=false)}}]{\setlength{\rightskip}{0pt plus 5cm}perlin\+\_\+sphere\+\_\+if\+::perlin\+\_\+sphere\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const Real \&}]{a\+\_\+rad, }
+\item[{const Real\+Vect \&}]{a\+\_\+center, }
+\item[{const bool \&}]{a\+\_\+inside, }
+\item[{const Real \&}]{a\+\_\+noise\+Amp, }
+\item[{const Real\+Vect \&}]{a\+\_\+noise\+Freq, }
+\item[{const Real \&}]{a\+\_\+persistence, }
+\item[{const int \&}]{a\+\_\+octaves, }
+\item[{const bool \&}]{a\+\_\+reseed = {\ttfamily false}}
+\end{DoxyParamCaption}
+)}\hypertarget{classperlin__sphere__if_a8e146896f2468d440f53cdc838368eb1}{}\label{classperlin__sphere__if_a8e146896f2468d440f53cdc838368eb1}
+
+
+Constructor. 
+
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{perlin\+\_\+sphere\+\_\+if(const perlin\+\_\+sphere\+\_\+if \&a\+\_\+input\+I\+F)}{perlin_sphere_if(const perlin_sphere_if &a_inputIF)}}]{\setlength{\rightskip}{0pt plus 5cm}perlin\+\_\+sphere\+\_\+if\+::perlin\+\_\+sphere\+\_\+if (
+\begin{DoxyParamCaption}
+\item[{const {\bf perlin\+\_\+sphere\+\_\+if} \&}]{a\+\_\+input\+IF}
+\end{DoxyParamCaption}
+)}\hypertarget{classperlin__sphere__if_a5ede857f290cff3fe939fb8f3a4df912}{}\label{classperlin__sphere__if_a5ede857f290cff3fe939fb8f3a4df912}
+
+
+Copy constructor. 
+
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!````~perlin\+\_\+sphere\+\_\+if@{$\sim$perlin\+\_\+sphere\+\_\+if}}
+\index{````~perlin\+\_\+sphere\+\_\+if@{$\sim$perlin\+\_\+sphere\+\_\+if}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{$\sim$perlin\+\_\+sphere\+\_\+if()}{~perlin_sphere_if()}}]{\setlength{\rightskip}{0pt plus 5cm}virtual perlin\+\_\+sphere\+\_\+if\+::$\sim$perlin\+\_\+sphere\+\_\+if (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classperlin__sphere__if_a76d08f8f552bde47ac7bdfc0fb4680d5}{}\label{classperlin__sphere__if_a76d08f8f552bde47ac7bdfc0fb4680d5}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!new\+Implicit\+Function@{new\+Implicit\+Function}}
+\index{new\+Implicit\+Function@{new\+Implicit\+Function}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{new\+Implicit\+Function() const }{newImplicitFunction() const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Base\+IF$\ast$ perlin\+\_\+sphere\+\_\+if\+::new\+Implicit\+Function (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classperlin__sphere__if_a1feafe792ec06d7d8ee009dbd34ae9bc}{}\label{classperlin__sphere__if_a1feafe792ec06d7d8ee009dbd34ae9bc}
+
+
+Factory function. 
+
+
+
+Reimplemented in \hyperlink{classperlin__rod__if_a3466999526f84e6ce652f326bc8bd5de}{perlin\+\_\+rod\+\_\+if}, and \hyperlink{classgraded__perlin__sphere__if_a9b2ecadd5a2c8242d13317eada1aea2a}{graded\+\_\+perlin\+\_\+sphere\+\_\+if}.
+
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!value@{value}}
+\index{value@{value}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{value(const Real\+Vect \&a\+\_\+pos) const }{value(const RealVect &a_pos) const }}]{\setlength{\rightskip}{0pt plus 5cm}virtual Real perlin\+\_\+sphere\+\_\+if\+::value (
+\begin{DoxyParamCaption}
+\item[{const Real\+Vect \&}]{a\+\_\+pos}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classperlin__sphere__if_a7e9900b9eb61080db8a884685ef2c9ab}{}\label{classperlin__sphere__if_a7e9900b9eb61080db8a884685ef2c9ab}
+
+
+Value function. 
+
+
+
+Reimplemented in \hyperlink{classperlin__rod__if_a9e41b07a1ddf74cd0e5cbb19c5d9199a}{perlin\+\_\+rod\+\_\+if}, and \hyperlink{classgraded__perlin__sphere__if_ac288065e514fccfeb6588bd6659723ce}{graded\+\_\+perlin\+\_\+sphere\+\_\+if}.
+
+
+
+\subsection{Member Data Documentation}
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!m\+\_\+center@{m\+\_\+center}}
+\index{m\+\_\+center@{m\+\_\+center}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+center}{m_center}}]{\setlength{\rightskip}{0pt plus 5cm}Real\+Vect perlin\+\_\+sphere\+\_\+if\+::m\+\_\+center\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__sphere__if_ab57fb2ddeecb83775ea2663d766b7314}{}\label{classperlin__sphere__if_ab57fb2ddeecb83775ea2663d766b7314}
+
+
+Center. 
+
+
+
+Definition at line 67 of file perlin\+\_\+sphere\+\_\+if.\+H.
+
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!m\+\_\+inside@{m\+\_\+inside}}
+\index{m\+\_\+inside@{m\+\_\+inside}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+inside}{m_inside}}]{\setlength{\rightskip}{0pt plus 5cm}bool perlin\+\_\+sphere\+\_\+if\+::m\+\_\+inside\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__sphere__if_ad768b4a9ceca76fe0d598abda41d5f60}{}\label{classperlin__sphere__if_ad768b4a9ceca76fe0d598abda41d5f60}
+
+
+Inside/outside. 
+
+
+
+Definition at line 72 of file perlin\+\_\+sphere\+\_\+if.\+H.
+
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!m\+\_\+perlin\+IF@{m\+\_\+perlin\+IF}}
+\index{m\+\_\+perlin\+IF@{m\+\_\+perlin\+IF}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+perlin\+IF}{m_perlinIF}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<$Base\+IF$>$ perlin\+\_\+sphere\+\_\+if\+::m\+\_\+perlin\+IF\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__sphere__if_ad4dd515e2ecefce15080869da1ce670d}{}\label{classperlin__sphere__if_ad4dd515e2ecefce15080869da1ce670d}
+
+
+Noise function. 
+
+
+
+Definition at line 77 of file perlin\+\_\+sphere\+\_\+if.\+H.
+
+\index{perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}!m\+\_\+rad@{m\+\_\+rad}}
+\index{m\+\_\+rad@{m\+\_\+rad}!perlin\+\_\+sphere\+\_\+if@{perlin\+\_\+sphere\+\_\+if}}
+\subsubsection[{\texorpdfstring{m\+\_\+rad}{m_rad}}]{\setlength{\rightskip}{0pt plus 5cm}Real perlin\+\_\+sphere\+\_\+if\+::m\+\_\+rad\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classperlin__sphere__if_a85022e4151bf46031f3e04b25b6ad8b1}{}\label{classperlin__sphere__if_a85022e4151bf46031f3e04b25b6ad8b1}
+
+
+Radius. 
+
+
+
+Definition at line 62 of file perlin\+\_\+sphere\+\_\+if.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/geometry/\hyperlink{perlin__sphere__if_8H}{perlin\+\_\+sphere\+\_\+if.\+H}\end{DoxyCompactItemize}

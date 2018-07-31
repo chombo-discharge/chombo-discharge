@@ -1,0 +1,33 @@
+\subsection*{T\+L\+DR }
+
+Load the modules by \begin{DoxyVerb}module load intel/2017a
+\end{DoxyVerb}
+
+
+The configuration file for fram.\+sigma2.\+no can be found here. Store it as chombo\+\_\+root/lib/mk/\+Make.\+defs.\+local
+
+\subsection*{Loading the modules }
+
+To compile the system on the {\itshape fram} supercomputer, you need to load compilers and libraries before compiling the code. The intel compiler toochain is loaded by \begin{DoxyVerb}module load intel/2017a
+\end{DoxyVerb}
+
+
+which will load Intel compilers for Fortran and C/\+C++, as well as Intel M\+PI.
+
+\subsection*{Modifying the configuration file }
+
+The modify the configuration file, find the H\+D\+F5 path by \begin{DoxyVerb}module disp HDF5/1.10.1-intel-2017a
+\end{DoxyVerb}
+
+
+which will display the library paths to H\+D\+F5.
+
+To use Intel\textquotesingle{}s Fortran and C/\+C++ compilers, please specify \begin{DoxyVerb} MPICXX = mpiicpc
+ FC     = ifort
+ CXX    = icpc
+\end{DoxyVerb}
+
+
+in Make.\+defs.\+local. Likewise, update Make.\+defs.\+local so that it finds the H\+D\+F5 libraries and include files.
+
+We also recommend that you compile with -\/x\+C\+O\+R\+E-\/\+A\+V\+X2 (put it in cxxoptflags and foptflags) to enable advanced vector extensions. 

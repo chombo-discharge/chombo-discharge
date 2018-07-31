@@ -20,12 +20,15 @@ PlasmaC is built on top of Chombo, and therefore additionally features
 * Patch based adaptive mesh refinement
 * Excellent scalability from 1 to 100,000 cores.
 
-Take a look at the gallery for some examples. 
+Take a look at the :ref:`Chap:Gallery` for some examples. 
 
 This documentation is the user documentation for usage and examples on how to use PlasmaC. There is a separate :doxy:`Doxygen API <index>` documentation of the source code. 
 
+Table of contents
+=================
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
    Introduction
    NewSimulations
@@ -33,6 +36,7 @@ This documentation is the user documentation for usage and examples on how to us
    Interface
    ImportantClasses
    Solvers
+   Visualization
    Gallery
 
 Indices and tables

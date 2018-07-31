@@ -1,0 +1,216 @@
+\hypertarget{classrobinconductivitydomainbcfactory}{}\section{robinconductivitydomainbcfactory Class Reference}
+\label{classrobinconductivitydomainbcfactory}\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+
+
+Factory class for generating Robin boundary condition on domain faces.  
+
+
+
+
+{\ttfamily \#include $<$robinconductivitydomainbcfactory.\+H$>$}
+
+
+
+Inherits Base\+Domain\+B\+C\+Factory.
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classrobinconductivitydomainbcfactory_afd51a944d6916615e1252f25c97ec6f6}{robinconductivitydomainbcfactory} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hyperlink{classrobinconductivitydomainbcfactory_a9ad36ad55c20ef2315d5cd41e70acce3}{$\sim$robinconductivitydomainbcfactory} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrobinconductivitydomainbcfactory_a70ccfcfcf9d6cb5c82b7634226f5075c}{set\+\_\+coefs} (Ref\+Counted\+Ptr$<$ \hyperlink{classrobin__coef}{robin\+\_\+coef} $>$ a\+\_\+robinco)
+\begin{DoxyCompactList}\small\item\em Function based coefficients and right hand sides. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrobinconductivitydomainbcfactory_a6452c35e5cd558e9531268a2372da46e}{set\+\_\+coefs} (const Real a\+\_\+aco, const Real b\+\_\+bco, const Real a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em Set constant coefficients. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classrobinconductivitydomainbcfactory_a12ccbfd42a9d55d04638280fdc24d4be}{set\+\_\+coefs} (const \hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \&a\+\_\+aco, const \hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \&a\+\_\+bco, const \hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \&a\+\_\+rhs)
+\begin{DoxyCompactList}\small\item\em Set data-\/based coefficients. \end{DoxyCompactList}\item 
+virtual Base\+Domain\+BC $\ast$ \hyperlink{classrobinconductivitydomainbcfactory_a9a792d46ce1bf1935407658ade995acd}{create} (const Problem\+Domain \&a\+\_\+domain, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl, const Real\+Vect \&a\+\_\+dx)
+\begin{DoxyCompactList}\small\item\em Create robin boundary condition object. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Ref\+Counted\+Ptr$<$ \hyperlink{classrobin__coef}{robin\+\_\+coef} $>$ \hyperlink{classrobinconductivitydomainbcfactory_a0bd3387a00dd879229bcb789819fb603}{m\+\_\+robinco}
+\item 
+Real \hyperlink{classrobinconductivitydomainbcfactory_aacc80154b5af65a8e1e9fdf6f07f5cea}{m\+\_\+aco}
+\item 
+Real \hyperlink{classrobinconductivitydomainbcfactory_a81137da36f4e96fa2601e6def280edd8}{m\+\_\+bco}
+\item 
+Real \hyperlink{classrobinconductivitydomainbcfactory_a078909aca7ef8f1a4986f72a4dc563a1}{m\+\_\+rhs}
+\item 
+\hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \hyperlink{classrobinconductivitydomainbcfactory_a2d2a38f37f8377cc9c367f2bfb5ff550}{m\+\_\+acodata}
+\item 
+\hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \hyperlink{classrobinconductivitydomainbcfactory_a7f2db134e4a779c600b1ec35b53c737d}{m\+\_\+bcodata}
+\item 
+\hyperlink{type__definitions_8H_aadad278b2e5d3d4abcf9032f90ba78c3}{E\+B\+A\+M\+R\+Flux\+Data} \hyperlink{classrobinconductivitydomainbcfactory_a15254f11bce4b7c30bfa87b7f7780398}{m\+\_\+rhsdata}
+\item 
+bool \hyperlink{classrobinconductivitydomainbcfactory_a50b3b3a13cbdbdfe03c2c44f07b7df87}{m\+\_\+const\+\_\+coeff}
+\item 
+bool \hyperlink{classrobinconductivitydomainbcfactory_ae0835d3eec0cc52e2f4937f80dd2d7df}{m\+\_\+data\+\_\+coeff}
+\item 
+bool \hyperlink{classrobinconductivitydomainbcfactory_a12f7cf84405d4b2e63cb196512d192cf}{m\+\_\+func\+\_\+coeff}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Factory class for generating Robin boundary condition on domain faces. 
+
+Definition at line 20 of file robinconductivitydomainbcfactory.\+H.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{robinconductivitydomainbcfactory()}{robinconductivitydomainbcfactory()}}]{\setlength{\rightskip}{0pt plus 5cm}robinconductivitydomainbcfactory\+::robinconductivitydomainbcfactory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classrobinconductivitydomainbcfactory_afd51a944d6916615e1252f25c97ec6f6}{}\label{classrobinconductivitydomainbcfactory_afd51a944d6916615e1252f25c97ec6f6}
+
+
+Constructor. 
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!````~robinconductivitydomainbcfactory@{$\sim$robinconductivitydomainbcfactory}}
+\index{````~robinconductivitydomainbcfactory@{$\sim$robinconductivitydomainbcfactory}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{$\sim$robinconductivitydomainbcfactory()}{~robinconductivitydomainbcfactory()}}]{\setlength{\rightskip}{0pt plus 5cm}robinconductivitydomainbcfactory\+::$\sim$robinconductivitydomainbcfactory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{classrobinconductivitydomainbcfactory_a9ad36ad55c20ef2315d5cd41e70acce3}{}\label{classrobinconductivitydomainbcfactory_a9ad36ad55c20ef2315d5cd41e70acce3}
+
+
+Destructor. 
+
+
+
+\subsection{Member Function Documentation}
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!create@{create}}
+\index{create@{create}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{create(const Problem\+Domain \&a\+\_\+domain, const E\+B\+I\+S\+Layout \&a\+\_\+ebisl, const Real\+Vect \&a\+\_\+dx)}{create(const ProblemDomain &a_domain, const EBISLayout &a_ebisl, const RealVect &a_dx)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual Base\+Domain\+BC$\ast$ robinconductivitydomainbcfactory\+::create (
+\begin{DoxyParamCaption}
+\item[{const Problem\+Domain \&}]{a\+\_\+domain, }
+\item[{const E\+B\+I\+S\+Layout \&}]{a\+\_\+ebisl, }
+\item[{const Real\+Vect \&}]{a\+\_\+dx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivitydomainbcfactory_a9a792d46ce1bf1935407658ade995acd}{}\label{classrobinconductivitydomainbcfactory_a9a792d46ce1bf1935407658ade995acd}
+
+
+Create robin boundary condition object. 
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!set\+\_\+coefs@{set\+\_\+coefs}}
+\index{set\+\_\+coefs@{set\+\_\+coefs}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{set\+\_\+coefs(\+Ref\+Counted\+Ptr$<$ robin\+\_\+coef $>$ a\+\_\+robinco)}{set_coefs(RefCountedPtr< robin_coef > a_robinco)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void robinconductivitydomainbcfactory\+::set\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{Ref\+Counted\+Ptr$<$ {\bf robin\+\_\+coef} $>$}]{a\+\_\+robinco}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivitydomainbcfactory_a70ccfcfcf9d6cb5c82b7634226f5075c}{}\label{classrobinconductivitydomainbcfactory_a70ccfcfcf9d6cb5c82b7634226f5075c}
+
+
+Function based coefficients and right hand sides. 
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!set\+\_\+coefs@{set\+\_\+coefs}}
+\index{set\+\_\+coefs@{set\+\_\+coefs}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{set\+\_\+coefs(const Real a\+\_\+aco, const Real b\+\_\+bco, const Real a\+\_\+rhs)}{set_coefs(const Real a_aco, const Real b_bco, const Real a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void robinconductivitydomainbcfactory\+::set\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{const Real}]{a\+\_\+aco, }
+\item[{const Real}]{b\+\_\+bco, }
+\item[{const Real}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivitydomainbcfactory_a6452c35e5cd558e9531268a2372da46e}{}\label{classrobinconductivitydomainbcfactory_a6452c35e5cd558e9531268a2372da46e}
+
+
+Set constant coefficients. 
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!set\+\_\+coefs@{set\+\_\+coefs}}
+\index{set\+\_\+coefs@{set\+\_\+coefs}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{set\+\_\+coefs(const E\+B\+A\+M\+R\+Flux\+Data \&a\+\_\+aco, const E\+B\+A\+M\+R\+Flux\+Data \&a\+\_\+bco, const E\+B\+A\+M\+R\+Flux\+Data \&a\+\_\+rhs)}{set_coefs(const EBAMRFluxData &a_aco, const EBAMRFluxData &a_bco, const EBAMRFluxData &a_rhs)}}]{\setlength{\rightskip}{0pt plus 5cm}virtual void robinconductivitydomainbcfactory\+::set\+\_\+coefs (
+\begin{DoxyParamCaption}
+\item[{const {\bf E\+B\+A\+M\+R\+Flux\+Data} \&}]{a\+\_\+aco, }
+\item[{const {\bf E\+B\+A\+M\+R\+Flux\+Data} \&}]{a\+\_\+bco, }
+\item[{const {\bf E\+B\+A\+M\+R\+Flux\+Data} \&}]{a\+\_\+rhs}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\hypertarget{classrobinconductivitydomainbcfactory_a12ccbfd42a9d55d04638280fdc24d4be}{}\label{classrobinconductivitydomainbcfactory_a12ccbfd42a9d55d04638280fdc24d4be}
+
+
+Set data-\/based coefficients. 
+
+
+
+\subsection{Member Data Documentation}
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+aco@{m\+\_\+aco}}
+\index{m\+\_\+aco@{m\+\_\+aco}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+aco}{m_aco}}]{\setlength{\rightskip}{0pt plus 5cm}Real robinconductivitydomainbcfactory\+::m\+\_\+aco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_aacc80154b5af65a8e1e9fdf6f07f5cea}{}\label{classrobinconductivitydomainbcfactory_aacc80154b5af65a8e1e9fdf6f07f5cea}
+
+
+Definition at line 57 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+acodata@{m\+\_\+acodata}}
+\index{m\+\_\+acodata@{m\+\_\+acodata}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+acodata}{m_acodata}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Flux\+Data} robinconductivitydomainbcfactory\+::m\+\_\+acodata\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a2d2a38f37f8377cc9c367f2bfb5ff550}{}\label{classrobinconductivitydomainbcfactory_a2d2a38f37f8377cc9c367f2bfb5ff550}
+
+
+Definition at line 63 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+bco@{m\+\_\+bco}}
+\index{m\+\_\+bco@{m\+\_\+bco}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bco}{m_bco}}]{\setlength{\rightskip}{0pt plus 5cm}Real robinconductivitydomainbcfactory\+::m\+\_\+bco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a81137da36f4e96fa2601e6def280edd8}{}\label{classrobinconductivitydomainbcfactory_a81137da36f4e96fa2601e6def280edd8}
+
+
+Definition at line 59 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+bcodata@{m\+\_\+bcodata}}
+\index{m\+\_\+bcodata@{m\+\_\+bcodata}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+bcodata}{m_bcodata}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Flux\+Data} robinconductivitydomainbcfactory\+::m\+\_\+bcodata\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a7f2db134e4a779c600b1ec35b53c737d}{}\label{classrobinconductivitydomainbcfactory_a7f2db134e4a779c600b1ec35b53c737d}
+
+
+Definition at line 65 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+const\+\_\+coeff@{m\+\_\+const\+\_\+coeff}}
+\index{m\+\_\+const\+\_\+coeff@{m\+\_\+const\+\_\+coeff}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+const\+\_\+coeff}{m_const_coeff}}]{\setlength{\rightskip}{0pt plus 5cm}bool robinconductivitydomainbcfactory\+::m\+\_\+const\+\_\+coeff\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a50b3b3a13cbdbdfe03c2c44f07b7df87}{}\label{classrobinconductivitydomainbcfactory_a50b3b3a13cbdbdfe03c2c44f07b7df87}
+
+
+Definition at line 69 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+data\+\_\+coeff@{m\+\_\+data\+\_\+coeff}}
+\index{m\+\_\+data\+\_\+coeff@{m\+\_\+data\+\_\+coeff}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+data\+\_\+coeff}{m_data_coeff}}]{\setlength{\rightskip}{0pt plus 5cm}bool robinconductivitydomainbcfactory\+::m\+\_\+data\+\_\+coeff\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_ae0835d3eec0cc52e2f4937f80dd2d7df}{}\label{classrobinconductivitydomainbcfactory_ae0835d3eec0cc52e2f4937f80dd2d7df}
+
+
+Definition at line 71 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+func\+\_\+coeff@{m\+\_\+func\+\_\+coeff}}
+\index{m\+\_\+func\+\_\+coeff@{m\+\_\+func\+\_\+coeff}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+func\+\_\+coeff}{m_func_coeff}}]{\setlength{\rightskip}{0pt plus 5cm}bool robinconductivitydomainbcfactory\+::m\+\_\+func\+\_\+coeff\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a12f7cf84405d4b2e63cb196512d192cf}{}\label{classrobinconductivitydomainbcfactory_a12f7cf84405d4b2e63cb196512d192cf}
+
+
+Definition at line 73 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+rhs@{m\+\_\+rhs}}
+\index{m\+\_\+rhs@{m\+\_\+rhs}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+rhs}{m_rhs}}]{\setlength{\rightskip}{0pt plus 5cm}Real robinconductivitydomainbcfactory\+::m\+\_\+rhs\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a078909aca7ef8f1a4986f72a4dc563a1}{}\label{classrobinconductivitydomainbcfactory_a078909aca7ef8f1a4986f72a4dc563a1}
+
+
+Definition at line 61 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+rhsdata@{m\+\_\+rhsdata}}
+\index{m\+\_\+rhsdata@{m\+\_\+rhsdata}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+rhsdata}{m_rhsdata}}]{\setlength{\rightskip}{0pt plus 5cm}{\bf E\+B\+A\+M\+R\+Flux\+Data} robinconductivitydomainbcfactory\+::m\+\_\+rhsdata\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a15254f11bce4b7c30bfa87b7f7780398}{}\label{classrobinconductivitydomainbcfactory_a15254f11bce4b7c30bfa87b7f7780398}
+
+
+Definition at line 67 of file robinconductivitydomainbcfactory.\+H.
+
+\index{robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}!m\+\_\+robinco@{m\+\_\+robinco}}
+\index{m\+\_\+robinco@{m\+\_\+robinco}!robinconductivitydomainbcfactory@{robinconductivitydomainbcfactory}}
+\subsubsection[{\texorpdfstring{m\+\_\+robinco}{m_robinco}}]{\setlength{\rightskip}{0pt plus 5cm}Ref\+Counted\+Ptr$<${\bf robin\+\_\+coef}$>$ robinconductivitydomainbcfactory\+::m\+\_\+robinco\hspace{0.3cm}{\ttfamily [protected]}}\hypertarget{classrobinconductivitydomainbcfactory_a0bd3387a00dd879229bcb789819fb603}{}\label{classrobinconductivitydomainbcfactory_a0bd3387a00dd879229bcb789819fb603}
+
+
+Definition at line 55 of file robinconductivitydomainbcfactory.\+H.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robertm/\+Projects/plasmac/src/elliptic/\hyperlink{robinconductivitydomainbcfactory_8H}{robinconductivitydomainbcfactory.\+H}\end{DoxyCompactItemize}
