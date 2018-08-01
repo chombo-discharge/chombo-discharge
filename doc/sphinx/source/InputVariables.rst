@@ -15,7 +15,7 @@ To pass input variables into PlasmaC, we generally refrain from hard-coding. Ins
    ParmParse pp("prefix");
    pp.get("suffix", my_variable);
 
-The above code segment will attept to fetch an input line **prefix.suffix** and place it in *my_variable*. Note that the specification of **prefix.suffix** should be of the same type as *my_variable* (float in this case). For this example, passing
+The above code segment will attept to fetch an input line ``prefix.suffix`` and place it in *my_variable*. Note that the specification of ``prefix.suffix`` should be of the same type as ``my_variable`` (float in this case). For this example, passing
 
 .. code-block:: bash
 

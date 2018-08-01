@@ -1,4 +1,4 @@
-.. _Chap:MakeDefsLocal:
+.. _Chap:Environment:
 
 Setting up your environment
 ___________________________
@@ -65,4 +65,4 @@ We also recommend that you create environment variables that hold the path to yo
 		CHOMBO_HOME=/usr/local/Chombo-3.2
 		PLASMAC_HOME=/home/foo/plasmac
 
-These two environment variables are used in the PlasmaC makefile system so that our makefiles can find Chombo and PlasmaC. Strictly speaking, you don't HAVE to set these as environment variables. However, both variables are used in the mini-application makefiles so if you don't use environment variables, you will need to specify them directly in your makefile. 
+These two environment variables are used in the PlasmaC makefile system so that our makefiles can find Chombo and PlasmaC. Strictly speaking, you don't *have* to set these as environment variables. However, both variables are used in the mini-application makefiles so if you don't use environment variables, you will need to specify them directly in your makefile. 

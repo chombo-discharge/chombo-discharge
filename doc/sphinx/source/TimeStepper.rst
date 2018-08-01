@@ -9,4 +9,4 @@ The :ref:`Chap:time_stepper` class handles the integration of the plasma equatio
 
 The input options above are, for the most part, self-explanatory. Mostly, they refer to the handling of the size of the time step, for example by passing the Courant-Friedrichs-Lewy number, or setting a minimum or maximum possible time step. However, all of these options *may* be handled differently by different integrators, since different schemes have different restrictions on stable time steps.
 
-Finally, there is an option to allow radiative transport updates only at certain time steps by modifying (at his own peril) the **fast_rte** flag. Yet again, we remark that this flag may be handled differently by different solvers. 
+Finally, there is an option to allow radiative transport updates only at certain time steps by modifying (at his own peril) the ``fast_rte`` flag. Yet again, we remark that this flag may be handled differently by different solvers. 

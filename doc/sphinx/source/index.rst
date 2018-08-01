@@ -22,7 +22,7 @@ PlasmaC is built on top of `Chombo <https://commons.lbl.gov/display/chombo/Chomb
 
 Take a look at the :ref:`Chap:Gallery` for some examples. 
 
-This documentation is the user documentation for usage and examples on how to use PlasmaC. There is a separate :doxy:`Doxygen API <index>` documentation of the source code. 
+This documentation is the user documentation for usage and examples on how to use PlasmaC. There is also a separate :doxy:`Doxygen API <index>` documentation of the source code. 
 
 Table of contents
 =================

@@ -7,4 +7,4 @@ geo_coarsener
 
 .. literalinclude:: links/geo_coarsener.options
 		    
-In the above, the user may modify **num_boxes** in order to specify a number of boxes where tags will be removed. As input, the boxes take the low and high corners, and the specified level on which tags are removed. Note that if tags are generated on level :math:`n`, the grid will have depth :math:`n+1`. Thus, if the user wishes to remove *all* boundary tags in a box, he must set **boxN_lvl** to zero. 
+In the above, the user may modify ``num_boxes`` in order to specify a number of boxes where tags will be removed. As input, the boxes take the low and high corners, and the specified level on which tags are removed. Note that if tags are generated on level :math:`n`, the grid will have depth :math:`n+1`. Thus, if the user wishes to remove *all* boundary tags in a box, he must set ``boxN_lvl`` to zero. 

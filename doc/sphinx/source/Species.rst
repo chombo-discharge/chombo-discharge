@@ -47,7 +47,7 @@ In addition to this, the user *must* provide information on the charge of the sp
   bool m_mobile;
 
 
-Usually, these are set through the constructor. The **m_charge** unit is in units of the elementary charge. For example, the following is a full implementation of an electron species:
+Usually, these are set through the constructor. The ``m_charge`` unit is in units of the elementary charge. For example, the following is a full implementation of an electron species:
 
 
 .. code-block:: c++
@@ -69,4 +69,4 @@ Usually, these are set through the constructor. The **m_charge** unit is in unit
 
 
 
-The members **m_mobile** and **m_diffusive** are used for optimization in PlasmaC: If the user specifies that a species is immobile, PlasmaC will skip the advection computation. Note that **m_diffusive** and **m_mobile** override the specifications in :ref:`Chap:plasma_kinetics`. If the user provides a non-zero velocity through :ref:`Chap:plasma_kinetics` function *compute_cdr_velocities*, and sets **m_mobile** to **false**, the species velocity will be zero. Of course, the user will often want to provide additional input information to his species, for example by specifying a seed for the initial conditions. Please see :ref:`Chap:MiniApplications` for how to provide input parameters. 
+The members ``m_mobile`` and ``m_diffusive`` are used for optimization in PlasmaC: If the user specifies that a species is immobile, PlasmaC will skip the advection computation. Note that ``m_diffusive`` and ``m_mobile`` override the specifications in :ref:`Chap:plasma_kinetics`. If the user provides a non-zero velocity through :ref:`Chap:plasma_kinetics` function *compute_cdr_velocities*, and sets ``m_mobile`` to ``false``, the species velocity will be zero. Of course, the user will often want to provide additional input information to his species, for example by specifying a seed for the initial conditions. Please see :ref:`Chap:MiniApplications` for how to provide input parameters. 

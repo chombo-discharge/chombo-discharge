@@ -9,7 +9,7 @@ photons
 
 		virtual const Real get_absorption_coeff(const RealVect& a_pos) const = 0;
 
-In addition, the user should provide a name for the RTE solver so that it can be identified in the output files. This is done by setting a **m_name** attribute in the :ref:`Chap:photon` class.
+In addition, the user should provide a name for the RTE solver so that it can be identified in the output files. This is done by setting a ``m_name`` attribute in the :ref:`Chap:photon` class.
 
 The following is a full implementation of the :ref:`Chap:photon` class:
 
@@ -27,4 +27,4 @@ The following is a full implementation of the :ref:`Chap:photon` class:
 		  }
 		};
 
-By default, there are no input parameters available for the :ref:`Chap:photon` class, but the user will often want to include these (for example by modifying the absorption coefficient). Please see :ref:`Chap:MiniApplications` for how to pass input parameters into your classes. 
+By default, there are no input parameters available for the :ref:`Chap:photon` class, but the user will often want to include these, for example by modifying the absorption coefficient. Note that you are allowed to use a spatially varying absorption coefficient. Please see :ref:`Chap:MiniApplications` for how to pass input parameters into your classes. 

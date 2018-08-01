@@ -60,4 +60,4 @@ There are options in the :ref:`Chap:cell_tagger` base class that permits the use
 
 .. literalinclude:: links/cell_tagger.options
 
-In the above, the user may define an arbitrary number of boxes in which tagging is *allowed*. If you do not specify a box, i.e. if **num_boxes** is zero, tagging is allowed everywhere. If specify one or more boxes, the **boxN_lo** and **boxN_hi** parameters indicate the valid tagging regions. Note that the boxes are not level-specific, since this is controlled through *coarsen_cell* and *refine_cell*, respectively. 
+In the above, the user may define an arbitrary number of boxes in which tagging is *allowed*. If you do not specify a box, i.e. if ``num_boxes`` is zero, tagging is allowed everywhere. If specify one or more boxes, the ``boxN_lo`` and ``boxN_hi`` parameters indicate the valid tagging regions. Note that the boxes are not level-specific, since this is controlled through *coarsen_cell* and *refine_cell*, respectively. 

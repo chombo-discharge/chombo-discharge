@@ -30,4 +30,4 @@ and the relative magnitude
 
    r = T
 
-If :math:`c` **or** :math:`r` are greater than **refine_curvature** or **refine_magnitude**, a cell is refined. Likewise, if :math:`c` **and** :math:`r` are smaller than **coarsen_curvature** and **coarsen_magnitude**, a cell is coarsened. 
+If :math:`c` *or* :math:`r` are greater than ``refine_curvature`` or ``refine_magnitude``, a cell is refined. Likewise, if :math:`c` *and* :math:`r` are smaller than ``coarsen_curvature`` and ``coarsen_magnitude``, a cell is coarsened. 

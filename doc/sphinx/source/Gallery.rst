@@ -15,6 +15,12 @@ Gallery
 
    Branching three-dimensional streamer structures
 
+.. figure:: figures/electron_1d5ns.png
+   :width: 480px
+   :align: center
+
+   Streamers moving along rough insulators. 
+
 .. figure:: figures/complex_patches.png
    :width: 480px
    :align: center

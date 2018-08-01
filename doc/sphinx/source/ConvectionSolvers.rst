@@ -12,7 +12,7 @@ In PlasmaC, solvers are selected at run-time by providing appropriate input para
 
 .. literalinclude:: links/cdr_layout.options
 
-In the above, **which_solver** specifies the solver that user wants. For the Scharfetter-Gummel scheme, there are no further options. For the Godunov methods, the user may also choose the way the hybrid advective divergence is computed in boundary cells by modifying **cdr_gdnv.divF_nc**. For this class, the user may also turn off the slope limiting by modifying **limit_slopes**, but this is not recommended. 
+In the above, ``which_solver`` specifies the solver that user wants. For the Scharfetter-Gummel scheme, there are no further options. For the Godunov methods, the user may also choose the way the hybrid advective divergence is computed in boundary cells by modifying ``cdr_gdnv.divF_nc``. For this class, the user may also turn off the slope limiting by modifying ``limit_slopes``, but this is not recommended. 
 
 Solver operator splitting
 _________________________

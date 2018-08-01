@@ -14,7 +14,7 @@ For the second order Runge-Kutta method, the following options are available:
 
 .. literalinclude:: links/rk2.options
 
-In the above option, **alpha** contains the Butcher tableu. Note that only Heun's method with **alpha** equal to one, is monotone in time (a.k.a. strongly stability preserving). 
+In the above option, ``alpha`` contains the Butcher tableu. Note that only Heun's method with ``alpha`` equal to one, is monotone in time (a.k.a. strongly stability preserving). 
 
 Other integrators
 _________________
