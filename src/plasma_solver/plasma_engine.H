@@ -233,6 +233,11 @@ public:
   virtual void set_max_plot_depth(const int a_max_plot_depth);
 
   /*!
+    @brief Set the maximum plot depth
+  */
+  virtual void set_max_chk_depth(const int a_max_chk_depth);
+
+  /*!
     @brief Set number of initial regrids
   */
   virtual void set_init_regrids(const int a_init_regrids);
@@ -408,6 +413,11 @@ protected:
     @brief Maximum plot depth
   */
   int m_max_plot_depth;
+
+  /*!
+    @brief Maximum plot depth
+  */
+  int m_max_chk_depth;
 
   /*!
     @brief Number of initial regrids

@@ -18,6 +18,7 @@ plasma_engine.output_directory                = ./            # Output directory
 plasma_engine.grow_tags                       = 0             # Grow tagged by this in every direction
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
+plasma_engine.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 plasma_engine.restart                         = false         # Do restart or not
 plasma_engine.restart_step                    = 0             # Restart step

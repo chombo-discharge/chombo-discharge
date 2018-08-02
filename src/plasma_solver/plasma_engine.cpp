@@ -83,6 +83,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_stop_time(1.0);                                  // Stop time
   this->set_max_steps(100);                                  // Max number of steps
   this->set_max_plot_depth(-1);                              // Set maximum plot depth.
+  this->set_max_chk_depth(-1);                               // Set maximum checkpoint depth.
 
   m_amr->set_physical_domain(m_physdom); // Set physical domain
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
@@ -1238,8 +1239,6 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     }
   }
 
-
-
   if(a_max_steps > 0){
     if(!m_restart){
       m_time = a_start_time;
@@ -2149,9 +2148,9 @@ void plasma_engine::set_max_steps(const int a_max_steps){
 }
 
 void plasma_engine::set_max_plot_depth(const int a_max_plot_depth){
-  CH_TIME("plasma_engine::set_max_steps");
+  CH_TIME("plasma_engine::set_max_plot_depth");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_max_steps" << endl;
+    pout() << "plasma_engine::set_max_plot_depth" << endl;
   }
 
   m_max_plot_depth = a_max_plot_depth;
@@ -2159,6 +2158,20 @@ void plasma_engine::set_max_plot_depth(const int a_max_plot_depth){
   {
     ParmParse pp("plasma_engine");
     pp.query("max_plot_depth", m_max_plot_depth);
+  }
+}
+
+void plasma_engine::set_max_chk_depth(const int a_max_chk_depth){
+  CH_TIME("plasma_engine::set_max_chk_depth");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_max_chk_deepth" << endl;
+  }
+
+  m_max_chk_depth = a_max_chk_depth;
+
+  {
+    ParmParse pp("plasma_engine");
+    pp.query("max_chk_depth", m_max_chk_depth);
   }
 }
 
@@ -2522,11 +2535,15 @@ void plasma_engine::write_checkpoint_file(){
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_checkpoint_file" << endl;
   }
+  
+  const int finest_level = m_amr->get_finest_level();
+  int finest_chk_level  = Min(m_max_chk_depth, finest_level);
+  if(m_max_chk_depth < 0){
+    finest_chk_level = finest_level;
+  }
 
-  const int finest_level             = m_amr->get_finest_level();
   const phase::which_phase cur_phase = phase::gas;
-
-
+  
   RefCountedPtr<cdr_layout>& cdr   = m_timestepper->get_cdr();
   RefCountedPtr<rte_layout>& rte   = m_timestepper->get_rte();
   RefCountedPtr<sigma_solver>& sig = m_timestepper->get_sigma();
@@ -2547,8 +2564,10 @@ void plasma_engine::write_checkpoint_file(){
   data_ops::set_value(sigma, 0.0);
   data_ops::incr(sigma, sig->get_state(), 1.0);
 
+
+
   // Set tagged cells = 1
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= finest_chk_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(cur_phase)[lvl];
     
@@ -2573,7 +2592,7 @@ void plasma_engine::write_checkpoint_file(){
   HDF5Handle handle_out(str, HDF5Handle::CREATE);
   header.writeToFile(handle_out);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= finest_chk_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     handle_out.setGroupToLevel(lvl);
     write(handle_out, dbl);
