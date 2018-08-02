@@ -147,7 +147,8 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
 	    scratch_gas(iv, comp) = data_sol(iv, comp);
 	  }
 	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	    scratch_gas(iv, comp) = 0.5*(data_gas(iv, comp) + data_sol(iv, comp));
+	    //	    scratch_gas(iv, comp) = 0.5*(data_gas(iv, comp) + data_sol(iv, comp));
+	    scratch_gas(iv, comp) = data_gas(iv,comp);
 	  }
 	}
       }

@@ -48,6 +48,7 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
     return true;
   }
 
+
   // If we got this far we have a stencil
   CH_assert(distance_along_lines.size() >= 2);
   CH_assert(point_stencils.size() >= 2);
@@ -277,6 +278,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   BaseIVFAB<Real>& homog1  = a_homog.get_ivfab(phase1);
   BaseIVFAB<Real>& homog2  = a_homog.get_ivfab(phase2);
 
+  inhomo1.setVal(0.0);
+  inhomo2.setVal(0.0);
   
   // Set phibc = a_jump
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
@@ -315,7 +318,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   // Divide by weights
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-    const Real factor   = 1./(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+
+    const Real factor   = 1.0/(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
     
     a_phibc(vof, comp) *= factor;
     inhomo1(vof, comp) *= factor;
