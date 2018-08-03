@@ -3,9 +3,6 @@
   <!-- Navigation index tabs for HTML output -->
   <navindex>
     <tab type="mainpage" visible="yes" title="Home"/>
-    <tab type="user" visible="yes" url="@ref doxy-contents" title="Contents" intro=""/>
-    <tab type="user" visible="yes" url="@ref gallery" title="Gallery" intro=""/>
-    <tab type="modules" visible="yes" title="Plasma models" intro=""/>
     <tab type="namespaces" visible="yes" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>
       <tab type="namespacemembers" visible="yes" title="" intro=""/>

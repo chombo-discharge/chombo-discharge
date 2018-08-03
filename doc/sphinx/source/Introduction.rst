@@ -15,7 +15,6 @@ If you are already using PlasmaC, and want to check out what various parameters 
 .. toctree::
   :maxdepth: 1
 
-  Obtaining
   Prerequisites
   Environment
   Compiling

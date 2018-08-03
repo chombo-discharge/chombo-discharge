@@ -30,6 +30,7 @@ Table of contents
 .. toctree::
    :maxdepth: 3
 
+   Obtaining
    Introduction
    Interface
    NewSimulations
