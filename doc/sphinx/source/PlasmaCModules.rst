@@ -23,4 +23,6 @@ In the above figure, the various modules that go into :ref:`Chap:plasma_engine` 
 * :ref:`Chap:cell_tagger` (Optional) Class that is responsible for refinement and coarsening decision. The base class is abstract, but users may implement their own classes if they like. 
 * :ref:`Chap:geo_coarsener` (Optional) A geometric coarsening class.
 
+Most users will only find the need to implement :ref:`Chap:plasma_kinetics`, :ref:`Chap:computational_geometry`, and possibly also :ref:`Chap:cell_tagger`. 
+
 You will find a much more thorough explanation of these classes in the :ref:`Chap:ImportantClasses` chapter.

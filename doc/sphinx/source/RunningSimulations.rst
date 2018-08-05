@@ -3,7 +3,7 @@
 Running simulations
 ===================
 
-To run simulations, the user must first compile his application. Once the application has been defined (either from :ref:`Chap:WorkedExample1` or by using the :ref:`Chap:PythonInterface`, he may compile is by
+To run simulations, the user must first compile his application. Once the application has been defined, the user may compile is by
 
 .. code-block:: bash
 
@@ -17,7 +17,7 @@ Next, applications are run by
 
 		mpirun -np 32 <application_executable> <input_file>
 
-where <input_file> is your input file. On clusters, this is a little bit different and usually requires passing the above command through a batch system.
+where <input_file> is your input file. On clusters, this is a little bit different and usually requires passing the above command through a batch system. Note that if you define a parameter multiple times in the input file, it's the last definition that matters. 
 
 You may also pass input parameters through the command line. For example, running
 

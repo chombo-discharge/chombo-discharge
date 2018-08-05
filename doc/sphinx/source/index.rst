@@ -37,6 +37,8 @@ Table of contents
    RunningSimulations
    ImportantClasses
    Solvers
+   FAQ
+   Bugs
    Visualization
    Gallery
 
