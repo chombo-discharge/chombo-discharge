@@ -59,6 +59,8 @@
 class plasma_engine {
 public:
 
+
+  
   /*!
     @brief Full constructor. 
   */
@@ -79,6 +81,11 @@ public:
     @brief Setup and run simulations
   */
   virtual void setup_and_run();
+
+  /*!
+    @brief This function will read two checkpoint files, perform ONE coarsening of the fine data file and compute the norms
+  */
+  virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
 
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached

@@ -564,7 +564,6 @@ void plasma_engine::allocate_internals(){
     tags_factory fact = tags_factory();
     m_tags[lvl] = RefCountedPtr<LevelData<tags> > (new LevelData<tags>(dbl, ncomp, ghost, fact));
   }
-
 }
 
 void plasma_engine::cache_tags(const EBAMRTags& a_tags){
@@ -2801,4 +2800,8 @@ Vector<string> plasma_engine::get_output_variable_names(){
   }
 
   return names;
+}
+
+void plasma_engine::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
+
 }
