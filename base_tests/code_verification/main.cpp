@@ -41,6 +41,9 @@ int main(int argc, char* argv[]){
   engine->set_potential(potential_curve);
   engine->setup_and_run();
 
+  engine->compute_norm("./outputs/chk.512.2d.hdf5", "./outputs/chk.1024.2d.hdf5");
+
+
 #ifdef CH_MPI
   CH_TIMER_REPORT();
   MPI_Finalize();

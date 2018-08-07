@@ -83,7 +83,7 @@ public:
   virtual void setup_and_run();
 
   /*!
-    @brief This function will read two checkpoint files, perform ONE coarsening of the fine data file and compute the norms
+    @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
   */
   virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
 

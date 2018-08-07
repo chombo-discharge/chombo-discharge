@@ -2803,5 +2803,82 @@ Vector<string> plasma_engine::get_output_variable_names(){
 }
 
 void plasma_engine::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
+  CH_TIME("plasma_engine::compute_norm");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::compute_norm" << endl;
+  }
 
+  // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
+  // into those solvers.
+  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
+
+  this->read_checkpoint_file(a_chk_fine); // This reads the fine-level data
+
+  Vector<EBISLayout>& fine_ebisl        = m_amr->get_ebisl(phase::gas);
+  Vector<DisjointBoxLayout>& fine_grids = m_amr->get_grids();
+  Vector<ProblemDomain>& fine_domains   = m_amr->get_domains();
+
+  // Read the second file header
+  HDF5Handle handle_in(a_chk_coarse, HDF5Handle::OPEN_RDONLY);
+  HDF5HeaderData header;
+  header.readFromFile(handle_in);
+  int finest_coar_level = header.m_int["finest_level"];
+
+
+  // Read coarse data into these data holders
+  Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
+  for (int i = 0; i < cdr_densities.size(); i++){
+    cdr_densities[i].resize(1+finest_coar_level);
+  }
+
+  // Read cdr data
+  for (int lvl = 0; lvl <= finest_coar_level; lvl++){
+    handle_in.setGroupToLevel(lvl);
+    
+    for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      RefCountedPtr<cdr_solver>& solver = solver_it();
+      const std::string solver_name = solver->get_name();
+      
+      EBCellFactory cellfact(fine_ebisl[lvl]);
+      cdr_densities[idx][lvl] = RefCountedPtr<LevelData<EBCellFAB> > 
+	(new LevelData<EBCellFAB>(fine_grids[lvl], 1, 3*IntVect::Unit, cellfact));
+      
+      read<EBCellFAB>(handle_in, *cdr_densities[idx][lvl], solver_name, fine_grids[lvl], Interval(), false);
+    }
+  }
+
+
+  // We will now compute n_2h - A(n_h)
+  pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
+  EBCellFactory cellfact(fine_ebisl[finest_coar_level]);
+  LevelData<EBCellFAB> diff(fine_grids[finest_coar_level], 1, 0*IntVect::Unit, cellfact);
+  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const std::string solver_name = solver->get_name();
+
+    LevelData<EBCellFAB>& fine_sol = *solver->get_state()[finest_coar_level];
+    LevelData<EBCellFAB>& coar_sol = *cdr_densities[idx][finest_coar_level];
+
+    data_ops::set_value(diff, 0.0);
+    data_ops::incr(diff, coar_sol,   1.0);
+    data_ops::incr(diff, fine_sol,  -1.0);
+    data_ops::scale(diff, 1.E-18);
+
+    writeEBLevelname (&diff, "diff.hdf5");
+    Real volume;
+
+    Real Linf;
+    Real L1;
+    Real L2;
+
+    Linf = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 0);
+    L1   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 1);
+    L2   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 2);
+    
+    pout() << idx << "\t Linf = " << Linf << "\t L1 = " << L1 << "\t L2 = " << L2 << endl;
+  }
+  
+  handle_in.close();
 }
