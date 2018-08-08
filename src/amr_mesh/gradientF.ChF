@@ -1,3 +1,5 @@
+#include "CONSTANTS.H"
+
       subroutine gradient(
      &     chf_fra[grad],
      &     chf_const_fra1[phi],
@@ -5,6 +7,33 @@
      &     chf_box[region],
      &)
 
+      integer chf_ddecl[i;j;k]
+      real_t inv_dx
+      integer spacedim, idir	
 
+      spacedim = CH_SPACEDIM
+
+      inv_dx = 1.0/(2.0*dx)
+
+      do idir=1,spacedim
+#if CH_SPACEDIM==3
+      do k=CHF_LBOUND[region;2], CHF_UBOUND[region;2]
+#endif
+#if CH_SPACEDIM > 1
+      do j=CHF_LBOUND[region;1], CHF_UBOUND[region;1]
+#endif
+      do i=CHF_LBOUND[region;0], CHF_UBOUND[region;0]
+c      grad(chf_ix[dir,i,j,k]) = phi(chf_ix]
+      end do
+#if CH_SPACEDIM > 1
+      end do	
+#endif
+#if CH_SPACEDIM == 3
+      end do	
+#endif
+      end do
+      
       return
       end
+
+

@@ -608,6 +608,7 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
 		    CHF_CONST_REAL(dx),
 		    CHF_BOX(region));
 
+
       // Irregular cells
       const IntVectSet ivs = ebisbox.getIrregIVS(dbl.get(dit()));
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
@@ -629,6 +630,9 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       }
     }
   }
+
+
+  MayDay::Abort("amr_mesh::compute_gradient - stop here");
 }
 
 void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi){
