@@ -8,6 +8,7 @@
 #include "amr_mesh.H"
 #include "mfalias.H"
 #include "load_balance.H"
+#include "gradientF_F.H"
 
 #include <BRMeshRefine.H>
 #include <EBEllipticLoadBalance.H>
@@ -584,9 +585,10 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     CH_assert(a_phi[lvl]->nComp()      == 1);
     CH_assert(a_gradient[lvl]->nComp() == SpaceDim);
-    
+
+    const Real& dx = m_dx[lvl];
     const DisjointBoxLayout& dbl = m_grids[lvl]; // Doing this since I assume everything is defined over m_grids
-    
+
     LayoutData<IntVectSet> cfivs;
     EBArith::defineCFIVS(cfivs, dbl, m_domains[lvl]);
 
@@ -595,24 +597,35 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       const EBCellFAB& phi   = (*a_phi[lvl])[dit()];
       const EBISBox& ebisbox = phi.getEBISBox();
       const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(dbl.get(dit()));
+      const Box& region      = dbl.get(dit());
+      //      const IntVectSet ivs(dbl.get(dit()));
 
+      // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
+      const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
+      BaseFab<Real>& grad_fab  = grad.getSingleValuedFAB();
+      FORT_GRADIENT(CHF_FRA(grad_fab),
+		    CHF_CONST_FRA1(phi_fab, 0),
+		    CHF_CONST_REAL(dx),
+		    CHF_BOX(region));
+
+      // Irregular cells
+      const IntVectSet ivs = ebisbox.getIrregIVS(dbl.get(dit()));
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
+      	const VolIndex& vof = vofit();
 
-	for (int dir = 0; dir < SpaceDim; dir++){
+      	for (int dir = 0; dir < SpaceDim; dir++){
 	  
-	  grad(vof, dir) = 0.;
+      	  grad(vof, dir) = 0.;
 
-	  VoFStencil sten;
-	  EBArith::getFirstDerivStencilWidthOne(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
-	  for (int i = 0; i < sten.size(); i++){
-	    const VolIndex& ivof = sten.vof(i);
-	    const Real& iweight  = sten.weight(i);
+      	  VoFStencil sten;
+      	  EBArith::getFirstDerivStencilWidthOne(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
+      	  for (int i = 0; i < sten.size(); i++){
+      	    const VolIndex& ivof = sten.vof(i);
+      	    const Real& iweight  = sten.weight(i);
 	    
-	    grad(vof, dir) += phi(ivof, 0)*iweight;
-	  }
-	}
+      	    grad(vof, dir) += phi(ivof, 0)*iweight;
+      	  }
+      	}
       }
     }
   }
