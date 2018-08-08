@@ -585,9 +585,13 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     CH_assert(a_phi[lvl]->nComp()      == 1);
     CH_assert(a_gradient[lvl]->nComp() == SpaceDim);
-
+    
+    const int comp  = 0;
+    const int ncomp = 1;
+    
     const Real& dx = m_dx[lvl];
     const DisjointBoxLayout& dbl = m_grids[lvl]; // Doing this since I assume everything is defined over m_grids
+    const ProblemDomain& domain  = m_domains[lvl];
 
     LayoutData<IntVectSet> cfivs;
     EBArith::defineCFIVS(cfivs, dbl, m_domains[lvl]);
@@ -598,20 +602,34 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       const EBISBox& ebisbox = phi.getEBISBox();
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const Box& region      = dbl.get(dit());
-      //      const IntVectSet ivs(dbl.get(dit()));
 
       // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
       const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
       BaseFab<Real>& grad_fab  = grad.getSingleValuedFAB();
       FORT_GRADIENT(CHF_FRA(grad_fab),
-		    CHF_CONST_FRA1(phi_fab, 0),
+		    CHF_CONST_FRA1(phi_fab, comp),
 		    CHF_CONST_REAL(dx),
 		    CHF_BOX(region));
 
 
-      // Irregular cells
-      const IntVectSet ivs = ebisbox.getIrregIVS(dbl.get(dit()));
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      // We can't REALLY trust ghost cells on the boundary. Do the boundary cells using safer stencils.
+      IntVectSet bndry_ivs = ebisbox.getIrregIVS(dbl.get(dit()));
+      for (int dir = 0; dir < SpaceDim; dir++){
+	Box lo_box, hi_box;
+	int has_lo, has_hi;
+
+	EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, region, dir);
+
+	if(has_lo){
+	  bndry_ivs |= IntVectSet(lo_box);
+	}
+	if(has_hi){
+	  bndry_ivs |= IntVectSet(hi_box);
+	}
+      }
+      
+      // Compute stencils for irregular cells
+      for (VoFIterator vofit(bndry_ivs, ebgraph); vofit.ok(); ++vofit){
       	const VolIndex& vof = vofit();
 
       	for (int dir = 0; dir < SpaceDim; dir++){
@@ -624,15 +642,12 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       	    const VolIndex& ivof = sten.vof(i);
       	    const Real& iweight  = sten.weight(i);
 	    
-      	    grad(vof, dir) += phi(ivof, 0)*iweight;
+      	    grad(vof, dir) += phi(ivof, comp)*iweight;
       	  }
       	}
       }
     }
   }
-
-
-  MayDay::Abort("amr_mesh::compute_gradient - stop here");
 }
 
 void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi){

@@ -4,36 +4,32 @@
      &     chf_fra[grad],
      &     chf_const_fra1[phi],
      &     chf_const_real[dx],
-     &     chf_box[region],
-     &)
+     &     chf_box[region])
+
 
       integer chf_ddecl[i;j;k]
-      real_t inv_dx
+      real_t inv_2dx
       integer spacedim, idir	
 
       spacedim = CH_SPACEDIM
 
-      inv_dx = 1.0/(2.0*dx)
+      inv_2dx = 1.0/(2.0*dx)
 
-      do idir=1,spacedim
 #if CH_SPACEDIM==3
       do k=CHF_LBOUND[region;2], CHF_UBOUND[region;2]
 #endif
-#if CH_SPACEDIM > 1
-      do j=CHF_LBOUND[region;1], CHF_UBOUND[region;1]
+        do j=CHF_LBOUND[region;1], CHF_UBOUND[region;1]
+           do i=CHF_LBOUND[region;0], CHF_UBOUND[region;0]
+               grad(chf_ix[i;j;k],0) = (phi(chf_ix[i+1;j  ;k  ]) - phi(chf_ix[i-1;j  ;k]  ))*inv_2dx
+               grad(chf_ix[i;j;k],1) = (phi(chf_ix[  i;j+1;k  ]) - phi(chf_ix[i  ;j-1;k  ]))*inv_2dx
+#if CH_SPACEDIM==3
+c               grad(chf_ix[i;j;k],2) = (phi(chf_ix[i  ;j  ;k+1]) - phi(chf_ix[i  ;j  ;k-1]))*inv_2dx
 #endif
-      do i=CHF_LBOUND[region;0], CHF_UBOUND[region;0]
-c      grad(chf_ix[dir,i,j,k]) = phi(chf_ix]
-      end do
-#if CH_SPACEDIM > 1
-      end do	
+           enddo
+      enddo
+#if CH_SPACEDIM==3
+      enddo
 #endif
-#if CH_SPACEDIM == 3
-      end do	
-#endif
-      end do
       
       return
       end
-
-
