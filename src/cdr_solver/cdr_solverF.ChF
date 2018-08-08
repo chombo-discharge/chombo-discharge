@@ -74,3 +74,36 @@
 
       return
       end
+
+      subroutine advective_cfl(
+     &     chf_const_fra[velo],
+     &     chf_const_real[dx],
+     &     chf_box[region]
+     &     chf_real[min_dt],
+     &)
+
+      real_t vel, dt
+      integer chf_ddecl[i; j; k]
+      do j=CHF_LBOUND[region;1], CHF_UBOUND[region,1]
+      
+      enddo
+#if CH_SPACEDIM==3
+c      do k = CHF_LBOUND[region;2], CHF_UBOUND[region;2]
+#endif
+c          do j = CHF_LBOUND[region;1], CHF_UBOUND[region;1]
+c             do i = CHF_LBOUND[region;0], CHF_UBOUND[region;0]
+c 	       vel = CHF_DTERM[
+c      &                velo(chf_ix[i;j;k],0)*velo(chf_ix[i;j;k],0);
+c      &              + velo(chf_ix[i;j;k],1)*velo(chf_ix[i;j;k],1);
+c      &              + velo(chf_ix[i;j;k],2)*velo(chf_ix[i;j;k],2)]
+c 	       dt = dx/sqrt(vel)
+c 	       min_dt = min(dt, min_dt)
+c             enddo
+c          enddo
+c #if CH_SPACEDIM==3
+c       enddo
+c #endif
+
+      return
+      end
+

@@ -79,6 +79,31 @@ inline void FORTRAN_NAME(inlineCONSDIV_REG, inlineCONSDIV_REG)(
 }
 #endif  // GUARDCONSDIV_REG 
 
+#ifndef GUARDADVECTIVE_CFL 
+#define GUARDADVECTIVE_CFL 
+// Prototype for Fortran procedure advective_cfl ...
+//
+void FORTRAN_NAME( ADVECTIVE_CFL ,advective_cfl )(
+      CHFp_CONST_FRA(velo)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_REAL(regionchf_realmin_dt) );
+
+#define FORT_ADVECTIVE_CFL FORTRAN_NAME( inlineADVECTIVE_CFL, inlineADVECTIVE_CFL)
+#define FORTNT_ADVECTIVE_CFL FORTRAN_NAME( ADVECTIVE_CFL, advective_cfl)
+
+inline void FORTRAN_NAME(inlineADVECTIVE_CFL, inlineADVECTIVE_CFL)(
+      CHFp_CONST_FRA(velo)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_REAL(regionchf_realmin_dt) )
+{
+ CH_TIMELEAF("FORT_ADVECTIVE_CFL");
+ FORTRAN_NAME( ADVECTIVE_CFL ,advective_cfl )(
+      CHFt_CONST_FRA(velo)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_REAL(regionchf_realmin_dt) );
+}
+#endif  // GUARDADVECTIVE_CFL 
+
 }
 
 #endif

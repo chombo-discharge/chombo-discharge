@@ -634,9 +634,31 @@ void cdr_solver::initial_data(){
       const Box box          = m_state[lvl]->disjointBoxLayout().get(dit());
       const EBISBox& ebisbox = state.getEBISBox();
       const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
 
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      BaseFab<Real>& reg_state = state.getSingleValuedFAB();
+
+      const IntVect lo = box.smallEnd();
+      const IntVect hi = box.bigEnd();
+
+#if CH_SPACEDIM==3
+      for (int k = lo[2]; k <= hi[2]; k++){
+#endif
+	for (int j = lo[1]; j <= hi[1]; j++){
+	  for (int i = lo[0]; i <= hi[0]; i++){
+	    const IntVect iv(D_DECL(i,j,k));
+	    const RealVect pos = origin + m_amr->get_dx()[lvl]*RealVect::Unit;
+
+	    for (int comp = 0; comp < state.nComp(); comp++){
+	      m_species->initial_data(pos, m_time);
+	    }
+	  }
+	}
+#if CH_SPACEDIM==3
+      }
+#endif
+
+      // Irreg and multicells
+      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
 	
@@ -1355,7 +1377,14 @@ Real cdr_solver::compute_cfl_dt(){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs(box);
 
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
+      FORT_ADVECTIVE_CFL(CHF_CONST_FRA(velo_fab),
+			 CHF_CONST_REAL(dx),
+			 CHF_BOX(box),
+			 CHF_REAL(min_dt));
+
+      // Irregular and multicells
+      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
 	const VolIndex vof = vofit();
 	const RealVect u  = RealVect(D_DECL(velo(vof, 0), velo(vof, 1), velo(vof, 2)));
 	const Real thisdt = dx/u.vectorLength();
