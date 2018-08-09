@@ -14,6 +14,8 @@
 
 #include <ParmParse.H>
 
+#define RK2_DEBUG_TIMER 0
+
 typedef rk2::cdr_storage     cdr_storage;
 typedef rk2::poisson_storage poisson_storage;
 typedef rk2::rte_storage     rte_storage;
@@ -172,7 +174,7 @@ Real rk2::advance(const Real a_dt){
   }
   const Real t4 = MPI_Wtime();
 
-#if 0
+#if RK2_DEBUG_TIMER
   pout() << "t1 - t0 = " << t1 - t0 << endl;
   pout() << "t2 - t1 = " << t2 - t1 << endl;
   pout() << "t3 - t2 = " << t3 - t2 << endl;
@@ -190,7 +192,7 @@ Real rk2::advance(const Real a_dt){
   pout() << "t33 - t32 = " << t33 - t32 << endl;
   pout() << "t34 - t33 = " << t34 - t33 << endl;
 
-  MayDay::Abort("stop");
+  MayDay::Abort("rk2::advance - debug timer stop");
 #endif
 
   return a_dt;

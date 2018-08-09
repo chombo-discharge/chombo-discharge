@@ -14,7 +14,7 @@
 #include <ParmParse.H>
 #include <EBLevelDataOps.H>
 
-#define VECTORIZE_PLASKIN 1
+#define VECTORIZE_PLASKIN 0
 
 time_stepper::time_stepper(){
   this->set_verbosity(1);
