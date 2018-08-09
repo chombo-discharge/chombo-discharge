@@ -23,7 +23,7 @@
                grad(chf_ix[i;j;k],0) = (phi(chf_ix[i+1;j  ;k  ]) - phi(chf_ix[i-1;j  ;k]  ))*inv_2dx
                grad(chf_ix[i;j;k],1) = (phi(chf_ix[  i;j+1;k  ]) - phi(chf_ix[i  ;j-1;k  ]))*inv_2dx
 #if CH_SPACEDIM==3
-c               grad(chf_ix[i;j;k],2) = (phi(chf_ix[i  ;j  ;k+1]) - phi(chf_ix[i  ;j  ;k-1]))*inv_2dx
+               grad(chf_ix[i;j;k],2) = (phi(chf_ix[i  ;j  ;k+1]) - phi(chf_ix[i  ;j  ;k-1]))*inv_2dx
 #endif
            enddo
       enddo

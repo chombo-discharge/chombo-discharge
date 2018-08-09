@@ -3,7 +3,7 @@
   @brief  Implementation of cdr_solver.H
   @author Robert Marskar
   @date   Nov. 2017
-  @todo   The dt computations use vofiterators over the full box. This should be replaced by fortran routines (or internal ebcell fab functions)
+  @todo   The diffusive dt computations use a faceiterator box. This should be replaced by fortran routines (or internal ebcell fab functions)
   @todo   The set_velocity(RealVect) function breaks sometimes when I have multicells. We should figure out why. 
 */
 
@@ -1384,15 +1384,16 @@ Real cdr_solver::compute_cfl_dt(){
 			 CHF_REAL(min_dt));
 
       // Irregular and multicells
-      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
-	const VolIndex vof = vofit();
-	const RealVect u  = RealVect(D_DECL(velo(vof, 0), velo(vof, 1), velo(vof, 2)));
-	const Real thisdt = dx/u.vectorLength();
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      	const VolIndex vof = vofit();
+      	const RealVect u  = RealVect(D_DECL(velo(vof, 0), velo(vof, 1), velo(vof, 2)));
+      	const Real thisdt = dx/u.vectorLength();
 
-	min_dt = Min(min_dt, thisdt);
+      	min_dt = Min(min_dt, thisdt);
       }
     }
   }
+
   
 #ifdef CH_MPI
   Real tmp = 1.;
@@ -1468,7 +1469,6 @@ Real cdr_solver::compute_diffusive_dt(){
 #endif
   }
 
-
   return min_dt;
 }
 
@@ -1497,7 +1497,18 @@ Real cdr_solver::compute_source_dt(const Real a_max, const Real a_tolerance){
 	const EBGraph& ebgraph  = ebisbox.getEBGraph();
 	const IntVectSet ivs(box);
 
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const BaseFab<Real>& state_fab  = state.getSingleValuedFAB();
+	const BaseFab<Real>& source_fab = source.getSingleValuedFAB();
+
+
+	FORT_SOURCE_DT(CHF_REAL(min_dt),
+		       CHF_CONST_FRA1(state_fab, comp),
+		       CHF_CONST_FRA1(source_fab, comp),
+		       CHF_CONST_REAL(a_tolerance),
+		       CHF_CONST_REAL(a_max),
+		       CHF_BOX(box));
+	  
+	for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
 	  const Real phi = state(vof, comp);

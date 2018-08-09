@@ -1,6 +1,6 @@
 # Chombo and chombo-streamer directories 
-CHOMBO_HOME   := /home/marskar/Projects/mf-chombo/lib
-STREAMER_HOME := /home/marskar/plasmac
+CHOMBO_HOME   := /home/robertm/Projects/mf-chombo/lib
+STREAMER_HOME := /home/robertm/Projects/plasmac
 
 include $(CHOMBO_HOME)/mk/Make.defs
 

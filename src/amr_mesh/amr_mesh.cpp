@@ -602,6 +602,7 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       const EBISBox& ebisbox = phi.getEBISBox();
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const Box& region      = dbl.get(dit());
+      const IntVectSet ivs(region);
 
       // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
       const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
