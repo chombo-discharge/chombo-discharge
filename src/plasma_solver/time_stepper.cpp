@@ -506,7 +506,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 #if CH_SPACEDIM==3
       }
 #endif
-#endif
+#endif // END VECTORIZE_PLASKIN
 
       // Irregular and multi-level cells.
 #if VECTORIZE_PLASKIN
@@ -587,6 +587,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	    }
 	    cdr_densities[idx] = Max(0.0, phi);
 	    cdr_grad[idx] = grad;
+	    
 	  }
 
 	  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -600,6 +601,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	    }
 	    rte_densities[idx] = Max(0.0, phi);
 	  }
+
 
 	  // Compute sources
 	  const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
@@ -1014,17 +1016,18 @@ void time_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a
       const Box& box          = dbl.get(dit());
       
       for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& E_face = (*a_E_face[lvl])[dit()][dir];
+      	EBFaceFAB& E_face = (*a_E_face[lvl])[dit()][dir];
+	E_face.setVal(0.0);
 
-	EBLevelDataOps::averageCellToFace(E_face,
-					  E_cell,
-					  ebgraph,
-					  box,
-					  0,
-					  dir,
-					  domain,
-					  dir,
-					  dir);
+      	EBLevelDataOps::averageCellToFace(E_face,
+      					  E_cell,
+      					  ebgraph,
+      					  box,
+      					  0,
+      					  dir,
+      					  domain,
+      					  dir,
+      					  dir);
       }
 
     }

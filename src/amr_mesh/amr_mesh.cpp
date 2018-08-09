@@ -602,8 +602,8 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       const EBISBox& ebisbox = phi.getEBISBox();
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const Box& region      = dbl.get(dit());
-      const IntVectSet ivs(region);
 
+#if 1 // Optimized code
       // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
       const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
       BaseFab<Real>& grad_fab  = grad.getSingleValuedFAB();
@@ -647,6 +647,25 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       	  }
       	}
       }
+#else // Original code
+      for (VoFIterator vofit(IntVectSet(region), ebgraph); vofit.ok(); ++vofit){
+      	const VolIndex& vof = vofit();
+
+      	for (int dir = 0; dir < SpaceDim; dir++){
+	  
+      	  grad(vof, dir) = 0.;
+
+      	  VoFStencil sten;
+      	  EBArith::getFirstDerivStencilWidthOne(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
+      	  for (int i = 0; i < sten.size(); i++){
+      	    const VolIndex& ivof = sten.vof(i);
+      	    const Real& iweight  = sten.weight(i);
+	    
+      	    grad(vof, dir) += phi(ivof, comp)*iweight;
+      	  }
+      	}
+      }
+#endif
     }
   }
 }

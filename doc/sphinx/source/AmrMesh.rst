@@ -19,7 +19,6 @@ To add some flexibility in how refinement levels are handled in different stages
 
 Users may also change the stencils for data interpolation across refinement boundaries, as well as stencils for extrapolation and interpolation near the embedded boundaries. Typically, we use linear interpolation for ghost cells but quadratic interpolation is supported as well, by changing ``ghost_interp``. The flags ``stencil_order``, ``stencil_type``, and ``stencil_radius`` control the stencils used for interpolation and extrapolation near the EB. 
 
-If users use features that imply that the grid might have crossing between coarse-fine interfaces and embedded boundaries, he should enable the ``ebcf`` flag. This is the case, for example, if one uses :ref:`Chap:geo_coarsener` to remove parts of the EB mesh. 
+If users use features that imply that the refinement boundaries might cross the EB, he must enable the ``ebcf`` flag. This is the case, for example, if one uses :ref:`Chap:geo_coarsener` to remove parts of the EB mesh. Internally, this flag informs :ref:`Chap:amr_mesh` about how to fill ghost and reflux data. If this flag is ``false`` *and* there are crossings between the EB and the refinement boundary, we cannot guarantee stable behavior since ghost cells might not be filled properly. 
 
 The options ``num_ghost`` and ``eb_ghost`` should not be changed since much of our code requires three ghost cells. 
-

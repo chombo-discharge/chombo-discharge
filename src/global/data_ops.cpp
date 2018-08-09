@@ -447,15 +447,15 @@ void data_ops::floor(EBAMRCellData& a_lhs, const Real a_value){
 void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs = a_lhs[dit()];
-    const Box box          = a_lhs.disjointBoxLayout().get(dit());
+    const Box box = lhs.getRegion();
     const EBISBox& ebisbox = lhs.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs(lhs.getRegion());
 
     const int ncomp = a_lhs.nComp();
 
-#if 1 // Optimized code
-    // Regular cells. This will also do covered cells, but I think that's fine. 
+#if 1 // Optimized code. 
+    // Regular cells. This also does ghost cells
     BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
     FORT_FLOOR(CHF_FRA(lhs_reg),
 	       CHF_CONST_INT(ncomp),
@@ -470,9 +470,9 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
 	lhs(vof, comp) = Max(value, a_value);
       }
     }
-#else
+#else // Other code
     // Irregular and multivalued cells
-    for (VoFIterator vofit(IntVectSet(box)), ebgraph); vofit.ok(); ++vofit){
+    for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       for (int comp = 0; comp < a_lhs.nComp(); comp++){
 	const Real value = lhs(vof, comp);
@@ -737,6 +737,7 @@ void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box
 
   const EBISBox& ebisbox = a_lhs.getEBISBox();
 
+#if 1 // Optimized code
   // Mask for skipping computation on covered cells
   EBCellFAB covered_mask(ebisbox, a_box, 1);
   covered_mask.setVal(1.0);
@@ -765,4 +766,18 @@ void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box
 
     a_lhs(vof, comp) = sqrt(a_lhs(vof, comp));
   }
+#else // Other code
+  // Irregular cells and multivalued cells
+  for (VoFIterator vofit(IntVectSet(a_box), ebisbox.getEBGraph()); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    a_lhs(vof, comp) = 0.;
+
+    for (int i = 0; i < ncomp; i++){
+      a_lhs(vof, comp) += a_rhs(vof, i)*a_rhs(vof, i);
+    }
+
+    a_lhs(vof, comp) = sqrt(a_lhs(vof, comp));
+  }
+#endif
 }

@@ -469,6 +469,7 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     this->coarse_fine_increment(mass_diff);     // Increment the coarse-fine redistribution objects
     this->increment_redist_flux();              // Increment flux registers with the redistribution stuff
     this->coarse_fine_redistribution(a_divF);   // Redistribute
+    this->reflux(a_divF);
   }
   else{
     this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
