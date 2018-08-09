@@ -45,7 +45,7 @@ Vector<Real> advection_kinetics::compute_cdr_diffusion_coefficients(const Real& 
 								    const RealVect&     a_pos,
 								    const RealVect&     a_E,
 								    const Vector<Real>& a_cdr_densities) const {
-  Vector<Real> diffco(m_num_species, 1.0);
+  Vector<Real> diffco(m_num_species, 0.0);
   return diffco;
 }
 
@@ -114,7 +114,7 @@ advection_kinetics::phi_advect::phi_advect() {
 
   m_name      = "phi";
   m_unit      = "m-3";
-  m_diffusive = true;
+  m_diffusive = false;
   m_mobile    = true;
   m_charge    = 1;
   m_pulse     = "square";

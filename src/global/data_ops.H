@@ -163,6 +163,8 @@ public:
   static void vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
   static void vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+
+  static void vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
 };
 
 #include "data_opsI.H"

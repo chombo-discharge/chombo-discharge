@@ -6,6 +6,7 @@
 */
 
 #include "data_ops.H"
+#include "data_opsF_F.H"
 #include "EBLevelDataOps.H"
 #include "MFLevelDataOps.H"
 
@@ -273,7 +274,6 @@ void data_ops::get_max_min(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAM
 void data_ops::get_max_min_norm(Real& a_max, Real& a_min, EBAMRCellData& a_data){
   a_max = -1.234567E89;
   a_min =  1.234567E89;
-  
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     Real max, min;
     data_ops::get_max_min_norm(max, min, *a_data[lvl]);
@@ -295,7 +295,30 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
     const EBISBox& ebisbox = data.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs(box);
+
+#if 1 // Optimized code
+    const BaseFab<Real>& data_reg = data.getSingleValuedFAB();
+    FORT_MAX_MIN_NORM(CHF_REAL(a_max),
+		      CHF_REAL(a_min),
+		      CHF_CONST_FRA(data_reg),
+		      CHF_CONST_INT(ncomp),
+		      CHF_BOX(box));
+
+    // Irregular and multivalued cells
+    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      Real cur = 0.0;
+      for (int comp = 0; comp < ncomp; comp++){
+	cur += data(vof, comp)*data(vof, comp);
+      }
+      cur = sqrt(cur);
+
+      a_max = Max(a_max, cur);
+      a_min = Min(a_min, cur);
+    }
     
+#else // Original code
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
@@ -308,6 +331,7 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
       a_max = Max(a_max, cur);
       a_min = Min(a_min, cur);
     }
+#endif
   }
 
   // Communicate result
@@ -420,13 +444,34 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs(lhs.getRegion());
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    const int ncomp = a_lhs.nComp();
+
+#if 1 // Optimized code
+    // Regular cells
+    BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
+    FORT_FLOOR(CHF_FRA(lhs_reg),
+	       CHF_CONST_INT(ncomp),
+	       CHF_CONST_REAL(a_value),
+	       CHF_BOX(box));
+
+    // Irregular and multivalued cells
+    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       for (int comp = 0; comp < a_lhs.nComp(); comp++){
 	const Real value = lhs(vof, comp);
 	lhs(vof, comp) = Max(value, a_value);
       }
     }
+#else
+    // Irregular and multivalued cells
+    for (VoFIterator vofit(IntVectSet(box)), ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int comp = 0; comp < a_lhs.nComp(); comp++){
+	const Real value = lhs(vof, comp);
+	lhs(vof, comp) = Max(value, a_value);
+      }
+    }
+#endif
   }
 }
 
@@ -671,13 +716,21 @@ void data_ops::vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs             = a_lhs[dit()];
+    const Box& box             = a_lhs.disjointBoxLayout().get(dit());
     const EBCellFAB& rhs       = a_rhs[dit()];
     const EBISBox& ebisbox     = lhs.getEBISBox();
     const EBGraph& ebgraph     = ebisbox.getEBGraph();
 
     const IntVectSet ivs(a_lhs.disjointBoxLayout()[dit()]);
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    BaseFab<Real>& lhs_fab = lhs.getSingleValuedFAB();
+    const BaseFab<Real>& rhs_fab = rhs.getSingleValuedFAB();
+    
+    FORT_VECTOR_LENGTH(CHF_FRA1(lhs_fab,comp),
+		       CHF_CONST_FRA(rhs_fab),
+		       CHF_BOX(box));
+    
+    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
       lhs(vof, comp) = 0.;
@@ -688,5 +741,36 @@ void data_ops::vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
 
       lhs(vof, comp) = sqrt(lhs(vof, comp));
     }
+  }
+}
+
+void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box){
+  CH_assert(a_lhs.nComp() == 1);
+  CH_assert(a_rhs.nComp() == SpaceDim);
+
+  const int comp = 0;
+  const int ncomp = SpaceDim;
+  
+  // Regular cells
+  BaseFab<Real>& lhs_reg       = a_lhs.getSingleValuedFAB();
+  const BaseFab<Real>& rhs_reg = a_rhs.getSingleValuedFAB();
+
+  FORT_VECTOR_LENGTH(CHF_FRA1(lhs_reg, comp),
+		     CHF_CONST_FRA(rhs_reg),
+		     CHF_BOX(a_box));
+
+
+  // Irregular cells and multivalued cells
+  const EBISBox& ebisbox = a_lhs.getEBISBox();
+  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph()); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    a_lhs(vof, comp) = 0.;
+
+    for (int i = 0; i < ncomp; i++){
+      a_lhs(vof, comp) += a_rhs(vof, i)*a_rhs(vof, i);
+    }
+
+    a_lhs(vof, comp) = sqrt(a_lhs(vof, comp));
   }
 }

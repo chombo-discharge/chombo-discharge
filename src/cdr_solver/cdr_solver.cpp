@@ -362,11 +362,23 @@ void cdr_solver::compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face
 	const EBFaceFAB& phi = (*a_face_state[lvl])[dit()][dir];
 	const EBFaceFAB& vel = (*a_face_vel[lvl])[dit()][dir];
 
+#if 1 // Optimized code
+	flx.setVal(0.0, comp);
+	flx += phi;
+	flx *= vel;
+
+	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
+	for (FaceIterator faceit(ebisbox.getIrregIVS(box), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+	  flx(face, comp) = vel(face, comp)*phi(face, comp);
+	}
+#else // Original code
 	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
 	for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 	  flx(face, comp) = vel(face, comp)*phi(face, comp);
 	}
+#endif
       }
     }
   }

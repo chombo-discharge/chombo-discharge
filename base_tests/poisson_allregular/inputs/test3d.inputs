@@ -13,7 +13,7 @@ physical_domain.hi_corner =  1  1  1    # High corner of problem domain
 # AMR_MESH OPTIONS
 # ====================================================================================================
 amr.verbosity       = -1          # Controls verbosity. 
-amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr.coarsest_domain = 256 256 256 # Number of cells on coarsest domain
 amr.max_amr_depth   = 0           # Maximum amr depth
 amr.max_sim_depth   = -1          # Maximum simulation depth
 amr.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -37,7 +37,7 @@ amr.ebcf            = false       # Tell amr to ignore EBCF-related code.
 # PLASMA_ENGINE OPTIONS
 # ====================================================================================================
 plasma_engine.verbosity                       = 20            # Engine verbosity
-plasma_engine.plot_interval                   = 10            # Plot interval
+plasma_engine.plot_interval                   = -1            # Plot interval
 plasma_engine.regrid_interval                 = 10            # Regrid interval
 plasma_engine.checkpoint_interval             = 10            # Checkpoint interval
 plasma_engine.initial_regrids                 = 0             # Number of initial regrids

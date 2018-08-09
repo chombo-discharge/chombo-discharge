@@ -116,6 +116,7 @@ Real rk2::advance(const Real a_dt){
   }
 
   // Prepare for k1 advance
+  const Real t0 = MPI_Wtime();
   this->compute_E_at_start_of_time_step();
   this->compute_cdr_velo_at_start_of_time_step();
   this->compute_cdr_eb_states_at_start_of_time_step();
@@ -125,6 +126,7 @@ Real rk2::advance(const Real a_dt){
   this->compute_sigma_flux_at_start_of_time_step();
 
   // Do k1 advance
+  const Real t1 = MPI_Wtime();
   this->advance_cdr_k1(a_dt);
   this->advance_sigma_k1(a_dt);
   this->solve_poisson_k1();
@@ -137,24 +139,59 @@ Real rk2::advance(const Real a_dt){
   }
 
   // Recompute things in order to do k2 advance
+  const Real t2 = MPI_Wtime();
   this->compute_cdr_eb_states_after_k1();
+  const Real t20 = MPI_Wtime();
   this->compute_cdr_velo_after_k1(a_dt);
+  const Real t21 = MPI_Wtime();
   this->compute_cdr_diffco_after_k1(a_dt);
+  const Real t22 = MPI_Wtime();
   this->compute_cdr_sources_after_k1(a_dt);
+  const Real t23 = MPI_Wtime();
   this->compute_cdr_fluxes_after_k1(a_dt);
+  const Real t24 = MPI_Wtime();
   this->compute_sigma_flux_after_k1();
+  const Real t25 = MPI_Wtime();
   
   // Do k2 advance
+  const Real t3 = MPI_Wtime();
+  const Real t30 = MPI_Wtime();
   this->advance_cdr_k2(a_dt);
+  const Real t31 = MPI_Wtime();
   this->advance_sigma_k2(a_dt);
+  const Real t32 = MPI_Wtime();
   this->solve_poisson_k2();
+  const Real t33 = MPI_Wtime();
   this->compute_E_after_k2();
+  const Real t34 = MPI_Wtime();
   if(m_rte->is_stationary()){
     this->advance_rte_k2_stationary(a_dt);
   }
   else{
     this->advance_rte_k2_transient(a_dt);
   }
+  const Real t4 = MPI_Wtime();
+
+#if 0
+  pout() << "t1 - t0 = " << t1 - t0 << endl;
+  pout() << "t2 - t1 = " << t2 - t1 << endl;
+  pout() << "t3 - t2 = " << t3 - t2 << endl;
+  pout() << "t4 - t3 = " << t4 - t3 << endl;
+  pout() << endl;
+  pout() << "t20 - t2  = " << t20 - t2  << endl;
+  pout() << "t21 - t20 = " << t21 - t20 << endl;
+  pout() << "t22 - t21 = " << t22 - t21 << endl;
+  pout() << "t23 - t22 = " << t23 - t22 << endl;
+  pout() << "t24 - t23 = " << t24 - t23 << endl;
+  pout() << "t25 - t24 = " << t25 - t24 << endl;
+  pout() << endl;
+  pout() << "t31 - t30 = " << t31 - t30 << endl;
+  pout() << "t32 - t31 = " << t32 - t31 << endl;
+  pout() << "t33 - t32 = " << t33 - t32 << endl;
+  pout() << "t34 - t33 = " << t34 - t33 << endl;
+
+  MayDay::Abort("stop");
+#endif
 
   return a_dt;
 }
@@ -553,7 +590,7 @@ void rk2::compute_cdr_eb_states_after_k1(){
 void rk2::compute_cdr_velo_after_k1(const Real a_dt){
   CH_TIME("rk2::compute_cdr_velo_after_k1");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_velo_after_k1";
+    pout() << "rk2::compute_cdr_velo_after_k1" << endl;
   }
   
   const int num_species = m_plaskin->get_num_species();

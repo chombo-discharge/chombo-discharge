@@ -1,0 +1,61 @@
+      subroutine vector_length(
+     &     chf_fra1[dst],
+     &     chf_const_fra[src],
+     &     chf_box[region] )
+
+      real_t len2
+      integer chf_ddecl[i;j;k]
+      
+      chf_multido[region;i;j;k]
+         len2 = CHF_DTERM[src(chf_ix[i;j;k], 0)*src(chf_ix[i;j;k], 0);
+     &                  + src(chf_ix[i;j;k], 1)*src(chf_ix[i;j;k], 1);
+     &                  + src(chf_ix[i;j;k], 2)*src(chf_ix[i;j;k], 2)];     
+         dst(chf_ix[i;j;k]) = sqrt(len2)
+      chf_enddo
+      
+      return
+      end
+
+
+      subroutine floor(
+     &     chf_fra[src],
+     &     chf_const_int[ncomps],
+     &     chf_const_real[value],
+     &     chf_box[region])
+
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      do ic=0,ncomps-1
+         chf_multido[region;i;j;k]
+            src(chf_ix[i;j;k],ic) = max(value, src(chf_ix[i;j;k],ic))
+         chf_enddo
+      enddo      
+      return
+      
+      end
+
+      subroutine max_min_norm(
+     &     chf_real[max_val],
+     &     chf_real[min_val],
+     &     chf_const_fra[src],
+     &     chf_const_int[ncomps],
+     &     chf_box[box])
+
+      real_t value
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      chf_multido[box;i;j;k]
+         value = 0.0
+         do ic=0, ncomps-1
+            value = value + src(chf_ix[i;j;k], ic)*src(chf_ix[i;j;k], ic)
+         enddo
+         value = sqrt(value)
+
+         max_val = max(max_val, value)
+         min_val = min(min_val, value)
+      chf_enddo
+      return
+
+      end
