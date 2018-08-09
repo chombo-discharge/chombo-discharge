@@ -297,13 +297,18 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
     const IntVectSet ivs(box);
 
 #if 1 // Optimized code
-    MayDay::Abort("data_ops::get_max_min_norm - Bug here. Figure out what is going on or switch to old code");
+    EBCellFAB covered_mask(ebisbox, box, 1);
+    covered_mask.setVal(1.0);
+    covered_mask.setCoveredCellVal(1.0, 0);
 
+    const BaseFab<Real>& mask = covered_mask.getSingleValuedFAB();
+    
     // Maybe this breaks because we should pass a covered flag into the routine
     const BaseFab<Real>& data_reg = data.getSingleValuedFAB();
     FORT_MAX_MIN_NORM(CHF_REAL(a_max),
 		      CHF_REAL(a_min),
 		      CHF_CONST_FRA(data_reg),
+      		      CHF_CONST_FRA1(mask, 0),
 		      CHF_CONST_INT(ncomp),
 		      CHF_BOX(box));
 
@@ -450,7 +455,7 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
     const int ncomp = a_lhs.nComp();
 
 #if 1 // Optimized code
-    // Regular cells
+    // Regular cells. This will also do covered cells, but I think that's fine. 
     BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
     FORT_FLOOR(CHF_FRA(lhs_reg),
 	       CHF_CONST_INT(ncomp),
@@ -713,37 +718,13 @@ void data_ops::vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
 void data_ops::vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   CH_assert(a_lhs.nComp() == 1);
   CH_assert(a_rhs.nComp() == SpaceDim);
-
-  const int comp  = 0;
-  const int ncomp = a_rhs.nComp();
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs             = a_lhs[dit()];
     const Box& box             = a_lhs.disjointBoxLayout().get(dit());
     const EBCellFAB& rhs       = a_rhs[dit()];
-    const EBISBox& ebisbox     = lhs.getEBISBox();
-    const EBGraph& ebgraph     = ebisbox.getEBGraph();
 
-    const IntVectSet ivs(a_lhs.disjointBoxLayout()[dit()]);
-
-    BaseFab<Real>& lhs_fab = lhs.getSingleValuedFAB();
-    const BaseFab<Real>& rhs_fab = rhs.getSingleValuedFAB();
-    
-    FORT_VECTOR_LENGTH(CHF_FRA1(lhs_fab,comp),
-		       CHF_CONST_FRA(rhs_fab),
-		       CHF_BOX(box));
-    
-    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-
-      lhs(vof, comp) = 0.;
-
-      for (int i = 0; i < ncomp; i++){
-	lhs(vof, comp) += rhs(vof, i)*rhs(vof, i);
-      }
-
-      lhs(vof, comp) = sqrt(lhs(vof, comp));
-    }
+    data_ops::vector_length(lhs, rhs, box);
   }
 }
 
@@ -753,18 +734,26 @@ void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box
 
   const int comp = 0;
   const int ncomp = SpaceDim;
+
+  const EBISBox& ebisbox = a_lhs.getEBISBox();
+
+  // Mask for skipping computation on covered cells
+  EBCellFAB covered_mask(ebisbox, a_box, 1);
+  covered_mask.setVal(1.0);
+  covered_mask.setCoveredCellVal(-1.0, 0);
   
   // Regular cells
   BaseFab<Real>& lhs_reg       = a_lhs.getSingleValuedFAB();
   const BaseFab<Real>& rhs_reg = a_rhs.getSingleValuedFAB();
+  const BaseFab<Real>& mask    = covered_mask.getSingleValuedFAB();
 
   FORT_VECTOR_LENGTH(CHF_FRA1(lhs_reg, comp),
 		     CHF_CONST_FRA(rhs_reg),
+		     CHF_CONST_FRA1(mask,0),
 		     CHF_BOX(a_box));
 
 
   // Irregular cells and multivalued cells
-  const EBISBox& ebisbox = a_lhs.getEBISBox();
   for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 

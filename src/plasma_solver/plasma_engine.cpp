@@ -1083,7 +1083,6 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   const bool got_new_tags = this->tag_cells(tags, m_tags);         // Tag cells
 
-
   if(!got_new_tags){
     if(a_use_initial_data){
       m_timestepper->initial_data();
@@ -1867,7 +1866,9 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
     m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
   }
   m_timestepper->regrid_internals(); // Prepare internal storage for time stepper
-  m_celltagger->regrid();            // Prepare internal storage for cell tagger
+  if(!m_celltagger.isNull()){
+    m_celltagger->regrid();            // Prepare internal storage for cell tagger
+  }
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
@@ -2478,7 +2479,7 @@ void plasma_engine::write_plot_file(){
   if(m_output_mode == output_mode::medium || m_output_mode == output_mode::full){
     this->add_rte_source_to_output(output, cur_var); cur_var += m_plaskin->get_num_photons();
   }
-  if(m_output_mode == output_mode::full){
+  if(m_output_mode == output_mode::full && !m_celltagger.isNull()){
     this->add_tracer_fields_to_output(output, cur_var); cur_var += m_celltagger->get_num_tracers();
   }
 

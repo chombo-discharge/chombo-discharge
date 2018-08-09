@@ -1188,21 +1188,17 @@ void time_stepper::compute_J(EBAMRCellData& a_J){
 	const EBCellFAB& n = (*density[lvl])[dit()];
 	const EBCellFAB& v = (*velo[lvl])[dit()];
 
-#if 1 // Optimized code. Ok this was stupid. Make a temporary EBCellFAB that holds q*v*n and add that to J
-	MayDay::Abort("time_stepper::compute_J - Bug here. Figure out what is going on or switch to old code");
+#if 1 // Optimized code. Need to check that this works. 
+	EBCellFAB cdr_j(ebisbox, box, SpaceDim);
+	cdr_j.setVal(0.0);
 	for (int comp = 0; comp < SpaceDim; comp++){
-	  J.plus(n, 0, comp, 1);
+	  cdr_j.plus(n, 0, comp, 1);
 	}
-	J *= v;
-	J *= q;
+	cdr_j *= v;
+	cdr_j *= q;
 
-	// for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
-	//   const VolIndex& vof = vofit();
+	J += cdr_j;
 
-	//   for (int comp = 0; comp < SpaceDim; comp++){
-	//     J(vof, comp) += q*n(vof,density_comp)*v(vof, comp);
-	//   }
-	// }
 #else // Original code
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
