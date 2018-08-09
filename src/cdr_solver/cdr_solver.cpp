@@ -647,6 +647,7 @@ void cdr_solver::initial_data(){
       const EBISBox& ebisbox = state.getEBISBox();
       const EBGraph& ebgraph = ebisbox.getEBGraph();
 
+#if 1
       BaseFab<Real>& reg_state = state.getSingleValuedFAB();
 
       const IntVect lo = box.smallEnd();
@@ -661,12 +662,13 @@ void cdr_solver::initial_data(){
 	    const RealVect pos = origin + m_amr->get_dx()[lvl]*RealVect::Unit;
 
 	    for (int comp = 0; comp < state.nComp(); comp++){
-	      m_species->initial_data(pos, m_time);
+	      reg_state(iv, comp) = m_species->initial_data(pos, m_time);
 	    }
 	  }
 	}
 #if CH_SPACEDIM==3
       }
+#endif
 #endif
 
       // Irreg and multicells
