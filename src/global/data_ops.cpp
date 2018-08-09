@@ -297,6 +297,9 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
     const IntVectSet ivs(box);
 
 #if 1 // Optimized code
+    MayDay::Abort("data_ops::get_max_min_norm - Bug here. Figure out what is going on or switch to old code");
+
+    // Maybe this breaks because we should pass a covered flag into the routine
     const BaseFab<Real>& data_reg = data.getSingleValuedFAB();
     FORT_MAX_MIN_NORM(CHF_REAL(a_max),
 		      CHF_REAL(a_min),

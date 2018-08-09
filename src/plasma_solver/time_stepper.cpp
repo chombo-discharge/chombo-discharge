@@ -1188,12 +1188,21 @@ void time_stepper::compute_J(EBAMRCellData& a_J){
 	const EBCellFAB& n = (*density[lvl])[dit()];
 	const EBCellFAB& v = (*velo[lvl])[dit()];
 
-#if 1 // Optimized code
+#if 1 // Optimized code. Ok this was stupid. Make a temporary EBCellFAB that holds q*v*n and add that to J
+	MayDay::Abort("time_stepper::compute_J - Bug here. Figure out what is going on or switch to old code");
 	for (int comp = 0; comp < SpaceDim; comp++){
 	  J.plus(n, 0, comp, 1);
 	}
 	J *= v;
 	J *= q;
+
+	// for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+	//   const VolIndex& vof = vofit();
+
+	//   for (int comp = 0; comp < SpaceDim; comp++){
+	//     J(vof, comp) += q*n(vof,density_comp)*v(vof, comp);
+	//   }
+	// }
 #else // Original code
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
@@ -1890,7 +1899,6 @@ Real time_stepper::compute_relaxation_time(){
     pout() << "time_stepper::compute_relaxation_time" << endl;
   }
 
-
   const int comp         = 0;
   const int finest_level = 0;
   const Real SAFETY      = 1.E-20;
@@ -1946,6 +1954,13 @@ Real time_stepper::compute_relaxation_time(){
       dt_fab *= e_magnitude;
       dt_fab /= j_magnitude;
 
+      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
+	const RealVect jj = RealVect(D_DECL(j(vof, 0), j(vof, 1), j(vof, 2)));
+
+	dt_fab(vof, comp) = Abs(units::s_eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
+      }
 #else // Original code
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
