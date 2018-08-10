@@ -125,7 +125,7 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
 
     mfalias::aliasMF(state_gas, phase::gas,   *potential[lvl]);
 
-    state_gas.copyTo(*scratch[lvl]);
+    state_gas.localCopyTo(*scratch[lvl]);
     
     // Copy all covered cells from the other phase
     if(!ebis_sol.isNull()){
@@ -222,7 +222,7 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
       }
     }
 
-    E_gas.copyTo(*scratch[lvl]);
+    E_gas.localCopyTo(*scratch[lvl]);
   }
 
   m_amr->average_down(scratch, phase::gas);
@@ -264,7 +264,7 @@ void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const in
     LevelData<EBCellFAB> rho_gas;
     mfalias::aliasMF(rho_gas, phase::gas, *rho[lvl]);
 
-    rho_gas.copyTo(*scratch[lvl]);
+    rho_gas.localCopyTo(*scratch[lvl]);
   }
 
   m_amr->average_down(scratch, phase::gas);
@@ -356,7 +356,7 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
     const int num                     = solver_it.get_solver();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
+      state[lvl]->localCopyTo(*scratch[lvl]);
     }
 
     m_amr->average_down(scratch, cdr->get_phase());
@@ -398,7 +398,7 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
     const int num                     = solver_it.get_solver();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      velo[lvl]->copyTo(*scratch[lvl]);
+      velo[lvl]->localCopyTo(*scratch[lvl]);
     }
 
     m_amr->average_down(scratch, cdr->get_phase());
@@ -440,7 +440,7 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
     const int num                     = solver_it.get_solver();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
+      state[lvl]->localCopyTo(*scratch[lvl]);
     }
 
     m_amr->average_down(scratch, cdr->get_phase());
@@ -480,7 +480,7 @@ void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const i
     const int num                     = solver_it.get_solver();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
+      state[lvl]->localCopyTo(*scratch[lvl]);
     }
 
     m_amr->average_down(scratch, rte_phase);
@@ -520,7 +520,7 @@ void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int 
     const int num                     = solver_it.get_solver();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->copyTo(*scratch[lvl]);
+      state[lvl]->localCopyTo(*scratch[lvl]);
     }
 
     m_amr->average_down(scratch, rte_phase);
@@ -584,7 +584,7 @@ void plasma_engine::cache_tags(const EBAMRTags& a_tags){
     tags_factory fact = tags_factory();
     m_cached_tags[lvl] = RefCountedPtr<LevelData<tags> > (new LevelData<tags>(dbl, ncomp, ghost, fact));
 
-    a_tags[lvl]->copyTo(*m_cached_tags[lvl]);
+    a_tags[lvl]->localCopyTo(*m_cached_tags[lvl]);
   }
 }
 

@@ -48,7 +48,7 @@ void eddington_sp1::cache_state(){
   m_amr->allocate(m_cache, m_phase, ncomp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    m_state[lvl]->copyTo(*m_cache[lvl]);
+    m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
 
@@ -224,7 +224,7 @@ void eddington_sp1::regrid(const int a_old_finest_level, const int a_new_finest_
 
   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_phase);
 
-  m_cache[0]->copyTo(*m_state[0]); // Base level should never change. 
+  m_cache[0]->copyTo(*m_state[0]); // Base level should never change, but ownership might
   for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
 
@@ -635,7 +635,7 @@ void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellD
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Interval interv(0,0);
-    a_state[lvl]->copyTo(interv, *a_isotropic[lvl], interv);
+    a_state[lvl]->localCopyTo(interv, *a_isotropic[lvl], interv);
   }
 }
 
@@ -680,10 +680,10 @@ void eddington_sp1::write_plot_file(){
     LevelData<EBCellFAB>& flx    = *flux[lvl];
     LevelData<EBCellFAB>& res    = *m_resid[lvl];
 
-    state.copyTo(Interval(0,0),          *output[lvl], Interval(0,0));
-    flx.copyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(1, SpaceDim));
-    source.copyTo(Interval(0,0),         *output[lvl], Interval(1 + SpaceDim, 1 + SpaceDim));
-    res.copyTo(Interval(0,0),            *output[lvl], Interval(2+SpaceDim, 2+SpaceDim));
+    state.localCopyTo(Interval(0,0),          *output[lvl], Interval(0,0));
+    flx.localCopyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(1, SpaceDim));
+    source.localCopyTo(Interval(0,0),         *output[lvl], Interval(1 + SpaceDim, 1 + SpaceDim));
+    res.localCopyTo(Interval(0,0),            *output[lvl], Interval(2+SpaceDim, 2+SpaceDim));
   }
 
   // Transform to centroid-centered

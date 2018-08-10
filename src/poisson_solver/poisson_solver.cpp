@@ -172,7 +172,7 @@ void poisson_solver::cache_state(){
   
   m_amr->allocate(m_cache, ncomp);
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    m_state[lvl]->copyTo(*m_cache[lvl]);
+    m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
 
@@ -222,7 +222,7 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
 
       Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(cur_phase);
 
-      scratch_phase[0]->copyTo(*state_phase[0]); // Base level should never change.
+      scratch_phase[0]->copyTo(*state_phase[0]); // Base level should never change, but ownership might
       for (int lvl = 1; lvl <= a_new_finest; lvl++){
 	interpolator[lvl]->interpolate(*state_phase[lvl], *state_phase[lvl-1], interv);
 	if(lvl <= a_old_finest){
@@ -515,10 +515,10 @@ void poisson_solver::write_plot_file(){
     }
 #endif
 
-    state_gas.copyTo(Interval(0,0),        *output[lvl], Interval(0,0));
-    source_gas.copyTo(Interval(0,0),       *output[lvl], Interval(1,1));
-    resid_gas.copyTo(Interval(0,0),        *output[lvl], Interval(2,2));
-    E_gas.copyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(3, 2 + SpaceDim));
+    state_gas.localCopyTo(Interval(0,0),        *output[lvl], Interval(0,0));
+    source_gas.localCopyTo(Interval(0,0),       *output[lvl], Interval(1,1));
+    resid_gas.localCopyTo(Interval(0,0),        *output[lvl], Interval(2,2));
+    E_gas.localCopyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(3, 2 + SpaceDim));
   }
 
   const irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);

@@ -199,7 +199,7 @@ void cdr_solver::cache_state(){
   
   m_amr->allocate(m_cache, m_phase, ncomp);
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    m_state[lvl]->copyTo(*m_cache[lvl]);
+    m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
 
@@ -985,7 +985,7 @@ void cdr_solver::regrid(const int a_old_finest_level, const int a_new_finest_lev
 
   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_phase);
 
-  m_cache[0]->copyTo(*m_state[0]); // Base level should never change. 
+  m_cache[0]->copyTo(*m_state[0]); // Base level should never change, but ownership can. 
   for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
     if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
@@ -1064,8 +1064,8 @@ void cdr_solver::set_diffco(const EBAMRFluxData& a_diffco, const EBAMRIVData& a_
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_diffco[lvl]->copyTo(*m_diffco[lvl]);
-    a_diffco_eb[lvl]->copyTo(*m_diffco_eb[lvl]);
+    a_diffco[lvl]->localCopyTo(*m_diffco[lvl]);
+    a_diffco_eb[lvl]->localCopyTo(*m_diffco_eb[lvl]);
   }
 
   m_amr->average_down(m_diffco, m_phase);
@@ -1102,7 +1102,7 @@ void cdr_solver::set_ebflux(const EBAMRIVData& a_ebflux){
   const Interval interv(comp, comp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_ebflux[lvl]->copyTo(interv, *m_ebflux[lvl], interv);
+    a_ebflux[lvl]->localCopyTo(interv, *m_ebflux[lvl], interv);
   }
 }
 
@@ -1166,7 +1166,7 @@ void cdr_solver::set_source(const EBAMRCellData& a_source){
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_source[lvl]->copyTo(*m_source[lvl]);
+    a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
   m_amr->average_down(m_source, m_phase);
@@ -1210,7 +1210,7 @@ void cdr_solver::set_velocity(const EBAMRCellData& a_velo){
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_velo[lvl]->copyTo(*m_velo_cell[lvl]);
+    a_velo[lvl]->localCopyTo(*m_velo_cell[lvl]);
   }
 
   m_amr->average_down(m_velo_cell, m_phase);
@@ -1330,9 +1330,9 @@ void cdr_solver::write_plot_file(){
     LevelData<EBCellFAB>& source = *m_source[lvl];
     LevelData<EBCellFAB>& velo   = *m_velo_cell[lvl];
 
-    state.copyTo(Interval(0,0),           *output[lvl],  Interval(0,0));
-    source.copyTo(Interval(0,0),          *output[lvl],  Interval(1,1));
-    velo.copyTo(Interval(0,SpaceDim - 1), *output[lvl],  Interval(2, 2 + (SpaceDim-1)));
+    state.localCopyTo(Interval(0,0),           *output[lvl],  Interval(0,0));
+    source.localCopyTo(Interval(0,0),          *output[lvl],  Interval(1,1));
+    velo.localCopyTo(Interval(0,SpaceDim - 1), *output[lvl],  Interval(2, 2 + (SpaceDim-1)));
   }
 
 #if 0 // Possibly removed. 

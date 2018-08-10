@@ -169,7 +169,7 @@ void rte_solver::set_source(const EBAMRCellData& a_source){
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_source[lvl]->copyTo(*m_source[lvl]);
+    a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
   m_amr->average_down(m_source, m_phase);

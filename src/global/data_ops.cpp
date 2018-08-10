@@ -195,7 +195,7 @@ void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFA
 void data_ops::copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
-      a_src[lvl]->copyTo(*a_dst[lvl]);
+      a_src[lvl]->localCopyTo(*a_dst[lvl]);
     }
   }
 }
@@ -203,7 +203,7 @@ void data_ops::copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src){
 void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
-      a_src[lvl]->copyTo(*a_dst[lvl]);
+      a_src[lvl]->localCopyTo(*a_dst[lvl]);
     }
   }
 }
@@ -211,7 +211,7 @@ void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
 void data_ops::copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
-      a_src[lvl]->copyTo(*a_dst[lvl]);
+      a_src[lvl]->localCopyTo(*a_dst[lvl]);
     }
   }
 }
@@ -299,7 +299,7 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
 #if 1 // Optimized code
     EBCellFAB covered_mask(ebisbox, box, 1);
     covered_mask.setVal(1.0);
-    covered_mask.setCoveredCellVal(1.0, 0);
+    covered_mask.setCoveredCellVal(-1.0, 0);
 
     const BaseFab<Real>& mask = covered_mask.getSingleValuedFAB();
     
