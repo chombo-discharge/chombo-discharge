@@ -171,7 +171,7 @@ void splitstep_tga::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::cfl;
   }
 
-  const Real dt_src = m_src_growth*m_cdr->compute_source_dt();
+  const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
   if(dt_src < dt){
     dt = dt_src;
     a_timecode = time_code::source;

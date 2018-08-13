@@ -1,0 +1,9 @@
+# ====================================================================================================
+# RK2_TGA
+# ====================================================================================================
+rk2_tga.rk2_alpha          = 1.0    # Set alpha. 1.0 = Heuns method, 0.5 = Midpoint method
+rk2_tga.turn_off_advection = false  # Turn off advection, debugging only
+rk2_tga.turn_off_diffusion = false  # Turn off diffusion, debugging only
+rk2_tga.turn_off_source    = false  # Turn off source term, debugging only
+rk2_tga.turn_off_poisson   = false  # Turn off Poisson, debugging only
+rk2_tga.turn_off_rte       = false  # Turn off RTE, debugging only

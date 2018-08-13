@@ -76,6 +76,20 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
   }
+
+  bool reset_stencil = false;
+  for (int i = 0; i < a_sten.size(); i++){
+    if(a_sten.weight(i) < 0.0){
+      reset_stencil = true;
+      break;
+    }
+  }
+
+  // Only monotone stencils allowed. 
+  if(reset_stencil){
+    a_sten.clear();
+    a_sten.add(a_vof, 1.0);
+  }
 }
 
 bool eb_centroid_interp::get_taylor_stencil(VoFStencil&              a_sten,

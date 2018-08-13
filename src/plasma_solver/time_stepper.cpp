@@ -14,6 +14,12 @@
 #include <ParmParse.H>
 #include <EBLevelDataOps.H>
 
+#if 0
+extern "C" {
+  void compute_sources(Real*, const int*, const int*, const int*);
+}
+#endif
+
 #define VECTORIZE_PLASKIN 0
 
 time_stepper::time_stepper(){
@@ -422,7 +428,6 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
     const Real dx                = m_amr->get_dx()[lvl];
     const RealVect origin        = m_physdom->get_prob_lo();
-
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box = dbl.get(dit());
@@ -430,6 +435,15 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const EBCellFAB& E     = (*a_E[lvl])[dit()];
       const EBCellFAB& gradE = (*grad_E[lvl])[dit()];
+
+#if 0
+      BaseFab<Real>& arr = (*grad_E[lvl])[dit()].getSingleValuedFAB();
+
+      const int* lo = arr.loVect();
+      const int* hi = arr.hiVect();
+      compute_sources(arr.dataPtr(), lo, hi, &SpaceDim);
+      MayDay::Abort("time_stepper::compute_cdr_sources - stop");
+#endif
 
       // Things to pass into plasma_kinetics
       RealVect         pos;
@@ -884,7 +898,7 @@ void time_stepper::compute_cdr_diffusion(){
   Vector<EBAMRIVData*> cdr_extrap(num_species);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    cdr_extrap[idx] = new EBAMRIVData();  // This must be delete
+    cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
     m_amr->allocate(*cdr_extrap[idx], m_cdr->get_phase(), ncomp);
 
     const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
