@@ -5,6 +5,7 @@
 /doc/html/*
 **/doc/html/**
 **/doc/sphinx/build/html/**
+**/doc/sphinx/build/**
 **/doc/sphinx/build/doctrees/**
 *.doctree
 *.pyc

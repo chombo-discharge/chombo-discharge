@@ -33,6 +33,18 @@ Gallery
 
    Streamer interaction with primitive shapes
 
+.. figure:: figures/box_space_charge_nomesh.png
+   :width: 480px
+   :align: center
+
+   Space charge layer for a positive streamer around a dielectric particle
+
+.. figure:: figures/box_electron_source_nomesh.png
+   :width: 480px
+   :align: center
+
+   Electron ionization term for a positive streamer interacting with a dielectric particle
+
 .. figure:: figures/triple_point_corona.png
    :width: 480px
    :align: center

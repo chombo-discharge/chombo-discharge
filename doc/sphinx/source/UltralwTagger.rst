@@ -86,4 +86,4 @@ The :doxy:`ultralw_tagger <ultralw__tagger>` does all the cell refinement and co
 		}
 	      };
 
-This fully functional refinement class defined a tracer field :math:`T = |\matbf{E}|` and refines if :math:`T > 1.0` and coarsens if :math:`T < 0`. One may, of course, define an arbitrary amount of tracer fields. 
+This fully functional refinement class defined a tracer field :math:`T = |\mathbf{E}|` and refines if :math:`T > 1.0` and coarsens if :math:`T < 0`. One may, of course, define an arbitrary amount of tracer fields. 
