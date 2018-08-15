@@ -121,25 +121,36 @@ Real rk2::advance(const Real a_dt){
   // Prepare for k1 advance
   const Real t0 = MPI_Wtime();
   this->compute_E_at_start_of_time_step();
+  const Real t00 = MPI_Wtime();
   this->compute_cdr_velo_at_start_of_time_step();
+  const Real t01 = MPI_Wtime();
   this->compute_cdr_eb_states_at_start_of_time_step();
+  const Real t02 = MPI_Wtime();
   this->compute_cdr_diffco_at_start_of_time_step();
+  const Real t03 = MPI_Wtime();
   this->compute_cdr_sources_at_start_of_time_step();
+  const Real t04 = MPI_Wtime();
   this->compute_cdr_fluxes_at_start_of_time_step();
+  const Real t05 = MPI_Wtime();
   this->compute_sigma_flux_at_start_of_time_step();
 
   // Do k1 advance
   const Real t1 = MPI_Wtime();
   this->advance_cdr_k1(a_dt);
+  const Real t10 = MPI_Wtime();
   this->advance_sigma_k1(a_dt);
+  const Real t11 = MPI_Wtime();
   this->solve_poisson_k1();
+  const Real t12 = MPI_Wtime();
   this->compute_E_after_k1();
+  const Real t13 = MPI_Wtime();
   if(m_rte->is_stationary()){
     this->advance_rte_k1_stationary(a_dt);
   }
   else{
     this->advance_rte_k1_transient(a_dt);
   }
+  const Real t14 = MPI_Wtime();
 
   // Recompute things in order to do k2 advance
   const Real t2 = MPI_Wtime();
@@ -176,22 +187,46 @@ Real rk2::advance(const Real a_dt){
   const Real t4 = MPI_Wtime();
 
 #if RK2_DEBUG_TIMER
-  pout() << "t1 - t0 = " << t1 - t0 << endl;
-  pout() << "t2 - t1 = " << t2 - t1 << endl;
-  pout() << "t3 - t2 = " << t3 - t2 << endl;
-  pout() << "t4 - t3 = " << t4 - t3 << endl;
   pout() << endl;
-  pout() << "t20 - t2  = " << t20 - t2  << endl;
-  pout() << "t21 - t20 = " << t21 - t20 << endl;
-  pout() << "t22 - t21 = " << t22 - t21 << endl;
-  pout() << "t23 - t22 = " << t23 - t22 << endl;
-  pout() << "t24 - t23 = " << t24 - t23 << endl;
-  pout() << "t25 - t24 = " << t25 - t24 << endl;
+  pout() << "rk2::advance breakdown" << endl;
+  
+  pout() << "t1 - t0 % = " << 100.*(t1 - t0)/(t4-t0) << "%" << endl;
+  pout() << "t2 - t1 % = " << 100.*(t2 - t1)/(t4-t0) << "%" << endl;
+  pout() << "t3 - t2 % = " << 100.*(t3 - t2)/(t4-t0) << "%" << endl;
+  pout() << "t4 - t3 % = " << 100.*(t4 - t3)/(t4-t0) << "%" << endl;
+  pout() << "Total time = " << t4 - t0 << endl;
   pout() << endl;
-  pout() << "t31 - t30 = " << t31 - t30 << endl;
-  pout() << "t32 - t31 = " << t32 - t31 << endl;
-  pout() << "t33 - t32 = " << t33 - t32 << endl;
-  pout() << "t34 - t33 = " << t34 - t33 << endl;
+  pout() << "t00 - t0  = " << 100.*(t00 - t0)/(t4-t0) << "%"  << endl;
+  pout() << "t01 - t00 = " << 100.*(t01 - t00)/(t4-t0) << "%" << endl;
+  pout() << "t02 - t01 = " << 100.*(t02 - t01)/(t4-t0) << "%" << endl;
+  pout() << "t03 - t02 = " << 100.*(t03 - t02)/(t4-t0) << "%" << endl;
+  pout() << "t04 - t03 = " << 100.*(t04 - t03)/(t4-t0) << "%" << endl;
+  pout() << "t05 - t04 = " << 100.*(t05 - t04)/(t4-t0) << "%" << endl;
+  pout() << "t1  - t05 = " << 100.*(t1  - t05)/(t4-t0) << "%" << endl;
+  pout() << "Total = " << 100.*(t1-t0)/(t4-t0) << "%" << endl;
+  pout() << endl;
+  pout() << "t10 - t1  = " << 100.*(t10 - t1)/(t4-t0) << "%"  << endl;
+  pout() << "t11 - t10 = " << 100.*(t11 - t10)/(t4-t0) << "%" << endl;
+  pout() << "t12 - t11 = " << 100.*(t12 - t11)/(t4-t0) << "%" << endl;
+  pout() << "t13 - t12 = " << 100.*(t13 - t12)/(t4-t0) << "%" << endl;
+  pout() << "t14 - t13 = " << 100.*(t14 - t13)/(t4-t0) << "%" << endl;
+  pout() << "Total = " << 100.*(t2-t1)/(t4-t0) << "%" << endl;
+  pout() << endl;
+  pout() << "t20 - t2  = " << 100.*(t20 - t2)/(t4-t0) << "%"  << endl;
+  pout() << "t21 - t20 = " << 100.*(t21 - t20)/(t4-t0) << "%" << endl;
+  pout() << "t22 - t21 = " << 100.*(t22 - t21)/(t4-t0) << "%" << endl;
+  pout() << "t23 - t22 = " << 100.*(t23 - t22)/(t4-t0) << "%" << endl;
+  pout() << "t24 - t23 = " << 100.*(t24 - t23)/(t4-t0) << "%" << endl;
+  pout() << "t25 - t24 = " << 100.*(t25 - t24)/(t4-t0) << "%" << endl;
+  pout() << "Total = " << 100.*(t3-t2)/(t4-t0) << "%" << endl;
+  pout() << endl;
+  pout() << "t31 - t30 = " << 100.*(t31 - t30)/(t4-t0) << "%" << endl;
+  pout() << "t32 - t31 = " << 100.*(t32 - t31)/(t4-t0) << "%" << endl;
+  pout() << "t33 - t32 = " << 100.*(t33 - t32)/(t4-t0) << "%" << endl;
+  pout() << "t34 - t33 = " << 100.*(t34 - t33)/(t4-t0) << "%" << endl;
+  pout() << "t4  - t34 = " << 100.*(t4  - t34)/(t4-t0) << "%" << endl;
+  pout() << "Total = " << 100.*(t4-t3)/(t4-t0) << "%" << endl;
+  pout() << endl;
 #if RK2_DEBUG_TIMER_STOP
   MayDay::Abort("rk2::advance - debug timer stop");
 #endif
@@ -322,7 +357,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
     extrap_cdr_fluxes.push_back(&flux_eb);
     extrap_cdr_gradients.push_back(&grad_eb);  // Already been computed
   }
-
+  
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_densities = m_cdr->get_states();
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
@@ -807,6 +842,7 @@ void rk2::advance_sigma_k2(const Real a_dt){
   data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
   data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
 
+  m_amr->average_down(state, m_cdr->get_phase());
   m_sigma->reset_cells(state);
 }
 

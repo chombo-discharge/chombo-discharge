@@ -15,6 +15,8 @@
 #include <NeumannConductivityEBBC.H>
 #include <NeumannConductivityDomainBC.H>
 
+#define CDR_TGA_DEBUG_TIMER 0
+
 cdr_tga::cdr_tga() : cdr_solver() {
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(1);
@@ -395,6 +397,7 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
     pout() << m_name + "::compute_divJ(divF, state)" << endl;
   }
 
+  const Real t0 = MPI_Wtime();
   const int comp  = 0;
   const int ncomp = 1;
 
@@ -407,17 +410,31 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
     m_amr->allocate(diffusion_term, m_phase, ncomp);
   }
 
+  const Real t1 = MPI_Wtime();
+
   // Compute advective term
   if(this->is_mobile()){
     this->compute_divF(advective_term, a_state, 0.0, true);
     data_ops::incr(a_divJ, advective_term, 1.0);
   }
 
+  const Real t2 = MPI_Wtime();
+
   // Add in diffusion term
   if(this->is_diffusive()){
     this->compute_divD(diffusion_term, a_state); // This already does refluxing. 
     data_ops::incr(a_divJ, diffusion_term, -1.0);
   }
+
+  const Real t3 = MPI_Wtime();
+#if CDR_TGA_DEBUG_TIMER
+  pout() << endl;
+  pout() << "cdr_tga::compute_divJ" << endl;
+  pout() << "t1 - t0 = " << t1 - t0 << endl;
+  pout() << "t2 - t1 = " << t2 - t1 << endl;
+  pout() << "t3 - t2 = " << t3 - t2 << endl;
+  pout() << "Total = " << t3 - t0 << endl;
+#endif
 }
 
 void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist){
@@ -425,6 +442,8 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
+
+  const Real t0 = MPI_Wtime();
   
   const int comp       = 0;
   const int ncomp      = 1;
@@ -450,6 +469,8 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     a_state[lvl]->copyTo(*weights[lvl]);
   }
 
+  const Real t1 = MPI_Wtime();
+
   // Compute the advective derivative
   this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
   this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
@@ -458,6 +479,8 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
   this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
   this->increment_flux_register(face_state, m_velo_face);           // Increment flux registers
   this->increment_redist(mass_diff);                                // Increment redistribution objects
+
+  const Real t2 = MPI_Wtime();
 
   // Mass weights.
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -475,6 +498,18 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
     this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
   }
+
+  const Real t3 = MPI_Wtime();
+
+#if CDR_TGA_DEBUG_TIMER
+  pout() << endl;
+  pout() << "Calilng cdr_tga::compute_divF" << endl;
+  pout() << "t1 - t0 = " << t1 - t0 << endl;
+  pout() << "t2 - t1 = " << t2 - t1 << endl;
+  pout() << "t3 - t2 = " << t3 - t2 << endl;
+  pout() << "Total = " << t3 - t0 << endl;
+  pout() << endl;
+#endif
 }
 
 void cdr_tga::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){

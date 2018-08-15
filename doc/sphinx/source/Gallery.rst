@@ -27,6 +27,12 @@ Gallery
 
    Fast and robust grid generation for complex structures
 
+.. figure:: figures/rod_sphere3d.png
+   :width: 480px
+   :align: center
+
+   Streamer interaction with primitive shapes
+
 .. figure:: figures/triple_point_corona.png
    :width: 480px
    :align: center
