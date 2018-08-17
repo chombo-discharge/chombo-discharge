@@ -53,7 +53,7 @@ We have extended Chombo with support for polygon tessellations through the ``dce
 PlasmaC geometries
 ------------------
 
-In PlasmaC, all geometries are created by providing ``BaseIF`` instances. For example, a dielectric is defined by an internal class ``dielectric`` (see :doxy:`Doxygen API <dielectric>` for details), and electrodes are supported through the ``electrode`` class (see :doxy:`Doxygen API <electrode>` for details).
+In PlasmaC, all geometries are created by providing ``BaseIF`` instances that describe the shape of a solid, and then pass these into the ``dielectric`` and ``electrode`` classes. These two classes are lightweight classes that pass additional information into PlasmaC, for example the permittivity or live voltage of an electrode. 
 
 Dielectrics
 ___________
@@ -84,3 +84,13 @@ Likewise, electrodes are created through the ``electrode`` class constructor
    electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
 
 Here, the constructor takes the shape through a ``BaseIF`` instance, and the user can specify if the electrode is at live voltage, and also specify the fraction of the live voltage. 
+
+Example geometry
+________________
+
+PlasmaC expects you to instantiate your geometries through a weak constructor. For example, the code segment below defines a geometry consisting only of a single electrode defined as a sphere
+
+.. literalinclude:: example_geometry.cpp
+   :language: c++
+
+The above piece of code defined a sphere at live voltage sitting at the origin with radius 1. Creating dielectrics is done in precisely the same way, except that you need to pass in the *permittivity* instead of the live voltage. 

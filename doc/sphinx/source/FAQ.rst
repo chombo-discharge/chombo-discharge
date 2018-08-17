@@ -26,7 +26,7 @@ This is a list to solutions of some common problems:
    This is the work of :ref:`Chap:computational_geometry`. You can also check out the :ref:`Chap:NewSimulations` chapter to see how things are done.
 
 ... implement or alter a plasma kinetic scheme?
-   This is the reponsibility of :ref:`Chap:plasma_engine`. You should also check out the worked examples in the :ref:`Chap:NewSimulations` chapter. 
+   This is the reponsibility of :ref:`Chap:plasma_kinetics`. You should also check out the worked examples in the :ref:`Chap:NewSimulations` chapter. 
 
 ... change the units in PlasmaC?
    You can't. We use SI units all over the place. 
