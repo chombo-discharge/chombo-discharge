@@ -45,6 +45,8 @@ amr_mesh::amr_mesh(){
   this->set_balance(load_balance::knapsack);
   this->set_irreg_sten_type(stencil_type::linear);
   this->set_ghost_interpolation(ghost_interpolation::pwl);
+
+  m_has_grids = false;
 }
 
 amr_mesh::~amr_mesh(){
@@ -520,8 +522,17 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
   const int hardcap = (a_hardcap == -1) ? m_max_amr_depth : a_hardcap;
 
   if(m_max_amr_depth > 0 && hardcap > 0){
-    for (int lvl = 0; lvl <= top_level; lvl++){
-      domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
+    domainSplit(m_domains[0], old_boxes[0], m_max_box_size, m_blocking_factor);
+
+    if(!m_has_grids){
+      for (int lvl = 1; lvl <= top_level; lvl++){
+	domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
+      }
+    }
+    else{
+      for (int lvl = 1; lvl <= top_level; lvl++){
+	old_boxes[lvl] = m_grids[lvl].boxArray();
+      }
     }
     
     // Berger-Rigoutsos grid generation
@@ -554,6 +565,8 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
     m_grids[lvl].close();
   }
+
+  m_has_grids = true;
 }
 
 void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes){

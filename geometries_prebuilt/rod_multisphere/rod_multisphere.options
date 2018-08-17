@@ -1,0 +1,13 @@
+# ====================================================================================================
+# ROD_MULTISPHERE CLASS OPTIONS
+# ====================================================================================================
+rod_multisphere.turn_off_electrode = false      # Turn off electrode (true)
+rod_multisphere.electrode_center1  = 0. 0. 0.   # One end of the rod
+rod_multisphere.electrode_center2  = 0. 0. 0.   # The other end
+rod_multisphere.electrode_radius   = 1.0;       # Radius
+rod_multisphere.electrode_live     = true       # Live or not
+
+rod_multisphere.num_spheres        = 1          # Number of spheres. Follow the sphereX_ syntax
+rod_multisphere.sphere0_center     = 0. 0. 0.   # Center for sphere0
+rod_multisphere.sphere0_radius     = 1.0        # Radius for sphere0
+rod_multisphere.sphere0_eps        = 5.0        # Permittivity for sphere0

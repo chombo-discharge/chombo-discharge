@@ -260,7 +260,7 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
-extlinks = {'doxy': ('../html_doxy/%s.html', None) }
+extlinks = {'doxy': ('../doxygen/html/%s.html', None) }
 #extlinks = {'doxy': ('/home/marskar/plasmac/doc/doxygen/html/%s.html', None) }
 sys.path.append(os.path.abspath("/home/marskar/plasmac"))
 def setup(app):

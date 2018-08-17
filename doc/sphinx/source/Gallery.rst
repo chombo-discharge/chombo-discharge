@@ -33,7 +33,7 @@ Gallery
 
    Streamer interaction with primitive shapes
 
-.. figure:: figures/box_space_charge_nomesh.png
+.. figure:: figures/box_space_charge.png
    :width: 480px
    :align: center
 

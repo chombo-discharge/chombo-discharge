@@ -634,6 +634,11 @@ protected:
   bool m_ebcf;
 
   /*!
+    @brief Has grids or not
+  */
+  bool m_has_grids;
+
+  /*!
     @brief Grids
   */
   Vector<DisjointBoxLayout> m_grids;

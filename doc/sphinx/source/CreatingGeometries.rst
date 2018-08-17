@@ -46,7 +46,9 @@ We have various implemented of ``BaseIF`` that the user may or may not find usef
 * ``perlin_sphere_if`` A sphere with surface roughness
 * ``rod_if.H`` A needle rod, essentially a cylinder with a spherical rounded end cap
 
-If you want to use these function, you should refer to the :doxy:`Doxygen API <index>` for the class that you're interested in. 
+If you want to use these function, you should refer to the :doxy:`Doxygen API <index>` for the class that you're interested in.
+
+We have extended Chombo with support for polygon tessellations through the ``dcel_if`` class which uses a doubly connected edge list (DCEL) in order to describe a watertight surface mesh. However, the current interface is not particularly user-friendly. If you are interested in using this, please :ref:`Chap:contact`. 
 
 PlasmaC geometries
 ------------------

@@ -11,4 +11,4 @@ Once you have provided us with a public key, you may fetch PlasmaC by
 
    git clone ssh://git@git.code.sintef.no/~robertm/plasmac
 
-You will also need a version of Chombo, but we do not distribute this. Please :ref:`Chap:contact`. 
+You will also need a version of Chombo, but we do not distribute this externally. Please :ref:`Chap:contact`. 

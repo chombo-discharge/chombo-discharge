@@ -4,11 +4,15 @@
    contain the root `toctree` directive.
 
 
+.. figure:: figures/front.png
+   :width: 720px
+   :align: center
+
 
 Welcome to PlasmaC's user documentation!
 ========================================
 	      
-PlasmaC is a scalable computer code for two- and three-dimensional simulations of low-temperature fluid plasmas in complex geometries. PlasmaC supports
+PlasmaC is a scalable computer code for two- and three-dimensional simulations of low-temperature fluid plasmas in complex geometries. PlasmaC features
 
 * Multi-material Poisson solvers
 * Diffusion radiation transport

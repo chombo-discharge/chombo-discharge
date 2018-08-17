@@ -20,7 +20,7 @@ This is a list to solutions of some common problems:
    You can't do this *unless* your finest level is lower than ``amr_mesh.max_amr_depth``. Please see :ref:`Chap:amr_mesh` for further details. 
 
 ... make my simulations run faster?
-Depending on your problem, you can try a few things. Try experimenting with different blocking factors by adjusting ``amr_mesh.blocking_factor`` and ``amr_mesh.max_box_size``. Please see :ref:`Chap:amr_mesh` to see what these parameters do. You can also try to manually remove some mesh by using :ref:`Chap:geo_coarsener`. If the convergence rate for the Poisson equation is low (:math:`<5`) then you can try experimenting with the level at which geometric multigrid enters the bottom solver. See :ref:`Chap:PoissonSolvers` for details.
+   Depending on your problem, you can try a few things. Try experimenting with different blocking factors by adjusting ``amr_mesh.blocking_factor`` and ``amr_mesh.max_box_size``. Please see :ref:`Chap:amr_mesh` to see what these parameters do. You can also try to manually remove some mesh by using :ref:`Chap:geo_coarsener`. If the convergence rate for the Poisson equation is low (:math:`<5`) then you can try experimenting with the level at which geometric multigrid enters the bottom solver. See :ref:`Chap:PoissonSolvers` for details.
 
 ... implement a new geometry?
    This is the work of :ref:`Chap:computational_geometry`. You can also check out the :ref:`Chap:NewSimulations` chapter to see how things are done.
