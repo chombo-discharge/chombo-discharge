@@ -27,6 +27,30 @@ You may also pass input parameters through the command line. For example, runnin
 
 set the ``plasma_engine.max_steps`` parameter to 10. Note that this overrides whatever is defined in the <input_file>. 
 
+.. _Chap:ControllingOutput:
+
+Controlling output
+------------------
+
+PlasmaC comes with controls for adjusting output. Through the :ref:`Chap:plasma_engine` class the user may adjust the option ``plasma_engine.output_directory`` to adjust where output files will be placed. If this directory does not exist, PlasmaC does it's best at creating it. In addition, it will create three more directories
+
+* :file:`output_directory/plt` contains all plot files.
+* :file:`output_directory/chk` contains all checkpoint files, which are used for restarting.
+* :file:`output_directory/proc` contains graphical information of patch distributions among the MPI ranks. 
+* :file:`output_directory/geo` contains geometric files that are written by PlasmaC (if you enable ``plasma_engine.write_ebis``).
+
+The files in :file:`output_directory/geo` do *not* represent your geometry in the form of level sets. Instead, the files that are placed here are HDF5 representations of your embedded boundary graph, which can be *read* by PlasmaC if you enable ``plasma_engine.read_ebis``. This is a shortcut that allows faster geometry generation when you restart simulations.
+
+The reason for this design is that PlasmaC can end up writing thousands of files per simulation and we feel that having a directory structure helps us navigate the simulation data.
+
+By default, Chombo will write a process output file *per MPI process* and this file will be named :file:`pout.n` where ``n`` is the MPI rank. These files are written in the directory where you executed your application, and are *not* related to plot files or checkpoint files. However, PlasmaC prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers). While it is possible to monitor the evolution of PlasmaC through each MPI, most of these files contain redundant information. To turn off the number of files that will be written, Chombo can read an environment variable ``CH_OUTPUT_INTERVAL``. For example, if you only want the master MPI rank to write :file:`pout.0`, you would do
+
+.. code-block:: bash
+
+   export CH_OUTPUT_INTERVAL=999999999
+
+You can, of course, put the definition in your :file:`.bashrc` file (for Bourne shell). Note that if you run simulations at high concurrencies, you *should* turn off the number of process output files since they impact the performance of the file system. 
+   
 .. _Chap:RestartingSimulations:
 
 Restarting simulations

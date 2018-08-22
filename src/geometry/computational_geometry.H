@@ -91,6 +91,12 @@ public:
   				const int&             a_nCellMax = -1,
   				const int&             a_maxCoarsen = -1);
 
+  /*!
+    @brief Build geometries from files
+  */
+  virtual void build_geo_from_files(const std::string&   a_gas_file,
+				    const std::string&   a_sol_file);
+
 protected:
 
   /*!

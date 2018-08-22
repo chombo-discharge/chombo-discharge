@@ -1,0 +1,64 @@
+      subroutine sgflux(
+     &     chf_fra1[flux],
+     &     chf_const_fra1[state],
+     &     chf_const_fra1[velo],
+     &     chf_const_fra1[diffco],
+     &     chf_const_int[dir],
+     &     chf_const_real[dx],
+     &     chf_box[face_box],
+     &)
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ioff; joff; koff]
+      real_t exp_plus, exp_minu, d, v, nlo, nhi
+
+      chf_dterm[
+      ioff = chf_id(0, dir);
+      joff = chf_id(1, dir);
+      koff = chf_id(2, dir)]
+      
+      chf_multido[face_box;i;j;k]
+         nlo = state(chf_ix[i - ioff; j - joff; k - koff]);
+         nhi = state(chf_ix[i; j; k]);
+         v   = velo(chf_ix[i; j; k])
+         d   = diffco(chf_ix[i; j; k])
+
+         exp_plus = exp(v*dx/d)
+         exp_minu = exp(-v*dx/d)
+
+         flux(chf_ix[i;j;k]) = v*(nlo*exp_plus - nhi*exp_minu)/(exp_plus - exp_minu)
+      chf_enddo
+      return
+      end
+
+      subroutine sgupwind(
+     &     chf_fra1[flux],
+     &     chf_const_fra1[state],
+     &     chf_const_fra1[velo],
+     &     chf_const_int[dir],
+     &     chf_const_real[dx],
+     &     chf_box[face_box],
+     &)
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ioff; joff; koff]
+      real_t v, nlo, nhi
+
+      chf_dterm[
+      ioff = chf_id(0, dir);
+      joff = chf_id(1, dir);
+      koff = chf_id(2, dir)]
+      
+      chf_multido[face_box;i;j;k]
+         nlo = state(chf_ix[i - ioff; j - joff; k - koff]);
+         nhi = state(chf_ix[i; j; k]);
+         v   = velo(chf_ix[i; j; k])
+
+         if(v > 0.0) then
+            flux(chf_ix[i;j;k]) = v*nlo;
+         else
+            flux(chf_ix[i;j;k]) = v*nhi;
+         endif		
+      chf_enddo
+      return
+      end

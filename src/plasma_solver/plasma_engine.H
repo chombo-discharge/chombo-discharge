@@ -352,6 +352,16 @@ protected:
   std::string m_output_names;
 
   /*!
+    @brief Name of the file holding the finest EBIS info for the gas phase
+  */
+  std::string m_ebis_gas_file;
+
+    /*!
+    @brief Name of the file holding the finest EBIS info for the gas phase
+  */
+  std::string m_ebis_sol_file;
+
+  /*!
     @brief Verbosity
   */
   int m_verbosity;

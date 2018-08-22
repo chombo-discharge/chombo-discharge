@@ -14,7 +14,7 @@
 
 #include <ParmParse.H>
 
-#define RK2_DEBUG_TIMER 0
+#define RK2_DEBUG_TIMER 1
 #define RK2_DEBUG_TIMER_STOP 0
 
 typedef rk2::cdr_storage     cdr_storage;

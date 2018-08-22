@@ -85,6 +85,27 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
   }
 }
 
+void computational_geometry::build_geo_from_files(const std::string&   a_gas_file,
+						  const std::string&   a_sol_file){
+
+  RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  // Define gas phase
+  HDF5Handle gas_handle(a_gas_file.c_str(), HDF5Handle::OPEN_RDONLY);
+  ebis_gas->define(gas_handle);
+  gas_handle.close();
+
+  if(m_dielectrics.size() > 0){
+    HDF5Handle sol_handle(a_sol_file.c_str(), HDF5Handle::OPEN_RDONLY);
+    ebis_sol->define(sol_handle);
+    sol_handle.close();
+  }
+  else {
+    ebis_sol = RefCountedPtr<EBIndexSpace> (NULL);
+  }
+}
+
 void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
 					       const ProblemDomain& a_finestDomain,
 					       const RealVect&      a_origin,

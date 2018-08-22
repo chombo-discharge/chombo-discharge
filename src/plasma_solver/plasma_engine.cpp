@@ -603,20 +603,21 @@ void plasma_engine::write_ebis(){
     pout() << "plasma_engine::write_ebis" << endl;
   }
 
-  const std::string path_gas = m_output_dir + "/gas_ebis.hdf5";
-  const std::string path_sol = m_output_dir + "/sol_ebis.hdf5";
-  
-  HDF5Handle gas_handle(path_gas.c_str(), HDF5Handle::CREATE);
-  HDF5Handle sol_handle(path_sol.c_str(), HDF5Handle::CREATE);
+  const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
+  const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
   if(!ebis_gas.isNull()){
-    ebis_gas->writeAllLevels(gas_handle);
+    HDF5Handle gas_handle(path_gas.c_str(), HDF5Handle::CREATE);
+    ebis_gas->write(gas_handle);
+    gas_handle.close();
   }
   if(!ebis_sol.isNull()){
-    ebis_sol->writeAllLevels(sol_handle);
+    HDF5Handle sol_handle(path_sol.c_str(), HDF5Handle::CREATE);
+    ebis_sol->write(sol_handle);
+    sol_handle.close();
   }
 }
 
@@ -1372,7 +1373,7 @@ void plasma_engine::setup_and_run(){
 
   char iter_str[100];
   sprintf(iter_str, ".check%07d.%dd.hdf5", m_restart_step, SpaceDim);
-  const std::string restart_file = m_output_dir + "/" + m_output_names + std::string(iter_str);
+  const std::string restart_file = m_output_dir + "/chk/" + m_output_names + std::string(iter_str);
 
   this->setup(m_init_regrids, m_restart, restart_file);
 
@@ -1593,6 +1594,47 @@ void plasma_engine::set_output_directory(const std::string a_output_dir){
 
   ParmParse pp("plasma_engine");
   pp.query("output_directory", m_output_dir);
+
+  // If directory does not exist, create it
+  int success = 0;
+  if(procID() == 0){
+    std::string cmd;
+
+    cmd = "mkdir -p " + m_output_dir;
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "plasma_engine::set_output_directory - master could not create directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/plt";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "plasma_engine::set_output_directory - master could not create plot directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/geo";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "plasma_engine::set_output_directory - master could not create geo directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/chk";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "plasma_engine::set_output_directory - master could not create checkpoint directory" << std::endl;
+    }
+
+    cmd = "mkdir -p " + m_output_dir + "/proc";
+    success = system(cmd.c_str());
+    if(success != 0){
+      std::cout << "plasma_engine::set_output_directory - master could not create proc directory" << std::endl;
+    }    
+  }
+  
+  MPI_Barrier(Chombo_MPI::comm);
+  if(success != 0){
+    MayDay::Abort("plasma_engine::set_output_directory - could not create directories for output");
+  }
 }
 
 void plasma_engine::set_output_file_names(const std::string a_output_names){
@@ -1718,6 +1760,9 @@ void plasma_engine::setup_geometry_only(){
 			       m_amr->get_finest_domain(),
 			       m_amr->get_finest_dx(),
 			       m_amr->get_max_ebis_box_size());
+  if(m_write_ebis){
+    this->write_ebis();
+  }
 
   this->get_geom_tags();       // Get geometric tags.
   
@@ -1750,14 +1795,22 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
-  m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
-			       m_amr->get_finest_domain(),
-			       m_amr->get_finest_dx(),
-			       m_amr->get_max_ebis_box_size());
-
-  if(m_write_ebis){
-    this->write_ebis();        // Write EBIndexSpace's for later use
+  if(!m_read_ebis){
+    m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
+				 m_amr->get_finest_domain(),
+				 m_amr->get_finest_dx(),
+				 m_amr->get_max_ebis_box_size());
+    if(m_write_ebis){
+      this->write_ebis();        // Write EBIndexSpace's for later use
+    }
   }
+  else{
+    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
+    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
+
+    m_compgeom->build_geo_from_files(path_gas, path_sol);
+  }
+
   this->get_geom_tags();       // Get geometric tags.
   
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
@@ -1829,10 +1882,17 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
 
   this->sanity_check();                                    // Sanity check before doing anything expensive
 
-  m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
-			       m_amr->get_finest_domain(),
-			       m_amr->get_finest_dx(),
-			       m_amr->get_max_ebis_box_size());
+  if(!m_read_ebis){
+    m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
+				 m_amr->get_finest_domain(),
+				 m_amr->get_finest_dx(),
+				 m_amr->get_max_ebis_box_size());
+  }
+  else{
+    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
+    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
+    m_compgeom->build_geo_from_files(path_gas, path_sol);
+  }
 
   this->get_geom_tags();       // Get geometric tags.
 
@@ -1998,6 +2058,9 @@ void plasma_engine::set_write_ebis(const bool a_write_ebis){
   }
 
   m_write_ebis = a_write_ebis;
+
+  m_ebis_gas_file = m_output_names + ".ebis.gas.hdf5";
+  m_ebis_sol_file = m_output_names + ".ebis.sol.hdf5";
 
   { // get parameter from input script
     std::string str;
@@ -2427,7 +2490,7 @@ void plasma_engine::write_geometry(){
 
   // Dummy file name
   char file_char[1000];
-  const std::string prefix = m_output_dir + "/" + m_output_names;
+  const std::string prefix = m_output_dir + "/geo/" + m_output_names;
   sprintf(file_char, "%s.geometry.%dd.hdf5", prefix.c_str(), SpaceDim);
   string fname(file_char);
 
@@ -2485,7 +2548,7 @@ void plasma_engine::write_plot_file(){
 
   // Filename
   char file_char[1000];
-  const std::string prefix = m_output_dir + "/" + m_output_names;
+  const std::string prefix = m_output_dir + "/plt/" + m_output_names;
   sprintf(file_char, "%s.step%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
   string fname(file_char);
 
@@ -2586,7 +2649,7 @@ void plasma_engine::write_checkpoint_file(){
 
   // Output file name
   char str[100];
-  const std::string prefix = m_output_dir + "/" + m_output_names;
+  const std::string prefix = m_output_dir + "/chk/" + m_output_names;
   sprintf(str, "%s.check%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
 
 

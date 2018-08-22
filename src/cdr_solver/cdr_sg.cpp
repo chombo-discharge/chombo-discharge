@@ -6,6 +6,7 @@
 */
 
 #include "cdr_sg.H"
+#include "cdr_sgF_F.H"
 #include "data_ops.H"
 
 #include <EBArith.H>
@@ -174,6 +175,7 @@ void cdr_sg::compute_sg_flux(LevelData<EBFluxFAB>&       a_flux,
       const EBFaceFAB& velo   = a_velo[dit()][dir];
       const EBFaceFAB& diffco = a_diffco[dit()][dir];
 
+#if 1
       const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary; // Boundary fluxes from elsewhere. 
       for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	const FaceIndex& face = faceit();
@@ -202,6 +204,70 @@ void cdr_sg::compute_sg_flux(LevelData<EBFluxFAB>&       a_flux,
 	  }
 	}
       }
+
+#else  // Optimized code
+      BaseFab<Real>& flux_fab        = flux.getSingleValuedFAB();
+      const BaseFab<Real>& velo_fab  = velo.getSingleValuedFAB();
+      const BaseFab<Real>& diff_fab  = diffco.getSingleValuedFAB();
+      const BaseFab<Real>& state_fab = state.getSingleValuedFAB();
+      
+      const Box& face_box = flux_fab.box();
+      const Box& cell_box = state_fab.box();
+
+      flux_fab.setVal(0.0);
+
+      if(m_diffusive){
+	if(m_mobile){
+	FORT_SGFLUX(CHF_FRA1(flux_fab, comp),
+		    CHF_CONST_FRA1(state_fab, comp),
+		    CHF_CONST_FRA1(velo_fab, comp),
+		    CHF_CONST_FRA1(diff_fab, comp),
+		    CHF_CONST_INT(dir),
+		    CHF_CONST_REAL(dx),
+		    CHF_BOX(face_box));
+	}
+      }
+      else {
+	if(m_mobile){
+	  FORT_SGUPWIND(CHF_FRA1(flux_fab, comp),
+			CHF_CONST_FRA1(state_fab, comp),
+			CHF_CONST_FRA1(velo_fab, comp),
+			CHF_CONST_INT(dir),
+			CHF_CONST_REAL(dx),
+			CHF_BOX(face_box));
+	}
+      }
+
+      // No do the multivalued faces
+      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary; // Boundary fluxes from elsewhere. 
+      for (FaceIterator faceit(ebisbox.getIrregIVS(cell_box), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	const FaceIndex& face = faceit();
+	const VolIndex vof_lo = face.getVoF(Side::Lo);
+	const VolIndex vof_hi = face.getVoF(Side::Hi);
+
+	flux(face, comp) = 0.;
+
+	const Real n_lo     = state(vof_lo, comp);
+	const Real n_hi     = state(vof_hi, comp);
+	const Real v        = velo(face,   comp);
+
+	if(m_diffusive){
+	  const Real d        = diffco(face, comp);
+	  const Real exp_plus = exp( v*dx/d);
+	  const Real exp_minu = exp(-v*dx/d);
+
+	  flux(face, comp) = v*(n_lo*exp_plus - n_hi*exp_minu)/(exp_plus - exp_minu);
+	}
+	else{
+	  if(v > 0.){
+	    flux(face, comp) = n_lo*v;
+	  }
+	  else if(v < 0.){
+	    flux(face, comp) = n_hi*v;
+	  }
+	}
+      }
+#endif
     }
   }
 }

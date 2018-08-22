@@ -56,6 +56,14 @@ const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const int a_phase) const {
   return m_ebis[a_phase];
 }
 
+RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const phase::which_phase a_phase){
+  return m_ebis[a_phase];
+}
+
+RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const int a_phase){
+  return m_ebis[a_phase];
+}
+
 
 int mfis::num_phases() const{
   int phases = 0;

@@ -16,7 +16,7 @@ Here are the options for plasma_engine in the current version of the code:
 
 .. literalinclude:: links/plasma_engine.options
 
-Most options here are self-explanatory. However, we explicitly mention a few that may not be immediately clear. Firstly, ``geometry_only`` is a special option that *only* generates the geometry. It will be written to an HDF5 file whose name depends on ``output_directory`` and ``output_names``. When you develop your applications, it is often convenient to set this one to *true*, since this will skip a bunch of initialization stages (such as solving the Poisson equation, for example). It allows for quick debugging of your geometry.
+Most options here are self-explanatory. However, we explicitly mention a few that may not be immediately clear. Firstly, ``geometry_only`` is a special option that *only* generates the geometry. It will be written to an HDF5 file whose name depends on ``output_directory`` and ``output_names``. When you develop your applications, it is often convenient to set this one to *true*, since this will skip a bunch of initialization stages (such as solving the Poisson equation, for example). It allows for quick debugging of your geometry. See chapter :ref:`Chap:ControllingOutput` to see where simulation files are placed. Furthermore, since generating the geometric information is a non-negligible work load, you may choose to write the geometric information to an HDF5 file by enable ``write_ebis``. This will write the finest level information to a file, which you can later read using ``read_ebis``. 
 
 The ``restart`` flag allows you to restart a simulation from a certain checkpoint step. See :ref:`Chap:RestartingSimulations` for details.
 
