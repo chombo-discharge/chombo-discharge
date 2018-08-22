@@ -764,6 +764,8 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
 					long long& a_totalBoxes,
 					Vector<long long>& a_my_level_boxes,
 					Vector<long long>& a_total_level_boxes,
+					Vector<long long>& a_my_level_points,
+					Vector<long long>& a_total_level_points,
 					const int& a_finestLevel,
 					const Vector<DisjointBoxLayout>& a_grids){
   CH_TIME("plasma_engine::get_loads_and_boxes");
@@ -780,6 +782,8 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
 
   a_my_level_boxes.resize(1 + a_finestLevel);
   a_total_level_boxes.resize(1 + a_finestLevel);
+  a_my_level_points.resize(1 + a_finestLevel);
+  a_total_level_points.resize(1 + a_finestLevel);
 
   const int ghost = m_amr->get_num_ghost();
 
@@ -802,8 +806,9 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
       pointsThisLevelGhosts += grownBox.numPts();
       boxesThisLevel        += 1;
     }
-    a_total_level_boxes[lvl] = boxesThisLevel;
-    
+    a_total_level_points[lvl] = pointsThisLevel;
+    a_total_level_boxes[lvl]  = boxesThisLevel;
+
 
     // Find the total number of points and boxes that this processor owns
     long long myPointsLevel       = 0;
@@ -818,7 +823,7 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
       myPointsLevelGhosts += grownBox.numPts();
       myBoxesLevel        += 1;
     }
-    a_my_level_boxes[lvl] = myBoxesLevel;
+
 
     // Total for this level
     a_totalPoints           += pointsThisLevel;
@@ -829,6 +834,8 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
     a_myBoxes               += myBoxesLevel;
     a_my_level_boxes[lvl]    = myBoxesLevel;
     a_total_level_boxes[lvl] = boxesThisLevel;
+    a_my_level_points[lvl]   = myPointsLevel;
+    a_my_level_boxes[lvl]    = myBoxesLevel;
   }
 }
 
@@ -854,6 +861,8 @@ void plasma_engine::grid_report(){
   long long myBoxes;
   Vector<long long> my_level_boxes;
   Vector<long long> total_level_boxes;
+  Vector<long long> my_level_points;
+  Vector<long long> total_level_points;
 
   //
   const long long uniformPoints = (domains[finest_level].domainBox()).numPts();
@@ -877,7 +886,6 @@ void plasma_engine::grid_report(){
 #endif
 #endif
 
-
   
   // Get loads and boxes
   this->get_loads_and_boxes(myPoints,
@@ -888,21 +896,25 @@ void plasma_engine::grid_report(){
 			    totBoxes,
 			    my_level_boxes,
 			    total_level_boxes,
+			    my_level_points,
+			    total_level_points,
 			    finest_level,
 			    grids);
 
   // Write a report
   pout() << "-----------------------------------------------------------------------" << endl
 	 << "plasma_engine::Grid report - timestep = " << m_step << endl 
-	 << "\t\t\t        Finest level          = " << finest_level << endl
-    	 << "\t\t\t        Total number boxes    = " << totBoxes << endl
-    	 << "\t\t\t        Total number of cells = " << totPoints << " (" << totPointsGhosts << ")" << endl
-	 << "\t\t\t        Total boxes per level = " << total_level_boxes << endl
-    	 << "\t\t\t        Proc. boxes per level = " << my_level_boxes << endl
-	 << "\t\t\t        Grid sparsity         = " << 1.0*totPoints/uniformPoints << endl
-	 << "\t\t\t        Finest dx             = " << dx[finest_level] << endl
-	 << "\t\t\t        Number of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
-    	 << "\t\t\t        Num boxes             = " << myBoxes << endl
+	 << "\t\t\t        Finest level           = " << finest_level << endl
+    	 << "\t\t\t        Total number boxes     = " << totBoxes << endl
+    	 << "\t\t\t        Total number of cells  = " << totPoints << " (" << totPointsGhosts << ")" << endl
+	 << "\t\t\t        Proc. # of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
+	 << "\t\t\t        Proc. # of boxes       = " << myBoxes << endl
+	 << "\t\t\t        Total # of boxes (lvl) = " << total_level_boxes << endl
+    	 << "\t\t\t        Proc. # of boxes (lvl) = " << my_level_boxes << endl
+    	 << "\t\t\t        Total # of cells (lvl) = " << total_level_points << endl
+	 << "\t\t\t        Proc. # of cells (lvl) = " << my_level_points << endl
+	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
+	 << "\t\t\t        Finest dx              = " << dx[finest_level] << endl
 #ifdef CH_USE_MEMORY_TRACKING
 	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
     	 << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl

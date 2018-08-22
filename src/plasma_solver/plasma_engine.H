@@ -674,6 +674,8 @@ protected:
 				   long long& a_totalBoxes,
 				   Vector<long long>& a_my_level_boxes,
 				   Vector<long long>& a_total_level_boxes,
+				   Vector<long long>& a_my_level_points,
+				   Vector<long long>& a_total_level_points,
 				   const int& a_finestLevel,
 				   const Vector<DisjointBoxLayout>& a_grids);
 
