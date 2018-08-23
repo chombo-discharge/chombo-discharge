@@ -8,7 +8,7 @@
 #include "load_balance.H"
 #include "EBEllipticLoadBalance.H"
 
-void load_balance::balance_knapsack(Vector<int>& a_procs, const Vector<Box>& a_boxes){
+void load_balance::balance_volume(Vector<int>& a_procs, const Vector<Box>& a_boxes){
   LoadBalance(a_procs, a_boxes);
 }
 

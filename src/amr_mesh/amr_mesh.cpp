@@ -42,7 +42,7 @@ amr_mesh::amr_mesh(){
   this->set_eb_ghost(4);
   this->set_irreg_sten_order(1);
   this->set_irreg_sten_radius(1);
-  this->set_balance(load_balance::knapsack);
+  this->set_balance(load_balance::volume);
   this->set_irreg_sten_type(stencil_type::linear);
   this->set_ghost_interpolation(ghost_interpolation::pwl);
 
@@ -308,8 +308,8 @@ void amr_mesh::set_balance(load_balance::which_balance a_load){
   ParmParse pp("amr");
   pp.query("load_balance", balance);
 
-  if(balance == "knapsack"){
-    m_which_balance = load_balance::knapsack;
+  if(balance == "volume"){
+    m_which_balance = load_balance::volume;
   }
   else if(balance == "elliptic"){
     m_which_balance = load_balance::elliptic;
@@ -577,8 +577,8 @@ void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& 
 
   // Level-by-level load balancing. This might change in the future. 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    if(m_which_balance == load_balance::knapsack){
-      load_balance::balance_knapsack(a_procs[lvl], a_boxes[lvl]);
+    if(m_which_balance == load_balance::volume){
+      load_balance::balance_volume(a_procs[lvl], a_boxes[lvl]);
     }
     else if(m_which_balance == load_balance::elliptic){
       load_balance::balance_elliptic(a_procs[lvl], a_boxes[lvl], m_mfis->get_ebis(phase::gas), m_domains[lvl], false);

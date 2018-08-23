@@ -20,7 +20,7 @@ public:
     @brief Load-balancing types
   */
   enum which_balance {
-    knapsack,
+    volume,
     elliptic,
     multifluid
   };
@@ -28,7 +28,7 @@ public:
   /*!
     @brief Conventional load balancing
   */
-  static void balance_knapsack(Vector<int>& a_procs, const Vector<Box>& a_boxes);
+  static void balance_volume(Vector<int>& a_procs, const Vector<Box>& a_boxes);
   
   /*!
     @brief Do elliptic load-balancing using EBAMRPoissonOp

@@ -55,7 +55,7 @@
       amr.stencil_radius  = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
       amr.stencil_type    = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
       amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-      amr.load_balance    = knapsack    # Load balancing algorithm. Valid options are 'knapsack' or 'elliptic'
+      amr.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
       amr.ebcf            = false       # Tell amr to ignore EBCF-related code. 
 */
 class amr_mesh {
