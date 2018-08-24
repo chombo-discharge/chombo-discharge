@@ -44,3 +44,19 @@ void load_balance::get_mfpoisson_loads(Vector<unsigned long long>& a_loads,
 				       const ProblemDomain&        a_domain){
   
 }
+
+void load_balance::get_cdr_loads(Vector<unsigned long long>& a_loads,
+				 Vector<Box>&                a_boxes,
+				 RefCountedPtr<mfis>&        a_mfis,
+				 const DisjointBoxLayout&    a_dbl,
+				 const ProblemDomain&        a_domain){
+  
+}
+
+void load_balance::get_rte_loads(Vector<unsigned long long>& a_loads,
+				 Vector<Box>&                a_boxes,
+				 RefCountedPtr<mfis>&        a_mfis,
+				 const DisjointBoxLayout&    a_dbl,
+				 const ProblemDomain&        a_domain){
+  
+}

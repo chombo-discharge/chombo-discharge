@@ -50,22 +50,37 @@ public:
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
+  /*!
+    @brief Allocate internal stuff
+  */
+  virtual void allocate_internals();
+
 protected:
 
   /*!
-    @brief Slope limiter
+    @brief
   */
-  Real (*m_slope_func)(const Real a_slopeL, const Real a_slopeR);
+  bool m_use_slope_limiter;
 
   /*!
     @brief Compute slopes
   */
-  virtual void compute_slopes(EBCellFAB& a_slopes, const EBCellFAB& a_state, const Box& a_box);
+  virtual void compute_slopes(EBCellFAB& a_deltaC, const EBCellFAB& a_state, const Box& a_box, const ProblemDomain& a_domain);
+
+  /*!
+    @brief Compute outflow fluxes at the boundary
+  */
+  virtual void compute_bndry_outflow(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
   /*!
     @brief Riemann solve (just choose the upwind side)
   */
-  virtual void upwind(EBFluxFAB& a_face_states, const EBCellFAB& a_slopes, const EBCellFAB& a_state, const Box& a_box);
+  virtual void upwind(EBFluxFAB&           a_face_states,
+		      const EBCellFAB&     a_slopes,
+		      const EBCellFAB&     a_state,
+		      const EBFluxFAB&     a_velo,
+		      const ProblemDomain& a_domain,
+		      const Box&           a_box);
 
 };
 #endif

@@ -65,5 +65,18 @@ protected:
 				  RefCountedPtr<mfis>&        a_mfis,
 				  const DisjointBoxLayout&    a_dbl,
 				  const ProblemDomain&        a_domain);
+
+  static void get_cdr_loads(Vector<unsigned long long>& a_loads,
+			    Vector<Box>&                a_boxes,
+			    RefCountedPtr<mfis>&        a_mfis,
+			    const DisjointBoxLayout&    a_dbl,
+			    const ProblemDomain&        a_domain);
+
+  static void get_rte_loads(Vector<unsigned long long>& a_loads,
+			    Vector<Box>&                a_boxes,
+			    RefCountedPtr<mfis>&        a_mfis,
+			    const DisjointBoxLayout&    a_dbl,
+			    const ProblemDomain&        a_domain);  
 };
+
 #endif
