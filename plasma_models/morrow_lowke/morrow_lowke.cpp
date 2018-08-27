@@ -488,19 +488,19 @@ morrow_lowke::electron::electron(){
 
   { // Get from input script or command line
     ParmParse pp("morrow_lowke");
-    std::string str;
+    std::string str = "true";
     pp.query("uniform_density",    m_uniform_density);
     pp.query("seed_density",       m_seed_density);
     pp.query("seed_radius",        m_seed_radius);
     pp.query("noise_amplitude",    m_noise_density);
     pp.query("electron_diffusion", str);
+    if(str == "true"){
+      m_diffusive = true;
+    }
+    else if(str == "false"){
+      m_diffusive = false;
+    }
     if(pp.contains("seed_position")){
-      if(str == "true"){
-	m_diffusive = true;
-      }
-      else if(str == "false"){
-	m_diffusive = false;
-      }
       Vector<Real> pos(SpaceDim);
       pp.queryarr("seed_position", pos, 0, SpaceDim);
       m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));

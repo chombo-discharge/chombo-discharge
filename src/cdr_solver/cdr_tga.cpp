@@ -15,7 +15,7 @@
 #include <NeumannConductivityEBBC.H>
 #include <NeumannConductivityDomainBC.H>
 
-#define CDR_TGA_DEBUG_TIMER 0
+#define CDR_TGA_DEBUG_TIMER 1
 
 cdr_tga::cdr_tga() : cdr_solver() {
   this->set_gmg_solver_parameters();
@@ -428,12 +428,13 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
 
   const Real t3 = MPI_Wtime();
 #if CDR_TGA_DEBUG_TIMER
+  const Real T = t3 - t0;
   pout() << endl;
   pout() << "cdr_tga::compute_divJ" << endl;
-  pout() << "t1 - t0 = " << t1 - t0 << endl;
-  pout() << "t2 - t1 = " << t2 - t1 << endl;
-  pout() << "t3 - t2 = " << t3 - t2 << endl;
-  pout() << "Total = " << t3 - t0 << endl;
+  pout() << "Allocations:  " << 100.*(t1 - t0)/T << "%" << endl;
+  pout() << "Compute divF: " << 100.*(t2 - t1)/T << "%" << endl;
+  pout() << "compute divD: " << 100.*(t3 - t2)/T << "%" << endl;
+  pout() << "Total:        " << T << endl;
 #endif
 }
 
@@ -473,13 +474,19 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
 
   // Compute the advective derivative
   this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
+  const Real t10 = MPI_Wtime();
   this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
+  const Real t11 = MPI_Wtime();
   this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
+  const Real t12 = MPI_Wtime();
   this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
+  const Real t13 = MPI_Wtime();
   this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
+  const Real t14 = MPI_Wtime();
   this->increment_flux_register(face_state, m_velo_face);           // Increment flux registers
+  const Real t15 = MPI_Wtime();
   this->increment_redist(mass_diff);                                // Increment redistribution objects
-
+  const Real t16 = MPI_Wtime();
   const Real t2 = MPI_Wtime();
 
   // Mass weights.
@@ -502,13 +509,19 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
   const Real t3 = MPI_Wtime();
 
 #if CDR_TGA_DEBUG_TIMER
+  const Real T = t3 - t0;
   pout() << endl;
-  pout() << "Calilng cdr_tga::compute_divF" << endl;
-  pout() << "t1 - t0 = " << t1 - t0 << endl;
-  pout() << "t2 - t1 = " << t2 - t1 << endl;
-  pout() << "t3 - t2 = " << t3 - t2 << endl;
-  pout() << "Total = " << t3 - t0 << endl;
-  pout() << endl;
+  pout() << "cdr_tga::compute_divF breakdown" << endl;
+  pout() << "Allocations:      " << 100.*(t1 - t0)/T   << "%" << endl;
+  pout() << "Average to faces: " << 100.*(t10 - t1)/T  << "%" << endl;
+  pout() << "Advect to faces:  " << 100.*(t11 - t10)/T << "%" << endl;
+  pout() << "Cons. Div.:       " << 100.*(t12 - t11)/T << "%" << endl;
+  pout() << "NonCons. Div.:    " << 100.*(t13 - t12)/T << "%" << endl;
+  pout() << "Hybrid. Div.:     " << 100.*(t14 - t13)/T << "%" << endl;
+  pout() << "Flux reg:         " << 100.*(t15 - t14)/T << "%" << endl;
+  pout() << "Incr redist:      " << 100.*(t16 - t15)/T << "%" << endl;
+  pout() << "Reflux-redist:    " << 100.*(t3 - t2)/T   << "%" << endl;
+  pout() << "Total time:       " << T << endl;
 #endif
 }
 
