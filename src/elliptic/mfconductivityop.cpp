@@ -300,7 +300,7 @@ void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, c
 #endif
 
   if(m_multifluid){
-    for (int iphase = 0; iphase < m_phases; iphase++){
+    for (int iphase = 0; iphase <= 1; iphase++){
       m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous); 
     }
   }
@@ -794,28 +794,20 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 	  m_ebops[1]->applyOp(*m_alias[5], *m_alias[3], NULL, true, true, false);
 
 
-	  // Don't relax covered boxes. This implies that only intersection boxes will be relaxed twice. Can't avoid this. 
+	  // Intersection boxes will be relaxed twice. Can't avoid this. 
 	  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	    const EBISBox& ebisbox0 = (*m_alias[0])[dit()].getEBISBox();
-	    if(!ebisbox0.isAllCovered()){
-	      m_ebops[0]->gsrbColor((*m_alias[0])[dit()],
-				    (*m_alias[2])[dit()],
-				    (*m_alias[1])[dit()],
-				    dbl.get(dit()),
-				    dit(),
-				    m_colors[icolor]);
-	    }
-
-	    // Check if box is covered. Relax if its not
-	    const EBISBox& ebisbox1 = (*m_alias[3])[dit()].getEBISBox();
-	    if(!ebisbox1.isAllCovered()){
-	      m_ebops[1]->gsrbColor((*m_alias[3])[dit()],
-				    (*m_alias[5])[dit()],
-				    (*m_alias[4])[dit()],
-				    dbl.get(dit()),
-				    dit(),
-				    m_colors[icolor]);
-	    }
+	    m_ebops[0]->gsrbColor((*m_alias[0])[dit()],
+				  (*m_alias[2])[dit()],
+				  (*m_alias[1])[dit()],
+				  dbl.get(dit()),
+				  dit(),
+				  m_colors[icolor]);
+	    m_ebops[1]->gsrbColor((*m_alias[3])[dit()],
+				  (*m_alias[5])[dit()],
+				  (*m_alias[4])[dit()],
+				  dbl.get(dit()),
+				  dit(),
+				  m_colors[icolor]);
 	  }
 
 	  if((icolor-1) % 2 == 0 && icolor - 1 < m_colors.size()){

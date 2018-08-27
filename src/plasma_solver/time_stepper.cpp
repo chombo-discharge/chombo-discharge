@@ -749,6 +749,7 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 	const EBCellFAB& E     = (*a_E[lvl])[dit()];
 
 	// Do all cells
+
 	IntVectSet ivs(box);
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
@@ -1888,7 +1889,6 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     EBAMRCellData& rhs                = *a_rte_sources[idx];
     solver->advance(a_dt, state, rhs);
   }
-
 }
 
 void time_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){

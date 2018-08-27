@@ -110,14 +110,14 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
   //  m_gmg_solver.init(phi, rhs, finest_level, 0);
-  //  const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
+  const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
 
   m_converged_resid = zero_resid*m_gmg_eps;
 
   const Real t3 = MPI_Wtime();
 
-  if(true){//phi_resid > m_converged_resid){ // Residual is too large, recompute solution
+  if(phi_resid > m_converged_resid){ // Residual is too large, recompute solution
     m_gmg_solver.m_convergenceMetric = zero_resid;
     m_gmg_solver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
