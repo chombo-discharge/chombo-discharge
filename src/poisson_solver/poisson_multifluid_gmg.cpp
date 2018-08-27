@@ -23,7 +23,7 @@
 #include <DirichletConductivityEBBC.H>
 #include <ParmParse.H>
 
-
+#define POISSON_MF_GMG_TIMER 1
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
@@ -63,6 +63,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
   }
 
+  const Real t0 = MPI_Wtime();
   bool converged = false;
 
   if(m_needs_setup){
@@ -75,6 +76,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   else{
     m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
   }
+  const Real t1 = MPI_Wtime();
 
 
   const int ncomp        = 1;
@@ -104,13 +106,16 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   m_amr->alias(res,     m_resid);
   m_amr->alias(zero,    mfzero);
 
+  const Real t2 = MPI_Wtime();
+
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
-  m_gmg_solver.init(phi, rhs, finest_level, 0);
+  //  m_gmg_solver.init(phi, rhs, finest_level, 0);
   const Real phi_resid  = m_gmg_solver.computeAMRResidual(phi,  rhs, finest_level, 0);
   const Real zero_resid = m_gmg_solver.computeAMRResidual(zero, rhs, finest_level, 0);
 
   m_converged_resid = zero_resid*m_gmg_eps;
 
+  const Real t3 = MPI_Wtime();
 
   if(phi_resid > m_converged_resid){ // Residual is too large, recompute solution
     m_gmg_solver.m_convergenceMetric = zero_resid;
@@ -126,7 +131,9 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   }
 
-#if 1 // Why is this required??? Is it because of op->zeroCovered()????
+  const Real t4 = MPI_Wtime();
+
+#if 0 // Why is this required??? Is it because of op->zeroCovered()????
   Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
   new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
 #endif
@@ -141,6 +148,20 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   m_amr->average_down(a_state);
   m_amr->interp_ghost(a_state);
+
+  const Real t5 = MPI_Wtime();
+
+#ifdef POISSON_MF_GMG_TIMER
+  const Real T = t5 - t0;
+  pout() << endl;
+  pout() << "poisson_multiflud_gmg::solve breakdown" << endl;
+  pout() << "set jump:   " << 100.*(t1-t0)/T << "%" << endl;
+  pout() << "alloc/alias:" << 100.*(t2-t1)/T << "%" << endl;
+  pout() << "resid:      " << 100.*(t3-t2)/T << "%" << endl;
+  pout() << "solve:      " << 100.*(t4-t3)/T << "%" << endl;
+  pout() << "revert/avg: " << 100.*(t5-t4)/T << "%" << endl;
+  pout() << "Total time: " << t5-t4 << endl;
+#endif
 
   return converged;
 }
@@ -730,4 +751,22 @@ void poisson_multifluid_gmg::setup_solver(){
 				   1.E-99); // Norm thresh will be set via eps
   m_gmg_solver.m_imin = m_gmg_min_iter;
   m_gmg_solver.m_verbosity = m_gmg_verbosity;
+
+
+  // Dummies for init
+  const int ncomp = 1;
+  MFAMRCellData dummy1, dummy2;
+  m_amr->allocate(dummy1, ncomp);
+  m_amr->allocate(dummy2, ncomp);
+  data_ops::set_value(dummy1, 0.0);
+  data_ops::set_value(dummy2, 0.0);
+
+  // Aliasing
+  Vector<LevelData<MFCellFAB>* > phi, rhs;
+  m_amr->alias(phi, dummy1);
+  m_amr->alias(rhs, dummy2);
+
+  // Init solver
+  m_gmg_solver.init(phi, rhs, finest_level, 0);
+
 }
