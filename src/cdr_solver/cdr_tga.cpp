@@ -15,7 +15,7 @@
 #include <NeumannConductivityEBBC.H>
 #include <NeumannConductivityDomainBC.H>
 
-#define CDR_TGA_DEBUG_TIMER 1
+#define CDR_TGA_DEBUG_TIMER 0
 
 cdr_tga::cdr_tga() : cdr_solver() {
   this->set_gmg_solver_parameters();

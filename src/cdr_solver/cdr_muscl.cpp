@@ -21,25 +21,6 @@ cdr_muscl::cdr_muscl(){
   { // Select slope from input
     ParmParse pp("cdr_muscl");
     pp.query("limit_slopes", m_use_slope_limiter);
-    // if(pp.contains("slope_limiter")){
-    //   std::string str;
-    //   pp.get("slope_limiter", str);
-    //   if(str == "koren"){
-    // 	m_slope_func = &(slope_limiters::koren);
-    //   }
-    //   else if(str == "minmod"){
-    // 	m_slope_func = &(slope_limiters::minmod);
-    //   }
-    //   else if(str == "superbee"){
-    // 	m_slope_func = &(slope_limiters::superbee);
-    //   }
-    //   else if(str == "van_leer"){
-    // 	m_slope_func = &(slope_limiters::van_leer);
-    //   }
-    //   else {
-    // 	MayDay::Abort("cdr_muscl::cdr_muscl - unsupported slope limiter requested"); 
-    //   }
-    // }
   }
 }
 
@@ -105,7 +86,6 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
 
     this->compute_bndry_outflow(*a_face_state[lvl], lvl);
   }
-
 }
 
 void cdr_muscl::allocate_internals(){
