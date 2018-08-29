@@ -151,10 +151,10 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   const Real t5 = MPI_Wtime();
 
-#ifdef POISSON_MF_GMG_TIMER
+#if POISSON_MF_GMG_TIMER
   const Real T = t5 - t0;
   pout() << endl;
-  pout() << "poisson_multiflud_gmg::solve breakdown" << endl;
+  pout() << "poisson_multifluid_gmg::solve breakdown" << endl;
   pout() << "set jump:   " << 100.*(t1-t0)/T << "%" << endl;
   pout() << "alloc/alias:" << 100.*(t2-t1)/T << "%" << endl;
   pout() << "resid:      " << 100.*(t3-t2)/T << "%" << endl;

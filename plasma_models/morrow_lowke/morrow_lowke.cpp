@@ -276,7 +276,6 @@ Real morrow_lowke::compute_eta2(const RealVect& a_E) const{
   return eta2;
 }
 
-
 Real morrow_lowke::compute_eta3(const RealVect& a_E) const{
   const RealVect E = a_E*1.E-2;         // Morrow-Lowke wants E in V/cm
   const Real Emag  = E.vectorLength();  //
@@ -347,6 +346,7 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
   if(PolyGeom::dot(a_E, a_normal) < 0.){
+    CH_assert(a_photon_fluxes[m_photon1_idx] >= 0.0);
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon1_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon2_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon3_idx]*m_dielectric_yield;

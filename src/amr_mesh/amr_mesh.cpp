@@ -660,6 +660,12 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       	  }
       	}
       }
+
+      // Set covered to zero
+      for (int dir= 0; dir < SpaceDim; dir++){
+	grad.setCoveredCellVal(0.0, dir);
+      }
+
 #else // Original code
       for (VoFIterator vofit(IntVectSet(region), ebgraph); vofit.ok(); ++vofit){
       	const VolIndex& vof = vofit();

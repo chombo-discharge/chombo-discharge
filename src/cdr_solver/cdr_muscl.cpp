@@ -72,7 +72,7 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
       const EBFluxFAB& velo  = (*m_velo_face[lvl])[dit()];
       const EBISBox& ebisbox = state.getEBISBox();
 
-      // Limit slopes.
+      // Limit slopes and solve Riemann problem
       Box grown_box = box;
       grown_box.grow(1);
       EBCellFAB deltaC(ebisbox, grown_box, SpaceDim); // Cell-centered slopes

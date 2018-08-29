@@ -168,6 +168,8 @@ protected:
 			    const Real&             a_time,
 			    const Real&             a_dx,
 			    const int&              a_lvl,
+			    const DataIndex&        a_dit,
+			    const VolIndex&         a_vof,
 			    const Vector<Real>&     a_tracer,
 			    const Vector<RealVect>& a_grad_tracer) = 0;
 
@@ -178,6 +180,8 @@ protected:
 			   const Real&             a_time,
 			   const Real&             a_dx,
 			   const int&              a_lvl,
+			   const DataIndex&        a_dit,
+			   const VolIndex&         a_vof,
 			   const Vector<Real>&     a_tracer,
 			   const Vector<RealVect>& a_grad_tracer) = 0;
 };

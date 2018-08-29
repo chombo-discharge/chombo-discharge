@@ -486,6 +486,11 @@ public:
   virtual Real get_time();
 
   /*!
+    @brief Get dt
+  */
+  virtual Real get_dt();
+
+  /*!
     @brief Get cdr solvers
   */
   virtual RefCountedPtr<cdr_layout>& get_cdr();
@@ -618,6 +623,11 @@ protected:
     @brief TIme
   */
   Real m_time;
+
+  /*!
+    @brief Previous time step size
+  */
+  Real m_dt;
 
   /*!
     @brief Tolerance for source term growth

@@ -749,7 +749,6 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 	const EBCellFAB& E     = (*a_E[lvl])[dit()];
 
 	// Do all cells
-
 	IntVectSet ivs(box);
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
@@ -1879,7 +1878,9 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     pout() << "time_stepper::solve_rte(full)" << endl;
   }
 
+  const Real t0 = MPI_Wtime();
   this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
+  const Real t1 = MPI_Wtime();
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -1889,6 +1890,10 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     EBAMRCellData& rhs                = *a_rte_sources[idx];
     solver->advance(a_dt, state, rhs);
   }
+  const Real t2 = MPI_Wtime();
+
+  pout() << "source time = " << 100.*(t1-t0)/(t2-t0) << endl;
+  pout() << "solve time = " << 100.*(t2-t1)/(t2-t0) << endl;
 }
 
 void time_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
@@ -1899,6 +1904,7 @@ void time_stepper::synchronize_solver_times(const int a_step, const Real a_time,
 
   m_step = a_step;
   m_time = a_time;
+  m_dt   = a_dt;
 
   m_cdr->set_time(a_step,     a_time, a_dt);
   m_poisson->set_time(a_step, a_time, a_dt);
@@ -1998,6 +2004,11 @@ Real time_stepper::compute_relaxation_time(){
 Real time_stepper::get_time(){
   return m_time;
 }
+
+Real time_stepper::get_dt(){
+  return m_dt;
+}
+
 
 RefCountedPtr<cdr_layout>& time_stepper::get_cdr(){
   return m_cdr;
