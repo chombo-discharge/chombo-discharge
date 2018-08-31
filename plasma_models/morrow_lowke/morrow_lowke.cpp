@@ -346,7 +346,6 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
   if(PolyGeom::dot(a_E, a_normal) < 0.){
-    CH_assert(a_photon_fluxes[m_photon1_idx] >= 0.0);
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon1_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon2_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon3_idx]*m_dielectric_yield;

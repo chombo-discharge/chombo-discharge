@@ -22,12 +22,7 @@
 
   By default, the gas is electrically neutral with initial data supplied through an equal mixture of electrons and positive ions. The class supports uniform distributions, seeds, and random distributions of the initial ionization. Some kinetic things that are not accessible through BOLSIG can be controlled directly here. The following options are available for this class:
 
-      air_bolsig.bolsig_path                   = ./plasma_models/bolsigplus032016-linux
-      air_bolsig.lxcat_path                    = ./plasma_models/bolsigplus032016-linux
-      air_bolsig.lxcat_file                    = LXCat-June2013.txt    # Where to find database file (LXCat)
-      air_bolsig.grid_points                   = 1000                  # Number of grid points for BOLSIG call
-      air_bolsig.min_townsend                  = 0.0                   # Transport coefficient computation limit (low)
-      air_bolsig.max_townsend                  = 2000                  # Transport coefficient computation limit (low)
+      air_bolsig.transport_file                = transport_data.txt    # Transport data file
       air_bolsig.gas_temperature               = 300                   # Gas temperature (K)
       air_bolsig.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
       air_bolsig.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
@@ -223,16 +218,6 @@ public:
 protected:
 
   /*!
-    @brief Name of temporary script file
-  */
-  static std::string s_script_file;
-
-  /*!
-    @brief Name of temporary data file
-  */
-  static std::string s_data_file;
-
-  /*!
     @brief String that we use to identify ionization coefficient in bolsig output
   */
   static std::string s_bolsig_alpha;
@@ -253,44 +238,14 @@ protected:
   static std::string s_bolsig_diff;
 
   /*!
-    @brief String that we use to identify electron excitation rate e + N2 -> N2_ex(12.25eV) + e
+    @brief Safety in case BOLSIG file was written with fitted functions
   */
-  static std::string s_bolsig_kex23;
-
-  /*!
-    @brief String that we use to identify electron excitation rate e + N2 -> N2_ex(13eV) + e
-  */
-  static std::string s_bolsig_kex24;
-
-  /*!
-    @brief Path to BOLSIG
-  */
-  std::string m_bolsig_path;
-
-  /*!
-    @brief Path to LXCAT data file
-  */
-  std::string m_lxcat_path;
-
-  /*!
-    @brief LXCAT file name
-  */
-  std::string m_lxcat_file;
-
-  /*!
-    @brief Name of temporary lxcat file
-  */
-  std::string m_local_lxcat_file;
-  
-  /*!
-    @brief Name of temporary script file
-  */
-  std::string m_local_script_file;
+  static std::string s_skip_fit;
 
   /*!
     @brief Name of temporary data file
   */
-  std::string m_local_data_file;
+  std::string m_transport_file;
 
   /*!
     @brief Noise function
@@ -316,16 +271,6 @@ protected:
     @brief Impact attachment coefficient
   */
   lookup_table m_eta;
-
-  /*!
-    @brief Electron excitation rate e + N2 -> N2^*(12.25eV) + e
-  */
-  lookup_table m_kex23;
-
-  /*!
-    @brief Electron excitation rate e + N2 -> N2^*(13eV) + e
-  */
-  lookup_table m_kex24;
 
   /*!
     @brief electron index 
@@ -356,26 +301,11 @@ protected:
     @brief photon_three index
   */
   int m_photon3_idx;
-  
-  /*!
-    @brief Number of grid points to use for BOLSIG computation
-  */
-  int m_grid_points;
 
   /*!
     @brief Number of octaves to use for noise function
   */
   int m_noise_octaves;
-
-  /*!
-    @brief Minimum electric field to compute transport coefficients from
-  */
-  Real m_min_townsend;
-  
-  /*!
-    @brief Maximum electric field to compute transport coefficients from
-  */
-  Real m_max_townsend;
 
   /*!
     @brief 
@@ -431,11 +361,6 @@ protected:
     @brief Quantum efficiency on dielectric surfaces
   */
   Real m_dielectric_quantum_efficiency;
-
-  /*!
-    @brief Work function for dielectric
-  */
-  Real m_dielectric_work;
 
   /*!
     @brief Uniform background density
@@ -498,31 +423,6 @@ protected:
   virtual void compute_transport_coefficients();
 
   /*!
-    @brief Build the BOLSIG input script
-  */
-  virtual void build_bolsig_script();
-
-  /*!
-    @brief Let BOLSIG build the input script
-  */
-  virtual void call_bolsig();
-
-  /*!
-    @brief Extract necessary data from BOLSIG output file
-  */
-  virtual void extract_bolsig_data();
-
-  /*!
-    @brief Delete the BOLSIG output file
-  */
-  virtual void delete_bolsig_data();
-
-  /*!
-    @brief Delete the BOLSIG script
-  */
-  virtual void delete_bolsig_script();
-
-    /*!
     @brief Compute the flux on the cathode
   */
   virtual Vector<Real> compute_cathode_flux(const Vector<Real>& a_extrapolated_fluxes,

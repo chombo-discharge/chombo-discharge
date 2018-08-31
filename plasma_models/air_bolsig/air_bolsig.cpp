@@ -16,32 +16,24 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-#define air_bolsig_debug 0
-
-std::string air_bolsig::s_script_file  = "bolsig_inputs.";
-std::string air_bolsig::s_data_file    = "bolsig_outputs.";
+// These are things that we use to identify lines in BOLSIG+ output files. If you want to
+// read transport data in a different format, you're on your own. 
+std::string air_bolsig::s_skip_fit     = "Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)";
 std::string air_bolsig::s_bolsig_alpha = "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)";
 std::string air_bolsig::s_bolsig_mob   = "E/N (Td)	Mobility *N (1/m/V/s)";
 std::string air_bolsig::s_bolsig_diff  = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
 std::string air_bolsig::s_bolsig_eta   = "E/N (Td)	Townsend attach. coef. eta/N (m2)";
-std::string air_bolsig::s_bolsig_kex23 = "C23   N2    Excitation    12.25 eV";                              
-std::string air_bolsig::s_bolsig_kex24 = "C24   N2    Excitation    13.00 eV";
 
 air_bolsig::air_bolsig(){
-  m_bolsig_path  = "./";
-  m_lxcat_path   = "./";
-  m_lxcat_file   = "LXCat-June2013.txt";
-  m_min_townsend = 0.0;
-  m_max_townsend = 3000.0;
-  m_grid_points  = 100;
   
+  // Default parameters
   m_gas_temp = 300.;
   m_frac_O2  = 0.2;
   m_frac_N2  = 0.8;
   m_p        = 1.0;
   m_pq       = 0.03947;
 
-  m_background_rate               = 1.E9;
+  m_background_rate               = 0.0;
   m_electron_recombination        = 5.E-14;
   m_electron_detachment           = 1.E-18;
   m_ion_recombination             = 2.07E-12;
@@ -49,37 +41,27 @@ air_bolsig::air_bolsig(){
   m_negative_species_mobility     = 2.E-4;
   m_excitation_efficiency         = 0.6;
   m_photoionization_efficiency    = 0.1;
-  m_townsend2_electrode           = 1.E-4;
+  m_townsend2_electrode           = 1.E-6;
   m_townsend2_dielectric          = 1.E-6;
-  m_electrode_quantum_efficiency  = 1.E-4;
+  m_electrode_quantum_efficiency  = 1.E-6;
   m_dielectric_quantum_efficiency = 1.E-6;
-  m_dielectric_work               = 3.0;
 
   m_noise_amplitude   = 0.0;
   m_noise_octaves     = 1;
   m_noise_persistence = 0.5;
   m_noise_frequency   = RealVect::Unit;
       
-      
-  { // Get path to BOLSIG and database file
+  { // Get path to BOLSIG and database file. 
     ParmParse pp("air_bolsig");
-    pp.query("bolsig_path",  m_bolsig_path);
-    pp.query("lxcat_path",   m_lxcat_path);
-    pp.query("lxcat_file",   m_lxcat_file);
-    pp.query("grid_points",  m_grid_points);
-    pp.query("min_townsend", m_min_townsend);
-    pp.query("max_townsend", m_max_townsend);
-
-    if(m_grid_points > 1000){
-      MayDay::Abort("air_bolsig::air_bolsig - it appears that BOLSIG+ has a hardcap at 1000 grid points. Adjust accordingly");
-    }
+    pp.get("transport_file",     m_transport_file);
+    pp.get("gas_temperature",    m_gas_temp);
+    pp.get("gas_O2_frac",        m_frac_O2);
+    pp.get("gas_N2_frac",        m_frac_N2);
   }
 
   { // Get gas parameters
     ParmParse pp("air_bolsig");
-    pp.query("gas_temperature",        m_gas_temp);
-    pp.query("gas_O2_frac",            m_frac_O2);
-    pp.query("gas_N2_frac",            m_frac_N2);
+
     pp.query("gas_pressure",           m_p);
     pp.query("gas_quenching_pressure", m_pq);
   }
@@ -98,7 +80,6 @@ air_bolsig::air_bolsig(){
     pp.query("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
     pp.query("dielectric_townsend2"       ,   m_townsend2_dielectric);
     pp.query("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
-    pp.query("dielectric_work",               m_dielectric_work);
   }
 
   { // Noise things. Noise function is passed by pointer to species since it must be unique
@@ -152,21 +133,13 @@ air_bolsig::air_bolsig(){
   air_bolsig::positive_species* pos = static_cast<air_bolsig::positive_species*> (&(*m_species[m_nplus_idx]));
   electron->set_noise(m_perlin);
   pos->set_noise(m_perlin);
-
-#if 1
-  m_alpha.dump_table();
-  MayDay::Abort("stop");
-#endif
 }
 
 air_bolsig::~air_bolsig(){
 
 }
 
-Vector<RealVect> air_bolsig::compute_velocities(const RealVect& a_E) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_velocities" << endl;
-#endif
+Vector<RealVect> air_bolsig::compute_velocities(const RealVect& a_E) const {
   Vector<RealVect> velocities(m_num_species);
 
   // Set ion and electron velocityes 
@@ -178,19 +151,13 @@ Vector<RealVect> air_bolsig::compute_velocities(const RealVect& a_E) const{
   const Real mobility = m_electron_mobility.get_entry(ET);
   velocities[m_nelec_idx] = -a_E*mobility;
 
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_velocities - done" << endl;
-#endif
   return velocities;
 }
 
 
 Vector<Real> air_bolsig::compute_source_terms(const Vector<Real>& a_cdr_densities, 
 					      const Vector<Real>& a_rte_densities,
-					      const RealVect&     a_E) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_source_terms" << endl;
-#endif
+					      const RealVect&     a_E) const {
   const Vector<RealVect> vel = this->compute_velocities(a_E);
 
   // Compute ionization and attachment coeffs
@@ -225,43 +192,32 @@ Vector<Real> air_bolsig::compute_source_terms(const Vector<Real>& a_cdr_densitie
   Se = alpha*Ne*ve - eta*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
   Sp = alpha*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
   Sn = eta*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;
+
+  CH_assert(Abs(Sp -Se - Sn) < 1.E-10);
   
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_source_terms - done" << endl;
-#endif  
   return source;
 }
 
 
-Vector<Real> air_bolsig::compute_rte_source_terms(const Vector<Real>& a_cdr_densities, const RealVect& a_E) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_rte_source_terms" << endl;
-#endif  
+Vector<Real> air_bolsig::compute_rte_source_terms(const Vector<Real>& a_cdr_densities, const RealVect& a_E) const {
   Vector<Real> ret(m_num_photons);
 
-  const Real ET    = a_E.vectorLength()/(units::s_Td*m_N);
-  const Vector<RealVect> vel = this->compute_velocities(a_E);      // Compute velocities
-  const Real alpha           = m_alpha.get_entry(ET);              // Compute ionization coefficient
-  const Real Ne              = a_cdr_densities[m_nelec_idx];       // Electron density
-  const Real ve              = vel[m_nelec_idx].vectorLength();    // Electron velocity
-  const Real Se              = Max(0., alpha*Ne*ve);               // Excitations = alpha*Ne*ve
+  const Real ET              = a_E.vectorLength()/(units::s_Td*m_N); // Field in Townsend
+  const Vector<RealVect> vel = this->compute_velocities(a_E);        // Compute velocities
+  const Real alpha           = m_alpha.get_entry(ET);                // Compute ionization coefficient
+  const Real Ne              = a_cdr_densities[m_nelec_idx];         // Electron density
+  const Real ve              = vel[m_nelec_idx].vectorLength();      // Electron velocity
+  const Real Se              = Max(0., alpha*Ne*ve);                 // Excitations = alpha*Ne*ve
 
-  // Photo emissions = electron excitations * efficiency * quenching
+  // Photosource = electron excitations * efficiency * quenching
   ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
   ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
   ret[m_photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
 
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_rte_source_terms - done" << endl;
-#endif  
-
   return ret;
 }
 
-Vector<Real> air_bolsig::compute_diffusion_coefficients(const RealVect& a_E) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_diffusion_coefficients" << endl;
-#endif  
+Vector<Real> air_bolsig::compute_diffusion_coefficients(const RealVect& a_E) const {
   Vector<Real> diffCo(m_num_species);
 
   const Real ET    = a_E.vectorLength()/(units::s_Td*m_N);
@@ -270,13 +226,9 @@ Vector<Real> air_bolsig::compute_diffusion_coefficients(const RealVect& a_E) con
   diffCo[m_nplus_idx] = 0.0;
   diffCo[m_nminu_idx] = 0.0;
 
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_diffusion_coefficients - done" << endl;
-#endif
 
   return diffCo;
 }
-
 
 Vector<Real> air_bolsig::compute_conductor_fluxes(const Vector<Real>& a_extrapolated_fluxes,
 						  const Vector<Real>& a_cdr_densities,
@@ -285,10 +237,7 @@ Vector<Real> air_bolsig::compute_conductor_fluxes(const Vector<Real>& a_extrapol
 						  const RealVect&     a_E,
 						  const RealVect&     a_pos,
 						  const RealVect&     a_normal,
-						  const Real&         a_time) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_conductor_fluxes" << endl;
-#endif  
+						  const Real&         a_time) const {
   Vector<Real> fluxes(m_num_species, 0.0);
 
   // Treat anode and cathode differently
@@ -314,9 +263,6 @@ Vector<Real> air_bolsig::compute_conductor_fluxes(const Vector<Real>& a_extrapol
 				      a_normal,
 				      a_time);
   }
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_conductor_fluxes - done" << endl;
-#endif  
 
   return fluxes;
 }
@@ -328,10 +274,7 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
 						const RealVect&     a_E,
 						const RealVect&     a_pos,
 						const RealVect&     a_normal,
-						const Real&         a_time) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_cathode_flux" << endl;
-#endif  
+						const Real&         a_time) const {
   Vector<Real> fluxes(m_num_species);
 
   // Set everything to outflow
@@ -348,9 +291,7 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_electrode_quantum_efficiency;
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_electrode_quantum_efficiency;
 
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_cathode_flux - done" << endl;
-#endif  
+
   return fluxes;
 }
 
@@ -361,10 +302,7 @@ Vector<Real> air_bolsig::compute_anode_flux(const Vector<Real>& a_extrapolated_f
 					      const RealVect&     a_E,
 					      const RealVect&     a_pos,
 					      const RealVect&     a_normal,
-					      const Real&         a_time) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_anode_flux" << endl;
-#endif  
+					      const Real&         a_time) const {
   Vector<Real> fluxes(m_num_species);
 
   // Set to outflux
@@ -372,9 +310,6 @@ Vector<Real> air_bolsig::compute_anode_flux(const Vector<Real>& a_extrapolated_f
     fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
 
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_anode_flux - done" << endl;
-#endif  
 
   return fluxes;
 }
@@ -387,13 +322,10 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
 						   const RealVect&     a_E,
 						   const RealVect&     a_pos,
 						   const RealVect&     a_normal,
-						   const Real&         a_time) const{
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_dielectric_fluxes" << endl;
-#endif
+						   const Real&         a_time) const {
 
   // Outflux of species
-  Vector<Real> fluxes(m_num_species, 0.0); return fluxes;
+  Vector<Real> fluxes(m_num_species, 0.0); 
   
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
     fluxes[m_nelec_idx] = Max(0.0, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons
@@ -404,175 +336,23 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
   }
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
-  if(PolyGeom::dot(a_E, a_normal) <= 0.){ // Field points into dielectric
+  if(PolyGeom::dot(a_E, a_normal) < 0.){ // Field points into dielectric
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -Max(0., a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
 
-  // Also add Schottky emission
-#if 0
-  if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
-    const Real W = m_dielectric_work*units::s_eV;
-    const Real dW = sqrt(units::s_Qe*units::s_Qe*units::s_Qe*a_E.vectorLength()/(4.0*units::s_pi*units::s_eps0));
-    const Real T  = m_gas_temp;
-    const Real A  = 1200000;
-    fluxes[m_nelec_idx] += -A*T*T*exp(-(W-dW)/(units::s_kb*T))/units::s_Qe;
-  }
-#endif
-
-#if air_bolsig_debug
-  pout() << "air_bolsig::compute_dielectric_fluxes - done" << endl;
-#endif  
 
   return fluxes;
 }
 
-Real air_bolsig::initial_sigma(const Real a_time, const RealVect& a_pos) const {
-  return 0.0;
-}
-
 void air_bolsig::compute_transport_coefficients(){
-  pout() << "air_bolsig::compute_transport_coefficients - Computing transport data using BOLSIG- ..." << endl;
-
-  std::stringstream ss;
-
-  ss << procID();
-
-  m_local_lxcat_file  = m_lxcat_file  + ss.str();
-  m_local_script_file = s_script_file + ss.str();
-  m_local_data_file   = s_data_file   + ss.str();
-
-  this->build_bolsig_script();   // Build input script for BOLSIG
-  this->call_bolsig();           // Call bolsigminus and generate output data
-  this->extract_bolsig_data();   // Extract data
-  this->delete_bolsig_data();    // Cleanup, delete file created by bolsigminus
-  this->delete_bolsig_script();  // Cleanup, delete script
-
-  
-  pout() << "air_bolsig::compute_transport_coefficients - Done computing transport data" << endl;
-}
-
-void air_bolsig::build_bolsig_script(){
-  // Get LxCat file
-  int success;
-  std::string cmd;
-  cmd = "cp " + m_lxcat_path + "/" + m_lxcat_file + " ./" + m_local_lxcat_file;
-  success = system(cmd.c_str());
-  if(success != 0){
-    MayDay::Abort("air_bolsig::build_bolsig_script - Could not get LXCat file");
-  }
-  
-  // Open file
-  ofstream file;
-  file.open(m_local_script_file.c_str());
-
-  // Comment for debugging, and turn off output
-  file << "/ Comment\n";
-  file << std::endl;
-  file << "NOSCREEN\n";
-  file << std::endl;
-
-  // Read collisions
-  file << "READCOLLISIONS\n"; 
-  file << m_local_lxcat_file.c_str() << "\t / File\n";
-  file << "N2 O2"                    << "\t / Species\n";
-  file << 1                          << "\t / Extrapolate: 0= No 1= Yes\n";
-  file << std::endl;
-  
-  // Set conditions
-  file << "CONDITIONS\n";
-  file << 0.1        << "\t / Electric field / N (Td)\n";
-  file << 0.0        << "\t / Angular field frequency / N (m3/s)\n";
-  file << 0.0        << "\t / Cosine of E-B field angle\n";
-  file << m_gas_temp << "\t / Gas temperature (K)\n";
-  file << m_gas_temp << "\t / Excitation temperature (K)\n";
-  file << 0.         << "\t / Transition energy (eV)\n";
-  file << 0.         << "\t / Ionization degree\n";
-  file << 1e18       << "\t / Plasma density (1/m3)\n";
-  file << 1          << "\t / Ion charge parameter\n";
-  file << 1          << "\t / Ion/neutral mass ratio\n";
-  file << 1          << "\t / e-e momentum effects: 0=No; 1=Yes*\n";
-  file << 1          << "\t / Energy sharing: 1=Equal*; 2=One takes all\n";
-  file << 1          << "\t / Growth: 1=Temporal*; 2=Spatial; 3=Not included; 4=Grad-n expansion\n";
-  file << 0.         << "\t / Maxwellian mean energy (eV) \n";
-  file << 200        << "\t / # of grid points\n";
-  file << 0          << "\t / Manual grid: 0=No; 1=Linear; 2=Parabolic \n";
-  file << 200.       << "\t / Manual maximum energy (eV)\n";
-  file << 1e-10      << "\t / Precision\n";
-  file << 1e-4       << "\t / Convergence\n";
-  file << 1000       << "\t / Maximum # of iterations\n";
-  file << m_frac_N2  << " "
-       << m_frac_O2  << "\t / Species fractions\n";
-  file << 1          << "\t / Normalize composition to unity: 0=No; 1=Yes\n";
-  file << std::endl;
-
-
-  // Run series1           / Variable: 1=E/N; 2=Mean energy; 3=Maxwellian energy
-  const int grid_points = m_grid_points;
-  const Real min        = m_min_townsend;
-  const Real max        = m_max_townsend;
-  
-  file << "RUNSERIES\n";
-  file << 1           << "\t / Variable: 1=E/N; 2=Mean energy; 3=Maxwellian energy\n";
-  file << min         << " "
-       << max         << "\t / Min/max\n";
-  file << grid_points << "\t / Number\n";
-  file << 1           << "\t / Type: 1=Linear; 2=Quadratic; 3=Exponential\n";
-  file << std::endl;
-
-  // Save results to file
-  const std::string output = m_local_data_file;
-  file << "SAVERESULTS\n";
-  file << output.c_str() << "\t / File\n";
-  file << 3              << "\t / Format: 1=Run by run; 2=Combined; 3=E/N; 4=Energy; 5=SIGLO; 6=PLASIMO\n";
-  file << 1              << "\t / Conditions: 0=No; 1=Yes\n";
-  file << 1              << "\t / Transport coefficients: 0=No; 1=Yes\n";
-  file << 1              << "\t / Rate coefficients: 0=No; 1=Yes\n";
-  file << 0              << "\t / Reverse rate coefficients: 0=No; 1=Yes\n";
-  file << 0              << "\t / Energy loss coefficients: 0=No; 1=Yes\n";
-  file << 0              << "\t / Distribution function: 0=No; 1=Yes \n";
-  file << 0              << "\t / Skip failed runs: 0=No; 1=Yes\n";
-
-  file << "END\n";
-  file.close();
-}
-
-void air_bolsig::call_bolsig(){
-
-  int success;
-  std::string cmd;
-
-  cmd = m_bolsig_path + "/bolsigminus " + m_local_script_file;
-  success = system(cmd.c_str());
-  if(success != 0){
-    MayDay::Abort("air_bolsig::call_bolsig - Could not call BOLSIG");
-  }
-
-  // Delete the transient copy of the data base when we are done. 
-  cmd = "rm " + m_local_lxcat_file;
-  success = system(cmd.c_str());
-  if(success != 0){
-    MayDay::Abort("air_bolsig::call_bolsig - Could not delete temporary file");
-  }
-
-  // Delete the bolsig log file. 
-  if(procID() == 0){
-    const std::string cmd = "rm bolsiglog.txt";
-    const int success = system(cmd.c_str());
-    if(success != 0){
-      MayDay::Abort("air_bolsig::call_bolsig - could not delete log file");
-    }
-  }
-}
-
-void air_bolsig::extract_bolsig_data(){
   Real EbyN;
   Real entry;
   bool readLine = false;
   lookup_table* which_table = NULL;
-  std::ifstream infile(air_bolsig::m_local_data_file.c_str());
+  std::ifstream infile(m_transport_file);
   std::string line;
   while (std::getline(infile, line)){
 
@@ -600,19 +380,9 @@ void air_bolsig::extract_bolsig_data(){
       readLine   = true;
       continue;
     }
-    else if(line == air_bolsig::s_bolsig_kex23){
-      which_table = &m_kex23;
-      readLine = true;
-      continue;
-    }
-    else if(line == air_bolsig::s_bolsig_kex24){
-      which_table = &m_kex24;
-      readLine = true;
-      continue;
-    }
 
     // Stop when we encounter an empty line
-    if(line == "" && readLine){
+    if((line == "" || line == s_skip_fit) && readLine){
       readLine = false;
       continue;
     }
@@ -624,27 +394,57 @@ void air_bolsig::extract_bolsig_data(){
       }
       which_table->add_entry(EbyN, entry);
     }
-
   }
-
   infile.close();
-
 }
 
-void air_bolsig::delete_bolsig_data(){
-  const std::string cmd = "rm " + m_local_data_file;
-  const int success = system(cmd.c_str());
-  if(success != 0){
-    MayDay::Abort("air_bolsig::delete_bolsig_script - Could not delete script file");
-  }
+void air_bolsig::electron::set_noise(RefCountedPtr<perlin_if> a_perlin){
+  m_perlin = a_perlin;
 }
 
-void air_bolsig::delete_bolsig_script(){
-  const std::string cmd = "rm " + m_local_script_file;
-  const int success = system(cmd.c_str());
-  if(success != 0){
-    MayDay::Abort("air_bolsig::delete_bolsig_script - Could not delete script file");
-  }
+void air_bolsig::positive_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
+  m_perlin = a_perlin;
+}
+
+void air_bolsig::negative_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
+  m_perlin = a_perlin;
+}
+
+Real air_bolsig::initial_sigma(const Real a_time, const RealVect& a_pos) const {
+  return 0.0;
+}
+
+Real air_bolsig::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+  const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
+  const Real seed   = m_seed_density*exp(-factor*factor);
+  const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
+
+  return seed + m_uniform_density + noise;
+}
+
+Real air_bolsig::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+  const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
+  const Real seed   = m_seed_density*exp(-factor*factor);
+  const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
+  
+  return seed + m_uniform_density + noise;
+}
+
+Real air_bolsig::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+  return 0.;
+}
+
+Real air_bolsig::photon_one::get_kappa(const RealVect a_pos) const {
+  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
+}
+
+Real air_bolsig::photon_two::get_kappa(const RealVect a_pos) const {
+  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
+}
+
+Real air_bolsig::photon_three::get_kappa(const RealVect a_pos) const {
+  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
+
 }
 
 air_bolsig::electron::electron(){
@@ -685,18 +485,6 @@ air_bolsig::electron::~electron(){
   
 }
 
-Real air_bolsig::electron::initial_data(const RealVect a_pos, const Real a_time) const {
-  const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
-  const Real seed   = m_seed_density*exp(-factor*factor);
-  const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
-
-  return seed + m_uniform_density + noise;
-}
-
-void air_bolsig::electron::set_noise(RefCountedPtr<perlin_if> a_perlin){
-  m_perlin = a_perlin;
-}
-
 air_bolsig::positive_species::positive_species(){
   m_name      = "positive_species density";
   m_unit      = "m-3";
@@ -724,18 +512,7 @@ air_bolsig::positive_species::positive_species(){
 }
 
 air_bolsig::positive_species::~positive_species(){
-}
-
-Real air_bolsig::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
-  const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
-  const Real seed   = m_seed_density*exp(-factor*factor);
-  const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
   
-  return seed + m_uniform_density + noise;
-}
-
-void air_bolsig::positive_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
-  m_perlin = a_perlin;
 }
 
 air_bolsig::negative_species::negative_species(){
@@ -746,14 +523,7 @@ air_bolsig::negative_species::negative_species(){
 }
 
 air_bolsig::negative_species::~negative_species(){
-}
-
-Real air_bolsig::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
-  return 0.;
-}
-
-void air_bolsig::negative_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
-  m_perlin = a_perlin;
+  
 }
 
 air_bolsig::photon_one::photon_one(){
@@ -784,10 +554,6 @@ air_bolsig::photon_one::~photon_one(){
   
 }
 
-Real air_bolsig::photon_one::get_kappa(const RealVect a_pos) const {
-  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
-}
-
 air_bolsig::photon_two::photon_two(){
   m_name   = "photon_two";
 
@@ -812,10 +578,7 @@ air_bolsig::photon_two::photon_two(){
 }
 
 air_bolsig::photon_two::~photon_two(){
-}
-
-Real air_bolsig::photon_two::get_kappa(const RealVect a_pos) const {
-  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
+  
 }
 
 air_bolsig::photon_three::photon_three(){
@@ -842,9 +605,7 @@ air_bolsig::photon_three::photon_three(){
 }
 
 air_bolsig::photon_three::~photon_three(){
+  
 }
 
-Real air_bolsig::photon_three::get_kappa(const RealVect a_pos) const {
-  return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
-}
