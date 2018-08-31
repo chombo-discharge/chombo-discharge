@@ -4,3 +4,4 @@
 cell_tagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 cell_tagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
 cell_tagger.box1_hi     = 0.0 0.0 0.0  # these two corners
+cell_tagger.buffer      = 0            # Grow tagged cells (finest level only)

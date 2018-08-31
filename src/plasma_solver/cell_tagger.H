@@ -131,6 +131,11 @@ protected:
   int m_verbosity;
 
   /*!
+    @brief Buffer. Grow tags by this amount (finest level only)
+  */
+  int m_buffer;
+
+  /*!
     @brief Tracer fields
   */
   Vector<EBAMRCellData> m_tracer;

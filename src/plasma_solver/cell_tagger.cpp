@@ -23,6 +23,7 @@ cell_tagger::cell_tagger(const int a_num_tracers){
   m_tagboxes.resize(0);
   m_num_tracers = a_num_tracers;
   m_name        = "cell_tagger";
+  m_buffer      = 0;
 
 
   this->set_phase(phase::gas);
@@ -32,6 +33,9 @@ cell_tagger::cell_tagger(const int a_num_tracers){
 
     int num_boxes = 0;
     pp.query("num_boxes", num_boxes);
+    pp.query("buffer",    m_buffer);
+
+    m_buffer = Max(0, m_buffer);
 
     if(num_boxes > 0){
       m_tagboxes.resize(num_boxes);
@@ -217,7 +221,12 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 	  }
 
 	  if(refine && do_this_refine){
-	    refine_tags |= vof.gridIndex();
+	    IntVectSet buf(vof.gridIndex());
+	      buf.grow(m_buffer);
+	      buf &= box;
+	    for (IVSIterator ivs_it(buf); ivs_it.ok(); ++ivs_it){
+	      refine_tags |= ivs_it();
+	    }
 	  }
 	}
 
