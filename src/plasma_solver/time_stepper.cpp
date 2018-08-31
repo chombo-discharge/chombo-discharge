@@ -1878,9 +1878,9 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     pout() << "time_stepper::solve_rte(full)" << endl;
   }
 
-  const Real t0 = MPI_Wtime();
+  //  const Real t0 = MPI_Wtime();
   this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
-  const Real t1 = MPI_Wtime();
+  //  const Real t1 = MPI_Wtime();
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -1890,10 +1890,10 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     EBAMRCellData& rhs                = *a_rte_sources[idx];
     solver->advance(a_dt, state, rhs);
   }
-  const Real t2 = MPI_Wtime();
+  //  const Real t2 = MPI_Wtime();
 
-  pout() << "source time = " << 100.*(t1-t0)/(t2-t0) << endl;
-  pout() << "solve time = " << 100.*(t2-t1)/(t2-t0) << endl;
+  //  pout() << "source time = " << 100.*(t1-t0)/(t2-t0) << endl;
+  //  pout() << "solve time = " << 100.*(t2-t1)/(t2-t0) << endl;
 }
 
 void time_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){

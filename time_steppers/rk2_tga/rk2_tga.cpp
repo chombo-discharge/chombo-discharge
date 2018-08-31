@@ -23,9 +23,8 @@ rk2_tga::rk2_tga(){
   m_alpha = 1.0;
 
   // Basically only for debugging
-  m_do_advection = true;
+  m_do_advec_src = true;
   m_do_diffusion = true;
-  m_do_source    = true;
   m_do_rte       = true;
   m_do_poisson   = true;
   
@@ -37,15 +36,14 @@ rk2_tga::rk2_tga(){
     pp.query("rk2_tga_alpha", m_alpha);
 
     if(pp.contains("turn_off_advection")){
-      pp.get("turn_off_advection", str);
+      pp.get("turn_off_advection_source", str);
       if(str == "true"){
-	m_do_advection = false;
+	m_do_advec_src = false;
 	if(m_verbosity > 2){
-	  pout() << "rk2_tga::rk2_tga - Turning off advection" << endl;
+	  pout() << "rk2_tga::rk2_tga - Turning off advection & source" << endl;
 	}
       }
     }
-    
     if(pp.contains("turn_off_diffusion")){
       pp.get("turn_off_diffusion", str);
       if(str == "true"){
@@ -55,18 +53,6 @@ rk2_tga::rk2_tga(){
 	}
       }
     }
-    
-    if(pp.contains("turn_off_source")){
-      pp.get("turn_off_source", str);
-      if(str == "true"){
-	m_do_source = false;
-
-	if(m_verbosity > 2){
-	  pout() << "rk2_tga::rk2_tga - Turning off source" << endl;
-	}
-      }
-    }
-
     if(pp.contains("turn_off_rte")){
       pp.get("turn_off_rte", str);
       if(str == "true"){
@@ -77,7 +63,6 @@ rk2_tga::rk2_tga(){
 	}
       }
     }
-
     if(pp.contains("turn_off_poisson")){
       pp.get("turn_off_poisson", str);
       if(str == "true"){
@@ -115,19 +100,20 @@ Real rk2_tga::advance(const Real a_dt){
 
   // When we enter this routine, we assume that velocities, source terms, and diffusion coefficients have already
   // been computed. If you change the order of the integration, you must ensure that appropriate velocities, diffusion
-  // coefficients, and source terms, are updated where they should. 
+  // coefficients, and source terms, are updated where they should. So please don't do that...
 
   this->cache_solutions(); // Cache old solutions. Not used for anything (yet), but derived classes might.
                            // This means that everything we do here is done directly in the solver states. 
 
-  if(m_do_advection){
-    this->advance_advection(a_dt); // Advective advance. After this, solvers contain the advected states. The poisson 
-  }                                // solver contains the potential after advection
-  if(m_do_diffusion){
-    this->advance_diffusion(a_dt); // Diffusion advance. After this, solvers contain the diffused advected states.
+  if(m_do_advec_src){
+    this->advance_advection_source(a_dt);
   }
-  if(m_do_source){
-    this->advance_sources(a_dt);   // Source term advance. 
+  if(m_do_diffusion){
+    this->advance_diffusion(a_dt);
+  }
+
+  if(m_do_rte){ // Solve for final RTE stage. Poisson equation should already have been solved at the end of the advection
+    this->advance_rte_stationary(m_time + a_dt); // and diffusion stages
   }
 
   // Put cdr solvers back in useable state so that we can reliably compute the next time step. 
@@ -288,43 +274,43 @@ void rk2_tga::cache_solutions(){
   }
 }
 
-void rk2_tga::advance_advection(const Real a_dt){
-  CH_TIME("rk2_tga::advance_advection");
+void rk2_tga::advance_advection_source(const Real a_dt){
+  CH_TIME("rk2_tga::advance_advection_source");
   if(m_verbosity > 5){
-    pout() << "rk2_tga::advance_advection" << endl;
+    pout() << "rk2_tga::advance_advection_source" << endl;
   }
-
-  // Set sources and diffusion coefficients to zero
-  m_cdr->set_source(0.0);
-  m_cdr->set_diffco(0.0);
 
   const Real t0 = m_time;
   const Real t1 = m_time + m_alpha*a_dt;
 
   // Compute necessary things for k1 advance
-  this->compute_E_into_scratch();
+  this->compute_E_into_scratch();             // Electric field
   this->compute_cdr_eb_states();              // Compute extrapolation n and grad(n) on the EB
   this->compute_cdr_fluxes(t0);               // Compute EB fluxes
   this->compute_sigma_flux_into_scratch();    // Compute sum of EB fluxes
 
   // Do k1 advance
-  this->advance_advection_cdr_k1(a_dt);       // First RK stage advance. Make phi = phi + k1*alpha*dt, phi being the solver state
+  this->advance_advection_source_cdr_k1(a_dt);// First RK stage advance. Make phi = phi + k1*alpha*dt, phi being the solver state
   this->advance_advection_sigma_k1(a_dt);     // First RK stage advance. Make phi = phi + k1*alpha*dt, phi being the solver state
   if(m_do_poisson){
     this->solve_poisson();                    // Solvers contain the intermediate states, resolve Poisson
   }
   this->compute_E_into_scratch();             // Recompute E
+  if(m_do_rte){                               // Do the RTE solve in order to get new source terms
+    this->advance_rte_stationary(t1);
+  }
 
   // Recompute things in order to do k2 advance
+  this->compute_cdr_sources_into_scratch(t1);
   this->compute_cdr_velo(t1);
   this->compute_cdr_eb_states();
   this->compute_cdr_fluxes(t1);
   this->compute_sigma_flux_into_scratch();
 
   // Do k2 advance
-  this->advance_advection_cdr_k2(a_dt);
+  this->advance_advection_source_cdr_k2(a_dt);
   this->advance_advection_sigma_k2(a_dt);
-  if(m_do_poisson){
+  if(m_do_poisson){ // Solve Poisson, but don't solve RTE because we should do that after implicit diffusion
     this->solve_poisson();
   }
 }
@@ -457,10 +443,10 @@ void rk2_tga::compute_sigma_flux_into_scratch(){
   m_sigma->reset_cells(flux);
 }
 
-void rk2_tga::advance_advection_cdr_k1(const Real a_dt){
-  CH_TIME("rk2_tga::advance_advection_cdr_k1");
+void rk2_tga::advance_advection_source_cdr_k1(const Real a_dt){
+  CH_TIME("rk2_tga::advance_advection_source_cdr_k1");
   if(m_verbosity > 5){
-    pout() << "rk2_tga::advance_advection_cdr_k1" << endl;
+    pout() << "rk2_tga::advance_advection_source_cdr_k1" << endl;
   }
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -469,11 +455,13 @@ void rk2_tga::advance_advection_cdr_k1(const Real a_dt){
 
     EBAMRCellData& k1  = storage->get_k1();
     EBAMRCellData& phi = solver->get_state();
+    EBAMRCellData& src = solver->get_source();
 
     // Compute rhs
     data_ops::set_value(k1, 0.0);
     solver->compute_divF(k1, phi, 0.0, true);
-    data_ops::scale(k1, -1.0);
+    data_ops::scale(k1, -1.0); 
+    data_ops::incr(k1, src, 1.0);
 
     // Make phi = phi + k1*alpha*dt
     data_ops::incr(phi, k1, m_alpha*a_dt);
@@ -505,10 +493,10 @@ void rk2_tga::advance_advection_sigma_k1(const Real a_dt){
   m_sigma->reset_cells(phi);
 }
 
-void rk2_tga::advance_advection_cdr_k2(const Real a_dt){
-  CH_TIME("rk2_tga::advance_advection_cdr_k2");
+void rk2_tga::advance_advection_source_cdr_k2(const Real a_dt){
+  CH_TIME("rk2_tga::advance_advection_source_cdr_k2");
   if(m_verbosity > 5){
-    pout() << "rk2_tga::advance_advection_cdr_k2" << endl;
+    pout() << "rk2_tga::advance_advection_source_cdr_k2" << endl;
   }
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -518,11 +506,13 @@ void rk2_tga::advance_advection_cdr_k2(const Real a_dt){
     EBAMRCellData& state       = solver->get_state();
     EBAMRCellData& k2          = storage->get_k2();
     const EBAMRCellData& k1    = storage->get_k1();
+    EBAMRCellData& src         = solver->get_source();
 
     // Compute RHS
     data_ops::set_value(k2, 0.0);
     solver->compute_divF(k2, state, 0.0, true);
     data_ops::scale(k2, -1.0);
+    data_ops::incr(k2, src, 1.0);
 
     // RK2 advance. The extract m_alpha subtraction is because when we came here, the solver state (which we update in place)
     // contained the intermediate state phi + k1*alpha_dt. But we want phi = phi + k1*a_dt*(1-1/(2*alpha)) + k2*dt/(2*alpha),
@@ -598,52 +588,6 @@ void rk2_tga::advance_diffusion(const Real a_dt){
   }
 }
 
-void rk2_tga::advance_sources(const Real a_dt){
-  CH_TIME("rk2_tga::advance_sources");
-  if(m_verbosity > 5){
-    pout() << "rk2_tga::advance_sources" << endl;
-  }
-
-  const Real t0 = m_time;
-  const Real t1 = m_time + m_alpha*a_dt;
-
-  // Compute necessary things for k1 advance
-  this->compute_E_into_scratch();
-  this->compute_cdr_sources_into_scratch(t0);
-
-  // Do k1 advance
-  this->advance_source_cdr_k1(a_dt);
-  if(m_do_poisson){
-    this->solve_poisson();
-  }
-  if(m_do_rte){
-    if(m_rte->is_stationary()){
-      this->advance_rte_stationary(t0);
-    }
-    else{
-      MayDay::Abort("rk2_tga::advance_sources - transient RTE not (yet) supported");
-    }
-  }
-
-  // Recompute necessary things for k2 advance
-  this->compute_E_into_scratch();
-  this->compute_cdr_sources_into_scratch(t1);
-  
-  // Do k2 advance
-  this->advance_source_cdr_k2(a_dt);
-  if(m_do_poisson){
-    this->solve_poisson();
-  }
-  if(m_do_rte){
-    if(m_rte->is_stationary()){
-      this->advance_rte_stationary(t1);
-    }
-    else{
-      MayDay::Abort("rk2_tga::advance_sources - transient RTE not (yet) supported");
-    }
-  }
-}
-
 void rk2_tga::compute_cdr_sources_into_scratch(const Real a_time){
   CH_TIME("rk2_tga::compute_cdr_sources_into_scratch");
   if(m_verbosity > 5){
@@ -656,33 +600,6 @@ void rk2_tga::compute_cdr_sources_into_scratch(const Real a_time){
   EBAMRCellData& E                   = m_poisson_scratch->get_E_cell();
 
   this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, a_time, centering::cell_center);
-}
-
-void rk2_tga::advance_source_cdr_k1(const Real a_dt){
-  CH_TIME("rk2_tga::advance_source_cdr_k1");
-  if(m_verbosity > 5){
-    pout() << "rk2_tga::advance_source_cdr_k1" << endl;
-  }
-
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-    EBAMRCellData& k1  = storage->get_k1();
-    EBAMRCellData& phi = solver->get_state();
-
-    const EBAMRCellData& state = solver->get_state();
-
-    data_ops::copy(k1, solver->get_source());
-
-    // Make phi = phi + k1*alpha*dt, phi being the solver state
-    data_ops::incr(phi, k1,    m_alpha*a_dt);
-
-    m_amr->average_down(phi, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-    data_ops::floor(phi, 0.0);
-  }
 }
 
 void rk2_tga::advance_rte_stationary(const Real a_time){
@@ -700,38 +617,5 @@ void rk2_tga::advance_rte_stationary(const Real a_time){
 
     const Real dummy_dt = 0.0;
     this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
-  }
-}
-
-void rk2_tga::advance_source_cdr_k2(const Real a_dt){
-  CH_TIME("rk2_tga::advance_source_cdr_k2");
-  if(m_verbosity > 5){
-    pout() << "rk2_tga::advance_source_cdr_k2" << endl;
-  }
-
-  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-    EBAMRCellData& state       = solver->get_state();
-    EBAMRCellData& k1          = storage->get_k1();
-    EBAMRCellData& k2          = storage->get_k2();
-    
-    // k2 coefficient is just the source term
-    data_ops::copy(k2, solver->get_source());
-
-    // RK2 advance. The extract m_alpha subtraction is because when we came here, the solver state (which we update in place)
-    // contained the intermediate state phi + k1*alpha_dt. But we want phi = phi + k1*a_dt*(1-1/(2*alpha)) + k2*dt/(2*alpha),
-    // so we just adjust the factor directly.
-    const Real k1_factor = a_dt*(1.0 - 1.0/(2.0*m_alpha) - m_alpha);
-    const Real k2_factor = a_dt/(2.0*m_alpha);
-    
-    data_ops::incr(state, k1, k1_factor);
-    data_ops::incr(state, k2, k2_factor);
-
-    m_amr->average_down(state, m_cdr->get_phase());
-    m_amr->interp_ghost(state, m_cdr->get_phase());
-
-    data_ops::floor(state, 0.0);
   }
 }

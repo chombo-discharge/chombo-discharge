@@ -193,7 +193,7 @@ Vector<Real> air_bolsig::compute_source_terms(const Vector<Real>& a_cdr_densitie
   Sp = alpha*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
   Sn = eta*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;
 
-  CH_assert(Abs(Sp -Se - Sn) < 1.E-10);
+  CH_assert(Abs(Sp -Se - Sn) < 1.E-10); // If this breaks, we don't conserve charge. 
   
   return source;
 }

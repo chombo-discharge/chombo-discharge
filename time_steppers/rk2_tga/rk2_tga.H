@@ -99,17 +99,12 @@ protected:
   /*!
     @brief Do advection advancement or not
   */
-  bool m_do_advection;
+  bool m_do_advec_src;
 
   /*!
     @brief Do diffusion advancement or not
   */
   bool m_do_diffusion;
-
-  /*!
-    @brief Do source term advancement or not
-  */
-  bool m_do_source;
 
   /*!
     @brief Solve RTE equations
@@ -162,9 +157,9 @@ protected:
   virtual void cache_solutions();
 
   /*!
-    @brief Advection advance
+    @brief Advection and source advance
   */
-  virtual void advance_advection(const Real a_dt);
+  virtual void advance_advection_source(const Real a_dt);
 
   /*!
     @brief Advect diffusion
@@ -172,17 +167,12 @@ protected:
   virtual void advance_diffusion(const Real a_dt);
 
   /*!
-    @brief Advance source
-  */
-  virtual void advance_sources(const Real a_dt);
-
-  /*!
     @brief Compute E at the start of the time step
   */
   virtual void compute_E_into_scratch();
 
   /*!
-    @brief Compute the velocities at the start of the time step
+    @brief Compute the velocities
   */
   virtual void compute_cdr_velo(const Real a_time);
 
@@ -201,10 +191,10 @@ protected:
   */
   virtual void compute_sigma_flux_into_scratch();
 
-  /*!
+    /*!
     @brief Compute k1 and intermediate state for cdr equations
   */
-  virtual void advance_advection_cdr_k1(const Real a_dt);
+  virtual void advance_advection_source_cdr_k1(const Real a_dt);
 
   /*!
     @brief Compute k1 and intermediate state for sigma equations
@@ -214,7 +204,7 @@ protected:
   /*!
     @brief Advance cdr equations to final state
   */  
-  virtual void advance_advection_cdr_k2(const Real a_dt);
+  virtual void advance_advection_source_cdr_k2(const Real a_dt);
 
   /*!
     @brief Advance cdr equations to final state
@@ -227,19 +217,9 @@ protected:
   virtual void compute_cdr_sources_into_scratch(const Real a_time);
 
   /*!
-    @brief Compute k1 and intermediate state for cdr equations
-  */
-  virtual void advance_source_cdr_k1(const Real a_dt);
-
-  /*!
     @brief Stationary RTE advance
   */
   virtual void advance_rte_stationary(const Real a_time);
-
-  /*!
-    @brief Advance cdr equations to final state
-  */
-  virtual void advance_source_cdr_k2(const Real a_dt);
 };
 
 #endif

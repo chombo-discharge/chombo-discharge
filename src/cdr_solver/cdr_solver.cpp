@@ -647,7 +647,7 @@ void cdr_solver::initial_data(){
       const EBISBox& ebisbox = state.getEBISBox();
       const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-#if 1
+#if 0
       BaseFab<Real>& reg_state = state.getSingleValuedFAB();
 
       const IntVect lo = box.smallEnd();
@@ -672,7 +672,7 @@ void cdr_solver::initial_data(){
 #endif
 
       // Irreg and multicells
-      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+      for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
 	
