@@ -155,10 +155,15 @@ Vector<RealVect> air_bolsig::compute_velocities(const RealVect& a_E) const {
 }
 
 
-Vector<Real> air_bolsig::compute_source_terms(const Vector<Real>& a_cdr_densities, 
-					      const Vector<Real>& a_rte_densities,
-					      const RealVect&     a_E) const {
+Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time,
+						const RealVect&         a_pos,
+						const RealVect&         a_E,
+						const RealVect&         a_gradE,
+						const Vector<Real>&     a_cdr_densities,
+						const Vector<Real>&     a_rte_densities,
+						  const Vector<RealVect>& a_grad_cdr) const {
   const Vector<RealVect> vel = this->compute_velocities(a_E);
+  const Vector<Real> diffCo  = this->compute_diffusion_coefficients(a_E);
 
   // Compute ionization and attachment coeffs
   const Real ET    = a_E.vectorLength()/(units::s_Td*m_N);
@@ -175,6 +180,7 @@ Vector<Real> air_bolsig::compute_source_terms(const Vector<Real>& a_cdr_densitie
   const Real Np  = a_cdr_densities[m_nplus_idx];
   const Real Nn  = a_cdr_densities[m_nminu_idx];
   const Real ve  = vel[m_nelec_idx].vectorLength();
+  const Real De  = diffCo[m_nelec_idx];
   const Real Sph = m_photoionization_efficiency*units::s_c0*m_frac_O2*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
 								 	 + photon2->get_A()*a_rte_densities[m_photon2_idx]
 								 	 + photon3->get_A()*a_rte_densities[m_photon3_idx]);
@@ -189,6 +195,7 @@ Vector<Real> air_bolsig::compute_source_terms(const Vector<Real>& a_cdr_densitie
   const Real& bpn  = m_ion_recombination;
   const Real& kdet = m_electron_detachment;
 
+  const Real alpha_corr = alpha*(1 + PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E)));
   Se = alpha*Ne*ve - eta*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
   Sp = alpha*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
   Sn = eta*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;

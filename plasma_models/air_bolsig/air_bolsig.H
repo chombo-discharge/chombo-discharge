@@ -102,9 +102,7 @@ public:
 						const RealVect&         a_gradE,
 						const Vector<Real>&     a_cdr_densities,
 						const Vector<Real>&     a_rte_densities,
-						const Vector<RealVect>& a_grad_cdr) const {
-    return this->compute_source_terms(a_cdr_densities, a_rte_densities, a_E);
-  }
+						const Vector<RealVect>& a_grad_cdr) const;
 
   /*!
     @brief Compute electrode fluxes
@@ -168,13 +166,6 @@ public:
     @brief Compute the velocity for an ion
   */
   virtual Vector<RealVect> compute_velocities(const RealVect& a_E) const;
-
-  /*!
-    @brief Compute the source terms for each charge-carrier species
-  */
-  virtual Vector<Real> compute_source_terms(const Vector<Real>& a_densities, 
-					    const Vector<Real>& a_intensities,
-					    const RealVect&     a_E) const;
 
   /*!
     @brief Compute the source terms (right-hand sides) for RTE equations
