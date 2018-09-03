@@ -155,8 +155,8 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 	const EBISBox& ebisbox = ebisl[dit()];
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-	const IntVectSet& irreg_ivs = ebisbox.getIrregIVS(box);
-	const IntVectSet prev_tags  = IntVectSet((*a_tags[lvl])[dit()].get_ivs());
+	const IntVectSet irreg_ivs = ebisbox.getIrregIVS(box);
+	const IntVectSet prev_tags = IntVectSet((*a_tags[lvl])[dit()].get_ivs());
 
 	DenseIntVectSet coarsen_tags(box, false);
 	DenseIntVectSet refine_tags(box, false);

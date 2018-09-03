@@ -31,7 +31,7 @@ poisson_multifluid_gmg::poisson_multifluid_gmg(){
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(0);
   this->set_botsolver_smooth(16);
-  this->set_bottom_drop(8);
+  this->set_bottom_drop(2);
   this->set_nwo(false);
 }
 
@@ -672,8 +672,6 @@ void poisson_multifluid_gmg::setup_nwo_operator_factory(){
   const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
 
   // Potential function
-
-
   conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
   RefCountedPtr<dirichlet_func> pot = RefCountedPtr<dirichlet_func> (new dirichlet_func(m_potential,
 											s_constant_one,
