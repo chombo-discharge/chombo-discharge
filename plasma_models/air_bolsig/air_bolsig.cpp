@@ -195,10 +195,12 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real& bpn  = m_ion_recombination;
   const Real& kdet = m_electron_detachment;
 
-  const Real alpha_corr = alpha*(1 + PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E)));
-  Se = alpha*Ne*ve - eta*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
-  Sp = alpha*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
-  Sn = eta*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;
+  const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E));
+  const Real alpha_corr = Max(0.0, alpha*(1 - factor));
+  const Real eta_corr   = Max(0.0, eta*(1 + factor));
+  Se = alpha_corr*Ne*ve - eta_corr*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
+  Sp = alpha_corr*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
+  Sn = eta_corr*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;
 
   CH_assert(Abs(Sp -Se - Sn) < 1.E-10); // If this breaks, we don't conserve charge. 
   
