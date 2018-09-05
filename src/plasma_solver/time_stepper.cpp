@@ -176,6 +176,7 @@ void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffco_eb
   const int ncomp        = 1;
   const int num_species  = m_plaskin->get_num_species();
   const int finest_level = m_amr->get_finest_level();
+  const Real zero        = 0.0;
 
   Vector<Real> cdr_densities(num_species);
   
@@ -202,7 +203,7 @@ void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffco_eb
 	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	  const int idx  = solver_it.get_solver();
 	  const Real phi = (*(*a_cdr_densities[idx])[lvl])[dit()](vof, 0);
-	  cdr_densities[idx] = Max(0.0, phi);
+	  cdr_densities[idx] = Max(zero, phi);
 	}
 
 
@@ -393,6 +394,8 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     pout() << "time_stepper::compute_cdr_sources(full)" << endl;
   }
 
+  const Real zero = 0.0;
+
   const int num_photons  = m_plaskin->get_num_photons();
   const int num_species  = m_plaskin->get_num_species();
 
@@ -492,14 +495,14 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	    
 	    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	      const int idx = solver_it.get_solver();
-	      cdr_densities[idx] = Max(0.0, (*reg_cdr[idx])(iv, 0));
+	      cdr_densities[idx] = Max(zero, (*reg_cdr[idx])(iv, 0));
 	      cdr_grad[idx]      = RealVect(D_DECL((*reg_cdr_grad[idx])(iv, 0),
 						   (*reg_cdr_grad[idx])(iv, 1),
 						   (*reg_cdr_grad[idx])(iv, 2)));
 	    }
 	    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	      const int idx = solver_it.get_solver();
-	      rte_densities[idx] = Max(0.0, (*reg_rte[idx])(iv,0));
+	      rte_densities[idx] = Max(zero, (*reg_rte[idx])(iv,0));
 	    }
 
 	    // Compute sources
@@ -538,7 +541,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	  const int idx  = solver_it.get_solver();
 	  const Real phi = (*(*a_cdr_densities[idx])[lvl])[dit()](vof, 0);
-	  cdr_densities[idx] = Max(0.0, phi);
+	  cdr_densities[idx] = Max(zero, phi);
 	  cdr_grad[idx]      = RealVect(D_DECL((*(*grad_cdr[idx])[lvl])[dit()](vof, 0),
 					       (*(*grad_cdr[idx])[lvl])[dit()](vof, 1),
 					       (*(*grad_cdr[idx])[lvl])[dit()](vof, 2)));
@@ -547,7 +550,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	  const int idx  = solver_it.get_solver();
 	  const Real phi = (*(*a_rte_densities[idx])[lvl])[dit()](vof, 0);
-	  rte_densities[idx] = Max(0.0, phi);
+	  rte_densities[idx] = Max(zero, phi);
 	}
 
 	// Compute sources
@@ -599,7 +602,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 		grad[dir] += (*(*grad_cdr[idx])[lvl])[dit()](ivof, dir);
 	      }
 	    }
-	    cdr_densities[idx] = Max(0.0, phi);
+	    cdr_densities[idx] = Max(zero, phi);
 	    cdr_grad[idx] = grad;
 	    
 	  }
@@ -613,7 +616,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 	      const Real& iweight  = stencil.weight(i);
 	      phi += (*(*a_rte_densities[idx])[lvl])[dit()](ivof, 0)*iweight;
 	    }
-	    rte_densities[idx] = Max(0.0, phi);
+	    rte_densities[idx] = Max(zero, phi);
 	  }
 
 
@@ -723,6 +726,7 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
     pout() << "time_stepper::compute_rte_sources(full)" << endl;
   }
 
+  const Real zero = 0.0;
   const int num_photons = m_plaskin->get_num_photons();
 
   if(num_photons > 0){
@@ -759,7 +763,7 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	    const int idx  = solver_it.get_solver();
 	    const Real phi = (*(*a_cdr_states[idx])[lvl])[dit](vof, comp);
-	    cdr_densities[idx] = Max(0.0, phi);
+	    cdr_densities[idx] = Max(zero, phi);
 	  }
 
 	  const Vector<Real> sources = m_plaskin->compute_rte_source_terms(a_time, pos, e, cdr_densities);
@@ -789,7 +793,7 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 		const Real& iweight  = stencil.weight(i);
 		phi += (*(*a_cdr_states[idx])[lvl])[dit()](ivof, comp)*iweight;
 	      }
-	      cdr_densities[idx] = Max(0.0, phi);
+	      cdr_densities[idx] = Max(zero, phi);
 	    }
 
 	    // Compute E
@@ -1685,7 +1689,8 @@ void time_stepper::set_fast_poisson(const int a_fast_poisson){
 }
 
 void time_stepper::set_min_dt(const Real a_min_dt){
-  m_min_dt = Max(a_min_dt, 0.0);
+  const Real zero = 0.0;
+  m_min_dt = Max(a_min_dt, zero);
 
   ParmParse pp("time_stepper");
   pp.query("min_dt", m_min_dt);
@@ -1695,7 +1700,8 @@ void time_stepper::set_min_dt(const Real a_min_dt){
 }
 
 void time_stepper::set_max_dt(const Real a_max_dt){
-  m_max_dt = Max(a_max_dt, 0.0);
+  const Real zero = 0.0;
+  m_max_dt = Max(a_max_dt, zero);
 
   ParmParse pp("time_stepper");
   pp.query("max_dt", m_max_dt);

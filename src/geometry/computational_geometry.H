@@ -44,6 +44,11 @@ public:
     @brief Maximum refines
   */
   static int s_maxRef;
+
+  /*!
+    @brief Threshold for Vof computation
+  */
+  static Real s_thresh;
   
   /*!
     @brief Get dielectrics

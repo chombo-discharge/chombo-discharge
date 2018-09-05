@@ -16,8 +16,13 @@
 
 #include "computational_geometry.H"
 
-int computational_geometry::s_minRef = 0;
-int computational_geometry::s_maxRef = 0;
+int computational_geometry::s_minRef  = 0;
+int computational_geometry::s_maxRef  = 0;
+#if CH_USE_DOUBLE
+Real computational_geometry::s_thresh = 1.E-15;
+#elif CH_USE_FLOAT
+Real computational_geometry::s_thresh = 1.E-6;
+#endif
 
 computational_geometry::computational_geometry(){
 
@@ -129,7 +134,7 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
 #if 0
     a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
 #endif
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit));
+    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit, s_thresh));
   }
 }
 
@@ -166,6 +171,6 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
 #endif
     
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit));
+    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit, s_thresh));
   }
 }

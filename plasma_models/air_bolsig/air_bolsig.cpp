@@ -169,6 +169,7 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real ET    = a_E.vectorLength()/(units::s_Td*m_N);
   const Real alpha = m_alpha.get_entry(ET);
   const Real eta   = m_eta.get_entry(ET);
+  const Real zero  = 0.0;
 
   // Cast so we can get A-coefficients from photons
   const air_bolsig::photon_one*   photon1 = static_cast<air_bolsig::photon_one*>   (&(*m_photons[m_photon1_idx]));
@@ -196,8 +197,8 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real& kdet = m_electron_detachment;
 
   const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E));
-  const Real alpha_corr = Max(0.0, alpha*(1 - factor));
-  const Real eta_corr   = Max(0.0, eta*(1 + factor));
+  const Real alpha_corr = Max(zero, alpha*(1 - factor));
+  const Real eta_corr   = Max(zero, eta*(1 + factor));
   Se = alpha_corr*Ne*ve - eta_corr*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
   Sp = alpha_corr*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
   Sn = eta_corr*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;
@@ -211,12 +212,13 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
 Vector<Real> air_bolsig::compute_rte_source_terms(const Vector<Real>& a_cdr_densities, const RealVect& a_E) const {
   Vector<Real> ret(m_num_photons);
 
+  const Real zero            = 0.0;
   const Real ET              = a_E.vectorLength()/(units::s_Td*m_N); // Field in Townsend
   const Vector<RealVect> vel = this->compute_velocities(a_E);        // Compute velocities
   const Real alpha           = m_alpha.get_entry(ET);                // Compute ionization coefficient
   const Real Ne              = a_cdr_densities[m_nelec_idx];         // Electron density
   const Real ve              = vel[m_nelec_idx].vectorLength();      // Electron velocity
-  const Real Se              = Max(0., alpha*Ne*ve);                 // Excitations = alpha*Ne*ve
+  const Real Se              = Max(zero, alpha*Ne*ve);                 // Excitations = alpha*Ne*ve
 
   // Photosource = electron excitations * efficiency * quenching
   ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
@@ -286,14 +288,15 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
 						const Real&         a_time) const {
   Vector<Real> fluxes(m_num_species);
 
+  const Real zero = 0.0;
   // Set everything to outflow
   for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
+    fluxes[i] = Max(zero, a_extrapolated_fluxes[i]);
   }
 
   // For electrons, we add ion bombardment of positive ions and the photoelectric effect
-  fluxes[m_nelec_idx] = 0.;
-  fluxes[m_nelec_idx] += -Max(0., a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_electrode;
+  fluxes[m_nelec_idx] = zero;
+  fluxes[m_nelec_idx] += -Max(zero, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_electrode;
 
   // Photoelectric effect
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_electrode_quantum_efficiency;
@@ -313,10 +316,10 @@ Vector<Real> air_bolsig::compute_anode_flux(const Vector<Real>& a_extrapolated_f
 					      const RealVect&     a_normal,
 					      const Real&         a_time) const {
   Vector<Real> fluxes(m_num_species);
-
+  const Real zero = 0.0;
   // Set to outflux
   for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
+    fluxes[i] = Max(zero, a_extrapolated_fluxes[i]);
   }
 
 
@@ -334,14 +337,15 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
 						   const Real&         a_time) const {
 
   // Outflux of species
-  Vector<Real> fluxes(m_num_species, 0.0); 
+  Vector<Real> fluxes(m_num_species, 0.0);
+  const Real zero = 0.0;
   
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
-    fluxes[m_nelec_idx] = Max(0.0, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons
-    fluxes[m_nminu_idx] = Max(0.0, a_extrapolated_fluxes[m_nminu_idx]); // Outflow for negative species
+    fluxes[m_nelec_idx] = Max(zero, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons
+    fluxes[m_nminu_idx] = Max(zero, a_extrapolated_fluxes[m_nminu_idx]); // Outflow for negative species
   }
   else if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
-    fluxes[m_nplus_idx] = Max(0.0, a_extrapolated_fluxes[m_nplus_idx]); // Outflow for positive species
+    fluxes[m_nplus_idx] = Max(zero, a_extrapolated_fluxes[m_nplus_idx]); // Outflow for positive species
   }
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
@@ -349,7 +353,7 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_dielectric_quantum_efficiency;
-    fluxes[m_nelec_idx] += -Max(0., a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
+    fluxes[m_nelec_idx] += -Max(zero, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
 
 

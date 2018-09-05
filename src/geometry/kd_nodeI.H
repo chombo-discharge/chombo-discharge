@@ -81,8 +81,9 @@ template<typename T> Real kd_node<T>::dist(const RealVect a_x0) const {
 
 template<typename T> Real kd_node<T>::aabb_dist(const RealVect a_x0) const{
   RealVect delta;
+  const Real zero = 0.0;
   for (int dir = 0; dir < SpaceDim; dir++){
-    delta[dir] = Max(m_lo[dir] - a_x0[dir], Max(0.0, a_x0[dir] - m_hi[dir]));
+    delta[dir] = Max(m_lo[dir] - a_x0[dir], Max(zero, a_x0[dir] - m_hi[dir]));
   }
 
   return delta.vectorLength();

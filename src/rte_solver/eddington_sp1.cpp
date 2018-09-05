@@ -277,8 +277,6 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
   m_amr->alias(zero, dummy);
 
   if(m_stationary){
-    m_gmg_solver->init(phi, rhs, finest_level, 0);
-
     const Real phi_resid  = m_gmg_solver->computeAMRResidual(phi,  rhs, finest_level, 0); // Incoming residual
     const Real zero_resid = m_gmg_solver->computeAMRResidual(zero, rhs, finest_level, 0); // Zero residual
 
@@ -550,6 +548,22 @@ void eddington_sp1::setup_multigrid(){
 				    1.E-99); // Residue set through other means
   m_gmg_solver->m_imin    = m_gmg_min_iter;
   m_gmg_solver->m_verbosity = m_gmg_verbosity;
+
+    // Dummies for init
+  const int ncomp = 1;
+  EBAMRCellData dummy1, dummy2;
+  m_amr->allocate(dummy1, m_phase, ncomp);
+  m_amr->allocate(dummy2, m_phase, ncomp);
+  data_ops::set_value(dummy1, 0.0);
+  data_ops::set_value(dummy2, 0.0);
+
+  // Aliasing
+  Vector<LevelData<EBCellFAB>* > phi, rhs;
+  m_amr->alias(phi, dummy1);
+  m_amr->alias(rhs, dummy2);
+
+  // Init solver
+  m_gmg_solver->init(phi, rhs, finest_level, 0);
 }
 
 void eddington_sp1::setup_tga(){

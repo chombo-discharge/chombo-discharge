@@ -280,6 +280,7 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
   const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
   const Real dx                = m_amr->get_dx()[a_lvl];
+  const Real zero              = 0.0;
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box          = dbl.get(dit());
@@ -324,7 +325,7 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
 	  // Extrapolate flux
 	  const Real extrap = 2.0*f1 - f2;
 
-	  flux(face, comp) = Min(extrap, 0.); // No inflow
+	  flux(face, comp) = Min(extrap, zero); // No inflow
 	}
       }
 
@@ -356,7 +357,7 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
 	  // Extrapolate flux
 	  const Real extrap = 2.0*f1 - f2;
 
-	  flux(face, comp) = Max(extrap, 0.); // No inflow
+	  flux(face, comp) = Max(extrap, zero); // No inflow
 	}
       }
     }
