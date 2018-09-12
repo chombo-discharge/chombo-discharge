@@ -14,7 +14,7 @@
 
 #include <ParmParse.H>
 
-#define RK2_DEBUG_TIMER 1
+#define RK2_DEBUG_TIMER 0
 #define RK2_DEBUG_TIMER_STOP 0
 
 typedef rk2::cdr_storage     cdr_storage;
@@ -189,7 +189,7 @@ Real rk2::advance(const Real a_dt){
 #if RK2_DEBUG_TIMER
   pout() << endl;
   pout() << "rk2::advance breakdown" << endl;
-  
+
   pout() << "t1 - t0 % = " << 100.*(t1 - t0)/(t4-t0) << "%" << endl;
   pout() << "t2 - t1 % = " << 100.*(t2 - t1)/(t4-t0) << "%" << endl;
   pout() << "t3 - t2 % = " << 100.*(t3 - t2)/(t4-t0) << "%" << endl;
