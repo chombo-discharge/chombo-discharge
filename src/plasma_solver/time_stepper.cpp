@@ -26,6 +26,7 @@ time_stepper::time_stepper(){
   this->set_verbosity(1);
   this->set_cfl(0.8);
   this->set_relax_time(1.0);
+  this->set_relax_level(-1);
   this->set_source_growth(1.E10);
   this->set_source_growth_tolerance(0.1);
   this->set_source_growth_elec_only(true);
@@ -898,6 +899,9 @@ void time_stepper::compute_cdr_diffusion(){
 
   Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
 
+  time_stepper::compute_cdr_diffusion(E_cell, E_eb);
+#if 0
+
   // Extrapolate states to the EB
   Vector<EBAMRIVData*> cdr_extrap(num_species);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -914,6 +918,41 @@ void time_stepper::compute_cdr_diffusion(){
 
   this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
   this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, E_eb,   m_time);
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    delete cdr_extrap[idx];
+  }
+#endif
+}
+
+void time_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, const EBAMRIVData& a_E_eb){
+  CH_TIME("time_stepper::compute_cdr_diffusion");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_diffusion" << endl;
+  }
+
+  const int ncomp       = 1;
+  const int num_species = m_plaskin->get_num_species();
+
+  Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
+
+  // Extrapolate states to the EB
+  Vector<EBAMRIVData*> cdr_extrap(num_species);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
+    m_amr->allocate(*cdr_extrap[idx], m_cdr->get_phase(), ncomp);
+
+    const irreg_amr_stencil<eb_centroid_interp>& stencil = m_amr->get_eb_centroid_interp_stencils(m_cdr->get_phase());
+    stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
+  }
+  
+  Vector<EBAMRFluxData*> diffco_face = m_cdr->get_diffco_face();
+  Vector<EBAMRIVData*> diffco_eb     = m_cdr->get_diffco_eb();
+
+  this->compute_cdr_diffco_face(diffco_face, cdr_states, a_E_cell, m_time);
+  this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, a_E_eb,   m_time);
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -1730,6 +1769,15 @@ void time_stepper::set_relax_time(const Real a_relax_time){
   }
 }
 
+void time_stepper::set_relax_level(const Real a_relax_level){
+  m_relax_level = a_relax_level;
+
+  ParmParse pp("time_stepper");
+  pp.query("relax_level", m_relax_level);
+}
+
+
+
 void time_stepper::set_source_growth(const Real a_src_growth){
   m_src_growth = a_src_growth;
 
@@ -1948,8 +1996,9 @@ Real time_stepper::compute_relaxation_time(){
     max_E[dir] = Max(Abs(max), Abs(min));
   }
 
+  const int finest_relax_level = (m_relax_level < 0) ? finest_level : Min(m_relax_level, finest_level);
   
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= finest_relax_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
 

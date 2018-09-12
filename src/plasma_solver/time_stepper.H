@@ -130,6 +130,11 @@ public:
   virtual void compute_cdr_diffusion();
 
   /*!
+    @brief Compute diffusion things using whatever is available in the solvers, except for the fields
+  */
+  virtual void compute_cdr_diffusion(const EBAMRCellData& a_E_cell, const EBAMRIVData& a_E_eb);
+
+  /*!
     @brief Compute diffusion coefficients
     @details The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that
     onto cell faces. 
@@ -194,6 +199,7 @@ public:
 				      const Vector<EBAMRCellData*>& a_cdr_densities,
 				      const EBAMRCellData&          a_E,
 				      const Real&                   a_time);
+
 
   /*!
     @brief Compute photon source terms. 
@@ -367,6 +373,11 @@ public:
     @brief Set fudge factor for relaxation time
   */
   virtual void set_relax_time(const Real a_relax_time);
+
+  /*!
+    @brief Set valid levels for relaxation time
+  */
+  virtual void set_relax_level(const Real a_relax_level);
 
   /*!
     @brief Set source growth
@@ -633,6 +644,11 @@ protected:
     @brief Tolerance for source term growth
   */
   Real m_src_tolerance;
+
+  /*!
+    @brief Finest level on which to impose relaxation time constraints
+  */
+  int m_relax_level;
 
   /*!
     @brief Verbosity
