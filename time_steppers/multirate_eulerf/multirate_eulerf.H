@@ -49,11 +49,14 @@ protected:
 
   Vector<Real> diag_times; 
 
-  bool m_diagnostics;
+  bool m_print_diagno;
+  bool m_write_diagno;
   bool m_do_advec_src;  
   bool m_do_diffusion;  
   bool m_do_poisson;
   bool m_do_rte;
+
+  time_code::which_code m_timecode;
 
 
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
@@ -74,9 +77,19 @@ protected:
   void compute_cdr_sources(const Real a_time);
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   void compute_sigma_flux();
+  void write_diagnostics(const int  a_substeps,
+			 const Real a_sub_dt,
+			 const Real a_glob_dt,
+			 const Real a_sub_cfl,
+			 const Real a_convection_time,
+			 const Real a_diffusion_time,
+			 const Real a_poisson_time,
+			 const Real a_rte_time,
+			 const Real a_misc_time,
+			 const Real a_total_time);
 
-  
   Real restrict_dt() ;
+
   
 };
 

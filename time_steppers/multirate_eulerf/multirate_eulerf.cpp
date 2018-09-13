@@ -5,12 +5,14 @@
   @date   Sept. 2018
 */
 
-
 #include "multirate_eulerf.H"
 #include "multirate_eulerf_storage.H"
 #include "data_ops.H"
 #include "units.H"
 
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 #include <ParmParse.H>
 
 typedef multirate_eulerf::cdr_storage     cdr_storage;
@@ -22,7 +24,8 @@ multirate_eulerf::multirate_eulerf(){
   m_maxCFL = 0.5;
 
   // Basically only for debugging
-  m_diagnostics  = false;
+  m_print_diagno = false;
+  m_write_diagno = false;
   m_do_advec_src = true;
   m_do_diffusion = true;
   m_do_rte       = true;
@@ -35,10 +38,16 @@ multirate_eulerf::multirate_eulerf(){
     
     pp.get("max_cfl", m_maxCFL);
 
-    if(pp.contains("diagnostics")){
-      pp.get("diagnostics", str);
+    if(pp.contains("print_diagnostics")){
+      pp.get("print_diagnostics", str);
       if(str == "true"){
-	m_diagnostics = true;
+	m_print_diagno = true;
+      }
+    }
+    if(pp.contains("write_diagnostics")){
+      pp.get("write_diagnostics", str);
+      if(str == "true"){
+	m_write_diagno = true;
       }
     }
 
@@ -151,7 +160,8 @@ Real multirate_eulerf::advance(const Real a_dt){
   multirate_eulerf::compute_cdr_sources(m_time + a_dt);
   const Real t5 = MPI_Wtime();
 
-  if(m_diagnostics){
+  if(m_print_diagno){
+    pout() << "\n";
     pout() << "\t multirate_eulerf::advance(Real a_dt) breakdown" << endl;
     pout() << "\t ==============================================\n" << endl;
     
@@ -186,8 +196,13 @@ Real multirate_eulerf::advance(const Real a_dt){
     pout() << "\n";
     pout() << "\t Total time = " << t5-t0 << endl;
     pout() << "\t ==============================================\n" << endl;
-      
+
+
   }
+  if(m_write_diagno){
+    this->write_diagnostics(substeps, sub_dt, a_dt, cfl, t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t5-t0);
+  }
+
   
   return a_dt;
 }
@@ -324,6 +339,9 @@ void multirate_eulerf::compute_dt(Real& a_dt, time_code::which_code& a_timecode)
   }
 
   a_dt = dt;
+
+  // Copy the time code, it is needed for diagnostics
+  m_timecode = a_timecode;
 }
 
 void multirate_eulerf::allocate_cdr_storage(){
@@ -547,7 +565,6 @@ void multirate_eulerf::compute_sigma_flux(){
   m_sigma->reset_cells(flux);
 }
 
-
 void multirate_eulerf::compute_cdr_sources(const Real a_time){
   CH_TIME("multirate_eulerf::compute_cdr_sources_into_scratch");
   if(m_verbosity > 5){
@@ -577,5 +594,80 @@ void multirate_eulerf::advance_rte_stationary(const Real a_time){
 
     const Real dummy_dt = 0.0;
     this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
+  }
+}
+
+void multirate_eulerf::write_diagnostics(const int  a_substeps,
+					 const Real a_sub_dt,
+					 const Real a_glob_dt,
+					 const Real a_sub_cfl,
+					 const Real a_convection_time,
+					 const Real a_diffusion_time,
+					 const Real a_poisson_time,
+					 const Real a_rte_time,
+					 const Real a_misc_time,
+					 const Real a_total_time){
+
+  // Compute the number of cells in the amr hierarchy
+  long long num_cells = 0;
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    num_cells += (m_amr->get_grids()[lvl]).numCells();
+  }
+
+  long long uniform_points = (m_amr->get_domains()[m_amr->get_finest_level()]).domainBox().numPts();
+  const Real compression = 1.0*num_cells/uniform_points;
+  
+  if(procID() == 0 ){
+
+    const std::string fname("multirate_eulerf_diagnostics.txt");
+    
+    bool write_header;
+    { // Write header if we must
+      std::ifstream infile(fname);
+      write_header = infile.peek() == std::ifstream::traits_type::eof() ? true : false;
+    }
+
+    // Write output
+    std::ofstream f;
+    f.open("multirate_eulerf_diagnostics.txt", std::ios_base::app);
+    const int width = 12;
+
+
+    if(write_header){
+      f << std::left << std::setw(width) << "# Step" << "\t"
+	<< std::left << std::setw(width) << "Time" << "\t"
+	<< std::left << std::setw(width) << "Time code" << "\t"
+	<< std::left << std::setw(width) << "Substeps" << "\t"
+	<< std::left << std::setw(width) << "Global dt" << "\t"
+	<< std::left << std::setw(width) << "Local dt" << "\t"
+	<< std::left << std::setw(width) << "Local cfl" << "\t"
+	<< std::left << std::setw(width) << "Convection time" << "\t"
+	<< std::left << std::setw(width) << "Diffusion time" << "\t"
+	<< std::left << std::setw(width) << "Poisson time" << "\t"
+	<< std::left << std::setw(width) << "RTE time" << "\t"
+	<< std::left << std::setw(width) << "Misc time" << "\t"
+	<< std::left << std::setw(width) << "Total time" << "\t"
+	<< std::left << std::setw(width) << "Mesh cells" << "\t"
+	<< std::left << std::setw(width) << "Mesh compression" << "\t"
+	<< endl;
+    }
+
+    f << std::left << std::setw(width) << m_step << "\t"
+      << std::left << std::setw(width) << m_time << "\t"            
+      << std::left << std::setw(width) << m_timecode << "\t"        
+      << std::left << std::setw(width) << a_substeps << "\t"        
+      << std::left << std::setw(width) << a_glob_dt << "\t"         
+      << std::left << std::setw(width) << a_sub_dt << "\t"
+      << std::left << std::setw(width) << a_sub_cfl << "\t"          
+      << std::left << std::setw(width) << a_convection_time << "\t" 
+      << std::left << std::setw(width) << a_diffusion_time  << "\t"
+      << std::left << std::setw(width) << a_poisson_time  << "\t"    
+      << std::left << std::setw(width) << a_rte_time  << "\t"        
+      << std::left << std::setw(width) << a_misc_time  << "\t"       
+      << std::left << std::setw(width) << a_total_time  << "\t"
+      << std::left << std::setw(width) << num_cells  << "\t"      
+      << std::left << std::setw(width) << compression  << "\t"      
+      << std::left << std::setw(width) << endl;
+    
   }
 }
