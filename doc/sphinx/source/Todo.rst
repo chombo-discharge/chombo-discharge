@@ -4,7 +4,6 @@ To-do list
 -------------
 
 * Average multi-valued cells in the multifluid Poisson operator
-* Implement a general order Runge-Kutta multirate solver
 * Tag source terms using the curvature. Might be good for tagging streamer heads. 
 * Clean up the polygonal tessellation stuff - the code is pretty dirty. 
 * Test the BaseIF functionality fastIntersection to see if we can speed up the EBIS generation
