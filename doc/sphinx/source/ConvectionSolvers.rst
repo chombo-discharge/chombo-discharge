@@ -8,11 +8,18 @@ In PlasmaC, the convection-diffusion-reaction solvers are represented by type-ca
 Selecting solvers
 _________________
 
-In PlasmaC, solvers are selected at run-time by providing appropriate input parameters. Currently, we support the Scharfetter-Gummel scheme and a Godunov method which computes fluxes by finding the slope-limited face states. These solvers are selected by modifying the input parameters:
+In PlasmaC, solvers are selected at run-time by providing appropriate input parameters. Currently, we support
+
+* Scharfetter-Gummel scheme
+* Godunov's method which computes fluxes by finding the slope-limited face states.
+
+In PlasmaC, there are two versions of the Godunov method. One of these (``cdr.godunov``) is used directly from Chombo, and the other is an optimized version that does not e.g. allow computation of transverse slopes. For most users, these two fill feel identical, but the Chombo solver has capabilities for extrapolation in time, allowing second-order single-stage methods. The other solver ``cdr.muscl``, is much more lightweight and will be preferred by most users. 
+
+  These solvers are selected by modifying the input parameters:
 
 .. literalinclude:: links/cdr_layout.options
 
-In the above, ``which_solver`` specifies the solver that user wants. For the Scharfetter-Gummel scheme, there are no further options. For the Godunov methods, the user may also choose the way the hybrid advective divergence is computed in boundary cells by modifying ``cdr_gdnv.divF_nc``. For this class, the user may also turn off the slope limiting by modifying ``limit_slopes``, but this is not recommended. 
+In the above, ``which_solver`` specifies the solver that user wants. For the Scharfetter-Gummel scheme, there are no further options. For the Godunov methods, the user may also choose the way the hybrid advective divergence is computed in boundary cells by modifying ``cdr_gdnv.divF_nc``. For this class, the user may also turn off the slope limiting by modifying ``limit_slopes``, and use the central slopes instead. 
 
 Solver operator splitting
 _________________________

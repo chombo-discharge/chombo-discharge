@@ -44,6 +44,7 @@ Table of contents
    Solvers
    FAQ
    Bugs
+   Todo
    Visualization
    Gallery
 

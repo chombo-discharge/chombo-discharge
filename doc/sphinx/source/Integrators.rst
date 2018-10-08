@@ -5,7 +5,7 @@ Time steppers
 
 We have various implementation of :ref:`Chap:time_stepper` that allow different temporal integration of the equations of motion. For the most part, we recommend using the second order Runge Kutta implementation with implicit diffusion. However, please refer to the :doxy:`Doxygen API <classtime__stepper>` to see all available integrators. 
 
-Time steppers are selected at compile time following the style in :ref:`Chap:NewSimulations`. Typically, there are various options available at run-time through an input script.
+Typically, time steppers are selected at compile time following the style in :ref:`Chap:NewSimulations`. However, the user may certainly select time steppers at run-time by modifying his main file. For each time stepper, there are various options available at run-time through an input script.
 
 Second order Runge-Kutta
 ________________________

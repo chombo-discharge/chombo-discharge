@@ -1,6 +1,7 @@
 # ====================================================================================================
 # CDR_LAYOUT SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-cdr_layout.which_solver = godunov                # Solver type, available options are "scharfetter-gummel" and "godunov"
+cdr_layout.which_solver = godunov                # Must equal "scharfetter-gummel", "godunov", and "muscl"
 cdr_gdnv.divF_nc        = covered_face           # Valid options are "covered_face" and "conservative_average"
-cdr_gdnv.limit_slopes   = true                   # MUST equals true for things to make sense. 
+cdr_gdnv.limit_slopes   = true                   # Use slope-limiters
+cdr_muscl.limit_slopes  = true                   # Use slope-limiters

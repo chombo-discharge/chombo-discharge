@@ -48,7 +48,13 @@ We have various implemented of ``BaseIF`` that the user may or may not find usef
 
 If you want to use these function, you should refer to the :doxy:`Doxygen API <index>` for the class that you're interested in.
 
-We have extended Chombo with support for polygon tessellations through the ``dcel_if`` class which uses a doubly connected edge list (DCEL) in order to describe a watertight surface mesh. However, the current interface is not particularly user-friendly. If you are interested in using this, please :ref:`Chap:contact`. 
+We have extended Chombo with support for polygon tessellations through the ``dcel_if`` class which uses a doubly connected edge list (DCEL) in order to describe a watertight surface mesh. However, the current interface is not particularly user-friendly. If you are interested in using this, please :ref:`Chap:contact`.
+
+.. figure:: figures/car.png
+   :width: 480px
+   :align: center
+
+   Cut-cell grid generation from surface tessellations
 
 PlasmaC geometries
 ------------------
