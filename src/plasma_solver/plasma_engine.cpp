@@ -543,7 +543,30 @@ void plasma_engine::add_tracer_fields_to_output(EBAMRCellData& a_output, const i
     pout() << "plasma_engine::add_tracer_fields_to_output" << endl;
   }
 
-  // Not implemented
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  if(!m_celltagger.isNull()){
+    m_celltagger->compute_tracers();
+
+    const int num_tracers = m_celltagger->get_num_tracers();
+    const Vector<EBAMRCellData>& tracers = m_celltagger->get_tracer_fields();
+    CH_assert(tracers.size() == num_tracers);
+
+    for (int itracer = 0; itracer < num_tracers; itracer++){
+      const EBAMRCellData& tracer = tracers[itracer];
+      const int num = itracer;
+
+      const Interval src_interv(comp, comp);
+      const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
+      for (int lvl = 0; lvl <= finest_level; lvl++){
+	tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+
+	data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
+      }
+    }
+  }
 }
 
 void plasma_engine::allocate_internals(){
