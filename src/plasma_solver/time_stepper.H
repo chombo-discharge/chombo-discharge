@@ -330,6 +330,11 @@ public:
   virtual void regrid_solvers(const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
+    @brief Set data defined over dielectric cells to zero
+  */
+  virtual void reset_dielectric_cells(EBAMRIVData& a_data);
+
+  /*!
     @brief Do a sanity check
   */
   virtual void sanity_check();
@@ -481,6 +486,16 @@ public:
   */
   virtual int query_ghost();
 
+  /*!
+    @brief Compute the ohmic current on electrodes
+  */
+  virtual Real compute_electrode_current();
+
+  /*!
+    @brief Compute the ohmic current on dielectrics
+  */
+  virtual Real compute_dielectric_current();
+			     
   /*!
     @brief Compute the relaxation time
   */

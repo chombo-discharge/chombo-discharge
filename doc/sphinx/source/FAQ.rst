@@ -5,7 +5,7 @@ FAQ
 
 This is a list to solutions of some common problems:
 
-.. rubric:: How do I....
+.. rubric:: How do I...
 
 ... change the spatial discretization?
    Please see the :ref:`Chap:amr_mesh` chapter.
@@ -29,4 +29,13 @@ This is a list to solutions of some common problems:
    This is the reponsibility of :ref:`Chap:plasma_kinetics`. You should also check out the worked examples in the :ref:`Chap:NewSimulations` chapter. 
 
 ... change the units in PlasmaC?
-   You can't. We use SI units all over the place. 
+   You can't. We use SI units all over the place.
+
+... speed up the geometry generation, or reduce the memory footprint?
+   There are various things you can try. Try using a smaller ``amr_mesh.max_ebis_box_size`` or using the recursive box division algorithm for the index space generation. 
+
+.. rubric:: Why does...
+	      
+... geometry generation take forever, or even crash?
+   You probably have too many AMR levels for your core count. There are memory limitations to the maximum AMR depth that can be used for embedded boundary applications. See :ref:`Chap:EBMesh` for details. 
+

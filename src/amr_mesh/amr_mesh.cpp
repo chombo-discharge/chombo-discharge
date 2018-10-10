@@ -1254,6 +1254,26 @@ void amr_mesh::average_down(EBAMRIVData& a_data, phase::which_phase a_phase){
 
 }
 
+void amr_mesh::conservative_average(EBAMRIVData& a_data, phase::which_phase a_phase){
+  CH_TIME("amr_mesh::conservative_average");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::conservative_average" << endl;
+  }
+
+  for (int lvl = m_finest_level; lvl > 0; lvl--){
+    const int ncomps = a_data[lvl]->nComp();
+    const Interval interv (0, ncomps-1);
+
+    m_coarave[a_phase][lvl]->conservative_average(*a_data[lvl-1], *a_data[lvl], interv);
+
+  }
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    a_data[lvl]->exchange();
+  }
+
+}
+
 void amr_mesh::interp_ghost(EBAMRCellData& a_data, phase::which_phase a_phase){
   CH_TIME("amr_mesh::interp_ghost(eb)");
   if(m_verbosity > 3){

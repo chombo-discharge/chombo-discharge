@@ -4,11 +4,6 @@
    contain the root `toctree` directive.
 
 
-.. figure:: figures/front.png
-   :width: 720px
-   :align: center
-
-
 Welcome to PlasmaC's user documentation!
 ========================================
 	      

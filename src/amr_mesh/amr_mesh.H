@@ -186,6 +186,11 @@ public:
   virtual void average_down(EBAMRIVData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Average down
+  */
+  virtual void conservative_average(EBAMRIVData& a_data, phase::which_phase a_phase);
+
+  /*!
     @brief Build new grids. This also load balances. 
   */
   virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap = -1);

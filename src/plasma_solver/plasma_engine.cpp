@@ -1353,6 +1353,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       // Time stepper advances solutions
       m_wallclock1 = MPI_Wtime();
       const Real actual_dt = m_timestepper->advance(m_dt);
+
       m_wallclock2 = MPI_Wtime();
 
       // Synchronize times
@@ -1361,9 +1362,20 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       m_step += 1;
       m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
 
+      // Print step report
       if(m_verbosity > 0){
 	this->step_report(a_start_time, a_end_time, a_max_steps);
       }
+
+      // Compute ohmic current and cache it
+      const Real electrode_I  = m_timestepper->compute_electrode_current();
+      const Real dielectric_I = m_timestepper->compute_dielectric_current();
+      //      const Real domain_I     = m_timestepper->compute_domain_current();
+#if 0 // This has not been implemented yet
+      if(procID() == 0){
+	std::cout << m_time << "\t" << electrode_I << "\t" << dielectric_I << std::endl;
+      }
+#endif
 
 
 #ifdef CH_USE_HDF5

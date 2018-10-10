@@ -1572,6 +1572,35 @@ void time_stepper::regrid_solvers(const int a_old_finest, const int a_new_finest
   m_sigma->regrid(a_old_finest,   a_new_finest);
 }
 
+void time_stepper::reset_dielectric_cells(EBAMRIVData& a_data){
+  CH_TIME("time_stepper::reset_dielectric_cells");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::reset_dielectric_cells" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    const MFLevelGrid& mflg      = *m_amr->get_mflg()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      BaseIVFAB<Real>& data  = (*a_data[lvl])[dit()];
+      const IntVectSet ivs   = data.getIVS() & mflg.interface_region(box, dit());
+      const EBGraph& ebgraph = data.getEBGraph();
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	for (int comp = 0; comp < data.nComp(); comp++){
+	  data(vof, comp) = 0.0;
+	}
+      }
+    }
+  }
+}
+
 void time_stepper::sanity_check(){
   CH_TIME("time_stepper::sanity_check");
   if(m_verbosity > 5){
@@ -1964,6 +1993,102 @@ void time_stepper::synchronize_solver_times(const int a_step, const Real a_time,
   m_poisson->set_time(a_step, a_time, a_dt);
   m_rte->set_time(a_step,     a_time, a_dt);
   m_sigma->set_time(a_step,   a_time, a_dt);
+}
+
+Real time_stepper::compute_electrode_current(){
+  CH_TIME("time_stepper::compute_electrode_current");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_electrode_current" << endl;
+  }
+
+  // Need to copy onto temporary storage because 
+  EBAMRIVData charge_flux;
+  m_amr->allocate(charge_flux, m_cdr->get_phase(), 1);
+  data_ops::set_value(charge_flux, 0.0);
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const EBAMRIVData& solver_flux          = solver->get_ebflux();
+
+    data_ops::incr(charge_flux, solver_flux, spec->get_charge()*units::s_Qe);
+  }
+
+  this->reset_dielectric_cells(charge_flux);
+  m_amr->conservative_average(charge_flux, m_cdr->get_phase());
+
+  const int compute_lvl = 0;
+  Real sum = 0.0;
+  const Real dx = m_amr->get_dx()[compute_lvl];
+  for (DataIterator dit = m_amr->get_grids()[compute_lvl].dataIterator(); dit.ok(); ++dit){
+    const BaseIVFAB<Real>& flx = (*charge_flux[compute_lvl])[dit()];
+
+    const IntVectSet ivs = flx.getIVS() & m_amr->get_grids()[compute_lvl].get(dit());
+    for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& vof   = vofit();
+      const Real& bndryFrac = m_amr->get_ebisl(m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
+      const Real& flux = flx(vof, 0);
+      sum += flux*bndryFrac;
+    }
+  }
+
+  sum *= pow(dx, SpaceDim-1);
+
+
+#ifdef CH_MPI
+  const Real sum1 = sum;
+  sum = EBLevelDataOps::parallelSum(sum1);  
+#endif
+
+  return sum;
+}
+
+Real time_stepper::compute_dielectric_current(){
+  CH_TIME("time_stepper::compute_dielectric_current");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_dielectric_current" << endl;
+  }
+
+  // Need to copy onto temporary storage because 
+  EBAMRIVData charge_flux;
+  m_amr->allocate(charge_flux, m_cdr->get_phase(), 1);
+  data_ops::set_value(charge_flux, 0.0);
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const EBAMRIVData& solver_flux          = solver->get_ebflux();
+
+    data_ops::incr(charge_flux, solver_flux, spec->get_charge()*units::s_Qe);
+  }
+
+  m_sigma->reset_cells(charge_flux);
+  m_amr->conservative_average(charge_flux, m_cdr->get_phase());
+
+  const int compute_lvl = 0;
+  Real sum = 0.0;
+  const Real dx = m_amr->get_dx()[compute_lvl];
+  for (DataIterator dit = m_amr->get_grids()[compute_lvl].dataIterator(); dit.ok(); ++dit){
+    const BaseIVFAB<Real>& flx = (*charge_flux[compute_lvl])[dit()];
+
+    const IntVectSet ivs = flx.getIVS() & m_amr->get_grids()[compute_lvl].get(dit());
+    for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& vof   = vofit();
+      const Real& bndryFrac = m_amr->get_ebisl(m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
+      const Real& flux = flx(vof, 0);
+      sum += flux*bndryFrac;
+    }
+  }
+
+  sum *= pow(dx, SpaceDim-1);
+
+
+#ifdef CH_MPI
+  const Real sum1 = sum;
+  sum = EBLevelDataOps::parallelSum(sum1);  
+#endif
+
+  return sum;
 }
 
 Real time_stepper::compute_relaxation_time(){
