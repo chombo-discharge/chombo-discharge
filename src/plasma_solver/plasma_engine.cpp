@@ -1129,6 +1129,11 @@ void plasma_engine::regrid(const bool a_use_initial_data){
     }
     return;
   }
+  else{ // Compact tags
+    for (int i = 0; i < tags.size(); i++){
+      tags[i].compact();
+    }
+  }
 
   m_timestepper->deallocate_internals(); // Deallocate internal storage for the time stepper.
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
