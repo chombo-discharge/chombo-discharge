@@ -49,6 +49,8 @@ protected:
 
   Real m_maxCFL;
   Real m_dt_cfl;
+  Real m_max_err;
+  Real m_safety;
 
   Vector<Real> m_cdr_error;
   Real m_sigma_error;

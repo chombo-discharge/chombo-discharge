@@ -21,8 +21,10 @@ typedef multirate_rkSSP::rte_storage     rte_storage;
 typedef multirate_rkSSP::sigma_storage   sigma_storage;
 
 multirate_rkSSP::multirate_rkSSP(){
-  m_order  = 2;
-  m_maxCFL = 0.5;
+  m_order   = 2;
+  m_maxCFL  = 0.5;
+  m_max_err = 1.E-4;
+  m_safety  = 0.9;
 
   if(procID() == 0){
     std::cout << "multirate_rkSSP::multirate_rkSSP - this class might be in error. Talk to Hans Kristian about this" << std::endl;
@@ -44,8 +46,10 @@ multirate_rkSSP::multirate_rkSSP(){
 
     std::string str;
 
-    pp.get("order",   m_order);
-    pp.get("max_cfl", m_maxCFL);
+    pp.query("order",     m_order);
+    pp.query("max_cfl",   m_maxCFL);
+    pp.query("max_error", m_max_err);
+    pp.query("safety",    m_safety);
 
     if(pp.contains("compute_v")){
       pp.get("compute_v", str);
@@ -494,8 +498,12 @@ void multirate_rkSSP::advance_advec_rk2(const int a_substeps, const Real a_dt){
     if(procID() == 0){
       std::cout << "cdr_err = " << m_cdr_error << "\t sigma_err = " << m_sigma_error << std::endl;
     }
+    Real cur_err = m_sigma_error;
+    for (int i = 0; i < m_cdr_error.size(); i++){
+      cur_err = Max(cur_err, m_cdr_error[i]);
+    }
+    std::cout << "new relative dt = " << sqrt(m_max_err/cur_err) << std::endl;
 #endif
-
   }
 }
 
