@@ -495,6 +495,11 @@ public:
     @brief Compute the ohmic current on dielectrics
   */
   virtual Real compute_dielectric_current();
+
+  /*!
+    @brief Compute induced current in external circuit due to ohmic conduction
+  */
+  virtual Real compute_ohmic_induction_current();
 			     
   /*!
     @brief Compute the relaxation time

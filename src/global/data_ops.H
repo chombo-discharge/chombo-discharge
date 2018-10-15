@@ -36,6 +36,10 @@ public:
 					    const LevelData<EBCellFAB>& a_celldata,
 					    const ProblemDomain&        a_domain);
 
+  static void dot_prod(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
+
+  static void dot_prod(LevelData<EBCellFAB>& a_result, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
+
   static void incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale);
   
   static void incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale);

@@ -98,6 +98,37 @@ inline void FORTRAN_NAME(inlineMAX_MIN_NORM, inlineMAX_MIN_NORM)(
 }
 #endif  // GUARDMAX_MIN_NORM 
 
+#ifndef GUARDDOT_PRODUCT 
+#define GUARDDOT_PRODUCT 
+// Prototype for Fortran procedure dot_product ...
+//
+void FORTRAN_NAME( DOT_PRODUCT ,dot_product )(
+      CHFp_FRA1(result)
+      ,CHFp_CONST_FRA(data1)
+      ,CHFp_CONST_FRA(data2)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(box) );
+
+#define FORT_DOT_PRODUCT FORTRAN_NAME( inlineDOT_PRODUCT, inlineDOT_PRODUCT)
+#define FORTNT_DOT_PRODUCT FORTRAN_NAME( DOT_PRODUCT, dot_product)
+
+inline void FORTRAN_NAME(inlineDOT_PRODUCT, inlineDOT_PRODUCT)(
+      CHFp_FRA1(result)
+      ,CHFp_CONST_FRA(data1)
+      ,CHFp_CONST_FRA(data2)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(box) )
+{
+ CH_TIMELEAF("FORT_DOT_PRODUCT");
+ FORTRAN_NAME( DOT_PRODUCT ,dot_product )(
+      CHFt_FRA1(result)
+      ,CHFt_CONST_FRA(data1)
+      ,CHFt_CONST_FRA(data2)
+      ,CHFt_CONST_INT(ncomps)
+      ,CHFt_BOX(box) );
+}
+#endif  // GUARDDOT_PRODUCT 
+
 }
 
 #endif

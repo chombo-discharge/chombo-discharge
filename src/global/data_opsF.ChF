@@ -66,3 +66,23 @@
       return
 
       end
+
+      subroutine dot_product(
+     &     chf_fra1[result],
+     &     chf_const_fra[data1],
+     &     chf_const_fra[data2],	
+     &     chf_const_int[ncomps],
+     &     chf_box[box])
+
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      chf_multido[box;i;j;k]
+         result(chf_ix[i;j;k]) = 0.0;
+         do ic=0, ncomps-1
+            result(chf_ix[i;j;k]) = result(chf_ix[i;j;k]) + data1(chf_ix[i;j;k], ic)*data2(chf_ix[i;j;k], ic)
+         enddo
+      chf_enddo
+      return
+
+      end

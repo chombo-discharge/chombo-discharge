@@ -1372,13 +1372,13 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	this->step_report(a_start_time, a_end_time, a_max_steps);
       }
 
-      // Compute ohmic current and cache it
+#if 0 // Development feature
       const Real electrode_I  = m_timestepper->compute_electrode_current();
       const Real dielectric_I = m_timestepper->compute_dielectric_current();
+      const Real ohmic_I      = m_timestepper->compute_ohmic_induction_current();
       //      const Real domain_I     = m_timestepper->compute_domain_current();
-#if 0 // This has not been implemented yet
       if(procID() == 0){
-	std::cout << m_time << "\t" << electrode_I << "\t" << dielectric_I << std::endl;
+	std::cout << m_time << "\t" << electrode_I << "\t" << "\t" << ohmic_I << std::endl;
       }
 #endif
 

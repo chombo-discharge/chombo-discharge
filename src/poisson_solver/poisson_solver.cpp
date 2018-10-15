@@ -176,6 +176,15 @@ void poisson_solver::cache_state(){
   }
 }
 
+Real poisson_solver::compute_capacitance(){
+  CH_TIME("poisson_solver::compute_capacitance");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::compute_capacitance" << endl;
+  }
+
+  MayDay::Abort("poisson_solver::compute_capacitance - Not implemented. This should set compute capacitance with the supplied V");
+}
+
 void poisson_solver::deallocate_internals(){
   CH_TIME("poisson_solver::deallocate_internals");
   if(m_verbosity > 5){
@@ -549,6 +558,7 @@ void poisson_solver::write_plot_file(){
 Real poisson_solver::get_time() const{
   return m_time;
 }
+
 
 wall_bc& poisson_solver::get_wall_bc(const int a_dir, Side::LoHiSide a_side) const{
   CH_TIME("poisson_solver::get_wall_bc");

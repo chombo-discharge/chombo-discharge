@@ -267,7 +267,7 @@ Real morrow_lowke::compute_eta2(const RealVect& a_E) const{
     eta2byN = 8.889E-5*EbyN + 2.567E-19;
   }
   else{
-    eta2byN = 6.089E-4*EbyN + 2.983E-19;
+    eta2byN = 6.089E-4*EbyN - 2.893E-19;
   }
 
   eta2byN *= 1.E-4;   // Morrow-Lowke expression is in cm^2, make it m^2

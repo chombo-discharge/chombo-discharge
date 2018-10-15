@@ -2091,6 +2091,35 @@ Real time_stepper::compute_dielectric_current(){
   return sum;
 }
 
+Real time_stepper::compute_ohmic_induction_current(){
+  CH_TIME("time_stepper::compute_relaxation_time");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_relaxation_time" << endl;
+  }
+
+  Real current = 0.0;
+
+  EBAMRCellData J, E, JdotE;
+  m_amr->allocate(J, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(E, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(JdotE, m_cdr->get_phase(), SpaceDim);
+
+  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
+  this->compute_J(J);
+
+  // Compute J.dot.E 
+  data_ops::dot_prod(JdotE, J,E);
+  m_amr->average_down(JdotE, m_cdr->get_phase());
+
+  // Only compue on coarsest level
+  const int coar = 0;
+  const Real dx  = m_amr->get_dx()[coar];
+  data_ops::kappa_sum(current, *JdotE[coar]);
+  current *= pow(dx, SpaceDim);
+
+  return current;
+}
+
 Real time_stepper::compute_relaxation_time(){
   CH_TIME("time_stepper::compute_relaxation_time");
   if(m_verbosity > 5){

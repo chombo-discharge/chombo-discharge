@@ -97,6 +97,53 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
   }
 }
 
+
+void data_ops::dot_prod(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2){
+  for (int lvl = 0; lvl < a_result.size(); lvl++){
+    data_ops::dot_prod(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
+  }
+}
+
+void data_ops::dot_prod(LevelData<EBCellFAB>& a_result,
+			const LevelData<EBCellFAB>& a_data1,
+			const LevelData<EBCellFAB>& a_data2){
+  const int nc = a_data1.nComp();
+
+  CH_assert(a_data2.nComp() == nc);
+  CH_assert(a_result.nComp() == 1);
+
+  for (DataIterator dit = a_result.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& result      = a_result[dit()];
+    const EBCellFAB& data1 = a_data1[dit()];
+    const EBCellFAB& data2 = a_data2[dit()];
+    const Box& box         = a_result.disjointBoxLayout().get(dit());
+
+
+    // Regular cells
+    BaseFab<Real>& result_reg      = result.getSingleValuedFAB();
+    const BaseFab<Real>& data1_reg = data1.getSingleValuedFAB();
+    const BaseFab<Real>& data2_reg = data2.getSingleValuedFAB();
+    FORT_DOT_PRODUCT(CHF_FRA1(result_reg, 0),
+		     CHF_CONST_FRA(data1_reg),
+		     CHF_CONST_FRA(data2_reg),
+		     CHF_CONST_INT(nc),
+		     CHF_BOX(box));
+    
+
+    // Irregular cells
+    const EBISBox& ebisbox = result.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      result(vof, 0) = 0.0;
+      for (int comp = 0; comp < nc; comp++){
+	result(vof, 0) += data1(vof, comp)*data2(vof,comp);
+      }
+    }
+  }
+}
+
 void data_ops::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
