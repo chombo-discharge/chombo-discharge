@@ -24,6 +24,8 @@ multirate_rkSSP::multirate_rkSSP(){
   m_order  = 2;
   m_maxCFL = 0.5;
 
+  MayDay::Warning("multirate_rkSSP::multirate_rkSSP - this class is known to be in error for order >= 2 becayuse the eb fluxes are computed incorrectly. Please use a different time_stepper for the time being. ");
+
   // Basically only for debugging
   m_print_diagno = false;
   m_write_diagno = false;
@@ -345,9 +347,9 @@ void multirate_rkSSP::advance_advec_rk2(const int a_substeps, const Real a_dt){
 	EBAMRCellData& phi  = solver->get_state();
 	EBAMRCellData& rhs  = storage->get_scratch();
 	EBAMRCellData& src  = solver->get_source();
-	EBAMRCellData& prev = storage->get_previous();
+	EBAMRCellData& pre = storage->get_previous();
 
-	data_ops::copy(prev, phi); // Store u^n
+	data_ops::copy(pre, phi); // Store u^n
 	
 	solver->compute_divF(rhs, phi, 0.0, true); // RHS =  div(u*v)
 	data_ops::scale(rhs, -1.0);                // RHS = -div(u*v)
@@ -361,20 +363,20 @@ void multirate_rkSSP::advance_advec_rk2(const int a_substeps, const Real a_dt){
       // Advance sigma
       EBAMRIVData& phi = m_sigma->get_state();
       EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-      EBAMRIVData& pre = m_sigma_scratch->get_cache();
+      EBAMRIVData& pre = m_sigma_scratch->get_previous();
 
-      data_ops::copy(pre, phi); // Store u^n
+      data_ops::copy(pre, phi); // Store u^n before doing anything
       
       m_sigma->compute_rhs(rhs);
       m_sigma->reset_cells(rhs);
-      data_ops::incr(phi, rhs, a_dt); // phi = u^n + dt*L(u^n)
+      data_ops::incr(phi, rhs, a_dt); // phi = u^1 = u^n + dt*L(u^n)
 
       m_amr->average_down(phi, m_cdr->get_phase());
       m_sigma->reset_cells(phi);
     }
 
     // u^(n+1) = 0.5*(u^n + u^1 + dt*L(u^(1)))
-    // u^n resides in cache, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
+    // u^n resides in temp storage, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
     {
       this->compute_cdr_eb_states();
       this->compute_cdr_fluxes(time);
@@ -464,7 +466,7 @@ void multirate_rkSSP::advance_advec_rk3(const int a_substeps, const Real a_dt){
       // Advance sigma
       EBAMRIVData& phi = m_sigma->get_state();
       EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-      EBAMRIVData& pre = m_sigma_scratch->get_cache();
+      EBAMRIVData& pre = m_sigma_scratch->get_previous();
 
       data_ops::copy(pre, phi); // Store u^n
       
