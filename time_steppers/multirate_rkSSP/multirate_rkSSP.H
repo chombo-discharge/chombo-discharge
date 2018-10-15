@@ -50,7 +50,8 @@ protected:
   Real m_maxCFL;
   Real m_dt_cfl;
 
-  Vector<Real> diag_times; 
+  Vector<Real> m_cdr_error;
+  Real m_sigma_error;
 
   bool m_print_diagno;
   bool m_write_diagno;
@@ -60,6 +61,8 @@ protected:
   bool m_do_rte;
   bool m_compute_v;
   bool m_compute_S;
+  bool m_compute_err;
+
 
   time_code::which_code m_timecode;
 
@@ -80,8 +83,11 @@ protected:
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
   void compute_cdr_fluxes(const Real a_time);
+  void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_velo(const Real a_time);
+  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_sources(const Real a_time);
+  void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   void compute_sigma_flux();
   void write_diagnostics(const int  a_substeps,

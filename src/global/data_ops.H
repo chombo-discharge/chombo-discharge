@@ -92,6 +92,10 @@ public:
 
   static void get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data);
 
+  static void get_max_min_norm(Real& a_max, Real& a_min, EBAMRIVData& data);
+
+  static void get_max_min_norm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> >& data);
+
   static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
 
   static void kappa_scale(EBAMRCellData& a_data);

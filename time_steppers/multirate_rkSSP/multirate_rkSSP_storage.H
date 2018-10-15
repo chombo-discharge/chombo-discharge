@@ -26,6 +26,7 @@ public:
   EBAMRCellData& get_cache(){   return m_cache;      }
   EBAMRCellData& get_scratch(){ return m_scratch;    }
   EBAMRCellData& get_previous(){return m_previous;   }
+  EBAMRCellData& get_error(){   return m_error;      }
 
   EBAMRIVData& get_eb_state(){  return m_scratchIV1; }
   EBAMRIVData& get_eb_velo(){   return m_scratchIV2; }
@@ -42,6 +43,7 @@ protected:
   EBAMRCellData m_cache;    // Cached solution
   EBAMRCellData m_scratch;  // Scratch data
   EBAMRCellData m_previous; // Previous solution (for each substep)
+  EBAMRCellData m_error;    // Error estimator
 
   EBAMRIVData m_scratchIV1; // Scratch data
   EBAMRIVData m_scratchIV2; // Scratch data
@@ -109,12 +111,13 @@ public:
   sigma_storage(const int a_stages, const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~sigma_storage();
   
-   void allocate_storage();
-   void deallocate_storage();
+  void allocate_storage();
+  void deallocate_storage();
   
   EBAMRIVData& get_cache(){   return m_cache; }
   EBAMRIVData& get_scratch(){ return m_scratch; }
   EBAMRIVData& get_previous(){return m_previous; }
+  EBAMRIVData& get_error(){   return m_error; }
 
   
 protected:
@@ -127,6 +130,7 @@ protected:
   EBAMRIVData m_cache;           // Cached solution
   EBAMRIVData m_scratch;         // Scratch data
   EBAMRIVData m_previous;        // Previous solution
+  EBAMRIVData m_error;           // Error 
 };
 
 #endif
