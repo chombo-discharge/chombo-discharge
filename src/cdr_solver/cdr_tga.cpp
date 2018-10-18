@@ -82,7 +82,6 @@ void cdr_tga::advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, 
     m_amr->allocate(phi_tga,   m_phase, ncomp); 
 
     data_ops::set_value(src, 0.0);
-    data_ops::copy(phi_euler, a_state);
     data_ops::copy(phi_tga, a_state);
 
     // Do the aliasing stuff
@@ -100,6 +99,7 @@ void cdr_tga::advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, 
     m_tgasolver->oneStep(tga_state, old_state, source, a_dt, 0, finest_level, 0.0);
 
     // Euler solve
+    data_ops::copy(phi_euler, phi_tga); // I assume that phi_tga is a very good initial guess
     m_eulersolver->resetAlphaAndBeta(alpha, beta);
     m_eulersolver->oneStep(euler_state, old_state, source, a_dt, 0, finest_level);
 

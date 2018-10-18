@@ -27,10 +27,6 @@ multirate_rkSSP::multirate_rkSSP(){
   m_safety     = 0.95;
   m_error_norm = 2;
 
-  if(procID() == 0){
-    std::cout << "multirate_rkSSP::multirate_rkSSP - this class might be in error. Talk to Hans Kristian about this" << std::endl;
-  }
-
   m_compute_v    = true;
   m_compute_S    = true;
   m_adaptive_dt  = true;
@@ -220,7 +216,7 @@ Real multirate_rkSSP::advance(const Real a_dt){
   }
   const Real t1 = MPI_Wtime();
 
-#if 1 // Debug
+#if 0 // Debug
   if(m_adaptive_dt){
     if(m_order >= 2){
       if(procID() == 0){
@@ -233,9 +229,10 @@ Real multirate_rkSSP::advance(const Real a_dt){
   // Diffusion advance
   if(m_do_diffusion){
     diff_dt = a_dt;
-    this->advance_diffusion(diffusive_substeps, diff_dt);
+    diffusive_substeps = 0;
+    this->advance_diffusion(diffusive_substeps, diff_dt, a_dt);
   }
-#if 1 // Debug
+#if 0 // Debug
   if(m_adaptive_dt){
     if(m_order >= 2){
       if(procID() == 0){
@@ -290,6 +287,14 @@ Real multirate_rkSSP::advance(const Real a_dt){
     pout() << "\n";
     pout() << "\t Diffusion advance:\n ";
     pout() << "\t -----------------\n";
+    pout() << "\t\t Steps     = " << diffusive_substeps << endl;
+    if(m_adaptive_dt){
+      pout() << "\t\t Avg. dt   = " << a_dt/diffusive_substeps << endl;
+    }
+    else{
+      pout() << "\t\t Local dt  = " << a_dt << endl;
+    }
+    pout() << endl;
     pout() << "\t\t Time      = " << 100.*(t2-t1)/(t5-t0) << "%\n" << endl;
 
     pout() << "\n";
@@ -320,7 +325,7 @@ Real multirate_rkSSP::advance(const Real a_dt){
   return a_dt;
 }
 
-void multirate_rkSSP::advance_diffusion(int& a_substeps, Real& a_dt){
+void multirate_rkSSP::advance_diffusion(int& a_substeps, Real& a_dt, const Real a_dtc){
   CH_TIME("multirate_rkSSP::advance_diffusion");
   if(m_verbosity > 5){
     pout() << "multirate_rkSSP::advance_diffusion" << endl;
@@ -336,25 +341,74 @@ void multirate_rkSSP::advance_diffusion(int& a_substeps, Real& a_dt){
 
   // Do the diffusion advance
   if(diffusive_states){
-    m_cdr->set_source(0.0); // This is necessary because advance_diffusion also works with source terms
+
+    // Necessary stuff
+    m_cdr->set_source(0.0);
     this->compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    Real sum_dt = 0.0;
+    while(sum_dt < a_dtc){
+
+      // Last time step can be smaller
+      Real actual_dt = a_dt;
+      bool last_step = false;
+      if(sum_dt + a_dt >= a_dtc){
+	actual_dt = a_dtc - sum_dt;
+	last_step = true;
+      }
+
+      // Storage solvers
+      this->store_solvers();
       
-      EBAMRCellData& phi   = solver->get_state();
-      EBAMRCellData& error = storage->get_error();
-      if(solver->is_diffusive()){
-	solver->advance_diffusion(phi, error, a_dt);
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	RefCountedPtr<cdr_solver>& solver   = solver_it();
+	RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      
+	EBAMRCellData& phi   = solver->get_state();
+	EBAMRCellData& error = storage->get_error();
+	if(solver->is_diffusive()){
+	  solver->advance_diffusion(phi, error, actual_dt);
+	}
+	else{
+	  data_ops::set_value(error, 0.0);
+	}
+      }
+
+      // Compute maximum error
+      m_sigma_error = 0.0; // No sigma error now
+      this->compute_errors();
+
+      const Real new_dt = a_dt*sqrt(m_err_thresh/m_max_error);
+      const bool accept = m_max_error <= m_err_thresh;
+
+      if(accept){
+	sum_dt += actual_dt;
+	a_substeps += 1;
+
+#if 0 // Debug
+	if(procID() == 0){
+	  std::cout << a_dtc << "\t" << actual_dt << endl;
+	  //	  std::cout << "doing another step" << "\t dtc = " << a_dtc << "\t dt = " << a_dt << std::endl;
+	}
+#endif
+
+	// Set new time step, but only if we are sufficiently far from the error threshold
+	// Note: No special actual is taken if the error was estimated from the last time step
+	// This will give a smaller time step for the first step in the next multirate loop,
+	// but this should be ok, it will be increased anyways.
+	const Real rel_err = m_max_error/m_err_thresh;
+	if(rel_err < m_safety){
+	  a_dt  = m_safety*new_dt; // Errors are far from the threshold, use a larger time step
+	}
+	else{ 
+	  a_dt  = m_safety*a_dt;   // If errors get too close, reduce the time step a little bit so we don̈́t get rejected steps
+	}
       }
       else{
-	data_ops::set_value(error, 0.0);
+	a_dt = m_safety*new_dt;
+	this->restore_solvers();
       }
     }
-    m_sigma_error = 0.0; // No sigma error now
-    this->compute_errors();
-    
-    const Real new_dt = a_dt*sqrt(m_err_thresh/m_max_error);
   }
 }
 
@@ -402,9 +456,9 @@ void multirate_rkSSP::advance_multirate_adaptive(int& a_substeps, Real& a_dt, co
   this->compute_E_into_scratch();
 
   Real sum_dt = 0.0;
-  while(sum_dt <= a_dtc){
+  while(sum_dt < a_dtc){
 
-    // Adjust last time step
+    // Adjust last time step so that we land on a_dtc
     Real actual_dt = a_dt;
     bool last_step = false;
     if(sum_dt + a_dt >= a_dtc){
@@ -446,7 +500,7 @@ void multirate_rkSSP::advance_multirate_adaptive(int& a_substeps, Real& a_dt, co
 	a_dt  = m_safety*a_dt;   // If errors get too close, reduce the time step a little bit so we don̈́t get rejected steps
       }
 
-#if 1// Debug
+#if 0// Debug
       if(procID() == 0){
 	std::cout << "Max err = " << m_max_error << "\t Accepted time step, increasing to = " << a_dt << std::endl;
       }
@@ -455,7 +509,7 @@ void multirate_rkSSP::advance_multirate_adaptive(int& a_substeps, Real& a_dt, co
     else{
       a_dt = m_safety*new_dt;
       this->restore_solvers();
-#if 1// Debug
+#if 0// Debug
       if(procID() == 0){
 	std::cout << "Max err = " << m_max_error << "\t Rejecting time step, trying dt = " << a_dt << std::endl;
       }
