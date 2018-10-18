@@ -711,6 +711,12 @@ void data_ops::multiply_scalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelDa
   }
 }
 
+void data_ops::norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p){
+  Real volume;
+
+  a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
+}
+
 void data_ops::set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::set_covered_value(*a_lhs[lvl], a_comp, a_value);
@@ -885,3 +891,5 @@ void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box
   }
 #endif
 }
+
+

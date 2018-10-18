@@ -119,6 +119,8 @@ public:
   static void multiply_scalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
   
   static void multiply_scalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs);
+  
+  static void norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p);
 
   static void scale(MFAMRCellData& a_lhs, const Real& a_scale);
 
@@ -173,6 +175,7 @@ public:
   static void vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   static void vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
+
 };
 
 #include "data_opsI.H"

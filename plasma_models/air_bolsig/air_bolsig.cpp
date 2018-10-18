@@ -156,11 +156,11 @@ Vector<RealVect> air_bolsig::compute_velocities(const RealVect& a_E) const {
 
 
 Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time,
-						const RealVect&         a_pos,
-						const RealVect&         a_E,
-						const RealVect&         a_gradE,
-						const Vector<Real>&     a_cdr_densities,
-						const Vector<Real>&     a_rte_densities,
+						  const RealVect&         a_pos,
+						  const RealVect&         a_E,
+						  const RealVect&         a_gradE,
+						  const Vector<Real>&     a_cdr_densities,
+						  const Vector<Real>&     a_rte_densities,
 						  const Vector<RealVect>& a_grad_cdr) const {
   const Vector<RealVect> vel = this->compute_velocities(a_E);
   const Vector<Real> diffCo  = this->compute_diffusion_coefficients(a_E);
@@ -183,8 +183,8 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real ve  = vel[m_nelec_idx].vectorLength();
   const Real De  = diffCo[m_nelec_idx];
   const Real Sph = m_photoionization_efficiency*units::s_c0*m_frac_O2*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-								 	 + photon2->get_A()*a_rte_densities[m_photon2_idx]
-								 	 + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+									   + photon2->get_A()*a_rte_densities[m_photon2_idx]
+									   + photon3->get_A()*a_rte_densities[m_photon3_idx]);
   
   Vector<Real> source(m_num_species, 0.0); 
   Real& Se = source[m_nelec_idx];
@@ -198,7 +198,9 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
 
   const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E));
   const Real alpha_corr = Max(zero, alpha*(1 - factor));
-  const Real eta_corr   = Max(zero, eta*(1 + factor));
+  //  const Real eta_corr   = Max(zero, eta*(1 + factor));
+  //  const Real alpha_corr = alpha;
+  const Real eta_corr   = eta;
   Se = alpha_corr*Ne*ve - eta_corr*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
   Sp = alpha_corr*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
   Sn = eta_corr*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;
@@ -279,13 +281,13 @@ Vector<Real> air_bolsig::compute_conductor_fluxes(const Vector<Real>& a_extrapol
 }
 
 Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated_fluxes,
-						const Vector<Real>& a_cdr_densities,
-						const Vector<Real>& a_cdr_velocities,
-						const Vector<Real>& a_rte_fluxes,
-						const RealVect&     a_E,
-						const RealVect&     a_pos,
-						const RealVect&     a_normal,
-						const Real&         a_time) const {
+					      const Vector<Real>& a_cdr_densities,
+					      const Vector<Real>& a_cdr_velocities,
+					      const Vector<Real>& a_rte_fluxes,
+					      const RealVect&     a_E,
+					      const RealVect&     a_pos,
+					      const RealVect&     a_normal,
+					      const Real&         a_time) const {
   Vector<Real> fluxes(m_num_species);
 
   const Real zero = 0.0;
@@ -308,13 +310,13 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
 }
 
 Vector<Real> air_bolsig::compute_anode_flux(const Vector<Real>& a_extrapolated_fluxes,
-					      const Vector<Real>& a_cdr_densities,
-					      const Vector<Real>& a_cdr_velocities,
-					      const Vector<Real>& a_rte_fluxes,
-					      const RealVect&     a_E,
-					      const RealVect&     a_pos,
-					      const RealVect&     a_normal,
-					      const Real&         a_time) const {
+					    const Vector<Real>& a_cdr_densities,
+					    const Vector<Real>& a_cdr_velocities,
+					    const Vector<Real>& a_rte_fluxes,
+					    const RealVect&     a_E,
+					    const RealVect&     a_pos,
+					    const RealVect&     a_normal,
+					    const Real&         a_time) const {
   Vector<Real> fluxes(m_num_species);
   const Real zero = 0.0;
   // Set to outflux
@@ -503,6 +505,7 @@ air_bolsig::positive_species::positive_species(){
   m_unit      = "m-3";
   m_charge    = 1;
   m_diffusive = false;
+  m_mobile    = true;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -533,6 +536,7 @@ air_bolsig::negative_species::negative_species(){
   m_unit      = "m-3";
   m_charge    = -1;
   m_diffusive = false;
+  m_mobile    = true;
 }
 
 air_bolsig::negative_species::~negative_species(){

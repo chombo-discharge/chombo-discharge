@@ -21,35 +21,40 @@ typedef multirate_rkSSP::rte_storage     rte_storage;
 typedef multirate_rkSSP::sigma_storage   sigma_storage;
 
 multirate_rkSSP::multirate_rkSSP(){
-  m_order   = 2;
-  m_maxCFL  = 0.5;
-  m_max_err = 1.E-4;
-  m_safety  = 0.9;
+  m_order      = 2;
+  m_maxCFL     = 0.5;
+  m_err_thresh = 1.E-2;;
+  m_safety     = 0.95;
+  m_error_norm = 2;
 
   if(procID() == 0){
     std::cout << "multirate_rkSSP::multirate_rkSSP - this class might be in error. Talk to Hans Kristian about this" << std::endl;
   }
 
+  m_compute_v    = true;
+  m_compute_S    = true;
+  m_adaptive_dt  = true;
+  m_multirate    = true;
+  m_have_dtf     = false;
+
   // Basically only for debugging
-  m_print_diagno = false;
-  m_write_diagno = false;
   m_do_advec_src = true;
   m_do_diffusion = true;
   m_do_rte       = true;
   m_do_poisson   = true;
-  m_compute_v    = true;
-  m_compute_S    = true;
-  m_compute_err  = true;
+  m_print_diagno = false;
+  m_write_diagno = false;
   
   {
     ParmParse pp("multirate_rkSSP");
 
     std::string str;
 
-    pp.query("order",     m_order);
-    pp.query("max_cfl",   m_maxCFL);
-    pp.query("max_error", m_max_err);
-    pp.query("safety",    m_safety);
+    pp.query("order",      m_order);
+    pp.query("max_cfl",    m_maxCFL);
+    pp.query("max_error",  m_err_thresh);
+    pp.query("safety",     m_safety);
+    pp.query("error_norm", m_error_norm);
 
     if(pp.contains("compute_v")){
       pp.get("compute_v", str);
@@ -63,10 +68,16 @@ multirate_rkSSP::multirate_rkSSP(){
 	m_compute_S = false;
       }
     }
-    if(pp.contains("compute_error")){
-      pp.get("compute_error", str);
+    if(pp.contains("adaptive_dt")){
+      pp.get("adaptive_dt", str);
       if(str == "false"){
-	m_compute_err = false;
+	m_adaptive_dt = false;
+      }
+    }
+    if(pp.contains("use_multirate")){
+      pp.get("use_multirate", str);
+      if(str == "false"){
+	m_multirate = false;
       }
     }
     if(pp.contains("print_diagnostics")){
@@ -81,7 +92,6 @@ multirate_rkSSP::multirate_rkSSP(){
 	m_write_diagno = true;
       }
     }
-
     if(pp.contains("turn_off_advection")){
       pp.get("turn_off_advection_source", str);
       if(str == "true"){
@@ -129,7 +139,12 @@ multirate_rkSSP::multirate_rkSSP(){
 
   // No embedded schemes lower than first order...
   if(m_order == 1){
-    m_compute_err = false;
+    m_adaptive_dt = false;
+  }
+
+  // If we don't use multirate, we can't go beyond CFL
+  if(!m_multirate){
+    m_cfl = m_maxCFL;
   }
 }
 
@@ -149,39 +164,77 @@ Real multirate_rkSSP::restrict_dt(){
   return 1.E99;
 }
 
+Real multirate_rkSSP::get_max_error(){
+  CH_TIME("multirate_rkSSP::get_max_error");
+  if(m_verbosity > 2){
+    pout() << "multirate_rkSSP::get_max_error" << endl;
+  }
+
+  Real cur_err = 0.0;//m_sigma_error;
+  for (int i = 0; i < m_cdr_error.size(); i++){
+    cur_err = Max(cur_err, m_cdr_error[i]);
+  }
+
+  return cur_err;
+}
+
 Real multirate_rkSSP::advance(const Real a_dt){
   CH_TIME("multirate_rkSSP::advance");
   if(m_verbosity > 2){
     pout() << "multirate_rkSSP::advance" << endl;
   }
-
-  const Real t0 = MPI_Wtime();
-
+  
   // When we enter this routine, we assume that velocities, source terms, and diffusion coefficients have already
-  // been computed. If you change the order of the integration, you must ensure that appropriate velocities, diffusion
-  // coefficients, and source terms, are updated where they should. So please don't do that...
-
+  // been computed. 
+  const Real t0 = MPI_Wtime();
   this->cache_solutions(); // Cache old solutions. We can safely manipulate directly into solver states.
 
   int substeps; // Number of substeps
   Real cfl;     // Substep CFL
   Real sub_dt;  // Substep time
 
-
+  // Advection and source term advancements
   if(m_do_advec_src){
-    substeps = ceil(a_dt/(m_maxCFL*m_dt_cfl));
-    cfl      = a_dt/(substeps*m_dt_cfl);
-    sub_dt   = cfl*m_dt_cfl;
+    if(m_adaptive_dt){
+      if(!m_have_dtf){
+	// Estimate dtf by substepping. This is probably a bad time step but it will be adjusted
+	substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
+	cfl        = a_dt/(substeps*m_dt_cfl);
+	m_dtf      = cfl*m_dt_cfl;
+	m_have_dtf = true;
+      }
 
-    this->advance_multirate_advec_src(substeps, sub_dt);
+      // Start substepping
+      substeps = 0;
+      this->advance_multirate_adaptive(substeps, m_dtf, m_time, a_dt);
+    }
+    else{
+      substeps = ceil(a_dt/(m_maxCFL*m_dt_cfl));
+      cfl      = a_dt/(substeps*m_dt_cfl);
+      sub_dt   = cfl*m_dt_cfl;
+    
+      this->advance_multirate_fixed(substeps, sub_dt);
+    }
   }
   const Real t1 = MPI_Wtime();
-  
+
+#if 1 // Debug
+  if(m_adaptive_dt){
+    if(m_order >= 2){
+      if(procID() == 0){
+	std::cout << "cdr_errors = " << m_cdr_error << "\t sigma error = " << m_sigma_error << std::endl;
+      }
+    }
+  }
+#endif
+
+  // Diffusion advance
   if(m_do_diffusion){
     this->advance_diffusion(a_dt);
   }
   const Real t2 = MPI_Wtime();
 
+  // Solve Poisson equation
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
       time_stepper::solve_poisson();
@@ -189,18 +242,20 @@ Real multirate_rkSSP::advance(const Real a_dt){
     }
   }
   const Real t3 = MPI_Wtime();
-  
+
+  // Solve RTE equations
   if(m_do_rte){ // Solve for final RTE stage. Poisson equation should already have been solved at the end of the advection
     this->advance_rte_stationary(m_time + a_dt); // and diffusion stages
   }
   const Real t4 = MPI_Wtime();
+  
   // Put cdr solvers back in useable state so that we can reliably compute the next time step.
-
   multirate_rkSSP::compute_cdr_velo(m_time + a_dt);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
   multirate_rkSSP::compute_cdr_sources(m_time + a_dt);
   const Real t5 = MPI_Wtime();
 
+  // Print diagnostics
   if(m_print_diagno){
     pout() << "\n";
     pout() << "\t multirate_rkSSP::advance(Real a_dt) breakdown" << endl;
@@ -209,8 +264,14 @@ Real multirate_rkSSP::advance(const Real a_dt){
     pout() << "\t Convection-source advance: \n ";
     pout() << "\t --------------------------\n";
     pout() << "\t\t Steps     = " << substeps << endl;
-    pout() << "\t\t Local cfl = " << cfl      << endl;
-    pout() << "\t\t Local dt  = " << sub_dt   << endl;
+    if(m_adaptive_dt){
+      pout() << "\t\t Avg. cfl  = " << a_dt/(substeps*m_dt_cfl) << endl;
+      pout() << "\t\t Avg. dt   = " << a_dt/substeps << endl;
+    }
+    else{
+      pout() << "\t\t Local cfl = " << cfl      << endl;
+      pout() << "\t\t Local dt  = " << sub_dt   << endl;
+    }
     pout() << endl;
     pout() << "\t\t Time      = " << 100.*(t1-t0)/(t5-t0) << "%\n" << endl;
 
@@ -244,7 +305,6 @@ Real multirate_rkSSP::advance(const Real a_dt){
     this->write_diagnostics(substeps, sub_dt, a_dt, cfl, t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t5-t0);
   }
 
-  
   return a_dt;
 }
 
@@ -274,464 +334,440 @@ void multirate_rkSSP::advance_diffusion(const Real a_dt){
   }
 }
 
-void multirate_rkSSP::advance_multirate_advec_src(const int a_substeps, const Real a_dt){
-  CH_TIME("multirate_rkSSP::advance_multirate_advec_src");
+void multirate_rkSSP::advance_multirate_fixed(const int a_substeps, const Real a_dt){
+  CH_TIME("multirate_rkSSP::advance_multirate_fixed");
   if(m_verbosity > 2){
-    pout() << "multirate_rkSSP::advance_multirate_advec_src" << endl;
+    pout() << "multirate_rkSSP::advance_multirate_fixed" << endl;
   }
 
   this->compute_E_into_scratch(); 
 
-  if(m_order == 1){
-    this->advance_advec_rk1(a_substeps, a_dt);
-  }
-  else if(m_order == 2){
-    this->advance_advec_rk2(a_substeps, a_dt);
-  }
-  else if(m_order == 3){
-    this->advance_advec_rk3(a_substeps, a_dt);
+  for (int step = 0; step < a_substeps; step++){
+    const Real time = m_time + step*a_dt;
+
+    // Integrate
+    if(m_order == 1){
+      this->advance_rk1(time, a_dt);
+    }
+    else if(m_order == 2){
+      this->store_solvers();
+      this->advance_rk2(time, a_dt);
+    }
+    else if(m_order == 3){
+      this->store_solvers();
+      this->advance_rk3(time, a_dt);
+    }
+    else{
+      MayDay::Abort("multirate_rkSSP::advance_multirate_fixed - unsupported order requested");
+    }
+
+    // Update for next iterate. This should generally be done because the solution might move many grid cells.
+    if(step < a_substeps -1){ // No need on last step
+      if(m_compute_v) this->compute_cdr_velo(time);
+      if(m_compute_S) this->compute_cdr_sources(time);
+    }
   }
 }
 
-void multirate_rkSSP::advance_advec_rk1(const int a_substeps, const Real a_dt){
-  CH_TIME("multirate_rkSSP::advance_advec_rk1");
+void multirate_rkSSP::advance_multirate_adaptive(int& a_substeps, Real& a_dt, const Real a_time, const Real a_dtc){
+  CH_TIME("multirate_rkSSP::advance_multirate_adaptive");
   if(m_verbosity > 2){
-    pout() << "multirate_rkSSP::advance_advec_rk1" << endl;
+    pout() << "multirate_rkSSP::advance_multirate_adaptive" << endl;
   }
 
-  for (int step = 0; step < a_substeps; step++){
-    const Real time = m_time + step*a_dt;
-    this->compute_cdr_eb_states();
-    this->compute_cdr_fluxes(time);
-    this->compute_sigma_flux();
+  this->compute_E_into_scratch();
 
-    // Advance advection-reaction
+  Real sum_dt = 0.0;
+  while(sum_dt <= a_dtc){
+
+    // Adjust last time step
+    Real actual_dt = a_dt;
+    bool last_step = false;
+    if(sum_dt + a_dt >= a_dtc){
+      actual_dt = a_dtc - sum_dt;
+      last_step = true;
+    }
+    const Real cur_time  = a_time + sum_dt;
+
+    // Store solver states
+    this->store_solvers();
+
+    // Advance with errors estimated with embedded formulas
+    if(m_order == 2){
+      this->advance_rk2(cur_time, actual_dt);
+    }
+    else if(m_order == 3){
+      this->advance_rk3(cur_time, actual_dt);
+    }
+
+    // Compute errors and new time step
+    this->compute_errors();
+    const Real new_dt = a_dt*pow(m_err_thresh/m_max_error, 1.0/m_order);
+    
+    // Accept or discard time step
+    const bool accept = m_max_error < m_err_thresh;
+    if(accept){
+      sum_dt += a_dt;
+      a_substeps += 1;
+
+      // Set new time step, but only if we are sufficiently far from the error threshold
+      // Note: No special actual is taken if the error was estimated from the last time step
+      // This will give a smaller time step for the first step in the next multirate loop,
+      // but this should be ok, it will be increased anyways.
+      const Real rel_err = m_max_error/m_err_thresh;
+      if(rel_err < m_safety){
+	a_dt  = m_safety*new_dt; // Errors are far from the threshold, use a larger time step
+      }
+      else{ 
+	a_dt  = m_safety*a_dt;   // If errors get too close, reduce the time step a little bit so we don̈́t get rejected steps
+      }
+
+#if 1// Debug
+      if(procID() == 0){
+	std::cout << "Max err = " << m_max_error << "\t Accepted time step, increasing to = " << a_dt << std::endl;
+      }
+#endif
+    }
+    else{
+      a_dt = m_safety*new_dt;
+      this->restore_solvers();
+#if 1// Debug
+      if(procID() == 0){
+	std::cout << "Max err = " << m_max_error << "\t Rejecting time step, trying dt = " << a_dt << std::endl;
+      }
+#endif
+    }
+
+    // New time step should never exceed CFL constraints
+    a_dt = Min(a_dt, m_maxCFL*m_dt_cfl);
+
+    // Update for next iterate. This should generally be done because the solution might move many grid cells.
+    if(!last_step){
+      if(m_compute_v) this->compute_cdr_velo(cur_time);
+      if(m_compute_S) this->compute_cdr_sources(cur_time);
+    } 
+  }
+}
+
+void multirate_rkSSP::advance_rk1(const Real a_time, const Real a_dt){
+  CH_TIME("multirate_rkSSP::advance_rk1");
+  if(m_verbosity > 2){
+    pout() << "multirate_rkSSP::advance_rk1" << endl;
+  }
+
+  this->compute_cdr_eb_states();
+  this->compute_cdr_fluxes(a_time);
+  this->compute_sigma_flux();
+
+  // Advance advection-reaction
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi = solver->get_state();
+    EBAMRCellData& src = solver->get_source();
+      
+    EBAMRCellData& rhs = storage->get_scratch();
+    data_ops::set_value(rhs, 0.0);              
+    solver->compute_divF(rhs, phi, 0.0, true);  // RHS =  div(u*v)
+    data_ops::scale(rhs, -1.0);                 // RHS = -div(u*v)
+    data_ops::incr(rhs, src, 1.0);              // RHS = S - div(u*v)
+    data_ops::incr(phi, rhs, a_dt);             // u^(n+1) = u^n + (S - div(u*v))*dt
+
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_amr->interp_ghost(phi, m_cdr->get_phase());
+  }
+
+  // Advance sigma
+  EBAMRIVData& phi = m_sigma->get_state();
+  EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
+
+  m_sigma->compute_rhs(rhs);
+  m_sigma->reset_cells(rhs);
+  data_ops::incr(phi, rhs, a_dt);
+
+  m_amr->average_down(phi, m_cdr->get_phase());
+  m_sigma->reset_cells(phi);
+}
+
+void multirate_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
+  CH_TIME("multirate_rkSSP::advance_rk2");
+  if(m_verbosity > 2){
+    pout() << "multirate_rkSSP::advance_rk2" << endl;
+  }
+
+  // u^1 = u^n + dt*L(u^n)
+  // u^n resides in cache, put u^1 in the solver. Use scratch for computing L(u^n)
+  {
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_sigma_flux();
+      
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<cdr_solver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& phi = solver->get_state();
-      EBAMRCellData& src = solver->get_source();
-      
-      EBAMRCellData& rhs = storage->get_scratch();
-      data_ops::set_value(rhs, 0.0);              
-      solver->compute_divF(rhs, phi, 0.0, true);  // RHS =  div(u*v)
-      data_ops::scale(rhs, -1.0);                 // RHS = -div(u*v)
-      data_ops::incr(rhs, src, 1.0);              // RHS = S - div(u*v)
-      data_ops::incr(phi, rhs, a_dt);             // u^(n+1) = u^n + (S - div(u*v))*dt
+      EBAMRCellData& phi  = solver->get_state();
+      EBAMRCellData& rhs  = storage->get_scratch();
+      EBAMRCellData& src  = solver->get_source();
+      EBAMRCellData& pre  = storage->get_previous();
+	
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  div(u*v)
+      data_ops::scale(rhs, -1.0);                // RHS = -div(u*v)
+      data_ops::incr(rhs, src, 1.0);             // RHS = S - div(u*v)
+      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^n + dt*L(u^n)
 
       m_amr->average_down(phi, m_cdr->get_phase());
       m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      // Embedded Euler method for error computation
+      EBAMRCellData& err = storage->get_error();
+      data_ops::copy(err, phi);   // err =  (u^n + dt*L(u^n))
+      data_ops::scale(err, -1.0); // err = -(u^n + dt*L(u^n))
     }
 
     // Advance sigma
     EBAMRIVData& phi = m_sigma->get_state();
     EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();
+      
     m_sigma->compute_rhs(rhs);
     m_sigma->reset_cells(rhs);
-    data_ops::incr(phi, rhs, a_dt);
+    data_ops::incr(phi, rhs, a_dt); // phi = u^1 = u^n + dt*L(u^n)
 
     m_amr->average_down(phi, m_cdr->get_phase());
     m_sigma->reset_cells(phi);
-    
-    // Update for next iterate. This should generally be done because the solution might move many grid cells.
-    if(step < a_substeps -1){ // No need on last step
-      if(m_compute_v) this->compute_cdr_velo(time);
-      if(m_compute_S) this->compute_cdr_sources(time);
+
+    // Embedded Euler method
+    EBAMRIVData& err = m_sigma_scratch->get_error();
+    data_ops::set_value(err, 0.0);
+    data_ops::incr(err, phi, -1.0);  // error = -(u^n + dt*L(u^n))
+  }
+
+  // u^(n+1) = 0.5*(u^n + u^1 + dt*L(u^(1)))
+  // u^n resides in temp storage, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
+  {
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time + a_dt);
+    this->compute_sigma_flux();
+
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi = solver->get_state();     // u^1
+      EBAMRCellData& rhs = storage->get_scratch();  // Storage for RHS
+      EBAMRCellData& src = solver->get_source();    // Source
+      EBAMRCellData& pre = storage->get_previous(); // u^n
+
+      solver->compute_divF(rhs, phi, 0.0, true);   // RHS =  div(u^1*v)
+      data_ops::scale(rhs, -1.0);                  // RHS = -div(u^1*v)
+      data_ops::incr(rhs, src, 1.0);               // RHS = S - div(u^1*v)
+      data_ops::incr(phi, rhs, a_dt);              // phi = u^1 + dt*L(u^1)
+      data_ops::incr(phi, pre, 1.0);               // phi = u^n + u^1 + dt*L(u^1)
+      data_ops::scale(phi, 0.5);                   // phi = 0.5*(u^n + u^1 + dt*L(u^1))
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      // Compute cdr error
+      EBAMRCellData& err = storage->get_error(); // err  = -(u^n + dt*L(u^n)) // 1st. order
+      data_ops::incr(err, phi, 1.0);             // err += (second order)
     }
+
+    // Advance sigma
+    EBAMRIVData& phi = m_sigma->get_state();
+    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();
+
+    m_sigma->compute_rhs(rhs);
+    m_sigma->reset_cells(rhs);
+    data_ops::incr(phi, rhs, a_dt); // phi = u^1 + dt*L(u^1)
+    data_ops::incr(phi, pre, 1.0);  // phi = u^n + u^1 + dt*L(u^1)
+    data_ops::scale(phi, 0.5);      // phi = 0.5*(u^n + u^1 + dt*L(u^1))
+
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_sigma->reset_cells(phi);
+
+    // Compute error sigma error
+    EBAMRIVData& err = m_sigma_scratch->get_error(); // err = -(u^n + dt*L(u^n))
+    data_ops::incr(err, phi, 1.0);                   // err = phi - (u^n + dt*L(u^n))
+    m_sigma->reset_cells(err);
   }
 }
 
-void multirate_rkSSP::advance_advec_rk2(const int a_substeps, const Real a_dt){
-  CH_TIME("multirate_rkSSP::advance_advec_rk2");
+void multirate_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
+  CH_TIME("multirate_rkSSP::advance_rk3");
   if(m_verbosity > 2){
-    pout() << "multirate_rkSSP::advance_advec_rk2" << endl;
+    pout() << "multirate_rkSSP::advance_rk3" << endl;
   }
 
-  for (int step = 0; step < a_substeps; step++){
-    const Real time = m_time + step*a_dt;
+#if 0
+  MayDay::Warning("multirate_rkSSP::advance_rk3 - this routine is probably in error because the computed errors with embedded formulas don't go to zero when dt -> 0");
+#endif
 
-    // u^1 = u^n + dt*L(u^n)
-    // u^n resides in cache, put u^1 in the solver. Use scratch for computing L(u^n)
-    {
-      // Compute fluxes using the solver state
-      this->compute_cdr_eb_states();
-      this->compute_cdr_fluxes(time);
-      this->compute_sigma_flux();
-      
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<cdr_solver>& solver   = solver_it();
-	RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+  // u^1 = u^n + dt*L(u^n)
+  // u^n resides in solver. Use this and put u^1 in the solver instead. Use scratch for computing L(u^n)
+  {
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_sigma_flux();
 
-	EBAMRCellData& phi  = solver->get_state();
-	EBAMRCellData& rhs  = storage->get_scratch();
-	EBAMRCellData& src  = solver->get_source();
-	EBAMRCellData& pre  = storage->get_previous();
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-	data_ops::copy(pre, phi); // Store u^n
+      EBAMRCellData& phi        = solver->get_state();
+      EBAMRCellData& rhs        = storage->get_scratch();
+      EBAMRCellData& pre        = storage->get_previous();
+      const EBAMRCellData& src  = solver->get_source();
 	
-	solver->compute_divF(rhs, phi, 0.0, true); // RHS =  div(u*v)
-	data_ops::scale(rhs, -1.0);                // RHS = -div(u*v)
-	data_ops::incr(rhs, src, 1.0);             // RHS = S - div(u*v)
-	data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^n + dt*L(u^n)
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  div(u*v)
+      data_ops::scale(rhs, -1.0);                // RHS = -div(u*v)
+      data_ops::incr(rhs, src, 1.0);             // RHS = S - div(u*v)
+      data_ops::incr(phi, rhs, a_dt);            // u^1 = u^n + dt*L(u^n)
 
-	m_amr->average_down(phi, m_cdr->get_phase());
-	m_amr->interp_ghost(phi, m_cdr->get_phase());
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
 
-	if(m_compute_err){
-	  EBAMRCellData& err = storage->get_error();
+      // Partial embedded formula
+      EBAMRCellData& err = storage->get_error();
+      data_ops::copy(err, pre);      // err = u^n
+      data_ops::incr(err, phi, 1.0); // err = u^n + u^1
+    }
 
-	  data_ops::copy(err, phi);   // err =  (u^n + dt*L(u^n))
-	  data_ops::scale(err, -1.0); // err = -(u^n + dt*L(u^n))
-	}
-      }
-
-      // Advance sigma
-      EBAMRIVData& phi = m_sigma->get_state();
-      EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-      EBAMRIVData& pre = m_sigma_scratch->get_previous();
-
-      data_ops::copy(pre, phi); // Store u^n before doing anything
+    // Advance sigma
+    EBAMRIVData& phi = m_sigma->get_state();
+    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();
       
-      m_sigma->compute_rhs(rhs);
-      m_sigma->reset_cells(rhs);
-      data_ops::incr(phi, rhs, a_dt); // phi = u^1 = u^n + dt*L(u^n)
+    m_sigma->compute_rhs(rhs);
+    m_sigma->reset_cells(rhs);
+    data_ops::incr(phi, rhs, a_dt); // phi = u^n + dt*L(u^n)
 
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_sigma->reset_cells(phi);
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_sigma->reset_cells(phi);
 
-      if(m_compute_err){
-	EBAMRIVData& err = m_sigma_scratch->get_error();
-	data_ops::set_value(err, 0.0);
-	data_ops::incr(err, phi, -1.0);  // error = -(u^n + dt*L(u^n))
-      }
-    }
-
-    // u^(n+1) = 0.5*(u^n + u^1 + dt*L(u^(1)))
-    // u^n resides in temp storage, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
-    {
-
-      // Compute fluxes from u^1, which resides in solvers. 
-      this->compute_cdr_eb_states();
-      this->compute_cdr_fluxes(time);
-      this->compute_sigma_flux();
-
-      if(m_compute_v) this->compute_cdr_velo(time);
-      if(m_compute_S) this->compute_cdr_sources(time);
-
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<cdr_solver>& solver   = solver_it();
-	RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-	EBAMRCellData& phi = solver->get_state();     // u^1
-	EBAMRCellData& rhs = storage->get_scratch();  // Storage for RHS
-	EBAMRCellData& src = solver->get_source();    // Source
-	EBAMRCellData& pre = storage->get_previous(); // u^n
-
-	solver->compute_divF(rhs, phi, 0.0, true);   // RHS =  div(u^1*v)
-	data_ops::scale(rhs, -1.0);                  // RHS = -div(u^1*v)
-	data_ops::incr(rhs, src, 1.0);               // RHS = S - div(u^1*v)
-	data_ops::incr(phi, rhs, a_dt);              // phi = u^1 + dt*L(u^1)
-	data_ops::incr(phi, pre, 1.0);               // phi = u^n + u^1 + dt*L(u^1)
-	data_ops::scale(phi, 0.5);                   // phi = 0.5*(u^n + u^1 + dt*L(u^1))
-
-	m_amr->average_down(phi, m_cdr->get_phase());
-	m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-	if(m_compute_err){
-	  EBAMRCellData& err = storage->get_error(); // err  = -(u^n + dt*L(u^n)) // 1st. order
-	  data_ops::incr(err, phi, 1.0);             // err += (second order)
-
-	  const int comp = 0;
-	  Real max, min;
-	  data_ops::get_max_min(max, min, phi, 0);
-	  
-	  Real emax, emin;
-	  data_ops::get_max_min_norm(emax, emin, err);
-	  emax = emax/max;
-
-	  const int which = solver_it.get_solver();
-	  m_cdr_error[which] = emax;
-	}
-      }
-
-      // Advance sigma
-      EBAMRIVData& phi = m_sigma->get_state();
-      EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-      EBAMRIVData& pre = m_sigma_scratch->get_previous();
-
-      m_sigma->compute_rhs(rhs);
-      m_sigma->reset_cells(rhs);
-      data_ops::incr(phi, rhs, a_dt); // phi = u^1 + dt*L(u^1)
-      data_ops::incr(phi, pre, 1.0);  // phi = u^n + u^1 + dt*L(u^1)
-      data_ops::scale(phi, 0.5);      // phi = 0.5*(u^n + u^1 + dt*L(u^1))
-
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_sigma->reset_cells(phi);
-
-      if(m_compute_err){
-	EBAMRIVData& err = m_sigma_scratch->get_error(); // err = -(u^n + dt*L(u^n))
-	data_ops::incr(err, phi, 1.0);                   // err = phi - (u^n + dt*L(u^n))
-
-	m_sigma->reset_cells(err);
-
-	const int comp = 0;
-	Real max, min;
-	data_ops::get_max_min_norm(max, min, phi);
-
-	Real emax, emin;
-	data_ops::get_max_min_norm(emax, emin, err);
-	emax = emax/max;
-
-	m_sigma_error = emax;
-      }
-    }
-    
-    // Update for next iterate. This should generally be done because the solution might move many grid cells.
-    if(step < a_substeps -1){ // No need on last step
-      if(m_compute_v) this->compute_cdr_velo(time);
-      if(m_compute_S) this->compute_cdr_sources(time);
-    }
-
-#if 1 // Debug
-    if(procID() == 0){
-      std::cout << "cdr_err = " << m_cdr_error << "\t sigma_err = " << m_sigma_error << std::endl;
-    }
-    Real cur_err = m_sigma_error;
-    for (int i = 0; i < m_cdr_error.size(); i++){
-      cur_err = Max(cur_err, m_cdr_error[i]);
-    }
-    std::cout << "new relative dt = " << sqrt(m_max_err/cur_err) << std::endl;
-#endif
-  }
-}
-
-void multirate_rkSSP::advance_advec_rk3(const int a_substeps, const Real a_dt){
-  CH_TIME("multirate_rkSSP::advance_advec_rk3");
-  if(m_verbosity > 2){
-    pout() << "multirate_rkSSP::advance_advec_rk3" << endl;
+    // Partial embedded formula for 
+    EBAMRIVData& err = m_sigma_scratch->get_error();
+    data_ops::set_value(err, 0.0);
+    data_ops::incr(err, pre, 1.0); // err = u^n
+    data_ops::incr(err, phi, 1.0); // err = u^n + u^1
   }
 
-#if 1 // Debug warning 
-  if(procID() == 0){
-    std::cout << "multirate_rkSSP::advance_advec_rk3 - There are indications of implementation errors in this routine; the computed error is larger than for the second order embedded scheme" << std::endl;
+  // u^2 = (3*u^n + u^1 + dt*L(u^(1)))/4
+  // u^n is stored, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
+  {
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    if(m_compute_v) this->compute_cdr_velo(a_time);
+    if(m_compute_S) this->compute_cdr_sources(a_time);
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi       = solver->get_state();     // u^1
+      EBAMRCellData& rhs       = storage->get_scratch();  // Storage for RHS
+      const EBAMRCellData& src = solver->get_source();    // Source
+      const EBAMRCellData& pre = storage->get_previous(); // u^n
+
+      solver->compute_divF(rhs, phi, 0.0, true);   // RHS =  div(u^1*v^1)
+      data_ops::scale(rhs, -1.0);                  // RHS = -div(u^1*v^1)
+      data_ops::incr(rhs, src, 1.0);               // RHS = S^1 - div(u^1*v^1)
+
+      data_ops::incr(phi, pre, 3);                 // u^2 = 3*u^n + u^1 
+      data_ops::incr(phi, rhs, a_dt);              // u^2 = 3^u^n + u^1 + dt*L(u^1)
+      data_ops::scale(phi, 0.25);                  // phi = (3*u^n + u^1 + dt*L(u^1))/4
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      // Embedded formula for error
+      EBAMRCellData& err = storage->get_error(); // err =  (u^n + u^1)
+      data_ops::incr(err, rhs, a_dt);            // err =  (u^n + u^1 + dt*L(u^1))
+      data_ops::scale(err, -0.5);                // err = -(u^n + u^1 + dt*L(u^1))/2
+    }
+
+    // Advance sigma
+    EBAMRIVData& phi = m_sigma->get_state();
+    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();
+
+    m_sigma->compute_rhs(rhs);
+    m_sigma->reset_cells(rhs);
+    data_ops::incr(phi, rhs, a_dt); // phi = u^1 + dt*L(u^1)
+    data_ops::incr(phi, pre, 3.0);  // phi = 3*u^n + u^1 + dt*L(u^1)
+    data_ops::scale(phi, 0.25);     // phi = (3*u^n + u^1 + dt*L(u^1))/4
+
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_sigma->reset_cells(phi);
+
+    // Embedded formula for error
+    EBAMRIVData& err = m_sigma_scratch->get_error(); // err =  (u^n + u^1)
+    data_ops::incr(err, rhs, a_dt);                  // err =  (u^n + u^1 + dt*L(u^1))
+    data_ops::scale(err, -0.5);                      // err = -(u^n + u^1 + dt*L(u^1))/2
   }
-#endif
 
-  for (int step = 0; step < a_substeps; step++){
-    const Real time = m_time + step*a_dt;
+  // u^(n+1) = (u^n + 2*u^2 + 2*dt*L(u^(1)))/3
+  // u^n is stored, u^2 resides in solver. Put u^(n+1) in solver at end and use scratch for computing L(u^1)
+  {
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_sigma_flux();
 
-    // u^1 = u^n + dt*L(u^n)
-    // u^n resides in solver. Store this and put u^1 in the solver instead. Use scratch for computing L(u^n)
-    {
+    if(m_compute_v) this->compute_cdr_velo(a_time);
+    if(m_compute_S) this->compute_cdr_sources(a_time);
 
-      // Compute fluxes from u^n
-      this->compute_cdr_eb_states();
-      this->compute_cdr_fluxes(time);
-      this->compute_sigma_flux();
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<cdr_solver>& solver   = solver_it();
-	RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      EBAMRCellData& phi       = solver->get_state();     // u^(2)
+      EBAMRCellData& rhs       = storage->get_scratch();  // Storage for RHS
+      const EBAMRCellData& src = solver->get_source();    // Source
+      const EBAMRCellData& pre = storage->get_previous(); // u^n
 
-	EBAMRCellData& phi        = solver->get_state();
-	EBAMRCellData& rhs        = storage->get_scratch();
-	EBAMRCellData& pre        = storage->get_previous();
-	const EBAMRCellData& src  = solver->get_source();
+      solver->compute_divF(rhs, phi, 0.0, true);   // RHS =  div(u*v)
+      data_ops::scale(rhs, -1.0);                  // RHS = -div(u*v)
+      data_ops::incr(rhs, src, 1.0);               // RHS = S - div(u*v)
 
-	data_ops::copy(pre, phi); // Store u^n
-	
-	solver->compute_divF(rhs, phi, 0.0, true); // RHS =  div(u*v)
-	data_ops::scale(rhs, -1.0);                // RHS = -div(u*v)
-	data_ops::incr(rhs, src, 1.0);             // RHS = S - div(u*v)
-	data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^n + dt*L(u^n)
-
-	m_amr->average_down(phi, m_cdr->get_phase());
-	m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-	if(m_compute_err){
-	  EBAMRCellData& err = storage->get_error();
-
-	  data_ops::copy(err, pre);      // err = u^n
-	  data_ops::incr(err, phi, 1.0); // err = u^n + u^1
-	}
-      }
-
-      // Advance sigma
-      EBAMRIVData& phi = m_sigma->get_state();
-      EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-      EBAMRIVData& pre = m_sigma_scratch->get_previous();
-
-      data_ops::copy(pre, phi); // Store u^n
-      
-      m_sigma->compute_rhs(rhs);
-      m_sigma->reset_cells(rhs);
-      data_ops::incr(phi, rhs, a_dt); // phi = u^n + dt*L(u^n)
+      data_ops::scale(phi, 2.0);                   // u^(n+1) = 2*u^2
+      data_ops::incr(phi, pre, 1);                 // u^(n+1) = u^n + 2*u^2
+      data_ops::incr(phi, rhs, 2.0*a_dt);          // u^(n+1) = u^n + 2*u^2 + 2*dt*L(u^2)
+      data_ops::scale(phi, 1./3.);                 // u^(n+1) = (u^n + 2*u^2 + 2*dt*L(u^2))/3
 
       m_amr->average_down(phi, m_cdr->get_phase());
-      m_sigma->reset_cells(phi);
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
 
-      if(m_compute_err){
-	EBAMRIVData& err = m_sigma_scratch->get_error();
-
-	data_ops::set_value(err, 0.0);
-	data_ops::incr(err, pre, 1.0); // err = u^n
-	data_ops::incr(err, phi, 1.0); // err = u^n + u^1
-      }
+      // Error computation
+      EBAMRCellData& err = storage->get_error(); // err  = -0.5*(u^n + u^1 + dt*L(u^1)) // second order
+      data_ops::incr(err, phi, 1.0);             // err += (third order approximation)
     }
 
-    // u^2 = (3*u^n + u^1 + dt*L(u^(1)))/4
-    // u^n is stored, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
-    {
-      // Compute fluxes from u^1, which reside in solver
-      this->compute_cdr_eb_states();
-      this->compute_cdr_fluxes(time);
-      this->compute_sigma_flux();
+    // Advance sigma
+    EBAMRIVData& phi = m_sigma->get_state();
+    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();
 
-      if(m_compute_v) this->compute_cdr_velo(time);
-      if(m_compute_S) this->compute_cdr_sources(time);
+    m_sigma->compute_rhs(rhs);
+    m_sigma->reset_cells(rhs);
+    data_ops::incr(phi, rhs, a_dt); // phi = u^2 + dt*L(u^2)
+    data_ops::scale(phi, 2.0);      // phi = 2*u^2 + 2*dt*L(u^2)
+    data_ops::incr(phi, pre, 1.0);  // phi = u^n + 2*u^2 + 2*dt*L(u^2)
+    data_ops::scale(phi, 1./3.);    // phi = (u^n + 2*u^2 + 2*dt*L(u^2))/3
 
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<cdr_solver>& solver   = solver_it();
-	RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_sigma->reset_cells(phi);
 
-	EBAMRCellData& phi       = solver->get_state();     // u^1
-	EBAMRCellData& rhs       = storage->get_scratch();  // Storage for RHS
-	const EBAMRCellData& src = solver->get_source();    // Source
-	const EBAMRCellData& pre = storage->get_previous(); // u^n
-
-	solver->compute_divF(rhs, phi, 0.0, true);   // RHS =  div(u^1*v^1)
-	data_ops::scale(rhs, -1.0);                  // RHS = -div(u^1*v^1)
-	data_ops::incr(rhs, src, 1.0);               // RHS = S^1 - div(u^1*v^1)
-
-	data_ops::incr(phi, pre, 3);                 // u^2 = 3*u^n + u^1 
-	data_ops::incr(phi, rhs, a_dt);              // u^2 = 3^u^n + u^1 + dt*L(u^1)
-	data_ops::scale(phi, 0.25);                  // phi = (3*u^n + u^1 + dt*L(u^1))/4
-
-	m_amr->average_down(phi, m_cdr->get_phase());
-	m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-	if(m_compute_err){
-	  EBAMRCellData& err = storage->get_error(); // err =  (u^n + u^1)
-	  data_ops::incr(err, rhs, a_dt);            // err =  (u^n + u^1 + dt*L(u^1))
-	  data_ops::scale(err, -0.5);                // err = -(u^n + u^1 + dt*L(u^1))/2
-	}
-      }
-
-      // Advance sigma
-      EBAMRIVData& phi = m_sigma->get_state();
-      EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-      EBAMRIVData& pre = m_sigma_scratch->get_previous();
-
-      m_sigma->compute_rhs(rhs);
-      m_sigma->reset_cells(rhs);
-      data_ops::incr(phi, rhs, a_dt); // phi = u^1 + dt*L(u^1)
-      data_ops::incr(phi, pre, 3.0);  // phi = 3*u^n + u^1 + dt*L(u^1)
-      data_ops::scale(phi, 0.25);     // phi = (3*u^n + u^1 + dt*L(u^1))/4
-
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_sigma->reset_cells(phi);
-
-      if(m_compute_err){
-	EBAMRIVData& err = m_sigma_scratch->get_error(); // err =  (u^n + u^1)
-	data_ops::incr(err, rhs, a_dt);                  // err =  (u^n + u^1 + dt*L(u^1))
-	data_ops::scale(err, -0.5);                      // err =  (u^n + u^1 + dt*L(u^1))/2
-      }
-    }
-
-    // u^(n+1) = (u^n + 2*u^2 + 2*dt*L(u^(1)))/3
-    // u^n is stored, u^2 resides in solver. Put u^(n+1) in solver at end and use scratch for computing L(u^1)
-    {
-      this->compute_cdr_eb_states();
-      this->compute_cdr_fluxes(time);
-      this->compute_sigma_flux();
-
-      if(m_compute_v) this->compute_cdr_velo(time);
-      if(m_compute_S) this->compute_cdr_sources(time);
-
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	RefCountedPtr<cdr_solver>& solver   = solver_it();
-	RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-	EBAMRCellData& phi       = solver->get_state();     // u^(2)
-	EBAMRCellData& rhs       = storage->get_scratch();  // Storage for RHS
-	const EBAMRCellData& src = solver->get_source();    // Source
-	const EBAMRCellData& pre = storage->get_previous(); // u^n
-
-	solver->compute_divF(rhs, phi, 0.0, true);   // RHS =  div(u*v)
-	data_ops::scale(rhs, -1.0);                  // RHS = -div(u*v)
-	data_ops::incr(rhs, src, 1.0);               // RHS = S - div(u*v)
-
-	data_ops::scale(phi, 2.0);                   // u^(n+1) = 2*u^2
-	data_ops::incr(phi, pre, 1);                 // u^(n+1) = u^n + 2*u^2
-	data_ops::incr(phi, rhs, 2.0*a_dt);          // u^(n+1) = u^n + 2*u^2 + 2*dt*L(u^2)
-	data_ops::scale(phi, 1./3.);                 // u^(n+1) = (u^n + 2*u^2 + 2*dt*L(u^2))/3
-
-	m_amr->average_down(phi, m_cdr->get_phase());
-	m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-	if(m_compute_err){
-	  EBAMRCellData& err = storage->get_error(); // err  = -0.5*(u^n + u^1 + dt*L(u^1)) // second order
-	  data_ops::incr(err, phi, 1.0);             // err += (third order approximation)
-
-	  const int comp = 0;
-	  Real max, min;
-	  data_ops::get_max_min(max, min, phi, 0);
-	  
-	  Real emax, emin;
-	  data_ops::get_max_min_norm(emax, emin, err);
-	  emax = emax/max;
-
-	  const int which = solver_it.get_solver();
-	  m_cdr_error[which] = emax;
-	}
-      }
-
-      // Advance sigma
-      EBAMRIVData& phi = m_sigma->get_state();
-      EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-      EBAMRIVData& pre = m_sigma_scratch->get_previous();
-
-      m_sigma->compute_rhs(rhs);
-      m_sigma->reset_cells(rhs);
-      data_ops::incr(phi, rhs, a_dt); // phi = u^2 + dt*L(u^2)
-      data_ops::scale(phi, 2.0);      // phi = 2*u^2 + 2*dt*L(u^2)
-      data_ops::incr(phi, pre, 1.0);  // phi = u^n + 2*u^2 + 2*dt*L(u^2)
-      data_ops::scale(phi, 1./3.);    // phi = (u^n + 2*u^2 + 2*dt*L(u^2))/3
-
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_sigma->reset_cells(phi);
-
-      if(m_compute_err){
-	EBAMRIVData& err = m_sigma_scratch->get_error(); // err = -(u^n + dt*L(u^n))
-	data_ops::incr(err, phi, 1.0);                   // err = phi - (u^n + dt*L(u^n))
-
-	m_sigma->reset_cells(err);
-
-	const int comp = 0;
-	Real max, min;
-	data_ops::get_max_min_norm(max, min, phi);
-
-	Real emax, emin;
-	data_ops::get_max_min_norm(emax, emin, err);
-	emax = emax/max;
-
-	m_sigma_error = emax;
-      }
-    }
-    
-    // Update for next iterate. This should generally be done because the solution might move many grid cells.
-    if(step < a_substeps -1){ // No need on last step
-      if(m_compute_v) this->compute_cdr_velo(time);
-      if(m_compute_S) this->compute_cdr_sources(time);
-    }
-
-#if 1 // Debug
-    if(procID() == 0){
-      std::cout << "cdr_err = " << m_cdr_error << "\t sigma_err = " << m_sigma_error << std::endl;
-    }
-#endif
+    // Error computation
+    EBAMRIVData& err = m_sigma_scratch->get_error(); // err = -(u^n + dt*L(u^n))
+    data_ops::incr(err, phi, 1.0);                   // err = phi - (u^n + dt*L(u^n))
   }
 }
 
@@ -747,6 +783,50 @@ void multirate_rkSSP::regrid_internals(){
   this->allocate_poisson_storage();
   this->allocate_rte_storage();
   this->allocate_sigma_storage();
+}
+
+void multirate_rkSSP::compute_errors(){
+  CH_TIME("time_stepper::compute_errors");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_errors" << endl;
+  }
+
+  const int comp = 0;
+  Real max, min, emax, emin;
+
+  // CDR errors
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    const int which = solver_it.get_solver();
+    
+    const EBAMRCellData& phi = solver->get_state();
+    EBAMRCellData& err = storage->get_error();
+
+    m_amr->average_down(err, m_cdr->get_phase());
+
+
+    // const int comp = 0;
+
+    // data_ops::get_max_min(max, min, phi, 0);
+    // data_ops::get_max_min_norm(emax, emin, err);
+    // m_cdr_error[which] = emax/max;;
+    Real Lerr, Lphi;
+    data_ops::norm(Lerr, *err[0], m_amr->get_domains()[0], m_error_norm);
+    data_ops::norm(Lphi, *phi[0], m_amr->get_domains()[0], m_error_norm);
+
+    m_cdr_error[which] = Lerr/Lphi;
+  }
+
+  // Sigma error
+  EBAMRIVData& phi = m_sigma->get_state();
+  EBAMRIVData& err = m_sigma_scratch->get_error();
+  data_ops::get_max_min_norm(max, min, phi);
+  data_ops::get_max_min_norm(emax, emin, err);
+  m_sigma_error = emax/max;
+
+  // Maximum error
+  m_max_error = this->get_max_error();
 }
 
 void multirate_rkSSP::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
@@ -1149,4 +1229,48 @@ void multirate_rkSSP::write_diagnostics(const int  a_substeps,
       << std::left << std::setw(width) << endl;
     
   }
+}
+
+void multirate_rkSSP::store_solvers(){
+  CH_TIME("multirate_rkSSP::store_solvers");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::store_solvers" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& prev  = storage->get_previous();
+
+    data_ops::copy(prev, state);
+  }
+
+  EBAMRIVData& phi = m_sigma->get_state();
+  EBAMRIVData& pre = m_sigma_scratch->get_previous();
+  data_ops::set_value(pre, 0.0);
+  data_ops::incr(pre, phi, 1.0);
+}
+
+void multirate_rkSSP::restore_solvers(){
+  CH_TIME("multirate_rkSSP::restore_solvers");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::restore_solvers" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& prev  = storage->get_previous();
+
+    data_ops::copy(state, prev);
+  }
+
+  EBAMRIVData& phi = m_sigma->get_state();
+  EBAMRIVData& pre = m_sigma_scratch->get_previous();
+  data_ops::set_value(phi, 0.0);
+  data_ops::incr(phi, pre, 1.0);
 }

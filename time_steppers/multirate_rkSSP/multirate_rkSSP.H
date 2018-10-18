@@ -46,14 +46,17 @@ protected:
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
   int m_order;
-
+  int m_error_norm;
+  
   Real m_maxCFL;
   Real m_dt_cfl;
-  Real m_max_err;
+  Real m_err_thresh;
   Real m_safety;
+  Real m_dtf;
 
   Vector<Real> m_cdr_error;
   Real m_sigma_error;
+  Real m_max_error;
 
   bool m_print_diagno;
   bool m_write_diagno;
@@ -63,7 +66,9 @@ protected:
   bool m_do_rte;
   bool m_compute_v;
   bool m_compute_S;
-  bool m_compute_err;
+  bool m_adaptive_dt;
+  bool m_have_dtf;
+  bool m_multirate;
 
 
   time_code::which_code m_timecode;
@@ -72,16 +77,18 @@ protected:
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
 
   void advance_diffusion(const Real a_dt);
-  void advance_multirate_advec_src(const int a_substeps, const Real a_dt);
-  void advance_advec_rk1(const int a_step, const Real a_dt);
-  void advance_advec_rk2(const int a_step, const Real a_dt);
-  void advance_advec_rk3(const int a_step, const Real a_dt);
+  void advance_multirate_fixed(const int a_substeps, const Real a_dt);
+  void advance_multirate_adaptive(int& a_substeps, Real& a_dt, const Real a_time, const Real a_dtc);
+  void advance_rk1(const Real a_time, const Real a_dt);
+  void advance_rk2(const Real a_time, const Real a_dt);
+  void advance_rk3(const Real a_time, const Real a_dt);
   void advance_rte_stationary(const Real a_time);
   void allocate_cdr_storage();
   void allocate_poisson_storage();
   void allocate_rte_storage();
   void allocate_sigma_storage();
   void cache_solutions();
+  void compute_errors();
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
   void compute_cdr_fluxes(const Real a_time);
@@ -102,7 +109,11 @@ protected:
 			 const Real a_rte_time,
 			 const Real a_misc_time,
 			 const Real a_total_time);
-
+  void store_solvers();
+  void restore_solvers();
+  
+  
+  Real get_max_error();
   Real restrict_dt() ;
 
   
