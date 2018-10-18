@@ -62,7 +62,7 @@ void cdr_tga::advance(EBAMRCellData& a_state, const Real& a_dt){
   m_step++;
 }
 
-void cdr_tga::advance_diffusion(EBAMRCellData& a_state, const Real a_dt){
+void cdr_tga::advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt){
   CH_TIME("cdr_tga::advance_diffusion");
   if(m_verbosity > 5){
     pout() << m_name + "::advance_diffusion" << endl;
@@ -76,40 +76,44 @@ void cdr_tga::advance_diffusion(EBAMRCellData& a_state, const Real a_dt){
     const int finest_level = m_amr->get_finest_level();
 
     // Create a source term = S = 0.0;
-    EBAMRCellData src, phi, divF;
-    m_amr->allocate(src,  m_phase, ncomp);
-    m_amr->allocate(phi,  m_phase, ncomp); 
+    EBAMRCellData src, phi_euler, phi_tga;
+    m_amr->allocate(src,       m_phase, ncomp);
+    m_amr->allocate(phi_euler, m_phase, ncomp);
+    m_amr->allocate(phi_tga,   m_phase, ncomp); 
 
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      data_ops::set_value(*src[lvl],  0.0);
-      data_ops::set_value(*phi[lvl],  0.0);
-      data_ops::incr(*phi[lvl], *a_state[lvl], 1.0);
-    }
+    data_ops::set_value(src, 0.0);
+    data_ops::copy(phi_euler, a_state);
+    data_ops::copy(phi_tga, a_state);
 
     // Do the aliasing stuff
-    Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
-    m_amr->alias(new_state, phi);
+    Vector<LevelData<EBCellFAB>* > euler_state, tga_state, old_state, source;
+    m_amr->alias(euler_state, phi_euler);
+    m_amr->alias(tga_state,   phi_tga);
     m_amr->alias(old_state, a_state);
     m_amr->alias(source,    src);
 
     const Real alpha = 0.0;
     const Real beta  = 1.0;
 
-    if(m_use_tga){
-      m_tgasolver->resetAlphaAndBeta(alpha, beta);
-      m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
-    }
-    else{
-      m_eulersolver->resetAlphaAndBeta(alpha, beta);
-      m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level);
-    }
+    // TGA solve
+    m_tgasolver->resetAlphaAndBeta(alpha, beta);
+    m_tgasolver->oneStep(tga_state, old_state, source, a_dt, 0, finest_level, 0.0);
+
+    // Euler solve
+    m_eulersolver->resetAlphaAndBeta(alpha, beta);
+    m_eulersolver->oneStep(euler_state, old_state, source, a_dt, 0, finest_level);
+
+    // Compute error
+    data_ops::copy(a_error, phi_euler);
+    data_ops::scale(a_error, -1.0);
+    data_ops::incr(a_error, phi_tga, 1.0);
 
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
       converged = true;
     }
 
-    data_ops::copy(a_state, phi);
+    data_ops::copy(a_state, phi_tga);
   }
 }
 
@@ -260,12 +264,8 @@ void cdr_tga::setup_gmg(){
   this->setup_operator_factory();
   this->setup_multigrid();
 
-  if(m_use_tga){
-    this->setup_tga();
-  }
-  else{
-    this->setup_euler();
-  }
+  this->setup_tga();
+  this->setup_euler();
 }
 
 void cdr_tga::setup_operator_factory(){

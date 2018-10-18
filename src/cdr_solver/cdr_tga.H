@@ -68,7 +68,7 @@ public:
   /*!
     @brief Diffusion advance
   */
-  virtual void advance_diffusion(EBAMRCellData& a_state, const Real a_dt);
+  virtual void advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt);
 
   /*!
     @brief Compute div(nv - D*grad(n))

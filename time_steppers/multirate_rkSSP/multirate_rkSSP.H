@@ -52,7 +52,8 @@ protected:
   Real m_dt_cfl;
   Real m_err_thresh;
   Real m_safety;
-  Real m_dtf;
+  Real m_dt_advec;
+  Real m_dt_diffu;
 
   Vector<Real> m_cdr_error;
   Real m_sigma_error;
@@ -76,7 +77,7 @@ protected:
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
 
-  void advance_diffusion(const Real a_dt);
+  void advance_diffusion(int& a_substeps, Real& a_dt);
   void advance_multirate_fixed(const int a_substeps, const Real a_dt);
   void advance_multirate_adaptive(int& a_substeps, Real& a_dt, const Real a_time, const Real a_dtc);
   void advance_rk1(const Real a_time, const Real a_dt);

@@ -36,7 +36,7 @@ public:
   /*!
     @brief Pure diffusion advance. Calling this is an error - SG currently only works with MOL methods. 
   */
-  virtual void advance_diffusion(EBAMRCellData& a_state, const Real a_dt);
+  virtual void advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt);
 
   /*!
     @brief Compute advective derivative. Calling this is an error - SG currently only works with MOL methods. 

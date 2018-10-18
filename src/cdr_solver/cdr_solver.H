@@ -174,7 +174,7 @@ public:
   /*!
     @brief Pure diffusion advance. I.e. advance with div(nv) = 0 and S = 0
   */
-  virtual void advance_diffusion(EBAMRCellData& a_state, const Real a_dt) = 0;
+  virtual void advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt) = 0;
 
   /*!
     @brief Explicit RK2 advance

@@ -39,7 +39,7 @@ void cdr_sg::advance_advect(EBAMRCellData& a_state, const Real a_dt){
   MayDay::Abort("cdr_sg::advance_advect - error. Scharfetter-Gummel currently only works with MOL methods");
 }
 
-void cdr_sg::advance_diffusion(EBAMRCellData& a_state, const Real a_dt){
+void cdr_sg::advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt){
   CH_TIME("cdr_sg::advance_diffusion");
   if(m_verbosity > 5){
     pout() << m_name + "::advance_diffusion" << endl;

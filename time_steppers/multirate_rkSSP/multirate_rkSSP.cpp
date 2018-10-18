@@ -189,31 +189,33 @@ Real multirate_rkSSP::advance(const Real a_dt){
   const Real t0 = MPI_Wtime();
   this->cache_solutions(); // Cache old solutions. We can safely manipulate directly into solver states.
 
-  int substeps; // Number of substeps
-  Real cfl;     // Substep CFL
-  Real sub_dt;  // Substep time
-
+  int advective_substeps = 0; // Number of advective_substeps
+  int diffusive_substeps = 0; // Number of advective_substeps
+  
+  Real cfl;     // Average or fixed CFL for advective+source term advancements
+  Real diff_dt;
+  
   // Advection and source term advancements
   if(m_do_advec_src){
     if(m_adaptive_dt){
       if(!m_have_dtf){
 	// Estimate dtf by substepping. This is probably a bad time step but it will be adjusted
-	substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
-	cfl        = a_dt/(substeps*m_dt_cfl);
-	m_dtf      = cfl*m_dt_cfl;
+	advective_substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
+	cfl        = a_dt/(advective_substeps*m_dt_cfl);
+	m_dt_advec = cfl*m_dt_cfl;
 	m_have_dtf = true;
       }
 
       // Start substepping
-      substeps = 0;
-      this->advance_multirate_adaptive(substeps, m_dtf, m_time, a_dt);
+      advective_substeps = 0;
+      this->advance_multirate_adaptive(advective_substeps, m_dt_advec, m_time, a_dt);
     }
     else{
-      substeps = ceil(a_dt/(m_maxCFL*m_dt_cfl));
-      cfl      = a_dt/(substeps*m_dt_cfl);
-      sub_dt   = cfl*m_dt_cfl;
+      advective_substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
+      cfl        = a_dt/(advective_substeps*m_dt_cfl);
+      m_dt_advec = cfl*m_dt_cfl;
     
-      this->advance_multirate_fixed(substeps, sub_dt);
+      this->advance_multirate_fixed(advective_substeps, m_dt_advec);
     }
   }
   const Real t1 = MPI_Wtime();
@@ -222,7 +224,7 @@ Real multirate_rkSSP::advance(const Real a_dt){
   if(m_adaptive_dt){
     if(m_order >= 2){
       if(procID() == 0){
-	std::cout << "cdr_errors = " << m_cdr_error << "\t sigma error = " << m_sigma_error << std::endl;
+	std::cout << "Advection:" << "\t cdr_errors = " << m_cdr_error << "\t sigma error = " << m_sigma_error << std::endl;
       }
     }
   }
@@ -230,8 +232,18 @@ Real multirate_rkSSP::advance(const Real a_dt){
 
   // Diffusion advance
   if(m_do_diffusion){
-    this->advance_diffusion(a_dt);
+    diff_dt = a_dt;
+    this->advance_diffusion(diffusive_substeps, diff_dt);
   }
+#if 1 // Debug
+  if(m_adaptive_dt){
+    if(m_order >= 2){
+      if(procID() == 0){
+	std::cout << "Diffusion:" << "\t cdr_errors = " << m_cdr_error << "\t sigma error = " << m_sigma_error << std::endl;
+      }
+    }
+  }
+#endif
   const Real t2 = MPI_Wtime();
 
   // Solve Poisson equation
@@ -263,14 +275,14 @@ Real multirate_rkSSP::advance(const Real a_dt){
     
     pout() << "\t Convection-source advance: \n ";
     pout() << "\t --------------------------\n";
-    pout() << "\t\t Steps     = " << substeps << endl;
+    pout() << "\t\t Steps     = " << advective_substeps << endl;
     if(m_adaptive_dt){
-      pout() << "\t\t Avg. cfl  = " << a_dt/(substeps*m_dt_cfl) << endl;
-      pout() << "\t\t Avg. dt   = " << a_dt/substeps << endl;
+      pout() << "\t\t Avg. cfl  = " << a_dt/(advective_substeps*m_dt_cfl) << endl;
+      pout() << "\t\t Avg. dt   = " << a_dt/advective_substeps << endl;
     }
     else{
-      pout() << "\t\t Local cfl = " << cfl      << endl;
-      pout() << "\t\t Local dt  = " << sub_dt   << endl;
+      pout() << "\t\t Local cfl = " << cfl        << endl;
+      pout() << "\t\t Local dt  = " << m_dt_advec << endl;
     }
     pout() << endl;
     pout() << "\t\t Time      = " << 100.*(t1-t0)/(t5-t0) << "%\n" << endl;
@@ -302,13 +314,13 @@ Real multirate_rkSSP::advance(const Real a_dt){
 
   }
   if(m_write_diagno){
-    this->write_diagnostics(substeps, sub_dt, a_dt, cfl, t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t5-t0);
+    this->write_diagnostics(advective_substeps, m_dt_advec, a_dt, cfl, t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t5-t0);
   }
 
   return a_dt;
 }
 
-void multirate_rkSSP::advance_diffusion(const Real a_dt){
+void multirate_rkSSP::advance_diffusion(int& a_substeps, Real& a_dt){
   CH_TIME("multirate_rkSSP::advance_diffusion");
   if(m_verbosity > 5){
     pout() << "multirate_rkSSP::advance_diffusion" << endl;
@@ -327,10 +339,22 @@ void multirate_rkSSP::advance_diffusion(const Real a_dt){
     m_cdr->set_source(0.0); // This is necessary because advance_diffusion also works with source terms
     this->compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver = solver_it();
-
-      solver->advance_diffusion(a_dt);
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      
+      EBAMRCellData& phi   = solver->get_state();
+      EBAMRCellData& error = storage->get_error();
+      if(solver->is_diffusive()){
+	solver->advance_diffusion(phi, error, a_dt);
+      }
+      else{
+	data_ops::set_value(error, 0.0);
+      }
     }
+    m_sigma_error = 0.0; // No sigma error now
+    this->compute_errors();
+    
+    const Real new_dt = a_dt*sqrt(m_err_thresh/m_max_error);
   }
 }
 

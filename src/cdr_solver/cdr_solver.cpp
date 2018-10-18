@@ -86,8 +86,10 @@ void cdr_solver::advance_diffusion(const Real a_dt){
   if(m_verbosity > 1){
     pout() << m_name + "::advance_diffusion(dt)" << endl;
   }
-  
-  this->advance_diffusion(m_state, a_dt);
+
+  EBAMRCellData error;
+  m_amr->allocate(error, m_phase, 1);
+  this->advance_diffusion(m_state, error, a_dt);
 }
 
 void cdr_solver::advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real a_alpha){
