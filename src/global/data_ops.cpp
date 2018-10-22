@@ -767,6 +767,16 @@ void data_ops::set_value(EBAMRIVData& a_data, const Real& a_value){
   }
 }
 
+void data_ops::set_value(EBAMRIFData& a_data, const Real& a_value){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    data_ops::set_value(*a_data[lvl], a_value);
+  }
+}
+
+void data_ops::set_value(LevelData<BaseIFFAB<Real> >& a_lhs, const Real a_value){
+  MayDay::Abort("data_ops::set_value(BaseIFFAB<Real>) - not implemented");
+}
+
 void data_ops::set_value(MFAMRCellData& a_lhs, const Real& a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::set_value(*a_lhs[lvl], a_value);
