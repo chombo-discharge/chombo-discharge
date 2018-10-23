@@ -18,6 +18,7 @@
 #include <MFCellFAB.H>
 #include <MFFluxFAB.H>
 
+#include "DomainFluxIFFAB.H"
 #include "tags.H"
 #include "MFBaseIVFAB.H"
 
@@ -165,7 +166,7 @@ typedef Vector<RefCountedPtr<LevelData<EBCellFAB> > >        EBAMRCellData;
 typedef Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        EBAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<EBFaceFAB> > >        EBAMRFaceData;
 typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;
-typedef Vector<RefCountedPtr<LevelData<BaseIFFAB<Real> > > > EBAMRIFData;
+typedef Vector<RefCountedPtr<LevelData<DomainFluxIFFAB > > > EBAMRIFData;
 typedef Vector<RefCountedPtr<LevelData<tags> > >             EBAMRTags;
 
 #endif

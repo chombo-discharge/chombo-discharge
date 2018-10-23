@@ -152,13 +152,9 @@ public:
   
   static void set_value(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value);
 
-  static void set_value(LevelData<BaseIFFAB<Real> >& a_lhs, const Real a_value);
-
   static void set_value(EBAMRFluxData& a_lhs, const Real& a_value);
 
   static void set_value(EBAMRIVData& a_lhs, const Real& a_value);
-
-  static void set_value(EBAMRIFData& a_lhs, const Real& a_value);
 
   static void set_value(MFAMRCellData& a_lhs, const Real& a_value);
 
@@ -171,6 +167,10 @@ public:
   static void set_value(MFAMRIVData& a_lhs, const Real& a_value);
 
   static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
+
+  static void set_value(EBAMRIFData& a_lhs, const Real a_value);
+
+  static void set_value(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value);
 
   static void sum(Real& a_value);
 

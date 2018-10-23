@@ -9,6 +9,7 @@
 #include "mfalias.H"
 #include "load_balance.H"
 #include "gradientF_F.H"
+#include "DomainFluxIFFABFactory.H"
 
 #include <BRMeshRefine.H>
 #include <EBEllipticLoadBalance.H>
@@ -162,10 +163,10 @@ void amr_mesh::allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, c
   }
 }
 
-void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_dir, const int a_ncomp, const int a_ghost){
-  CH_TIME("amr_mesh::allocate(BaseIFFAB)");
+void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
+  CH_TIME("amr_mesh::allocate(EBAMRIFData)");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(BaseIFFab)" << endl;
+    pout() << "amr_mesh::allocate(EBAMRIFData)" << endl;
   }
 
   const int ghost = (a_ghost == -1) ? m_num_ghost : a_ghost;
@@ -174,28 +175,11 @@ void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, c
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
 
-    LayoutData<IntVectSet> sets(m_grids[lvl]);
-    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
-      Box box = m_grids[lvl].get(dit());
-      box.grow(ghost);
-      box &= m_domains[lvl];       // Intersect with boundary
+    DomainFluxIFFABFactory fact(m_ebisl[a_phase][lvl],m_domains[lvl]);
 
-      Box lobox = adjCellLo(box, a_dir, 1);
-      Box hibox = adjCellHi(box, a_dir, 1);
-
-      sets[dit()] |= IntVectSet(lobox);
-      sets[dit()] |= IntVectSet(hibox);
-    }
-
-    BaseIFFactory<Real> fact(m_ebisl[a_phase][lvl], sets, a_dir);
-
-    a_data[lvl] = RefCountedPtr<LevelData<BaseIFFAB<Real> > >
-      (new LevelData<BaseIFFAB<Real> >(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
+    a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
+      (new LevelData<DomainFluxIFFAB>(m_grids[lvl], a_ncomp, ghost*IntVect::Unit, fact));
   }
-
-  
-  MayDay::Abort("amr_mesh::allocate - Is this really the best approach, a_data won't have knowledge of which side it belongs to. Maybe we should introduce a new template for this data structure. ");
-
 }
 
 void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_ghost){

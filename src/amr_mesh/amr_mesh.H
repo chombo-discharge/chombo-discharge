@@ -16,6 +16,8 @@
 #include "nwoebquadcfinterp.H"
 #include "MFLevelGrid.H"
 #include "ebcoarseaverage.H"
+#include "DomainFluxIFFAB.H"
+#include "DomainFluxIFFABFactory.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
@@ -140,7 +142,7 @@ public:
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
-  virtual void allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_dir, const int a_ncomp, const int a_ghost = -1);
+  virtual void allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 

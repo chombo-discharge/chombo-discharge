@@ -143,12 +143,10 @@ void cdr_solver::allocate_internals(){
   m_amr->allocate(m_velo_face,  m_phase, sca);
   m_amr->allocate(m_velo_cell,  m_phase, vec); 
   m_amr->allocate(m_ebflux,     m_phase, sca);
-  for (int dir = 0; dir < SpaceDim; dir++){
-    m_amr->allocate(m_domainflux[dir], m_phase, dir, sca);
-  }
   m_amr->allocate(m_diffco,     m_phase, sca);
   m_amr->allocate(m_diffco_eb,  m_phase, sca);
   m_amr->allocate(m_scratch,    m_phase, sca);
+  m_amr->allocate(m_domainflux, m_phase, sca);
 
   data_ops::set_value(m_state,      0.0);
   data_ops::set_value(m_source,     0.0);
@@ -156,11 +154,9 @@ void cdr_solver::allocate_internals(){
   data_ops::set_value(m_velo_cell,  0.0);
   data_ops::set_value(m_ebflux,     0.0);
   data_ops::set_value(m_ebflux,     0.0);
-  for (int dir = 0; dir < SpaceDim; dir++){
-    data_ops::set_value(m_domainflux[dir], 0.0);
-  }
   data_ops::set_value(m_diffco,     0.0);
   data_ops::set_value(m_diffco_eb,  0.0);
+  data_ops::set_value(m_domainflux, 0.0);
   data_ops::set_value(m_scratch,    0.0);
 
   this->define_interp_stencils();

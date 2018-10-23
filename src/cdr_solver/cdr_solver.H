@@ -382,9 +382,9 @@ protected:
   EBAMRIVData m_ebflux;
 
   /*!
-    @Flux through the domain boundary
+    @brief Domain flux
   */
-  EBAMRIFData m_domainflux[SpaceDim];
+  EBAMRIFData m_domainflux;
 
   /*!
     @brief Diffusion coefficients (can
