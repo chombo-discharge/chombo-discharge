@@ -476,6 +476,37 @@ void time_stepper::compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
   }
 }
 
+void time_stepper::compute_gradients_at_domain_faces(Vector<EBAMRIFData*>&         a_grad,
+						     const phase::which_phase&     a_phase,
+						     const Vector<EBAMRCellData*>& a_phi){
+  CH_TIME("time_stepper::compute_gradients_at_eb");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_gradients_at_eb" << endl;
+  }
+
+  CH_assert(a_grad.size() == a_phi.size());
+
+  EBAMRIFData   domain_gradient;
+  EBAMRCellData gradient;
+  m_amr->allocate(domain_gradient, a_phase, SpaceDim);
+  m_amr->allocate(gradient,        a_phase, SpaceDim);
+
+  for (int i = 0; i < a_phi.size(); i++){
+    EBAMRIFData& grad_density    = *a_grad[i];
+    const EBAMRCellData& density = *a_phi[i];
+
+    CH_assert(grad_density[0]->nComp() == 1);
+    CH_assert(density[0]->nComp()      == 1);
+    
+    m_amr->compute_gradient(gradient, density);                         // Compute cell-centered gradient
+    m_amr->average_down(gradient, a_phase);                             // Average down
+    m_amr->interp_ghost(gradient, a_phase);                             // Interpolate ghost cells (have to do this before interp)
+    
+    this->extrapolate_to_domain_faces(domain_gradient, a_phase, gradient);  // Extrapolate to EB
+    this->project_domain(grad_density, domain_gradient);                // Project normal compoent
+  }
+}
+
 void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				       const Vector<EBAMRCellData*>&  a_cdr_densities,
 				       const Vector<EBAMRCellData*>&  a_rte_densities,
@@ -1711,6 +1742,44 @@ void time_stepper::project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData
 
 	// For EB's, the geometrical normal vector is opposite of the finite volume method normal
 	proj_flux(vof,0) = PolyGeom::dot(vec_flux, -normal);
+      }
+    }
+  }
+}
+
+void time_stepper::project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux){
+  CH_TIME("time_stepper::project_domain");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::project_domain" << endl;
+  }
+
+  const int comp         = 0;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    CH_assert(a_projected_flux[lvl]->nComp() == 1);
+    CH_assert(a_flux[lvl]->nComp()           == SpaceDim);
+
+    const DisjointBoxLayout& dbl  = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+      const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+      for (int dir = 0; dir < SpaceDim; dir++){
+	for (SideIterator sit; sit.ok(); ++sit){
+	  BaseIFFAB<Real>& normal_comp    = (*a_projected_flux[lvl])[dit()](dir, sit());
+	  const BaseIFFAB<Real>& gradient = (*a_flux[lvl])[dit()](dir, sit());
+
+	  const int sgn          = sign(sit());
+	  const EBGraph& ebgraph = normal_comp.getEBGraph();
+	  const IntVectSet& ivs  = normal_comp.getIVS();
+
+	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	    const FaceIndex& face = faceit();
+	    normal_comp(face, comp) = sgn*gradient(face, dir);
+	  }
+	}
       }
     }
   }

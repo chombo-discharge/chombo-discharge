@@ -185,6 +185,13 @@ public:
 				       const Vector<EBAMRCellData*>& a_phi);
 
   /*!
+    @brief Compute gradients at domain faces
+  */
+  virtual void compute_gradients_at_domain_faces(Vector<EBAMRIFData*>&         a_grad,
+						 const phase::which_phase&     a_phase,
+						 const Vector<EBAMRCellData*>& a_phi);
+
+  /*!
     @brief Compute CDR source terms
   */
   virtual void compute_cdr_sources();
@@ -338,6 +345,11 @@ public:
     @brief Extrapolated flux to EB and project it onto the normal
   */
   virtual void project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux);
+
+  /*!
+    @brief Project flux on the boundary normal
+  */
+  virtual void project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
 
   /*!
     @brief Regrid
