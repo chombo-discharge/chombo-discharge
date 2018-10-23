@@ -14,6 +14,8 @@
 #include <EBAMRIO.H>
 #include <EBArith.H>
 
+#define USE_DOMAIN_FLUX 1
+
 cdr_solver::cdr_solver(){
   m_name = "cdr_solver";
 
@@ -389,6 +391,73 @@ void cdr_solver::compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face
   }
 }
 
+void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
+				  const EBAMRFluxData& a_face_state,
+				  const EBAMRFluxData& a_face_vel,
+				  const EBAMRIFData&   a_domain_flux){
+  CH_TIME("cdr_solver::new_compute_flux");
+  if(m_verbosity > 5){
+    pout() << m_name + "::new_compute_flux" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(box);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB& flx       = (*a_flux[lvl])[dit()][dir];
+	const EBFaceFAB& phi = (*a_face_state[lvl])[dit()][dir];
+	const EBFaceFAB& vel = (*a_face_vel[lvl])[dit()][dir];
+
+	flx.setVal(0.0, comp);
+	flx += phi;
+	flx *= vel;
+
+	// Irregular faces
+	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
+	for (FaceIterator faceit(ebisbox.getIrregIVS(box), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+	  flx(face, comp) = vel(face, comp)*phi(face, comp);
+	}
+
+	// Domain faces
+	for (SideIterator sit; sit.ok(); ++sit){
+	  BaseIFFAB<Real>& domflux = (*a_domain_flux[lvl])[dit()](dir, sit());
+
+	  const IntVectSet& ivs  = domflux.getIVS();
+	  const EBGraph& ebgraph = domflux.getEBGraph();
+
+	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	    const FaceIndex& face = faceit();
+#if 0 // debug
+	    if(sit() == Side::Lo){
+	      flx(face, comp) = 1.E99;
+	    }
+	    else{
+	      flx(face, comp) = 0.0;
+	    }
+#else // Original code
+	    flx(face, comp) = domflux(face, comp);
+#endif
+	  }
+	}
+      }
+    }
+  }
+}
+
 void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt){
   CH_TIME("cdr_solver::compute_rhs(rhs, dt)");
   if(m_verbosity > 5){
@@ -455,7 +524,11 @@ void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
   EBAMRFluxData flux;
   m_amr->allocate(flux, m_phase, ncomp);
 
+#if USE_DOMAIN_FLUX
+  this->new_compute_flux(flux, a_face_vel, a_face_state, m_domainflux);
+#else
   this->compute_flux(flux, a_face_vel, a_face_state);
+#endif
   this->conservative_divergence(a_cons_div, flux);
 }
 

@@ -66,8 +66,13 @@ void DomainFluxIFFAB::define(const ProblemDomain& a_domain, const EBISBox& a_ebi
   m_isDefined = true;
   
   for (int dir = 0; dir < SpaceDim; dir++){
-    Box lobox = adjCellLo(a_domain, dir, 1);
-    Box hibox = adjCellHi(a_domain, dir, 1);
+    Box shrinkbox = a_domain.domainBox();
+
+    Box lobox = adjCellLo(shrinkbox, dir, 1);
+    Box hibox = adjCellHi(shrinkbox, dir, 1);
+
+    lobox.shift(dir, 1);
+    hibox.shift(dir, -1);
 
     lobox &= a_box;
     hibox &= a_box;
@@ -86,6 +91,12 @@ void DomainFluxIFFAB::define(const ProblemDomain& a_domain, const EBISBox& a_ebi
 
     const IntVectSet ivs_lo(lobox);
     const IntVectSet ivs_hi(hibox);
+
+#if 0
+    if(!ivs_lo.isEmpty()){
+      std::cout << ivs_lo << std::endl;
+    }
+#endif
 
     m_flux_lo[dir] = new BaseIFFAB<Real>(ivs_lo, a_ebisbox.getEBGraph(), dir, a_ncomp);
     m_flux_hi[dir] = new BaseIFFAB<Real>(ivs_hi, a_ebisbox.getEBGraph(), dir, a_ncomp);

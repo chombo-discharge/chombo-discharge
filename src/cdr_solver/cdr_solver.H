@@ -450,6 +450,14 @@ protected:
   virtual void compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_face_vel);
 
   /*!
+    @brief Set up flux
+  */
+  virtual void new_compute_flux(EBAMRFluxData&       a_flux,
+				const EBAMRFluxData& a_face_state,
+				const EBAMRFluxData& a_face_vel,
+				const EBAMRIFData&   a_domain_flux);
+
+  /*!
     @brief Compute conservative divergence from fluxes. 
   */
   virtual void conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRFluxData& a_flux);
@@ -458,6 +466,7 @@ protected:
     @brief Conservative divergence over regular cells
   */
   virtual void consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
+
 
   /*!
     @brief Compute flux interpolant
