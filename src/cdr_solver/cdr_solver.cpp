@@ -23,7 +23,7 @@ cdr_solver::cdr_solver(){
   this->set_phase(phase::gas);
   this->set_time(0, 0., 0.);
   this->set_mass_redist(false);
-  this->set_domain_bc(cdr_bc::outflow);
+  this->set_domain_bc(cdr_bc::external);
 }
 
 cdr_solver::~cdr_solver(){
@@ -449,8 +449,7 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	      flx(face, comp) = 0.0;
 	    }
 	    else if(m_dombc == cdr_bc::outflow){
-	      const int sgn = sign(sit());
-	      flx(face, comp) = Max(0.0, sgn*flx(face, comp));
+	      flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
 	    }
 	    else if(m_dombc == cdr_bc::extrap){
 	      // Don't do anything, the solver should have extrapolated the face-centered state
@@ -1731,4 +1730,8 @@ EBAMRIVData& cdr_solver::get_diffco_eb(){
 
 EBAMRIVData& cdr_solver::get_ebflux(){
   return m_ebflux;
+}
+
+EBAMRIFData& cdr_solver::get_domainflux(){
+  return m_domainflux;
 }

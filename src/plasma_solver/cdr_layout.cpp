@@ -578,3 +578,19 @@ Vector<EBAMRIVData*> cdr_layout::get_ebflux(){
 
   return ebflux;
 }
+
+Vector<EBAMRIFData*> cdr_layout::get_domainflux(){
+  CH_TIME("cdr_layout::get_domainflux");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::get_domainflux" << endl;
+  }
+
+  Vector<EBAMRIFData*> domainflux;
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    domainflux.push_back(&(solver->get_domainflux()));
+  }
+
+  return domainflux;
+}

@@ -10,6 +10,7 @@
 
 #include <RealVect.H>
 #include <RefCountedPtr.H>
+#include <LoHiSide.H>
 
 #include "species.H"
 #include "photon_group.H"
@@ -114,6 +115,33 @@ public:
 						     const Vector<Real>& a_cdr_gradients,
 						     const Vector<Real>& a_rte_fluxes,
 						     const Vector<Real>& a_extrap_cdr_fluxes) const = 0;
+
+  /*!
+    @brief Compute cdr fluxes through domain sides
+    @param[in] a_time Time
+    @param[in] a_pos Position
+    @param[in] a_dir Direction (0 = x, 1=y etc)
+    @param[in] a_side Side (low or high side)
+    @param[in] a_E Electric field
+    @param[in] a_cdr_densities CDR densities. 
+    @param[in] a_cdr_velocities CDR velocities. Normal component only. 
+    @param[in] a_cdr_gradients Normal gradients of cdr densities
+    @param[in] a_rte_fluxes RTE fluxes (normal component only)
+    @param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
+  */
+  virtual Vector<Real> compute_cdr_domain_fluxes(const Real&           a_time,
+						 const RealVect&       a_pos,
+						 const int&            a_dir,
+						 const Side::LoHiSide& a_side,
+						 const RealVect&       a_E,
+						 const Vector<Real>&   a_cdr_densities,
+						 const Vector<Real>&   a_cdr_velocities,
+						 const Vector<Real>&   a_cdr_gradients,
+						 const Vector<Real>&   a_rte_fluxes,
+						 const Vector<Real>&   a_extrap_cdr_fluxes) const{
+    Vector<Real> fluxes(m_num_species, 0.0);
+    return fluxes;
+  }
 
   /*!
     @brief Compute the isotropic source terms for the RTE

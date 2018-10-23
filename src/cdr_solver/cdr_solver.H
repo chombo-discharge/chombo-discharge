@@ -299,6 +299,11 @@ public:
   */
   virtual EBAMRIVData& get_ebflux();
 
+  /*!
+    @brief Get the domain flux data holder
+  */
+  virtual EBAMRIFData& get_domainflux();
+
 protected:
   
   /*!

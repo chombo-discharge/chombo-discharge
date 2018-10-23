@@ -237,6 +237,11 @@ public:
   */
   virtual Vector<EBAMRIVData*> get_ebflux();
 
+  /*!
+    @brief Get domain fluxes
+  */
+  virtual Vector<EBAMRIFData*> get_domainflux();
+
 protected:
 
   /*!

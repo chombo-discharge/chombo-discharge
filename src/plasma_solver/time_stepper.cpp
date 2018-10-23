@@ -354,6 +354,98 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
   }
 }
 
+void time_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a_fluxes,
+					     const Vector<EBAMRIFData*>& a_extrap_cdr_fluxes,
+					     const Vector<EBAMRIFData*>& a_extrap_cdr_densities,
+					     const Vector<EBAMRIFData*>& a_extrap_cdr_velocities,
+					     const Vector<EBAMRIFData*>& a_extrap_cdr_gradients,
+					     const Vector<EBAMRIFData*>& a_extrap_rte_fluxes,
+					     const EBAMRIFData&          a_E,
+					     const Real&                 a_time){
+  CH_TIME("time_stepper::compute_cdr_domain_fluxes(full)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_domain_fluxes(full)" << endl;
+  }
+
+  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_species();
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  // Things that will be passed into plaskin
+  Vector<Real> extrap_cdr_fluxes(num_species);
+  Vector<Real> extrap_cdr_densities(num_species);
+  Vector<Real> extrap_cdr_velocities(num_species);
+  Vector<Real> extrap_cdr_gradients(num_species);
+  Vector<Real> extrap_rte_fluxes(num_photons);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl  = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
+    const ProblemDomain& domain   = m_amr->get_domains()[lvl];
+    const Real dx                 = m_amr->get_dx()[lvl];
+    const RealVect origin         = m_physdom->get_prob_lo();
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box& box         = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+      
+      for (int dir = 0; dir < SpaceDim; dir++){
+	for (SideIterator sit; sit.ok(); ++sit){
+	  const IntVectSet& ivs  = (*(*a_fluxes[0])[lvl])[dit()](dir, sit()).getIVS();
+
+	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	    const FaceIndex& face = faceit();
+	    const RealVect pos    = EBArith::getFaceLocation(face, dx*RealVect::Unit, origin);
+	    
+	    // Define the electric field
+	    const RealVect E = RealVect(D_DECL((*a_E[lvl])[dit()](dir, sit())(face,0),
+					       (*a_E[lvl])[dit()](dir, sit())(face,1),
+					       (*a_E[lvl])[dit()](dir, sit())(face,2)));
+
+	    // Ion densities. 
+	    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	      const int idx = solver_it.get_solver();
+	      extrap_cdr_fluxes[idx]     = (*(*a_extrap_cdr_fluxes[idx])[lvl])[dit()](dir, sit())(face,comp);
+	      extrap_cdr_densities[idx]  = (*(*a_extrap_cdr_densities[idx])[lvl])[dit()](dir, sit())(face,comp);
+	      extrap_cdr_velocities[idx] = (*(*a_extrap_cdr_velocities[idx])[lvl])[dit()](dir, sit())(face,comp);
+	      extrap_cdr_gradients[idx]  = (*(*a_extrap_cdr_gradients[idx])[lvl])[dit()](dir, sit())(face,comp);
+	    }
+
+	    // Photon fluxes
+	    for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+	      const int idx = solver_it.get_solver();
+	      extrap_rte_fluxes[idx] = (*(*a_extrap_rte_fluxes[idx])[lvl])[dit()](dir, sit())(face,comp);
+	    }
+
+	    // Call plasma_kinetics
+	    const Vector<Real> fluxes = m_plaskin->compute_cdr_domain_fluxes(a_time,
+									     pos,
+									     dir,
+									     sit(),
+									     E,
+									     extrap_cdr_densities,
+									     extrap_cdr_velocities,
+									     extrap_cdr_gradients,
+									     extrap_rte_fluxes,
+									     extrap_cdr_fluxes);
+
+	    // Put fluxes where they belong
+	    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	      const int idx = solver_it.get_solver();
+	      (*(*a_fluxes[idx])[lvl])[dit()](dir, sit())(face, comp) = fluxes[idx];
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
 void time_stepper::compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
 					   const phase::which_phase&     a_phase,
 					   const Vector<EBAMRCellData*>& a_phi){
@@ -1432,6 +1524,80 @@ void time_stepper::extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
 
   for (int i = 0; i < a_extrap.size(); i++){
     this->extrapolate_to_eb(*a_extrap[i], a_phase, *a_data[i]);
+  }
+}
+
+void time_stepper::extrapolate_to_domain_faces(EBAMRIFData&             a_extrap,
+					       const phase::which_phase a_phase,
+					       const EBAMRCellData&     a_data){
+  CH_TIME("time_stepper::extrapolate_to_domain_faces");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_domain_faces" << endl;
+  }
+
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const int ncomp = a_data[lvl]->nComp();
+      
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(a_phase)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBCellFAB& data         = (*a_data[lvl])[dit()];
+      const EBISBox& ebisbox        = ebisl[dit()];
+      const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
+      
+      for (int dir = 0; dir < SpaceDim; dir++){
+	for (SideIterator sit; sit.ok(); ++sit){
+	  BaseIFFAB<Real>& extrap = (*a_extrap[lvl])[dit()](dir, sit());
+
+	  const IntVectSet& ivs  = extrap.getIVS();
+	  const EBGraph& ebgraph = extrap.getEBGraph();
+
+	  // Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
+	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	    const FaceIndex& face = faceit();
+
+	    const int sgn = sign(sit()); // Lo = -1, Hi = 1
+	    
+	    const VolIndex& vof = face.getVoF(sit());
+	    const IntVect iv0   = vof.gridIndex();
+	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
+
+	    if(ebisbox.isCovered(iv0)){
+	      MayDay::Abort("time_stepper::extrapolate_to_domain_faces - shouldn't happen");
+	    }
+	    
+	    if(!ebisbox.isCovered(iv1)){ // linear extrapolation
+	      for (int comp = 0; comp < ncomp; comp++){
+		extrap(face, comp) = 1.5*data_fab(iv0, comp) - 0.5*data_fab(iv1, comp); // Should be ok
+	      }
+	    }
+	    else{ // Not enough cells available, use cell-centered only
+	      for (int comp = 0; comp < ncomp; comp++){
+		extrap(face, comp) = data_fab(iv0, comp);
+	      }		
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
+void time_stepper::extrapolate_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+					       const phase::which_phase      a_phase,
+					       const Vector<EBAMRCellData*>& a_data){
+  CH_TIME("time_stepper::extrapolate_to_domain_faces(vec)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_domain_faces(vec)" << endl;
+  }
+
+  CH_assert(a_extrap.size() == a_data.size());
+
+  for (int i = 0; i < a_extrap.size(); i++){
+    this->extrapolate_to_domain_faces(*a_extrap[i], a_phase, *a_data[i]);
   }
 }
 

@@ -165,6 +165,19 @@ public:
 				  const Real&                 a_time);
 
   /*!
+    @brief Compute cdr fluxes on domain faces
+    @note Everything that comes in here should have been computed on the domain faces
+  */
+  virtual void compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a_fluxes,
+					 const Vector<EBAMRIFData*>& a_extrap_cdr_fluxes,
+					 const Vector<EBAMRIFData*>& a_extrap_cdr_densities,
+					 const Vector<EBAMRIFData*>& a_extrap_cdr_velocities,
+					 const Vector<EBAMRIFData*>& a_extrap_cdr_gradients,
+					 const Vector<EBAMRIFData*>& a_extrap_rte_fluxes,
+					 const EBAMRIFData&          a_field,
+					 const Real&                 a_time);
+
+  /*!
     @brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
   */
   virtual void compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
@@ -278,6 +291,18 @@ public:
   virtual void extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
 				 const phase::which_phase      a_phase,
 				 const Vector<EBAMRCellData*>& a_data);
+
+  /*!
+    @brief Extrapolate to domain faces
+  */
+  virtual void extrapolate_to_domain_faces(EBAMRIFData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
+
+  /*!
+    @brief Extrapolate to domain faces
+  */
+  virtual void extrapolate_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+					   const phase::which_phase      a_phase,
+					   const Vector<EBAMRCellData*>& a_data);
 
   /*!
     @brief Get maximum value of the cdr solver stuff
