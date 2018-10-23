@@ -81,6 +81,11 @@ public:
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
 
   /*!
+    @brief Set domain bc type
+  */
+  virtual void set_domain_bc(const cdr_bc::which_bc a_bctype);
+
+  /*!
     @brief Set phase
     @details This must be done BEFORE callilng set_computational_geometry
   */
@@ -335,6 +340,11 @@ protected:
     @brief Phase
   */
   phase::which_phase m_phase;
+
+  /*!
+    @brief Domain bc condition
+  */
+  cdr_bc::which_bc m_dombc;
 
   /*!
     @brief Name

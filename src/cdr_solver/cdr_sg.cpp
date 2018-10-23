@@ -12,7 +12,7 @@
 #include <EBArith.H>
 
 cdr_sg::cdr_sg() : cdr_solver() {
-
+  MayDay::Abort("cdr_sg::cdr_sg - this class is horribly outdated and will be remove from future designs");
   m_name = "cdr_sg";
 
   this->set_mass_redist(false);

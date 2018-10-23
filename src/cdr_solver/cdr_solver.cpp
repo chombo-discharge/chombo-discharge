@@ -23,6 +23,7 @@ cdr_solver::cdr_solver(){
   this->set_phase(phase::gas);
   this->set_time(0, 0., 0.);
   this->set_mass_redist(false);
+  this->set_domain_bc(cdr_bc::outflow);
 }
 
 cdr_solver::~cdr_solver(){
@@ -441,16 +442,22 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
 	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
 	    const FaceIndex& face = faceit();
-#if 0 // debug
-	    if(sit() == Side::Lo){
-	      flx(face, comp) = 1.E99;
+	    if(m_dombc == cdr_bc::external){
+	      flx(face, comp) = domflux(face, comp);
 	    }
-	    else{
+	    else if(m_dombc == cdr_bc::wall){
 	      flx(face, comp) = 0.0;
 	    }
-#else // Original code
-	    flx(face, comp) = domflux(face, comp);
-#endif
+	    else if(m_dombc == cdr_bc::outflow){
+	      const int sgn = sign(sit());
+	      flx(face, comp) = Max(0.0, sgn*flx(face, comp));
+	    }
+	    else if(m_dombc == cdr_bc::extrap){
+	      // Don't do anything, the solver should have extrapolated the face-centered state
+	    }
+	    else {
+	      MayDay::Abort("cdr_solver::new_compute_flux - stop this madness!");
+	    }
 	  }
 	}
       }
@@ -1119,6 +1126,15 @@ void cdr_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   }
 
   m_amr = a_amr;
+}
+
+void cdr_solver::set_domain_bc(const cdr_bc::which_bc a_bctype){
+  CH_TIME("cdr_solver::set_domain_bc");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_domain_bc" << endl;
+  }
+
+  m_dombc = a_bctype;
 }
 
 void cdr_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){

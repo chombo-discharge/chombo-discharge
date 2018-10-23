@@ -141,6 +141,19 @@ namespace wallbc {
 };
 
 /*!
+  @brief Boundary condition types for the CDR solvers
+*/
+namespace cdr_bc {
+  enum which_bc {
+    external = 0,
+    wall     = 1,
+    outflow  = 2,
+    extrap   = 3,
+  };
+};
+    
+
+/*!
   @brief Restart modes
 */
 namespace restart_mode {
