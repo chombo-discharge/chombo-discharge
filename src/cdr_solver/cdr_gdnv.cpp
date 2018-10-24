@@ -126,7 +126,7 @@ void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCell
 		const FaceIndex& face = faces[iface];
 
 		if(velo[dir](face, 0)*isign < 0.0){
-		  velo[dir](face, 0) = 0.0;
+		  //		  velo[dir](face, 0) = 0.0;
 		}
 	      }
 	    }

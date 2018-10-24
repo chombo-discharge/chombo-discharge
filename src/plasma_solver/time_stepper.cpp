@@ -1725,7 +1725,7 @@ void time_stepper::extrapolate_to_domain_faces(EBAMRIFData&             a_extrap
 
 	    const int sgn = sign(sit()); // Lo = -1, Hi = 1
 	    
-	    const VolIndex& vof = face.getVoF(sit());
+	    const VolIndex& vof = face.getVoF(flip(sit()));
 	    const IntVect iv0   = vof.gridIndex();
 	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
 
@@ -1745,6 +1745,12 @@ void time_stepper::extrapolate_to_domain_faces(EBAMRIFData&             a_extrap
 		  extrap(face, comp) = data_fab(iv0, comp);
 		}
 	      }
+
+#if 0 // Debug
+	      for (int comp = 0; comp < ncomp; comp++){
+		extrap(face, comp) = data_fab(iv0, comp);
+	      }
+#endif
 	    }
 	  }
 	}
@@ -1913,7 +1919,7 @@ void time_stepper::project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFDa
 
 	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
 	    const FaceIndex& face = faceit();
-	    normal_comp(face, comp) = sgn*gradient(face, dir);
+	    normal_comp(face, comp) = gradient(face, dir);
 	  }
 	}
       }

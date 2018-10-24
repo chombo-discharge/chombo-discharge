@@ -442,6 +442,7 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
 	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
 	    const FaceIndex& face = faceit();
+	    
 	    if(m_dombc == cdr_bc::external){
 	      flx(face, comp) = domflux(face, comp);
 	    }
@@ -457,6 +458,8 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	    else {
 	      MayDay::Abort("cdr_solver::new_compute_flux - stop this madness!");
 	    }
+
+
 	  }
 	}
       }
