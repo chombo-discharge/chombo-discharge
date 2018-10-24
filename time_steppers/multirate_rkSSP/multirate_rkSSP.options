@@ -6,7 +6,8 @@ multirate_rkSSP.max_cfl       = 0.5    # Maximum allowed CFL number for each sub
 multirate_rkSSP.max_error     = 1.E-4  # Maximum allowed error. Only if compute_error=true
 multirate.rkSSP.error_norm    = 2      # Which error norm. Must be >= 1, Linf is not supported. 
 multirate_rkSSP.safety        = 0.9    # Safety factor for adaptive step size control. Must (0,1]
-multirate_rkSSP.use_multirate = true   # Use multirate functionality	 
+multirate_rkSSP.use_multirate = true   # Use multirate functionality
+multirate_rkSSP.consistent    = true   # Use consistent E-field computations (update in between RK stages)
 multirate_rkSSP.adaptive_dt   = true   # Compute error by using an embedded lower order scheme
 multirate_rkSSP.compute_v     = true   # Compute v in between substeps. If v = v(E) only, set this to false. 
 multirate_rkSSP.compute_S     = true   # Compute S in between substeps.

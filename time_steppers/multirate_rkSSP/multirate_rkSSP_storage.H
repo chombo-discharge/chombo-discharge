@@ -27,6 +27,7 @@ public:
   EBAMRCellData& get_scratch(){ return m_scratch;    }
   EBAMRCellData& get_previous(){return m_previous;   }
   EBAMRCellData& get_error(){   return m_error;      }
+  EBAMRCellData& get_gradient(){return m_gradient;   }
 
   EBAMRIVData& get_eb_state(){  return m_scratchIV1; }
   EBAMRIVData& get_eb_velo(){   return m_scratchIV2; }
@@ -44,6 +45,7 @@ protected:
   EBAMRCellData m_scratch;  // Scratch data
   EBAMRCellData m_previous; // Previous solution (for each substep)
   EBAMRCellData m_error;    // Error estimator
+  EBAMRCellData m_gradient; // Storage for holding gradient
 
   EBAMRIVData m_scratchIV1; // Scratch data
   EBAMRIVData m_scratchIV2; // Scratch data

@@ -70,6 +70,7 @@ protected:
   bool m_adaptive_dt;
   bool m_have_dtf;
   bool m_multirate;
+  bool m_consistent;
 
 
   time_code::which_code m_timecode;
@@ -89,6 +90,7 @@ protected:
   void allocate_rte_storage();
   void allocate_sigma_storage();
   void cache_solutions();
+  void compute_cdr_gradients();
   void compute_errors();
   void compute_E_into_scratch();
   void compute_cdr_eb_states();

@@ -31,6 +31,7 @@ multirate_rkSSP::multirate_rkSSP(){
   m_compute_S    = true;
   m_adaptive_dt  = true;
   m_multirate    = true;
+  m_consistent   = true;
   m_have_dtf     = false;
 
   // Basically only for debugging
@@ -68,6 +69,12 @@ multirate_rkSSP::multirate_rkSSP(){
       pp.get("adaptive_dt", str);
       if(str == "false"){
 	m_adaptive_dt = false;
+      }
+    }
+    if(pp.contains("consistent")){
+      pp.get("consistent", str);
+      if(str == "false"){
+	m_consistent = false;
       }
     }
     if(pp.contains("use_multirate")){
@@ -341,6 +348,14 @@ void multirate_rkSSP::advance_diffusion(int& a_substeps, Real& a_dt, const Real 
 
   // Do the diffusion advance
   if(diffusive_states){
+    if(m_consistent){ // Consistent => Update E before computing diffusion coefficients
+      if(m_do_poisson){ // Solve Poisson equation
+	if((m_step +1) % m_fast_poisson == 0){
+	  time_stepper::solve_poisson();
+	  this->compute_E_into_scratch();
+	}
+      }
+    }
 
     // Necessary stuff
     m_cdr->set_source(0.0);
@@ -385,13 +400,6 @@ void multirate_rkSSP::advance_diffusion(int& a_substeps, Real& a_dt, const Real 
 	sum_dt += actual_dt;
 	a_substeps += 1;
 
-#if 0 // Debug
-	if(procID() == 0){
-	  std::cout << a_dtc << "\t" << actual_dt << endl;
-	  //	  std::cout << "doing another step" << "\t dtc = " << a_dtc << "\t dt = " << a_dt << std::endl;
-	}
-#endif
-
 	// Set new time step, but only if we are sufficiently far from the error threshold
 	// Note: No special actual is taken if the error was estimated from the last time step
 	// This will give a smaller time step for the first step in the next multirate loop,
@@ -418,10 +426,12 @@ void multirate_rkSSP::advance_multirate_fixed(const int a_substeps, const Real a
     pout() << "multirate_rkSSP::advance_multirate_fixed" << endl;
   }
 
-  this->compute_E_into_scratch(); 
+  this->compute_E_into_scratch();
+  this->compute_cdr_gradients(); // Precompute gradients
 
   for (int step = 0; step < a_substeps; step++){
     const Real time = m_time + step*a_dt;
+    const bool last_step = (step == a_substeps - 1);
 
     // Integrate
     if(m_order == 1){
@@ -440,7 +450,19 @@ void multirate_rkSSP::advance_multirate_fixed(const int a_substeps, const Real a
     }
 
     // Update for next iterate. This should generally be done because the solution might move many grid cells.
-    if(step < a_substeps -1){ // No need on last step
+    if(!last_step){
+      if(m_consistent){ // Consistent => Update E and RTE before the next fine step
+	if(m_do_poisson){ // Solve Poisson equation
+	  if((m_step +1) % m_fast_poisson == 0){
+	    time_stepper::solve_poisson();
+	    this->compute_E_into_scratch();
+	  }
+	}
+	if(m_do_rte){this->advance_rte_stationary(m_time + a_dt);}
+      }
+
+      // Compute new velocities and source terms
+      this->compute_cdr_gradients();
       if(m_compute_v) this->compute_cdr_velo(time);
       if(m_compute_S) this->compute_cdr_sources(time);
     }
@@ -499,21 +521,10 @@ void multirate_rkSSP::advance_multirate_adaptive(int& a_substeps, Real& a_dt, co
       else{ 
 	a_dt  = m_safety*a_dt;   // If errors get too close, reduce the time step a little bit so we don̈́t get rejected steps
       }
-
-#if 0// Debug
-      if(procID() == 0){
-	std::cout << "Max err = " << m_max_error << "\t Accepted time step, increasing to = " << a_dt << std::endl;
-      }
-#endif
     }
     else{
       a_dt = m_safety*new_dt;
       this->restore_solvers();
-#if 0// Debug
-      if(procID() == 0){
-	std::cout << "Max err = " << m_max_error << "\t Rejecting time step, trying dt = " << a_dt << std::endl;
-      }
-#endif
     }
 
     // New time step should never exceed CFL constraints
@@ -521,6 +532,18 @@ void multirate_rkSSP::advance_multirate_adaptive(int& a_substeps, Real& a_dt, co
 
     // Update for next iterate. This should generally be done because the solution might move many grid cells.
     if(!last_step){
+
+      if(m_consistent){ // Consistent => Update E and RTE before the next fine step
+	if(m_do_poisson){ // Solve Poisson equation
+	  if((m_step +1) % m_fast_poisson == 0){
+	    time_stepper::solve_poisson();
+	    this->compute_E_into_scratch();
+	  }
+	}
+	if(m_do_rte){this->advance_rte_stationary(m_time + a_dt);}
+      }
+
+      this->compute_cdr_gradients();
       if(m_compute_v) this->compute_cdr_velo(cur_time);
       if(m_compute_S) this->compute_cdr_sources(cur_time);
     } 
@@ -577,6 +600,7 @@ void multirate_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
   // u^1 = u^n + dt*L(u^n)
   // u^n resides in cache, put u^1 in the solver. Use scratch for computing L(u^n)
   {
+    // CDR gradients already computed so proceed as usual
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
@@ -622,9 +646,23 @@ void multirate_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
     data_ops::incr(err, phi, -1.0);  // error = -(u^n + dt*L(u^n))
   }
 
+  // For consistent computations, we must do this
+  if(m_consistent){ // Must update E and RTE
+    if(m_do_poisson){ // Solve Poisson equation
+      if((m_step +1) % m_fast_poisson == 0){
+	time_stepper::solve_poisson();
+	this->compute_E_into_scratch();
+      }
+    }
+    if(m_do_rte){ // Update RTE equations
+      this->advance_rte_stationary(m_time + a_dt);
+    }
+  }
+
   // u^(n+1) = 0.5*(u^n + u^1 + dt*L(u^(1)))
   // u^n resides in temp storage, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
   {
+    this->compute_cdr_gradients();
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time + a_dt);
     this->compute_sigma_flux();
@@ -683,10 +721,6 @@ void multirate_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
     pout() << "multirate_rkSSP::advance_rk3" << endl;
   }
 
-#if 0
-  MayDay::Warning("multirate_rkSSP::advance_rk3 - this routine is probably in error because the computed errors with embedded formulas don't go to zero when dt -> 0");
-#endif
-
   // u^1 = u^n + dt*L(u^n)
   // u^n resides in solver. Use this and put u^1 in the solver instead. Use scratch for computing L(u^n)
   {
@@ -739,6 +773,7 @@ void multirate_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
   // u^2 = (3*u^n + u^1 + dt*L(u^(1)))/4
   // u^n is stored, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
   {
+    this->compute_cdr_gradients();
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
@@ -795,6 +830,7 @@ void multirate_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
   // u^(n+1) = (u^n + 2*u^2 + 2*dt*L(u^(1)))/3
   // u^n is stored, u^2 resides in solver. Put u^(n+1) in solver at end and use scratch for computing L(u^1)
   {
+    this->compute_cdr_gradients();
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
@@ -861,6 +897,25 @@ void multirate_rkSSP::regrid_internals(){
   this->allocate_poisson_storage();
   this->allocate_rte_storage();
   this->allocate_sigma_storage();
+}
+
+void multirate_rkSSP::compute_cdr_gradients(){
+  CH_TIME("time_stepper::compute_cdr_gradients");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_gradients" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    
+    const EBAMRCellData& phi = solver->get_state();
+    EBAMRCellData& grad = storage->get_gradient();
+
+    m_amr->compute_gradient(grad, phi);
+    m_amr->average_down(grad, m_cdr->get_phase());
+    m_amr->interp_ghost(grad, m_cdr->get_phase());
+  }
 }
 
 void multirate_rkSSP::compute_errors(){
@@ -1095,6 +1150,7 @@ void multirate_rkSSP::compute_cdr_eb_states(){
   Vector<EBAMRIVData*>   eb_gradients;
   Vector<EBAMRIVData*>   eb_states;
   Vector<EBAMRCellData*> cdr_states;
+  Vector<EBAMRCellData*> cdr_gradients;
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -1103,10 +1159,19 @@ void multirate_rkSSP::compute_cdr_eb_states(){
     cdr_states.push_back(&(solver->get_state()));
     eb_states.push_back(&(storage->get_eb_state()));
     eb_gradients.push_back(&(storage->get_eb_grad()));
+    cdr_gradients.push_back(&(storage->get_gradient()));
   }
 
-  this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
-  this->compute_gradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+  // Extrapolate states to the EB
+  this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+
+  // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
+  EBAMRIVData eb_gradient;
+  m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
+  for (int i = 0; i < cdr_states.size(); i++){
+    this->extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_states[i]);
+    this->project_flux(*eb_gradients[i], eb_gradient);
+  }
 }
 
 void multirate_rkSSP::compute_cdr_fluxes(const Real a_time){
@@ -1213,7 +1278,13 @@ void multirate_rkSSP::compute_cdr_sources(const Vector<EBAMRCellData*>& a_states
   Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
   EBAMRCellData& E                   = m_poisson_scratch->get_E_cell();
 
-  time_stepper::compute_cdr_sources(cdr_sources, a_states, rte_states, E, a_time, centering::cell_center);
+  Vector<EBAMRCellData*> cdr_gradients;
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    cdr_gradients.push_back(&(storage->get_gradient()));
+  }
+
+  time_stepper::compute_cdr_sources(cdr_sources, a_states, cdr_gradients, rte_states, E, a_time, centering::cell_center);
 }
 
 void multirate_rkSSP::advance_rte_stationary(const Real a_time){

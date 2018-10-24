@@ -31,6 +31,7 @@ void multirate_rkSSP::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_previous, m_phase, m_ncomp);
   m_amr->allocate(m_error,    m_phase, m_ncomp);
+  m_amr->allocate(m_gradient, m_phase, SpaceDim);
 
   m_amr->allocate(m_scratchIV1,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
@@ -44,6 +45,7 @@ void multirate_rkSSP::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_error);
+  m_amr->deallocate(m_gradient);
 
   m_amr->deallocate(m_scratchIV1);
   m_amr->deallocate(m_scratchIV2);

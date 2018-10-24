@@ -179,6 +179,7 @@ public:
 
   /*!
     @brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
+    @note This version computes the gradients from phi
   */
   virtual void compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
 				       const phase::which_phase&     a_phase,
@@ -199,9 +200,21 @@ public:
 
   /*!
     @brief Compute cdr source terms
+    @note This version computes the cdr_gradients and then calls the full compute_cdr_sources
   */
   virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				   const Vector<EBAMRCellData*>&  a_cdr_densities,
+				   const Vector<EBAMRCellData*>&  a_rte_densities,
+				   const EBAMRCellData&           a_E,
+				   const Real&                    a_time,
+				   const centering::which_center  a_centering);
+
+  /*!
+    @brief Compute cdr source terms
+  */
+  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
+				   const Vector<EBAMRCellData*>&  a_cdr_densities,
+				   const Vector<EBAMRCellData*>&  a_cdr_gradients,
 				   const Vector<EBAMRCellData*>&  a_rte_densities,
 				   const EBAMRCellData&           a_E,
 				   const Real&                    a_time,
