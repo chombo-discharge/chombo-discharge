@@ -37,6 +37,11 @@ void multirate_rkSSP::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV3,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV4,  m_phase, m_ncomp);
+
+  m_amr->allocate(m_scratchIF1,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF2,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF3,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF4,  m_phase, m_ncomp);
 }
 
 
@@ -51,6 +56,11 @@ void multirate_rkSSP::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratchIV2);
   m_amr->deallocate(m_scratchIV3);
   m_amr->deallocate(m_scratchIV4);
+
+  m_amr->deallocate(m_scratchIF1);
+  m_amr->deallocate(m_scratchIF2);
+  m_amr->deallocate(m_scratchIF3);
+  m_amr->deallocate(m_scratchIF4);
 }
 
 multirate_rkSSP::poisson_storage::poisson_storage(){
@@ -76,6 +86,7 @@ void multirate_rkSSP::poisson_storage::allocate_storage(){
   m_amr->allocate(m_E_cell, m_phase, SpaceDim);
   m_amr->allocate(m_E_face, m_phase, SpaceDim);
   m_amr->allocate(m_E_eb,   m_phase, SpaceDim);
+  m_amr->allocate(m_E_dom,  m_phase, SpaceDim);
 }
 
 void multirate_rkSSP::poisson_storage::deallocate_storage(){
@@ -83,6 +94,7 @@ void multirate_rkSSP::poisson_storage::deallocate_storage(){
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_face);
   m_amr->deallocate(m_E_eb);
+  m_amr->deallocate(m_E_dom);
 }
 
 multirate_rkSSP::rte_storage::rte_storage(){
@@ -106,11 +118,13 @@ multirate_rkSSP::rte_storage::~rte_storage(){
 void multirate_rkSSP::rte_storage::allocate_storage(){
   m_amr->allocate(m_cache,      m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
+  m_amr->allocate(m_scratchIF,  m_phase, m_ncomp);
 }
 
 void multirate_rkSSP::rte_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_scratchIV);
+  m_amr->deallocate(m_scratchIF);
 }
 
 multirate_rkSSP::sigma_storage::sigma_storage(){

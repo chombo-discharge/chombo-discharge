@@ -34,6 +34,11 @@ public:
   EBAMRIVData& get_eb_flux(){   return m_scratchIV3; }
   EBAMRIVData& get_eb_grad(){   return m_scratchIV4; }
 
+  EBAMRIFData& get_domain_state(){  return m_scratchIF1; }
+  EBAMRIFData& get_domain_velo(){   return m_scratchIF2; }
+  EBAMRIFData& get_domain_flux(){   return m_scratchIF3; }
+  EBAMRIFData& get_domain_grad(){   return m_scratchIF4; }
+  
 protected:
 
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
@@ -51,6 +56,11 @@ protected:
   EBAMRIVData m_scratchIV2; // Scratch data
   EBAMRIVData m_scratchIV3; // Scratch data
   EBAMRIVData m_scratchIV4; // Scratch data
+
+  EBAMRIFData m_scratchIF1;
+  EBAMRIFData m_scratchIF2;
+  EBAMRIFData m_scratchIF3;
+  EBAMRIFData m_scratchIF4;
 };
 
 class multirate_rkSSP::poisson_storage {
@@ -63,10 +73,11 @@ public:
   void allocate_storage();
   void deallocate_storage();
   
-  MFAMRCellData& get_cache(){  return m_cache;  }
-  EBAMRCellData& get_E_cell(){ return m_E_cell; }
-  EBAMRFluxData& get_E_face(){ return m_E_face; }
-  EBAMRIVData& get_E_eb(){     return m_E_eb;   }
+  MFAMRCellData& get_cache(){  return m_cache;   }
+  EBAMRCellData& get_E_cell(){ return m_E_cell;  }
+  EBAMRFluxData& get_E_face(){ return m_E_face;  }
+  EBAMRIVData& get_E_eb(){     return m_E_eb;    }
+  EBAMRIFData& get_E_domain(){ return m_E_dom;   }
 
 protected:
 
@@ -79,6 +90,7 @@ protected:
   EBAMRCellData m_E_cell;        // Cell-centered E
   EBAMRFluxData m_E_face;        // Face-centered E
   EBAMRIVData m_E_eb;            // EB-centered E
+  EBAMRIFData m_E_dom;           // E-field on domain faces
 };
 
 class multirate_rkSSP::rte_storage {
@@ -93,6 +105,7 @@ public:
   
   EBAMRCellData& get_cache(){ return m_cache; }
   EBAMRIVData& get_eb_flux(){ return m_scratchIV; }
+  EBAMRIFData& get_domain_flux(){ return m_scratchIF; }
 
 protected:
 
@@ -104,6 +117,7 @@ protected:
 
   EBAMRCellData m_cache;   // Cached solution
   EBAMRIVData m_scratchIV; // Used for EB-centered isotropic density
+  EBAMRIFData m_scratchIF; // Used for domain-centered isotropic density
 };
 
 class multirate_rkSSP::sigma_storage {

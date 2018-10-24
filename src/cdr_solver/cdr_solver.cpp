@@ -532,7 +532,7 @@ void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
 
 #if USE_DOMAIN_FLUX
   this->new_compute_flux(flux, a_face_vel, a_face_state, m_domainflux);
-#else
+#else // This version ignores what's in the domain flux data holder
   this->compute_flux(flux, a_face_vel, a_face_state);
 #endif
   this->conservative_divergence(a_cons_div, flux);

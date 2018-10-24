@@ -98,6 +98,11 @@ public:
   virtual void set_phase(phase::which_phase a_phase = phase::gas);
 
   /*!
+    @brief Set phase
+  */
+  virtual void set_bc(cdr_bc::which_bc a_bc);
+
+  /*!
     @brief Set verbosity.
   */
   virtual void set_verbosity(const int a_verbosity);
@@ -263,6 +268,11 @@ protected:
     @brief phase
   */
   phase::which_phase m_phase;
+
+  /*!
+    @brief
+  */
+  cdr_bc::which_bc m_bc_type;
 };
 
 #endif

@@ -671,6 +671,12 @@ void data_ops::multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>&
   }
 }
 
+void data_ops::multiply_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::multiply_scalar(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+
 void data_ops::multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   CH_assert(a_rhs.nComp() == 1);
 

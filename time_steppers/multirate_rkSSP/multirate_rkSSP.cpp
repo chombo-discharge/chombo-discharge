@@ -556,7 +556,9 @@ void multirate_rkSSP::advance_rk1(const Real a_time, const Real a_dt){
     pout() << "multirate_rkSSP::advance_rk1" << endl;
   }
 
+  this->compute_cdr_domain_states();
   this->compute_cdr_eb_states();
+  this->compute_cdr_domain_fluxes(a_time);
   this->compute_cdr_fluxes(a_time);
   this->compute_sigma_flux();
 
@@ -601,7 +603,9 @@ void multirate_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
   // u^n resides in cache, put u^1 in the solver. Use scratch for computing L(u^n)
   {
     // CDR gradients already computed so proceed as usual
+    this->compute_cdr_domain_states();
     this->compute_cdr_eb_states();
+    this->compute_cdr_domain_fluxes(a_time);
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
       
@@ -663,7 +667,9 @@ void multirate_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
   // u^n resides in temp storage, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
   {
     this->compute_cdr_gradients();
+    this->compute_cdr_domain_states();
     this->compute_cdr_eb_states();
+    this->compute_cdr_domain_fluxes(a_time + a_dt);
     this->compute_cdr_fluxes(a_time + a_dt);
     this->compute_sigma_flux();
 
@@ -724,7 +730,9 @@ void multirate_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
   // u^1 = u^n + dt*L(u^n)
   // u^n resides in solver. Use this and put u^1 in the solver instead. Use scratch for computing L(u^n)
   {
+    this->compute_cdr_domain_states();
     this->compute_cdr_eb_states();
+    this->compute_cdr_domain_fluxes(a_time);
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
 
@@ -774,7 +782,9 @@ void multirate_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
   // u^n is stored, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
   {
     this->compute_cdr_gradients();
+    this->compute_cdr_domain_states();
     this->compute_cdr_eb_states();
+    this->compute_cdr_domain_fluxes(a_time);
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
 
@@ -831,6 +841,8 @@ void multirate_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
   // u^n is stored, u^2 resides in solver. Put u^(n+1) in solver at end and use scratch for computing L(u^1)
   {
     this->compute_cdr_gradients();
+    this->compute_cdr_domain_states();
+    this->compute_cdr_domain_fluxes(a_time);
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
@@ -1114,12 +1126,15 @@ void multirate_rkSSP::compute_E_into_scratch(){
   EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
   EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
   EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
+  EBAMRIFData&   E_dom  = m_poisson_scratch->get_E_domain();
 
   const MFAMRCellData& phi = m_poisson->get_state();
   
   this->compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
   this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
   this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+
+  time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
 }
 
 void multirate_rkSSP::compute_cdr_velo(const Real a_time){
@@ -1169,8 +1184,41 @@ void multirate_rkSSP::compute_cdr_eb_states(){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    this->extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_states[i]);
+    this->extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
     this->project_flux(*eb_gradients[i], eb_gradient);
+  }
+}
+
+void multirate_rkSSP::compute_cdr_domain_states(){
+  CH_TIME("multirate_rkSSP::compute_cdr_domain_states");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::compute_cdr_domain_states" << endl;
+  }
+
+  Vector<EBAMRIFData*>   domain_gradients;
+  Vector<EBAMRIFData*>   domain_states;
+  Vector<EBAMRCellData*> cdr_states;
+  Vector<EBAMRCellData*> cdr_gradients;
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    cdr_states.push_back(&(solver->get_state()));
+    domain_states.push_back(&(storage->get_domain_state()));
+    domain_gradients.push_back(&(storage->get_domain_grad()));
+    cdr_gradients.push_back(&(storage->get_gradient()));
+  }
+
+  // Extrapolate states to the domain faces
+  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+
+  // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
+  EBAMRIFData grad;
+  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  for (int i = 0; i < cdr_states.size(); i++){
+    this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    this->project_domain(*domain_gradients[i], grad);
   }
 }
 
@@ -1237,6 +1285,101 @@ void multirate_rkSSP::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states,
 				   extrap_rte_fluxes,
 				   E,
 				   a_time);
+}
+
+void multirate_rkSSP::compute_cdr_domain_fluxes(const Real a_time){
+  CH_TIME("multirate_rkSSP::compute_cdr_domain_fluxes");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::compute_cdr_domain_fluxes" << endl;
+  }
+
+  this->compute_cdr_domain_fluxes(m_cdr->get_states(), a_time);
+}
+
+void multirate_rkSSP::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time){
+  CH_TIME("multirate_rkSSP::compute_cdr_domain_fluxes(Vector<EBAMRCellData*>, Real)");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::compute_cdr_domain_fluxes(Vector<EBAMRCellData*>, Real)" << endl;
+  }
+
+  Vector<EBAMRIFData*> cdr_fluxes;
+  Vector<EBAMRIFData*> extrap_cdr_fluxes;
+  Vector<EBAMRIFData*> extrap_cdr_densities;
+  Vector<EBAMRIFData*> extrap_cdr_velocities;
+  Vector<EBAMRIFData*> extrap_cdr_gradients;
+  Vector<EBAMRIFData*> extrap_rte_fluxes;
+
+
+  cdr_fluxes = m_cdr->get_domainflux();
+
+
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRIFData& dens_domain = storage->get_domain_state();
+    EBAMRIFData& velo_domain = storage->get_domain_velo();
+    EBAMRIFData& flux_domain = storage->get_domain_flux();
+    EBAMRIFData& grad_domain = storage->get_domain_grad();
+
+    extrap_cdr_densities.push_back(&dens_domain);  // Computed in compute_cdr_eb_states
+    extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
+    extrap_cdr_fluxes.push_back(&flux_domain);     // Has not been computed
+    extrap_cdr_gradients.push_back(&grad_domain);  // Computed in compute_cdr_eb_states
+  }
+
+  // Compute extrapolated velocities and fluxes at the domain faces
+  Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
+  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
+  this->extrapolate_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), a_states);
+
+  // Compute RTE flux on domain faces
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    EBAMRIFData& domain_flux = storage->get_domain_flux();
+    solver->compute_domain_flux(domain_flux, solver->get_state());
+    extrap_rte_fluxes.push_back(&domain_flux);
+  }
+
+  const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
+  
+  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+				   extrap_cdr_fluxes,
+				   extrap_cdr_densities,
+				   extrap_cdr_velocities,
+				   extrap_cdr_gradients,
+				   extrap_rte_fluxes,
+				   E,
+				   a_time);
+  
+#if 0
+  // Extrapolate densities, velocities, and fluxes
+
+  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
+  this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+
+  // Compute RTE flux on the boundary
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    solver->compute_domain_flux(flux_eb, solver->get_state());
+    extrap_rte_fluxes.push_back(&flux_eb);
+  }
+
+  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
+
+  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+				   extrap_cdr_fluxes,
+				   extrap_cdr_densities,
+				   extrap_cdr_velocities,
+				   extrap_cdr_gradients,
+				   extrap_rte_fluxes,
+				   E,
+				   a_time);
+#endif
 }
 
 void multirate_rkSSP::compute_sigma_flux(){

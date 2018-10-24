@@ -113,6 +113,8 @@ public:
   static void multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
   static void multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+  
+  static void multiply_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
   static void multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 

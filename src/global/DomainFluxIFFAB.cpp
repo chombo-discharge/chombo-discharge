@@ -89,12 +89,37 @@ void DomainFluxIFFAB::define(const ProblemDomain& a_domain, const EBISBox& a_ebi
       m_flux_hi[dir] = NULL;
     }
 
+    // ivs_lo and ivs_hi MAY CONTAIN COVERED CELLS!
     const IntVectSet ivs_lo(lobox);
     const IntVectSet ivs_hi(hibox);
 
 #if 0
+    // Get covered cells
+    IntVectSet covered_lo = IntVectSet();
+    IntVectSet covered_hi = IntVectSet();
+
+    for (IVSIterator iter(ivs_lo); iter.ok(); ++iter){
+      const IntVect iv = iter();
+      if(a_ebisbox.isCovered(iv)) covered_lo |= iv;
+    }
+    for (IVSIterator iter(ivs_hi); iter.ok(); ++iter){
+      const IntVect iv = iter();
+      if(a_ebisbox.isCovered(iv)) covered_hi |= iv;
+    }
+
+    IntVectSet lo = ivs_lo - covered_lo;
+    IntVectSet hi = ivs_hi - covered_hi;
+#endif
+    
+#if 0
     if(!ivs_lo.isEmpty()){
       std::cout << ivs_lo << std::endl;
+    }
+
+    for (IVSIterator iter(ivs_lo); iter.ok(); ++iter){
+      if(a_ebisbox.isCovered(iter())){
+	MayDay::Abort("stop");
+      }
     }
 #endif
 

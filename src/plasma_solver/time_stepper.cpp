@@ -1405,7 +1405,6 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
   EBAMRIVData eb_vel;
   EBAMRIVData eb_phi;
 
-
   m_amr->allocate(eb_flx, a_phase, SpaceDim);
   m_amr->allocate(eb_vel, a_phase, SpaceDim);
   m_amr->allocate(eb_phi, a_phase, 1);
@@ -1425,6 +1424,33 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
     m_amr->average_down(*a_fluxes[i], a_phase);
   }
 #endif
+}
+
+void time_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&        a_fluxes,
+						      const Vector<EBAMRCellData*> a_densities,
+						      const Vector<EBAMRCellData*> a_velocities,
+						      const phase::which_phase     a_phase){
+  CH_TIME("time_stepper::compute_extrapolated_domain_fluxes");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_extrapolated_domain_fluxes" << endl;
+  }
+
+  EBAMRCellData cell_flux;
+  EBAMRIFData domain_flux;
+
+  m_amr->allocate(cell_flux,   a_phase, SpaceDim);
+  m_amr->allocate(domain_flux, a_phase, SpaceDim);
+
+  for (int i = 0; i < a_fluxes.size(); i++){
+    data_ops::copy(cell_flux, *a_velocities[i]);
+    data_ops::multiply_scalar(cell_flux, *a_densities[i]); // cell_flux = n*v
+
+    // Extrapolate cell-centered to domain faces
+    this->extrapolate_to_domain_faces(domain_flux, a_phase, cell_flux);
+
+    // Project normal component onto domain face
+    this->project_domain(*a_fluxes[i], domain_flux);
+  }
 }
 
 void time_stepper::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_density, const EBAMRCellData& a_velocity){
@@ -1703,19 +1729,22 @@ void time_stepper::extrapolate_to_domain_faces(EBAMRIFData&             a_extrap
 	    const IntVect iv0   = vof.gridIndex();
 	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
 
-	    if(ebisbox.isCovered(iv0)){
-	      MayDay::Abort("time_stepper::extrapolate_to_domain_faces - shouldn't happen");
-	    }
-	    
-	    if(!ebisbox.isCovered(iv1)){ // linear extrapolation
+	    if(ebisbox.isCovered(iv0)){ // Just provide some bogus data because the face 
 	      for (int comp = 0; comp < ncomp; comp++){
-		extrap(face, comp) = 1.5*data_fab(iv0, comp) - 0.5*data_fab(iv1, comp); // Should be ok
+		extrap(face, comp) = 0.0;
 	      }
 	    }
-	    else{ // Not enough cells available, use cell-centered only
-	      for (int comp = 0; comp < ncomp; comp++){
-		extrap(face, comp) = data_fab(iv0, comp);
-	      }		
+	    else{
+	      if(!ebisbox.isCovered(iv1)){ // linear extrapolation
+		for (int comp = 0; comp < ncomp; comp++){
+		  extrap(face, comp) = 1.5*data_fab(iv0, comp) - 0.5*data_fab(iv1, comp); // Should be ok
+		}
+	      }
+	      else{ // Not enough cells available, use cell-centered only
+		for (int comp = 0; comp < ncomp; comp++){
+		  extrap(face, comp) = data_fab(iv0, comp);
+		}
+	      }
 	    }
 	  }
 	}

@@ -252,6 +252,14 @@ public:
 					   const phase::which_phase     a_phase);
 
   /*!
+    @brief Compute the cell-centered fluxes and extrapolate these to the domain faces
+  */
+  virtual void compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&        a_fluxes,
+						  const Vector<EBAMRCellData*> a_densities,
+						  const Vector<EBAMRCellData*> a_velocities,
+						  const phase::which_phase     a_phase);
+
+  /*!
     @brief Compute flux
   */
   virtual void compute_flux(EBAMRCellData&       a_flux,

@@ -94,8 +94,11 @@ protected:
   void compute_errors();
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
+  void compute_cdr_domain_states();
   void compute_cdr_fluxes(const Real a_time);
   void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
+  void compute_cdr_domain_fluxes(const Real a_time);
+  void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_velo(const Real a_time);
   void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_sources(const Real a_time);

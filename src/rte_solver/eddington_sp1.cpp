@@ -610,7 +610,7 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
 
   const int finest_level = m_amr->get_finest_level();
   
-  irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(phase::gas);
+  irreg_amr_stencil<eb_centroid_interp>& sten = m_amr->get_eb_centroid_interp_stencils(m_phase);
   for(int lvl = 0; lvl <= finest_level; lvl++){
     sten.apply(*a_ebflux[lvl], *a_state[lvl], lvl, true);
   }
@@ -618,6 +618,68 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCell
   m_amr->average_down(a_ebflux, m_phase);
 
   data_ops::scale(a_ebflux, 0.5*units::s_c0);
+}
+
+void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data){
+  CH_TIME("eddington_sp1::compute_domain_flux");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_domain_flux" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const int ncomp = a_data[lvl]->nComp();
+      
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBCellFAB& data         = (*a_data[lvl])[dit()];
+      const EBISBox& ebisbox        = ebisl[dit()];
+      const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
+      
+      for (int dir = 0; dir < SpaceDim; dir++){
+	for (SideIterator sit; sit.ok(); ++sit){
+	  BaseIFFAB<Real>& extrap = (*a_domainflux[lvl])[dit()](dir, sit());
+
+	  const IntVectSet& ivs  = extrap.getIVS();
+	  const EBGraph& ebgraph = extrap.getEBGraph();
+
+	  // Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
+	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	    const FaceIndex& face = faceit();
+
+	    const int sgn = sign(sit()); // Lo = -1, Hi = 1
+	    
+	    const VolIndex& vof = face.getVoF(sit());
+	    const IntVect iv0   = vof.gridIndex();
+	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
+
+	    if(ebisbox.isCovered(iv0)){ // Just provide some bogus data because the face 
+	      for (int comp = 0; comp < ncomp; comp++){
+		extrap(face, comp) = 0.0;
+	      }
+	    }
+	    else{
+	      if(!ebisbox.isCovered(iv1)){ // linear extrapolation
+		for (int comp = 0; comp < ncomp; comp++){
+		  extrap(face, comp) = 1.5*data_fab(iv0, comp) - 0.5*data_fab(iv1, comp); // Should be ok
+		}
+	      }
+	      else{ // Not enough cells available, use cell-centered only
+		for (int comp = 0; comp < ncomp; comp++){
+		  extrap(face, comp) = data_fab(iv0, comp);
+		}
+	      }
+	    }
+	    for (int comp = 0; comp < ncomp; comp++){
+	      extrap(face, comp) = 0.5*units::s_c0*extrap(face, comp);
+	    }
+	  }
+	}
+      }
+    }
+  }
 }
 
 void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state){

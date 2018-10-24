@@ -107,6 +107,11 @@ public:
   virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state) = 0;
 
   /*!
+    @brief Compute the domain flux given a state (a_state will be different for different RTE approximations)
+  */
+  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_state) = 0;
+
+  /*!
     @brief Compute the flux
     @details For diffusive models, the flux will be something like grad(a_state). For higher-order models, the flux 
     will be contained in a_state (somehow);

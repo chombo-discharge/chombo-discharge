@@ -18,15 +18,30 @@
 cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_species = a_plaskin->get_species();
   m_solvers.resize(m_species.size());
-
+  m_bc_type = cdr_bc::outflow;
   
   std::string str = "godunov"; // Default
   
-  { // Get solver type from input script
-    ParmParse pp("cdr_layout");
-    pp.query("which_solver", str);
+  ParmParse pp("cdr_layout");
+
+
+  if(pp.contains("domain_bc")){
+    pp.get("domain_bc", str);
+    if(str == "kinetic"){
+      m_bc_type = cdr_bc::external;
+    }
+    else if(str == "outflow"){
+      m_bc_type = cdr_bc::outflow;
+    }
+    else if(str == "wall"){
+      m_bc_type = cdr_bc::wall;
+    }
+    else if(str == "extrap"){
+      m_bc_type = cdr_bc::extrap;
+    }
   }
 
+  pp.query("which_solver", str);
   for (int i = 0; i < a_plaskin->get_num_species(); i++){
     if(str == "scharfetter-gummel"){
       m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_sg());
@@ -45,6 +60,7 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
 
   this->set_verbosity(-1);
   this->set_phase(phase::gas);
+  this->set_bc(m_bc_type);
 }
 
 cdr_layout::~cdr_layout(){
@@ -159,7 +175,6 @@ void cdr_layout::set_phase(phase::which_phase a_phase){
 
 void cdr_layout::set_verbosity(const int a_verbosity){
   CH_TIME("cdr_layout::set_verbosity");
-
   m_verbosity = a_verbosity;
   if(m_verbosity > 5){
     pout() << "cdr_layout::set_verbosity" << endl;
@@ -168,6 +183,18 @@ void cdr_layout::set_verbosity(const int a_verbosity){
   for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     solver->set_verbosity(a_verbosity);
+  }
+}
+
+void cdr_layout::set_bc(cdr_bc::which_bc a_bc){
+  CH_TIME("cdr_layout::set_bc");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::set_bc" << endl;
+  }
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->set_domain_bc(a_bc);
   }
 }
 

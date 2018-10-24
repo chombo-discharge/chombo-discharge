@@ -134,6 +134,11 @@ public:
   virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state);
 
   /*!
+    @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
+  */
+  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_state);
+
+  /*!
     @brief Compute the flux
     @details For diffusive models, the flux will be something like grad(a_state). For higher-order models, the flux 
     will be contained in a_state (somehow);
