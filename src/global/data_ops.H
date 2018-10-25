@@ -36,9 +36,15 @@ public:
 					    const LevelData<EBCellFAB>& a_celldata,
 					    const ProblemDomain&        a_domain);
 
+  static void dot_prod(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2);
+
+  static void dot_prod(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2);
+  
   static void dot_prod(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
 
   static void dot_prod(LevelData<EBCellFAB>& a_result, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
+
+  static void dot_prod(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box);
 
   static void incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale);
   
@@ -51,6 +57,10 @@ public:
   static void incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale);
 
   static void incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real& a_scale);
+
+  static void incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale);
+
+  static void incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale);
 
   static void incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale);
 
@@ -181,6 +191,12 @@ public:
   static void vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   static void vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
+
+  static void vector_length2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+
+  static void vector_length2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+
+  static void vector_length2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
 
 };
 

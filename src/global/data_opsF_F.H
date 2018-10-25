@@ -129,6 +129,34 @@ inline void FORTRAN_NAME(inlineDOT_PRODUCT, inlineDOT_PRODUCT)(
 }
 #endif  // GUARDDOT_PRODUCT 
 
+#ifndef GUARDVECTOR_LENGTH2 
+#define GUARDVECTOR_LENGTH2 
+// Prototype for Fortran procedure vector_length2 ...
+//
+void FORTRAN_NAME( VECTOR_LENGTH2 ,vector_length2 )(
+      CHFp_FRA1(dst)
+      ,CHFp_CONST_FRA(src)
+      ,CHFp_CONST_FRA1(mask)
+      ,CHFp_BOX(region) );
+
+#define FORT_VECTOR_LENGTH2 FORTRAN_NAME( inlineVECTOR_LENGTH2, inlineVECTOR_LENGTH2)
+#define FORTNT_VECTOR_LENGTH2 FORTRAN_NAME( VECTOR_LENGTH2, vector_length2)
+
+inline void FORTRAN_NAME(inlineVECTOR_LENGTH2, inlineVECTOR_LENGTH2)(
+      CHFp_FRA1(dst)
+      ,CHFp_CONST_FRA(src)
+      ,CHFp_CONST_FRA1(mask)
+      ,CHFp_BOX(region) )
+{
+ CH_TIMELEAF("FORT_VECTOR_LENGTH2");
+ FORTRAN_NAME( VECTOR_LENGTH2 ,vector_length2 )(
+      CHFt_FRA1(dst)
+      ,CHFt_CONST_FRA(src)
+      ,CHFt_CONST_FRA1(mask)
+      ,CHFt_BOX(region) );
+}
+#endif  // GUARDVECTOR_LENGTH2 
+
 }
 
 #endif

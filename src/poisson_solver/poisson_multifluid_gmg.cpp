@@ -51,6 +51,7 @@ bool poisson_multifluid_gmg::solve(const bool a_zerophi){
   
   const bool converged = this->solve(m_state, m_source, m_sigma, a_zerophi);
 
+
   return converged;
 }
 
@@ -162,6 +163,10 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   pout() << "revert/avg: " << 100.*(t5-t4)/T << "%" << endl;
   pout() << "Total time: " << t5-t4 << endl;
 #endif
+
+  
+  
+
 
   return converged;
 }

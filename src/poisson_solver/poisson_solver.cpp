@@ -9,8 +9,10 @@
 #include "poisson_solver.H"
 #include "MFAliasFactory.H"
 #include "mfalias.H"
-#include "data_ops.H" 
+#include "data_ops.H"
+#include "units.H"
 
+#include <EBArith.H>
 #include <iostream>
 #include <ParmParse.H>
 #include <MFAMRIO.H>
@@ -38,7 +40,6 @@ poisson_solver::poisson_solver(){
       }
     }
   }
-    
 
   if(SpaceDim == 2){
     this->set_neumann_wall_bc(0,   Side::Lo, 0.0);                  
@@ -176,13 +177,140 @@ void poisson_solver::cache_state(){
   }
 }
 
+void poisson_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
+  CH_TIME("poisson_solver::compute_D");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::compute_D" << endl;
+  }
+
+  const Vector<dielectric>& dielectrics = m_compgeom->get_dielectrics();
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    LevelData<MFCellFAB>& D = *a_D[lvl];
+    LevelData<MFCellFAB>& E = *a_E[lvl];
+
+    LevelData<EBCellFAB> D_gas, D_solid;
+    LevelData<EBCellFAB> E_gas, E_solid;
+
+    // This is all we need for the gas phase
+    mfalias::aliasMF(D_gas,   phase::gas, D);
+    mfalias::aliasMF(E_gas,   phase::gas, E);
+    E_gas.localCopyTo(D_gas);
+    data_ops::scale(D_gas,   units::s_eps0);
+    
+    if(m_mfis->num_phases() > 1){
+      mfalias::aliasMF(D_solid, phase::solid, D);
+      mfalias::aliasMF(E_solid, phase::solid, E);
+      E_solid.localCopyTo(D_solid);
+      data_ops::scale(D_solid, units::s_eps0);
+
+      // Now scale by relative epsilon
+      if(dielectrics.size() > 0){
+	const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
+	const RealVect origin        = m_physdom->get_prob_lo();
+	const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  EBCellFAB& dg = D_gas[dit()];
+
+	  const Box box = dbl.get(dit());
+	  for (VoFIterator vofit(IntVectSet(box), dg.getEBISBox().getEBGraph()); vofit.ok(); ++vofit){
+	    const VolIndex& vof = vofit();
+	    const RealVect& pos = EBArith::getVofLocation(vof, origin, dx);
+
+	    Real dist = 1.E99;
+	    int closest = 0;
+	    for (int i = 0; i < dielectrics.size(); i++){
+	      const RefCountedPtr<BaseIF> func = dielectrics[i].get_function();
+
+	      const Real cur_dist = func->value(pos);
+	
+	      if(cur_dist <= dist){
+		dist = cur_dist;
+		closest = i;
+	      }
+	    }
+	    const Real eps = dielectrics[closest].get_permittivity(pos);
+
+	    for (int comp = 0; comp < dg.nComp(); comp++){
+	      dg(vof, comp) *= eps;
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
+Real poisson_solver::compute_U(const MFAMRCellData& a_E){
+  CH_TIME("poisson_solver::compute_U");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::compute_U" << endl;
+  }
+
+  MFAMRCellData D, EdotD;   
+  m_amr->allocate(D, SpaceDim);
+  m_amr->allocate(EdotD, 1);
+  this->compute_D(D, a_E);
+  data_ops::dot_prod(EdotD, D, a_E);
+
+  Real U_g = 0.0;
+  Real U_s = 0.0;
+
+  // Energy in gas phase
+  EBAMRCellData data_g;
+  m_amr->allocate_ptr(data_g);
+  m_amr->alias(data_g, phase::gas, EdotD);
+  m_amr->average_down(data_g, phase::gas);
+  data_ops::norm(U_g, *data_g[0], m_amr->get_domains()[0], 1);
+
+  if(m_mfis->num_phases() > 1){
+    EBAMRCellData data_s;
+    m_amr->allocate_ptr(data_s);
+    m_amr->alias(data_s, phase::solid, EdotD);
+    m_amr->average_down(data_s, phase::solid);
+    data_ops::norm(U_s, *data_s[0], m_amr->get_domains()[0], 1);
+  }
+
+  return 0.5*(U_g + U_s);
+}
+
 Real poisson_solver::compute_capacitance(){
   CH_TIME("poisson_solver::compute_capacitance");
   if(m_verbosity > 5){
     pout() << "poisson_solver::compute_capacitance" << endl;
   }
 
-  MayDay::Abort("poisson_solver::compute_capacitance - Not implemented. This should set compute capacitance with the supplied V");
+  // TLDR; We MUST compute the energy density with the Laplace field, so no sources here...
+  Real C;
+
+  MFAMRCellData phi, source;
+  EBAMRIVData sigma;
+
+  m_amr->allocate(phi, 1);
+  m_amr->allocate(source, 1);
+  m_amr->allocate(sigma, phase::gas, 1);
+
+  data_ops::set_value(phi,    0.0);
+  data_ops::set_value(source, 0.0);
+  data_ops::set_value(sigma,  0.0);
+
+  solve(phi, source, sigma);
+
+  // Solve and compute energy density
+  MFAMRCellData E;
+  m_amr->allocate(E, SpaceDim);
+  m_amr->compute_gradient(E, phi); // -E
+  const Real U = this->compute_U(E); // Energy density
+
+  // U = 0.5*CV^2
+  const Real pot = m_potential(m_time);
+  if(pot == 0.0){
+    MayDay::Abort("poisson_solver::compute_capacitance - error, can't compute energy density with V = 0");
+  }
+  C = 2.0*U/(pot*pot);
+
+  return C;
 }
 
 void poisson_solver::deallocate_internals(){

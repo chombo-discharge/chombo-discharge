@@ -276,8 +276,6 @@ public:
   */
   virtual void compute_rte_sources();
 
-
-
   /*!
     @brief Compute the cell-centered space charge density by using data inside cdr_layout. 
     @details This assumes that the data contain in cdr_layout is cell-centered
@@ -553,6 +551,11 @@ public:
     @brief Compute the ohmic current on dielectrics
   */
   virtual Real compute_dielectric_current();
+
+  /*!
+    @brief Compute the ohmic current through the domain faces
+  */
+  virtual Real compute_domain_current();
 
   /*!
     @brief Compute induced current in external circuit due to ohmic conduction

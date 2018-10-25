@@ -86,3 +86,24 @@
       return
 
       end
+
+      subroutine vector_length2(
+     &     chf_fra1[dst],
+     &     chf_const_fra[src],
+     &     chf_const_fra1[mask],
+     &     chf_box[region] )
+
+      real_t len2
+      integer chf_ddecl[i;j;k]
+      
+      chf_multido[region;i;j;k]
+         if(mask(chf_ix[i;j;k]) > 0.0) then
+            len2 = CHF_DTERM[src(chf_ix[i;j;k], 0)*src(chf_ix[i;j;k], 0);
+     &                     + src(chf_ix[i;j;k], 1)*src(chf_ix[i;j;k], 1);
+     &                     + src(chf_ix[i;j;k], 2)*src(chf_ix[i;j;k], 2)];     
+            dst(chf_ix[i;j;k]) = len2
+         endif
+      chf_enddo
+      
+      return
+      end

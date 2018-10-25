@@ -2468,6 +2468,59 @@ Real time_stepper::compute_dielectric_current(){
   return sum;
 }
 
+Real time_stepper::compute_domain_current(){
+  CH_TIME("time_stepper::compute_domain_current");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_domain_current" << endl;
+  }
+
+  const int comp = 0;
+
+  // Need to copy onto temporary storage because 
+  EBAMRIFData charge_flux;
+  m_amr->allocate(charge_flux, m_cdr->get_phase(), 1);
+  data_ops::set_value(charge_flux, 0.0);
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const EBAMRIFData& solver_flux          = solver->get_domainflux();
+
+    data_ops::incr(charge_flux, solver_flux, spec->get_charge()*units::s_Qe);
+  }
+
+  const int compute_lvl = 0;
+  Real sum = 0.0;
+  const Real dx = m_amr->get_dx()[compute_lvl];
+  for (DataIterator dit = m_amr->get_grids()[compute_lvl].dataIterator(); dit.ok(); ++dit){
+    const DomainFluxIFFAB& flux = (*charge_flux[compute_lvl])[dit()];
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	const BaseIFFAB<Real>& fluxdir = flux(dir, sit());
+
+	FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;
+	const IntVectSet& ivs  = fluxdir.getIVS();
+	const EBGraph& ebgraph = fluxdir.getEBGraph();
+
+	for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	  sum += sign(sit())*fluxdir(faceit(), comp);
+	}
+      }
+    }
+  }
+
+  sum *= pow(dx, SpaceDim-1);
+
+
+#ifdef CH_MPI
+  const Real sum1 = sum;
+  sum = EBLevelDataOps::parallelSum(sum1);  
+#endif
+
+  return sum;
+}
+
 Real time_stepper::compute_ohmic_induction_current(){
   CH_TIME("time_stepper::compute_relaxation_time");
   if(m_verbosity > 5){

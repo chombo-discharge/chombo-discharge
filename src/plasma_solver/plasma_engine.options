@@ -30,3 +30,4 @@ plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode
 plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
 plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
 plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
+plasma_engine.use_new_io                      = false         # Use the new I/O and checkpointing functions

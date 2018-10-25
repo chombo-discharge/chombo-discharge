@@ -19,7 +19,7 @@
 class poisson_solver {
 public:
 
-  static Real potential_one(const Real a_time);
+  static Real potential_one(const Real a_time){return 1.0;}
 
   /*!
     @brief Constructor
@@ -64,6 +64,11 @@ public:
     @brief Cache state before regridding
   */
   virtual void cache_state();
+
+  /*!
+    @brief Compute displacement field from E
+  */
+  virtual void compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E);
 
   /*!
     @brief Deallocate internal storage
@@ -148,9 +153,14 @@ public:
   virtual Real get_time() const;
 
   /*!
-    @brief Compute the capacitance
+    @brief Compute the capacitance. This assumes that m_state is a current solution to your Poisson problem!
   */
   virtual Real compute_capacitance();
+
+    /*!
+    @brief Compute energy density U = 0.5*int(E.dot.D dV)
+  */
+  virtual Real compute_U(const MFAMRCellData& a_E);
 
   /*!
     @brief Get Poisson BC at specified domain wall

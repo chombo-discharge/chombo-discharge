@@ -529,6 +529,11 @@ protected:
   Real m_time;
 
   /*!
+    @brief 
+  */
+  Real m_capacitance;
+
+  /*!
     @brief MPI timer
   */
   Real m_wallclock_start;
@@ -582,6 +587,11 @@ protected:
     @brief Dump charge for cdr and surface charge solvers at every time step
   */
   bool m_dump_charge;
+
+  /*!
+    @brief Use the old or new IO functions
+  */
+  bool m_new_io;
 
   /*!
     @brief Allocate internals
@@ -688,11 +698,21 @@ protected:
     @brief Memory report
   */
   virtual void memory_report(const memory_report_mode::which_mode a_mode);
-  
+
   /*!
     @brief Read checkpoint file
   */
   virtual void read_checkpoint_file(const std::string& a_restart_file);
+
+  /*!
+    @brief Read checkpoint file
+  */
+  virtual void old_read_checkpoint_file(const std::string& a_restart_file);
+  
+  /*!
+    @brief Read checkpoint file
+  */
+  virtual void new_read_checkpoint_file(const std::string& a_restart_file);
 
   /*!
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
@@ -774,6 +794,16 @@ protected:
     @brief Write a checkpoint file
   */
   virtual void write_checkpoint_file();
+  
+  /*!
+    @brief Write a checkpoint file
+  */
+  virtual void old_write_checkpoint_file();
+
+  /*!
+    @brief Write a checkpoint file
+  */
+  virtual void new_write_checkpoint_file();
 
   /*!
     @brief Write the geometry only

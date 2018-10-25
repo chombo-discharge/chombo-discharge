@@ -977,6 +977,20 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
   if(m_verbosity > 3){
     pout() << "plasma_engine::read_checkpoint_file" << endl;
   }
+  
+  if(m_new_io){
+    this->new_read_checkpoint_file(a_restart_file);
+  }
+  else{
+    this->old_read_checkpoint_file(a_restart_file);
+  }
+}
+
+void plasma_engine::old_read_checkpoint_file(const std::string& a_restart_file){
+  CH_TIME("plasma_engine::read_checkpoint_file");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::read_checkpoint_file" << endl;
+  }
 
   RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
   RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
@@ -993,11 +1007,136 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
     MayDay::Abort("plasma_engine::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
   }
 
-  m_time       = header.m_real["time"];
-  m_dt         = header.m_real["dt"];
-  m_step       = header.m_int["step"];
-  
+  m_time        = header.m_real["time"];
+  m_dt          = header.m_real["dt"];
+  m_step        = header.m_int["step"];
+
   int finest_level = header.m_int["finest_level"];
+
+  // Read in grids
+  Vector<Vector<Box> > boxes(1 + finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    handle_in.setGroupToLevel(lvl);
+
+    const int status = read(handle_in, boxes[lvl]);
+
+    if(status != 0){
+      MayDay::Error("plasma_engine::read_checkpoint_file - file has no grids");
+    }
+  }
+
+  m_amr->set_finest_level(finest_level); // Set finest level
+  m_amr->set_grids(boxes);               // Set up amr
+  m_timestepper->instantiate_solvers();  // Instantiate solvrs, they can now be filled with data
+  this->allocate_internals();            // Allocate internal storage which also needs to be filled
+
+
+  // Transient storage
+  EBAMRCellData sig, tags;
+  m_amr->allocate(sig, phase::gas, 1);
+  m_amr->allocate(tags, phase::gas, 1);
+  data_ops::set_value(sig, 0.0);
+  data_ops::set_value(tags,  0.0);
+
+  finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    handle_in.setGroupToLevel(lvl);
+
+    // CDR solver
+    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver = solver_it();
+      EBAMRCellData& solver_state       = solver->get_state();
+      const std::string solver_name     = solver->get_name();
+
+      if(m_restart_mode != restart_mode::surface_charge_only){
+	read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
+      }
+    }
+
+    // RTE solvers
+    if(!m_timestepper->stationary_rte()){
+      for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+	RefCountedPtr<rte_solver>& solver = solver_it();
+	EBAMRCellData& solver_state       = solver->get_state();
+	const std::string solver_name     = solver->get_name();
+
+	read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
+      }
+    }
+
+    // Read in sigma and tags
+    read<EBCellFAB>(handle_in, *sig[lvl],  "sigma", dbl, Interval(), false);
+    read<EBCellFAB>(handle_in, *tags[lvl], "tags",  dbl, Interval(), false);
+  }
+
+  // Copy data to sigma solver
+  data_ops::set_value(sigma->get_state(), 0.0);
+  if(m_restart_mode != restart_mode::volume_charge_only){
+    data_ops::incr(sigma->get_state(), sig, 1.0);
+  }
+  sigma->reset_cells(sigma->get_state());
+
+  // Instantiate m_tags
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBCellFAB& tmp   = (*tags[lvl])[dit()];
+      const EBISBox& ebisbox = tmp.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs(box);
+
+      DenseIntVectSet& tagged_cells = (*m_tags[lvl])[dit()].get_ivs();
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	if(tmp(vof, 0) >= 0.9999){
+	  tagged_cells |= vof.gridIndex();
+	}
+      }
+    }
+  }
+
+
+  handle_in.close();
+}
+
+void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
+  CH_TIME("plasma_engine::new_read_checkpoint_file");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::new_read_checkpoint_file" << endl;
+  }
+
+  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
+  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
+  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
+  RefCountedPtr<sigma_solver>& sigma     = m_timestepper->get_sigma();
+
+  HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
+  HDF5HeaderData header;
+  header.readFromFile(handle_in);
+
+  // Base resolution should not have changed. If it did, issue an error
+  const Real coarsest_dx = header.m_real["coarsest_dx"];
+  if(!coarsest_dx == m_amr->get_dx()[0]){
+    MayDay::Abort("plasma_engine::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
+  }
+
+  m_time        = header.m_real["time"];
+  m_dt          = header.m_real["dt"];
+  m_capacitance = header.m_real["capacitance"];
+  m_step        = header.m_int["step"];
+
+  int finest_level = header.m_int["finest_level"];
+
+  
+#if 1 // Debug
+  if(procID() == 0){
+    std::cout << "plasma_engine::new_read_checkpoint_file - capacitance = " << m_capacitance << std::endl;
+  }
+#endif
 
   // Read in grids
   Vector<Vector<Box> > boxes(1 + finest_level);
@@ -1372,13 +1511,14 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	this->step_report(a_start_time, a_end_time, a_max_steps);
       }
 
-#if 0 // Development feature
+#if 1 // Development feature
+      // Positive current = current OUT OF DOMAIN
       const Real electrode_I  = m_timestepper->compute_electrode_current();
       const Real dielectric_I = m_timestepper->compute_dielectric_current();
       const Real ohmic_I      = m_timestepper->compute_ohmic_induction_current();
-      //      const Real domain_I     = m_timestepper->compute_domain_current();
+      const Real domain_I     = m_timestepper->compute_domain_current();
       if(procID() == 0){
-	std::cout << m_time << "\t" << electrode_I << "\t" << "\t" << ohmic_I << std::endl;
+	std::cout << m_time << "\t" << electrode_I << "\t" << domain_I << "\t" << ohmic_I << std::endl;
       }
 #endif
 
@@ -1590,6 +1730,11 @@ void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
   else if(str == "ultra_light"){
     m_output_mode = output_mode::light; // Ultra_light not yet supported
   }
+
+  // Old or new IO mode
+  m_new_io = false;
+  pp.query("use_new_io", str);
+  if(str == "true") m_new_io = true;
 }
 
 void plasma_engine::set_restart_mode(const restart_mode::which_mode a_mode){
@@ -1898,7 +2043,9 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
       const Real dummy_dt = 0.0;
       m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
     }
-    
+
+    // Compute the capacitance
+    m_capacitance = poisson->compute_capacitance();
   }
 
   if(!m_celltagger.isNull()){
@@ -2652,6 +2799,20 @@ void plasma_engine::write_checkpoint_file(){
     pout() << "plasma_engine::write_checkpoint_file" << endl;
   }
   
+  if(m_new_io){
+    this->new_write_checkpoint_file();
+  }
+  else{
+    this->old_write_checkpoint_file();
+  }
+}
+
+void plasma_engine::old_write_checkpoint_file(){
+  CH_TIME("plasma_engine::write_checkpoint_file");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_checkpoint_file" << endl;
+  }
+  
   const int finest_level = m_amr->get_finest_level();
   int finest_chk_level  = Min(m_max_chk_depth, finest_level);
   if(m_max_chk_depth < 0){
@@ -2680,6 +2841,99 @@ void plasma_engine::write_checkpoint_file(){
   data_ops::set_value(sigma, 0.0);
   data_ops::incr(sigma, sig->get_state(), 1.0);
 
+
+  // Set tagged cells = 1
+  for (int lvl = 0; lvl <= finest_chk_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(cur_phase)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = IntVectSet((*m_tags[lvl])[dit()].get_ivs());
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	(*tags[lvl])[dit()](vof, 0) = 1.;
+      }
+    }
+  }
+
+  // Output file name
+  char str[100];
+  const std::string prefix = m_output_dir + "/chk/" + m_output_names;
+  sprintf(str, "%s.check%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
+
+
+  HDF5Handle handle_out(str, HDF5Handle::CREATE);
+  header.writeToFile(handle_out);
+
+  for (int lvl = 0; lvl <= finest_chk_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    handle_out.setGroupToLevel(lvl);
+    write(handle_out, dbl);
+
+    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+      const RefCountedPtr<cdr_solver>& solver = solver_it();
+      const EBAMRCellData& state              = solver->get_state();
+      const std::string name                  = solver->get_name();
+
+      write(handle_out, *state[lvl], name);
+    }
+
+    if(!m_timestepper->stationary_rte()){ // Must write RTE data if the solvers are transient
+      for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+	const RefCountedPtr<rte_solver>& solver = solver_it();
+	const EBAMRCellData& state              = solver->get_state();
+	const std::string name                  = solver->get_name();
+	
+	write(handle_out, *state[lvl], name);
+      }
+    }
+
+    write(handle_out, *sigma[lvl], "sigma");
+    write(handle_out, *tags[lvl],  "tags");
+  }
+
+  
+  handle_out.close();
+}
+
+void plasma_engine::new_write_checkpoint_file(){
+  CH_TIME("plasma_engine::new_write_checkpoint_file");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::new_write_checkpoint_file" << endl;
+  }
+  
+  const int finest_level = m_amr->get_finest_level();
+  int finest_chk_level  = Min(m_max_chk_depth, finest_level);
+  if(m_max_chk_depth < 0){
+    finest_chk_level = finest_level;
+  }
+
+  const phase::which_phase cur_phase = phase::gas;
+  
+  RefCountedPtr<cdr_layout>& cdr   = m_timestepper->get_cdr();
+  RefCountedPtr<rte_layout>& rte   = m_timestepper->get_rte();
+  RefCountedPtr<sigma_solver>& sig = m_timestepper->get_sigma();
+
+  HDF5HeaderData header;
+  header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
+  header.m_real["time"]        = m_time;
+  header.m_real["capacitance"] = m_capacitance;
+  header.m_real["dt"]          = m_dt;
+  header.m_int["step"]         = m_step;
+  header.m_int["finest_level"] = finest_level;
+
+
+  // Storage for sigma and m_tags - these are things that can't be written directly
+  EBAMRCellData sigma, tags;
+  m_amr->allocate(sigma, cur_phase, 1);
+  m_amr->allocate(tags,  cur_phase, 1);
+
+  // Copy data from sigma solver to sigma
+  data_ops::set_value(sigma, 0.0);
+  data_ops::incr(sigma, sig->get_state(), 1.0);
 
 
   // Set tagged cells = 1

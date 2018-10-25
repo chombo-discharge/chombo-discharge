@@ -97,6 +97,33 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
   }
 }
 
+void data_ops::dot_prod(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2){
+  for (int lvl = 0; lvl < a_result.size(); lvl++){
+    data_ops::dot_prod(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
+  }
+}
+
+void data_ops::dot_prod(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2){
+  const int nc = a_data1.nComp();
+
+  CH_assert(a_data2.nComp() == nc);
+  CH_assert(a_result.nComp() == 1);
+
+  for (DataIterator dit = a_result.dataIterator(); dit.ok(); ++dit){
+    MFCellFAB& result      = a_result[dit()];
+    const MFCellFAB& data1 = a_data1[dit()];
+    const MFCellFAB& data2 = a_data2[dit()];
+    const Box& box = a_result.disjointBoxLayout().get(dit());
+
+    for (int i = 0; i < result.numPhases(); i++){
+      EBCellFAB& result_phase      = result.getPhase(i);
+      const EBCellFAB& data1_phase = data1.getPhase(i);
+      const EBCellFAB& data2_phase = data2.getPhase(i);
+
+      data_ops::dot_prod(result_phase, data1_phase, data2_phase, box);
+    }
+  }
+}
 
 void data_ops::dot_prod(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2){
   for (int lvl = 0; lvl < a_result.size(); lvl++){
@@ -117,8 +144,9 @@ void data_ops::dot_prod(LevelData<EBCellFAB>& a_result,
     const EBCellFAB& data1 = a_data1[dit()];
     const EBCellFAB& data2 = a_data2[dit()];
     const Box& box         = a_result.disjointBoxLayout().get(dit());
+    data_ops::dot_prod(result, data1, data2, box);
 
-
+#if 0
     // Regular cells
     BaseFab<Real>& result_reg      = result.getSingleValuedFAB();
     const BaseFab<Real>& data1_reg = data1.getSingleValuedFAB();
@@ -140,6 +168,32 @@ void data_ops::dot_prod(LevelData<EBCellFAB>& a_result,
       for (int comp = 0; comp < nc; comp++){
 	result(vof, 0) += data1(vof, comp)*data2(vof,comp);
       }
+    }
+#endif
+  }
+}
+
+void data_ops::dot_prod(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box){
+  const int nc = a_data1.nComp();
+  BaseFab<Real>& result_reg      = a_result.getSingleValuedFAB();
+  const BaseFab<Real>& data1_reg = a_data1.getSingleValuedFAB();
+  const BaseFab<Real>& data2_reg = a_data2.getSingleValuedFAB();
+  FORT_DOT_PRODUCT(CHF_FRA1(result_reg, 0),
+		   CHF_CONST_FRA(data1_reg),
+		   CHF_CONST_FRA(data2_reg),
+		   CHF_CONST_INT(nc),
+		   CHF_BOX(a_box));
+    
+
+  // Irregular cells
+  const EBISBox& ebisbox = a_result.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const IntVectSet& ivs  = ebisbox.getIrregIVS(a_box);
+  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    a_result(vof, 0) = 0.0;
+    for (int comp = 0; comp < nc; comp++){
+      a_result(vof, 0) += a_data1(vof, comp)*a_data2(vof,comp);
     }
   }
 }
@@ -184,6 +238,43 @@ void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFA
 
       for (int comp = 0; comp < ncomp; comp++){
 	lhs(vof, comp) += rhs(vof, comp)*a_scale;
+      }
+    }
+  }
+}
+
+void data_ops::incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+  }
+}
+
+void data_ops::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale){
+  CH_assert(a_lhs.nComp() == a_rhs.nComp());
+
+  const int ncomp = a_lhs.nComp();
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    DomainFluxIFFAB& lhs       = a_lhs[dit()];
+    const DomainFluxIFFAB& rhs = a_rhs[dit()];
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	BaseIFFAB<Real>& cur_lhs       = lhs(dir, sit());
+	const BaseIFFAB<Real>& cur_rhs = rhs(dir, sit());
+
+	const IntVectSet& ivs  = cur_lhs.getIVS();
+	const EBGraph& ebgraph = cur_lhs.getEBGraph();
+	const FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
+
+	for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+
+	  for (int comp = 0; comp < ncomp; comp++){
+	    cur_lhs(face, comp) += cur_rhs(face, comp)*a_scale;
+	  }
+	}
+	
       }
     }
   }
@@ -916,4 +1007,58 @@ void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box
 #endif
 }
 
+void data_ops::vector_length2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::vector_length2(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
 
+void data_ops::vector_length2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+  CH_assert(a_lhs.nComp() == 1);
+  CH_assert(a_rhs.nComp() == SpaceDim);
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs             = a_lhs[dit()];
+    const Box& box             = a_lhs.disjointBoxLayout().get(dit());
+    const EBCellFAB& rhs       = a_rhs[dit()];
+
+    data_ops::vector_length2(lhs, rhs, box);
+  }
+}
+
+void data_ops::vector_length2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box){
+  CH_assert(a_lhs.nComp() == 1);
+  CH_assert(a_rhs.nComp() == SpaceDim);
+
+  const int comp = 0;
+  const int ncomp = SpaceDim;
+
+  const EBISBox& ebisbox = a_lhs.getEBISBox();
+
+  // Mask for skipping computation on covered cells
+  EBCellFAB covered_mask(ebisbox, a_box, 1);
+  covered_mask.setVal(1.0);
+  covered_mask.setCoveredCellVal(-1.0, 0);
+  
+  // Regular cells
+  BaseFab<Real>& lhs_reg       = a_lhs.getSingleValuedFAB();
+  const BaseFab<Real>& rhs_reg = a_rhs.getSingleValuedFAB();
+  const BaseFab<Real>& mask    = covered_mask.getSingleValuedFAB();
+
+  FORT_VECTOR_LENGTH2(CHF_FRA1(lhs_reg, comp),
+		      CHF_CONST_FRA(rhs_reg),
+		      CHF_CONST_FRA1(mask,0),
+		      CHF_BOX(a_box));
+
+
+  // Irregular cells and multivalued cells
+  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph()); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    a_lhs(vof, comp) = 0.;
+
+    for (int i = 0; i < ncomp; i++){
+      a_lhs(vof, comp) += a_rhs(vof, i)*a_rhs(vof, i);
+    }
+  }
+}
