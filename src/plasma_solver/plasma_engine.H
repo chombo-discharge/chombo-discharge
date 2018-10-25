@@ -715,6 +715,11 @@ protected:
   virtual void new_read_checkpoint_file(const std::string& a_restart_file);
 
   /*!
+    @brief Read vector data
+  */
+  virtual void read_vector_data(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_step);
+
+  /*!
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
     whose solution is recomputed. The same goes for stationary RTE methods. 
   */
@@ -804,6 +809,11 @@ protected:
     @brief Write a checkpoint file
   */
   virtual void new_write_checkpoint_file();
+
+  /*!
+    @brief Write vector data to a HDF5Header. This writes up to a_step
+  */
+  virtual void write_vector_data(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_step);
 
   /*!
     @brief Write the geometry only

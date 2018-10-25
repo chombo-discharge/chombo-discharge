@@ -1131,6 +1131,14 @@ void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
 
   int finest_level = header.m_int["finest_level"];
 
+#if 1 // Debug
+  Vector<Real> test(4);
+  read_vector_data(header, test, "test", 4);
+  if(procID() == 0){
+    std::cout << test << std::endl;
+  }
+#endif
+
   
 #if 1 // Debug
   if(procID() == 0){
@@ -2925,6 +2933,16 @@ void plasma_engine::new_write_checkpoint_file(){
   header.m_int["step"]         = m_step;
   header.m_int["finest_level"] = finest_level;
 
+#if 1 // Debug
+  Vector<Real> test(4);
+  test[0] = 1.0;
+  test[1] = 2.0;
+  test[2] = 3.0;
+  test[3] = 4.0;
+  write_vector_data(header, test, "test", 4);
+#endif
+
+
 
   // Storage for sigma and m_tags - these are things that can't be written directly
   EBAMRCellData sigma, tags;
@@ -2992,6 +3010,46 @@ void plasma_engine::new_write_checkpoint_file(){
   
   handle_out.close();
 }
+
+void plasma_engine::write_vector_data(HDF5HeaderData&     a_header,
+				      const Vector<Real>& a_data,
+				      const std::string   a_name,
+				      const int           a_step){
+  CH_TIME("plasma_engine::write_vector_data");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_vector_data" << endl;
+  }
+
+  char step[100];
+
+  const int last = a_step < a_data.size() ? a_step : a_data.size();
+  for (int i = 0; i < last; i++){
+    sprintf(step, "%07d", i);
+
+    const std::string identifier = a_name + std::string(step);
+    a_header.m_real[identifier] = a_data[i];
+  }
+}
+
+void plasma_engine::read_vector_data(HDF5HeaderData& a_header,
+				     Vector<Real>&         a_data,
+				     const std::string     a_name,
+				     const int             a_step){
+  CH_TIME("plasma_engine::read_vector_data");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::read_vector_data" << endl;
+  }
+
+  char step[100];
+
+  for (int i = 0; i < a_step; i++){
+    sprintf(step, "%07d", i);
+
+    const std::string identifier = a_name + std::string(step);
+    a_data[i] = a_header.m_real[identifier];
+  }
+}
+
 
 void plasma_engine::open_mass_dump_file(ofstream& a_file){
   if(procID() == 0){
