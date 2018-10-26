@@ -233,6 +233,7 @@ Real multirate_rkSSP::advance(const Real a_dt){
   }
 #endif
 
+
   // Diffusion advance
   if(m_do_diffusion){
     diff_dt = a_dt;
@@ -250,6 +251,7 @@ Real multirate_rkSSP::advance(const Real a_dt){
 #endif
   const Real t2 = MPI_Wtime();
 
+
   // Solve Poisson equation
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
@@ -264,8 +266,10 @@ Real multirate_rkSSP::advance(const Real a_dt){
     this->advance_rte_stationary(m_time + a_dt); // and diffusion stages
   }
   const Real t4 = MPI_Wtime();
+
   
   // Put cdr solvers back in useable state so that we can reliably compute the next time step.
+  this->compute_cdr_gradients();
   multirate_rkSSP::compute_cdr_velo(m_time + a_dt);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
   multirate_rkSSP::compute_cdr_sources(m_time + a_dt);
@@ -448,6 +452,8 @@ void multirate_rkSSP::advance_multirate_fixed(const int a_substeps, const Real a
     else{
       MayDay::Abort("multirate_rkSSP::advance_multirate_fixed - unsupported order requested");
     }
+
+
 
     // Update for next iterate. This should generally be done because the solution might move many grid cells.
     if(!last_step){

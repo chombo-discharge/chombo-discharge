@@ -190,7 +190,7 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
   m_amr->allocate(E, ncomp);
 
   m_timestepper->compute_E(E, potential);
-  m_amr->compute_gradient(E, poisson->get_state());
+  //  m_amr->compute_gradient(E, poisson->get_state());
   data_ops::scale(E, -1.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -381,7 +381,9 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
     pout() << "plasma_engine::add_cdr_velocities_to_output" << endl;
   }
 
+#if 0 // Really shouldn't be necessary
   m_timestepper->compute_cdr_velocities();
+#endif
 
   const int comp         = 0;
   const int ncomp        = SpaceDim;
@@ -423,7 +425,9 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
     pout() << "plasma_engine::add_cdr_source_to_output" << endl;
   }
 
+#if 0 // Shouldn't be necessary
   m_timestepper->compute_cdr_sources();
+#endif
   
   const int comp         = 0;
   const int ncomp        = 1;
@@ -1128,23 +1132,7 @@ void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
   m_dt          = header.m_real["dt"];
   m_capacitance = header.m_real["capacitance"];
   m_step        = header.m_int["step"];
-
   int finest_level = header.m_int["finest_level"];
-
-#if 1 // Debug
-  Vector<Real> test(4);
-  read_vector_data(header, test, "test", 4);
-  if(procID() == 0){
-    std::cout << test << std::endl;
-  }
-#endif
-
-  
-#if 1 // Debug
-  if(procID() == 0){
-    std::cout << "plasma_engine::new_read_checkpoint_file - capacitance = " << m_capacitance << std::endl;
-  }
-#endif
 
   // Read in grids
   Vector<Vector<Box> > boxes(1 + finest_level);
@@ -1519,7 +1507,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	this->step_report(a_start_time, a_end_time, a_max_steps);
       }
 
-#if 1 // Development feature
+#if 0 // Development feature
       // Positive current = current OUT OF DOMAIN
       const Real electrode_I  = m_timestepper->compute_electrode_current();
       const Real dielectric_I = m_timestepper->compute_dielectric_current();
@@ -2729,6 +2717,7 @@ void plasma_engine::write_plot_file(){
   m_amr->allocate(output, phase::gas, num_output);
   data_ops::set_value(output, 0.0);
 
+
   // Add data to output
   int cur_var = 0.0;
   this->add_potential_to_output(output,      cur_var); cur_var += 1;
@@ -2933,7 +2922,7 @@ void plasma_engine::new_write_checkpoint_file(){
   header.m_int["step"]         = m_step;
   header.m_int["finest_level"] = finest_level;
 
-#if 1 // Debug
+#if 0 // Debug
   Vector<Real> test(4);
   test[0] = 1.0;
   test[1] = 2.0;
@@ -3014,7 +3003,7 @@ void plasma_engine::new_write_checkpoint_file(){
 void plasma_engine::write_vector_data(HDF5HeaderData&     a_header,
 				      const Vector<Real>& a_data,
 				      const std::string   a_name,
-				      const int           a_step){
+				      const int           a_elements){
   CH_TIME("plasma_engine::write_vector_data");
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_vector_data" << endl;
@@ -3022,7 +3011,7 @@ void plasma_engine::write_vector_data(HDF5HeaderData&     a_header,
 
   char step[100];
 
-  const int last = a_step < a_data.size() ? a_step : a_data.size();
+  const int last = a_data.size() < a_elements ? a_data.size() : a_elements;
   for (int i = 0; i < last; i++){
     sprintf(step, "%07d", i);
 
@@ -3034,7 +3023,7 @@ void plasma_engine::write_vector_data(HDF5HeaderData&     a_header,
 void plasma_engine::read_vector_data(HDF5HeaderData& a_header,
 				     Vector<Real>&         a_data,
 				     const std::string     a_name,
-				     const int             a_step){
+				     const int             a_elements){
   CH_TIME("plasma_engine::read_vector_data");
   if(m_verbosity > 3){
     pout() << "plasma_engine::read_vector_data" << endl;
@@ -3042,7 +3031,8 @@ void plasma_engine::read_vector_data(HDF5HeaderData& a_header,
 
   char step[100];
 
-  for (int i = 0; i < a_step; i++){
+  const int last = a_data.size() < a_elements ? a_data.size() : a_elements;
+  for (int i = 0; i < last; i++){
     sprintf(step, "%07d", i);
 
     const std::string identifier = a_name + std::string(step);

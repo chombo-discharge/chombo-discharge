@@ -593,6 +593,18 @@ protected:
   */
   bool m_new_io;
 
+  // Output parameters that go into checkpoint files
+  Vector<Real> m_time_history;        // Simulation time
+  Vector<Real> m_voltage_history;     // Applied voltage
+  Vector<Real> m_dt_history;          // Time steps
+  Vector<Real> m_exec_history;        // Execution time per time step
+  Vector<Real> m_charge_history;      // Total charge in domain
+  Vector<Real> m_ohmic_induced_I;     // Ohmic induced current
+  Vector<Real> m_capacitive_induced;  // Capacitively induced current
+  Vector<Real> m_domain_I;            // Current through domain faces
+  Vector<Real> m_electrode_I;         // Current through electrode EBs
+
+
   /*!
     @brief Allocate internals
   */
@@ -715,9 +727,9 @@ protected:
   virtual void new_read_checkpoint_file(const std::string& a_restart_file);
 
   /*!
-    @brief Read vector data
+    @brief Read vector data up to and including a_step
   */
-  virtual void read_vector_data(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_step);
+  virtual void read_vector_data(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_elements);
 
   /*!
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
@@ -813,7 +825,7 @@ protected:
   /*!
     @brief Write vector data to a HDF5Header. This writes up to a_step
   */
-  virtual void write_vector_data(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_step);
+  virtual void write_vector_data(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_elem);
 
   /*!
     @brief Write the geometry only

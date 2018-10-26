@@ -447,8 +447,6 @@ void time_stepper::compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
     pout() << "time_stepper::compute_gradients_at_eb" << endl;
   }
 
-  MayDay::Abort("time_stepper::compute_gradients_at_eb - shouldn't happen");
-
   CH_assert(a_grad.size() == a_phi.size());
 
   EBAMRIVData   eb_gradient;
@@ -480,8 +478,6 @@ void time_stepper::compute_gradients_at_domain_faces(Vector<EBAMRIFData*>&      
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_gradients_at_eb" << endl;
   }
-
-  MayDay::Abort("time_stepper::compute_gradients_at_domain_faces - shouldn't happen");
 
   CH_assert(a_grad.size() == a_phi.size());
 
