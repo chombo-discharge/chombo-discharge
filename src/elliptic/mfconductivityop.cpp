@@ -790,7 +790,13 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 	    }
 	  }
 
+#if verb
+	  pout() << "mfconducitivyop::relax - applying operator gas" << endl;
+#endif
 	  m_ebops[0]->applyOp(*m_alias[2], *m_alias[0], NULL, true, true, false);
+#if verb
+	  pout() << "mfconducitivyop::relax - applying operator solid" << endl;
+#endif
 	  m_ebops[1]->applyOp(*m_alias[5], *m_alias[3], NULL, true, true, false);
 
 
@@ -818,6 +824,10 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
       }
 #endif
   }
+
+#if verb
+  pout() << "mfconductivityop::relax - done"<< endl;
+#endif
 }
 
 void mfconductivityop::levelJacobi(LevelData<MFCellFAB>&       a_phi,

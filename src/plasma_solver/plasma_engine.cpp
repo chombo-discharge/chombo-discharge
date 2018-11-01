@@ -1550,7 +1550,6 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     pout() << "plasma_engine::run -- ending run  " << endl;
     pout() << "==================================" << endl;
   }
-
 }
 
 void plasma_engine::setup_and_run(){
@@ -2041,7 +2040,9 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     }
 
     // Compute the capacitance
-    m_capacitance = poisson->compute_capacitance();
+    if(m_new_io){
+      m_capacitance = poisson->compute_capacitance();
+    }
   }
 
   if(!m_celltagger.isNull()){

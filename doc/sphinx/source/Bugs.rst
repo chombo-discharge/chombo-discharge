@@ -16,3 +16,12 @@ Below, we present a list of some currently known bugs, missing features, or perf
    * In PlasmaC, the lower levels of multigrid are created by coarsening of the coarsest AMR level. How deep you can coarsen generally depends on your coarse-level decomposition (i.e. trough ``amr.max_box_size`` and ``amr.coarsest_domain``). For example, a box size of 16 on the coarsest level can be coarsened 4 times to a box size of 1. This implies that a base domain of :math:`128^3` cells can be coarsened to an :math:`8^3` domain. Likewise, if you had a box size of :math:`32`, you could coarsen down to :math:`4^3`. Typically, the performance of geometric multigrid is better the further you can coarsen.
   
    * We do not support arbitrary grid configurations. For robust performance, you should refine all the embedded boundaries down to the finest level. This might not always be an option, and you might see degraded performance for the multigrid solvers when you have EBCF crossings. 
+
+... Still, the Poisson solver doesn't converge....
+   With dielectrics, there are current limitations to the geometrical complexity. If you see the error message
+
+   .. code-block:: bash
+		
+      jump_bc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge !!!
+
+   then it is a sign that something has gone wrong. We know about this problem: It is due to the fact that a stencil for evaluating the normal derivative on one of the sides of the multifluid boundary was not found, and our Dirichlet-ish method of describing the boundary does not work. We are working on a solution to this problem. 

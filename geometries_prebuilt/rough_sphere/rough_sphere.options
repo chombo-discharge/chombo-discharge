@@ -1,0 +1,12 @@
+# ====================================================================================================
+# ROUGH_SPHERE CLASS OPTIONS
+# ====================================================================================================
+rough_sphere.eps0              = 1             # Permittivity
+rough_sphere.sphere_radius     = 1             # Sphere radius
+rough_sphere.sphere_center     = 0. 0. 0.      # Sphere center
+rough_sphere.live              = true          # At live voltage
+rough_sphere.noise_amplitude   = 0.1           # Noise amplitude
+rough_sphere.noise_frequency   = 10. 10. 10.   # Noise frequency
+rough_sphere.noise_persistence = 0.5           # Noise persistence
+rough_sphere.noise_octaves     = 1             # Noise octaves
+rough_sphere.noise_reseed      = false         # Reseed noise

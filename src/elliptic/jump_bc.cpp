@@ -10,7 +10,7 @@
 #include <EBArith.H>
 
 bool jump_bc::s_quadrant_based = true;
-int  jump_bc::s_lsq_radius     = 2;
+int  jump_bc::s_lsq_radius     = 1;
 
 jump_bc::jump_bc(){
   CH_TIME("jump_bc::jump_bc(weak)");
@@ -199,6 +199,25 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 					       m_domain,
 					       0,
 					       s_lsq_radius);
+  }
+
+  if(a_stencil.size() == 0){
+    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
+
+    // Get an approximation for the cell-centered gradient
+    a_stencil.clear();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      VoFStencil sten; 
+      EBArith::getFirstDerivStencilWidthOne(sten, a_vof, a_ebisbox, dir, m_dx, (IntVectSet*) &a_cfivs, 0);
+
+      if(sten.size() > 0){
+	sten *= normal[dir];
+	a_stencil += sten;
+      }
+    }
+
+
+    a_weight = 0.0;
   }
 }
 
