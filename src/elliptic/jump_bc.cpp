@@ -9,6 +9,8 @@
 
 #include <EBArith.H>
 
+#define VOFIT_PREBUILT 1
+
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
 
@@ -90,6 +92,8 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_stencils.define(m_grids);
   m_inhomo.define(m_grids);
   m_homog.define(m_grids);
+  m_vofit_gas.define(m_grids);
+  m_vofit_sol.define(m_grids);
 
   int num = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
@@ -109,10 +113,30 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
     m_ivs[dit()] = bco.get_ivs();
   }
 
+  this->define_vofiter();
   this->set_bco(a_bco);
   this->build_stencils();
 
   m_defined = true;
+}
+
+void jump_bc::define_vofiter(){
+  CH_TIME("jump_bc::define_vofiter");
+
+  const int phase1 = 0;
+  const int phase2 = 1;
+  
+  for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
+    VoFIterator& vofit_g = m_vofit_gas[dit()];
+    VoFIterator& vofit_s = m_vofit_sol[dit()];
+
+    const IntVectSet& ivs = m_bco[dit()].get_ivs();
+    const EBGraph& graph1 = m_bco[dit()].get_ivfab(phase1).getEBGraph();
+    const EBGraph& graph2 = m_bco[dit()].get_ivfab(phase2).getEBGraph();
+
+    vofit_g.define(ivs, graph1);
+    vofit_s.define(ivs, graph2);
+  }
 }
 
 void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
@@ -236,7 +260,8 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		   m_bco[dit()],
 		   m_weights[dit()],
 		   m_stencils[dit()],
-		   a_homogeneous);
+		   a_homogeneous,
+		   dit());
   }
 }
 
@@ -257,7 +282,8 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		   m_bco[dit()],
 		   m_weights[dit()],
 		   m_stencils[dit()],
-		   a_homogeneous);
+		   a_homogeneous,
+		   dit());
   }
 }
 
@@ -269,7 +295,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const MFInterfaceFAB<Real>&       a_bco,
 		       const MFInterfaceFAB<Real>&       a_weights,
 		       const MFInterfaceFAB<VoFStencil>& a_stencils,
-		       const bool                        a_homogeneous){
+		       const bool                        a_homogeneous,
+		       const DataIndex&                  a_dit){
   CH_TIME("jump_bc::match_bc(2)");
 
   const int comp   = 0;
@@ -301,6 +328,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   inhomo2.setVal(0.0);
   
   // Set phibc = a_jump
+  const Real t0 = MPI_Wtime();
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
@@ -308,8 +336,16 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     homog2(vof, comp)  = a_jump(vof, comp);
   }
 
+
   // First phase loop. Add first stencil stuff
+  const Real t1 = MPI_Wtime();
+#if VOFIT_PREBUILT
+  {
+  VoFIterator& vofit = m_vofit_gas[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
+#else
   for (VoFIterator vofit(ivs, graph1); vofit.ok(); ++vofit){
+#endif
     const VolIndex& vof = vofit();
 
     const VoFStencil& sten = sten1(vof, comp);
@@ -320,9 +356,19 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       inhomo2(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
     }
   }
+#if VOFIT_PREBUILT
+  }
+#endif
   
   // Second phase loop. Add second stencil stuff
+  const Real t2 = MPI_Wtime();
+#if VOFIT_PREBUILT
+  {
+  VoFIterator& vofit = m_vofit_sol[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
+#else
   for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
+#endif
     const VolIndex& vof = vofit();
     
     const VoFStencil& sten = sten2(vof, comp);
@@ -333,8 +379,12 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
       inhomo1(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
     }
   }
+#if VOFIT_PREBUILT
+  }
+#endif
   
   // Divide by weights
+  const Real t3 = MPI_Wtime();
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
@@ -346,6 +396,15 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     homog1(vof, comp)  *= factor;
     homog2(vof, comp)  *= factor;
   }
+
+  const Real t4 = MPI_Wtime();
+
+#if 0
+  pout() << "vofiter 1 = " << 100.*(t1-t0)/(t4-t0) << endl;
+  pout() << "vofiter 2 = " << 100.*(t2-t1)/(t4-t0) << endl;
+  pout() << "vofiter 3 = " << 100.*(t3-t2)/(t4-t0) << endl;
+  pout() << "vofiter 4 = " << 100.*(t4-t3)/(t4-t0) << endl;
+#endif
 }
 
 void jump_bc::compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&       a_dphidn,

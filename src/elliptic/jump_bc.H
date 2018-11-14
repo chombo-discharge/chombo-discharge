@@ -75,7 +75,6 @@ public:
 			const LevelData<MFCellFAB>&  a_phi,
 			const bool                   a_homogeneous);
 
-
   /*!
     @brief Compute dphidn for all phases
   */
@@ -203,6 +202,26 @@ protected:
   LayoutData<MFInterfaceFAB<VoFStencil> > m_stencils;
 
   /*!
+    @brief VoFIterator for gas-side cells
+  */
+  LayoutData<VoFIterator> m_vofit_gas;
+
+  /*!
+    @brief VoFIterator for solid-side cells
+  */
+  LayoutData<VoFIterator> m_vofit_sol;
+
+  /*!
+    @brief VoFIterator for bcs
+  */
+  LayoutData<VoFIterator> m_vofit_bc;
+
+  /*!
+    @brief Define VoFIterators
+  */
+  virtual void define_vofiter();
+
+  /*!
     @brief Set b-coefficient
   */
   virtual void set_bco(const LevelData<MFBaseIVFAB>& a_bco);
@@ -241,7 +260,8 @@ protected:
 			const MFInterfaceFAB<Real>&       a_bco,
 			const MFInterfaceFAB<Real>&       a_weights,
 			const MFInterfaceFAB<VoFStencil>& a_stencils,
-			const bool                        a_homogeneous);
+			const bool                        a_homogeneous,
+			const DataIndex&                  a_dit);
 };
 
 #endif

@@ -135,16 +135,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     ConductivityBaseDomainBC* bc = (ConductivityBaseDomainBC*) a_dombc->create(a_domain, ebisl, a_dx*RealVect::Unit);
     RefCountedPtr<ConductivityBaseDomainBC> dbc(bc);
 
-    // EB BC
-    m_ebbc[iphase] = RefCountedPtr<mfdirichletconductivityebbc> (new mfdirichletconductivityebbc(a_domain,
-												 ebisl,
-												 a_dx*RealVect::Unit,
-												 &a_ghost_phi,
-												 &a_ghost_rhs,
-												 iphase)),
-    m_ebbc[iphase]->set_jump_object(m_jumpbc);
-    m_ebbc[iphase]->setOrder(a_order_ebbc);
-    m_ebbc[iphase]->define_ivs(a_mflg);
+
 
 
     // Create storage for data-based dirichlet boundary conditions
@@ -156,6 +147,17 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     BaseIVFactory<Real> ivfact(ebisl, ivs);
     m_dirival[iphase] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
       (new LevelData<BaseIVFAB<Real> > (eblg.getDBL(), 1, IntVect::Zero, ivfact));
+
+    // EB BC
+    m_ebbc[iphase] = RefCountedPtr<mfdirichletconductivityebbc> (new mfdirichletconductivityebbc(a_domain,
+												 ebisl,
+												 a_dx*RealVect::Unit,
+												 &a_ghost_phi,
+												 &a_ghost_rhs,
+												 iphase));
+    m_ebbc[iphase]->set_jump_object(m_jumpbc);
+    m_ebbc[iphase]->setOrder(a_order_ebbc);
+    m_ebbc[iphase]->define_ivs(a_mflg);
 
     EBLevelDataOps::setVal(*m_dirival[iphase], 0.0);
     m_ebbc[iphase]->setData(m_dirival[iphase]);
@@ -240,6 +242,7 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
   this->set_bc_from_levelset();
   this->set_bc_from_matching(a_phi, a_homogeneous);
 
+
 #if verb
   pout() << "mfconductivityop::update_bc - done" << endl;
 #endif
@@ -255,6 +258,7 @@ void mfconductivityop::set_bc_from_levelset(){
   const int comp = 0;
   
   for (int iphase = 0; iphase < m_phases; iphase++){
+    //  for (int iphase = 0; iphase <= 0; iphase++){
     LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
 
     for (DataIterator dit = val.dataIterator(); dit.ok(); ++dit){
@@ -301,6 +305,7 @@ void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, c
 
   if(m_multifluid){
     for (int iphase = 0; iphase <= 1; iphase++){
+    //    for (int iphase = 0; iphase <= 0; iphase++){
       m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous); 
     }
   }
@@ -774,7 +779,9 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 
     
     for (int i = 0; i < a_iterations; i++){
+      const Real t0 = MPI_Wtime();
       this->update_bc(a_e, homogeneous);
+      const Real t1 = MPI_Wtime();
 
       for (int icolor = 0; icolor < m_colors.size(); icolor++){
 
@@ -821,6 +828,8 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 	    m_alias[3]->exchange();
 	  }
 	}
+      const Real t2 = MPI_Wtime();
+      //      pout() << "update bc time = " << 100.*(t1 - t0)/(t2-t0) << "\t relax time = " << 100.*(t2 - t1)/(t2-t0) << endl;
       }
 #endif
   }
