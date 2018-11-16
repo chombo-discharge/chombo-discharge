@@ -26,7 +26,14 @@ mfconductivityop::mfconductivityop(){
 
 mfconductivityop::~mfconductivityop(){
   for (int i = 0; i < m_alias.size(); i++){
+    delete m_alias[i];
     m_alias[i] = NULL;
+  }
+
+  //  delete m_jumpbc;
+
+  for (int iphase= 0; iphase < m_phases; iphase++){
+    //    delete m_ebbc[iphase];
   }
 }
 

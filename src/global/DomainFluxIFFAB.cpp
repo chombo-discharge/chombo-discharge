@@ -17,7 +17,10 @@ DomainFluxIFFAB::DomainFluxIFFAB(const ProblemDomain& a_domain, const EBISBox& a
 }
 
 DomainFluxIFFAB::~DomainFluxIFFAB(){
-
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(m_flux_lo[dir] != NULL) delete m_flux_lo[dir];
+    if(m_flux_hi[dir] != NULL) delete m_flux_hi[dir];
+  }
 }
 
 int DomainFluxIFFAB::size(const Box& R, const Interval& comps) const{

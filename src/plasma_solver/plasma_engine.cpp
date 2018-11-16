@@ -100,6 +100,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 
 plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
+  delete &(*m_timestepper);
 }
 
 void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a_cur_var){
@@ -1545,6 +1546,8 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
     }
   }
 
+  m_timestepper->deallocate_internals();
+
   if(m_verbosity > 0){
     pout() << "==================================" << endl;
     pout() << "plasma_engine::run -- ending run  " << endl;
@@ -1957,7 +1960,6 @@ void plasma_engine::setup_geometry_only(){
   }
 
   this->get_geom_tags();       // Get geometric tags.
-  
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   
   Vector<IntVectSet> tags = m_geom_tags;

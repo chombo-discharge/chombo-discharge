@@ -32,6 +32,8 @@ multirate_rkSSP::multirate_rkSSP(){
   m_adaptive_dt  = true;
   m_multirate    = true;
   m_consistent   = true;
+  m_local_extrap = true;
+  m_stepdouble   = false;
   m_have_dtf     = false;
 
   // Basically only for debugging
@@ -63,6 +65,18 @@ multirate_rkSSP::multirate_rkSSP(){
       pp.get("compute_S", str);
       if(str == "false"){
 	m_compute_S = false;
+      }
+    }
+    if(pp.contains("local_extrap")){
+      pp.get("local_extrap", str);
+      if(str == "false"){
+	m_local_extrap = false;
+      }
+    }
+    if(pp.contains("stepdouble")){
+      pp.get("stepdouble", str);
+      if(str == "true"){
+	m_stepdouble = true;
       }
     }
     if(pp.contains("adaptive_dt")){
@@ -152,7 +166,7 @@ multirate_rkSSP::multirate_rkSSP(){
 }
 
 multirate_rkSSP::~multirate_rkSSP(){
-
+  deallocate_internals();
 }
 
 RefCountedPtr<cdr_storage>& multirate_rkSSP::get_cdr_storage(const cdr_iterator& a_solverit){
@@ -186,11 +200,43 @@ Real multirate_rkSSP::advance(const Real a_dt){
   if(m_verbosity > 2){
     pout() << "multirate_rkSSP::advance" << endl;
   }
+
+  this->cache_solutions(); // Cache old solutions. We can safely manipulate directly into solver states.
+  
+  Real dt = multirate_rkSSP::advance_single(a_dt);
+  if(m_stepdouble){
+    this->cache_bigstep();     // Take the single step advance and store it
+    this->uncache_solutions(); // Restore solutions to the way they were before ::advance_single
+
+    // When we came in, we had source terms and everything, but the solvers have overwritten that so we need
+    // to recompute all that stuff... :(
+    for (int i = 0; i <= 1; i++){
+      this->compute_E_into_scratch(); 
+      this->compute_cdr_sources(m_time);
+      this->compute_cdr_velo(m_time);
+      multirate_rkSSP::advance_single(0.5*a_dt);
+    }
+
+    this->compute_bigstep_errors(); // Compute errors
+    if(!m_local_extrap){ // If we don't use local extrapolation, solutions are equal to the bigstep solution
+      this->uncache_bigstep();
+    }
+  }
+
+  return dt;
+  
+}
+
+Real multirate_rkSSP::advance_single(const Real a_dt){
+  CH_TIME("multirate_rkSSP::advance_single");
+  if(m_verbosity > 2){
+    pout() << "multirate_rkSSP::advance_single" << endl;
+  }
   
   // When we enter this routine, we assume that velocities, source terms, and diffusion coefficients have already
   // been computed. 
   const Real t0 = MPI_Wtime();
-  this->cache_solutions(); // Cache old solutions. We can safely manipulate directly into solver states.
+
 
   int advective_substeps = 0; // Number of advective_substeps
   int diffusive_substeps = 0; // Number of advective_substeps
@@ -200,7 +246,7 @@ Real multirate_rkSSP::advance(const Real a_dt){
   
   // Advection and source term advancements
   if(m_do_advec_src){
-    if(m_adaptive_dt){
+    if(m_adaptive_dt){ // Adaptive time stepping scheme
       if(!m_have_dtf){
 	// Estimate dtf by substepping. This is probably a bad time step but it will be adjusted
 	advective_substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
@@ -213,7 +259,7 @@ Real multirate_rkSSP::advance(const Real a_dt){
       advective_substeps = 0;
       this->advance_multirate_adaptive(advective_substeps, m_dt_advec, m_time, a_dt);
     }
-    else{
+    else{ // Non-adaptive time-stepping scheme
       advective_substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
       cfl        = a_dt/(advective_substeps*m_dt_cfl);
       m_dt_advec = cfl*m_dt_cfl;
@@ -452,8 +498,6 @@ void multirate_rkSSP::advance_multirate_fixed(const int a_substeps, const Real a
     else{
       MayDay::Abort("multirate_rkSSP::advance_multirate_fixed - unsupported order requested");
     }
-
-
 
     // Update for next iterate. This should generally be done because the solution might move many grid cells.
     if(!last_step){
@@ -980,6 +1024,67 @@ void multirate_rkSSP::compute_errors(){
   m_max_error = this->get_max_error();
 }
 
+void multirate_rkSSP::compute_bigstep_errors(){
+  CH_TIME("time_stepper::compute_bigstep_errors");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_bigstep_errors" << endl;
+  }
+
+  const int comp = 0;
+  Real max, min, emax, emin;
+
+  // CDR errors
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    const int which = solver_it.get_solver();
+    
+    const EBAMRCellData& phi     = solver->get_state();
+    const EBAMRCellData& bigstep = storage->get_bigstep();
+    EBAMRCellData& err = storage->get_error();
+
+    // Make err = phi - bigstep
+    data_ops::copy(err, phi);
+    data_ops::incr(err, bigstep, -1.0);
+    m_amr->average_down(err, m_cdr->get_phase());
+
+
+    // const int comp = 0;
+
+    // data_ops::get_max_min(max, min, phi, 0);
+    // data_ops::get_max_min_norm(emax, emin, err);
+    // m_cdr_error[which] = emax/max;;
+    Real Lerr, Lphi;
+    data_ops::norm(Lerr, *err[0], m_amr->get_domains()[0], m_error_norm);
+    data_ops::norm(Lphi, *phi[0], m_amr->get_domains()[0], m_error_norm);
+
+    m_cdr_error[which] = Lerr/Lphi;
+  }
+
+  // Sigma error
+  EBAMRIVData& phi     = m_sigma->get_state();
+  EBAMRIVData& bigstep = m_sigma_scratch->get_bigstep();
+  EBAMRIVData& err     = m_sigma_scratch->get_error();
+
+  // Make err = phi - bigstep
+  data_ops::copy(err, phi);
+  data_ops::incr(err, bigstep, -1.0);
+  m_amr->average_down(err, m_cdr->get_phase());
+  
+  data_ops::get_max_min_norm(max, min, phi);
+  data_ops::get_max_min_norm(emax, emin, err);
+  m_sigma_error = emax/max;
+
+  // Maximum error
+  m_max_error = this->get_max_error();
+
+#if 1 // Debug
+  if(procID() == 0){
+    std::cout << m_cdr_error << std::endl;
+  }
+#endif
+}
+
 void multirate_rkSSP::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   CH_TIME("time_stepper::compute_dt");
   if(m_verbosity > 5){
@@ -1075,15 +1180,20 @@ void multirate_rkSSP::deallocate_internals(){
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
   }
 
   m_poisson_scratch->deallocate_storage();
+  m_poisson_scratch = RefCountedPtr<poisson_storage>(0);
+  
   m_sigma_scratch->deallocate_storage();
+  m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
 }
 
 void multirate_rkSSP::cache_solutions(){
@@ -1120,6 +1230,117 @@ void multirate_rkSSP::cache_solutions(){
   { // Cache sigma
     EBAMRIVData& cache = m_sigma_scratch->get_cache();
     data_ops::copy(cache, m_sigma->get_state());
+  }
+}
+
+void multirate_rkSSP::uncache_solutions(){
+  CH_TIME("multirate_rkSSP::uncache_solutions");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::uncache_solutions" << endl;
+  }
+  
+  // Uncache cdr solutions
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    const EBAMRCellData& cache = storage->get_cache();
+
+    data_ops::copy(solver->get_state(), cache);
+  }
+
+  {// Uncache Poisson solution
+    const MFAMRCellData& cache = m_poisson_scratch->get_cache();
+    data_ops::copy(m_poisson->get_state(), cache);
+  }
+
+  // Uncache RTE solutions
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<rte_solver>& solver = solver_it();
+
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    const EBAMRCellData& cache = storage->get_cache();
+
+    data_ops::copy(solver->get_state(), cache);
+  }
+
+  { // Uncache sigma
+    const EBAMRIVData& cache = m_sigma_scratch->get_cache();
+    data_ops::copy(m_sigma->get_state(), cache);
+  }
+}
+
+void multirate_rkSSP::cache_bigstep(){
+  CH_TIME("multirate_rkSSP::cache_bigstep");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::cache_bigstep" << endl;
+  }
+  
+  // Cache cdr solutions
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    EBAMRCellData& bigstep = storage->get_bigstep();
+
+    data_ops::copy(bigstep, solver->get_state());
+  }
+
+  {// Cache Poisson solution
+    MFAMRCellData& bigstep = m_poisson_scratch->get_bigstep();
+    data_ops::copy(bigstep, m_poisson->get_state());
+  }
+
+  // Cache RTE solutions
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<rte_solver>& solver = solver_it();
+
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    EBAMRCellData& bigstep = storage->get_bigstep();
+
+    data_ops::copy(bigstep, solver->get_state());
+  }
+
+  { // Cache sigma
+    EBAMRIVData& bigstep = m_sigma_scratch->get_bigstep();
+    data_ops::copy(bigstep, m_sigma->get_state());
+  }
+}
+
+void multirate_rkSSP::uncache_bigstep(){
+  CH_TIME("multirate_rkSSP::uncache_bigstep");
+  if(m_verbosity > 5){
+    pout() << "multirate_rkSSP::uncache_bigstep" << endl;
+  }
+  
+  // Cache cdr solutions
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    const EBAMRCellData& bigstep = storage->get_bigstep();
+
+    data_ops::copy(solver->get_state(), bigstep);
+  }
+
+  {// Cache Poisson solution
+    const MFAMRCellData& bigstep = m_poisson_scratch->get_bigstep();
+    data_ops::copy(m_poisson->get_state(), bigstep);
+  }
+
+  // Cache RTE solutions
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<rte_solver>& solver = solver_it();
+
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    const EBAMRCellData& bigstep = storage->get_bigstep();
+
+    data_ops::copy(solver->get_state(), bigstep);
+  }
+
+  { // Cache sigma
+    const EBAMRIVData& bigstep = m_sigma_scratch->get_bigstep();
+    data_ops::copy(m_sigma->get_state(), bigstep);
   }
 }
 

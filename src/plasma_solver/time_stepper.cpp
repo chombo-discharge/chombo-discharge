@@ -31,7 +31,7 @@ time_stepper::time_stepper(){
 }
 
 time_stepper::~time_stepper(){
-  
+  deallocate_internals();
 }
 
 int time_stepper::query_ghost(){
@@ -705,6 +705,12 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
   }
 #endif
+
+  // Delete extra storage - didn't use smart pointers for this...
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    delete grad_cdr[idx];
+  }
 }
 
 void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,

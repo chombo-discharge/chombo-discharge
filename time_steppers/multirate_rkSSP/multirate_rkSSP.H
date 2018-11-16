@@ -34,6 +34,7 @@ public:
   ~multirate_rkSSP();
   
   Real advance(const Real a_dt);
+  Real advance_single(const Real a_dt);
   
   void regrid_internals();
   void deallocate_internals();
@@ -71,6 +72,8 @@ protected:
   bool m_have_dtf;
   bool m_multirate;
   bool m_consistent;
+  bool m_stepdouble;
+  bool m_local_extrap;
 
 
   time_code::which_code m_timecode;
@@ -90,7 +93,11 @@ protected:
   void allocate_rte_storage();
   void allocate_sigma_storage();
   void cache_solutions();
+  void uncache_solutions();
+  void cache_bigstep();
+  void uncache_bigstep();
   void compute_cdr_gradients();
+  void compute_bigstep_errors(); 
   void compute_errors();
   void compute_E_into_scratch();
   void compute_cdr_eb_states();

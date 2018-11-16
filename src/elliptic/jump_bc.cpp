@@ -226,7 +226,7 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
   }
 
   if(a_stencil.size() == 0){
-    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
+    //    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
 
     // Get an approximation for the cell-centered gradient
     a_stencil.clear();

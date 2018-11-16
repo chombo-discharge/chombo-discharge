@@ -48,6 +48,7 @@ amr_mesh::amr_mesh(){
   this->set_irreg_sten_type(stencil_type::linear);
   this->set_ghost_interpolation(ghost_interpolation::pwl);
 
+  m_finest_level = 0;
   m_has_grids = false;
 }
 

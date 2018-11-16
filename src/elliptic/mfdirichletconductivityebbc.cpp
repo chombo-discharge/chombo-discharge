@@ -225,7 +225,7 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
   }
 
   if(a_stencil.size() == 0){
-    MayDay::Warning("mfdirichletconductivityebbc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
+    //    MayDay::Warning("mfdirichletconductivityebbc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
 
     // Get an approximation for the cell-centered gradient
     a_stencil.clear();
