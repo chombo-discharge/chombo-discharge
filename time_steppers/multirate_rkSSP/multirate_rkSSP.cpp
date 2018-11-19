@@ -35,6 +35,7 @@ multirate_rkSSP::multirate_rkSSP(){
   m_local_extrap = true;
   m_stepdouble   = false;
   m_have_dtf     = false;
+  m_write_errf   = false;
 
   // Basically only for debugging
   m_do_advec_src = true;
@@ -77,6 +78,12 @@ multirate_rkSSP::multirate_rkSSP(){
       pp.get("stepdouble", str);
       if(str == "true"){
 	m_stepdouble = true;
+      }
+    }
+    if(pp.contains("write_error_file")){
+      pp.get("write_error_file", str);
+      if(str == "true"){
+	m_write_errf = true;
       }
     }
     if(pp.contains("adaptive_dt")){
@@ -166,7 +173,7 @@ multirate_rkSSP::multirate_rkSSP(){
 }
 
 multirate_rkSSP::~multirate_rkSSP(){
-  deallocate_internals();
+  //  deallocate_internals();
 }
 
 RefCountedPtr<cdr_storage>& multirate_rkSSP::get_cdr_storage(const cdr_iterator& a_solverit){
@@ -220,6 +227,10 @@ Real multirate_rkSSP::advance(const Real a_dt){
     this->compute_bigstep_errors(); // Compute errors
     if(!m_local_extrap){ // If we don't use local extrapolation, solutions are equal to the bigstep solution
       this->uncache_bigstep();
+    }
+
+    if(m_write_errf){
+      this->write_errf();
     }
   }
 
@@ -1077,12 +1088,6 @@ void multirate_rkSSP::compute_bigstep_errors(){
 
   // Maximum error
   m_max_error = this->get_max_error();
-
-#if 1 // Debug
-  if(procID() == 0){
-    std::cout << m_cdr_error << std::endl;
-  }
-#endif
 }
 
 void multirate_rkSSP::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
@@ -1707,7 +1712,7 @@ void multirate_rkSSP::write_diagnostics(const int  a_substeps,
 
     // Write output
     std::ofstream f;
-    f.open("multirate_rkSSP_diagnostics.txt", std::ios_base::app);
+    f.open(fname, std::ios_base::app);
     const int width = 12;
 
 
@@ -1747,6 +1752,46 @@ void multirate_rkSSP::write_diagnostics(const int  a_substeps,
       << std::left << std::setw(width) << compression  << "\t"      
       << std::left << std::setw(width) << endl;
     
+  }
+}
+
+void multirate_rkSSP::write_errf(){
+  if(procID() == 0 ){
+
+    const std::string fname("multirate_rkSSP_errf.txt");
+    
+    bool write_header;
+    { // Write header if we must
+      std::ifstream infile(fname);
+      write_header = infile.peek() == std::ifstream::traits_type::eof() ? true : false;
+    }
+
+    // Write output
+    std::ofstream f;
+    f.open(fname, std::ios_base::app);
+    const int width = 12;
+
+
+    if(write_header){
+      f << std::left << std::setw(width) << "# Step" << "\t"
+	<< std::left << std::setw(width) << "Time" << "\t"
+	<< std::left << std::setw(width) << "Time code" << "\t";
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const RefCountedPtr<cdr_solver>& solver = solver_it();
+	const std::string name = solver->get_name();
+	f << std::left << std::setw(width) << solver->get_name() << "\t";
+      }
+      f << endl;
+    }
+
+    f << std::left << std::setw(width) << m_step << "\t"
+      << std::left << std::setw(width) << m_time << "\t"            
+      << std::left << std::setw(width) << m_timecode << "\t";
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int num = solver_it.get_solver();
+      f << std::left << std::setw(width) << m_cdr_error[num] << "\t";
+    }
+    f << endl;
   }
 }
 

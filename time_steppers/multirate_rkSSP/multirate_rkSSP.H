@@ -62,6 +62,7 @@ protected:
 
   bool m_print_diagno;
   bool m_write_diagno;
+  bool m_write_errf;
   bool m_do_advec_src;  
   bool m_do_diffusion;  
   bool m_do_poisson;
@@ -122,6 +123,7 @@ protected:
 			 const Real a_rte_time,
 			 const Real a_misc_time,
 			 const Real a_total_time);
+  void write_errf();
   void store_solvers();
   void restore_solvers();
   

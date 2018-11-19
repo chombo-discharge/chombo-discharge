@@ -100,7 +100,6 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 
 plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
-  delete &(*m_timestepper);
 }
 
 void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a_cur_var){

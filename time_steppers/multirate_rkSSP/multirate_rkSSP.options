@@ -21,3 +21,4 @@ multirate_rkSSP.do_rte          = true   # Turn off code functionality. Only for
 
 multirate_rkSSP.write_diagnostics    = true  # Print diagnostics to file
 multirate_rkSSP.print_diagnostics    = true  # Print diagnostics to pout
+multirate_rkSSP.write_error_file     = true  # Write error file when using step doubling
