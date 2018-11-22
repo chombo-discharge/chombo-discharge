@@ -696,7 +696,8 @@ void poisson_solver::write_plot_file(){
 	      m_amr->get_ref_rat(),
 	      m_amr->get_finest_level() + 1,
 	      false,
-	      covered_values);
+	      covered_values,
+	      IntVect::Unit);
 }
 #endif
 

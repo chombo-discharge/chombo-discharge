@@ -83,6 +83,11 @@ public:
   virtual void setup_and_run();
 
   /*!
+    @brief Only set up and solve the Poisson equation
+  */
+  virtual void setup_poisson_only();
+
+  /*!
     @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
   */
   virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);

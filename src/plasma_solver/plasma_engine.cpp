@@ -1576,6 +1576,93 @@ void plasma_engine::setup_and_run(){
   }
 }
 
+void plasma_engine::setup_poisson_only(){
+  CH_TIME("plasma_engine::setup_poisson_only");
+  if(m_verbosity > 0){
+    pout() << "plasma_engine::setup_poisson_only" << endl;
+  }
+
+  this->sanity_check();                                    // Sanity check before doing anything expensive
+
+  if(m_ebis_memory_load_balance){
+    EBIndexSpace::s_useMemoryLoadBalance = true;
+  }
+  else {
+    EBIndexSpace::s_useMemoryLoadBalance = false;
+  }
+
+  if(!m_read_ebis){
+    m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
+				 m_amr->get_finest_domain(),
+				 m_amr->get_finest_dx(),
+				 m_amr->get_max_ebis_box_size());
+    if(m_write_ebis){
+      this->write_ebis();        // Write EBIndexSpace's for later use
+    }
+  }
+  else{
+    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
+    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
+
+    m_compgeom->build_geo_from_files(path_gas, path_sol);
+  }
+
+  this->get_geom_tags();       // Get geometric tags.
+  
+  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
+
+  this->allocate_internals();
+
+  if(m_verbosity > 0){
+    this->grid_report();
+  }
+
+  m_timestepper->set_amr(m_amr);
+  m_timestepper->set_plasma_kinetics(m_plaskin);
+  m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
+  m_timestepper->set_physical_domain(m_physdom);               // Physical domain
+  m_timestepper->set_potential(m_potential);                   // Potential
+  m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
+  m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
+  m_timestepper->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
+  m_timestepper->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
+#if CH_SPACEDIM==3
+  m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
+  m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
+#endif
+
+  m_timestepper->sanity_check();
+  m_timestepper->setup_poisson();
+
+  MFAMRCellData rhs;
+  EBAMRIVData sigma;
+
+  m_amr->allocate(rhs, 1);
+  m_amr->allocate(sigma, phase::gas, 1);
+
+  data_ops::set_value(rhs, 0.0);
+  data_ops::set_value(sigma, 0.0);
+    
+
+  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
+
+  poisson->solve(poisson->get_state(), rhs, sigma, true);
+
+
+  if(m_verbosity > 0){
+    this->grid_report();
+  }
+
+  poisson->write_plot_file();
+
+  if(m_verbosity > 0){
+    pout() << "=========================================" << endl;
+    pout() << "plasma_engine::setup_poisson_only -- done" << endl;
+    pout() << "=========================================" << endl;
+  }
+}
+
 void plasma_engine::set_verbosity(const int a_verbosity){
   CH_TIME("plasma_engine::set_verbosity");
 
