@@ -89,6 +89,9 @@ poisson_solver::poisson_solver(){
 	    else if(type == "neumann"){
 	      this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
 	    }
+	    else if(type == "robin"){
+	      this->set_robin_wall_bc(dir, Side::Lo, 0.0);
+	    }
 	    else {
 	      std::string error = "poisson_solver::poisson_solver - unknown bc requested for " + bc_string;
 	      MayDay::Abort(error.c_str());
@@ -108,6 +111,9 @@ poisson_solver::poisson_solver(){
 	    }
 	    else if(type == "neumann"){
 	      this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
+	    }
+	    else if(type == "robin"){
+	      this->set_robin_wall_bc(dir, Side::Hi, 0.0);
 	    }
 	    else {
 	      std::string error = "poisson_solver::poisson_solver - unknown bc requested for " + bc_string;
@@ -446,6 +452,17 @@ void poisson_solver::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side,
 
   const int idx = wall_bc::map_bc(a_dir, a_side);
   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::neumann));
+  m_wallbc[idx]->set_value(a_value);
+}
+
+void poisson_solver::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
+  CH_TIME("poisson_solver::set_robin_wall_bc");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_robin_wall_bc" << endl;
+  }
+
+  const int idx = wall_bc::map_bc(a_dir, a_side);
+  m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
   m_wallbc[idx]->set_value(a_value);
 }
 

@@ -105,6 +105,11 @@ public:
   */
   virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
+  /*!
+    @Set Set constant value Robin wall bc
+  */
+  virtual void set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+
 #ifdef CH_USE_HDF5
   /*!
     @brief Write plot file

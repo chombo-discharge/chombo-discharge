@@ -6,6 +6,7 @@
 */
 
 #include "conductivitydomainbc_wrapper.H"
+#include "robinconductivitydomainbc.H"
 
 conductivitydomainbc_wrapper::conductivitydomainbc_wrapper(){
   m_bc.resize(2*SpaceDim);
@@ -46,6 +47,13 @@ void conductivitydomainbc_wrapper::set_wallbc(const Vector<RefCountedPtr<wall_bc
     else if(a_wallbc[i]->which_bc() == wallbc::neumann){
       m_bc[idx] = RefCountedPtr<NeumannConductivityDomainBC> (new NeumannConductivityDomainBC());
       m_bc[idx]->setValue(a_wallbc[i]->get_value());
+    }
+    else if(a_wallbc[i]->which_bc() == wallbc::robin){
+      // For the Poisson equation, the appropriate coefficients are (1,-1,0.0) for the robin BC class (see robincondu*.H)
+      robinconductivitydomainbc* robinbc = new robinconductivitydomainbc();
+      robinbc->set_coefs(1.0, -1.0, 0.0);
+      m_bc[idx] = RefCountedPtr<robinconductivitydomainbc> (robinbc);
+      m_bc[idx]->setValue(0.0);
     }
     else{
       MayDay::Abort("conductivitydomainbc_wrapper::set_bc(wall) - unsupported bc type requested");

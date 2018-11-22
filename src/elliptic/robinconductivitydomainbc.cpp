@@ -11,7 +11,7 @@
 #include "PolyGeom.H"
 
 robinconductivitydomainbc::robinconductivitydomainbc(){
-  this->set_coefs(1., 1., 0);
+  this->set_coefs(1., -1.0, 0);
 }
 
 robinconductivitydomainbc::~robinconductivitydomainbc(){
