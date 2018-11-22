@@ -1,0 +1,18 @@
+# ====================================================================================================
+# COAXIAL_PACKED_BED CLASS OPTIONS
+# ====================================================================================================
+coaxial_packed_bed.turn_off_outer      = false     # Turn off (true) outer electrode
+coaxial_packed_bed.turn_off_dielectric = false     # Turn off (true) dielectric
+coaxial_packed_bed.turn_off_inner      = false     # Turn off (true) inner electrode
+coaxial_packed_bed.eps0                = 1         # Gas permittivity
+coaxial_packed_bed.eps1                = 4         # Dielectric permittivity
+
+coaxial_packed_bed.outer_center1       = 0.0 0.0 -10  # Outer electrode center
+coaxial_packed_bed.outer_center2       = 0.0 0.0  10  # Outer electrode center
+coaxial_packed_bed.outer_radius        = 0.9          # Outer electrode radius	
+coaxial_packed_bed.outer_live          = true         # Live (true) outer electrode
+
+coaxial_packed_bed.inner_center1       = 0.0 0.0 -10  # Inner electrode center
+coaxial_packed_bed.inner_center2       = 0.0 0.0  10  # Inner electrode center
+coaxial_packed_bed.inner_radius        = 0.3          # Inner electrode radius	
+coaxial_packed_bed.inner_live          = false        # Live (true) outer electrode	

@@ -31,7 +31,7 @@ Real cylinder_if::value(const RealVect& a_point) const{
   const RealVect cylAxis = cylTop/sqrt(PolyGeom::dot(cylTop,cylTop));
 
   // Translate cylinder center to origin and do all calculations for "positive half" of the cylinder
-  const RealVect newPoint = a_point - m_center1 - (m_center2-m_center1)*0.5;
+  const RealVect newPoint = a_point - m_center1 - 0.5*(m_center2-m_center1);
   const Real paraComp     = PolyGeom::dot(newPoint,cylAxis);
   const RealVect orthoVec = newPoint - paraComp*cylAxis;
   const Real orthoComp    = sqrt(PolyGeom::dot(orthoVec,orthoVec));
@@ -39,25 +39,24 @@ Real cylinder_if::value(const RealVect& a_point) const{
   const Real f = orthoComp - m_radius;
   const Real g = abs(paraComp)  - 0.5*m_length;
 
-  Real retval = -1;
+  Real retval = 0.0;
   if(f <= 0. && g <= 0.){      // Point lies within the cylinder. Either short end or wall is closest point. 
-    retval = f <= g ? f : g;
+    retval = abs(f) <= abs(g) ? f : g;
   }
-  else if(f <= 0. && g >= 0.){ // Point lies inside radius but outside length. Short end is the closest point
+  else if(f <= 0. && g > 0.){ // Point lies inside radius but outside length. Short end is the closest point
     retval = g;
   }
-  else if(f > 0. && g <= 0.){  // Point lies outside radius but inside length. Cylinder wall is the closest point. 
+  else if(f > 0. && g <= 0.){  // Point lies outside radius but inside length. Cylinder wall is the closest point.
     retval = f;
   }
   else if(f > 0. && g >  0.){  // Point lies outside both. The cylinder corner is the closest point.
     retval = sqrt(f*f + g*g);
   }
 
-  // Change sign if called for
   if(!m_inside){
     retval = -retval;
   }
-
+  
   return retval;
 }
 
