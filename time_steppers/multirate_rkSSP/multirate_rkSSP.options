@@ -9,7 +9,8 @@ multirate_rkSSP.safety          = 0.9    # Safety factor for adaptive step size 
 multirate_rkSSP.stepdouble      = true   # Evaluate total error by step doubling
 multirate_rkSSP.local_extrap    = true   # Use local extrapolation after step doubling
 multirate_rkSSP.use_multirate   = true   # Use multirate functionality
-multirate_rkSSP.consistent      = true   # Use consistent E-field computations (update in between RK stages)
+multirate_rkSSP.consistent_E    = true   # Use consistent E-field computations (update in between RK stages)
+multirate_rkSSP.consistent_rte  = true   # Use consistent RTE updates
 multirate_rkSSP.adaptive_dt     = true   # Compute error by using an embedded lower order scheme
 multirate_rkSSP.compute_v       = true   # Compute v in between substeps. If v   = v(E) only, set this to false. 
 multirate_rkSSP.compute_S       = true   # Compute S in between substeps.

@@ -72,7 +72,8 @@ protected:
   bool m_adaptive_dt;
   bool m_have_dtf;
   bool m_multirate;
-  bool m_consistent;
+  bool m_consistent_E;
+  bool m_consistent_rte;
   bool m_stepdouble;
   bool m_local_extrap;
 

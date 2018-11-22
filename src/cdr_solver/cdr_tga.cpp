@@ -444,85 +444,88 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
 
-  const Real t0 = MPI_Wtime();
+  if(m_mobile){
+
+    const Real t0 = MPI_Wtime();
   
-  const int comp       = 0;
-  const int ncomp      = 1;
-  const int redist_rad = m_amr->get_redist_rad();
+    const int comp       = 0;
+    const int ncomp      = 1;
+    const int redist_rad = m_amr->get_redist_rad();
 
-  EBAMRFluxData face_state;
-  EBAMRIVData   div_nc;
-  EBAMRIVData   mass_diff;
-  EBAMRCellData weights;
+    EBAMRFluxData face_state;
+    EBAMRIVData   div_nc;
+    EBAMRIVData   mass_diff;
+    EBAMRCellData weights;
 
-  m_amr->allocate(face_state, m_phase, ncomp);
-  m_amr->allocate(div_nc,     m_phase, ncomp);
-  m_amr->allocate(mass_diff,  m_phase, ncomp);
-  m_amr->allocate(weights,    m_phase, ncomp, 2*redist_rad);
+    m_amr->allocate(face_state, m_phase, ncomp);
+    m_amr->allocate(div_nc,     m_phase, ncomp);
+    m_amr->allocate(mass_diff,  m_phase, ncomp);
+    m_amr->allocate(weights,    m_phase, ncomp, 2*redist_rad);
 
-  data_ops::set_value(a_divF,     0.0); 
-  data_ops::set_value(face_state, 0.0);
-  data_ops::set_value(div_nc,     0.0);
-  data_ops::set_value(mass_diff,  0.0);
-  data_ops::set_value(weights,    0.0);
+    data_ops::set_value(a_divF,     0.0); 
+    data_ops::set_value(face_state, 0.0);
+    data_ops::set_value(div_nc,     0.0);
+    data_ops::set_value(mass_diff,  0.0);
+    data_ops::set_value(weights,    0.0);
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    a_state[lvl]->copyTo(*weights[lvl]);
-  }
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      a_state[lvl]->copyTo(*weights[lvl]);
+    }
 
-  const Real t1 = MPI_Wtime();
+    const Real t1 = MPI_Wtime();
 
-  // Compute the advective derivative
-  this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
-  const Real t10 = MPI_Wtime();
-  this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
-  const Real t11 = MPI_Wtime();
-  this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
-  const Real t12 = MPI_Wtime();
-  this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
-  const Real t13 = MPI_Wtime();
-  this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
-  const Real t14 = MPI_Wtime();
-  this->increment_flux_register(face_state, m_velo_face);           // Increment flux registers
-  const Real t15 = MPI_Wtime();
-  this->increment_redist(mass_diff);                                // Increment redistribution objects
-  const Real t16 = MPI_Wtime();
-  const Real t2 = MPI_Wtime();
+    // Compute the advective derivative
+    this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
+    const Real t10 = MPI_Wtime();
+    this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
+    const Real t11 = MPI_Wtime();
+    this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
+    const Real t12 = MPI_Wtime();
+    this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
+    const Real t13 = MPI_Wtime();
+    this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
+    const Real t14 = MPI_Wtime();
+    this->increment_flux_register(face_state, m_velo_face);           // Increment flux registers
+    const Real t15 = MPI_Wtime();
+    this->increment_redist(mass_diff);                                // Increment redistribution objects
+    const Real t16 = MPI_Wtime();
+    const Real t2 = MPI_Wtime();
 
-  // Mass weights.
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    data_ops::incr(*weights[lvl], *a_state[lvl], 1.0);
-  }
+    // Mass weights.
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      data_ops::incr(*weights[lvl], *a_state[lvl], 1.0);
+    }
 
-  const bool ebcf = m_amr->get_ebcf();
-  if(ebcf){ 
-    this->coarse_fine_increment(mass_diff);     // Increment the coarse-fine redistribution objects
-    this->increment_redist_flux();              // Increment flux registers with the redistribution stuff
-    this->coarse_fine_redistribution(a_divF);   // Redistribute
-    this->reflux(a_divF);
-  }
-  else{
-    this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
-    this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
-  }
+    const bool ebcf = m_amr->get_ebcf();
+    if(ebcf){ 
+      this->coarse_fine_increment(mass_diff);     // Increment the coarse-fine redistribution objects
+      this->increment_redist_flux();              // Increment flux registers with the redistribution stuff
+      this->coarse_fine_redistribution(a_divF);   // Redistribute
+      this->reflux(a_divF);
+    }
+    else{
+      this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
+      this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
+    }
 
-  const Real t3 = MPI_Wtime();
+    const Real t3 = MPI_Wtime();
 
 #if CDR_TGA_DEBUG_TIMER
-  const Real T = t3 - t0;
-  pout() << endl;
-  pout() << "cdr_tga::compute_divF breakdown" << endl;
-  pout() << "Allocations:      " << 100.*(t1 - t0)/T   << "%" << endl;
-  pout() << "Average to faces: " << 100.*(t10 - t1)/T  << "%" << endl;
-  pout() << "Advect to faces:  " << 100.*(t11 - t10)/T << "%" << endl;
-  pout() << "Cons. Div.:       " << 100.*(t12 - t11)/T << "%" << endl;
-  pout() << "NonCons. Div.:    " << 100.*(t13 - t12)/T << "%" << endl;
-  pout() << "Hybrid. Div.:     " << 100.*(t14 - t13)/T << "%" << endl;
-  pout() << "Flux reg:         " << 100.*(t15 - t14)/T << "%" << endl;
-  pout() << "Incr redist:      " << 100.*(t16 - t15)/T << "%" << endl;
-  pout() << "Reflux-redist:    " << 100.*(t3 - t2)/T   << "%" << endl;
-  pout() << "Total time:       " << T << endl;
+    const Real T = t3 - t0;
+    pout() << endl;
+    pout() << "cdr_tga::compute_divF breakdown" << endl;
+    pout() << "Allocations:      " << 100.*(t1 - t0)/T   << "%" << endl;
+    pout() << "Average to faces: " << 100.*(t10 - t1)/T  << "%" << endl;
+    pout() << "Advect to faces:  " << 100.*(t11 - t10)/T << "%" << endl;
+    pout() << "Cons. Div.:       " << 100.*(t12 - t11)/T << "%" << endl;
+    pout() << "NonCons. Div.:    " << 100.*(t13 - t12)/T << "%" << endl;
+    pout() << "Hybrid. Div.:     " << 100.*(t14 - t13)/T << "%" << endl;
+    pout() << "Flux reg:         " << 100.*(t15 - t14)/T << "%" << endl;
+    pout() << "Incr redist:      " << 100.*(t16 - t15)/T << "%" << endl;
+    pout() << "Reflux-redist:    " << 100.*(t3 - t2)/T   << "%" << endl;
+    pout() << "Total time:       " << T << endl;
 #endif
+  }
 }
 
 void cdr_tga::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){

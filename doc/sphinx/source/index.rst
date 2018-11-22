@@ -37,6 +37,7 @@ Table of contents
    RunningSimulations
    ImportantClasses
    Solvers
+   Performance
    FAQ
    Bugs
    Todo
