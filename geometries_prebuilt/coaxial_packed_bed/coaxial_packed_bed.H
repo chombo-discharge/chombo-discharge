@@ -11,20 +11,24 @@
 #include "computational_geometry.H"
 
 /*!
-  @brief This is a class that defines a coaxial cable geometry 
+  @brief This is a class that defines a coaxial cable geometry with packed bed spheres
 */
 class coaxial_packed_bed : public computational_geometry {
 public:
-
-  /*!
-    @brief Constructor. First sphere is the electrode. 
-  */
-  coaxial_packed_bed();
-
-  /*!
-    @brief Destructor
-  */
+  coaxial_packed_bed(); 
   ~coaxial_packed_bed();
+protected:
+  void reseed(); 
+  Real random();
+  void build_conductors();
+  void build_packed_bed();
+
+  Real m_rad_outer;
+  Real m_rad_inner;
+  Real m_rad_sphere;
+  Real m_min_dist;
+  int  m_num_spheres;
+  
 };
 
 #endif
