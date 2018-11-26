@@ -314,7 +314,7 @@ void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){
     pout() << "poisson_multifluid_gmg::set_bottom_solver" << endl;
   }
   
-  if(a_whichsolver == 0 || a_whichsolver == 1){
+  if(a_whichsolver == 0 || a_whichsolver == 1 || a_whichsolver == 2){
     m_bottomsolver = a_whichsolver;
 
     std::string str;
@@ -325,6 +325,9 @@ void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){
     }
     else if(str == "bicgstab"){
       m_bottomsolver = 1;
+    }
+    else if(str == "gmres"){
+      m_bottomsolver=2;
     }
   }
   else{
@@ -727,7 +730,7 @@ void poisson_multifluid_gmg::setup_solver(){
     m_mfsolver.setNumSmooths(m_numsmooth);
     botsolver = &m_mfsolver;
   }
-  else{
+  else if(m_bottomsolver==1){
     botsolver = &m_bicgstab;
 #if 1
     if(m_mfis->num_phases() == 2){ // BiCGStab doesn't work with multifluid (yet)
@@ -738,6 +741,9 @@ void poisson_multifluid_gmg::setup_solver(){
       }
     }
 #endif
+  }
+  else if(m_bottomsolver==2){
+    botsolver = &m_gmres;
   }
 
 

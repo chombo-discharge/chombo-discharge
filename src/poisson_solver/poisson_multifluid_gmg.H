@@ -251,6 +251,11 @@ protected:
   BiCGStabSolver<LevelData<MFCellFAB> > m_bicgstab;
 
   /*!
+    @brief GMRES solver
+  */
+  GMRESSolver<LevelData<MFCellFAB> > m_gmres;
+
+  /*!
     @brief Geometric multigrid solver
   */
   AMRMultiGrid<LevelData<EBCellFAB> > m_cond_solver;
