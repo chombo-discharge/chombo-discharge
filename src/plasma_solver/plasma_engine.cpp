@@ -737,43 +737,8 @@ void plasma_engine::get_geom_tags(){
 
   // Remove tags using the geocoarsener if we have it
   if(!m_geocoarsen.isNull()){
-    const Vector<real_box> coarsen_boxes = m_geocoarsen->get_coarsen_boxes();
-    const Vector<int>      coarsen_level = m_geocoarsen->get_coarsen_levels();
-
-
-    if(!(coarsen_boxes.size() == coarsen_level.size())){
-      if(m_verbosity > 2){
-	pout() << "plasma_engine::get_geom_tags - m_geocoarsen is not well defined. Skipping the coarsening step" << endl;
-      }
-    }
-    else{
-      if(coarsen_boxes.size() > 0){
-
-	const RealVect origin = m_physdom->get_prob_lo();
-	for (int lvl = 0; lvl < maxdepth; lvl++){
-	  const Real dx         = m_amr->get_dx()[lvl];
-	  const int num_coarsen = coarsen_boxes.size();
-
-	  const IntVectSet tmp = m_geom_tags[lvl];
-
-	  for (IVSIterator it(tmp); it.ok(); ++it){
-	    const IntVect iv   = it();
-	    const RealVect pos = origin + RealVect(iv)*dx;
-	    for (int ibox = 0; ibox < num_coarsen; ibox++){
-	      const RealVect lo = coarsen_boxes[ibox].get_lo();
-	      const RealVect hi = coarsen_boxes[ibox].get_hi();
-
-
-	      if(pos > lo && pos < hi && lvl >= coarsen_level[ibox]){
-		m_geom_tags[lvl] -= iv;
-	      }
-	    }
-	  }
-	}
-      }
-    }
+    m_geocoarsen->coarsen_tags(m_geom_tags, m_amr->get_dx(), m_physdom->get_prob_lo());
   }
-
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
   // for elliptic equations)

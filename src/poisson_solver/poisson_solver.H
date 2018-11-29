@@ -21,6 +21,8 @@ public:
 
   static Real potential_one(const Real a_time){return 1.0;}
 
+  static Real s_constant_one(const RealVect a_pos);
+
   /*!
     @brief Constructor
   */

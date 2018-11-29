@@ -18,6 +18,10 @@
 #include <MFAMRIO.H>
 #include <EBAMRIO.H>
 
+Real poisson_solver::s_constant_one(const RealVect a_pos){
+  return 1.0;
+}
+
 poisson_solver::poisson_solver(){
   this->set_verbosity(-1);
   
@@ -124,6 +128,16 @@ poisson_solver::poisson_solver(){
       }
     }
   }
+
+  // Set default distribution on domain edges(faces)
+  m_wall_func_x_lo = poisson_solver::s_constant_one;
+  m_wall_func_x_hi = poisson_solver::s_constant_one;
+  m_wall_func_y_lo = poisson_solver::s_constant_one;
+  m_wall_func_y_hi = poisson_solver::s_constant_one;
+#if CH_SPACEDIM==3
+  m_wall_func_z_lo = poisson_solver::s_constant_one;
+  m_wall_func_z_hi = poisson_solver::s_constant_one;
+#endif
 }
 
 poisson_solver::~poisson_solver(){

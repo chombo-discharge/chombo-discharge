@@ -59,6 +59,34 @@ geo_coarsener::geo_coarsener(){
 geo_coarsener::~geo_coarsener(){
 }
 
+void geo_coarsener::coarsen_tags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const {
+  CH_TIME("geo_coarsener::coarsen_tags");
+  if(!(m_coarsen_boxes.size() == m_coarsen_levels.size())){
+    pout() << "geo_coarsener::coarsen_tags - m_geocoarsen is not well defined. Skipping the coarsening step" << endl;
+  }
+  else{
+    if(m_coarsen_boxes.size() > 0){
+      for (int lvl = 0; lvl < a_tags.size(); lvl++){
+	const int num_coarsen = m_coarsen_boxes.size();
+
+	const IntVectSet tmp = a_tags[lvl];
+	for (IVSIterator it(tmp); it.ok(); ++it){
+	  const IntVect iv   = it();
+	  const RealVect pos = a_origin + RealVect(iv)*a_dx[lvl];
+	  for (int ibox = 0; ibox < num_coarsen; ibox++){
+	    const RealVect lo = m_coarsen_boxes[ibox].get_lo();
+	    const RealVect hi = m_coarsen_boxes[ibox].get_hi();
+
+	    if(pos > lo && pos < hi && lvl >= m_coarsen_levels[ibox]){
+	      a_tags[lvl] -= iv;
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
 Vector<real_box> geo_coarsener::get_coarsen_boxes(){
   return m_coarsen_boxes;
 }

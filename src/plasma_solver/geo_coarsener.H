@@ -11,6 +11,7 @@
 #include "real_box.H"
 
 #include <Vector.H>
+#include <IntVectSet.H>
 
 /*!
   @brief Utility class for removing geometrically tagged cells
@@ -28,6 +29,11 @@ public:
     @brief Destructor
   */
   virtual ~geo_coarsener();
+
+  /*!
+    @brief Coarsen tags
+  */
+  virtual void coarsen_tags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const;
 
   /*!
     @brief Get coarsening boxes

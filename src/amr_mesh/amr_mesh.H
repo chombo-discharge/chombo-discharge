@@ -366,7 +366,7 @@ public:
   /*!
     @brief Regrid function. Generate new grids. 
   */
-  virtual void regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap);
+  virtual void regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap=123456);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
@@ -442,6 +442,11 @@ public:
     @brief Get refinement ratios
   */
   virtual Vector<int>& get_ref_rat();
+
+  /*!
+    @brief Get ALL irregular tags
+  */
+  virtual Vector<IntVectSet> get_irreg_tags() const;
 
   /*!
     @brief Get the grids
@@ -780,7 +785,6 @@ protected:
     @brief Define redistribution operators
   */
   virtual void define_redist_oper();
-
 
   /*!
     @brief Define flux registers

@@ -638,7 +638,6 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const Box& region      = dbl.get(dit());
 
-#if 1 // Optimized code
       // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
       const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
       BaseFab<Real>& grad_fab  = grad.getSingleValuedFAB();
@@ -673,7 +672,7 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       	  grad(vof, dir) = 0.;
 
       	  VoFStencil sten;
-      	  EBArith::getFirstDerivStencilWidthOne(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
+      	  EBArith::getFirstDerivStencil(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
       	  for (int i = 0; i < sten.size(); i++){
       	    const VolIndex& ivof = sten.vof(i);
       	    const Real& iweight  = sten.weight(i);
@@ -687,26 +686,6 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
       for (int dir= 0; dir < SpaceDim; dir++){
 	grad.setCoveredCellVal(0.0, dir);
       }
-
-#else // Original code
-      for (VoFIterator vofit(IntVectSet(region), ebgraph); vofit.ok(); ++vofit){
-      	const VolIndex& vof = vofit();
-
-      	for (int dir = 0; dir < SpaceDim; dir++){
-	  
-      	  grad(vof, dir) = 0.;
-
-      	  VoFStencil sten;
-      	  EBArith::getFirstDerivStencilWidthOne(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
-      	  for (int i = 0; i < sten.size(); i++){
-      	    const VolIndex& ivof = sten.vof(i);
-      	    const Real& iweight  = sten.weight(i);
-	    
-      	    grad(vof, dir) += phi(ivof, comp)*iweight;
-      	  }
-      	}
-      }
-#endif
     }
   }
 }
@@ -1788,6 +1767,31 @@ Vector<Real>& amr_mesh::get_dx(){
 
 Vector<int>& amr_mesh::get_ref_rat(){
   return m_ref_ratios;
+}
+
+Vector<IntVectSet> amr_mesh::get_irreg_tags() const {
+  CH_TIME("amr_mesh::get_irreg_tags");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::get_irreg_tags" << endl;
+  }
+
+  Vector<IntVectSet> tags(m_max_amr_depth);
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  CH_assert(ebis_gas != NULL);
+
+  for (int lvl = 0; lvl < m_max_amr_depth; lvl++){ // Don't need tags on maxdepth, we will never generate grids below that.
+    const int which_level = ebis_gas->getLevel(m_domains[lvl]);
+
+    tags[lvl] |= ebis_gas->irregCells(which_level);
+    if(!ebis_sol.isNull()){
+      tags[lvl] |= ebis_sol->irregCells(which_level);
+    }
+  }
+
+  return tags;
 }
 
 Vector<DisjointBoxLayout>& amr_mesh::get_grids(){

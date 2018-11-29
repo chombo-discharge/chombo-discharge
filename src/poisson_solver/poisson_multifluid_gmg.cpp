@@ -537,8 +537,6 @@ void poisson_multifluid_gmg::setup_gmg(){
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
-
-  overallMemoryUsage();
   
   this->set_coefficients();       // Set coefficients
   if(m_use_nwo){
@@ -548,8 +546,6 @@ void poisson_multifluid_gmg::setup_gmg(){
     this->setup_operator_factory(); // Set the NWO operator factory
   }
   this->setup_solver();           // Set up the AMR multigrid solver
-
-  overallMemoryUsage();
 
   m_needs_setup = false;
 }
