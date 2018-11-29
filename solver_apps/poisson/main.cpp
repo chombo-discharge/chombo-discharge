@@ -1,8 +1,5 @@
-#include "plasma_engine.H"
-#include "geo_coarsener.H"
 #include "mechanical_shaft.H"
 #include "poisson_multifluid_gmg.H"
-#include "plasma_engine.H"
 #include "ParmParse.H"
 
 Real potential_curve(const Real a_time){ 
@@ -19,7 +16,7 @@ int main(int argc, char* argv[]){
   char* input_file = argv[1];
   ParmParse pp(argc-2, argv+2, NULL, input_file);
 
-  // Set up geometry, physical domain, spatial discretization, and a geo_coarsener
+  // Set up geometry, physical domain, spatial discretization
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
   RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());

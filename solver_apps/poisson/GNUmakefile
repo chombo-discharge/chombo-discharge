@@ -26,14 +26,8 @@ src_dirs = $(STREAMER_HOME)/src \
 	$(STREAMER_HOME)/src/elliptic \
 	$(STREAMER_HOME)/src/geometry \
 	$(STREAMER_HOME)/src/global \
-	$(STREAMER_HOME)/src/plasma_solver \
 	$(STREAMER_HOME)/src/poisson_solver \
-	$(STREAMER_HOME)/src/rte_solver \
-	$(STREAMER_HOME)/src/sigma_solver \
 	$(STREAMER_HOME)/geometries_prebuilt/mechanical_shaft\
-	$(STREAMER_HOME)/cell_taggers/field_tagger\
-	$(STREAMER_HOME)/time_steppers/rk2_tga\
-	$(STREAMER_HOME)/plasma_models/morrow_lowke
 
 
 include $(CHOMBO_HOME)/mk/Make.example
