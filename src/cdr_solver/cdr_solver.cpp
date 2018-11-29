@@ -458,8 +458,6 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	    else {
 	      MayDay::Abort("cdr_solver::new_compute_flux - stop this madness!");
 	    }
-
-
 	  }
 	}
       }
@@ -1461,7 +1459,8 @@ void cdr_solver::write_plot_file(){
 	      m_amr->get_ref_rat(),
 	      m_amr->get_finest_level() + 1,
 	      true,
-	      covered_values);
+	      covered_values,
+	      IntVect::Zero);
 }
 #endif
 
@@ -1490,7 +1489,6 @@ Real cdr_solver::compute_cfl_dt(){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs(box);
 
-#if 1 // Optimized code
       const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
       FORT_ADVECTIVE_CFL(CHF_CONST_FRA(velo_fab),
 			 CHF_CONST_REAL(dx),
@@ -1505,15 +1503,6 @@ Real cdr_solver::compute_cfl_dt(){
 
       	min_dt = Min(min_dt, thisdt);
       }
-#else // Original code
-      for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
-      	const VolIndex vof = vofit();
-      	const RealVect u  = RealVect(D_DECL(velo(vof, 0), velo(vof, 1), velo(vof, 2)));
-      	const Real thisdt = dx/u.vectorLength();
-
-      	min_dt = Min(min_dt, thisdt);
-      }
-#endif
     }
   }
 

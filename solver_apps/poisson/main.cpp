@@ -44,7 +44,6 @@ int main(int argc, char* argv[]){
 
   // Set up the Poisson equation
   poisson_solver* poisson = (poisson_solver*) (new poisson_multifluid_gmg()); // Instantiate solver
-  poisson->set_verbosity(-1);                       // Print messages
   poisson->set_amr(amr);                            // Give the Poisson solver the amr_mesh object
   poisson->set_computational_geometry(compgeom);    // Tell it about electrodes and dielectrics
   poisson->set_physical_domain(physdom);            // Give it information about the physical domain

@@ -1,0 +1,46 @@
+# ====================================================================================================
+# PHYSICAL_DOMAIN CLASS OPTIONS
+# ====================================================================================================
+physical_domain.lo_corner = -2E-2 -2E-2 -2E-2    # Low corner of problem domain
+physical_domain.hi_corner =  2E-2  2E-2  2E-2    # High corner of problem domain
+
+# ====================================================================================================
+# AMR_MESH OPTIONS
+# ====================================================================================================
+amr.verbosity       = -1          # Controls verbosity. 
+amr.coarsest_domain = 64 64 64 # Number of cells on coarsest domain
+amr.max_amr_depth   = 0           # Maximum amr depth
+amr.max_sim_depth   = -1          # Maximum simulation depth
+amr.fill_ratio      = 1.0         # Fill ratio for grid generation
+amr.irreg_growth    = 1           # How much to grow irregular tagged cells
+amr.buffer_size     = 1           # Number of cells between grid levels
+amr.blocking_factor = 16           # Default blocking factor (16 in 3D)
+amr.max_box_size    = 16          # Maximum allowed box size
+amr.max_ebis_box    = 32          # Maximum allowed box size
+amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+amr.num_ghost       = 3           # Number of ghost cells. Default is 3
+amr.eb_ghost        = 3           # Set number of of ghost cells for EB stuff
+amr.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
+amr.stencil_order   = 1           # Order for interpolation/extrapolation stencils. Must be 1 or 2
+amr.stencil_radius  = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
+amr.stencil_type    = taylor      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
+amr.ghost_interp    = pwl        # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr.load_balance    = elliptic    # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+amr.ebcf            = false       # If you have EBCF crossing, this must be true. 
+
+# ====================================================================================================
+# MECHANICAL_SHAFT CLASS OPTIONS
+# ====================================================================================================
+mechanical_shaft.eps0                      = 1               # Background permittivity
+mechanical_shaft.corner_curvatures         = 2.E-3          # Corner curvatures
+mechanical_shaft.turn_off_electrode        = true           # Turn on/off electrode
+mechanical_shaft.turn_off_dielectric       = true            # Turn on/off dielectric
+mechanical_shaft.electrode_live            = true            # Live electrode or not
+mechanical_shaft.electrode_inner_radius    = 7.0E-3           # Electrode inner radius
+mechanical_shaft.electrode_outer_radius    = 1.2E-2          # Electrode outer radius
+mechanical_shaft.electrode_height          = 2.E-2           # Electrode height
+mechanical_shaft.electrode_center          = 0.0 0.0 1.E-2   # Electrode center
+mechanical_shaft.dielectric_permittivity   = 4.0             # Dielectric permittivity
+mechanical_shaft.dielectric_rod_sides      = 6               # Number of sides
+mechanical_shaft.dielectric_rod_radius     = 5E-3            # Dielectric rod radius
+mechanical_shaft.dielectric_rod_length     = 1.0             # Dielectric rod length

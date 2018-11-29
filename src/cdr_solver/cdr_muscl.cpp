@@ -22,6 +22,7 @@ cdr_muscl::cdr_muscl(){
     ParmParse pp("cdr_muscl");
     pp.query("limit_slopes", m_use_slope_limiter);
   }
+
 }
 
 cdr_muscl::~cdr_muscl(){
@@ -80,7 +81,7 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
       if(m_use_slope_limiter){
 	this->compute_slopes(deltaC, state, box, domain);
       }
-      deltaC.setVal(0.0);
+      //      deltaC.setVal(0.0);
       this->upwind(face_state, deltaC, state, velo, domain, box);
     }
 

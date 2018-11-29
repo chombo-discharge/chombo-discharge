@@ -9,6 +9,8 @@
 #include "data_opsF_F.H"
 #include "EBLevelDataOps.H"
 #include "MFLevelDataOps.H"
+#include "CCProjectorF_F.H"
+#include "EBLevelDataOpsF_F.H"
 
 void data_ops::average_cell_to_face(EBAMRFluxData&               a_facedata,
 				    const EBAMRCellData&         a_celldata,
@@ -33,7 +35,7 @@ void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
     const Box& box            = a_celldata.disjointBoxLayout().get(dit());
     
     for (int dir = 0; dir < SpaceDim; dir++){
-      EBLevelDataOps::averageCellToFace(flux_vel[dir], cell_vel, ebgraph, box, dir, dir, a_domain, dir, 0);
+      EBLevelDataOps::averageCellToFace(flux_vel[dir], cell_vel, ebgraph, box, 1, dir, a_domain, dir, 0);
     }
   }
 }

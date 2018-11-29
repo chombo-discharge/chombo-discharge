@@ -22,6 +22,7 @@ all: all-test
 base_dir = .
 src_dirs = $(STREAMER_HOME)/src \
 	$(STREAMER_HOME)/src/amr_mesh \
+	$(STREAMER_HOME)/src/cdr_solver \
 	$(STREAMER_HOME)/src/elliptic \
 	$(STREAMER_HOME)/src/geometry \
 	$(STREAMER_HOME)/src/global \
