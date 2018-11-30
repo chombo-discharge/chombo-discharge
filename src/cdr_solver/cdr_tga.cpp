@@ -37,7 +37,7 @@ void cdr_tga::advance(EBAMRCellData& a_state, const Real& a_dt){
   }
   
   if(this->is_diffusive()){
-    bool m_needs_setup = true;
+    bool m_needs_setup = false;
     if(m_needs_setup){
       this->setup_gmg();
     }

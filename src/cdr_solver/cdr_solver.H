@@ -215,6 +215,16 @@ public:
   virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
+    @brief Tag solution data based on the gradient
+  */
+  virtual void tag_gradient(Vector<IntVectSet>& a_tags, const Real a_grad);
+
+  /*!
+    @brief Tag solution data based on the value
+  */
+  virtual void tag_value(Vector<IntVectSet>& a_tags, const Real a_value);
+
+  /*!
     @brief Get solver name
   */
   virtual std::string get_name();

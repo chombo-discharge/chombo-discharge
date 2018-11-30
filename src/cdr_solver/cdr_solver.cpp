@@ -572,7 +572,6 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
 		       CHF_BOX(box));
     }
 
-
     // Reset irregular cells - these contain bogus values and will be set elsewhere. 
     const EBISBox& ebisbox = divJ.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
@@ -625,11 +624,13 @@ void cdr_solver::define_divFnc_stencils(){
 	Vector<VolIndex> vofs;
 	EBArith::getAllVoFsInMonotonePath(vofs, vof, ebisbox, rad);
 	for (int i = 0; i < vofs.size(); i++){
-	  const VolIndex& ivof = vofs[i];
-	  const Real iweight   = ebisbox.volFrac(ivof);
+	  if(vofs[i] != vof){
+	    const VolIndex& ivof = vofs[i];
+	    const Real iweight   = ebisbox.volFrac(ivof);
 
-	  norm += iweight;
-	  sten.add(ivof, 1.0);
+	    norm += iweight;
+	    sten.add(ivof, 1.0);
+	  }
 	}
 
 	sten *= 1./norm;
@@ -1398,6 +1399,75 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
   }
 }
 
+void cdr_solver::tag_gradient(Vector<IntVectSet>& a_tags, const Real a_grad){
+  CH_TIME("cdr_solver::tag_gradient");
+  if(m_verbosity > 5){
+    pout() << m_name + "::tag_gradient" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  EBAMRCellData grad, grad_norm;
+  m_amr->allocate(grad,      m_phase, SpaceDim);
+  m_amr->allocate(grad_norm, m_phase, 1);
+  m_amr->compute_gradient(grad, m_state);
+  data_ops::vector_length(grad_norm, grad);
+
+  a_tags.resize(1+finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const Real dx = m_amr->get_dx()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[lvl][dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      const EBCellFAB& gradfab  = (*grad_norm[lvl])[dit()];
+      
+      const IntVectSet ivs(box);
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+
+	if(abs(gradfab(vof, 0)) > a_grad){
+	  a_tags[lvl] |= vof.gridIndex();
+	}
+      }
+    }
+  }
+}
+
+void cdr_solver::tag_value(Vector<IntVectSet>& a_tags, const Real a_value){
+  CH_TIME("cdr_solver::tag_value");
+  if(m_verbosity > 5){
+    pout() << m_name + "::tag_value" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  a_tags.resize(1+finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[lvl][dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      const EBCellFAB& state  = (*m_state[lvl])[dit()];
+      
+      const IntVectSet ivs(box);
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+
+	if(state(vof,0) > a_value){
+	  a_tags[lvl] |= vof.gridIndex();
+	}
+      }
+    }
+  }
+}
+
 #ifdef CH_USE_HDF5
 void cdr_solver::write_plot_file(){
   CH_TIME("cdr_solver::write_plot_file");
@@ -1460,7 +1530,7 @@ void cdr_solver::write_plot_file(){
 	      m_amr->get_finest_level() + 1,
 	      true,
 	      covered_values,
-	      IntVect::Zero);
+	      IntVect::Unit);
 }
 #endif
 

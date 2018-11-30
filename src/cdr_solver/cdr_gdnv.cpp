@@ -26,6 +26,7 @@ cdr_gdnv::cdr_gdnv() : cdr_tga() {
     pp.query("divF_nc", str);
     if(str == "conservative_average"){
       which = 0;
+      MayDay::Warning("cdr_gdnv::cdr_gdnv - we are decommissioning the conservative average stuff for this solver");
     }
     else if(str == "covered_face"){
       which = 1;
@@ -317,20 +318,20 @@ void cdr_gdnv::extrapolate_vel_to_covered_faces(){
   if(m_verbosity > 5){
     pout() << m_name + "::extrapolate_vel_to_covered_faces" << endl;
   }
-  
+
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
   // Need some temporary storage below
   EBAMRCellData velo;
-  m_amr->allocate(velo, m_phase, ncomp, 2);
+  m_amr->allocate(velo, m_phase, ncomp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl         = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl              = m_amr->get_ebisl(m_phase)[lvl];
     EBAdvectLevelIntegrator& leveladvect = *m_level_advect[lvl];
-    
+
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
@@ -359,6 +360,7 @@ void cdr_gdnv::extrapolate_vel_to_covered_faces(){
 				     dir,
 				     Side::Hi,
 				     box);
+
       }
     }
   }
@@ -455,42 +457,6 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     else{
       MayDay::Abort("cdr_gdnv::extrapolate_to_faces - unknown method requested");
     }
-
-
-#if 0    // Do not fall below 0
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      for (int dir = 0; dir < SpaceDim; dir++){
-	BaseIVFAB<Real>& phi_lo = *(*m_covered_phi_lo[lvl])[dit()][dir];
-	BaseIVFAB<Real>& phi_hi = *(*m_covered_phi_hi[lvl])[dit()][dir];
-
-
-	for(VoFIterator vofit(phi_lo.getIVS(), ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  phi_lo(vof, comp) = Max(phi_lo(vof, comp), 0.0);
-	}
-	for(VoFIterator vofit(phi_hi.getIVS(), ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  phi_hi(vof, comp) = Max(phi_hi(vof, comp), 0.0);
-	}
-
-
-	const Box box = dbl.get(dit());
-	const IntVectSet ivs(box);
-	FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
-
-	EBFaceFAB& phi = (*a_face_state[lvl])[dit()][dir];
-	for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  if(phi(face, comp) < 0.){
-	    phi(face, comp) = 0.;
-	  }
-	}
-      
-      }
-    }
-#endif
   }
 }
 

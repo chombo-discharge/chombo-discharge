@@ -64,20 +64,45 @@ int main(int argc, char* argv[]){
 
   // Set velocities, diffusion coefficients, source, and domain bc type. 
   cdr->initial_data();
-  cdr->set_velocity(-RealVect(BASISV(2)));
-  cdr->set_diffco(1.E-4);
+  cdr->set_velocity(RealVect(BASISV(2)));
+  cdr->set_diffco(1.E-3);
   cdr->set_source(0.0);
   cdr->set_domain_bc(cdr_bc::extrap);
 
 
   cdr->write_plot_file();
   for (int k=0; k < 50; k++){
-    if(procID() == 0){
-      std::cout << "step = " << k << std::endl;
+        // Regrid every 2 time steps
+    if(k%2 == 0 && amr->get_max_amr_depth() > 0){
+      //Get tags
+      Vector<IntVectSet> solver_tags;
+      cdr->tag_value(solver_tags, 0.25);
+      for (int lvl = 0; lvl < geotags.size(); lvl++){
+	solver_tags[lvl] |= geotags[lvl];
+      }
+
+      // Regrid amr
+      const int old_finest = amr->get_finest_level();
+      cdr->cache_state();
+      amr->regrid(solver_tags);
+      const int new_finest = amr->get_finest_level();
+      cdr->regrid(old_finest, new_finest);
+
+      // Re-fill solver with velocities and stuff
+      cdr->set_velocity(RealVect(BASISV(2)));
+      cdr->set_diffco(1.E-3);
+      cdr->set_source(0.0);
     }
+
+    // Advance, and time it
+    const Real t1 = MPI_Wtime();
     const Real cfl = cdr->compute_cfl_dt();
     cdr->advance(0.9*cfl);
     cdr->write_plot_file();
+    const Real t2 = MPI_Wtime();
+    if(procID() == 0){
+      std::cout << "step = " << k << "\t wall time = " << t2-t1 << std::endl;
+    }
   }
 
   overallMemoryUsage();
