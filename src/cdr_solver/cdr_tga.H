@@ -233,6 +233,16 @@ protected:
   virtual void advance_tga(EBAMRCellData& a_state, const Real a_dt);
 
   /*!
+    @brief Pure TGA advance without source terms
+  */
+  virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
+
+  /*!
+    @brief Pure TGA advance without source terms
+  */
+  virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
+
+  /*!
     @brief Advection-only extrapolation to faces
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
