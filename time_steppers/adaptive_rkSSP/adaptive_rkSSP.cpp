@@ -9,6 +9,7 @@
 #include "adaptive_rkSSP_storage.H"
 #include "data_ops.H"
 #include "units.H"
+#include "cdr_tga.H"
 
 #include <fstream>
 #include <iostream>
@@ -26,6 +27,7 @@ adaptive_rkSSP::adaptive_rkSSP(){
   m_err_thresh = 1.E-2;;
   m_safety     = 0.95;
   m_error_norm = 2;
+  m_max_order  = 3;
 
   m_compute_v      = true;
   m_compute_S      = true;
@@ -34,6 +36,7 @@ adaptive_rkSSP::adaptive_rkSSP(){
   m_consistent_E   = true;
   m_consistent_rte = true;
   m_have_dtf       = false;
+  m_fixed_order    = false;
 
   // Basically only for debugging
   m_do_advec_src = true;
@@ -41,7 +44,6 @@ adaptive_rkSSP::adaptive_rkSSP(){
   m_do_rte       = true;
   m_do_poisson   = true;
   m_print_diagno = false;
-  m_write_diagno = false;
   
   {
     ParmParse pp("adaptive_rkSSP");
@@ -49,12 +51,18 @@ adaptive_rkSSP::adaptive_rkSSP(){
     std::string str;
 
     pp.query("order",      m_order);
-    pp.query("min_cfl";    m_minCFL);
+    pp.query("min_cfl",    m_minCFL);
     pp.query("max_cfl",    m_maxCFL);
     pp.query("max_error",  m_err_thresh);
     pp.query("safety",     m_safety);
     pp.query("error_norm", m_error_norm);
 
+    if(pp.contains("fixed_order")){
+      pp.get("fixed_order", str);
+      if(str == "true"){
+	m_fixed_order = true;
+      }
+    }
     if(pp.contains("compute_D")){
       pp.get("compute_D", str);
       if(str == "false"){
@@ -154,7 +162,7 @@ adaptive_rkSSP::adaptive_rkSSP(){
   }
 
   // If we don't use adaptive, we can't go beyond CFL
-  if(!m_adaptive){
+  if(!m_adaptive_dt){
     m_cfl = m_maxCFL;
   }
 }
@@ -194,13 +202,15 @@ Real adaptive_rkSSP::advance(const Real a_dt){
   if(m_verbosity > 2){
     pout() << "adaptive_rkSSP::advance" << endl;
   }
+
+  this->cache_solutions(); // Store old solution. 
+
   // When we enter this routine, solvers should have been filled with valid ready and be ready for
   // advancement
   
-  Real cfl;     // Adaptive or fixed CFL for advective+source term advancements
-  Real diff_dt;
-
-  int substeps = 0;
+  Real cfl;              // Adaptive or fixed CFL for advective+source term advancements
+  Real actual_dt = a_dt; // This is the actual time step taken. It is equal to or larger than a_dt
+  int substeps = 0;      // Number of individual steps taken
   
   // Advection and source term advancements
   if(m_do_advec_src){
@@ -208,20 +218,19 @@ Real adaptive_rkSSP::advance(const Real a_dt){
       if(!m_have_dtf){
 	// Estimate dtf by substepping. This is probably a bad time step but it will be adjusted
 	substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
-	cfl        = a_dt/(advective_substeps*m_dt_cfl);
+	cfl        = a_dt/(substeps*m_dt_cfl);
 	m_dt_adapt = cfl*m_dt_cfl;
 	m_have_dtf = true;
       }
 
       // Start substepping
-      this->advance_adaptive(substeps, m_dt_adapt, m_time, a_dt);
+      actual_dt = this->advance_adaptive(substeps, m_dt_adapt, m_time, a_dt);
     }
     else{ // Non-adaptive time-stepping scheme
       substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
-      cfl        = a_dt/(advective_substeps*m_dt_cfl);
-      m_dt_advec = cfl*m_dt_cfl;
-    
-      this->advance_fixed(substeps, m_dt_advec);
+      cfl        = a_dt/(substeps*m_dt_cfl);
+      m_dt_adapt = cfl*m_dt_cfl;
+      actual_dt = this->advance_fixed(substeps, m_dt_adapt);
     }
   }
 
@@ -252,170 +261,18 @@ Real adaptive_rkSSP::advance(const Real a_dt){
     
     pout() << "\t Convection-source advance: \n ";
     pout() << "\t --------------------------\n";
-    pout() << "\t\t Steps     = " << advective_substeps << endl;
+    pout() << "\t\t Steps     = " << substeps << endl;
     if(m_adaptive_dt){
-      pout() << "\t\t Avg. cfl  = " << a_dt/(advective_substeps*m_dt_cfl) << endl;
-      pout() << "\t\t Avg. dt   = " << a_dt/advective_substeps << endl;
+      pout() << "\t\t Avg. cfl  = " << actual_dt/(substeps*m_dt_cfl) << endl;
+      pout() << "\t\t Avg. dt   = " << actual_dt/substeps << endl;
     }
     else{
       pout() << "\t\t Local cfl = " << cfl        << endl;
-      pout() << "\t\t Local dt  = " << m_dt_advec << endl;
-    }
-    pout() << endl;
-    pout() << "\t\t Time      = " << 100.*(t1-t0)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Diffusion advance:\n ";
-    pout() << "\t -----------------\n";
-    pout() << "\t\t Steps     = " << diffusive_substeps << endl;
-    if(m_adaptive_dt){
-      pout() << "\t\t Avg. dt   = " << a_dt/diffusive_substeps << endl;
-    }
-    else{
-      pout() << "\t\t Local dt  = " << a_dt << endl;
-    }
-    pout() << endl;
-    pout() << "\t\t Time      = " << 100.*(t2-t1)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Poisson solve:\n ";
-    pout() << "\t --------------\n";
-    pout() << "\t\t Time      = " << 100.*(t3-t2)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t RTE solve:\n ";
-    pout() << "\t ----------\n";
-    pout() << "\t\t Time      = " << 100.*(t4-t3)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Fill solvers at end:\n ";
-    pout() << "\t --------------------\n";
-    pout() << "\t\t Time      = " << 100.*(t5-t4)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Total time = " << t5-t0 << endl;
-    pout() << "\t ==============================================\n" << endl;
-  }
-  if(m_write_diagno){
-    this->write_diagnostics(advective_substeps, m_dt_advec, a_dt, cfl, t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t5-t0);
-  }
-
-  return a_dt;
-}
-
-Real adaptive_rkSSP::advance_single(const Real a_dt){
-  CH_TIME("adaptive_rkSSP::advance_single");
-  if(m_verbosity > 2){
-    pout() << "adaptive_rkSSP::advance_single" << endl;
-  }
-  
-  // When we enter this routine, we assume that velocities, source terms, and diffusion coefficients have already
-  // been computed. 
-  
-  Real cfl;     // Average or fixed CFL for advective+source term advancements
-  Real diff_dt;
-
-  int substeps = 0;
-  
-  // Advection and source term advancements
-  if(m_do_advec_src){
-    if(m_adaptive_dt){ // Adaptive time stepping scheme
-      if(!m_have_dtf){
-	// Estimate dtf by substepping. This is probably a bad time step but it will be adjusted
-	substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
-	cfl        = a_dt/(advective_substeps*m_dt_cfl);
-	m_dt_adapt = cfl*m_dt_cfl;
-	m_have_dtf = true;
-      }
-
-      // Start substepping
-      this->advance_adaptive(substeps, m_dt_adapt, m_time, a_dt);
-    }
-    else{ // Non-adaptive time-stepping scheme
-      substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
-      cfl        = a_dt/(advective_substeps*m_dt_cfl);
-      m_dt_advec = cfl*m_dt_cfl;
-    
-      this->advance_fixed(substeps, m_dt_advec);
+      pout() << "\t\t Local dt  = " << m_dt_adapt << endl;
     }
   }
 
-  // End of the large time step, solve Poisson's equation
-  if(m_do_poisson){ 
-    if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson();
-      this->compute_E_into_scratch();
-    }
-  }
-
-  // Solve RTE equations
-  if(m_do_rte){ // Solve for final RTE stage. Poisson equation should already have been solved at the end of the advection
-    this->advance_rte_stationary(m_time + a_dt); // and diffusion stages
-  }
-  
-  // Put cdr solvers back in useable state so that we can reliably compute the next time step.
-  this->compute_cdr_gradients();
-  adaptive_rkSSP::compute_cdr_velo(m_time + a_dt);
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
-  adaptive_rkSSP::compute_cdr_sources(m_time + a_dt);
-
-  // Print diagnostics
-  if(m_print_diagno){
-    pout() << "\n";
-    pout() << "\t adaptive_rkSSP::advance(Real a_dt) breakdown" << endl;
-    pout() << "\t ==============================================\n" << endl;
-    
-    pout() << "\t Convection-source advance: \n ";
-    pout() << "\t --------------------------\n";
-    pout() << "\t\t Steps     = " << advective_substeps << endl;
-    if(m_adaptive_dt){
-      pout() << "\t\t Avg. cfl  = " << a_dt/(advective_substeps*m_dt_cfl) << endl;
-      pout() << "\t\t Avg. dt   = " << a_dt/advective_substeps << endl;
-    }
-    else{
-      pout() << "\t\t Local cfl = " << cfl        << endl;
-      pout() << "\t\t Local dt  = " << m_dt_advec << endl;
-    }
-    pout() << endl;
-    pout() << "\t\t Time      = " << 100.*(t1-t0)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Diffusion advance:\n ";
-    pout() << "\t -----------------\n";
-    pout() << "\t\t Steps     = " << diffusive_substeps << endl;
-    if(m_adaptive_dt){
-      pout() << "\t\t Avg. dt   = " << a_dt/diffusive_substeps << endl;
-    }
-    else{
-      pout() << "\t\t Local dt  = " << a_dt << endl;
-    }
-    pout() << endl;
-    pout() << "\t\t Time      = " << 100.*(t2-t1)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Poisson solve:\n ";
-    pout() << "\t --------------\n";
-    pout() << "\t\t Time      = " << 100.*(t3-t2)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t RTE solve:\n ";
-    pout() << "\t ----------\n";
-    pout() << "\t\t Time      = " << 100.*(t4-t3)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Fill solvers at end:\n ";
-    pout() << "\t --------------------\n";
-    pout() << "\t\t Time      = " << 100.*(t5-t4)/(t5-t0) << "%\n" << endl;
-
-    pout() << "\n";
-    pout() << "\t Total time = " << t5-t0 << endl;
-    pout() << "\t ==============================================\n" << endl;
-  }
-  if(m_write_diagno){
-    this->write_diagnostics(advective_substeps, m_dt_advec, a_dt, cfl, t1-t0, t2-t1, t3-t2, t4-t3, t5-t4, t5-t0);
-  }
-
-  return a_dt;
+  return actual_dt;
 }
 
 void adaptive_rkSSP::advance_diffusion(const Real a_time, const Real a_dt){
@@ -424,9 +281,9 @@ void adaptive_rkSSP::advance_diffusion(const Real a_time, const Real a_dt){
     pout() << "adaptive_rkSSP::advance_diffusion" << endl;
   }
 
-  this->advance_tga_diffusion();   // This is the 2nd order update
-  this->advance_euler_diffusion(); // This is the embedded formula 1st order update, it uses
-                                   // the solution from advance_tga_diffusion as initial guess in order to optimize. 
+  this->advance_tga_diffusion(a_time, a_dt);   // This is the 2nd order update
+  this->advance_euler_diffusion(a_time, a_dt); // This is the embedded formula 1st order update, it uses
+                                               // the solution from advance_tga_diffusion as initial guess in order to optimize. 
 }
 
 void adaptive_rkSSP::advance_tga_diffusion(const Real a_time, const Real a_dt){
@@ -435,12 +292,19 @@ void adaptive_rkSSP::advance_tga_diffusion(const Real a_time, const Real a_dt){
     pout() << "adaptive_rkSSP::advance_tga_diffusion" << endl;
   }
 
+  const int ncomp = 1;
+
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
       
-    EBAMRCellData& phi   = solver->get_state();
+    EBAMRCellData& phi = solver->get_state();
     if(solver->is_diffusive()){
-      solver->advance_tga(phi, phi, a_dt);
+      EBAMRCellData old_phi;
+      m_amr->allocate(old_phi, phase::gas, ncomp);
+      data_ops::copy(old_phi, phi);
+      
+      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      tgasolver->advance_tga(phi, old_phi, a_dt);
     }
   }
 }
@@ -451,22 +315,30 @@ void adaptive_rkSSP::advance_euler_diffusion(const Real a_time, const Real a_dt)
     pout() << "adaptive_rkSSP::advance_euler_diffusion" << endl;
   }
 
+  const int ncomp = 1;
+
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
       
     EBAMRCellData& exact_phi = solver->get_state();
-    EBAMRCellData& wrong_phi = storage->get
+    EBAMRCellData& wrong_phi = storage->get_error();
     if(solver->is_diffusive()){
-      solver->advance_tga(phi, phi, a_dt);
+      EBAMRCellData old_phi;
+      m_amr->allocate(old_phi, phase::gas, ncomp);
+      data_ops::copy(old_phi, wrong_phi);
+      data_ops::copy(wrong_phi, exact_phi);
+
+      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      tgasolver->advance_euler(wrong_phi, old_phi, a_dt);
     }
   }
 }
 
-void adaptive_rkSSP::advance_fixed(const int a_substeps, const Real a_dt){
+Real adaptive_rkSSP::advance_fixed(const int a_substeps, const Real a_dt){
   CH_TIME("adaptive_rkSSP::advance_adaptive_fixed");
   if(m_verbosity > 2){
-    pout() << "adaptive_rkSSP::advance_adaptive_fixed" << endl;
+    pout() << "adaptive_rkSSP::advance_fixed" << endl;
   }
 
   this->compute_E_into_scratch();
@@ -474,6 +346,7 @@ void adaptive_rkSSP::advance_fixed(const int a_substeps, const Real a_dt){
 
   for (int step = 0; step < a_substeps; step++){
     const Real time = m_time + step*a_dt;
+    const bool last_step = (step == a_substeps - 1);
 
     // Advection-reaction
     if(m_order == 1){ 
@@ -488,7 +361,7 @@ void adaptive_rkSSP::advance_fixed(const int a_substeps, const Real a_dt){
       this->advance_rk3(time, a_dt);
     }
     else{
-      MayDay::Abort("adaptive_rkSSP::advance_adaptive_fixed - unsupported order requested");
+      MayDay::Abort("adaptive_rkSSP::advance_fixed - unsupported order requested");
     }
 
     // Update E before computing new diffusion coefficients
@@ -507,7 +380,6 @@ void adaptive_rkSSP::advance_fixed(const int a_substeps, const Real a_dt){
 
     // Advance diffusion
     this->advance_diffusion(time, a_dt);
-    
 
     if(!last_step){
       // Compute the electric field
@@ -533,12 +405,14 @@ void adaptive_rkSSP::advance_fixed(const int a_substeps, const Real a_dt){
       if(m_compute_S) this->compute_cdr_sources(time);
     }
   }
+
+  return a_dt;
 }
 
-void adaptive_rkSSP::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, const Real a_dtc){
-  CH_TIME("adaptive_rkSSP::advance_adaptive_adaptive");
+Real adaptive_rkSSP::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, const Real a_dtc){
+  CH_TIME("adaptive_rkSSP::advance_adaptive");
   if(m_verbosity > 2){
-    pout() << "adaptive_rkSSP::advance_adaptive_adaptive" << endl;
+    pout() << "adaptive_rkSSP::advance_adaptive" << endl;
   }
 
   this->compute_E_into_scratch();
@@ -547,10 +421,8 @@ void adaptive_rkSSP::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_
   while(sum_dt < a_dtc){
 
     // Adjust last time step so that we land on a_dtc
-    Real actual_dt = a_dt;
     bool last_step = false;
     if(sum_dt + a_dt >= a_dtc){
-      actual_dt = a_dtc - sum_dt;
       last_step = true;
     }
     const Real cur_time  = a_time + sum_dt;
@@ -558,21 +430,50 @@ void adaptive_rkSSP::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_
     // Store solver states
     this->store_solvers();
 
-    // Advance with errors estimated with embedded formulas
-    if(m_order == 2){
-      this->advance_rk2(cur_time, actual_dt);
+    // Advective advance
+    if(m_order == 1){
+      MayDay::Abort("adaptive_rkSSP::advance_adaptive - adaptive stepping not supported with m_order=1. How did you get here?");
+    }
+    else if(m_order == 2){
+      this->advance_rk2(cur_time, a_dt);
     }
     else if(m_order == 3){
-      this->advance_rk3(cur_time, actual_dt);
+      this->advance_rk3(cur_time, a_dt);
     }
+    else if(m_order > m_max_order){
+      MayDay::Abort("adaptive_rkSSP::advance_adaptive - integration order is too high. How did you get here?");
+    }
+
+    // Update E before computing new diffusion coefficients
+    if(m_consistent_E){ // Consistent => Update E and RTE before the next fine step
+      if(m_do_poisson){ // Solve Poisson equation
+	if((m_step +1) % m_fast_poisson == 0){
+	  time_stepper::solve_poisson();
+	  this->compute_E_into_scratch();
+	}
+      }
+      // Compute new diffusion coefficients with the new electric field
+      if(m_compute_D){
+	this->compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+      }
+    }
+
+    // Advance diffusion
+    this->advance_diffusion(cur_time, a_dt);
 
     // Compute errors and new time step
     this->compute_errors();
+
+    const Real old_dt = a_dt;
     const Real new_dt = a_dt*pow(m_err_thresh/m_max_error, 1.0/m_order);
     
     // Accept or discard time step
-    const bool accept = m_max_error < m_err_thresh;
-    if(accept){
+    const bool accept_err   = (m_max_error <= m_err_thresh);                         // Acceptable error
+    const bool decr_order   = accept_err  && (a_dt >= m_maxCFL*m_dt_cfl);            // Should drop order
+    const bool incr_order   = !accept_err && (a_dt <= m_minCFL*m_dt_cfl);            // Should increase order
+    const bool accept_order = (a_dt <= m_minCFL*m_dt_cfl) && (m_order >= m_max_order || m_fixed_order); // Can't increase order or decrease step size
+    const bool accept_step  = accept_err || accept_order;
+    if(accept_step){
       sum_dt += a_dt;
       a_substeps += 1;
 
@@ -593,12 +494,37 @@ void adaptive_rkSSP::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_
       this->restore_solvers();
     }
 
+    // Increase or decrease order if we can/must
+    if(!m_fixed_order){
+      if(decr_order && m_order > 2){
+	m_order = m_order - 1;
+      }
+      else if(incr_order && m_order < m_max_order){
+	m_order = m_order + 1;
+      }
+    }
+
+
+#if 1 // Debug
+    if(procID() == 0){
+      std::cout << "accept = " << accept_step
+		<< "\t accept_order = " << accept_order
+		<< "\torder = " << m_order
+		<< "\t last = " << last_step
+		<< "\tmax error = " << m_max_error
+		<< "\t a_dt = " << old_dt
+		<< "\t new_dt = " << a_dt
+		<< "\t dt_cfl " << m_dt_cfl
+		<< std::endl;
+    }
+#endif
+
     // New time step should never exceed CFL constraints
     a_dt = Min(a_dt, m_maxCFL*m_dt_cfl);
+    a_dt = Max(a_dt, m_minCFL*m_dt_cfl);
 
     // Update for next iterate. This should generally be done because the solution might move many grid cells.
     if(!last_step){
-
       if(m_consistent_E){ // Consistent => Update E and RTE before the next fine step
 	if(m_do_poisson){ // Solve Poisson equation
 	  if((m_step +1) % m_fast_poisson == 0){
@@ -619,6 +545,8 @@ void adaptive_rkSSP::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_
       if(m_compute_S) this->compute_cdr_sources(cur_time);
     } 
   }
+
+  return sum_dt;
 }
 
 void adaptive_rkSSP::advance_rk1(const Real a_time, const Real a_dt){
@@ -791,8 +719,6 @@ void adaptive_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
     pout() << "adaptive_rkSSP::advance_rk3" << endl;
   }
 
-  MayDay::Abort("adaptive_rkSSP::advance_rk3 - error computation is just wrong, wrong, wrong!");
-
   // u^1 = u^n + dt*L(u^n)
   // u^n resides in solver. Use this and put u^1 in the solver instead. Use scratch for computing L(u^n)
   {
@@ -880,7 +806,7 @@ void adaptive_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
       // Embedded formula for error
       EBAMRCellData& err = storage->get_error(); // err =  (u^n + u^1)
       data_ops::incr(err, rhs, a_dt);            // err =  (u^n + u^1 + dt*L(u^1))
-      data_ops::scale(err, -0.5);                // err = -(u^n + u^1 + dt*L(u^1))/2
+      data_ops::scale(err, 0.5);                 // err = -(u^n + u^1 + dt*L(u^1))/2
     }
 
     // Advance sigma
@@ -900,7 +826,7 @@ void adaptive_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
     // Embedded formula for error
     EBAMRIVData& err = m_sigma_scratch->get_error(); // err =  (u^n + u^1)
     data_ops::incr(err, rhs, a_dt);                  // err =  (u^n + u^1 + dt*L(u^1))
-    data_ops::scale(err, -0.5);                      // err = -(u^n + u^1 + dt*L(u^1))/2
+    data_ops::scale(err, 0.5);                       // err = -(u^n + u^1 + dt*L(u^1))/2
   }
 
   // u^(n+1) = (u^n + 2*u^2 + 2*dt*L(u^(1)))/3
@@ -936,10 +862,6 @@ void adaptive_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
 
       m_amr->average_down(phi, m_cdr->get_phase());
       m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-      // Error computation
-      EBAMRCellData& err = storage->get_error(); // err  = -0.5*(u^n + u^1 + dt*L(u^1)) // second order
-      data_ops::incr(err, phi, 1.0);             // err += (third order approximation)
     }
 
     // Advance sigma
@@ -956,10 +878,6 @@ void adaptive_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
 
     m_amr->average_down(phi, m_cdr->get_phase());
     m_sigma->reset_cells(phi);
-
-    // Error computation
-    EBAMRIVData& err = m_sigma_scratch->get_error(); // err = -(u^n + dt*L(u^n))
-    data_ops::incr(err, phi, 1.0);                   // err = phi - (u^n + dt*L(u^n))
   }
 }
 
@@ -1014,14 +932,13 @@ void adaptive_rkSSP::compute_errors(){
     const EBAMRCellData& phi = solver->get_state();
     EBAMRCellData& err = storage->get_error();
 
+
+    // So far 'err' contains the embedded formula and 'phi' is the numerical solution
+    data_ops::scale(err, -1.0);    // err -> -err
+    data_ops::incr(err, phi, 1.0); // err -> (phi-err)
+
     m_amr->average_down(err, m_cdr->get_phase());
-
-
-    // const int comp = 0;
-
-    // data_ops::get_max_min(max, min, phi, 0);
-    // data_ops::get_max_min_norm(emax, emin, err);
-    // m_cdr_error[which] = emax/max;;
+    
     Real Lerr, Lphi;
     data_ops::norm(Lerr, *err[0], m_amr->get_domains()[0], m_error_norm);
     data_ops::norm(Lphi, *phi[0], m_amr->get_domains()[0], m_error_norm);
@@ -1029,64 +946,11 @@ void adaptive_rkSSP::compute_errors(){
     m_cdr_error[which] = Lerr/Lphi;
   }
 
-  // Sigma error
+  // Sigma error. So far, 'err' contains the embedded formula and 'phi' is the numerical solution
   EBAMRIVData& phi = m_sigma->get_state();
   EBAMRIVData& err = m_sigma_scratch->get_error();
-  data_ops::get_max_min_norm(max, min, phi);
-  data_ops::get_max_min_norm(emax, emin, err);
-  m_sigma_error = emax/max;
-
-  // Maximum error
-  m_max_error = this->get_max_error();
-}
-
-void adaptive_rkSSP::compute_bigstep_errors(){
-  CH_TIME("time_stepper::compute_bigstep_errors");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::compute_bigstep_errors" << endl;
-  }
-
-  const int comp = 0;
-  Real max, min, emax, emin;
-
-  // CDR errors
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    const int which = solver_it.get_solver();
-    
-    const EBAMRCellData& phi     = solver->get_state();
-    const EBAMRCellData& bigstep = storage->get_bigstep();
-    EBAMRCellData& err = storage->get_error();
-
-    // Make err = phi - bigstep
-    data_ops::copy(err, phi);
-    data_ops::incr(err, bigstep, -1.0);
-    m_amr->average_down(err, m_cdr->get_phase());
-
-
-    // const int comp = 0;
-
-    // data_ops::get_max_min(max, min, phi, 0);
-    // data_ops::get_max_min_norm(emax, emin, err);
-    // m_cdr_error[which] = emax/max;;
-    Real Lerr, Lphi;
-    data_ops::norm(Lerr, *err[0], m_amr->get_domains()[0], m_error_norm);
-    data_ops::norm(Lphi, *phi[0], m_amr->get_domains()[0], m_error_norm);
-
-    m_cdr_error[which] = Lerr/Lphi;
-  }
-
-  // Sigma error
-  EBAMRIVData& phi     = m_sigma->get_state();
-  EBAMRIVData& bigstep = m_sigma_scratch->get_bigstep();
-  EBAMRIVData& err     = m_sigma_scratch->get_error();
-
-  // Make err = phi - bigstep
-  data_ops::copy(err, phi);
-  data_ops::incr(err, bigstep, -1.0);
-  m_amr->average_down(err, m_cdr->get_phase());
-  
+  data_ops::scale(err, -1.0);
+  data_ops::incr(err, phi, 1.0);
   data_ops::get_max_min_norm(max, min, phi);
   data_ops::get_max_min_norm(emax, emin, err);
   m_sigma_error = emax/max;
@@ -1277,80 +1141,6 @@ void adaptive_rkSSP::uncache_solutions(){
   { // Uncache sigma
     const EBAMRIVData& cache = m_sigma_scratch->get_cache();
     data_ops::copy(m_sigma->get_state(), cache);
-  }
-}
-
-void adaptive_rkSSP::cache_bigstep(){
-  CH_TIME("adaptive_rkSSP::cache_bigstep");
-  if(m_verbosity > 5){
-    pout() << "adaptive_rkSSP::cache_bigstep" << endl;
-  }
-  
-  // Cache cdr solutions
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
-
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    EBAMRCellData& bigstep = storage->get_bigstep();
-
-    data_ops::copy(bigstep, solver->get_state());
-  }
-
-  {// Cache Poisson solution
-    MFAMRCellData& bigstep = m_poisson_scratch->get_bigstep();
-    data_ops::copy(bigstep, m_poisson->get_state());
-  }
-
-  // Cache RTE solutions
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
-
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
-    EBAMRCellData& bigstep = storage->get_bigstep();
-
-    data_ops::copy(bigstep, solver->get_state());
-  }
-
-  { // Cache sigma
-    EBAMRIVData& bigstep = m_sigma_scratch->get_bigstep();
-    data_ops::copy(bigstep, m_sigma->get_state());
-  }
-}
-
-void adaptive_rkSSP::uncache_bigstep(){
-  CH_TIME("adaptive_rkSSP::uncache_bigstep");
-  if(m_verbosity > 5){
-    pout() << "adaptive_rkSSP::uncache_bigstep" << endl;
-  }
-  
-  // Cache cdr solutions
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
-
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    const EBAMRCellData& bigstep = storage->get_bigstep();
-
-    data_ops::copy(solver->get_state(), bigstep);
-  }
-
-  {// Cache Poisson solution
-    const MFAMRCellData& bigstep = m_poisson_scratch->get_bigstep();
-    data_ops::copy(m_poisson->get_state(), bigstep);
-  }
-
-  // Cache RTE solutions
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
-
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
-    const EBAMRCellData& bigstep = storage->get_bigstep();
-
-    data_ops::copy(solver->get_state(), bigstep);
-  }
-
-  { // Cache sigma
-    const EBAMRIVData& bigstep = m_sigma_scratch->get_bigstep();
-    data_ops::copy(m_sigma->get_state(), bigstep);
   }
 }
 
@@ -1683,121 +1473,6 @@ void adaptive_rkSSP::advance_rte_stationary(const Real a_time){
 
     const Real dummy_dt = 0.0;
     this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
-  }
-}
-
-void adaptive_rkSSP::write_diagnostics(const int  a_substeps,
-					const Real a_sub_dt,
-					const Real a_glob_dt,
-					const Real a_sub_cfl,
-					const Real a_convection_time,
-					const Real a_diffusion_time,
-					const Real a_poisson_time,
-					const Real a_rte_time,
-					const Real a_misc_time,
-					const Real a_total_time){
-
-  // Compute the number of cells in the amr hierarchy
-  long long num_cells = 0;
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    num_cells += (m_amr->get_grids()[lvl]).numCells();
-  }
-
-  long long uniform_points = (m_amr->get_domains()[m_amr->get_finest_level()]).domainBox().numPts();
-  const Real compression = 1.0*num_cells/uniform_points;
-  
-  if(procID() == 0 ){
-
-    const std::string fname("adaptive_rkSSP_diagnostics.txt");
-    
-    bool write_header;
-    { // Write header if we must
-      std::ifstream infile(fname);
-      write_header = infile.peek() == std::ifstream::traits_type::eof() ? true : false;
-    }
-
-    // Write output
-    std::ofstream f;
-    f.open(fname, std::ios_base::app);
-    const int width = 12;
-
-
-    if(write_header){
-      f << std::left << std::setw(width) << "# Step" << "\t"
-	<< std::left << std::setw(width) << "Time" << "\t"
-	<< std::left << std::setw(width) << "Time code" << "\t"
-	<< std::left << std::setw(width) << "Substeps" << "\t"
-	<< std::left << std::setw(width) << "Global dt" << "\t"
-	<< std::left << std::setw(width) << "Local dt" << "\t"
-	<< std::left << std::setw(width) << "Local cfl" << "\t"
-	<< std::left << std::setw(width) << "Convection time" << "\t"
-	<< std::left << std::setw(width) << "Diffusion time" << "\t"
-	<< std::left << std::setw(width) << "Poisson time" << "\t"
-	<< std::left << std::setw(width) << "RTE time" << "\t"
-	<< std::left << std::setw(width) << "Misc time" << "\t"
-	<< std::left << std::setw(width) << "Total time" << "\t"
-	<< std::left << std::setw(width) << "Mesh cells" << "\t"
-	<< std::left << std::setw(width) << "Mesh compression" << "\t"
-	<< endl;
-    }
-
-    f << std::left << std::setw(width) << m_step << "\t"
-      << std::left << std::setw(width) << m_time << "\t"            
-      << std::left << std::setw(width) << m_timecode << "\t"        
-      << std::left << std::setw(width) << a_substeps << "\t"        
-      << std::left << std::setw(width) << a_glob_dt << "\t"         
-      << std::left << std::setw(width) << a_sub_dt << "\t"
-      << std::left << std::setw(width) << a_sub_cfl << "\t"          
-      << std::left << std::setw(width) << a_convection_time << "\t" 
-      << std::left << std::setw(width) << a_diffusion_time  << "\t"
-      << std::left << std::setw(width) << a_poisson_time  << "\t"    
-      << std::left << std::setw(width) << a_rte_time  << "\t"        
-      << std::left << std::setw(width) << a_misc_time  << "\t"       
-      << std::left << std::setw(width) << a_total_time  << "\t"
-      << std::left << std::setw(width) << num_cells  << "\t"      
-      << std::left << std::setw(width) << compression  << "\t"      
-      << std::left << std::setw(width) << endl;
-    
-  }
-}
-
-void adaptive_rkSSP::write_errf(){
-  if(procID() == 0 ){
-
-    const std::string fname("adaptive_rkSSP_errf.txt");
-    
-    bool write_header;
-    { // Write header if we must
-      std::ifstream infile(fname);
-      write_header = infile.peek() == std::ifstream::traits_type::eof() ? true : false;
-    }
-
-    // Write output
-    std::ofstream f;
-    f.open(fname, std::ios_base::app);
-    const int width = 12;
-
-
-    if(write_header){
-      f << std::left << std::setw(width) << "# Step" << "\t"
-	<< std::left << std::setw(width) << "Time" << "\t"
-	<< std::left << std::setw(width) << "Time code" << "\t";
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const RefCountedPtr<cdr_solver>& solver = solver_it();
-	const std::string name = solver->get_name();
-	f << std::left << std::setw(width) << solver->get_name() << "\t";
-      }
-      f << endl;
-    }
-
-    f << std::left << std::setw(width) << m_step << "\t"
-      << std::left << std::setw(width) << m_time << "\t"            
-      << std::left << std::setw(width) << m_timecode << "\t";
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int num = solver_it.get_solver();
-      f << std::left << std::setw(width) << m_cdr_error[num] << "\t";
-    }
-    f << endl;
   }
 }
 

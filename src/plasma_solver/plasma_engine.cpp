@@ -269,7 +269,7 @@ void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const in
 
   m_amr->average_down(scratch, phase::gas);
   m_amr->interp_ghost(scratch, phase::gas);
-  m_amr->interpolate_to_centroids(scratch, phase::gas);
+  //  m_amr->interpolate_to_centroids(scratch, phase::gas);
 
 
   const Interval src_interv(comp, comp);

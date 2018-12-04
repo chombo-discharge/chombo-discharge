@@ -125,6 +125,16 @@ public:
   */
   virtual int query_ghost() const = 0;
 
+  /*!
+    @brief Pure TGA advance without source terms
+  */
+  virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
+
+  /*!
+    @brief Pure TGA advance without source terms
+  */
+  virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
+
 protected:
 
   /*!
@@ -232,15 +242,7 @@ protected:
   */
   virtual void advance_tga(EBAMRCellData& a_state, const Real a_dt);
 
-  /*!
-    @brief Pure TGA advance without source terms
-  */
-  virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
 
-  /*!
-    @brief Pure TGA advance without source terms
-  */
-  virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
 
   /*!
     @brief Advection-only extrapolation to faces

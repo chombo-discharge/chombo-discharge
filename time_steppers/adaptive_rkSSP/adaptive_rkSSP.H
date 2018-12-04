@@ -47,6 +47,7 @@ protected:
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
   int m_order;
+  int m_max_order;
   int m_error_norm;
 
   Real m_minCFL;
@@ -60,6 +61,7 @@ protected:
   Real m_sigma_error;
   Real m_max_error;
 
+  bool m_fixed_order;
   bool m_print_diagno;
   bool m_write_diagno;
   bool m_write_errf;
@@ -73,6 +75,7 @@ protected:
   bool m_adaptive_dt;
   bool m_have_dtf;
   bool m_multirate;
+  bool m_consistent_E;
   bool m_consistent_rte;
 
   time_code::which_code m_timecode;
@@ -80,8 +83,8 @@ protected:
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
 
-  void advance_fixed(const int a_substeps, const Real a_dt);
-  void advance_adaptive(int& substeps, Real& a_dt, const Real a_time, const Real a_dtc);
+  Real advance_adaptive(int& substeps, Real& a_dt, const Real a_time, const Real a_dtc);
+  Real advance_fixed(const int a_substeps, const Real a_dt);
   void advance_rk1(const Real a_time, const Real a_dt);
   void advance_rk2(const Real a_time, const Real a_dt);
   void advance_rk3(const Real a_time, const Real a_dt);
