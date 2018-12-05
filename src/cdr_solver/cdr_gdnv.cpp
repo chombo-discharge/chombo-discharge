@@ -51,7 +51,7 @@ cdr_gdnv::cdr_gdnv() : cdr_tga() {
 
 
 cdr_gdnv::~cdr_gdnv(){
-
+  this->delete_covered();
 }
 
 int cdr_gdnv::query_ghost() const {
@@ -157,7 +157,7 @@ void cdr_gdnv::allocate_internals(){
   cdr_solver::allocate_internals();
 
   if(m_which_divFnc == 1){
-    //    this->delete_covered();
+    this->delete_covered();
     this->allocate_covered();
   }
   if(m_diffusive){
@@ -208,6 +208,8 @@ void cdr_gdnv::allocate_covered(){
   const int ncomp = 1;
 
   const int finest_level = m_amr->get_finest_level();
+
+  //  this->delete_covered();
 
   m_covered_sets_lo.resize(1 + finest_level);
   m_covered_sets_hi.resize(1 + finest_level);
@@ -279,6 +281,7 @@ void cdr_gdnv::allocate_covered(){
 				     box);
 
 
+							   
 	(*m_covered_velo_lo[lvl])[dit()][dir] = new BaseIVFAB<Real>((*m_covered_sets_lo[lvl])[dit()][dir], ebgraph, ncomp);
 	(*m_covered_velo_hi[lvl])[dit()][dir] = new BaseIVFAB<Real>((*m_covered_sets_hi[lvl])[dit()][dir], ebgraph, ncomp);
 	(*m_covered_phi_lo[lvl])[dit()][dir]  = new BaseIVFAB<Real>((*m_covered_sets_lo[lvl])[dit()][dir], ebgraph, ncomp);
@@ -304,10 +307,26 @@ void cdr_gdnv::delete_covered(){
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       for (int dir = 0; dir < SpaceDim; dir++){
-	delete (*m_covered_velo_lo[lvl])[dit()][dir];
-	delete (*m_covered_velo_hi[lvl])[dit()][dir];
-	delete (*m_covered_phi_lo[lvl])[dit()][dir];
-	delete (*m_covered_phi_hi[lvl])[dit()][dir];
+	if((*m_covered_velo_lo[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_velo_lo[lvl])[dit()][dir];
+	  (*m_covered_velo_lo[lvl])[dit()][dir] = NULL;
+	}
+	if((*m_covered_velo_hi[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_velo_hi[lvl])[dit()][dir];
+	  (*m_covered_velo_hi[lvl])[dit()][dir] = NULL;
+	}
+	if((*m_covered_phi_lo[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_phi_lo[lvl])[dit()][dir];
+	  (*m_covered_phi_lo[lvl])[dit()][dir] = NULL;
+	}
+	if((*m_covered_phi_hi[lvl])[dit()][dir] != NULL){
+	  delete (*m_covered_phi_hi[lvl])[dit()][dir];
+	  (*m_covered_phi_hi[lvl])[dit()][dir] = NULL;
+	}
+	// delete (*m_covered_velo_lo[lvl])[dit()][dir];
+	// delete (*m_covered_velo_hi[lvl])[dit()][dir];
+	// delete (*m_covered_phi_lo[lvl])[dit()][dir];
+	// delete (*m_covered_phi_hi[lvl])[dit()][dir];
       }
     }
   }

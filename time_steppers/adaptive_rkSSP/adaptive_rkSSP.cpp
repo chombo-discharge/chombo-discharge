@@ -1012,6 +1012,7 @@ void adaptive_rkSSP::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 void adaptive_rkSSP::allocate_cdr_storage(){
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();
+
   m_cdr_scratch.resize(num_species);
   
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
