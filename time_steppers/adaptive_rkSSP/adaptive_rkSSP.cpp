@@ -111,27 +111,27 @@ adaptive_rkSSP::adaptive_rkSSP(){
 	m_write_diagno = true;
       }
     }
-    if(pp.contains("turn_off_advection")){
-      pp.get("turn_off_advection_source", str);
-      if(str == "true"){
+    if(pp.contains("do_advec_src")){
+      pp.get("do_advec_src", str);
+      if(str == "false"){
 	m_do_advec_src = false;
 	if(m_verbosity > 2){
 	  pout() << "adaptive_rkSSP::adaptive_rkSSP - Turning off advection & source" << endl;
 	}
       }
     }
-    if(pp.contains("turn_off_diffusion")){
-      pp.get("turn_off_diffusion", str);
-      if(str == "true"){
+    if(pp.contains("do_diffusion")){
+      pp.get("do_diffusion", str);
+      if(str == "false"){
 	m_do_diffusion = false;
 	if(m_verbosity > 2){
 	  pout() << "adaptive_rkSSP::adaptive_rkSSP - Turning off diffusion" << endl;
 	}
       }
     }
-    if(pp.contains("turn_off_rte")){
-      pp.get("turn_off_rte", str);
-      if(str == "true"){
+    if(pp.contains("do_rte")){
+      pp.get("do_rte", str);
+      if(str == "false"){
 	m_do_rte = false;
 
 	if(m_verbosity > 2){
@@ -139,9 +139,9 @@ adaptive_rkSSP::adaptive_rkSSP(){
 	}
       }
     }
-    if(pp.contains("turn_off_poisson")){
-      pp.get("turn_off_poisson", str);
-      if(str == "true"){
+    if(pp.contains("do_poisson")){
+      pp.get("do_poisson", str);
+      if(str == "false"){
 	m_do_poisson = false;
 
 	if(m_verbosity > 2){
@@ -203,7 +203,7 @@ Real adaptive_rkSSP::advance(const Real a_dt){
     pout() << "adaptive_rkSSP::advance" << endl;
   }
 
-  this->cache_solutions(); // Store old solution. 
+  this->cache_solutions(); // Store old solution.
 
   // When we enter this routine, solvers should have been filled with valid ready and be ready for
   // advancement
@@ -249,9 +249,9 @@ Real adaptive_rkSSP::advance(const Real a_dt){
   
   // Put cdr solvers back in useable state so that we can reliably compute the next time step.
   this->compute_cdr_gradients();
+  adaptive_rkSSP::compute_cdr_sources(m_time + a_dt);
   adaptive_rkSSP::compute_cdr_velo(m_time + a_dt);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
-  adaptive_rkSSP::compute_cdr_sources(m_time + a_dt);
 
   // Print diagnostics
   if(m_print_diagno){
@@ -271,7 +271,7 @@ Real adaptive_rkSSP::advance(const Real a_dt){
       pout() << "\t\t Local dt  = " << m_dt_adapt << endl;
     }
   }
-
+  
   return actual_dt;
 }
 
@@ -281,9 +281,11 @@ void adaptive_rkSSP::advance_diffusion(const Real a_time, const Real a_dt){
     pout() << "adaptive_rkSSP::advance_diffusion" << endl;
   }
 
-  this->advance_tga_diffusion(a_time, a_dt);   // This is the 2nd order update
-  this->advance_euler_diffusion(a_time, a_dt); // This is the embedded formula 1st order update, it uses
-                                               // the solution from advance_tga_diffusion as initial guess in order to optimize. 
+  if(m_do_diffusion){
+    this->advance_tga_diffusion(a_time, a_dt);   // This is the 2nd order update
+    this->advance_euler_diffusion(a_time, a_dt); // This is the embedded formula 1st order update, it uses the solution from
+                                                 // advance_tga_diffusion as initial guess in order to optimize.
+  }
 }
 
 void adaptive_rkSSP::advance_tga_diffusion(const Real a_time, const Real a_dt){
@@ -598,16 +600,20 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
     pout() << "adaptive_rkSSP::advance_rk2" << endl;
   }
 
+  Real sumdivF = 0.0;
+  Vector<Real> t(0);
   // u^1 = u^n + dt*L(u^n)
   // u^n resides in cache, put u^1 in the solver. Use scratch for computing L(u^n)
   {
+    t.push_back(MPI_Wtime());
     // CDR gradients already computed so proceed as usual
     this->compute_cdr_domain_states();
     this->compute_cdr_eb_states();
     this->compute_cdr_domain_fluxes(a_time);
     this->compute_cdr_fluxes(a_time);
     this->compute_sigma_flux();
-    
+
+    t.push_back(MPI_Wtime());
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<cdr_solver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -617,7 +623,10 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
       EBAMRCellData& src  = solver->get_source();
       EBAMRCellData& pre  = storage->get_previous();
 
+      const Real t0 = MPI_Wtime();
       solver->compute_divF(rhs, phi, 0.0, true); // RHS =  div(u*v)
+      const Real t1 = MPI_Wtime();
+      sumdivF += (t1-t0);
 
       data_ops::scale(rhs, -1.0);                // RHS = -div(u*v)
       data_ops::incr(rhs, src, 1.0);             // RHS = S - div(u*v)
@@ -632,6 +641,7 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
     }
 
     // Advance sigma
+    t.push_back(MPI_Wtime());
     EBAMRIVData& phi = m_sigma->get_state();
     EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
     EBAMRIVData& pre = m_sigma_scratch->get_previous();
@@ -644,12 +654,14 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
     m_sigma->reset_cells(phi);
 
     // Embedded Euler method
+    t.push_back(MPI_Wtime());
     EBAMRIVData& err = m_sigma_scratch->get_error();
     data_ops::set_value(err, 0.0);
     data_ops::incr(err, phi, 1.0);  // err = u^n + dt*L(u^n)
   }
 
   // For consistent computations, elliptic equations must be updated
+  t.push_back(MPI_Wtime());
   if(m_consistent_E){ // Must update E and RTE
     if(m_do_poisson){ // Solve Poisson equation
       if((m_step +1) % m_fast_poisson == 0){
@@ -667,6 +679,7 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
   // u^(n+1) = 0.5*(u^n + u^1 + dt*L(u^(1)))
   // u^n resides in temp storage, u^1 resides in solver. Put u^2 in solver at end and use scratch fo computing L(u^1)
   {
+    t.push_back(MPI_Wtime());
     this->compute_cdr_gradients();
     this->compute_cdr_domain_states();
     this->compute_cdr_eb_states();
@@ -674,6 +687,7 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
     this->compute_cdr_fluxes(a_time + a_dt);
     this->compute_sigma_flux();
 
+    t.push_back(MPI_Wtime());
     if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
 
@@ -685,8 +699,12 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
       EBAMRCellData& rhs = storage->get_scratch();  // Storage for RHS
       EBAMRCellData& src = solver->get_source();    // Source
       EBAMRCellData& pre = storage->get_previous(); // u^n
-
+      
+      const Real t0 = MPI_Wtime();
       solver->compute_divF(rhs, phi, 0.0, true);   // RHS =  div(u^1*v)
+      const Real t1 = MPI_Wtime();
+      sumdivF += (t1-t0);
+      
       data_ops::scale(rhs, -1.0);                  // RHS = -div(u^1*v)
       data_ops::incr(rhs, src, 1.0);               // RHS = S - div(u^1*v)
       data_ops::incr(phi, rhs, a_dt);              // phi = u^1 + dt*L(u^1)
@@ -698,6 +716,7 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
     }
 
     // Advance sigma
+    t.push_back(MPI_Wtime());
     EBAMRIVData& phi = m_sigma->get_state();
     EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
     EBAMRIVData& pre = m_sigma_scratch->get_previous();
@@ -710,7 +729,21 @@ void adaptive_rkSSP::advance_rk2(const Real a_time, const Real a_dt){
 
     m_amr->average_down(phi, m_cdr->get_phase());
     m_sigma->reset_cells(phi);
+    t.push_back(MPI_Wtime());
   }
+  t.push_back(MPI_Wtime());
+
+  if(procID() == 0){
+    const Real T = t[t.size()-1] - t[0];
+    for (int i = 1; i < t.size(); i++){
+      //      std::cout << "i = " << 100.*(t[i] - t[i-1])/T << std::endl;
+    }
+#if 0
+    std::cout << "T = " << T << std::endl;
+    std::cout << "sumdivF = " << sumdivF << std::endl;
+#endif
+  }
+  //  MayDay::Abort("stop");
 }
 
 void adaptive_rkSSP::advance_rk3(const Real a_time, const Real a_dt){
@@ -1381,34 +1414,6 @@ void adaptive_rkSSP::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_s
 				   extrap_rte_fluxes,
 				   E,
 				   a_time);
-  
-#if 0
-  // Extrapolate densities, velocities, and fluxes
-
-  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
-
-  // Compute RTE flux on the boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
-
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_domain_flux(flux_eb, solver->get_state());
-    extrap_rte_fluxes.push_back(&flux_eb);
-  }
-
-  const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
-
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
-				   extrap_cdr_fluxes,
-				   extrap_cdr_densities,
-				   extrap_cdr_velocities,
-				   extrap_cdr_gradients,
-				   extrap_rte_fluxes,
-				   E,
-				   a_time);
-#endif
 }
 
 void adaptive_rkSSP::compute_sigma_flux(){

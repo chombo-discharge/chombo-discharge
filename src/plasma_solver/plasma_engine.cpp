@@ -1555,7 +1555,7 @@ void plasma_engine::setup_poisson_only(){
   else {
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
-
+  
   if(!m_read_ebis){
     m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
 				 m_amr->get_finest_domain(),
@@ -1571,6 +1571,7 @@ void plasma_engine::setup_poisson_only(){
 
     m_compgeom->build_geo_from_files(path_gas, path_sol);
   }
+    
 
   this->get_geom_tags();       // Get geometric tags.
   
@@ -2634,6 +2635,22 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
 	  advSec, 
 	  advMs);
   pout() << metrics << endl;
+
+    // Hours, minutes, seconds and millisecond of the previous iteration
+  const Real wt_ns = (m_wallclock2 - m_wallclock1)*1.E-9/m_dt;
+  const int wt_Hrs = floor(wt_ns/3600);
+  const int wt_Min = floor((wt_ns - 3600*wt_Hrs)/60);
+  const int wt_Sec = floor( wt_ns - 3600*wt_Hrs - 60*wt_Min);
+  const int wt_Ms  = floor((wt_ns - 3600*wt_Hrs - 60*wt_Min - wt_Sec)*1000);
+  sprintf(metrics, 
+	  "%31c -- Wall time per ns      : %3.3ih %2.2im %2.2is %3.3ims",
+	  ' ',
+	  wt_Hrs, 
+	  wt_Min, 
+	  wt_Sec, 
+	  wt_Ms);
+  pout() << metrics << endl;
+
 
   // This is the time remaining
   const Real maxPercent = Max(percentTime, percentStep);

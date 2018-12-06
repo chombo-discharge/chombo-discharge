@@ -602,6 +602,9 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     pout() << "Total time:       " << T << endl;
 #endif
   }
+  else{
+    data_ops::set_value(a_divF, 0.0);
+  }
 }
 
 void cdr_tga::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){

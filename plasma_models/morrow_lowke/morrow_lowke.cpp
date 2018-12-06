@@ -179,6 +179,8 @@ RealVect morrow_lowke::compute_vn(const RealVect& a_E) const{
 Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_densities,
 						const Vector<Real>& a_photon_densities,
 						const RealVect&     a_E) const {
+  Vector<Real> source(m_num_species, 0.0);
+
   const Vector<RealVect> vel = this->compute_velocities(a_E); // Does it's own conversion
 
   const Real alpha  = this->compute_alpha(a_E); // Ionization coefficient
@@ -201,7 +203,7 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_de
 							 + photon2->get_A()*a_photon_densities[m_photon2_idx]
 							 + photon3->get_A()*a_photon_densities[m_photon3_idx]);
 
-  Vector<Real> source(m_num_species, 0.0); 
+
   Real& Se = source[m_nelec_idx];
   Real& Sp = source[m_nplus_idx];
   Real& Sn = source[m_nminu_idx];
