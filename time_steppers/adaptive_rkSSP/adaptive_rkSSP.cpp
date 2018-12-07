@@ -271,6 +271,7 @@ Real adaptive_rkSSP::advance(const Real a_dt){
       pout() << "\t\t Local dt  = " << m_dt_adapt << endl;
     }
   }
+
   
   return actual_dt;
 }
@@ -1096,6 +1097,9 @@ void adaptive_rkSSP::deallocate_internals(){
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
   }
+
+  m_cdr_scratch.resize(0);
+  m_rte_scratch.resize(0);
 
   m_poisson_scratch->deallocate_storage();
   m_poisson_scratch = RefCountedPtr<poisson_storage>(0);

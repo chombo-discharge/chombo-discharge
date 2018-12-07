@@ -45,11 +45,23 @@ amr_mesh::amr_mesh(){
   this->set_irreg_sten_order(1);
   this->set_irreg_sten_radius(1);
   this->set_balance(load_balance::volume);
-  this->set_irreg_sten_type(stencil_type::linear);
+  this->set_irreg_sten_type(stencil_type::taylor);
   this->set_ghost_interpolation(ghost_interpolation::pwl);
 
   m_finest_level = 0;
   m_has_grids = false;
+
+#if 1
+  // This is a fucking HACK! I have no idea why this work, and we should check that out. But, for some reason
+  // if we use refinement of 4, without a 2 at the end (even if this is NOT used anywhere?!?!?), we get memory
+  // leaks through define_eblevelgrid() in the setMaxCoarseningRatio stuff. I don't know if this leak is real,
+  // but that's what valgrind tells me....
+  //
+  // Robert Marskar, Dec 7 (2018)
+  //
+  m_ref_ratios.resize(m_max_amr_depth);
+  m_ref_ratios.push_back(2);
+#endif
 }
 
 amr_mesh::~amr_mesh(){

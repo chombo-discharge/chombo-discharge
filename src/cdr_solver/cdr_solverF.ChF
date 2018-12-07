@@ -83,7 +83,7 @@
 
       real_t vel, dt
       integer chf_ddecl[i; j; k]
-      
+
 #if CH_SPACEDIM==3
       do k = CHF_LBOUND[dcalc;2], CHF_UBOUND[dcalc;2]
 #endif
@@ -136,5 +136,32 @@
       enddo
 #endif
 
+      return
+      end
+
+      subroutine get_max_vel(
+     &     chf_real[max_vel],
+     &     chf_const_fra1[velo],
+     &     chf_box[box],
+     &     chf_const_fba1[mask])
+
+      real_t vel, dt
+      integer chf_ddecl[i; j; k]
+      CHF_MULTIDO[box; i; j; k]
+         max_vel = max(max_vel, abs(velo(CHF_IX[i;j;k]))*mask(CHF_IX[i;j;k]))
+      CHF_ENDDO
+      return
+      end
+
+      subroutine get_maxnorm(
+     &     chf_real[max_vel],
+     &     chf_const_fra1[velo],
+     &     chf_box[box])
+
+      real_t vel, dt
+      integer chf_ddecl[i; j; k]
+      CHF_MULTIDO[box; i; j; k]
+         max_vel = max(max_vel, abs(velo(CHF_IX[i;j;k])));
+      CHF_ENDDO
       return
       end

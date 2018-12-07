@@ -197,7 +197,7 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real& kdet = m_electron_detachment;
 
   const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E));
-  const Real alpha_corr = Max(zero, alpha*(1 - factor));
+  const Real alpha_corr = alpha;//Max(zero, alpha*(1 - factor));
   //  const Real eta_corr   = Max(zero, eta*(1 + factor));
   //  const Real alpha_corr = alpha;
   const Real eta_corr   = eta;
@@ -323,6 +323,7 @@ Vector<Real> air_bolsig::compute_anode_flux(const Vector<Real>& a_extrapolated_f
   for (int i = 0; i < m_num_species; i++){
     fluxes[i] = Max(zero, a_extrapolated_fluxes[i]);
   }
+  fluxes[m_nplus_idx] = a_extrapolated_fluxes[m_nplus_idx];
 
 
   return fluxes;
@@ -505,7 +506,7 @@ air_bolsig::positive_species::positive_species(){
   m_unit      = "m-3";
   m_charge    = 1;
   m_diffusive = false;
-  m_mobile    = true;
+  m_mobile    = false;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -536,7 +537,7 @@ air_bolsig::negative_species::negative_species(){
   m_unit      = "m-3";
   m_charge    = -1;
   m_diffusive = false;
-  m_mobile    = true;
+  m_mobile    = false;
 }
 
 air_bolsig::negative_species::~negative_species(){

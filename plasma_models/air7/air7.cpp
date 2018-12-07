@@ -204,16 +204,20 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
 					    const Vector<Real>&     a_cdr_densities,
 					    const Vector<Real>&     a_rte_densities,
 					    const Vector<RealVect>& a_grad_cdr) const {
-  Vector<Real> source(m_num_species, 0.0);
+  Vector<Real> source(m_num_species, 0.0); 
 
   const Real ET       = a_E.vectorLength()/(m_N*units::s_Td);
   const Real Te       = this->compute_electron_temperature(ET);
   const RealVect vele = -1.0*this->compute_electron_mobility(ET)*(a_E);
   const Real De       = this->compute_electron_diffusion(ET);
 
-
+#if 0 // Original code
   const Real k1  = this->compute_townsend_ionization_N2(ET);
   const Real k2  = this->compute_townsend_ionization_O2(ET);
+#else
+  const Real k1  = 0.0;
+  const Real k2  = 0.0;
+#endif
   const Real k3  = this->compute_N2plus_N2_M_to_N4plus_M();
   const Real k4  = this->compute_N4plus_O2_to_O2plus_2N2();
   const Real k5  = this->compute_N2plus_O2_to_O2plus_N2();
@@ -227,7 +231,6 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const Real k13 = this->compute_O2minus_O4plus_to_3O2();
   const Real k14 = this->compute_O2minus_O4plus_M_to_3O2_M();
   const Real k15 = this->compute_O2minus_O2plus_M_to_2O2_M();
-
 
   const Real n_N2    = m_N*m_N2frac;
   const Real n_O2    = m_N*m_O2frac;
@@ -664,11 +667,11 @@ Real air7::compute_e_O4plus_to_2O2(const Real a_Te) const {
 }
 
 Real air7::compute_e_O2plus_to_2O(const Real a_Te) const {
-  return 6E-11/(a_Te);
+  return 2E-13*(300.0/a_Te);
 }
 
 Real air7::compute_e_2O2_to_O2minus_O2(const Real a_Te) const {
-  return 6E-39/(a_Te);
+  return 2E-41*(300.0/a_Te);
 }
 
 Real air7::compute_O2minus_O4plus_to_3O2() const {

@@ -113,31 +113,12 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
     m_ivs[dit()] = bco.get_ivs();
   }
 
-  this->define_vofiter();
   this->set_bco(a_bco);
   this->build_stencils();
 
   m_defined = true;
 }
 
-void jump_bc::define_vofiter(){
-  CH_TIME("jump_bc::define_vofiter");
-
-  const int phase1 = 0;
-  const int phase2 = 1;
-  
-  for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
-    VoFIterator& vofit_g = m_vofit_gas[dit()];
-    VoFIterator& vofit_s = m_vofit_sol[dit()];
-
-    const IntVectSet& ivs = m_bco[dit()].get_ivs();
-    const EBGraph& graph1 = m_bco[dit()].get_ivfab(phase1).getEBGraph();
-    const EBGraph& graph2 = m_bco[dit()].get_ivfab(phase2).getEBGraph();
-
-    vofit_g.define(ivs, graph1);
-    vofit_s.define(ivs, graph2);
-  }
-}
 
 void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
   CH_TIME("jump_bc::build_stencils");

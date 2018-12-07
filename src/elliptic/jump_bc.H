@@ -217,11 +217,6 @@ protected:
   LayoutData<VoFIterator> m_vofit_bc;
 
   /*!
-    @brief Define VoFIterators
-  */
-  virtual void define_vofiter();
-
-  /*!
     @brief Set b-coefficient
   */
   virtual void set_bco(const LevelData<MFBaseIVFAB>& a_bco);

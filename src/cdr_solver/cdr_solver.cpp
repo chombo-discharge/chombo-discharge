@@ -1540,6 +1540,8 @@ Real cdr_solver::compute_cfl_dt(){
     pout() << m_name + "::compute_cfl_dt" << endl;
   }
 
+  const Real SAFETY = 1.E-10; 
+
   Real min_dt = 1.E99;
 
   const int comp  = 0;
@@ -1552,28 +1554,46 @@ Real cdr_solver::compute_cfl_dt(){
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
     const Real dx                = m_amr->get_dx()[lvl];
 
+    Real max_vel = 0.0;
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
+      const IntVectSet ivs(ebisbox.getIrregIVS(box));
 
+      int fab_type;
+      const BaseFab<char>& mask     = ebgraph.getMask(fab_type);
       const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-      FORT_ADVECTIVE_CFL(CHF_CONST_FRA(velo_fab),
-			 CHF_CONST_REAL(dx),
-			 CHF_BOX(box),
-			 CHF_REAL(min_dt));
 
-      // Irregular and multicells
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      	const VolIndex vof = vofit();
-      	const RealVect u  = RealVect(D_DECL(velo(vof, 0), velo(vof, 1), velo(vof, 2)));
-      	const Real thisdt = dx/u.vectorLength();
-
-      	min_dt = Min(min_dt, thisdt);
+      if(fab_type != -1){// not all covered
+	if(fab_type == 0){ // Has irregular cells
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    FORT_GET_MAX_VEL(CHF_REAL(max_vel),
+			     CHF_CONST_FRA1(velo_fab, dir),
+			     CHF_BOX(box),
+			     CHF_CONST_FBA1(mask, 0));
+	  }
+	  for (VoFIterator vofit(ebisbox.getMultiCells(box), ebgraph); vofit.ok(); ++vofit){
+	    const VolIndex& vof = vofit();
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      max_vel = Max(max_vel, Abs(velo(vof, dir)));
+	    }
+	  }
+	}
+	else { // all regular
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    FORT_GET_MAXNORM(CHF_REAL(max_vel),
+			     CHF_CONST_FRA1(velo_fab, dir),
+			     CHF_BOX(box));
+	  }
+	}
       }
     }
+
+    
+    max_vel = Max(max_vel, SAFETY);
+    min_dt  = Min(min_dt, dx/max_vel);
   }
 
   

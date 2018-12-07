@@ -15,6 +15,7 @@ air7::electron::electron(){
   m_unit      = "m-3";
   m_charge    = -1;
   m_diffusive = true;
+  m_mobile    = true;
 
   {// Get initial parameter
     ParmParse pp("air7");
@@ -39,6 +40,7 @@ air7::N2plus::N2plus(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile    = false;
 
   Real Tg, p, N, O2frac, N2frac;
   air7::get_gas_parameters(Tg, p, N, O2frac, m_N2frac);
@@ -59,6 +61,7 @@ air7::O2plus::O2plus(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile    = false;
 
   Real Tg, p, N, O2frac, N2frac;
   air7::get_gas_parameters(Tg, p, N, m_O2frac, N2frac);
@@ -79,6 +82,7 @@ air7::N4plus::N4plus(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile    = false;
 }
 
 air7::N4plus::~N4plus(){
@@ -90,6 +94,7 @@ air7::O4plus::O4plus(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile    = false;
 }
 
 air7::O4plus::~O4plus(){
@@ -101,6 +106,7 @@ air7::O2plusN2::O2plusN2(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile    = false;
 }
 
 air7::O2plusN2::~O2plusN2(){
@@ -112,6 +118,7 @@ air7::O2minus::O2minus(){
   m_unit   = "m-3";
   m_charge = -1;
   m_diffusive = false;
+  m_mobile    = false;
 }
 
 air7::O2minus::~O2minus(){

@@ -141,6 +141,59 @@ inline void FORTRAN_NAME(inlineSOURCE_DT, inlineSOURCE_DT)(
 }
 #endif  // GUARDSOURCE_DT 
 
+#ifndef GUARDGET_MAX_VEL 
+#define GUARDGET_MAX_VEL 
+// Prototype for Fortran procedure get_max_vel ...
+//
+void FORTRAN_NAME( GET_MAX_VEL ,get_max_vel )(
+      CHFp_REAL(max_vel)
+      ,CHFp_CONST_FRA1(velo)
+      ,CHFp_BOX(box)
+      ,CHFp_CONST_FBA1(mask) );
+
+#define FORT_GET_MAX_VEL FORTRAN_NAME( inlineGET_MAX_VEL, inlineGET_MAX_VEL)
+#define FORTNT_GET_MAX_VEL FORTRAN_NAME( GET_MAX_VEL, get_max_vel)
+
+inline void FORTRAN_NAME(inlineGET_MAX_VEL, inlineGET_MAX_VEL)(
+      CHFp_REAL(max_vel)
+      ,CHFp_CONST_FRA1(velo)
+      ,CHFp_BOX(box)
+      ,CHFp_CONST_FBA1(mask) )
+{
+ CH_TIMELEAF("FORT_GET_MAX_VEL");
+ FORTRAN_NAME( GET_MAX_VEL ,get_max_vel )(
+      CHFt_REAL(max_vel)
+      ,CHFt_CONST_FRA1(velo)
+      ,CHFt_BOX(box)
+      ,CHFt_CONST_FBA1(mask) );
+}
+#endif  // GUARDGET_MAX_VEL 
+
+#ifndef GUARDGET_MAXNORM 
+#define GUARDGET_MAXNORM 
+// Prototype for Fortran procedure get_maxnorm ...
+//
+void FORTRAN_NAME( GET_MAXNORM ,get_maxnorm )(
+      CHFp_REAL(max_vel)
+      ,CHFp_CONST_FRA1(velo)
+      ,CHFp_BOX(box) );
+
+#define FORT_GET_MAXNORM FORTRAN_NAME( inlineGET_MAXNORM, inlineGET_MAXNORM)
+#define FORTNT_GET_MAXNORM FORTRAN_NAME( GET_MAXNORM, get_maxnorm)
+
+inline void FORTRAN_NAME(inlineGET_MAXNORM, inlineGET_MAXNORM)(
+      CHFp_REAL(max_vel)
+      ,CHFp_CONST_FRA1(velo)
+      ,CHFp_BOX(box) )
+{
+ CH_TIMELEAF("FORT_GET_MAXNORM");
+ FORTRAN_NAME( GET_MAXNORM ,get_maxnorm )(
+      CHFt_REAL(max_vel)
+      ,CHFt_CONST_FRA1(velo)
+      ,CHFt_BOX(box) );
+}
+#endif  // GUARDGET_MAXNORM 
+
 }
 
 #endif

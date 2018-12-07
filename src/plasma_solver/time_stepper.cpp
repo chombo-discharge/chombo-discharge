@@ -531,8 +531,11 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   // Delete extra storage - didn't use smart pointers for this...
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
+    m_amr->deallocate(*grad_cdr[idx]);
     delete grad_cdr[idx];
+    //    delete grad_cdr[idx];
   }
+
 }
 
 void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
@@ -570,6 +573,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
   m_amr->interp_ghost(grad_E, m_cdr->get_phase());   // Interpolate ghost cells
 
+
   // Stencils for extrapolating things to cell centroids
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
 
@@ -599,6 +603,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
       const EBCellFAB& gE = (*grad_E[lvl])[dit()];
 
       // This does all cells
+
       time_stepper::compute_cdr_sources_reg(sources,
 					    cdr_densities,
 					    cdr_gradients,
@@ -631,6 +636,8 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     m_amr->average_down(*a_sources[idx], m_cdr->get_phase());
     m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
   }
+
+
 }
 
 void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sources,
@@ -647,6 +654,7 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
     pout() << "time_stepper::compute_cdr_sources_reg" << endl;
   }
 
+
   const Real zero = 0.0;
   
   const int num_photons  = m_plaskin->get_num_photons();
@@ -662,7 +670,6 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
   Vector<Real>     cdr_densities(num_species);
   Vector<Real>     rte_densities(num_photons);
   Vector<RealVect> cdr_grad(num_species);
-  Vector<Real>     sources(num_species);
 
   // Computed source terms onto here
   EBCellFAB tmp(ebisbox, a_E.getRegion(), num_species);
@@ -693,16 +700,18 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
     }
 
     // Compute source terms
-    sources = m_plaskin->compute_cdr_source_terms(a_time,
-						  pos,
-						  E,
-						  grad_E,
-						  cdr_densities,
-						  rte_densities,
-						  cdr_grad);
+    const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
+								     pos,
+								     E,
+								     grad_E,
+								     cdr_densities,
+								     rte_densities,
+								     cdr_grad);
 
-    for (int i = 0; i < sources.size(); i++){
-      tmp(vof,i) = sources[i];
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      tmp(vof,idx) = sources[idx];
     }
   }
 
@@ -1112,6 +1121,7 @@ void time_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, const EB
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
+    m_amr->deallocate(*cdr_extrap[idx]);
     delete cdr_extrap[idx];
   }
 }
@@ -2107,8 +2117,6 @@ void time_stepper::set_relax_level(const Real a_relax_level){
   ParmParse pp("time_stepper");
   pp.query("relax_level", m_relax_level);
 }
-
-
 
 void time_stepper::set_source_growth(const Real a_src_growth){
   m_src_growth = a_src_growth;
