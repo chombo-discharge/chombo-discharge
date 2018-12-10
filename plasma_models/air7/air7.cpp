@@ -211,13 +211,8 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const RealVect vele = -1.0*this->compute_electron_mobility(ET)*(a_E);
   const Real De       = this->compute_electron_diffusion(ET);
 
-#if 0 // Original code
   const Real k1  = this->compute_townsend_ionization_N2(ET);
   const Real k2  = this->compute_townsend_ionization_O2(ET);
-#else
-  const Real k1  = 0.0;
-  const Real k2  = 0.0;
-#endif
   const Real k3  = this->compute_N2plus_N2_M_to_N4plus_M();
   const Real k4  = this->compute_N4plus_O2_to_O2plus_2N2();
   const Real k5  = this->compute_N2plus_O2_to_O2plus_N2();
