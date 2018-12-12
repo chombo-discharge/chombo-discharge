@@ -295,7 +295,9 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
     fluxes[i] = Max(zero, a_extrapolated_fluxes[i]);
   }
 
-  // For electrons, we add ion bombardment of positive ions and the photoelectric effect
+  // For electrons, we add ion bombardment and the photoelectric effect
+
+  // Ion bombardment
   fluxes[m_nelec_idx] = zero;
   fluxes[m_nelec_idx] += -Max(zero, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_electrode;
 
@@ -303,59 +305,6 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_electrode_quantum_efficiency;
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_electrode_quantum_efficiency;
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_electrode_quantum_efficiency;
-
-  const RealVect velo = compute_velocities(a_E)[m_nelec_idx];
-  Real secondary_fluxes = fluxes[m_nelec_idx];
-  Real ngamma = Abs(secondary_fluxes/PolyGeom::dot(velo, a_normal));
-
-#if 1 // Extrapolate fluxes
-  //  fluxes[m_nelec_idx] = a_extrapolated_fluxes[m_nelec_idx];
-  fluxes[m_nminu_idx] = a_extrapolated_fluxes[m_nminu_idx];
-#endif
-
-  const Real m_dielectric_work = 1.0;
-  const Real W  = m_dielectric_work*units::s_eV;
-  const Real dW = sqrt(units::s_Qe*units::s_Qe*units::s_Qe*a_E.vectorLength()/(4.0*units::s_pi*units::s_eps0));
-  const Real T  = 300.;
-  const Real A  = 1200000;
-  const Real Js = A*T*T*exp(-(W-dW)/(units::s_kb*T))/units::s_Qe;
-  fluxes[m_nelec_idx] += -Js;
-  
-#if 0 // Add the thermal electron influx
-  const Real a_EbyN = a_E.vectorLength()/(m_N*units::s_Td);
-  const Real safety = 1.0; // To avoid division by zero
-  const Real minE   = 10;
-  const Real maxE   = 6000;
-  const Real min_eV = 0.9559;
-  const Real max_eV = 91.06;
-
-  Real temp = 0.0;
-  if(a_EbyN < minE){
-    temp = min_eV;
-  }
-  else if(a_EbyN > maxE){
-    temp = max_eV;
-  }
-  else {
-    const Real A = -3.920;
-    const Real B =  0.9681;
-    const Real C =  62.01;
-    const Real D = -1517;
-    const Real E =  0.1062E5;
-
-    const Real x = a_EbyN;
-    temp = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
-  }
-
-  temp = 0.8616 + (42.56 - 0.8616)/3000*a_EbyN;
-
-  // temp is in energy so far, make it into Kelvin by E = 1.5*k_b*T
-  temp *= units::s_Qe;          // eV -> Joule
-  temp *= 1./(1.5*units::s_kb); // Mean temperature
-
-  const Real vth_e = sqrt(8.0*units::s_kb*temp/(units::s_pi*units::s_me));
-  fluxes[m_nelec_idx] += -0.25*vth_e*a_cdr_densities[m_nelec_idx];
-#endif
 
   return fluxes;
 }
