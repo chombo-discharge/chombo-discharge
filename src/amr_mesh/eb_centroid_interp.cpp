@@ -60,6 +60,34 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
 
+#if 1 // Try out the new stencil stuff
+  Vector<VoFStencil> point_stencils;
+  Vector<Real> distance_along_lines;
+  bool drop_order = true;
+  EBArith::johanStencil(drop_order, point_stencils, distance_along_lines, a_vof, a_ebisbox, a_dx*RealVect::Unit, a_cfivs);
+
+  if(!drop_order && distance_along_lines.size() >= 2){
+    found_stencil = true;
+    const Real x1 = distance_along_lines[0];
+    const Real x2 = distance_along_lines[1];
+
+    // This is the stencil for the slope between x1 and x2
+    VoFStencil slope = point_stencils[0];
+    slope *= -1.0;
+    slope += point_stencils[1];
+    slope *= -1./(x2-x1);
+
+    // This is the stencil that extrapolates from x1 to the EB
+    VoFStencil extrap = slope;
+    extrap *= -x1;
+    extrap += point_stencils[1];
+    
+    a_sten = extrap;
+  }
+
+
+#endif
+
   // If we couldn't find a stencil, try other types in this order
   if(!found_stencil){
     const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);

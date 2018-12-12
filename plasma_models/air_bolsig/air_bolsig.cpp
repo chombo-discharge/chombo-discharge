@@ -197,9 +197,8 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real& kdet = m_electron_detachment;
 
   const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E));
-  const Real alpha_corr = alpha;//Max(zero, alpha*(1 - factor));
-  //  const Real eta_corr   = Max(zero, eta*(1 + factor));
-  //  const Real alpha_corr = alpha;
+  // const Real alpha_corr = Max(zero, alpha*(1 - factor));
+  const Real alpha_corr = alpha;
   const Real eta_corr   = eta;
   Se = alpha_corr*Ne*ve - eta_corr*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
   Sp = alpha_corr*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
@@ -305,6 +304,58 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_electrode_quantum_efficiency;
   fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_electrode_quantum_efficiency;
 
+  const RealVect velo = compute_velocities(a_E)[m_nelec_idx];
+  Real secondary_fluxes = fluxes[m_nelec_idx];
+  Real ngamma = Abs(secondary_fluxes/PolyGeom::dot(velo, a_normal));
+
+#if 1 // Extrapolate fluxes
+  //  fluxes[m_nelec_idx] = a_extrapolated_fluxes[m_nelec_idx];
+  fluxes[m_nminu_idx] = a_extrapolated_fluxes[m_nminu_idx];
+#endif
+
+  const Real m_dielectric_work = 1.0;
+  const Real W  = m_dielectric_work*units::s_eV;
+  const Real dW = sqrt(units::s_Qe*units::s_Qe*units::s_Qe*a_E.vectorLength()/(4.0*units::s_pi*units::s_eps0));
+  const Real T  = 300.;
+  const Real A  = 1200000;
+  const Real Js = A*T*T*exp(-(W-dW)/(units::s_kb*T))/units::s_Qe;
+  fluxes[m_nelec_idx] += -Js;
+  
+#if 0 // Add the thermal electron influx
+  const Real a_EbyN = a_E.vectorLength()/(m_N*units::s_Td);
+  const Real safety = 1.0; // To avoid division by zero
+  const Real minE   = 10;
+  const Real maxE   = 6000;
+  const Real min_eV = 0.9559;
+  const Real max_eV = 91.06;
+
+  Real temp = 0.0;
+  if(a_EbyN < minE){
+    temp = min_eV;
+  }
+  else if(a_EbyN > maxE){
+    temp = max_eV;
+  }
+  else {
+    const Real A = -3.920;
+    const Real B =  0.9681;
+    const Real C =  62.01;
+    const Real D = -1517;
+    const Real E =  0.1062E5;
+
+    const Real x = a_EbyN;
+    temp = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
+  }
+
+  temp = 0.8616 + (42.56 - 0.8616)/3000*a_EbyN;
+
+  // temp is in energy so far, make it into Kelvin by E = 1.5*k_b*T
+  temp *= units::s_Qe;          // eV -> Joule
+  temp *= 1./(1.5*units::s_kb); // Mean temperature
+
+  const Real vth_e = sqrt(8.0*units::s_kb*temp/(units::s_pi*units::s_me));
+  fluxes[m_nelec_idx] += -0.25*vth_e*a_cdr_densities[m_nelec_idx];
+#endif
 
   return fluxes;
 }
@@ -506,7 +557,7 @@ air_bolsig::positive_species::positive_species(){
   m_unit      = "m-3";
   m_charge    = 1;
   m_diffusive = false;
-  m_mobile    = false;
+  m_mobile    = true;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -537,7 +588,7 @@ air_bolsig::negative_species::negative_species(){
   m_unit      = "m-3";
   m_charge    = -1;
   m_diffusive = false;
-  m_mobile    = false;
+  m_mobile    = true;
 }
 
 air_bolsig::negative_species::~negative_species(){

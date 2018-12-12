@@ -92,6 +92,10 @@ public:
 
   static void floor(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
+  static void floor(EBAMRIVData& a_lhs, const Real a_value);
+
+  static void floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value);
+
   static void get_max_min(Real& max, Real& min, EBAMRCellData& a_E, const int a_comp);
 
   static void get_max_min(Real& max, Real& min, LevelData<EBCellFAB>& a_E, const int a_comp);

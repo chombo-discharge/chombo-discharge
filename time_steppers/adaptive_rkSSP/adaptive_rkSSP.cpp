@@ -1242,8 +1242,12 @@ void adaptive_rkSSP::compute_cdr_eb_states(){
     cdr_gradients.push_back(&(storage->get_gradient()));
   }
 
-  // Extrapolate states to the EB
+  // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary
   this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    data_ops::floor(*eb_states[idx], 0.0);
+  }
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
@@ -1342,7 +1346,6 @@ void adaptive_rkSSP::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, 
   }
 
   const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
-
   time_stepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,

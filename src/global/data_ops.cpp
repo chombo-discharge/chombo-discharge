@@ -680,6 +680,27 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
   }
 }
 
+void data_ops::floor(EBAMRIVData& a_lhs, const Real a_value){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::floor(*a_lhs[lvl], a_value);
+  }
+}
+
+void data_ops::floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
+  const int ncomp = a_lhs.nComp();
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    BaseIVFAB<Real>& lhs   = a_lhs[dit()];
+    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int comp = 0; comp < a_lhs.nComp(); comp++){
+	const Real value = lhs(vof, comp);
+	lhs(vof, comp) = Max(value, a_value);
+      }
+    }
+  }
+}
+
 void data_ops::kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
 
 

@@ -29,7 +29,7 @@ public:
 
   // Inline this shit
   const Box& box() const{ return m_box; }
-  const int nComp() const { return m_nComp; }
+  int nComp() const { return m_nComp; }
   const ProblemDomain& get_domain() const { return m_domain;}
   EBISBox getEBISBox() const {return m_ebisbox;}
   void define(const DomainFluxIFFAB& a_copy){define(a_copy.get_domain(), a_copy.getEBISBox(), a_copy.box(), a_copy.nComp());}
