@@ -93,6 +93,11 @@ public:
   virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
 
   /*!
+    @brief Compute the error norm on the coarsest level 
+  */
+  virtual void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2);
+
+  /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
   */
   virtual void run(const Real a_start_time, const Real a_end_time, const int a_max_steps);
