@@ -1,0 +1,15 @@
+# ----------------------------------------------------------------------------------------------------
+# ELECTRODE_ARRAY CLASS OPTIONS. This is a pure 3D class.
+# 
+# The center1 and center2 arguments indicate the one of the corners of the electrode array. Use
+# num_x, num_y, and the spacings delta_x and delta_y to adjust the number of electrodes. Everything
+# lives in the xy plane. 
+# ----------------------------------------------------------------------------------------------------
+electrode_array.live    = 1             # Live voltage (1) or not (0)
+electrode_array.radius  = 100E-6        # Radius 
+electrode_array.center1 = 0.0 0.0 10.   # Center for first electrode
+electrode_array.center2 = 0.0 0.0 0.    # Center for second electrode
+electrode_array.num_x   = 10            # Number of electrodes in the x-direction
+electrode_array.num_y   = 10            # Number of electrodes in the y-direction
+electrode_array.delta_x = 200E-6        # Electrode spacing in the x-direction
+electrode_array.delta_y = 200E-6        # Electrode spacing in the y-direction
