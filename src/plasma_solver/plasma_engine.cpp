@@ -3429,6 +3429,7 @@ void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const st
   const int compute_level = 0;
   EBCellFactory cellfact(fine_ebisl[compute_level]);
   LevelData<EBCellFAB> diff(fine_grids[compute_level], 1, 0*IntVect::Unit, cellfact);
+  pout() << "Linf = " << "\t L1" << "\t L2" << endl;
   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -3455,7 +3456,8 @@ void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const st
 
 
     
-    pout() << idx << "\t Linf = " << Linf/sLinf << "\t L1 = " << L1/sL1 << "\t L2 = " << L2/sL2 << endl;
+
+    pout() << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
   }
   
   handle_in.close();
