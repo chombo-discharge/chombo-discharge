@@ -279,6 +279,11 @@ public:
   virtual void set_max_simulation_depth(const int a_max_sim_depth);
 
   /*!
+    @brief Refine all cells down to this level
+  */
+  virtual void set_refine_all_depth(const int a_refine_all_depth);
+
+  /*!
     @brief Tell amr_mesh to forget about ebcf (user must guarantee that this is the case)
   */
   virtual void set_ebcf(const bool a_ebcf);
@@ -393,10 +398,15 @@ public:
   */
   virtual int get_max_amr_depth();
 
-    /*!
+  /*!
     @brief Get maximum simulation depth
   */
   virtual int get_max_sim_depth();
+
+  /*!
+    @brief Get maximum  depth
+  */
+  virtual int get_refine_all_depth();
 
   /*!
     @brief Get blocking factor
@@ -595,6 +605,11 @@ protected:
     @brief Maximum allowed depth for simulation
   */
   int m_max_sim_depth;
+
+  /*!
+    @brief Uniform refinement depth
+  */
+  int m_refine_all_depth;
 
   /*!
     @brief Max box size

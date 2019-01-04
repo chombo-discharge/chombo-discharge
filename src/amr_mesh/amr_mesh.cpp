@@ -27,6 +27,7 @@ amr_mesh::amr_mesh(){
   this->set_coarsest_num_cells(128*IntVect::Unit);
   this->set_max_amr_depth(0);
   this->set_max_simulation_depth(0);
+  this->set_refine_all_depth(0);
   this->set_refinement_ratio(2);
 #if CH_SPACEDIM == 2
   this->set_blocking_factor(8);
@@ -568,13 +569,27 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
 	old_boxes[lvl] = m_grids[lvl].boxArray();
       }
     }
-    
-    // Berger-Rigoutsos grid generation
-    BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
-    int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, 0, top_level, old_boxes);
-    m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
-    m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
-    m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
+
+    int base_level = m_refine_all_depth;
+    if(top_level > base_level){ // Use tags for regridding
+      // Berger-Rigoutsos grid generation
+      BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
+      int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base_level, top_level, old_boxes);
+      m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
+      m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
+      m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
+    }
+    else{ // Tag depth is below uniform refinement depth, create uniform grids everywhere
+      m_finest_level = m_refine_all_depth;
+      m_finest_level = Min(m_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
+      m_finest_level = Min(m_finest_level, m_max_sim_depth); // Don't exceed maximum simulation depth
+      m_finest_level = Min(m_finest_level, hardcap);         // Don't exceed hardcap
+
+      new_boxes.resize(1 + m_finest_level);
+      for (int lvl = 0; lvl <= m_finest_level; lvl++){
+	domainSplit(m_domains[lvl], new_boxes[lvl], m_max_box_size, m_blocking_factor);
+      }
+    }
   }
   else{
     new_boxes.resize(1);
@@ -1433,6 +1448,23 @@ void amr_mesh::set_max_simulation_depth(const int a_max_sim_depth){
   }
 }
 
+void amr_mesh::set_refine_all_depth(const int a_refine_all_depth){
+
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("refine_all_lvl")){
+      int depth;
+      pp.get("refine_all_lvl", depth);
+      if(depth > 0){
+	m_refine_all_depth = depth;
+      }
+      else {
+	m_refine_all_depth = 0;
+      }
+    }
+  }
+}
+
 void amr_mesh::set_ebcf(const bool a_ebcf){
   m_ebcf = a_ebcf;
 
@@ -1743,6 +1775,10 @@ int amr_mesh::get_max_amr_depth(){
 
 int amr_mesh::get_max_sim_depth(){
   return m_max_sim_depth;
+}
+
+int amr_mesh::get_refine_all_depth(){
+  return m_refine_all_depth;
 }
 
 int amr_mesh::get_num_ghost(){
