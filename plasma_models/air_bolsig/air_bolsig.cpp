@@ -323,8 +323,6 @@ Vector<Real> air_bolsig::compute_anode_flux(const Vector<Real>& a_extrapolated_f
   for (int i = 0; i < m_num_species; i++){
     fluxes[i] = Max(zero, a_extrapolated_fluxes[i]);
   }
-  fluxes[m_nplus_idx] = a_extrapolated_fluxes[m_nplus_idx];
-
 
   return fluxes;
 }
