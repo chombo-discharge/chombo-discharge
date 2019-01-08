@@ -1409,8 +1409,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       this->open_charge_dump_file(charge_dump_file);
     }
 
-    while(m_time < a_end_time && m_step < a_max_steps){
-
+    while(m_time < a_end_time && m_step < a_max_steps && !last_step){
       const int max_sim_depth = m_amr->get_max_sim_depth();
       const int max_amr_depth = m_amr->get_max_amr_depth();     
       if(m_step%m_regrid_interval == 0 && m_regrid_interval > 0 && max_sim_depth > 0 && max_amr_depth > 0){
@@ -1459,7 +1458,6 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       // Time stepper advances solutions
       m_wallclock1 = MPI_Wtime();
       const Real actual_dt = m_timestepper->advance(m_dt);
-
       m_wallclock2 = MPI_Wtime();
 
       // Synchronize times
@@ -1467,6 +1465,10 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       m_time += actual_dt;
       m_step += 1;
       m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
+
+      if(Abs(m_time - a_end_time) < m_dt*1.E-5){
+	last_step = true;
+      }
 
       // Print step report
       if(m_verbosity > 0){

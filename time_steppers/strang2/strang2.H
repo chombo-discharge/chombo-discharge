@@ -66,6 +66,8 @@ protected:
   bool m_fixed_order;
   bool m_print_diagno;
   bool m_write_diagno;
+  bool m_use_embedded;
+  bool m_compute_error;
   bool m_write_errf;
   bool m_do_advec_src;  
   bool m_do_diffusion;  

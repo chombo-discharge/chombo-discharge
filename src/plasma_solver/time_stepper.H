@@ -357,6 +357,14 @@ public:
 					   const phase::which_phase      a_phase,
 					   const Vector<EBAMRCellData*>& a_data);
 
+  virtual void extrapolate_vector_to_domain_faces(EBAMRIFData&             a_extrap,
+						  const phase::which_phase a_phase,
+						  const EBAMRCellData&     a_data);
+
+  virtual void extrapolate_vector_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+						  const phase::which_phase      a_phase,
+						  const Vector<EBAMRCellData*>& a_data);
+
   /*!
     @brief Get maximum value of the cdr solver stuff
   */

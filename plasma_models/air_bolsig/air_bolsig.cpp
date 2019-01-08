@@ -204,7 +204,13 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   Sp = alpha_corr*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;
   Sn = eta_corr*Ne*ve   - bpn*Np*Nn - kdet*Nn*m_N;
 
-  CH_assert(Abs(Sp -Se - Sn) < 1.E-10); // If this breaks, we don't conserve charge. 
+  CH_assert(Abs(Sp -Se - Sn) < 1.E-10); // If this breaks, we don't conserve charge.
+
+#if 0 // debug code
+  Se = 0.0;
+  Sp = 0.0;
+  Sn = 0.0;
+#endif
   
   return source;
 }
@@ -250,7 +256,7 @@ Vector<Real> air_bolsig::compute_conductor_fluxes(const Vector<Real>& a_extrapol
 						  const RealVect&     a_pos,
 						  const RealVect&     a_normal,
 						  const Real&         a_time) const {
-  Vector<Real> fluxes(m_num_species, 0.0);
+  Vector<Real> fluxes(m_num_species, 0.0); 
 
   // Treat anode and cathode differently
   const bool is_cathode = PolyGeom::dot(a_E, a_normal) < 0.;

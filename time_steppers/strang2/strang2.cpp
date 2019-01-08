@@ -33,12 +33,14 @@ strang2::strang2(){
   m_max_advection_order = 3;
 
   m_adaptive_dt    = true;
+  m_compute_error  = true;
   m_have_dtf       = false;
   m_fixed_order    = false;
 
   m_splitting      = "strang";
 
   // Basically only for debugging
+  m_use_embedded   = false;
   m_compute_v      = true;
   m_compute_S      = true;
   m_compute_D      = true;
@@ -76,7 +78,7 @@ strang2::strang2(){
       m_maxCFL = 1.8;
     }
 
-    pp.query("advection_order", m_advective_order);
+    pp.query("advective_order", m_advective_order);
     pp.query("min_cfl",         m_minCFL);
     pp.query("max_cfl",         m_maxCFL);
     pp.query("max_error",       m_err_thresh);
@@ -87,6 +89,21 @@ strang2::strang2(){
       pp.get("fixed_order", str);
       if(str == "true"){
 	m_fixed_order = true;
+      }
+    }
+    if(pp.contains("accept_error")){
+      pp.get("accept_error", str);
+      if(str == "true"){
+	m_use_embedded = true;
+      }
+    }
+    if(pp.contains("compute_error")){
+      pp.get("compute_error", str);
+      if(str == "true"){
+	m_compute_error = true;
+      }
+      else{
+	m_compute_error = false;
       }
     }
     if(pp.contains("compute_D")){
@@ -183,14 +200,14 @@ strang2::strang2(){
     MayDay::Abort("strang2 ::strang2 - order < 1 or order > 3 requested!.");
   }
 
-  // No embedded schemes lower than first order...
-  if(m_advective_order == 1){
-    m_adaptive_dt = false;
-  }
-
   // If we don't use adaptive, we can't go beyond CFL
   if(!m_adaptive_dt){
     m_cfl = m_maxCFL;
+  }
+
+  // If we're doing adaptive stepping, errors must always be comptued
+  if(m_adaptive_dt){
+    m_compute_error = true;
   }
 
   // Strang splitting limited by CFL of 2, Godunov of 1
@@ -278,7 +295,6 @@ Real strang2::advance(const Real a_dt){
       actual_dt = this->advance_adaptive(substeps, m_dt_adapt, m_time, a_dt);
     }
     else{ // Non-adaptive time-stepping scheme loop
-
       // Do equal division of the time steps. This integration always lands on a_dt
       substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
       cfl        = a_dt/(substeps*m_dt_cfl);
@@ -391,8 +407,6 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
     pout() << "strang2::advance_fixed" << endl;
   }
 
-  MayDay::Abort("strang2::advance_fixed - decommissioned for now");
-
   this->compute_E_into_scratch(); // Compute the electric field
   this->compute_cdr_gradients();  // Precompute gradients
 
@@ -412,19 +426,20 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
       advective_dt = 0.5*a_dt;
     }
     else {
-      MayDay::Abort("strang2::advance_adaptive - unknown splitting");
+      MayDay::Abort("strang2::advance_fixed - unknown splitting");
     }
 
     // Advection-reaction integration. We must have a place to put u^n (the current solution) before
-    // we advance, so it is put in storage->m_previous. The 'true' flag indicates that we should compute
-    // the embedded formula error, which we only do on the first time step (the embedded splitting uses a
-    // Lie splitting)
+    // we advance, so it is put in storage->m_previous. We do this because it's easier to fill
+    // the solvers with the intermediate Runge-Kutta stage (it lets us use a simpler interface).
+    // The 'true' flag indicates that we should compute the embedded formula error, which we only do
+    // on the first time step (the embedded splitting uses a Lie splitting)
     this->store_solvers();
     if(m_advective_order == 2){
-      this->advance_rk2(time, advective_dt, true);
+      this->advance_rk2(time, advective_dt, m_compute_error);
     }
     else if(m_advective_order == 3){
-      this->advance_rk3(time, advective_dt, true);
+      this->advance_rk3(time, advective_dt, m_compute_error);
     }
     else{
       MayDay::Abort("strang2::advance_fixed - unsupported order requested");
@@ -502,9 +517,104 @@ void strang2::advance_rk2(const Real a_time, const Real a_dt, const bool a_compu
     pout() << "strang2::advance_rk2" << endl;
   }
 
-  MayDay::Warning("advance_rk2 - under implementation");
+  // NOTE: If we use strang splitting, the time step that comes in here has been halved. Furthermore,
+  //       the solvers have been filled with source terms and velocities, but not much else.
 
-  // NOTE: If we use strang splitting, the time step that comes in here has been halved
+  { // u^1 = u^n + dt*L(u^n)
+    this->compute_E_into_scratch();
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state();
+      const EBAMRCellData& src = solver->get_source();
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
+      data_ops::incr(phi, rhs, a_dt);            // u^1 = u^n + dt*L(u^n)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+
+       // For Heun's method, the embedded error is just u^1 (the forward Euler)
+      if(a_compute_err){
+	EBAMRCellData& err = storage->get_error();
+	data_ops::copy(err, phi);         // err = u^n + dt*L(u^n). Correct for Godunov splitting. 
+	if(m_splitting == "strang"){
+	  data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*L(u^n). Correct for Strang splitting. 
+	}
+      }
+    }
+
+    EBAMRIVData& sigma = m_sigma->get_state();
+    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
+
+    // For Heun's method, the embedded error is just u^1 (the forward Euler)
+    if(a_compute_err){
+      EBAMRIVData& err = m_sigma_scratch->get_error();
+      data_ops::set_value(err, 0.0);
+      data_ops::incr(err, sigma, 1.0);  // err = u^n + dt*L(u^n). Correct for Godunov splitting.
+      if(m_splitting == "strang"){
+	data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*L(u^n). Correct for Strang splitting.
+      }
+    }
+  }
+
+  if(m_consistent_E)   this->update_poisson();
+  if(m_consistent_rte) this->update_rte(a_time + a_dt);
+
+
+  { // u^(n+1) = u^n + 0.5*dt*[L(u^n) + L(u^1)]
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state();
+      const EBAMRCellData& src = solver->get_source();
+      const EBAMRCellData& pre = storage->get_previous();
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
+      
+      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^1 + dt*L(u^1)
+      data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + u^1 + dt*L(u^1);
+      data_ops::scale(phi, 0.5);                 // u^(n+1) = 0.5*[u^n + u^1 + dt*L(u^1)];
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma     = m_sigma->get_state();
+    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
+    const EBAMRIVData& pre = m_sigma_scratch->get_previous();
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, a_dt); // sigma^(n+1) = sigma^1 + dt*F^1
+    data_ops::incr(sigma, pre, 1.0);  // sigma^(n+1) = sigma^n + sigma^1 + dt*F^1
+    data_ops::scale(sigma, 0.5);      // sigma^(n+1) = 0.5*[sigma^n + sigma^1 + dt*F^1]
+  }
 }
 
 void strang2::advance_rk3(const Real a_time, const Real a_dt, const bool a_compute_err){
@@ -513,7 +623,219 @@ void strang2::advance_rk3(const Real a_time, const Real a_dt, const bool a_compu
     pout() << "strang2::advance_rk3" << endl;
   }
 
-  MayDay::Abort("strang2::advance_rk3 - not implemented (yet)");
+  // u^1 = u^n + dt*L(u^n)
+  { 
+    this->compute_E_into_scratch();
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+  
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    
+      EBAMRCellData& phi       = solver->get_state();    // u^n
+      EBAMRCellData& rhs       = storage->get_scratch();
+      const EBAMRCellData& src = solver->get_source();
+    
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
+      data_ops::incr(phi, rhs, a_dt);            // u^1 = u^n + dt*L(u^n)
+    
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+    
+      data_ops::floor(phi, 0.0);
+
+      // For RK3, the embedded method is u^(n+1) = 0.5*[u^n + u^1 + dt*L(u^1)]. We must
+      // make err = u^1 because we will later need to compute 
+      if(a_compute_err){
+	EBAMRCellData& err = storage->get_error();
+	data_ops::copy(err, phi);         // err = u^n + dt*L(u^n). Correct so far for the Godunov splitting. 
+	if(m_splitting == "strang"){
+	  data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*L(u^n). Correct so far for Strang splitting. 
+	}
+      }
+    }
+
+    EBAMRIVData& sigma = m_sigma->get_state();
+    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
+
+    // For Heun's method, the embedded error is just u^1 (the forward Euler)
+    if(a_compute_err){
+      EBAMRIVData& err = m_sigma_scratch->get_error();
+      data_ops::set_value(err, 0.0);
+      data_ops::incr(err, sigma, 1.0);  // err = u^n + dt*F^n. Correct so far for the Godunov splitting. 
+      if(m_splitting == "strang"){      
+	data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*F^n. Correct so far for the Strang splitting. 
+      }
+    }
+  }
+
+  if(m_consistent_E)   this->update_poisson();
+  if(m_consistent_rte) this->update_rte(a_time + a_dt);
+
+  // Final Heun update for the error in case of Strang splitting. In principle, it should use the fields
+  // obtained from the embedded formula update, but we skip that here to save some computations. It's just the error
+  // and we don't care if it is exact.
+  //
+  // This loop is only for Strang splitting because the Godunov splitting shares function evaluations with
+  // the full RK3 scheme and therefore has no overhead. 
+  if(a_compute_err && m_splitting == "strang"){
+    Vector<EBAMRCellData*> err_states;
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      err_states.push_back(&(storage->get_error()));
+    }
+
+    this->compute_cdr_gradients(err_states);
+    if(m_compute_v) this->compute_cdr_velo(err_states, a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(err_states, a_time + a_dt);
+    this->compute_cdr_eb_states(err_states);
+    this->compute_cdr_fluxes(err_states,a_time);
+    this->compute_cdr_domain_fluxes(err_states,a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      
+      EBAMRCellData& err       = storage->get_error();    // err = u^n + 2*dt*L(u^n) for Strang splitting. 
+      EBAMRCellData& rhs       = storage->get_scratch();
+      const EBAMRCellData& pre = storage->get_previous();
+      const EBAMRCellData& src = solver->get_source();
+
+      solver->compute_divF(rhs, err, 0.0, true); // RHS = Div(u^1*v^1)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
+      
+      data_ops::incr(err, rhs, 2*a_dt);            // err = u^1 + 2*dt*L(u^1). Correct for Strang splitting.
+      data_ops::incr(err, pre, 1.0);               // err = u^n + u^1 + 2*dt*L(u^1); 
+      data_ops::scale(err, 0.5);                   // err = 0.5*[u^n + u^1 + 2*dt*L(u^1)];
+
+      m_amr->average_down(err, m_cdr->get_phase());
+      m_amr->interp_ghost(err, m_cdr->get_phase());
+    }
+
+    EBAMRIVData& err = m_sigma_scratch->get_error();     // err = sigma^n + 2*dt*F^n = sigma^1
+    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(err, rhs, 2*a_dt); // err = sigma^1 + 2*dt*F^n. Correct for Strang splitting
+    data_ops::incr(err, pre, 2*a_dt); // err = sigma^n + sigma^1 + 2*dt*F^1
+    data_ops::scale(err, 0.5);        // err = 0.5*(sigma^n + sigma^1 + 2*dt*F^1)
+  }
+
+  // u^2 = 0.25*(3*u^n + u^1 + dt*L(u^1)). For Godunov splitting, the embedded formula is
+  // err = 0.5*(u^n + u^1 + dt*L(u^1)). The Strang splitting error is handled in the loop above. 
+  { 
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state();     // phi = u^1 = u^n + dt*L(u^n)
+      const EBAMRCellData& src = solver->get_source();
+      const EBAMRCellData& pre = storage->get_previous(); // pre = u^n
+    
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^1*v^1)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^1*v^1)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^1 - Div(u^1*v^1)
+      data_ops::incr(phi,  rhs, a_dt);           // u^2 = u^1 + dt*L(u^1)
+      data_ops::incr(phi,  pre, 3.0);            // u^2 = 3*u^n + u^1 + dt*L(u^1)
+      data_ops::scale(phi, 0.25);                // u^2 = 0.25*[3*u^n + u^1 + dt*L(u^1)]
+    
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+    
+      data_ops::floor(phi, 0.0);
+
+      // For RK3 Strang splitting, the error has already been computed. For Godunov splitting,
+      // the embedded method is u^(n+1) = 0.5*[u^n + u^1 + dt*L(u^1)] and we computed L(u^1) above into rhs
+      // so just increment the error with what we need. 
+      if(a_compute_err && m_splitting == "godunov"){
+	EBAMRCellData& err = storage->get_error(); // err = u^1
+	data_ops::incr(err,  rhs, a_dt);           // err = u^1 + dt*L(u^1)
+	data_ops::incr(err,  pre, 1.0);            // err = u^n + u^1 + dt*L(u^1)
+	data_ops::scale(err, 0.5);                 // err = 0.5*[u^n + u^1 + dt*L(u^1)]
+      }
+    }
+
+    EBAMRIVData& sigma = m_sigma->get_state();           // u^1
+    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();   // Storage for right hand side
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, a_dt);  // sigma = u^1 + dt*L(u^1)
+    data_ops::incr(sigma, pre, 3.0);   // sigma = 3*u^n + u^1 + dt*L(u^1)
+    data_ops::scale(sigma, 0.25);      // sigma = 0.25*[3*u^n + u^1 + dt*L(u^1)]
+
+    if(a_compute_err && m_splitting == "strang"){
+      EBAMRIVData& err = m_sigma_scratch->get_error(); // u^1
+      data_ops::incr(err, rhs, a_dt);                  // err = u^1 + dt*L(u^1)
+      data_ops::incr(err, pre, 1.0);                   // err = u^n + u^1 + dt*L(u^1)
+      data_ops::scale(err, 0.5);                       // err = 0.5*[u^n + u^1 + dt*L(u^1)]
+    }
+  }
+
+  if(m_consistent_E)   this->update_poisson();
+  if(m_consistent_rte) this->update_rte(a_time + a_dt);
+
+  // u^3 = u^n + 2*u^2 + 2*dt*L(u^2). Embedded errors have already been computed so this only advances
+  // the final stage of the solution. 
+  {
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state();     // phi = u^2
+      const EBAMRCellData& src = solver->get_source();
+      const EBAMRCellData& pre = storage->get_previous(); // pre = u^n
+    
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^2*v^2)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^2 - Div(u^2*v^2)
+      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^2 + dt*L(u^2)
+      data_ops::scale(phi, 2.0);                 // u^(n+1) = 2*u^2 + 2*dt*L(u^2)
+      data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + 2*u^2 + dt*L(u^2)
+      data_ops::scale(phi, 1./3.);               // u^(n+1) = (1/3)*[u^n + 2*u^2 + 2*dt*L(u^2)]
+    
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+    
+      data_ops::floor(phi, 0.0);
+
+    }
+
+    EBAMRIVData& sigma = m_sigma->get_state();           // u^2
+    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();   // Storage for right hand side
+    EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, a_dt);  // sigma = u^2 + dt*L(u^2)
+    data_ops::scale(sigma, 2.0);       // sigma = 2*u^2 + 2*dt*L(u^2)
+    data_ops::incr(sigma, pre, 1.0);   // sigma = u^n + 2*u^2 + 2*dt*L(u^2)
+    data_ops::scale(sigma, 1./3.);     // sigma = (1/3)*[u^n + 2*u^2 + 2*dt*L(u^2)]
+  }
 }
 
 void strang2::compute_cdr_gradients(){
@@ -873,9 +1195,9 @@ void strang2::compute_cdr_eb_states(){
 }
 
 void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
-  CH_TIME("strang2::compute_cdr_eb_states");
+  CH_TIME("strang2::compute_cdr_eb_states(vec)");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_eb_states" << endl;
+    pout() << "strang2::compute_cdr_eb_states(vec)" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -1051,15 +1373,18 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, 
     pout() << "strang2::compute_cdr_domain_fluxes(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
-  Vector<EBAMRIFData*> cdr_fluxes;
-  Vector<EBAMRIFData*> extrap_cdr_fluxes;
-  Vector<EBAMRIFData*> extrap_cdr_densities;
-  Vector<EBAMRIFData*> extrap_cdr_velocities;
-  Vector<EBAMRIFData*> extrap_cdr_gradients;
-  Vector<EBAMRIFData*> extrap_rte_fluxes;
+  Vector<EBAMRIFData*>   cdr_fluxes;
+  Vector<EBAMRIFData*>   extrap_cdr_fluxes;
+  Vector<EBAMRIFData*>   extrap_cdr_densities;
+  Vector<EBAMRIFData*>   extrap_cdr_velocities;
+  Vector<EBAMRIFData*>   extrap_cdr_gradients;
+  Vector<EBAMRIFData*>   extrap_rte_fluxes;
+
+  Vector<EBAMRCellData*> cdr_velocities;
+  Vector<EBAMRCellData*> cdr_gradients;
 
   cdr_fluxes = m_cdr->get_domainflux();
-
+  cdr_velocities = m_cdr->get_velocities();
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
@@ -1067,19 +1392,20 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, 
     EBAMRIFData& velo_domain = storage->get_domain_velo();
     EBAMRIFData& flux_domain = storage->get_domain_flux();
     EBAMRIFData& grad_domain = storage->get_domain_grad();
+    EBAMRCellData& gradient  = storage->get_gradient();
 
     extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
     extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
     extrap_cdr_fluxes.push_back(&flux_domain);     // Has not been computed
     extrap_cdr_gradients.push_back(&grad_domain);  // Has not been computed
+    cdr_gradients.push_back(&gradient);
   }
 
   // Compute extrapolated velocities and fluxes at the domain faces
-  Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  this->extrapolate_to_domain_faces(extrap_cdr_densities,       m_cdr->get_phase(), a_states);
-  this->extrapolate_to_domain_faces(extrap_cdr_velocities,      m_cdr->get_phase(), cdr_velocities);
-  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,   a_states,           cdr_velocities, m_cdr->get_phase());
-  this->compute_gradients_at_domain_faces(extrap_cdr_gradients, m_cdr->get_phase(), a_states);
+  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), a_states);
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_states,           cdr_velocities, m_cdr->get_phase());
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -1092,7 +1418,8 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, 
   }
 
   const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
-  
+
+  // This fills the solvers' domain fluxes
   time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
 					  extrap_cdr_fluxes,
 					  extrap_cdr_densities,

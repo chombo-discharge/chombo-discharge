@@ -502,6 +502,36 @@ void time_stepper::compute_gradients_at_domain_faces(Vector<EBAMRIFData*>&      
   }
 }
 
+void time_stepper::extrapolate_vector_to_domain_faces(EBAMRIFData&             a_extrap,
+						      const phase::which_phase a_phase,
+						      const EBAMRCellData&     a_data){
+  CH_TIME("time_stepper::extrapolate_to_domain_faces");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_domain_faces" << endl;
+  }
+
+  CH_assert(a_extrap[0]->nComp() == 1);
+  CH_assert(a_data[0]->nComp()   == SpaceDim);
+
+  EBAMRIFData domain_vector;
+  m_amr->allocate(domain_vector, a_phase, SpaceDim);
+  this->extrapolate_to_domain_faces(domain_vector, a_phase, a_data);
+  this->project_domain(a_extrap, domain_vector);
+}
+
+void time_stepper::extrapolate_vector_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+						      const phase::which_phase      a_phase,
+						      const Vector<EBAMRCellData*>& a_data){
+  CH_TIME("time_stepper::extrapolate_to_domain_faces(vec)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_domain_faces(vec)" << endl;
+  }
+
+  for(int i = 0; i < a_extrap.size(); i++){
+    extrapolate_vector_to_domain_faces(*a_extrap[i], a_phase, *a_data[i]);
+  }
+}
+
 void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				       const Vector<EBAMRCellData*>&  a_cdr_densities,
 				       const Vector<EBAMRCellData*>&  a_rte_densities,
