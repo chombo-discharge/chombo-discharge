@@ -94,6 +94,7 @@ protected:
   
   void cache_solutions();
   void uncache_solutions();
+  void copy_error_to_solvers();
   
   Real advance_adaptive(int& substeps, Real& a_dt, const Real a_time, const Real a_dtc);
   Real advance_fixed(const int a_substeps, const Real a_dt);

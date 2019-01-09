@@ -483,6 +483,13 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
       }
     }
 
+    if(m_compute_error){
+      this->compute_errors();
+    }
+    if(m_use_embedded){
+      this->copy_error_to_solvers();
+    }
+
     // If we're doing one more substep, we need to make sure that the solvers are up to date. If not, let advance()
     // take care of the rest of the synchronization
     if(!last_step){
@@ -496,6 +503,9 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
       if(m_compute_v) this->compute_cdr_velo(time);
       if(m_compute_S) this->compute_cdr_sources(time);
     }
+
+    const bool accept_step = true;
+    const bool accept_order = true;
   }
 
   return a_dt;
@@ -884,8 +894,7 @@ void strang2::compute_errors(){
     EBAMRCellData& err       = storage->get_error();
 
     // So far 'err' contains the embedded formula and 'phi' is the numerical solution
-    data_ops::scale(err, -1.0);    // err -> -err
-    data_ops::incr(err, phi, 1.0); // err -> (phi-err)
+    data_ops::incr(err, phi, -1.0); // err -> (err-phi), this is opposite, but the norm takes the magnitude anyways
 
     m_amr->average_down(err, m_cdr->get_phase());
     
@@ -897,19 +906,24 @@ void strang2::compute_errors(){
     Lphi = Max(Lphi, safety);
     
     m_cdr_error[which] = Lerr/Lphi;
+
+    // Done computing errors, make err into the embedded formula again
+    data_ops::incr(err, phi, 1.0);
   }
 
   // Sigma error. So far, 'err' contains the embedded formula and 'phi' is the numerical solution
   EBAMRIVData& phi = m_sigma->get_state();
   EBAMRIVData& err = m_sigma_scratch->get_error();
-  data_ops::scale(err, -1.0);
-  data_ops::incr(err, phi, 1.0);
+  data_ops::incr(err, phi, -1.0);
   data_ops::get_max_min_norm(max, min, phi);
   data_ops::get_max_min_norm(emax, emin, err);
 
   // DOn't want to divide by zero
   max = Max(max, safety);
   m_sigma_error = emax/max;
+
+  // Done with sigma, make it the embedded formula again
+  data_ops::incr(err, phi, 1.0);
 
   // Maximum error
   m_max_error = this->get_max_error();
@@ -1115,6 +1129,28 @@ void strang2::uncache_solutions(){
     const EBAMRIVData& cache = m_sigma_scratch->get_cache();
     data_ops::copy(m_sigma->get_state(), cache);
   }
+}
+
+void strang2::copy_error_to_solvers(){
+  CH_TIME("strang2::copy_error_to_solvers");
+  if(m_verbosity > 5){
+    pout() << "strang2::copy_error_to_solvers" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& prev  = storage->get_error();
+
+    data_ops::copy(state, prev);
+  }
+
+  EBAMRIVData& phi = m_sigma->get_state();
+  EBAMRIVData& pre = m_sigma_scratch->get_error();
+  data_ops::set_value(phi, 0.0);
+  data_ops::incr(phi, pre, 1.0);
 }
 
 void strang2::compute_E_into_scratch(){
