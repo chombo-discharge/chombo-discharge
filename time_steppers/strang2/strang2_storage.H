@@ -24,6 +24,7 @@ public:
   void deallocate_storage();
 
   EBAMRCellData& get_cache(){   return m_cache;      }
+  EBAMRCellData& get_backup(){  return m_backup;     }
   EBAMRCellData& get_scratch(){ return m_scratch;    }
   EBAMRCellData& get_previous(){return m_previous;   }
   EBAMRCellData& get_error(){   return m_error;      }
@@ -47,6 +48,7 @@ protected:
   int m_stages;                  // Number of RK stages
 
   EBAMRCellData m_cache;    // Cached solution
+  EBAMRCellData m_backup;   // Backup solution
   EBAMRCellData m_scratch;  // Scratch data
   EBAMRCellData m_previous; // Previous solution (for each substep)
   EBAMRCellData m_error;    // Error estimator
@@ -74,6 +76,7 @@ public:
   void deallocate_storage();
   
   MFAMRCellData& get_cache(){   return m_cache;   }
+  MFAMRCellData& get_backup(){  return m_backup; }
   EBAMRCellData& get_E_cell(){  return m_E_cell;  }
   EBAMRFluxData& get_E_face(){  return m_E_face;  }
   EBAMRIVData& get_E_eb(){      return m_E_eb;    }
@@ -87,6 +90,7 @@ protected:
   int m_stages;                  // Number of RK stages
 
   MFAMRCellData m_cache;         // Cached solution
+  MFAMRCellData m_backup;        // Scratch storage
   EBAMRCellData m_E_cell;        // Cell-centered E
   EBAMRFluxData m_E_face;        // Face-centered E
   EBAMRIVData m_E_eb;            // EB-centered E
@@ -103,8 +107,9 @@ public:
   void allocate_storage();
   void deallocate_storage();
   
-  EBAMRCellData& get_cache(){ return m_cache; }
-  EBAMRIVData& get_eb_flux(){ return m_scratchIV; }
+  EBAMRCellData& get_cache(){     return m_cache; }
+  EBAMRCellData& get_backup(){    return m_backup; }
+  EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
   EBAMRIFData& get_domain_flux(){ return m_scratchIF; }
 
 protected:
@@ -116,6 +121,7 @@ protected:
 
 
   EBAMRCellData m_cache;   // Cached solution
+  EBAMRCellData m_backup;  // Cached solution
   EBAMRIVData m_scratchIV; // Used for EB-centered isotropic density
   EBAMRIFData m_scratchIF; // Used for domain-centered isotropic density
 };
@@ -132,6 +138,7 @@ public:
   
   EBAMRIVData& get_cache(){   return m_cache; }
   EBAMRIVData& get_scratch(){ return m_scratch; }
+  EBAMRIVData& get_backup(){  return m_backup; }
   EBAMRIVData& get_previous(){return m_previous; }
   EBAMRIVData& get_error(){   return m_error; }
 
@@ -144,6 +151,7 @@ protected:
   int m_stages;                  // Number of RK stages
 
   EBAMRIVData m_cache;           // Cached solution
+  EBAMRIVData m_backup;          // Backup solution
   EBAMRIVData m_scratch;         // Scratch data
   EBAMRIVData m_previous;        // Previous solution
   EBAMRIVData m_error;           // Error 

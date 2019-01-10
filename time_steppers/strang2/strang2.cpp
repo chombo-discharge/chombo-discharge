@@ -25,7 +25,7 @@ strang2::strang2(){
   m_rk_order     = 3;
   m_rk_stages    = 3;
   m_minCFL       = 0.1;
-  m_maxCFL       = 0.9;   // Overriden below since Strang and Godunov splittings have different CFLs
+  m_maxCFL       = 1.8;   
   m_err_thresh   = 1.E-4;
   m_safety       = 0.9;
   m_error_norm   = 2;
@@ -37,8 +37,6 @@ strang2::strang2(){
   m_compute_error  = true;
   m_have_dtf       = false;
   m_fixed_order    = false;
-
-  m_splitting      = "strang";
 
   // Basically only for debugging
   m_use_embedded   = false;
@@ -60,30 +58,10 @@ strang2::strang2(){
     std::string str;
     Vector<Real> rk_method(2);
 
-    if(pp.contains("splitting")){
-      pp.get("splitting", str);
-      if(str == "godunov"){
-	m_splitting = "godunov";
-      }
-      else if(str == "strang"){
-	m_splitting = "strang";
-      }
-      else {
-	MayDay::Abort("strang2::strang2 - unknown argument 'splitting'. This must be 'godunov' or 'strang'");
-      }
-    }
-
-    if(m_splitting == "godunov"){
-      m_maxCFL = 0.9;
-    }
-    if(m_splitting == "strang"){
-      m_maxCFL = 1.8;
-    }
-
     if(pp.contains("rk_method")){
       pp.getarr("rk_method", rk_method, 0, 2);
-      m_rk_order  = rk_method[0];
-      m_rk_stages = rk_method[1];
+      m_rk_stages = rk_method[0];
+      m_rk_order  = rk_method[1];
     }
     pp.query("min_cfl",         m_minCFL);
     pp.query("max_cfl",         m_maxCFL);
@@ -212,14 +190,6 @@ strang2::strang2(){
   if(m_adaptive_dt){
     m_compute_error = true;
   }
-
-  // Strang splitting limited by CFL of 2, Godunov of 1
-  if(m_splitting == "strang"){
-    m_maxCFL = Min(m_maxCFL, 2.0);
-  }
-  else if(m_splitting == "godunov"){
-    m_maxCFL = Min(m_maxCFL, 1.0);
-  }
 }
 
 strang2::~strang2(){
@@ -264,18 +234,15 @@ Real strang2::advance(const Real a_dt){
   //
   //       PS: When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //           advancement. If you think that this may not be the case, activate the debugging below
-
-  {
-#if 0
+#if 0 // Debugging
   this->compute_E_into_scratch();
   this->compute_cdr_gradients();
   this->compute_cdr_velo(m_time);
   this->compute_cdr_sources(m_time);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 #endif
-  }
 
-  this->cache_solutions(); // Store old solution. This stores the old solutions in storage->m_cache
+  this->backup_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
   
   Real cfl;              // Adaptive or fixed CFL for advective+source term advancements
   Real actual_dt = a_dt; // This is the actual time step taken. It is equal to or larger than a_dt
@@ -347,7 +314,7 @@ void strang2::advance_diffusion(const Real a_time, const Real a_dt){
 
   if(m_do_diffusion){
     this->advance_tga_diffusion(a_time, a_dt);   // This is the 2nd order update
-    this->advance_euler_diffusion(a_time, a_dt); // This is the embedded formula 1st order update, it uses the solution from
+    //    this->advance_euler_diffusion(a_time, a_dt); // This is the embedded formula 1st order update, it uses the solution from
                                                  // advance_tga_diffusion as initial guess in order to optimize.
   }
 }
@@ -409,20 +376,6 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
   if(m_verbosity > 2){
     pout() << "strang2::advance_one_step" << endl;
   }
-  // If we're doing Strang splitting, we're actually taking two
-  // advective steps with 0.5*dt. Since a_dt is the fine time step,
-  // we adjust here. 
-  Real diffusive_dt = a_dt;
-  Real advective_dt;
-  if(m_splitting == "godunov"){
-    advective_dt = a_dt;
-  }
-  else if(m_splitting == "strang"){
-    advective_dt = 0.5*a_dt;
-  }
-  else {
-    MayDay::Abort("strang2::advance_fixed - unknown splitting");
-  }
 
   // Advection-reaction integration. We must have a place to put u^n (the current solution) before
   // we advance, so it is put in storage->m_previous. We do this because it's easier to fill
@@ -430,37 +383,55 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
   // The 'true' flag indicates that we should compute the embedded formula error, which we only do
   // on the first time step (the embedded splitting uses a Lie splitting)
   this->store_solvers();
-  this->advance_rk(a_time, advective_dt, m_compute_error);
+  this->advance_rk(a_time, 0.5*a_dt);
 
-  // In principle, we should update E before computing new diffusion coefficients. Do that, then update
-  // the diffusion coefficients and then advance both solutions
-  if(m_do_diffusion){
-    if(m_consistent_E){
-      this->update_poisson();
+  // Update elliptic equations. 
+  if(m_consistent_E) this->update_poisson();
+  if(m_consistent_rte) this->update_rte(a_time + a_dt);
+
+  // Embedded formula is the same for the first half step, but it should use another advective half step
+  // followed by diffusion. The embedded formulas will mess with the elliptic solutions, so we should back
+  // up those solutions first, and then revert later. 
+  if(m_compute_error){
+    this->copy_solvers_to_cache();                       // scratch -> e^(0.5*A*dt)u. Also does elliptic equations
+    this->store_solvers();                               // Store solvers
+    this->compute_cdr_gradients();                       // Compute gradients, then do velo and source
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+    this->advance_rk(a_time, 0.5*a_dt);                  // Solvers now contain e^(0.5*A*dt)*e^(0.5*A*dt)*u
+
+    // Last embedded diffusive step tep
+    if(m_do_diffusion){
+      if(m_consistent_E) this->update_poisson();
+      time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+      this->advance_diffusion(a_time, a_dt);
     }
+
+    // Solvers now contain e^(D*dt)*e^(0.5*A*dt)*e^(0.5*A*dt)*u, but this is the error so we need
+    // to copy that to the correct place, and revert the solvers to their original states
+    this->copy_solvers_to_error();   // error -> e^(D*dt)*e^(0.5*A*dt)*e^(0.5*A*dt)*u
+    this->copy_cache_to_solvers();   // solvers -> e^(0.5*A*dt)*u, this also reverts the potential and RTE solutions
+    this->compute_E_into_scratch();  // Field were not reverted (for storage reasons), recompute them here. 
+  }
+
+  // Diffusion advance
+  if(m_do_diffusion){
     if(m_compute_D){
       time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
     }
-    this->advance_diffusion(a_time, diffusive_dt);
+    this->advance_diffusion(a_time, a_dt);
   }
 
-  // If we're doing a Strang splitting, we need to advance the final advection-reaction stuff. But for
-  // Godunov splitting we don't need to do this. 
-  if(m_splitting == "strang"){
-    // Strictly speaking, we should update the electric field and RTE equations again
-    if(m_consistent_E) this->update_poisson();
-    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+  // Update the electric field and RTE equations again
+  if(m_consistent_E) this->update_poisson();
+  if(m_consistent_rte) this->update_rte(a_time + a_dt);
 
-    // We're now doing a full time step, so solvers need to be filled again
-    this->store_solvers();
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
-    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
-
-    // Now do the second advance. No need to monkey with more error computations since the embedded formula
-    // is a Lie split
-    this->advance_rk(a_time, advective_dt, false);
-  }
+  // Solvers need to be refilled with stuff
+  this->store_solvers();
+  this->compute_cdr_gradients();
+  if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+  if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  this->advance_rk(a_time, 0.5*a_dt);
 }
 
 Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
@@ -510,7 +481,7 @@ Real strang2::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, c
   }
 
   this->compute_E_into_scratch();
-  this->compute_cdr_gradients();
+  this->compute_cdr_gradients();  // Precompute gradients
 
   Real sum_dt = 0.0;
   const Real fudge = 1E-6;
@@ -603,7 +574,7 @@ Real strang2::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, c
   return sum_dt;
 }
 
-void strang2::advance_rk(const Real a_time, const Real a_dt, const bool a_compute_err){
+void strang2::advance_rk(const Real a_time, const Real a_dt){
   CH_TIME("strang2::advance_rk");
   if(m_verbosity > 2){
     pout() << "strang2::advance_rk" << endl;
@@ -611,33 +582,39 @@ void strang2::advance_rk(const Real a_time, const Real a_dt, const bool a_comput
 
   if(m_rk_order == 2){
     if(m_rk_stages == 2){
-      this->advance_rk22(a_time, a_dt, m_compute_error);
+      this->advance_rk22(a_time, a_dt);
+    }
+    else if(m_rk_stages == 3){
+      this->advance_rk32(a_time, a_dt);
+    }
+    else if(m_rk_stages == 4){
+      this->advance_rk42(a_time, a_dt);
     }
     else{
-      MayDay::Abort("strang2::advance_fixed - unknown RK method requested");
+      MayDay::Abort("strang2::advance_fixed - unknown second RK method requested");
     }
   }
   else if(m_rk_order == 3){
     if(m_rk_stages == 3){
-      this->advance_rk33(a_time, a_dt, m_compute_error);
+      this->advance_rk33(a_time, a_dt);
+    }
+    else if(m_rk_stages == 4){
+      this->advance_rk43(a_time, a_dt);
     }
     else{
-      MayDay::Abort("strang2::advance_fixed - unknown RK method requested");
+      MayDay::Abort("strang2::advance_fixed - unknown third order RK method requested");
     }
   }
   else{
-    MayDay::Abort("strang2::advance_fixed - unknown RK method requested");
+    MayDay::Abort("strang2::advance_fixed - unknown RK order requested");
   }
 }
 
-void strang2::advance_rk22(const Real a_time, const Real a_dt, const bool a_compute_err){
+void strang2::advance_rk22(const Real a_time, const Real a_dt){
   CH_TIME("strang2::advance_rk22");
   if(m_verbosity > 2){
     pout() << "strang2::advance_rk22" << endl;
   }
-
-  // NOTE: If we use strang splitting, the time step that comes in here has been halved. Furthermore,
-  //       the solvers have been filled with source terms and velocities, but not much else.
 
   { // u^1 = u^n + dt*L(u^n)
     this->compute_E_into_scratch();
@@ -663,31 +640,12 @@ void strang2::advance_rk22(const Real a_time, const Real a_dt, const bool a_comp
       m_amr->interp_ghost(phi, m_cdr->get_phase());
 
       data_ops::floor(phi, 0.0);
-
-       // For Heun's method, the embedded error is just u^1 (the forward Euler)
-      if(a_compute_err){
-	EBAMRCellData& err = storage->get_error();
-	data_ops::copy(err, phi);         // err = u^n + dt*L(u^n). Correct for Godunov splitting. 
-	if(m_splitting == "strang"){
-	  data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*L(u^n). Correct for Strang splitting. 
-	}
-      }
     }
 
     EBAMRIVData& sigma = m_sigma->get_state();
     EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
     m_sigma->compute_rhs(rhs);
     data_ops::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
-
-    // For Heun's method, the embedded error is just u^1 (the forward Euler)
-    if(a_compute_err){
-      EBAMRIVData& err = m_sigma_scratch->get_error();
-      data_ops::set_value(err, 0.0);
-      data_ops::incr(err, sigma, 1.0);  // err = u^n + dt*L(u^n). Correct for Godunov splitting.
-      if(m_splitting == "strang"){
-	data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*L(u^n). Correct for Strang splitting.
-      }
-    }
   }
 
   if(m_consistent_E)   this->update_poisson();
@@ -736,15 +694,232 @@ void strang2::advance_rk22(const Real a_time, const Real a_dt, const bool a_comp
   }
 }
 
-void strang2::advance_rk33(const Real a_time, const Real a_dt, const bool a_compute_err){
+void strang2::advance_rk32(const Real a_time, const Real a_dt){
+  CH_TIME("strang2::advance_rk32");
+  if(m_verbosity > 5){
+    pout() << "strang2::advance_rk32" << endl;
+  }
+
+  
+  // The tables for this scheme are
+  // alpha            
+  // -----------------
+  //  1               
+  //  0    1
+  // 1/3    0  2/3
+  //
+  // beta            
+  // -----------------
+  // 1/2               
+  //  0   1/2
+  //  0    0   1/3
+  //
+  // I.e. the first two stages are equal (we put the result into the solver). Put them in a loop. 
+
+  // u^(i+1) = u^i + 0.5*dt*L(u^i)
+  for (int i = 0; i < 2; i++){
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state();
+      const EBAMRCellData& src = solver->get_source();
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
+      data_ops::incr(phi, rhs, 0.5*a_dt);        // u^1 = u^n + 0.5*dt*L(u^n)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma = m_sigma->get_state();
+    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, 0.5*a_dt); // sigma^1 = sigma^n + 0.5*dt*F^n
+
+    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  }
+
+  { // u^(n+1) = u^n + (1./3)*(2*u^2 + dt*L(u^2))
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state(); // u^2
+      const EBAMRCellData& pre = storage->get_previous(); // u^n
+      const EBAMRCellData& src = solver->get_source();
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^2*v^2)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^2 - Div(u^2*v^2)
+      data_ops::scale(phi, 2.0);                 // u^(n+1) = 2*u^2
+      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = 2*u^2 + dt*L(u^2)
+      data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + [2*u^2 + dt*L(u^2)]
+      data_ops::scale(phi, 1./3.);               // u^(n+1) = (1/3)*[u^n + 2*u^2 + dt*L(u^2)]
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma = m_sigma->get_state(); // u^2
+    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
+    m_sigma->compute_rhs(rhs);
+    data_ops::scale(sigma, 2.0);          // sigma^(n+1) = 2*sigma^2
+    data_ops::incr(sigma, rhs, a_dt);     // sigma^(n+1) = 2*sigma^2 + dt*F^2
+    data_ops::incr(sigma, pre, 1.0);      // sigma^(n+1) = [sigma^n + 2*sigma^2 + dt*F^2]
+    data_ops::scale(sigma, 1./3.);        // sigma^(n+1) = (1/3)*[sigma^n + 2*sigma^2 + dt*F^2]
+  }
+}
+
+void strang2::advance_rk42(const Real a_time, const Real a_dt){
+  CH_TIME("strang2::advance_rk42");
+  if(m_verbosity > 5){
+    pout() << "strang2::advance_rk42" << endl;
+  }
+
+  // The tables for this scheme are
+  // alpha            
+  // -----------------
+  //  1               
+  //  0    1
+  //  0    0   1
+  // 1/4   0   0   3/4
+  //
+  // beta            
+  // -----------------
+  // 1/3               
+  //  0   1/3
+  //  0    0  1/3
+  //  0   0   0   1/4
+  //
+  // I.e. the first three stages are equal (we put the result into the solver). Put them in a loop. 
+
+  const Real third = 1./3.;
+
+  // u^(i) = u^(i-1) + third*dt*L(u^(i-1))
+  for (int i = 0; i <= 2; i++){
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state();  // u^i
+      const EBAMRCellData& src = solver->get_source(); // S^i
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^i*v^i)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^i*v^i)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^i - Div(u^i*v^i)
+      data_ops::incr(phi, rhs, third*a_dt);      // u^(i+1) = u^i + (1./3)*dt*L(u^i)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma = m_sigma->get_state(); // sigma^i
+    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, third*a_dt); // sigma^(i+1) = sigma^i + (1/3.)*dt*F^i
+
+    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  }
+
+
+  { // u^(n+1) = (1/4)*[u^n + 3*u^3 + dt*L(u^3)]
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& phi       = solver->get_state();     // u^3
+      const EBAMRCellData& src = solver->get_source();
+      const EBAMRCellData& pre = storage->get_previous(); // u^n
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^3*v^3)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^3*v^3)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^3 - Div(u^3*v^3)
+      data_ops::scale(phi, 3.0);                 // u^(n+1) = 3*u^3
+      data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + 3*u^3
+      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^n + 3*u^3 + dt*L(u^3)
+      data_ops::scale(phi, 0.25);                // u^(n+1) = 0.25*[u^n + 3*u^3 + dt*L(u^3)]
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma     = m_sigma->get_state();            // sigma^3
+    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
+    const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
+    m_sigma->compute_rhs(rhs);
+    data_ops::scale(sigma, 3.0);            // sigma^(n+1) = 3*sigma^3
+    data_ops::incr(sigma, pre, 1.0);        // sigma^(n+1) = sigma^n + 3*sigma^3
+    data_ops::incr(sigma, rhs, a_dt);       // sigma^(n+1) = sigma^n + 3*sigma^3 + dt*F^3
+    data_ops::scale(sigma, 0.25);           // sigma^(n+1) = 0.25*[sigma^n + 3*sigma^3 + dt*F^3]
+  }
+}
+
+void strang2::advance_rk33(const Real a_time, const Real a_dt){
   CH_TIME("strang2::advance_rk33");
   if(m_verbosity > 2){
     pout() << "strang2::advance_rk33" << endl;
   }
 
+  // The tables for this scheme are
+  // alpha            
+  // -----------------
+  //  1               
+  // 3/4  1/4
+  // 1/3   0   2/3
+  //
+  // beta            
+  // -----------------
+  //  1               
+  //  0   1/4
+  //  0    0    2/3
+
   // u^1 = u^n + dt*L(u^n)
   { 
-    this->compute_E_into_scratch();
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
     this->compute_cdr_domain_fluxes(a_time);
@@ -768,89 +943,18 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt, const bool a_comp
     
       data_ops::floor(phi, 0.0);
 
-      // For RK3, the embedded method is u^(n+1) = 0.5*[u^n + u^1 + dt*L(u^1)]. We must
-      // make err = u^1 because we will later need to compute 
-      if(a_compute_err){
-	EBAMRCellData& err = storage->get_error();
-	data_ops::copy(err, phi);         // err = u^n + dt*L(u^n). Correct so far for the Godunov splitting. 
-	if(m_splitting == "strang"){
-	  data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*L(u^n). Correct so far for Strang splitting. 
-	}
-      }
     }
 
     EBAMRIVData& sigma = m_sigma->get_state();
     EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
     m_sigma->compute_rhs(rhs);
     data_ops::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
-
-    // For Heun's method, the embedded error is just u^1 (the forward Euler)
-    if(a_compute_err){
-      EBAMRIVData& err = m_sigma_scratch->get_error();
-      data_ops::set_value(err, 0.0);
-      data_ops::incr(err, sigma, 1.0);  // err = u^n + dt*F^n. Correct so far for the Godunov splitting. 
-      if(m_splitting == "strang"){      
-	data_ops::incr(err, rhs, a_dt); // err = u^n + 2*dt*F^n. Correct so far for the Strang splitting. 
-      }
-    }
   }
 
   if(m_consistent_E)   this->update_poisson();
   if(m_consistent_rte) this->update_rte(a_time + a_dt);
 
-  // Final Heun update for the error in case of Strang splitting. In principle, it should use the fields
-  // obtained from the embedded formula update, but we skip that here to save some computations. It's just the error
-  // and we don't care if it is exact.
-  //
-  // This loop is only for Strang splitting because the Godunov splitting shares function evaluations with
-  // the full RK3 scheme and therefore has no overhead. 
-  if(a_compute_err && m_splitting == "strang"){
-    Vector<EBAMRCellData*> err_states;
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-      err_states.push_back(&(storage->get_error()));
-    }
-
-    this->compute_cdr_gradients(err_states);
-    if(m_compute_v) this->compute_cdr_velo(err_states, a_time + a_dt);
-    if(m_compute_S) this->compute_cdr_sources(err_states, a_time + a_dt);
-    this->compute_cdr_eb_states(err_states);
-    this->compute_cdr_fluxes(err_states,a_time);
-    this->compute_cdr_domain_fluxes(err_states,a_time);
-    this->compute_sigma_flux();
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-      
-      EBAMRCellData& err       = storage->get_error();    // err = u^n + 2*dt*L(u^n) for Strang splitting. 
-      EBAMRCellData& rhs       = storage->get_scratch();
-      const EBAMRCellData& pre = storage->get_previous();
-      const EBAMRCellData& src = solver->get_source();
-
-      solver->compute_divF(rhs, err, 0.0, true); // RHS = Div(u^1*v^1)
-      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
-      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
-      
-      data_ops::incr(err, rhs, 2*a_dt);            // err = u^1 + 2*dt*L(u^1). Correct for Strang splitting.
-      data_ops::incr(err, pre, 1.0);               // err = u^n + u^1 + 2*dt*L(u^1); 
-      data_ops::scale(err, 0.5);                   // err = 0.5*[u^n + u^1 + 2*dt*L(u^1)];
-
-      m_amr->average_down(err, m_cdr->get_phase());
-      m_amr->interp_ghost(err, m_cdr->get_phase());
-    }
-
-    EBAMRIVData& err = m_sigma_scratch->get_error();     // err = sigma^n + 2*dt*F^n = sigma^1
-    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();
-    EBAMRIVData& pre = m_sigma_scratch->get_previous();
-    m_sigma->compute_rhs(rhs);
-    data_ops::incr(err, rhs, 2*a_dt); // err = sigma^1 + 2*dt*F^n. Correct for Strang splitting
-    data_ops::incr(err, pre, 2*a_dt); // err = sigma^n + sigma^1 + 2*dt*F^1
-    data_ops::scale(err, 0.5);        // err = 0.5*(sigma^n + sigma^1 + 2*dt*F^1)
-  }
-
-  // u^2 = 0.25*(3*u^n + u^1 + dt*L(u^1)). For Godunov splitting, the embedded formula is
-  // err = 0.5*(u^n + u^1 + dt*L(u^1)). The Strang splitting error is handled in the loop above. 
+  // u^2 = 0.25*(3*u^n + u^1 + dt*L(u^1)). 
   { 
     this->compute_cdr_gradients();
     if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
@@ -880,16 +984,6 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt, const bool a_comp
       m_amr->interp_ghost(phi, m_cdr->get_phase());
     
       data_ops::floor(phi, 0.0);
-
-      // For RK3 Strang splitting, the error has already been computed. For Godunov splitting,
-      // the embedded method is u^(n+1) = 0.5*[u^n + u^1 + dt*L(u^1)] and we computed L(u^1) above into rhs
-      // so just increment the error with what we need. 
-      if(a_compute_err && m_splitting == "godunov"){
-	EBAMRCellData& err = storage->get_error(); // err = u^1
-	data_ops::incr(err,  rhs, a_dt);           // err = u^1 + dt*L(u^1)
-	data_ops::incr(err,  pre, 1.0);            // err = u^n + u^1 + dt*L(u^1)
-	data_ops::scale(err, 0.5);                 // err = 0.5*[u^n + u^1 + dt*L(u^1)]
-      }
     }
 
     EBAMRIVData& sigma = m_sigma->get_state();           // u^1
@@ -899,13 +993,6 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt, const bool a_comp
     data_ops::incr(sigma, rhs, a_dt);  // sigma = u^1 + dt*L(u^1)
     data_ops::incr(sigma, pre, 3.0);   // sigma = 3*u^n + u^1 + dt*L(u^1)
     data_ops::scale(sigma, 0.25);      // sigma = 0.25*[3*u^n + u^1 + dt*L(u^1)]
-
-    if(a_compute_err && m_splitting == "strang"){
-      EBAMRIVData& err = m_sigma_scratch->get_error(); // u^1
-      data_ops::incr(err, rhs, a_dt);                  // err = u^1 + dt*L(u^1)
-      data_ops::incr(err, pre, 1.0);                   // err = u^n + u^1 + dt*L(u^1)
-      data_ops::scale(err, 0.5);                       // err = 0.5*[u^n + u^1 + dt*L(u^1)]
-    }
   }
 
   if(m_consistent_E)   this->update_poisson();
@@ -957,19 +1044,65 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt, const bool a_comp
   }
 }
 
-void strang2::compute_cdr_gradients(){
-  CH_TIME("time_stepper::compute_cdr_gradients");
+void strang2::advance_rk43(const Real a_time, const Real a_dt){
+  CH_TIME("strang2::advance_rk43");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_cdr_gradients" << endl;
+    pout() << "strang2::advance_rk43" << endl;
+  }
+
+  // The tables for this scheme are
+  // alpha            
+  // -----------------
+  //  1               
+  //  0    1
+  // 2/3   0   1/3
+  //  0    0    0    1
+  //
+  // beta            
+  // -----------------
+  // 1/2               
+  //  0   1/2
+  //  0    0   1/6
+  //  0    0    0   1/2
+  //
+  // The first two stages are equal, so they can be loop'ed.
+  for (int i = 0; i <= 1; i++){
+
+  }
+  MayDay::Abort("strang2::advance_rk43 - not implemented");
+}
+
+void strang2::advance_rk44(const Real a_time, const Real a_dt){
+  CH_TIME("strang2::advance_rk44");
+  if(m_verbosity > 5){
+    pout() << "strang2::advance_rk44" << endl;
+  }
+
+  MayDay::Abort("strang2::advance_rk44 - not implemented");
+}
+
+void strang2::advance_rk54(const Real a_time, const Real a_dt){
+  CH_TIME("strang2::advance_rk54");
+  if(m_verbosity > 5){
+    pout() << "strang2::advance_rk54" << endl;
+  }
+
+  MayDay::Abort("strang2::advance_rk54 - not implemented");
+}
+
+void strang2::compute_cdr_gradients(){
+  CH_TIME("strang2::compute_cdr_gradients");
+  if(m_verbosity > 5){
+    pout() << "strang2::compute_cdr_gradients" << endl;
   }
 
   strang2::compute_cdr_gradients(m_cdr->get_states());
 }
 
 void strang2::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
-  CH_TIME("time_stepper::compute_cdr_gradients");
+  CH_TIME("strang2::compute_cdr_gradients");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_cdr_gradients" << endl;
+    pout() << "strang2::compute_cdr_gradients" << endl;
   }
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -984,9 +1117,9 @@ void strang2::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
 }
 
 void strang2::compute_errors(){
-  CH_TIME("time_stepper::compute_errors");
+  CH_TIME("strang2::compute_errors");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_errors" << endl;
+    pout() << "strang2::compute_errors" << endl;
   }
 
   const Real safety = 1.E-20;
@@ -1039,9 +1172,9 @@ void strang2::compute_errors(){
 }
 
 void strang2::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  CH_TIME("time_stepper::compute_dt");
+  CH_TIME("strang2::compute_dt");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_dt" << endl;
+    pout() << "strang2::compute_dt" << endl;
   }
 
   Real dt = 1.E99;
@@ -1139,9 +1272,9 @@ void strang2::allocate_sigma_storage(){
 }
 
 void strang2::deallocate_internals(){
-  CH_TIME("time_stepper::deallocate_internals");
+  CH_TIME("strang2::deallocate_internals");
   if(m_verbosity > 5){
-    pout() << "time_stepper::deallocate_internals" << endl;
+    pout() << "strang2::deallocate_internals" << endl;
   }
   
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -1166,77 +1299,77 @@ void strang2::deallocate_internals(){
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
 }
 
-void strang2::cache_solutions(){
-  CH_TIME("strang2::cache_solutions");
+void strang2::backup_solutions(){
+  CH_TIME("strang2::backup_solutions");
   if(m_verbosity > 5){
-    pout() << "strang2::cache_solutions" << endl;
+    pout() << "strang2::backup_solutions" << endl;
   }
   
-  // Cache cdr solutions
+  // Backup cdr solutions
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
 
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    EBAMRCellData& cache = storage->get_cache();
+    EBAMRCellData& backup = storage->get_backup();
 
-    data_ops::copy(cache, solver->get_state());
+    data_ops::copy(backup, solver->get_state());
   }
 
-  {// Cache Poisson solution
-    MFAMRCellData& cache = m_poisson_scratch->get_cache();
-    data_ops::copy(cache, m_poisson->get_state());
+  {// Backup Poisson solution
+    MFAMRCellData& backup = m_poisson_scratch->get_backup();
+    data_ops::copy(backup, m_poisson->get_state());
   }
 
-  // Cache RTE solutions
+  // Backup RTE solutions
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<rte_solver>& solver = solver_it();
 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
-    EBAMRCellData& cache = storage->get_cache();
+    EBAMRCellData& backup = storage->get_backup();
 
-    data_ops::copy(cache, solver->get_state());
+    data_ops::copy(backup, solver->get_state());
   }
 
-  { // Cache sigma
-    EBAMRIVData& cache = m_sigma_scratch->get_cache();
-    data_ops::copy(cache, m_sigma->get_state());
+  { // Backup sigma
+    EBAMRIVData& backup = m_sigma_scratch->get_backup();
+    data_ops::copy(backup, m_sigma->get_state());
   }
 }
 
-void strang2::uncache_solutions(){
-  CH_TIME("strang2::uncache_solutions");
+void strang2::revert_backup(){
+  CH_TIME("strang2::revert_backup");
   if(m_verbosity > 5){
-    pout() << "strang2::uncache_solutions" << endl;
+    pout() << "strang2::revert_backup" << endl;
   }
   
-  // Uncache cdr solutions
+  // Revert cdr solutions
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
 
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    const EBAMRCellData& cache = storage->get_cache();
+    const EBAMRCellData& backup = storage->get_backup();
 
-    data_ops::copy(solver->get_state(), cache);
+    data_ops::copy(solver->get_state(), backup);
   }
 
-  {// Uncache Poisson solution
-    const MFAMRCellData& cache = m_poisson_scratch->get_cache();
-    data_ops::copy(m_poisson->get_state(), cache);
+  {// Revert Poisson solution
+    const MFAMRCellData& backup = m_poisson_scratch->get_backup();
+    data_ops::copy(m_poisson->get_state(), backup);
   }
 
-  // Uncache RTE solutions
+  // Revert RTE solutions
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<rte_solver>& solver = solver_it();
 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
-    const EBAMRCellData& cache = storage->get_cache();
+    const EBAMRCellData& backup = storage->get_backup();
 
-    data_ops::copy(solver->get_state(), cache);
+    data_ops::copy(solver->get_state(), backup);
   }
 
-  { // Uncache sigma
-    const EBAMRIVData& cache = m_sigma_scratch->get_cache();
-    data_ops::copy(m_sigma->get_state(), cache);
+  { // Revert sigma solution
+    const EBAMRIVData& backup = m_sigma_scratch->get_backup();
+    data_ops::copy(m_sigma->get_state(), backup);
   }
 }
 
@@ -1250,16 +1383,118 @@ void strang2::copy_error_to_solvers(){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-    EBAMRCellData& state = solver->get_state();
-    EBAMRCellData& prev  = storage->get_error();
+    EBAMRCellData& state      = solver->get_state();
+    const EBAMRCellData& err  = storage->get_error();
 
-    data_ops::copy(state, prev);
+    data_ops::copy(state, err);
   }
 
-  EBAMRIVData& phi = m_sigma->get_state();
-  EBAMRIVData& pre = m_sigma_scratch->get_error();
+  EBAMRIVData& phi       = m_sigma->get_state();
+  const EBAMRIVData& err = m_sigma_scratch->get_error();
   data_ops::set_value(phi, 0.0);
-  data_ops::incr(phi, pre, 1.0);
+  data_ops::incr(phi, err, 1.0);
+}
+
+void strang2::copy_solvers_to_error(){
+  CH_TIME("strang2::copy_error_to_solvers");
+  if(m_verbosity > 5){
+    pout() << "strang2::copy_error_to_solvers" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    const EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& err   = storage->get_error();
+
+    data_ops::copy(err, state);
+  }
+
+  const EBAMRIVData& phi = m_sigma->get_state();
+  EBAMRIVData& err = m_sigma_scratch->get_error();
+  data_ops::set_value(err, 0.0);
+  data_ops::incr(err, phi, 1.0);
+}
+
+void strang2::copy_solvers_to_cache(){
+  CH_TIME("strang2::copy_solvers_to_cache");
+  if(m_verbosity > 5){
+    pout() << "strang2::copy_solvers_to_cache" << endl;
+  }
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    const EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& cache       = storage->get_cache();
+
+    data_ops::copy(cache, state);
+  }
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    const EBAMRCellData& state = solver->get_state();
+    EBAMRCellData& cache       = storage->get_cache();
+
+    data_ops::copy(cache, state);
+  }
+
+  { // Cache the Poisson solution
+    const MFAMRCellData& state = m_poisson->get_state();
+    MFAMRCellData& cache       = m_poisson_scratch->get_cache();
+    data_ops::copy(cache, state);
+  }
+
+  { // Cache the surface charge density
+    const EBAMRIVData& phi = m_sigma->get_state();
+    EBAMRIVData& cache = m_sigma_scratch->get_cache();
+    data_ops::set_value(cache, 0.0);
+    data_ops::incr(cache, phi, 1.0);
+  }
+}
+
+void strang2::copy_cache_to_solvers(){
+  CH_TIME("strang2::copy_cache_to_solvers");
+  if(m_verbosity > 5){
+    pout() << "strang2::copy_cache_to_solvers" << endl;
+  }
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRCellData& state       = solver->get_state();
+    const EBAMRCellData& cache = storage->get_cache();
+
+    data_ops::copy(state, cache);
+  }
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    EBAMRCellData& state       = solver->get_state();
+    const EBAMRCellData& cache = storage->get_cache();
+
+    data_ops::copy(state, cache);
+  }
+
+  { // Uncache the Poisson solution
+    MFAMRCellData& state       = m_poisson->get_state();
+    const MFAMRCellData& cache = m_poisson_scratch->get_cache();
+    data_ops::copy(state, cache);
+  }
+
+  { // Uncache the surface charge density
+    EBAMRIVData& sigma       = m_sigma->get_state();
+    const EBAMRIVData& cache = m_sigma_scratch->get_cache();
+    data_ops::set_value(sigma, 0.0);
+    data_ops::incr(sigma, cache, 1.0);
+  }
 }
 
 void strang2::compute_E_into_scratch(){

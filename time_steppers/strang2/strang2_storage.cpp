@@ -29,6 +29,7 @@ strang2::cdr_storage::~cdr_storage(){
 void strang2::cdr_storage::allocate_storage(){
   m_amr->allocate(m_cache,    m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
+  m_amr->allocate(m_backup,   m_phase, m_ncomp);
   m_amr->allocate(m_previous, m_phase, m_ncomp);
   m_amr->allocate(m_error,    m_phase, m_ncomp);
   m_amr->allocate(m_gradient, m_phase, SpaceDim);
@@ -48,6 +49,7 @@ void strang2::cdr_storage::allocate_storage(){
 void strang2::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_scratch);
+  m_amr->deallocate(m_backup);
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_error);
   m_amr->deallocate(m_gradient);
@@ -83,6 +85,7 @@ strang2::poisson_storage::~poisson_storage(){
 
 void strang2::poisson_storage::allocate_storage(){
   m_amr->allocate(m_cache,   m_ncomp);
+  m_amr->allocate(m_backup,  m_ncomp);
   m_amr->allocate(m_E_cell,  m_phase, SpaceDim);
   m_amr->allocate(m_E_face,  m_phase, SpaceDim);
   m_amr->allocate(m_E_eb,    m_phase, SpaceDim);
@@ -91,6 +94,7 @@ void strang2::poisson_storage::allocate_storage(){
 
 void strang2::poisson_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_backup);
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_face);
   m_amr->deallocate(m_E_eb);
@@ -117,12 +121,14 @@ strang2::rte_storage::~rte_storage(){
 
 void strang2::rte_storage::allocate_storage(){
   m_amr->allocate(m_cache,      m_phase, m_ncomp);
+  m_amr->allocate(m_backup,     m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIF,  m_phase, m_ncomp);
 }
 
 void strang2::rte_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_backup);
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
 }
@@ -147,6 +153,7 @@ strang2::sigma_storage::~sigma_storage(){
 
 void strang2::sigma_storage::allocate_storage(){
   m_amr->allocate(m_cache,    m_phase, m_ncomp);
+  m_amr->allocate(m_backup,   m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_previous, m_phase, m_ncomp);
   m_amr->allocate(m_error,    m_phase, m_ncomp);
@@ -154,6 +161,7 @@ void strang2::sigma_storage::allocate_storage(){
 
 void strang2::sigma_storage::deallocate_storage(){
   m_amr->deallocate(m_cache);
+  m_amr->deallocate(m_backup);
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_error);

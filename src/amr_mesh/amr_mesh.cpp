@@ -571,7 +571,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
     }
 
     int base_level = m_refine_all_depth;
-    if(top_level > base_level){ // Use tags for regridding
+    if(top_level >= base_level){ // Use tags for regridding
       // Berger-Rigoutsos grid generation
       BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
       int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base_level, top_level, old_boxes);

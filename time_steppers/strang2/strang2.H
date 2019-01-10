@@ -95,17 +95,25 @@ protected:
   void allocate_rte_storage();
   void allocate_sigma_storage();
   
-  void cache_solutions();
-  void uncache_solutions();
+  void backup_solutions();
+  void revert_backup();
+  void copy_solvers_to_error();
   void copy_error_to_solvers();
+  void copy_solvers_to_cache();
+  void copy_cache_to_solvers();
   
   Real advance_adaptive(int& substeps, Real& a_dt, const Real a_time, const Real a_dtc);
   Real advance_fixed(const int a_substeps, const Real a_dt);
   Real advance_one_step(const Real a_time, const Real a_dt);
 
-  void advance_rk(const Real a_time, const Real a_dt, const bool a_compute_err);
-  void advance_rk22(const Real a_time, const Real a_dt, const bool a_compute_err);
-  void advance_rk33(const Real a_time, const Real a_dt, const bool a_compute_err);
+  void advance_rk(const Real a_time,   const Real a_dt);
+  void advance_rk22(const Real a_time, const Real a_dt);
+  void advance_rk32(const Real a_time, const Real a_dt);
+  void advance_rk42(const Real a_time, const Real a_dt);
+  void advance_rk33(const Real a_time, const Real a_dt);
+  void advance_rk43(const Real a_time, const Real a_dt);
+  void advance_rk44(const Real a_time, const Real a_dt);
+  void advance_rk54(const Real a_time, const Real a_dt);
   
   void advance_diffusion(const Real a_time, const Real a_dt);
   void advance_euler_diffusion(const Real a_time, const Real a_dt);

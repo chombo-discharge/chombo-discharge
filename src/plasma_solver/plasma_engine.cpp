@@ -191,7 +191,7 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
 
   m_timestepper->compute_E(E, potential);
   //  m_amr->compute_gradient(E, poisson->get_state());
-  data_ops::scale(E, -1.0);
+  //  data_ops::scale(E, -1.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     LevelData<EBCellFAB> E_gas, E_sol;
