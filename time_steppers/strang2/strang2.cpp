@@ -22,15 +22,16 @@ typedef strang2::rte_storage     rte_storage;
 typedef strang2::sigma_storage   sigma_storage;
 
 strang2::strang2(){
-  m_advective_order     = 2;
-  m_minCFL              = 0.1;
-  m_maxCFL              = 0.9;   // Overriden below since Strang and Godunov splittings have different CFLs
-  m_err_thresh          = 1.E-4;
-  m_safety              = 0.9;
-  m_error_norm          = 2;
-
-  // This is maximum order supported right now
-  m_max_advection_order = 3;
+  m_rk_order     = 3;
+  m_rk_stages    = 3;
+  m_minCFL       = 0.1;
+  m_maxCFL       = 0.9;   // Overriden below since Strang and Godunov splittings have different CFLs
+  m_err_thresh   = 1.E-4;
+  m_safety       = 0.9;
+  m_error_norm   = 2;
+  m_alpha        = 0.25;
+  m_min_alpha    = 0.2;
+  m_max_alpha    = 1.5;
 
   m_adaptive_dt    = true;
   m_compute_error  = true;
@@ -57,6 +58,7 @@ strang2::strang2(){
     ParmParse pp("strang2");
 
     std::string str;
+    Vector<Real> rk_method(2);
 
     if(pp.contains("splitting")){
       pp.get("splitting", str);
@@ -78,12 +80,19 @@ strang2::strang2(){
       m_maxCFL = 1.8;
     }
 
-    pp.query("advective_order", m_advective_order);
+    if(pp.contains("rk_method")){
+      pp.getarr("rk_method", rk_method, 0, 2);
+      m_rk_order  = rk_method[0];
+      m_rk_stages = rk_method[1];
+    }
     pp.query("min_cfl",         m_minCFL);
     pp.query("max_cfl",         m_maxCFL);
     pp.query("max_error",       m_err_thresh);
     pp.query("safety",          m_safety);
     pp.query("error_norm",      m_error_norm);
+    pp.query("alpha",           m_alpha);
+    pp.query("min_alpha",       m_min_alpha);
+    pp.query("max_alpha",       m_max_alpha);
 
     if(pp.contains("fixed_order")){
       pp.get("fixed_order", str);
@@ -192,12 +201,6 @@ strang2::strang2(){
 	}
       }
     }
-  }
-
-  // Print error if user tries to exceed supported orders
-  if(m_advective_order < 2 || m_advective_order > m_max_advection_order){
-    pout() << "strang2 ::strang2 - order < 1 or order > 3 requested!." << endl;
-    MayDay::Abort("strang2 ::strang2 - order < 1 or order > 3 requested!.");
   }
 
   // If we don't use adaptive, we can't go beyond CFL
@@ -396,8 +399,67 @@ void strang2::advance_euler_diffusion(const Real a_time, const Real a_dt){
       data_ops::copy(wrong_phi, exact_phi);
 
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->advance_euler(wrong_phi, old_phi, a_dt);
+      tgasolver->advance_tga(wrong_phi, old_phi, a_dt);
     }
+  }
+}
+
+Real strang2::advance_one_step(const Real a_time, const Real a_dt){
+  CH_TIME("strang2::advance_one_step");
+  if(m_verbosity > 2){
+    pout() << "strang2::advance_one_step" << endl;
+  }
+  // If we're doing Strang splitting, we're actually taking two
+  // advective steps with 0.5*dt. Since a_dt is the fine time step,
+  // we adjust here. 
+  Real diffusive_dt = a_dt;
+  Real advective_dt;
+  if(m_splitting == "godunov"){
+    advective_dt = a_dt;
+  }
+  else if(m_splitting == "strang"){
+    advective_dt = 0.5*a_dt;
+  }
+  else {
+    MayDay::Abort("strang2::advance_fixed - unknown splitting");
+  }
+
+  // Advection-reaction integration. We must have a place to put u^n (the current solution) before
+  // we advance, so it is put in storage->m_previous. We do this because it's easier to fill
+  // the solvers with the intermediate Runge-Kutta stage (it lets us use a simpler interface).
+  // The 'true' flag indicates that we should compute the embedded formula error, which we only do
+  // on the first time step (the embedded splitting uses a Lie splitting)
+  this->store_solvers();
+  this->advance_rk(a_time, advective_dt, m_compute_error);
+
+  // In principle, we should update E before computing new diffusion coefficients. Do that, then update
+  // the diffusion coefficients and then advance both solutions
+  if(m_do_diffusion){
+    if(m_consistent_E){
+      this->update_poisson();
+    }
+    if(m_compute_D){
+      time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+    }
+    this->advance_diffusion(a_time, diffusive_dt);
+  }
+
+  // If we're doing a Strang splitting, we need to advance the final advection-reaction stuff. But for
+  // Godunov splitting we don't need to do this. 
+  if(m_splitting == "strang"){
+    // Strictly speaking, we should update the electric field and RTE equations again
+    if(m_consistent_E) this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+
+    // We're now doing a full time step, so solvers need to be filled again
+    this->store_solvers();
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+
+    // Now do the second advance. No need to monkey with more error computations since the embedded formula
+    // is a Lie split
+    this->advance_rk(a_time, advective_dt, false);
   }
 }
 
@@ -414,74 +476,7 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
     const Real time      = m_time + step*a_dt;
     const bool last_step = (step == a_substeps - 1);
 
-    // If we're doing Strang splitting, we're actually taking two
-    // advective steps with 0.5*dt. Since a_dt is the fine time step,
-    // we adjust here. 
-    Real diffusive_dt = a_dt;
-    Real advective_dt;
-    if(m_splitting == "godunov"){
-      advective_dt = a_dt;
-    }
-    else if(m_splitting == "strang"){
-      advective_dt = 0.5*a_dt;
-    }
-    else {
-      MayDay::Abort("strang2::advance_fixed - unknown splitting");
-    }
-
-    // Advection-reaction integration. We must have a place to put u^n (the current solution) before
-    // we advance, so it is put in storage->m_previous. We do this because it's easier to fill
-    // the solvers with the intermediate Runge-Kutta stage (it lets us use a simpler interface).
-    // The 'true' flag indicates that we should compute the embedded formula error, which we only do
-    // on the first time step (the embedded splitting uses a Lie splitting)
-    this->store_solvers();
-    if(m_advective_order == 2){
-      this->advance_rk2(time, advective_dt, m_compute_error);
-    }
-    else if(m_advective_order == 3){
-      this->advance_rk3(time, advective_dt, m_compute_error);
-    }
-    else{
-      MayDay::Abort("strang2::advance_fixed - unsupported order requested");
-    }
-
-    // In principle, we should update E before computing new diffusion coefficients. Do that, then update
-    // the diffusion coefficients and then advance both solutions
-    if(m_do_diffusion){
-      if(m_consistent_E){
-	this->update_poisson();
-      }
-      if(m_compute_D){
-	time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
-      }
-      this->advance_diffusion(time, diffusive_dt);
-    }
-
-    // If we're doing a Strang splitting, we need to advance the final advection-reaction stuff. But for
-    // Godunov splitting we don't need to do this. 
-    if(m_splitting == "strang"){
-      // Strictly speaking, we should update the electric field and RTE equations again
-      if(m_consistent_E) this->update_poisson();
-      if(m_consistent_rte) this->update_rte(m_time + 0.5*a_dt);
-
-      // We're now doing a full time step, so solvers need to be filled again
-      this->store_solvers();
-      this->compute_cdr_gradients();
-      if(m_compute_v) this->compute_cdr_velo(time);
-      if(m_compute_S) this->compute_cdr_sources(time);
-
-      // Now do the second advance. No need to monkey with more error computations since the embedded formula
-      // is a Lie split
-      if(m_advective_order == 2){
-	this->advance_rk2(time, advective_dt, false);
-      }
-      else if(m_advective_order == 3){
-	this->advance_rk3(time, advective_dt, false);
-      }
-      else{
-	MayDay::Abort("strang2::advance_fixed - unsupported order requested");
-      }
-    }
+    this->advance_one_step(time, a_dt);
 
     if(m_compute_error){
       this->compute_errors();
@@ -503,9 +498,6 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
       if(m_compute_v) this->compute_cdr_velo(time);
       if(m_compute_S) this->compute_cdr_sources(time);
     }
-
-    const bool accept_step = true;
-    const bool accept_order = true;
   }
 
   return a_dt;
@@ -517,14 +509,131 @@ Real strang2::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, c
     pout() << "strang2::advance_adaptive" << endl;
   }
 
-  MayDay::Abort("strang2::advance_adaptive - not implemented (yet)");
-  return 0.0;
+  this->compute_E_into_scratch();
+  this->compute_cdr_gradients();
+
+  Real sum_dt = 0.0;
+  const Real fudge = 1E-6;
+  while (sum_dt - a_dtc < -fudge*a_dt){
+    const bool last_step = (sum_dt + a_dt >= a_dtc - a_dt*1.E-3) ? true : false;
+    const Real cur_time  = a_time + sum_dt;
+
+    // Split step advance and compute errors
+    this->advance_one_step(cur_time, a_dt);
+    if(m_compute_error) {
+      this->compute_errors();
+    }
+    else{
+      MayDay::Abort("strang2::advance_adaptive - m_compute_errors = false but this shouldn't happen!");
+    }
+    if(m_use_embedded){
+      this->copy_error_to_solvers();
+    }
+
+    const Real old_dt  = a_dt;
+    const Real rel_err = m_err_thresh/m_max_error;
+#if 1 // Simple way
+    const Real new_dt  = (m_max_error > 0.0) ? a_dt*sqrt(rel_err) : m_max_dt;
+#else // Better way?
+    const Real new_dt  = (m_max_error > 0.0) ? a_dt*Min(m_max_alpha, Max(m_min_alpha, sqrt(m_alpha*rel_err))) : m_max_dt;
+#endif
+    
+    const bool accept_err   = m_max_error <= m_err_thresh;
+    const bool decr_order   = accept_err  && (a_dt >= m_maxCFL*m_dt_cfl);
+    const bool incr_order   = !accept_err && (a_dt <= m_minCFL*m_dt_cfl);
+    const bool accept_order = !decr_order && !accept_order;
+    const bool accept_step  = accept_err;
+
+    if(accept_step){
+      sum_dt     += a_dt;
+      a_substeps += 1;
+
+      // Set the new time step, but only if we are sufficiently far from the error threshold.
+      const Real err_factor = 1./rel_err;
+      if(err_factor < m_safety){
+	a_dt  = m_safety*new_dt; // Errors are far from the threshold, use a larger time step
+      }
+      else{ 
+	a_dt  = m_safety*a_dt;   // If errors get too close, reduce the time step a little bit so we don̈́t get rejected steps
+      }
+    }
+    else{
+      a_dt = m_safety*new_dt;
+      this->restore_solvers();
+    }
+
+#if 1 // Debug
+    if(procID() == 0){
+      std::cout << "accept = " << accept_step
+		<< "\t accept_order = " << accept_order
+		<< "\t RK order = " << m_rk_order
+		<< "\t last = " << last_step
+		<< "\t rel error = " << m_err_thresh/m_max_error
+		<< "\tmax error = " << m_max_error
+		<< "\t a_dt = " << old_dt
+		<< "\t new_dt = " << a_dt
+		<< "\t dt_cfl = " << m_dt_cfl
+		<< "\t cfl = " << old_dt/m_dt_cfl 
+		<< std::endl;
+    }
+#endif
+
+    // New time step should never exceed CFL or hardcap constraints
+    a_dt = Min(a_dt, m_maxCFL*m_dt_cfl);
+    a_dt = Max(a_dt, m_minCFL*m_dt_cfl);
+    a_dt = Min(a_dt, m_max_dt);
+    a_dt = Max(a_dt, m_min_dt);
+
+    // If we're doing one more substep, we need to make sure that the solvers are up to date. If not, let advance()
+    // take care of the rest of the synchronization
+    if(!last_step){
+      // Update the electric field and RTE equations
+      if(m_consistent_E)   this->update_poisson();
+      if(m_consistent_rte) this->update_rte(cur_time);
+
+      // Compute new velocities and source terms for the next advective step. No need to compute the
+      // diffusion coefficients because they are automateically filled before advance_diffusion() call
+      if(m_compute_S) this->compute_cdr_gradients();
+      if(m_compute_v) this->compute_cdr_velo(cur_time);
+      if(m_compute_S) this->compute_cdr_sources(cur_time);
+    }
+
+  }
+
+  return sum_dt;
 }
 
-void strang2::advance_rk2(const Real a_time, const Real a_dt, const bool a_compute_err){
-  CH_TIME("strang2::advance_rk2");
+void strang2::advance_rk(const Real a_time, const Real a_dt, const bool a_compute_err){
+  CH_TIME("strang2::advance_rk");
   if(m_verbosity > 2){
-    pout() << "strang2::advance_rk2" << endl;
+    pout() << "strang2::advance_rk" << endl;
+  }
+
+  if(m_rk_order == 2){
+    if(m_rk_stages == 2){
+      this->advance_rk22(a_time, a_dt, m_compute_error);
+    }
+    else{
+      MayDay::Abort("strang2::advance_fixed - unknown RK method requested");
+    }
+  }
+  else if(m_rk_order == 3){
+    if(m_rk_stages == 3){
+      this->advance_rk33(a_time, a_dt, m_compute_error);
+    }
+    else{
+      MayDay::Abort("strang2::advance_fixed - unknown RK method requested");
+    }
+  }
+  else{
+    MayDay::Abort("strang2::advance_fixed - unknown RK method requested");
+  }
+}
+
+void strang2::advance_rk22(const Real a_time, const Real a_dt, const bool a_compute_err){
+  CH_TIME("strang2::advance_rk22");
+  if(m_verbosity > 2){
+    pout() << "strang2::advance_rk22" << endl;
   }
 
   // NOTE: If we use strang splitting, the time step that comes in here has been halved. Furthermore,
@@ -627,10 +736,10 @@ void strang2::advance_rk2(const Real a_time, const Real a_dt, const bool a_compu
   }
 }
 
-void strang2::advance_rk3(const Real a_time, const Real a_dt, const bool a_compute_err){
-  CH_TIME("strang2::advance_rk3");
+void strang2::advance_rk33(const Real a_time, const Real a_dt, const bool a_compute_err){
+  CH_TIME("strang2::advance_rk33");
   if(m_verbosity > 2){
-    pout() << "strang2::advance_rk3" << endl;
+    pout() << "strang2::advance_rk33" << endl;
   }
 
   // u^1 = u^n + dt*L(u^n)
@@ -1000,14 +1109,14 @@ void strang2::allocate_cdr_storage(){
   
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_advective_order, m_amr, m_cdr->get_phase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
 }
 
 void strang2::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_poisson_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_advective_order, m_amr, m_cdr->get_phase(), ncomp));
+  m_poisson_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
   m_poisson_scratch->allocate_storage();
 }
 
@@ -1018,14 +1127,14 @@ void strang2::allocate_rte_storage(){
   
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_advective_order, m_amr, m_rte->get_phase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_rk_order, m_amr, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
 }
 
 void strang2::allocate_sigma_storage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_advective_order, m_amr, m_cdr->get_phase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
   m_sigma_scratch->allocate_storage();
 }
 

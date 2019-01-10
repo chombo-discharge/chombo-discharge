@@ -48,8 +48,8 @@ protected:
 
   std::string m_splitting;
 
-  int m_advective_order;
-  int m_max_advection_order;
+  int m_rk_order;
+  int m_rk_stages;
   int m_error_norm;
 
   Real m_minCFL;
@@ -58,6 +58,9 @@ protected:
   Real m_err_thresh;
   Real m_safety;
   Real m_dt_adapt;
+  Real m_alpha;
+  Real m_min_alpha;
+  Real m_max_alpha;
 
   Vector<Real> m_cdr_error;
   Real m_sigma_error;
@@ -98,9 +101,11 @@ protected:
   
   Real advance_adaptive(int& substeps, Real& a_dt, const Real a_time, const Real a_dtc);
   Real advance_fixed(const int a_substeps, const Real a_dt);
-  
-  void advance_rk2(const Real a_time, const Real a_dt, const bool a_compute_err);
-  void advance_rk3(const Real a_time, const Real a_dt, const bool a_compute_err);
+  Real advance_one_step(const Real a_time, const Real a_dt);
+
+  void advance_rk(const Real a_time, const Real a_dt, const bool a_compute_err);
+  void advance_rk22(const Real a_time, const Real a_dt, const bool a_compute_err);
+  void advance_rk33(const Real a_time, const Real a_dt, const bool a_compute_err);
   
   void advance_diffusion(const Real a_time, const Real a_dt);
   void advance_euler_diffusion(const Real a_time, const Real a_dt);

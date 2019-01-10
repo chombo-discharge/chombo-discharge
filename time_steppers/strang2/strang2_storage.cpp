@@ -13,9 +13,9 @@ strang2::cdr_storage::cdr_storage(){
 }
 
 strang2::cdr_storage::cdr_storage(const int a_stages,
-					  const RefCountedPtr<amr_mesh>& a_amr,
-					  const phase::which_phase       a_phase,
-					  const int                      a_ncomp){
+				  const RefCountedPtr<amr_mesh>& a_amr,
+				  const phase::which_phase       a_phase,
+				  const int                      a_ncomp){
   m_stages = a_stages;
   m_amr    = a_amr;
   m_phase  = a_phase;
@@ -68,9 +68,9 @@ strang2::poisson_storage::poisson_storage(){
 }
 
 strang2::poisson_storage::poisson_storage(const int a_stages,
-						  const RefCountedPtr<amr_mesh>& a_amr,
-						  const phase::which_phase       a_phase,
-						  const int                      a_ncomp){
+					  const RefCountedPtr<amr_mesh>& a_amr,
+					  const phase::which_phase       a_phase,
+					  const int                      a_ncomp){
   m_stages = a_stages;
   m_amr    = a_amr;
   m_ncomp  = a_ncomp;
@@ -102,9 +102,9 @@ strang2::rte_storage::rte_storage(){
 }
 
 strang2::rte_storage::rte_storage(const int a_stages,
-					  const RefCountedPtr<amr_mesh>& a_amr,
-					  const phase::which_phase       a_phase,
-					  const int                      a_ncomp){
+				  const RefCountedPtr<amr_mesh>& a_amr,
+				  const phase::which_phase       a_phase,
+				  const int                      a_ncomp){
   m_stages = a_stages;
   m_amr    = a_amr;
   m_phase  = a_phase;
@@ -132,9 +132,9 @@ strang2::sigma_storage::sigma_storage(){
 }
 
 strang2::sigma_storage::sigma_storage(const int a_stages,
-					      const RefCountedPtr<amr_mesh>& a_amr,
-					      const phase::which_phase       a_phase,
-					      const int                      a_ncomp){
+				      const RefCountedPtr<amr_mesh>& a_amr,
+				      const phase::which_phase       a_phase,
+				      const int                      a_ncomp){
   m_stages = a_stages;
   m_amr    = a_amr;
   m_phase  = a_phase;

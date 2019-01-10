@@ -3,14 +3,17 @@
 # ====================================================================================================
 strang2.adaptive_dt       = true    # Tune time step by using an embedded lower order scheme
 strang2.compute_error     = true    # Compute the error by using an embedded Lie scheme. 
-strang2.splitting         = godunov # 'strang' or 'godunov'
-strang2.advective_order   = 2       # Advection integration order (1-3) supported
+strang2.splitting         = strang  # 'strang' or 'godunov'
+strang2.rk_method         = 3 3     # Runge-Kutta method. Not all are supported. 
 strang2.fixed_order       = true    # Fix the integration order
 strang2.min_cfl           = 0.1     # Minimum allowed CFL number for each substep	
-strang2.max_cfl           = 0.9     # Maximum allowed CFL number for each substep. Max = 2 for strang, 1 for godunov
+strang2.max_cfl           = 0.9     # Maximum allowed CFL number for each substep. Different for each RK method. 
 strang2.max_error         = 1.E-5   # Maximum allowed error. Only if compute_error = true
 strang2.error_norm        = 2       # Which error norm.
 strang2.safety            = 0.9     # Safety factor for adaptive step size control. Must (0,1]
+strang2.alpha             = 0.25    # Tuning factor for time step control  
+strang2.min_alpha         = 0.2     # Tuning factor for time step control
+strang2.max_alpha         = 1.5     # Tuning factor for time step control
 
 #-----------------
 # Debugging options
