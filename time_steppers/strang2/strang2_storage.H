@@ -22,6 +22,8 @@ public:
 
   void allocate_storage();
   void deallocate_storage();
+  void allocate_extra_storage(const int a_num_extra);
+  void deallocate_extra_storage();
 
   EBAMRCellData& get_cache(){   return m_cache;      }
   EBAMRCellData& get_backup(){  return m_backup;     }
@@ -29,6 +31,8 @@ public:
   EBAMRCellData& get_previous(){return m_previous;   }
   EBAMRCellData& get_error(){   return m_error;      }
   EBAMRCellData& get_gradient(){return m_gradient;   }
+  
+  Vector<EBAMRCellData*> get_extra_storage(){return m_extra_storage;}
 
   EBAMRIVData& get_eb_state(){  return m_scratchIV1; }
   EBAMRIVData& get_eb_velo(){   return m_scratchIV2; }
@@ -46,6 +50,7 @@ protected:
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
   int m_stages;                  // Number of RK stages
+  bool m_has_extra;              // 
 
   EBAMRCellData m_cache;    // Cached solution
   EBAMRCellData m_backup;   // Backup solution
@@ -53,6 +58,7 @@ protected:
   EBAMRCellData m_previous; // Previous solution (for each substep)
   EBAMRCellData m_error;    // Error estimator
   EBAMRCellData m_gradient; // Storage for holding gradient
+  Vector<EBAMRCellData*> m_extra_storage;
 
   EBAMRIVData m_scratchIV1; // Scratch data
   EBAMRIVData m_scratchIV2; // Scratch data
@@ -135,12 +141,16 @@ public:
   
   void allocate_storage();
   void deallocate_storage();
+  void allocate_extra_storage(const int a_num_extra);
+  void deallocate_extra_storage();
   
   EBAMRIVData& get_cache(){   return m_cache; }
   EBAMRIVData& get_scratch(){ return m_scratch; }
   EBAMRIVData& get_backup(){  return m_backup; }
   EBAMRIVData& get_previous(){return m_previous; }
   EBAMRIVData& get_error(){   return m_error; }
+
+  Vector<EBAMRIVData*> get_extra_storage(){return m_extra_storage;}
 
   
 protected:
@@ -149,12 +159,15 @@ protected:
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
   int m_stages;                  // Number of RK stages
+  bool m_has_extra;              // For checking for extra storage
 
   EBAMRIVData m_cache;           // Cached solution
   EBAMRIVData m_backup;          // Backup solution
   EBAMRIVData m_scratch;         // Scratch data
   EBAMRIVData m_previous;        // Previous solution
-  EBAMRIVData m_error;           // Error 
+  EBAMRIVData m_error;           // Error
+
+  Vector<EBAMRIVData*> m_extra_storage;
 };
 
 #endif

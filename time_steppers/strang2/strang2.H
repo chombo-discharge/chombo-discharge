@@ -112,7 +112,7 @@ protected:
   void advance_rk42(const Real a_time, const Real a_dt);
   void advance_rk33(const Real a_time, const Real a_dt);
   void advance_rk43(const Real a_time, const Real a_dt);
-  void advance_rk44(const Real a_time, const Real a_dt);
+  void advance_rk53(const Real a_time, const Real a_dt);
   void advance_rk54(const Real a_time, const Real a_dt);
   
   void advance_diffusion(const Real a_time, const Real a_dt);

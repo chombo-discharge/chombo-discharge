@@ -2,13 +2,13 @@
 # POISSON_MULTIFLUID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
 poisson_multifluid.gmg_verbosity     = -1        # GMG verbosity
-poisson_multifluid.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
-poisson_multifluid.gmg_post_smooth   = 16        # Number of relaxations in upsweep
-poisson_multifluid.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
+poisson_multifluid.gmg_post_smooth   = 12        # Number of relaxations in upsweep
+poisson_multifluid.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
 poisson_multifluid.gmg_min_iter      = 5         # Minimum number of iterations
 poisson_multifluid.gmg_max_iter      = 32        # Maximum number of iterations
-poisson_multifluid.gmg_tolerance     = 1.E-6     # Residue tolerance
+poisson_multifluid.gmg_tolerance     = 1.E-8     # Residue tolerance
 poisson_multifluid.gmg_hang          = 0.2       # Solver hang
-poisson_multifluid.gmg_bottom_drop   = 2         # Bottom drop
+poisson_multifluid.gmg_bottom_drop   = 8         # Bottom drop
 poisson_multifluid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 poisson_multifluid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)

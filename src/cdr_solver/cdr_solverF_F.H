@@ -194,6 +194,34 @@ inline void FORTRAN_NAME(inlineGET_MAXNORM, inlineGET_MAXNORM)(
 }
 #endif  // GUARDGET_MAXNORM 
 
+#ifndef GUARDADVECTIVE_CFL_DT 
+#define GUARDADVECTIVE_CFL_DT 
+// Prototype for Fortran procedure advective_cfl_dt ...
+//
+void FORTRAN_NAME( ADVECTIVE_CFL_DT ,advective_cfl_dt )(
+      CHFp_CONST_FRA(velo)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(dcalc)
+      ,CHFp_REAL(min_dt) );
+
+#define FORT_ADVECTIVE_CFL_DT FORTRAN_NAME( inlineADVECTIVE_CFL_DT, inlineADVECTIVE_CFL_DT)
+#define FORTNT_ADVECTIVE_CFL_DT FORTRAN_NAME( ADVECTIVE_CFL_DT, advective_cfl_dt)
+
+inline void FORTRAN_NAME(inlineADVECTIVE_CFL_DT, inlineADVECTIVE_CFL_DT)(
+      CHFp_CONST_FRA(velo)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(dcalc)
+      ,CHFp_REAL(min_dt) )
+{
+ CH_TIMELEAF("FORT_ADVECTIVE_CFL_DT");
+ FORTRAN_NAME( ADVECTIVE_CFL_DT ,advective_cfl_dt )(
+      CHFt_CONST_FRA(velo)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_BOX(dcalc)
+      ,CHFt_REAL(min_dt) );
+}
+#endif  // GUARDADVECTIVE_CFL_DT 
+
 }
 
 #endif

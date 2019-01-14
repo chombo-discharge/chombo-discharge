@@ -111,7 +111,11 @@ void streamer_tagger::compute_tracers(){
 	tracer2 = 0.0;
 	
 	if(n > 0.0){
+#if 0 // Original code
 	  tracer1 = Max(S, 0.0)/((n + m_fudge*ne_max)*v.vectorLength());
+#else
+	  tracer1 = Max(S, 0.0)/Se_max;
+#endif
 	}
 	if(E.vectorLength() > 0.0){
 	  tracer2 = E.vectorLength();
@@ -146,8 +150,11 @@ bool streamer_tagger::refine_cell(const RealVect&         a_pos,
 				  const int&              a_lvl,
 				  const Vector<Real>&     a_tracer,
 				  const Vector<RealVect>& a_grad_tracer){
-
+#if 0
   const bool refine1 = (a_tracer[0]*a_dx > m_thresh1[a_lvl]) ? true : false;
+#else
+  const bool refine1 = (a_tracer[0] > m_thresh1[a_lvl]) ? true : false;
+#endif
   const bool refine2 = (a_grad_tracer[1].vectorLength()*a_dx/a_tracer[1] > m_thresh2[a_lvl]) ? true : false;
 
   return refine1 || refine2;

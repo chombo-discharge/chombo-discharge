@@ -1562,6 +1562,7 @@ Real cdr_solver::compute_cfl_dt(){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs(ebisbox.getIrregIVS(box));
 
+#if 0 // I think this is wrong, the CFL should be dx/(|vx| + |vy| + |vz|)
       int fab_type;
       const BaseFab<char>& mask     = ebgraph.getMask(fab_type);
       const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
@@ -1589,6 +1590,23 @@ Real cdr_solver::compute_cfl_dt(){
 	  }
 	}
       }
+#else // This is the correct way of computing this (I think)
+      const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
+      FORT_ADVECTIVE_CFL_DT(CHF_CONST_FRA(velo_fab),
+			    CHF_CONST_REAL(dx),
+			    CHF_BOX(box),
+			    CHF_REAL(min_dt));
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	
+	Real vel = 0.0;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  vel += Abs(velo(vof, dir));
+	}
+	const Real thisdt = dx/vel;
+	min_dt = Min(thisdt, min_dt);
+      }
+#endif
     }
 
     
