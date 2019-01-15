@@ -449,19 +449,39 @@ public:
   virtual Vector<DisjointBoxLayout>& get_grids();
 
   /*!
+    @brief Get pre-coarsened MG grids
+  */
+  virtual Vector<DisjointBoxLayout>& get_mg_grids();
+
+  /*!
     @brief Get domains
   */
   virtual Vector<ProblemDomain>& get_domains();
+
+    /*!
+    @brief Get pre-coarsened MG domains
+  */
+  virtual Vector<ProblemDomain>& get_mg_domains();
 
   /*!
     @brief Get the EBLevelGrid 
   */
   virtual Vector<RefCountedPtr<EBLevelGrid> >& get_eblg(phase::which_phase a_phase);
 
+    /*!
+    @brief Get the pre-coarsened EBLevelGrid 
+  */
+  virtual Vector<RefCountedPtr<EBLevelGrid> >& get_mg_eblg(phase::which_phase a_phase);
+
   /*!
     @brief Get the EBLevelGrid 
   */
   virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mflg();
+
+    /*!
+    @brief Get the pre-coarsened MFLevelGrids
+  */
+  virtual Vector<RefCountedPtr<MFLevelGrid> >& get_mg_mflg();
 
   /*!
     @brief Get the EBISLayouts

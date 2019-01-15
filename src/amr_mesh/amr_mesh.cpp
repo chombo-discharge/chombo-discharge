@@ -1950,8 +1950,16 @@ Vector<DisjointBoxLayout>& amr_mesh::get_grids(){
   return m_grids;
 }
 
+Vector<DisjointBoxLayout>& amr_mesh::get_mg_grids(){
+  return m_mg_grids;
+}
+
 Vector<ProblemDomain>& amr_mesh::get_domains(){
   return m_domains;
+}
+
+Vector<ProblemDomain>& amr_mesh::get_mg_domains(){
+  return m_mg_domains;
 }
 
 Vector<EBISLayout>& amr_mesh::get_ebisl(phase::which_phase a_phase){
@@ -1962,8 +1970,16 @@ Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(phase::which_phase a_pha
   return m_eblg[a_phase];
 }
 
+Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_mg_eblg(phase::which_phase a_phase){
+  return m_mg_eblg[a_phase];
+}
+
 Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mflg(){
   return m_mflg;
+}
+
+Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mg_mflg(){
+  return m_mg_mflg;
 }
 
 Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
