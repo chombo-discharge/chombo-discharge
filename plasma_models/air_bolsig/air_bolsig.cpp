@@ -197,8 +197,8 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real& kdet = m_electron_detachment;
 
   const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_nelec_idx])/((1.0 + Ne)*PolyGeom::dot(vel[m_nelec_idx], a_E));
-  const Real alpha_corr = alpha*(1 - Max(factor, 0.0));
-  //const Real alpha_corr = alpha;
+  //  const Real alpha_corr = alpha*(1 - Max(factor, 0.0));
+  const Real alpha_corr = alpha;
   const Real eta_corr   = eta;
   Se = alpha_corr*Ne*ve - eta_corr*Ne*ve - bep*Ne*Np + m_background_rate + Sph + kdet*Nn*m_N;
   Sp = alpha_corr*Ne*ve - bep*Ne*Np - bpn*Np*Nn + m_background_rate + Sph;

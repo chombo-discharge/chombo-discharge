@@ -3379,7 +3379,7 @@ void plasma_engine::compute_norm(std::string a_chk_coarse, std::string a_chk_fin
   handle_in.close();
 }
 
-void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const std::string a_chk_fine){
+void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const std::string a_chk_fine, const int a_species){
   CH_TIME("plasma_engine::compute_coarse_norm");
   if(m_verbosity > 5){
     pout() << "plasma_engine::compute_coarse_norm" << endl;
@@ -3400,7 +3400,7 @@ void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const st
   HDF5HeaderData header;
   header.readFromFile(handle_in);
   int finest_coar_level = 0;
-
+  Real dt = header.m_real["dt"];
 
   // Read coarse data into these data holders
   Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
@@ -3426,12 +3426,16 @@ void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const st
   }
 
 
-  // For each of the 
-  pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
+  // For each of the
+  if(a_species == -1){
+    pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
+  }
   const int compute_level = 0;
   EBCellFactory cellfact(fine_ebisl[compute_level]);
   LevelData<EBCellFAB> diff(fine_grids[compute_level], 1, 0*IntVect::Unit, cellfact);
-  pout() << "Linf = " << "\t L1" << "\t L2" << endl;
+  if(a_species == -1){
+    pout() << "Linf = " << "\t L1" << "\t L2" << endl;
+  }
   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -3456,10 +3460,12 @@ void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const st
     const Real sL1   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 1);
     const Real sL2   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 2);
 
-
-    
-
-    pout() << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
+    if(a_species == -1){
+      pout() << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
+    }
+    else if(idx == a_species){
+      pout() << dt << "\t" << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
+    }
   }
   
   handle_in.close();

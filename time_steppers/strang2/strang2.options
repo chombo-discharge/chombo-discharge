@@ -23,7 +23,11 @@
 #
 # Note that if you use fixed time stepping then the CFL number from time_stepper is overridden
 # and taken as strang2_maxcfl, which allows you to run at a specified CFL. If you use adaptive
-# stepping (development feature). 
+# stepping (development feature).
+#
+# TODO: We've done SOME convergence testing, but it is by no means exhaustive. Convergence testing
+#       should be run for all the RK solvers above. 
+#
 # ====================================================================================================
 # Main arguments
 # --------------

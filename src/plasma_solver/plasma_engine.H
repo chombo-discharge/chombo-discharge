@@ -95,7 +95,7 @@ public:
   /*!
     @brief Compute the error norm on the coarsest level 
   */
-  virtual void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2);
+  virtual void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2, const int a_species = -1);
 
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached

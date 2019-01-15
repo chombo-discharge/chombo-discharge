@@ -1244,7 +1244,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
   const Real a33 = 0.90698426185967;
   const Real a44 = 0.78952932024253;
 
-  const Real b00 = 1.0;
+  const Real b00 = 0.37726891511710;
   const Real b30 = 0.00071997378654;
   const Real b40 = 0.00277719819460;
   const Real b11 = 0.37726891511710;
@@ -1263,6 +1263,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
   }
 
   // u^1 = u^n + dt*b00*L(u^n)
+  // 
   { 
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
@@ -1520,7 +1521,302 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     pout() << "strang2::advance_rk54" << endl;
   }
 
-  MayDay::Abort("strang2::advance_rk54 - not implemented");
+    // The tables for this scheme are
+  // alpha            
+  // -----------------
+  // a00
+  // a10  a11
+  // a20   0   a22
+  // a30   0   0    a33
+  // a40   0   a42  a43  a44
+  //
+  // beta            
+  // -----------------
+  //  1
+  //  0   b11
+  //  0    0   b22
+  //  0    0    0    b33
+  //  0    0    0    b43   b44
+  //
+  // This scheme requires extra storage for u^2, u^3, L(u^3)
+  //
+  // u^2    -> extra[0]
+  // u^3    -> extra[1]
+  // L(u^3) -> extra[2]
+
+  const Real a00 = 1.0;
+  const Real a10 = 0.44437049406734;
+  const Real a20 = 0.62010185138540;
+  const Real a30 = 0.17807995410773;
+  const Real a40 = 0.00683325884039;
+  const Real a11 = 0.55562950593266;
+  const Real a22 = 0.37989814861469;
+  const Real a42 = 0.51723167208978;
+  const Real a33 = 0.82192004589227;
+  const Real a43 = 0.12759831133288;
+  const Real a44 = 0.34833675773694;
+
+  const Real b00 = 0.39175222700392;
+  const Real b11 = 0.36841029262959;
+  const Real b22 = 0.25189177424738;
+  const Real b33 = 0.54497475021237;
+  const Real b43 = 0.08460416338212;
+  const Real b44 = 0.22600748319395;
+
+  // Allocate extra storage on way in
+  {
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      storage->allocate_extra_storage(3);
+    }
+    m_sigma_scratch->allocate_extra_storage(3);
+  }
+
+  // u^1 = u^n + dt*b00*L(u^n)
+  { 
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch(); // rhs
+      EBAMRCellData& phi       = solver->get_state();    // u^n
+      const EBAMRCellData& src = solver->get_source();   // S^n
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n) = L(u^n)
+      data_ops::incr(phi, rhs, a_dt*b00);        // u^1 = u^n + dt*b00*L(u^n)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma  = m_sigma->get_state();           // sigma^n
+    EBAMRIVData& rhs    = m_sigma_scratch->get_scratch(); // rhs
+    m_sigma->compute_rhs(rhs);
+    data_ops::incr(sigma, rhs, a_dt*b00);   // sigma^1 = sigma^n + dt*b00*L(sigma^n)
+
+    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  }
+
+  // u^2 = a10*u^n + a11*u^1 + b11*L(u^1)
+  { 
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& rhs       = storage->get_scratch();  // rhs
+      EBAMRCellData& phi       = solver->get_state();     // u^1
+      EBAMRCellData& u2        = *(storage->get_extra_storage()[0]); // Becomes u^2
+      const EBAMRCellData& pre = storage->get_previous(); // u^n
+      const EBAMRCellData& src = solver->get_source();    // S^1
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^1*v^1)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^1*v^1)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^1 - Div(u^1*v^1) = L(u^1)
+      data_ops::scale(phi, a11);                 // u^2 = a11*u^1
+      data_ops::incr(phi, pre, a10);             // u^2 = a10*u^n + a11*u^1
+      data_ops::incr(phi, rhs, a_dt*b11);        // u^2 = a10*u^n + a11*u^1 + dt*b11*L(u^1)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+      data_ops::copy(u2, phi);   // Backup of u^2
+    }
+
+    EBAMRIVData& sigma     = m_sigma->get_state();           // sigma^1
+    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch(); // RHS
+    EBAMRIVData& sigma2    = *(m_sigma_scratch->get_extra_storage()[0]); // Will become sigma^2
+    const EBAMRIVData& pre = m_sigma_scratch->get_previous();
+    m_sigma->compute_rhs(rhs);
+    data_ops::scale(sigma, a11);            // sigma^2 = a11*sigma^1
+    data_ops::incr(sigma, pre, a10);        // sigma^2 = a10*sigma^n + a11*sigma^1
+    data_ops::incr(sigma, rhs, a_dt*b11);   // sigma^2 = a10*sigma^n + a11*sigma^1 + dt*b11*L(sigma^n)
+    data_ops::set_value(sigma2, 0.0);
+    data_ops::incr(sigma2, sigma, 1.0);     // Backup of sigma^2
+
+    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  }
+
+  // u^3 = a20*u^n + a22*u^2 + b22*L(u^2)
+  { 
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi       = solver->get_state();     // u^2
+      EBAMRCellData& rhs       = storage->get_scratch();  // RHS
+      EBAMRCellData& u3        = *(storage->get_extra_storage()[1]); // Becomes u^3
+      const EBAMRCellData& pre = storage->get_previous(); // u^n
+      const EBAMRCellData& src = solver->get_source();    // S^3
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^2*v^2)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^2 - Div(u^2*v^2) = L(u^2)
+      data_ops::scale(phi, a22);                 // u^3 = a22*u^2
+      data_ops::incr(phi, pre, a20);             // u^3 = a20*u^n + a22*u^2
+      data_ops::incr(phi, rhs, a_dt*b22);        // u^3 = a20*u^n + a22*u^2 + dt*b22*L(u^2)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+      data_ops::copy(u3, phi);   // Backup of u^3
+    }
+
+    EBAMRIVData& sigma     = m_sigma->get_state();            // sigma^2
+    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();  // RHS
+    EBAMRIVData& sigma3    = *(m_sigma_scratch->get_extra_storage()[1]); // Becomes sigma^3
+    const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
+    m_sigma->compute_rhs(rhs);
+    data_ops::scale(sigma, a22);                           // sigma^3 = a2*sigma^2
+    data_ops::incr(sigma, pre, a20);                       // sigma^3 = a20*sigma^n + a22*sigma^2
+    data_ops::incr(sigma, rhs, a_dt*b22);                  // sigma^3 = a20*sigma^n + a22*sigma^2 + b22*dt*L(sigma^2)
+    data_ops::set_value(sigma3, 0.0);
+    data_ops::incr(sigma3, sigma, 1.0);
+
+    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  }
+
+  // u^4 = a30*u^n + a33*u^3 + b33*dt*L(u^3)
+  { 
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi       = solver->get_state();                // u^3
+      EBAMRCellData& rhs       = *(storage->get_extra_storage()[2]); // RHS, becomes L(u^3) after RHS computation
+      const EBAMRCellData& pre = storage->get_previous();            // u^n
+      const EBAMRCellData& src = solver->get_source();               // S^3
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^3*v^3)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^3*v^3)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^3 - Div(u^3*v^3)
+      data_ops::scale(phi, a33);                 // u^4 = a33*u^3
+      data_ops::incr(phi, pre, a30);             // u^4 = a30*u^n + a33*u^3
+      data_ops::incr(phi, rhs, a_dt*b33);        // u^4 = a30*u^n + a33*u^3 + dt*b33*L(u^3)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma         = m_sigma->get_state();                       // sigma^3
+    EBAMRIVData& rhs           = *(m_sigma_scratch->get_extra_storage()[2]); // Becomes L(sigma^3) after RHS computation
+    const EBAMRIVData& pre     = m_sigma_scratch->get_previous();            // sigma^n
+    m_sigma->compute_rhs(rhs);
+    data_ops::scale(sigma, a33);            // sigma^4 = a33*sigma^3
+    data_ops::incr(sigma,  pre, a30);       // sigma^4 = a30*sigma^n + a33*sigma^3
+    data_ops::incr(sigma,  rhs, a_dt*b33);  // sigma^3 = a30*sigma^n + a33*sigma^3 + b33*dt*L(u^3)
+
+    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  }
+
+  // u^(n+1) = a40*u^n + a42*u^2 + a43*u^3 + a44*u^4 + b43*L(u^3) + b44*L(u^4)
+  { 
+    this->compute_cdr_eb_states();
+    this->compute_cdr_fluxes(a_time);
+    this->compute_cdr_domain_fluxes(a_time);
+    this->compute_sigma_flux();
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver   = solver_it();
+      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi       = solver->get_state();                // u^4
+      EBAMRCellData& rhs       = storage->get_scratch();             // RHS     
+      const EBAMRCellData& pre = storage->get_previous();            // u^n
+      const EBAMRCellData& u2  = *(storage->get_extra_storage()[0]); // u^2
+      const EBAMRCellData& u3  = *(storage->get_extra_storage()[1]); // u^3
+      const EBAMRCellData& Lu3 = *(storage->get_extra_storage()[2]); // L(u^3)
+      const EBAMRCellData& src = solver->get_source();               // S^4
+
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^4*v^4)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^4*v^4)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^4 - Div(u^4*v^4)
+      
+      data_ops::scale(phi, a44);                 // u^(n+1) = a44*u^4
+      data_ops::incr(phi, pre, a40);             // u^(n+1) = a40*u^n + a44*u^4
+      data_ops::incr(phi, u2,  a42);             // u^(n+1) = a40*u^n + a42*u^2 + a44*u^4
+      data_ops::incr(phi, u3,  a43);             // u^(n+1) = a40*u^n + a42*u^2 + a43*u^3 a44*u^4
+      data_ops::incr(phi, Lu3, a_dt*b43);        // u^(n+1) = a40*u^n + a42*u^2 + a43*u^3 a44*u^4 + b43*dt*L(u^3)
+      data_ops::incr(phi, rhs, a_dt*b44);        // u^(n+1) = a40*u^n + a42*u^2 + a43*u^3 a44*u^4 + b43*dt*L(u^3) + b44*dt*L(u^4)
+
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+      data_ops::floor(phi, 0.0);
+    }
+
+    EBAMRIVData& sigma         = m_sigma->get_state();               // sigma^4
+    EBAMRIVData& rhs           = m_sigma_scratch->get_scratch();     // RHS
+    const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
+    const EBAMRIVData& sigma2  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
+    const EBAMRIVData& sigma3  = *(m_sigma_scratch->get_extra_storage()[1]); // sigma^2
+    const EBAMRIVData& Lsigma3 = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^3)
+    m_sigma->compute_rhs(rhs);
+    data_ops::scale(sigma, a44);                // sigma^(n+1)  = a44*sigma^4
+    data_ops::incr(sigma,  pre,     a40);       // sigma^(n+1)  = a40*sigma^n + a44*sigma^4
+    data_ops::incr(sigma,  sigma2,  a42);       // sigma^(n+1)  = a40*sigma^n + a42*sigma^2 + a44*sigma^4
+    data_ops::incr(sigma,  sigma3,  a43);       // sigma^(n+1)  = a40*sigma^n + a42*sigma^2 + a43*sigma^3 + a44*sigma^4
+    data_ops::incr(sigma,  Lsigma3, a_dt*b43);  // sigma^(n+1) += b43*dt*L(sigma^3)
+    data_ops::incr(sigma,  rhs,     a_dt*b44);  // sigma^(n+1) += b44*dt*L(sigma^4)
+
+    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_rte) this->update_rte(a_time + a_dt);
+    this->compute_cdr_gradients();
+    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
+  }
+
+  // Deallocate extra storage on way out
+  {
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      storage->deallocate_extra_storage();
+    }
+    m_sigma_scratch->deallocate_extra_storage();
+  }
 }
 
 void strang2::compute_cdr_gradients(){
