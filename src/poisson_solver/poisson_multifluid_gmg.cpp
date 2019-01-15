@@ -588,6 +588,13 @@ void poisson_multifluid_gmg::setup_operator_factory(){
     mfquadcfi[lvl].define(quadcfi_phases);
   }
 
+  // Pre-coarsened MG levels
+  Vector<MFLevelGrid> mg_levelgrids;
+  const Vector<RefCountedPtr<MFLevelGrid> >& mg_mflg = m_amr->get_mg_mflg();
+  for (int lvl = 0; lvl < mg_mflg.size(); lvl++){
+    mg_levelgrids.push_back(*mg_mflg[lvl]);
+  }
+
   // Appropriate coefficients for poisson equation
   const Real alpha =  0.0;
   const Real beta  = -1.0;
@@ -627,7 +634,8 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 ghost_rhs,
 										 bc_order,
 										 m_bottom_drop,
-										 1 + finest_level));
+										 1 + finest_level,
+										 mg_levelgrids));
   CH_assert(!m_bcfunc.isNull());
   m_opfact->set_electrodes(m_compgeom->get_electrodes(), m_bcfunc);
 }

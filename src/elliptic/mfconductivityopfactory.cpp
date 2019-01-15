@@ -28,7 +28,8 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 						 const IntVect&                            a_ghost_rhs,
 						 const int                                 a_order_ebbc,
 						 const int                                 a_drop_bottom,
-						 int                                       a_num_levels){
+						 const int                                 a_num_levels,
+						 const Vector<MFLevelGrid>&                a_mg_mflg){
 #if verb
   pout() << "mfconductivityopfactory::mfconductivityopfactory" << endl;
 #endif
