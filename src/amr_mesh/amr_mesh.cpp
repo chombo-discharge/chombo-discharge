@@ -28,6 +28,7 @@ amr_mesh::amr_mesh(){
   this->set_max_amr_depth(0);
   this->set_max_simulation_depth(0);
   this->set_refine_all_depth(0);
+  this->set_mg_coarsen(0);
   this->set_refinement_ratio(2);
 #if CH_SPACEDIM == 2
   this->set_blocking_factor(8);
@@ -50,7 +51,8 @@ amr_mesh::amr_mesh(){
   this->set_ghost_interpolation(ghost_interpolation::pwl);
 
   m_finest_level = 0;
-  m_has_grids = false;
+  m_has_grids    = false;
+  m_has_mg_stuff = false;
 
 #if 1
   // This is a fucking HACK! I have no idea why this work, and we should check that out. But, for some reason
@@ -516,7 +518,11 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   const Real t10 = MPI_Wtime();
 #endif
 
-
+  if(!m_has_mg_stuff){
+    this->define_mg_stuff();
+    m_has_mg_stuff = true;
+  }
+  
 #if AMR_MESH_DEBUG
   pout() << "amr_mesh::regrid breakdown" << endl;
   pout() << "overall memory usage" << endl;
@@ -616,6 +622,89 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
   }
 
   m_has_grids = true;
+}
+
+void amr_mesh::define_mg_stuff(){
+  CH_TIME("amr_mesh::define_mg_stuff");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_mg_stuff" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  const int coar_ref = 2;
+
+  // Redo these
+  m_mg_domains.resize(0);
+  m_mg_grids.resize(0);
+  m_mg_mflg.resize(0);
+  
+  m_mg_eblg.resize(phase::num_phases);
+
+  m_mg_eblg[phase::gas].resize(0);
+  m_mg_eblg[phase::solid].resize(0);
+
+
+  int num_coar       = 0;
+  bool has_coar      = true;
+  ProblemDomain fine = m_domains[0];
+
+  // Coarsen problem domains and create grids
+  while(num_coar < m_mg_coarsen || !has_coar){
+
+    // Check if we can coarsen
+    const ProblemDomain coar = fine.coarsen(coar_ref);
+    const Box coar_box       = coar.domainBox();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(coar_box.size()[dir] < m_max_box_size){
+	has_coar = false;
+      }
+    }
+
+    if(has_coar){
+      // Split the domain into pieces, then order and load balance them
+      Vector<Box> boxes;
+      Vector<int> proc_assign;
+      domainSplit(coar, boxes, m_max_box_size, m_blocking_factor);
+      mortonOrdering(boxes);
+      load_balance::balance_volume(proc_assign, boxes);
+
+      // Add problem domain and grid
+      m_mg_domains.push_back(coar);
+      m_mg_grids.push_back(DisjointBoxLayout(boxes, proc_assign, coar));
+
+      // Define the EBLevelGrids
+      const int idx = m_mg_grids.size() - 1; // Last element added
+      if(!ebis_gas.isNull()){
+	m_mg_eblg[phase::gas].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_mg_grids[idx],
+										    m_mg_domains[idx],
+										    m_ebghost,
+										    ebis_gas)));
+      }
+      if(!ebis_sol.isNull()){
+	m_mg_eblg[phase::solid].push_back(RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_mg_grids[idx],
+										      m_mg_domains[idx],
+										      m_ebghost,
+										      ebis_sol)));
+      }
+
+      // Define the MFLevelGrid object
+      Vector<EBLevelGrid> eblgs;
+      if(!ebis_gas.isNull()){
+	eblgs.push_back(*m_mg_eblg[phase::gas][idx]);
+      }
+      if(!ebis_sol.isNull()){
+	eblgs.push_back(*m_mg_eblg[phase::solid][idx]);
+      }
+      m_mg_mflg.push_back(RefCountedPtr<MFLevelGrid> (new MFLevelGrid(m_mfis, eblgs)));
+      
+
+      // Next iterate
+      fine = coar;
+      num_coar++;
+    }
+  }
 }
 
 void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& a_boxes){
@@ -1411,6 +1500,21 @@ void amr_mesh::set_coarsest_num_cells(const IntVect a_num_cells){
     pp.getarr("coarsest_domain", cells, 0, SpaceDim);
 
     m_num_cells = IntVect(D_DECL(cells[0], cells[1], cells[2]));
+  }
+}
+
+void amr_mesh::set_mg_coarsen(const int a_mg_coarsen){
+  m_mg_coarsen = a_mg_coarsen;
+
+  { // Get from input script
+    ParmParse pp("amr");
+    if(pp.contains("mg_coarsen")){
+      int depth;
+      pp.get("mg_coarsen", depth);
+      if(depth >= 0){
+	m_mg_coarsen = depth;
+      }
+    }
   }
 }
 

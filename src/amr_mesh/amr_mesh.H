@@ -34,31 +34,6 @@
 /*!
   @brief Class for handling spatial operations for streamer equations.
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
-
-  Class options
-  -------------
-  The following options control the behavior of this class. The arguments provided below are the default arguments. 
-
-      amr.verbosity       = 10          # Controls verbosity. 
-      amr.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-      amr.max_amr_depth   = 0           # Maximum amr depth
-      amr.max_sim_depth   = -1          # Maximum simulation depth
-      amr.fill_ratio      = 1.0         # Fill ratio for grid generation
-      amr.irreg_growth    = 2           # How much to grow irregular tagged cells
-      amr.buffer_size     = 2           # Number of cells between grid levels
-      amr.blocking_factor = 8           # Default blocking factor (16 in 3D)
-      amr.max_box_size    = 16          # Maximum allowed box size
-      amr.max_ebis_box    = 32          # Maximum allowed box size
-      amr.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-      amr.num_ghost       = 3           # Number of ghost cells. Default is 3
-      amr.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
-      amr.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
-      amr.stencil_order   = 1           # Order for interpolation/extrapolation stencils. Must be 1 or 2
-      amr.stencil_radius  = 1           # Radius for interpolation/extrapolation stencils. Must be 1 or 2
-      amr.stencil_type    = linear      # Default stencil type. Valid options are 'linear', 'taylor', 'lsq'
-      amr.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
-      amr.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-      amr.ebcf            = false       # Tell amr to ignore EBCF-related code. 
 */
 class amr_mesh {
 public:
@@ -202,6 +177,11 @@ public:
     @brief Build new grids. This also load balances. 
   */
   virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap = -1);
+
+  /*!
+    @brief Define the MG stuff
+  */
+  virtual void define_mg_stuff();
   
   /*!
     @brief Define EBLevelGrid
@@ -267,6 +247,11 @@ public:
     @brief Set coarsest level box; this is the coarsest domain (well, except for lower levels GMG)
   */
   virtual void set_coarsest_num_cells(const IntVect a_num_cells);
+
+  /*!
+    @brief Set multigrid coarsening
+  */
+  virtual void set_mg_coarsen(const int a_mg_coarsen);
 
   /*!
     @brief Maximum AMR depth
@@ -637,6 +622,11 @@ protected:
   int m_blocking_factor;
 
   /*!
+    @brief Pre-coarsening of multigrid levels
+  */
+  int m_mg_coarsen;
+
+  /*!
     @brief Number of ghost cells to use for eb stuff
   */
   int m_ebghost;
@@ -672,9 +662,16 @@ protected:
   bool m_has_grids;
 
   /*!
+    @brief Has MG stuff or not
+  */
+  bool m_has_mg_stuff;
+
+  /*!
     @brief Grids
   */
   Vector<DisjointBoxLayout> m_grids;
+
+
 
   /*!
     @brief Problem domains
@@ -765,6 +762,26 @@ protected:
     @brief Interpolation stencil for interpolating to boundary centroid
   */
   Vector<RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> > > m_eb_centroid_interp;
+
+  /*!
+    @brief Grids for multigrid pre-coarsening
+  */
+  Vector<DisjointBoxLayout> m_mg_grids;
+
+  /*!
+    @brief Problem domains for multigrid pre-coarsening
+  */
+  Vector<ProblemDomain> m_mg_domains;
+
+  /*!
+    @brief EBLevelgrids for the multigrid pre-coarsening
+  */
+  Vector<Vector<RefCountedPtr<EBLevelGrid> > > m_mg_eblg;
+
+  /*!
+    @brief EBLevelgrids for the multigrid pre-coarsening
+  */
+  Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
   /*!
     @brief Load balance grids
