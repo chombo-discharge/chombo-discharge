@@ -164,9 +164,9 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	  has_coarser    = true;
 	  grid_coar_mg   = m_mg_mflg[imgsize-1].get_eblg(0).getDBL();
 	  domain_coar_mg = m_mg_mflg[imgsize-1].get_eblg(0).getDomain();
-	  layout_changed = true;
+	  layout_changed = true; // Different proc layout for these
 	}
-	else{
+	else{ // Just coarsen the grids in a "regular way"
 	  has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,   // Coarsened grid
 						   domain_coar_mg, // Coarsened domain  
 						   fine_grid,      // Fine/current level
@@ -215,17 +215,17 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	pout() << endl;
 #endif
 
+	// Which ones have MG objects
 	if(at_amr_lvl && !has_coarser){
 	  m_has_mg_objects[lvl] = false;
 	}
-
 	if(at_amr_lvl){
 	  m_layout_changed[lvl] = layout_changed;
 	  at_amr_lvl = false;
 	}
 
+	// If a level has a coarser level, do this
 	if(has_coarser){
-
 	  m_grids_mg[lvl].push_back(grid_coar_mg);
 	  m_domains_mg[lvl].push_back(domain_coar_mg);
 	  m_layout_changed_mg[lvl].push_back(layout_changed);
