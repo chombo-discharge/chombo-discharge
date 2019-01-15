@@ -62,7 +62,8 @@ public:
                           const IntVect&                                              a_ghostCellsRhs,
                           const int&                                                  a_relaxType,
 			  const int&                                                  a_botdrop = 8,
-                          int a_numLevels = -1);
+                          const int                                                   a_numLevels = -1,
+			  const Vector<EBLevelGrid>&                                  m_mg_eblgs = Vector<EBLevelGrid>(0));
 
 
   //! Destructor.

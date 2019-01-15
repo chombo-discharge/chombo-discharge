@@ -88,7 +88,8 @@ ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&    
 						  const IntVect&                                              a_ghostCellsRhs,
 						  const int &                                                 a_relaxType,
 						  const int&                                                  a_botdrop,
-						  int a_numLevels){
+						  const int                                                   a_numLevels,
+						  const Vector<EBLevelGrid>&                                  a_mg_eblgs){
   CH_assert(a_eblgs.size() <= a_refRatio.size());
   m_dataBased = false;
   m_relaxType = a_relaxType;
