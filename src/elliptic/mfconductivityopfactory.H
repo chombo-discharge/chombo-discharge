@@ -214,6 +214,11 @@ protected:
   Vector<MFLevelGrid> m_mflg;
 
   /*!
+    @brief Pre-coarsened MG levels (in MFLevelGrid form)
+  */
+  Vector<MFLevelGrid> m_mg_mflg;
+
+  /*!
     @brief Interpolation utilities
   */
   Vector<MFQuadCFInterp> m_mfquadcfi;

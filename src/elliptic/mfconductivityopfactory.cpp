@@ -52,6 +52,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   m_ghost_rhs  = a_ghost_rhs;
   m_origin     = a_origin;
   m_ebbc_order = a_order_ebbc;
+  m_mg_mflg    = a_mg_mflg;
 
     
   m_domains.resize(m_num_levels);
@@ -62,7 +63,6 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
     
   for (int lvl = 1; lvl < m_num_levels; lvl++){
     m_dx[lvl]      = m_dx[lvl-1]/m_ref_rat[lvl-1];
-
 
     m_domains[lvl] = m_domains[lvl-1];
     m_domains[lvl].refine(m_ref_rat[lvl-1]);
@@ -125,7 +125,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       m_domains_mg[lvl].resize(0);        // Domains for all MG levels at this level
       m_layout_changed_mg[lvl].resize(0); // Layout changed for all MG levels at this level
       m_aveop_mg[lvl].resize(0);          //
-      m_jump_mg[lvl].resize(0);          // sigma for all MG levels at this AMR level
+      m_jump_mg[lvl].resize(0);           // sigma for all MG levels at this AMR level
 
       m_aco_mg[lvl].push_back(m_aco[lvl]);                         // MG depth 0 is an AMR level
       m_bco_mg[lvl].push_back(m_bco[lvl]);                         //  
@@ -148,7 +148,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       }
       while(has_coarser){ 
 
-	int imgsize = m_grids_mg[lvl].size();
+	const int imgsize                  = m_grids_mg[lvl].size();         // Number of MG levels so far (for this AMR level)
 	const DisjointBoxLayout& fine_grid = m_grids_mg[lvl][imgsize - 1];   // Finer grid for current MG level
 	const MFLevelGrid& mflg_fine       = m_mflg_mg[lvl][imgsize - 1];    // Finer MFLevelGrid for current MG level
 	const ProblemDomain& domain_fine   = m_domains_mg[lvl][imgsize - 1]; // Finer domain for current MG level
@@ -159,14 +159,23 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	bool layout_changed;
 
 	// Check if we have coarser stuff
-	has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,   // Coarsened grid
-						 domain_coar_mg, // Coarsened domain  
-						 fine_grid,      // Fine/current level
-						 domain_fine,    // Fine/current domain
-						 mg_refi,        // Refinement factor
-						 m_max_box_size, // 
-						 layout_changed, //
-						 m_test_ref);    //
+	//
+	if(lvl == 0 && imgsize < m_mg_mflg.size()){
+	  has_coarser    = true;
+	  grid_coar_mg   = m_mg_mflg[imgsize-1].get_eblg(0).getDBL();
+	  domain_coar_mg = m_mg_mflg[imgsize-1].get_eblg(0).getDomain();
+	  layout_changed = true;
+	}
+	else{
+	  has_coarser = EBArith::getCoarserLayouts(grid_coar_mg,   // Coarsened grid
+						   domain_coar_mg, // Coarsened domain  
+						   fine_grid,      // Fine/current level
+						   domain_fine,    // Fine/current domain
+						   mg_refi,        // Refinement factor
+						   m_max_box_size, // 
+						   layout_changed, //
+						   m_test_ref);    //
+	}
 
 
 	// For some reason getCoarserLayouts doesn't trigger correctly - I don't know what's wrong... :)
@@ -224,7 +233,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 
 	  const int  ncomps = 1; // Number of components we solve for. Always 1. 
 	  const int ebghost = 4; // Ghost cells for MG, using 4 since that allows refinement of 4
-	  const int   ghost = 1; // Ghost cells
+	  const int   ghost = 1; // Ghost cells for MG levels
 
 	  m_mflg_mg[lvl].push_back(MFLevelGrid(grid_coar_mg, domain_coar_mg, ebghost, m_mfis));
 
