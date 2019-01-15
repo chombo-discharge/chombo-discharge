@@ -645,7 +645,6 @@ void amr_mesh::define_mg_stuff(){
   m_mg_eblg[phase::gas].resize(0);
   m_mg_eblg[phase::solid].resize(0);
 
-
   int num_coar       = 0;
   bool has_coar      = true;
   ProblemDomain fine = m_domains[0];
