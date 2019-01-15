@@ -584,14 +584,8 @@ void strang2::advance_rk(const Real a_time, const Real a_dt){
   }
 
   if(m_rk_order == 2){
-    if(m_rk_stages == 2){
-      this->advance_rk22(a_time, a_dt);
-    }
-    else if(m_rk_stages == 3){
-      this->advance_rk32(a_time, a_dt);
-    }
-    else if(m_rk_stages == 4){
-      this->advance_rk42(a_time, a_dt);
+    if(m_rk_stages >= 2){
+      this->advance_rkN2(a_time, a_dt, m_rk_stages);
     }
     else{
       MayDay::Abort("strang2::advance_rk - unknown second RK method requested");
@@ -624,195 +618,10 @@ void strang2::advance_rk(const Real a_time, const Real a_dt){
   }
 }
 
-void strang2::advance_rk22(const Real a_time, const Real a_dt){
-  CH_TIME("strang2::advance_rk22");
-  if(m_verbosity > 2){
-    pout() << "strang2::advance_rk22" << endl;
-  }
-
-  { // u^1 = u^n + dt*L(u^n)
-    this->compute_E_into_scratch();
-    this->compute_cdr_eb_states();
-    this->compute_cdr_fluxes(a_time);
-    this->compute_cdr_domain_fluxes(a_time);
-    this->compute_sigma_flux();
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-      EBAMRCellData& rhs       = storage->get_scratch();
-      EBAMRCellData& phi       = solver->get_state();
-      const EBAMRCellData& src = solver->get_source();
-
-      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
-      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
-      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
-      data_ops::incr(phi, rhs, a_dt);            // u^1 = u^n + dt*L(u^n)
-
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-      data_ops::floor(phi, 0.0);
-    }
-
-    EBAMRIVData& sigma = m_sigma->get_state();
-    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
-    m_sigma->compute_rhs(rhs);
-    data_ops::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
-  }
-
-  if(m_consistent_E)   this->update_poisson();
-  if(m_consistent_rte) this->update_rte(a_time + a_dt);
-
-
-  { // u^(n+1) = u^n + 0.5*dt*[L(u^n) + L(u^1)]
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
-    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
-    this->compute_cdr_eb_states();
-    this->compute_cdr_fluxes(a_time);
-    this->compute_cdr_domain_fluxes(a_time);
-    this->compute_sigma_flux();
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-      EBAMRCellData& rhs       = storage->get_scratch();
-      EBAMRCellData& phi       = solver->get_state();
-      const EBAMRCellData& src = solver->get_source();
-      const EBAMRCellData& pre = storage->get_previous();
-
-      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
-      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
-      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
-      
-      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^1 + dt*L(u^1)
-      data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + u^1 + dt*L(u^1);
-      data_ops::scale(phi, 0.5);                 // u^(n+1) = 0.5*[u^n + u^1 + dt*L(u^1)];
-
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-      data_ops::floor(phi, 0.0);
-    }
-
-    EBAMRIVData& sigma     = m_sigma->get_state();
-    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
-    const EBAMRIVData& pre = m_sigma_scratch->get_previous();
-    m_sigma->compute_rhs(rhs);
-    data_ops::incr(sigma, rhs, a_dt); // sigma^(n+1) = sigma^1 + dt*F^1
-    data_ops::incr(sigma, pre, 1.0);  // sigma^(n+1) = sigma^n + sigma^1 + dt*F^1
-    data_ops::scale(sigma, 0.5);      // sigma^(n+1) = 0.5*[sigma^n + sigma^1 + dt*F^1]
-  }
-}
-
-void strang2::advance_rk32(const Real a_time, const Real a_dt){
-  CH_TIME("strang2::advance_rk32");
+void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stages){
+  CH_TIME("strang2::advance_rkN2");
   if(m_verbosity > 5){
-    pout() << "strang2::advance_rk32" << endl;
-  }
-
-  
-  // The tables for this scheme are
-  // alpha            
-  // -----------------
-  //  1               
-  //  0    1
-  // 1/3    0  2/3
-  //
-  // beta            
-  // -----------------
-  // 1/2               
-  //  0   1/2
-  //  0    0   1/3
-  //
-  // I.e. the first two stages are equal (we put the result into the solver). Put them in a loop. 
-
-  // u^(i+1) = u^i + 0.5*dt*L(u^i)
-  for (int i = 0; i < 2; i++){
-    this->compute_cdr_eb_states();
-    this->compute_cdr_fluxes(a_time);
-    this->compute_cdr_domain_fluxes(a_time);
-    this->compute_sigma_flux();
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-      EBAMRCellData& rhs       = storage->get_scratch();
-      EBAMRCellData& phi       = solver->get_state();
-      const EBAMRCellData& src = solver->get_source();
-
-      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
-      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^n*v^n)
-      data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
-      data_ops::incr(phi, rhs, 0.5*a_dt);        // u^1 = u^n + 0.5*dt*L(u^n)
-
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-      data_ops::floor(phi, 0.0);
-    }
-
-    EBAMRIVData& sigma = m_sigma->get_state();
-    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
-    m_sigma->compute_rhs(rhs);
-    data_ops::incr(sigma, rhs, 0.5*a_dt); // sigma^1 = sigma^n + 0.5*dt*F^n
-
-    if(m_consistent_E)   this->update_poisson();
-    if(m_consistent_rte) this->update_rte(a_time + a_dt);
-
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
-    if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
-  }
-
-  { // u^(n+1) = u^n + (1./3)*(2*u^2 + dt*L(u^2))
-    this->compute_cdr_eb_states();
-    this->compute_cdr_fluxes(a_time);
-    this->compute_cdr_domain_fluxes(a_time);
-    this->compute_sigma_flux();
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-
-      EBAMRCellData& rhs       = storage->get_scratch();
-      EBAMRCellData& phi       = solver->get_state(); // u^2
-      const EBAMRCellData& pre = storage->get_previous(); // u^n
-      const EBAMRCellData& src = solver->get_source();
-
-      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
-      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^2*v^2)
-      data_ops::incr(rhs,  src, 1.0);            // RHS = S^2 - Div(u^2*v^2)
-      data_ops::scale(phi, 2.0);                 // u^(n+1) = 2*u^2
-      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = 2*u^2 + dt*L(u^2)
-      data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + [2*u^2 + dt*L(u^2)]
-      data_ops::scale(phi, 1./3.);               // u^(n+1) = (1/3)*[u^n + 2*u^2 + dt*L(u^2)]
-
-      m_amr->average_down(phi, m_cdr->get_phase());
-      m_amr->interp_ghost(phi, m_cdr->get_phase());
-
-      data_ops::floor(phi, 0.0);
-    }
-
-    EBAMRIVData& sigma = m_sigma->get_state(); // u^2
-    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
-    const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
-    m_sigma->compute_rhs(rhs);
-    data_ops::scale(sigma, 2.0);          // sigma^(n+1) = 2*sigma^2
-    data_ops::incr(sigma, rhs, a_dt);     // sigma^(n+1) = 2*sigma^2 + dt*F^2
-    data_ops::incr(sigma, pre, 1.0);      // sigma^(n+1) = [sigma^n + 2*sigma^2 + dt*F^2]
-    data_ops::scale(sigma, 1./3.);        // sigma^(n+1) = (1/3)*[sigma^n + 2*sigma^2 + dt*F^2]
-  }
-}
-
-void strang2::advance_rk42(const Real a_time, const Real a_dt){
-  CH_TIME("strang2::advance_rk42");
-  if(m_verbosity > 5){
-    pout() << "strang2::advance_rk42" << endl;
+    pout() << "strang2::advance_rkN2" << endl;
   }
 
   // The tables for this scheme are
@@ -821,21 +630,28 @@ void strang2::advance_rk42(const Real a_time, const Real a_dt){
   //  1               
   //  0    1
   //  0    0   1
-  // 1/4   0   0   3/4
+  //  :    :   :   1
+  //  :    :   :   :   1
+  // 1/s   0   0   0   0  (s-1)/s
   //
-  // beta            
+  // beta 
   // -----------------
-  // 1/3               
-  //  0   1/3
-  //  0    0  1/3
-  //  0   0   0   1/4
+  //  b
+  //  0   b 
+  //  :   0   b
+  //  :   :   0   b
+  //  0   0   0   0  1/s
   //
+  // with b = 1/(s-1)
   // I.e. the first three stages are equal (we put the result into the solver). Put them in a loop. 
 
-  const Real third = 1./3.;
+  const Real s     = a_stages;
+  const Real alpha = (s-1)/s;
+  const Real beta  = 1/(s-1);
+  const Real sinv  = 1./s;
 
   // u^(i) = u^(i-1) + third*dt*L(u^(i-1))
-  for (int i = 0; i <= 2; i++){
+  for (int i = 0; i < a_stages-1; i++){
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
     this->compute_cdr_domain_fluxes(a_time);
@@ -852,7 +668,7 @@ void strang2::advance_rk42(const Real a_time, const Real a_dt){
       solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^i*v^i)
       data_ops::scale(rhs, -1.0);                // RHS = -Div(u^i*v^i)
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^i - Div(u^i*v^i)
-      data_ops::incr(phi, rhs, third*a_dt);      // u^(i+1) = u^i + (1./3)*dt*L(u^i)
+      data_ops::incr(phi, rhs, beta*a_dt);       // u^(i+1) = u^i + [1/(s-1)]*dt*L(u^i)
 
       m_amr->average_down(phi, m_cdr->get_phase());
       m_amr->interp_ghost(phi, m_cdr->get_phase());
@@ -863,7 +679,7 @@ void strang2::advance_rk42(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma = m_sigma->get_state(); // sigma^i
     EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
     m_sigma->compute_rhs(rhs);
-    data_ops::incr(sigma, rhs, third*a_dt); // sigma^(i+1) = sigma^i + (1/3.)*dt*F^i
+    data_ops::incr(sigma, rhs, beta*a_dt); // sigma^(i+1) = sigma^i + [1/(s-1)]*dt*F^i
 
     if(m_consistent_E)   this->update_poisson();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
@@ -873,7 +689,7 @@ void strang2::advance_rk42(const Real a_time, const Real a_dt){
   }
 
 
-  { // u^(n+1) = (1/4)*[u^n + 3*u^3 + dt*L(u^3)]
+  { // u^(n+1) = (1/s)*u^n + {(s-1)/s]*u^(s-1) + (1/s)*dt*L[u^(s-1)]
     this->compute_cdr_eb_states();
     this->compute_cdr_fluxes(a_time);
     this->compute_cdr_domain_fluxes(a_time);
@@ -884,17 +700,16 @@ void strang2::advance_rk42(const Real a_time, const Real a_dt){
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
       EBAMRCellData& rhs       = storage->get_scratch();
-      EBAMRCellData& phi       = solver->get_state();     // u^3
+      EBAMRCellData& phi       = solver->get_state();     // u^i
       const EBAMRCellData& src = solver->get_source();
       const EBAMRCellData& pre = storage->get_previous(); // u^n
 
-      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^3*v^3)
-      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^3*v^3)
-      data_ops::incr(rhs,  src, 1.0);            // RHS = S^3 - Div(u^3*v^3)
-      data_ops::scale(phi, 3.0);                 // u^(n+1) = 3*u^3
-      data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + 3*u^3
-      data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = u^n + 3*u^3 + dt*L(u^3)
-      data_ops::scale(phi, 0.25);                // u^(n+1) = 0.25*[u^n + 3*u^3 + dt*L(u^3)]
+      solver->compute_divF(rhs, phi, 0.0, true); // RHS =  Div(u^i*v^i)
+      data_ops::scale(rhs, -1.0);                // RHS = -Div(u^i*v^i)
+      data_ops::incr(rhs,  src, 1.0);            // RHS = S^3 - Div(u^i*v^i)
+      data_ops::scale(phi, alpha);               // u^(n+1) = (s-1/s)*u^i
+      data_ops::incr(phi, pre, sinv);            // u^(n+1) = (1/s)*u^n + (s-1/s)*u^i
+      data_ops::incr(phi, rhs, sinv*a_dt);       // u^(n+1) = (1/s)*u^n + (1/s)*dt*L(u^i)
 
       m_amr->average_down(phi, m_cdr->get_phase());
       m_amr->interp_ghost(phi, m_cdr->get_phase());
@@ -906,10 +721,9 @@ void strang2::advance_rk42(const Real a_time, const Real a_dt){
     EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
     const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
     m_sigma->compute_rhs(rhs);
-    data_ops::scale(sigma, 3.0);            // sigma^(n+1) = 3*sigma^3
-    data_ops::incr(sigma, pre, 1.0);        // sigma^(n+1) = sigma^n + 3*sigma^3
-    data_ops::incr(sigma, rhs, a_dt);       // sigma^(n+1) = sigma^n + 3*sigma^3 + dt*F^3
-    data_ops::scale(sigma, 0.25);           // sigma^(n+1) = 0.25*[sigma^n + 3*sigma^3 + dt*F^3]
+    data_ops::scale(sigma, alpha);           // sigma^(n+1) = (s-1/s)*sigma^i
+    data_ops::incr(sigma, pre, sinv);        // sigma^(n+1) = (1/s)*sigma^n + (s-1/s)*sigma^i
+    data_ops::incr(sigma, rhs, sinv*a_dt);   // sigma^(n+1) = (1/s)*sigma^n + (s-1/s)*sigma^i + (1/s)*dt*L(sigma^i)
   }
 }
 

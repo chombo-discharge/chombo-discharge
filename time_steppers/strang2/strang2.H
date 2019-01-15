@@ -107,9 +107,7 @@ protected:
   Real advance_one_step(const Real a_time, const Real a_dt);
 
   void advance_rk(const Real a_time,   const Real a_dt);
-  void advance_rk22(const Real a_time, const Real a_dt);
-  void advance_rk32(const Real a_time, const Real a_dt);
-  void advance_rk42(const Real a_time, const Real a_dt);
+  void advance_rkN2(const Real a_time, const Real a_dt, const int a_stages);
   void advance_rk33(const Real a_time, const Real a_dt);
   void advance_rk43(const Real a_time, const Real a_dt);
   void advance_rk53(const Real a_time, const Real a_dt);

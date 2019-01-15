@@ -8,12 +8,11 @@
 #
 # Method       CFL
 # ---------    ---
-# SSPRK(2,2)   1
-# SSPRK(3,2)   2
-# SSPRK(4,2)   3
+# SSPRK(s,2)   s-1
 # SSPRK(3,3)   1
 # SSPRK(4,3)   2
 # SSPRK(5,3)   2.650
+# SSPRK(5,4)   1.508
 #
 # It is recommended that you stay away from the maximum theoretical CFL limits since the velocity
 # may change in the course of a time step. It is usually safe to run at 90% of the theoretical maximum. 
