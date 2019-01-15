@@ -301,7 +301,6 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 
 
   }
-
 }
 
 void mfconductivityopfactory::coarsen_coefficients(LevelData<MFCellFAB>&         a_aco_coar,

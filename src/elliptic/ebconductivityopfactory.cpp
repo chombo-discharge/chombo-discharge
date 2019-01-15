@@ -146,52 +146,64 @@ ebconductivityopfactory:: ebconductivityopfactory(const Vector<EBLevelGrid>&    
       bool hasCoarser = true;
       hasCoarser = (m_botdrop<s_maxBoxSize);
       while (hasCoarser){
-	int imgsize = m_eblgsMG[ilev].size();
-	const EBLevelGrid& eblgFine=  m_eblgsMG[ilev][imgsize-1];
+	const int imgsize           = m_eblgsMG[ilev].size();
+	const EBLevelGrid& eblgFine = m_eblgsMG[ilev][imgsize-1];
 	DisjointBoxLayout dblCoarMG;
 	ProblemDomain  domainCoarMG;
 	bool dumbool;
-	hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoarMG,
-						       domainCoarMG,
-						       eblgFine.getDBL(),
-						       eblgFine.getEBISL(),
-						       eblgFine.getDomain(),
-						       mgRef,
-						       eblgFine.getEBIS(),
-						       s_maxBoxSize,
-						       dumbool,
-						       m_botdrop);
+
+	// a_mg_eblgs contain the first multigrid levels for the coarsest AMR level. Use them
+	if(ilev == 0 && imgsize < a_mg_eblgs.size() ){
+	  hasCoarser   = true;
+	  dblCoarMG    = a_mg_eblgs[imgsize-1].getDBL();
+	  domainCoarMG = a_mg_eblgs[imgsize-1].getDomain();
+	}
+	else{ // If these levels are exhausted, we must coarsen the boxes themselves
+	  hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoarMG,
+							 domainCoarMG,
+							 eblgFine.getDBL(),
+							 eblgFine.getEBISL(),
+							 eblgFine.getDomain(),
+							 mgRef,
+							 eblgFine.getEBIS(),
+							 s_maxBoxSize,
+							 dumbool,
+							 m_botdrop);
+	}
 
 	if (hasCoarser){
 	  m_eblgsMG[ilev].push_back(EBLevelGrid(dblCoarMG, domainCoarMG, 4, eblgFine.getEBIS()));
-	  int img = m_eblgsMG[ilev].size() - 1;
+	  const int img = m_eblgsMG[ilev].size() - 1;
 	  const EBLevelGrid& eblgCoar = m_eblgsMG[ilev][img  ];
 	  const EBLevelGrid& eblgFine = m_eblgsMG[ilev][img-1];
 
-	  int nghost = 1;
+	  const int nghost = 1;
 	  LayoutData<IntVectSet> irregSets(eblgCoar.getDBL());
 	  for (DataIterator dit = eblgCoar.getDBL().dataIterator(); dit.ok(); ++dit){
 	    Box grownBox = grow(eblgCoar.getDBL().get(dit()), nghost);
 	    grownBox &= domainCoarMG;
 	    irregSets[dit()] = eblgCoar.getEBISL()[dit()].getIrregIVS(grownBox);
 	  }
+
+	  // Define factories
 	  EBFluxFactory       ebfluxfact(eblgCoar.getEBISL());
 	  EBCellFactory       ebcellfact(eblgCoar.getEBISL());
 	  BaseIVFactory<Real> baseivfact(eblgCoar.getEBISL(), irregSets);
 
-	  RefCountedPtr<LevelData<BaseIVFAB<Real> > > bcoefIrregCoar(new LevelData<BaseIVFAB<Real> >(eblgCoar.getDBL(),1,nghost*IntVect::Unit,baseivfact) );
-	  RefCountedPtr<LevelData<EBCellFAB> >        acoefCoar(new LevelData<EBCellFAB>(eblgCoar.getDBL(),1,nghost*IntVect::Unit,ebcellfact) );
-	  RefCountedPtr<LevelData<EBFluxFAB> >        bcoefCoar(new LevelData<EBFluxFAB>(eblgCoar.getDBL(), 1, nghost*IntVect::Unit, ebfluxfact) );
+	  // Define multigrid coefficients and coarsen them
+	  RefCountedPtr<LevelData<BaseIVFAB<Real> > > bcoefIrregCoar(new LevelData<BaseIVFAB<Real> >(eblgCoar.getDBL(), 1, nghost*IntVect::Unit, baseivfact) );
+	  RefCountedPtr<LevelData<EBCellFAB> >        acoefCoar(new LevelData<EBCellFAB>(            eblgCoar.getDBL(), 1, nghost*IntVect::Unit, ebcellfact) );
+	  RefCountedPtr<LevelData<EBFluxFAB> >        bcoefCoar(new LevelData<EBFluxFAB>(            eblgCoar.getDBL(), 1, nghost*IntVect::Unit, ebfluxfact) );
 
-	  coarsen_stuff(*acoefCoar, *bcoefCoar, *bcoefIrregCoar, eblgFine, eblgCoar,
-			*m_acoefMG[ilev][img-1], *m_bcoefMG[ilev][img-1], *m_bcoefIrregMG[ilev][img-1], mgRef);
+	  // Coarsen coefficients
+	  coarsen_stuff(*acoefCoar, *bcoefCoar, *bcoefIrregCoar, eblgFine, eblgCoar, *m_acoefMG[ilev][img-1], *m_bcoefMG[ilev][img-1], *m_bcoefIrregMG[ilev][img-1], mgRef);
 
+	  // Move them to appropriate multigrid level
 	  m_acoefMG[ilev].push_back(acoefCoar);
 	  m_bcoefMG[ilev].push_back(bcoefCoar);
 	  m_bcoefIrregMG[ilev].push_back(bcoefIrregCoar);
 	}
       }
-
     }
     else{
       m_hasMGObjects[ilev] = false;

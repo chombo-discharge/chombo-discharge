@@ -483,8 +483,15 @@ void eddington_sp1::setup_operator_factory(){
   const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->get_old_quadcfi(m_phase);
 
   Vector<EBLevelGrid> levelgrids;
+
   for (int lvl = 0; lvl <= finest_level; lvl++){ 
     levelgrids.push_back(*(m_amr->get_eblg(m_phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
+  }
+
+  Vector<EBLevelGrid> mg_levelgrids;
+  Vector<RefCountedPtr<EBLevelGrid> >& mg_eblg = m_amr->get_mg_eblg(m_phase);
+  for (int lvl = 0; lvl < mg_eblg.size(); lvl++){
+    mg_levelgrids.push_back(*mg_eblg[lvl]);
   }
 
   // Appropriate coefficients. 
@@ -514,7 +521,9 @@ void eddington_sp1::setup_operator_factory(){
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
 										 m_gmg_relax_type,
-										 m_bottom_drop));
+										 m_bottom_drop,
+										 -1,
+										 mg_levelgrids));
 }
 
 void eddington_sp1::setup_multigrid(){

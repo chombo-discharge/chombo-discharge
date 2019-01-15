@@ -365,6 +365,12 @@ void cdr_tga::setup_operator_factory(){
     levelgrids.push_back(*(m_amr->get_eblg(m_phase)[lvl])); // amr_mesh uses RefCounted levelgrids. EBConductivityOp does not. 
   }
 
+  Vector<EBLevelGrid> mg_levelgrids;
+  Vector<RefCountedPtr<EBLevelGrid> >& mg_eblg = m_amr->get_mg_eblg(m_phase);
+  for (int lvl = 0; lvl < mg_eblg.size(); lvl++){
+    mg_levelgrids.push_back(*mg_eblg[lvl]);
+  }
+
   // Appropriate coefficients. 
   const Real alpha =  0.0;
   const Real beta  =  1.0;
@@ -394,7 +400,9 @@ void cdr_tga::setup_operator_factory(){
 										 ghost*IntVect::Unit,
 										 ghost*IntVect::Unit,
 										 m_gmg_relax_type,
-										 m_bottom_drop));
+										 m_bottom_drop,
+										 -1,
+										 mg_levelgrids));
 }
 
 void cdr_tga::setup_multigrid(){
