@@ -309,7 +309,7 @@ protected:
   /*!
     @brief Compute rate constant \f$e + N_2 \rightarrow 2e + N_2^+\f$
   */
-  Real compute_electron_N2_impact_ionization(const Real a_energy, const Real a_N) const;
+  Real compute_electron_N2_impact_ionization(const Real a_Te, const Real a_N) const;
 
   /*!
     @brief Compute rate constant \f$e + O_2 \rightarrow 2e + O_2^+\f$
