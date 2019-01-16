@@ -174,12 +174,10 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 						   m_max_box_size, // 
 						   layout_changed, // May or may not become different
 						   m_test_ref);    //
-#if 1 // debug
-	  if(domain_coar_mg.size()[0] <= m_test_ref){
+	  if(domain_coar_mg.size()[0] < m_test_ref){
 	    has_coarser = false;
 	    layout_changed=false;
 	  }
-#endif
 	}
 
 #if 0 // debug
@@ -190,7 +188,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 
 	// For some reason getCoarserLayouts doesn't trigger correctly - I don't know what's wrong... :)
 	// Here is a (bad) solution
-#if 1
+#if 0
 	if(has_coarser){
 	  if(fine_grid.coarsenable(2*mg_refi)){
 	    has_coarser = true;
