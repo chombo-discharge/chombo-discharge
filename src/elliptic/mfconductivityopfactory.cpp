@@ -76,7 +76,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   this->set_max_box_size(32);         // Default max box size
   this->define_jump_stuff();          // Define jump cell stuff
   this->define_multigrid_stuff();     // Define things for lower levels of multigrid. Must happen after define_jump_stuff
-#if 0
+#if 1
   this->set_jump(0.0, 1.0);           // Default, no surface charge.
 #endif
 
@@ -127,8 +127,8 @@ void mfconductivityopfactory::define_multigrid_stuff(){
       m_aveop_mg[lvl].resize(0);          //
       m_jump_mg[lvl].resize(0);           // sigma for all MG levels at this AMR level
 
-      m_aco_mg[lvl].push_back(m_aco[lvl]);                         // MG depth 0 is an AMR level
-      m_bco_mg[lvl].push_back(m_bco[lvl]);                         //  
+      m_aco_mg[lvl].push_back(m_aco[lvl]);                         // MG depth 0 is the AMR level, the stuff 
+      m_bco_mg[lvl].push_back(m_bco[lvl]);                         // below will be coarsened versions
       m_bco_irreg_mg[lvl].push_back(m_bco_irreg[lvl]);             // 
       m_mflg_mg[lvl].push_back(m_mflg[lvl]);                       // 
       m_grids_mg[lvl].push_back(m_grids[lvl]);                     // 
@@ -159,8 +159,7 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 	bool layout_changed;
 
 	// Check if we have coarser stuff
-	//
-	if(lvl == 0 && imgsize < m_mg_mflg.size()){
+	if(lvl == 0 && imgsize <= m_mg_mflg.size()){
 	  has_coarser    = true;
 	  grid_coar_mg   = m_mg_mflg[imgsize-1].get_eblg(0).getDBL();
 	  domain_coar_mg = m_mg_mflg[imgsize-1].get_eblg(0).getDomain();
@@ -173,10 +172,21 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 						   domain_fine,    // Fine/current domain
 						   mg_refi,        // Refinement factor
 						   m_max_box_size, // 
-						   layout_changed, //
+						   layout_changed, // May or may not become different
 						   m_test_ref);    //
+#if 1 // debug
+	  if(domain_coar_mg.size()[0] <= m_test_ref){
+	    has_coarser = false;
+	    layout_changed=false;
+	  }
+#endif
 	}
 
+#if 0 // debug
+	if(lvl == 0){
+	  pout() << domain_coar_mg << endl;
+	}
+#endif
 
 	// For some reason getCoarserLayouts doesn't trigger correctly - I don't know what's wrong... :)
 	// Here is a (bad) solution
@@ -264,7 +274,8 @@ void mfconductivityopfactory::define_multigrid_stuff(){
 								   eblg_coar.getEBIS()));
 
 #if verb
-	  //	  pout() << "AMR level = lvl " << "\tMG level = " << "\t coar domain = " << eblg_coar.getDomain() << endl;
+	  pout() << "AMR level = " <<  lvl << "\tMG level = " << img << "\t coar domain = " << eblg_coar.getDomain() << endl;
+	  pout() << "end iter" << endl;
 #endif
 	  // Interface cells on MG level img. 
 	  LayoutData<IntVectSet> isect_cells (eblg_coar.getDBL());
@@ -462,7 +473,7 @@ void mfconductivityopfactory::average_down_mg(){
 
   const int ncomp        = 0;
   const Interval interv  = Interval(0, ncomp -1);
-  
+
   for (int lvl = 0; lvl < m_num_levels; lvl++){ // Average down the MG stuff
     if(m_has_mg_objects[lvl]){
       EBAMRIVData& jump_mg = m_jump_mg[lvl]; // m_jump_mg[lvl][0] is the AMR level, which has already been coarsened
@@ -470,15 +481,21 @@ void mfconductivityopfactory::average_down_mg(){
       const int finest_mg_level   = 0;
       const int coarsest_mg_level = jump_mg.size() - 1;
 
-      for (int img = finest_mg_level + 1; img <= coarsest_mg_level; img++){ 
+      for (int img = finest_mg_level+1; img <= coarsest_mg_level; img++){ 
 #if verb // DEBUG
 	pout() << "mfconductivityopfactory::average_down_mg from AMR level = " << lvl
 	       << " from MG level = " << img-1
 	       << " to   MG level = " << img 
-	       << " fine domain = " << m_domains_mg[lvl][img] 
+	       << " fine domain = " << m_domains_mg[lvl][img-1]
+	       << " coar domain = " << m_domains_mg[lvl][img]
 	       << endl;
 #endif
-	m_aveop_mg[lvl][img]->average(*jump_mg[img-1], *jump_mg[img], interv); // Average down onto level img
+#if 0 // Debug
+	if(m_aveop_mg[lvl][img].isNull()){
+	  MayDay::Abort("mfconductivityopfactory::average_down_mg - aveop is NULL");
+	}
+#endif
+	m_aveop_mg[lvl][img]->average(*jump_mg[img], *jump_mg[img-1], interv); // Average down onto level img
 #if verb
 	pout() << "mfconductivityopfactory::average_down_mg - done" << endl;
 #endif

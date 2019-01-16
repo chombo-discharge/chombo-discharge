@@ -703,6 +703,9 @@ void amr_mesh::define_mg_stuff(){
       fine = coar;
       num_coar++;
     }
+    else{
+      break;
+    }
   }
 }
 
