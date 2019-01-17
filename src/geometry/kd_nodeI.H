@@ -142,6 +142,11 @@ template<typename T> void kd_node<T>::compute_bbox(){
     }
   }
 #endif
+
+// #if 1 // Debug
+//   std::cout << m_lo << "\t" << m_hi << std::endl;
+// #endif
+//   MayDay::Abort("stop");
 }
 
 template<typename T> void kd_node<T>::set_leaf(const bool a_leaf){
