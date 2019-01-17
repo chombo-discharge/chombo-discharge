@@ -12,6 +12,7 @@ Below, :ref:`Chap:WorkedExample1` considers advective motion of a single species
 .. toctree::
    :maxdepth: 3
 
+   CreatingGeometries
    WorkedExample1
    WorkedExample2
 

@@ -3,27 +3,28 @@
 Time steppers
 -------------
 
-We have various implementation of :ref:`Chap:time_stepper` that allow different temporal integration of the equations of motion. For the most part, we recommend using the second order Runge Kutta implementation with implicit diffusion. However, please refer to the :doxy:`Doxygen API <classtime__stepper>` to see all available integrators. 
+We have various implementation of :ref:`Chap:time_stepper` that allow different temporal integration of the equations of motion. Our favorite integrator is a second order Strang splitting with implicit diffusion in the middle. However, please refer to the :doxy:`Doxygen API <classtime__stepper>` to see all available integrators. 
 
-Typically, time steppers are selected at compile time following the style in :ref:`Chap:NewSimulations`. However, the user may select time steppers at run-time by modifying his main file. For each time stepper, there are various options available at run-time through an input script.
+Typically, time steppers are selected at compile time following the style in :ref:`Chap:NewSimulations`. However, the user may select time steppers at run-time by modifying his main file in the appropriate way. For each time stepper, there are various options available at run-time through an input script.
 
-Multirate SSP Runge-Kutta
-_________________________
+strang2
+_______
 
-The multirate solver is the one that we use the most. This solver uses an adaptive-in-time method (without error control) which removes redundant elliptic solves at CFL bound time scales. This implies that the electric field and radiative transfer equations are updated only at the end of each time step. For SSP reasons, we only support first to third order Runge-Kutta stages. The tableus for these can be found in paper *On High Order Strong Stability Preserving Runge-Kutta and Multi Step Time Discretizations* by Sigal Gottlieb. The diffusion advance is done by using the TGA scheme. The following options are available:
+The ``strang2`` time integrator is the one we favor the most. Currently, this class performs a Strang splitting of the convection-reaction-diffusion equations in the form: 
 
-.. literalinclude:: links/multirate_rkSSP.options
+.. math::
+   :nowrap:
 
-Second order Runge-Kutta
-________________________
+   \begin{equation}
+   n^{k+1} = \exp\left(\frac{\Delta t}{2}A\right)\exp\left(\Delta tD\right)\exp\left(\frac{\Delta t}{2}A\right)n^{k},
+   \end{equation}
 
-For the second order Runge-Kutta method, the following options are available:
+where :math:`A` is the advection-reaction operator and :math:`D` is the diffusion operator. Likewise, the surface charge updates occur in the evaluation of the advective updates since charge injection is a part of the advective scheme. The RTE and electric fields are updated after each Runge-Kutta stage, although there are debugging features that allow the user to turn this off.
 
-.. literalinclude:: links/rk2_tga.options
+In ``strang2``, the diffusion operator is a second order implicit Runge-Kutta method (TGA), whereas the advection-reaction solvers are strongly stability preserving explicit Runge Kutta methods of order 2, 3, or 4. The Runge-Kutta methods support stages up to 5 and can therefore be at efficiencies close to the explicit Euler method, but with significantly higher accuracy. Note that for a five-stage second order Runge-Kutta method, the CFL limit is 4, so that the Strang splitting has a CFL limitation of 8 (since :math:`A` is advanced twice with :math:`\Delta t/2`).
 
-In the above option, ``alpha`` contains the Butcher tableu. Note that only Heun's method with ``alpha`` equal to one, is monotone in time (a.k.a. strongly stability preserving) with a CFL of one. The above scheme solves the equations of motion by using a consistent second-order accurate Runge-Kutta scheme where the elliptic solves (RTE and Poisson) are synchronized at every stage. 
+The following options are available for the ``strang2`` integrator; there is also support for adaptive integration, but this is a part of the development feature and is not stable for use. The user will, for the most part, only change the Runge-Kutta method and adjust the CFL accordingly. 
+   
 
-Other integrators
-_________________
+.. literalinclude:: links/strang2.options
 
-In this user guide, we do not discuss the other temporal integrators for two reasons. 1) These integrators are not sufficiently stable for full release and 2) We have not performed benchmarking or comparisons of these solvers. However, you may of course use these solvers nonetheless (at your own peril). 

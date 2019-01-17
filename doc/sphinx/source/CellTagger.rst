@@ -5,6 +5,8 @@ cell_tagger
 
 The :ref:`Chap:cell_tagger` class handles tagging of cells inside the gas phase of the simulation region. Currently, we do not support tagging of cells inside the solid phase, although this would be straightforward to implement. If this feature is desired, please contact us (see :ref:`Chap:contact` for contact information).
 
+
+
 In PlasmaC, :ref:`Chap:cell_tagger` is an abstract class that the user must implement if he wishes to change how cells are tagged. The user must defined the number of desired tracer fields (through the constructor) and then implement three functions:
 
 
@@ -61,3 +63,10 @@ There are options in the :ref:`Chap:cell_tagger` base class that permits the use
 .. literalinclude:: links/cell_tagger.options
 
 In the above, the user may define an arbitrary number of boxes in which tagging is *allowed*. If you do not specify a box, i.e. if ``num_boxes`` is zero, tagging is allowed everywhere. If specify one or more boxes, the ``boxN_lo`` and ``boxN_hi`` parameters indicate the valid tagging regions. Note that the boxes are not level-specific, since this is controlled through *coarsen_cell* and *refine_cell*, respectively. 
+
+For the interfaces to some specific cell taggers that we have implemented, see below.
+
+.. toctree::
+   :maxdepth: 3
+
+   Tagging

@@ -5,7 +5,7 @@ ___________________________
 
 In Chombo,the system information is supplied through a file known as Make.defs.local, which resides in the Chombo library itself. This file contains a number of build settings, such as dimension, compilers, paths to HDF5 and so on. The file itself is in Chombo/lib/mk/Make.defs.local. Strictly speaking, it is not necessary to modify this file since all build parameters can be controlled through the command line, but it usually pays off.
 
-Here are what configuration variables that we use on the fram supercomputer
+Here are what configuration variables that we use on the ``fram`` supercomputer
 
 .. code-block:: c++
 

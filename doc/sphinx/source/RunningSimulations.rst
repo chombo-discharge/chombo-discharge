@@ -69,11 +69,6 @@ _____________________
 
 During the restart step, PlasmaC will load the initial grids and checkpointed data into memory. This data resides in an HDF5 file with where appropriate headers are used to identify where the data belongs. Amongst other things, the names of these headers are taken from :ref:`Chap:plasma_kinetics`, so you cannot change the species during during restarts. Currently, PlasmaC requires the exact same number of species during restarts, as well as consistent names for these. However, you *may* change the :ref:`Chap:plasma_kinetics` core functions, allowing you to change your plasma chemistry during restarts.
 
-Changing your integrator
-________________________
-
-Users may also change temporal integrators during restarts. However, this requires you to 1) in advance set up two different integrators and provide input variables to these or 2) recompile your executable with a different integrator.
-
 Changing spatial discretization
 _______________________________
 

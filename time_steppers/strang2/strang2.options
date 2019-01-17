@@ -24,20 +24,12 @@
 # and taken as strang2_maxcfl, which allows you to run at a specified CFL. If you use adaptive
 # stepping (development feature).
 #
-# TODO: We've done SOME convergence testing, but it is by no means exhaustive. Convergence testing
-#       should be run for all the RK solvers above. 
-#
 # ====================================================================================================
 # Main arguments
 # --------------
 strang2.rk_method         = 2 2     # Runge-Kutta method. First argument is stages, second is order. 
-strang2.min_cfl           = 0.1     # Minimum allowed CFL number for each substep. 
 strang2.max_cfl           = 0.9     # Maximum allowed CFL number for each substep. Different for each RK method. 
-strang2.error_norm        = 2       # Which error norm.
-strang2.safety            = 0.9     # Safety factor for adaptive step size control. Must (0,1]
-strang2.alpha             = 0.25    # Tuning factor for time step control  
-strang2.min_alpha         = 0.2     # Tuning factor for time step control
-strang2.max_alpha         = 1.5     # Tuning factor for time step control
+
 
 # --------------------
 # Development features
@@ -45,6 +37,12 @@ strang2.max_alpha         = 1.5     # Tuning factor for time step control
 strang2.adaptive_dt       = false   # Tune time step by using an embedded lower order scheme
 strang2.compute_error     = false   # Compute the error by using an embedded Lie scheme.
 strang2.fixed_order       = false   # Fix the integration order
+strang2.error_norm        = 2       # Which error norm.
+strang2.alpha             = 0.25    # Tuning factor for time step control
+strang2.min_cfl           = 0.1     # Minimum allowed CFL number for each substep. 
+strang2.min_alpha         = 0.2     # Tuning factor for time step control
+strang2.max_alpha         = 1.5     # Tuning factor for time step control
+strang2.safety            = 0.9     # Safety factor for adaptive step size control. Must (0,1]	
 strang2.max_error         = 1.E-5   # Maximum allowed error. Only if compute_error = true	
 
 #-----------------

@@ -15,5 +15,3 @@ Below, we present a summary of the currently available solvers in PlasmaC.
    RteSolvers
    Integrators
    Tagging
-
-   

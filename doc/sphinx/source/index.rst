@@ -3,7 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-
+**This is an alpha release of PlasmaC. Development is still in progress, and various bugs may or may not be present.**
+   
 Welcome to PlasmaC's user documentation!
 ========================================
 	      
@@ -20,7 +21,7 @@ PlasmaC is built on top of `Chombo <https://commons.lbl.gov/display/chombo/Chomb
 
 * Cut-cell representation of multi-material geometries
 * Patch based adaptive mesh refinement
-* Excellent scalability from 1 to 100,000 cores.
+* Scalable in parallel
 
 Take a look at the :ref:`Chap:Gallery` for some examples. 
 
@@ -32,15 +33,11 @@ Table of contents
 .. toctree::
    :maxdepth: 3
 
-   Obtaining
    Introduction
    Interface
-   CreatingGeometries
    NewSimulations
    RunningSimulations
    ImportantClasses
-   Solvers
-   Performance
    FAQ
    Bugs
    Todo

@@ -1,9 +1,7 @@
 .. _Chap:Obtaining:
 
-**This is an alpha release of PlasmaC. Development is still in progress, and various bugs may or may not be present.**
-
 Obtaining PlasmaC
-=================
+-----------------
 
 Access to PlasmaC is currently granted on a per-user basis. For an access requiry, please :ref:`Chap:contact`.
 

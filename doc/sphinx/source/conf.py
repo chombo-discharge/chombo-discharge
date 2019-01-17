@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PlasmaC'
+project = u'PlasmaC-dev'
 copyright = u'2018, Robert Marskar'
 
 # The version info for the project you're documenting, acts as replacement for

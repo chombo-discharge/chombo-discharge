@@ -1,7 +1,7 @@
 .. _Chap:CreatingGeometries:
 
 Creating geometries
-===================
+-------------------
 
 In PlasmaC, support for internal boundary is done by means of an embedded boundary approach. The surface itself is computed by intersecting the mesh with a level-set function, i.e. a function of the form
 
