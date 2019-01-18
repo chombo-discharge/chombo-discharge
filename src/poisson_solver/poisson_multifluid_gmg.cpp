@@ -134,7 +134,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   const Real t4 = MPI_Wtime();
 
-#if 0 // Why is this required??? Is it because of op->zeroCovered()????
+#if 1 // Why is this required??? Is it because of op->zeroCovered()????
   Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
   new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
 #endif
