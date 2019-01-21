@@ -1662,6 +1662,12 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes){
   this->define_flux_reg();     // Define flux register (phase::gas only)
   this->define_redist_oper();  // Define redistribution (phase::gas only)
   this->define_irreg_sten();   // Define irregular stencils
+
+  // Do the multilevel stuff
+  if(!m_has_mg_stuff){
+    this->define_mg_stuff();
+    m_has_mg_stuff = true;
+  }
 }
 
 void amr_mesh::set_max_box_size(const int a_max_box_size){

@@ -956,9 +956,9 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
 }
 
 void plasma_engine::old_read_checkpoint_file(const std::string& a_restart_file){
-  CH_TIME("plasma_engine::read_checkpoint_file");
+  CH_TIME("plasma_engine::old_read_checkpoint_file");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::read_checkpoint_file" << endl;
+    pout() << "plasma_engine::old_read_checkpoint_file" << endl;
   }
 
   RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
