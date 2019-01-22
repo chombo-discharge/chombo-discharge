@@ -32,11 +32,17 @@ strang2::strang2(){
   m_alpha        = 0.25;
   m_min_alpha    = 0.2;
   m_max_alpha    = 1.5;
+  
+  m_auto_safety_cfl = 0.8;
+  m_auto_min_stages = 2;
+  m_auto_max_stages = 5;
 
+  m_auto_stages    = false;
   m_adaptive_dt    = true;
   m_compute_error  = true;
   m_have_dtf       = false;
   m_fixed_order    = false;
+
 
   // Basically only for debugging
   m_use_embedded   = false;
@@ -71,11 +77,20 @@ strang2::strang2(){
     pp.query("alpha",           m_alpha);
     pp.query("min_alpha",       m_min_alpha);
     pp.query("max_alpha",       m_max_alpha);
+    pp.query("auto_max_stages", m_auto_max_stages);
+    pp.query("auto_min_stages", m_auto_min_stages);
+    pp.query("auto_safety_cfl", m_auto_safety_cfl);
 
     if(pp.contains("fixed_order")){
       pp.get("fixed_order", str);
       if(str == "true"){
 	m_fixed_order = true;
+      }
+    }
+    if(pp.contains("auto_stages")){
+      pp.get("auto_stages", str);
+      if(str == "true"){
+	m_auto_stages = true;
       }
     }
     if(pp.contains("accept_error")){
@@ -190,6 +205,12 @@ strang2::strang2(){
   if(m_adaptive_dt){
     m_compute_error = true;
   }
+
+  // If we do automatic selection of # of stages, order must be do
+  if(m_auto_stages){
+    m_rk_order  = 2;
+    m_rk_stages = 2;
+  }
 }
 
 strang2::~strang2(){
@@ -265,8 +286,29 @@ Real strang2::advance(const Real a_dt){
       actual_dt = this->advance_adaptive(substeps, m_dt_adapt, m_time, a_dt);
     }
     else{ // Non-adaptive time-stepping scheme loop
-      // Do equal division of the time steps. This integration always lands on a_dt
-      substeps   = ceil(a_dt/(m_maxCFL*m_dt_cfl));
+      // Do equal division of the time steps. This integration always lands on a_dt.
+
+      // Automatic stage selection for second order
+      if(m_auto_stages){
+	const Real safe_cfl = m_dt_cfl;
+	const int s = 1 + ceil(a_dt/(2*m_dt_cfl)); // Because advection is done with a_dt/2. 
+	m_rk_stages = s;
+	m_rk_stages = Min(m_rk_stages, m_auto_max_stages);
+	m_rk_stages = Max(m_rk_stages, m_auto_min_stages);
+
+#if 1 // Debug
+	if(procID() == 0){
+	  std::cout << m_rk_stages << std::endl;
+	}
+#endif
+
+	// Given order s. Use more time steps if we must. 
+	substeps = ceil(a_dt/(2*(m_rk_stages-1)*m_auto_safety_cfl*m_dt_cfl));
+      }
+      else{
+	substeps = ceil(a_dt/(m_maxCFL*m_dt_cfl)); // Just do equal division
+      }
+
       cfl        = a_dt/(substeps*m_dt_cfl);
       m_dt_adapt = cfl*m_dt_cfl;
       actual_dt = this->advance_fixed(substeps, m_dt_adapt);

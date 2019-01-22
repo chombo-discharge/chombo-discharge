@@ -51,9 +51,12 @@ protected:
   int m_rk_order;
   int m_rk_stages;
   int m_error_norm;
+  int m_auto_min_stages;
+  int m_auto_max_stages;
 
   Real m_minCFL;
   Real m_maxCFL;
+  Real m_auto_safety_cfl;
   Real m_dt_cfl;
   Real m_err_thresh;
   Real m_safety;
@@ -66,6 +69,7 @@ protected:
   Real m_sigma_error;
   Real m_max_error;
 
+  bool m_auto_stages;
   bool m_fixed_order;
   bool m_print_diagno;
   bool m_write_diagno;
@@ -120,6 +124,7 @@ protected:
   void update_poisson();
   void update_rte(const Real a_time);
   void advance_rte_stationary(const Real a_time);
+
 
   void compute_E_into_scratch();
   void compute_cdr_eb_states();

@@ -24,16 +24,33 @@
 # and taken as strang2_maxcfl, which allows you to run at a specified CFL. If you use adaptive
 # stepping (development feature).
 #
+# If you use the auto_stages functionality, you can specify the maximum and minimum number of stages
+# for the advective discretization. Order 2 is locked. 
+#
 # ====================================================================================================
 # Main arguments
 # --------------
 strang2.rk_method         = 2 2     # Runge-Kutta method. First argument is stages, second is order. 
-strang2.max_cfl           = 0.9     # Maximum allowed CFL number for each substep. Different for each RK method. 
+strang2.max_cfl           = 0.9     # Maximum allowed CFL number for each substep. Different for each RK method.
+
+# Need to get into the blabalblabl
 
 
-# --------------------
-# Development features
-# --------------------	
+# ---------------------------------------------
+# Development features below. For experts only.
+# ---------------------------------------------
+#
+# -------------------------------------
+# Automatic stage selection for order 2
+# -------------------------------------
+strang2.auto_stages       = false   # Automatic stage selection. Only works for order = 2. See explanation of usage above
+strang2.auto_safety_cfl   = 0.5     # Safety factor for CFL
+strang2.auto_max_stages   = 5       # Maximum number of stages
+strang2.auto_min_stages   = 2       # Minium number of stages
+
+# -----------------	  
+# Adaptive stepping
+# -----------------
 strang2.adaptive_dt       = false   # Tune time step by using an embedded lower order scheme
 strang2.compute_error     = false   # Compute the error by using an embedded Lie scheme.
 strang2.fixed_order       = false   # Fix the integration order
