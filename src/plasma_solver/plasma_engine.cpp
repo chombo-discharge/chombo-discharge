@@ -1316,7 +1316,7 @@ void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_n
   this->allocate_internals();
 
   // Copy cached tags back over to m_tags
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+  for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
     m_cached_tags[lvl]->copyTo(*m_tags[lvl]);
 
 #if 1 // For some reason this needs to happen, but I don't really see how the DenseIntVectSet leaks over

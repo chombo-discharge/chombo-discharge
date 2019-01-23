@@ -355,6 +355,8 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
   const Interval interv(comp, comp);
 
   this->allocate_internals();
+
+
   
   for (int i = 0; i < phase::num_phases; i++){
     phase::which_phase cur_phase;    
@@ -375,7 +377,7 @@ void poisson_solver::regrid(const int a_old_finest, const int a_new_finest){
       m_amr->allocate_ptr(scratch_phase);
       m_amr->allocate_ptr(state_phase);
       m_amr->alias(state_phase,   cur_phase, m_state);
-      m_amr->alias(scratch_phase, cur_phase, m_cache, a_old_finest);
+      m_amr->alias(scratch_phase, cur_phase, m_cache, Min(a_old_finest, a_new_finest));
 
       Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(cur_phase);
 
