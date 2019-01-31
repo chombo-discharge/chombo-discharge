@@ -120,6 +120,10 @@ public:
 
   static void kappa_scale(LevelData<MFCellFAB>& a_data);
 
+  static void laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data);
+  
+  static void laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data);
+
   static void ln(EBAMRCellData& a_lhs);
 
   static void ln(LevelData<EBCellFAB>& a_lhs);

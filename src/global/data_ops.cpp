@@ -7,6 +7,7 @@
 
 #include "data_ops.H"
 #include "data_opsF_F.H"
+#include "EBArith.H"
 #include "EBLevelDataOps.H"
 #include "MFLevelDataOps.H"
 #include "CCProjectorF_F.H"
@@ -746,6 +747,59 @@ void data_ops::kappa_scale(MFAMRCellData& a_data){
 
 void data_ops::kappa_scale(LevelData<MFCellFAB>& a_data){
   MFLevelDataOps::kappaWeight(a_data);
+}
+
+void data_ops::laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    data_ops::laplacian(*a_lapl[lvl], *a_data[lvl]);
+  }
+}
+
+void data_ops::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
+  const int ncomp = a_data.nComp();
+  
+  for (DataIterator dit = a_lapl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lapl        = a_lapl[dit()];
+    const EBCellFAB& data  = a_data[dit()];
+    const EBISBox& ebisbox = data.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box box          = a_lapl.disjointBoxLayout().get(dit());
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+    BaseFab<Real>& lapl_fab       = lapl.getSingleValuedFAB();
+    const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
+
+    // Regular stuff
+    FORT_LAPLACIAN(CHF_FRA(lapl_fab),
+		   CHF_CONST_FRA(data_fab),
+		   CHF_CONST_INT(ncomp),
+		   CHF_BOX(box));
+    
+
+    // Irregular and multi-valued
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+
+      for (int comp = 0; comp < ncomp; comp++){
+	lapl(vof, comp) = 0.0;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  Real value = 0.0;
+	  VoFStencil sten;
+
+	  // Get stencil
+	  EBArith::getSecondDerivStencil(sten, vof, ebisbox, dir, 1.0);
+
+	  // Apply it
+	  for (int i = 0; i < sten.size(); i++){
+	    const VolIndex& ivof = sten.vof(i);
+	    const Real iweight   = sten.weight(i);
+	    lapl(vof, comp) += iweight*data(ivof,comp);
+	  }
+	}
+      }
+    }
+  }
 }
 
 void data_ops::ln(EBAMRCellData& a_lhs){

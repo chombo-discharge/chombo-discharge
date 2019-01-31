@@ -107,3 +107,32 @@
       
       return
       end
+
+      subroutine laplacian(
+     &     chf_fra[lapl],
+     &     chf_const_fra[data],
+     &     chf_const_int[ncomps],
+     &     chf_box[region] )
+
+      real_t len2
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ioff; joff; koff]
+      integer ic, dir
+
+      do ic=1,ncomps
+         chf_multido[region;i;j;k]
+            lapl(chf_ix[i;j;k], ic) = 0.0
+            do dir=1,CH_SPACEDIM
+               chf_dterm[ioff = chf_id(0, dir);
+                         joff = chf_id(1, dir);
+                         koff = chf_id(2, dir)]
+               lapl(chf_ix[i;j;k], ic) = lapl(chf_ix[i;j;k], ic)
+     &                                 +     data(chf_ix[i+ioff; j+joff; k+koff], ic)
+     &                                 - 2.0*data(chf_ix[i;      j;      k     ], ic)
+     &                                 +     data(chf_ix[i-ioff; j-joff; k-koff], ic)
+            enddo
+         chf_enddo
+      enddo
+      
+      return
+      end

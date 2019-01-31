@@ -157,6 +157,34 @@ inline void FORTRAN_NAME(inlineVECTOR_LENGTH2, inlineVECTOR_LENGTH2)(
 }
 #endif  // GUARDVECTOR_LENGTH2 
 
+#ifndef GUARDLAPLACIAN 
+#define GUARDLAPLACIAN 
+// Prototype for Fortran procedure laplacian ...
+//
+void FORTRAN_NAME( LAPLACIAN ,laplacian )(
+      CHFp_FRA(lapl)
+      ,CHFp_CONST_FRA(data)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(region) );
+
+#define FORT_LAPLACIAN FORTRAN_NAME( inlineLAPLACIAN, inlineLAPLACIAN)
+#define FORTNT_LAPLACIAN FORTRAN_NAME( LAPLACIAN, laplacian)
+
+inline void FORTRAN_NAME(inlineLAPLACIAN, inlineLAPLACIAN)(
+      CHFp_FRA(lapl)
+      ,CHFp_CONST_FRA(data)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(region) )
+{
+ CH_TIMELEAF("FORT_LAPLACIAN");
+ FORTRAN_NAME( LAPLACIAN ,laplacian )(
+      CHFt_FRA(lapl)
+      ,CHFt_CONST_FRA(data)
+      ,CHFt_CONST_INT(ncomps)
+      ,CHFt_BOX(region) );
+}
+#endif  // GUARDLAPLACIAN 
+
 }
 
 #endif
