@@ -109,30 +109,66 @@
       end
 
       subroutine laplacian(
-     &     chf_fra[lapl],
-     &     chf_const_fra[data],
-     &     chf_const_int[ncomps],
+     &     chf_fra1[lapl],
+     &     chf_const_fra1[data],
      &     chf_box[region] )
 
-      real_t len2
       integer chf_ddecl[i; j; k]
       integer chf_ddecl[ioff; joff; koff]
-      integer ic, dir
+      integer dir
 
-      do ic=1,ncomps
-         chf_multido[region;i;j;k]
-            lapl(chf_ix[i;j;k], ic) = 0.0
-            do dir=1,CH_SPACEDIM
-               chf_dterm[ioff = chf_id(0, dir);
-                         joff = chf_id(1, dir);
-                         koff = chf_id(2, dir)]
-               lapl(chf_ix[i;j;k], ic) = lapl(chf_ix[i;j;k], ic)
-     &                                 +     data(chf_ix[i+ioff; j+joff; k+koff], ic)
-     &                                 - 2.0*data(chf_ix[i;      j;      k     ], ic)
-     &                                 +     data(chf_ix[i-ioff; j-joff; k-koff], ic)
-            enddo
-         chf_enddo
-      enddo
+      chf_multido[region;i;j;k]
+         lapl(chf_ix[i;j;k]) = 0.0
+         do dir=1,CH_SPACEDIM
+            chf_dterm[ioff = chf_id(0, dir);
+                      joff = chf_id(1, dir);
+                      koff = chf_id(2, dir)]
+            lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k])
+     &                          +     data(chf_ix[i+ioff; j+joff; k+koff])
+     &                          - 2.0*data(chf_ix[i;      j;      k     ])
+     &                          +     data(chf_ix[i-ioff; j-joff; k-koff])
+         enddo
+      chf_enddo
       
+      return
+      end
+
+      subroutine flash_laplacian(
+     &     chf_fra1[lapl],
+     &     chf_const_fra1[data],
+     &     chf_box[region] )
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ioff; joff; koff]
+      integer dir
+      real_t res
+
+      chf_multido[region;i;j;k]
+         lapl(chf_ix[i;j;k]) = 0.0
+         do dir=1,CH_SPACEDIM
+            chf_dterm[ioff = chf_id(0, dir);
+                      joff = chf_id(1, dir);
+                      koff = chf_id(2, dir)]
+            res = data(chf_ix[i+ioff;j+joff;k+koff]) - 2.0*data(chf_ix[i;j;k]) + data(chf_ix[i-ioff;j-joff;k-koff])
+            lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
+         enddo
+c c Cross-terms, different for 2D and 3D
+#if CH_SPACEDIM==2
+c 1/dxdy
+        res = 0.25*(data(i+1,j+1) - data(i+1,j-1) - data(i-1,j+1) + data(i-1,j-1))
+        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
+#elif CH_SPACEDIM==3
+c 1/(dxdy) and 1/(dydx)
+        res = 0.25*(data(i+1,j+1,k) - data(i+1,j-1,k) - data(i-1,j+1,k) + data(i-1,j-1,k))
+        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
+c 1/(dxdz) and 1/(dzdx)
+        res = 0.25*(data(i+1,j,k+1) - data(i+1,j,k-1) - data(i-1,j,k+1) + data(i-1,j,k-1))
+        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
+c 1/(dydz) and 1/(dzdy)
+        res = 0.25*(data(i,j+1,k+1) - data(i,j+1,k-1) - data(i,j-1,k+1) + data(i,j-1,k-1))
+        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res	
+#endif
+        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k]))
+      chf_enddo	 
       return
       end

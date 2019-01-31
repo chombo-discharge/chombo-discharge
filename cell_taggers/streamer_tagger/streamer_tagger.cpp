@@ -79,6 +79,9 @@ void streamer_tagger::compute_tracers(){
   data_ops::get_max_min(ne_max, ne_min, ne, comp);
   data_ops::get_max_min(Se_max, Se_min, Se, comp);
 
+  // Compute Laplacian of source term
+  data_ops::flash_laplacian(m_tracer[0], Se);
+
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
@@ -107,14 +110,20 @@ void streamer_tagger::compute_tracers(){
 	Real& tracer1 = (*m_tracer[0][lvl])[dit()](vof, 0);
 	Real& tracer2 = (*m_tracer[1][lvl])[dit()](vof, 0);
 	
-	tracer1 = 0.0;
+	//	tracer1 = 0.0;
 	tracer2 = 0.0;
 	
 	if(n > 0.0){
 #if 0 // Original code
 	  tracer1 = Max(S, 0.0)/((n + m_fudge*ne_max)*v.vectorLength());
 #else
-	  tracer1 = Max(S, 0.0)/Se_max;
+	  tracer1 = Abs(tracer1);
+	  if(S > 1E-2*Se_max){
+	    tracer1 = Abs(tracer1)/(S);
+	  }
+	  else{
+	    tracer1 = 0.0;
+	  }
 #endif
 	}
 	if(E.vectorLength() > 0.0){
@@ -131,7 +140,6 @@ void streamer_tagger::compute_tracers(){
     m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i]);
     m_amr->average_down(m_grad_tracer[i], m_phase);
   }
-
 }
 
 
@@ -141,7 +149,8 @@ bool streamer_tagger::coarsen_cell(const RealVect&         a_pos,
 				   const int&              a_lvl,
 				   const Vector<Real>&     a_tracer,
 				   const Vector<RealVect>& a_grad_tracer){
-  return true;
+  //  return true;
+  return a_tracer[0] < 0.001;
 }
 
 bool streamer_tagger::refine_cell(const RealVect&         a_pos,
@@ -157,5 +166,5 @@ bool streamer_tagger::refine_cell(const RealVect&         a_pos,
 #endif
   const bool refine2 = (a_grad_tracer[1].vectorLength()*a_dx/a_tracer[1] > m_thresh2[a_lvl]) ? true : false;
 
-  return refine1 || refine2;
+  return refine1;// || refine2;
 }

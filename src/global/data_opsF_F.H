@@ -162,28 +162,50 @@ inline void FORTRAN_NAME(inlineVECTOR_LENGTH2, inlineVECTOR_LENGTH2)(
 // Prototype for Fortran procedure laplacian ...
 //
 void FORTRAN_NAME( LAPLACIAN ,laplacian )(
-      CHFp_FRA(lapl)
-      ,CHFp_CONST_FRA(data)
-      ,CHFp_CONST_INT(ncomps)
+      CHFp_FRA1(lapl)
+      ,CHFp_CONST_FRA1(data)
       ,CHFp_BOX(region) );
 
 #define FORT_LAPLACIAN FORTRAN_NAME( inlineLAPLACIAN, inlineLAPLACIAN)
 #define FORTNT_LAPLACIAN FORTRAN_NAME( LAPLACIAN, laplacian)
 
 inline void FORTRAN_NAME(inlineLAPLACIAN, inlineLAPLACIAN)(
-      CHFp_FRA(lapl)
-      ,CHFp_CONST_FRA(data)
-      ,CHFp_CONST_INT(ncomps)
+      CHFp_FRA1(lapl)
+      ,CHFp_CONST_FRA1(data)
       ,CHFp_BOX(region) )
 {
  CH_TIMELEAF("FORT_LAPLACIAN");
  FORTRAN_NAME( LAPLACIAN ,laplacian )(
-      CHFt_FRA(lapl)
-      ,CHFt_CONST_FRA(data)
-      ,CHFt_CONST_INT(ncomps)
+      CHFt_FRA1(lapl)
+      ,CHFt_CONST_FRA1(data)
       ,CHFt_BOX(region) );
 }
 #endif  // GUARDLAPLACIAN 
+
+#ifndef GUARDFLASH_LAPLACIAN 
+#define GUARDFLASH_LAPLACIAN 
+// Prototype for Fortran procedure flash_laplacian ...
+//
+void FORTRAN_NAME( FLASH_LAPLACIAN ,flash_laplacian )(
+      CHFp_FRA1(lapl)
+      ,CHFp_CONST_FRA1(data)
+      ,CHFp_BOX(region) );
+
+#define FORT_FLASH_LAPLACIAN FORTRAN_NAME( inlineFLASH_LAPLACIAN, inlineFLASH_LAPLACIAN)
+#define FORTNT_FLASH_LAPLACIAN FORTRAN_NAME( FLASH_LAPLACIAN, flash_laplacian)
+
+inline void FORTRAN_NAME(inlineFLASH_LAPLACIAN, inlineFLASH_LAPLACIAN)(
+      CHFp_FRA1(lapl)
+      ,CHFp_CONST_FRA1(data)
+      ,CHFp_BOX(region) )
+{
+ CH_TIMELEAF("FORT_FLASH_LAPLACIAN");
+ FORTRAN_NAME( FLASH_LAPLACIAN ,flash_laplacian )(
+      CHFt_FRA1(lapl)
+      ,CHFt_CONST_FRA1(data)
+      ,CHFt_BOX(region) );
+}
+#endif  // GUARDFLASH_LAPLACIAN 
 
 }
 

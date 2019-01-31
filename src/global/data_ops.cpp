@@ -770,10 +770,11 @@ void data_ops::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB
     const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
 
     // Regular stuff
-    FORT_LAPLACIAN(CHF_FRA(lapl_fab),
-		   CHF_CONST_FRA(data_fab),
-		   CHF_CONST_INT(ncomp),
-		   CHF_BOX(box));
+    for (int comp = 0; comp < ncomp; comp++){
+      FORT_LAPLACIAN(CHF_FRA1(lapl_fab, comp),
+		     CHF_CONST_FRA1(data_fab, comp),
+		     CHF_BOX(box));
+    }
     
 
     // Irregular and multi-valued
@@ -797,6 +798,74 @@ void data_ops::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB
 	    lapl(vof, comp) += iweight*data(ivof,comp);
 	  }
 	}
+      }
+    }
+  }
+}
+
+void data_ops::flash_laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
+
+  // TLDR: This version of the Laplacian also takes the cross-derivative
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    data_ops::flash_laplacian(*a_lapl[lvl], *a_data[lvl]);
+  }
+}
+
+void data_ops::flash_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
+  const int ncomp = a_data.nComp();
+  const DisjointBoxLayout& dbl = a_lapl.disjointBoxLayout();
+  const ProblemDomain domain   = dbl.physDomain();
+
+  for (DataIterator dit = a_lapl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lapl        = a_lapl[dit()];
+    const EBCellFAB& data  = a_data[dit()];
+    const EBISBox& ebisbox = data.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box box          = dbl.get(dit());
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+    BaseFab<Real>& lapl_fab       = lapl.getSingleValuedFAB();
+    const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
+
+    // Regular stuff
+    for (int comp = 0; comp < ncomp; comp++){
+      FORT_FLASH_LAPLACIAN(CHF_FRA1(lapl_fab, comp),
+		     CHF_CONST_FRA1(data_fab, comp),
+		     CHF_BOX(box));
+    }
+
+    // Can't trust stuff on the sides
+    IntVectSet bndry_ivs = ebisbox.getIrregIVS(dbl.get(dit()));
+    for (int dir = 0; dir < SpaceDim; dir++){
+      Box lo_box, hi_box;
+      int has_lo, has_hi;
+
+      EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
+
+      if(has_lo) bndry_ivs |= IntVectSet(lo_box);
+      if(has_hi) bndry_ivs |= IntVectSet(hi_box);
+    }
+      
+    // Compute stencils for boundary cells
+    for (VoFIterator vofit(bndry_ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int comp = 0; comp < ncomp; comp++){
+	lapl(vof, comp) = 0.;
+      }
+    }
+
+    // Set covered to zero
+    for (int comp = 0; comp < ncomp; comp++){
+      lapl.setCoveredCellVal(0.0, comp);
+    }
+    
+
+    // Irregular and multi-valued. Set these to zero for now
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      
+      for (int comp = 0; comp < ncomp; comp++){
+	lapl(vof, comp) = 0.0;
       }
     }
   }
