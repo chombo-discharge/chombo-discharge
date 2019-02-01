@@ -80,7 +80,10 @@ void streamer_tagger::compute_tracers(){
   data_ops::get_max_min(Se_max, Se_min, Se, comp);
 
   // Compute Laplacian of source term
+
   data_ops::flash_laplacian(m_tracer[0], Se);
+  m_amr->average_down(m_tracer[0], phase::gas);
+  m_amr->interp_ghost(m_tracer[0], phase::gas);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -118,8 +121,8 @@ void streamer_tagger::compute_tracers(){
 	  tracer1 = Max(S, 0.0)/((n + m_fudge*ne_max)*v.vectorLength());
 #else
 	  tracer1 = Abs(tracer1);
-	  if(S > 1E-2*Se_max){
-	    tracer1 = Abs(tracer1)/(S);
+	  if(S > 1E-4*Se_max){
+	    tracer1 = Abs(tracer1);///(S);
 	  }
 	  else{
 	    tracer1 = 0.0;
@@ -149,8 +152,7 @@ bool streamer_tagger::coarsen_cell(const RealVect&         a_pos,
 				   const int&              a_lvl,
 				   const Vector<Real>&     a_tracer,
 				   const Vector<RealVect>& a_grad_tracer){
-  //  return true;
-  return a_tracer[0] < 0.001;
+  return a_tracer[0] < 0.25*m_thresh1[a_lvl];
 }
 
 bool streamer_tagger::refine_cell(const RealVect&         a_pos,

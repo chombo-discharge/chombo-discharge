@@ -139,16 +139,19 @@
      &     chf_box[region] )
 
       integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ii; jj; kk]	
       integer chf_ddecl[ioff; joff; koff]
-      integer dir
-      real_t res
+      integer dir, p, q
+      real_t res, denom, uavg
 
       chf_multido[region;i;j;k]
          lapl(chf_ix[i;j;k]) = 0.0
-         do dir=1,CH_SPACEDIM
-            chf_dterm[ioff = chf_id(0, dir);
-                      joff = chf_id(1, dir);
-                      koff = chf_id(2, dir)]
+
+c Compute the numerator with cross derivatives
+         do p=1,CH_SPACEDIM
+            chf_dterm[ioff = chf_id(0, p);
+                      joff = chf_id(1, p);
+                      koff = chf_id(2, p)]
             res = data(chf_ix[i+ioff;j+joff;k+koff]) - 2.0*data(chf_ix[i;j;k]) + data(chf_ix[i-ioff;j-joff;k-koff])
             lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
          enddo
@@ -168,7 +171,33 @@ c 1/(dydz) and 1/(dzdy)
         res = 0.25*(data(i,j+1,k+1) - data(i,j+1,k-1) - data(i,j-1,k+1) + data(i,j-1,k-1))
         lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res	
 #endif
-        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k]))
+
+c Compute the denominator part with the gradients
+        denom = 0.0
+        do q=1,CH_SPACEDIM
+           do p=1,CH_SPACEDIM
+              chf_dterm[ioff = chf_id(0, p);
+	                joff = chf_id(1, p);
+			koff = chf_id(2, p)]
+
+              res = 1.E-1*data(chf_ix[i;j;k])
+c Shift point to iq+1 and compute |du/dxp|
+              chf_dterm[ii = i + chf_id(0, q);
+	                jj = j + chf_id(1, q);
+			kk = k + chf_id(2, q)]
+	      res = res + 0.25*abs((data(chf_ix[ii+ioff; jj+joff; kk+koff]) - data(chf_ix[ii-ioff; jj-joff; kk-koff])))
+
+c Shift point to iq-1 and compute du/dxp
+              chf_dterm[ii = i - chf_id(0, q);
+	                jj = j - chf_id(1, q);
+			kk = k - chf_id(2, q)]
+              res = res + 0.25*abs((data(chf_ix[ii+ioff; jj+joff; kk+koff]) - data(chf_ix[ii-ioff; jj-joff; kk-koff])))
+	      denom = denom + res*res
+           enddo
+        enddo
+
+        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k])/denom)
+c        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k]))/(data(chf_ix[i;j;k]))
       chf_enddo	 
       return
       end
