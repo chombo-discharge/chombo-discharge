@@ -133,54 +133,71 @@
       return
       end
 
-      subroutine flash_laplacian(
+      subroutine flash_error(
      &     chf_fra1[lapl],
      &     chf_const_fra1[data],
+     &     chf_const_real[eps],     
      &     chf_box[region] )
 
       integer chf_ddecl[i; j; k]
       integer chf_ddecl[ii; jj; kk]	
       integer chf_ddecl[ioff; joff; koff]
+      integer chf_ddecl[ioff2; joff2; koff2]
       integer dir, p, q
       real_t res, denom, uavg
 
       chf_multido[region;i;j;k]
          lapl(chf_ix[i;j;k]) = 0.0
 
-c Compute the numerator with cross derivatives
+c Compute the Laplacian in the numerator (including cross-derivatives)
          do p=1,CH_SPACEDIM
-            chf_dterm[ioff = chf_id(0, p);
-                      joff = chf_id(1, p);
-                      koff = chf_id(2, p)]
-            res = data(chf_ix[i+ioff;j+joff;k+koff]) - 2.0*data(chf_ix[i;j;k]) + data(chf_ix[i-ioff;j-joff;k-koff])
-            lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
+            do q=1,CH_SPACEDIM
+               chf_dterm[ioff  = chf_id(0, p);
+                         joff  = chf_id(1, p);
+                         koff  = chf_id(2, p)]
+               chf_dterm[ioff2 = chf_id(0, q);
+                         joff2 = chf_id(1, q);
+                         koff2 = chf_id(2, q)]
+               if(p .eq. q) then
+                  res = data(chf_ix[i+ioff;j+joff;k+koff]) - 2.0*data(chf_ix[i;j;k]) + data(chf_ix[i-ioff;j-joff;k-koff])
+               else	       
+                  res = data(chf_ix[i+ioff+ioff2;j+joff+joff2;k+koff+koff2])
+     &                - data(chf_ix[i+ioff-ioff2;j+joff-joff2;k+koff-koff2])
+     &                - data(chf_ix[i-ioff+ioff2;j-joff+joff2;k-koff+koff2])
+     &                + data(chf_ix[i-ioff-ioff2;j-joff-joff2;k-koff-koff2])
+                  res = 0.25*res
+               endif
+               lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + res*res
+            enddo
          enddo
-c c Cross-terms, different for 2D and 3D
-#if CH_SPACEDIM==2
-c 1/dxdy
-        res = 0.25*(data(i+1,j+1) - data(i+1,j-1) - data(i-1,j+1) + data(i-1,j-1))
-        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
-#elif CH_SPACEDIM==3
-c 1/(dxdy) and 1/(dydx)
-        res = 0.25*(data(i+1,j+1,k) - data(i+1,j-1,k) - data(i-1,j+1,k) + data(i-1,j-1,k))
-        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
-c 1/(dxdz) and 1/(dzdx)
-        res = 0.25*(data(i+1,j,k+1) - data(i+1,j,k-1) - data(i-1,j,k+1) + data(i-1,j,k-1))
-        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res
-c 1/(dydz) and 1/(dzdy)
-        res = 0.25*(data(i,j+1,k+1) - data(i,j+1,k-1) - data(i,j-1,k+1) + data(i,j-1,k-1))
-        lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + 2*res*res	
-#endif
 
 c Compute the denominator part with the gradients
         denom = 0.0
         do q=1,CH_SPACEDIM
            do p=1,CH_SPACEDIM
-              chf_dterm[ioff = chf_id(0, p);
-	                joff = chf_id(1, p);
-			koff = chf_id(2, p)]
+              chf_dterm[ioff  = chf_id(0, p);
+	                joff  = chf_id(1, p);
+			koff  = chf_id(2, p)]
+              chf_dterm[ioff2 = chf_id(0, p);
+	                joff2 = chf_id(1, p);
+			koff2 = chf_id(2, p)]
 
-              res = 1.E-1*data(chf_ix[i;j;k])
+              res = 0.0
+
+c Compute the Laplacian	of |u| with cross terms
+              if(p .eq. q) then
+                 res =    abs(data(chf_ix[i+ioff;j+joff;k+koff]))
+     &               +2.0*abs(data(chf_ix[i;j;k]))
+     &                  + abs(data(chf_ix[i-ioff;j-joff;k-koff]))
+              else	       
+                 res = abs(data(chf_ix[i+ioff+ioff2;j+joff+joff2;k+koff+koff2]))
+     &               + abs(data(chf_ix[i+ioff-ioff2;j+joff-joff2;k+koff-koff2]))
+     &               + abs(data(chf_ix[i-ioff+ioff2;j-joff+joff2;k-koff+koff2]))
+     &               + abs(data(chf_ix[i-ioff-ioff2;j-joff-joff2;k-koff-koff2]))
+                 res = 0.25*res
+              endif		  
+              res = eps*abs(res)
+	      
 c Shift point to iq+1 and compute |du/dxp|
               chf_dterm[ii = i + chf_id(0, q);
 	                jj = j + chf_id(1, q);
@@ -197,7 +214,6 @@ c Shift point to iq-1 and compute du/dxp
         enddo
 
         lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k])/denom)
-c        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k]))/(data(chf_ix[i;j;k]))
       chf_enddo	 
       return
       end

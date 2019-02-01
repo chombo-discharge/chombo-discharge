@@ -182,30 +182,33 @@ inline void FORTRAN_NAME(inlineLAPLACIAN, inlineLAPLACIAN)(
 }
 #endif  // GUARDLAPLACIAN 
 
-#ifndef GUARDFLASH_LAPLACIAN 
-#define GUARDFLASH_LAPLACIAN 
-// Prototype for Fortran procedure flash_laplacian ...
+#ifndef GUARDFLASH_ERROR 
+#define GUARDFLASH_ERROR 
+// Prototype for Fortran procedure flash_error ...
 //
-void FORTRAN_NAME( FLASH_LAPLACIAN ,flash_laplacian )(
+void FORTRAN_NAME( FLASH_ERROR ,flash_error )(
       CHFp_FRA1(lapl)
       ,CHFp_CONST_FRA1(data)
+      ,CHFp_CONST_REAL(eps)
       ,CHFp_BOX(region) );
 
-#define FORT_FLASH_LAPLACIAN FORTRAN_NAME( inlineFLASH_LAPLACIAN, inlineFLASH_LAPLACIAN)
-#define FORTNT_FLASH_LAPLACIAN FORTRAN_NAME( FLASH_LAPLACIAN, flash_laplacian)
+#define FORT_FLASH_ERROR FORTRAN_NAME( inlineFLASH_ERROR, inlineFLASH_ERROR)
+#define FORTNT_FLASH_ERROR FORTRAN_NAME( FLASH_ERROR, flash_error)
 
-inline void FORTRAN_NAME(inlineFLASH_LAPLACIAN, inlineFLASH_LAPLACIAN)(
+inline void FORTRAN_NAME(inlineFLASH_ERROR, inlineFLASH_ERROR)(
       CHFp_FRA1(lapl)
       ,CHFp_CONST_FRA1(data)
+      ,CHFp_CONST_REAL(eps)      
       ,CHFp_BOX(region) )
 {
- CH_TIMELEAF("FORT_FLASH_LAPLACIAN");
- FORTRAN_NAME( FLASH_LAPLACIAN ,flash_laplacian )(
+ CH_TIMELEAF("FORT_FLASH_ERROR");
+ FORTRAN_NAME( FLASH_ERROR ,flash_error )(
       CHFt_FRA1(lapl)
       ,CHFt_CONST_FRA1(data)
+      ,CHFt_CONST_REAL(eps)
       ,CHFt_BOX(region) );
 }
-#endif  // GUARDFLASH_LAPLACIAN 
+#endif  // GUARDFLASH_ERROR 
 
 }
 

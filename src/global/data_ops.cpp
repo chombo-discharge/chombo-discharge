@@ -803,15 +803,13 @@ void data_ops::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB
   }
 }
 
-void data_ops::flash_laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
-
-  // TLDR: This version of the Laplacian also takes the cross-derivative
+void data_ops::flash_error(EBAMRCellData& a_lapl, const EBAMRCellData& a_data, const Real a_eps){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    data_ops::flash_laplacian(*a_lapl[lvl], *a_data[lvl]);
+    data_ops::flash_error(*a_lapl[lvl], *a_data[lvl], a_eps);
   }
 }
 
-void data_ops::flash_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
+void data_ops::flash_error(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data, const Real a_eps){
   const int ncomp = a_data.nComp();
   const DisjointBoxLayout& dbl = a_lapl.disjointBoxLayout();
   const ProblemDomain domain   = dbl.physDomain();
@@ -829,9 +827,10 @@ void data_ops::flash_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBC
 
     // Regular stuff
     for (int comp = 0; comp < ncomp; comp++){
-      FORT_FLASH_LAPLACIAN(CHF_FRA1(lapl_fab, comp),
-		     CHF_CONST_FRA1(data_fab, comp),
-		     CHF_BOX(box));
+      FORT_FLASH_ERROR(CHF_FRA1(lapl_fab, comp),
+		       CHF_CONST_FRA1(data_fab, comp),
+		       CHF_CONST_REAL(a_eps),
+		       CHF_BOX(box));
     }
 
     // Can't trust stuff on the sides
@@ -861,7 +860,11 @@ void data_ops::flash_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBC
     
 
     // Irregular and multi-valued. Set these to zero for now
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    IntVectSet irreg = ivs;
+    //    irreg.grow(2);
+    irreg.grow(2);
+    irreg &= box;
+    for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       
       for (int comp = 0; comp < ncomp; comp++){
