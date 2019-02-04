@@ -20,6 +20,8 @@ streamer_tagger::streamer_tagger(){
   m_thresh2.resize(1, 0.1);
 
 
+
+
   {
     ParmParse pp("streamer_tagger");
     
@@ -39,6 +41,8 @@ streamer_tagger::streamer_tagger(){
   }
 
   this->set_phase(phase::gas);
+
+  std::cout << m_thresh2 << std::endl;
 }
 
 streamer_tagger::~streamer_tagger(){
@@ -91,9 +95,10 @@ void streamer_tagger::compute_tracers(){
   Real Se_max,  Se_min;
   Real E_max,   E_min;
   Real rho_max, rho_min;
-  data_ops::get_max_min(ne_max,  ne_min, ne,   comp);
-  data_ops::get_max_min(Se_max,  Se_min, Se,   comp);
-  data_ops::get_max_min(E_max,   E_min,  Emag, comp);
+  data_ops::get_max_min(ne_max,  ne_min,  ne,   comp);
+  data_ops::get_max_min(Se_max,  Se_min,  Se,   comp);
+  data_ops::get_max_min(E_max,   E_min,   Emag, comp);
+  data_ops::get_max_min(rho_max, rho_min, rho,  comp);
 
   // Compute the FLASH code error
   const Real FLASH_eps = 1.E-1;
@@ -104,12 +109,12 @@ void streamer_tagger::compute_tracers(){
     data_ops::set_value(m_tracer[0], 0.0);
   }
 
-  if(Abs(rho_max-rho_min) > 1.E-2*Abs(rho_max)){
-    data_ops::flash_error(m_tracer[1], rho, FLASH_eps);
-  }
-  else{
-    data_ops::set_value(m_tracer[1], 0.0);
-  }
+  //  if(Abs(rho_max) > 1.E-2*Abs(rho_min)){
+  //    data_ops::flash_error(m_tracer[1], Emag, FLASH_eps);
+  // }
+  // else{
+  //   data_ops::set_value(m_tracer[1], 0.0);
+  // }
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -125,12 +130,14 @@ void streamer_tagger::compute_tracers(){
       const EBCellFAB& ne_fab  = (*ne[lvl])[dit()];
       const EBCellFAB& Se_fab  = (*Se[lvl])[dit()];
       const EBCellFAB& rho_fab = (*rho[lvl])[dit()];
+      const EBCellFAB& E_fab   = (*Emag[lvl])[dit()];
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real S        = Se_fab(vof, comp);
 	const Real n        = ne_fab(vof, comp);
 	const Real ro       = rho_fab(vof, comp);
+	const Real e        = E_fab(vof,comp);
 
 	Real& tracer0 = (*m_tracer[0][lvl])[dit()](vof, 0);
 	Real& tracer1 = (*m_tracer[1][lvl])[dit()](vof, 0);
@@ -143,8 +150,8 @@ void streamer_tagger::compute_tracers(){
 	}
 
 #if 1
-	if(Abs(ro) > 1.E-2*Max(Abs(rho_max), Abs(rho_min))){
-	  tracer1 = Abs(tracer1);
+	if(e > 1.E-1*E_max && e > 0.0){
+	  tracer1 = Abs(e);
 	}
 	else{
 	  tracer1 = 0.0;
@@ -172,7 +179,7 @@ bool streamer_tagger::coarsen_cell(const RealVect&         a_pos,
 				   const Vector<RealVect>& a_grad_tracer){
 
   const bool coarsen1 = a_tracer[0] < 0.25*m_thresh1[a_lvl] ? true : false;
-  const bool coarsen2 = a_tracer[1] < 0.25*m_thresh1[a_lvl] ? true : false;
+  const bool coarsen2 = a_tracer[1] < 0.25*m_thresh2[a_lvl] ? true : false;
 
   return coarsen1 && coarsen2; 
 }
@@ -184,7 +191,8 @@ bool streamer_tagger::refine_cell(const RealVect&         a_pos,
 				  const Vector<Real>&     a_tracer,
 				  const Vector<RealVect>& a_grad_tracer){
   const bool refine1 = (a_tracer[0] > m_thresh1[a_lvl]) ? true : false;
-  const bool refine2 = (a_tracer[1] > m_thresh1[a_lvl]) ? true : false;
+  //  const bool refine2 = (a_tracer[1] > m_thresh2[a_lvl]) ? true : false;
+  const bool refine2 = a_grad_tracer[1].vectorLength()*a_dx/a_tracer[1] > m_thresh2[a_lvl] ? true : false;
 
   return refine1 || refine2;
 }
