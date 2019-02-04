@@ -573,6 +573,45 @@ void plasma_engine::add_tracer_fields_to_output(EBAMRCellData& a_output, const i
   }
 }
 
+void plasma_engine::add_cell_tags_to_output(EBAMRCellData& a_output, const int a_cur_var){
+  CH_TIME("plasma_engine::add_cell_tags_to_output");
+  if(m_verbosity > 10){
+    pout() << "plasma_engine::add_cell_tags_to_output" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const phase::which_phase cur_phase = phase::gas;
+
+  EBAMRCellData tags;
+  m_amr->allocate(tags, cur_phase, 1);
+  data_ops::set_value(tags, 0.0);
+
+    // Set tagged cells = 1
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(cur_phase)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = IntVectSet((*m_tags[lvl])[dit()].get_ivs());
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	(*tags[lvl])[dit()](vof, 0) = 1.;
+      }
+    }
+  }
+
+  const Interval src_interv(comp, comp);
+  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    tags[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+}
+
 void plasma_engine::allocate_internals(){
   CH_TIME("plasma_engine::allocate_internals");
   if(m_verbosity > 5){
@@ -2818,6 +2857,7 @@ void plasma_engine::write_plot_file(){
   }
   if(m_output_mode == output_mode::full && !m_celltagger.isNull()){
     this->add_tracer_fields_to_output(output, cur_var); cur_var += m_celltagger->get_num_tracers();
+    this->add_cell_tags_to_output(output, cur_var); cur_var += 1;
   }
 
   // Filename
@@ -3293,6 +3333,14 @@ Vector<string> plasma_engine::get_output_variable_names(){
 	names.push_back(one + two); cur_name++; num_vars++;
       }
     }
+  }
+
+  // Cell tags
+  if(m_output_mode == output_mode::full){
+    const std::string str = "cell_tags";
+    names.push_back(str);
+    cur_name++;
+    num_vars++;
   }
 
   return names;

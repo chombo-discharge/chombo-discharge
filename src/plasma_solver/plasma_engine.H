@@ -676,6 +676,11 @@ protected:
   virtual void add_tracer_fields_to_output(EBAMRCellData& a_output, const int a_curVar);
 
   /*!
+    @brief Add cell tags to output
+  */
+  virtual void add_cell_tags_to_output(EBAMRCellData& a_output, const int a_curVar);
+  
+  /*!
     @brief Cache tags
   */
   virtual void cache_tags(const EBAMRTags& a_tags);

@@ -124,6 +124,10 @@ public:
   
   static void laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data);
 
+  static void gen_laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data);
+  
+  static void gen_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data);
+
   static void flash_error(EBAMRCellData& a_lapl, const EBAMRCellData& a_data, const Real a_eps);
   
   static void flash_error(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data, const Real a_eps);

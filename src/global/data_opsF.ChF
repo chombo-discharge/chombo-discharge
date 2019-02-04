@@ -217,3 +217,45 @@ c Shift point to iq-1 and compute du/dxp
       chf_enddo	 
       return
       end
+
+      subroutine gen_laplacian(
+     &     chf_fra1[lapl],
+     &     chf_const_fra1[data],
+     &     chf_box[region] )
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ii; jj; kk]	
+      integer chf_ddecl[ioff; joff; koff]
+      integer chf_ddecl[ioff2; joff2; koff2]
+      integer dir, p, q
+      real_t res
+
+      chf_multido[region;i;j;k]
+         lapl(chf_ix[i;j;k]) = 0.0
+
+c Compute the Laplacian in the numerator (including cross-derivatives)
+         do p=1,CH_SPACEDIM
+            do q=1,CH_SPACEDIM
+               chf_dterm[ioff  = chf_id(0, p);
+                         joff  = chf_id(1, p);
+                         koff  = chf_id(2, p)]
+               chf_dterm[ioff2 = chf_id(0, q);
+                         joff2 = chf_id(1, q);
+                         koff2 = chf_id(2, q)]
+               if(p .eq. q) then
+                  res = data(chf_ix[i+ioff;j+joff;k+koff]) - 2.0*data(chf_ix[i;j;k]) + data(chf_ix[i-ioff;j-joff;k-koff])
+               else	       
+                  res = data(chf_ix[i+ioff+ioff2;j+joff+joff2;k+koff+koff2])
+     &                - data(chf_ix[i+ioff-ioff2;j+joff-joff2;k+koff-koff2])
+     &                - data(chf_ix[i-ioff+ioff2;j-joff+joff2;k-koff+koff2])
+     &                + data(chf_ix[i-ioff-ioff2;j-joff-joff2;k-koff-koff2])
+                  res = 0.25*res
+               endif
+               lapl(chf_ix[i;j;k]) = lapl(chf_ix[i;j;k]) + res*res
+            enddo
+         enddo
+
+        lapl(chf_ix[i;j;k]) = sqrt(lapl(chf_ix[i;j;k]))
+      chf_enddo	 
+      return
+      end

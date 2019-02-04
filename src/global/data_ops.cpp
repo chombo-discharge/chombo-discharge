@@ -803,6 +803,64 @@ void data_ops::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB
   }
 }
 
+void data_ops::gen_laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    data_ops::gen_laplacian(*a_lapl[lvl], *a_data[lvl]);
+  }
+}
+
+void data_ops::gen_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
+  const int ncomp = a_data.nComp();
+  
+  for (DataIterator dit = a_lapl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lapl        = a_lapl[dit()];
+    const EBCellFAB& data  = a_data[dit()];
+    const EBISBox& ebisbox = data.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box box          = a_lapl.disjointBoxLayout().get(dit());
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+    BaseFab<Real>& lapl_fab       = lapl.getSingleValuedFAB();
+    const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
+
+    // Regular stuff
+    for (int comp = 0; comp < ncomp; comp++){
+      FORT_GEN_LAPLACIAN(CHF_FRA1(lapl_fab, comp),
+		     CHF_CONST_FRA1(data_fab, comp),
+		     CHF_BOX(box));
+    }
+    
+
+    // Irregular and multi-valued
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+
+      for (int comp = 0; comp < ncomp; comp++){
+	lapl(vof, comp) = 0.0;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  Real value = 0.0;
+	  VoFStencil sten;
+
+	  // Get stencil
+	  EBArith::getSecondDerivStencil(sten, vof, ebisbox, dir, 1.0);
+
+	  // Apply it
+	  for (int i = 0; i < sten.size(); i++){
+	    const VolIndex& ivof = sten.vof(i);
+	    const Real iweight   = sten.weight(i);
+	    lapl(vof, comp) += iweight*data(ivof,comp);
+	  }
+	}
+
+#if 1 // Debug
+	lapl(vof,comp) = 0.0;
+#endif
+      }
+    }
+  }
+}
+
 void data_ops::flash_error(EBAMRCellData& a_lapl, const EBAMRCellData& a_data, const Real a_eps){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     data_ops::flash_error(*a_lapl[lvl], *a_data[lvl], a_eps);

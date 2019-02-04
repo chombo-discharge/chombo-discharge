@@ -41,8 +41,6 @@ streamer_tagger::streamer_tagger(){
   }
 
   this->set_phase(phase::gas);
-
-  std::cout << m_thresh2 << std::endl;
 }
 
 streamer_tagger::~streamer_tagger(){
@@ -101,7 +99,7 @@ void streamer_tagger::compute_tracers(){
   data_ops::get_max_min(rho_max, rho_min, rho,  comp);
 
   // Compute the FLASH code error
-  const Real FLASH_eps = 1.E-1;
+  const Real FLASH_eps = 1.E-2;
   if(ne_max > 1.E-2*ne_min && Abs(ne_max) > 0.0){
     data_ops::flash_error(m_tracer[0], ne, FLASH_eps);
   }
@@ -144,6 +142,9 @@ void streamer_tagger::compute_tracers(){
 	
 	if(S > 1.E-3*Se_max && n > 1.E-3*ne_max){
 	  tracer0 = Abs(tracer0);
+#if 1
+	  tracer0 = S/Se_max;
+#endif
 	}
 	else{
 	  tracer0 = 0.0;
@@ -178,10 +179,10 @@ bool streamer_tagger::coarsen_cell(const RealVect&         a_pos,
 				   const Vector<Real>&     a_tracer,
 				   const Vector<RealVect>& a_grad_tracer){
 
-  const bool coarsen1 = a_tracer[0] < 0.25*m_thresh1[a_lvl] ? true : false;
+  const bool coarsen1 = a_tracer[0] < 0.125*m_thresh1[a_lvl] ? true : false;
   const bool coarsen2 = a_tracer[1] < 0.25*m_thresh2[a_lvl] ? true : false;
-
-  return coarsen1 && coarsen2; 
+  return true;
+  return coarsen1;// && coarsen2; 
 }
 
 bool streamer_tagger::refine_cell(const RealVect&         a_pos,
