@@ -22,18 +22,20 @@ typedef sisdc::rte_storage     rte_storage;
 typedef sisdc::sigma_storage   sigma_storage;
 
 sisdc::sisdc(){
-  m_order        = 2;
-  m_min_order    = 2;
-  m_max_order    = 2;
-  m_error_norm   = 2;
-  m_minCFL       = 0.1;
-  m_maxCFL       = 0.9;   
-  m_err_thresh   = 1.E-4;
-  m_safety       = 0.9;
+  m_order         = 2;
+  m_min_order     = 2;
+  m_max_order     = 2;
+  m_error_norm    = 2;
+  m_minCFL        = 0.1;
+  m_maxCFL        = 0.9;   
+  m_err_thresh    = 1.E-4;
+  m_safety        = 0.9;
+  m_num_diff_corr = 0;
 
   m_adaptive_dt    = false;
   m_adaptive_order = false;
   m_have_dtf       = false;
+  m_strong_diffu   = false;
 
   // Basically only for debugging
   m_compute_v      = true;
@@ -62,6 +64,7 @@ sisdc::sisdc(){
     pp.query("max_cfl",         m_maxCFL);
     pp.query("max_error",       m_err_thresh);
     pp.query("safety",          m_safety);
+    pp.query("num_corrections", m_num_diff_corr);
 
     if(pp.contains("adaptive_dt")){
       pp.get("adaptive_dt", str);
@@ -73,6 +76,12 @@ sisdc::sisdc(){
       pp.get("adaptive_order", str);
       if(str == "true"){
 	m_adaptive_order = true;
+      }
+    }
+    if(pp.contains("strong_diffu")){
+      pp.get("strong_diffu", str);
+      if(str == "true"){
+	m_strong_diffu = true;
       }
     }
     if(pp.contains("compute_D")){
@@ -156,6 +165,12 @@ sisdc::sisdc(){
       }
     }
   }
+
+  //
+  if(!m_adaptive_order){
+    m_min_order = m_order;
+    m_max_order = m_order;
+  }
 }
 
 sisdc::~sisdc(){
@@ -214,15 +229,18 @@ Real sisdc::advance(const Real a_dt){
   this->setup_gauss_lobatto(m_order);
   this->setup_subintervals(m_order, m_time, a_dt);
 
+  sisdc::predictor();
+  
+
   MayDay::Abort("stop");
   
   return 0.0;
 }
 
 void sisdc::setup_gauss_lobatto(const int a_order){
-  CH_TIME("sisdc::regrid_internals");
+  CH_TIME("sisdc::setup_gauss_lobatto");
   if(m_verbosity > 5){
-    pout() << "sisdc::regrid_internals" << endl;
+    pout() << "sisdc::setup_gauss_lobatto" << endl;
   }
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
@@ -345,6 +363,60 @@ void sisdc::setup_subintervals(const int a_order, const Real a_time, const Real 
   
 }
 
+void sisdc::predictor(){
+  CH_TIME("sisdc::predictor");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor" << endl;
+  }
+
+  // TLDR; Source terms and velocities have been filled when we get here, but we need to update
+  //       boundary conditions
+
+  // Copy cdr solvers to starting states
+  for (cdr_iterator solver_it; solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>&  solver  = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    
+    EBAMRCellData& phi0 = storage->get_phi()[0];
+    const EBAMRCellData& phi = solver->get_state();
+    data_ops::copy(phi0, phi);
+  }
+
+  // Copy sigma to starting state
+  EBAMRIVData& sigma0      = m_sigma_scratch->get_sigma()[0];
+  const EBAMRIVData& sigma = m_sigma->get_state();
+  data_ops::copy(sigma0, sigma);
+
+  
+  for (int m = 0; m < m_order; m++){
+    this->predictor_advection_reaction(m);
+    this->predictor_sigma(m);
+    this->predictor_diffusion(m);
+  }
+}
+
+void sisdc::predictor_advection_reaction(const int a_m){
+  CH_TIME("sisdc::predictor_advection_reaction");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor_advection_reaction" << endl;
+  }
+
+}
+
+void sisdc::predictor_sigma(const int a_m){
+  CH_TIME("sisdc::predictor_sigma");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor_sigma" << endl;
+  }
+}
+
+void sisdc::predictor_diffusion(const int a_m){
+  CH_TIME("sisdc::predictor_diffusion");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor_diffusion" << endl;
+  }
+}
+
 void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   CH_TIME("sisdc::compute_dt");
   if(m_verbosity > 5){
@@ -407,7 +479,7 @@ void sisdc::regrid_internals(){
   this->allocate_rte_storage();
   this->allocate_sigma_storage();
 
-  //  this->build_gauss_lobatto(m_order);
+  this->setup_gauss_lobatto(m_order);
 }
 
 void sisdc::allocate_cdr_storage(){
@@ -937,8 +1009,9 @@ void sisdc::compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Re
 }
 
 void sisdc::update_poisson(){
+  CH_TIME("sisdc::update_poisson(solver)");
   if(m_verbosity > 5){
-    pout() << "sisdc::update_poisson" << endl;
+    pout() << "sisdc::update_poisson(solver)" << endl;
   }
   
   if(m_do_poisson){ // Solve Poisson equation
@@ -949,9 +1022,28 @@ void sisdc::update_poisson(){
   }
 }
 
-void sisdc::update_rte(const Real a_time){
+void sisdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma){
+  CH_TIME("sisdc::update_poisson(full)");
   if(m_verbosity > 5){
-    pout() << "sisdc::update_rte" << endl;
+    pout() << "sisdc::update_poisson(full)" << endl;
+  }
+  
+  if(m_do_poisson){ // Solve Poisson equation
+    if((m_step +1) % m_fast_poisson == 0){
+      time_stepper::solve_poisson(m_poisson->get_state(),
+				  m_poisson->get_source(),
+				  a_densities,
+				  a_sigma,
+				  centering::cell_center);
+      this->compute_E_into_scratch();
+    }
+  }
+}
+
+void sisdc::update_rte(const Real a_time){
+  CH_TIME("sisdc::update_rte(solver)");
+  if(m_verbosity > 5){
+    pout() << "sisdc::update_rte(solver)" << endl;
   }
   
   if(m_do_rte){
@@ -966,4 +1058,38 @@ void sisdc::update_rte(const Real a_time){
       this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
     }
   }
+}
+
+void sisdc::update_rte(const Vector<EBAMRCellData*>& a_cdr_states, const Real a_time){
+  CH_TIME("sisdc::update_rte(full)");
+  if(m_verbosity > 5){
+    pout() << "sisdc::update_rte(full)" << endl;
+  }
+  
+  if(m_do_rte){
+    if((m_step + 1) % m_fast_rte == 0){
+      Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
+      Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
+
+      EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+
+      const Real dummy_dt = 0.0;
+      this->solve_rte(rte_states, rte_sources, a_cdr_states, E, a_time, dummy_dt, centering::cell_center);
+    }
+  }
+}
+
+Vector<EBAMRCellData*> sisdc::get_cdr_phik(const int a_m){
+
+  Vector<EBAMRCellData*> ret;
+  for (cdr_iterator solver_it; solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    ret.push_back(&(storage->get_phi()[a_m]));
+  }
+
+  return ret;
+}
+
+EBAMRIVData& sisdc::get_sigmak(const int a_m){
+  return m_sigma_scratch->get_sigma()[a_m];
 }

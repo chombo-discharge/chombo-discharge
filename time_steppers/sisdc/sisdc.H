@@ -49,6 +49,7 @@ protected:
   int m_min_order;
   int m_max_order;
   int m_error_norm;
+  int m_num_diff_corr;
 
   Real m_minCFL;
   Real m_maxCFL;
@@ -73,6 +74,7 @@ protected:
   bool m_consistent_rte;
   bool m_print_diagno;
   bool m_write_diagno;
+  bool m_strong_diffu;
 
   Vector<Real> m_cdr_error;
   Real m_sigma_error;
@@ -88,22 +90,37 @@ protected:
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
 
+  // Allocation functions
   void allocate_cdr_storage();
   void allocate_poisson_storage();
   void allocate_rte_storage();
   void allocate_sigma_storage();
-  
+
+  // Store and reset functions
   void store_previous_solutions();
   void restore_previous_solutions();
 
+  // Get functions for substep data. 
+  Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
+  EBAMRIVData& get_sigmak(const int a_m);
+
+  // Routines for intervals etc. 
   void setup_gauss_lobatto(const int a_order);
-  void setup_subintervals(const int a_p, const Real a_time, const Real a_dt);
-  
+  void setup_subintervals(const int a_order, const Real a_time, const Real a_dt);
+
+  // SISDC predictor routines
+  void predictor();
+  void predictor_advection_reaction(const int a_m);
+  void predictor_sigma(const int a_m);
+  void predictor_diffusion(const int a_m);
 
   // Poisson and RTE updates
-  void update_poisson();
-  void update_rte(const Real a_time);
+  void update_poisson(); // This uses the solver states
+  void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
+  void update_rte(const Real a_time); // This uses the solver states, make sure that is what you want
+  void update_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time); 
 
+  // Aux functions
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
   void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
@@ -121,8 +138,6 @@ protected:
   void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   void compute_sigma_flux();
-  void store_solvers();
-  void restore_solvers();
   
   Real get_max_error();
   Real restrict_dt() ;

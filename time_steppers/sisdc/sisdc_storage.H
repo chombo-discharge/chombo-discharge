@@ -28,6 +28,11 @@ public:
   EBAMRCellData& get_error(){   return m_error;      }
   EBAMRCellData& get_gradient(){return m_gradient;   }
 
+  Vector<EBAMRCellData>& get_phi() {return m_phi;}
+  Vector<EBAMRCellData>& get_FAR() {return m_FAR;}
+  Vector<EBAMRCellData>& get_FD()  {return m_FD; }
+  Vector<EBAMRCellData>& get_F()   {return m_F;  }
+
   EBAMRIVData& get_eb_state(){  return m_scratchIV1; }
   EBAMRIVData& get_eb_velo(){   return m_scratchIV2; }
   EBAMRIVData& get_eb_flux(){   return m_scratchIV3; }
@@ -49,6 +54,11 @@ protected:
   EBAMRCellData m_scratch;  // Scratch data
   EBAMRCellData m_error;    // Error estimator
   EBAMRCellData m_gradient; // Storage for holding gradient
+
+  Vector<EBAMRCellData> m_phi;    // phi^k in the  SISDC notation
+  Vector<EBAMRCellData> m_FAR;    // FAR(phi^k) in the SISDC notation
+  Vector<EBAMRCellData> m_FD;     // FD(phi^k) in the SISDC notation
+  Vector<EBAMRCellData> m_F;      // F(phi^k) in the SISDC notation
 
   EBAMRIVData m_scratchIV1; // Scratch data
   EBAMRIVData m_scratchIV2; // Scratch data
@@ -131,6 +141,9 @@ public:
   EBAMRIVData& get_previous(){return m_previous; }
   EBAMRIVData& get_scratch(){ return m_scratch; }
   EBAMRIVData& get_error(){   return m_error; }
+
+  Vector<EBAMRIVData>& get_sigma(){ return m_sigma;}
+  Vector<EBAMRIVData>& get_Fsig(){  return m_Fsig; }
   
 protected:
 
@@ -142,6 +155,9 @@ protected:
   EBAMRIVData m_previous;        // Previous solution
   EBAMRIVData m_scratch;         // Scratch data
   EBAMRIVData m_error;           // Error
+
+  Vector<EBAMRIVData> m_sigma;   // sigma^k in the SISDC notation
+  Vector<EBAMRIVData> m_Fsig;    // F(sigma^k) in the SISDC notation
 };
 
 #endif

@@ -4,6 +4,14 @@
 sisdc.order = 2
 
 # ---------------------------------------------------------	
+# Diffusive coupling
+#
+# This defines the weak coupling used for the implicit diffusion advance. 
+# ---------------------------------------------------------
+sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
+sisdc.num_corrections    = 5     # Number of corrections for 'strong'
+
+# ---------------------------------------------------------	
 # Adaptive time stepping
 # ---------------------------------------------------------	
 sisdc.adaptive_dt     = false    # Use adaptive time stepping
