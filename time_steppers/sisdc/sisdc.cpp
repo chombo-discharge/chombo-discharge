@@ -210,6 +210,10 @@ Real sisdc::advance(const Real a_dt){
 
   this->store_previous_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
 
+  // Allocate Gauss-Lobatto quadrature stuff
+  this->setup_gauss_lobatto(m_order);
+  this->setup_subintervals(m_order, m_time, a_dt);
+
   MayDay::Abort("stop");
   
   return 0.0;
@@ -320,7 +324,6 @@ void sisdc::setup_subintervals(const int a_order, const Real a_time, const Real 
   m_tm.resize(a_order);
   Vector<Real> shifted_gl_nodes = m_gl_nodes;
   for (int m = 0; m < shifted_gl_nodes.size(); m++){
-
     shifted_gl_nodes[m] += 1.0;    // [0,2]
     shifted_gl_nodes[m] *= 0.5;    // [0,1]
     shifted_gl_nodes[m] *= a_dt;   // [0, a_dt]
@@ -338,6 +341,8 @@ void sisdc::setup_subintervals(const int a_order, const Real a_time, const Real 
       m_dtm[m] = m_tm[m+1] - m_tm[m];
     }
   }
+
+  
 }
 
 void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
