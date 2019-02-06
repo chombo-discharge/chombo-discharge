@@ -216,25 +216,27 @@ Real sisdc::advance(const Real a_dt){
   //       PS: When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //           advancement. If you think that this may not be the case, activate the debugging below
 #if 0 // Debugging
-  this->compute_E_into_scratch();
-  this->compute_cdr_gradients();
-  this->compute_cdr_velo(m_time);
-  this->compute_cdr_sources(m_time);
+  sisdc::compute_E_into_scratch();
+  sisdc::compute_cdr_gradients();
+  sisdc::compute_cdr_velo(m_time);
+  sisdc::compute_cdr_sources(m_time);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 #endif
-
-  this->store_previous_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
-
+  
   // Allocate Gauss-Lobatto quadrature stuff
-  this->setup_gauss_lobatto(m_order);
-  this->setup_subintervals(m_order, m_time, a_dt);
+  sisdc::setup_gauss_lobatto(m_order);
+  sisdc::setup_subintervals(m_order, m_time, a_dt);
 
-  sisdc::predictor();
+#if 0 // Shouldn't be necessary since we don't manipulate the solver state
+  sisdc::store_previous_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
+#endif
+
+  sisdc::predictor(m_time);
   
 
-  MayDay::Abort("stop");
+  MayDay::Abort("sisdc::advance - stop here");
   
-  return 0.0;
+  return a_dt;
 }
 
 void sisdc::setup_gauss_lobatto(const int a_order){
@@ -363,14 +365,19 @@ void sisdc::setup_subintervals(const int a_order, const Real a_time, const Real 
   
 }
 
-void sisdc::predictor(){
+void sisdc::predictor(const Real a_time){
   CH_TIME("sisdc::predictor");
   if(m_verbosity > 5){
     pout() << "sisdc::predictor" << endl;
   }
 
   // TLDR; Source terms and velocities have been filled when we get here, but we need to update
-  //       boundary conditions
+  //       boundary conditions. So do that first.
+  this->compute_cdr_eb_states();
+  this->compute_cdr_fluxes(a_time);
+  this->compute_cdr_domain_states();
+  this->compute_cdr_domain_fluxes(a_time);
+  this->compute_sigma_flux();
 
   // Copy cdr solvers to starting states
   for (cdr_iterator solver_it; solver_it.ok(); ++solver_it){
@@ -387,8 +394,8 @@ void sisdc::predictor(){
   const EBAMRIVData& sigma = m_sigma->get_state();
   data_ops::copy(sigma0, sigma);
 
-  
-  for (int m = 0; m < m_order; m++){
+  // This does the actual advance. After the diffusion step, we should update source terms and boundary conditions
+  for (int m = 0; m < m_order - 1; m++){
     this->predictor_advection_reaction(m);
     this->predictor_sigma(m);
     this->predictor_diffusion(m);
@@ -401,6 +408,27 @@ void sisdc::predictor_advection_reaction(const int a_m){
     pout() << "sisdc::predictor_advection_reaction" << endl;
   }
 
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_mp1     = storage->get_phi()[a_m+1]; // phi^(m+1)
+    EBAMRCellData& rhs         = storage->get_FAR()[a_m];   // FAR(phi^m)
+    const EBAMRCellData& phi_m = storage->get_phi()[a_m];   // phi_m
+    const EBAMRCellData& src   = solver->get_source();      // S_m
+
+    // Compute rhs
+    solver->compute_divF(rhs, phi_m, 0.0, true); // RHS =  Div(v_m*phi_m)
+    data_ops::scale(rhs, -1.0);                  // RHS = -Div(v_m*phi_m)
+    data_ops::incr(rhs, src, 1.0);               // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
+    data_ops::copy(phi_mp1, phi_m);              // phi_(m+1) = phi_m
+    data_ops::incr(phi_mp1, rhs, m_tm[a_m]);     // phi_(m+1) = phi_m + dt_m*FAR(phi_m)
+
+    m_amr->average_down(phi_mp1, m_cdr->get_phase());
+    m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
+
+    data_ops::floor(phi_mp1, 0.0);
+  }
 }
 
 void sisdc::predictor_sigma(const int a_m){
@@ -408,12 +436,27 @@ void sisdc::predictor_sigma(const int a_m){
   if(m_verbosity > 5){
     pout() << "sisdc::predictor_sigma" << endl;
   }
+
+  EBAMRIVData& sigma_mp1     = m_sigma_scratch->get_sigma()[a_m+1];  // sigma_(m+1)
+  EBAMRIVData& Fsig_m        = m_sigma_scratch->get_Fsig()[a_m];     // Fsig_m
+  const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];    // sigma_m
+
+  m_sigma->compute_rhs(Fsig_m);                 // Fsig_m = Injected charge flux
+  data_ops::copy(sigma_mp1, sigma_m);           // sigma_(m+1) = sigma_m
+  data_ops::incr(sigma_mp1, Fsig_m, m_tm[a_m]); // sigma_(m+1) = sigma_m + dt_m*Fsig(phi_m)
 }
 
 void sisdc::predictor_diffusion(const int a_m){
   CH_TIME("sisdc::predictor_diffusion");
   if(m_verbosity > 5){
     pout() << "sisdc::predictor_diffusion" << endl;
+  }
+#if 1 // Always true for bug testing
+  m_strong_diffu = true;
+#endif
+  if(m_strong_diffu){
+    sisdc::update_poisson(get_cdr_phik(a_m + 1), sisdc::get_sigmak(a_m + 1));
+    sisdc::update_diffusion_coefficients();
   }
 }
 
@@ -1079,11 +1122,23 @@ void sisdc::update_rte(const Vector<EBAMRCellData*>& a_cdr_states, const Real a_
   }
 }
 
-Vector<EBAMRCellData*> sisdc::get_cdr_phik(const int a_m){
+void sisdc::update_diffusion_coefficients(){
+  CH_TIME("sisdc::update_diffusion_coefficients");
+  if(m_verbosity > 5){
+    pout() << "sisdc::update_diffusion_coefficients" << endl;
+  }
+  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+}
 
+Vector<EBAMRCellData*> sisdc::get_cdr_phik(const int a_m){
+  CH_TIME("sisdc::get_cdr_phik");
+  if(m_verbosity > 5){
+    pout() << "sisdc::get_cdr_phik" << endl;
+  }
+  
   Vector<EBAMRCellData*> ret;
-  for (cdr_iterator solver_it; solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     ret.push_back(&(storage->get_phi()[a_m]));
   }
 
@@ -1091,5 +1146,9 @@ Vector<EBAMRCellData*> sisdc::get_cdr_phik(const int a_m){
 }
 
 EBAMRIVData& sisdc::get_sigmak(const int a_m){
+  CH_TIME("sisdc::get_sigmak");
+  if(m_verbosity > 5){
+    pout() << "sisdc::get_sigmak)" << endl;
+  }
   return m_sigma_scratch->get_sigma()[a_m];
 }

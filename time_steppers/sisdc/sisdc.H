@@ -109,16 +109,17 @@ protected:
   void setup_subintervals(const int a_order, const Real a_time, const Real a_dt);
 
   // SISDC predictor routines
-  void predictor();
+  void predictor(const Real a_time);
   void predictor_advection_reaction(const int a_m);
   void predictor_sigma(const int a_m);
   void predictor_diffusion(const int a_m);
 
-  // Poisson and RTE updates
+  // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
   void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
   void update_rte(const Real a_time); // This uses the solver states, make sure that is what you want
-  void update_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time); 
+  void update_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time);
+  void update_diffusion_coefficients();
 
   // Aux functions
   void compute_E_into_scratch();
@@ -138,6 +139,7 @@ protected:
   void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   void compute_sigma_flux();
+
   
   Real get_max_error();
   Real restrict_dt() ;
