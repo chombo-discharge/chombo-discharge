@@ -144,6 +144,7 @@ public:
 
   Vector<EBAMRIVData>& get_sigma(){ return m_sigma;}
   Vector<EBAMRIVData>& get_Fsig(){  return m_Fsig; }
+  Vector<EBAMRIVData>& get_Fsum(){  return m_Fsum; }
   
 protected:
 
@@ -158,6 +159,7 @@ protected:
 
   Vector<EBAMRIVData> m_sigma;   // sigma^k in the SISDC notation
   Vector<EBAMRIVData> m_Fsig;    // F(sigma^k) in the SISDC notation
+  Vector<EBAMRIVData> m_Fsum;    // F(sigma^k) in the SISDC, but used for the integrand
 };
 
 #endif

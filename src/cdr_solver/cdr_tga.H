@@ -131,9 +131,17 @@ public:
   virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
 
   /*!
-    @brief Pure TGA advance without source terms
+    @brief Pure Euler advance without source terms
   */
   virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
+
+    /*!
+    @brief Pure Euler advance with source terms
+  */
+  virtual void advance_euler(EBAMRCellData&       a_new_state,
+			     const EBAMRCellData& a_old_state,
+			     const EBAMRCellData& a_source,
+			     const Real           a_dt);
 
 protected:
 

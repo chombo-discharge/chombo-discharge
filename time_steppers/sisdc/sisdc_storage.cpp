@@ -174,10 +174,12 @@ void sisdc::sigma_storage::allocate_storage(const int a_order){
 
   m_sigma.resize(m_order);
   m_Fsig.resize(m_order);
+  m_Fsum.resize(m_order);
 
   for (int m = 0; m < m_order; m++){
     m_amr->allocate(m_sigma[m], m_phase, m_ncomp);
     m_amr->allocate(m_Fsig[m],  m_phase, m_ncomp);
+    m_amr->allocate(m_Fsum[m],  m_phase, m_ncomp);
   }
 }
 
@@ -189,8 +191,10 @@ void sisdc::sigma_storage::deallocate_storage(){
   for (int m = 0; m < m_order; m++){
     m_amr->deallocate(m_sigma[m]);
     m_amr->deallocate(m_Fsig[m]);
+    m_amr->deallocate(m_Fsum[m]);
   }
 
   m_sigma.resize(0);
   m_Fsig.resize(0);
+  m_Fsum.resize(0);
 }

@@ -45,6 +45,7 @@ protected:
   RefCountedPtr<poisson_storage>      m_poisson_scratch;
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
+  int m_p;
   int m_order;
   int m_min_order;
   int m_max_order;
@@ -76,10 +77,15 @@ protected:
   bool m_write_diagno;
   bool m_strong_diffu;
 
+  // Error things
   Vector<Real> m_cdr_error;
   Real m_sigma_error;
   Real m_max_error;
 
+  // Stuff for Lobatto intervals, Vandermonde matrix, integration
+  // weights, Lobatto nodes etc. 
+  Vector<Vector<Real> > m_qmj;
+  Vector<Vector<Real> > m_vandermonde;
   Vector<Real> m_gl_weights;
   Vector<Real> m_gl_nodes;
   Vector<Real> m_tm;
@@ -104,15 +110,30 @@ protected:
   Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
   EBAMRIVData& get_sigmak(const int a_m);
 
-  // Routines for intervals etc. 
-  void setup_gauss_lobatto(const int a_order);
-  void setup_subintervals(const int a_order, const Real a_time, const Real a_dt);
+  // Routines for intervals and quadrature
+  void setup_lobatto_nodes(const int a_order);
+  void setup_qmj(const int a_p);
+  void setup_subintervals(const Real a_time, const Real a_dt);
+  void gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
+
+  // Routines for copying data at tm[0] and tm[p]
+  void copy_cdr_to_phi_m0();
+  void copy_sigma_to_sigma_m0();
+  void copy_phi_p_to_cdr();
+  void copy_sigma_p_to_sigma();
 
   // SISDC predictor routines
   void predictor(const Real a_time);
   void predictor_advection_reaction(const int a_m);
   void predictor_sigma(const int a_m);
   void predictor_diffusion(const int a_m);
+  void predictor_diffusion_onestep(const int a_m);
+  void predictor_diffusion_build_FD(const int a_m);
+
+  // SISDC corrector routines
+  void corrector_reconcile_gl_integrands();
+  void corrector(const Real a_time);
+  void corrector_advection_reaction(const int a_m);
 
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
