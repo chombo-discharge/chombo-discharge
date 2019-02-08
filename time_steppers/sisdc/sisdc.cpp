@@ -174,6 +174,10 @@ sisdc::sisdc(){
     m_min_order = m_order;
     m_max_order = m_order;
   }
+
+  // Setup nodes
+  sisdc::setup_lobatto_nodes(m_order);
+  sisdc::setup_qmj(m_p);
 }
 
 sisdc::~sisdc(){
@@ -206,61 +210,18 @@ Real sisdc::get_max_error(){
   return cur_err;
 }
 
-Real sisdc::advance(const Real a_dt){
-  CH_TIME("sisdc::advance");
-  if(m_verbosity > 2){
-    pout() << "sisdc::advance" << endl;
+Real sisdc::get_max_lobatto_distance(){
+  CH_TIME("sisdc::get_max_lobatto_distance");
+  if(m_verbosity > 5){
+    pout() << "sisdc::get_max_lobatto_distance" << endl;
   }
 
-  // TLDR: This timestepper can do multiple steps per a_dt. If you're using adaptive time integration,
-  //       the number of steps are adjusted such that the invididual step errors remain below a specified
-  //       threshold. A side effect of this is that the final substep may cause integration beyond a_dt.
-  //
-  //       PS: When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
-  //           advancement. If you think that this may not be the case, activate the debugging below
-#if 0 // Debugging
-  sisdc::compute_E_into_scratch();
-  sisdc::compute_cdr_gradients();
-  sisdc::compute_cdr_velo(m_time);
-  sisdc::compute_cdr_sources(m_time);
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
-#endif
-  
-  // Allocate Gauss-Lobatto quadrature stuff
-  sisdc::setup_lobatto_nodes(m_order);
-  sisdc::setup_qmj(m_p);
-  sisdc::setup_subintervals(m_time, a_dt);
-
-#if 0 // Shouldn't be necessary since we don't manipulate the solver state
-  sisdc::store_previous_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
-#endif
-
-  sisdc::copy_cdr_to_phi_m0();
-  sisdc::copy_sigma_to_sigma_m0();
-
-  // SISDC advance
-  sisdc::predictor(m_time); // SISDC predictor
-  if(m_order > 1){          // SISDC correctors 
-    for(int icorr = 0; icorr < m_order; icorr++){
-      sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
-      sisdc::corrector(m_time);
-    }
-    
-    MayDay::Abort("sisdc::advance - SISDC corrector loop not yet implemented");
+  Real max_dist = 0.0;
+  for (int m = 0; m < m_p; m++){
+    max_dist = Max(max_dist, m_gl_nodes[m+1] - m_gl_nodes[m]);
   }
 
-  // Final update
-  sisdc::copy_phi_p_to_cdr();
-  sisdc::copy_sigma_p_to_sigma();
-  sisdc::update_poisson();
-  sisdc::update_rte(m_time + a_dt);
-
-  // Always recompute source terms and velocities
-  sisdc::compute_cdr_gradients();
-  sisdc::compute_cdr_sources(m_time + a_dt);
-  sisdc::compute_cdr_velo(m_time + a_dt);
-  
-  return a_dt;
+  return max_dist;
 }
 
 void sisdc::setup_lobatto_nodes(const int a_order){
@@ -321,24 +282,91 @@ void sisdc::setup_lobatto_nodes(const int a_order){
     m_gl_nodes[6] =  1.0;
   }
   else{
-    MayDay::Abort("sisdc::compute_gauss_lobatto - requested order exceeds. If you want order > 7, compute your own damn weights!");
+    MayDay::Abort("sisdc::compute_gauss_lobatto - requested order exceeds. If you want order > 7, compute your own nodes!");
   }
 }
 
 void sisdc::setup_qmj(const int a_p){
-  CH_TIME("sisdc::setup_subintervals");
+  CH_TIME("sisdc::setup_qmj");
   if(m_verbosity > 5){
-    pout() << "sisdc::setup_subintervals" << endl;
+    pout() << "sisdc::setup_qmj" << endl;
   }
 
-  // Resize the integration matrix
-  m_qmj.resize(1 + a_p);
-  for (int m = 0; m < (1+a_p); m++){
-    m_qmj[m].resize(1+m_p);
-    for(int j=0; j <= a_p; j++){
+  const int nnodes = 1 + a_p;
+
+  // Resize the integration matrix, it should be p x (p+1)
+  m_qmj.resize(a_p);
+  for (int m = 0; m < a_p; m++){
+    m_qmj[m].resize(nnodes, 0.0);
+  }
+
+  // Generate the qmj matrix
+  for (int j=0; j < nnodes; j++){
+
+    // Set up the Vandermonde matrix (in Fortran order since we will call LaPack)
+    double V[nnodes*nnodes];
+    for (int j=0; j<nnodes; j++){
+      for (int i=0; i<nnodes; i++){
+	const int k = j*nnodes + i;
+	V[k] = pow(m_gl_nodes[i],j);
+      }
+    }
+
+    // Setup f = delta_kj. When we solve, this becomes the solution vector
+    double cj[nnodes];
+    for (int k=0; k<nnodes; k++){
+      cj[k] = (k==j) ? 1.0 : 0.0;
+    }
+
+#if 0 // Debug
+    if(procID() == 0){
+      std::cout << "input RHS = ";
+      for (int k = 0; k<nnodes; k++){
+	std::cout << cj[k] << "\t";
+      }
+      std::cout << std::endl;
+    }
+#endif
+
+    // Solve V*c = f. This calls LAPACK
+    int N    = nnodes;
+    int NRHS = 1;
+    int LDA  = nnodes;
+    int IPIV[nnodes];
+    int LDB  = nnodes;
+    int INFO = 10;
+    dgesv_(&N, &NRHS, V, &LDA, IPIV, cj, &LDB, &INFO);
+    if(INFO != 0) MayDay::Abort("sisdc::setup_qmj - could not compute weights");
+    
+#if 0// Debug
+    if(procID() == 0){
+      std::cout << "output rhs = ";
+      for (int k = 0; k < nnodes; k++){
+	std::cout << cj[k] << "\t";
+      }
+      std::cout << "\n" << std::endl;;
+    }
+#endif
+
+    // Now construct qmj
+    for (int m = 0; m < a_p; m++){
       m_qmj[m][j] = 0.0;
+      for (int k = 0; k < nnodes; k++){
+	m_qmj[m][j] += cj[k]*(pow(m_gl_nodes[m+1], k+1) - pow(m_gl_nodes[m], k+1))/(k+1);
+      }
     }
   }
+
+#if 0 // debug
+  if(procID() == 0){
+    for (int m = 0; m < a_p; m++){
+      for (int j = 0; j < nnodes; j++){
+	std::cout << m_qmj[m][j] << "\t";
+      }
+      std::cout << "\n";
+    }
+  }
+#endif
 }
 
 void sisdc::setup_subintervals(const Real a_time, const Real a_dt){
@@ -374,7 +402,22 @@ void sisdc::gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integr
   }
 
   if(a_m < 0)     MayDay::Abort("sisdc::gl_quad - bad index a_m < 0");
-  if(a_m > m_p)   MayDay::Abort("sisdc::gl_quad - bad index a_m > m_p");
+  if(a_m >= m_p)  MayDay::Abort("sisdc::gl_quad - bad index a_m >= m_p");
+
+  data_ops::set_value(a_quad, 0.0);
+  for (int j = 0; j <= m_p; j++){
+    data_ops::incr(a_quad, a_integrand[j], m_qmj[a_m][j]);
+  }
+}
+
+void sisdc::gl_quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m){
+  CH_TIME("sisdc::gl_quad");
+  if(m_verbosity > 5){
+    pout() << "sisdc::gl_quad" << endl;
+  }
+
+  if(a_m < 0)     MayDay::Abort("sisdc::gl_quad - bad index a_m < 0");
+  if(a_m >= m_p)  MayDay::Abort("sisdc::gl_quad - bad index a_m >= m_p");
 
   data_ops::set_value(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++){
@@ -435,6 +478,54 @@ void sisdc::copy_sigma_p_to_sigma(){
   EBAMRIVData& sigma        = m_sigma->get_state();
   const EBAMRIVData& sigmap = m_sigma_scratch->get_sigma()[m_tm.size()-1];
   data_ops::copy(sigma, sigmap);
+}
+
+Real sisdc::advance(const Real a_dt){
+  CH_TIME("sisdc::advance");
+  if(m_verbosity > 2){
+    pout() << "sisdc::advance" << endl;
+  }
+
+  // TLDR: This timestepper can do multiple steps per a_dt. If you're using adaptive time integration,
+  //       the number of steps are adjusted such that the invididual step errors remain below a specified
+  //       threshold. A side effect of this is that the final substep may cause integration beyond a_dt.
+  //
+  //       PS: When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
+  //           advancement. If you think that this may not be the case, activate the debugging below
+#if 0 // Debugging
+  sisdc::compute_E_into_scratch();
+  sisdc::compute_cdr_gradients();
+  sisdc::compute_cdr_velo(m_time);
+  sisdc::compute_cdr_sources(m_time);
+  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+#endif
+  
+  // Set up subintervals
+  sisdc::setup_subintervals(m_time, a_dt);
+
+  // SISDC advance
+  sisdc::copy_cdr_to_phi_m0();
+  sisdc::copy_sigma_to_sigma_m0();
+  sisdc::predictor(m_time); // SISDC predictor
+  if(m_order > 1){          // SISDC correctors 
+    for(int icorr = 0; icorr < m_order; icorr++){
+      sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
+      sisdc::corrector(m_time, a_dt);
+    }
+  }
+
+  // Final update
+  sisdc::copy_phi_p_to_cdr();
+  sisdc::copy_sigma_p_to_sigma();
+  sisdc::update_poisson();
+  sisdc::update_rte(m_time + a_dt);
+
+  // Always recompute source terms and velocities for the next time step
+  sisdc::compute_cdr_gradients();
+  sisdc::compute_cdr_sources(m_time + a_dt);
+  sisdc::compute_cdr_velo(m_time + a_dt);
+  
+  return a_dt;
 }
 
 void sisdc::predictor(const Real a_time){
@@ -512,6 +603,10 @@ void sisdc::predictor_advection_reaction(const int a_m){
     m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
 
     data_ops::floor(phi_mp1, 0.0);
+
+    // Copy result onto phi^ast
+    EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
+    data_ops::copy(phi_ast, phi_mp1);
   }
 }
 
@@ -567,10 +662,9 @@ void sisdc::predictor_diffusion_onestep(const int a_m){
     if(solver->is_diffusive()){
       RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
-      EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];
-      EBAMRCellData& phi_ast = storage->get_scratch();
+      EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];           // This is the advected solution
+      const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1]; // This is also the advected solution
 
-      data_ops::copy(phi_ast, phi_mp1); // phi^ast is the advected solution. 
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
       tgasolver->advance_euler(phi_mp1, phi_ast, m_dtm[a_m]); // No source for the predictor
 
@@ -594,11 +688,11 @@ void sisdc::predictor_diffusion_build_FD(const int a_m){
 
     EBAMRCellData& FD_mp1        = storage->get_FD()[a_m+1];
     const EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];
-    const EBAMRCellData& phi_m   = storage->get_phi()[a_m];
+    const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
 
     // FD_mp1 = (phi_mp1 - phi_m)/dtm
     data_ops::copy(FD_mp1, phi_mp1);
-    data_ops::incr(FD_mp1, phi_m, -1.0);
+    data_ops::incr(FD_mp1, phi_ast, -1.0);
     data_ops::scale(FD_mp1, 1./m_dtm[a_m]);
 
     m_amr->average_down(FD_mp1, m_cdr->get_phase());
@@ -643,7 +737,7 @@ void sisdc::corrector_reconcile_gl_integrands(){
   }
 }
 
-void sisdc::corrector(const Real a_time){
+void sisdc::corrector(const Real a_time, const Real a_dt){
   CH_TIME("sisdc::corrector");
   if(m_verbosity > 5){
     pout() << "sisdc::corrector" << endl;
@@ -675,11 +769,13 @@ void sisdc::corrector(const Real a_time){
     sisdc::compute_sigma_flux();
 
     // Correction for advection-reaction
-    sisdc::corrector_advection_reaction(m);
+    sisdc::corrector_advection_reaction(m, a_dt);
+    sisdc::corrector_sigma(m,a_dt);
+    sisdc::corrector_diffusion(m);
   }
 }
 
-void sisdc::corrector_advection_reaction(const int a_m){
+void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
   CH_TIME("sisdc::corrector_advection_reaction");
   if(m_verbosity > 5){
     pout() << "sisdc::corrector_advection_reaction" << endl;
@@ -701,7 +797,7 @@ void sisdc::corrector_advection_reaction(const int a_m){
     EBAMRCellData& phi_mp1     = storage->get_phi()[a_m+1]; // phi^(m+1)
     EBAMRCellData& scratch     = storage->get_scratch();    // Used for FAR(phi_m^(k+1)) and I_m^(m+1)
     EBAMRCellData& FAR_m       = storage->get_FAR()[a_m];   // FAR(phi_m^k). Will overwrite with RHS later
-    const EBAMRCellData& phi_m = storage->get_phi()[a_m];   // phi_m
+    const EBAMRCellData& phi_m = storage->get_phi()[a_m];   // phi_m^(k+1)
     const EBAMRCellData& src   = solver->get_source();      // S_m
 
     // Compute rhs
@@ -717,12 +813,134 @@ void sisdc::corrector_advection_reaction(const int a_m){
 
     // Compute the Gauss-Lobatto integral and increment phi_mp1
     sisdc::gl_quad(scratch, storage->get_F(), a_m);
-    data_ops::incr(phi_mp1, scratch, 1.0);
+    data_ops::incr(phi_mp1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling onto [-1,1] for quadrature
 
     m_amr->average_down(phi_mp1, m_cdr->get_phase());
     m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
 
     data_ops::floor(phi_mp1, 0.0);
+
+    // Compute result onto phi_ast
+    EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
+    data_ops::copy(phi_ast, phi_mp1);
+  }
+}
+
+void sisdc::corrector_sigma(const int a_m, const Real a_dt){
+  CH_TIME("sisdc::corrector_sigma");
+  if(m_verbosity > 5){
+    pout() << "sisdc::corrector_sigma" << endl;
+  }
+
+  EBAMRIVData& sigma_mp1     = m_sigma_scratch->get_sigma()[a_m+1];  // sigma_(m+1)^(k+1)
+  EBAMRIVData& scratch       = m_sigma_scratch->get_scratch();       // Used for Fsig_m^(k+1) and Sigma_m^(m+1)
+  EBAMRIVData& Fsig_m        = m_sigma_scratch->get_Fsig()[a_m];     // Fsig_m^k
+  const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];    // sigma_m^(k+1)
+
+  m_sigma->compute_rhs(scratch);                   // Fsig_m^(k+1)= Injected charge flux
+  data_ops::copy(sigma_mp1, sigma_m);              // sigma_(m+1) = sigma_m
+  data_ops::incr(sigma_mp1, scratch, m_dtm[a_m]);  // sigma_(m+1) = sigma_m + dt_m*Fsig_m^k^+1
+  data_ops::incr(sigma_mp1, Fsig_m,  m_dtm[a_m]);  // sigma_(m+1) = sigma_m + dt_m*Fsig_m^k
+
+  // Update the Fsig storage, Fsig_m^k -> Fsig_m^(k+1)
+  data_ops::copy(Fsig_m, scratch);
+
+  // Increment with the quadrature
+  sisdc::gl_quad(scratch, m_sigma_scratch->get_Fsum(), a_m);
+  data_ops::incr(sigma_mp1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling onto [-1,1] for the quadrature
+}
+
+void sisdc::corrector_diffusion(const int a_m){
+  CH_TIME("sisdc::corrector_diffusion");
+  if(m_verbosity > 5){
+    pout() << "sisdc::corrector_diffusion" << endl;
+  }
+
+  // First solve
+  if(m_strong_diffu && m_compute_D && m_consistent_E){
+    sisdc::update_poisson(get_cdr_phik(a_m + 1), sisdc::get_sigmak(a_m + 1));
+    sisdc::update_diffusion_coefficients();
+
+  }
+  sisdc::corrector_diffusion_onestep(a_m);
+
+  // Iterative solves
+  if(m_strong_diffu && m_compute_D && m_consistent_E){
+    for (int icorr = 0; icorr < m_num_diff_corr; icorr++){
+      sisdc::update_poisson(get_cdr_phik(a_m + 1), sisdc::get_sigmak(a_m + 1));
+      sisdc::update_diffusion_coefficients();
+      sisdc::corrector_diffusion_onestep(a_m);
+    }
+  }
+
+  sisdc::corrector_diffusion_build_FD(a_m);
+}
+
+void sisdc::corrector_diffusion_onestep(const int a_m){
+  CH_TIME("sisdc::corrector_diffusion_onestep");
+  if(m_verbosity > 5){
+    pout() << "sisdc::corrector_diffusion_onestep" << endl;
+  }
+
+  // TLDR: We're solving
+  //
+  // phi_(m+1)^(k+1) = phi_(m+1)^(k+1,\ast) + dtm*[FD_(m+1)^(k+1) - FD_(m+1)^k]
+  //
+  // This routine does not modify FD_(m+1)^k. This is replaced by FD_(m+1)^(k+1) later on. 
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    if(solver->is_diffusive()){
+      RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi_mp1       = storage->get_phi()[a_m+1];     // Will become phi_(m+1)^(k+1)
+      EBAMRCellData& scratch       = storage->get_scratch();        // Will become -dtm*FD_(m+1)^k
+      const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1]; // phi^ast
+      const EBAMRCellData& FD_mk   = storage->get_FD()[a_m+1];      // FD_(m+1)^k
+
+      // phi^ast is the advected and reacted solution. Compute -dtm*FD_(m+1)^k for source term advance
+      data_ops::set_value(scratch, 0.0);
+      data_ops::incr(scratch, FD_mk, -m_dtm[a_m]);
+
+      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      tgasolver->advance_euler(phi_mp1, phi_ast, scratch, m_dtm[a_m]); // No source for the predictor
+
+      m_amr->average_down(phi_mp1, m_cdr->get_phase());
+      m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
+
+      data_ops::floor(phi_mp1, 0.0);
+    }
+  }
+}
+
+void sisdc::corrector_diffusion_build_FD(const int a_m){
+  CH_TIME("sisdc::corrector_diffusion_build_FD");
+  if(m_verbosity > 5){
+    pout() << "sisdc::corrector_diffusion_build_FD" << endl;
+  }
+
+  // TLDR: We want FD_(m+1)^(k+1) for the next iteration. According to the scheme we thus have
+  //
+  // FD_(m+1)^(k+1) = FD_(m+1)^k + (phi_(m+1)^(k+1) - phi_(m+1)^\ast)/dtm
+  //
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+
+    if(solver->is_diffusive()){
+      RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+
+      EBAMRCellData& FD_mp1        = storage->get_FD()[a_m+1]; 
+      const EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];
+      const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
+
+      // FD_mp1 = (phi_mp1 - phi_m)/dtm
+      data_ops::incr(FD_mp1, phi_mp1,  1.0/m_dtm[a_m]);
+      data_ops::incr(FD_mp1, phi_ast, -1.0/m_dtm[a_m]);
+
+      m_amr->average_down(FD_mp1, m_cdr->get_phase());
+      m_amr->interp_ghost(FD_mp1, m_cdr->get_phase());
+    }
   }
 }
 
@@ -734,12 +952,20 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   Real dt = 1.E99;
 
+  const Real max_gl_dist = sisdc::get_max_lobatto_distance();
+  
   m_dt_cfl = m_cdr->compute_cfl_dt();
-  const Real dt_cfl = m_cfl*m_dt_cfl;
+  const Real dt_cfl = m_cfl*m_dt_cfl/(max_gl_dist);
   if(dt_cfl < dt){
     dt = dt_cfl;
     a_timecode = time_code::cfl;
   }
+
+#if 1 // Debug
+  if(procID() == 0) std::cout << "max_gl_dist = " << max_gl_dist << std::endl;
+  if(procID() == 0) std::cout << "dt_cfl = " << m_dt_cfl << std::endl;
+  
+#endif
 
   const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
   if(dt_src < dt){
@@ -783,10 +1009,13 @@ void sisdc::regrid_internals(){
 
   m_cdr_error.resize(m_plaskin->get_num_species());
   
-  this->allocate_cdr_storage();
-  this->allocate_poisson_storage();
-  this->allocate_rte_storage();
-  this->allocate_sigma_storage();
+  sisdc::allocate_cdr_storage();
+  sisdc::allocate_poisson_storage();
+  sisdc::allocate_rte_storage();
+  sisdc::allocate_sigma_storage();
+
+  sisdc::setup_lobatto_nodes(m_order);
+  sisdc::setup_qmj(m_p);
 }
 
 void sisdc::allocate_cdr_storage(){
@@ -864,7 +1093,7 @@ void sisdc::store_previous_solutions(){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
 
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     EBAMRCellData& previous = storage->get_previous();
 
     data_ops::copy(previous, solver->get_state());
@@ -879,7 +1108,7 @@ void sisdc::store_previous_solutions(){
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<rte_solver>& solver = solver_it();
 
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<rte_storage>& storage = sisdc::get_rte_storage(solver_it);
     EBAMRCellData& previous = storage->get_previous();
 
     data_ops::copy(previous, solver->get_state());
@@ -901,7 +1130,7 @@ void sisdc::restore_previous_solutions(){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
 
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     const EBAMRCellData& previous = storage->get_previous();
 
     data_ops::copy(solver->get_state(), previous);
@@ -916,7 +1145,7 @@ void sisdc::restore_previous_solutions(){
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<rte_solver>& solver = solver_it();
 
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<rte_storage>& storage = sisdc::get_rte_storage(solver_it);
     const EBAMRCellData& previous = storage->get_previous();
 
     data_ops::copy(solver->get_state(), previous);
@@ -941,9 +1170,9 @@ void sisdc::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_poisson->get_state();
   
-  this->compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
-  this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+  sisdc::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
+  sisdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
+  sisdc::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 
   time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
 }
@@ -965,7 +1194,7 @@ void sisdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
     m_amr->compute_gradient(grad, *a_states[idx]);
     m_amr->average_down(grad, m_cdr->get_phase());
@@ -979,7 +1208,7 @@ void sisdc::compute_cdr_velo(const Real a_time){
     pout() << "sisdc::compute_cdr_velo" << endl;
   }
 
-  this->compute_cdr_velo(m_cdr->get_states(), a_time);
+  sisdc::compute_cdr_velo(m_cdr->get_states(), a_time);
 }
 
 void sisdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time){
@@ -989,7 +1218,7 @@ void sisdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real 
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  this->compute_cdr_velocities(velocities, a_states, m_poisson_scratch->get_E_cell(), a_time);
+  sisdc::compute_cdr_velocities(velocities, a_states, m_poisson_scratch->get_E_cell(), a_time);
 }
 
 void sisdc::compute_cdr_eb_states(){
@@ -1005,7 +1234,7 @@ void sisdc::compute_cdr_eb_states(){
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
     cdr_states.push_back(&(solver->get_state()));
     eb_states.push_back(&(storage->get_eb_state()));
@@ -1015,7 +1244,7 @@ void sisdc::compute_cdr_eb_states(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+  sisdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -1025,8 +1254,8 @@ void sisdc::compute_cdr_eb_states(){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    this->extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
-    this->project_flux(*eb_gradients[i], eb_gradient);
+    sisdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    sisdc::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
 
@@ -1041,7 +1270,7 @@ void sisdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
     eb_states.push_back(&(storage->get_eb_state()));
     eb_gradients.push_back(&(storage->get_eb_grad()));
@@ -1050,7 +1279,7 @@ void sisdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_states);
+  sisdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_states);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -1060,8 +1289,8 @@ void sisdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < a_states.size(); i++){
-    this->extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
-    this->project_flux(*eb_gradients[i], eb_gradient);
+    sisdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    sisdc::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
 
@@ -1078,7 +1307,7 @@ void sisdc::compute_cdr_domain_states(){
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
     cdr_states.push_back(&(solver->get_state()));
     domain_states.push_back(&(storage->get_domain_state()));
@@ -1087,14 +1316,14 @@ void sisdc::compute_cdr_domain_states(){
   }
 
   // Extrapolate states to the domain faces
-  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+  sisdc::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
   m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
-    this->project_domain(*domain_gradients[i], grad);
+    sisdc::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    sisdc::project_domain(*domain_gradients[i], grad);
   }
 }
 

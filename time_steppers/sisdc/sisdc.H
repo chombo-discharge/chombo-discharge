@@ -14,6 +14,15 @@
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
+extern "C" void dgesv_(int*    N,
+		       int*    NRHS,
+		       double* A,
+		       int*    LDA,
+		       int*    IPIV,
+		       double* B,
+		       int*    LDB,
+		       int*    INFO);
+
 /*!
   @brief Class for evolving plasma equations with a multirate method using strongly stability preserving
   Runge-Kutta methods. 
@@ -93,6 +102,7 @@ protected:
 
   time_code::which_code m_timecode;
 
+  // Get functions for storage
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
 
@@ -115,6 +125,7 @@ protected:
   void setup_qmj(const int a_p);
   void setup_subintervals(const Real a_time, const Real a_dt);
   void gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
+  void gl_quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m);
 
   // Routines for copying data at tm[0] and tm[p]
   void copy_cdr_to_phi_m0();
@@ -132,8 +143,12 @@ protected:
 
   // SISDC corrector routines
   void corrector_reconcile_gl_integrands();
-  void corrector(const Real a_time);
-  void corrector_advection_reaction(const int a_m);
+  void corrector(const Real a_time, const Real a_dt);
+  void corrector_advection_reaction(const int a_m, const Real a_dt);
+  void corrector_sigma(const int a_m, const Real a_dt);
+  void corrector_diffusion(const int a_m);
+  void corrector_diffusion_onestep(const int a_m);
+  void corrector_diffusion_build_FD(const int a_m);
 
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
@@ -161,9 +176,10 @@ protected:
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   void compute_sigma_flux();
 
-  
+  //
   Real get_max_error();
   Real restrict_dt() ;
+  Real get_max_lobatto_distance();
 };
 
 #endif

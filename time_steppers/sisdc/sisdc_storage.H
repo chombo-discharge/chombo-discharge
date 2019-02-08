@@ -23,15 +23,17 @@ public:
   void allocate_storage(const int a_order);
   void deallocate_storage();
 
-  EBAMRCellData& get_scratch(){ return m_scratch;    }
-  EBAMRCellData& get_previous(){return m_previous;   }
-  EBAMRCellData& get_error(){   return m_error;      }
-  EBAMRCellData& get_gradient(){return m_gradient;   }
+  EBAMRCellData& get_scratch()  { return m_scratch;    }
+  EBAMRCellData& get_scratch2() { return m_scratch2;    }
+  EBAMRCellData& get_previous() { return m_previous;   }
+  EBAMRCellData& get_error()    { return m_error;      }
+  EBAMRCellData& get_gradient() { return m_gradient;   }
 
-  Vector<EBAMRCellData>& get_phi() {return m_phi;}
-  Vector<EBAMRCellData>& get_FAR() {return m_FAR;}
-  Vector<EBAMRCellData>& get_FD()  {return m_FD; }
-  Vector<EBAMRCellData>& get_F()   {return m_F;  }
+  Vector<EBAMRCellData>& get_phi()     { return m_phi;     }
+  Vector<EBAMRCellData>& get_phi_ast() { return m_phi_ast; }
+  Vector<EBAMRCellData>& get_FAR()     { return m_FAR;     }
+  Vector<EBAMRCellData>& get_FD()      { return m_FD;      }
+  Vector<EBAMRCellData>& get_F()       { return m_F;       }
 
   EBAMRIVData& get_eb_state(){  return m_scratchIV1; }
   EBAMRIVData& get_eb_velo(){   return m_scratchIV2; }
@@ -52,13 +54,15 @@ protected:
 
   EBAMRCellData m_previous; // Solution at previous time step
   EBAMRCellData m_scratch;  // Scratch data
+  EBAMRCellData m_scratch2; // Scratch data
   EBAMRCellData m_error;    // Error estimator
   EBAMRCellData m_gradient; // Storage for holding gradient
 
-  Vector<EBAMRCellData> m_phi;    // phi^k in the  SISDC notation
-  Vector<EBAMRCellData> m_FAR;    // FAR(phi^k) in the SISDC notation
-  Vector<EBAMRCellData> m_FD;     // FD(phi^k) in the SISDC notation
-  Vector<EBAMRCellData> m_F;      // F(phi^k) in the SISDC notation
+  Vector<EBAMRCellData> m_phi;      // phi^k in the  SISDC notation
+  Vector<EBAMRCellData> m_phi_ast;  // phi^(k,ast) in the  SISDC notation
+  Vector<EBAMRCellData> m_FAR;      // FAR(phi^k) in the SISDC notation
+  Vector<EBAMRCellData> m_FD;       // FD(phi^k) in the SISDC notation
+  Vector<EBAMRCellData> m_F;        // F(phi^k) in the SISDC notation
 
   EBAMRIVData m_scratchIV1; // Scratch data
   EBAMRIVData m_scratchIV2; // Scratch data
