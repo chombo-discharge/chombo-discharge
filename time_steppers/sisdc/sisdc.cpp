@@ -955,7 +955,7 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   const Real max_gl_dist = sisdc::get_max_lobatto_distance();
   
   m_dt_cfl = m_cdr->compute_cfl_dt();
-  const Real dt_cfl = m_cfl*m_dt_cfl/(max_gl_dist);
+  const Real dt_cfl = 2.0*m_cfl*m_dt_cfl/(max_gl_dist);
   if(dt_cfl < dt){
     dt = dt_cfl;
     a_timecode = time_code::cfl;
