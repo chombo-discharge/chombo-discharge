@@ -393,6 +393,14 @@ void sisdc::setup_subintervals(const Real a_time, const Real a_dt){
   for (int m = 0; m < m_tm.size()-1; m++){
     m_dtm[m] = m_tm[m+1] - m_tm[m];
   }
+
+#if 1 // Debug
+  if(procID() == 0){
+    for (int m = 0; m < m_dtm.size(); m++){
+      pout() << m_dtm[m] << "\t" << m_dt_cfl << endl;
+    }
+  }
+#endif
 }
 
 void sisdc::gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m){
@@ -749,10 +757,10 @@ void sisdc::corrector(const Real a_time, const Real a_dt){
   const int p = m_tm.size() - 1; // Number of nodes
   for (int m = 0; m < p; m++){
 
-    // We update (m+1)
-    Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(m+1);
-    EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(m+1);
-    const Real t_mp1 = m_tm[m+1];
+    // We update (m+1), but it
+    Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(m);
+    EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(m);
+    const Real t_mp1 = m_tm[m];
 
     // Update electric field, RTE equations, source terms, and velocities
     if(m_consistent_E)   sisdc::update_poisson(cdr_densities_mp1, sigma_mp1);
@@ -900,10 +908,11 @@ void sisdc::corrector_diffusion_onestep(const int a_m){
 
       // phi^ast is the advected and reacted solution. Compute -dtm*FD_(m+1)^k for source term advance
       data_ops::set_value(scratch, 0.0);
-      data_ops::incr(scratch, FD_mk, -m_dtm[a_m]);
+      //      data_ops::incr(scratch, FD_mk, -m_dtm[a_m]);
+      data_ops::incr(scratch, FD_mk, -1.0);
 
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->advance_euler(phi_mp1, phi_ast, scratch, m_dtm[a_m]); // No source for the predictor
+      tgasolver->advance_euler(phi_mp1, phi_ast, scratch, m_dtm[a_m]); // Soucre is -Fd_(m+1)^k
 
       m_amr->average_down(phi_mp1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
@@ -930,11 +939,11 @@ void sisdc::corrector_diffusion_build_FD(const int a_m){
     if(solver->is_diffusive()){
       RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
-      EBAMRCellData& FD_mp1        = storage->get_FD()[a_m+1]; 
+      EBAMRCellData& FD_mp1        = storage->get_FD()[a_m+1];  // Currently holds FD_(m+1)^k
       const EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];
       const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
 
-      // FD_mp1 = (phi_mp1 - phi_m)/dtm
+      // FD_mp1 += (phi_mp1 - phi_m)/dtm
       data_ops::incr(FD_mp1, phi_mp1,  1.0/m_dtm[a_m]);
       data_ops::incr(FD_mp1, phi_ast, -1.0/m_dtm[a_m]);
 
@@ -964,7 +973,6 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 #if 1 // Debug
   if(procID() == 0) std::cout << "max_gl_dist = " << max_gl_dist << std::endl;
   if(procID() == 0) std::cout << "dt_cfl = " << m_dt_cfl << std::endl;
-  
 #endif
 
   const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
