@@ -24,8 +24,8 @@ sisdc::cdr_storage::~cdr_storage(){
   deallocate_storage();
 }
 
-void sisdc::cdr_storage::allocate_storage(const int a_order){
-  m_order = Max(2, a_order); // Order = 1 is a special case
+void sisdc::cdr_storage::allocate_storage(const int a_p){
+  m_p = a_p;
   
   m_amr->allocate(m_previous, m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
@@ -43,13 +43,13 @@ void sisdc::cdr_storage::allocate_storage(const int a_order){
   m_amr->allocate(m_scratchIF3,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIF4,  m_phase, m_ncomp);
 
-  m_phi.resize(m_order);
-  m_phi_ast.resize(m_order);
-  m_FAR.resize(m_order);
-  m_FD.resize(m_order);
-  m_F.resize(m_order);
+  m_phi.resize(1+m_p);
+  m_phi_ast.resize(1+m_p);
+  m_FAR.resize(1+m_p);
+  m_FD.resize(1+m_p);
+  m_F.resize(1+m_p);
 
-  for (int m = 0; m < m_order; m++){
+  for (int m = 0; m <= m_p; m++){
     m_amr->allocate(m_phi[m],     m_phase, m_ncomp);
     m_amr->allocate(m_phi_ast[m], m_phase, m_ncomp);
     m_amr->allocate(m_FAR[m],     m_phase, m_ncomp);
@@ -75,7 +75,7 @@ void sisdc::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratchIF3);
   m_amr->deallocate(m_scratchIF4);
 
-  for (int m = 0; m < m_order; m++){
+  for (int m = 0; m <= m_p; m++){
     m_amr->deallocate(m_phi[m]);
     m_amr->deallocate(m_FAR[m]);
     m_amr->deallocate(m_FD[m]);
@@ -104,8 +104,8 @@ sisdc::poisson_storage::~poisson_storage(){
   deallocate_storage();
 }
 
-void sisdc::poisson_storage::allocate_storage(const int a_order){
-  m_order = Max(2, a_order); // Order = 1 is a special case
+void sisdc::poisson_storage::allocate_storage(const int a_p){
+  m_p = a_p;
   
   m_amr->allocate(m_previous, m_ncomp);
   m_amr->allocate(m_E_cell,   m_phase, SpaceDim);
@@ -138,8 +138,8 @@ sisdc::rte_storage::~rte_storage(){
   deallocate_storage();
 }
 
-void sisdc::rte_storage::allocate_storage(const int a_order){
-  m_order = Max(2, a_order); // Order = 1 is a special case
+void sisdc::rte_storage::allocate_storage(const int a_p){
+  m_p = a_p;
   
   m_amr->allocate(m_previous,   m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
@@ -168,18 +168,18 @@ sisdc::sigma_storage::~sigma_storage(){
   deallocate_storage();
 }
 
-void sisdc::sigma_storage::allocate_storage(const int a_order){
-  m_order = Max(2, a_order); // Order = 1 is a special case
+void sisdc::sigma_storage::allocate_storage(const int a_p){
+  m_p = a_p;
   
   m_amr->allocate(m_previous, m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_error,    m_phase, m_ncomp);
 
-  m_sigma.resize(m_order);
-  m_Fsig.resize(m_order);
-  m_Fsum.resize(m_order);
+  m_sigma.resize(1+m_p);
+  m_Fsig.resize(1+m_p);
+  m_Fsum.resize(1+m_p);
 
-  for (int m = 0; m < m_order; m++){
+  for (int m = 0; m <= m_p; m++){
     m_amr->allocate(m_sigma[m], m_phase, m_ncomp);
     m_amr->allocate(m_Fsig[m],  m_phase, m_ncomp);
     m_amr->allocate(m_Fsum[m],  m_phase, m_ncomp);
@@ -191,7 +191,7 @@ void sisdc::sigma_storage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_error);
 
-  for (int m = 0; m < m_order; m++){
+  for (int m = 0; m <= m_p; m++){
     m_amr->deallocate(m_sigma[m]);
     m_amr->deallocate(m_Fsig[m]);
     m_amr->deallocate(m_Fsum[m]);

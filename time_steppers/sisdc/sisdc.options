@@ -1,7 +1,13 @@
 # ====================================================================================================
 # SISDC CLASS OPTIONS
+#
+# This class uses semi-implicit spectral deferred corrections. Diffusion is handled implicitly,
+# and advection-reaction is handled explicitly
+# 
 # ====================================================================================================
-sisdc.order = 2
+sisdc.subintervals = 3   # Number of subintervals. This will be the maximum possible order.
+sisdc.corr_iter    = 1   # Number of iterations of the correction equation. Should be (subintervals-1)
+                         # for maximum order
 
 # ---------------------------------------------------------	
 # Diffusive coupling

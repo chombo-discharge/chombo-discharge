@@ -20,7 +20,7 @@ public:
   cdr_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~cdr_storage();
 
-  void allocate_storage(const int a_order);
+  void allocate_storage(const int a_p);
   void deallocate_storage();
 
   EBAMRCellData& get_scratch()  { return m_scratch;    }
@@ -50,7 +50,7 @@ protected:
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
-  int m_order;                   // SISDC order
+  int m_p;                   // SISDC order
 
   EBAMRCellData m_previous; // Solution at previous time step
   EBAMRCellData m_scratch;  // Scratch data
@@ -82,7 +82,7 @@ public:
   poisson_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~poisson_storage();
 
-  void allocate_storage(const int a_order);
+  void allocate_storage(const int a_p);
   void deallocate_storage();
 
   MFAMRCellData& get_previous(){ return m_previous; }
@@ -96,7 +96,7 @@ protected:
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
-  int m_order;                   // SISDC order
+  int m_p;                   // SISDC order
 
   MFAMRCellData m_previous;      // Solution at previous time step
   EBAMRCellData m_E_cell;        // Cell-centered E
@@ -112,7 +112,7 @@ public:
   rte_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~rte_storage();
 
-  void allocate_storage(const int a_order);
+  void allocate_storage(const int a_p);
   void deallocate_storage();
   
   EBAMRCellData& get_previous(){  return m_previous;  }
@@ -124,7 +124,7 @@ protected:
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
-  int m_order;                   // SISDC order
+  int m_p;                   // SISDC order
 
 
   EBAMRCellData m_previous;  // Solution at previous time step
@@ -139,7 +139,7 @@ public:
   sigma_storage(const RefCountedPtr<amr_mesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
   ~sigma_storage();
   
-  void allocate_storage(const int a_order);
+  void allocate_storage(const int a_p);
   void deallocate_storage();
 
   EBAMRIVData& get_previous(){return m_previous; }
@@ -155,7 +155,7 @@ protected:
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
-  int m_order;                   // SISDC order
+  int m_p;                   // SISDC order
 
   EBAMRIVData m_previous;        // Previous solution
   EBAMRIVData m_scratch;         // Scratch data

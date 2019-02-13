@@ -55,9 +55,7 @@ protected:
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
   int m_p;
-  int m_order;
-  int m_min_order;
-  int m_max_order;
+  int m_k;
   int m_error_norm;
   int m_num_diff_corr;
 
@@ -69,7 +67,6 @@ protected:
   Real m_dt_cfl;
 
   bool m_adaptive_dt;
-  bool m_adaptive_order;
 
   // Basically6 only debugging stuff
   bool m_do_advec_src;  
@@ -121,7 +118,7 @@ protected:
   EBAMRIVData& get_sigmak(const int a_m);
 
   // Routines for intervals and quadrature
-  void setup_lobatto_nodes(const int a_order);
+  void setup_lobatto_nodes(const int a_p);
   void setup_qmj(const int a_p);
   void setup_subintervals(const Real a_time, const Real a_dt);
   void gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
@@ -142,6 +139,7 @@ protected:
   void predictor_diffusion_build_FD(const int a_m);
 
   // SISDC corrector routines
+  void corrector_initialize_errors();
   void corrector_reconcile_gl_integrands();
   void corrector(const Real a_time, const Real a_dt);
   void corrector_advection_reaction(const int a_m, const Real a_dt);
@@ -149,6 +147,7 @@ protected:
   void corrector_diffusion(const int a_m);
   void corrector_diffusion_onestep(const int a_m);
   void corrector_diffusion_build_FD(const int a_m);
+  void corrector_finalize_errors();
 
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states

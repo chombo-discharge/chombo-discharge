@@ -275,6 +275,11 @@ public:
   virtual void set_dump_charge(const bool a_dump_charge);
 
   /*!
+    @brief Output on centroids or cell centers
+  */
+  virtual void set_output_centroids(const bool a_output_centroids);
+
+  /*!
     @brief Sanity check
   */
   virtual void sanity_check();
@@ -557,6 +562,11 @@ protected:
     @brief MPI timer
   */
   Real m_wallclock2;
+
+  /*!
+    @brief 
+  */
+  bool m_output_centroids;
 
   /*!
     @brief Potential has been set

@@ -84,6 +84,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_max_steps(100);                                  // Max number of steps
   this->set_max_plot_depth(-1);                              // Set maximum plot depth.
   this->set_max_chk_depth(-1);                               // Set maximum checkpoint depth.
+  this->set_output_centroids(true);                          // Use cell centroids for output
 
   m_amr->set_physical_domain(m_physdom); // Set physical domain
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
@@ -157,7 +158,9 @@ void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a
 
   m_amr->average_down(scratch, phase::gas);
   m_amr->interp_ghost(scratch, phase::gas);
-  m_amr->interpolate_to_centroids(scratch, phase::gas);
+  if(m_output_centroids){
+    m_amr->interpolate_to_centroids(scratch, phase::gas);
+  }
 
   const Interval src_interv(comp, comp);
   const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
@@ -227,7 +230,9 @@ void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const 
 
   m_amr->average_down(scratch, phase::gas);
   m_amr->interp_ghost(scratch, phase::gas);
-  m_amr->interpolate_to_centroids(scratch, phase::gas);
+  if(m_output_centroids){
+    m_amr->interpolate_to_centroids(scratch, phase::gas);
+  }
 
   const Interval src_interv(0, ncomp - 1);
   const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
@@ -325,7 +330,9 @@ void plasma_engine::add_current_density_to_output(EBAMRCellData& a_output, const
   EBAMRCellData J;
   m_amr->allocate(J, cdr->get_phase(), SpaceDim);
   m_timestepper->compute_J(J);
-  m_amr->interpolate_to_centroids(J, cdr->get_phase());
+  if(m_output_centroids){
+    m_amr->interpolate_to_centroids(J, cdr->get_phase());
+  }
 
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -361,7 +368,9 @@ void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const i
 
     m_amr->average_down(scratch, cdr->get_phase());
     m_amr->interp_ghost(scratch, cdr->get_phase());
-    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+    if(m_output_centroids){
+      m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+    }
 
     data_ops::floor(scratch, 0.0);
 
@@ -405,7 +414,9 @@ void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const 
 
     m_amr->average_down(scratch, cdr->get_phase());
     m_amr->interp_ghost(scratch, cdr->get_phase());
-    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+    if(m_output_centroids){
+      m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+    }
 
     const Interval src_interv(0, ncomp -1);
     const Interval dst_interv(a_cur_var + num*ncomp, a_cur_var + num*ncomp + ncomp -1);
@@ -449,7 +460,9 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
 
     m_amr->average_down(scratch, cdr->get_phase());
     m_amr->interp_ghost(scratch, cdr->get_phase());
-    m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+    if(m_output_centroids){
+      m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
+    }
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
@@ -489,7 +502,9 @@ void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const i
 
     m_amr->average_down(scratch, rte_phase);
     m_amr->interp_ghost(scratch, rte_phase);
-    m_amr->interpolate_to_centroids(scratch, rte_phase);
+    if(m_output_centroids){
+      m_amr->interpolate_to_centroids(scratch, rte_phase);
+    }
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
@@ -529,7 +544,9 @@ void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int 
 
     m_amr->average_down(scratch, rte_phase);
     m_amr->interp_ghost(scratch, rte_phase);
-    m_amr->interpolate_to_centroids(scratch, rte_phase);
+    if(m_output_centroids){
+      m_amr->interpolate_to_centroids(scratch, rte_phase);
+    }
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
@@ -2430,6 +2447,27 @@ void plasma_engine::set_dump_charge(const bool a_dump_charge){
     }
     else if(str == "false"){
       m_dump_charge = false;
+    }
+  }
+}
+
+void plasma_engine::set_output_centroids(const bool a_output_centroids){
+  CH_TIME("plasma_engine::set_output_centroids");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_output_centroids" << endl;
+  }
+
+  m_output_centroids = a_output_centroids;
+
+  { // get parameter from input script
+    std::string str;
+    ParmParse pp("plasma_engine");
+    pp.query("output_centroids", str);
+    if(str == "true"){
+      m_output_centroids = true;
+    }
+    else if(str == "false"){
+      m_output_centroids = false;
     }
   }
 }

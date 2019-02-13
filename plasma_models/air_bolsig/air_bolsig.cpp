@@ -508,7 +508,7 @@ air_bolsig::positive_species::positive_species(){
   m_unit      = "m-3";
   m_charge    = 1;
   m_diffusive = false;
-  m_mobile    = true;
+  m_mobile    = false;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;
@@ -539,7 +539,7 @@ air_bolsig::negative_species::negative_species(){
   m_unit      = "m-3";
   m_charge    = -1;
   m_diffusive = false;
-  m_mobile    = true;
+  m_mobile    = false;
 }
 
 air_bolsig::negative_species::~negative_species(){
