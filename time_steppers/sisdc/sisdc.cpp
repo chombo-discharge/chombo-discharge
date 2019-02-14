@@ -532,6 +532,7 @@ Real sisdc::advance(const Real a_dt){
   sisdc::setup_subintervals(m_time, a_dt);
 
   // SISDC advance
+  int num_corrections = 0;
   sisdc::copy_cdr_to_phi_m0();
   sisdc::copy_sigma_to_sigma_m0();
   if(m_k > 0){ // If we do corrections, we need FD(phi_0). Compute that immediately. 
@@ -543,9 +544,14 @@ Real sisdc::advance(const Real a_dt){
     sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
     sisdc::corrector(m_time, a_dt);
     sisdc::corrector_finalize_errors();
+
+    num_corrections += 1;
+
+    if(m_max_error < m_err_thresh) break; // No need in going beyond
   }
 
-  sisdc::compute_new_dt();
+  // Compute a new time step
+  sisdc::compute_new_dt(a_dt, num_corrections);
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
@@ -1085,6 +1091,20 @@ void sisdc::corrector_finalize_errors(){
 
 #if 0 // Debug
   if(procID() == 0) std::cout << m_max_error << std::endl;
+#endif
+}
+
+void sisdc::compute_new_dt(const Real a_dt, const int a_num_corrections){
+  CH_TIME("sisdc::compute_new_dt");
+  if(m_verbosity > 5){
+    pout() << "sisdc::compute_new_dt" << endl;
+  }
+
+  const Real rel_err = m_err_thresh/m_max_error;
+  const Real new_dt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
+
+#if 1 // Debug
+  if(procID() == 0) std::cout << m_max_error << "\t" << a_num_corrections << "\t" << a_dt << "\t" << new_dt << std::endl;
 #endif
 }
 

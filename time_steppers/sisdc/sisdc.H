@@ -155,6 +155,9 @@ protected:
   void corrector_diffusion_build_FD(const int a_m);
   void corrector_finalize_errors();
 
+  // Step size control routines
+  void compute_new_dt(const Real a_dt, const int a_num_corrections);
+
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
   void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
