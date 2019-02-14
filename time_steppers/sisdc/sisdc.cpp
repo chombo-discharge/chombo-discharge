@@ -545,6 +545,8 @@ Real sisdc::advance(const Real a_dt){
     sisdc::corrector_finalize_errors();
   }
 
+  sisdc::compute_new_dt();
+
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
   sisdc::copy_sigma_p_to_sigma();
@@ -1080,6 +1082,10 @@ void sisdc::corrector_finalize_errors(){
   const EBAMRIVData& sigma_final = m_sigma_scratch->get_sigma()[m_p];
   data_ops::incr(error, sigma_final, 1.0);
   m_sigma_error = 0.0;
+
+#if 0 // Debug
+  if(procID() == 0) std::cout << m_max_error << std::endl;
+#endif
 }
 
 void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
