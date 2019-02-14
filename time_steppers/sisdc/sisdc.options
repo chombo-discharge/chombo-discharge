@@ -2,12 +2,18 @@
 # SISDC CLASS OPTIONS
 #
 # This class uses semi-implicit spectral deferred corrections. Diffusion is handled implicitly,
-# and advection-reaction is handled explicitly
+# and advection-reaction is handled explicitly.
+#
+# The maximum possible global order of accuracy is (p+1) where p is the number of subintervals. Each
+# correction raises the order by 1 (corr_iter=0 is the first order solution). To reach the maximum
+# possible order, you should perform p correction iterations. 
+#
 # 
 # ====================================================================================================
-sisdc.subintervals = 3   # Number of subintervals. This will be the maximum possible order.
-sisdc.corr_iter    = 1   # Number of iterations of the correction equation. Should be (subintervals-1)
-                         # for maximum order
+sisdc.quad_nodes   = lobatto  # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
+sisdc.subintervals = 1        # Number of subintervals. This will be the maximum possible order.
+sisdc.corr_iter    = 1        # Number of iterations of the correction equation. Should be (subintervals-1)
+                              # for maximum order
 
 # ---------------------------------------------------------	
 # Diffusive coupling

@@ -422,12 +422,12 @@ void cdr_tga::setup_operator_factory(){
   ebfact->setValue(0.0);
   
   // Create operator factory.
-  data_ops::set_value(m_scratch, 1.0);
+  data_ops::set_value(m_aco, 1.0); // alpha = 0 so this is just a dummy value. 
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
 										 alpha,
 										 beta,
-										 m_scratch,
+										 m_aco,
 										 m_diffco,
 										 m_diffco_eb,
 										 dx[0],
@@ -658,34 +658,38 @@ void cdr_tga::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData&
     pout() << m_name + "::compute_divD" << endl;
   }
 
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
+  if(m_diffusive){
+    const int ncomp        = 1;
+    const int finest_level = m_amr->get_finest_level();
 
-  // Copy a_state because AMRMultiGrid may do exchange operations
-  EBAMRCellData clone;
-  m_amr->allocate(clone, m_phase, ncomp);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_state[lvl]->copyTo(*clone[lvl]);
-  }
+    // Copy a_state because AMRMultiGrid may do exchange operations
+    EBAMRCellData clone;
+    m_amr->allocate(clone, m_phase, ncomp);
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      a_state[lvl]->localCopyTo(*clone[lvl]);
+    }
 
-  // Multigrid doesn't want smart pointers, so do aliasing. 
-  Vector<LevelData<EBCellFAB>* > res, phi, zero;
-  m_amr->alias(res,  a_diffusive_term);
-  m_amr->alias(phi,  clone);
-  m_amr->alias(zero, m_scratch);
+    // Multigrid doesn't want smart pointers, so do aliasing. 
+    Vector<LevelData<EBCellFAB>* > res, phi, zero;
+    m_amr->alias(res,  a_diffusive_term);
+    m_amr->alias(phi,  clone);
+    m_amr->alias(zero, m_scratch);
 
-  // TGA can mess with alpha and beta so I need to reset them to the appropriate values
-  const Real alpha =  0.0;
-  const Real beta  = -1.0; // Minus one because the AMRMultiGrid computes the residual as resid = rhs - L(phi)
+    // TGA can mess with alpha and beta so I need to reset them to the appropriate values
+    const Real alpha =  0.0;
+    const Real beta  = -1.0; // Minus one because the AMRMultiGrid computes the residual as resid = rhs - L(phi)
   
-  if(m_use_tga){
-    m_tgasolver->resetAlphaAndBeta(alpha, beta);
+    if(m_use_tga){
+      m_tgasolver->resetAlphaAndBeta(alpha, beta);
+    }
+    else{
+      m_eulersolver->resetAlphaAndBeta(alpha, beta);
+    }
+    data_ops::set_value(m_scratch, 0.0);
+    m_gmg_solver->computeAMRResidual(res, phi, zero, finest_level, 0); // Computes res = L(phi) - zero
+    data_ops::set_value(m_scratch, 0.0);
   }
   else{
-    m_eulersolver->resetAlphaAndBeta(alpha, beta);
+    data_ops::set_value(a_diffusive_term, 0.0);
   }
-  
-  data_ops::set_value(m_scratch, 0.0);
-  m_gmg_solver->computeAMRResidual(res, phi, zero, finest_level, 0); // Computes res = L(phi) - zero
-  data_ops::set_value(m_scratch, 0.0);
 }

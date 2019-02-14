@@ -146,6 +146,7 @@ void cdr_solver::allocate_internals(){
   m_amr->allocate(m_velo_face,  m_phase, sca);
   m_amr->allocate(m_velo_cell,  m_phase, vec); 
   m_amr->allocate(m_ebflux,     m_phase, sca);
+  m_amr->allocate(m_aco,        m_phase, sca);
   m_amr->allocate(m_diffco,     m_phase, sca);
   m_amr->allocate(m_diffco_eb,  m_phase, sca);
   m_amr->allocate(m_scratch,    m_phase, sca);
@@ -157,6 +158,7 @@ void cdr_solver::allocate_internals(){
   data_ops::set_value(m_velo_cell,  0.0);
   data_ops::set_value(m_ebflux,     0.0);
   data_ops::set_value(m_ebflux,     0.0);
+  data_ops::set_value(m_aco,        0.0);
   data_ops::set_value(m_diffco,     0.0);
   data_ops::set_value(m_diffco_eb,  0.0);
   data_ops::set_value(m_domainflux, 0.0);

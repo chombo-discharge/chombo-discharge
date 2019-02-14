@@ -250,8 +250,6 @@ protected:
   */
   virtual void advance_tga(EBAMRCellData& a_state, const Real a_dt);
 
-
-
   /*!
     @brief Advection-only extrapolation to faces
   */

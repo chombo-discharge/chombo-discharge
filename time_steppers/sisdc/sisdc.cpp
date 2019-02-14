@@ -31,6 +31,8 @@ sisdc::sisdc(){
   m_safety        = 0.9;
   m_num_diff_corr = 0;
 
+  m_which_nodes   = "lobatto";
+
   m_adaptive_dt    = false;
   m_have_dtf       = false;
   m_strong_diffu   = false;
@@ -63,6 +65,18 @@ sisdc::sisdc(){
     pp.query("safety",          m_safety);
     pp.query("num_corrections", m_num_diff_corr);
 
+    if(pp.contains("quad_nodes")){
+      pp.get("quad_nodes", str);
+      if(str == "lobatto"){
+	m_which_nodes = "lobatto";
+      }
+      else if(str == "uniform"){
+	m_which_nodes = "uniform";
+      }
+      else if(str == "chebyshev"){
+	m_which_nodes = "chebyshev";
+      }
+    }
     if(pp.contains("adaptive_dt")){
       pp.get("adaptive_dt", str);
       if(str == "true"){
@@ -161,7 +175,7 @@ sisdc::sisdc(){
   }
 
   // Setup nodes
-  sisdc::setup_lobatto_nodes(m_p);
+  sisdc::setup_quadrature_nodes(m_p);
   sisdc::setup_qmj(m_p);
 }
 
@@ -181,20 +195,6 @@ Real sisdc::restrict_dt(){
   return 1.E99;
 }
 
-Real sisdc::get_max_error(){
-  CH_TIME("sisdc::get_max_error");
-  if(m_verbosity > 2){
-    pout() << "sisdc::get_max_error" << endl;
-  }
-
-  Real cur_err = m_sigma_error;
-  for (int i = 0; i < m_cdr_error.size(); i++){
-    cur_err = Max(cur_err, m_cdr_error[i]);
-  }
-
-  return cur_err;
-}
-
 Real sisdc::get_max_lobatto_distance(){
   CH_TIME("sisdc::get_max_lobatto_distance");
   if(m_verbosity > 5){
@@ -203,10 +203,46 @@ Real sisdc::get_max_lobatto_distance(){
 
   Real max_dist = 0.0;
   for (int m = 0; m < m_p; m++){
-    max_dist = Max(max_dist, m_gl_nodes[m+1] - m_gl_nodes[m]);
+    max_dist = Max(max_dist, m_nodes[m+1] - m_nodes[m]);
   }
 
   return max_dist;
+}
+
+void sisdc::setup_quadrature_nodes(const int a_p){
+  CH_TIME("sisdc::setup_quadrature_nodes");
+  if(m_verbosity > 5){
+    pout() << "sisdc::setup_quadrature_nodes" << endl;
+  }
+
+  if(m_which_nodes == "uniform"){
+    sisdc::setup_uniform_nodes(a_p);
+  }
+  else if(m_which_nodes == "lobatto"){
+    sisdc::setup_lobatto_nodes(a_p);
+  }
+  else if(m_which_nodes == "chebyshev"){
+    sisdc::setup_chebyshev_nodes(a_p);
+  }
+  else {
+    MayDay::Abort("sisdc::setup_quadrature_nodes - unknown nodes requested");
+  }
+}
+
+void sisdc::setup_uniform_nodes(const int a_p){
+  CH_TIME("sisdc::setup_uniform_nodes");
+  if(m_verbosity > 5){
+    pout() << "sisdc::setup_uniform_nodes" << endl;
+  }
+
+  // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
+  //       recursively with Legendre polynomials. 
+  m_nodes.resize(1+a_p);
+
+  const Real delta = 2./a_p;
+  for (int m = 0; m <= a_p; m++){
+    m_nodes[m] = m*delta;
+  }
 }
 
 void sisdc::setup_lobatto_nodes(const int a_p){
@@ -217,50 +253,66 @@ void sisdc::setup_lobatto_nodes(const int a_p){
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
   //       recursively with Legendre polynomials. 
-  m_gl_nodes.resize(1+a_p);
+  m_nodes.resize(1+a_p);
 
   if(a_p == 1){
-    m_gl_nodes[0]   = -1.0;
-    m_gl_nodes[1]   =  1.0;
+    m_nodes[0]   = -1.0;
+    m_nodes[1]   =  1.0;
   }
   else if(a_p == 2){
-    m_gl_nodes[0] = -1.0;
-    m_gl_nodes[1] =  0.0;
-    m_gl_nodes[2] =  1.0;
+    m_nodes[0] = -1.0;
+    m_nodes[1] =  0.0;
+    m_nodes[2] =  1.0;
   }
   else if(a_p == 3){
-    m_gl_nodes[0] = -1.0;
-    m_gl_nodes[1] = -1./sqrt(5.);
-    m_gl_nodes[2] =  1./sqrt(5.);
-    m_gl_nodes[3] =  1.0;
+    m_nodes[0] = -1.0;
+    m_nodes[1] = -1./sqrt(5.);
+    m_nodes[2] =  1./sqrt(5.);
+    m_nodes[3] =  1.0;
   }
   else if(a_p == 4){
-    m_gl_nodes[0] = -1.0;
-    m_gl_nodes[1] = -sqrt(3./7);
-    m_gl_nodes[2] =  0.0;
-    m_gl_nodes[3] =  sqrt(3./7);
-    m_gl_nodes[4] =  1.0;
+    m_nodes[0] = -1.0;
+    m_nodes[1] = -sqrt(3./7);
+    m_nodes[2] =  0.0;
+    m_nodes[3] =  sqrt(3./7);
+    m_nodes[4] =  1.0;
   }
   else if(a_p == 5){
-    m_gl_nodes[0] = -1.0;
-    m_gl_nodes[1] = -0.76595532;
-    m_gl_nodes[2] = -0.28532152;
-    m_gl_nodes[3] =  0.28532152;
-    m_gl_nodes[4] =  0.76595532;
-    m_gl_nodes[5] =  1.0;
+    m_nodes[0] = -1.0;
+    m_nodes[1] = -0.76595532;
+    m_nodes[2] = -0.28532152;
+    m_nodes[3] =  0.28532152;
+    m_nodes[4] =  0.76595532;
+    m_nodes[5] =  1.0;
   }
   else if(a_p == 6){
-    m_gl_nodes[0] = -1.0;
-    m_gl_nodes[1] = -0.83022390;
-    m_gl_nodes[2] = -0.46884879;
-    m_gl_nodes[3] =  0.0;
-    m_gl_nodes[4] =  0.46884879;
-    m_gl_nodes[5] =  0.83022390;
-    m_gl_nodes[6] =  1.0;
+    m_nodes[0] = -1.0;
+    m_nodes[1] = -0.83022390;
+    m_nodes[2] = -0.46884879;
+    m_nodes[3] =  0.0;
+    m_nodes[4] =  0.46884879;
+    m_nodes[5] =  0.83022390;
+    m_nodes[6] =  1.0;
   }
   else{
-    MayDay::Abort("sisdc::compute_gauss_lobatto - requested order exceeds 7. Compute your own damn nodes!");
+    MayDay::Abort("sisdc::setup_lobatto_nodes - requested order exceeds 7. Compute your own damn nodes!");
   }
+}
+
+void sisdc::setup_chebyshev_nodes(const int a_p){
+  CH_TIME("sisdc::setup_chebyshev_nodes");
+  if(m_verbosity > 5){
+    pout() << "sisdc::setup_chebyshev_nodes" << endl;
+  }
+
+  // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
+  //       recursively with Legendre polynomials. 
+  m_nodes.resize(1+a_p);
+  m_nodes[0] = -1.0;
+  for (int m = 1; m < a_p; m++){
+    m_nodes[m] = -cos((2*m-1)*units::s_pi/(2*(a_p-1)));
+  }
+  m_nodes[a_p] = 1.0;
 }
 
 void sisdc::setup_qmj(const int a_p){
@@ -285,7 +337,7 @@ void sisdc::setup_qmj(const int a_p){
     for (int j=0; j<nnodes; j++){
       for (int i=0; i<nnodes; i++){
 	const int k = j*nnodes + i;
-	V[k] = pow(m_gl_nodes[i],j);
+	V[k] = pow(m_nodes[i],j);
       }
     }
 
@@ -329,7 +381,7 @@ void sisdc::setup_qmj(const int a_p){
     for (int m = 0; m < a_p; m++){
       m_qmj[m][j] = 0.0;
       for (int k = 0; k < nnodes; k++){
-	m_qmj[m][j] += cj[k]*(pow(m_gl_nodes[m+1], k+1) - pow(m_gl_nodes[m], k+1))/(k+1);
+	m_qmj[m][j] += cj[k]*(pow(m_nodes[m+1], k+1) - pow(m_nodes[m], k+1))/(k+1);
       }
     }
   }
@@ -352,10 +404,10 @@ void sisdc::setup_subintervals(const Real a_time, const Real a_dt){
     pout() << "sisdc::setup_subintervals" << endl;
   }
 
-  // m_gl_nodes are Gauss-Lobatto nodes on [-1,1]. These must
+  // m_nodes are Gauss-Lobatto nodes on [-1,1]. These must
   // be shifted to [t_n,t_n + a_dt]
-  m_tm.resize(m_gl_nodes.size());
-  Vector<Real> shifted_gl_nodes = m_gl_nodes;
+  m_tm.resize(m_nodes.size());
+  Vector<Real> shifted_gl_nodes = m_nodes;
   for (int m = 0; m < shifted_gl_nodes.size(); m++){
     shifted_gl_nodes[m] += 1.0;    // [0,2]
     shifted_gl_nodes[m] *= 0.5;    // [0,1]
@@ -370,24 +422,6 @@ void sisdc::setup_subintervals(const Real a_time, const Real a_dt){
   for (int m = 0; m < m_tm.size()-1; m++){
     m_dtm[m] = m_tm[m+1] - m_tm[m];
   }
-
-#if 0 // Debug
-  if(procID() == 0){
-    for (int m = 0; m < m_dtm.size(); m++){
-      pout() << m_dtm[m] << "\t" << m_dt_cfl << endl;
-    }
-  }
-#endif
-
-#if 0 // Debug
-  if(procID() == 0){
-    Real sum = 0.0;
-    for (int m = 0; m < m_dtm.size(); m++){
-      sum += m_dtm[m];
-    }
-    std::cout << sum - a_dt << std::endl;
-  }
-#endif
 }
 
 void sisdc::gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m){
@@ -481,13 +515,12 @@ Real sisdc::advance(const Real a_dt){
     pout() << "sisdc::advance" << endl;
   }
 
-  // TLDR: This timestepper can do multiple steps per a_dt. If you're using adaptive time integration,
-  //       the number of steps are adjusted such that the invididual step errors remain below a specified
-  //       threshold. A side effect of this is that the final substep may cause integration beyond a_dt.
-  //
-  //       PS: When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
-  //           advancement. If you think that this may not be the case, activate the debugging below
-#if 0 // Debugging
+  // ---------------------------------------------------------------------------------------------------
+  // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
+  //        advancement. If you think that this may not be the case, activate the debugging below
+  // ---------------------------------------------------------------------------------------------------
+  
+#if 0 // Debug
   sisdc::compute_E_into_scratch();
   sisdc::compute_cdr_gradients();
   sisdc::compute_cdr_velo(m_time);
@@ -501,17 +534,18 @@ Real sisdc::advance(const Real a_dt){
   // SISDC advance
   sisdc::copy_cdr_to_phi_m0();
   sisdc::copy_sigma_to_sigma_m0();
+  if(m_k > 0){ // If we do corrections, we need FD(phi_0). Compute that immediately. 
+    sisdc::predictor_compute_FD_0();
+  }
   sisdc::predictor(m_time); // SISDC predictor
-  if(m_p > 1){
-    for(int icorr = 0; icorr < m_k; icorr++){
-      sisdc::corrector_initialize_errors();
-      sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
-      sisdc::corrector(m_time, a_dt);
-      sisdc::corrector_finalize_errors();
-    }
+  for(int icorr = 0; icorr < m_k; icorr++){
+    sisdc::corrector_initialize_errors();
+    sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
+    sisdc::corrector(m_time, a_dt);
+    sisdc::corrector_finalize_errors();
   }
 
-  // Final update
+  // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
   sisdc::copy_sigma_p_to_sigma();
   sisdc::update_poisson();
@@ -523,6 +557,24 @@ Real sisdc::advance(const Real a_dt){
   sisdc::compute_cdr_velo(m_time + a_dt);
   
   return a_dt;
+}
+
+void sisdc::predictor_compute_FD_0(){
+  CH_TIME("sisdc::predictor_advection_reaction");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor_advection_reaction" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+  
+    const EBAMRCellData& phi_0 = storage->get_phi()[0]; // phi_0
+    EBAMRCellData& FD_0        = storage->get_FD()[0];  // FD(phi_0)
+
+    cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+    tgasolver->compute_divD(FD_0, phi_0);
+  }
 }
 
 void sisdc::predictor(const Real a_time){
@@ -701,19 +753,45 @@ void sisdc::predictor_diffusion_build_FD(const int a_m){
 void sisdc::corrector_reconcile_gl_integrands(){
   CH_TIME("sisdc::predictor_reconcile_gl_integrands");
   if(m_verbosity > 5){
-    pout() << "sisdc::predictor_reoncile_gl_integrands" << endl;
+    pout() << "sisdc::predictor_reconcile_gl_integrands" << endl;
   }
 
+  // We update (m+1), but it
+  Vector<EBAMRCellData*> cdr_densities_p = sisdc::get_cdr_phik(m_p);
+  EBAMRIVData& sigma_p = sisdc::get_sigmak(m_p);
+  const Real t_p = m_tm[m_p];
+
+  // Update electric field, RTE equations, source terms, and velocities
+  if(m_consistent_E)   sisdc::update_poisson(cdr_densities_p, sigma_p);
+  if(m_consistent_rte) sisdc::update_rte(cdr_densities_p, t_p);
+  if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_p);
+  if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_p, t_p);
+  if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_p, t_p);
+
+  // Update boundary conditions for cdr and sigma equations
+  sisdc::compute_cdr_eb_states(cdr_densities_p);
+  sisdc::compute_cdr_fluxes(cdr_densities_p, t_p);
+  sisdc::compute_cdr_domain_states(cdr_densities_p);
+  sisdc::compute_cdr_domain_fluxes(cdr_densities_p, t_p);
+  sisdc::compute_sigma_flux();
+
+  // Now compute FAR_p - that wasn't done in the predictor
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+    const int idx = solver_it.get_solver();
 
-    // These should be zero
-    EBAMRCellData& FD_0  = storage->get_FD()[0];
-    EBAMRCellData& FAR_M = storage->get_FAR()[m_p];
-    data_ops::set_value(FD_0,  0.0);
-    data_ops::set_value(FAR_M, 0.0);
+    // This has not been computed yet. Do it.
+    EBAMRCellData& FAR_p       = storage->get_FAR()[m_p];
+    const EBAMRCellData& phi_p = *cdr_densities_p[idx] ;
+    const EBAMRCellData& src   = solver->get_source();
 
+    // Compute -divF + S
+    solver->compute_divF(FAR_p, phi_p, 0.0, true); // FAR_p =  Div(v_p*phi_p)
+    data_ops::scale(FAR_p, -1.0);                  // FAR_p = -Div(v_p*phi_p)
+    data_ops::incr(FAR_p, src, 1.0);               // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
+
+    // Build the integrand
     for (int m = 0; m <= m_p; m++){
       EBAMRCellData& F_m         = storage->get_F()[m];
       const EBAMRCellData& FD_m  = storage->get_FD()[m];
@@ -724,8 +802,9 @@ void sisdc::corrector_reconcile_gl_integrands(){
     }
   }
 
-  EBAMRIVData& Fsig_M = m_sigma_scratch->get_Fsig()[m_p];
-  data_ops::set_value(Fsig_M, 0.0);
+  // Compute Fsig_p - that wasn't done in the predictor either
+  EBAMRIVData& Fsig_p = m_sigma_scratch->get_Fsig()[m_p];
+  m_sigma->compute_rhs(Fsig_p);
   for (int m = 0; m <= m_p; m++){
     EBAMRIVData& Fsig_m = m_sigma_scratch->get_Fsig()[m];
     EBAMRIVData& Fsum_m = m_sigma_scratch->get_Fsum()[m];
@@ -767,29 +846,32 @@ void sisdc::corrector(const Real a_time, const Real a_dt){
   //       we need to do that at every advance
   for (int m = 0; m < m_p; m++){ // Update m->(m+1)
 
-    // We update (m+1), but it
-    Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(m);
-    EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(m);
-    const Real t_mp1 = m_tm[m];
+    // We update (m+1), but m=0 is a special update since FAR(phi_0^k) never changes, and
+    // E and the RTE were updated in the reconcile_gl_integrands routine. So, skip all of that if we can. 
+    if(m > 0){
+      Vector<EBAMRCellData*> cdr_densities_m = sisdc::get_cdr_phik(m);
+      EBAMRIVData& sigma_m = sisdc::get_sigmak(m);
+      const Real t_m = m_tm[m];
 
-    // Update electric field, RTE equations, source terms, and velocities
-    if(m_consistent_E)   sisdc::update_poisson(cdr_densities_mp1, sigma_mp1);
-    if(m_consistent_rte) sisdc::update_rte(cdr_densities_mp1, t_mp1);
-    if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
-    if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
-    if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
+      // Update electric field, RTE equations, source terms, and velocities
+      if(m_consistent_E)   sisdc::update_poisson(cdr_densities_m, sigma_m);
+      if(m_consistent_rte) sisdc::update_rte(cdr_densities_m, t_m);
+      if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_m);
+      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_m, t_m);
+      if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_m, t_m);
 
-    // Update boundary conditions for cdr and sigma equations
-    sisdc::compute_cdr_eb_states(cdr_densities_mp1);
-    sisdc::compute_cdr_fluxes(cdr_densities_mp1, t_mp1);
-    sisdc::compute_cdr_domain_states(cdr_densities_mp1);
-    sisdc::compute_cdr_domain_fluxes(cdr_densities_mp1, t_mp1);
-    sisdc::compute_sigma_flux();
+      // Update boundary conditions for cdr and sigma equations
+      sisdc::compute_cdr_eb_states(cdr_densities_m);
+      sisdc::compute_cdr_fluxes(cdr_densities_m, t_m);
+      sisdc::compute_cdr_domain_states(cdr_densities_m);
+      sisdc::compute_cdr_domain_fluxes(cdr_densities_m, t_m);
+      sisdc::compute_sigma_flux();
+    }
 
     // Correction for advection-reaction
     sisdc::corrector_advection_reaction(m, a_dt);
-    // sisdc::corrector_sigma(m,a_dt);
-    // sisdc::corrector_diffusion(m);
+    sisdc::corrector_sigma(m,a_dt);
+    sisdc::corrector_diffusion(m);
   }
 }
 
@@ -817,18 +899,21 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];   // phi_m^(k+1)
     const EBAMRCellData& src   = solver->get_source();      // S_m
 
-    // Compute rhs
-    solver->compute_divF(scratch, phi_m, 0.0, true);  // RHS =  Div(v_m*phi_m)
-    data_ops::scale(scratch, -1.0);                   // RHS = -Div(v_m*phi_m)
-    data_ops::incr(scratch, src, 1.0);                // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
     data_ops::copy(phi_mp1, phi_m);                   // phi_(m+1) = phi_m
-    data_ops::incr(phi_mp1, scratch,  m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*FAR(phi_m)
-    data_ops::incr(phi_mp1, FAR_m,   -m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*FAR(phi_m)
+    
+    // Compute rhs, but for m = 0 then FAR(phi_0^(k+1)) = FAR(phi_0^k) so there's no need for that
+    if(a_m > 0){
+      solver->compute_divF(scratch, phi_m, 0.0, true);  // scratch   =  Div(v_m*phi_m^(k+1))
+      data_ops::scale(scratch, -1.0);                   // scratch   = -Div(v_m*phi_m^(k+1))
+      data_ops::incr(scratch, src, 1.0);                // scratch   = -Div(v_m*phi_m^(k+1)) + S_m^(k+1) = FAR(phi_m^(k+1))
+      data_ops::incr(phi_mp1, scratch,  m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*FAR(phi_m^(k+1))
+      data_ops::incr(phi_mp1, FAR_m,   -m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*[FAR(phi_m) - FAR(phi_m^k)]
 
-    // Update the FAR_m storage - this overwrites FAR(phi_m^k) with FAR(phi_m^(k+1))
-    data_ops::copy(FAR_m, scratch);
+      // Update the FAR_m storage - this overwrites FAR(phi_m^k) with FAR(phi_m^(k+1))
+      data_ops::copy(FAR_m, scratch);
+    }
 
-    // Quadrature
+    // Lagged quadrature
     sisdc::gl_quad(scratch, storage->get_F(), a_m);
     data_ops::incr(phi_mp1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling onto [-1,1] for quadrature
 
@@ -854,13 +939,14 @@ void sisdc::corrector_sigma(const int a_m, const Real a_dt){
   EBAMRIVData& Fsig_m        = m_sigma_scratch->get_Fsig()[a_m];     // Fsig_m^k
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];    // sigma_m^(k+1)
 
-  m_sigma->compute_rhs(scratch);                   // Fsig_m^(k+1)= Injected charge flux
   data_ops::copy(sigma_mp1, sigma_m);              // sigma_(m+1) = sigma_m
-  data_ops::incr(sigma_mp1, scratch, m_dtm[a_m]);  // sigma_(m+1) = sigma_m + dt_m*Fsig_m^k^+1
-  data_ops::incr(sigma_mp1, Fsig_m,  m_dtm[a_m]);  // sigma_(m+1) = sigma_m + dt_m*Fsig_m^k
-
-  // Update the Fsig storage, Fsig_m^k -> Fsig_m^(k+1)
-  data_ops::copy(Fsig_m, scratch);
+  
+  if(a_m > 0){
+    m_sigma->compute_rhs(scratch);                    // Fsig_m^(k+1)= Injected charge flux
+    data_ops::incr(sigma_mp1, scratch,  m_dtm[a_m]);  // sigma_(m+1) = sigma_m + dt_m*Fsig_m^(k+1)
+    data_ops::incr(sigma_mp1, Fsig_m,  -m_dtm[a_m]);  // sigma_(m+1) = sigma_m + dt_m*(Fsig_m^(k+1) -Fsig_m^k)
+    data_ops::copy(Fsig_m, scratch);                  // Update the Fsig storage, Fsig_m^k -> Fsig_m^(k+1)
+  }
 
   // Increment with the quadrature
   sisdc::gl_quad(scratch, m_sigma_scratch->get_Fsum(), a_m);
@@ -967,20 +1053,33 @@ void sisdc::corrector_finalize_errors(){
     pout() << "sisdc::corrector_finalize_errors" << endl;
   }
 
+  const Real safety = 1.E-20;
+
+  m_max_error = 0.0;
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+    const int idx = solver_it.get_solver();
 
-    // These should be zero
-    EBAMRCellData& error = storage->get_error();
-    const EBAMRCellData& phi_final = storage->get_phi()[m_p];
+    // Compute error 
+    EBAMRCellData& error       = storage->get_error();
+    const EBAMRCellData& phi_p = storage->get_phi()[m_p];
+    data_ops::incr(error, phi_p, 1.0);
 
-    data_ops::incr(error, phi_final, 1.0);
+    // Compute norms
+    Real Lerr, Lphi;
+    data_ops::norm(Lerr, *error[0], m_amr->get_domains()[0], m_error_norm);
+    data_ops::norm(Lphi, *phi_p[0], m_amr->get_domains()[0], m_error_norm);
+    m_cdr_error[idx] = (Lphi > 0.0) ? (Lerr/Lphi) : 0.0;
+
+    m_max_error = Max(m_cdr_error[idx], m_max_error);
   }
 
+  // Compute the surface charge conservation error
   EBAMRIVData& error = m_sigma_scratch->get_error();
   const EBAMRIVData& sigma_final = m_sigma_scratch->get_sigma()[m_p];
   data_ops::incr(error, sigma_final, 1.0);
+  m_sigma_error = 0.0;
 }
 
 void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
@@ -1052,7 +1151,7 @@ void sisdc::regrid_internals(){
   sisdc::allocate_rte_storage();
   sisdc::allocate_sigma_storage();
 
-  sisdc::setup_lobatto_nodes(m_p);
+  sisdc::setup_quadrature_nodes(m_p);
   sisdc::setup_qmj(m_p);
 }
 

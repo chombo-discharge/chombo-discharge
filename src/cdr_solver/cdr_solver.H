@@ -412,6 +412,11 @@ protected:
   EBAMRIFData m_domainflux;
 
   /*!
+    @brief Dummy data
+  */
+  EBAMRCellData m_aco;
+
+  /*!
     @brief Diffusion coefficients (can
   */
   EBAMRFluxData m_diffco;

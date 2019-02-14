@@ -92,12 +92,13 @@ protected:
   // weights, Lobatto nodes etc. 
   Vector<Vector<Real> > m_qmj;
   Vector<Vector<Real> > m_vandermonde;
-  Vector<Real> m_gl_weights;
-  Vector<Real> m_gl_nodes;
+  Vector<Real> m_nodes;
   Vector<Real> m_tm;
   Vector<Real> m_dtm;
 
   time_code::which_code m_timecode;
+
+  std::string m_which_nodes;
 
   // Get functions for storage
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
@@ -118,7 +119,10 @@ protected:
   EBAMRIVData& get_sigmak(const int a_m);
 
   // Routines for intervals and quadrature
+  void setup_quadrature_nodes(const int a_p);
+  void setup_uniform_nodes(const int a_p);
   void setup_lobatto_nodes(const int a_p);
+  void setup_chebyshev_nodes(const int a_p);
   void setup_qmj(const int a_p);
   void setup_subintervals(const Real a_time, const Real a_dt);
   void gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
@@ -131,6 +135,7 @@ protected:
   void copy_sigma_p_to_sigma();
 
   // SISDC predictor routines
+  void predictor_compute_FD_0();
   void predictor(const Real a_time);
   void predictor_advection_reaction(const int a_m);
   void predictor_sigma(const int a_m);
@@ -140,6 +145,7 @@ protected:
 
   // SISDC corrector routines
   void corrector_initialize_errors();
+  void corrector_compute_FAR_p();
   void corrector_reconcile_gl_integrands();
   void corrector(const Real a_time, const Real a_dt);
   void corrector_advection_reaction(const int a_m, const Real a_dt);
