@@ -521,7 +521,9 @@ Real sisdc::advance(const Real a_dt){
 
     num_corrections += 1;
 
+#if 0 // Should we do this???
     //    if(m_max_error < m_err_thresh) break; // No need in going beyond
+#endif
   }
 
   // Compute a new time step

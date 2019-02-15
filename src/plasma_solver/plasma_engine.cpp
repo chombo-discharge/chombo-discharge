@@ -2626,6 +2626,8 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   std::string solver_max;
   m_timestepper->get_cdr_max(nmax, solver_max);
 
+  const Real cfl_dt = m_timestepper->get_cfl_dt();
+
   pout() << endl;
   std::string str;
   if(m_timecode == time_code::cfl){
@@ -2649,6 +2651,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   pout() << "plasma_engine::Time step report -- Time step #" << m_step << endl
 	 << "                                   Time  = " << m_time << endl
 	 << "                                   dt    = " << m_dt << str << endl
+    	 << "                                   cfl   = " << m_dt/cfl_dt << endl
 	 << "                                   Emax  = " << Emax << endl
 	 << "                                   n_max = " << nmax << "(" + solver_max + ")" << endl;
 

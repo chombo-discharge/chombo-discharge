@@ -1164,7 +1164,8 @@ void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   Real dt = 1.E99;
 
-  const Real dt_cfl = m_cfl*m_cdr->compute_cfl_dt();
+  const Real m_dt_cfl = m_cdr->compute_cfl_dt();
+  const Real dt_cfl   = m_cfl*m_dt_cfl;
   if(dt_cfl < dt){
     dt = dt_cfl;
     a_timecode = time_code::cfl;
@@ -2610,6 +2611,10 @@ Real time_stepper::get_time(){
 
 Real time_stepper::get_dt(){
   return m_dt;
+}
+
+Real time_stepper::get_cfl_dt(){
+  return m_dt_cfl;
 }
 
 RefCountedPtr<cdr_layout>& time_stepper::get_cdr(){

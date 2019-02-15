@@ -618,6 +618,11 @@ public:
   virtual Real get_dt();
 
   /*!
+    @brief Get the CFL time step
+  */
+  virtual Real get_cfl_dt();
+
+  /*!
     @brief Get cdr solvers
   */
   virtual RefCountedPtr<cdr_layout>& get_cdr();
@@ -755,6 +760,11 @@ protected:
     @brief Previous time step size
   */
   Real m_dt;
+
+  /*!
+    @brief Computed CFL time step
+  */
+  Real m_dt_cfl;
 
   /*!
     @brief Tolerance for source term growth

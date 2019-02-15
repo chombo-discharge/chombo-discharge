@@ -64,7 +64,6 @@ protected:
   Real m_err_thresh;
   Real m_safety;
   Real m_dt_adapt;
-  Real m_dt_cfl;
 
   bool m_adaptive_dt;
 
