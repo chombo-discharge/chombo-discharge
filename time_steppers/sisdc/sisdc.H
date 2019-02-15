@@ -156,7 +156,7 @@ protected:
   void corrector_finalize_errors();
 
   // Step size control routines
-  void compute_new_dt(const Real a_dt, const int a_num_corrections);
+  void compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
 
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states

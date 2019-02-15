@@ -454,8 +454,6 @@ void sisdc::gl_quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand,
     data_ops::incr(a_quad, a_integrand[j], m_qmj[a_m][j]);
   }
 }
-
-
   
 void sisdc::copy_phi_p_to_cdr(){
   CH_TIME("sisdc::copy_phi_p_to_cdr");
@@ -494,54 +492,79 @@ Real sisdc::advance(const Real a_dt){
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //        advancement. If you think that this may not be the case, activate the debugging below
   // ---------------------------------------------------------------------------------------------------
-  
-#if 0 // Debug
-  sisdc::compute_E_into_scratch();
-  sisdc::compute_cdr_gradients();
-  sisdc::compute_cdr_velo(m_time);
-  sisdc::compute_cdr_sources(m_time);
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  { // Debug
+#if 0 
+    sisdc::compute_E_into_scratch();
+    sisdc::compute_cdr_gradients();
+    sisdc::compute_cdr_velo(m_time);
+    sisdc::compute_cdr_sources(m_time);
+    time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 #endif
-  
-  // Set up subintervals
-  sisdc::setup_subintervals(m_time, a_dt);
+  }
 
-  // SISDC advance
-  int num_corrections = 0;
+  // Copy to predictor
   sisdc::copy_cdr_to_phi_m0();
   sisdc::copy_sigma_to_sigma_m0();
-  if(m_k > 0){ // If we do corrections, we need FD(phi_0). Compute that immediately. 
-    sisdc::predictor_compute_FD_0();
-  }
-  sisdc::predictor(m_time); // SISDC predictor
-  for(int icorr = 0; icorr < m_k; icorr++){
-    sisdc::corrector_initialize_errors();
-    sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
-    sisdc::corrector(m_time, a_dt);
-    sisdc::corrector_finalize_errors();
 
-    num_corrections += 1;
+  // If we do corrections, we need FD(phi_0). Compute that immediately.
+  if(m_k > 0) sisdc::predictor_compute_FD_0();
 
-#if 0 // Should we do this???
-    //    if(m_max_error < m_err_thresh) break; // No need in going beyond
+  // SISDC advance
+  int num_reject  = 0;
+  Real actual_dt = a_dt;
+  bool accept_step = false;
+  while(!accept_step){
+    int num_corrections = 0;
+    sisdc::setup_subintervals(m_time, actual_dt);
+
+    sisdc::predictor(m_time); // SISDC predictor
+    for(int icorr = 0; icorr < m_k; icorr++){
+      num_corrections++;
+      sisdc::corrector_initialize_errors();
+      sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
+      sisdc::corrector(m_time, actual_dt);
+      sisdc::corrector_finalize_errors();
+      if(m_max_error < m_err_thresh) break; // No need in going beyond
+    }
+
+    // Compute a new time step. If it is smaller than the minimum allowed CFL step, accept the step anyways
+    if(m_adaptive_dt){
+      // This restricts new_dt to > min_cfl and > min_hardcap. If actual_dt is equal these bounds, we accept the step
+      sisdc::compute_new_dt(accept_step, actual_dt, num_corrections); 
+
+      // Step rejection, use the new dt
+      if(!accept_step){  
+	actual_dt = m_new_dt;
+	num_reject++;
+      }
+    }
+    else{
+      accept_step = true;
+    }
+
+#if 1 // Debug
+    if(procID() == 0) std::cout << "\taccept = " << accept_step
+				<< "\tactual_dt = " << actual_dt
+				<< "\tnew_dt = " << m_new_dt
+				<< "\tcorr = " << num_corrections
+				<< "\t # rejections = " << num_reject
+				<< "\t err = " << m_max_error
+				<< std::endl;
 #endif
   }
-
-  // Compute a new time step
-  sisdc::compute_new_dt(a_dt, num_corrections);
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
   sisdc::copy_sigma_p_to_sigma();
   sisdc::update_poisson();
-  sisdc::update_rte(m_time + a_dt);
+  sisdc::update_rte(m_time + actual_dt);
 
   // Always recompute source terms and velocities for the next time step
   sisdc::compute_cdr_gradients();
-  sisdc::compute_cdr_sources(m_time + a_dt);
-  sisdc::compute_cdr_velo(m_time + a_dt);
+  sisdc::compute_cdr_sources(m_time + actual_dt);
+  sisdc::compute_cdr_velo(m_time + actual_dt);
   
-  return a_dt;
+  return actual_dt;
 }
 
 void sisdc::copy_cdr_to_phi_m0(){
@@ -1106,29 +1129,55 @@ void sisdc::corrector_finalize_errors(){
 #endif
 }
 
-void sisdc::compute_new_dt(const Real a_dt, const int a_num_corrections){
+void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections){
   CH_TIME("sisdc::compute_new_dt");
   if(m_verbosity > 5){
     pout() << "sisdc::compute_new_dt" << endl;
   }
 
+  // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
+  const Real max_gl_dist = sisdc::get_max_lobatto_distance();
+  const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
+  if(a_dt <= dt_cfl*m_minCFL){
+    a_accept_step = true;
+    m_new_dt = dt_cfl*m_minCFL;
+    return;
+  }
+  if(a_dt <= m_min_dt){
+    a_accept_step = true;
+    m_new_dt = m_min_dt;
+    return;
+  }
+
+  // If we made it here, we should be able to decrease the time step as we see fit.
+  
   const Real rel_err = m_err_thresh/m_max_error;
   const Real dt_adapt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
-
   if(m_max_error <= m_err_thresh){ // Increase time step, but only if we're sufficiently far away form the error threshold
-    if(rel_err < m_safety){ // Far away from the error threshold
+    if(rel_err < m_safety){ 
       m_new_dt = dt_adapt;
     }
     else{
       //      m_new_dt = m_safety*a_dt;  // If we're too close, reduce the new time step with safety margin
       m_new_dt = m_safety*dt_adapt;
     }
+    a_accept_step = true;
   }
   else{ // Decrease time step
     m_new_dt = m_safety*dt_adapt;
+    a_accept_step = false;
   }
 
-#if 1 // Debug
+  // New time step can't go below minimum permitted CFL
+  if(m_new_dt < dt_cfl*m_minCFL){ // Can't decrease above minimum CFL step, accept the step
+    m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);
+  }
+  if(m_new_dt < m_min_dt){ // Can't decrease below hardcap, accept the step
+    m_new_dt = Max(m_new_dt, m_min_dt);
+  }
+
+  { // Debug
+#if 0 // Debug
   if(procID() == 0) std::cout << m_max_error << "\t"
 			      << a_num_corrections << "\t"
 			      << a_dt << "\t"
@@ -1136,6 +1185,7 @@ void sisdc::compute_new_dt(const Real a_dt, const int a_num_corrections){
 			      << dt_adapt << "\t"
 			      << std::endl;
 #endif
+    }
 
   m_have_dt_err = true;
 }
