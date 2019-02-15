@@ -3520,7 +3520,7 @@ void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const st
   EBCellFactory cellfact(fine_ebisl[compute_level]);
   LevelData<EBCellFAB> diff(fine_grids[compute_level], 1, 0*IntVect::Unit, cellfact);
   if(a_species == -1){
-    pout() << "Linf = " << "\t L1" << "\t L2" << endl;
+    pout() << "Linf" << "\t L1" << "\t L2" << endl;
   }
   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();

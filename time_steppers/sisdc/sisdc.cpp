@@ -454,33 +454,7 @@ void sisdc::gl_quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand,
   }
 }
 
-void sisdc::copy_cdr_to_phi_m0(){
-  CH_TIME("sisdc::copy_cdr_to_phi_m0");
-  if(m_verbosity > 5){
-    pout() << "sisdc::copy_cdr_to_phi_m0" << endl;
-  }
 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>&  solver  = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-    
-    EBAMRCellData& phi0 = storage->get_phi()[0];
-    const EBAMRCellData& phi = solver->get_state();
-    data_ops::copy(phi0, phi);
-  }
-}
-
-void sisdc::copy_sigma_to_sigma_m0(){
-  CH_TIME("sisdc::copy_sigma_sigma_m0");
-  if(m_verbosity > 5){
-    pout() << "sisdc::copy_sigma_to_sigma_m0" << endl;
-  }
-
-  // Copy sigma to starting state
-  EBAMRIVData& sigma0      = m_sigma_scratch->get_sigma()[0];
-  const EBAMRIVData& sigma = m_sigma->get_state();
-  data_ops::copy(sigma0, sigma);
-}
   
 void sisdc::copy_phi_p_to_cdr(){
   CH_TIME("sisdc::copy_phi_p_to_cdr");
@@ -547,7 +521,7 @@ Real sisdc::advance(const Real a_dt){
 
     num_corrections += 1;
 
-    if(m_max_error < m_err_thresh) break; // No need in going beyond
+    //    if(m_max_error < m_err_thresh) break; // No need in going beyond
   }
 
   // Compute a new time step
@@ -565,6 +539,34 @@ Real sisdc::advance(const Real a_dt){
   sisdc::compute_cdr_velo(m_time + a_dt);
   
   return a_dt;
+}
+
+void sisdc::copy_cdr_to_phi_m0(){
+  CH_TIME("sisdc::copy_cdr_to_phi_m0");
+  if(m_verbosity > 5){
+    pout() << "sisdc::copy_cdr_to_phi_m0" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>&  solver  = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    
+    EBAMRCellData& phi0 = storage->get_phi()[0];
+    const EBAMRCellData& phi = solver->get_state();
+    data_ops::copy(phi0, phi);
+  }
+}
+
+void sisdc::copy_sigma_to_sigma_m0(){
+  CH_TIME("sisdc::copy_sigma_sigma_m0");
+  if(m_verbosity > 5){
+    pout() << "sisdc::copy_sigma_to_sigma_m0" << endl;
+  }
+
+  // Copy sigma to starting state
+  EBAMRIVData& sigma0      = m_sigma_scratch->get_sigma()[0];
+  const EBAMRIVData& sigma = m_sigma->get_state();
+  data_ops::copy(sigma0, sigma);
 }
 
 void sisdc::predictor_compute_FD_0(){
@@ -601,8 +603,8 @@ void sisdc::predictor(const Real a_time){
   sisdc::compute_sigma_flux();
 
   // We begin with phi[0] = phi(t_n). Then update phi[m+1].
-  const int p = m_tm.size() - 1; // Number of subintervals
-  for (int m = 0; m < p; m++){ // m->(m+1)
+  //  const int p = m_tm.size() - 1; // Number of subintervals
+  for (int m = 0; m < m_p; m++){ // m->(m+1)
 
     // This does the actual advance and updates at (m+1). After the diffusion step,
     // we should update source terms and boundary conditions
@@ -611,21 +613,22 @@ void sisdc::predictor(const Real a_time){
     sisdc::predictor_diffusion(m);
 
     // We now have phi[m+1]. Update boundary conditions after diffusion step. But not on the last step. The
-    // loop updates on (m+1) so we need to stop if (m+1) = m_order - 1
-    const bool last = (m == p-1);
+    // loop updates on (m+1) so we need to stop if (m+1) = m_p - 1
+    const bool last = (m == m_p-1);
     if(!last){
       Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(m+1);
       EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(m+1);
       const Real t_mp1 = m_tm[m+1];
 
-      // Update electric field, RTE equations, source terms, and velocities
+      // Update electric field, RTE equations, source terms, and velocities. No need to update diffusion since
+      // that is done in the predictor_diffusion routine
       if(m_consistent_E)   sisdc::update_poisson(cdr_densities_mp1, sigma_mp1);
       if(m_consistent_rte) sisdc::update_rte(cdr_densities_mp1, t_mp1);
       if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
       if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
       if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
 
-      // Update boundary conditions for cdr and sigma equations
+      // Update boundary conditions for cdr and sigma equations. 
       sisdc::compute_cdr_eb_states(cdr_densities_mp1);
       sisdc::compute_cdr_fluxes(cdr_densities_mp1, t_mp1);
       sisdc::compute_cdr_domain_states(cdr_densities_mp1);
@@ -645,7 +648,7 @@ void sisdc::predictor_advection_reaction(const int a_m){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
-    EBAMRCellData& phi_mp1     = storage->get_phi()[a_m+1]; // phi^(m+1)
+    EBAMRCellData& phi_mp1     = storage->get_phi()[a_m+1]; // phi^(m+1). We will udpate this one. 
     EBAMRCellData& rhs         = storage->get_FAR()[a_m];   // FAR(phi^m)
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];   // phi_m
     const EBAMRCellData& src   = solver->get_source();      // S_m
@@ -689,11 +692,10 @@ void sisdc::predictor_diffusion(const int a_m){
     pout() << "sisdc::predictor_diffusion" << endl;
   }
 
-  // First solve
+  // First solve. 
   if(m_strong_diffu && m_compute_D && m_consistent_E){
     sisdc::update_poisson(get_cdr_phik(a_m + 1), sisdc::get_sigmak(a_m + 1));
     sisdc::update_diffusion_coefficients();
-
   }
   sisdc::predictor_diffusion_onestep(a_m);
 
@@ -748,13 +750,18 @@ void sisdc::predictor_diffusion_build_FD(const int a_m){
     const EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];
     const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
 
-    // FD_mp1 = (phi_mp1 - phi_m)/dtm
-    data_ops::copy(FD_mp1, phi_mp1);
-    data_ops::incr(FD_mp1, phi_ast, -1.0);
-    data_ops::scale(FD_mp1, 1./m_dtm[a_m]);
+    if(solver->is_diffusive()){
+      // FD_mp1 = (phi_mp1 - phi_m)/dtm
+      data_ops::copy(FD_mp1, phi_mp1);
+      data_ops::incr(FD_mp1, phi_ast, -1.0);
+      data_ops::scale(FD_mp1, 1./m_dtm[a_m]);
 
-    m_amr->average_down(FD_mp1, m_cdr->get_phase());
-    m_amr->interp_ghost(FD_mp1, m_cdr->get_phase());
+      m_amr->average_down(FD_mp1, m_cdr->get_phase());
+      m_amr->interp_ghost(FD_mp1, m_cdr->get_phase());
+    }
+    else{
+      data_ops::set_value(FD_mp1, 0.0);
+    }
   }
 }
 
@@ -855,7 +862,8 @@ void sisdc::corrector(const Real a_time, const Real a_dt){
   for (int m = 0; m < m_p; m++){ // Update m->(m+1)
 
     // We update (m+1), but m=0 is a special update since FAR(phi_0^k) never changes, and
-    // E and the RTE were updated in the reconcile_gl_integrands routine. So, skip all of that if we can. 
+    // E and the RTE were updated in the reconcile_gl_integrands routine. So, skip all of that if we can.
+    // There is also a special flag in corrector_advection_reaction that we use. 
     if(m > 0){
       Vector<EBAMRCellData*> cdr_densities_m = sisdc::get_cdr_phik(m);
       EBAMRIVData& sigma_m = sisdc::get_sigmak(m);
@@ -930,7 +938,7 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
 
     data_ops::floor(phi_mp1, 0.0);
 
-    // Compute result onto phi_ast
+    // Compute result onto phi_ast as well since we need to do a diffusion step
     EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
     data_ops::copy(phi_ast, phi_mp1);
   }
@@ -971,7 +979,6 @@ void sisdc::corrector_diffusion(const int a_m){
   if(m_strong_diffu && m_compute_D && m_consistent_E){
     sisdc::update_poisson(get_cdr_phik(a_m + 1), sisdc::get_sigmak(a_m + 1));
     sisdc::update_diffusion_coefficients();
-
   }
   sisdc::corrector_diffusion_onestep(a_m);
 
@@ -1037,20 +1044,22 @@ void sisdc::corrector_diffusion_build_FD(const int a_m){
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+
+    EBAMRCellData& FD_mp1        = storage->get_FD()[a_m+1];  // Currently holds FD_(m+1)^k
+    const EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];
+    const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
 
     if(solver->is_diffusive()){
-      RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
-
-      EBAMRCellData& FD_mp1        = storage->get_FD()[a_m+1];  // Currently holds FD_(m+1)^k
-      const EBAMRCellData& phi_mp1 = storage->get_phi()[a_m+1];
-      const EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
-
       // FD_mp1 += (phi_mp1 - phi_m)/dtm
       data_ops::incr(FD_mp1, phi_mp1,  1.0/m_dtm[a_m]);
       data_ops::incr(FD_mp1, phi_ast, -1.0/m_dtm[a_m]);
 
       m_amr->average_down(FD_mp1, m_cdr->get_phase());
       m_amr->interp_ghost(FD_mp1, m_cdr->get_phase());
+    }
+    else{
+      data_ops::set_value(FD_mp1, 0.0);
     }
   }
 }
@@ -1103,7 +1112,7 @@ void sisdc::compute_new_dt(const Real a_dt, const int a_num_corrections){
   const Real rel_err = m_err_thresh/m_max_error;
   const Real new_dt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
 
-#if 1 // Debug
+#if 0 // Debug
   if(procID() == 0) std::cout << m_max_error << "\t" << a_num_corrections << "\t" << a_dt << "\t" << new_dt << std::endl;
 #endif
 }
