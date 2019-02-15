@@ -64,10 +64,11 @@ protected:
   Real m_err_thresh;
   Real m_safety;
   Real m_dt_adapt;
+  Real m_new_dt; // dt for next time step
 
   bool m_adaptive_dt;
 
-  // Basically6 only debugging stuff
+  // Basically only debugging stuff
   bool m_do_advec_src;  
   bool m_do_diffusion;  
   bool m_do_poisson;
@@ -75,12 +76,12 @@ protected:
   bool m_compute_D;
   bool m_compute_v;
   bool m_compute_S;
-  bool m_have_dtf;
   bool m_consistent_E;
   bool m_consistent_rte;
   bool m_print_diagno;
   bool m_write_diagno;
   bool m_strong_diffu;
+  bool m_have_dt_err;
 
   // Error things
   Vector<Real> m_cdr_error;

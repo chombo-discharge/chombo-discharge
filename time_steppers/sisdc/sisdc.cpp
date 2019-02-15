@@ -30,12 +30,13 @@ sisdc::sisdc(){
   m_err_thresh    = 1.E-4;
   m_safety        = 0.9;
   m_num_diff_corr = 0;
+  m_new_dt        = 1.E99;
 
   m_which_nodes   = "lobatto";
 
   m_adaptive_dt    = false;
-  m_have_dtf       = false;
   m_strong_diffu   = false;
+  m_have_dt_err    = false;
 
   // Basically only for debugging
   m_compute_v      = true;
@@ -1112,11 +1113,31 @@ void sisdc::compute_new_dt(const Real a_dt, const int a_num_corrections){
   }
 
   const Real rel_err = m_err_thresh/m_max_error;
-  const Real new_dt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
+  const Real dt_adapt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
 
-#if 0 // Debug
-  if(procID() == 0) std::cout << m_max_error << "\t" << a_num_corrections << "\t" << a_dt << "\t" << new_dt << std::endl;
+  if(m_max_error <= m_err_thresh){ // Increase time step, but only if we're sufficiently far away form the error threshold
+    if(rel_err < m_safety){ // Far away from the error threshold
+      m_new_dt = dt_adapt;
+    }
+    else{
+      //      m_new_dt = m_safety*a_dt;  // If we're too close, reduce the new time step with safety margin
+      m_new_dt = m_safety*dt_adapt;
+    }
+  }
+  else{ // Decrease time step
+    m_new_dt = m_safety*dt_adapt;
+  }
+
+#if 1 // Debug
+  if(procID() == 0) std::cout << m_max_error << "\t"
+			      << a_num_corrections << "\t"
+			      << a_dt << "\t"
+			      << m_new_dt << "\t"
+			      << dt_adapt << "\t"
+			      << std::endl;
 #endif
+
+  m_have_dt_err = true;
 }
 
 void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
@@ -1130,16 +1151,30 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   const Real max_gl_dist = sisdc::get_max_lobatto_distance();
   
   m_dt_cfl = m_cdr->compute_cfl_dt();
-  const Real dt_cfl = 2.0*m_cfl*m_dt_cfl/(max_gl_dist);
-  if(dt_cfl < dt){
-    dt = dt_cfl;
-    a_timecode = time_code::cfl;
+  if(!m_adaptive_dt){
+    const Real dt_cfl = 2.0*m_cfl*m_dt_cfl/max_gl_dist;
+    if(dt_cfl < dt){
+      dt = dt_cfl;
+      a_timecode = time_code::cfl;
+    }
   }
+  else{
+    Real new_dt;
+    const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
+    if(m_have_dt_err){
+      new_dt = m_new_dt;
+      new_dt = Max(new_dt, dt_cfl*m_minCFL);
+      new_dt = Min(new_dt, dt_cfl*m_maxCFL);
+    }
+    else{
+      new_dt = m_maxCFL*dt_cfl;
+    }
 
-#if 0 // Debug
-  if(procID() == 0) std::cout << "max_gl_dist = " << max_gl_dist << std::endl;
-  if(procID() == 0) std::cout << "dt_cfl = " << m_dt_cfl << std::endl;
-#endif
+    if(new_dt < dt){
+      dt = new_dt;
+      a_timecode = time_code::error;
+    }
+  }
 
   const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
   if(dt_src < dt){

@@ -100,6 +100,7 @@ namespace time_code {
     relaxation_time = 3,
     restricted      = 4,
     hardcap         = 5,
+    error           = 6,
   };
 };
 
