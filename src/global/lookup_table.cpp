@@ -120,3 +120,23 @@ Real lookup_table::get_entry(const Real a_x) const {
 
   return value;
 }
+
+Real lookup_table::direct_lookup(const Real a_x) const {
+  if(a_x <= m_x[0]){
+    return m_y[0];
+  }
+  else if(a_x >= m_x[m_num_entries - 1]){
+    return m_y[m_num_entries - 1];
+  }
+  else{
+    for (int i = 0; i < m_x.size()-2; i++){
+      if(a_x >= m_x[i] && a_x <= m_x[i+1]){
+	Real value = m_y[i] + ((m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]))*(a_x - m_x[i]);
+	return value;
+
+      }
+    }
+  }
+
+  MayDay::Abort("lookup_table::direct_lookup - shouldn't happen");
+}

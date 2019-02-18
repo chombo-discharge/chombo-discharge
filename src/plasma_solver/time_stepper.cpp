@@ -763,16 +763,16 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					     const Real                    a_time,
 					     const Real                    a_dx){
   if(m_interp_sources){
-    this->compute_cdr_sources_interp(a_sources,
-				    a_cdr_densities,
-				    a_cdr_gradients,
-				    a_rte_densities,
-				    a_E,
-				    a_gradE,
-				    a_interp_stencils,
-				    a_box,
-				    a_time,
-				    a_dx);
+    this->compute_cdr_sources_irreg_interp(a_sources,
+					   a_cdr_densities,
+					   a_cdr_gradients,
+					   a_rte_densities,
+					   a_E,
+					   a_gradE,
+					   a_interp_stencils,
+					   a_box,
+					   a_time,
+					   a_dx);
   }
   else{
     // Not implemented yet

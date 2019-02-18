@@ -136,6 +136,7 @@ protected:
   void copy_sigma_p_to_sigma();
 
   // SISDC predictor routines
+  void set_dummy_error();
   void predictor_compute_FD_0();
   void predictor(const Real a_time);
   void predictor_advection_reaction(const int a_m);

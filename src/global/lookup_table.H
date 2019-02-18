@@ -60,6 +60,11 @@ public:
   virtual Real get_entry(const Real a_x) const;
 
   /*!
+    @brief Direct lookup, assumes non-uniform ordering. Performance killer. 
+  */ 
+  virtual Real direct_lookup(const Real a_x) const;
+
+  /*!
     @brief Swap x and y vectors
   */
   virtual void swap_xy();

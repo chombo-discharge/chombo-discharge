@@ -525,6 +525,7 @@ Real sisdc::advance(const Real a_dt){
     num_corrections = 0;
     sisdc::setup_subintervals(m_time, actual_dt);
 
+    sisdc::set_dummy_error();
     sisdc::predictor(m_time); // SISDC predictor
     for(int icorr = 0; icorr < m_k; icorr++){
       num_corrections++;
@@ -555,8 +556,6 @@ Real sisdc::advance(const Real a_dt){
   if(m_print_report){
     sisdc::adaptive_report(actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
   }
-
-
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
@@ -598,6 +597,10 @@ void sisdc::copy_sigma_to_sigma_m0(){
   EBAMRIVData& sigma0      = m_sigma_scratch->get_sigma()[0];
   const EBAMRIVData& sigma = m_sigma->get_state();
   data_ops::copy(sigma0, sigma);
+}
+
+void sisdc::set_dummy_error(){
+  m_max_error = 1.234567E89;
 }
 
 void sisdc::predictor_compute_FD_0(){

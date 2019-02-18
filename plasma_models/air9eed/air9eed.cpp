@@ -97,7 +97,9 @@ air9eed::air9eed(){
   m_e_mobility.scale_y(1./m_N); // Need to scale
   m_init_eed.swap_xy();         // Input table is in reverse order
 
-  m_e_mobility.dump_table();
+
+  //  m_e_mobility.dump_table();
+  m_init_eed.dump_table();
 }
 
 air9eed::~air9eed(){
@@ -298,6 +300,10 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_eed_idx]      -= products*loss;
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
+
+#if 1 // Debug
+  return source;
+#endif
 
   // k3 reaction. 
   products = k3 * n_N2p * n_N2 * (n_N2 + n_O2);
@@ -721,5 +727,5 @@ Real air9eed::compute_e_N2_scattering_loss() const {
 
 Real air9eed::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-  return m_init_eed.get_entry(EbyN)*(m_species[m_electron_idx]->initial_data(a_pos, a_time));
+  return m_init_eed.direct_lookup(EbyN)*(m_species[m_electron_idx]->initial_data(a_pos, a_time));
 }
