@@ -128,6 +128,7 @@ public:
 
 protected:
 
+  static std::string s_bolsig_energy_E;
   static std::string s_bolsig_mobility;
   static std::string s_bolsig_N2_alpha;
   static std::string s_bolsig_O2_alpha;
@@ -164,6 +165,7 @@ protected:
   Real m_excitation_efficiency;          // Excitation efficiency
 
   // Tables built from BOLSIG+
+  lookup_table m_init_eed;
   lookup_table m_e_mobility;
   lookup_table m_e_N2_alpha;
   lookup_table m_e_O2_alpha;
@@ -227,6 +229,8 @@ protected:
   Real compute_e_O2_dissociative_attachment_loss() const;
   Real compute_e_O2_scattering_loss() const;
   Real compute_e_N2_scattering_loss() const;
+
+  Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E);
 
 private:
 

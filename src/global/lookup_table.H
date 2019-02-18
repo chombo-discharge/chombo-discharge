@@ -60,6 +60,11 @@ public:
   virtual Real get_entry(const Real a_x) const;
 
   /*!
+    @brief Swap x and y vectors
+  */
+  virtual void swap_xy();
+
+  /*!
     @brief Add a table to this one
   */
   void operator+=(const lookup_table& a_table);

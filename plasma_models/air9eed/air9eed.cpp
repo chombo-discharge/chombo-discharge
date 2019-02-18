@@ -18,16 +18,20 @@
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
+std::string air9eed::s_bolsig_energy_E = "Energy (eV) 	Electric field / N (Td)";
 std::string air9eed::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";
 std::string air9eed::s_bolsig_N2_alpha = "C25   N2    Ionization    15.60 eV";
 std::string air9eed::s_bolsig_O2_alpha = "C42   O2    Ionization    12.06 eV";
 
+
 air9eed::air9eed(){
 
   MayDay::Warning("air9eed::air9eed - this class is really not done...");
-  
+
   m_num_species = 9;  // 8 reactive ones plus the eed
   m_num_photons = 3;  // Bourdon model for photons
+  m_eed_solve = true;
+  m_eed_index = 0;
 
   air9eed::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac); // Get gas parameters
 
@@ -90,7 +94,10 @@ air9eed::air9eed(){
 
   // Compute transport coefficients
   this->compute_transport_coefficients();
-  m_e_mobility.scale_y(1./m_N);
+  m_e_mobility.scale_y(1./m_N); // Need to scale
+  m_init_eed.swap_xy();         // Input table is in reverse order
+
+  m_e_mobility.dump_table();
 }
 
 air9eed::~air9eed(){
@@ -124,8 +131,13 @@ void air9eed::compute_transport_coefficients(){
 
     // Right trim string
     line.erase(line.find_last_not_of(" \n\r\t")+1);
-      
-    if(line == air9eed::s_bolsig_mobility){
+
+    if(line == air9eed::s_bolsig_energy_E){
+      which_table = &m_init_eed;
+      readLine = true;
+      continue;
+    }
+    else if(line == air9eed::s_bolsig_mobility){
       which_table = &m_e_mobility;
       readLine   = true;
       continue;
@@ -273,6 +285,10 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   loss = PolyGeom::dot(-je, a_E); 
   source[m_eed_idx] += loss;
   
+#if 1 // Debug
+  source[m_eed_idx] = this->compute_electron_mobility(6.0, m_N);
+  return source;
+#endif
   // k1 reaction
   loss     = dE_k1;
   products = k1 * n_e * n_N2;
@@ -286,6 +302,8 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_eed_idx]      -= products*loss;
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
+
+
 
   // k3 reaction. 
   products = k3 * n_N2p * n_N2 * (n_N2 + n_O2);
@@ -705,4 +723,9 @@ Real air9eed::compute_e_O2_scattering_loss() const {
 }
 Real air9eed::compute_e_N2_scattering_loss() const {
   return 1;
+}
+
+Real air9eed::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
+  const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
+  return m_init_eed.get_entry(EbyN)*(m_species[m_electron_idx]->initial_data(a_pos, a_time));
 }

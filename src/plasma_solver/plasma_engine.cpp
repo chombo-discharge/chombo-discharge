@@ -13,6 +13,7 @@
 #include "tags_factory.H"
 #include "units.H"
 
+#include <EBArith.H>
 #include <EBAlias.H>
 #include <LevelData.H>
 #include <EBCellFAB.H>
@@ -3415,11 +3416,13 @@ void plasma_engine::initialize_eed(){
   }
 
   const int finest_level = m_amr->get_finest_level();
+  const RealVect origin = m_physdom->get_prob_lo();
 
   // Compute E
   EBAMRCellData Ecell;
   m_amr->allocate(Ecell, phase::gas, SpaceDim);
   m_timestepper->compute_E(Ecell, phase::gas);
+  //  m_amr->interpolate_to_centroids(Ecell, phase::gas);
 
   const int eed_index = m_plaskin->get_eed_index();
 
@@ -3428,10 +3431,9 @@ void plasma_engine::initialize_eed(){
   RefCountedPtr<cdr_solver>& eed_solver = cdr->get_solvers()[eed_index];
 
   EBAMRCellData& eed_density = eed_solver->get_state();
-  
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-
+    const Real dx = m_amr->get_dx()[lvl];
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBCellFAB& E = (*Ecell[lvl])[dit()];
       const EBISBox& ebisbox = E.getEBISBox();
@@ -3444,8 +3446,9 @@ void plasma_engine::initialize_eed(){
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect Evec = RealVect(D_DECL(E(vof, 0), E(vof, 1), E(vof, 2)));
+	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
 
-	density(vof,0) = m_plaskin->init_eed(Evec);
+	density(vof,0) = m_plaskin->init_eed(pos, m_time, Evec);
       }
     }
   }

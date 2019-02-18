@@ -16,9 +16,7 @@ lookup_table::lookup_table(){
   m_y.resize(m_num_entries);
 }
 
-lookup_table::~lookup_table(){
-}
-
+lookup_table::~lookup_table(){}
 
 lookup_table::lookup_table(const lookup_table& a_table){
   m_dx = a_table.m_dx;
@@ -55,6 +53,19 @@ void lookup_table::scale_y(const Real& a_scale){
 void lookup_table::dump_table(){
   for (int i = 0; i < m_y.size(); i++){
     pout() << m_x[i] << "\t" << m_y[i] << endl;
+  }
+}
+
+void lookup_table::swap_xy(){
+  Vector<Real> tmp = m_x;
+  m_x = m_y;
+  m_y = tmp;
+
+  if(m_num_entries == 1){
+    m_dx    = 0.;
+  }
+  else if(m_num_entries >= 2){
+    m_dx    = m_x[1] - m_x[0];
   }
 }
 

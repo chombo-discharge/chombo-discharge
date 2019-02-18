@@ -633,7 +633,6 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
       const EBCellFAB& gE = (*grad_E[lvl])[dit()];
 
       // This does all cells
-
       time_stepper::compute_cdr_sources_reg(sources,
 					    cdr_densities,
 					    cdr_gradients,

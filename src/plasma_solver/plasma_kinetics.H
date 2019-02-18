@@ -169,7 +169,7 @@ public:
   /*!
     @brief Initialize electron energy density
   */
-  virtual Real init_eed(const RealVect a_E){
+  virtual Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
     return 0.0;
   }
 
