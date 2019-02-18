@@ -1,0 +1,14 @@
+# ====================================================================================================
+# AIR9EED CLASS OPTIONS
+# ====================================================================================================
+air9eed.gas_temperature    = 300
+air9eed.gas_pressure       = 1.0
+
+air9eed.electrode_townsend2           = 1.E-3
+air9eed.dielectric_townsend2          = 1.E-3
+air9eed.electrode_quantum_efficiency  = 1.E-3
+air9eed.dielectric_quantum_efficiency = 1.E-3
+
+air9eed.quenching_pressure         = 0.03947
+air9eed.photoionization_efficiency = 0.1
+air9eed.excitation_efficiency      = 0.6

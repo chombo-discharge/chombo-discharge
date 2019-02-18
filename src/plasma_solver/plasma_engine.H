@@ -54,7 +54,6 @@
       plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
       plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
       plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
-
 */
 class plasma_engine {
 public:
@@ -886,6 +885,11 @@ protected:
     @brief Close file for mass dump
   */
   virtual void close_charge_dump_file(ofstream& a_file);
+
+  /*!
+    @brief Initialize eed
+  */
+  virtual void initialize_eed();
 
   /*!
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);

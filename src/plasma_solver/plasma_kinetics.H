@@ -24,7 +24,10 @@ public:
   /*!
     @brief Constructor
   */
-  plasma_kinetics(){}
+  plasma_kinetics(){
+    m_eed_solve = false;
+    m_eed_index = 0;
+  }
 
   /*!
     @brief Destructor
@@ -190,8 +193,30 @@ public:
   int get_num_photons() const {
     return m_photons.size();
   }
+
+  /*!
+    @brief Check if solver solves for eed
+  */
+  bool solve_eed(){
+    return m_eed_solve;
+  }
+
+  /*!
+    @brief Get eed solver index
+  */
+  int get_eed_index(){
+    return m_eed_index;
+  }
+
+  Real init_eed(const RealVect a_E){
+    return 1.2345678E9;
+  }
   
 protected:
+
+  bool m_eed_solve;
+  
+  int m_eed_index;
 
   /*!
     @brief List of species

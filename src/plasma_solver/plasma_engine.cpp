@@ -1320,6 +1320,12 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   // Solve the elliptic parts
   bool converged = m_timestepper->solve_poisson();
+  
+  // If the plasma_kinetics module solves for the electron energy density, it should be re-initialized based on the field
+  if(m_plaskin->solve_eed()){
+    this->initialize_eed();
+  }
+  
   if(!converged){ // If we don't converge, try new solver settings
     if(m_verbosity > 0){
       pout() << "plasma_engine::regrid - Poisson solver failed to converge. Trying to auto-tune new settings." << endl;
@@ -1328,6 +1334,11 @@ void plasma_engine::regrid(const bool a_use_initial_data){
     RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
     poisson->auto_tune();
     converged = m_timestepper->solve_poisson();
+    
+    // If the plasma_kinetics module solves for the electron energy density, it should be re-initialized based on the field
+    if(m_plaskin->solve_eed()){
+      this->initialize_eed();
+    }
 
     if(!converged){
       if(m_verbosity > 0){
@@ -2167,6 +2178,11 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   }
   m_timestepper->regrid_internals();
 
+  // If the plasma_kinetics module solves for the electron energy density, it should be initialized
+  if(m_plaskin->solve_eed()){
+    this->initialize_eed();
+  }
+
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
   m_timestepper->compute_cdr_diffusion(); 
@@ -2185,6 +2201,8 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
       this->grid_report();
     }
   }
+
+
 }
 
 void plasma_engine::setup_for_restart(const int a_init_regrids, const std::string a_restart_file){
@@ -3388,6 +3406,49 @@ Vector<string> plasma_engine::get_output_variable_names(){
   }
 
   return names;
+}
+
+void plasma_engine::initialize_eed(){
+  CH_TIME("plasma_engine::initialize_eed");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::initialize_eed_" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  // Compute E
+  EBAMRCellData Ecell;
+  m_amr->allocate(Ecell, phase::gas, SpaceDim);
+  m_timestepper->compute_E(Ecell, phase::gas);
+
+  const int eed_index = m_plaskin->get_eed_index();
+
+  // Get the eed solver
+  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
+  RefCountedPtr<cdr_solver>& eed_solver = cdr->get_solvers()[eed_index];
+
+  EBAMRCellData& eed_density = eed_solver->get_state();
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBCellFAB& E = (*Ecell[lvl])[dit()];
+      const EBISBox& ebisbox = E.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const Box box = dbl.get(dit());
+      const IntVectSet ivs(box);
+      
+      EBCellFAB& density = (*eed_density[lvl])[dit()];
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect Evec = RealVect(D_DECL(E(vof, 0), E(vof, 1), E(vof, 2)));
+
+	density(vof,0) = m_plaskin->init_eed(Evec);
+      }
+    }
+  }
 }
 
 void plasma_engine::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
