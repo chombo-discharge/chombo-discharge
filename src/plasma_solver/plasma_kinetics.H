@@ -167,6 +167,13 @@ public:
 			     const RealVect& a_pos) const = 0;
 
   /*!
+    @brief Initialize electron energy density
+  */
+  virtual Real init_eed(const RealVect a_E){
+    return 0.0;
+  }
+
+  /*!
     @brief Get all ions
   */
   const Vector<RefCountedPtr<species> >& get_species() const { 
@@ -208,9 +215,7 @@ public:
     return m_eed_index;
   }
 
-  Real init_eed(const RealVect a_E){
-    return 1.2345678E9;
-  }
+
   
 protected:
 
