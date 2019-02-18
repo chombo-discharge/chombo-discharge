@@ -27,15 +27,16 @@
   Class options
   -------------
 
-  time_stepper.verbosity        = 1     # Class verbosity
-  time_stepper.solver_verbosity = 0     # Individual solver verbosities
-  time_stepper.fast_rte         = 1     # Solve RTE every this time steps
-  time_stepper.fast_poisson     = 1     # Solve Poisson every this time steps
-  time_stepper.min_dt           = 0.    # Minimum permitted time step
-  time_stepper.min_dt           = 1.    # Maximum permitted time step
-  time_stepper.cfl              = 0.5   # CFL number
-  time_stepper.relax_time       = 1.0   # Relaxation time constant
-  time_stepper.source_growth    = 100.0 # Relaxation time constant
+  time_stepper.verbosity        = 1      # Class verbosity
+  time_stepper.solver_verbosity = 0      # Individual solver verbosities
+  time_stepper.fast_rte         = 1      # Solve RTE every this time steps
+  time_stepper.fast_poisson     = 1      # Solve Poisson every this time steps
+  time_stepper.min_dt           = 0.     # Minimum permitted time step
+  time_stepper.min_dt           = 1.     # Maximum permitted time step
+  time_stepper.cfl              = 0.5    # CFL number
+  time_stepper.relax_time       = 1.0    # Relaxation time constant
+  time_stepper.source_growth    = 100.0  # Relaxation time constant
+  time_stepper.source_comp      = interp # Interpolated or volume-weighted
 
 */
 class time_stepper {
@@ -248,6 +249,20 @@ public:
 					 const Real                    a_dx);
 
   /*!
+    @brief Compute source terms on irregular cells
+  */
+  virtual void compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&           a_sources,
+						const Vector<EBCellFAB*>&     a_cdr_densities,
+						const Vector<EBCellFAB*>&     a_cdr_gradients,
+						const Vector<EBCellFAB*>&     a_rte_densities,
+						const EBCellFAB&              a_E,
+						const EBCellFAB&              a_gradE,
+						const BaseIVFAB<VoFStencil>&  a_interp_stencils,
+						const Box                     a_box,
+						const Real                    a_time,
+						const Real                    a_dx);
+
+  /*!
     @brief Compute cdr velocities
   */
   virtual void compute_cdr_velocities();
@@ -449,6 +464,11 @@ public:
     @brief Set fast rte
   */
   virtual void set_fast_poisson(const int a_fast_poisson);
+
+  /*!
+    @brief Set type of source term computation
+  */
+  virtual void set_source_computation();
 
   /*!
     @brief Set hardcap on the time step
@@ -807,6 +827,11 @@ protected:
     restriction time for the first species defined in the plasma kinetics
   */
   bool m_src_elec_only;
+
+  /*!
+    @brief Interpolate source to centroids (or use volume-weighted in-cell stuff)
+  */
+  bool m_interp_sources;
 };
 
 #endif

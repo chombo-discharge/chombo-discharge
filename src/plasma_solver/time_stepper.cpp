@@ -28,6 +28,7 @@ time_stepper::time_stepper(){
   this->set_fast_rte(1);
   this->set_fast_poisson(1);
   this->set_solver_verbosity(0);
+  this->set_source_computation();
 }
 
 time_stepper::~time_stepper(){
@@ -761,6 +762,33 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					     const Box                     a_box,
 					     const Real                    a_time,
 					     const Real                    a_dx){
+  if(m_interp_sources){
+    this->compute_cdr_sources_interp(a_sources,
+				    a_cdr_densities,
+				    a_cdr_gradients,
+				    a_rte_densities,
+				    a_E,
+				    a_gradE,
+				    a_interp_stencils,
+				    a_box,
+				    a_time,
+				    a_dx);
+  }
+  else{
+    // Not implemented yet
+  }
+}
+
+void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&           a_sources,
+						    const Vector<EBCellFAB*>&     a_cdr_densities,
+						    const Vector<EBCellFAB*>&     a_cdr_gradients,
+						    const Vector<EBCellFAB*>&     a_rte_densities,
+						    const EBCellFAB&              a_E,
+						    const EBCellFAB&              a_gradE,
+						    const BaseIVFAB<VoFStencil>&  a_interp_stencils,
+						    const Box                     a_box,
+						    const Real                    a_time,
+						    const Real                    a_dx){
   const Real zero = 0.0;
   
   const int num_photons  = m_plaskin->get_num_photons();
@@ -847,6 +875,7 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
     }
   }
 }
+
 
 void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_velocities,
 					  const Vector<EBAMRCellData*>& a_cdr_densities,
@@ -2098,6 +2127,25 @@ void time_stepper::set_fast_poisson(const int a_fast_poisson){
   pp.query("fast_poisson", m_fast_poisson);
   if(m_fast_poisson <= 0){
     m_fast_poisson = a_fast_poisson;
+  }
+}
+
+void time_stepper::set_source_computation(){
+  m_interp_sources = true;
+
+  std::string str;
+  ParmParse pp("time_stepper");
+  if(pp.contains("source_comp")){
+    pp.get("source_comp", str);
+    if(str == "interp"){
+      m_interp_sources = true;
+    }
+    else if(str == "kappa"){
+      m_interp_sources = false;
+    }
+    else{
+      MayDay::Abort("time_stepper::set_source_computation - unknown type requested");
+    }
   }
 }
 

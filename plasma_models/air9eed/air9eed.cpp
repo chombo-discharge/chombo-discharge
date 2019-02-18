@@ -285,10 +285,6 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   loss = PolyGeom::dot(-je, a_E); 
   source[m_eed_idx] += loss;
   
-#if 1 // Debug
-  source[m_eed_idx] = this->compute_electron_mobility(6.0, m_N);
-  return source;
-#endif
   // k1 reaction
   loss     = dE_k1;
   products = k1 * n_e * n_N2;
@@ -302,8 +298,6 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_eed_idx]      -= products*loss;
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
-
-
 
   // k3 reaction. 
   products = k3 * n_N2p * n_N2 * (n_N2 + n_O2);
