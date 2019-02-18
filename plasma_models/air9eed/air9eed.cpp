@@ -301,14 +301,12 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
 
-#if 1 // Debug
-  return source;
-#endif
-
   // k3 reaction. 
   products = k3 * n_N2p * n_N2 * (n_N2 + n_O2);
   source[m_N2plus_idx] -= products;
   source[m_N4plus_idx] += products;
+
+  return source;
 
   // k4 reaction
   products = k4 * n_N4p * n_O2;
@@ -560,7 +558,7 @@ Real air9eed::compute_O2plusN2_O2_to_O4plus_N2() const {return 1.E-15;}
 Real air9eed::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg) const {return 2.03E-34*pow(a_Tg, -3.2);}
 Real air9eed::compute_e_O4plus_to_2O2(const Real a_Te) const {return 2.42E-11/(sqrt(a_Te));}
 Real air9eed::compute_e_O2plus_to_O2(const Real a_Te) const {return 6.E-11/a_Te;}
-Real air9eed::compute_e_2O2_to_O2minus_O2(const Real a_Te) const {return 0.0;}//6E-39/a_Te;}
+Real air9eed::compute_e_2O2_to_O2minus_O2(const Real a_Te) const {6E-39/a_Te;}
 Real air9eed::compute_O2minus_O4plus_to_3O2() const {return 1.E-13;}
 Real air9eed::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
 Real air9eed::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}

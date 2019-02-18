@@ -30,7 +30,7 @@ sisdc::sisdc(){
   m_err_thresh    = 1.E-4;
   m_safety        = 0.9;
   m_num_diff_corr = 0;
-  m_new_dt        = 1.E99;
+  m_new_dt        = 1.234567E89;
 
   m_which_nodes   = "lobatto";
 
@@ -539,16 +539,15 @@ Real sisdc::advance(const Real a_dt){
     // Compute a new time step. If it is smaller than the minimum allowed CFL step, accept the step anyways
     if(m_adaptive_dt){
       // This restricts new_dt to > min_cfl and > min_hardcap. If actual_dt is equal these bounds, we accept the step
-      sisdc::compute_new_dt(accept_step, actual_dt, num_corrections); 
-
-      // Step rejection, use the new dt
-      if(!accept_step){  
+      sisdc::compute_new_dt(accept_step, actual_dt, num_corrections);
+      
+      if(!accept_step){  // Step rejection, use the new dt
 	actual_dt = m_new_dt;
 	num_reject++;
       }
     }
     else{
-      m_new_dt = 1.E99;
+      m_new_dt = 1.234567E89;
       accept_step = true;
     }
   }
