@@ -67,6 +67,7 @@ protected:
   Real m_new_dt; // dt for next time step
 
   bool m_adaptive_dt;
+  bool m_print_report;
 
   // Basically only debugging stuff
   bool m_do_advec_src;  
@@ -157,6 +158,7 @@ protected:
 
   // Step size control routines
   void compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
+  void adaptive_report(const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err);
 
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states

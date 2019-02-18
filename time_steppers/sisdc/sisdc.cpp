@@ -34,6 +34,7 @@ sisdc::sisdc(){
 
   m_which_nodes   = "lobatto";
 
+  m_print_report   = false;
   m_adaptive_dt    = false;
   m_strong_diffu   = false;
   m_have_dt_err    = false;
@@ -76,6 +77,12 @@ sisdc::sisdc(){
       }
       else if(str == "chebyshev"){
 	m_which_nodes = "chebyshev";
+      }
+    }
+    if(pp.contains("print_report")){
+      pp.get("print_report", str);
+      if(str == "true"){
+	m_print_report = true;
       }
     }
     if(pp.contains("adaptive_dt")){
@@ -513,8 +520,9 @@ Real sisdc::advance(const Real a_dt){
   int num_reject  = 0;
   Real actual_dt = a_dt;
   bool accept_step = false;
+  int num_corrections = 0;
   while(!accept_step){
-    int num_corrections = 0;
+    num_corrections = 0;
     sisdc::setup_subintervals(m_time, actual_dt);
 
     sisdc::predictor(m_time); // SISDC predictor
@@ -539,19 +547,16 @@ Real sisdc::advance(const Real a_dt){
       }
     }
     else{
+      m_new_dt = 1.E99;
       accept_step = true;
     }
-
-#if 1 // Debug
-    if(procID() == 0) std::cout << "\taccept = " << accept_step
-				<< "\tactual_dt = " << actual_dt
-				<< "\tnew_dt = " << m_new_dt
-				<< "\tcorr = " << num_corrections
-				<< "\t # rejections = " << num_reject
-				<< "\t err = " << m_max_error
-				<< std::endl;
-#endif
   }
+
+  if(m_print_report){
+    sisdc::adaptive_report(actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
+  }
+
+
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
@@ -1190,6 +1195,32 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   m_have_dt_err = true;
 }
 
+void sisdc::adaptive_report(const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err){
+  CH_TIME("sisdc::adaptive_report");
+  if(m_verbosity > 5){
+    pout() << "sisdc::adaptive_report" << endl;
+  }
+
+  pout() << "\n";
+  pout() << "sisdc::adaptive_report breakdown" << endl;
+  pout() << "--------------------------------\n";
+  pout() << "\t Advanced dt  = " << a_dt << endl;
+  pout() << "\t New dt       = " << a_new_dt << endl;
+  pout() << "\t Corrections  = " << a_corr << endl;
+  pout() << "\t Rejections   = " << a_rej << endl;
+  pout() << "\t Max error    = " << a_max_err << endl;
+  pout() << "\n";
+
+#if 0 // Debug
+  if(procID() == 0) std::cout << "\tactual_dt = " << a_dt
+			      << "\tnew_dt = " << a_new_dt
+			      << "\tcorr = " << a_corr
+			      << "\t # rejections = " << a_rej
+			      << "\t err = " << a_max_err
+			      << std::endl;
+#endif
+}
+
 void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   CH_TIME("sisdc::compute_dt");
   if(m_verbosity > 5){
@@ -1217,7 +1248,7 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
       new_dt = Min(new_dt, dt_cfl*m_maxCFL);
     }
     else{
-      new_dt = m_maxCFL*dt_cfl;
+      new_dt = 0.5*(m_maxCFL+m_minCFL)*dt_cfl;
     }
 
     if(new_dt < dt){

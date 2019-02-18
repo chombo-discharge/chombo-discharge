@@ -21,11 +21,12 @@ sisdc.corr_iter    = 1        # Number of iterations of the correction equation.
 # This defines the weak coupling used for the implicit diffusion advance. 
 # ---------------------------------------------------------
 sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
-sisdc.num_corrections    = 5     # Number of corrections for 'strong'
+sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 
 # ---------------------------------------------------------	
 # Adaptive time stepping
-# ---------------------------------------------------------	
+# ---------------------------------------------------------
+sisdc.print_report    = false    # Print report with error and stuff	
 sisdc.adaptive_dt     = false    # Use adaptive time stepping
 sisdc.adaptive_order  = false    # Use adaptive integration order
 sisdc.min_order       = 2        # Minimum accepted order
