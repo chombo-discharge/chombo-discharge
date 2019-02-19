@@ -26,6 +26,8 @@ std::string air9eed::s_bolsig_O2_alpha = "C42   O2    Ionization    12.06 eV";
 
 air9eed::air9eed(){
 
+  // Comment: I've taken out the dissociative excitation losses and all excitation losses
+
   MayDay::Warning("air9eed::air9eed - this class is really not done...");
 
   m_num_species = 9;  // 8 reactive ones plus the eed
@@ -59,6 +61,22 @@ air9eed::air9eed(){
     pp.query("quenching_pressure", m_pq);
     
     m_pq *= units::s_atm2pascal;
+  }
+
+  { // Mobile ions
+    m_mobile_ions = true;
+    std::string str;
+
+    ParmParse pp("air9eed");
+    if(pp.contains("mobile_ions")){
+      pp.get("mobile_ions", str);
+      if(str == "true"){
+	m_mobile_ions = true;
+      }
+      else if(str == "false"){
+	m_mobile_ions = false;
+      }
+    }
   }
 
   // Instantiate cdr species
@@ -99,7 +117,7 @@ air9eed::air9eed(){
 
 
   //  m_e_mobility.dump_table();
-  m_init_eed.dump_table();
+ //  m_init_eed.dump_table();
 }
 
 air9eed::~air9eed(){
@@ -112,8 +130,8 @@ void air9eed::get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2fra
   pp.query("gas_pressure", a_p);
 
   a_Tg = 300.;
-  a_O2frac = 0.21;
-  a_N2frac = 0.79; 
+  a_O2frac = 0.20;
+  a_N2frac = 0.80; 
 
   const Real tot_frac = a_O2frac + a_N2frac; 
   a_p      = a_p*units::s_atm2pascal;
@@ -206,13 +224,15 @@ Vector<RealVect> air9eed::compute_cdr_velocities(const Real&         a_time,
 
   velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy, m_N)*(-a_E);
   velocities[m_electron_idx] = this->compute_electron_mobility(electron_energy, m_N)*(-a_E);
-  velocities[m_N2plus_idx]   = this->compute_N2plus_mobility(EbyN)*a_E;
-  velocities[m_N4plus_idx]   = this->compute_N4plus_mobility(EbyN)*a_E;
-  velocities[m_O2plus_idx]   = this->compute_O2plus_mobility(EbyN)*a_E;
-  velocities[m_O4plus_idx]   = this->compute_O4plus_mobility(EbyN)*a_E;
-  velocities[m_O2plusN2_idx] = this->compute_O2plusN2_mobility(EbyN)*a_E;
-  velocities[m_O2minus_idx]  = this->compute_O2minus_mobility(EbyN)*(-a_E);
-  velocities[m_Ominus_idx]   = this->compute_Ominus_mobility(EbyN)*(-a_E);
+  if(m_mobile_ions){
+    velocities[m_N2plus_idx]   = this->compute_N2plus_mobility(EbyN)*a_E;
+    velocities[m_N4plus_idx]   = this->compute_N4plus_mobility(EbyN)*a_E;
+    velocities[m_O2plus_idx]   = this->compute_O2plus_mobility(EbyN)*a_E;
+    velocities[m_O4plus_idx]   = this->compute_O4plus_mobility(EbyN)*a_E;
+    velocities[m_O2plusN2_idx] = this->compute_O2plusN2_mobility(EbyN)*a_E;
+    velocities[m_O2minus_idx]  = this->compute_O2minus_mobility(EbyN)*(-a_E);
+    velocities[m_Ominus_idx]   = this->compute_Ominus_mobility(EbyN)*(-a_E);
+  }
 
   return velocities;
 }
@@ -224,7 +244,11 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
 					       const Vector<Real>&     a_cdr_densities,
 					       const Vector<Real>&     a_rte_densities,
 					       const Vector<RealVect>& a_grad_cdr) const {
-  Vector<Real> source(m_num_species, 0.0); 
+  Vector<Real> source(m_num_species, 0.0);
+
+#if 0 // Debug
+  return source;
+#endif
 
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
   const Real Te              = 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb);  // Kelvin
@@ -286,7 +310,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   // Joule heating
   loss = PolyGeom::dot(-je, a_E); 
   source[m_eed_idx] += loss;
-  
+
   // k1 reaction
   loss     = dE_k1;
   products = k1 * n_e * n_N2;
@@ -302,11 +326,9 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_O2plus_idx]   += products;
 
   // k3 reaction. 
-  products = k3 * n_N2p * n_N2 * (n_N2 + n_O2);
+  products = k3 * n_N2p * n_N2 * m_N;
   source[m_N2plus_idx] -= products;
   source[m_N4plus_idx] += products;
-
-  return source;
 
   // k4 reaction
   products = k4 * n_N4p * n_O2;
@@ -335,7 +357,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_O4plus_idx]   += products;
 
   // k9 reaction
-  products = k9 * n_O2p * n_O2 * (n_O2 + n_N2);
+  products = k9 * n_O2p * n_O2 * m_N;
   source[m_O2plus_idx] -= products;
   source[m_O4plus_idx] += products;
 
@@ -370,6 +392,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_O2plus_idx]  -= products;
 
   // k16 reaction
+#if 0
   loss     = dE_k16;
   products = k16 * n_e * n_O2;
   source[m_eed_idx] -= products*loss;
@@ -385,12 +408,14 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_eed_idx]      -= products*loss;
   source[m_electron_idx] -= products;
   source[m_Ominus_idx]   += products;
+#endif
 
   // k19 reaction
   products = k19 * n_Om * n_O2p;
   source[m_Ominus_idx] -= products;
   source[m_O2plus_idx] -= products;
 
+#if 0
   // k20 reaction
   loss     = dE_k20;
   products = k20 * n_e * n_N2;
@@ -400,6 +425,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   loss     = dE_k21;
   products = k21 * n_e * n_O2;
   source[m_eed_idx] -= products*loss;
+#endif
 
   // Photoionization gamma + O2 -> e + O2+
   const air9eed::photon_one*   photon1 = static_cast<air9eed::photon_one*>   (&(*m_photons[m_photon1_idx]));
@@ -428,8 +454,7 @@ Vector<Real> air9eed::compute_cdr_fluxes(const Real&         a_time,
 					 const Real&         a_townsend2,
 					 const Real&         a_quantum_efficiency) const {
 
-  Vector<Real> fluxes(m_num_species, 0.0);
-
+  Vector<Real> fluxes(m_num_species, 0.0);  
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
   
@@ -452,10 +477,10 @@ Vector<Real> air9eed::compute_cdr_fluxes(const Real&         a_time,
     }
   }
 
-  // Drift outflow 
+  // Drift outflow for now
   for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
     fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
+    //    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
   }
 
   return fluxes;
@@ -495,7 +520,6 @@ Vector<Real> air9eed::compute_rte_source_terms(const Real&         a_time,
 					       const Vector<Real>& a_cdr_densities) const {
 
   // We take the source terms as Se = alpha*Ne*ve
-
   Vector<Real> ret(m_num_photons, 0.0);
 
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
@@ -516,7 +540,7 @@ Real air9eed::initial_sigma(const Real a_time, const RealVect& a_pos) const {
 }
 
 Real air9eed::compute_eed_mobility(const Real a_energy, const Real a_N) const {
-  return (5.0/3.0)*this->compute_electron_mobility(a_energy, a_N);
+  return (5.0/3.0)*m_e_mobility.get_entry(a_energy);
 }
 Real air9eed::compute_electron_mobility(const Real a_energy, const Real a_N) const {
   return m_e_mobility.get_entry(a_energy);
@@ -725,5 +749,9 @@ Real air9eed::compute_e_N2_scattering_loss() const {
 
 Real air9eed::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
+#if 0 // Original code
   return m_init_eed.direct_lookup(EbyN)*(m_species[m_electron_idx]->initial_data(a_pos, a_time));
+#else // Debug code
+  return 1.0*(m_species[m_electron_idx]->initial_data(a_pos, a_time));
+#endif
 }

@@ -15,20 +15,12 @@ air9eed::eed::eed(){
   m_name      = "electron energy density";
   m_unit      = "eVm-3";
   m_charge    = 0;
-  m_diffusive = true;
+  m_diffusive = false;
+  m_mobile    = true;
 
   // Get gas parameters
   Real Tg, p, N, O2frac, N2frac;
   air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
-
-  { // Get initial energy
-    Real init_ionization;
-    ParmParse pp("air9eed");
-    pp.get("initial_electron_energy", m_init_energy);
-    pp.get("initial_ionization", init_ionization);
-
-    m_init_energy *= init_ionization;
-  }
 }
 
 air9eed::eed::~eed(){
@@ -56,12 +48,24 @@ air9eed::N2plus::N2plus() {
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
   air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
   ParmParse pp("air9eed");
   pp.get("initial_ionization", m_initial_ionization);
   m_initial_ionization *= N2frac;
+
+  std::string str;
+  if(pp.contains("mobile_ions")){
+    pp.get("mobile_ions", str);
+    if(str == "true"){
+      m_mobile = true;
+    }
+    else if(str == "false"){
+      m_mobile = false;
+    }
+  }
 }
 
 air9eed::N2plus::~N2plus(){
@@ -73,6 +77,19 @@ air9eed::N4plus::N4plus(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile = true;
+
+    std::string str;
+  ParmParse pp("air9eed");
+  if(pp.contains("mobile_ions")){
+    pp.get("mobile_ions", str);
+    if(str == "true"){
+      m_mobile = true;
+    }
+    else if(str == "false"){
+      m_mobile = false;
+    }
+  }
 }
 
 air9eed::N4plus::~N4plus(){
@@ -84,12 +101,24 @@ air9eed::O2plus::O2plus(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
   air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  std::string str;
   ParmParse pp("air9eed");
   pp.get("initial_ionization", m_initial_ionization);
   m_initial_ionization *= O2frac;
+
+  if(pp.contains("mobile_ions")){
+    pp.get("mobile_ions", str);
+    if(str == "true"){
+      m_mobile = true;
+    }
+    else if(str == "false"){
+      m_mobile = false;
+    }
+  }
 }
 
 air9eed::O2plus::~O2plus(){
@@ -101,6 +130,19 @@ air9eed::O4plus::O4plus(){
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile = true;
+
+  std::string str;
+  ParmParse pp("air9eed");
+  if(pp.contains("mobile_ions")){
+    pp.get("mobile_ions", str);
+    if(str == "true"){
+      m_mobile = true;
+    }
+    else if(str == "false"){
+      m_mobile = false;
+    }
+  }
 }
 
 air9eed::O4plus::~O4plus(){
@@ -112,6 +154,19 @@ air9eed::O2plusN2::O2plusN2() {
   m_unit   = "m-3";
   m_charge = 1;
   m_diffusive = false;
+  m_mobile = true;
+
+  std::string str;
+  ParmParse pp("air9eed");
+  if(pp.contains("mobile_ions")){
+    pp.get("mobile_ions", str);
+    if(str == "true"){
+      m_mobile = true;
+    }
+    else if(str == "false"){
+      m_mobile = false;
+    }
+  }
 }
 
 air9eed::O2plusN2::~O2plusN2(){
@@ -123,6 +178,19 @@ air9eed::O2minus::O2minus(){
   m_unit   = "m-3";
   m_charge = -1;
   m_diffusive = false;
+  m_mobile = true;
+
+    std::string str;
+  ParmParse pp("air9eed");
+  if(pp.contains("mobile_ions")){
+    pp.get("mobile_ions", str);
+    if(str == "true"){
+      m_mobile = true;
+    }
+    else if(str == "false"){
+      m_mobile = false;
+    }
+  }
 }
 
 air9eed::O2minus::~O2minus(){
@@ -134,6 +202,19 @@ air9eed::Ominus::Ominus(){
   m_unit   = "m-3";
   m_charge = -1;
   m_diffusive = false;
+  m_mobile = true;
+
+    std::string str;
+  ParmParse pp("air9eed");
+  if(pp.contains("mobile_ions")){
+    pp.get("mobile_ions", str);
+    if(str == "true"){
+      m_mobile = true;
+    }
+    else if(str == "false"){
+      m_mobile = false;
+    }
+  }
 }
 
 air9eed::Ominus::~Ominus(){
@@ -204,7 +285,7 @@ air9eed::photon_three::~photon_three(){
 }
 
 Real air9eed::eed::initial_data(const RealVect a_pos, const Real a_time) const{
-  return m_init_energy;
+  return 1.E30;
 }
 
 Real air9eed::electron::initial_data(const RealVect a_pos, const Real a_time) const {

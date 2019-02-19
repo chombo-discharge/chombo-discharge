@@ -500,7 +500,7 @@ Real sisdc::advance(const Real a_dt){
   //        advancement. If you think that this may not be the case, activate the debugging below
   // ---------------------------------------------------------------------------------------------------
   { // Debug
-#if 0 
+#if 0
     sisdc::compute_E_into_scratch();
     sisdc::compute_cdr_gradients();
     sisdc::compute_cdr_velo(m_time);
@@ -1145,19 +1145,18 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
   const Real max_gl_dist = sisdc::get_max_lobatto_distance();
   const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
-  if(a_dt <= dt_cfl*m_minCFL){
+  if(a_dt <= dt_cfl*m_minCFL && m_max_error > m_err_thresh){ // No choice but to accept
     a_accept_step = true;
     m_new_dt = dt_cfl*m_minCFL;
     return;
   }
-  if(a_dt <= m_min_dt){
+  if(a_dt <= m_min_dt && m_max_error > m_err_thresh){ // No choice but to accept
     a_accept_step = true;
     m_new_dt = m_min_dt;
     return;
   }
 
-  // If we made it here, we should be able to decrease the time step as we see fit.
-  
+  // If we made it here, we should be able to decrease or increase the time step as we see fit.
   const Real rel_err = m_err_thresh/m_max_error;
   const Real dt_adapt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
   if(m_max_error <= m_err_thresh){ // Increase time step, but only if we're sufficiently far away form the error threshold

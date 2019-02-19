@@ -1280,6 +1280,9 @@ void plasma_engine::regrid(const bool a_use_initial_data){
   if(!got_new_tags){
     if(a_use_initial_data){
       m_timestepper->initial_data();
+      if(m_plaskin->solve_eed()){
+	this->initialize_eed();
+      }
     }
 
     if(m_verbosity > 1){
@@ -1322,10 +1325,6 @@ void plasma_engine::regrid(const bool a_use_initial_data){
   // Solve the elliptic parts
   bool converged = m_timestepper->solve_poisson();
   
-  // If the plasma_kinetics module solves for the electron energy density, it should be re-initialized based on the field
-  if(m_plaskin->solve_eed()){
-    this->initialize_eed();
-  }
   
   if(!converged){ // If we don't converge, try new solver settings
     if(m_verbosity > 0){
@@ -1335,11 +1334,6 @@ void plasma_engine::regrid(const bool a_use_initial_data){
     RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
     poisson->auto_tune();
     converged = m_timestepper->solve_poisson();
-    
-    // If the plasma_kinetics module solves for the electron energy density, it should be re-initialized based on the field
-    if(m_plaskin->solve_eed()){
-      this->initialize_eed();
-    }
 
     if(!converged){
       if(m_verbosity > 0){
@@ -1353,6 +1347,10 @@ void plasma_engine::regrid(const bool a_use_initial_data){
   }
 
   const Real elliptic_solve = MPI_Wtime(); // Elliptic solve time
+
+  if(m_plaskin->solve_eed() && a_use_initial_data){
+    this->initialize_eed();
+  }
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
@@ -3452,6 +3450,9 @@ void plasma_engine::initialize_eed(){
       }
     }
   }
+
+  m_amr->average_down(eed_density, phase::gas);
+  m_amr->interp_ghost(eed_density, phase::gas);
 }
 
 void plasma_engine::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){

@@ -775,7 +775,16 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					   a_dx);
   }
   else{
-    // Not implemented yet
+    this->compute_cdr_sources_irreg_kappa(a_sources,
+					  a_cdr_densities,
+					  a_cdr_gradients,
+					  a_rte_densities,
+					  a_E,
+					  a_gradE,
+					  a_interp_stencils,
+					  a_box,
+					  a_time,
+					  a_dx);
   }
 }
 
@@ -874,6 +883,107 @@ void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&         
       (*a_sources[idx])(vof, 0) = sources[idx];
     }
   }
+}
+
+void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&           a_sources,
+						   const Vector<EBCellFAB*>&     a_cdr_densities,
+						   const Vector<EBCellFAB*>&     a_cdr_gradients,
+						   const Vector<EBCellFAB*>&     a_rte_densities,
+						   const EBCellFAB&              a_E,
+						   const EBCellFAB&              a_gradE,
+						   const BaseIVFAB<VoFStencil>&  a_interp_stencils,
+						   const Box                     a_box,
+						   const Real                    a_time,
+						   const Real                    a_dx){
+  const Real zero = 0.0;
+  
+  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_species();
+
+  return;
+
+#if 0 // Not implemented yet
+
+  // Interpolation stencils
+  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
+
+  // EBISBox and graph
+  const EBISBox& ebisbox = a_E.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  // Things that are passed into plasma_kinetics
+  RealVect         pos, E, grad_E;
+  Vector<Real>     cdr_densities(num_species);
+  Vector<Real>     rte_densities(num_photons);
+  Vector<RealVect> cdr_grad(num_species);
+  Vector<Real>     sources(num_species);
+
+  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof       = vofit();
+    const VoFStencil& stencil = a_interp_stencils(vof, 0);
+
+    pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
+
+    // Compute electric field on centroids
+    E      = RealVect::Zero;
+    grad_E = RealVect::Zero;
+    for (int i = 0; i < stencil.size(); i++){
+      const VolIndex& ivof = stencil.vof(i);
+      const Real& iweight  = stencil.weight(i);
+      for (int dir = 0; dir < SpaceDim; dir++){
+	E[dir] += a_E(ivof, dir)*iweight;
+	grad_E[dir] += a_gradE(ivof, dir)*iweight;
+      }
+    }
+
+    // Compute cdr_densities and their gradients on centroids
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+
+      Real phi = 0.0;
+      RealVect grad = RealVect::Zero;
+      for (int i = 0; i < stencil.size(); i++){
+	const VolIndex& ivof = stencil.vof(i);
+	const Real& iweight  = stencil.weight(i);
+	      
+	phi += (*a_cdr_densities[idx])(ivof, 0)*iweight;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  grad[dir] += (*a_cdr_gradients[idx])(ivof, dir);
+	}
+      }
+      cdr_densities[idx] = Max(zero, phi);
+      cdr_grad[idx] = grad;
+    }
+
+    // Compute RTE densities on the centroids
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+
+      Real phi = 0.0;
+      for (int i = 0; i < stencil.size(); i++){
+	const VolIndex& ivof = stencil.vof(i);
+	const Real& iweight  = stencil.weight(i);
+	phi += (*a_rte_densities[idx])(ivof, 0)*iweight;
+      }
+      rte_densities[idx] = Max(zero, phi);
+    }
+
+    // Compute sources
+    const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
+								     pos,
+								     E,
+								     grad_E,
+								     cdr_densities,
+								     rte_densities,
+								     cdr_grad);
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      (*a_sources[idx])(vof, 0) = sources[idx];
+    }
+  }
+#endif 
 }
 
 
@@ -1629,7 +1739,7 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
       data_ops::incr(*rho_gas[lvl], *density[lvl], spec->get_charge());
     }
 
-    // Scale by s_Qe/s_eps0
+    // Scale by s_Qe
     data_ops::scale(*a_rho[lvl], units::s_Qe);
   }
 
@@ -1643,9 +1753,11 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
   m_amr->interp_ghost(a_rho);
 
   // Transform to centroids
+#if 0
   if(a_centering == centering::cell_center){
     m_amr->interpolate_to_centroids(rho_gas, phase::gas);
   }
+#endif
 }
 
 void time_stepper::deallocate_solver_internals(){

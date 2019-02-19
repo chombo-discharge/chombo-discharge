@@ -135,6 +135,7 @@ protected:
 
   std::string m_transport_file;
 
+  bool m_mobile_ions;
 
   int m_eed_idx;
   int m_electron_idx;

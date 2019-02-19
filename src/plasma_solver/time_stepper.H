@@ -263,6 +263,20 @@ public:
 						const Real                    a_dx);
 
   /*!
+    @brief Compute source terms on irregular cells
+  */
+  virtual void compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&           a_sources,
+					       const Vector<EBCellFAB*>&     a_cdr_densities,
+					       const Vector<EBCellFAB*>&     a_cdr_gradients,
+					       const Vector<EBCellFAB*>&     a_rte_densities,
+					       const EBCellFAB&              a_E,
+					       const EBCellFAB&              a_gradE,
+					       const BaseIVFAB<VoFStencil>&  a_interp_stencils,
+					       const Box                     a_box,
+					       const Real                    a_time,
+					       const Real                    a_dx);
+
+  /*!
     @brief Compute cdr velocities
   */
   virtual void compute_cdr_velocities();

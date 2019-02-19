@@ -566,7 +566,6 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
   }
 
   if(m_mobile){
-
     const Real t0 = MPI_Wtime();
   
     const int comp       = 0;
