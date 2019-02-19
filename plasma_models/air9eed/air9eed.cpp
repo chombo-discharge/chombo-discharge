@@ -32,7 +32,7 @@ air9eed::air9eed(){
 
   m_num_species = 9;  // 8 reactive ones plus the eed
   m_num_photons = 3;  // Bourdon model for photons
-  m_eed_solve = false;
+  m_eed_solve = true;
   m_eed_index = 0;
 
   air9eed::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac); // Get gas parameters
@@ -749,7 +749,7 @@ Real air9eed::compute_e_N2_scattering_loss() const {
 
 Real air9eed::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-#if 0 // Original code
+#if 1 // Original code
   return m_init_eed.direct_lookup(EbyN)*(m_species[m_electron_idx]->initial_data(a_pos, a_time));
 #else // Debug code
   return 1.0*(m_species[m_electron_idx]->initial_data(a_pos, a_time));

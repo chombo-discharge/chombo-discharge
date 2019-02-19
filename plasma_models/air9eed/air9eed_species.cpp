@@ -15,7 +15,7 @@ air9eed::eed::eed(){
   m_name      = "electron energy density";
   m_unit      = "eVm-3";
   m_charge    = 0;
-  m_diffusive = true;
+  m_diffusive = false;
   m_mobile    = true;
 
   // Get gas parameters
@@ -31,7 +31,7 @@ air9eed::electron::electron(){
   m_name   = "electron density";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = true;
+  m_diffusive = false;
   m_mobile = true;
 
   {// Get initial parameter
@@ -286,7 +286,7 @@ air9eed::photon_three::~photon_three(){
 }
 
 Real air9eed::eed::initial_data(const RealVect a_pos, const Real a_time) const{
-  return 1.E30;
+  return 1.E10;
 }
 
 Real air9eed::electron::initial_data(const RealVect a_pos, const Real a_time) const {

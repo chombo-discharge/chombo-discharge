@@ -589,7 +589,7 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     data_ops::set_value(weights,    0.0);
 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      a_state[lvl]->copyTo(*weights[lvl]);
+      //      a_state[lvl]->copyTo(*weights[lvl]);
     }
 
     const Real t1 = MPI_Wtime();

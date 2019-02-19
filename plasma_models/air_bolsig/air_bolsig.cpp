@@ -469,7 +469,7 @@ air_bolsig::electron::electron(){
   m_name      = "electron density";
   m_unit      = "m-3";
   m_charge    = -1;
-  m_diffusive = true;
+  m_diffusive = false;
 
   m_uniform_density = 1.0;
   m_seed_density    = 0.0;

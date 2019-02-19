@@ -265,6 +265,11 @@ protected:
   int m_verbosity;
 
   /*!
+    @brief Mass redistribution for hyperbolic part
+  */
+  bool m_mass_redist;
+
+  /*!
     @brief phase
   */
   phase::which_phase m_phase;

@@ -774,7 +774,8 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					   a_time,
 					   a_dx);
   }
-  else{
+  else{ // Cell-ave has already been done
+#if 0
     this->compute_cdr_sources_irreg_kappa(a_sources,
 					  a_cdr_densities,
 					  a_cdr_gradients,
@@ -785,6 +786,7 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					  a_box,
 					  a_time,
 					  a_dx);
+#endif
   }
 }
 
@@ -1724,7 +1726,6 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
 
   data_ops::set_value(a_rho, 0.0);
 
-
   EBAMRCellData rho_gas;
   m_amr->allocate_ptr(rho_gas); 
   m_amr->alias(rho_gas, phase::gas, a_rho); 
@@ -1755,11 +1756,9 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
   m_amr->interp_ghost(a_rho);
 
   // Transform to centroids
-#if 0
-  if(a_centering == centering::cell_center){
+  if(a_centering == centering::cell_center && m_interp_sources == true){
     m_amr->interpolate_to_centroids(rho_gas, phase::gas);
   }
-#endif
 }
 
 void time_stepper::deallocate_solver_internals(){
@@ -2254,7 +2253,7 @@ void time_stepper::set_source_computation(){
     if(str == "interp"){
       m_interp_sources = true;
     }
-    else if(str == "kappa"){
+    else if(str == "cell_ave"){
       m_interp_sources = false;
     }
     else{

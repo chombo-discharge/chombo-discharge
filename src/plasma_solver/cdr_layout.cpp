@@ -19,12 +19,18 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_species = a_plaskin->get_species();
   m_solvers.resize(m_species.size());
   m_bc_type = cdr_bc::outflow;
+  m_mass_redist = false;
   
   std::string str = "godunov"; // Default
   
   ParmParse pp("cdr_layout");
 
-
+  if(pp.contains("mass_redist")){
+    pp.get("mass_redist", str);
+    if(str == "true"){
+      m_mass_redist = true;
+    }
+  }
   if(pp.contains("domain_bc")){
     pp.get("domain_bc", str);
     if(str == "kinetic"){
@@ -56,6 +62,7 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
       MayDay::Abort("cdr_layout::cdr_layout - unknown cdr solver type requested");
     }
     m_solvers[i]->set_species(m_species[i]);
+    m_solvers[i]->set_mass_redist(m_mass_redist);
   }
 
   this->set_verbosity(-1);
