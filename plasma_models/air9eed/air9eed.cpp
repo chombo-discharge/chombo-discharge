@@ -32,7 +32,7 @@ air9eed::air9eed(){
 
   m_num_species = 9;  // 8 reactive ones plus the eed
   m_num_photons = 3;  // Bourdon model for photons
-  m_eed_solve = true;
+  m_eed_solve = false;
   m_eed_index = 0;
 
   air9eed::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac); // Get gas parameters

@@ -1701,7 +1701,7 @@ void time_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_
       const EBAMRCellData& density       = *(densities[solver_it.get_solver()]);
       const RefCountedPtr<species>& spec = solver_it.get_species();
 
-      if(!(spec->get_charge() != 0)){
+      if(spec->get_charge() != 0){
 	data_ops::incr(*a_rho[lvl], *density[lvl], spec->get_charge());
       }
     }
@@ -1736,7 +1736,9 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
       const EBAMRCellData& density       = *(a_densities[solver_it.get_solver()]);
       const RefCountedPtr<species>& spec = solver_it.get_species();
 
-      data_ops::incr(*rho_gas[lvl], *density[lvl], spec->get_charge());
+      if(spec->get_charge() != 0){
+	data_ops::incr(*rho_gas[lvl], *density[lvl], spec->get_charge());
+      }
     }
 
     // Scale by s_Qe

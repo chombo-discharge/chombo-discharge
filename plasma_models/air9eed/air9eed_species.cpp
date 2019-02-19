@@ -15,7 +15,7 @@ air9eed::eed::eed(){
   m_name      = "electron energy density";
   m_unit      = "eVm-3";
   m_charge    = 0;
-  m_diffusive = false;
+  m_diffusive = true;
   m_mobile    = true;
 
   // Get gas parameters
@@ -32,6 +32,7 @@ air9eed::electron::electron(){
   m_unit   = "m-3";
   m_charge = -1;
   m_diffusive = true;
+  m_mobile = true;
 
   {// Get initial parameter
     ParmParse pp("air9eed");
