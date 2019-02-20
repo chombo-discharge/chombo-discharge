@@ -5,13 +5,13 @@ Prerequisites
 
 From the ground up, PlasmaC is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework. To compile PlasmaC, you must therefore have the following in place:
 
-* A Fortran compiler, typically gfortran or Intel Fortran
-* A C++ compiler, typically g++ or Intel C++
+* A Fortran compiler, usually gfortran or Intel Fortran
+* A C++ compiler, usually g++ or Intel C++
 * An MPI installation
 * A parallel HDF5 installation
 * A Chombo library
 
-Typically, local clients (laptops and desktops) already have appropriate Fortran and C++ compilers installed, as well as a version of MPI. On clusters, HDF5 is also preinstalled (usually), and in this case, it will be sufficient to modify the Chombo build files in order to compile PlasmaC. If you already have HDF5 installed, you may skip directly to :ref:`Chap:Environment`.
+Usually, laptops and desktops already have appropriate Fortran and C++ compilers installed, as well as a version of MPI. On clusters, HDF5 is (usually) preinstalled, and in this case, it will be sufficient to modify the Chombo build files in order to compile PlasmaC. If you already have HDF5 installed, you may skip directly to :ref:`Chap:Environment`.
 
 .. _Chap:HDF5:
 

@@ -40,7 +40,3 @@ PlasmaC works by embedding the equations above into an abstract C++ framework th
   :maxdepth: 1
 
   SpatialDiscretization
-  PlasmaCModules
-  MiniApplications
-  PythonInterface
-  CodeStructure

@@ -1,9 +1,9 @@
-.. _Chap:RunningSimulations:
+.. _Chap:Control:
 
-Controlling simulations
-=======================
+Controlling PlasmaC
+===================
 
-Iin this chapter we show how to run a ``PlasmaC`` simulation and control its behavior through input scripts or command line options.
+In this chapter we show how to run a ``PlasmaC`` simulation and control its behavior through input scripts or command line options.
 
 Compiling and running
 ---------------------

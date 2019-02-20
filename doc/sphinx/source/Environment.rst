@@ -3,9 +3,9 @@
 Setting up your environment
 ___________________________
 
-In Chombo,the system information is supplied through a file known as Make.defs.local, which resides in the Chombo library itself. This file contains a number of build settings, such as dimension, compilers, paths to HDF5 and so on. The file itself is in Chombo/lib/mk/Make.defs.local. Strictly speaking, it is not necessary to modify this file since all build parameters can be controlled through the command line, but it usually pays off.
+In Chombo,the system information is supplied through a file known as Make.defs.local, which resides in the Chombo library itself. This file contains a number of build settings, such as dimension, compilers, paths to HDF5 and so on. The file itself is in Chombo/lib/mk/Make.defs.local. The build parameters can also be controlled through the command line. 
 
-Here are what configuration variables that we use on the ``fram`` supercomputer
+Here are what configuration variables that are used on the ``fram`` supercomputer
 
 .. code-block:: c++
 
@@ -65,4 +65,4 @@ We also recommend that you create environment variables that hold the path to yo
 		CHOMBO_HOME=/usr/local/Chombo-3.2
 		PLASMAC_HOME=/home/foo/plasmac
 
-These two environment variables are used in the PlasmaC makefile system so that our makefiles can find Chombo and PlasmaC. Strictly speaking, you don't *have* to set these as environment variables. However, both variables are used in the mini-application makefiles so if you don't use environment variables, you will need to specify them directly in your makefile. 
+These two environment variables are used in the PlasmaC makefile system so that our makefiles can find both Chombo and PlasmaC. 
