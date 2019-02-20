@@ -1157,10 +1157,11 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   }
 
   // If we made it here, we should be able to decrease or increase the time step as we see fit.
-  const Real rel_err = m_err_thresh/m_max_error;
+  const Real rel_err  = (m_safety*m_err_thresh)/m_max_error;
   const Real dt_adapt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
+
   if(m_max_error <= m_err_thresh){ // Increase time step, but only if we're sufficiently far away form the error threshold
-    if(rel_err < m_safety){ 
+    if(m_max_error < m_safety*m_err_thresh){ 
       m_new_dt = dt_adapt;
     }
     else{
@@ -1181,17 +1182,25 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   if(m_new_dt < m_min_dt){ // Can't decrease below hardcap, accept the step
     m_new_dt = Max(m_new_dt, m_min_dt);
   }
+  if(m_new_dt > dt_cfl*m_maxCFL){
+    m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);
+  }
+
+  // Also, can't go beyond what is limited by dt_m...
+  if(m_new_dt > dt_cfl){
+    m_new_dt = Min(dt_cfl, m_new_dt);
+  }
 
   { // Debug
 #if 0 // Debug
-  if(procID() == 0) std::cout << m_max_error << "\t"
-			      << a_num_corrections << "\t"
-			      << a_dt << "\t"
-			      << m_new_dt << "\t"
-			      << dt_adapt << "\t"
-			      << std::endl;
+    pout() << m_max_error << "\t"
+	   << a_num_corrections << "\t"
+	   << a_dt << "\t"
+	   << m_new_dt << "\t"
+	   << dt_adapt << "\t"
+	   << endl;
 #endif
-    }
+  }
 
   m_have_dt_err = true;
 }
@@ -1207,6 +1216,7 @@ void sisdc::adaptive_report(const Real a_dt, const Real a_new_dt, const int a_co
   pout() << "--------------------------------\n";
   pout() << "\t Advanced dt  = " << a_dt << endl;
   pout() << "\t New dt       = " << a_new_dt << endl;
+  pout() << "\t Subintervals = " << m_p << endl;
   pout() << "\t Corrections  = " << a_corr << endl;
   pout() << "\t Rejections   = " << a_rej << endl;
   pout() << "\t Max error    = " << a_max_err << endl;
