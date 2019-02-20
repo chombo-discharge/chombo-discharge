@@ -200,8 +200,8 @@ Vector<Real> air9eed::compute_cdr_diffusion_coefficients(const Real&         a_t
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
   
-  diffco[m_eed_idx]      = this->compute_eed_diffco(electron_energy, m_N);
-  diffco[m_electron_idx] = this->compute_electron_diffco(electron_energy, m_N);
+  diffco[m_eed_idx]      = this->compute_eed_diffco(electron_energy);
+  diffco[m_electron_idx] = this->compute_e_diffco(electron_energy);
   diffco[m_N2plus_idx]   = this->compute_N2plus_diffco();
   diffco[m_N4plus_idx]   = this->compute_N4plus_diffco();
   diffco[m_O2plus_idx]   = this->compute_O2plus_diffco();
@@ -222,8 +222,8 @@ Vector<RealVect> air9eed::compute_cdr_velocities(const Real&         a_time,
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
 
-  velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy, m_N)*(-a_E);
-  velocities[m_electron_idx] = this->compute_electron_mobility(electron_energy, m_N)*(-a_E);
+  velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy)*(-a_E);
+  velocities[m_electron_idx] = this->compute_e_mobility(electron_energy)*(-a_E);
   if(m_mobile_ions){
     velocities[m_N2plus_idx]   = this->compute_N2plus_mobility(EbyN)*a_E;
     velocities[m_N4plus_idx]   = this->compute_N4plus_mobility(EbyN)*a_E;
@@ -257,8 +257,8 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   // Room for improvement: The best thing would be to store the rate coefficients as matrices and then do S = K*n
   
   // Get all rate constant
-  const Real k1  = this->compute_electron_N2_impact_ionization(electron_energy, m_N); 
-  const Real k2  = this->compute_electron_O2_impact_ionization(electron_energy, m_N); 
+  const Real k1  = this->compute_electron_N2_alpha(electron_energy); 
+  const Real k2  = this->compute_electron_O2_alpha(electron_energy); 
   const Real k3  = this->compute_N2plus_N2_M_to_N4plus_M();                         
   const Real k4  = this->compute_N4plus_O2_to_O2_2N2();
   const Real k5  = this->compute_N2plus_O2_to_O2plus_N2(m_Tg);
@@ -272,12 +272,12 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   const Real k13 = this->compute_O2minus_O4plus_to_3O2();
   const Real k14 = this->compute_O2minus_O4plus_M_to_3O2_M(m_Tg);
   const Real k15 = this->compute_O2minus_O2plus_M_to_2O2_M(m_Tg);
-  const Real k16 = this->compute_e_O2_to_e_2O_c1(electron_energy, m_N);
-  const Real k17 = this->compute_e_O2_to_e_2O_c2(electron_energy, m_N);
-  const Real k18 = this->compute_e_O2_to_Ominus_O(electron_energy, m_N);
+  const Real k16 = this->compute_e_O2_to_e_2O_c1(electron_energy);
+  const Real k17 = this->compute_e_O2_to_e_2O_c2(electron_energy);
+  const Real k18 = this->compute_e_O2_to_Ominus_O(electron_energy);
   const Real k19 = this->compute_Oplus_O2_to_O_O2(m_Tg);
-  const Real k20 = this->compute_e_N2_to_e_N2(electron_energy, m_N);
-  const Real k21 = this->compute_e_O2_to_e_O2(electron_energy, m_N);
+  const Real k20 = this->compute_e_N2_to_e_N2(electron_energy);
+  const Real k21 = this->compute_e_O2_to_e_O2(electron_energy);
 
   // Electron energy losses for electron collisions
   const Real dE_k1  = this->compute_e_N2_ionization_loss();
@@ -303,8 +303,8 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   Real products;
 
   // Compute electron velocity, both drift and diffusion
-  const RealVect ve = this->compute_electron_mobility(electron_energy, m_N)*(-a_E);
-  const Real     De = this->compute_electron_diffco(electron_energy, m_N);
+  const RealVect ve = this->compute_e_mobility(electron_energy)*(-a_E);
+  const Real     De = this->compute_e_diffco(electron_energy);
   const RealVect je = ve*n_e - De*a_grad_cdr[m_electron_idx];
 
   // Joule heating
@@ -334,7 +334,6 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   products = k4 * n_N4p * n_O2;
   source[m_N4plus_idx]  -= products;
   source[m_O2plus_idx]  += products;
-  source[m_N2plus_idx]  += 2*products;
 
   // k5 reaction
   products = k5 * n_N2p * n_O2;
@@ -342,7 +341,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_O2plus_idx] += products;
 
   // k6 reaction
-  products = k6 * n_O2p * 2.0*n_N2;
+  products = k6 * n_O2p * n_N2 * n_N2;
   source[m_O2plus_idx]   -= products;
   source[m_O2plusN2_idx] += products;
 
@@ -382,12 +381,12 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_O4plus_idx]  -= products;
 
   // k14 reaction
-  products = k14 * n_O2m * n_O4p * (n_N2 + n_O2);
+  products = k14 * n_O2m * n_O4p * m_N;
   source[m_O2minus_idx] -= products;
   source[m_O4plus_idx]  -= products;
 
   // k15 reaction
-  products = k15 * n_O2m * n_O2p * (n_O2 + n_N2);
+  products = k15 * n_O2m * n_O2p * m_N;
   source[m_O2minus_idx] -= products;
   source[m_O2plus_idx]  -= products;
 
@@ -438,6 +437,11 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
 
+#if 0 // Debug
+  Real sum = 0.0;
+  sum += -source[1] + source[2] + source[3] + source[4] + source[5] + source[6] - source[7] - source[8];
+  std::cout << sum << std::endl;
+#endif
 
   return source;
 }
@@ -525,7 +529,7 @@ Vector<Real> air9eed::compute_rte_source_terms(const Real&         a_time,
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
   const Real Te              = 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb);  // Kelvin
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
-  const Real k1              = this->compute_electron_N2_impact_ionization(electron_energy, m_N); 
+  const Real k1              = this->compute_electron_N2_alpha(electron_energy); 
   const Real Se              = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
 
   ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
@@ -535,58 +539,45 @@ Vector<Real> air9eed::compute_rte_source_terms(const Real&         a_time,
   return ret;
 }
 
-Real air9eed::initial_sigma(const Real a_time, const RealVect& a_pos) const {
-  return 0.0;
-}
+Real air9eed::initial_sigma(const Real a_time, const RealVect& a_pos) const {return 0.0;}
 
-Real air9eed::compute_eed_mobility(const Real a_energy, const Real a_N) const {
-  return (5.0/3.0)*m_e_mobility.get_entry(a_energy);
-}
-Real air9eed::compute_electron_mobility(const Real a_energy, const Real a_N) const {
-  return m_e_mobility.get_entry(a_energy);
-}
-Real air9eed::compute_N2plus_mobility(const Real a_EbyN) const   {return 2.E-4;}
-Real air9eed::compute_N4plus_mobility(const Real a_EbyN) const   {return 2.E-4;}
-Real air9eed::compute_O2plus_mobility(const Real a_EbyN) const   {return 2.E-4;}
-Real air9eed::compute_O4plus_mobility(const Real a_EbyN) const   {return 2.E-4;}
+Real air9eed::compute_eed_mobility(const Real a_energy)    const {return (5.0/3.0)*m_e_mobility.get_entry(a_energy);}
+Real air9eed::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.get_entry(a_energy);}
+Real air9eed::compute_N2plus_mobility(const Real a_EbyN)   const {return 2.E-4;}
+Real air9eed::compute_N4plus_mobility(const Real a_EbyN)   const {return 2.E-4;}
+Real air9eed::compute_O2plus_mobility(const Real a_EbyN)   const {return 2.E-4;}
+Real air9eed::compute_O4plus_mobility(const Real a_EbyN)   const {return 2.E-4;}
 Real air9eed::compute_O2plusN2_mobility(const Real a_EbyN) const {return 2.E-4;}
-Real air9eed::compute_O2minus_mobility(const Real a_EbyN) const  {return 2.E-4;}
-Real air9eed::compute_Ominus_mobility(const Real a_EbyN) const   {return 2.E-4;}
+Real air9eed::compute_O2minus_mobility(const Real a_EbyN)  const {return 2.E-4;}
+Real air9eed::compute_Ominus_mobility(const Real a_EbyN)   const {return 2.E-4;}
 
-Real air9eed::compute_eed_diffco(const Real a_energy, const Real a_N) const{
-  return (5.0/3.0)*this->compute_electron_diffco(a_energy, a_N);
-}
-Real air9eed::compute_electron_diffco(const Real a_energy, const Real a_N) const{
-  return (2.0/3.0)*a_energy*this->compute_electron_mobility(a_energy, a_N);
-}
-Real air9eed::compute_N2plus_diffco() const {return 0.0;}
-Real air9eed::compute_N4plus_diffco() const {return 0.0;}
-Real air9eed::compute_O2plus_diffco() const {return 0.0;}
-Real air9eed::compute_O4plus_diffco() const {return 0.0;}
-Real air9eed::compute_O2plusN2_diffco() const {return 0.0;}
-Real air9eed::compute_O2minus_diffco() const {return 0.0;}
-Real air9eed::compute_Ominus_diffco() const {return 0.0;}
+Real air9eed::compute_eed_diffco(const Real a_energy) const {return (5.0/3.0)*this->compute_e_diffco(a_energy);}
+Real air9eed::compute_e_diffco(const Real a_energy)   const {return (2.0/3.0)*a_energy*this->compute_e_mobility(a_energy);}
+Real air9eed::compute_N2plus_diffco()                 const {return 0.0;}
+Real air9eed::compute_N4plus_diffco()                 const {return 0.0;}
+Real air9eed::compute_O2plus_diffco()                 const {return 0.0;}
+Real air9eed::compute_O4plus_diffco()                 const {return 0.0;}
+Real air9eed::compute_O2plusN2_diffco()               const {return 0.0;}
+Real air9eed::compute_O2minus_diffco()                const {return 0.0;}
+Real air9eed::compute_Ominus_diffco()                 const {return 0.0;}
 
-Real air9eed::compute_electron_N2_impact_ionization(const Real a_energy, const Real a_N) const {
-  return m_e_N2_alpha.get_entry(a_energy);
-}
-Real air9eed::compute_electron_O2_impact_ionization(const Real a_energy, const Real a_N) const {
-  return m_e_O2_alpha.get_entry(a_energy);
-}
-Real air9eed::compute_N2plus_N2_M_to_N4plus_M() const {return 5.E-41;}
-Real air9eed::compute_N4plus_O2_to_O2_2N2() const {return 2.5E-16;}
-Real air9eed::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg) const {return 1.05E-15/sqrt(a_Tg);}
+// Reaction rates
+Real air9eed::compute_electron_N2_alpha(const Real a_energy)     const {return m_e_N2_alpha.get_entry(a_energy);}
+Real air9eed::compute_electron_O2_alpha(const Real a_energy)     const {return m_e_O2_alpha.get_entry(a_energy);}
+Real air9eed::compute_N2plus_N2_M_to_N4plus_M()                  const {return 5.E-41;}
+Real air9eed::compute_N4plus_O2_to_O2_2N2()                      const {return 2.5E-16;}
+Real air9eed::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)    const {return 1.05E-15/sqrt(a_Tg);}
 Real air9eed::compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg) const {return 8.1E-38/(a_Tg*a_Tg);}
 Real air9eed::compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg) const {return 14.8*pow(a_Tg, -5.3)*exp(-2357.0/a_Tg);}
-Real air9eed::compute_O2plusN2_O2_to_O4plus_N2() const {return 1.E-15;}
-Real air9eed::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg) const {return 2.03E-34*pow(a_Tg, -3.2);}
-Real air9eed::compute_e_O4plus_to_2O2(const Real a_Te) const {return 2.42E-11/(sqrt(a_Te));}
-Real air9eed::compute_e_O2plus_to_O2(const Real a_Te) const {return 6.E-11/a_Te;}
-Real air9eed::compute_e_2O2_to_O2minus_O2(const Real a_Te) const {6E-39/a_Te;}
-Real air9eed::compute_O2minus_O4plus_to_3O2() const {return 1.E-13;}
+Real air9eed::compute_O2plusN2_O2_to_O4plus_N2()                 const {return 1.E-15;}
+Real air9eed::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg)   const {return 2.03E-34*pow(a_Tg, -3.2);}
+Real air9eed::compute_e_O4plus_to_2O2(const Real a_Te)           const {return 2.42E-11/(sqrt(a_Te));}
+Real air9eed::compute_e_O2plus_to_O2(const Real a_Te)            const {return 6.E-11/a_Te;}
+Real air9eed::compute_e_2O2_to_O2minus_O2(const Real a_Te)       const {return 6E-39/a_Te;}
+Real air9eed::compute_O2minus_O4plus_to_3O2()                    const {return 1.E-13;}
 Real air9eed::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
 Real air9eed::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
-Real air9eed::compute_e_O2_to_e_2O_c1(const Real a_energy, const Real a_N) const {
+Real air9eed::compute_e_O2_to_e_2O_c1(const Real a_energy)       const {
   Real k = 0.0;
   return 0.0;
     
@@ -614,7 +605,7 @@ Real air9eed::compute_e_O2_to_e_2O_c1(const Real a_energy, const Real a_N) const
 
   return k;
 } // TABLE
-Real air9eed::compute_e_O2_to_e_2O_c2(const Real a_energy, const Real a_N) const {
+Real air9eed::compute_e_O2_to_e_2O_c2(const Real a_energy)       const {
   Real k = 0.0; return k;
     
   const Real min_energy       = 1.0;
@@ -641,7 +632,7 @@ Real air9eed::compute_e_O2_to_e_2O_c2(const Real a_energy, const Real a_N) const
 
   return k;
 } // TABLE
-Real air9eed::compute_e_O2_to_Ominus_O(const Real a_energy, const Real a_N) const {
+Real air9eed::compute_e_O2_to_Ominus_O(const Real a_energy)      const {
   Real k = 0.0;return k;
   
   const Real min_energy       = 1.0;
@@ -668,8 +659,8 @@ Real air9eed::compute_e_O2_to_Ominus_O(const Real a_energy, const Real a_N) cons
 
   return k;
 } // TABLE
-Real air9eed::compute_Oplus_O2_to_O_O2(const Real a_Tg) const {return 3.46E-12/sqrt(a_Tg);}
-Real air9eed::compute_e_N2_to_e_N2(const Real a_energy, const Real a_N) const {
+Real air9eed::compute_Oplus_O2_to_O_O2(const Real a_Tg)          const {return 3.46E-12/sqrt(a_Tg);}
+Real air9eed::compute_e_N2_to_e_N2(const Real a_energy)          const {
 
   Real k = 0.0;return k;
   
@@ -697,7 +688,7 @@ Real air9eed::compute_e_N2_to_e_N2(const Real a_energy, const Real a_N) const {
 
   return k;
 } // TABLE
-Real air9eed::compute_e_O2_to_e_O2(const Real a_energy, const Real a_N) const {
+Real air9eed::compute_e_O2_to_e_O2(const Real a_energy)          const {
   Real k = 0.0;return k;
   
   const Real min_energy       = 1.0;
@@ -725,27 +716,14 @@ Real air9eed::compute_e_O2_to_e_O2(const Real a_energy, const Real a_N) const {
   return k;
 } // TABLE
 
-Real air9eed::compute_e_N2_ionization_loss() const {
-  return 15.6;
-}
-Real air9eed::compute_e_O2_ionization_loss() const {
-  return 12.07;
-}
-Real air9eed::compute_e_O2_dissociation_loss_c1() const {
-  return 5.58;
-}
-Real air9eed::compute_e_O2_dissociation_loss_c2() const {
-  return 8.4;
-}
-Real air9eed::compute_e_O2_dissociative_attachment_loss() const {
-  return 3.6;
-}
-Real air9eed::compute_e_O2_scattering_loss() const {
-  return 1;
-}
-Real air9eed::compute_e_N2_scattering_loss() const {
-  return 1;
-}
+// Electron losses
+Real air9eed::compute_e_N2_ionization_loss()              const {return 15.6;}
+Real air9eed::compute_e_O2_ionization_loss()              const {return 12.07;}
+Real air9eed::compute_e_O2_dissociation_loss_c1()         const {return 5.58;}
+Real air9eed::compute_e_O2_dissociation_loss_c2()         const {return 8.4;}
+Real air9eed::compute_e_O2_dissociative_attachment_loss() const {return 3.6;}
+Real air9eed::compute_e_O2_scattering_loss()              const {return 1;}
+Real air9eed::compute_e_N2_scattering_loss()              const {return 1;}
 
 Real air9eed::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();

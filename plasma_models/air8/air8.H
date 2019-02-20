@@ -1,12 +1,12 @@
 /*!
-  @file   air9eed.H
+  @file   air8.H
   @brief  Declaration of a BOLSIG-based transport model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#ifndef _AIR9EED_
-#define _AIR9EED_
+#ifndef _AIR8_
+#define _AIR8_
 
 #include "plasma_kinetics.H"
 #include "lookup_table.H"
@@ -24,11 +24,10 @@
   @todo If anyone finds the time, please improve the ion mobilities. 
 
 */
-class air9eed : public plasma_kinetics {
+class air8 : public plasma_kinetics {
 public:
 
   // Forward declaration of cdr species
-  class eed;      // Electron energy distribution
   class electron;
   class N2plus;   
   class N4plus;   
@@ -52,12 +51,12 @@ public:
   /*!
     @brief Constructor
   */
-  air9eed();
+  air8();
 
   /*!
     @brief Destructor
   */
-  virtual ~air9eed();
+  virtual ~air8();
 
 
   /*!
@@ -127,17 +126,18 @@ public:
   virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const; 
 
 protected:
-
-  static std::string s_bolsig_energy_E;
-  static std::string s_bolsig_mobility;
+  
   static std::string s_bolsig_N2_alpha;
   static std::string s_bolsig_O2_alpha;
+  static std::string s_bolsig_mobility;
+  static std::string s_bolsig_diffusion;
+  static std::string s_bolsig_mean_energy;
+  static std::string s_skip_fit;
 
   std::string m_transport_file;
 
   bool m_mobile_ions;
 
-  int m_eed_idx;
   int m_electron_idx;
   int m_N2plus_idx;
   int m_N4plus_idx;
@@ -166,72 +166,53 @@ protected:
   Real m_excitation_efficiency;          // Excitation efficiency
 
   // Tables built from BOLSIG+
-  lookup_table m_init_eed;
-  lookup_table m_e_mobility;
-  lookup_table m_e_N2_alpha;
   lookup_table m_e_O2_alpha;
-  lookup_table m_e_O2_to_e_2O_c1;
-  lookup_table m_e_O2_to_e_2O_c2;
-  lookup_table m_e_O2_to_Ominus_O;
-  lookup_table m_e_N2_to_e_N2;
-  lookup_table m_e_O2_to_e_O2;
+  lookup_table m_e_N2_alpha;
+  lookup_table m_e_mobility;
+  lookup_table m_e_diffco;
+  lookup_table m_e_energy;
 
+  // Electron temperature
+  inline Real compute_Te(const Real a_EbyN) const;
 
   // Mobility computations
-  inline Real compute_eed_mobility(const Real a_energy) const;
-  inline Real compute_e_mobility(const Real a_energy) const;
-  inline Real compute_N2plus_mobility(const Real a_EbyN) const;
-  inline Real compute_N4plus_mobility(const Real a_EbyN) const;
-  inline Real compute_O2plus_mobility(const Real a_EbyN) const;
-  inline Real compute_O4plus_mobility(const Real a_EbyN) const;
+  inline Real compute_electron_mobility(const Real a_EbyN) const;
+  inline Real compute_N2plus_mobility(const Real a_EbyN)   const;
+  inline Real compute_N4plus_mobility(const Real a_EbyN)   const;
+  inline Real compute_O2plus_mobility(const Real a_EbyN)   const;
+  inline Real compute_O4plus_mobility(const Real a_EbyN)   const;
   inline Real compute_O2plusN2_mobility(const Real a_EbyN) const;
-  inline Real compute_O2minus_mobility(const Real a_EbyN) const;
-  inline Real compute_Ominus_mobility(const Real a_EbyN) const;
+  inline Real compute_O2minus_mobility(const Real a_EbyN)  const;
+  inline Real compute_Ominus_mobility(const Real a_EbyN)   const;
 
   // Diffusion coefficient computatations
-  inline Real compute_eed_diffco(const Real a_energy) const;
-  inline Real compute_e_diffco(const Real a_energy) const;
-  inline Real compute_N2plus_diffco() const;
-  inline Real compute_N4plus_diffco() const;
-  inline Real compute_O2plus_diffco() const;
-  inline Real compute_O4plus_diffco() const;
-  inline Real compute_O2plusN2_diffco() const;
-  inline Real compute_O2minus_diffco() const;
-  inline Real compute_Ominus_diffco() const;
+  inline Real compute_electron_diffco(const Real a_byN) const;
+  inline Real compute_N2plus_diffco()                   const;
+  inline Real compute_N4plus_diffco()                   const;
+  inline Real compute_O2plus_diffco()                   const;
+  inline Real compute_O4plus_diffco()                   const;
+  inline Real compute_O2plusN2_diffco()                 const;
+  inline Real compute_O2minus_diffco()                  const;
+  inline Real compute_Ominus_diffco()                   const;
 
   // Reactions
-  inline Real compute_electron_N2_alpha(const Real a_energy) const;
-  inline Real compute_electron_O2_alpha(const Real a_energy) const;
-  inline Real compute_N2plus_N2_M_to_N4plus_M() const;
-  inline Real compute_N4plus_O2_to_O2_2N2() const;
-  inline Real compute_N2plus_O2_to_O2plus_N2(const Real a_Tg) const;
-  inline Real compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg) const;
-  inline Real compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg) const;
-  inline Real compute_O2plusN2_O2_to_O4plus_N2() const;
-  inline Real compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg) const;
-  inline Real compute_e_O4plus_to_2O2(const Real a_Te) const;
-  inline Real compute_e_O2plus_to_O2(const Real a_Te) const;
-  inline Real compute_e_2O2_to_O2minus_O2(const Real a_Te) const;
-  inline Real compute_O2minus_O4plus_to_3O2() const;
-  inline Real compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg) const;
-  inline Real compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const;
-  inline Real compute_e_O2_to_e_2O_c1(const Real a_energy) const;
-  inline Real compute_e_O2_to_e_2O_c2(const Real a_energy) const;
-  inline Real compute_e_O2_to_Ominus_O(const Real a_energy) const;
-  inline Real compute_Oplus_O2_to_O_O2(const Real a_Tg) const;
-  inline Real compute_e_N2_to_e_N2(const Real a_energy) const;
-  inline Real compute_e_O2_to_e_O2(const Real a_energy) const;
+  inline Real compute_electron_N2_impact_ionization(const Real a_EbyN) const;
+  inline Real compute_electron_O2_impact_ionization(const Real a_EbyN) const;
+  inline Real compute_N2plus_N2_M_to_N4plus_M()                        const;
+  inline Real compute_N4plus_O2_to_O2_2N2()                            const;
+  inline Real compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)          const;
+  inline Real compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg)       const;
+  inline Real compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg)       const;
+  inline Real compute_O2plusN2_O2_to_O4plus_N2()                       const;
+  inline Real compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg)         const;
+  inline Real compute_e_O4plus_to_2O2(const Real a_Te)                 const;
+  inline Real compute_e_O2plus_to_O2(const Real a_Te)                  const;
+  inline Real compute_e_2O2_to_O2minus_O2(const Real a_Te)             const;
+  inline Real compute_O2minus_O4plus_to_3O2()                          const;
+  inline Real compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg)       const;
+  inline Real compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg)       const;
+  inline Real compute_Oplus_O2_to_O_O2(const Real a_Tg)                const;
 
-  // Energy losses
-  inline Real compute_e_N2_ionization_loss() const;
-  inline Real compute_e_O2_ionization_loss() const;
-  inline Real compute_e_O2_dissociation_loss_c1() const;
-  inline Real compute_e_O2_dissociation_loss_c2() const;
-  inline Real compute_e_O2_dissociative_attachment_loss() const;
-  inline Real compute_e_O2_scattering_loss() const;
-  inline Real compute_e_N2_scattering_loss() const;
-
-  Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E);
 
 private:
 

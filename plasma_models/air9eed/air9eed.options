@@ -3,7 +3,7 @@
 # ====================================================================================================
 air9eed.gas_temperature    = 300
 air9eed.gas_pressure       = 1.0
-air9eed.transport_file     = air_transport.data.txt
+air9eed.transport_file     = transport.data.txt
 
 air9eed.initial_ionization = 1.E10
 air9eed.mobile_ions        = true
