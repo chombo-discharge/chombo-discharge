@@ -30,8 +30,8 @@ This documentation is the user documentation ``PlasmaC``. There is also a separa
    
    Introduction
    Equations
+   TemporalDiscretization
    Design
    NewSimulations
-   TemporalDiscretization
    Control
    ImportantClasses

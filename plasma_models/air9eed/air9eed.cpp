@@ -115,9 +115,8 @@ air9eed::air9eed(){
   m_e_mobility.scale_y(1./m_N); // Need to scale
   m_init_eed.swap_xy();         // Input table is in reverse order
 
-
   //  m_e_mobility.dump_table();
- //  m_init_eed.dump_table();
+  //  m_e_mobility.dump_table();
 }
 
 air9eed::~air9eed(){

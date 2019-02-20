@@ -59,3 +59,52 @@ ___________________
 Geometry generation for ``PlasmaC`` follows that of Chombo. In Chombo, the geometries are generated from a function :math:`f(\mathbf{x})` that describes the level-set surface. This is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption (but increase run time). Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. Furthermore, geometric data describes by the graph only exists in the cut cells themselves, so that this data is truly sparse. 
 
 Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. The finest AMR level always dominates the memory consumption for the EB mesh, and arbitrarily fine grids are not possible. Essentially, one must expect that one dense box is allocated for each box that intersects the graph at the finest AMR level. In other words, the available system memory must be sufficiently so that one can refine the entire embedded boundary at the finest AMR level. For example, if your finest AMR grid contains :math:`10^4` cut-cell boxes each of size :math:`64^3` (both are realistic numbers), the graph will contain roughly :math:`2.6\times 10^9` graph nodes (one node per cell in each cut-cell box). The memory consumption per graph various, but if we estimate this at :math:`512` bytes per node on average, then the graph memory consumption is :math:`1.34\,\textrm{TB}`. 
+
+Advective discretization
+------------------------
+
+Here, we discuss the discretization of advective derivates
+
+.. math::
+   \frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v}\phi\right) = 0
+
+We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries). We use the finite volume method to construct fluxes in a cut cell and discretize the advective derivative as
+
+.. math::
+   \int_V\nabla\cdot\left(\mathbf{v}\phi\right)dV =\sum_{f\in f(V)}\left(\mathbf{v}_f\cdot \mathbf{n}_f\right)\phi_f\alpha_f\Delta x^{D -1},
+   
+where the sum runs over all cell edges (faces in 3D) of the cell, :math:`F_f(\phi) = \left(\mathbf{v}_f\cdot \mathbf{n}_f\right)\phi_f` is the edge (face) centroid flux, :math:`\alpha_f` is the edge (face) aperture, and :math:`D` is the dimension. The evaluation of this expression requires knowledge of the state at the face, which in the current version of ``PlasmaC`` is given by a Godunov method.  
+
+.. figure:: figures/cutCell.pdf
+   :width: 480px
+   :align: center
+
+The possibility of arbitrarily small volume fractions :math:`\kappa` requires modification of the advective discretization in the cut cells. We use the Chombo approach and expand the range of influence of the cut cells. First, we compute the conservative divergence
+
+.. math::
+  D_{\mathbf{i}}^c(\phi) =  \sum_fF_f(\phi)\alpha_f\Delta x^{D -1}.
+
+Next, we compute a non-conservative divergence :math:`D_{\mathbf{i}}^{nc}` that uses an extended state on covered cell faces and thereby ignores the presence of the boundaries. The extended states are extrapolated from the interior. We then use a hybrid divergence
+
+.. math::
+  D_{\mathbf{i}}^H = \kappa_{\mathbf{i}} D_{\mathbf{i}}^c + (1-\kappa_{\mathbf{i}})D_{\mathbf{i}}^{nc}.
+
+The hybrid divergence fails to conserve mass by an amount :math:`\delta M_{\mathbf{i}} = \kappa_{\mathbf{i}}\left(1-\kappa_{\mathbf{i}}\right)\left(D_{\mathbf{i}}^c - D_{\mathbf{i}}^{nc}\right)`, which is redistributed into neighboring cells that can be reached with a monotone path of radius one. Let :math:`\delta M_{\mathbf{i}, \mathbf{j}}` be the redistributed mass from :math:`\mathbf{i}` to :math:`\mathbf{j}`. The advective discretization of cell :math:`\mathbf{j}` is then
+
+.. math::
+  D_{\mathbf{j}} = D_{\mathbf{j}}^H + \delta M_{\mathbf{i}, \mathbf{j}}.
+With these definitions, the forward Euler method on :math:`\partial_t\phi = \nabla\cdot\left(\mathbf{v} \phi\right)` can now be written as :math:`\phi_{\mathbf{i}}^{n+1} = \phi_{\mathbf{i}}^n + \Delta t D_{\mathbf{i}}`. 
+
+Charge injection and extraction in ``PlasmaC`` is currently handled through the advective discretization. In the future, there might exist solvers options to injects this charge though the diffusion operator instead. This would be straightforward to modify in the ``PlasmaC`` source code. To construct boundary fluxes, the user computes :math:`F_{\textrm{EB}}` through the physics module :ref:`Chap:plasma_kinetics`. This provides a straightforward way of handling charge injection boundary conditions. 
+
+In order to conserve charge on solid insulators, ``PlasmaC`` always updates the total injection current as
+
+.. math::
+   F_\sigma(\phi) = \sum_{\phi}q_\phi F_{\textrm{EB}}(\phi),
+
+where :math:`q_\phi` is the charge of a species :math:`\phi`. This ensures strong conservation on insulating surfaces.
+
+Elliptic discretization
+-----------------------
+
+The elliptic discretization in ``PlasmaC`` also follows that of 

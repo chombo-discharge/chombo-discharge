@@ -64,7 +64,7 @@ copyright = u'2018, Robert Marskar'
 # built documents.
 #
 # The short X.Y version.
-version = 'alpha'
+version = '1.0'
 # The full version, including alpha/beta/rc tags.
 release = 'alpha'
 
