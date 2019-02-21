@@ -28,10 +28,8 @@ sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 # ---------------------------------------------------------
 sisdc.print_report    = false    # Print report with error and stuff	
 sisdc.adaptive_dt     = false    # Use adaptive time stepping
-sisdc.adaptive_order  = false    # Use adaptive integration order
-sisdc.min_order       = 2        # Minimum accepted order
-sisdc.max_order       = 4        # Maximum accepted order
 sisdc.error_norm      = 2        # Error norm (0 = Linf)
+sisdc.max_tries       = 1        # Maximum number of tries
 sisdc.min_cfl         = 0.1      # Minimum CFL
 sisdc.max_cfl         = 0.9      # Maximum CFL
 sisdc.max_error       = 1.E-4    # Error threshold

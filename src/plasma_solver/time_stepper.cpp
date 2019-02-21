@@ -842,20 +842,19 @@ void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&         
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
 
-      Real phi = 0.0;
+      Real phi = Max(0.0, (*a_cdr_densities[idx])(vof,0));;
       RealVect grad = RealVect::Zero;
       for (int i = 0; i < stencil.size(); i++){
 	const VolIndex& ivof = stencil.vof(i);
 	const Real& iweight  = stencil.weight(i);
 	      
-	phi += (*a_cdr_densities[idx])(ivof, 0)*iweight;
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  grad[dir] += (*a_cdr_gradients[idx])(ivof, dir);
 	}
       }
+      
       cdr_densities[idx] = Max(zero, phi);
       cdr_grad[idx] = grad;
-	    
     }
 
     // Compute RTE densities on the centroids
@@ -1110,8 +1109,8 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 	  }
 	}
 
-	// Do irregular cells
-	if(a_centering == centering::cell_center){
+	// Do irregular cells. Interpolate if we called for it. 
+	if(a_centering == centering::cell_center && m_interp_sources){
 	  ivs = ebisbox.getIrregIVS(box);
 	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	    const VolIndex& vof = vofit();

@@ -1083,6 +1083,9 @@ void cdr_solver::regrid(const int a_old_finest_level, const int a_new_finest_lev
       m_cache[lvl]->copyTo(*m_state[lvl]);
     }
   }
+
+  m_amr->average_down(m_state, m_phase);
+  m_amr->interp_ghost(m_state, m_phase);
 }
 
 void cdr_solver::reflux(EBAMRCellData& a_state){

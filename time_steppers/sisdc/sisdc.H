@@ -54,6 +54,7 @@ protected:
   RefCountedPtr<poisson_storage>      m_poisson_scratch;
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
+  int m_max_tries;
   int m_p;
   int m_k;
   int m_error_norm;
@@ -159,7 +160,7 @@ protected:
 
   // Step size control routines
   void compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
-  void adaptive_report(const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err);
+  void adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err);
 
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
@@ -190,7 +191,7 @@ protected:
   //
   Real get_max_error();
   Real restrict_dt() ;
-  Real get_max_lobatto_distance();
+  Real get_max_node_distance();
 };
 
 #endif

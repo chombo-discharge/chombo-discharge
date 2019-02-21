@@ -196,6 +196,10 @@ Vector<Real> air9eed::compute_cdr_diffusion_coefficients(const Real&         a_t
 
   Vector<Real> diffco(m_num_species, 0.0);
 
+#if 0 // Debug
+  return diffco;
+#endif
+
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
   
@@ -425,6 +429,8 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_eed_idx] -= products*loss;
 #endif
 
+#if 0
+
   // Photoionization gamma + O2 -> e + O2+
   const air9eed::photon_one*   photon1 = static_cast<air9eed::photon_one*>   (&(*m_photons[m_photon1_idx]));
   const air9eed::photon_two*   photon2 = static_cast<air9eed::photon_two*>   (&(*m_photons[m_photon2_idx]));
@@ -435,6 +441,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
 
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
+#endif
 
 #if 0 // Debug
   Real sum = 0.0;
@@ -457,7 +464,11 @@ Vector<Real> air9eed::compute_cdr_fluxes(const Real&         a_time,
 					 const Real&         a_townsend2,
 					 const Real&         a_quantum_efficiency) const {
 
-  Vector<Real> fluxes(m_num_species, 0.0);  
+  Vector<Real> fluxes(m_num_species, 0.0);
+
+#if 0 // Debug
+  return fluxes;
+#endif
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
   
@@ -541,7 +552,11 @@ Vector<Real> air9eed::compute_rte_source_terms(const Real&         a_time,
 Real air9eed::initial_sigma(const Real a_time, const RealVect& a_pos) const {return 0.0;}
 
 Real air9eed::compute_eed_mobility(const Real a_energy)    const {return (5.0/3.0)*m_e_mobility.get_entry(a_energy);}
+#if 1 // Original code
 Real air9eed::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.get_entry(a_energy);}
+#else
+Real air9eed::compute_e_mobility(const Real a_energy)      const {return 2.E-2;}
+#endif
 Real air9eed::compute_N2plus_mobility(const Real a_EbyN)   const {return 2.E-4;}
 Real air9eed::compute_N4plus_mobility(const Real a_EbyN)   const {return 2.E-4;}
 Real air9eed::compute_O2plus_mobility(const Real a_EbyN)   const {return 2.E-4;}

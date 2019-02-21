@@ -31,6 +31,7 @@ sisdc::sisdc(){
   m_safety        = 0.9;
   m_num_diff_corr = 0;
   m_new_dt        = 1.234567E89;
+  m_max_tries     = 1;
 
   m_which_nodes   = "lobatto";
 
@@ -66,6 +67,7 @@ sisdc::sisdc(){
     pp.query("max_error",       m_err_thresh);
     pp.query("safety",          m_safety);
     pp.query("num_corrections", m_num_diff_corr);
+    pp.query("max_tries",       m_max_tries);
 
     if(pp.contains("quad_nodes")){
       pp.get("quad_nodes", str);
@@ -203,10 +205,10 @@ Real sisdc::restrict_dt(){
   return 1.E99;
 }
 
-Real sisdc::get_max_lobatto_distance(){
-  CH_TIME("sisdc::get_max_lobatto_distance");
+Real sisdc::get_max_node_distance(){
+  CH_TIME("sisdc::get_max_node_distance");
   if(m_verbosity > 5){
-    pout() << "sisdc::get_max_lobatto_distance" << endl;
+    pout() << "sisdc::get_max_node_distance" << endl;
   }
 
   Real max_dist = 0.0;
@@ -504,8 +506,8 @@ Real sisdc::advance(const Real a_dt){
     sisdc::compute_E_into_scratch();
     sisdc::compute_cdr_gradients();
     sisdc::compute_cdr_velo(m_time);
-    sisdc::compute_cdr_sources(m_time);
     time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+    sisdc::compute_cdr_sources(m_time);
 #endif
   }
 
@@ -517,11 +519,13 @@ Real sisdc::advance(const Real a_dt){
   if(m_k > 0) sisdc::predictor_compute_FD_0();
 
   // SISDC advance
-  int num_reject  = 0;
-  Real actual_dt = a_dt;
-  bool accept_step = false;
+  Real first_dt       = a_dt;
+  Real actual_dt      = a_dt;
+  int num_reject      = 0;
   int num_corrections = 0;
-  while(!accept_step){
+  bool accept_step    = false;
+  bool retry_step     = true;
+  while(!accept_step && retry_step){
     num_corrections = 0;
     sisdc::setup_subintervals(m_time, actual_dt);
 
@@ -533,17 +537,28 @@ Real sisdc::advance(const Real a_dt){
       sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
       sisdc::corrector(m_time, actual_dt);
       sisdc::corrector_finalize_errors();
-      if(m_max_error < m_err_thresh) break; // No need in going beyond
+      if(m_max_error < m_err_thresh && m_adaptive_dt) break; // No need in going beyond
     }
+
 
     // Compute a new time step. If it is smaller than the minimum allowed CFL step, accept the step anyways
     if(m_adaptive_dt){
       // This restricts new_dt to > min_cfl and > min_hardcap. If actual_dt is equal these bounds, we accept the step
       sisdc::compute_new_dt(accept_step, actual_dt, num_corrections);
       
-      if(!accept_step){  // Step rejection, use the new dt
+      if(!accept_step){  // Step rejection, use the new dt for next step. 
 	actual_dt = m_new_dt;
 	num_reject++;
+
+	retry_step  = num_reject <= m_max_tries;
+
+	if(retry_step){
+	  sisdc::compute_E_into_scratch();
+	  sisdc::compute_cdr_gradients();
+	  sisdc::compute_cdr_velo(m_time);
+	  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+	  sisdc::compute_cdr_sources(m_time);
+	}
       }
     }
     else{
@@ -553,7 +568,7 @@ Real sisdc::advance(const Real a_dt){
   }
 
   if(m_print_report){
-    sisdc::adaptive_report(actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
+    sisdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
   }
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
@@ -564,8 +579,10 @@ Real sisdc::advance(const Real a_dt){
 
   // Always recompute source terms and velocities for the next time step
   sisdc::compute_cdr_gradients();
-  sisdc::compute_cdr_sources(m_time + actual_dt);
   sisdc::compute_cdr_velo(m_time + actual_dt);
+  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  sisdc::compute_cdr_sources(m_time + actual_dt);
+
   
   return actual_dt;
 }
@@ -658,8 +675,8 @@ void sisdc::predictor(const Real a_time){
       if(m_consistent_E)   sisdc::update_poisson(cdr_densities_mp1, sigma_mp1);
       if(m_consistent_rte) sisdc::update_rte(cdr_densities_mp1, t_mp1);
       if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
-      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
       if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
+      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
 
       // Update boundary conditions for cdr and sigma equations. 
       sisdc::compute_cdr_eb_states(cdr_densities_mp1);
@@ -813,8 +830,8 @@ void sisdc::corrector_reconcile_gl_integrands(){
   if(m_consistent_E)   sisdc::update_poisson(cdr_densities_p, sigma_p);
   if(m_consistent_rte) sisdc::update_rte(cdr_densities_p, t_p);
   if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_p);
-  if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_p, t_p);
   if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_p, t_p);
+  if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_p, t_p);
 
   // Update boundary conditions for cdr and sigma equations
   sisdc::compute_cdr_eb_states(cdr_densities_p);
@@ -823,7 +840,7 @@ void sisdc::corrector_reconcile_gl_integrands(){
   sisdc::compute_cdr_domain_fluxes(cdr_densities_p, t_p);
   sisdc::compute_sigma_flux();
 
-  // Now compute FAR_p - that wasn't done in the predictor
+  // Now compute FAR_p - that wasn't done in the predictor or the corrector
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
@@ -906,8 +923,8 @@ void sisdc::corrector(const Real a_time, const Real a_dt){
       if(m_consistent_E)   sisdc::update_poisson(cdr_densities_m, sigma_m);
       if(m_consistent_rte) sisdc::update_rte(cdr_densities_m, t_m);
       if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_m);
-      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_m, t_m);
       if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_m, t_m);
+      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_m, t_m);
 
       // Update boundary conditions for cdr and sigma equations
       sisdc::compute_cdr_eb_states(cdr_densities_m);
@@ -1143,7 +1160,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   }
 
   // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
-  const Real max_gl_dist = sisdc::get_max_lobatto_distance();
+  const Real max_gl_dist = sisdc::get_max_node_distance();
   const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
   if(a_dt <= dt_cfl*m_minCFL && m_max_error > m_err_thresh){ // No choice but to accept
     a_accept_step = true;
@@ -1205,7 +1222,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   m_have_dt_err = true;
 }
 
-void sisdc::adaptive_report(const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err){
+void sisdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err){
   CH_TIME("sisdc::adaptive_report");
   if(m_verbosity > 5){
     pout() << "sisdc::adaptive_report" << endl;
@@ -1214,6 +1231,7 @@ void sisdc::adaptive_report(const Real a_dt, const Real a_new_dt, const int a_co
   pout() << "\n";
   pout() << "sisdc::adaptive_report breakdown" << endl;
   pout() << "--------------------------------\n";
+  pout() << "\t Try dt       = " << a_first_dt << endl;
   pout() << "\t Advanced dt  = " << a_dt << endl;
   pout() << "\t New dt       = " << a_new_dt << endl;
   pout() << "\t Subintervals = " << m_p << endl;
@@ -1240,9 +1258,12 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   Real dt = 1.E99;
 
-  const Real max_gl_dist = sisdc::get_max_lobatto_distance();
-  
+  const Real max_gl_dist = sisdc::get_max_node_distance();
+
   m_dt_cfl = m_cdr->compute_cfl_dt();
+#if 0 // Debug
+  if(procID() == 0) std::cout << m_dt_cfl << std::endl;
+#endif
   if(!m_adaptive_dt){
     const Real dt_cfl = 2.0*m_cfl*m_dt_cfl/max_gl_dist;
     //const Real dt_cfl = m_cfl*m_dt_cfl;
