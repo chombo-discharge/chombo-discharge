@@ -50,8 +50,6 @@ sisdc::sisdc(){
   m_do_diffusion   = true;
   m_do_rte         = true;
   m_do_poisson     = true;
-  m_print_diagno   = false;
-  m_write_diagno   = false;
 
   // Get parameters from input script
   {
@@ -130,18 +128,6 @@ sisdc::sisdc(){
       pp.get("consistent_rte", str);
       if(str == "false"){
 	m_consistent_rte = false;
-      }
-    }
-    if(pp.contains("print_diagnostics")){
-      pp.get("print_diagnostics", str);
-      if(str == "true"){
-	m_print_diagno = true;
-      }
-    }
-    if(pp.contains("write_diagnostics")){
-      pp.get("write_diagnostics", str);
-      if(str == "true"){
-	m_write_diagno = true;
       }
     }
     if(pp.contains("do_advec_src")){

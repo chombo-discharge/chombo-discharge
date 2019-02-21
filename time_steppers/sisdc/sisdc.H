@@ -80,8 +80,6 @@ protected:
   bool m_compute_S;
   bool m_consistent_E;
   bool m_consistent_rte;
-  bool m_print_diagno;
-  bool m_write_diagno;
   bool m_strong_diffu;
   bool m_have_dt_err;
 

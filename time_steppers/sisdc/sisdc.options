@@ -29,7 +29,7 @@ sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 sisdc.print_report    = false    # Print report with error and stuff	
 sisdc.adaptive_dt     = false    # Use adaptive time stepping
 sisdc.error_norm      = 2        # Error norm (0 = Linf)
-sisdc.max_tries       = 1        # Maximum number of tries
+sisdc.max_tries       = 100      # Maximum number of tries (for step rejection)
 sisdc.min_cfl         = 0.1      # Minimum CFL
 sisdc.max_cfl         = 0.9      # Maximum CFL
 sisdc.max_error       = 1.E-4    # Error threshold
@@ -47,5 +47,3 @@ sisdc.do_advec_src      = true   # Turn off code functionality. Only for debuggi
 sisdc.do_diffusion      = true   # Turn off code functionality. Only for debugging
 sisdc.do_poisson        = true   # Turn off code functionality. Only for debugging
 sisdc.do_rte            = true   # Turn off code functionality. Only for debugging
-sisdc.print_diagnostics = false  # Print diagnostics to pout
-sisdc.write_diagnostics = false  # Write diagnostics to pout	
