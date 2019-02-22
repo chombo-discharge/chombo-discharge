@@ -29,6 +29,7 @@ sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 sisdc.print_report    = false    # Print report with error and stuff	
 sisdc.adaptive_dt     = false    # Use adaptive time stepping
 sisdc.error_norm      = 2        # Error norm (0 = Linf)
+sisdc.min_corr        = 1        # Minimum number of corrections
 sisdc.max_tries       = 100      # Maximum number of tries (for step rejection)
 sisdc.min_cfl         = 0.1      # Minimum CFL
 sisdc.max_cfl         = 0.9      # Maximum CFL

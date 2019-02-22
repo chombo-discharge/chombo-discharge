@@ -32,6 +32,7 @@ sisdc::sisdc(){
   m_num_diff_corr = 0;
   m_new_dt        = 1.234567E89;
   m_max_tries     = 1;
+  m_min_corr      = 1;
 
   m_which_nodes   = "lobatto";
 
@@ -60,6 +61,7 @@ sisdc::sisdc(){
     pp.query("subintervals",    m_p);
     pp.query("corr_iter",       m_k);
     pp.query("error_norm",      m_error_norm);
+    pp.query("min_corr",        m_min_corr);
     pp.query("min_cfl",         m_minCFL);
     pp.query("max_cfl",         m_maxCFL);
     pp.query("max_error",       m_err_thresh);
@@ -343,16 +345,6 @@ void sisdc::setup_qmj(const int a_p){
       cj[k] = (k==j) ? 1.0 : 0.0;
     }
 
-#if 0 // Debug
-    if(procID() == 0){
-      std::cout << "input RHS = ";
-      for (int k = 0; k<nnodes; k++){
-	std::cout << cj[k] << "\t";
-      }
-      std::cout << std::endl;
-    }
-#endif
-
     // Solve V*c = f. This calls LAPACK
     int N    = nnodes;
     int NRHS = 1;
@@ -363,16 +355,6 @@ void sisdc::setup_qmj(const int a_p){
     dgesv_(&N, &NRHS, V, &LDA, IPIV, cj, &LDB, &INFO);
     if(INFO != 0) MayDay::Abort("sisdc::setup_qmj - could not compute weights");
     
-#if 0// Debug
-    if(procID() == 0){
-      std::cout << "output rhs = ";
-      for (int k = 0; k < nnodes; k++){
-	std::cout << cj[k] << "\t";
-      }
-      std::cout << "\n" << std::endl;;
-    }
-#endif
-
     // Now construct qmj
     for (int m = 0; m < a_p; m++){
       m_qmj[m][j] = 0.0;
@@ -381,17 +363,6 @@ void sisdc::setup_qmj(const int a_p){
       }
     }
   }
-
-#if 0 // debug
-  if(procID() == 0){
-    for (int m = 0; m < a_p; m++){
-      for (int j = 0; j < nnodes; j++){
-	std::cout << m_qmj[m][j] << "\t";
-      }
-      std::cout << "\n";
-    }
-  }
-#endif
 }
 
 void sisdc::setup_subintervals(const Real a_time, const Real a_dt){
@@ -517,13 +488,13 @@ Real sisdc::advance(const Real a_dt){
 
     sisdc::set_dummy_error();
     sisdc::predictor(m_time); // SISDC predictor
-    for(int icorr = 0; icorr < m_k; icorr++){
+    for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
       num_corrections++;
       sisdc::corrector_initialize_errors();
       sisdc::corrector_reconcile_gl_integrands(); // Reconcile the integrads
       sisdc::corrector(m_time, actual_dt);
       sisdc::corrector_finalize_errors();
-      if(m_max_error < m_err_thresh && m_adaptive_dt) break; // No need in going beyond
+      if(m_max_error < m_err_thresh && m_adaptive_dt && icorr >= m_min_corr) break; // No need in going beyond
     }
 
 
@@ -563,11 +534,25 @@ Real sisdc::advance(const Real a_dt){
   sisdc::update_poisson();
   sisdc::update_rte(m_time + actual_dt);
 
+
   // Always recompute source terms and velocities for the next time step
   sisdc::compute_cdr_gradients();
   sisdc::compute_cdr_velo(m_time + actual_dt);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
   sisdc::compute_cdr_sources(m_time + actual_dt);
+
+  {// Debug, copy error to solver
+#if 0 
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>&  solver  = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi = solver->get_state();
+    const EBAMRCellData& error = storage->get_error();
+    data_ops::copy(phi, error);
+  }
+#endif
+  }
 
   
   return actual_dt;
@@ -1929,6 +1914,21 @@ void sisdc::update_diffusion_coefficients(){
     pout() << "sisdc::update_diffusion_coefficients" << endl;
   }
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+}
+
+Vector<EBAMRCellData*> sisdc::get_cdr_errors(){
+  CH_TIME("sisdc::get_cdr_errors");
+  if(m_verbosity > 5){
+    pout() << "sisdc::get_cdr_errors" << endl;
+  }
+  
+  Vector<EBAMRCellData*> ret;
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+    ret.push_back(&(storage->get_error()));
+  }
+
+  return ret;
 }
 
 Vector<EBAMRCellData*> sisdc::get_cdr_phik(const int a_m){
