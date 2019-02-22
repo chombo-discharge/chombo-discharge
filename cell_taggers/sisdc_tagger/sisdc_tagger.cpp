@@ -80,7 +80,6 @@ void sisdc_tagger::compute_tracers(){
   }
 }
 
-
 bool sisdc_tagger::coarsen_cell(const RealVect&         a_pos,
 				   const Real&             a_time,
 				   const Real&             a_dx,
