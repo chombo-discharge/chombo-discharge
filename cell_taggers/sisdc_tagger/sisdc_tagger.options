@@ -5,4 +5,5 @@
 #  something like sisdc_tagger.refine_source = 0.5 0.4 0.3. If the entry
 #  vector is too short, it will be padded with the last entry.)
 # ====================================================================================================
+sisdc_tagger.cdr_index         = 0      # Solver to refine
 sisdc_tagger.refine_err        = 0.1    # Refinement factor for electron source term 
