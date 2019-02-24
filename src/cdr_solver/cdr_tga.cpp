@@ -687,6 +687,9 @@ void cdr_tga::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData&
     data_ops::set_value(m_scratch, 0.0);
     m_gmg_solver->computeAMRResidual(res, phi, zero, finest_level, 0); // Computes res = L(phi) - zero
     data_ops::set_value(m_scratch, 0.0);
+
+    m_amr->average_down(a_diffusive_term, m_phase);
+    m_amr->interp_ghost(a_diffusive_term, m_phase);
   }
   else{
     data_ops::set_value(a_diffusive_term, 0.0);

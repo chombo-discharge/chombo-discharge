@@ -835,6 +835,9 @@ void sisdc::corrector_reconcile_gl_integrands(){
 
       data_ops::copy(F_m, FD_m);
       data_ops::incr(F_m, FAR_m, 1.0);
+
+      m_amr->average_down(F_m, m_cdr->get_phase());
+      m_amr->interp_ghost(F_m, m_cdr->get_phase());
     }
   }
 
@@ -1038,11 +1041,10 @@ void sisdc::corrector_diffusion_onestep(const int a_m){
 
       // phi^ast is the advected and reacted solution. Compute -dtm*FD_(m+1)^k for source term advance
       data_ops::set_value(scratch, 0.0);
-      //      data_ops::incr(scratch, FD_mk, -m_dtm[a_m]);
       data_ops::incr(scratch, FD_mk, -1.0);
 
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->advance_euler(phi_mp1, phi_ast, scratch, m_dtm[a_m]); // Soucre is -Fd_(m+1)^k
+      tgasolver->advance_euler(phi_mp1, phi_ast, scratch, m_dtm[a_m]); // Source is -Fd_(m+1)^k
 
       m_amr->average_down(phi_mp1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
