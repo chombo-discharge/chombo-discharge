@@ -24,7 +24,7 @@ public:
   
 protected:
 
-  int m_electron_idx;
+  int m_cdr_idx;
   Real m_thresh;
 
   bool coarsen_cell(const RealVect&         a_pos,

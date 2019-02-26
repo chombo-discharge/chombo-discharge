@@ -15,16 +15,14 @@ sisdc_tagger::sisdc_tagger(){
   m_num_tracers = 1;
   m_name        = "sisdc_tagger";
 
-  m_electron_idx = 0;
+  m_cdr_idx = 0;
   m_thresh       = 0.1;
 
   ParmParse pp("sisdc_tagger");
-  pp.query("electron_index",  m_electron_idx);
+  pp.query("cdr_index",  m_cdr_idx);
   pp.query("err_thresh",      m_thresh);
 
   this->set_phase(phase::gas);
-
-  std::cout << m_thresh << std::endl;
 }
 
 sisdc_tagger::~sisdc_tagger(){
@@ -43,7 +41,9 @@ void sisdc_tagger::compute_tracers(){
 
   // Get electron error
   sisdc* stepper = (sisdc*) (&(*m_timestepper));
-  EBAMRCellData& ne_err  = *(stepper->get_cdr_errors()[m_electron_idx]);
+
+  EBAMRCellData& ne_err  = *(stepper->get_cdr_errors()[m_cdr_idx]);
+  Vector<EBAMRCellData*> errors  = stepper->get_cdr_errors();
 
   // Get maximum and minimum ne and Se, and the electric field
   Real err_max,  err_min;
@@ -73,6 +73,10 @@ void sisdc_tagger::compute_tracers(){
     }
   }
 
+  data_ops::get_max_min(err_max, err_min, m_tracer[0], 0);
+  err_max = Max(Abs(err_max), Abs(err_min));
+  data_ops::scale(m_tracer[0], 1./err_max);
+
   // Compute gradient of the tracer
   for (int i = 0; i < m_num_tracers; i++){
     m_amr->average_down(m_tracer[i], m_phase);
@@ -81,22 +85,22 @@ void sisdc_tagger::compute_tracers(){
 }
 
 bool sisdc_tagger::coarsen_cell(const RealVect&         a_pos,
-				   const Real&             a_time,
-				   const Real&             a_dx,
-				   const int&              a_lvl,
-				   const Vector<Real>&     a_tracer,
-				   const Vector<RealVect>& a_grad_tracer){
+				const Real&             a_time,
+				const Real&             a_dx,
+				const int&              a_lvl,
+				const Vector<Real>&     a_tracer,
+				const Vector<RealVect>& a_grad_tracer){
 
   return true;
 }
 
 bool sisdc_tagger::refine_cell(const RealVect&         a_pos,
-				  const Real&             a_time,
-				  const Real&             a_dx,
-				  const int&              a_lvl,
-				  const Vector<Real>&     a_tracer,
-				  const Vector<RealVect>& a_grad_tracer){
-  const bool refine = (a_tracer[0] > m_thresh) ? true : false;
+			       const Real&             a_time,
+			       const Real&             a_dx,
+			       const int&              a_lvl,
+			       const Vector<Real>&     a_tracer,
+			       const Vector<RealVect>& a_grad_tracer){
+  const bool refine = (Abs(a_tracer[0]) > m_thresh) ? true : false;
   
   return refine;
 }

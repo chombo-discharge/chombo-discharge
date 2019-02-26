@@ -285,13 +285,19 @@ Vector<Real> air8::compute_cdr_source_terms(const Real              a_time,
 
   Real products;
 
+  const RealVect ve = -a_E*this->compute_electron_mobility(EbyN);
+  const Real De     =      this->compute_electron_diffco(EbyN);
+  const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + n_e)*PolyGeom::dot(ve, a_E));
+  const Real k1_corr = k1*(1-Max(factor, 0.0));
+  const Real k2_corr = k2*(1-Max(factor, 0.0));
+
   // k1 reaction
-  products = k1 * n_e * n_N2;
+  products = k1_corr * n_e * n_N2;
   source[m_electron_idx]  += products;
   source[m_N2plus_idx]    += products;
 
   // k2 reaction
-  products = k2 * n_e * n_O2;
+  products = k2_corr * n_e * n_O2;
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
 
@@ -410,7 +416,7 @@ Vector<Real> air8::compute_cdr_fluxes(const Real&         a_time,
 
   // Drift outflow for now
   for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
+    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
   }
 
   return fluxes;
@@ -439,7 +445,13 @@ Vector<Real> air8::compute_cdr_dielectric_fluxes(const Real&         a_time,
 						 const Vector<Real>& a_cdr_gradients,
 						 const Vector<Real>& a_rte_fluxes,
 						 const Vector<Real>& a_extrap_cdr_fluxes) const {
-  
+
+  if(a_pos[1] > -700E-6 && a_normal[1] < 0.0){
+    if(PolyGeom::dot(a_E, a_normal) > 0.0){
+      std::cout << a_pos << std::endl;
+      MayDay::Abort("wtf");
+    }
+  }
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
@@ -456,9 +468,11 @@ Vector<Real> air8::compute_rte_source_terms(const Real&         a_time,
   return ret;
 #endif
 
-  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
-  const Real k1              = this->compute_electron_N2_impact_ionization(EbyN);
-  const Real Se              = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
+
+
+  const Real EbyN  = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real k1    = this->compute_electron_N2_impact_ionization(EbyN);
+  const Real Se    = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
 
   ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
   ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));

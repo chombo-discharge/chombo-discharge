@@ -1126,6 +1126,25 @@ void plasma_engine::old_read_checkpoint_file(const std::string& a_restart_file){
     }
   }
 
+  // Make CDR data consistent
+  for (cdr_iterator solver_it = m_timestepper->get_cdr()->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+
+    m_amr->average_down(solver->get_state(), phase::gas);
+    m_amr->interp_ghost(solver->get_state(), phase::gas);
+  }
+
+  // Average down and update ghost cells for Poisson
+  m_amr->average_down(poisson->get_state());
+  m_amr->interp_ghost(poisson->get_state());
+
+  // Average down and update ghost cells for RTE
+  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+
+    m_amr->average_down(solver->get_state(), phase::gas);
+    m_amr->interp_ghost(solver->get_state(), phase::gas);
+  }
 
   handle_in.close();
 }
@@ -1243,6 +1262,26 @@ void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
     }
   }
 
+  // Make CDR data consistent
+  for (cdr_iterator solver_it = m_timestepper->get_cdr()->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+
+    m_amr->average_down(solver->get_state(), phase::gas);
+    m_amr->interp_ghost(solver->get_state(), phase::gas);
+  }
+
+  // Average down and update ghost cells for Poisson
+  m_amr->average_down(poisson->get_state());
+  m_amr->interp_ghost(poisson->get_state());
+
+  // Average down and update ghost cells for RTE
+  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+
+    m_amr->average_down(solver->get_state(), phase::gas);
+    m_amr->interp_ghost(solver->get_state(), phase::gas);
+  }
+
 
   handle_in.close();
 }
@@ -1324,7 +1363,6 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   // Solve the elliptic parts
   bool converged = m_timestepper->solve_poisson();
-  
   
   if(!converged){ // If we don't converge, try new solver settings
     if(m_verbosity > 0){
@@ -2250,14 +2288,14 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
     }
   }
 
-  m_timestepper->solve_poisson();                       // Solve Poisson equation by 
-  if(m_timestepper->stationary_rte()){                  // Solve RTE equations if stationary solvers
+  m_timestepper->solve_poisson();       // Solve Poisson equation by 
+  if(m_timestepper->stationary_rte()){  // Solve RTE equations if stationary solvers
     const Real dummy_dt = 0.0;
-    m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
+    m_timestepper->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
   }
-  m_timestepper->regrid_internals(); // Prepare internal storage for time stepper
+  m_timestepper->regrid_internals();    // Prepare internal storage for time stepper
   if(!m_celltagger.isNull()){
-    m_celltagger->regrid();            // Prepare internal storage for cell tagger
+    m_celltagger->regrid();             // Prepare internal storage for cell tagger
   }
 
   // Fill solvers with important stuff

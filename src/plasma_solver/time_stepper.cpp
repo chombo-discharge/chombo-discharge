@@ -775,7 +775,7 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					   a_dx);
   }
   else{ // Cell-ave has already been done
-#if 0
+#if 1
     this->compute_cdr_sources_irreg_kappa(a_sources,
 					  a_cdr_densities,
 					  a_cdr_gradients,
@@ -901,10 +901,6 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
   const int num_photons  = m_plaskin->get_num_photons();
   const int num_species  = m_plaskin->get_num_species();
 
-  return;
-
-#if 0 // Not implemented yet
-
   // Interpolation stencils
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
 
@@ -938,7 +934,7 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
       }
     }
 
-    // Compute cdr_densities and their gradients on centroids
+    // Compute cdr_densities as averages and their gradients on centroids
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
 
@@ -948,11 +944,12 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
 	const VolIndex& ivof = stencil.vof(i);
 	const Real& iweight  = stencil.weight(i);
 	      
-	phi += (*a_cdr_densities[idx])(ivof, 0)*iweight;
+	//	phi += (*a_cdr_densities[idx])(ivof, 0)*iweight;
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  grad[dir] += (*a_cdr_gradients[idx])(ivof, dir);
 	}
       }
+      cdr_densities[idx] = Max(zero, (*a_cdr_densities[idx])(vof, 0));
       cdr_densities[idx] = Max(zero, phi);
       cdr_grad[idx] = grad;
     }
@@ -984,7 +981,6 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
       (*a_sources[idx])(vof, 0) = sources[idx];
     }
   }
-#endif 
 }
 
 

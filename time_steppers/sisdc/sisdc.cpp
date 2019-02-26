@@ -542,7 +542,7 @@ Real sisdc::advance(const Real a_dt){
   sisdc::compute_cdr_sources(m_time + actual_dt);
 
   {// Debug, copy error to solver
-#if 0 
+#if 0
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>&  solver  = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
@@ -833,8 +833,8 @@ void sisdc::corrector_reconcile_gl_integrands(){
       const EBAMRCellData& FD_m  = storage->get_FD()[m];
       const EBAMRCellData& FAR_m = storage->get_FAR()[m];
 
-      data_ops::copy(F_m, FD_m);
-      data_ops::incr(F_m, FAR_m, 1.0);
+      data_ops::copy(F_m, FAR_m);
+      data_ops::incr(F_m, FD_m, 1.0);
 
       m_amr->average_down(F_m, m_cdr->get_phase());
       m_amr->interp_ghost(F_m, m_cdr->get_phase());
@@ -887,7 +887,7 @@ void sisdc::corrector(const Real a_time, const Real a_dt){
 
     // We update (m+1), but m=0 is a special update since FAR(phi_0^k) never changes, and
     // E and the RTE were updated in the reconcile_gl_integrands routine. So, skip all of that if we can.
-    // There is also a special flag in corrector_advection_reaction that we use. 
+    // There is also a special flag in corrector_advection_reaction that we use for this. 
     if(m > 0){
       Vector<EBAMRCellData*> cdr_densities_m = sisdc::get_cdr_phik(m);
       EBAMRIVData& sigma_m = sisdc::get_sigmak(m);
@@ -946,8 +946,8 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
       solver->compute_divF(scratch, phi_m, 0.0, true);  // scratch   =  Div(v_m*phi_m^(k+1))
       data_ops::scale(scratch, -1.0);                   // scratch   = -Div(v_m*phi_m^(k+1))
       data_ops::incr(scratch, src, 1.0);                // scratch   = -Div(v_m*phi_m^(k+1)) + S_m^(k+1) = FAR(phi_m^(k+1))
-      data_ops::incr(phi_mp1, scratch,  m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*FAR(phi_m^(k+1))
-      data_ops::incr(phi_mp1, FAR_m,   -m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*[FAR(phi_m) - FAR(phi_m^k)]
+      data_ops::incr(phi_mp1, scratch,  m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*[FAR(phi_m^(k+1))]
+      data_ops::incr(phi_mp1, FAR_m,   -m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*[FAR(phi_m^(k+1)) - FAR(phi_m^k)]
 
       // Update the FAR_m storage - this overwrites FAR(phi_m^k) with FAR(phi_m^(k+1))
       data_ops::copy(FAR_m, scratch);
@@ -959,7 +959,6 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
 
     m_amr->average_down(phi_mp1, m_cdr->get_phase());
     m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
-
     data_ops::floor(phi_mp1, 0.0);
 
     // Compute result onto phi_ast as well since we need to do a diffusion step
@@ -1212,15 +1211,6 @@ void sisdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Real a
   pout() << "\t Rejections   = " << a_rej << endl;
   pout() << "\t Max error    = " << a_max_err << endl;
   pout() << "\n";
-
-#if 0 // Debug
-  if(procID() == 0) std::cout << "\tactual_dt = " << a_dt
-			      << "\tnew_dt = " << a_new_dt
-			      << "\tcorr = " << a_corr
-			      << "\t # rejections = " << a_rej
-			      << "\t err = " << a_max_err
-			      << std::endl;
-#endif
 }
 
 void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
@@ -1254,7 +1244,8 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
       new_dt = Min(new_dt, dt_cfl*m_maxCFL);
     }
     else{
-      new_dt = 0.5*(m_maxCFL+m_minCFL)*dt_cfl;
+      //      new_dt = 0.5*(m_maxCFL+m_minCFL)*dt_cfl;
+      new_dt = m_maxCFL*dt_cfl;
     }
 
     if(new_dt < dt){
