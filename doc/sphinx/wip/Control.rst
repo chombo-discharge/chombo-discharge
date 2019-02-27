@@ -3,7 +3,7 @@
 Controlling PlasmaC
 ===================
 
-In this chapter we show how to run a `PlasmaC` simulation and control its behavior through input scripts or command line options.
+In this chapter we show how to run a ``PlasmaC`` simulation and control its behavior through input scripts or command line options.
 
 Compiling and running
 ---------------------
@@ -86,7 +86,7 @@ Spatial discretization may be changed during restarts. **However, you are *not* 
 * ``amr.max_amr_depth``
 * ``amr.ref_rat``
 
-If you change these variables, the checkpointed data cannot be imported into memory. In principle, we *can* extend PlasmaC so that this will be allowed. 
+If you change these variables, the checkpointed data cannot be imported into memory. In principle, we *can* extend PlasmaC so that this will be allowed. If you really, really want this feature, please :ref:`Chap:contact`.
 
 Note that whatever changes you otherwise apply to :ref:`Chap:amr_mesh` become active only after the first regrid. 
 

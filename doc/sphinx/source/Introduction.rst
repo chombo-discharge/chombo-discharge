@@ -3,14 +3,14 @@
 Getting started
 ===============
 
-This chapter discusses how you may obtain ``PlasmaC`` and compile it.
+This chapter discusses what `PlasmaC` really is, how you may obtain `PlasmaC` and compile it.
 
 .. _Chap:Obtaining:
 
-Obtaining ``PlasmaC``
------------------
+Obtaining `PlasmaC`
+---------------------
 
-``PlasmaC`` is obtained by cloning the following repository:
+`PlasmaC` is obtained by cloning the following repository:
 
 .. code-block:: bash
 
@@ -23,7 +23,7 @@ You will also need a version of Chombo, which you may download online.
 Prerequisites
 -------------
 
-From the ground up, ``PlasmaC`` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework. To compile ``PlasmaC``, you must therefore have the following in place:
+From the ground up, `PlasmaC` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework. To compile `PlasmaC`, you must therefore have the following in place:
 
 * A Fortran compiler, usually gfortran or Intel Fortran
 * A C++ compiler, usually g++ or Intel C++
@@ -31,7 +31,7 @@ From the ground up, ``PlasmaC`` is built on top of the `Chombo <https://commons.
 * A parallel HDF5 installation
 * A Chombo library
 
-Usually, laptops and desktops already have appropriate Fortran and C++ compilers installed, as well as a version of MPI. On clusters, HDF5 is (usually) preinstalled, and in this case, it will be sufficient to modify the Chombo build files in order to compile ``PlasmaC``. If you already have HDF5 installed, you may skip directly to :ref:`Chap:Environment`.
+Usually, laptops and desktops already have appropriate Fortran and C++ compilers installed, as well as a version of MPI. On clusters, HDF5 is (usually) preinstalled, and in this case, it will be sufficient to modify the Chombo build files in order to compile `PlasmaC`. If you already have HDF5 installed, you may skip directly to :ref:`Chap:Environment`.
 
 .. _Chap:HDF5:
 
@@ -116,19 +116,19 @@ Here are what configuration variables that are used on the ``fram`` supercompute
 		syslibflags    = -ldl -lm -lz
 
 
-We also recommend that you create environment variables that hold the path to your Chombo and ``PlasmaC`` libraries. For example,
+We also recommend that you create environment variables that hold the path to your Chombo and `PlasmaC` libraries. For example,
 
 .. code-block:: c++
 
 		CHOMBO_HOME=/usr/local/Chombo-3.2
 		PLASMAC_HOME=/home/foo/plasmac
 
-These two environment variables are used in the ``PlasmaC`` makefile system so that our makefiles can find both Chombo and ``PlasmaC``.
+These two environment variables are used in the `PlasmaC` makefile system so that our makefiles can find both Chombo and `PlasmaC`.
 
 .. _Chap:Compiling:
 
-Compiling ``PlasmaC``
------------------
+Compiling `PlasmaC`
+---------------------
 
 Once an application has been set up, compiling is done by
 
@@ -138,7 +138,7 @@ Once an application has been set up, compiling is done by
 
 Compiling must be performed from the folder which houses your makefile. 
 
-Currently, all of ``PlasmaC`` is compiled into your mini-applications. While this is something that we are working on improving, this means that there is no separate build for the ``PlasmaC`` source code and your application files.
+Currently, all of `PlasmaC` is compiled into your mini-applications. While this is something that we are working on improving, this means that there is no separate build for the `PlasmaC` source code and your application files.
 
 .. _Chap:Visualization:
 
