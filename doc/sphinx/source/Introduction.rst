@@ -16,7 +16,7 @@ Obtaining `PlasmaC`
 
    git clone ssh://git@git.code.sintef.no/~robertm/plasmac
 
-You will also need a version of Chombo, which you may download online.
+You will also need a version of Chombo, which you may download online. 
 
 .. _Chap:Prerequisites:
 
@@ -29,6 +29,7 @@ From the ground up, `PlasmaC` is built on top of the `Chombo <https://commons.lb
 * A C++ compiler, usually g++ or Intel C++
 * An MPI installation
 * A parallel HDF5 installation
+* LAPACK and BLAS
 * A Chombo library
 
 Usually, laptops and desktops already have appropriate Fortran and C++ compilers installed, as well as a version of MPI. On clusters, HDF5 is (usually) preinstalled, and in this case, it will be sufficient to modify the Chombo build files in order to compile `PlasmaC`. If you already have HDF5 installed, you may skip directly to :ref:`Chap:Environment`.
@@ -138,13 +139,45 @@ Once an application has been set up, compiling is done by
 
 Compiling must be performed from the folder which houses your makefile. 
 
-Currently, all of `PlasmaC` is compiled into your mini-applications. While this is something that we are working on improving, this means that there is no separate build for the `PlasmaC` source code and your application files.
+Currently, all of `PlasmaC` is compiled into your mini-applications. While this is something that we are working on improving, this means that there is no separate build for the `PlasmaC` source code and your application files. You will *not* be able to install `PlasmaC` separately; compilation is only possible once a user case has been set up. 
 
 .. _Chap:Visualization:
 
 Visualization
 -------------
 
-PlasmaC writes it's output files to HDF5. In general, user's can decide what data to output, as well as restrict plot depth to a certain AMR level. There are also options for including ghost cells in the output files.
+PlasmaC writes it's output files to HDF5. Users can decide what data to output, as well as restrict plot depth to a certain AMR level. There are also options for including ghost cells in the output files.
 
-Our favorite tool for visualization is `VisIt <https://wci.llnl.gov/codes/visit/>`_, which can be freely downloaded. Our experience is that client-server visualization is beneficial, especially for in three dimensions. For information on how to set up host profiles for VisIt, please contact your local guru or refer to the `VisIt documentation <http://visit-sphinx-user-manual.readthedocs.io/en/latest/index.html>`_. 
+Our favorite tool for visualization is `VisIt <https://wci.llnl.gov/codes/visit/>`_, which can be freely downloaded. Our experience is that client-server visualization is beneficial for visualization of three-dimensional simulation data. For information on how to set up host profiles for VisIt, please contact your local guru or refer to the `VisIt documentation <http://visit-sphinx-user-manual.readthedocs.io/en/latest/index.html>`_. 
+
+.. _Chap:MyFirstCompilation:
+
+My first compilation
+--------------------
+
+Before moving on with more complex descriptions of `PlasmaC`, we will try to compile a test problem which simply advects a scalar in a geometry-less domain. To set up this application, call the following on the command line:
+
+.. code-block:: bash
+
+   ./setup.py -base_dir=./ -app_name=advection2d -plasma_kinetics=advection_kinetics -time_stepper=sisdc
+
+This will create a folder in the `PlasmaC` source folder called :file:`advection2d`. Inside that folder you will find three files; a makefile (:file:`GNUmakefile`), a compilation file (:file:`main.cpp`) and an input file (:file:`template.inputs`). You may try to compile that application for two-dimensional execution by navigating to :file:`advection2d` and executing
+
+.. code-block:: bash
+
+   make -s -j4 DIM=2 main
+
+where ``-j4`` is the number of cores used for the compilation. If that application compiles successfully, you will see a file called :file:`main2d.<bunch_of_options>.ex`. If you see this file, you will be able to compile all of `PlasmaC`. If you don't, you won't be able to compile any of it. Before moving on further, please make sure that your model compiles.
+
+Once we have compiled our application, we are ready to run it. The example that we will run is a very simple one; it uses the full `PlasmaC` framework for advecting a scalar with velocity :math:`\mathbf{v} = \mathbf{E}`, where :math:`\mathbf{E}` is the electric field. The physics module that describes this example is found in :file:`/plasma_models/advection_kinetics`. We will not go through that module here, except mention that the model just sets the velocity to be equal to the electric field (i.e. unity mobility); turns off diffusion and reactive terms, and initializes the advected species to be a square or Gaussian pulse. You may now run this example by
+
+.. code-block:: bash
+
+   mpirun -np4 main2d.<bunch_of_options>.ex template.inputs
+
+where the latter two options override some settings in template.inputs that would set Neumann boundary conditions everywhere (its only a template, after all). Output files should now appear in :file:`advection2d/plt`. 
+
+Troubleshooting
+---------------
+
+If the prerequisites are in place, compilation of `PlasmaC` is usually straightforward. However, due to dependencies on Chombo and HDF5, compilation can be a drag. Our experience is that if Chombo compiles, so does `PlasmaC`. For that reason we refer you to the Chombo user guide for troubleshooting. 
