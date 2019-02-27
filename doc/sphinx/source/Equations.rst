@@ -34,14 +34,14 @@ The coupling that is (currently) available in `PlasmaC` is
 where :math:`F` is the boundary flux on insulators or electrodes (which must be separately implemented). 
 
 
-`PlasmaC` works by embedding the equations above into an abstract C++ framework that the user must implement or reuse existing pieces of, and then compile into a *mini-application*. For most users, this will mostly include implementing a new geometry, a new plasma-kinetic scheme, or new functions for deciding when to coarsen or refine a certain spatial region. It is our goal that the user does not need to worry about temporal or spatial discretization of these equations. 
+`PlasmaC` works by embedding the equations above into an abstract C++ framework that the user must implement or reuse existing pieces of, and then compile into a *mini-application*. For most users, this will mostly include implementing a new geometry, a new plasma-kinetic scheme, or new functions for deciding when to coarsen or refine a certain spatial region. It is our goal that the user does not need to worry about temporal or spatial discretization of these equations, but rather focus on the actual setup of the plasma kinetics, boundary conditions, and so on. 
 
 .. _Chap:SpatialDiscretization:
 
 Spatial discretization
 ----------------------
 
-`PlasmaC` uses spatial discretization provided by Chombo. In `PlasmaC`, computations occur over a set of levels with different resolutions, where the resolution refinement between levels can be a factor 2 or 4. On each level, the mesh is described by a set of disjoint patches (rectangular box in space), where the patches are distributed among MPI processes.
+`PlasmaC` uses structured adaptive mesh refinement (SAMR provided by Chombo :cite:`ebchombo`. SAMR exists in two separate categories, patch-based and tree-based AMR. Patch-based AMR is the more general type and contain tree-based grids as a subset; they can use refinement factors other than 2, as well as accomodate anisotropic resolutions and non-cubic patches. In patch-based AMR the domain is subdivided into a collection of hierarchically nested overlapping patches (or boxes). Each patch is a rectangular block of cells which, in space, exists on a subdomain of the union of patches with a coarser resolution. Patch-based grids generally do not have unique parent-children relations: A fine-level patch may have multiple coarse-level parents. An obvious advantage of a patch-based approach is that entire Cartesian blocks are sent into solvers, and that the patches are not restricted to squares or cubes. A notable disadvantage is that the overlapping grids inflate memory, and that additional logic is required when updating a coarse grid level from the overlapping region of a finer level. Tree-based AMR use quadtree or octree data structures that describe a hierarchy of unique parent-children relations throughout the AMR levels: Each child has exactly one parent, whereas each parent has multiple children (4 in 2D, 8 in 3D). For CPU cache performance reasons, the leaves of an octree are often cubic patches (e.g. :math:`4^3` or :math:`8^3` boxes), but the mesh can also be refined on a cell-by-cell basis. However, the use of single cell leaves becomes prohibitive at large scale for two reasons. The first is that special case must be taken in order to avoid memory inflation due to a growing tree structure. The second is that such trees, while still being SAMR, use indirect memory referencing, thus adding latency in data accessing and processing. This typically leads to poorer CPU performance since the data defined in neighboring cells may be stored on different cache lines. In `PlasmaC` and Chombo, computations occur over a set of levels with different resolutions, where the resolution refinement between levels can be a factor 2 or 4. On each level, the mesh is described by a set of disjoint patches (rectangular box in space), where the patches are distributed among MPI processes.
 
 Embedded boundary applications are supported by additionally describing the mesh with a graph near cut-cells. This allows us to combine the efficiency of patch-based AMR with complex geometries. 
 
@@ -56,9 +56,9 @@ Embedded boundary applications are supported by additionally describing the mesh
 Geometry generation
 ___________________
 
-Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometries are generated from a function :math:`f(\mathbf{x})` that describes the level-set surface. This is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption (but increase run time). Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. Furthermore, geometric data describes by the graph only exists in the cut cells themselves, so that this data is truly sparse. 
+Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometries are generated from a function :math:`f(\mathbf{x}) = 0` that describes the level-set surface. This is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption (but increase run time). Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. Furthermore, geometric data describes by the graph only exists in the cut cells themselves, so that this data is sparse. 
 
-Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. The finest AMR level always dominates the memory consumption for the EB mesh, and arbitrarily fine grids are not possible. Essentially, one must expect that one dense box is allocated for each box that intersects the graph at the finest AMR level. In other words, the available system memory must be sufficiently so that one can refine the entire embedded boundary at the finest AMR level. For example, if your finest AMR grid contains :math:`10^4` cut-cell boxes each of size :math:`64^3` (both are realistic numbers), the graph will contain roughly :math:`2.6\times 10^9` graph nodes (one node per cell in each cut-cell box). The memory consumption per graph various, but if we estimate this at :math:`512` bytes per node on average, then the graph memory consumption is :math:`1.34\,\textrm{TB}`. 
+Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. Arbitrarily with fine grids geometries are not possible. Consider for example a cubic domain of :math:`(16384)^3` cells which is decomposed into :math:`(64)^3` cell size patches. This yields :math:`(256)^3` patches. Now consider that this domain is cut in half along one of the coordinate basis vectors by a planar level set surface. This surface will require allocation of :math:`256\times256\times 1` patches for the geometry. If each patch is padded with 4 ghost cells, this yields :math:`256\times256\times(72)^3 \approx 24\times 10^9` cells. Inside each cell we must store volume fraction, area fractions, cell centroids positions and so one. The required memory easily ranges in the terabyte range. 
 
 .. _Chap:AdvectiveDiscretization:
 
@@ -154,4 +154,65 @@ Flux evaluation on coarse-fine boundaries is slightly more involved. The AMR way
 .. math::
    \nabla\cdot\mathbf{F} \rightarrow \nabla\cdot\mathbf{F} + \frac{1}{\Delta x}\left(\sum_{f} F_{f} - F_c\right),
 
-where :math:`F_{c}` and :math:`F_{f}` are the coarse and fine-face fluxes, and the sum runs over all the fine faces that abut the coarse face. 
+where :math:`F_{c}` and :math:`F_{f}` are the coarse and fine-face fluxes, and the sum runs over all the fine faces that abut the coarse face.
+
+.. _Chap:EllipticBoundaryConditions:
+
+Elliptic boundary conditions
+----------------------------
+Next, we discuss four types of boundary conditions for the Helmholtz equation: Neumann, Dirichlet, Robin, and multifluid type boundary conditions. For Neumann boundary conditions the domain and embedded boundary fluxes are specified directly. For Dirichlet boundary co
+nditions the process is more involved. For Dirichlet conditions on domain faces we apply finite differences in order to evaluate the flux through the face. For example, for a constant Dirichlet boundary condition :math:`\phi = \phi_0` the face-centered flux at the bottom face is, to second order
+
+.. math::
+  F_{i,j-\frac{1}{2}} = -\frac{b_{i,j-\frac{1}{2}}}{\Delta x}\left(3\phi_{i,j+1} -\frac{1}{3}\phi_{i,j} - \frac{8}{3}\phi_0\right)
+
+As with the flux :math:`F_2` on the interior face, fluxes on domain faces are also interpolated to face centroids. Thus, :math:`F_{\textrm{D}}` becomes
+
+.. math::
+  F_{\textrm{D}} = \left[F_{i,j-\frac{1}{2}}(1-t) + tF_{i-1,j-\frac{1}{2}}\right],
+
+where :math:`t` is the distance from the face center to the face centroid.
+
+.. figure:: figures/raycast.png
+   :width: 480px
+   :align: center
+
+   Ray casting at the EB for obtaining the normal gradient.
+
+The evaluation of Dirichlet boundary conditions on the EB is more complicated because the EB normal does not align with any of the coordinate directions. To evaluate the flux on the boundary we construct ray based or least squares based stencils for evaluating :math:`\partial_n\phi` (see \cite{Johansen1998} or \cite{ebchombo} for details). Regardless of which approach is used, we have
+
+.. math::
+  \frac{\partial\phi}{\partial n} = w_0\phi_0 + \sum_{{\mathbf{i}} \in \Psi}w_{{\mathbf{i}}}\phi_{{\mathbf{i}}},
+
+where :math:`\phi_0` is the Dirichlet value on the boundary, :math:`w_0` is a boundary weight and :math:`\Psi` is a stencil that contains only interior points. The weights :math:`w_{{\mathbf{i}}}` are weights for these points. As an example, consider the flux in the figure above. The first order accurate partial derivative on the boundary is given by
+
+.. math::
+  \frac{\partial\phi}{\partial n} = \frac{\phi_0 - \overline{\phi}}{l},
+
+where :math:`\overline{\phi}` is the interpolated value at the intersection of the ray and the line that connects :math:`\mathbf{x}_{i-1, j}` and :math:`\mathbf{x}_{i-1, j+1}`. Since :math:`\overline{\phi}` can be linearly interpolated by using these two interior points only, this is clearly in the form of Eq.~\eqref{eq:bndry_stencil}. The boundary derivative stencils are well separated from the boundary (i.e. they do not use the values of the irregular cell itself). For the Poisson equation this is a requirement in order to achieve good conditioning of the discretized system as the volume fraction approaches zero \cite{Johansen1998}. 
+
+Higher-order approximations to the flux are built in a similar way by including more interior cells. In our experience, the best convergence results come from using second order accurate ray-based boundary stencils, which requires 3 ghost cells in the general case. If we cannot find a stencil for computing the normal derivative by ray-casting, which can occur if there aren't enough cells available, we use quadrant-based least squares for computing the normal derivative (again, see \cite{Johansen1998} or \cite{ebchombo}).
+
+We have also implemented Robin boundary conditions of the type
+
+.. math::
+  a_1\phi + a_2\frac{\partial \phi}{\partial n} = a_3,
+
+which is an appropriate type of boundary condition for the radiative transfer equation. The normal derivative is given by :math:`\partial_n\phi = (a_3 - a_1\phi)/a_2` so that extrapolation of :math:`\phi` to the boundary is sufficient for imposing the boundary flux. Our way of doing this is simply to extrapolate :math:`\phi` to the boundary by using either least squares or Taylor-based stencils. 
+
+On multifluid boundaries the boundary condition is neither Dirichlet, Neumann, or Robin. Multifluid boundaries are more complex since the state at the boundary is not known, but rather depends on the solution inside both fluids. Our approach follows that of \cite{Crockett2011} where we first compute stencils for the normal derivative on each side of the boundary,
+
+.. math::
+  \frac{\partial\phi}{\partial n_q} = w_0^q\phi_B + \sum_{{\mathbf{i}} \in \Psi_q}w_{{\mathbf{i}}}^q\phi_{{\mathbf{i}}},
+
+where :math:`q = p` or :math:`q=p^\prime` and :math:`\phi_B` is the solution on the surface centroid, and the stencil only reaches into one of the fluids. The linear nature of this equation allows one to obtain the surface state :math:`\phi_B` from the matching condition, which can then be eliminated in order to evaluate :math:`\partial\phi/\partial n_p`. 
+
+
+.. _Chap:GMG:
+
+Geometric multigrid
+-------------------
+
+To solve the discretized Helmholtz equation we use the geometric multigrid (GMG) solver template that ships with Chombo :cite:`ebchombo`. GMG involves smoothing of the solutions on progressively coarsened grids and is compatible with AMR. Smoothing on each level involves relaxation (e.g. Jacobi or Gauss-Seidel), which primarily reduces the magnitude of high freqency errors. Removal of low-frequency errors from the solution is much slower. Because of this, multigrid accelerates convergence by projecting the error onto a coarser grid where the error has, from the viewpoint of the grid, a shorter wavelength, making relaxation more efficient. Once a bottom grid level has been reached and an approximate bottom-level solution has been found, the error is prolongated onto a finer grid and relaxation is then re-applied. Geometric multigrid works best when the long wavelength modes of the fine grid operator are well represented as short wavelength modes on the coarse grid operator. For EB applications however, coarsening can result in the removal of finer geometric features so that the relaxation step cannot sufficiently dampen the error modes at which GMG is aimed at. Because of this, geometric multigrid for EB applications usually involve lower convergence rates between each multigrid cycle than it does for geometry-less domains and, moreover, typically involves dropping to the bottom solver sooner. Currently, we only support relaxation solvers as the bottom solver for multi-phase problems, whereas we use the built-in BiCGStab and GMRES solvers in Chombo :cite:`ebchombo` for single-phase elliptic problems. In the future, we would like to use algebraic multigrid from e.g. PETSc as a bottom solver in the V-cycle in order to enhance solver efficiency for very complex geometries. 
+
+.. bibliography:: references.bib
