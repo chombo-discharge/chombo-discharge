@@ -950,7 +950,7 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
 	}
       }
       cdr_densities[idx] = Max(zero, (*a_cdr_densities[idx])(vof, 0));
-      cdr_densities[idx] = Max(zero, phi);
+      //      cdr_densities[idx] = Max(zero, phi);
       cdr_grad[idx] = grad;
     }
 
