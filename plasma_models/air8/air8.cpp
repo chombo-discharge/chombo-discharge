@@ -446,12 +446,6 @@ Vector<Real> air8::compute_cdr_dielectric_fluxes(const Real&         a_time,
 						 const Vector<Real>& a_rte_fluxes,
 						 const Vector<Real>& a_extrap_cdr_fluxes) const {
 
-  if(a_pos[1] > -700E-6 && a_normal[1] < 0.0){
-    if(PolyGeom::dot(a_E, a_normal) > 0.0){
-      std::cout << a_pos << std::endl;
-      MayDay::Abort("wtf");
-    }
-  }
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }

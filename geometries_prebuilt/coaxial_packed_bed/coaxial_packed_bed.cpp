@@ -26,7 +26,11 @@
 
 coaxial_packed_bed::coaxial_packed_bed(){
   this->build_conductors();
+#if 1 // 
   this->build_packed_bed();
+#else // Hard-coded sphere
+  this->build_hardcoded_spheres();
+#endif
 }
 
 coaxial_packed_bed::~coaxial_packed_bed(){
@@ -88,14 +92,25 @@ void coaxial_packed_bed::build_conductors(){
   // Create geometry
   const Real eps0 = 1.0;
   this->set_eps0(eps0);
-
   m_electrodes.resize(0);
   if(!turn_off_outer){
-    RefCountedPtr<BaseIF> outer = RefCountedPtr<BaseIF> (new cylinder_if(c0, c1, m_rad_outer, true));
+    RefCountedPtr<BaseIF> outer;
+    if(SpaceDim == 2){
+      outer = RefCountedPtr<BaseIF> (new new_sphere_if(c0, m_rad_outer, true));
+    }
+    else if(SpaceDim == 3){
+      outer = RefCountedPtr<BaseIF> (new cylinder_if(c0, c1, m_rad_outer, true));
+    }
     m_electrodes.push_back(electrode(outer, outer_live, 1.0));
   }
   if(!turn_off_inner){
-    RefCountedPtr<BaseIF> inner = RefCountedPtr<BaseIF> (new cylinder_if(c0, c1, m_rad_inner, false));
+    RefCountedPtr<BaseIF> inner;
+    if(SpaceDim == 2){
+      inner = RefCountedPtr<BaseIF> (new new_sphere_if(c0, m_rad_inner, false));
+    }
+    else if(SpaceDim == 3){
+      inner = RefCountedPtr<BaseIF> (new cylinder_if(c0, c1, m_rad_inner, false));
+    }
     m_electrodes.push_back(electrode(inner, inner_live, 1.0));
   }
 
