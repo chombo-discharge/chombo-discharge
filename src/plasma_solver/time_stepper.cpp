@@ -946,7 +946,7 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
 	      
 	//	phi += (*a_cdr_densities[idx])(ivof, 0)*iweight;
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  grad[dir] += (*a_cdr_gradients[idx])(ivof, dir);
+	  grad[dir] += (*a_cdr_gradients[idx])(ivof, dir)*iweight;
 	}
       }
       cdr_densities[idx] = Max(zero, (*a_cdr_densities[idx])(vof, 0));
