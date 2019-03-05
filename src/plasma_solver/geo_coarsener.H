@@ -56,6 +56,10 @@ protected:
     @brief Coarsening levels. Tags are removed above this level
   */
   Vector<int> m_coarsen_levels;
-  
+
+  /*!
+    @brief Inverse box or not
+  */
+  Vector<int> m_inverse;
 };
 #endif
