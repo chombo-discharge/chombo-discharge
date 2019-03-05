@@ -3,123 +3,110 @@
   @brief  Implementation of air7.H
   @author Robert Marskar
   @date   Feb. 2018
-  @todo   Implement corrections for the k1/k2 ionization source terms due to diffusion into high-field regions. 
 */
 
 #include "air7.H"
 #include "air7_species.H"
 #include "units.H"
+#include "data_ops.H"
 
-#include <ParmParse.H>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+
 #include <PolyGeom.H>
+#include <ParmParse.H>
+
+std::string air7::s_bolsig_N2_alpha       = "C25   N2    Ionization    15.60 eV";
+std::string air7::s_bolsig_O2_alpha       = "C42   O2    Ionization    12.06 eV";
+std::string air7::s_bolsig_mobility       = "E/N (Td)	Mobility *N (1/m/V/s)";
+std::string air7::s_bolsig_diffusion      = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
+std::string air7::s_bolsig_mean_energy    = "E/N (Td)	Mean energy (eV)";
+std::string air7::s_skip_fit              = "Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)";
 
 air7::air7(){
-  
-  m_num_species = 7;
-  m_num_photons = 3;
 
+  // Comment: I've taken out the dissociative excitation losses and all excitation losses
 
-  { // Use simple BC on cathode electrode
-    m_simple_cathode = true;
-    ParmParse pp("air7");
-    if(pp.contains("simple_cathode")){
-      std::string str;
-      pp.get("simple_cathode", str);
-      if(str == "false");{
-	m_simple_cathode = false;
-      }
-    }
-  }
+  MayDay::Warning("air7::air7 - this class is really not done...");
 
-  {
-    m_thermal_outflow   = false;
-    m_diffusive_outflow = false;
+  m_num_species = 7;  // seven species
+  m_num_photons = 3;  // Bourdon model for photons
 
-    ParmParse pp("air7");
-    if(pp.contains("thermal_outflow")){
-      std::string str;
-      pp.get("thermal_outflow", str);
-      if(str == "true"){
-	m_thermal_outflow = true;
-      }
-    }
-    if(pp.contains("diffusive_outflow")){
-      std::string str;
-      pp.get("diffusive_outflow", str);
-      if(str == "true"){
-	m_diffusive_outflow = true;
-      }
-    }
-  }
-
-  air7::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac);
+  air7::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac); // Get gas parameters
 
   { // Emission coefficients at boundaries. Can be overridden from input script.
-    m_townsend2_electrode           = 1.E-1;
-    m_townsend2_dielectric          = 1.E-1;
-    m_electrode_quantum_efficiency  = 1.E-1;
-    m_dielectric_quantum_efficiency = 1.E-6;
+    m_townsend2_electrode           = 1.E-3;
+    m_townsend2_dielectric          = 1.E-6;
+    m_electrode_quantum_efficiency  = 1.E-2;
+    m_dielectric_quantum_efficiency = 1.E-4;
     m_photoionization_efficiency    = 0.1;
     m_excitation_efficiency         = 0.6;
 
     ParmParse pp("air7");
+    pp.get("transport_file",                  m_transport_file);
     pp.query("electrode_townsend2"       ,    m_townsend2_electrode);
-    pp.query("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
     pp.query("dielectric_townsend2"       ,   m_townsend2_dielectric);
+    pp.query("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
     pp.query("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
     pp.query("photoionization_efficiency",    m_photoionization_efficiency);
     pp.query("excitation_efficiency",         m_excitation_efficiency);
   }
 
   { // Quenching pressure
-    m_pq        = 0.03947;
+    m_pq        = 0.03947; 
     ParmParse pp("air7");
     pp.query("quenching_pressure", m_pq);
-
+    
     m_pq *= units::s_atm2pascal;
   }
 
-  { // Ion mobility
-    m_ion_mobility = 2.E-4;
+  { // Mobile ions
+    m_ion_mobility   = 2.E-4;
+    m_mobile_ions    = true;
+    m_diffusive_ions = true;
+    std::string str;
+
     ParmParse pp("air7");
     pp.query("ion_mobility", m_ion_mobility);
-  }
-
-  { // Noise parameters for Perlin noise
-    m_noise_amp     = 0.0;
-    m_noise_freq    = RealVect::Unit;
-    m_noise_persist = 0.5;
-    m_noise_octaves = 1;
-
-    ParmParse pp("air7");
-    pp.query("initial_noise", m_noise_amp);
-    pp.query("initial_noise_peristence", m_noise_persist);
-    pp.query("initial_noise_octaves", m_noise_octaves);
-    if(pp.contains("initial_noise_frequency")){
-      Vector<Real> vec(SpaceDim);
-      pp.getarr("initial_noise_frequency", vec, 0, SpaceDim);
-      m_noise_freq = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+    if(pp.contains("mobile_ions")){
+      pp.get("mobile_ions", str);
+      if(str == "true"){
+	m_mobile_ions = true;
+      }
+      else if(str == "false"){
+	m_mobile_ions = false;
+      }
+    }
+    if(pp.contains("diffusive_ions")){
+      pp.get("diffusive_ions", str);
+      if(str == "true"){
+	m_diffusive_ions = true;
+      }
+      else if(str == "false"){
+	m_diffusive_ions = false;
+      }
     }
   }
 
-
-  // Instantiate species
+  // Instantiate cdr species
   m_species.resize(m_num_species);
   m_electron_idx = 0;
   m_N2plus_idx   = 1;
-  m_O2plus_idx   = 2;
-  m_N4plus_idx   = 3;
+  m_N4plus_idx   = 2;
+  m_O2plus_idx   = 3;
   m_O4plus_idx   = 4;
   m_O2plusN2_idx = 5;
   m_O2minus_idx  = 6;
+  
   m_species[m_electron_idx] = RefCountedPtr<species> (new air7::electron());
   m_species[m_N2plus_idx]   = RefCountedPtr<species> (new air7::N2plus());
-  m_species[m_O2plus_idx]   = RefCountedPtr<species> (new air7::O2plus());
   m_species[m_N4plus_idx]   = RefCountedPtr<species> (new air7::N4plus());
+  m_species[m_O2plus_idx]   = RefCountedPtr<species> (new air7::O2plus());
   m_species[m_O4plus_idx]   = RefCountedPtr<species> (new air7::O4plus());
   m_species[m_O2plusN2_idx] = RefCountedPtr<species> (new air7::O2plusN2());
   m_species[m_O2minus_idx]  = RefCountedPtr<species> (new air7::O2minus());
-
 
   // Instantiate photon solvers
   m_photons.resize(m_num_photons);
@@ -130,15 +117,10 @@ air7::air7(){
   m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air7::photon_two());
   m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air7::photon_three());
 
-  // Instantiate noise function and give it to initial conditions
-  m_perlin = RefCountedPtr<perlin_if> (new perlin_if(1.0, m_noise_freq, m_noise_persist, m_noise_octaves));
-  air7::electron* electr = static_cast<air7::electron*> (&(*m_species[m_electron_idx]));
-  air7::N2plus* N2p_spec = static_cast<air7::N2plus*>   (&(*m_species[m_N2plus_idx]));
-  air7::O2plus* O2p_spec = static_cast<air7::O2plus*>   (&(*m_species[m_O2plus_idx]));
-
-  electr->set_initial_noise(m_noise_amp, m_perlin);
-  N2p_spec->set_initial_noise(m_noise_amp, m_perlin);
-  O2p_spec->set_initial_noise(m_noise_amp, m_perlin);
+  // Compute transport coefficients
+  this->compute_transport_coefficients();
+  m_e_mobility.scale_y(1./m_N); // Need to scale
+  m_e_diffco.scale_y(1./m_N); // Need to scale
 }
 
 air7::~air7(){
@@ -146,23 +128,74 @@ air7::~air7(){
 }
 
 void air7::get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac){
-    ParmParse pp("air7");
-    a_p = 1.0;
-    pp.query("gas_pressure", a_p); // Only get to adjust pressure for now.
-    
-    //    pp.query("gas_temperature", a_Tg);
-    //    pp.query("gas_O2_frac", a_O2frac);
-    //    pp.query("gas_N2_frac", a_N2frac);
+  ParmParse pp("air7");
+  pp.query("gas_temperature", a_Tg);
+  pp.query("gas_pressure", a_p);
 
-    a_Tg     = 300.;
-    a_O2frac = 0.21;
-    a_N2frac = 0.79; 
+  a_Tg = 300.;
+  a_O2frac = 0.20;
+  a_N2frac = 0.80; 
 
-    const Real tot_frac = a_O2frac + a_N2frac; 
-    a_p      = a_p*units::s_atm2pascal;
-    a_O2frac = a_O2frac/tot_frac; // Normalize to one
-    a_N2frac = a_N2frac/tot_frac;
-    a_N      = a_p*units::s_Na/(a_Tg*units::s_R);
+  const Real tot_frac = a_O2frac + a_N2frac; 
+  a_p      = a_p*units::s_atm2pascal;
+  a_O2frac = a_O2frac/tot_frac; // Normalize to one
+  a_N2frac = a_N2frac/tot_frac;
+  a_N      = a_p*units::s_Na/(a_Tg*units::s_R);
+}
+
+void air7::compute_transport_coefficients(){
+  Real energy;
+  Real entry;
+  bool readLine = false;
+  lookup_table* which_table = NULL;
+  std::ifstream infile(m_transport_file);
+  std::string line;
+  while (std::getline(infile, line)){
+
+    // Right trim string
+    line.erase(line.find_last_not_of(" \n\r\t")+1);
+
+    if(line == air7::s_bolsig_O2_alpha){
+      which_table = &m_e_O2_alpha;
+      readLine = true;
+      continue;
+    }
+    else if(line == air7::s_bolsig_N2_alpha){
+      which_table = &m_e_N2_alpha;
+      readLine = true;
+      continue;
+    }
+    else if(line == air7::s_bolsig_mobility){
+      which_table = &m_e_mobility;
+      readLine   = true;
+      continue;
+    }
+    else if(line == air7::s_bolsig_diffusion){
+      which_table = &m_e_diffco;
+      readLine   = true;
+      continue;
+    }
+    else if(line == air7::s_bolsig_mean_energy){
+      which_table = &m_e_energy;
+      readLine   = true;
+      continue;
+    }
+
+    // Stop when we encounter an empty line
+    if((line == "" || line == s_skip_fit) && readLine){
+      readLine = false;
+      continue;
+    }
+
+    if(readLine){
+      std::istringstream iss(line);
+      if (!(iss >> energy >> entry)) {
+    	continue;
+      }
+      which_table->add_entry(energy, entry);
+    }
+  }
+  infile.close();
 }
 
 Vector<Real> air7::compute_cdr_diffusion_coefficients(const Real&         a_time,
@@ -172,8 +205,16 @@ Vector<Real> air7::compute_cdr_diffusion_coefficients(const Real&         a_time
 
   Vector<Real> diffco(m_num_species, 0.0);
 
-  const Real ET = a_E.vectorLength()/(m_N*units::s_Td);
-  diffco[m_electron_idx] = this->compute_electron_diffusion(ET);
+  const Real EbyN        = (a_E/(m_N*units::s_Td)).vectorLength();
+  diffco[m_electron_idx] = this->compute_electron_diffco(EbyN);
+  if(m_diffusive_ions){
+    diffco[m_N2plus_idx]   = this->compute_N2plus_diffco(m_Tg);
+    diffco[m_N4plus_idx]   = this->compute_N4plus_diffco(m_Tg);
+    diffco[m_O2plus_idx]   = this->compute_O2plus_diffco(m_Tg);
+    diffco[m_O4plus_idx]   = this->compute_O4plus_diffco(m_Tg);
+    diffco[m_O2plusN2_idx] = this->compute_O2plusN2_diffco(m_Tg);
+    diffco[m_O2minus_idx]  = this->compute_O2minus_diffco(m_Tg);
+  }
 
   return diffco;
 }
@@ -181,22 +222,23 @@ Vector<Real> air7::compute_cdr_diffusion_coefficients(const Real&         a_time
 Vector<RealVect> air7::compute_cdr_velocities(const Real&         a_time,
 					      const RealVect&     a_pos,
 					      const RealVect&     a_E,
-					      const Vector<Real>& a_cdr_densities) const{
-  Vector<RealVect> velo(m_num_species);
+					      const Vector<Real>& a_cdr_densities) const {
+  Vector<RealVect> velocities(m_num_species, RealVect::Zero);
 
-  const Real ET = a_E.vectorLength()/(m_N*units::s_Td);
-  
-  velo[m_electron_idx] = -1.0*this->compute_electron_mobility(ET)*a_E;
-  velo[m_N2plus_idx]   =  1.0*m_ion_mobility*a_E;
-  velo[m_O2plus_idx]   =  1.0*m_ion_mobility*a_E;
-  velo[m_N4plus_idx]   =  1.0*m_ion_mobility*a_E;
-  velo[m_O4plus_idx]   =  1.0*m_ion_mobility*a_E;
-  velo[m_O2plusN2_idx] =  1.0*m_ion_mobility*a_E;
-  velo[m_O2minus_idx]  = -1.0*m_ion_mobility*a_E;
+  const Real EbyN             = (a_E/(m_N*units::s_Td)).vectorLength();
+  velocities[m_electron_idx]   = -a_E*this->compute_electron_mobility(EbyN);
+  if(m_mobile_ions){
+    velocities[m_N2plus_idx]   =  a_E*this->compute_N2plus_mobility(EbyN);
+    velocities[m_N4plus_idx]   =  a_E*this->compute_N4plus_mobility(EbyN);
+    velocities[m_O2plus_idx]   =  a_E*this->compute_O2plus_mobility(EbyN);
+    velocities[m_O4plus_idx]   =  a_E*this->compute_O4plus_mobility(EbyN);
+    velocities[m_O2plusN2_idx] =  a_E*this->compute_O2plusN2_mobility(EbyN);
+    velocities[m_O2minus_idx]  = -a_E*this->compute_O2minus_mobility(EbyN);
+  }
 
-  return velo;
+  return velocities;
 }
-
+  
 Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
 					    const RealVect&         a_pos,
 					    const RealVect&         a_E,
@@ -204,135 +246,173 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
 					    const Vector<Real>&     a_cdr_densities,
 					    const Vector<Real>&     a_rte_densities,
 					    const Vector<RealVect>& a_grad_cdr) const {
-  Vector<Real> source(m_num_species, 0.0); 
+  Vector<Real> source(m_num_species, 0.0);
 
-  const Real ET       = a_E.vectorLength()/(m_N*units::s_Td);
-  const Real Te       = this->compute_electron_temperature(ET);
-  const RealVect vele = -1.0*this->compute_electron_mobility(ET)*(a_E);
-  const Real De       = this->compute_electron_diffusion(ET);
-
-  const Real k1  = this->compute_townsend_ionization_N2(ET);
-  const Real k2  = this->compute_townsend_ionization_O2(ET);
-  const Real k3  = this->compute_N2plus_N2_M_to_N4plus_M();
-  const Real k4  = this->compute_N4plus_O2_to_O2plus_2N2();
-  const Real k5  = this->compute_N2plus_O2_to_O2plus_N2();
-  const Real k6  = this->compute_O2plus_2N2_to_O2plusN2_N2();
-  const Real k7  = this->compute_O2plusN2_N2_to_O2plus_2N2();
+  // Reduced field and electron temperature
+  const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real Te   = this->compute_Te(EbyN);
+  
+  // Rate constants
+  const Real k1  = this->compute_electron_N2_impact_ionization(EbyN);
+  const Real k2  = this->compute_electron_O2_impact_ionization(EbyN);
+  const Real k3  = this->compute_N2plus_N2_M_to_N4plus_M();                         
+  const Real k4  = this->compute_N4plus_O2_to_O2_2N2();
+  const Real k5  = this->compute_N2plus_O2_to_O2plus_N2(m_Tg);
+  const Real k6  = this->compute_O2plus_2N2_to_O2plusN2_N2(m_Tg);
+  const Real k7  = this->compute_O2plusN2_N2_to_O2plus_2N2(m_Tg);
   const Real k8  = this->compute_O2plusN2_O2_to_O4plus_N2();
-  const Real k9  = this->compute_O2plus_O2_M_to_O4plus_M();
+  const Real k9  = this->compute_O2plus_O2_M_to_O4plus_M(m_Tg);
   const Real k10 = this->compute_e_O4plus_to_2O2(Te);
-  const Real k11 = this->compute_e_O2plus_to_2O(Te);
+  const Real k11 = this->compute_e_O2plus_to_O2(Te);
   const Real k12 = this->compute_e_2O2_to_O2minus_O2(Te);
   const Real k13 = this->compute_O2minus_O4plus_to_3O2();
-  const Real k14 = this->compute_O2minus_O4plus_M_to_3O2_M();
-  const Real k15 = this->compute_O2minus_O2plus_M_to_2O2_M();
+  const Real k14 = this->compute_O2minus_O4plus_M_to_3O2_M(m_Tg);
+  const Real k15 = this->compute_O2minus_O2plus_M_to_2O2_M(m_Tg);
+  const Real k16 = this->compute_Oplus_O2_to_O_O2(m_Tg);
 
   const Real n_N2    = m_N*m_N2frac;
   const Real n_O2    = m_N*m_O2frac;
-  const Real n_Ne    = a_cdr_densities[m_electron_idx];
+  
+  const Real n_e     = a_cdr_densities[m_electron_idx];
   const Real n_N2p   = a_cdr_densities[m_N2plus_idx];
-  const Real n_O2p   = a_cdr_densities[m_O2plus_idx];
   const Real n_N4p   = a_cdr_densities[m_N4plus_idx];
+  const Real n_O2p   = a_cdr_densities[m_O2plus_idx];
   const Real n_O4p   = a_cdr_densities[m_O4plus_idx];
   const Real n_O2pN2 = a_cdr_densities[m_O2plusN2_idx];
   const Real n_O2m   = a_cdr_densities[m_O2minus_idx];
-  const Real n_M     = n_N2 + n_O2;
 
-  Real S = 0.0;
+  Real products;
 
-  const Real a1 = PolyGeom::dot(a_E, De*a_grad_cdr[m_electron_idx]);
-  const Real a2 = PolyGeom::dot(a_E, (1.0 + a_cdr_densities[m_electron_idx])*vele);
-  const Real corr = (1.0 - a1/a2);
-  
-  // k1 reaction, e + N2 -> e + e + N2+
-  S = k1 * n_Ne * n_N2;
-  source[m_electron_idx] += S;
-  source[m_N2plus_idx]   += S;
+  const RealVect ve = -a_E*this->compute_electron_mobility(EbyN);
+  const Real De     =      this->compute_electron_diffco(EbyN);
+  const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + n_e)*PolyGeom::dot(ve, a_E));
+  const Real k1_corr = k1*(1-Max(factor, 0.0));
+  const Real k2_corr = k2*(1-Max(factor, 0.0));
 
-  // k2 reaction, e + O2 -> e + e + O2+
-  S = k2 * n_Ne * n_O2;
-  source[m_electron_idx] += S;
-  source[m_O2plus_idx]   += S;
+  // k1 reaction
+  products = k1_corr * n_e * n_N2;
+  source[m_electron_idx]  += products;
+  source[m_N2plus_idx]    += products;
 
-  // k3 reaction
-  S = k3 * n_N2p * n_N2 * n_M;
-  source[m_N2plus_idx] -= S;
-  source[m_N4plus_idx] += S;
+  // k2 reaction
+  products = k2_corr * n_e * n_O2;
+  source[m_electron_idx] += products;
+  source[m_O2plus_idx]   += products;
+
+  // k3 reaction. 
+  products = k3 * n_N2p * n_N2 * m_N;
+  source[m_N2plus_idx] -= products;
+  source[m_N4plus_idx] += products;
 
   // k4 reaction
-  S = k4 * n_N4p * n_O2;
-  source[m_N4plus_idx] -= S;
-  source[m_O2plus_idx] += S;
+  products = k4 * n_N4p * n_O2;
+  source[m_N4plus_idx]  -= products;
+  source[m_O2plus_idx]  += products;
 
   // k5 reaction
-  S = k5 * n_N2p * n_O2;
-  source[m_N2plus_idx] -= S;
-  source[m_O2plus_idx] += S;
+  products = k5 * n_N2p * n_O2;
+  source[m_N2plus_idx] -= products;
+  source[m_O2plus_idx] += products;
 
   // k6 reaction
-  S = k6 * n_O2p * n_N2 * n_N2;
-  source[m_O2plus_idx]   -= S;
-  source[m_O2plusN2_idx] += S;
+  products = k6 * n_O2p * n_N2 * n_N2;
+  source[m_O2plus_idx]   -= products;
+  source[m_O2plusN2_idx] += products;
 
   // k7 reaction
-  S = k7 * n_O2pN2 * n_N2;
-  source[m_O2plusN2_idx] -= S;
-  source[m_O2plus_idx]   += S;
+  products = k7 * n_O2pN2 * n_N2;
+  source[m_O2plusN2_idx] -= products;
+  source[m_O2plus_idx]   += products;
 
   // k8 reaction
-  S = k8 * n_O2pN2 * n_O2;
-  source[m_O2plusN2_idx] -= S;
-  source[m_O4plus_idx]   += S;
+  products = k8 * n_O2pN2 * n_O2;
+  source[m_O2plusN2_idx] -= products;
+  source[m_O4plus_idx]   += products;
 
   // k9 reaction
-  S = k9 * n_O2p * n_O2 * n_M;
-  source[m_O2plus_idx] -= S;
-  source[m_O4plus_idx] += S;
+  products = k9 * n_O2p * n_O2 * m_N;
+  source[m_O2plus_idx] -= products;
+  source[m_O4plus_idx] += products;
 
   // k10 reaction
-  S = k10 * n_Ne * n_O4p;
-  source[m_electron_idx] -= S;
-  source[m_O4plus_idx]   -= S;
-  
+  products = k10 * n_e * n_O4p;
+  source[m_electron_idx] -= products;
+  source[m_O4plus_idx]   -= products;
+
   // k11 reaction
-  S = k11 * n_Ne * n_O2p;
-  source[m_electron_idx] -= S;
-  source[m_O2plus_idx]   -= S;
+  products = k11 * n_e * n_O2p;
+  source[m_electron_idx] -= products;
+  source[m_O2plus_idx]   -= products;
 
   // k12 reaction
-  S = k12 * n_Ne * n_O2 * n_O2;
-  source[m_electron_idx] -= S;
-  source[m_O2minus_idx]  += S;
+  products = k12 * n_e * n_O2 * n_O2;
+  source[m_electron_idx] -= products;
+  source[m_O2minus_idx]  += products;
 
   // k13 reaction
-  S = k13 * n_O2m * n_O4p;
-  source[m_O2minus_idx] -= S;
-  source[m_O4plus_idx]  -= S;
+  products = k13 * n_O2m * n_O4p;
+  source[m_O2minus_idx] -= products;
+  source[m_O4plus_idx]  -= products;
 
   // k14 reaction
-  S = k14 * n_O2m * n_O4p * n_M;
-  source[m_O2minus_idx] -= S;
-  source[m_O4plus_idx]  -= S;
+  products = k14 * n_O2m * n_O4p * m_N;
+  source[m_O2minus_idx] -= products;
+  source[m_O4plus_idx]  -= products;
 
   // k15 reaction
-  S = k15 * n_O2m * n_O2p * n_M;
-  source[m_O2minus_idx] -= S;
-  source[m_O2plus_idx]  -= S;
-  
-  
-  // Photoionization source term
+  products = k15 * n_O2m * n_O2p * m_N;
+  source[m_O2minus_idx] -= products;
+  source[m_O2plus_idx]  -= products;
+
+
+
+  // Photoionization gamma + O2 -> e + O2+
   const air7::photon_one*   photon1 = static_cast<air7::photon_one*>   (&(*m_photons[m_photon1_idx]));
   const air7::photon_two*   photon2 = static_cast<air7::photon_two*>   (&(*m_photons[m_photon2_idx]));
   const air7::photon_three* photon3 = static_cast<air7::photon_three*> (&(*m_photons[m_photon3_idx]));
+  products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
+								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
+								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
 
-  const Real Sph = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-  							         	  + photon2->get_A()*a_rte_densities[m_photon2_idx]
-  									  + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+  source[m_electron_idx] += products;
+  source[m_O2plus_idx]   += products;
 
-  source[m_electron_idx] += Sph;
-  source[m_O2plus_idx]   += Sph;
-  
   return source;
+}
+
+Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
+				      const RealVect&     a_pos,
+				      const RealVect&     a_normal,
+				      const RealVect&     a_E,
+				      const Vector<Real>& a_cdr_densities,
+				      const Vector<Real>& a_cdr_velocities,
+				      const Vector<Real>& a_cdr_gradients,
+				      const Vector<Real>& a_rte_fluxes,
+				      const Vector<Real>& a_extrap_cdr_fluxes,
+				      const Real&         a_townsend2,
+				      const Real&         a_quantum_efficiency) const {
+
+  Vector<Real> fluxes(m_num_species, 0.0);  
+  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
+  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
+
+  // Switch for setting drift flux to zero for charge species
+  Vector<Real> aj(m_num_species, 0.0);
+  for (int i = 0; i < m_num_species; i++){
+    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+      aj[i] = 1.0;
+    }
+    else {
+      aj[i] = 0.0;
+    }
+  }
+
+  // Drift outflow for now
+  for (int i = 0; i < m_num_species; i++){
+    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
+  }
+
+  return fluxes;
 }
 
 Vector<Real> air7::compute_cdr_electrode_fluxes(const Real&         a_time,
@@ -344,9 +424,9 @@ Vector<Real> air7::compute_cdr_electrode_fluxes(const Real&         a_time,
 						const Vector<Real>& a_cdr_gradients,
 						const Vector<Real>& a_rte_fluxes,
 						const Vector<Real>& a_extrap_cdr_fluxes) const {
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities,
-				  a_cdr_gradients, a_rte_fluxes, a_extrap_cdr_fluxes,
-				  m_townsend2_electrode, m_electrode_quantum_efficiency, m_simple_cathode);
+
+  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
+				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
 Vector<Real> air7::compute_cdr_dielectric_fluxes(const Real&         a_time,
@@ -359,119 +439,22 @@ Vector<Real> air7::compute_cdr_dielectric_fluxes(const Real&         a_time,
 						 const Vector<Real>& a_rte_fluxes,
 						 const Vector<Real>& a_extrap_cdr_fluxes) const {
 
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities,
-				  a_cdr_gradients, a_rte_fluxes, a_extrap_cdr_fluxes,
-				  m_townsend2_dielectric, m_dielectric_quantum_efficiency, false);
-}
-
-Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
-				      const RealVect&     a_pos,
-				      const RealVect&     a_normal,
-				      const RealVect&     a_E,
-				      const Vector<Real>& a_cdr_densities,
-				      const Vector<Real>& a_cdr_velocities,
-				      const Vector<Real>& a_cdr_gradients,
-				      const Vector<Real>& a_rte_fluxes,
-				      const Vector<Real>& a_extrap_cdr_fluxes,
-				      const Real&         a_townsend,
-				      const Real&         a_quantum_efficiency,
-				      const bool&         a_extrap_electrons) const {
-
-  Vector<Real> fluxes(m_num_species, 0.0);
-
-  const Real ET  = a_E.vectorLength()/(m_N*units::s_Td);;
-  const Real Te  = this->compute_electron_temperature(ET);
-  const Real De  = this->compute_electron_diffusion(ET);
-  const Real Tg  = m_Tg;
-  const Real mO2 = 2.65E-26;
-
-
-  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
-  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
-  
-  Vector<Real> aj(m_num_species, 0.0);
-  if(anode){
-    aj[m_electron_idx] = 1.0;
-    aj[m_O2minus_idx]  = 1.0;
-  }
-  else if(cathode){
-    aj[m_N2plus_idx]   = 1.0;
-    aj[m_O2plus_idx]   = 1.0;
-    aj[m_N4plus_idx]   = 1.0;
-    aj[m_O4plus_idx]   = 1.0;
-    aj[m_O2plusN2_idx] = 1.0;
-  }
-
-  // Drift outflow.
-  for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
-  }
-
-  // Thermal outflow
-  if(m_thermal_outflow){
-    const Real vth_g = sqrt(8.0*units::s_kb*Te/(units::s_pi*mO2));
-    const Real vth_e = sqrt(8.0*units::s_kb*Te/(units::s_pi*units::s_me));
-    for (int i = 0; i < m_num_species; i++){
-      Real vth = 0.0;
-      if(i == m_electron_idx){
-	vth = vth_e;
-      }
-      else{
-	vth = vth_g;
-      }
-      fluxes[i] += 0.25*vth*a_cdr_densities[i];
-    }
-  }
-
-  // Diffusive electron flux
-  if(m_diffusive_outflow){
-    if(a_cdr_gradients[m_electron_idx] > 0.0){
-      fluxes[m_electron_idx] += 0.5*De*a_cdr_gradients[m_electron_idx];
-    }
-  }
-
-  // Secondary emission
-  if(cathode){
-    Real ion_bombardment    = 0.0;
-    Real photon_bombardment = 0.0;
-    
-    ion_bombardment += fluxes[m_N2plus_idx];
-    ion_bombardment += fluxes[m_O2plus_idx];
-    ion_bombardment += fluxes[m_N4plus_idx];
-    ion_bombardment += fluxes[m_O4plus_idx];
-    ion_bombardment += fluxes[m_O2plusN2_idx];
-
-    photon_bombardment += a_rte_fluxes[m_photon1_idx];
-    photon_bombardment += a_rte_fluxes[m_photon2_idx];
-    photon_bombardment += a_rte_fluxes[m_photon3_idx];
-
-    fluxes[m_electron_idx] -= ion_bombardment*a_townsend;
-    fluxes[m_electron_idx] -= photon_bombardment*a_quantum_efficiency;
-  }
-
-  // Use a simple BC for electron; extrapolate from the interior
-  if(a_extrap_electrons){
-    fluxes[m_electron_idx] = a_extrap_cdr_fluxes[m_electron_idx];
-  }
-  
-  return fluxes;
+  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
+				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
 Vector<Real> air7::compute_rte_source_terms(const Real&         a_time,
 					    const RealVect&     a_pos,
 					    const RealVect&     a_E,
 					    const Vector<Real>& a_cdr_densities) const {
-  Vector<Real> ret(m_num_photons);
 
-  const Real ET      = a_E.vectorLength()/(units::s_Td*m_N);
-  const RealVect vel = -1.0*this->compute_electron_mobility(ET)*a_E;
-  const Real alpha   = this->compute_townsend_ionization_N2(ET);
-  const Real N2      = m_N*m_N2frac;
-  const Real Ne      = a_cdr_densities[m_electron_idx];       // Electron density
-  const Real ve      = vel.vectorLength();
-  const Real Se      = Max(0., alpha*N2*Ne);                  // Excitations = alpha*Ne*ve
+  // We take the source terms as Se = alpha*Ne*ve
+  Vector<Real> ret(m_num_photons, 0.0);
 
-  // Photo emissions = electron excitations * efficiency * quenching
+  const Real EbyN  = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real k1    = this->compute_electron_N2_impact_ionization(EbyN);
+  const Real Se    = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
+
   ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
   ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
   ret[m_photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
@@ -483,200 +466,40 @@ Real air7::initial_sigma(const Real a_time, const RealVect& a_pos) const {
   return 0.0;
 }
 
-Real air7::compute_electron_temperature(const Real a_EbyN) const {
-  Real temp = 0.0;
-
-  const Real safety = 1.0; // To avoid division by zero
-  const Real minE   = 10;
-  const Real maxE   = 6000;
-  const Real min_eV = 0.9559;
-  const Real max_eV = 91.06;
-
-  if(a_EbyN < minE){
-    temp = min_eV;
-  }
-  else if(a_EbyN > maxE){
-    temp = max_eV;
-  }
-  else {
-    const Real A = -3.920;
-    const Real B =  0.9681;
-    const Real C =  62.01;
-    const Real D = -1517;
-    const Real E =  0.1062E5;
-
-    const Real x = a_EbyN;
-    temp = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
-  }
-
-  // temp is in energy so far, make it into Kelvin by E = 1.5*k_b*T
-  temp *= units::s_Qe;          // eV -> Joule
-  temp *= 1./(1.5*units::s_kb); // Mean temperature
-
-  return safety + temp;
+Real air7::compute_Te(const Real a_EbyN) const{
+  const Real electron_energy = m_e_energy.get_entry(a_EbyN);
+  return 2.0*electron_energy*units::s_Qe/(3.0*units::s_kb);
 }
 
-Real air7::compute_electron_mobility(const Real a_EbyN) const {
+Real air7::compute_electron_mobility(const Real a_EbyN) const {return m_e_mobility.get_entry(a_EbyN);}
+Real air7::compute_N2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air7::compute_N4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air7::compute_O2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air7::compute_O4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air7::compute_O2plusN2_mobility(const Real a_EbyN) const {return m_ion_mobility;}
+Real air7::compute_O2minus_mobility(const Real a_EbyN)  const {return m_ion_mobility;}
 
-  Real mobility = 0.0;
-  
-  const Real minE = 10.0;
-  const Real maxE = 6000.;
-  const Real min_mob = 0.2038E25;
-  const Real max_mob = 0.3675E24;
-  
-  if(a_EbyN < minE){
-    mobility = min_mob;
-  }
-  else if(a_EbyN > maxE){
-    mobility = max_mob;
-  }
-  else {
-    const Real A =  57.15;
-    const Real B = -0.3315;
-    const Real C = -22.21;
-    const Real D =  423.7;
-    const Real E = -2428;
+Real air7::compute_electron_diffco(const Real a_EbyN) const {return m_e_diffco.get_entry(a_EbyN);}
+Real air7::compute_N2plus_diffco(const Real a_Tg)     const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
+Real air7::compute_N4plus_diffco(const Real a_Tg)     const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
+Real air7::compute_O2plus_diffco(const Real a_Tg)     const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
+Real air7::compute_O4plus_diffco(const Real a_Tg)     const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
+Real air7::compute_O2plusN2_diffco(const Real a_Tg)   const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
+Real air7::compute_O2minus_diffco(const Real a_Tg)    const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
 
-    const Real x = a_EbyN;
-    mobility = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
-  }
-
-  return mobility/m_N;
-}
-
-Real air7::compute_electron_diffusion(const Real a_EbyN) const {
-  Real diffCo = 0.0;
-  
-  const Real minE = 10.0;
-  const Real maxE = 6000.;
-  const Real min_diffco = 0.1899E25;
-  const Real max_diffco = 0.2245E26;
-  
-  if(a_EbyN < minE){
-    diffCo = min_diffco;
-  }
-  else if(a_EbyN > maxE){
-    diffCo = max_diffco;
-  }
-  else {
-    const Real A =  52.85;
-    const Real B =  0.6332;
-    const Real C =  66.86;
-    const Real D = -1502.0;
-    const Real E =  9928.0;
-
-    const Real x = a_EbyN;
-    diffCo = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
-  }
-
-  return diffCo/m_N;
-}
-
-Real air7::compute_townsend_ionization_N2(const Real a_EbyN) const {
-  Real k = 0.0;
-  
-  const Real minE = 10.0;
-  const Real maxE = 6000.;
-  const Real min_k = 0.0;
-  const Real max_k = 0.1159E-12;
-  
-  if(a_EbyN < minE){
-    k = min_k;
-  }
-  else if(a_EbyN > maxE){
-    k = max_k;
-  }
-  else {
-    const Real A = -36.71;
-    const Real B =  0.8155;
-    const Real C = -1050.0;
-    const Real D =  0.1902E5;
-    const Real E = -0.3950E6;
-
-    const Real x = a_EbyN;
-    k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
-  }
-
-  return k;
-}
-
-Real air7::compute_townsend_ionization_O2(const Real a_EbyN) const {
-  Real k = 0.0;
-  
-  const Real minE = 10.0;
-  const Real maxE = 6000.;
-  const Real min_k = 0.0;
-  const Real max_k = 0.1279E-12;
-  
-  if(a_EbyN < minE){
-    k = min_k;
-  }
-  else if(a_EbyN > maxE){
-    k = max_k;
-  }
-  else {
-    const Real A = -38.73;
-    const Real B =  1.053;
-    const Real C = -700.4;
-    const Real D =  9351.0;
-    const Real E = -0.1345E6;
-
-    const Real x = a_EbyN;
-    k = exp(A + B*log(x) + C/x + D/(x*x) + E/(x*x*x));
-  }
-
-  return k;
-}
-
-Real air7::compute_N2plus_N2_M_to_N4plus_M() const {
-  return 5.0E-41;
-}
-
-Real air7::compute_N4plus_O2_to_O2plus_2N2() const {
-  return 2.5E-16;
-}
-
-Real air7::compute_N2plus_O2_to_O2plus_N2() const {
-  return 6.0E-17;
-}
-
-Real air7::compute_O2plus_2N2_to_O2plusN2_N2() const {
-  return 9.0E-43;
-}
-
-Real air7::compute_O2plusN2_N2_to_O2plus_2N2() const {
-  return 4.3E-16;
-}
-
-Real air7::compute_O2plusN2_O2_to_O4plus_N2() const {
-  return 1.E-15;
-}
-
-Real air7::compute_O2plus_O2_M_to_O4plus_M() const {
-  return 2.4E-42;
-}
-
-Real air7::compute_e_O4plus_to_2O2(const Real a_Te) const {
-  return 1.4E-12*sqrt(300./a_Te);
-}
-
-Real air7::compute_e_O2plus_to_2O(const Real a_Te) const {
-  return 2E-13*(300.0/a_Te);
-}
-
-Real air7::compute_e_2O2_to_O2minus_O2(const Real a_Te) const {
-  return 2E-41*(300.0/a_Te);
-}
-
-Real air7::compute_O2minus_O4plus_to_3O2() const {
-  return 1.E-13;
-}
-
-Real air7::compute_O2minus_O4plus_M_to_3O2_M() const {
-  return 2.E-37;
-}
-
-Real air7::compute_O2minus_O2plus_M_to_2O2_M() const {
-  return 2.E-37;
-}
+Real air7::compute_electron_N2_impact_ionization(const Real a_EbyN) const {return m_e_N2_alpha.get_entry(a_EbyN);}
+Real air7::compute_electron_O2_impact_ionization(const Real a_EbyN) const {return m_e_O2_alpha.get_entry(a_EbyN);}
+Real air7::compute_N2plus_N2_M_to_N4plus_M()                        const {return 5.E-41;}
+Real air7::compute_N4plus_O2_to_O2_2N2()                            const {return 2.5E-16;}
+Real air7::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)          const {return 1.05E-15/sqrt(a_Tg);}
+Real air7::compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg)       const {return 8.1E-38/(a_Tg*a_Tg);}
+Real air7::compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg)       const {return 14.8*pow(a_Tg, -5.3)*exp(-2357.0/a_Tg);}
+Real air7::compute_O2plusN2_O2_to_O4plus_N2()                       const {return 1.E-15;}
+Real air7::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg)         const {return 2.03E-34*pow(a_Tg, -3.2);}
+Real air7::compute_e_O4plus_to_2O2(const Real a_Te)                 const {return 2.42E-11/(sqrt(a_Te));}
+Real air7::compute_e_O2plus_to_O2(const Real a_Te)                  const {return 6.E-11/a_Te;}
+Real air7::compute_e_2O2_to_O2minus_O2(const Real a_Te)             const {return 6E-39/a_Te;}
+Real air7::compute_O2minus_O4plus_to_3O2()                          const {return 1.E-13;}
+Real air7::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg)       const {return 3.12E-31*pow(a_Tg, -2.5);}
+Real air7::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg)       const {return 3.12E-31*pow(a_Tg, -2.5);}
+Real air7::compute_Oplus_O2_to_O_O2(const Real a_Tg)                const {return 3.46E-12/sqrt(a_Tg);}

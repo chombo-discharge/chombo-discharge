@@ -1,6 +1,6 @@
 /*!
   @file   air7.H
-  @brief  Declaration of a 3-species BOLSIG-based transport model for air
+  @brief  Declaration of a BOLSIG-based transport model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -9,48 +9,34 @@
 #define _AIR7_
 
 #include "plasma_kinetics.H"
-#include "perlin_if.H"
+#include "lookup_table.H"
 
 /*!
-  @brief 7-species BOLSIG-based transport model for air at 1atm and 300K. 
-  temperature in the 
+  @brief 9-species plasma model for air (79/21 N2/O2 ratio) at 300K
 
-  @details This model includes variations due to the electron temperature in the LFA
+  @details 
+
+  This class uses functions from BOLSIG+ to compute ionization and transport coefficients for air at room temperature. BOLSIG+ has been pre-run for an electron energy range of \f$[10^{-3}\textrm{eV}, 20\textrm{eV}]\f$ which corresponds to electron temperatures in the range of 1K to 170000K. If you need transport data for other mixing ratios and gas temperatures, you should really, really re-run BOLSIG before running the kinetics in this program. 
 
   Class options
   -------------
 
-      air7.electron_diffusion            = true                  # Turn off electron diffusion (debugging only)
-      air7.excitation_efficiency         = 0.6                   # Impact excitation efficiency
-      air7.thermal_outflow               = false                 # Thermal outflow on/off
-      air7.diffusive_outflow             = false                 # Diffusive outflow on/off
-      air7.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
-      air7.electrode_townsend2           = 1.E-2                 # Townsend coefficient on electrodes
-      air7.electrode_quantum_efficiency  = 1.E-2                 # Quantum efficiency on electrodes
-      air7.dielectric_townsend2          = 1.E-1                 # Townsend coefficient on dielectrics
-      air7.dielectric_quantum_efficiency = 1.E-1                 # Quantum efficiency on dielectrics
-      air7.initial_ionization            = 1.E10                 # Initial background ionization
-      air7.quenching_pressure            = 0.03947               # Quenching pressure for photo-emission
-      air7.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
-      air7.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
-      air7.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
-      air7.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
-      air7.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
-      air7.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
-      air7.simple_cathode_bc             = false                 # Use simpiflied BC on electrode cathodes
+  @todo If anyone finds the time, please improve the ion mobilities. 
 
 */
 class air7 : public plasma_kinetics {
 public:
 
+  // Forward declaration of cdr species
   class electron;
-  class N2plus;
+  class N2plus;   
+  class N4plus;   
   class O2plus;
-  class N4plus;
   class O4plus;
   class O2plusN2;
   class O2minus;
 
+  // Forward declaration of photon excitations
   class photon_one;
   class photon_two;
   class photon_three;
@@ -59,7 +45,7 @@ public:
     @brief Get gas temperature, pressure, density, and molecular fractions
   */
   static void get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac);
-
+  
   /*!
     @brief Constructor
   */
@@ -69,6 +55,7 @@ public:
     @brief Destructor
   */
   virtual ~air7();
+
 
   /*!
     @brief Compute diffusion coefficients
@@ -137,215 +124,100 @@ public:
   virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const; 
 
 protected:
+  
+  static std::string s_bolsig_N2_alpha;
+  static std::string s_bolsig_O2_alpha;
+  static std::string s_bolsig_mobility;
+  static std::string s_bolsig_diffusion;
+  static std::string s_bolsig_mean_energy;
+  static std::string s_skip_fit;
 
-  /*!
-    @brief Noise function. Used for random initial conditions.
-  */
-  RefCountedPtr<perlin_if> m_perlin;
-  Real m_noise_amp;      // Noise amplitude for Perlin noise
-  RealVect m_noise_freq; // Noise frequency for Perlin noise
-  Real m_noise_persist;  // Persistence for Perlin noise
-  int m_noise_octaves;   // Number of octaves for Perlin noise
+  std::string m_transport_file;
+
+  bool m_mobile_ions;
+  bool m_diffusive_ions;
 
   int m_electron_idx;
   int m_N2plus_idx;
-  int m_O2plus_idx;
   int m_N4plus_idx;
+  int m_O2plus_idx;
   int m_O4plus_idx;
   int m_O2plusN2_idx;
   int m_O2minus_idx;
-
+  int m_Ominus_idx;
+  
   int m_photon1_idx;
   int m_photon2_idx;
   int m_photon3_idx;
 
-  /*!
-    @brief Simple cathode (electrode) boundary condition
-  */
-  bool m_simple_cathode;
+  Real m_Tg;           // Gas and ion temperature
+  Real m_p;            // Gas pressure
+  Real m_pq;           // Quenching pressure
+  Real m_N;            // Neutral number density
+  Real m_O2frac;       // O2 fraction
+  Real m_N2frac;       // N2 fraction
+  Real m_ion_mobility; // Ion mobility
 
-  /*!
-    @brief Thermal outflow on/off
-  */
-  bool m_thermal_outflow;
+  Real m_townsend2_electrode;            // 2nd Townsend on electrodes
+  Real m_townsend2_dielectric;           // 2nd Townsend on dielectrics
+  Real m_electrode_quantum_efficiency;   // Quantum efficiency on electrodes
+  Real m_dielectric_quantum_efficiency;  // Quantum efficiency on dielectrics
+  Real m_photoionization_efficiency;     // Photoionization efficiency
+  Real m_excitation_efficiency;          // Excitation efficiency
 
-  /*!
-    @brief Diffusive outflow on/off
-  */
-  bool m_diffusive_outflow;
+  // Tables built from BOLSIG+
+  lookup_table m_e_O2_alpha;
+  lookup_table m_e_N2_alpha;
+  lookup_table m_e_mobility;
+  lookup_table m_e_diffco;
+  lookup_table m_e_energy;
 
-  /*!
-    @brief Background gas temperature
-  */
-  Real m_Tg;
+  // Electron temperature
+  inline Real compute_Te(const Real a_EbyN) const;
 
-  /*!
-    @brief Background gas pressure
-  */
-  Real m_p;
+  // Mobility computations
+  inline Real compute_electron_mobility(const Real a_EbyN) const;
+  inline Real compute_N2plus_mobility(const Real a_EbyN)   const;
+  inline Real compute_N4plus_mobility(const Real a_EbyN)   const;
+  inline Real compute_O2plus_mobility(const Real a_EbyN)   const;
+  inline Real compute_O4plus_mobility(const Real a_EbyN)   const;
+  inline Real compute_O2plusN2_mobility(const Real a_EbyN) const;
+  inline Real compute_O2minus_mobility(const Real a_EbyN)  const;
 
-  /*!
-    @brief Quenching pressure
-  */
-  Real m_pq;
+  // Diffusion coefficient computatations
+  inline Real compute_electron_diffco(const Real a_byN) const;
+  inline Real compute_N2plus_diffco(const Real a_Tg)    const;
+  inline Real compute_N4plus_diffco(const Real a_Tg)    const;
+  inline Real compute_O2plus_diffco(const Real a_Tg)    const;
+  inline Real compute_O4plus_diffco(const Real a_Tg)    const;
+  inline Real compute_O2plusN2_diffco(const Real a_Tg)  const;
+  inline Real compute_O2minus_diffco(const Real a_Tg)   const;
 
-  /*!
-    @brief Background gas density
-  */
-  Real m_N;
+  // Reactions
+  inline Real compute_electron_N2_impact_ionization(const Real a_EbyN) const;
+  inline Real compute_electron_O2_impact_ionization(const Real a_EbyN) const;
+  inline Real compute_N2plus_N2_M_to_N4plus_M()                        const;
+  inline Real compute_N4plus_O2_to_O2_2N2()                            const;
+  inline Real compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)          const;
+  inline Real compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg)       const;
+  inline Real compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg)       const;
+  inline Real compute_O2plusN2_O2_to_O4plus_N2()                       const;
+  inline Real compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg)         const;
+  inline Real compute_e_O4plus_to_2O2(const Real a_Te)                 const;
+  inline Real compute_e_O2plus_to_O2(const Real a_Te)                  const;
+  inline Real compute_e_2O2_to_O2minus_O2(const Real a_Te)             const;
+  inline Real compute_O2minus_O4plus_to_3O2()                          const;
+  inline Real compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg)       const;
+  inline Real compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg)       const;
+  inline Real compute_Oplus_O2_to_O_O2(const Real a_Tg)                const;
 
-  /*!
-    @brief O2 fraction of gas
-  */
-  Real m_O2frac;
 
-  /*!
-    @brief N2 fraction of gas
-  */
-  Real m_N2frac;
+private:
 
-  /*!
-    @brief Second Townsend coefficient for conductors
-  */
-  Real m_townsend2_electrode;
-
-  /*!
-    @brief Second Townsend coefficient for dielectrics
-  */
-  Real m_townsend2_dielectric;
-
-  /*!
-    @brief Quantum efficiency on electrodes
-  */
-  Real m_electrode_quantum_efficiency;
-
-  /*!
-    @brief Quantum efficiency on dielectric surfaces
-  */
-  Real m_dielectric_quantum_efficiency;
-
-  /*!
-    @brief Photoionization efficiency
-  */
-  Real m_photoionization_efficiency;
-
-  /*!
-    @brief Excitation efficiency
-  */
-  Real m_excitation_efficiency;
-
-  /*!
-    @brief Ion mobility
-  */
-  Real m_ion_mobility;
-
-  /*!
-    @brief Electron-positive ion recombination
-  */
-  Real m_electron_recombination;
-
-  /*!
-    @brief Ion-ion recombination
-  */
-  Real m_ion_recombination;
-
-  /*!
-    @brief Electron detachmetn
-  */
-  Real m_electron_detachment;
-
-  /*!
-    @brief Compute the electron temperature
-  */
-  Real compute_electron_temperature(const Real a_EbyN) const;
-
-  /*!
-    @brief Compute electron mobility
-  */
-  Real compute_electron_mobility(const Real a_EbyN) const;
-
-  /*!
-    @brief Compute electron diffusion
-  */
-  Real compute_electron_diffusion(const Real a_EbyN) const;
-
-  /*!
-    @brief Compute Townsend ionization coefficient
-  */
-  Real compute_townsend_ionization_N2(const Real a_EbyN) const;
-
-  /*!
-    @brief Compute Townsend ionization coefficient
-  */
-  Real compute_townsend_ionization_O2(const Real a_EbyN) const;
-
-  /*!
-    @brief Compute rate constant for \f$N_2^+ + N_2 + M \rightarrow N_4^+ + M\f$
-  */
-  Real compute_N2plus_N2_M_to_N4plus_M() const;
-
-  /*!
-    @brief Compute rate constant for \f$N_4^+ + O_2 \rightarrow O_2^+ + N_2 + N_2\f$
-  */
-  Real compute_N4plus_O2_to_O2plus_2N2() const;
-
-  /*!
-    @brief Compute rate constant for \f$N_2^+ + O_2 \rightarrow O_2^+ N_2\f$
-  */
-  Real compute_N2plus_O2_to_O2plus_N2() const;
+  void compute_transport_coefficients();
   
   /*!
-    @brief Compute rate constant for \f$O_2^+ + 2N_2 \rightarrow O_2^+N_2 N_2\f$
-  */
-  Real compute_O2plus_2N2_to_O2plusN2_N2() const;
-
-  /*!
-    @brief Compute rate constant for \f$O_2^+N2 + N_2 \rightarrow O_2^+ + 2N_2
-  */
-  Real compute_O2plusN2_N2_to_O2plus_2N2() const;
-
-  /*!
-    @brief Compute rate constant for \f$O_2^+N2 + O_2 \rightarrow O_4^+ + N_2
-  */
-  Real compute_O2plusN2_O2_to_O4plus_N2() const;
-
-  /*!
-    @brief Compute rate constant for \f$O_2^+ + O_2 + M\rightarrow O_4^+ + M\f$
-  */
-  Real compute_O2plus_O2_M_to_O4plus_M() const;
-
-  /*!
-    @brief Compute rate constant for the dissociative recombination \f$e + O_4^+ \rightarrow 2O_2\f$
-  */
-  Real compute_e_O4plus_to_2O2(const Real a_Te) const;
-
-  /*!
-    @brief Compute rate constant for the dissociative recombination \f$e + O_2^+ \rightarrow 2O\f$
-  */
-  Real compute_e_O2plus_to_2O(const Real a_Te) const;
-
-  /*!
-    @brief Compute rate constant for attachment \f$e + 2O_2 \rightarrow O_2^- + O_2\f$
-  */
-  Real compute_e_2O2_to_O2minus_O2(const Real a_Te) const;
-
-  /*!
-    @brief Compute rate constant for ion recombination \f$O_2^- + O_4^+ \rightarrow 3O_2\f$
-  */
-  Real compute_O2minus_O4plus_to_3O2() const;
-
-  /*!
-    @brief Compute rate constant for ion recombination \f$O_2^- + O_4^+ M \rightarrow 3O_2 + M\f$
-  */
-  Real compute_O2minus_O4plus_M_to_3O2_M() const;
-
-  /*!
-    @brief Compute rate constant for ion recombination \f$O_2^- + O_4^+ M \rightarrow 3O_2 + M\f$
-  */
-  Real compute_O2minus_O2plus_M_to_2O2_M() const;
-
-  /*!
-    @brief Common interface for cdr fluxes
+    @brief Common function for dielectric and electrode fluxes, only difference is the secondary emission coefficients
   */
   Vector<Real> compute_cdr_fluxes(const Real&         a_time,
 				  const RealVect&     a_pos,
@@ -356,8 +228,8 @@ protected:
 				  const Vector<Real>& a_cdr_gradients,
 				  const Vector<Real>& a_rte_fluxes,
 				  const Vector<Real>& a_extrap_cdr_fluxes,
-				  const Real&         a_townsend,
-				  const Real&         a_quantum_efficiency,
-				  const bool&         a_extrap_electrons) const;
+				  const Real&         a_townsend2,
+				  const Real&         a_quantum_efficiency) const;
 };
+
 #endif

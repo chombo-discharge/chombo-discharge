@@ -1,17 +1,14 @@
 /*!
-  @file   air7_species.H
-  @brief  Declaration of species for the air7 model
+  @file   air7.H
+  @brief  Declaration of species for the BOLSIG-based 8-species air model
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-
+#include "air7.H"
 
 #ifndef _AIR7_SPECIES_
 #define _AIR7_SPECIES_
-
-#include "air7.H"
-#include "perlin_if.H"
 
 /*!
   @brief Electron class
@@ -33,11 +30,6 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
-
-  /*!
-    @brief Set noise function
-  */
-  virtual void set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func);
   
 protected:
 
@@ -45,16 +37,7 @@ protected:
     @brief Initial ionization level
   */
   Real m_initial_ionization;
-
-  /*!
-    @brief Initial noise level
-  */
-  Real m_initial_noise;
-
-  /*!
-    @brief Noise function
-  */
-  RefCountedPtr<perlin_if> m_noise_func;
+  
 };
 
 /*!
@@ -77,76 +60,10 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
-
-  /*!
-    @brief Set noise function
-  */
-  virtual void set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func);
   
 protected:
-  
+
   Real m_initial_ionization;
-
-  /*!
-    @brief N2 fraction
-  */
-  Real m_N2frac;
-  
-  /*!
-    @brief Initial noise level
-  */
-  Real m_initial_noise;
-
-  /*!
-    @brief Noise function
-  */
-  RefCountedPtr<perlin_if> m_noise_func;
-};
-
-/*!
-  @brief O2plus class
-*/
-class air7::O2plus : public species {
-public:
-
-  /*!
-    @brief Constructor
-  */
-  O2plus();
-
-  /*!
-    @brief Destructor
-  */
-  virtual ~O2plus();
-
-  /*!
-    @brief Initial data
-  */
-  virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
-
-  /*!
-    @brief Set noise function
-  */
-  virtual void set_initial_noise(const Real a_noise_amp, const RefCountedPtr<perlin_if>& a_noise_func);
-  
-protected:
-  
-  Real m_initial_ionization;
-
-  /*!
-    @brief O2 fraction
-  */
-  Real m_O2frac;
-
-  /*!
-    @brief Initial noise level
-  */
-  Real m_initial_noise;
-  
-  /*!
-    @brief Noise function
-  */
-  RefCountedPtr<perlin_if> m_noise_func;
 };
 
 /*!
@@ -169,6 +86,34 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  
+protected:
+};
+
+/*!
+  @brief O2plus class
+*/
+class air7::O2plus : public species {
+public:
+
+  /*!
+    @brief Constructor
+  */
+  O2plus();
+
+  /*!
+    @brief Destructor
+  */
+  virtual ~O2plus();
+
+  /*!
+    @brief Initial data
+  */
+  virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  
+protected:
+
+  Real m_initial_ionization;
 };
 
 /*!
@@ -191,6 +136,8 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  
+protected:
 };
 
 /*!
@@ -213,6 +160,8 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  
+protected:
 };
 
 /*!
@@ -235,8 +184,9 @@ public:
     @brief Initial data
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const;
+  
+protected:
 };
-
 
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
