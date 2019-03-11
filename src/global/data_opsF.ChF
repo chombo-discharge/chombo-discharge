@@ -177,10 +177,10 @@ c Compute the denominator part with the gradients
            do p=1,CH_SPACEDIM
               chf_dterm[ioff  = chf_id(0, p);
 	                joff  = chf_id(1, p);
-			koff  = chf_id(2, p)]
+                        koff  = chf_id(2, p)]
               chf_dterm[ioff2 = chf_id(0, p);
 	                joff2 = chf_id(1, p);
-			koff2 = chf_id(2, p)]
+                        koff2 = chf_id(2, p)]
 
               res = 0.0
 
@@ -201,13 +201,13 @@ c Compute the Laplacian	of |u| with cross terms
 c Shift point to iq+1 and compute |du/dxp|
               chf_dterm[ii = i + chf_id(0, q);
 	                jj = j + chf_id(1, q);
-			kk = k + chf_id(2, q)]
+                        kk = k + chf_id(2, q)]
 	      res = res + 0.25*abs((data(chf_ix[ii+ioff; jj+joff; kk+koff]) - data(chf_ix[ii-ioff; jj-joff; kk-koff])))
 
 c Shift point to iq-1 and compute du/dxp
               chf_dterm[ii = i - chf_id(0, q);
 	                jj = j - chf_id(1, q);
-			kk = k - chf_id(2, q)]
+                        kk = k - chf_id(2, q)]
               res = res + 0.25*abs((data(chf_ix[ii+ioff; jj+joff; kk+koff]) - data(chf_ix[ii-ioff; jj-joff; kk-koff])))
 	      denom = denom + res*res
            enddo

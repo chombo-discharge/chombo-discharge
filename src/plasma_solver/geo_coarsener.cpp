@@ -109,7 +109,7 @@ void geo_coarsener::coarsen_tags(Vector<IntVectSet>& a_tags, const Vector<Real>&
 	    if(inside_box && inverse && coarsen_lvl){ // Protect tag
 	      inside_inverse_box = true;
 	    }
-	    else{ // Remove tag
+	    else if(!inside_box && inverse && coarsen_lvl){ // Remove tag
 	      outside_inverse_box = true;
 	    }
 	  }

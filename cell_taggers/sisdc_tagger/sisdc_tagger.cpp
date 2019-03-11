@@ -12,15 +12,17 @@
 #include <ParmParse.H>
   
 sisdc_tagger::sisdc_tagger(){
-  m_num_tracers = 1;
+  m_num_tracers = 2;
   m_name        = "sisdc_tagger";
 
-  m_cdr_idx = 0;
-  m_thresh       = 0.1;
+  m_cdr_idx     = 0;
+  m_err_thresh  = 0.01;
+  m_curv_thresh = 0.1;
 
   ParmParse pp("sisdc_tagger");
-  pp.query("cdr_index",  m_cdr_idx);
-  pp.query("err_thresh",      m_thresh);
+  pp.query("cdr_index",   m_cdr_idx);
+  pp.query("err_thresh",  m_err_thresh);
+  pp.query("curv_thresh", m_curv_thresh);
 
   this->set_phase(phase::gas);
 }
@@ -41,15 +43,19 @@ void sisdc_tagger::compute_tracers(){
 
   // Get electron error
   sisdc* stepper = (sisdc*) (&(*m_timestepper));
-
   EBAMRCellData& ne_err  = *(stepper->get_cdr_errors()[m_cdr_idx]);
   Vector<EBAMRCellData*> errors  = stepper->get_cdr_errors();
 
   // Get maximum and minimum ne and Se, and the electric field
   Real err_max,  err_min;
   data_ops::get_max_min(err_max,  err_min,  ne_err,   comp);
-
   err_max = Max(Abs(err_max), Abs(err_min));
+
+  // Compute the electric field and take the magnitude onto tracer1
+  EBAMRCellData E;
+  m_amr->allocate(E, phase::gas, SpaceDim);
+  m_timestepper->compute_E(E, phase::gas);
+  data_ops::vector_length(m_tracer[1], E);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -100,7 +106,8 @@ bool sisdc_tagger::refine_cell(const RealVect&         a_pos,
 			       const int&              a_lvl,
 			       const Vector<Real>&     a_tracer,
 			       const Vector<RealVect>& a_grad_tracer){
-  const bool refine = (Abs(a_tracer[0]) > m_thresh) ? true : false;
+  const bool refine_err  = (Abs(a_tracer[0]) > m_err_thresh) ? true : false;
+  const bool refine_curv = (a_grad_tracer[1].vectorLength()*a_dx)/a_tracer[1] > m_curv_thresh ? true : false;
   
-  return refine;
+  return refine_err || refine_curv;
 }
