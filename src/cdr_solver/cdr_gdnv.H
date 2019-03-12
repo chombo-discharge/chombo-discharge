@@ -109,8 +109,9 @@ protected:
 			       const int                    a_lvl);
 
   virtual void advance_subcycle_amr(EBAMRCellData& a_state,
+				    EBAMRFluxData& a_flux,
+				    EBAMRFluxData& a_face_states,
 				    EBAMRCellData& a_coar_old_state,
-				    EBAMRCellData& a_coar_new_state,
 				    EBAMRCellData& a_divF_c,
 				    EBAMRCellData& a_weights,
 				    EBAMRIVData&   a_divF_nc,
@@ -123,6 +124,8 @@ protected:
 				    const Real     a_dt);
 
   virtual void advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
+				      LevelData<EBFluxFAB>&        a_flux,
+				      LevelData<EBFluxFAB>&        a_face_states,
 				      LevelData<EBCellFAB>&        a_divF_c,
 				      LevelData<EBCellFAB>&        a_weights,
 				      LevelData<BaseIVFAB<Real> >& a_mass_diff,
@@ -152,6 +155,26 @@ protected:
     @brief Non-conservative divergence. Overwriting because this class has two ways of doing this. 
   */
   virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
+
+  /*!
+    @brief Level-wise non-conservative divergence. Only for covered face stuff
+  */
+  virtual void nonconservative_divergence(LevelData<BaseIVFAB<Real> >& a_divF_nc,
+					  const LevelData<EBFluxFAB>&  a_face_state,
+					  const int                    a_lvl);
+
+  /*!
+    @brief Update flux registers 
+  */
+  virtual void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
+				     const int             a_lvl,
+				     const int             a_coarsest_lvl,
+				     const int             a_finest_lvl);
+
+  /*!
+    @brief Update the mass redistribution register
+  */
+  virtual void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_lvl);
 
   /*!
     @brief Covered faces on side Lo

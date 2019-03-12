@@ -408,6 +408,10 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
+
+#if 1 // New code
+    new_compute_flux(*a_flux[lvl], *a_face_state[lvl], *a_face_vel[lvl], *a_domain_flux[lvl], lvl);
+#else // Old code (that we know works)
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
@@ -460,6 +464,74 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	    else {
 	      MayDay::Abort("cdr_solver::new_compute_flux - stop this madness!");
 	    }
+	  }
+	}
+      }
+    }
+#endif
+  }
+}
+
+void cdr_solver::new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
+				  const LevelData<EBFluxFAB>&        a_face_state,
+				  const LevelData<EBFluxFAB>&        a_face_vel,
+				  const LevelData<DomainFluxIFFAB>&  a_domain_flux,
+				  const int                          a_lvl){
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box          = dbl.get(dit());
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs(box);
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& flx       = a_flux[dit()][dir];
+      const EBFaceFAB& phi = a_face_state[dit()][dir];
+      const EBFaceFAB& vel = a_face_vel[dit()][dir];
+
+      flx.setVal(0.0, comp);
+      flx += phi;
+      flx *= vel;
+
+      // Irregular faces
+      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
+      for (FaceIterator faceit(ebisbox.getIrregIVS(box), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	const FaceIndex& face = faceit();
+	flx(face, comp) = vel(face, comp)*phi(face, comp);
+      }
+
+      // Domain faces
+      for (SideIterator sit; sit.ok(); ++sit){
+	const BaseIFFAB<Real>& domflux = a_domain_flux[dit()](dir, sit());
+
+	const IntVectSet& ivs  = domflux.getIVS();
+	const EBGraph& ebgraph = domflux.getEBGraph();
+
+	const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+	for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+	    
+	  if(m_dombc == cdr_bc::external){
+	    flx(face, comp) = domflux(face, comp);
+	  }
+	  else if(m_dombc == cdr_bc::wall){
+	    flx(face, comp) = 0.0;
+	  }
+	  else if(m_dombc == cdr_bc::outflow){
+	    flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
+	  }
+	  else if(m_dombc == cdr_bc::extrap){
+	    // Don't do anything, the solver should have extrapolated the face-centered state
+	  }
+	  else {
+	    MayDay::Abort("cdr_solver::new_compute_flux - stop this madness!");
 	  }
 	}
       }
@@ -814,6 +886,43 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	// Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
 	// which it would be otherwise. 
       }
+    }
+  }
+}
+
+void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
+				   LevelData<BaseIVFAB<Real> >&       a_mass_diff,
+				   const LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				   const int                          a_lvl){
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+    
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& divH               = a_divF_H[dit()];  // On input, this contains kappa*div(F)
+    BaseIVFAB<Real>& deltaM       = a_mass_diff[dit()];
+    const BaseIVFAB<Real>& divNC  = a_divF_nc[dit()]; 
+
+    const Box box          = dbl.get(dit());
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const Real kappa    = ebisbox.volFrac(vof);
+      const Real dc       = divH(vof, comp);
+      const Real dnc      = divNC(vof, comp);
+
+      divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
+      deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
+
+      // Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
+      // which it would be otherwise. 
     }
   }
 }

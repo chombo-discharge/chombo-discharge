@@ -493,6 +493,12 @@ protected:
 				const EBAMRFluxData& a_face_vel,
 				const EBAMRIFData&   a_domain_flux);
 
+  virtual void new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
+				const LevelData<EBFluxFAB>&        a_face_state,
+				const LevelData<EBFluxFAB>&        a_face_vel,
+				const LevelData<DomainFluxIFFAB>&  a_domain_flux,
+				const int                          a_lvl);
+
   /*!
     @brief Compute conservative divergence from fluxes. 
   */
@@ -537,6 +543,11 @@ protected:
   virtual void hybrid_divergence(EBAMRCellData&       a_divF,
 				 EBAMRIVData&         a_mass_diff,
 				 const EBAMRIVData&   a_noncons_div);
+
+  virtual void hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
+				 LevelData<BaseIVFAB<Real> >&       a_mass_diff,
+				 const LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				 const int                          a_lvl);
 
   /*!
     @brief Increment flux registers. 

@@ -533,6 +533,49 @@ void cdr_gdnv::nonconservative_divergence(EBAMRIVData&         a_div_nc,
   }
 }
 
+void cdr_gdnv::nonconservative_divergence(LevelData<BaseIVFAB<Real> >& a_divF_nc,
+					  const LevelData<EBFluxFAB>&  a_face_state,
+					  const int                    a_lvl){
+
+  const int comp         = 0;
+  const int ncomp        = 1;
+
+  if(m_which_divFnc == 0){
+    MayDay::Abort("cdr_gdnv::nonconservative_divergence(per level) - this only works for covered cells stuff");
+  }
+
+  const DisjointBoxLayout& dbl         = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl              = m_amr->get_ebisl(m_phase)[a_lvl];
+  EBAdvectLevelIntegrator& leveladvect = *(m_level_advect[a_lvl]);
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box          = dbl.get(dit());
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+      
+    EBAdvectPatchIntegrator& patcher = leveladvect.getPatchAdvect(dit());
+    EBCellFAB divF(ebisbox, box, ncomp); // Temporary storage
+
+    patcher.advectiveDerivative(divF,
+				a_face_state[dit()],
+				(*m_velo_face[a_lvl])[dit()],
+				(*m_covered_phi_lo[a_lvl])[dit()],
+				(*m_covered_phi_hi[a_lvl])[dit()],
+				(*m_covered_velo_lo[a_lvl])[dit()],
+				(*m_covered_velo_hi[a_lvl])[dit()],
+				(*m_covered_face_lo[a_lvl])[dit()],
+				(*m_covered_face_hi[a_lvl])[dit()],
+				box);
+
+    // Copy results for irregular cells over to a_div_nc
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      a_divF_nc[dit()](vof, comp) = divF(vof, comp);
+    }
+  }
+}
+
 void cdr_gdnv::regrid(const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("cdr_gdnv::regrid");
   if(m_verbosity > 5){
@@ -556,6 +599,7 @@ void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bo
     const int ncomp      = 1;
     const int redist_rad = m_amr->get_redist_rad();
 
+    EBAMRFluxData flux;
     EBAMRFluxData face_state;
     EBAMRCellData divF_c;
     EBAMRCellData weights;
@@ -567,6 +611,7 @@ void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bo
 
     
     m_amr->allocate(face_state, m_phase, ncomp);
+    m_amr->allocate(flux,       m_phase, ncomp);
     m_amr->allocate(divF_nc,    m_phase, ncomp);
     m_amr->allocate(mass_diff,  m_phase, ncomp);
     m_amr->allocate(divF_c,     m_phase, ncomp);
@@ -575,10 +620,10 @@ void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bo
     m_amr->allocate(weights,    m_phase, ncomp, 2*redist_rad);
 
     data_ops::set_value(face_state, 0.0);
+    data_ops::set_value(flux,       0.0);
     data_ops::set_value(divF_nc,    0.0);
     data_ops::set_value(divF_c,     0.0);
     data_ops::set_value(coar_old,   0.0);
-    data_ops::set_value(coar_new,   0.0);
     data_ops::set_value(mass_diff,  0.0);
     data_ops::set_value(weights,    0.0);
 
@@ -593,8 +638,9 @@ void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bo
     Vector<Real> times_new(1+fine_lvl, 0.0); // These are the CURRENT grid times 
     Vector<Real> times_old(1+fine_lvl, 0.0); // These are the PREVIOUS grid times
     advance_subcycle_amr(a_state,
+			 flux,
+			 face_state,
 			 coar_old,
-			 coar_new,
 			 divF_c,
 			 weights,
 			 divF_nc,
@@ -643,8 +689,8 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
   const LevelData<EBCellFAB>* coar_vel_ptr = NULL;
 
   if(a_lvl > 0){
-    coar_vel_ptr = m_velo_cell[a_lvl];
-    coar_vel_ptr = m_velo_cell[a_lvl];
+    coar_vel_ptr = m_velo_cell[a_lvl-1];
+    coar_vel_ptr = m_velo_cell[a_lvl-1];
   }
 
   // Extrapolate to faces. Interpolate to a_time between a_coarse_time_old and a_coarse_time new
@@ -694,8 +740,9 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 }
 
 void cdr_gdnv::advance_subcycle_amr(EBAMRCellData& a_state,
+				    EBAMRFluxData& a_flux,
+				    EBAMRFluxData& a_face_states,
 				    EBAMRCellData& a_coar_old_state,
-				    EBAMRCellData& a_coar_new_state,
 				    EBAMRCellData& a_divF_c,
 				    EBAMRCellData& a_weights,
 				    EBAMRIVData&   a_divF_nc,
@@ -713,19 +760,29 @@ void cdr_gdnv::advance_subcycle_amr(EBAMRCellData& a_state,
   // Grid times for the coarser grid
   Real coar_time_old = 0.0;
   Real coar_time_new = 0.0;
-  if(a_lvl > a_coarsest_level){ 
+
+  LevelData<EBCellFAB>* coar_state_old = NULL;
+  LevelData<EBCellFAB>* coar_state_new = NULL;
+  if(a_lvl > a_coarsest_level){
+    
     coar_time_old = a_told[a_lvl-1];
     coar_time_new = a_tnew[a_lvl-1];
+
+    coar_state_old = &(*a_coar_old_state[a_lvl-1]);
+    coar_state_new = &(*a_state[a_lvl-1]);
   }
 
-  // This advances this level from a_tnew[a_lvl] to a_tnew[a_lvl] + a_dt
+  // This advances this level from a_tnew[a_lvl] to a_tnew[a_lvl] + a_dt. Copy the old state to a_coar_old_state first
+  a_state[a_lvl]->copyTo(*a_coar_old_state[a_lvl]); // Update coar state
   advance_subcycle_level(*a_state[a_lvl],
+			 *a_flux[a_lvl],
+			 *a_face_states[a_lvl],
   			 *a_divF_c[a_lvl],
   			 *a_weights[a_lvl],
   			 *a_divF_nc[a_lvl],
   			 *a_mass_diff[a_lvl],
-  			 a_coar_old_state[a_lvl],
-  			 a_coar_new_state[a_lvl],
+  			 coar_state_old,
+  			 coar_state_new,
   			 a_lvl,
   			 a_coarsest_level,
   			 a_finest_level,
@@ -741,13 +798,13 @@ void cdr_gdnv::advance_subcycle_amr(EBAMRCellData& a_state,
   const bool has_fine = a_lvl < a_finest_level;
   const bool has_coar = a_lvl > a_coarsest_level;
 
-  // If there is a coarser level, advance it nref times so that we synchronize. 
+  // If there is a coarser level, advance it nref times so that we synchronize. a_state[lvl]
   if(a_lvl < a_finest_level){
     const int nref    = m_amr->get_ref_rat()[a_lvl];
     const Real dt_ref = a_dt/nref;
     for (int i=0; i < nref-1; i++){
-      advance_subcycle_amr(a_state, a_coar_old_state, a_coar_new_state, a_divF_c,a_weights, a_divF_nc, a_mass_diff, a_lvl+1,
-			   a_tnew, a_told, a_coarsest_level, a_finest_level, dt_ref);
+      advance_subcycle_amr(a_state, a_flux, a_face_states, a_coar_old_state, a_divF_c,a_weights, a_divF_nc,
+			   a_mass_diff, a_lvl+1, a_tnew, a_told, a_coarsest_level, a_finest_level, dt_ref);
     }
   }
 
@@ -758,6 +815,8 @@ void cdr_gdnv::advance_subcycle_amr(EBAMRCellData& a_state,
 }
 
 void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
+				      LevelData<EBFluxFAB>&        a_flux,
+				      LevelData<EBFluxFAB>&        a_face_states,
 				      LevelData<EBCellFAB>&        a_divF_c,
 				      LevelData<EBCellFAB>&        a_weights,
 				      LevelData<BaseIVFAB<Real> >& a_mass_diff,
@@ -783,7 +842,102 @@ void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
     MayDay::Abort("cdr_gdnv::advance_subcycle_level - ebcf not (yet) supported");
   }
 
+  // Advect to faces and compute fluxes on face centers, and compute the conservative divergence on regular cells
+  advect_to_faces(a_face_states, a_state, a_coar_old_state, a_coar_new_state, a_time, a_coar_time_old, a_coar_time_new, a_lvl);
+  new_compute_flux(a_flux, a_face_states, *m_velo_face[a_lvl], *m_domainflux[a_lvl], a_lvl);
+  consdiv_regular(a_divF_c, a_flux, a_lvl);
+
+  // Set up flux interpolant and compute conservative flux on irregular cells. 
+  LevelData<BaseIFFAB<Real> > flux_interp[SpaceDim];
+  setup_flux_interpolant(flux_interp, a_flux, a_lvl); // Compute interpolant
+  interpolate_flux_to_centroids(flux_interp, a_lvl);  // Interpolant now holds face centroid-centered fluxes
+  compute_divF_irreg(a_divF_c, flux_interp, *m_ebflux[a_lvl], a_lvl); // Update the conservative divergence in the cut cells
+
+  // Recess: So far the conservative divergence is scaled by 1/dx but not yet divided by the volume fraction. This
+  // means that the actual advance without the hybrid stuff would be
+  //
+  // new_state += dt*a_divF_c/kappa
+
+  // Compute the nonconservative and hybrid divergences (hybrid put on storage for conservative, which is lost)
+  nonconservative_divergence(a_divF_nc, a_face_states, a_lvl);
+  hybrid_divergence(a_divF_c, a_mass_diff, a_divF_nc, a_lvl);
+
+  // Update flux registers and redistribution registers
+  update_flux_registers(a_flux, a_lvl, a_coarsest_level, a_finest_level);
+  update_redist_register(a_mass_diff, a_lvl);
+
+  // Euler advance and then redistribute mass on this level
+  data_ops::incr(a_state, a_divF_c, a_dt);
+
+  MayDay::Abort("cdr_gdnv::advance_subcycle_level - we still need to redistribute mass");
+  
+
   //  MayDay::Abort("cdr_gdnv::advance_subcycle_level - not implemented");
+}
+
+void cdr_gdnv::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
+				     const int             a_lvl,
+				     const int             a_coarsest_level,
+				     const int             a_finest_level){
+
+    // Increment the coarser flux register and initialize the finer flux register. a_flux holds phi*vel which we can use
+  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_coar = a_lvl > a_coarsest_level;
+
+  const int comp = 0;
+  const Interval interv(comp, comp);
+  const Real fluxreg_scale     = 1.0;
+  EBFluxRegister* fluxreg_fine = NULL;
+  EBFluxRegister* fluxreg_coar = NULL;
+
+  // Remember, register on a_lvl holds flux between level a_lvl and a_lvl+1
+  if(has_fine) fluxreg_fine = m_amr->get_flux_reg(m_phase)[a_lvl];   
+  if(has_coar) fluxreg_coar = m_amr->get_flux_reg(m_phase)[a_lvl-1]; 
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const EBISBox& ebisbox = ebisl[dit()];
+    const Box box          = dbl.get(dit());
+      
+    for (int dir = 0; dir < SpaceDim; dir++){
+
+      // Initialize finer flux register with flux leaving this level and into the finer level (or invalid region of that level)
+      if(has_fine) { 
+	fluxreg_fine->setToZero();
+	for (SideIterator sit; sit.ok(); ++sit){
+	  fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], fluxreg_scale, dit(), interv, dir, sit());
+	}
+      }
+
+      // Increment coarser flux register with flux entering that level from this level 
+      if(has_coar){ // 
+	for (SideIterator sit; sit.ok(); ++sit){
+	  fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], fluxreg_scale, dit(), interv, dir, sit());
+	}
+      }
+    }
+  }
+}
+
+void cdr_gdnv::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_lvl){
+  CH_TIME("cdr_solver::update_redist_register");
+  if(m_verbosity > 5){
+    pout() << m_name + "::update_redist_register" << endl;
+  }
+
+  const int comp  = 0;
+  const Interval interv(comp, comp);
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+    
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[a_lvl]);
+  level_redist.setToZero();
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    level_redist.increment(a_mass_diff[dit()], dit(), interv);
+  }
 }
 
 
@@ -803,7 +957,8 @@ void cdr_gdnv::reflux(EBAMRCellData& a_state, const int a_level, const int a_coa
   // Scale the flux with resolution
   const Real dx    = m_amr->get_dx()[a_level];
   const Real scale = 1.0/dx;
-      
+
+  // Reflux this level, then empty the register. 
   fluxreg->reflux(*a_state[a_level], interv, scale);
   fluxreg->setToZero();
 }
