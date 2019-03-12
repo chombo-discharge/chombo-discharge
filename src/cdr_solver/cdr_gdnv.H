@@ -108,6 +108,41 @@ protected:
 			       const Real                   a_coarse_time_new,
 			       const int                    a_lvl);
 
+  virtual void advance_subcycle_amr(EBAMRCellData& a_state,
+				    EBAMRCellData& a_coar_old_state,
+				    EBAMRCellData& a_coar_new_state,
+				    EBAMRCellData& a_divF_c,
+				    EBAMRCellData& a_weights,
+				    EBAMRIVData&   a_divF_nc,
+				    EBAMRIVData&   a_mass_diff,
+				    int            a_lvl,
+				    Vector<Real>&  a_tnew,
+				    Vector<Real>&  a_told,
+				    const int      a_coarsest_level,
+				    const int      a_finest_level,
+				    const Real     a_dt);
+
+  virtual void advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
+				      LevelData<EBCellFAB>&        a_divF_c,
+				      LevelData<EBCellFAB>&        a_weights,
+				      LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				      LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				      const LevelData<EBCellFAB>*  a_coar_old_state,
+				      const LevelData<EBCellFAB>*  a_coar_new_state,
+				      const int                    a_lvl,
+				      const int                    a_coarsest_level,
+				      const int                    a_finest_level,
+				      const Real                   a_coar_time_old,
+				      const Real                   a_coar_time_new,
+				      const Real                   a_time,
+				      const Real                   a_dt);
+
+  /*!
+    @brief Reflux a_state with flux registers from finer level (if we have it)
+  */
+  virtual void reflux(EBAMRCellData& a_state, const int a_level, const int a_coarsest_level, const int a_finest_level);
+				      
+
   /*!
     @brief Compute div(J)
   */

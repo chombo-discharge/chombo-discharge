@@ -49,7 +49,6 @@ cdr_gdnv::cdr_gdnv() : cdr_tga() {
   this->set_divF_nc(which);
 }
 
-
 cdr_gdnv::~cdr_gdnv(){
   this->delete_covered();
 }
@@ -558,27 +557,58 @@ void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bo
     const int redist_rad = m_amr->get_redist_rad();
 
     EBAMRFluxData face_state;
-    EBAMRIVData   div_nc;
-    EBAMRIVData   mass_diff;
+    EBAMRCellData divF_c;
     EBAMRCellData weights;
+    EBAMRIVData   divF_nc;
+    EBAMRIVData   mass_diff;
 
+    EBAMRCellData coar_old;
+    EBAMRCellData coar_new;
+
+    
     m_amr->allocate(face_state, m_phase, ncomp);
-    m_amr->allocate(div_nc,     m_phase, ncomp);
+    m_amr->allocate(divF_nc,    m_phase, ncomp);
     m_amr->allocate(mass_diff,  m_phase, ncomp);
+    m_amr->allocate(divF_c,     m_phase, ncomp);
+    m_amr->allocate(coar_old,   m_phase, ncomp);
+    m_amr->allocate(coar_new,   m_phase, ncomp);
     m_amr->allocate(weights,    m_phase, ncomp, 2*redist_rad);
 
     data_ops::set_value(face_state, 0.0);
-    data_ops::set_value(div_nc,     0.0);
+    data_ops::set_value(divF_nc,    0.0);
+    data_ops::set_value(divF_c,     0.0);
+    data_ops::set_value(coar_old,   0.0);
+    data_ops::set_value(coar_new,   0.0);
     data_ops::set_value(mass_diff,  0.0);
     data_ops::set_value(weights,    0.0);
 
     this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
     this->extrapolate_vel_to_covered_faces();              // Extrapolate velocities to covered face centers
 
+    // We now have all the things that we need. Cycle through levels
+    const int coar_lvl = 0;
+    const int fine_lvl = m_amr->get_finest_level();
+
+    // Do subcycle advance between coarsest_level and finest_level. Use scratch storage.
+    Vector<Real> times_new(1+fine_lvl, 0.0); // These are the CURRENT grid times 
+    Vector<Real> times_old(1+fine_lvl, 0.0); // These are the PREVIOUS grid times
+    advance_subcycle_amr(a_state,
+			 coar_old,
+			 coar_new,
+			 divF_c,
+			 weights,
+			 divF_nc,
+			 mass_diff,
+			 coar_lvl,
+			 times_new,
+			 times_old,
+			 coar_lvl,
+			 fine_lvl,
+			 a_dt);
+
   }
 
-  
-  MayDay::Abort("cdr_gdnv::eulerF_subcycle - not implemented yet!");
+  MayDay::Abort("cdr_gdnv::eulerF_subcycle - not yet done with this one...");
 }
 
 void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
@@ -609,7 +639,15 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
   leveladvect->resetBCs(bcfact);
 
   const Real extrap_dt = 0.0;
-  const LevelData<EBCellFAB>* source_ptr = NULL;
+  const LevelData<EBCellFAB>* source_ptr   = NULL;
+  const LevelData<EBCellFAB>* coar_vel_ptr = NULL;
+
+  if(a_lvl > 0){
+    coar_vel_ptr = m_velo_cell[a_lvl];
+    coar_vel_ptr = m_velo_cell[a_lvl];
+  }
+
+  // Extrapolate to faces. Interpolate to a_time between a_coarse_time_old and a_coarse_time new
   if(m_which_divFnc == 0){
     leveladvect->advectToFacesBCG(a_face_state,
 				  a_cell_state,
@@ -617,8 +655,8 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  *m_velo_face[a_lvl],
 				  a_state_coarse_old,
 				  a_state_coarse_new,
-				  m_velo_cell[a_lvl], // This is not correct, should be old velocity on coarse
-				  m_velo_cell[a_lvl], // This is not correct, should be new velocity on coarse
+				  coar_vel_ptr,
+				  coar_vel_ptr,
 				  a_coarse_time_old,
 				  a_coarse_time_new,
 				  a_time,
@@ -628,7 +666,6 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  source_ptr);
   }
   else if(m_which_divFnc == 1){
-#if 0
     leveladvect->advectToFacesCol(a_face_state,
 				  *m_covered_phi_lo[a_lvl],
 				  *m_covered_phi_hi[a_lvl],
@@ -641,8 +678,8 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  *m_velo_face[a_lvl],
 				  a_state_coarse_old,
 				  a_state_coarse_new,
-				  *m_velo_cell[a_lvl],
-				  *m_velo_cell[a_lvl],
+				  coar_vel_ptr,
+				  coar_vel_ptr,
 				  a_coarse_time_old,
 				  a_coarse_time_new,
 				  a_time,
@@ -650,9 +687,123 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  source_ptr,
 				  source_ptr,
 				  source_ptr);
-#endif
   }
   else{
     MayDay::Abort("cdr_gdnv::extrapolate_to_faces - unknown method requested");
   }
+}
+
+void cdr_gdnv::advance_subcycle_amr(EBAMRCellData& a_state,
+				    EBAMRCellData& a_coar_old_state,
+				    EBAMRCellData& a_coar_new_state,
+				    EBAMRCellData& a_divF_c,
+				    EBAMRCellData& a_weights,
+				    EBAMRIVData&   a_divF_nc,
+				    EBAMRIVData&   a_mass_diff,
+				    int            a_lvl,
+				    Vector<Real>&  a_tnew,
+				    Vector<Real>&  a_told,
+				    const int      a_coarsest_level,
+				    const int      a_finest_level,
+				    const Real     a_dt){
+
+  // TLDR: When we come in here we want to advance a_dt using subcycling over finer grid levels. Normal and advective velocities
+  //       have been filled, and boundary conditions are fixed. 
+
+  // Grid times for the coarser grid
+  Real coar_time_old = 0.0;
+  Real coar_time_new = 0.0;
+  if(a_lvl > a_coarsest_level){ 
+    coar_time_old = a_told[a_lvl-1];
+    coar_time_new = a_tnew[a_lvl-1];
+  }
+
+  // This advances this level from a_tnew[a_lvl] to a_tnew[a_lvl] + a_dt
+  advance_subcycle_level(*a_state[a_lvl],
+  			 *a_divF_c[a_lvl],
+  			 *a_weights[a_lvl],
+  			 *a_divF_nc[a_lvl],
+  			 *a_mass_diff[a_lvl],
+  			 a_coar_old_state[a_lvl],
+  			 a_coar_new_state[a_lvl],
+  			 a_lvl,
+  			 a_coarsest_level,
+  			 a_finest_level,
+  			 coar_time_old,
+  			 coar_time_new,
+			 a_tnew[a_lvl],
+  			 a_dt);
+
+  // We have advanced. Update new times
+  a_told[a_lvl] = a_tnew[a_lvl];
+  a_tnew[a_lvl] = a_tnew[a_lvl] + a_dt;
+
+  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_coar = a_lvl > a_coarsest_level;
+
+  // If there is a coarser level, advance it nref times so that we synchronize. 
+  if(a_lvl < a_finest_level){
+    const int nref    = m_amr->get_ref_rat()[a_lvl];
+    const Real dt_ref = a_dt/nref;
+    for (int i=0; i < nref-1; i++){
+      advance_subcycle_amr(a_state, a_coar_old_state, a_coar_new_state, a_divF_c,a_weights, a_divF_nc, a_mass_diff, a_lvl+1,
+			   a_tnew, a_told, a_coarsest_level, a_finest_level, dt_ref);
+    }
+  }
+
+  // Average finer level onto this level
+  if(has_fine) m_amr->average_down(a_state, m_phase, a_lvl);
+  if(has_fine) reflux(a_state, a_lvl, a_coarsest_level, a_finest_level);
+
+}
+
+void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
+				      LevelData<EBCellFAB>&        a_divF_c,
+				      LevelData<EBCellFAB>&        a_weights,
+				      LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				      LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				      const LevelData<EBCellFAB>*  a_coar_old_state,
+				      const LevelData<EBCellFAB>*  a_coar_new_state,
+				      const int                    a_lvl,
+				      const int                    a_coarsest_level,
+				      const int                    a_finest_level,
+				      const Real                   a_coar_time_old,
+				      const Real                   a_coar_time_new,
+				      const Real                   a_time,
+				      const Real                   a_dt){
+
+  // This is the level advance. It advances with hyperbolic redistribution and increments flux registers on the way. 
+  //
+  // The actual advance is state = state + dt*div(F). Reflux registers are incremented 
+  //
+  // 
+
+  const bool ebcf = m_amr->get_ebcf();
+  if(ebcf){
+    MayDay::Abort("cdr_gdnv::advance_subcycle_level - ebcf not (yet) supported");
+  }
+
+  //  MayDay::Abort("cdr_gdnv::advance_subcycle_level - not implemented");
+}
+
+
+void cdr_gdnv::reflux(EBAMRCellData& a_state, const int a_level, const int a_coarsest_level, const int a_finest_level){
+  CH_TIME("cdr_gdnv::reflux");
+  if(m_verbosity > 5){
+    pout() << m_name + "::reflux(cdr_gdnv, level stuff)" << endl;
+  }
+  
+  const int comp  = 0;
+  const int ncomp = 1;
+  const Interval interv(comp, comp);
+
+  // Remember, the flux register for smooshing mass from a_level+1 to a_level lives on a_level
+  RefCountedPtr<EBFluxRegister >& fluxreg = m_amr->get_flux_reg(m_phase)[a_level];
+
+  // Scale the flux with resolution
+  const Real dx    = m_amr->get_dx()[a_level];
+  const Real scale = 1.0/dx;
+      
+  fluxreg->reflux(*a_state[a_level], interv, scale);
+  fluxreg->setToZero();
 }

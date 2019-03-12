@@ -1278,6 +1278,25 @@ void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
   }
 }
 
+
+void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_lvl){
+  CH_TIME("amr_mesh::average_down");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::average_down(ebcell, level)" << endl;
+  }
+  
+  const RefCountedPtr<EBIndexSpace>& ebis = m_mfis->get_ebis(a_phase);
+
+  if(!ebis.isNull()){
+      const int ncomps = a_data[a_lvl]->nComp();
+      const Interval interv (0, ncomps-1);
+
+      m_coarave[a_phase][a_lvl+1]->average(*a_data[a_lvl], *a_data[a_lvl+1], interv);
+  }
+
+  a_data[a_lvl]->exchange();
+}
+
 void amr_mesh::average_down(MFAMRFluxData& a_data){
   CH_TIME("amr_mesh::average_down");
   if(m_verbosity > 3){

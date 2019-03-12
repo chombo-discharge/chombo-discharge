@@ -154,6 +154,11 @@ public:
   virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase);
 
   /*!
+    @brief Average down level
+  */
+  virtual void average_down(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_lvl);
+
+  /*!
     @brief Average down both phases
   */
   virtual void average_down(MFAMRFluxData& a_data);
