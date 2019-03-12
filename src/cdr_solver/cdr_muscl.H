@@ -45,6 +45,13 @@ public:
   */
   virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
 
+    /*!
+    @brief Advective advance using subcycling
+  */
+  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist){
+    MayDay::Abort("cdr_muscl::eulerF_subcycle - not implemented");
+  }
+
   /*!
     @brief MUSCL advection to faces
   */

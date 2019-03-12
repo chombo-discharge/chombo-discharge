@@ -544,3 +544,36 @@ void cdr_gdnv::regrid(const int a_old_finest_level, const int a_new_finest_level
 
   cdr_solver::regrid(a_old_finest_level, a_new_finest_level);
 }
+
+
+void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist){
+  CH_TIME("cdr_gdnv::eulerF_subcycle(divF, state)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::eulerF_subcycle(divF, state)" << endl;
+  }
+
+  if(m_mobile){
+    const int comp       = 0;
+    const int ncomp      = 1;
+    const int redist_rad = m_amr->get_redist_rad();
+
+    EBAMRFluxData face_state;
+    EBAMRIVData   div_nc;
+    EBAMRIVData   mass_diff;
+    EBAMRCellData weights;
+
+    m_amr->allocate(face_state, m_phase, ncomp);
+    m_amr->allocate(div_nc,     m_phase, ncomp);
+    m_amr->allocate(mass_diff,  m_phase, ncomp);
+    m_amr->allocate(weights,    m_phase, ncomp, 2*redist_rad);
+
+    data_ops::set_value(face_state, 0.0);
+    data_ops::set_value(div_nc,     0.0);
+    data_ops::set_value(mass_diff,  0.0);
+    data_ops::set_value(weights,    0.0);
+
+  }
+
+  
+  MayDay::Abort("cdr_gdnv::eulerF_subcycle - not implemented yet!");
+}

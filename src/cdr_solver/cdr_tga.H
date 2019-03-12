@@ -83,7 +83,7 @@ public:
   /*!
     @brief Compute pure hyperbolic Euler advance using subcycling in time
   */
-  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist);
+  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist) = 0;
 
   /*!
     @brief Compute diffusion term

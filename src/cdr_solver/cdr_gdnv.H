@@ -43,6 +43,11 @@ public:
   virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
 
   /*!
+    @brief Advective advance using subcycling
+  */
+  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist);
+
+  /*!
     @brief Query number of ghost cells
   */
   virtual int query_ghost() const;
