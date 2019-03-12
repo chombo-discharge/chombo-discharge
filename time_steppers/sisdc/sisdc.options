@@ -10,10 +10,16 @@
 #
 # 
 # ====================================================================================================
+
 sisdc.quad_nodes   = lobatto  # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
 sisdc.subintervals = 1        # Number of subintervals. This will be the maximum possible order.
 sisdc.corr_iter    = 1        # Number of iterations of the correction equation. Should be (subintervals-1)
                               # for maximum order
+			      
+# ---------------------------------------------------------	
+# Development features
+# ---------------------------------------------------------
+sisdc.subcycle     = true     # Use subcycling for AMR
 
 # ---------------------------------------------------------	
 # Diffusive coupling

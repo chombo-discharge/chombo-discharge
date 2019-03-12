@@ -81,6 +81,11 @@ public:
   virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
 
   /*!
+    @brief Compute pure hyperbolic Euler advance using subcycling in time
+  */
+  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist);
+
+  /*!
     @brief Compute diffusion term
   */
   virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);

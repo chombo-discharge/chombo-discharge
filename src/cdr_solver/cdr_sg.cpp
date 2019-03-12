@@ -58,6 +58,10 @@ void cdr_sg::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, c
   MayDay::Abort("cdr_sg::compute_divF - error. Scharfetter-Gummel currently only works with MOL methods");
 }
 
+void cdr_sg::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist){
+  MayDay::Abort("cdr_sg::eulerF_subcycle - Scharfetter-Gummel is horribly out of date. Stay away");
+}
+
 void cdr_sg::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){
   CH_TIME("cdr_sg::compute_divD");
   if(m_verbosity > 5){
