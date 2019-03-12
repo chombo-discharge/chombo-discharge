@@ -95,6 +95,20 @@ protected:
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
   /*!
+    @brief Face extrapolation method used for subcycling
+    @details This routine fills a_state with face-centered states. On CF interfaces the 
+    states used time-interpolated state from the coarse cells. Very useful routine. 
+  */
+  virtual void advect_to_faces(LevelData<EBFluxFAB>&        a_state,
+			       const LevelData<EBCellFAB>&  a_cell_state,
+			       const LevelData<EBCellFAB>*  a_state_coarse_old,
+			       const LevelData<EBCellFAB>*  a_state_coarse_new,
+			       const Real                   a_time,
+			       const Real                   a_coarse_time_old,
+			       const Real                   a_coarse_time_new,
+			       const int                    a_lvl);
+
+  /*!
     @brief Compute div(J)
   */
   virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);

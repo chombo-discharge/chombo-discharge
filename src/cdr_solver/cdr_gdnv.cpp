@@ -572,8 +572,87 @@ void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bo
     data_ops::set_value(mass_diff,  0.0);
     data_ops::set_value(weights,    0.0);
 
+    this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
+    this->extrapolate_vel_to_covered_faces();              // Extrapolate velocities to covered face centers
+
   }
 
   
   MayDay::Abort("cdr_gdnv::eulerF_subcycle - not implemented yet!");
+}
+
+void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
+			       const LevelData<EBCellFAB>&  a_cell_state,
+			       const LevelData<EBCellFAB>*  a_state_coarse_old,
+			       const LevelData<EBCellFAB>*  a_state_coarse_new,
+			       const Real                   a_time,
+			       const Real                   a_coarse_time_old,
+			       const Real                   a_coarse_time_new,
+			       const int                    a_lvl){
+  CH_TIME("cdr_gdnv::advect_to_faces(subcycle)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advect_to_faces(subcycle)" << endl;
+  }
+
+
+  const int comp = 0;
+  
+  EBAdvectPatchIntegrator::setCurComp(0);
+  EBAdvectPatchIntegrator::setDoingVel(0);
+
+  RefCountedPtr<ExtrapAdvectBCFactory> bcfact = RefCountedPtr<ExtrapAdvectBCFactory> (new ExtrapAdvectBCFactory());
+
+  const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_level_advect[a_lvl];
+  
+  CH_assert(!leveladvect.isNull());
+  
+  leveladvect->resetBCs(bcfact);
+
+  const Real extrap_dt = 0.0;
+  const LevelData<EBCellFAB>* source_ptr = NULL;
+  if(m_which_divFnc == 0){
+    leveladvect->advectToFacesBCG(a_face_state,
+				  a_cell_state,
+				  *m_velo_cell[a_lvl],
+				  *m_velo_face[a_lvl],
+				  a_state_coarse_old,
+				  a_state_coarse_new,
+				  m_velo_cell[a_lvl], // This is not correct, should be old velocity on coarse
+				  m_velo_cell[a_lvl], // This is not correct, should be new velocity on coarse
+				  a_coarse_time_old,
+				  a_coarse_time_new,
+				  a_time,
+				  extrap_dt,
+				  source_ptr,
+				  source_ptr,
+				  source_ptr);
+  }
+  else if(m_which_divFnc == 1){
+#if 0
+    leveladvect->advectToFacesCol(a_face_state,
+				  *m_covered_phi_lo[a_lvl],
+				  *m_covered_phi_hi[a_lvl],
+				  *m_covered_face_lo[a_lvl],
+				  *m_covered_face_hi[a_lvl],
+				  *m_covered_sets_lo[a_lvl],
+				  *m_covered_sets_hi[a_lvl],
+				  a_cell_state,
+				  *m_velo_cell[a_lvl],
+				  *m_velo_face[a_lvl],
+				  a_state_coarse_old,
+				  a_state_coarse_new,
+				  *m_velo_cell[a_lvl],
+				  *m_velo_cell[a_lvl],
+				  a_coarse_time_old,
+				  a_coarse_time_new,
+				  a_time,
+				  extrap_dt,
+				  source_ptr,
+				  source_ptr,
+				  source_ptr);
+#endif
+  }
+  else{
+    MayDay::Abort("cdr_gdnv::extrapolate_to_faces - unknown method requested");
+  }
 }
