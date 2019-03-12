@@ -23,7 +23,13 @@ For scalability, `PlasmaC` is built on top of `Chombo <https://commons.lbl.gov/d
 * Patch based adaptive mesh refinement
 * Good weak and strong scalability to thousands of computer cores
 
-It is our goal that users will be able to use `PlasmaC` without modifying the underlying solvers. Because of this, there are quite general interfaces for describing the plasma physics, setting up boundary conditions, ensuring mesh refinement, and so on. As `PlasmaC` evolves, so will these interfaces. However, we always aim for backward compatibility such that existing `PlasmaC` models can be run on future versions of `PlasmaC`. In particular, there are plans to include Euler equations for the fluid transport and port compute kernels to GPUs. Both of these features will very strongly affect how `PlasmaC` is set up and run. 
+It is our goal that users will be able to use `PlasmaC` without modifying the underlying solvers. Because of this, there are quite general interfaces for describing the plasma physics, setting up boundary conditions, ensuring mesh refinement, and so on. As `PlasmaC` evolves, so will these interfaces. However, we always aim for backward compatibility such that existing `PlasmaC` models can be run on future versions of `PlasmaC`. In particular, there are plans to include Euler equations for the fluid transport and port compute kernels to GPUs. Both of these features will very strongly affect how `PlasmaC` is set up and run. In addition to this, we are working on increasing the performance of `PlasmaC` by means of
+
+* Adaptive high-order integrators based on spectral deferred corrections
+* Subcycling in time for hyperbolic advance. This is planned to be a part of the MISDC integrator. 
+* PETSc interfaces for geometric multigrid bottom solvers
+
+However, none of these developments will affect the interface to `PlasmaC`. 
 
 This documentation is the user documentation `PlasmaC`. There is also a separate :doxy:`Doxygen API <index>` that can be compiled together with the source code.
 
