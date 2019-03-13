@@ -881,7 +881,7 @@ void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 	const Real dnc      = divNC(vof, comp);
 
 	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
-	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
+	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Opposite of Chombo manual?
 
 	// Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
 	// which it would be otherwise. 

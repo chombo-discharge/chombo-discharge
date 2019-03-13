@@ -143,7 +143,16 @@ protected:
   /*!
     @brief Reflux a_state with flux registers from finer level (if we have it)
   */
-  virtual void reflux(EBAMRCellData& a_state, const int a_level, const int a_coarsest_level, const int a_finest_level);
+  virtual void reflux_level(EBAMRCellData& a_state,
+			    const int      a_level,
+			    const int      a_coarsest_level,
+			    const int      a_finest_level,
+			    const Real     a_scale);
+
+  /*!
+    @brief Level redistribution
+  */
+  virtual void redist_level(LevelData<EBCellFAB>& a_state, const LevelData<EBCellFAB>& a_weights, const int a_level);
 				      
 
   /*!
@@ -169,7 +178,8 @@ protected:
   virtual void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
 				     const int             a_lvl,
 				     const int             a_coarsest_lvl,
-				     const int             a_finest_lvl);
+				     const int             a_finest_lvl,
+				     const Real            a_dt);
 
   /*!
     @brief Update the mass redistribution register
