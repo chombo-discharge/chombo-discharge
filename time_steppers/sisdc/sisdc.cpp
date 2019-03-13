@@ -685,16 +685,16 @@ void sisdc::predictor_advection_reaction(const int a_m){
     const EBAMRCellData& src   = solver->get_source();      // S_m
 
     // Compute rhs
-    if(m_subcycle){
-      const Real dt = m_dtm[a_m];
-      data_ops::copy(rhs, phi_m);               // rhs = old_state
-      solver->eulerF_subcycle(rhs, dt, true);   // This output rhs = old_state - a_dt*div(F)
-      data_ops::incr(rhs, phi_m, -1.0);         // rhs =   new_state - old_state
-      data_ops::scale(rhs, -1.0/dt);            // rhs = -(new_state - old_state)/a_dt = div(F)
-    }
-    else{
+    // if(m_subcycle){
+    //   const Real dt = m_dtm[a_m];
+    //   data_ops::copy(rhs, phi_m);               // rhs = old_state
+    //   solver->eulerF_subcycle(rhs, dt, true);   // This output rhs = old_state - a_dt*div(F)
+    //   data_ops::incr(rhs, phi_m, -1.0);         // rhs =   new_state - old_state
+    //   data_ops::scale(rhs, -1.0/dt);            // rhs = -(new_state - old_state)/a_dt = div(F)
+    // }
+    // else{
       solver->compute_divF(rhs, phi_m, 0.0, true); // RHS =  Div(v_m*phi_m)
-    }
+      //    }
     data_ops::scale(rhs, -1.0);                  // RHS = -Div(v_m*phi_m)
     data_ops::incr(rhs, src, 1.0);               // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
     data_ops::copy(phi_mp1, phi_m);              // phi_(m+1) = phi_m
@@ -842,16 +842,16 @@ void sisdc::corrector_reconcile_gl_integrands(){
     const EBAMRCellData& src   = solver->get_source();
 
     // Compute -divF + S
-    if(m_subcycle){
-      const Real dt = m_dtm[m_p-1];
-      data_ops::copy(FAR_p, phi_p);               // FAR_p = old_state
-      solver->eulerF_subcycle(FAR_p, m_dt, true); // This output FAR_p = old_state - a_dt*div(F) = new_state
-      data_ops::incr(FAR_p, phi_p, -1.0);         // FAR_p =   new_state - old_state
-      data_ops::scale(FAR_p, -1.0/dt);            // FAR_p = -(new_state - old_state)/a_dt
-    }
-    else{
+    // if(m_subcycle){
+    //   const Real dt = m_dtm[m_p-1];
+    //   data_ops::copy(FAR_p, phi_p);               // FAR_p = old_state
+    //   solver->eulerF_subcycle(FAR_p, m_dt, true); // This output FAR_p = old_state - a_dt*div(F) = new_state
+    //   data_ops::incr(FAR_p, phi_p, -1.0);         // FAR_p =   new_state - old_state
+    //   data_ops::scale(FAR_p, -1.0/dt);            // FAR_p = -(new_state - old_state)/a_dt
+    // }
+    // else{
       solver->compute_divF(FAR_p, phi_p, 0.0, true); // FAR_p =  Div(v_p*phi_p)
-    }
+      //    }
     data_ops::scale(FAR_p, -1.0);                  // FAR_p = -Div(v_p*phi_p)
     data_ops::incr(FAR_p, src, 1.0);               // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
 
@@ -971,16 +971,16 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
     
     // Compute rhs, but for m = 0 then FAR(phi_0^(k+1)) = FAR(phi_0^k) so there's no need for that
     if(a_m > 0){
-      if(m_subcycle){
-	const Real dt = m_dtm[a_m];
-	data_ops::copy(scratch, phi_m);               // scratch = old_state
-	solver->eulerF_subcycle(scratch, dt, true);   // This output scratch = old_state - a_dt*div(F)
-	data_ops::incr(scratch, phi_m, -1.0);         // scratch =   new_state - old_state
-	data_ops::scale(scratch, -1.0/dt);            // scratch = -(new_state - old_state)/a_dt = div(F)
-      }
-      else{
+      // if(m_subcycle){
+      // 	const Real dt = m_dtm[a_m];
+      // 	data_ops::copy(scratch, phi_m);               // scratch = old_state
+      // 	solver->eulerF_subcycle(scratch, dt, true);   // This output scratch = old_state - a_dt*div(F)
+      // 	data_ops::incr(scratch, phi_m, -1.0);         // scratch =   new_state - old_state
+      // 	data_ops::scale(scratch, -1.0/dt);            // scratch = -(new_state - old_state)/a_dt = div(F)
+      // }
+      // else{
 	solver->compute_divF(scratch, phi_m, 0.0, true);  // scratch   =  Div(v_m*phi_m^(k+1))
-      }
+	//      }
       data_ops::scale(scratch, -1.0);                   // scratch   = -Div(v_m*phi_m^(k+1))
       data_ops::incr(scratch, src, 1.0);                // scratch   = -Div(v_m*phi_m^(k+1)) + S_m^(k+1) = FAR(phi_m^(k+1))
       data_ops::incr(phi_mp1, scratch,  m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*[FAR(phi_m^(k+1))]
