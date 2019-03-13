@@ -248,6 +248,10 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
 					    const Vector<RealVect>& a_grad_cdr) const {
   Vector<Real> source(m_num_species, 0.0);
 
+#if 0 // Debug
+  return source;
+#endif
+
   // Reduced field and electron temperature
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
   const Real Te   = this->compute_Te(EbyN);

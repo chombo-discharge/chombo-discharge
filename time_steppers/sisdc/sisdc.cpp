@@ -688,7 +688,7 @@ void sisdc::predictor_advection_reaction(const int a_m){
     if(m_subcycle){
       const Real dt = m_dtm[a_m];
       data_ops::copy(rhs, phi_m);               // rhs = old_state
-      solver->eulerF_subcycle(rhs, dt, true);   // This output new_state = old_state - a_dt*div(F)
+      solver->eulerF_subcycle(rhs, dt, true);   // This output rhs = old_state - a_dt*div(F)
       data_ops::incr(rhs, phi_m, -1.0);         // rhs =   new_state - old_state
       data_ops::scale(rhs, -1.0/dt);            // rhs = -(new_state - old_state)/a_dt = div(F)
     }
@@ -845,7 +845,7 @@ void sisdc::corrector_reconcile_gl_integrands(){
     if(m_subcycle){
       const Real dt = m_dtm[m_p-1];
       data_ops::copy(FAR_p, phi_p);               // FAR_p = old_state
-      solver->eulerF_subcycle(FAR_p, m_dt, true); // This output new_state = old_state - a_dt*div(F)
+      solver->eulerF_subcycle(FAR_p, m_dt, true); // This output FAR_p = old_state - a_dt*div(F) = new_state
       data_ops::incr(FAR_p, phi_p, -1.0);         // FAR_p =   new_state - old_state
       data_ops::scale(FAR_p, -1.0/dt);            // FAR_p = -(new_state - old_state)/a_dt
     }

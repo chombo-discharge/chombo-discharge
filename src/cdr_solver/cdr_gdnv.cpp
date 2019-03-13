@@ -682,6 +682,15 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
   
   leveladvect->resetBCs(bcfact);
 
+#if 0 // Debug
+  if(procID() == 0){
+    std::cout << "\tadvecting to faces on lvl = " << a_lvl
+	      << "\tcoar_T_old = " << a_coarse_time_old
+      	      << "\tcoar_T_new = " << a_coarse_time_new
+	      << "\t time = " << a_time
+	      << std::endl;
+  }
+#endif
   const Real extrap_dt = 0.0;
   const LevelData<EBCellFAB>* source_ptr   = NULL;
   const LevelData<EBCellFAB>* coar_vel_ptr = NULL;
@@ -759,19 +768,23 @@ void cdr_gdnv::advance_subcycle_amr(EBAMRCellData& a_state,
   Real coar_time_old = 0.0;
   Real coar_time_new = 0.0;
 
+  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_coar = a_lvl > a_coarsest_level;
+
   LevelData<EBCellFAB>* coar_state_old = NULL;
   LevelData<EBCellFAB>* coar_state_new = NULL;
-  if(a_lvl > a_coarsest_level){
+  if(has_coar){
     
     coar_time_old = a_told[a_lvl-1];
     coar_time_new = a_tnew[a_lvl-1];
 
     coar_state_old = &(*a_coar_old_state[a_lvl-1]);
     coar_state_new = &(*a_state[a_lvl-1]);
+
   }
 
   // This advances this level from a_tnew[a_lvl] to a_tnew[a_lvl] + a_dt. Copy the old state to a_coar_old_state first
-  a_state[a_lvl]->copyTo(*a_coar_old_state[a_lvl]); // Update coar state
+  a_state[a_lvl]->copyTo(*a_coar_old_state[a_lvl]); // Need to back up old states
   advance_subcycle_level(*a_state[a_lvl],
 			 *a_flux[a_lvl],
 			 *a_face_states[a_lvl],
@@ -789,39 +802,24 @@ void cdr_gdnv::advance_subcycle_amr(EBAMRCellData& a_state,
 			 a_tnew[a_lvl],
   			 a_dt);
 
-#if 0 // Debug
-  if(procID() == 0){
-    std::cout << "level = " << a_lvl << endl
-	      << "dt = " << a_dt << endl
-	      << "time = " << a_tnew[a_lvl] << endl
-      	      << "coar_time_old = " << coar_time_old << endl
-	      << "coar_time_new = " << coar_time_new << endl
-	      << endl;
-  }
-#endif
-
   // We have advanced this level. Update new times
   a_told[a_lvl] = a_tnew[a_lvl];
   a_tnew[a_lvl] = a_tnew[a_lvl] + a_dt;
 
-  const bool has_fine = a_lvl < a_finest_level;
-  const bool has_coar = a_lvl > a_coarsest_level;
-
   // If there is a coarser level, advance it nref times so that we synchronize. a_state[lvl]
-  if(has_fine){
+
+  if(has_fine){ 
     const int nref    = m_amr->get_ref_rat()[a_lvl];
-    const Real dt_ref = a_dt/nref;
+    const Real dt_ref = a_dt/(nref);
     for (int i=0; i < nref; i++){
       advance_subcycle_amr(a_state, a_flux, a_face_states, a_coar_old_state, a_divF_c,a_weights, a_divF_nc,
 			   a_mass_diff, a_lvl+1, a_tnew, a_told, a_coarsest_level, a_finest_level, dt_ref);
     }
+
+    // Finer level has reached this level, average down finer level onto this one and reflux
+    m_amr->average_down(a_state, m_phase, a_lvl);
+    reflux_level(a_state, a_lvl, a_coarsest_level, a_finest_level, 1.0);
   }
-
-  // Average finer level onto this level
-
-  if(has_fine) m_amr->average_down(a_state, m_phase, a_lvl);
-  if(has_fine) reflux_level(a_state, a_lvl, a_coarsest_level, a_finest_level, 1.0);
-
 }
 
 void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
@@ -843,7 +841,7 @@ void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
 
   // This is the level advance. It advances with hyperbolic redistribution and increments flux registers on the way. 
   //
-  // The actual advance is state = state + dt*div(F). Reflux registers are incremented 
+  // The actual advance is state = state - dt*div(F). Reflux registers are incremented 
   //
   // 
 
@@ -852,7 +850,7 @@ void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
     MayDay::Abort("cdr_gdnv::advance_subcycle_level - ebcf not (yet) supported");
   }
 
-  a_state.exchange();
+  //  a_state.exchange(); // Necessary???
 
   // Advect to faces and compute fluxes on face centers, and compute the conservative divergence on regular cells
   advect_to_faces(a_face_states, a_state, a_coar_old_state, a_coar_new_state, a_time, a_coar_time_old, a_coar_time_new, a_lvl);
@@ -875,8 +873,8 @@ void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
 
   // Compute the nonconservative and hybrid divergences (hybrid put on storage for conservative, which is lost)
   nonconservative_divergence(a_divF_nc, a_face_states, a_lvl);
-  hybrid_divergence(a_divF_c, a_mass_diff, a_divF_nc, a_lvl); // Puts hybrid in a_divF_c. mass_diff as usual without dt
-  data_ops::scale(a_mass_diff, -a_dt);
+  hybrid_divergence(a_divF_c, a_mass_diff, a_divF_nc, a_lvl); // Puts hybrid in a_divF_c. mass_diff as usual without dt, but it
+  data_ops::scale(a_mass_diff, -a_dt);                        // Was given the opposite sign of the Chombo convention
 
   // Update flux registers and redistribution registers
   update_flux_registers(a_flux, a_lvl, a_coarsest_level, a_finest_level, a_dt);
@@ -891,7 +889,6 @@ void cdr_gdnv::advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
   a_state.exchange();
   redist_level(a_state, a_weights, a_lvl);
 
-  //  MayDay::Abort("cdr_gdnv::advance_subcycle_level - not implemented");
 }
 
 void cdr_gdnv::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
@@ -899,6 +896,12 @@ void cdr_gdnv::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
 				     const int             a_coarsest_level,
 				     const int             a_finest_level,
 				     const Real            a_dt){
+
+#if 0 // Debug
+  if(procID() == 0){
+    std::cout << "update fluxreg on a_lvl = " << a_lvl << "\t dt = " << a_dt << std::endl;
+  }
+#endif
 
     // Increment the coarser flux register and initialize the finer flux register. a_flux holds phi*vel which we can use
   const bool has_fine = a_lvl < a_finest_level;
@@ -913,6 +916,28 @@ void cdr_gdnv::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
   if(has_fine) fluxreg_fine = m_amr->get_flux_reg(m_phase)[a_lvl];   
   if(has_coar) fluxreg_coar = m_amr->get_flux_reg(m_phase)[a_lvl-1]; 
 
+  // Initialize flux register
+  if(has_fine) {
+
+    fluxreg_fine->setToZero();
+  }
+
+#if 0 // Debug
+  if(procID() == 0){
+    std::cout << "------------------------------ " << std::endl;
+    std::cout << "Updating flux registers from " << a_lvl << std::endl;
+    if(has_fine){
+      std::cout << "Resetting flux reg on level = " << a_lvl << std::endl;
+      std::cout << "Incrementing flux reg on level = " << a_lvl << " with coarse flux" << std::endl;
+    }
+    if(has_coar){
+      std::cout << "incrementing flux reg on coarser level = " << a_lvl-1 << " with fine flux" << std::endl;
+    }
+    std::cout << "------------------------------ " << std::endl;
+    std::cout << std::endl;
+  }
+#endif
+
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
   
@@ -923,15 +948,14 @@ void cdr_gdnv::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
     for (int dir = 0; dir < SpaceDim; dir++){
 
       // Initialize finer flux register with flux leaving this level and into the finer level (or invalid region of that level)
-      if(has_fine) { 
-	fluxreg_fine->setToZero();
+      if(has_fine) {
 	for (SideIterator sit; sit.ok(); ++sit){
 	  fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
 	}
       }
 
       // Increment coarser flux register with flux entering that level from this level 
-      if(has_coar){ // 
+      if(has_coar){ // The coarser level has already been initialized with the coarse side flux
 	for (SideIterator sit; sit.ok(); ++sit){
 	  fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
 	}
@@ -960,7 +984,7 @@ void cdr_gdnv::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_
 }
 
 void cdr_gdnv::reflux_level(EBAMRCellData& a_state,
-			    const int      a_level,
+			    const int      a_lvl,
 			    const int      a_coarsest_level,
 			    const int      a_finest_level,
 			    const Real     a_scale){
@@ -974,14 +998,12 @@ void cdr_gdnv::reflux_level(EBAMRCellData& a_state,
   const Interval interv(comp, comp);
 
   // Remember, the flux register for smooshing mass from a_level+1 to a_level lives on a_level
-  RefCountedPtr<EBFluxRegister >& fluxreg = m_amr->get_flux_reg(m_phase)[a_level];
+  RefCountedPtr<EBFluxRegister >& fluxreg = m_amr->get_flux_reg(m_phase)[a_lvl];
 
-  // Scale the flux with resolution
-  const Real dx    = m_amr->get_dx()[a_level];
-  const Real scale = 1.0;//
-
-  // Reflux this level, then empty the register. 
-  fluxreg->reflux(*a_state[a_level], interv, a_scale);
+  // Reflux this level, then empty the register.
+  const Real dx = m_amr->get_dx()[a_lvl];
+  //  fluxreg->reflux(*a_state[a_lvl], interv, a_scale);
+  fluxreg->reflux(*a_state[a_lvl], interv, 1./dx);
   fluxreg->setToZero();
 }
 

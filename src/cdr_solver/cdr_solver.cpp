@@ -634,6 +634,7 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
     BaseFab<Real>& divJ_fab = divJ.getSingleValuedFAB();
     const Box box = dbl.get(dit());
 
+    divJ.setVal(0.0);
     for (int dir = 0; dir < SpaceDim; dir++){
       const EBFaceFAB& flx         = a_flux[dit()][dir];
       const BaseFab<Real>& flx_fab = flx.getSingleValuedFAB();
