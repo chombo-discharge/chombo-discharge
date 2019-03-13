@@ -436,7 +436,7 @@ void amr_mesh::build_domains(){
   }
 }
 
-void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
+void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_regsize, const int a_hardcap){
   CH_TIME("amr_mesh::regrid");
   if(m_verbosity > 1){
     pout() << "amr_mesh::regrid" << endl;
@@ -499,14 +499,14 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap){
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_flux_reg();     // Define flux register (phase::gas only)
+  this->define_flux_reg(a_regsize);     // Define flux register (phase::gas only)
 #if AMR_MESH_DEBUG
   const Real t8 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_redist_oper" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_redist_oper();  // Define redistribution (phase::gas only)
+  this->define_redist_oper(a_regsize);  // Define redistribution (phase::gas only)
 #if AMR_MESH_DEBUG
   const Real t9 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_irreg_sten" << endl;
@@ -1100,13 +1100,13 @@ void amr_mesh::define_ebpwl_interp(){
   }
 }
 
-void amr_mesh::define_flux_reg(){
+void amr_mesh::define_flux_reg(const int a_regsize){
   CH_TIME("amr_mesh::define_flux_reg");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_flux_reg" << endl;
   }
 
-  const int comps = 1;
+  const int comps = a_regsize;
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
@@ -1130,13 +1130,13 @@ void amr_mesh::define_flux_reg(){
   }
 }
 
-void amr_mesh::define_redist_oper(){
+void amr_mesh::define_redist_oper(const int a_regsize){
   CH_TIME("amr_mesh::define_redist_oper");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_redist_oper" << endl;
   }
 
-  const int comps = 1;
+  const int comps = a_regsize;
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
@@ -1653,7 +1653,7 @@ void amr_mesh::set_finest_level(const int a_finest_level){
   m_finest_level = Min(m_finest_level, m_max_sim_depth); // Don't exceed maximum simulation depth
 }
 
-void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes){
+void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
 
   // Do Morton ordering
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -1678,8 +1678,8 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes){
   this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases.
   this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
   this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
-  this->define_flux_reg();     // Define flux register (phase::gas only)
-  this->define_redist_oper();  // Define redistribution (phase::gas only)
+  this->define_flux_reg(a_regsize);     // Define flux register (phase::gas only)
+  this->define_redist_oper(a_regsize);  // Define redistribution (phase::gas only)
   this->define_irreg_sten();   // Define irregular stencils
 
   // Do the multilevel stuff

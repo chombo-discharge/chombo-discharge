@@ -311,7 +311,7 @@ public:
   /*!
     @brief Set grids on level
   */
-  virtual void set_grids(Vector<Vector<Box> >& boxes);
+  virtual void set_grids(Vector<Vector<Box> >& boxes, const int a_regsize=1);
 
   /*!
     @brief Set the maximum box size
@@ -361,7 +361,7 @@ public:
   /*!
     @brief Regrid function. Generate new grids. 
   */
-  virtual void regrid(const Vector<IntVectSet>& a_tags, const int a_hardcap=123456);
+  virtual void regrid(const Vector<IntVectSet>& a_tags, const int a_regsize=1, const int a_hardcap=123456);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
@@ -841,12 +841,12 @@ protected:
   /*!
     @brief Define redistribution operators
   */
-  virtual void define_redist_oper();
+  virtual void define_redist_oper(const int a_regsize);
 
   /*!
     @brief Define flux registers
   */
-  virtual void define_flux_reg();
+  virtual void define_flux_reg(const int a_regsize);
 
   /*!
     @brief Define irregular stencils

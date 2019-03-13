@@ -1346,7 +1346,8 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   // Regrid base
   const int old_finest_level = m_amr->get_finest_level();
-  m_amr->regrid(tags, old_finest_level + 1);
+  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
+  m_amr->regrid(tags, regsize, old_finest_level + 1);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   const int new_finest_level = m_amr->get_finest_level();

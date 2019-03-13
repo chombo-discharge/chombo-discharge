@@ -53,6 +53,11 @@ public:
   ~time_stepper();
 
   /*!
+    @brief Check if time stepper does subcycling
+  */
+  virtual bool do_subcycle();
+
+  /*!
     @brief Advance method, advances equations.
     @param[in] a_dt Time step
     @returns Actual time step used (can be different from a_dt for adaptive methods)
@@ -846,6 +851,11 @@ protected:
     @brief Interpolate source to centroids (or use volume-weighted in-cell stuff)
   */
   bool m_interp_sources;
+
+  /*!
+    @brief Check if solver does subcyling. If it does, we need to tell amr_mesh to make some extra storage for us
+  */
+  bool m_subcycle;
 };
 
 #endif

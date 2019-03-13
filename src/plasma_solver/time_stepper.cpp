@@ -29,6 +29,8 @@ time_stepper::time_stepper(){
   this->set_fast_poisson(1);
   this->set_solver_verbosity(0);
   this->set_source_computation();
+
+  m_subcycle = false;
 }
 
 time_stepper::~time_stepper(){
@@ -37,6 +39,15 @@ time_stepper::~time_stepper(){
 
 int time_stepper::query_ghost(){
   return 3;
+}
+
+bool time_stepper::do_subcycle(){
+  CH_TIME("time_stepper::do_subcycle");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::do_subcycle" << endl;
+  }
+
+  return m_subcycle;
 }
 
 bool time_stepper::stationary_rte(){
