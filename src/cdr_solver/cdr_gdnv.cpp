@@ -405,6 +405,12 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   RefCountedPtr<ExtrapAdvectBCFactory> bcfact = RefCountedPtr<ExtrapAdvectBCFactory>
     (new ExtrapAdvectBCFactory());
 
+  // This data is used as a source term for time-extrapolation to edges 
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_phase, 1);
+  compute_divD(scratch, a_state);
+  data_ops::incr(scratch, m_source, 1.0);
+
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_level_advect[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -445,7 +451,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
 				    m_time,
 				    m_time,
 				    a_extrap_dt,
-				    m_source[lvl], 
+				    scratch[lvl],
 				    coarsrc_old,
 				    coarsrc_new);
     }
@@ -468,7 +474,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
 				    m_time,
 				    m_time,
 				    a_extrap_dt,
-				    m_source[lvl],
+				    scratch[lvl],
 				    coarsrc_old,
 				    coarsrc_new);
     }

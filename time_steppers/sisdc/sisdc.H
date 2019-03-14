@@ -70,6 +70,7 @@ protected:
   Real m_dt_adapt;
   Real m_new_dt; // dt for next time step
 
+  bool m_extrap_advect;
   bool m_adaptive_dt;
   bool m_print_report;
 

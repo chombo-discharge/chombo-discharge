@@ -10,7 +10,6 @@
 #
 # 
 # ====================================================================================================
-
 sisdc.quad_nodes   = lobatto  # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
 sisdc.subintervals = 1        # Number of subintervals. This will be the maximum possible order.
 sisdc.corr_iter    = 1        # Number of iterations of the correction equation. Should be (subintervals-1)
@@ -23,6 +22,12 @@ sisdc.corr_iter    = 1        # Number of iterations of the correction equation.
 # ---------------------------------------------------------
 sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
 sisdc.num_corrections    = 0     # Number of corrections for 'strong'
+
+# ---------------------
+# Stabilization feature
+# ---------------------
+sisdc.extrap_advect = true
+
 
 # ---------------------------------------------------------	
 # Adaptive time stepping

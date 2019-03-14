@@ -290,8 +290,8 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const RealVect ve = -a_E*this->compute_electron_mobility(EbyN);
   const Real De     =      this->compute_electron_diffco(EbyN);
   const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + n_e)*PolyGeom::dot(ve, a_E));
-  const Real k1_corr = k1*(1-Max(factor, 0.0));
-  const Real k2_corr = k2*(1-Max(factor, 0.0));
+  const Real k1_corr = k1*(1.0 - 2.0*Max(factor, 0.0));
+  const Real k2_corr = k2*(1.0 - 2.0*Max(factor, 0.0));
 
   // k1 reaction
   products = k1_corr * n_e * n_N2;
@@ -414,6 +414,19 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
   // Drift outflow for now
   for (int i = 0; i < m_num_species; i++){
     fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
+  }
+
+  // Add secondary emission
+  if(cathode){
+    fluxes[m_electron_idx] += -a_rte_fluxes[m_photon1_idx]*a_quantum_efficiency;
+    fluxes[m_electron_idx] += -a_rte_fluxes[m_photon2_idx]*a_quantum_efficiency;
+    fluxes[m_electron_idx] += -a_rte_fluxes[m_photon3_idx]*a_quantum_efficiency;
+
+    fluxes[m_electron_idx] += -fluxes[m_O2plus_idx]*a_townsend2;
+    fluxes[m_electron_idx] += -fluxes[m_N2plus_idx]*a_townsend2;
+    fluxes[m_electron_idx] += -fluxes[m_N4plus_idx]*a_townsend2;
+    fluxes[m_electron_idx] += -fluxes[m_O4plus_idx]*a_townsend2;
+    fluxes[m_electron_idx] += -fluxes[m_O2plusN2_idx]*a_townsend2;
   }
 
   return fluxes;
