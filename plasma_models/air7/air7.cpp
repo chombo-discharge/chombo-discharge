@@ -287,11 +287,15 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
 
   Real products;
 
-  const RealVect ve = -a_E*this->compute_electron_mobility(EbyN);
-  const Real De     =      this->compute_electron_diffco(EbyN);
-  const Real factor = PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + n_e)*PolyGeom::dot(ve, a_E));
-  const Real k1_corr = k1*(1.0 - 2.0*Max(factor, 0.0));
-  const Real k2_corr = k2*(1.0 - 2.0*Max(factor, 0.0));
+  const RealVect ve  = -a_E*this->compute_electron_mobility(EbyN);
+  const Real De      =      this->compute_electron_diffco(EbyN);
+  const Real factor  = PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + n_e)*PolyGeom::dot(ve, a_E));
+  const Real k1_corr = k1*Max(0.0, (1.0 - Max(factor, 0.0)));
+  const Real k2_corr = k2*Max(0.0, (1.0 - Max(factor, 0.0)));
+
+  const Real k10_corr = k10;//*(1.0 + Max(factor, 0.0));
+  const Real k11_corr = k11;//*(1.0 + Max(factor, 0.0));
+  const Real k12_corr = k12;//*(1.0 + Max(factor, 0.0));
 
   // k1 reaction
   products = k1_corr * n_e * n_N2;
@@ -339,17 +343,17 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   source[m_O4plus_idx] += products;
 
   // k10 reaction
-  products = k10 * n_e * n_O4p;
+  products = k10_corr * n_e * n_O4p;
   source[m_electron_idx] -= products;
   source[m_O4plus_idx]   -= products;
 
   // k11 reaction
-  products = k11 * n_e * n_O2p;
+  products = k11_corr * n_e * n_O2p;
   source[m_electron_idx] -= products;
   source[m_O2plus_idx]   -= products;
 
   // k12 reaction
-  products = k12 * n_e * n_O2 * n_O2;
+  products = k12_corr * n_e * n_O2 * n_O2;
   source[m_electron_idx] -= products;
   source[m_O2minus_idx]  += products;
 
@@ -496,7 +500,9 @@ Real air7::compute_O4plus_mobility(const Real a_EbyN)   const {return m_ion_mobi
 Real air7::compute_O2plusN2_mobility(const Real a_EbyN) const {return m_ion_mobility;}
 Real air7::compute_O2minus_mobility(const Real a_EbyN)  const {return m_ion_mobility;}
 
-Real air7::compute_electron_diffco(const Real a_EbyN) const {return m_e_diffco.get_entry(a_EbyN);}
+Real air7::compute_electron_diffco(const Real a_EbyN) const {//
+  return m_e_diffco.get_entry(a_EbyN);
+}
 Real air7::compute_N2plus_diffco(const Real a_Tg)     const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
 Real air7::compute_N4plus_diffco(const Real a_Tg)     const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}
 Real air7::compute_O2plus_diffco(const Real a_Tg)     const {return units::s_kb*a_Tg*m_ion_mobility/(units::s_Qe);}

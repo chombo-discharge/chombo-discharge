@@ -493,8 +493,8 @@ Vector<Real> air9eed::compute_cdr_fluxes(const Real&         a_time,
 
   // Drift outflow for now
   for (int i = 0; i < m_num_species; i++){
+    //fluxes[i] = Max(0.0, aj[i]*a_extrap_cdr_fluxes[i]);
     fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
-    //    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
   }
 
   return fluxes;
