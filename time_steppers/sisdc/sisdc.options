@@ -23,12 +23,6 @@ sisdc.corr_iter    = 1        # Number of iterations of the correction equation.
 sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
 sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 
-# ---------------------
-# Stabilization feature
-# ---------------------
-sisdc.extrap_advect = false
-
-
 # ---------------------------------------------------------	
 # Adaptive time stepping
 # ---------------------------------------------------------
@@ -54,3 +48,9 @@ sisdc.do_advec_src      = true   # Turn off code functionality. Only for debuggi
 sisdc.do_diffusion      = true   # Turn off code functionality. Only for debugging
 sisdc.do_poisson        = true   # Turn off code functionality. Only for debugging
 sisdc.do_rte            = true   # Turn off code functionality. Only for debugging
+
+# ---------------------
+# Stabilization feature
+# ---------------------
+sisdc.upwind_source = false      # Use Villa et. al upwinding technique for source terms
+sisdc.extrap_advect = false      # Time extrapolate with source and diffusion in advection step
