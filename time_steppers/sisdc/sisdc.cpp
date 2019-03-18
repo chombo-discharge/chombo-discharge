@@ -61,6 +61,9 @@ sisdc::sisdc(){
   m_do_rte         = true;
   m_do_poisson     = true;
 
+  // Profiling
+  m_profile_steps  = false;
+
   // Get parameters from input script
   {
     ParmParse pp("sisdc");
@@ -206,6 +209,15 @@ sisdc::sisdc(){
 	if(m_verbosity > 2){
 	  pout() << "sisdc::sisdc - Turning off poisson" << endl;
 	}
+      }
+    }
+    if(pp.contains("profile_steps")){
+      pp.get("profile_steps", str);
+      if(str == "true"){
+	m_profile_steps = true;
+      }
+      else {
+	m_profile_steps = false;
       }
     }
   }
@@ -2134,5 +2146,52 @@ void sisdc::upwind_sources(Vector<EBAMRCellData*>&       a_src_upwd,
 
     m_amr->average_down(*a_src_upwd[idx], phase::gas);
     m_amr->interp_ghost(*a_src_upwd[idx], phase::gas);
+  }
+}
+
+
+void sisdc::write_step_profile(const Real a_dt,
+			       const Real a_error,
+			       const int  a_substeps,
+			       const int  a_corrections){
+  CH_TIME("sissdc::write_step_profile");
+  if(m_verbosity > 5){
+    pout() << "sisdc::write_step_profile" << endl;
+  }
+
+  if(procID() == 0 ){
+
+    const std::string fname("sisdc_step_profile.txt");
+    
+    bool write_header;
+    { // Write header if we must
+      std::ifstream infile(fname);
+      write_header = infile.peek() == std::ifstream::traits_type::eof() ? true : false;
+    }
+
+    // Write output
+    std::ofstream f;
+    f.open(fname, std::ios_base::app);
+    const int width = 12;
+
+    if(write_header){
+      f << std::left << std::setw(width) << "# Step" << "\t"
+	<< std::left << std::setw(width) << "Time" << "\t"
+	<< std::left << std::setw(width) << "dt" << "\t"
+	<< std::left << std::setw(width) << "Substeps" << "\t"
+	<< std::left << std::setw(width) << "Corrections" << "\t"
+	<< std::left << std::setw(width) << "Error" << "\t"
+	<< std::left << std::setw(width) << "CFL" << "\t"
+	<< endl;
+    }
+
+    f << std::left << std::setw(width) << m_step << "\t"
+      << std::left << std::setw(width) << m_time << "\t"            
+      << std::left << std::setw(width) << m_dt << "\t"        
+      << std::left << std::setw(width) << a_substeps << "\t"
+      << std::left << std::setw(width) << a_corrections << "\t"
+      << std::left << std::setw(width) << m_max_error << "\t"
+      << std::left << std::setw(width) << m_dt_cfl << "\t"
+      << endl;
   }
 }

@@ -89,6 +89,7 @@ protected:
   bool m_consistent_rte;
   bool m_strong_diffu;
   bool m_have_dt_err;
+  bool m_profile_steps;
 
   // Error things
   Vector<Real> m_cdr_error;
@@ -120,6 +121,8 @@ protected:
   // Store and reset functions
   void store_previous_solutions();
   void restore_previous_solutions();
+
+
 
   // Get functions for substep data. 
   Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
@@ -200,6 +203,12 @@ protected:
   Real get_max_error();
   Real restrict_dt() ;
   Real get_max_node_distance();
+
+  // Profiling
+  void write_step_profile(const Real a_dt,
+			  const Real a_error,
+			  const int  a_substeps,
+			  const int  a_corrections);
 };
 
 #endif

@@ -49,6 +49,12 @@ sisdc.do_diffusion      = true   # Turn off code functionality. Only for debuggi
 sisdc.do_poisson        = true   # Turn off code functionality. Only for debugging
 sisdc.do_rte            = true   # Turn off code functionality. Only for debugging
 
+# ---------------------------------------------------------	
+# Profiling options
+# ---------------------------------------------------------
+sisdc.profile_steps     = false  # Profile time steps with order, accuracy, cfl, etc.
+
+
 # ---------------------
 # Stabilization feature
 # ---------------------
