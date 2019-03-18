@@ -5,7 +5,8 @@
 #include "CH_Timer.H"
 #include "REAL.H"
 
-extern "C" {
+extern "C"
+{
 
 #ifndef GUARDUPWIND_SOURCE 
 #define GUARDUPWIND_SOURCE 

@@ -579,14 +579,14 @@ Real sisdc::advance(const Real a_dt){
 
   {// Debug, copy error to solver
 #if 0
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>&  solver  = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>&  solver  = solver_it();
+      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
-    EBAMRCellData& phi = solver->get_state();
-    const EBAMRCellData& error = storage->get_error();
-    data_ops::copy(phi, error);
-  }
+      EBAMRCellData& phi = solver->get_state();
+      const EBAMRCellData& error = storage->get_error();
+      data_ops::copy(phi, error);
+    }
 #endif
   }
 
@@ -2068,8 +2068,69 @@ void sisdc::upwind_sources(Vector<EBAMRCellData*>&       a_src_upwd,
     const int idx = solver_it.get_solver();
 
     data_ops::copy(*a_src_upwd[idx], *a_sources[idx]);
+    
+    const int finest_level = m_amr->get_finest_level();
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+      const ProblemDomain& probdom = m_amr->get_domains()[lvl];
 
-    m_amr->average_down(*a_src_upwd[idx],phase::gas);
-    m_amr->interp_ghost(*a_src_upwd[idx],phase::gas);
+      LayoutData<IntVectSet> cfivs;
+      EBArith::defineCFIVS(cfivs, dbl, probdom);
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	EBCellFAB& dst         = (*(*a_src_upwd[idx])[lvl])[dit()];
+	const EBCellFAB& src   = (*(*a_sources[idx])[lvl])[dit()];
+	const EBCellFAB& vel   = (*a_velo[lvl])[dit()];
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const Box box          = dbl.get(dit());
+
+	BaseFab<Real>& dst_reg       = dst.getSingleValuedFAB();
+	const BaseFab<Real>& src_reg = src.getSingleValuedFAB();
+	const BaseFab<Real>& vel_reg = vel.getSingleValuedFAB();
+
+	const int comp = 0;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  FORT_UPWIND_SOURCE(CHF_FRA1(dst_reg, comp),
+			     CHF_CONST_FRA1(src_reg, comp),
+			     CHF_CONST_FRA1(vel_reg, dir),
+			     CHF_CONST_INT(dir),
+			     CHF_BOX(box));
+	}
+
+	// Reset irregular cells
+	const IntVectSet ivs = ebisbox.getIrregIVS(box);
+	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+	  const Real kappa = ebisbox.volFrac(vof);
+
+	  dst(vof, comp) = src(vof,comp);
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const Real u = vel(vof, dir);
+
+	    Vector<VolIndex> closevofs(0);
+	    if(u > 0.0){
+	      closevofs = ebisbox.getVoFs(vof, dir, Side::Lo, 1);
+	    }
+	    else if(u < 0.0){
+	      closevofs = ebisbox.getVoFs(vof, dir, Side::Hi, 1);
+	    }
+
+	    const int num_close = closevofs.size();
+	    if(num_close > 0){
+	      for (int ivof = 0; ivof < num_close; ivof++){
+		dst(vof, comp) = dst(vof, comp) - (src(vof, comp) - src(closevofs[ivof], comp))/num_close;
+	      }
+	    }
+	  }
+	}
+
+	// Do the boundary cells
+      }
+    }
+
+    m_amr->average_down(*a_src_upwd[i], phase::gas);
+    m_amr->interp_ghost(*a_src_upwd[i], phase::gas);
   }
 }

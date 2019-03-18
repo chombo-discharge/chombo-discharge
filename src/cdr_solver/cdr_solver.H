@@ -231,11 +231,6 @@ public:
   virtual void tag_value(Vector<IntVectSet>& a_tags, const Real a_value);
 
   /*!
-    @brief Upwind with internal velocity
-  */
-  virtual void upwind_source(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
-
-  /*!
     @brief Get solver name
   */
   virtual std::string get_name();

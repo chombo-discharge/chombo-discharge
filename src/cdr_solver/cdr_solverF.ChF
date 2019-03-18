@@ -194,34 +194,3 @@
 
       return
       end
-
-
-      subroutine upwind_source(
-     &     chf_fra1[dst],
-     &     chf_const_fra1[src],
-     &     chf_const_fra1[vel],
-     &     chf_const_int[dir],
-     &     chf_box[dcalc])
-
-      integer chf_ddecl[i; j; k]
-      integer chf_ddecl[ioff; joff; koff]
-      real_t S, Slo, Shi, v
-      
-      chf_dterm[
-      ioff=chf_id(0,dir);
-      joff=chf_id(1,dir);
-      koff=chf_id(2,dir)]
-
-      chf_multido[dcalc; i;j;k]
-         S   = src(chf_ix[i;j;k]);
-         Slo = src(chf_ix[i-ioff;j-joff;k-koff]);
-         Shi = src(chf_ix[i+ioff;j+joff;k+koff]);
-         v   = vel(chf_ix[i;j;k]);
-
-         if(v > 0.0) then
-            dst(chf_ix[i;j;k]) = dst(chf_ix[i;j;k]) - (S - Slo)
-         else if(v < 0.0) then
-            dst(chf_ix[i;j;k]) = dst(chf_ix[i;j;k]) - (S - Shi)
-         endif
-      chf_enddo
-      end
