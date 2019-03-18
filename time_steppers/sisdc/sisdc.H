@@ -70,6 +70,7 @@ protected:
   Real m_safety;
   Real m_dt_adapt;
   Real m_new_dt; // dt for next time step
+  Real m_extrap_dt;
 
   bool m_upwind_source;
   bool m_extrap_advect;

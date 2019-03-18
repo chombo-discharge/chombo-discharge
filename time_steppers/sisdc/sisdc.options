@@ -52,5 +52,6 @@ sisdc.do_rte            = true   # Turn off code functionality. Only for debuggi
 # ---------------------
 # Stabilization feature
 # ---------------------
-sisdc.upwind_source = false      # Use Villa et. al upwinding technique for source terms
 sisdc.extrap_advect = false      # Time extrapolate with source and diffusion in advection step
+sisdc.extrap_dt     = 1.0        # How far to time-extrapolate (in terms of dt)
+sisdc.upwind_source = false      # Use Villa et. al upwinding technique for source terms. Nasty, buggy, inaccurate.

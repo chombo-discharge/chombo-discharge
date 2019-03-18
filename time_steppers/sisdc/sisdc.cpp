@@ -38,6 +38,7 @@ sisdc::sisdc(){
   m_max_tries     = 1;
   m_min_corr      = 1;
   m_upwd_idx      = 0;
+  m_extrap_dt     = 1.0;
 
   m_which_nodes   = "lobatto";
 
@@ -77,6 +78,7 @@ sisdc::sisdc(){
     pp.query("num_corrections", m_num_diff_corr);
     pp.query("max_tries",       m_max_tries);
     pp.query("upwind_src_idx",  m_upwd_idx);
+    pp.query("extrap_dt",       m_extrap_dt);
 
     if(pp.contains("subcycle")){
       pp.get("subcycle", str);
@@ -727,7 +729,7 @@ void sisdc::predictor_advection_reaction(const int a_m){
     const EBAMRCellData& src   = solver->get_source();      // S_m
 
     // Compute div F
-    const Real extrap_dt = m_extrap_advect ? m_dtm[a_m] : 0.0;
+    const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to PatchAdvect
     solver->compute_divF(rhs, phi_m, extrap_dt, true); // RHS =  Div(v_m*phi_m)
     data_ops::scale(rhs, -1.0);                  // RHS = -Div(v_m*phi_m)
 
@@ -900,7 +902,7 @@ void sisdc::corrector_reconcile_gl_integrands(){
     const EBAMRCellData& phi_p = *cdr_densities_p[idx] ;
     const EBAMRCellData& src   = solver->get_source();
 
-    const Real extrap_dt = m_extrap_advect ? m_dtm[m_p-1] : 0.0;
+    const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
     solver->compute_divF(FAR_p, phi_p, extrap_dt, true); // FAR_p =  Div(v_p*phi_p)
     data_ops::scale(FAR_p, -1.0);                  // FAR_p = -Div(v_p*phi_p)
 
@@ -1044,7 +1046,7 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
     
     // Compute rhs, but for m = 0 then FAR(phi_0^(k+1)) = FAR(phi_0^k) so there's no need for that
     if(a_m > 0){
-      const Real extrap_dt = m_extrap_advect ? m_dtm[a_m] : false;
+      const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
       solver->compute_divF(scratch, phi_m, extrap_dt, true);  // scratch   =  Div(v_m*phi_m^(k+1))
       data_ops::scale(scratch, -1.0);                   // scratch   = -Div(v_m*phi_m^(k+1))
 
@@ -2130,7 +2132,7 @@ void sisdc::upwind_sources(Vector<EBAMRCellData*>&       a_src_upwd,
       }
     }
 
-    m_amr->average_down(*a_src_upwd[i], phase::gas);
-    m_amr->interp_ghost(*a_src_upwd[i], phase::gas);
+    m_amr->average_down(*a_src_upwd[idx], phase::gas);
+    m_amr->interp_ghost(*a_src_upwd[idx], phase::gas);
   }
 }
