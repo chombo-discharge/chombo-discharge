@@ -208,7 +208,8 @@ protected:
   void write_step_profile(const Real a_dt,
 			  const Real a_error,
 			  const int  a_substeps,
-			  const int  a_corrections);
+			  const int  a_corrections,
+			  const int  a_rejections);
 };
 
 #endif

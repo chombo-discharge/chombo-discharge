@@ -38,7 +38,7 @@ sisdc::sisdc(){
   m_max_tries     = 1;
   m_min_corr      = 1;
   m_upwd_idx      = 0;
-  m_extrap_dt     = 1.0;
+  m_extrap_dt     = 0.5;
 
   m_which_nodes   = "lobatto";
 
@@ -574,9 +574,7 @@ Real sisdc::advance(const Real a_dt){
     }
   }
 
-  if(m_print_report){
-    sisdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
-  }
+
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
@@ -603,6 +601,10 @@ Real sisdc::advance(const Real a_dt){
     }
 #endif
   }
+
+  // Profile step
+  if(m_print_report)  sisdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
+  if(m_profile_steps) sisdc::write_step_profile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
 
   
   return actual_dt;
@@ -2153,7 +2155,8 @@ void sisdc::upwind_sources(Vector<EBAMRCellData*>&       a_src_upwd,
 void sisdc::write_step_profile(const Real a_dt,
 			       const Real a_error,
 			       const int  a_substeps,
-			       const int  a_corrections){
+			       const int  a_corrections,
+			       const int  a_rejections){
   CH_TIME("sissdc::write_step_profile");
   if(m_verbosity > 5){
     pout() << "sisdc::write_step_profile" << endl;
@@ -2180,6 +2183,7 @@ void sisdc::write_step_profile(const Real a_dt,
 	<< std::left << std::setw(width) << "dt" << "\t"
 	<< std::left << std::setw(width) << "Substeps" << "\t"
 	<< std::left << std::setw(width) << "Corrections" << "\t"
+	<< std::left << std::setw(width) << "Rejections" << "\t"
 	<< std::left << std::setw(width) << "Error" << "\t"
 	<< std::left << std::setw(width) << "CFL" << "\t"
 	<< endl;
@@ -2187,9 +2191,10 @@ void sisdc::write_step_profile(const Real a_dt,
 
     f << std::left << std::setw(width) << m_step << "\t"
       << std::left << std::setw(width) << m_time << "\t"            
-      << std::left << std::setw(width) << m_dt << "\t"        
+      << std::left << std::setw(width) << a_dt << "\t"        
       << std::left << std::setw(width) << a_substeps << "\t"
       << std::left << std::setw(width) << a_corrections << "\t"
+      << std::left << std::setw(width) << a_rejections << "\t"
       << std::left << std::setw(width) << m_max_error << "\t"
       << std::left << std::setw(width) << m_dt_cfl << "\t"
       << endl;
