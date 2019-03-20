@@ -759,8 +759,6 @@ void sisdc::predictor_advection_reaction_nosubcycle(const int a_m){
   data_ops::incr(sigma_mp1, Fsig_m, m_dtm[a_m]); // sigma_(m+1) = sigma_m + dt_m*Fsig(phi_m)
 }
 
-
-
 void sisdc::predictor_diffusion(const int a_m){
   CH_TIME("sisdc::predictor_diffusion");
   if(m_verbosity > 5){
@@ -2101,12 +2099,13 @@ void sisdc::reflux_level(EBAMRCellData& a_state,
   if(m_verbosity > 5){
     pout() << "sisdc::::reflux_level" << endl;
   }
-
+  
   const phase::which_phase phase = m_cdr->get_phase();
-  const Interval interv(a_solver, a_solver);
+  const Interval soln_interv(0, 0);
+  const Interval flux_interv(a_solver, a_solver);
   const Real dx = m_amr->get_dx()[a_lvl];
   RefCountedPtr<EBFluxRegister >& fluxreg = m_amr->get_flux_reg(phase)[a_lvl];
-  fluxreg->reflux(*a_state[a_lvl], interv, 1./dx);
+  fluxreg->reflux(*a_state[a_lvl], soln_interv, flux_interv, 1./dx);
 }
 
 void sisdc::redist_level(LevelData<EBCellFAB>&       a_state,
@@ -2156,19 +2155,45 @@ void sisdc::predictor_advection_reaction_subcycle(const int a_m){
   m_amr->allocate(divF_c,     phase, ncomp);
   m_amr->allocate(weights,    phase, ncomp, 2*redist_rad);
 
-  // Compute advection velocities. These don't change. 
+  // Compute advection velocities. These don't change.
+  MayDay::Warning("advect velo start");
   sisdc::subcycle_compute_advection_velocities();
+  MayDay::Warning("advect velo done");
 
   const int coar_lvl = 0;
   const int fine_lvl = m_amr->get_finest_level();
 
   Vector<Real> tnew(1 + fine_lvl, 0.0);
   Vector<Real> told(1 + fine_lvl, 0.0);
-  
-  sisdc::subcycle_advance_amr(flux, face_state, divF_c, weights, divF_nc, mass_diff, tnew, told,
-			      a_m, coar_lvl, coar_lvl, fine_lvl, m_dtm[a_m]);
 
-  // Now add in the reaction terms
+  // Advance phi[a_m] to phi[a_m+1] using subcycling
+  sisdc::subcycle_advect_amr(flux, face_state, divF_c, weights, divF_nc, mass_diff, tnew, told,
+  			      a_m, coar_lvl, coar_lvl, fine_lvl, m_dtm[a_m]);
+
+  MayDay::Warning("subcycle_advect_amr_done");
+
+  // Add the reaction terms for the final update and compute the operator slope
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_mp1     = storage->get_phi()[a_m+1]; // phi^(m+1). Contains the advected update.
+    const EBAMRCellData& phi_m = storage->get_phi()[a_m];   // phi^(m). 
+    const EBAMRCellData& src   = solver->get_source();      // S_m
+
+    data_ops::incr(phi_mp1, src, m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*FAR(phi_m)
+
+    m_amr->average_down(phi_mp1, m_cdr->get_phase());
+    m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
+
+    data_ops::floor(phi_mp1, 0.0);
+
+    // Compute the advection-reaction operator slope
+    EBAMRCellData& FARm = storage->get_FAR()[a_m];
+    data_ops::copy(FARm, phi_mp1);
+    data_ops::incr(FARm, phi_m, -1.0);
+    data_ops::scale(FARm, 1./m_dtm[a_m]);
+  }
   
   MayDay::Abort("sisdc::predictor_advection_reaction_subcycle - not implemented");
 }
@@ -2185,7 +2210,7 @@ void sisdc::subcycle_compute_advection_velocities(){
   }
 }
     
-void sisdc::subcycle_advance_amr(EBAMRFluxData& a_flux,
+void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 				 EBAMRFluxData& a_face_states,
 				 EBAMRCellData& a_divF_c,
 				 EBAMRCellData& a_weights,
@@ -2198,9 +2223,9 @@ void sisdc::subcycle_advance_amr(EBAMRFluxData& a_flux,
 				 const int      a_coarsest_level,
 				 const int      a_finest_level,
 				 const Real     a_dt){
-  CH_TIME("sisdc::subcycle_advance_amr");
+  CH_TIME("sisdc::subcycle_advect_amr");
   if(m_verbosity > 5){
-    pout() << "sisdc::subcycle_advance_amr" << endl;
+    pout() << "sisdc::subcycle_advect_amr" << endl;
   }
 
   Real coar_time_old = 0.0;
@@ -2218,6 +2243,7 @@ void sisdc::subcycle_advance_amr(EBAMRFluxData& a_flux,
   sisdc::subcycle_copy_current_to_old_states(a_m, a_lvl);
   sisdc::reset_finer_flux_registers_level(a_lvl, a_coarsest_level, a_finest_level);
 
+  MayDay::Abort("sisdc::subcycle_advect_amr - remember to reset redistribution registers above this stop");
 
   // We have advance this level. Updates new times
   a_told[a_lvl] = a_tnew[a_lvl];
@@ -2229,7 +2255,7 @@ void sisdc::subcycle_advance_amr(EBAMRFluxData& a_flux,
     const Real dt_ref = a_dt/nref;
 
     for (int i = 0; i < nref; i++){
-      sisdc::subcycle_advance_amr(a_flux, a_face_states, a_divF_c, a_weights, a_divF_nc, a_mass_diff,
+      sisdc::subcycle_advect_amr(a_flux, a_face_states, a_divF_c, a_weights, a_divF_nc, a_mass_diff,
 				  a_tnew, a_told, a_m, a_lvl+1, a_coarsest_level, a_finest_level, dt_ref);
     }
 

@@ -227,7 +227,7 @@ protected:
 
 
   
-  void subcycle_advance_amr(EBAMRFluxData& a_flux,
+  void subcycle_advect_amr(EBAMRFluxData& a_flux,
 			    EBAMRFluxData& a_face_states,
 			    EBAMRCellData& a_divF_c,
 			    EBAMRCellData& a_weights,

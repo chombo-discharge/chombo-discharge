@@ -2172,7 +2172,8 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   this->get_geom_tags();       // Get geometric tags.
   
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
-  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
+  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
+  m_amr->regrid(m_geom_tags, regsize, m_geom_tag_depth);       // Regrid using geometric tags for now
 
   this->allocate_internals();
 
