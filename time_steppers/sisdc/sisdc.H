@@ -72,7 +72,6 @@ protected:
   Real m_new_dt; // dt for next time step
   Real m_extrap_dt;
 
-  bool m_upwind_source;
   bool m_extrap_advect;
   bool m_adaptive_dt;
   bool m_print_report;
@@ -195,9 +194,6 @@ protected:
   void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   void compute_sigma_flux();
-
-  // Stability function
-  void upwind_sources(Vector<EBAMRCellData*>& a_src_upwd, const Vector<EBAMRCellData*>& a_sources, const EBAMRCellData& velo);
 
   //
   Real get_max_error();

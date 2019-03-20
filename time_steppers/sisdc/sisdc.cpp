@@ -42,7 +42,6 @@ sisdc::sisdc(){
 
   m_which_nodes   = "lobatto";
 
-  m_upwind_source  = false;
   m_extrap_advect  = false;
   m_subcycle       = false;
   m_print_report   = false;
@@ -80,7 +79,6 @@ sisdc::sisdc(){
     pp.query("safety",          m_safety);
     pp.query("num_corrections", m_num_diff_corr);
     pp.query("max_tries",       m_max_tries);
-    pp.query("upwind_src_idx",  m_upwd_idx);
     pp.query("extrap_dt",       m_extrap_dt);
 
     if(pp.contains("subcycle")){
@@ -99,15 +97,6 @@ sisdc::sisdc(){
       }
       else{
 	m_extrap_advect = false;
-      }
-    }
-    if(pp.contains("upwind_source")){
-      pp.get("upwind_source", str);
-      if(str == "true"){
-	m_upwind_source = true;
-      }
-      else{
-	m_upwind_source = false;
       }
     }
     if(pp.contains("quad_nodes")){
@@ -719,20 +708,6 @@ void sisdc::predictor_advection_reaction(const int a_m){
 
   // If we're going to upwind the source terms, we must have the velocity for deciding the upwind side,
   // holders for the upwinded stuff, and the original source terms
-  if(m_upwind_source){
-    Vector<EBAMRCellData*> upwd_src;
-    const Vector<EBAMRCellData*> sources = m_cdr->get_sources();
-    const EBAMRCellData& velo = *(m_cdr->get_velocities()[m_upwd_idx]);
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-      EBAMRCellData& scratch2 = storage->get_scratch2();
-      upwd_src.push_back(&scratch2);
-    }
-
-    upwind_sources(upwd_src, sources, velo);
-  }
-
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
@@ -748,13 +723,7 @@ void sisdc::predictor_advection_reaction(const int a_m){
     data_ops::scale(rhs, -1.0);                  // RHS = -Div(v_m*phi_m)
 
     // Use source upwinding or not
-    if(m_upwind_source){
-      EBAMRCellData& scratch2 = storage->get_scratch2();
-      data_ops::incr(rhs, scratch2, 1.0);
-    }
-    else{
-      data_ops::incr(rhs, src, 1.0);               // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
-    }
+    data_ops::incr(rhs, src, 1.0);               // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
     data_ops::copy(phi_mp1, phi_m);              // phi_(m+1) = phi_m
     data_ops::incr(phi_mp1, rhs, m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*FAR(phi_m)
 
@@ -888,21 +857,6 @@ void sisdc::corrector_reconcile_gl_integrands(){
   sisdc::compute_cdr_domain_fluxes(cdr_densities_p, t_p);
   sisdc::compute_sigma_flux();
 
-  // Hook for upwinding of source terms
-  if(m_upwind_source){
-    Vector<EBAMRCellData*> upwd_src;
-    const Vector<EBAMRCellData*> sources = m_cdr->get_sources();
-    const EBAMRCellData& velo = *(m_cdr->get_velocities()[m_upwd_idx]);
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-      EBAMRCellData& scratch2 = storage->get_scratch2();
-      upwd_src.push_back(&scratch2);
-    }
-
-    upwind_sources(upwd_src, sources, velo);
-  }
-
   // Now compute FAR_p - that wasn't done in the predictor or the corrector
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
@@ -916,16 +870,8 @@ void sisdc::corrector_reconcile_gl_integrands(){
 
     const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
     solver->compute_divF(FAR_p, phi_p, extrap_dt, true); // FAR_p =  Div(v_p*phi_p)
-    data_ops::scale(FAR_p, -1.0);                  // FAR_p = -Div(v_p*phi_p)
-
-    // Upwind the source or not
-    if(m_upwind_source){
-      EBAMRCellData& scratch2 = storage->get_scratch2();
-      data_ops::incr(FAR_p, scratch2, 1.0);
-    }
-    else{
-      data_ops::incr(FAR_p, src, 1.0);               // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
-    }
+    data_ops::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
+    data_ops::incr(FAR_p, src, 1.0);                     // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
 
     // Build the integrand
     for (int m = 0; m <= m_p; m++){
@@ -1029,20 +975,6 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
   //       that result onto the storage that holds FAR_m^k (which is discarded) once the computation
   //       is done. The scratch storage is then used for computing I_m^(m+1)
   //
-
-  if(m_upwind_source){
-    Vector<EBAMRCellData*> upwd_src;
-    const Vector<EBAMRCellData*> sources = m_cdr->get_sources();
-    const EBAMRCellData& velo = *(m_cdr->get_velocities()[m_upwd_idx]);
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-      EBAMRCellData& scratch2 = storage->get_scratch2();
-      upwd_src.push_back(&scratch2);
-    }
-
-    upwind_sources(upwd_src, sources, velo);
-  }
     
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
@@ -1060,17 +992,10 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
     if(a_m > 0){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
       solver->compute_divF(scratch, phi_m, extrap_dt, true);  // scratch   =  Div(v_m*phi_m^(k+1))
-      data_ops::scale(scratch, -1.0);                   // scratch   = -Div(v_m*phi_m^(k+1))
-
-      if(m_upwind_source){
-	EBAMRCellData& scratch2 = storage->get_scratch2();
-	data_ops::incr(scratch, scratch2, 1.0);
-      }
-      else{
-	data_ops::incr(scratch, src, 1.0);              // scratch   = -Div(v_m*phi_m^(k+1)) + S_m^(k+1) = FAR(phi_m^(k+1))
-      }
-      data_ops::incr(phi_mp1, scratch,  m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*[FAR(phi_m^(k+1))]
-      data_ops::incr(phi_mp1, FAR_m,   -m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*[FAR(phi_m^(k+1)) - FAR(phi_m^k)]
+      data_ops::scale(scratch, -1.0);                         // scratch   = -Div(v_m*phi_m^(k+1))
+      data_ops::incr(scratch, src, 1.0);                      // scratch   = -Div(v_m*phi_m^(k+1)) + S_m^(k+1) = FAR(phi_m^(k+1))
+      data_ops::incr(phi_mp1, scratch,  m_dtm[a_m]);          // phi_(m+1) = phi_m + dt_m*[FAR(phi_m^(k+1))]
+      data_ops::incr(phi_mp1, FAR_m,   -m_dtm[a_m]);          // phi_(m+1) = phi_m + dt_m*[FAR(phi_m^(k+1)) - FAR(phi_m^k)]
 
       // Update the FAR_m storage - this overwrites FAR(phi_m^k) with FAR(phi_m^(k+1))
       data_ops::copy(FAR_m, scratch);
@@ -2069,86 +1994,6 @@ EBAMRIVData& sisdc::get_sigmak(const int a_m){
   }
   return m_sigma_scratch->get_sigma()[a_m];
 }
-
-void sisdc::upwind_sources(Vector<EBAMRCellData*>&       a_src_upwd,
-			   const Vector<EBAMRCellData*>& a_sources,
-			   const EBAMRCellData&          a_velo){
-  CH_TIME("sisdc::upwind_sources");
-  if(m_verbosity > 5){
-    pout() << "sisdc::upwind_sources)" << endl;
-  }
-
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-
-    data_ops::copy(*a_src_upwd[idx], *a_sources[idx]);
-    
-    const int finest_level = m_amr->get_finest_level();
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-      const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
-      const ProblemDomain& probdom = m_amr->get_domains()[lvl];
-
-      LayoutData<IntVectSet> cfivs;
-      EBArith::defineCFIVS(cfivs, dbl, probdom);
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	EBCellFAB& dst         = (*(*a_src_upwd[idx])[lvl])[dit()];
-	const EBCellFAB& src   = (*(*a_sources[idx])[lvl])[dit()];
-	const EBCellFAB& vel   = (*a_velo[lvl])[dit()];
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	const Box box          = dbl.get(dit());
-
-	BaseFab<Real>& dst_reg       = dst.getSingleValuedFAB();
-	const BaseFab<Real>& src_reg = src.getSingleValuedFAB();
-	const BaseFab<Real>& vel_reg = vel.getSingleValuedFAB();
-
-	const int comp = 0;
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  FORT_UPWIND_SOURCE(CHF_FRA1(dst_reg, comp),
-			     CHF_CONST_FRA1(src_reg, comp),
-			     CHF_CONST_FRA1(vel_reg, dir),
-			     CHF_CONST_INT(dir),
-			     CHF_BOX(box));
-	}
-
-	// Reset irregular cells
-	const IntVectSet ivs = ebisbox.getIrregIVS(box);
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  const Real kappa = ebisbox.volFrac(vof);
-
-	  dst(vof, comp) = src(vof,comp);
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const Real u = vel(vof, dir);
-
-	    Vector<VolIndex> closevofs(0);
-	    if(u > 0.0){
-	      closevofs = ebisbox.getVoFs(vof, dir, Side::Lo, 1);
-	    }
-	    else if(u < 0.0){
-	      closevofs = ebisbox.getVoFs(vof, dir, Side::Hi, 1);
-	    }
-
-	    const int num_close = closevofs.size();
-	    if(num_close > 0){
-	      for (int ivof = 0; ivof < num_close; ivof++){
-		dst(vof, comp) = dst(vof, comp) - (src(vof, comp) - src(closevofs[ivof], comp))/num_close;
-	      }
-	    }
-	  }
-	}
-
-	// Do the boundary cells
-      }
-    }
-
-    m_amr->average_down(*a_src_upwd[idx], phase::gas);
-    m_amr->interp_ghost(*a_src_upwd[idx], phase::gas);
-  }
-}
-
 
 void sisdc::write_step_profile(const Real a_dt,
 			       const Real a_error,
