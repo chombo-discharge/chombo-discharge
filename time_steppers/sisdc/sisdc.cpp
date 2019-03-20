@@ -2,7 +2,7 @@
   @file   sisdc.cpp
   @brief  Implementation of sisdc.H
   @author Robert Marskar
-  @date   Sept. 2018
+  @date   Feb. 2019
 */
 
 #include "sisdc.H"
@@ -17,8 +17,6 @@
 #include <iostream>
 #include <iomanip>
 #include <ParmParse.H>
-
-#define UPWIND_DEVEL 1
 
 typedef sisdc::cdr_storage     cdr_storage;
 typedef sisdc::poisson_storage poisson_storage;
