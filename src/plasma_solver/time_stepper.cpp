@@ -677,8 +677,6 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     m_amr->average_down(*a_sources[idx], m_cdr->get_phase());
     m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
   }
-
-
 }
 
 void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sources,
@@ -714,29 +712,31 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
 
   // Computed source terms onto here
   EBCellFAB tmp(ebisbox, a_E.getRegion(), num_species);
+
+  const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
+  const BaseFab<Real>& gradEfab = a_gradE.getSingleValuedFAB();
   
   // VOFITERATOR LOOP
   const IntVectSet ivs(a_box);
-  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv = bit();
     // Position, E, and grad(|E|)
-    pos    = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
-    E      = RealVect(D_DECL(a_E(vof, 0),     a_E(vof, 1),     a_E(vof, 2)));
-    grad_E = RealVect(D_DECL(a_gradE(vof, 0), a_gradE(vof, 1), a_gradE(vof, 2)));
+    pos    = origin + iv*a_dx;
+    E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
+    grad_E = RealVect(D_DECL(gradEfab(iv, 0), gradEfab(iv, 1), gradEfab(iv, 2)));
 
     // Fill vectors with densities
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx  = solver_it.get_solver();
-      const Real phi = (*a_cdr_densities[idx])(vof, 0);
+      const Real phi = (*a_cdr_densities[idx]).getSingleValuedFAB()(iv, 0);
       cdr_densities[idx] = Max(zero, phi);
-      cdr_grad[idx]      = RealVect(D_DECL((*a_cdr_gradients[idx])(vof, 0),
-					   (*a_cdr_gradients[idx])(vof, 1),
-					   (*a_cdr_gradients[idx])(vof, 2)));
+      cdr_grad[idx]      = RealVect(D_DECL((*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 0),
+					   (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 1),
+					   (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 2)));
     }
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx  = solver_it.get_solver();
-      const Real phi = (*a_rte_densities[idx])(vof, 0);
+      const Real phi = (*a_rte_densities[idx]).getSingleValuedFAB()(iv, 0);
       rte_densities[idx] = Max(zero, phi);
     }
 
@@ -752,13 +752,14 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      tmp(vof,idx) = sources[idx];
+      tmp.getSingleValuedFAB()(iv,idx) = sources[idx];
     }
   }
 
   // Copy temporary storage back to solvers
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
+    (*a_sources[idx]).setVal(0.0);
     (*a_sources[idx]).plus(tmp, idx, 0, 1);
   }
 }
@@ -786,7 +787,6 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					   a_dx);
   }
   else{ // Cell-ave has already been done
-#if 1
     this->compute_cdr_sources_irreg_kappa(a_sources,
 					  a_cdr_densities,
 					  a_cdr_gradients,
@@ -797,7 +797,6 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 					  a_box,
 					  a_time,
 					  a_dx);
-#endif
   }
 }
 
@@ -1013,47 +1012,105 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
     const Real dx                 = m_amr->get_dx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const EBCellFAB& E     = (*a_E[lvl])[dit()];
-      const RealVect origin  = m_physdom->get_prob_lo();
 
-      const IntVect lo = box.smallEnd();
-      const IntVect hi = box.bigEnd();
-      
-      // Do all cells in the box. 
-      IntVectSet ivs(box);
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect e    = RealVect(D_DECL(E(vof, 0), E(vof, 1), E(vof, 2)));
-	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
-
-	// Get densities
-	Vector<Real> cdr_densities;
-	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-	  cdr_densities.push_back((*(*a_cdr_densities[idx])[lvl])[dit()](vof, 0));
-	}
-
-	// Compute velocities
-	const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
-
-	// Put velocities in the appropriate place. 
-	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-	  for (int comp = 0; comp < SpaceDim; comp++){
-	    (*(*a_velocities[idx])[lvl])[dit()](vof, comp) = velocities[idx][comp];
-	  }
-	}
+      Vector<EBCellFAB*> vel;
+      Vector<EBCellFAB*> phi;
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	vel.push_back(&(*(*a_velocities[idx])[lvl])[dit()]);
+	phi.push_back(&(*(*a_cdr_densities[idx])[lvl])[dit()]);
       }
-    }
 
-    // Average down and interpolate ghost cells
+      // Separate calls for regular and irregular
+      compute_cdr_velocities_reg(vel,   phi, (*a_E[lvl])[dit()], dbl.get(dit()), a_time, dx);
+      compute_cdr_velocities_irreg(vel, phi, (*a_E[lvl])[dit()], dbl.get(dit()), a_time, dx);
+    }
+  }
+
+  // Average down and interpolate ghost cells
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->average_down(*a_velocities[idx], cdr_phase);
+    m_amr->interp_ghost(*a_velocities[idx], cdr_phase);
+  }
+}
+void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_velocities,
+					      const Vector<EBCellFAB*>& a_cdr_densities,
+					      const EBCellFAB&          a_E,
+					      const Box&                a_box,
+					      const Real&               a_time,
+					      const Real&               a_dx){
+  CH_TIME("time_stepper::compute_cdr_velocities_reg");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_velocities_reg" << endl;
+  }
+
+  const int comp         = 0;
+  const RealVect origin  = m_physdom->get_prob_lo();
+  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv    = bit();
+    const RealVect pos  = origin + a_dx*iv;
+    const RealVect e    = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
+
+    // Get densities
+    Vector<Real> cdr_densities;
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      m_amr->average_down(*a_velocities[idx], cdr_phase);
-      m_amr->interp_ghost(*a_velocities[idx], cdr_phase);
+      cdr_densities.push_back((*a_cdr_densities[idx]).getSingleValuedFAB()(iv, comp));
+    }
+
+    // Compute velocities
+    const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
+
+    // Put velocities in the appropriate place. 
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      for (int dir = 0; dir < SpaceDim; dir++){
+	(*a_velocities[idx]).getSingleValuedFAB()(iv, dir) = velocities[idx][dir];
+      }
+    }
+  }
+}
+
+void time_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       a_velocities,
+						const Vector<EBCellFAB*>& a_cdr_densities,
+						const EBCellFAB&          a_E,
+						const Box&                a_box,
+						const Real&               a_time,
+						const Real&               a_dx){
+  CH_TIME("time_stepper::compute_cdr_velocities_irreg");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_velocities_irreg" << endl;
+  }
+
+  const int comp         = 0;
+  const EBISBox& ebisbox = a_E.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
+    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
+
+    // Get densities
+    Vector<Real> cdr_densities;
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      cdr_densities.push_back((*a_cdr_densities[idx])(vof, comp));
+    }
+    
+    // Compute velocities
+    const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
+
+    // Put velocities in the appropriate place. 
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      for (int dir = 0; dir < SpaceDim; dir++){
+	(*a_velocities[idx])(vof, dir) = velocities[idx][dir];
+      }
     }
   }
 }

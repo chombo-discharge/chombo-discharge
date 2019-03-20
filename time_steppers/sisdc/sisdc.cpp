@@ -864,17 +864,15 @@ void sisdc::predictor_diffusion_build_FD(const int a_m){
 }
 
 void sisdc::corrector_reconcile_gl_integrands(){
-  CH_TIME("sisdc::predictor_reconcile_gl_integrands");
+  CH_TIME("sisdc::corrector_reconcile_gl_integrands");
   if(m_verbosity > 5){
-    pout() << "sisdc::predictor_reconcile_gl_integrands" << endl;
+    pout() << "sisdc::corrector_reconcile_gl_integrands" << endl;
   }
 
   // We update (m+1), but it
   Vector<EBAMRCellData*> cdr_densities_p = sisdc::get_cdr_phik(m_p);
   EBAMRIVData& sigma_p = sisdc::get_sigmak(m_p);
   const Real t_p = m_tm[m_p];
-
-
 
   // Update electric field, RTE equations, source terms, and velocities
   if(m_consistent_E)   sisdc::update_poisson(cdr_densities_p, sigma_p);
