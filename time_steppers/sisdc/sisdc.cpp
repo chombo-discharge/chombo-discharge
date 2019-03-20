@@ -11,6 +11,7 @@
 #include "data_ops.H"
 #include "units.H"
 #include "cdr_tga.H"
+#include "cdr_gdnv.H"
 
 
 #include <fstream>
@@ -2140,6 +2141,7 @@ void sisdc::predictor_advection_reaction_subcycle(const int a_m){
 
   const phase::which_phase phase = m_cdr->get_phase();
 
+  // These are all temporaries that are required for evaluating the advective derivative. 
   EBAMRFluxData flux;
   EBAMRFluxData face_state;
   EBAMRCellData divF_c;
@@ -2154,13 +2156,37 @@ void sisdc::predictor_advection_reaction_subcycle(const int a_m){
   m_amr->allocate(divF_c,     phase, ncomp);
   m_amr->allocate(weights,    phase, ncomp, 2*redist_rad);
 
-  // Add the reaction terms
+  // Compute advection velocities. These don't change. 
+  sisdc::subcycle_compute_advection_velocities();
+
+  const int coar_lvl = 0;
+  const int fine_lvl = m_amr->get_finest_level();
+
+  Vector<Real> tnew(1 + fine_lvl, 0.0);
+  Vector<Real> told(1 + fine_lvl, 0.0);
+  
+  sisdc::subcycle_advance_amr(flux, face_state, divF_c, weights, divF_nc, mass_diff, tnew, told,
+			      a_m, coar_lvl, coar_lvl, fine_lvl, m_dtm[a_m]);
+
+  // Now add in the reaction terms
   
   MayDay::Abort("sisdc::predictor_advection_reaction_subcycle - not implemented");
 }
 
-void sisdc::subcycle_advance_amr(EBAMRCellData& a_flux,
-				 EBAMRCellData& a_face_states,
+void sisdc::subcycle_compute_advection_velocities(){
+  CH_TIME("sisdc::subcycle_compute_advection_velocities");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_compute_advection_velocities" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    cdr_gdnv* solver = (cdr_gdnv*) (&(*(solver_it())));
+    solver->average_velo_to_faces();
+  }
+}
+    
+void sisdc::subcycle_advance_amr(EBAMRFluxData& a_flux,
+				 EBAMRFluxData& a_face_states,
 				 EBAMRCellData& a_divF_c,
 				 EBAMRCellData& a_weights,
 				 EBAMRIVData&   a_divF_nc,
@@ -2189,7 +2215,50 @@ void sisdc::subcycle_advance_amr(EBAMRCellData& a_flux,
   }
 
   // Integrate this level. Begin by updating boundary conditions.
+  sisdc::subcycle_copy_current_to_old_states(a_m, a_lvl);
   sisdc::reset_finer_flux_registers_level(a_lvl, a_coarsest_level, a_finest_level);
+
+
+  // We have advance this level. Updates new times
+  a_told[a_lvl] = a_tnew[a_lvl];
+  a_tnew[a_lvl] = a_tnew[a_lvl] + a_dt;
+
+  // If there is a coarse level, advance it nref times so that we synchronize.
+  if(has_fine){
+    const int nref    = m_amr->get_ref_rat()[a_lvl];
+    const Real dt_ref = a_dt/nref;
+
+    for (int i = 0; i < nref; i++){
+      sisdc::subcycle_advance_amr(a_flux, a_face_states, a_divF_c, a_weights, a_divF_nc, a_mass_diff,
+				  a_tnew, a_told, a_m, a_lvl+1, a_coarsest_level, a_finest_level, dt_ref);
+    }
+
+    // Finer level has reached this level. Average down solution on this level and reflux mass.
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+      EBAMRCellData& state = storage->get_phi()[a_m];
+      const int solver_idx = solver_it.get_solver();
+
+      m_amr->average_down(state, m_cdr->get_phase(), a_lvl);
+      sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finest_level, 1.0);
+    }
+  }
+}
+
+void sisdc::subcycle_copy_current_to_old_states(const int a_m, const int a_lvl){
+  CH_TIME("sisdc::subcycle_integrate_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_integrate_level" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+
+    EBAMRCellData& old = storage->get_old();
+    const EBAMRCellData& current = storage->get_phi()[a_m];
+
+    current[a_lvl]->localCopyTo(*old[a_lvl]);
+  }
 }
   
 void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,

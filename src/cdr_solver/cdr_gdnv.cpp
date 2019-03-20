@@ -80,6 +80,16 @@ void cdr_gdnv::advance_advect(EBAMRCellData& a_state, const Real a_dt){
   data_ops::floor(a_state, 0.0);
 }
 
+void cdr_gdnv::average_velo_to_faces(){
+  CH_TIME("cdr_gdnv::average_velo_to_faces(public, full)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::average_velo_to_faces(public, full)" << endl;
+  }
+
+  this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
+  this->extrapolate_vel_to_covered_faces();              // Extrapolate velocities to covered face centers
+}
+
 void cdr_gdnv::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
   CH_TIME("cdr_gdnv::average_velo_to_faces");
   if(m_verbosity > 5){

@@ -225,10 +225,10 @@ protected:
 		    const int                   a_lvl,
 		    const int                   a_idx);
 
-  void subcycle_copy_old_states(const int a_m, const int a_lvl);
+
   
-  void subcycle_advance_amr(EBAMRCellData& a_flux,
-			    EBAMRCellData& a_face_states,
+  void subcycle_advance_amr(EBAMRFluxData& a_flux,
+			    EBAMRFluxData& a_face_states,
 			    EBAMRCellData& a_divF_c,
 			    EBAMRCellData& a_weights,
 			    EBAMRIVData&   a_divF_nc,
@@ -240,6 +240,10 @@ protected:
 			    const int      a_coarsest_lvl,
 			    const int      a_finest_level,
 			    const Real     a_dt);
+
+  void subcycle_compute_advection_velocities();
+  
+  void subcycle_copy_current_to_old_states(const int a_m, const int a_lvl);
   
   void subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
 				LevelData<EBFluxFAB>&        a_face_states,
