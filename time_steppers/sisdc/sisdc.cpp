@@ -630,9 +630,9 @@ void sisdc::set_dummy_error(){
 }
 
 void sisdc::predictor_compute_FD_0(){
-  CH_TIME("sisdc::predictor_advection_reaction");
+  CH_TIME("sisdc::predictor_compute_FD_0");
   if(m_verbosity > 5){
-    pout() << "sisdc::predictor_advection_reaction" << endl;
+    pout() << "sisdc::predictor_compute_FD_0" << endl;
   }
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -669,7 +669,6 @@ void sisdc::predictor(const Real a_time){
     // This does the actual advance and updates at (m+1). After the diffusion step,
     // we should update source terms and boundary conditions
     sisdc::predictor_advection_reaction(m);
-    sisdc::predictor_sigma(m);
     sisdc::predictor_diffusion(m);
 
     // We now have phi[m+1]. Update boundary conditions after diffusion step. But not on the last step. The
@@ -699,6 +698,20 @@ void sisdc::predictor(const Real a_time){
 }
 
 void sisdc::predictor_advection_reaction(const int a_m){
+  CH_TIME("sisdc::predictor_advection_reaction");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor_advection_reaction" << endl;
+  }
+
+  if(!m_subcycle){
+    sisdc::predictor_advection_reaction_nosubcycle(a_m);
+  }
+  else{
+    sisdc::predictor_advection_reaction_subcycle(a_m);
+  }
+}
+
+void sisdc::predictor_advection_reaction_nosubcycle(const int a_m){
   CH_TIME("sisdc::predictor_advection_reaction");
   if(m_verbosity > 5){
     pout() << "sisdc::predictor_advection_reaction" << endl;
@@ -734,14 +747,8 @@ void sisdc::predictor_advection_reaction(const int a_m){
     EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
     data_ops::copy(phi_ast, phi_mp1);
   }
-}
 
-void sisdc::predictor_sigma(const int a_m){
-  CH_TIME("sisdc::predictor_sigma");
-  if(m_verbosity > 5){
-    pout() << "sisdc::predictor_sigma" << endl;
-  }
-
+  // Update sigma
   EBAMRIVData& sigma_mp1     = m_sigma_scratch->get_sigma()[a_m+1];  // sigma_(m+1)
   EBAMRIVData& Fsig_m        = m_sigma_scratch->get_Fsig()[a_m];     // Fsig_m
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];    // sigma_m
@@ -749,6 +756,10 @@ void sisdc::predictor_sigma(const int a_m){
   m_sigma->compute_rhs(Fsig_m);                 // Fsig_m = Injected charge flux
   data_ops::copy(sigma_mp1, sigma_m);           // sigma_(m+1) = sigma_m
   data_ops::incr(sigma_mp1, Fsig_m, m_dtm[a_m]); // sigma_(m+1) = sigma_m + dt_m*Fsig(phi_m)
+}
+
+void sisdc::predictor_advection_reaction_subcycle(const int a_m){
+  MayDay::Abort("sisdc::predictor_advection_reaction_subcycle - not implemented");
 }
 
 void sisdc::predictor_diffusion(const int a_m){
@@ -954,7 +965,6 @@ void sisdc::corrector(const Real a_time, const Real a_dt){
 
     // Correction for advection-reaction
     sisdc::corrector_advection_reaction(m, a_dt);
-    sisdc::corrector_sigma(m,a_dt);
     sisdc::corrector_diffusion(m);
   }
 }
@@ -963,6 +973,20 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
   CH_TIME("sisdc::corrector_advection_reaction");
   if(m_verbosity > 5){
     pout() << "sisdc::corrector_advection_reaction" << endl;
+  }
+
+  if(!m_subcycle){
+    sisdc::corrector_advection_reaction_nosubcycle(a_m, a_dt);
+  }
+  else{
+    sisdc::corrector_advection_reaction_nosubcycle(a_m, a_dt);
+  }
+}
+
+void sisdc::corrector_advection_reaction_nosubcycle(const int a_m, const Real a_dt){
+  CH_TIME("sisdc::corrector_advection_reaction_nosubcycle");
+  if(m_verbosity > 5){
+    pout() << "sisdc::corrector_advection_reaction_nosubcycle" << endl;
   }
 
   // TLDR: We need to compute
@@ -1011,14 +1035,8 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
     EBAMRCellData& phi_ast = storage->get_phi_ast()[a_m+1];
     data_ops::copy(phi_ast, phi_mp1);
   }
-}
 
-void sisdc::corrector_sigma(const int a_m, const Real a_dt){
-  CH_TIME("sisdc::corrector_sigma");
-  if(m_verbosity > 5){
-    pout() << "sisdc::corrector_sigma" << endl;
-  }
-
+  // Update sigma
   EBAMRIVData& sigma_mp1     = m_sigma_scratch->get_sigma()[a_m+1];  // sigma_(m+1)^(k+1)
   EBAMRIVData& scratch       = m_sigma_scratch->get_scratch();       // Used for Fsig_m^(k+1) and Sigma_m^(m+1)
   EBAMRIVData& Fsig_m        = m_sigma_scratch->get_Fsig()[a_m];     // Fsig_m^k
@@ -1036,6 +1054,16 @@ void sisdc::corrector_sigma(const int a_m, const Real a_dt){
   // Increment with the quadrature
   sisdc::gl_quad(scratch, m_sigma_scratch->get_Fsum(), a_m);
   data_ops::incr(sigma_mp1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling onto [-1,1] for the quadrature
+}
+
+void sisdc::corrector_advection_reaction_subcycle(const int a_m, const Real a_dt){
+  CH_TIME("sisdc::corrector_advection_reaction_subcycle");
+  if(m_verbosity > 5){
+    pout() << "sisdc::corrector_advection_reaction_subcycle" << endl;
+  }
+
+  MayDay::Abort("sisdc::corrector_advection_reaction_subcycle - not implemented");
+
 }
 
 void sisdc::corrector_diffusion(const int a_m){

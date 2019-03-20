@@ -148,7 +148,8 @@ protected:
   void predictor_compute_FD_0();
   void predictor(const Real a_time);
   void predictor_advection_reaction(const int a_m);
-  void predictor_sigma(const int a_m);
+  void predictor_advection_reaction_subcycle(const int a_m);
+  void predictor_advection_reaction_nosubcycle(const int a_m);
   void predictor_diffusion(const int a_m);
   void predictor_diffusion_onestep(const int a_m);
   void predictor_diffusion_build_FD(const int a_m);
@@ -159,7 +160,8 @@ protected:
   void corrector_reconcile_gl_integrands();
   void corrector(const Real a_time, const Real a_dt);
   void corrector_advection_reaction(const int a_m, const Real a_dt);
-  void corrector_sigma(const int a_m, const Real a_dt);
+  void corrector_advection_reaction_subcycle(const int a_m, const Real a_dt);
+  void corrector_advection_reaction_nosubcycle(const int a_m, const Real a_dt);
   void corrector_diffusion(const int a_m);
   void corrector_diffusion_onestep(const int a_m);
   void corrector_diffusion_build_FD(const int a_m);
