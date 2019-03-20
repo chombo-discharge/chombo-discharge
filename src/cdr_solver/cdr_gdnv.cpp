@@ -619,7 +619,6 @@ void cdr_gdnv::eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bo
 
     EBAMRCellData coar_old;
     EBAMRCellData coar_new;
-
     
     m_amr->allocate(face_state, m_phase, ncomp);
     m_amr->allocate(flux,       m_phase, ncomp);

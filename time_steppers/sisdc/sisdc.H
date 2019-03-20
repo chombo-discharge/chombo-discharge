@@ -117,12 +117,6 @@ protected:
   void allocate_rte_storage();
   void allocate_sigma_storage();
 
-  // Store and reset functions
-  void store_previous_solutions();
-  void restore_previous_solutions();
-
-
-
   // Get functions for substep data. 
   Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
   EBAMRIVData& get_sigmak(const int a_m);
@@ -134,8 +128,8 @@ protected:
   void setup_chebyshev_nodes(const int a_p);
   void setup_qmj(const int a_p);
   void setup_subintervals(const Real a_time, const Real a_dt);
-  void gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
-  void gl_quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m);
+  void quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
+  void quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m);
 
   // Routines for copying data at tm[0] and tm[p]
   void copy_cdr_to_phi_m0();
@@ -208,6 +202,60 @@ protected:
 			  const int  a_substeps,
 			  const int  a_corrections,
 			  const int  a_rejections);
+
+  // Subcycling routines
+  void reset_finer_flux_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level);
+  void reset_redist_registers_level(const int a_lvl);
+  void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl);
+  void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
+			     const int             a_solver,
+			     const int             a_lvl,
+			     const int             a_coarsest_level,
+			     const int             a_finest_level,
+			     const Real            a_dt);
+  void reflux_level(EBAMRCellData& a_state,
+		    const int      a_solver,
+		    const int      a_lvl,
+		    const int      a_coarsest_level,
+		    const int      a_finest_level,
+		    const Real     a_scale);
+  void redist_level(LevelData<EBCellFAB>&       a_state,
+		    const int                   a_solver,   
+		    const LevelData<EBCellFAB>& a_weights,
+		    const int                   a_lvl,
+		    const int                   a_idx);
+
+  void subcycle_copy_old_states(const int a_m, const int a_lvl);
+  
+  void subcycle_advance_amr(EBAMRCellData& a_flux,
+			    EBAMRCellData& a_face_states,
+			    EBAMRCellData& a_divF_c,
+			    EBAMRCellData& a_weights,
+			    EBAMRIVData&   a_divF_nc,
+			    EBAMRIVData&   a_mass_diff,
+			    Vector<Real>&  a_tnew,
+			    Vector<Real>&  a_told,
+			    const int      a_m,
+			    const int      a_lvl,
+			    const int      a_coarsest_lvl,
+			    const int      a_finest_level,
+			    const Real     a_dt);
+  
+  void subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
+				LevelData<EBFluxFAB>&        a_face_states,
+				LevelData<EBCellFAB>&        a_divF_c,
+				LevelData<EBCellFAB>&        a_weights,
+				LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				const int                    a_m,
+				const int                    a_lvl,
+				const int                    a_coarsest_level,
+				const int                    a_finest_level,
+				const Real                   a_coar_time_old,
+				const Real                   a_coar_time_new,
+				const Real                   a_time,
+				const Real                   a_dt);
+				 
 };
 
 #endif

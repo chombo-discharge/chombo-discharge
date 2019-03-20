@@ -428,14 +428,14 @@ void sisdc::setup_subintervals(const Real a_time, const Real a_dt){
   }
 }
 
-void sisdc::gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m){
-  CH_TIME("sisdc::gl_quad");
+void sisdc::quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m){
+  CH_TIME("sisdc::quad");
   if(m_verbosity > 5){
-    pout() << "sisdc::gl_quad" << endl;
+    pout() << "sisdc::quad" << endl;
   }
 
-  if(a_m < 0)     MayDay::Abort("sisdc::gl_quad - bad index a_m < 0");
-  if(a_m >= m_p)  MayDay::Abort("sisdc::gl_quad - bad index a_m >= m_p");
+  if(a_m < 0)     MayDay::Abort("sisdc::quad - bad index a_m < 0");
+  if(a_m >= m_p)  MayDay::Abort("sisdc::quad - bad index a_m >= m_p");
 
   data_ops::set_value(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++){
@@ -443,14 +443,14 @@ void sisdc::gl_quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integr
   }
 }
 
-void sisdc::gl_quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m){
-  CH_TIME("sisdc::gl_quad");
+void sisdc::quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m){
+  CH_TIME("sisdc::quad");
   if(m_verbosity > 5){
-    pout() << "sisdc::gl_quad" << endl;
+    pout() << "sisdc::quad" << endl;
   }
 
-  if(a_m < 0)     MayDay::Abort("sisdc::gl_quad - bad index a_m < 0");
-  if(a_m >= m_p)  MayDay::Abort("sisdc::gl_quad - bad index a_m >= m_p");
+  if(a_m < 0)     MayDay::Abort("sisdc::quad - bad index a_m < 0");
+  if(a_m >= m_p)  MayDay::Abort("sisdc::quad - bad index a_m >= m_p");
 
   data_ops::set_value(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++){
@@ -758,9 +758,7 @@ void sisdc::predictor_advection_reaction_nosubcycle(const int a_m){
   data_ops::incr(sigma_mp1, Fsig_m, m_dtm[a_m]); // sigma_(m+1) = sigma_m + dt_m*Fsig(phi_m)
 }
 
-void sisdc::predictor_advection_reaction_subcycle(const int a_m){
-  MayDay::Abort("sisdc::predictor_advection_reaction_subcycle - not implemented");
-}
+
 
 void sisdc::predictor_diffusion(const int a_m){
   CH_TIME("sisdc::predictor_diffusion");
@@ -979,7 +977,7 @@ void sisdc::corrector_advection_reaction(const int a_m, const Real a_dt){
     sisdc::corrector_advection_reaction_nosubcycle(a_m, a_dt);
   }
   else{
-    sisdc::corrector_advection_reaction_nosubcycle(a_m, a_dt);
+    sisdc::corrector_advection_reaction_subcycle(a_m, a_dt);
   }
 }
 
@@ -1024,7 +1022,7 @@ void sisdc::corrector_advection_reaction_nosubcycle(const int a_m, const Real a_
     }
 
     // Lagged quadrature
-    sisdc::gl_quad(scratch, storage->get_F(), a_m);
+    sisdc::quad(scratch, storage->get_F(), a_m);
     data_ops::incr(phi_mp1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling onto [-1,1] for quadrature
 
     m_amr->average_down(phi_mp1, m_cdr->get_phase());
@@ -1052,7 +1050,7 @@ void sisdc::corrector_advection_reaction_nosubcycle(const int a_m, const Real a_
   }
 
   // Increment with the quadrature
-  sisdc::gl_quad(scratch, m_sigma_scratch->get_Fsum(), a_m);
+  sisdc::quad(scratch, m_sigma_scratch->get_Fsum(), a_m);
   data_ops::incr(sigma_mp1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling onto [-1,1] for the quadrature
 }
 
@@ -1442,80 +1440,6 @@ void sisdc::deallocate_internals(){
   
   m_sigma_scratch->deallocate_storage();
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
-}
-
-void sisdc::store_previous_solutions(){
-  CH_TIME("sisdc::store_previous_solutions");
-  if(m_verbosity > 5){
-    pout() << "sisdc::store_previous_solutions" << endl;
-  }
-  
-  // Backup cdr solutions
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
-
-    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
-    EBAMRCellData& previous = storage->get_previous();
-
-    data_ops::copy(previous, solver->get_state());
-  }
-
-  {// Backup Poisson solution
-    MFAMRCellData& previous = m_poisson_scratch->get_previous();
-    data_ops::copy(previous, m_poisson->get_state());
-  }
-
-  // Backup RTE solutions
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
-
-    RefCountedPtr<rte_storage>& storage = sisdc::get_rte_storage(solver_it);
-    EBAMRCellData& previous = storage->get_previous();
-
-    data_ops::copy(previous, solver->get_state());
-  }
-
-  { // Backup sigma
-    EBAMRIVData& previous = m_sigma_scratch->get_previous();
-    data_ops::copy(previous, m_sigma->get_state());
-  }
-}
-
-void sisdc::restore_previous_solutions(){
-  CH_TIME("sisdc::restore_previous_solutions");
-  if(m_verbosity > 5){
-    pout() << "sisdc::restore_previous_solutions" << endl;
-  }
-  
-  // Revert cdr solutions
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_solver>& solver = solver_it();
-
-    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
-    const EBAMRCellData& previous = storage->get_previous();
-
-    data_ops::copy(solver->get_state(), previous);
-  }
-
-  {// Revert Poisson solution
-    const MFAMRCellData& previous = m_poisson_scratch->get_previous();
-    data_ops::copy(m_poisson->get_state(), previous);
-  }
-
-  // Revert RTE solutions
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
-
-    RefCountedPtr<rte_storage>& storage = sisdc::get_rte_storage(solver_it);
-    const EBAMRCellData& previous = storage->get_previous();
-
-    data_ops::copy(solver->get_state(), previous);
-  }
-
-  { // Revert sigma solution
-    const EBAMRIVData& previous = m_sigma_scratch->get_previous();
-    data_ops::copy(m_sigma->get_state(), previous);
-  }
 }
 
 void sisdc::compute_E_into_scratch(){
@@ -2067,5 +1991,223 @@ void sisdc::write_step_profile(const Real a_dt,
       << std::left << std::setw(width) << m_max_error << "\t"
       << std::left << std::setw(width) << m_dt_cfl << "\t"
       << endl;
+  }
+}
+
+void sisdc::reset_finer_flux_registers_level(const int a_lvl,
+				       const int a_coarsest_level,
+				       const int a_finest_level){
+  CH_TIME("sisdc::reset_flux_registers_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::reset_flux_registers_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  const bool has_fine = a_lvl < a_finest_level;
+  if(has_fine){
+    EBFluxRegister* fluxreg_fine = m_amr->get_flux_reg(phase)[a_lvl];
+    fluxreg_fine->setToZero();
+  }
+}
+
+void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
+				  const int             a_solver,
+				  const int             a_lvl,
+				  const int             a_coarsest_level,
+				  const int             a_finest_level,
+				  const Real            a_dt){
+
+  // Increment the coarser flux register and initialize the finer flux register. a_flux holds phi*vel which we can use
+  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_coar = a_lvl > a_coarsest_level;
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  const Interval interv(a_solver, a_solver);
+  EBFluxRegister* fluxreg_fine = NULL;
+  EBFluxRegister* fluxreg_coar = NULL;
+
+  // Remember, register on a_lvl holds flux between level a_lvl and a_lvl+1
+  if(has_fine) fluxreg_fine = m_amr->get_flux_reg(phase)[a_lvl];   
+  if(has_coar) fluxreg_coar = m_amr->get_flux_reg(phase)[a_lvl-1]; 
+
+  // Resetting the fine was done outside. 
+  // if(has_fine) {
+  //   fluxreg_fine->setToZero();
+  // }
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(phase)[a_lvl];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const EBISBox& ebisbox = ebisl[dit()];
+    const Box box          = dbl.get(dit());
+      
+    for (int dir = 0; dir < SpaceDim; dir++){
+
+      // Initialize finer flux register with flux leaving this level and into the finer level (or invalid region of that level)
+      if(has_fine) {
+	for (SideIterator sit; sit.ok(); ++sit){
+	  fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	}
+      }
+
+      // Increment coarser flux register with flux entering that level from this level 
+      if(has_coar){ // The coarser level has already been initialized with the coarse side flux
+	for (SideIterator sit; sit.ok(); ++sit){
+	  fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	}
+      }
+    }
+  }
+}
+
+void sisdc::reset_redist_registers_level(const int a_lvl){
+  CH_TIME("sisdc::reset_redist_registers_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::reset_redist_registers_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
+  level_redist.setToZero();
+}
+
+void sisdc::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl){
+  CH_TIME("cdr_solver::update_redist_register");
+  if(m_verbosity > 5){
+    pout() << "sisdc::::update_redist_register" << endl;
+  }
+
+  const Interval interv(a_solver, a_solver);
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
+  level_redist.setToZero();
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    level_redist.increment(a_mass_diff[dit()], dit(), interv);
+  }
+}
+
+void sisdc::reflux_level(EBAMRCellData& a_state,
+			 const int      a_solver,
+			 const int      a_lvl,
+			 const int      a_coarsest_level,
+			 const int      a_finest_level,
+			 const Real     a_scale){
+  CH_TIME("sisdc::reflux_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::::reflux_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  const Interval interv(a_solver, a_solver);
+  const Real dx = m_amr->get_dx()[a_lvl];
+  RefCountedPtr<EBFluxRegister >& fluxreg = m_amr->get_flux_reg(phase)[a_lvl];
+  fluxreg->reflux(*a_state[a_lvl], interv, 1./dx);
+}
+
+void sisdc::redist_level(LevelData<EBCellFAB>&       a_state,
+			 const int                   a_solver,   
+			 const LevelData<EBCellFAB>& a_weights,
+			 const int                   a_lvl,
+			 const int                   a_idx){
+  CH_TIME("sisdc::redist_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::::redist_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  const Interval interv(a_solver, a_solver);
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
+  if(m_cdr->get_mass_redist()){
+    level_redist.resetWeights(a_weights, a_solver);
+  }
+  level_redist.redistribute(a_state, interv);
+}
+
+void sisdc::predictor_advection_reaction_subcycle(const int a_m){
+  CH_TIME("sisdc::predictor_advection_reaction_subcycle");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor_advection_reaction_subcycle" << endl;
+  }
+
+  // Required storages for advection outside of cdr_solver. Don't need all of these for every species, fortunately. 
+  const int comp       = 0;
+  const int ncomp      = 1;
+  const int redist_rad = m_amr->get_redist_rad();
+
+  const phase::which_phase phase = m_cdr->get_phase();
+
+  EBAMRFluxData flux;
+  EBAMRFluxData face_state;
+  EBAMRCellData divF_c;
+  EBAMRCellData weights;
+  EBAMRIVData   divF_nc;
+  EBAMRIVData   mass_diff;
+    
+  m_amr->allocate(face_state, phase, ncomp);
+  m_amr->allocate(flux,       phase, ncomp);
+  m_amr->allocate(divF_nc,    phase, ncomp);
+  m_amr->allocate(mass_diff,  phase, ncomp);
+  m_amr->allocate(divF_c,     phase, ncomp);
+  m_amr->allocate(weights,    phase, ncomp, 2*redist_rad);
+
+  // Add the reaction terms
+  
+  MayDay::Abort("sisdc::predictor_advection_reaction_subcycle - not implemented");
+}
+
+void sisdc::subcycle_advance_amr(EBAMRCellData& a_flux,
+				 EBAMRCellData& a_face_states,
+				 EBAMRCellData& a_divF_c,
+				 EBAMRCellData& a_weights,
+				 EBAMRIVData&   a_divF_nc,
+				 EBAMRIVData&   a_mass_diff,
+				 Vector<Real>&  a_tnew,
+				 Vector<Real>&  a_told,
+				 const int      a_m,
+				 const int      a_lvl,
+				 const int      a_coarsest_level,
+				 const int      a_finest_level,
+				 const Real     a_dt){
+  CH_TIME("sisdc::subcycle_advance_amr");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_advance_amr" << endl;
+  }
+
+  Real coar_time_old = 0.0;
+  Real coar_time_new = 0.0;
+
+  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_coar = a_lvl > a_coarsest_level;
+
+  if(has_coar){
+    coar_time_old = a_told[a_lvl-1];
+    coar_time_new = a_tnew[a_lvl-1];
+  }
+
+  // Integrate this level. Begin by updating boundary conditions.
+  sisdc::reset_finer_flux_registers_level(a_lvl, a_coarsest_level, a_finest_level);
+}
+  
+void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
+				     LevelData<EBFluxFAB>&        a_face_states,
+				     LevelData<EBCellFAB>&        a_divF_c,
+				     LevelData<EBCellFAB>&        a_weights,
+				     LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				     LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				     const int                    a_m,
+				     const int                    a_lvl,
+				     const int                    a_coarsest_level,
+				     const int                    a_finest_level,
+				     const Real                   a_coar_time_old,
+				     const Real                   a_coar_time_new,
+				     const Real                   a_time,
+				     const Real                   a_dt){
+  CH_TIME("sisdc::subcycle_integrate_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_integrate_level" << endl;
   }
 }

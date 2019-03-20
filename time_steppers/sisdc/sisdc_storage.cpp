@@ -27,11 +27,10 @@ sisdc::cdr_storage::~cdr_storage(){
 void sisdc::cdr_storage::allocate_storage(const int a_p){
   m_p = a_p;
   
-  m_amr->allocate(m_previous, m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
-  m_amr->allocate(m_scratch2, m_phase, m_ncomp);
   m_amr->allocate(m_error,    m_phase, m_ncomp);
   m_amr->allocate(m_gradient, m_phase, SpaceDim);
+  m_amr->allocate(m_old,      m_phase, SpaceDim);
 
   m_amr->allocate(m_scratchIV1,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
@@ -59,11 +58,11 @@ void sisdc::cdr_storage::allocate_storage(const int a_p){
 }
 
 void sisdc::cdr_storage::deallocate_storage(){
-  m_amr->deallocate(m_previous);
+
   m_amr->deallocate(m_scratch);
-  m_amr->deallocate(m_scratch2);
   m_amr->deallocate(m_error);
   m_amr->deallocate(m_gradient);
+  m_amr->deallocate(m_old);
 
   m_amr->deallocate(m_scratchIV1);
   m_amr->deallocate(m_scratchIV2);

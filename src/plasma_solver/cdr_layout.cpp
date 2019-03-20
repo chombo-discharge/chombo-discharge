@@ -628,3 +628,8 @@ Vector<EBAMRIFData*> cdr_layout::get_domainflux(){
 
   return domainflux;
 }
+
+
+bool cdr_layout::get_mass_redist(){
+  return m_mass_redist;
+}

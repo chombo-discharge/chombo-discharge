@@ -24,10 +24,9 @@ public:
   void deallocate_storage();
 
   EBAMRCellData& get_scratch()  { return m_scratch;    }
-  EBAMRCellData& get_scratch2() { return m_scratch2;    }
-  EBAMRCellData& get_previous() { return m_previous;   }
   EBAMRCellData& get_error()    { return m_error;      }
   EBAMRCellData& get_gradient() { return m_gradient;   }
+  EBAMRCellData& get_old()      { return m_old;   }
 
   Vector<EBAMRCellData>& get_phi()     { return m_phi;     }
   Vector<EBAMRCellData>& get_phi_ast() { return m_phi_ast; }
@@ -50,13 +49,13 @@ protected:
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
-  int m_p;                   // SISDC order
+  int m_p;                       // SISDC order
+  bool m_subcycle;               // Extra storage for subcycling
 
-  EBAMRCellData m_previous; // Solution at previous time step
   EBAMRCellData m_scratch;  // Scratch data
-  EBAMRCellData m_scratch2; // Scratch data
   EBAMRCellData m_error;    // Error estimator
   EBAMRCellData m_gradient; // Storage for holding gradient
+  EBAMRCellData m_old;      // "Old solution". Only used for subcycling
 
   Vector<EBAMRCellData> m_phi;      // phi^k in the  SISDC notation
   Vector<EBAMRCellData> m_phi_ast;  // phi^(k,ast) in the  SISDC notation

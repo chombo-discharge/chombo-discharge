@@ -247,6 +247,11 @@ public:
   */
   virtual Vector<EBAMRIFData*> get_domainflux();
 
+  /*!
+    @brief Get mass redistribution
+  */
+  virtual bool get_mass_redist();
+
 protected:
 
   /*!
