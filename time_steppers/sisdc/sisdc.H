@@ -145,19 +145,10 @@ protected:
   void reconcile_integrands();
 
   // SISDC predictor routines
-  void set_dummy_error();
   void compute_FD_0();
 
-  void predictor(const Real a_time);
-  void predictor_advection_reaction(const int a_m);
-  void predictor_advection_reaction_subcycle(const int a_m);
-  void predictor_advection_reaction_nosubcycle(const int a_m);
-  void predictor_diffusion(const int a_m);
-  void predictor_diffusion_onestep(const int a_m);
-  void predictor_diffusion_build_FD(const int a_m);
-
   // SISDC corrector routines
-  void corrector_initialize_errors();
+  void initialize_errors();
   void corrector_reconcile_gl_integrands();
   void corrector(const Real a_time, const Real a_dt);
   void corrector_advection_reaction(const int a_m, const Real a_dt);
@@ -166,7 +157,7 @@ protected:
   void corrector_diffusion(const int a_m);
   void corrector_diffusion_onestep(const int a_m);
   void corrector_diffusion_build_FD(const int a_m);
-  void corrector_finalize_errors();
+  void finalize_errors();
 
   // Step size control routines
   void compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
