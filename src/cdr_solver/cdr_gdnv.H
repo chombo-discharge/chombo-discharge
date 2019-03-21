@@ -71,6 +71,28 @@ public:
     @brief Average velocities to faces
   */
   virtual void average_velo_to_faces();
+
+    /*!
+    @brief Face extrapolation method used for subcycling
+    @details This routine fills a_state with face-centered states. On CF interfaces the 
+    states used time-interpolated state from the coarse cells. Very useful routine. 
+  */
+  virtual void advect_to_faces(LevelData<EBFluxFAB>&        a_state,
+			       const LevelData<EBCellFAB>&  a_cell_state,
+			       const LevelData<EBCellFAB>*  a_state_coarse_old,
+			       const LevelData<EBCellFAB>*  a_state_coarse_new,
+			       const Real                   a_time,
+			       const Real                   a_coarse_time_old,
+			       const Real                   a_coarse_time_new,
+			       const int                    a_lvl,
+			       const Real                   a_extrap_dt = 0.0);
+
+  /*!
+    @brief Level-wise non-conservative divergence. Only for covered face stuff
+  */
+  virtual void nonconservative_divergence(LevelData<BaseIVFAB<Real> >& a_divF_nc,
+					  const LevelData<EBFluxFAB>&  a_face_state,
+					  const int                    a_lvl);
   
 protected:
 
@@ -99,19 +121,7 @@ protected:
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
-  /*!
-    @brief Face extrapolation method used for subcycling
-    @details This routine fills a_state with face-centered states. On CF interfaces the 
-    states used time-interpolated state from the coarse cells. Very useful routine. 
-  */
-  virtual void advect_to_faces(LevelData<EBFluxFAB>&        a_state,
-			       const LevelData<EBCellFAB>&  a_cell_state,
-			       const LevelData<EBCellFAB>*  a_state_coarse_old,
-			       const LevelData<EBCellFAB>*  a_state_coarse_new,
-			       const Real                   a_time,
-			       const Real                   a_coarse_time_old,
-			       const Real                   a_coarse_time_new,
-			       const int                    a_lvl);
+
 
   virtual void advance_subcycle_amr(EBAMRCellData& a_state,
 				    EBAMRFluxData& a_flux,
@@ -170,12 +180,7 @@ protected:
   */
   virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
 
-  /*!
-    @brief Level-wise non-conservative divergence. Only for covered face stuff
-  */
-  virtual void nonconservative_divergence(LevelData<BaseIVFAB<Real> >& a_divF_nc,
-					  const LevelData<EBFluxFAB>&  a_face_state,
-					  const int                    a_lvl);
+
 
   /*!
     @brief Update flux registers 

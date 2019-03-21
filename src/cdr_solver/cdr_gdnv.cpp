@@ -682,7 +682,8 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 			       const Real                   a_time,
 			       const Real                   a_coarse_time_old,
 			       const Real                   a_coarse_time_new,
-			       const int                    a_lvl){
+			       const int                    a_lvl,
+			       const Real                   a_extrap_dt){
   CH_TIME("cdr_gdnv::advect_to_faces(subcycle)");
   if(m_verbosity > 5){
     pout() << m_name + "::advect_to_faces(subcycle)" << endl;
@@ -702,16 +703,6 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
   
   leveladvect->resetBCs(bcfact);
 
-#if 0 // Debug
-  if(procID() == 0){
-    std::cout << "\tadvecting to faces on lvl = " << a_lvl
-	      << "\tcoar_T_old = " << a_coarse_time_old
-      	      << "\tcoar_T_new = " << a_coarse_time_new
-	      << "\t time = " << a_time
-	      << std::endl;
-  }
-#endif
-  const Real extrap_dt = 0.0;
   const LevelData<EBCellFAB>* source_ptr   = NULL;
   const LevelData<EBCellFAB>* coar_vel_ptr = NULL;
 
@@ -733,7 +724,7 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  a_coarse_time_old,
 				  a_coarse_time_new,
 				  a_time,
-				  extrap_dt,
+				  a_extrap_dt,
 				  source_ptr,
 				  source_ptr,
 				  source_ptr);
@@ -756,7 +747,7 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  a_coarse_time_old,
 				  a_coarse_time_new,
 				  a_time,
-				  extrap_dt,
+				  a_extrap_dt,
 				  source_ptr,
 				  source_ptr,
 				  source_ptr);

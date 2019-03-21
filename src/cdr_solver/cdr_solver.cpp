@@ -539,6 +539,16 @@ void cdr_solver::new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
   }
 }
 
+void cdr_solver::new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
+				  const LevelData<EBFluxFAB>&        a_face_state,
+				  const int                          a_lvl){
+  CH_TIME("cdr_solver::new_compute_flux(internal velocities)");
+  if(m_verbosity > 5){
+    pout() << "cdr_solver::new_compute_flux(internal velocities)" << endl;
+  }
+  cdr_solver::new_compute_flux(a_flux, a_face_state, *m_velo_face[a_lvl], *m_domainflux[a_lvl], a_lvl);
+}
+
 void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt){
   CH_TIME("cdr_solver::compute_rhs(rhs, dt)");
   if(m_verbosity > 5){

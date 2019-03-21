@@ -320,6 +320,23 @@ public:
   */
   virtual EBAMRIFData& get_domainflux();
 
+  /*!
+    @brief Fill fluxes 
+  */
+  virtual void new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
+				const LevelData<EBFluxFAB>&        a_face_state,
+				const int                          a_lvl);
+
+  /*!
+    @brief Conservative divergence over regular cells
+  */
+  virtual void consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
+
+  virtual void hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
+				 LevelData<BaseIVFAB<Real> >&       a_mass_diff,
+				 const LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				 const int                          a_lvl);
+
 protected:
   
   /*!
@@ -504,10 +521,7 @@ protected:
   */
   virtual void conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRFluxData& a_flux);
 
-  /*!
-    @brief Conservative divergence over regular cells
-  */
-  virtual void consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
+
 
 
   /*!
@@ -544,10 +558,7 @@ protected:
 				 EBAMRIVData&         a_mass_diff,
 				 const EBAMRIVData&   a_noncons_div);
 
-  virtual void hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
-				 LevelData<BaseIVFAB<Real> >&       a_mass_diff,
-				 const LevelData<BaseIVFAB<Real> >& a_divF_nc,
-				 const int                          a_lvl);
+
 
   /*!
     @brief Increment flux registers. 

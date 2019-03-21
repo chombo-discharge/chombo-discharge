@@ -222,8 +222,7 @@ protected:
   void redist_level(LevelData<EBCellFAB>&       a_state,
 		    const int                   a_solver,   
 		    const LevelData<EBCellFAB>& a_weights,
-		    const int                   a_lvl,
-		    const int                   a_idx);
+		    const int                   a_lvl);
 
 
   
