@@ -686,7 +686,8 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
   // with the operator slopes for phi, but they do adjust the slopes m_Fsig (but not m_Fsum) for sigma. Incidentally,
   // if m=0 and a_corrector=true, we can increment directly with the precomputed advection-reaction. This means that
   // we can skip the advective advance. The sigma advance is accordingly also skipped.
-  if(!(a_m == 0 && a_corrector)){
+  const bool skip = (a_m == 0 && a_corrector);
+  if(!skip){
     if(m_subcycle){
       sisdc::integrate_advection_subcycle(a_dt, a_m, a_corrector);    
     }
@@ -710,14 +711,17 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
     
     // Increment with operator slopes. m=0 and corrector is a special case where we skipped the advective advance,
     // choosing instead to use the old slopes (which did not change)
-    if(a_m == 0 && a_corrector){ // Can use the old slopes
+    if(skip){ // Can use the old slopes
       const EBAMRCellData& FAR_m = storage->get_FAR()[a_m]; // Slope, doesn't require recomputation. 
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, FAR_m, m_dtm[a_m]);
+      if(a_corrector) {
+	data_ops::copy(scratch, FAR_m);
+      }
     }
     else{ // If we made it here, phi_(m+1) = phi_m + dtm*FA(phi_m) through the integrate_advection_subcycle routine
-      EBAMRCellData& FAR_m     = storage->get_FAR()[a_m];
-      const EBAMRCellData& src = solver->get_source();
+      EBAMRCellData& FAR_m     = storage->get_FAR()[a_m]; // Currently the old slope
+      const EBAMRCellData& src = solver->get_source();    // Updated source
 
       // Increment swith source and then compute slope. 
       data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
@@ -946,7 +950,6 @@ void sisdc::initialize_errors(){
   data_ops::set_value(error, 0.0);
   data_ops::incr(error, sigma_final, -1.0);
 }
-
 
 void sisdc::finalize_errors(){
   CH_TIME("sisdc::corrector_finalize_errors");
