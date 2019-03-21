@@ -27,10 +27,8 @@ public:
   EBAMRCellData& get_error()    { return m_error;      }
   EBAMRCellData& get_gradient() { return m_gradient;   }
   EBAMRCellData& get_old()      { return m_old;        }
-  EBAMRCellData& get_phi_dag()  { return m_phi_dag;    }
 
   Vector<EBAMRCellData>& get_phi()     { return m_phi;     }
-  Vector<EBAMRCellData>& get_phi_ast() { return m_phi_ast; }
   Vector<EBAMRCellData>& get_FAR()     { return m_FAR;     }
   Vector<EBAMRCellData>& get_FD()      { return m_FD;      }
   Vector<EBAMRCellData>& get_F()       { return m_F;       }
@@ -57,10 +55,8 @@ protected:
   EBAMRCellData m_error;    // Error estimator
   EBAMRCellData m_gradient; // Storage for holding gradient
   EBAMRCellData m_old;      // "Old solution". Only used for subcycling
-  EBAMRCellData m_phi_dag;  // Extra storage for diffusion advance
   
   Vector<EBAMRCellData> m_phi;      // phi^k in the  SISDC notation
-  Vector<EBAMRCellData> m_phi_ast;  // phi^(k,ast) in the  SISDC notation
   Vector<EBAMRCellData> m_FAR;      // FAR(phi^k) in the SISDC notation
   Vector<EBAMRCellData> m_FD;       // FD(phi^k) in the SISDC notation
   Vector<EBAMRCellData> m_F;        // F(phi^k) in the SISDC notation
@@ -148,9 +144,6 @@ public:
   EBAMRIVData& get_error(){   return m_error; }
 
   Vector<EBAMRIVData>& get_sigma(){ return m_sigma;}
-  Vector<EBAMRIVData>& get_Fsig(){  return m_Fsig; }
-  Vector<EBAMRIVData>& get_Fsum(){  return m_Fsum; }
-
   Vector<EBAMRIVData>& get_Fnew(){  return m_Fnew; }
   Vector<EBAMRIVData>& get_Fold(){  return m_Fold; }
 
@@ -167,9 +160,6 @@ protected:
   EBAMRIVData m_error;           // Error
 
   Vector<EBAMRIVData> m_sigma;   // sigma^k in the SISDC notation
-  Vector<EBAMRIVData> m_Fsig;    // F(sigma^k) in the SISDC notation
-  Vector<EBAMRIVData> m_Fsum;    // F(sigma^k) in the SISDC, but used for the integrand
-
   Vector<EBAMRIVData> m_Fnew;    // New operator lsopes
   Vector<EBAMRIVData> m_Fold;    // Lagged operator slopes
 };

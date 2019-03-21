@@ -664,6 +664,7 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
       if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
       if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
       if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
+      if(m_compute_D)      sisdc::update_diffusion_coefficients();
 
       // Update boundary conditions for cdr and sigma equations. 
       sisdc::compute_cdr_eb_states(cdr_densities_mp1);
@@ -720,7 +721,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
 
       // Increment swith source and then compute slope. 
       data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
-      if(a_corrector){ // Back up the old slope first, we need it for the lagged term
+      if(a_corrector){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
       }
       data_ops::copy(FAR_m, phi_m1);            // FAR_m = (phi_(m+1) - phi_m)/dtm
@@ -913,7 +914,6 @@ void sisdc::reconcile_integrands(){
   }
 
   // Compute Fsig_p - that wasn't done in the predictor either
-  EBAMRIVData& Fsig_p = m_sigma_scratch->get_Fsig()[m_p];
   EBAMRIVData& Fnew_p = m_sigma_scratch->get_Fnew()[m_p];
   m_sigma->compute_rhs(Fnew_p);
   for (int m = 0; m <= m_p; m++){
