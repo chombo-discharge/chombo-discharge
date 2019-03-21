@@ -36,8 +36,8 @@ sisdc::sisdc(){
   m_new_dt        = 1.234567E89;
   m_max_tries     = 1;
   m_min_corr      = 1;
-  m_upwd_idx      = 0;
   m_extrap_dt     = 0.5;
+  m_error_idx     = -1;
 
   m_which_nodes   = "lobatto";
 
@@ -79,6 +79,7 @@ sisdc::sisdc(){
     pp.query("num_corrections", m_num_diff_corr);
     pp.query("max_tries",       m_max_tries);
     pp.query("extrap_dt",       m_extrap_dt);
+    pp.query("error_index",     m_error_idx);
 
     if(pp.contains("subcycle")){
       pp.get("subcycle", str);
@@ -774,7 +775,7 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
   //       The lagged terms are not a part of this routine. 
 
   if(a_m == 0 && a_corrector){
-    MayDay::Abort("sisdc::integrate_advection_nosubcycle - m=0 and corrector=true should never happen");
+    MayDay::Abort("sisdc::integrate_advection_nosubcycle - (m==0 && corrector==true) should never happen");
   }
 
   // Advance cdr equations
@@ -979,15 +980,16 @@ void sisdc::finalize_errors(){
     m_max_error = Max(m_cdr_error[idx], m_max_error);
   }
 
+  // Override if
+  if(m_error_idx >= 0){
+    m_max_error = m_cdr_error[m_error_idx];
+  }
+
   // Compute the surface charge conservation error
   EBAMRIVData& error = m_sigma_scratch->get_error();
   const EBAMRIVData& sigma_final = m_sigma_scratch->get_sigma()[m_p];
   data_ops::incr(error, sigma_final, 1.0);
-  m_sigma_error = 0.0;
-
-#if 1 // Debug
-  if(procID() == 0) std::cout << m_cdr_error << std::endl;
-#endif
+  m_sigma_error = 0.0; // I don't think this is ever used...
 }
 
 void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections){

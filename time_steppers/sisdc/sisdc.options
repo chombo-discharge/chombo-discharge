@@ -34,6 +34,7 @@ sisdc.max_tries       = 100      # Maximum number of tries (for step rejection)
 sisdc.min_cfl         = 0.1      # Minimum CFL
 sisdc.max_cfl         = 0.9      # Maximum CFL
 sisdc.max_error       = 1.E-4    # Error threshold
+sisdc.error_index     = -1       # Error index. If -1, evaluate all CDR solvers	
 sisdc.safety          = 0.95     # Safety factor for time stepping
 
 # ---------------------------------------------------------	

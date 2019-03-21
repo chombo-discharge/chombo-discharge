@@ -62,7 +62,7 @@ protected:
   int m_error_norm;
   int m_num_diff_corr;
   int m_min_corr;
-  int m_upwd_idx;
+  int m_error_idx;
 
   Real m_minCFL;
   Real m_maxCFL;
