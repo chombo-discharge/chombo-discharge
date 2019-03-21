@@ -137,17 +137,9 @@ protected:
   void copy_phi_p_to_cdr();
   void copy_sigma_p_to_sigma();
 
-  void integrate(const Real a_dt, const Real a_time, const bool a_corrector);
-  void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_diffusion(const Real a_dt, const int a_m, const bool a_corrector);
-  void reconcile_integrands();
-
   // SISDC predictor routines
   void set_dummy_error();
-  void compute_FD_0();
-
+  void predictor_compute_FD_0();
   void predictor(const Real a_time);
   void predictor_advection_reaction(const int a_m);
   void predictor_advection_reaction_subcycle(const int a_m);
@@ -158,6 +150,7 @@ protected:
 
   // SISDC corrector routines
   void corrector_initialize_errors();
+  void corrector_compute_FAR_p();
   void corrector_reconcile_gl_integrands();
   void corrector(const Real a_time, const Real a_dt);
   void corrector_advection_reaction(const int a_m, const Real a_dt);
@@ -209,6 +202,63 @@ protected:
 			  const int  a_substeps,
 			  const int  a_corrections,
 			  const int  a_rejections);
+
+  // Subcycling routines
+  void reset_finer_flux_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level);
+  void reset_redist_registers_level(const int a_lvl);
+  void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl);
+  void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
+			     const int             a_solver,
+			     const int             a_lvl,
+			     const int             a_coarsest_level,
+			     const int             a_finest_level,
+			     const Real            a_dt);
+  void reflux_level(EBAMRCellData& a_state,
+		    const int      a_solver,
+		    const int      a_lvl,
+		    const int      a_coarsest_level,
+		    const int      a_finest_level,
+		    const Real     a_scale);
+  void redist_level(LevelData<EBCellFAB>&       a_state,
+		    const int                   a_solver,   
+		    const LevelData<EBCellFAB>& a_weights,
+		    const int                   a_lvl);
+
+
+  
+  void subcycle_advect_amr(EBAMRFluxData& a_flux,
+			    EBAMRFluxData& a_face_states,
+			    EBAMRCellData& a_divF_c,
+			    EBAMRCellData& a_weights,
+			    EBAMRIVData&   a_divF_nc,
+			    EBAMRIVData&   a_mass_diff,
+			    Vector<Real>&  a_tnew,
+			    Vector<Real>&  a_told,
+			    const int      a_m,
+			    const int      a_lvl,
+			    const int      a_coarsest_lvl,
+			    const int      a_finest_level,
+			    const Real     a_dt);
+
+  void subcycle_compute_advection_velocities();
+  
+  void subcycle_copy_current_to_old_states(const int a_m, const int a_lvl);
+  
+  void subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
+				LevelData<EBFluxFAB>&        a_face_states,
+				LevelData<EBCellFAB>&        a_divF_c,
+				LevelData<EBCellFAB>&        a_weights,
+				LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				const int                    a_m,
+				const int                    a_lvl,
+				const int                    a_coarsest_level,
+				const int                    a_finest_level,
+				const Real                   a_coar_time_old,
+				const Real                   a_coar_time_new,
+				const Real                   a_time,
+				const Real                   a_dt);
+				 
 };
 
 #endif

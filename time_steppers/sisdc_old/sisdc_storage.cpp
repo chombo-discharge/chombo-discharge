@@ -31,7 +31,6 @@ void sisdc::cdr_storage::allocate_storage(const int a_p){
   m_amr->allocate(m_error,    m_phase, m_ncomp);
   m_amr->allocate(m_gradient, m_phase, SpaceDim);
   m_amr->allocate(m_old,      m_phase, SpaceDim);
-  m_amr->allocate(m_phi_dag,  m_phase, SpaceDim);
 
   m_amr->allocate(m_scratchIV1,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV2,  m_phase, m_ncomp);
@@ -64,7 +63,6 @@ void sisdc::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_error);
   m_amr->deallocate(m_gradient);
   m_amr->deallocate(m_old);
-  m_amr->deallocate(m_phi_dag);
 
   m_amr->deallocate(m_scratchIV1);
   m_amr->deallocate(m_scratchIV2);
@@ -179,15 +177,11 @@ void sisdc::sigma_storage::allocate_storage(const int a_p){
   m_sigma.resize(1+m_p);
   m_Fsig.resize(1+m_p);
   m_Fsum.resize(1+m_p);
-  m_Fnew.resize(1+m_p);
-  m_Fold.resize(1+m_p);
 
   for (int m = 0; m <= m_p; m++){
     m_amr->allocate(m_sigma[m], m_phase, m_ncomp);
     m_amr->allocate(m_Fsig[m],  m_phase, m_ncomp);
     m_amr->allocate(m_Fsum[m],  m_phase, m_ncomp);
-    m_amr->allocate(m_Fnew[m],  m_phase, m_ncomp);
-    m_amr->allocate(m_Fold[m],  m_phase, m_ncomp);
   }
 }
 
@@ -200,13 +194,9 @@ void sisdc::sigma_storage::deallocate_storage(){
     m_amr->deallocate(m_sigma[m]);
     m_amr->deallocate(m_Fsig[m]);
     m_amr->deallocate(m_Fsum[m]);
-    m_amr->deallocate(m_Fnew[m]);
-    m_amr->deallocate(m_Fold[m]);
   }
 
   m_sigma.resize(0);
   m_Fsig.resize(0);
   m_Fsum.resize(0);
-  m_Fnew.resize(0);
-  m_Fold.resize(0);
 }

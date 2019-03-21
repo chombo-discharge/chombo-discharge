@@ -2,7 +2,7 @@
   @file   sisdc.cpp
   @brief  Implementation of sisdc.H
   @author Robert Marskar
-n  @date   Feb. 2019
+  @date   Feb. 2019
 */
 
 #include "sisdc.H"
@@ -213,11 +213,6 @@ sisdc::sisdc(){
   // Setup nodes
   sisdc::setup_quadrature_nodes(m_p);
   sisdc::setup_qmj(m_p);
-
-  if(m_subcycle){
-    pout() << "sisdc::sisdc - subcycling in time not (yet) supported. Turning it off" << endl;
-    m_subcycle = false;
-  }
 }
 
 sisdc::~sisdc(){
@@ -417,14 +412,14 @@ void sisdc::setup_subintervals(const Real a_time, const Real a_dt){
   // m_nodes are Gauss-Lobatto nodes on [-1,1]. These must
   // be shifted to [t_n,t_n + a_dt]
   m_tm.resize(m_nodes.size());
-  Vector<Real> shifted_nodes = m_nodes;
-  for (int m = 0; m < shifted_nodes.size(); m++){
-    shifted_nodes[m] += 1.0;    // [0,2]
-    shifted_nodes[m] *= 0.5;    // [0,1]
-    shifted_nodes[m] *= a_dt;   // [0, a_dt]
-    shifted_nodes[m] += a_time; // [a_time, a_time + a_dt]
+  Vector<Real> shifted_gl_nodes = m_nodes;
+  for (int m = 0; m < shifted_gl_nodes.size(); m++){
+    shifted_gl_nodes[m] += 1.0;    // [0,2]
+    shifted_gl_nodes[m] *= 0.5;    // [0,1]
+    shifted_gl_nodes[m] *= a_dt;   // [0, a_dt]
+    shifted_gl_nodes[m] += a_time; // [a_time, a_time + a_dt]
 
-    m_tm[m] = shifted_nodes[m];
+    m_tm[m] = shifted_gl_nodes[m];
   }
 
   // dtm = t_{m+1} - t_m. Order 1 is special since we only use the SISDC predictor from a second order formulation
@@ -501,11 +496,22 @@ Real sisdc::advance(const Real a_dt){
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //        advancement. If you think that this may not be the case, activate the debugging below
   // ---------------------------------------------------------------------------------------------------
+  { // Debug
+#if 0
+    sisdc::compute_E_into_scratch();
+    sisdc::compute_cdr_gradients();
+    sisdc::compute_cdr_velo(m_time);
+    time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+    sisdc::compute_cdr_sources(m_time);
+#endif
+  }
 
-  // Initialize integrations. If we do corrections, we need FD(phi_0) since this is implicit
+  // Copy to predictor
   sisdc::copy_cdr_to_phi_m0();
   sisdc::copy_sigma_to_sigma_m0();
-  if(m_k > 0) sisdc::compute_FD_0();
+
+  // If we do corrections, we need FD(phi_0). Compute that immediately.
+  if(m_k > 0) sisdc::predictor_compute_FD_0();
 
   // SISDC advance
   Real first_dt       = a_dt;
@@ -519,8 +525,7 @@ Real sisdc::advance(const Real a_dt){
     sisdc::setup_subintervals(m_time, actual_dt);
 
     sisdc::set_dummy_error();
-    //    sisdc::predictor(m_time); // SISDC predictor
-    sisdc::integrate(a_dt, m_time, false);
+    sisdc::predictor(m_time); // SISDC predictor
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
       num_corrections++;
       sisdc::corrector_initialize_errors();
@@ -557,17 +562,33 @@ Real sisdc::advance(const Real a_dt){
     }
   }
 
+
+
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
   sisdc::copy_sigma_p_to_sigma();
   sisdc::update_poisson();
   sisdc::update_rte(m_time + actual_dt);
 
-  // Always recompute source terms and velocities for the next time step. These were computed ea
+
+  // Always recompute source terms and velocities for the next time step
   sisdc::compute_cdr_gradients();
   sisdc::compute_cdr_velo(m_time + actual_dt);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
   sisdc::compute_cdr_sources(m_time + actual_dt);
+
+  {// Debug, copy error to solver
+#if 0
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>&  solver  = solver_it();
+      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi = solver->get_state();
+      const EBAMRCellData& error = storage->get_error();
+      data_ops::copy(phi, error);
+    }
+#endif
+  }
 
   // Profile step
   if(m_print_report)  sisdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
@@ -609,7 +630,7 @@ void sisdc::set_dummy_error(){
   m_max_error = 1.234567E89;
 }
 
-void sisdc::compute_FD_0(){
+void sisdc::predictor_compute_FD_0(){
   CH_TIME("sisdc::predictor_compute_FD_0");
   if(m_verbosity > 5){
     pout() << "sisdc::predictor_compute_FD_0" << endl;
@@ -626,244 +647,6 @@ void sisdc::compute_FD_0(){
     tgasolver->compute_divD(FD_0, phi_0);
   }
 }
-
-void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector){
-  CH_TIME("sisdc::integrate");
-  if(m_verbosity > 5){
-    pout() << "sisdc::integrate" << endl;
-  }
-
-  // 1. The first time we enter this routine, source terms and velocities were updated.
-  // 2. For further calls, source terms and velocities have been overwritten, but since the explicit
-  //    operator slopes do not change, this is perfectly fine. We just increment with the lagged terms. 
-
-  // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
-  // which is what we need to do at the start of the time step. 
-  sisdc::compute_E_into_scratch();
-  sisdc::compute_cdr_eb_states();
-  sisdc::compute_cdr_fluxes(a_time);
-  sisdc::compute_cdr_domain_states();
-  sisdc::compute_cdr_domain_fluxes(a_time);
-  sisdc::compute_sigma_flux();
-
-  // We begin with phi[0] = phi(t_n). Then update phi[m+1].
-  for(int m = 0; m < m_p; m++){
-
-    // This does the actual advance and updates at (m+1). For sigma, the lagged terms come in 
-    // through the advection step. For phi, these are put in the diffusion step.
-
-    // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and advection-reaction
-    sisdc::integrate_advection_reaction(a_dt, m, a_corrector);
-
-    // This does the diffusion advance. It also adds in the lagged diffusion terms before the implicit diffusion solve
-    sisdc::integrate_diffusion(a_dt, m, a_corrector);
-
-    // After the diffusion step we should update source terms and boundary conditions for the next step. We don't
-    // do this on the last step. This is done either in the reconcile_integrands routine, or after SISDC is done
-    // with its substebs. 
-    const bool last = (m == m_p-1);
-    if(!last){
-      Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(m+1);
-      EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(m+1);
-      const Real t_mp1 = m_tm[m+1];
-
-      // Update electric field, RTE equations, source terms, and velocities. No need to update diffusion since
-      // that is done in the predictor_diffusion routine
-      if(m_consistent_E)   sisdc::update_poisson(cdr_densities_mp1, sigma_mp1);
-      if(m_consistent_rte) sisdc::update_rte(cdr_densities_mp1, t_mp1);
-      if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
-      if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
-      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
-
-      // Update boundary conditions for cdr and sigma equations. 
-      sisdc::compute_cdr_eb_states(cdr_densities_mp1);
-      sisdc::compute_cdr_fluxes(cdr_densities_mp1, t_mp1);
-      sisdc::compute_cdr_domain_states(cdr_densities_mp1);
-      sisdc::compute_cdr_domain_fluxes(cdr_densities_mp1, t_mp1);
-      sisdc::compute_sigma_flux();
-    }
-  }
-}
-
-void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_corrector){
-  CH_TIME("sisdc::integrate_advection_reaction");
-  if(m_verbosity > 5){
-    pout() << "sisdc::integrate_advection_reaction" << endl;
-  }
-
-  // Advance phi_(m+1) = phi_m + dtm*F_A using either subcyling or not. These routines do nothing
-  // with the operator slopes for phi, but they do adjust the slopes m_Fsig (but not m_Fsum) for sigma. Incidentally,
-  // if m=0 and a_corrector=true, we can increment directly with the precomputed advection-reaction. This means that
-  // we can skip the advective advance. The sigma advance is accordingly also skipped.
-  if(!(a_m == 0 && a_corrector)){
-    if(m_subcycle){
-      sisdc::integrate_advection_subcycle(a_dt, a_m, a_corrector);    
-    }
-    else{
-      sisdc::integrate_advection_nosubcycle(a_dt, a_m, a_corrector);
-    }
-  }
-
-  // Add in the reaction term and then compute the operator slopes.
-  // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
-  // advection-reaction operator slope. In this case phi_(m+1) is bogus and we need to recompute it. Otherwise,
-  // phi_(m+1) = phi_m + dtm*FA_m, and we just increment with the reaction operator. 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-
-    // phi_(m+1) = phi_M
-    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-    EBAMRCellData& scratch     = storage->get_scratch();
-    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
-    
-    // Increment with operator slopes. m=0 and corrector is a special case where we skipped the advective advance,
-    // choosing instead to use the old slopes (which did not change)
-    if(a_m == 0 && a_corrector){ // Can use the old slopes
-      const EBAMRCellData& FAR_m = storage->get_FAR()[a_m]; // Slope, doesn't require recomputation. 
-      data_ops::copy(phi_m1, phi_m);
-      data_ops::incr(phi_m1, FAR_m, m_dtm[a_m]);
-    }
-    else{ // If we made it here, phi_(m+1) = phi_m + dtm*FA(phi_m) through the integrate_advection_subcycle routine
-      EBAMRCellData& FAR_m     = storage->get_FAR()[a_m];
-      const EBAMRCellData& src = solver->get_source();
-
-      // Increment swith source and then compute slope. 
-      data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
-      if(a_corrector){ // Back up the old slope first, we need it for the lagged term
-	data_ops::copy(scratch, FAR_m);
-      }
-      data_ops::copy(FAR_m, phi_m1);            // FAR_m = (phi_(m+1) - phi_m)/dtm
-      data_ops::incr(FAR_m, phi_m, -1.0);       // :
-      data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
-    }
-
-    // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
-    // FAR_m above after the advection-reaction advance, but we also backed up the old term into scratch. 
-    // diffusion solve so only 
-    if(a_corrector){
-      data_ops::incr(phi_m1, scratch, -m_dtm[a_m]); // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k)
-      sisdc::quad(scratch, storage->get_F(), a_m);  // Does the quadrature of the lagged operator slopes. 
-      data_ops::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
-    }
-  }
-
-  // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
-  EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
-  const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
-  if(a_m == 0 && a_corrector){ 
-    const EBAMRIVData& Fsig_m = m_sigma_scratch->get_Fold()[a_m]; // Here, we should be able to use either Fold or Fnew
-    data_ops::copy(sigma_m1, sigma_m);                            // since Fsig_0 is only computed once. 
-    data_ops::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
-  }
-
-  if(a_corrector){ // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m. 
-    EBAMRIVData& Fsig_lag = m_sigma_scratch->get_Fold()[a_m];
-    data_ops::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
-
-    // Add in the quadrature term
-    EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
-    sisdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
-    data_ops::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
-  }      
-}
-
-void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_corrector){
-  CH_TIME("sisdc::integrate_advection_nosubcycle");
-  if(m_verbosity > 5){
-    pout() << "sisdc::integrate_advection_nosubcycle" << endl;
-  }
-
-  // TLDR; This routine should do phi_(m+1) = phi_m + dtm*FA_m, and sigma_(m+1) = sigma_m + dt*Fsig_m.
-  //       It also computes the sigma slope.
-  //
-  //       The lagged terms are not a part of this routine. 
-
-  if(a_m == 0 && a_corrector){
-    MayDay::Abort("sisdc::integrate_advection_nosubcycle - m=0 and corrector=true should never happen");
-  }
-
-  // Advance cdr equations
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-
-    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-    EBAMRCellData& scratch     = storage->get_scratch();
-    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
-
-    const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
-    solver->compute_divF(scratch, phi_m, extrap_dt, true);                     // scratch =  Div(v_m*phi_m^(k+1))
-
-    data_ops::copy(phi_m1, phi_m);
-    data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
-
-    m_amr->average_down(phi_m1, m_cdr->get_phase());
-    m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
-    data_ops::floor(phi_m1, 0.0);
-  }
-
-  // Update sigma. Also compute the new slope.
-  EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
-  EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
-  const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
-  m_sigma->compute_rhs(Fsig_new);
-  data_ops::copy(sigma_m1, sigma_m);
-  data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
-}
-
-void sisdc::integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_corrector){
-  CH_TIME("sisdc::integrate_advection_nosubcycle");
-  if(m_verbosity > 5){
-    pout() << "sisdc::integrate_advection_nosubcycle" << endl;
-  }
-
-  MayDay::Abort("sisdc::integrate_advection_subcycle - not implemented");
-}
-
-void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_corrector){
-  CH_TIME("sisdc::integrate_diffusion");
-  if(m_verbosity > 5){
-    pout() << "sisdc::integrate_diffusion" << endl;
-  }
-
-  // TLDR: We're solving
-  //
-  // phi_(m+1)^(k+1) = phi_(m)^(k+1,\ast) + dtm*FD_(m+1)^(k+1) + sources. 
-  //
-  // This routine does not modify FD_(m+1)^k. This is replaced by FD_(m+1)^(k+1) later on. 
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
-    
-    if(solver->is_diffusive()){
-      EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1]; // 
-      const EBAMRCellData& phi_m = storage->get_phi()[a_m];
-
-      // Build the diffusion source term
-      EBAMRCellData& source  = storage->get_scratch();
-      data_ops::copy(source, phi_m1);      // Copy initial solutions
-      data_ops::incr(source, phi_m, -1.0); // Copy initial solutions
-      data_ops::scale(source, 1./m_dtm[a_m]);
-      if(a_corrector){
-	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
-	data_ops::incr(source, FD_m1k, -1.0);
-      }
-
-      // Solve
-      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->advance_euler(phi_m1, phi_m, source, m_dtm[a_m]); // Source is -Fd_(m+1)^k
-      m_amr->average_down(phi_m1, m_cdr->get_phase());
-      m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
-      data_ops::floor(phi_m1, 0.0);
-
-
-      // Update the operator slope
-      EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
-      tgasolver->compute_divD(FD_m1k, phi_m1);
-    }
-  }
-} 
 
 void sisdc::predictor(const Real a_time){
   CH_TIME("sisdc::predictor");
@@ -925,7 +708,7 @@ void sisdc::predictor_advection_reaction(const int a_m){
     sisdc::predictor_advection_reaction_nosubcycle(a_m);
   }
   else{
-    //    sisdc::predictor_advection_reaction_subcycle(a_m);
+    sisdc::predictor_advection_reaction_subcycle(a_m);
   }
 }
 
@@ -2207,5 +1990,408 @@ void sisdc::write_step_profile(const Real a_dt,
       << std::left << std::setw(width) << m_max_error << "\t"
       << std::left << std::setw(width) << m_dt_cfl << "\t"
       << endl;
+  }
+}
+
+void sisdc::reset_finer_flux_registers_level(const int a_lvl,
+					     const int a_coarsest_level,
+					     const int a_finest_level){
+  CH_TIME("sisdc::reset_flux_registers_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::reset_flux_registers_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  const bool has_fine = a_lvl < a_finest_level;
+  if(has_fine){
+    EBFluxRegister* fluxreg_fine = m_amr->get_flux_reg(phase)[a_lvl];
+    fluxreg_fine->setToZero();
+  }
+}
+
+void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
+				  const int             a_solver,
+				  const int             a_lvl,
+				  const int             a_coarsest_level,
+				  const int             a_finest_level,
+				  const Real            a_dt){
+
+  // Increment the coarser flux register and initialize the finer flux register. a_flux holds phi*vel which we can use
+  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_coar = a_lvl > a_coarsest_level;
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  const Interval interv(a_solver, a_solver);
+  EBFluxRegister* fluxreg_fine = NULL;
+  EBFluxRegister* fluxreg_coar = NULL;
+
+  // Remember, register on a_lvl holds flux between level a_lvl and a_lvl+1
+  if(has_fine) fluxreg_fine = m_amr->get_flux_reg(phase)[a_lvl];   
+  if(has_coar) fluxreg_coar = m_amr->get_flux_reg(phase)[a_lvl-1]; 
+
+  // Resetting the fine was done outside. 
+  // if(has_fine) {
+  //   fluxreg_fine->setToZero();
+  // }
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(phase)[a_lvl];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const EBISBox& ebisbox = ebisl[dit()];
+    const Box box          = dbl.get(dit());
+      
+    for (int dir = 0; dir < SpaceDim; dir++){
+
+      // Initialize finer flux register with flux leaving this level and into the finer level (or invalid region of that level)
+      if(has_fine) {
+	for (SideIterator sit; sit.ok(); ++sit){
+	  fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	}
+      }
+
+      // Increment coarser flux register with flux entering that level from this level 
+      if(has_coar){ // The coarser level has already been initialized with the coarse side flux
+	for (SideIterator sit; sit.ok(); ++sit){
+	  fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	}
+      }
+    }
+  }
+}
+
+void sisdc::reset_redist_registers_level(const int a_lvl){
+  CH_TIME("sisdc::reset_redist_registers_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::reset_redist_registers_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
+  level_redist.setToZero();
+}
+
+void sisdc::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl){
+  CH_TIME("cdr_solver::update_redist_register");
+  if(m_verbosity > 5){
+    pout() << "sisdc::::update_redist_register" << endl;
+  }
+
+  const Interval interv(a_solver, a_solver);
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
+  level_redist.setToZero();
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    level_redist.increment(a_mass_diff[dit()], dit(), interv);
+  }
+}
+
+void sisdc::reflux_level(EBAMRCellData& a_state,
+			 const int      a_solver,
+			 const int      a_lvl,
+			 const int      a_coarsest_level,
+			 const int      a_finest_level,
+			 const Real     a_scale){
+  CH_TIME("sisdc::reflux_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::::reflux_level" << endl;
+  }
+  
+  const phase::which_phase phase = m_cdr->get_phase();
+  const Interval soln_interv(0, 0);
+  const Interval flux_interv(a_solver, a_solver);
+  const Real dx = m_amr->get_dx()[a_lvl];
+  RefCountedPtr<EBFluxRegister >& fluxreg = m_amr->get_flux_reg(phase)[a_lvl];
+  fluxreg->reflux(*a_state[a_lvl], soln_interv, flux_interv, 1./dx);
+}
+
+void sisdc::redist_level(LevelData<EBCellFAB>&       a_state,
+			 const int                   a_solver,   
+			 const LevelData<EBCellFAB>& a_weights,
+			 const int                   a_lvl){
+  CH_TIME("sisdc::redist_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::::redist_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  const Interval solver_interv(0, 0);
+  const Interval redist_interv(a_solver, a_solver);
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
+  if(m_cdr->get_mass_redist()){
+    level_redist.resetWeights(a_weights, a_solver);
+  }
+  level_redist.redistribute(a_state, redist_interv, solver_interv);
+}
+
+void sisdc::predictor_advection_reaction_subcycle(const int a_m){
+  CH_TIME("sisdc::predictor_advection_reaction_subcycle");
+  if(m_verbosity > 5){
+    pout() << "sisdc::predictor_advection_reaction_subcycle" << endl;
+  }
+
+  // Required storages for advection outside of cdr_solver. Don't need all of these for every species, fortunately. 
+  const int comp       = 0;
+  const int ncomp      = 1;
+  const int redist_rad = m_amr->get_redist_rad();
+
+  const phase::which_phase phase = m_cdr->get_phase();
+
+  // These are all temporaries that are required for evaluating the advective derivative. 
+  EBAMRFluxData flux;
+  EBAMRFluxData face_state;
+  EBAMRCellData divF_c;
+  EBAMRCellData weights;
+  EBAMRIVData   divF_nc;
+  EBAMRIVData   mass_diff;
+    
+  m_amr->allocate(face_state, phase, ncomp);
+  m_amr->allocate(flux,       phase, ncomp);
+  m_amr->allocate(divF_nc,    phase, ncomp);
+  m_amr->allocate(mass_diff,  phase, ncomp);
+  m_amr->allocate(divF_c,     phase, ncomp);
+  m_amr->allocate(weights,    phase, ncomp, 2*redist_rad);
+
+  // Compute advection velocities. These don't change.
+  sisdc::subcycle_compute_advection_velocities();
+
+  const int coar_lvl = 0;
+  const int fine_lvl = m_amr->get_finest_level();
+
+  Vector<Real> tnew(1 + fine_lvl, m_tm[a_m]);
+  Vector<Real> told(1 + fine_lvl, m_tm[a_m]);
+
+  // Advance phi[a_m] to phi[a_m+1] using subcycling
+  sisdc::subcycle_advect_amr(flux, face_state, divF_c, weights, divF_nc, mass_diff, tnew, told,
+			     a_m, coar_lvl, coar_lvl, fine_lvl, m_dtm[a_m]);
+
+  // Add the reaction terms for the final update and compute the operator slope
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_mp1     = storage->get_phi()[a_m+1]; // phi^(m+1). Contains the advected update.
+    EBAMRCellData& ast         = storage->get_phi_ast()[a_m+1];
+    const EBAMRCellData& phi_m = storage->get_phi()[a_m];   // phi^(m). 
+    const EBAMRCellData& src   = solver->get_source();      // S_m
+
+    data_ops::incr(phi_mp1, src, m_dtm[a_m]);    // phi_(m+1) = phi_m + dt_m*FAR(phi_m)
+
+    m_amr->average_down(phi_mp1, m_cdr->get_phase());
+    m_amr->interp_ghost(phi_mp1, m_cdr->get_phase());
+
+    data_ops::floor(phi_mp1, 0.0);
+
+    // Compute the advection-reaction operator slope
+    EBAMRCellData& FARm = storage->get_FAR()[a_m];
+    data_ops::copy(FARm, phi_mp1);
+    data_ops::incr(FARm, phi_m, -1.0);
+    data_ops::scale(FARm, 1./m_dtm[a_m]);
+
+
+    // Copy advection-reaction advance to phi_ast
+    data_ops::copy(ast, phi_mp1);
+  }
+}
+
+void sisdc::subcycle_compute_advection_velocities(){
+  CH_TIME("sisdc::subcycle_compute_advection_velocities");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_compute_advection_velocities" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    cdr_gdnv* gdnv = dynamic_cast<cdr_gdnv*>(&(*solver));
+    if(gdnv == NULL){
+      MayDay::Abort("sisdc::subcycle_compute_advection_velocities - Only cdr_gdnv can subcycle these days...");
+    }
+    else{
+      gdnv->average_velo_to_faces();
+    }
+  }
+}
+    
+void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
+				EBAMRFluxData& a_face_states,
+				EBAMRCellData& a_divF_c,
+				EBAMRCellData& a_weights,
+				EBAMRIVData&   a_divF_nc,
+				EBAMRIVData&   a_mass_diff,
+				Vector<Real>&  a_tnew,
+				Vector<Real>&  a_told,
+				const int      a_m,
+				const int      a_lvl,
+				const int      a_coarsest_level,
+				const int      a_finest_level,
+				const Real     a_dt){
+  CH_TIME("sisdc::subcycle_advect_amr");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_advect_amr" << endl;
+  }
+
+  Real coar_time_old = 0.0;
+  Real coar_time_new = 0.0;
+
+  const bool has_fine = a_lvl < a_finest_level;
+  const bool has_coar = a_lvl > a_coarsest_level;
+
+  if(has_coar){
+    coar_time_old = a_told[a_lvl-1];
+    coar_time_new = a_tnew[a_lvl-1];
+  }
+
+  // Prepare level solve
+  sisdc::subcycle_copy_current_to_old_states(a_m, a_lvl);
+  sisdc::reset_finer_flux_registers_level(a_lvl, a_coarsest_level, a_finest_level);
+  sisdc::reset_redist_registers_level(a_lvl);
+
+  // Update boundary conditions on this level
+  MayDay::Warning("sisdc::subcycle_advect_amr - we're missing bounadry conditions");
+
+
+  // Level solve
+#if 1
+  if(procID() == 0) pout() << "Integrating level = " << a_lvl << endl;
+#endif
+  sisdc::subcycle_integrate_level(*a_flux[a_lvl],
+				  *a_face_states[a_lvl],
+				  *a_divF_c[a_lvl],
+				  *a_weights[a_lvl],
+				  *a_mass_diff[a_lvl],
+				  *a_divF_nc[a_lvl],
+				  a_m,
+				  a_lvl,
+				  a_coarsest_level,
+				  a_finest_level,
+				  coar_time_old,
+				  coar_time_new,
+				  a_tnew[a_lvl],
+				  a_dt);
+#if 1
+  if(procID() == 0) pout() << "Done integrating level = " << a_lvl << endl;
+#endif
+
+  // We have advance this level. Updates new times
+  a_told[a_lvl] = a_tnew[a_lvl];
+  a_tnew[a_lvl] = a_tnew[a_lvl] + a_dt;
+
+  // If there is a coarse level, advance it nref times so that we synchronize.
+  if(has_fine){
+    const int nref    = m_amr->get_ref_rat()[a_lvl];
+    const Real dt_ref = a_dt/nref;
+
+    for (int i = 0; i < nref; i++){
+      sisdc::subcycle_advect_amr(a_flux, a_face_states, a_divF_c, a_weights, a_divF_nc, a_mass_diff,
+				 a_tnew, a_told, a_m, a_lvl+1, a_coarsest_level, a_finest_level, dt_ref);
+    }
+
+    // Finer level has reached this level. Average down solution on this level and reflux mass.
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+      EBAMRCellData& state = storage->get_phi()[a_m+1]; // This is the one that we update
+      const int solver_idx = solver_it.get_solver();
+
+      m_amr->average_down(state, m_cdr->get_phase(), a_lvl);
+      sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finest_level, 1.0);
+    }
+  }
+}
+
+void sisdc::subcycle_copy_current_to_old_states(const int a_m, const int a_lvl){
+  CH_TIME("sisdc::subcycle_integrate_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_integrate_level" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+
+    EBAMRCellData& old = storage->get_old();
+    const EBAMRCellData& current = storage->get_phi()[a_m];
+
+    current[a_lvl]->localCopyTo(*old[a_lvl]);
+  }
+}
+  
+void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
+				     LevelData<EBFluxFAB>&        a_face_states,
+				     LevelData<EBCellFAB>&        a_divF_c,
+				     LevelData<EBCellFAB>&        a_weights,
+				     LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				     LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				     const int                    a_m,
+				     const int                    a_lvl,
+				     const int                    a_coarsest_level,
+				     const int                    a_finest_level,
+				     const Real                   a_coar_time_old,
+				     const Real                   a_coar_time_new,
+				     const Real                   a_time,
+				     const Real                   a_dt){
+  CH_TIME("sisdc::subcycle_integrate_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_integrate_level" << endl;
+  }
+
+  const bool ebcf = m_amr->get_ebcf();
+  if(ebcf){
+    MayDay::Abort("sisdc::subcycle_integrate_level - not supported with ebcf (yet)");
+  }
+
+  const bool has_coar = a_lvl > a_coarsest_level;
+  const bool has_fine = a_lvl < a_finest_level;
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int solver_idx = solver_it.get_solver();
+    RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+
+    cdr_gdnv* gdnv = (cdr_gdnv*) (&(*solver));
+
+    LevelData<EBCellFAB>& state_m1      = (*storage->get_phi()[a_m+1][a_lvl]); // We will update this one.
+    LevelData<EBCellFAB>& state_m = (*storage->get_phi()[a_m][a_lvl]);   // We will update this one. 
+
+    LevelData<EBCellFAB>* coar_old = NULL;
+    LevelData<EBCellFAB>* coar_new = NULL;
+
+    if(has_coar){
+      coar_old = storage->get_old()[a_lvl-1];
+      coar_new = storage->get_phi()[a_m][a_lvl-1];
+    }
+
+    // Advect to faces and compute fluxes on face centers, and compute the conservative divergence on regular cells
+    const Real extr_dt = m_extrap_advect ? 2.0*m_extrap_dt*a_dt : 0.0;
+    gdnv->advect_to_faces(a_face_states, state_m, coar_old, coar_new, a_time, a_coar_time_old, a_coar_time_new, a_lvl, extr_dt);
+    gdnv->new_compute_flux(a_flux, a_face_states, a_lvl);
+    gdnv->consdiv_regular(a_divF_c, a_flux, a_lvl);
+
+    // Recess: So far the conservative divergence is scaled by 1/dx but not yet divided by the volume fraction. This
+    // means that the actual advance without the hybrid stuff would be
+    //
+    // new_state -= dt*a_divF_c/kappa
+    //
+    // The stuff below was originally written for d(phi)/dt = Div(F) rather than d(phi)/dt = -Div(F) so that's why
+    // there's a (-a_dt) in all the stuff below. This design choice was made because I am, in fact, an ass.
+
+    // Compute the nonconservative and hybrid divergences (hybrid put on storage for divF_c, which is lost)
+    gdnv->nonconservative_divergence(a_divF_nc, a_face_states, a_lvl);
+    gdnv->hybrid_divergence(a_divF_c, a_mass_diff, a_divF_nc, a_lvl); // Puts hybrid in a_divF_c. mass_diff as usual without dt,
+    data_ops::scale(a_mass_diff, -a_dt);                              // Sign convention
+
+    // Update flux and redistribution registers
+    sisdc::update_flux_registers(a_flux, solver_idx, a_lvl, a_coarsest_level, a_finest_level, a_dt);
+    sisdc::update_redist_register(a_mass_diff, solver_idx, a_lvl);
+    if(m_cdr->get_mass_redist()){
+      data_ops::incr(a_weights, state_m, 1.0);
+    }
+
+    // Euler advance with redistribution
+    state_m.localCopyTo(state_m1);
+    data_ops::incr(state_m1, a_divF_c, -a_dt);
+    state_m1.exchange();
+    sisdc::redist_level(state_m1, solver_idx, a_weights, a_lvl);
   }
 }
