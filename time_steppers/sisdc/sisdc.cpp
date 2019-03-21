@@ -986,7 +986,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
 
   // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
   const Real max_gl_dist = sisdc::get_max_node_distance();
-  const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
+  const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
   if(a_dt <= dt_cfl*m_minCFL && m_max_error > m_err_thresh){ // No choice but to accept
     a_accept_step = true;
     m_new_dt = dt_cfl*m_minCFL;
@@ -1791,6 +1791,17 @@ void sisdc::reset_finer_flux_registers_level(const int a_lvl,
   }
 }
 
+void sisdc::reset_redist_registers_level(const int a_lvl){
+  CH_TIME("sisdc::reset_redist_registers_level");
+  if(m_verbosity > 5){
+    pout() << "sisdc::reset_redist_registers_level" << endl;
+  }
+
+  const phase::which_phase phase = m_cdr->get_phase();
+  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
+  level_redist.setToZero();
+}
+
 void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
 				  const int             a_solver,
 				  const int             a_lvl,
@@ -1811,13 +1822,15 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
   if(has_fine) fluxreg_fine = m_amr->get_flux_reg(phase)[a_lvl];   
   if(has_coar) fluxreg_coar = m_amr->get_flux_reg(phase)[a_lvl-1]; 
 
-  // Resetting the fine was done outside. 
-  // if(has_fine) {
-  //   fluxreg_fine->setToZero();
-  // }
-
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(phase)[a_lvl];
+
+  // This is a bit stupid but in order to get the correct flux in the correct place in the register, we need some storage
+  // with enough variables
+  EBFluxFactory fact(ebisl);
+  LevelData<EBFluxFAB> scratch(dbl, m_plaskin->get_num_species(), a_flux.ghostVect(), fact);
+  a_flux.localCopyTo(Interval(0,0), scratch, interv);
+  scratch.exchange(interv);
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const EBISBox& ebisbox = ebisl[dit()];
@@ -1828,29 +1841,20 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
       // Initialize finer flux register with flux leaving this level and into the finer level (or invalid region of that level)
       if(has_fine) {
 	for (SideIterator sit; sit.ok(); ++sit){
-	  fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	  //	  fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	  fluxreg_fine->incrementCoarseBoth(scratch[dit()][dir], a_dt, dit(), interv, dir, sit());
 	}
       }
 
       // Increment coarser flux register with flux entering that level from this level 
       if(has_coar){ // The coarser level has already been initialized with the coarse side flux
 	for (SideIterator sit; sit.ok(); ++sit){
-	  fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	  //	  fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	  fluxreg_coar->incrementFineBoth(scratch[dit()][dir], a_dt, dit(), interv, dir, sit());
 	}
       }
     }
   }
-}
-
-void sisdc::reset_redist_registers_level(const int a_lvl){
-  CH_TIME("sisdc::reset_redist_registers_level");
-  if(m_verbosity > 5){
-    pout() << "sisdc::reset_redist_registers_level" << endl;
-  }
-
-  const phase::which_phase phase = m_cdr->get_phase();
-  EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
-  level_redist.setToZero();
 }
 
 void sisdc::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl){
@@ -1864,10 +1868,16 @@ void sisdc::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_dif
 
   const phase::which_phase phase = m_cdr->get_phase();
   EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
-  level_redist.setToZero();
+
+  // Again, this is a bit stupid but to get the correct data from the correct interval, we have to do this
+  EBAMRIVData diff;
+  m_amr->allocate(diff, m_cdr->get_phase(), m_plaskin->get_num_species());
+  a_mass_diff.localCopyTo(Interval(0,0), *diff[a_lvl], interv);
+  diff[a_lvl]->exchange(interv);
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    level_redist.increment(a_mass_diff[dit()], dit(), interv);
+    //    level_redist.increment(a_mass_diff[dit()], dit(), interv);
+    level_redist.increment((*diff[a_lvl])[dit()], dit(), interv);
   }
 }
 
@@ -1896,9 +1906,8 @@ void sisdc::redist_level(LevelData<EBCellFAB>&       a_state,
 			 const int                   a_lvl){
   CH_TIME("sisdc::redist_level");
   if(m_verbosity > 5){
-    pout() << "sisdc::::redist_level" << endl;
+    pout() << "sisdc::redist_level" << endl;
   }
-
   const phase::which_phase phase = m_cdr->get_phase();
   const Interval solver_interv(0, 0);
   const Interval redist_interv(a_solver, a_solver);
@@ -2272,6 +2281,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       data_ops::scale(a_mass_diff, -a_dt);                              // Sign convention
 
       // Update flux and redistribution registers
+
       sisdc::update_flux_registers(a_flux, solver_idx, a_lvl, a_coarsest_level, a_finest_level, a_dt);
       sisdc::update_redist_register(a_mass_diff, solver_idx, a_lvl);
       if(m_cdr->get_mass_redist()){
