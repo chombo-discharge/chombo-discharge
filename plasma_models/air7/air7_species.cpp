@@ -15,7 +15,7 @@ air7::electron::electron(){
   m_name   = "electron density";
   m_unit   = "m-3";
   m_charge = -1;
-  m_diffusive = false;
+  m_diffusive = true;
   m_mobile = true;
 
   {// Get initial parameter
