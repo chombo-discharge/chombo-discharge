@@ -729,6 +729,84 @@ void amr_mesh::loadbalance(Vector<Vector<int> >& a_procs, Vector<Vector<Box> >& 
   }
 }
 
+void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi, const int a_lvl){
+  CH_TIME("amr_mesh::compute_gradient(level)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::compute_gradient(level)" << endl;
+  }
+
+  CH_assert(a_phi.nComp()      == 1);
+  CH_assert(a_gradient.nComp() == SpaceDim);
+
+    
+  const int comp  = 0;
+  const int ncomp = 1;
+    
+  const Real& dx = m_dx[a_lvl];
+  const DisjointBoxLayout& dbl = m_grids[a_lvl]; // Doing this since I assume everything is defined over m_grids
+  const ProblemDomain& domain  = m_domains[a_lvl];
+
+  LayoutData<IntVectSet> cfivs;
+  EBArith::defineCFIVS(cfivs, dbl, domain);
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& grad        = a_gradient[dit()];
+    const EBCellFAB& phi   = a_phi[dit()];
+    const EBISBox& ebisbox = phi.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box& region      = dbl.get(dit());
+
+    // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
+    const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
+    BaseFab<Real>& grad_fab  = grad.getSingleValuedFAB();
+    FORT_GRADIENT(CHF_FRA(grad_fab),
+		  CHF_CONST_FRA1(phi_fab, comp),
+		  CHF_CONST_REAL(dx),
+		  CHF_BOX(region));
+
+
+    // We can't REALLY trust ghost cells on the boundary. Do the boundary cells using safer stencils.
+    IntVectSet bndry_ivs = ebisbox.getIrregIVS(dbl.get(dit()));
+    for (int dir = 0; dir < SpaceDim; dir++){
+      Box lo_box, hi_box;
+      int has_lo, has_hi;
+
+      EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, region, dir);
+
+      if(has_lo){
+	bndry_ivs |= IntVectSet(lo_box);
+      }
+      if(has_hi){
+	bndry_ivs |= IntVectSet(hi_box);
+      }
+    }
+      
+    // Compute stencils for irregular cells
+    for (VoFIterator vofit(bndry_ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	  
+	grad(vof, dir) = 0.;
+
+	VoFStencil sten;
+	EBArith::getFirstDerivStencil(sten, vof, ebisbox, dir, dx, &cfivs[dit()], 0);
+	for (int i = 0; i < sten.size(); i++){
+	  const VolIndex& ivof = sten.vof(i);
+	  const Real& iweight  = sten.weight(i);
+	    
+	  grad(vof, dir) += phi(ivof, comp)*iweight;
+	}
+      }
+    }
+
+    // Set covered to zero
+    for (int dir= 0; dir < SpaceDim; dir++){
+      grad.setCoveredCellVal(0.0, dir);
+    }
+  }
+}
+
 void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi){
   CH_TIME("amr_mesh::compute_gradient");
   if(m_verbosity > 5){
@@ -736,75 +814,8 @@ void amr_mesh::compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& 
   }
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    CH_assert(a_phi[lvl]->nComp()      == 1);
-    CH_assert(a_gradient[lvl]->nComp() == SpaceDim);
-    
-    const int comp  = 0;
-    const int ncomp = 1;
-    
-    const Real& dx = m_dx[lvl];
-    const DisjointBoxLayout& dbl = m_grids[lvl]; // Doing this since I assume everything is defined over m_grids
-    const ProblemDomain& domain  = m_domains[lvl];
+    compute_gradient(*a_gradient[lvl], *a_phi[lvl], lvl);
 
-    LayoutData<IntVectSet> cfivs;
-    EBArith::defineCFIVS(cfivs, dbl, m_domains[lvl]);
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& grad        = (*a_gradient[lvl])[dit()];
-      const EBCellFAB& phi   = (*a_phi[lvl])[dit()];
-      const EBISBox& ebisbox = phi.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const Box& region      = dbl.get(dit());
-
-      // For interior cells we do our old friend centered differences. God I hate Chombo Fortran.
-      const BaseFab<Real>& phi_fab = phi.getSingleValuedFAB();
-      BaseFab<Real>& grad_fab  = grad.getSingleValuedFAB();
-      FORT_GRADIENT(CHF_FRA(grad_fab),
-		    CHF_CONST_FRA1(phi_fab, comp),
-		    CHF_CONST_REAL(dx),
-		    CHF_BOX(region));
-
-
-      // We can't REALLY trust ghost cells on the boundary. Do the boundary cells using safer stencils.
-      IntVectSet bndry_ivs = ebisbox.getIrregIVS(dbl.get(dit()));
-      for (int dir = 0; dir < SpaceDim; dir++){
-	Box lo_box, hi_box;
-	int has_lo, has_hi;
-
-	EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, region, dir);
-
-	if(has_lo){
-	  bndry_ivs |= IntVectSet(lo_box);
-	}
-	if(has_hi){
-	  bndry_ivs |= IntVectSet(hi_box);
-	}
-      }
-      
-      // Compute stencils for irregular cells
-      for (VoFIterator vofit(bndry_ivs, ebgraph); vofit.ok(); ++vofit){
-      	const VolIndex& vof = vofit();
-
-      	for (int dir = 0; dir < SpaceDim; dir++){
-	  
-      	  grad(vof, dir) = 0.;
-
-      	  VoFStencil sten;
-      	  EBArith::getFirstDerivStencil(sten, vof, ebisbox, dir, m_dx[lvl], &cfivs[dit()], 0);
-      	  for (int i = 0; i < sten.size(); i++){
-      	    const VolIndex& ivof = sten.vof(i);
-      	    const Real& iweight  = sten.weight(i);
-	    
-      	    grad(vof, dir) += phi(ivof, comp)*iweight;
-      	  }
-      	}
-      }
-
-      // Set covered to zero
-      for (int dir= 0; dir < SpaceDim; dir++){
-	grad.setCoveredCellVal(0.0, dir);
-      }
-    }
   }
 }
 

@@ -56,6 +56,10 @@ protected:
   RefCountedPtr<poisson_storage>      m_poisson_scratch;
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
+  // Extra storage outside of solver storage
+  EBAMRCellData scratch1;
+  EBAMRCellData scratchD;
+
   int m_max_tries;
   int m_p;
   int m_k;
@@ -200,6 +204,64 @@ protected:
 			  const int  a_substeps,
 			  const int  a_corrections,
 			  const int  a_rejections);
+
+  // All the routines required for the subcycling advection routines
+  void reset_finer_flux_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level);
+  void reset_redist_registers_level(const int a_lvl);
+  void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl);
+  void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
+			     const int             a_solver,
+			     const int             a_lvl,
+			     const int             a_coarsest_level,
+			     const int             a_finest_level,
+			     const Real            a_dt);
+  void reflux_level(EBAMRCellData& a_state,
+		    const int      a_solver,
+		    const int      a_lvl,
+		    const int      a_coarsest_level,
+		    const int      a_finest_level,
+		    const Real     a_scale);
+  void redist_level(LevelData<EBCellFAB>&       a_state,
+		    const int                   a_solver,   
+		    const LevelData<EBCellFAB>& a_weights,
+		    const int                   a_lvl);
+
+
+  
+  void subcycle_advect_amr(EBAMRFluxData& a_flux,
+			   EBAMRFluxData& a_face_states,
+			   EBAMRCellData& a_divF_c,
+			   EBAMRCellData& a_weights,
+			   EBAMRIVData&   a_divF_nc,
+			   EBAMRIVData&   a_mass_diff,
+			   Vector<Real>&  a_tnew,
+			   Vector<Real>&  a_told,
+			   const int      a_m,
+			   const int      a_lvl,
+			   const int      a_coarsest_lvl,
+			   const int      a_finest_level,
+			   const Real     a_dt);
+
+  void subcycle_compute_advection_velocities();
+  void subcycle_copy_states(const int a_m);
+  void subcycle_copy_current_to_old_states(const int a_m, const int a_lvl);
+  void subcycle_update_transport_bc(const int a_m, const int a_lvl, const Real a_time);
+  void subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finest_level);
+  
+  void subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
+				LevelData<EBFluxFAB>&        a_face_states,
+				LevelData<EBCellFAB>&        a_divF_c,
+				LevelData<EBCellFAB>&        a_weights,
+				LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				const int                    a_m,
+				const int                    a_lvl,
+				const int                    a_coarsest_level,
+				const int                    a_finest_level,
+				const Real                   a_coar_time_old,
+				const Real                   a_coar_time_new,
+				const Real                   a_time,
+				const Real                   a_dt);
 };
 
 #endif

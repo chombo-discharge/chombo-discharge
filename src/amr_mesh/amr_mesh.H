@@ -77,6 +77,11 @@ public:
   virtual void alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
 
   /*!
+    @brief Compute gradient on level
+  */
+  virtual void compute_gradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
+
+  /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 

@@ -27,16 +27,20 @@ public:
   EBAMRCellData& get_error()    { return m_error;      }
   EBAMRCellData& get_gradient() { return m_gradient;   }
   EBAMRCellData& get_old()      { return m_old;        }
+  EBAMRCellData& get_scratchD() { return m_scratchD;   }
+  
 
   Vector<EBAMRCellData>& get_phi()     { return m_phi;     }
   Vector<EBAMRCellData>& get_FAR()     { return m_FAR;     }
   Vector<EBAMRCellData>& get_FD()      { return m_FD;      }
   Vector<EBAMRCellData>& get_F()       { return m_F;       }
 
-  EBAMRIVData& get_eb_state(){  return m_scratchIV1; }
-  EBAMRIVData& get_eb_velo(){   return m_scratchIV2; }
-  EBAMRIVData& get_eb_flux(){   return m_scratchIV3; }
-  EBAMRIVData& get_eb_grad(){   return m_scratchIV4; }
+  EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
+  EBAMRIVData& get_eb_scratchD(){ return m_scratchIVD; }
+  EBAMRIVData& get_eb_state(){    return m_scratchIV1; }
+  EBAMRIVData& get_eb_velo(){     return m_scratchIV2; }
+  EBAMRIVData& get_eb_flux(){     return m_scratchIV3; }
+  EBAMRIVData& get_eb_grad(){     return m_scratchIV4; }
 
   EBAMRIFData& get_domain_state(){  return m_scratchIF1; }
   EBAMRIFData& get_domain_velo(){   return m_scratchIF2; }
@@ -55,12 +59,15 @@ protected:
   EBAMRCellData m_error;    // Error estimator
   EBAMRCellData m_gradient; // Storage for holding gradient
   EBAMRCellData m_old;      // "Old solution". Only used for subcycling
+  EBAMRCellData m_scratchD; // SpaceDim scratch storage
   
   Vector<EBAMRCellData> m_phi;      // phi^k in the  SISDC notation
   Vector<EBAMRCellData> m_FAR;      // FAR(phi^k) in the SISDC notation
   Vector<EBAMRCellData> m_FD;       // FD(phi^k) in the SISDC notation
   Vector<EBAMRCellData> m_F;        // F(phi^k) in the SISDC notation
 
+  EBAMRIVData m_scratchIVs; // Scratch data
+  EBAMRIVData m_scratchIVD; // Scratch data
   EBAMRIVData m_scratchIV1; // Scratch data
   EBAMRIVData m_scratchIV2; // Scratch data
   EBAMRIVData m_scratchIV3; // Scratch data

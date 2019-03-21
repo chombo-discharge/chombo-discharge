@@ -228,6 +228,138 @@ void time_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffco_eb
   }
 }
 
+void time_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
+				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_fluxes,
+				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_densities,
+				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_velocities,
+				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_gradients,
+				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_rte_fluxes,
+				      const LevelData<BaseIVFAB<Real> >&          a_E,
+				      const Real&                                 a_time,
+				      const int                                   a_lvl){
+  CH_TIME("time_stepper::compute_cdr_fluxes(full, level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_fluxes(full, level)" << endl;
+  }
+
+  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_species();
+  const int comp         = 0;
+  const int ncomp        = 1;
+
+  // Things that will be passed into plaskin
+  Vector<Real> extrap_cdr_fluxes(num_species);
+  Vector<Real> extrap_cdr_densities(num_species);
+  Vector<Real> extrap_cdr_velocities(num_species);
+  Vector<Real> extrap_cdr_gradients(num_species);
+  Vector<Real> extrap_rte_fluxes(num_photons);
+
+  // Grid stuff
+  const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
+  const ProblemDomain& domain   = m_amr->get_domains()[a_lvl];
+  const Real dx                 = m_amr->get_dx()[a_lvl];
+  const MFLevelGrid& mflg       = *(m_amr->get_mflg()[a_lvl]);
+  const RealVect origin         = m_physdom->get_prob_lo();
+
+  // Patch loop
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box              = dbl.get(dit());
+    const EBISBox& ebisbox      = ebisl[dit()];
+    const EBGraph& ebgraph      = ebisbox.getEBGraph();
+    const IntVectSet& diel_ivs  = mflg.interface_region(box, dit());
+    const IntVectSet& elec_ivs  = ebisbox.getIrregIVS(box) - diel_ivs;
+
+    // Loop over conductor cells
+    for (VoFIterator vofit(elec_ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+
+      // Define the electric field
+      const BaseIVFAB<Real>& E = a_E[dit()];
+      const RealVect centroid  = ebisbox.bndryCentroid(vof);
+      const RealVect normal    = ebisbox.normal(vof);
+      const RealVect e         = RealVect(D_DECL(E(vof,0), E(vof,1), E(vof,2)));
+      const RealVect pos       = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin) + centroid*dx;
+
+      // Build ion densities and velocities
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[dit()](vof,comp);
+	extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[dit()](vof,comp);
+	extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[dit()](vof,comp);
+	extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[dit()](vof,comp);
+      }
+
+      // Build photon intensities
+      for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
+      }
+
+      const Vector<Real> fluxes = m_plaskin->compute_cdr_electrode_fluxes(a_time,
+									  pos,
+									  normal,
+									  e,
+									  extrap_cdr_densities,
+									  extrap_cdr_velocities,
+									  extrap_cdr_gradients,
+									  extrap_rte_fluxes,
+									  extrap_cdr_fluxes);
+	
+      // Put the fluxes in their respective place
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	(*a_fluxes[idx])[dit()](vof, comp) = fluxes[idx];
+      }
+    }
+
+    // Loop over dielectric cells
+    for (VoFIterator vofit(diel_ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      // Define the electric field
+      const BaseIVFAB<Real>& E = a_E[dit()];
+      const RealVect centroid  = ebisbox.bndryCentroid(vof);
+      const RealVect normal    = ebisbox.normal(vof);
+      const RealVect e         = RealVect(D_DECL(E(vof,0), E(vof,1), E(vof,2)));
+      const RealVect pos       = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin) + centroid*dx;
+      const Real     time      = 0.0;
+
+      // Build ion densities and velocities
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[dit()](vof,comp);
+	extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[dit()](vof,comp);
+	extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[dit()](vof,comp);
+	extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[dit()](vof,comp);
+      }
+
+      // Build photon intensities
+      for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
+      }
+
+      const Vector<Real> fluxes = m_plaskin->compute_cdr_dielectric_fluxes(a_time,
+									   pos,
+									   normal,
+									   e,
+									   extrap_cdr_densities,
+									   extrap_cdr_velocities,
+									   extrap_cdr_gradients,
+									   extrap_rte_fluxes,
+									   extrap_cdr_fluxes);
+	
+      // Put the fluxes in their respective place
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	(*a_fluxes[idx])[dit()](vof, comp) = fluxes[idx];
+      }
+    }
+  }
+}
+
 void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
 				      const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
 				      const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
@@ -1596,6 +1728,23 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
 #endif
 }
 
+void time_stepper::compute_extrapolated_velocities(Vector<EBAMRIVData*>&        a_ebvelo,
+						   const Vector<EBAMRCellData*> a_cell_vel,
+						   const phase::which_phase     a_phase){
+  CH_TIME("time_stepper::compute_extrapolated_velocities");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_extrapolated_velocities" << endl;
+  }
+
+  EBAMRIVData scratch;
+  m_amr->allocate(scratch, a_phase, SpaceDim);
+
+  for (int i = 0; i < a_ebvelo.size(); i++){
+    this->extrapolate_to_eb(scratch, a_phase, *a_cell_vel[i]);
+    this->project_flux(*a_ebvelo[i], scratch);
+  }
+}
+
 void time_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&        a_fluxes,
 						      const Vector<EBAMRCellData*> a_densities,
 						      const Vector<EBAMRCellData*> a_velocities,
@@ -1836,6 +1985,19 @@ void time_stepper::deallocate_solver_internals(){
   m_sigma->deallocate_internals();
 }
 
+void time_stepper::extrapolate_to_eb(LevelData<BaseIVFAB<Real> >& a_extrap,
+				     const phase::which_phase     a_phase,
+				     const LevelData<EBCellFAB>&  a_data,
+				     const int                    a_lvl){
+  CH_TIME("time_stepper::extrapolate_to_eb(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_eb(level)" << endl;
+  }
+
+  const irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
+  stencils.apply(a_extrap, a_data, a_lvl);
+}
+
 void time_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data){
   CH_TIME("time_stepper::extrapolate_to_eb");
   if(m_verbosity > 5){
@@ -1845,7 +2007,7 @@ void time_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_p
   const irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    stencils.apply(*a_extrap[lvl], *a_data[lvl], lvl);
+    extrapolate_to_eb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
   }
 }
 
@@ -2025,6 +2187,40 @@ void time_stepper::initial_sigma_data(){
   m_sigma->initial_data();
 }
 
+void time_stepper::project_flux(LevelData<BaseIVFAB<Real> >&       a_projected_flux,
+				const LevelData<BaseIVFAB<Real> >& a_flux,
+				const int                          a_lvl){
+  CH_TIME("time_stepper::project_flux(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::project_flux(level)" << endl;
+  }
+
+  CH_assert(a_projected_flux.nComp() == 1);
+  CH_assert(a_flux.nComp()           == SpaceDim);
+
+  const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box         = dbl.get(dit());
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+    
+    BaseIVFAB<Real>& proj_flux  = a_projected_flux[dit()];
+    const BaseIVFAB<Real>& flux = a_flux[dit()];
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof     = vofit();
+      const RealVect& normal  = ebisbox.normal(vof);
+      const RealVect vec_flux = RealVect(D_DECL(flux(vof,0), flux(vof,1), flux(vof,2)));
+      
+      // For EB's, the geometrical normal vector is opposite of the finite volume method normal
+      proj_flux(vof,0) = PolyGeom::dot(vec_flux, -normal);
+    }
+  }
+}
+
 void time_stepper::project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux){
   CH_TIME("time_stepper::project_flux");
   if(m_verbosity > 5){
@@ -2035,30 +2231,7 @@ void time_stepper::project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    CH_assert(a_projected_flux[lvl]->nComp() == 1);
-    CH_assert(a_flux[lvl]->nComp()           == SpaceDim);
-
-    const DisjointBoxLayout& dbl  = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box& box         = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
-
-      BaseIVFAB<Real>& proj_flux  = (*a_projected_flux[lvl])[dit()];
-      const BaseIVFAB<Real>& flux = (*a_flux[lvl])[dit()];
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof     = vofit();
-	const RealVect& normal  = ebisbox.normal(vof);
-	const RealVect vec_flux = RealVect(D_DECL(flux(vof,0), flux(vof,1), flux(vof,2)));
-
-	// For EB's, the geometrical normal vector is opposite of the finite volume method normal
-	proj_flux(vof,0) = PolyGeom::dot(vec_flux, -normal);
-      }
-    }
+    time_stepper::project_flux(*a_projected_flux[lvl], *a_flux[lvl], lvl);
   }
 }
 

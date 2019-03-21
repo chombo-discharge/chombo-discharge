@@ -161,6 +161,16 @@ public:
   /*!
     @brief Compute cdr_fluxes
   */
+  virtual void compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
+				  const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_fluxes,
+				  const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_densities,
+				  const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_velocities,
+				  const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_gradients,
+				  const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_rte_fluxes,
+				  const LevelData<BaseIVFAB<Real> >&          a_field,
+				  const Real&                                 a_time,
+				  const int                                   a_lvl);
+
   virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
 				  const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
 				  const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
@@ -327,6 +337,13 @@ public:
 					   const phase::which_phase     a_phase);
 
   /*!
+    @brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
+  */
+  virtual void compute_extrapolated_velocities(Vector<EBAMRIVData*>&        a_ebvel,
+					       const Vector<EBAMRCellData*> a_velocities,
+					       const phase::which_phase     a_phase);
+
+  /*!
     @brief Compute the cell-centered fluxes and extrapolate these to the domain faces
   */
   virtual void compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&        a_fluxes,
@@ -380,6 +397,11 @@ public:
     @brief Deallocate internal solver storages
   */
   virtual void deallocate_solver_internals();
+
+  virtual void extrapolate_to_eb(LevelData<BaseIVFAB<Real> >& a_extrap,
+				 const phase::which_phase     a_phase,
+				 const LevelData<EBCellFAB>&  a_data,
+				 const int                    a_lvl);
 
   /*!
     @brief Extrapolate data to EB centroid
@@ -442,6 +464,11 @@ public:
     @brief Fill initial sigma data
   */
   virtual void initial_sigma_data();
+
+  /*!
+    @brief Project flux
+  */
+  virtual void project_flux(LevelData<BaseIVFAB<Real> >& a_proj_flux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
 
   /*!
     @brief Extrapolated flux to EB and project it onto the normal

@@ -337,6 +337,27 @@ public:
 				 const LevelData<BaseIVFAB<Real> >& a_divF_nc,
 				 const int                          a_lvl);
 
+  /*!
+    @brief Compute flux interpolant
+  */
+  virtual void setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
+				      const LevelData<EBFluxFAB>&   a_flux,
+				      const int                     a_lvl);
+
+  /*!
+    @brief Interpolate flux to centroids
+  */
+  virtual void interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
+					     const int                         a_lvl);
+
+  /*!
+    @brief Compute div(F) on irregular cells
+  */
+  virtual void compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
+				  const LevelData<BaseIFFAB<Real> >  a_flux[SpaceDim],
+				  const LevelData<BaseIVFAB<Real> >& a_ebflux,
+				  const int                          a_lvl);
+
 protected:
   
   /*!
@@ -524,26 +545,9 @@ protected:
 
 
 
-  /*!
-    @brief Compute flux interpolant
-  */
-  virtual void setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
-				      const LevelData<EBFluxFAB>&   a_flux,
-				      const int                     a_lvl);
 
-  /*!
-    @brief Interpolate flux to centroids
-  */
-  virtual void interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
-					     const int                         a_lvl);
 
-  /*!
-    @brief Compute div(F) on irregular cells
-  */
-  virtual void compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
-				  const LevelData<BaseIFFAB<Real> >  a_flux[SpaceDim],
-				  const LevelData<BaseIVFAB<Real> >& a_ebflux,
-				  const int                          a_lvl);
+
 				  
   /*!
     @brief Compute the non-conservative divergence
