@@ -57,6 +57,9 @@ void sisdc_tagger::compute_tracers(){
   m_timestepper->compute_E(E, phase::gas);
   data_ops::vector_length(m_tracer[1], E);
 
+  // Now do the gradient of this tracer
+  m_amr->compute_gradient(m_grad_tracer[1], m_tracer[1]);
+
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
