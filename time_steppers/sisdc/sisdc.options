@@ -30,13 +30,20 @@ sisdc.print_report    = false    # Print report with error and stuff
 sisdc.adaptive_dt     = false    # Use adaptive time stepping
 sisdc.error_norm      = 2        # Error norm (0 = Linf)
 sisdc.min_corr        = 1        # Minimum number of corrections
-sisdc.max_tries       = 100      # Maximum number of tries (for step rejection)
+sisdc.max_retries     = 100      # Maximum number of tries (for step rejection)
 sisdc.max_growth      = 1.2      # Maximum permissible time step growth
 sisdc.min_cfl         = 0.1      # Minimum CFL
 sisdc.max_cfl         = 0.9      # Maximum CFL
 sisdc.max_error       = 1.E-4    # Error threshold
 sisdc.error_index     = -1       # Error index. If -1, evaluate all CDR solvers	
 sisdc.safety          = 0.95     # Safety factor for time stepping
+
+# ---------------------------------------------------------	
+# Subcycling in time
+#
+# If you decide to subcycle, you should really, really, really use adaptive time stepping. Really. 
+# ---------------------------------------------------------
+sisdc.subcycle = false           # 'false', 'standard', or 'optimal'
 
 # ---------------------------------------------------------	
 # Debugging options

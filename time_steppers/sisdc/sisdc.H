@@ -94,6 +94,7 @@ protected:
   bool m_strong_diffu;
   bool m_have_dt_err;
   bool m_profile_steps;
+  bool m_optimal_subcycling;
 
   // Error things
   Vector<Real> m_cdr_error;

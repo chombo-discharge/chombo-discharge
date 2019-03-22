@@ -33,7 +33,7 @@ sisdc::sisdc(){
   m_safety        = 0.9;
   m_num_diff_corr = 0;
   m_new_dt        = 1.234567E89;
-  m_max_retries     = 1;
+  m_max_retries   = 1;
   m_min_corr      = 1;
   m_extrap_dt     = 0.5;
   m_error_idx     = -1;
@@ -41,12 +41,13 @@ sisdc::sisdc(){
 
   m_which_nodes   = "lobatto";
 
-  m_extrap_advect  = false;
-  m_subcycle       = false;
-  m_print_report   = false;
-  m_adaptive_dt    = false;
-  m_strong_diffu   = false;
-  m_have_dt_err    = false;
+  m_extrap_advect      = false;
+  m_subcycle           = false;
+  m_print_report       = false;
+  m_adaptive_dt        = false;
+  m_strong_diffu       = false;
+  m_have_dt_err        = false;
+  m_optimal_subcycling = false;
 
   // Basically only for debugging
   m_compute_v      = true;
@@ -83,12 +84,20 @@ sisdc::sisdc(){
     pp.query("max_growth",      m_max_growth);
 
     if(pp.contains("subcycle")){
-      pp.get("subcycle", str);
-      if(str == "true"){
+      std::cout << str << std::endl;
+      if(str == "false"){
+	m_subcycle = false;
+      }
+      else if(str == "standard"){
 	m_subcycle = true;
+	m_optimal_subcycling = false;
+      }
+      else if(str == "optimal"){
+	m_subcycle = true;
+	m_optimal_subcycling = true;
       }
       else{
-	m_subcycle = false;
+	MayDay::Abort("sisdc::sisdc - unknown sisdc.subcycle = blargh");
       }
     }
     if(pp.contains("extrap_advect")){
@@ -1093,14 +1102,13 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   m_dt_cfl = m_cdr->compute_cfl_dt();
 
   //  Real dt_cfldt_cfl = (m_subcycle) ? m_dt_cfl*Nref : m_dt_cfl;
-
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
   dt_cfl = m_subcycle ? Nref*dt_cfl : dt_cfl;
   
   // Time step selection for non-adaptive stepping
   if(!m_adaptive_dt){
     if(dt_cfl < dt){
-      dt = dt_cfl;
+      dt = m_cfl*dt_cfl;
       a_timecode = time_code::cfl;
     }
   }
@@ -1937,7 +1945,7 @@ void sisdc::redist_level(LevelData<EBCellFAB>&       a_state,
   const Interval redist_interv(a_solver, a_solver);
   EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
   if(m_cdr->get_mass_redist()){
-    level_redist.resetWeights(a_weights, a_solver);
+    level_redist.resetWeights(a_weights, 0);
   }
   level_redist.redistribute(a_state, redist_interv, solver_interv);
 }
@@ -2084,9 +2092,35 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 
   // If there is a coarse level, advance it nref times so that we synchronize.
   if(has_fine){
-    const int nref    = m_amr->get_ref_rat()[a_lvl];
-    const Real dt_ref = a_dt/nref;
 
+    int nref;
+    Real dt_ref;
+    if(!m_optimal_subcycling){ // Standard, use refinement ratio
+      nref   = m_amr->get_ref_rat()[a_lvl];
+      dt_ref = a_dt/nref;
+    }
+    else{ // Take as few steps as possible. NEVER exceed CFL
+      int tref = 1;
+      for (int lvl = a_coarsest_level; lvl < a_finest_level; lvl++){
+	tref *= m_amr->get_ref_rat()[lvl];
+      }
+      
+      Real dt_cfl_level = m_dt_cfl*tref;
+      for (int lvl = a_coarsest_level; lvl < a_lvl; lvl++){
+	dt_cfl_level /= m_amr->get_ref_rat()[lvl];
+      }
+    
+      // Try to take as few steps as possible
+      nref   = 1;
+      dt_ref = a_dt;
+      while(dt_ref > dt_cfl_level){
+	nref++;
+	dt_ref = a_dt/nref;
+      }
+    }
+#if 0 // Debug
+    if(procID() == 0) std::cout << "lvl = " << a_lvl << " .....On next level I'm taking nref = " << nref << " steps" << endl;
+#endif
     for (int i = 0; i < nref; i++){
       sisdc::subcycle_advect_amr(a_flux, a_face_states, a_divF_c, a_weights, a_divF_nc, a_mass_diff,
 				 a_tnew, a_told, a_m, a_lvl+1, a_coarsest_level, a_finest_level, dt_ref);
