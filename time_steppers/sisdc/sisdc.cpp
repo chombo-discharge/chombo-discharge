@@ -33,10 +33,11 @@ sisdc::sisdc(){
   m_safety        = 0.9;
   m_num_diff_corr = 0;
   m_new_dt        = 1.234567E89;
-  m_max_tries     = 1;
+  m_max_retries     = 1;
   m_min_corr      = 1;
   m_extrap_dt     = 0.5;
   m_error_idx     = -1;
+  m_max_growth    = 1.2;
 
   m_which_nodes   = "lobatto";
 
@@ -76,9 +77,10 @@ sisdc::sisdc(){
     pp.query("max_error",       m_err_thresh);
     pp.query("safety",          m_safety);
     pp.query("num_corrections", m_num_diff_corr);
-    pp.query("max_tries",       m_max_tries);
+    pp.query("max_retries",     m_max_retries);
     pp.query("extrap_dt",       m_extrap_dt);
     pp.query("error_index",     m_error_idx);
+    pp.query("max_growth",      m_max_growth);
 
     if(pp.contains("subcycle")){
       pp.get("subcycle", str);
@@ -532,7 +534,7 @@ Real sisdc::advance(const Real a_dt){
 	actual_dt = m_new_dt;
 	num_reject++;
 
-	retry_step  = num_reject <= m_max_tries;
+	retry_step  = num_reject <= m_max_retries;
 
 	if(retry_step){
 	  sisdc::compute_E_into_scratch();
@@ -800,8 +802,6 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
   data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 }
 
-
-
 void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_corrector){
   CH_TIME("sisdc::integrate_diffusion");
   if(m_verbosity > 5){
@@ -986,63 +986,74 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
 
   // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
   const Real max_gl_dist = sisdc::get_max_node_distance();
-  const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
-  if(a_dt <= dt_cfl*m_minCFL && m_max_error > m_err_thresh){ // No choice but to accept
-    a_accept_step = true;
-    m_new_dt = dt_cfl*m_minCFL;
-    return;
-  }
-  if(a_dt <= m_min_dt && m_max_error > m_err_thresh){ // No choice but to accept
-    a_accept_step = true;
-    m_new_dt = m_min_dt;
-    return;
+  Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
+
+  if(m_subcycle){
+    int Nref = 1;
+    for (int lvl = 0; lvl < m_amr->get_finest_level(); lvl++){
+      Nref = Nref*m_amr->get_ref_rat()[lvl];
+    }
+    dt_cfl = dt_cfl*Nref;
   }
 
-  // If we made it here, we should be able to decrease or increase the time step as we see fit.
-  const Real rel_err  = (m_safety*m_err_thresh)/m_max_error;
-  const Real dt_adapt = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
 
-  if(m_max_error <= m_err_thresh){ // Increase time step, but only if we're sufficiently far away form the error threshold
-    if(m_max_error < m_safety*m_err_thresh){ 
-      m_new_dt = dt_adapt;
-    }
-    else{
-      //      m_new_dt = m_safety*a_dt;  // If we're too close, reduce the new time step with safety margin
-      m_new_dt = m_safety*dt_adapt;
-    }
+  // Try time step
+  const Real rel_err    = (m_safety*m_err_thresh)/m_max_error;
+  const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
+  const Real min_dt_cfl = dt_cfl*m_minCFL;
+  const Real max_dt_cfl = dt_cfl*m_maxCFL;
+
+  if(m_max_error <= m_err_thresh){ // Always accept, and compute new step
     a_accept_step = true;
+
+    const Real dt = Min(m_max_growth*a_dt, dt_adapt); // Do not grow too fast
+    m_new_dt = (m_safety*m_err_thresh) ? dt : a_dt; // Increase if sufficiently far from error
+    m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
+    m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
+    m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap
+    m_new_dt = Min(m_new_dt, m_max_dt);                   // Don't go above other hardcap
   }
-  else{ // Decrease time step
-    m_new_dt = m_safety*dt_adapt;
+  else{
     a_accept_step = false;
-  }
 
-  // New time step can't go below minimum permitted CFL
-  if(m_new_dt < dt_cfl*m_minCFL){ // Can't decrease above minimum CFL step, accept the step
-    m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);
-  }
-  if(m_new_dt < m_min_dt){ // Can't decrease below hardcap, accept the step
-    m_new_dt = Max(m_new_dt, m_min_dt);
-  }
-  if(m_new_dt > dt_cfl*m_maxCFL){
-    m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);
-  }
+#if 1 // Debug
+    if(procID() == 0) std::cout << "rejecting with dt = " << a_dt << " and error = " << m_max_error << std::endl;
+#endif
 
-  // Also, can't go beyond what is limited by dt_m...
-  if(m_new_dt > dt_cfl){
-    m_new_dt = Min(dt_cfl, m_new_dt);
-  }
+#if 1 // Debug
+    const Real dt = Max(0.8*a_dt, dt_adapt);
+#else
+    const Real dt = Max(a_dt, dt_adapt);
+#endif
+    m_new_dt = dt_adapt; // Decrease time step
 
+    if(a_dt <= min_dt_cfl || a_dt < m_min_dt){ // Step already at minimum. Accept it anyways.
+#if 1 // Debug
+      if(procID() == 0) std::cout << "accepting after all" << std::endl;
+#endif
+      a_accept_step = true;
+    }
+
+    m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
+    m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
+    m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap
+    m_new_dt = Min(m_new_dt, m_max_dt);                   // Don't go above other hardcap
+  }
+  
   { // Debug
 #if 0 // Debug
-    pout() << m_max_error << "\t"
-	   << a_num_corrections << "\t"
-	   << a_dt << "\t"
-	   << m_new_dt << "\t"
-	   << dt_adapt << "\t"
-	   << endl;
+    if(procID() == 0){
+      std::cout << m_max_error << "\t"
+		<< a_accept_step << "\t"
+		<< a_num_corrections << "\t"
+		<< a_dt << "\t"
+		<< m_new_dt << "\t"
+		<< dt_adapt << "\t"
+		<< endl;
+    }
 #endif
   }
+
 
   m_have_dt_err = true;
 }
@@ -1074,15 +1085,20 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   Real dt = 1.E99;
 
+  int Nref = 1;
+  for (int lvl = 0; lvl < m_amr->get_finest_level(); lvl++){
+    Nref = Nref*m_amr->get_ref_rat()[lvl];
+  }
   const Real max_gl_dist = sisdc::get_max_node_distance();
-
   m_dt_cfl = m_cdr->compute_cfl_dt();
-#if 0 // Debug
-  if(procID() == 0) std::cout << m_dt_cfl << std::endl;
-#endif
+
+  //  Real dt_cfldt_cfl = (m_subcycle) ? m_dt_cfl*Nref : m_dt_cfl;
+
+  Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
+  dt_cfl = m_subcycle ? Nref*dt_cfl : dt_cfl;
+  
+  // Time step selection for non-adaptive stepping
   if(!m_adaptive_dt){
-    const Real dt_cfl = 2.0*m_cfl*m_dt_cfl/max_gl_dist;
-    //const Real dt_cfl = m_cfl*m_dt_cfl;
     if(dt_cfl < dt){
       dt = dt_cfl;
       a_timecode = time_code::cfl;
@@ -1090,15 +1106,15 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   }
   else{
     Real new_dt;
-    const Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
+
+    // Step should not exceed m_new_dt. Also, it shoul
     if(m_have_dt_err){
       new_dt = m_new_dt;
       new_dt = Max(new_dt, dt_cfl*m_minCFL);
       new_dt = Min(new_dt, dt_cfl*m_maxCFL);
     }
     else{
-      //      new_dt = 0.5*(m_maxCFL+m_minCFL)*dt_cfl;
-      new_dt = m_maxCFL*dt_cfl;
+      new_dt = m_minCFL*dt_cfl;
     }
 
     if(new_dt < dt){
@@ -1107,6 +1123,8 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     }
   }
 
+  // EVERYTHING BELOW HERE IS "STANDARD"
+  // -----------------------------------
   const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
   if(dt_src < dt){
     dt = dt_src;
@@ -1139,6 +1157,12 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   // Copy the time code, it is needed for diagnostics
   m_timecode = a_timecode;
+
+#if 0 // Debug
+  if(procID() == 0){
+    std::cout << "compute_dt = " << a_dt << "\t m_new_dt = " << m_new_dt << std::endl; 
+  }
+#endif
 }
 
 void sisdc::regrid_internals(){

@@ -60,7 +60,7 @@ protected:
   EBAMRCellData scratch1;
   EBAMRCellData scratchD;
 
-  int m_max_tries;
+  int m_max_retries;
   int m_p;
   int m_k;
   int m_error_norm;
@@ -68,6 +68,7 @@ protected:
   int m_min_corr;
   int m_error_idx;
 
+  Real m_max_growth;
   Real m_minCFL;
   Real m_maxCFL;
   Real m_err_thresh;
