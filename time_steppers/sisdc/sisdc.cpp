@@ -84,7 +84,7 @@ sisdc::sisdc(){
     pp.query("max_growth",      m_max_growth);
 
     if(pp.contains("subcycle")){
-      std::cout << str << std::endl;
+      pp.get("subcycle", str);
       if(str == "false"){
 	m_subcycle = false;
       }
