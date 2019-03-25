@@ -553,7 +553,6 @@ Real sisdc::advance(const Real a_dt){
 
 	retry_step  = num_reject <= m_max_retries;
 
-	retry_step = false;
 	if(retry_step){
 	  sisdc::compute_E_into_scratch();
 	  sisdc::compute_cdr_gradients();
@@ -709,8 +708,6 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       sisdc::integrate_advection_nosubcycle(a_dt, a_m, a_corrector);
     }
   }
-
-  return;
 
   // Add in the reaction term and then compute the operator slopes.
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
