@@ -503,6 +503,14 @@ Real sisdc::advance(const Real a_dt){
     pout() << "sisdc::advance" << endl;
   }
 
+#if 0 // Debug
+  if(procID() == 0) std::cout << "step = " << m_step
+			      << " and dt = " << a_dt
+			      << " with cfl = " << m_cfl_dt
+			      << " dt/cfl = " << a_dt/m_dt_cfl 
+			      << std::endl;
+#endif
+
   // ---------------------------------------------------------------------------------------------------
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //        advancement. If you think that this may not be the case, activate the debugging below
@@ -545,6 +553,7 @@ Real sisdc::advance(const Real a_dt){
 
 	retry_step  = num_reject <= m_max_retries;
 
+	retry_step = false;
 	if(retry_step){
 	  sisdc::compute_E_into_scratch();
 	  sisdc::compute_cdr_gradients();
@@ -701,6 +710,8 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
     }
   }
 
+  return;
+
   // Add in the reaction term and then compute the operator slopes.
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
   // advection-reaction operator slope. In this case phi_(m+1) is bogus and we need to recompute it. Otherwise,
@@ -730,6 +741,8 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
 
       // Increment swith source and then compute slope. 
       data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
+      m_amr->average_down(phi_m1, m_cdr->get_phase());
+      m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
       if(a_corrector){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
       }
@@ -793,7 +806,7 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
 
     const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
     solver->compute_divF(scratch, phi_m, extrap_dt, true);                     // scratch =  Div(v_m*phi_m^(k+1))
-
+    
     data_ops::copy(phi_m1, phi_m);
     data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
 
@@ -1025,11 +1038,14 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   else{
     a_accept_step = false;
 
-#if 1 // Debug
-    if(procID() == 0) std::cout << "rejecting with dt = " << a_dt << " and error = " << m_max_error << std::endl;
+#if 0 // Debug
+    if(procID() == 0) std::cout << "rejecting with dt = " << a_dt
+				<< " and error = " << m_max_error
+				<< " dt/cfl = " << a_dt/m_dt_cfl
+				<< std::endl;
 #endif
 
-#if 1 // Debug
+#if 0 // Debug
     const Real dt = Max(0.8*a_dt, dt_adapt);
 #else
     const Real dt = Max(a_dt, dt_adapt);
@@ -1037,7 +1053,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
     m_new_dt = dt_adapt; // Decrease time step
 
     if(a_dt <= min_dt_cfl || a_dt < m_min_dt){ // Step already at minimum. Accept it anyways.
-#if 1 // Debug
+#if 0 // Debug
       if(procID() == 0) std::cout << "accepting after all" << std::endl;
 #endif
       a_accept_step = true;
@@ -1863,7 +1879,7 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
   LevelData<EBFluxFAB> scratch(dbl, m_plaskin->get_num_species(), a_flux.ghostVect(), fact);
   a_flux.localCopyTo(Interval(0,0), scratch, interv);
   scratch.exchange(interv);
-  
+
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const EBISBox& ebisbox = ebisl[dit()];
     const Box box          = dbl.get(dit());
@@ -1873,7 +1889,7 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
       // Initialize finer flux register with flux leaving this level and into the finer level (or invalid region of that level)
       if(has_fine) {
 	for (SideIterator sit; sit.ok(); ++sit){
-	  //	  fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	  //fluxreg_fine->incrementCoarseBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
 	  fluxreg_fine->incrementCoarseBoth(scratch[dit()][dir], a_dt, dit(), interv, dir, sit());
 	}
       }
@@ -1881,7 +1897,7 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
       // Increment coarser flux register with flux entering that level from this level 
       if(has_coar){ // The coarser level has already been initialized with the coarse side flux
 	for (SideIterator sit; sit.ok(); ++sit){
-	  //	  fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
+	  //fluxreg_coar->incrementFineBoth(a_flux[dit()][dir], a_dt, dit(), interv, dir, sit());
 	  fluxreg_coar->incrementFineBoth(scratch[dit()][dir], a_dt, dit(), interv, dir, sit());
 	}
       }
@@ -2106,28 +2122,42 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
       }
       
       Real dt_cfl_level = m_dt_cfl*tref;
-      for (int lvl = a_coarsest_level; lvl < a_lvl; lvl++){
+      for (int lvl = a_coarsest_level; lvl <= a_lvl; lvl++){
 	dt_cfl_level /= m_amr->get_ref_rat()[lvl];
       }
     
-      // Try to take as few steps as possible
+      // Try to take as few steps as possible. We will ensure that local cfl = [minCFL, maxCFL]
       nref   = 1;
       dt_ref = a_dt;
-      while(dt_ref > dt_cfl_level){
+      while(dt_ref > dt_cfl_level*m_maxCFL){
 	nref++;
 	dt_ref = a_dt/nref;
       }
-    }
-#if 0 // Debug
-    if(procID() == 0) std::cout << "lvl = " << a_lvl << " .....On next level I'm taking nref = " << nref << " steps" << endl;
+
+#if 1 // Debug
+    if(procID() == 0 && a_lvl == 0) std::cout << std::endl;
+    if(procID() == 0) std::cout << "lvl = " << a_lvl
+				<< " dt_cfl = " << m_dt_cfl
+				<< " dt = " << a_dt
+				<< " .....On next level I'm taking nref = " << nref << " steps"
+				<< " with time = " << dt_ref 
+				<< " for total time = " << dt_ref*nref
+				<< " with level cfl = " << dt_ref/dt_cfl_level
+				<< endl;
 #endif
+    }
+
     for (int i = 0; i < nref; i++){
       sisdc::subcycle_advect_amr(a_flux, a_face_states, a_divF_c, a_weights, a_divF_nc, a_mass_diff,
 				 a_tnew, a_told, a_m, a_lvl+1, a_coarsest_level, a_finest_level, dt_ref);
     }
 
+
     // Finer level has caught up. Sync levels
     sisdc::subcycle_sync_levels(a_m, a_lvl, a_coarsest_level, a_finest_level);
+#if 0
+    if(procID() == 0) std::cout << "done syncing on level = " << a_lvl << std::endl;
+#endif
   }
 }
 
@@ -2227,6 +2257,10 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
 				   *E[a_lvl],
 				   a_time,
 				   a_lvl);
+
+#if 0 
+  MayDay::Warning("sisdc::update_transport_bc - we have not yet done the domain boundary conditiosn!!!");
+#endif
 }
 
 void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finest_level){
@@ -2246,6 +2280,8 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
       EBAMRCellData& state = storage->get_phi()[a_m+1]; // This is the one that we update
       m_amr->average_down(state, m_cdr->get_phase(), a_lvl);
       sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finest_level, 1.0);
+      m_amr->average_down(state, m_cdr->get_phase(), a_lvl); // Why is this necessary? 
+      state[a_lvl]->exchange();
     }
   }
 }
@@ -2263,6 +2299,7 @@ void sisdc::subcycle_copy_current_to_old_states(const int a_m, const int a_lvl){
     const EBAMRCellData& current = storage->get_phi()[a_m+1];
 
     current[a_lvl]->localCopyTo(*old[a_lvl]);
+    old[a_lvl]->exchange();
   }
 }
   
@@ -2290,6 +2327,12 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
     MayDay::Abort("sisdc::subcycle_integrate_level - not supported with ebcf (yet)");
   }
 
+#if 0 //
+  if(procID() == 0) std::cout << "Integrating level = " << a_lvl << std::endl;
+  if(procID() == 0) std::cout << "time debug: " << a_coar_time_old
+			      << "\t" << a_time << "\t" << a_coar_time_new << std::endl;
+#endif
+
   const bool has_coar = a_lvl > a_coarsest_level;
   const bool has_fine = a_lvl < a_finest_level;
 
@@ -2311,7 +2354,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
 	coar_old = storage->get_old()[a_lvl-1];
 	coar_new = storage->get_phi()[a_m+1][a_lvl-1];
       }
-
+      
       // Advect to faces and compute fluxes on face centers, and compute the conservative divergence on regular cells
       const Real extr_dt = m_extrap_advect ? 2.0*m_extrap_dt*a_dt : 0.0;
       gdnv->advect_to_faces(a_face_states, state_m1, coar_old, coar_new, a_time, a_coar_time_old,a_coar_time_new, a_lvl, extr_dt);
@@ -2339,7 +2382,7 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       data_ops::scale(a_mass_diff, -a_dt);                              // Sign convention
 
       // Update flux and redistribution registers
-
+      gdnv->new_compute_flux(a_flux, a_face_states, a_lvl);
       sisdc::update_flux_registers(a_flux, solver_idx, a_lvl, a_coarsest_level, a_finest_level, a_dt);
       sisdc::update_redist_register(a_mass_diff, solver_idx, a_lvl);
       if(m_cdr->get_mass_redist()){
@@ -2352,4 +2395,5 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       sisdc::redist_level(state_m1, solver_idx, a_weights, a_lvl);
     }
   }
+  //  if(procID() == 0) std::cout << "DONE ON LEVEL = " << a_lvl << std::endl;
 }
