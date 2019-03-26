@@ -73,13 +73,15 @@ protected:
   Real m_maxCFL;
   Real m_err_thresh;
   Real m_safety;
-  Real m_dt_adapt;
   Real m_new_dt; // dt for next time step
   Real m_extrap_dt;
+  Real m_max_cycle_cfl; // Largest allowed global CFL for subcycling advances
 
   bool m_extrap_advect;
+  bool m_cycle_sources; // Subcycle with source terms
   bool m_adaptive_dt;
   bool m_print_report;
+  
 
   // Basically only debugging stuff
   bool m_do_advec_src;  
@@ -209,7 +211,7 @@ protected:
 
   // All the routines required for the subcycling advection routines
   void reset_finer_flux_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level);
-  void reset_redist_registers_level(const int a_lvl);
+  void reset_redist_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level);
   void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_solver, const int a_lvl);
   void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
 			     const int             a_solver,
@@ -217,6 +219,11 @@ protected:
 			     const int             a_coarsest_level,
 			     const int             a_finest_level,
 			     const Real            a_dt);
+  void update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff,
+				   const int a_solver,
+				   const int a_lvl,
+				   const int a_coarsest_level,
+				   const int a_finest_level);
   void reflux_level(EBAMRCellData& a_state,
 		    const int      a_solver,
 		    const int      a_lvl,
@@ -248,6 +255,7 @@ protected:
   void subcycle_copy_states(const int a_m);
   void subcycle_copy_current_to_old_states(const int a_m, const int a_lvl);
   void subcycle_update_transport_bc(const int a_m, const int a_lvl, const Real a_time);
+  void subcycle_update_sources(const int a_m, const int a_lvl, const Real a_time); 
   void subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finest_level);
   
   void subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,

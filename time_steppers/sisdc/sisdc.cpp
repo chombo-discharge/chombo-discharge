@@ -38,11 +38,13 @@ sisdc::sisdc(){
   m_extrap_dt     = 0.5;
   m_error_idx     = -1;
   m_max_growth    = 1.2;
+  m_max_cycle_cfl = 10.0;
 
   m_which_nodes   = "lobatto";
 
   m_extrap_advect      = false;
   m_subcycle           = false;
+  m_cycle_sources      = false;
   m_print_report       = false;
   m_adaptive_dt        = false;
   m_strong_diffu       = false;
@@ -82,6 +84,7 @@ sisdc::sisdc(){
     pp.query("extrap_dt",       m_extrap_dt);
     pp.query("error_index",     m_error_idx);
     pp.query("max_growth",      m_max_growth);
+    pp.query("max_cycle_cfl",   m_max_cycle_cfl);
 
     if(pp.contains("subcycle")){
       pp.get("subcycle", str);
@@ -98,6 +101,15 @@ sisdc::sisdc(){
       }
       else{
 	MayDay::Abort("sisdc::sisdc - unknown sisdc.subcycle = blargh");
+      }
+    }
+    if(pp.contains("cycle_sources")){
+      pp.get("cycle_sources", str);
+      if(str == "true"){
+	m_cycle_sources = true;
+      }
+      else {
+	m_cycle_sources = false;
       }
     }
     if(pp.contains("extrap_advect")){
@@ -503,14 +515,6 @@ Real sisdc::advance(const Real a_dt){
     pout() << "sisdc::advance" << endl;
   }
 
-#if 0 // Debug
-  if(procID() == 0) std::cout << "step = " << m_step
-			      << " and dt = " << a_dt
-			      << " with cfl = " << m_cfl_dt
-			      << " dt/cfl = " << a_dt/m_dt_cfl 
-			      << std::endl;
-#endif
-
   // ---------------------------------------------------------------------------------------------------
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
   //        advancement. If you think that this may not be the case, activate the debugging below
@@ -736,8 +740,10 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       EBAMRCellData& FAR_m     = storage->get_FAR()[a_m]; // Currently the old slope
       const EBAMRCellData& src = solver->get_source();    // Updated source
 
-      // Increment swith source and then compute slope. 
-      data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
+      // Increment swith source and then compute slope.
+      if(!m_cycle_sources){
+	data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
+      }
       m_amr->average_down(phi_m1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
       if(a_corrector){ // Back up the old slope first, we will need it for the lagged term
@@ -1007,8 +1013,8 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   const Real max_gl_dist = sisdc::get_max_node_distance();
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
 
+  int Nref = 1;
   if(m_subcycle){
-    int Nref = 1;
     for (int lvl = 0; lvl < m_amr->get_finest_level(); lvl++){
       Nref = Nref*m_amr->get_ref_rat()[lvl];
     }
@@ -1025,57 +1031,43 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   if(m_max_error <= m_err_thresh){ // Always accept, and compute new step
     a_accept_step = true;
 
-    const Real dt = Min(m_max_growth*a_dt, dt_adapt); // Do not grow too fast
-    m_new_dt = (m_safety*m_err_thresh) ? dt : a_dt; // Increase if sufficiently far from error
-    m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
-    m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
+    // Do not grow step too fast
+    if(rel_err > 1.0){ // rel_err > 1 => dt_adapt > a_dt
+      m_new_dt = Min(m_max_growth*a_dt, dt_adapt);
+    }
+    else{ // rel_err > 1 => dt_adapt < a_dt
+      m_new_dt = dt_adapt;
+    }
     m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap
     m_new_dt = Min(m_new_dt, m_max_dt);                   // Don't go above other hardcap
+    if(!m_subcycle){
+      m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
+      m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
+    }
   }
   else{
     a_accept_step = false;
 
-#if 0 // Debug
-    if(procID() == 0) std::cout << "rejecting with dt = " << a_dt
-				<< " and error = " << m_max_error
-				<< " dt/cfl = " << a_dt/m_dt_cfl
-				<< std::endl;
-#endif
-
-#if 0 // Debug
-    const Real dt = Max(0.8*a_dt, dt_adapt);
-#else
-    const Real dt = Max(a_dt, dt_adapt);
-#endif
-    m_new_dt = dt_adapt; // Decrease time step
-
-    if(a_dt <= min_dt_cfl || a_dt < m_min_dt){ // Step already at minimum. Accept it anyways.
-#if 0 // Debug
-      if(procID() == 0) std::cout << "accepting after all" << std::endl;
-#endif
+    m_new_dt = dt_adapt/m_max_growth; // Decrease time step a little bit extra
+    if(a_dt <= min_dt_cfl/Nref || a_dt < m_min_dt){ // Step already at minimum. Accept it anyways.
       a_accept_step = true;
     }
-
-    m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
-    m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
+    
+    if(!m_subcycle){
+      m_new_dt = Max(m_new_dt, dt_cfl*m_minCFL);            // Don't drop below minimum CFL
+      m_new_dt = Min(m_new_dt, dt_cfl*m_maxCFL);            // Don't go above maximum CFL
+    }
     m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap
     m_new_dt = Min(m_new_dt, m_max_dt);                   // Don't go above other hardcap
   }
-  
-  { // Debug
-#if 0 // Debug
-    if(procID() == 0){
-      std::cout << m_max_error << "\t"
-		<< a_accept_step << "\t"
-		<< a_num_corrections << "\t"
-		<< a_dt << "\t"
-		<< m_new_dt << "\t"
-		<< dt_adapt << "\t"
-		<< endl;
-    }
-#endif
-  }
 
+#if 1 // Debug
+  if(procID() == 0) std::cout << "accept = " << a_accept_step
+			      << " dt = " << a_dt
+			      << " new_dt = " << m_new_dt
+			      << " fraction = " << m_new_dt/a_dt
+			      << std::endl;
+#endif
 
   m_have_dt_err = true;
 }
@@ -1131,17 +1123,32 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     // Step should not exceed m_new_dt. Also, it shoul
     if(m_have_dt_err){
       new_dt = m_new_dt;
-      new_dt = Max(new_dt, dt_cfl*m_minCFL);
-      new_dt = Min(new_dt, dt_cfl*m_maxCFL);
+      if(!m_subcycle){
+	new_dt = Max(new_dt, dt_cfl*m_minCFL);
+	new_dt = Min(new_dt, dt_cfl*m_maxCFL);
+      }
+      else{
+	//	new_dt = Min(new_dt, dt_cfl*m_maxCFL);
+      }
     }
     else{
-      new_dt = m_minCFL*dt_cfl;
+      if(!m_subcycle){
+	new_dt = m_minCFL*dt_cfl;
+      }
+      else{
+	new_dt = 0.5*max_gl_dist*m_maxCFL*dt_cfl/Nref; // Default start step for subcycling advances
+      }
     }
 
     if(new_dt < dt){
       dt = new_dt;
       a_timecode = time_code::error;
     }
+  }
+
+  // Truncate
+  if(m_subcycle){
+    //    dt = Min(dt, m_max_cycle_cfl*m_dt_cfl);
   }
 
   // EVERYTHING BELOW HERE IS "STANDARD"
@@ -1245,7 +1252,7 @@ void sisdc::deallocate_internals(){
   if(m_verbosity > 5){
     pout() << "sisdc::deallocate_internals" << endl;
   }
-  
+
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
@@ -1836,7 +1843,7 @@ void sisdc::reset_finer_flux_registers_level(const int a_lvl,
   }
 }
 
-void sisdc::reset_redist_registers_level(const int a_lvl){
+void sisdc::reset_redist_registers_level(const int a_lvl, const int a_coarsest_level, const int a_finest_level){
   CH_TIME("sisdc::reset_redist_registers_level");
   if(m_verbosity > 5){
     pout() << "sisdc::reset_redist_registers_level" << endl;
@@ -1845,6 +1852,24 @@ void sisdc::reset_redist_registers_level(const int a_lvl){
   const phase::which_phase phase = m_cdr->get_phase();
   EBLevelRedist& level_redist = *(m_amr->get_level_redist(phase)[a_lvl]);
   level_redist.setToZero();
+
+  if(m_amr->get_ebcf()){
+    const bool has_fine = a_lvl < a_finest_level;
+    const bool has_coar = a_lvl > a_coarsest_level;
+
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_cdr->get_phase())[a_lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_cdr->get_phase())[a_lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_cdr->get_phase())[a_lvl];
+
+    if(has_coar){
+      fine2coar_redist->setToZero();
+    }
+
+    if(has_fine){
+      coar2fine_redist->setToZero();
+      coar2coar_redist->setToZero();
+    }
+  }
 }
 
 void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
@@ -1924,6 +1949,56 @@ void sisdc::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_dif
     //    level_redist.increment(a_mass_diff[dit()], dit(), interv);
     level_redist.increment((*diff[a_lvl])[dit()], dit(), interv);
   }
+}
+
+void sisdc::update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff,
+					const int a_solver,
+					const int a_lvl,
+					const int a_coarsest_level,
+					const int a_finest_level){
+  CH_TIME("cdr_solver::update_redist_register");
+  if(m_verbosity > 5){
+    pout() << "sisdc::::update_redist_register" << endl;
+  }
+
+  const Interval interv(a_solver, a_solver);
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const bool has_coar = a_lvl > a_coarsest_level;
+  const bool has_fine = a_lvl < a_finest_level;
+
+  if(has_coar || has_fine){
+
+    const Real dx = m_amr->get_dx()[a_lvl];
+    
+    // Again, this is a bit stupid but to get the correct data from the correct interval, we have to do this
+    EBAMRIVData diff;
+    m_amr->allocate(diff, m_cdr->get_phase(), m_plaskin->get_num_species());
+    a_mass_diff.localCopyTo(Interval(0,0), *diff[a_lvl], interv);
+
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_cdr->get_phase())[a_lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_cdr->get_phase())[a_lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_cdr->get_phase())[a_lvl];
+
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      if(has_coar){
+	fine2coar_redist->increment((*diff[a_lvl])[dit()], dit(), interv);
+      }
+
+      if(has_fine){
+	coar2fine_redist->increment((*diff[a_lvl])[dit()], dit(), interv); 
+	coar2coar_redist->increment((*diff[a_lvl])[dit()], dit(), interv); 
+      }
+    }
+
+    // Tell the flux register about what is going on with EBCF. 
+    if(has_fine){
+      RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->get_flux_reg(m_cdr->get_phase())[a_lvl];
+      // fluxreg->incrementRedistRegister(*coar2fine_redist, interv, 1.0);
+      // fluxreg->incrementRedistRegister(*coar2coar_redist, interv, 1.0);
+    }
+  }
+  
 }
 
 void sisdc::reflux_level(EBAMRCellData& a_state,
@@ -2034,10 +2109,9 @@ void sisdc::subcycle_copy_states(const int a_m){
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
-
     EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];
-
+    
     data_ops::copy(phi_m1, phi_m);
   }
 
@@ -2078,12 +2152,13 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
   // Prepare level solve
   sisdc::subcycle_copy_current_to_old_states(a_m, a_lvl);
   sisdc::reset_finer_flux_registers_level(a_lvl, a_coarsest_level, a_finest_level);
-  sisdc::reset_redist_registers_level(a_lvl);
+  sisdc::reset_redist_registers_level(a_lvl, a_coarsest_level, a_finest_level);
 
-  // Update boundary conditions on this level
+  // Level solve. Update boundary conditions and source terms on this level
   sisdc::subcycle_update_transport_bc(a_m, a_lvl, a_tnew[a_lvl]);
-
-  // Level solve
+  if(m_cycle_sources){
+    sisdc::subcycle_update_sources(a_m, a_lvl, a_tnew[a_lvl]);
+  }
   sisdc::subcycle_integrate_level(*a_flux[a_lvl],
 				  *a_face_states[a_lvl],
 				  *a_divF_c[a_lvl],
@@ -2131,7 +2206,7 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 	dt_ref = a_dt/nref;
       }
 
-#if 1 // Debug
+#if 0 // Debug
     if(procID() == 0 && a_lvl == 0) std::cout << std::endl;
     if(procID() == 0) std::cout << "lvl = " << a_lvl
 				<< " dt_cfl = " << m_dt_cfl
@@ -2152,9 +2227,6 @@ void sisdc::subcycle_advect_amr(EBAMRFluxData& a_flux,
 
     // Finer level has caught up. Sync levels
     sisdc::subcycle_sync_levels(a_m, a_lvl, a_coarsest_level, a_finest_level);
-#if 0
-    if(procID() == 0) std::cout << "done syncing on level = " << a_lvl << std::endl;
-#endif
   }
 }
 
@@ -2195,7 +2267,6 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
     solver_eb_fluxes.push_back(solver->get_ebflux()[a_lvl]);
   }
 
-
   // Compute all the things that are necessary for BCs
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -2207,6 +2278,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
     LevelData<BaseIVFAB<Real> >& scratchIV_D = *storage->get_eb_scratchD()[a_lvl]; // SpaceDim comps
 
     // 1. Compute cell-centered gradients
+    cell_states[idx]->exchange();
     m_amr->compute_gradient(*cell_gradients[idx], *cell_states[idx], a_lvl);
     
     // 2. Extrapolate cell-centered gradient to the EB
@@ -2260,6 +2332,89 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
 #endif
 }
 
+void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a_time){
+  CH_TIME("sisdc::subcycle_update_sources");
+  if(m_verbosity > 5){
+    pout() << "sisdc::subcycle_update_sources" << endl;
+  }
+
+#if 0 //
+  // Actually, we DO need to interpolate the coarse grid data to a_time in order to get update ghost cells.
+  MayDay::Warning("sisdc::subcycle_update_sources - Coarse grid data should be interpolated to current time");
+#endif
+
+  // This should have been called AFTER update_transport_bc, which computed the cell centered gradients. So
+  // at least we don't have to do that again...
+  const int num_species        = m_plaskin->get_num_species();
+  const int num_photons        = m_plaskin->get_num_photons();
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
+  const RealVect origin        = m_physdom->get_prob_lo();
+  const Real dx                = m_amr->get_dx()[a_lvl];
+
+  // Stencils for extrapolating things to cell centroids
+  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
+
+  // We must have the gradient of E. This block of code does that. 
+  EBAMRCellData grad_E, E_norm;
+  m_amr->allocate(grad_E, m_cdr->get_phase(), SpaceDim);  // Allocate storage for grad(|E|)
+  m_amr->allocate(E_norm, m_cdr->get_phase(), 1);         // Allocate storage for |E|
+  const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+  data_ops::vector_length(*E_norm[a_lvl], *E[a_lvl]);            // Compute |E| on this level
+  m_amr->compute_gradient(*grad_E[a_lvl], *E_norm[a_lvl], a_lvl);// Compute grad(|E|) on this level
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      Vector<EBCellFAB*> sources(num_species);
+      Vector<EBCellFAB*> cdr_densities(num_species);
+      Vector<EBCellFAB*> cdr_gradients(num_species);
+      Vector<EBCellFAB*> rte_densities(num_photons);
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	RefCountedPtr<cdr_solver>& solver   = solver_it();
+	RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+	const int idx = solver_it.get_solver();
+	EBAMRCellData& src   = solver->get_source();
+	EBAMRCellData& phim  = storage->get_phi()[a_m+1];
+	EBAMRCellData& gradm = storage->get_gradient();
+	
+	sources[idx]       = &((*src[a_lvl])[dit()]);
+	cdr_densities[idx] = &((*phim[a_lvl])[dit()]);
+	cdr_gradients[idx] = &((*gradm[a_lvl])[dit()]);
+      }
+      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      	const int idx = solver_it.get_solver();
+	RefCountedPtr<rte_solver>& solver = solver_it();
+	EBAMRCellData& state = solver->get_state();
+      	rte_densities[idx] = &((*state[a_lvl])[dit()]);
+      }
+      const EBCellFAB& e  = (*E[a_lvl])[dit()];
+      const EBCellFAB& gE = (*grad_E[a_lvl])[dit()];
+
+      // This does all cells
+      time_stepper::compute_cdr_sources_reg(sources,
+      					    cdr_densities,
+      					    cdr_gradients,
+      					    rte_densities,
+      					    e,
+      					    gE,
+      					    dbl.get(dit()),
+      					    a_time,
+      					    dx);
+
+      // Have to redo irregular cells
+      time_stepper::compute_cdr_sources_irreg(sources,
+					      cdr_densities,
+					      cdr_gradients,
+					      rte_densities,
+					      e,
+					      gE,
+					      interp_stencils[a_lvl][dit()],
+					      dbl.get(dit()),
+					      a_time,
+					      dx);
+  }
+}
+
 void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coarsest_level, const int a_finest_level){
   CH_TIME("sisdc::subcycle_sync_levels");
   if(m_verbosity > 5){
@@ -2271,15 +2426,65 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
     const int solver_idx                = solver_it.get_solver();
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
+
+    EBAMRCellData& state = storage->get_phi()[a_m+1]; // This is the one that we update
+
+    // Since the redistribution registers don't allow components, do some transient storage stuff
+    
     
     // Reflux state
     if(solver->is_mobile()){
-      EBAMRCellData& state = storage->get_phi()[a_m+1]; // This is the one that we update
       m_amr->average_down(state, m_cdr->get_phase(), a_lvl);
       sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finest_level, 1.0);
-      m_amr->average_down(state, m_cdr->get_phase(), a_lvl); // Why is this necessary? 
-      state[a_lvl]->exchange();
+
+      // EBCF related code. 
+      if(m_amr->get_ebcf()){
+	const Interval inter0(0,0);
+	const Interval interv(solver_idx, solver_idx);
+	
+	const bool has_fine = a_lvl < a_finest_level;
+	const bool has_coar = a_lvl > a_coarsest_level;
+
+	// Bah, extra storage becase redistribution registers don't let me use different for mass diffs and target FAB
+	EBAMRCellData dummy;
+	m_amr->allocate(dummy, m_cdr->get_phase(), m_plaskin->get_num_species());
+	data_ops::set_value(dummy, 0.0);
+
+	RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_cdr->get_phase())[a_lvl];
+	RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_cdr->get_phase())[a_lvl];
+	RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_cdr->get_phase())[a_lvl];
+
+
+	LevelData<EBCellFAB>* dummy_lev  = dummy[a_lvl];
+	LevelData<EBCellFAB>* dummy_coar = has_coar ? &(*dummy[a_lvl-1]) : NULL;
+	LevelData<EBCellFAB>* dummy_fine = has_fine ? &(*dummy[a_lvl+1]) : NULL;
+
+	// Level copies
+	if(has_coar || has_fine){
+	  state[a_lvl]->localCopyTo(inter0, *dummy_lev, interv);
+
+	  if(has_coar) state[a_lvl-1]->localCopyTo(inter0, *dummy_coar, interv);
+	  if(has_fine) state[a_lvl+1]->localCopyTo(inter0, *dummy_fine, interv);
+	
+	  if(has_coar){
+	    state[a_lvl-1]->localCopyTo(Interval(0,0), *dummy_coar, interv);
+	    fine2coar_redist->redistribute(*dummy_coar, interv);
+	  }
+
+	  if(has_fine){
+	    coar2fine_redist->redistribute(*dummy_fine, interv);
+	    coar2coar_redist->redistribute(*dummy_lev,  interv);
+	  }
+
+	  // Copy back
+	  dummy_lev->localCopyTo(interv, *state[a_lvl], inter0);
+	  if(has_coar) dummy_coar->localCopyTo(interv, *state[a_lvl-1], inter0);
+	  if(has_fine) dummy_fine->localCopyTo(interv, *state[a_lvl+1], inter0);
+	}
+      }
     }
+    m_amr->average_down(state, m_cdr->get_phase(), a_lvl);
+    state[a_lvl]->exchange();
   }
 }
 
@@ -2319,31 +2524,27 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
     pout() << "sisdc::subcycle_integrate_level" << endl;
   }
 
-  const bool ebcf = m_amr->get_ebcf();
-  if(ebcf){
-    MayDay::Abort("sisdc::subcycle_integrate_level - not supported with ebcf (yet)");
-  }
-
 #if 0 //
   if(procID() == 0) std::cout << "Integrating level = " << a_lvl << std::endl;
   if(procID() == 0) std::cout << "time debug: " << a_coar_time_old
 			      << "\t" << a_time << "\t" << a_coar_time_new << std::endl;
 #endif
 
+  const bool ebcf     = m_amr->get_ebcf();
   const bool has_coar = a_lvl > a_coarsest_level;
   const bool has_fine = a_lvl < a_finest_level;
-
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int solver_idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     RefCountedPtr<cdr_solver>& solver   = solver_it();
 
+    LevelData<EBCellFAB>& state_m1 = (*storage->get_phi()[a_m+1][a_lvl]); // We will update this one.
+    LevelData<EBCellFAB>& source   = *solver->get_source()[a_lvl];
+
     if(solver->is_mobile()){
+      
       cdr_gdnv* gdnv = (cdr_gdnv*) (&(*solver));
-
-      LevelData<EBCellFAB>& state_m1 = (*storage->get_phi()[a_m+1][a_lvl]); // We will update this one.
-
       LevelData<EBCellFAB>* coar_old = NULL;
       LevelData<EBCellFAB>* coar_new = NULL;
 
@@ -2382,15 +2583,25 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       gdnv->new_compute_flux(a_flux, a_face_states, a_lvl);
       sisdc::update_flux_registers(a_flux, solver_idx, a_lvl, a_coarsest_level, a_finest_level, a_dt);
       sisdc::update_redist_register(a_mass_diff, solver_idx, a_lvl);
+
+      // If we have EBCF, we must update those as well
+      if(ebcf){
+	sisdc::update_coarse_fine_register(a_mass_diff, solver_idx, a_lvl, a_coarsest_level, a_finest_level);
+      }
+      
       if(m_cdr->get_mass_redist()){
 	data_ops::incr(a_weights, state_m1, 1.0);
       }
 
       // Euler advance with redistribution
       data_ops::incr(state_m1, a_divF_c, -a_dt);
-      state_m1.exchange();
       sisdc::redist_level(state_m1, solver_idx, a_weights, a_lvl);
     }
+
+    // Add in the source term
+    if(m_cycle_sources){
+      data_ops::incr(state_m1, source, a_dt);
+    }
+      state_m1.exchange();
   }
-  //  if(procID() == 0) std::cout << "DONE ON LEVEL = " << a_lvl << std::endl;
 }
