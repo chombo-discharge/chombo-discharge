@@ -418,13 +418,14 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   // This data is used as a source term for time-extrapolation to edges 
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_phase, 1);
+  data_ops::set_value(scratch, 0.0);
   if(a_extrap_dt > 0.0){
     compute_divD(scratch, a_state);
+    data_ops::incr(scratch, m_source, 1.0);
+
+    m_amr->average_down(scratch, m_phase);
+    m_amr->interp_ghost(scratch, m_phase);
   }
-  else{
-    data_ops::set_value(scratch, 0.0);
-  }
-  data_ops::incr(scratch, m_source, 1.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_level_advect[lvl];
@@ -441,14 +442,13 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     LevelData<EBCellFAB>* coarsrc_old   = NULL;
     LevelData<EBCellFAB>* coarsrc_new   = NULL;
 
-    
     if(has_coar){
       coarstate_old = a_state[lvl-1];
       coarstate_new = a_state[lvl-1];
       coarvel_old   = m_velo_cell[lvl-1];
       coarvel_new   = m_velo_cell[lvl-1];
-      coarsrc_old   = m_source[lvl-1];
-      coarsrc_new   = m_source[lvl-1];
+      coarsrc_old   = scratch[lvl-1];
+      coarsrc_new   = scratch[lvl-1];
     }
 
     leveladvect->resetBCs(bcfact);

@@ -893,6 +893,9 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
     const int idx = solver_it.get_solver();
     (*a_sources[idx]).setVal(0.0);
     (*a_sources[idx]).plus(tmp, idx, 0, 1);
+
+    // Covered cells are bogus. 
+    (*a_sources[idx]).setCoveredCellVal(0.0, 0);
   }
 }
 
@@ -1202,6 +1205,14 @@ void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_veloci
       for (int dir = 0; dir < SpaceDim; dir++){
 	(*a_velocities[idx]).getSingleValuedFAB()(iv, dir) = velocities[idx][dir];
       }
+    }
+  }
+
+  // Covered is bogus.
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      a_velocities[idx]->setCoveredCellVal(0.0, dir);
     }
   }
 }

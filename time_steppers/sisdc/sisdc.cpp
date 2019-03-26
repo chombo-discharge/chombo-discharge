@@ -532,6 +532,8 @@ Real sisdc::advance(const Real a_dt){
   int num_corrections = 0;
   bool accept_step    = false;
   bool retry_step     = true;
+
+  m_max_error = 0.1234E5;
   while(!accept_step && retry_step){
     num_corrections = 0;
     sisdc::setup_subintervals(m_time, actual_dt);
@@ -557,8 +559,8 @@ Real sisdc::advance(const Real a_dt){
 
 	retry_step  = num_reject <= m_max_retries;
 
-	if(retry_step){
-	  sisdc::compute_E_into_scratch();
+	if(retry_step){ 
+	  sisdc::compute_E_into_scratch(); // This can't be correct, right??? We keep solving into the Poisson solver...
 	  sisdc::compute_cdr_gradients();
 	  sisdc::compute_cdr_velo(m_time);
 	  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
@@ -738,14 +740,15 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
     }
     else{ // If we made it here, phi_(m+1) = phi_m + dtm*FA(phi_m) through the integrate_advection_subcycle routine
       EBAMRCellData& FAR_m     = storage->get_FAR()[a_m]; // Currently the old slope
-      const EBAMRCellData& src = solver->get_source();    // Updated source
+      EBAMRCellData& src = solver->get_source();    // Updated source
 
       // Increment swith source and then compute slope.
-      if(!m_cycle_sources){
+      if(!(m_cycle_sources && m_subcycle)){
 	data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
       }
       m_amr->average_down(phi_m1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
+
       if(a_corrector){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
       }
@@ -1899,6 +1902,7 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
   // with enough variables
   EBFluxFactory fact(ebisl);
   LevelData<EBFluxFAB> scratch(dbl, m_plaskin->get_num_species(), a_flux.ghostVect(), fact);
+  EBLevelDataOps::setVal(scratch, 0.0);
   a_flux.localCopyTo(Interval(0,0), scratch, interv);
   scratch.exchange(interv);
 
@@ -1973,7 +1977,9 @@ void sisdc::update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mas
     // Again, this is a bit stupid but to get the correct data from the correct interval, we have to do this
     EBAMRIVData diff;
     m_amr->allocate(diff, m_cdr->get_phase(), m_plaskin->get_num_species());
+    data_ops::set_value(*diff[a_lvl], 0.0);
     a_mass_diff.localCopyTo(Interval(0,0), *diff[a_lvl], interv);
+    diff[a_lvl]->exchange();
 
     RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_cdr->get_phase())[a_lvl];
     RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_cdr->get_phase())[a_lvl];
@@ -1994,8 +2000,8 @@ void sisdc::update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mas
     // Tell the flux register about what is going on with EBCF. 
     if(has_fine){
       RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->get_flux_reg(m_cdr->get_phase())[a_lvl];
-      // fluxreg->incrementRedistRegister(*coar2fine_redist, interv, 1.0);
-      // fluxreg->incrementRedistRegister(*coar2coar_redist, interv, 1.0);
+      fluxreg->incrementRedistRegister(*coar2fine_redist, interv, -dx);
+      fluxreg->incrementRedistRegister(*coar2coar_redist, interv, -dx);
     }
   }
   
@@ -2436,7 +2442,6 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
     if(solver->is_mobile()){
       m_amr->average_down(state, m_cdr->get_phase(), a_lvl);
       sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finest_level, 1.0);
-
       // EBCF related code. 
       if(m_amr->get_ebcf()){
 	const Interval inter0(0,0);
@@ -2602,6 +2607,6 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
     if(m_cycle_sources){
       data_ops::incr(state_m1, source, a_dt);
     }
-      state_m1.exchange();
+    state_m1.exchange();
   }
 }
