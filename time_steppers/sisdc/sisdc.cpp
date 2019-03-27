@@ -552,12 +552,21 @@ Real sisdc::advance(const Real a_dt){
     if(m_adaptive_dt){
       // This restricts new_dt to > min_cfl and > min_hardcap. If actual_dt is equal these bounds, we accept the step
       sisdc::compute_new_dt(accept_step, actual_dt, num_corrections);
-      
-      if(!accept_step){  // Step rejection, use the new dt for next step. 
+      if(!accept_step){  // Step rejection, use the new dt for next step.
+#if 0 // Debug
+	if(procID() == 0){
+	  std::cout << "Rejecting with actual_dt = " << actual_dt
+		    << "\t Err = " << m_max_error
+		    << "\t New dt = " << m_new_dt
+		    << std::endl;
+	}
+#endif
 	actual_dt = m_new_dt;
 	num_reject++;
 
 	retry_step  = num_reject <= m_max_retries;
+
+
 
 	if(retry_step){ 
 	  sisdc::compute_E_into_scratch(); // This can't be correct, right??? We keep solving into the Poisson solver...
@@ -1064,7 +1073,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
     m_new_dt = Min(m_new_dt, m_max_dt);                   // Don't go above other hardcap
   }
 
-#if 1 // Debug
+#if 0 // Debug
   if(procID() == 0) std::cout << "accept = " << a_accept_step
 			      << " dt = " << a_dt
 			      << " new_dt = " << m_new_dt
@@ -1151,7 +1160,7 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   // Truncate
   if(m_subcycle){
-    //    dt = Min(dt, m_max_cycle_cfl*m_dt_cfl);
+    dt = Min(dt, m_max_cycle_cfl*m_dt_cfl);
   }
 
   // EVERYTHING BELOW HERE IS "STANDARD"

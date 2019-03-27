@@ -1052,7 +1052,8 @@ void plasma_engine::old_read_checkpoint_file(const std::string& a_restart_file){
   }
 
   m_amr->set_finest_level(finest_level); // Set finest level
-  m_amr->set_grids(boxes);               // Set up amr
+  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
+  m_amr->set_grids(boxes, regsize);               // Set up amr
   m_timestepper->instantiate_solvers();  // Instantiate solvrs, they can now be filled with data
 
   this->allocate_internals();            // Allocate internal storage which also needs to be filled
@@ -1189,7 +1190,8 @@ void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
   }
 
   m_amr->set_finest_level(finest_level); // Set finest level
-  m_amr->set_grids(boxes);               // Set up amr
+  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
+  m_amr->set_grids(boxes, regsize);               // Set up amr
   m_timestepper->instantiate_solvers();  // Instantiate solvrs, they can now be filled with data
   this->allocate_internals();            // Allocate internal storage which also needs to be filled
 
