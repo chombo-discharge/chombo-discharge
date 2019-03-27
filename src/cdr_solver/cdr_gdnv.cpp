@@ -691,6 +691,7 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 
 
   const int comp = 0;
+  const bool has_coar = a_lvl > 0;
   
   EBAdvectPatchIntegrator::setCurComp(0);
   EBAdvectPatchIntegrator::setDoingVel(0);
@@ -703,13 +704,36 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
   
   leveladvect->resetBCs(bcfact);
 
-  const LevelData<EBCellFAB>* source_ptr   = NULL;
-  const LevelData<EBCellFAB>* coar_vel_ptr = NULL;
 
-  if(a_lvl > 0){
-    coar_vel_ptr = m_velo_cell[a_lvl-1];
-    coar_vel_ptr = m_velo_cell[a_lvl-1];
+  // Level source on this level and coarser level
+  data_ops::set_value(m_scratch, 0.0);
+  if(a_extrap_dt > 0.0){
+
+    // Compute DivD on this level
+    if(m_diffusive){
+      AMRLevelOp<LevelData<EBCellFAB> >* oper = m_gmg_solver->getAMROperators()[a_lvl];
+      oper->applyOp(*m_scratch[a_lvl], a_cell_state);
+
+#if 0 // Fuck the coarse stuff. 
+      if(has_coar){
+	AMRLevelOp<LevelData<EBCellFAB> >* coar_oper = m_gmg_solver->getAMROperators()[a_lvl-1];
+	oper->applyOp(*m_resid[a_lvl-1], a_state_coar_old);
+	data_ops::incr(*m_scratch[a_lvl-1], *m_resid[a_lvl-1], 1.0);
+
+      }
+#endif
+    }
+    data_ops::incr(*m_scratch[a_lvl], *m_source[a_lvl], 1.0);
+    if(has_coar){
+      data_ops::incr(*m_scratch[a_lvl-1], *m_source[a_lvl-1], 1.0);
+    }
   }
+
+  const LevelData<EBCellFAB>* source_ptr   = m_scratch[a_lvl];
+  const LevelData<EBCellFAB>* coar_src_old = has_coar ? &(*m_scratch[a_lvl-1])   : NULL;
+  const LevelData<EBCellFAB>* coar_src_new = has_coar ? &(*m_scratch[a_lvl-1])   : NULL;
+  const LevelData<EBCellFAB>* coar_vel_old = has_coar ? &(*m_velo_cell[a_lvl-1]) : NULL;
+  const LevelData<EBCellFAB>* coar_vel_new = has_coar ? &(*m_velo_cell[a_lvl-1]) : NULL;
 
   // Extrapolate to faces. Interpolate to a_time between a_coarse_time_old and a_coarse_time new
   if(m_which_divFnc == 0){
@@ -719,15 +743,15 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  *m_velo_face[a_lvl],
 				  a_state_coarse_old,
 				  a_state_coarse_new,
-				  coar_vel_ptr,
-				  coar_vel_ptr,
+				  coar_vel_old,
+				  coar_vel_new,
 				  a_coarse_time_old,
 				  a_coarse_time_new,
 				  a_time,
 				  a_extrap_dt,
 				  source_ptr,
-				  source_ptr,
-				  source_ptr);
+				  coar_src_old,
+				  coar_src_new);
   }
   else if(m_which_divFnc == 1){
     leveladvect->advectToFacesCol(a_face_state,
@@ -742,15 +766,15 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
 				  *m_velo_face[a_lvl],
 				  a_state_coarse_old,
 				  a_state_coarse_new,
-				  coar_vel_ptr,
-				  coar_vel_ptr,
+				  coar_vel_old,
+				  coar_vel_new,
 				  a_coarse_time_old,
 				  a_coarse_time_new,
 				  a_time,
 				  a_extrap_dt,
 				  source_ptr,
-				  source_ptr,
-				  source_ptr);
+				  coar_src_old,
+				  coar_src_new);
   }
   else{
     MayDay::Abort("cdr_gdnv::extrapolate_to_faces - unknown method requested");
