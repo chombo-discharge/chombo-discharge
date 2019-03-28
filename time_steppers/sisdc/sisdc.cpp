@@ -30,7 +30,8 @@ sisdc::sisdc(){
   m_minCFL        = 0.1;
   m_maxCFL        = 0.9;   
   m_err_thresh    = 1.E-4;
-  m_safety        = 0.9;
+  m_safety        = 0.75;
+  m_decrease_safe = 0.9;
   m_num_diff_corr = 0;
   m_new_dt        = 1.234567E89;
   m_max_retries   = 1;
@@ -71,20 +72,21 @@ sisdc::sisdc(){
 
     std::string str;
 
-    pp.query("subintervals",    m_p);
-    pp.query("corr_iter",       m_k);
-    pp.query("error_norm",      m_error_norm);
-    pp.query("min_corr",        m_min_corr);
-    pp.query("min_cfl",         m_minCFL);
-    pp.query("max_cfl",         m_maxCFL);
-    pp.query("max_error",       m_err_thresh);
-    pp.query("safety",          m_safety);
-    pp.query("num_corrections", m_num_diff_corr);
-    pp.query("max_retries",     m_max_retries);
-    pp.query("extrap_dt",       m_extrap_dt);
-    pp.query("error_index",     m_error_idx);
-    pp.query("max_growth",      m_max_growth);
-    pp.query("max_cycle_cfl",   m_max_cycle_cfl);
+    pp.query("subintervals",     m_p);
+    pp.query("corr_iter",        m_k);
+    pp.query("error_norm",       m_error_norm);
+    pp.query("min_corr",         m_min_corr);
+    pp.query("min_cfl",          m_minCFL);
+    pp.query("max_cfl",          m_maxCFL);
+    pp.query("max_error",        m_err_thresh);
+    pp.query("safety",           m_safety);
+    pp.query("decrease_safety",  m_decrease_safe);
+    pp.query("num_corrections",  m_num_diff_corr);
+    pp.query("max_retries",      m_max_retries);
+    pp.query("extrap_dt",        m_extrap_dt);
+    pp.query("error_index",      m_error_idx);
+    pp.query("max_growth",       m_max_growth);
+    pp.query("max_cycle_cfl",    m_max_cycle_cfl);
 
     if(pp.contains("subcycle")){
       pp.get("subcycle", str);
@@ -550,12 +552,13 @@ Real sisdc::advance(const Real a_dt){
 
     // Compute a new time step. If it is smaller than the minimum allowed CFL step, accept the step anyways
     if(m_adaptive_dt){
-      // This restricts new_dt to > min_cfl and > min_hardcap. If actual_dt is equal these bounds, we accept the step
       sisdc::compute_new_dt(accept_step, actual_dt, num_corrections);
+      
       if(!accept_step){  // Step rejection, use the new dt for next step.
-#if 0 // Debug
+#if 1 // Debug
 	if(procID() == 0){
-	  std::cout << "Rejecting with actual_dt = " << actual_dt
+	  std::cout << "Rejecting step = " << m_step
+		    << "\t dt = " << actual_dt
 		    << "\t Err = " << m_max_error
 		    << "\t New dt = " << m_new_dt
 		    << std::endl;
@@ -565,9 +568,7 @@ Real sisdc::advance(const Real a_dt){
 	num_reject++;
 
 	retry_step  = num_reject <= m_max_retries;
-
-
-
+	
 	if(retry_step){ 
 	  sisdc::compute_E_into_scratch(); // This can't be correct, right??? We keep solving into the Poisson solver...
 	  sisdc::compute_cdr_gradients();
@@ -581,6 +582,8 @@ Real sisdc::advance(const Real a_dt){
       m_new_dt = 1.234567E89;
       accept_step = true;
     }
+
+
   }
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
@@ -646,6 +649,9 @@ void sisdc::compute_FD_0(){
 
     cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
     tgasolver->compute_divD(FD_0, phi_0);
+
+    m_amr->average_down(FD_0, m_cdr->get_phase());
+    m_amr->interp_ghost(FD_0, m_cdr->get_phase());
   }
 }
 
@@ -751,7 +757,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       EBAMRCellData& FAR_m     = storage->get_FAR()[a_m]; // Currently the old slope
       EBAMRCellData& src = solver->get_source();    // Updated source
 
-      // Increment swith source and then compute slope.
+      // Increment swith source and then compute slope. This has already been done 
       if(!(m_cycle_sources && m_subcycle)){
 	data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
       }
@@ -764,6 +770,9 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       data_ops::copy(FAR_m, phi_m1);            // FAR_m = (phi_(m+1) - phi_m)/dtm
       data_ops::incr(FAR_m, phi_m, -1.0);       // :
       data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
+
+      m_amr->average_down(FAR_m, m_cdr->get_phase());
+      m_amr->interp_ghost(FAR_m, m_cdr->get_phase());
     }
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
@@ -824,7 +833,6 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
     
     data_ops::copy(phi_m1, phi_m);
     data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
-
     m_amr->average_down(phi_m1, m_cdr->get_phase());
     m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
     data_ops::floor(phi_m1, 0.0);
@@ -855,30 +863,40 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_cor
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     
     if(solver->is_diffusive()){
-      EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1]; // 
+      EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1]; // Advected solution. Possibly with lagged terms. 
       const EBAMRCellData& phi_m = storage->get_phi()[a_m];
 
       // Build the diffusion source term
-      EBAMRCellData& source  = storage->get_scratch();
-      data_ops::copy(source, phi_m1);      // Copy initial solutions
-      data_ops::incr(source, phi_m, -1.0); // Copy initial solutions
-      data_ops::scale(source, 1./m_dtm[a_m]);
+      EBAMRCellData& source   = storage->get_scratch();
+      EBAMRCellData& init_soln = storage->get_scratch2();
+      data_ops::set_value(source, 0.0); // No source term
+      
+      data_ops::copy(init_soln, phi_m1);      // Copy initial solutions
       if(a_corrector){
 	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
-	data_ops::incr(source, FD_m1k, -1.0);
+	data_ops::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
+      m_amr->average_down(init_soln, m_cdr->get_phase());
+      m_amr->interp_ghost(init_soln, m_cdr->get_phase());
+      data_ops::copy(phi_m1, init_soln);
+      data_ops::floor(init_soln, 0.0);
 
       // Solve
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->advance_euler(phi_m1, phi_m, source, m_dtm[a_m]); // Source is -Fd_(m+1)^k
+      tgasolver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       m_amr->average_down(phi_m1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
       data_ops::floor(phi_m1, 0.0);
 
-
       // Update the operator slope
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
-      tgasolver->compute_divD(FD_m1k, phi_m1);
+      data_ops::set_value(FD_m1k, 0.0);
+      data_ops::incr(FD_m1k, phi_m1, 1.0);
+      data_ops::incr(FD_m1k, init_soln, -1.0);
+      data_ops::scale(FD_m1k, 1./m_dtm[a_m]);
+
+      m_amr->average_down(FD_m1k, m_cdr->get_phase());
+      m_amr->interp_ghost(FD_m1k, m_cdr->get_phase());
     }
     else{
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
@@ -930,14 +948,19 @@ void sisdc::reconcile_integrands(){
     // Build the integrand
     for (int m = 0; m <= m_p; m++){
       EBAMRCellData& F_m         = storage->get_F()[m];
-      const EBAMRCellData& FD_m  = storage->get_FD()[m];
-      const EBAMRCellData& FAR_m = storage->get_FAR()[m];
+      EBAMRCellData& FD_m  = storage->get_FD()[m];
+      EBAMRCellData& FAR_m = storage->get_FAR()[m];
 
       data_ops::copy(F_m, FAR_m);
       data_ops::incr(F_m, FD_m, 1.0);
 
+      
       m_amr->average_down(F_m, m_cdr->get_phase());
+      // m_amr->average_down(FD_m, m_cdr->get_phase());
+      // m_amr->average_down(FAR_m, m_cdr->get_phase());
       m_amr->interp_ghost(F_m, m_cdr->get_phase());
+      // m_amr->interp_ghost(FD_m, m_cdr->get_phase());
+      // m_amr->interp_ghost(FAR_m, m_cdr->get_phase());
     }
   }
 
@@ -994,10 +1017,11 @@ void sisdc::finalize_errors(){
     const EBAMRCellData& phi_p = storage->get_phi()[m_p];
     data_ops::incr(error, phi_p, 1.0);
 
-    // Compute norms
+    // Compute norms. Only finest level.
+    const int lvl = m_amr->get_finest_level();
     Real Lerr, Lphi;
-    data_ops::norm(Lerr, *error[0], m_amr->get_domains()[0], m_error_norm);
-    data_ops::norm(Lphi, *phi_p[0], m_amr->get_domains()[0], m_error_norm);
+    data_ops::norm(Lerr, *error[lvl], m_amr->get_domains()[lvl], m_error_norm);
+    data_ops::norm(Lphi, *phi_p[lvl], m_amr->get_domains()[lvl], m_error_norm);
     m_cdr_error[idx] = (Lphi > 0.0) ? (Lerr/Lphi) : 0.0;
 
     m_max_error = Max(m_cdr_error[idx], m_max_error);
@@ -1036,7 +1060,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
 
   // Try time step
   const Real rel_err    = (m_safety*m_err_thresh)/m_max_error;
-  const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
+  const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections)) : m_max_dt;
   const Real min_dt_cfl = dt_cfl*m_minCFL;
   const Real max_dt_cfl = dt_cfl*m_maxCFL;
 
@@ -1060,7 +1084,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
   else{
     a_accept_step = false;
 
-    m_new_dt = dt_adapt/m_max_growth; // Decrease time step a little bit extra
+    m_new_dt = m_decrease_safe*dt_adapt; // Decrease time step a little bit extra to avoid another rejection
     if(a_dt <= min_dt_cfl/Nref || a_dt < m_min_dt){ // Step already at minimum. Accept it anyways.
       a_accept_step = true;
     }

@@ -21,6 +21,27 @@ air7::electron::electron(){
   {// Get initial parameter
     ParmParse pp("air7");
     pp.get("initial_ionization", m_initial_ionization);
+
+    std::string str;
+    if(pp.contains("mobile_electrons")){
+      pp.get("mobile_electrons", str);
+      if(str == "true"){
+	m_mobile = true;
+      }
+      else if(str == "false"){
+	m_mobile = false;
+      }
+    }
+    if(pp.contains("diffusive_electrons")){
+      pp.get("diffusive_electrons", str);
+      if(str == "true"){
+	m_diffusive = true;
+      }
+      else if(str == "false"){
+	m_diffusive = false;
+      }
+    }
+
   }
 }
 

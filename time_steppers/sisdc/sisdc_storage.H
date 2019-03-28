@@ -24,6 +24,7 @@ public:
   void deallocate_storage();
 
   EBAMRCellData& get_scratch()  { return m_scratch;    }
+  EBAMRCellData& get_scratch2() { return m_scratch2;    }
   EBAMRCellData& get_error()    { return m_error;      }
   EBAMRCellData& get_gradient() { return m_gradient;   }
   EBAMRCellData& get_old()      { return m_old;        }
@@ -56,6 +57,7 @@ protected:
   bool m_subcycle;               // Extra storage for subcycling
 
   EBAMRCellData m_scratch;  // Scratch data
+  EBAMRCellData m_scratch2; // Scratch data
   EBAMRCellData m_error;    // Error estimator
   EBAMRCellData m_gradient; // Storage for holding gradient
   EBAMRCellData m_old;      // "Old solution". Only used for subcycling

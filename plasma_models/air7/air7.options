@@ -3,12 +3,14 @@
 # ====================================================================================================
 air7.gas_temperature    = 300
 air7.gas_pressure       = 1.0
-air7.transport_file     = transport.data.txt
+air7.transport_file     = new_transport_data.txt
 
-air7.initial_ionization = 1.E10
-air7.ion_mobility       = 2.E-4
-air7.mobile_ions        = true
-air7.diffusive_ions     = true
+air7.initial_ionization  = 1.E10
+air7.ion_mobility        = 2.E-4
+air7.mobile_ions         = true
+air7.diffusive_ions      = true
+air7.mobile_electrons    = true
+air7.diffusive_electrons = true
 
 air7.electrode_townsend2           = 1.E-3
 air7.dielectric_townsend2          = 1.E-3

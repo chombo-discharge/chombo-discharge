@@ -73,6 +73,7 @@ protected:
   Real m_maxCFL;
   Real m_err_thresh;
   Real m_safety;
+  Real m_decrease_safe;
   Real m_new_dt; // dt for next time step
   Real m_extrap_dt;
   Real m_max_cycle_cfl; // Largest allowed global CFL for subcycling advances
