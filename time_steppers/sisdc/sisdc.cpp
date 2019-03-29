@@ -1066,7 +1066,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
 
   // Try time step
   const Real rel_err    = (m_safety*m_err_thresh)/m_max_error;
-  const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections)) : m_max_dt;
+  const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
   const Real min_dt_cfl = dt_cfl*m_minCFL;
   const Real max_dt_cfl = dt_cfl*m_maxCFL;
 
@@ -1076,15 +1076,6 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
     // Do not grow step too fast
     if(rel_err > 1.0){ // rel_err > 1 => dt_adapt > a_dt
       m_new_dt = Min(m_max_growth*a_dt, dt_adapt);
-
-//       // Try to prevent overshoot
-//       if(m_max_error > m_pre_error && m_have_err){ 
-// 	const Real dt_noshoot = a_dt*((m_err_thresh*m_safety - m_pre_error)/(m_max_error - m_pre_error) - 1.0);
-// #if 0 // Debug
-// 	if(procID() == 0) std::cout << dt_noshoot << std::endl;
-// #endif
-// 	m_new_dt = Min(dt_noshoot, m_new_dt);
-//       }
     }
     else{ // rel_err > 1 => dt_adapt < a_dt. This shrinks down the error down to the safety factor. 
       m_new_dt = dt_adapt;
