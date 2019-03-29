@@ -82,6 +82,7 @@ protected:
   bool m_cycle_sources; // Subcycle with source terms
   bool m_adaptive_dt;
   bool m_print_report;
+  bool m_have_err; 
   
 
   // Basically only debugging stuff
@@ -103,6 +104,7 @@ protected:
   Vector<Real> m_cdr_error;
   Real m_sigma_error;
   Real m_max_error;
+  Real m_pre_error;
 
   // Stuff for Lobatto intervals, Vandermonde matrix, integration
   // weights, Lobatto nodes etc. 
@@ -178,6 +180,10 @@ protected:
   void update_rte(const Real a_time); // This uses the solver states, make sure that is what you want
   void update_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time);
   void update_diffusion_coefficients();
+
+  // Store & restore functions
+  void store_solvers();
+  void restore_solvers();
 
   // Aux functions
   void compute_E_into_scratch();

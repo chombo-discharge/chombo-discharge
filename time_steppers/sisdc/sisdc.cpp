@@ -43,6 +43,7 @@ sisdc::sisdc(){
 
   m_which_nodes   = "lobatto";
 
+  m_have_err           = false;
   m_extrap_advect      = false;
   m_subcycle           = false;
   m_cycle_sources      = false;
@@ -526,6 +527,9 @@ Real sisdc::advance(const Real a_dt){
   sisdc::copy_cdr_to_phi_m0();
   sisdc::copy_sigma_to_sigma_m0();
   if(m_k > 0) sisdc::compute_FD_0();
+  if(m_k > 0 && m_adaptive_dt) {
+    sisdc::store_solvers();
+  }
 
   // SISDC advance
   Real first_dt       = a_dt;
@@ -569,8 +573,9 @@ Real sisdc::advance(const Real a_dt){
 
 	retry_step  = num_reject <= m_max_retries;
 	
-	if(retry_step){ 
-	  sisdc::compute_E_into_scratch(); // This can't be correct, right??? We keep solving into the Poisson solver...
+	if(retry_step){
+	  sisdc::restore_solvers();
+	  sisdc::compute_E_into_scratch();
 	  sisdc::compute_cdr_gradients();
 	  sisdc::compute_cdr_velo(m_time);
 	  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
@@ -582,8 +587,6 @@ Real sisdc::advance(const Real a_dt){
       m_new_dt = 1.234567E89;
       accept_step = true;
     }
-
-
   }
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
@@ -602,6 +605,9 @@ Real sisdc::advance(const Real a_dt){
   if(m_print_report)  sisdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
   if(m_profile_steps) sisdc::write_step_profile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
 
+  // Store current error. 
+  m_have_err  = true;
+  m_pre_error = m_max_error;
   
   return actual_dt;
 }
@@ -1070,8 +1076,17 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
     // Do not grow step too fast
     if(rel_err > 1.0){ // rel_err > 1 => dt_adapt > a_dt
       m_new_dt = Min(m_max_growth*a_dt, dt_adapt);
+
+//       // Try to prevent overshoot
+//       if(m_max_error > m_pre_error && m_have_err){ 
+// 	const Real dt_noshoot = a_dt*((m_err_thresh*m_safety - m_pre_error)/(m_max_error - m_pre_error) - 1.0);
+// #if 0 // Debug
+// 	if(procID() == 0) std::cout << dt_noshoot << std::endl;
+// #endif
+// 	m_new_dt = Min(dt_noshoot, m_new_dt);
+//       }
     }
-    else{ // rel_err > 1 => dt_adapt < a_dt
+    else{ // rel_err > 1 => dt_adapt < a_dt. This shrinks down the error down to the safety factor. 
       m_new_dt = dt_adapt;
     }
     m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap
@@ -2641,5 +2656,58 @@ void sisdc::subcycle_integrate_level(LevelData<EBFluxFAB>&        a_flux,
       data_ops::incr(state_m1, source, a_dt);
     }
     state_m1.exchange();
+  }
+}
+
+void sisdc::store_solvers(){
+  CH_TIME("sisdc::store_solvers");
+  if(m_verbosity > 5){
+    pout() << "sisdc::store_solvers" << endl;
+  }
+
+  // SISDC does not manipulate cdr and sigma solvers until the end of the time step. Only need to do
+  // Poisson and RTE here. 
+
+  // Poisson
+  MFAMRCellData& previous    = m_poisson_scratch->get_previous();
+  const MFAMRCellData& state = m_poisson->get_state();
+  data_ops::copy(previous, state);
+
+  // RTE
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_storage>& storage     = sisdc::get_rte_storage(solver_it);
+    const RefCountedPtr<rte_solver>& solver = solver_it();
+
+    EBAMRCellData& previous = storage->get_previous();
+    const EBAMRCellData& state = solver->get_state();
+
+    data_ops::copy(previous, state);
+  }
+}
+
+void sisdc::restore_solvers(){
+  CH_TIME("sisdc::restore_solvers");
+  if(m_verbosity > 5){
+    pout() << "sisdc::restore_solvers" << endl;
+  }
+
+  // SISDC does not manipulate cdr and sigma solvers until the end of the time step. Only need to do
+  // Poisson and RTE here. 
+
+  // Poisson
+  MFAMRCellData& state = m_poisson->get_state();
+  const MFAMRCellData& previous    = m_poisson_scratch->get_previous();
+
+  data_ops::copy(state, previous);
+
+  // RTE
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_storage>& storage     = sisdc::get_rte_storage(solver_it);
+    RefCountedPtr<rte_solver>& solver = solver_it();
+
+    EBAMRCellData& previous = storage->get_previous();
+    EBAMRCellData& state = solver->get_state();
+
+    data_ops::copy(state, previous);
   }
 }

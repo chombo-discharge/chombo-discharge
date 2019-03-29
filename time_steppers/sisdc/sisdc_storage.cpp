@@ -174,7 +174,6 @@ sisdc::sigma_storage::~sigma_storage(){
 void sisdc::sigma_storage::allocate_storage(const int a_p){
   m_p = a_p;
   
-  m_amr->allocate(m_previous, m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_error,    m_phase, m_ncomp);
 
@@ -190,7 +189,6 @@ void sisdc::sigma_storage::allocate_storage(const int a_p){
 }
 
 void sisdc::sigma_storage::deallocate_storage(){
-  m_amr->deallocate(m_previous);
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_error);
 

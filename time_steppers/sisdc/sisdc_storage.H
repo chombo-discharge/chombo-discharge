@@ -148,7 +148,6 @@ public:
   void allocate_storage(const int a_p);
   void deallocate_storage();
 
-  EBAMRIVData& get_previous(){return m_previous; }
   EBAMRIVData& get_scratch(){ return m_scratch; }
   EBAMRIVData& get_error(){   return m_error; }
 
@@ -164,7 +163,6 @@ protected:
   int m_ncomp;                   // with this many components
   int m_p;                   // SISDC order
 
-  EBAMRIVData m_previous;        // Previous solution
   EBAMRIVData m_scratch;         // Scratch data
   EBAMRIVData m_error;           // Error
 
