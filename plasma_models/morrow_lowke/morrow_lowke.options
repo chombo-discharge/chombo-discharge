@@ -9,6 +9,7 @@ morrow_lowke.gas_quenching_pressure        = 0.03947               # Quenching p
 morrow_lowke.positive_species_mobility     = 2.E-4                 # Positive species mobility
 morrow_lowke.negative_species_mobility     = 2.E-4                 # Negative species mobility
 morrow_lowke.turn_off_ion_mobility         = false                 # Turn off ion mobility (true/false)
+morrow_lowke.electron_diffusion            = true                  # Electron diffusion on/off
 morrow_lowke.excitation_efficiency         = 0.6                   # Impact excitation efficiency
 morrow_lowke.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
 morrow_lowke.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes

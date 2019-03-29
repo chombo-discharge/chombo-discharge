@@ -1025,6 +1025,7 @@ void sisdc::finalize_errors(){
 
     // Compute norms. Only finest level.
     const int lvl = m_amr->get_finest_level();
+    //    const int lvl = 0;
     Real Lerr, Lphi;
     data_ops::norm(Lerr, *error[lvl], m_amr->get_domains()[lvl], m_error_norm);
     data_ops::norm(Lphi, *phi_p[lvl], m_amr->get_domains()[lvl], m_error_norm);
