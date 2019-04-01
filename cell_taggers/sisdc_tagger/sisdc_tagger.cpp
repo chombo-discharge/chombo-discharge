@@ -21,10 +21,10 @@ sisdc_tagger::sisdc_tagger(){
   m_mag_thresh  = 0.9;
 
   ParmParse pp("sisdc_tagger");
-  pp.query("cdr_index",   m_cdr_idx);
-  pp.query("err_thresh",  m_err_thresh);
-  pp.query("curv_thresh", m_curv_thresh);
-  pp.query("mag_thresh",  m_magn_thresh);
+  pp.query("cdr_index",        m_cdr_idx);
+  pp.query("err_thresh",       m_err_thresh);
+  pp.query("curv_thresh",      m_curv_thresh);
+  pp.query("magnitude_thresh", m_mag_thresh);
 
   this->set_phase(phase::gas);
 }

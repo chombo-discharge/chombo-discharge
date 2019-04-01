@@ -540,10 +540,10 @@ Real sisdc::advance(const Real a_dt){
   bool retry_step     = true;
 
   m_max_error = 0.1234E5;
+  Real t = 0.0;
   while(!accept_step && retry_step){
     num_corrections = 0;
     sisdc::setup_subintervals(m_time, actual_dt);
-
     sisdc::integrate(a_dt, m_time, false);
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
       num_corrections++;
@@ -588,6 +588,7 @@ Real sisdc::advance(const Real a_dt){
       accept_step = true;
     }
   }
+
 
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
