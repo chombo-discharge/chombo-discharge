@@ -649,15 +649,20 @@ void sisdc::compute_FD_0(){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
-  
+    
     const EBAMRCellData& phi_0 = storage->get_phi()[0]; // phi_0
     EBAMRCellData& FD_0        = storage->get_FD()[0];  // FD(phi_0)
+    
+    if(solver->is_diffusive()){
+      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      tgasolver->compute_divD(FD_0, phi_0);
 
-    cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-    tgasolver->compute_divD(FD_0, phi_0);
-
-    m_amr->average_down(FD_0, m_cdr->get_phase());
-    m_amr->interp_ghost(FD_0, m_cdr->get_phase());
+      m_amr->average_down(FD_0, m_cdr->get_phase());
+      m_amr->interp_ghost(FD_0, m_cdr->get_phase());
+    }
+    else{
+      data_ops::set_value(FD_0, 0.0);
+    }
   }
 }
 
@@ -953,20 +958,17 @@ void sisdc::reconcile_integrands(){
 
     // Build the integrand
     for (int m = 0; m <= m_p; m++){
-      EBAMRCellData& F_m         = storage->get_F()[m];
+      EBAMRCellData& F_m   = storage->get_F()[m];
       EBAMRCellData& FD_m  = storage->get_FD()[m];
       EBAMRCellData& FAR_m = storage->get_FAR()[m];
 
       data_ops::copy(F_m, FAR_m);
-      data_ops::incr(F_m, FD_m, 1.0);
+      if(solver->is_diffusive()){
+	data_ops::incr(F_m, FD_m, 1.0);
+      }
 
-      
       m_amr->average_down(F_m, m_cdr->get_phase());
-      // m_amr->average_down(FD_m, m_cdr->get_phase());
-      // m_amr->average_down(FAR_m, m_cdr->get_phase());
       m_amr->interp_ghost(F_m, m_cdr->get_phase());
-      // m_amr->interp_ghost(FD_m, m_cdr->get_phase());
-      // m_amr->interp_ghost(FAR_m, m_cdr->get_phase());
     }
   }
 
@@ -989,13 +991,16 @@ void sisdc::initialize_errors(){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
-
+    const int idx = solver_it.get_solver();
+    
     // These should be zero
-    EBAMRCellData& error = storage->get_error();
-    const EBAMRCellData& phi_final = storage->get_phi()[m_p];
+    if(idx == m_error_idx || m_error_idx < 0){
+      EBAMRCellData& error = storage->get_error();
+      const EBAMRCellData& phi_final = storage->get_phi()[m_p];
 
-    data_ops::set_value(error, 0.0);
-    data_ops::incr(error, phi_final, -1.0);
+      data_ops::set_value(error, 0.0);
+      data_ops::incr(error, phi_final, -1.0);
+    }
   }
 
   EBAMRIVData& error = m_sigma_scratch->get_error();
@@ -1018,20 +1023,22 @@ void sisdc::finalize_errors(){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     const int idx = solver_it.get_solver();
 
-    // Compute error 
-    EBAMRCellData& error       = storage->get_error();
-    const EBAMRCellData& phi_p = storage->get_phi()[m_p];
-    data_ops::incr(error, phi_p, 1.0);
+    // Compute error
+    if(idx == m_error_idx || m_error_idx < 0){
+      EBAMRCellData& error       = storage->get_error();
+      const EBAMRCellData& phi_p = storage->get_phi()[m_p];
+      data_ops::incr(error, phi_p, 1.0);
 
-    // Compute norms. Only finest level.
-    const int lvl = m_amr->get_finest_level();
-    //    const int lvl = 0;
-    Real Lerr, Lphi;
-    data_ops::norm(Lerr, *error[lvl], m_amr->get_domains()[lvl], m_error_norm);
-    data_ops::norm(Lphi, *phi_p[lvl], m_amr->get_domains()[lvl], m_error_norm);
-    m_cdr_error[idx] = (Lphi > 0.0) ? (Lerr/Lphi) : 0.0;
+      // Compute norms. Only finest level.
+      const int lvl = m_amr->get_finest_level();
+      //    const int lvl = 0;
+      Real Lerr, Lphi;
+      data_ops::norm(Lerr, *error[lvl], m_amr->get_domains()[lvl], m_error_norm);
+      data_ops::norm(Lphi, *phi_p[lvl], m_amr->get_domains()[lvl], m_error_norm);
+      m_cdr_error[idx] = (Lphi > 0.0) ? (Lerr/Lphi) : 0.0;
 
-    m_max_error = Max(m_cdr_error[idx], m_max_error);
+      m_max_error = Max(m_cdr_error[idx], m_max_error);
+    }
   }
 
   // Override if
@@ -1064,7 +1071,6 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
     dt_cfl = dt_cfl*Nref;
   }
 
-
   // Try time step
   const Real rel_err    = (m_safety*m_err_thresh)/m_max_error;
   const Real dt_adapt   = (m_max_error > 0.0) ? a_dt*pow(rel_err, 1.0/(a_num_corrections+1)) : m_max_dt;
@@ -1078,7 +1084,7 @@ void sisdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num
     if(rel_err > 1.0){ // rel_err > 1 => dt_adapt > a_dt
       m_new_dt = Min(m_max_growth*a_dt, dt_adapt);
     }
-    else{ // rel_err > 1 => dt_adapt < a_dt. This shrinks down the error down to the safety factor. 
+    else{ // rel_err > 1 => dt_adapt < a_dt. This shrinks the error down to the safety factor. 
       m_new_dt = dt_adapt;
     }
     m_new_dt = Max(m_new_dt, m_min_dt);                   // Don't go below hardcap

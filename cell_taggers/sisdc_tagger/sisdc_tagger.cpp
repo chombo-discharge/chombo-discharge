@@ -18,11 +18,13 @@ sisdc_tagger::sisdc_tagger(){
   m_cdr_idx     = 0;
   m_err_thresh  = 0.01;
   m_curv_thresh = 0.1;
+  m_mag_thresh  = 0.9;
 
   ParmParse pp("sisdc_tagger");
   pp.query("cdr_index",   m_cdr_idx);
   pp.query("err_thresh",  m_err_thresh);
   pp.query("curv_thresh", m_curv_thresh);
+  pp.query("mag_thresh",  m_magn_thresh);
 
   this->set_phase(phase::gas);
 }
@@ -47,15 +49,18 @@ void sisdc_tagger::compute_tracers(){
   Vector<EBAMRCellData*> errors  = stepper->get_cdr_errors();
 
   // Get maximum and minimum ne and Se, and the electric field
-  Real err_max,  err_min;
+  Real err_max,  err_min, Emax, Emin;
   data_ops::get_max_min(err_max,  err_min,  ne_err,   comp);
   err_max = Max(Abs(err_max), Abs(err_min));
 
   // Compute the electric field and take the magnitude onto tracer1
+  
   EBAMRCellData E;
   m_amr->allocate(E, phase::gas, SpaceDim);
   m_timestepper->compute_E(E, phase::gas);
   data_ops::vector_length(m_tracer[1], E);
+  data_ops::get_max_min(Emax, Emin, m_tracer[1], 0);
+  data_ops::scale(m_tracer[1], 1./Emax);
 
   // Now do the gradient of this tracer
   m_amr->compute_gradient(m_grad_tracer[1], m_tracer[1]);
@@ -86,6 +91,7 @@ void sisdc_tagger::compute_tracers(){
   err_max = Max(Abs(err_max), Abs(err_min));
   data_ops::scale(m_tracer[0], 1./err_max);
 
+
   // Compute gradient of the tracer
   for (int i = 0; i < m_num_tracers; i++){
     m_amr->average_down(m_tracer[i], m_phase);
@@ -111,6 +117,7 @@ bool sisdc_tagger::refine_cell(const RealVect&         a_pos,
 			       const Vector<RealVect>& a_grad_tracer){
   const bool refine_err  = (Abs(a_tracer[0]) > m_err_thresh) ? true : false;
   const bool refine_curv = (a_grad_tracer[1].vectorLength()*a_dx)/a_tracer[1] > m_curv_thresh ? true : false;
+  const bool refine_magn = a_tracer[1] > m_mag_thresh;
   
-  return refine_err || refine_curv;
+  return refine_err || refine_magn;
 }

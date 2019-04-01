@@ -5,6 +5,7 @@
 #  something like sisdc_tagger.refine_source = 0.5 0.4 0.3. If the entry
 #  vector is too short, it will be padded with the last entry.)
 # ====================================================================================================
-sisdc_tagger.cdr_index    = 0      # Solver to refine
-sisdc_tagger.err_thresh   = 0.01   # Refinement factor for cdr error
-sisdc_tagger.curv_thresh  = 0.1    # Refinement factor for electric field
+sisdc_tagger.cdr_index       = 0      # Solver to refine
+sisdc_tagger.err_thresh      = 0.01   # Refinement factor for cdr error
+sisdc_tagger.curv_thresh     = 0.1    # Refinement factor for electric field
+sisdc_tagger.magnitude_thres = 0.9    # Tagging threshold for magnitude
