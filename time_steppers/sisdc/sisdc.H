@@ -71,6 +71,7 @@ protected:
   Real m_max_growth;
   Real m_minCFL;
   Real m_maxCFL;
+  Real m_cycleCFL;
   Real m_err_thresh;
   Real m_safety;
   Real m_decrease_safe;
@@ -99,6 +100,7 @@ protected:
   bool m_have_dt_err;
   bool m_profile_steps;
   bool m_optimal_subcycling;
+  bool m_multistep;
 
   // Error things
   Vector<Real> m_cdr_error;
@@ -151,6 +153,7 @@ protected:
   void integrate(const Real a_dt, const Real a_time, const bool a_corrector);
   void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_corrector);
   void integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_corrector);
+  void integrate_advection_multistep(const Real a_dt, const int a_m, const bool a_corrector);
   void integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_corrector);
   void integrate_diffusion(const Real a_dt, const int a_m, const bool a_corrector);
   void reconcile_integrands();

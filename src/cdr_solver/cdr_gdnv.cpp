@@ -708,25 +708,26 @@ void cdr_gdnv::advect_to_faces(LevelData<EBFluxFAB>&        a_face_state,
   // Level source on this level and coarser level
   data_ops::set_value(m_scratch, 0.0);
   if(a_extrap_dt > 0.0){
-
+#if 0 // Development feature....
     // Compute DivD on this level
     if(m_diffusive){
       AMRLevelOp<LevelData<EBCellFAB> >* oper = m_gmg_solver->getAMROperators()[a_lvl];
       oper->applyOp(*m_scratch[a_lvl], a_cell_state);
 
-#if 0 // Fuck the coarse stuff. 
+
       if(has_coar){
 	AMRLevelOp<LevelData<EBCellFAB> >* coar_oper = m_gmg_solver->getAMROperators()[a_lvl-1];
 	oper->applyOp(*m_resid[a_lvl-1], a_state_coar_old);
 	data_ops::incr(*m_scratch[a_lvl-1], *m_resid[a_lvl-1], 1.0);
 
       }
-#endif
+
     }
     data_ops::incr(*m_scratch[a_lvl], *m_source[a_lvl], 1.0);
     if(has_coar){
       data_ops::incr(*m_scratch[a_lvl-1], *m_source[a_lvl-1], 1.0);
     }
+#endif
   }
 
   const LevelData<EBCellFAB>* source_ptr   = m_scratch[a_lvl];

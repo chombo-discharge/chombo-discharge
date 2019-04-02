@@ -3,5 +3,5 @@
 # ----------------------------------------------------------------------------------------------------
 cdr_layout.domain_bc    = kinetic                # 'kinetic', 'wall', 'outflow', or 'extrap'
 cdr_layout.which_solver = godunov                # Solver. Please use 'godunov'. 
-cdr_layout.mass_redist  = true                   # Mass-weighted redistribution or volume-weighted
+cdr_layout.mass_redist  = false                  # Mass-weighted redistribution or volume-weighted
 cdr_gdnv.limit_slopes   = true                   # Use slope-limiters for godunov

@@ -44,7 +44,7 @@ sisdc.safety          = 0.75     # Safety factor for time stepping
 #
 # If you decide to subcycle, you should really, really, really use adaptive time stepping. Really. 
 # ---------------------------------------------------------
-sisdc.subcycle      = false      # 'false', 'standard', or 'optimal'
+sisdc.subcycle      = false      # 'false', 'standard', 'optimal'
 sisdc.cycle_sources = false      # Subcycle also with reaction terms
 sisdc.max_cycle_cfl = 2.0        # Maximum permitted CFL
 
