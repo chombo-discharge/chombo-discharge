@@ -77,6 +77,7 @@ protected:
   Real m_decrease_safe;
   Real m_new_dt; // dt for next time step
   Real m_extrap_dt;
+  Real m_min_cycle_cfl; // Smallest allowed global CFL for subcycling advances
   Real m_max_cycle_cfl; // Largest allowed global CFL for subcycling advances
 
   bool m_extrap_advect;
@@ -84,6 +85,7 @@ protected:
   bool m_adaptive_dt;
   bool m_print_report;
   bool m_have_err; 
+  bool m_use_tga; // Second order diffusion
   
 
   // Basically only debugging stuff

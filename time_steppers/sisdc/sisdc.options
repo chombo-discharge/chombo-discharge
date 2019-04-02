@@ -21,6 +21,7 @@ sisdc.corr_iter    = 1        # Number of iterations of the correction equation.
 # This defines the weak coupling used for the implicit diffusion advance. 
 # ---------------------------------------------------------
 sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
+sisdc.use_tga            = false # Use second order diffusion per substep
 sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 
 # ---------------------------------------------------------	
@@ -44,9 +45,11 @@ sisdc.safety          = 0.75     # Safety factor for time stepping
 #
 # If you decide to subcycle, you should really, really, really use adaptive time stepping. Really. 
 # ---------------------------------------------------------
-sisdc.subcycle      = false      # 'false', 'standard', 'optimal'
+sisdc.subcycle      = false      # 'false', 'standard', 'optimal', or 'multistep'
 sisdc.cycle_sources = false      # Subcycle also with reaction terms
-sisdc.max_cycle_cfl = 2.0        # Maximum permitted CFL
+sisdc.min_cycle_cfl = 0.5        # Maximum permitted CFL (total step)	
+sisdc.max_cycle_cfl = 20.0       # Maximum permitted CFL (total step)
+sisdc.subcycle_cfl  = 0.5        # Maximum CFL per advective step
 
 # ---------------------------------------------------------	
 # Debugging options

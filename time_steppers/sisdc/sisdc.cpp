@@ -40,10 +40,12 @@ sisdc::sisdc(){
   m_extrap_dt     = 0.5;
   m_error_idx     = -1;
   m_max_growth    = 1.2;
+  m_min_cycle_cfl = 0.5;
   m_max_cycle_cfl = 10.0;
 
   m_which_nodes   = "lobatto";
 
+  m_use_tga            = false;
   m_multistep          = false;
   m_have_err           = false;
   m_extrap_advect      = false;
@@ -90,6 +92,7 @@ sisdc::sisdc(){
     pp.query("extrap_dt",        m_extrap_dt);
     pp.query("error_index",      m_error_idx);
     pp.query("max_growth",       m_max_growth);
+    pp.query("min_cycle_cfl",    m_min_cycle_cfl);
     pp.query("max_cycle_cfl",    m_max_cycle_cfl);
 
     if(pp.contains("subcycle")){
@@ -120,6 +123,15 @@ sisdc::sisdc(){
       }
       else {
 	m_cycle_sources = false;
+      }
+    }
+    if(pp.contains("use_tga")){
+      pp.get("use_tga", str);
+      if(str == "true"){
+	m_use_tga = true;
+      }
+      else {
+	m_use_tga = false;
       }
     }
     if(pp.contains("extrap_advect")){
@@ -887,7 +899,6 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
   }
 
   // Copy into phi[a_m+1]
-  sisdc::subcycle_compute_advection_velocities();
   sisdc::subcycle_copy_states(a_m);
 
   const int nsteps = ceil(m_dtm[a_m]/(m_cycleCFL*m_dt_cfl));
@@ -900,11 +911,16 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
   // Advance cdr equations. Use a Heun's method
   for (int istep = 0; istep < nsteps; istep++){
 
-    // Always need to update boundary conditions
+    // Always need to update boundary conditions and source terms (if we substep with the sources)
     if (istep > 0){
       Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(a_m+1);
       EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(a_m+1);
       const Real t_mp1 = m_tm[a_m+1];
+
+      if(m_cycle_sources){
+	if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
+	if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
+      }
       
       sisdc::compute_cdr_eb_states(cdr_densities_mp1);
       sisdc::compute_cdr_fluxes(cdr_densities_mp1, t_mp1);
@@ -921,12 +937,16 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
       EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
       EBAMRCellData& scratch     = storage->get_scratch();
       EBAMRCellData& scratch2    = storage->get_scratch2();
+      const EBAMRCellData& src   = solver->get_source();
 
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*dt : 0.0; // Factor of 2 due to EBPatchAdvect
       solver->compute_divF(scratch, phi_m1, extrap_dt, true);            // scratch =  Div(v_m*phi_m^(k+1))
 
       data_ops::copy(scratch2, phi_m1);
       data_ops::incr(phi_m1, scratch, -dt);
+      if(m_cycle_sources){
+	data_ops::incr(phi_m1, src, dt);
+      }
       m_amr->average_down(phi_m1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
       data_ops::floor(phi_m1, 0.0);
@@ -936,6 +956,11 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
     Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(a_m+1);
     EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(a_m+1);
     const Real t_mp1 = m_tm[a_m+1];
+
+    if(m_cycle_sources){
+      if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
+      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
+    }
       
     sisdc::compute_cdr_eb_states(cdr_densities_mp1);
     sisdc::compute_cdr_fluxes(cdr_densities_mp1, t_mp1);
@@ -951,10 +976,15 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
       EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
       EBAMRCellData& scratch     = storage->get_scratch();
       EBAMRCellData& scratch2    = storage->get_scratch2();
+      const EBAMRCellData& src   = solver->get_source();
+
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*dt : 0.0; // Factor of 2 due to EBPatchAdvect
       solver->compute_divF(scratch, phi_m1, extrap_dt, true);            // scratch =  Div(v_m*phi_m^(k+1))
     
       data_ops::incr(phi_m1, scratch, -dt);
+      if(m_cycle_sources){
+	data_ops::incr(phi_m1, src, dt);
+      }
       data_ops::incr(phi_m1, scratch2, 1.0);
       data_ops::scale(phi_m1, 0.5);
       m_amr->average_down(phi_m1, m_cdr->get_phase());
@@ -1010,7 +1040,12 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_cor
 
       // Solve
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+      if(m_use_tga){
+	tgasolver->advance_tga(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+      }
+      else{
+	tgasolver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+      }
       m_amr->average_down(phi_m1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
       data_ops::floor(phi_m1, 0.0);
@@ -1322,6 +1357,7 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   // Truncate
   if(m_subcycle){
+    dt = Max(dt, m_min_cycle_cfl*m_dt_cfl);
     dt = Min(dt, m_max_cycle_cfl*m_dt_cfl);
   }
 
