@@ -1518,8 +1518,12 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 
     while(m_time < a_end_time && m_step < a_max_steps && !last_step){
       const int max_sim_depth = m_amr->get_max_sim_depth();
-      const int max_amr_depth = m_amr->get_max_amr_depth();     
-      if(m_step%m_regrid_interval == 0 && m_regrid_interval > 0 && max_sim_depth > 0 && max_amr_depth > 0){
+      const int max_amr_depth = m_amr->get_max_amr_depth();
+
+      const bool can_regrid = max_sim_depth > 0 && max_amr_depth > 0;
+      const bool check_step = m_step%m_regrid_interval == 0 && m_regrid_interval > 0;
+      const bool check_timestepper = m_timestepper->need_to_regrid() && m_regrid_interval > 0;
+      if(can_regrid && (check_step || check_timestepper)){
 	if(!first_step){
 	  this->regrid(false);
 	  if(m_verbosity > 0){

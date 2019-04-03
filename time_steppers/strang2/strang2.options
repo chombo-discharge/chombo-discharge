@@ -33,9 +33,6 @@
 strang2.rk_method         = 2 2     # Runge-Kutta method. First argument is stages, second is order. 
 strang2.max_cfl           = 0.9     # Maximum allowed CFL number for each substep. Different for each RK method.
 
-# Need to get into the blabalblabl
-
-
 # ---------------------------------------------
 # Development features below. For experts only.
 # ---------------------------------------------

@@ -58,6 +58,13 @@ public:
   virtual bool do_subcycle();
 
   /*!
+    @brief Check if time stepper needs to regrid
+  */
+  virtual bool need_to_regrid(){
+    return false;
+  }
+
+  /*!
     @brief Advance method, advances equations.
     @param[in] a_dt Time step
     @returns Actual time step used (can be different from a_dt for adaptive methods)

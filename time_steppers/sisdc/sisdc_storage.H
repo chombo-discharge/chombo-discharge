@@ -91,11 +91,11 @@ public:
   void allocate_storage(const int a_p);
   void deallocate_storage();
 
-  MFAMRCellData& get_previous(){ return m_previous; }
-  EBAMRCellData& get_E_cell(){   return m_E_cell;   }
-  EBAMRFluxData& get_E_face(){   return m_E_face;   }
-  EBAMRIVData& get_E_eb(){       return m_E_eb;     }
-  EBAMRIFData& get_E_domain(){   return m_E_dom;    }
+  MFAMRCellData& get_previous()    {return m_previous; }
+  EBAMRCellData& get_E_cell()      {return m_E_cell;   }
+  EBAMRFluxData& get_E_face()      {return m_E_face;   }
+  EBAMRIVData& get_E_eb()          {return m_E_eb;     }
+  EBAMRIFData& get_E_domain()      {return m_E_dom;    }
 
 protected:
 
@@ -131,7 +131,6 @@ protected:
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
   int m_p;                   // SISDC order
-
 
   EBAMRCellData m_previous;  // Solution at previous time step
   EBAMRIVData m_scratchIV;   // Used for EB-centered isotropic density

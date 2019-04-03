@@ -42,6 +42,7 @@ sisdc::sisdc(){
   m_max_growth    = 1.2;
   m_min_cycle_cfl = 0.5;
   m_max_cycle_cfl = 10.0;
+  m_regrid_cfl    = 5.0;
 
   m_which_nodes   = "lobatto";
 
@@ -77,6 +78,7 @@ sisdc::sisdc(){
 
     std::string str;
 
+    pp.query("regrid_cfl",       m_regrid_cfl);
     pp.query("subcycle_cfl",     m_cycleCFL);
     pp.query("subintervals",     m_p);
     pp.query("corr_iter",        m_k);
@@ -270,6 +272,10 @@ RefCountedPtr<cdr_storage>& sisdc::get_cdr_storage(const cdr_iterator& a_solveri
 
 RefCountedPtr<rte_storage>& sisdc::get_rte_storage(const rte_iterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
+}
+
+bool sisdc::need_to_regrid(){
+  return m_accum_cfl > m_regrid_cfl;
 }
 
 Real sisdc::restrict_dt(){
@@ -612,6 +618,7 @@ Real sisdc::advance(const Real a_dt){
   // Copy results back to solvers, and update the Poisson and radiative transfer equations
   sisdc::copy_phi_p_to_cdr();
   sisdc::copy_sigma_p_to_sigma();
+
   sisdc::update_poisson();
   sisdc::update_rte(m_time + actual_dt);
 
@@ -628,6 +635,9 @@ Real sisdc::advance(const Real a_dt){
   // Store current error. 
   m_have_err  = true;
   m_pre_error = m_max_error;
+
+  //
+  m_accum_cfl += actual_dt/m_dt_cfl;
   
   return actual_dt;
 }
@@ -638,6 +648,7 @@ void sisdc::copy_cdr_to_phi_m0(){
     pout() << "sisdc::copy_cdr_to_phi_m0" << endl;
   }
 
+  // CDR solvers
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>&  solver  = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
@@ -905,7 +916,7 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
   const Real dt    = m_dtm[a_m]/nsteps;
 
 #if 0
- MayDay:Abort("sisdc::integrate_advection_multistep - sigma equations and source terms are missing!!!");
+  MayDay::Abort("sisdc::integrate_advection_multistep - multistep is not done");
 #endif
   
   // Advance cdr equations. Use a Heun's method
@@ -952,6 +963,16 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
       data_ops::floor(phi_m1, 0.0);
     }
 
+    // Update sigma. Also compute the new slope.
+#if 0 // Bogus code, please, please fix this!
+  EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
+  EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
+  const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
+  m_sigma->compute_rhs(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
+  data_ops::copy(sigma_m1, sigma_m);
+  data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
+#endif
+
     // Always update BC between stages
     Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(a_m+1);
     EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(a_m+1);
@@ -993,15 +1014,7 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
     }
   }
 
-  // Update sigma. Also compute the new slope.
-#if 0 // Bogus code, please, please fix this!
-  EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
-  EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
-  const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
-  m_sigma->compute_rhs(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
-  data_ops::copy(sigma_m1, sigma_m);
-  data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
-#endif
+
 }
 
 void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_corrector){
@@ -1191,7 +1204,7 @@ void sisdc::finalize_errors(){
 
 	m_max_error = Max(m_cdr_error[idx], m_max_error);
       }
-#if 1 // Debug
+#if 0 // Debug
       if(procID() == 0){
 	std::cout << "Lerr = " << Lerr << "\t Lphi = " << Lphi << "\t Lerr/Lphi = " << Lerr/Lphi << std::endl;
       }
@@ -1409,6 +1422,7 @@ void sisdc::regrid_internals(){
     pout() << "sisdc::regrid_internals" << endl;
   }
 
+  m_accum_cfl = 0.0;
   m_cdr_error.resize(m_plaskin->get_num_species());
   
   sisdc::allocate_cdr_storage();

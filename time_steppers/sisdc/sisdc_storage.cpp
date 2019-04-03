@@ -135,6 +135,8 @@ sisdc::rte_storage::rte_storage(const RefCountedPtr<amr_mesh>& a_amr,
   m_amr    = a_amr;
   m_phase  = a_phase;
   m_ncomp  = a_ncomp;
+
+
 }
 
 sisdc::rte_storage::~rte_storage(){

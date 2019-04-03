@@ -43,27 +43,28 @@ void sisdc_tagger::compute_tracers(){
   const int max_amr_depth = m_amr->get_max_amr_depth();
   const int finest_level  = m_amr->get_finest_level();
 
-  // Get electron error
+  // Get electron density and error
   sisdc* stepper = (sisdc*) (&(*m_timestepper));
   EBAMRCellData& ne_err  = *(stepper->get_cdr_errors()[m_cdr_idx]);
-  Vector<EBAMRCellData*> errors  = stepper->get_cdr_errors();
+  EBAMRCellData& ne      = *stepper->get_cdr()->get_states()[m_cdr_idx];
 
-  // Get maximum and minimum ne and Se, and the electric field
+  // Get maximum and minimum stuff
   Real err_max,  err_min, Emax, Emin;
+  Real ne_min, ne_max;
   data_ops::get_max_min(err_max,  err_min,  ne_err,   comp);
+  data_ops::get_max_min(ne_max,  ne_min,  ne,   comp);
   err_max = Max(Abs(err_max), Abs(err_min));
 
-  // Compute the electric field and take the magnitude onto tracer1
-  
+  // Compute the electric field and take the magnitude onto tracer1. Also scale it. 
   EBAMRCellData E;
   m_amr->allocate(E, phase::gas, SpaceDim);
   m_timestepper->compute_E(E, phase::gas);
+
   data_ops::vector_length(m_tracer[1], E);
+  m_amr->interpolate_to_centroids(m_tracer[1], m_phase);
   data_ops::get_max_min(Emax, Emin, m_tracer[1], 0);
   data_ops::scale(m_tracer[1], 1./Emax);
 
-  // Now do the gradient of this tracer
-  m_amr->compute_gradient(m_grad_tracer[1], m_tracer[1]);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -76,11 +77,13 @@ void sisdc_tagger::compute_tracers(){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs(box);
 
+      const EBCellFAB& ne_fab     = (*ne[lvl])[dit()];
       const EBCellFAB& ne_err_fab = (*ne_err[lvl])[dit()];
       
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa = ebisbox.volFrac(vof);
+	const Real ne_vof   = ne_fab(vof, comp);
 	const Real err_vof  = ne_err_fab(vof, comp);
 	(*m_tracer[0][lvl])[dit()](vof, 0) = (err_max > 0.0) ? Abs(kappa*err_vof/err_max) : 0.0;
       }
@@ -90,13 +93,6 @@ void sisdc_tagger::compute_tracers(){
   data_ops::get_max_min(err_max, err_min, m_tracer[0], 0);
   err_max = Max(Abs(err_max), Abs(err_min));
   data_ops::scale(m_tracer[0], 1./err_max);
-
-
-  // Compute gradient of the tracer
-  for (int i = 0; i < m_num_tracers; i++){
-    m_amr->average_down(m_tracer[i], m_phase);
-    m_amr->interp_ghost(m_tracer[i], m_phase);
-  }
 }
 
 bool sisdc_tagger::coarsen_cell(const RealVect&         a_pos,
@@ -105,7 +101,6 @@ bool sisdc_tagger::coarsen_cell(const RealVect&         a_pos,
 				const int&              a_lvl,
 				const Vector<Real>&     a_tracer,
 				const Vector<RealVect>& a_grad_tracer){
-
   return true;
 }
 
@@ -119,5 +114,5 @@ bool sisdc_tagger::refine_cell(const RealVect&         a_pos,
   const bool refine_curv = (a_grad_tracer[1].vectorLength()*a_dx)/a_tracer[1] > m_curv_thresh ? true : false;
   const bool refine_magn = a_tracer[1] > m_mag_thresh;
   
-  return refine_err || refine_magn;
+  return refine_err || refine_magn || refine_curv;
 }

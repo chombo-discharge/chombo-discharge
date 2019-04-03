@@ -47,6 +47,8 @@ public:
   void regrid_internals();
   void deallocate_internals();
 
+  bool need_to_regrid();
+
   Vector<EBAMRCellData*> get_cdr_errors();
   
 protected:
@@ -68,6 +70,8 @@ protected:
   int m_min_corr;
   int m_error_idx;
 
+  Real m_accum_cfl;
+  Real m_regrid_cfl;
   Real m_max_growth;
   Real m_minCFL;
   Real m_maxCFL;
@@ -149,6 +153,7 @@ protected:
   // Routines for copying data at tm[0] and tm[p]
   void copy_cdr_to_phi_m0();
   void copy_sigma_to_sigma_m0();
+
   void copy_phi_p_to_cdr();
   void copy_sigma_p_to_sigma();
 

@@ -25,6 +25,11 @@ sisdc.use_tga            = false # Use second order diffusion per substep
 sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 
 # ---------------------------------------------------------	
+# Adaptive regridding
+# ---------------------------------------------------------
+sisdc.regrid_cfl      = 5.0      # Regrid if accumulated time exceeds this
+# ---------------------------------------------------------
+
 # Adaptive time stepping
 # ---------------------------------------------------------
 sisdc.print_report    = false    # Print report with error and stuff	
@@ -36,12 +41,15 @@ sisdc.max_growth      = 1.2      # Maximum permissible time step growth
 sisdc.decrease_safety = 0.9      # Fudge factor when we decrease the time step. 
 sisdc.min_cfl         = 0.1      # Minimum CFL
 sisdc.max_cfl         = 0.75     # Maximum CFL
-sisdc.max_error       = 1.E-3    # Error threshold
+sisdc.max_error       = 1.E-4    # Error threshold
 sisdc.error_index     = -1       # Error index. If -1, evaluate all CDR solvers	
 sisdc.safety          = 0.75     # Safety factor for time stepping
 
 # ---------------------------------------------------------	
 # Subcycling in time
+#
+# DEVELOPMENT FEATURES WITH LOW ACCURACY - STAY AWAY!!!
+#
 #
 # If you decide to subcycle, you should really, really, really use adaptive time stepping. Really. 
 # ---------------------------------------------------------
