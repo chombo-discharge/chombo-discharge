@@ -1,0 +1,22 @@
+# ====================================================================================================
+# ROD_PLANE_PROFILE_PROFILE CLASS OPTIONS
+# ====================================================================================================
+rod_plane_profile.turn_off_rod   = false         # Turn on/off electrode
+rod_plane_profile.turn_off_plane = false         # Turn on/off dielectric
+
+rod_plane_profile.rod_live       = true          # Live electrode or not
+rod_plane_profile.rod_radius     = 5.E-3         # Electrode inner radius
+rod_plane_profile.rod_center1    = 0.0 0.0 1E-2  # Center 1
+rod_plane_profile.rod_center2    = 0.0 1.0 0E-2  # Center 2
+
+rod_plane_profile.plane_width    = 5.E-3         # Plane width	
+rod_plane_profile.plane_normal   = 0.0 1.0 0.0   # Plane normal
+rod_plane_profile.plane_point    = 0.0 0.0 0.0   # Point on plane
+rod_plane_profile.plane_eps      = 4.0           # Plane permittivity
+
+rod_plane_profile.profile_radius = 1.0           # Profile base radius
+rod_plane_profile.profile_num    = 1             # Number of holes	
+rod_plane_profile.profile_offset = 1.0           # Radius offset (vertical)
+rod_plane_profile.profile_dist   = 1.0           # Distance between each hole
+rod_plane_profile.profile_shift  = 0.1           # Shift profile along x dir
+rod_plane_profile.profile_curv   = 0.1           # Rounding radius
