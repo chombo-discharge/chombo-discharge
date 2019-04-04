@@ -115,7 +115,7 @@ sisdc::sisdc(){
 	m_multistep = true;
       }
       else{
-	MayDay::Abort("sisdc::sisdc - unknown sisdc.subcycle = blargh");
+	MayDay::Abort("sisdc::sisdc - unknown sisdc.subcycle = ???");
       }
     }
     if(pp.contains("cycle_sources")){
@@ -572,6 +572,7 @@ Real sisdc::advance(const Real a_dt){
     sisdc::integrate(a_dt, m_time, false);
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
       num_corrections++;
+
       sisdc::initialize_errors();
       sisdc::reconcile_integrands();
       sisdc::integrate(a_dt, m_time, true);
@@ -708,22 +709,39 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
   //    operator slopes do not change, this is perfectly fine. We just increment with the lagged terms. 
 
   // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
-  // which is what we need to do at the start of the time step. 
+  // which is what we need to do at the start of the time step.
+  Real t0, t1;
+  Real total_time = 0.0;
+  Real setup_time  = 0.0;
+  Real advect_time = 0.0;
+  Real diffusive_time = 0.0;
+
+  t0 = MPI_Wtime();
   sisdc::compute_E_into_scratch();
   sisdc::compute_cdr_eb_states();
   sisdc::compute_cdr_fluxes(a_time);
   sisdc::compute_cdr_domain_states();
   sisdc::compute_cdr_domain_fluxes(a_time);
   sisdc::compute_sigma_flux();
+  t1 = MPI_Wtime();
+
+  total_time = -t0;
+  setup_time = t1-t0;
 
   // We begin with phi[0] = phi(t_n). Then update phi[m+1].
   for(int m = 0; m < m_p; m++){
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
+    t0 = MPI_Wtime();
     sisdc::integrate_advection_reaction(a_dt, m, a_corrector);
+    t1 = MPI_Wtime();
+    advect_time += t1-t0;
 
     // This does the diffusion advance. It also adds in the remaining lagged diffusion terms before the implicit diffusion solve
+    t0 = MPI_Wtime();
     sisdc::integrate_diffusion(a_dt, m, a_corrector);
+    t1 = MPI_Wtime();
+    diffusive_time += t1-t0;
 
     // After the diffusion step we should update source terms and boundary conditions for the next step. We don't
     // do this on the last step. This is done either in the reconcile_integrands routine, or after SISDC is done
@@ -750,6 +768,18 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
       sisdc::compute_sigma_flux();
     }
   }
+  t1 = MPI_Wtime();
+
+  total_time += t1;
+
+#if 0 
+  pout() << endl
+	 << "setup time = " << setup_time << endl
+	 << "advect_time = " << advect_time << endl
+	 << "diffusive_time = " << diffusive_time << endl
+	 << "total time = " << total_time << endl
+	 << endl;
+#endif
 }
 
 void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_corrector){
@@ -1090,7 +1120,7 @@ void sisdc::reconcile_integrands(){
   EBAMRIVData& sigma_p = sisdc::get_sigmak(m_p);
   const Real t_p = m_tm[m_p];
 
-  // Update electric field, RTE equations, source terms, and velocities
+//  Update electric field, RTE equations, source terms, and velocities
   if(m_consistent_E)   sisdc::update_poisson(cdr_densities_p, sigma_p);
   if(m_consistent_rte) sisdc::update_rte(cdr_densities_p, t_p);
   if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_p);
