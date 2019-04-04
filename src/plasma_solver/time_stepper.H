@@ -377,13 +377,45 @@ public:
 
 
   /*!
-    @brief Compute photon source terms. 
+    @brief Compute photon source terms. Calls the level version. 
   */
   virtual void compute_rte_sources(Vector<EBAMRCellData*>        a_source,
 				   const Vector<EBAMRCellData*>& a_cdr_states,
 				   const EBAMRCellData&          a_E,
 				   const Real&                   a_time,
 				   const centering::which_center a_centering);
+
+  /*!
+    @brief Compute photon source terms. Level version. 
+  */
+  virtual void compute_rte_sources(Vector<LevelData<EBCellFAB>* >&       a_source,
+				   const Vector<LevelData<EBCellFAB>* >& a_cdr_states,
+				   const LevelData<EBCellFAB>&           a_E,
+				   const Real&                           a_time,
+				   const int                             a_lvl,
+				   const centering::which_center         a_centering);
+
+    /*!
+    @brief Compute source terms on regular cells
+  */
+  virtual void compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sources,
+				       const Vector<EBCellFAB*>&     a_cdr_densities,
+				       const EBCellFAB&              a_E,
+				       const Box&                    a_box,
+				       const Real                    a_dx,
+				       const Real                    a_time);
+
+  /*!
+    @brief Compute source terms on irregular cells
+  */
+  virtual void compute_rte_sources_irreg(Vector<EBCellFAB*>&           a_sources,
+					 const Vector<EBCellFAB*>&     a_cdr_densities,
+					 const EBCellFAB&              a_E,
+					 const BaseIVFAB<VoFStencil>&  a_interp_stencils,
+					 const Box                     a_box,
+					 const Real                    a_time,
+					 const Real                    a_dx);
+
 
   /*!
     @brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
@@ -407,6 +439,7 @@ public:
 						  const Vector<EBAMRCellData*> a_densities,
 						  const Vector<EBAMRCellData*> a_velocities,
 						  const phase::which_phase     a_phase);
+
 
   /*!
     @brief Compute flux
