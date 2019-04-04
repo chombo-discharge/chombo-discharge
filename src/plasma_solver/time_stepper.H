@@ -161,12 +161,59 @@ public:
 				       const Real&                   a_time);
 
   /*!
+    @brief Compute diffusion coefficients on cell centers. Calls the level version. 
+  */
+  virtual void compute_cdr_diffco_cell(Vector<EBAMRCellData>&        a_diffco_cell,
+				       const Vector<EBAMRCellData*>& a_cdr_densities,
+				       const EBAMRCellData&          a_E,
+				       const Real&                   a_time);
+
+  /*!
+    @brief Compute diffusion coefficients on cell centers. Regular cells. 
+  */
+  virtual void compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffco_cell,
+					   const Vector<EBCellFAB*>& a_cdr_densities,
+					   const EBCellFAB&          a_E,
+					   const Box                 a_box,
+					   const Real                a_dx,
+					   const Real                a_time);
+
+  /*!
+    @brief Compute diffusion coefficients on cell centers. Regular cells. 
+  */
+  virtual void compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&           a_diffco_cell,
+					     const Vector<EBCellFAB*>&    a_cdr_densities,
+					     const EBCellFAB&             a_E,
+					     const Box                    a_box,
+					     const Real                   a_dx,
+					     const BaseIVFAB<VoFStencil>& a_interp_stencils,
+					     const Real&                  a_time);
+  
+  /*!
+    @brief Compute diffusion coefficients. Level version. 
+  */
+  virtual void compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&       a_diffco_cell,
+				       const Vector<LevelData<EBCellFAB>* >& a_cdr_densities,
+				       const LevelData<EBCellFAB>&           a_E,
+				       const int                             a_lvl,
+				       const Real&                           a_time);
+
+  /*!
     @brief Compute diffusion coefficients on the EB. 
   */
   virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffco_face,
 				     const Vector<EBAMRIVData*>& a_cdr_densities,
 				     const EBAMRIVData&          a_E,
 				     const Real&                 a_time);
+
+  /*!
+    @brief Compute diffusion coefficients on the EB. Level version. 
+  */
+  virtual void compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_diffco_eb,
+				     const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdr_densities,
+				     const LevelData<BaseIVFAB<Real> >&           a_E,
+				     const Real&                                  a_time,
+				     const int                                    a_lvl);
 
   /*!
     @brief Compute cdr_fluxes
