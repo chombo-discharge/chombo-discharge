@@ -60,9 +60,7 @@ public:
   /*!
     @brief Check if time stepper needs to regrid
   */
-  virtual bool need_to_regrid(){
-    return false;
-  }
+  virtual bool need_to_regrid();
 
   /*!
     @brief Advance method, advances equations.
@@ -136,6 +134,11 @@ public:
     @brief Compute the current density
   */
   virtual void compute_J(EBAMRCellData& a_J);
+
+  /*!
+    @brief Compute the current density. Level version. 
+  */
+  virtual void compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl);
   
   /*!
     @brief Compute diffusion things using whatever is available in the solvers
@@ -201,6 +204,19 @@ public:
 					 const Real&                 a_time);
 
   /*!
+    @brief Compute cdr fluxes on domain faces. Level version
+  */
+  void compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
+				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_fluxes,
+				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_densities,
+				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_velocities,
+				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_gradients,
+				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_rte_fluxes,
+				 const LevelData<DomainFluxIFFAB>&          a_E,
+				 const Real&                                a_time,
+				 const int                                  a_lvl);
+
+  /*!
     @brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
     @note This version computes the gradients from phi
   */
@@ -222,8 +238,7 @@ public:
 
 
   /*!
-    @brief Compute cdr source terms
-    @note This version computes the cdr_gradients and then calls the full compute_cdr_sources
+    @brief Compute cdr source terms. This version computes the cdr_gradients and then calls the full compute_cdr_sources
   */
   virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				   const Vector<EBAMRCellData*>&  a_cdr_densities,
@@ -233,7 +248,7 @@ public:
 				   const centering::which_center  a_centering);
 
   /*!
-    @brief Compute cdr source terms
+    @brief Compute cdr source terms. Computes grad(E) and then calls the full version
   */
   virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				   const Vector<EBAMRCellData*>&  a_cdr_densities,
@@ -242,6 +257,32 @@ public:
 				   const EBAMRCellData&           a_E,
 				   const Real&                    a_time,
 				   const centering::which_center  a_centering);
+
+  /*!
+    @brief Compute cdr source terms. Computes grad(E) and then calls the full version
+  */
+  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
+				   const Vector<EBAMRCellData*>&  a_cdr_densities,
+				   const Vector<EBAMRCellData*>&  a_cdr_gradients,
+				   const Vector<EBAMRCellData*>&  a_rte_densities,
+				   const EBAMRCellData&           a_E,
+				   const EBAMRCellData&           a_gradE,
+				   const Real&                    a_time,
+				   const centering::which_center  a_centering);
+
+  /*!
+    @brief Compute source terms. Level version.
+  */
+  virtual void compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_sources,
+				   const Vector<LevelData<EBCellFAB>*>&  a_cdr_densities,
+				   const Vector<LevelData<EBCellFAB>*>&  a_cdr_gradients,
+				   const Vector<LevelData<EBCellFAB>*>&  a_rte_densities,
+				   const LevelData<EBCellFAB>&           a_E,
+				   const LevelData<EBCellFAB>&           a_gradE,
+				   const Real&                           a_time,
+				   const int                             a_lvl,
+				   const centering::which_center         a_centering);
+
 
   /*!
     @brief Compute source terms on regular cells
@@ -304,12 +345,21 @@ public:
   virtual void compute_cdr_velocities();
 
   /*!
-    @brief Compute the cell-centered cdr velocities
+    @brief Compute the cell-centered cdr velocities. Calls the level versions. 
   */
   virtual void compute_cdr_velocities(Vector<EBAMRCellData*>&       a_velocities,
 				      const Vector<EBAMRCellData*>& a_cdr_densities,
 				      const EBAMRCellData&          a_E,
 				      const Real&                   a_time);
+
+  /*!
+    @brief Compute the cell-centered cdr velocities. Level version. 
+  */
+  virtual void compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
+				      const Vector<LevelData<EBCellFAB> *>& a_cdr_densities,
+				      const LevelData<EBCellFAB> &          a_E,
+				      const int                             a_lvl,
+				      const Real&                           a_time);
 
   virtual void compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_velocities,
 					  const Vector<EBCellFAB*>& a_cdr_densities,
@@ -365,8 +415,13 @@ public:
 			    const EBAMRCellData& a_density,
 			    const EBAMRCellData& a_velocity);
 
+  virtual void compute_flux(LevelData<EBCellFAB>&       a_flux,
+			    const LevelData<EBCellFAB>& a_density,
+			    const LevelData<EBCellFAB>& a_velocity,
+			    const int                   a_lvl);
+
   /*!
-    @brief Compute charge flux
+    @brief Compute charge flux. 
   */
   virtual void compute_charge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
 
@@ -423,9 +478,17 @@ public:
 				 const Vector<EBAMRCellData*>& a_data);
 
   /*!
-    @brief Extrapolate to domain faces
+    @brief Extrapolate to domain faces. Calls level version. 
   */
   virtual void extrapolate_to_domain_faces(EBAMRIFData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
+
+  /*!
+    @brief Extrapolate to domain faces
+  */
+  virtual void extrapolate_to_domain_faces(LevelData<DomainFluxIFFAB>& a_extrap,
+					   const phase::which_phase    a_phase,
+					   const LevelData<EBCellFAB>& a_data,
+					   const int                   a_lvl);
 
   /*!
     @brief Extrapolate to domain faces
@@ -433,6 +496,7 @@ public:
   virtual void extrapolate_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
 					   const phase::which_phase      a_phase,
 					   const Vector<EBAMRCellData*>& a_data);
+  
 
   virtual void extrapolate_vector_to_domain_faces(EBAMRIFData&             a_extrap,
 						  const phase::which_phase a_phase,
@@ -596,11 +660,6 @@ public:
     @brief Set solver verbosity
   */
   virtual void set_solver_verbosity(const int a_verbosity);
-
-  /*!
-    @brief Set stationary/nonstationary RTE
-  */
-  virtual void set_stationary_rte(const bool a_stationary);
 
   /*!
     @brief Setup the cdr solvers

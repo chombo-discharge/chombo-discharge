@@ -41,6 +41,15 @@ int time_stepper::query_ghost(){
   return 3;
 }
 
+bool time_stepper::need_to_regrid(){
+  CH_TIME("time_stepper::need_to_regrid");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::need_to_regrid" << endl;
+  }
+
+  return false;
+}
+
 bool time_stepper::do_subcycle(){
   CH_TIME("time_stepper::do_subcycle");
   if(m_verbosity > 5){
@@ -60,9 +69,9 @@ bool time_stepper::stationary_rte(){
 }
 
 bool time_stepper::solve_poisson(){
-  CH_TIME("time_stepper::solve_poisson()");
+  CH_TIME("time_stepper::solve_poisson");
   if(m_verbosity > 5){
-    pout() << "time_stepper::solve_poisson()" << endl;
+    pout() << "time_stepper::solve_poisson" << endl;
   }
 
   this->compute_rho();
@@ -375,119 +384,35 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
 
   const int num_species  = m_plaskin->get_num_species();
   const int num_photons  = m_plaskin->get_num_species();
-  const int comp         = 0;
-  const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
-  // Things that will be passed into plaskin
-  Vector<Real> extrap_cdr_fluxes(num_species);
-  Vector<Real> extrap_cdr_densities(num_species);
-  Vector<Real> extrap_cdr_velocities(num_species);
-  Vector<Real> extrap_cdr_gradients(num_species);
-  Vector<Real> extrap_rte_fluxes(num_photons);
-
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl  = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
-    const ProblemDomain& domain   = m_amr->get_domains()[lvl];
-    const Real dx                 = m_amr->get_dx()[lvl];
-    const MFLevelGrid& mflg       = *(m_amr->get_mflg()[lvl]);
-    const RealVect origin         = m_physdom->get_prob_lo();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box& box              = dbl.get(dit());
-      const EBISBox& ebisbox      = ebisl[dit()];
-      const EBGraph& ebgraph      = ebisbox.getEBGraph();
-      const IntVectSet& diel_ivs  = mflg.interface_region(box, dit());
-      const IntVectSet& elec_ivs  = ebisbox.getIrregIVS(box) - diel_ivs;
 
-      // Loop over conductor cells
-      for (VoFIterator vofit(elec_ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-
-	// Define the electric field
-	const BaseIVFAB<Real>& E = (*a_E[lvl])[dit()];
-	const RealVect centroid  = ebisbox.bndryCentroid(vof);
-	const RealVect normal    = ebisbox.normal(vof);
-	const RealVect e         = RealVect(D_DECL(E(vof,0), E(vof,1), E(vof,2)));
-	const RealVect pos       = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin) + centroid*dx;
-
-	// Build ion densities and velocities
-	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-    	  extrap_cdr_fluxes[idx]     = (*(*a_extrap_cdr_fluxes[idx])[lvl])[dit()](vof,comp);
-    	  extrap_cdr_densities[idx]  = (*(*a_extrap_cdr_densities[idx])[lvl])[dit()](vof,comp);
-    	  extrap_cdr_velocities[idx] = (*(*a_extrap_cdr_velocities[idx])[lvl])[dit()](vof,comp);
-	  extrap_cdr_gradients[idx]  = (*(*a_extrap_cdr_gradients[idx])[lvl])[dit()](vof,comp);
-	}
-
-	// Build photon intensities
-	for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-	  extrap_rte_fluxes[idx] = (*(*a_extrap_rte_fluxes[idx])[lvl])[dit()](vof,comp);
-	}
-
-	const Vector<Real> fluxes = m_plaskin->compute_cdr_electrode_fluxes(a_time,
-									    pos,
-									    normal,
-									    e,
-									    extrap_cdr_densities,
-									    extrap_cdr_velocities,
-									    extrap_cdr_gradients,
-									    extrap_rte_fluxes,
-									    extrap_cdr_fluxes);
-	
-	// Put the fluxes in their respective place
-	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-	  (*(*a_fluxes[idx])[lvl])[dit()](vof, comp) = fluxes[idx];
-	}
-      }
-
-      // Loop over dielectric cells
-      for (VoFIterator vofit(diel_ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-
-	// Define the electric field
-	const BaseIVFAB<Real>& E = (*a_E[lvl])[dit()];
-	const RealVect centroid  = ebisbox.bndryCentroid(vof);
-	const RealVect normal    = ebisbox.normal(vof);
-	const RealVect e         = RealVect(D_DECL(E(vof,0), E(vof,1), E(vof,2)));
-	const RealVect pos       = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin) + centroid*dx;
-	const Real     time      = 0.0;
-
-	// Build ion densities and velocities
-	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-    	  extrap_cdr_fluxes[idx]     = (*(*a_extrap_cdr_fluxes[idx])[lvl])[dit()](vof,comp);
-    	  extrap_cdr_densities[idx]  = (*(*a_extrap_cdr_densities[idx])[lvl])[dit()](vof,comp);
-    	  extrap_cdr_velocities[idx] = (*(*a_extrap_cdr_velocities[idx])[lvl])[dit()](vof,comp);
-	  extrap_cdr_gradients[idx]  = (*(*a_extrap_cdr_gradients[idx])[lvl])[dit()](vof,comp);
-	}
-
-	// Build photon intensities
-	for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-	  extrap_rte_fluxes[idx] = (*(*a_extrap_rte_fluxes[idx])[lvl])[dit()](vof,comp);
-	}
-
-	const Vector<Real> fluxes = m_plaskin->compute_cdr_dielectric_fluxes(a_time,
-									     pos,
-									     normal,
-									     e,
-									     extrap_cdr_densities,
-									     extrap_cdr_velocities,
-									     extrap_cdr_gradients,
-									     extrap_rte_fluxes,
-									     extrap_cdr_fluxes);
-	
-	// Put the fluxes in their respective place
-	for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	  const int idx = solver_it.get_solver();
-	  (*(*a_fluxes[idx])[lvl])[dit()](vof, comp) = fluxes[idx];
-	}
-      }
+    Vector<LevelData<BaseIVFAB<Real> >* > fluxes(num_species);
+    Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_fluxes(num_species);
+    Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_densities(num_species);
+    Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_velocities(num_species);
+    Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_gradients(num_species);
+    Vector<LevelData<BaseIVFAB<Real> >* > extrap_rte_fluxes(num_photons);
+    
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      fluxes[idx]                = (*a_fluxes[idx])[lvl];
+      extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[lvl];
+      extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[lvl];
+      extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[lvl];
+      extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[lvl];
     }
+
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[lvl];
+    }
+
+    // Call the level version
+    compute_cdr_fluxes(fluxes, extrap_cdr_fluxes, extrap_cdr_densities, extrap_cdr_velocities,
+		       extrap_cdr_gradients, extrap_rte_fluxes, *a_E[lvl], a_time, lvl);
   }
 }
 
@@ -499,9 +424,64 @@ void time_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a_fluxe
 					     const Vector<EBAMRIFData*>& a_extrap_rte_fluxes,
 					     const EBAMRIFData&          a_E,
 					     const Real&                 a_time){
-  CH_TIME("time_stepper::compute_cdr_domain_fluxes(full)");
+  CH_TIME("time_stepper::compute_cdr_domain_fluxes(level)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_cdr_domain_fluxes(full)" << endl;
+    pout() << "time_stepper::compute_cdr_domain_fluxes(level)" << endl;
+  }
+
+  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_species();
+  const int finest_level = m_amr->get_finest_level();
+
+  // Things that will be passed into plaskin
+  Vector<Real> extrap_cdr_fluxes(num_species);
+  Vector<Real> extrap_cdr_densities(num_species);
+  Vector<Real> extrap_cdr_velocities(num_species);
+  Vector<Real> extrap_cdr_gradients(num_species);
+  Vector<Real> extrap_rte_fluxes(num_photons);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    Vector<LevelData<DomainFluxIFFAB>* > fluxes(num_species);
+    Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_fluxes(num_species);
+    Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_densities(num_species);
+    Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_velocities(num_species);
+    Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_gradients(num_species);
+    Vector<LevelData<DomainFluxIFFAB>* > extrap_rte_fluxes(num_photons);
+    
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      fluxes[idx]                = (*a_fluxes[idx])[lvl];
+      extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[lvl];
+      extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[lvl];
+      extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[lvl];
+      extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[lvl];
+    }
+
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[lvl];
+    }
+
+    // Call the level version
+    compute_cdr_domain_fluxes(fluxes, extrap_cdr_fluxes, extrap_cdr_densities, extrap_cdr_velocities,
+			      extrap_cdr_gradients, extrap_rte_fluxes, *a_E[lvl], a_time, lvl);
+    
+  }
+}
+
+void time_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
+					     const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_fluxes,
+					     const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_densities,
+					     const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_velocities,
+					     const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_gradients,
+					     const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_rte_fluxes,
+					     const LevelData<DomainFluxIFFAB>&          a_E,
+					     const Real&                                a_time,
+					     const int                                  a_lvl){
+  CH_TIME("time_stepper::compute_cdr_domain_fluxes(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_domain_fluxes(level)" << endl;
   }
 
   const int num_species  = m_plaskin->get_num_species();
@@ -517,65 +497,63 @@ void time_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a_fluxe
   Vector<Real> extrap_cdr_gradients(num_species);
   Vector<Real> extrap_rte_fluxes(num_photons);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl  = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
-    const ProblemDomain& domain   = m_amr->get_domains()[lvl];
-    const Real dx                 = m_amr->get_dx()[lvl];
-    const RealVect origin         = m_physdom->get_prob_lo();
+  const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
+  const ProblemDomain& domain   = m_amr->get_domains()[a_lvl];
+  const Real dx                 = m_amr->get_dx()[a_lvl];
+  const RealVect origin         = m_physdom->get_prob_lo();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box& box         = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box         = dbl.get(dit());
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    
+    const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	const IntVectSet& ivs  = (*a_fluxes[0])[dit()](dir, sit()).getIVS();
 
-      const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-      
-      for (int dir = 0; dir < SpaceDim; dir++){
-	for (SideIterator sit; sit.ok(); ++sit){
-	  const IntVectSet& ivs  = (*(*a_fluxes[0])[lvl])[dit()](dir, sit()).getIVS();
-
-	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
-	    const FaceIndex& face = faceit();
-	    const RealVect pos    = EBArith::getFaceLocation(face, dx*RealVect::Unit, origin);
+	for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+	  const RealVect pos    = EBArith::getFaceLocation(face, dx*RealVect::Unit, origin);
 	    
-	    // Define the electric field
-	    const RealVect E = RealVect(D_DECL((*a_E[lvl])[dit()](dir, sit())(face,0),
-					       (*a_E[lvl])[dit()](dir, sit())(face,1),
-					       (*a_E[lvl])[dit()](dir, sit())(face,2)));
+	  // Define the electric field
+	  const RealVect E = RealVect(D_DECL((a_E)[dit()](dir, sit())(face,0),
+					     (a_E)[dit()](dir, sit())(face,1),
+					     (a_E)[dit()](dir, sit())(face,2)));
 
-	    // Ion densities. 
-	    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	      const int idx = solver_it.get_solver();
-	      extrap_cdr_fluxes[idx]     = (*(*a_extrap_cdr_fluxes[idx])[lvl])[dit()](dir, sit())(face,comp);
-	      extrap_cdr_densities[idx]  = (*(*a_extrap_cdr_densities[idx])[lvl])[dit()](dir, sit())(face,comp);
-	      extrap_cdr_velocities[idx] = (*(*a_extrap_cdr_velocities[idx])[lvl])[dit()](dir, sit())(face,comp);
-	      extrap_cdr_gradients[idx]  = (*(*a_extrap_cdr_gradients[idx])[lvl])[dit()](dir, sit())(face,comp);
-	    }
+	  // Ion densities. 
+	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	    const int idx = solver_it.get_solver();
+	    extrap_cdr_fluxes[idx]     = (*a_extrap_cdr_fluxes[idx])[dit()](dir, sit())(face,comp);
+	    extrap_cdr_densities[idx]  = (*a_extrap_cdr_densities[idx])[dit()](dir, sit())(face,comp);
+	    extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[dit()](dir, sit())(face,comp);
+	    extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[dit()](dir, sit())(face,comp);
+	  }
 
-	    // Photon fluxes
-	    for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-	      const int idx = solver_it.get_solver();
-	      extrap_rte_fluxes[idx] = (*(*a_extrap_rte_fluxes[idx])[lvl])[dit()](dir, sit())(face,comp);
-	    }
+	  // Photon fluxes
+	  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+	    const int idx = solver_it.get_solver();
+	    extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](dir, sit())(face,comp);
+	  }
 
-	    // Call plasma_kinetics
-	    const Vector<Real> fluxes = m_plaskin->compute_cdr_domain_fluxes(a_time,
-									     pos,
-									     dir,
-									     sit(),
-									     E,
-									     extrap_cdr_densities,
-									     extrap_cdr_velocities,
-									     extrap_cdr_gradients,
-									     extrap_rte_fluxes,
-									     extrap_cdr_fluxes);
+	  // Call plasma_kinetics
+	  const Vector<Real> fluxes = m_plaskin->compute_cdr_domain_fluxes(a_time,
+									   pos,
+									   dir,
+									   sit(),
+									   E,
+									   extrap_cdr_densities,
+									   extrap_cdr_velocities,
+									   extrap_cdr_gradients,
+									   extrap_rte_fluxes,
+									   extrap_cdr_fluxes);
 
-	    // Put fluxes where they belong
-	    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	      const int idx = solver_it.get_solver();
-	      (*(*a_fluxes[idx])[lvl])[dit()](dir, sit())(face, comp) = fluxes[idx];
-	    }
+	  // Put fluxes where they belong
+	  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	    const int idx = solver_it.get_solver();
+	    (*a_fluxes[idx])[dit()](dir, sit())(face, comp) = fluxes[idx];
 	  }
 	}
       }
@@ -612,8 +590,6 @@ void time_stepper::compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
     this->project_flux(grad_density, eb_gradient);                      // Project onto EB
   }
 }
-
-
 
 void time_stepper::compute_gradients_at_domain_faces(Vector<EBAMRIFData*>&         a_grad,
 						     const phase::which_phase&     a_phase,
@@ -707,9 +683,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     const int idx = solver_it.get_solver();
     m_amr->deallocate(*grad_cdr[idx]);
     delete grad_cdr[idx];
-    //    delete grad_cdr[idx];
   }
-
 }
 
 void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
@@ -724,16 +698,6 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     pout() << "time_stepper::compute_cdr_sources(full)" << endl;
   }
 
-  // Reset first
-  for (int i = 0; i < a_sources.size(); i++){
-    data_ops::set_value(*a_sources[i], 0.0);
-  }
-
-  const Real zero = 0.0;
-
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
-
   // Compute grad(|E|)
   EBAMRCellData grad_E, E_norm;
   m_amr->allocate(grad_E, m_cdr->get_phase(), SpaceDim);  // Allocate storage for grad(|E|)
@@ -747,67 +711,132 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
   m_amr->interp_ghost(grad_E, m_cdr->get_phase());   // Interpolate ghost cells
 
+  // Call full versions
+  compute_cdr_sources(a_sources, a_cdr_densities, a_cdr_gradients, a_rte_densities, a_E, grad_E, a_time, a_centering);
+}
 
-  // Stencils for extrapolating things to cell centroids
-  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
-
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
-    const RealVect origin        = m_physdom->get_prob_lo();
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      
-      Vector<EBCellFAB*> sources(num_species);
-      Vector<EBCellFAB*> cdr_densities(num_species);
-      Vector<EBCellFAB*> cdr_gradients(num_species);
-      Vector<EBCellFAB*> rte_densities(num_photons);
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	sources[idx] = &(*(*a_sources[idx])[lvl])[dit()];
-	cdr_densities[idx] = &(*(*a_cdr_densities[idx])[lvl])[dit()];
-	cdr_gradients[idx] = &(*(*a_cdr_gradients[idx])[lvl])[dit()];
-      }
-      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	rte_densities[idx] = &(*(*a_rte_densities[idx])[lvl])[dit()];
-      }
-      const EBCellFAB& E  = (*a_E[lvl])[dit()];
-      const EBCellFAB& gE = (*grad_E[lvl])[dit()];
-
-      // This does all cells
-      time_stepper::compute_cdr_sources_reg(sources,
-					    cdr_densities,
-					    cdr_gradients,
-					    rte_densities,
-					    E,
-					    gE,
-					    dbl.get(dit()),
-					    a_time,
-					    dx);
-
-      // Have to redo irregular cells
-      if(a_centering == centering::cell_center){
-	time_stepper::compute_cdr_sources_irreg(sources,
-						cdr_densities,
-						cdr_gradients,
-						rte_densities,
-						E,
-						gE,
-						interp_stencils[lvl][dit()],
-						dbl.get(dit()),
-						a_time,
-						dx);
-      }
-    }
+void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
+				       const Vector<EBAMRCellData*>&  a_cdr_densities,
+				       const Vector<EBAMRCellData*>&  a_cdr_gradients,
+				       const Vector<EBAMRCellData*>&  a_rte_densities,
+				       const EBAMRCellData&           a_E,
+				       const EBAMRCellData&           a_grad_E,
+				       const Real&                    a_time,
+				       const centering::which_center  a_centering){
+  CH_TIME("time_stepper::compute_cdr_sources(full)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_sources(full)" << endl;
   }
 
-  // average down
+  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_species();
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+
+    Vector<LevelData<EBCellFAB>* > sources(num_species);
+    Vector<LevelData<EBCellFAB>* > cdr_densities(num_species);
+    Vector<LevelData<EBCellFAB>* > cdr_gradients(num_species);
+    Vector<LevelData<EBCellFAB>* > rte_densities(num_photons);
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      sources[idx]       = (*a_sources[idx])[lvl];
+      cdr_densities[idx] = (*a_cdr_densities[idx])[lvl];
+      cdr_gradients[idx] = (*a_cdr_gradients[idx])[lvl];
+    }
+
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      rte_densities[idx] = (*a_rte_densities[idx])[lvl];
+    }
+
+    // Call the level versions
+    compute_cdr_sources(sources, cdr_densities, cdr_gradients, rte_densities,
+			*a_E[lvl], *a_grad_E[lvl], a_time, lvl, a_centering);
+  }
+
+  // Average down
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->average_down(*a_sources[idx], m_cdr->get_phase());
     m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
+  }
+}
+
+void time_stepper::compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_sources,
+				       const Vector<LevelData<EBCellFAB>*>&  a_cdr_densities,
+				       const Vector<LevelData<EBCellFAB>*>&  a_cdr_gradients,
+				       const Vector<LevelData<EBCellFAB>*>&  a_rte_densities,
+				       const LevelData<EBCellFAB>&           a_E,
+				       const LevelData<EBCellFAB>&           a_gradE,
+				       const Real&                           a_time,
+				       const int                             a_lvl,
+				       const centering::which_center         a_centering){
+  CH_TIME("time_stepper::compute_cdr_sources(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_sources(level)" << endl;
+  }
+
+  const Real zero = 0.0;
+
+  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_species();
+
+
+  // Stencils for extrapolating things to cell centroids
+  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
+  const Real dx                = m_amr->get_dx()[a_lvl];
+  const RealVect origin        = m_physdom->get_prob_lo();
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      
+    Vector<EBCellFAB*> sources(num_species);
+    Vector<EBCellFAB*> cdr_densities(num_species);
+    Vector<EBCellFAB*> cdr_gradients(num_species);
+    Vector<EBCellFAB*> rte_densities(num_photons);
+    
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      sources[idx]       = &(*a_sources[idx])[dit()];
+      cdr_densities[idx] = &(*a_cdr_densities[idx])[dit()];
+      cdr_gradients[idx] = &(*a_cdr_gradients[idx])[dit()];
+    }
+    
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      rte_densities[idx] = &(*a_rte_densities[idx])[dit()];
+    }
+    
+    const EBCellFAB& E  = a_E[dit()];
+    const EBCellFAB& gE = a_gradE[dit()];
+
+    // This does all cells
+    time_stepper::compute_cdr_sources_reg(sources,
+					  cdr_densities,
+					  cdr_gradients,
+					  rte_densities,
+					  E,
+					  gE,
+					  dbl.get(dit()),
+					  a_time,
+					  dx);
+    
+      // Have to redo irregular cells
+    if(a_centering == centering::cell_center){
+      time_stepper::compute_cdr_sources_irreg(sources,
+					      cdr_densities,
+					      cdr_gradients,
+					      rte_densities,
+					      E,
+					      gE,
+					      interp_stencils[a_lvl][dit()],
+					      dbl.get(dit()),
+					      a_time,
+					      dx);
+    }
   }
 }
 
@@ -1128,7 +1157,6 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
   }
 }
 
-
 void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_velocities,
 					  const Vector<EBAMRCellData*>& a_cdr_densities,
 					  const EBAMRCellData&          a_E,
@@ -1138,37 +1166,64 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
     pout() << "time_stepper::compute_cdr_velocities(full)" << endl;
   }
   
-  const phase::which_phase cdr_phase = m_cdr->get_phase();
-  const int finest_level             = m_amr->get_finest_level();
+  const int num_species  = m_plaskin->get_num_species();
+  const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl  = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl       = m_amr->get_ebisl(cdr_phase)[lvl];
-    const Real dx                 = m_amr->get_dx()[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-      Vector<EBCellFAB*> vel;
-      Vector<EBCellFAB*> phi;
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	vel.push_back(&(*(*a_velocities[idx])[lvl])[dit()]);
-	phi.push_back(&(*(*a_cdr_densities[idx])[lvl])[dit()]);
-      }
+    Vector<LevelData<EBCellFAB>* > velocities(num_species);
+    Vector<LevelData<EBCellFAB>* > cdr_densities(num_species);
 
-      // Separate calls for regular and irregular
-      compute_cdr_velocities_reg(vel,   phi, (*a_E[lvl])[dit()], dbl.get(dit()), a_time, dx);
-      compute_cdr_velocities_irreg(vel, phi, (*a_E[lvl])[dit()], dbl.get(dit()), a_time, dx);
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      velocities[idx]    = (*a_velocities[idx])[lvl];
+      cdr_densities[idx] = (*a_cdr_densities[idx])[lvl];
     }
+
+    compute_cdr_velocities(velocities, cdr_densities, *a_E[lvl], lvl, a_time);
   }
 
   // Average down and interpolate ghost cells
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_amr->average_down(*a_velocities[idx], cdr_phase);
-    m_amr->interp_ghost(*a_velocities[idx], cdr_phase);
+    m_amr->average_down(*a_velocities[idx], m_cdr->get_phase());
+    m_amr->interp_ghost(*a_velocities[idx], m_cdr->get_phase());
   }
 }
+
+void time_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
+					  const Vector<LevelData<EBCellFAB> *>& a_cdr_densities,
+					  const LevelData<EBCellFAB> &          a_E,
+					  const int                             a_lvl,
+					  const Real&                           a_time){
+  CH_TIME("time_stepper::compute_cdr_velocities(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_velocities(level)" << endl;
+  }
+
+  const phase::which_phase cdr_phase = m_cdr->get_phase();
+  const int finest_level             = m_amr->get_finest_level();
+
+  const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl       = m_amr->get_ebisl(cdr_phase)[a_lvl];
+  const Real dx                 = m_amr->get_dx()[a_lvl];
+    
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+    Vector<EBCellFAB*> vel;
+    Vector<EBCellFAB*> phi;
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      vel.push_back(&(*a_velocities[idx])[dit()]);
+      phi.push_back(&(*a_cdr_densities[idx])[dit()]);
+    }
+
+    // Separate calls for regular and irregular
+    compute_cdr_velocities_reg(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+    compute_cdr_velocities_irreg(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+  }
+}
+
 void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_velocities,
 					      const Vector<EBCellFAB*>& a_cdr_densities,
 					      const EBCellFAB&          a_E,
@@ -1510,8 +1565,8 @@ void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   Real dt = 1.E99;
 
-  const Real m_dt_cfl = m_cdr->compute_cfl_dt();
-  const Real dt_cfl   = m_cfl*m_dt_cfl;
+  m_dt_cfl          = m_cdr->compute_cfl_dt();
+  const Real dt_cfl = m_cfl*m_dt_cfl;
   if(dt_cfl < dt){
     dt = dt_cfl;
     a_timecode = time_code::cfl;
@@ -1631,9 +1686,7 @@ void time_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a
       }
 
     }
-    
     //    data_ops::average_cell_to_face_allcomps(*a_E_face[lvl], *a_E_cell[lvl], m_amr->get_domains()[lvl]);
-
     a_E_face[lvl]->exchange();
   }
 }
@@ -1673,6 +1726,8 @@ void time_stepper::compute_charge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_charge_flux" << endl;
   }
+
+  MayDay::Abort("time_stepper::compute_charge_flux - I'm suspecting that this is deprecated code which is no longer used");
 
   data_ops::set_value(a_flux, 0.0);
 
@@ -1784,9 +1839,9 @@ void time_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&     
 }
 
 void time_stepper::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_density, const EBAMRCellData& a_velocity){
-  CH_TIME("time_stepper::compute_flux");
+  CH_TIME("time_stepper::compute_flux(amr)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_flux" << endl;
+    pout() << "time_stepper::compute_flux(amr)" << endl;
   }
   
   const int finest_level = m_amr->get_finest_level();
@@ -1796,45 +1851,75 @@ void time_stepper::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_de
     CH_assert(a_density[lvl]->nComp()  == 1);
     CH_assert(a_velocity[lvl]->nComp() == SpaceDim);
 
-    data_ops::set_value(*a_flux[lvl], 0.0);
-    data_ops::incr(*a_flux[lvl], *a_velocity[lvl], 1.0);
-    data_ops::multiply_scalar(*a_flux[lvl], *a_density[lvl]);
+    // Call level versions
+    compute_flux(*a_flux[lvl], *a_density[lvl], *a_velocity[lvl], lvl);
   }
 }
 
-void time_stepper::compute_J(EBAMRCellData& a_J){
-  CH_TIME("time_stepper::compute_J");
+void time_stepper::compute_flux(LevelData<EBCellFAB>&       a_flux,
+				const LevelData<EBCellFAB>& a_density,
+				const LevelData<EBCellFAB>& a_velocity,
+				const int                   a_lvl){
+  CH_TIME("time_stepper::compute_flux(amr)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_J" << endl;
+    pout() << "time_stepper::compute_flux(amr)" << endl;
   }
-  const int density_comp = 0;
+
+  data_ops::set_value(a_flux, 0.0);
+  data_ops::incr(a_flux, a_velocity, 1.0);
+  data_ops::multiply_scalar(a_flux, a_density);
+}
+
+void time_stepper::compute_J(EBAMRCellData& a_J){
+  CH_TIME("time_stepper::compute_J(amr)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_J(amr)" << endl;
+  }
+  
   const int finest_level = m_amr->get_finest_level();
 
+  // Call level versions
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[lvl];
+    compute_J(*a_J[lvl], lvl);
+  }
 
-    data_ops::set_value(*a_J[lvl], 0.0);
+  m_amr->average_down(a_J, m_cdr->get_phase());
+  m_amr->interp_ghost(a_J, m_cdr->get_phase());
+}
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver = solver_it();
-      RefCountedPtr<species>& spec      = solver_it.get_species();
+void time_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl){
+  CH_TIME("time_stepper::compute_J(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_J(level)" << endl;
+  }
 
-      const int q                       = spec->get_charge();
-      const EBAMRCellData& density      = solver->get_state();
-      const EBAMRCellData& velo         = solver->get_velo_cell();
+  data_ops::set_value(a_J, 0.0);
+  
+  const int density_comp = 0;
 
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
+
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<species>& spec      = solver_it.get_species();
+    
+    const int q                       = spec->get_charge();
+    const EBAMRCellData& density      = solver->get_state();
+    const EBAMRCellData& velo         = solver->get_velo_cell();
+
+    if(q != 0){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box& box         = dbl.get(dit());
 	const EBISBox& ebisbox = ebisl[dit()];
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
 	const IntVectSet ivs(box);
-
-	EBCellFAB& J       = (*a_J[lvl])[dit()];
-	const EBCellFAB& n = (*density[lvl])[dit()];
-	const EBCellFAB& v = (*velo[lvl])[dit()];
-
-#if 1 // Optimized code. Need to check that this works. 
+      
+	EBCellFAB& J       = a_J[dit()];
+	const EBCellFAB& n = (*density[a_lvl])[dit()];
+	const EBCellFAB& v = (*velo[a_lvl])[dit()];
+      
 	EBCellFAB cdr_j(ebisbox, box, SpaceDim);
 	cdr_j.setVal(0.0);
 	for (int comp = 0; comp < SpaceDim; comp++){
@@ -1842,26 +1927,15 @@ void time_stepper::compute_J(EBAMRCellData& a_J){
 	}
 	cdr_j *= v;
 	cdr_j *= q;
-
+      
 	J += cdr_j;
 
-#else // Original code
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-
-	  for (int comp = 0; comp < SpaceDim; comp++){
-	    J(vof, comp) += q*n(vof,density_comp)*v(vof, comp);
-	  }
-	}
-#endif
+	// Should we monkey with irregular cells??? 
       }
     }
-
-    data_ops::scale(*a_J[lvl], units::s_Qe);
   }
-
-  m_amr->average_down(a_J, m_cdr->get_phase());
-  m_amr->interp_ghost(a_J, m_cdr->get_phase());
+  
+  data_ops::scale(a_J, units::s_Qe);
 }
 
 void time_stepper::compute_rte_sources(){
@@ -1901,9 +1975,7 @@ void time_stepper::compute_rho(){
     densities.push_back(&(solver->get_state()));
   }
 
-  this->compute_rho(m_poisson->get_source(),
-		    densities,
-		    centering::cell_center);
+  this->compute_rho(m_poisson->get_source(), densities, centering::cell_center);
 }
 
 void time_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase){
@@ -1969,17 +2041,11 @@ void time_stepper::compute_rho(MFAMRCellData&                 a_rho,
     data_ops::scale(*a_rho[lvl], units::s_Qe);
   }
 
-
-#if 0 // Debug
-  MayDay::Warning("time_stepper::compute_rho - debug mode");
-  data_ops::set_value(a_rho, 0.0);
-#endif
-
   m_amr->average_down(a_rho);
   m_amr->interp_ghost(a_rho);
 
   // Transform to centroids
-  if(a_centering == centering::cell_center && m_interp_sources == true){
+  if(a_centering == centering::cell_center){
     m_amr->interpolate_to_centroids(rho_gas, phase::gas);
   }
 }
@@ -1994,32 +2060,6 @@ void time_stepper::deallocate_solver_internals(){
   m_rte->deallocate_internals();
   m_poisson->deallocate_internals();
   m_sigma->deallocate_internals();
-}
-
-void time_stepper::extrapolate_to_eb(LevelData<BaseIVFAB<Real> >& a_extrap,
-				     const phase::which_phase     a_phase,
-				     const LevelData<EBCellFAB>&  a_data,
-				     const int                    a_lvl){
-  CH_TIME("time_stepper::extrapolate_to_eb(level)");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::extrapolate_to_eb(level)" << endl;
-  }
-
-  const irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
-  stencils.apply(a_extrap, a_data, a_lvl);
-}
-
-void time_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data){
-  CH_TIME("time_stepper::extrapolate_to_eb");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::extrapolate_to_eb" << endl;
-  }
-
-  const irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
-  
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    extrapolate_to_eb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
-  }
 }
 
 void time_stepper::extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
@@ -2037,66 +2077,97 @@ void time_stepper::extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
   }
 }
 
+void time_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data){
+  CH_TIME("time_stepper::extrapolate_to_eb");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_eb" << endl;
+  }
+
+  const irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    extrapolate_to_eb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
+  }
+}
+
+void time_stepper::extrapolate_to_eb(LevelData<BaseIVFAB<Real> >& a_extrap,
+				     const phase::which_phase     a_phase,
+				     const LevelData<EBCellFAB>&  a_data,
+				     const int                    a_lvl){
+  CH_TIME("time_stepper::extrapolate_to_eb(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_eb(level)" << endl;
+  }
+
+  const irreg_amr_stencil<eb_centroid_interp>& stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
+  stencils.apply(a_extrap, a_data, a_lvl);
+}
+
 void time_stepper::extrapolate_to_domain_faces(EBAMRIFData&             a_extrap,
 					       const phase::which_phase a_phase,
 					       const EBAMRCellData&     a_data){
-  CH_TIME("time_stepper::extrapolate_to_domain_faces");
+  CH_TIME("time_stepper::extrapolate_to_domain_faces(amr)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::extrapolate_to_domain_faces" << endl;
+    pout() << "time_stepper::extrapolate_to_domain_faces(amr)" << endl;
   }
 
-
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const int ncomp = a_data[lvl]->nComp();
+    extrapolate_to_domain_faces(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
+  }
+}
+
+void time_stepper::extrapolate_to_domain_faces(LevelData<DomainFluxIFFAB>& a_extrap,
+					       const phase::which_phase    a_phase,
+					       const LevelData<EBCellFAB>& a_data,
+					       const int                   a_lvl){
+  CH_TIME("time_stepper::extrapolate_to_domain_faces(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_to_domain_faces(level)" << endl;
+  }
+
+  const int ncomp = a_data.nComp();
       
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(a_phase)[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBCellFAB& data         = (*a_data[lvl])[dit()];
-      const EBISBox& ebisbox        = ebisl[dit()];
-      const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(a_phase)[a_lvl];
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const EBCellFAB& data         = a_data[dit()];
+    const EBISBox& ebisbox        = ebisl[dit()];
+    const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
       
-      for (int dir = 0; dir < SpaceDim; dir++){
-	for (SideIterator sit; sit.ok(); ++sit){
-	  BaseIFFAB<Real>& extrap = (*a_extrap[lvl])[dit()](dir, sit());
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	BaseIFFAB<Real>& extrap = a_extrap[dit()](dir, sit());
 
-	  const IntVectSet& ivs  = extrap.getIVS();
-	  const EBGraph& ebgraph = extrap.getEBGraph();
+	const IntVectSet& ivs  = extrap.getIVS();
+	const EBGraph& ebgraph = extrap.getEBGraph();
 
-	  // Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
-	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
-	    const FaceIndex& face = faceit();
+	// Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
+	const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
+	for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
 
-	    const int sgn = sign(sit()); // Lo = -1, Hi = 1
+	  const int sgn = sign(sit()); // Lo = -1, Hi = 1
 	    
-	    const VolIndex& vof = face.getVoF(flip(sit()));
-	    const IntVect iv0   = vof.gridIndex();
-	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
+	  const VolIndex& vof = face.getVoF(flip(sit()));
+	  const IntVect iv0   = vof.gridIndex();
+	  const IntVect iv1   = iv0 - sgn*BASISV(dir);
 
-	    if(ebisbox.isCovered(iv0)){ // Just provide some bogus data because the face 
+	  if(ebisbox.isCovered(iv0)){ // Just provide some bogus data because the face 
+	    for (int comp = 0; comp < ncomp; comp++){
+	      extrap(face, comp) = 0.0;
+	    }
+	  }
+	  else{
+	    if(!ebisbox.isCovered(iv1)){ // linear extrapolation
 	      for (int comp = 0; comp < ncomp; comp++){
-		extrap(face, comp) = 0.0;
+		extrap(face, comp) = 1.5*data_fab(iv0, comp) - 0.5*data_fab(iv1, comp); // Should be ok
 	      }
 	    }
-	    else{
-	      if(!ebisbox.isCovered(iv1)){ // linear extrapolation
-		for (int comp = 0; comp < ncomp; comp++){
-		  extrap(face, comp) = 1.5*data_fab(iv0, comp) - 0.5*data_fab(iv1, comp); // Should be ok
-		}
-	      }
-	      else{ // Not enough cells available, use cell-centered only
-		for (int comp = 0; comp < ncomp; comp++){
-		  extrap(face, comp) = data_fab(iv0, comp);
-		}
-	      }
-
-#if 0 // Debug
+	    else{ // Not enough cells available, use cell-centered only
 	      for (int comp = 0; comp < ncomp; comp++){
 		extrap(face, comp) = data_fab(iv0, comp);
 	      }
-#endif
 	    }
 	  }
 	}
@@ -2462,13 +2533,6 @@ void time_stepper::set_solver_verbosity(const int a_verbosity){
   }
 }
 
-void time_stepper::set_stationary_rte(const bool a_stationary){
-  CH_TIME("time_stepper::set_stationary_rte");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::set_stationary_rte" << endl;
-  }
-}
-
 void time_stepper::set_fast_rte(const int a_fast_rte){
   m_fast_rte = a_fast_rte;
 
@@ -2477,7 +2541,6 @@ void time_stepper::set_fast_rte(const int a_fast_rte){
   if(m_fast_rte <= 0){
     m_fast_rte = a_fast_rte;
   }
-
 }
 
 void time_stepper::set_fast_poisson(const int a_fast_poisson){
@@ -2712,9 +2775,7 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     pout() << "time_stepper::solve_rte(full)" << endl;
   }
 
-  //  const Real t0 = MPI_Wtime();
   this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
-  //  const Real t1 = MPI_Wtime();
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -2724,10 +2785,6 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     EBAMRCellData& rhs                = *a_rte_sources[idx];
     solver->advance(a_dt, state, rhs);
   }
-  //  const Real t2 = MPI_Wtime();
-
-  //  pout() << "source time = " << 100.*(t1-t0)/(t2-t0) << endl;
-  //  pout() << "solve time = " << 100.*(t2-t1)/(t2-t0) << endl;
 }
 
 void time_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
@@ -2970,7 +3027,6 @@ Real time_stepper::compute_relaxation_time(){
       const EBCellFAB& e = (*E[lvl])[dit()];
       const EBCellFAB& j = (*J[lvl])[dit()];
 
-#if 1 // Optimized code
       EBCellFAB e_magnitude(ebisbox, box, 1);
       EBCellFAB j_magnitude(ebisbox, box, 1);
 
@@ -2986,6 +3042,7 @@ Real time_stepper::compute_relaxation_time(){
       dt_fab *= e_magnitude;
       dt_fab /= j_magnitude;
 
+      // Now do the irregular cells
       for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
@@ -2993,15 +3050,6 @@ Real time_stepper::compute_relaxation_time(){
 
 	dt_fab(vof, comp) = Abs(units::s_eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
       }
-#else // Original code
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
-	const RealVect jj = RealVect(D_DECL(j(vof, 0), j(vof, 1), j(vof, 2)));
-
-	dt_fab(vof, comp) = Abs(units::s_eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
-      }
-#endif
     }
   }
 
