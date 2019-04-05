@@ -864,7 +864,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
   // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
   EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
-  if(a_m == 0 && a_corrector){ 
+  if(skip){
     const EBAMRIVData& Fsig_m = m_sigma_scratch->get_Fold()[a_m]; // Here, we should be able to use either Fold or Fnew
     data_ops::copy(sigma_m1, sigma_m);                            // since Fsig_0 is only computed once. 
     data_ops::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
