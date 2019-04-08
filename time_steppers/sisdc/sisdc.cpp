@@ -1079,7 +1079,6 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_cor
       m_amr->average_down(init_soln, m_cdr->get_phase());
       m_amr->interp_ghost(init_soln, m_cdr->get_phase());
       data_ops::copy(phi_m1, init_soln);
-      data_ops::floor(init_soln, 0.0);
 
       // Solve
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));

@@ -2043,7 +2043,7 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
     pout() << "time_stepper::compute_extrapolated_fluxes" << endl;
   }
 
-#if 0 // Original code
+#if 0 // This code computes the cell-centered flux which is then extrapolated to the EB. Please don't remove this code. 
   EBAMRCellData cell_flux;
   EBAMRIVData   eb_flux;
 
