@@ -10,7 +10,7 @@ time_stepper.max_dt           = 1.E99     # Maximum permitted time step
 time_stepper.cfl              = 0.5       # CFL number
 time_stepper.relax_time       = 1.0       # Relaxation time constant
 time_stepper.relax_level      = -1        # Finest level with relaxation time constraint. -1 => all levels
-time_stepper.source_comp      = cell_ave  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+time_stepper.source_comp      = interp  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
 time_stepper.source_growth    = 1.0       # Maximum allowed source term growth
 time_stepper.source_tolerance = 0.1       # Impose source term restriction only if amplitude exceeds this
 time_stepper.source_elec_only = true      # Do the source term time step restriction for electrons (only). This assumes

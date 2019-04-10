@@ -21,7 +21,7 @@ sisdc.corr_iter    = 1        # Number of iterations of the correction equation.
 # This defines the weak coupling used for the implicit diffusion advance. 
 # ---------------------------------------------------------
 sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
-sisdc.use_tga            = false # Use second order diffusion per substep
+sisdc.use_tga            = true  # Use second order diffusion per substep
 sisdc.num_corrections    = 0     # Number of corrections for 'strong'
 
 # ---------------------------------------------------------	
