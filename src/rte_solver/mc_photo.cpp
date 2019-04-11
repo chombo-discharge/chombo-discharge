@@ -10,6 +10,7 @@
 
 #include <BoxIterator.H>
 #include <Particle.H>
+#include <ParticleData.H>
 #include <BinItem.H>
 #include <MeshInterp.H>
 
@@ -28,6 +29,12 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   const RealVect origin = m_physdom->get_prob_lo();
   const Real dx = m_amr->get_dx()[0];
   const DisjointBoxLayout& dbl = m_amr->get_grids()[0];
+  const ProblemDomain& dom = m_amr->get_domains()[0];
+  const int boxsize = m_amr->get_max_box_size();
+
+  ParticleData<Particle> m_particles(dbl, dom, boxsize, dx*RealVect::Unit, origin);
+
+  // Create initial particles
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
@@ -38,17 +45,46 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
     
     for (BoxIterator bit(box); bit.ok(); ++bit){
       const IntVect iv = bit();
-      const RealVect pos = origin + 3*iv*dx;
+      const RealVect pos = origin + ((RealVect)iv+0.5)*dx*RealVect::Unit;
 
-      Particle part(1.0, pos);
+      Particle part(source(iv,0)/1.E20, pos);
       particles.append(part);
     }
+    m_particles[dit()].addItemsDestructive(particles);
+  }
 
-    // Interpolate to mesh
+  // Move all the particles a little bit
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box = dbl.get(dit());
+
+    List<Particle>& particles = m_particles[dit()].listItems();
+
+    for (ListIterator<Particle> lit(particles); lit.ok(); ++lit){
+
+      Particle& p = lit();
+
+      p.position() += -1.E-3*RealVect(0.,1.);
+    }
+  }
+
+  m_particles.gatherOutcast();
+  m_particles.remapOutcast();
+
+
+  // Interpolate to mesh
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box = dbl.get(dit());
+    
+    FArrayBox& state  = (*a_state[0])[dit()].getFArrayBox();
+
+    List<Particle>& particles = m_particles[dit()].listItems();
+    
+    // Interp
     MeshInterp interp(box, dx*RealVect::Unit, origin);
     InterpType type = InterpType::CIC;
     interp.deposit(particles, state, type);
   }
+
   
 }
   
