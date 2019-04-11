@@ -8,6 +8,11 @@
 #include "mc_photo.H"
 #include "data_ops.H"
 
+#include <BoxIterator.H>
+#include <Particle.H>
+#include <BinItem.H>
+#include <MeshInterp.H>
+
 mc_photo::mc_photo(){
 
 }
@@ -17,7 +22,34 @@ mc_photo::~mc_photo(){
 }
 
 bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
-  data_ops::set_value(a_state, 1.2345);
+  data_ops::set_value(a_state, 0.0);
+
+  // Deposit on particle on each patch on the coarsest level
+  const RealVect origin = m_physdom->get_prob_lo();
+  const Real dx = m_amr->get_dx()[0];
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[0];
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box = dbl.get(dit());
+
+    List<Particle> particles;
+
+    FArrayBox& state  = (*a_state[0])[dit()].getFArrayBox();
+    FArrayBox& source = (*a_source[0])[dit()].getFArrayBox();
+    
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      const RealVect pos = origin + 3*iv*dx;
+
+      Particle part(1.0, pos);
+      particles.append(part);
+    }
+
+    // Interpolate to mesh
+    MeshInterp interp(box, dx*RealVect::Unit, origin);
+    InterpType type = InterpType::CIC;
+    interp.deposit(particles, state, type);
+  }
+  
 }
   
 void mc_photo::allocate_internals(){
