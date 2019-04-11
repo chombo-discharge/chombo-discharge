@@ -8,6 +8,7 @@
 #include "rte_layout.H"
 #include "rte_iterator.H"
 #include "eddington_sp1.H"
+#include "mc_photo.H"
 #include "units.H"
 
 #include <ParmParse.H>
@@ -27,6 +28,9 @@ rte_layout::rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   for (int i = 0; i < a_plaskin->get_num_photons(); i++){
     if(solver == "eddington_sp1"){
       m_solvers[i] = RefCountedPtr<rte_solver> (new eddington_sp1());
+    }
+    else if(solver == "mc_photo"){
+      m_solvers[i] = RefCountedPtr<rte_solver> (new mc_photo());
     }
     else {
       MayDay::Abort("rte_layout::rte_layout - unknown solver type requested");
