@@ -972,6 +972,8 @@ void time_stepper::compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_s
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
   const Real dx                = m_amr->get_dx()[a_lvl];
   const RealVect origin        = m_physdom->get_prob_lo();
+
+
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
@@ -1029,8 +1031,8 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
 					   const EBCellFAB&              a_E,
 					   const EBCellFAB&              a_gradE,
 					   const Box                     a_box,
-					   const Real                    a_dx,
-					   const Real                    a_time){
+					   const Real                    a_time,
+					   const Real                    a_dx){
   CH_TIME("time_stepper::compute_cdr_sources_reg");
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_cdr_sources_reg" << endl;
@@ -1084,7 +1086,10 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
     }
 
     // Compute source terms
+    const Real kappa = 1.0; // Kappa for regular cells
     const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
+								     kappa,
+								     a_dx,
 								     pos,
 								     E,
 								     grad_E,
@@ -1178,6 +1183,7 @@ void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&         
 
   for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
     const VolIndex& vof       = vofit();
+    const Real kappa          = ebisbox.volFrac(vof);
     const VoFStencil& stencil = a_interp_stencils(vof, 0);
 
     pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
@@ -1228,6 +1234,8 @@ void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&         
 
     // Compute sources
     const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
+								     kappa,
+								     a_dx,
 								     pos,
 								     E,
 								     grad_E,
@@ -1275,7 +1283,7 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
   for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
     const VolIndex& vof       = vofit();
     const VoFStencil& stencil = a_interp_stencils(vof, 0);
-
+    const Real kappa          = ebisbox.volFrac(vof);
     pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
 
     // Compute electric field on centroids
@@ -1325,6 +1333,8 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
 
     // Compute sources
     const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
+								     kappa,
+								     a_dx,
 								     pos,
 								     E,
 								     grad_E,

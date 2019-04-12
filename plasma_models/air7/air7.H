@@ -78,6 +78,8 @@ public:
     @brief Compute source terms
   */
   virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
+						const Real              a_kappa,
+						const Real              a_dx,
 						const RealVect&         a_pos,
 						const RealVect&         a_E,
 						const RealVect&         a_gradE,

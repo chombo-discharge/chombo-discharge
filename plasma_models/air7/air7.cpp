@@ -14,6 +14,8 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <stdlib.h>
+#include <time.h>
 
 #include <PolyGeom.H>
 #include <ParmParse.H>
@@ -240,6 +242,8 @@ Vector<RealVect> air7::compute_cdr_velocities(const Real&         a_time,
 }
   
 Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
+					    const Real              a_kappa,
+					    const Real              a_dx,
 					    const RealVect&         a_pos,
 					    const RealVect&         a_E,
 					    const RealVect&         a_gradE,
@@ -277,7 +281,7 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const Real n_N2    = m_N*m_N2frac;
   const Real n_O2    = m_N*m_O2frac;
   
-  const Real n_e     = a_cdr_densities[m_electron_idx];
+  Real n_e     = a_cdr_densities[m_electron_idx];
   const Real n_N2p   = a_cdr_densities[m_N2plus_idx];
   const Real n_N4p   = a_cdr_densities[m_N4plus_idx];
   const Real n_O2p   = a_cdr_densities[m_O2plus_idx];
@@ -285,7 +289,7 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const Real n_O2pN2 = a_cdr_densities[m_O2plusN2_idx];
   const Real n_O2m   = a_cdr_densities[m_O2minus_idx];
 
-  Real products;
+  Real products,r;
 
   const RealVect ve  = -a_E*this->compute_electron_mobility(EbyN);
   const Real De      =      this->compute_electron_diffco(EbyN);
@@ -296,6 +300,12 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const Real k10_corr = k10;//*(1.0 + Max(factor, 0.0));
   const Real k11_corr = k11;//*(1.0 + Max(factor, 0.0));
   const Real k12_corr = k12;//*(1.0 + Max(factor, 0.0));
+  
+  const Real vol = a_dx*a_dx;
+
+  r = 2.0*(rand()*1.0/RAND_MAX - 0.5);
+  n_e = Max(0.0, n_e*vol + sqrt(n_e*vol)*r);
+  n_e = n_e/vol;
 
   // k1 reaction
   products = k1_corr * n_e * n_N2;

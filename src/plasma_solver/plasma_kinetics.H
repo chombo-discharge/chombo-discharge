@@ -69,6 +69,8 @@ public:
     @param[in] a_grad_cdr Gradients of cdr densities
   */
   virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
+						const Real              a_kappa,
+						const Real              a_dx,
 						const RealVect&         a_pos,
 						const RealVect&         a_E,
 						const RealVect&         a_gradE,
@@ -215,13 +217,24 @@ public:
     return m_eed_index;
   }
 
+  void set_dt(const Real a_dt){
+    m_dt = a_dt;
+  }
+
+  void set_finest_dx(const Real a_finest_dx){
+    m_finest_dx = a_finest_dx;
+  }
 
   
 protected:
 
-  bool m_eed_solve;
-  
-  int m_eed_index;
+  /*!
+    @brief Check if we're doing an EED solve
+  */
+  bool m_eed_solve; // Doing EED solve or not?
+  int m_eed_index;  // EED solver index
+  Real m_dt;        // FHD kinetics need access to time steps
+  Real m_finest_dx; // Finest dx
 
   /*!
     @brief List of species
