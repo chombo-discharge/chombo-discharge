@@ -1939,6 +1939,10 @@ int amr_mesh::get_max_box_size(){
   return m_max_box_size;
 }
 
+int amr_mesh::get_buffer(){
+  return m_buffer_size;
+}
+
 int amr_mesh::get_max_ebis_box_size(){
   return m_max_ebis_box_size;
 }
