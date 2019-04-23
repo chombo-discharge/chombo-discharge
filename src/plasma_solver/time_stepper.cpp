@@ -1880,12 +1880,6 @@ void time_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::diffusion;
   }
 
-  const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
-  if(dt_src < dt){
-    dt = dt_src;
-    a_timecode = time_code::source;
-  }
-
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;

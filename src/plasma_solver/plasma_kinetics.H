@@ -25,6 +25,7 @@ public:
     @brief Constructor
   */
   plasma_kinetics(){
+    m_fhd       = false;
     m_eed_solve = false;
     m_eed_index = 0;
   }
@@ -211,6 +212,13 @@ public:
   }
 
   /*!
+    @brief Check if we're using fluctuating hydrodynamics
+  */
+  bool using_fhd(){
+    return m_fhd;
+  }
+
+  /*!
     @brief Get eed solver index
   */
   int get_eed_index(){
@@ -231,6 +239,7 @@ protected:
   /*!
     @brief Check if we're doing an EED solve
   */
+  bool m_fhd;       // Fluctuating hydrodynamics or not
   bool m_eed_solve; // Doing EED solve or not?
   int m_eed_index;  // EED solver index
   Real m_dt;        // FHD kinetics need access to time steps

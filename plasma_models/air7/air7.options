@@ -1,22 +1,31 @@
 # ====================================================================================================
 # AIR7 CLASS OPTIONS
 # ====================================================================================================
-air7.gas_temperature    = 300
-air7.gas_pressure       = 1.0
-air7.transport_file     = new_transport_data.txt
+air7.gas_temperature    = 300                      # Gas temperature
+air7.gas_pressure       = 1.0                      # Gas pressure
+air7.transport_file     = new_transport_data.txt   # Transport data file
 
-air7.initial_ionization  = 1.E10
-air7.ion_mobility        = 2.E-4
-air7.mobile_ions         = true
-air7.diffusive_ions      = true
-air7.mobile_electrons    = true
-air7.diffusive_electrons = true
+air7.alpha_corr         = false                    # Ionization coefficient correction
+air7.use_fhd            = false                    # Use stochastic reactions
+air7.rng_seed           = 0                        # Set seed. -1 => random seed
+air7.poiss_exp_swap     = 500.                     # Switch from Poisson to exponential distribution
 
-air7.electrode_townsend2           = 1.E-3
-air7.dielectric_townsend2          = 1.E-3
-air7.electrode_quantum_efficiency  = 1.E-3
-air7.dielectric_quantum_efficiency = 1.E-3
+air7.initial_ionization  = 1.E10                   # Initial uniform ionization
+air7.seed_density        = 1.E18                   # Initial seed density
+air7.seed_radius         = 250.E-6                 # Seed radius
+air7.seed_position       = 0. 0. 0.                # Seed position	
 
-air7.quenching_pressure         = 0.03947
-air7.photoionization_efficiency = 0.1
-air7.excitation_efficiency      = 0.6
+air7.ion_mobility        = 2.E-4                   # Ion mobility
+air7.mobile_ions         = true                    # Mobile ions or not
+air7.diffusive_ions      = true                    # Diffusive ions or not
+air7.mobile_electrons    = true                    # Mobile electrons or not
+air7.diffusive_electrons = true                    # Diffusive electrons or not
+
+air7.electrode_townsend2           = 1.E-3         # 2nd Townsend coeff on electrode
+air7.dielectric_townsend2          = 1.E-3         # 2nd Townsend coeff on dielectric
+air7.electrode_quantum_efficiency  = 1.E-3         # Quantum efficiency on electrode
+air7.dielectric_quantum_efficiency = 1.E-3         # Quantum efficiency on electrode
+
+air7.quenching_pressure         = 0.03947          # Photoionization quenching
+air7.photoionization_efficiency = 0.1              # Photoionization efficiency
+air7.excitation_efficiency      = 0.6              # Photoionization excitation efficiency

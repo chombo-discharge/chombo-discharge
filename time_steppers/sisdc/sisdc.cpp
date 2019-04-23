@@ -627,6 +627,12 @@ Real sisdc::advance(const Real a_dt){
   sisdc::compute_cdr_gradients();
   sisdc::compute_cdr_velo(m_time + actual_dt);
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+
+  // In case we're using FHD, we need to tell the kinetics module about the time step before computign sources
+  Real next_dt;
+  time_code::which_code dummy;
+  compute_dt(next_dt, dummy);
+  m_plaskin->set_dt(next_dt);
   sisdc::compute_cdr_sources(m_time + actual_dt);
 
   // Profile step
@@ -1405,12 +1411,6 @@ void sisdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   // EVERYTHING BELOW HERE IS "STANDARD"
   // -----------------------------------
-  const Real dt_src = m_src_growth*m_cdr->compute_source_dt(m_src_tolerance, m_src_elec_only);
-  if(dt_src < dt){
-    dt = dt_src;
-    a_timecode = time_code::source;
-  }
-
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;

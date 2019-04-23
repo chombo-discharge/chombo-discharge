@@ -1,3 +1,5 @@
+#include <random>
+
 /*!
   @file   air7.cpp
   @brief  Implementation of air7.H
@@ -16,6 +18,7 @@
 #include <string>
 #include <stdlib.h>
 #include <time.h>
+#include <chrono>
 
 #include <PolyGeom.H>
 #include <ParmParse.H>
@@ -36,6 +39,9 @@ air7::air7(){
   m_num_species = 7;  // seven species
   m_num_photons = 3;  // Bourdon model for photons
 
+  m_seed = 0;
+  m_poiss_exp_swap = 500.;
+
   air7::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac); // Get gas parameters
 
   { // Emission coefficients at boundaries. Can be overridden from input script.
@@ -48,18 +54,25 @@ air7::air7(){
 
     ParmParse pp("air7");
     pp.get("transport_file",                  m_transport_file);
-    pp.query("electrode_townsend2"       ,    m_townsend2_electrode);
-    pp.query("dielectric_townsend2"       ,   m_townsend2_dielectric);
-    pp.query("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
-    pp.query("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
-    pp.query("photoionization_efficiency",    m_photoionization_efficiency);
-    pp.query("excitation_efficiency",         m_excitation_efficiency);
+    pp.get("electrode_townsend2"       ,    m_townsend2_electrode);
+    pp.get("dielectric_townsend2"       ,   m_townsend2_dielectric);
+    pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
+    pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
+    pp.get("photoionization_efficiency",    m_photoionization_efficiency);
+    pp.get("excitation_efficiency",         m_excitation_efficiency);
+
+    pp.get("rng_seed", m_seed);
+    pp.get("poiss_exp_swap", m_poiss_exp_swap);
+  }
+
+  if(m_seed < 0){ // Use time for seed
+    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
   }
 
   { // Quenching pressure
     m_pq        = 0.03947; 
     ParmParse pp("air7");
-    pp.query("quenching_pressure", m_pq);
+    pp.get("quenching_pressure", m_pq);
     
     m_pq *= units::s_atm2pascal;
   }
@@ -71,7 +84,7 @@ air7::air7(){
     std::string str;
 
     ParmParse pp("air7");
-    pp.query("ion_mobility", m_ion_mobility);
+    pp.get("ion_mobility", m_ion_mobility);
     if(pp.contains("mobile_ions")){
       pp.get("mobile_ions", str);
       if(str == "true"){
@@ -88,6 +101,24 @@ air7::air7(){
       }
       else if(str == "false"){
 	m_diffusive_ions = false;
+      }
+    }
+    if(pp.contains("use_fhd")){
+      pp.get("use_fhd", str);
+      if(str == "true"){
+	m_fhd = true;
+      }
+      else if(str == "false"){
+	m_fhd = false;
+      }
+    }
+    if(pp.contains("alpha_corr")){
+      pp.get("alpha_corr", str);
+      if(str == "true"){
+	m_alpha_corr = true;
+      }
+      else if(str == "false"){
+	m_alpha_corr = false;
       }
     }
   }
@@ -123,6 +154,9 @@ air7::air7(){
   this->compute_transport_coefficients();
   m_e_mobility.scale_y(1./m_N); // Need to scale
   m_e_diffco.scale_y(1./m_N); // Need to scale
+
+  // Init rng
+  m_rng = new std::mt19937_64(m_seed);
 }
 
 air7::~air7(){
@@ -131,8 +165,8 @@ air7::~air7(){
 
 void air7::get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac){
   ParmParse pp("air7");
-  pp.query("gas_temperature", a_Tg);
-  pp.query("gas_pressure", a_p);
+  pp.get("gas_temperature", a_Tg);
+  pp.get("gas_pressure", a_p);
 
   a_Tg = 300.;
   a_O2frac = 0.20;
@@ -281,7 +315,7 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const Real n_N2    = m_N*m_N2frac;
   const Real n_O2    = m_N*m_O2frac;
   
-  Real n_e     = a_cdr_densities[m_electron_idx];
+  const Real n_e     = a_cdr_densities[m_electron_idx];
   const Real n_N2p   = a_cdr_densities[m_N2plus_idx];
   const Real n_N4p   = a_cdr_densities[m_N4plus_idx];
   const Real n_O2p   = a_cdr_densities[m_O2plus_idx];
@@ -289,96 +323,112 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const Real n_O2pN2 = a_cdr_densities[m_O2plusN2_idx];
   const Real n_O2m   = a_cdr_densities[m_O2minus_idx];
 
-  Real products,r;
+  Real products, p, mean;
 
+  const Real vol     = pow(a_dx, SpaceDim);
   const RealVect ve  = -a_E*this->compute_electron_mobility(EbyN);
   const Real De      =      this->compute_electron_diffco(EbyN);
-  const Real factor  = PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + n_e)*PolyGeom::dot(ve, a_E));
-  const Real k1_corr = k1*Max(0.0, (1.0 - Max(factor, 0.0)));
-  const Real k2_corr = k2*Max(0.0, (1.0 - Max(factor, 0.0)));
 
-  const Real k10_corr = k10;//*(1.0 + Max(factor, 0.0));
-  const Real k11_corr = k11;//*(1.0 + Max(factor, 0.0));
-  const Real k12_corr = k12;//*(1.0 + Max(factor, 0.0));
+  Real k1_corr;
+  Real k2_corr;
+  if(m_alpha_corr){
+    const Real factor  = PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + n_e)*PolyGeom::dot(ve, a_E));
+    k1_corr = k1*Max(0.0, (1.0 - Max(factor, 0.0)));
+    k2_corr = k2*Max(0.0, (1.0 - Max(factor, 0.0)));
+  }
+  else{
+    k1_corr = k1;
+    k2_corr = k2;
+  }
+
   
-  const Real vol = a_dx*a_dx;
-
-  r = 2.0*(rand()*1.0/RAND_MAX - 0.5);
-  n_e = Max(0.0, n_e*vol + sqrt(n_e*vol)*r);
-  n_e = n_e/vol;
-
   // k1 reaction
-  products = k1_corr * n_e * n_N2;
+  p = k1_corr * n_e * n_N2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_electron_idx]  += products;
   source[m_N2plus_idx]    += products;
 
   // k2 reaction
-  products = k2_corr * n_e * n_O2;
+  p = k2_corr * n_e * n_O2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
 
   // k3 reaction. 
-  products = k3 * n_N2p * n_N2 * m_N;
+  p = k3 * n_N2p * n_N2 * m_N;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_N2plus_idx] -= products;
   source[m_N4plus_idx] += products;
 
   // k4 reaction
-  products = k4 * n_N4p * n_O2;
+  p = k4 * n_N4p * n_O2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_N4plus_idx]  -= products;
   source[m_O2plus_idx]  += products;
 
   // k5 reaction
-  products = k5 * n_N2p * n_O2;
+  p = k5 * n_N2p * n_O2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_N2plus_idx] -= products;
   source[m_O2plus_idx] += products;
 
   // k6 reaction
-  products = k6 * n_O2p * n_N2 * n_N2;
+  p = k6 * n_O2p * n_N2 * n_N2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_O2plus_idx]   -= products;
   source[m_O2plusN2_idx] += products;
 
   // k7 reaction
-  products = k7 * n_O2pN2 * n_N2;
+  p = k7 * n_O2pN2 * n_N2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_O2plusN2_idx] -= products;
   source[m_O2plus_idx]   += products;
 
   // k8 reaction
-  products = k8 * n_O2pN2 * n_O2;
+  p = k8 * n_O2pN2 * n_O2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_O2plusN2_idx] -= products;
   source[m_O4plus_idx]   += products;
 
   // k9 reaction
-  products = k9 * n_O2p * n_O2 * m_N;
+  p = k9 * n_O2p * n_O2 * m_N;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_O2plus_idx] -= products;
   source[m_O4plus_idx] += products;
 
   // k10 reaction
-  products = k10_corr * n_e * n_O4p;
+  p = k10 * n_e * n_O4p;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_electron_idx] -= products;
   source[m_O4plus_idx]   -= products;
 
   // k11 reaction
-  products = k11_corr * n_e * n_O2p;
+  p = k11 * n_e * n_O2p;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_electron_idx] -= products;
   source[m_O2plus_idx]   -= products;
 
   // k12 reaction
-  products = k12_corr * n_e * n_O2 * n_O2;
+  p = k12 * n_e * n_O2 * n_O2;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_electron_idx] -= products;
   source[m_O2minus_idx]  += products;
 
   // k13 reaction
-  products = k13 * n_O2m * n_O4p;
+  p = k13 * n_O2m * n_O4p;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_O2minus_idx] -= products;
   source[m_O4plus_idx]  -= products;
 
   // k14 reaction
-  products = k14 * n_O2m * n_O4p * m_N;
+  p = k14 * n_O2m * n_O4p * m_N;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_O2minus_idx] -= products;
   source[m_O4plus_idx]  -= products;
 
   // k15 reaction
-  products = k15 * n_O2m * n_O2p * m_N;
+  p = k15 * n_O2m * n_O2p * m_N;
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_O2minus_idx] -= products;
   source[m_O2plus_idx]  -= products;
 
@@ -388,9 +438,10 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
   const air7::photon_one*   photon1 = static_cast<air7::photon_one*>   (&(*m_photons[m_photon1_idx]));
   const air7::photon_two*   photon2 = static_cast<air7::photon_two*>   (&(*m_photons[m_photon2_idx]));
   const air7::photon_three* photon3 = static_cast<air7::photon_three*> (&(*m_photons[m_photon3_idx]));
-  products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
+  p = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
 								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
 								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
 
   source[m_electron_idx] += products;
   source[m_O2plus_idx]   += products;
@@ -536,3 +587,18 @@ Real air7::compute_O2minus_O4plus_to_3O2()                          const {retur
 Real air7::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg)       const {return 3.12E-31*pow(a_Tg, -2.5);}
 Real air7::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg)       const {return 3.12E-31*pow(a_Tg, -2.5);}
 Real air7::compute_Oplus_O2_to_O_O2(const Real a_Tg)                const {return 3.46E-12/sqrt(a_Tg);}
+
+Real air7::stochastic_reaction(const Real a_S, const Real a_vol, const Real a_dt) const{
+  Real value = 0.0;
+  const Real mean = a_S*a_vol*a_dt;
+  if(mean < m_poiss_exp_swap){
+    std::poisson_distribution<int> dist(mean);
+    value = Max(0.0, 1.0*dist(*m_rng)/(a_vol * a_dt));
+  }
+  else{
+    std::normal_distribution<double> dist(mean, sqrt(mean));
+    value = Max(0.0, 1.0*dist(*m_rng)/(a_vol * a_dt));
+  }
+
+  return value;
+}

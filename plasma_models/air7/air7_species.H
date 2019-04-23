@@ -37,6 +37,9 @@ protected:
     @brief Initial ionization level
   */
   Real m_initial_ionization;
+  Real m_seed_density;
+  Real m_seed_radius;
+  RealVect m_seed_position;
   
 };
 
@@ -64,6 +67,9 @@ public:
 protected:
 
   Real m_initial_ionization;
+  Real m_seed_density;
+  Real m_seed_radius;
+  RealVect m_seed_position;
 };
 
 /*!
@@ -114,6 +120,9 @@ public:
 protected:
 
   Real m_initial_ionization;
+  Real m_seed_density;
+  Real m_seed_radius;
+  RealVect m_seed_position;
 };
 
 /*!

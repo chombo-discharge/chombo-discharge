@@ -10,6 +10,7 @@
 #include "units.H" 
 
 #include <ParmParse.H>
+#include <PolyGeom.H>
 
 air7::electron::electron(){
   m_name   = "electron density";
@@ -21,6 +22,10 @@ air7::electron::electron(){
   {// Get initial parameter
     ParmParse pp("air7");
     pp.get("initial_ionization", m_initial_ionization);
+    Vector<Real> vec(SpaceDim);
+    pp.get("seed_density", m_seed_density);
+    pp.get("seed_radius", m_seed_radius);
+    pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_position = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
     std::string str;
     if(pp.contains("mobile_electrons")){
@@ -41,7 +46,6 @@ air7::electron::electron(){
 	m_diffusive = false;
       }
     }
-
   }
 }
 
@@ -60,7 +64,12 @@ air7::N2plus::N2plus() {
   air7::get_gas_parameters(Tg, p, N, O2frac, N2frac);
   ParmParse pp("air7");
   pp.get("initial_ionization", m_initial_ionization);
+  Vector<Real> vec(SpaceDim);
+  pp.get("seed_density", m_seed_density);
+  pp.get("seed_radius", m_seed_radius);
+  pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_position = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   m_initial_ionization *= N2frac;
+  m_seed_density *= N2frac;
 
   std::string str;
   if(pp.contains("mobile_ions")){
@@ -123,7 +132,12 @@ air7::O2plus::O2plus(){
   std::string str;
   ParmParse pp("air7");
   pp.get("initial_ionization", m_initial_ionization);
+  Vector<Real> vec(SpaceDim);
+  pp.get("seed_density", m_seed_density);
+  pp.get("seed_radius", m_seed_radius);
+  pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_position = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   m_initial_ionization *= O2frac;
+  m_seed_density *= O2frac;
 
   if(pp.contains("mobile_ions")){
     pp.get("mobile_ions", str);
@@ -312,11 +326,13 @@ air7::photon_three::~photon_three(){
 }
 
 Real air7::electron::initial_data(const RealVect a_pos, const Real a_time) const {
-  return m_initial_ionization;
+  const RealVect p = (a_pos - m_seed_position)/(m_seed_radius);
+  return m_initial_ionization + m_seed_density*exp(-0.5*PolyGeom::dot(p, p));
 }
 
 Real air7::N2plus::initial_data(const RealVect a_pos, const Real a_time) const {
-  return m_initial_ionization;
+  const RealVect p = (a_pos - m_seed_position)/(m_seed_radius);
+  return m_initial_ionization + m_seed_density*exp(-0.5*PolyGeom::dot(p, p));
 }
 
 Real air7::N4plus::initial_data(const RealVect a_pos, const Real a_time) const {
@@ -324,7 +340,8 @@ Real air7::N4plus::initial_data(const RealVect a_pos, const Real a_time) const {
 }
 
 Real air7::O2plus::initial_data(const RealVect a_pos, const Real a_time) const{
-  return m_initial_ionization;
+  const RealVect p = (a_pos - m_seed_position)/(m_seed_radius);
+  return m_initial_ionization + m_seed_density*exp(-0.5*PolyGeom::dot(p, p));
 }
 
 Real air7::O4plus::initial_data(const RealVect a_pos, const Real a_time) const {

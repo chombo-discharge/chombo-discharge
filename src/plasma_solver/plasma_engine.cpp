@@ -436,10 +436,6 @@ void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int 
   if(m_verbosity > 10){
     pout() << "plasma_engine::add_cdr_source_to_output" << endl;
   }
-
-#if 0 // Shouldn't be necessary
-  m_timestepper->compute_cdr_sources();
-#endif
   
   const int comp         = 0;
   const int ncomp        = 1;
@@ -1395,7 +1391,9 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion(); 
+  m_timestepper->compute_cdr_diffusion();
+  m_timestepper->compute_dt(m_dt, m_timecode);
+  m_plaskin->set_dt(m_dt);
   m_timestepper->compute_cdr_sources();
   m_timestepper->compute_rte_sources();
 
@@ -2230,7 +2228,9 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion(); 
+  m_timestepper->compute_cdr_diffusion();
+  m_timestepper->compute_dt(m_dt, m_timecode);
+  m_plaskin->set_dt(m_dt);
   m_timestepper->compute_cdr_sources();
   m_timestepper->compute_rte_sources();
 
@@ -2308,7 +2308,9 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
 
   // Fill solvers with important stuff
   m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion(); 
+  m_timestepper->compute_cdr_diffusion();
+  m_timestepper->compute_dt(m_dt, m_timecode);
+  m_plaskin->set_dt(m_dt);
   m_timestepper->compute_cdr_sources();
   m_timestepper->compute_rte_sources();
 
@@ -2703,6 +2705,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
     str = " (Restricted by diffusion)";
   }
   if(m_timecode == time_code::source){
+    MayDay::Abort("plasma_engine::step_report - shouldn't happen, source term has been taken out of the design");
     str = " (Restricted by source term)";
   }
   if(m_timecode == time_code::relaxation_time){

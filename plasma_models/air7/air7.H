@@ -10,6 +10,7 @@
 
 #include "plasma_kinetics.H"
 #include "lookup_table.H"
+#include <random>
 
 /*!
   @brief 9-species plasma model for air (79/21 N2/O2 ratio) at 300K
@@ -138,6 +139,7 @@ protected:
 
   bool m_mobile_ions;
   bool m_diffusive_ions;
+  bool m_alpha_corr;
 
   int m_electron_idx;
   int m_N2plus_idx;
@@ -167,12 +169,19 @@ protected:
   Real m_photoionization_efficiency;     // Photoionization efficiency
   Real m_excitation_efficiency;          // Excitation efficiency
 
+
+
   // Tables built from BOLSIG+
   lookup_table m_e_O2_alpha;
   lookup_table m_e_N2_alpha;
   lookup_table m_e_mobility;
   lookup_table m_e_diffco;
   lookup_table m_e_energy;
+
+  // RNG stuff
+  std::mt19937_64* m_rng;     // Engine
+  int  m_seed;                // RNG seed
+  Real m_poiss_exp_swap;      // Swap from Poisson to exponential distribution
 
   // Electron temperature
   inline Real compute_Te(const Real a_EbyN) const;
@@ -217,6 +226,8 @@ protected:
 private:
 
   void compute_transport_coefficients();
+
+  inline Real stochastic_reaction(const Real a_S, const Real a_vol, const Real a_dt) const;
   
   /*!
     @brief Common function for dielectric and electrode fluxes, only difference is the secondary emission coefficients
