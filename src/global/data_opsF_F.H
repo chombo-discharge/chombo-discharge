@@ -235,6 +235,31 @@ inline void FORTRAN_NAME(inlineGEN_LAPLACIAN, inlineGEN_LAPLACIAN)(
 }
 #endif  // GUARDGEN_LAPLACIAN 
 
+#ifndef GUARDSQUARE_ROOT 
+#define GUARDSQUARE_ROOT 
+// Prototype for Fortran procedure square_root ...
+//
+void FORTRAN_NAME( SQUARE_ROOT ,square_root )(
+      CHFp_FRA1(data)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_BOX(facebox) );
+
+#define FORT_SQUARE_ROOT FORTRAN_NAME( inlineSQUARE_ROOT, inlineSQUARE_ROOT)
+#define FORTNT_SQUARE_ROOT FORTRAN_NAME( SQUARE_ROOT, square_root)
+
+inline void FORTRAN_NAME(inlineSQUARE_ROOT, inlineSQUARE_ROOT)(
+      CHFp_FRA1(data)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_BOX(facebox) )
+{
+ CH_TIMELEAF("FORT_SQUARE_ROOT");
+ FORTRAN_NAME( SQUARE_ROOT ,square_root )(
+      CHFt_FRA1(data)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_BOX(facebox) );
+}
+#endif  // GUARDSQUARE_ROOT 
+
 }
 
 #endif

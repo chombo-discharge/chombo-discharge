@@ -10,6 +10,7 @@
 #include "cdr_sg.H"
 #include "cdr_gdnv.H"
 #include "cdr_muscl.H"
+#include "cdr_fhd.H"
 #include "units.H"
 #include "data_ops.H"
 
@@ -57,6 +58,9 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
     }
     else if(str == "muscl"){
       m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_muscl());
+    }
+    else if(str == "fhd"){
+      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_fhd());
     }
     else {
       MayDay::Abort("cdr_layout::cdr_layout - unknown cdr solver type requested");

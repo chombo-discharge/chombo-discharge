@@ -1141,6 +1141,46 @@ void data_ops::sum(Real& a_value){
 #endif
 }
 
+void data_ops::square_root(EBAMRFluxData& a_lhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::square_root(*a_lhs[lvl]);
+  }
+}
+
+void data_ops::square_root(LevelData<EBFluxFAB>& a_lhs){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+
+    const Box& box         = a_lhs.disjointBoxLayout().get(dit());
+
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& lhs         = a_lhs[dit()][dir];
+      BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
+
+      // Face centered box
+      Box facebox = box;
+      facebox.surroundingNodes(dir);
+
+      // All comps
+      for (int comp = 0; comp < lhs.nComp(); comp++){
+	FORT_SQUARE_ROOT(CHF_FRA1(lhs_reg, comp),
+			 CHF_CONST_INT(dir),
+			 CHF_BOX(facebox));
+
+	const FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
+	const EBISBox& ebisbox = lhs.getEBISBox();
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+	
+	for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+	  const FaceIndex& face  = faceit();
+	  lhs(face, comp) = sqrt(lhs(face, comp));
+	}
+      }
+    }
+  }
+}
+
 void data_ops::vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::vector_length(*a_lhs[lvl], *a_rhs[lvl]);

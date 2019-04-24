@@ -535,8 +535,10 @@ Vector<Real> air7::compute_rte_source_terms(const Real&         a_time,
 
   const Real EbyN  = (a_E/(m_N*units::s_Td)).vectorLength();
   const Real k1    = this->compute_electron_N2_impact_ionization(EbyN);
-  const Real Se    = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
+  const Real p    = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
 
+  const Real vol = 1.E-12;
+  const Real Se  = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
   ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
   ret[m_photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));

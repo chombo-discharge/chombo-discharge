@@ -1,0 +1,8 @@
+# ====================================================================================================
+# CDR_FHD CLASS OPTIONS
+# ====================================================================================================
+cdr_fhd.divF_nc        = covered_face           # Hybrid divergence version
+cdr_fhd.limit_slopes   = true                   # Slope-limiters or not
+
+cdr_fhd.stochastic_diffusion = true             # Stochastic diffusion. 'true' or 'false'
+cdr_fhd.stochastic_advection = true             # Stochastic advection. 'true' or 'false'

@@ -202,6 +202,10 @@ public:
 
   static void sum(Real& a_value);
 
+  static void square_root(EBAMRFluxData& a_lhs);
+
+  static void square_root(LevelData<EBFluxFAB>& a_lhs);
+
   static void vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
   static void vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);

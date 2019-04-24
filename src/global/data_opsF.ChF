@@ -259,3 +259,14 @@ c Compute the Laplacian in the numerator (including cross-derivatives)
       chf_enddo	 
       return
       end
+
+      subroutine square_root(
+     &     chf_fra1[data],
+     &     chf_const_int[dir],     
+     &     chf_box[facebox])
+     
+      integer i,j,k
+      chf_multido[facebox;i;j;k]
+         data(chf_ix[i;j;k]) = sqrt(data(chf_ix[i;j;k]))      
+      chf_enddo      
+      end
