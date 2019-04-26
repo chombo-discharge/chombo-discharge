@@ -11,6 +11,7 @@
 #include "data_ops.H"
 #include "units.H"
 #include "cdr_tga.H"
+#include "cdr_fhd.H"
 #include "cdr_gdnv.H"
 
 #include <fstream>

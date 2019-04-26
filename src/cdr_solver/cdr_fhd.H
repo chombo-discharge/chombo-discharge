@@ -10,6 +10,9 @@
 
 #include "cdr_gdnv.H"
 
+#include <random>
+#include <time.h>
+
 /*!
   @brief Godunov implementation for convection-diffusion-reaction equations. 
 
@@ -60,12 +63,20 @@ public:
 			   const EBAMRCellData& a_old_state,
 			   const EBAMRCellData& a_source,
 			   const Real           a_dt);
+
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
 protected:
 
   bool m_stochastic_diffusion;
   bool m_stochastic_advection;
 
+  void GWN_advection_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
+  void GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
   void smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states);
+  void fill_GWN(EBAMRFluxData& a_noise, const Real a_mean);
+
+  std::mt19937_64* m_rng;     // Engine
+  int  m_seed;                // RNG seed
 };
 
 #endif

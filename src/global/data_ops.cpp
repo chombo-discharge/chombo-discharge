@@ -969,6 +969,18 @@ void data_ops::multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>&
   }
 }
 
+void data_ops::multiply(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::multiply(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+
+void data_ops::multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    a_lhs[dit()] *= a_rhs[dit()];
+  }
+}
+
 void data_ops::multiply_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::multiply_scalar(*a_lhs[lvl], *a_rhs[lvl]);
