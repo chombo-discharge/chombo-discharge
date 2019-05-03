@@ -13,3 +13,6 @@ eddington_sp1.gmg_hang          = 0.2       # Solver hang
 eddington_sp1.gmg_bottom_drop   = 8         # Bottom drop
 eddington_sp1.gmg_bottom_solver = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+
+eddington_sp1.stochastic_photons = false    # Draw discrete photons from continuum distribution
+eddington_sp1.seed               = 0        # Seed
