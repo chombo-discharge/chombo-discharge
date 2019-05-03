@@ -98,33 +98,23 @@ protected:
   RefCountedPtr<robin_coef> m_robinco;
   
   Real m_aco;
-
   Real m_bco;
-  
   Real m_rhs;
 
   Real (*m_acofunc)(const RealVect a_pos);
-
   Real (*m_bcofunc)(const RealVect a_pos);
-
   Real (*m_rhsfunc)(const RealVect a_pos);
 
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_acodata;
-
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_bcodata;
-  
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_rhsdata;
 
   bool m_const_rhs;
-
   bool m_data_rhs;
-
   bool m_func_rhs;
 
   bool m_const_coeff;
-
   bool m_data_coeff;
-
   bool m_func_coeff;
 
   virtual bool get_taylor_sten(VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox, const IntVectSet& a_cfivs);

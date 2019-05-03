@@ -276,7 +276,10 @@ RefCountedPtr<rte_storage>& sisdc::get_rte_storage(const rte_iterator& a_solveri
 }
 
 bool sisdc::need_to_regrid(){
-  return m_accum_cfl > m_regrid_cfl;
+  const bool regrid = m_accum_cfl > m_regrid_cfl;
+  if(regrid) m_accum_cfl = 0.0;
+  
+  return regrid;
 }
 
 Real sisdc::restrict_dt(){

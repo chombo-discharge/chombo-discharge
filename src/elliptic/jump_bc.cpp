@@ -37,8 +37,6 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
 				    const VolIndex&   a_vof,
 				    const EBISBox&    a_ebisbox,
 				    const IntVectSet& a_cfivs){
-  CH_TIME("jump_bc::get_second_order_sten");
-
   a_stencil.clear();
   bool drop_order = false;
 
@@ -204,8 +202,6 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 				   const VolIndex&   a_vof,
 				   const EBISBox&    a_ebisbox,
 				   const IntVectSet& a_cfivs){
-  CH_TIME("jump_bc::get_first_order_sten");
-
   const RealVect& normal   = a_ebisbox.normal(a_vof);
   const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
 
@@ -297,8 +293,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const MFInterfaceFAB<VoFStencil>& a_stencils,
 		       const bool                        a_homogeneous,
 		       const DataIndex&                  a_dit){
-  CH_TIME("jump_bc::match_bc(2)");
-
   const int comp   = 0;
   const int phase1 = 0;
   const int phase2 = 1;
