@@ -1622,6 +1622,7 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_physdom->get_prob_lo();
 
+
   // Things that are passed into plasma_kinetics
   RealVect     pos, E;
   Vector<Real> cdr_densities(num_species);
@@ -1644,7 +1645,7 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
     }
 
     // Call plaskin
-    Vector<Real> sources = m_plaskin->compute_rte_source_terms(a_time, pos, E, cdr_densities);
+    Vector<Real> sources = m_plaskin->compute_rte_source_terms(a_time, 1.0, a_dx, pos, E, cdr_densities);
 
     // Put source term in place
     for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -1685,7 +1686,7 @@ void time_stepper::compute_rte_sources_irreg(Vector<EBCellFAB*>&           a_sou
   for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
     const VoFStencil& stencil = a_interp_stencils(vof, comp);
-
+    const Real kappa = ebisbox.volFrac(vof);
     
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
     
@@ -1713,7 +1714,7 @@ void time_stepper::compute_rte_sources_irreg(Vector<EBCellFAB*>&           a_sou
     }
 
     // Call Plaskin
-    Vector<Real> sources = m_plaskin->compute_rte_source_terms(a_time, pos, E, cdr_densities);
+    Vector<Real> sources = m_plaskin->compute_rte_source_terms(a_time, kappa, a_dx, pos, E, cdr_densities);
 
     // Put source term in place
     for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){

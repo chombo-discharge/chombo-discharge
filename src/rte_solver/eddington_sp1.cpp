@@ -13,6 +13,9 @@
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 
+#include <chrono>
+#include <time.h>
+
 #define eddington_sp1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics. 
 
 eddington_sp1::eddington_sp1() : rte_solver() {
@@ -25,6 +28,7 @@ eddington_sp1::eddington_sp1() : rte_solver() {
   this->set_tga(true);
   this->set_reflectivity(0.0);
   this->set_time(0, 0., 0.);
+  this->set_rng();
 
   m_needs_setup = true;
 }
@@ -78,6 +82,30 @@ void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2
   
   m_r1 = a_r1;
   m_r2 = a_r2;
+}
+
+void eddington_sp1::set_rng(){
+  CH_TIME("eddington_sp1::set_rng");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_rng" << endl;
+  }
+
+  ParmParse pp("eddington_sp1");
+
+  m_stochastic_photons = false;
+  m_seed = 0;
+
+  std::string str = "false";
+  pp.query("stochastic_photons", str);
+  m_stochastic_photons = (str == "true") ? true : false;
+  pp.query("seed", m_seed);
+
+  if(m_stochastic_photons){
+    if(m_seed < 0){
+      m_seed = std::chrono::system_clock::now().time_since_epoch().count();
+    }
+    m_rng = new std::mt19937_64(m_seed);
+  }
 }
 
 void eddington_sp1::set_bottom_solver(const int a_whichsolver){
@@ -268,8 +296,6 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
     data_ops::kappa_scale(source);
   }
 
-
-
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
   m_amr->alias(phi,  a_state);
   m_amr->alias(rhs,  source);
@@ -317,6 +343,28 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
 
     // We solve onto res, copy back to state
     data_ops::copy(a_state, m_resid);
+  }
+
+  if(m_stochastic_photons){
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const Real dx = m_amr->get_dx()[lvl];
+      const int comp = 0;
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[lvl][dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const Box& box         = dbl.get(dit());
+
+	EBCellFAB& state = (*a_state[lvl])[dit()];
+	for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+	  const Real vol  = pow(dx, SpaceDim);
+	  const Real mean = state(vof, comp)*vol;
+	  std::poisson_distribution<int> dist(mean);
+	  state(vof,0) = dist(*m_rng)/vol;
+	}
+      }
+    }
   }
 
   m_amr->average_down(a_state, m_phase);

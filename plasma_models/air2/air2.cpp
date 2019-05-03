@@ -117,13 +117,21 @@ Vector<Real> air2::compute_cdr_source_terms(const Real              a_time,
   const Real pO2    = 0.2*m_p;;
 
 
-  Real products, p;
+  Real products,  p;
+  Real products1, p1;
+  Real products2, p2;
   
   // Stochastic or deterministic impact ionization
-  p = mu*(alpha-eta)*E*a_cdr_densities[m_electron_idx];
-  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
-  source[m_electron_idx] += products;
-  source[m_positive_idx] += products;
+  p1 = mu*alpha*E*a_cdr_densities[m_electron_idx];
+  p2 = mu*eta*E*a_cdr_densities[m_electron_idx];
+  products1 = m_fhd ? stochastic_reaction(p1, vol, m_dt) : p1;
+  products2 = m_fhd ? stochastic_reaction(p2, vol, m_dt) : p2;
+  
+  source[m_electron_idx] += products1;
+  source[m_positive_idx] += products1;
+
+  source[m_electron_idx] -= products2;
+  source[m_positive_idx] -= products2;
 
   // Stochastic or deterministic photoionization
   const air2::photon_one*   photon1 = static_cast<air2::photon_one*>   (&(*m_photons[m_photon1_idx]));
@@ -207,6 +215,8 @@ Vector<Real> air2::compute_cdr_dielectric_fluxes(const Real&         a_time,
 }
 
 Vector<Real> air2::compute_rte_source_terms(const Real&         a_time,
+					    const Real&         a_kappa,
+					    const Real&         a_dx,
 					    const RealVect&     a_pos,
 					    const RealVect&     a_E,
 					    const Vector<Real>& a_cdr_densities) const {
@@ -217,13 +227,13 @@ Vector<Real> air2::compute_rte_source_terms(const Real&         a_time,
   const Real E     = a_E.vectorLength();
   const Real mu    = air2::get_mobility(E);
   const Real alpha = air2::get_alpha(a_E.vectorLength());
-  const Real p     = mu*alpha*E*a_cdr_densities[m_electron_idx]*m_excitation_efficiency;
-  const Real vol = 1.E-12;
-  const Real Se  = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
+  const Real p     = mu*alpha*E*a_cdr_densities[m_electron_idx]*m_excitation_efficiency*(m_pq/(m_pq + m_p));;
+  const Real vol   = pow(a_dx, SpaceDim);
+  const Real Se    = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   
-  ret[m_photon1_idx] = Se*(m_pq/(m_pq + m_p));
-  ret[m_photon2_idx] = Se*(m_pq/(m_pq + m_p));
-  ret[m_photon3_idx] = Se*(m_pq/(m_pq + m_p));
+  ret[m_photon1_idx] = Se;
+  ret[m_photon2_idx] = Se;
+  ret[m_photon3_idx] = Se;
 
   return ret;
 }

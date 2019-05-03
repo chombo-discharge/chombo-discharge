@@ -21,29 +21,10 @@
 #include <EBSimpleSolver.H>
 #include <EBConductivityOpFactory.H>
 
+#include <random>
+
 /*!
-  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation
-  @details This class solves the RTE in the form 
-  \f[
-  \frac{\partial E}{\partial t} + c\kappa E - \nabla\cdot\left[\frac{c}{\kappa}\nabla E\right] = \eta
-  \f]
-
-  Class options
-  -------------
-
-      eddington_sp1.reflectivity      = 1.E-4     # Reflectivity
-      eddington_sp1.gmg_verbosity     = -1        # GMG verbosity
-      eddington_sp1.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
-      eddington_sp1.gmg_post_smooth   = 16        # Number of relaxations in upsweep
-      eddington_sp1.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
-      eddington_sp1.gmg_min_iter      = 5         # Minimum number of iterations
-      eddington_sp1.gmg_max_iter      = 32        # Maximum number of iterations
-      eddington_sp1.gmg_tolerance     = 1.E-6     # Residue tolerance
-      eddington_sp1.gmg_hang          = 0.2       # Solver hang
-      eddington_sp1.gmg_bottom_drop   = 8         # Bottom drop
-      eddington_sp1.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-      eddington_sp1.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
-
+  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn photons. 
 */
 class eddington_sp1 : public rte_solver {
 public:
@@ -122,6 +103,11 @@ public:
     @brief Set reflectivity
   */
   virtual void set_reflectivity(const Real a_reflectivity);
+  
+  /*!
+    @brief Set stochastic photons or not
+  */
+  virtual void set_rng();
 
   /*!
     @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
@@ -364,6 +350,11 @@ protected:
     @brief Set up the Euler solver
   */
   virtual void setup_euler();
+
+
+  bool m_stochastic_photons;
+  std::mt19937_64* m_rng;
+  int m_seed;
 
 };
 #endif

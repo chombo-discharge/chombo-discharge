@@ -526,6 +526,8 @@ Vector<Real> air7::compute_cdr_dielectric_fluxes(const Real&         a_time,
 }
 
 Vector<Real> air7::compute_rte_source_terms(const Real&         a_time,
+					    const Real&         a_kappa,
+					    const Real&         a_dx,
 					    const RealVect&     a_pos,
 					    const RealVect&     a_E,
 					    const Vector<Real>& a_cdr_densities) const {
