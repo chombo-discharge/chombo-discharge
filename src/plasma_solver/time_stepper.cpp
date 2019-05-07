@@ -3079,7 +3079,7 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     RefCountedPtr<rte_solver>& solver = solver_it();
     EBAMRCellData& state              = *a_rte_states[idx];
     EBAMRCellData& rhs                = *a_rte_sources[idx];
-    solver->advance(a_dt, state, rhs);
+   solver->advance(a_dt, state, rhs);
   }
 }
 

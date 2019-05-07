@@ -10,6 +10,12 @@
 
 #include "rte_solver.H"
 
+#include <Particle.H>
+#include <ParticleData.H>
+#include <ParticleValidRegion.H>
+#include <BinItem.H>
+#include <MeshInterp.H>
+
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
 */
@@ -93,5 +99,8 @@ protected:
   */
   bool m_needs_setup;
 
+  Vector<RefCountedPtr<ParticleData<Particle> > > m_particles;
+  Vector<RefCountedPtr<ParticleValidRegion> >     m_pvr;
 };
+
 #endif

@@ -109,6 +109,56 @@ void amr_mesh::allocate_ptr(EBAMRCellData& a_data){
   }
 }
 
+void amr_mesh::allocate(EBAMRParticles& a_particles){
+  CH_TIME("amr_mesh::allocate(AMR Particle)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(AMR Particle)" << endl;
+  }
+
+  if(m_max_box_size != m_blocking_factor){
+    MayDay::Abort("amr_mesh::allocate(particles) - only constant box sizes supported for particle methods");
+  }
+  
+  a_particles.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    a_particles[lvl] = RefCountedPtr<ParticleData<Particle> > (new ParticleData<Particle>(m_grids[lvl],
+											  m_domains[lvl],
+											  m_blocking_factor,
+											  m_dx[lvl]*RealVect::Unit,
+											  m_physdom->get_prob_lo()));
+  }
+}
+
+void amr_mesh::allocate(EBAMRPVR& a_pvr, const int a_buffer){
+  CH_TIME("amr_mesh::allocate(AMR PVR)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(AMR PVR)" << endl;
+  }
+
+  if(m_max_box_size != m_blocking_factor){
+    MayDay::Abort("amr_mesh::allocate(particles) - only constant box sizes supported for particle methods");
+  }
+  
+  a_pvr.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    const Real dx                = m_dx[lvl];
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const ProblemDomain& dom     = m_domains[lvl];
+
+    const bool has_coar = lvl > 0;
+
+    if(!has_coar){
+      a_pvr[lvl] = RefCountedPtr<ParticleValidRegion> (new ParticleValidRegion(dbl, NULL, 1, 0));
+    }
+    else{
+      const int ref_ratio = m_ref_ratios[lvl-1];
+      a_pvr[lvl] = RefCountedPtr<ParticleValidRegion> (new ParticleValidRegion(dbl, a_pvr[lvl-1]->mask(), ref_ratio, a_buffer));
+    }
+  }
+}
+
 void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(cell)");
   if(m_verbosity > 5){

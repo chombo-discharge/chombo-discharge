@@ -25,7 +25,7 @@ eddington_sp1::eddington_sp1() : rte_solver() {
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(1);
   this->set_bottom_drop(16);
-  this->set_tga(true);
+  this->set_tga(false);
   this->set_reflectivity(0.0);
   this->set_time(0, 0., 0.);
   this->set_rng();
@@ -167,6 +167,11 @@ void eddington_sp1::set_tga(const bool a_use_tga){
   }
   
   m_use_tga = a_use_tga;
+
+  ParmParse pp("eddington_sp1");
+  std::string str = "false";
+  pp.get("use_tga", str);
+  m_use_tga = (str == "true") ? true : false;
 }
 
 void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
@@ -843,3 +848,18 @@ void eddington_sp1::write_plot_file(){
 	      covered_values);
 }
 #endif
+
+void eddington_sp1::set_stationary(const bool a_stationary) {
+  CH_TIME("rte_solver::set_stationary");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_stationry" << endl;
+  }
+  m_stationary = a_stationary;
+
+
+  ParmParse pp("eddington_sp1");
+  std::string str;
+
+  pp.query("stationary", str);
+  m_stationary = (str == "false") ? false : true;
+}

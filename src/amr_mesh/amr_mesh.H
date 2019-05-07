@@ -101,6 +101,16 @@ public:
   virtual void allocate_ptr(EBAMRCellData& a_data);
 
   /*!
+    @brief Allocate AMR particles
+  */
+  virtual void allocate(EBAMRParticles& a_particles);
+
+  /*!
+    @brief Allocate particle valid regions
+  */
+  virtual void allocate(EBAMRPVR& a_pvr, const int a_buffer);
+
+  /*!
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */

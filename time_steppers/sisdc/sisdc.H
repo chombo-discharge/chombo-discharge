@@ -158,6 +158,7 @@ protected:
   void copy_sigma_p_to_sigma();
 
   void integrate(const Real a_dt, const Real a_time, const bool a_corrector);
+  void integrate_rte(const Real a_dt, const int a_m, const bool a_corrector);
   void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_corrector);
   void integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_corrector);
   void integrate_advection_multistep(const Real a_dt, const int a_m, const bool a_corrector);
@@ -187,8 +188,8 @@ protected:
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
   void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
-  void update_rte(const Real a_time); // This uses the solver states, make sure that is what you want
-  void update_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time);
+  void update_stationary_rte(const Real a_time); // This uses the solver states, make sure that is what you want
+  void update_stationary_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time);
   void update_diffusion_coefficients();
 
   // Store & restore functions

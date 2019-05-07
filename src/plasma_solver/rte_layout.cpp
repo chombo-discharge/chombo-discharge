@@ -18,12 +18,9 @@ rte_layout::rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_solvers.resize(m_photons.size());
 
   std::string solver     = "eddington_sp1";
-  std::string stationary = "true";
-  { // Get from input script
-    ParmParse pp("rte_layout");
-    pp.query("which_solver", solver);
-    pp.query("stationary", stationary);
-  }
+  
+  ParmParse pp("rte_layout");
+  pp.get("which_solver", solver);
   
   for (int i = 0; i < a_plaskin->get_num_photons(); i++){
     if(solver == "eddington_sp1"){
@@ -34,16 +31,6 @@ rte_layout::rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
     }
     else {
       MayDay::Abort("rte_layout::rte_layout - unknown solver type requested");
-    }
-
-    if(stationary == "true"){
-      m_solvers[i]->set_stationary(true);
-    }
-    else if(stationary == "false"){
-      m_solvers[i]->set_stationary(false);
-    }
-    else {
-      MayDay::Error("rte_layout::rte_layout - unknown stationary/transient type requested.");
     }
     m_solvers[i]->set_photon_group(m_photons[i]);
   }

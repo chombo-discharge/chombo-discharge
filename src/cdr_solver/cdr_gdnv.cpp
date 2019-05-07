@@ -419,6 +419,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_phase, 1);
   data_ops::set_value(scratch, 0.0);
+#if 0
   if(a_extrap_dt > 0.0){
     compute_divD(scratch, a_state);
     data_ops::incr(scratch, m_source, 1.0);
@@ -426,6 +427,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     m_amr->average_down(scratch, m_phase);
     m_amr->interp_ghost(scratch, m_phase);
   }
+#endif
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_level_advect[lvl];

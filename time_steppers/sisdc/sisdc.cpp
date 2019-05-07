@@ -625,7 +625,7 @@ Real sisdc::advance(const Real a_dt){
   sisdc::copy_sigma_p_to_sigma();
 
   sisdc::update_poisson();
-  sisdc::update_rte(m_time + actual_dt);
+  sisdc::update_stationary_rte(m_time + actual_dt); // Only triggers if m_rte->is_stationar() == true
 
   // Always recompute source terms and velocities for the next time step. These were computed ea
   sisdc::compute_cdr_gradients();
@@ -638,6 +638,9 @@ Real sisdc::advance(const Real a_dt){
   compute_dt(next_dt, dummy);
   m_plaskin->set_dt(next_dt);
   sisdc::compute_cdr_sources(m_time + actual_dt);
+  if(!m_rte->is_stationary()){
+
+  }
 
   // Profile step
   if(m_print_report)  sisdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
@@ -740,6 +743,17 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
 
   // We begin with phi[0] = phi(t_n). Then update phi[m+1].
   for(int m = 0; m < m_p; m++){
+    
+    // This does the transient rte advance. Stationary solves are done after computing the E-field.
+    // The transient solve needs to happen BEFORE the reaction solve in case there is a tight coupling
+    // between the RTE and CDR equations (relaxations of excited states). The integrate_rte routine compues
+    // source terms just before advancing, and since source terms for the CDR equations are not updated
+    // between this routine and the integrate_advection_reaction call, we are ensured that the source terms
+    // are consistent. 
+    t0 = MPI_Wtime();
+    if(m_consistent_rte) {
+      sisdc::integrate_rte(a_dt, m, a_corrector);
+    }
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
     t0 = MPI_Wtime();
@@ -753,6 +767,8 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
     t1 = MPI_Wtime();
     diffusive_time += t1-t0;
 
+
+
     // After the diffusion step we should update source terms and boundary conditions for the next step. We don't
     // do this on the last step. This is done either in the reconcile_integrands routine, or after SISDC is done
     // with its substebs. 
@@ -764,7 +780,7 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
 
       // Update electric field, RTE equations, source terms, and velocities. 
       if(m_consistent_E)   sisdc::update_poisson(cdr_densities_mp1, sigma_mp1);
-      if(m_consistent_rte) sisdc::update_rte(cdr_densities_mp1, t_mp1);
+      if(m_consistent_rte) sisdc::update_stationary_rte(cdr_densities_mp1, t_mp1);
       if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
       if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
       if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
@@ -1131,7 +1147,7 @@ void sisdc::reconcile_integrands(){
 
 //  Update electric field, RTE equations, source terms, and velocities
   if(m_consistent_E)   sisdc::update_poisson(cdr_densities_p, sigma_p);
-  if(m_consistent_rte) sisdc::update_rte(cdr_densities_p, t_p);
+  if(m_consistent_rte) sisdc::update_stationary_rte(cdr_densities_p, t_p);
   if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_p);
   if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_p, t_p);
   if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_p, t_p);
@@ -1950,41 +1966,64 @@ void sisdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAM
   }
 }
 
-void sisdc::update_rte(const Real a_time){
-  CH_TIME("sisdc::update_rte(solver)");
+void sisdc::update_stationary_rte(const Real a_time){
+  CH_TIME("sisdc::update_stationary_rte(solver)");
   if(m_verbosity > 5){
-    pout() << "sisdc::update_rte(solver)" << endl;
+    pout() << "sisdc::update_stationary_rte(solver)" << endl;
   }
   
   if(m_do_rte){
     if((m_step + 1) % m_fast_rte == 0){
-      Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-      Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
-      Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
+      if(m_rte->is_stationary()){
+	Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
+	Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
+	Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
 
-      EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
-      const Real dummy_dt = 0.0;
-      this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
+	const Real dummy_dt = 0.0;
+	this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
+      }
     }
   }
 }
 
-void sisdc::update_rte(const Vector<EBAMRCellData*>& a_cdr_states, const Real a_time){
-  CH_TIME("sisdc::update_rte(full)");
+void sisdc::update_stationary_rte(const Vector<EBAMRCellData*>& a_cdr_states, const Real a_time){
+  CH_TIME("sisdc::update_stationary_rte(full)");
   if(m_verbosity > 5){
-    pout() << "sisdc::update_rte(full)" << endl;
+    pout() << "sisdc::update_stationary_rte(full)" << endl;
   }
   
   if(m_do_rte){
     if((m_step + 1) % m_fast_rte == 0){
-      Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-      Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
+      if(m_rte->is_stationary()){
+	Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
+	Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
 
+	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+
+	const Real dummy_dt = 0.0;
+	this->solve_rte(rte_states, rte_sources, a_cdr_states, E, a_time, dummy_dt, centering::cell_center);
+      }
+    }
+  }
+}
+
+void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_corrector){
+  CH_TIME("sisdc::update_stationary_rte(full)");
+  if(m_verbosity > 5){
+    pout() << "sisdc::update_stationary_rte(full)" << endl;
+  }
+
+  if(m_do_rte){
+    if((m_step + 1) % m_fast_rte == 0){
+      const Real time = m_time + m_dtm[a_m]; // This is the current time
+      
+      Vector<EBAMRCellData*>  rte_states  = m_rte->get_states();
+      Vector<EBAMRCellData*>  rte_sources = m_rte->get_sources();
+      Vector<EBAMRCellData*>  cdr_states  = sisdc::get_cdr_phik(a_m);
       EBAMRCellData& E = m_poisson_scratch->get_E_cell();
-
-      const Real dummy_dt = 0.0;
-      this->solve_rte(rte_states, rte_sources, a_cdr_states, E, a_time, dummy_dt, centering::cell_center);
+      this->solve_rte(rte_states, rte_sources, cdr_states, E, time, a_dt, centering::cell_center);
     }
   }
 }

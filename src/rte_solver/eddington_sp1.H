@@ -149,6 +149,11 @@ public:
   */
   virtual int query_ghost() const;
 
+  /*!
+    @brief Set stationary or not
+  */
+  virtual void set_stationary(const bool a_stationary);
+
 protected:
   
   /*!
