@@ -27,7 +27,7 @@ def write_template(args):
 
     makef.write("\n")
     makef.write("LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTools AMRElliptic AMRTools \\\n")
-    makef.write("\tAMRTimeDependent BaseTools BoxTools Workshop\n")
+    makef.write("\tAMRTimeDependent BaseTools BoxTools Workshop ParticleTools\n")
     makef.write("\n")
  	
     makef.write("\n")

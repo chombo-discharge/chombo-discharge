@@ -9,6 +9,7 @@
 #include "data_ops.H"
 
 #include <BoxIterator.H>
+#include <EBArith.H>
 
 mc_photo::mc_photo(){
   this->set_verbosity(-1);
@@ -28,31 +29,25 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   if(boxsize != m_amr->get_blocking_factor()){
     MayDay::Abort("mc_photo::advance - only constant box sizes supported for particle methods");
   }
-  
-  Vector<ParticleData<Particle>* > n_particles(1 + finest_level);
-  Vector<ParticleValidRegion* > n_pvr(1 + finest_level);
+
+  //  this->generate_photons(m_particles, a_source, a_dt);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx = m_amr->get_dx()[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& dom = m_amr->get_domains()[lvl];
-    const Real vol = pow(dx, SpaceDim);
-    const int ref_ratio = m_amr->get_ref_rat()[lvl];
+    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const Real vol               = pow(dx, SpaceDim);
+    const int ref_ratio          = m_amr->get_ref_rat()[lvl];
+    const bool has_coar          = lvl > 0;
 
-    const bool has_coar = lvl > 0;
-
-    n_particles[lvl] = new ParticleData<Particle>(dbl, dom, boxsize, dx*RealVect::Unit, origin);
-    if(!has_coar){
-      n_pvr[lvl] = new ParticleValidRegion(dbl, NULL, 1, 0);
-    }
     if(has_coar) { // Get particles from coarser region and put onto this one
-      collectValidParticles(n_particles[lvl]->outcast(),
-      			    *n_particles[lvl-1],
+      collectValidParticles(m_particles[lvl]->outcast(),
+      			    *m_particles[lvl-1],
       			    m_pvr[lvl]->mask(),
       			    dx*RealVect::Unit,
       			    ref_ratio,
-			    false,
-			    origin);
+    			    false,
+    			    origin);
       m_particles[lvl]->outcast().clear();
     }
 
@@ -70,23 +65,23 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
 
       List<Particle> particles;
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const IntVect iv = vof.gridIndex();
-	const RealVect pos = origin + ((RealVect)iv + 0.5*RealVect::Unit)*dx;
+      	const VolIndex& vof = vofit();
+      	const IntVect iv = vof.gridIndex();
+      	const RealVect pos = origin + ((RealVect)iv + 0.5*RealVect::Unit)*dx;
 
-	Particle part(source(iv,0)*vol*a_dt, pos);
-	particles.append(part);
+      	Particle part(source(iv,0)*vol*a_dt, pos);
+      	particles.append(part);
       }
-      (*n_particles[lvl])[dit()].addItemsDestructive(particles);
+      (*m_particles[lvl])[dit()].addItemsDestructive(particles);
 
       // Interp
       MeshInterp interp(box, dx*RealVect::Unit, origin);
       InterpType type = InterpType::CIC;
-      interp.deposit((*n_particles[lvl])[dit()].listItems(), state, type);
+      interp.deposit((*m_particles[lvl])[dit()].listItems(), state, type);
     }
 
-    n_particles[lvl]->gatherOutcast();
-    n_particles[lvl]->remapOutcast();
+    m_particles[lvl]->gatherOutcast();
+    m_particles[lvl]->remapOutcast();
   }
 
   //   // Deposit on particle on each patch on the coarsest level
@@ -221,4 +216,62 @@ void mc_photo::write_plot_file(){
 
 int mc_photo::query_ghost() const {
   return 3;
+}
+
+void mc_photo::generate_photons(EBAMRParticles& a_particles, const EBAMRCellData& a_source, const Real a_dt){
+  CH_TIME("mc_photo::generate_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::generate_photons" << endl;
+  }
+
+  const RealVect origin  = m_physdom->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const Real vol               = pow(dx, SpaceDim);
+    const int ref_ratio          = m_amr->get_ref_rat()[lvl];
+    const bool has_coar          = lvl > 0;
+
+    if(has_coar) { // If there is a coarser level, remove particles from the overlapping region and put them onto this level
+      collectValidParticles(a_particles[lvl]->outcast(),
+      			    *a_particles[lvl-1],
+      			    m_pvr[lvl]->mask(),
+      			    dx*RealVect::Unit,
+      			    ref_ratio,
+			    false,
+			    origin);
+      a_particles[lvl]->outcast().clear(); // Delete particles generated on the coarser level and regenerate them now
+    }
+
+    // Create new particles on this level using fine-resolution data
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = (*a_source[lvl])[dit()].getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = IntVectSet(box);
+
+      FArrayBox& source = (*a_source[lvl])[dit()].getFArrayBox();
+
+      // Generate new particles in this box
+      List<Particle> particles;
+      for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const IntVect iv = vof.gridIndex();
+	//const RealVect pos = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
+	const RealVect pos = origin + ((RealVect)iv + 0.5*RealVect::Unit)*dx; // By default, generate on the centroid
+
+	Particle part(source(iv,0)*vol*a_dt, pos);
+	particles.append(part);
+      }
+
+      // Add particles to data holder
+      (*a_particles[lvl])[dit()].addItemsDestructive(particles);
+    }
+
+    m_particles[lvl]->gatherOutcast();
+    m_particles[lvl]->remapOutcast();
+  }
 }

@@ -99,8 +99,12 @@ protected:
   */
   bool m_needs_setup;
 
-  Vector<RefCountedPtr<ParticleData<Particle> > > m_particles;
-  Vector<RefCountedPtr<ParticleValidRegion> >     m_pvr;
+  EBAMRParticles m_particles;
+  EBAMRPVR m_pvr;
+
+  void generate_photons(EBAMRParticles& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  void move_photons(EBAMRParticles& a_particles, const Real a_dt);
+  void deposit_photons(EBAMRCellData& a_state, const EBAMRParticles& a_particles);
 };
 
 #endif
