@@ -9,6 +9,9 @@
 
 photon_group::photon_group(){
   this->define("default_photon", 1.0);
+
+  m_scatter = 0.0;
+  m_kappa = 0.0;
 }
 
 photon_group::photon_group(const std::string a_name, const Real a_kappa){
@@ -43,5 +46,14 @@ Real photon_group::get_kappa(const RealVect a_pos) const{
   }
   else{
     return m_varkappa(a_pos);
+  }
+}
+
+Real photon_group::get_scatter(const RealVect a_pos) const{
+  if(m_constant){
+    return m_scatter;
+  }
+  else{
+    return m_varscatter(a_pos);
   }
 }

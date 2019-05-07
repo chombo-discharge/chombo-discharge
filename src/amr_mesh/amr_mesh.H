@@ -414,6 +414,11 @@ public:
   virtual int get_max_box_size();
 
   /*!
+    @brief Return bffer
+  */
+  virtual int get_buffer();
+
+  /*!
     @brief Get maximum box size for EBIS generation
   */
   virtual int get_max_ebis_box_size();
