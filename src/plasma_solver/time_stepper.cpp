@@ -1520,7 +1520,6 @@ void time_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
   const int num_photons  = m_plaskin->get_num_photons();
   const int finest_level = m_amr->get_finest_level();
 
-
   if(num_photons > 0){
     for (int lvl = 0; lvl <= finest_level; lvl++){
       
@@ -1567,7 +1566,6 @@ void time_stepper::compute_rte_sources(Vector<LevelData<EBCellFAB>* >&       a_s
 
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
 
-  
   if(num_photons > 0){
     const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
     
@@ -1625,14 +1623,15 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
 
   // Things that are passed into plasma_kinetics
   RealVect     pos, E;
-  Vector<Real> cdr_densities(num_species);
-  Vector<Real> sources(num_photons);
+  Vector<Real> cdr_densities(num_species, 0.0);
+  Vector<Real> sources(num_photons, 0.0);
 
   const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
 
-  const IntVectSet ivs(a_box);
+  //  const IntVectSet ivs(a_box);
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
+
 
     pos = origin + iv*a_dx;
     E   = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
@@ -1644,16 +1643,17 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
       cdr_densities[idx] = Max(0.0, phi);
     }
 
-    // Call plaskin
-    Vector<Real> sources = m_plaskin->compute_rte_source_terms(a_time, 1.0, a_dx, pos, E, cdr_densities);
 
+    // Call plaskin
+
+    sources = m_plaskin->compute_rte_source_terms(a_time, 1.0, a_dx, pos, E, cdr_densities);
     // Put source term in place
     for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
       a_source[idx]->getSingleValuedFAB()(iv, comp) = sources[idx];
 
       // Covered is bogus
-      a_source[idx]->setCoveredCellVal(0.0, comp);
+      //      a_source[idx]->setCoveredCellVal(0.0, comp);
     }
   }
 }

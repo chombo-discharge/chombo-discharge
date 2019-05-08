@@ -534,16 +534,16 @@ Vector<Real> air7::compute_rte_source_terms(const Real&         a_time,
 
   // We take the source terms as Se = alpha*Ne*ve
   Vector<Real> ret(m_num_photons, 0.0);
-
+  
   const Real EbyN  = (a_E/(m_N*units::s_Td)).vectorLength();
   const Real k1    = this->compute_electron_N2_impact_ionization(EbyN);
-  const Real p    = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac*m_excitation_efficiency*(m_pq/(m_pq + m_p));;
+  const Real p    = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac*m_excitation_efficiency*(m_pq/(m_pq + m_p));
 
   const Real vol = pow(a_dx, SpaceDim);
   const Real Se  = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
-  ret[m_photon1_idx] = Se;
-  ret[m_photon2_idx] = Se;
-  ret[m_photon3_idx] = Se;
+  ret[m_photon1_idx] = Max(0.0, Se);
+  ret[m_photon2_idx] = Max(0.0, Se);
+  ret[m_photon3_idx] = Max(0.0, Se);
 
   return ret;
 }

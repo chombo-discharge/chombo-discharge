@@ -16,6 +16,8 @@
 #include <BinItem.H>
 #include <MeshInterp.H>
 
+#include <random>
+
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
 */
@@ -94,17 +96,23 @@ public:
 
 protected:
 
-  /*!
-    @brief Needs setup
-  */
-  bool m_needs_setup;
+  int  m_seed;            // RNG seed
+  std::mt19937_64* m_rng; // Engine
+  std::uniform_real_distribution<Real>* m_udist01; // Uniform real distribuion on [0,1]
+  std::uniform_real_distribution<Real>* m_udist11; // Uniform real distribuion on [-1,1]
 
-  EBAMRParticles m_particles;
-  EBAMRPVR m_pvr;
+  bool draw_random;
 
+  EBAMRParticles m_particles; // Particles
+  EBAMRPVR m_pvr;             // Valid region
+
+  void set_rng();
+  
   void generate_photons(EBAMRParticles& a_particles, const EBAMRCellData& a_source, const Real a_dt);
-  void move_photons(EBAMRParticles& a_particles, const Real a_dt);
+  void move_and_absorb_photons(EBAMRParticles& a_absorbed, EBAMRParticles& a_original, const Real a_dt);
   void deposit_photons(EBAMRCellData& a_state, const EBAMRParticles& a_particles);
+
+  RealVect random_direction();
 };
 
 #endif

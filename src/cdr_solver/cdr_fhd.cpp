@@ -25,9 +25,7 @@ cdr_fhd::cdr_fhd() : cdr_gdnv() {
   pp.get("limit_slopes", str);         m_slopelim             = (str == "true") ? true : false;
   pp.get("seed", m_seed);
 
-  if(m_seed < 0){
-    std::chrono::system_clock::now().time_since_epoch().count();
-  }
+  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
 
   this->set_divF_nc(1); // Use covered face stuff for nonconservative divergence
 
