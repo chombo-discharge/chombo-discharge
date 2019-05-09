@@ -12,6 +12,7 @@
 #include <time.h>
 #include <chrono>
 
+#include <EBLevelDataOps.H>
 #include <BoxIterator.H>
 #include <EBArith.H>
 #include <ParmParse.H>
@@ -37,6 +38,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
     MayDay::Abort("mc_photo::advance - only constant box sizes are supported for particle methods");
   }
 
+#if 0 // Debug
+  if(procID() == 0) std::cout << "advancing mc_photo" << std::endl;
+#endif
+
   EBAMRParticles absorbed_photons;
   m_amr->allocate(absorbed_photons);
 
@@ -49,13 +54,17 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   }
 
   // Deposit absorbed photons onto mesh
-#if 0 // Actual code
+#if 1 // Actual code
   this->deposit_photons(a_state, absorbed_photons);
 #else // Debug
   this->deposit_photons(a_state, m_particles);
 #endif
 
   data_ops::floor(a_state, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    EBLevelDataOps::setCoveredVal(*a_state[lvl], 0.0);
+  }
 
   return true;
 }
@@ -174,6 +183,8 @@ void mc_photo::generate_photons(EBAMRParticles& a_particles, const EBAMRCellData
     pout() << m_name + "::generate_photons" << endl;
   }
 
+
+
   const RealVect origin  = m_physdom->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
@@ -211,14 +222,11 @@ void mc_photo::generate_photons(EBAMRParticles& a_particles, const EBAMRCellData
 	const VolIndex& vof = vofit();
 	const IntVect iv = vof.gridIndex();
 	const RealVect pos = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
-
-	const Real mean = source(iv,0)*vol*a_dt;
+	const Real kappa = ebisbox.volFrac(vof);
+	
+	const Real mean = source(iv,0)*kappa*vol*a_dt;
 	std::poisson_distribution<int> dist(mean);
-	int num_particles = floor(dist(*m_rng)*dx);
-
-#if CH_SPACEDIM==2
-	//	num_particles = 1;
-#endif
+	const int num_particles = dist(*m_rng);
 	for (int i = 0; i < num_particles; i++){
 	  const RealVect dir = random_direction();
 	  particles.append(Particle(1.0, pos, dir*units::s_c0));
@@ -264,6 +272,7 @@ void mc_photo::move_and_absorb_photons(EBAMRParticles& a_absorbed, EBAMRParticle
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const Real dx = m_amr->get_dx()[lvl];
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
@@ -276,30 +285,32 @@ void mc_photo::move_and_absorb_photons(EBAMRParticles& a_absorbed, EBAMRParticle
       for (ListIterator<Particle> lit(particles); lit.ok(); ++lit){
 	Particle& particle = lit();
 
-	const RealVect vel = particle.velocity();
+	const RealVect vel     = particle.velocity();
 	const RealVect old_pos = particle.position();
-	const RealVect new_pos = old_pos + vel*a_dt;
-	 
-	const Real kappa  = 0.5*(m_photon_group->get_kappa(old_pos) + m_photon_group->get_kappa(new_pos));
-	const Real r      = (*m_udist01)(*m_rng);
-	const Real d      = (new_pos - old_pos).vectorLength();
-	const Real p      = kappa*d;
+	const Real kappa       = m_photon_group->get_kappa(old_pos);
+	const Real v           = vel.vectorLength();
+	const Real max_dx      = Min(0.1/kappa, v*a_dt);
+	const int nsteps       = max_dx <= v*a_dt ? ceil(v*a_dt/max_dx) : v*a_dt;
+	const Real dtstep      = a_dt/nsteps;
 
-	bool absorb = r > p;
+	for (int istep = 0; istep < nsteps; istep++){
+	  // We need to determine the maximum allowed step that this photon can move. It is either one grid cell or 0.1*kappa
+	  //	  const Real kappa  = 0.5*(m_photon_group->get_kappa(old_pos) + m_photon_group->get_kappa(new_pos));
+	  const RealVect dx = vel*dtstep;
+	  const Real p      = dx.vectorLength()*kappa;
+	  const Real r      = (*m_udist01)(*m_rng);
+	  const bool absorb = r < p;
 
-
-	absorb = false;
-	std::exponential_distribution<Real> expdist(kappa);
-	const Real s = expdist(*m_rng);
-	if(s < d){
-	  absorb = true;
+	  if(absorb) {
+	    const Real r = (*m_udist01)(*m_rng);
+	    particle.position() += r*dx;
+	    absorbed.transfer(lit);
+	    break;
+	  }
+	  else{
+	    particle.position() += dx;
+	  }
 	}
-	
-	if(absorb) {
-	  absorbed.transfer(lit);
-	}
-
-	particle.position() = new_pos;
       }
     }
 
