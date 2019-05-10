@@ -41,3 +41,24 @@ template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefC
     a_alias[lvl] = &(*a_data[lvl]);
   }
 }
+
+template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles){
+  CH_TIME("amr_mesh::allocate(AMR ParticleData)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(AMR ParticleData)" << endl;
+  }
+
+  if(m_max_box_size != m_blocking_factor){
+    MayDay::Abort("amr_mesh::allocate(photons) - only constant box sizes supported for particle methods");
+  }
+  
+  a_particles.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(m_grids[lvl],
+									    m_domains[lvl],
+									    m_blocking_factor,
+									    m_dx[lvl]*RealVect::Unit,
+									    m_physdom->get_prob_lo()));
+  }
+}

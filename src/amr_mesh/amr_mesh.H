@@ -63,6 +63,11 @@ public:
   */
   template<typename T> void alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data);
 
+  /*!
+    @brief Template class for generic allocation of particles
+  */
+  template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
+
     /*!
     @brief Alias an entire hierarchy of data. 
   */
@@ -99,11 +104,6 @@ public:
     @brief Create pointers
   */
   virtual void allocate_ptr(EBAMRCellData& a_data);
-
-  /*!
-    @brief Allocate AMR particles
-  */
-  virtual void allocate(EBAMRParticles& a_particles);
 
   /*!
     @brief Allocate particle valid regions

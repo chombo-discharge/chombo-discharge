@@ -25,6 +25,7 @@
 #include "DomainFluxIFFAB.H"
 #include "tags.H"
 #include "MFBaseIVFAB.H"
+#include "photon.H"
 
 /*!
   @brief phase names
@@ -187,5 +188,7 @@ typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;
 typedef Vector<RefCountedPtr<LevelData<DomainFluxIFFAB > > > EBAMRIFData;
 typedef Vector<RefCountedPtr<LevelData<tags> > >             EBAMRTags;
 typedef Vector<RefCountedPtr<ParticleData<Particle> > >      EBAMRParticles;
+typedef Vector<RefCountedPtr<ParticleData<photon> > >        EBAMRPhotons;
 typedef Vector<RefCountedPtr<ParticleValidRegion> >          EBAMRPVR;
+
 #endif

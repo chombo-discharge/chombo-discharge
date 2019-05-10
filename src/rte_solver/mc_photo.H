@@ -103,14 +103,14 @@ protected:
 
   bool draw_random;
 
-  EBAMRParticles m_particles; // Particles
-  EBAMRPVR m_pvr;             // Valid region
+  EBAMRPhotons m_photons; // Particles
+  EBAMRPVR m_pvr;         // Valid region
 
   void set_rng();
   
-  void generate_photons(EBAMRParticles& a_particles, const EBAMRCellData& a_source, const Real a_dt);
-  void move_and_absorb_photons(EBAMRParticles& a_absorbed, EBAMRParticles& a_original, const Real a_dt);
-  void deposit_photons(EBAMRCellData& a_state, const EBAMRParticles& a_particles);
+  void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
+  void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles);
 
   RealVect random_direction();
 };

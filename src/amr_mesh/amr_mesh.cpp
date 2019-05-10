@@ -109,27 +109,6 @@ void amr_mesh::allocate_ptr(EBAMRCellData& a_data){
   }
 }
 
-void amr_mesh::allocate(EBAMRParticles& a_particles){
-  CH_TIME("amr_mesh::allocate(AMR Particle)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(AMR Particle)" << endl;
-  }
-
-  if(m_max_box_size != m_blocking_factor){
-    MayDay::Abort("amr_mesh::allocate(particles) - only constant box sizes supported for particle methods");
-  }
-  
-  a_particles.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    a_particles[lvl] = RefCountedPtr<ParticleData<Particle> > (new ParticleData<Particle>(m_grids[lvl],
-											  m_domains[lvl],
-											  m_blocking_factor,
-											  m_dx[lvl]*RealVect::Unit,
-											  m_physdom->get_prob_lo()));
-  }
-}
-
 void amr_mesh::allocate(EBAMRPVR& a_pvr, const int a_buffer){
   CH_TIME("amr_mesh::allocate(AMR PVR)");
   if(m_verbosity > 5){

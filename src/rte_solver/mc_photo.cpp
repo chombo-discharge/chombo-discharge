@@ -42,22 +42,22 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   if(procID() == 0) std::cout << "advancing mc_photo" << std::endl;
 #endif
 
-  EBAMRParticles absorbed_photons;
+  EBAMRPhotons absorbed_photons;
   m_amr->allocate(absorbed_photons);
 
   // Generate photons
-  this->generate_photons(m_particles, a_source, a_dt);
+  this->generate_photons(m_photons, a_source, a_dt);
 
   const int N = 1;
   for (int i = 0; i < N; i++){
-    this->move_and_absorb_photons(absorbed_photons, m_particles, a_dt/N);
+    this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt/N);
   }
 
   // Deposit absorbed photons onto mesh
 #if 1 // Actual code
   this->deposit_photons(a_state, absorbed_photons);
 #else // Debug
-  this->deposit_photons(a_state, m_particles);
+  this->deposit_photons(a_state, m_photons);
 #endif
 
   data_ops::floor(a_state, 0.0);
@@ -96,7 +96,7 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_state,  m_phase, ncomp); // This is the deposited 
   m_amr->allocate(m_source, m_phase, ncomp);
   
-  m_amr->allocate(m_particles);
+  m_amr->allocate(m_photons);
   m_amr->allocate(m_pvr, buffer);
 }
   
@@ -177,7 +177,7 @@ RealVect mc_photo::random_direction(){
   return ret;
 }
 
-void mc_photo::generate_photons(EBAMRParticles& a_particles, const EBAMRCellData& a_source, const Real a_dt){
+void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt){
   CH_TIME("mc_photo::generate_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::generate_photons" << endl;
@@ -217,7 +217,7 @@ void mc_photo::generate_photons(EBAMRParticles& a_particles, const EBAMRCellData
       FArrayBox& source = (*a_source[lvl])[dit()].getFArrayBox();
 
       // Generate new particles in this box
-      List<Particle> particles;
+      List<photon> particles;
       for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const IntVect iv = vof.gridIndex();
@@ -226,10 +226,11 @@ void mc_photo::generate_photons(EBAMRParticles& a_particles, const EBAMRCellData
 	
 	const Real mean = source(iv,0)*kappa*vol*a_dt;
 	std::poisson_distribution<int> dist(mean);
-	const int num_particles = dist(*m_rng);
-	for (int i = 0; i < num_particles; i++){
+	const int num_photons = dist(*m_rng);
+	for (int i = 0; i < num_photons; i++){
 	  const RealVect dir = random_direction();
-	  particles.append(Particle(1.0, pos, dir*units::s_c0));
+	  //	  particles.append(photon(1.0, pos, dir*units::s_c0));
+	  particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos)));
 	}
       }
 
@@ -239,7 +240,7 @@ void mc_photo::generate_photons(EBAMRParticles& a_particles, const EBAMRCellData
   }
 }
 
-void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRParticles& a_particles){
+void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles){
   CH_TIME("mc_photo::generate_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::generate_photons" << endl;
@@ -262,7 +263,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRParticles& a_p
   }
 }
 
-void mc_photo::move_and_absorb_photons(EBAMRParticles& a_absorbed, EBAMRParticles& a_original, const Real a_dt){
+void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){
   CH_TIME("mc_photo::move_and_absorb_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::move_and_absorb_photons" << endl;
@@ -279,11 +280,11 @@ void mc_photo::move_and_absorb_photons(EBAMRParticles& a_absorbed, EBAMRParticle
 
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<Particle>& absorbed  = (*a_absorbed[lvl])[dit()].listItems();
-      List<Particle>& particles = (*a_original[lvl])[dit()].listItems();
+      List<photon>& absorbed  = (*a_absorbed[lvl])[dit()].listItems();
+      List<photon>& particles = (*a_original[lvl])[dit()].listItems();
       
-      for (ListIterator<Particle> lit(particles); lit.ok(); ++lit){
-	Particle& particle = lit();
+      for (ListIterator<photon> lit(particles); lit.ok(); ++lit){
+	photon& particle = lit();
 
 	const RealVect vel     = particle.velocity();
 	const RealVect old_pos = particle.position();
