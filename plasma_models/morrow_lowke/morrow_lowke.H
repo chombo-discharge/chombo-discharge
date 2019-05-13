@@ -14,41 +14,6 @@
 /*!
   @brief Class that implements the Morrow-Lowke discharge model for air.
   @details This class uses the Morrow-Lowke kinetic scheme for air and the three-group Bourdon model for the RTE equations. 
-  
-  Class options
-  -------------
-
-  By default, the gas is electrically neutral with initial data supplied through an equal mixture of electrons and positive ions. The class supports uniform distributions, seeds, and random distributions of the initial ionization. 
-
-      morrow_lowke.gas_temperature               = 300                   # Gas temperature (K)
-      morrow_lowke.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
-      morrow_lowke.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
-      morrow_lowke.gas_pressure                  = 1.0                   # Gas pressure
-      morrow_lowke.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission
-      morrow_lowke.positive_species_mobility     = 2.E-4                 # Positive species mobility
-      morrow_lowke.negative_species_mobility     = 2.E-4                 # Negative species mobility
-      morrow_lowke.excitation_efficiency         = 0.6                   # Impact excitation efficiency
-      morrow_lowke.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
-      morrow_lowke.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
-      morrow_lowke.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
-      morrow_lowke.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
-      morrow_lowke.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
-      morrow_lowke.dielectric_work_function      = 1.E-6                 # Dielectric work function (ev)
-      morrow_lowke.uniform_density               = 1.E10                 # Initial background ionization
-      morrow_lowke.seed_density                  = 0.E16                 # Initial seed ionization
-      morrow_lowke.seed_radius                   = 1E-3                  # Initial seed radius
-      morrow_lowke.seed_position                 = 0. 0. 0.              # Initial seed position
-      morrow_lowke.noise_amplitude               = 0.0                   # Initial noise amplitude
-      morrow_lowke.noise_octaves                 = 1                     # Initial noise octaves
-      morrow_lowke.noise_persistence             = 0.5                   # Reduction factor between each noise octave
-      morrow_lowke.noise_frequency               = 1.0 1.0 1.0           # Spatial noise frequency
-      morrow_lowke.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
-      morrow_lowke.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
-      morrow_lowke.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
-      morrow_lowke.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
-      morrow_lowke.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
-      morrow_lowke.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
-
 */
 class morrow_lowke : public plasma_kinetics {
 public:
@@ -144,6 +109,18 @@ public:
 					   a_normal,
 					   a_time);
   }
+
+  virtual Vector<Real> compute_cdr_domain_fluxes(const Real&           a_time,
+						 const RealVect&       a_pos,
+						 const int&            a_dir,
+						 const Side::LoHiSide& a_side,
+						 const RealVect&       a_E,
+						 const Vector<Real>&   a_cdr_densities,
+						 const Vector<Real>&   a_cdr_velocities,
+						 const Vector<Real>&   a_cdr_gradients,
+						 const Vector<Real>&   a_rte_fluxes,
+						 const Vector<Real>&   a_extrap_cdr_fluxes) const;
+
 
   /*!
     @brief Compute the isotropic source terms for the RTE
@@ -582,6 +559,11 @@ public:
     @brief Perlin noise function
   */
   RefCountedPtr<perlin_if> m_perlin;
+
+  /*!
+    @brief Switch for BC at wall
+  */
+  Vector<int> m_wallbc;
 
   /*!
     @brief electron index 

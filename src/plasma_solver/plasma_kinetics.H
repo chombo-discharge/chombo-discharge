@@ -148,7 +148,7 @@ public:
     Vector<Real> fluxes(m_num_species, 0.0); 
     const int sgn = sign(a_side);
     for (int i = 0; i < fluxes.size(); i++){
-      fluxes[i] = Max(sgn*a_extrap_cdr_fluxes[i], 0.); // Outflow
+      fluxes[i] = sgn*Max(sgn*a_extrap_cdr_fluxes[i], 0.); // Outflow
     }
     return fluxes;
   }
