@@ -81,7 +81,16 @@ public:
   */
   virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
 
+  /*!
+    @brief Turn on/off subcycling in time
+  */
+  virtual void set_subcycle();
 
+  /*!
+    @brief Set maximum number of photons per pseudophoton
+  */
+  virtual void set_pseudophotons();
+    
 #ifdef CH_USE_HDF5
   /*!
     @brief Write plot file
@@ -96,6 +105,8 @@ public:
 
 protected:
 
+  bool m_subcycle;        // Subcycling or not
+  int  m_max_photons;     // Number of photons per pseudophoton
   int  m_seed;            // RNG seed
   std::mt19937_64* m_rng; // Engine
   std::uniform_real_distribution<Real>* m_udist01; // Uniform real distribuion on [0,1]

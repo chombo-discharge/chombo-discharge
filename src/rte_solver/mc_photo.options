@@ -1,4 +1,6 @@
 # ====================================================================================================
 # MC_PHOTO CLASS OPTIONS
 # ====================================================================================================
-mc_photo.seed = 0 # Seed for RNG
+mc_photo.seed        = 0           # Seed for RNG
+mc_photo.subcycle    = false       # Subcycling in time
+mc_photo.max_photons = 1           # Maximum no. generated in a cell (<= 0 yields physical photons)

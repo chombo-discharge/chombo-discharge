@@ -22,6 +22,8 @@ mc_photo::mc_photo(){
   this->set_verbosity(-1);
   this->set_stationary(false);
   this->set_rng();
+  this->set_subcycle();
+  this->set_pseudophotons();
 }
 
 mc_photo::~mc_photo(){
@@ -38,33 +40,17 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
     MayDay::Abort("mc_photo::advance - only constant box sizes are supported for particle methods");
   }
 
-#if 0 // Debug
-  if(procID() == 0) std::cout << "advancing mc_photo" << std::endl;
-#endif
-
   EBAMRPhotons absorbed_photons;
   m_amr->allocate(absorbed_photons);
 
   // Generate photons
-  this->generate_photons(m_photons, a_source, a_dt);
-
-  const int N = 1;
-  for (int i = 0; i < N; i++){
-    this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt/N);
-  }
-
-  // Deposit absorbed photons onto mesh
+  this->generate_photons(m_photons, a_source, a_dt);                 // Generate
+  this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt);  // Move and absorb
 #if 1 // Actual code
-  this->deposit_photons(a_state, absorbed_photons);
+  this->deposit_photons(a_state, absorbed_photons);                  // Deposit absorbed photons
 #else // Debug
   this->deposit_photons(a_state, m_photons);
 #endif
-
-  data_ops::floor(a_state, 0.0);
-
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    EBLevelDataOps::setCoveredVal(*a_state[lvl], 0.0);
-  }
 
   return true;
 }
@@ -183,8 +169,6 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
     pout() << m_name + "::generate_photons" << endl;
   }
 
-
-
   const RealVect origin  = m_physdom->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
@@ -220,17 +204,25 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
       List<photon> particles;
       for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
-	const IntVect iv = vof.gridIndex();
-	const RealVect pos = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
-	const Real kappa = ebisbox.volFrac(vof);
-	
-	const Real mean = source(iv,0)*kappa*vol*a_dt;
+	const IntVect iv    = vof.gridIndex();
+	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
+	const Real kappa    = ebisbox.volFrac(vof);
+
+	// RNG 
+	const Real mean = source(iv,0)*vol*a_dt;
 	std::poisson_distribution<int> dist(mean);
-	const int num_photons = dist(*m_rng);
-	for (int i = 0; i < num_photons; i++){
-	  const RealVect dir = random_direction();
-	  //	  particles.append(photon(1.0, pos, dir*units::s_c0));
-	  particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos)));
+
+	const int num_phys_photons = dist(*m_rng);
+	if(num_phys_photons > 0){
+	  
+	  const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
+	  const Real weight     = (1.0*num_phys_photons)/num_photons;
+
+	  // Generate computational photons
+	  for (int i = 0; i < num_photons; i++){
+	    const RealVect dir = random_direction();
+	    particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+	  }
 	}
       }
 
@@ -261,6 +253,8 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), type);
     }
   }
+
+  data_ops::floor(a_state, 0.0);
 }
 
 void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){
@@ -320,5 +314,32 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 
     a_absorbed[lvl]->gatherOutcast();
     a_absorbed[lvl]->remapOutcast();
+  }
+}
+
+
+void mc_photo::set_subcycle(){
+  CH_TIME("mc_photo::set_subcycle");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_subcycle" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("mc_photo");
+  pp.get("subcycle", str);
+  m_subcycle = (str == "true") ? true : false;
+}
+
+void mc_photo::set_pseudophotons(){
+  CH_TIME("mc_photo::set_pseudophotons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_pseudophotons" << endl;
+  }
+
+  ParmParse pp("mc_photo");
+  pp.get("max_photons", m_max_photons);
+  
+  if(m_max_photons <= 0){ // = -1 => no restriction
+    m_max_photons = 99999999;
   }
 }
