@@ -124,6 +124,12 @@ protected:
   void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles);
 
   RealVect random_direction();
+
+#if CH_SPACEDIM==2
+  RealVect random_direction2D();
+#elif CH_SPACEDIM==3
+  RealVect random_direction3D();
+#endif
 };
 
 #endif

@@ -12,6 +12,7 @@
 #include <time.h>
 #include <chrono>
 
+#include <EBAlias.H>
 #include <EBLevelDataOps.H>
 #include <BoxIterator.H>
 #include <EBArith.H>
@@ -41,7 +42,7 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   }
 
   EBAMRPhotons absorbed_photons;
-  m_amr->allocate(absorbed_photons);
+  m_amr->allocate(absorbed_photons,0);
 
   // Generate photons
   this->generate_photons(m_photons, a_source, a_dt);                 // Generate
@@ -82,7 +83,7 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_state,  m_phase, ncomp); // This is the deposited 
   m_amr->allocate(m_source, m_phase, ncomp);
   
-  m_amr->allocate(m_photons);
+  m_amr->allocate(m_photons, 0);
   m_amr->allocate(m_pvr, buffer);
 }
   
@@ -143,25 +144,50 @@ int mc_photo::query_ghost() const {
 }
 
 RealVect mc_photo::random_direction(){
-
-  Real u1 = 2.0;
-  Real u2 = 2.0;
-  Real a  = u1*u1 + u2*u2;
-  while(a >= 1.0 || a < 1.E-10){
-    u1 = (*m_udist11)(*m_rng);
-    u2 = (*m_udist11)(*m_rng);
-    a  = u1*u1 + u2*u2;
-  }
+#if CH_SPACEDIM == 2
+  return random_direction2D();
+#else
+  return random_direction3D();
+#endif
+}
 
 #if CH_SPACEDIM == 2
-  RealVect ret = RealVect((u1*u1 - u2*u2), 2*u1*u2)/a;
-#else
-  const Real b = 2*sqrt(1.0 - a);
-  RealVect ret = RealVect(b*u1, b*u2, 1-2*a);
+RealVect mc_photo::random_direction2D(){
+  const Real EPS = 1.E-8;
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = (*m_udist11)(*m_rng);
+    x2 = (*m_udist11)(*m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  //  return -RealVect(BASISV(1));
+
+  return RealVect(x1,x2)/sqrt(r);
+}
 #endif
 
-  return ret;
+#if CH_SPACEDIM==3
+RealVect mc_photo::random_direction3D(){
+  const Real EPS = 1.E-8;
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = (*m_udist11)(*m_rng);
+    x2 = (*m_udist11)(*m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  const Real x = 2*x1*sqrt(1-r);
+  const Real y = 2*x2*sqrt(1-r);
+  const Real z = 1 - 2*r;
+
+  return RealVect(x,y,z);
 }
+#endif
 
 void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt){
   CH_TIME("mc_photo::generate_photons");
@@ -209,7 +235,7 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	const Real kappa    = ebisbox.volFrac(vof);
 
 	// RNG 
-	const Real mean = source(iv,0)*vol*a_dt;
+	const Real mean = source(iv,0)*kappa*vol*a_dt;
 	std::poisson_distribution<int> dist(mean);
 
 	const int num_phys_photons = dist(*m_rng);
@@ -238,6 +264,9 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     pout() << m_name + "::generate_photons" << endl;
   }
 
+  EBAMRPhotons schme;
+  m_amr->allocate(schme, 0);
+
   const RealVect origin  = m_physdom->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
@@ -246,15 +275,31 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& dom     = m_amr->get_domains()[lvl];
 
+
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       MeshInterp interp(box, dx*RealVect::Unit, origin);
       InterpType type = InterpType::CIC;
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), type);
     }
+
+    Copier m_reverseCopier;
+    m_reverseCopier.define(m_amr->get_grids()[lvl], 
+			   m_amr->get_grids()[lvl], 
+			   m_amr->get_domains()[lvl],
+			   2*IntVect::Unit, 
+			   true);
+    m_reverseCopier.reverse();
+    LDaddOp<FArrayBox> addOp;
+    LevelData<FArrayBox> aliasFAB;
+    aliasEB(aliasFAB, *a_state[lvl]);
+    aliasFAB.exchange(Interval(0,0), m_reverseCopier, addOp);
+    //    (*a_state[lvl]).getFArrayBox().exchange(Interval(0,0), m_reverseCopier, addOp);
   }
 
-  data_ops::floor(a_state, 0.0);
+
+
+  //  data_ops::floor(a_state, 0.0);
 }
 
 void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){

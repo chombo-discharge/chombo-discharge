@@ -66,7 +66,7 @@ public:
   /*!
     @brief Template class for generic allocation of particles
   */
-  template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
+  template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const int a_ghosts);
 
     /*!
     @brief Alias an entire hierarchy of data. 

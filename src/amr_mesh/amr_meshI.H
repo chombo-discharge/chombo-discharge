@@ -42,7 +42,7 @@ template<typename T> void amr_mesh::alias(Vector<T*>& a_alias, const Vector<RefC
   }
 }
 
-template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles){
+template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const int a_ghost){
   CH_TIME("amr_mesh::allocate(AMR ParticleData)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(AMR ParticleData)" << endl;
@@ -55,9 +55,17 @@ template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
   a_particles.resize(1 + m_finest_level);
 
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(m_grids[lvl],
-									    m_domains[lvl],
-									    m_blocking_factor,
+    BoxLayout grids = BoxLayout(m_grids[lvl]);
+    grids.grow(a_ghost);
+    //    grids &= m_domains[lvl];
+
+    ProblemDomain domain = m_domains[lvl];
+    domain.grow(a_ghost);
+
+    int blocking_factor = m_blocking_factor;
+    a_particles[lvl] = RefCountedPtr<ParticleData<T> > (new ParticleData<T>(grids,
+									    domain,
+									    blocking_factor,
 									    m_dx[lvl]*RealVect::Unit,
 									    m_physdom->get_prob_lo()));
   }
