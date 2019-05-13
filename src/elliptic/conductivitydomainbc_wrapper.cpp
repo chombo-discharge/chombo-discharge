@@ -29,6 +29,10 @@ void conductivitydomainbc_wrapper::set_potentials(const Vector<RefCountedPtr<Bas
   m_potentials = a_potentials;
 }
 
+void conductivitydomainbc_wrapper::set_robin_coefs(const Vector<RefCountedPtr<robin_coef> >& a_robinco){
+  m_robinco = a_robinco;
+}
+
 void conductivitydomainbc_wrapper::set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc){
   for (int i = 0; i < a_wallbc.size(); i++){
     const int dir             = a_wallbc[i]->direction();
@@ -49,9 +53,16 @@ void conductivitydomainbc_wrapper::set_wallbc(const Vector<RefCountedPtr<wall_bc
       m_bc[idx]->setValue(a_wallbc[i]->get_value());
     }
     else if(a_wallbc[i]->which_bc() == wallbc::robin){
-      // For the Poisson equation, the appropriate coefficients are (1,-1,0.0) for the robin BC class (see robincondu*.H)
+      // For the Poisson equation, the appropriate coefficients are (1,-1,0.0) for the robin BC class (see robincondu*.H).
+      // Otherwise, use externally supplied values
       robinconductivitydomainbc* robinbc = new robinconductivitydomainbc();
-      robinbc->set_coefs(1.0, -1.0, 0.0);
+      if(m_robinco[i] == NULL){
+	robinbc->set_coefs(1.0, -1.0, 0.0);
+      }
+      else{
+	robinbc->set_coefs(m_robinco[i]);
+      }
+	    
       m_bc[idx] = RefCountedPtr<robinconductivitydomainbc> (robinbc);
       m_bc[idx]->setValue(0.0);
     }

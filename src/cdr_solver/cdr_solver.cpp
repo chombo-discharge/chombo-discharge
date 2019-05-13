@@ -456,6 +456,7 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	      flx(face, comp) = 0.0;
 	    }
 	    else if(m_dombc == cdr_bc::outflow){
+
 	      flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
 	    }
 	    else if(m_dombc == cdr_bc::extrap){

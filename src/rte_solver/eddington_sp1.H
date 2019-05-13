@@ -13,6 +13,8 @@
 #include "larsen_coefs.H"
 #include "robinconductivityebbcfactory.H"
 #include "robinconductivitydomainbcfactory.H"
+#include "conductivitydomainbc_wrapper_factory.H"
+#include "wall_bc.H"
 
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
@@ -48,6 +50,11 @@ public:
     @brief Allocate internal storage
   */
   virtual void allocate_internals();
+
+  /*!
+    @brief Allocate wall bc
+  */
+  virtual void allocate_wall_bc();
   
   /*!
     @brief Cache state
@@ -93,6 +100,11 @@ public:
     @brief Set number of smoothing for the bottom solver (simplified solver only)
   */
   virtual void set_botsolver_smooth(const int a_smooth);
+
+  /*!
+    @brief Set boundary conditions at wall
+  */
+  virtual void set_wall_bc();
 
   /*!
     @brief Use tga for temporal integration
@@ -282,6 +294,11 @@ protected:
   RefCountedPtr<robinconductivitydomainbcfactory> m_domfact;
 
   /*!
+    @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
+  */
+  Vector<RefCountedPtr<wall_bc> > m_wallbc;
+
+  /*!
     @brief multi-fluid simple solver
   */
   EBSimpleSolver m_simple_solver;
@@ -345,6 +362,16 @@ protected:
     @brief Set the GMG solver
   */
   virtual void setup_multigrid();
+
+  /*!
+    @brief Set Neumann wall boundary condition
+  */
+  virtual void set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+
+  /*!
+    @brief Set Robin wall BC
+  */
+  virtual void set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
   /*!
     @brief Set up the TGA solver

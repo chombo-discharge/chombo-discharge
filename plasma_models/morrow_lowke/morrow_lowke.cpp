@@ -19,7 +19,6 @@ morrow_lowke::morrow_lowke(){
   m_num_species = 3;
   m_num_photons = 3;
 
-
   m_species.resize(m_num_species);
   m_photons.resize(m_num_photons);
 
@@ -38,6 +37,7 @@ morrow_lowke::morrow_lowke(){
   m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new morrow_lowke::photon_three());
 
 
+
   // Default parameters. All of these can be changed through the command line or an input script.
   m_temp      = 300.;      // Gas temperature
   m_fracN2    = 0.8;       // Gas composition
@@ -51,7 +51,6 @@ morrow_lowke::morrow_lowke(){
   m_townsend2_dielectric = 1.E-4; // Second Townsend coefficient on dielectric surfaces
   m_electrode_yield      = 1.E-6; // Photo-emission yield on conductor surfaces
   m_dielectric_yield     = 1.E-6; // Photo-emission yield on dielectric surfaces
-  m_dielectric_work      = 3.0;   // Dielectric work function (in eV)
 
   m_noise_amp     = 0.0;
   m_noise_freq    = 0.0*RealVect::Unit;
@@ -75,7 +74,6 @@ morrow_lowke::morrow_lowke(){
     pp.query("electrode_quantum_efficiency",  m_electrode_yield);
     pp.query("dielectric_townsend2",          m_townsend2_dielectric);
     pp.query("dielectric_quantum_efficiency", m_dielectric_yield);
-    pp.query("dielectric_work_function",      m_dielectric_work);
   }
 
   { // Noise parameters for initial dat
@@ -89,6 +87,52 @@ morrow_lowke::morrow_lowke(){
       m_noise_freq = RealVect(D_DECL(freq[0], freq[1], freq[2]));
     }
   }
+   
+  { // Boundary condition at wall. 0 = extrap, 1 = wall
+    m_wallbc.resize(2*SpaceDim, 0); 
+    ParmParse pp("morrow_lowke");
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	const Side::LoHiSide side = sit();
+	
+	std::string str_dir;
+	if(dir == 0){
+	  str_dir = "x";
+	}
+	else if(dir == 1){
+	  str_dir = "y";
+	}
+	else if(dir == 2){
+	  str_dir = "z";
+	}
+
+
+	if(side == Side::Lo){
+	  std::string type;
+	  std::string bc_string = "domain_bc_" + str_dir + "_lo";
+	  if(pp.contains(bc_string.c_str())){
+	    pp.get(bc_string.c_str(), type);
+	    const int idx = 2*dir;
+	    if(type == "wall"){
+	      m_wallbc[idx] = 1;
+	    }
+	  }
+	}
+	else if(side == Side::Hi){
+	  std::string type;
+	  std::string bc_string = "domain_bc_" + str_dir + "_hi";
+	  if(pp.contains(bc_string.c_str())){
+	    pp.get(bc_string.c_str(), type);
+	    const int idx = 2*dir + 1;
+	    if(type == "wall"){
+	      m_wallbc[idx] = 1;
+	    }
+	  }
+	}
+      }
+    }
+  }
+
 
   // Initiate noise function and give this to electron and positive species
   m_perlin = RefCountedPtr<perlin_if> (new perlin_if(1.0, m_noise_freq, m_noise_persist, m_noise_octaves));
@@ -355,18 +399,6 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
   }
 
 
-#if 0 // This currently does not work.. why?
-  // Also add in Schottky emission
-  if(PolyGeom::dot(a_E, a_normal) <= 0.){
-    const Real W  = m_dielectric_work*units::s_eV;
-    const Real dW = sqrt(units::s_Qe*units::s_Qe*units::s_Qe*a_E.vectorLength()/(4.0*units::s_pi*units::s_eps0));
-    const Real T  = m_temp;
-    const Real A  = 1200000;
-    fluxes[m_nelec_idx] += -A*T*T*exp(-(W-dW)/(units::s_kb*T))/units::s_Qe;
-  }
-#endif
-
-
   return fluxes;
 }
 
@@ -451,6 +483,47 @@ Vector<Real> morrow_lowke::compute_anode_flux(const Vector<Real>& a_extrapolated
   }
   fluxes[m_nplus_idx] = a_extrapolated_fluxes[m_nplus_idx];
 
+  return fluxes;
+}
+
+Vector<Real> morrow_lowke::compute_cdr_domain_fluxes(const Real&           a_time,
+						     const RealVect&       a_pos,
+						     const int&            a_dir,
+						     const Side::LoHiSide& a_side,
+						     const RealVect&       a_E,
+						     const Vector<Real>&   a_cdr_densities,
+						     const Vector<Real>&   a_cdr_velocities,
+						     const Vector<Real>&   a_cdr_gradients,
+						     const Vector<Real>&   a_rte_fluxes,
+						     const Vector<Real>&   a_extrap_cdr_fluxes) const{
+  Vector<Real> fluxes(m_num_species, 0.0); 
+
+  int idx;
+  int sgn;
+  if(a_side == Side::Lo){
+    sgn = -1;
+    idx = 2*a_dir;
+  }
+  else{
+    sgn = 1;
+    idx = 2*a_dir + 1;
+  }
+
+  if(m_wallbc[idx] == 0){ // Inflow/outflow
+    for (int i = 0; i < fluxes.size(); i++){
+      fluxes[i] = sgn*Max(0.0, sgn*a_extrap_cdr_fluxes[i]);
+    }
+  }
+  else if(m_wallbc[idx] == 1){ // wall
+    for (int i = 0; i < fluxes.size(); i++){
+      fluxes[i] = 0.0;
+    }
+  }
+  else{
+    MayDay::Abort("morrow_lowke::compute_cdr_domain_fluxes - uknown domain bc requested");
+  }
+
+  
   return fluxes;
 }
 

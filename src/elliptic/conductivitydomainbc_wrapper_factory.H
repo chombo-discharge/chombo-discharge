@@ -9,6 +9,7 @@
 #define _CONDUCTIVITYDOMAINBC_WRAPPER_FACTORY_
 
 #include "conductivitydomainbc_wrapper.H"
+#include "robin_coef.H"
 
 #include <ConductivityBaseDomainBC.H>
 
@@ -30,15 +31,9 @@ public:
   */
   virtual ~conductivitydomainbc_wrapper_factory();
 
-  /*!
-    @brief Set wall bc
-  */
   virtual void set_wallbc(const Vector<RefCountedPtr<wall_bc> >& a_wallbc);
-
-  /*!
-    @brief Set potentials
-  */
   virtual void set_potentials(const Vector<RefCountedPtr<BaseBCFuncEval> >& a_potentials);
+  virtual void set_robin_coefs(const Vector<RefCountedPtr<robin_coef> >& a_robinco);
 
   /*!
     @brief Factory method
@@ -49,20 +44,11 @@ public:
   
 protected:
 
-  /*!
-    @brief Make sure BCs are set
-  */
   bool m_hasbc;
 
-  /*!
-    @brief Wall boundary conditions
-  */
-  Vector<RefCountedPtr<wall_bc> > m_wallbc;
-
-  /*!
-    @brief Potential function
-  */
-  Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;
+  Vector<RefCountedPtr<wall_bc> >        m_wallbc;      // BC identifier
+  Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;  // Wall potential
+  Vector<RefCountedPtr<robin_coef> >     m_robinco;     // Robin coefficients for Robin
 
 };
 #endif
