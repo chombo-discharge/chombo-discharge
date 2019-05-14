@@ -123,6 +123,51 @@ air7::air7(){
     }
   }
 
+    { // Boundary condition at wall. 0 = extrap, 1 = wall
+    m_wallbc.resize(2*SpaceDim, 0); 
+    ParmParse pp("air7");
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	const Side::LoHiSide side = sit();
+	
+	std::string str_dir;
+	if(dir == 0){
+	  str_dir = "x";
+	}
+	else if(dir == 1){
+	  str_dir = "y";
+	}
+	else if(dir == 2){
+	  str_dir = "z";
+	}
+
+
+	if(side == Side::Lo){
+	  std::string type;
+	  std::string bc_string = "domain_bc_" + str_dir + "_lo";
+	  if(pp.contains(bc_string.c_str())){
+	    pp.get(bc_string.c_str(), type);
+	    const int idx = 2*dir;
+	    if(type == "wall"){
+	      m_wallbc[idx] = 1;
+	    }
+	  }
+	}
+	else if(side == Side::Hi){
+	  std::string type;
+	  std::string bc_string = "domain_bc_" + str_dir + "_hi";
+	  if(pp.contains(bc_string.c_str())){
+	    pp.get(bc_string.c_str(), type);
+	    const int idx = 2*dir + 1;
+	    if(type == "wall"){
+	      m_wallbc[idx] = 1;
+	    }
+	  }
+	}
+      }
+    }
+  }
+
   // Instantiate cdr species
   m_species.resize(m_num_species);
   m_electron_idx = 0;
@@ -523,6 +568,47 @@ Vector<Real> air7::compute_cdr_dielectric_fluxes(const Real&         a_time,
 
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
+}
+
+Vector<Real> air7::compute_cdr_domain_fluxes(const Real&           a_time,
+					     const RealVect&       a_pos,
+					     const int&            a_dir,
+					     const Side::LoHiSide& a_side,
+					     const RealVect&       a_E,
+					     const Vector<Real>&   a_cdr_densities,
+					     const Vector<Real>&   a_cdr_velocities,
+					     const Vector<Real>&   a_cdr_gradients,
+					     const Vector<Real>&   a_rte_fluxes,
+					     const Vector<Real>&   a_extrap_cdr_fluxes) const{
+  Vector<Real> fluxes(m_num_species, 0.0); 
+
+  int idx;
+  int sgn;
+  if(a_side == Side::Lo){
+    sgn = -1;
+    idx = 2*a_dir;
+  }
+  else{
+    sgn = 1;
+    idx = 2*a_dir + 1;
+  }
+
+  if(m_wallbc[idx] == 0){ // Inflow/outflow
+    for (int i = 0; i < fluxes.size(); i++){
+      fluxes[i] = sgn*Max(0.0, sgn*a_extrap_cdr_fluxes[i]);
+    }
+  }
+  else if(m_wallbc[idx] == 1){ // wall
+    for (int i = 0; i < fluxes.size(); i++){
+      fluxes[i] = 0.0;
+    }
+  }
+  else{
+    MayDay::Abort("air7::compute_cdr_domain_fluxes - uknown domain bc requested");
+  }
+
+  
+  return fluxes;
 }
 
 Vector<Real> air7::compute_rte_source_terms(const Real&         a_time,

@@ -90,6 +90,16 @@ public:
     @brief Set maximum number of photons per pseudophoton
   */
   virtual void set_pseudophotons();
+
+  /*!
+    @brief Set largest possible step that samples the grid cells
+  */
+  virtual void set_max_cell_step();
+
+  /*!
+    @brief Set largest possible step that samples the absorption length
+  */
+  virtual void set_max_kappa_step();
     
 #ifdef CH_USE_HDF5
   /*!
@@ -112,6 +122,9 @@ protected:
   std::uniform_real_distribution<Real>* m_udist01; // Uniform real distribuion on [0,1]
   std::uniform_real_distribution<Real>* m_udist11; // Uniform real distribuion on [-1,1]
 
+  Real m_max_cell_step;
+  Real m_max_kappa_step;
+
   bool draw_random;
 
   EBAMRPhotons m_photons; // Particles
@@ -121,6 +134,12 @@ protected:
   
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
+  void move_and_absorb_nosubcycle(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
+  void move_and_absorb_subcycle(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
+  void move_and_absorb_nosubcycle_level(ParticleData<photon>& a_absorbed,
+					ParticleData<photon>& a_original,
+					const int             a_lvl,
+					const Real            a_dt);
   void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles);
 
   RealVect random_direction();

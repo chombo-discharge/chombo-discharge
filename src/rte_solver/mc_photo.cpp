@@ -25,6 +25,8 @@ mc_photo::mc_photo(){
   this->set_rng();
   this->set_subcycle();
   this->set_pseudophotons();
+  this->set_max_cell_step();
+  this->set_max_kappa_step();
 }
 
 mc_photo::~mc_photo(){
@@ -45,10 +47,23 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   m_amr->allocate(absorbed_photons,0);
 
   // Generate photons
-  this->generate_photons(m_photons, a_source, a_dt);                 // Generate
-  this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt);  // Move and absorb
+  this->generate_photons(m_photons, a_source, a_dt);
+
+  // Move and absorb photons
 #if 1 // Actual code
-  this->deposit_photons(a_state, absorbed_photons);                  // Deposit absorbed photons
+  if(m_subcycle){
+    this->move_and_absorb_subcycle(absorbed_photons, m_photons, a_dt);  
+  }
+  else{
+    this->move_and_absorb_nosubcycle(absorbed_photons, m_photons, a_dt);
+  }
+#else // Fallback code
+  this->move_and_absorb(absorbed_photons, m_photons, a_dt);  
+#endif
+  
+  // Deposit absorbed photons on mesh
+#if 1// Actual code
+  this->deposit_photons(a_state, absorbed_photons);
 #else // Debug
   this->deposit_photons(a_state, m_photons);
 #endif
@@ -376,5 +391,132 @@ void mc_photo::set_pseudophotons(){
   
   if(m_max_photons <= 0){ // = -1 => no restriction
     m_max_photons = 99999999;
+  }
+}
+
+void mc_photo::set_max_cell_step(){
+  CH_TIME("mc_photo::set_max_cell_step");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_max_cell-step" << endl;
+  }
+
+  m_max_cell_step = 0.5;
+  
+  ParmParse pp("mc_photo");
+  pp.get("max_cell_step", m_max_cell_step);
+  
+}
+
+void mc_photo::set_max_kappa_step(){
+  CH_TIME("mc_photo::set_max_kappa_step");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_max_kappa_step" << endl;
+  }
+
+  m_max_cell_step = 0.5;
+  
+  ParmParse pp("mc_photo");
+  pp.get("max_kappa_step", m_max_kappa_step);
+}
+
+void mc_photo::move_and_absorb_subcycle(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){
+  CH_TIME("mc_photo::move_and_absorb_subcycle");
+  if(m_verbosity > 5){
+    pout() << m_name + "::move_and_absorb_subcycle" << endl;
+  }
+
+  MayDay::Abort("mc_photo::move_and_absorb_subcycle - not implemented");
+}
+
+void mc_photo::move_and_absorb_nosubcycle(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){
+  CH_TIME("mc_photo::move_and_absorb_nosubcycle");
+  if(m_verbosity > 5){
+    pout() << m_name + "::move_and_absorb_nosubcycle" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  // Compute the finest dt
+  const Real finest_dx = m_amr->get_dx()[finest_level];
+  const Real kappa_inv = 1.0/(m_photon_group->get_kappa(RealVect::Zero));
+  const Real dtau      = Min(m_max_cell_step*finest_dx, m_max_kappa_step*kappa_inv)/(units::s_c0);
+  const int nsteps     = ceil(a_dt/dtau);
+  const Real dtstep    = a_dt/nsteps;
+
+  for (int istep = 0; istep < nsteps; istep++){
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const Real dx      = m_amr->get_dx()[lvl];
+
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < finest_level;
+      
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	List<photon>& absorbed  = (*a_absorbed[lvl])[dit()].listItems();
+	List<photon>& particles = (*a_original[lvl])[dit()].listItems();
+	
+	for (ListIterator<photon> lit(particles); lit.ok(); ++lit){
+	  photon& particle = lit();
+	  
+	  const RealVect vel     = particle.velocity();
+	  const RealVect old_pos = particle.position();
+	  const Real kappa       = m_photon_group->get_kappa(old_pos);
+	  
+	  // We need to determine the maximum allowed step that this photon can move. It is either one grid cell or 0.1*kappa
+	  //	  const Real kappa  = 0.5*(m_photon_group->get_kappa(old_pos) + m_photon_group->get_kappa(new_pos));
+	  const RealVect dx = vel*dtstep;
+	  const Real p      = dx.vectorLength()*kappa;
+	  const Real r      = (*m_udist01)(*m_rng);
+	  const bool absorb = r < p;
+	    
+	  if(absorb) {
+	    const Real r = (*m_udist01)(*m_rng);
+	    particle.position() += r*dx;
+	    absorbed.transfer(lit);
+	    break;
+	  }
+	  else{
+	    particle.position() += dx;
+	  }
+	}
+      }
+
+      a_absorbed[lvl]->gatherOutcast();
+      a_absorbed[lvl]->remapOutcast();
+
+      // Rebin this level
+      a_original[lvl]->gatherOutcast();
+      a_original[lvl]->remapOutcast();
+
+      // Gather particles that have moved from lvl-1 to lvl
+#if 0
+      if(has_coar){
+	const int ref_ratio = m_amr->get_ref_rat()[lvl-1];
+	collectValidParticles(a_original[lvl]->outcast(),
+			      *a_original[lvl-1],
+			      m_pvr[lvl]->mask(),
+			      dx*RealVect::Unit,
+			      ref_ratio,
+			      false,
+			      origin);
+	a_original[lvl]->remapOutcast();
+	
+      }
+      if(has_fine){
+
+      }
+#endif
+    }
+  }
+}
+
+void mc_photo::move_and_absorb_nosubcycle_level(ParticleData<photon>& a_absorbed,
+						ParticleData<photon>& a_original,
+						const int             a_lvl,
+						const Real            a_dt){
+  CH_TIME("mc_photo::move_and_absorb_nosubcycle");
+  if(m_verbosity > 5){
+    pout() << m_name + "::move_and_absorb_nosubcycle" << endl;
   }
 }
