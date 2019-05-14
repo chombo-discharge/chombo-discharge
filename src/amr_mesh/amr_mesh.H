@@ -573,6 +573,16 @@ public:
   */
   virtual irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(phase::which_phase a_phase);
 
+  /*!
+    @brief Get copier
+  */
+  virtual Vector<RefCountedPtr<Copier> >& get_copier(phase::which_phase a_phase);
+
+  /*!
+    @brief Get reverse copier
+  */
+  virtual Vector<RefCountedPtr<Copier> >& get_reverse_copier(phase::which_phase a_phase);
+
   
 protected:
 
@@ -716,8 +726,6 @@ protected:
   */
   Vector<DisjointBoxLayout> m_grids;
 
-
-
   /*!
     @brief Problem domains
   */
@@ -743,10 +751,20 @@ protected:
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
 
-    /*!
+  /*!
     @brief EBIS layout. One for each phase.
   */
   Vector<Vector<EBISLayout> > m_ebisl;
+
+  /*!
+    @brief Copier
+  */
+  Vector<Vector<RefCountedPtr<Copier> > > m_copier;
+
+  /*!
+    @brief Reverse copier
+  */
+  Vector<Vector<RefCountedPtr<Copier> > > m_reverse_copier;
 
   /*!
     @brief ebcoarseaverage. One for each phase. 
@@ -872,6 +890,11 @@ protected:
     @brief Define irregular stencils
   */
   virtual void define_irreg_sten();
+
+  /*!
+    @brief Define copiers
+  */
+  virtual void define_copier();
 };
 
 #include "amr_meshI.H"

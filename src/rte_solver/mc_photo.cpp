@@ -283,23 +283,13 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), type);
     }
 
-    Copier m_reverseCopier;
-    m_reverseCopier.define(m_amr->get_grids()[lvl], 
-			   m_amr->get_grids()[lvl], 
-			   m_amr->get_domains()[lvl],
-			   2*IntVect::Unit, 
-			   true);
-    m_reverseCopier.reverse();
+    // Add in the contribution from the ghost cells
+    const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
-    aliasFAB.exchange(Interval(0,0), m_reverseCopier, addOp);
-    //    (*a_state[lvl]).getFArrayBox().exchange(Interval(0,0), m_reverseCopier, addOp);
+    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
   }
-
-
-
-  //  data_ops::floor(a_state, 0.0);
 }
 
 void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){
