@@ -6,3 +6,7 @@ mc_photo.subcycle       = false       # Subcycling in time
 mc_photo.max_photons    = 1           # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.max_cell_step  = 0.5         # Sampling for cell
 mc_photo.max_kappa_step = 0.5         # Sampling for kappa
+mc_photo.deposition     = cic         # 'ngp' = nearest grid point
+                                      # 'cic' = cloud-in-cell
+                                      # 'tsc' = triangle-shaped-cloud
+                                      # 'w4'  = 3rd order interpolation

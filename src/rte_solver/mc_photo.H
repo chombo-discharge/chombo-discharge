@@ -82,6 +82,11 @@ public:
   virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
 
   /*!
+    @brief 
+  */
+  virtual void set_deposition_type();
+
+  /*!
     @brief Turn on/off subcycling in time
   */
   virtual void set_subcycle();
@@ -122,6 +127,8 @@ protected:
   std::uniform_real_distribution<Real>* m_udist01; // Uniform real distribuion on [0,1]
   std::uniform_real_distribution<Real>* m_udist11; // Uniform real distribuion on [-1,1]
 
+  InterpType m_deposition;
+  
   Real m_max_cell_step;
   Real m_max_kappa_step;
 
