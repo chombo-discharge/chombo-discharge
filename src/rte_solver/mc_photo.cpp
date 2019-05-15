@@ -228,7 +228,10 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 	const Real kappa    = ebisbox.volFrac(vof);
 
-	// RNG 
+	// RNG
+#if 1
+	MayDay::Abort("mc_photo::generate_photons - swap this out with a exponential distribution above some mean");
+#endif
 	const Real mean = source(iv,0)*kappa*vol*a_dt;
 	std::poisson_distribution<int> dist(mean);
 
@@ -352,6 +355,9 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	std::exponential_distribution<Real> dist(m_photon_group->get_kappa(pos));
 	const RealVect absorbed_pos = dist(*m_rng)*n;
 
+#if 1
+	MayDay::Abort("mc_photo::move_and_absorb - please, please use the Brent root finder");
+#endif
 	// Check if we should absorb
 	bool absorb = false;
 	const int nsteps = 100;
