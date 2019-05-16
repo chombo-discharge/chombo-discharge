@@ -256,7 +256,7 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 	const Real kappa    = ebisbox.volFrac(vof);
 
-	const Real mean = source(iv,0)*vol*a_dt*kappa;
+	const Real mean = source(iv,0)*vol*a_dt;//*kappa;
 	const int num_phys_photons = random_poisson(mean);
 	if(num_phys_photons > 0){
 
@@ -548,7 +548,7 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
       List<photon>& coar_outcast = a_photons[lvl-1]->outcast();
       coar_outcast.catenate(this_outcast);
       this_outcast.clear();
-      
+
       a_photons[lvl]->remapOutcast();
       a_photons[lvl-1]->remapOutcast();
     }
