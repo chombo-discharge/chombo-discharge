@@ -294,7 +294,7 @@ protected:
   RefCountedPtr<robinconductivitydomainbcfactory> m_domfact;
 
   /*!
-    @brief Wall boundary conditions for Poisson equation. Must be set by the plasma engine. 
+    @brief Wall boundary conditions
   */
   Vector<RefCountedPtr<wall_bc> > m_wallbc;
 

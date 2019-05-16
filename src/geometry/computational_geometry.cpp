@@ -45,6 +45,14 @@ const Vector<electrode>& computational_geometry::get_electrodes() const  {
   return m_electrodes;
 }
 
+const RefCountedPtr<BaseIF>& computational_geometry::get_gas_if() const{
+  return m_gas_if;
+}
+
+const RefCountedPtr<BaseIF>& computational_geometry::get_sol_if() const{
+  return m_sol_if;
+}
+
 const Real& computational_geometry::get_eps0() const {
   return m_eps0;
 }
@@ -130,11 +138,12 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
     a_geoserver = new AllRegularService();
   }
   else {
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
+    //    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
+    m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
 #if 0
     a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
 #endif
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit, s_thresh));
+    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
   }
 }
 
@@ -166,11 +175,11 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     parts.push_back(&(*diel_compif)); // Parts for intersection
     parts.push_back(&(*elec_baseif)); // Parts for intersection
     
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
+    m_sol_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
 #if 0
     a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
 #endif
     
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*baseif, 0, a_dx*RealVect::Unit, s_thresh));
+    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_sol_if, 0, a_dx*RealVect::Unit, s_thresh));
   }
 }

@@ -8,6 +8,7 @@
 #include "mc_photo.H"
 #include "data_ops.H"
 #include "units.H"
+#include "poly.H"
 
 #include <time.h>
 #include <chrono>
@@ -25,6 +26,8 @@ mc_photo::mc_photo(){
   this->set_rng();
   this->set_pseudophotons();
   this->set_deposition_type();
+  this->set_bisect_step();
+  this->set_domain_bc();
 }
 
 mc_photo::~mc_photo(){
@@ -47,8 +50,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   // Generate photons
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
+  this->remap_photons(m_photons);                                   // Remap photons
+  this->remap_photons(absorbed_photons);                            // Remap photons
   this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
-
+  
   return true;
 }
 
@@ -61,6 +66,7 @@ void mc_photo::set_rng(){
   // Seed the RNG
   ParmParse pp("mc_photo");
   pp.get("seed", m_seed);
+  pp.get("poiss_exp_swap", m_poiss_exp_swap);
   if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
   m_rng = new std::mt19937_64(m_seed);
 
@@ -137,6 +143,28 @@ void mc_photo::write_plot_file(){
 
 int mc_photo::query_ghost() const {
   return 3;
+}
+
+int mc_photo::random_poisson(const Real& a_mean){
+  if(a_mean < m_poiss_exp_swap){
+    std::poisson_distribution<int> pdist(a_mean);
+    return pdist(*m_rng);
+  }
+  else {
+    std::normal_distribution<Real> ndist(a_mean, sqrt(a_mean));
+    return (int) round(ndist(*m_rng));
+  }
+}
+
+int mc_photo::domainbc_map(const int a_dir, const Side::LoHiSide a_side) {
+  const int iside = (a_side == Side::Lo) ? 0 : 1;
+
+  return 2*a_dir + iside;
+}
+
+Real mc_photo::random_exponential(const Real a_mean){
+  std::exponential_distribution<Real> dist(a_mean);
+  return dist(*m_rng);
 }
 
 RealVect mc_photo::random_direction(){
@@ -228,14 +256,8 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 	const Real kappa    = ebisbox.volFrac(vof);
 
-	// RNG
-#if 1
-	MayDay::Abort("mc_photo::generate_photons - swap this out with a exponential distribution above some mean");
-#endif
-	const Real mean = source(iv,0)*kappa*vol*a_dt;
-	std::poisson_distribution<int> dist(mean);
-
-	const int num_phys_photons = dist(*m_rng);
+	const Real mean = source(iv,0)*vol*a_dt*kappa;
+	const int num_phys_photons = random_poisson(mean);
 	if(num_phys_photons > 0){
 
 	  const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
@@ -277,11 +299,13 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     }
 
     // Add in the contribution from the ghost cells
+#if 0 // Actual code
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
     aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
+#endif
   }
 }
 
@@ -326,6 +350,61 @@ void mc_photo::set_pseudophotons(){
   }
 }
 
+void mc_photo::set_domain_bc(){
+  CH_TIME("mc_photo::set_domain_bc");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_domain_bc" << endl;
+  }
+
+  m_domainbc.resize(2*SpaceDim);
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Side::LoHiSide side = sit();
+      const int idx = domainbc_map(dir, side);
+
+      ParmParse pp("mc_photo");
+      std::string str_dir;
+      if(dir == 0){
+	str_dir = "x";
+      }
+      else if(dir == 1){
+	str_dir = "y";
+      }
+      else if(dir == 2){
+	str_dir = "z";
+      }
+
+      std::string sidestr = (side == Side::Lo) ? "_low" : "_high";
+      std::string bc_string = "bc_" + str_dir + sidestr;
+      std::string type;
+      pp.get(bc_string.c_str(), type);
+      if(type == "outflow"){
+	m_domainbc[idx] = wallbc::outflow;
+      }
+      else if(type == "symmetry"){
+	m_domainbc[idx] = wallbc::symmetry;
+      }
+      else if(type == "wall"){
+	m_domainbc[idx] = wallbc::wall;
+      }
+      else {
+	std::string error = "mc_photo::set_domain_bc - unsupported boundary condition requested: " + bc_string;
+	MayDay::Abort(error.c_str());
+      }
+    }
+  }
+}
+
+void mc_photo::set_bisect_step(){
+  CH_TIME("mc_photo::set_bisect_step");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_bisect_step" << endl;
+  }
+
+  ParmParse pp("mc_photo");
+  pp.get("bisect_step", m_bisect_step);
+}
+
 void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){
   CH_TIME("mc_photo::move_and_absorb_photons");
   if(m_verbosity > 5){
@@ -334,7 +413,7 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_physdom->get_prob_lo();
-
+  const RefCountedPtr<BaseIF>& impfunc = m_compgeom->get_gas_if();
 
   // Advance over levels
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -347,42 +426,134 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
       for (ListIterator<photon> lit(particles); lit.ok(); ++lit){
 	photon& particle = lit();
 
-	// Position and direction
 	RealVect& pos = particle.position();
 	const RealVect n = particle.velocity()/units::s_c0;
-	
-	// Draw the absorption position for this photon
-	std::exponential_distribution<Real> dist(m_photon_group->get_kappa(pos));
-	const RealVect absorbed_pos = dist(*m_rng)*n;
+	const RealVect absorbed_pos = pos + n*random_exponential(particle.kappa());
 
-#if 1
-	MayDay::Abort("mc_photo::move_and_absorb - please, please use the Brent root finder");
-#endif
-	// Check if we should absorb
-	bool absorb = false;
-	const int nsteps = 100;
-	const RealVect dx    = absorbed_pos/nsteps;
-	for (int istep = 0; istep < nsteps; istep++){
-	  pos += dx;
+	// Check if absorbed_pos - pos is smaller than distance to any object
+	const Real dist = impfunc->value(pos);
+	const Real len  = (absorbed_pos - pos).vectorLength();
 
-	  const Vector<dielectric>& dielectrics = m_compgeom->get_dielectrics();
-	  const RefCountedPtr<BaseIF>& impfunc = dielectrics[0].get_function();
-	  absorb = impfunc->value(pos) > 0.0;
+	if(dist > len){ // Skip intersection test
+	  pos = absorbed_pos;
+	}
+	else{// Bisect traveled path to find intersected position
+	  const int nsteps  = ceil(len/m_bisect_step);
+	  const RealVect dx = (absorbed_pos - pos)/nsteps;
 
-	  if(absorb) {
-	    const Real r = (*m_udist01)(*m_rng);
-	    particle.position() += r*dx;
-	    absorbed.transfer(lit);
-	    break;
+	  // Check each interval
+	  bool absorb = false;
+	  for (int istep = 0; istep < nsteps; istep++){
+	    const Real fa = impfunc->value(pos);
+	    const Real fb = impfunc->value(pos+dx);
+	    const bool absorb = fa*fb <= 0.0;
+
+	    if(absorb){ 
+	      // We happen to know that f(pos+dx) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
+	      // where the absorption happens. For that we use a Brent root finder on the interval [pos, pos+dx].
+	      const RealVect xcol = poly::brent_root_finder(impfunc, pos, pos+dx);
+	      pos = xcol;
+	      absorbed.transfer(lit);
+	      break;
+	    }
+	    else{ // Move to next interval
+	      pos += dx;
+	    }
 	  }
 	}
       }
     }
-
-    a_original[lvl]->gatherOutcast();
-    a_original[lvl]->remapOutcast();
-
-    a_absorbed[lvl]->gatherOutcast();
-    a_absorbed[lvl]->remapOutcast();
   }
+}
+
+void mc_photo::remap_photons(EBAMRPhotons& a_photons){
+  CH_TIME("mc_photo::remap_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remap_photons" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_physdom->get_prob_lo();
+  
+// #if 0 // Fallback
+//   for (int lvl = 0; lvl <= finest_level; lvl++){
+//     a_photons[lvl]->gatherOutcast();
+//     a_photons[lvl]->remapOutcast();
+//   }
+// #else
+
+//   for (int lvl = 0; lvl <= finest_level; lvl++){
+//     const Real dx = m_amr->get_dx()[lvl];
+//     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+//     const bool has_coar = lvl > 0;
+//     const bool has_fine = lvl < finest_level;
+
+//     a_photons[lvl]->gatherOutcast();
+//     a_photons[lvl]->remapOutcast();
+
+//     // The remaining elements in the outcast list must move to coarse
+//     if(has_coar){
+//       List<photon>& this_outcast = a_photons[lvl]->outcast();
+//       List<photon>& coar_outcast = a_photons[lvl-1]->outcast();
+//       coar_outcast.clear();
+//       coar_outcast.catenate(this_outcast);
+//       this_outcast.clear();
+//       a_photons[lvl-1]->remapOutcast();
+//     }
+
+// #if 1
+//     if(has_coar){ // Move particles that move onto the fine PVR
+//       collectValidParticles(a_photons[lvl]->outcast(),
+//     			    *a_photons[lvl-1],
+//     			    m_pvr[lvl]->mask(),
+//     			    dx*RealVect::Unit,
+//     			    2,
+//     			    false,
+//     			    origin);
+//       a_photons[lvl]->remapOutcast();
+//     }
+// #endif
+//   }
+
+
+  // Upsweep, build outcast lists on each level and transfer from coarser levels to current levels PVR
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    // Build outcast list on this level
+    a_photons[lvl]->outcast().clear();
+    a_photons[lvl]->gatherOutcast();
+
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
+
+    // Transfer particles from coarser level to this levels PVR
+    if(has_coar){
+      collectValidParticles(a_photons[lvl]->outcast(),
+			    *a_photons[lvl-1],
+			    m_pvr[lvl]->mask(),
+			    m_amr->get_dx()[lvl]*RealVect::Unit,
+			    m_amr->get_ref_rat()[lvl-1],
+			    false,
+			    origin);
+    }
+    a_photons[lvl]->remapOutcast();
+  }
+
+  // Downsweep
+  for (int lvl = finest_level; lvl >= 0; lvl--){
+    const bool has_coar = lvl > 0;
+
+    if(has_coar){ // Add the current levels outcast list to the coarser level, then rebin the coarser level
+      List<photon>& this_outcast = a_photons[lvl]->outcast();
+      List<photon>& coar_outcast = a_photons[lvl-1]->outcast();
+      coar_outcast.catenate(this_outcast);
+      this_outcast.clear();
+      
+      a_photons[lvl]->remapOutcast();
+      a_photons[lvl-1]->remapOutcast();
+    }
+  }
+
+
+  //#endif
 }

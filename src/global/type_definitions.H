@@ -143,6 +143,9 @@ namespace wallbc {
     neumann_map   = 3,
     robin         = 4,
     robin_map     = 5,
+    outflow       = 6,
+    symmetry      = 7,
+    wall          = 8,
   };
 };
 

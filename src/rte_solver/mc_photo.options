@@ -1,11 +1,19 @@
 # ====================================================================================================
 # MC_PHOTO CLASS OPTIONS
 # ====================================================================================================
+mc_photo.bisect_step    = 1.E-4       # Bisection step length for intersection tests
 mc_photo.seed           = 0           # Seed for RNG
 mc_photo.subcycle       = false       # Subcycling in time
 mc_photo.max_photons    = 1           # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.max_cell_step  = 0.5         # Sampling for cell
 mc_photo.max_kappa_step = 0.5         # Sampling for kappa
+mc_photo.bc_x_low       = outflow     # Boundary condition. 'outflow', 'symmetry', or 'wall'
+mc_photo.bc_x_high      = outflow     # Boundary condition
+mc_photo.bc_y_low       = outflow     # Boundary condition
+mc_photo.bc_y_high      = outflow     # Boundary condition
+mc_photo.bc_z_low       = outflow     # Boundary condition
+mc_photo.bc_z_high      = outflow     # Boundary condition
+mc_photo.poiss_exp_swap = 100         # Swap out Poisson with exponential distribution above this mean
 mc_photo.deposition     = cic         # 'ngp' = nearest grid point
                                       # 'cic' = cloud-in-cell
                                       # 'tsc' = triangle-shaped-cloud

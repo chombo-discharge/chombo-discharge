@@ -90,6 +90,17 @@ public:
     @brief Set pseudophotons
   */
   virtual void set_pseudophotons();
+
+  /*!
+    @brief Set bisection step legnth
+  */
+  virtual void set_bisect_step();
+
+  /*!
+    @brief 
+  */
+  virtual void set_domain_bc();
+  
 #ifdef CH_USE_HDF5
   /*!
     @brief Write plot file
@@ -102,27 +113,36 @@ public:
   */
   virtual int query_ghost() const;
 
+
 protected:
 
   int  m_max_photons;     // Number of photons per pseudophoton
   int  m_seed;            // RNG seed
+  int  m_poiss_exp_swap;  // Threshold for swapping Poisson and exponential distributions
+
+  Real m_bisect_step;     // Bisection step length
+  
   std::mt19937_64* m_rng; // Engine
   std::uniform_real_distribution<Real>* m_udist01; // Uniform real distribuion on [0,1]
   std::uniform_real_distribution<Real>* m_udist11; // Uniform real distribuion on [-1,1]
 
-  InterpType m_deposition;
+  InterpType m_deposition; // Mass deposition type
 
-  EBAMRPhotons m_photons; // Particles
-  EBAMRPVR m_pvr;         // Valid region
+  EBAMRPhotons m_photons;  // Particles
+  EBAMRPVR m_pvr;          // Valid region
 
+  Vector<wallbc::which_bc> m_domainbc;
   void set_rng();
   
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
+  void remap_photons(EBAMRPhotons& a_photons);
   void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles);
 
+  int domainbc_map(const int a_dir, const Side::LoHiSide a_side);
+  int random_poisson(const Real& a_mean);
+  Real random_exponential(const Real a_mean);
   RealVect random_direction();
-
 #if CH_SPACEDIM==2
   RealVect random_direction2D();
 #elif CH_SPACEDIM==3
