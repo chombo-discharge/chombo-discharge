@@ -13,6 +13,7 @@
 #include <time.h>
 #include <chrono>
 
+#include <PolyGeom.H>
 #include <EBAlias.H>
 #include <EBLevelDataOps.H>
 #include <BoxIterator.H>
@@ -411,6 +412,7 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect prob_hi = m_physdom->get_prob_hi();
   const RefCountedPtr<BaseIF>& impfunc = m_compgeom->get_gas_if();
 
   // Advance over levels
@@ -424,38 +426,115 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
       for (ListIterator<photon> lit(particles); lit.ok(); ++lit){
 	photon& particle = lit();
 
-	RealVect& pos = particle.position();
-	const RealVect n = particle.velocity()/units::s_c0;
-	const RealVect absorbed_pos = pos + n*random_exponential(particle.kappa());
+	RealVect& pos               = particle.position();
+	const RealVect unit_v       = particle.velocity()/units::s_c0;
+	const RealVect absorbed_pos = pos + unit_v*random_exponential(particle.kappa());
+	const RealVect path         = absorbed_pos - pos;
+	const Real path_len         = path.vectorLength();
 
 	// Check if absorbed_pos - pos is smaller than distance to any object
 	const Real dist = impfunc->value(pos);
-	const Real len  = (absorbed_pos - pos).vectorLength();
 
-	if(dist > len){ // Skip intersection test
+	bool check_eb = false; // Flag for intersection test with eb
+	bool check_bc = false; // Flag for intersection test with domain
+
+	// See if we should check for different types of boundary intersections
+	if(impfunc->value(pos) < path_len){
+	  check_eb = true;
+	}
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  if(absorbed_pos[dir] < origin[dir] || absorbed_pos[dir] > prob_hi[dir]){
+	    check_bc = true;
+	  }
+	}
+						  
+	// The remaining code does the boundary intersection tests
+	if(!check_eb && !check_bc){ // Test necessary
 	  pos = absorbed_pos;
 	}
-	else{// Bisect traveled path to find intersected position
-	  const int nsteps  = ceil(len/m_bisect_step);
-	  const RealVect dx = (absorbed_pos - pos)/nsteps;
+	else{
 
-	  // Check each interval
-	  bool absorb = false;
-	  for (int istep = 0; istep < nsteps; istep++){
-	    const Real fa = impfunc->value(pos);
-	    const Real fb = impfunc->value(pos+dx);
-	    const bool absorb = fa*fb <= 0.0;
+	  // Determine if the particle contacts one of the domain walls, and after how long it contacts
+	  bool contact_bc = false;
+	  Real contact_s = 2.0;
+	  int contact_dir;
+	  Side::LoHiSide contact_side;
+	  RealVect contact_point;
+	  if(check_bc){ // This test does a line-plane intersection test on each side and selects the shortest intersection
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      for (SideIterator sit; sit.ok(); ++sit){
+		const Side::LoHiSide side = sit();
 
-	    if(absorb){ 
-	      // We happen to know that f(pos+dx) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
-	      // where the absorption happens. For that we use a Brent root finder on the interval [pos, pos+dx].
-	      const RealVect xcol = poly::brent_root_finder(impfunc, pos, pos+dx);
-	      pos = xcol;
-	      absorbed.transfer(lit);
-	      break;
+		const RealVect p0    = (side == Side::Lo) ? origin : prob_hi; // A point on the domain
+		const RealVect n0    = sign(side)*RealVect(BASISV(dir));
+		const Real norm_path = PolyGeom::dot(n0, path);
+
+		if(norm_path > 0.0){
+		  const Real s = PolyGeom::dot(p0-pos, n0)/norm_path;
+		  if(s >= 0.0 && s <= 1.0){
+		    if(s < contact_s){
+		      contact_bc    = true;
+		      contact_side  = side;
+		      contact_dir   = dir;
+		      contact_s     = s;
+		      contact_point = pos + contact_s*path;
+		    }
+		  }
+		}
+	      }
 	    }
-	    else{ // Move to next interval
-	      pos += dx;
+	  }
+	  else{
+	    contact_bc = false;
+	  }
+	  
+	  // Now check the where we contact the embedded boundary
+	  if(check_eb){
+	    const int nsteps  = ceil(path_len/m_bisect_step);
+	    const RealVect dx = (absorbed_pos - pos)/nsteps;
+
+	    // Check each interval
+	    bool absorb = false;
+	    for (int istep = 0; istep < nsteps; istep++){
+	      const Real fa = impfunc->value(pos);
+	      const Real fb = impfunc->value(pos+dx);
+	      const bool absorb = fa*fb <= 0.0;
+
+	      if(absorb){ 
+		// We happen to know that f(pos+dx) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
+		// where the absorption happens. For that we use a Brent root finder on the interval [pos, pos+dx].
+		const RealVect xcol = poly::brent_root_finder(impfunc, pos, pos+dx);
+		pos = xcol;
+		absorbed.transfer(lit);
+		break;
+	      }
+	      else{ // Move to next interval
+		pos += dx;
+	      }
+	    }
+	  }
+	  else if(contact_bc){
+	    const int idx = domainbc_map(contact_dir, contact_side);
+
+	    // Check the boundary condition type
+	    if(m_domainbc[idx] == wallbc::symmetry){ // Need to bounce back
+	      pos += contact_s*path; // Gives point on wall
+
+	      // Wall normal vector
+
+		
+	      // Modify velocity vector
+	      RealVect& v  = particle.velocity();
+	      const RealVect n0 = sign(contact_side)*RealVect(BASISV(contact_dir));
+
+	      v = v - 2.0*PolyGeom::dot(v, n0)*n0; // New direction
+	      pos += (1-contact_s)*path_len*v/v.vectorLength();
+	    }
+	    else if(m_domainbc[idx] == wallbc::wall){
+	      pos += contact_s*path;
+	      absorbed.transfer(lit);
+	    }
+	    else if(m_domainbc[idx] == wallbc::outflow){ // Do nothing
 	    }
 	  }
 	}
@@ -494,6 +573,7 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
 			    false,
 			    origin);
     }
+    a_photons[lvl]->gatherOutcast();
     a_photons[lvl]->remapOutcast();
   }
 
