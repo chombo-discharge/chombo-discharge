@@ -89,6 +89,20 @@ public:
 						const Vector<RealVect>& a_grad_cdr) const;
 
   /*!
+    @brief Compute domain fluxes
+  */
+  virtual Vector<Real> compute_cdr_domain_fluxes(const Real&           a_time,
+						 const RealVect&       a_pos,
+						 const int&            a_dir,
+						 const Side::LoHiSide& a_side,
+						 const RealVect&       a_E,
+						 const Vector<Real>&   a_cdr_densities,
+						 const Vector<Real>&   a_cdr_velocities,
+						 const Vector<Real>&   a_cdr_gradients,
+						 const Vector<Real>&   a_rte_fluxes,
+						 const Vector<Real>&   a_extrap_cdr_fluxes) const;
+
+  /*!
     @brief Compute electrode fluxes
   */
   virtual Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
@@ -171,6 +185,7 @@ protected:
   Real m_photoionization_efficiency;     // Photoionization efficiency
   Real m_excitation_efficiency;          // Excitation efficiency
 
+  Vector<int> m_wallbc; // Switch for wall bc
 
 
   // Tables built from BOLSIG+

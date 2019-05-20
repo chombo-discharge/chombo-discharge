@@ -86,6 +86,16 @@ public:
   virtual const RefCountedPtr<mfis>& get_mfis() const;
 
   /*!
+    @brief Get the implicit function used to generate the gas-phase EBIS
+  */
+  virtual const RefCountedPtr<BaseIF>& get_gas_if() const;
+
+  /*!
+    @brief Get the implicit function used to generate the solid-phase EBIS
+  */
+  virtual const RefCountedPtr<BaseIF>& get_sol_if() const;
+
+  /*!
     @brief Build MFIndexSpace
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_origin, a_origin + a_box*a_dx)
@@ -123,6 +133,16 @@ protected:
     @brief electrodes
   */
   Vector<electrode> m_electrodes;
+
+  /*!
+    @brief The gas-phase implicit function
+  */
+  RefCountedPtr<BaseIF> m_gas_if;
+
+  /*!
+    @brief The solid-phase implicit function
+  */
+  RefCountedPtr<BaseIF> m_sol_if;
 
   /*!
     @brief Geometry server for gas phase

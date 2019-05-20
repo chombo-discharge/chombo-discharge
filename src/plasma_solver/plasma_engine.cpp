@@ -496,12 +496,13 @@ void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const i
     for (int lvl = 0; lvl <= finest_level; lvl++){
       state[lvl]->localCopyTo(*scratch[lvl]);
     }
-
     m_amr->average_down(scratch, rte_phase);
     m_amr->interp_ghost(scratch, rte_phase);
     if(m_output_centroids){
       m_amr->interpolate_to_centroids(scratch, rte_phase);
     }
+
+    data_ops::floor(scratch, 0.0);
 
     const Interval src_interv(comp, comp);
     const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);

@@ -109,27 +109,6 @@ void amr_mesh::allocate_ptr(EBAMRCellData& a_data){
   }
 }
 
-void amr_mesh::allocate(EBAMRParticles& a_particles){
-  CH_TIME("amr_mesh::allocate(AMR Particle)");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate(AMR Particle)" << endl;
-  }
-
-  if(m_max_box_size != m_blocking_factor){
-    MayDay::Abort("amr_mesh::allocate(particles) - only constant box sizes supported for particle methods");
-  }
-  
-  a_particles.resize(1 + m_finest_level);
-
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    a_particles[lvl] = RefCountedPtr<ParticleData<Particle> > (new ParticleData<Particle>(m_grids[lvl],
-											  m_domains[lvl],
-											  m_blocking_factor,
-											  m_dx[lvl]*RealVect::Unit,
-											  m_physdom->get_prob_lo()));
-  }
-}
-
 void amr_mesh::allocate(EBAMRPVR& a_pvr, const int a_buffer){
   CH_TIME("amr_mesh::allocate(AMR PVR)");
   if(m_verbosity > 5){
@@ -449,9 +428,12 @@ void amr_mesh::build_domains(){
   m_coar_to_fine_redist.resize(phase::num_phases);
   m_coar_to_coar_redist.resize(phase::num_phases);
   m_fine_to_coar_redist.resize(phase::num_phases);
+  m_copier.resize(phase::num_phases);
+  m_reverse_copier.resize(phase::num_phases);
 
   m_eblg[phase::gas].resize(nlevels);
   m_ebisl[phase::gas].resize(nlevels);
+
   m_coarave[phase::gas].resize(nlevels);
   m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
@@ -462,6 +444,9 @@ void amr_mesh::build_domains(){
   m_coar_to_fine_redist[phase::gas].resize(nlevels);
   m_coar_to_coar_redist[phase::gas].resize(nlevels);
   m_fine_to_coar_redist[phase::gas].resize(nlevels);
+  m_copier[phase::gas].resize(nlevels);
+  m_reverse_copier[phase::gas].resize(nlevels);
+
 
   m_eblg[phase::solid].resize(nlevels);
   m_ebisl[phase::solid].resize(nlevels);
@@ -475,6 +460,8 @@ void amr_mesh::build_domains(){
   m_coar_to_fine_redist[phase::solid].resize(nlevels);
   m_coar_to_coar_redist[phase::solid].resize(nlevels);
   m_fine_to_coar_redist[phase::solid].resize(nlevels);
+  m_copier[phase::solid].resize(nlevels);
+  m_reverse_copier[phase::solid].resize(nlevels);
 
   m_dx[0] = (m_physdom->get_prob_hi()[0] - m_physdom->get_prob_lo()[0])/m_num_cells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_num_cells - IntVect::Unit);
@@ -567,6 +554,8 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_regsize, con
 #if AMR_MESH_DEBUG
   const Real t10 = MPI_Wtime();
 #endif
+  this->define_copier();
+  const Real t11 = MPI_Wtime();
 
   if(!m_has_mg_stuff){
     this->define_mg_stuff();
@@ -574,20 +563,22 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_regsize, con
   }
   
 #if AMR_MESH_DEBUG
+  const Real T = t11 - t0;
   pout() << "amr_mesh::regrid breakdown" << endl;
   pout() << "overall memory usage" << endl;
   overallMemoryUsage();
-  pout() << "build grids = " << t1-t0  << "\t % =  " << 100.*(t1-t0)/(t10-t0) << endl;
-  pout() << "eblevelgrid = " << t2-t1  << "\t % =  " << 100.*(t2-t1)/(t10-t0) << endl;
-  pout() << "mflevelgrid = " << t3-t2  << "\t % =  " << 100.*(t3-t2)/(t10-t0) << endl;
-  pout() << "ebcoarseave = " << t4-t3  << "\t % =  " << 100.*(t4-t3)/(t10-t0) << endl;
-  pout() << "ebquadcfi   = " << t5-t4  << "\t % =  " << 100.*(t5-t4)/(t10-t0) << endl;
-  pout() << "fillpatch   = " << t6-t5  << "\t % =  " << 100.*(t6-t5)/(t10-t0) << endl;
-  pout() << "pwl_interp  = " << t7-t6  << "\t % =  " << 100.*(t7-t6)/(t10-t0) << endl;
-  pout() << "flux_reg    = " << t8-t7  << "\t % =  " << 100.*(t8-t7)/(t10-t0) << endl;
-  pout() << "redist_oper = " << t9-t8  << "\t % =  " << 100.*(t9-t8)/(t10-t0) << endl;
-  pout() << "irreg_sten  = " << t10-t9 << "\t % =  " << 100.*(t10-t9)/(t10-t0) << endl;
-  pout() << "total time  = " << t10-t0 << endl;
+  pout() << "build grids = " << t1-t0   << "\t % =  " << 100.*(t1-t0)/(T) << endl;
+  pout() << "eblevelgrid = " << t2-t1   << "\t % =  " << 100.*(t2-t1)/(T) << endl;
+  pout() << "mflevelgrid = " << t3-t2   << "\t % =  " << 100.*(t3-t2)/(T) << endl;
+  pout() << "ebcoarseave = " << t4-t3   << "\t % =  " << 100.*(t4-t3)/(T) << endl;
+  pout() << "ebquadcfi   = " << t5-t4   << "\t % =  " << 100.*(t5-t4)/(T) << endl;
+  pout() << "fillpatch   = " << t6-t5   << "\t % =  " << 100.*(t6-t5)/(T) << endl;
+  pout() << "pwl_interp  = " << t7-t6   << "\t % =  " << 100.*(t7-t6)/(T) << endl;
+  pout() << "flux_reg    = " << t8-t7   << "\t % =  " << 100.*(t8-t7)/(T) << endl;
+  pout() << "redist_oper = " << t9-t8   << "\t % =  " << 100.*(t9-t8)/(T) << endl;
+  pout() << "irreg_sten  = " << t10-t9  << "\t % =  " << 100.*(t10-t9)/(T) << endl;
+  pout() << "copier      = " << t11-t10 << "\t % =  " << 100.*(t10-t9)/(T) << endl;
+  pout() << "total time  = " << T << endl;
 #endif
 }
 
@@ -1315,6 +1306,36 @@ void amr_mesh::define_irreg_sten(){
 						 order,
 						 rad,
 						 m_stencil_type));
+  }
+}
+
+void amr_mesh::define_copier(){
+  CH_TIME("amr_mesh::define_copier");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::define_copier" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    if(!ebis_gas.isNull()){
+      m_copier[phase::gas][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
+								    m_grids[lvl],
+								    m_domains[lvl],
+								    m_num_ghost*IntVect::Unit,
+								    true));
+      m_reverse_copier[phase::gas][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
+									    m_grids[lvl],
+									    m_domains[lvl],
+									    m_num_ghost*IntVect::Unit,
+									    true));
+      m_reverse_copier[phase::gas][lvl]->reverse();
+    }
+
+    if(!ebis_sol.isNull()){
+      
+    }
   }
 }
 
@@ -2128,4 +2149,14 @@ irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(phase
 
 irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils(phase::which_phase a_phase){
   return *m_eb_centroid_interp[a_phase];
+}
+
+
+Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(phase::which_phase a_phase){
+  return m_copier[a_phase];
+}
+
+
+Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(phase::which_phase a_phase){
+  return m_reverse_copier[a_phase];
 }
