@@ -8,14 +8,21 @@
 Welcome to `PlasmaC`'s user documentation!
 ============================================
 	      
-`PlasmaC` is a scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature fluid advection-diffusion-reaction plasmas in complex geometries. `PlasmaC` features
+`PlasmaC` is a scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries. `PlasmaC` features
 
-* Multiphase Poisson and Helmholtz solvers
-* Time-dependent multiphase heat solvers
-* Diffusive radiative transport
-* Convection-diffusion-reaction solvers
+* Multiphase field solvers
+* Stationary or transient diffusive RTE
+* Stationary or transient Monte Carlo based RTE
+* Deterministic and fluctuating advection-diffusion-reaction solvers
+* Various time integration schemes
+  
+   * Godunov splitting
+   * Strang splitting based on high-order SSPRK schemes
+   * Arbitrary order and error-aware semi-implicit spectral deferred corrections (SISDC)
+* Parallel I/O with HDF5
+* Sensible and simple-to-use physics interfaces
 
-The solvers can be run on their own, or they can be coupled through one of our (or your own) physics interfaces. For example, `PlasmaC` can be run as a pure electrostatic solver, a heat or diffusion equation solver, and it is applicable to corona and streamer simulations. 
+Solvers can be run on their own, or they can be coupled through our physics interfaces. 
 
 For scalability, `PlasmaC` is built on top of `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_, and therefore additionally features
 
@@ -23,13 +30,12 @@ For scalability, `PlasmaC` is built on top of `Chombo <https://commons.lbl.gov/d
 * Patch based adaptive mesh refinement
 * Good weak and strong scalability to thousands of computer cores
 
-It is our goal that users will be able to use `PlasmaC` without modifying the underlying solvers. Because of this, there are quite general interfaces for describing the plasma physics, setting up boundary conditions, ensuring mesh refinement, and so on. As `PlasmaC` evolves, so will these interfaces. However, we always aim for backward compatibility such that existing `PlasmaC` models can be run on future versions of `PlasmaC`. In particular, there are plans to include Euler equations for the fluid transport and port compute kernels to GPUs. Both of these features will very strongly affect how `PlasmaC` is set up and run. In addition to this, we are working on increasing the performance of `PlasmaC` by means of
+Our goal is that users will be able to use `PlasmaC` without modifying the underlying solvers. There are quite general interfaces for describing the plasma physics, setting up boundary conditions, ensuring mesh refinement, and so on. As `PlasmaC` evolves, so will these interfaces. We aim for (but cannot guarantee) backward compatibility such that existing `PlasmaC` models can be run on future versions. In particular, there are plans to
 
-* Adaptive high-order integrators based on spectral deferred corrections
-* Subcycling in time for hyperbolic advance. This is planned to be a part of the MISDC integrator. 
-* PETSc interfaces for geometric multigrid bottom solvers
+* support adaptive mesh and algorithm refinement (AMAR)
+* port compute kernels to GPUs.
 
-However, none of these developments will affect the interface to `PlasmaC`. 
+Both of these features will very strongly affect how `PlasmaC` is used. In addition, we are working on increasing the performance of `PlasmaC` by using hybrid-geometric multigrid with PETSc. 
 
 This documentation is the user documentation `PlasmaC`. There is also a separate :doxy:`Doxygen API <index>` that can be compiled together with the source code.
 

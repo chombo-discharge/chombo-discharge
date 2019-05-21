@@ -11,13 +11,24 @@ The `PlasmaC` equation set
    \begin{align}
    &\nabla\cdot\left(\epsilon_r\nabla\cdot\Phi\right) = -\frac{\rho}{\epsilon_0}, \\[1ex]
    &\frac{\partial\sigma}{\partial t} = F_\sigma,\\[1ex]
-   &\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\\[1ex]
+
    &\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S.
    \end{align}
 
-This must be supported by additional boundary conditions on electrodes and insulating surfaces (on which the surface charge :math:`\sigma` lives). The number of advected species and radiative transport equations is arbitrary; the user can select the coupling through our interfaces: He can even turn off radiative transport altogether.
+This must be supported by additional boundary conditions on electrodes and insulating surfaces (on which the surface charge :math:`\sigma` lives). In addition, the user can choose to include radiative transport, which is done either in the diffusive approximation or by means of Monte Carlo methods.
 
-The coupling that is (currently) available in `PlasmaC` is
+Diffusive RTE methods involve solving
+
+.. math::
+   :nowrap:
+
+   \begin{align}
+      \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) &= \frac{\eta}{c},
+   \end{align}
+   
+where :math:`\Psi` is the isotropic photon density, :math:`\kappa` is an absorption length and :math:`\eta` is an isotropic source term. As an alternative, we also provide discrete photon methods that solve for the photoionization profile on a mesh by sampling discrete photons. Our discrete photon methods are capable of including far more physics; they can easily be adapted to e.g. scattering media and also provide much better qualitative features (like shadows, for example). They are, on the other hand, inherently stochastic which implies that some extra care must be taken when integrating the equations of motion. 
+
+The number of advected species and radiative transport equations is arbitrary; the user can select the coupling through our interface. The coupling that is (currently) available in `PlasmaC` is
 
 .. math::
    :nowrap:
@@ -31,10 +42,10 @@ The coupling that is (currently) available in `PlasmaC` is
       F &= F(t, \mathbf{x}, \mathbf{E}, n),
    \end{align}
 
-where :math:`F` is the boundary flux on insulators or electrodes (which must be separately implemented). 
+where :math:`F` is the boundary flux on insulators or electrodes (which must be separately implemented).
 
 
-`PlasmaC` works by embedding the equations above into an abstract C++ framework that the user must implement or reuse existing pieces of, and then compile into a *mini-application*. For most users, this will mostly include implementing a new geometry, a new plasma-kinetic scheme, or new functions for deciding when to coarsen or refine a certain spatial region. It is our goal that the user does not need to worry about temporal or spatial discretization of these equations, but rather focus on the actual setup of the plasma kinetics, boundary conditions, and so on. 
+`PlasmaC` works by embedding the equations above into an abstract C++ framework that the user must implement or reuse existing pieces of, and then compile into a *mini-application*. For most users, this will mostly include implementing a new geometry or a new plasma-kinetic scheme. It is our goal that the user does not need to worry about temporal or spatial discretization of these equations, but rather focus on the actual setup of the geometry and physics. 
 
 .. _Chap:SpatialDiscretization:
 
@@ -56,9 +67,9 @@ Embedded boundary applications are supported by additionally describing the mesh
 Geometry generation
 ___________________
 
-Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometries are generated from a function :math:`f(\mathbf{x}) = 0` that describes the level-set surface. This is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption (but increase run time). Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. Furthermore, geometric data describes by the graph only exists in the cut cells themselves, so that this data is sparse. 
+Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometries are generated from a function :math:`f(\mathbf{x}) = 0` that describes the level-set surface. This is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption. Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. Furthermore, geometric data describes by the graph only exists in the cut cells themselves, so that this data is sparse. 
 
-Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. Arbitrarily with fine grids geometries are not possible. Consider for example a cubic domain of :math:`(16384)^3` cells which is decomposed into :math:`(64)^3` cell size patches. This yields :math:`(256)^3` patches. Now consider that this domain is cut in half along one of the coordinate basis vectors by a planar level set surface. This surface will require allocation of :math:`256\times256\times 1` patches for the geometry. If each patch is padded with 4 ghost cells, this yields :math:`256\times256\times(72)^3 \approx 24\times 10^9` cells. Inside each cell we must store volume fraction, area fractions, cell centroids positions and so one. The required memory easily ranges in the terabyte range. 
+Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. Arbitrarily with fine grids geometries are not possible. Consider for example a cubic domain of :math:`(16384)^3` cells which is decomposed into :math:`(64)^3` cell size patches. This yields :math:`(256)^3` patches. Now consider that this domain is cut in half along one of the coordinate basis vectors by a planar level set surface. This surface will require allocation of :math:`256\times256\times 1` patches for the geometry. If each patch is padded with 4 ghost cells, this yields :math:`256\times256\times(72)^3 \approx 24\times 10^9` cells. Inside each cell we must store volume fractions, area fractions, cell centroids positions and so one. The required memory easily ranges in the terabyte range. 
 
 .. _Chap:AdvectiveDiscretization:
 
@@ -214,5 +225,68 @@ Geometric multigrid
 -------------------
 
 To solve the discretized Helmholtz equation we use the geometric multigrid (GMG) solver template that ships with Chombo :cite:`ebchombo`. GMG involves smoothing of the solutions on progressively coarsened grids and is compatible with AMR. Smoothing on each level involves relaxation (e.g. Jacobi or Gauss-Seidel), which primarily reduces the magnitude of high freqency errors. Removal of low-frequency errors from the solution is much slower. Because of this, multigrid accelerates convergence by projecting the error onto a coarser grid where the error has, from the viewpoint of the grid, a shorter wavelength, making relaxation more efficient. Once a bottom grid level has been reached and an approximate bottom-level solution has been found, the error is prolongated onto a finer grid and relaxation is then re-applied. Geometric multigrid works best when the long wavelength modes of the fine grid operator are well represented as short wavelength modes on the coarse grid operator. For EB applications however, coarsening can result in the removal of finer geometric features so that the relaxation step cannot sufficiently dampen the error modes at which GMG is aimed at. Because of this, geometric multigrid for EB applications usually involve lower convergence rates between each multigrid cycle than it does for geometry-less domains and, moreover, typically involves dropping to the bottom solver sooner. Currently, we only support relaxation solvers as the bottom solver for multi-phase problems, whereas we use the built-in BiCGStab and GMRES solvers in Chombo :cite:`ebchombo` for single-phase elliptic problems. In the future, we would like to use algebraic multigrid from e.g. PETSc as a bottom solver in the V-cycle in order to enhance solver efficiency for very complex geometries. 
+
+
+Radiative transfer
+------------------
+
+Diffusion approximation
+_______________________
+
+In the diffusion approximation, the radiative transport equation is
+
+.. math::
+
+      \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
+
+which is called the Eddington approximation. The radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`. In the stationary case the Eddington approximation yields a Helmholtz equation
+
+.. math::
+
+   \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
+
+which is solved by using the multigrid methods discussed above. For fully transient radiative transport, we offer discretizations based on the backward Euler and TGA schemes as discussed above. 
+
+Monte Carlo methods
+___________________
+
+All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable). For example, in the diffusion approximation the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`, implying that photons can leak around boundaries. I.e. the diffusion approximation does not correctly describe shadows. It is possible to go beyond the diffusion approximation by also solving for higher-order moments like the radiative flux. While such methods can describe shadows, they contain other nonphysical features.
+
+Monte Carlo methods are offered as an alternative to the diffusion approximation. Currently, we have a fully developed stationary Monte Carlo method and a transient method (which tracks photons in time) is also under development. Neither method currently includes scattering, although this would be comparatively straightforward to incorporate. As with the diffusion approximation, we do not include interaction with the plasma state in the time-of-flight of the photon. That is, we do not support e.g. scattering of a photon off electron densities. The reason for this design choice is that the velocity of a photon is much greater than the velocity of an electron, and we would have to rebin discrete photons in parallel several thousand times for each fluid advance. Thus, once a photon is created, it is invisible for the remaining solvers until it is absorbed at a point in the mesh.
+
+Stationary Monte Carlo
+~~~~~~~~~~~~~~~~~~~~~~
+
+The stationary Monte Carlo method proceeds as follows.
+
+1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` where :math:`\mathcal{P}` is a Poisson distribution. The user may also choose to use pseudophotons rather than physical photons. Each photon is generated in the cell centroid :math:`\mathbf{x}_0` and given a random propagation direction :math:`\mathbf{n}`.
+
+2. Draw a propagation distance :math:`r` by drawing random numbers from an exponential distribution :math:`p(r) = \kappa \exp\left(-\kappa r\right)`. The absorbed position of the photon is :math:`\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}`.
+
+3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}`.
+
+4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
+
+5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell). 
+
+Transient Monte Carlo
+~~~~~~~~~~~~~~~~~~~~~
+
+The transient Monte Carlo method is almost identical to the stationary method, except that it does not deposit all generated photons on the mesh but tracks them through time. The transient method is implemented as follows:
+
+1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` as above, and append these to the already existing photons. Each photon is given a random creation time in :math:`\Delta t`. 
+   
+2. Each photon is advanced over the time step :math:`\Delta t` by a sequence of :math:`N` substeps (:math:`N` may be different for each photon).
+
+   a. We compute :math:`N` such that we sample :math:`N\Delta \tau = \Delta t` with :math:`c\kappa\Delta\tau < 1`.
+
+   b. A photon at position :math:`\mathbf{x}_0` is moved a distance :math:`\Delta \mathbf{x} = c\mathbf{n}\Delta\tau`. For each step we compute the absorption probability :math:`p = \kappa\left|\Delta\mathbf{x}\right|` where :math:`p\in[0,1]` is a uniform random number. If the photon is absorbed on this interval, draw a new uniform random number :math:`r \in [0,1]` and absorb the photon at the position :math:`\mathbf{x}_0 + r\Delta\mathbf{x}`. If the photon is not absorbed, it is moved to position :math:`\mathbf{x}_0 + r\Delta\mathbf{x}`.
+
+3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}`.
+
+4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
+
+5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell). 
+
 
 .. bibliography:: references.bib

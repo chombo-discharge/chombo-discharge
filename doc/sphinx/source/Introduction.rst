@@ -3,7 +3,7 @@
 Getting started
 ===============
 
-This chapter discusses what `PlasmaC` really is, how you may obtain `PlasmaC` and compile it.
+This chapter discusses how you may obtain `PlasmaC` and compile it.
 
 .. _Chap:Obtaining:
 
@@ -131,6 +131,8 @@ These two environment variables are used in the `PlasmaC` makefile system so tha
 Compiling `PlasmaC`
 ---------------------
 
+Currently, all of `PlasmaC` is compiled into your mini-applications. While this is something that we are working on improving, this means that there is no separate build for the `PlasmaC` source code and your application files. You will *not* be able to install `PlasmaC` separately; compilation is only possible once a user case has been set up. 
+
 Once an application has been set up, compiling is done by
 
 .. code-block:: bash
@@ -139,7 +141,6 @@ Once an application has been set up, compiling is done by
 
 Compiling must be performed from the folder which houses your makefile. 
 
-Currently, all of `PlasmaC` is compiled into your mini-applications. While this is something that we are working on improving, this means that there is no separate build for the `PlasmaC` source code and your application files. You will *not* be able to install `PlasmaC` separately; compilation is only possible once a user case has been set up. 
 
 .. _Chap:Visualization:
 
