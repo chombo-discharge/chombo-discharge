@@ -57,3 +57,15 @@ Real photon_group::get_scatter(const RealVect a_pos) const{
     return m_varscatter(a_pos);
   }
 }
+
+
+Real photon_group::get_random_kappa() const{
+  MayDay::Abort("photon_group::get_random_kappa - override this method if you want to use it");
+  return 0.0;
+}
+
+
+Real photon_group::get_random_scatter() const{
+  MayDay::Abort("photon_group::get_random_scatter - override this method if you want to use it");
+  return 0.0;
+}
