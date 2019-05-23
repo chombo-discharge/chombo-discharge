@@ -97,6 +97,17 @@ public:
   virtual void set_bisect_step();
 
   /*!
+    @brief Switch for selecting absorption length randomly
+    @details Used e.g. if the photon frequency is "random"
+  */
+  virtual void set_random_kappa();
+
+  /*!
+    @brief Clear data holder
+  */
+  virtual void clear(EBAMRPhotons& a_photons);
+  
+  /*!
     @brief 
   */
   virtual void set_domain_bc();
@@ -113,12 +124,25 @@ public:
   */
   virtual int query_ghost() const;
 
+  /*!
+    @brief Count number of photons in particle list
+  */
+  virtual int count_photons(const EBAMRPhotons& a_photons) const;
 
+  /*!
+    @brief Count number of outcast photons in particle list
+  */
+  virtual int count_outcast(const EBAMRPhotons& a_photons) const;
+  
 protected:
+
+  bool m_random_kappa;    // Use random kappa or not
 
   int  m_max_photons;     // Number of photons per pseudophoton
   int  m_seed;            // RNG seed
   int  m_poiss_exp_swap;  // Threshold for swapping Poisson and exponential distributions
+
+  long long m_num_photons;
 
   Real m_bisect_step;     // Bisection step length
   

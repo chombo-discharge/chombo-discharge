@@ -29,6 +29,7 @@ mc_photo::mc_photo(){
   this->set_deposition_type();
   this->set_bisect_step();
   this->set_domain_bc();
+  this->set_random_kappa();
 }
 
 mc_photo::~mc_photo(){
@@ -48,7 +49,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   EBAMRPhotons absorbed_photons;
   m_amr->allocate(absorbed_photons);
 
+  int num_photons, num_outcast;
+
   // Generate photons
+  this->clear(m_photons);
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
   this->remap_photons(m_photons);                                   // Remap photons
@@ -56,6 +60,17 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
   
   return true;
+}
+
+void mc_photo::clear(EBAMRPhotons& a_photons){
+  CH_TIME("mc_photo::clear");
+  if(m_verbosity > 5){
+    pout() << m_name + "::clear" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    a_photons[lvl]->clear();
+  }
 }
 
 void mc_photo::set_rng(){
@@ -83,9 +98,9 @@ void mc_photo::allocate_internals(){
 
   const int buffer = 0;
   const int ncomp  = 1;
-  m_amr->allocate(m_state,  m_phase, ncomp); // This is the deposited 
+  m_amr->allocate(m_state,  m_phase, ncomp); 
   m_amr->allocate(m_source, m_phase, ncomp);
-  
+
   m_amr->allocate(m_photons);
   m_amr->allocate(m_pvr, buffer);
 }
@@ -267,7 +282,12 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	  // Generate computational photons
 	  for (int i = 0; i < num_photons; i++){
 	    const RealVect dir = random_direction();
-	    particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+	    if(m_random_kappa){
+	      particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_random_kappa(), weight));
+	    }
+	    else{
+	      particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+	    }
 	  }
 	}
       }
@@ -276,12 +296,15 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
       (*a_particles[lvl])[dit()].addItemsDestructive(particles);
     }
   }
+
+  // Count number of photons
+  m_num_photons = this->count_photons(m_photons);
 }
 
 void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles){
-  CH_TIME("mc_photo::generate_photons");
+  CH_TIME("mc_photo::deposit_photons");
   if(m_verbosity > 5){
-    pout() << m_name + "::generate_photons" << endl;
+    pout() << m_name + "::deposit_photons" << endl;
   }
 
   const RealVect origin  = m_physdom->get_prob_lo();
@@ -308,10 +331,23 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
   }
 }
 
-void mc_photo::set_deposition_type(){
-  CH_TIME("mc_photo::setdeposition_type");
+void mc_photo::set_random_kappa(){
+  CH_TIME("mc_photo::set_random_kappa");
   if(m_verbosity > 5){
-    pout() << m_name + "::setdeposition_type" << endl;
+    pout() << m_name + "::set_random_kappa" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("mc_photo");
+  pp.get("random_kappa", str);
+
+  m_random_kappa = (str == "true") ? true : false;
+}
+
+void mc_photo::set_deposition_type(){
+  CH_TIME("mc_photo::set_deposition_type");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_deposition_type" << endl;
   }
 
   std::string str;
@@ -578,17 +614,52 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
   }
 
   // Downsweep
-  for (int lvl = finest_level; lvl > 0; lvl--){
+  for (int lvl = finest_level; lvl >= 0; lvl--){
     const bool has_coar = lvl > 0;
 
     if(has_coar){ // Add the current levels outcast list to the coarser level, then rebin the coarser level
       List<photon>& this_outcast = a_photons[lvl]->outcast();
       List<photon>& coar_outcast = a_photons[lvl-1]->outcast();
       coar_outcast.catenate(this_outcast);
-      this_outcast.clear();
+      //      this_outcast.clear();
 
+      a_photons[lvl]->gatherOutcast();
       a_photons[lvl]->remapOutcast();
+
+      a_photons[lvl-1]->gatherOutcast();
       a_photons[lvl-1]->remapOutcast();
     }
+
+    a_photons[lvl]->outcast().clear(); // Done with this level, anything that did not get transferred is lost
   }
+}
+
+int mc_photo::count_photons(const EBAMRPhotons& a_photons) const {
+  CH_TIME("mc_photo::count_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::count_photons" << endl;
+  }
+
+  int num_photons = 0;
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    num_photons += a_photons[lvl]->numValid();
+  }
+
+  return num_photons;
+}
+
+int mc_photo::count_outcast(const EBAMRPhotons& a_photons) const {
+  CH_TIME("mc_photo::count_outcast");
+  if(m_verbosity > 5){
+    pout() << m_name + "::count_outcast" << endl;
+  }
+
+  int num_outcast = 0;
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    num_outcast += a_photons[lvl]->numOutcast();
+  }
+
+  return num_outcast;
 }

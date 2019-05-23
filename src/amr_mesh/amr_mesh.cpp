@@ -1762,7 +1762,8 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
   this->define_flux_reg(a_regsize);     // Define flux register (phase::gas only)
   this->define_redist_oper(a_regsize);  // Define redistribution (phase::gas only)
-  this->define_irreg_sten();   // Define irregular stencils
+  this->define_irreg_sten();            // Define irregular stencils
+  this->define_copier();                // Define copiers
 
   // Do the multilevel stuff
   if(!m_has_mg_stuff){
