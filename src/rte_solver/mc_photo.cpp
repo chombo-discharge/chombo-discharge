@@ -306,6 +306,8 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_photons" << endl;
   }
+  const int comp = 0;
+  const Interval interv(comp, comp);
 
   const RealVect origin  = m_physdom->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
@@ -315,19 +317,29 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& dom     = m_amr->get_domains()[lvl];
 
+    const bool has_coar = (lvl > 0);
+    const bool has_fine = (lvl < finest_level);
 
+    // 1. If we have a coarser level whose cloud hangs into this level, interpolate the coarser level here first
+    if(has_coar){
+      RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
+      interp->interpolate(*a_state[lvl], *a_state[lvl-1], interv);
+    }
+    
+    // 2. Deposit this levels particles and exchange ghost cells
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       MeshInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
-    // Add in the contribution from the ghost cells
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
     aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
+
+    // 3. If we have a finer level, add this levels
   }
 }
 
