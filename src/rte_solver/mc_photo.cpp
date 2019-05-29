@@ -57,6 +57,7 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
   this->remap_photons(m_photons);                                   // Remap photons
   this->remap_photons(absorbed_photons);                            // Remap photons
+  this->aggregate_photons(m_photons);                               // Aggregate photons
   this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
   
   return true;
@@ -100,7 +101,8 @@ void mc_photo::allocate_internals(){
   const int ncomp  = 1;
   m_amr->allocate(m_state,  m_phase, ncomp); 
   m_amr->allocate(m_source, m_phase, ncomp);
-
+  m_amr->allocate(m_crse,   m_phase, ncomp);
+		  
   m_amr->allocate(m_photons);
   m_amr->allocate(m_pvr, buffer);
 }
@@ -301,16 +303,61 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
   m_num_photons = this->count_photons(m_photons);
 }
 
+void mc_photo::aggregate_photons(const EBAMRPhotons& a_photons){
+  CH_TIME("mc_photo::aggregate_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::aggregate_photons" << endl;
+  }
+
+  // Allocate the joint photons
+  m_amr->allocate(m_joint_photons);
+
+  const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    const RealVect coar_dx       = m_amr->get_dx()[lvl]*RealVect::Unit;
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    m_joint_photons[lvl]->clear();
+    List<joint_photon>& plist = m_joint_photons[lvl]->outcast();
+      
+    const bool has_fine = lvl < finest_level;
+    if(has_fine){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl+1];
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	// Map particle positions to bins
+	std::map<IntVect, joint_photon, CompIntVect> mip;
+
+	binmapPhotons(mip, (*a_photons[lvl+1])[dit()].listItems(), coar_dx, origin);
+
+	for (std::map<IntVect, joint_photon, CompIntVect>::iterator it = mip.begin(); it != mip.end(); ++it){
+	  plist.add(it->second);
+	}
+      }
+    }
+
+    m_joint_photons[lvl]->remapOutcast();
+  }
+}
+
 void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles){
   CH_TIME("mc_photo::deposit_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_photons" << endl;
   }
+
+  
   const int comp = 0;
   const Interval interv(comp, comp);
 
   const RealVect origin  = m_physdom->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
+
+  data_ops::set_value(a_state, 0.0);
+  data_ops::set_value(m_crse,  0.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
@@ -323,7 +370,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     // 1. If we have a coarser level whose cloud hangs into this level, interpolate the coarser level here first
     if(has_coar){
       RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
-      interp->interpolate(*a_state[lvl], *a_state[lvl-1], interv);
+      interp->interpolate(*a_state[lvl], *m_crse[lvl-1], interv);
     }
     
     // 2. Deposit this levels particles and exchange ghost cells
@@ -339,8 +386,23 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     aliasEB(aliasFAB, *a_state[lvl]);
     aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
 
-    // 3. If we have a finer level, add this levels
+    // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
+    //    interpolation of "hanging clouds"
+    if(has_fine){
+      a_state[lvl]->copyTo(*m_crse[lvl]);
+    }
+
+    // 4. Add in contributions from photons on finer levels
+    if(has_fine){
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box box          = dbl.get(dit());
+	MeshInterp interp(box, dx*RealVect::Unit, origin);
+	interp.deposit((*m_joint_photons[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
+      }
+    }
   }
+
+  data_ops::kappa_scale(a_state);
 }
 
 void mc_photo::set_random_kappa(){
@@ -353,7 +415,7 @@ void mc_photo::set_random_kappa(){
   ParmParse pp("mc_photo");
   pp.get("random_kappa", str);
 
-  m_random_kappa = (str == "true") ? true : false;
+  m_random_kappa = (str == "true") ? true : false; 
 }
 
 void mc_photo::set_deposition_type(){
@@ -644,6 +706,14 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
 
     a_photons[lvl]->outcast().clear(); // Done with this level, anything that did not get transferred is lost
   }
+
+#if 1 // Debug
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_photons[lvl]->gatherOutcast();
+    a_photons[lvl]->remapOutcast();
+    a_photons[lvl]->outcast().clear();
+  }
+#endif
 }
 
 int mc_photo::count_photons(const EBAMRPhotons& a_photons) const {
@@ -674,4 +744,26 @@ int mc_photo::count_outcast(const EBAMRPhotons& a_photons) const {
   }
 
   return num_outcast;
+}
+
+
+
+void mc_photo::binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,
+			     const List<photon>&                           a_photons,
+			     const RealVect&                               a_meshSpacing,
+			     const RealVect&                               a_origin){
+
+  for (ListIterator<photon> li(a_photons); li; ++li){
+    const photon& p = li();
+    const IntVect bin = locateBin(p.position(), a_meshSpacing, a_origin);
+
+    std::map<IntVect, joint_photon, CompIntVect>::iterator it = a_mip.find(bin);
+
+    if(it == a_mip.end()){ // Create a new joint_photon
+      a_mip[bin] = joint_photon(p.mass(), p.position(), 1);
+    }
+    else{ // Increment to the one that is already here
+      it->second.add_photon(&p);
+    }
+  }
 }

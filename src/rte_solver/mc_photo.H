@@ -9,6 +9,7 @@
 #define _MC_PHOTO_
 
 #include "rte_solver.H"
+#include "joint_photon.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -152,8 +153,12 @@ protected:
 
   InterpType m_deposition; // Mass deposition type
 
-  EBAMRPhotons m_photons;  // Particles
-  EBAMRPVR m_pvr;          // Valid region
+  EBAMRPhotons m_photons;   // Particles
+  EBAMRPVR m_pvr;           // Valid region
+  EBAMRCellData m_crse;     // Photoionization profile from the coarse level photons
+
+  // Joint photons for finer level stuff
+  Vector<RefCountedPtr<ParticleData<joint_photon> > >m_joint_photons;
 
   Vector<wallbc::which_bc> m_domainbc;
   void set_rng();
@@ -161,7 +166,14 @@ protected:
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
   void remap_photons(EBAMRPhotons& a_photons);
+  void aggregate_photons(const EBAMRPhotons& a_photons);
   void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles);
+
+  // For mapping photons into bins
+  void binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,
+                     const List<photon>&                           a_photons,
+                     const RealVect&                               a_meshSpacing,
+                     const RealVect&                               a_origin);
 
   int domainbc_map(const int a_dir, const Side::LoHiSide a_side);
   int random_poisson(const Real& a_mean);
