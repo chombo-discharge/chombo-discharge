@@ -17,12 +17,10 @@ wall_bc::~wall_bc(){
 }
 
 void wall_bc::set_value(Real a_value){
-  CH_assert(m_which == wallbc::neumann);
   m_value = a_value;
 }
 
 void wall_bc::set_live(bool a_live){
-  CH_assert(m_which == wallbc::dirichlet);
   m_live = a_live;
 }
 

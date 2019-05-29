@@ -84,7 +84,6 @@ void lookup_table::operator-=(const lookup_table& a_table){
 Real lookup_table::get_entry(const Real a_x) const {
 
   Real value;
-  
   if(m_num_entries == 1){
     value = m_y[0];
   }
@@ -93,7 +92,6 @@ Real lookup_table::get_entry(const Real a_x) const {
     // Find entry. We will linear interpolate between i and i+1
     // where i: 
     const int i = floor((a_x - m_x[0])/m_dx);
-
 
     if(i < 0){
       value = m_y[0];
