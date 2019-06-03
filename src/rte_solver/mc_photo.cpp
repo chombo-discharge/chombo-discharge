@@ -56,8 +56,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
   this->remap_photons(m_photons);                                   // Remap photons
+#if 0
   this->remap_photons(absorbed_photons);                            // Remap photons
   this->aggregate_photons(m_photons);                               // Aggregate photons
+#endif
   this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
   
   return true;
@@ -393,6 +395,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     }
 
     // 4. Add in contributions from photons on finer levels
+#if 0
     if(has_fine){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box box          = dbl.get(dit());
@@ -400,6 +403,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
 	interp.deposit((*m_joint_photons[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
       }
     }
+#endif
   }
 
   data_ops::kappa_scale(a_state);
@@ -579,8 +583,8 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 		const RealVect n0    = sign(side)*RealVect(BASISV(dir));
 		const Real norm_path = PolyGeom::dot(n0, path);
 
-		if(norm_path > 0.0){
-		  const Real s = PolyGeom::dot(p0-pos, n0)/norm_path;
+		if(norm_path > 0.0){ // Moves towards wall
+		  const Real s = PolyGeom::dot(p0-pos, n0)/norm_path; // Intersection test
 		  if(s >= 0.0 && s <= 1.0){
 		    if(s < contact_s){
 		      contact_bc    = true;
@@ -597,6 +601,9 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	  else{
 	    contact_bc = false;
 	  }
+#if 0 // MEssage to myself - we should check where the photon is absorbed FIRST
+	  MayDay::Abort("mc_photo - incorrect collision tests");
+#endif
 	  
 	  // Now check the where we contact the embedded boundary
 	  if(check_eb){
@@ -623,7 +630,8 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	      }
 	    }
 	  }
-	  else if(contact_bc){
+	  
+	  if(contact_bc){
 	    const int idx = domainbc_map(contact_dir, contact_side);
 
 	    // Check the boundary condition type
@@ -631,7 +639,6 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	      pos += contact_s*path; // Gives point on wall
 
 	      // Wall normal vector
-
 		
 	      // Modify velocity vector
 	      RealVect& v  = particle.velocity();

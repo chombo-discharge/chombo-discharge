@@ -1,0 +1,40 @@
+# ====================================================================================================
+# MORROW_FHD CLASS OPTIONS
+# ====================================================================================================
+morrow_fhd.gas_temperature               = 300                   # Gas temperature (K)
+morrow_fhd.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
+morrow_fhd.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
+morrow_fhd.gas_pressure                  = 1.0                   # Gas pressure (atm)
+
+morrow_fhd.mobile_ions                   = false                 # Turn off ion mobility (true/false)
+morrow_fhd.diffusive_electrons           = true                  # Electron diffusion on/off
+
+morrow_fhd.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
+morrow_fhd.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
+morrow_fhd.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
+morrow_fhd.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
+
+morrow_fhd.use_fhd                       = true                  # Use FHD
+morrow_fhd.seed                          = 0                     # RNG seed
+morrow_fhd.poiss_exp_swap                = 100                   # Swap from Poisson to exponential distribution
+
+morrow_fhd.uniform_density               = 1.E10                 # Initial background ionization
+morrow_fhd.seed_density                  = 0.E16                 # Initial seed ionization
+morrow_fhd.seed_radius                   = 1E-3                  # Initial seed radius
+morrow_fhd.seed_position                 = 0. 0. 0.              # Initial seed position
+
+morrow_fhd.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission (atm)
+morrow_fhd.excitation_efficiency         = 0.6                   # Impact excitation efficiency
+morrow_fhd.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
+morrow_fhd.photoi_seed                   = 0                     # RNG seed
+morrow_fhd.photoi_f1                     = 2.925E15              # Lower frequency
+morrow_fhd.photoi_f2                     = 3.059E15              # High frequency
+morrow_fhd.photoi_K1                     = 2.1939E-2             # Converted to (mPa)^-1
+morrow_fhd.photoi_K2                     = 1.5                   # Converted to (mPa)^-1
+
+morrow_fhd.domain_bc_x_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+morrow_fhd.domain_bc_x_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+morrow_fhd.domain_bc_y_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+morrow_fhd.domain_bc_y_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+morrow_fhd.domain_bc_z_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+morrow_fhd.domain_bc_z_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
