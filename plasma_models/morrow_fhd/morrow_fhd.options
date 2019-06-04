@@ -16,6 +16,7 @@ morrow_fhd.dielectric_quantum_efficiency = 1.E-6                 # Quantum effic
 
 morrow_fhd.use_fhd                       = true                  # Use FHD
 morrow_fhd.poiss_exp_swap                = 100                   # Swap from Poisson to exponential distribution
+morrow_fhd.seed                          = 0                     # RNG seed
 
 morrow_fhd.uniform_density               = 1.E10                 # Initial background ionization
 morrow_fhd.seed_density                  = 0.E16                 # Initial seed ionization

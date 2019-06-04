@@ -228,16 +228,9 @@ Vector<Real> morrow_fhd::compute_cdr_source_terms(const Real              a_time
 
   // Photoionization
   p = m_photoi_eff*a_rte_densities[m_photon1_idx];
-  products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
+  products = p;//m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_nelec_idx] += products;
   source[m_nplus_idx] += products;
-
-
-#if 0  
-  source[m_nelec_idx] = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np + Sph;
-  source[m_nplus_idx] = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
-  source[m_nminu_idx] = eta*Ne*Ve   - beta*Np*Nn;
-#endif
 
   return source;
 }
@@ -380,7 +373,7 @@ Vector<Real> morrow_fhd::compute_cdr_fluxes(const Real&         a_time,
 
   // Drift outflow for now
   for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = a_extrap_cdr_fluxes[i];
+    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
   }
 
   return fluxes;
@@ -428,28 +421,28 @@ Vector<Real> morrow_fhd::compute_cdr_domain_fluxes(const Real&           a_time,
 }
 
 Vector<Real> morrow_fhd::compute_cdr_electrode_fluxes(const Real&         a_time,
-						const RealVect&     a_pos,
-						const RealVect&     a_normal,
-						const RealVect&     a_E,
-						const Vector<Real>& a_cdr_densities,
-						const Vector<Real>& a_cdr_velocities,
-						const Vector<Real>& a_cdr_gradients,
-						const Vector<Real>& a_rte_fluxes,
-						const Vector<Real>& a_extrap_cdr_fluxes) const {
+						      const RealVect&     a_pos,
+						      const RealVect&     a_normal,
+						      const RealVect&     a_E,
+						      const Vector<Real>& a_cdr_densities,
+						      const Vector<Real>& a_cdr_velocities,
+						      const Vector<Real>& a_cdr_gradients,
+						      const Vector<Real>& a_rte_fluxes,
+						      const Vector<Real>& a_extrap_cdr_fluxes) const {
 
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
 Vector<Real> morrow_fhd::compute_cdr_dielectric_fluxes(const Real&         a_time,
-						 const RealVect&     a_pos,
-						 const RealVect&     a_normal,
-						 const RealVect&     a_E,
-						 const Vector<Real>& a_cdr_densities,
-						 const Vector<Real>& a_cdr_velocities,
-						 const Vector<Real>& a_cdr_gradients,
-						 const Vector<Real>& a_rte_fluxes,
-						 const Vector<Real>& a_extrap_cdr_fluxes) const {
+						       const RealVect&     a_pos,
+						       const RealVect&     a_normal,
+						       const RealVect&     a_E,
+						       const Vector<Real>& a_cdr_densities,
+						       const Vector<Real>& a_cdr_velocities,
+						       const Vector<Real>& a_cdr_gradients,
+						       const Vector<Real>& a_rte_fluxes,
+						       const Vector<Real>& a_extrap_cdr_fluxes) const {
 
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
@@ -476,6 +469,7 @@ Vector<Real> morrow_fhd::compute_rte_source_terms(const Real&         a_time,
 Real morrow_fhd::stochastic_reaction(const Real a_S, const Real a_vol, const Real a_dt) const{
   Real value = 0.0;
   const Real mean = a_S*a_vol*a_dt;
+  if(mean < 1.0) return a_S;
   if(mean < m_poiss_exp_swap){
     std::poisson_distribution<int> dist(mean);
     value = Max(0.0, 1.0*dist(*m_rng)/(a_vol * a_dt));
@@ -533,7 +527,7 @@ morrow_fhd::positive_species::positive_species(){
 
 morrow_fhd::negative_species::negative_species(){
   m_name      = "negative_species";
-  m_charge    = 1;
+  m_charge    = -1;
   m_diffusive = false;
   m_mobile    = false;
   m_unit      = "m-3";
