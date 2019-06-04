@@ -51,6 +51,7 @@ morrow_fhd::morrow_fhd(){
   pp.get("use_fhd", str);   m_fhd = (str == "true") ? true : false;
   pp.get("seed",           m_seed);
   pp.get("poiss_exp_swap", m_poiss_exp_swap);
+  pp.get("cutoff_poisson", m_cutoff_poisson);
 
   // Boundary conditions at domain walls
   m_wallbc.resize(2*SpaceDim, 0); 
@@ -469,14 +470,18 @@ Vector<Real> morrow_fhd::compute_rte_source_terms(const Real&         a_time,
 Real morrow_fhd::stochastic_reaction(const Real a_S, const Real a_vol, const Real a_dt) const{
   Real value = 0.0;
   const Real mean = a_S*a_vol*a_dt;
-  if(mean < 1.0) return a_S;
-  if(mean < m_poiss_exp_swap){
-    std::poisson_distribution<int> dist(mean);
-    value = Max(0.0, 1.0*dist(*m_rng)/(a_vol * a_dt));
+  if(mean < m_cutoff_poisson){
+    value = a_S;
   }
   else{
-    std::normal_distribution<double> dist(mean, sqrt(mean));
-    value = Max(0.0, 1.0*dist(*m_rng)/(a_vol * a_dt));
+    if(mean < m_poiss_exp_swap){
+      std::poisson_distribution<int> dist(mean);
+      value = Max(0.0, 1.0*dist(*m_rng)/(a_vol * a_dt));
+    }
+    else{
+      std::normal_distribution<double> dist(mean, sqrt(mean));
+      value = Max(0.0, 1.0*dist(*m_rng)/(a_vol * a_dt));
+    }
   }
 
   return value;
