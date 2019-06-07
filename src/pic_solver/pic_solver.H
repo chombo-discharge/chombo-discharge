@@ -29,15 +29,17 @@ public:
   virtual ~pic_solver();
 
   void advance(const Real a_dt);
-  void deposit(EBAMRCellData& a_density) const;
+  void deposit_charge(EBAMRCellData& a_density);
   void interpolate_force(const EBAMRCellData& a_E);
   void set_deposition_type();
-  void set_bisect_step();
+  void initial_data(List<Particle>& a_particles);
   void insert_particles(EBAMRParticles& a_particles);
   void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
   void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
   void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
   void set_time(const int a_step, const Real a_time, const Real a_dt);
+  void set_verbosity(const int a_verbosity);
+  void set_phase(const phase::which_phase a_phase);
 
   virtual void allocate_internals();
   virtual void cache_state();
@@ -57,16 +59,25 @@ public:
 
 protected:
 
-  std::string m_name; // Solver name
+  phase::which_phase m_phase; // Phase
+  std::string m_name;         // Solver name
 
   RefCountedPtr<computational_geometry> m_compgeom; // Computational domain
   RefCountedPtr<physical_domain> m_physdom;         // Physical domain
   RefCountedPtr<amr_mesh> m_amr;                    // AMR grids
-  
+
+  EBAMRCellData m_scratch_sca; // Scratch storage
+  EBAMRCellData m_scratch_vec; // Scratch storage for vector fields
+
+  bool m_mobile;       // Mobile or not
+
+  Real m_mass;         // Particle mass
+  Real m_QbyM;         // Particle charge/mass
   Real m_bisect_step;  // Bisection step length
   Real m_time;         // Simulation time. For staggered methods this is the positional time
   Real m_dt;           // Time step size
 
+  int m_charge;     // Charge
   int m_verbosity;  // Solver verbosity
   int m_step;       // Time step #
 

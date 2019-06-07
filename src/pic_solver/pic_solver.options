@@ -1,0 +1,7 @@
+# ====================================================================================================
+# PIC_SOLVER CLASS OPTIONS
+# ====================================================================================================
+pic_solver.deposition     = cic         # 'ngp' = nearest grid point
+                                        # 'cic' = cloud-in-cell
+                                        # 'tsc' = triangle-shaped-cloud
+                                        # 'w4'  = 3rd order interpolation
