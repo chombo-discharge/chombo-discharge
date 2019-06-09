@@ -40,14 +40,20 @@ public:
   void set_time(const int a_step, const Real a_time, const Real a_dt);
   void set_verbosity(const int a_verbosity);
   void set_phase(const phase::which_phase a_phase);
+  void set_charge(const int a_charge);
+  void set_mass(const Real a_mass);
+  void leapfrog_rewind(const Real a_dt);
+  void advance_leapfrog(const Real a_dt); // Leapfrog advance algorithm
+  void advance_vervlet(const Real a_dt);  // Velocity vervlet advance algorithm
 
   virtual void allocate_internals();
   virtual void cache_state();
   virtual void deallocate_internals();
   virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
-  virtual void write_plot_file() const; 
+  virtual void write_plot_file(); 
 
   Real get_time() const;
+  Real compute_dt() const;
   
   int query_ghost() const;
   int get_step() const;
@@ -88,8 +94,7 @@ protected:
   EBAMRParticles m_eb_part;   // Particles that struck the EB in a time step. Passed externally for boundary treatment
   EBAMRParticles m_dom_part;  // Particles that struck a domain in a time step. Passed externally for boundary treatment
 
-  void advance_leapfrog(const Real a_dt); // Leapfrog advance algorithm
-  void advance_vervlet(const Real a_dt);  // Velocity vervlet advance algorithm
+
 };
 
 #endif
