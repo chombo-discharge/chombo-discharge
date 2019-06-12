@@ -740,7 +740,7 @@ void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCe
 
 	    const int sgn = sign(sit()); // Lo = -1, Hi = 1
 	    
-	    const VolIndex& vof = face.getVoF(sit());
+	    const VolIndex& vof = face.getVoF(flip(sit()));
 	    const IntVect iv0   = vof.gridIndex();
 	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
 
@@ -761,6 +761,8 @@ void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCe
 		}
 	      }
 	    }
+
+	    // Necessary scaling
 	    for (int comp = 0; comp < ncomp; comp++){
 	      extrap(face, comp) = 0.5*units::s_c0*extrap(face, comp);
 	    }

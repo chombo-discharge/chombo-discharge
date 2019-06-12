@@ -702,8 +702,9 @@ void sisdc::compute_FD_0(){
       cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
       tgasolver->compute_divD(FD_0, phi_0);
 
-      m_amr->average_down(FD_0, m_cdr->get_phase());
-      m_amr->interp_ghost(FD_0, m_cdr->get_phase());
+      // Shouldn't be necesary
+      // m_amr->average_down(FD_0, m_cdr->get_phase());
+      // m_amr->interp_ghost(FD_0, m_cdr->get_phase());
     }
     else{
       data_ops::set_value(FD_0, 0.0);
@@ -864,8 +865,10 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       if(!(m_cycle_sources && m_subcycle)){
 	data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
       }
-      m_amr->average_down(phi_m1, m_cdr->get_phase());
-      m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
+
+      // This shouldn't be necessary
+      // m_amr->average_down(phi_m1, m_cdr->get_phase());
+      // m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
 
       if(a_corrector){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
@@ -874,8 +877,9 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       data_ops::incr(FAR_m, phi_m, -1.0);       // :
       data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
 
-      m_amr->average_down(FAR_m, m_cdr->get_phase());
-      m_amr->interp_ghost(FAR_m, m_cdr->get_phase());
+      // Shouldn't be necessary
+      // m_amr->average_down(FAR_m, m_cdr->get_phase());
+      // m_amr->interp_ghost(FAR_m, m_cdr->get_phase());
     }
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
@@ -931,14 +935,19 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
     EBAMRCellData& scratch     = storage->get_scratch();
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];
 
-    const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
-    solver->compute_divF(scratch, phi_m, extrap_dt, true);                     // scratch =  Div(v_m*phi_m^(k+1))
+    if(solver->is_mobile()){
+      const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
+      solver->compute_divF(scratch, phi_m, extrap_dt, true);                     // scratch =  Div(v_m*phi_m^(k+1))
     
-    data_ops::copy(phi_m1, phi_m);
-    data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
-    m_amr->average_down(phi_m1, m_cdr->get_phase());
-    m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
-    data_ops::floor(phi_m1, 0.0);
+      data_ops::copy(phi_m1, phi_m);
+      data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
+      // m_amr->average_down(phi_m1, m_cdr->get_phase());
+      // m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
+      data_ops::floor(phi_m1, 0.0);
+    }
+    else{
+      data_ops::copy(phi_m1, phi_m);
+    }
   }
 
   // Update sigma. Also compute the new slope.
@@ -1170,9 +1179,14 @@ void sisdc::reconcile_integrands(){
     const EBAMRCellData& phi_p = *cdr_densities_p[idx] ;
     const EBAMRCellData& src   = solver->get_source();
 
-    const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
-    solver->compute_divF(FAR_p, phi_p, extrap_dt, true); // FAR_p =  Div(v_p*phi_p)
-    data_ops::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
+    if(solver->is_mobile()){
+      const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
+      solver->compute_divF(FAR_p, phi_p, extrap_dt, true); // FAR_p =  Div(v_p*phi_p)
+      data_ops::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
+    }
+    else{
+      data_ops::set_value(FAR_p, 0.0);
+    }
     data_ops::incr(FAR_p, src, 1.0);                     // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
 
     // Build the integrand
@@ -1186,8 +1200,9 @@ void sisdc::reconcile_integrands(){
 	data_ops::incr(F_m, FD_m, 1.0);
       }
 
-      m_amr->average_down(F_m, m_cdr->get_phase());
-      m_amr->interp_ghost(F_m, m_cdr->get_phase());
+      // Shouldn't be necessary
+      // m_amr->average_down(F_m, m_cdr->get_phase());
+      // m_amr->interp_ghost(F_m, m_cdr->get_phase());
     }
   }
 
@@ -1588,7 +1603,7 @@ void sisdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
     m_amr->compute_gradient(grad, *a_states[idx]);
-    m_amr->average_down(grad, m_cdr->get_phase());
+    //    m_amr->average_down(grad, m_cdr->get_phase());
     m_amr->interp_ghost(grad, m_cdr->get_phase());
   }
 }

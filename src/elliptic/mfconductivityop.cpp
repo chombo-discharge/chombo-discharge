@@ -234,6 +234,7 @@ void mfconductivityop::set_electrodes(const Vector<electrode>& a_electrodes, con
 
   m_electrodes = a_electrodes;
   m_potential  = a_potential;
+
   this->set_bc_from_levelset();
 }
 
@@ -248,7 +249,6 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
 
   this->set_bc_from_levelset();
   this->set_bc_from_matching(a_phi, a_homogeneous);
-
 
 #if verb
   pout() << "mfconductivityop::update_bc - done" << endl;
@@ -265,7 +265,6 @@ void mfconductivityop::set_bc_from_levelset(){
   const int comp = 0;
   
   for (int iphase = 0; iphase < m_phases; iphase++){
-    //  for (int iphase = 0; iphase <= 0; iphase++){
     LevelData<BaseIVFAB<Real> >& val = *m_dirival[iphase];
 
     for (DataIterator dit = val.dataIterator(); dit.ok(); ++dit){
@@ -295,7 +294,7 @@ void mfconductivityop::set_bc_from_levelset(){
 	    potential *= m_electrodes[func].get_fraction();
 	  }
 	  else{
-	    potential = 0.;
+	    potential = 0.0;
 	  }
 	  val[dit()](vof, comp) = potential;
 	}

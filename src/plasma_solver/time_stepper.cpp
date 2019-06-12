@@ -133,7 +133,7 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffc
 
     if(solver->is_diffusive()){ // Only need to do this for diffusive things
       m_amr->average_down(diffco[idx], m_cdr->get_phase());
-      m_amr->interp_ghost(diffco[idx], m_cdr->get_phase());
+      // m_amr->interp_ghost(diffco[idx], m_cdr->get_phase()); // Shouldn't be necessary
 
       data_ops::average_cell_to_face_allcomps(*a_diffco_face[idx], diffco[idx], m_amr->get_domains());
     }
@@ -766,7 +766,7 @@ void time_stepper::compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
     CH_assert(density[0]->nComp()      == 1);
     
     m_amr->compute_gradient(gradient, density);                         // Compute cell-centered gradient
-    m_amr->average_down(gradient, a_phase);                             // Average down
+    //    m_amr->average_down(gradient, a_phase);                             // Average down - shouldn't be necesasry
     m_amr->interp_ghost(gradient, a_phase);                             // Interpolate ghost cells (have to do this before interp)
     this->extrapolate_to_eb(eb_gradient, a_phase, gradient);            // Extrapolate to EB
     this->project_flux(grad_density, eb_gradient);                      // Project onto EB
@@ -840,9 +840,9 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
 				       const EBAMRCellData&           a_E,
 				       const Real&                    a_time,
 				       const centering::which_center  a_centering){
-  CH_TIME("time_stepper::compute_cdr_sources(full)");
+  CH_TIME("time_stepper::compute_cdr_sources(full, nograd)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_cdr_sources(full)" << endl;
+    pout() << "time_stepper::compute_cdr_sources(full, nograd)" << endl;
   }
 
   const int num_species = m_plaskin->get_num_species();
@@ -886,11 +886,11 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   m_amr->allocate(E_norm, m_cdr->get_phase(), 1);         // Allocate storage for |E|
 
   data_ops::vector_length(E_norm, a_E);             // Compute |E|
-  m_amr->average_down(E_norm, m_cdr->get_phase());  // Average down
-  m_amr->interp_ghost(E_norm, m_cdr->get_phase());  // Interpolate ghost cells
+  //  m_amr->average_down(E_norm, m_cdr->get_phase());  // Average down
+  m_amr->interp_ghost(E_norm, m_cdr->get_phase());  // Interpolate ghost cells. 
 
   m_amr->compute_gradient(grad_E, E_norm);           // Compute grad(|E|)
-  m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
+  // m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
   m_amr->interp_ghost(grad_E, m_cdr->get_phase());   // Interpolate ghost cells
 
   // Call full versions
@@ -941,7 +941,9 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->average_down(*a_sources[idx], m_cdr->get_phase());
-    m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
+
+    // Commenting this out. Updated ghost cell data shouldn't be necessary. 
+    //    m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
   }
 }
 
@@ -1378,8 +1380,8 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
   // Average down and interpolate ghost cells
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_amr->average_down(*a_velocities[idx], m_cdr->get_phase());
-    m_amr->interp_ghost(*a_velocities[idx], m_cdr->get_phase());
+    //    m_amr->average_down(*a_velocities[idx], m_cdr->get_phase()); // This _should't be necessary. 
+    m_amr->interp_ghost(*a_velocities[idx], m_cdr->get_phase());       // This definitely is. 
   }
 }
 

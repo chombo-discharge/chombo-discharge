@@ -10,6 +10,7 @@
 #include <EBArith.H>
 
 #define VOFIT_PREBUILT 1
+#define verb 1
 
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
@@ -94,26 +95,30 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_vofit_sol.define(m_grids);
 
   int num = 0;
-  for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
-    MFInterfaceFAB<Real>& bco         = m_bco[dit()];
-    MFInterfaceFAB<Real>& weights     = m_weights[dit()];
-    MFInterfaceFAB<Real>& inhomo      = m_inhomo[dit()];
-    MFInterfaceFAB<Real>& homog       = m_homog[dit()];
-    MFInterfaceFAB<VoFStencil>& stens = m_stencils[dit()];
+
+  // If we only have one phase, there are no jump cells and we don't need to do anything. 
+  if(m_mfis->num_phases() > 1){
+    for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
+      MFInterfaceFAB<Real>& bco         = m_bco[dit()];
+      MFInterfaceFAB<Real>& weights     = m_weights[dit()];
+      MFInterfaceFAB<Real>& inhomo      = m_inhomo[dit()];
+      MFInterfaceFAB<Real>& homog       = m_homog[dit()];
+      MFInterfaceFAB<VoFStencil>& stens = m_stencils[dit()];
 
 
-    bco.define(m_mflg,     dit());
-    weights.define(m_mflg, dit());
-    inhomo.define(m_mflg,  dit());
-    homog.define(m_mflg,   dit());
-    stens.define(m_mflg,   dit());
+      bco.define(m_mflg,     dit());
+      weights.define(m_mflg, dit());
+      inhomo.define(m_mflg,  dit());
+      homog.define(m_mflg,   dit());
+      stens.define(m_mflg,   dit());
 
-    m_ivs[dit()] = bco.get_ivs();
+      m_ivs[dit()] = bco.get_ivs();
+    }
+
+    this->define_vofiter();
+    this->set_bco(a_bco);
+    this->build_stencils();
   }
-
-  this->define_vofiter();
-  this->set_bco(a_bco);
-  this->build_stencils();
 
   m_defined = true;
 }

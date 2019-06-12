@@ -115,6 +115,8 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       bool drop_order = false;
 
       if(m_order == 2){
+	
+
 	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	if(drop_order){
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
@@ -196,6 +198,8 @@ bool mfdirichletconductivityebbc::get_second_order_sten(Real&             a_weig
   a_weight   = -x1*x1/denom + x2*x2/denom;
   a_stencil +=  phi1Sten;
   a_stencil +=  phi2Sten;
+
+  return false;
 }
 
 void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weight,
@@ -301,7 +305,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
       const Real& beta       = m_beta;
       const Real& bco        = (*m_bcoe)[a_dit](vof, comp);
       const Real& area_frac  = ebisbox.bndryArea(vof);
-      const Real& weight     = m_irreg_weights[a_dit](vof, comp); 
+      const Real& weight     = m_irreg_weights[a_dit](vof, comp);
       Real flux              = weight*value*beta*bco*area_frac*a_factor;
 
       if(mfdirichletconductivityebbc::s_areaFracWeighted){
