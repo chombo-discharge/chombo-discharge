@@ -553,59 +553,57 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	bool check_bc = false; // Flag for intersection test with domain
 
 	// See if we should check for different types of boundary intersections
-	if(impfunc->value(pos) < path_len){
+	if(impfunc->value(pos) < path_len){ // This tests if we should check for EB intersections
 	  check_eb = true;
 	}
-	for (int dir = 0; dir < SpaceDim; dir++){
+	for (int dir = 0; dir < SpaceDim; dir++){ // This tests if the photon ended up outside the domain
 	  if(absorbed_pos[dir] < origin[dir] || absorbed_pos[dir] > prob_hi[dir]){
-	    check_bc = true;
+	    check_bc = true; // We are guaranteed that the photon crossed a domain boundary
 	  }
 	}
 						  
 	// The remaining code does the boundary intersection tests
-	if(!check_eb && !check_bc){ // Test necessary
+	if(!check_eb && !check_bc){ // No further testing necessary
 	  pos = absorbed_pos;
 	}
 	else{
 
-	  // Determine if the particle contacts one of the domain walls, and after how long it contacts
+	  // Here are the contact points for the EB and domain stuff.
+	  // We have x(s) = x0 + s*(x1-x0), s=[0,1].
+	  // Take the smallest s to be the intersection points
+	  Real s_eb = 2.0;
+	  Real s_bc = 2.0;
 	  bool contact_bc = false;
-	  Real contact_s = 2.0;
+	  bool contact_eb = false;
 	  int contact_dir;
 	  Side::LoHiSide contact_side;
-	  RealVect contact_point;
-	  if(check_bc){ // This test does a line-plane intersection test on each side and selects the shortest intersection
+	  
+	  // 1. Determine if the particle contacts one of the domain walls, and after how long it contacts
+	  if(check_bc){ // This test does a line-plane intersection test on each side and direction
 	    for (int dir = 0; dir < SpaceDim; dir++){
 	      for (SideIterator sit; sit.ok(); ++sit){
 		const Side::LoHiSide side = sit();
 
 		const RealVect p0    = (side == Side::Lo) ? origin : prob_hi; // A point on the domain
-		const RealVect n0    = sign(side)*RealVect(BASISV(dir));
-		const Real norm_path = PolyGeom::dot(n0, path);
+		const RealVect n0    = sign(side)*RealVect(BASISV(dir));      // Domain side normal vector
+		const Real norm_path = PolyGeom::dot(n0, path);               // Used for test
 
 		if(norm_path > 0.0){ // Moves towards wall
 		  const Real s = PolyGeom::dot(p0-pos, n0)/norm_path; // Intersection test
 		  if(s >= 0.0 && s <= 1.0){
-		    if(s < contact_s){
+		    if(s < s_bc){
 		      contact_bc    = true;
 		      contact_side  = side;
 		      contact_dir   = dir;
-		      contact_s     = s;
-		      contact_point = pos + contact_s*path;
+		      s_bc          = s;
 		    }
 		  }
 		}
 	      }
 	    }
 	  }
-	  else{
-	    contact_bc = false;
-	  }
-#if 0 // MEssage to myself - we should check where the photon is absorbed FIRST
-	  MayDay::Abort("mc_photo - incorrect collision tests");
-#endif
 	  
-	  // Now check the where we contact the embedded boundary
+	  // 2. Now check the where we contact the embedded boundary
 	  if(check_eb){
 	    const int nsteps  = ceil(path_len/m_bisect_step);
 	    const RealVect dx = (absorbed_pos - pos)/nsteps;
@@ -615,14 +613,17 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	    for (int istep = 0; istep < nsteps; istep++){
 	      const Real fa = impfunc->value(pos);
 	      const Real fb = impfunc->value(pos+dx);
-	      const bool absorb = fa*fb <= 0.0;
 
-	      if(absorb){ 
+	      if(fa*fb <= 0.0){ 
 		// We happen to know that f(pos+dx) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
-		// where the absorption happens. For that we use a Brent root finder on the interval [pos, pos+dx].
+		// where the photon crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dx].
 		const RealVect xcol = poly::brent_root_finder(impfunc, pos, pos+dx);
+		s_eb = (xcol - pos).vectorLength()/path.vectorLength();
+#if 0
 		pos = xcol;
 		absorbed.transfer(lit);
+#endif
+		contact_eb = true;
 		break;
 	      }
 	      else{ // Move to next interval
@@ -630,28 +631,33 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	      }
 	    }
 	  }
-	  
-	  if(contact_bc){
-	    const int idx = domainbc_map(contact_dir, contact_side);
 
-	    // Check the boundary condition type
-	    if(m_domainbc[idx] == wallbc::symmetry){ // Need to bounce back
-	      pos += contact_s*path; // Gives point on wall
+	  // 3. Move the photon to the absorption point
+	  if(contact_eb || contact_bc){  
+	    pos += Min(s_eb, s_bc)*path; // Move the photon to the absorption point. This is either on the boundary
 
-	      // Wall normal vector
-		
-	      // Modify velocity vector
-	      RealVect& v  = particle.velocity();
-	      const RealVect n0 = sign(contact_side)*RealVect(BASISV(contact_dir));
+	    // Domain boundaries may be bounce-back. 
+	    if(contact_bc && s_bc < s_eb){ // Photon was absorbed on the domain 
+	      const int idx = domainbc_map(contact_dir, contact_side);
 
-	      v = v - 2.0*PolyGeom::dot(v, n0)*n0; // New direction
-	      pos += (1-contact_s)*path_len*v/v.vectorLength();
+	      // Check the boundary condition type
+	      if(m_domainbc[idx] == wallbc::symmetry){ // Need to bounce back
+
+		// Modify velocity vector
+		RealVect& v  = particle.velocity();
+		const RealVect n0 = sign(contact_side)*RealVect(BASISV(contact_dir));
+
+		v = v - 2.0*PolyGeom::dot(v, n0)*n0; // New direction
+		pos += (1-s_bc)*path_len*v/v.vectorLength();
+	      }
+	      else if(m_domainbc[idx] == wallbc::wall){
+		absorbed.transfer(lit);
+	      }
+	      else if(m_domainbc[idx] == wallbc::outflow){ // Do nothing
+	      }
 	    }
-	    else if(m_domainbc[idx] == wallbc::wall){
-	      pos += contact_s*path;
+	    else if(contact_eb && s_eb < s_bc) { // Photon was absorbed on the EB
 	      absorbed.transfer(lit);
-	    }
-	    else if(m_domainbc[idx] == wallbc::outflow){ // Do nothing
 	    }
 	  }
 	}
@@ -714,7 +720,7 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
     a_photons[lvl]->outcast().clear(); // Done with this level, anything that did not get transferred is lost
   }
 
-#if 1 // Debug
+#if 0 // Debug
   for (int lvl = 0; lvl <= finest_level; lvl++){
     a_photons[lvl]->gatherOutcast();
     a_photons[lvl]->remapOutcast();
