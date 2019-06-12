@@ -52,9 +52,19 @@ public:
   virtual Real get_kappa(const RealVect a_pos) const;
 
   /*!
+    @brief Get a random kappa
+  */
+  virtual Real get_random_kappa() const;
+
+  /*!
     @brief Get scattering coefficient. 
   */
   virtual Real get_scatter(const RealVect a_pos) const;
+
+  /*!
+    @brief Get a random scattering coefficient
+  */
+  virtual Real get_random_scatter() const;
 	      
 protected:
 

@@ -715,6 +715,7 @@ void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCe
     pout() << m_name + "::compute_domain_flux" << endl;
   }
 
+
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const int ncomp = a_data[lvl]->nComp();
       
@@ -744,7 +745,7 @@ void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCe
 	    const IntVect iv0   = vof.gridIndex();
 	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
 
-	    if(ebisbox.isCovered(iv0)){ // Just provide some bogus data because the face 
+	    if(ebisbox.isCovered(iv0)){ // Just provide some bogus data because the face
 	      for (int comp = 0; comp < ncomp; comp++){
 		extrap(face, comp) = 0.0;
 	      }

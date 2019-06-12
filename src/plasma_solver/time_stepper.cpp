@@ -1638,7 +1638,7 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
     pos = origin + iv*a_dx;
     E   = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
 
-        // Fill vectors with densities
+    // Fill vectors with densities
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx  = solver_it.get_solver();
       const Real phi = (*a_cdr_densities[idx]).getSingleValuedFAB()(iv, 0);

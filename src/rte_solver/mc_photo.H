@@ -9,6 +9,7 @@
 #define _MC_PHOTO_
 
 #include "rte_solver.H"
+#include "joint_photon.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -97,6 +98,17 @@ public:
   virtual void set_bisect_step();
 
   /*!
+    @brief Switch for selecting absorption length randomly
+    @details Used e.g. if the photon frequency is "random"
+  */
+  virtual void set_random_kappa();
+
+  /*!
+    @brief Clear data holder
+  */
+  virtual void clear(EBAMRPhotons& a_photons);
+  
+  /*!
     @brief 
   */
   virtual void set_domain_bc();
@@ -113,12 +125,25 @@ public:
   */
   virtual int query_ghost() const;
 
+  /*!
+    @brief Count number of photons in particle list
+  */
+  virtual int count_photons(const EBAMRPhotons& a_photons) const;
 
+  /*!
+    @brief Count number of outcast photons in particle list
+  */
+  virtual int count_outcast(const EBAMRPhotons& a_photons) const;
+  
 protected:
+
+  bool m_random_kappa;    // Use random kappa or not
 
   int  m_max_photons;     // Number of photons per pseudophoton
   int  m_seed;            // RNG seed
   int  m_poiss_exp_swap;  // Threshold for swapping Poisson and exponential distributions
+
+  long long m_num_photons;
 
   Real m_bisect_step;     // Bisection step length
   
@@ -128,8 +153,12 @@ protected:
 
   InterpType m_deposition; // Mass deposition type
 
-  EBAMRPhotons m_photons;  // Particles
-  EBAMRPVR m_pvr;          // Valid region
+  EBAMRPhotons m_photons;   // Particles
+  EBAMRPVR m_pvr;           // Valid region
+  EBAMRCellData m_crse;     // Photoionization profile from the coarse level photons
+
+  // Joint photons for finer level stuff
+  Vector<RefCountedPtr<ParticleData<joint_photon> > >m_joint_photons;
 
   Vector<wallbc::which_bc> m_domainbc;
   void set_rng();
@@ -137,7 +166,14 @@ protected:
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
   void remap_photons(EBAMRPhotons& a_photons);
+  void aggregate_photons(const EBAMRPhotons& a_photons);
   void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles);
+
+  // For mapping photons into bins
+  void binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,
+                     const List<photon>&                           a_photons,
+                     const RealVect&                               a_meshSpacing,
+                     const RealVect&                               a_origin);
 
   int domainbc_map(const int a_dir, const Side::LoHiSide a_side);
   int random_poisson(const Real& a_mean);
