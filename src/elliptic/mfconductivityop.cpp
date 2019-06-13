@@ -247,7 +247,7 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
   LevelData<MFCellFAB>* phi = const_cast<LevelData<MFCellFAB>* > (&a_phi);
   phi->exchange();
 
-  this->set_bc_from_levelset();
+  //  this->set_bc_from_levelset();
   this->set_bc_from_matching(a_phi, a_homogeneous);
 
 #if verb
@@ -256,6 +256,7 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
 }
 
 void mfconductivityop::set_bc_from_levelset(){
+  CH_TIME("mfconductivityop::set_bc_from_levelset");
 #if verb
   pout() << "mfconductivityop::set_bc_from_levelset"<< endl;
 #endif

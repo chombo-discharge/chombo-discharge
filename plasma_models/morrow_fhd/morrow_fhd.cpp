@@ -228,7 +228,7 @@ Vector<Real> morrow_fhd::compute_cdr_source_terms(const Real              a_time
   source[m_nminu_idx] -= products;
 
   // Photoionization
-  p = m_photoi_eff*a_rte_densities[m_photon1_idx];
+  p = m_photoi_eff*a_rte_densities[m_photon1_idx]/m_dt;
   products = p;//m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_nelec_idx] += products;
   source[m_nplus_idx] += products;
