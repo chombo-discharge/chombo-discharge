@@ -30,6 +30,7 @@ mc_photo::mc_photo(){
   this->set_bisect_step();
   this->set_domain_bc();
   this->set_random_kappa();
+  this->set_pvr_buffer();
 }
 
 mc_photo::~mc_photo(){
@@ -56,8 +57,8 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
   this->remap_photons(m_photons);                                   // Remap photons
-#if 0
   this->remap_photons(absorbed_photons);                            // Remap photons
+#if 0
   this->aggregate_photons(m_photons);                               // Aggregate photons
 #endif
   this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
@@ -106,7 +107,7 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_crse,   m_phase, ncomp);
 		  
   m_amr->allocate(m_photons);
-  m_amr->allocate(m_pvr, buffer);
+  m_amr->allocate(m_pvr, m_pvr_buffer);
 }
   
 void mc_photo::cache_state(){
@@ -256,7 +257,7 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
       			    ref_ratio,
 			    false,
 			    origin);
-      a_particles[lvl]->outcast().clear(); // Delete particles generated on the coarser level and regenerate them on this level
+      a_particles[lvl]->outcast().clear(); // Delete particles generated on the coarser level. We'll generate them on this level.
     }
 
     // Create new particles on this level using fine-resolution data
@@ -675,19 +676,23 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_physdom->get_prob_lo();
 
-  // Upsweep, build outcast lists on each level and transfer from coarser levels to current levels PVR
+  // Upsweep
+  // -------
+  //    Build outcast lists on each level and transfer from coarser levels to current levels PVR and vice versa. We
+  //    begin by remapping each level. For level l>0, we begin by moving particles that lie outside level l's PVR and
+  //    onto level (l-1)'s outcast list. Then, we move particles from level (l-1)'s level and onto level l's PVR. 
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
     // Build outcast list on this level
     a_photons[lvl]->outcast().clear();
-    a_photons[lvl]->gatherOutcast();
-    a_photons[lvl]->remapOutcast();
+
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
-    // Transfer particles from coarser level to this levels PVR
     if(has_coar){
+
+      // 1. Photons on the coarser level are moved to this levels PVR
       collectValidParticles(a_photons[lvl]->outcast(),
 			    *a_photons[lvl-1],
 			    m_pvr[lvl]->mask(),
@@ -695,38 +700,60 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
 			    m_amr->get_ref_rat()[lvl-1],
 			    false,
 			    origin);
+
+      // 2. Remap particles
+      a_photons[lvl]->gatherOutcast();
+      a_photons[lvl]->remapOutcast();
+
+      // 3. Transfer particles out of this regions PVR and onto the coarser level outcast list
+      collectValidParticles(a_photons[lvl]->outcast(),
+			    *a_photons[lvl],
+			    m_pvr[lvl]->mask(),
+			    m_amr->get_dx()[lvl]*RealVect::Unit,
+			    1,//m_amr->get_ref_rat()[lvl-1],
+			    true, 
+			    origin);
+
+
+
     }
-    a_photons[lvl]->gatherOutcast();
-    a_photons[lvl]->remapOutcast();
+    else{
+      a_photons[lvl]->gatherOutcast();
+      a_photons[lvl]->remapOutcast();
+    }
   }
 
   // Downsweep
+  // ---------
+  //    We now particles in the correct PVR on each level, and we also have an outcast list for each level. Starting on
+  //    the finest level, copy the list onto the coarser level and rebin that level. 
+  ///   Keep doing this until we reach the coarsest grid level.
   for (int lvl = finest_level; lvl >= 0; lvl--){
     const bool has_coar = lvl > 0;
 
     if(has_coar){ // Add the current levels outcast list to the coarser level, then rebin the coarser level
+
+      // 1. Level lvl should be done, so its outcast list is copied to (lvl-1) outcast list
       List<photon>& this_outcast = a_photons[lvl]->outcast();
       List<photon>& coar_outcast = a_photons[lvl-1]->outcast();
       coar_outcast.catenate(this_outcast);
-      //      this_outcast.clear();
 
-      a_photons[lvl]->gatherOutcast();
-      a_photons[lvl]->remapOutcast();
-
+      // 2. Remap the outcast list on level lvl-1
       a_photons[lvl-1]->gatherOutcast();
       a_photons[lvl-1]->remapOutcast();
+
+      // 3. Level lvl-1 can still have particles that dont belong on the PVR. Put them back in the outcast list
+      collectValidParticles(a_photons[lvl-1]->outcast(),
+			    *a_photons[lvl-1],
+			    m_pvr[lvl-1]->mask(),
+			    m_amr->get_dx()[lvl-1]*RealVect::Unit,
+			    1,
+			    true, 
+			    origin);
     }
 
     a_photons[lvl]->outcast().clear(); // Done with this level, anything that did not get transferred is lost
   }
-
-#if 0 // Debug
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_photons[lvl]->gatherOutcast();
-    a_photons[lvl]->remapOutcast();
-    a_photons[lvl]->outcast().clear();
-  }
-#endif
 }
 
 int mc_photo::count_photons(const EBAMRPhotons& a_photons) const {
@@ -757,6 +784,17 @@ int mc_photo::count_outcast(const EBAMRPhotons& a_photons) const {
   }
 
   return num_outcast;
+}
+
+int mc_photo::set_pvr_buffer(){
+  CH_TIME("mc_photo::set_pvr_buffer");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_pvr_buffer" << endl;
+  }
+
+  // Seed the RNG
+  ParmParse pp("mc_photo");
+  pp.get("pvr_buffer", m_pvr_buffer);
 }
 
 

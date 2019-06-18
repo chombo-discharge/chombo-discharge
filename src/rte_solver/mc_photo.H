@@ -121,6 +121,11 @@ public:
 #endif
 
   /*!
+    @brief Set PVR buffer
+  */
+  virtual int set_pvr_buffer();
+
+  /*!
     @brief Return required number of ghost cells
   */
   virtual int query_ghost() const;
@@ -142,6 +147,7 @@ protected:
   int  m_max_photons;     // Number of photons per pseudophoton
   int  m_seed;            // RNG seed
   int  m_poiss_exp_swap;  // Threshold for swapping Poisson and exponential distributions
+  int  m_pvr_buffer;      // PVR buffer
 
   long long m_num_photons;
 

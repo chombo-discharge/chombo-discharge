@@ -2025,9 +2025,9 @@ void sisdc::update_stationary_rte(const Vector<EBAMRCellData*>& a_cdr_states, co
 }
 
 void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_corrector){
-  CH_TIME("sisdc::update_stationary_rte(full)");
+  CH_TIME("sisdc::integrate_rte(full)");
   if(m_verbosity > 5){
-    pout() << "sisdc::update_stationary_rte(full)" << endl;
+    pout() << "sisdc::integrate_rte(full)" << endl;
   }
 
   if(m_do_rte){
