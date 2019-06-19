@@ -357,7 +357,10 @@ Vector<Real> morrow_fhd::compute_cdr_fluxes(const Real&         a_time,
 					    const Real&         a_townsend2,
 					    const Real&         a_quantum_efficiency) const {
 
-  Vector<Real> fluxes(m_num_species, 0.0);  
+  Vector<Real> fluxes(m_num_species, 0.0);
+
+  return a_extrap_cdr_fluxes;
+  
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
 

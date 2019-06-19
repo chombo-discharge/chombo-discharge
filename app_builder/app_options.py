@@ -21,7 +21,6 @@ def write_template(args):
                      args.streamer_home + "/src/poisson_solver/poisson_multifluid_gmg.options", \
                      args.streamer_home + "/src/plasma_solver/cdr_layout.options", \
                      args.streamer_home + "/src/plasma_solver/rte_layout.options", \
-                     args.streamer_home + "/src/rte_solver/eddington_sp1.options", \
                      args.streamer_home + "/src/plasma_solver/geo_coarsener.options", \
                      args.streamer_home + "/src/plasma_solver/cell_tagger.options", \
                      args.streamer_home + "/geometries_prebuilt/" + args.geometry + "/" + args.geometry + ".options", \

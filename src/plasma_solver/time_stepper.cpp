@@ -133,7 +133,7 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffc
 
     if(solver->is_diffusive()){ // Only need to do this for diffusive things
       m_amr->average_down(diffco[idx], m_cdr->get_phase());
-      // m_amr->interp_ghost(diffco[idx], m_cdr->get_phase()); // Shouldn't be necessary
+      m_amr->interp_ghost(diffco[idx], m_cdr->get_phase()); // Shouldn't be necessary
 
       data_ops::average_cell_to_face_allcomps(*a_diffco_face[idx], diffco[idx], m_amr->get_domains());
     }

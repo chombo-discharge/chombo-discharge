@@ -96,12 +96,12 @@ void cdr_tga::advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, 
 
     // TGA solve
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(tga_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_tgasolver->oneStep(tga_state, old_state, source, a_dt, 0, finest_level, false);
 
     // Euler solve
     data_ops::copy(phi_euler, phi_tga); // I assume that phi_tga is a very good initial guess
     m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(euler_state, old_state, source, a_dt, 0, finest_level);
+    m_eulersolver->oneStep(euler_state, old_state, source, a_dt, 0, finest_level, false);
 
     // Compute error
     data_ops::copy(a_error, phi_euler);
@@ -147,7 +147,7 @@ void cdr_tga::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old
 
     // TGA solve
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
 
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -184,7 +184,7 @@ void cdr_tga::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_o
 
     // TGA solve
     m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
 
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -209,19 +209,18 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
     const int ncomp        = 1;
     const int finest_level = m_amr->get_finest_level();
 
-
     // Do the aliasing stuff
     Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
     m_amr->alias(new_state, a_new_state);
     m_amr->alias(old_state, a_old_state);
     m_amr->alias(source,    a_source);
 
-    const Real alpha = 0.0;
-    const Real beta  = 1.0;
+    //    setup_gmg();
+    data_ops::set_value(m_diffco_eb, 0.0);
+    
+    // Euler solve
+    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
 
-    // TGA solve
-    m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
 
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -272,11 +271,11 @@ void cdr_tga::advance_tga(EBAMRCellData& a_state, const Real a_dt){
   
   if(m_use_tga){
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
   }
   else{
     m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level);
+    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
   }
 
   const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
@@ -314,7 +313,7 @@ void cdr_tga::advance_tga(EBAMRCellData&       a_new_state,
 
     // TGA solve
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
 
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -328,9 +327,19 @@ void cdr_tga::set_bottom_solver(const int a_whichsolver){
   if(m_verbosity > 5){
     pout() << m_name + "::set_bottom_solver" << endl;
   }
-  
+
   if(a_whichsolver == 0 || a_whichsolver == 1){
     m_bottomsolver = a_whichsolver;
+
+    std::string str;
+    ParmParse pp("cdr_tga");
+    pp.get("gmg_bottom_solver", str);
+    if(str == "simple"){
+      m_bottomsolver = 0;
+    }
+    else if(str == "bicgstab"){
+      m_bottomsolver = 1;
+    }
   }
   else{
     MayDay::Abort("cdr_tga::set_bottom_solver - Unsupported solver type requested");
@@ -343,8 +352,14 @@ void cdr_tga::set_botsolver_smooth(const int a_numsmooth){
     pout() << m_name + "::set_botsolver_smooth" << endl;
   }
   CH_assert(a_numsmooth > 0);
-  
-  m_numsmooth = a_numsmooth;
+
+
+  ParmParse pp("cdr_tga");
+  pp.query("gmg_bottom_relax", m_numsmooth);
+
+  if(m_numsmooth < 0){
+    m_numsmooth = 0;
+  }
 }
 
 void cdr_tga::set_bottom_drop(const int a_bottom_drop){
@@ -352,8 +367,13 @@ void cdr_tga::set_bottom_drop(const int a_bottom_drop){
   if(m_verbosity > 5){
     pout() << m_name + "::set_bottom_drop" << endl;
   }
-  
-  m_bottom_drop = a_bottom_drop;
+
+  ParmParse pp("cdr_tga");
+  pp.get("gmg_bottom_drop", m_bottom_drop);
+
+  if(m_bottom_drop < 2){
+    m_bottom_drop = 2;
+  }
 }
 
 void cdr_tga::set_tga(const bool a_use_tga){
@@ -402,6 +422,17 @@ void cdr_tga::set_gmg_solver_parameters(relax::which_relax a_relax_type,
   m_gmg_min_iter    = a_min_iter;
   m_gmg_eps         = a_eps;
   m_gmg_hang        = a_hang;
+
+  ParmParse pp("cdr_tga");
+
+  pp.get("gmg_verbosity",   m_gmg_verbosity);
+  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
+  pp.get("gmg_post_smooth", m_gmg_post_smooth);
+  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
+  pp.get("gmg_max_iter",    m_gmg_max_iter);
+  pp.get("gmg_min_iter",    m_gmg_min_iter);
+  pp.get("gmg_tolerance",   m_gmg_eps);
+  pp.get("gmg_hang",        m_gmg_hang);
 }
 
 void cdr_tga::setup_gmg(){
@@ -444,8 +475,8 @@ void cdr_tga::setup_operator_factory(){
     mg_levelgrids.push_back(*mg_eblg[lvl]);
   }
 
-  // Appropriate coefficients. 
-  const Real alpha =  0.0;
+  // Appropriate coefficients. These don't matter right now. 
+  const Real alpha =  1.0;
   const Real beta  =  1.0;
 
   // Default is Neumann. This might change in the future. 
@@ -458,7 +489,8 @@ void cdr_tga::setup_operator_factory(){
   ebfact->setValue(0.0);
   
   // Create operator factory.
-  data_ops::set_value(m_aco, 1.0); // alpha = 0 so this is just a dummy value. 
+  data_ops::set_value(m_aco, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
+  data_ops::set_value(m_diffco_eb, 0.0);
   m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
 										 quadcfi,
 										 alpha,
@@ -496,7 +528,6 @@ void cdr_tga::setup_multigrid(){
   else{
     botsolver = &m_bicgstab;
   }
-
   m_gmg_solver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
   m_gmg_solver->m_imin = m_gmg_min_iter;
   m_gmg_solver->m_verbosity = m_gmg_verbosity;
