@@ -57,8 +57,8 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
   this->remap_photons(m_photons);                                   // Remap photons
-  this->remap_photons(absorbed_photons);                            // Remap photons
 #if 0
+  this->remap_photons(absorbed_photons);                            // Remap photons
   this->aggregate_photons(m_photons);                               // Aggregate photons
 #endif
   this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
@@ -535,25 +535,32 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<photon>& absorbed  = (*a_absorbed[lvl])[dit()].listItems();
-      List<photon>& particles = (*a_original[lvl])[dit()].listItems();
-      
-      for (ListIterator<photon> lit(particles); lit.ok(); ++lit){
+      List<photon>& deposit_surf = (*a_absorbed[lvl])[dit()].listItems();
+      List<photon>& deposit_bulk = (*a_original[lvl])[dit()].listItems();
+
+      // Copy a list we can iterate through and then clear the list to be filled
+      List<photon>  all_photons = deposit_bulk;
+
+      // Clear these, they will be filled.
+      deposit_bulk.clear();
+      deposit_surf.clear();
+
+      // Iterate through everything
+      for (ListIterator<photon> lit(all_photons); lit.ok(); ++lit){
 	photon& particle = lit();
 
+	// Draw a randomly absorbed position
 	RealVect& pos               = particle.position();
 	const RealVect unit_v       = particle.velocity()/units::s_c0;
-	const RealVect absorbed_pos = pos + unit_v*random_exponential(particle.kappa());
+	const RealVect absorbed_pos = pos + unit_v*0.7E-3;//random_exponential(particle.kappa());
 	const RealVect path         = absorbed_pos - pos;
 	const Real path_len         = path.vectorLength();
 
-	// Check if absorbed_pos - pos is smaller than distance to any object
-	const Real dist = impfunc->value(pos);
 
+	// See if we should check for different types of boundary intersections. These are basically
+	// cheap initial tests that allow us to skip computations for some particles. 
 	bool check_eb = false; // Flag for intersection test with eb
 	bool check_bc = false; // Flag for intersection test with domain
-
-	// See if we should check for different types of boundary intersections
 	if(impfunc->value(pos) < path_len){ // This tests if we should check for EB intersections
 	  check_eb = true;
 	}
@@ -563,12 +570,12 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	  }
 	}
 						  
-	// The remaining code does the boundary intersection tests
-	if(!check_eb && !check_bc){ // No further testing necessary
+	// These two loops do the boundary intersection tests. 
+	if(true){//!check_eb && !check_bc){ // Impossible for this photon to strike a boundary. Yay!
 	  pos = absorbed_pos;
+	  deposit_bulk.add(particle);
 	}
 	else{
-
 	  // Here are the contact points for the EB and domain stuff.
 	  // We have x(s) = x0 + s*(x1-x0), s=[0,1].
 	  // Take the smallest s to be the intersection points
@@ -604,39 +611,43 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	    }
 	  }
 	  
-	  // 2. Now check the where we contact the embedded boundary
+	  // 2. Now check the where we contact the embedded boundary. We do a step-wise increment and
+	  //    check where the photon cross the boundary. If it does, find the position and flag the photon. 
 	  if(check_eb){
 	    const int nsteps  = ceil(path_len/m_bisect_step);
 	    const RealVect dx = (absorbed_pos - pos)/nsteps;
-
+	    RealVect cur_pos  = pos;
+	    
 	    // Check each interval
-	    bool absorb = false;
 	    for (int istep = 0; istep < nsteps; istep++){
-	      const Real fa = impfunc->value(pos);
-	      const Real fb = impfunc->value(pos+dx);
+	      const Real fa = impfunc->value(cur_pos);
+	      const Real fb = impfunc->value(cur_pos+dx);
 
 	      if(fa*fb <= 0.0){ 
 		// We happen to know that f(pos+dx) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
 		// where the photon crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dx].
-		const RealVect xcol = poly::brent_root_finder(impfunc, pos, pos+dx);
+		const RealVect xcol = poly::brent_root_finder(impfunc, cur_pos, cur_pos+dx);
 		s_eb = (xcol - pos).vectorLength()/path.vectorLength();
-#if 0
-		pos = xcol;
-		absorbed.transfer(lit);
-#endif
 		contact_eb = true;
 		break;
 	      }
 	      else{ // Move to next interval
-		pos += dx;
+		cur_pos += dx;
 	      }
 	    }
 	  }
 
-	  // 3. Move the photon to the absorption point
-	  if(contact_eb || contact_bc){  
+	  // 3. If we don't contact either boundary, absorb the particle in the bulk. Otherwise, absorb in on a surface
+	  //    somewhere
+	  if(!contact_eb && !contact_bc){
+	    pos = absorbed_pos;
+	    deposit_bulk.add(particle);
+	  }
+	  else{
 	    pos += Min(s_eb, s_bc)*path; // Move the photon to the absorption point. This is either on the boundary
+	    deposit_surf.add(particle);
 
+#if 0 // This code needs to be rewritten, I don't think it does 
 	    // Domain boundaries may be bounce-back. 
 	    if(contact_bc && s_bc < s_eb){ // Photon was absorbed on the domain 
 	      const int idx = domainbc_map(contact_dir, contact_side);
@@ -660,6 +671,7 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
 	    else if(contact_eb && s_eb < s_bc) { // Photon was absorbed on the EB
 	      absorbed.transfer(lit);
 	    }
+#endif
 	  }
 	}
       }
@@ -676,6 +688,7 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_physdom->get_prob_lo();
 
+  size_t num, out;
   // Upsweep
   // -------
   //    Build outcast lists on each level and transfer from coarser levels to current levels PVR and vice versa. We
@@ -684,12 +697,23 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
     // Build outcast list on this level
-    a_photons[lvl]->outcast().clear();
+    //a_photons[lvl]->outcast().clear();
+    // a_photons[lvl]->gatherOutcast();
+    // a_photons[lvl]->remapOutcast();
+
 
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
+
+    num = a_photons[lvl]->numValid();
+    out = a_photons[lvl]->numOutcast();
+    if(procID() == 0){
+      std::cout << "Before upsweep on level = " << lvl << "\t valid = " << num << "\t out = " << out << std::endl;
+    }
+
+#if 0
     if(has_coar){
 
       // 1. Photons on the coarser level are moved to this levels PVR
@@ -700,26 +724,35 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
 			    m_amr->get_ref_rat()[lvl-1],
 			    false,
 			    origin);
-
-      // 2. Remap particles
       a_photons[lvl]->gatherOutcast();
       a_photons[lvl]->remapOutcast();
+      
 
-      // 3. Transfer particles out of this regions PVR and onto the coarser level outcast list
-      collectValidParticles(a_photons[lvl]->outcast(),
+      // 2. Transfer particles out of this regions PVR and onto the coarser level outcast list
+      collectValidParticles(a_photons[lvl-1]->outcast(),
 			    *a_photons[lvl],
 			    m_pvr[lvl]->mask(),
 			    m_amr->get_dx()[lvl]*RealVect::Unit,
-			    1,//m_amr->get_ref_rat()[lvl-1],
+			    1,
 			    true, 
 			    origin);
 
+      a_photons[lvl-1]->gatherOutcast();
+      a_photons[lvl-1]->remapOutcast();
 
 
     }
     else{
       a_photons[lvl]->gatherOutcast();
       a_photons[lvl]->remapOutcast();
+    }
+#endif
+    a_photons[lvl]->gatherOutcast();
+
+    num = a_photons[lvl]->numValid();
+    out = a_photons[lvl]->numOutcast();
+    if(procID() == 0){
+      std::cout << "After upsweep on level = " << lvl << "\t valid = " << num << "\t out = " << out << std::endl;
     }
   }
 
@@ -732,17 +765,20 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
     const bool has_coar = lvl > 0;
 
     if(has_coar){ // Add the current levels outcast list to the coarser level, then rebin the coarser level
+      a_photons[lvl-1]->gatherOutcast();
+      a_photons[lvl-1]->remapOutcast();
 
       // 1. Level lvl should be done, so its outcast list is copied to (lvl-1) outcast list
       List<photon>& this_outcast = a_photons[lvl]->outcast();
       List<photon>& coar_outcast = a_photons[lvl-1]->outcast();
-      coar_outcast.catenate(this_outcast);
+      coar_outcast.join(this_outcast);
 
       // 2. Remap the outcast list on level lvl-1
       a_photons[lvl-1]->gatherOutcast();
       a_photons[lvl-1]->remapOutcast();
 
       // 3. Level lvl-1 can still have particles that dont belong on the PVR. Put them back in the outcast list
+#if 0
       collectValidParticles(a_photons[lvl-1]->outcast(),
 			    *a_photons[lvl-1],
 			    m_pvr[lvl-1]->mask(),
@@ -750,9 +786,11 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
 			    1,
 			    true, 
 			    origin);
+#endif
+      a_photons[lvl]->outcast().clear(); // Done with this level, anything that did not get transferred is lost
     }
 
-    a_photons[lvl]->outcast().clear(); // Done with this level, anything that did not get transferred is lost
+
   }
 }
 
