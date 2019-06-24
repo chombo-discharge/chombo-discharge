@@ -54,7 +54,32 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
 					     const ProblemDomain&        a_domain){
 
   CH_assert(a_facedata.nComp() == a_celldata.nComp());
-  
+
+#if 1 // New code, should perform 5x faster than the crap below. 
+  const int ncomp = a_facedata.nComp();
+  for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
+    const EBCellFAB& celldata = a_celldata[dit()];
+    const EBISBox& ebisbox    = celldata.getEBISBox();
+    const EBGraph& ebgraph    = ebisbox.getEBGraph();
+    const Box box             = a_celldata.disjointBoxLayout().get(dit());
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (int icomp = 0; icomp < ncomp; icomp++){
+	EBLevelDataOps::averageCellToFace(a_facedata[dit()][dir],
+					  celldata,
+					  ebgraph,
+					  box,
+					  1,
+					  dir,
+					  a_domain,
+					  icomp,
+					  icomp);
+
+      }
+    }
+  }
+
+#else // Original, non-performant code
   const int ncomp = a_facedata.nComp();
 
   for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
@@ -98,6 +123,7 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
       }
     }
   }
+#endif
 }
 
 void data_ops::dot_prod(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2){

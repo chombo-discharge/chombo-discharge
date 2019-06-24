@@ -133,7 +133,7 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffc
 
     if(solver->is_diffusive()){ // Only need to do this for diffusive things
       m_amr->average_down(diffco[idx], m_cdr->get_phase());
-      m_amr->interp_ghost(diffco[idx], m_cdr->get_phase()); // Shouldn't be necessary
+      m_amr->interp_ghost(diffco[idx], m_cdr->get_phase()); 
 
       data_ops::average_cell_to_face_allcomps(*a_diffco_face[idx], diffco[idx], m_amr->get_domains());
     }
@@ -261,23 +261,27 @@ void time_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffc
     }
 
     const Vector<Real> coeffs = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
-									      pos,
-									      E,
-									      cdr_densities);
+    									      pos,
+    									      E,
+    									      cdr_densities);
 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      tmp.getSingleValuedFAB()(iv,idx) = coeffs[idx];
+      if(solver_it()->is_diffusive()){
+    	tmp.getSingleValuedFAB()(iv,idx) = coeffs[idx];
+      }
     }
   }
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    (*a_diffco_cell[idx]).setVal(0.0);
-    (*a_diffco_cell[idx]).plus(tmp, idx, 0, 1);
+    if(solver_it()->is_diffusive()){
+      (*a_diffco_cell[idx]).setVal(0.0);
+      (*a_diffco_cell[idx]).plus(tmp, idx, 0, 1);
 
-    // Covered cells are bogus. 
-    (*a_diffco_cell[idx]).setCoveredCellVal(0.0, 0);
+      // Covered cells are bogus. 
+      (*a_diffco_cell[idx]).setCoveredCellVal(0.0, 0);
+    }
   }
 }
 
@@ -941,9 +945,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->average_down(*a_sources[idx], m_cdr->get_phase());
-
-    // Commenting this out. Updated ghost cell data shouldn't be necessary. 
-    //    m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase());
+    m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase()); // This MAY be necessary if we extrapolate advection to faces
   }
 }
 
@@ -1380,8 +1382,10 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
   // Average down and interpolate ghost cells
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    //    m_amr->average_down(*a_velocities[idx], m_cdr->get_phase()); // This _should't be necessary. 
-    m_amr->interp_ghost(*a_velocities[idx], m_cdr->get_phase());       // This definitely is. 
+    if(solver_it()->is_mobile()){
+      m_amr->average_down(*a_velocities[idx], m_cdr->get_phase()); 
+      m_amr->interp_ghost(*a_velocities[idx], m_cdr->get_phase()); 
+    }
   }
 }
 
@@ -1433,10 +1437,12 @@ void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_veloci
   const RealVect origin  = m_physdom->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
 
+
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv    = bit();
     const RealVect pos  = origin + a_dx*iv;
     const RealVect e    = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
+
 
     // Get densities
     Vector<Real> cdr_densities;
@@ -1450,18 +1456,24 @@ void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_veloci
 
     // Put velocities in the appropriate place. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      RefCountedPtr<cdr_solver>& solver = solver_it();
       const int idx = solver_it.get_solver();
-      for (int dir = 0; dir < SpaceDim; dir++){
-	(*a_velocities[idx]).getSingleValuedFAB()(iv, dir) = velocities[idx][dir];
+      if(solver->is_mobile()){
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  (*a_velocities[idx]).getSingleValuedFAB()(iv, dir) = velocities[idx][dir];
+	}
       }
     }
   }
 
+
   // Covered is bogus.
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    for (int dir = 0; dir < SpaceDim; dir++){
-      a_velocities[idx]->setCoveredCellVal(0.0, dir);
+    if(solver_it()->is_mobile()){
+      const int idx = solver_it.get_solver();
+      for (int dir = 0; dir < SpaceDim; dir++){
+	a_velocities[idx]->setCoveredCellVal(0.0, dir);
+      }
     }
   }
 }
@@ -1499,9 +1511,11 @@ void time_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       a_velo
 
     // Put velocities in the appropriate place. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      for (int dir = 0; dir < SpaceDim; dir++){
-	(*a_velocities[idx])(vof, dir) = velocities[idx][dir];
+      if(solver_it()->is_mobile()){
+	const int idx = solver_it.get_solver();
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  (*a_velocities[idx])(vof, dir) = velocities[idx][dir];
+	}
       }
     }
   }

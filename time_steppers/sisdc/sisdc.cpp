@@ -624,13 +624,18 @@ Real sisdc::advance(const Real a_dt){
   sisdc::copy_phi_p_to_cdr();
   sisdc::copy_sigma_p_to_sigma();
 
+  const Real t0 = MPI_Wtime();
   sisdc::update_poisson();
   sisdc::update_stationary_rte(m_time + actual_dt); // Only triggers if m_rte->is_stationar() == true
 
   // Always recompute source terms and velocities for the next time step. These were computed ea
+  const Real t1 = MPI_Wtime();
   sisdc::compute_cdr_gradients();
+  const Real t2 = MPI_Wtime();
   sisdc::compute_cdr_velo(m_time + actual_dt);
+  const Real t3 = MPI_Wtime();
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  const Real t4 = MPI_Wtime();
 
   // In case we're using FHD, we need to tell the kinetics module about the time step before computign sources
   Real next_dt;
@@ -641,10 +646,19 @@ Real sisdc::advance(const Real a_dt){
   if(!m_rte->is_stationary()){
     
   }
+  const Real t5 = MPI_Wtime();
 
   // Profile step
   if(m_print_report)  sisdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
   if(m_profile_steps) sisdc::write_step_profile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
+
+#if 0 // Debug
+  pout() << "poisson time = " << t1 - t0 << endl;
+  pout() << "gradient = " << t2 - t1 << endl;
+  pout() << "velo = " << t3 - t2 << endl;
+  pout() << "diffco = " << t4 - t3 << endl;
+  pout() << "source = " << t5 - t4 << endl;
+#endif
 
   // Store current error. 
   m_have_err  = true;
@@ -799,7 +813,7 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
 
   total_time += t1;
 
-#if 0 
+#if 0
   pout() << endl
 	 << "setup time = " << setup_time << endl
 	 << "advect_time = " << advect_time << endl
@@ -820,6 +834,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
   // if m=0 and a_corrector=true, we can increment directly with the precomputed advection-reaction. This means that
   // we can skip the advective advance. The sigma advance is accordingly also skipped.
   const bool skip = (a_m == 0 && a_corrector);
+  const Real t0 = MPI_Wtime();
   if(!skip){
     if(m_subcycle){
       if(m_multistep){
@@ -833,6 +848,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       sisdc::integrate_advection_nosubcycle(a_dt, a_m, a_corrector);
     }
   }
+  const Real t1 = MPI_Wtime();
 
   // Add in the reaction term and then compute the operator slopes.
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
@@ -890,6 +906,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       data_ops::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
     }
   }
+  const Real t2 = MPI_Wtime();
 
   // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
   EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
@@ -900,6 +917,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
     data_ops::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
   }
 
+  const Real t3 = MPI_Wtime();
   if(a_corrector){ // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m. 
     EBAMRIVData& Fsig_lag = m_sigma_scratch->get_Fold()[a_m];
     data_ops::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
@@ -908,7 +926,16 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
     EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
     sisdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
     data_ops::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
-  }      
+  }
+  const Real t4 = MPI_Wtime();
+
+#if 0
+  pout() << "integrate_advection_reaction::" << endl;
+  pout() << "t1-t0 = " << t1-t0 << endl;
+  pout() << "t2-t1 = " << t2-t2 << endl;
+  pout() << "t3-t2 = " << t3-t2 << endl;
+  pout() << "t4-t3 = " << t4-t3 << endl;
+#endif
 }
 
 void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_corrector){
