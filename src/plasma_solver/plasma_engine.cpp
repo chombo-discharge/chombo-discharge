@@ -2166,7 +2166,9 @@ void plasma_engine::setup_geometry_only(){
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   
   Vector<IntVectSet> tags = m_geom_tags;
-  m_amr->build_grids(tags, m_geom_tag_depth);
+  const int a_lmin = 0;
+  const int a_lmax = m_geom_tag_depth;
+  m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
   m_amr->define_eblevelgrid();
   //  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 

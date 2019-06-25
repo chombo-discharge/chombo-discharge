@@ -196,7 +196,7 @@ public:
   /*!
     @brief Build new grids. This also load balances. 
   */
-  virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap = -1);
+  virtual void build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
 
   /*!
     @brief Define the MG stuff

@@ -491,7 +491,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->build_grids(tags, a_hardcap);
+  this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
 #if AMR_MESH_DEBUG
   const Real t1 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_eblevelgrid" << endl;
@@ -586,13 +586,17 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
 #endif
 }
 
-void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
+void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap){
   CH_TIME("amr_mesh::build_grids");
   if(m_verbosity > 2){
     pout() << "amr_mesh::build_grids" << endl;
   }
 
-  const int base      = 0;                                    // Base level never changes. 
+#if 1 // Original code
+  const int base      = 0;                                    // Base level never changes.
+#else // Debug code
+  const int base = Max(0, a_lmin - 1);
+#endif
   const int top_level = (m_finest_level == m_max_amr_depth) ? // top_level is the finest level where we have tags. We should never
     m_finest_level - 1 : a_tags.size() - 1;                   // have tags on max_amr_depth, and we make that restriction here. 
   Vector<Vector<Box> > new_boxes(1 + top_level);  // New boxes to be load balance
@@ -660,7 +664,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_hardcap){
 
   // Define grids
   m_grids.resize(1 + m_finest_level);
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = base; lvl <= m_finest_level; lvl++){
     m_grids[lvl] = DisjointBoxLayout();
     m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
     m_grids[lvl].close();
