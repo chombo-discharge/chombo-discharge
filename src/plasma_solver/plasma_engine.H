@@ -177,6 +177,11 @@ public:
     @brief Set wall function
   */
   virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
+
+  /*!
+    @brief Set recursive regrid
+  */
+  virtual void set_recursive_regrid();
   
   /*!
     @brief Set the regrid interval
@@ -563,7 +568,12 @@ protected:
   Real m_wallclock2;
 
   /*!
-    @brief 
+    @brief Use recursive regrid (true) or regrid all levels at once (false)
+  */
+  bool m_recursive_regrid;
+
+  /*!
+    @brief Output on centroids or not
   */
   bool m_output_centroids;
 
@@ -759,7 +769,7 @@ protected:
     @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
     whose solution is recomputed. The same goes for stationary RTE methods. 
   */
-  virtual void regrid(const bool a_use_initial_data);
+  virtual void regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data);
 
   /*!
     @brief Regrid internal storage for this class

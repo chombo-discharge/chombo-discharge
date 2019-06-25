@@ -57,8 +57,8 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   this->set_amr(a_amr);                                      // Set amr
   this->set_cell_tagger(a_celltagger);                       // Set cell tagger
   this->set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
-  this->set_poisson_wall_func(s_constant_one);                       // Set wall function
-
+  this->set_poisson_wall_func(s_constant_one);               // Set wall function
+  this->set_recursive_regrid();                              // Set recursive regrid
   this->set_geom_refinement_depth(-1);                       // Set geometric refinement depths
   this->set_verbosity(1);                                    // Set verbosity
   this->set_plot_interval(10);                               // Set plot interval
@@ -1285,7 +1285,7 @@ void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
   handle_in.close();
 }
 
-void plasma_engine::regrid(const bool a_use_initial_data){
+void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data){
   CH_TIME("plasma_engine::regrid");
   if(m_verbosity > 2){
     pout() << "plasma_engine::regrid" << endl;
@@ -1313,7 +1313,7 @@ void plasma_engine::regrid(const bool a_use_initial_data){
 
   const Real start_time = MPI_Wtime();   // Timer
 
-  const bool got_new_tags = this->tag_cells(tags, m_tags);         // Tag cells
+  const bool got_new_tags = this->tag_cells(tags, m_tags); // Tag cells
 
   if(!got_new_tags){
     if(a_use_initial_data){
@@ -1343,10 +1343,10 @@ void plasma_engine::regrid(const bool a_use_initial_data){
   
   const Real cell_tags = MPI_Wtime();    // Timer
 
-  // Regrid base
+  // Regrid base. Only levels [lmin, lmax] are allowed to change. 
   const int old_finest_level = m_amr->get_finest_level();
   const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
-  m_amr->regrid(tags, regsize, old_finest_level + 1);
+  m_amr->regrid(tags, a_lmin, a_lmax, regsize, old_finest_level + 1);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   const int new_finest_level = m_amr->get_finest_level();
@@ -1519,12 +1519,41 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       const int max_sim_depth = m_amr->get_max_sim_depth();
       const int max_amr_depth = m_amr->get_max_amr_depth();
 
-      const bool can_regrid = max_sim_depth > 0 && max_amr_depth > 0;
-      const bool check_step = m_step%m_regrid_interval == 0 && m_regrid_interval > 0;
+      // This is the regrid test. We do some dummy tests first and then do the recursive/non-recursive stuff
+      // inside the loop. 
+      const bool can_regrid        = max_sim_depth > 0 && max_amr_depth > 0;
+      const bool check_step        = m_step%m_regrid_interval == 0 && m_regrid_interval > 0;
       const bool check_timestepper = m_timestepper->need_to_regrid() && m_regrid_interval > 0;
       if(can_regrid && (check_step || check_timestepper)){
 	if(!first_step){
-	  this->regrid(false);
+
+	  // We'll regrid levels lmin through lmax. As always, new grids on level l are generated through tags
+	  // on levels (l-1);
+	  int lmin, lmax;
+	  if(!m_recursive_regrid){
+	    lmin = 1; // level = 0 never changes
+	    lmax = m_amr->get_finest_level();
+	  }
+	  else{
+	    int iref = 1;//m_regrid_interval;
+	    lmax = m_amr->get_finest_level();
+	    lmin = lmax;
+	    for (int lvl = m_amr->get_finest_level(); lvl > 0; lvl--){
+	      if(m_step%(iref*m_regrid_interval) == 0){
+		lmin = lvl;
+	      }
+	      iref *= m_amr->get_ref_rat()[lvl-1];
+	    }
+	  }
+
+#if 1 // Debug test
+	  if(procID() == 0){
+	    std::cout << "step = " << m_step << "\t tagging levels = [" << lmin << "," << lmax << "]" << std::endl;
+	  }
+#endif
+
+	  // Regrid, the two options tells us to generate tags on [(lmin-1),(lmax-1)];
+	  this->regrid(lmin, lmax, false);
 	  if(m_verbosity > 0){
 	    this->grid_report();
 	  }
@@ -1688,7 +1717,12 @@ void plasma_engine::setup_poisson_only(){
   this->get_geom_tags();       // Get geometric tags.
   
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
-  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
+
+  // This is a "fresh" regrid in which there is no coarser level
+  const int lmin = 0;
+  const int lmax = m_geom_tag_depth;
+  const int regsize = 1;
+  m_amr->regrid(m_geom_tags, lmin, lmax, regsize, m_geom_tag_depth);       // Regrid using geometric tags for now
 
   this->allocate_internals();
 
@@ -2178,7 +2212,11 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   
   m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
-  m_amr->regrid(m_geom_tags, regsize, m_geom_tag_depth);       // Regrid using geometric tags for now
+
+  // When we're setting up fresh, we need to regrid everything
+  const int lmin = 0;
+  const int lmax = m_geom_tag_depth;
+  m_amr->regrid(m_geom_tags, lmin, lmax, regsize, m_geom_tag_depth);       // Regrid using geometric tags for now
 
   this->allocate_internals();
 
@@ -2240,8 +2278,10 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     if(m_verbosity > 5){
       pout() << "plasma_engine::initial_regrids" << endl;
     }
-    
-    this->regrid(true);
+
+    const int lmin = 1;
+    const int lmax = m_amr->get_finest_level();
+    this->regrid(lmin, lmax, true);
 
     if(m_verbosity > 0){
       this->grid_report();
@@ -2321,8 +2361,10 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
     if(m_verbosity > 0){
       pout() << "plasma_engine -- initial regrid # " << i + 1 << endl;
     }
-      
-    this->regrid(false);
+
+    const int lmin = 1;
+    const int lmax = m_amr->get_finest_level();
+    this->regrid(lmin, lmax, false);
 
     if(m_verbosity > 0){
       this->grid_report();
@@ -2338,6 +2380,19 @@ void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_
   m_physdom = a_physdom;
 }
 
+void plasma_engine::set_recursive_regrid(){
+  CH_TIME("plasma_engine::set_recursive_regrid");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_recursive_regrid" << endl;
+  }
+
+  ParmParse pp("plasma_engine");
+  std::string str;
+  pp.get("recursive_regrid", str);
+
+  m_recursive_regrid = (str == "true") ? true : false;
+}
+
 void plasma_engine::set_regrid_interval(const int a_regrid_interval){
   CH_TIME("plasma_engine::set_regrid_interval");
   if(m_verbosity > 5){
@@ -2349,6 +2404,8 @@ void plasma_engine::set_regrid_interval(const int a_regrid_interval){
   ParmParse pp("plasma_engine");
   pp.query("regrid_interval", m_regrid_interval);
 }
+
+
 
 void plasma_engine::set_plot_interval(const int a_plot_interval){
   CH_TIME("plasma_engine::set_plot_interval");

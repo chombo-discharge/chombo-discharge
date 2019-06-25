@@ -2,6 +2,7 @@
 # PLASMA_ENGINE OPTIONS
 # ====================================================================================================
 plasma_engine.verbosity                       = 2             # Engine verbosity
+plasma_engine.recursive_regrid                = false         # Recursive regrids
 plasma_engine.plot_interval                   = 10            # Plot interval
 plasma_engine.regrid_interval                 = 10            # Regrid interval
 plasma_engine.checkpoint_interval             = 10            # Checkpoint interval

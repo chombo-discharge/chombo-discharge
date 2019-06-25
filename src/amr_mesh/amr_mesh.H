@@ -376,7 +376,11 @@ public:
   /*!
     @brief Regrid function. Generate new grids. 
   */
-  virtual void regrid(const Vector<IntVectSet>& a_tags, const int a_regsize=1, const int a_hardcap=123456);
+  virtual void regrid(const Vector<IntVectSet>& a_tags,
+		      const int a_lmin,
+		      const int a_lmax,
+		      const int a_regsize=1, 
+		      const int a_hardcap=123456);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly

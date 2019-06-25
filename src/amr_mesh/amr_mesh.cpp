@@ -473,7 +473,11 @@ void amr_mesh::build_domains(){
   }
 }
 
-void amr_mesh::regrid(const Vector<IntVectSet>& a_tags, const int a_regsize, const int a_hardcap){
+void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
+		      const int a_lmin,
+		      const int a_lmax,
+		      const int a_regsize,
+		      const int a_hardcap){
   CH_TIME("amr_mesh::regrid");
   if(m_verbosity > 1){
     pout() << "amr_mesh::regrid" << endl;
