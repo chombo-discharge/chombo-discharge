@@ -122,7 +122,7 @@ void mc_photo::deallocate_internals(){
   m_amr->deallocate(m_source);
 }
 
-void mc_photo::regrid(const int a_old_finest_level, const int a_new_finest_level){
+void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("mc_photo::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;

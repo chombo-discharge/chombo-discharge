@@ -498,56 +498,56 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
+  this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
 #if AMR_MESH_DEBUG
   const Real t2 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_mflevelgrid" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_mflevelgrid();  // Define MFLevelGrid
+  this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
 #if AMR_MESH_DEBUG
   const Real t3 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_ebcoarave" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_eb_coar_ave();  // Define ebcoarseaverage on both phases
+  this->define_eb_coar_ave(a_lmin);  // Define ebcoarseaverage on both phases
 #if AMR_MESH_DEBUG
   const Real t4 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_ebquadcfi" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases.
+  this->define_eb_quad_cfi(a_lmin);  // Define nwoebquadcfinterp on both phases.
 #if AMR_MESH_DEBUG
   const Real t5 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_fillpatch" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
+  this->define_fillpatch(a_lmin);    // Define operator for piecewise linear interpolation of ghost cells
 #if AMR_MESH_DEBUG
   const Real t6 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_ebpwl_interp" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
+  this->define_ebpwl_interp(a_lmin); // Define interpolator for piecewise interpolation of interior points
 #if AMR_MESH_DEBUG
   const Real t7 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_flux_reg" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_flux_reg(a_regsize);     // Define flux register (phase::gas only)
+  this->define_flux_reg(a_lmin,a_regsize);     // Define flux register (phase::gas only)
 #if AMR_MESH_DEBUG
   const Real t8 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_redist_oper" << endl;
   overallMemoryUsage();
   pout() << endl;
 #endif
-  this->define_redist_oper(a_regsize);  // Define redistribution (phase::gas only)
+  this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
 #if AMR_MESH_DEBUG
   const Real t9 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_irreg_sten" << endl;
@@ -558,12 +558,12 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
 #if AMR_MESH_DEBUG
   const Real t10 = MPI_Wtime();
 #endif
-  this->define_copier();
+  this->define_copier(a_lmin);
   const Real t11 = MPI_Wtime();
 
   if(!m_has_mg_stuff){
     this->define_mg_stuff();
-    m_has_mg_stuff = true;
+    m_has_mg_stuff = true; // Only needs to be done ONCE
   }
   
 #if AMR_MESH_DEBUG
@@ -592,7 +592,11 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     pout() << "amr_mesh::build_grids" << endl;
   }
 
-#if 1 // Original code
+  // TLDR: a_lmin is the coarsest level that changes. A special condition is a_lmin=0 for which we assume
+  //       that there are no prior grids.
+  //       a_lmax is the finest level that changes. This is typically 
+
+#if 0 // Original code
   const int base      = 0;                                    // Base level never changes.
 #else // Debug code
   const int base = Max(0, a_lmin - 1);
@@ -620,7 +624,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
       }
     }
     else{
-      for (int lvl = 1; lvl <= top_level; lvl++){
+      for (int lvl = 1; lvl <= top_level; lvl++){ 
 	old_boxes[lvl] = m_grids[lvl].boxArray();
       }
     }
@@ -629,7 +633,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     if(top_level >= base_level){ // Use tags for regridding
       // Berger-Rigoutsos grid generation
       BRMeshRefine mesh_refine(m_domains[0], m_ref_ratios, m_fill_ratio, m_blocking_factor, m_buffer_size, m_max_box_size);
-      int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base_level, top_level, old_boxes);
+      int new_finest_level = mesh_refine.regrid(new_boxes, a_tags, base, top_level, old_boxes);
       m_finest_level = Min(new_finest_level, m_max_amr_depth); // Don't exceed m_max_amr_depth
       m_finest_level = Min(m_finest_level,   m_max_sim_depth); // Don't exceed maximum simulation depth
       m_finest_level = Min(m_finest_level,   hardcap);         // Don't exceed hardcap
@@ -662,12 +666,25 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
   Vector<Vector<int> > proc_assign(1 + m_finest_level);
   this->loadbalance(proc_assign, new_boxes);
 
-  // Define grids
-  m_grids.resize(1 + m_finest_level);
-  for (int lvl = base; lvl <= m_finest_level; lvl++){
-    m_grids[lvl] = DisjointBoxLayout();
-    m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
-    m_grids[lvl].close();
+  // Define grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
+  if(a_lmin == 0){
+    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+      m_grids[lvl] = DisjointBoxLayout();
+      m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
+      m_grids[lvl].close();
+    }
+  }
+  else{
+    Vector<DisjointBoxLayout> old_grids = m_grids;
+    m_grids.resize(1 + m_finest_level);
+    for (int lvl = 0; lvl < a_lmin; lvl++){ // Copy old grids
+      m_grids[lvl] = old_grids[lvl];
+    }
+    for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){ // Create new ones from tags
+      m_grids[lvl] = DisjointBoxLayout();
+      m_grids[lvl].define(new_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
+      m_grids[lvl].close();
+    }
   }
 
   m_has_grids = true;
@@ -890,7 +907,7 @@ void amr_mesh::compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& 
   }
 }
 
-void amr_mesh::define_eblevelgrid(){
+void amr_mesh::define_eblevelgrid(const int a_lmin){
   CH_TIME("amr_mesh::define_eblevelgrid");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_eblevelgrid" << endl;
@@ -899,7 +916,7 @@ void amr_mesh::define_eblevelgrid(){
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     if(!ebis_gas.isNull()){
       m_eblg[phase::gas][lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl],
 									     m_domains[lvl],
@@ -923,7 +940,7 @@ void amr_mesh::define_eblevelgrid(){
   }
 }
 
-void amr_mesh::define_mflevelgrid(){
+void amr_mesh::define_mflevelgrid(const int a_lmin){
   CH_TIME("amr_mesh::define_mflevelgrid");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_mflevelgrid" << endl;
@@ -932,7 +949,7 @@ void amr_mesh::define_mflevelgrid(){
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     Vector<EBLevelGrid> eblgs;
     if(!ebis_gas.isNull()){
       eblgs.push_back(*m_eblg[phase::gas][lvl]);
@@ -945,7 +962,7 @@ void amr_mesh::define_mflevelgrid(){
   }
 }
 
-void amr_mesh::define_eb_coar_ave(){
+void amr_mesh::define_eb_coar_ave(const int a_lmin){
   CH_TIME("amr_mesh::define_eb_coar_ave");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_eb_coar_ave" << endl;
@@ -956,7 +973,7 @@ void amr_mesh::define_eb_coar_ave(){
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
     const bool has_coar = lvl > 0;
 
@@ -986,7 +1003,7 @@ void amr_mesh::define_eb_coar_ave(){
   }
 }
 
-void amr_mesh::define_eb_quad_cfi(){
+void amr_mesh::define_eb_quad_cfi(const int a_lmin){
   CH_TIME("amr_mesh::define_eb_quad_cfi");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_eb_quad_cfi" << endl;
@@ -999,7 +1016,7 @@ void amr_mesh::define_eb_quad_cfi(){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
     const bool has_coar = lvl > 0;
 
@@ -1061,7 +1078,7 @@ void amr_mesh::define_eb_quad_cfi(){
   }
 }
 
-void amr_mesh::define_fillpatch(){
+void amr_mesh::define_fillpatch(const int a_lmin){
   CH_TIME("amr_mesh::define_fillpatch");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_fillpatch" << endl;
@@ -1078,7 +1095,7 @@ void amr_mesh::define_fillpatch(){
     const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
     const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-    for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
       const bool has_coar = lvl > 0;
 
@@ -1116,7 +1133,7 @@ void amr_mesh::define_fillpatch(){
   }
 }
 
-void amr_mesh::define_ebpwl_interp(){
+void amr_mesh::define_ebpwl_interp(const int a_lmin){
   CH_TIME("amr_mesh::define_ebpwl_interp");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_ebpwl_interp" << endl;
@@ -1131,7 +1148,7 @@ void amr_mesh::define_ebpwl_interp(){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
     const bool has_coar = lvl > 0;
 
@@ -1160,18 +1177,21 @@ void amr_mesh::define_ebpwl_interp(){
   }
 }
 
-void amr_mesh::define_flux_reg(const int a_regsize){
+void amr_mesh::define_flux_reg(const int a_lmin, const int a_regsize){
   CH_TIME("amr_mesh::define_flux_reg");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_flux_reg" << endl;
   }
+
+  // TLDR; The flux register between levels [lvl,(lvl+1)] lives on vector entry [lvl]. Since a_lmin is the coarsest
+  //       level which has changed, we need to update the flux register in entry a_lmin-1 as well. 
 
   const int comps = a_regsize;
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = Max(0,a_lmin-1); lvl <= m_finest_level; lvl++){
 
     const bool has_fine = lvl < m_finest_level;
 
@@ -1190,71 +1210,91 @@ void amr_mesh::define_flux_reg(const int a_regsize){
   }
 }
 
-void amr_mesh::define_redist_oper(const int a_regsize){
+void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
   CH_TIME("amr_mesh::define_redist_oper");
   if(m_verbosity > 2){
     pout() << "amr_mesh::define_redist_oper" << endl;
   }
+
+  // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
+  //       live on these levels:
+  //
+  //       Oper                        Level
+  //       EBFineToCoar [l,  l-1]    l
+  //       EBCoarToFine [l-1,l  ] 
+  //       when level a_lmin changed we need to update fine-to-coar 
 
   const int comps = a_regsize;
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = Max(0, a_lmin-1); lvl <= m_finest_level; lvl++){
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < m_finest_level;
 
     if(!ebis_gas.isNull()){
-      m_level_redist[phase::gas][lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
-											m_ebisl[phase::gas][lvl],
-											m_domains[lvl],
-											comps,
-											m_redist_rad));
+      if(lvl >= a_lmin){ 
+	m_level_redist[phase::gas][lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
+											  m_ebisl[phase::gas][lvl],
+											  m_domains[lvl],
+											  comps,
+											  m_redist_rad));
+      }
 
     
       if(m_ebcf){
 	if(has_coar){
-	  m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (new EBFineToCoarRedist());
-	  m_fine_to_coar_redist[phase::gas][lvl]->define(m_grids[lvl],
-							 m_grids[lvl-1],
-							 m_ebisl[phase::gas][lvl],
-							 m_ebisl[phase::gas][lvl-1],
-							 m_domains[lvl-1].domainBox(),
-							 m_ref_ratios[lvl-1],
-							 comps,
-							 m_redist_rad,
-							 ebis_gas);
 
-	  // Set register to zero
-	  m_fine_to_coar_redist[phase::gas][lvl]->setToZero();
+	  // TLDR: The fine-to-coar redistribution operator that transfers from the fine level to the coar level
+	  //       obviously lives on the fine level. But since a_lmin is the coarsest level that changed, we only
+	  //       need to update this if lvl >= a_lmin
+	  if(lvl >= a_lmin){
+	    m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (new EBFineToCoarRedist());
+	    m_fine_to_coar_redist[phase::gas][lvl]->define(m_grids[lvl],
+							   m_grids[lvl-1],
+							   m_ebisl[phase::gas][lvl],
+							   m_ebisl[phase::gas][lvl-1],
+							   m_domains[lvl-1].domainBox(),
+							   m_ref_ratios[lvl-1],
+							   comps,
+							   m_redist_rad,
+							   ebis_gas);
+
+	    // Set register to zero
+	    m_fine_to_coar_redist[phase::gas][lvl]->setToZero();
+	  }
 	}
 
 	if(has_fine){
+	  // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
+	  //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
+	  //       if lvl >= a_lmin-1
+	  if(lvl >= a_lmin-1){
+	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
+	    m_coar_to_fine_redist[phase::gas][lvl]->define(m_grids[lvl+1],
+							   m_grids[lvl],
+							   m_ebisl[phase::gas][lvl],
+							   m_domains[lvl].domainBox(),
+							   m_ref_ratios[lvl],
+							   comps,
+							   m_redist_rad,
+							   ebis_gas);
 
-	  m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
-	  m_coar_to_fine_redist[phase::gas][lvl]->define(m_grids[lvl+1],
-							 m_grids[lvl],
-							 m_ebisl[phase::gas][lvl],
-							 m_domains[lvl].domainBox(),
-							 m_ref_ratios[lvl],
-							 comps,
-							 m_redist_rad,
-							 ebis_gas);
-
-	  // Coarse to coarse redistribution
-	  m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
-	  m_coar_to_coar_redist[phase::gas][lvl]->define(*m_eblg[phase::gas][lvl+1],
-							 *m_eblg[phase::gas][lvl],
-							 m_ref_ratios[lvl],
-							 comps,
-							 m_redist_rad);
+	    // Coarse to coarse redistribution
+	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
+	    m_coar_to_coar_redist[phase::gas][lvl]->define(*m_eblg[phase::gas][lvl+1],
+							   *m_eblg[phase::gas][lvl],
+							   m_ref_ratios[lvl],
+							   comps,
+							   m_redist_rad);
 
 
-	  // Set registers to zero
-	  m_coar_to_fine_redist[phase::gas][lvl]->setToZero();
-	  m_coar_to_coar_redist[phase::gas][lvl]->setToZero();
+	    // Set registers to zero
+	    m_coar_to_fine_redist[phase::gas][lvl]->setToZero();
+	    m_coar_to_coar_redist[phase::gas][lvl]->setToZero();
+	  }
 	}
       }
     }
@@ -1317,7 +1357,7 @@ void amr_mesh::define_irreg_sten(){
   }
 }
 
-void amr_mesh::define_copier(){
+void amr_mesh::define_copier(const int a_lmin){
   CH_TIME("amr_mesh::define_copier");
   if(m_verbosity > 3){
     pout() << "amr_mesh::define_copier" << endl;
@@ -1326,7 +1366,7 @@ void amr_mesh::define_copier(){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     if(!ebis_gas.isNull()){
       m_copier[phase::gas][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
 								    m_grids[lvl],
@@ -1367,7 +1407,6 @@ void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
     }
   }
 }
-
 
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase, const int a_lvl){
   CH_TIME("amr_mesh::average_down");
@@ -1762,16 +1801,17 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
     m_grids[lvl].close();
   }
 
-  this->define_eblevelgrid();  // Define EBLevelGrid objects on both phases
-  this->define_mflevelgrid();  // Define MFLevelGrid
-  this->define_eb_coar_ave();  // Define ebcoarseaverage on both phases
-  this->define_eb_quad_cfi();  // Define nwoebquadcfinterp on both phases.
-  this->define_fillpatch();    // Define operator for piecewise linear interpolation of ghost cells
-  this->define_ebpwl_interp(); // Define interpolator for piecewise interpolation of interior points
-  this->define_flux_reg(a_regsize);     // Define flux register (phase::gas only)
-  this->define_redist_oper(a_regsize);  // Define redistribution (phase::gas only)
+  const int a_lmin = 0;
+  this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
+  this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
+  this->define_eb_coar_ave(a_lmin);  // Define ebcoarseaverage on both phases
+  this->define_eb_quad_cfi(a_lmin);  // Define nwoebquadcfinterp on both phases.
+  this->define_fillpatch(a_lmin);    // Define operator for piecewise linear interpolation of ghost cells
+  this->define_ebpwl_interp(a_lmin); // Define interpolator for piecewise interpolation of interior points
+  this->define_flux_reg(a_lmin,a_regsize);     // Define flux register (phase::gas only)
+  this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
   this->define_irreg_sten();            // Define irregular stencils
-  this->define_copier();                // Define copiers
+  this->define_copier(a_lmin);                // Define copiers
 
   // Do the multilevel stuff
   if(!m_has_mg_stuff){

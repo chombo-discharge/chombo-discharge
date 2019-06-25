@@ -599,7 +599,7 @@ void cdr_gdnv::nonconservative_divergence(LevelData<BaseIVFAB<Real> >& a_divF_nc
   }
 }
 
-void cdr_gdnv::regrid(const int a_old_finest_level, const int a_new_finest_level){
+void cdr_gdnv::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("cdr_gdnv::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
@@ -607,7 +607,7 @@ void cdr_gdnv::regrid(const int a_old_finest_level, const int a_new_finest_level
 
   this->delete_covered();
 
-  cdr_solver::regrid(a_old_finest_level, a_new_finest_level);
+  cdr_solver::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
 }
 
 

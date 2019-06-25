@@ -80,7 +80,7 @@ public:
   /*!
     @brief Regrid method. 
   */
-  virtual void regrid(const int a_old_finest, const int a_new_finest);
+  virtual void regrid(const int a_lmin, const int a_old_finest, const int a_new_finest);
 
   /*!
     @brief Set the computational geometry

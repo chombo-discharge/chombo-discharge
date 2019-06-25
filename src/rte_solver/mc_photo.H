@@ -58,7 +58,7 @@ public:
   /*!
     @brief Regrid function for this class
   */
-  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
+  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2

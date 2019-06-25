@@ -69,7 +69,7 @@ public:
   /*!
     @brief Regrid method. 
   */
-  virtual void regrid(const int a_old_finest_level, const int a_new_finest_level);
+  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
     @brief Set amr

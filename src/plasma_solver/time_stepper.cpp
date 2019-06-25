@@ -2667,26 +2667,26 @@ void time_stepper::project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFDa
   }
 }
 
-void time_stepper::regrid(const int a_old_finest, const int a_new_finest){
+void time_stepper::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
   CH_TIME("time_stepper::regrid");
   if(m_verbosity > 5){
     pout() << "time_stepper::regrid" << endl;
   }
 
-  this->regrid_solvers(a_old_finest, a_new_finest);
+  this->regrid_solvers(a_lmin, a_old_finest, a_new_finest);
   this->regrid_internals();
 }
 
-void time_stepper::regrid_solvers(const int a_old_finest, const int a_new_finest){
+void time_stepper::regrid_solvers(const int a_lmin, const int a_old_finest, const int a_new_finest){
   CH_TIME("time_stepper::regrid_solvers");
   if(m_verbosity > 5){
     pout() << "time_stepper::regrid_solvers" << endl;
   }
 
-  m_cdr->regrid(a_old_finest,     a_new_finest);
-  m_poisson->regrid(a_old_finest, a_new_finest);
-  m_rte->regrid(a_old_finest,     a_new_finest);
-  m_sigma->regrid(a_old_finest,   a_new_finest);
+  m_cdr->regrid(a_lmin,     a_old_finest, a_new_finest);
+  m_poisson->regrid(a_lmin, a_old_finest, a_new_finest);
+  m_rte->regrid(a_lmin,     a_old_finest, a_new_finest);
+  m_sigma->regrid(a_lmin,   a_old_finest, a_new_finest);
 }
 
 void time_stepper::reset_dielectric_cells(EBAMRIVData& a_data){

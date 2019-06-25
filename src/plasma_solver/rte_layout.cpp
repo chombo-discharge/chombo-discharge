@@ -169,7 +169,7 @@ void rte_layout::set_time(const int a_step, const Real a_time, const Real a_dt) 
   }
 }
 
-void rte_layout::regrid(const int a_old_finest_level, const int a_new_finest_level){
+void rte_layout::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("rte_layout::regrid");
   if(m_verbosity > 5){
     pout() << "rte_layout::regrid" << endl;
@@ -177,7 +177,7 @@ void rte_layout::regrid(const int a_old_finest_level, const int a_new_finest_lev
 
   for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
-    solver->regrid(a_old_finest_level, a_new_finest_level);
+    solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   }
 }
 

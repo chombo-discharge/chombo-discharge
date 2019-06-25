@@ -1183,7 +1183,7 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
 
 
 
-void cdr_solver::regrid(const int a_old_finest_level, const int a_new_finest_level){
+void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("cdr_solver::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
@@ -1197,8 +1197,13 @@ void cdr_solver::regrid(const int a_old_finest_level, const int a_new_finest_lev
 
   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_phase);
 
-  m_cache[0]->copyTo(*m_state[0]); // Base level should never change, but ownership can. 
-  for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
+  // These levels have not changed
+  for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
+    m_cache[lvl]->copyTo(*m_state[lvl]); // Base level should never change, but ownership can.
+  }
+
+  // These levels have changed
+  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
     if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
       m_cache[lvl]->copyTo(*m_state[lvl]);

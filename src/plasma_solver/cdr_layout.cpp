@@ -134,7 +134,7 @@ void cdr_layout::initial_data(){
   }
 }
 
-void cdr_layout::regrid(const int a_old_finest_level, const int a_new_finest_level){
+void cdr_layout::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("cdr_layout::regrid");
   if(m_verbosity > 5){
     pout() << "cdr_layout::regrid" << endl;
@@ -142,7 +142,7 @@ void cdr_layout::regrid(const int a_old_finest_level, const int a_new_finest_lev
 
   for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->regrid(a_old_finest_level, a_new_finest_level);
+    solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   }
 }
 

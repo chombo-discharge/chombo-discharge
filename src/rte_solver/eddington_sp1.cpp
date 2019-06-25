@@ -257,7 +257,7 @@ void eddington_sp1::deallocate_internals(){
   m_amr->deallocate(m_resid);
 }
 
-void eddington_sp1::regrid(const int a_old_finest_level, const int a_new_finest_level) {
+void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
   CH_TIME("eddington_sp1::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
@@ -271,8 +271,13 @@ void eddington_sp1::regrid(const int a_old_finest_level, const int a_new_finest_
 
   Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(m_phase);
 
-  m_cache[0]->copyTo(*m_state[0]); // Base level should never change, but ownership might
-  for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
+  // These levels have not changed
+  for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
+    m_cache[lvl]->copyTo(*m_state[lvl]); // Base level should never change, but ownership might
+  }
+
+  // These levels have changed
+  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
 
     if(lvl <= a_old_finest_level){

@@ -206,7 +206,7 @@ public:
   /*!
     @brief Define EBLevelGrid
   */
-  virtual void define_eblevelgrid();
+  virtual void define_eblevelgrid(const int a_lmin);
 
   /*!
     @brief Interpolate ghost vectors
@@ -858,47 +858,48 @@ protected:
   /*!
     Define MFLevelGrid
   */
-  virtual void define_mflevelgrid();
+  virtual void define_mflevelgrid(const int a_lmin);
 
   /*!
     @brief Define ebcoarseaverage
   */
-  virtual void define_eb_coar_ave();
+  virtual void define_eb_coar_ave(const int a_lmin);
 
   /*!
     @brief Define nwoebquadcfinterp
   */
-  virtual void define_eb_quad_cfi();
+  virtual void define_eb_quad_cfi(const int a_lmin);
 
   /*!
     @brief Define operators for piecewise linear interpolation of ghost cells
   */
-  virtual void define_fillpatch();
+  virtual void define_fillpatch(const int a_lmin);
 
   /*!
     @brief Define interpolator for regridding
   */
-  virtual void define_ebpwl_interp();
+  virtual void define_ebpwl_interp(const int a_lmin);
 
   /*!
     @brief Define redistribution operators
   */
-  virtual void define_redist_oper(const int a_regsize);
+  virtual void define_redist_oper(const int a_lmin, const int a_regsize);
 
   /*!
     @brief Define flux registers
   */
-  virtual void define_flux_reg(const int a_regsize);
+  virtual void define_flux_reg(const int a_lmin, const int a_regsize);
 
   /*!
     @brief Define irregular stencils
+    @note This routine shouldn't need to define over all AMR levels, but performance-wise this might be negligible
   */
   virtual void define_irreg_sten();
 
   /*!
     @brief Define copiers
   */
-  virtual void define_copier();
+  virtual void define_copier(const int a_lmin);
 };
 
 #include "amr_meshI.H"

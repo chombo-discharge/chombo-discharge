@@ -134,7 +134,7 @@ void sigma_solver::initial_data(){
   this->reset_cells(m_state);
 }
 
-void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_level){
+void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("sigma_solver::regrid");
   if(m_verbosity > 5){
     pout() << "sigma_solver::regrid" << endl;
@@ -149,9 +149,13 @@ void sigma_solver::regrid(const int a_old_finest_level, const int a_new_finest_l
 
   this->allocate_internals();
 
-  // Regrid. Base level should never change
-  m_cache[0]->copyTo(*m_state[0]); 
-  for (int lvl = 1; lvl <= a_new_finest_level; lvl++){
+  // These levels have never changed
+  for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
+    m_cache[lvl]->copyTo(*m_state[lvl]); 
+  }
+
+  // These levels have changed
+  for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
     const DisjointBoxLayout& fine_grid = m_amr->get_grids()[lvl];
     const ProblemDomain& fine_domain   = m_amr->get_domains()[lvl];
     const ProblemDomain& coar_domain   = m_amr->get_domains()[lvl-1];

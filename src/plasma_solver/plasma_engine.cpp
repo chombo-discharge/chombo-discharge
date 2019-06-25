@@ -1350,10 +1350,10 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   const int new_finest_level = m_amr->get_finest_level();
-  this->regrid_internals(old_finest_level, new_finest_level);        // Regrid internals for plasma_engine
-  m_timestepper->regrid_solvers(old_finest_level, new_finest_level); // Regrid solvers
-  m_timestepper->regrid_internals();                                 // Regrid internal storage for time_stepper
-  m_celltagger->regrid();                                            // Regrid cell tagger
+  this->regrid_internals(old_finest_level, new_finest_level);                // Regrid internals for plasma_engine
+  m_timestepper->regrid_solvers(a_lmin, old_finest_level, new_finest_level); // Regrid solvers
+  m_timestepper->regrid_internals();                                         // Regrid internal storage for time_stepper
+  m_celltagger->regrid();                                                    // Regrid cell tagger
 
   if(a_use_initial_data){
     m_timestepper->initial_data();
@@ -1537,7 +1537,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	  else{
 	    int iref = 1;//m_regrid_interval;
 	    lmax = m_amr->get_finest_level();
-	    lmin = lmax;
+	    lmin = 1;
 	    for (int lvl = m_amr->get_finest_level(); lvl > 0; lvl--){
 	      if(m_step%(iref*m_regrid_interval) == 0){
 		lmin = lvl;
@@ -1545,11 +1545,9 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	      iref *= m_amr->get_ref_rat()[lvl-1];
 	    }
 	  }
-
+#define DEBUG_TIMER 1
 #if 1 // Debug test
-	  if(procID() == 0){
-	    std::cout << "step = " << m_step << "\t tagging levels = [" << lmin << "," << lmax << "]" << std::endl;
-	  }
+	  const Real t0 = MPI_Wtime();
 #endif
 
 	  // Regrid, the two options tells us to generate tags on [(lmin-1),(lmax-1)];
@@ -1557,6 +1555,13 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	  if(m_verbosity > 0){
 	    this->grid_report();
 	  }
+#if 1 // Debug test
+	  const Real t1 = MPI_Wtime();
+	  if(procID() == 0){
+	    std::cout << "step = " << m_step << "\t tagging levels = [" << lmin << "," << lmax << "]"
+		      << "\t time = " << t1-t0 <<std::endl;
+	  }
+#endif
 	}
       }
 
@@ -2169,7 +2174,7 @@ void plasma_engine::setup_geometry_only(){
   const int a_lmin = 0;
   const int a_lmax = m_geom_tag_depth;
   m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
-  m_amr->define_eblevelgrid();
+  m_amr->define_eblevelgrid(a_lmin);
   //  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
   if(m_verbosity > 0){
@@ -2944,7 +2949,11 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
   }
 #endif
 
+#if 1 // Debug
+  return true;
+#else // Original code
   return got_new_tags;
+#endif
 }
 
 void plasma_engine::write_geometry(){

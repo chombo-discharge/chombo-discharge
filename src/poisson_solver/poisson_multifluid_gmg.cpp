@@ -299,12 +299,12 @@ void poisson_multifluid_gmg::auto_tune(){
   }
 }
 
-void poisson_multifluid_gmg::regrid(const int a_old_finest_level, const int a_new_finest_level){
+void poisson_multifluid_gmg::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("poisson_multifluid_gmg::regrid");
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::regrid" << endl;
   }
-  poisson_solver::regrid(a_old_finest_level, a_new_finest_level);
+  poisson_solver::regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   m_needs_setup = true;
 }
 
