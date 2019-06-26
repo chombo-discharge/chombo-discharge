@@ -1545,8 +1545,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	      iref *= m_amr->get_ref_rat()[lvl-1];
 	    }
 	  }
-#define DEBUG_TIMER 1
-#if 1 // Debug test
+#if 0 // Debug test
 	  const Real t0 = MPI_Wtime();
 #endif
 
@@ -1555,7 +1554,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	  if(m_verbosity > 0){
 	    this->grid_report();
 	  }
-#if 1 // Debug test
+#if 0 // Debug test
 	  const Real t1 = MPI_Wtime();
 	  if(procID() == 0){
 	    std::cout << "step = " << m_step << "\t tagging levels = [" << lmin << "," << lmax << "]"
