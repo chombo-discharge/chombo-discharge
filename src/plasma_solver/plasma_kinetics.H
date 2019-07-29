@@ -63,6 +63,36 @@ public:
 					const Real&             a_kappa) const {};
 
   /*!
+    @brief Compute source terms for the cdr equations
+    @param[in] a_time Time
+    @param[in] a_pos Position
+    @param[in] a_E Electric field
+    @param[in] a_gradE \f$\nabla|\mathbf{E}|\f$
+    @param[in] a_cdr_densities CDR densities
+    @param[in] a_rte_densities RTE densities (isotropic terms)
+    @param[in] a_grad_cdr Gradients of cdr densities
+  */
+  virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
+						const Real              a_kappa,
+						const Real              a_dx,
+						const RealVect&         a_pos,
+						const RealVect&         a_E,
+						const RealVect&         a_gradE,
+						const Vector<Real>&     a_cdr_densities,
+						const Vector<Real>&     a_rte_densities,
+						const Vector<RealVect>& a_grad_cdr) const = 0;
+
+  /*!
+    @brief Compute the isotropic source terms for the RTE equations
+  */
+  virtual Vector<Real> compute_rte_source_terms(const Real&         a_time,
+						const Real&         a_kappa,
+						const Real&         a_dx,
+						const RealVect&     a_pos,
+						const RealVect&     a_E,
+						const Vector<Real>& a_cdr_densities) const = 0;
+
+  /*!
     @brief Compute velocities for the CDR equations
     @param[in] a_time Time
     @param[in] a_pos Position
@@ -86,25 +116,7 @@ public:
 							  const RealVect&     a_E,
 							  const Vector<Real>& a_cdr_densities) const = 0;
 
-  /*!
-    @brief Compute source terms for the cdr equations
-    @param[in] a_time Time
-    @param[in] a_pos Position
-    @param[in] a_E Electric field
-    @param[in] a_gradE \f$\nabla|\mathbf{E}|\f$
-    @param[in] a_cdr_densities CDR densities
-    @param[in] a_rte_densities RTE densities (isotropic terms)
-    @param[in] a_grad_cdr Gradients of cdr densities
-  */
-  virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
-						const Real              a_kappa,
-						const Real              a_dx,
-						const RealVect&         a_pos,
-						const RealVect&         a_E,
-						const RealVect&         a_gradE,
-						const Vector<Real>&     a_cdr_densities,
-						const Vector<Real>&     a_rte_densities,
-						const Vector<RealVect>& a_grad_cdr) const = 0;
+
   /*!
     @brief Compute cdr fluxes through electrode-gas interfaces
     @param[in] a_time Time
@@ -180,15 +192,7 @@ public:
     return fluxes;
   }
 
-  /*!
-    @brief Compute the isotropic source terms for the RTE
-  */
-  virtual Vector<Real> compute_rte_source_terms(const Real&         a_time,
-						const Real&         a_kappa,
-						const Real&         a_dx,
-						const RealVect&     a_pos,
-						const RealVect&     a_E,
-						const Vector<Real>& a_cdr_densities) const = 0;
+
 
   /*!
     @brief Set the initial surface charge
