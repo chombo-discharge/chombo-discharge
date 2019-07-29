@@ -100,6 +100,313 @@ bool time_stepper::solve_poisson(MFAMRCellData&                a_potential,
   return converged;
 }
 
+void time_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
+					    Vector<EBAMRCellData*>&       a_photon_sources,
+					    const Vector<EBAMRCellData*>& a_particle_densities,
+					    const Vector<EBAMRCellData*>& a_photon_densities,
+					    const EBAMRCellData&          a_E,
+					    const Real&                   a_time,
+					    const Real&                   a_dt){
+  CH_TIME("time_stepper::advance_reaction_network(nograd)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network(nograd)" << endl;
+  }
+
+  const int num_species = m_plaskin->get_num_species();
+
+  Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
+    m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);  // Allocate
+
+    m_amr->compute_gradient(*grad_cdr[idx], *a_particle_densities[idx]); // Compute grad()
+    m_amr->average_down(*grad_cdr[idx], m_cdr->get_phase());        // Average down
+    m_amr->interp_ghost(*grad_cdr[idx], m_cdr->get_phase());        // Interpolate ghost cells
+  }
+
+  this->advance_reaction_network(a_particle_sources,
+				 a_photon_sources,
+				 a_particle_densities,
+				 grad_cdr,
+				 a_photon_densities,
+				 a_E,
+				 a_time,
+				 a_dt);
+
+  // Delete extra storage - didn't use smart pointers for this...
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->deallocate(*grad_cdr[idx]);
+    delete grad_cdr[idx];
+  }
+}
+
+void time_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
+					    Vector<EBAMRCellData*>&       a_photon_sources,
+					    const Vector<EBAMRCellData*>& a_particle_densities,
+					    const Vector<EBAMRCellData*>& a_particle_gradients,
+					    const Vector<EBAMRCellData*>& a_photon_densities,
+					    const EBAMRCellData&          a_E,
+					    const Real&                   a_time,
+					    const Real&                   a_dt){
+  CH_TIME("time_stepper::advance_reaction_network(amr)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network(amr)" << endl;
+  }
+
+  const int num_photons = m_plaskin->get_num_photons();
+  const int num_species = m_plaskin->get_num_species();
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    Vector<LevelData<EBCellFAB>* > particle_sources(num_species);
+    Vector<LevelData<EBCellFAB>* > photon_sources(num_species);
+    Vector<LevelData<EBCellFAB>* > particle_densities(num_species);
+    Vector<LevelData<EBCellFAB>* > particle_gradients(num_species);
+    Vector<LevelData<EBCellFAB>* > photon_densities(num_species);
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      particle_sources[idx]   = (*a_particle_sources[idx])[lvl];
+      particle_densities[idx] = (*a_particle_densities[idx])[lvl];
+      particle_gradients[idx] = (*a_particle_gradients[idx])[lvl];
+    }
+
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      photon_sources[idx]   = (*a_photon_sources[idx])[lvl];
+      photon_densities[idx] = (*a_photon_densities[idx])[lvl];
+    }
+
+    // Call the level versions
+    advance_reaction_network(particle_sources,
+			     photon_sources,
+			     particle_densities,
+			     particle_gradients,
+			     photon_densities,
+			     *a_E[lvl],
+			     a_time,
+			     a_dt,
+			     lvl);
+  }
+
+  // Average down species
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->average_down(*a_particle_sources[idx], m_cdr->get_phase());
+    m_amr->interp_ghost(*a_particle_sources[idx], m_cdr->get_phase()); // This MAY be necessary if we extrapolate advection
+  }
+
+  // Average down photon solvers
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->average_down(*a_photon_sources[idx], m_cdr->get_phase());
+  }
+}
+
+void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
+					    Vector<LevelData<EBCellFAB>* >&       a_photon_sources,
+					    const Vector<LevelData<EBCellFAB>* >& a_particle_densities,
+					    const Vector<LevelData<EBCellFAB>* >& a_particle_gradients,
+					    const Vector<LevelData<EBCellFAB> *>& a_photon_densities,
+					    const LevelData<EBCellFAB>&           a_E,
+					    const Real&                           a_time,
+					    const Real&                           a_dt,
+					    const int                             a_lvl){
+  CH_TIME("time_stepper::advance_reaction_network(level)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network(level)" << endl;
+  }
+
+  const Real zero = 0.0;
+
+  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_species();
+
+
+  // Stencils for extrapolating things to cell centroids
+  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
+
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
+  const Real dx                = m_amr->get_dx()[a_lvl];
+  const RealVect origin        = m_physdom->get_prob_lo();
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    Vector<EBCellFAB*> particle_sources(num_species);
+    Vector<EBCellFAB*> photon_sources(num_photons);
+    Vector<EBCellFAB*> particle_densities(num_species);
+    Vector<EBCellFAB*> particle_gradients(num_species);
+    Vector<EBCellFAB*> photon_densities(num_photons);
+    
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      particle_sources[idx]   = &(*a_particle_sources[idx])[dit()];
+      particle_densities[idx] = &(*a_particle_densities[idx])[dit()];
+      particle_gradients[idx] = &(*a_particle_gradients[idx])[dit()];
+    }
+    
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      photon_sources[idx]   = &(*a_photon_sources[idx])[dit()];
+      photon_densities[idx] = &(*a_photon_densities[idx])[dit()];
+    }
+    
+    // This does all cells
+    advance_reaction_network_reg(particle_sources,
+				 photon_sources,
+				 particle_densities,
+				 particle_gradients,
+				 photon_densities,
+				 a_E[dit()],
+				 a_time,
+				 a_dt,
+				 dx,
+				 dbl.get(dit()));
+
+    // This overwrites irregular celles
+    advance_reaction_network_irreg(particle_sources,
+				   photon_sources,
+				   particle_densities,
+				   particle_gradients,
+				   photon_densities,
+				   interp_stencils[a_lvl][dit()],
+				   a_E[dit()],
+				   a_time,
+				   a_dt,
+				   dx,
+				   dbl.get(dit()));
+  }
+}
+
+void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_particle_sources,
+						Vector<EBCellFAB*>&       a_photon_sources,
+						const Vector<EBCellFAB*>& a_particle_densities,
+						const Vector<EBCellFAB*>& a_particle_gradients,
+						const Vector<EBCellFAB*>& a_photon_densities,
+						const EBCellFAB&          a_E,
+						const Real&               a_time,
+						const Real&               a_dt,
+						const Real&               a_dx,
+						const Box&                a_box){
+  CH_TIME("time_stepper::advance_reaction_network_reg(patch)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network_reg(patch)" << endl;
+  }
+
+  const Real zero = 0.0;
+    
+  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_species();
+
+  // EBISBox and graph
+  const EBISBox& ebisbox = a_E.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  // Things that are passed into plasma_kinetics
+  RealVect         pos, E;
+  Vector<Real>     particle_sources(num_species);
+  Vector<Real>     photon_sources(num_photons);
+  Vector<Real>     particle_densities(num_species);
+  Vector<RealVect> particle_gradients(num_species);
+  Vector<Real>     photon_densities(num_photons);
+
+  // Computed source terms onto here
+  EBCellFAB part_src(ebisbox, a_E.getRegion(), num_species);
+  EBCellFAB phot_src(ebisbox, a_E.getRegion(), num_photons);
+
+  const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
+  
+  // Grid loop
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+    
+    // Position and E
+    pos    = origin + iv*a_dx;
+    E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
+
+    // Fill vectors with densities
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx  = solver_it.get_solver();
+      const Real phi = (*a_particle_densities[idx]).getSingleValuedFAB()(iv, 0);
+      particle_densities[idx] = Max(zero, phi);
+      particle_gradients[idx] = RealVect(D_DECL((*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 0),
+					   (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 1),
+					   (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 2)));
+    }
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx  = solver_it.get_solver();
+      const Real phi = (*a_photon_densities[idx]).getSingleValuedFAB()(iv, 0);
+      photon_densities[idx] = Max(zero, phi);
+    }
+
+    // Compute source terms
+    const Real kappa = 1.0; // Kappa for regular cells
+    m_plaskin->advance_reaction_network(particle_sources,
+					photon_sources,
+					particle_densities,
+					particle_gradients,
+					photon_densities,
+					E,
+					pos,
+					a_dt,
+					a_time,
+					kappa);
+
+    // Put vector into temporary holders
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      part_src.getSingleValuedFAB()(iv,idx) = particle_sources[idx];
+    }
+    
+    // Put vector into temporary holders
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      phot_src.getSingleValuedFAB()(iv,idx) = photon_sources[idx];
+    }
+  }
+
+  // Copy temporary storage back to solvers
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    (*a_particle_sources[idx]).setVal(0.0);
+    (*a_particle_sources[idx]).plus(part_src, idx, 0, 1);
+
+    // Covered cells are bogus. 
+    (*a_particle_sources[idx]).setCoveredCellVal(0.0, 0);
+  }
+
+  // Copy temporary storage back to solvers
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    (*a_photon_sources[idx]).setVal(0.0);
+    (*a_photon_sources[idx]).plus(phot_src, idx, 0, 1);
+
+    // Covered cells are bogus. 
+    (*a_photon_sources[idx]).setCoveredCellVal(0.0, 0);
+  }
+}
+
+void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a_particle_sources,
+						  Vector<EBCellFAB*>&          a_photon_sources,
+						  const Vector<EBCellFAB*>&    a_particle_densities,
+						  const Vector<EBCellFAB*>&    a_particle_gradients,
+						  const Vector<EBCellFAB*>&    a_photon_densities,
+						  const BaseIVFAB<VoFStencil>& a_interp_stencils,
+						  const EBCellFAB&             a_E,
+						  const Real&                  a_time,
+						  const Real&                  a_dt,
+						  const Real&                  a_dx,
+						  const Box&                   a_box){
+  CH_TIME("time_stepper::advance_reaction_network_irreg(patch)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network_irreg(patch)" << endl;
+  }
+
+  MayDay::Abort("time_stepper::advance_reaction_network_irreg - not implemented");
+}
+
 void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffco_face,
 					   const Vector<EBAMRCellData*>& a_cdr_densities,
 					   const EBAMRCellData&          a_E,

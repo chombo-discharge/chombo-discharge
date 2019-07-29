@@ -36,6 +36,31 @@ public:
   virtual ~plasma_kinetics(){}
 
   /*!
+    @brief Routine intended for advancing a full reaction network simultaneous. 
+    @details This is the routine that advances the reaction network in the FHD description. Things
+             that come in/out of this routine are DENSITIES, but you should translate this to number
+             of particles/photons per cell. 
+    @param[out] a_particle_sources   Number of particles produced per unit volume per unit time
+    @param[out] a_particle_sources   Number of photons produced per unit volume per unit time
+    @param[in]  a_particle_densities Grid-based density for particle species
+    @param[in]  a_photon_densities   Grid-based densities for photons
+    @param[in]  a_time               Current time
+    @param[in]  a_dt                 Advanced time
+    @param[in]  a_pos                Position in space
+    @param[in]  a_E                  Electric field
+  */
+  virtual void advance_reaction_network(Vector<Real>&           a_particle_sources,
+					Vector<Real>&           a_photon_sources,
+					const Vector<Real>&     a_particle_densities,
+					const Vector<RealVect>& a_particle_gradients,
+					const Vector<Real>&     a_photon_densities,
+					const RealVect&         a_E,
+					const RealVect&         a_pos,
+					const Real&             a_dt,
+					const Real&             a_time,
+					const Real&             a_kappa) const {};
+										
+  /*!
     @brief Compute velocities for the CDR equations
     @param[in] a_time Time
     @param[in] a_pos Position

@@ -95,6 +95,68 @@ public:
 			     const EBAMRIVData&            a_sigma,
 			     const centering::which_center a_centering);
 
+  
+  /*!
+    @brief Compute reaction network sources. First computes the CDR gradients and then calls the other version
+  */
+  virtual void advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
+					Vector<EBAMRCellData*>&       a_photon_sources,
+					const Vector<EBAMRCellData*>& a_particle_densities,
+					const Vector<EBAMRCellData*>& a_photon_densities,
+					const EBAMRCellData&          a_E,
+					const Real&                   a_time,
+					const Real&                   a_dt);
+
+  /*!
+    @brief Compute reaction network sources. Used for time-dependent FHD models
+  */
+  virtual void advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
+					Vector<EBAMRCellData*>&       a_photon_sources,
+					const Vector<EBAMRCellData*>& a_particle_densities,
+					const Vector<EBAMRCellData*>& a_particle_gradients,
+					const Vector<EBAMRCellData*>& a_photon_densities,
+					const EBAMRCellData&          a_E,
+					const Real&                   a_time,
+					const Real&                   a_dt);
+
+  virtual void advance_reaction_network(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
+					Vector<LevelData<EBCellFAB>* >&       a_photon_sources,
+					const Vector<LevelData<EBCellFAB>* >& a_particle_densities,
+					const Vector<LevelData<EBCellFAB>* >& a_particle_gradients,
+					const Vector<LevelData<EBCellFAB>* >& a_photon_densities,
+					const LevelData<EBCellFAB>&           a_E,
+					const Real&                           a_time,
+					const Real&                           a_dt,
+					const int                             a_level);
+  /*!
+    @brief Compute reaction network sources. Patch version.
+  */
+  virtual void advance_reaction_network_reg(Vector<EBCellFAB*>&       a_particle_sources,
+					    Vector<EBCellFAB*>&       a_photon_sources,
+					    const Vector<EBCellFAB*>& a_particle_densities,
+					    const Vector<EBCellFAB*>& a_particle_gradients,
+					    const Vector<EBCellFAB*>& a_photon_densities,
+					    const EBCellFAB&          a_E,
+					    const Real&               a_time,
+					    const Real&               a_dt,
+					    const Real&               a_dx,
+					    const Box&                a_box);
+
+  /*!
+    @brief Compute reaction network sources. Irregular patch version.
+  */
+  virtual void advance_reaction_network_irreg(Vector<EBCellFAB*>&          a_particle_sources,
+					      Vector<EBCellFAB*>&          a_photon_sources,
+					      const Vector<EBCellFAB*>&    a_particle_densities,
+					      const Vector<EBCellFAB*>&    a_particle_gradients,
+					      const Vector<EBCellFAB*>&    a_photon_densities,
+					      const BaseIVFAB<VoFStencil>& a_interp_stencils,
+					      const EBCellFAB&             a_E,
+					      const Real&                  a_time,
+					      const Real&                  a_dt,
+					      const Real&                  a_dx,
+					      const Box&                   a_box);
+
   /*!
     @brief Compute the time step and how it was restricted
   */
@@ -139,6 +201,7 @@ public:
     @brief Compute the current density. Level version. 
   */
   virtual void compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl);
+
   
   /*!
     @brief Compute diffusion things using whatever is available in the solvers
@@ -253,15 +316,15 @@ public:
   /*!
     @brief Compute cdr fluxes on domain faces. Level version
   */
-  void compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
-				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_fluxes,
-				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_densities,
-				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_velocities,
-				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_gradients,
-				 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_rte_fluxes,
-				 const LevelData<DomainFluxIFFAB>&          a_E,
-				 const Real&                                a_time,
-				 const int                                  a_lvl);
+  virtual void compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
+					 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_fluxes,
+					 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_densities,
+					 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_velocities,
+					 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_gradients,
+					 const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_rte_fluxes,
+					 const LevelData<DomainFluxIFFAB>&          a_E,
+					 const Real&                                a_time,
+					 const int                                  a_lvl);
 
   /*!
     @brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
