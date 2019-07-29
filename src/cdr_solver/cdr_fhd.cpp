@@ -56,7 +56,8 @@ void cdr_fhd::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_o
     EBAMRCellData ransource;
     m_amr->allocate(ransource, m_phase, 1);
     this->GWN_diffusion_source(ransource, a_old_state);
-      
+
+
     // Do the regular aliasing stuff for passing into AMRMultiGrid
     Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
     m_amr->alias(new_state, a_new_state);
@@ -65,10 +66,12 @@ void cdr_fhd::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_o
       
     const Real alpha = 0.0;
     const Real beta  = 1.0;
+
+    data_ops::set_value(m_diffco_eb, 0.0);
       
     // Multigrid solver
     m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
       
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -87,6 +90,7 @@ void cdr_fhd::advance_euler(EBAMRCellData&       a_new_state,
     pout() << m_name + "::advance_euler (with source)" << endl;
   }
 
+  
   if(m_diffusive){
     if(!m_stochastic_diffusion){
       cdr_tga::advance_euler(a_new_state, a_old_state, a_source, a_dt);
@@ -111,10 +115,12 @@ void cdr_fhd::advance_euler(EBAMRCellData&       a_new_state,
       
       const Real alpha = 0.0;
       const Real beta  = 1.0;
+
+      data_ops::set_value(m_diffco_eb, 0.0);
       
       // Multigrid solver
       m_eulersolver->resetAlphaAndBeta(alpha, beta);
-      m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+      m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
       
       const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
       if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -155,10 +161,12 @@ void cdr_fhd::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old
       
     const Real alpha = 0.0;
     const Real beta  = 1.0;
+
+    data_ops::set_value(m_diffco_eb, 0.0);
       
     // Multigrid solver
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
       
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -199,10 +207,12 @@ void cdr_fhd::advance_tga(EBAMRCellData&       a_new_state,
       
     const Real alpha = 0.0;
     const Real beta  = 1.0;
+
+    data_ops::set_value(m_diffco_eb, 0.0);
       
     // Multigrid solver
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, 0.0);
+    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
       
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -222,19 +232,38 @@ void cdr_fhd::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellDa
   
   EBAMRFluxData ranflux;
   EBAMRFluxData GWN;
+
+  // Putting this in here because it is really, really important that we don't send in any stupid ghost cells or negative
+  // values for the diffusion advance
+  EBAMRCellData& states = const_cast<EBAMRCellData&> (a_cell_states);
+  m_amr->average_down(states, m_phase);
+  m_amr->interp_ghost(states, m_phase);
+  data_ops::floor(states, 0.0);
   
   m_amr->allocate(ranflux,   m_phase, ncomp);
   m_amr->allocate(GWN,       m_phase, ncomp);
   
   data_ops::set_value(a_ransource, 0.0);
-  data_ops::set_value(ranflux,   0.0);
-  data_ops::set_value(GWN,       0.0);
-      
+  data_ops::set_value(ranflux,     0.0);
+  data_ops::set_value(GWN,         0.0);
+
   this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise
   this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis
-  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis
-  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis
-  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis)
+   data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis
+   data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis
+   data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis)
+
+#if 1 // Debug
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (int dir = 0; dir <SpaceDim; dir++){
+      Real max, min;
+      EBLevelDataOps::getMaxMin(max, min, *ranflux[lvl], 0, dir);
+      if(min < 0.0 || max < 0.0){
+	MayDay::Abort("stop - negative face value");
+      }
+    }
+  }
+#endif
   data_ops::multiply(ranflux, GWN);                     // Holds random, cell-centered flux
 
   // Source term. 
@@ -244,8 +273,21 @@ void cdr_fhd::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellDa
   m_amr->allocate(backup, m_phase, 1);
   data_ops::copy(backup, m_ebflux);
   data_ops::set_value(m_ebflux, 0.0);
+  data_ops::set_value(a_ransource, 0.0);
   conservative_divergence(a_ransource, ranflux); // Compute the conservative divergence. This also refluxes. 
   data_ops::copy(m_ebflux, backup);
+
+  //  data_ops::set_value(a_ransource, 0.0);
+
+  
+#if 1 // Debug
+  m_amr->average_down(a_ransource, m_phase);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    if(EBLevelDataOps::checkNANINF(*a_ransource[lvl])){
+      MayDay::Abort("something is wrong");
+    }
+  }
+#endif
 }
 
 void cdr_fhd::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states){
@@ -260,6 +302,7 @@ void cdr_fhd::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCe
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
     const Real dx                = m_amr->get_dx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
@@ -277,11 +320,11 @@ void cdr_fhd::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCe
 	const BaseFab<Real>& reg_cell = cell_states.getSingleValuedFAB();
 
 	Box facebox = box;
-	facebox.grow(dir,1);
+	//	facebox.grow(dir,1);
 	facebox.surroundingNodes(dir);
 
-	face_states.setVal(0.0);
-	FORT_HEAVISIDE_MEAN(CHF_FRA1(reg_face, comp),
+	// This will also do irregular cells and boundary faces
+	FORT_HEAVISIDE_MEAN(CHF_FRA1(reg_face, comp),  
 			    CHF_CONST_FRA1(reg_cell, comp),
 			    CHF_CONST_INT(dir),
 			    CHF_CONST_REAL(dx),
@@ -326,9 +369,25 @@ void cdr_fhd::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCe
 	  face_states(face, comp) = 0.5*(hival + loval)*Hlo*Hhi;
 	}
 
-	// No random flux on domain faces. 
+	// No random flux on domain faces. Reset those. 
 	for (SideIterator sit; sit.ok(); ++sit){
+	  Box sidebox;
+	  if(sit() == Side::Lo){
+	    sidebox = bdryLo(domain, dir, 1);
+	  }
+	  else if(sit() == Side::Hi){
+	    sidebox = bdryHi(domain, dir, 1);
+	  }
 	  
+	  sidebox &= facebox;
+
+	  Box cellbox = sidebox.enclosedCells(dir);
+
+	  const IntVectSet ivs(cellbox);
+	  const FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;
+	  for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	    face_states(faceit(), comp) = 0.0;
+	  }
 	}
       }
     }

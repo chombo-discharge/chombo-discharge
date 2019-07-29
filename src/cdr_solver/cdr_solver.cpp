@@ -1917,20 +1917,10 @@ Real cdr_solver::compute_charge(){
 }
 
 bool cdr_solver::is_diffusive(){
-  CH_TIME("cdr_solver::is_diffusive");
-  if(m_verbosity > 5){
-    pout() << m_name + "::is_diffusive" << endl;
-  }
-  
   return m_diffusive;
 }
 
 bool cdr_solver::is_mobile(){
-  CH_TIME("cdr_solver::is_mobile");
-  if(m_verbosity > 5){
-    pout() << m_name + "::is_mobile" << endl;
-  }
-  
   return m_mobile;
 }
 

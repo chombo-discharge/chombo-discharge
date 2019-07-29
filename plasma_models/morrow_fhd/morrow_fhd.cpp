@@ -191,15 +191,17 @@ Vector<Real> morrow_fhd::compute_cdr_source_terms(const Real              a_time
 						  const Vector<RealVect>& a_grad_cdr) const {
   Vector<Real> source(m_num_species, 0.0);
 
-  const Real Ne  = a_cdr_densities[m_nelec_idx]; 
-  const Real Np  = a_cdr_densities[m_nplus_idx];
-  const Real Nn  = a_cdr_densities[m_nminu_idx];
+  const Real vol   = pow(a_dx, SpaceDim);
+
+  const Real Ne  = floor(0.5 + a_cdr_densities[m_nelec_idx]*vol)/vol; 
+  const Real Np  = floor(0.5 + a_cdr_densities[m_nplus_idx]*vol)/vol;
+  const Real Nn  = floor(0.5 + a_cdr_densities[m_nminu_idx]*vol)/vol; 
   
   const Real Ve    = (compute_ve(a_E)).vectorLength(); // Electron velocity
   const Real alpha = this->compute_alpha(a_E);         // Ionization coefficient
   const Real eta   = this->compute_eta(a_E);           // Attachment coefficient
   const Real beta  = this->compute_beta(a_E);          // Recombination coefficient
-  const Real vol   = pow(a_dx, SpaceDim);
+
   
   Real products, p;
 
