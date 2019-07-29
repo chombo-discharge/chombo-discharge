@@ -25,8 +25,8 @@ public:
     @brief Constructor
   */
   plasma_kinetics(){
-    m_fhd       = false;
-    m_eed_solve = false;
+    m_eed_solve     = false;
+    m_tight_network = false;
     m_eed_index = 0;
   }
 
@@ -37,9 +37,11 @@ public:
 
   /*!
     @brief Routine intended for advancing a full reaction network simultaneous. 
-    @details This is the routine that advances the reaction network in the FHD description. Things
+    @details This is the routine that sometimes the reaction network in the FHD description. Things
              that come in/out of this routine are DENSITIES, but you should translate this to number
-             of particles/photons per cell. 
+             of particles/photons per cell. The particle densities are probably not integers, i.e. cells may
+	     contain "half an electron". If you're doing nearest-grid point deposition of photons, the
+	     photon densities x cell volume should be an integer, although stored as a floating point. 
     @param[out] a_particle_sources   Number of particles produced per unit volume per unit time
     @param[out] a_particle_sources   Number of photons produced per unit volume per unit time
     @param[in]  a_particle_densities Grid-based density for particle species
@@ -59,7 +61,7 @@ public:
 					const Real&             a_dt,
 					const Real&             a_time,
 					const Real&             a_kappa) const {};
-										
+
   /*!
     @brief Compute velocities for the CDR equations
     @param[in] a_time Time
@@ -239,10 +241,10 @@ public:
   }
 
   /*!
-    @brief Check if we're using fluctuating hydrodynamics
+    @brief Check if 
   */
-  bool using_fhd(){
-    return m_fhd;
+  bool tight_reaction_network(){
+    return m_tight_network;
   }
 
   /*!
@@ -262,15 +264,13 @@ public:
 
   
 protected:
-
-  /*!
-    @brief Check if we're doing an EED solve
-  */
-  bool m_fhd;       // Fluctuating hydrodynamics or not
-  bool m_eed_solve; // Doing EED solve or not?
-  int m_eed_index;  // EED solver index
-  Real m_dt;        // FHD kinetics need access to time steps
-  Real m_finest_dx; // Finest dx
+  bool m_eed_solve;     // Doing EED solve or not?
+  bool m_tight_network; // Tightly coupled particle-photon network
+  
+  int m_eed_index;      // EED solver index
+  
+  Real m_dt;            // FHD kinetics need access to time steps
+  Real m_finest_dx;     // Finest dx
 
   /*!
     @brief List of species

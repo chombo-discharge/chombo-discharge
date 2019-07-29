@@ -101,6 +101,8 @@ public:
 
 
   Vector<int> m_wallbc; // Wall boundary conditions
+
+  bool m_fhd; // Using FHD or not
   
   Real m_seed;
   Real m_cutoff_poisson;

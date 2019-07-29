@@ -100,6 +100,32 @@ bool time_stepper::solve_poisson(MFAMRCellData&                a_potential,
   return converged;
 }
 
+void time_stepper::advance_reaction_network(const Real a_time, const Real a_dt){
+  CH_TIME("time_stepper::advance_reaction_network(solvers)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network(solvers)" << endl;
+  }
+
+  // Compute the electric field
+  EBAMRCellData E;
+  m_amr->allocate(E, m_cdr->get_phase(), SpaceDim);
+  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
+
+  Vector<EBAMRCellData*> particle_sources = m_cdr->get_sources();
+  Vector<EBAMRCellData*> photon_sources   = m_rte->get_sources();
+  Vector<EBAMRCellData*> particle_states  = m_cdr->get_states();
+  Vector<EBAMRCellData*> photon_states    = m_cdr->get_states();
+
+  // Call the AMR version (without the gradient)
+  advance_reaction_network(particle_sources,
+			   photon_sources, 
+			   particle_states,
+			   photon_states,
+			   E,
+			   a_time,
+			   a_dt);
+}
+
 void time_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
 					    Vector<EBAMRCellData*>&       a_photon_sources,
 					    const Vector<EBAMRCellData*>& a_particle_densities,
@@ -405,6 +431,23 @@ void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a
   }
 
   MayDay::Abort("time_stepper::advance_reaction_network_irreg - not implemented");
+}
+
+void time_stepper::compute_source_terms(){
+  CH_TIME("time_stepper::compute_source_terms");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_source_terms" << endl;
+  }
+
+  const bool tight_network = m_plaskin->tight_reaction_network();
+  if(!tight_network){ // Decoupled networks
+    compute_cdr_sources();
+    compute_rte_sources();
+  }
+  else{ // Tightly coupled networks
+    // The tight network is not advanced in this way because the inherited class might choose to recompute certain things
+    //    advance_reaction_network(m_time, m_dt);
+  }
 }
 
 void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffco_face,

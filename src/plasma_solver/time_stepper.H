@@ -95,6 +95,10 @@ public:
 			     const EBAMRIVData&            a_sigma,
 			     const centering::which_center a_centering);
 
+  /*!
+    @brief Advance the reaction network. 
+  */
+  virtual void advance_reaction_network(const Real a_time, const Real a_dt);
   
   /*!
     @brief Compute reaction network sources. First computes the CDR gradients and then calls the other version
@@ -156,6 +160,12 @@ public:
 					      const Real&                  a_dt,
 					      const Real&                  a_dx,
 					      const Box&                   a_box);
+
+  
+  /*!
+    @brief Compute all source terms. This either does a decoupled cdr/rte solve or tight reaction advance
+  */
+  virtual void compute_source_terms();
 
   /*!
     @brief Compute the time step and how it was restricted
@@ -345,6 +355,7 @@ public:
     @brief Compute CDR source terms
   */
   virtual void compute_cdr_sources();
+
 
 
   /*!

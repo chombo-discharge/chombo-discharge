@@ -1395,8 +1395,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   m_timestepper->compute_cdr_diffusion();
   m_timestepper->compute_dt(m_dt, m_timecode);
   m_plaskin->set_dt(m_dt);
-  m_timestepper->compute_cdr_sources();
-  m_timestepper->compute_rte_sources();
+  m_timestepper->compute_source_terms(); 
 
   const Real solver_filling = MPI_Wtime();
 
@@ -2276,8 +2275,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_timestepper->compute_cdr_diffusion();
   m_timestepper->compute_dt(m_dt, m_timecode);
   m_plaskin->set_dt(m_dt);
-  m_timestepper->compute_cdr_sources();
-  m_timestepper->compute_rte_sources();
+  m_timestepper->compute_source_terms();
 
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
@@ -2358,9 +2356,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_timestepper->compute_cdr_diffusion();
   m_timestepper->compute_dt(m_dt, m_timecode);
   m_plaskin->set_dt(m_dt);
-  m_timestepper->compute_cdr_sources();
-  m_timestepper->compute_rte_sources();
-
+  m_timestepper->compute_source_terms();
 
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
