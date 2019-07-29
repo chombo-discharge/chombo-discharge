@@ -3,12 +3,17 @@
 Temporal discretization
 =======================
 
-In this chapter we discuss the supported temporal integrators for `PlasmaC`, and discuss their input parameters. These integrators differ in their level of efficiency and accuracy. Currently, we recommend the ``SISDC`` which is an adaptive high-order discretization with variable order and variable step functionality. The efficiency and adaptivity of ``SISDC`` has displaced our Godunov (``rk2_tga``) and Strang (``strang2``)  operator splitting methods, and these are likely to be removed in future versions of `PlasmaC`. The multirate method ``MISDC`` (a variety of ``SISDC``) is under development, and is intended for applications where chemistry terms are faster than advective and diffusive time scales.
+In this chapter we discuss the supported temporal integrators for `PlasmaC`, and discuss their input parameters. These integrators differ in their level of efficiency and accuracy.
+
+For deterministic CFD we recommend the ``SISDC`` which is an adaptive high-order discretization with variable order and variable step functionality. The efficiency and adaptivity of ``SISDC`` has displaced our Godunov (``rk2_tga``) and Strang (``strang2``)  operator splitting methods, and these are likely to be removed in future versions of `PlasmaC`. The multirate method ``MISDC`` (a variety of ``SISDC``) is under development, and is intended for applications where chemistry terms are faster than advective and diffusive time scales.
+
+Deterministic integrators
+-------------------------
 
 .. _Chap:godunov:
 
 godunov
--------
+_______
 The ``rk2_tga`` temporal integrator is our least sophisticated temporal integrator. ``rk2_tga`` uses a Godunov splitting between advection-reaction and diffusion, and advances the equations of motion as follows:
 
 1. Advance :math:`\phi^\ast = \phi^k + \Delta t\left[S^k - \nabla\cdot\left(\mathbf{v}^k\phi^k\right)\right]` and :math:`\sigma^\ast = \sigma^k + \Delta tF_\sigma^k`
@@ -28,7 +33,7 @@ Steps 1 through 7 describes a second order Runge-Kutta method (Heun's method); s
 .. _Chap:strang2:
     
 strang2
--------
+_______
 The ``strang2`` temporal integrator uses a second order Strang splitting between advection-reaction and diffusion, and supports up to fifth order Runge-Kutta schemes for the advection-reaction part. The ``strang2`` integrator integrates the equations of motion in the following way:
 
 .. math::
@@ -81,11 +86,11 @@ Finally, note that the advective advance is performed with :math:`\Delta t/2`, a
 .. _Chap:SISDC:
 
 SISDC
------
+_____
 ``SISDC`` is a semi-implicit spectral deferred correction method for the `PlasmaC` equation set and is an adaptive high-order discretization with implicit diffusion. This method integrates the advection-diffusion-reaction equations in the following way.
 
 Spectral deferred corrections
-_____________________________
+*****************************
 
 Given an ordinary differential equation (ODE) as
 
@@ -158,7 +163,7 @@ Next, we will approximate :math:`\mathbf{E}_{m+1}^{0}` for use in the predictor.
 which we will refer to as the implicit coupling. This is e.g. the electric field coupling used in :cite:`Marskar2019`. This approximation can be improved by using more fixed-point iterations that computes :math:`\mathbf{E}_{m+1}^{0,\dagger} = \mathbf{E}\left(\phi_{m+1}^{0,\dagger}, \sigma_{m+1}^0\right)` and then re-solves the predictor equation with :math:`\mathbf{E}_{m+1}^{0,\dagger}` in place of :math:`\mathbf{E}_{m+1}^{0,\ast}`. The process can then be repeated for increased accuracy. Regardless of which coupling is used, we have now calculated :math:`\phi_{m+1}^0`, :math:`\sigma_{m+1}^0`, through which we obtain :math:`\mathbf{E}_{m+1}^0 = \mathbf{E}\left(\phi_{m+1}^0, \sigma_{m+1}^0\right)`, and :math:`\Psi_{m+1}^0 = \Psi\left(\mathbf{E}_{m+1}^0, \phi_{m+1}^0\right)`. Finally, we remark that the SISDC predictor is a sequentially advanced semi-implicit Euler method, which is locally second order accurate and globally first order accurate. Each step of the predictor can be thought of as a Godunov splitting between the advective-reactive and diffusive terms. 
 
 SISDC corrector
-_______________
+***************
 Next, the semi-implicit discretization of the correction equation is
 
 .. math::
@@ -208,7 +213,7 @@ The solution for :math:`\sigma_{m+1}^{k+1}` is final since all charge is injecte
 with some approximation for :math:`\mathbf{E}_{m+1}^{k+1}`. As before, this coupling can be made either semi-implicitly or implicitly. The corrector equation defines a Helmholtz equation for :math:`\phi_{m+1}^{k+1}` using :math:`\phi_{m+1}^{k+1,\ast}` as the previous solution and :math:`-\mathcal{F}_{\textrm{D}}\left(\phi_{m+1}^{k}; \mathbf{E}_{m+1}^k\right)` as a source term.
 
 Order, stability, and computational cost
-________________________________________
+****************************************
 For consistency with the literature, denote the SISDC method which uses :math:`P` nodes (i.e. :math:`P-1` subintervals) and :math:`K` total iterations (i.e. :math:`K-1` iterations of the correction equation) by :math:`\verb|SISDC|_P^K`. This method will have a global order of accuracy :math:`\min\left(K,P\right)` if the quadrature can be evaluated with appropriate accuracy. Order reductions may occur if the interpolating polynomial in the quadrature suffers from Runge's phenomenon. As we discuss below, uniformly spaced nodes have some computational advantage but is therefore also associated with some risk. Safer choices include Lobatto nodes or Chebyshev nodes (with inclusion of endpoints) to minimize the risk of order reductions. Implications on the choice of quadrature nodes can be found in :cite:`Layton2005`. 
 
 For explicit advection, the deferred correction procedure integrates the correction equation sequentially and therefore does not allow each substep :math:`\Delta t_m` to exceed the CFL-limited time step :math:`\Delta t_{\textrm{cfl}}`, i.e. :math:`\Delta t_m < \Delta t_{\textrm{cfl}} \forall m`. Since we have :math:`\Delta t = \sum_m\Delta t_m`, uniform nodes maximize :math:`\Delta t` subject to the CFL constraint. For example, an :math:`\verb|SISDC|_P^K` method with uniformly spaced nodes has a maximum possible time step :math:`\Delta t < (P-1)\Delta t_{\textrm{cfl}}`. For the same number of function evaluations, the allowed time step with for Lobatto or Chebyshev nodes is smaller. For :math:`P\leq 3`, the uniform nodes, Lobatto nodes, and Chebyshev nodes coincide. Larger time steps are possible with uniform nodes for :math:`P>3`, which has some computational consequence. The table below summarizes the largest possible time steps for the :math:`\verb|SISDC|_P^K` method with the various quadratures. Finally, note that :math:`\Delta t_m < \Delta t_{\textrm{cfl}}` does not guarantee stability since further restrictions may required for stability of the reaction terms.
@@ -231,7 +236,19 @@ Next, we provide some remarks on the extra computational work involved for highe
 .. _Chap:MISDC:
 
 MISDC
------
+______
 `MISDC` is a semi-implicit spectral deferred correction method for the :math:`PlasmaC` equation set and is an adaptive high-order discretization with implicit diffusion and multirate substepping for reactive terms. This integrator is currently under development. 
+
+Stochastic integrators
+----------------------
+
+Deterministic CFD integrators are generally not suitable for stochastic ODEs. For example, the recursive nature of Heun's method or spectral deferred corrections hardly make sense for stochastic ODEs.
+
+For fluctuating hydrodynamics we are preparing several temporal integrators. Currently, we only support the Euler-Maruyama integrator which is first order accurate in time (although with an accurate advective integrator).
+
+eulerMaruyama
+_____________
+
+``eulerMaruyama`` implements the Euler-Maruyama method. This method is based on a semi-implicit Euler method with implicit diffusion. 
 
 .. bibliography:: references.bib
