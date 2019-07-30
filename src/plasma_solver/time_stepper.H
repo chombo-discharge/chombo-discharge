@@ -165,7 +165,7 @@ public:
   /*!
     @brief Compute all source terms. This either does a decoupled cdr/rte solve or tight reaction advance
   */
-  virtual void compute_source_terms();
+  virtual void init_source_terms() = 0;
 
   /*!
     @brief Compute the time step and how it was restricted

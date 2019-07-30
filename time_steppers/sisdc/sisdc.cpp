@@ -300,6 +300,15 @@ Real sisdc::get_max_node_distance(){
   return max_dist;
 }
 
+void sisdc::init_source_terms(){
+  CH_TIME("sisdc::init_source_terms");
+  if(m_verbosity > 5){
+    pout() << "sisdc::init_source_terms" << endl;
+  }
+  
+  time_stepper::init_source_terms();
+}
+
 void sisdc::setup_quadrature_nodes(const int a_p){
   CH_TIME("sisdc::setup_quadrature_nodes");
   if(m_verbosity > 5){

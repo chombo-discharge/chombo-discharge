@@ -1,38 +1,31 @@
 /*!
-  @file plasma_kinetics.H
+  @file network_kinetics.H
   @brief Declarationof the plasma kinetics class
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#ifndef _PLASMA_KINETICS_
-#define _PLASMA_KINETICS_
+#ifndef _NETWORK_KINETICS_
+#define _NETWORK_KINETICS_
 
-#include <RealVect.H>
-#include <RefCountedPtr.H>
-#include <LoHiSide.H>
-
-#include "species.H"
-#include "photon_group.H"
+#include "plasma_kinetics.H"
 
 /*!
   @brief Abstract base class for specifying plasma kinetics
 */
-class plasma_kinetics {
+class network_kinetics : public plasma_kinetics {
 public:
 
   /*!
     @brief Constructor
   */
-  plasma_kinetics(){
-    m_eed_solve     = false;
-    m_eed_index = 0;
+  network_kinetics() : plasma_kinetics() {
   }
 
   /*!
     @brief Destructor
   */
-  virtual ~plasma_kinetics(){}
+  virtual ~network_kinetics(){}
 
   /*!
     @brief Routine intended for advancing a full reaction network simultaneous. 
@@ -59,37 +52,30 @@ public:
 					const RealVect&         a_pos,
 					const Real&             a_dt,
 					const Real&             a_time,
-					const Real&             a_kappa) const = 0;
+					const Real&             a_kappa) const {};
 
-  /*!
-    @brief Compute source terms for the cdr equations
-    @param[in] a_time Time
-    @param[in] a_pos Position
-    @param[in] a_E Electric field
-    @param[in] a_gradE \f$\nabla|\mathbf{E}|\f$
-    @param[in] a_cdr_densities CDR densities
-    @param[in] a_rte_densities RTE densities (isotropic terms)
-    @param[in] a_grad_cdr Gradients of cdr densities
-  */
-  virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
-						const Real              a_kappa,
-						const Real              a_dx,
-						const RealVect&         a_pos,
-						const RealVect&         a_E,
-						const RealVect&         a_gradE,
-						const Vector<Real>&     a_cdr_densities,
-						const Vector<Real>&     a_rte_densities,
-						const Vector<RealVect>& a_grad_cdr) const = 0;
+  // Calling this is an error
+  Vector<Real> compute_cdr_source_terms(const Real              a_time,
+					const Real              a_kappa,
+					const Real              a_dx,
+					const RealVect&         a_pos,
+					const RealVect&         a_E,
+					const RealVect&         a_gradE,
+					const Vector<Real>&     a_cdr_densities,
+					const Vector<Real>&     a_rte_densities,
+					const Vector<RealVect>& a_grad_cdr) const {
+    MayDay::Abort("network_kinetics::compute_cdr_source_terms - Calling this is an error");
+  }
 
-  /*!
-    @brief Compute the isotropic source terms for the RTE equations
-  */
-  virtual Vector<Real> compute_rte_source_terms(const Real&         a_time,
-						const Real&         a_kappa,
-						const Real&         a_dx,
-						const RealVect&     a_pos,
-						const RealVect&     a_E,
-						const Vector<Real>& a_cdr_densities) const = 0;
+  // Calling this is an error
+  Vector<Real> compute_rte_source_terms(const Real&         a_time,
+					const Real&         a_kappa,
+					const Real&         a_dx,
+					const RealVect&     a_pos,
+					const RealVect&     a_E,
+					const Vector<Real>& a_cdr_densities) const {
+    MayDay::Abort("network_kinetics::compute_rte_source_terms - Calling this is an error");
+  }
 
   /*!
     @brief Compute velocities for the CDR equations
@@ -182,7 +168,7 @@ public:
 						 const Vector<Real>&   a_cdr_velocities,
 						 const Vector<Real>&   a_cdr_gradients,
 						 const Vector<Real>&   a_rte_fluxes,
-						 const Vector<Real>&   a_extrap_cdr_fluxes) const{
+						 const Vector<Real>&   a_extrap_cdr_fluxes) const {
     Vector<Real> fluxes(m_num_species, 0.0); 
     const int sgn = sign(a_side);
     for (int i = 0; i < fluxes.size(); i++){
@@ -207,85 +193,6 @@ public:
   virtual Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
     return 0.0;
   }
-
-  /*!
-    @brief Get all ions
-  */
-  const Vector<RefCountedPtr<species> >& get_species() const { 
-    return m_species; 
-  }
-
-  /*!
-    @brief Get all photons
-  */
-  const Vector<RefCountedPtr<photon_group> >& get_photons() const {
-    return m_photons;
-  }
-
-  /*!
-    @brief Return number of ion equations
-  */
-  int get_num_species() const{
-    return m_species.size();
-  }
-
-  /*!
-    @brief Return number of RTE equations
-  */
-  int get_num_photons() const {
-    return m_photons.size();
-  }
-
-  /*!
-    @brief Check if solver solves for eed
-  */
-  bool solve_eed(){
-    return m_eed_solve;
-  }
-
-  /*!
-    @brief Get eed solver index
-  */
-  int get_eed_index(){
-    return m_eed_index;
-  }
-
-  void set_dt(const Real a_dt){
-    m_dt = a_dt;
-  }
-
-  void set_finest_dx(const Real a_finest_dx){
-    m_finest_dx = a_finest_dx;
-  }
-
-  
-protected:
-  bool m_eed_solve;     // Doing EED solve or not?
-  
-  int m_eed_index;      // EED solver index
-  
-  Real m_dt;            // FHD kinetics need access to time steps
-  Real m_finest_dx;     // Finest dx
-
-  /*!
-    @brief List of species
-  */
-  Vector<RefCountedPtr<species> > m_species;
-
-  /*!
-    @brief List of optical transitions between species
-  */
-  Vector<RefCountedPtr<photon_group> > m_photons;
-
-  /*!
-    @brief Number of species
-  */
-  int m_num_species;
-
-  /*!
-    @brief Number of RTE groups
-  */
-  int m_num_photons;
 };
 
 #endif

@@ -8,14 +8,14 @@
 #ifndef _MORROW_LOWKE_
 #define _MORROW_LOWKE_
 
-#include "plasma_kinetics.H"
+#include "simple_kinetics.H"
 #include "perlin_if.H"
 
 /*!
   @brief Class that implements the Morrow-Lowke discharge model for air.
   @details This class uses the Morrow-Lowke kinetic scheme for air and the three-group Bourdon model for the RTE equations. 
 */
-class morrow_lowke : public plasma_kinetics {
+class morrow_lowke : public simple_kinetics {
 public:
 
   /*!

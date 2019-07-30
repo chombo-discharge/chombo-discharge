@@ -1,12 +1,12 @@
 /*!
-  @file plasma_kinetics.H
+  @file decoupled_kinetics.H
   @brief Declarationof the plasma kinetics class
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#ifndef _PLASMA_KINETICS_
-#define _PLASMA_KINETICS_
+#ifndef _DECOUPLED_KINETICS_
+#define _DECOUPLED_KINETICS_
 
 #include <RealVect.H>
 #include <RefCountedPtr.H>
@@ -18,21 +18,19 @@
 /*!
   @brief Abstract base class for specifying plasma kinetics
 */
-class plasma_kinetics {
+class decoupled_kinetics {
 public:
 
   /*!
     @brief Constructor
   */
-  plasma_kinetics(){
-    m_eed_solve     = false;
-    m_eed_index = 0;
+  decoupled_kinetics() : plasma_kinetics() {
   }
 
   /*!
     @brief Destructor
   */
-  virtual ~plasma_kinetics(){}
+  virtual ~decoupled_kinetics(){}
 
   /*!
     @brief Routine intended for advancing a full reaction network simultaneous. 
@@ -59,7 +57,9 @@ public:
 					const RealVect&         a_pos,
 					const Real&             a_dt,
 					const Real&             a_time,
-					const Real&             a_kappa) const = 0;
+					const Real&             a_kappa) const {
+    MayDay::Abort("decoupled_kinetics::advance_reaction_network - Calling this is an error");
+  }
 
   /*!
     @brief Compute source terms for the cdr equations
@@ -191,8 +191,6 @@ public:
     return fluxes;
   }
 
-
-
   /*!
     @brief Set the initial surface charge
     @param[in] a_time Time
@@ -200,92 +198,8 @@ public:
   */
   virtual Real initial_sigma(const Real      a_time,
 			     const RealVect& a_pos) const = 0;
-
-  /*!
-    @brief Initialize electron energy density
-  */
-  virtual Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
-    return 0.0;
-  }
-
-  /*!
-    @brief Get all ions
-  */
-  const Vector<RefCountedPtr<species> >& get_species() const { 
-    return m_species; 
-  }
-
-  /*!
-    @brief Get all photons
-  */
-  const Vector<RefCountedPtr<photon_group> >& get_photons() const {
-    return m_photons;
-  }
-
-  /*!
-    @brief Return number of ion equations
-  */
-  int get_num_species() const{
-    return m_species.size();
-  }
-
-  /*!
-    @brief Return number of RTE equations
-  */
-  int get_num_photons() const {
-    return m_photons.size();
-  }
-
-  /*!
-    @brief Check if solver solves for eed
-  */
-  bool solve_eed(){
-    return m_eed_solve;
-  }
-
-  /*!
-    @brief Get eed solver index
-  */
-  int get_eed_index(){
-    return m_eed_index;
-  }
-
-  void set_dt(const Real a_dt){
-    m_dt = a_dt;
-  }
-
-  void set_finest_dx(const Real a_finest_dx){
-    m_finest_dx = a_finest_dx;
-  }
-
   
 protected:
-  bool m_eed_solve;     // Doing EED solve or not?
-  
-  int m_eed_index;      // EED solver index
-  
-  Real m_dt;            // FHD kinetics need access to time steps
-  Real m_finest_dx;     // Finest dx
-
-  /*!
-    @brief List of species
-  */
-  Vector<RefCountedPtr<species> > m_species;
-
-  /*!
-    @brief List of optical transitions between species
-  */
-  Vector<RefCountedPtr<photon_group> > m_photons;
-
-  /*!
-    @brief Number of species
-  */
-  int m_num_species;
-
-  /*!
-    @brief Number of RTE groups
-  */
-  int m_num_photons;
 };
 
 #endif

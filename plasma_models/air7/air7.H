@@ -8,7 +8,7 @@
 #ifndef _AIR7_
 #define _AIR7_
 
-#include "plasma_kinetics.H"
+#include "simple_kinetics.H"
 #include "lookup_table.H"
 #include <random>
 
@@ -25,7 +25,7 @@
   @todo If anyone finds the time, please improve the ion mobilities. 
 
 */
-class air7 : public plasma_kinetics {
+class air7 : public simple_kinetics {
 public:
 
   // Forward declaration of cdr species

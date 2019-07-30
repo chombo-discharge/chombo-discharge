@@ -115,6 +115,24 @@ void mc_photo::cache_state(){
   if(m_verbosity > 5){
     pout() << m_name + "::cache_state" << endl;
   }
+
+  // Allocate cache
+  m_amr->allocate(m_photocache);
+
+  // Copy photons onto cache
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    collectValidParticles(m_photocache[lvl]->outcast(),
+			  *m_photons[lvl],
+			  m_pvr[lvl]->mask(),
+			  m_amr->get_dx()[lvl]*RealVect::Unit,
+			  1,
+			  true, 
+			  m_physdom->get_prob_lo());
+    m_photocache[lvl]->remapOutcast();
+
+    // Clear old photons
+    m_photons[lvl]->clear();
+  }
 }
 
 void mc_photo::deallocate_internals(){
@@ -129,6 +147,56 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   }
 
   this->allocate_internals();
+
+  MayDay::Abort("mc_photo::regrid - not implemented yet");
+
+
+  // Here are the steps:
+  //
+  // 1. We are regridding a_lmin and above, so we need to move all photons onto level a_lmin-1
+  // 
+  // 
+
+  // 1. Move all photons (that are in the cache) onto the coarsest grid level
+  List<photon>& coarsest_outcast = m_photocache[0]->outcast();
+  m_cache[0]->gatherOutcast();
+  for (int lvl = 1; lvl <= finest_level; lvl++){
+    m_photocache[lvl]->outcast().clear();
+    m_photocache[lvl]->gatherOutcast();
+    coarsest_outcast.catenate(a_photons[lvl]->outcast());
+  }
+  m_photocache[0]->remapOutcast();
+  coarsest_outcast.clear();
+
+  // 2. 
+  
+  for (int lvl = 1; lvl <= finest_level; lvl++){
+
+    // 1. Collect coarser level particles into this levels PVR 
+    collectValidParticles(a_photons[lvl]->outcast(),
+			  *a_photons[lvl-1],
+			  m_pvr[lvl]->mask(),
+			  m_amr->get_dx()[lvl]*RealVect::Unit,
+			  m_amr->get_ref_rat()[lvl-1],
+			  false, 
+			  origin);
+    a_photons[lvl]->remapOutcast();
+
+    // 2. There may be particles that remained on this levels DBL but may not belong to the PVR. Move those 
+    //    particles one level down and remap that level once more
+    if(m_pvr_buffer > 0){
+      collectValidParticles(a_photons[lvl-1]->outcast(),
+			    *a_photons[lvl],
+			    m_pvr[lvl]->mask(),
+			    m_amr->get_dx()[lvl]*RealVect::Unit,
+			    1,
+			    true, 
+			    origin);
+
+      a_photons[lvl-1]->remapOutcast();
+    }
+
+  }
 }
 
 void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
@@ -688,6 +756,7 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_physdom->get_prob_lo();
 
+  // 1. Gather everything on the coarsest level
   List<photon>& coarsest_outcast = a_photons[0]->outcast();
   a_photons[0]->gatherOutcast();
   for (int lvl = 1; lvl <= finest_level; lvl++){
@@ -769,8 +838,6 @@ int mc_photo::set_pvr_buffer(){
   ParmParse pp("mc_photo");
   pp.get("pvr_buffer", m_pvr_buffer);
 }
-
-
 
 void mc_photo::binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,
 			     const List<photon>&                           a_photons,

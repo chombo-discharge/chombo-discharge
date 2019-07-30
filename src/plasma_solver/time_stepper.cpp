@@ -430,24 +430,17 @@ void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a
     pout() << "time_stepper::advance_reaction_network_irreg(patch)" << endl;
   }
 
-  MayDay::Abort("time_stepper::advance_reaction_network_irreg - not implemented");
+  MayDay::Abort("time_stepper::advance_reaction_network_irreg - not yet implemented");
 }
 
-void time_stepper::compute_source_terms(){
-  CH_TIME("time_stepper::compute_source_terms");
+void time_stepper::init_source_terms(){
+  CH_TIME("time_stepper::init_source_terms");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_source_terms" << endl;
+    pout() << "time_stepper::init_source_terms" << endl;
   }
 
-  const bool tight_network = m_plaskin->tight_reaction_network();
-  if(!tight_network){ // Decoupled networks
-    compute_cdr_sources();
-    compute_rte_sources();
-  }
-  else{ // Tightly coupled networks
-    // The tight network is not advanced in this way because the inherited class might choose to recompute certain things
-    //    advance_reaction_network(m_time, m_dt);
-  }
+  compute_cdr_sources();
+  compute_rte_sources();
 }
 
 void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffco_face,

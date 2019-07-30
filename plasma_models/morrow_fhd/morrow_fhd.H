@@ -8,14 +8,14 @@
 #ifndef _MORROW_FHD_
 #define _MORROW_FHD_
 
-#include "plasma_kinetics.H"
+#include "simple_kinetics.H"
 
 #include <random>
 
 /*!
   @brief Class that implements the fluctuating Morrow-Lowke discharge model for air.
 */
-class morrow_fhd : public plasma_kinetics {
+class morrow_fhd : public simple_kinetics {
 public:
 
   morrow_fhd();

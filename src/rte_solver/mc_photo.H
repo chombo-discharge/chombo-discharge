@@ -159,9 +159,10 @@ protected:
 
   InterpType m_deposition; // Mass deposition type
 
-  EBAMRPhotons m_photons;   // Particles
-  EBAMRPVR m_pvr;           // Valid region
-  EBAMRCellData m_crse;     // Photoionization profile from the coarse level photons
+  EBAMRPhotons m_photons;    // Particles
+  EBAMRPhotons m_photocache; // Photon cache
+  EBAMRPVR m_pvr;            // Valid region
+  EBAMRCellData m_crse;      // Photoionization profile from the coarse level photons
 
   // Joint photons for finer level stuff
   Vector<RefCountedPtr<ParticleData<joint_photon> > >m_joint_photons;

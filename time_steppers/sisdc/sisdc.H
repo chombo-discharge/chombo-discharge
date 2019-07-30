@@ -43,7 +43,8 @@ public:
   ~sisdc();
   
   Real advance(const Real a_dt);
-  
+
+  void init_source_terms();
   void regrid_internals();
   void deallocate_internals();
 
