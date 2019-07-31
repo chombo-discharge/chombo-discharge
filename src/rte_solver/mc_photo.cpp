@@ -26,6 +26,8 @@ mc_photo::mc_photo(){
   this->set_stationary(false);
   this->set_rng();
   this->set_pseudophotons();
+  this->set_photon_generation();
+  this->set_source_type();
   this->set_deposition_type();
   this->set_bisect_step();
   this->set_domain_bc();
@@ -53,14 +55,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   int num_photons, num_outcast;
 
   // Generate photons
-  this->clear(m_photons);
+  this->clear(m_photons);                                           // Clear internal data
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
   this->remap_photons(m_photons);                                   // Remap photons
-#if 0
-  this->remap_photons(absorbed_photons);                            // Remap photons
-  this->aggregate_photons(m_photons);                               // Aggregate photons
-#endif
   this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
   
   return true;
@@ -119,6 +117,13 @@ void mc_photo::cache_state(){
   // Allocate cache
   m_amr->allocate(m_photocache);
 
+#if 0 // Debug, count number of photons
+  long long num_precopy = 0;
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    num_precopy += m_photons[lvl]->numParticles();
+  }
+#endif
+
   // Copy photons onto cache
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     collectValidParticles(m_photocache[lvl]->outcast(),
@@ -126,13 +131,24 @@ void mc_photo::cache_state(){
 			  m_pvr[lvl]->mask(),
 			  m_amr->get_dx()[lvl]*RealVect::Unit,
 			  1,
-			  true, 
+			  false, 
 			  m_physdom->get_prob_lo());
     m_photocache[lvl]->remapOutcast();
 
     // Clear old photons
     m_photons[lvl]->clear();
   }
+
+#if 0 // Debug, count number of photons
+  long long num_postcopy = 0;
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    num_postcopy += m_photocache[lvl]->numParticles();
+  }
+
+  if(procID() == 0){
+    std::cout << "precopy = " << num_precopy << "\t postcopy = " << num_postcopy << std::endl;
+  }
+#endif
 }
 
 void mc_photo::deallocate_internals(){
@@ -146,57 +162,85 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
     pout() << m_name + "::regrid" << endl;
   }
 
-  this->allocate_internals();
 
-  MayDay::Abort("mc_photo::regrid - not implemented yet");
+  // This reallocates all internal stuff. After this, the only object with any knowledge of the past
+  // is m_photocache, which has all the photons in the old data holders.
+  this->allocate_internals();
 
 
   // Here are the steps:
+  // 
+  // 1. We are regridding a_lmin and above, so we need to move all photons onto level a_lmin-1. There's
+  //    probably a better way to do this
+  // 
+  // 2. Levels 0 through a_lmin-1 did not change. Copy photons back into those levels. 
+  // 
+  // 3. Levels a_lmin-1 through a_new_finest_level changed. Remap photons into the correct boxes. 
   //
-  // 1. We are regridding a_lmin and above, so we need to move all photons onto level a_lmin-1
-  // 
-  // 
+  // 4. Redeposit photons
+  
+  const int base_level  = Max(0, a_lmin-1);
+  const RealVect origin = m_physdom->get_prob_lo();
+
+#if 0 // Debug, count number of photons
+  long long num_pretransfer = 0;
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+    num_pretransfer += m_photocache[lvl]->numParticles();
+  }
+#endif
+  
 
   // 1. Move all photons (that are in the cache) onto the coarsest grid level
-  List<photon>& coarsest_outcast = m_photocache[0]->outcast();
-  m_cache[0]->gatherOutcast();
-  for (int lvl = 1; lvl <= finest_level; lvl++){
-    m_photocache[lvl]->outcast().clear();
-    m_photocache[lvl]->gatherOutcast();
-    coarsest_outcast.catenate(a_photons[lvl]->outcast());
+  List<photon>& base_cache = m_photocache[0]->outcast();
+  base_cache.clear();
+  for (int lvl = base_level; lvl <= a_old_finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      for (ListIterator<photon> li((*m_photons[lvl])[dit()].listItems()); li.ok(); ){
+	m_photocache[base_level]->outcast().transfer(li);
+      }
+    }
   }
-  m_photocache[0]->remapOutcast();
-  coarsest_outcast.clear();
 
-  // 2. 
-  
-  for (int lvl = 1; lvl <= finest_level; lvl++){
+#if 0 // Debug, count number of photons
+  long long num_posttransfer = 0;
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+    num_posttransfer += m_photocache[lvl]->numParticles();
+  }
 
-    // 1. Collect coarser level particles into this levels PVR 
-    collectValidParticles(a_photons[lvl]->outcast(),
-			  *a_photons[lvl-1],
+  if(procID() == 0){
+    std::cout << "pre = " << num_pretransfer << "\t post = " << num_posttransfer << std::endl;
+  }
+#endif
+
+  // 2. Levels 0 through base_level did not change, so copy photons back onto those levels. 
+  for (int lvl = 0; lvl <= base_level; lvl++){
+    collectValidParticles(*m_photons[lvl],
+			  *m_photocache[lvl],
 			  m_pvr[lvl]->mask(),
 			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  m_amr->get_ref_rat()[lvl-1],
+			  1,
 			  false, 
 			  origin);
-    a_photons[lvl]->remapOutcast();
 
-    // 2. There may be particles that remained on this levels DBL but may not belong to the PVR. Move those 
-    //    particles one level down and remap that level once more
-    if(m_pvr_buffer > 0){
-      collectValidParticles(a_photons[lvl-1]->outcast(),
-			    *a_photons[lvl],
-			    m_pvr[lvl]->mask(),
-			    m_amr->get_dx()[lvl]*RealVect::Unit,
-			    1,
-			    true, 
-			    origin);
-
-      a_photons[lvl-1]->remapOutcast();
-    }
-
+    m_photons[lvl]->gatherOutcast();
+    m_photons[lvl]->remapOutcast();
   }
+
+  // 3. Levels above base_level may have changed, so we need to move the particles into the correct boxes now
+  for (int lvl = base_level; lvl < a_new_finest_level; lvl++){
+    collectValidParticles(m_photons[lvl+1]->outcast(),
+			  *m_photons[lvl],
+			  m_pvr[lvl+1]->mask(),
+			  m_amr->get_dx()[lvl+1]*RealVect::Unit,
+			  m_amr->get_ref_rat()[lvl],
+			  false,
+			  origin);
+    m_photons[lvl+1]->remapOutcast();
+  }
+
+  // 4. Redeposit photons
+  deposit_photons(m_state, m_photons);
 }
 
 void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
@@ -345,8 +389,12 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 	const Real kappa    = ebisbox.volFrac(vof);
 
+#if 0 // Original code
 	const Real mean = source(iv,0)*vol*a_dt;//*kappa;
 	const int num_phys_photons = random_poisson(mean);
+#else // New code
+	const int num_phys_photons = draw_photons(source(iv,0), vol, a_dt);
+#endif
 	if(num_phys_photons > 0){
 
 	  const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
@@ -374,44 +422,42 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
   m_num_photons = this->count_photons(m_photons);
 }
 
-void mc_photo::aggregate_photons(const EBAMRPhotons& a_photons){
-  CH_TIME("mc_photo::aggregate_photons");
+int mc_photo::draw_photons(const Real a_source, const Real a_volume, const Real a_dt){
+  CH_TIME("mc_photo::draw_photons");
   if(m_verbosity > 5){
-    pout() << m_name + "::aggregate_photons" << endl;
+    pout() << m_name + "::draw_photons" << endl;
   }
 
-  // Allocate the joint photons
-  m_amr->allocate(m_joint_photons);
+  int num_photons = 0;
 
-  const int finest_level = m_amr->get_finest_level();
-  const RealVect origin  = m_physdom->get_prob_lo();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-
-    const RealVect coar_dx       = m_amr->get_dx()[lvl]*RealVect::Unit;
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-
-    m_joint_photons[lvl]->clear();
-    List<joint_photon>& plist = m_joint_photons[lvl]->outcast();
-      
-    const bool has_fine = lvl < finest_level;
-    if(has_fine){
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl+1];
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	// Map particle positions to bins
-	std::map<IntVect, joint_photon, CompIntVect> mip;
-
-	binmapPhotons(mip, (*a_photons[lvl+1])[dit()].listItems(), coar_dx, origin);
-
-	for (std::map<IntVect, joint_photon, CompIntVect>::iterator it = mip.begin(); it != mip.end(); ++it){
-	  plist.add(it->second);
-	}
-      }
-    }
-
-    m_joint_photons[lvl]->remapOutcast();
+  // Check if we need any type of source term normalization
+  Real factor;
+  if(m_src_type == source_type::number){
+    factor = 1.0;
   }
+  else if(m_src_type == source_type::per_vol){
+    factor = a_volume;
+  }
+  else if(m_src_type == source_type::per_vols){
+    factor = a_volume*a_dt;
+  }
+  else if(m_src_type == source_type::per_s){
+    factor = a_dt;
+  }
+
+  // Draw a number of photons with the desired algorithm
+  if(m_photogen == photon_generation::stochastic){
+    const Real mean = a_source*factor;
+    num_photons = random_poisson(mean);
+  }
+  else if(m_photogen == photon_generation::deterministic){
+    num_photons = round(a_source*factor);
+  }
+  else{
+    MayDay::Abort("mc::draw_photons - unknown generation requested. Aborting...");
+  }
+
+  return num_photons;
 }
 
 void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles){
@@ -475,7 +521,15 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
 #endif
   }
 
-  data_ops::kappa_scale(a_state);
+  // In this case we should deposit numbers and not densities
+  if(m_deposit_numbers && m_deposition == InterpType::NGP){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      data_ops::scale(*a_state[lvl], pow(m_amr->get_dx()[lvl], SpaceDim));
+    }
+  }
+  else{
+    data_ops::kappa_scale(a_state);
+  }
 }
 
 void mc_photo::set_random_kappa(){
@@ -491,6 +545,54 @@ void mc_photo::set_random_kappa(){
   m_random_kappa = (str == "true") ? true : false; 
 }
 
+void mc_photo::set_photon_generation(){
+  CH_TIME("mc_photo::set_photon_generation");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_photon_generation" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("mc_photo");
+  pp.get("photon_generation", str);
+
+  if(str == "deterministic"){
+    m_photogen = photon_generation::deterministic;
+  }
+  else if(str == "stochastic"){
+    m_photogen = photon_generation::stochastic;
+  }
+  else{
+    MayDay::Abort("mc_photo::set_photon_generation - unknown photon generation type requested");
+  }
+}
+
+void mc_photo::set_source_type(){
+  CH_TIME("mc_photo::set_source_type");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_source_type" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("mc_photo");
+  pp.get("source_type", str);
+
+  if(str == "number"){
+    m_src_type = source_type::number;
+  }
+  else if(str == "volume"){
+    m_src_type = source_type::per_vol;
+  }
+  else if(str == "volume_rate"){
+    m_src_type = source_type::per_vols;
+  }
+  else if(str == "rate"){
+    m_src_type = source_type::per_s;
+  }
+  else{
+    MayDay::Abort("mc_photo::set_source_type - unknown source type requested");
+  }
+}
+
 void mc_photo::set_deposition_type(){
   CH_TIME("mc_photo::set_deposition_type");
   if(m_verbosity > 5){
@@ -501,7 +603,12 @@ void mc_photo::set_deposition_type(){
   ParmParse pp("mc_photo");
   pp.get("deposition", str);
 
-  if(str == "ngp"){
+  m_deposit_numbers = false;
+  if(str == "num"){
+    m_deposition = InterpType::NGP;
+    m_deposit_numbers = true;
+  }
+  else if(str == "ngp"){
     m_deposition = InterpType::NGP;
   }
   else if(str == "cic"){

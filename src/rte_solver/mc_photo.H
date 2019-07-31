@@ -88,6 +88,16 @@ public:
   virtual void set_deposition_type();
 
   /*!
+    @brief Set photon generation type
+  */
+  virtual void set_photon_generation();
+
+  /*!
+    @brief Declare what the source contains. Since the physics interface is arbitrary, this might be an integer number, the number per volume, a volumetric rate, or just a rate. In this case some normalization is required. 
+  */
+  virtual void set_source_type();
+
+  /*!
     @brief Set pseudophotons
   */
   virtual void set_pseudophotons();
@@ -142,7 +152,21 @@ public:
   
 protected:
 
+  enum photon_generation {
+    deterministic = 0,
+    stochastic = 1,
+  };
+
+  
+  enum source_type {
+    number   = 0,
+    per_vols = 1, 
+    per_vol  = 2,
+    per_s    = 3,
+  };
+    
   bool m_random_kappa;    // Use random kappa or not
+  bool m_deposit_numbers; // Deposit numbers of photons in each cell
 
   int  m_max_photons;     // Number of photons per pseudophoton
   int  m_seed;            // RNG seed
@@ -150,6 +174,9 @@ protected:
   int  m_pvr_buffer;      // PVR buffer
 
   long long m_num_photons;
+
+  photon_generation m_photogen;
+  source_type m_src_type;
 
   Real m_bisect_step;     // Bisection step length
   
@@ -164,13 +191,12 @@ protected:
   EBAMRPVR m_pvr;            // Valid region
   EBAMRCellData m_crse;      // Photoionization profile from the coarse level photons
 
-  // Joint photons for finer level stuff
-  Vector<RefCountedPtr<ParticleData<joint_photon> > >m_joint_photons;
 
   Vector<wallbc::which_bc> m_domainbc;
   void set_rng();
   
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
   void remap_photons(EBAMRPhotons& a_photons);
   void aggregate_photons(const EBAMRPhotons& a_photons);
@@ -182,6 +208,7 @@ protected:
                      const RealVect&                               a_meshSpacing,
                      const RealVect&                               a_origin);
 
+  int draw_photons(const Real a_source, const Real a_volume, const Real a_dt);
   int domainbc_map(const int a_dir, const Side::LoHiSide a_side);
   int random_poisson(const Real& a_mean);
   Real random_exponential(const Real a_mean);
