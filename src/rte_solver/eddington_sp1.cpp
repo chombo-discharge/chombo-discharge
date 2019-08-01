@@ -812,7 +812,6 @@ void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellD
   }
 }
 
-#ifdef CH_USE_HDF5
 void eddington_sp1::write_plot_file(){
   CH_TIME("eddington_sp1::write_plot_file");
   if(m_verbosity > 5){
@@ -882,7 +881,25 @@ void eddington_sp1::write_plot_file(){
 	      true,
 	      covered_values);
 }
-#endif
+
+void eddington_sp1::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("eddington_sp1::write_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_checkpoint_level" << endl;
+  }
+
+  // Write state vector
+  write(a_handle, *m_state[a_level], m_name);
+}
+
+void eddington_sp1::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("eddington_sp1::read_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::read_checkpoint_level" << endl;
+  }
+
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
+}
 
 void eddington_sp1::set_stationary(const bool a_stationary) {
   CH_TIME("rte_solver::set_stationary");

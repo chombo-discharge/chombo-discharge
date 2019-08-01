@@ -1,3 +1,6 @@
+
+
+
 /*!
   @file cdr_solver.H
   @brief Declaration of an abstract class for evolving cdr equations
@@ -203,12 +206,30 @@ public:
   */
   virtual void compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt);
 
-#ifdef CH_USE_HDF5
   /*!
     @brief Write plot file
   */
   virtual void write_plot_file();
-#endif
+
+  /*!
+    @brief Write output data to a_output
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
+    /*!
+    @brief Write data to output. Convenience function. 
+  */
+  virtual void write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
+
+  /*!
+    @brief Write checkpoint data into handle
+  */
+  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+
+  /*!
+    @brief Read checkpoint data from handle
+  */
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Use mass-weighted redistribution
@@ -231,14 +252,29 @@ public:
   virtual void tag_value(Vector<IntVectSet>& a_tags, const Real a_value);
 
   /*!
+    @brief Set which variables to output
+  */
+  virtual void set_output_variables();
+
+  /*!
     @brief Get solver name
   */
   virtual std::string get_name();
 
   /*!
+    @brief Get output plot names
+  */
+  virtual Vector<std::string> get_output_names() const;
+
+  /*!
     @brief Get the ghost cell requirement
   */
   virtual int query_ghost() const = 0;
+
+  /*!
+    @brief Get number of output fields
+  */
+  virtual int get_num_output() const;
 
   /*!
     @brief Compute the largest possible advection time step (for explicit methods)
@@ -504,6 +540,26 @@ protected:
     @brief Use mass-weighted redistribution
   */
   bool m_mass_redist;
+
+    /*!
+    @brief Output state
+  */
+  bool m_plot_phi;
+
+  /*!
+    @brief Output rhs
+  */
+  bool m_plot_vel;
+
+  /*!
+    @brief Output electric field
+  */
+  bool m_plot_dco;
+
+  /*!
+    @brief Output GMG residue
+  */
+  bool m_plot_src;
 
   /*!
     @brief Average cell-centered velocities to face centers

@@ -272,6 +272,32 @@ void mc_photo::write_plot_file(){
   if(m_verbosity > 5){
     pout() << m_name + "::write_plot_file" << endl;
   }
+
+  MayDay::Abort("mc_photo::write_plot_file - not implemented");
+}
+
+void mc_photo::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("mc_photo::write_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_checkpoint_level" << endl;
+  }
+
+  // Write state vector
+  write(a_handle, *m_state[a_level], m_name);
+
+  // Write particles. Must be implemented.
+}
+
+void mc_photo::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("mc_photo::read_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::read_checkpoint_level" << endl;
+  }
+
+  // Read state vector
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
+
+  // Read particles. Should be implemented
 }
 
 int mc_photo::query_ghost() const {

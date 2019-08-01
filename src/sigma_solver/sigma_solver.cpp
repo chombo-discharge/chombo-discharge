@@ -354,6 +354,40 @@ void sigma_solver::set_time(const int a_step, const Real a_time, const Real a_dt
   m_dt   = a_dt;
 }
 
+void sigma_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("sigma_solver::write_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::write_checkpoint_level" << endl;
+  }
+
+  EBCellFactory fact(m_amr->get_ebisl(phase::gas)[a_level]);
+  LevelData<EBCellFAB> scratch(m_amr->get_grids()[a_level], 1, 3*IntVect::Unit, fact);
+  data_ops::set_value(scratch, 0.0);
+  data_ops::incr(scratch, *m_state[a_level], 1.0);
+
+  // Write state vector
+  write(a_handle, scratch, "sigma");
+}
+
+void sigma_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("sigma_solver::read_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::read_checkpoint_level" << endl;
+  }
+
+  const EBISLayout& ebisl = m_amr->get_ebisl(phase::gas)[a_level];
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  
+  EBCellFactory fact(ebisl);
+  LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
+  data_ops::set_value(scratch, 0.0);
+  read<EBCellFAB>(a_handle, scratch, "sigma", dbl, Interval(0,0), false);
+
+		     
+  data_ops::set_value(*m_state[a_level], 0.0);
+  data_ops::incr(*m_state[a_level], scratch, 1.0);
+}
+
 Real sigma_solver::compute_charge(){
   CH_TIME("sigma_solver::compute_charge");
   if(m_verbosity > 5){

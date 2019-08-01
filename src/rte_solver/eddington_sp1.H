@@ -148,13 +148,20 @@ public:
   */
   virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
 
-
-#ifdef CH_USE_HDF5
   /*!
     @brief Write plot file
   */
   virtual void write_plot_file();
-#endif
+
+  /*!
+    @brief Write checkpoint data into handle
+  */
+  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+
+  /*!
+    @brief Read checkpoint data from handle
+  */
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Return required number of ghost cells

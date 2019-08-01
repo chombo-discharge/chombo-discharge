@@ -32,6 +32,7 @@ poisson_solver::poisson_solver(){
 
   this->allocate_wall_bc();
   this->set_time(0, 0., 0.);
+  this->set_output_variables();
 
   m_autotune = false;
   { // Check if we should use auto-tuning of the solver
@@ -593,12 +594,37 @@ void poisson_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_com
   }
 }
 
-#ifdef CH_USE_HDF5
+void poisson_solver::set_output_variables(){
+  CH_TIME("poisson_solver::set_output_variables");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::set_output_variables" << endl;
+  }
+
+  m_plot_phi = false;
+  m_plot_rho = false;
+  m_plot_E   = false;
+  m_plot_res = false;
+
+  ParmParse pp("poisson_solver");
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi")   m_plot_phi = true;
+    else if(str[i] == "rho")   m_plot_rho = true;
+    else if(str[i] == "resid") m_plot_res = true;
+    else if(str[i] == "E")     m_plot_E = true;
+  }
+}
+
 void poisson_solver::write_plot_file(){
   CH_TIME("poisson_solver::write_plot_file");
   if(m_verbosity > 5){
     pout() << "poisson_solver::write_plot_file" << endl;
   }
+
+  MayDay::Warning("poisson_solver::write_plot_file - not updated with the plotting mechanism");
 
   char file_char[1000];
   sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", m_step, SpaceDim);
@@ -718,7 +744,173 @@ void poisson_solver::write_plot_file(){
 	      covered_values,
 	      IntVect::Unit);
 }
-#endif
+
+void poisson_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("poisson_solver::write_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::write_checkpoint_level" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  // Used for aliasing phases
+  LevelData<EBCellFAB> state_gas;
+  LevelData<EBCellFAB> state_sol;
+
+  if(!ebis_gas.isNull()) mfalias::aliasMF(state_gas,  phase::gas,   *m_state[a_level]);
+  if(!ebis_sol.isNull()) mfalias::aliasMF(state_sol,  phase::solid, *m_state[a_level]);
+  
+  // Write data
+  if(!ebis_gas.isNull()) write(a_handle, state_gas, "poisson_g");
+  if(!ebis_sol.isNull()) write(a_handle, state_sol, "poisson_s");
+}
+
+void poisson_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("poisson_solver::read_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::read_checkpoint_level" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  // Used for aliasing phases
+  LevelData<EBCellFAB> state_gas;
+  LevelData<EBCellFAB> state_sol;
+
+  if(!ebis_gas.isNull()) mfalias::aliasMF(state_gas,  phase::gas,   *m_state[a_level]);
+  if(!ebis_sol.isNull()) mfalias::aliasMF(state_sol,  phase::solid, *m_state[a_level]);
+  
+  // Read data
+  if(!ebis_gas.isNull()) read<EBCellFAB>(a_handle, state_gas, "poisson_g", m_amr->get_grids()[a_level], Interval(0,0), false);
+  if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, state_sol, "poisson_s", m_amr->get_grids()[a_level], Interval(0,0), false);
+}
+
+void poisson_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("poisson_solver::write_plot_level");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::write_plot_level" << endl;
+  }
+
+  // Add phi to output
+  if(m_plot_phi) write_mfdata(a_output, a_comp, m_state,  true);
+  if(m_plot_rho) write_mfdata(a_output, a_comp, m_source, false);
+  if(m_plot_res) write_mfdata(a_output, a_comp, m_resid,  false);
+  if(m_plot_E) {
+    MFAMRCellData E;
+    m_amr->allocate(E, SpaceDim);
+    m_amr->compute_gradient(E, m_state);
+    data_ops::scale(E, -1.0);
+    write_mfdata(a_output, a_comp, E, true);
+  }
+}
+
+void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
+  CH_TIME("poisson_solver::write_mfdata");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::write_mfdata" << endl;
+  }
+
+  const int comp = 0;
+  const int ncomp = a_data[0]->nComp();
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  // Allocate some scratch data that we can use
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, phase::gas, ncomp);
+
+  //
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    LevelData<EBCellFAB> data_gas;
+    LevelData<EBCellFAB> data_sol;
+
+    if(!ebis_gas.isNull()) mfalias::aliasMF(data_gas,  phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) mfalias::aliasMF(data_sol,  phase::solid, *a_data[lvl]);
+
+    data_gas.localCopyTo(*scratch[lvl]);
+
+    // Copy all covered cells from the other phase
+    if(!ebis_sol.isNull()){
+      for (DataIterator dit = data_sol.dataIterator(); dit.ok(); ++dit){
+	const Box box = data_sol.disjointBoxLayout().get(dit());
+	const IntVectSet ivs(box);
+	const EBISBox& ebisb_gas = data_gas[dit()].getEBISBox();
+	const EBISBox& ebisb_sol = data_sol[dit()].getEBISBox();
+
+	FArrayBox& scratch_gas    = (*scratch[lvl])[dit()].getFArrayBox();
+	const FArrayBox& fab_gas = data_gas[dit()].getFArrayBox();
+	const FArrayBox& fab_sol = data_sol[dit()].getFArrayBox();
+
+	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+	  const IntVect iv = ivsit();
+	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
+	    scratch_gas(iv, comp) = fab_sol(iv, comp);
+	  }
+	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
+	    //	    scratch_gas(iv, comp) = 0.5*(data_gas(iv, comp) + data_sol(iv, comp));
+	    scratch_gas(iv, comp) = fab_gas(iv,comp);
+	  }
+	}
+      }
+    }
+  }
+
+  // Average down shit and interpolate to centroids
+  m_amr->average_down(scratch, phase::gas);
+  m_amr->interp_ghost(scratch, phase::gas);
+  if(a_interp){
+    m_amr->interpolate_to_centroids(scratch, phase::gas);
+  }
+
+  const Interval src_interv(0, ncomp-1);
+  const Interval dst_interv(a_comp, a_comp + ncomp - 1);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+
+  a_comp += ncomp;
+}
+
+int poisson_solver::get_num_output() const {
+  CH_TIME("poisson_solver::get_num_output");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::get_num_output" << endl;
+  }
+
+  int num_output = 0;
+
+  if(m_plot_phi) num_output = num_output + 1;
+  if(m_plot_rho) num_output = num_output + 1;
+  if(m_plot_res) num_output = num_output + 1;
+  if(m_plot_E)   num_output = num_output + SpaceDim;
+
+  return num_output;
+}
+
+Vector<std::string> poisson_solver::get_output_names() const {
+  CH_TIME("poisson_solver::get_output_names");
+  if(m_verbosity > 5){
+    pout() << "poisson_solver::get_output_names" << endl;
+  }
+  Vector<std::string> names(0);
+  
+  if(m_plot_phi) names.push_back("potential");
+  if(m_plot_rho) names.push_back("Space charge density");
+  if(m_plot_res) names.push_back("potential_residue");
+  if(m_plot_E){
+    names.push_back("x-Electric field"); 
+    names.push_back("y-Electric field"); 
+    if(SpaceDim == 3){
+      names.push_back("z-Electric field");
+    }
+  }
+  
+  return names;
+}
 
 Real poisson_solver::get_time() const{
   return m_time;

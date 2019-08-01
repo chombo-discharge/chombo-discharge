@@ -842,6 +842,16 @@ protected:
   virtual void write_plot_file();
 
   /*!
+    @brief Old plot file version
+  */
+  virtual void old_write_plot_file();
+  
+  /*!
+    @brief Old plot file version
+  */
+  virtual void new_write_plot_file();
+
+  /*!
     @brief Write a checkpoint file
   */
   virtual void write_checkpoint_file();
@@ -855,6 +865,16 @@ protected:
     @brief Write a checkpoint file
   */
   virtual void new_write_checkpoint_file();
+
+  /*!
+    @brief Write checkpoint data
+  */
+  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+
+  /*!
+    @brief Write checkpoint data
+  */
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
     @brief Write vector data to a HDF5Header. This writes up to a_step

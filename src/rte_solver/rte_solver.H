@@ -160,12 +160,20 @@ public:
   */
   virtual void set_source(const Real a_source);
 
-#ifdef CH_USE_HDF5
   /*!
     @brief Write plot file
   */
   virtual void write_plot_file() = 0;
-#endif
+
+  /*!
+    @brief Write checkpoint data into handle
+  */
+  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const = 0;
+
+  /*!
+    @brief Read checkpoint data from handle
+  */
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level) = 0;
 
   /*!
     @brief Return required number of ghost cells

@@ -33,7 +33,6 @@ public:
   */
   virtual ~poisson_solver();
 
-
   /*!
     @brief Solve Poisson equation
   */
@@ -112,12 +111,35 @@ public:
   */
   virtual void set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
-#ifdef CH_USE_HDF5
+  /*!
+    @brief Set which variables to output
+  */
+  virtual void set_output_variables();
+
   /*!
     @brief Write plot file
   */
   virtual void write_plot_file();
-#endif
+
+  /*!
+    @brief Write checkpoint data into handle
+  */
+  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+
+  /*!
+    @brief Read checkpoint data from handle
+  */
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+
+  /*!
+    @brief Write output data to a_output
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Write mf-data to output
+  */
+  virtual void write_mfdata(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
 
   /*!
     @brief Sanity check
@@ -155,6 +177,11 @@ public:
   virtual int query_ghost() const = 0;
 
   /*!
+    @brief Get number of output fields
+  */
+  virtual int get_num_output() const;
+
+  /*!
     @brief Get current time
   */
   virtual Real get_time() const;
@@ -168,6 +195,11 @@ public:
     @brief Compute energy density U = 0.5*int(E.dot.D dV)
   */
   virtual Real compute_U(const MFAMRCellData& a_E);
+
+  /*!
+    @brief Get output plot names
+  */
+  virtual Vector<std::string> get_output_names() const;
 
   /*!
     @brief Get Poisson BC at specified domain wall
@@ -246,6 +278,26 @@ protected:
     @brief Automatic tuning
   */
   bool m_autotune;
+
+  /*!
+    @brief Output state
+  */
+  bool m_plot_phi;
+
+  /*!
+    @brief Output rhs
+  */
+  bool m_plot_rho;
+
+  /*!
+    @brief Output electric field
+  */
+  bool m_plot_E;
+
+  /*!
+    @brief Output GMG residue
+  */
+  bool m_plot_res;
 
   /*!
     @brief Verbosity

@@ -11,6 +11,7 @@
 #include "cdr_solverF_F.H"
 #include "data_ops.H"
 
+#include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
 
@@ -24,6 +25,7 @@ cdr_solver::cdr_solver(){
   this->set_time(0, 0., 0.);
   this->set_mass_redist(false);
   this->set_domain_bc(cdr_bc::external);
+  this->set_output_variables();
 }
 
 cdr_solver::~cdr_solver(){
@@ -34,6 +36,28 @@ std::string cdr_solver::get_name(){
   return m_name;
 }
 
+Vector<std::string> cdr_solver::get_output_names() const {
+  CH_TIME("cdr_solver::get_output_names");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_output_names" << endl;
+  }
+  
+  Vector<std::string> names(0);
+  
+  if(m_plot_phi) names.push_back(m_name+"_phi");
+  if(m_plot_dco) names.push_back(m_name+"_diffusion_coefficient");
+  if(m_plot_src) names.push_back(m_name+"_source");
+  if(m_plot_vel){
+    names.push_back("x-Velocity" + m_name);
+    names.push_back("y-Velocity" + m_name);
+    if(SpaceDim == 3){
+      names.push_back("z-Velocity" + m_name);
+    }
+  }
+  
+  return names;
+}
+
 int cdr_solver::query_ghost() const {
   CH_TIME("cdr_solver::query_ghost");
   if(m_verbosity > 5){
@@ -41,6 +65,22 @@ int cdr_solver::query_ghost() const {
   }
 
   return 3;
+}
+
+int cdr_solver::get_num_output() const {
+  CH_TIME("cdr_solver::get_num_output");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_output" << endl;
+  }
+
+  int num_output = 0;
+
+  if(m_plot_phi) num_output = num_output + 1;
+  if(m_plot_vel) num_output = num_output + SpaceDim;
+  if(m_plot_dco) num_output = num_output + 1;
+  if(m_plot_src) num_output = num_output + 1;
+
+  return num_output;
 }
 
 void cdr_solver::advance(const Real& a_dt){
@@ -1530,6 +1570,30 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
   }
 }
 
+void cdr_solver::set_output_variables(){
+  CH_TIME("cdr_solver::set_output_variables");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_output_variables" << endl;
+  }
+
+  m_plot_phi = false;
+  m_plot_vel = false;
+  m_plot_dco = false;
+  m_plot_src = false;
+
+  ParmParse pp("cdr_solver");
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi") m_plot_phi = true;
+    else if(str[i] == "vel") m_plot_vel = true;
+    else if(str[i] == "dco") {m_plot_dco = true; MayDay::Abort("cdr_solver::set_output_variables - not yet supported");}
+    else if(str[i] == "src") m_plot_src = true;
+  }
+}
+
 void cdr_solver::tag_gradient(Vector<IntVectSet>& a_tags, const Real a_grad){
   CH_TIME("cdr_solver::tag_gradient");
   if(m_verbosity > 5){
@@ -1599,7 +1663,6 @@ void cdr_solver::tag_value(Vector<IntVectSet>& a_tags, const Real a_value){
   }
 }
 
-#ifdef CH_USE_HDF5
 void cdr_solver::write_plot_file(){
   CH_TIME("cdr_solver::write_plot_file");
   if(m_verbosity > 5){
@@ -1663,7 +1726,66 @@ void cdr_solver::write_plot_file(){
 	      covered_values,
 	      IntVect::Unit);
 }
-#endif
+
+void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("cdr_solver::write_plot_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_plot_data" << endl;
+  }
+
+  data_ops::set_value(m_scratch, 0.0);
+  
+  if(m_plot_phi) write_data(a_output, a_comp, m_state,     true);
+  if(m_plot_vel) write_data(a_output, a_comp, m_velo_cell, false);
+  if(m_plot_dco) write_data(a_output, a_comp, m_scratch,   false);
+  if(m_plot_src) write_data(a_output, a_comp, m_source,    false);
+}
+
+void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
+  CH_TIME("cdr_solver::write_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_data" << endl;
+  }
+
+  const int comp = 0;
+  const int ncomp = a_data[0]->nComp();
+
+  // Allocate some scratch data that we can use
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_phase, ncomp);
+  data_ops::copy(scratch, a_data);
+  if(a_interp){
+    m_amr->interpolate_to_centroids(scratch, phase::gas);
+  }
+
+  const Interval src_interv(0, ncomp-1);
+  const Interval dst_interv(a_comp, a_comp + ncomp - 1);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+
+  a_comp += ncomp;
+}
+
+void cdr_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("cdr_solver::write_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_checkpoint_level" << endl;
+  }
+
+  // Write state vector
+  write(a_handle, *m_state[a_level], m_name);
+}
+
+void cdr_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("cdr_solver::read_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::read_checkpoint_level" << endl;
+  }
+
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
+}
 
 Real cdr_solver::compute_cfl_dt(){
   CH_TIME("cdr_solver::compute_cfl_dt");

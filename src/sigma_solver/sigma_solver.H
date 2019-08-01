@@ -127,6 +127,16 @@ public:
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
+    @brief Write checkpoint data into handle
+  */
+  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+
+  /*!
+    @brief Read checkpoint data from handle
+  */
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+
+  /*!
     @brief Compute total charge
   */
   virtual Real compute_charge();
