@@ -34,6 +34,11 @@ public:
     @brief Get solver name
   */
   virtual std::string get_name();
+
+  /*!
+    @brief Get output plot names
+  */
+  virtual Vector<std::string> get_plotvar_names() const;
   
   /*!
     @brief Advance equation one time step
@@ -80,6 +85,11 @@ public:
     @brief Set verbosity.
   */
   virtual void set_verbosity(const int a_verbosity);
+
+  /*!
+    @brief Set which variables to output
+  */
+  virtual void set_plot_variables();
 
   /*!
     @brief Get current time
@@ -166,6 +176,16 @@ public:
   virtual void write_plot_file() = 0;
 
   /*!
+    @brief Write output data to a_output
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Write data to output. Convenience function. 
+  */
+  virtual void write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
+
+  /*!
     @brief Write checkpoint data into handle
   */
   virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const = 0;
@@ -179,6 +199,11 @@ public:
     @brief Return required number of ghost cells
   */
   virtual int query_ghost() const = 0;
+
+  /*!
+    @brief Get number of output fields
+  */
+  virtual int get_num_plotvars() const;
 
   /*!
     @brief Get time
@@ -290,6 +315,16 @@ protected:
     @brief Stationary solver or not
   */
   bool m_stationary;
+
+  /*!
+    @brief Output state
+  */
+  bool m_plot_phi;
+
+  /*!
+    @brief Output source term
+  */
+  bool m_plot_src;
 
   /*!
     @brief

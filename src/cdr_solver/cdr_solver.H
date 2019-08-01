@@ -254,7 +254,7 @@ public:
   /*!
     @brief Set which variables to output
   */
-  virtual void set_output_variables();
+  virtual void set_plot_variables();
 
   /*!
     @brief Get solver name
@@ -541,7 +541,7 @@ protected:
   */
   bool m_mass_redist;
 
-    /*!
+  /*!
     @brief Output state
   */
   bool m_plot_phi;
@@ -557,7 +557,7 @@ protected:
   bool m_plot_dco;
 
   /*!
-    @brief Output GMG residue
+    @brief Output source term
   */
   bool m_plot_src;
 

@@ -8,12 +8,14 @@
 #include "rte_solver.H"
 #include "data_ops.H"
 
+#include <ParmParse.H>
+
 rte_solver::rte_solver(){
   m_name = "rte_solver";
 
   this->set_verbosity(-1);
   this->set_phase();
-
+  this->set_plot_variables();
 
 }
 
@@ -23,6 +25,20 @@ rte_solver::~rte_solver(){
 
 std::string rte_solver::get_name(){
   return m_name;
+}
+
+Vector<std::string> rte_solver::get_plotvar_names() const {
+  CH_TIME("rte_solver::get_plotvar_names");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_plotvar_names" << endl;
+  }
+  
+  Vector<std::string> names(0);
+  
+  if(m_plot_phi) names.push_back(m_name + " phi");
+  if(m_plot_src) names.push_back(m_name + " source");
+
+  return names;
 }
 
 bool rte_solver::is_stationary(){
@@ -194,6 +210,40 @@ void rte_solver::set_source(const Real a_source){
   m_amr->interp_ghost(m_source, m_phase);
 }
 
+void rte_solver::set_plot_variables(){
+  CH_TIME("rte_solver::set_plot_variables");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_plot_variables" << endl;
+  }
+
+  m_plot_phi = false;
+  m_plot_src = false;
+
+  ParmParse pp("rte_solver");
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi") m_plot_phi = true;
+    else if(str[i] == "src") m_plot_src = true;
+  }
+}
+
+int rte_solver::get_num_plotvars() const {
+  CH_TIME("rte_solver::get_num_plotvars");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_plotvars" << endl;
+  }
+
+  int num_output = 0;
+
+  if(m_plot_phi) num_output = num_output + 1;
+  if(m_plot_src) num_output = num_output + 1;
+
+  return num_output;
+}
+
 void rte_solver::initial_data() {
   CH_TIME("rte_solver::initial_data");
   if(m_verbosity > 5){
@@ -201,6 +251,51 @@ void rte_solver::initial_data() {
   }
   
   data_ops::set_value(m_state, 0.0);
+}
+
+void rte_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("rte_solver::write_plot_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_plot_data" << endl;
+  }
+
+  if(m_plot_phi) write_data(a_output, a_comp, m_state,  true);
+  if(m_plot_src) write_data(a_output, a_comp, m_source, false);
+}
+
+void rte_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
+  CH_TIME("rte_solver::write_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_data" << endl;
+  }
+
+  const int comp = 0;
+  const int ncomp = a_data[0]->nComp();
+
+  const Interval src_interv(0, ncomp-1);
+  const Interval dst_interv(a_comp, a_comp + ncomp - 1);
+
+  if(!a_interp){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      a_data[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+  }
+  else {// Allocate some scratch data that we can use for interpolation
+    EBAMRCellData scratch;
+    m_amr->allocate(scratch, m_phase, ncomp);
+    data_ops::copy(scratch, a_data);
+
+    // Interp if we should
+    if(a_interp){
+      m_amr->interpolate_to_centroids(scratch, phase::gas);
+    }
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+  }
+
+  a_comp += ncomp;
 }
 
 Real rte_solver::get_time() const{

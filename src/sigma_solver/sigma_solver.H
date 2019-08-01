@@ -137,6 +137,26 @@ public:
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
   /*!
+    @brief Write output data to a_output
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Set variables to be plotted
+  */
+  virtual void set_plot_variables();
+
+  /*!
+    @brief Number of variables to be plotted
+  */
+  virtual int get_num_plotvars();
+
+  /*!
+    @brief Get output plot names
+  */
+  virtual Vector<std::string> get_plotvar_names() const;
+
+  /*!
     @brief Compute total charge
   */
   virtual Real compute_charge();
@@ -217,6 +237,11 @@ protected:
     @brief Time increment
   */
   Real m_dt;
+
+  /*!
+    @brief Output sigma
+  */
+  bool m_plot_phi;
   
 };
 #endif

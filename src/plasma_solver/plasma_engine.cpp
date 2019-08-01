@@ -2991,10 +2991,17 @@ void plasma_engine::new_write_plot_file(){
   // Get total number of components for output
   int ncomp = 0;
   ncomp += poisson->get_num_plotvars();
+  ncomp += sig->get_num_plotvars();
   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     ncomp += solver->get_num_plotvars();
   }
+  for (rte_iterator solver_it = rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    ncomp += solver->get_num_plotvars();
+  }
+
+  
 
   // Allocate storage
   EBAMRCellData output;
@@ -3009,6 +3016,10 @@ void plasma_engine::new_write_plot_file(){
   names.append(poisson->get_plotvar_names());
   poisson->write_plot_data(output, icomp);
 
+  // Surface charge solver writes
+  names.append(sig->get_plotvar_names());
+  sig->write_plot_data(output, icomp);
+
   // CDR solvers copy their output data
   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
@@ -3019,9 +3030,10 @@ void plasma_engine::new_write_plot_file(){
 
   // RTE solvers copy their output data
   for (rte_iterator solver_it = rte->iterator(); solver_it.ok(); ++solver_it){
-
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    names.append(solver->get_plotvar_names());
+    solver->write_plot_data(output, icomp);
   }
-
 
 
 									       

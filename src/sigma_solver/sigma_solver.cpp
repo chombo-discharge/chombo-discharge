@@ -14,6 +14,7 @@ sigma_solver::sigma_solver(){
 
   this->set_verbosity(-1);
   this->set_phase(phase::gas);
+  this->set_plot_variables();
 }
 
 sigma_solver::~sigma_solver(){
@@ -387,6 +388,54 @@ void sigma_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level
   data_ops::set_value(*m_state[a_level], 0.0);
   data_ops::incr(*m_state[a_level], scratch, 1.0);
 }
+
+void sigma_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("sigma_solver::write_plot_data");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::write_plot_data" << endl;
+  }
+
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_phase, 1);
+  data_ops::set_value(scratch, 0.0);
+  data_ops::incr(scratch, m_state, 1.0);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+  }
+
+  a_comp++;
+}
+
+void sigma_solver::set_plot_variables(){
+  CH_TIME("sigma_solver::set_plot_variables");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::set_plot_variables" << endl;
+  }
+
+  m_plot_phi = true;
+}
+
+int sigma_solver::get_num_plotvars(){
+  CH_TIME("sigma_solver::get_num_plotvars");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::get_num_plotvars" << endl;
+  }
+  
+  return 1;
+}
+  
+  
+Vector<std::string> sigma_solver::get_plotvar_names() const{
+  CH_TIME("sigma_solver::get_num_plotvars");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::get_num_plotvars" << endl;
+  }
+
+  return Vector<std::string>(1, "surface charge density");
+}
+
 
 Real sigma_solver::compute_charge(){
   CH_TIME("sigma_solver::compute_charge");

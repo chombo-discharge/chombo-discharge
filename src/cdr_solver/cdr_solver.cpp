@@ -25,7 +25,7 @@ cdr_solver::cdr_solver(){
   this->set_time(0, 0., 0.);
   this->set_mass_redist(false);
   this->set_domain_bc(cdr_bc::external);
-  this->set_output_variables();
+  this->set_plot_variables();
 }
 
 cdr_solver::~cdr_solver(){
@@ -1570,10 +1570,10 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
   }
 }
 
-void cdr_solver::set_output_variables(){
-  CH_TIME("cdr_solver::set_output_variables");
+void cdr_solver::set_plot_variables(){
+  CH_TIME("cdr_solver::set_plot_variables");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_output_variables" << endl;
+    pout() << m_name + "::set_plot_variables" << endl;
   }
 
   m_plot_phi = false;

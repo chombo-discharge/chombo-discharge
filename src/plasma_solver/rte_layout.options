@@ -4,6 +4,8 @@
 rte_layout.which_solver = eddington_sp1 # Solver type. Available option is "eddington_sp1"
 rte_layout.stationary   = true          # Stationary solver ot no.
 
+rte_solver.plt_vars = phi src
+
 # ---------------------------
 # eddington_sp1 class options
 #----------------------------
