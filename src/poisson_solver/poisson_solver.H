@@ -179,7 +179,7 @@ public:
   /*!
     @brief Get number of output fields
   */
-  virtual int get_num_output() const;
+  virtual int get_num_plotvars() const;
 
   /*!
     @brief Get current time
@@ -199,7 +199,7 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_output_names() const;
+  virtual Vector<std::string> get_plotvar_names() const;
 
   /*!
     @brief Get Poisson BC at specified domain wall

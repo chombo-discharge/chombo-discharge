@@ -2990,12 +2990,11 @@ void plasma_engine::new_write_plot_file(){
 
   // Get total number of components for output
   int ncomp = 0;
-  ncomp += poisson->get_num_output();
-
-
-  // Names for output variables
-  Vector<std::string> names;
-  names.append(poisson->get_output_names());
+  ncomp += poisson->get_num_plotvars();
+  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    ncomp += solver->get_num_plotvars();
+  }
 
   // Allocate storage
   EBAMRCellData output;
@@ -3003,10 +3002,29 @@ void plasma_engine::new_write_plot_file(){
   data_ops::set_value(output, 0.0);
 
 
-  // Solvers write plot data
-  int icomp = 0;
+  Vector<std::string> names; // Names for output variables
+  int icomp = 0;             // Used as reference for output components
+
+  // Poisson solver copies over its output data
+  names.append(poisson->get_plotvar_names());
   poisson->write_plot_data(output, icomp);
 
+  // CDR solvers copy their output data
+  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    names.append(solver->get_plotvar_names());
+    solver->write_plot_data(output, icomp);
+
+  }
+
+  // RTE solvers copy their output data
+  for (rte_iterator solver_it = rte->iterator(); solver_it.ok(); ++solver_it){
+
+  }
+
+
+
+									       
   
   // Filename
   char file_char[1000];
@@ -3050,6 +3068,13 @@ void plasma_engine::new_write_plot_file(){
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_plot_file - DONE writing plot file..." << endl;
   }
+
+#if 1 // Debug test
+  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->write_plot_file();
+  }
+#endif
 }
 
 void plasma_engine::old_write_plot_file(){

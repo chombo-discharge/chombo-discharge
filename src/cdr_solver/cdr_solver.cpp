@@ -36,22 +36,22 @@ std::string cdr_solver::get_name(){
   return m_name;
 }
 
-Vector<std::string> cdr_solver::get_output_names() const {
-  CH_TIME("cdr_solver::get_output_names");
+Vector<std::string> cdr_solver::get_plotvar_names() const {
+  CH_TIME("cdr_solver::get_plotvar_names");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_output_names" << endl;
+    pout() << m_name + "::get_plotvar_names" << endl;
   }
   
   Vector<std::string> names(0);
   
-  if(m_plot_phi) names.push_back(m_name+"_phi");
-  if(m_plot_dco) names.push_back(m_name+"_diffusion_coefficient");
-  if(m_plot_src) names.push_back(m_name+"_source");
+  if(m_plot_phi) names.push_back(m_name + " phi");
+  if(m_plot_dco) names.push_back(m_name + " diffusion_coefficient");
+  if(m_plot_src) names.push_back(m_name + " source");
   if(m_plot_vel){
-    names.push_back("x-Velocity" + m_name);
-    names.push_back("y-Velocity" + m_name);
+    names.push_back("x-Velocity " + m_name);
+    names.push_back("y-Velocity " + m_name);
     if(SpaceDim == 3){
-      names.push_back("z-Velocity" + m_name);
+      names.push_back("z-Velocity " + m_name);
     }
   }
   
@@ -67,18 +67,18 @@ int cdr_solver::query_ghost() const {
   return 3;
 }
 
-int cdr_solver::get_num_output() const {
-  CH_TIME("cdr_solver::get_num_output");
+int cdr_solver::get_num_plotvars() const {
+  CH_TIME("cdr_solver::get_num_plotvars");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_num_output" << endl;
+    pout() << m_name + "::get_num_plotvars" << endl;
   }
 
   int num_output = 0;
 
   if(m_plot_phi) num_output = num_output + 1;
-  if(m_plot_vel) num_output = num_output + SpaceDim;
   if(m_plot_dco) num_output = num_output + 1;
   if(m_plot_src) num_output = num_output + 1;
+  if(m_plot_vel) num_output = num_output + SpaceDim;
 
   return num_output;
 }
@@ -1589,7 +1589,7 @@ void cdr_solver::set_output_variables(){
   for (int i = 0; i < num; i++){
     if(     str[i] == "phi") m_plot_phi = true;
     else if(str[i] == "vel") m_plot_vel = true;
-    else if(str[i] == "dco") {m_plot_dco = true; MayDay::Abort("cdr_solver::set_output_variables - not yet supported");}
+    else if(str[i] == "dco") m_plot_dco = true; 
     else if(str[i] == "src") m_plot_src = true;
   }
 }
@@ -1669,46 +1669,27 @@ void cdr_solver::write_plot_file(){
     pout() << m_name + "::write_plot_file" << endl;
   }
 
-  char file_char[1000];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
 
-  const int ncomps = 2 + SpaceDim;
-  Vector<string> names(ncomps);
-  names[0] = "density";
-  names[1] = "source";
-  names[2] = "x-velocity";
-  names[3] = "y-velocity";
-  if(SpaceDim == 3){
-    names[4] = "z-velocity";
-  }
+  // Number of output components and their names
+  const int ncomps = get_num_plotvars();
+  const Vector<std::string> names = get_plotvar_names();
 
-
+  // Allocate storage
   EBAMRCellData output;
   m_amr->allocate(output, m_phase, ncomps);
+  data_ops::set_value(output, 0.0);
 
-  for (int lvl = 0; lvl < output.size(); lvl++){
-    LevelData<EBCellFAB>& state  = *m_state[lvl];
-    LevelData<EBCellFAB>& source = *m_source[lvl];
-    LevelData<EBCellFAB>& velo   = *m_velo_cell[lvl];
+  // Copy internal data to be plotted over to 'output'
+  int icomp = 0;
+  write_plot_data(output, icomp);
 
-    state.localCopyTo(Interval(0,0),           *output[lvl],  Interval(0,0));
-    source.localCopyTo(Interval(0,0),          *output[lvl],  Interval(1,1));
-    velo.localCopyTo(Interval(0,SpaceDim - 1), *output[lvl],  Interval(2, 2 + (SpaceDim-1)));
-  }
+  // Filename
+  char file_char[100];
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
 
-#if 0 // Possibly removed. 
-  // Transform to centroids
-  irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
-  sten.apply(output, true);
-#endif
-
-
+  // Alias
   Vector<LevelData<EBCellFAB>* > output_ptr;
   m_amr->alias(output_ptr, output);
-
-#if 0 // Should be removed
-  data_ops::floor(output, 0.0);
-#endif
   
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
@@ -1733,12 +1714,14 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     pout() << m_name + "::write_plot_data" << endl;
   }
 
-  data_ops::set_value(m_scratch, 0.0);
-  
-  if(m_plot_phi) write_data(a_output, a_comp, m_state,     true);
-  if(m_plot_vel) write_data(a_output, a_comp, m_velo_cell, false);
-  if(m_plot_dco) write_data(a_output, a_comp, m_scratch,   false);
+  if(m_plot_phi) write_data(a_output, a_comp, m_state, true);
+  if(m_plot_dco) {
+    data_ops::set_value(m_scratch, 0.0);
+    data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->get_domains());
+    write_data(a_output, a_comp, m_scratch,   false);
+  }
   if(m_plot_src) write_data(a_output, a_comp, m_source,    false);
+  if(m_plot_vel) write_data(a_output, a_comp, m_velo_cell, false);
 }
 
 void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
@@ -1754,6 +1737,8 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_phase, ncomp);
   data_ops::copy(scratch, a_data);
+
+  data_ops::set_value(scratch, 1.0);
   if(a_interp){
     m_amr->interpolate_to_centroids(scratch, phase::gas);
   }
@@ -1762,7 +1747,7 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   const Interval dst_interv(a_comp, a_comp + ncomp - 1);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
   }
 
   a_comp += ncomp;

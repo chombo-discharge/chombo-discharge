@@ -36,6 +36,14 @@ public:
 					    const LevelData<EBCellFAB>& a_celldata,
 					    const ProblemDomain&        a_domain);
 
+  static void average_face_to_cell(EBAMRCellData&               a_celldata,
+				   const EBAMRFluxData&         a_fluxdata,
+				   const Vector<ProblemDomain>& a_domains);
+
+  static void average_face_to_cell(LevelData<EBCellFAB>&       a_celldata,
+				   const LevelData<EBFluxFAB>& a_fluxdata,
+				   const ProblemDomain&        a_domain);
+
   static void dot_prod(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2);
 
   static void dot_prod(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2);

@@ -624,109 +624,25 @@ void poisson_solver::write_plot_file(){
     pout() << "poisson_solver::write_plot_file" << endl;
   }
 
-  MayDay::Warning("poisson_solver::write_plot_file - not updated with the plotting mechanism");
+  // Number of output components and their names
+  const int ncomps = get_num_plotvars();
+  const Vector<std::string> names = get_plotvar_names();
 
+  // Allocate storage for output
+  EBAMRCellData output;
+  m_amr->allocate(output, phase::gas, ncomps);
+
+  // Copy internal data to be plotted over to 'output'
+  int icomp = 0;
+  write_plot_data(output, icomp);
+
+  // Filename
   char file_char[1000];
   sprintf(file_char, "%s.step%07d.%dd.hdf5", "poisson_solver", m_step, SpaceDim);
 
-  const int ncomps = 3 + SpaceDim;
-  Vector<string> names(ncomps);
-  names[0] = "potential";
-  names[1] = "space charge density";
-  names[2] = "residue";
-  names[3] = "x-Electric field";
-  names[4] = "y-Electric field";
-  if(SpaceDim == 3){
-    names[5] = "z-Electric field";
-  }
-
-  // Compute the electric field. 
-  MFAMRCellData E;
-  m_amr->allocate(E, SpaceDim, 3);
-  m_amr->compute_gradient(E, m_state);
-  m_amr->interp_ghost(E);
-  m_amr->average_down(E);
-  data_ops::scale(E, -1.0);
-
-  Vector<RefCountedPtr<LevelData<EBCellFAB> > > output;
-  m_amr->allocate(output, phase::gas, ncomps, 1);
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-
-
-  for (int lvl = 0; lvl < output.size(); lvl++){
-    LevelData<EBCellFAB> state_gas,  source_gas, E_gas, resid_gas;
-    LevelData<EBCellFAB> state_sol,  source_sol, E_sol, resid_sol;
-
-    mfalias::aliasMF(state_gas,  phase::gas,   *m_state[lvl]);
-    mfalias::aliasMF(source_gas, phase::gas,   *m_source[lvl]);
-    mfalias::aliasMF(E_gas,      phase::gas,   *E[lvl]);
-    mfalias::aliasMF(resid_gas,  phase::gas,   *m_resid[lvl]);
-
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(state_sol,  phase::solid, *m_state[lvl]);
-      mfalias::aliasMF(source_sol, phase::solid, *m_source[lvl]);
-      mfalias::aliasMF(E_sol,      phase::solid, *E[lvl]);
-      mfalias::aliasMF(resid_sol,  phase::solid, *m_resid[lvl]);
-    }
-
-
-
-    // Copy all covered cells from the other phase
-#if 0 // This code segment is really shit - it changes the potential at irregular cells which it really shouldn't do...
-    // Fix this if you really need this functionality. 
-    if(!ebis_sol.isNull()){
-      for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
-	const Box box = state_sol.disjointBoxLayout().get(dit());
-	const IntVectSet ivs(box);
-	const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
-	const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
-
-	FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
-	FArrayBox& src_gas  = source_gas[dit()].getFArrayBox();
-	FArrayBox& e_gas    = E_gas[dit()].getFArrayBox();
-	FArrayBox& res_gas  = resid_gas[dit()].getFArrayBox();
-
-	FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
-	FArrayBox& src_sol  = source_sol[dit()].getFArrayBox();
-	FArrayBox& e_sol    = E_sol[dit()].getFArrayBox();
-	FArrayBox& res_sol  = resid_sol[dit()].getFArrayBox();
-
-	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
-	  const IntVect iv = ivsit();
-	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	    data_gas(iv, 0) = data_sol(iv,0);
-	    src_gas(iv,0)   = src_sol(iv,0);
-	    res_gas(iv, 0)  = res_sol(iv, 0);
-	    for (int comp = 0; comp < SpaceDim; comp++){
-	      e_gas(iv,comp) = e_sol(iv, comp);
-	    }
-	  }
-	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	    data_gas(iv, 0) = 0.5*(data_gas(iv,0) + data_sol(iv,0));
-	    src_gas(iv, 0)  = 0.5*(src_gas(iv,0) + src_sol(iv,0));
-	    res_gas(iv, 0)  = 0.5*(res_gas(iv,0) + res_sol(iv,0));
-	  }
-	}
-      }
-    }
-#endif
-
-    state_gas.localCopyTo(Interval(0,0),        *output[lvl], Interval(0,0));
-    source_gas.localCopyTo(Interval(0,0),       *output[lvl], Interval(1,1));
-    resid_gas.localCopyTo(Interval(0,0),        *output[lvl], Interval(2,2));
-    E_gas.localCopyTo(Interval(0,SpaceDim - 1), *output[lvl], Interval(3, 2 + SpaceDim));
-  }
-
-  const irreg_amr_stencil<centroid_interp>& sten = m_amr->get_centroid_interp_stencils(phase::gas);
-  sten.apply(output);
-
-  Vector<LevelData<EBCellFAB>* > output_ptr;
-  for (int lvl = 0; lvl < m_state.size(); lvl++){
-    output_ptr.push_back(&(*output[lvl]));
-  }
+  // Alias
+  Vector<LevelData<EBCellFAB>* > output_ptr(1+m_amr->get_finest_level());
+  m_amr->alias(output_ptr, output);
 
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
@@ -875,10 +791,10 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
   a_comp += ncomp;
 }
 
-int poisson_solver::get_num_output() const {
-  CH_TIME("poisson_solver::get_num_output");
+int poisson_solver::get_num_plotvars() const {
+  CH_TIME("poisson_solver::get_num_plotvars");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::get_num_output" << endl;
+    pout() << "poisson_solver::get_num_plotvars" << endl;
   }
 
   int num_output = 0;
@@ -891,10 +807,10 @@ int poisson_solver::get_num_output() const {
   return num_output;
 }
 
-Vector<std::string> poisson_solver::get_output_names() const {
-  CH_TIME("poisson_solver::get_output_names");
+Vector<std::string> poisson_solver::get_plotvar_names() const {
+  CH_TIME("poisson_solver::get_plotvar_names");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::get_output_names" << endl;
+    pout() << "poisson_solver::get_plotvar_names" << endl;
   }
   Vector<std::string> names(0);
   

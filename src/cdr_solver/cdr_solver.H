@@ -264,7 +264,7 @@ public:
   /*!
     @brief Get output plot names
   */
-  virtual Vector<std::string> get_output_names() const;
+  virtual Vector<std::string> get_plotvar_names() const;
 
   /*!
     @brief Get the ghost cell requirement
@@ -274,7 +274,7 @@ public:
   /*!
     @brief Get number of output fields
   */
-  virtual int get_num_output() const;
+  virtual int get_num_plotvars() const;
 
   /*!
     @brief Compute the largest possible advection time step (for explicit methods)
