@@ -94,6 +94,8 @@ void cdr_tga::advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, 
     const Real alpha = 0.0;
     const Real beta  = 1.0;
 
+    data_ops::set_value(m_diffco_eb, 0.0);
+
     // TGA solve
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
     m_tgasolver->oneStep(tga_state, old_state, source, a_dt, 0, finest_level, false);
@@ -145,6 +147,8 @@ void cdr_tga::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old
     const Real alpha = 0.0;
     const Real beta  = 1.0;
 
+    data_ops::set_value(m_diffco_eb, 0.0);
+
     // TGA solve
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
     m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
@@ -181,6 +185,8 @@ void cdr_tga::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_o
 
     const Real alpha = 0.0;
     const Real beta  = 1.0;
+
+    data_ops::set_value(m_diffco_eb, 0.0);
 
     // TGA solve
     m_eulersolver->resetAlphaAndBeta(alpha, beta);
@@ -268,6 +274,8 @@ void cdr_tga::advance_tga(EBAMRCellData& a_state, const Real a_dt){
   // Advance
   const Real alpha = 0.0;
   const Real beta  = 1.0;
+
+  data_ops::set_value(m_diffco_eb, 0.0);
   
   if(m_use_tga){
     m_tgasolver->resetAlphaAndBeta(alpha, beta);
@@ -310,6 +318,8 @@ void cdr_tga::advance_tga(EBAMRCellData&       a_new_state,
 
     const Real alpha = 0.0;
     const Real beta  = 1.0;
+
+    data_ops::set_value(m_diffco_eb, 0.0);
 
     // TGA solve
     m_tgasolver->resetAlphaAndBeta(alpha, beta);

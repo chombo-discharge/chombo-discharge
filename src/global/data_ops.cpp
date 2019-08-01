@@ -138,6 +138,42 @@ void data_ops::average_face_to_cell(LevelData<EBCellFAB>&       a_celldata,
 				    const LevelData<EBFluxFAB>& a_fluxdata,
 				    const ProblemDomain&        a_domain){
 
+  const int nc = a_celldata.nComp();
+  CH_assert(a_facedata.nComp() == nc);
+
+  for (DataIterator dit = a_celldata.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& celldata       = a_celldata[dit()];
+    const EBFluxFAB& fluxdata = a_fluxdata[dit()];
+    const Box& box            = a_celldata.disjointBoxLayout().get(dit());
+
+    // Irregular cells
+    const EBISBox& ebisbox = celldata.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+
+    // Reset
+    celldata.setVal(0.0);
+
+    // Do regular cells; all components in each direction
+    for (int dir = 0; dir < SpaceDim; dir++){
+      BaseFab<Real>& cellreg       = celldata.getSingleValuedFAB();
+      //      const BaseFab<Real>& facereg = fluxdata[dir].getSingleValuedFAB();
+      auto& facereg = fluxdata[dir].getSingleValuedFAB();
+      FORT_AVERAGE_FACE_TO_CELL(CHF_FRA(cellreg),
+				CHF_CONST_FRA(facereg),
+				CHF_CONST_INT(dir),
+				CHF_CONST_INT(nc),
+				CHF_BOX(box));
+    }
+
+    // Reset irregular cells
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int ic = 0; ic < nc; ic++){
+	celldata(vof, ic) = 0.0;
+      }
+    }
+  }
 }
 
 void data_ops::dot_prod(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2){

@@ -270,3 +270,30 @@ c Compute the Laplacian in the numerator (including cross-derivatives)
          data(chf_ix[i;j;k]) = sqrt(data(chf_ix[i;j;k]))      
       chf_enddo      
       end
+
+
+      subroutine average_face_to_cell(
+     &     chf_fra[cellreg],
+     &     chf_const_fra[facereg],
+     &     chf_const_int[dir],     
+     &     chf_const_int[ncomps],
+     &     chf_box[box])
+
+      real_t value
+      integer ic
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff;joff;koff]
+
+      chf_dterm[ioff = chf_id(0, dir);
+                joff = chf_id(1, dir);
+                koff = chf_id(2, dir)]
+
+      chf_multido[box;i;j;k]
+         do ic=0, ncomps-1
+            cellreg(chf_ix[i;j;k], ic) = cellreg(chf_ix[i;j;k], ic)
+     &                                + 0.5*(facereg(chf_ix[i+ioff;j+joff;k+koff], ic) + facereg(chf_ix[i;j;k], ic))
+         enddo
+      chf_enddo
+      return
+
+      end

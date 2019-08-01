@@ -260,6 +260,37 @@ inline void FORTRAN_NAME(inlineSQUARE_ROOT, inlineSQUARE_ROOT)(
 }
 #endif  // GUARDSQUARE_ROOT 
 
+#ifndef GUARDAVERAGE_FACE_TO_CELL 
+#define GUARDAVERAGE_FACE_TO_CELL 
+// Prototype for Fortran procedure average_face_to_cell ...
+//
+void FORTRAN_NAME( AVERAGE_FACE_TO_CELL ,average_face_to_cell )(
+      CHFp_FRA(cellreg)
+      ,CHFp_CONST_FRA(facereg)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(box) );
+
+#define FORT_AVERAGE_FACE_TO_CELL FORTRAN_NAME( inlineAVERAGE_FACE_TO_CELL, inlineAVERAGE_FACE_TO_CELL)
+#define FORTNT_AVERAGE_FACE_TO_CELL FORTRAN_NAME( AVERAGE_FACE_TO_CELL, average_face_to_cell)
+
+inline void FORTRAN_NAME(inlineAVERAGE_FACE_TO_CELL, inlineAVERAGE_FACE_TO_CELL)(
+      CHFp_FRA(cellreg)
+      ,CHFp_CONST_FRA(facereg)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(box) )
+{
+ CH_TIMELEAF("FORT_AVERAGE_FACE_TO_CELL");
+ FORTRAN_NAME( AVERAGE_FACE_TO_CELL ,average_face_to_cell )(
+      CHFt_FRA(cellreg)
+      ,CHFt_CONST_FRA(facereg)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_CONST_INT(ncomps)
+      ,CHFt_BOX(box) );
+}
+#endif  // GUARDAVERAGE_FACE_TO_CELL 
+
 }
 
 #endif

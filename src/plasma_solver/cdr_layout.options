@@ -8,8 +8,10 @@ cdr_layout.mass_redist  = false                  # Mass-weighted redistribution 
 cdr_gdnv.divF_nc        = covered_face           # Hybrid divergence version
 cdr_gdnv.limit_slopes   = true                   # Use slope-limiters for godunov
 
-cdr_fhd.divF_nc        = covered_face           # Hybrid divergence version
-cdr_fhd.limit_slopes   = true                   # Use slope-limiters for godunov
+cdr_fhd.divF_nc              = covered_face      # Hybrid divergence version
+cdr_fhd.limit_slopes         = true              # Use slope-limiters for godunov
+cdr_fhd.stochastic_diffusion = false             # Stochastic diffusion. 'true' or 'false'
+cdr_fhd.seed = -1
 
 cdr_tga.gmg_verbosity      = -1        # GMG verbosity
 cdr_tga.gmg_pre_smooth     = 3         # Number of relaxations in downsweep

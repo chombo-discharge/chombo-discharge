@@ -1715,7 +1715,7 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_phi) write_data(a_output, a_comp, m_state, true);
-  if(m_plot_dco) {
+  if(m_plot_dco) { // Need to compute the cell-centerd stuff first
     data_ops::set_value(m_scratch, 0.0);
     data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->get_domains());
     write_data(a_output, a_comp, m_scratch,   false);
@@ -1733,21 +1733,27 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   const int comp = 0;
   const int ncomp = a_data[0]->nComp();
 
-  // Allocate some scratch data that we can use
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_phase, ncomp);
-  data_ops::copy(scratch, a_data);
-
-  data_ops::set_value(scratch, 1.0);
-  if(a_interp){
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
-  }
-
   const Interval src_interv(0, ncomp-1);
   const Interval dst_interv(a_comp, a_comp + ncomp - 1);
 
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+  if(!a_interp){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      a_data[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
+  }
+  else {// Allocate some scratch data that we can use for interpolation
+    EBAMRCellData scratch;
+    m_amr->allocate(scratch, m_phase, ncomp);
+    data_ops::copy(scratch, a_data);
+
+    // Interp if we should
+    if(a_interp){
+      m_amr->interpolate_to_centroids(scratch, phase::gas);
+    }
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+    }
   }
 
   a_comp += ncomp;
