@@ -24,8 +24,7 @@ extern "C" void dgesv_(int*    N,
 		       int*    INFO);
 
 /*!
-  @brief Class for evolving plasma equations with a multirate method using strongly stability preserving
-  Runge-Kutta methods. 
+  @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
 */
 class sisdc : public time_stepper {
 public:
