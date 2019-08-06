@@ -21,7 +21,8 @@ cdr_fhd::cdr_fhd() : cdr_gdnv() {
 
 
   pp.get("stochastic_diffusion", str); m_stochastic_diffusion = (str == "true") ? true : false;
-  pp.get("stochastic_advection", str); m_stochastic_advection = (str == "true") ? true : false;
+  //  pp.get("stochastic_advection", str); m_stochastic_advection = (str == "true") ? true : false;
+  m_stochastic_advection = false;
   pp.get("limit_slopes", str);         m_slopelim             = (str == "true") ? true : false;
   pp.get("seed", m_seed);
 

@@ -3080,13 +3080,6 @@ void plasma_engine::new_write_plot_file(){
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_plot_file - DONE writing plot file..." << endl;
   }
-
-#if 1 // Debug test
-  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->write_plot_file();
-  }
-#endif
 }
 
 void plasma_engine::old_write_plot_file(){

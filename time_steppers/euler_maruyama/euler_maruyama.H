@@ -57,8 +57,16 @@ protected:
   void compute_cdr_gradients();
   void compute_cdr_eb_states();
   void compute_cdr_eb_fluxes();
+  void compute_cdr_domain_states();
+  void compute_cdr_domain_fluxes();
+  void compute_sigma_flux();
+  void compute_reaction_network(const Real a_dt);
+  void advance_cdr(const Real a_dt);
+  void advance_rte(const Real a_dt);
+  void advance_sigma(const Real a_dt);
 
-
+  void compute_cdr_velo(const Real a_time);
+  void compute_cdr_diffco(const Real a_time);
 };
 
 #endif

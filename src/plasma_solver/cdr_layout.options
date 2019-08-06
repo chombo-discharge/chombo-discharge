@@ -25,4 +25,4 @@ cdr_tga.gmg_bottom_drop    = 16        # Bottom drop
 cdr_tga.gmg_bottom_solver  = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 cdr_tga.gmg_bottom_relax   = 8         # Number of relaxations in bottom solve ('simple' solver only)
 
-cdr_solver.plot_vars       = phi vel src # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+cdr_solver.plt_vars        = phi vel src # Plot variables. Options are 'phi', 'vel', 'dco', 'src'

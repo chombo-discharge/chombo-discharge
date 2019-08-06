@@ -9,6 +9,7 @@
 #include "euler_maruyama_storage.H"
 #include "data_ops.H"
 #include "units.H"
+#include "cdr_tga.H"
 
 typedef euler_maruyama::cdr_storage     cdr_storage;
 typedef euler_maruyama::poisson_storage poisson_storage;
@@ -17,6 +18,7 @@ typedef euler_maruyama::sigma_storage   sigma_storage;
 
 euler_maruyama::euler_maruyama(){
 
+  m_extrap_advect = true;
 }
 
 euler_maruyama::~euler_maruyama(){
@@ -65,9 +67,24 @@ Real euler_maruyama::advance(const Real a_dt){
   // 8. Update the Poisson equation
   // 9. Recompute solver velocities and diffusion coefficients
 
-  euler_maruyama::compute_E_into_scratch();
-  euler_maruyama::compute_cdr_eb_states(); // Extrapolate cell-centered stuff to EB centroids
-  euler_maruyama::compute_cdr_eb_fluxes(); // Extrapolate cell-centered fluxes to EB centroids
+  euler_maruyama::compute_E_into_scratch();       // Compute the electric field
+  euler_maruyama::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
+  euler_maruyama::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
+  euler_maruyama::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
+  euler_maruyama::compute_cdr_domain_fluxes();    // Extrapolate cell-centered fluxes to domain edges
+  euler_maruyama::compute_sigma_flux();           // Update charge flux for sigma solver
+  euler_maruyama::compute_reaction_network(a_dt); // Advance the reaction network
+
+  euler_maruyama::advance_cdr(a_dt);              // Update cdr equations
+  // euler_maruyama::advance_rte(a_dt);              // Update RTE equations
+  // euler_maruyama::advance_sigma(a_dt);            // Update sigma equation
+  
+  time_stepper::solve_poisson();                  // Update the Poisson equation
+  euler_maruyama::compute_E_into_scratch();       // Update electric fields too
+
+  // Update velocities and diffusion coefficients. We don't do sources here. 
+  euler_maruyama::compute_cdr_velo(m_time + a_dt);
+  euler_maruyama::compute_cdr_diffco(m_time + a_dt);
   
   return a_dt;
 }
@@ -187,16 +204,16 @@ void euler_maruyama::compute_cdr_eb_states(){
     pout() << "euler_maruyama::compute_cdr_eb_states" << endl;
   }
 
+  Vector<EBAMRCellData*> cdr_states = m_cdr->get_states();
+  
   Vector<EBAMRIVData*>   eb_gradients;
   Vector<EBAMRIVData*>   eb_states;
-  Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
-    cdr_states.push_back(&(solver->get_state()));
     eb_states.push_back(&(storage->get_eb_state()));
     eb_gradients.push_back(&(storage->get_eb_grad()));
     cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
@@ -277,4 +294,224 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
 				   m_time);
 }
 
+void euler_maruyama::compute_cdr_domain_states(){
+  CH_TIME("euler_maruyama::compute_cdr_domain_states");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::compute_cdr_domain_states" << endl;
+  }
 
+  Vector<EBAMRIFData*>   domain_gradients;
+  Vector<EBAMRIFData*>   domain_states;
+  Vector<EBAMRCellData*> cdr_states;
+  Vector<EBAMRCellData*> cdr_gradients;
+  
+  for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+
+    cdr_states.push_back(&(solver->get_state()));
+    domain_states.push_back(&(storage->get_domain_state()));
+    domain_gradients.push_back(&(storage->get_domain_grad()));
+    cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
+  }
+
+  // Extrapolate states to the domain faces
+  time_stepper::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+
+  // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
+  EBAMRIFData grad;
+  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  for (int i = 0; i < cdr_states.size(); i++){
+    time_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    time_stepper::project_domain(*domain_gradients[i], grad);
+  }
+}
+
+void euler_maruyama::compute_cdr_domain_fluxes(){
+  CH_TIME("euler_maruyama::compute_cdr_domain_fluxes()");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::compute_cdr_domain_fluxes()" << endl;
+  }
+
+  Vector<EBAMRCellData*> states = m_cdr->get_states();
+
+  Vector<EBAMRIFData*>   cdr_fluxes;
+  Vector<EBAMRIFData*>   extrap_cdr_fluxes;
+  Vector<EBAMRIFData*>   extrap_cdr_densities;
+  Vector<EBAMRIFData*>   extrap_cdr_velocities;
+  Vector<EBAMRIFData*>   extrap_cdr_gradients;
+  Vector<EBAMRIFData*>   extrap_rte_fluxes;
+
+  Vector<EBAMRCellData*> cdr_velocities;
+  Vector<EBAMRCellData*> cdr_gradients;
+
+  cdr_fluxes = m_cdr->get_domainflux();
+  cdr_velocities = m_cdr->get_velocities();
+  for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+
+    EBAMRIFData& dens_domain = storage->get_domain_state();
+    EBAMRIFData& velo_domain = storage->get_domain_velo();
+    EBAMRIFData& flux_domain = storage->get_domain_flux();
+    EBAMRIFData& grad_domain = storage->get_domain_grad();
+    EBAMRCellData& gradient  = storage->get_gradient();
+
+    extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
+    extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
+    extrap_cdr_fluxes.push_back(&flux_domain);     // Has not been computed
+    extrap_cdr_gradients.push_back(&grad_domain);  // Has not been computed
+    cdr_gradients.push_back(&gradient);
+  }
+
+  // Compute extrapolated velocities and fluxes at the domain faces
+  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), states);
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     states,             cdr_velocities, m_cdr->get_phase());
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
+
+  // Compute RTE flux on domain faces
+  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+
+    EBAMRIFData& domain_flux = storage->get_domain_flux();
+    solver->compute_domain_flux(domain_flux, solver->get_state());
+    extrap_rte_fluxes.push_back(&domain_flux);
+  }
+
+  const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
+
+  // This fills the solvers' domain fluxes
+  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+					  extrap_cdr_fluxes,
+					  extrap_cdr_densities,
+					  extrap_cdr_velocities,
+					  extrap_cdr_gradients,
+					  extrap_rte_fluxes,
+					  E,
+					  m_time);
+}
+
+void euler_maruyama::compute_sigma_flux(){
+  CH_TIME("euler_maruyama::compute_sigma_flux");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::compute_sigma_flux" << endl;
+  }
+
+  EBAMRIVData& flux = m_sigma->get_flux();
+  data_ops::set_value(flux, 0.0);
+
+  for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const EBAMRIVData& solver_flux          = solver->get_ebflux();
+
+    data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
+  }
+
+  m_sigma->reset_cells(flux);
+}
+
+void euler_maruyama::compute_reaction_network(const Real a_dt){
+  CH_TIME("euler_maruyama::compute_reaction_network");
+  if(m_verbosity > 5){
+    pout() << "euler_maruaya::compute_reaction_network" << endl;
+  }
+
+#if 0 // Original code
+  time_stepper::advance_reaction_network(m_time, a_dt);
+#else // Debug code
+
+#endif
+}
+
+void euler_maruyama::advance_cdr(const Real a_dt){
+  CH_TIME("euler_maruyama::advance_cdr");
+  if(m_verbosity > 5){
+    pout() << "euler_maruaya::advance_cdr" << endl;
+  }
+
+  for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi = solver->get_state();
+    EBAMRCellData& src = solver->get_source();
+    
+    EBAMRCellData& scratch  = storage->get_scratch();
+    EBAMRCellData& scratch2 = storage->get_scratch2();
+
+    // Compute hyperbolic term into scratch
+    if(solver->is_mobile()){
+      const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
+      solver->compute_divF(scratch, phi, extrap_dt, true);
+      data_ops::scale(scratch, -1.0);
+    }
+    else{
+      data_ops::set_value(scratch, 0.0);
+    }
+
+    // Also include the source term
+    data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F) + R]
+    data_ops::scale(scratch, a_dt);     // scratch = [-div(F) + R]*dt
+    data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F) + dt*R
+
+
+    // Solve diffusion equation. This looks weird but we're solving
+    //
+    // phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
+    //
+    // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
+    // so we just use that for simplicity
+    if(solver->is_diffusive()){
+      data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
+      data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
+      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      tgasolver->advance_euler(phi, scratch, scratch2, a_dt); 
+    }
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_amr->interp_ghost(phi, m_cdr->get_phase());
+  }
+}
+
+void euler_maruyama::advance_rte(const Real a_dt){
+  CH_TIME("euler_maruyama::advance_rte");
+  if(m_verbosity > 5){
+    pout() << "euler_maruaya::advance_rte" << endl;
+  }
+
+  // Source terms should already be in place so we can solve directly.
+  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    solver->advance(a_dt);
+  }
+}
+
+void euler_maruyama::advance_sigma(const Real a_dt){
+  CH_TIME("euler_maruyama::advance_sigma");
+  if(m_verbosity > 5){
+    pout() << "euler_maruaya::advance_sigma" << endl;
+  }
+
+  // Advance the sigma equation
+  EBAMRIVData& sigma = m_sigma->get_state();
+  const EBAMRIVData& rhs = m_sigma->get_flux();
+  data_ops::incr(sigma, rhs, a_dt);
+}
+
+void euler_maruyama::compute_cdr_velo(const Real a_time){
+  CH_TIME("euler_maruyama::compute_cdr_velo");
+  if(m_verbosity > 5){
+    pout() << "euler_maruaya::compute_cdr_velo" << endl;
+  }
+
+  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
+  time_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_poisson_scratch->get_E_cell(), a_time);
+}
+
+void euler_maruyama::compute_cdr_diffco(const Real a_time){
+  CH_TIME("euler_maruyama::compute_cdr_diffco");
+  if(m_verbosity > 5){
+    pout() << "euler_maruaya::compute_cdr_diffco" << endl;
+  }
+}

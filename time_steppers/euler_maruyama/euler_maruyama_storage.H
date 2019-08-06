@@ -24,7 +24,8 @@ public:
   void deallocate_storage();
 
   EBAMRCellData& get_scratch()  { return m_scratch;    }
-  EBAMRCellData& get_gradient() { return m_scratch;    }
+  EBAMRCellData& get_scratch2() { return m_scratch2;   }
+  EBAMRCellData& get_gradient() { return m_gradient;   }
 
   EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
   EBAMRIVData& get_eb_scratchD(){ return m_scratchIVD; }
@@ -45,6 +46,7 @@ protected:
   int m_ncomp;                   // with this many components
 
   EBAMRCellData m_scratch;  // Scratch data
+  EBAMRCellData m_scratch2; // Scratch data
   EBAMRCellData m_gradient; // Storage for holding gradient
 
   EBAMRIVData m_scratchIVs; // Scratch data

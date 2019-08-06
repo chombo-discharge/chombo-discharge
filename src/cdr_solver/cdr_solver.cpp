@@ -1746,15 +1746,14 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
     m_amr->allocate(scratch, m_phase, ncomp);
     data_ops::copy(scratch, a_data);
 
-    // Interp if we should
-    if(a_interp){
-      m_amr->interpolate_to_centroids(scratch, phase::gas);
-    }
+    m_amr->interpolate_to_centroids(scratch, phase::gas);
 
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
     }
   }
+
+  data_ops::set_covered_value(a_output, a_comp, 0.0);
 
   a_comp += ncomp;
 }
