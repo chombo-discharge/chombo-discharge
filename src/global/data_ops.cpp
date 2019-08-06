@@ -139,7 +139,7 @@ void data_ops::average_face_to_cell(LevelData<EBCellFAB>&       a_celldata,
 				    const ProblemDomain&        a_domain){
 
   const int nc = a_celldata.nComp();
-  CH_assert(a_facedata.nComp() == nc);
+  CH_assert(a_fluxdata.nComp() == nc);
 
   for (DataIterator dit = a_celldata.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& celldata       = a_celldata[dit()];
