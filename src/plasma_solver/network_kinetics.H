@@ -50,9 +50,10 @@ public:
 					const Vector<Real>&     a_photon_densities,
 					const RealVect&         a_E,
 					const RealVect&         a_pos,
+					const Real&             a_dx,
 					const Real&             a_dt,
 					const Real&             a_time,
-					const Real&             a_kappa) const {};
+					const Real&             a_kappa) const = 0;
 
   // Calling this is an error
   Vector<Real> compute_cdr_source_terms(const Real              a_time,

@@ -76,8 +76,8 @@ Real euler_maruyama::advance(const Real a_dt){
   euler_maruyama::compute_reaction_network(a_dt); // Advance the reaction network
 
   euler_maruyama::advance_cdr(a_dt);              // Update cdr equations
-  // euler_maruyama::advance_rte(a_dt);              // Update RTE equations
-  // euler_maruyama::advance_sigma(a_dt);            // Update sigma equation
+  euler_maruyama::advance_rte(a_dt);              // Update RTE equations
+  euler_maruyama::advance_sigma(a_dt);            // Update sigma equation
   
   time_stepper::solve_poisson();                  // Update the Poisson equation
   euler_maruyama::compute_E_into_scratch();       // Update electric fields too
@@ -418,11 +418,7 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
     pout() << "euler_maruaya::compute_reaction_network" << endl;
   }
 
-#if 0 // Original code
   time_stepper::advance_reaction_network(m_time, a_dt);
-#else // Debug code
-
-#endif
 }
 
 void euler_maruyama::advance_cdr(const Real a_dt){
@@ -481,7 +477,7 @@ void euler_maruyama::advance_rte(const Real a_dt){
   }
 
   // Source terms should already be in place so we can solve directly.
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
     solver->advance(a_dt);
   }

@@ -117,14 +117,17 @@ void morrow_network::advance_reaction_network(Vector<Real>&           a_particle
 					      const Vector<Real>&     a_photon_densities,
 					      const RealVect&         a_E,
 					      const RealVect&         a_pos,
+					      const Real&             a_dx,
 					      const Real&             a_dt,
+					      const Real&             a_time,
 					      const Real&             a_kappa) const{
 
+  const Real volume = pow(a_dx, SpaceDim);
   for (int i = 0; i < a_particle_sources.size(); i++){
-    a_particle_sources[i] = 0.0;
+    a_particle_sources[i] = 1.0/(volume*a_dt);
   }
   for (int i = 0; i < a_photon_sources.size(); i++){
-    a_photon_sources[i] = 0.0;
+    a_photon_sources[i] = 1.0;
   }
 
   return;

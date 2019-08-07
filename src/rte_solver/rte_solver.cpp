@@ -53,9 +53,6 @@ bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
 
   const bool converged = this->advance(a_dt, m_state, a_zerophi);
 
-  m_time += a_dt;
-  m_step++;
-
   return converged;
 }
 
@@ -66,9 +63,6 @@ bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_z
   }
 
   const bool converged = this->advance(a_dt, a_state, m_source, a_zerophi);
-
-  m_time += a_dt;
-  m_step++;
 
   return converged;
 }

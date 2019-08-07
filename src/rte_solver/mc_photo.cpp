@@ -491,7 +491,6 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_photons" << endl;
   }
-
   
   const int comp = 0;
   const Interval interv(comp, comp);
