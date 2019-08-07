@@ -9,7 +9,6 @@
 #include "euler_maruyama_storage.H"
 #include "data_ops.H"
 #include "units.H"
-#include "cdr_tga.H"
 
 typedef euler_maruyama::cdr_storage     cdr_storage;
 typedef euler_maruyama::poisson_storage poisson_storage;
@@ -462,8 +461,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     if(solver->is_diffusive()){
       data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
       data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
-      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->advance_euler(phi, scratch, scratch2, a_dt); 
+      solver->advance_euler(phi, scratch, scratch2, a_dt); 
     }
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());

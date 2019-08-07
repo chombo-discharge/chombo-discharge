@@ -191,6 +191,32 @@ public:
   virtual void advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt) = 0;
 
   /*!
+    @brief Pure TGA advance without source terms
+  */
+  virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt) = 0;
+
+  /*!
+    @brief Pure Euler advance with source terms
+  */
+  virtual void advance_tga(EBAMRCellData&       a_new_state,
+			   const EBAMRCellData& a_old_state,
+			   const EBAMRCellData& a_source,
+			   const Real           a_dt) = 0;
+
+  /*!
+    @brief Pure Euler advance without source terms
+  */
+  virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt) = 0;
+
+  /*!
+    @brief Pure Euler advance with source terms
+  */
+  virtual void advance_euler(EBAMRCellData&       a_new_state,
+			     const EBAMRCellData& a_old_state,
+			     const EBAMRCellData& a_source,
+			     const Real           a_dt) = 0;
+
+  /*!
     @brief Explicit RK2 advance
   */
   virtual void advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real a_alpha);

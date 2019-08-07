@@ -7,7 +7,6 @@
 
 #include "cdr_layout.H"
 #include "cdr_iterator.H"
-#include "cdr_sg.H"
 #include "cdr_gdnv.H"
 #include "cdr_muscl.H"
 #include "cdr_fhd.H"
@@ -50,10 +49,7 @@ cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
 
   pp.query("which_solver", str);
   for (int i = 0; i < a_plaskin->get_num_species(); i++){
-    if(str == "scharfetter-gummel"){
-      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_sg());
-    }
-    else if(str == "godunov"){
+    if(str == "godunov"){
       m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_gdnv());
     }
     else if(str == "muscl"){
