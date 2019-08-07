@@ -17,19 +17,19 @@
 
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";
-  this->set_verbosity(1);
-  this->set_cfl(0.8);
-  this->set_relax_time(1.0);
-  this->set_relax_level(-1);
-  this->set_source_growth(1.E10);
-  this->set_source_growth_tolerance(0.1);
-  this->set_source_growth_elec_only(true);
-  this->set_min_dt(0.0);
-  this->set_max_dt(1.E99);
-  this->set_fast_rte(1);
-  this->set_fast_poisson(1);
-  this->set_solver_verbosity(0);
-  this->set_source_computation();
+  
+  parse_verbosity();
+  parse_solver_verbosity();
+  parse_cfl();
+  parse_relax_time();
+  parse_source_growth();
+  parse_source_tolerance();
+  parse_min_dt();
+  parse_max_dt();
+  parse_fast_rte();
+  parse_fast_rte();
+  parse_fast_poisson();
+  parse_source_comp();
 
   m_subcycle = false;
 }
@@ -2979,7 +2979,7 @@ void time_stepper::setup_solvers(){
   this->setup_poisson();
   this->setup_sigma();
 
-  this->set_solver_verbosity(m_solver_verbosity);
+  this->set_solver_verbosity();
 }
 
 void time_stepper::initial_data(){
@@ -3248,28 +3248,112 @@ void time_stepper::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a
 #endif
 }
 
-void time_stepper::set_verbosity(const int a_verbosity){
-  m_verbosity = a_verbosity;
-
-  ParmParse pp("time_stepper");
-  pp.query("verbosity", m_verbosity);
-
-  CH_TIME("time_stepper::set_verbosity");
+void time_stepper::parse_verbosity(){
+  CH_TIME("time_stepper::parse_verbosity");
   if(m_verbosity > 5){
-    pout() << "time_stepper::set_verbosity" << endl;
+    pout() << "time_stepper::parse_verbosity" << endl;
+  }
+  
+  ParmParse pp(m_class_name.c_str());
+  pp.get("verbosity", m_verbosity);
+}
+
+void time_stepper::parse_solver_verbosity(){
+  CH_TIME("time_stepper::parse_solver_verbosity");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::parse_solver_verbosity" << endl;
+  }
+  
+  ParmParse pp(m_class_name.c_str());
+  pp.get("solver_verbosity", m_solver_verbosity);
+}
+
+void time_stepper::parse_cfl(){
+
+  ParmParse pp(m_class_name.c_str());
+  pp.get("cfl", m_cfl);
+  if(m_cfl < 0.0){
+    MayDay::Abort("time_stepper::parse_cfl - CFL cannot be negative!");
   }
 }
 
-void time_stepper::set_solver_verbosity(const int a_verbosity){
+void time_stepper::parse_relax_time(){
+  ParmParse pp(m_class_name.c_str());
+  pp.get("relax_time", m_relax_time);
+  if(m_relax_time < 0.0){
+    MayDay::Abort("time_stepper::parse_relax_time - relaxation time cannot be negative");
+  }
+}
+
+void time_stepper::parse_source_growth(){
+  ParmParse pp(m_class_name.c_str());
+  pp.query("source_growth", m_src_growth);
+  if(m_src_growth < 0.0){
+    MayDay::Abort("time_stepper::parse_source_growth - value cannot be negative");
+  }
+}
+
+void time_stepper::parse_source_tolerance(){
+  ParmParse pp(m_class_name.c_str());
+  pp.query("source_tolerance", m_src_tolerance);
+  if(m_src_tolerance < 0.0){
+    MayDay::Abort("time_stepper::parse_source_tolerance - value cannot be negative");
+  }
+}
+
+void time_stepper::parse_min_dt(){
+  ParmParse pp(m_class_name.c_str());
+  pp.get("min_dt", m_min_dt);
+  if(m_min_dt < 0.0){
+    MayDay::Abort("time_stepper::parse_min_dt - value cannot be negative");
+  }
+}
+
+void time_stepper::parse_max_dt(){
+  ParmParse pp(m_class_name.c_str());
+  pp.get("max_dt", m_max_dt);
+  if(m_max_dt < 0.0){
+    MayDay::Abort("time_stepper::parse_max_dt - value cannot be negative");
+  }
+}
+
+void time_stepper::parse_fast_rte(){
+  ParmParse pp(m_class_name.c_str());
+  pp.get("fast_rte", m_fast_rte);
+  if(m_fast_rte <= 0){
+    MayDay::Abort("time_stepper::parse_fast_rte - value cannot be negative");
+  }
+}
+
+void time_stepper::parse_fast_poisson(){
+  ParmParse pp(m_class_name.c_str());
+  pp.get("fast_poisson", m_fast_poisson);
+  if(m_fast_poisson <= 0){
+    MayDay::Abort("time_stepper::parse_fast_poisson - value cannot be negative");
+  }
+}
+
+void time_stepper::parse_source_comp(){
+
+  std::string str;
+  ParmParse pp(m_class_name.c_str());
+  pp.get("source_comp", str);
+  if(str == "interp"){
+    m_interp_sources = true;
+  }
+  else if(str == "cell_ave"){
+    m_interp_sources = false;
+  }
+  else{
+    MayDay::Abort("time_stepper::parse_source_comp - unknown type requested");
+  }
+}
+
+void time_stepper::set_solver_verbosity(){
   CH_TIME("time_stepper::set_solver_verbosity");
   if(m_verbosity > 5){
     pout() << "time_stepper::set_solver_verbosity" << endl;
   }
-
-  m_solver_verbosity = a_verbosity;
-  
-  ParmParse pp("time_stepper");
-  pp.query("solver_verbosity", m_solver_verbosity);
 
   if(!m_cdr.isNull()){
     m_cdr->set_verbosity(m_solver_verbosity);
@@ -3366,13 +3450,6 @@ void time_stepper::set_relax_time(const Real a_relax_time){
   }
 }
 
-void time_stepper::set_relax_level(const Real a_relax_level){
-  m_relax_level = a_relax_level;
-
-  ParmParse pp("time_stepper");
-  pp.query("relax_level", m_relax_level);
-}
-
 void time_stepper::set_source_growth(const Real a_src_growth){
   m_src_growth = a_src_growth;
 
@@ -3390,25 +3467,6 @@ void time_stepper::set_source_growth_tolerance(const Real a_src_tolerance){
   pp.query("source_tolerance", m_src_tolerance);
   if(m_src_tolerance < 0.0){
     m_src_tolerance = a_src_tolerance;
-  }
-}
-
-void time_stepper::set_source_growth_elec_only(const bool a_src_elec_only){
-  m_src_elec_only = a_src_elec_only;
-
-  ParmParse pp("time_stepper");
-  std::string str;
-  if(pp.contains("source_elec_only")){
-    pp.get("source_elec_only", str);
-    if(str == "true"){
-      m_src_elec_only = true;
-    }
-    else if(str == "false"){
-      m_src_elec_only = false;
-    }
-    else{
-      MayDay::Abort("time_stepper::set_source_growth_elec_only - ParmParse can't get 'source_elec_only'");
-    }
   }
 }
 
@@ -3763,7 +3821,7 @@ Real time_stepper::compute_relaxation_time(){
     max_E[dir] = Max(Abs(max), Abs(min));
   }
 
-  const int finest_relax_level = (m_relax_level < 0) ? finest_level : Min(m_relax_level, finest_level);
+  const int finest_relax_level = finest_level;
   
   for (int lvl = 0; lvl <= finest_relax_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];

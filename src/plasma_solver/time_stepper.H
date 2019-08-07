@@ -21,24 +21,9 @@
 #include <RealVect.H>
 
 /*!
-  @brief Abstract class for evolving in time across an amr mesh. 
-  @details This class has default options relating
-  
-  Class options
-  -------------
-
-  time_stepper.verbosity        = 1      # Class verbosity
-  time_stepper.solver_verbosity = 0      # Individual solver verbosities
-  time_stepper.fast_rte         = 1      # Solve RTE every this time steps
-  time_stepper.fast_poisson     = 1      # Solve Poisson every this time steps
-  time_stepper.min_dt           = 0.     # Minimum permitted time step
-  time_stepper.min_dt           = 1.     # Maximum permitted time step
-  time_stepper.cfl              = 0.5    # CFL number
-  time_stepper.relax_time       = 1.0    # Relaxation time constant
-  time_stepper.source_growth    = 100.0  # Relaxation time constant
-  time_stepper.source_comp      = interp # Interpolated or volume-weighted
-
+  @brief Abstract class for evolving plasma equations in time
 */
+
 class time_stepper {
 public:
 
@@ -73,6 +58,13 @@ public:
     @brief Check if RTE solvers are stationary
   */
   virtual bool stationary_rte();
+
+  /*!
+    @brief Parse options. Not yet. 
+  */
+#if 0
+  virtual void parse_options() = 0;
+#endif
 
   /*!
     @brief Cache states
@@ -776,11 +768,6 @@ public:
   virtual void set_relax_time(const Real a_relax_time);
 
   /*!
-    @brief Set valid levels for relaxation time
-  */
-  virtual void set_relax_level(const Real a_relax_level);
-
-  /*!
     @brief Set source growth
   */
   virtual void set_source_growth(const Real a_src_growth);
@@ -789,11 +776,6 @@ public:
     @brief Set source growth
   */
   virtual void set_source_growth_tolerance(const Real a_src_tolerance);
-
-  /*!
-    @brief Set source growth
-  */
-  virtual void set_source_growth_elec_only(const bool a_src_elec_only);
 
   /*!
     @brief Set the physical domain
@@ -806,14 +788,9 @@ public:
   virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
 
   /*!
-    @brief Verbosity
-  */
-  virtual void set_verbosity(const int a_verbosity);
-
-  /*!
     @brief Set solver verbosity
   */
-  virtual void set_solver_verbosity(const int a_verbosity);
+  virtual void set_solver_verbosity();
 
   /*!
     @brief Setup the cdr solvers
@@ -947,6 +924,19 @@ public:
   virtual RefCountedPtr<sigma_solver>& get_sigma();
   
 protected:
+
+  // Various parsing functions that are common to many derived classes
+  virtual void parse_verbosity();
+  virtual void parse_solver_verbosity();
+  virtual void parse_cfl();
+  virtual void parse_relax_time();
+  virtual void parse_source_growth();
+  virtual void parse_source_tolerance();
+  virtual void parse_min_dt();
+  virtual void parse_max_dt();
+  virtual void parse_fast_poisson();
+  virtual void parse_fast_rte();
+  virtual void parse_source_comp();
 
   /*!
     @brief Time stepper class name

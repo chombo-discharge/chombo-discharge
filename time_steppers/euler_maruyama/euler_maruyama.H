@@ -31,6 +31,7 @@ public:
 
   // Pure functions that must be overwritten
   Real advance(const Real a_dt);
+  void parse_options();
   void init_source_terms();
   void regrid_internals();
   void deallocate_internals();
@@ -67,6 +68,9 @@ protected:
 
   void compute_cdr_velo(const Real a_time);
   void compute_cdr_diffco(const Real a_time);
+
+  // Various option parsing
+  
 };
 
 #endif

@@ -24,6 +24,13 @@ euler_maruyama::~euler_maruyama(){
 
 }
 
+void euler_maruyama::parse_options(){
+  CH_TIME("euler_maruyama::parse_options");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::parse_options" << endl;
+  }
+}
+
 bool euler_maruyama::need_to_regrid(){
   CH_TIME("euler_maruyama::deallocate_internals");
   if(m_verbosity > 5){
