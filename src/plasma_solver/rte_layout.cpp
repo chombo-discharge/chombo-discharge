@@ -15,6 +15,8 @@
 
 rte_layout::rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_photons = a_plaskin->get_photons();
+  m_solvers.resize(0); // Solvers added through the add_solver function
+#if 0  
   m_solvers.resize(m_photons.size());
 
   std::string solver     = "eddington_sp1";
@@ -37,6 +39,7 @@ rte_layout::rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
 
   this->set_verbosity(-1);
   this->set_phase(phase::gas);
+#endif
 }
 
 rte_layout::~rte_layout(){
@@ -45,6 +48,22 @@ rte_layout::~rte_layout(){
 
 rte_iterator rte_layout::iterator(){
   return rte_iterator(*this);
+}
+
+void rte_layout::add_solver(RefCountedPtr<rte_solver> a_solver){
+  m_solvers.push_back(a_solver);
+}
+
+void rte_layout::parse_options(){
+  CH_TIME("rte_layout::parse_options");
+  if(m_verbosity > 6){
+    pout() << "rte_layout::parse_options" << endl;
+  }
+
+  for (rte_iterator solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    solver->parse_options();
+  }
 }
 
 void rte_layout::allocate_internals(){

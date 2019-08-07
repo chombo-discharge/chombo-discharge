@@ -45,6 +45,11 @@ public:
     @brief Advance RTE onto state a_state
   */
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
+
+  /*!
+    @brief Parse class options
+  */
+  virtual void parse_options();
   
   /*!
     @brief Allocate internal storage
@@ -70,56 +75,6 @@ public:
     @brief Regrid function for this class
   */
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-
-  /*!
-    @brief Set solver parameters. These are normally good for this class. 
-  */
-  virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
-					 amrmg::which_mg a_gmg_type      = amrmg::vcycle,
-					 const int a_verbosity           = 100,
-					 const int a_pre_smooth          = 16,
-					 const int a_post_smooth         = 16,
-					 const int a_bot_smooth          = 16,
-					 const int a_max_iter            = 16,
-					 const int a_min_iter            = 5,
-					 const Real a_eps                = 1.E-6,
-					 const Real a_hang               = 0.2);
-
-  /*!
-    @brief Set the bottom solver.  
-    @param[in] a_which_solver Solver type. 0 = smoother, 1 = BiCGStab
-  */
-  virtual void set_bottom_solver(const int a_which_solver);
-
-  /*!
-    @brief Set the depth for bottom drop
-  */
-  virtual void set_bottom_drop(const int a_bottom_drop);
-
-  /*!
-    @brief Set number of smoothing for the bottom solver (simplified solver only)
-  */
-  virtual void set_botsolver_smooth(const int a_smooth);
-
-  /*!
-    @brief Set boundary conditions at wall
-  */
-  virtual void set_wall_bc();
-
-  /*!
-    @brief Use tga for temporal integration
-  */
-  virtual void set_tga(const bool a_use_tga);
-
-  /*!
-    @brief Set reflectivity
-  */
-  virtual void set_reflectivity(const Real a_reflectivity);
-  
-  /*!
-    @brief Set stochastic photons or not
-  */
-  virtual void set_rng();
 
   /*!
     @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
@@ -168,11 +123,6 @@ public:
   */
   virtual int query_ghost() const;
 
-  /*!
-    @brief Set stationary or not
-  */
-  virtual void set_stationary(const bool a_stationary);
-
 protected:
   
   /*!
@@ -191,9 +141,14 @@ protected:
   bool m_needs_setup;
 
   /*!
-    @brief Use tga
+    @brief Use tga for transient solevs
   */
   bool m_use_tga;
+
+  /*!
+    @brief Use the source term to draw stochastic photons
+  */
+  bool m_stochastic_photons;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -241,6 +196,11 @@ protected:
   int m_bottom_drop;
 
   /*!
+    @brief RNG seed
+  */
+  int m_seed;
+
+  /*!
     @brief 
   */
   Real m_gmg_eps;
@@ -259,6 +219,11 @@ protected:
     @brief Reflection coefficient
   */
   Real m_r2;
+
+  /*!
+    @brief RNG
+  */
+  std::mt19937_64* m_rng;
 
   /*!
     @brief Geometric multigrid solver
@@ -390,10 +355,12 @@ protected:
   */
   virtual void setup_euler();
 
-
-  bool m_stochastic_photons;
-  std::mt19937_64* m_rng;
-  int m_seed;
-
+  // Parse options functions
+  virtual void parse_domain_bc();    // Parses domain BC options
+  virtual void parse_stationary();   // Parse stationary solver
+  virtual void parse_plot_vars();    // Parses plot variables
+  virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  virtual void parse_rng();          // Parse RNG stuff
+  virtual void parse_reflection();   // Parse reflection coefficient
 };
 #endif

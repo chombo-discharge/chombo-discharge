@@ -39,6 +39,11 @@ public:
     @brief Advance RTE onto state a_state
   */
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
+
+  /*!
+    Parse options
+  */
+  virtual void parse_options();
   
   /*!
     @brief Allocate internal storage
@@ -226,6 +231,18 @@ protected:
 #elif CH_SPACEDIM==3
   RealVect random_direction3D();
 #endif
+
+  // Options parsing functions
+  void parse_rng();
+  void parse_pseudophotons();
+  void parse_photogen();
+  void parse_source_type();
+  void parse_deposition();
+  void parse_bisect_step();
+  void parse_domain_bc();
+  void parse_random_kappa();
+  void parse_pvr_buffer();
+  void parse_plot_vars();
 };
 
 #endif

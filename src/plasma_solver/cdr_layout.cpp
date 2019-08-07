@@ -17,6 +17,7 @@
 
 cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_species = a_plaskin->get_species();
+  m_solvers.resize(0);
 }
 
 cdr_layout::~cdr_layout(){

@@ -24,6 +24,7 @@
 mc_photo.max_photons       = 1             # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 mc_photo.random_kappa      = true          # Randomize absorption length (taken from photon implementation)
+mc_photo.plt_vars          = phi src       # Available are 'phi' and 'src'
 mc_photo.bisect_step       = 1.E-4         # Bisection step length for intersection tests
 mc_photo.seed              = 0             # Seed for RNG
 mc_photo.bc_x_low          = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
@@ -43,3 +44,4 @@ mc_photo.deposition        = cic           # 'ngp' = nearest grid point
                                            # 'cic' = cloud-in-cell
                                            # 'tsc' = triangle-shaped-cloud
                                            # 'w4'  = 3rd order interpolation
+

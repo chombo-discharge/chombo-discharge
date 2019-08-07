@@ -20,19 +20,10 @@
 #define eddington_sp1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics. 
 
 eddington_sp1::eddington_sp1() : rte_solver() {
-  
-  this->set_verbosity(-1);
-  this->set_stationary(true);
-  this->set_gmg_solver_parameters();
-  this->set_bottom_solver(1);
-  this->set_bottom_drop(16);
-  this->set_tga(false);
-  this->set_reflectivity(0.0);
-  this->set_time(0, 0., 0.);
-  this->set_rng();
-  this->allocate_wall_bc();
-  this->set_wall_bc();
+  m_name = "eddington_sp1";
+  m_class_name = "eddington_sp1";
 
+  m_verbosity  = -1;
   m_needs_setup = true;
 }
 
@@ -41,6 +32,212 @@ eddington_sp1::~eddington_sp1(){
 
 int eddington_sp1::query_ghost() const{
   return 3;
+}
+
+void eddington_sp1::parse_options(){
+  CH_TIME("eddington_sp1::parse_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_options" << endl;
+  }
+  
+  parse_domain_bc();    // Parses domain BC options
+  parse_stationary();   // Parse stationary solver
+  parse_plot_vars();    // Parses plot variables
+  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parse_rng();          // Parse RNG stuff
+}
+
+void eddington_sp1::parse_domain_bc(){
+  CH_TIME("eddington_sp1::parse_domain_bc");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_domain_bc" << endl;
+  }
+
+  allocate_wall_bc();
+
+  // Get BC from input script
+  ParmParse pp(m_class_name.c_str());
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Side::LoHiSide side = sit();
+	
+      std::string str_dir;
+      if(dir == 0){
+	str_dir = "x";
+      }
+      else if(dir == 1){
+	str_dir = "y";
+      }
+      else if(dir == 2){
+	str_dir = "z";
+      }
+
+      if(side == Side::Lo){
+	std::string type;
+	std::string bc_string = "bc_" + str_dir + "_low";
+	if(pp.contains(bc_string.c_str())){
+	  pp.get(bc_string.c_str(), type);
+	  if(type == "neumann"){
+	    this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
+	  }
+	  else if(type == "robin"){
+	    this->set_robin_wall_bc(dir, Side::Lo, 0.0);
+	  }
+	  else {
+	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
+	    MayDay::Abort(error.c_str());
+	  }
+	}
+      }
+      else if(side == Side::Hi){
+	std::string type;
+	std::string bc_string = "bc_" + str_dir + "_high";
+	if(pp.contains(bc_string.c_str())){
+	  pp.get(bc_string.c_str(), type);
+	  if(type == "neumann"){
+	    this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
+	  }
+	  else if(type == "robin"){
+	    this->set_robin_wall_bc(dir, Side::Hi, 0.0);
+	  }
+	  else {
+	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
+	    MayDay::Abort(error.c_str());
+	  }
+	}
+      }
+    }
+  }
+}
+
+void eddington_sp1::parse_stationary(){
+  CH_TIME("eddington_sp1::parse_stationary");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_stationary" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+  
+  pp.get("stationary", str);
+  m_stationary = (str == "true") ? true : false;
+  
+  pp.get("use_tga", str);
+  m_use_tga = (str == "true") ? true : false;
+}
+
+void eddington_sp1::parse_plot_vars(){
+  CH_TIME("eddington_sp1::parse_plot_vars");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_plot_vars" << endl;
+  }
+
+  m_plot_phi = false;
+  m_plot_src = false;
+
+  ParmParse pp(m_class_name.c_str());
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi") m_plot_phi = true;
+    else if(str[i] == "src") m_plot_src = true;
+  }
+}
+
+void eddington_sp1::parse_gmg_settings(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+
+  pp.get("gmg_verbosity",   m_gmg_verbosity);
+  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
+  pp.get("gmg_post_smooth", m_gmg_post_smooth);
+  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
+  pp.get("gmg_max_iter",    m_gmg_max_iter);
+  pp.get("gmg_min_iter",    m_gmg_min_iter);
+  pp.get("gmg_tolerance",   m_gmg_eps);
+  pp.get("gmg_hang",        m_gmg_hang);
+  pp.get("gmg_bottom_drop", m_bottom_drop);
+
+  // Bottom solver
+  pp.get("gmg_bottom_solver", str);
+  if(str == "simple"){
+    m_bottomsolver = 0;
+  }
+  else if(str == "bicgstab"){
+    m_bottomsolver = 1;
+  }
+  else{
+    MayDay::Abort("eddington_sp1::parse_gmg_settings - unknown bottom solver requested");
+  }
+
+  // Relaxation type
+  pp.get("gmg_relax_type", str);
+  if(str == "gsrb"){
+    m_gmg_relax_type = relax::gsrb_fast;
+  }
+  else if(str == "jacobi"){
+    m_gmg_relax_type = relax::jacobi;
+  }
+  else if(str == "gauss_seidel"){
+    m_gmg_relax_type = relax::gauss_seidel;
+  }
+  else{
+    MayDay::Abort("eddington_sp1::parse_gmg_settings - unknown relaxation method requested");
+  }
+
+  // Cycle type
+  pp.get("gmg_cycle", str);
+  if(str == "vcycle"){
+    m_gmg_type = amrmg::vcycle;
+  }
+  else{
+    MayDay::Abort("eddington_sp1::parse_gmg_settings - unknown cycle type requested");
+  }
+
+  // No lower than 2. 
+  if(m_bottom_drop < 2){
+    m_bottom_drop = 2;
+  }
+}
+
+void eddington_sp1::parse_rng(){
+  CH_TIME("eddington_sp1::parse_rng");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_rng" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str = "false";
+  pp.get("stochastic_photons", str);
+  m_stochastic_photons = (str == "true") ? true : false;
+  pp.get("seed", m_seed);
+
+  if(m_stochastic_photons){
+    if(m_seed < 0){
+      m_seed = std::chrono::system_clock::now().time_since_epoch().count();
+    }
+    m_rng = new std::mt19937_64(m_seed);
+  }
+}
+
+void eddington_sp1::parse_reflection(){
+  CH_TIME("eddington_sp1::parse_reflectivity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_reflectivity" << endl;
+  }
+  
+  ParmParse pp(m_class_name.c_str());
+
+  Real r;
+  pp.get("reflectivity", r);
+
+  m_r1 = r/(2.0);
+  m_r2 = r/(3.0);
 }
 
 void eddington_sp1::allocate_wall_bc(){
@@ -70,24 +267,6 @@ void eddington_sp1::cache_state(){
   }
 }
 
-void eddington_sp1::set_reflectivity(const Real a_reflectivity){
-  CH_TIME("eddington_sp1::set_reflectivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_reflectivity" << endl;
-  }
-
-  Real r = a_reflectivity;
-
-  { // Get from input script
-    ParmParse pp("eddington_sp1");
-    pp.query("reflectivity", r);
-  }
-
-  m_r1 = r/(2.0);
-  m_r2 = r/(3.0);
-  
-}
-
 void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2){
   CH_TIME("eddington_sp1::set_reflection_coefficients");
   if(m_verbosity > 5){
@@ -96,134 +275,6 @@ void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2
   
   m_r1 = a_r1;
   m_r2 = a_r2;
-}
-
-void eddington_sp1::set_rng(){
-  CH_TIME("eddington_sp1::set_rng");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_rng" << endl;
-  }
-
-  ParmParse pp("eddington_sp1");
-
-  m_stochastic_photons = false;
-  m_seed = 0;
-
-  std::string str = "false";
-  pp.query("stochastic_photons", str);
-  m_stochastic_photons = (str == "true") ? true : false;
-  pp.query("seed", m_seed);
-
-  if(m_stochastic_photons){
-    if(m_seed < 0){
-      m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-    }
-    m_rng = new std::mt19937_64(m_seed);
-  }
-}
-
-void eddington_sp1::set_bottom_solver(const int a_whichsolver){
-  CH_TIME("eddington_sp1::set_bottom_solver");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_bottom_solver" << endl;
-  }
-  if(a_whichsolver == 0 || a_whichsolver == 1){
-    m_bottomsolver = a_whichsolver;
-
-    std::string str;
-    ParmParse pp("eddington_sp1");
-    pp.query("gmg_bottom_solver", str);
-    if(str == "simple"){
-      m_bottomsolver = 0;
-    }
-    else if(str == "bicgstab"){
-      m_bottomsolver = 1;
-    }
-    
-  }
-  else{
-    MayDay::Abort("eddington_sp1::set_bottom_solver - Unsupported solver type requested");
-  }
-}
-
-void eddington_sp1::set_botsolver_smooth(const int a_numsmooth){
-  CH_TIME("eddington_sp1::set_botsolver_smooth");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_botsolver_smooth" << endl;
-  }
-  CH_assert(a_numsmooth > 0);
-  
-  m_numsmooth = a_numsmooth;
-
-  ParmParse pp("eddington_sp1");
-  pp.query("gmg_bottom_relax", m_numsmooth);
-}
-
-void eddington_sp1::set_bottom_drop(const int a_bottom_drop){
-  CH_TIME("eddington_sp1::set_bottom_drop");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_bottom_drop" << endl;
-  }
-  
-  m_bottom_drop = a_bottom_drop;
-
-  ParmParse pp("eddington_sp1");
-  pp.query("gmg_bottom_drop", m_bottom_drop);
-  if(m_bottom_drop < 2){
-    m_bottom_drop = 2;
-  }
-}
-
-void eddington_sp1::set_tga(const bool a_use_tga){
-  CH_TIME("eddington_sp1::set_tga");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_tga" << endl;
-  }
-  
-  m_use_tga = a_use_tga;
-
-  ParmParse pp("eddington_sp1");
-  std::string str = "false";
-  pp.get("use_tga", str);
-  m_use_tga = (str == "true") ? true : false;
-}
-
-void eddington_sp1::set_gmg_solver_parameters(relax::which_relax a_relax_type,
-					      amrmg::which_mg    a_gmg_type,      
-					      const int          a_verbosity,          
-					      const int          a_pre_smooth,         
-					      const int          a_post_smooth,       
-					      const int          a_bot_smooth,         
-					      const int          a_max_iter,
-					      const int          a_min_iter,
-					      const Real         a_eps,               
-					      const Real         a_hang){
-  CH_TIME("eddington_sp1::set_gmg_solver_parameters");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_gmg_solver_parameters" << endl;
-  }
-
-  m_gmg_relax_type  = a_relax_type;
-  m_gmg_type        = a_gmg_type;
-  m_gmg_verbosity   = a_verbosity;
-  m_gmg_pre_smooth  = a_pre_smooth;
-  m_gmg_post_smooth = a_post_smooth;
-  m_gmg_bot_smooth  = a_bot_smooth;
-  m_gmg_max_iter    = a_max_iter;
-  m_gmg_min_iter    = a_min_iter;
-  m_gmg_eps         = a_eps;
-  m_gmg_hang        = a_hang;
-
-  ParmParse pp("eddington_sp1");
-
-  pp.query("gmg_verbosity",   m_gmg_verbosity);
-  pp.query("gmg_pre_smooth",  m_gmg_pre_smooth);
-  pp.query("gmg_post_smooth", m_gmg_post_smooth);
-  pp.query("gmg_bott_smooth", m_gmg_bot_smooth);
-  pp.query("gmg_max_iter",    m_gmg_max_iter);
-  pp.query("gmg_min_iter",    m_gmg_min_iter);
-  pp.query("gmg_tolerance",   m_gmg_eps);
-  pp.query("gmg_hang",        m_gmg_hang);
 }
 
 void eddington_sp1::allocate_internals(){
@@ -901,21 +952,6 @@ void eddington_sp1::read_checkpoint_level(HDF5Handle& a_handle, const int a_leve
   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
 }
 
-void eddington_sp1::set_stationary(const bool a_stationary) {
-  CH_TIME("rte_solver::set_stationary");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_stationry" << endl;
-  }
-  m_stationary = a_stationary;
-
-
-  ParmParse pp("eddington_sp1");
-  std::string str;
-
-  pp.query("stationary", str);
-  m_stationary = (str == "false") ? false : true;
-}
-
 void eddington_sp1::set_neumann_wall_bc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
   CH_TIME("eddington_sp1::set_neumann_wall_bc");
   if(m_verbosity > 5){
@@ -936,81 +972,4 @@ void eddington_sp1::set_robin_wall_bc(const int a_dir, Side::LoHiSide a_side, co
   const int idx = wall_bc::map_bc(a_dir, a_side);
   m_wallbc[idx] = RefCountedPtr<wall_bc> (new wall_bc(a_dir, a_side, wallbc::robin));
   m_wallbc[idx]->set_value(a_value);
-}
-
-void eddington_sp1::set_wall_bc(){
-  CH_TIME("eddington_sp1::set_wall_bc");
-  if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_wall_bc" << endl;
-  }
-  
-  if(SpaceDim == 2){
-    this->set_robin_wall_bc(0,   Side::Lo, 0.0);                  
-    this->set_robin_wall_bc(0,   Side::Hi, 0.0);
-    this->set_robin_wall_bc(1,   Side::Lo, 0.0);
-    this->set_robin_wall_bc(1,   Side::Hi, 0.0); 
-  }
-  else if(SpaceDim == 3){
-    this->set_robin_wall_bc(0,   Side::Lo, 0.0);                  
-    this->set_robin_wall_bc(0,   Side::Hi, 0.0);
-    this->set_robin_wall_bc(1,   Side::Lo, 0.0);                  
-    this->set_robin_wall_bc(1,   Side::Hi, 0.0);
-    this->set_robin_wall_bc(2,   Side::Lo, 0.0);
-    this->set_robin_wall_bc(2,   Side::Hi, 0.0);
-  }
-
-  // Get BC from input script
-  ParmParse pp("eddington_sp1");
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-	
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-
-      if(side == Side::Lo){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_low";
-	if(pp.contains(bc_string.c_str())){
-	  pp.get(bc_string.c_str(), type);
-	  if(type == "neumann"){
-	    this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
-	  }
-	  else if(type == "robin"){
-	    this->set_robin_wall_bc(dir, Side::Lo, 0.0);
-	  }
-	  else {
-	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
-	    MayDay::Abort(error.c_str());
-	  }
-	}
-      }
-      else if(side == Side::Hi){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_high";
-	if(pp.contains(bc_string.c_str())){
-	  pp.get(bc_string.c_str(), type);
-	  if(type == "neumann"){
-	    this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
-	  }
-	  else if(type == "robin"){
-	    this->set_robin_wall_bc(dir, Side::Hi, 0.0);
-	  }
-	  else {
-	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
-	    MayDay::Abort(error.c_str());
-	  }
-	}
-      }
-    }
-  }
 }

@@ -1,6 +1,6 @@
 /*!
-  @file   cdr_layout.H
-  @brief  Declaration of a class that holds a set of cdr_solvers
+  @file   cdr_layoutI.H
+  @brief  Implementation of cdr_layout.H
   @author Robert Marskar
   @date   Jan. 2018
 */

@@ -1,27 +1,32 @@
 # ====================================================================================================
 # EDDINGTON_SP1 CLASS OPTIONS
 # ====================================================================================================
-eddington_sp1.stationary         = true      # Stationary solver
-eddington_sp1.reflectivity       = 0.        # Reflectivity
-eddington_sp1.use_tga            = false     # Second order integration (if transient)
-eddington_sp1.gmg_verbosity      = -1        # GMG verbosity
-eddington_sp1.gmg_pre_smooth     = 6         # Number of relaxations in downsweep
-eddington_sp1.gmg_post_smooth    = 6         # Number of relaxations in upsweep
-eddington_sp1.gmg_bott_smooth    = 6         # NUmber of relaxations before dropping to bottom solver
-eddington_sp1.gmg_min_iter       = 5         # Minimum number of iterations
-eddington_sp1.gmg_max_iter       = 32        # Maximum number of iterations
-eddington_sp1.gmg_tolerance      = 1.E-8     # Residue tolerance
-eddington_sp1.gmg_hang           = 0.2       # Solver hang
-eddington_sp1.gmg_bottom_drop    = 16        # Bottom drop
-eddington_sp1.gmg_bottom_solver  = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-eddington_sp1.gmg_bottom_relax   = 32        # Number of relaxations in bottom solve ('simple' solver only)
+eddington_sp1.stationary         = true       # Stationary solver
+eddington_sp1.reflectivity       = 0.         # Reflectivity
+eddington_sp1.use_tga            = false      # Use TGA for integration
 
-eddington_sp1.stochastic_photons = false     # Draw discrete photons from continuum distribution
-eddington_sp1.seed               = 0         # Seed
+eddington_sp1.plt_vars            = phi src   # Plot variables. Available are 'phi' and 'src'
 
-eddington_sp1.bc_x_low  = robin              # Boundary on domain. 'neumann' or 'robin'
-eddington_sp1.bc_x_high = robin              # Boundary on domain. 'neumann' or 'robin'              
-eddington_sp1.bc_y_low  = robin              # Boundary on domain. 'neumann' or 'robin'
-eddington_sp1.bc_y_high = robin              # Boundary on domain. 'neumann' or 'robin'
-eddington_sp1.bc_z_low  = robin              # Boundary on domain. 'neumann' or 'robin'
-eddington_sp1.bc_z_high = robin              # Boundary on domain. 'neumann' or 'robin'		
+eddington_sp1.gmg_verbosity       = -1        # GMG verbosity
+eddington_sp1.gmg_pre_smooth      = 8         # Number of relaxations in downsweep
+eddington_sp1.gmg_post_smooth     = 8         # Number of relaxations in upsweep
+eddington_sp1.gmg_bott_smooth     = 8         # NUmber of relaxations before dropping to bottom solver
+eddington_sp1.gmg_min_iter        = 5         # Minimum number of iterations
+eddington_sp1.gmg_max_iter        = 32        # Maximum number of iterations
+eddington_sp1.gmg_tolerance       = 1.E-6     # Residue tolerance
+eddington_sp1.gmg_hang            = 0.2       # Solver hang
+eddington_sp1.gmg_bottom_drop     = 16        # Bottom drop
+eddington_sp1.gmg_bottom_solver   = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+eddington_sp1.gmg_bottom_relax    = 8         # Number of relaxations in bottom solve ('simple' solver only)
+eddington_sp1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
+eddington_sp1.gmg_relax_type      = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+
+eddington_sp1.stochastic_photons  = false     # Draw discrete photons from continuum distribution
+eddington_sp1.seed                = 0         # Seed
+
+eddington_sp1.bc_x_low            = robin     # Boundary on domain. 'neumann' or 'robin'
+eddington_sp1.bc_x_high           = robin     # Boundary on domain. 'neumann' or 'robin'              
+eddington_sp1.bc_y_low            = robin     # Boundary on domain. 'neumann' or 'robin'
+eddington_sp1.bc_y_high           = robin     # Boundary on domain. 'neumann' or 'robin'
+eddington_sp1.bc_z_low            = robin     # Boundary on domain. 'neumann' or 'robin'
+eddington_sp1.bc_z_high           = robin     # Boundary on domain. 'neumann' or 'robin'		

@@ -2966,10 +2966,10 @@ void time_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name){
   }
 }
 
-void time_stepper::instantiate_solvers(){
-  CH_TIME("time_stepper::instantiate_solvers");
+void time_stepper::setup_solvers(){
+  CH_TIME("time_stepper::setup_solvers");
   if(m_verbosity > 5){
-    pout() << "time_stepper::instantiate_solvers" << endl;
+    pout() << "time_stepper::setup_solvers" << endl;
   }
 
   this->sanity_check();
@@ -3418,9 +3418,8 @@ void time_stepper::setup_cdr(){
     pout() << "time_stepper::setup_cdr" << endl;
   }
 
-  //  m_cdr = RefCountedPtr<cdr_layout> (new cdr_layout(m_plaskin));
+  m_rte->set_verbosity(m_solver_verbosity);
   m_cdr->parse_options();
-  m_cdr->set_verbosity(m_solver_verbosity);
   m_cdr->set_amr(m_amr);
   m_cdr->set_computational_geometry(m_compgeom);
   m_cdr->set_physical_domain(m_physdom);
@@ -3435,9 +3434,8 @@ void time_stepper::setup_poisson(){
     pout() << "time_stepper::setup_poisson" << endl;
   }
 
-  //  m_poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
-  m_poisson->parse_options();
   m_poisson->set_verbosity(m_solver_verbosity);
+  m_poisson->parse_options();
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
   m_poisson->set_physical_domain(m_physdom);
@@ -3462,9 +3460,9 @@ void time_stepper::setup_rte(){
     pout() << "time_stepper::setup_rte" << endl;
   }
 
-  m_rte = RefCountedPtr<rte_layout> (new rte_layout(m_plaskin));
-  m_rte->set_phase(phase::gas);
   m_rte->set_verbosity(m_solver_verbosity);
+  m_rte->parse_options();
+  m_rte->set_phase(phase::gas);
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);
   m_rte->set_physical_domain(m_physdom);

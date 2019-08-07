@@ -668,7 +668,7 @@ public:
   /*!
     @brief Instantiate solvers
   */
-  virtual void instantiate_solvers();
+  virtual void setup_solvers();
 
   /*!
     @brief Fill all solvers with initial data
@@ -857,7 +857,7 @@ public:
 
   virtual void set_cdr(RefCountedPtr<cdr_layout>& a_cdr){m_cdr = a_cdr;}
   virtual void set_poisson(RefCountedPtr<poisson_solver>& a_poisson){m_poisson = a_poisson;}
-  //  virtual void set_rte(RefCountedPtr<rte_layout>& a_rte){m_rte = a_rte;}
+  virtual void set_rte(RefCountedPtr<rte_layout>& a_rte){m_rte = a_rte;}
 
   /*!
     @brief General RTE advance routine

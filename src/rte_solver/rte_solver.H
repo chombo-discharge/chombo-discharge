@@ -36,6 +36,11 @@ public:
   virtual std::string get_name();
 
   /*!
+    @brief Parse options
+  */
+  virtual void parse_options() = 0;
+
+  /*!
     @brief Get output plot names
   */
   virtual Vector<std::string> get_plotvar_names() const;
@@ -271,6 +276,11 @@ protected:
     @brief Name
   */
   std::string m_name;
+
+  /*!
+    @brief Class name
+  */
+  std::string m_class_name;
 
   /*!
     @brief Cached state used for regridding

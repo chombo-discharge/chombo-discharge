@@ -35,6 +35,16 @@ public:
   virtual rte_iterator iterator();
 
   /*!
+    @brief Add solver
+  */
+  virtual void add_solver(RefCountedPtr<rte_solver> a_solver);
+
+  /*!
+    @brief Parse options
+  */
+  virtual void parse_options();
+
+  /*!
     @brief Allocate internal storage for solvers
   */
   virtual void allocate_internals();
@@ -167,6 +177,19 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
+};
+
+/*!
+  @brief Factory class for rte_layout. 
+  @details Factory class is very simple; since we don't want to template rte_layout2 we use a factory to instantiate solvers of 
+  any rte_solver inherited class, and then return a layout with the casted classes. That's about it. 
+*/
+template <class T>
+class rte_factory {
+public:
+  rte_factory();
+  ~rte_factory();
+  RefCountedPtr<rte_layout> new_layout(const RefCountedPtr<plasma_kinetics> a_plaskin) const;
 };
 
 #endif

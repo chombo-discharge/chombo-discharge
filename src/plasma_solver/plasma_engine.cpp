@@ -1051,7 +1051,7 @@ void plasma_engine::old_read_checkpoint_file(const std::string& a_restart_file){
   m_amr->set_finest_level(finest_level); // Set finest level
   const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
   m_amr->set_grids(boxes, regsize);               // Set up amr
-  m_timestepper->instantiate_solvers();  // Instantiate solvrs, they can now be filled with data
+  m_timestepper->setup_solvers();  // Instantiate solvrs, they can now be filled with data
 
   this->allocate_internals();            // Allocate internal storage which also needs to be filled
 
@@ -1195,7 +1195,7 @@ void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
   m_amr->set_grids(boxes, regsize);      
   
   // Instantiate solvers
-  m_timestepper->instantiate_solvers();  
+  m_timestepper->setup_solvers();  
 
   // Allocate internal stuff (e.g. space for tags)
   this->allocate_internals();            
@@ -2210,7 +2210,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
   m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
 #endif
-  m_timestepper->instantiate_solvers();                   // Instantiate sigma and cdr with initial data (and rte if transient)
+  m_timestepper->setup_solvers();                   // Instantiate sigma and cdr with initial data (and rte if transient)
   m_timestepper->initial_data();                          // Fill cdr and rte with initial data
 
   if (a_init_regrids >= 0){

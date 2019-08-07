@@ -11,12 +11,8 @@
 #include <ParmParse.H>
 
 rte_solver::rte_solver(){
-  m_name = "rte_solver";
-
-  this->set_verbosity(-1);
-  this->set_phase();
-  this->set_plot_variables();
-
+  m_name       = "rte_solver";
+  m_class_name = "rte_solver";
 }
 
 rte_solver::~rte_solver(){
