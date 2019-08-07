@@ -18,14 +18,17 @@
 #define USE_DOMAIN_FLUX 1
 
 cdr_solver::cdr_solver(){
-  m_name = "cdr_solver";
+  m_name       = "cdr_solver";
+  m_class_name = "cdr_solver";
 
+#if 0
   this->set_verbosity(-1);
   this->set_phase(phase::gas);
   this->set_time(0, 0., 0.);
   this->set_mass_redist(false);
   this->set_domain_bc(cdr_bc::external);
-  this->set_plot_variables();
+  //  this->set_plot_variables();
+#endif
 }
 
 cdr_solver::~cdr_solver(){

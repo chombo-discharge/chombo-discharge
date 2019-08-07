@@ -1,4 +1,3 @@
-
 /*!
   @file   cdr_tga.cpp
   @brief  Implementation of cdr_tga.H
@@ -18,12 +17,16 @@
 #define CDR_TGA_DEBUG_TIMER 0
 
 cdr_tga::cdr_tga() : cdr_solver() {
+  m_name       = "cdr_tga";
+  m_class_name = "cdr_tga";
+  
+#if 0
   this->set_gmg_solver_parameters();
   this->set_bottom_solver(1);
   this->set_bottom_drop(2);
   this->set_tga(true);
+#endif
 
-  m_name = "cdr_tga";
 }
 
 cdr_tga::~cdr_tga(){

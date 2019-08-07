@@ -1,6 +1,3 @@
-
-
-
 /*!
   @file cdr_solver.H
   @brief Declaration of an abstract class for evolving cdr equations
@@ -32,6 +29,11 @@ public:
     @brief Constructor
   */
   virtual ~cdr_solver();
+
+  /*!
+    @brief Parse class options from the command line
+  */
+  virtual void parse_options() = 0;
   
   /*!
     @brief Cache internal state
@@ -471,6 +473,11 @@ protected:
     @brief Name
   */
   std::string m_name;
+
+  /*!
+    @brief Class name. 
+  */
+  std::string m_class_name;
 
   /*!
     @brief State data (i.e. the ion density)

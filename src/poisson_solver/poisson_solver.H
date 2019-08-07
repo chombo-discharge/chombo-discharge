@@ -51,6 +51,12 @@ public:
 		     const EBAMRIVData&   a_sigma,
 		     const bool           a_zerophi = false) = 0;
 
+  
+  /*!
+    @brief Parse options
+  */
+  virtual void parse_options() = 0;
+  
   /*!
     @brief Allocate internal storage
   */
@@ -223,6 +229,8 @@ public:
 
   
 protected:
+
+  std::string m_class_name;
 
   /*!
     @brief MFindex space

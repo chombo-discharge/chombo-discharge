@@ -55,6 +55,11 @@ public:
   virtual ~cdr_tga();
 
   /*!
+    @brief Parse class options
+  */
+  virtual void parse_options() = 0;
+
+  /*!
     @brief Advance state. Current is explicit Euler.
     @details Make the default RK2 for non-diffusive media and semi-implicit TGA for diffusive media. 
   */

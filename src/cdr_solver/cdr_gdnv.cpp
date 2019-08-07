@@ -1,9 +1,9 @@
 /*!
-  @file cdr_gdnv.cpp
-  @brief Implementation of cdr_gdnv.H
-  @author Robert Marskar
-  @date Jan. 2018
-*/
+   @file cdr_gdnv.cpp
+   @brief Implementation of cdr_gdnv.H
+   @author Robert Marskar
+   @date Jan. 2018
+ */
 
 #include "cdr_gdnv.H"
 #include "gdnv_outflow_bc.H"
@@ -15,42 +15,154 @@
 #include <ParmParse.H>
 
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
-  m_name = "cdr_gdnv";
-  m_slopelim = false;
-  std::string str = "covered_face";
-  int which = 0;
-
-  // Get options from input script
-  {
-    ParmParse pp("cdr_gdnv");
-    pp.query("divF_nc", str);
-    if(str == "conservative_average"){
-      which = 0;
-      MayDay::Warning("cdr_gdnv::cdr_gdnv - we are decommissioning the conservative average stuff for this solver");
-    }
-    else if(str == "covered_face"){
-      which = 1;
-    }
-    else {
-      MayDay::Abort("cdr_gdnv::cdr_gdnv - unknown non-conservative divergence type requested");
-    }
-
-    if(pp.contains("limit_slopes")){
-      pp.get("limit_slopes", str);
-      if(str == "true"){
-	m_slopelim = true;
-      }
-      else if(str == "false"){
-	m_slopelim = false;
-      }
-    }
-  }
-  
-  this->set_divF_nc(which);
+  m_class_name = "cdr_gdnv";
+  m_name       = "cdr_gdnv";
 }
 
 cdr_gdnv::~cdr_gdnv(){
   this->delete_covered();
+}
+
+void cdr_gdnv::parse_options(){
+  CH_TIME("cdr_gdnv::parse_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_options" << endl;
+  }
+  
+  parse_domain_bc();    // Parses domain BC options
+  parse_mass_redist();  // Parses mass redistribution
+  parse_hybrid_div();   // Parses options for hybrid divergence
+  parse_slopelim();     // Parses slope limiter settings
+  parse_plot_vars();    // Parses plot variables
+  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+}
+
+void cdr_gdnv::parse_domain_bc(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("domain_bc", str);
+  if(str == "kinetic"){
+    set_domain_bc(cdr_bc::external);
+  }
+  else if(str == "outflow"){
+    set_domain_bc(cdr_bc::outflow);
+  }
+  else if(str == "wall"){
+    set_domain_bc(cdr_bc::wall);
+  }
+  else if(str == "extrap"){
+    set_domain_bc(cdr_bc::extrap);
+  }
+  else{
+    MayDay::Abort("cdr_gdnv::parse_domain_bc - unknown BC requested");
+  }
+}
+
+void cdr_gdnv::parse_mass_redist(){
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+  pp.get("mass_redist", str);
+  m_mass_redist = (str == "true") ? true : false;
+}
+
+void cdr_gdnv::parse_hybrid_div(){
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+  pp.get("divF_nc", str);
+  if(str == "conservative_average"){
+    m_which_divFnc = 0;
+  }
+  else if(str == "covered_face"){
+    m_which_divFnc = 1;
+  }
+  else {
+    MayDay::Abort("cdr_gdnv::cdr_gdnv - unknown non-conservative divergence type requested");
+  }
+}
+
+void cdr_gdnv::parse_slopelim(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("limit_slopes", str);
+  m_slopelim = (str == "true") ? true : false;
+}
+
+void cdr_gdnv::parse_plot_vars(){
+  ParmParse pp(m_class_name.c_str());
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  m_plot_phi = false;
+  m_plot_vel = false;
+  m_plot_dco = false;
+  m_plot_src = false;
+  
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi") m_plot_phi = true;
+    else if(str[i] == "vel") m_plot_vel = true;
+    else if(str[i] == "dco") m_plot_dco = true; 
+    else if(str[i] == "src") m_plot_src = true;
+  }
+}
+
+void cdr_gdnv::parse_gmg_settings(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+
+  pp.get("gmg_verbosity",   m_gmg_verbosity);
+  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
+  pp.get("gmg_post_smooth", m_gmg_post_smooth);
+  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
+  pp.get("gmg_max_iter",    m_gmg_max_iter);
+  pp.get("gmg_min_iter",    m_gmg_min_iter);
+  pp.get("gmg_tolerance",   m_gmg_eps);
+  pp.get("gmg_hang",        m_gmg_hang);
+  pp.get("gmg_bottom_drop", m_bottom_drop);
+
+  // Bottom solver
+  pp.get("gmg_bottom_solver", str);
+  if(str == "simple"){
+    m_bottomsolver = 0;
+  }
+  else if(str == "bicgstab"){
+    m_bottomsolver = 1;
+  }
+  else{
+    MayDay::Abort("cdr_gdnv::parse_gmg_settings - unknown bottom solver requested");
+  }
+
+  // Relaxation type
+  pp.get("gmg_relax_type", str);
+  if(str == "gsrb"){
+    m_gmg_relax_type = relax::gsrb_fast;
+  }
+  else if(str == "jacobi"){
+    m_gmg_relax_type = relax::jacobi;
+  }
+  else if(str == "gauss_seidel"){
+    m_gmg_relax_type = relax::gauss_seidel;
+  }
+  else{
+    MayDay::Abort("cdr_gdnv::parse_gmg_settings - unknown relaxation method requested");
+  }
+
+  // Cycle type
+  pp.get("gmg_cycle", str);
+  if(str == "vcycle"){
+    m_gmg_type = amrmg::vcycle;
+  }
+  else{
+    MayDay::Abort("cdr_gdnv::parse_gmg_settings - unknown cycle type requested");
+  }
+
+  // No lower than 2. 
+  if(m_bottom_drop < 2){
+    m_bottom_drop = 2;
+  }
 }
 
 int cdr_gdnv::query_ghost() const {
@@ -941,7 +1053,7 @@ void cdr_gdnv::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
   }
 #endif
 
-    // Increment the coarser flux register and initialize the finer flux register. a_flux holds phi*vel which we can use
+  // Increment the coarser flux register and initialize the finer flux register. a_flux holds phi*vel which we can use
   const bool has_fine = a_lvl < a_finest_level;
   const bool has_coar = a_lvl > a_coarsest_level;
 

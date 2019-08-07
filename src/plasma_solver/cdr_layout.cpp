@@ -17,57 +17,6 @@
 
 cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
   m_species = a_plaskin->get_species();
-  m_solvers.resize(m_species.size());
-  m_bc_type = cdr_bc::outflow;
-  m_mass_redist = false;
-  
-  std::string str = "godunov"; // Default
-  
-  ParmParse pp("cdr_layout");
-
-  if(pp.contains("mass_redist")){
-    pp.get("mass_redist", str);
-    if(str == "true"){
-      m_mass_redist = true;
-    }
-  }
-  if(pp.contains("domain_bc")){
-    pp.get("domain_bc", str);
-    if(str == "kinetic"){
-      m_bc_type = cdr_bc::external;
-    }
-    else if(str == "outflow"){
-      m_bc_type = cdr_bc::outflow;
-    }
-    else if(str == "wall"){
-      m_bc_type = cdr_bc::wall;
-    }
-    else if(str == "extrap"){
-      m_bc_type = cdr_bc::extrap;
-    }
-  }
-
-  pp.query("which_solver", str);
-  for (int i = 0; i < a_plaskin->get_num_species(); i++){
-    if(str == "godunov"){
-      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_gdnv());
-    }
-    else if(str == "muscl"){
-      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_muscl());
-    }
-    else if(str == "fhd"){
-      m_solvers[i] = RefCountedPtr<cdr_solver> (new cdr_fhd());
-    }
-    else {
-      MayDay::Abort("cdr_layout::cdr_layout - unknown cdr solver type requested");
-    }
-    m_solvers[i]->set_species(m_species[i]);
-    m_solvers[i]->set_mass_redist(m_mass_redist);
-  }
-
-  this->set_verbosity(-1);
-  this->set_phase(phase::gas);
-  this->set_bc(m_bc_type);
 }
 
 cdr_layout::~cdr_layout(){
@@ -80,6 +29,22 @@ phase::which_phase cdr_layout::get_phase() const{
 
 cdr_iterator cdr_layout::iterator() {
   return cdr_iterator(*this);
+}
+
+void cdr_layout::add_solver(RefCountedPtr<cdr_solver> a_solver){
+  m_solvers.push_back(a_solver);
+}
+
+void cdr_layout::parse_options(){
+  CH_TIME("cdr_layout::parse_options");
+  if(m_verbosity > 6){
+    pout() << "cdr_layout::parse_options" << endl;
+  }
+
+  for (cdr_iterator solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->parse_options();
+  }
 }
 
 void cdr_layout::allocate_internals(){

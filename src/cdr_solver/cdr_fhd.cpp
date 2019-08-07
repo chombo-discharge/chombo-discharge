@@ -14,29 +14,47 @@
 #include <ParmParse.H>
 
 cdr_fhd::cdr_fhd() : cdr_gdnv() {
-  m_name = "cdr_fhd";
-  m_seed = 0;  
-  std::string str;
-  ParmParse pp("cdr_fhd");
-
-
-  pp.get("stochastic_diffusion", str); m_stochastic_diffusion = (str == "true") ? true : false;
-  //  pp.get("stochastic_advection", str); m_stochastic_advection = (str == "true") ? true : false;
-  m_stochastic_advection = false;
-  pp.get("limit_slopes", str);         m_slopelim             = (str == "true") ? true : false;
-  pp.get("seed", m_seed);
-
-  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-  this->set_divF_nc(1); // Use covered face stuff for nonconservative divergence
-
-  m_rng = new std::mt19937_64(m_seed);
+  m_name       = "cdr_fhd";
+  m_class_name = "cdr_fhd";
 }
 
 cdr_fhd::~cdr_fhd(){
   this->delete_covered();
 }
 
+void cdr_fhd::parse_options(){
+  CH_TIME("cdr_fhd::parse_options");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_options" << endl;
+  }
+  
+  parse_diffusion();    // Parses stochastic diffusion
+  parse_rng_seed();     // Parses RNG seed
+  parse_domain_bc();    // Parses domain BC options
+  parse_mass_redist();  // Parses mass redistribution
+  parse_hybrid_div();   // Parses options for hybrid divergence
+  parse_slopelim();     // Parses slope limiter settings
+  parse_plot_vars();    // Parses plot variables
+  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+}
+
+void cdr_fhd::parse_diffusion(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("stochastic_diffusion", str);
+  
+  m_stochastic_diffusion = (str == "true") ? true : false;
+  m_stochastic_advection = false;
+}
+
+void cdr_fhd::parse_rng_seed(){
+  ParmParse pp(m_class_name.c_str());
+  pp.get("seed", m_seed);
+  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
+
+  m_rng = new std::mt19937_64(m_seed);
+}
 
 void cdr_fhd::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
   CH_TIME("cdr_fhd::advance_euler");

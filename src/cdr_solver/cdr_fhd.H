@@ -39,6 +39,11 @@ public:
   virtual ~cdr_fhd();
 
   /*!
+    @brief Parse class options
+  */
+  virtual void parse_options();
+
+  /*!
     @brief Pure Euler advance without source terms
   */
   virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
@@ -77,6 +82,10 @@ protected:
 
   std::mt19937_64* m_rng;     // Engine
   int  m_seed;                // RNG seed
+
+  // Various routines for setting class options. 
+  virtual void parse_diffusion();    // Parses stochastic diffusion
+  virtual void parse_rng_seed();     // Parses RNG seed
 };
 
 #endif

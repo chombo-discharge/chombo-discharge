@@ -16,6 +16,7 @@
 
 
 time_stepper::time_stepper(){
+  m_class_name = "time_stepper";
   this->set_verbosity(1);
   this->set_cfl(0.8);
   this->set_relax_time(1.0);
@@ -3417,7 +3418,8 @@ void time_stepper::setup_cdr(){
     pout() << "time_stepper::setup_cdr" << endl;
   }
 
-  m_cdr = RefCountedPtr<cdr_layout> (new cdr_layout(m_plaskin));
+  //  m_cdr = RefCountedPtr<cdr_layout> (new cdr_layout(m_plaskin));
+  m_cdr->parse_options();
   m_cdr->set_verbosity(m_solver_verbosity);
   m_cdr->set_amr(m_amr);
   m_cdr->set_computational_geometry(m_compgeom);
@@ -3433,7 +3435,8 @@ void time_stepper::setup_poisson(){
     pout() << "time_stepper::setup_poisson" << endl;
   }
 
-  m_poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
+  //  m_poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
+  m_poisson->parse_options();
   m_poisson->set_verbosity(m_solver_verbosity);
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);

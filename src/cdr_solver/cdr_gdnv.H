@@ -38,6 +38,11 @@ public:
   virtual ~cdr_gdnv();
 
   /*!
+    @brief Parse options
+  */
+  virtual void parse_options();
+
+  /*!
     @brief Advective advance
   */
   virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
@@ -252,6 +257,14 @@ protected:
     @brief Turn on/off slope limiting
   */
   bool m_slopelim;
+
+  // Various routines for setting class options
+  virtual void parse_domain_bc();    // Parses domain BC options
+  virtual void parse_mass_redist();  // Parses mass redistribution
+  virtual void parse_hybrid_div();   // Parses options for hybrid divergence
+  virtual void parse_slopelim();     // Parses slope limiter settings
+  virtual void parse_plot_vars();    // Parses plot variables
+  virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 };
 
 #endif

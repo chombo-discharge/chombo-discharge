@@ -41,6 +41,11 @@ public:
   virtual int query_ghost() const;
 
   /*!
+    @brief Parse options
+  */
+  virtual void parse_options(){MayDay::Abort("cdr_muscl::parse_options - not implemented");}
+
+  /*!
     @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.
   */
   virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);

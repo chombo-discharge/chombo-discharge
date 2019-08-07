@@ -855,6 +855,10 @@ public:
   */
   virtual void solve_rte(const Real a_dt);
 
+  virtual void set_cdr(RefCountedPtr<cdr_layout>& a_cdr){m_cdr = a_cdr;}
+  virtual void set_poisson(RefCountedPtr<poisson_solver>& a_poisson){m_poisson = a_poisson;}
+  //  virtual void set_rte(RefCountedPtr<rte_layout>& a_rte){m_rte = a_rte;}
+
   /*!
     @brief General RTE advance routine
     @details This computes the source terms at the specified time and then advances the solution
@@ -943,6 +947,11 @@ public:
   virtual RefCountedPtr<sigma_solver>& get_sigma();
   
 protected:
+
+  /*!
+    @brief Time stepper class name
+  */
+  std::string m_class_name;
 
   /*!
     @brief Index space

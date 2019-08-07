@@ -27,12 +27,7 @@
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
-
-  this->set_gmg_solver_parameters();
-  this->set_bottom_solver(0);
-  this->set_botsolver_smooth(16);
-  this->set_bottom_drop(2);
-  this->set_nwo(false);
+  m_class_name  = "poisson_multifluid_gmg";
 }
 
 poisson_multifluid_gmg::~poisson_multifluid_gmg(){
@@ -41,6 +36,173 @@ poisson_multifluid_gmg::~poisson_multifluid_gmg(){
 
 Real poisson_multifluid_gmg::s_constant_one(const RealVect a_pos){
   return 1.0;
+}
+
+void poisson_multifluid_gmg::parse_options(){
+
+  parse_autotune();
+  parse_domain_bc();
+  parse_plot_vars();
+  parse_gmg_settings();
+}
+
+void poisson_multifluid_gmg::parse_autotune(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("auto_tune", str);
+  m_autotune = (str == "true") ? true : false;
+}
+
+void poisson_multifluid_gmg::parse_domain_bc(){
+  ParmParse pp(m_class_name.c_str());
+
+  this->allocate_wall_bc();
+
+  // Check each side in each direction
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Side::LoHiSide side = sit();
+	
+      std::string str_dir;
+      if(dir == 0){
+	str_dir = "x";
+      }
+      else if(dir == 1){
+	str_dir = "y";
+      }
+      else if(dir == 2){
+	str_dir = "z";
+      }
+
+      // Get dir/side and set accordingly
+      if(side == Side::Lo){
+	std::string type;
+	std::string bc_string = "bc_" + str_dir + "_low";
+	pp.get(bc_string.c_str(), type);
+	if(type == "dirichlet_ground"){
+	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::ground);
+	}
+	else if(type == "dirichlet_live"){
+	  this->set_dirichlet_wall_bc(dir, Side::Lo, potential::live);
+	}
+	else if(type == "neumann"){
+	  this->set_neumann_wall_bc(dir, Side::Lo, 0.0);
+	}
+	else if(type == "robin"){
+	  this->set_robin_wall_bc(dir, Side::Lo, 0.0);
+	}
+	else {
+	  std::string error = "poisson_multifluid_gmg::poisson_multifluid_gmg - unknown bc requested for " + bc_string;
+	  MayDay::Abort(error.c_str());
+	}
+      }
+      else if(side == Side::Hi){
+	std::string type;
+	std::string bc_string = "bc_" + str_dir + "_high";
+	pp.get(bc_string.c_str(), type);
+	if(type == "dirichlet_ground"){
+	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::ground);
+	}
+	else if(type == "dirichlet_live"){
+	  this->set_dirichlet_wall_bc(dir, Side::Hi, potential::live);
+	}
+	else if(type == "neumann"){
+	  this->set_neumann_wall_bc(dir, Side::Hi, 0.0);
+	}
+	else if(type == "robin"){
+	  this->set_robin_wall_bc(dir, Side::Hi, 0.0);
+	}
+	else {
+	  std::string error = "poisson_multifluid_gmg::poisson_multifluid_gmg - unknown bc requested for " + bc_string;
+	  MayDay::Abort(error.c_str());
+	}
+      }
+    }
+  }
+
+  // Set default distribution on domain edges
+  m_wall_func_x_lo = poisson_solver::s_constant_one;
+  m_wall_func_x_hi = poisson_solver::s_constant_one;
+  m_wall_func_y_lo = poisson_solver::s_constant_one;
+  m_wall_func_y_hi = poisson_solver::s_constant_one;
+#if CH_SPACEDIM==3
+  m_wall_func_z_lo = poisson_solver::s_constant_one;
+  m_wall_func_z_hi = poisson_solver::s_constant_one;
+#endif
+}
+
+void poisson_multifluid_gmg::parse_plot_vars(){
+  ParmParse pp(m_class_name.c_str());
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+  
+  m_plot_phi = false;
+  m_plot_rho = false;
+  m_plot_E   = false;
+  m_plot_res = false;
+
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi") m_plot_phi = true;
+    else if(str[i] == "rho") m_plot_rho = true;
+    else if(str[i] == "res") m_plot_res = true; 
+    else if(str[i] == "E")   m_plot_E   = true;
+  }
+}
+
+void poisson_multifluid_gmg::parse_gmg_settings(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+
+  pp.get("gmg_verbosity",   m_gmg_verbosity);
+  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
+  pp.get("gmg_post_smooth", m_gmg_post_smooth);
+  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
+  pp.get("gmg_max_iter",    m_gmg_max_iter);
+  pp.get("gmg_min_iter",    m_gmg_min_iter);
+  pp.get("gmg_tolerance",   m_gmg_eps);
+  pp.get("gmg_hang",        m_gmg_hang);
+  pp.get("gmg_bottom_drop", m_bottom_drop);
+
+  // Bottom solver
+  pp.get("gmg_bottom_solver", str);
+  if(str == "simple"){
+    m_bottomsolver = 0;
+  }
+  else if(str == "bicgstab"){
+    m_bottomsolver = 1;
+  }
+  else if(str == "gmres"){
+    m_bottomsolver = 2;
+    }
+  else{
+    MayDay::Abort("poisson_multifluid_gmg::parse_gmg_settings - unknown bottom solver requested");
+  }
+
+  // Relaxation type
+  pp.get("gmg_relax_type", str);
+  if(str == "gsrb"){
+    m_gmg_relax_type = relax::gsrb_fast;
+  }
+  else{
+    MayDay::Abort("poisson_multifluid_gmgcdr_gdnv::parse_gmg_settings - unsupported relaxation method requested");
+  }
+
+  // Cycle type
+  pp.get("gmg_cycle", str);
+  if(str == "vcycle"){
+    m_gmg_type = amrmg::vcycle;
+  }
+  else{
+    MayDay::Abort("cdr_gdnv::parse_gmg_settings - unknown cycle type requested");
+  }
+
+  // No lower than 2. 
+  if(m_bottom_drop < 2){
+    m_bottom_drop = 2;
+  }
 }
 
 bool poisson_multifluid_gmg::solve(const bool a_zerophi){
@@ -71,12 +233,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-  if(m_use_nwo){
-    m_nwo_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
-  }
-  else{
-    m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
-  }
+  m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
   const Real t1 = MPI_Wtime();
 
 
@@ -175,21 +332,6 @@ int poisson_multifluid_gmg::query_ghost() const {
   return 3; // Need this many cells
 }
 
-void poisson_multifluid_gmg::set_nwo(const bool a_use_nwo){
-  m_use_nwo = a_use_nwo;
-
-  { // Get parameter from input script
-    std::string str;
-    ParmParse pp("poisson_multifluid_gmg");
-    if(pp.contains("use_nwo")){
-      pp.get("use_nwo", str);
-      if(str == "true"){
-	m_use_nwo = true;
-      }
-    }
-  }
-}
-
 void poisson_multifluid_gmg::set_potential(Real (*a_potential)(const Real a_time)){
   poisson_solver::set_potential(a_potential);
 
@@ -224,15 +366,9 @@ void poisson_multifluid_gmg::set_time(const int a_step, const Real a_time, const
     dirichlet_func* func = static_cast<dirichlet_func*> (&(*m_wall_bcfunc[i]));
     func->set_time(a_time);
   }
-  if(m_use_nwo){
-    if(!m_nwo_opfact.isNull()){
-      MayDay::Abort("poisson_multifluid_gmg::NWO is not supported any longer");
-    }
-  }
-  else{
-    if(!m_opfact.isNull()){
-      m_opfact->set_time(&m_time);
-    }
+  
+  if(!m_opfact.isNull()){
+    m_opfact->set_time(&m_time);
   }
 }
 
@@ -539,12 +675,7 @@ void poisson_multifluid_gmg::setup_gmg(){
   }
   
   this->set_coefficients();       // Set coefficients
-  if(m_use_nwo){
-    this->setup_nwo_operator_factory(); // Set the operator factory
-  }
-  else{
-    this->setup_operator_factory(); // Set the NWO operator factory
-  }
+  this->setup_operator_factory(); // Set the operator factory
   this->setup_solver();           // Set up the AMR multigrid solver
 
   m_needs_setup = false;
@@ -640,85 +771,6 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   m_opfact->set_electrodes(m_compgeom->get_electrodes(), m_bcfunc);
 }
 
-void poisson_multifluid_gmg::setup_nwo_operator_factory(){
-  CH_TIME("poisson_multifluid_gmg::setup_nwo_operator_factory");
-  if(m_verbosity > 5){
-    pout() << "poisson_multifluid_gmg::setup_nwo_operator_factory" << endl;
-  }
-
-  const int nphases                      = m_mfis->num_phases();
-  const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
-  const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
-  const RealVect& origin                 = m_physdom->get_prob_lo();
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
-
-  // This stuff is needed for the operator factory
-  Vector<MFLevelGrid>    mflg(1 + finest_level);
-  Vector<NWOMFQuadCFInterp> mfquadcfi(1 + finest_level);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    Vector<EBLevelGrid>                    eblg_phases(nphases);
-    Vector<RefCountedPtr<nwoebquadcfinterp> > quadcfi_phases(nphases);
-
-    eblg_phases[phase::gas]   = *(m_amr->get_eblg(phase::gas)[lvl]);
-    if(!ebis_sol.isNull()){
-      eblg_phases[phase::solid] = *(m_amr->get_eblg(phase::solid)[lvl]);
-    }
-
-    quadcfi_phases[phase::gas]   = (m_amr->get_quadcfi(phase::gas)[lvl]);
-    if(!ebis_sol.isNull()){
-      quadcfi_phases[phase::solid] = (m_amr->get_quadcfi(phase::solid)[lvl]);
-    }
-    
-    mflg[lvl].define(m_mfis, eblg_phases);
-    mfquadcfi[lvl].define(quadcfi_phases);
-  }
-
-  // Appropriate coefficients for poisson equation
-  const Real alpha =  0.0;
-  const Real beta  = -1.0;
-
-  RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory> (NULL);
-
-  const IntVect ghost_phi = this->query_ghost()*IntVect::Unit;
-  const IntVect ghost_rhs = this->query_ghost()*IntVect::Unit;
-
-  // Potential function
-  conductivitydomainbc_wrapper_factory* bcfact = new conductivitydomainbc_wrapper_factory();
-  RefCountedPtr<dirichlet_func> pot = RefCountedPtr<dirichlet_func> (new dirichlet_func(m_potential,
-											s_constant_one,
-											RealVect::Zero));
-  bcfact->set_wallbc(m_wallbc);
-  bcfact->set_potentials(m_wall_bcfunc);
-  domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
-
-  m_nwo_opfact = RefCountedPtr<nwomfconductivityopfactory> (new nwomfconductivityopfactory(m_mfis,
-											   mflg,
-											   mfquadcfi,
-											   refinement_ratios,
-											   grids,
-											   m_aco,
-											   m_bco,
-											   m_bco_irreg,
-											   alpha,
-											   beta,
-											   dx[0],
-											   domains[0],
-											   domfact,
-											   origin,
-											   ghost_phi,
-											   ghost_rhs,
-											   2,
-											   m_bottom_drop,
-											   1 + finest_level));
-
-  m_nwo_opfact->set_electrodes(m_compgeom->get_electrodes(), pot);
-}
-
 void poisson_multifluid_gmg::setup_solver(){
   CH_TIME("poisson_multifluid_gmg::setup_solver");
   if(m_verbosity > 5){
@@ -751,13 +803,7 @@ void poisson_multifluid_gmg::setup_solver(){
   }
 
 
-  if(m_use_nwo){
-    //    CH_assert(false);
-    m_gmg_solver.define(coar_dom, *m_nwo_opfact, botsolver, 1 + finest_level);
-  }
-  else{
-    m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
-  }
+  m_gmg_solver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
   m_gmg_solver.setSolverParameters(m_gmg_pre_smooth,
 				   m_gmg_post_smooth,
 				   m_gmg_bot_smooth,

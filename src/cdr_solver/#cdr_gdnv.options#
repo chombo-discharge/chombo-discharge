@@ -1,0 +1,24 @@
+# ====================================================================================================
+# CDR_GDNV SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_gdnv.domain_bc           = kinetic      # 'kinetic', 'wall', 'outflow', or 'extrap'
+cdr_gdnv.mass_redist         = false        # Mass-weighted redistribution or volume-weighted
+
+cdr_gdnv.divF_nc             = covered_face # Hybrid divergence version
+cdr_gdnv.limit_slopes        = true         # Use slope-limiters for godunov
+
+cdr_gdnv.plt_vars            = phi vel src  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+
+cdr_gdnv.gmg_verbosity       = -1           # GMG verbosity
+cdr_gdnv.gmg_pre_smooth      = 3            # Number of relaxations in downsweep
+cdr_gdnv.gmg_post_smooth     = 3            # Number of relaxations in upsweep
+cdr_gdnv.gmg_bott_smooth     = 3            # NUmber of relaxations before dropping to bottom solver
+cdr_gdnv.gmg_min_iter        = 5            # Minimum number of iterations
+cdr_gdnv.gmg_max_iter        = 32           # Maximum number of iterations
+cdr_gdnv.gmg_tolerance       = 1.E-6        # Residue tolerance
+cdr_gdnv.gmg_hang            = 0.2          # Solver hang
+cdr_gdnv.gmg_bottom_drop     = 16           # Bottom drop
+cdr_gdnv.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+cdr_gdnv.gmg_bottom_relax    = 8            # Number of relaxations in bottom solve ('simple' solver only)
+cdr_fhd.gmg_cycle           = vcycle       # Cycle type. Only 'vcycle' supported for now
+cdr_fhd.gmg_relax_type      = gsrb         # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'

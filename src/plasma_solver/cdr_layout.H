@@ -47,6 +47,16 @@ public:
   virtual cdr_iterator iterator();
 
   /*!
+    @brief Parse class options
+  */
+  virtual void parse_options();
+
+  /*!
+    @brief Add solver
+  */
+  virtual void add_solver(RefCountedPtr<cdr_solver> a_solver);
+
+  /*!
     @brief Allocate internal storage for solvers
   */
   virtual void allocate_internals();
@@ -283,6 +293,19 @@ protected:
     @brief
   */
   cdr_bc::which_bc m_bc_type;
+};
+
+/*!
+  @brief Factory class for cdr_layout. 
+  @details Factory class is very simple; since we don't want to template cdr_layout2 we use a factory to instantiate solvers of 
+  any cdr_solver inherited class, and then return a layout with the casted classes. That's about it. 
+*/
+template <class T>
+class cdr_factory {
+public:
+  cdr_factory();
+  ~cdr_factory();
+  RefCountedPtr<cdr_layout> new_layout(const RefCountedPtr<plasma_kinetics> a_plaskin) const;
 };
 
 #endif

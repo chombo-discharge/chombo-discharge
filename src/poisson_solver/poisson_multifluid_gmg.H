@@ -10,7 +10,6 @@
 
 #include "poisson_solver.H"
 #include "mfconductivityopfactory.H"
-#include "nwomfconductivityopfactory.H"
 #include "dirichlet_func.H"
 
 #include <AMRMultiGrid.H>
@@ -69,6 +68,11 @@ public:
 		     const bool           a_zerophi = false);
 
   /*!
+    @brief parse options
+  */
+  virtual void parse_options();
+
+  /*!
     @brief Automatic tuning of the Poisson solver
   */
   virtual void auto_tune();
@@ -114,11 +118,6 @@ public:
   virtual void set_botsolver_smooth(const int a_smooth);
 
   /*!
-    @brief Use nwo factory or not
-  */
-  virtual void set_nwo(const bool a_use_nwo);
-
-  /*!
     @brief Return require number of ghost cells. 
   */
   virtual int query_ghost() const;
@@ -144,11 +143,6 @@ protected:
     @brief Needs setup
   */
   bool m_needs_setup;
-
-  /*!
-    @brief Use nwo or not
-  */
-  bool m_use_nwo;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -219,11 +213,6 @@ protected:
     @brief Operator factory
   */
   RefCountedPtr<mfconductivityopfactory> m_opfact;
-
-  /*!
-    @brief Operator factory
-  */
-  RefCountedPtr<nwomfconductivityopfactory> m_nwo_opfact;
   
   /*!
     @brief b-coefficient
@@ -322,16 +311,15 @@ protected:
   virtual void setup_operator_factory();
 
   /*!
-    @brief Set nwo operator factory
-  */
-  virtual void setup_nwo_operator_factory();
-
-  /*!
     @brief Set up AMRMultiGrid
   */
   virtual void setup_solver();
 
-private:
+  // Option parsing functions
+  virtual void parse_autotune();     // Parse autotuning
+  virtual void parse_domain_bc();    // Parse domain boundary conditions
+  virtual void parse_plot_vars();    // Parse plot variables
+  virtual void parse_gmg_settings(); // Parse geometric multigrid settings
 
 };
 #endif
