@@ -597,7 +597,10 @@ void poisson_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   // Add phi to output
   if(m_plot_phi) write_mfdata(a_output, a_comp, m_state,  true);
-  if(m_plot_rho) write_mfdata(a_output, a_comp, m_source, false);
+  if(m_plot_rho) {
+    write_mfdata(a_output, a_comp, m_source, false);
+    data_ops::set_covered_value(a_output, a_comp-1, 0.0); // We wrote m_source to a_comp and then increment by one. Undo that. 
+  }
   if(m_plot_res) write_mfdata(a_output, a_comp, m_resid,  false);
   if(m_plot_E) {
     MFAMRCellData E;

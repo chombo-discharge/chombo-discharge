@@ -224,7 +224,13 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
     m_amr->alias(old_state, a_old_state);
     m_amr->alias(source,    a_source);
 
-    //    setup_gmg();
+#if 0 // Debug
+    setup_gmg();
+#endif
+    const Real alpha = 0.0;
+    const Real beta  = 1.0;
+
+    m_eulersolver->resetAlphaAndBeta(alpha, beta);
     data_ops::set_value(m_diffco_eb, 0.0);
     
     // Euler solve
@@ -332,6 +338,9 @@ void cdr_tga::advance_tga(EBAMRCellData&       a_new_state,
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
       converged = true;
     }
+  }
+  else{
+    data_ops::copy(a_new_state, a_old_state);
   }
 }
 

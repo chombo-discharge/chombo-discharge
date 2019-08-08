@@ -279,7 +279,7 @@ c Compute the Laplacian in the numerator (including cross-derivatives)
      &     chf_const_int[ncomps],
      &     chf_box[box])
 
-      real_t value
+      real_t factor
       integer ic
       integer chf_ddecl[i;j;k]
       integer chf_ddecl[ioff;joff;koff]
@@ -287,11 +287,11 @@ c Compute the Laplacian in the numerator (including cross-derivatives)
       chf_dterm[ioff = chf_id(0, dir);
                 joff = chf_id(1, dir);
                 koff = chf_id(2, dir)]
-
+      factor = 1./(2*CH_SPACEDIM)		
       chf_multido[box;i;j;k]
          do ic=0, ncomps-1
             cellreg(chf_ix[i;j;k], ic) = cellreg(chf_ix[i;j;k], ic)
-     &                                + 0.5*(facereg(chf_ix[i+ioff;j+joff;k+koff], ic) + facereg(chf_ix[i;j;k], ic))
+     &                                + factor*(facereg(chf_ix[i+ioff;j+joff;k+koff], ic) + facereg(chf_ix[i;j;k], ic))
          enddo
       chf_enddo
       return

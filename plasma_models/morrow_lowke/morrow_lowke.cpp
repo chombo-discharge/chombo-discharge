@@ -288,7 +288,6 @@ Real morrow_lowke::compute_alpha(const RealVect& a_E) const{
   return alpha;
 }
 
-
 Real morrow_lowke::compute_eta(const RealVect& a_E) const{
 
   const Real eta2 = this->compute_eta2(a_E); 
@@ -354,17 +353,24 @@ Real morrow_lowke::compute_De(const RealVect& a_E) const{
   //
   const RealVect Ve = this->compute_ve(a_E);     // Does it's own conversion, comes out in m/s (aka. mentally sane units)
   const Real ve     = Ve.vectorLength()*1.E-2;   // Make it cm/s
-  Real De = 0.3341E9*pow(EbyN, 0.54069)*ve/Emag;
+  Real De = 0.3341E9*pow(EbyN, 0.54069)*ve/(1.E-4 + Emag);
   
   De *= 1.E-4; // Morrow-Lowke expression is in cm^2/s. Make it m^2/s
-
+  
   return De;
 }
 
 Vector<Real> morrow_lowke::compute_diffusion_coefficients(const RealVect& a_E) const {
 
   Vector<Real> diffCo(m_num_species, 0.0);
+
+#if 1 // Original code
   diffCo[m_nelec_idx] = this->compute_De(a_E);
+#else // Debug code
+  const RealVect E = 1.E6*RealVect::Unit;
+  diffCo[m_nelec_idx] = this->compute_De(E);
+  //  diffCo[m_nelec_idx] = 1.E-5;
+#endif
   diffCo[m_nplus_idx] = 0.;
   diffCo[m_nminu_idx] = 0.;
   
@@ -410,7 +416,11 @@ Vector<Real> morrow_lowke::compute_conductor_fluxes(const Vector<Real>& a_extrap
 						    const RealVect&     a_pos,
 						    const RealVect&     a_normal,
 						    const Real&         a_time) const{
-  Vector<Real> fluxes(m_num_species, 0.0); 
+  Vector<Real> fluxes(m_num_species, 0.0);
+
+#if 1 // Debug
+  return a_extrapolated_fluxes;
+#endif
 
   // Treat anode and cathode differently
   const bool is_cathode = PolyGeom::dot(a_E, a_normal) < 0.;

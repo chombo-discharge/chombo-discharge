@@ -12,6 +12,8 @@
 # ====================================================================================================
 sisdc.verbosity        = -1      # Class verbosity
 sisdc.solver_verbosity = -1      # Individual solver verbosities
+sisdc.fast_rte         = 1       # Solve RTE every this time steps
+sisdc.fast_poisson     = 1       # Solve Poisson every this time steps	
 sisdc.min_dt           = 0.      # Minimum permitted time step
 sisdc.max_dt           = 1.E99   # Maximum permitted time step
 sisdc.cfl              = 0.5     # CFL number
@@ -32,7 +34,7 @@ sisdc.corr_iter    = 1           # Number of iterations of the correction equati
 # This defines the weak coupling used for the implicit diffusion advance. 
 # ---------------------------------------------------------
 sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
-sisdc.use_tga            = true  # Use second order diffusion per substep
+sisdc.use_tga            = false # Use second order diffusion per substep ('true')
 sisdc.num_diff_corr      = 0     # Number of corrections for 'strong'
 
 # Adaptive time stepping
@@ -83,5 +85,4 @@ sisdc.profile_steps     = false  # Profile time steps with order, accuracy, cfl,
 # ---------------------
 # Advection extrapolation. Currently does NOT work with subcycling (but I'm working on it...)
 # ---------------------
-sisdc.extrap_advect = false      # Time extrapolate with source and diffusion in advection step
-sisdc.extrap_dt     = 0.5        # How far to time-extrapolate (in terms of dt). 0.5 is usually good. 
+sisdc.extrap_advect = true      # Time extrapolate with source and diffusion in advection step

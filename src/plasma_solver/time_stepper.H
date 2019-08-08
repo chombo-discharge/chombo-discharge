@@ -23,7 +23,6 @@
 /*!
   @brief Abstract class for evolving plasma equations in time
 */
-
 class time_stepper {
 public:
 

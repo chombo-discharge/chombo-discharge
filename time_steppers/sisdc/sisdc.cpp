@@ -43,6 +43,8 @@ void sisdc::parse_options(){
   parse_solver_verbosity();
   parse_cfl();
   parse_relax_time();
+  parse_fast_rte();
+  parse_fast_poisson();
   parse_min_dt();
   parse_max_dt();
   parse_source_comp();
@@ -1106,15 +1108,18 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_cor
       }
       m_amr->average_down(init_soln, m_cdr->get_phase());
       m_amr->interp_ghost(init_soln, m_cdr->get_phase());
+#if 1 // Original code
       data_ops::copy(phi_m1, phi_m);
+#else // Debug code
+      data_ops::copy(phi_m1, init_soln);
+#endif
 
       // Solve
-      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
       if(m_use_tga){
-	tgasolver->advance_tga(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+	solver->advance_tga(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
       else{
-	tgasolver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
+	solver->advance_euler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
       m_amr->average_down(phi_m1, m_cdr->get_phase());
       m_amr->interp_ghost(phi_m1, m_cdr->get_phase());

@@ -17,7 +17,8 @@
 
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";
-  
+  m_verbosity  = -1;
+  m_solver_verbosity = -1;
   // parse_verbosity();
   // parse_solver_verbosity();
   // parse_cfl();
@@ -565,20 +566,27 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffc
 
   // Call the cell version
   compute_cdr_diffco_cell(diffco, a_cdr_densities, a_E, a_time);
+#if 0 // Debug
+  Real max, min;
+  data_ops::get_max_min(max, min, diffco[0], 0);
+  if(procID() == 0) std::cout << "min = " << min << "\t max = " << max << std::endl;
+#endif
 
   // Now compute face-centered things by taking the average of cell-centered things
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     const int idx = solver_it.get_solver();
 
+    data_ops::set_value(*a_diffco_face[idx], 1.0);
     if(solver->is_diffusive()){ // Only need to do this for diffusive things
       m_amr->average_down(diffco[idx], m_cdr->get_phase());
       m_amr->interp_ghost(diffco[idx], m_cdr->get_phase()); 
 
       data_ops::average_cell_to_face_allcomps(*a_diffco_face[idx], diffco[idx], m_amr->get_domains());
-    }
-    else { // Just set this to something for non-diffusive species
-      data_ops::set_value(*a_diffco_face[idx], 0.0);
+#if 0 // Debug
+      data_ops::set_value(*a_diffco_face[idx], 1.E-5);
+      m_amr->average_down(*a_diffco_face[idx], m_cdr->get_phase());
+#endif
     }
   }
 }
@@ -768,7 +776,11 @@ void time_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&          a_
       
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
+#if 0 // Original code
       (*a_diffco_cell[idx])(vof, comp) = coeffs[idx];
+#else // Debug code
+      (*a_diffco_cell[idx])(vof, comp) = 1.E-5;
+#endif
     }
   }
 }
@@ -857,7 +869,11 @@ void time_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >& 
 										  
       for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.get_solver();
+#if 0 // Original code
 	(*a_diffco_eb[idx])[dit()](vof, comp) = diffco[idx];
+#else // Debug code
+	(*a_diffco_eb[idx])[dit()](vof, comp) = 0.0;//1.E-5;
+#endif
       }
     }
   }
@@ -2975,7 +2991,7 @@ void time_stepper::setup_solvers(){
   this->sanity_check();
 
   this->setup_cdr();
-  this->setup_rte();
+  this->setup_rte(); 
   this->setup_poisson();
   this->setup_sigma();
 
@@ -3476,7 +3492,7 @@ void time_stepper::setup_cdr(){
     pout() << "time_stepper::setup_cdr" << endl;
   }
 
-  m_rte->set_verbosity(m_solver_verbosity);
+  m_cdr->set_verbosity(m_solver_verbosity);
   m_cdr->parse_options();
   m_cdr->set_amr(m_amr);
   m_cdr->set_computational_geometry(m_compgeom);
