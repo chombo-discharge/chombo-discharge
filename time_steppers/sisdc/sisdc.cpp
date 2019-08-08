@@ -25,246 +25,199 @@ typedef sisdc::rte_storage     rte_storage;
 typedef sisdc::sigma_storage   sigma_storage;
 
 sisdc::sisdc(){
-  m_p             = 2;
-  m_k             = 1;
-  m_error_norm    = 2;
-  m_minCFL        = 0.1;
-  m_maxCFL        = 0.9;
-  m_cycleCFL      = 0.2;
-  m_err_thresh    = 1.E-4;
-  m_safety        = 0.75;
-  m_decrease_safe = 0.9;
-  m_num_diff_corr = 0;
-  m_new_dt        = 1.234567E89;
-  m_max_retries   = 1;
-  m_min_corr      = 1;
-  m_extrap_dt     = 0.5;
-  m_error_idx     = -1;
-  m_max_growth    = 1.2;
-  m_min_cycle_cfl = 0.5;
-  m_max_cycle_cfl = 10.0;
-  m_regrid_cfl    = 5.0;
+  m_class_name = "sisdc";
+}
 
-  m_which_nodes   = "lobatto";
+sisdc::~sisdc(){
 
-  m_use_tga            = false;
-  m_multistep          = false;
-  m_have_err           = false;
-  m_extrap_advect      = false;
-  m_subcycle           = false;
-  m_cycle_sources      = false;
-  m_print_report       = false;
-  m_adaptive_dt        = false;
-  m_strong_diffu       = false;
-  m_have_dt_err        = false;
-  m_optimal_subcycling = false;
+}
 
-  // Basically only for debugging
-  m_compute_v      = true;
-  m_compute_S      = true;
-  m_compute_D      = true;
-  m_consistent_E   = true;
-  m_consistent_rte = true;
-  m_do_advec_src   = true;
-  m_do_diffusion   = true;
-  m_do_rte         = true;
-  m_do_poisson     = true;
-
-  // Profiling
-  m_profile_steps  = false;
-
-  // Get parameters from input script
-  {
-    ParmParse pp("sisdc");
-
-    std::string str;
-
-    pp.query("regrid_cfl",       m_regrid_cfl);
-    pp.query("subcycle_cfl",     m_cycleCFL);
-    pp.query("subintervals",     m_p);
-    pp.query("corr_iter",        m_k);
-    pp.query("error_norm",       m_error_norm);
-    pp.query("min_corr",         m_min_corr);
-    pp.query("min_cfl",          m_minCFL);
-    pp.query("max_cfl",          m_maxCFL);
-    pp.query("max_error",        m_err_thresh);
-    pp.query("safety",           m_safety);
-    pp.query("decrease_safety",  m_decrease_safe);
-    pp.query("num_corrections",  m_num_diff_corr);
-    pp.query("max_retries",      m_max_retries);
-    pp.query("extrap_dt",        m_extrap_dt);
-    pp.query("error_index",      m_error_idx);
-    pp.query("max_growth",       m_max_growth);
-    pp.query("min_cycle_cfl",    m_min_cycle_cfl);
-    pp.query("max_cycle_cfl",    m_max_cycle_cfl);
-
-    if(pp.contains("subcycle")){
-      pp.get("subcycle", str);
-      if(str == "false"){
-	m_subcycle = false;
-      }
-      else if(str == "standard"){
-	m_subcycle = true;
-	m_optimal_subcycling = false;
-      }
-      else if(str == "optimal"){
-	m_subcycle = true;
-	m_optimal_subcycling = true;
-      }
-      else if(str == "multistep"){
-	m_subcycle  = true;
-	m_multistep = true;
-      }
-      else{
-	MayDay::Abort("sisdc::sisdc - unknown sisdc.subcycle = ???");
-      }
-    }
-    if(pp.contains("cycle_sources")){
-      pp.get("cycle_sources", str);
-      if(str == "true"){
-	m_cycle_sources = true;
-      }
-      else {
-	m_cycle_sources = false;
-      }
-    }
-    if(pp.contains("use_tga")){
-      pp.get("use_tga", str);
-      if(str == "true"){
-	m_use_tga = true;
-      }
-      else {
-	m_use_tga = false;
-      }
-    }
-    if(pp.contains("extrap_advect")){
-      pp.get("extrap_advect", str);
-      if(str == "true"){
-	m_extrap_advect = true;
-      }
-      else{
-	m_extrap_advect = false;
-      }
-    }
-    if(pp.contains("quad_nodes")){
-      pp.get("quad_nodes", str);
-      if(str == "lobatto"){
-	m_which_nodes = "lobatto";
-      }
-      else if(str == "uniform"){
-	m_which_nodes = "uniform";
-      }
-      else if(str == "chebyshev"){
-	m_which_nodes = "chebyshev";
-      }
-    }
-    if(pp.contains("print_report")){
-      pp.get("print_report", str);
-      if(str == "true"){
-	m_print_report = true;
-      }
-    }
-    if(pp.contains("adaptive_dt")){
-      pp.get("adaptive_dt", str);
-      if(str == "true"){
-	m_adaptive_dt = true;
-      }
-    }
-    if(pp.contains("diffusive_coupling")){
-      pp.get("diffusive_coupling", str);
-      if(str == "strong"){
-	m_strong_diffu = true;
-      }
-      if(str == "weak"){
-	m_strong_diffu = false;
-      }
-    }
-    if(pp.contains("compute_D")){
-      pp.get("compute_D", str);
-      if(str == "false"){
-	m_compute_D = false;
-      }
-    }
-    if(pp.contains("compute_v")){
-      pp.get("compute_v", str);
-      if(str == "false"){
-	m_compute_v = false;
-      }
-    }
-    if(pp.contains("compute_S")){
-      pp.get("compute_S", str);
-      if(str == "false"){
-	m_compute_S = false;
-      }
-    }
-    if(pp.contains("consistent_E")){
-      pp.get("consistent_E", str);
-      if(str == "false"){
-	m_consistent_E = false;
-      }
-    }
-    if(pp.contains("consistent_rte")){
-      pp.get("consistent_rte", str);
-      if(str == "false"){
-	m_consistent_rte = false;
-      }
-    }
-    if(pp.contains("do_advec_src")){
-      pp.get("do_advec_src", str);
-      if(str == "false"){
-	m_do_advec_src = false;
-	if(m_verbosity > 2){
-	  pout() << "sisdc::sisdc - Turning off advection & source" << endl;
-	}
-      }
-    }
-    if(pp.contains("do_diffusion")){
-      pp.get("do_diffusion", str);
-      if(str == "false"){
-	m_do_diffusion = false;
-	if(m_verbosity > 2){
-	  pout() << "sisdc::sisdc - Turning off diffusion" << endl;
-	}
-      }
-    }
-    if(pp.contains("do_rte")){
-      pp.get("do_rte", str);
-      if(str == "false"){
-	m_do_rte = false;
-
-	if(m_verbosity > 2){
-	  pout() << "sisdc::sisdc - Turning off rte" << endl;
-	}
-      }
-    }
-    if(pp.contains("do_poisson")){
-      pp.get("do_poisson", str);
-      if(str == "false"){
-	m_do_poisson = false;
-
-	if(m_verbosity > 2){
-	  pout() << "sisdc::sisdc - Turning off poisson" << endl;
-	}
-      }
-    }
-    if(pp.contains("profile_steps")){
-      pp.get("profile_steps", str);
-      if(str == "true"){
-	m_profile_steps = true;
-      }
-      else {
-	m_profile_steps = false;
-      }
-    }
+void sisdc::parse_options(){
+  CH_TIME("sisdc::parse_options");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_options" << endl;
   }
+
+  // Regular stuff from time_stepper that we almost always need
+  parse_verbosity();
+  parse_solver_verbosity();
+  parse_cfl();
+  parse_relax_time();
+  parse_min_dt();
+  parse_max_dt();
+  parse_source_comp();
+
+  // Specific to this class
+  parse_nodes();
+  parse_diffusion_coupling();
+  parse_adaptive_options();
+  parse_subcycle_options();
+  parse_debug_options();
+  parse_advection_options();
 
   // Setup nodes
   sisdc::setup_quadrature_nodes(m_p);
   sisdc::setup_qmj(m_p);
 }
 
-sisdc::~sisdc(){
+void sisdc::parse_nodes(){
+  CH_TIME("sisdc::parse_nodes");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_nodes" << endl;
+  }
 
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+  
+  pp.get("quad_nodes", str);
+  if(str == "lobatto"){
+    m_which_nodes = "lobatto";
+  }
+  else if(str == "uniform"){
+    m_which_nodes = "uniform";
+  }
+  else if(str == "chebyshev"){
+    m_which_nodes = "chebyshev";
+  }
+  else {
+    MayDay::Abort("sisdc::parse_nodes - unknown node type requested");
+  }
+
+  pp.get("subintervals",     m_p);
+  pp.get("corr_iter",        m_k);
+
+  if(m_p < 1){
+    MayDay::Abort("sisdc::parse_nodes - sisdc.subintervals cannot be < 1");
+  }
+  if(m_k < 0){
+    MayDay::Abort("sisdc::parse_nodes - sisdc.corr_iter cannot be < 0");
+  }
+}
+
+void sisdc::parse_diffusion_coupling(){
+  CH_TIME("sisdc::parse_diffusion_coupling");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_diffusion_coupling" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  
+  std::string str;
+
+  pp.get("use_tga", str);
+  m_use_tga = (str == "true") ? true : false;
+
+  pp.get("diffusive_coupling", str);
+  m_strong_diffu = (str == "true") ? true : false;
+  
+  pp.get("num_diff_corr",  m_num_diff_corr);
+  if(m_num_diff_corr < 0){
+    MayDay::Abort("sisdc::parse_diffusion_coupling - option 'sisdc.num_diff_corr' cannot be negative");
+  }
+}
+
+void sisdc::parse_adaptive_options(){
+  CH_TIME("sisdc::parse_adaptive_options");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_adaptive_options" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+
+  pp.get("error_norm",       m_error_norm);
+  pp.get("min_corr",         m_min_corr);
+  pp.get("max_retries",      m_max_retries);
+  pp.get("max_growth",       m_max_growth);
+  pp.get("decrease_safety",  m_decrease_safe);
+  pp.get("min_cfl",          m_minCFL);
+  pp.get("max_cfl",          m_maxCFL);
+  pp.get("max_error",        m_err_thresh);
+  pp.get("error_index",      m_error_idx);
+  pp.get("safety",           m_safety);
+
+  pp.get("print_report", str);
+  m_print_report = (str == "true") ? true : false;
+  
+  pp.get("adaptive_dt", str);
+  m_adaptive_dt = (str == "true") ? true : false;
+}
+
+void sisdc::parse_subcycle_options(){
+  CH_TIME("sisdc::parse_subcycle_options");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_subcycle_options" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+
+  pp.get("regrid_cfl",       m_regrid_cfl);
+  pp.get("subcycle_cfl",     m_cycleCFL);
+  pp.get("min_cycle_cfl",    m_min_cycle_cfl);
+  pp.get("max_cycle_cfl",    m_max_cycle_cfl);
+
+  pp.get("subcycle", str);
+  if(str == "false"){
+    m_subcycle = false;
+  }
+  else if(str == "standard"){
+    m_subcycle = true;
+    m_optimal_subcycling = false;
+  }
+  else if(str == "optimal"){
+    m_subcycle = true;
+    m_optimal_subcycling = true;
+  }
+  else if(str == "multistep"){
+    m_subcycle  = true;
+    m_multistep = true;
+  }
+  else{
+    MayDay::Abort("sisdc::sisdc - unknown sisdc.subcycle = ???");
+  }
+  
+  pp.get("cycle_sources", str);
+  m_cycle_sources = (str == "true") ? true : false;
+}
+
+void sisdc::parse_debug_options(){
+  CH_TIME("sisdc::parse_debug_options");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_debug_options" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+
+  pp.get("compute_D", str); m_compute_D = (str == "true") ? true : false;
+  pp.get("compute_v", str); m_compute_v = (str == "true") ? true : false;
+  pp.get("compute_S", str); m_compute_S = (str == "true") ? true : false;
+  
+  pp.get("consistent_E",   str); m_consistent_E   = (str == "true") ? true : false;
+  pp.get("consistent_rte", str); m_consistent_rte = (str == "true") ? true : false;
+  
+  pp.get("do_advec_src", str); 	m_do_advec_src = (str == "true") ? true : false;
+  pp.get("do_diffusion", str); 	m_do_diffusion = (str == "true") ? true : false;
+  pp.get("do_rte", str); 	m_do_rte       = (str == "true") ? true : false;
+  pp.get("do_poisson", str); 	m_do_poisson   = (str == "true") ? true : false;
+  
+  pp.get("profile_steps", str); m_profile_steps = (str == "true") ? true : false;
+}
+
+void sisdc::parse_advection_options(){
+  CH_TIME("sisdc::parse_advection_options");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_advection_options" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+
+  m_extrap_dt = 0.5;  // Relic of an ancient past. I don't see any reason why extrapolating to anything but the half interval
+                      // would make sense. 
+
+  pp.get("extrap_advect", str); m_extrap_advect = (str == "true") ? true : false;
 }
 
 RefCountedPtr<cdr_storage>& sisdc::get_cdr_storage(const cdr_iterator& a_solverit){
@@ -276,6 +229,10 @@ RefCountedPtr<rte_storage>& sisdc::get_rte_storage(const rte_iterator& a_solveri
 }
 
 bool sisdc::need_to_regrid(){
+  CH_TIME("sisdc::need_to_regrid");
+  if(m_verbosity > 5){
+    pout() << "sisdc::need_to_regrid" << endl;
+  }
   const bool regrid = m_accum_cfl > m_regrid_cfl;
   if(regrid) m_accum_cfl = 0.0;
   

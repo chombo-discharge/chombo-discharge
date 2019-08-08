@@ -46,6 +46,7 @@ public:
   void init_source_terms();
   void regrid_internals();
   void deallocate_internals();
+  void parse_options();
 
   bool need_to_regrid();
 
@@ -290,6 +291,14 @@ protected:
 				const Real                   a_coar_time_new,
 				const Real                   a_time,
 				const Real                   a_dt);
+
+  // Parse optiosn that are not really used
+  void parse_nodes();
+  void parse_diffusion_coupling();
+  void parse_adaptive_options();
+  void parse_subcycle_options();
+  void parse_debug_options();
+  void parse_advection_options();
 };
 
 #endif

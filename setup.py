@@ -2,7 +2,7 @@
 import argparse
 import os
 import sys
-sys.path.append('./app_builder')
+sys.path.append('./python')
 import app_main
 import app_make
 import app_options
@@ -19,9 +19,12 @@ parser.add_argument('-streamer_home',   type=str,  help="Source code base direct
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
+parser.add_argument('-poisson_solver',  type=str,  help="CDR solver implementation", default="poisson_multifluid_gmg")
+parser.add_argument('-cdr_solver',      type=str,  help="CDR solver implementation", default="cdr_gdnv")
+parser.add_argument('-rte_solver',      type=str,  help="RTE solver implementation", default="eddington_sp1")
 parser.add_argument('-plasma_kinetics', type=str,  help="Plasma kinetics class", default="")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
-parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="rk2")
+parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="sisdc")
 parser.add_argument('-cell_tagger',     type=str,  help="Cell tagging method", default="none")
 args = parser.parse_args()
 

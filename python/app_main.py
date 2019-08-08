@@ -27,6 +27,12 @@ def write_template(args):
     mainf = open(main_filename, "w")
     mainf.write('#include "plasma_engine.H"\n')
     mainf.write('#include "geo_coarsener.H"\n')
+    mainf.write('#include "poisson_factoryI.H"\n')
+    mainf.write('#include "' + args.poisson_solver + '.H"\n')
+    mainf.write('#include "cdr_layoutI.H"\n')
+    mainf.write('#include "' + args.cdr_solver + '.H"\n')
+    mainf.write('#include "rte_layoutI.H"\n')
+    mainf.write('#include "' + args.rte_solver + '.H"\n')
     mainf.write('#include "' + args.plasma_kinetics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.time_stepper + '.H"\n')
@@ -57,10 +63,8 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("\n")
-    mainf.write("  { // Get potential from input script \n")
-    mainf.write('    ParmParse pp("' + args.app_name + '");\n')
-    mainf.write('    pp.get("potential", g_potential);\n')
-    mainf.write("  }\n")
+    mainf.write("  // Get potential from input script \n")
+    mainf.write('  pp.get("potential", g_potential);\n')
 
     mainf.write("\n")
     mainf.write("  // Set up everything \n")
@@ -76,6 +80,25 @@ def write_template(args):
     mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")
     mainf.write("  RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom, compgeom, plaskin, timestepper, amr, tagger, geocoarsen));\n")
     mainf.write("\n")
+
+    mainf.write("  // Create solver factories\n")
+    mainf.write("  auto poi_fact = new poisson_factory<" + args.poisson_solver + ">();\n")
+    mainf.write("  auto cdr_fact = new cdr_factory<" + args.cdr_solver + ">();\n")
+    mainf.write("  auto rte_fact = new rte_factory<" + args.rte_solver + ">();\n")
+    mainf.write("\n")
+    
+    mainf.write("  // Instantiate solvers\n")
+    mainf.write("  auto poi = poi_fact->new_solver();\n");
+    mainf.write("  auto cdr = cdr_fact->new_layout(plaskin);\n");
+    mainf.write("  auto rte = rte_fact->new_layout(plaskin);\n");
+    mainf.write("\n")
+
+    mainf.write("  // Send solvers to time_stepper \n")
+    mainf.write("  timestepper->set_poisson(poi);\n");
+    mainf.write("  timestepper->set_cdr(cdr);\n");
+    mainf.write("  timestepper->set_rte(rte);\n");
+    mainf.write("\n")
+    
     mainf.write("  // Run the plasma engine\n")
     mainf.write("  engine->set_potential(potential_curve);\n");
     mainf.write("  engine->setup_and_run();\n");

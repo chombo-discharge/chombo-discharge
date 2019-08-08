@@ -18,18 +18,18 @@
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";
   
-  parse_verbosity();
-  parse_solver_verbosity();
-  parse_cfl();
-  parse_relax_time();
-  parse_source_growth();
-  parse_source_tolerance();
-  parse_min_dt();
-  parse_max_dt();
-  parse_fast_rte();
-  parse_fast_rte();
-  parse_fast_poisson();
-  parse_source_comp();
+  // parse_verbosity();
+  // parse_solver_verbosity();
+  // parse_cfl();
+  // parse_relax_time();
+  // parse_source_growth();
+  // parse_source_tolerance();
+  // parse_min_dt();
+  // parse_max_dt();
+  // parse_fast_rte();
+  // parse_fast_rte();
+  // parse_fast_poisson();
+  // parse_source_comp();
 
   m_subcycle = false;
 }
@@ -2971,7 +2971,7 @@ void time_stepper::setup_solvers(){
   if(m_verbosity > 5){
     pout() << "time_stepper::setup_solvers" << endl;
   }
-
+  parse_options();
   this->sanity_check();
 
   this->setup_cdr();

@@ -16,7 +16,7 @@ typedef euler_maruyama::rte_storage     rte_storage;
 typedef euler_maruyama::sigma_storage   sigma_storage;
 
 euler_maruyama::euler_maruyama(){
-
+  m_class_name = "euler_maruyama";
   m_extrap_advect = true;
 }
 
@@ -29,6 +29,14 @@ void euler_maruyama::parse_options(){
   if(m_verbosity > 5){
     pout() << "euler_maruyama::parse_options" << endl;
   }
+
+  parse_verbosity();
+  parse_solver_verbosity();
+  parse_cfl();
+  parse_relax_time();
+  parse_min_dt();
+  parse_max_dt();
+  parse_source_comp();
 }
 
 bool euler_maruyama::need_to_regrid(){

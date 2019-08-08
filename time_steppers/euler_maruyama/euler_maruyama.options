@@ -1,0 +1,10 @@
+# ====================================================================================================
+# EULER_MARUYAMA CLASS OPTIONS
+# ====================================================================================================
+euler_maruyama.verbosity        = -1        # Class verbosity
+euler_maruyama.solver_verbosity = -1        # Individual solver verbosities
+euler_maruyama.min_dt           = 0.        # Minimum permitted time step
+euler_maruyama.max_dt           = 1.E99     # Maximum permitted time step
+euler_maruyama.cfl              = 0.5       # CFL number
+euler_maruyama.relax_time       = 1.0       # Relaxation time constant
+euler_maruyama.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations

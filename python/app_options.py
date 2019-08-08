@@ -16,11 +16,9 @@ def write_template(args):
     options_files = [args.streamer_home + "/src/geometry/physical_domain.options", \
                      args.streamer_home + "/src/amr_mesh/amr_mesh.options", \
                      args.streamer_home + "/src/plasma_solver/plasma_engine.options", \
-                     args.streamer_home + "/src/plasma_solver/time_stepper.options", \
-                     args.streamer_home + "/src/poisson_solver/poisson_solver.options", \
-                     args.streamer_home + "/src/poisson_solver/poisson_multifluid_gmg.options", \
-                     args.streamer_home + "/src/plasma_solver/cdr_layout.options", \
-                     args.streamer_home + "/src/plasma_solver/rte_layout.options", \
+                     args.streamer_home + "/src/poisson_solver/" + args.poisson_solver + ".options",\
+                     args.streamer_home + "/src/cdr_solver/" + args.cdr_solver + ".options",\
+                     args.streamer_home + "/src/rte_solver/" + args.rte_solver + ".options",\
                      args.streamer_home + "/src/plasma_solver/geo_coarsener.options", \
                      args.streamer_home + "/src/plasma_solver/cell_tagger.options", \
                      args.streamer_home + "/geometries_prebuilt/" + args.geometry + "/" + args.geometry + ".options", \

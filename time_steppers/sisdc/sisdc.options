@@ -10,10 +10,21 @@
 #
 # 
 # ====================================================================================================
-sisdc.quad_nodes   = lobatto  # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
-sisdc.subintervals = 1        # Number of subintervals. This will be the maximum possible order.
-sisdc.corr_iter    = 1        # Number of iterations of the correction equation. Should be (subintervals-1)
-                              # for maximum order
+sisdc.verbosity        = -1      # Class verbosity
+sisdc.solver_verbosity = -1      # Individual solver verbosities
+sisdc.min_dt           = 0.      # Minimum permitted time step
+sisdc.max_dt           = 1.E99   # Maximum permitted time step
+sisdc.cfl              = 0.5     # CFL number
+sisdc.relax_time       = 1.0     # Relaxation time constant
+sisdc.source_comp      = interp  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+
+# ------------------------------------
+# Nodes, subintervals, and corrections
+# ------------------------------------
+sisdc.quad_nodes   = lobatto     # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
+sisdc.subintervals = 1           # Number of subintervals. This will be the maximum possible order.
+sisdc.corr_iter    = 1           # Number of iterations of the correction equation. Should be (subintervals-1)
+                                 # for maximum order
 
 # ---------------------------------------------------------	
 # Diffusive coupling
@@ -22,13 +33,7 @@ sisdc.corr_iter    = 1        # Number of iterations of the correction equation.
 # ---------------------------------------------------------
 sisdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
 sisdc.use_tga            = true  # Use second order diffusion per substep
-sisdc.num_corrections    = 0     # Number of corrections for 'strong'
-
-# ---------------------------------------------------------	
-# Adaptive regridding
-# ---------------------------------------------------------
-sisdc.regrid_cfl      = 5.0      # Regrid if accumulated time exceeds this
-# ---------------------------------------------------------
+sisdc.num_diff_corr      = 0     # Number of corrections for 'strong'
 
 # Adaptive time stepping
 # ---------------------------------------------------------
@@ -58,6 +63,7 @@ sisdc.cycle_sources = false      # Subcycle also with reaction terms
 sisdc.min_cycle_cfl = 0.5        # Maximum permitted CFL (total step)	
 sisdc.max_cycle_cfl = 20.0       # Maximum permitted CFL (total step)
 sisdc.subcycle_cfl  = 0.5        # Maximum CFL per advective step
+sisdc.regrid_cfl    = 1.E99      # Regrid if accumulated time exceeds this
 
 # ---------------------------------------------------------	
 # Debugging options
@@ -71,15 +77,11 @@ sisdc.do_advec_src      = true   # Turn off code functionality. Only for debuggi
 sisdc.do_diffusion      = true   # Turn off code functionality. Only for debugging
 sisdc.do_poisson        = true   # Turn off code functionality. Only for debugging
 sisdc.do_rte            = true   # Turn off code functionality. Only for debugging
-
-# ---------------------------------------------------------	
-# Profiling options
-# ---------------------------------------------------------
 sisdc.profile_steps     = false  # Profile time steps with order, accuracy, cfl, etc.
 
 
 # ---------------------
-# Stabilization feature. Currently does NOT work with subcycling (but I'm working on it...)
+# Advection extrapolation. Currently does NOT work with subcycling (but I'm working on it...)
 # ---------------------
 sisdc.extrap_advect = false      # Time extrapolate with source and diffusion in advection step
 sisdc.extrap_dt     = 0.5        # How far to time-extrapolate (in terms of dt). 0.5 is usually good. 

@@ -60,11 +60,9 @@ public:
   virtual bool stationary_rte();
 
   /*!
-    @brief Parse options. Not yet. 
+    @brief Parse options.
   */
-#if 0
   virtual void parse_options() = 0;
-#endif
 
   /*!
     @brief Cache states
