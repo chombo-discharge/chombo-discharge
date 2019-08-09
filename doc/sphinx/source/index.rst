@@ -30,7 +30,7 @@ For scalability, `PlasmaC` is built on top of `Chombo <https://commons.lbl.gov/d
 * Patch based adaptive mesh refinement
 * Good weak and strong scalability to thousands of computer cores
 
-Our goal is that users will be able to use `PlasmaC` without modifying the underlying solvers. There are quite general interfaces for describing the plasma physics, setting up boundary conditions, ensuring mesh refinement, and so on. As `PlasmaC` evolves, so will these interfaces. We aim for (but cannot guarantee) backward compatibility such that existing `PlasmaC` models can be run on future versions. In particular, there are plans to
+Our goal is that users will be able to use `PlasmaC` without modifying the underlying solvers. There are interfaces for describing the plasma physics, setting up boundary conditions, ensuring mesh refinement, and so on. As `PlasmaC` evolves, so will these interfaces. We aim for (but cannot guarantee) backward compatibility such that existing `PlasmaC` models can be run on future versions. In particular, there are plans to
 
 * support adaptive mesh and algorithm refinement (AMAR)
 * port compute kernels to GPUs.

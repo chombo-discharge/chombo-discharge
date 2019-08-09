@@ -11,7 +11,6 @@ The `PlasmaC` equation set
    \begin{align}
    &\nabla\cdot\left(\epsilon_r\nabla\cdot\Phi\right) = -\frac{\rho}{\epsilon_0}, \\[1ex]
    &\frac{\partial\sigma}{\partial t} = F_\sigma,\\[1ex]
-
    &\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S.
    \end{align}
 
@@ -67,7 +66,7 @@ Embedded boundary applications are supported by additionally describing the mesh
 Geometry generation
 ___________________
 
-Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometries are generated from a function :math:`f(\mathbf{x}) = 0` that describes the level-set surface. This is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption. Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. Furthermore, geometric data describes by the graph only exists in the cut cells themselves, so that this data is sparse. 
+Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometries are generated from a function :math:`f(\mathbf{x}) = 0` that describes the level-set surface. This is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption. Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. 
 
 Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. Arbitrarily with fine grids geometries are not possible. Consider for example a cubic domain of :math:`(16384)^3` cells which is decomposed into :math:`(64)^3` cell size patches. This yields :math:`(256)^3` patches. Now consider that this domain is cut in half along one of the coordinate basis vectors by a planar level set surface. This surface will require allocation of :math:`256\times256\times 1` patches for the geometry. If each patch is padded with 4 ghost cells, this yields :math:`256\times256\times(72)^3 \approx 24\times 10^9` cells. Inside each cell we must store volume fractions, area fractions, cell centroids positions and so one. The required memory easily ranges in the terabyte range. 
 
@@ -263,7 +262,7 @@ The stationary Monte Carlo method proceeds as follows.
 
 2. Draw a propagation distance :math:`r` by drawing random numbers from an exponential distribution :math:`p(r) = \kappa \exp\left(-\kappa r\right)`. The absorbed position of the photon is :math:`\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}`.
 
-3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}`.
+3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}` or reflect it off symmetry boundaries. 
 
 4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
 
@@ -274,7 +273,7 @@ Transient Monte Carlo
 
 The transient Monte Carlo method is almost identical to the stationary method, except that it does not deposit all generated photons on the mesh but tracks them through time. The transient method is implemented as follows:
 
-1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` as above, and append these to the already existing photons. Each photon is given a random creation time in :math:`\Delta t`. 
+1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` as above, and append these to the already existing photons. Each photon is given a uniformly distributed random creation time within :math:`\Delta t`. 
    
 2. Each photon is advanced over the time step :math:`\Delta t` by a sequence of :math:`N` substeps (:math:`N` may be different for each photon).
 
