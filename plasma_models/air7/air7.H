@@ -155,6 +155,7 @@ protected:
 
   bool m_mobile_ions;
   bool m_diffusive_ions;
+  bool m_fhd;
   bool m_alpha_corr;
 
   int m_electron_idx;

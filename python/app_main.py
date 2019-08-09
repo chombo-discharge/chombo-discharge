@@ -64,7 +64,10 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Get potential from input script \n")
-    mainf.write('  pp.get("potential", g_potential);\n')
+    mainf.write("  {\n")
+    mainf.write('     ParmParse pp("' + args.app_name + '");\n')
+    mainf.write('     pp.get("potential", g_potential);\n')
+    mainf.write("  }\n")
 
     mainf.write("\n")
     mainf.write("  // Set up everything \n")

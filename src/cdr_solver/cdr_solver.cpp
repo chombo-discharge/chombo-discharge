@@ -48,9 +48,9 @@ Vector<std::string> cdr_solver::get_plotvar_names() const {
   Vector<std::string> names(0);
   
   if(m_plot_phi) names.push_back(m_name + " phi");
-  if(m_plot_dco) names.push_back(m_name + " diffusion_coefficient");
+  if(m_plot_dco && m_diffusive) names.push_back(m_name + " diffusion_coefficient");
   if(m_plot_src) names.push_back(m_name + " source");
-  if(m_plot_vel){
+  if(m_plot_vel && m_mobile){
     names.push_back("x-Velocity " + m_name);
     names.push_back("y-Velocity " + m_name);
     if(SpaceDim == 3){
@@ -79,9 +79,9 @@ int cdr_solver::get_num_plotvars() const {
   int num_output = 0;
 
   if(m_plot_phi) num_output = num_output + 1;
-  if(m_plot_dco) num_output = num_output + 1;
+  if(m_plot_dco && m_diffusive) num_output = num_output + 1;
   if(m_plot_src) num_output = num_output + 1;
-  if(m_plot_vel) num_output = num_output + SpaceDim;
+  if(m_plot_vel && m_mobile) num_output = num_output + SpaceDim;
 
   return num_output;
 }
@@ -1718,13 +1718,13 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_phi) write_data(a_output, a_comp, m_state, true);
-  if(m_plot_dco) { // Need to compute the cell-centerd stuff first
+  if(m_plot_dco && m_diffusive) { // Need to compute the cell-centerd stuff first
     data_ops::set_value(m_scratch, 0.0);
     data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->get_domains());
     write_data(a_output, a_comp, m_scratch,   false);
   }
   if(m_plot_src) write_data(a_output, a_comp, m_source,    false);
-  if(m_plot_vel) write_data(a_output, a_comp, m_velo_cell, false);
+  if(m_plot_vel && m_mobile) write_data(a_output, a_comp, m_velo_cell, false);
 }
 
 void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){

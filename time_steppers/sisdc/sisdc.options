@@ -42,7 +42,7 @@ sisdc.num_diff_corr      = 0     # Number of corrections for 'strong'
 sisdc.print_report    = false    # Print report with error and stuff	
 sisdc.adaptive_dt     = false    # Use adaptive time stepping
 sisdc.error_norm      = 2        # Error norm (0 = Linf)
-sisdc.min_corr        = 1        # Minimum number of corrections
+sisdc.min_corr        = 0        # Minimum number of corrections
 sisdc.max_retries     = 100      # Maximum number of tries (for step rejection)
 sisdc.max_growth      = 1.2      # Maximum permissible time step growth
 sisdc.decrease_safety = 0.9      # Fudge factor when we decrease the time step. 
