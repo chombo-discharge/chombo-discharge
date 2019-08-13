@@ -51,6 +51,7 @@ void sisdc::parse_options(){
 
   // Specific to this class
   parse_nodes();
+  parse_AP();
   parse_diffusion_coupling();
   parse_adaptive_options();
   parse_subcycle_options();
@@ -94,6 +95,20 @@ void sisdc::parse_nodes(){
   if(m_k < 0){
     MayDay::Abort("sisdc::parse_nodes - sisdc.corr_iter cannot be < 0");
   }
+}
+
+void sisdc::parse_AP(){
+  CH_TIME("sisdc::parse_AP");
+  if(m_verbosity > 5){
+    pout() << "sisdc::parse_AP" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  
+  std::string str;
+
+  pp.get("use_AP", str);
+  m_use_AP = (str == "true") ? true : false;
 }
 
 void sisdc::parse_diffusion_coupling(){
@@ -535,7 +550,6 @@ Real sisdc::advance(const Real a_dt){
   int num_corrections = 0;
   bool accept_step    = false;
   bool retry_step     = true;
-  bool use_AP         = false; // Development feature. Not ready for the public. 
 
   m_max_error = 0.1234E5;
   Real t = 0.0;
@@ -544,7 +558,7 @@ Real sisdc::advance(const Real a_dt){
     sisdc::setup_subintervals(m_time, actual_dt);
 
     // First SDC sweep. No lagged slopes here. 
-    if(use_AP){
+    if(m_use_AP){
       sisdc::integrate_AP(a_dt, m_time, false);
     }
     else{
@@ -560,7 +574,7 @@ Real sisdc::advance(const Real a_dt){
       sisdc::reconcile_integrands();
 
       // SDC correction along whole interval
-      if(use_AP){
+      if(m_use_AP){
 	sisdc::integrate_AP(a_dt, m_time, true);
       }
       else{

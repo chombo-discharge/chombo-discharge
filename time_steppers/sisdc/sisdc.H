@@ -90,6 +90,7 @@ protected:
   bool m_print_report;
   bool m_have_err; 
   bool m_use_tga; // Second order diffusion
+  bool m_use_AP; // Use the AP scheme
   
 
   // Basically only debugging stuff
@@ -304,6 +305,7 @@ protected:
 
   // Parse optiosn that are not really used
   void parse_nodes();
+  void parse_AP();
   void parse_diffusion_coupling();
   void parse_adaptive_options();
   void parse_subcycle_options();

@@ -53,6 +53,11 @@ sisdc.error_index     = -1       # Error index. If -1, evaluate all CDR solvers
 sisdc.safety          = 0.75     # Safety factor for time stepping
 
 # ---------------------------------------------------------	
+# "Asymptotic preserving". Development feature. 
+# ---------------------------------------------------------	
+sisdc.use_AP        = false      # Turn on the "asymptotic preserving" feature. 
+
+# ---------------------------------------------------------	
 # Subcycling in time
 #
 # DEVELOPMENT FEATURES WITH LOW ACCURACY - STAY AWAY!!!
