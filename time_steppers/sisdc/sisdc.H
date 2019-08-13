@@ -157,13 +157,22 @@ protected:
   void copy_phi_p_to_cdr();
   void copy_sigma_p_to_sigma();
 
-  void integrate(const Real a_dt, const Real a_time, const bool a_corrector);
-  void integrate_rte(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_advection_multistep(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_corrector);
-  void integrate_diffusion(const Real a_dt, const int a_m, const bool a_corrector);
+  // Integrate RTE (only time dependent)
+  void integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_terms);
+
+  // These are the standard SISDC integration routines
+  void integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms);
+  void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrate_advection_multistep(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrate_diffusion(const Real a_dt, const int a_m, const bool a_lagged_terms);
+
+  // Here are the ''asymptotic-preserving'' AP methods
+  void integrate_AP(const Real a_dt, const Real a_time, const bool a_lagged_terms);
+  void integrate_AP_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms, const bool a_predictor);
+
+  // Make integrands quadrature-ready
   void reconcile_integrands();
 
   // SISDC predictor routines
@@ -171,6 +180,7 @@ protected:
 
   // SISDC corrector routines
   void initialize_errors();
+#if 0 // Deprecated?
   void corrector_reconcile_gl_integrands();
   void corrector(const Real a_time, const Real a_dt);
   void corrector_advection_reaction(const int a_m, const Real a_dt);
@@ -179,6 +189,7 @@ protected:
   void corrector_diffusion(const int a_m);
   void corrector_diffusion_onestep(const int a_m);
   void corrector_diffusion_build_FD(const int a_m);
+#endif
   void finalize_errors();
 
   // Step size control routines

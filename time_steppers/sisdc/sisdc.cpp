@@ -535,19 +535,39 @@ Real sisdc::advance(const Real a_dt){
   int num_corrections = 0;
   bool accept_step    = false;
   bool retry_step     = true;
+  bool use_AP         = false; // Development feature. Not ready for the public. 
 
   m_max_error = 0.1234E5;
   Real t = 0.0;
   while(!accept_step && retry_step){
     num_corrections = 0;
     sisdc::setup_subintervals(m_time, actual_dt);
-    sisdc::integrate(a_dt, m_time, false);
+
+    // First SDC sweep. No lagged slopes here. 
+    if(use_AP){
+      sisdc::integrate_AP(a_dt, m_time, false);
+    }
+    else{
+      sisdc::integrate(a_dt, m_time, false);
+    }
+
+    // SDC correction sweeps. Need to take care of lagged terms. 
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
       num_corrections++;
 
+      // Initialize error and reconcile integrands (i.e. make them quadrature-ready)
       sisdc::initialize_errors();
       sisdc::reconcile_integrands();
-      sisdc::integrate(a_dt, m_time, true);
+
+      // SDC correction along whole interval
+      if(use_AP){
+	sisdc::integrate_AP(a_dt, m_time, true);
+      }
+      else{
+	sisdc::integrate(a_dt, m_time, true);
+      }
+
+      // Compute error and check if we need to keep iterating
       sisdc::finalize_errors();
       if(m_max_error < m_err_thresh && m_adaptive_dt && icorr >= m_min_corr) break; // No need in going beyond
     }
@@ -694,63 +714,66 @@ void sisdc::compute_FD_0(){
   }
 }
 
-void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector){
+void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms){
   CH_TIME("sisdc::integrate");
   if(m_verbosity > 5){
     pout() << "sisdc::integrate" << endl;
   }
 
+
   // 1. The first time we enter this routine, source terms and velocities were updated.
   // 2. For further calls, source terms and velocities have been overwritten, but since the explicit
   //    operator slopes do not change, this is perfectly fine. We just increment with the lagged terms. 
 
-  // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
-  // which is what we need to do at the start of the time step.
+
   Real t0, t1;
   Real total_time = 0.0;
   Real setup_time  = 0.0;
   Real advect_time = 0.0;
   Real diffusive_time = 0.0;
 
-  t0 = MPI_Wtime();
-  sisdc::compute_E_into_scratch();
-  sisdc::compute_cdr_eb_states();
-  sisdc::compute_cdr_fluxes(a_time);
-  sisdc::compute_cdr_domain_states();
-  sisdc::compute_cdr_domain_fluxes(a_time);
-  sisdc::compute_sigma_flux();
-  t1 = MPI_Wtime();
-
-  total_time = -t0;
-  setup_time = t1-t0;
-
   // We begin with phi[0] = phi(t_n). Then update phi[m+1].
   for(int m = 0; m < m_p; m++){
+
+    // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
+    // which is what we need to do at the start of the time step. In principle, these things do not change
+    // and so we could probably store them somewhere for increased performance. 
+    if(m == 0 && !a_lagged_terms){ // This updates the boundary conditions; since these are used to compute the slopes,
+      t0 = MPI_Wtime();         // and the m=0 slopes do not change, we only need to do this for the predictor. 
+      sisdc::compute_E_into_scratch();
+      sisdc::compute_cdr_eb_states();
+      sisdc::compute_cdr_fluxes(a_time);
+      sisdc::compute_cdr_domain_states();
+      sisdc::compute_cdr_domain_fluxes(a_time);
+      sisdc::compute_sigma_flux();
+      t1 = MPI_Wtime();
+
+      total_time = -t0;
+      setup_time = t1-t0;
+    }
     
     // This does the transient rte advance. Stationary solves are done after computing the E-field.
     // The transient solve needs to happen BEFORE the reaction solve in case there is a tight coupling
     // between the RTE and CDR equations (relaxations of excited states). The integrate_rte routine compues
     // source terms just before advancing, and since source terms for the CDR equations are not updated
     // between this routine and the integrate_advection_reaction call, we are ensured that the source terms
-    // are consistent. 
+    // are consistent.
     t0 = MPI_Wtime();
     if(m_consistent_rte) {
-      sisdc::integrate_rte(a_dt, m, a_corrector);
+      sisdc::integrate_rte(a_dt, m, a_lagged_terms);
     }
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
     t0 = MPI_Wtime();
-    sisdc::integrate_advection_reaction(a_dt, m, a_corrector);
+    sisdc::integrate_advection_reaction(a_dt, m, a_lagged_terms);
     t1 = MPI_Wtime();
     advect_time += t1-t0;
 
     // This does the diffusion advance. It also adds in the remaining lagged diffusion terms before the implicit diffusion solve
     t0 = MPI_Wtime();
-    sisdc::integrate_diffusion(a_dt, m, a_corrector);
+    sisdc::integrate_diffusion(a_dt, m, a_lagged_terms);
     t1 = MPI_Wtime();
     diffusive_time += t1-t0;
-
-
 
     // After the diffusion step we should update source terms and boundary conditions for the next step. We don't
     // do this on the last step. This is done either in the reconcile_integrands routine, or after SISDC is done
@@ -791,7 +814,112 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_corrector
 #endif
 }
 
-void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_corrector){
+void sisdc::integrate_AP(const Real a_dt, const Real a_time, const bool a_lagged_terms){
+  CH_TIME("sisdc::integrate_AP");
+  if(m_verbosity > 5){
+    pout() << "sisdc::integrate_AP" << endl;
+  }
+
+
+  // TLDR: This is the asymptotic preserving method for the advance routine. It can be optimized
+  //  MayDay::Warning("sisdc::integrate_AP - routine is not yet done");
+
+
+  // 1. The first time we enter this routine, source terms and velocities were updated.
+  // 2. For further calls, source terms and velocities have been overwritten, but since the explicit
+  //    operator slopes do not change, this is perfectly fine. We just increment with the lagged terms.
+
+  // Not supported with subcycling
+  if(m_subcycle == true) MayDay::Abort("sisdc::integrate_AP - AP method not supported with subcycling in time (yet)");
+
+
+  Real t0, t1;
+  Real total_time = 0.0;
+  Real setup_time  = 0.0;
+  Real advect_time = 0.0;
+  Real diffusive_time = 0.0;
+
+  // We begin with phi[0] = phi(t_n). Then update phi[m+1].
+  for(int m = 0; m < m_p; m++){
+
+    // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
+    // which is what we need to do at the start of the time step. In principle, these things do not change
+    // and so we could probably store them somewhere for increased performance. 
+    if(m == 0 && !a_lagged_terms){ // This updates the boundary conditions; since these are used to compute the slopes,
+      t0 = MPI_Wtime();         // and the m=0 slopes do not change, we only need to do this for the first SDC sweep
+      sisdc::compute_E_into_scratch();
+      sisdc::compute_cdr_eb_states();
+      sisdc::compute_cdr_fluxes(a_time);
+      sisdc::compute_cdr_domain_states();
+      sisdc::compute_cdr_domain_fluxes(a_time);
+      sisdc::compute_sigma_flux();
+      t1 = MPI_Wtime();
+
+      total_time = -t0;
+      setup_time = t1-t0;
+    }
+    
+    // This does the transient rte advance. Stationary solves are done after computing the E-field.
+    // The transient solve needs to happen BEFORE the reaction solve in case there is a tight coupling
+    // between the RTE and CDR equations (relaxations of excited states). The integrate_rte routine compues
+    // source terms just before advancing, and since source terms for the CDR equations are not updated
+    // between this routine and the integrate_advection_reaction call, we are ensured that the source terms
+    // are consistent.
+    t0 = MPI_Wtime();
+    if(m_consistent_rte) {
+      sisdc::integrate_rte(a_dt, m, a_lagged_terms);
+    }
+
+    // Predictor + corrector. Can definitely optimize a bunch of stuff here. 
+    sisdc::integrate_AP_advection_reaction(a_dt, m, a_lagged_terms, true);
+    sisdc::integrate_diffusion(a_dt, m, a_lagged_terms);
+
+    update_poisson(get_cdr_phik(m+1), get_sigmak(m+1));
+    compute_cdr_sources(get_cdr_phik(m), m_tm[m+1]);
+
+    sisdc::integrate_AP_advection_reaction(a_dt, m, a_lagged_terms, false);
+    sisdc::integrate_diffusion(a_dt, m, a_lagged_terms);
+
+    // After the diffusion step we should update source terms and boundary conditions for the next step. We don't
+    // do this on the last step. This is done either in the reconcile_integrands routine, or after SISDC is done
+    // with its substebs. 
+    const bool last = (m == m_p-1);
+    if(!last){
+      Vector<EBAMRCellData*> cdr_densities_mp1 = sisdc::get_cdr_phik(m+1);
+      EBAMRIVData& sigma_mp1 = sisdc::get_sigmak(m+1);
+      const Real t_mp1 = m_tm[m+1];
+
+      // Update electric field, RTE equations, source terms, and velocities. 
+      if(m_consistent_E)   sisdc::update_poisson(cdr_densities_mp1, sigma_mp1);
+      if(m_consistent_rte) sisdc::update_stationary_rte(cdr_densities_mp1, t_mp1);
+      if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
+      if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
+      if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
+      if(m_compute_D)      sisdc::update_diffusion_coefficients();
+
+      // Update boundary conditions for cdr and sigma equations. 
+      sisdc::compute_cdr_eb_states(cdr_densities_mp1);
+      sisdc::compute_cdr_fluxes(cdr_densities_mp1, t_mp1);
+      sisdc::compute_cdr_domain_states(cdr_densities_mp1);
+      sisdc::compute_cdr_domain_fluxes(cdr_densities_mp1, t_mp1);
+      sisdc::compute_sigma_flux();
+    }
+  }
+  t1 = MPI_Wtime();
+
+  total_time += t1;
+
+#if 0
+  pout() << endl
+	 << "setup time = " << setup_time << endl
+	 << "advect_time = " << advect_time << endl
+	 << "diffusive_time = " << diffusive_time << endl
+	 << "total time = " << total_time << endl
+	 << endl;
+#endif
+}
+
+void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms){
   CH_TIME("sisdc::integrate_advection_reaction");
   if(m_verbosity > 5){
     pout() << "sisdc::integrate_advection_reaction" << endl;
@@ -799,26 +927,26 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
 
   // Advance phi_(m+1) = phi_m + dtm*F_A using either subcyling or not. These routines do nothing
   // with the operator slopes for phi, but they do adjust the slopes m_Fsig (but not m_Fsum) for sigma. Incidentally,
-  // if m=0 and a_corrector=true, we can increment directly with the precomputed advection-reaction. This means that
+  // if m=0 and a_lagged_terms=true, we can increment directly with the precomputed advection-reaction. This means that
   // we can skip the advective advance. The sigma advance is accordingly also skipped.
-  const bool skip = (a_m == 0 && a_corrector);
+  const bool skip = (a_m == 0 && a_lagged_terms);
   const Real t0 = MPI_Wtime();
   if(!skip){
     if(m_subcycle){
       if(m_multistep){
-	sisdc::integrate_advection_multistep(a_dt, a_m, a_corrector);
+	sisdc::integrate_advection_multistep(a_dt, a_m, a_lagged_terms);
       }
       else{
-	sisdc::integrate_advection_subcycle(a_dt, a_m, a_corrector);
+	sisdc::integrate_advection_subcycle(a_dt, a_m, a_lagged_terms);
       }
     }
     else{
-      sisdc::integrate_advection_nosubcycle(a_dt, a_m, a_corrector);
+      sisdc::integrate_advection_nosubcycle(a_dt, a_m, a_lagged_terms);
     }
   }
   const Real t1 = MPI_Wtime();
 
-  // Add in the reaction term and then compute the operator slopes.
+  // Add in the reaction term and then compute the new operator slopes.
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
   // advection-reaction operator slope. In this case phi_(m+1) is bogus and we need to recompute it. Otherwise,
   // phi_(m+1) = phi_m + dtm*FA_m, and we just increment with the reaction operator. 
@@ -837,7 +965,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       const EBAMRCellData& FAR_m = storage->get_FAR()[a_m]; // Slope, doesn't require recomputation. 
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, FAR_m, m_dtm[a_m]);
-      if(a_corrector) {
+      if(a_lagged_terms) {
 	data_ops::copy(scratch, FAR_m);
       }
     }
@@ -854,9 +982,11 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       // m_amr->average_down(phi_m1, m_cdr->get_phase());
       // m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
 
-      if(a_corrector){ // Back up the old slope first, we will need it for the lagged term
+      if(a_lagged_terms){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
       }
+
+      // Re-compute the advection-reaction slope for node t_m
       data_ops::copy(FAR_m, phi_m1);            // FAR_m = (phi_(m+1) - phi_m)/dtm
       data_ops::incr(FAR_m, phi_m, -1.0);       // :
       data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
@@ -868,7 +998,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
     // FAR_m above after the advection-reaction advance, but we also backed up the old term into scratch. 
-    if(a_corrector){
+    if(a_lagged_terms){
       data_ops::incr(phi_m1, scratch, -m_dtm[a_m]); // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k)
       sisdc::quad(scratch, storage->get_F(), a_m);  // Does the quadrature of the lagged operator slopes. 
       data_ops::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
@@ -886,7 +1016,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
   }
 
   const Real t3 = MPI_Wtime();
-  if(a_corrector){ // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m. 
+  if(a_lagged_terms){ // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m. 
     EBAMRIVData& Fsig_lag = m_sigma_scratch->get_Fold()[a_m];
     data_ops::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
 
@@ -906,7 +1036,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
 #endif
 }
 
-void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_corrector){
+void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_lagged_terms){
   CH_TIME("sisdc::integrate_advection_nosubcycle");
   if(m_verbosity > 5){
     pout() << "sisdc::integrate_advection_nosubcycle" << endl;
@@ -917,7 +1047,7 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
   //
   //       The lagged terms are not a part of this routine. 
 
-  if(a_m == 0 && a_corrector){
+  if(a_m == 0 && a_lagged_terms){
     MayDay::Abort("sisdc::integrate_advection_nosubcycle - (m==0 && corrector==true) should never happen");
   }
 
@@ -954,7 +1084,7 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
   data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 }
 
-void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const bool a_corrector){
+void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const bool a_lagged_terms){
   CH_TIME("sisdc::integrate_advection_nosubcycle");
   if(m_verbosity > 5){
     pout() << "sisdc::integrate_advection_nosubcycle" << endl;
@@ -965,7 +1095,7 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
   //
   //       The lagged terms are not a part of this routine. 
 
-  if(a_m == 0 && a_corrector){
+  if(a_m == 0 && a_lagged_terms){
     MayDay::Abort("sisdc::integrate_advection_multistep - (m==0 && corrector==true) should never happen");
   }
 
@@ -1077,7 +1207,7 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
 
 }
 
-void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_corrector){
+void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lagged_terms){
   CH_TIME("sisdc::integrate_diffusion");
   if(m_verbosity > 5){
     pout() << "sisdc::integrate_diffusion" << endl;
@@ -1102,7 +1232,7 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_cor
       data_ops::set_value(source, 0.0); // No source term
       
       data_ops::copy(init_soln, phi_m1);      // Copy initial solutions
-      if(a_corrector){
+      if(a_lagged_terms){
 	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
 	data_ops::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
@@ -1138,6 +1268,123 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_cor
     else{
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
       data_ops::set_value(FD_m1k, 0.0);
+    }
+  }
+}
+
+void sisdc::integrate_AP_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms, const bool a_predictor){
+  CH_TIME("sisdc::integrate_AP_advection_reaction");
+  if(m_verbosity > 5){
+    pout() << "sisdc::integrate_AP_advection_reaction" << endl;
+  }
+
+  // Advance phi_(m+1) = phi_m + dtm*F_A using either subcyling or not. These routines do nothing
+  // with the operator slopes for phi, but they do adjust the slopes m_Fsig (but not m_Fsum) for sigma. Incidentally,
+  // if m=0 and a_lagged_terms=true, we can increment directly with the precomputed advection-reaction. This means that
+  // we can skip the advective advance. The sigma advance is accordingly also skipped.
+  const bool skip = (a_m == 0 && a_lagged_terms); // First step in corrector => true. False otherwise. 
+
+  // Compute phi_(m+1) = phi_m + dt_m*DivF. If this is the AP predictor, we can store divF. If this is the AP corrector,
+  // we can fetch divF from the predictor. 
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1]; 
+    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
+
+
+    if(solver->is_mobile()){
+      EBAMRCellData& divF = storage->get_divF();
+      if(a_predictor && !skip){ // Need to compute divF for predictor. For the corrector, it has already been computed. Yay!
+	const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
+	solver->compute_divF(divF, phi_m, extrap_dt, true);                        // divF =  Div(v_m*phi_m^(k+1))
+      }
+
+      // phi_(m+1) = phi_m - dt*div(F)
+      data_ops::copy(phi_m1, phi_m);
+      data_ops::incr(phi_m1, divF, -m_dtm[a_m]);
+      data_ops::floor(phi_m1, 0.0);
+    }
+    else{
+      data_ops::copy(phi_m1, phi_m);
+    }
+  }
+
+  // Update sigma. Also compute the new slope. This codes computes the new slope and does
+  // sigma_(m+1) = sigma_m + dt*J_m(phi_m^(k+1)). If this is the first step in the SDC correcting sweeps, we
+  // can skip this update. Since the boundary flux comes in through div(F), we only need to do this in the AP predictor
+  if(a_predictor){
+    EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
+    EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
+    const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
+    m_sigma->compute_rhs(Fsig_new); // Fills Fsig_new with BC data in solver
+    data_ops::copy(sigma_m1, sigma_m);
+    data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
+  }
+
+  // Add in the reaction operator
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1]; 
+    const EBAMRCellData& src   = solver->get_source();
+
+    data_ops::incr(phi_m1, src, m_dtm[a_m]);
+  }
+
+  // Add in the lagged advection-reaction terms for the CDR equations. 
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_m1  = storage->get_phi()[a_m+1]; // This contains phi_m - dt*div(F) + dt*R
+    EBAMRCellData& phi_m   = storage->get_phi()[a_m];   // This contains phi_m - dt*div(F) + dt*R
+    EBAMRCellData& FAR_m   = storage->get_FAR()[a_m];   // Old operator slope
+    EBAMRCellData& scratch = storage->get_scratch();    // Scratch storage
+
+
+    // Back up the old slope first
+    if(a_predictor){ // For the predictor, we shouldn't monkey with the slopes
+      if(a_lagged_terms){
+	data_ops::incr(phi_m1, FAR_m, -m_dtm[a_m]);   // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(-div(F) + R - FAR_m^k)
+	sisdc::quad(scratch, storage->get_F(), a_m);  // Does the quadrature of the lagged operator slopes. 
+	data_ops::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
+      }
+    }
+    else{ // For the corrector, we do need to update the slopes as we move along
+      if(a_lagged_terms) { 
+	data_ops::copy(scratch, FAR_m); // Put the old operator slope in scratch; we need a backup
+      }
+
+      // Update the slopes
+      data_ops::copy(FAR_m, phi_m1);            // FAR_m = (phi_(m+1) - phi_m)/dtm
+      data_ops::incr(FAR_m, phi_m, -1.0);       // :
+      data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
+
+      //
+      if(a_lagged_terms){
+	data_ops::incr(phi_m1, scratch, -m_dtm[a_m]); // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k)
+	sisdc::quad(scratch, storage->get_F(), a_m);  // Does the quadrature of the lagged operator slopes. 
+	data_ops::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
+      }
+    }
+  }
+
+  // Add in the lagged terms for sigma. We have already done sigma_(m+1) = sigma_m + dt*J_m. Now add the lagged terms
+  if(a_predictor){
+    EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
+    const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
+
+    if(a_lagged_terms){
+      EBAMRIVData& Fsig_lag = m_sigma_scratch->get_Fold()[a_m]; // Add in the lagged term
+      data_ops::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
+
+      // Add in the quadrature term
+      EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
+      sisdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
+      data_ops::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
     }
   }
 }
@@ -2022,7 +2269,7 @@ void sisdc::update_stationary_rte(const Vector<EBAMRCellData*>& a_cdr_states, co
   }
 }
 
-void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_corrector){
+void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_terms){
   CH_TIME("sisdc::integrate_rte(full)");
   if(m_verbosity > 5){
     pout() << "sisdc::integrate_rte(full)" << endl;
@@ -2030,13 +2277,18 @@ void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_corrector
 
   if(m_do_rte){
     if((m_step + 1) % m_fast_rte == 0){
-      const Real time = m_time + m_dtm[a_m]; // This is the current time
+      if(!(m_rte->is_stationary())){
+	const Real time = m_time + m_dtm[a_m]; // This is the current time
       
-      Vector<EBAMRCellData*>  rte_states  = m_rte->get_states();
-      Vector<EBAMRCellData*>  rte_sources = m_rte->get_sources();
-      Vector<EBAMRCellData*>  cdr_states  = sisdc::get_cdr_phik(a_m);
-      EBAMRCellData& E = m_poisson_scratch->get_E_cell();
-      this->solve_rte(rte_states, rte_sources, cdr_states, E, time, a_dt, centering::cell_center);
+	Vector<EBAMRCellData*>  rte_states  = m_rte->get_states();
+	Vector<EBAMRCellData*>  rte_sources = m_rte->get_sources();
+	Vector<EBAMRCellData*>  cdr_states  = sisdc::get_cdr_phik(a_m);
+	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+	this->solve_rte(rte_states, rte_sources, cdr_states, E, time, a_dt, centering::cell_center);
+#if 1 // Debug
+	MayDay::Abort("sisdc::integrate_rte - shouldn't happen");
+#endif
+      }
     }
   }
 }
@@ -2350,7 +2602,7 @@ void sisdc::redist_level(LevelData<EBCellFAB>&       a_state,
   level_redist.redistribute(a_state, redist_interv, solver_interv);
 }
 
-void sisdc::integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_corrector){
+void sisdc::integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_lagged_terms){
   CH_TIME("sisdc::integrate_advection_subcycle");
   if(m_verbosity > 5){
     pout() << "sisdc::integrate_advection_subcycle" << endl;

@@ -24,11 +24,12 @@ public:
   void deallocate_storage();
 
   EBAMRCellData& get_scratch()  { return m_scratch;    }
-  EBAMRCellData& get_scratch2() { return m_scratch2;    }
+  EBAMRCellData& get_scratch2() { return m_scratch2;   }
   EBAMRCellData& get_error()    { return m_error;      }
   EBAMRCellData& get_gradient() { return m_gradient;   }
   EBAMRCellData& get_old()      { return m_old;        }
   EBAMRCellData& get_scratchD() { return m_scratchD;   }
+  EBAMRCellData& get_divF()     { return m_divF;       }
   
 
   Vector<EBAMRCellData>& get_phi()     { return m_phi;     }
@@ -62,6 +63,7 @@ protected:
   EBAMRCellData m_gradient; // Storage for holding gradient
   EBAMRCellData m_old;      // "Old solution". Only used for subcycling
   EBAMRCellData m_scratchD; // SpaceDim scratch storage
+  EBAMRCellData m_divF;     // SpaceDim scratch storage
   
   Vector<EBAMRCellData> m_phi;      // phi^k in the  SISDC notation
   Vector<EBAMRCellData> m_FAR;      // FAR(phi^k) in the SISDC notation
