@@ -1226,7 +1226,7 @@ void time_stepper::compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
     CH_assert(density[0]->nComp()      == 1);
     
     m_amr->compute_gradient(gradient, density);                         // Compute cell-centered gradient
-    //    m_amr->average_down(gradient, a_phase);                             // Average down - shouldn't be necesasry
+    m_amr->average_down(gradient, a_phase);                             // Average down - shouldn't be necesasry
     m_amr->interp_ghost(gradient, a_phase);                             // Interpolate ghost cells (have to do this before interp)
     this->extrapolate_to_eb(eb_gradient, a_phase, gradient);            // Extrapolate to EB
     this->project_flux(grad_density, eb_gradient);                      // Project onto EB
@@ -1346,11 +1346,11 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   m_amr->allocate(E_norm, m_cdr->get_phase(), 1);         // Allocate storage for |E|
 
   data_ops::vector_length(E_norm, a_E);             // Compute |E|
-  //  m_amr->average_down(E_norm, m_cdr->get_phase());  // Average down
+  m_amr->average_down(E_norm, m_cdr->get_phase());  // Average down
   m_amr->interp_ghost(E_norm, m_cdr->get_phase());  // Interpolate ghost cells. 
 
   m_amr->compute_gradient(grad_E, E_norm);           // Compute grad(|E|)
-  // m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
+  m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
   m_amr->interp_ghost(grad_E, m_cdr->get_phase());   // Interpolate ghost cells
 
   // Call full versions
@@ -1517,6 +1517,7 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
 
   // Computed source terms onto here
   EBCellFAB tmp(ebisbox, a_E.getRegion(), num_species);
+  BaseFab<Real>& tmpFAB = tmp.getSingleValuedFAB();
 
   const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
   const BaseFab<Real>& gradEfab = a_gradE.getSingleValuedFAB();
@@ -1560,7 +1561,7 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      tmp.getSingleValuedFAB()(iv,idx) = sources[idx];
+      tmpFAB(iv,idx) = sources[idx];
     }
   }
 
@@ -2100,10 +2101,13 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
 
   const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
 
-  //  const IntVectSet ivs(a_box);
+  // Computed source terms onto here
+  EBCellFAB tmp(ebisbox, a_E.getRegion(), num_species);
+  BaseFab<Real>& tmpFAB = tmp.getSingleValuedFAB();
+
+  // Loop over all points
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-
 
     pos = origin + iv*a_dx;
     E   = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
@@ -2115,18 +2119,22 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
       cdr_densities[idx] = Max(0.0, phi);
     }
 
-
     // Call plaskin
-
     sources = m_plaskin->compute_rte_source_terms(a_time, 1.0, a_dx, pos, E, cdr_densities);
-    // Put source term in place
+    
+    // Put into temporary data holder
     for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      a_source[idx]->getSingleValuedFAB()(iv, comp) = sources[idx];
-
-      // Covered is bogus
-      //      a_source[idx]->setCoveredCellVal(0.0, comp);
+      tmpFAB(iv, idx) = sources[idx];
     }
+  }
+
+  // Copy result back to solvers
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    a_source[idx]->setVal(0.0);
+    a_source[idx]->plus(tmp, idx, 0, 1);
+    a_source[idx]->setCoveredCellVal(0.0, comp);
   }
 }
 

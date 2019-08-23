@@ -153,7 +153,7 @@ morrow_lowke::~morrow_lowke(){
 
 }
 
-Vector<RealVect> morrow_lowke::compute_velocities(const RealVect& a_E) const{
+Vector<RealVect> morrow_lowke::compute_velocities(const RealVect a_E) const{
   Vector<RealVect> velocities(m_num_species);
   
   velocities[m_nelec_idx] = this->compute_ve(a_E);
@@ -163,7 +163,7 @@ Vector<RealVect> morrow_lowke::compute_velocities(const RealVect& a_E) const{
   return velocities;
 }
 
-RealVect morrow_lowke::compute_ve(const RealVect& a_E) const{
+RealVect morrow_lowke::compute_ve(const RealVect a_E) const{
   RealVect ve = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;          // Morrow-Lowke wants E in V/cm
@@ -192,7 +192,7 @@ RealVect morrow_lowke::compute_ve(const RealVect& a_E) const{
   return ve;
 }
 
-RealVect morrow_lowke::compute_vp(const RealVect& a_E) const{
+RealVect morrow_lowke::compute_vp(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;           // E in V/cm
   RealVect vp = 2.34*E*m_p/units::s_atm2pascal;  // Morrow-Lowke wants V/cm
   vp *= 0.01;                             // Morrow-Lowke expression is in cm/s
@@ -200,7 +200,7 @@ RealVect morrow_lowke::compute_vp(const RealVect& a_E) const{
   return vp;  
 }
 
-RealVect morrow_lowke::compute_vn(const RealVect& a_E) const{
+RealVect morrow_lowke::compute_vn(const RealVect a_E) const{
   RealVect vn = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;       // Morrow-Lowke wants E in V/cm
@@ -220,9 +220,9 @@ RealVect morrow_lowke::compute_vn(const RealVect& a_E) const{
   return vn;
 }
 
-Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_densities,
-						const Vector<Real>& a_photon_densities,
-						const RealVect&     a_E) const {
+Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real> a_species_densities,
+						const Vector<Real> a_photon_densities,
+						const RealVect     a_E) const {
   Vector<Real> source(m_num_species, 0.0);
 
   const Vector<RealVect> vel = this->compute_velocities(a_E); // Does it's own conversion
@@ -265,7 +265,7 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real>& a_species_de
   return source;
 }
 
-Real morrow_lowke::compute_alpha(const RealVect& a_E) const{
+Real morrow_lowke::compute_alpha(const RealVect a_E) const{
   Real alpha    = 0.;
   Real alphabyN = 0.;
 
@@ -288,7 +288,7 @@ Real morrow_lowke::compute_alpha(const RealVect& a_E) const{
   return alpha;
 }
 
-Real morrow_lowke::compute_eta(const RealVect& a_E) const{
+Real morrow_lowke::compute_eta(const RealVect a_E) const{
 
   const Real eta2 = this->compute_eta2(a_E); 
   const Real eta3 = this->compute_eta3(a_E);
@@ -297,7 +297,7 @@ Real morrow_lowke::compute_eta(const RealVect& a_E) const{
   return eta;
 }
 
-Real morrow_lowke::compute_eta2(const RealVect& a_E) const{
+Real morrow_lowke::compute_eta2(const RealVect a_E) const{
   Real eta2    = 0.;
   Real eta2byN = 0.;
 
@@ -321,7 +321,7 @@ Real morrow_lowke::compute_eta2(const RealVect& a_E) const{
   return eta2;
 }
 
-Real morrow_lowke::compute_eta3(const RealVect& a_E) const{
+Real morrow_lowke::compute_eta3(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;         // Morrow-Lowke wants E in V/cm
   const Real Emag  = E.vectorLength();  //
   const Real N     = m_N*1.E-6;         // Morrow-Lowke weants N in cm^3
@@ -338,13 +338,13 @@ Real morrow_lowke::compute_eta3(const RealVect& a_E) const{
   return eta3;
 }
 
-Real morrow_lowke::compute_beta(const RealVect& a_E) const{
+Real morrow_lowke::compute_beta(const RealVect a_E) const{
   Real beta = 2.0E-7;
   beta *= 1.E-6; // Morrow-Lowke expression is in cm^3. Make it m^3
   return beta;
 }
 
-Real morrow_lowke::compute_De(const RealVect& a_E) const{
+Real morrow_lowke::compute_De(const RealVect a_E) const{
   const RealVect E  = a_E*1.E-2;                 // Morrow-Lowke wants E in V/cm
   const Real Emag   = E.vectorLength();          //
   const Real N      = m_N*1.E-6;                 // Morrow-Lowke weants N in cm^3
@@ -360,7 +360,7 @@ Real morrow_lowke::compute_De(const RealVect& a_E) const{
   return De;
 }
 
-Vector<Real> morrow_lowke::compute_diffusion_coefficients(const RealVect& a_E) const {
+Vector<Real> morrow_lowke::compute_diffusion_coefficients(const RealVect a_E) const {
 
   Vector<Real> diffCo(m_num_species, 0.0);
 
@@ -377,14 +377,14 @@ Vector<Real> morrow_lowke::compute_diffusion_coefficients(const RealVect& a_E) c
   return diffCo;
 }
 
-Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extrapolated_fluxes,
-						     const Vector<Real>& a_ion_densities,
-						     const Vector<Real>& a_ion_velocities,
-						     const Vector<Real>& a_photon_fluxes,
-						     const RealVect&     a_E,
-						     const RealVect&     a_pos,
-						     const RealVect&     a_normal,
-						     const Real&         a_time) const{
+Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
+						     const Vector<Real> a_ion_densities,
+						     const Vector<Real> a_ion_velocities,
+						     const Vector<Real> a_photon_fluxes,
+						     const RealVect     a_E,
+						     const RealVect     a_pos,
+						     const RealVect     a_normal,
+						     const Real         a_time) const{
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0); 
 
@@ -408,14 +408,14 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real>& a_extra
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_conductor_fluxes(const Vector<Real>& a_extrapolated_fluxes,
-						    const Vector<Real>& a_ion_densities,
-						    const Vector<Real>& a_ion_velocities,
-						    const Vector<Real>& a_photon_fluxes,
-						    const RealVect&     a_E,
-						    const RealVect&     a_pos,
-						    const RealVect&     a_normal,
-						    const Real&         a_time) const{
+Vector<Real> morrow_lowke::compute_conductor_fluxes(const Vector<Real> a_extrapolated_fluxes,
+						    const Vector<Real> a_ion_densities,
+						    const Vector<Real> a_ion_velocities,
+						    const Vector<Real> a_photon_fluxes,
+						    const RealVect     a_E,
+						    const RealVect     a_pos,
+						    const RealVect     a_normal,
+						    const Real         a_time) const{
   Vector<Real> fluxes(m_num_species, 0.0);
 
 #if 0 // Debug
@@ -450,14 +450,14 @@ Vector<Real> morrow_lowke::compute_conductor_fluxes(const Vector<Real>& a_extrap
 }
 
 
-Vector<Real> morrow_lowke::compute_cathode_flux(const Vector<Real>& a_extrapolated_fluxes,
-						const Vector<Real>& a_ion_densities,
-						const Vector<Real>& a_ion_velocities,
-						const Vector<Real>& a_photon_fluxes,
-						const RealVect&     a_E,
-						const RealVect&     a_pos,
-						const RealVect&     a_normal,
-						const Real&         a_time) const{
+Vector<Real> morrow_lowke::compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
+						const Vector<Real> a_ion_densities,
+						const Vector<Real> a_ion_velocities,
+						const Vector<Real> a_photon_fluxes,
+						const RealVect     a_E,
+						const RealVect     a_pos,
+						const RealVect     a_normal,
+						const Real         a_time) const{
   Vector<Real> fluxes(m_num_species);
 
   // Set everything to outflow
@@ -477,14 +477,14 @@ Vector<Real> morrow_lowke::compute_cathode_flux(const Vector<Real>& a_extrapolat
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_anode_flux(const Vector<Real>& a_extrapolated_fluxes,
-					      const Vector<Real>& a_ion_densities,
-					      const Vector<Real>& a_ion_velocities,
-					      const Vector<Real>& a_photon_fluxes,
-					      const RealVect&     a_E,
-					      const RealVect&     a_pos,
-					      const RealVect&     a_normal,
-					      const Real&         a_time) const{
+Vector<Real> morrow_lowke::compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
+					      const Vector<Real> a_ion_densities,
+					      const Vector<Real> a_ion_velocities,
+					      const Vector<Real> a_photon_fluxes,
+					      const RealVect     a_E,
+					      const RealVect     a_pos,
+					      const RealVect     a_normal,
+					      const Real         a_time) const{
   Vector<Real> fluxes(m_num_species);
 
   // Set to outflux
@@ -496,16 +496,16 @@ Vector<Real> morrow_lowke::compute_anode_flux(const Vector<Real>& a_extrapolated
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_cdr_domain_fluxes(const Real&           a_time,
-						     const RealVect&       a_pos,
-						     const int&            a_dir,
-						     const Side::LoHiSide& a_side,
-						     const RealVect&       a_E,
-						     const Vector<Real>&   a_cdr_densities,
-						     const Vector<Real>&   a_cdr_velocities,
-						     const Vector<Real>&   a_cdr_gradients,
-						     const Vector<Real>&   a_rte_fluxes,
-						     const Vector<Real>&   a_extrap_cdr_fluxes) const{
+Vector<Real> morrow_lowke::compute_cdr_domain_fluxes(const Real           a_time,
+						     const RealVect       a_pos,
+						     const int            a_dir,
+						     const Side::LoHiSide a_side,
+						     const RealVect       a_E,
+						     const Vector<Real>   a_cdr_densities,
+						     const Vector<Real>   a_cdr_velocities,
+						     const Vector<Real>   a_cdr_gradients,
+						     const Vector<Real>   a_rte_fluxes,
+						     const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_num_species, 0.0); 
 
   int idx;
@@ -537,7 +537,7 @@ Vector<Real> morrow_lowke::compute_cdr_domain_fluxes(const Real&           a_tim
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_rte_source_terms(const Vector<Real>& a_densities, const RealVect& a_E) const{
+Vector<Real> morrow_lowke::compute_rte_source_terms(const Vector<Real> a_densities, const RealVect a_E) const{
   Vector<Real> ret(m_num_photons);
 
   const Vector<RealVect> vel = this->compute_velocities(a_E);      // Compute velocities
@@ -554,7 +554,7 @@ Vector<Real> morrow_lowke::compute_rte_source_terms(const Vector<Real>& a_densit
   return ret;
 }
 
-Real morrow_lowke::initial_sigma(const Real a_time, const RealVect& a_pos) const{
+Real morrow_lowke::initial_sigma(const Real a_time, const RealVect a_pos) const{
   return 0.;
 }
 
