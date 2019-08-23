@@ -617,7 +617,6 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
     pout() << "poisson_solver::write_mfdata" << endl;
   }
 
-  const int comp = 0;
   const int ncomp = a_data[0]->nComp();
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
@@ -649,14 +648,31 @@ void poisson_solver::write_mfdata(EBAMRCellData& a_output, int& a_comp, const MF
 	const FArrayBox& fab_gas = data_gas[dit()].getFArrayBox();
 	const FArrayBox& fab_sol = data_sol[dit()].getFArrayBox();
 
-	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
-	  const IntVect iv = ivsit();
-	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	    scratch_gas(iv, comp) = fab_sol(iv, comp);
+	// TLDR: There are four cases
+	// 1. Both are covered => inside electrode
+	// 2. Gas is covered, solid is regular => inside solid phase only
+	// 3. Gas is regular, solid is covered => inside gas phase only
+	// 4. Gas is !(covered || regular) and solid is !(covered || regular) => on dielectric boundary
+	if(!(ebisb_gas.isAllCovered() && ebisb_sol.isAllCovered())){ // Outside electrode, lets do stuff
+	  if(ebisb_gas.isAllCovered() && ebisb_sol.isAllRegular()){ // Case 2, copy directly. 
+	    scratch_gas += fab_sol;
 	  }
-	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	    //	    scratch_gas(iv, comp) = 0.5*(data_gas(iv, comp) + data_sol(iv, comp));
-	    scratch_gas(iv, comp) = fab_gas(iv,comp);
+	  else if(ebisb_gas.isAllRegular() && ebisb_sol.isAllCovered()) { // Case 3. Inside gas phase. Already did this. 
+	  }
+	  else{ // Case 4, needs special treatment. 
+	    for (BoxIterator bit(box); bit.ok(); ++bit){ // Loop through all cells here
+	      const IntVect iv = bit();
+	      if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){   // Regular cells from phase 2
+		for (int comp = 0; comp < ncomp; comp++){
+		  scratch_gas(iv, comp) = fab_sol(iv, comp);
+		}
+	      }
+	      else if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells. Use gas side data
+		for (int comp = 0; comp < ncomp; comp++){
+		  scratch_gas(iv, comp) = fab_gas(iv,comp);
+		}
+	      }
+	    }
 	  }
 	}
       }
