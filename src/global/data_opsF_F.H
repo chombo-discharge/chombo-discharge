@@ -291,6 +291,31 @@ inline void FORTRAN_NAME(inlineAVERAGE_FACE_TO_CELL, inlineAVERAGE_FACE_TO_CELL)
 }
 #endif  // GUARDAVERAGE_FACE_TO_CELL 
 
+#ifndef GUARDINVERT 
+#define GUARDINVERT 
+// Prototype for Fortran procedure invert ...
+//
+void FORTRAN_NAME( INVERT ,invert )(
+      CHFp_FRA(data)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(region) );
+
+#define FORT_INVERT FORTRAN_NAME( inlineINVERT, inlineINVERT)
+#define FORTNT_INVERT FORTRAN_NAME( INVERT, invert)
+
+inline void FORTRAN_NAME(inlineINVERT, inlineINVERT)(
+      CHFp_FRA(data)
+      ,CHFp_CONST_INT(ncomps)
+      ,CHFp_BOX(region) )
+{
+ CH_TIMELEAF("FORT_INVERT");
+ FORTRAN_NAME( INVERT ,invert )(
+      CHFt_FRA(data)
+      ,CHFt_CONST_INT(ncomps)
+      ,CHFt_BOX(region) );
+}
+#endif  // GUARDINVERT 
+
 }
 
 #endif

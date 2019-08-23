@@ -55,7 +55,7 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
 
   CH_assert(a_facedata.nComp() == a_celldata.nComp());
 
-#if 1 // New code, should perform 5x faster than the crap below. 
+#if 0 // New code, should perform 5x faster than the crap below. 
   const int ncomp = a_facedata.nComp();
   for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
     const EBCellFAB& celldata = a_celldata[dit()];
@@ -633,6 +633,53 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Re
   }
   a_min = tmp;
 #endif
+}
+
+void data_ops::invert(EBAMRFluxData& a_data){
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    data_ops::invert(*a_data[lvl]);
+  }
+}
+
+void data_ops::invert(LevelData<EBFluxFAB>& a_data){
+  
+  const int ncomp = a_data.nComp();
+
+  for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit){
+    EBFluxFAB& fluxfab = a_data[dit()];
+    const EBISBox& ebisbox = fluxfab.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box box          = a_data.disjointBoxLayout().get(dit());
+    const IntVectSet irreg = ebisbox.getIrregIVS(box);
+
+    // Do each dircetion
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& data = a_data[dit()][dir];
+
+      // Need a copy because regular Fortran loop inverts irregular face cells
+      EBFaceFAB cpy(ebisbox, box, dir, ncomp);
+      cpy.setVal(0.0);
+      cpy += data;
+      
+      // Regular cells
+      Box facebox = box;
+      facebox.surroundingNodes(dir);
+      BaseFab<Real>& data_fab = data.getSingleValuedFAB();
+      FORT_INVERT(CHF_FRA(data_fab),
+		  CHF_CONST_INT(ncomp),
+		  CHF_BOX(facebox));
+      
+
+      // Irregular cells
+      FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
+      for (FaceIterator faceit(irreg, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+	const FaceIndex& face  = faceit();
+	for (int comp = 0; comp < ncomp; comp++){
+	  data(face, comp) = 1./cpy(face, comp);
+	}
+      }
+    }
+  }
 }
 
 void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){

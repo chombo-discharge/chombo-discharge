@@ -311,6 +311,15 @@ protected:
   virtual void set_aco_and_bco();
 
   /*!
+    @brief Set both aco and bco (irregular version)
+  */
+  virtual void set_aco_and_bco_box(EBCellFAB&       a_aco,
+				   BaseIVFAB<Real>& a_bco_irreg,
+				   const Box        a_cellbox,
+				   const RealVect   a_origin,
+				   const Real       a_dx);
+
+  /*!
     @brief Set a-coefficient
   */
   virtual void set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Real a_dx);

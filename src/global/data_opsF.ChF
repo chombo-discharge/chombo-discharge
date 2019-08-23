@@ -297,3 +297,20 @@ c Compute the Laplacian in the numerator (including cross-derivatives)
       return
 
       end
+
+      subroutine invert(
+     &     chf_fra[data],
+     &     chf_const_int[ncomps],
+     &     chf_box[region])
+
+      integer ic
+      integer chf_ddecl[i;j;k]
+
+      do ic=0,ncomps-1
+         chf_multido[region;i;j;k]
+            data(chf_ix[i;j;k],ic) = 1.0/data(chf_ix[i;j;k],ic)
+         chf_enddo
+      enddo      
+      return
+      
+      end

@@ -118,6 +118,12 @@ public:
 
   static void get_max_min_norm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> >& data);
 
+  static void invert(EBAMRFluxData& a_data);
+
+  static void invert(LevelData<EBFluxFAB>& a_data);
+
+  static void invert(EBFluxFAB& a_data);
+
   static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
 
   static void kappa_scale(EBAMRCellData& a_data);

@@ -285,12 +285,12 @@ void eddington_sp1::allocate_internals(){
   
   const int ncomp = 1;
 
-  m_amr->allocate(m_aco,        m_phase, ncomp);
-  m_amr->allocate(m_bco,        m_phase, ncomp);
-  m_amr->allocate(m_bco_irreg,  m_phase, ncomp);
-  m_amr->allocate(m_state,  m_phase, ncomp);
-  m_amr->allocate(m_source, m_phase, ncomp);
-  m_amr->allocate(m_resid,  m_phase, ncomp);
+  m_amr->allocate(m_aco,       m_phase, ncomp);
+  m_amr->allocate(m_bco,       m_phase, ncomp);
+  m_amr->allocate(m_bco_irreg, m_phase, ncomp);
+  m_amr->allocate(m_state,     m_phase, ncomp);
+  m_amr->allocate(m_source,    m_phase, ncomp);
+  m_amr->allocate(m_resid,     m_phase, ncomp);
 
   data_ops::set_value(m_resid,  0.0);
   data_ops::set_value(m_state,  0.0);
@@ -481,7 +481,7 @@ void eddington_sp1::set_coefficients(){
   }
 
   const int ncomp = 1;
-  const int ghost = 1;
+  const int ghost = 3;
 
   m_amr->allocate(m_aco,        m_phase, ncomp, ghost);
   m_amr->allocate(m_bco,        m_phase, ncomp, ghost);
@@ -496,23 +496,36 @@ void eddington_sp1::set_aco_and_bco(){
     pout() << m_name + "::set_aco_and_bco" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
+#define USE_NEW_ACO_AND_BCO 1
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-
+  // This loop fills aco with kappa and bco_irreg with 1./kappa
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const RealVect origin = m_physdom->get_prob_lo();
     const Real dx         = m_amr->get_dx()[lvl];
-
+    
     LevelData<EBCellFAB>& aco            = *m_aco[lvl];
     LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
     LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
 
     for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
+#if USE_NEW_ACO_AND_BCO
+      const Box box = (m_amr->get_grids()[lvl]).get(dit());
+      this->set_aco_and_bco_box(aco[dit()], bco_irr[dit()], box, origin, dx);
+#else // Old way
       this->set_aco(aco[dit()],        origin, dx);   // Set aco = kappa
       this->set_bco_face(bco[dit()],   origin, dx);   // Set bco = 1./kappa
       this->set_bco_eb(bco_irr[dit()], origin, dx);   // Set bco = 1./kappa
+#endif
     }
   }
+
+#if USE_NEW_ACO_AND_BCO // New way of doing this. This saves us a LOT of calls to photon_group->get_kappa
+  m_amr->average_down(m_aco, m_phase);
+  m_amr->interp_ghost(m_aco, m_phase);
+  data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->get_domains()); // Average aco onto face
+  data_ops::invert(m_bco); // Make m_bco = 1./kappa
+#endif
+  
 
 #if eddington_sp1_feature // Different scaling for the RTE
   data_ops::scale(m_aco,       1.0);       // aco = c*kappa
@@ -523,6 +536,45 @@ void eddington_sp1::set_aco_and_bco(){
   data_ops::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
   data_ops::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
 #endif
+}
+
+void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
+					BaseIVFAB<Real>& a_bco,
+					const Box        a_box,
+					const RealVect   a_origin,
+					const Real       a_dx){
+  CH_TIME("eddington_sp1::set_aco_and_bco_box");
+  if(m_verbosity > 10){
+    pout() << m_name + "::set_aco_and_bco_box" << endl;
+  }
+  
+  const int comp  = 0;
+  const int ncomp = 1;
+  
+  const EBISBox& ebisbox = a_aco.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+  // Regular aco
+  BaseFab<Real>& aco_fab = a_aco.getSingleValuedFAB();
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+
+    const RealVect pos = a_origin + iv*a_dx*RealVect::Unit;
+    aco_fab(iv, comp) = m_photon_group->get_kappa(pos);
+  }
+
+  // Regular bco
+
+  // Irregular stuff
+  const IntVectSet irreg = ebisbox.getIrregIVS(a_box);
+  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
+    const Real tmp = m_photon_group->get_kappa(pos);
+    a_aco(vof, comp) = tmp;
+    a_bco(vof, comp) = 1./tmp;
+  }
 }
 
 void eddington_sp1::set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Real a_dx){
