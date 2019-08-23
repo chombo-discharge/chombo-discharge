@@ -75,7 +75,7 @@ void sigma_solver::cache_state(){
   m_amr->allocate(m_cache, m_phase, ncomp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    m_state[lvl]->copyTo(*m_cache[lvl]);
+    m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
 
@@ -85,7 +85,7 @@ void sigma_solver::compute_rhs(EBAMRIVData& a_rhs){
     pout() << "sigma_solver::compute_rhs" << endl;
   }
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl ++){
-    m_flux[lvl]->copyTo(*a_rhs[lvl]);
+    m_flux[lvl]->localCopyTo(*a_rhs[lvl]);
   }
 }
 
@@ -312,7 +312,7 @@ void sigma_solver::set_sigma(const EBAMRIVData& a_sigma){
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_sigma[lvl]->copyTo(*m_state[lvl]);
+    a_sigma[lvl]->localCopyTo(*m_state[lvl]);
   }
 
   this->reset_cells(m_state);

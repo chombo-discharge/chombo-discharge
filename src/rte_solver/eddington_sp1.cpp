@@ -394,6 +394,8 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMR
       converged = true;
     }
     m_gmg_solver->revert(phi, rhs, finest_level, 0);
+
+    data_ops::set_covered_value(a_state, 0, 0.0);
   }
   else{
     if(m_use_tga){

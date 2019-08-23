@@ -1739,21 +1739,19 @@ void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCel
   const Interval src_interv(0, ncomp-1);
   const Interval dst_interv(a_comp, a_comp + ncomp - 1);
 
-  if(!a_interp){
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      a_data[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-    }
-  }
-  else {// Allocate some scratch data that we can use for interpolation
-    EBAMRCellData scratch;
-    m_amr->allocate(scratch, m_phase, ncomp);
-    data_ops::copy(scratch, a_data);
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_phase, ncomp);
+  data_ops::copy(scratch, a_data);
 
+  if(a_interp){
     m_amr->interpolate_to_centroids(scratch, phase::gas);
+  }
 
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
-    }
+  m_amr->average_down(scratch, m_phase);
+  m_amr->interp_ghost(scratch, m_phase);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
   }
 
   data_ops::set_covered_value(a_output, a_comp, 0.0);
