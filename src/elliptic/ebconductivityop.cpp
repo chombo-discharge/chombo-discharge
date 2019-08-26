@@ -1066,7 +1066,11 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
     {
       applyCFBCs(phi, a_phiCoar, a_homogeneousCFBC);
     }
+#if 0 // Original code - why was this here in the first place?!?!?!?!?
   if(true){////a_doexchange){
+#else
+  if(a_doexchange){
+#endif
     phi.exchange(phi.interval());
   }
 
@@ -1562,7 +1566,6 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
   for (int whichIter =0; whichIter < a_iterations; whichIter++)
     {
 
-
       //this is a multigrid operator so only homogeneous CF BC and null coar level
       CH_assert(a_rhs.ghostVect()    == m_ghostCellsRHS);
       CH_assert(a_phi.ghostVect()    == m_ghostCellsPhi);
@@ -1676,7 +1679,7 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
                 
                 for (int c = 0; c < m_colors.size()/2; ++c)
                   {
-                    GSColorAllIrregular(phifab, rhsfab, m_colors.size()/2*redBlack+c, dit[mybox]);
+		    GSColorAllIrregular(phifab, rhsfab, m_colors.size()/2*redBlack+c, dit[mybox]);
                   }
                 ibox++;
               }

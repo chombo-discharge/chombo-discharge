@@ -8,6 +8,7 @@
 #include "mfdirichletconductivityebbc.H"
 #include "mfconductivityop.H"
 #include "mfalias.H"
+#include "data_ops.H"
 
 #include <EBArith.H>
 #include <DirichletConductivityDomainBC.H>
@@ -101,6 +102,8 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 
   Vector<EBISLayout> layouts(num_phases);
   Vector<int> comps(num_phases);;
+
+
   
   for (int iphase = 0; iphase < num_phases; iphase++){
 
@@ -154,6 +157,8 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
     BaseIVFactory<Real> ivfact(ebisl, ivs);
     m_dirival[iphase] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
       (new LevelData<BaseIVFAB<Real> > (eblg.getDBL(), 1, IntVect::Zero, ivfact));
+
+
 
     // EB BC
     m_ebbc[iphase] = RefCountedPtr<mfdirichletconductivityebbc> (new mfdirichletconductivityebbc(a_domain,
@@ -217,6 +222,13 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
   m_ops.define(fac);
 
   EBArith::getMultiColors(m_colors);
+
+#if 1 // Define aggregate stencils in jump_bc object
+  LevelData<MFCellFAB> dummy(a_aco->disjointBoxLayout(), 1, a_ghost_phi*IntVect::Unit, *factory);
+  for (int iphase = 0; iphase < num_phases; iphase++){
+    m_jumpbc->define_agg_stencils(*m_dirival[iphase], dummy, iphase);
+  }
+#endif
 }
 
 void mfconductivityop::set_jump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
@@ -244,11 +256,17 @@ void mfconductivityop::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a
   pout() << "mfconductivityop::update_bc"<< endl;
 #endif
 
+  //  const Real t0 = MPI_Wtime();
   LevelData<MFCellFAB>* phi = const_cast<LevelData<MFCellFAB>* > (&a_phi);
   phi->exchange();
+  //  const Real t1 = MPI_Wtime();
 
   //  this->set_bc_from_levelset();
   this->set_bc_from_matching(a_phi, a_homogeneous);
+  //  const Real t2 = MPI_Wtime();
+
+  // pout() << "update bc exchange = " << 100.*(t1-t0)/(t2-t0) << endl;
+  // pout() << "update bc matching = " << 100.*(t2-t1)/(t2-t0) << endl;
 
 #if verb
   pout() << "mfconductivityop::update_bc - done" << endl;
@@ -312,8 +330,7 @@ void mfconductivityop::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, c
 
   if(m_multifluid){
     for (int iphase = 0; iphase <= 1; iphase++){
-    //    for (int iphase = 0; iphase <= 0; iphase++){
-      m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous); 
+      m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_homogeneous);
     }
   }
 
@@ -410,6 +427,7 @@ void mfconductivityop::preCond(LevelData<MFCellFAB>&       a_correction,
 #if verb
   pout() << "mfconductivityop::precond"<< endl;
 #endif
+
   this->relax(a_correction, a_residual, 40);
 }
 
@@ -762,11 +780,16 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
     for (int i = 0; i < a_iterations; i++){
       this->update_bc(a_e, homogeneous);
 
-      for (int iphase = 0; iphase < m_phases; iphase++){
+      for (int iphase = 0; iphase <= 1; iphase++){
 	mfalias::aliasMF(*m_alias[0], iphase, a_e);
 	mfalias::aliasMF(*m_alias[1], iphase, a_residual);
 
-	m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+#if 0 // Original code
+	//	m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
+	m_ebops[iphase]->relaxGauSai(*m_alias[0], *m_alias[1], 1);
+#else // test
+	m_ebops[iphase]->relaxGSRBFast(*m_alias[0], *m_alias[1], 1);
+#endif
       }
     }
 #else // Place to put optimized code
@@ -786,58 +809,56 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 
     
     for (int i = 0; i < a_iterations; i++){
-      const Real t0 = MPI_Wtime();
+      //      const Real t0 = MPI_Wtime();
       this->update_bc(a_e, homogeneous);
-      const Real t1 = MPI_Wtime();
+      //      const Real t1 = MPI_Wtime();
 
       for (int icolor = 0; icolor < m_colors.size(); icolor++){
-
-	// Apply homogeneous CFBCs
-
-	  // Get coarse-fine boundary conditions
-	  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	    for (int dir = 0; dir < SpaceDim; dir++){
-	      for (SideIterator sit; sit.ok(); sit.next()){
-		m_ebops[0]->applyHomogeneousCFBCs((*m_alias[0])[dit()], dit(), dir, sit());
-		m_ebops[1]->applyHomogeneousCFBCs((*m_alias[3])[dit()], dit(), dir, sit());
-	      }
+	// Get coarse-fine boundary conditions
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    for (SideIterator sit; sit.ok(); sit.next()){
+	      m_ebops[0]->applyHomogeneousCFBCs((*m_alias[0])[dit()], dit(), dir, sit());
+	      m_ebops[1]->applyHomogeneousCFBCs((*m_alias[3])[dit()], dit(), dir, sit());
 	    }
 	  }
-
-#if verb
-	  pout() << "mfconducitivyop::relax - applying operator gas" << endl;
-#endif
-	  m_ebops[0]->applyOp(*m_alias[2], *m_alias[0], NULL, true, true, false);
-#if verb
-	  pout() << "mfconducitivyop::relax - applying operator solid" << endl;
-#endif
-	  m_ebops[1]->applyOp(*m_alias[5], *m_alias[3], NULL, true, true, false);
-
-
-	  // Intersection boxes will be relaxed twice. Can't avoid this. 
-	  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	    m_ebops[0]->gsrbColor((*m_alias[0])[dit()],
-				  (*m_alias[2])[dit()],
-				  (*m_alias[1])[dit()],
-				  dbl.get(dit()),
-				  dit(),
-				  m_colors[icolor]);
-	    m_ebops[1]->gsrbColor((*m_alias[3])[dit()],
-				  (*m_alias[5])[dit()],
-				  (*m_alias[4])[dit()],
-				  dbl.get(dit()),
-				  dit(),
-				  m_colors[icolor]);
-	  }
-
-	  if((icolor-1) % 2 == 0 && icolor - 1 < m_colors.size()){
-	    m_alias[0]->exchange();
-	    m_alias[3]->exchange();
-	  }
 	}
-      const Real t2 = MPI_Wtime();
-      //      pout() << "update bc time = " << 100.*(t1 - t0)/(t2-t0) << "\t relax time = " << 100.*(t2 - t1)/(t2-t0) << endl;
+
+#if verb
+	pout() << "mfconducitivyop::relax - applying operator gas" << endl;
+#endif
+	m_ebops[0]->applyOp(*m_alias[2], *m_alias[0], NULL, true, true, false);
+#if verb
+	pout() << "mfconducitivyop::relax - applying operator solid" << endl;
+#endif
+	m_ebops[1]->applyOp(*m_alias[5], *m_alias[3], NULL, true, true, false);
+
+
+	// Intersection boxes will be relaxed twice. Can't avoid this. 
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  m_ebops[0]->gsrbColor((*m_alias[0])[dit()],
+				(*m_alias[2])[dit()],
+				(*m_alias[1])[dit()],
+				dbl.get(dit()),
+				dit(),
+				m_colors[icolor]);
+	  m_ebops[1]->gsrbColor((*m_alias[3])[dit()],
+				(*m_alias[5])[dit()],
+				(*m_alias[4])[dit()],
+				dbl.get(dit()),
+				dit(),
+				m_colors[icolor]);
+	}
+#if 1
+	if((icolor-1) % 2 == 0 && icolor - 1 < m_colors.size()){
+	  m_alias[0]->exchange();
+	  m_alias[3]->exchange();
+	}
+#endif
       }
+      //      const Real t2 = MPI_Wtime();
+      //      pout() << "update bc time = " << 100.*(t1 - t0)/(t2-t0) << "\t relax time = " << 100.*(t2 - t1)/(t2-t0) << endl;
+    }
 #endif
   }
 

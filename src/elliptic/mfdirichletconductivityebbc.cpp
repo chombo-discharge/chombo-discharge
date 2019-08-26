@@ -115,8 +115,6 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       bool drop_order = false;
 
       if(m_order == 2){
-	
-
 	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	if(drop_order){
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
@@ -257,7 +255,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 					      const Real&                   a_factor,
 					      const bool&                   a_useHomogeneous,
 					      const Real&                   a_time){
-  
+
   const int comp         = 0;
   const int otherphase   = m_phase == 0 ? 1 : 0;
   const EBISBox& ebisbox = a_phi.getEBISBox();
@@ -288,8 +286,8 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 
     // Increment
     a_lphi(vof, comp) += flux;
-
   }
+
 
   // Pure Dirichlet irregular cells
   if(!a_useHomogeneous){

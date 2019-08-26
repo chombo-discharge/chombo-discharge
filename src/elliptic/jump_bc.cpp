@@ -9,8 +9,7 @@
 
 #include <EBArith.H>
 
-#define VOFIT_PREBUILT 1
-#define verb 1
+#define USE_AGG_STENCIL 1
 
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
@@ -93,6 +92,11 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_homog.define(m_grids);
   m_vofit_gas.define(m_grids);
   m_vofit_sol.define(m_grids);
+  m_vofit_bc.define(m_grids);
+  m_factor.define(m_grids);
+
+  m_aggsten_gas.define(m_grids);
+  m_aggsten_sol.define(m_grids);
 
   int num = 0;
 
@@ -199,6 +203,62 @@ void jump_bc::build_stencils(){
 	}
       }
     }
+
+    // Now do the "factor" stencil. This is defined over the gas EBIS
+    const int phase1 = 0;
+    const int phase2 = 1;
+    BaseIVFAB<VoFStencil>& factor_ivfab = m_factor[dit()];
+    const IntVectSet& ivs = m_bco[dit()].get_ivs();
+    const EBGraph& graph1 = m_bco[dit()].get_ivfab(0).getEBGraph();
+    factor_ivfab.define(ivs, graph1, 1);
+
+    const BaseIVFAB<Real>& bco1        = m_bco[dit()].get_ivfab(phase1);
+    const BaseIVFAB<Real>& bco2        = m_bco[dit()].get_ivfab(phase2);
+    const BaseIVFAB<Real>& w1          = m_weights[dit()].get_ivfab(phase1);
+    const BaseIVFAB<Real>& w2          = m_weights[dit()].get_ivfab(phase2);
+
+    for (VoFIterator vofit(ivs, graph1); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      const Real factor = 1.0/(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+      factor_ivfab(vof, 0) = VoFStencil();
+      factor_ivfab(vof, 0).add(vof, factor);
+    }
+  }
+}
+
+void jump_bc::define_agg_stencils(const LevelData<BaseIVFAB<Real> >& a_dst, const LevelData<MFCellFAB>& a_src, const int a_phase){
+  CH_TIME("jump_bc::define_agg_stencils");
+  if(m_mfis->num_phases() > 1){
+    const int comp   = 0;
+  
+    for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
+      const EBCellFAB& phi              = a_src[dit()].getPhase(a_phase);
+      const BaseIVFAB<VoFStencil>& sten = m_stencils[dit()].get_ivfab(a_phase);
+      const BaseIVFAB<Real>& bco        = m_bco[dit()].get_ivfab(a_phase);
+      
+      // Monkey with stencils
+      Vector<RefCountedPtr<BaseIndex> >  index(0);
+      Vector<RefCountedPtr<BaseStencil> > vofsten(0);
+      for (VoFIterator vofit(sten.getIVS(), sten.getEBGraph()); vofit.ok(); ++vofit){
+	const VolIndex& vof       = vofit();
+	VoFStencil stencil = sten(vof, comp);
+	stencil *= -bco(vof, 0);
+	
+	index.push_back(RefCountedPtr<BaseIndex> (new VolIndex(vof)));
+	vofsten.push_back(RefCountedPtr<BaseStencil> (new VoFStencil(stencil)));
+      }
+
+      // Build aggstencil objects
+      if(a_phase == 0){
+	m_aggsten_gas[dit()] = RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>> >
+	  (new AggStencil<EBCellFAB, BaseIVFAB<Real> >(index, vofsten, phi, a_dst[dit()]));
+      }
+      else if(a_phase == 1){
+	m_aggsten_sol[dit()] = RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real>> >
+	  (new AggStencil<EBCellFAB, BaseIVFAB<Real> >(index, vofsten, phi, a_dst[dit()]));
+      }
+    }
   }
 }
 
@@ -298,96 +358,66 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const MFInterfaceFAB<VoFStencil>& a_stencils,
 		       const bool                        a_homogeneous,
 		       const DataIndex&                  a_dit){
+  //  const Real t0 = MPI_Wtime();
   const int comp   = 0;
   const int phase1 = 0;
   const int phase2 = 1;
-  
   const IntVectSet& ivs = a_bco.get_ivs();
-  
+
+#if 0
   const BaseIVFAB<Real>& bco1        = a_bco.get_ivfab(phase1);
   const BaseIVFAB<Real>& bco2        = a_bco.get_ivfab(phase2);
   const BaseIVFAB<Real>& w1          = a_weights.get_ivfab(phase1);
   const BaseIVFAB<Real>& w2          = a_weights.get_ivfab(phase2);
-  
+#endif
+
+#if 0
   const BaseIVFAB<VoFStencil>& sten1 = a_stencils.get_ivfab(phase1);
   const BaseIVFAB<VoFStencil>& sten2 = a_stencils.get_ivfab(phase2);
+#endif
   
   const EBCellFAB& phi1              = a_phi.getPhase(phase1);
   const EBCellFAB& phi2              = a_phi.getPhase(phase2);
 
+#if 0
   const EBGraph& graph1              = bco1.getEBGraph();
   const EBGraph& graph2              = bco2.getEBGraph();
+#endif
 
   BaseIVFAB<Real>& inhomo1 = a_inhomo.get_ivfab(phase1);
   BaseIVFAB<Real>& inhomo2 = a_inhomo.get_ivfab(phase2);
   BaseIVFAB<Real>& homog1  = a_homog.get_ivfab(phase1);
   BaseIVFAB<Real>& homog2  = a_homog.get_ivfab(phase2);
-
-  inhomo1.setVal(0.0);
-  inhomo2.setVal(0.0);
   
   // Set phibc = a_jump
-  const Real t0 = MPI_Wtime();
-  for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit(); 
+  for (m_vofit_gas[a_dit].reset(); m_vofit_gas[a_dit].ok(); ++m_vofit_gas[a_dit]){
+    const VolIndex& vof = m_vofit_gas[a_dit]();
+
     a_phibc(vof, comp) = a_jump(vof, comp);
+    
     homog1(vof, comp)  = a_jump(vof, comp);
     homog2(vof, comp)  = a_jump(vof, comp);
+    
+    inhomo1(vof, comp) = 0.0;
+    inhomo2(vof, comp) = 0.0;
   }
-
 
   // First phase loop. Add first stencil stuff
-  const Real t1 = MPI_Wtime();
-#if VOFIT_PREBUILT
-  {
-  VoFIterator& vofit = m_vofit_gas[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-#else
-  for (VoFIterator vofit(ivs, graph1); vofit.ok(); ++vofit){
-#endif
-    const VolIndex& vof = vofit();
-
-    const VoFStencil& sten = sten1(vof, comp);
-    for (int i = 0; i < sten.size(); i++){
-      const VolIndex& ivof = sten.vof(i);
-      const Real& iweight  = sten.weight(i);
-      a_phibc(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
-      inhomo2(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
-    }
-  }
-#if VOFIT_PREBUILT
-  }
-#endif
+  //  const Real t1 = MPI_Wtime();
+  m_aggsten_gas[a_dit]->apply(a_phibc, phi1, 0, 0, 1, true);
+  m_aggsten_gas[a_dit]->apply(inhomo2, phi1, 0, 0, 1, true);
   
   // Second phase loop. Add second stencil stuff
-  const Real t2 = MPI_Wtime();
-#if VOFIT_PREBUILT
-  {
-  VoFIterator& vofit = m_vofit_sol[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-#else
-  for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
-#endif
-    const VolIndex& vof = vofit();
-    
-    const VoFStencil& sten = sten2(vof, comp);
-    for (int i = 0; i < sten.size(); i++){
-      const VolIndex& ivof = sten.vof(i);
-      const Real& iweight  = sten.weight(i);
-      a_phibc(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
-      inhomo1(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
-    }
-  }
-#if VOFIT_PREBUILT
-  }
-#endif
+  //  const Real t2 = MPI_Wtime();
+  m_aggsten_sol[a_dit]->apply(a_phibc, phi2, 0, 0, 1, true);
+  m_aggsten_sol[a_dit]->apply(inhomo1, phi2, 0, 0, 1, true);
   
   // Divide by weights
-  const Real t3 = MPI_Wtime();
-  for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
+  //  const Real t3 = MPI_Wtime();
+  for (m_vofit_gas[a_dit].reset(); m_vofit_gas[a_dit].ok(); ++m_vofit_gas[a_dit]){
+    const VolIndex& vof = m_vofit_gas[a_dit]();
 
-    const Real factor   = 1.0/(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
+    const Real factor   = m_factor[a_dit](vof, comp).weight(comp);
     
     a_phibc(vof, comp) *= factor;
     inhomo1(vof, comp) *= factor;
@@ -395,14 +425,14 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     homog1(vof, comp)  *= factor;
     homog2(vof, comp)  *= factor;
   }
-
-  const Real t4 = MPI_Wtime();
+  //  const Real t4 = MPI_Wtime();
 
 #if 0
-  pout() << "vofiter 1 = " << 100.*(t1-t0)/(t4-t0) << endl;
-  pout() << "vofiter 2 = " << 100.*(t2-t1)/(t4-t0) << endl;
-  pout() << "vofiter 3 = " << 100.*(t3-t2)/(t4-t0) << endl;
-  pout() << "vofiter 4 = " << 100.*(t4-t3)/(t4-t0) << endl;
+  pout() << "vofiter 1 = " << 100.*(t1-t0)/(t4-t0) << " = " << t1-t0 <<  endl;
+  pout() << "vofiter 2 = " << 100.*(t2-t1)/(t4-t0) << " = " << t2-t1 <<  endl;
+  pout() << "vofiter 3 = " << 100.*(t3-t2)/(t4-t0) << " = " << t3-t2 <<  endl;
+  pout() << "vofiter 4 = " << 100.*(t4-t3)/(t4-t0) << " = " << t4-t3 <<  endl;
+  pout() << "total     = " << t4 - t0 << endl;
 #endif
 }
 
