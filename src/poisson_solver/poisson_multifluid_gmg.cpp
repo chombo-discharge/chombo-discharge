@@ -23,7 +23,7 @@
 #include <DirichletConductivityEBBC.H>
 #include <ParmParse.H>
 
-#define POISSON_MF_GMG_TIMER 0
+#define POISSON_MF_GMG_TIMER 1
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
@@ -186,6 +186,9 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
   if(str == "gsrb"){
     m_gmg_relax_type = relax::gsrb_fast;
   }
+  else if( str == "gauss_seidel"){
+    m_gmg_relax_type = relax::gauss_seidel;
+  }
   else{
     MayDay::Abort("poisson_multifluid_gmgcdr_gdnv::parse_gmg_settings - unsupported relaxation method requested");
   }
@@ -316,9 +319,9 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   pout() << "set jump:   " << 100.*(t1-t0)/T << "%" << endl;
   pout() << "alloc/alias:" << 100.*(t2-t1)/T << "%" << endl;
   pout() << "resid:      " << 100.*(t3-t2)/T << "%" << endl;
-  pout() << "solve:      " << 100.*(t4-t3)/T << "%" << endl;
+  pout() << "solve:      " << 100.*(t4-t3)/T << "%" << " = " << t4 - t3 << endl;
   pout() << "revert/avg: " << 100.*(t5-t4)/T << "%" << endl;
-  pout() << "Total time: " << t5-t4 << endl;
+  pout() << "Total time: " << T << endl;
 #endif
 
   
