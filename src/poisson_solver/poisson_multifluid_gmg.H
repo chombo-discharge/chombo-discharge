@@ -293,6 +293,7 @@ protected:
     @brief Set face-centered permittivities
   */
   virtual void set_face_perm(EBFluxFAB&                a_perm,
+			     const Box&                a_box,
 			     const RealVect&           a_origin,
 			     const Real&               a_dx,
 			     const Vector<dielectric>& a_dielectrics);
@@ -301,6 +302,7 @@ protected:
     @brief Set EB-centered permittivities
   */
   virtual void set_eb_perm(BaseIVFAB<Real>&          a_perm,
+			   const Box&                a_box,
 			   const RealVect&           a_origin,
 			   const Real&               a_dx,
 			   const Vector<dielectric>& a_dielectrics);

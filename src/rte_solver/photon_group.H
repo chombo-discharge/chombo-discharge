@@ -47,6 +47,11 @@ public:
   virtual std::string get_name() const;
 
   /*!
+    @brief Constant kappa or not
+  */
+  virtual bool constant_kappa() const;
+
+  /*!
     @brief Get kappa at position. You really need to impement this, but it's not pure since this class may be useful for testing. 
   */
   virtual Real get_kappa(const RealVect a_pos) const;

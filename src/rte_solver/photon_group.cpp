@@ -40,6 +40,10 @@ std::string photon_group::get_name() const{
   return m_name;
 }
 
+bool photon_group::constant_kappa() const {
+  return m_constant;
+}
+
 Real photon_group::get_kappa(const RealVect a_pos) const{
   if(m_constant){
     return m_kappa;

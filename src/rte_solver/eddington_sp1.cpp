@@ -499,33 +499,40 @@ void eddington_sp1::set_aco_and_bco(){
 #define USE_NEW_ACO_AND_BCO 1
 
   // This loop fills aco with kappa and bco_irreg with 1./kappa
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const RealVect origin = m_physdom->get_prob_lo();
-    const Real dx         = m_amr->get_dx()[lvl];
-    
-    LevelData<EBCellFAB>& aco            = *m_aco[lvl];
-    LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
-    LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
-
-    for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
-#if USE_NEW_ACO_AND_BCO
-      const Box box = (m_amr->get_grids()[lvl]).get(dit());
-      this->set_aco_and_bco_box(aco[dit()], bco_irr[dit()], box, origin, dx);
-#else // Old way
-      this->set_aco(aco[dit()],        origin, dx);   // Set aco = kappa
-      this->set_bco_face(bco[dit()],   origin, dx);   // Set bco = 1./kappa
-      this->set_bco_eb(bco_irr[dit()], origin, dx);   // Set bco = 1./kappa
-#endif
-    }
+  if(m_photon_group->constant_kappa()){
+    const Real kap = m_photon_group->get_kappa(RealVect::Zero);
+    data_ops::set_value(m_aco, kap);
+    data_ops::set_value(m_bco, 1./kap);
+    data_ops::set_value(m_bco_irreg, 1./kap);
   }
+  else{ // If kappa is not constant, we need to go through each cell to determine it
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const RealVect origin = m_physdom->get_prob_lo();
+      const Real dx         = m_amr->get_dx()[lvl];
+    
+      LevelData<EBCellFAB>& aco            = *m_aco[lvl];
+      LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
+      LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
+
+      for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
+#if USE_NEW_ACO_AND_BCO
+	const Box box = (m_amr->get_grids()[lvl]).get(dit());
+	this->set_aco_and_bco_box(aco[dit()], bco_irr[dit()], box, origin, dx);
+#else // Old way
+	this->set_aco(aco[dit()],        origin, dx);   // Set aco = kappa
+	this->set_bco_face(bco[dit()],   origin, dx);   // Set bco = 1./kappa
+	this->set_bco_eb(bco_irr[dit()], origin, dx);   // Set bco = 1./kappa
+#endif
+      }
+    }
 
 #if USE_NEW_ACO_AND_BCO // New way of doing this. This saves us a LOT of calls to photon_group->get_kappa
-  m_amr->average_down(m_aco, m_phase);
-  m_amr->interp_ghost(m_aco, m_phase);
-  data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->get_domains()); // Average aco onto face
-  data_ops::invert(m_bco); // Make m_bco = 1./kappa
+    m_amr->average_down(m_aco, m_phase);
+    m_amr->interp_ghost(m_aco, m_phase);
+    data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->get_domains()); // Average aco onto face
+    data_ops::invert(m_bco); // Make m_bco = 1./kappa
 #endif
-  
+  }
 
 #if eddington_sp1_feature // Different scaling for the RTE
   data_ops::scale(m_aco,       1.0);       // aco = c*kappa

@@ -577,25 +577,28 @@ void poisson_multifluid_gmg::set_permittivities(const Vector<dielectric>& a_diel
     const int finest_level = m_amr->get_finest_level();
 
     for (int lvl = 0; lvl <= finest_level; lvl++){
-
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      
       LevelData<EBFluxFAB> bco;
       LevelData<BaseIVFAB<Real> > bco_irreg;
 
       mfalias::aliasMF(bco,       phase::solid, *m_bco[lvl]);
       mfalias::aliasMF(bco_irreg, phase::solid, *m_bco_irreg[lvl]);
 
-      for (DataIterator dit = bco.dataIterator(); dit.ok(); ++dit){
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	EBFluxFAB& perm          = bco[dit()];
 	BaseIVFAB<Real>& perm_eb = bco_irreg[dit()];
+	const Box box            = dbl.get(dit());
 
-	this->set_face_perm(perm,  origin, dx[lvl], a_dielectrics);
-	this->set_eb_perm(perm_eb, origin, dx[lvl], a_dielectrics);
+	this->set_face_perm(perm,  box, origin, dx[lvl], a_dielectrics);
+	this->set_eb_perm(perm_eb, box, origin, dx[lvl], a_dielectrics);
       }
     }
   }
 }
 
 void poisson_multifluid_gmg::set_face_perm(EBFluxFAB&                a_perm,
+					   const Box&                a_box,
 					   const RealVect&           a_origin,
 					   const Real&               a_dx,
 					   const Vector<dielectric>& a_dielectrics){
@@ -611,7 +614,34 @@ void poisson_multifluid_gmg::set_face_perm(EBFluxFAB&                a_perm,
   FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
   
   for (int dir = 0; dir < SpaceDim; dir++){
-    for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+
+    // Regular clels
+    Box facebox = a_box;
+    facebox.surroundingNodes(dir);
+    BaseFab<Real>& perm_fab = a_perm[dir].getSingleValuedFAB();
+    for (BoxIterator bit(facebox); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
+
+	Real dist   = 1.E99;
+	int closest = 0;
+	for (int i = 0; i < a_dielectrics.size(); i++){
+	  const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
+
+	  const Real cur_dist = func->value(pos);
+	
+	  if(cur_dist <= dist){
+	    dist = cur_dist;
+	    closest = i;
+	  }
+	}
+	perm_fab(iv, comp) = a_dielectrics[closest].get_permittivity(pos);
+    }
+    
+
+    // Irregular cells
+    const IntVectSet irreg = ebisbox.getIrregIVS(a_box);
+    for (FaceIterator faceit(irreg, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
       const FaceIndex& face  = faceit();
       const IntVect iv       = face.gridIndex(Side::Lo);
       const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
@@ -635,6 +665,7 @@ void poisson_multifluid_gmg::set_face_perm(EBFluxFAB&                a_perm,
 
 
 void poisson_multifluid_gmg::set_eb_perm(BaseIVFAB<Real>&          a_perm,
+					 const Box&                a_box,
 					 const RealVect&           a_origin,
 					 const Real&               a_dx,
 					 const Vector<dielectric>& a_dielectrics){
