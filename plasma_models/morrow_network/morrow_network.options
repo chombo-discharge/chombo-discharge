@@ -14,7 +14,7 @@ morrow_network.electrode_quantum_efficiency  = 1.E-6                 # Quantum e
 morrow_network.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
 morrow_network.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
 
-morrow_network.use_fhd                       = true                  # Use FHD
+morrow_network.use_ssa                       = false                 # Use SSA algorithm
 morrow_network.poiss_exp_swap                = 100                   # Swap from Poisson to exponential distribution
 morrow_network.cutoff_poisson                = 1.0                   # Cutoff for Poisson distribution
 morrow_network.seed                          = 0                     # RNG seed

@@ -344,6 +344,9 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
   EBCellFAB part_src(ebisbox, a_E.getRegion(), num_species);
   EBCellFAB phot_src(ebisbox, a_E.getRegion(), num_photons);
 
+  part_src.setVal(0.0);
+  phot_src.setVal(0.0);
+
   const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
   
   // Grid loop
@@ -360,8 +363,8 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
       const Real phi = (*a_particle_densities[idx]).getSingleValuedFAB()(iv, 0);
       particle_densities[idx] = Max(zero, phi);
       particle_gradients[idx] = RealVect(D_DECL((*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 0),
-					   (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 1),
-					   (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 2)));
+						(*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 1),
+						(*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 2)));
     }
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx  = solver_it.get_solver();
@@ -428,9 +431,48 @@ void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a
 						  const Real&                  a_dt,
 						  const Real&                  a_dx,
 						  const Box&                   a_box){
-  CH_TIME("time_stepper::advance_reaction_network_irreg(patch)");
+  if(m_interp_sources){
+    advance_reaction_network_irreg_interp(a_particle_sources,
+					  a_photon_sources,
+					  a_particle_densities,
+					  a_particle_gradients,
+					  a_photon_densities,
+					  a_interp_stencils,
+					  a_E,
+					  a_time,
+					  a_dt,
+					  a_dx,
+					  a_box);
+  }
+  else{
+    advance_reaction_network_irreg_kappa(a_particle_sources,
+					 a_photon_sources,
+					 a_particle_densities,
+					 a_particle_gradients,
+					 a_photon_densities,
+					 a_interp_stencils,
+					 a_E,
+					 a_time,
+					 a_dt,
+					 a_dx,
+					 a_box);
+  }
+}
+
+void time_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&          a_particle_sources,
+							 Vector<EBCellFAB*>&          a_photon_sources,
+							 const Vector<EBCellFAB*>&    a_particle_densities,
+							 const Vector<EBCellFAB*>&    a_particle_gradients,
+							 const Vector<EBCellFAB*>&    a_photon_densities,
+							 const BaseIVFAB<VoFStencil>& a_interp_stencils,
+							 const EBCellFAB&             a_E,
+							 const Real&                  a_time,
+							 const Real&                  a_dt,
+							 const Real&                  a_dx,
+							 const Box&                   a_box){
+  CH_TIME("time_stepper::advance_reaction_network_irreg_interp(patch)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::advance_reaction_network_irreg(patch)" << endl;
+    pout() << "time_stepper::advance_reaction_network_irreg_interp(patch)" << endl;
   }
 
   const Real zero = 0.0;
@@ -450,10 +492,6 @@ void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a
   Vector<Real>     particle_densities(num_species);
   Vector<RealVect> particle_gradients(num_species);
   Vector<Real>     photon_densities(num_photons);
-
-  // Computed source terms onto here
-  EBCellFAB part_src(ebisbox, a_E.getRegion(), num_species);
-  EBCellFAB phot_src(ebisbox, a_E.getRegion(), num_photons);
 
   for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
     const VolIndex& vof       = vofit();
@@ -517,13 +555,110 @@ void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a
 					a_time,
 					kappa);
 
-    // Copy result back to solvers
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
       (*a_particle_sources[idx])(vof, 0) = particle_sources[idx];
     }
     
-    // Copy result back to solvers
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      (*a_photon_sources[idx])(vof, 0) = photon_sources[idx];
+    }
+  }
+}
+
+void time_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>&          a_particle_sources,
+							 Vector<EBCellFAB*>&          a_photon_sources,
+							 const Vector<EBCellFAB*>&    a_particle_densities,
+							 const Vector<EBCellFAB*>&    a_particle_gradients,
+							 const Vector<EBCellFAB*>&    a_photon_densities,
+							 const BaseIVFAB<VoFStencil>& a_interp_stencils,
+							 const EBCellFAB&             a_E,
+							 const Real&                  a_time,
+							 const Real&                  a_dt,
+							 const Real&                  a_dx,
+							 const Box&                   a_box){
+  CH_TIME("time_stepper::advance_reaction_network_irreg_kappa(patch)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network_irreg_kappa(patch)" << endl;
+  }
+
+    const Real zero = 0.0;
+  
+  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_species();
+
+  // EBISBox and graph
+  const EBISBox& ebisbox = a_E.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  // Things that are passed into plasma_kinetics
+  RealVect         pos, E;
+  Vector<Real>     particle_sources(num_species);
+  Vector<Real>     photon_sources(num_photons);
+  Vector<Real>     particle_densities(num_species);
+  Vector<RealVect> particle_gradients(num_species);
+  Vector<Real>     photon_densities(num_photons);
+
+  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof       = vofit();
+    const Real kappa          = ebisbox.volFrac(vof);
+    const VoFStencil& stencil = a_interp_stencils(vof, 0);
+
+    pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
+
+    // Compute electric field on centroids
+    E = RealVect::Zero;
+    for (int i = 0; i < stencil.size(); i++){
+      const VolIndex& ivof = stencil.vof(i);
+      const Real& iweight  = stencil.weight(i);
+      for (int dir = 0; dir < SpaceDim; dir++){
+	E[dir] += a_E(ivof, dir)*iweight;
+      }
+    }
+
+    // Compute cdr_densities and their gradients on centroids
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+
+      // Gradient on centroids for some reason
+      RealVect grad = RealVect::Zero;
+      for (int i = 0; i < stencil.size(); i++){
+	const VolIndex& ivof = stencil.vof(i);
+	const Real& iweight  = stencil.weight(i);
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  grad[dir] += (*a_particle_gradients[idx])(ivof, dir);
+	}
+      }
+      
+      particle_densities[idx] = Max(zero, (*a_particle_densities[idx])(vof,0));
+      particle_gradients[idx] = grad;
+    }
+
+    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      photon_densities[idx] = Max(zero, (*a_photon_densities[idx])(vof, 0));
+    }
+
+    // Compute source terms
+    m_plaskin->advance_reaction_network(particle_sources,
+					photon_sources,
+					particle_densities,
+					particle_gradients,
+					photon_densities,
+					E,
+					pos,
+					a_dx,
+					a_dt,
+					a_time,
+					kappa);
+
+    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const int idx = solver_it.get_solver();
+      (*a_particle_sources[idx])(vof, 0) = particle_sources[idx];
+    }
+    
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
       (*a_photon_sources[idx])(vof, 0) = photon_sources[idx];

@@ -150,6 +150,33 @@ public:
 					      const Real&                  a_dx,
 					      const Box&                   a_box);
 
+    /*!
+    @brief Compute reaction network sources. Irregular patch version.
+  */
+  virtual void advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&          a_particle_sources,
+						     Vector<EBCellFAB*>&          a_photon_sources,
+						     const Vector<EBCellFAB*>&    a_particle_densities,
+						     const Vector<EBCellFAB*>&    a_particle_gradients,
+						     const Vector<EBCellFAB*>&    a_photon_densities,
+						     const BaseIVFAB<VoFStencil>& a_interp_stencils,
+						     const EBCellFAB&             a_E,
+						     const Real&                  a_time,
+						     const Real&                  a_dt,
+						     const Real&                  a_dx,
+						     const Box&                   a_box);
+
+  virtual void advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>&          a_particle_sources,
+						    Vector<EBCellFAB*>&          a_photon_sources,
+						    const Vector<EBCellFAB*>&    a_particle_densities,
+						    const Vector<EBCellFAB*>&    a_particle_gradients,
+						    const Vector<EBCellFAB*>&    a_photon_densities,
+						    const BaseIVFAB<VoFStencil>& a_interp_stencils,
+						    const EBCellFAB&             a_E,
+						    const Real&                  a_time,
+						    const Real&                  a_dt,
+						    const Real&                  a_dx,
+						    const Box&                   a_box);
+
   
   /*!
     @brief Compute all source terms. This either does a decoupled cdr/rte solve or tight reaction advance

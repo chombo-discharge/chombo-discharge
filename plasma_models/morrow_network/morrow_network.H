@@ -23,82 +23,73 @@ public:
 
   void advance_reaction_network(Vector<Real>&           a_particle_sources,
 				Vector<Real>&           a_photon_sources,
-				const Vector<Real>&     a_particle_densities,
-				const Vector<RealVect>& a_particle_gradients,
-				const Vector<Real>&     a_photon_densities,
-				const RealVect&         a_E,
-				const RealVect&         a_pos,
-				const Real&             a_dx,
-				const Real&             a_dt,
-				const Real&             a_time,
-				const Real&             a_kappa) const;
+				const Vector<Real>     a_particle_densities,
+				const Vector<RealVect> a_particle_gradients,
+				const Vector<Real>     a_photon_densities,
+				const RealVect         a_E,
+				const RealVect         a_pos,
+				const Real             a_dx,
+				const Real             a_dt,
+				const Real             a_time,
+				const Real             a_kappa) const;
 
 
-  Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
-						  const RealVect&     a_pos,
-						  const RealVect&     a_E,
-						  const Vector<Real>& a_cdr_densities) const;
+  Vector<Real> compute_cdr_diffusion_coefficients(const Real         a_time,
+						  const RealVect     a_pos,
+						  const RealVect     a_E,
+						  const Vector<Real> a_cdr_densities) const;
   
-  Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
-					  const RealVect&     a_pos,
-					  const RealVect&     a_E,
-					  const Vector<Real>& a_cdr_densities) const;
+  Vector<RealVect> compute_cdr_velocities(const Real         a_time,
+					  const RealVect     a_pos,
+					  const RealVect     a_E,
+					  const Vector<Real> a_cdr_densities) const;
   
-  Vector<Real> compute_cdr_domain_fluxes(const Real&           a_time,
-					 const RealVect&       a_pos,
-					 const int&            a_dir,
-					 const Side::LoHiSide& a_side,
-					 const RealVect&       a_E,
-					 const Vector<Real>&   a_cdr_densities,
-					 const Vector<Real>&   a_cdr_velocities,
-					 const Vector<Real>&   a_cdr_gradients,
-					 const Vector<Real>&   a_rte_fluxes,
-					 const Vector<Real>&   a_extrap_cdr_fluxes) const;
+  Vector<Real> compute_cdr_domain_fluxes(const Real           a_time,
+					 const RealVect       a_pos,
+					 const int            a_dir,
+					 const Side::LoHiSide a_side,
+					 const RealVect       a_E,
+					 const Vector<Real>   a_cdr_densities,
+					 const Vector<Real>   a_cdr_velocities,
+					 const Vector<Real>   a_cdr_gradients,
+					 const Vector<Real>   a_rte_fluxes,
+					 const Vector<Real>   a_extrap_cdr_fluxes) const;
   
-  Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
-					    const RealVect&     a_pos,
-					    const RealVect&     a_normal,
-					    const RealVect&     a_E,
-					    const Vector<Real>& a_cdr_densities,
-					    const Vector<Real>& a_cdr_velocities,
-					    const Vector<Real>& a_cdr_gradients,
-					    const Vector<Real>& a_rte_fluxes,
-					    const Vector<Real>& a_extrap_cdr_fluxes) const;
+  Vector<Real> compute_cdr_electrode_fluxes(const Real         a_time,
+					    const RealVect     a_pos,
+					    const RealVect     a_normal,
+					    const RealVect     a_E,
+					    const Vector<Real> a_cdr_densities,
+					    const Vector<Real> a_cdr_velocities,
+					    const Vector<Real> a_cdr_gradients,
+					    const Vector<Real> a_rte_fluxes,
+					    const Vector<Real> a_extrap_cdr_fluxes) const;
 
-  Vector<Real> compute_cdr_dielectric_fluxes(const Real&         a_time,
-					     const RealVect&     a_pos,
-					     const RealVect&     a_normal,
-					     const RealVect&     a_E,
-					     const Vector<Real>& a_cdr_densities,
-					     const Vector<Real>& a_cdr_velocities,
-					     const Vector<Real>& a_cdr_gradients,
-					     const Vector<Real>& a_rte_fluxes,
-					     const Vector<Real>& a_extrap_cdr_fluxes) const;
+  Vector<Real> compute_cdr_dielectric_fluxes(const Real         a_time,
+					     const RealVect     a_pos,
+					     const RealVect     a_normal,
+					     const RealVect     a_E,
+					     const Vector<Real> a_cdr_densities,
+					     const Vector<Real> a_cdr_velocities,
+					     const Vector<Real> a_cdr_gradients,
+					     const Vector<Real> a_rte_fluxes,
+					     const Vector<Real> a_extrap_cdr_fluxes) const;
 
-  Vector<Real> compute_conductor_fluxes(const Vector<Real>& a_extrapolated_fluxes,
-					const Vector<Real>& a_ion_densities,
-					const Vector<Real>& a_ion_velocities,
-					const Vector<Real>& a_photon_fluxes,
-					const RealVect&     a_E,
-					const RealVect&     a_pos,
-					const RealVect&     a_normal,
-					const Real&         a_time) const;
+  Vector<Real> compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
+					 const Vector<Real> a_ion_densities,
+					 const Vector<Real> a_ion_velocities,
+					 const Vector<Real> a_photon_fluxes,
+					 const RealVect     a_E,
+					 const RealVect     a_pos,
+					 const RealVect     a_normal,
+					 const Real         a_time) const;
 
-  Vector<Real> compute_dielectric_fluxes(const Vector<Real>& a_extrapolated_fluxes,
-					 const Vector<Real>& a_ion_densities,
-					 const Vector<Real>& a_ion_velocities,
-					 const Vector<Real>& a_photon_fluxes,
-					 const RealVect&     a_E,
-					 const RealVect&     a_pos,
-					 const RealVect&     a_normal,
-					 const Real&         a_time) const;
-
-  Real initial_sigma(const Real a_time, const RealVect& a_pos) const;
+  Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
 
   Vector<int> m_wallbc; // Wall boundary conditions
 
-  bool m_fhd; // Using FHD or not
+  bool m_ssa; // Using SSA or not
   
   Real m_seed;
   Real m_cutoff_poisson;
@@ -128,31 +119,59 @@ public:
   Real m_photoi_eff; // Photoionization efficiency
 
   // Common function for computing CDR fluxes
-  Vector<Real> compute_cdr_fluxes(const Real&         a_time,
-				  const RealVect&     a_pos,
-				  const RealVect&     a_normal,
-				  const RealVect&     a_E,
-				  const Vector<Real>& a_cdr_densities,
-				  const Vector<Real>& a_cdr_velocities,
-				  const Vector<Real>& a_cdr_gradients,
-				  const Vector<Real>& a_rte_fluxes,
-				  const Vector<Real>& a_extrap_cdr_fluxes,
-				  const Real&         a_townsend2,
-				  const Real&         a_quantum_efficiency) const;
+  Vector<Real> compute_cdr_fluxes(const Real         a_time,
+				  const RealVect     a_pos,
+				  const RealVect     a_normal,
+				  const RealVect     a_E,
+				  const Vector<Real> a_cdr_densities,
+				  const Vector<Real> a_cdr_velocities,
+				  const Vector<Real> a_cdr_gradients,
+				  const Vector<Real> a_rte_fluxes,
+				  const Vector<Real> a_extrap_cdr_fluxes,
+				  const Real         a_townsend2,
+				  const Real         a_quantum_efficiency) const;
 
-  inline Real stochastic_reaction(const Real a_S, const Real a_vol, const Real a_dt) const;
+  // Tau leaping method
+  void network_tau(Vector<Real>&          a_particle_sources,
+		   Vector<Real>&          a_photon_sources,
+		   const Vector<Real>     a_particle_densities,
+		   const Vector<RealVect> a_particle_gradients,
+		   const Vector<Real>     a_photon_densities,
+		   const RealVect         a_E,
+		   const RealVect         a_pos,
+		   const Real             a_dx,
+		   const Real             a_dt,
+		   const Real             a_time,
+		   const Real             a_kappa) const;
+
+  // Tau leaping method
+  void network_ssa(Vector<Real>&          a_particle_sources,
+		   Vector<Real>&          a_photon_sources,
+		   const Vector<Real>     a_particle_densities,
+		   const Vector<RealVect> a_particle_gradients,
+		   const Vector<Real>     a_photon_densities,
+		   const RealVect         a_E,
+		   const RealVect         a_pos,
+		   const Real             a_dx,
+		   const Real             a_dt,
+		   const Real             a_time,
+		   const Real             a_kappa) const;
+
+
+
+  inline Real poisson_reaction(const Real a_propensity, const Real a_dt) const;
   
-  inline Real compute_alpha(const RealVect& a_E) const;
-  inline Real compute_eta(const RealVect& a_E)   const;
-  inline Real compute_eta2(const RealVect& a_E)  const;
-  inline Real compute_eta3(const RealVect& a_E)  const;
-  inline Real compute_beta(const RealVect& a_E)  const;
+  inline Real compute_alpha(const RealVect a_E) const;
+  inline Real compute_eta(const RealVect a_E)   const;
+  inline Real compute_eta2(const RealVect a_E)  const;
+  inline Real compute_eta3(const RealVect a_E)  const;
+  inline Real compute_beta(const RealVect a_E)  const;
 
-  inline Real compute_De(const RealVect& a_E) const;
+  inline Real compute_De(const RealVect a_E) const;
 
-  inline RealVect compute_ve(const RealVect& a_E) const;
-  inline RealVect compute_vp(const RealVect& a_E) const;
-  inline RealVect compute_vn(const RealVect& a_E) const;
+  inline RealVect compute_ve(const RealVect a_E) const;
+  inline RealVect compute_vp(const RealVect a_E) const;
+  inline RealVect compute_vn(const RealVect a_E) const;
 
   class electron : public species {
   public:
