@@ -157,6 +157,8 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   const Real volume = pow(a_dx, SpaceDim);
 
   Vector<int> particle_numbers(m_num_species, 0);
+  Vector<int> photon_numbers(m_num_photons, 0);
+  
   for (int i = 0; i < m_num_species; i++){
     a_particle_sources[i] = 0.0;
     particle_numbers[i] = floor(a_particle_densities[i]*volume);
@@ -164,15 +166,15 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
 
   for (int i = 0; i < m_num_photons; i++){
     a_photon_sources[i] = 0.0;
+    photon_numbers[i] = floor(a_photon_densities[i]);
   }
 
-  Real& Se = a_particle_sources[m_nelec_idx];
-  Real& Sp = a_particle_sources[m_nplus_idx];
-  Real& Sm = a_particle_sources[m_nminu_idx];
 
-  Se = 0.0;
-  Sp = 0.0;
-  Sm = 0.0;
+
+  int se = 0;
+  int sp = 0;
+  int sm = 0;
+  int sy = 0;
 
   // Get some aux stuff for propensity functions
   const RealVect Ve = compute_ve(a_E);
@@ -183,44 +185,59 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   
   // Reaction 1: e + M => 2e + M+
   const Real a1 = Max(0.0, particle_numbers[m_nelec_idx]*alpha*ve);
-  const Real S1 = poisson_reaction(a1, a_dt);
-  Se += S1;
-  Sp += S1;
+  const int S1  = poisson_reaction(a1, a_dt);
+  se += S1;
+  sp += S1;
 
   // Reaction 2: e + M   => M-
   const Real a2 = Max(0.0, particle_numbers[m_nelec_idx]*eta*ve);
-  const Real S2 = poisson_reaction(a2, a_dt);
-  Se -= S2;
-  Sm += S2;
+  const int S2  = poisson_reaction(a2, a_dt);
+  se -= S2;
+  sm += S2;
 
   // Reaction 3: e + M+  => 0
-  const Real a3 = Max(0.0, particle_numbers[m_nelec_idx]*particle_numbers[m_nplus_idx]*beta*volume);
-  const Real S3 = poisson_reaction(a3, a_dt);
-  Se -= S3;
-  Sp -= S3;
+  const Real a3 = Max(0.0, particle_numbers[m_nelec_idx]*particle_numbers[m_nplus_idx]*beta/volume);
+  const int S3  = poisson_reaction(a3, a_dt);
+  se -= S3;
+  sp -= S3;
 
   // Reaction 3: M+ + M-  => 0
-  const Real a4 = Max(0.0, particle_numbers[m_nplus_idx]*particle_numbers[m_nminu_idx]*beta*volume);
-  const Real S4 = poisson_reaction(a4, a_dt);
-  Sp -= S4;
-  Sm -= S4;
+  const Real a4 = Max(0.0, particle_numbers[m_nplus_idx]*particle_numbers[m_nminu_idx]*beta/volume);
+  const int  S4 = poisson_reaction(a4, a_dt);
+  sp -= S4;
+  sm -= S4;
 
   // Reaction 5: y + M   => e + M+
-  Se += a_photon_densities[0];
-  Sp += a_photon_densities[0];
+  se += photon_numbers[0];
+  sp += photon_numbers[0];
 
   // Reaction 6: e + M => e + M + y
-  a_photon_sources[0] = 1;
+  const Real a6 = a1*m_exc_eff*m_pq/(m_p+m_pq);
+  const int S6  = poisson_reaction(a6, a_dt);
+  a_photon_sources[0] = 1.0*S6;
 
-#if 0
-  std::cout << (-Se + Sp - Sm) << std::endl;
+#if 1
+  const int res = -se + sp - sm;
+  if(res != 0) MayDay::Abort("nope");
 #endif
+
+  // Do some scaling
+  Real& Se = a_particle_sources[m_nelec_idx];
+  Real& Sp = a_particle_sources[m_nplus_idx];
+  Real& Sm = a_particle_sources[m_nminu_idx];
+
+  Se = 1.0*se;
+  Sp = 1.0*sp;
+  Sm = 1.0*sm;
+
   
   // Do the proper scaling
   const Real factor = 1./(volume*a_dt);
   for (int i = 0; i < a_particle_sources.size(); i++){
     a_particle_sources[i] *= factor;
   }
+
+  
 
 
   return;
@@ -524,20 +541,20 @@ Vector<Real> morrow_network::compute_cdr_dielectric_fluxes(const Real         a_
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
-Real morrow_network::poisson_reaction(const Real a_propensity, const Real a_dt) const{
-  Real value = 0.0;
+int morrow_network::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+  int value = 0.0;
   const Real mean = a_propensity*a_dt;
   if(mean < m_cutoff_poisson){
-    value = a_propensity*a_dt;
+    value = round(a_propensity*a_dt);
   }
   else{
     if(mean < m_poiss_exp_swap){
       std::poisson_distribution<int> dist(mean);
-      value = Max(0.0, 1.0*dist(*m_rng));
+      value = dist(*m_rng);
     }
     else{
       std::normal_distribution<double> dist(mean, sqrt(mean));
-      value = Max(0.0, 1.0*dist(*m_rng));
+      value = dist(*m_rng);
     }
   }
 

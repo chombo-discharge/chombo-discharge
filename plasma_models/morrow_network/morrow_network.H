@@ -159,7 +159,7 @@ public:
 
 
 
-  inline Real poisson_reaction(const Real a_propensity, const Real a_dt) const;
+  inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
   
   inline Real compute_alpha(const RealVect a_E) const;
   inline Real compute_eta(const RealVect a_E)   const;

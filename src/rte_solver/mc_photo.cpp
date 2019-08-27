@@ -24,18 +24,6 @@
 mc_photo::mc_photo(){
   m_name       = "mc_photo";
   m_class_name = "mc_photo";
-  
-  this->set_verbosity(-1);
-  this->set_stationary(false);
-  this->set_rng();
-  this->set_pseudophotons();
-  this->set_photon_generation();
-  this->set_source_type();
-  this->set_deposition_type();
-  this->set_bisect_step();
-  this->set_domain_bc();
-  this->set_random_kappa();
-  this->set_pvr_buffer();
 }
 
 mc_photo::~mc_photo(){
@@ -62,7 +50,7 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
   this->remap_photons(m_photons);                                   // Remap photons
-  this->deposit_photons(a_state, m_photons);                        // Compute photoionization profile
+  this->deposit_photons(a_state, m_photons, m_deposition);          // Compute photoionization profile
   
   return true;
 }
@@ -197,6 +185,28 @@ void mc_photo::parse_deposition(){
   else{
     MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
   }
+
+  pp.get("plot_deposition", str);
+  m_plot_numbers = false;
+  if(str == "num"){
+    m_plot_deposition = InterpType::NGP;
+    m_plot_numbers = true;
+  }
+  else if(str == "ngp"){
+    m_plot_deposition = InterpType::NGP;
+  }
+  else if(str == "cic"){
+    m_plot_deposition = InterpType::CIC;
+  }
+  else if(str == "tsc"){
+    m_plot_deposition = InterpType::TSC;
+  }
+  else if(str == "w4"){
+    m_plot_deposition = InterpType::W4;
+  }
+  else{
+    MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
+  }
 }
 
 void mc_photo::parse_bisect_step(){
@@ -307,23 +317,6 @@ void mc_photo::clear(EBAMRPhotons& a_photons){
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     a_photons[lvl]->clear();
   }
-}
-
-void mc_photo::set_rng(){
-  CH_TIME("mc_photo::set_rng");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_rng" << endl;
-  }
-
-  // Seed the RNG
-  ParmParse pp("mc_photo");
-  pp.get("seed", m_seed);
-  pp.get("poiss_exp_swap", m_poiss_exp_swap);
-  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  m_rng = new std::mt19937_64(m_seed);
-
-  m_udist01 = new uniform_real_distribution<Real>( 0.0, 1.0);
-  m_udist11 = new uniform_real_distribution<Real>(-1.0, 1.0);
 }
   
 void mc_photo::allocate_internals(){
@@ -474,7 +467,7 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   }
 
   // 4. Redeposit photons
-  deposit_photons(m_state, m_photons);
+  deposit_photons(m_state, m_photons, m_deposition);
 }
 
 void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
@@ -720,7 +713,7 @@ int mc_photo::draw_photons(const Real a_source, const Real a_volume, const Real 
   return num_photons;
 }
 
-void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles){
+void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles, const InterpType& a_deposition){
   CH_TIME("mc_photo::deposit_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_photons" << endl;
@@ -734,6 +727,8 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
 
   data_ops::set_value(a_state, 0.0);
   data_ops::set_value(m_crse,  0.0);
+
+  InterpType deposition = a_deposition;
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
@@ -753,7 +748,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       MeshInterp interp(box, dx*RealVect::Unit, origin);
-      interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
+      interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), deposition);
     }
 
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
@@ -774,14 +769,14 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box box          = dbl.get(dit());
 	MeshInterp interp(box, dx*RealVect::Unit, origin);
-	interp.deposit((*m_joint_photons[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
+	interp.deposit((*m_joint_photons[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), deposition);
       }
     }
 #endif
   }
 
   // In this case we should deposit numbers and not densities
-  if(m_deposit_numbers && m_deposition == InterpType::NGP){
+  if(m_deposit_numbers && a_deposition == InterpType::NGP){
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       data_ops::scale(*a_state[lvl], pow(m_amr->get_dx()[lvl], SpaceDim));
     }
@@ -789,168 +784,6 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
   else{
     data_ops::kappa_scale(a_state);
   }
-}
-
-void mc_photo::set_random_kappa(){
-  CH_TIME("mc_photo::set_random_kappa");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_random_kappa" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("mc_photo");
-  pp.get("random_kappa", str);
-
-  m_random_kappa = (str == "true") ? true : false; 
-}
-
-void mc_photo::set_photon_generation(){
-  CH_TIME("mc_photo::set_photon_generation");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_photon_generation" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("mc_photo");
-  pp.get("photon_generation", str);
-
-  if(str == "deterministic"){
-    m_photogen = photon_generation::deterministic;
-  }
-  else if(str == "stochastic"){
-    m_photogen = photon_generation::stochastic;
-  }
-  else{
-    MayDay::Abort("mc_photo::set_photon_generation - unknown photon generation type requested");
-  }
-}
-
-void mc_photo::set_source_type(){
-  CH_TIME("mc_photo::set_source_type");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_source_type" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("mc_photo");
-  pp.get("source_type", str);
-
-  if(str == "number"){
-    m_src_type = source_type::number;
-  }
-  else if(str == "volume"){
-    m_src_type = source_type::per_vol;
-  }
-  else if(str == "volume_rate"){
-    m_src_type = source_type::per_vols;
-  }
-  else if(str == "rate"){
-    m_src_type = source_type::per_s;
-  }
-  else{
-    MayDay::Abort("mc_photo::set_source_type - unknown source type requested");
-  }
-}
-
-void mc_photo::set_deposition_type(){
-  CH_TIME("mc_photo::set_deposition_type");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_deposition_type" << endl;
-  }
-
-  std::string str;
-  ParmParse pp("mc_photo");
-  pp.get("deposition", str);
-
-  m_deposit_numbers = false;
-  if(str == "num"){
-    m_deposition = InterpType::NGP;
-    m_deposit_numbers = true;
-  }
-  else if(str == "ngp"){
-    m_deposition = InterpType::NGP;
-  }
-  else if(str == "cic"){
-    m_deposition = InterpType::CIC;
-  }
-  else if(str == "tsc"){
-    m_deposition = InterpType::TSC;
-  }
-  else if(str == "w4"){
-    m_deposition = InterpType::W4;
-  }
-  else{
-    MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
-  }
-}
-
-void mc_photo::set_pseudophotons(){
-  CH_TIME("mc_photo::set_pseudophotons");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_pseudophotons" << endl;
-  }
-
-  ParmParse pp("mc_photo");
-  pp.get("max_photons", m_max_photons);
-  
-  if(m_max_photons <= 0){ // = -1 => no restriction
-    m_max_photons = 99999999;
-  }
-}
-
-void mc_photo::set_domain_bc(){
-  CH_TIME("mc_photo::set_domain_bc");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_domain_bc" << endl;
-  }
-
-  m_domainbc.resize(2*SpaceDim);
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-      const int idx = domainbc_map(dir, side);
-
-      ParmParse pp("mc_photo");
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-      std::string sidestr = (side == Side::Lo) ? "_low" : "_high";
-      std::string bc_string = "bc_" + str_dir + sidestr;
-      std::string type;
-      pp.get(bc_string.c_str(), type);
-      if(type == "outflow"){
-	m_domainbc[idx] = wallbc::outflow;
-      }
-      else if(type == "symmetry"){
-	m_domainbc[idx] = wallbc::symmetry;
-      }
-      else if(type == "wall"){
-	m_domainbc[idx] = wallbc::wall;
-      }
-      else {
-	std::string error = "mc_photo::set_domain_bc - unsupported boundary condition requested: " + bc_string;
-	MayDay::Abort(error.c_str());
-      }
-    }
-  }
-}
-
-void mc_photo::set_bisect_step(){
-  CH_TIME("mc_photo::set_bisect_step");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_bisect_step" << endl;
-  }
-
-  ParmParse pp("mc_photo");
-  pp.get("bisect_step", m_bisect_step);
 }
 
 void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt){
@@ -1194,17 +1027,6 @@ int mc_photo::count_outcast(const EBAMRPhotons& a_photons) const {
   return num_outcast;
 }
 
-int mc_photo::set_pvr_buffer(){
-  CH_TIME("mc_photo::set_pvr_buffer");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_pvr_buffer" << endl;
-  }
-
-  // Seed the RNG
-  ParmParse pp("mc_photo");
-  pp.get("pvr_buffer", m_pvr_buffer);
-}
-
 void mc_photo::binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,
 			     const List<photon>&                           a_photons,
 			     const RealVect&                               a_meshSpacing,
@@ -1223,4 +1045,20 @@ void mc_photo::binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip
       it->second.add_photon(&p);
     }
   }
+}
+
+void mc_photo::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("mc_photo::write_plot_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_plot_data" << endl;
+  }
+
+  if(m_plot_phi) {
+    const int ncomp = 1;
+    EBAMRCellData dummy;
+    m_amr->allocate(dummy, m_phase, ncomp);
+    deposit_photons(dummy, m_photons, m_plot_deposition);
+    write_data(a_output, a_comp, dummy,  true);
+  }
+  if(m_plot_src) write_data(a_output, a_comp, m_source, false);
 }

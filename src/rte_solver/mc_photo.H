@@ -88,50 +88,19 @@ public:
   virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state);
 
   /*!
-    @brief Set grid deposition type
-  */
-  virtual void set_deposition_type();
-
-  /*!
-    @brief Set photon generation type
-  */
-  virtual void set_photon_generation();
-
-  /*!
-    @brief Declare what the source contains. Since the physics interface is arbitrary, this might be an integer number, the number per volume, a volumetric rate, or just a rate. In this case some normalization is required. 
-  */
-  virtual void set_source_type();
-
-  /*!
-    @brief Set pseudophotons
-  */
-  virtual void set_pseudophotons();
-
-  /*!
-    @brief Set bisection step legnth
-  */
-  virtual void set_bisect_step();
-
-  /*!
-    @brief Switch for selecting absorption length randomly
-    @details Used e.g. if the photon frequency is "random"
-  */
-  virtual void set_random_kappa();
-
-  /*!
     @brief Clear data holder
   */
   virtual void clear(EBAMRPhotons& a_photons);
-  
-  /*!
-    @brief 
-  */
-  virtual void set_domain_bc();
-  
+
   /*!
     @brief Write plot file
   */
   virtual void write_plot_file();
+
+  /*!
+    @brief Write plot data
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write checkpoint data into handle
@@ -142,11 +111,6 @@ public:
     @brief Read checkpoint data from handle
   */
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);  
-
-  /*!
-    @brief Set PVR buffer
-  */
-  virtual int set_pvr_buffer();
 
   /*!
     @brief Return required number of ghost cells
@@ -180,6 +144,7 @@ protected:
     
   bool m_random_kappa;    // Use random kappa or not
   bool m_deposit_numbers; // Deposit numbers of photons in each cell
+  bool m_plot_numbers;    // Plot numbers or densities
 
   int  m_max_photons;     // Number of photons per pseudophoton
   int  m_seed;            // RNG seed
@@ -198,6 +163,8 @@ protected:
   std::uniform_real_distribution<Real>* m_udist11; // Uniform real distribuion on [-1,1]
 
   InterpType m_deposition; // Mass deposition type
+  InterpType m_plot_deposition;
+  
 
   EBAMRPhotons m_photons;    // Particles
   EBAMRPhotons m_photocache; // Photon cache
@@ -206,14 +173,13 @@ protected:
 
 
   Vector<wallbc::which_bc> m_domainbc;
-  void set_rng();
   
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
   void remap_photons(EBAMRPhotons& a_photons);
   void aggregate_photons(const EBAMRPhotons& a_photons);
-  void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles);
+  void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles, const InterpType& a_deposition);
 
   // For mapping photons into bins
   void binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,
