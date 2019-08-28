@@ -2946,6 +2946,7 @@ void plasma_engine::write_geometry(){
   sprintf(file_char, "%s.geometry.%dd.hdf5", prefix.c_str(), SpaceDim);
   string fname(file_char);
 
+
   writeEBHDF5(fname, 
 	      grids,
 	      output_ptr,
@@ -3059,7 +3060,7 @@ void plasma_engine::new_write_plot_file(){
   }
 
   // Write HDF5 file
-  if(m_verbosity > 3){
+  if(m_verbosity >= 3){
     pout() << "plasma_engine::write_plot_file - writing plot file..." << endl;
   }
   const Real t0 = MPI_Wtime();
@@ -3072,13 +3073,13 @@ void plasma_engine::new_write_plot_file(){
 	      m_dt,
 	      m_time,
 	      m_amr->get_ref_rat(),
-	      plot_depth + 1,
+	      1,
 	      false,
 	      Vector<Real>(),
 	      m_num_plot_ghost*IntVect::Unit);
   const Real t1 = MPI_Wtime();
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::write_plot_file - DONE writing plot file..." << endl;
+  if(m_verbosity >= 3){
+    pout() << "plasma_engine::write_plot_file - writing plot file... DONE!. Write time = " << t1 - t0 << " seconds." << endl;
   }
 }
 
@@ -3310,6 +3311,10 @@ void plasma_engine::new_write_checkpoint_file(){
   header.writeToFile(handle_out);
 
   // Write stuff level by level
+  const Real t0 = MPI_Wtime();
+  if(m_verbosity >= 3){
+    pout() << "plasma_engine::new_write_checkpoint_file - writing checkpoint file..." << endl;
+  }
   for (int lvl = 0; lvl <= finest_chk_level; lvl++){
     handle_out.setGroupToLevel(lvl);
 
@@ -3336,6 +3341,11 @@ void plasma_engine::new_write_checkpoint_file(){
 
     // plasma_engine checkpoints its internal data
     write_checkpoint_level(handle_out, lvl);
+  }
+  const Real t1 = MPI_Wtime();
+  if(m_verbosity >= 3){
+    pout() << "plasma_engine::new_write_checkpoint_file - writing checkpoint file... DONE! Write time = "
+	   << t1-t0<< " seconds." << endl;
   }
   
   handle_out.close();
