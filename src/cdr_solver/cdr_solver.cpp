@@ -14,6 +14,7 @@
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
+#include <EBAlias.H>
 
 #define USE_DOMAIN_FLUX 1
 
@@ -849,8 +850,22 @@ void cdr_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
+  const bool deposit_function  = m_species->init_with_function();
+  const bool deposit_particles = m_species->init_with_particles();
 
+  if(deposit_particles){
+    initial_data_particles();
+  }
+  else{
+    data_ops::set_value(m_state, 0.0);
+  }
 
+  // Increment with function values if this is also called for
+  if(deposit_function){
+    initial_data_distribution();
+  }
+
+#if 0
   const RealVect origin  = m_physdom->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
@@ -898,8 +913,148 @@ void cdr_solver::initial_data(){
     }
   }
 
+#endif
+
   m_amr->average_down(m_state, m_phase);
   m_amr->interp_ghost(m_state, m_phase);
+}
+
+void cdr_solver::initial_data_distribution(){
+  CH_TIME("cdr_solver::initial_data_distribution");
+  if(m_verbosity > 5){
+    pout() << m_name + "::initial_data_distribution" << endl;
+  }
+
+  const RealVect origin  = m_physdom->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  // Copy this
+  data_ops::copy(m_scratch, m_state);
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+    for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& state         = (*m_state[lvl])[dit()];
+      const EBCellFAB& scratch = (*m_scratch[lvl])[dit()];
+      const Box box            = m_state[lvl]->disjointBoxLayout().get(dit());
+      const EBISBox& ebisbox   = state.getEBISBox();
+      const EBGraph& ebgraph   = ebisbox.getEBGraph();
+
+      BaseFab<Real>& reg_state   = state.getSingleValuedFAB();
+      const BaseFab<Real>& reg_scratch = scratch.getSingleValuedFAB();
+
+      // Regular cells
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+	const IntVect iv = bit();
+	const RealVect pos = origin + RealVect(iv)*m_amr->get_dx()[lvl]*RealVect::Unit;
+
+	for (int comp = 0; comp < state.nComp(); comp++){
+	  reg_state(iv, comp) = reg_scratch(iv, comp) + m_species->initial_data(pos, m_time);
+	}
+      }
+
+      // Irreg and multicells
+      const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
+	
+	for (int comp = 0; comp < state.nComp(); comp++){
+	  state(vof, comp) = scratch(vof, comp) + m_species->initial_data(pos, m_time);
+	}
+      }
+    }
+  }
+
+  m_amr->average_down(m_state, m_phase);
+  m_amr->interp_ghost(m_state, m_phase);
+
+  data_ops::set_covered_value(m_state, 0, 0.0);
+}
+
+void cdr_solver::initial_data_particles(){
+  CH_TIME("cdr_solver::initial_data_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::initial_data_particles" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  const int comp = 0;
+  const Interval interv(comp, comp);
+
+  // Allocate some stuff
+  Vector<RefCountedPtr<ParticleData<Particle> > > amrparticles;
+  Vector<RefCountedPtr<ParticleValidRegion> > pvr;
+  m_amr->allocate(amrparticles);
+  m_amr->allocate(pvr, 1);
+
+  // Gather particles on the coarsest level
+  List<Particle>& initial_particles = m_species->get_initial_particles();
+  List<Particle>& coarsest_outcast  = amrparticles[0]->outcast();
+  coarsest_outcast.clear();
+  coarsest_outcast.catenate(initial_particles);
+
+  // Remap coarsest level and get rid of everything that falls outside
+  amrparticles[0]->remapOutcast();
+  coarsest_outcast.clear();
+
+  // Remap amr particles
+  for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
+
+    // 1. Collect coarser level particles into this levels PVR
+    collectValidParticles(amrparticles[lvl]->outcast(),
+			  *amrparticles[lvl-1],
+			  pvr[lvl]->mask(),
+			  m_amr->get_dx()[lvl]*RealVect::Unit,
+			  m_amr->get_ref_rat()[lvl-1],
+			  false, 
+			  origin);
+    amrparticles[lvl]->remapOutcast();
+  }
+
+  // We will deposit onto m_state, using m_scratch as a scratch holder for interpolation stuff
+  data_ops::set_value(m_state, 0.0);
+  data_ops::set_value(m_scratch, 0.0);
+
+  // Deposit onto mseh
+  InterpType deposition = m_species->get_deposition();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+
+    const bool has_coar = (lvl > 0);
+    const bool has_fine = (lvl < finest_level);
+
+    // 1. If we have a coarser level whose cloud hangs into this level, interpolate the coarser level here first
+    if(has_coar){
+      RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
+      interp->interpolate(*m_state[lvl], *m_scratch[lvl-1], interv);
+    }
+    
+    // 2. Deposit this levels particles and exchange ghost cells
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      MeshInterp interp(box, dx*RealVect::Unit, origin);
+      interp.deposit((*amrparticles[lvl])[dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), deposition);
+    }
+    data_ops::scale(*m_state[lvl], 1./dx);
+
+    // Exchange ghost cells
+    const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
+    LDaddOp<FArrayBox> addOp;
+    LevelData<FArrayBox> aliasFAB;
+    aliasEB(aliasFAB, *m_state[lvl]);
+    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
+
+    // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
+    //    interpolation of "hanging clouds"
+    if(has_fine){
+      m_state[lvl]->localCopyTo(*m_scratch[lvl]);
+    }
+  }
 }
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,

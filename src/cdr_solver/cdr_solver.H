@@ -158,6 +158,16 @@ public:
   virtual void initial_data();
 
   /*!
+    @brief Fill initial data from a distribution function
+  */
+  virtual void initial_data_distribution();
+
+    /*!
+    @brief Fill initial data from particles
+  */
+  virtual void initial_data_particles();
+
+  /*!
     @brief Allocate internal storage
   */
   virtual void allocate_internals();

@@ -582,6 +582,12 @@ morrow_network::electron::electron(){
   pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
+
+  Particle p(1, RealVect(0, -3E-3));
+  m_initial_particles.add(p);
+  m_init_with_particles = true;
+  m_init_with_function = true;
+  m_deposition = InterpType::NGP;
 }
 
 morrow_network::positive_species::positive_species(){

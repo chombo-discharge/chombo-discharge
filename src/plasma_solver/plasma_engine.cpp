@@ -3073,7 +3073,7 @@ void plasma_engine::new_write_plot_file(){
 	      m_dt,
 	      m_time,
 	      m_amr->get_ref_rat(),
-	      1,
+	      plot_depth + 1,
 	      false,
 	      Vector<Real>(),
 	      m_num_plot_ghost*IntVect::Unit);

@@ -14,6 +14,13 @@ species::species(){
   m_diffusive    = true;
   m_mobile       = true;
   m_force_output = false;
+
+  m_init_with_function  = true;
+  m_init_with_particles = false;
+  
+  m_deposition = InterpType::NGP;
+
+  m_initial_particles.clear();
 }
 
 species::species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive){
@@ -21,6 +28,12 @@ species::species(const std::string a_name, const int a_charge, const bool a_mobi
   m_charge    = a_charge;
   m_mobile    = a_mobile;
   m_diffusive = a_diffusive;
+
+  m_init_with_function  = true;
+  m_init_with_particles = false;
+  
+  m_deposition = InterpType::NGP;
+  m_initial_particles.clear();
 }
 
 species::~species(){
@@ -53,4 +66,20 @@ bool species::is_mobile() const {
 
 bool species::force_output() const {
   return m_force_output;
+}
+
+bool species::init_with_particles() const {
+  return m_init_with_particles;
+}
+
+bool species::init_with_function() const{
+  return m_init_with_function;
+}
+
+InterpType species::get_deposition() const {
+  return m_deposition;
+}
+
+List<Particle>& species::get_initial_particles() {
+  return m_initial_particles;
 }

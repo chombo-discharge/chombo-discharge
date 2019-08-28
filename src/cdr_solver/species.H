@@ -9,6 +9,9 @@
 #define _SPECIES_
 
 #include <RealVect.H>
+#include <Particle.H>
+#include <BinItem.H>
+#include <MeshInterp.H>
 
 /*!
   @brief Abstract class that describes an electron or species
@@ -67,6 +70,26 @@ public:
   */
   virtual bool force_output() const;
 
+  /*!
+    @brief Init with particles or not
+  */
+  virtual bool init_with_particles() const;
+
+  /*!
+    @brief Init with function or not
+  */
+  virtual bool init_with_function() const;
+
+  /*!
+    @brief Get deposition
+  */
+  virtual InterpType get_deposition() const;
+
+  /*!
+    @brief Get initial particles
+  */
+  virtual List<Particle>& get_initial_particles();
+
 protected:
 
   /*!
@@ -98,6 +121,26 @@ protected:
     @brief Force output of species. This is relevant for plasma_engine only. 
   */
   bool m_force_output;
+
+  /*!
+    @brief Init with particles
+  */
+  bool m_init_with_particles;
+
+  /*!
+    @brief Init function values
+  */
+  bool m_init_with_function;
+
+  /*!
+    @brief Initial particles
+  */
+  List<Particle> m_initial_particles;
+
+  /*!
+    @brief Deposition type for initial particles
+  */
+  InterpType m_deposition;
 };
 
 #endif
