@@ -16,7 +16,7 @@ species::species(){
   m_force_output = false;
 
   m_init_with_function  = true;
-  m_init_with_particles = false;
+  m_init_with_particles = true;
   
   m_deposition = InterpType::NGP;
 
@@ -30,7 +30,7 @@ species::species(const std::string a_name, const int a_charge, const bool a_mobi
   m_diffusive = a_diffusive;
 
   m_init_with_function  = true;
-  m_init_with_particles = false;
+  m_init_with_particles = true;
   
   m_deposition = InterpType::NGP;
   m_initial_particles.clear();
@@ -76,7 +76,7 @@ bool species::init_with_function() const{
   return m_init_with_function;
 }
 
-InterpType species::get_deposition() const {
+InterpType& species::get_deposition() {
   return m_deposition;
 }
 

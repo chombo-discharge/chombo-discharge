@@ -24,6 +24,11 @@ morrow_network.seed_density                  = 0.E16                 # Initial s
 morrow_network.seed_radius                   = 1E-3                  # Initial seed radius
 morrow_network.seed_position                 = 0. 0. 0.              # Initial seed position
 
+morrow_network.uniform_particles             = 0                     # Number of uniformly distributed particles in the domain
+morrow_network.gaussian_particles            = 10000                 # Number of Gaussian distributed particles in the domain
+morrow_network.gaussian_center               = 0.0 0.0 0.0           # Gaussian seed center
+morrow_network.gaussian_radius               = 500.E-6               # Gaussian seed radius
+
 morrow_network.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission (atm)
 morrow_network.excitation_efficiency         = 0.6                   # Impact excitation efficiency
 morrow_network.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency

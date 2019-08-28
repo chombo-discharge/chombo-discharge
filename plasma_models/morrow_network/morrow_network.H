@@ -112,7 +112,7 @@ public:
   Real m_T;      // Temperature
   Real m_fracO2; // O2 fraction
   Real m_fracN2; // N2 fraction
-  Real m_pO2;    // 
+  Real m_pO2;    //
 
   Real m_pq;         // Quenching pressure
   Real m_exc_eff;    // Excitation efficiency
@@ -158,7 +158,16 @@ public:
 		   const Real             a_kappa) const;
 
 
+protected:
 
+  void parse_gas_params();
+  void parse_see();
+  void parse_domain_bc();
+  void parse_reaction_settings();
+  void parse_initial_particles();
+  void add_uniform_particles(List<Particle>& particles);
+  void add_gaussian_particles(List<Particle>& particles);
+  
   inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
   
   inline Real compute_alpha(const RealVect a_E) const;

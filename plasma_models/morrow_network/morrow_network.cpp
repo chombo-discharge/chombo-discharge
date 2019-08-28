@@ -16,7 +16,6 @@
 #include <chrono>
 
 morrow_network::morrow_network(){
-
   m_num_species = 3;
   m_num_photons = 1;
 
@@ -27,82 +26,32 @@ morrow_network::morrow_network(){
   m_nplus_idx   = 1;
   m_nminu_idx   = 2;
   m_photon1_idx = 0;
-  
+
+  // Instantiate species
   m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_network::electron());
   m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_network::positive_species());
   m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_network::negative_species());
   m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_network::uv_photon());
 
-  ParmParse pp("morrow_network");
-  std::string str;
-  pp.get("gas_temperature",            m_T);
-  pp.get("gas_N2_frac",                m_fracN2);
-  pp.get("gas_O2_frac",                m_fracO2);
-  pp.get("gas_pressure",               m_p);
-  pp.get("gas_quenching_pressure",     m_pq);
-  pp.get("excitation_efficiency",      m_exc_eff);
-  pp.get("photoionization_efficiency", m_photoi_eff);
+  // Parse some basic settings
+  parse_gas_params();
+  parse_see();
+  parse_domain_bc();
+  parse_reaction_settings();
 
-  pp.get("electrode_townsend2",           m_townsend2_electrode);
-  pp.get("dielectric_townsend2",          m_townsend2_dielectric);
-  pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
-  pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
-
-  pp.get("use_ssa",        str); m_ssa = (str == "true") ? true : false;
-  pp.get("seed",           m_seed);
-  pp.get("poiss_exp_swap", m_poiss_exp_swap);
-  pp.get("cutoff_poisson", m_cutoff_poisson);
-
-  // Boundary conditions at domain walls
-  m_wallbc.resize(2*SpaceDim, 0); 
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-	
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-      // Check for wall BCs
-      if(side == Side::Lo){
-	std::string type;
-	std::string bc_string = "domain_bc_" + str_dir + "_lo";
-	if(pp.contains(bc_string.c_str())){
-	  pp.get(bc_string.c_str(), type);
-	  const int idx = 2*dir;
-	  if(type == "wall"){
-	    m_wallbc[idx] = 1;
-	  }
-	}
-      }
-      else if(side == Side::Hi){
-	std::string type;
-	std::string bc_string = "domain_bc_" + str_dir + "_hi";
-	if(pp.contains(bc_string.c_str())){
-	  pp.get(bc_string.c_str(), type);
-	  const int idx = 2*dir + 1;
-	  if(type == "wall"){
-	    m_wallbc[idx] = 1;
-	  }
-	}
-      }
-    }
+  // Init RNG
+  if(m_seed < 0) {
+    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
   }
+  m_rng = new std::mt19937_64(m_seed);
+
+  // Parse initial data
+  parse_initial_particles();
 
   // Convert to correct units and compute necessary things
   m_p  *= units::s_atm2pascal;
   m_pq *= units::s_atm2pascal;
   m_N   = m_p*units::s_Na/(m_T*units::s_R);
-
-  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  m_rng = new std::mt19937_64(m_seed);
 }
 
 morrow_network::~morrow_network(){
@@ -582,12 +531,6 @@ morrow_network::electron::electron(){
   pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
 
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
-
-  Particle p(1, RealVect(0, -3E-3));
-  m_initial_particles.add(p);
-  m_init_with_particles = true;
-  m_init_with_function = true;
-  m_deposition = InterpType::NGP;
 }
 
 morrow_network::positive_species::positive_species(){
@@ -689,4 +632,166 @@ Real morrow_network::uv_photon::get_kappa(const RealVect a_pos) const {
 Real morrow_network::uv_photon::get_random_kappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
+}
+
+void morrow_network::parse_gas_params(){
+  ParmParse pp("morrow_network");
+  std::string str;
+  pp.get("gas_temperature",            m_T);
+  pp.get("gas_N2_frac",                m_fracN2);
+  pp.get("gas_O2_frac",                m_fracO2);
+  pp.get("gas_pressure",               m_p);
+  pp.get("gas_quenching_pressure",     m_pq);
+  pp.get("excitation_efficiency",      m_exc_eff);
+  pp.get("photoionization_efficiency", m_photoi_eff);
+}
+
+void morrow_network::parse_see(){
+
+  ParmParse pp("morrow_network");
+
+  pp.get("electrode_townsend2",           m_townsend2_electrode);
+  pp.get("dielectric_townsend2",          m_townsend2_dielectric);
+  pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
+  pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
+}
+
+void morrow_network::parse_domain_bc(){
+
+  ParmParse pp("morrow_network");
+  std::string str;
+
+  m_wallbc.resize(2*SpaceDim, 0); 
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Side::LoHiSide side = sit();
+	
+      std::string str_dir;
+      if(dir == 0){
+	str_dir = "x";
+      }
+      else if(dir == 1){
+	str_dir = "y";
+      }
+      else if(dir == 2){
+	str_dir = "z";
+      }
+
+      // Check for wall BCs
+      if(side == Side::Lo){
+	std::string type;
+	std::string bc_string = "domain_bc_" + str_dir + "_lo";
+	if(pp.contains(bc_string.c_str())){
+	  pp.get(bc_string.c_str(), type);
+	  const int idx = 2*dir;
+	  if(type == "wall"){
+	    m_wallbc[idx] = 1;
+	  }
+	}
+      }
+      else if(side == Side::Hi){
+	std::string type;
+	std::string bc_string = "domain_bc_" + str_dir + "_hi";
+	if(pp.contains(bc_string.c_str())){
+	  pp.get(bc_string.c_str(), type);
+	  const int idx = 2*dir + 1;
+	  if(type == "wall"){
+	    m_wallbc[idx] = 1;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void morrow_network::parse_reaction_settings(){
+  ParmParse pp("morrow_network");
+  std::string str;
+
+  pp.get("use_ssa",        str); m_ssa = (str == "true") ? true : false;
+  pp.get("seed",           m_seed);
+  pp.get("poiss_exp_swap", m_poiss_exp_swap);
+  pp.get("cutoff_poisson", m_cutoff_poisson);
+}
+
+void morrow_network::parse_initial_particles(){
+
+  List<Particle> p;
+
+  add_uniform_particles(p);
+  add_gaussian_particles(p);
+  
+  // Copy initial particles to various species
+  m_species[m_nelec_idx]->get_initial_particles() = p;
+  m_species[m_nplus_idx]->get_initial_particles() = p;
+
+  m_species[m_nelec_idx]->get_deposition() = InterpType::CIC;
+  m_species[m_nplus_idx]->get_deposition() = InterpType::CIC;
+}
+
+void morrow_network::add_uniform_particles(List<Particle>& a_particles){
+  
+  // Get lo/hi sides
+  RealVect lo, hi;
+  Vector<Real> vec(SpaceDim);
+  {
+    ParmParse pp1("physical_domain");
+
+    pp1.getarr("lo_corner", vec, 0, SpaceDim); lo = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+    pp1.getarr("hi_corner", vec, 0, SpaceDim); hi = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  }
+
+
+  // Make RNGs
+  auto rngX = new std::uniform_real_distribution<Real>(lo[0], hi[0]);
+  auto rngY = new std::uniform_real_distribution<Real>(lo[1], hi[1]);
+#if CH_SPACEDIM==3
+  auto rngZ = new std::uniform_real_distribution<Real>(lo[2], hi[2]);
+#endif
+
+  int num_uniform_particles;
+  
+  // Create uniform particles
+  ParmParse pp("morrow_network");
+  pp.get("uniform_particles",  num_uniform_particles);
+
+  for (int i = 0; i < num_uniform_particles; i++){
+    const Real x = (*rngX)(*m_rng);
+    const Real y = (*rngY)(*m_rng);
+#if CH_SPACEDIM==3
+    const Real z = (*rngZ)(*m_rng);
+#endif
+    RealVect pos = RealVect(D_DECL(x, y, z));
+    a_particles.add(Particle(1.0, pos));
+  }
+}
+
+void morrow_network::add_gaussian_particles(List<Particle>& a_particles){
+
+  // Create uniform particles
+  ParmParse pp("morrow_network");
+
+  int num_gaussian_particles;
+  Real gaussian_radius;
+  RealVect gaussian_center;
+  Vector<Real> vec(SpaceDim);
+  // Create Gaussian seed particles
+  pp.get("gaussian_particles", num_gaussian_particles);
+  pp.get("gaussian_radius",    gaussian_radius);
+  pp.getarr("gaussian_center", vec, 0, SpaceDim); gaussian_center = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+
+  auto rngGX  = new std::normal_distribution<Real>(gaussian_center[0], gaussian_radius);
+  auto rngGY  = new std::normal_distribution<Real>(gaussian_center[1], gaussian_radius);
+#if CH_SPACEDIM==3
+  auto rngGZ  = new std::normal_distribution<Real>(gaussian_center[2], gaussian_radius);
+#endif
+  for (int i = 0; i < num_gaussian_particles; i++){
+    const Real x = (*rngGX)(*m_rng);
+    const Real y = (*rngGY)(*m_rng);
+#if CH_SPACEDIM==3
+    const Real z = (*rngGZ)(*m_rng);
+#endif
+    RealVect pos = RealVect(D_DECL(x, y, z));
+    a_particles.add(Particle(1.0, pos));
+  }
 }

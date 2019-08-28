@@ -83,7 +83,7 @@ public:
   /*!
     @brief Get deposition
   */
-  virtual InterpType get_deposition() const;
+  virtual InterpType& get_deposition();
 
   /*!
     @brief Get initial particles
