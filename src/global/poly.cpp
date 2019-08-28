@@ -142,9 +142,9 @@ RealVect poly::brent_root_finder(const RefCountedPtr<BaseIF>& a_impFunc, const R
     //    std::cout << "Iteration: " << i << "\t Function value: " << fb << std::endl;
   }
 
-  if(i >= maxIter){
-    cerr << "IntersectionUtils::BrentRootFinder: exceeding maximum iterations: " << maxIter << endl;
-  }
+  // if(i >= maxIter){
+  //   cerr << "IntersectionUtils::BrentRootFinder: exceeding maximum iterations: " << maxIter << endl;
+  // }
     
   return bPt + a_point1;
 }

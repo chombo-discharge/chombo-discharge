@@ -15,6 +15,8 @@ typedef euler_maruyama::poisson_storage poisson_storage;
 typedef euler_maruyama::rte_storage     rte_storage;
 typedef euler_maruyama::sigma_storage   sigma_storage;
 
+#define EULER_MARUYAMA_TIMER 1
+
 euler_maruyama::euler_maruyama(){
   m_class_name = "euler_maruyama";
   m_extrap_advect = true;
@@ -81,24 +83,75 @@ Real euler_maruyama::advance(const Real a_dt){
   // 8. Update the Poisson equation
   // 9. Recompute solver velocities and diffusion coefficients
 
+  Real t_fil1 = 0.0;
+  Real t_reac = 0.0;
+  Real t_cdr  = 0.0;
+  Real t_rte  = 0.0;
+  Real t_sig  = 0.0;
+  Real t_pois = 0.0;
+  Real t_fil2 = 0.0;
+  Real t_tot  = 0.0;
+
+  Real t0, t1;
+  t0 = MPI_Wtime();
+  t_tot  = -t0;
+
   euler_maruyama::compute_E_into_scratch();       // Compute the electric field
   euler_maruyama::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   euler_maruyama::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
   euler_maruyama::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
   euler_maruyama::compute_cdr_domain_fluxes();    // Extrapolate cell-centered fluxes to domain edges
   euler_maruyama::compute_sigma_flux();           // Update charge flux for sigma solver
-  euler_maruyama::compute_reaction_network(a_dt); // Advance the reaction network
+  t1 = MPI_Wtime();
+  t_fil1 = t1 - t0;
 
+  t0 = MPI_Wtime();
+  euler_maruyama::compute_reaction_network(a_dt); // Advance the reaction network
+  t1 = MPI_Wtime();
+  t_reac = t1-t0;
+
+  t0 = MPI_Wtime();
   euler_maruyama::advance_cdr(a_dt);              // Update cdr equations
+  t1 = MPI_Wtime();
+  t_cdr = t1 - t0;
+
+  t0 = MPI_Wtime();
   euler_maruyama::advance_rte(a_dt);              // Update RTE equations
+  t1 = MPI_Wtime();
+  t_rte = t1-t0;
+
+  t0 = MPI_Wtime();
   euler_maruyama::advance_sigma(a_dt);            // Update sigma equation
+  t1 = MPI_Wtime();
+  t_sig = t1 - t0;
   
+  t0 = MPI_Wtime();
   time_stepper::solve_poisson();                  // Update the Poisson equation
+  t1 = MPI_Wtime();
+  t_pois = t1 - t0;
+
+  t0 = MPI_Wtime();
   euler_maruyama::compute_E_into_scratch();       // Update electric fields too
 
   // Update velocities and diffusion coefficients. We don't do sources here. 
   euler_maruyama::compute_cdr_velo(m_time + a_dt);
   euler_maruyama::compute_cdr_diffco(m_time + a_dt);
+  t1 = MPI_Wtime();
+  t_fil2 = t1 - t0;
+  t_tot += t1;
+
+#if EULER_MARUYAMA_TIMER
+  pout() << endl;
+  pout() << "euler_maruyama::advance breakdown:" << endl
+	 << "BC fill   = " << 100.0*t_fil1/t_tot << "%" << endl
+	 << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
+	 << "CDR adv.  = " << 100.*t_cdr/t_tot << "%" << endl
+	 << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
+	 << "Poisson   = " << 100.*t_pois/t_tot << "%" << endl
+	 << "Vel/Dco   = " << 100.*t_fil2/t_tot << "%" << endl
+	 << "TOTAL = " << t_tot << "seconds" << endl;
+  pout() << endl;
+#endif
   
   return a_dt;
 }
@@ -441,6 +494,13 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     pout() << "euler_maruaya::advance_cdr" << endl;
   }
 
+  Real t0, t1;
+
+  Real t_divF = 0.0;
+  Real t_sour = 0.0;
+  Real t_diff = 0.0;
+  Real t_sync = 0.0;
+  Real t_tot  = -MPI_Wtime();
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
@@ -452,6 +512,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     EBAMRCellData& scratch2 = storage->get_scratch2();
 
     // Compute hyperbolic term into scratch
+    t0 = MPI_Wtime();
     if(solver->is_mobile()){
       const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
       solver->compute_divF(scratch, phi, extrap_dt, true);
@@ -460,11 +521,16 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     else{
       data_ops::set_value(scratch, 0.0);
     }
+    t1 = MPI_Wtime();
+    t_divF += t1-t0;
 
     // Also include the source term
+    t0 = MPI_Wtime();
     data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F) + R]
     data_ops::scale(scratch, a_dt);     // scratch = [-div(F) + R]*dt
     data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F) + dt*R
+    t1 = MPI_Wtime();
+    t_sour += t1 - t0;
 
 
     // Solve diffusion equation. This looks weird but we're solving
@@ -473,14 +539,33 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     //
     // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
     // so we just use that for simplicity
+    t0 = MPI_Wtime();
     if(solver->is_diffusive()){
       data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
       data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
       solver->advance_euler(phi, scratch, scratch2, a_dt); 
     }
+    t1 = MPI_Wtime();
+    t_diff += t1 - t0;
+
+    t0 = MPI_Wtime();
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());
+    t1 = MPI_Wtime();
+    t_sync += t1 - t0;
   }
+  t_tot += MPI_Wtime();
+
+#if EULER_MARUYAMA_TIMER
+  pout() << endl;
+  pout() << "euler_maruayama::advance_cdr breakdown:" << endl
+	 << "divF       = " << 100.*t_divF/t_tot << "%" << endl
+	 << "source     = " << 100.*t_sour/t_tot << "%" << endl
+	 << "diffusion  = " << 100.*t_diff/t_tot << "%" << endl
+	 << "avg/interp = " << 100.*t_sync/t_tot << "%" << endl
+	 << "TOTAL = " << t_tot << "seconds" << endl;
+  pout() << endl;
+#endif
 }
 
 void euler_maruyama::advance_rte(const Real a_dt){
