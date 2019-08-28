@@ -1040,7 +1040,9 @@ void cdr_solver::initial_data_particles(){
       MeshInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*amrparticles[lvl])[dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), deposition);
     }
+#if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
     data_ops::scale(*m_state[lvl], 1./dx);
+#endif
 
     // Exchange ghost cells
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
