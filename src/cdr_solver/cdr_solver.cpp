@@ -980,21 +980,31 @@ void cdr_solver::initial_data_particles(){
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_physdom->get_prob_lo();
+  InterpType deposition  = m_species->get_deposition();
 
   const int comp = 0;
   const Interval interv(comp, comp);
+
+  // Need buffer for everything that has non-zero cloud width
+  int pvr_buffer = 1;
+  if(deposition == InterpType::NGP){
+    pvr_buffer = 0;
+  }
+
 
   // Allocate some stuff
   Vector<RefCountedPtr<ParticleData<Particle> > > amrparticles;
   Vector<RefCountedPtr<ParticleValidRegion> > pvr;
   m_amr->allocate(amrparticles);
-  m_amr->allocate(pvr, 0);
+  m_amr->allocate(pvr, pvr_buffer);
 
   // Gather particles on the coarsest level
   List<Particle>& initial_particles = m_species->get_initial_particles();
   List<Particle>& coarsest_outcast  = amrparticles[0]->outcast();
   coarsest_outcast.clear();
-  coarsest_outcast.catenate(initial_particles);
+  if(procID() == 0){
+    coarsest_outcast.catenate(initial_particles);
+  }
 
   // Remap coarsest level and get rid of everything that falls outside
   amrparticles[0]->remapOutcast();
@@ -1019,7 +1029,6 @@ void cdr_solver::initial_data_particles(){
   data_ops::set_value(m_scratch, 0.0);
 
   // Deposit onto mseh
-  InterpType deposition = m_species->get_deposition();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -1029,7 +1038,7 @@ void cdr_solver::initial_data_particles(){
     const bool has_fine = (lvl < finest_level);
 
     // 1. If we have a coarser level whose cloud hangs into this level, interpolate the coarser level here first
-    if(has_coar){
+    if(has_coar && deposition != InterpType::NGP){
       RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
       interp->interpolate(*m_state[lvl], *m_scratch[lvl-1], interv);
     }
@@ -1040,9 +1049,7 @@ void cdr_solver::initial_data_particles(){
       MeshInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*amrparticles[lvl])[dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), deposition);
     }
-#if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
-    data_ops::scale(*m_state[lvl], 1./dx);
-#endif
+
 
     // Exchange ghost cells
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
@@ -1057,6 +1064,13 @@ void cdr_solver::initial_data_particles(){
       m_state[lvl]->localCopyTo(*m_scratch[lvl]);
     }
   }
+
+#if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx = m_amr->get_dx()[lvl];
+    data_ops::scale(*m_state[lvl], 1./dx);
+  }
+#endif
 }
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
