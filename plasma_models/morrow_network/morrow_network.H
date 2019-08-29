@@ -144,8 +144,21 @@ public:
 		   const Real             a_time,
 		   const Real             a_kappa) const;
 
-  // Tau leaping method
+  // stochastic simulation algorithm
   void network_ssa(Vector<Real>&          a_particle_sources,
+		   Vector<Real>&          a_photon_sources,
+		   const Vector<Real>     a_particle_densities,
+		   const Vector<RealVect> a_particle_gradients,
+		   const Vector<Real>     a_photon_densities,
+		   const RealVect         a_E,
+		   const RealVect         a_pos,
+		   const Real             a_dx,
+		   const Real             a_dt,
+		   const Real             a_time,
+		   const Real             a_kappa) const;
+
+  // stochastic simulation algorithm
+  void network_rre(Vector<Real>&          a_particle_sources,
 		   Vector<Real>&          a_photon_sources,
 		   const Vector<Real>     a_particle_densities,
 		   const Vector<RealVect> a_particle_gradients,
@@ -159,6 +172,14 @@ public:
 
 
 protected:
+
+  enum source_comp{
+    ssa = 0,
+    tau = 1,
+    rre = 2
+  };
+
+  source_comp m_scomp;
 
   void parse_gas_params();
   void parse_see();

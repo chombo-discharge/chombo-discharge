@@ -44,57 +44,56 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 			     const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
   CH_TIME("plasma_engine::plasma_engine(full)");
 
-  this->set_verbosity(1);
+  parse_verbosity();
   if(m_verbosity > 5){
     pout() << "plasma_engine::plasma_engine(full)" << endl;
   }
   
 
-  this->set_physical_domain(a_physdom);                      // Set physical domain
-  this->set_computational_geometry(a_compgeom);              // Set computational geometry
-  this->set_plasma_kinetics(a_plaskin);                      // Set plasma kinetics
-  this->set_time_stepper(a_timestepper);                     // Set time stepper
-  this->set_amr(a_amr);                                      // Set amr
-  this->set_cell_tagger(a_celltagger);                       // Set cell tagger
-  this->set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
-  this->set_poisson_wall_func(s_constant_one);               // Set wall function
-  this->set_recursive_regrid();                              // Set recursive regrid
-  this->set_geom_refinement_depth(-1);                       // Set geometric refinement depths
-  this->set_verbosity(1);                                    // Set verbosity
-  this->set_plot_interval(10);                               // Set plot interval
-  this->set_checkpoint_interval(10);                         // Set checkpoint interval
-  this->set_num_plot_ghost(0);                               // Set number of ghost cells in plots
-  this->set_grow_tags(0);                                    // Grow tagged cells
-  this->set_regrid_interval(10);                             // Set regrid interval
-  this->set_output_directory("./");                          // Set output directory
-  this->set_output_file_names("simulation");                 // Set output file names
-  this->set_output_mode(output_mode::full);                  // Set output mode
-  this->set_restart_mode(restart_mode::full);                // Set restart mode
-  this->set_memory_report_mode(memory_report_mode::overall); // Set memory report mode
-  this->set_init_regrids(0);                                 // Number of initial regrids
-  this->set_geom_only(false);                                // Only plot geometry
+  set_physical_domain(a_physdom);                      // Set physical domain
+  set_computational_geometry(a_compgeom);              // Set computational geometry
+  set_plasma_kinetics(a_plaskin);                      // Set plasma kinetics
+  set_time_stepper(a_timestepper);                     // Set time stepper
+  set_amr(a_amr);                                      // Set amr
+  set_cell_tagger(a_celltagger);                       // Set cell tagger
+  set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
+  set_poisson_wall_func(s_constant_one);               // Set wall function
+
+  // Parse some class options
+  parse_regrid();
+  parse_restart();
+  parse_memrep();
+  parse_output_directory();
+  parse_output_mode();
+  parse_output_file_names();
+  parse_verbosity();
+  parse_output_intervals();
+  parse_geo_refinement();
+  parse_num_plot_ghost();
+  parse_grow_tags();
+  parse_geom_only();
+  parse_ebis_memory_load_balance();
+  parse_write_ebis();
+  parse_read_ebis(); 
+  parse_simulation_time();
+  parse_file_depth();
+
+  // About-to-be-deprecated features
   this->set_dump_mass(false);                                // Dump mass to file
   this->set_dump_charge(false);                              // Dump charges to file
-  this->set_ebis_memory_load_balance(false);                 // Set load balance for EBIS generation
-  this->set_restart(false);                                  // Restart mode
-  this->set_write_ebis(false);                               // Write EBIS
-  this->set_read_ebis(false);                                // Read EBIS when restarting simulation
-  this->set_restart_step(0);                                 // Restart from this step
-  this->set_start_time(0.0);                                 // Start time
-  this->set_stop_time(1.0);                                  // Stop time
-  this->set_max_steps(100);                                  // Max number of steps
-  this->set_max_plot_depth(-1);                              // Set maximum plot depth.
-  this->set_max_chk_depth(-1);                               // Set maximum checkpoint depth.
   this->set_output_centroids(true);                          // Use cell centroids for output
 
+  // AMR does its thing
   m_amr->set_physical_domain(m_physdom); // Set physical domain
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
   m_amr->build_domains();                // Build domains and resolutions, nothing else
 
+  // Define the cell tagger
   if(!m_celltagger.isNull()){ 
     m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
   }
 
+  // Ok we're ready to go. 
   m_potential_set = false;
   m_step          = 0;
   m_time          = 0.0;
@@ -102,529 +101,6 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 
 plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
-}
-
-void plasma_engine::add_potential_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_potential_to_output");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::add_potential_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas   = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol   = m_mfis->get_ebis(phase::solid);
-  const RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  const MFAMRCellData& potential               = poisson->get_state();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    LevelData<EBCellFAB> state_gas, state_sol;
-
-    mfalias::aliasMF(state_gas, phase::gas,   *potential[lvl]);
-
-    state_gas.localCopyTo(*scratch[lvl]);
-    
-    // Copy all covered cells from the other phase
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(state_sol, phase::solid, *potential[lvl]);
-      
-      for (DataIterator dit = state_sol.dataIterator(); dit.ok(); ++dit){
-	const Box box = state_sol.disjointBoxLayout().get(dit());
-	const IntVectSet ivs(box);
-	const EBISBox& ebisb_gas = state_gas[dit()].getEBISBox();
-	const EBISBox& ebisb_sol = state_sol[dit()].getEBISBox();
-
-	FArrayBox& scratch_gas    = (*scratch[lvl])[dit()].getFArrayBox();
-	const FArrayBox& data_gas = state_gas[dit()].getFArrayBox();
-	const FArrayBox& data_sol = state_sol[dit()].getFArrayBox();
-
-	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
-	  const IntVect iv = ivsit();
-	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	    scratch_gas(iv, comp) = data_sol(iv, comp);
-	  }
-	  if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells
-	    //	    scratch_gas(iv, comp) = 0.5*(data_gas(iv, comp) + data_sol(iv, comp));
-	    scratch_gas(iv, comp) = data_gas(iv,comp);
-	  }
-	}
-      }
-    }
-  }
-
-  m_amr->average_down(scratch, phase::gas);
-  m_amr->interp_ghost(scratch, phase::gas);
-  if(m_output_centroids){
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
-  }
-
-  const Interval src_interv(comp, comp);
-  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-  }
-
-  // Set covered potential
-  //  poisson->set_covered_potential(a_output, a_cur_var, m_time);
-}
-
-void plasma_engine::add_electric_field_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_electric_field_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_electric_field_to_output" << endl;
-  } 
-
-  const int ncomp        = SpaceDim;
-  const int finest_level = m_amr->get_finest_level();
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas   = m_mfis->get_ebis(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol   = m_mfis->get_ebis(phase::solid);
-  const RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  const MFAMRCellData& potential               = poisson->get_state();
-
-  MFAMRCellData E;
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, ncomp);
-  m_amr->allocate(E, ncomp);
-
-  m_timestepper->compute_E(E, potential);
-  //  m_amr->compute_gradient(E, poisson->get_state());
-  //  data_ops::scale(E, -1.0);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    LevelData<EBCellFAB> E_gas, E_sol;
-
-    mfalias::aliasMF(E_gas, phase::gas,*E[lvl]);
-
-    // Copy all covered cells from the other phase
-    if(!ebis_sol.isNull()){
-      mfalias::aliasMF(E_sol, phase::solid, *E[lvl]);
-      
-      for (DataIterator dit = E_sol.dataIterator(); dit.ok(); ++dit){
-	const Box box = E_sol.disjointBoxLayout().get(dit());
-	const IntVectSet ivs(box);
-	const EBISBox& ebisb_gas = E_gas[dit()].getEBISBox();
-	const EBISBox& ebisb_sol = E_sol[dit()].getEBISBox();
-
-	FArrayBox& data_gas = E_gas[dit()].getFArrayBox();
-	FArrayBox& data_sol = E_sol[dit()].getFArrayBox();
-
-	for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
-	  const IntVect iv = ivsit();
-	  if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){ // Regular cells from phase 2
-	    for (int comp = 0; comp < ncomp; comp++){
-	      data_gas(iv, comp) = data_sol(iv,comp);
-	    }
-	  }
-	}
-      }
-    }
-
-    E_gas.localCopyTo(*scratch[lvl]);
-  }
-
-  m_amr->average_down(scratch, phase::gas);
-  m_amr->interp_ghost(scratch, phase::gas);
-  if(m_output_centroids){
-    m_amr->interpolate_to_centroids(scratch, phase::gas);
-  }
-
-  const Interval src_interv(0, ncomp - 1);
-  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-  }
-}
-
-void plasma_engine::add_space_charge_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_space_charge_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_space_charge_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  EBAMRCellData scratch;
-  MFAMRCellData rho;
-  m_amr->allocate(rho, ncomp);
-  m_amr->allocate(scratch, phase::gas, ncomp);
-
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
-  Vector<EBAMRCellData*> densities; 
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    densities.push_back(&(solver->get_state()));
-  }
-
-  m_timestepper->compute_rho(rho, densities, centering::cell_center);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    LevelData<EBCellFAB> rho_gas;
-    mfalias::aliasMF(rho_gas, phase::gas, *rho[lvl]);
-
-    rho_gas.localCopyTo(*scratch[lvl]);
-  }
-
-  m_amr->average_down(scratch, phase::gas);
-  m_amr->interp_ghost(scratch, phase::gas);
-  //  m_amr->interpolate_to_centroids(scratch, phase::gas);
-
-
-  const Interval src_interv(comp, comp);
-  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-
-    data_ops::set_covered_value(*a_output[lvl], a_cur_var, 0.0);
-  }
-}
-
-void plasma_engine::add_surface_charge_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_surface_charge_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_surface_charge_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<sigma_solver>& sigma = m_timestepper->get_sigma();
-  EBAMRIVData& data = sigma->get_state();
-  sigma->reset_cells(data);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    for (DataIterator dit = data[lvl]->dataIterator(); dit.ok(); ++dit){
-      BaseIVFAB<Real>& sig   = (*data[lvl])[dit()];
-      const EBGraph& ebgraph = sig.getEBGraph();
-      const IntVectSet& ivs  = sig.getIVS();
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	(*a_output[lvl])[dit()](vof, a_cur_var) = sig(vof, comp);
-      }
-    }
-  }
-}
-
-void plasma_engine::add_current_density_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_current_density_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_current_density_to_output" << endl;
-  }
-
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
-
-  const int comp         = 0;
-  const int ncomp        = SpaceDim;
-  const int finest_level = m_amr->get_finest_level();
-
-  // Allocate and compute on centroids
-  EBAMRCellData J;
-  m_amr->allocate(J, cdr->get_phase(), SpaceDim);
-  m_timestepper->compute_J(J);
-  if(m_output_centroids){
-    m_amr->interpolate_to_centroids(J, cdr->get_phase());
-  }
-
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Interval src_interv(0, ncomp - 1);
-    const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-    J[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-  }
-}
-
-void plasma_engine::add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_densities_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_cdr_densities_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
-
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_state();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->localCopyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, cdr->get_phase());
-    m_amr->interp_ghost(scratch, cdr->get_phase());
-    if(m_output_centroids){
-      m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
-    }
-
-    data_ops::floor(scratch, 0.0);
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num, 0.0);
-    }
-  }
-}
-
-void plasma_engine::add_cdr_velocities_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_velocities_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_cdr_velocities_to_output" << endl;
-  }
-
-#if 0 // Really shouldn't be necessary
-  m_timestepper->compute_cdr_velocities();
-#endif
-
-  const int comp         = 0;
-  const int ncomp        = SpaceDim;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
-
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& velo         = solver->get_velo_cell();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      velo[lvl]->localCopyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, cdr->get_phase());
-    m_amr->interp_ghost(scratch, cdr->get_phase());
-    if(m_output_centroids){
-      m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
-    }
-
-    const Interval src_interv(0, ncomp -1);
-    const Interval dst_interv(a_cur_var + num*ncomp, a_cur_var + num*ncomp + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-
-      for (int comp = 0; comp < SpaceDim; comp ++){
-	data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp + comp, 0.0);
-      }
-    }
-  }
-}
-
-void plasma_engine::add_cdr_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cdr_source_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_cdr_source_to_output" << endl;
-  }
-  
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<cdr_layout>& cdr     = m_timestepper->get_cdr();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, cdr->get_phase(), ncomp);
-
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_source();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->localCopyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, cdr->get_phase());
-    m_amr->interp_ghost(scratch, cdr->get_phase());
-    if(m_output_centroids){
-      m_amr->interpolate_to_centroids(scratch, cdr->get_phase());
-    }
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
-    }
-  }
-}
-
-void plasma_engine::add_rte_densities_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_rte_densities_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_rte_densities_to_output" << endl;
-  }
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<rte_layout>& rte     = m_timestepper->get_rte();
-  const phase::which_phase rte_phase = rte->get_phase();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, rte_phase, 1);
-  data_ops::set_value(scratch, 0.0);
-
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_state();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->localCopyTo(*scratch[lvl]);
-    }
-    m_amr->average_down(scratch, rte_phase);
-    m_amr->interp_ghost(scratch, rte_phase);
-    if(m_output_centroids){
-      m_amr->interpolate_to_centroids(scratch, rte_phase);
-    }
-
-    data_ops::floor(scratch, 0.0);
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
-    }
-  }
-}
-
-void plasma_engine::add_rte_source_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_rte_source_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_rte_source_to_output" << endl;
-  }
-  
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  RefCountedPtr<rte_layout>& rte     = m_timestepper->get_rte();
-  const phase::which_phase rte_phase = rte->get_phase();
-
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, rte_phase, 1);
-  data_ops::set_value(scratch, 0.0);
-
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    const EBAMRCellData& state        = solver->get_source();
-    const int num                     = solver_it.get_solver();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      state[lvl]->localCopyTo(*scratch[lvl]);
-    }
-
-    m_amr->average_down(scratch, rte_phase);
-    m_amr->interp_ghost(scratch, rte_phase);
-    if(m_output_centroids){
-      m_amr->interpolate_to_centroids(scratch, rte_phase);
-    }
-
-    const Interval src_interv(comp, comp);
-    const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-
-      data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
-    }
-  }
-}
-
-void plasma_engine::add_tracer_fields_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_tracer_fields_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_tracer_fields_to_output" << endl;
-  }
-
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  if(!m_celltagger.isNull()){
-    m_celltagger->compute_tracers();
-
-    const int num_tracers = m_celltagger->get_num_tracers();
-    const Vector<EBAMRCellData>& tracers = m_celltagger->get_tracer_fields();
-    CH_assert(tracers.size() == num_tracers);
-
-    for (int itracer = 0; itracer < num_tracers; itracer++){
-      const EBAMRCellData& tracer = tracers[itracer];
-      const int num = itracer;
-
-      const Interval src_interv(comp, comp);
-      const Interval dst_interv(a_cur_var + num, a_cur_var + num + ncomp -1);
-      for (int lvl = 0; lvl <= finest_level; lvl++){
-	tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-
-	data_ops::set_covered_value(*a_output[lvl], a_cur_var + num*ncomp, 0.0);
-      }
-    }
-  }
-}
-
-void plasma_engine::add_cell_tags_to_output(EBAMRCellData& a_output, const int a_cur_var){
-  CH_TIME("plasma_engine::add_cell_tags_to_output");
-  if(m_verbosity > 10){
-    pout() << "plasma_engine::add_cell_tags_to_output" << endl;
-  }
-
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-  const phase::which_phase cur_phase = phase::gas;
-
-  EBAMRCellData tags;
-  m_amr->allocate(tags, cur_phase, 1);
-  data_ops::set_value(tags, 0.0);
-
-    // Set tagged cells = 1
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(cur_phase)[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = IntVectSet((*m_tags[lvl])[dit()].get_ivs());
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	(*tags[lvl])[dit()](vof, 0) = 1.;
-      }
-    }
-  }
-
-  const Interval src_interv(comp, comp);
-  const Interval dst_interv(a_cur_var, a_cur_var + ncomp -1);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    tags[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-  }
 }
 
 void plasma_engine::allocate_internals(){
@@ -1746,20 +1222,6 @@ void plasma_engine::setup_poisson_only(){
   }
 }
 
-void plasma_engine::set_verbosity(const int a_verbosity){
-  CH_TIME("plasma_engine::set_verbosity");
-
-  
-  m_verbosity = a_verbosity;
-
-  ParmParse pp("plasma_engine");
-  pp.query("verbosity", m_verbosity);
-
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_verbosity" << endl;
-  }
-}
-
 void plasma_engine::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
   CH_TIME("plasma_engine::set_computational_geometry");
   if(m_verbosity > 5){
@@ -1801,54 +1263,6 @@ void plasma_engine::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoa
   m_geocoarsen = a_geocoarsen;
 }
 
-void plasma_engine::set_geom_refinement_depth(const int a_depth){
-  CH_TIME("plasma_engine::set_geom_refinement_depth");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_geom_refinement_depth" << endl;
-  }
-
-  const int max_depth = m_amr->get_max_amr_depth();
-  
-  int depth     = (a_depth < 0) ? max_depth : a_depth;
-  int depth1    = depth;
-  int depth2    = depth;
-  int depth3    = depth;
-  int depth4    = depth;
-  int depth5    = depth;
-  int depth6    = depth;
-
-  { // Get parameter from input script
-    ParmParse pp("plasma_engine");
-    pp.query("refine_geometry", depth);
-    depth  = (depth < 0) ? max_depth : depth;
-    depth1 = depth;
-    depth2 = depth;
-    depth3 = depth;
-    depth4 = depth;
-    depth5 = depth;
-    depth6 = depth;
-  }
-
-  { // Get fine controls from input script
-    ParmParse pp("plasma_engine");
-    pp.query("refine_electrodes",               depth1);
-    pp.query("refine_dielectrics",              depth2);
-    pp.query("refine_electrode_gas_interface",  depth3);
-    pp.query("refine_dielectric_gas_interface", depth4);
-    pp.query("refine_solid_gas_interface",      depth5);
-    pp.query("refine_solid_solid_interface",    depth6);
-
-    depth1 = (depth1 < 0) ? depth : depth1;
-    depth2 = (depth2 < 0) ? depth : depth2;
-    depth3 = (depth3 < 0) ? depth : depth3;
-    depth4 = (depth4 < 0) ? depth : depth4;
-    depth5 = (depth5 < 0) ? depth : depth5;
-    depth6 = (depth6 < 0) ? depth : depth6;
-  }
-  
-  this->set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
-}
-
 void plasma_engine::set_geom_refinement_depth(const int a_depth1,
 					      const int a_depth2,
 					      const int a_depth3,
@@ -1879,17 +1293,22 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth1,
   m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
 }
 
-void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
-  CH_TIME("plasma_engine::set_output_mode");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_output_mode" << endl;
-  }
+void plasma_engine::parse_verbosity(){
+  CH_TIME("plasma_engine::parse_verbosity");
 
-  m_output_mode = a_mode;
+  ParmParse pp("plasma_engine");
+  pp.get("verbosity", m_verbosity);
+}
+
+void plasma_engine::parse_output_mode(){
+  CH_TIME("plasma_engine::parse_output_mode");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_output_mode" << endl;
+  }
 
   std::string str;
   ParmParse pp("plasma_engine");
-  pp.query("output_mode", str);
+  pp.get("output_mode", str);
   if(str == "full"){
     m_output_mode = output_mode::full;
   }
@@ -1905,21 +1324,39 @@ void plasma_engine::set_output_mode(const output_mode::which_mode a_mode){
 
   // Old or new IO mode
   m_new_io = false;
-  pp.query("use_new_io", str);
+  pp.get("use_new_io", str);
   if(str == "true") m_new_io = true;
 }
 
-void plasma_engine::set_restart_mode(const restart_mode::which_mode a_mode){
-  CH_TIME("plasma_engine::set_restart_mode");
+void plasma_engine::parse_regrid(){
+  CH_TIME("plasma_engine::parse_regrid");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_restart_mode" << endl;
+    pout() << "plasma_engine::parse_regrid" << endl;
   }
 
-  m_restart_mode = a_mode;
+  ParmParse pp("plasma_engine");
 
   std::string str;
+  pp.get("regrid_interval", m_regrid_interval);
+  pp.get("initial_regrids", m_init_regrids);
+  pp.get("recursive_regrid", str); m_recursive_regrid = (str == "true") ? true : false;
+}
+
+void plasma_engine::parse_restart(){
+  CH_TIME("plasma_engine::parse_restart");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_restart" << endl;
+  }
+
   ParmParse pp("plasma_engine");
-  pp.query("restart_mode", str);
+
+  // Get restart step
+  pp.get("restart_step", m_restart_step); // Get restart step
+  m_restart = (m_restart_step > 0) ? true : false;
+
+  // Get restart mode
+  std::string str;
+  pp.get("restart_mode", str);
   if(str == "full"){
     m_restart_mode = restart_mode::full;
   }
@@ -1931,13 +1368,11 @@ void plasma_engine::set_restart_mode(const restart_mode::which_mode a_mode){
   }
 }
 
-void plasma_engine::set_memory_report_mode(const memory_report_mode::which_mode a_memory_mode){
-  CH_TIME("plasma_engine::set_memory_report_mode");
+void plasma_engine::parse_memrep(){
+  CH_TIME("plasma_engine::parse_memrep");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_memory_report_mode" << endl;
+    pout() << "plasma_engine::parse_memrep" << endl;
   }
-
-  m_memory_mode = a_memory_mode;
 
   std::string str;
   ParmParse pp("plasma_engine");
@@ -1953,16 +1388,14 @@ void plasma_engine::set_memory_report_mode(const memory_report_mode::which_mode 
   }
 }
 
-void plasma_engine::set_output_directory(const std::string a_output_dir){
-  CH_TIME("plasma_engine::set_output_directory");
+void plasma_engine::parse_output_directory(){
+  CH_TIME("plasma_engine::parse_output_directory");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_output_directory" << endl;
+    pout() << "plasma_engine::parse_output_directory" << endl;
   }
 
-  m_output_dir = a_output_dir;
-
   ParmParse pp("plasma_engine");
-  pp.query("output_directory", m_output_dir);
+  pp.get("output_directory", m_output_dir);
 
   // If directory does not exist, create it
   int success = 0;
@@ -2006,16 +1439,193 @@ void plasma_engine::set_output_directory(const std::string a_output_dir){
   }
 }
 
-void plasma_engine::set_output_file_names(const std::string a_output_names){
+void plasma_engine::parse_output_file_names(){
   CH_TIME("plasma_engine::set_output_names");
   if(m_verbosity > 5){
     pout() << "plasma_engine::set_output_names" << endl;
   }
 
-  m_output_names = a_output_names;
+  ParmParse pp("plasma_engine");
+  pp.get("output_names", m_output_names);
+}
+
+void plasma_engine::parse_output_intervals(){
+  CH_TIME("plasma_engine::set_plot_interval");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_plot_interval" << endl;
+  }
+  
 
   ParmParse pp("plasma_engine");
-  pp.query("output_names", m_output_names);
+  pp.get("plot_interval", m_plot_interval);
+  pp.get("checkpoint_interval", m_chk_interval);
+}
+
+void plasma_engine::parse_geo_refinement(){
+  CH_TIME("plasma_engine::set_geom_refinement_depth");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::set_geom_refinement_depth" << endl;
+  }
+
+  const int max_depth = m_amr->get_max_amr_depth();
+  
+  int depth     = max_depth;
+  int depth1    = depth;
+  int depth2    = depth;
+  int depth3    = depth;
+  int depth4    = depth;
+  int depth5    = depth;
+  int depth6    = depth;
+
+  { // Get parameter from input script
+    ParmParse pp("plasma_engine");
+    pp.get("refine_geometry", depth);
+    depth  = (depth < 0) ? max_depth : depth;
+    depth1 = depth;
+    depth2 = depth;
+    depth3 = depth;
+    depth4 = depth;
+    depth5 = depth;
+    depth6 = depth;
+  }
+
+  { // Get fine controls from input script
+    ParmParse pp("plasma_engine");
+    pp.get("refine_electrodes",               depth1);
+    pp.get("refine_dielectrics",              depth2);
+    pp.get("refine_electrode_gas_interface",  depth3);
+    pp.get("refine_dielectric_gas_interface", depth4);
+    pp.get("refine_solid_gas_interface",      depth5);
+    pp.get("refine_solid_solid_interface",    depth6);
+
+    depth1 = (depth1 < 0) ? depth : depth1;
+    depth2 = (depth2 < 0) ? depth : depth2;
+    depth3 = (depth3 < 0) ? depth : depth3;
+    depth4 = (depth4 < 0) ? depth : depth4;
+    depth5 = (depth5 < 0) ? depth : depth5;
+    depth6 = (depth6 < 0) ? depth : depth6;
+  }
+  
+  set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
+}
+
+void plasma_engine::parse_num_plot_ghost(){
+  CH_TIME("plasma_engine::parse_num_plot_ghost");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_num_plot_ghost" << endl;
+  }
+
+  ParmParse pp("plasma_engine");
+  pp.get("num_plot_ghost", m_num_plot_ghost);
+
+  m_num_plot_ghost = (m_num_plot_ghost < 0) ? 0 : m_num_plot_ghost;
+  m_num_plot_ghost = (m_num_plot_ghost > 3) ? 3 : m_num_plot_ghost;
+}
+
+void plasma_engine::parse_grow_tags(){
+  CH_TIME("plasma_engine::parse_grow_tags");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_grow_tags" << endl;
+  }
+
+  ParmParse pp("plasma_engine");
+  pp.get("grow_tags", m_grow_tags);
+
+  m_grow_tags = Max(0, m_grow_tags);
+}
+
+void plasma_engine::parse_geom_only(){
+  CH_TIME("plasma_engine::parse_geom_only");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_geom_only" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.get("geometry_only", str);
+  if(str == "true"){
+    m_geometry_only = true;
+  }
+  else if(str == "false"){
+    m_geometry_only = false;
+  }
+}
+
+void plasma_engine::parse_ebis_memory_load_balance(){
+  CH_TIME("plasma_engine::parse_ebis_memory_load_balance");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_ebis_memory_load_balance" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.get("ebis_memory_load_balance", str);
+  if(str == "true"){
+    m_ebis_memory_load_balance = true;
+  }
+  else if(str == "false"){
+    m_ebis_memory_load_balance = false;
+  }
+}
+
+void plasma_engine::parse_write_ebis(){
+  CH_TIME("plasma_engine::parse_write_ebis");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_write_ebis" << endl;
+  }
+
+  m_ebis_gas_file = m_output_names + ".ebis.gas.hdf5";
+  m_ebis_sol_file = m_output_names + ".ebis.sol.hdf5";
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.get("write_ebis", str);
+  if(str == "true"){
+    m_write_ebis = true;
+  }
+  else if(str == "false"){
+    m_write_ebis = false;
+  }
+}
+
+void plasma_engine::parse_read_ebis(){
+  CH_TIME("plasma_engine::parse_read_ebis");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_read_ebis" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.get("read_ebis", str);
+  if(str == "true"){
+    m_read_ebis = true;
+  }
+  else if(str == "false"){
+    m_read_ebis = false;
+  }
+}
+
+void plasma_engine::parse_simulation_time(){
+  CH_TIME("plasma_engine::parse_simulation_time");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_simulation_time" << endl;
+  }
+
+  ParmParse pp("plasma_engine");
+  pp.get("max_steps", m_max_steps);
+  pp.get("start_time", m_start_time);
+  pp.get("stop_time", m_stop_time);
+}
+
+void plasma_engine::parse_file_depth(){
+  CH_TIME("plasma_engine::parse_file_depth");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_file_depth" << endl;
+  }
+
+  ParmParse pp("plasma_engine");
+  pp.get("max_plot_depth", m_max_plot_depth);
+  pp.get("max_chk_depth", m_max_chk_depth);
 }
 
 void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
@@ -2348,158 +1958,6 @@ void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_
   m_physdom = a_physdom;
 }
 
-void plasma_engine::set_recursive_regrid(){
-  CH_TIME("plasma_engine::set_recursive_regrid");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_recursive_regrid" << endl;
-  }
-
-  ParmParse pp("plasma_engine");
-  std::string str;
-  pp.get("recursive_regrid", str);
-
-  m_recursive_regrid = (str == "true") ? true : false;
-}
-
-void plasma_engine::set_regrid_interval(const int a_regrid_interval){
-  CH_TIME("plasma_engine::set_regrid_interval");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_regrid_interval" << endl;
-  }
-  
-  m_regrid_interval = a_regrid_interval;
-
-  ParmParse pp("plasma_engine");
-  pp.query("regrid_interval", m_regrid_interval);
-}
-
-
-
-void plasma_engine::set_plot_interval(const int a_plot_interval){
-  CH_TIME("plasma_engine::set_plot_interval");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_plot_interval" << endl;
-  }
-  
-  m_plot_interval = a_plot_interval;
-
-  ParmParse pp("plasma_engine");
-  pp.query("plot_interval", m_plot_interval);
-}
-
-void plasma_engine::set_checkpoint_interval(const int a_chk_interval){
-  CH_TIME("plasma_engine::set_checkpoint_interval");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_checkpoint_interval" << endl;
-  }
-  
-  m_chk_interval = a_chk_interval;
-
-  ParmParse pp("plasma_engine");
-  pp.query("checkpoint_interval", m_chk_interval);
-}
-
-void plasma_engine::set_num_plot_ghost(const int a_num_plot_ghost){
-  CH_TIME("plasma_engine::set_num_plot_ghost");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_num_plot_ghost" << endl;
-  }
-  
-  m_num_plot_ghost = a_num_plot_ghost;
-
-
-  ParmParse pp("plasma_engine");
-  pp.query("num_plot_ghost", m_num_plot_ghost);
-
-  m_num_plot_ghost = (m_num_plot_ghost < 0) ? 0 : m_num_plot_ghost;
-  m_num_plot_ghost = (m_num_plot_ghost > 3) ? 3 : m_num_plot_ghost;
-}
-
-void plasma_engine::set_restart(const bool a_restart){
-  CH_TIME("plasma_engine::set_restart");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_restart" << endl;
-  }
-  
-  m_restart = a_restart;
-
-  std::string str = "";
-  ParmParse pp("plasma_engine");
-  pp.query("restart", str);
-  if(str == "true"){
-    m_restart = true;
-  }
-  else if(str == "false"){
-    m_restart = false;
-  }
-}
-
-void plasma_engine::set_ebis_memory_load_balance(const bool a_balance){
-  CH_TIME("plasma_engine::set_ebis_memory_load_balance");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_ebis_memory_load_balance" << endl;
-  }
-
-  m_ebis_memory_load_balance = a_balance;
-
-  { // get parameter from input script
-    std::string str;
-    ParmParse pp("plasma_engine");
-    pp.query("ebis_memory_load_balance", str);
-    if(str == "true"){
-      m_ebis_memory_load_balance = true;
-    }
-    else if(str == "false"){
-      m_ebis_memory_load_balance = false;
-    }
-  }
-}
-
-void plasma_engine::set_write_ebis(const bool a_write_ebis){
-  CH_TIME("plasma_engine::set_write_ebis");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_write_ebis" << endl;
-  }
-
-  m_write_ebis = a_write_ebis;
-
-  m_ebis_gas_file = m_output_names + ".ebis.gas.hdf5";
-  m_ebis_sol_file = m_output_names + ".ebis.sol.hdf5";
-
-  { // get parameter from input script
-    std::string str;
-    ParmParse pp("plasma_engine");
-    pp.query("write_ebis", str);
-    if(str == "true"){
-      m_write_ebis = true;
-    }
-    else if(str == "false"){
-      m_write_ebis = false;
-    }
-  }
-}
-
-void plasma_engine::set_read_ebis(const bool a_read_ebis){
-  CH_TIME("plasma_engine::set_read_ebis");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_read_ebis" << endl;
-  }
-
-  m_read_ebis = a_read_ebis;
-
-  { // get parameter from input script
-    std::string str;
-    ParmParse pp("plasma_engine");
-    pp.query("read_ebis", str);
-    if(str == "true"){
-      m_read_ebis = true;
-    }
-    else if(str == "false"){
-      m_read_ebis = false;
-    }
-  }
-}
-
 void plasma_engine::set_dump_mass(const bool a_dump_mass){
   CH_TIME("plasma_engine::set_dump_mass");
   if(m_verbosity > 5){
@@ -2563,134 +2021,7 @@ void plasma_engine::set_output_centroids(const bool a_output_centroids){
   }
 }
 
-void plasma_engine::set_geom_only(const bool a_geom_only){
-  CH_TIME("plasma_engine::set_geom_only");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_geom_only" << endl;
-  }
 
-  m_geometry_only = a_geom_only;
-
-  { // Get parameter from input file
-    std::string str;
-    ParmParse pp("plasma_engine");
-    pp.query("geometry_only", str);
-    if(str == "true"){
-      m_geometry_only = true;
-    }
-    else if(str == "false"){
-      m_geometry_only = false;
-    }
-  }
-}
-
-void plasma_engine::set_restart_step(const int a_restart_step){
-  CH_TIME("plasma_engine::set_restart_step");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_restart_step" << endl;
-  }
-  
-  m_restart_step = a_restart_step;
-
-  int step;
-  ParmParse pp("plasma_engine");
-  pp.query("restart_step", step);
-  if(step >= 0){
-    m_restart_step = step;
-  }
-}
-
-void plasma_engine::set_start_time(const Real a_start_time){
-  CH_TIME("plasma_engine::set_start_time");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_start_time" << endl;
-  }
-  
-  m_start_time = a_start_time;
-
-  ParmParse pp("plasma_engine");
-  pp.query("start_time", m_start_time);
-}
-
-void plasma_engine::set_stop_time(const Real a_stop_time){
-  CH_TIME("plasma_engine::set_stop_time");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_stop_time" << endl;
-  }
-  
-  m_stop_time = a_stop_time;
-  
-  ParmParse pp("plasma_engine");
-  pp.query("stop_time", m_stop_time);
-}
-
-void plasma_engine::set_max_steps(const int a_max_steps){
-  CH_TIME("plasma_engine::set_max_steps");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_max_steps" << endl;
-  }
-  
-  m_max_steps = a_max_steps;
-
-  ParmParse pp("plasma_engine");
-  pp.query("max_steps", m_max_steps);
-}
-
-void plasma_engine::set_max_plot_depth(const int a_max_plot_depth){
-  CH_TIME("plasma_engine::set_max_plot_depth");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_max_plot_depth" << endl;
-  }
-
-  m_max_plot_depth = a_max_plot_depth;
-
-  {
-    ParmParse pp("plasma_engine");
-    pp.query("max_plot_depth", m_max_plot_depth);
-  }
-}
-
-void plasma_engine::set_max_chk_depth(const int a_max_chk_depth){
-  CH_TIME("plasma_engine::set_max_chk_depth");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_max_chk_deepth" << endl;
-  }
-
-  m_max_chk_depth = a_max_chk_depth;
-
-  {
-    ParmParse pp("plasma_engine");
-    pp.query("max_chk_depth", m_max_chk_depth);
-  }
-}
-
-void plasma_engine::set_init_regrids(const int a_init_regrids){
-  CH_TIME("plasma_engine::set_init_regrids");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_init_regrids" << endl;
-  }
-  
-  m_init_regrids = a_init_regrids;
-
-
-  ParmParse pp("plasma_engine");
-  pp.query("initial_regrids", m_init_regrids);
-
-}
-
-void plasma_engine::set_grow_tags(const int a_grow_tags){
-  CH_TIME("plasma_engine::set_grow_tags");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::set_grow_tags" << endl;
-  }
-  
-  m_grow_tags = a_grow_tags;
-
-  ParmParse pp("plasma_engine");
-  pp.query("grow_tags", m_grow_tags);
-
-  m_grow_tags = Max(0, m_grow_tags);
-}
 
 void plasma_engine::sanity_check(){
   CH_TIME("plasma_engine::sanity_check");
@@ -2962,22 +2293,8 @@ void plasma_engine::write_geometry(){
 	      m_num_plot_ghost*IntVect::Unit);
 }
 
+
 void plasma_engine::write_plot_file(){
-  CH_TIME("plasma_engine::write_plot_file");
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::write_plot_file" << endl;
-  }
-
-  if(m_new_io){
-    new_write_plot_file();
-  }
-  else{
-    old_write_plot_file();
-  }
-}
-  
-
-void plasma_engine::new_write_plot_file(){
   CH_TIME("plasma_engine::new_write_plot_file");
   if(m_verbosity > 3){
     pout() << "plasma_engine::new_write_plot_file" << endl;
@@ -3080,93 +2397,6 @@ void plasma_engine::new_write_plot_file(){
   const Real t1 = MPI_Wtime();
   if(m_verbosity >= 3){
     pout() << "plasma_engine::write_plot_file - writing plot file... DONE!. Write time = " << t1 - t0 << " seconds." << endl;
-  }
-}
-
-void plasma_engine::old_write_plot_file(){
-  CH_TIME("plasma_engine::old_write_plot_file");
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::old_write_plot_file" << endl;
-  }
-  
-  Vector<string> names = this->get_output_variable_names();
-  const int num_output = names.size();
-
-  EBAMRCellData output;
-  m_amr->allocate(output, phase::gas, num_output);
-  data_ops::set_value(output, 0.0);
-
-
-  // Add data to output
-  int cur_var = 0;
-  this->add_potential_to_output(output,      cur_var); cur_var += 1;
-  this->add_electric_field_to_output(output, cur_var); cur_var += SpaceDim;
-  this->add_space_charge_to_output(output,   cur_var); cur_var += 1;
-  this->add_surface_charge_to_output(output, cur_var); cur_var += 1;
-  if(m_output_mode == output_mode::full){
-    this->add_current_density_to_output(output, cur_var); cur_var += SpaceDim;
-  }
-  this->add_cdr_densities_to_output(output,  cur_var); cur_var += m_plaskin->get_num_species();;
-  if(m_output_mode == output_mode::full){
-    this->add_cdr_velocities_to_output(output, cur_var); cur_var += m_plaskin->get_num_species()*SpaceDim;
-  }
-  if(m_output_mode == output_mode::medium || m_output_mode == output_mode::full){
-    this->add_cdr_source_to_output(output,     cur_var); cur_var += m_plaskin->get_num_species();
-  }
-  this->add_rte_densities_to_output(output, cur_var); cur_var += m_plaskin->get_num_photons();
-  if(m_output_mode == output_mode::medium || m_output_mode == output_mode::full){
-    this->add_rte_source_to_output(output, cur_var); cur_var += m_plaskin->get_num_photons();
-  }
-  if(m_output_mode == output_mode::full && !m_celltagger.isNull()){
-    this->add_tracer_fields_to_output(output, cur_var); cur_var += m_celltagger->get_num_tracers();
-    this->add_cell_tags_to_output(output, cur_var); cur_var += 1;
-  }
-
-  // Filename
-  char file_char[1000];
-  const std::string prefix = m_output_dir + "/plt/" + m_output_names;
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
-  string fname(file_char);
-
-  // Write data file
-  const int finest_level                 = m_amr->get_finest_level();
-  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
-  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
-  const Vector<Real>& dx                 = m_amr->get_dx();
-  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
-
-  bool replace_covered = false;
-  Vector<Real> covered_values;
-
-  Vector<LevelData<EBCellFAB>* > output_ptr(1 + finest_level);
-  m_amr->alias(output_ptr, output);
-
-  // Write HDF5 file
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::write_plot_file - writing plot file..." << endl;
-  }
-
-  int plot_depth = Min(m_max_plot_depth, finest_level);
-  if(m_max_plot_depth < 0){
-    plot_depth = finest_level;
-  }
-
-  writeEBHDF5(fname, 
-	      grids,
-	      output_ptr,
-	      names, 
-	      domains[0],
-	      dx[0], 
-	      m_dt,
-	      m_time,
-	      ref_rat,
-	      plot_depth + 1,
-	      replace_covered,
-	      covered_values,
-	      m_num_plot_ghost*IntVect::Unit);
-  
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::write_plot_file - writing plot file... DONE!" << endl;
   }
 }
 
@@ -3457,7 +2687,6 @@ void plasma_engine::read_vector_data(HDF5HeaderData& a_header,
   }
 }
 
-
 void plasma_engine::open_mass_dump_file(ofstream& a_file){
   if(procID() == 0){
     const std::string prefix = m_output_dir + "/" + "mass_dump.txt";
@@ -3523,126 +2752,6 @@ void plasma_engine::close_charge_dump_file(ofstream& a_file){
   if(procID() == 0){
     a_file.close();
   }
-}
-
-Vector<string> plasma_engine::get_output_variable_names(){
-  CH_TIME("plasma_engine::get_output_variable_names");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::get_output_variable_names" << endl;
-  }
-
-  // Handle to solvers
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
-  RefCountedPtr<sigma_solver>& sigma     = m_timestepper->get_sigma();
-
-  int cur_name = 0;
-  int num_vars = 0;
-
-  Vector<string> names;
-
-  names.clear();
-
-  // Things related to the field solver. Potential, Electric field, and surface charge density => (2 + SpaceDim)
-  names.push_back("Potential"); cur_name++; num_vars++;
-  names.push_back("x-Electric field"); cur_name++; num_vars++;
-  names.push_back("y-Electric field"); cur_name++; num_vars++;
-  if(SpaceDim == 3){
-    names.push_back("z-Electric field"); cur_name++; num_vars++;
-  }
-  names.push_back("Space charge density"); cur_name++; num_vars++;
-  names.push_back("Surface charge density"); cur_name++; num_vars++;
-  if(m_output_mode == output_mode::full){
-    names.push_back("x-Current density"); cur_name++; num_vars++;
-    names.push_back("y-Current density"); cur_name++; num_vars++;
-    if(SpaceDim == 3){
-      names.push_back("z-Current density"); cur_name++; num_vars++;
-    }
-  }
-
-  // Ion densities
-  for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    RefCountedPtr<species>& spec      = solver_it.get_species();
-    const std::string name = spec->get_name();
-    const std::string unit = spec->get_unit();
-
-    names.push_back(name + " ." + unit + "."); cur_name++; num_vars++;
-  }
-
-  // Ion velocities
-  if(m_output_mode == output_mode::full){
-    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver = solver_it();
-      RefCountedPtr<species>& spec      = solver_it.get_species();
-      const std::string& name           = spec->get_name();
-    
-      names.push_back("x-Velocity " + name);   cur_name++; num_vars++;
-      names.push_back("y-Velocity " + name);   cur_name++; num_vars++;
-      if(SpaceDim == 3){
-	names.push_back("z-Velocity " + name); cur_name++; num_vars++;
-      }
-    }
-  }
-
-  // Ion source terms
-  if(m_output_mode == output_mode::full || m_output_mode == output_mode::medium){
-    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver = solver_it();
-      RefCountedPtr<species>& spec      = solver_it.get_species();
-      const std::string& name           = spec->get_name();
-    
-      names.push_back(name + " source");  cur_name++; num_vars++;
-    }
-  }
-
-  // Photon solvers' stuff. Photon density and source term => (2 + SpaceDim)
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
-    RefCountedPtr<photon_group>& photon = solver_it.get_photon();
-    const std::string& name = photon->get_name();
-
-    names.push_back(name + " density"); cur_name++; num_vars++;
-  }
-
-  // Photon solvers' stuff. Photon density and source term => (2 + SpaceDim)
-  if(m_output_mode == output_mode::full || m_output_mode == output_mode::medium){
-    for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-      RefCountedPtr<rte_solver>& solver   = solver_it();
-      RefCountedPtr<photon_group>& photon = solver_it.get_photon();
-      const std::string& name = photon->get_name();
-
-      names.push_back(name + " source"); cur_name++; num_vars++;
-    }
-  }
-
-  // Tracer field(s)
-  if(m_output_mode == output_mode::full){
-    if(!m_celltagger.isNull()){
-      const Vector<EBAMRCellData>& tracer = m_celltagger->get_tracer_fields();
-      for (int i = 0; i < tracer.size(); i++){
-	std::string one = "Tracer field-";
-
-	long int j = i;
-	char s[2]; 
-	sprintf(s,"%ld", j);
-
-	std::string two(s);
-	names.push_back(one + two); cur_name++; num_vars++;
-      }
-    }
-  }
-
-  // Cell tags
-  if(m_output_mode == output_mode::full){
-    const std::string str = "cell_tags";
-    names.push_back(str);
-    cur_name++;
-    num_vars++;
-  }
-
-  return names;
 }
 
 void plasma_engine::initialize_eed(){

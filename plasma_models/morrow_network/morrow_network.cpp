@@ -71,20 +71,26 @@ void morrow_network::advance_reaction_network(Vector<Real>&          a_particle_
 					      const Real             a_time,
 					      const Real             a_kappa) const{
 
-  // There are 6 reactions for this plasma model:
-
+  // Six reactions for this plasma model:
+  // ===================================
   // 1. e + M   => 2e + M+ 
   // 2. e + M   => M-
   // 3. e + M+  => 0
   // 4. M- + M+ => 0
   // 5  y + M   => e + M+
   // 6. e + M   => e + M + y
-  if(m_ssa){ // SSA algorithm
+  //
+  // The various forms of the chemistry step is given in the routines below
+  if(m_scomp == source_comp::ssa){ // SSA algorithm
     network_ssa(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
-  else{ // Tau leaping
+  else if(m_scomp == source_comp::tau){ // Tau leaping
     network_tau(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
+		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
+  }
+  else if(m_scomp == source_comp::rre){ // Reaction rate equation
+    network_rre(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
 
@@ -190,6 +196,21 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
 
 
   return;
+}
+
+// Tau leaping method
+void morrow_network::network_rre(Vector<Real>&          a_particle_sources,
+				 Vector<Real>&          a_photon_sources,
+				 const Vector<Real>     a_particle_densities,
+				 const Vector<RealVect> a_particle_gradients,
+				 const Vector<Real>     a_photon_densities,
+				 const RealVect         a_E,
+				 const RealVect         a_pos,
+				 const Real             a_dx,
+				 const Real             a_dt,
+				 const Real             a_time,
+				 const Real             a_kappa) const{
+  MayDay::Abort("morrow_network::network_rre - not implemented");
 }
 
 // Tau leaping method
@@ -396,7 +417,6 @@ Vector<Real> morrow_network::compute_cdr_fluxes(const Real         a_time,
 						const Vector<Real> a_extrap_cdr_fluxes,
 						const Real         a_townsend2,
 						const Real         a_quantum_efficiency) const {
-  return a_extrap_cdr_fluxes;
   Vector<Real> fluxes(m_num_species, 0.0); 
   
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
@@ -708,7 +728,20 @@ void morrow_network::parse_reaction_settings(){
   ParmParse pp("morrow_network");
   std::string str;
 
-  pp.get("use_ssa",        str); m_ssa = (str == "true") ? true : false;
+  pp.get("chemistry", str);
+  if(str == "ssa"){
+    m_scomp = source_comp::ssa;
+  }
+  else if(str == "tau"){
+    m_scomp = source_comp::tau;
+  }
+  else if(str == "rre"){
+    m_scomp = source_comp::rre;
+  }
+  else{
+    MayDay::Abort("morrow_network::parse_reaction_settings - stop!");
+  }
+
   pp.get("seed",           m_seed);
   pp.get("poiss_exp_swap", m_poiss_exp_swap);
   pp.get("cutoff_poisson", m_cutoff_poisson);
@@ -718,6 +751,7 @@ void morrow_network::parse_initial_particles(){
 
   List<Particle> p;
 
+  // Get types of particles
   add_uniform_particles(p);
   add_gaussian_particles(p);
   
@@ -725,8 +759,27 @@ void morrow_network::parse_initial_particles(){
   m_species[m_nelec_idx]->get_initial_particles() = p;
   m_species[m_nplus_idx]->get_initial_particles() = p;
 
-  m_species[m_nelec_idx]->get_deposition() = InterpType::CIC;
-  m_species[m_nplus_idx]->get_deposition() = InterpType::CIC;
+  // Get the initial deposition scheme
+  ParmParse pp("morrow_network");
+  std::string str;
+  InterpType deposition;
+
+  pp.get("particle_deposition", str);
+  if(str == "cic"){
+    deposition = InterpType::CIC;
+  }
+  else if(str == "ngp"){
+    deposition = InterpType::NGP;
+  }
+  else if(str == "tsc"){
+    deposition = InterpType::TSC;
+  }
+  else{
+    MayDay::Abort("morrow_network::parse_initial_particles - unknown deposition type requested");
+  }
+  
+  m_species[m_nelec_idx]->get_deposition() = deposition;
+  m_species[m_nplus_idx]->get_deposition() = deposition;
 }
 
 void morrow_network::add_uniform_particles(List<Particle>& a_particles){

@@ -98,6 +98,8 @@ void cdr_fhd::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_o
     }
     MayDay::Abort("cdr_fhd::advance_euler - stochastic not implemented");
   }
+
+  data_ops::floor(a_new_state, 0.0);
 }
 
 void cdr_fhd::advance_euler(EBAMRCellData&       a_new_state,
@@ -150,6 +152,8 @@ void cdr_fhd::advance_euler(EBAMRCellData&       a_new_state,
   else{
     data_ops::copy(a_new_state, a_old_state);
   }
+
+  data_ops::floor(a_new_state, 0.0);
 }
 
 void cdr_fhd::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
@@ -359,8 +363,8 @@ void cdr_fhd::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCe
 	  const VolIndex lovof = face.getVoF(Side::Lo);
 	  const VolIndex hivof = face.getVoF(Side::Hi);
 
-	  const Real loval = cell_states(lovof, comp);
-	  const Real hival = cell_states(hivof, comp);
+	  const Real loval = Max(0.0, cell_states(lovof, comp));
+	  const Real hival = Max(0.0, cell_states(hivof, comp));
 
 
 	  Real Hlo;

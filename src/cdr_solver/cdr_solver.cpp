@@ -988,7 +988,7 @@ void cdr_solver::initial_data_particles(){
   Vector<RefCountedPtr<ParticleData<Particle> > > amrparticles;
   Vector<RefCountedPtr<ParticleValidRegion> > pvr;
   m_amr->allocate(amrparticles);
-  m_amr->allocate(pvr, 1);
+  m_amr->allocate(pvr, 0);
 
   // Gather particles on the coarsest level
   List<Particle>& initial_particles = m_species->get_initial_particles();

@@ -96,6 +96,24 @@ public:
   */
   virtual void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2, const int a_species = -1);
 
+  virtual void parse_regrid();
+  virtual void parse_restart();
+  virtual void parse_memrep();
+  virtual void parse_output_directory();
+  virtual void parse_geo_refinement();
+  virtual void parse_output_mode();
+  virtual void parse_verbosity();
+  virtual void parse_output_file_names();
+  virtual void parse_output_intervals();
+  virtual void parse_num_plot_ghost();
+  virtual void parse_grow_tags();
+  virtual void parse_geom_only();
+  virtual void parse_ebis_memory_load_balance();
+  virtual void parse_write_ebis();
+  virtual void parse_read_ebis();
+  virtual void parse_simulation_time();
+  virtual void parse_file_depth();
+  
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
   */
@@ -107,20 +125,9 @@ public:
   virtual void setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file);
 
   /*!
-    @brief Verbosity
-  */
-  virtual void set_verbosity(const int a_verbosity);
-
-  /*!
     @brief Set amr
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
-
-
-  /*!
-    @brief Set geometric refinement depth
-  */
-  virtual void set_geom_refinement_depth(const int a_depth = -1);
 
   /*!
     @brief Set geometrical refinement depths. This provides a little more flexibility than the basic call. 
@@ -138,30 +145,7 @@ public:
 					 const int a_depth5,
 					 const int a_depth6);
 
-  /*!
-    @brief Set output mode
-  */
-  virtual void set_output_mode(const output_mode::which_mode a_mode);
 
-  /*!
-    @brief Set restart mode
-  */
-  virtual void set_restart_mode(const restart_mode::which_mode a_mode);
-
-  /*!
-    @brief Set memory report mode
-  */
-  virtual void set_memory_report_mode(const memory_report_mode::which_mode a_memory_mode);
-
-  /*!
-    @brief Set output directory
-  */
-  virtual void set_output_directory(const std::string a_output_dir);
-
-  /*!
-    @brief Set output file names
-  */
-  virtual void set_output_file_names(const std::string a_output_names);
   
   /*!
     @brief Set potential function
@@ -177,96 +161,6 @@ public:
     @brief Set wall function
   */
   virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
-
-  /*!
-    @brief Set recursive regrid
-  */
-  virtual void set_recursive_regrid();
-  
-  /*!
-    @brief Set the regrid interval
-  */
-  virtual void set_regrid_interval(const int a_regrid_interval);
-
-  /*!
-    @brief Set the plot interval
-  */
-  virtual void set_plot_interval(const int a_plot_interval);
-
-  /*!
-    @brief Set the checkpoint interval
-  */
-  virtual void set_checkpoint_interval(const int a_chk_interval);
-
-  /*!
-    @brief Set number of ghost cells to plot
-  */
-  virtual void set_num_plot_ghost(const int a_num_plot_ghost);
-
-  /*!
-    @brief Set restart
-  */
-  virtual void set_restart(const bool a_restart);
-
-  /*!
-    @brief Set load balance for memory
-  */
-  virtual void set_ebis_memory_load_balance(const bool a_balance);
-
-  /*!
-    @brief Write EBIS to HDF5
-  */
-  virtual void set_write_ebis(const bool a_write_ebis);
-
-    /*!
-    @brief Read EBIS to HDF5
-  */
-  virtual void set_read_ebis(const bool a_read_ebis);
-  
-  /*!
-    @brief Only geometry
-  */
-  virtual void set_geom_only(const bool a_geom_only);
-
-  /*!
-    @brief Restart step file
-  */
-  virtual void set_restart_step(const int a_restart_step);
-
-  /*!
-    @brief Set simulation start time
-  */
-  virtual void set_start_time(const Real a_start_time);
-
-  /*!
-    @brief Set simulation stop time
-  */
-  virtual void set_stop_time(const Real a_stop_time);
-
-  /*!
-    @brief Set maximum number of steps
-  */
-  virtual void set_max_steps(const int a_max_steps);
-  
-  /*!
-    @brief Set the maximum plot depth
-  */
-  virtual void set_max_plot_depth(const int a_max_plot_depth);
-
-  /*!
-    @brief Set the maximum plot depth
-  */
-  virtual void set_max_chk_depth(const int a_max_chk_depth);
-
-  /*!
-    @brief Set number of initial regrids
-  */
-  virtual void set_init_regrids(const int a_init_regrids);
-
-  /*!
-    @brief Set tag growth
-  */
-  virtual void set_grow_tags(const int a_grow_tags);
 
   /*!
     @brief Dump mass for cdr solvers
@@ -638,66 +532,6 @@ protected:
     @brief Allocate internals
   */
   virtual void allocate_internals();
-
-  /*!
-    @brief Add potential to the output data holder
-  */
-  virtual void add_potential_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the electric field to the output data holder
-  */
-  virtual void add_electric_field_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the electric field to the output data holder
-  */
-  virtual void add_space_charge_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the surface charge to the output data holder
-  */
-  virtual void add_surface_charge_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the current density to output
-  */
-  virtual void add_current_density_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the ion densities to the output data holder
-  */
-  virtual void add_cdr_densities_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the ion velocities to the output data holder
-  */
-  virtual void add_cdr_velocities_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the ion source terms to the output data holder
-  */
-  virtual void add_cdr_source_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the photon densities to the output data holder
-  */
-  virtual void add_rte_densities_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add the photon source terms to the output data holder
-  */
-  virtual void add_rte_source_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add tracer fields to output data holder
-  */
-  virtual void add_tracer_fields_to_output(EBAMRCellData& a_output, const int a_curVar);
-
-  /*!
-    @brief Add cell tags to output
-  */
-  virtual void add_cell_tags_to_output(EBAMRCellData& a_output, const int a_curVar);
   
   /*!
     @brief Cache tags
@@ -842,16 +676,6 @@ protected:
   virtual void write_plot_file();
 
   /*!
-    @brief Old plot file version
-  */
-  virtual void old_write_plot_file();
-  
-  /*!
-    @brief Old plot file version
-  */
-  virtual void new_write_plot_file();
-
-  /*!
     @brief Write a checkpoint file
   */
   virtual void write_checkpoint_file();
@@ -925,10 +749,5 @@ protected:
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
   */
   virtual bool tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
-
-  /*!
-    @brief Get output variable names for a given output mode
-  */
-  virtual Vector<string> get_output_variable_names();
 };
 #endif

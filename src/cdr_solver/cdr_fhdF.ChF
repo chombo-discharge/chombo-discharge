@@ -22,8 +22,8 @@
 
       half_v = 0.5/vol
       chf_multido[facebox;i;j;k]
-         loval = vol*celldata(chf_ix[i-ioff; j-joff; k-koff])
-         hival = vol*celldata(chf_ix[i;j;k])	 
+         loval = Max(0.0, vol*celldata(chf_ix[i-ioff; j-joff; k-koff]))
+         hival = Max(0.0, vol*celldata(chf_ix[i;j;k]))	 
 
          if(loval <= 0.0) then
             Hlo = 0.0
