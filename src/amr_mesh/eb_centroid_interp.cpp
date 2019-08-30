@@ -59,6 +59,12 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
   else if(m_stencil_type == stencil_type::lsq){
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
+  else if(m_stencil_type == stencil_type::pwl){
+    found_stencil = this->get_pwl_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  }
+  else{
+    MayDay::Abort("eb_centroid_interp::build_stencil - Unsupported stencil type");
+  }
 
   // If we couldn't find a stencil, try other types in this order
   if(!found_stencil){
@@ -171,4 +177,44 @@ bool eb_centroid_interp::get_lsq_grad_stencil(VoFStencil&              a_sten,
   else{
     return false;
   }
+}
+
+bool eb_centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
+				      const VolIndex&          a_vof,
+				      const DisjointBoxLayout& a_dbl,
+				      const ProblemDomain&     a_domain,
+				      const EBISBox&           a_ebisbox,
+				      const Box&               a_box,
+				      const Real&              a_dx,
+				      const IntVectSet&        a_cfivs){
+
+  a_sten.clear();
+  a_sten.add(a_vof, 1.0);
+
+  const Real thresh = 1.E-8;
+  
+  const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
+  for (int dir = 0; dir < SpaceDim; dir++){
+
+    bool hasLo, hasLower, hasHi, hasHigher;
+    VolIndex loVoF, lowerVoF, hiVoF, higherVoF;
+    EBArith::getVoFsDir(hasLo, loVoF, hasLower, lowerVoF,   a_ebisbox, a_vof, dir, Side::Lo, (IntVectSet*) &a_cfivs);
+    EBArith::getVoFsDir(hasHi, hiVoF, hasHigher, higherVoF, a_ebisbox, a_vof, dir, Side::Hi, (IntVectSet*) &a_cfivs);
+
+    if(hasLo || hasHi){
+      if(centroid[dir] > thresh && hasHi){ // Deriv is to the right
+	a_sten.add(hiVoF,  centroid[dir]);
+	a_sten.add(hiVoF, -centroid[dir]);
+      }
+      else if(centroid[dir] < thresh && hasLo){ // Deriv is to the left
+	a_sten.add(loVoF,  centroid[dir]);
+	a_sten.add(loVoF, -centroid[dir]);
+      }
+      else if(centroid[dir] == 0.0){
+	// No deriv in this direction
+      }
+    }
+  }
+
+  return true;
 }

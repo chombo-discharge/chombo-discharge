@@ -70,6 +70,7 @@ namespace stencil_type {
     taylor = 1,
     ray    = 2,
     lsq    = 3,
+    pwl    = 4,
   };
 };
 

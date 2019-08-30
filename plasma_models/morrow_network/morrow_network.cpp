@@ -803,10 +803,12 @@ void morrow_network::add_uniform_particles(List<Particle>& a_particles){
 #endif
 
   int num_uniform_particles;
+  Real num_particles;
   
   // Create uniform particles
   ParmParse pp("morrow_network");
-  pp.get("uniform_particles",  num_uniform_particles);
+  pp.get("uniform_particles",  num_particles);
+  num_uniform_particles = round(num_particles);
 
   for (int i = 0; i < num_uniform_particles; i++){
     const Real x = (*rngX)(*m_rng);
@@ -825,13 +827,16 @@ void morrow_network::add_gaussian_particles(List<Particle>& a_particles){
   ParmParse pp("morrow_network");
 
   int num_gaussian_particles;
+  Real num_particles;
   Real gaussian_radius;
   RealVect gaussian_center;
   Vector<Real> vec(SpaceDim);
   // Create Gaussian seed particles
-  pp.get("gaussian_particles", num_gaussian_particles);
+  pp.get("gaussian_particles", num_particles);
   pp.get("gaussian_radius",    gaussian_radius);
   pp.getarr("gaussian_center", vec, 0, SpaceDim); gaussian_center = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+
+  num_gaussian_particles = round(num_particles);
 
   auto rngGX  = new std::normal_distribution<Real>(gaussian_center[0], gaussian_radius);
   auto rngGY  = new std::normal_distribution<Real>(gaussian_center[1], gaussian_radius);

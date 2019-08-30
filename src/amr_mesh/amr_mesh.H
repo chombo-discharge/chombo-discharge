@@ -241,12 +241,12 @@ public:
   /*!
     @brief Set load balance
   */
-  virtual void set_balance(const load_balance::which_balance a_load);
+  virtual void parse_load_balance();
 
   /*!
     @brief Set ghost cell interpolation type. Either piecewise linear or quadratic. 
   */
-  virtual void set_ghost_interpolation(const ghost_interpolation::which_type a_interp);
+  virtual void parse_ghost_interpolation();
 
   /*!
     @brief Build domains
@@ -261,42 +261,42 @@ public:
   /*!
     @brief Set verbosity
   */
-  virtual void set_verbosity(const int a_verbosity);
+  virtual void parse_verbosity();
 
   /*!
     @brief Set coarsest level box; this is the coarsest domain (well, except for lower levels GMG)
   */
-  virtual void set_coarsest_num_cells(const IntVect a_num_cells);
+  virtual void parse_coarsest_num_cells();
 
   /*!
     @brief Set multigrid coarsening
   */
-  virtual void set_mg_coarsen(const int a_mg_coarsen);
+  virtual void parse_mg_coarsen();
 
   /*!
     @brief Maximum AMR depth
   */
-  virtual void set_max_amr_depth(const int a_max_amr_depth);
+  virtual void parse_max_amr_depth();
 
   /*!
     @brief Set maximum simulation depth. 
   */
-  virtual void set_max_simulation_depth(const int a_max_sim_depth);
+  virtual void parse_max_simulation_depth();
 
   /*!
     @brief Refine all cells down to this level
   */
-  virtual void set_refine_all_depth(const int a_refine_all_depth);
+  virtual void parse_refine_all_depth();
 
   /*!
     @brief Tell amr_mesh to forget about ebcf (user must guarantee that this is the case)
   */
-  virtual void set_ebcf(const bool a_ebcf);
+  virtual void parse_ebcf();
 
   /*!
     @brief Set refinement ratio
   */
-  virtual void set_refinement_ratio(const int a_refinement_ratio);
+  virtual void parse_refinement_ratio();
 
   /*!
     @brief Set refinement ratios
@@ -306,17 +306,17 @@ public:
   /*!
     @brief Set buffer size
   */
-  virtual void set_buffer_size(const int a_buffer_size);
+  virtual void parse_buffer_size();
 
   /*!
     @brief Set irregular growth
   */
-  virtual void set_irreg_growth(const int a_irreg_growth);
+  virtual void parse_irreg_growth();
 
   /*!
     @brief Set fill ratio
   */
-  virtual void set_fill_ratio(const Real a_fill_ratio);
+  virtual void parse_fill_ratio();
 
   /*!
     @brief Set the finest level
@@ -331,32 +331,42 @@ public:
   /*!
     @brief Set the maximum box size
   */
-  virtual void set_max_box_size(const int a_max_box_size);
+  virtual void parse_max_box_size();
 
   /*!
     @brief Set the maximum EBIS generation box size
   */
-  virtual void set_max_ebis_box_size(const int a_max_ebis_box_size);
+  virtual void parse_max_ebis_box_size();
 
   /*!
     @brief Set the blocking factor
   */
-  virtual void set_blocking_factor(const int a_blocking_factor);
+  virtual void parse_blocking_factor();
 
   /*!
     @brief Set number of ghost cells for eb stuff
   */ 
-  virtual void set_eb_ghost(const int a_ebghost);
+  virtual void parse_eb_ghost();
 
   /*!
     @brief Set number of ghost cells 
   */ 
-  virtual void set_num_ghost(const int a_num_ghost);
+  virtual void parse_num_ghost();
 
   /*!
     @brief Set redistribution radius
   */
-  virtual void set_redist_rad(const int a_redist_rad);
+  virtual void parse_redist_rad();
+
+  /*!
+    @brief Parse centroid interpolation stencils
+*/
+  virtual void parse_centroid_stencils();
+
+  /*!
+    @brief Parse EB interpolation (or extrapolation) stencils
+  */
+  virtual void parse_eb_stencils();
 
   /*!
     @brief Set preferred stencil type
@@ -611,6 +621,16 @@ protected:
   stencil_type::which_type m_stencil_type;
 
   /*!
+    @brief Stencil type for centroid interpolation
+  */
+  stencil_type::which_type m_centroid_stencil;
+
+  /*!
+    @brief Stencil type for EB interpolation
+  */
+  stencil_type::which_type m_eb_stencil;
+
+  /*!
     @brief Interpolation type
   */
   ghost_interpolation::which_type m_interp_type;
@@ -699,6 +719,26 @@ protected:
     @brief Redistribution radius
   */
   int m_redist_rad;
+
+  /*!
+    @brief Order for interpolation stencils to centroids
+  */
+  int m_centroid_sten_order;
+
+  /*!
+    @brief Radius for centroid interpolation stencil
+  */
+  int m_centroid_sten_rad;
+
+  /*!
+    @brief Order for interpolation stencilst to EB
+  */
+  int m_eb_sten_order;
+
+  /*!
+    @brief Radius for EB interpolation stencil
+  */
+  int m_eb_sten_rad;
 
   /*!
     @brief Stencil order for irregular stencils

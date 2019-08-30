@@ -1163,7 +1163,7 @@ void plasma_engine::setup_poisson_only(){
 
   this->get_geom_tags();       // Get geometric tags.
   
-  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
 
   // This is a "fresh" regrid in which there is no coarser level
   const int lmin = 0;
@@ -1744,7 +1744,7 @@ void plasma_engine::setup_geometry_only(){
   }
 
   this->get_geom_tags();       // Get geometric tags.
-  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   
   Vector<IntVectSet> tags = m_geom_tags;
   const int a_lmin = 0;
@@ -1793,7 +1793,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
 
   this->get_geom_tags();       // Get geometric tags.
   
-  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
 
   // When we're setting up fresh, we need to regrid everything
@@ -1906,7 +1906,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
   m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
 #endif
-  m_amr->set_num_ghost(m_timestepper->query_ghost());    // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  //  m_amr->set_num_ghost(m_timestepper->query_ghost());    // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
 
   this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
 

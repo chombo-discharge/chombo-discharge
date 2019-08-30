@@ -999,16 +999,14 @@ void cdr_solver::initial_data_particles(){
   m_amr->allocate(pvr, pvr_buffer);
 
   // Gather particles on the coarsest level
-  List<Particle>& initial_particles = m_species->get_initial_particles();
-  List<Particle>& coarsest_outcast  = amrparticles[0]->outcast();
-  coarsest_outcast.clear();
-  if(procID() == 0){
-    coarsest_outcast.catenate(initial_particles);
-  }
+  //  List<Particle>& initial_particles = m_species->get_initial_particles();
 
-  // Remap coarsest level and get rid of everything that falls outside
-  amrparticles[0]->remapOutcast();
-  coarsest_outcast.clear();
+  // Have not added the particles to the 
+  const DisjointBoxLayout& dbl_coar = m_amr->get_grids()[0];
+  for (DataIterator dit = dbl_coar.dataIterator(); dit.ok(); ++dit){
+    const Box box = dbl_coar.get(dit());
+    (*amrparticles[0])[dit()].addItems(m_species->get_initial_particles());
+  }
 
   // Remap amr particles
   for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
