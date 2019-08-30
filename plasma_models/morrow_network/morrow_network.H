@@ -186,8 +186,8 @@ protected:
   void parse_domain_bc();
   void parse_reaction_settings();
   void parse_initial_particles();
-  void add_uniform_particles(List<Particle>& particles);
-  void add_gaussian_particles(List<Particle>& particles);
+  void add_uniform_particles(List<Particle>& a_particles);
+  void add_gaussian_particles(List<Particle>& a_particles);
   
   inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
   
