@@ -43,6 +43,7 @@ morrow_network::morrow_network(){
   if(m_seed < 0) {
     m_seed = std::chrono::system_clock::now().time_since_epoch().count();
   }
+  m_udist01 = new std::uniform_real_distribution<Real>(1.E-6, 1.0);
   m_rng = new std::mt19937_64(m_seed);
 
   // Parse initial data
@@ -94,8 +95,24 @@ void morrow_network::advance_reaction_network(Vector<Real>&          a_particle_
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
 
-
   return;
+}
+
+
+
+// Deterministic reaction-rate equation
+void morrow_network::network_rre(Vector<Real>&          a_particle_sources,
+				 Vector<Real>&          a_photon_sources,
+				 const Vector<Real>     a_particle_densities,
+				 const Vector<RealVect> a_particle_gradients,
+				 const Vector<Real>     a_photon_densities,
+				 const RealVect         a_E,
+				 const RealVect         a_pos,
+				 const Real             a_dx,
+				 const Real             a_dt,
+				 const Real             a_time,
+				 const Real             a_kappa) const{
+  MayDay::Abort("morrow_network::network_rre - not implemented");
 }
 
 void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
@@ -111,20 +128,22 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
 				 const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
 
+
+
   Vector<int> particle_numbers(m_num_species, 0);
   Vector<int> photon_numbers(m_num_photons, 0);
+
+  const Real thresh = 0.5;
   
   for (int i = 0; i < m_num_species; i++){
     a_particle_sources[i] = 0.0;
-    particle_numbers[i] = floor(a_particle_densities[i]*volume);
+    particle_numbers[i] = floor(thresh + a_particle_densities[i]*volume);
   }
 
   for (int i = 0; i < m_num_photons; i++){
     a_photon_sources[i] = 0.0;
-    photon_numbers[i] = floor(a_photon_densities[i]);
+    photon_numbers[i] = floor(thresh + a_photon_densities[i]);
   }
-
-
 
   int se = 0;
   int sp = 0;
@@ -137,7 +156,8 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   const Real alpha  = compute_alpha(a_E);
   const Real eta    = compute_eta(a_E);
   const Real beta   = compute_beta(a_E);
-  
+
+
   // Reaction 1: e + M => 2e + M+
   const Real a1 = Max(0.0, particle_numbers[m_nelec_idx]*alpha*ve);
   const int S1  = poisson_reaction(a1, a_dt);
@@ -145,6 +165,7 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   sp += S1;
 
   // Reaction 2: e + M   => M-
+
   const Real a2 = Max(0.0, particle_numbers[m_nelec_idx]*eta*ve);
   const int S2  = poisson_reaction(a2, a_dt);
   se -= S2;
@@ -156,13 +177,13 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   se -= S3;
   sp -= S3;
 
-  // Reaction 3: M+ + M-  => 0
+  // Reaction 4: M+ + M-  => 0
   const Real a4 = Max(0.0, particle_numbers[m_nplus_idx]*particle_numbers[m_nminu_idx]*beta/volume);
   const int  S4 = poisson_reaction(a4, a_dt);
   sp -= S4;
   sm -= S4;
 
-  // Reaction 5: y + M   => e + M+
+  // Reaction 5: Y + M => e + M+
   se += photon_numbers[0];
   sp += photon_numbers[0];
 
@@ -171,46 +192,23 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   const int S6  = poisson_reaction(a6, a_dt);
   a_photon_sources[0] = 1.0*S6;
 
-#if 1
-  const int res = -se + sp - sm;
-  if(res != 0) MayDay::Abort("nope");
-#endif
-
   // Do some scaling
+  const Real factor = 1./(volume*a_dt);
   Real& Se = a_particle_sources[m_nelec_idx];
   Real& Sp = a_particle_sources[m_nplus_idx];
   Real& Sm = a_particle_sources[m_nminu_idx];
 
-  Se = 1.0*se;
-  Sp = 1.0*sp;
-  Sm = 1.0*sm;
+  Se = se*factor;
+  Sp = sp*factor;
+  Sm = sm*factor;
 
+#if 0 // Debug
+  const int res = -se + sp - sm;
+  if(res != 0) MayDay::Abort("nope");
+#endif
   
-  // Do the proper scaling
-  const Real factor = 1./(volume*a_dt);
-  for (int i = 0; i < a_particle_sources.size(); i++){
-    a_particle_sources[i] *= factor;
-  }
-
-  
-
 
   return;
-}
-
-// Tau leaping method
-void morrow_network::network_rre(Vector<Real>&          a_particle_sources,
-				 Vector<Real>&          a_photon_sources,
-				 const Vector<Real>     a_particle_densities,
-				 const Vector<RealVect> a_particle_gradients,
-				 const Vector<Real>     a_photon_densities,
-				 const RealVect         a_E,
-				 const RealVect         a_pos,
-				 const Real             a_dx,
-				 const Real             a_dt,
-				 const Real             a_time,
-				 const Real             a_kappa) const{
-  MayDay::Abort("morrow_network::network_rre - not implemented");
 }
 
 // Tau leaping method
@@ -225,7 +223,120 @@ void morrow_network::network_ssa(Vector<Real>&          a_particle_sources,
 				 const Real             a_dt,
 				 const Real             a_time,
 				 const Real             a_kappa) const{
-  MayDay::Abort("morrow_network::network_ssa - not implemented");
+
+  const Real volume = pow(a_dx, SpaceDim);
+  
+  Real dtau = 0.0;
+  Real tau  = 0.0;
+  Real A    = 0.0;
+  Vector<Real> ar(5, 0.0);
+
+  Vector<int> X(m_num_species, 0);
+  Vector<int> Y(m_num_photons, 0);
+
+  // Some uax stuff
+  const RealVect Ve = compute_ve(a_E);
+  const Real ve     = Ve.vectorLength();
+  const Real alpha  = compute_alpha(a_E);
+  const Real eta    = compute_eta(a_E);
+  const Real beta   = compute_beta(a_E);
+
+  // Six reactions for this plasma model:
+  // ===================================
+  // 1. e + M   => 2e + M+ 
+  // 2. e + M   => M-
+  // 3. e + M+  => 0
+  // 4. M- + M+ => 0
+  // 5. e + M   => e + M + y
+  // 6  y + M   => e + M+
+  
+  // Initial particle densities
+  for (int i = 0; i < m_num_species; i++){
+    X[i] = floor(0.5 + a_particle_densities[i]*volume);
+  }
+
+  Vector<int> X0 = X;
+
+  // Initial photon densities
+  for (int i = 0; i < m_num_photons; i++){
+    Y[i] = floor(a_photon_densities[i]);
+  }
+
+  // Deposit photons. This is reaction #6 in the list above. We will only do the other 5 reactions.
+  X[m_nelec_idx] += Y[0];
+  X[m_nplus_idx] += Y[0];
+  Y[0] = 0;
+
+  int& Xe = X[m_nelec_idx];
+  int& Xp = X[m_nplus_idx];
+  int& Xm = X[m_nminu_idx];
+
+  // Do SSA algorithm
+  while (tau <= a_dt){
+    ar[0] = Xe*alpha*ve;
+    ar[1] = Xe*eta*ve;
+    ar[2] = 0.0;
+    ar[3] = 0.0;
+    ar[4] = ar[0]*m_exc_eff*m_pq/(m_p+m_pq);
+
+    // Total reaction rate
+    A = 0;
+    for (int i=0; i<ar.size(); i++){
+      A += ar[i];
+    }
+
+    ar[0] = ar[0]/A;
+    ar[1] = ar[1]/A;
+    ar[2] = ar[2]/A;
+    ar[3] = ar[3]/A;
+    ar[4] = ar[4]/A;
+
+    // Time until next reaction
+    if(A > 0){
+      const Real u1 = (*m_udist01)(*m_rng);
+      //      const Real dtau = (1./A);//*log(u1);
+      const Real dtau = (1./A)*log(1/u1);
+
+      // Type of reaction
+      const Real u2 = (*m_udist01)(*m_rng);
+      if(u2 <= ar[0]){
+	Xe += 1;
+	Xp += 1;
+      }
+      else if(ar[0] < u2 <= ar[1]){
+	Xe -= 1;
+	Xm += 1;
+      }
+      else if(ar[1] < u2 <= ar[2]){
+	Xe -= 1;
+	Xp -= 1;
+      }
+      else if(ar[2] < u2 <= ar[3]){
+	Xp -=1;
+	Xe -=1;
+      }
+      else {
+	Y[0] += 1;
+      }
+
+      // Increment with time 
+      tau += dtau;
+    }
+    else{
+      break;
+    }
+  }
+  
+  // Now we need to normalize some stuff
+  a_photon_sources[0] = 1.0*Y[0];
+
+  
+  const Real factor = 1./(volume*a_dt);
+  for (int i = 0; i < m_num_species; i++){
+    a_particle_sources[i] = factor*(X[i] - X0[i]);
+  }
+
+  return;
 }
 
 Vector<RealVect> morrow_network::compute_cdr_velocities(const Real         a_time,
@@ -511,7 +622,7 @@ Vector<Real> morrow_network::compute_cdr_dielectric_fluxes(const Real         a_
 }
 
 int morrow_network::poisson_reaction(const Real a_propensity, const Real a_dt) const{
-  int value = 0.0;
+  int value = 0;
   const Real mean = a_propensity*a_dt;
   if(mean < m_cutoff_poisson){
     value = round(a_propensity*a_dt);
@@ -850,6 +961,6 @@ void morrow_network::add_gaussian_particles(List<Particle>& a_particles){
     const Real z = (*rngGZ)(*m_rng);
 #endif
     RealVect pos = RealVect(D_DECL(x, y, z));
-    a_particles.add(Particle(1.0, pos));
+    a_particles.add(Particle(5.0, pos));
   }
 }

@@ -128,14 +128,18 @@ void cdr_fhd::advance_euler(EBAMRCellData&       a_new_state,
       this->GWN_diffusion_source(ransource, a_old_state);
 
       // Make new state = old_state + dt*random_source
+#if 0
       data_ops::copy(a_new_state, a_old_state);
       data_ops::incr(a_new_state, ransource, a_dt);
+#else
+      data_ops::incr(ransource, a_source, 1.0);
+#endif
       
       // Do the regular aliasing stuff for passing into AMRMultiGrid
       Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
       m_amr->alias(new_state, a_new_state);
       m_amr->alias(old_state, a_old_state);
-      m_amr->alias(source,    a_source);
+      m_amr->alias(source,    ransource);
       
       const Real alpha = 0.0;
       const Real beta  = 1.0;

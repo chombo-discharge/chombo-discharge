@@ -95,6 +95,7 @@ public:
   Real m_cutoff_poisson;
   Real m_poiss_exp_swap;
   std::mt19937_64* m_rng; 
+  std::uniform_real_distribution<Real>* m_udist01;
 
   int m_nelec_idx;      // Electron index
   int m_nplus_idx;      // Positive ion index
