@@ -22,7 +22,7 @@ plasma_engine.output_names                    = simulation    # Simulation outpu
 plasma_engine.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 plasma_engine.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
-plasma_engine.restart_step                    = 0             # Restart step (less or equal to 0 implies fresh simulation)
+plasma_engine.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 plasma_engine.restart_mode                    = full          # Restart mode. 
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry

@@ -1886,13 +1886,37 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     pout() << m_name + "::write_plot_data" << endl;
   }
 
+#if 1 // Original code
   if(m_plot_phi) write_data(a_output, a_comp, m_state, true);
+#else
+  if(m_plot_phi){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      data_ops::scale(*m_state[lvl], (pow(m_amr->get_dx()[lvl], 3)));
+    }
+    write_data(a_output, a_comp, m_state,    false);
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      data_ops::scale(*m_state[lvl], 1./(pow(m_amr->get_dx()[lvl], 3)));
+    }
+  }
+#endif
   if(m_plot_dco && m_diffusive) { // Need to compute the cell-centerd stuff first
     data_ops::set_value(m_scratch, 0.0);
     data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->get_domains());
     write_data(a_output, a_comp, m_scratch,   false);
   }
+#if 1 // Original code
   if(m_plot_src) write_data(a_output, a_comp, m_source,    false);
+#else // Debug
+  if(m_plot_src){
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      data_ops::scale(*m_source[lvl], (pow(m_amr->get_dx()[lvl], 3)));
+    }
+    write_data(a_output, a_comp, m_source,    false);
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      data_ops::scale(*m_source[lvl], 1./(pow(m_amr->get_dx()[lvl], 3)));
+    }
+  }
+#endif
   if(m_plot_vel && m_mobile) write_data(a_output, a_comp, m_velo_cell, false);
 }
 

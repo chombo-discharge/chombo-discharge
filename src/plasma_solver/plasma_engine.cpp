@@ -1351,7 +1351,7 @@ void plasma_engine::parse_restart(){
   ParmParse pp("plasma_engine");
 
   // Get restart step
-  pp.get("restart_step", m_restart_step); // Get restart step
+  pp.get("restart", m_restart_step); // Get restart step
   m_restart = (m_restart_step > 0) ? true : false;
 
   // Get restart mode
