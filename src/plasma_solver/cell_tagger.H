@@ -83,8 +83,6 @@ public:
   */
   bool tag_cells(EBAMRTags& a_tags);
 
-  bool new_tag_cells(EBAMRTags& a_tags);
-
   /*!
     @brief Tracer fields
   */
