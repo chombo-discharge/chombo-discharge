@@ -14,14 +14,13 @@ plasma_engine.geometry_only                   = false         # Special option t
 plasma_engine.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 plasma_engine.write_ebis                      = false         # Write geometry to an HDF5 file
 plasma_engine.read_ebis                       = false         # Read EBIS when restarting a simulation
-plasma_engine.output_mode                     = medium        # Output mode
 plasma_engine.output_directory                = ./            # Output directory
-plasma_engine.output_centroids		      = true          # Write solution data on centroids instead of cell centers
 plasma_engine.grow_tags                       = 0             # Grow tagged by this in every direction
 plasma_engine.output_names                    = simulation    # Simulation output names
 plasma_engine.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 plasma_engine.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+plasma_engine.plt_vars                        = tags tracer   # Plot 'tags' and tracer fields 'tracer'
 plasma_engine.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 plasma_engine.restart_mode                    = full          # Restart mode. 
 plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down

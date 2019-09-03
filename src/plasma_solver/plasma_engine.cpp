@@ -77,6 +77,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   parse_read_ebis(); 
   parse_simulation_time();
   parse_file_depth();
+  parse_plot_vars();
 
   // About-to-be-deprecated features
   this->set_dump_mass(false);                                // Dump mass to file
@@ -101,6 +102,46 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 
 plasma_engine::~plasma_engine(){
   CH_TIME("plasma_engine::~plasma_engine");
+}
+
+int plasma_engine::get_num_plotvars() const {
+  CH_TIME("plasma_engine::get_num_plotvars");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::get_num_plotvars" << endl;
+  }
+
+  int num_output = 0;
+
+  if(m_plot_tags) num_output = num_output + 1;
+  if(m_plot_tracer && !m_celltagger.isNull()){
+    num_output += m_celltagger->get_num_tracers();
+  }
+
+  return num_output;
+
+}
+
+Vector<std::string> plasma_engine::get_plotvar_names() const {
+  CH_TIME("plasma_engine::get_plotvar_names");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::get_plotvar_names" << endl;
+  }
+  
+  Vector<std::string> names(0);
+  
+  if(m_plot_tags) names.push_back("cell_tags");
+  if(m_plot_tracer && !m_celltagger.isNull()){
+    for (int i = 0; i < m_celltagger->get_num_tracers(); i++){
+      std::string one = "Tracer field-";
+      long int j = i;
+      char s[2]; 
+      sprintf(s,"%ld", j);
+
+      std::string two(s);
+      names.push_back(one + two); 
+    }
+  }
+  return names;
 }
 
 void plasma_engine::allocate_internals(){
@@ -1305,22 +1346,8 @@ void plasma_engine::parse_output_mode(){
   if(m_verbosity > 5){
     pout() << "plasma_engine::parse_output_mode" << endl;
   }
-
   std::string str;
   ParmParse pp("plasma_engine");
-  pp.get("output_mode", str);
-  if(str == "full"){
-    m_output_mode = output_mode::full;
-  }
-  else if(str == "medium"){
-    m_output_mode = output_mode::medium;
-  }
-  else if(str == "light"){
-    m_output_mode = output_mode::light;
-  }
-  else if(str == "ultra_light"){
-    m_output_mode = output_mode::light; // Ultra_light not yet supported
-  }
 
   // Old or new IO mode
   m_new_io = false;
@@ -1627,6 +1654,23 @@ void plasma_engine::parse_file_depth(){
   pp.get("max_plot_depth", m_max_plot_depth);
   pp.get("max_chk_depth", m_max_chk_depth);
 }
+
+void plasma_engine::parse_plot_vars(){
+  ParmParse pp("plasma_engine");
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  m_plot_tags   = false;
+  m_plot_tracer = false;
+  
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "tags")   m_plot_tags   = true;
+    else if(str[i] == "tracer") m_plot_tracer = true;
+  }
+}
+
+
 
 void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("plasma_engine::set_amr");
@@ -2324,7 +2368,7 @@ void plasma_engine::write_plot_file(){
     RefCountedPtr<rte_solver>& solver = solver_it();
     ncomp += solver->get_num_plotvars();
   }
-
+  ncomp += get_num_plotvars();
   
 
   // Allocate storage
@@ -2359,7 +2403,8 @@ void plasma_engine::write_plot_file(){
     solver->write_plot_data(output, icomp);
   }
 
-
+  names.append(get_plotvar_names());
+  write_plot_data(output, icomp);
 									       
   
   // Filename
@@ -2403,6 +2448,83 @@ void plasma_engine::write_plot_file(){
   const Real t1 = MPI_Wtime();
   if(m_verbosity >= 3){
     pout() << "plasma_engine::write_plot_file - writing plot file... DONE!. Write time = " << t1 - t0 << " seconds." << endl;
+  }
+}
+
+void plasma_engine::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("plasma_engine::write_plot_data");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_plot_data" << endl;
+  }
+
+  if(m_plot_tags)   write_tags(a_output, a_comp);
+  if(m_plot_tracer) write_tracer(a_output, a_comp);
+
+}
+
+void plasma_engine::write_tags(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("plasma_engine::write_tags");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_tags" << endl;
+  }
+  
+  // Alloc some temporary storage
+  EBAMRCellData tags;
+  m_amr->allocate(tags, phase::gas, 1);
+  data_ops::set_value(tags, 0.0);
+    
+  // Set tagged cells = 1
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()].get_ivs();
+      const Box box              = dbl.get(dit());
+
+      // Do regular cells only.
+      BaseFab<Real>& tags_fab = (*tags[lvl])[dit()].getSingleValuedFAB();
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+	const IntVect iv = bit();
+	if(ivs[iv]){
+	  tags_fab(iv, 0) = 1.0;
+	}
+      }
+    }
+  }
+
+  data_ops::set_covered_value(tags, 0, 0.0);
+
+  const Interval src_interv(0, 0);
+  const Interval dst_interv(a_comp, a_comp);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    tags[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+
+  a_comp++;
+}
+
+void plasma_engine::write_tracer(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("plasma_engine::write_tracer");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_tracer" << endl;
+  }
+
+  if(!m_celltagger.isNull()){
+    m_celltagger->compute_tracers();
+    for (int i = 0; i < m_celltagger->get_num_tracers(); i++){
+      const EBAMRCellData& tracer = m_celltagger->get_tracer_fields()[i];
+
+      const Interval src_interv(0, 0);
+      const Interval dst_interv(a_comp, a_comp);
+      
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+	data_ops::set_covered_value(*a_output[lvl], a_comp, 0.0);
+      }
+
+      a_comp++;
+    }
   }
 }
 
@@ -2603,14 +2725,18 @@ void plasma_engine::write_checkpoint_level(HDF5Handle& a_handle, const int a_lev
   const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[a_level];
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = IntVectSet((*m_tags[a_level])[dit()].get_ivs());
+    const Box box = dbl.get(dit());
+    const DenseIntVectSet& tags = (*m_tags[a_level])[dit()].get_ivs();
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      scratch[dit()](vof, 0) = 1.;
+    BaseFab<Real>& scratch_fab = scratch[dit()].getSingleValuedFAB();
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      if(tags[iv]){
+	scratch_fab(iv, 0) = 1.0;
+      }
     }
+
+    data_ops::set_covered_value(scratch, 0, 0.0);
   }
 
   // Write tags
@@ -2626,7 +2752,7 @@ void plasma_engine::read_checkpoint_level(HDF5Handle& a_handle, const int a_leve
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
   const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[a_level];
 
-  // Create some scratch data = 0 which can grok
+  // Some scratch data we can use
   EBCellFactory fact(ebisl);
   LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
   data_ops::set_value(scratch, 0.0);
@@ -2644,10 +2770,11 @@ void plasma_engine::read_checkpoint_level(HDF5Handle& a_handle, const int a_leve
 
     DenseIntVectSet& tagged_cells = (*m_tags[a_level])[dit()].get_ivs();
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      if(tmp(vof, 0) >= 0.9999){
-	tagged_cells |= vof.gridIndex();
+    BaseFab<Real>& scratch_fab = scratch[dit()].getSingleValuedFAB();
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      if(scratch_fab(iv, 0) > 0.9999){
+	tagged_cells |= iv;
       }
     }
   }
@@ -2980,3 +3107,5 @@ void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const st
   
   handle_in.close();
 }
+
+

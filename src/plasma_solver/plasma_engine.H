@@ -113,6 +113,7 @@ public:
   virtual void parse_read_ebis();
   virtual void parse_simulation_time();
   virtual void parse_file_depth();
+  virtual void parse_plot_vars();
   
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
@@ -516,6 +517,16 @@ protected:
   */
   bool m_new_io;
 
+  /*!
+    @brief Plot tagged cells
+  */
+  bool m_plot_tags;
+
+  /*!
+    @brief Plot tracer fields
+  */
+  bool m_plot_tracer;
+
   // Output parameters that go into checkpoint files
   Vector<Real> m_time_history;        // Simulation time
   Vector<Real> m_voltage_history;     // Applied voltage
@@ -749,5 +760,30 @@ protected:
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
   */
   virtual bool tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags);
+
+  /*!
+    @brief Get number of plot variables
+  */
+  virtual int get_num_plotvars() const;
+
+  /*!
+    @brief Get names for the plot variables
+  */
+  virtual Vector<std::string> get_plotvar_names() const;
+
+  /*!
+    @brief Write internal plot data
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Write cell tags to file
+  */
+  virtual void write_tags(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Write tracer fields to output
+  */
+  virtual void write_tracer(EBAMRCellData& a_output, int& a_comp);
 };
 #endif
