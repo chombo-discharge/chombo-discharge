@@ -103,12 +103,48 @@ void ultralw_tagger::compute_tracers(){
       const EBCellFAB& E_fab    = (*m_E[lvl])[dit()];
       const EBCellFAB& gE_fab   = (*m_grad_E[lvl])[dit()];
 
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const BaseFab<Real>& E_reg  = E_fab.getSingleValuedFAB();
+      const BaseFab<Real>& gE_reg = gE_fab.getSingleValuedFAB();
+
+      // Avoid the extra point lookups by getting these before the point loops
+      Vector<EBCellFAB*> tr;
+      Vector<BaseFab<Real>* > tr_fab;
+      for (int i = 0; i < m_num_tracers; i++){
+	tr.push_back(&((*m_tracer[i][lvl])[dit()]));
+	tr_fab.push_back(&(tr[i]->getSingleValuedFAB()));
+      }
+
+      // Regular box loop
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+	const IntVect iv   = bit();
+	const RealVect pos = origin + RealVect(iv)*dx;
+
+	const RealVect E        = RealVect(D_DECL(E_reg(iv, 0),  E_reg(iv, 1),  E_reg(iv, 2)));
+	const RealVect grad_E   = RealVect(D_DECL(gE_reg(iv, 0), gE_reg(iv, 1), gE_reg(iv, 2)));
+
+	Vector<Real> tracers = this->tracer(pos,
+					    time,
+					    dx,
+					    E,
+					    E_min,
+					    E_max,
+					    grad_E,
+					    grad_E_min,
+					    grad_E_max);
+	
+	for(int i = 0; i < m_num_tracers; i++){
+	  (*tr_fab[i])(iv, 0) = tracers[i];
+	}
+      }
+
+      // Irregular box loop
+      const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 
 	// Electric field and grad(|E|)
-	const RealVect E        = RealVect(D_DECL(E_fab(vof, 0), E_fab(vof, 1), E_fab(vof, 2)));
+	const RealVect E        = RealVect(D_DECL(E_fab(vof, 0),  E_fab(vof, 1), E_fab(vof, 2)));
 	const RealVect grad_E   = RealVect(D_DECL(gE_fab(vof, 0), gE_fab(vof, 1), gE_fab(vof, 2)));
 
 	Vector<Real> tracers = this->tracer(pos,
@@ -122,7 +158,7 @@ void ultralw_tagger::compute_tracers(){
 					    grad_E_max);
 	
 	for(int i = 0; i < m_num_tracers; i++){
-	  (*m_tracer[i][lvl])[dit()](vof, 0) = tracers[i];
+	  (*tr[i])(vof, 0);
 	}
       }
     }

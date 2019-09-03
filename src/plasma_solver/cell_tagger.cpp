@@ -76,6 +76,10 @@ int cell_tagger::get_num_tracers(){
   return m_num_tracers;
 }
 
+int cell_tagger::get_buffer(){
+  return m_buffer;
+}
+
 void cell_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 			 const RefCountedPtr<time_stepper>&           a_timestepper,
 			 const RefCountedPtr<amr_mesh>&               a_amr,
@@ -133,6 +137,9 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
     pout() << m_name + "::tag_cells" << endl;
   }
 
+#if 1 // New routine
+  return new_tag_cells(a_tags);
+#endif
   bool got_new_tags = false;
 
   if(m_num_tracers > 0){
@@ -161,18 +168,27 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 	DenseIntVectSet coarsen_tags(box, false);
 	DenseIntVectSet refine_tags(box, false);
 
-	// Coarsening loop - do not coarsen irregular cells that have been tagged previously (we consider them to be too important)
+	Vector<EBCellFAB*> tracers;
+	Vector<EBCellFAB*> gtracers;
+
+	for (int i = 0; i < m_num_tracers; i++){
+	  tracers.push_back(&((*m_tracer[i][lvl])[dit()]));
+	  gtracers.push_back(&((*m_grad_tracer[i][lvl])[dit()]));
+	}
+
+	// Coarsening loop - do not coarsen irregular cells that have been tagged previously.
+	// This must, unfortunately, be done through a VofIterator
 	const IntVectSet coarsen_ivs = (prev_tags - irreg_ivs); 
 	for (VoFIterator vofit(coarsen_ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
+	  const VolIndex vof = vofit();
+	  const RealVect pos = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 
-	  Vector<Real> tracers(m_num_tracers);
-	  Vector<RealVect> grad_tracers(m_num_tracers);
+	  Vector<Real>     tr(m_num_tracers);
+	  Vector<RealVect> gtr(m_num_tracers);
 	  
 	  for (int itracer = 0; itracer < m_num_tracers; itracer++){
-	    tracers[itracer]     = (*m_tracer[itracer][lvl])[dit()](vof, 0);
-	    grad_tracers[itracer] = RealVect(D_DECL((*m_grad_tracer[itracer][lvl])[dit()](vof, 0),
+	    tr[itracer]  = (*tracers[itracer])(vof, 0);
+	    gtr[itracer] = RealVect(D_DECL((*m_grad_tracer[itracer][lvl])[dit()](vof, 0),
 						    (*m_grad_tracer[itracer][lvl])[dit()](vof, 1),
 						    (*m_grad_tracer[itracer][lvl])[dit()](vof, 2)));
 	  }
@@ -180,12 +196,24 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 						  time,
 						  dx,
 						  lvl,
-						  tracers,
-						  grad_tracers);
+						  tr,
+						  gtr);
 
 	  if(coarsen){
 	    coarsen_tags |= vof.gridIndex();
 	  }
+	}
+
+
+
+	// Refinement loop, regular cells
+	for (BoxIterator bit(box); bit.ok(); ++bit){
+	  const IntVect iv = bit();
+	  const RealVect pos = origin + RealVect(iv)*dx;
+
+	  Vector<Real> tracers(m_num_tracers);
+	  Vector<RealVect> grad_tracers(m_num_tracers);
+
 	}
 
 	// Refinement loop
@@ -261,4 +289,252 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 
 Vector<EBAMRCellData>& cell_tagger::get_tracer_fields() {
   return m_tracer;
+}
+
+
+bool cell_tagger::new_tag_cells(EBAMRTags& a_tags){
+  CH_TIME("cell_tagger::new_tag_cells");
+  if(m_verbosity > 5){
+    pout() << m_name + "::new_tag_cells" << endl;
+  }
+
+  bool got_new_tags = false;
+
+  const RealVect origin      = m_physdom->get_prob_lo();
+  const Real time            = m_timestepper->get_time();
+  const int finest_level     = m_amr->get_finest_level();
+  const int max_depth        = m_amr->get_max_amr_depth();
+  const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth
+
+
+
+  if(m_num_tracers > 0){
+
+    // Compute tracer fields. This is a virtual function. 
+    compute_tracers();
+    
+    for (int lvl = 0; lvl <= finest_tag_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+      const Real dx                = m_amr->get_dx()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box box          = dbl.get(dit());
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+	const IntVectSet irreg_ivs = ebisbox.getIrregIVS(box);
+	const IntVectSet prev_tags = IntVectSet((*a_tags[lvl])[dit()].get_ivs());
+
+	DenseIntVectSet coarsen_tags(box, false); // Cells that will be coarsened
+	DenseIntVectSet refine_tags(box, false);  // Cells that will be refined
+
+	Vector<EBCellFAB*> tracers;
+	Vector<EBCellFAB*> gtracers;
+
+	for (int i = 0; i < m_num_tracers; i++){
+	  tracers.push_back(&((*m_tracer[i][lvl])[dit()]));
+	  gtracers.push_back(&((*m_grad_tracer[i][lvl])[dit()]));
+	}
+
+	DenseIntVectSet& tags = (*a_tags[lvl])[dit()].get_ivs();
+	
+	// Refinement and coarsening
+	refine_cells_box(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+	coarsen_cells_box(coarsen_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+
+	// Check if we got any new tags, or we are just recycling old tags.
+	// Basically we will check if (current_tags + refined_tags - coarsen_tags) == current_tags
+	DenseIntVectSet cpy1 = tags;
+	tags -= coarsen_tags;
+	tags |= refine_tags;
+	DenseIntVectSet cpy2 = tags;
+
+	cpy2 -= cpy1; // = new tags minus old tags. If nonzero, we got some new tags. 
+	cpy1 -= tags; // = old_tags minus new tags. If nonzero, we got some new tags
+	if(cpy1.numPts() != 0 || cpy2.numPts() != 0){
+	  got_new_tags = true;
+	}
+
+	tags &= box;
+      }
+    }
+  }
+
+  // Some ranks may have gotten new tags while others have not. This little code snippet
+  // sets got_new_tags = true for all ranks if any rank originally had got_new_tags = true
+#ifdef CH_MPI
+  int glo = 1;
+  int loc = got_new_tags ? 1 : 0;
+
+  const int result = MPI_Allreduce(&loc, &glo, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+
+  got_new_tags = (glo == 1) ? true : false;
+#endif
+
+  return got_new_tags;
+}
+
+
+void cell_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tags,
+				   const Vector<EBCellFAB*>& a_tracers,
+				   const Vector<EBCellFAB*>& a_grad_tracers,
+				   const int                 a_lvl,
+				   const Box                 a_box,
+				   const EBISBox&            a_ebisbox,
+				   const Real                a_time,
+				   const Real                a_dx,
+				   const RealVect            a_origin){
+
+
+  
+  Vector<BaseFab<Real>* > reg_tracers;
+  Vector<BaseFab<Real>* > reg_gtracer;
+
+  for (int i = 0; i < m_num_tracers; i++){
+    reg_tracers.push_back(&(a_tracers[i]->getSingleValuedFAB()));
+    reg_gtracer.push_back(&(a_grad_tracers[i]->getSingleValuedFAB()));
+  }
+
+  // Regular box loop
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv   = bit();
+    const RealVect pos = a_origin + a_dx*RealVect(iv);
+    
+    // If position is inside any of the tagging boxes, we can refine
+    if(inside_tag_box(pos) && a_ebisbox.isRegular(iv)){
+      
+      // Build point-wise tracer fields
+      Vector<Real>     tr(m_num_tracers); 
+      Vector<RealVect> gt(m_num_tracers);
+      for (int i = 0; i < m_num_tracers; i++){
+	tr[i] = (*reg_tracers[i])(iv, 0);
+	gt[i] = RealVect(D_DECL((*reg_gtracer[i])(iv, 0),(*reg_gtracer[i])(iv, 1),(*reg_gtracer[i])(iv, 2)));
+      }
+
+      // Check if this cell should be refined
+      const bool refine = refine_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+
+      // If we refine, grow with buffer and increment to a_refined_tags
+      if(refine){
+	a_refined_tags |= iv;
+      }
+    }
+  }
+
+  // Irregular box loop
+  const IntVectSet& irreg = a_ebisbox.getIrregIVS(a_box);
+  const EBGraph& ebgraph  = a_ebisbox.getEBGraph();
+  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
+
+    // If position is inside any of the tagging boxes, we can refine
+    if(inside_tag_box(pos)){
+      
+      // Build point-wise tracer fields
+      Vector<Real>     tr(m_num_tracers); 
+      Vector<RealVect> gt(m_num_tracers);
+      for (int i = 0; i < m_num_tracers; i++){
+	tr[i] = (*a_tracers[i])(vof, 0);
+	gt[i] = RealVect(D_DECL((*a_grad_tracers[i])(vof, 0),(*a_grad_tracers[i])(vof, 1),(*a_grad_tracers[i])(vof, 2)));
+      }
+
+      // Check if this cell should be refined
+      const bool refine = refine_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+
+      if(refine){
+	a_refined_tags |= vof.gridIndex();
+      }
+    }
+  }
+}
+
+void cell_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_tags,
+				   const Vector<EBCellFAB*>& a_tracers,
+				   const Vector<EBCellFAB*>& a_grad_tracers,
+				   const int                 a_lvl,
+				   const Box                 a_box,
+				   const EBISBox&            a_ebisbox,
+				   const Real                a_time,
+				   const Real                a_dx,
+				   const RealVect            a_origin){
+
+
+  
+  Vector<BaseFab<Real>* > reg_tracers;
+  Vector<BaseFab<Real>* > reg_gtracer;
+
+  for (int i = 0; i < m_num_tracers; i++){
+    reg_tracers.push_back(&(a_tracers[i]->getSingleValuedFAB()));
+    reg_gtracer.push_back(&(a_grad_tracers[i]->getSingleValuedFAB()));
+  }
+
+  // Regular box loop
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv   = bit();
+    const RealVect pos = a_origin + a_dx*RealVect(iv);
+    
+    // If position is inside any of the tagging boxes, we can refine
+    if(inside_tag_box(pos) && a_ebisbox.isRegular(iv)){
+      
+      // Build point-wise tracer fields
+      Vector<Real>     tr(m_num_tracers); 
+      Vector<RealVect> gt(m_num_tracers);
+      for (int i = 0; i < m_num_tracers; i++){
+	tr[i] = (*reg_tracers[i])(iv, 0);
+	gt[i] = RealVect(D_DECL((*reg_gtracer[i])(iv, 0),(*reg_gtracer[i])(iv, 1),(*reg_gtracer[i])(iv, 2)));
+      }
+
+      // Check if this cell should be refined
+      const bool coarsen = coarsen_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+
+      // If we refine, grow with buffer and increment to a_refined_tags
+      if(coarsen){
+	a_coarsened_tags |= iv;
+      }
+    }
+  }
+
+  // Irregular box loop
+  const IntVectSet& irreg = a_ebisbox.getIrregIVS(a_box);
+  const EBGraph& ebgraph  = a_ebisbox.getEBGraph();
+  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
+
+    // If position is inside any of the tagging boxes, we can refine
+    if(inside_tag_box(pos)){
+      
+      // Build point-wise tracer fields
+      Vector<Real>     tr(m_num_tracers); 
+      Vector<RealVect> gt(m_num_tracers);
+      for (int i = 0; i < m_num_tracers; i++){
+	tr[i] = (*a_tracers[i])(vof, 0);
+	gt[i] = RealVect(D_DECL((*a_grad_tracers[i])(vof, 0),(*a_grad_tracers[i])(vof, 1),(*a_grad_tracers[i])(vof, 2)));
+      }
+
+      // Check if this cell should be refined
+      const bool coarsen = coarsen_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+
+      if(coarsen){
+	a_coarsened_tags |= vof.gridIndex();
+      }
+    }
+  }
+}
+
+
+bool cell_tagger::inside_tag_box(const RealVect a_pos){
+  bool do_this_refine = (m_tagboxes.size() > 0) ? false : true;
+  for (int ibox = 0; ibox < m_tagboxes.size(); ibox++){
+    const RealVect lo = m_tagboxes[ibox].get_lo();
+    const RealVect hi = m_tagboxes[ibox].get_hi();
+
+    if(a_pos >= lo && a_pos <= hi){
+      do_this_refine = true;
+    }
+  }
+
+  return do_this_refine;
 }

@@ -2224,6 +2224,12 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
     for (DataIterator dit = a_cell_tags[lvl]->dataIterator(); dit.ok(); ++dit){
       a_all_tags[lvl] |= IntVectSet((*a_cell_tags[lvl])[dit()].get_ivs());
     }
+
+    // Grow tags with cell taggers buffer
+    if(!m_celltagger.isNull()){
+      const int buf = m_celltagger->get_buffer();
+      a_all_tags[lvl].grow(buf);
+    }
   }
 
   // Add geometric tags. 

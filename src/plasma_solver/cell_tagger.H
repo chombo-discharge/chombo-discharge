@@ -59,6 +59,11 @@ public:
   int get_num_tracers();
 
   /*!
+    @brief Get tag buffer
+  */
+  int get_buffer();
+
+  /*!
     @brief Regrid storage for tracer field
   */
   void regrid();
@@ -77,6 +82,8 @@ public:
     @brief Tag cells
   */
   bool tag_cells(EBAMRTags& a_tags);
+
+  bool new_tag_cells(EBAMRTags& a_tags);
 
   /*!
     @brief Tracer fields
@@ -151,24 +158,55 @@ protected:
   Vector<real_box> m_tagboxes;
 
   /*!
+    @brief Check if a point is inside a tagging box
+  */
+  bool inside_tag_box(const RealVect a_pos);
+
+  /*!
+    @brief Per-box refinement tags
+  */
+  void refine_cells_box(DenseIntVectSet&          a_refined_tags,
+				const Vector<EBCellFAB*>& a_tracers,
+				const Vector<EBCellFAB*>& a_grad_tracers,
+				const int                 a_lvl,
+				const Box                 a_box,
+				const EBISBox&            a_ebisbox,
+				const Real                a_time,
+				const Real                a_dx,
+				const RealVect            a_origin);
+
+  /*!
+    @brief Per-box coarsen
+  */
+  void coarsen_cells_box(DenseIntVectSet&          a_refined_tags,
+			 const Vector<EBCellFAB*>& a_tracers,
+			 const Vector<EBCellFAB*>& a_grad_tracers,
+			 const int                 a_lvl,
+			 const Box                 a_box,
+			 const EBISBox&            a_ebisbox,
+			 const Real                a_time,
+			 const Real                a_dx,
+			 const RealVect            a_origin);
+
+  /*!
     @brief Coarsen a cell based on a tracer field
   */
-  virtual bool coarsen_cell(const RealVect&         a_pos,
-			    const Real&             a_time,
-			    const Real&             a_dx,
-			    const int&              a_lvl,
-			    const Vector<Real>&     a_tracer,
-			    const Vector<RealVect>& a_grad_tracer) = 0;
+  virtual bool coarsen_cell(const RealVect         a_pos,
+			    const Real             a_time,
+			    const Real             a_dx,
+			    const int              a_lvl,
+			    const Vector<Real>     a_tracer,
+			    const Vector<RealVect> a_grad_tracer) = 0;
 
   /*!
     @brief Refine a cell based on a tracer field
   */
-  virtual bool refine_cell(const RealVect&         a_pos,
-			   const Real&             a_time,
-			   const Real&             a_dx,
-			   const int&              a_lvl,
-			   const Vector<Real>&     a_tracer,
-			   const Vector<RealVect>& a_grad_tracer) = 0;
+  virtual bool refine_cell(const RealVect         a_pos,
+			   const Real             a_time,
+			   const Real             a_dx,
+			   const int              a_lvl,
+			   const Vector<Real>     a_tracer,
+			   const Vector<RealVect> a_grad_tracer) = 0;
 };
 
 #endif
