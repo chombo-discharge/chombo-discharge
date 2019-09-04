@@ -608,4 +608,40 @@ void euler_maruyama::compute_cdr_diffco(const Real a_time){
   if(m_verbosity > 5){
     pout() << "euler_maruaya::compute_cdr_diffco" << endl;
   }
+
+  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+}
+
+void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+  CH_TIME("euler_maruyama::compute_dt");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::compute_dt" << endl;
+  }
+
+  Real dt = 1.E99;
+
+  m_dt_cfl          = m_cdr->compute_cfl_dt();
+  const Real dt_cfl = m_cfl*m_dt_cfl;
+  if(dt_cfl < dt){
+    dt = dt_cfl;
+    a_timecode = time_code::cfl;
+  }
+
+  const Real dt_relax = m_relax_time*this->compute_relaxation_time();
+  if(dt_relax < dt){
+    dt = dt_relax;
+    a_timecode = time_code::relaxation_time;
+  }
+
+  if(dt < m_min_dt){
+    dt = m_min_dt;
+    a_timecode = time_code::hardcap;
+  }
+
+  if(dt > m_max_dt){
+    dt = m_max_dt;
+    a_timecode = time_code::hardcap;
+  }
+
+  a_dt = dt;
 }

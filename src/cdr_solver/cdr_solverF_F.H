@@ -222,6 +222,34 @@ inline void FORTRAN_NAME(inlineADVECTIVE_CFL_DT, inlineADVECTIVE_CFL_DT)(
 }
 #endif  // GUARDADVECTIVE_CFL_DT 
 
+#ifndef GUARDDIFFUSIVE_DT 
+#define GUARDDIFFUSIVE_DT 
+// Prototype for Fortran procedure diffusive_dt ...
+//
+void FORTRAN_NAME( DIFFUSIVE_DT ,diffusive_dt )(
+      CHFp_CONST_FRA1(diffco)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(facebox)
+      ,CHFp_REAL(min_dt) );
+
+#define FORT_DIFFUSIVE_DT FORTRAN_NAME( inlineDIFFUSIVE_DT, inlineDIFFUSIVE_DT)
+#define FORTNT_DIFFUSIVE_DT FORTRAN_NAME( DIFFUSIVE_DT, diffusive_dt)
+
+inline void FORTRAN_NAME(inlineDIFFUSIVE_DT, inlineDIFFUSIVE_DT)(
+      CHFp_CONST_FRA1(diffco)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(facebox)
+      ,CHFp_REAL(min_dt) )
+{
+ CH_TIMELEAF("FORT_DIFFUSIVE_DT");
+ FORTRAN_NAME( DIFFUSIVE_DT ,diffusive_dt )(
+      CHFt_CONST_FRA1(diffco)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_BOX(facebox)
+      ,CHFt_REAL(min_dt) );
+}
+#endif  // GUARDDIFFUSIVE_DT 
+
 }
 
 #endif

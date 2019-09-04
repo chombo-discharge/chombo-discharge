@@ -2097,12 +2097,23 @@ Real cdr_solver::compute_diffusive_dt(){
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  const EBFaceFAB& diffco = (*m_diffco[lvl])[dit()][dir];
 
+	  const BaseFab<Real>& diffco_fab = diffco.getSingleValuedFAB();
+	  Box facebox = box;
+	  facebox.surroundingNodes(dir);
+
+	  FORT_DIFFUSIVE_DT(CHF_CONST_FRA1(diffco_fab, comp),
+			    CHF_CONST_REAL(dx),
+			    CHF_BOX(facebox),
+			    CHF_REAL(min_dt));
+
+#if 0 // Old code
 	  for (FaceIterator faceit(norm_ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
 	    const FaceIndex& face = faceit();
 	    const Real thisdt = dx*dx/(2*SpaceDim*diffco(face, comp));
 
 	    min_dt = Min(thisdt, min_dt);
 	  }
+#endif
 	}
 
 	// Irregular faces

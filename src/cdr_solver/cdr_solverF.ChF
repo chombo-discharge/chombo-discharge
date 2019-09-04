@@ -194,3 +194,20 @@
 
       return
       end
+
+      subroutine diffusive_dt(
+     &     chf_const_fra1[diffco],
+     &     chf_const_real[dx],
+     &     chf_box[facebox],
+     &     chf_real[min_dt])
+
+      real_t dt
+      integer chf_ddecl[i; j; k]
+
+      chf_multido[facebox; i;j; k]
+         dt = dx*dx/(2*CH_SPACEDIM*diffco(chf_ix[i;j;k]))
+         min_dt = min(dt, min_dt);
+      chf_enddo	 
+
+      return
+      end

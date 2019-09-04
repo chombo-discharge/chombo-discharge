@@ -35,6 +35,7 @@ public:
   void init_source_terms();
   void regrid_internals();
   void deallocate_internals();
+  void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   bool need_to_regrid();
 
 protected:
