@@ -192,7 +192,7 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   Vector<int> X(m_num_species, 0);
   Vector<int> Y(m_num_photons, 0);
 
-  const Real thresh = 0.3;
+  const Real thresh = 1.E-2;
   
   for (int i = 0; i < m_num_species; i++){
     X[i] = floor(thresh + a_particle_densities[i]*volume);
@@ -305,17 +305,19 @@ void morrow_network::network_ssa(Vector<Real>&          a_particle_sources,
   // 4. M- + M+ => 0
   // 5. e + M   => e + M + y
   // 6  y + M   => e + M+
+
+  const Real thresh = 1.E-2;
   
   // Initial particle densities
   for (int i = 0; i < m_num_species; i++){
-    X[i] = floor(a_particle_densities[i]*volume);
+    X[i] = floor(thresh + a_particle_densities[i]*volume);
   }
   const Vector<int> X0 = X;
 
 
   // Initial photon densities
   for (int i = 0; i < m_num_photons; i++){
-    Y[i] = floor(a_photon_densities[i]);
+    Y[i] = floor(thresh + a_photon_densities[i]);
   }
 
   // Deposit photons. This is reaction #6 in the list above. We will only do the other 5 reactions.

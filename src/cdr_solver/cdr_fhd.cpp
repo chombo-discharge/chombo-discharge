@@ -597,4 +597,11 @@ void cdr_fhd::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   if(m_plot_vel && m_mobile) {
     write_data(a_output, a_comp, m_velo_cell, false);
   }
+
+  // Plot EB fluxes
+  if(m_plot_ebf && m_mobile){
+    data_ops::set_value(m_scratch, 0.0);
+    data_ops::incr(m_scratch, m_ebflux, 1.0);
+    write_data(a_output, a_comp, m_scratch, false);
+  }
 }

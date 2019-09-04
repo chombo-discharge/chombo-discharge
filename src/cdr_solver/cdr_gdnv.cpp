@@ -99,12 +99,14 @@ void cdr_gdnv::parse_plot_vars(){
   m_plot_vel = false;
   m_plot_dco = false;
   m_plot_src = false;
+  m_plot_ebf = false;
   
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plot_phi = true;
-    else if(str[i] == "vel") m_plot_vel = true;
-    else if(str[i] == "dco") m_plot_dco = true; 
-    else if(str[i] == "src") m_plot_src = true;
+    if(     str[i] == "phi")    m_plot_phi = true;
+    else if(str[i] == "vel")    m_plot_vel = true;
+    else if(str[i] == "dco")    m_plot_dco = true; 
+    else if(str[i] == "src")    m_plot_src = true;
+    else if(str[i] == "ebflux") m_plot_ebf = true;
   }
 }
 

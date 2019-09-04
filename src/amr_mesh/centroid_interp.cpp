@@ -200,7 +200,7 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
   a_sten.clear();
   a_sten.add(a_vof, 1.0);
 
-  const Real thresh = 1.E-8;
+  const Real thresh = 1.E-5;
   
   const RealVect centroid = a_ebisbox.centroid(a_vof);
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -219,12 +219,14 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
 	a_sten.add(loVoF,  centroid[dir]);
 	a_sten.add(loVoF, -centroid[dir]);
       }
+#if 0
       else if(centroid[dir] == 0.0){
 	// No deriv in this direction
       }
       else{ // Logic bust, shouldn't happen
 	MayDay::Abort("centroid_interp::get_pwl_stencil - logic bust, shouldn't happen");
       }
+#endif
     }
   }
 

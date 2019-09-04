@@ -590,14 +590,19 @@ protected:
   bool m_plot_phi;
 
   /*!
-    @brief Output rhs
+    @brief Output velocities
   */
   bool m_plot_vel;
 
   /*!
-    @brief Output electric field
+    @brief Output diffusion coefficients
   */
   bool m_plot_dco;
+
+  /*!
+    @brief Output EB fluxes
+  */
+  bool m_plot_ebf;
 
   /*!
     @brief Output source term

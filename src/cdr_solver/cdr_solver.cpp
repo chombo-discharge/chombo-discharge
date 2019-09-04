@@ -58,6 +58,9 @@ Vector<std::string> cdr_solver::get_plotvar_names() const {
       names.push_back("z-Velocity " + m_name);
     }
   }
+  if(m_plot_ebf && m_mobile){
+    names.push_back(m_name + " eb_flux");
+  }
   
   return names;
 }
@@ -79,10 +82,11 @@ int cdr_solver::get_num_plotvars() const {
 
   int num_output = 0;
 
-  if(m_plot_phi) num_output = num_output + 1;
+  if(m_plot_phi)                num_output = num_output + 1;
   if(m_plot_dco && m_diffusive) num_output = num_output + 1;
-  if(m_plot_src) num_output = num_output + 1;
-  if(m_plot_vel && m_mobile) num_output = num_output + SpaceDim;
+  if(m_plot_src)                num_output = num_output + 1;
+  if(m_plot_vel && m_mobile)    num_output = num_output + SpaceDim;
+  if(m_plot_ebf && m_mobile)    num_output = num_output + 1;
 
   return num_output;
 }
@@ -1886,38 +1890,35 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     pout() << m_name + "::write_plot_data" << endl;
   }
 
-#if 1 // Original code
-  if(m_plot_phi) write_data(a_output, a_comp, m_state, true);
-#else
-  if(m_plot_phi){
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      data_ops::scale(*m_state[lvl], (pow(m_amr->get_dx()[lvl], 3)));
-    }
-    write_data(a_output, a_comp, m_state,    false);
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      data_ops::scale(*m_state[lvl], 1./(pow(m_amr->get_dx()[lvl], 3)));
-    }
+
+  // Plot state
+  if(m_plot_phi) {
+    write_data(a_output, a_comp, m_state, true);
   }
-#endif
+
+  // Plot diffusion coefficients
   if(m_plot_dco && m_diffusive) { // Need to compute the cell-centerd stuff first
     data_ops::set_value(m_scratch, 0.0);
     data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->get_domains());
     write_data(a_output, a_comp, m_scratch,   false);
   }
-#if 1 // Original code
-  if(m_plot_src) write_data(a_output, a_comp, m_source,    false);
-#else // Debug
-  if(m_plot_src){
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      data_ops::scale(*m_source[lvl], (pow(m_amr->get_dx()[lvl], 3)));
-    }
+
+  // Plot source terms
+  if(m_plot_src) {
     write_data(a_output, a_comp, m_source,    false);
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      data_ops::scale(*m_source[lvl], 1./(pow(m_amr->get_dx()[lvl], 3)));
-    }
   }
-#endif
-  if(m_plot_vel && m_mobile) write_data(a_output, a_comp, m_velo_cell, false);
+
+  // Plot velocities
+  if(m_plot_vel && m_mobile) {
+    write_data(a_output, a_comp, m_velo_cell, false);
+  }
+
+  // Plot EB fluxes
+  if(m_plot_ebf && m_mobile){
+    data_ops::set_value(m_scratch, 0.0);
+    data_ops::incr(m_scratch, m_ebflux, 1.0);
+    write_data(a_output, a_comp, m_scratch, false);
+  }
 }
 
 void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
