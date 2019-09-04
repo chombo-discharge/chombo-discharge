@@ -7,4 +7,5 @@ euler_maruyama.min_dt           = 0.        # Minimum permitted time step
 euler_maruyama.max_dt           = 1.E99     # Maximum permitted time step
 euler_maruyama.cfl              = 0.5       # CFL number
 euler_maruyama.relax_time       = 1.0       # Relaxation time constant
+euler_maruyama.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
 euler_maruyama.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations

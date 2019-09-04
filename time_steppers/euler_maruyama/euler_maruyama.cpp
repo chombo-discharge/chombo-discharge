@@ -34,6 +34,7 @@ void euler_maruyama::parse_options(){
 
   parse_verbosity();
   parse_solver_verbosity();
+  parse_fast_poisson();
   parse_cfl();
   parse_relax_time();
   parse_min_dt();
@@ -126,7 +127,9 @@ Real euler_maruyama::advance(const Real a_dt){
   t_sig = t1 - t0;
   
   t0 = MPI_Wtime();
-  time_stepper::solve_poisson();                  // Update the Poisson equation
+  if((m_step +1) % m_fast_poisson == 0){
+    time_stepper::solve_poisson();                  // Update the Poisson equation
+  }
   t1 = MPI_Wtime();
   t_pois = t1 - t0;
 

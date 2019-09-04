@@ -192,7 +192,7 @@ void morrow_network::network_tau(Vector<Real>&          a_particle_sources,
   Vector<int> X(m_num_species, 0);
   Vector<int> Y(m_num_photons, 0);
 
-  const Real thresh = 0.0;
+  const Real thresh = 0.3;
   
   for (int i = 0; i < m_num_species; i++){
     X[i] = floor(thresh + a_particle_densities[i]*volume);

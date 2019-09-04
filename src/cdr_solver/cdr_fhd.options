@@ -8,6 +8,7 @@ cdr_fhd.mass_redist          = false        # Mass-weighted redistribution or vo
 cdr_fhd.divF_nc              = covered_face # Hybrid divergence version
 cdr_fhd.limit_slopes         = true         # Use slope-limiters for godunov
 cdr_fhd.plt_vars             = phi vel src  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+cdr_fhd.plot_mode            = density      # Plot densities 'density' or particle numbers ('numbers')
 cdr_fhd.gmg_verbosity        = -1           # GMG verbosity
 cdr_fhd.gmg_pre_smooth       = 6            # Number of relaxations in downsweep
 cdr_fhd.gmg_post_smooth      = 6            # Number of relaxations in upsweep

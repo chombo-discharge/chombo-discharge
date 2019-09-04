@@ -36,6 +36,7 @@ void cdr_fhd::parse_options(){
   parse_slopelim();     // Parses slope limiter settings
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parse_plotmode();    // Parse plot mode
 }
 
 void cdr_fhd::parse_diffusion(){
@@ -54,6 +55,21 @@ void cdr_fhd::parse_rng_seed(){
   if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
 
   m_rng = new std::mt19937_64(m_seed);
+}
+
+void cdr_fhd::parse_plotmode(){
+  ParmParse pp(m_class_name.c_str());
+
+  m_plot_numbers = false;
+  
+  std::string str;
+  pp.get("plot_mode", str);
+  if(str == "density"){
+    m_plot_numbers = false;
+  }
+  else if(str == "numbers"){
+    m_plot_numbers = true;
+  }
 }
 
 void cdr_fhd::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
@@ -533,4 +549,52 @@ void cdr_fhd::GWN_advection_source(EBAMRCellData& a_ransource, const EBAMRCellDa
   data_ops::set_value(m_ebflux, 0.0);
   conservative_divergence(a_ransource, ranflux); // Compute the conservative divergence. This also refluxes. 
   data_ops::copy(m_ebflux, backup);
+}
+
+void cdr_fhd::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("cdr_fhd::write_plot_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_plot_data" << endl;
+  }
+
+  if(m_plot_phi) {
+    if(!m_plot_numbers){ // Regular write
+      write_data(a_output, a_comp, m_state, true);
+    }
+    else{ // Scale, write, and scale back
+     
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	data_ops::scale(*m_state[lvl], (pow(m_amr->get_dx()[lvl], 3)));
+      }
+      write_data(a_output, a_comp, m_state,    false);
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	data_ops::scale(*m_state[lvl], 1./(pow(m_amr->get_dx()[lvl], 3)));
+      }
+    }
+  }
+
+  if(m_plot_dco && m_diffusive) { // Need to compute the cell-centerd stuff first
+    data_ops::set_value(m_scratch, 0.0);
+    data_ops::average_face_to_cell(m_scratch, m_diffco, m_amr->get_domains());
+    write_data(a_output, a_comp, m_scratch,   false);
+  }
+
+  if(m_plot_src) {
+    if(!m_plot_numbers){
+      write_data(a_output, a_comp, m_source,    false);
+    }
+    else { // Scale, write, and scale back
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	data_ops::scale(*m_source[lvl], (pow(m_amr->get_dx()[lvl], 3)));
+      }
+      write_data(a_output, a_comp, m_source,    false);
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	data_ops::scale(*m_source[lvl], 1./(pow(m_amr->get_dx()[lvl], 3)));
+      }
+    }
+  }
+
+  if(m_plot_vel && m_mobile) {
+    write_data(a_output, a_comp, m_velo_cell, false);
+  }
 }
