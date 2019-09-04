@@ -1,4 +1,4 @@
-.. _Chap:ImportantClasses:
+.. _Chap:ClassAPI:
 
 Class API
 =========
@@ -11,11 +11,127 @@ If you want to view the code in full, please see the :doxy:`Doxygen API <index>`
 
 Here are the base modules for `PlasmaC`, note that :ref:`Chap:plasma_kinetics`, :ref:`Chap:time_stepper`, :ref:`Chap:computational_geometry`, and :ref:`Chap:cell_tagger` are abstract, and require top-level implementation.
 
+.. _Chap:physical_domain:
+
+physical_domain
+---------------
+
+:ref:`Chap:physical_domain` is the simplest class in `PlasmaC`. Internally, it contains only two corners of a rectangular box, and these two corners indicate the low and high ends of your physical domain. The following two options control the origin and extents of your simulation region:
+
+.. literalinclude:: links/physical_domain.options
+
 .. _Chap:plasma_engine:
 
+plasma_engine
+-------------
 
+:ref:`Chap:plasma_engine` is the driver class in `PlasmaC`. In order to be instantiated, :ref:`Chap:plasma_kinetics` is fed all the other modules that we discuss below. Broadly speaking, :ref:`Chap:plasma_engine` has the following responsibilities:
 
-.. _Chap:plasma_kinetics:
+* If given a geometry, it will call for generation of the necessary geometric information for the EB grid. This is done by fetching the geometry from :ref:`Chap:computational_geometry`, the physical simulation domain from :ref:`Chap:physical_domain`, and the grid information from :ref:`Chap:amr_mesh`. 
+* It is reponsible for setting up simulations for fresh starts, or for restarts (by reading a checkpoint file). See :ref:`Chap:RestartingSimulations` for details. 
+* It calls for instantiation of solvers at appropriate times. This is done by calls to :ref:`Chap:time_stepper`, which has the ownership of the solvers.
+* It keeps track of the time step, and ensures that the time in all solvers are synchronized.
+* The class is responsible for regridding, which occurs through two separate mechanisms: Tagging of irregular cells and tagging of regular cells. The former is only done once, while the latter is controlled through an input parameter. For regular cells, :ref:`Chap:plasma_engine` will perform calls to (derived classes of) :ref:`Chap:cell_tagger`.
+* :ref:`Chap:plasma_engine` does all the output and checkpointing.
+
+Here are the options for plasma_engine in the current version of the code:
+
+.. literalinclude:: links/plasma_engine.options
+
+We now discuss these options in turn:
+
+* ``plasma_engine.verbosity`` controls how much info is written in the pout.* files from each MPI rank. Higher numbers means more messages.
+* ``plasma_engine.recursive_regrid`` is a special flag that does a recursive type of regrid where not all levels are regridded at once, but are instead regridded at time steps that are factors of ``plasma_engine.regrid_interval``. If this flag is false, all grid levels are regridded simultanously. If this flag is true, only the *finest* AMR level is regridded every ``plasma_engine.regrid_interval`` while the others are regridded at intervals defined by their refinement ratios. 
+* ``plasma_engine.plot_interval`` controls how often plot files are written to disk. A negative interval turns off plot I/O. 
+* ``plasma_engine.regrid_interval`` controls how often we will call for a regrid. A negative interval turns off regrids. 
+* ``plasma_engine.checkpoint_interval`` controls how often checkpoint files are written to disk. A negative interval turns off file checkpointing. 
+* ``plasma_engine.initial_regrids`` sets up *initial* regrids, i.e. regrids before the first time step. 
+* ``plasma_engine.start_time`` is the simulation start time.
+* ``plasma_engine.stop_time`` is the simulation stop time. If the simulation reaches this time, the final time step adjusted so the simulation lands on ``plasma_engine.stop_time`` 
+* ``plasma_engine.max_steps`` is the maximum number of time step the simulation is allowed to run. 
+* ``plasma_engine.geometry_only`` is a special flag that only plots the geometry. This will skip everything solver-related and only output a plot file of the geometry in the :file:`/geo` subfolder. 
+* ``plasma_engine.ebis_memory_load_balance`` is a special flag that load balances geometry generation with respect to memory or not. 
+* ``plasma_engine.write_ebis`` is a special flag that writes the EB geometry to an HDF5 file. 
+* ``plasma_engine.read_ebis`` is a special flag that reads the EB geometry from an HDF5 file. 
+* ``plasma_engine.output_directory`` sets the output directory for the simulation. 
+* ``plasma_engine.grow_tags`` species how much to grow *irregular tags* (i.e. boundary tags). 
+* ``plasma_engine.output_names`` controls the plot and checkpoint file names. 
+* ``plasma_engine.max_plot_depth`` restricts the maximum plot depth. A negative number implies that plot data is taken all the way down to the finest level. 
+* ``plasma_engine.max_chk_depth`` restricts the maximum checkpoint depth. A negative number implies that plot data is taken all the way down to the finest level. 
+* ``plasma_engine.num_plot_ghost`` controls the number of ghost cells that will be included in plot files. 
+* ``plasma_engine.plt_vars`` controls the plot variables for ``plasma_engine``. Currently available plot variables are 'tags' and 'tracer', which plots cells marked for refinement and the associated tracer fields. 
+* ``plasma_engine.restart`` controls the restart step. A value less or equal to zero implies a fresh simulation. Setting this number to larger than zero tells ``plasma_engine`` to look for a checkpoint file with the specified time step, and then start the simulation from that particular time step. 
+* ``plasma_engine.restart_mode`` This is a special flag that allows different restart modes (for example, removing all space charge or surface charge). 
+* ``plasma_engine.refine_geometry`` controls how far the geometry will be refined. A negative values implies that level-set surfaces are refined down to the maximum allowed level. 
+* ``plasma_engine.use_new_io`` is a flag that tells ``plasma_engine`` to use the new I/O routines. As these become standard, this class option will be removed. 
+
+..
+   Most options here are self-explanatory. However, we explicitly mention a few that may not be immediately clear. Firstly, ``geometry_only`` is a special option that *only* generates the geometry. It will be written to an HDF5 file whose name depends on ``output_directory`` and ``output_names``. When you develop your applications, it is often convenient to set this one to *true*, since this will skip a bunch of initialization stages (such as solving the Poisson equation, for example). It allows for quick debugging of your geometry. See chapter :ref:`Chap:ControllingOutput` to see where simulation files are placed. Furthermore, since generating the geometric information is a non-negligible work load, you may choose to write the geometric information to an HDF5 file by enable ``write_ebis``. This will write the finest level information to a file, which you can later read using ``read_ebis``. 
+
+   The ``restart`` flag allows you to restart a simulation from a certain checkpoint step. See :ref:`Chap:RestartingSimulations` for details.
+
+   The geometry refinement options specify to which level the geometry will be refined. Internally, this is done by tagging irregular cells down to certain levels. ``refine_geometry`` is a master option, refining all surfaces down to the specified level. The remaining options allow you to individually tag certain surfaces, such as dielectric-gas surfaces, electrode-gas surfaces, electrode-dielectric surfaces and so on. We remark that :ref:`Chap:geo_coarsener` offers a way of leveraging this coarse-grained refinement by removing tags in certain places.
+
+.. _Chap:amr_mesh:
+
+amr_mesh
+--------
+
+:ref:`Chap:amr_mesh` handles (almost) all spatial operations in `PlasmaC`. Internally, :ref:`Chap:amr_mesh` contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries. :ref:`Chap:amr_mesh` also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory. 
+
+:ref:`Chap:amr_mesh` is an integral part of `PlasmaC`, and users will never have the need to modify it unless they are implementing something entirely new. The behavior of :ref:`Chap:amr_mesh` is modified through it's available input parameters, listed below:
+
+.. literalinclude:: links/amr_mesh.options
+
+We now discuss the various ``amr_mesh`` class options.
+
+* ``amr_mesh.verbosity`` controls the verbosity of this class. ``amr_mesh`` can potentially do a lot of output, so it is best to leave this to the default value (-1) unless you are debugging. 
+* ``amr_mesh.coarsest_domain`` is the partitioning of the *coarsest* grid level that discretizes your problem domain. The entries in this option must all be integers of ``amr_mesh.max_box_size``.
+* ``amr_mesh.blocking_factor`` sets the minimum box size that can be generated by the mesh generation algorithm. We remark that if you are doing particle deposition, ``amr_mesh.blocking_factor`` and ``amr_mesh.max_box_size`` MUST be equal. 
+* ``amr_mesh.max_box_size`` sets the maximum box size that can be generated by the mesh generation algorithm. 
+* ``amr_mesh.max_ebis_box`` sets the maximum box size that will be used in the geometry generation step. A smaller box will consume less memory, but geometry generation runtime will be longer. 
+* ``amr_mesh.max_amr_depth`` defines the largest possible number of grids that can be used. 
+* ``amr_mesh.max_sim_depth`` defines the maximum simulation depth for the simulation. This options exists because you may want to run one part of a simulation using a coarser resolution than ``amr_mesh.max_amr_depth``. 
+* ``amr_mesh.refine_all_lvl`` is deprecated class option. 
+* ``amr_mesh.mg_coarsen`` is a "pre-coarsening" method for multigrid solvers. The deeper multigrids levels are there to facilitate convergence, and it often helps to use fairly large box sizes on some of these levels before aggregating boxes. 
+* ``amr_mesh.fill_ratio`` is the fill ratio for the mesh refinement algorithm. This value must be between 0 and 1; a smaller value will result in larger grids. A higher value results in more compact grids, but possibly with more boxes. 
+* ``amr_mesh.irreg_growth`` controls how much irregular tags (e.g. boundary tags) are grown before being passed into the mesh refinement algorithm. 
+* ``amr_mesh.buffer_size`` is the minimum number of cells between grid levels. 
+* ``amr_mesh.ref_rat`` is the refinement factor between levels. Values 2 and 4 are supported, and you may use mixed refinement ratios. The length of this vector must be at least equal to the number of refinement levels. 
+* ``amr_mesh.num_ghost`` indicates how many ghost cells to use for all data holders. The typical value is 3 for EB-applications, but non-EB applications might get away with fewer ghost cells. 
+* ``amr_mesh.eb_ghost`` controls how ghost cells are used for the EB generation. 
+* ``amr_mesh.centroid_sten`` controls which stencil is used for interpolating data to irregular cell centroids. Currently available options are 'pwl' (piecewise linear), 'linear' (bi/trilinear), 'taylor' (higher order Taylor expansion), and 'lsq' which is a least squares fit. Only 'pwl' is guaranteed to have positive weights in the stencil. 
+* ``amr_mesh.eb_sten`` controls which stencil is used for interpolation/extrapolation to embedded boundary centroids. We cannot guarantee that the stencils have only positive weights. 
+* ``amr_mesh.redist_radius`` is the redistribution radius for hyperbolic redistribution. 
+* ``amr_mesh.ghost_interp`` defines the ghost cell interpolation type. Algorithms that require very specific ghost cell interpolation schemes (advection, for example) use their own interpolation method that is outside user control. The available options are 'pwl' (piecewise linear) and 'quad' (quadratic). 
+* ``amr_mesh.load_balance`` tells ``amr_mesh`` how to load balance the grids. 
+* ``amr_mesh.ebcf`` allows ``amr_mesh`` to turn on certain optimizations when there are **not** crossing between embedded boundaries and grid refinement boundaries. If such crossings exist, and you set this flag to false, `PlasmaC` *will* compute incorrect answers. 
+
+..
+   In the above input parameters, ``max_amr_depth`` indicates the maximum AMR depth that we will simulate. ``coarsest_domain``, which is the number of cells on the coarsest AMR level, *must* be divisible by ``blocking_factor``, which is the smallest possible allowed box that will be generated in the grid generation. Likewise, ``max_box_size`` indicates the largest possible box. If you are using any of the particle methods in `PlasmaC`, ``blocking_factor`` and ``max_box_size`` must be equal. 
+
+   ``ref_rat`` indicates the refinement factors between levels; the first entry indicates the refinement between the coarsest AMR level and the next. We only support refinement factors of 2 or 4 (you may use mixed refinement factors). This means that your coarsest spatial resolution will be given by the ``coarsest_domain``, and the finest resolution given by ``coarsest_domain`` multiplied recursively by your refinement ratios. Note that the resolution in each spatial direction *must* be the same.
+
+   ``fill_ratio``, which must be :math:`>0` and :math:`\leq 1` indicates the grid generation effectiveness. For higher values of the fill ratio, grids are smaller and more compact, but more boxes are generated. For lower values, grids tend to be larger, and boxes tend to be more square. Note that if ``max_box_size`` is equal to ``blocking_factor``, the generated grids are essentially octrees.
+
+   To add some flexibility in how refinement levels are handled in different stages of evolution, we've added an option ``max_sim_depth`` which restricts the grid generation to a level equal to or lower than ``max_amr_depth``. This options exists because checkpoint/restart (see :ref:`Chap:RestartingSimulations`) do *not* allow changing the AMR levels since this implies a changed geometry as well.
+
+   Users may also change the stencils for data interpolation across refinement boundaries, as well as stencils for extrapolation and interpolation near the embedded boundaries. Typically, we use linear interpolation for ghost cells but quadratic interpolation is supported as well, by changing ``ghost_interp``. The flags ``stencil_order``, ``stencil_type``, and ``stencil_radius`` control the stencils used for interpolation and extrapolation near the EB. 
+
+   If users use features that imply that the refinement boundaries might cross the EB, he **must** enable the ``ebcf`` flag. This is the case, for example, if one uses :ref:`Chap:geo_coarsener` to remove parts of the EB mesh. Internally, this flag informs :ref:`Chap:amr_mesh` about how to fill ghost and reflux data. If this flag is ``false`` *and* there are crossings between the EB and the refinement boundary, we cannot guarantee stable behavior since ghost cells might not be filled properly. 
+
+   The options ``num_ghost`` and ``eb_ghost`` should not be changed since much of our code requires three ghost cells.
+
+.. _Chap:computational_geometry:
+
+computational_geometry
+----------------------
+
+:ref:`Chap:computational_geometry` is the class that implements that geometry. In `PlasmaC`, we use level-set functions for description of surfaces. Please refer to :ref:`Chap:MiniApplications` for descriptions on how to implement new geometries.
+
+:ref:`Chap:computational_geometry` is not an abstract class; if you pass in an instance of :ref:`Chap:computational_geometry` (rather than a casted instance), you will get a regular geometry without embedded boundaries.
+
+By default, there are no input options available for :ref:`Chap:computational_geometry`, although inherited classes that actual implement a non-regular geometry will typically have many. Please see :ref:`Chap:MiniApplications` for further information.   
 
 plasma_kinetics
 ---------------
@@ -305,70 +421,13 @@ The following is a full implementation of the :ref:`Chap:photon` class:
 
 By default, there are no input parameters available for the :ref:`Chap:photon` class, but the user will often want to include these, for example by modifying the absorption coefficient. Note that you are allowed to use a spatially varying absorption coefficient. Please see :ref:`Chap:MiniApplications` for how to pass input parameters into your classes.
 
-.. _Chap:amr_mesh:
-
-amr_mesh
---------
-
-:ref:`Chap:amr_mesh` is the class that handles almost all spatial operations in `PlasmaC`. Internally, :ref:`Chap:amr_mesh` contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries. :ref:`Chap:amr_mesh` also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory. For details, see the :doxy:`Doxygen API <amr_mesh>`.
-
-:ref:`Chap:amr_mesh` is an integral part of `PlasmaC`, and users will never have the need to modify it unless they are implementing something entirely new. The behavior of :ref:`Chap:amr_mesh` is modified through it's available input parameters, listed below:
-
-.. literalinclude:: links/amr_mesh.options     
-
-In the above input parameters, ``max_amr_depth`` indicates the maximum AMR depth that we will simulate. ``coarsest_domain``, which is the number of cells on the coarsest AMR level, *must* be divisible by ``blocking_factor``, which is the smallest possible allowed box that will be generated in the grid generation. Likewise, ``max_box_size`` indicates the largest possible box. If you are using any of the particle methods in `PlasmaC`, ``blocking_factor`` and ``max_box_size`` must be equal. 
-
-``ref_rat`` indicates the refinement factors between levels; the first entry indicates the refinement between the coarsest AMR level and the next. We only support refinement factors of 2 or 4 (you may use mixed refinement factors). This means that your coarsest spatial resolution will be given by the ``coarsest_domain``, and the finest resolution given by ``coarsest_domain`` multiplied recursively by your refinement ratios. Note that the resolution in each spatial direction *must* be the same.
-
-``fill_ratio``, which must be :math:`>0` and :math:`\leq 1` indicates the grid generation effectiveness. For higher values of the fill ratio, grids are smaller and more compact, but more boxes are generated. For lower values, grids tend to be larger, and boxes tend to be more square. Note that if ``max_box_size`` is equal to ``blocking_factor``, the generated grids are essentially octrees.
-
-To add some flexibility in how refinement levels are handled in different stages of evolution, we've added an option ``max_sim_depth`` which restricts the grid generation to a level equal to or lower than ``max_amr_depth``. This options exists because checkpoint/restart (see :ref:`Chap:RestartingSimulations`) do *not* allow changing the AMR levels since this implies a changed geometry as well.
-
-Users may also change the stencils for data interpolation across refinement boundaries, as well as stencils for extrapolation and interpolation near the embedded boundaries. Typically, we use linear interpolation for ghost cells but quadratic interpolation is supported as well, by changing ``ghost_interp``. The flags ``stencil_order``, ``stencil_type``, and ``stencil_radius`` control the stencils used for interpolation and extrapolation near the EB. 
-
-If users use features that imply that the refinement boundaries might cross the EB, he **must** enable the ``ebcf`` flag. This is the case, for example, if one uses :ref:`Chap:geo_coarsener` to remove parts of the EB mesh. Internally, this flag informs :ref:`Chap:amr_mesh` about how to fill ghost and reflux data. If this flag is ``false`` *and* there are crossings between the EB and the refinement boundary, we cannot guarantee stable behavior since ghost cells might not be filled properly. 
-
-The options ``num_ghost`` and ``eb_ghost`` should not be changed since much of our code requires three ghost cells.
-
-.. _Chap:physical_domain:
-
-physical_domain
----------------
-
-:ref:`Chap:physical_domain` is the simplest class in `PlasmaC`. Internally, it contains only two corners of a rectangular box, and these two corners indicate the low and high ends of your physical domain. The following two options control the origin and extents of your simulation region:
-
-.. literalinclude:: links/physical_domain.options
-
-.. _Chap:time_stepper:
-
-plasma_engine
--------------
-
-:ref:`Chap:plasma_engine` is the most important class in `PlasmaC`, and is the object that choreographs a mini-app. In order to be instantiated, :ref:`Chap:plasma_kinetics` must be fed all the other modules that we discuss below. On the whole, :ref:`Chap:plasma_engine` is given the following responsibilities:
-
-* Given a geometry, it will call for generation of the necessary geometric information for the EB grid. This is done by fetching the geometry from :ref:`Chap:computational_geometry`, the physical simulation domain from :ref:`Chap:physical_domain`, and the grid information from :ref:`Chap:amr_mesh`. 
-* It is reponsible for setting up simulations for fresh starts, or for restarts (by reading a checkpoint file). See :ref:`Chap:RestartingSimulations` for details. 
-* It calls for instantiation of solvers at appropriate times. This is done by calls to :ref:`Chap:time_stepper`, which has the ownership of the solvers.
-* It keeps track of the time step, and ensures that the time in all solvers are synchronized.
-* The class is responsible for regridding, which occurs through two separate mechanisms: Tagging of irregular cells and tagging of regular cells. The former is only done once, while the latter is controlled through an input parameter. For regular cells, :ref:`Chap:plasma_engine` will perform calls to (derived classes of) :ref:`Chap:cell_tagger`.
-* :ref:`Chap:plasma_engine` does all the output and checkpointing.
-
-Here are the options for plasma_engine in the current version of the code:
-
-.. literalinclude:: links/plasma_engine.options
-
-Most options here are self-explanatory. However, we explicitly mention a few that may not be immediately clear. Firstly, ``geometry_only`` is a special option that *only* generates the geometry. It will be written to an HDF5 file whose name depends on ``output_directory`` and ``output_names``. When you develop your applications, it is often convenient to set this one to *true*, since this will skip a bunch of initialization stages (such as solving the Poisson equation, for example). It allows for quick debugging of your geometry. See chapter :ref:`Chap:ControllingOutput` to see where simulation files are placed. Furthermore, since generating the geometric information is a non-negligible work load, you may choose to write the geometric information to an HDF5 file by enable ``write_ebis``. This will write the finest level information to a file, which you can later read using ``read_ebis``. 
-
-The ``restart`` flag allows you to restart a simulation from a certain checkpoint step. See :ref:`Chap:RestartingSimulations` for details.
-
-The geometry refinement options specify to which level the geometry will be refined. Internally, this is done by tagging irregular cells down to certain levels. ``refine_geometry`` is a master option, refining all surfaces down to the specified level. The remaining options allow you to individually tag certain surfaces, such as dielectric-gas surfaces, electrode-gas surfaces, electrode-dielectric surfaces and so on. We remark that :ref:`Chap:geo_coarsener` offers a way of leveraging this coarse-grained refinement by removing tags in certain places.
 
 time_stepper
 ------------
 
-The :ref:`Chap:time_stepper` class handles the integration of the plasma equations. :ref:`Chap:time_stepper` is an abstract for which we have several implements (such as a second order Runge Kutta method). Writing new temporal integrators is an extensive task, but the base class :ref:`Chap:time_stepper` contains a lot of short hand functionality for updating equations, and also contains an interface to :ref:`Chap:plasma_kinetics`. Since :ref:`Chap:time_stepper` does not actually contain an advance method for the equations of motion, we recommend that the user refers to the API of the temporal integrator that he uses for a full explanation of the various integrators. However, the following options for :ref:`Chap:time_stepper` are passed into *all* implementation classes:
+The :ref:`Chap:time_stepper` class handles the integration of the plasma equations. :ref:`Chap:time_stepper` is an abstract class for which we have several implementations that use various levels of sophistication. Writing new temporal integrators is usually an extensive task, but the base class :ref:`Chap:time_stepper` contains a lot of basic functionality (such as computing source terms for all grid levels and boxes), and also contains an interface to :ref:`Chap:plasma_kinetics`. Since :ref:`Chap:time_stepper` does not actually contain an advance method for the equations of motion, we recommend that the user refers to the API of the temporal integrator that he uses for a full explanation of the various integrators. 
 
-.. literalinclude:: links/time_stepper.options
+
 
 The input options above are, for the most part, self-explanatory. Mostly, they refer to the handling of the size of the time step, for example by passing the Courant-Friedrichs-Lewy number, or setting a minimum or maximum possible time step. However, all of these options *may* be handled differently by different integrators, since different schemes have different restrictions on stable time steps.
 
@@ -379,16 +438,7 @@ We have various implementation of :ref:`Chap:time_stepper` that allow different 
 Typically, time steppers are selected at compile time. However, the user may select time steppers at run-time by modifying his main file in the appropriate way. For each time stepper, there are various options available at run-time through an input script.
 
 
-.. _Chap:computational_geometry:
 
-computational_geometry
-----------------------
-
-:ref:`Chap:computational_geometry` is the class that implements that geometry. In `PlasmaC`, we use level-set functions for description of surfaces. Please refer to :ref:`Chap:MiniApplications` for descriptions on how to implement new geometries.
-
-:ref:`Chap:computational_geometry` is not an abstract class; if you pass in an instance of :ref:`Chap:computational_geometry` (rather than a casted instance), you will get a regular geometry without embedded boundaries.
-
-     By default, there are no input options available for :ref:`Chap:computational_geometry`, although inherited classes that actual implement a non-regular geometry will typically have many. Please see :ref:`Chap:MiniApplications` for further information.
 
 .. _Chap:cell_tagger:
 

@@ -41,9 +41,8 @@ This documentation is the user documentation `PlasmaC`. There is also a separate
    
    GettingStarted
    Model
-   NewSimulations
    Design
    Control
    TemporalDiscretization
    Tutorials
-   ImportantClasses
+   ClassAPI

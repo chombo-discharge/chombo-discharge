@@ -30,7 +30,7 @@ You may also pass input parameters through the command line. For example, runnin
 
    mpirun -np 32 <application_executable> <input_file> plasma_engine.max_steps=10
 
-set the ``plasma_engine.max_steps`` parameter to 10. Note that this overrides whatever is defined in the <input_file>. 
+will set the ``plasma_engine.max_steps`` parameter to 10. Command-line parameters override definitions in the input_file. 
 
 .. _Chap:ControllingOutput:
 
@@ -48,8 +48,16 @@ The files in :file:`output_directory/geo` do *not* represent your geometry in th
 
 The reason for this design is that PlasmaC can end up writing thousands of files per simulation and we feel that having a directory structure helps us navigate the simulation data.
 
+:ref:`Chap:plasma_engine` is responsible for writing output files at specified intervals. However, *you* are responsible for specifying what goes into those files. Since not all variables are always of interest, the solver classes themselves have options ``plt_vars`` that specify which output variables will be written to the output file. For example, our CDR integrators have output options
+
+.. code-block:: bash
+
+   cdr_gdnv.plt_vars = phi vel dco src ebflux # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
+
+where ``phi`` is the state density, ``vel`` is the drift velocity, ``dco`` is the diffusion coefficient, ``src`` is the source term, and ``ebflux`` is the flux at embedded boundaries. Which variables are available for output changes for one class to the next. If you only want to plot the density, then you should put ``cdr_gdnv.plt_vars = phi``. 
+
 Controlling processor output
-____________________________
+----------------------------
 
 By default, Chombo will write a process output file *per MPI process* and this file will be named :file:`pout.n` where ``n`` is the MPI rank. These files are written in the directory where you executed your application, and are *not* related to plot files or checkpoint files. However, PlasmaC prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers). While it is possible to monitor the evolution of PlasmaC through each MPI, most of these files contain redundant information. To turn off the number of files that will be written, Chombo can read an environment variable ``CH_OUTPUT_INTERVAL``. For example, if you only want the master MPI rank to write :file:`pout.0`, you would do
 
@@ -64,61 +72,63 @@ You can, of course, put the definition in your :file:`.bashrc` file (for Bourne 
 Restarting simulations
 ----------------------
 
-Restarting simulations is done in exactly the same way as running simulations, although the user must set the ``plasma_engine.restart`` flag and the ``plasma_engine.restart_step`` input variable. For example:
+Restarting simulations is done in exactly the same way as running simulations, although the user must set the ``plasma_engine.restart`` parameter. For example,
 
 .. code-block:: bash
 
-   mpirun -np 32 <application_executable> <input_file> plasma_engine.restart=true plasma_engine.restart_step=10
+   mpirun -np 32 <application_executable> <input_file> plasma_engine.restart=true plasma_engine.restart=10
 
-When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` variable during restarts, unless you also change the name of your checkpoint file.
+will restart from step 10. If you set ``plasma_engine.restart=0``, you will get a fresh simulation. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and `PlasmaC` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` or ``plasma_engine.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory. 
 
-Changing your physics
-_____________________
+..
+   Changing your physics
+   _____________________
 
-During the restart step, PlasmaC will load the initial grids and checkpointed data into memory. This data resides in an HDF5 file with where appropriate headers are used to identify where the data belongs. Amongst other things, the names of these headers are taken from :ref:`Chap:plasma_kinetics`, so you cannot change the species during during restarts. Currently, PlasmaC requires the exact same number of species during restarts, as well as consistent names for these. However, you *may* change the :ref:`Chap:plasma_kinetics` core functions, allowing you to change your plasma chemistry during restarts.
+   During the restart step, PlasmaC will load the initial grids and checkpointed data into memory. This data resides in an HDF5 file with where appropriate headers are used to identify where the data belongs. Amongst other things, the names of these headers are taken from :ref:`Chap:plasma_kinetics`, so you cannot change the species during during restarts. Currently, PlasmaC requires the exact same number of species during restarts, as well as consistent names for these. However, you *may* change the :ref:`Chap:plasma_kinetics` core functions, allowing you to change your plasma chemistry during restarts.
 
-Changing spatial discretization
-_______________________________
+..
+   Changing spatial discretization
+   _______________________________
 
-Spatial discretization may be changed during restarts. **However, you are *not* allowed to change the geometry or physical domain.** Furthermore, the following :ref:`Chap:amr_mesh` input variables are off-limits:
+   Spatial discretization may be changed during restarts. **However, you are *not* allowed to change the geometry or physical domain.** Furthermore, the following :ref:`Chap:amr_mesh` input variables are off-limits:
 
-* ``amr.coarsest_domain``
-* ``amr.max_amr_depth``
-* ``amr.ref_rat``
+   * ``amr.coarsest_domain``
+   * ``amr.max_amr_depth``
+   * ``amr.ref_rat``
 
-If you change these variables, the checkpointed data cannot be imported into memory. In principle, we *can* extend PlasmaC so that this will be allowed. 
+   If you change these variables, the checkpointed data cannot be imported into memory. In principle, we *can* extend PlasmaC so that this will be allowed. 
 
-Note that whatever changes you otherwise apply to :ref:`Chap:amr_mesh` become active only after the first regrid. 
+   Note that whatever changes you otherwise apply to :ref:`Chap:amr_mesh` become active only after the first regrid. 
 
-Changing other settings
-_______________________
+   Changing other settings
+   _______________________
 
-Apart from the above variables, most changes are allowed during restarts. For example, you are allowed to use different tagging criteria (or even entirely different tagging classes); you can change the solver settings or applied potential; alter the output routines, and so on.
+   Apart from the above variables, most changes are allowed during restarts. For example, you are allowed to use different tagging criteria (or even entirely different tagging classes); you can change the solver settings or applied potential; alter the output routines, and so on.
 
-For example, here is a code snippet (see :ref:`Chap:MiniApplications` for the full code) that allows you to change your cell tagger during restarts
+   For example, here is a code snippet (see :ref:`Chap:MiniApplications` for the full code) that allows you to change your cell tagger during restarts
 
-.. code-block:: c++
-	  
-   ParmParse pp("my_application");
-   bool use_my_tagger = false;
-   pp.query("change_tagger", use_my_tagger);
+   .. code-block:: c++
 
-   RefCountedPtr<cell_tagger> tagger;
-   if(use_my_tagger){
-      tagger = RefCountedPtr<cell_tagger> (new my_tagger());
-   }
-   else{
-      tagger = RefCountedPtr<cell_tagger> (new field_tagger());
-   }
+      ParmParse pp("my_application");
+      bool use_my_tagger = false;
+      pp.query("change_tagger", use_my_tagger);
 
-   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
-   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<amr_mesh> (new geo_coarsener());
-   RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
-		                                                                                    compgeom,
-												    plaskin,
-												    timestepper,
-												    amr,
-												    tagger,
-												    geocoarsen));
+      RefCountedPtr<cell_tagger> tagger;
+      if(use_my_tagger){
+	 tagger = RefCountedPtr<cell_tagger> (new my_tagger());
+      }
+      else{
+	 tagger = RefCountedPtr<cell_tagger> (new field_tagger());
+      }
 
-In the above, we assume that *my_tagger* and *field_tagger* are separate implementations of :ref:`Chap:cell_tagger`, and we have created an input variable ``my_application.change_tagger`` which allows for specification of the cell tagger at run time. 
+      RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
+      RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<amr_mesh> (new geo_coarsener());
+      RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
+												       compgeom,
+												       plaskin,
+												       timestepper,
+												       amr,
+												       tagger,
+												       geocoarsen));
+
+   In the above, we assume that *my_tagger* and *field_tagger* are separate implementations of :ref:`Chap:cell_tagger`, and we have created an input variable ``my_application.change_tagger`` which allows for specification of the cell tagger at run time. 
