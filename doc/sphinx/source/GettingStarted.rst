@@ -162,9 +162,9 @@ Before moving on with more complex descriptions of `PlasmaC`, we will try to com
 
 .. code-block:: bash
 
-   ./setup.py -base_dir=./mini_apps -app_name=advection2d -plasma_kinetics=advection_kinetics -time_stepper=sisdc
+   ./setup.py -base_dir=./mini_apps -app_name=advection2d -plasma_kinetics=advection_kinetics
 
-This will create a folder in the `PlasmaC` source folder called :file:`advection2d`. Inside that folder you will find three files; a makefile (:file:`GNUmakefile`), a compilation file (:file:`main.cpp`) and an input file (:file:`template.inputs`). You may try to compile that application for two-dimensional execution by navigating to :file:`advection2d` and executing
+This will create a folder in the `PlasmaC` source folder called :file:`advection2d`. Inside that folder you will find three files; a makefile (:file:`GNUmakefile`), a compilation file (:file:`main.cpp`) and an input file (:file:`template.inputs`). The input file contains *all* the available parameters that control your problem. Often, this file will contain hundreds of available options that control many aspects of your simulation. We will not go through these parameterse right now, but you may try to compile that application for two-dimensional execution by navigating to :file:`advection2d` and executing
 
 .. code-block:: bash
 
@@ -178,7 +178,7 @@ Once we have compiled our application, we are ready to run it. The example that 
 
    mpirun -np4 main2d.<bunch_of_options>.ex template.inputs
 
-where the latter two options override some settings in template.inputs that would set Neumann boundary conditions everywhere (its only a template, after all). Output files should now appear in :file:`advection2d/plt`. 
+Output files should now appear in :file:`advection2d/plt`. 
 
 Troubleshooting
 ---------------
