@@ -43,8 +43,9 @@ morrow_network::morrow_network(){
   if(m_seed < 0) {
     m_seed = std::chrono::system_clock::now().time_since_epoch().count();
   }
-  m_udist01 = new std::uniform_real_distribution<Real>(1.E-6, 1.0);
-  m_rng = new std::mt19937_64(m_seed);
+  m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
+  m_udist11 = new std::uniform_real_distribution<Real>(-1.0, 1.0);
+  m_rng     = new std::mt19937_64(m_seed);
 
   // Parse initial data
   parse_initial_particles();
@@ -112,7 +113,7 @@ void morrow_network::network_rre(Vector<Real>&          a_particle_sources,
 				 const Real             a_dt,
 				 const Real             a_time,
 				 const Real             a_kappa) const{
-  const Real volume = pow(a_dx, 3);
+  const Real volume = pow(a_dx, SpaceDim);
 
   Vector<Real> rest(m_num_species, 0.0);
   Vector<int> particle_numbers(m_num_species, 0);
@@ -158,8 +159,7 @@ void morrow_network::network_rre(Vector<Real>&          a_particle_sources,
   Sm -= a4;
 
   // Reaction 5: Y + M => e + M+
-  //const Real a5 = floor(a_photon_densities[0])/(volume*a_dt);
-  const Real a5 = a_photon_densities[0]/(a_dx*a_dt);
+  const Real a5 = a_photon_densities[0]/a_dt;
   Se += a5;
   Sp += a5;
 
@@ -407,9 +407,9 @@ void morrow_network::network_ssa(Vector<Real>&          a_particle_sources,
 }
 
 Vector<RealVect> morrow_network::compute_cdr_velocities(const Real         a_time,
-						    const RealVect     a_pos,
-						    const RealVect     a_E,
-						    const Vector<Real> a_cdr_densities) const{
+							const RealVect     a_pos,
+							const RealVect     a_E,
+							const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> velocities(m_num_species);
   
   velocities[m_nelec_idx] = this->compute_ve(a_E);
@@ -620,15 +620,15 @@ Vector<Real> morrow_network::compute_cdr_fluxes(const Real         a_time,
 }
 
 Vector<Real> morrow_network::compute_cdr_domain_fluxes(const Real           a_time,
-						   const RealVect       a_pos,
-						   const int            a_dir,
-						   const Side::LoHiSide a_side,
-						   const RealVect       a_E,
-						   const Vector<Real>   a_cdr_densities,
-						   const Vector<Real>   a_cdr_velocities,
-						   const Vector<Real>   a_cdr_gradients,
-						   const Vector<Real>   a_rte_fluxes,
-						   const Vector<Real>   a_extrap_cdr_fluxes) const{
+						       const RealVect       a_pos,
+						       const int            a_dir,
+						       const Side::LoHiSide a_side,
+						       const RealVect       a_E,
+						       const Vector<Real>   a_cdr_densities,
+						       const Vector<Real>   a_cdr_velocities,
+						       const Vector<Real>   a_cdr_gradients,
+						       const Vector<Real>   a_rte_fluxes,
+						       const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_num_species, 0.0); 
 
   int idx;
@@ -653,7 +653,7 @@ Vector<Real> morrow_network::compute_cdr_domain_fluxes(const Real           a_ti
     }
   }
   else{
-    MayDay::Abort("morrow_lowke::compute_cdr_domain_fluxes - uknown domain bc requested");
+    MayDay::Abort("morrow_network::compute_cdr_domain_fluxes - uknown domain bc requested");
   }
 
   
@@ -661,28 +661,28 @@ Vector<Real> morrow_network::compute_cdr_domain_fluxes(const Real           a_ti
 }
 
 Vector<Real> morrow_network::compute_cdr_electrode_fluxes(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_normal,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities,
-						      const Vector<Real> a_cdr_velocities,
-						      const Vector<Real> a_cdr_gradients,
-						      const Vector<Real> a_rte_fluxes,
-						      const Vector<Real> a_extrap_cdr_fluxes) const {
+							  const RealVect     a_pos,
+							  const RealVect     a_normal,
+							  const RealVect     a_E,
+							  const Vector<Real> a_cdr_densities,
+							  const Vector<Real> a_cdr_velocities,
+							  const Vector<Real> a_cdr_gradients,
+							  const Vector<Real> a_rte_fluxes,
+							  const Vector<Real> a_extrap_cdr_fluxes) const {
 
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
 Vector<Real> morrow_network::compute_cdr_dielectric_fluxes(const Real         a_time,
-						       const RealVect     a_pos,
-						       const RealVect     a_normal,
-						       const RealVect     a_E,
-						       const Vector<Real> a_cdr_densities,
-						       const Vector<Real> a_cdr_velocities,
-						       const Vector<Real> a_cdr_gradients,
-						       const Vector<Real> a_rte_fluxes,
-						       const Vector<Real> a_extrap_cdr_fluxes) const {
+							   const RealVect     a_pos,
+							   const RealVect     a_normal,
+							   const RealVect     a_E,
+							   const Vector<Real> a_cdr_densities,
+							   const Vector<Real> a_cdr_velocities,
+							   const Vector<Real> a_cdr_gradients,
+							   const Vector<Real> a_rte_fluxes,
+							   const Vector<Real> a_extrap_cdr_fluxes) const {
 
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
@@ -691,21 +691,15 @@ Vector<Real> morrow_network::compute_cdr_dielectric_fluxes(const Real         a_
 int morrow_network::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   int value = 0;
   const Real mean = a_propensity*a_dt;
-#if 0
-  if(mean < m_cutoff_poisson){
-    value = round(a_propensity*a_dt);
+
+  if(mean < m_poiss_exp_swap){
+    std::poisson_distribution<int> dist(mean);
+    value = dist(*m_rng);
   }
   else{
-#endif
-    if(mean < m_poiss_exp_swap){
-      std::poisson_distribution<int> dist(mean);
-      value = dist(*m_rng);
-    }
-    else{
-      std::normal_distribution<double> dist(mean, sqrt(mean));
-      value = dist(*m_rng);
-    }
-    //  }
+    std::normal_distribution<double> dist(mean, sqrt(mean));
+    value = dist(*m_rng);
+  }
 
   return value;
 }
@@ -965,6 +959,7 @@ void morrow_network::parse_initial_particles(){
 void morrow_network::add_uniform_particles(List<Particle>& a_particles){
   
   // Get lo/hi sides
+  Real weight;
   RealVect lo, hi;
   Vector<Real> vec(SpaceDim);
   {
@@ -988,6 +983,7 @@ void morrow_network::add_uniform_particles(List<Particle>& a_particles){
   // Create uniform particles
   ParmParse pp("morrow_network");
   pp.get("uniform_particles",  num_particles);
+  pp.get("particle_weight", weight);
   num_uniform_particles = round(num_particles);
 
   for (int i = 0; i < num_uniform_particles; i++){
@@ -997,8 +993,14 @@ void morrow_network::add_uniform_particles(List<Particle>& a_particles){
     const Real z = (*rngZ)(*m_rng);
 #endif
     RealVect pos = RealVect(D_DECL(x, y, z));
-    a_particles.add(Particle(1.0, pos));
+    a_particles.add(Particle(weight, pos));
   }
+
+  delete rngX;
+  delete rngY;
+#if CH_SPACEDIM==3
+  delete rngZ;
+#endif
 }
 
 void morrow_network::add_gaussian_particles(List<Particle>& a_particles){
@@ -1008,28 +1010,72 @@ void morrow_network::add_gaussian_particles(List<Particle>& a_particles){
 
   int num_gaussian_particles;
   Real num_particles;
+  Real weight;
   Real gaussian_radius;
   RealVect gaussian_center;
   Vector<Real> vec(SpaceDim);
   // Create Gaussian seed particles
+  pp.get("particle_weight", weight);
   pp.get("gaussian_particles", num_particles);
   pp.get("gaussian_radius",    gaussian_radius);
   pp.getarr("gaussian_center", vec, 0, SpaceDim); gaussian_center = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
   num_gaussian_particles = round(num_particles);
 
-  auto rngGX  = new std::normal_distribution<Real>(gaussian_center[0], gaussian_radius);
-  auto rngGY  = new std::normal_distribution<Real>(gaussian_center[1], gaussian_radius);
-#if CH_SPACEDIM==3
-  auto rngGZ  = new std::normal_distribution<Real>(gaussian_center[2], gaussian_radius);
-#endif
+  m_gauss = std::normal_distribution<Real>(0., gaussian_radius);
   for (int i = 0; i < num_gaussian_particles; i++){
-    const Real x = (*rngGX)(*m_rng);
-    const Real y = (*rngGY)(*m_rng);
-#if CH_SPACEDIM==3
-    const Real z = (*rngGZ)(*m_rng);
-#endif
-    RealVect pos = RealVect(D_DECL(x, y, z));
-    a_particles.add(Particle(5.0, pos));
+    RealVect pos = gaussian_center + random_gaussian(gaussian_radius);
+    a_particles.add(Particle(weight, pos));
   }
+
 }
+ 
+RealVect morrow_network::random_gaussian(const Real a_rad){
+
+  const Real rad = m_gauss(*m_rng);
+  return rad*random_direction();
+}
+
+RealVect morrow_network::random_direction(){
+#if CH_SPACEDIM == 2
+  return random_direction2D();
+#else
+  return random_direction3D();
+#endif
+}
+
+#if CH_SPACEDIM == 2
+RealVect morrow_network::random_direction2D(){
+  const Real EPS = 1.E-8;
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = (*m_udist11)(*m_rng);
+    x2 = (*m_udist11)(*m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  return RealVect(x1,x2)/sqrt(r);
+}
+#endif
+
+#if CH_SPACEDIM==3
+RealVect morrow_network::random_direction3D(){
+  const Real EPS = 1.E-8;
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = (*m_udist11)(*m_rng);
+    x2 = (*m_udist11)(*m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  const Real x = 2*x1*sqrt(1-r);
+  const Real y = 2*x2*sqrt(1-r);
+  const Real z = 1 - 2*r;
+
+  return RealVect(x,y,z);
+}
+#endif

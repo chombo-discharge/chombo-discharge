@@ -86,7 +86,8 @@ public:
 
   Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
-
+protected:
+  
   Vector<int> m_wallbc; // Wall boundary conditions
 
   bool m_ssa; // Using SSA or not
@@ -96,7 +97,8 @@ public:
   Real m_poiss_exp_swap;
   std::mt19937_64* m_rng; 
   std::uniform_real_distribution<Real>* m_udist01;
-
+  std::uniform_real_distribution<Real>* m_udist11;
+  std::normal_distribution<Real> m_gauss;
   int m_nelec_idx;      // Electron index
   int m_nplus_idx;      // Positive ion index
   int m_nminu_idx;      // Negative ion index
@@ -118,6 +120,7 @@ public:
   Real m_pq;         // Quenching pressure
   Real m_exc_eff;    // Excitation efficiency
   Real m_photoi_eff; // Photoionization efficiency
+  Real m_particle_w; // Particle weights
 
   // Common function for computing CDR fluxes
   Vector<Real> compute_cdr_fluxes(const Real         a_time,
@@ -171,9 +174,7 @@ public:
 		   const Real             a_time,
 		   const Real             a_kappa) const;
 
-
-protected:
-
+  
   enum source_comp{
     ssa = 0,
     tau = 1,
@@ -189,6 +190,15 @@ protected:
   void parse_initial_particles();
   void add_uniform_particles(List<Particle>& a_particles);
   void add_gaussian_particles(List<Particle>& a_particles);
+
+  RealVect random_gaussian(const Real a_rad);
+
+  RealVect random_direction();
+#if CH_SPACEDIM==2
+  RealVect random_direction2D();
+#elif CH_SPACEDIM==3
+  RealVect random_direction3D();
+#endif
   
   inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
   
