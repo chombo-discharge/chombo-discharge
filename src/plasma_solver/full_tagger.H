@@ -141,54 +141,50 @@ protected:
     @param[in] a_min_photon_densities Minium photon densities in domain
     @param[in] a_max_photon_densities Maximum photon densities in domain
   */
-  virtual Vector<Real> tracer(const RealVect&         a_pos,
-			      const Real&             a_time,
-			      const Real&             a_dx,
-			      const RealVect&         a_E,
-			      const Real&             a_min_E,
-			      const Real&             a_max_E,
-			      const RealVect&         a_grad_E,
-			      const Real&             a_min_grad_E,
-			      const Real&             a_max_grad_E,
-			      const Real&             a_rho,
-			      const Real&             a_min_rho,
-			      const Real&             a_max_rho,
-			      const RealVect&         a_grad_rho,
-			      const Real&             a_min_grad_rho,
-			      const Real&             a_max_grad_rho,
-			      const Vector<Real>&     a_ion_densities,
-			      const Vector<Real>&     a_min_ion_densities,
-			      const Vector<Real>&     a_max_ion_densities,
-			      const Vector<RealVect>& a_ion_gradients,
-			      const Vector<Real>&     a_min_ion_gradients,
-			      const Vector<Real>&     a_max_ion_gradients,
-			      const Vector<Real>&     a_photon_densities,
-			      const Vector<Real>&     a_min_photon_densities,
-			      const Vector<Real>&     a_max_photon_densities) = 0;
+  virtual Vector<Real> tracer(const RealVect         a_pos,
+			      const Real             a_time,
+			      const Real             a_dx,
+			      const RealVect         a_E,
+			      const Real             a_min_E,
+			      const Real             a_max_E,
+			      const RealVect         a_grad_E,
+			      const Real             a_min_grad_E,
+			      const Real             a_max_grad_E,
+			      const Real             a_rho,
+			      const Real             a_min_rho,
+			      const Real             a_max_rho,
+			      const RealVect         a_grad_rho,
+			      const Real             a_min_grad_rho,
+			      const Real             a_max_grad_rho,
+			      const Vector<Real>     a_ion_densities,
+			      const Vector<Real>     a_min_ion_densities,
+			      const Vector<Real>     a_max_ion_densities,
+			      const Vector<RealVect> a_ion_gradients,
+			      const Vector<Real>     a_min_ion_gradients,
+			      const Vector<Real>     a_max_ion_gradients,
+			      const Vector<Real>     a_photon_densities,
+			      const Vector<Real>     a_min_photon_densities,
+			      const Vector<Real>     a_max_photon_densities) = 0;
 
   /*!
     @brief Coarsen a cell based on a tracer field
   */
-  virtual bool coarsen_cell(const RealVect&         a_pos,
-			    const Real&             a_time,
-			    const Real&             a_dx,
-			    const int&              a_lvl,
-			    const DataIndex&        a_dit,
-			    const VolIndex&         a_vof,
-			    const Vector<Real>&     a_tracer,
-			    const Vector<RealVect>& a_grad_tracer) = 0;
+  virtual bool coarsen_cell(const RealVect         a_pos,
+			    const Real             a_time,
+			    const Real             a_dx,
+			    const int              a_lvl,
+			    const Vector<Real>     a_tracer,
+			    const Vector<RealVect> a_grad_tracer) = 0;
 
   /*!
     @brief Refine a cell based on a tracer field
   */
-  virtual bool refine_cell(const RealVect&         a_pos,
-			   const Real&             a_time,
-			   const Real&             a_dx,
-			   const int&              a_lvl,
-			   const DataIndex&        a_dit,
-			   const VolIndex&         a_vof,
-			   const Vector<Real>&     a_tracer,
-			   const Vector<RealVect>& a_grad_tracer) = 0;
+  virtual bool refine_cell(const RealVect         a_pos,
+			   const Real             a_time,
+			   const Real             a_dx,
+			   const int              a_lvl,
+			   const Vector<Real>     a_tracer,
+			   const Vector<RealVect> a_grad_tracer) = 0;
 };
 
 #endif

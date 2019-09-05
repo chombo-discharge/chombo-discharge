@@ -131,6 +131,14 @@ void full_tagger::compute_tracers(){
   data_ops::get_max_min(rho_max,           rho_min,      m_rho, 0);
   data_ops::get_max_min_norm(grad_rho_max, grad_rho_min, m_grad_rho);
 
+  // Shit that will be passed on
+  Vector<Real>     cdr_phi;
+  Vector<RealVect> cdr_gra;
+  Vector<Real>     rte_phi;
+  cdr_phi.resize(m_plaskin->get_num_species());
+  cdr_gra.resize(m_plaskin->get_num_species());
+  rte_phi.resize(m_plaskin->get_num_photons());
+
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -148,7 +156,98 @@ void full_tagger::compute_tracers(){
       const EBCellFAB& rho_fab  = (*m_rho[lvl])[dit()];
       const EBCellFAB& grho_fab = (*m_grad_rho[lvl])[dit()];
 
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const BaseFab<Real>& E_reg    = E_fab.getSingleValuedFAB();
+      const BaseFab<Real>& gE_reg   = gE_fab.getSingleValuedFAB();
+      const BaseFab<Real>& rho_reg  = rho_fab.getSingleValuedFAB();
+      const BaseFab<Real>& grho_reg = grho_fab.getSingleValuedFAB();
+
+      Vector<EBCellFAB*> tracers;
+      Vector<EBCellFAB*> cdr_densities;
+      Vector<EBCellFAB*> cdr_gradients;
+      Vector<EBCellFAB*> rte_densities;
+
+      Vector<BaseFab<Real>*> tracers_reg;
+      Vector<BaseFab<Real>*> cdr_phi_reg;
+      Vector<BaseFab<Real>*> cdr_gra_reg;
+      Vector<BaseFab<Real>*> rte_phi_reg;
+
+      for (int i = 0; i < m_num_tracers; i++){
+	tracers.push_back(&((*m_tracer[i][lvl])[dit()]));
+	tracers_reg.push_back(&(tracers[i]->getSingleValuedFAB()));
+      }
+
+      for (int i = 0; i < m_cdr_densities.size(); i++){
+	cdr_densities.push_back(&((*(m_cdr_densities[i])[lvl])[dit()]));
+	cdr_gradients.push_back(&((*(m_cdr_gradients[i])[lvl])[dit()]));
+
+	cdr_phi_reg.push_back(&(cdr_densities[i]->getSingleValuedFAB()));
+	cdr_gra_reg.push_back(&(cdr_gradients[i]->getSingleValuedFAB()));
+      }
+
+      for (int i = 0; i < m_rte_densities.size(); i++){
+	rte_densities.push_back(&((*(m_rte_densities[i])[lvl])[dit()]));
+
+	rte_phi_reg.push_back(&(rte_densities[i]->getSingleValuedFAB()));
+      }
+
+      // Regular cells
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+	const IntVect iv = bit();
+	const RealVect pos = origin + RealVect(iv)*dx;
+
+	// Electric field, rho, and their gradients
+	const RealVect E        = RealVect(D_DECL(E_reg(iv, 0), E_reg(iv, 1), E_reg(iv, 2)));
+	const RealVect grad_E   = RealVect(D_DECL(gE_reg(iv, 0), gE_reg(iv, 1), gE_reg(iv, 2)));
+	const Real rho          = rho_reg(iv, 0);
+	const RealVect grad_rho = RealVect(D_DECL(grho_reg(iv, 0), grho_reg(iv, 1), grho_reg(iv, 2)));
+
+	// CDR phi and gradients
+	for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
+	  const int idx = solver_it.get_solver();
+	  cdr_phi[idx] = (*cdr_phi_reg[idx])(iv, 0);
+	  cdr_gra[idx] = RealVect(D_DECL((*cdr_gra_reg[idx])(iv, 0), (*cdr_gra_reg[idx])(iv, 1), (*cdr_gra_reg[idx])(iv, 2)));
+	}
+
+	// RTE phi
+	for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+	  const int idx = solver_it.get_solver();
+	  rte_phi[idx] = (*rte_phi_reg[idx])(iv, 0);
+	}
+
+	// Compute tracer field
+	Vector<Real> tr = this->tracer(pos,
+				       time,
+				       dx,
+				       E,
+				       E_min,
+				       E_max,
+				       grad_E,
+				       grad_E_min,
+				       grad_E_max,
+				       rho,
+				       rho_min,
+				       rho_max,
+				       grad_rho,
+				       grad_rho_min,
+				       grad_rho_max,
+				       cdr_phi,
+				       cdr_min,
+				       cdr_max,
+				       cdr_gra,
+				       grad_cdr_min,
+				       grad_cdr_max,
+				       rte_phi,
+				       rte_min,
+				       rte_max);
+	
+	for(int i = 0; i < m_num_tracers; i++){
+	  (*tracers_reg[i])(iv, 0) = tr[i];
+	}
+      }
+
+
+      // Redo irregar cells
+      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
 
@@ -159,62 +258,53 @@ void full_tagger::compute_tracers(){
 	const Real rho          = rho_fab(vof, 0);
 	const RealVect grad_rho = RealVect(D_DECL(grho_fab(vof, 0), grho_fab(vof, 1), grho_fab(vof, 2)));
 
-	Vector<Real>     cdr_densities;
-	Vector<RealVect> cdr_gradients;
-	Vector<Real>     rte_densities;
-	cdr_densities.resize(m_plaskin->get_num_species());
-	cdr_gradients.resize(m_plaskin->get_num_species());
-	rte_densities.resize(m_plaskin->get_num_photons());
-
 	for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
 	  const int idx = solver_it.get_solver();
-	  const EBCellFAB& density  = (*(m_cdr_densities[idx])[lvl])[dit()];
-	  const EBCellFAB& gradient = (*(m_cdr_gradients[idx])[lvl])[dit()];
-	  cdr_densities[idx] = density(vof, 0);
-	  cdr_gradients[idx] = RealVect(D_DECL(gradient(vof, 0),
-					       gradient(vof, 1),
-					       gradient(vof, 2)));
+	  const EBCellFAB& density  = *cdr_densities[idx];
+	  const EBCellFAB& gradient = *cdr_gradients[idx];
+	  cdr_phi[idx] = density(vof, 0);
+	  cdr_gra[idx] = RealVect(D_DECL(gradient(vof, 0), gradient(vof, 1), gradient(vof, 2)));
 	}
 
 	for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
 	  const int idx = solver_it.get_solver();
-	  const EBCellFAB& density  = (*(m_rte_densities[idx])[lvl])[dit()];
-	  rte_densities[idx] = density(vof, 0);
+	  const EBCellFAB& density  = *rte_densities[idx];
+	  rte_phi[idx] = density(vof, 0);
 	}
 
-	Vector<Real> tracers = this->tracer(pos,
-					    time,
-					    dx,
-					    E,
-					    E_min,
-					    E_max,
-					    grad_E,
-					    grad_E_min,
-					    grad_E_max,
-					    rho,
-					    rho_min,
-					    rho_max,
-					    grad_rho,
-					    grad_rho_min,
-					    grad_rho_max,
-					    cdr_densities,
-					    cdr_min,
-					    cdr_max,
-					    cdr_gradients,
-					    grad_cdr_min,
-					    grad_cdr_max,
-					    rte_densities,
-					    rte_min,
-					    rte_max);
+	Vector<Real> tr = this->tracer(pos,
+				       time,
+				       dx,
+				       E,
+				       E_min,
+				       E_max,
+				       grad_E,
+				       grad_E_min,
+				       grad_E_max,
+				       rho,
+				       rho_min,
+				       rho_max,
+				       grad_rho,
+				       grad_rho_min,
+				       grad_rho_max,
+				       cdr_phi,
+				       cdr_min,
+				       cdr_max,
+				       cdr_gra,
+				       grad_cdr_min,
+				       grad_cdr_max,
+				       rte_phi,
+				       rte_min,
+				       rte_max);
 	
 	for(int i = 0; i < m_num_tracers; i++){
-	  (*m_tracer[i][lvl])[dit()](vof, 0) = tracers[i];
+	  (*tracers[i])(vof, 0) = tr[i];
 	}
       }
     }
   }
 
-
+  // Average down tracers
   for (int i = 0; i < m_num_tracers; i++){
     m_amr->average_down(m_tracer[i], m_phase);
     m_amr->interp_ghost(m_tracer[i], m_phase);
