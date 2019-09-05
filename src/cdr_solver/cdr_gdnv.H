@@ -258,13 +258,16 @@ protected:
   */
   bool m_slopelim;
 
-  // Various routines for setting class options
-  virtual void parse_domain_bc();    // Parses domain BC options
-  virtual void parse_mass_redist();  // Parses mass redistribution
-  virtual void parse_hybrid_div();   // Parses options for hybrid divergence
+  /*!
+    @brief Parse options for setting the hybrid divergence
+  */
+  virtual void parse_hybrid_div();   
+
+  /*!
+    @brief Parses slope limiter options
+  */
   virtual void parse_slopelim();     // Parses slope limiter settings
-  virtual void parse_plot_vars();    // Parses plot variables
-  virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+
 };
 
 #endif

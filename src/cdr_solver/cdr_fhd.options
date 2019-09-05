@@ -1,8 +1,8 @@
 # ====================================================================================================
 # CDR_FHD SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-cdr_fhd.stochastic_diffusion = true        # Stochastic advection. 'true' or 'false'
-cdr_fhd.seed                 = -1          # Seed. Random seed with seed < 0
+cdr_fhd.stochastic_diffusion = true         # Stochastic advection. 'true' or 'false'
+cdr_fhd.seed                 = -1           # Seed. Random seed with seed < 0
 cdr_fhd.domain_bc            = kinetic      # 'kinetic', 'wall', 'outflow', or 'extrap'
 cdr_fhd.mass_redist          = false        # Mass-weighted redistribution or volume-weighted
 cdr_fhd.divF_nc              = covered_face # Hybrid divergence version

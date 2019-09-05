@@ -1080,50 +1080,48 @@ void amr_mesh::define_fillpatch(const int a_lmin){
     pout() << "amr_mesh::define_fillpatch" << endl;
   }
 
-  if(m_interp_type == ghost_interpolation::pwl){
 
-    const int comps     = SpaceDim;
+  const int comps     = SpaceDim;
 
-    // Should these be input somehow?
-    const int radius    = 1;
-    const IntVect ghost = m_num_ghost*IntVect::Unit;
+  // Should these be input somehow?
+  const int radius    = 1;
+  const IntVect ghost = m_num_ghost*IntVect::Unit;
 
-    const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
-    const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-    for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
-      const bool has_coar = lvl > 0;
+    const bool has_coar = lvl > 0;
 
-      if(has_coar){
-	if(!ebis_gas.isNull()){
-	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-	  m_pwl_fillpatch[phase::gas][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
+    if(has_coar){
+      if(!ebis_gas.isNull()){
+	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
+	m_pwl_fillpatch[phase::gas][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
+												   m_grids[lvl-1],
+												   m_ebisl[phase::gas][lvl],
+												   m_ebisl[phase::gas][lvl-1],
+												   m_domains[lvl-1],
+												   m_ref_ratios[lvl-1],
+												   comps,
+												   radius,
+												   ghost,
+												   !m_ebcf,
+												   ebis_gas));
+      }
+      if(!ebis_sol.isNull()){
+	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
+	m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
 												     m_grids[lvl-1],
-												     m_ebisl[phase::gas][lvl],
-												     m_ebisl[phase::gas][lvl-1],
+												     m_ebisl[phase::solid][lvl],
+												     m_ebisl[phase::solid][lvl-1],
 												     m_domains[lvl-1],
 												     m_ref_ratios[lvl-1],
 												     comps,
 												     radius,
 												     ghost,
 												     !m_ebcf,
-												     ebis_gas));
-	}
-	if(!ebis_sol.isNull()){
-	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	  m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
-												       m_grids[lvl-1],
-												       m_ebisl[phase::solid][lvl],
-												       m_ebisl[phase::solid][lvl-1],
-												       m_domains[lvl-1],
-												       m_ref_ratios[lvl-1],
-												       comps,
-												       radius,
-												       ghost,
-												       !m_ebcf,
-												       ebis_sol));
-	}
+												     ebis_sol));
       }
     }
   }

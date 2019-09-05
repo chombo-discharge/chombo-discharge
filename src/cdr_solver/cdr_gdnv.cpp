@@ -37,35 +37,6 @@ void cdr_gdnv::parse_options(){
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid
 }
 
-void cdr_gdnv::parse_domain_bc(){
-  ParmParse pp(m_class_name.c_str());
-
-  std::string str;
-  pp.get("domain_bc", str);
-  if(str == "kinetic"){
-    set_domain_bc(cdr_bc::external);
-  }
-  else if(str == "outflow"){
-    set_domain_bc(cdr_bc::outflow);
-  }
-  else if(str == "wall"){
-    set_domain_bc(cdr_bc::wall);
-  }
-  else if(str == "extrap"){
-    set_domain_bc(cdr_bc::extrap);
-  }
-  else{
-    MayDay::Abort("cdr_gdnv::parse_domain_bc - unknown BC requested");
-  }
-}
-
-void cdr_gdnv::parse_mass_redist(){
-  ParmParse pp(m_class_name.c_str());
-  std::string str;
-  pp.get("mass_redist", str);
-  m_mass_redist = (str == "true") ? true : false;
-}
-
 void cdr_gdnv::parse_hybrid_div(){
   ParmParse pp(m_class_name.c_str());
   std::string str;
@@ -87,84 +58,6 @@ void cdr_gdnv::parse_slopelim(){
   std::string str;
   pp.get("limit_slopes", str);
   m_slopelim = (str == "true") ? true : false;
-}
-
-void cdr_gdnv::parse_plot_vars(){
-  ParmParse pp(m_class_name.c_str());
-  const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
-
-  m_plot_phi = false;
-  m_plot_vel = false;
-  m_plot_dco = false;
-  m_plot_src = false;
-  m_plot_ebf = false;
-  
-  for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")    m_plot_phi = true;
-    else if(str[i] == "vel")    m_plot_vel = true;
-    else if(str[i] == "dco")    m_plot_dco = true; 
-    else if(str[i] == "src")    m_plot_src = true;
-    else if(str[i] == "ebflux") m_plot_ebf = true;
-  }
-}
-
-void cdr_gdnv::parse_gmg_settings(){
-  ParmParse pp(m_class_name.c_str());
-
-  std::string str;
-
-  pp.get("gmg_verbosity",   m_gmg_verbosity);
-  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
-  pp.get("gmg_post_smooth", m_gmg_post_smooth);
-  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
-  pp.get("gmg_max_iter",    m_gmg_max_iter);
-  pp.get("gmg_min_iter",    m_gmg_min_iter);
-  pp.get("gmg_tolerance",   m_gmg_eps);
-  pp.get("gmg_hang",        m_gmg_hang);
-  pp.get("gmg_bottom_drop", m_bottom_drop);
-
-  // Bottom solver
-  pp.get("gmg_bottom_solver", str);
-  if(str == "simple"){
-    m_bottomsolver = 0;
-  }
-  else if(str == "bicgstab"){
-    m_bottomsolver = 1;
-  }
-  else{
-    MayDay::Abort("cdr_gdnv::parse_gmg_settings - unknown bottom solver requested");
-  }
-
-  // Relaxation type
-  pp.get("gmg_relax_type", str);
-  if(str == "gsrb"){
-    m_gmg_relax_type = relax::gsrb_fast;
-  }
-  else if(str == "jacobi"){
-    m_gmg_relax_type = relax::jacobi;
-  }
-  else if(str == "gauss_seidel"){
-    m_gmg_relax_type = relax::gauss_seidel;
-  }
-  else{
-    MayDay::Abort("cdr_gdnv::parse_gmg_settings - unknown relaxation method requested");
-  }
-
-  // Cycle type
-  pp.get("gmg_cycle", str);
-  if(str == "vcycle"){
-    m_gmg_type = amrmg::vcycle;
-  }
-  else{
-    MayDay::Abort("cdr_gdnv::parse_gmg_settings - unknown cycle type requested");
-  }
-
-  // No lower than 2. 
-  if(m_bottom_drop < 2){
-    m_bottom_drop = 2;
-  }
 }
 
 int cdr_gdnv::query_ghost() const {

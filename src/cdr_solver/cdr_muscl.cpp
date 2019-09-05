@@ -14,19 +14,31 @@
 #include <ParmParse.H>
 
 cdr_muscl::cdr_muscl(){
-
-  m_use_slope_limiter = false;
-  //  m_slope_func = &(slope_limiters::superbee);
-
-  { // Select slope from input
-    ParmParse pp("cdr_muscl");
-    pp.query("limit_slopes", m_use_slope_limiter);
-  }
-
+  m_class_name = "cdr_muscl";
+  m_name = "cdr_muscl";
 }
 
 cdr_muscl::~cdr_muscl(){
 
+}
+
+void cdr_muscl::parse_options(){
+  parse_diffusion();    // Parses stochastic diffusion
+  parse_rng_seed();     // Parses RNG seed
+  parse_plotmode();     // Parses plot mode
+  parse_domain_bc();    // Parses domain BC options
+  parse_mass_redist();  // Parses mass redistribution
+  parse_slopelim();     // Parses slope limiter settings
+  parse_plot_vars();    // Parses plot variables
+  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+}
+
+void cdr_muscl::parse_slopelim(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("limit_slopes", str);
+  m_slopelim = (str == "true") ? true : false;
 }
 
 int cdr_muscl::query_ghost() const {
@@ -58,9 +70,11 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
   m_amr->allocate(copy_state, m_phase, ncomp);
   data_ops::set_value(copy_state, 0.0);
   data_ops::incr(copy_state, a_state, 1.0);
+
   m_amr->interp_ghost_pwl(copy_state, m_phase);
 
   data_ops::set_value(a_face_state, 0.0);
+
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
@@ -75,13 +89,12 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
 
       // Limit slopes and solve Riemann problem
       Box grown_box = box;
-      grown_box.grow(1);
+      grown_box.grow(2);
       EBCellFAB deltaC(ebisbox, grown_box, SpaceDim); // Cell-centered slopes
       deltaC.setVal(0.0);
-      if(m_use_slope_limiter){
+      if(m_slopelim){
 	this->compute_slopes(deltaC, state, box, domain);
       }
-      //      deltaC.setVal(0.0);
       this->upwind(face_state, deltaC, state, velo, domain, box);
     }
 
@@ -112,12 +125,17 @@ void cdr_muscl::compute_slopes(EBCellFAB& a_deltaC,
   // Regular cells
   BaseFab<Real>& regDeltaC      = a_deltaC.getSingleValuedFAB();
   const BaseFab<Real>& regState = a_state.getSingleValuedFAB();
+
+
   for (int dir = 0; dir < SpaceDim; dir++){
+    Box cellbox = a_box;
+    cellbox.grow(1,dir);
     FORT_MUSCL_SLOPES(CHF_FRA1(regDeltaC, dir),
 		      CHF_CONST_FRA1(regState, comp),
 		      CHF_CONST_INT(dir),
-		      CHF_BOX(a_box));
+		      CHF_BOX(cellbox));
   }
+
 
   // Irregular cells
   const Box& domain_box      = a_domain.domainBox();
@@ -140,12 +158,16 @@ void cdr_muscl::compute_slopes(EBCellFAB& a_deltaC,
       VolIndex vof_left;
       VolIndex vof_righ;
       
-      Real dwc, dwl, dwr, dwmin;
+      Real dwc   = 0.0;
+      Real dwl   = 0.0;
+      Real dwr   = 0.0;
+      Real dwmin = 0.0;
 
       Real state_left = 0.0;
       Real state_righ = 0.0;
       Real state_cent = a_state(vof, comp);
 
+      // Compute left and right slope
       if(has_faces_left){
 	Vector<FaceIndex> faces_left = ebisbox.getFaces(vof, dir, Side::Lo);
 	vof_left   = faces_left[0].getVoF(Side::Lo);
@@ -189,14 +211,19 @@ void cdr_muscl::compute_slopes(EBCellFAB& a_deltaC,
 	if(dwc < 0.0){
 	  dwc = -Min(dwmin, Abs(dwc));
 	}
-	else {
+	else if (dwc > 0.0){
 	  dwc = Min(dwmin, Abs(dwc));
+	}
+	else{
+	  dwc = 0.0;
 	}
       }
 
       if(dwc != dwc){
 	MayDay::Abort("cdr_muscl::compute_slopes - dwc != dwc.");
       }
+
+      a_deltaC(vof, comp) = 0.0;//dwc;
     }
   }
 }
@@ -231,7 +258,7 @@ void cdr_muscl::upwind(EBFluxFAB&           a_face_states,
     // Regular cells
     regFaceStates.setVal(0.0);
     FORT_MUSCL_UPWIND(CHF_FRA1(regFaceStates,   comp),
-		      CHF_CONST_FRA1(regSlopes, comp),
+		      CHF_CONST_FRA1(regSlopes, dir),
 		      CHF_CONST_FRA1(regStates, comp),
 		      CHF_CONST_FRA1(regVelo,   comp),
 		      CHF_CONST_INT(dir),
@@ -244,8 +271,8 @@ void cdr_muscl::upwind(EBFluxFAB&           a_face_states,
     // The box that was sent in was cell-centered. We need to grow it by 1 in order to get 
     // all the cells around this box
     Box box = a_box;
-    box.grow(1);
-    Vector<FaceIndex> multi_faces = ebgraph.getMultiValuedFaces(dir, box);
+    box.grow(1, dir);
+    Vector<FaceIndex> multi_faces = ebgraph.getIrregFaces(box, dir);
     for (int i = 0; i < multi_faces.size(); i++){
       const FaceIndex& face = multi_faces[i];
       if(!face.isBoundary()){
@@ -261,6 +288,9 @@ void cdr_muscl::upwind(EBFluxFAB&           a_face_states,
 	}
 	else if (velo < 0.0){
 	  face_states(face, comp) = prim_righ;
+	}
+	else{
+	  face_states(face, comp) = 0.0;
 	}
       }
     }

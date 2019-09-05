@@ -32,5 +32,7 @@ RefCountedPtr<cdr_layout> cdr_factory<T>::new_layout(const RefCountedPtr<plasma_
     cdr->add_solver(solver);
   }
 
+  auto schme = cdr->get_solvers();
+
   return cdr;
 }

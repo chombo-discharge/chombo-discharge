@@ -724,6 +724,13 @@ protected:
     @brief Define stencils for computing the non-conservative divergence
   */
   virtual void define_divFnc_stencils();
+
+  /*!
+    @brief Options for parsing some class options
+  */
+  virtual void parse_mass_redist();  // Parses mass redistribution
+  virtual void parse_domain_bc();    // Parses domain BC options
+  virtual void parse_plot_vars();    // Parses plot variables
 };
 
 #endif

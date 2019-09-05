@@ -993,8 +993,8 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       }
 
       // This shouldn't be necessary
-      // m_amr->average_down(phi_m1, m_cdr->get_phase());
-      // m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
+      m_amr->average_down(phi_m1, m_cdr->get_phase());
+      m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
 
       if(a_lagged_terms){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
@@ -1006,8 +1006,8 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
 
       // Shouldn't be necessary
-      // m_amr->average_down(FAR_m, m_cdr->get_phase());
-      // m_amr->interp_ghost(FAR_m, m_cdr->get_phase());
+      m_amr->average_down(FAR_m, m_cdr->get_phase());
+      m_amr->interp_ghost(FAR_m, m_cdr->get_phase());
     }
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
@@ -1080,9 +1080,10 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
     
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
-      // m_amr->average_down(phi_m1, m_cdr->get_phase());
-      // m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
-      data_ops::floor(phi_m1, 0.0);
+      //      data_ops::floor(phi_m1, 0.0);
+      m_amr->average_down(phi_m1, m_cdr->get_phase());
+      m_amr->interp_ghost(phi_m1, m_cdr->get_phase());
+
     }
     else{
       data_ops::copy(phi_m1, phi_m);
@@ -1460,8 +1461,8 @@ void sisdc::reconcile_integrands(){
       }
 
       // Shouldn't be necessary
-      // m_amr->average_down(F_m, m_cdr->get_phase());
-      // m_amr->interp_ghost(F_m, m_cdr->get_phase());
+      m_amr->average_down(F_m, m_cdr->get_phase());
+      m_amr->interp_ghost(F_m, m_cdr->get_phase());
     }
   }
 

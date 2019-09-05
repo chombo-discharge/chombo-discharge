@@ -9,7 +9,7 @@
 #define _CDR_TGA_
 
 #include "cdr_solver.H"
-
+#include "cdr_fhdF_F.H"
 #include "ebconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
@@ -18,28 +18,12 @@
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
 
+#include <random>
+#include <time.h>
+#include <chrono>
+
 /*!
-  @brief Extension class of cdr_solver that uses ebconductivityop for diffusion part. This class also has a multigrid
-  solver for implicit diffusion
-
-  @details 
-
-  Class options
-  -------------
-
-      cdr_tga.use_tga           = true      # Use TGA or not. Valid options are "true" (use TGA) or "false" (use backward Euler)
-      cdr_tga.gmg_verbosity     = -1        # GMG verbosity
-      cdr_tga.gmg_pre_smooth    = 16        # Number of relaxations in downsweep
-      cdr_tga.gmg_post_smooth   = 16        # Number of relaxations in upsweep
-      cdr_tga.gmg_bott_smooth   = 16        # NUmber of relaxations before dropping to bottom solver
-      cdr_tga.gmg_min_iter      = 5         # Minimum number of iterations
-      cdr_tga.gmg_max_iter      = 32        # Maximum number of iterations
-      cdr_tga.gmg_tolerance     = 1.E-6     # Residue tolerance
-      cdr_tga.gmg_hang          = 0.2       # Solver hang
-      cdr_tga.gmg_bottom_drop   = 8         # Bottom drop
-      cdr_tga.gmg_bottom_solver = simple    # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-      cdr_tga.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
-
+  @brief Extension class of cdr_solver that uses ebconductivityop for diffusion part. Can also solve for stochastic diffusion
 */
 class cdr_tga : public cdr_solver {
 public:
@@ -161,6 +145,11 @@ public:
 			     const EBAMRCellData& a_source,
 			     const Real           a_dt);
 
+  /*!
+    @brief Write plot data
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
 protected:
 
   /*!
@@ -202,6 +191,29 @@ protected:
     @brief Simple solver
   */
   EBSimpleSolver m_simple_solver;
+
+  /*!
+    @brief Stochastic diffusion or not
+  */
+  bool m_stochastic_diffusion;
+
+  /*!
+    @brief
+  */
+  bool m_stochastic_advection;
+
+  /*!
+    @brief Plot numbers or densities
+  */
+  bool m_plot_numbers;
+
+
+
+  std::mt19937_64* m_rng;     // Engine
+  int  m_seed;                // RNG seed
+
+  // Various routines for setting class options. 
+
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -297,5 +309,45 @@ protected:
     @brief Setup the Euler solver
   */
   virtual void setup_euler();
+
+  /*!
+    @brief Parse solver settings for geometric multigrid
+  */
+  virtual void parse_gmg_settings();
+
+  /*!
+    @brief Parse stochastic diffusion or not
+  */
+  virtual void parse_diffusion();   
+
+  /*!
+    @brief Parse random number generator
+  */
+  virtual void parse_rng_seed();    
+
+  /*!
+    @brief Parse plot mode
+  */
+  virtual void parse_plotmode();    
+
+  /*!
+    @brief Source for advection
+  */
+  virtual void GWN_advection_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
+
+  /*!
+    @brief Random source for diffusion
+  */
+  virtual void GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
+
+  /*!
+    @brief Smoothed face average
+  */
+  virtual void smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states);
+
+  /*!
+    @brief Gaussian noise field
+  */
+  virtual void fill_GWN(EBAMRFluxData& a_noise, const Real a_mean);
 };
 #endif

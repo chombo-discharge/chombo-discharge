@@ -21,15 +21,6 @@
 cdr_solver::cdr_solver(){
   m_name       = "cdr_solver";
   m_class_name = "cdr_solver";
-
-#if 0
-  this->set_verbosity(-1);
-  this->set_phase(phase::gas);
-  this->set_time(0, 0., 0.);
-  this->set_mass_redist(false);
-  this->set_domain_bc(cdr_bc::external);
-  //  this->set_plot_variables();
-#endif
 }
 
 cdr_solver::~cdr_solver(){
@@ -961,6 +952,7 @@ void cdr_solver::initial_data_distribution(){
       const IntVectSet& irreg = ebisbox.getIrregIVS(box);
       for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
+	const Real kappa    = ebisbox.volFrac(vof);
 	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
 	
 	for (int comp = 0; comp < state.nComp(); comp++){
@@ -1078,43 +1070,13 @@ void cdr_solver::initial_data_particles(){
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,
 				   EBAMRIVData&       a_mass_diff,
 				   const EBAMRIVData& a_noncons_div){
-  CH_TIME("cdr_solver::hybrid_divergence");
+  CH_TIME("cdr_solver::hybrid_divergence(AMR)");
   if(m_verbosity > 5){
-    pout() << m_name + "::hybrid_divergence" << endl;
+    pout() << m_name + "::hybrid_divergence(AMR)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& divH               = (*a_hybrid_div[lvl])[dit()];  // On input, this contains kappa*div(F)
-      BaseIVFAB<Real>& deltaM       = (*a_mass_diff[lvl])[dit()];
-      const BaseIVFAB<Real>& divNC  = (*a_noncons_div[lvl])[dit()]; 
-
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const Real kappa    = ebisbox.volFrac(vof);
-	const Real dc       = divH(vof, comp);
-	const Real dnc      = divNC(vof, comp);
-
-	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
-	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Opposite of Chombo manual?
-
-	// Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
-	// which it would be otherwise. 
-      }
-    }
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    hybrid_divergence(*a_hybrid_div[lvl], *a_mass_diff[lvl], *a_noncons_div[lvl], lvl);
   }
 }
 
@@ -1122,7 +1084,11 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
 				   LevelData<BaseIVFAB<Real> >&       a_mass_diff,
 				   const LevelData<BaseIVFAB<Real> >& a_divF_nc,
 				   const int                          a_lvl){
-
+  CH_TIME("cdr_solver::hybrid_divergence(level)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::hybrid_divergence(level)" << endl;
+  }
+  
   const int comp  = 0;
   const int ncomp = 1;
   
@@ -2278,3 +2244,52 @@ EBAMRIFData& cdr_solver::get_domainflux(){
   return m_domainflux;
 }
 
+void cdr_solver::parse_domain_bc(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("domain_bc", str);
+  if(str == "kinetic"){
+    set_domain_bc(cdr_bc::external);
+  }
+  else if(str == "outflow"){
+    set_domain_bc(cdr_bc::outflow);
+  }
+  else if(str == "wall"){
+    set_domain_bc(cdr_bc::wall);
+  }
+  else if(str == "extrap"){
+    set_domain_bc(cdr_bc::extrap);
+  }
+  else{
+    MayDay::Abort("cdr_solver::parse_domain_bc - unknown BC requested");
+  }
+}
+
+void cdr_solver::parse_mass_redist(){
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+  pp.get("mass_redist", str);
+  m_mass_redist = (str == "true") ? true : false;
+}
+
+void cdr_solver::parse_plot_vars(){
+  ParmParse pp(m_class_name.c_str());
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  m_plot_phi = false;
+  m_plot_vel = false;
+  m_plot_dco = false;
+  m_plot_src = false;
+  m_plot_ebf = false;
+  
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi")    m_plot_phi = true;
+    else if(str[i] == "vel")    m_plot_vel = true;
+    else if(str[i] == "dco")    m_plot_dco = true; 
+    else if(str[i] == "src")    m_plot_src = true;
+    else if(str[i] == "ebflux") m_plot_ebf = true;
+  }
+}

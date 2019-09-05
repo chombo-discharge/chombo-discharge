@@ -9,18 +9,10 @@
 #define _CDR_MUSCL_
 
 #include "cdr_tga.H"
+#include "cdr_gdnv.H"
 
 /*!
   @brief Class that uses MUSCL discretization for the advective term in the cdr equation
-
-  @details 
-
-  Class options
-  -------------
-
-  The user may modify the cell slopes through
-
-      cdr_muscl.slope_limiter = superbee     # Valid options are 'koren', 'minmod', 'superbee', 'van_leer'
 */
 class cdr_muscl : public cdr_tga {
 public:
@@ -43,7 +35,7 @@ public:
   /*!
     @brief Parse options
   */
-  virtual void parse_options(){MayDay::Abort("cdr_muscl::parse_options - not implemented");}
+  virtual void parse_options();
 
   /*!
     @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.
@@ -72,7 +64,7 @@ protected:
   /*!
     @brief
   */
-  bool m_use_slope_limiter;
+  bool m_slopelim;
 
   /*!
     @brief Compute slopes
@@ -94,5 +86,6 @@ protected:
 		      const ProblemDomain& a_domain,
 		      const Box&           a_box);
 
+  virtual void parse_slopelim();     // Parses slope limiter settings
 };
 #endif

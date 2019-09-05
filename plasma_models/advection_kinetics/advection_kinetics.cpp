@@ -81,7 +81,6 @@ Vector<Real> advection_kinetics::compute_cdr_electrode_fluxes(const Real        
 							      const Vector<Real> a_rte_fluxes,
 							      const Vector<Real> a_extrap_cdr_fluxes) const {
   Vector<Real> flux(m_num_species, 0.0);
-
   flux[0] = m_outflow ? a_extrap_cdr_fluxes[0] : 0.0;
   return flux;
 }

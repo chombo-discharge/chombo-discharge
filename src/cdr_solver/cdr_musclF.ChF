@@ -18,10 +18,10 @@ c     and dqlim is the limited slope (which becomes deltaC)
       koff = chf_id(2, dir)]
 
       chf_multido[region; i; j; k]
-         dwl = state(chf_ix[i;j;k]) - state(chf_ix[i-ioff; j-joff; k-koff])
-         dwr = state(chf_ix[i+ioff; j+joff; k+koff]) - state(chf_ix[i; j; k])
+         dwl = state(chf_ix[i;      j;      k])      - state(chf_ix[i-ioff; j-joff; k-koff])
+         dwr = state(chf_ix[i+ioff; j+joff; k+koff]) - state(chf_ix[i;       j;     k])
          dwc = half*(dwl + dwr)
-         if(dwl*dwr < 0.0) then
+         if(dwl*dwr .lt. zero) then
             dqlim = 0.0
          else
             dqlim = min(two*abs(dwl), two*abs(dwr))
@@ -44,8 +44,9 @@ c     and dqlim is the limited slope (which becomes deltaC)
 
       integer chf_ddecl[i;j;k]
       integer chf_ddecl[ioff; joff; koff]
-      real_t phi, vel, prim_left, prim_righ;
- 
+      real_t phi, vel, prim_left, prim_righ, tol
+
+      tol = 1.E-12      
       chf_dterm[
       ioff = chf_id(0, dir);
       joff = chf_id(1, dir);
@@ -53,15 +54,15 @@ c     and dqlim is the limited slope (which becomes deltaC)
 
       chf_multido[face_box; i; j; k]
          prim_left = cell_states(chf_ix[i-ioff;j-joff; k-koff]) + half*cell_slopes(chf_ix[i-ioff; j-joff; k-koff])
-         prim_righ = cell_states(chf_ix[i;j; k]) - half*cell_slopes(chf_ix[i; j; k])	
-         vel = face_vel(chf_ix[i; j; k])
+         prim_righ = cell_states(chf_ix[i;     j;      k])      - half*cell_slopes(chf_ix[i;      j;      k])
+         vel       = face_vel(chf_ix[i; j; k])
 
-         face_states(chf_ix[i;j;k]) = 0.0;
+         face_states(chf_ix[i;j;k]) = 0.0
          if(vel > 0.0) then
             face_states(chf_ix[i;j;k]) = prim_left
          else if(vel < 0.0) then
             face_states(chf_ix[i;j;k]) = prim_righ
-         endif
+         endif            
       chf_enddo
       return
       end

@@ -70,10 +70,10 @@ public:
 			   const Real           a_dt);
 
   virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
-
-  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+  
 protected:
 
+#if 0
   bool m_stochastic_diffusion;
   bool m_stochastic_advection;
   bool m_plot_numbers;
@@ -87,9 +87,10 @@ protected:
   int  m_seed;                // RNG seed
 
   // Various routines for setting class options. 
-  virtual void parse_diffusion();    // Parses stochastic diffusion
-  virtual void parse_rng_seed();     // Parses RNG seed
-  virtual void parse_plotmode();     // Output with numbers rather 
+  // virtual void parse_diffusion();    // Parses stochastic diffusion
+  // virtual void parse_rng_seed();     // Parses RNG seed
+  // virtual void parse_plotmode();     // Output with numbers rather
+#endif
 };
 
 #endif

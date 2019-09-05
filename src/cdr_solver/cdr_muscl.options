@@ -1,0 +1,23 @@
+# ====================================================================================================
+# CDR_MUSCL SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_muscl.stochastic_diffusion = false                   # Stochastic advection. 'true' or 'false'
+cdr_muscl.seed                 = -1                      # Seed. Random seed with seed < 0
+cdr_muscl.domain_bc            = kinetic                 # 'kinetic', 'wall', 'outflow', or 'extrap'
+cdr_muscl.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
+cdr_muscl.limit_slopes         = true                    # Use slope-limiters or not
+cdr_muscl.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+cdr_muscl.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
+cdr_muscl.gmg_verbosity        = -1                      # GMG verbosity
+cdr_muscl.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
+cdr_muscl.gmg_post_smooth      = 6                       # Number of relaxations in upsweep
+cdr_muscl.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
+cdr_muscl.gmg_min_iter         = 5                       # Minimum number of iterations
+cdr_muscl.gmg_max_iter         = 32                      # Maximum number of iterations
+cdr_muscl.gmg_tolerance        = 1.E-8                   # Residue tolerance
+cdr_muscl.gmg_hang             = 0.2                     # Solver hang
+cdr_muscl.gmg_bottom_drop      = 16                      # Bottom drop
+cdr_muscl.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+cdr_muscl.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
+cdr_muscl.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
+cdr_muscl.gmg_relax_type       = gsrb                    # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
