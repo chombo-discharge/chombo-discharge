@@ -20,7 +20,7 @@ public:
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  full_tagger(const int a_num_tracers = 0);
+  full_tagger();
 
   /*!
     @brief Destructor
@@ -31,6 +31,11 @@ public:
     @brief Compute tracer fields
   */
   virtual void compute_tracers();
+
+  /*!
+    @brief Parse options
+  */
+  virtual void parse_options() = 0;
   
 protected:
 

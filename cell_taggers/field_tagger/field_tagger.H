@@ -37,6 +37,11 @@ public:
   virtual ~field_tagger();
 
   /*!
+    @brief Parse class options
+  */
+  virtual void parse_options();
+
+  /*!
     @brief Return tracer field
   */
   virtual Vector<Real> tracer(const RealVect         a_pos,

@@ -12,18 +12,13 @@
 
 #include <EBArith.H>
 
-full_tagger::full_tagger(const int a_num_tracers){
+full_tagger::full_tagger(){
   CH_TIME("full_tagger::full_tagger");
-  this->set_verbosity(-1);
   if(m_verbosity > 5){
     pout() << "full_tagger::full_tagger" << endl;
   }
   
-  m_num_tracers = a_num_tracers;
   m_name        = "full_tagger";
-
-
-  this->set_phase(phase::gas);
 }
 
 full_tagger::~full_tagger(){

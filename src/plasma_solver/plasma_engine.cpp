@@ -79,6 +79,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   parse_file_depth();
   parse_plot_vars();
 
+
   // About-to-be-deprecated features
   this->set_dump_mass(false);                                // Dump mass to file
   this->set_dump_charge(false);                              // Dump charges to file
@@ -1293,7 +1294,11 @@ void plasma_engine::set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagg
   if(m_verbosity > 5){
     pout() << "plasma_engine::set_cell_tagger" << endl;
   }
+
   m_celltagger = a_celltagger;
+  if(!a_celltagger.isNull()){
+    m_celltagger->parse_options();
+  }
 }
 
 void plasma_engine::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){

@@ -26,7 +26,7 @@ public:
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  cell_tagger(const int a_num_tracers = 0);
+  cell_tagger();
 
   /*!
     @brief Destructor
@@ -54,6 +54,11 @@ public:
   virtual void compute_tracers() = 0;
 
   /*!
+    @brief Parse class options
+  */
+  virtual void parse_options() = 0;
+
+  /*!
     @brief Get number of tracer fields
   */
   int get_num_tracers();
@@ -74,11 +79,6 @@ public:
   void set_phase(const phase::which_phase a_phase);
 
   /*!
-    @brief Set verbosity
-  */
-  void set_verbosity(const int a_verbosity);
-
-  /*!
     @brief Tag cells
   */
   bool tag_cells(EBAMRTags& a_tags);
@@ -90,7 +90,7 @@ public:
 
 protected:
 
-    /*!
+  /*!
     @brief Plasma kinetics. 
   */
   RefCountedPtr<plasma_kinetics> m_plaskin;
@@ -121,7 +121,7 @@ protected:
   phase::which_phase m_phase;
 
   /*!
-    @brief Set name
+    @brief Class name
   */
   std::string m_name;
 
@@ -161,9 +161,24 @@ protected:
   bool inside_tag_box(const RealVect a_pos);
 
   /*!
+    @brief Parse boxes
+  */
+  virtual void parse_boxes();
+
+  /*!
+    @brief Parse buffer
+  */
+  virtual void parse_buffer();
+
+  /*!
+    @brief Set verbosity
+  */
+  virtual void parse_verbosity();
+
+  /*!
     @brief Per-box refinement tags
   */
-  void refine_cells_box(DenseIntVectSet&          a_refined_tags,
+  virtual void refine_cells_box(DenseIntVectSet&          a_refined_tags,
 				const Vector<EBCellFAB*>& a_tracers,
 				const Vector<EBCellFAB*>& a_grad_tracers,
 				const int                 a_lvl,
@@ -176,15 +191,17 @@ protected:
   /*!
     @brief Per-box coarsen
   */
-  void coarsen_cells_box(DenseIntVectSet&          a_refined_tags,
-			 const Vector<EBCellFAB*>& a_tracers,
-			 const Vector<EBCellFAB*>& a_grad_tracers,
-			 const int                 a_lvl,
-			 const Box                 a_box,
-			 const EBISBox&            a_ebisbox,
-			 const Real                a_time,
-			 const Real                a_dx,
-			 const RealVect            a_origin);
+  virtual void coarsen_cells_box(DenseIntVectSet&          a_refined_tags,
+				 const Vector<EBCellFAB*>& a_tracers,
+				 const Vector<EBCellFAB*>& a_grad_tracers,
+				 const int                 a_lvl,
+				 const Box                 a_box,
+				 const EBISBox&            a_ebisbox,
+				 const Real                a_time,
+				 const Real                a_dx,
+				 const RealVect            a_origin);
+
+
 
   /*!
     @brief Coarsen a cell based on a tracer field

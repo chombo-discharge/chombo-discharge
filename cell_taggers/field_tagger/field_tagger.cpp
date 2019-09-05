@@ -10,27 +10,25 @@
 #include <ParmParse.H>
 
 field_tagger::field_tagger(){
+  m_name = "field_tagger";
   m_num_tracers = 1;
-
-  m_coar_curv = 0.1;
-  m_coar_mag  = 0.1;
-  m_refi_curv = 0.2;
-  m_refi_mag  = 0.75;
-
-  // Get input parameters if we have them
-  {
-    ParmParse pp("field_tagger");
-
-    pp.query("coarsen_curvature", m_coar_curv);
-    pp.query("coarsen_magnitude", m_coar_mag);
-    pp.query("refine_curvature",  m_refi_curv);
-    pp.query("refine_magnitude",  m_refi_mag);
-  }
 }
 
 
 field_tagger::~field_tagger(){
 
+}
+
+void field_tagger::parse_options(){
+  parse_verbosity();
+  parse_boxes();
+  parse_buffer();
+
+  ParmParse pp(m_name.c_str());
+  pp.get("coarsen_curvature", m_coar_curv);
+  pp.get("coarsen_magnitude", m_coar_mag);
+  pp.get("refine_curvature",  m_refi_curv);
+  pp.get("refine_magnitude",  m_refi_mag);
 }
 
 

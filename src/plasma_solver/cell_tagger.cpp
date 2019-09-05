@@ -13,59 +13,22 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
-cell_tagger::cell_tagger(const int a_num_tracers){
+cell_tagger::cell_tagger(){
   CH_TIME("cell_tagger::cell_tagger");
-  this->set_verbosity(-1);
+  m_verbosity = 10;
   if(m_verbosity > 5){
     pout() << "cell_tagger::cell_tagger" << endl;
   }
 
-  m_tagboxes.resize(0);
-  m_num_tracers = a_num_tracers;
-  m_name        = "cell_tagger";
-  m_buffer      = 0;
+  m_name  = "cell_tagger";
+  m_phase = phase::gas;
 
-
-  this->set_phase(phase::gas);
-
-  { // Get options from input script
-    ParmParse pp("cell_tagger");
-
-    int num_boxes = 0;
-    pp.query("num_boxes", num_boxes);
-    pp.query("buffer",    m_buffer);
-
-    m_buffer = Max(0, m_buffer);
-
-    if(num_boxes > 0){
-      m_tagboxes.resize(num_boxes);
-
-      const int ndigits = (int) log10((double) num_boxes) + 1;
-      
-      for (int ibox = 0; ibox < num_boxes; ibox++){
-	char* cstr = new char[ndigits];
-	sprintf(cstr, "%d", 1+ibox);
-
-	std::string str1 = "box" + std::string(cstr) + "_lo";
-	std::string str2 = "box" + std::string(cstr) + "_hi";
-
-	Vector<Real> corner_lo(SpaceDim);
-	Vector<Real> corner_hi(SpaceDim);
-
-	pp.getarr(str1.c_str(), corner_lo, 0, SpaceDim);
-	pp.getarr(str2.c_str(), corner_hi, 0, SpaceDim);
-
-	const RealVect c1 = RealVect(D_DECL(corner_lo[0], corner_lo[1], corner_lo[2]));
-	const RealVect c2 = RealVect(D_DECL(corner_hi[0], corner_hi[1], corner_hi[2]));
-
-	m_tagboxes[ibox] = real_box(c1,c2);
-	
-	delete cstr;
-      }
-    }
-  }
-  
-
+  // Parse class options directly
+#if 0 // Should be moved
+  parse_verbosity();
+  parse_buffer();
+  parse_boxes();
+#endif
 }
 
 cell_tagger::~cell_tagger(){
@@ -78,6 +41,49 @@ int cell_tagger::get_num_tracers(){
 
 int cell_tagger::get_buffer(){
   return m_buffer;
+}
+
+void cell_tagger::parse_boxes(){
+  
+  ParmParse pp(m_name.c_str());
+
+  int num_boxes = 0;
+  pp.get("num_boxes", num_boxes);
+
+  m_tagboxes.resize(0);
+  if(num_boxes > 0){
+    m_tagboxes.resize(num_boxes);
+
+    const int ndigits = (int) log10((double) num_boxes) + 1;
+      
+    for (int ibox = 0; ibox < num_boxes; ibox++){
+      char* cstr = new char[ndigits];
+      sprintf(cstr, "%d", 1+ibox);
+
+      std::string str1 = "box" + std::string(cstr) + "_lo";
+      std::string str2 = "box" + std::string(cstr) + "_hi";
+
+      Vector<Real> corner_lo(SpaceDim);
+      Vector<Real> corner_hi(SpaceDim);
+
+      pp.getarr(str1.c_str(), corner_lo, 0, SpaceDim);
+      pp.getarr(str2.c_str(), corner_hi, 0, SpaceDim);
+
+      const RealVect c1 = RealVect(D_DECL(corner_lo[0], corner_lo[1], corner_lo[2]));
+      const RealVect c2 = RealVect(D_DECL(corner_hi[0], corner_hi[1], corner_hi[2]));
+
+      m_tagboxes[ibox] = real_box(c1,c2);
+	
+      delete cstr;
+    }
+  }
+}
+
+void cell_tagger::parse_buffer(){
+
+  ParmParse pp(m_name.c_str());
+  pp.get("buffer", m_buffer);
+  m_buffer = Max(0, m_buffer);
 }
 
 void cell_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
@@ -122,13 +128,11 @@ void cell_tagger::set_phase(const phase::which_phase a_phase){
   m_phase = a_phase;
 }
 
-void cell_tagger::set_verbosity(const int a_verbosity){
-  CH_TIME("cell_tagger::set_verbosity");
-  m_verbosity = a_verbosity;
-  
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_verbosity" << endl;
-  }
+void cell_tagger::parse_verbosity(){
+  CH_TIME("cell_tagger::parse_verbosity");
+
+  ParmParse pp(m_name.c_str());
+  pp.get("verbosity", m_verbosity);
 }
 
 Vector<EBAMRCellData>& cell_tagger::get_tracer_fields() {

@@ -19,7 +19,7 @@ public:
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  ultralw_tagger(const int a_num_tracers = 0);
+  ultralw_tagger();
 
   /*!
     @brief Destructor
@@ -30,6 +30,11 @@ public:
     @brief Compute tracer fields
   */
   void compute_tracers();
+
+  /*!
+    @brief Parse options
+  */
+  virtual void parse_options() = 0;
 
 protected:
 

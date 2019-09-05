@@ -20,7 +20,6 @@ def write_template(args):
                      args.streamer_home + "/src/cdr_solver/" + args.cdr_solver + ".options",\
                      args.streamer_home + "/src/rte_solver/" + args.rte_solver + ".options",\
                      args.streamer_home + "/src/plasma_solver/geo_coarsener.options", \
-                     args.streamer_home + "/src/plasma_solver/cell_tagger.options", \
                      args.streamer_home + "/geometries_prebuilt/" + args.geometry + "/" + args.geometry + ".options", \
                      args.streamer_home + "/time_steppers/" + args.time_stepper + "/" + args.time_stepper + ".options", \
                      args.streamer_home + "/plasma_models/" + args.plasma_kinetics + "/" + args.plasma_kinetics + ".options"]

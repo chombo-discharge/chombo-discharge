@@ -10,18 +10,13 @@
 
 #include <EBArith.H>
 
-ultralw_tagger::ultralw_tagger(const int a_num_tracers){
+ultralw_tagger::ultralw_tagger(){
   CH_TIME("ultralw_tagger::ultralw_tagger");
-  this->set_verbosity(-1);
   if(m_verbosity > 5){
     pout() << "ultralw_tagger::ultralw_tagger" << endl;
   }
-  
-  m_num_tracers = a_num_tracers;
-  m_name        = "cell_tagger";
 
-
-  this->set_phase(phase::gas);
+  m_name = "ultralw_tagger";
 }
 
 ultralw_tagger::~ultralw_tagger(){
