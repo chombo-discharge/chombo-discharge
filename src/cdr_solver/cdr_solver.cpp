@@ -224,6 +224,15 @@ void cdr_solver::deallocate_internals(){
   m_amr->deallocate(m_scratch);
 }
 
+void cdr_solver::average_velo_to_faces(){
+  CH_TIME("cdr_solver::average_velo_to_faces(public, full)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::average_velo_to_faces(public, full)" << endl;
+  }
+
+  this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
+}
+
 void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell){
   CH_TIME("cdr_solver::average_velo_to_faces");
   if(m_verbosity > 5){

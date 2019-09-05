@@ -10,8 +10,6 @@
 #include "sisdc_storage.H"
 #include "data_ops.H"
 #include "units.H"
-#include "cdr_tga.H"
-#include "cdr_fhd.H"
 #include "cdr_gdnv.H"
 
 #include <fstream>
@@ -715,8 +713,9 @@ void sisdc::compute_FD_0(){
     EBAMRCellData& FD_0        = storage->get_FD()[0];  // FD(phi_0)
     
     if(solver->is_diffusive()){
-      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
-      tgasolver->compute_divD(FD_0, phi_0);
+      //      cdr_tga* tgasolver = (cdr_tga*) (&(*solver));
+      //tgasolver->compute_divD(FD_0, phi_0);
+      solver->compute_divD(FD_0, phi_0);
 
       // Shouldn't be necesary
       // m_amr->average_down(FD_0, m_cdr->get_phase());
@@ -2684,7 +2683,7 @@ void sisdc::subcycle_compute_advection_velocities(){
     }
     else{
       if(solver->is_mobile()){
-	gdnv->average_velo_to_faces();
+	solver->average_velo_to_faces();
       }
     }
   }

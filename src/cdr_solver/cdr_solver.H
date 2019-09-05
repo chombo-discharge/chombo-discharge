@@ -34,7 +34,12 @@ public:
     @brief Parse class options from the command line
   */
   virtual void parse_options() = 0;
-  
+
+  /*!
+    @brief Average velocities to faces
+  */
+  virtual void average_velo_to_faces();
+
   /*!
     @brief Cache internal state
   */
