@@ -398,13 +398,22 @@ void sigma_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_phase, 1);
+
+
+  // Write sigma
   data_ops::set_value(scratch, 0.0);
   data_ops::incr(scratch, m_state, 1.0);
-
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
   }
+  a_comp++;
 
+  // Write flux
+  data_ops::set_value(scratch, 0.0);
+  data_ops::incr(scratch, m_flux, 1.0);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+  }
   a_comp++;
 }
 
@@ -423,7 +432,7 @@ int sigma_solver::get_num_plotvars(){
     pout() << "sigma_solver::get_num_plotvars" << endl;
   }
   
-  return 1;
+  return 2;
 }
   
   
@@ -432,8 +441,12 @@ Vector<std::string> sigma_solver::get_plotvar_names() const{
   if(m_verbosity > 5){
     pout() << "sigma_solver::get_num_plotvars" << endl;
   }
+  Vector<std::string> ret(2);
 
-  return Vector<std::string>(1, "surface charge density");
+  ret[0] = "surface charge density";
+  ret[1] = "surface charge flux";
+  
+  return ret;
 }
 
 
