@@ -35,6 +35,11 @@ public:
   virtual ~lookup_table();
 
   /*!
+    @brief Make the table into a uniform table with the number of entries
+  */
+  virtual void make_uniform(const int a_entries);
+
+  /*!
     @brief Scale x values
   */
   virtual void scale_x(const Real& a_scale);

@@ -12,7 +12,7 @@
 #include <ParmParse.H>
 
 air9eed::eed::eed(){
-  m_name      = "electron energy density";
+  m_name      = "eed";
   m_unit      = "eVm-3";
   m_charge    = 0;
   m_diffusive = true;
@@ -20,7 +20,7 @@ air9eed::eed::eed(){
 
   // Get gas parameters
   Real Tg, p, N, O2frac, N2frac;
-  air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air9eed::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
 }
 
 air9eed::eed::~eed(){
@@ -28,7 +28,7 @@ air9eed::eed::~eed(){
 }
 
 air9eed::electron::electron(){
-  m_name   = "electron density";
+  m_name   = "electron";
   m_unit   = "m-3";
   m_charge = -1;
   m_diffusive = true;
@@ -52,7 +52,7 @@ air9eed::N2plus::N2plus() {
   m_mobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
-  air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air9eed::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
   ParmParse pp("air9eed");
   pp.get("initial_ionization", m_initial_ionization);
   m_initial_ionization *= N2frac;
@@ -105,7 +105,7 @@ air9eed::O2plus::O2plus(){
   m_mobile = true;
 
   Real Tg, p, N, O2frac, N2frac;
-  air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air9eed::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
   std::string str;
   ParmParse pp("air9eed");
   pp.get("initial_ionization", m_initial_ionization);
@@ -235,7 +235,7 @@ air9eed::photon_one::photon_one(){
 
   // Get gas stuff from input script
   Real Tg, p, N, O2frac, N2frac;
-  air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air9eed::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
   m_pO2 = p*O2frac;
 }
 
@@ -256,7 +256,7 @@ air9eed::photon_two::photon_two(){
 
   // Get gas stuff from input script
   Real Tg, p, N, O2frac, N2frac;
-  air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air9eed::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
   m_pO2 = p*O2frac;
 }
 
@@ -277,7 +277,7 @@ air9eed::photon_three::photon_three(){
 
   // Get gas stuff from input script
   Real Tg, p, N, O2frac, N2frac;
-  air9eed::get_gas_parameters(Tg, p, N, O2frac, N2frac);
+  air9eed::parse_gas_parameters(Tg, p, N, O2frac, N2frac);
   m_pO2 = p*O2frac;
 }
 

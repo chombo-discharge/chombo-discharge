@@ -8,7 +8,7 @@
 #ifndef _AIR9EED_
 #define _AIR9EED_
 
-#include "plasma_kinetics.H"
+#include "simple_kinetics.H"
 #include "lookup_table.H"
 
 /*!
@@ -24,7 +24,7 @@
   @todo If anyone finds the time, please improve the ion mobilities. 
 
 */
-class air9eed : public plasma_kinetics {
+class air9eed : public simple_kinetics {
 public:
 
   // Forward declaration of cdr species
@@ -47,84 +47,76 @@ public:
   /*!
     @brief Get gas temperature, pressure, density, and molecular fractions
   */
-  static void get_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac);
+  static void parse_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac);
   
-  /*!
-    @brief Constructor
-  */
   air9eed();
 
-  /*!
-    @brief Destructor
-  */
   virtual ~air9eed();
 
-
-  /*!
-    @brief Compute diffusion coefficients
-  */
-  virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
-							  const RealVect&     a_pos,
-							  const RealVect&     a_E,
-							  const Vector<Real>& a_cdr_densities) const;
-
-  /*!
-    @brief Compute drift velocities
-  */
-  virtual Vector<RealVect> compute_cdr_velocities(const Real&         a_time,
-						  const RealVect&     a_pos,
-						  const RealVect&     a_E,
-						  const Vector<Real>& a_cdr_densities) const;
-
+  virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real         a_time,
+							  const RealVect     a_pos,
+							  const RealVect     a_E,
+							  const Vector<Real> a_cdr_densities) const;
   
-  /*!
-    @brief Compute source terms
-  */
+  virtual Vector<RealVect> compute_cdr_velocities(const Real         a_time,
+						  const RealVect     a_pos,
+						  const RealVect     a_E,
+						  const Vector<Real> a_cdr_densities) const;
+  
   virtual Vector<Real> compute_cdr_source_terms(const Real              a_time,
-						const RealVect&         a_pos,
-						const RealVect&         a_E,
-						const RealVect&         a_gradE,
-						const Vector<Real>&     a_cdr_densities,
-						const Vector<Real>&     a_rte_densities,
-						const Vector<RealVect>& a_grad_cdr) const;
+						const Real             a_kappa,
+						const Real             a_dx,
+						const RealVect         a_pos,
+						const RealVect         a_E,
+						const RealVect         a_gradE,
+						const Vector<Real>     a_cdr_densities,
+						const Vector<Real>     a_rte_densities,
+						const Vector<RealVect> a_grad_cdr) const;
 
-  /*!
-    @brief Compute electrode fluxes
-  */
-  virtual Vector<Real> compute_cdr_electrode_fluxes(const Real&         a_time,
-						    const RealVect&     a_pos,
-						    const RealVect&     a_normal,
-						    const RealVect&     a_E,
-						    const Vector<Real>& a_cdr_densities,
-						    const Vector<Real>& a_cdr_velocities,
-						    const Vector<Real>& a_cdr_gradients,
-						    const Vector<Real>& a_rte_fluxes,
-						    const Vector<Real>& a_extrap_cdr_fluxes) const;
+  virtual Vector<Real> compute_cdr_electrode_fluxes(const Real         a_time,
+						    const RealVect     a_pos,
+						    const RealVect     a_normal,
+						    const RealVect     a_E,
+						    const Vector<Real> a_cdr_densities,
+						    const Vector<Real> a_cdr_velocities,
+						    const Vector<Real> a_cdr_gradients,
+						    const Vector<Real> a_rte_fluxes,
+						    const Vector<Real> a_extrap_cdr_fluxes) const;
 
-  /*!
-    @brief Compute dielectric fluxes
-  */
-  virtual Vector<Real> compute_cdr_dielectric_fluxes(const Real&         a_time,
-						     const RealVect&     a_pos,
-						     const RealVect&     a_normal,
-						     const RealVect&     a_E,
-						     const Vector<Real>& a_cdr_densities,
-						     const Vector<Real>& a_cdr_velocities,
-						     const Vector<Real>& a_cdr_gradients,
-						     const Vector<Real>& a_rte_fluxes,
-						     const Vector<Real>& a_extrap_cdr_fluxes) const;
+  virtual Vector<Real> compute_cdr_dielectric_fluxes(const Real         a_time,
+						     const RealVect     a_pos,
+						     const RealVect     a_normal,
+						     const RealVect     a_E,
+						     const Vector<Real> a_cdr_densities,
+						     const Vector<Real> a_cdr_velocities,
+						     const Vector<Real> a_cdr_gradients,
+						     const Vector<Real> a_rte_fluxes,
+						     const Vector<Real> a_extrap_cdr_fluxes) const;
+
+  virtual Vector<Real> compute_cdr_domain_fluxes(const Real           a_time,
+						 const RealVect       a_pos,
+						 const int            a_dir,
+						 const Side::LoHiSide a_side,
+						 const RealVect       a_E,
+						 const Vector<Real>   a_cdr_densities,
+						 const Vector<Real>   a_cdr_velocities,
+						 const Vector<Real>   a_cdr_gradients,
+						 const Vector<Real>   a_rte_fluxes,
+						 const Vector<Real>   a_extrap_cdr_fluxes) const;
   /*!
     @brief Compute the isotropic source terms for the RTEs
   */
-  virtual Vector<Real> compute_rte_source_terms(const Real&         a_time,
-						const RealVect&     a_pos,
-						const RealVect&     a_E,
-						const Vector<Real>& a_cdr_densities) const;
+  virtual Vector<Real> compute_rte_source_terms(const Real         a_time,
+						const Real             a_kappa,
+						const Real             a_dx,
+						const RealVect     a_pos,
+						const RealVect     a_E,
+						const Vector<Real> a_cdr_densities) const;
 
   /*!
     @brief Set the initial surface charge
   */
-  virtual Real initial_sigma(const Real a_time, const RealVect& a_pos) const; 
+  virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const; 
 
 protected:
 
@@ -136,6 +128,10 @@ protected:
   std::string m_transport_file;
 
   bool m_mobile_ions;
+  bool m_diffusive_ions;
+  bool m_diffusive_electrons;
+
+  int m_uniform_tables;
 
   int m_eed_idx;
   int m_electron_idx;
@@ -150,13 +146,16 @@ protected:
   int m_photon1_idx;
   int m_photon2_idx;
   int m_photon3_idx;
-
+  
   Real m_Tg;       // Gas and ion temperature
   Real m_p;        // Gas pressure
   Real m_pq;       // Quenching pressure
   Real m_N;        // Neutral number density
   Real m_O2frac;   // O2 fraction
   Real m_N2frac;   // N2 fraction
+
+  Real m_ion_mobility; // Ion mobility
+  Real m_ion_diffusion; // Ion mobility
 
   Real m_townsend2_electrode;            // 2nd Townsend on electrodes
   Real m_townsend2_dielectric;           // 2nd Townsend on dielectrics
@@ -176,7 +175,15 @@ protected:
   lookup_table m_e_N2_to_e_N2;
   lookup_table m_e_O2_to_e_O2;
 
+  void parse_transport_file();
+  void parse_photoi();
+  void parse_see();
+  void parse_transport();
+  void instantiate_species();
 
+  // Compute electron energy in eV
+  inline Real electron_energy(const Real a_energy, const Real a_density);
+  
   // Mobility computations
   inline Real compute_eed_mobility(const Real a_energy) const;
   inline Real compute_e_mobility(const Real a_energy) const;
@@ -235,22 +242,26 @@ protected:
 
 private:
 
-  void compute_transport_coefficients();
+  void read_file_entries(lookup_table& a_table, const std::string a_string);
+  void read_electron_mobility();
+  void read_init_eed();
+  void read_e_N2_alpha();
+  void read_e_O2_alpha();
   
   /*!
     @brief Common function for dielectric and electrode fluxes, only difference is the secondary emission coefficients
   */
-  Vector<Real> compute_cdr_fluxes(const Real&         a_time,
-				  const RealVect&     a_pos,
-				  const RealVect&     a_normal,
-				  const RealVect&     a_E,
-				  const Vector<Real>& a_cdr_densities,
-				  const Vector<Real>& a_cdr_velocities,
-				  const Vector<Real>& a_cdr_gradients,
-				  const Vector<Real>& a_rte_fluxes,
-				  const Vector<Real>& a_extrap_cdr_fluxes,
-				  const Real&         a_townsend2,
-				  const Real&         a_quantum_efficiency) const;
+  Vector<Real> compute_cdr_fluxes(const Real         a_time,
+				  const RealVect     a_pos,
+				  const RealVect     a_normal,
+				  const RealVect     a_E,
+				  const Vector<Real> a_cdr_densities,
+				  const Vector<Real> a_cdr_velocities,
+				  const Vector<Real> a_cdr_gradients,
+				  const Vector<Real> a_rte_fluxes,
+				  const Vector<Real> a_extrap_cdr_fluxes,
+				  const Real         a_townsend2,
+				  const Real         a_quantum_efficiency) const;
 };
 
 #endif
