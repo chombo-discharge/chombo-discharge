@@ -534,6 +534,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F) + dt*R
     t1 = MPI_Wtime();
     t_sour += t1 - t0;
+    data_ops::floor(phi, 0.0);
 
 
     // Solve diffusion equation. This looks weird but we're solving
@@ -552,10 +553,13 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     t_diff += t1 - t0;
 
     t0 = MPI_Wtime();
+    data_ops::floor(phi, 0.0);
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());
     t1 = MPI_Wtime();
     t_sync += t1 - t0;
+
+    
   }
   t_tot += MPI_Wtime();
 
