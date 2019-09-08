@@ -59,7 +59,7 @@ We now discuss these options in turn:
 * ``plasma_engine.max_plot_depth`` restricts the maximum plot depth. A negative number implies that plot data is taken all the way down to the finest level. 
 * ``plasma_engine.max_chk_depth`` restricts the maximum checkpoint depth. A negative number implies that plot data is taken all the way down to the finest level. 
 * ``plasma_engine.num_plot_ghost`` controls the number of ghost cells that will be included in plot files. 
-* ``plasma_engine.plt_vars`` controls the plot variables for ``plasma_engine``. Currently available plot variables are 'tags' and 'tracer', which plots cells marked for refinement and the associated tracer fields. 
+* ``plasma_engine.plt_vars`` controls the plot variables for ``plasma_engine``. Currently available plot variables are: `tags`, which plot the cells marked for refinement. `tracer` plots the associated tracer fields from which refinement and coarsening decisions are made. `J` plots the space charge current, and `mpi_rank` plots the MPI rank for the various boxes. 
 * ``plasma_engine.restart`` controls the restart step. A value less or equal to zero implies a fresh simulation. Setting this number to larger than zero tells ``plasma_engine`` to look for a checkpoint file with the specified time step, and then start the simulation from that particular time step. 
 * ``plasma_engine.restart_mode`` This is a special flag that allows different restart modes (for example, removing all space charge or surface charge). 
 * ``plasma_engine.refine_geometry`` controls how far the geometry will be refined. A negative values implies that level-set surfaces are refined down to the maximum allowed level. 
@@ -127,11 +127,46 @@ We now discuss the various ``amr_mesh`` class options.
 computational_geometry
 ----------------------
 
-:ref:`Chap:computational_geometry` is the class that implements that geometry. In `PlasmaC`, we use level-set functions for description of surfaces. Please refer to :ref:`Chap:MiniApplications` for descriptions on how to implement new geometries.
+:ref:`Chap:computational_geometry` is the class that implements that geometry. In `PlasmaC`, we use level-set functions for description of surfaces. :ref:`Chap:computational_geometry` is not an abstract class; if you pass in an instance of :ref:`Chap:computational_geometry` (rather than a casted instance), you will get a regular geometry without embedded boundaries. A new :ref:`Chap:computational_geometry` class requires that you set the following class members:
 
-:ref:`Chap:computational_geometry` is not an abstract class; if you pass in an instance of :ref:`Chap:computational_geometry` (rather than a casted instance), you will get a regular geometry without embedded boundaries.
+.. code-block:: c++
 
-By default, there are no input options available for :ref:`Chap:computational_geometry`, although inherited classes that actual implement a non-regular geometry will typically have many. Please see :ref:`Chap:MiniApplications` for further information.   
+   Real m_eps0;
+   Vector<electrode> m_electrodes;
+   Vector<dielectric> m_dielectrics;
+
+Here, ``m_eps0`` is hte gas permittivity, ``m_electrodes`` are the electrodes for the geometry and ``m_dielectrics`` are the dielectrics for the geometry. 
+
+.. _Chap:electrode:
+
+electrode
+_________
+
+The :ref:`Chap:electrode` class is responsible for describing an electrode and its boundary conditions. Internally, this class is lightweight and consists only of a tuple that holds a level-set function and an associated boolean value that tells whether or not the level-set function has a live potential or not. The constructor for the electrode class is:
+
+.. code-block:: c++
+   
+  electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
+
+where the first argument is the level-set function and the second argument is responsible for setting the potential. The third argument is an optional argument that allows the user to set the potential to a specified fraction of the applied potential.
+
+.. _Chap:dielectric:
+
+dielectric
+__________
+
+The :ref:`Chap:dielectric` class is another lightweight class that describes a dielectric and its permittivity. The class has two constructors:
+
+
+.. code-block:: c++
+		
+  dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
+
+  dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
+
+The first constructor defines a dielectric with the first argumennt describing the level-set surface and the second argument describing the permittivity. The second constructor is just like the first one, except that it allows the user to define a spatially dependent permittivity. 
+
+.. _Chap:plasma_kinetics:
 
 plasma_kinetics
 ---------------
@@ -340,7 +375,7 @@ Finally, the final function specifies the initial surface charge in the domain. 
 .. _Chap:species:
 
 species
--------
+_______
 
 The :ref:`Chap:species` is a lightweight class used to provide information into convection-diffusion-reaction solvers. This class is mostly used within :ref:`Chap:plasma_kinetics` in order to provide information on how to instantiate CDR solvers. :ref:`Chap:species` is abstract so that the user must implement
 
@@ -393,7 +428,7 @@ The members ``m_mobile`` and ``m_diffusive`` are used for optimization in `Plasm
 .. _Chap:photon:
 
 photons
--------
+_______
 
 :ref:`Chap:photon` is the class that supplies extra information to the RTE solvers. In those solvers, the source term computation is handled by :ref:`Chap:plasma_kinetics`, so the :ref:`Chap:photon` class is very lightweight. The user must implement a single function which specifies the absorption coefficient at a point in space:
 
@@ -422,6 +457,8 @@ The following is a full implementation of the :ref:`Chap:photon` class:
 By default, there are no input parameters available for the :ref:`Chap:photon` class, but the user will often want to include these, for example by modifying the absorption coefficient. Note that you are allowed to use a spatially varying absorption coefficient. Please see :ref:`Chap:MiniApplications` for how to pass input parameters into your classes.
 
 
+.. _Chap::time_stepper:
+
 time_stepper
 ------------
 
@@ -436,8 +473,6 @@ Finally, there is an option to allow radiative transport updates only at certain
 We have various implementation of :ref:`Chap:time_stepper` that allow different temporal integration of the equations of motion. Please see :ref:`Chap:TemporalDiscretization`.  
 
 Typically, time steppers are selected at compile time. However, the user may select time steppers at run-time by modifying his main file in the appropriate way. For each time stepper, there are various options available at run-time through an input script.
-
-
 
 
 .. _Chap:cell_tagger:
@@ -503,7 +538,7 @@ There are options in the :ref:`Chap:cell_tagger` base class that permits the use
 
 .. literalinclude:: links/cell_tagger.options
 
-In the above, the user may define an arbitrary number of boxes in which tagging is *allowed*. If you do not specify a box, i.e. if ``num_boxes`` is zero, tagging is allowed everywhere. If specify one or more boxes, the ``boxN_lo`` and ``boxN_hi`` parameters indicate the valid tagging regions. Note that the boxes are not level-specific, since this is controlled through *coarsen_cell* and *refine_cell*, respectively. 
+In the above, the user may define an arbitrary number of boxes in which tagging is *allowed*. If you do not specify a box, i.e. if ``num_boxes`` is zero, tagging is allowed everywhere. If specify one or more boxes, the ``boxN_lo`` and ``boxN_hi`` parameters indicate the valid tagging regions. Note that the boxes are not level-specific, since this is controlled through *coarsen_cell* and *refine_cell*, respectively. Again, we remark that :ref:`Chap:cell_tagger` is an abstract class, which means that these options are passed in through the *derived* class. 
 
 
 .. _Chap:geo_coarsener:

@@ -44,5 +44,6 @@ This documentation is the user documentation `PlasmaC`. There is also a separate
    Design
    Control
    TemporalDiscretization
+   NewSimulations
    Tutorials
    ClassAPI
