@@ -1,12 +1,12 @@
 /*!
-  @file   morrow_network.H
+  @file   morrow_mc.H
   @brief  Declaration of the Morrow-Lowke plasma model for air
   @author Robert Marskar
   @date   Jan. 2018
 */
 
-#ifndef _MORROW_NETWORK_
-#define _MORROW_NETWORK_
+#ifndef _MORROW_MC_
+#define _MORROW_MC_
 
 #include "network_kinetics.H"
 
@@ -15,11 +15,11 @@
 /*!
   @brief Class that implements the fluctuating Morrow-Lowke discharge model for air.
 */
-class morrow_network : public network_kinetics {
+class morrow_mc : public network_kinetics {
 public:
 
-  morrow_network();
-  ~morrow_network();
+  morrow_mc();
+  ~morrow_mc();
 
   void advance_reaction_network(Vector<Real>&           a_particle_sources,
 				Vector<Real>&           a_photon_sources,

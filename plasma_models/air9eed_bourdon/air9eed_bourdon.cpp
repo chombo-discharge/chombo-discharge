@@ -1,12 +1,12 @@
 /*!
-  @file   air9eed.cpp
-  @brief  Implementation of air9eed.H
+  @file   air9eed_bourdon.cpp
+  @brief  Implementation of air9eed_bourdon.H
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#include "air9eed.H"
-#include "air9eed_species.H"
+#include "air9eed_bourdon.H"
+#include "air9eed_bourdon_species.H"
 #include "units.H"
 #include "data_ops.H"
 
@@ -18,13 +18,13 @@
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
-std::string air9eed::s_bolsig_energy_E = "Energy (eV) 	Electric field / N (Td)";
-std::string air9eed::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";
-std::string air9eed::s_bolsig_N2_alpha = "C25   N2    Ionization    15.60 eV";
-std::string air9eed::s_bolsig_O2_alpha = "C42   O2    Ionization    12.06 eV";
+std::string air9eed_bourdon::s_bolsig_energy_E = "Energy (eV) 	Electric field / N (Td)";
+std::string air9eed_bourdon::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";
+std::string air9eed_bourdon::s_bolsig_N2_alpha = "C25   N2    Ionization    15.60 eV";
+std::string air9eed_bourdon::s_bolsig_O2_alpha = "C42   O2    Ionization    12.06 eV";
 
 
-air9eed::air9eed(){
+air9eed_bourdon::air9eed_bourdon(){
   m_num_species = 9;    // 8 reactive ones plus the eed
   m_num_photons = 3;    // Bourdon model for photons
   m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
@@ -46,26 +46,26 @@ air9eed::air9eed(){
 
 }
 
-air9eed::~air9eed(){
+air9eed_bourdon::~air9eed_bourdon(){
 
 }
 
-void air9eed::parse_transport_file(){
-  ParmParse pp("air9eed");
+void air9eed_bourdon::parse_transport_file(){
+  ParmParse pp("air9eed_bourdon");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables", m_uniform_tables);
   
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
-    MayDay::Abort("air9eed::parse_transport_file - could not find transport data");
+    MayDay::Abort("air9eed_bourdon::parse_transport_file - could not find transport data");
   }
   else{
     infile.close();
   }
 }
 
-void air9eed::parse_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac){
-  ParmParse pp("air9eed");
+void air9eed_bourdon::parse_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac){
+  ParmParse pp("air9eed_bourdon");
   pp.get("gas_pressure",    a_p);
 
   // This has a hard definition from BOLSIG+
@@ -80,8 +80,8 @@ void air9eed::parse_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2f
   a_N      = a_p*units::s_Na/(a_Tg*units::s_R);
 }
 
-void air9eed::parse_photoi(){
-  ParmParse pp("air9eed");
+void air9eed_bourdon::parse_photoi(){
+  ParmParse pp("air9eed_bourdon");
   pp.get("photoionization_efficiency", m_photoionization_efficiency);
   pp.get("excitation_efficiency",      m_excitation_efficiency);
   pp.get("quenching_pressure",         m_pq);
@@ -89,16 +89,16 @@ void air9eed::parse_photoi(){
   m_pq *= units::s_atm2pascal;
 }
 
-void air9eed::parse_see(){
-  ParmParse pp("air9eed");
+void air9eed_bourdon::parse_see(){
+  ParmParse pp("air9eed_bourdon");
   pp.get("electrode_townsend2"       ,    m_townsend2_electrode);
   pp.get("dielectric_townsend2"       ,   m_townsend2_dielectric);
   pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void air9eed::parse_transport(){
-  ParmParse pp("air9eed");
+void air9eed_bourdon::parse_transport(){
+  ParmParse pp("air9eed_bourdon");
 
   std::string str;
 
@@ -111,7 +111,7 @@ void air9eed::parse_transport(){
   m_ion_diffusion = m_ion_mobility*(units::s_kb*m_Tg)/units::s_Qe;
 }
 
-void air9eed::instantiate_species(){
+void air9eed_bourdon::instantiate_species(){
   m_species.resize(m_num_species);
   m_eed_idx      = 0;
   m_electron_idx = 1;
@@ -123,15 +123,15 @@ void air9eed::instantiate_species(){
   m_O2minus_idx  = 7;
   m_Ominus_idx   = 8;
   
-  m_species[m_eed_idx]      = RefCountedPtr<species> (new air9eed::eed());
-  m_species[m_electron_idx] = RefCountedPtr<species> (new air9eed::electron());
-  m_species[m_N2plus_idx]   = RefCountedPtr<species> (new air9eed::N2plus());
-  m_species[m_N4plus_idx]   = RefCountedPtr<species> (new air9eed::N4plus());
-  m_species[m_O2plus_idx]   = RefCountedPtr<species> (new air9eed::O2plus());
-  m_species[m_O4plus_idx]   = RefCountedPtr<species> (new air9eed::O4plus());
-  m_species[m_O2plusN2_idx] = RefCountedPtr<species> (new air9eed::O2plusN2());
-  m_species[m_O2minus_idx]  = RefCountedPtr<species> (new air9eed::O2minus());
-  m_species[m_Ominus_idx]   = RefCountedPtr<species> (new air9eed::Ominus());
+  m_species[m_eed_idx]      = RefCountedPtr<species> (new air9eed_bourdon::eed());
+  m_species[m_electron_idx] = RefCountedPtr<species> (new air9eed_bourdon::electron());
+  m_species[m_N2plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::N2plus());
+  m_species[m_N4plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::N4plus());
+  m_species[m_O2plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::O2plus());
+  m_species[m_O4plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::O4plus());
+  m_species[m_O2plusN2_idx] = RefCountedPtr<species> (new air9eed_bourdon::O2plusN2());
+  m_species[m_O2minus_idx]  = RefCountedPtr<species> (new air9eed_bourdon::O2minus());
+  m_species[m_Ominus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::Ominus());
 
   // Instantiate photon solvers
   m_photons.resize(m_num_photons);
@@ -139,12 +139,12 @@ void air9eed::instantiate_species(){
   m_photon2_idx = 1;
   m_photon3_idx = 2;
   
-  m_photons[m_photon1_idx] = RefCountedPtr<photon_group> (new air9eed::photon_one());
-  m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air9eed::photon_two());
-  m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air9eed::photon_three());
+  m_photons[m_photon1_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_one());
+  m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_two());
+  m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_three());
 }
 
-void air9eed::read_file_entries(lookup_table& a_table, const std::string a_string){
+void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -172,41 +172,41 @@ void air9eed::read_file_entries(lookup_table& a_table, const std::string a_strin
   infile.close();
 }
 
-void air9eed::read_e_N2_alpha(){
+void air9eed_bourdon::read_e_N2_alpha(){
 
   // Read file entries
-  read_file_entries(m_e_N2_alpha, air9eed::s_bolsig_N2_alpha);
+  read_file_entries(m_e_N2_alpha, air9eed_bourdon::s_bolsig_N2_alpha);
 
   m_e_N2_alpha.make_uniform(m_uniform_tables);
 }
 
-void air9eed::read_e_O2_alpha(){
+void air9eed_bourdon::read_e_O2_alpha(){
 
   // Read file entries
-  read_file_entries(m_e_O2_alpha, air9eed::s_bolsig_O2_alpha);
+  read_file_entries(m_e_O2_alpha, air9eed_bourdon::s_bolsig_O2_alpha);
 
   m_e_O2_alpha.make_uniform(m_uniform_tables);
 }
 
-void air9eed::read_electron_mobility(){
+void air9eed_bourdon::read_electron_mobility(){
 
   // Read file entries
-  read_file_entries(m_e_mobility, air9eed::s_bolsig_mobility);
+  read_file_entries(m_e_mobility, air9eed_bourdon::s_bolsig_mobility);
 
   // Scale with density and make a uniform table (there's no guarantee that BOLSIG output is uniform!)
   m_e_mobility.scale_y(1./m_N); 
   m_e_mobility.make_uniform(m_uniform_tables);
 }
 
-void air9eed::read_init_eed(){
-  read_file_entries(m_init_eed, air9eed::s_bolsig_energy_E);
+void air9eed_bourdon::read_init_eed(){
+  read_file_entries(m_init_eed, air9eed_bourdon::s_bolsig_energy_E);
 
   // Input table is in reverse order. Then make it uniform. 
   m_init_eed.swap_xy();
   m_init_eed.make_uniform(m_uniform_tables);
 }
 
-Vector<Real> air9eed::compute_cdr_diffusion_coefficients(const Real         a_time,
+Vector<Real> air9eed_bourdon::compute_cdr_diffusion_coefficients(const Real         a_time,
 							 const RealVect     a_pos,
 							 const RealVect     a_E,
 							 const Vector<Real> a_cdr_densities) const {
@@ -228,7 +228,7 @@ Vector<Real> air9eed::compute_cdr_diffusion_coefficients(const Real         a_ti
   return diffco;
 }
 
-Vector<RealVect> air9eed::compute_cdr_velocities(const Real         a_time,
+Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_time,
 						 const RealVect     a_pos,
 						 const RealVect     a_E,
 						 const Vector<Real> a_cdr_densities) const {
@@ -253,7 +253,7 @@ Vector<RealVect> air9eed::compute_cdr_velocities(const Real         a_time,
   return velocities;
 }
   
-Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
+Vector<Real> air9eed_bourdon::compute_cdr_source_terms(const Real              a_time,
 					       const Real             a_kappa,
 					       const Real             a_dx,
 					       const RealVect         a_pos,
@@ -442,9 +442,9 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
 
   // Photoionization gamma + O2 -> e + O2+
 #if 1
-  const air9eed::photon_one*   photon1 = static_cast<air9eed::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const air9eed::photon_two*   photon2 = static_cast<air9eed::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const air9eed::photon_three* photon3 = static_cast<air9eed::photon_three*> (&(*m_photons[m_photon3_idx]));
+  const air9eed_bourdon::photon_one*   photon1 = static_cast<air9eed_bourdon::photon_one*>   (&(*m_photons[m_photon1_idx]));
+  const air9eed_bourdon::photon_two*   photon2 = static_cast<air9eed_bourdon::photon_two*>   (&(*m_photons[m_photon2_idx]));
+  const air9eed_bourdon::photon_three* photon3 = static_cast<air9eed_bourdon::photon_three*> (&(*m_photons[m_photon3_idx]));
   products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
 								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
 								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
@@ -463,7 +463,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   return source;
 }
 
-Vector<Real> air9eed::compute_cdr_domain_fluxes(const Real           a_time,
+Vector<Real> air9eed_bourdon::compute_cdr_domain_fluxes(const Real           a_time,
 						const RealVect       a_pos,
 						const int            a_dir,
 						const Side::LoHiSide a_side,
@@ -484,7 +484,7 @@ Vector<Real> air9eed::compute_cdr_domain_fluxes(const Real           a_time,
   return fluxes;
 }
 
-Vector<Real> air9eed::compute_cdr_fluxes(const Real         a_time,
+Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
 					 const RealVect     a_pos,
 					 const RealVect     a_normal,
 					 const RealVect     a_E,
@@ -534,7 +534,7 @@ Vector<Real> air9eed::compute_cdr_fluxes(const Real         a_time,
   return fluxes;
 }
 
-Vector<Real> air9eed::compute_cdr_electrode_fluxes(const Real         a_time,
+Vector<Real> air9eed_bourdon::compute_cdr_electrode_fluxes(const Real         a_time,
 						   const RealVect     a_pos,
 						   const RealVect     a_normal,
 						   const RealVect     a_E,
@@ -548,7 +548,7 @@ Vector<Real> air9eed::compute_cdr_electrode_fluxes(const Real         a_time,
 				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
-Vector<Real> air9eed::compute_cdr_dielectric_fluxes(const Real         a_time,
+Vector<Real> air9eed_bourdon::compute_cdr_dielectric_fluxes(const Real         a_time,
 						    const RealVect     a_pos,
 						    const RealVect     a_normal,
 						    const RealVect     a_E,
@@ -562,7 +562,7 @@ Vector<Real> air9eed::compute_cdr_dielectric_fluxes(const Real         a_time,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
-Vector<Real> air9eed::compute_rte_source_terms(const Real         a_time,
+Vector<Real> air9eed_bourdon::compute_rte_source_terms(const Real         a_time,
 					       const Real             a_kappa,
 					       const Real             a_dx,
 					       const RealVect     a_pos,
@@ -585,48 +585,48 @@ Vector<Real> air9eed::compute_rte_source_terms(const Real         a_time,
   return ret;
 }
 
-Real air9eed::initial_sigma(const Real a_time, const RealVect a_pos) const {return 0.0;}
+Real air9eed_bourdon::initial_sigma(const Real a_time, const RealVect a_pos) const {return 0.0;}
 
-Real air9eed::electron_energy(const Real a_energy, const Real a_density){
+Real air9eed_bourdon::electron_energy(const Real a_energy, const Real a_density){
   return a_energy/(1.0 + a_density);
 }
 
-Real air9eed::compute_eed_mobility(const Real a_energy)    const {return (5.0/3.0)*compute_e_mobility(a_energy);}
-Real air9eed::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.get_entry(a_energy);}
-Real air9eed::compute_N2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
-Real air9eed::compute_N4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
-Real air9eed::compute_O2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
-Real air9eed::compute_O4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
-Real air9eed::compute_O2plusN2_mobility(const Real a_EbyN) const {return m_ion_mobility;}
-Real air9eed::compute_O2minus_mobility(const Real a_EbyN)  const {return m_ion_mobility;}
-Real air9eed::compute_Ominus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air9eed_bourdon::compute_eed_mobility(const Real a_energy)    const {return (5.0/3.0)*compute_e_mobility(a_energy);}
+Real air9eed_bourdon::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.get_entry(a_energy);}
+Real air9eed_bourdon::compute_N2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air9eed_bourdon::compute_N4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air9eed_bourdon::compute_O2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air9eed_bourdon::compute_O4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
+Real air9eed_bourdon::compute_O2plusN2_mobility(const Real a_EbyN) const {return m_ion_mobility;}
+Real air9eed_bourdon::compute_O2minus_mobility(const Real a_EbyN)  const {return m_ion_mobility;}
+Real air9eed_bourdon::compute_Ominus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
 
-Real air9eed::compute_eed_diffco(const Real a_energy) const {return (5.0/3.0)*this->compute_e_diffco(a_energy);}
-Real air9eed::compute_e_diffco(const Real a_energy)   const {return (2.0/3.0)*a_energy*this->compute_e_mobility(a_energy);}
-Real air9eed::compute_N2plus_diffco()                 const {return m_ion_diffusion;}
-Real air9eed::compute_N4plus_diffco()                 const {return m_ion_diffusion;}
-Real air9eed::compute_O2plus_diffco()                 const {return m_ion_diffusion;}
-Real air9eed::compute_O4plus_diffco()                 const {return m_ion_diffusion;}
-Real air9eed::compute_O2plusN2_diffco()               const {return m_ion_diffusion;}
-Real air9eed::compute_O2minus_diffco()                const {return m_ion_diffusion;}
-Real air9eed::compute_Ominus_diffco()                 const {return m_ion_diffusion;}
+Real air9eed_bourdon::compute_eed_diffco(const Real a_energy) const {return (5.0/3.0)*this->compute_e_diffco(a_energy);}
+Real air9eed_bourdon::compute_e_diffco(const Real a_energy)   const {return (2.0/3.0)*a_energy*this->compute_e_mobility(a_energy);}
+Real air9eed_bourdon::compute_N2plus_diffco()                 const {return m_ion_diffusion;}
+Real air9eed_bourdon::compute_N4plus_diffco()                 const {return m_ion_diffusion;}
+Real air9eed_bourdon::compute_O2plus_diffco()                 const {return m_ion_diffusion;}
+Real air9eed_bourdon::compute_O4plus_diffco()                 const {return m_ion_diffusion;}
+Real air9eed_bourdon::compute_O2plusN2_diffco()               const {return m_ion_diffusion;}
+Real air9eed_bourdon::compute_O2minus_diffco()                const {return m_ion_diffusion;}
+Real air9eed_bourdon::compute_Ominus_diffco()                 const {return m_ion_diffusion;}
 
-Real air9eed::compute_electron_N2_alpha(const Real a_energy)     const {return m_e_N2_alpha.get_entry(a_energy);}
-Real air9eed::compute_electron_O2_alpha(const Real a_energy)     const {return m_e_O2_alpha.get_entry(a_energy);}
-Real air9eed::compute_N2plus_N2_M_to_N4plus_M()                  const {return 5.E-41;}
-Real air9eed::compute_N4plus_O2_to_O2_2N2()                      const {return 2.5E-16;}
-Real air9eed::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)    const {return 1.05E-15/sqrt(a_Tg);}
-Real air9eed::compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg) const {return 8.1E-38/(a_Tg*a_Tg);}
-Real air9eed::compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg) const {return 14.8*pow(a_Tg, -5.3)*exp(-2357.0/a_Tg);}
-Real air9eed::compute_O2plusN2_O2_to_O4plus_N2()                 const {return 1.E-15;}
-Real air9eed::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg)   const {return 2.03E-34*pow(a_Tg, -3.2);}
-Real air9eed::compute_e_O4plus_to_2O2(const Real a_Te)           const {return 2.42E-11/(sqrt(a_Te));}
-Real air9eed::compute_e_O2plus_to_O2(const Real a_Te)            const {return 6.E-11/a_Te;}
-Real air9eed::compute_e_2O2_to_O2minus_O2(const Real a_Te)       const {return 6.E-39/a_Te;}
-Real air9eed::compute_O2minus_O4plus_to_3O2()                    const {return 1.E-13;}
-Real air9eed::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
-Real air9eed::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
-Real air9eed::compute_e_O2_to_e_2O_c1(const Real a_energy)       const {
+Real air9eed_bourdon::compute_electron_N2_alpha(const Real a_energy)     const {return m_e_N2_alpha.get_entry(a_energy);}
+Real air9eed_bourdon::compute_electron_O2_alpha(const Real a_energy)     const {return m_e_O2_alpha.get_entry(a_energy);}
+Real air9eed_bourdon::compute_N2plus_N2_M_to_N4plus_M()                  const {return 5.E-41;}
+Real air9eed_bourdon::compute_N4plus_O2_to_O2_2N2()                      const {return 2.5E-16;}
+Real air9eed_bourdon::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)    const {return 1.05E-15/sqrt(a_Tg);}
+Real air9eed_bourdon::compute_O2plus_2N2_to_O2plusN2_N2(const Real a_Tg) const {return 8.1E-38/(a_Tg*a_Tg);}
+Real air9eed_bourdon::compute_O2plusN2_N2_to_O2plus_2N2(const Real a_Tg) const {return 14.8*pow(a_Tg, -5.3)*exp(-2357.0/a_Tg);}
+Real air9eed_bourdon::compute_O2plusN2_O2_to_O4plus_N2()                 const {return 1.E-15;}
+Real air9eed_bourdon::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg)   const {return 2.03E-34*pow(a_Tg, -3.2);}
+Real air9eed_bourdon::compute_e_O4plus_to_2O2(const Real a_Te)           const {return 2.42E-11/(sqrt(a_Te));}
+Real air9eed_bourdon::compute_e_O2plus_to_O2(const Real a_Te)            const {return 6.E-11/a_Te;}
+Real air9eed_bourdon::compute_e_2O2_to_O2minus_O2(const Real a_Te)       const {return 6.E-39/a_Te;}
+Real air9eed_bourdon::compute_O2minus_O4plus_to_3O2()                    const {return 1.E-13;}
+Real air9eed_bourdon::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
+Real air9eed_bourdon::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
+Real air9eed_bourdon::compute_e_O2_to_e_2O_c1(const Real a_energy)       const {
   Real k = 0.0;
   return 0.0;
     
@@ -654,7 +654,7 @@ Real air9eed::compute_e_O2_to_e_2O_c1(const Real a_energy)       const {
 
   return k;
 } // TABLE
-Real air9eed::compute_e_O2_to_e_2O_c2(const Real a_energy)       const {
+Real air9eed_bourdon::compute_e_O2_to_e_2O_c2(const Real a_energy)       const {
   Real k = 0.0; return k;
     
   const Real min_energy       = 1.0;
@@ -681,7 +681,7 @@ Real air9eed::compute_e_O2_to_e_2O_c2(const Real a_energy)       const {
 
   return k;
 } // TABLE
-Real air9eed::compute_e_O2_to_Ominus_O(const Real a_energy)      const {
+Real air9eed_bourdon::compute_e_O2_to_Ominus_O(const Real a_energy)      const {
   Real k = 0.0;return k;
   
   const Real min_energy       = 1.0;
@@ -708,8 +708,8 @@ Real air9eed::compute_e_O2_to_Ominus_O(const Real a_energy)      const {
 
   return k;
 } // TABLE
-Real air9eed::compute_Oplus_O2_to_O_O2(const Real a_Tg)          const {return 3.46E-12/sqrt(a_Tg);}
-Real air9eed::compute_e_N2_to_e_N2(const Real a_energy)          const {
+Real air9eed_bourdon::compute_Oplus_O2_to_O_O2(const Real a_Tg)          const {return 3.46E-12/sqrt(a_Tg);}
+Real air9eed_bourdon::compute_e_N2_to_e_N2(const Real a_energy)          const {
 
   Real k = 0.0;return k;
   
@@ -737,7 +737,7 @@ Real air9eed::compute_e_N2_to_e_N2(const Real a_energy)          const {
 
   return k;
 } // TABLE
-Real air9eed::compute_e_O2_to_e_O2(const Real a_energy)          const {
+Real air9eed_bourdon::compute_e_O2_to_e_O2(const Real a_energy)          const {
   Real k = 0.0;return k;
   
   const Real min_energy       = 1.0;
@@ -766,15 +766,15 @@ Real air9eed::compute_e_O2_to_e_O2(const Real a_energy)          const {
 } // TABLE
 
 // Electron losses
-Real air9eed::compute_e_N2_ionization_loss()              const {return 15.6;}
-Real air9eed::compute_e_O2_ionization_loss()              const {return 12.07;}
-Real air9eed::compute_e_O2_dissociation_loss_c1()         const {return 5.58;}
-Real air9eed::compute_e_O2_dissociation_loss_c2()         const {return 8.4;}
-Real air9eed::compute_e_O2_dissociative_attachment_loss() const {return 3.6;}
-Real air9eed::compute_e_O2_scattering_loss()              const {return 1;}
-Real air9eed::compute_e_N2_scattering_loss()              const {return 1;}
+Real air9eed_bourdon::compute_e_N2_ionization_loss()              const {return 15.6;}
+Real air9eed_bourdon::compute_e_O2_ionization_loss()              const {return 12.07;}
+Real air9eed_bourdon::compute_e_O2_dissociation_loss_c1()         const {return 5.58;}
+Real air9eed_bourdon::compute_e_O2_dissociation_loss_c2()         const {return 8.4;}
+Real air9eed_bourdon::compute_e_O2_dissociative_attachment_loss() const {return 3.6;}
+Real air9eed_bourdon::compute_e_O2_scattering_loss()              const {return 1;}
+Real air9eed_bourdon::compute_e_N2_scattering_loss()              const {return 1;}
 
-Real air9eed::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
+Real air9eed_bourdon::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
   return m_init_eed.get_entry(EbyN)*m_species[m_electron_idx]->initial_data(a_pos, a_time);
 }

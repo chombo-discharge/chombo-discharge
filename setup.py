@@ -6,6 +6,7 @@ sys.path.append('./python')
 import app_main
 import app_make
 import app_options
+import app_inc
 
 # Get arguments from input script
 parser = argparse.ArgumentParser();
@@ -32,6 +33,7 @@ args = parser.parse_args()
 app_main.write_template(args)
 app_make.write_template(args)
 app_options.write_template(args)
+app_inc.copy_dependencies(args)
 
 if args.build:
     os.chdir(args.streamer_home + "/" + args.base_dir + "/" + args.app_name)

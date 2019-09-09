@@ -1,0 +1,22 @@
+# ====================================================================================================
+# AIR9EED_BOURDON CLASS OPTIONS
+# ====================================================================================================
+air9eed_bourdon.gas_pressure       = 1.0                          # Gas pressure
+air9eed_bourdon.transport_file     = air_transport_energy.txt     # Transport file
+air9eed_bourdon.uniform_tables     = 100	                  # Converted # of points in transport file
+
+air9eed_bourdon.initial_ionization = 1.E10                        # Initial background ionization
+
+air9eed_bourdon.diffusive_electrons = true                        # Diffusive electrons or not
+air9eed_bourdon.mobile_ions         = true                        # Mobile ions or not
+air9eed_bourdon.diffusive_ions      = true                        # Diffusive ions or not
+air9eed_bourdon.ion_mobility        = 2.E-4                       # Ion mobility
+
+air9eed_bourdon.electrode_townsend2           = 1.E-6             # SEE on electrodes
+air9eed_bourdon.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
+air9eed_bourdon.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
+air9eed_bourdon.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
+
+air9eed_bourdon.quenching_pressure         = 0.03947              # Quenching pressure
+air9eed_bourdon.photoionization_efficiency = 0.1                  # Photoionization efficiency
+air9eed_bourdon.excitation_efficiency      = 0.6                  # Excitation efficiency

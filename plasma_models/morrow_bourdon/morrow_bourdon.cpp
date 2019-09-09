@@ -1,19 +1,19 @@
 /*!
-  @file   morrow_lowke.cpp
-  @brief  Implementation of morrow_lowke.H
+  @file   morrow_bourdon.cpp
+  @brief  Implementation of morrow_bourdon.H
   @author Robert Marskar
   @date   Jan. 2018
   @todo   Really, really need to revise these functions since we've changed the scaling for the rte equations
 */
 
-#include "morrow_lowke.H"
+#include "morrow_bourdon.H"
 #include "units.H"
 
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-morrow_lowke::morrow_lowke(){
-  CH_TIME("morrow_lowke::morrow_lowke");
+morrow_bourdon::morrow_bourdon(){
+  CH_TIME("morrow_bourdon::morrow_bourdon");
 
   // Number of cdr and rte equations
   m_num_species = 3;
@@ -29,12 +29,12 @@ morrow_lowke::morrow_lowke(){
   m_photon2_idx = 1;
   m_photon3_idx = 2;
   
-  m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_lowke::electron());
-  m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_lowke::positive_species());
-  m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_lowke::negative_species());
-  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_lowke::photon_one());
-  m_photons[m_photon2_idx]  = RefCountedPtr<photon_group> (new morrow_lowke::photon_two());
-  m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new morrow_lowke::photon_three());
+  m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_bourdon::electron());
+  m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_bourdon::positive_species());
+  m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_bourdon::negative_species());
+  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_bourdon::photon_one());
+  m_photons[m_photon2_idx]  = RefCountedPtr<photon_group> (new morrow_bourdon::photon_two());
+  m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new morrow_bourdon::photon_three());
 
 
 
@@ -58,7 +58,7 @@ morrow_lowke::morrow_lowke(){
   m_noise_octaves = 1;
 
   { // Gas composition
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("gas_temperature",            m_temp);
     pp.query("gas_N2_frac",                m_fracN2);
     pp.query("gas_O2_frac",                m_fracO2);
@@ -69,7 +69,7 @@ morrow_lowke::morrow_lowke(){
   }
 
   { // Electrode things
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("electrode_townsend2",           m_townsend2_conductor);
     pp.query("electrode_quantum_efficiency",  m_electrode_yield);
     pp.query("dielectric_townsend2",          m_townsend2_dielectric);
@@ -77,7 +77,7 @@ morrow_lowke::morrow_lowke(){
   }
 
   { // Noise parameters for initial dat
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("noise_amplitude",   m_noise_amp);
     pp.query("noise_octaves",     m_noise_octaves);
     pp.query("noise_persistence", m_noise_persist);
@@ -90,7 +90,7 @@ morrow_lowke::morrow_lowke(){
    
   { // Boundary condition at wall. 0 = extrap, 1 = wall
     m_wallbc.resize(2*SpaceDim, 0); 
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     for (int dir = 0; dir < SpaceDim; dir++){
       for (SideIterator sit; sit.ok(); ++sit){
 	const Side::LoHiSide side = sit();
@@ -136,8 +136,8 @@ morrow_lowke::morrow_lowke(){
 
   // Initiate noise function and give this to electron and positive species
   m_perlin = RefCountedPtr<perlin_if> (new perlin_if(1.0, m_noise_freq, m_noise_persist, m_noise_octaves));
-  morrow_lowke::electron* electron    = static_cast<morrow_lowke::electron*> (&(*m_species[m_nelec_idx]));
-  morrow_lowke::positive_species* pos = static_cast<morrow_lowke::positive_species*> (&(*m_species[m_nplus_idx]));
+  morrow_bourdon::electron* electron    = static_cast<morrow_bourdon::electron*> (&(*m_species[m_nelec_idx]));
+  morrow_bourdon::positive_species* pos = static_cast<morrow_bourdon::positive_species*> (&(*m_species[m_nplus_idx]));
   electron->set_noise(m_perlin);
   pos->set_noise(m_perlin);
 
@@ -148,12 +148,12 @@ morrow_lowke::morrow_lowke(){
   m_N   = m_p*units::s_Na/(m_temp*units::s_R);
 }
 
-morrow_lowke::~morrow_lowke(){
+morrow_bourdon::~morrow_bourdon(){
 
 
 }
 
-Vector<RealVect> morrow_lowke::compute_velocities(const RealVect a_E) const{
+Vector<RealVect> morrow_bourdon::compute_velocities(const RealVect a_E) const{
   Vector<RealVect> velocities(m_num_species);
   
   velocities[m_nelec_idx] = this->compute_ve(a_E);
@@ -163,7 +163,7 @@ Vector<RealVect> morrow_lowke::compute_velocities(const RealVect a_E) const{
   return velocities;
 }
 
-RealVect morrow_lowke::compute_ve(const RealVect a_E) const{
+RealVect morrow_bourdon::compute_ve(const RealVect a_E) const{
   RealVect ve = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;          // Morrow-Lowke wants E in V/cm
@@ -192,7 +192,7 @@ RealVect morrow_lowke::compute_ve(const RealVect a_E) const{
   return ve;
 }
 
-RealVect morrow_lowke::compute_vp(const RealVect a_E) const{
+RealVect morrow_bourdon::compute_vp(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;           // E in V/cm
   RealVect vp = 2.34*E*m_p/units::s_atm2pascal;  // Morrow-Lowke wants V/cm
   vp *= 0.01;                             // Morrow-Lowke expression is in cm/s
@@ -200,7 +200,7 @@ RealVect morrow_lowke::compute_vp(const RealVect a_E) const{
   return vp;  
 }
 
-RealVect morrow_lowke::compute_vn(const RealVect a_E) const{
+RealVect morrow_bourdon::compute_vn(const RealVect a_E) const{
   RealVect vn = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;       // Morrow-Lowke wants E in V/cm
@@ -220,7 +220,7 @@ RealVect morrow_lowke::compute_vn(const RealVect a_E) const{
   return vn;
 }
 
-Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real> a_species_densities,
+Vector<Real> morrow_bourdon::compute_source_terms(const Vector<Real> a_species_densities,
 						const Vector<Real> a_photon_densities,
 						const RealVect     a_E) const {
   Vector<Real> source(m_num_species, 0.0);
@@ -232,9 +232,9 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real> a_species_den
   const Real beta   = this->compute_beta(a_E);  // Recombination coefficient
 
   // Cast so we can get A-coefficients
-  const morrow_lowke::photon_one*   photon1 = static_cast<morrow_lowke::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const morrow_lowke::photon_two*   photon2 = static_cast<morrow_lowke::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const morrow_lowke::photon_three* photon3 = static_cast<morrow_lowke::photon_three*> (&(*m_photons[m_photon3_idx]));
+  const morrow_bourdon::photon_one*   photon1 = static_cast<morrow_bourdon::photon_one*>   (&(*m_photons[m_photon1_idx]));
+  const morrow_bourdon::photon_two*   photon2 = static_cast<morrow_bourdon::photon_two*>   (&(*m_photons[m_photon2_idx]));
+  const morrow_bourdon::photon_three* photon3 = static_cast<morrow_bourdon::photon_three*> (&(*m_photons[m_photon3_idx]));
   
   // Densities and velocities
   const Real Ne  = a_species_densities[m_nelec_idx]; 
@@ -265,7 +265,7 @@ Vector<Real> morrow_lowke::compute_source_terms(const Vector<Real> a_species_den
   return source;
 }
 
-Real morrow_lowke::compute_alpha(const RealVect a_E) const{
+Real morrow_bourdon::compute_alpha(const RealVect a_E) const{
   Real alpha    = 0.;
   Real alphabyN = 0.;
 
@@ -288,7 +288,7 @@ Real morrow_lowke::compute_alpha(const RealVect a_E) const{
   return alpha;
 }
 
-Real morrow_lowke::compute_eta(const RealVect a_E) const{
+Real morrow_bourdon::compute_eta(const RealVect a_E) const{
 
   const Real eta2 = this->compute_eta2(a_E); 
   const Real eta3 = this->compute_eta3(a_E);
@@ -297,7 +297,7 @@ Real morrow_lowke::compute_eta(const RealVect a_E) const{
   return eta;
 }
 
-Real morrow_lowke::compute_eta2(const RealVect a_E) const{
+Real morrow_bourdon::compute_eta2(const RealVect a_E) const{
   Real eta2    = 0.;
   Real eta2byN = 0.;
 
@@ -321,7 +321,7 @@ Real morrow_lowke::compute_eta2(const RealVect a_E) const{
   return eta2;
 }
 
-Real morrow_lowke::compute_eta3(const RealVect a_E) const{
+Real morrow_bourdon::compute_eta3(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;         // Morrow-Lowke wants E in V/cm
   const Real Emag  = E.vectorLength();  //
   const Real N     = m_N*1.E-6;         // Morrow-Lowke weants N in cm^3
@@ -338,13 +338,13 @@ Real morrow_lowke::compute_eta3(const RealVect a_E) const{
   return eta3;
 }
 
-Real morrow_lowke::compute_beta(const RealVect a_E) const{
+Real morrow_bourdon::compute_beta(const RealVect a_E) const{
   Real beta = 2.0E-7;
   beta *= 1.E-6; // Morrow-Lowke expression is in cm^3. Make it m^3
   return beta;
 }
 
-Real morrow_lowke::compute_De(const RealVect a_E) const{
+Real morrow_bourdon::compute_De(const RealVect a_E) const{
   const RealVect E  = a_E*1.E-2;                 // Morrow-Lowke wants E in V/cm
   const Real Emag   = E.vectorLength();          //
   const Real N      = m_N*1.E-6;                 // Morrow-Lowke weants N in cm^3
@@ -360,7 +360,7 @@ Real morrow_lowke::compute_De(const RealVect a_E) const{
   return De;
 }
 
-Vector<Real> morrow_lowke::compute_diffusion_coefficients(const RealVect a_E) const {
+Vector<Real> morrow_bourdon::compute_diffusion_coefficients(const RealVect a_E) const {
 
   Vector<Real> diffCo(m_num_species, 0.0);
 
@@ -377,7 +377,7 @@ Vector<Real> morrow_lowke::compute_diffusion_coefficients(const RealVect a_E) co
   return diffCo;
 }
 
-Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
+Vector<Real> morrow_bourdon::compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
 						     const Vector<Real> a_ion_densities,
 						     const Vector<Real> a_ion_velocities,
 						     const Vector<Real> a_photon_fluxes,
@@ -408,7 +408,7 @@ Vector<Real> morrow_lowke::compute_dielectric_fluxes(const Vector<Real> a_extrap
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_conductor_fluxes(const Vector<Real> a_extrapolated_fluxes,
+Vector<Real> morrow_bourdon::compute_conductor_fluxes(const Vector<Real> a_extrapolated_fluxes,
 						    const Vector<Real> a_ion_densities,
 						    const Vector<Real> a_ion_velocities,
 						    const Vector<Real> a_photon_fluxes,
@@ -450,7 +450,7 @@ Vector<Real> morrow_lowke::compute_conductor_fluxes(const Vector<Real> a_extrapo
 }
 
 
-Vector<Real> morrow_lowke::compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
+Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
 						const Vector<Real> a_ion_densities,
 						const Vector<Real> a_ion_velocities,
 						const Vector<Real> a_photon_fluxes,
@@ -477,7 +477,7 @@ Vector<Real> morrow_lowke::compute_cathode_flux(const Vector<Real> a_extrapolate
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
+Vector<Real> morrow_bourdon::compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
 					      const Vector<Real> a_ion_densities,
 					      const Vector<Real> a_ion_velocities,
 					      const Vector<Real> a_photon_fluxes,
@@ -496,7 +496,7 @@ Vector<Real> morrow_lowke::compute_anode_flux(const Vector<Real> a_extrapolated_
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_cdr_domain_fluxes(const Real           a_time,
+Vector<Real> morrow_bourdon::compute_cdr_domain_fluxes(const Real           a_time,
 						     const RealVect       a_pos,
 						     const int            a_dir,
 						     const Side::LoHiSide a_side,
@@ -530,14 +530,14 @@ Vector<Real> morrow_lowke::compute_cdr_domain_fluxes(const Real           a_time
     }
   }
   else{
-    MayDay::Abort("morrow_lowke::compute_cdr_domain_fluxes - uknown domain bc requested");
+    MayDay::Abort("morrow_bourdon::compute_cdr_domain_fluxes - uknown domain bc requested");
   }
 
   
   return fluxes;
 }
 
-Vector<Real> morrow_lowke::compute_rte_source_terms(const Vector<Real> a_densities, const RealVect a_E) const{
+Vector<Real> morrow_bourdon::compute_rte_source_terms(const Vector<Real> a_densities, const RealVect a_E) const{
   Vector<Real> ret(m_num_photons);
 
   const Vector<RealVect> vel = this->compute_velocities(a_E);      // Compute velocities
@@ -554,11 +554,11 @@ Vector<Real> morrow_lowke::compute_rte_source_terms(const Vector<Real> a_densiti
   return ret;
 }
 
-Real morrow_lowke::initial_sigma(const Real a_time, const RealVect a_pos) const{
+Real morrow_bourdon::initial_sigma(const Real a_time, const RealVect a_pos) const{
   return 0.;
 }
 
-morrow_lowke::electron::electron(){
+morrow_bourdon::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
   m_diffusive = true;
@@ -572,7 +572,7 @@ morrow_lowke::electron::electron(){
   m_seed_pos        = RealVect::Zero;
 
   { // Get from input script or command line
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     std::string str = "true";
     pp.query("uniform_density",    m_uniform_density);
     pp.query("seed_density",       m_seed_density);
@@ -593,10 +593,10 @@ morrow_lowke::electron::electron(){
   }
 }
 
-morrow_lowke::electron::~electron(){
+morrow_bourdon::electron::~electron(){
 }
 
-Real morrow_lowke::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_bourdon::electron::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
@@ -604,11 +604,11 @@ Real morrow_lowke::electron::initial_data(const RealVect a_pos, const Real a_tim
   return seed + m_uniform_density + noise;
 }
 
-void morrow_lowke::electron::set_noise(RefCountedPtr<perlin_if> a_perlin){
+void morrow_bourdon::electron::set_noise(RefCountedPtr<perlin_if> a_perlin){
   m_perlin = a_perlin;
 }
 
-morrow_lowke::positive_species::positive_species(){
+morrow_bourdon::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
   m_diffusive = false;
@@ -622,7 +622,7 @@ morrow_lowke::positive_species::positive_species(){
   m_seed_pos        = RealVect::Zero;
   
   { // Get from input script or command line
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("uniform_density",  m_uniform_density);
     pp.query("seed_density",     m_seed_density);
     pp.query("seed_radius",      m_seed_radius);
@@ -644,10 +644,10 @@ morrow_lowke::positive_species::positive_species(){
   }
 }
 
-morrow_lowke::positive_species::~positive_species(){
+morrow_bourdon::positive_species::~positive_species(){
 }
 
-Real morrow_lowke::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_bourdon::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
@@ -655,11 +655,11 @@ Real morrow_lowke::positive_species::initial_data(const RealVect a_pos, const Re
   return seed + m_uniform_density + noise;
 }
 
-void morrow_lowke::positive_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
+void morrow_bourdon::positive_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
   m_perlin = a_perlin;
 }
 
-morrow_lowke::negative_species::negative_species(){
+morrow_bourdon::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
   m_diffusive = false;
@@ -667,7 +667,7 @@ morrow_lowke::negative_species::negative_species(){
   m_unit      = "m-3";
 
   { // Get parameter from input script
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     
     // Turn off ion mobility
     std::string str = "false";
@@ -680,18 +680,18 @@ morrow_lowke::negative_species::negative_species(){
   }
 }
 
-morrow_lowke::negative_species::~negative_species(){
+morrow_bourdon::negative_species::~negative_species(){
 }
 
-Real morrow_lowke::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_bourdon::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 
-void morrow_lowke::negative_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
+void morrow_bourdon::negative_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
   m_perlin = a_perlin;
 }
 
-morrow_lowke::photon_one::photon_one(){
+morrow_bourdon::photon_one::photon_one(){
   m_name   = "photon_one";
 
   m_A      = 1.12E-4;
@@ -699,7 +699,7 @@ morrow_lowke::photon_one::photon_one(){
   m_constant = true;
 
   { // Parameters
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("photon1_A_coeff",      m_A);
     pp.query("photon1_lambda_coeff", m_lambda);
   }
@@ -708,7 +708,7 @@ morrow_lowke::photon_one::photon_one(){
   Real O2_frac  = 0.2;
   Real pressure = 1.0;
   {
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("gas_O2_frac",  O2_frac);
     pp.query("gas_pressure", pressure);
   }
@@ -716,15 +716,15 @@ morrow_lowke::photon_one::photon_one(){
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-morrow_lowke::photon_one::~photon_one(){
+morrow_bourdon::photon_one::~photon_one(){
   
 }
 
-Real morrow_lowke::photon_one::get_kappa(const RealVect a_pos) const {
+Real morrow_bourdon::photon_one::get_kappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-morrow_lowke::photon_two::photon_two(){
+morrow_bourdon::photon_two::photon_two(){
   m_name   = "photon_two";
 
   m_A      = 2.88E-3;
@@ -732,7 +732,7 @@ morrow_lowke::photon_two::photon_two(){
   m_constant = true;
 
   { // Parameters
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("photon2_A_coeff",      m_A);
     pp.query("photon2_lambda_coeff", m_lambda);
   }
@@ -741,21 +741,21 @@ morrow_lowke::photon_two::photon_two(){
   Real O2_frac  = 0.2;
   Real pressure = 1.0;
   {
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("gas_O2_frac",  O2_frac);
     pp.query("gas_pressure", pressure);
   }
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-morrow_lowke::photon_two::~photon_two(){
+morrow_bourdon::photon_two::~photon_two(){
 }
 
-Real morrow_lowke::photon_two::get_kappa(const RealVect a_pos) const {
+Real morrow_bourdon::photon_two::get_kappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-morrow_lowke::photon_three::photon_three(){
+morrow_bourdon::photon_three::photon_three(){
   m_name   = "photon_three";
 
   m_A      = 2.76E-1;
@@ -763,7 +763,7 @@ morrow_lowke::photon_three::photon_three(){
   m_constant = true;
 
   { // Parameters
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("photon3_A_coeff",      m_A);
     pp.query("photon3_lambda_coeff", m_lambda);
   }
@@ -772,17 +772,17 @@ morrow_lowke::photon_three::photon_three(){
   Real O2_frac  = 0.2;
   Real pressure = 1.0;
   {
-    ParmParse pp("morrow_lowke");
+    ParmParse pp("morrow_bourdon");
     pp.query("gas_O2_frac",  O2_frac);
     pp.query("gas_pressure", pressure);
   }
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }
 
-morrow_lowke::photon_three::~photon_three(){
+morrow_bourdon::photon_three::~photon_three(){
 }
 
-Real morrow_lowke::photon_three::get_kappa(const RealVect a_pos) const {
+Real morrow_bourdon::photon_three::get_kappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }

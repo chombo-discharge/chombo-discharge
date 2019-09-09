@@ -117,6 +117,8 @@ int plasma_engine::get_num_plotvars() const {
   if(m_plot_tracer && !m_celltagger.isNull()){
     num_output += m_celltagger->get_num_tracers();
   }
+  if(m_plot_ranks) num_output = num_output+1;
+  if(m_plot_J) num_output = num_output + SpaceDim;
 
   return num_output;
 
@@ -140,6 +142,14 @@ Vector<std::string> plasma_engine::get_plotvar_names() const {
 
       std::string two(s);
       names.push_back(one + two); 
+    }
+  }
+  if(m_plot_ranks) names.push_back("mpi_rank");
+  if(m_plot_J){
+    names.push_back("x-J");
+    names.push_back("y-J");
+    if(SpaceDim == 3){
+      names.push_back("z-J");
     }
   }
   return names;
@@ -1668,10 +1678,14 @@ void plasma_engine::parse_plot_vars(){
 
   m_plot_tags   = false;
   m_plot_tracer = false;
+  m_plot_J      = false;
+  m_plot_ranks  = false;
   
   for (int i = 0; i < num; i++){
-    if(     str[i] == "tags")   m_plot_tags   = true;
-    else if(str[i] == "tracer") m_plot_tracer = true;
+    if(     str[i] == "tags")     m_plot_tags   = true;
+    else if(str[i] == "tracer")   m_plot_tracer = true;
+    else if(str[i] == "J")        m_plot_J      = true;
+    else if(str[i] == "mpi_rank") m_plot_ranks  = true;
   }
 }
 
@@ -2464,7 +2478,8 @@ void plasma_engine::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   if(m_plot_tags)   write_tags(a_output, a_comp);
   if(m_plot_tracer) write_tracer(a_output, a_comp);
-
+  if(m_plot_ranks)  write_ranks(a_output, a_comp);
+  if(m_plot_J)      write_J(a_output, a_comp);
 }
 
 void plasma_engine::write_tags(EBAMRCellData& a_output, int& a_comp){
@@ -2531,6 +2546,46 @@ void plasma_engine::write_tracer(EBAMRCellData& a_output, int& a_comp){
       a_comp++;
     }
   }
+}
+
+void plasma_engine::write_ranks(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("plasma_engine::write_ranks");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_ranks" << endl;
+  }
+
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, phase::gas, 1);
+
+  const Real rank = 1.0*procID();
+  data_ops::set_value(scratch, rank);
+
+  const Interval src_interv(0, 0);
+  const Interval dst_interv(a_comp, a_comp);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+
+  a_comp++; 
+}
+
+void plasma_engine::write_J(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("plasma_engine::write_J");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_J" << endl;
+  }
+
+  // Allocates storage and computes J
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, phase::gas, SpaceDim);
+  m_timestepper->compute_J(scratch);
+
+  const Interval src_interv(0, SpaceDim-1);
+  const Interval dst_interv(a_comp, a_comp + SpaceDim -1);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+  a_comp += SpaceDim;
 }
 
 void plasma_engine::write_checkpoint_file(){

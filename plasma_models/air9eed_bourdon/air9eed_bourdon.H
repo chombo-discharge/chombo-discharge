@@ -1,12 +1,12 @@
 /*!
-  @file   air9eed.H
+  @file   air9eed_bourdon.H
   @brief  Declaration of a BOLSIG-based transport model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#ifndef _AIR9EED_
-#define _AIR9EED_
+#ifndef _AIR9EED_BOURDON_
+#define _AIR9EED_BOURDON_
 
 #include "simple_kinetics.H"
 #include "lookup_table.H"
@@ -24,7 +24,7 @@
   @todo If anyone finds the time, please improve the ion mobilities. 
 
 */
-class air9eed : public simple_kinetics {
+class air9eed_bourdon : public simple_kinetics {
 public:
 
   // Forward declaration of cdr species
@@ -49,9 +49,9 @@ public:
   */
   static void parse_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Real& a_O2frac, Real& a_N2frac);
   
-  air9eed();
+  air9eed_bourdon();
 
-  virtual ~air9eed();
+  virtual ~air9eed_bourdon();
 
   virtual Vector<Real> compute_cdr_diffusion_coefficients(const Real         a_time,
 							  const RealVect     a_pos,
@@ -107,8 +107,8 @@ public:
     @brief Compute the isotropic source terms for the RTEs
   */
   virtual Vector<Real> compute_rte_source_terms(const Real         a_time,
-						const Real             a_kappa,
-						const Real             a_dx,
+						const Real         a_kappa,
+						const Real         a_dx,
 						const RealVect     a_pos,
 						const RealVect     a_E,
 						const Vector<Real> a_cdr_densities) const;

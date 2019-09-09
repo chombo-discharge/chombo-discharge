@@ -1,12 +1,12 @@
 /*!
-  @file   morrow_lowke.H
+  @file   morrow_bourdon.H
   @brief  Declaration of the Morrow-Lowke plasma model for air
   @author Robert Marskar
   @date   Jan. 2018
 */
 
-#ifndef _MORROW_LOWKE_
-#define _MORROW_LOWKE_
+#ifndef _MORROW_BOURDON_
+#define _MORROW_BOURDON_
 
 #include "simple_kinetics.H"
 #include "perlin_if.H"
@@ -15,18 +15,18 @@
   @brief Class that implements the Morrow-Lowke discharge model for air.
   @details This class uses the Morrow-Lowke kinetic scheme for air and the three-group Bourdon model for the RTE equations. 
 */
-class morrow_lowke : public simple_kinetics {
+class morrow_bourdon : public simple_kinetics {
 public:
 
   /*!
     @brief Constructor
   */
-  morrow_lowke();
+  morrow_bourdon();
 
   /*!
     @brief Destructor
   */
-  virtual ~morrow_lowke();
+  virtual ~morrow_bourdon();
 
   // ====================================================================================================
 // NEW FUNCTION SIGNATURES

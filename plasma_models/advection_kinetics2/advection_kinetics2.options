@@ -1,7 +1,0 @@
-# ====================================================================================================
-# ADVECTION_KINETICS CLASS OPTIONS
-# ====================================================================================================
-advection_kinetics2.square_center = 0.0  0.0  0.0  # Center of square wave pulse
-advection_kinetics2.square_width  = 0.1  0.1  0.1  # Total width of square wave pulse
-advection_kinetics2.mobile        = true           # Turn on (true) or off (false) mobility
-advection_kinetics2.beta          = 0.5            # Ion bombardment coefficient

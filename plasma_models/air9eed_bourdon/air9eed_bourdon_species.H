@@ -1,19 +1,19 @@
 /*!
-  @file   air9eed.H
+  @file   air9eed_bourdon.H
   @brief  Declaration of species for the BOLSIG-based 11-species air model
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#include "air9eed.H"
+#include "air9eed_bourdon.H"
 
-#ifndef _AIR9EED_SPECIES_
-#define _AIR9EED_SPECIES_
+#ifndef _AIR9EED_BOURDON_SPECIES_
+#define _AIR9EED_BOURDON_SPECIES_
 
 /*!
   @brief Electron energy distribution
 */
-class air9eed::eed : public species {
+class air9eed_bourdon::eed : public species {
 public:
 
   /*!
@@ -42,7 +42,7 @@ protected:
 /*!
   @brief Electron class
 */
-class air9eed::electron : public species {
+class air9eed_bourdon::electron : public species {
 public:
 
   /*!
@@ -72,7 +72,7 @@ protected:
 /*!
   @brief N2plus class
 */
-class air9eed::N2plus : public species {
+class air9eed_bourdon::N2plus : public species {
 public:
 
   /*!
@@ -98,7 +98,7 @@ protected:
 /*!
   @brief N4plus class
 */
-class air9eed::N4plus : public species {
+class air9eed_bourdon::N4plus : public species {
 public:
 
   /*!
@@ -122,7 +122,7 @@ protected:
 /*!
   @brief O2plus class
 */
-class air9eed::O2plus : public species {
+class air9eed_bourdon::O2plus : public species {
 public:
 
   /*!
@@ -148,7 +148,7 @@ protected:
 /*!
   @brief O4plus class
 */
-class air9eed::O4plus : public species {
+class air9eed_bourdon::O4plus : public species {
 public:
 
   /*!
@@ -172,7 +172,7 @@ protected:
 /*!
   @brief O2plusN2 class
 */
-class air9eed::O2plusN2 : public species {
+class air9eed_bourdon::O2plusN2 : public species {
 public:
 
   /*!
@@ -196,7 +196,7 @@ protected:
 /*!
   @brief O2minus class
 */
-class air9eed::O2minus : public species {
+class air9eed_bourdon::O2minus : public species {
 public:
 
   /*!
@@ -220,7 +220,7 @@ protected:
 /*!
   @brief Ominus class
 */
-class air9eed::Ominus : public species {
+class air9eed_bourdon::Ominus : public species {
 public:
 
   /*!
@@ -245,7 +245,7 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air9eed::photon_one : public photon_group {
+class air9eed_bourdon::photon_one : public photon_group {
 public:
   /*!
     @brief Constructor
@@ -297,7 +297,7 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air9eed::photon_two : public photon_group {
+class air9eed_bourdon::photon_two : public photon_group {
 public:
   /*!
     @brief Constructor
@@ -349,7 +349,7 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air9eed::photon_three : public photon_group {
+class air9eed_bourdon::photon_three : public photon_group {
 public:
   /*!
     @brief Constructor
