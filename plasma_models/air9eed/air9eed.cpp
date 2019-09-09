@@ -265,8 +265,10 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   Vector<Real> source(m_num_species, 0.0);
 
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
-  const Real Te              = 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb);  // Kelvin
+  const Real Te              = Max(300., 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb));  // Kelvin
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
+
+  if(electron_energy > 1.E12) std::cout << electron_energy << std::endl;
 
   // Room for improvement: The best thing would be to store the rate coefficients as matrices and then do S = K*n
   
@@ -379,7 +381,6 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_electron_idx] -= products;
   source[m_O4plus_idx]   -= products;
 
-#if 0
   // k11 reaction
   products = k11 * n_e * n_O2p;
   source[m_electron_idx] -= products;
@@ -405,7 +406,7 @@ Vector<Real> air9eed::compute_cdr_source_terms(const Real              a_time,
   source[m_O2minus_idx] -= products;
   source[m_O2plus_idx]  -= products;
   
-
+#if 1
   // k16 reaction
   loss     = dE_k16;
   products = k16 * n_e * n_O2;
@@ -621,7 +622,7 @@ Real air9eed::compute_O2plusN2_O2_to_O4plus_N2()                 const {return 1
 Real air9eed::compute_O2plus_O2_M_to_O4plus_M(const Real a_Tg)   const {return 2.03E-34*pow(a_Tg, -3.2);}
 Real air9eed::compute_e_O4plus_to_2O2(const Real a_Te)           const {return 2.42E-11/(sqrt(a_Te));}
 Real air9eed::compute_e_O2plus_to_O2(const Real a_Te)            const {return 6.E-11/a_Te;}
-Real air9eed::compute_e_2O2_to_O2minus_O2(const Real a_Te)       const {return 6E-39/a_Te;}
+Real air9eed::compute_e_2O2_to_O2minus_O2(const Real a_Te)       const {return 6.E-39/a_Te;}
 Real air9eed::compute_O2minus_O4plus_to_3O2()                    const {return 1.E-13;}
 Real air9eed::compute_O2minus_O4plus_M_to_3O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
 Real air9eed::compute_O2minus_O2plus_M_to_2O2_M(const Real a_Tg) const {return 3.12E-31*pow(a_Tg, -2.5);}
@@ -775,6 +776,6 @@ Real air9eed::compute_e_N2_scattering_loss()              const {return 1;}
 
 Real air9eed::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-  return m_init_eed.get_entry(m_species[m_electron_idx]->initial_data(a_pos, a_time));
+  return m_init_eed.get_entry(EbyN)*m_species[m_electron_idx]->initial_data(a_pos, a_time);
 }
 

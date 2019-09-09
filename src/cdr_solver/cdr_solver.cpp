@@ -1401,8 +1401,10 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
     }
   }
 
+  data_ops::floor(m_state, 0.0);
   m_amr->average_down(m_state, m_phase);
   m_amr->interp_ghost(m_state, m_phase);
+
 }
 
 void cdr_solver::reflux(EBAMRCellData& a_state){

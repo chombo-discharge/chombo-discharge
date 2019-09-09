@@ -352,50 +352,52 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
   // Grid loop
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
+    if(ebisbox.isRegular(iv)){
     
-    // Position and E
-    pos    = origin + iv*a_dx;
-    E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
+      // Position and E
+      pos    = origin + iv*a_dx;
+      E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
 
-    // Fill vectors with densities
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx  = solver_it.get_solver();
-      const Real phi = (*a_particle_densities[idx]).getSingleValuedFAB()(iv, 0);
-      particle_densities[idx] = Max(zero, phi);
-      particle_gradients[idx] = RealVect(D_DECL((*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 0),
-						(*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 1),
-						(*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 2)));
-    }
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx  = solver_it.get_solver();
-      const Real phi = (*a_photon_densities[idx]).getSingleValuedFAB()(iv, 0);
-      photon_densities[idx] = Max(zero, phi);
-    }
+      // Fill vectors with densities
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx  = solver_it.get_solver();
+	const Real phi = (*a_particle_densities[idx]).getSingleValuedFAB()(iv, 0);
+	particle_densities[idx] = Max(zero, phi);
+	particle_gradients[idx] = RealVect(D_DECL((*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 0),
+						  (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 1),
+						  (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 2)));
+      }
+      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	const int idx  = solver_it.get_solver();
+	const Real phi = (*a_photon_densities[idx]).getSingleValuedFAB()(iv, 0);
+	photon_densities[idx] = Max(zero, phi);
+      }
 
-    // Compute source terms
-    const Real kappa = 1.0; // Kappa for regular cells
-    m_plaskin->advance_reaction_network(particle_sources,
-					photon_sources,
-					particle_densities,
-					particle_gradients,
-					photon_densities,
-					E,
-					pos,
-					a_dx,
-					a_dt,
-					a_time,
-					kappa);
+      // Compute source terms
+      const Real kappa = 1.0; // Kappa for regular cells
+      m_plaskin->advance_reaction_network(particle_sources,
+					  photon_sources,
+					  particle_densities,
+					  particle_gradients,
+					  photon_densities,
+					  E,
+					  pos,
+					  a_dx,
+					  a_dt,
+					  a_time,
+					  kappa);
 
-    // Put vector into temporary holders
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      part_src.getSingleValuedFAB()(iv,idx) = particle_sources[idx];
-    }
+      // Put vector into temporary holders
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	part_src.getSingleValuedFAB()(iv,idx) = particle_sources[idx];
+      }
     
-    // Put vector into temporary holders
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      phot_src.getSingleValuedFAB()(iv,idx) = photon_sources[idx];
+      // Put vector into temporary holders
+      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	phot_src.getSingleValuedFAB()(iv,idx) = photon_sources[idx];
+      }
     }
   }
 
@@ -1661,42 +1663,45 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
   const IntVectSet ivs(a_box);
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-    // Position, E, and grad(|E|)
-    pos    = origin + iv*a_dx;
-    E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
-    grad_E = RealVect(D_DECL(gradEfab(iv, 0), gradEfab(iv, 1), gradEfab(iv, 2)));
 
-    // Fill vectors with densities
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx  = solver_it.get_solver();
-      const Real phi = (*a_cdr_densities[idx]).getSingleValuedFAB()(iv, 0);
-      cdr_densities[idx] = Max(zero, phi);
-      cdr_grad[idx]      = RealVect(D_DECL((*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 0),
-					   (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 1),
-					   (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 2)));
-    }
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx  = solver_it.get_solver();
-      const Real phi = (*a_rte_densities[idx]).getSingleValuedFAB()(iv, 0);
-      rte_densities[idx] = Max(zero, phi);
-    }
+    if(ebisbox.isRegular(iv)){
+      // Position, E, and grad(|E|)
+      pos    = origin + iv*a_dx;
+      E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
+      grad_E = RealVect(D_DECL(gradEfab(iv, 0), gradEfab(iv, 1), gradEfab(iv, 2)));
 
-    // Compute source terms
-    const Real kappa = 1.0; // Kappa for regular cells
-    const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
-								     kappa,
-								     a_dx,
-								     pos,
-								     E,
-								     grad_E,
-								     cdr_densities,
-								     rte_densities,
-								     cdr_grad);
+      // Fill vectors with densities
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx  = solver_it.get_solver();
+	const Real phi = (*a_cdr_densities[idx]).getSingleValuedFAB()(iv, 0);
+	cdr_densities[idx] = Max(zero, phi);
+	cdr_grad[idx]      = RealVect(D_DECL((*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 0),
+					     (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 1),
+					     (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 2)));
+      }
+      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	const int idx  = solver_it.get_solver();
+	const Real phi = (*a_rte_densities[idx]).getSingleValuedFAB()(iv, 0);
+	rte_densities[idx] = Max(zero, phi);
+      }
+
+      // Compute source terms
+      const Real kappa = 1.0; // Kappa for regular cells
+      const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
+								       kappa,
+								       a_dx,
+								       pos,
+								       E,
+								       grad_E,
+								       cdr_densities,
+								       rte_densities,
+								       cdr_grad);
 
 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      tmpFAB(iv,idx) = sources[idx];
+      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.get_solver();
+	tmpFAB(iv,idx) = sources[idx];
+      }
     }
   }
 
