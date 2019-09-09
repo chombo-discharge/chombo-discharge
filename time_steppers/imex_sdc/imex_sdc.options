@@ -1,0 +1,77 @@
+# ====================================================================================================
+# IMEX_SDC CLASS OPTIONS
+#
+# This class uses semi-implicit spectral deferred corrections. Diffusion is handled implicitly,
+# and advection-reaction is handled explicitly.
+#
+# The maximum possible global order of accuracy is (p+1) where p is the number of subintervals. Each
+# correction raises the order by 1 (corr_iter=0 is the first order solution). To reach the maximum
+# possible order, you should perform p correction iterations. 
+#
+# 
+# ====================================================================================================
+imex_sdc.verbosity        = -1      # Class verbosity
+imex_sdc.solver_verbosity = -1      # Individual solver verbosities
+imex_sdc.fast_rte         = 1       # Solve RTE every this time steps
+imex_sdc.fast_poisson     = 1       # Solve Poisson every this time steps	
+imex_sdc.min_dt           = 0.      # Minimum permitted time step
+imex_sdc.max_dt           = 1.E99   # Maximum permitted time step
+imex_sdc.cfl              = 0.5     # CFL number
+imex_sdc.relax_time       = 1.0     # Relaxation time constant
+imex_sdc.source_comp      = interp  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+
+# ------------------------------------
+# Nodes, subintervals, and corrections
+# ------------------------------------
+imex_sdc.quad_nodes   = lobatto     # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
+imex_sdc.subintervals = 1           # Number of subintervals. This will be the maximum possible order.
+imex_sdc.corr_iter    = 1           # Number of iterations of the correction equation. Should be (subintervals-1)
+                                 # for maximum order
+
+# ---------------------------------------------------------	
+# Diffusive coupling
+#
+# This defines the weak coupling used for the implicit diffusion advance. 
+# ---------------------------------------------------------
+imex_sdc.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
+imex_sdc.use_tga            = false # Use second order diffusion per substep ('true')
+imex_sdc.num_diff_corr      = 0     # Number of corrections for 'strong'
+
+# Adaptive time stepping
+# ---------------------------------------------------------
+imex_sdc.print_report    = false    # Print report with error and stuff	
+imex_sdc.adaptive_dt     = false    # Use adaptive time stepping
+imex_sdc.error_norm      = 2        # Error norm (0 = Linf)
+imex_sdc.min_corr        = 0        # Minimum number of corrections
+imex_sdc.max_retries     = 100      # Maximum number of tries (for step rejection)
+imex_sdc.max_growth      = 1.2      # Maximum permissible time step growth
+imex_sdc.decrease_safety = 0.9      # Fudge factor when we decrease the time step. 
+imex_sdc.min_cfl         = 0.1      # Minimum CFL
+imex_sdc.max_cfl         = 0.75     # Maximum CFL
+imex_sdc.max_error       = 1.E-3    # Error threshold
+imex_sdc.error_index     = -1       # Error index. If -1, evaluate all CDR solvers	
+imex_sdc.safety          = 0.75     # Safety factor for time stepping
+
+# ---------------------------------------------------------	
+# "Asymptotic preserving". Development feature. 
+# ---------------------------------------------------------	
+imex_sdc.use_AP        = false      # Turn on the "asymptotic preserving" feature. 
+
+# ---------------------------------------------------------	
+# Debugging options
+# ---------------------------------------------------------
+imex_sdc.consistent_E      = true   # Use consistent E-field computations (update in between RK stages)
+imex_sdc.consistent_rte    = true   # Use consistent RTE updates
+imex_sdc.compute_v         = true   # Compute v in between substeps. 
+imex_sdc.compute_S         = true   # Compute S in between substeps.
+imex_sdc.compute_D         = true   # Compute S in between substeps.
+imex_sdc.do_advec_src      = true   # Turn off code functionality. Only for debugging 
+imex_sdc.do_diffusion      = true   # Turn off code functionality. Only for debugging
+imex_sdc.do_poisson        = true   # Turn off code functionality. Only for debugging
+imex_sdc.do_rte            = true   # Turn off code functionality. Only for debugging
+imex_sdc.profile_steps     = false  # Profile time steps with order, accuracy, cfl, etc.
+
+# ---------------------
+# Advection extrapolation. Currently does NOT work with subcycling (but I'm working on it...)
+# ---------------------
+imex_sdc.extrap_advect = true      # Time extrapolate with source and diffusion in advection step
