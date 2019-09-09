@@ -875,10 +875,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
       }
     }
   }
-  if(m_timestepper->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
-    const Real dummy_dt = 0.0;
-    m_timestepper->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
-  }
+
 
   const Real elliptic_solve = MPI_Wtime(); // Elliptic solve time
 
@@ -891,7 +888,14 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   m_timestepper->compute_cdr_diffusion();
   m_timestepper->compute_dt(m_dt, m_timecode);
   m_plaskin->set_dt(m_dt);
-  m_timestepper->init_source_terms(); 
+
+  if(m_timestepper->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
+    const Real dummy_dt = 1.0;
+
+    // Need new source terms for RTE equations
+    m_timestepper->advance_reaction_network(m_time, dummy_dt);
+    m_timestepper->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
+  }
 
   const Real solver_filling = MPI_Wtime();
 
@@ -1890,10 +1894,14 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
     poisson->auto_tune();
     m_timestepper->solve_poisson();                       // Solve Poisson equation by using initial data
+#if 0
     if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
-      const Real dummy_dt = 0.0;
+      const Real dummy_dt = 1.0;
+
+      m_timestepper->advance_reaction_network(m_time, dummy_dt);
       m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
     }
+#endif
 
     // Compute the capacitance
     if(m_new_io){
@@ -1917,6 +1925,11 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_timestepper->compute_dt(m_dt, m_timecode);
   m_plaskin->set_dt(m_dt);
   m_timestepper->init_source_terms();
+  if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
+    const Real dummy_dt = 1.0;
+
+    m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
+  }
 
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){

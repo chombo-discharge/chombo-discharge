@@ -112,6 +112,7 @@ public:
 					const Real&                   a_time,
 					const Real&                   a_dt);
 
+
   virtual void advance_reaction_network(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
 					Vector<LevelData<EBCellFAB>* >&       a_photon_sources,
 					const Vector<LevelData<EBCellFAB>* >& a_particle_densities,

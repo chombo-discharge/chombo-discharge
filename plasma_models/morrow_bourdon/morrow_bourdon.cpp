@@ -15,8 +15,6 @@
 morrow_bourdon::morrow_bourdon(){
   CH_TIME("morrow_bourdon::morrow_bourdon");
 
-
-
   parse_gas();
   parse_photoi();
   parse_see();
@@ -126,6 +124,52 @@ void morrow_bourdon::instantiate_species(){
   m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new morrow_bourdon::photon_three());
 }
 
+void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_sources,
+					      Vector<Real>&          a_photon_sources,
+					      const Vector<Real>     a_particle_densities,
+					      const Vector<RealVect> a_particle_gradients,
+					      const Vector<Real>     a_photon_densities,
+					      const RealVect         a_E,
+					      const RealVect         a_pos,
+					      const Real             a_dx,
+					      const Real             a_dt,
+					      const Real             a_time,
+					      const Real             a_kappa) const {
+
+  const Real alpha  = compute_alpha(a_E); // Ionization coefficient
+  const Real eta    = compute_eta(a_E);   // Attachment coefficient
+  const Real beta   = compute_beta(a_E);  // Recombination coefficient
+
+  // Cast so we can get A-coefficients
+  const morrow_bourdon::photon_one*   photon1 = static_cast<morrow_bourdon::photon_one*>   (&(*m_photons[m_photon1_idx]));
+  const morrow_bourdon::photon_two*   photon2 = static_cast<morrow_bourdon::photon_two*>   (&(*m_photons[m_photon2_idx]));
+  const morrow_bourdon::photon_three* photon3 = static_cast<morrow_bourdon::photon_three*> (&(*m_photons[m_photon3_idx]));
+  
+  // Densities and velocities
+  const Real Ne  = a_particle_densities[m_nelec_idx]; 
+  const Real Np  = a_particle_densities[m_nplus_idx];
+  const Real Nn  = a_particle_densities[m_nminu_idx];
+  const Real Ve  = compute_ve(a_E).vectorLength();
+  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(photon1->get_A()*a_photon_densities[m_photon1_idx]
+							 + photon2->get_A()*a_photon_densities[m_photon2_idx]
+							 + photon3->get_A()*a_photon_densities[m_photon3_idx]);
+
+
+  Real& Se = a_particle_sources[m_nelec_idx];
+  Real& Sp = a_particle_sources[m_nplus_idx];
+  Real& Sn = a_particle_sources[m_nminu_idx];
+
+  Se = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np + Sph;
+  Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
+  Sn = eta*Ne*Ve   - beta*Np*Nn;
+
+  const Real tmp = Max(0.0, alpha*Ne*Ve*m_exc_eff*(m_pq/(m_pq + m_p)));
+  a_photon_sources[m_photon1_idx] = tmp;
+  a_photon_sources[m_photon1_idx] = tmp;
+  a_photon_sources[m_photon1_idx] = tmp;
+ 
+}
+
 Vector<RealVect> morrow_bourdon::compute_cdr_velocities(const Real         a_time,
 							const RealVect     a_pos,
 							const RealVect     a_E,
@@ -195,54 +239,6 @@ RealVect morrow_bourdon::compute_vn(const RealVect a_E) const{
 
   vn *= 0.01; // Morrow-Lowke expression is in cm/s
   return vn;
-}
-
-Vector<Real> morrow_bourdon::compute_cdr_source_terms(const Real             a_time,
-						      const Real             a_kappa,
-						      const Real             a_dx,
-						      const RealVect         a_pos,
-						      const RealVect         a_E,
-						      const RealVect         a_gradE,
-						      const Vector<Real>     a_cdr_densities,
-						      const Vector<Real>     a_rte_densities,
-						      const Vector<RealVect> a_grad_cdr) const {
-
-  Vector<Real> source(m_num_species, 0.0);
-
-  const Real alpha  = compute_alpha(a_E); // Ionization coefficient
-  const Real eta    = compute_eta(a_E);   // Attachment coefficient
-  const Real beta   = compute_beta(a_E);  // Recombination coefficient
-
-  // Cast so we can get A-coefficients
-  const morrow_bourdon::photon_one*   photon1 = static_cast<morrow_bourdon::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const morrow_bourdon::photon_two*   photon2 = static_cast<morrow_bourdon::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const morrow_bourdon::photon_three* photon3 = static_cast<morrow_bourdon::photon_three*> (&(*m_photons[m_photon3_idx]));
-  
-  // Densities and velocities
-  const Real Ne  = a_cdr_densities[m_nelec_idx]; 
-  const Real Np  = a_cdr_densities[m_nplus_idx];
-  const Real Nn  = a_cdr_densities[m_nminu_idx];
-  const Real Ve  = compute_ve(a_E).vectorLength();
-  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-							 + photon2->get_A()*a_rte_densities[m_photon2_idx]
-							 + photon3->get_A()*a_rte_densities[m_photon3_idx]);
-
-
-  Real& Se = source[m_nelec_idx];
-  Real& Sp = source[m_nplus_idx];
-  Real& Sn = source[m_nminu_idx];
-
-  Se = alpha*Ne*Ve - eta*Ne*Ve   - beta*Ne*Np + Sph;
-  Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
-  Sn = eta*Ne*Ve   - beta*Np*Nn;
-
-#if 0 // Debug
-  Se = 0.E10;
-  Sp = 0.E10;
-  Sn = 0.E10;
-#endif
-
-  return source;
 }
 
 Real morrow_bourdon::compute_alpha(const RealVect a_E) const{
@@ -361,7 +357,9 @@ Vector<Real> morrow_bourdon::compute_cdr_dielectric_fluxes(const Real         a_
 							   const Vector<Real> a_rte_fluxes,
 							   const Vector<Real> a_extrap_cdr_fluxes) const {
   // Outflux of species
-  Vector<Real> fluxes(m_num_species, 0.0); 
+  Vector<Real> fluxes(m_num_species, 0.0);
+
+  return a_extrap_cdr_fluxes;
 
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
     fluxes[m_nelec_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nelec_idx]); // Outflow for electrons
@@ -508,27 +506,6 @@ Vector<Real> morrow_bourdon::compute_cdr_domain_fluxes(const Real           a_ti
 
   
   return fluxes;
-}
-
-Vector<Real> morrow_bourdon::compute_rte_source_terms(const Real         a_time,
-						      const Real         a_kappa,
-						      const Real         a_dx,
-						      const RealVect     a_pos,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities) const {
-  Vector<Real> ret(m_num_photons);
-
-  const Real alpha           = this->compute_alpha(a_E);       // Compute ionization coefficient
-  const Real Ne              = a_cdr_densities[m_nelec_idx];   // Electron density
-  const Real ve              = compute_ve(a_E).vectorLength(); // Electron velocity
-  const Real Se              = Max(0., alpha*Ne*ve);           // Excitations = alpha*Ne*ve
-
-  // Photo emissions = electron excitations * efficiency * quenching
-  ret[m_photon1_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
-  ret[m_photon2_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
-  ret[m_photon3_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
-
-  return ret;
 }
 
 Real morrow_bourdon::initial_sigma(const Real a_time, const RealVect a_pos) const{

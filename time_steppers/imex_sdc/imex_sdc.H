@@ -151,8 +151,8 @@ protected:
   void copy_phi_p_to_cdr();
   void copy_sigma_p_to_sigma();
 
-  // Integrate RTE (only time dependent)
-  void integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrate_rte_transient(const Real a_dt);
+  void integrate_rte_stationary();
 
   // These are the standard IMEX_SDC integration routines
   void integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms);
@@ -177,8 +177,6 @@ protected:
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
   void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
-  void update_stationary_rte(const Real a_time); // This uses the solver states, make sure that is what you want
-  void update_stationary_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time);
   void update_diffusion_coefficients();
 
   // Store & restore functions
@@ -186,7 +184,7 @@ protected:
   void restore_solvers();
 
   // Aux functions
-  void compute_reaction_network(const Vector<EBAMRCellData*> a_states, const Real a_time, const Real a_dt);
+  void compute_reaction_network(const int a_m, const Real a_time, const Real a_dt);
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
   void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
@@ -200,8 +198,6 @@ protected:
   void compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_cdr_velo(const Real a_time);
   void compute_cdr_velo(const Vector<EBAMRCellData*>& a_states, const Real a_time);
-  void compute_cdr_sources(const Real a_time);
-  void compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time);
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
   void compute_sigma_flux();
 

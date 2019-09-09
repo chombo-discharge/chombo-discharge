@@ -185,10 +185,8 @@ bool imex_sdc::need_to_regrid(){
   if(m_verbosity > 5){
     pout() << "imex_sdc::need_to_regrid" << endl;
   }
-  const bool regrid = m_accum_cfl > m_regrid_cfl;
-  if(regrid) m_accum_cfl = 0.0;
-  
-  return regrid;
+
+  return false;
 }
 
 Real imex_sdc::restrict_dt(){
@@ -214,8 +212,8 @@ void imex_sdc::init_source_terms(){
   if(m_verbosity > 5){
     pout() << "imex_sdc::init_source_terms" << endl;
   }
-  
-  time_stepper::init_source_terms();
+
+  advance_reaction_network(m_time, m_dt);
 }
 
 void imex_sdc::setup_quadrature_nodes(const int a_p){
@@ -526,7 +524,6 @@ Real imex_sdc::advance(const Real a_dt){
 	  imex_sdc::compute_cdr_gradients();
 	  imex_sdc::compute_cdr_velo(m_time);
 	  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
-	  imex_sdc::compute_cdr_sources(m_time);
 	}
       }
     }
@@ -536,53 +533,23 @@ Real imex_sdc::advance(const Real a_dt){
     }
   }
 
-
-  // Copy results back to solvers, and update the Poisson and radiative transfer equations
+  // Copy results back to solvers
   imex_sdc::copy_phi_p_to_cdr();
   imex_sdc::copy_sigma_p_to_sigma();
 
-  const Real t0 = MPI_Wtime();
-  imex_sdc::update_poisson();
-  imex_sdc::update_stationary_rte(m_time + actual_dt); // Only triggers if m_rte->is_stationar() == true
-
-  // Always recompute source terms and velocities for the next time step. These were computed ea
-  const Real t1 = MPI_Wtime();
-  imex_sdc::compute_cdr_gradients();
-  const Real t2 = MPI_Wtime();
+  // Always recompute velocities and diffusion coefficients before the next time step. The Poisson and RTE equations
+  // have been updated when we come in here. 
   imex_sdc::compute_cdr_velo(m_time + actual_dt);
-  const Real t3 = MPI_Wtime();
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
-  const Real t4 = MPI_Wtime();
 
-  // In case we're using FHD, we need to tell the kinetics module about the time step before computign sources
-  Real next_dt;
-  time_code::which_code dummy;
-  compute_dt(next_dt, dummy);
-  m_plaskin->set_dt(next_dt);
-  imex_sdc::compute_cdr_sources(m_time + actual_dt);
-  if(!m_rte->is_stationary()){
-    
-  }
-  const Real t5 = MPI_Wtime();
 
   // Profile step
   if(m_print_report)  imex_sdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
   if(m_profile_steps) imex_sdc::write_step_profile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
 
-#if 0 // Debug
-  pout() << "poisson time = " << t1 - t0 << endl;
-  pout() << "gradient = " << t2 - t1 << endl;
-  pout() << "velo = " << t3 - t2 << endl;
-  pout() << "diffco = " << t4 - t3 << endl;
-  pout() << "source = " << t5 - t4 << endl;
-#endif
-
   // Store current error. 
   m_have_err  = true;
   m_pre_error = m_max_error;
-
-  //
-  m_accum_cfl += actual_dt/m_dt_cfl;
   
   return actual_dt;
 }
@@ -651,11 +618,9 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
   }
 
 
-  // 1. The first time we enter this routine, source terms and velocities were updated.
+  // 1. The first time we enter this routine, velocities were updated.
   // 2. For further calls, source terms and velocities have been overwritten, but since the explicit
   //    operator slopes do not change, this is perfectly fine. We just increment with the lagged terms. 
-
-
   Real t0, t1;
   Real total_time = 0.0;
   Real setup_time  = 0.0;
@@ -663,18 +628,18 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
   Real diffusive_time = 0.0;
 
   // We begin with phi[0] = phi(t_n). Then update phi[m+1].
+  Real time = a_time;
   for(int m = 0; m < m_p; m++){
 
-    
-
     // Update source terms every time we go through this
+    imex_sdc::compute_E_into_scratch();
+    imex_sdc::compute_reaction_network(m, a_time, m_dtm[m]); // This updates the CDR and RTE source terms
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
     // which is what we need to do at the start of the time step. In principle, these things do not change
     // and so we could probably store them somewhere for increased performance. 
-    if(m == 0 && !a_lagged_terms){ // This updates the boundary conditions; since these are used to compute the slopes,
-      t0 = MPI_Wtime();         // and the m=0 slopes do not change, we only need to do this for the predictor. 
-      imex_sdc::compute_E_into_scratch();
+    if(m == 0 && !a_lagged_terms){ // This updates the CDR boundary conditions; since these are used to compute the slopes,
+      t0 = MPI_Wtime();            // and the m=0 hyperbolic slopes do not change, we only need to do this for the predictor. 
       imex_sdc::compute_cdr_eb_states();
       imex_sdc::compute_cdr_fluxes(a_time);
       imex_sdc::compute_cdr_domain_states();
@@ -686,16 +651,9 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
       setup_time = t1-t0;
     }
     
-    // This does the transient rte advance. Stationary solves are done after computing the E-field.
-    // The transient solve needs to happen BEFORE the reaction solve in case there is a tight coupling
-    // between the RTE and CDR equations (relaxations of excited states). The integrate_rte routine compues
-    // source terms just before advancing, and since source terms for the CDR equations are not updated
-    // between this routine and the integrate_advection_reaction call, we are ensured that the source terms
-    // are consistent.
+    // This does the transient rte advance. Source terms were uåpdated in the compute_reaction_network routine above. 
     t0 = MPI_Wtime();
-    if(m_consistent_rte) {
-      imex_sdc::integrate_rte(a_dt, m, a_lagged_terms);
-    }
+    if(!(m_rte->is_stationary())) imex_sdc::integrate_rte_transient(a_dt);
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
     t0 = MPI_Wtime();
@@ -709,30 +667,38 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
     t1 = MPI_Wtime();
     diffusive_time += t1-t0;
 
-    // After the diffusion step we should update source terms and boundary conditions for the next step. We don't
-    // do this on the last step. This is done either in the reconcile_integrands routine, or after IMEX_SDC is done
-    // with its substebs. 
-    const bool last = (m == m_p-1);
-    if(!last){
-      Vector<EBAMRCellData*> cdr_densities_mp1 = imex_sdc::get_cdr_phik(m+1);
-      EBAMRIVData& sigma_mp1 = imex_sdc::get_sigmak(m+1);
-      const Real t_mp1 = m_tm[m+1];
+    // After the diffusion step we update the Poisson and *stationary* RTE equations
+    Vector<EBAMRCellData*> cdr_densities_mp1 = imex_sdc::get_cdr_phik(m+1);
+    EBAMRIVData& sigma_mp1 = imex_sdc::get_sigmak(m+1);
+    const Real t_mp1 = m_tm[m+1];
 
-      // Update electric field, RTE equations, source terms, and velocities. 
-      if(m_consistent_E)   imex_sdc::update_poisson(cdr_densities_mp1, sigma_mp1);
-      if(m_consistent_rte) imex_sdc::update_stationary_rte(cdr_densities_mp1, t_mp1);
+    // Update electric field and stationary RTE equations
+    if(m_consistent_E)   imex_sdc::update_poisson(cdr_densities_mp1, sigma_mp1);
+    if(m_consistent_rte) {
+      if(m_rte->is_stationary()){
+	imex_sdc::compute_reaction_network(m+1, time + m_dtm[m], m_dtm[m]);
+	imex_sdc::integrate_rte_stationary();
+      }
+    }
+
+    // If we need another step, we should update boundary conditions agains. We DONT do this on the last step
+    // because this was also done on the way INTO this routine. If we've updated m=m_p, we either recompute
+    // boundary conditions in the next SDC sweep, or we allow the next time step to take care of this. 
+    const int last = m == m_p-1;
+    if(!last){
       if(m_compute_S)      imex_sdc::compute_cdr_gradients(cdr_densities_mp1);
       if(m_compute_v)      imex_sdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
-      if(m_compute_S)      imex_sdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
       if(m_compute_D)      imex_sdc::update_diffusion_coefficients();
 
-      // Update boundary conditions for cdr and sigma equations. 
+      // Update boundary conditions for cdr and sigma equations. We need them for the next step
       imex_sdc::compute_cdr_eb_states(cdr_densities_mp1);
       imex_sdc::compute_cdr_fluxes(cdr_densities_mp1, t_mp1);
       imex_sdc::compute_cdr_domain_states(cdr_densities_mp1);
       imex_sdc::compute_cdr_domain_fluxes(cdr_densities_mp1, t_mp1);
       imex_sdc::compute_sigma_flux();
     }
+
+    time += m_dtm[m];
   }
   t1 = MPI_Wtime();
 
@@ -969,18 +935,14 @@ void imex_sdc::reconcile_integrands(){
     pout() << "imex_sdc::reconcile_integrands" << endl;
   }
 
+  // TLDR: When we come in here, all solutions (Poisson, CDR, RTE, Sigma) are known at node m_p. But we
+  //       do need the extra slopes for the explicit operators
+
   Vector<EBAMRCellData*> cdr_densities_p = imex_sdc::get_cdr_phik(m_p);
   EBAMRIVData& sigma_p = imex_sdc::get_sigmak(m_p);
   const Real t_p = m_tm[m_p];
 
-//  Update electric field, RTE equations, source terms, and velocities
-  if(m_consistent_E)   imex_sdc::update_poisson(cdr_densities_p, sigma_p);
-  if(m_consistent_rte) imex_sdc::update_stationary_rte(cdr_densities_p, t_p);
-  if(m_compute_S)      imex_sdc::compute_cdr_gradients(cdr_densities_p);
-  if(m_compute_v)      imex_sdc::compute_cdr_velo(cdr_densities_p, t_p);
-  if(m_compute_S)      imex_sdc::compute_cdr_sources(cdr_densities_p, t_p);
-
-  // Update boundary conditions for cdr and sigma equations
+  // Update boundary conditions for cdr and sigma equations before getting the slope at the final node
   imex_sdc::compute_cdr_eb_states(cdr_densities_p);
   imex_sdc::compute_cdr_fluxes(cdr_densities_p, t_p);
   imex_sdc::compute_cdr_domain_states(cdr_densities_p);
@@ -1279,7 +1241,6 @@ void imex_sdc::regrid_internals(){
     pout() << "imex_sdc::regrid_internals" << endl;
   }
 
-  m_accum_cfl = 0.0;
   m_cdr_error.resize(m_plaskin->get_num_species());
   
   imex_sdc::allocate_cdr_storage();
@@ -1714,47 +1675,20 @@ void imex_sdc::compute_sigma_flux(){
   m_sigma->reset_cells(flux);
 }
 
-void imex_sdc::compute_reaction_network(const Vector<EBAMRCellData*> a_states, const Real a_time, const Real a_dt){
-  CH_TIME("imex_sdc::compute_cdr_sources(Vector<EBAMRCellData*>, Real)");
+void imex_sdc::compute_reaction_network(const int a_m, const Real a_time, const Real a_dt){
+  CH_TIME("imex_sdc::compute_reaction_network");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_sources(Vector<EBAMRCellData*>, Real)" << endl;
+    pout() << "imex_sdc::compute_reaction_network";
   }
 
   Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
   Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
 
+  const Vector<EBAMRCellData*> cdr_densities = get_cdr_phik(a_m);
   const Vector<EBAMRCellData*> rte_densities = m_rte->get_states();
   const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
-  time_stepper::advance_reaction_network(cdr_sources, rte_sources, a_states, rte_densities, E, a_time, a_dt);
-}
-
-void imex_sdc::compute_cdr_sources(const Real a_time){
-  CH_TIME("imex_sdc::compute_cdr_sources_into_scratch");
-  if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_sources_into_scratch" << endl;
-  }
-
-  this->compute_cdr_sources(m_cdr->get_states(), a_time);
-}
-
-void imex_sdc::compute_cdr_sources(const Vector<EBAMRCellData*>& a_states, const Real a_time){
-  CH_TIME("imex_sdc::compute_cdr_sources(Vector<EBAMRCellData*>, Real)");
-  if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_sources(Vector<EBAMRCellData*>, Real)" << endl;
-  }
-  
-  Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
-  Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-  EBAMRCellData& E                   = m_poisson_scratch->get_E_cell();
-
-  Vector<EBAMRCellData*> cdr_gradients;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_gradients.push_back(&(storage->get_gradient())); // These should already have been computed
-  }
-
-  time_stepper::compute_cdr_sources(cdr_sources, a_states, cdr_gradients, rte_states, E, a_time, centering::cell_center);
+  time_stepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
 }
 
 void imex_sdc::update_poisson(){
@@ -1789,68 +1723,37 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
   }
 }
 
-void imex_sdc::update_stationary_rte(const Real a_time){
-  CH_TIME("imex_sdc::update_stationary_rte(solver)");
+void imex_sdc::integrate_rte_transient(const Real a_dt){
+  CH_TIME("imex_sdc::integrate_rte_transient");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::update_stationary_rte(solver)" << endl;
-  }
-  
-  if(m_do_rte){
-    if((m_step + 1) % m_fast_rte == 0){
-      if(m_rte->is_stationary()){
-	Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-	Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
-	Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
-
-	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
-
-	const Real dummy_dt = 0.0;
-	this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
-      }
-    }
-  }
-}
-
-void imex_sdc::update_stationary_rte(const Vector<EBAMRCellData*>& a_cdr_states, const Real a_time){
-  CH_TIME("imex_sdc::update_stationary_rte(full)");
-  if(m_verbosity > 5){
-    pout() << "imex_sdc::update_stationary_rte(full)" << endl;
-  }
-  
-  if(m_do_rte){
-    if((m_step + 1) % m_fast_rte == 0){
-      if(m_rte->is_stationary()){
-	Vector<EBAMRCellData*> rte_states  = m_rte->get_states();
-	Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
-
-	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
-
-	const Real dummy_dt = 0.0;
-	this->solve_rte(rte_states, rte_sources, a_cdr_states, E, a_time, dummy_dt, centering::cell_center);
-      }
-    }
-  }
-}
-
-void imex_sdc::integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_terms){
-  CH_TIME("imex_sdc::integrate_rte(full)");
-  if(m_verbosity > 5){
-    pout() << "imex_sdc::integrate_rte(full)" << endl;
+    pout() << "imex_sdc::integrate_rte_transient" << endl;
   }
 
   if(m_do_rte){
     if((m_step + 1) % m_fast_rte == 0){
       if(!(m_rte->is_stationary())){
-	const Real time = m_time + m_dtm[a_m]; // This is the current time
-      
-	Vector<EBAMRCellData*>  rte_states  = m_rte->get_states();
-	Vector<EBAMRCellData*>  rte_sources = m_rte->get_sources();
-	Vector<EBAMRCellData*>  cdr_states  = imex_sdc::get_cdr_phik(a_m);
-	EBAMRCellData& E = m_poisson_scratch->get_E_cell();
-	this->solve_rte(rte_states, rte_sources, cdr_states, E, time, a_dt, centering::cell_center);
-#if 1 // Debug
-	MayDay::Abort("imex_sdc::integrate_rte - shouldn't happen");
-#endif
+	for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	  RefCountedPtr<rte_solver>& solver = solver_it();
+	  solver->advance(a_dt);
+	}
+      }
+    }
+  }
+}
+
+void imex_sdc::integrate_rte_stationary(){
+  CH_TIME("imex_sdc::integrate_rte_transient");
+  if(m_verbosity > 5){
+    pout() << "imex_sdc::integrate_rte_transient" << endl;
+  }
+
+  if(m_do_rte){
+    if((m_step + 1) % m_fast_rte == 0){
+      if((m_rte->is_stationary())){
+	for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	  RefCountedPtr<rte_solver>& solver = solver_it();
+	  solver->advance(0.0);
+	}
       }
     }
   }

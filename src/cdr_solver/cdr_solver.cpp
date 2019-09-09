@@ -996,84 +996,86 @@ void cdr_solver::initial_data_particles(){
     pvr_buffer = 0;
   }
 
+  const List<Particle>& initial_particles = m_species->get_initial_particles();
+  const int num_particles = initial_particles.length();
+
 
   // Allocate some stuff
-  Vector<RefCountedPtr<ParticleData<Particle> > > amrparticles;
-  Vector<RefCountedPtr<ParticleValidRegion> > pvr;
-  m_amr->allocate(amrparticles);
-  m_amr->allocate(pvr, pvr_buffer);
+  if(num_particles > 0){
+    Vector<RefCountedPtr<ParticleData<Particle> > > amrparticles;
+    Vector<RefCountedPtr<ParticleValidRegion> > pvr;
+    m_amr->allocate(amrparticles);
+    m_amr->allocate(pvr, pvr_buffer);
 
-  // Gather particles on the coarsest level
-  //  List<Particle>& initial_particles = m_species->get_initial_particles();
-
-  // Have not added the particles to the 
-  const DisjointBoxLayout& dbl_coar = m_amr->get_grids()[0];
-  for (DataIterator dit = dbl_coar.dataIterator(); dit.ok(); ++dit){
-    const Box box = dbl_coar.get(dit());
-    (*amrparticles[0])[dit()].addItems(m_species->get_initial_particles());
-  }
-
-  // Remap amr particles
-  for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
-
-    // 1. Collect coarser level particles into this levels PVR
-    collectValidParticles(amrparticles[lvl]->outcast(),
-			  *amrparticles[lvl-1],
-			  pvr[lvl]->mask(),
-			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  m_amr->get_ref_rat()[lvl-1],
-			  false, 
-			  origin);
-    amrparticles[lvl]->remapOutcast();
-  }
-
-  // We will deposit onto m_state, using m_scratch as a scratch holder for interpolation stuff
-  data_ops::set_value(m_state, 0.0);
-  data_ops::set_value(m_scratch, 0.0);
-
-  // Deposit onto mseh
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->get_dx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
-
-    const bool has_coar = (lvl > 0);
-    const bool has_fine = (lvl < finest_level);
-
-    // 1. If we have a coarser level whose cloud hangs into this level, interpolate the coarser level here first
-    if(has_coar && deposition != InterpType::NGP){
-      RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
-      interp->interpolate(*m_state[lvl], *m_scratch[lvl-1], interv);
+    // Have not added the particles to the 
+    const DisjointBoxLayout& dbl_coar = m_amr->get_grids()[0];
+    for (DataIterator dit = dbl_coar.dataIterator(); dit.ok(); ++dit){
+      const Box box = dbl_coar.get(dit());
+      (*amrparticles[0])[dit()].addItems(m_species->get_initial_particles());
     }
+
+    // Remap amr particles
+    for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
+
+      // 1. Collect coarser level particles into this levels PVR
+      collectValidParticles(amrparticles[lvl]->outcast(),
+			    *amrparticles[lvl-1],
+			    pvr[lvl]->mask(),
+			    m_amr->get_dx()[lvl]*RealVect::Unit,
+			    m_amr->get_ref_rat()[lvl-1],
+			    false, 
+			    origin);
+      amrparticles[lvl]->remapOutcast();
+    }
+
+    // We will deposit onto m_state, using m_scratch as a scratch holder for interpolation stuff
+    data_ops::set_value(m_state, 0.0);
+    data_ops::set_value(m_scratch, 0.0);
+
+    // Deposit onto mseh
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const Real dx                = m_amr->get_dx()[lvl];
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+
+      const bool has_coar = (lvl > 0);
+      const bool has_fine = (lvl < finest_level);
+
+      // 1. If we have a coarser level whose cloud hangs into this level, interpolate the coarser level here first
+      if(has_coar && deposition != InterpType::NGP){
+	RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
+	interp->interpolate(*m_state[lvl], *m_scratch[lvl-1], interv);
+      }
     
-    // 2. Deposit this levels particles and exchange ghost cells
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      MeshInterp interp(box, dx*RealVect::Unit, origin);
-      interp.deposit((*amrparticles[lvl])[dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), deposition);
+      // 2. Deposit this levels particles and exchange ghost cells
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const Box box          = dbl.get(dit());
+	MeshInterp interp(box, dx*RealVect::Unit, origin);
+	interp.deposit((*amrparticles[lvl])[dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), deposition);
+      }
+
+
+      // Exchange ghost cells
+      const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
+      LDaddOp<FArrayBox> addOp;
+      LevelData<FArrayBox> aliasFAB;
+      aliasEB(aliasFAB, *m_state[lvl]);
+      aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
+
+      // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
+      //    interpolation of "hanging clouds"
+      if(has_fine){
+	m_state[lvl]->localCopyTo(*m_scratch[lvl]);
+      }
     }
-
-
-    // Exchange ghost cells
-    const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
-    LDaddOp<FArrayBox> addOp;
-    LevelData<FArrayBox> aliasFAB;
-    aliasEB(aliasFAB, *m_state[lvl]);
-    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
-
-    // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
-    //    interpolation of "hanging clouds"
-    if(has_fine){
-      m_state[lvl]->localCopyTo(*m_scratch[lvl]);
-    }
-  }
 
 #if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx = m_amr->get_dx()[lvl];
-    data_ops::scale(*m_state[lvl], 1./dx);
-  }
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const Real dx = m_amr->get_dx()[lvl];
+      data_ops::scale(*m_state[lvl], 1./dx);
+    }
 #endif
+  }
 }
 
 void cdr_solver::hybrid_divergence(EBAMRCellData&     a_hybrid_div,

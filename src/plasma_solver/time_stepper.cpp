@@ -674,8 +674,10 @@ void time_stepper::init_source_terms(){
     pout() << "time_stepper::init_source_terms" << endl;
   }
 
+#if 0
   compute_cdr_sources();
   compute_rte_sources();
+#endif
 }
 
 void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffco_face,
@@ -3749,7 +3751,8 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     pout() << "time_stepper::solve_rte(full)" << endl;
   }
 
-  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
+  //  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
+  //  advance_reaction_network(a_time, a_dt);
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -3757,7 +3760,7 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
     RefCountedPtr<rte_solver>& solver = solver_it();
     EBAMRCellData& state              = *a_rte_states[idx];
     EBAMRCellData& rhs                = *a_rte_sources[idx];
-   solver->advance(a_dt, state, rhs);
+    solver->advance(a_dt, state, rhs);
   }
 }
 

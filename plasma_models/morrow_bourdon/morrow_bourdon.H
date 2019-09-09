@@ -9,17 +9,30 @@
 #define _MORROW_BOURDON_
 
 #include "simple_kinetics.H"
+#include "network_kinetics.H"
 #include "perlin_if.H"
 
 /*!
   @brief Class that implements the Morrow-Lowke discharge model for air.
   @details This class uses the Morrow-Lowke kinetic scheme for air and the three-group Bourdon model for the RTE equations. 
 */
-class morrow_bourdon : public simple_kinetics {
+class morrow_bourdon : public network_kinetics {
 public:
 
   morrow_bourdon();
   ~morrow_bourdon();
+
+  void advance_reaction_network(Vector<Real>&          a_particle_sources,
+				Vector<Real>&          a_photon_sources,
+				const Vector<Real>     a_particle_densities,
+				const Vector<RealVect> a_particle_gradients,
+				const Vector<Real>     a_photon_densities,
+				const RealVect         a_E,
+				const RealVect         a_pos,
+				const Real             a_dx,
+				const Real             a_dt,
+				const Real             a_time,
+				const Real             a_kappa) const;
 
 
   Vector<Real> compute_cdr_diffusion_coefficients(const Real         a_time,
@@ -33,15 +46,6 @@ public:
 					  const RealVect     a_E,
 					  const Vector<Real> a_cdr_densities) const;
 
-  Vector<Real> compute_cdr_source_terms(const Real              a_time,
-					const Real              a_kappa,
-					const Real              a_dx,
-					const RealVect         a_pos,
-					const RealVect         a_E,
-					const RealVect         a_gradE,
-					const Vector<Real>     a_cdr_densities,
-					const Vector<Real>     a_rte_densities,
-					const Vector<RealVect> a_grad_cdr) const;
 
   Vector<Real> compute_cdr_electrode_fluxes(const Real         a_time,
 					    const RealVect     a_pos,
@@ -73,13 +77,6 @@ public:
 					 const Vector<Real>   a_cdr_gradients,
 					 const Vector<Real>   a_rte_fluxes,
 					 const Vector<Real>   a_extrap_cdr_fluxes) const;
-
-  Vector<Real> compute_rte_source_terms(const Real         a_time,
-					const Real         a_kappa,
-					const Real         a_dx,
-					const RealVect     a_pos,
-					const RealVect     a_E,
-					const Vector<Real> a_cdr_densities) const;
 
   Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
