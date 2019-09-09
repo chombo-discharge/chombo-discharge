@@ -186,6 +186,7 @@ protected:
   void restore_solvers();
 
   // Aux functions
+  void compute_reaction_network(const Vector<EBAMRCellData*> a_states, const Real a_time, const Real a_dt);
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
   void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);

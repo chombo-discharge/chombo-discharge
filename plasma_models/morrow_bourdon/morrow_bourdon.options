@@ -7,10 +7,10 @@ morrow_bourdon.gas_O2_frac                   = 0.2                   # Mixing fr
 morrow_bourdon.gas_pressure                  = 1.0                   # Gas pressure (atm)
 morrow_bourdon.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission (atm)
 
+morrow_bourdon.electron_diffusion            = true                  # Electron diffusion on/off	     
+morrow_bourdon.mobile_ions                   = false                 # Turn off ion mobility (true/false)
 morrow_bourdon.positive_species_mobility     = 2.E-4                 # Positive species mobility
 morrow_bourdon.negative_species_mobility     = 2.E-4                 # Negative species mobility
-morrow_bourdon.turn_off_ion_mobility         = false                 # Turn off ion mobility (true/false)
-morrow_bourdon.electron_diffusion            = true                  # Electron diffusion on/off
 
 morrow_bourdon.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
 morrow_bourdon.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes

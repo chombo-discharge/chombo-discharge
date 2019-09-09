@@ -15,7 +15,94 @@
 morrow_bourdon::morrow_bourdon(){
   CH_TIME("morrow_bourdon::morrow_bourdon");
 
-  // Number of cdr and rte equations
+
+
+  parse_gas();
+  parse_photoi();
+  parse_see();
+  parse_bc();
+
+  instantiate_species();
+}
+
+morrow_bourdon::~morrow_bourdon(){
+
+
+}
+
+void morrow_bourdon::parse_gas(){
+  ParmParse pp("morrow_bourdon");
+  pp.get("gas_temperature", m_temp);
+  pp.get("gas_N2_frac",     m_fracN2);
+  pp.get("gas_O2_frac",     m_fracO2);
+  pp.get("gas_pressure",    m_p);
+
+  // Convert to correct units and compute necessary things
+  m_p  *= units::s_atm2pascal;
+  m_N   = m_p*units::s_Na/(m_temp*units::s_R);
+}
+
+void morrow_bourdon::parse_photoi(){
+  ParmParse pp("morrow_bourdon");
+  pp.get("gas_quenching_pressure",     m_pq);
+  pp.get("excitation_efficiency",      m_exc_eff);
+  pp.get("photoionization_efficiency", m_photo_eff);
+
+  m_pq *= units::s_atm2pascal;
+}
+
+void morrow_bourdon::parse_see(){
+  ParmParse pp("morrow_bourdon");
+  pp.get("electrode_townsend2",           m_townsend2_conductor);
+  pp.get("electrode_quantum_efficiency",  m_electrode_yield);
+  pp.get("dielectric_townsend2",          m_townsend2_dielectric);
+  pp.get("dielectric_quantum_efficiency", m_dielectric_yield);
+}
+
+void morrow_bourdon::parse_bc(){
+
+  m_wallbc.resize(2*SpaceDim, 0); 
+  ParmParse pp("morrow_bourdon");
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Side::LoHiSide side = sit();
+
+      // Identifier
+      std::string str_dir;
+      if(dir == 0){
+	str_dir = "x";
+      }
+      else if(dir == 1){
+	str_dir = "y";
+      }
+      else if(dir == 2){
+	str_dir = "z";
+      }
+
+
+      if(side == Side::Lo){
+	std::string type;
+	std::string bc_string = "domain_bc_" + str_dir + "_lo";
+	pp.get(bc_string.c_str(), type);
+	const int idx = 2*dir;
+	if(type == "wall"){
+	  m_wallbc[idx] = 1;
+	}
+      }
+      else if(side == Side::Hi){
+	std::string type;
+	std::string bc_string = "domain_bc_" + str_dir + "_hi";
+	pp.get(bc_string.c_str(), type);
+	const int idx = 2*dir + 1;
+	if(type == "wall"){
+	  m_wallbc[idx] = 1;
+	}
+      }
+    }
+  }
+}
+
+void morrow_bourdon::instantiate_species(){
   m_num_species = 3;
   m_num_photons = 3;
 
@@ -25,6 +112,7 @@ morrow_bourdon::morrow_bourdon(){
   m_nelec_idx   = 0;
   m_nplus_idx   = 1;
   m_nminu_idx   = 2;
+  
   m_photon1_idx = 0;
   m_photon2_idx = 1;
   m_photon3_idx = 2;
@@ -32,133 +120,22 @@ morrow_bourdon::morrow_bourdon(){
   m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_bourdon::electron());
   m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_bourdon::positive_species());
   m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_bourdon::negative_species());
+  
   m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_bourdon::photon_one());
   m_photons[m_photon2_idx]  = RefCountedPtr<photon_group> (new morrow_bourdon::photon_two());
   m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new morrow_bourdon::photon_three());
-
-
-
-  // Default parameters. All of these can be changed through the command line or an input script.
-  m_temp      = 300.;      // Gas temperature
-  m_fracN2    = 0.8;       // Gas composition
-  m_fracO2    = 0.2;       // Gas composition
-  m_p         = 1.0;       // Gas pressure (in atm)
-  m_pq        = 0.03947;   // Quenching pressure (in atm)
-  m_exc_eff   = 0.6;       // Excitation efficient (excitations per collisions)
-  m_photo_eff = 0.1;       // Photo-efficiency (emissions per excitation)
-  
-  m_townsend2_conductor  = 1.E-4; // Second Townsend coefficient on conductor surfaces
-  m_townsend2_dielectric = 1.E-4; // Second Townsend coefficient on dielectric surfaces
-  m_electrode_yield      = 1.E-6; // Photo-emission yield on conductor surfaces
-  m_dielectric_yield     = 1.E-6; // Photo-emission yield on dielectric surfaces
-
-  m_noise_amp     = 0.0;
-  m_noise_freq    = 0.0*RealVect::Unit;
-  m_noise_persist = 0.5;
-  m_noise_octaves = 1;
-
-  { // Gas composition
-    ParmParse pp("morrow_bourdon");
-    pp.query("gas_temperature",            m_temp);
-    pp.query("gas_N2_frac",                m_fracN2);
-    pp.query("gas_O2_frac",                m_fracO2);
-    pp.query("gas_pressure",               m_p);
-    pp.query("gas_quenching_pressure",     m_pq);
-    pp.query("excitation_efficiency",      m_exc_eff);
-    pp.query("photoionization_efficiency", m_photo_eff);
-  }
-
-  { // Electrode things
-    ParmParse pp("morrow_bourdon");
-    pp.query("electrode_townsend2",           m_townsend2_conductor);
-    pp.query("electrode_quantum_efficiency",  m_electrode_yield);
-    pp.query("dielectric_townsend2",          m_townsend2_dielectric);
-    pp.query("dielectric_quantum_efficiency", m_dielectric_yield);
-  }
-
-  { // Noise parameters for initial dat
-    ParmParse pp("morrow_bourdon");
-    pp.query("noise_amplitude",   m_noise_amp);
-    pp.query("noise_octaves",     m_noise_octaves);
-    pp.query("noise_persistence", m_noise_persist);
-    if(pp.contains("noise_frequency")){
-      Vector<Real> freq(SpaceDim);
-      pp.queryarr("noise_frequency", freq, 0, SpaceDim);
-      m_noise_freq = RealVect(D_DECL(freq[0], freq[1], freq[2]));
-    }
-  }
-   
-  { // Boundary condition at wall. 0 = extrap, 1 = wall
-    m_wallbc.resize(2*SpaceDim, 0); 
-    ParmParse pp("morrow_bourdon");
-    for (int dir = 0; dir < SpaceDim; dir++){
-      for (SideIterator sit; sit.ok(); ++sit){
-	const Side::LoHiSide side = sit();
-	
-	std::string str_dir;
-	if(dir == 0){
-	  str_dir = "x";
-	}
-	else if(dir == 1){
-	  str_dir = "y";
-	}
-	else if(dir == 2){
-	  str_dir = "z";
-	}
-
-
-	if(side == Side::Lo){
-	  std::string type;
-	  std::string bc_string = "domain_bc_" + str_dir + "_lo";
-	  if(pp.contains(bc_string.c_str())){
-	    pp.get(bc_string.c_str(), type);
-	    const int idx = 2*dir;
-	    if(type == "wall"){
-	      m_wallbc[idx] = 1;
-	    }
-	  }
-	}
-	else if(side == Side::Hi){
-	  std::string type;
-	  std::string bc_string = "domain_bc_" + str_dir + "_hi";
-	  if(pp.contains(bc_string.c_str())){
-	    pp.get(bc_string.c_str(), type);
-	    const int idx = 2*dir + 1;
-	    if(type == "wall"){
-	      m_wallbc[idx] = 1;
-	    }
-	  }
-	}
-      }
-    }
-  }
-
-
-  // Initiate noise function and give this to electron and positive species
-  m_perlin = RefCountedPtr<perlin_if> (new perlin_if(1.0, m_noise_freq, m_noise_persist, m_noise_octaves));
-  morrow_bourdon::electron* electron    = static_cast<morrow_bourdon::electron*> (&(*m_species[m_nelec_idx]));
-  morrow_bourdon::positive_species* pos = static_cast<morrow_bourdon::positive_species*> (&(*m_species[m_nplus_idx]));
-  electron->set_noise(m_perlin);
-  pos->set_noise(m_perlin);
-
-  // Convert to correct units and compute necessary things
-  m_p  *= units::s_atm2pascal;
-  m_pq *= units::s_atm2pascal;
-
-  m_N   = m_p*units::s_Na/(m_temp*units::s_R);
 }
 
-morrow_bourdon::~morrow_bourdon(){
+Vector<RealVect> morrow_bourdon::compute_cdr_velocities(const Real         a_time,
+							const RealVect     a_pos,
+							const RealVect     a_E,
+							const Vector<Real> a_cdr_densities) const {
 
-
-}
-
-Vector<RealVect> morrow_bourdon::compute_velocities(const RealVect a_E) const{
   Vector<RealVect> velocities(m_num_species);
   
-  velocities[m_nelec_idx] = this->compute_ve(a_E);
-  velocities[m_nplus_idx] = this->compute_vp(a_E);
-  velocities[m_nminu_idx] = this->compute_vn(a_E);
+  velocities[m_nelec_idx] = compute_ve(a_E);
+  velocities[m_nplus_idx] = compute_vp(a_E);
+  velocities[m_nminu_idx] = compute_vn(a_E);
 
   return velocities;
 }
@@ -220,16 +197,21 @@ RealVect morrow_bourdon::compute_vn(const RealVect a_E) const{
   return vn;
 }
 
-Vector<Real> morrow_bourdon::compute_source_terms(const Vector<Real> a_species_densities,
-						const Vector<Real> a_photon_densities,
-						const RealVect     a_E) const {
+Vector<Real> morrow_bourdon::compute_cdr_source_terms(const Real             a_time,
+						      const Real             a_kappa,
+						      const Real             a_dx,
+						      const RealVect         a_pos,
+						      const RealVect         a_E,
+						      const RealVect         a_gradE,
+						      const Vector<Real>     a_cdr_densities,
+						      const Vector<Real>     a_rte_densities,
+						      const Vector<RealVect> a_grad_cdr) const {
+
   Vector<Real> source(m_num_species, 0.0);
 
-  const Vector<RealVect> vel = this->compute_velocities(a_E); // Does it's own conversion
-
-  const Real alpha  = this->compute_alpha(a_E); // Ionization coefficient
-  const Real eta    = this->compute_eta(a_E);   // Attachment coefficient
-  const Real beta   = this->compute_beta(a_E);  // Recombination coefficient
+  const Real alpha  = compute_alpha(a_E); // Ionization coefficient
+  const Real eta    = compute_eta(a_E);   // Attachment coefficient
+  const Real beta   = compute_beta(a_E);  // Recombination coefficient
 
   // Cast so we can get A-coefficients
   const morrow_bourdon::photon_one*   photon1 = static_cast<morrow_bourdon::photon_one*>   (&(*m_photons[m_photon1_idx]));
@@ -237,15 +219,13 @@ Vector<Real> morrow_bourdon::compute_source_terms(const Vector<Real> a_species_d
   const morrow_bourdon::photon_three* photon3 = static_cast<morrow_bourdon::photon_three*> (&(*m_photons[m_photon3_idx]));
   
   // Densities and velocities
-  const Real Ne  = a_species_densities[m_nelec_idx]; 
-  const Real Np  = a_species_densities[m_nplus_idx];
-  const Real Nn  = a_species_densities[m_nminu_idx];
-  const Real Ve  = vel[m_nelec_idx].vectorLength();
-  const Real Vp  = vel[m_nplus_idx].vectorLength();
-  const Real Vn  = vel[m_nminu_idx].vectorLength();
-  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(photon1->get_A()*a_photon_densities[m_photon1_idx]
-							 + photon2->get_A()*a_photon_densities[m_photon2_idx]
-							 + photon3->get_A()*a_photon_densities[m_photon3_idx]);
+  const Real Ne  = a_cdr_densities[m_nelec_idx]; 
+  const Real Np  = a_cdr_densities[m_nplus_idx];
+  const Real Nn  = a_cdr_densities[m_nminu_idx];
+  const Real Ve  = compute_ve(a_E).vectorLength();
+  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
+							 + photon2->get_A()*a_rte_densities[m_photon2_idx]
+							 + photon3->get_A()*a_rte_densities[m_photon3_idx]);
 
 
   Real& Se = source[m_nelec_idx];
@@ -360,86 +340,79 @@ Real morrow_bourdon::compute_De(const RealVect a_E) const{
   return De;
 }
 
-Vector<Real> morrow_bourdon::compute_diffusion_coefficients(const RealVect a_E) const {
+Vector<Real> morrow_bourdon::compute_cdr_diffusion_coefficients(const Real         a_time,
+								const RealVect     a_pos,
+								const RealVect     a_E,
+								const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> diffCo(m_num_species, 0.0);
-
-#if 1 // Original code
-  diffCo[m_nelec_idx] = this->compute_De(a_E);
-#else // Debug code
-  const RealVect E = 1.E6*RealVect::Unit;
-  diffCo[m_nelec_idx] = this->compute_De(E);
-  //  diffCo[m_nelec_idx] = 1.E-5;
-#endif
-  diffCo[m_nplus_idx] = 0.;
-  diffCo[m_nminu_idx] = 0.;
+  diffCo[m_nelec_idx] = compute_De(a_E);
   
   return diffCo;
 }
 
-Vector<Real> morrow_bourdon::compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
-						     const Vector<Real> a_ion_densities,
-						     const Vector<Real> a_ion_velocities,
-						     const Vector<Real> a_photon_fluxes,
-						     const RealVect     a_E,
-						     const RealVect     a_pos,
-						     const RealVect     a_normal,
-						     const Real         a_time) const{
+Vector<Real> morrow_bourdon::compute_cdr_dielectric_fluxes(const Real         a_time,
+							   const RealVect     a_pos,
+							   const RealVect     a_normal,
+							   const RealVect     a_E,
+							   const Vector<Real> a_cdr_densities,
+							   const Vector<Real> a_cdr_velocities,
+							   const Vector<Real> a_cdr_gradients,
+							   const Vector<Real> a_rte_fluxes,
+							   const Vector<Real> a_extrap_cdr_fluxes) const {
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0); 
 
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
-    fluxes[m_nelec_idx] = Max(0.0, a_extrapolated_fluxes[m_nelec_idx]); // Outflow for electrons
-    fluxes[m_nminu_idx] = Max(0.0, a_extrapolated_fluxes[m_nminu_idx]); // Outflow for negative species
+    fluxes[m_nelec_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nelec_idx]); // Outflow for electrons
+    fluxes[m_nminu_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nminu_idx]); // Outflow for negative species
   }
   else if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
-    fluxes[m_nplus_idx] = Max(0.0, a_extrapolated_fluxes[m_nplus_idx]); // Outflow for positive species
+    fluxes[m_nplus_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nplus_idx]); // Outflow for positive species
   }
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
   if(PolyGeom::dot(a_E, a_normal) < 0.){
-    fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon1_idx]*m_dielectric_yield;
-    fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon2_idx]*m_dielectric_yield;
-    fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon3_idx]*m_dielectric_yield;
-    fluxes[m_nelec_idx] += -Max(0.0, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_dielectric_yield;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_dielectric_yield;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_dielectric_yield;
+    fluxes[m_nelec_idx] += -Max(0.0, a_extrap_cdr_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
 
 
   return fluxes;
 }
 
-Vector<Real> morrow_bourdon::compute_conductor_fluxes(const Vector<Real> a_extrapolated_fluxes,
-						    const Vector<Real> a_ion_densities,
-						    const Vector<Real> a_ion_velocities,
-						    const Vector<Real> a_photon_fluxes,
-						    const RealVect     a_E,
-						    const RealVect     a_pos,
-						    const RealVect     a_normal,
-						    const Real         a_time) const{
-  Vector<Real> fluxes(m_num_species, 0.0);
+Vector<Real> morrow_bourdon::compute_cdr_electrode_fluxes(const Real         a_time,
+							  const RealVect     a_pos,
+							  const RealVect     a_normal,
+							  const RealVect     a_E,
+							  const Vector<Real> a_cdr_densities,
+							  const Vector<Real> a_cdr_velocities,
+							  const Vector<Real> a_cdr_gradients,
+							  const Vector<Real> a_rte_fluxes,
+							  const Vector<Real> a_extrap_cdr_fluxes) const {
 
-#if 0 // Debug
-  return a_extrapolated_fluxes;
-#endif
+  Vector<Real> fluxes(m_num_species, 0.0);
 
   // Treat anode and cathode differently
   const bool is_cathode = PolyGeom::dot(a_E, a_normal) < 0.;
   const bool is_anode   = PolyGeom::dot(a_E, a_normal) > 0.;
   if(is_cathode){
-    fluxes = this->compute_cathode_flux(a_extrapolated_fluxes,
-					a_ion_densities,
-					a_ion_velocities,
-					a_photon_fluxes,
+    fluxes = this->compute_cathode_flux(a_extrap_cdr_fluxes,
+					a_cdr_densities,
+					a_cdr_velocities,
+					a_rte_fluxes,
 					a_E,
 					a_pos,
 					a_normal,
 					a_time);
   }
   else if(is_anode){
-    fluxes = this->compute_anode_flux(a_extrapolated_fluxes,
-				      a_ion_densities,
-				      a_ion_velocities,
-				      a_photon_fluxes,
+    fluxes = this->compute_anode_flux(a_extrap_cdr_fluxes,
+				      a_cdr_densities,
+				      a_cdr_velocities,
+				      a_rte_fluxes,
 				      a_E,
 				      a_pos,
 				      a_normal,
@@ -537,14 +510,18 @@ Vector<Real> morrow_bourdon::compute_cdr_domain_fluxes(const Real           a_ti
   return fluxes;
 }
 
-Vector<Real> morrow_bourdon::compute_rte_source_terms(const Vector<Real> a_densities, const RealVect a_E) const{
+Vector<Real> morrow_bourdon::compute_rte_source_terms(const Real         a_time,
+						      const Real         a_kappa,
+						      const Real         a_dx,
+						      const RealVect     a_pos,
+						      const RealVect     a_E,
+						      const Vector<Real> a_cdr_densities) const {
   Vector<Real> ret(m_num_photons);
 
-  const Vector<RealVect> vel = this->compute_velocities(a_E);      // Compute velocities
-  const Real alpha           = this->compute_alpha(a_E);           // Compute ionization coefficient
-  const Real Ne              = a_densities[m_nelec_idx];           // Electron density
-  const Real ve              = vel[m_nelec_idx].vectorLength();    // Electron velocity
-  const Real Se              = Max(0., alpha*Ne*ve);               // Excitations = alpha*Ne*ve
+  const Real alpha           = this->compute_alpha(a_E);       // Compute ionization coefficient
+  const Real Ne              = a_cdr_densities[m_nelec_idx];   // Electron density
+  const Real ve              = compute_ve(a_E).vectorLength(); // Electron velocity
+  const Real Se              = Max(0., alpha*Ne*ve);           // Excitations = alpha*Ne*ve
 
   // Photo emissions = electron excitations * efficiency * quenching
   ret[m_photon1_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
@@ -565,32 +542,22 @@ morrow_bourdon::electron::electron(){
   m_mobile    = true;
   m_unit      = "m-3";
 
-  m_uniform_density = 1.E10;
-  m_seed_density    = 0.0;
-  m_seed_radius     = 1.0;
-  m_noise_density   = 0.0;
-  m_seed_pos        = RealVect::Zero;
 
-  { // Get from input script or command line
-    ParmParse pp("morrow_bourdon");
-    std::string str = "true";
-    pp.query("uniform_density",    m_uniform_density);
-    pp.query("seed_density",       m_seed_density);
-    pp.query("seed_radius",        m_seed_radius);
-    pp.query("noise_amplitude",    m_noise_density);
-    pp.query("electron_diffusion", str);
-    if(str == "true"){
-      m_diffusive = true;
-    }
-    else if(str == "false"){
-      m_diffusive = false;
-    }
-    if(pp.contains("seed_position")){
-      Vector<Real> pos(SpaceDim);
-      pp.queryarr("seed_position", pos, 0, SpaceDim);
-      m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
-    }
+  ParmParse pp("morrow_bourdon");
+  std::string str = "true";
+  pp.get("uniform_density",    m_uniform_density);
+  pp.get("seed_density",       m_seed_density);
+  pp.get("seed_radius",        m_seed_radius);
+  pp.get("electron_diffusion", str);
+  if(str == "true"){
+    m_diffusive = true;
   }
+  else if(str == "false"){
+    m_diffusive = false;
+  }
+  Vector<Real> pos(SpaceDim);
+  pp.getarr("seed_position", pos, 0, SpaceDim);
+  m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
 
 morrow_bourdon::electron::~electron(){
@@ -599,13 +566,8 @@ morrow_bourdon::electron::~electron(){
 Real morrow_bourdon::electron::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
-  const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
 
-  return seed + m_uniform_density + noise;
-}
-
-void morrow_bourdon::electron::set_noise(RefCountedPtr<perlin_if> a_perlin){
-  m_perlin = a_perlin;
+  return seed + m_uniform_density;
 }
 
 morrow_bourdon::positive_species::positive_species(){
@@ -615,33 +577,15 @@ morrow_bourdon::positive_species::positive_species(){
   m_mobile    = true;
   m_unit      = "m-3";
 
-  m_uniform_density = 1.E10;
-  m_seed_density    = 0.0;
-  m_seed_radius     = 1.0;
-  m_noise_density   = 0.0;
-  m_seed_pos        = RealVect::Zero;
+  Vector<Real> pos(SpaceDim);
+  std::string str;
   
-  { // Get from input script or command line
-    ParmParse pp("morrow_bourdon");
-    pp.query("uniform_density",  m_uniform_density);
-    pp.query("seed_density",     m_seed_density);
-    pp.query("seed_radius",      m_seed_radius);
-    pp.query("noise_amplitude",  m_noise_density);
-    if(pp.contains("seed_position")){
-      Vector<Real> pos(SpaceDim);
-      pp.queryarr("seed_position", pos, 0, SpaceDim);
-      m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
-    }
-
-    // Turn off ion mobility
-    std::string str = "false";
-    if(pp.contains("turn_off_ion_mobility")){
-      pp.get("turn_off_ion_mobility", str);
-      if(str == "true"){
-	m_mobile = false;
-      }
-    }
-  }
+  ParmParse pp("morrow_bourdon");
+  pp.get("uniform_density",  m_uniform_density);
+  pp.get("seed_density",     m_seed_density);
+  pp.get("seed_radius",      m_seed_radius);
+  pp.get("mobile_ions", str); m_mobile = (str == "true") ? true : false;
+  pp.getarr("seed_position", pos, 0, SpaceDim);  m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
 
 morrow_bourdon::positive_species::~positive_species(){
@@ -650,14 +594,10 @@ morrow_bourdon::positive_species::~positive_species(){
 Real morrow_bourdon::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
-  const Real noise  = pow(m_perlin->value(a_pos),10)*m_noise_density;;
   
-  return seed + m_uniform_density + noise;
+  return seed + m_uniform_density;
 }
 
-void morrow_bourdon::positive_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
-  m_perlin = a_perlin;
-}
 
 morrow_bourdon::negative_species::negative_species(){
   m_name      = "negative_species";
@@ -666,18 +606,11 @@ morrow_bourdon::negative_species::negative_species(){
   m_mobile    = true;
   m_unit      = "m-3";
 
-  { // Get parameter from input script
-    ParmParse pp("morrow_bourdon");
+  ParmParse pp("morrow_bourdon");
     
     // Turn off ion mobility
-    std::string str = "false";
-    if(pp.contains("turn_off_ion_mobility")){
-      pp.get("turn_off_ion_mobility", str);
-      if(str == "true"){
-	m_mobile = false;
-      }
-    }
-  }
+  std::string str;
+  pp.get("mobile_ions", str); m_mobile = (str == "true") ? true : false;
 }
 
 morrow_bourdon::negative_species::~negative_species(){
@@ -687,31 +620,17 @@ Real morrow_bourdon::negative_species::initial_data(const RealVect a_pos, const 
   return 0.;
 }
 
-void morrow_bourdon::negative_species::set_noise(RefCountedPtr<perlin_if> a_perlin){
-  m_perlin = a_perlin;
-}
 
 morrow_bourdon::photon_one::photon_one(){
-  m_name   = "photon_one";
-
-  m_A      = 1.12E-4;
-  m_lambda = 4.15E-2;
+  m_name     = "photon_one";
   m_constant = true;
 
-  { // Parameters
-    ParmParse pp("morrow_bourdon");
-    pp.query("photon1_A_coeff",      m_A);
-    pp.query("photon1_lambda_coeff", m_lambda);
-  }
-
-  // Find pressure. Need gas state for this. 
-  Real O2_frac  = 0.2;
-  Real pressure = 1.0;
-  {
-    ParmParse pp("morrow_bourdon");
-    pp.query("gas_O2_frac",  O2_frac);
-    pp.query("gas_pressure", pressure);
-  }
+  Real O2_frac, pressure;
+  ParmParse pp("morrow_bourdon");
+  pp.get("photon1_A_coeff",      m_A);
+  pp.get("photon1_lambda_coeff", m_lambda);
+  pp.get("gas_O2_frac",  O2_frac);
+  pp.get("gas_pressure", pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
@@ -725,26 +644,16 @@ Real morrow_bourdon::photon_one::get_kappa(const RealVect a_pos) const {
 }
 
 morrow_bourdon::photon_two::photon_two(){
-  m_name   = "photon_two";
-
-  m_A      = 2.88E-3;
-  m_lambda = 1.09E-1;
+  m_name     = "photon_two";
   m_constant = true;
 
-  { // Parameters
-    ParmParse pp("morrow_bourdon");
-    pp.query("photon2_A_coeff",      m_A);
-    pp.query("photon2_lambda_coeff", m_lambda);
-  }
-
-  // Find pressure. Need gas state for this. 
-  Real O2_frac  = 0.2;
-  Real pressure = 1.0;
-  {
-    ParmParse pp("morrow_bourdon");
-    pp.query("gas_O2_frac",  O2_frac);
-    pp.query("gas_pressure", pressure);
-  }
+  Real O2_frac, pressure;
+  ParmParse pp("morrow_bourdon");
+  pp.get("photon2_A_coeff",      m_A);
+  pp.get("photon2_lambda_coeff", m_lambda);
+  pp.get("gas_O2_frac",  O2_frac);
+  pp.get("gas_pressure", pressure);
+  
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
@@ -756,26 +665,16 @@ Real morrow_bourdon::photon_two::get_kappa(const RealVect a_pos) const {
 }
 
 morrow_bourdon::photon_three::photon_three(){
-  m_name   = "photon_three";
-
-  m_A      = 2.76E-1;
-  m_lambda = 6.69E-1;
+  m_name     = "photon_three";
   m_constant = true;
 
-  { // Parameters
-    ParmParse pp("morrow_bourdon");
-    pp.query("photon3_A_coeff",      m_A);
-    pp.query("photon3_lambda_coeff", m_lambda);
-  }
+  Real O2_frac, pressure;
+  ParmParse pp("morrow_bourdon");
+  pp.get("photon3_A_coeff",      m_A);
+  pp.get("photon3_lambda_coeff", m_lambda);
+  pp.get("gas_O2_frac",  O2_frac);
+  pp.get("gas_pressure", pressure);
 
-  // Find pressure. Need gas state for this. 
-  Real O2_frac  = 0.2;
-  Real pressure = 1.0;
-  {
-    ParmParse pp("morrow_bourdon");
-    pp.query("gas_O2_frac",  O2_frac);
-    pp.query("gas_pressure", pressure);
-  }
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }
 

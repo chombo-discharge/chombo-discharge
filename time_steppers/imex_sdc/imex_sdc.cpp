@@ -665,6 +665,8 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
   // We begin with phi[0] = phi(t_n). Then update phi[m+1].
   for(int m = 0; m < m_p; m++){
 
+    
+
     // Update source terms every time we go through this
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
@@ -1710,6 +1712,21 @@ void imex_sdc::compute_sigma_flux(){
   }
 
   m_sigma->reset_cells(flux);
+}
+
+void imex_sdc::compute_reaction_network(const Vector<EBAMRCellData*> a_states, const Real a_time, const Real a_dt){
+  CH_TIME("imex_sdc::compute_cdr_sources(Vector<EBAMRCellData*>, Real)");
+  if(m_verbosity > 5){
+    pout() << "imex_sdc::compute_cdr_sources(Vector<EBAMRCellData*>, Real)" << endl;
+  }
+
+  Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
+  Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
+
+  const Vector<EBAMRCellData*> rte_densities = m_rte->get_states();
+  const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+
+  time_stepper::advance_reaction_network(cdr_sources, rte_sources, a_states, rte_densities, E, a_time, a_dt);
 }
 
 void imex_sdc::compute_cdr_sources(const Real a_time){
