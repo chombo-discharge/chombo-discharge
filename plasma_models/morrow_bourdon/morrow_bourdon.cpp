@@ -359,8 +359,6 @@ Vector<Real> morrow_bourdon::compute_cdr_dielectric_fluxes(const Real         a_
   // Outflux of species
   Vector<Real> fluxes(m_num_species, 0.0);
 
-  return a_extrap_cdr_fluxes;
-
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
     fluxes[m_nelec_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nelec_idx]); // Outflow for electrons
     fluxes[m_nminu_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nminu_idx]); // Outflow for negative species
