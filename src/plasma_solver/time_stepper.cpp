@@ -3754,7 +3754,7 @@ void time_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
   //  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
   //  advance_reaction_network(a_time, a_dt);
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     
     RefCountedPtr<rte_solver>& solver = solver_it();

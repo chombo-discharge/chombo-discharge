@@ -165,8 +165,8 @@ void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_
 
   const Real tmp = Max(0.0, alpha*Ne*Ve*m_exc_eff*(m_pq/(m_pq + m_p)));
   a_photon_sources[m_photon1_idx] = tmp;
-  a_photon_sources[m_photon1_idx] = tmp;
-  a_photon_sources[m_photon1_idx] = tmp;
+  a_photon_sources[m_photon2_idx] = tmp;
+  a_photon_sources[m_photon3_idx] = tmp;
  
 }
 
