@@ -98,19 +98,6 @@ void amr_mesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, co
   }
 }
 
-void amr_mesh::allocate_ptr(EBAMRCellData& a_data){
-  CH_TIME("amr_mesh::allocate_ptr");
-  if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate_ptr" << endl;
-  }
-
-  a_data.resize(1 + m_finest_level);
-  
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >(new LevelData<EBCellFAB>());
-  }
-}
-
 void amr_mesh::allocate(EBAMRPVR& a_pvr, const int a_buffer){
   CH_TIME("amr_mesh::allocate(AMR PVR)");
   if(m_verbosity > 5){

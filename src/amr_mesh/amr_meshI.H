@@ -62,3 +62,16 @@ template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
 									    m_physdom->get_prob_lo()));
   }
 }
+
+
+template<typename T > void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data){
+  CH_TIME("amr_mesh::allocate_ptr");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate_ptr";
+  }
+
+  a_data.resize(1 + m_finest_level);
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    a_data[lvl] = RefCountedPtr<T> (new T());
+  }
+}

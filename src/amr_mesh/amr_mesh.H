@@ -68,6 +68,11 @@ public:
   */
   template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
 
+  /*!
+    @brief Allocate pointer but not memory
+  */
+  template <typename T> void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
+
     /*!
     @brief Alias an entire hierarchy of data. 
   */
@@ -99,11 +104,6 @@ public:
     nor are ghost cells updated. 
   */
   virtual void compute_gradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi);
-
-  /*!
-    @brief Create pointers
-  */
-  virtual void allocate_ptr(EBAMRCellData& a_data);
 
   /*!
     @brief Allocate particle valid regions
