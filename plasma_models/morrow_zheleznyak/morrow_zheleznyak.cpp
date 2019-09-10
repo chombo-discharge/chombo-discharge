@@ -1,12 +1,12 @@
 /*!
-  @file   morrow_mc.cpp
-  @brief  Implementation of morrow_mc.H
+  @file   morrow_zheleznyak.cpp
+  @brief  Implementation of morrow_zheleznyak.H
   @author Robert Marskar
   @date   Jan. 2018
   @todo   Really, really need to revise these functions since we've changed the scaling for the rte equations
 */
 
-#include "morrow_mc.H"
+#include "morrow_zheleznyak.H"
 #include "units.H"
 #include "data_ops.H"
 
@@ -15,7 +15,7 @@
 
 #include <chrono>
 
-morrow_mc::morrow_mc(){
+morrow_zheleznyak::morrow_zheleznyak(){
   m_num_species = 3;
   m_num_photons = 1;
 
@@ -28,10 +28,10 @@ morrow_mc::morrow_mc(){
   m_photon1_idx = 0;
 
   // Instantiate species
-  m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_mc::electron());
-  m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_mc::positive_species());
-  m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_mc::negative_species());
-  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_mc::uv_photon());
+  m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_zheleznyak::electron());
+  m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_zheleznyak::positive_species());
+  m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_zheleznyak::negative_species());
+  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_zheleznyak::uv_photon());
 
   // Parse some basic settings
   parse_gas_params();
@@ -56,22 +56,22 @@ morrow_mc::morrow_mc(){
   m_N   = m_p*units::s_Na/(m_T*units::s_R);
 }
 
-morrow_mc::~morrow_mc(){
+morrow_zheleznyak::~morrow_zheleznyak(){
 
 
 }
 
-void morrow_mc::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					      Vector<Real>&          a_photon_sources,
-					      const Vector<Real>     a_particle_densities,
-					      const Vector<RealVect> a_particle_gradients,
-					      const Vector<Real>     a_photon_densities,
-					      const RealVect         a_E,
-					      const RealVect         a_pos,
-					      const Real             a_dx,
-					      const Real             a_dt,
-					      const Real             a_time,
-					      const Real             a_kappa) const{
+void morrow_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle_sources,
+					 Vector<Real>&          a_photon_sources,
+					 const Vector<Real>     a_particle_densities,
+					 const Vector<RealVect> a_particle_gradients,
+					 const Vector<Real>     a_photon_densities,
+					 const RealVect         a_E,
+					 const RealVect         a_pos,
+					 const Real             a_dx,
+					 const Real             a_dt,
+					 const Real             a_time,
+					 const Real             a_kappa) const{
 
   // Six reactions for this plasma model:
   // ===================================
@@ -102,7 +102,7 @@ void morrow_mc::advance_reaction_network(Vector<Real>&          a_particle_sourc
 
 
 // Deterministic reaction-rate equation
-void morrow_mc::network_rre(Vector<Real>&          a_particle_sources,
+void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
 				 Vector<Real>&          a_photon_sources,
 				 const Vector<Real>     a_particle_densities,
 				 const Vector<RealVect> a_particle_gradients,
@@ -173,7 +173,7 @@ void morrow_mc::network_rre(Vector<Real>&          a_particle_sources,
   return;
 }
 
-void morrow_mc::network_tau(Vector<Real>&          a_particle_sources,
+void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
 				 Vector<Real>&          a_photon_sources,
 				 const Vector<Real>     a_particle_densities,
 				 const Vector<RealVect> a_particle_gradients,
@@ -189,13 +189,15 @@ void morrow_mc::network_tau(Vector<Real>&          a_particle_sources,
   Vector<int> particle_numbers(m_num_species, 0);
   Vector<int> photon_numbers(m_num_photons, 0);
 
+  Vector<Real> x(m_num_species, 0.0);
   Vector<int> X(m_num_species, 0);
   Vector<int> Y(m_num_photons, 0);
 
   const Real thresh = 1.E-2;
   
   for (int i = 0; i < m_num_species; i++){
-    X[i] = floor(thresh + a_particle_densities[i]*volume);
+    X[i] = floor(thresh + a_particle_densities[i]*volume); // Integer particles
+    x[i] = a_particle_densities[i] - X[i]*volume;          // "Partial particles"
   }
 
   for (int i = 0; i < m_num_photons; i++){
@@ -213,33 +215,41 @@ void morrow_mc::network_tau(Vector<Real>&          a_particle_sources,
   const Real eta    = compute_eta(a_E);
   const Real beta   = compute_beta(a_E);
 
+  const Real xe = x[m_nelec_idx];
+  const Real xp = x[m_nplus_idx];
+  const Real xm = x[m_nminu_idx];
+  
   const Real Xe = X[m_nelec_idx];
   const Real Xp = X[m_nplus_idx];
   const Real Xm = X[m_nminu_idx];
 
   // Reaction 1: e + M => 2e + M+
-  const Real a1 = Xe*alpha*ve;
-  const int S1  = poisson_reaction(a1, a_dt);
+  const Real A1 = Xe*alpha*ve;
+  const Real a1 = xe*alpha*ve;
+  const int S1  = poisson_reaction(A1, a_dt);
   se += S1;
   sp += S1;
   
   // Reaction 2: e + M   => M-
-  const Real a2 = Xe*eta*ve;
-  const int S2  = poisson_reaction(a2, a_dt);
+  const Real A2 = Xe*eta*ve;
+  const Real a2 = xe*eta*ve;
+  const int S2  = poisson_reaction(A2, a_dt);
   se -= S2;
   sm += S2;
 
   // Reaction 3: e + M+  => 0
-  const Real a3 = Xe*Xp*beta/volume;
-  const int S3  = poisson_reaction(a3, a_dt);
-  se -= S3;
-  sp -= S3;
+  const Real A3 = Xe*Xp*beta/volume;
+  const Real a3 = xe*xp*beta;
+  const int S3  = poisson_reaction(A3, a_dt);
+  // se -= S3;
+  // sp -= S3;
 
   // Reaction 4: M+ + M-  => 0
-  const Real a4 = Xp*Xm*beta/volume;
-  const int  S4 = poisson_reaction(a4, a_dt);
-  sp -= S4;
-  sm -= S4;
+  const Real A4 = Xp*Xm*beta/volume;
+  const Real a4 = xp*xm*beta;
+  const int  S4 = poisson_reaction(A4, a_dt);
+  // sp -= S4;
+  // sm -= S4;
 
   // Reaction 5: Y + M => e + M+
   se += Y[0];
@@ -251,16 +261,15 @@ void morrow_mc::network_tau(Vector<Real>&          a_particle_sources,
   const int S6      = poisson_reaction(a6, a_dt);
   a_photon_sources[0] = 1.0*S6;
 
-
   // Do some scaling
   const Real factor = 1./(volume*a_dt);
   Real& Se = a_particle_sources[m_nelec_idx];
   Real& Sp = a_particle_sources[m_nplus_idx];
   Real& Sm = a_particle_sources[m_nminu_idx];
 
-  Se = se*factor;
-  Sp = sp*factor;
-  Sm = sm*factor;
+  Se = se*factor + (a1 - a2 - a3);
+  Sp = sp*factor + (a1 - a3 - a4);
+  Sm = sm*factor + (a2 - a4);
 
 #if 1 // Debug
   const int res = -se + sp - sm;
@@ -272,7 +281,7 @@ void morrow_mc::network_tau(Vector<Real>&          a_particle_sources,
 }
 
 // Tau leaping method
-void morrow_mc::network_ssa(Vector<Real>&          a_particle_sources,
+void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
 				 Vector<Real>&          a_photon_sources,
 				 const Vector<Real>     a_particle_densities,
 				 const Vector<RealVect> a_particle_gradients,
@@ -286,8 +295,9 @@ void morrow_mc::network_ssa(Vector<Real>&          a_particle_sources,
 
   const Real volume = pow(a_dx, 3);
 
-  Vector<int> X(m_num_species, 0);
-  Vector<int> Y(m_num_photons, 0);
+  Vector<Real> x(m_num_species, 0.0);
+  Vector<int>  X(m_num_species, 0);
+  Vector<int>  Y(m_num_photons, 0);
 
   //
   const RealVect Ve = compute_ve(a_E);
@@ -297,6 +307,7 @@ void morrow_mc::network_ssa(Vector<Real>&          a_particle_sources,
   const Real beta   = compute_beta(a_E);
   const Real eff    = m_exc_eff*m_photoi_eff*m_pq/(m_p+m_pq);
 
+
   // Six reactions for this plasma model:
   // ===================================
   // 1. e + M   => 2e + M+ 
@@ -305,11 +316,11 @@ void morrow_mc::network_ssa(Vector<Real>&          a_particle_sources,
   // 4. M- + M+ => 0
   // 5. e + M   => e + M + y
   // 6  y + M   => e + M+
-
   const Real thresh = 1.E-2;
   
   // Initial particle densities
   for (int i = 0; i < m_num_species; i++){
+    x[i] = a_particle_densities[i] - X[i]*volume;
     X[i] = floor(thresh + a_particle_densities[i]*volume);
   }
   const Vector<int> X0 = X;
@@ -325,11 +336,15 @@ void morrow_mc::network_ssa(Vector<Real>&          a_particle_sources,
   // X[m_nplus_idx] += Y[0];
   Y[0] = 0;
 
+  const Real xe = x[m_nelec_idx];
+  const Real xp = x[m_nplus_idx];
+  const Real xm = x[m_nminu_idx];
+  
   int& Xe = X[m_nelec_idx];
   int& Xp = X[m_nplus_idx];
   int& Xm = X[m_nminu_idx];
 
-  // Do SSA algorithm
+  // Do SSA algorithm for INTEGER particles
   Real tau  = 0.0;
   while (tau <= a_dt){
 
@@ -337,8 +352,13 @@ void morrow_mc::network_ssa(Vector<Real>&          a_particle_sources,
     
     ar[0] = Xe*alpha*ve;        // Impact ionization
     ar[1] = Xe*eta*ve;          // Electron attachment
+#if 0
     ar[2] = Xe*Xp*beta/volume;  // Electron-ion recombination
     ar[3] = Xp*Xm*beta/volume;  // Ion-ion recombination
+#else
+    ar[2] = 0.0;
+    ar[3] = 0.0;
+#endif
     ar[4] = ar[0]*eff;          // Photon generation
 
     // Total reaction rate
@@ -399,16 +419,30 @@ void morrow_mc::network_ssa(Vector<Real>&          a_particle_sources,
   // Now we need to normalize some stuff
   a_photon_sources[0] = 1.0*Y[0];
 
+  // Non-integer reactions
+  const Real a1 = xe*alpha*ve;
+  const Real a2 = xe*eta*ve;
+  const Real a3 = xe*xp*beta;
+  const Real a4 = xp*xm*beta;
   
   const Real factor = 1./(volume*a_dt);
   for (int i = 0; i < m_num_species; i++){
     a_particle_sources[i] = factor*(X[i] - X0[i]);
   }
 
+  Real& Se = a_particle_sources[m_nelec_idx];
+  Real& Sp = a_particle_sources[m_nplus_idx];
+  Real& Sm = a_particle_sources[m_nminu_idx];
+
+  Se += (a1 - a2 - a3);
+  Sp += (a1 - a3 - a4);
+  Sm += (a2 - a4);
+  
+
   return;
 }
 
-Vector<RealVect> morrow_mc::compute_cdr_velocities(const Real         a_time,
+Vector<RealVect> morrow_zheleznyak::compute_cdr_velocities(const Real         a_time,
 							const RealVect     a_pos,
 							const RealVect     a_E,
 							const Vector<Real> a_cdr_densities) const{
@@ -421,7 +455,7 @@ Vector<RealVect> morrow_mc::compute_cdr_velocities(const Real         a_time,
   return velocities;
 }
 
-RealVect morrow_mc::compute_ve(const RealVect a_E) const{
+RealVect morrow_zheleznyak::compute_ve(const RealVect a_E) const{
   RealVect ve = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;          // Morrow-Lowke wants E in V/cm
@@ -450,7 +484,7 @@ RealVect morrow_mc::compute_ve(const RealVect a_E) const{
   return ve;
 }
 
-RealVect morrow_mc::compute_vp(const RealVect a_E) const{
+RealVect morrow_zheleznyak::compute_vp(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;           // E in V/cm
   RealVect vp = 2.34*E*m_p/units::s_atm2pascal;  // Morrow-Lowke wants V/cm
   vp *= 0.01;                             // Morrow-Lowke expression is in cm/s
@@ -458,7 +492,7 @@ RealVect morrow_mc::compute_vp(const RealVect a_E) const{
   return vp;  
 }
 
-RealVect morrow_mc::compute_vn(const RealVect a_E) const{
+RealVect morrow_zheleznyak::compute_vn(const RealVect a_E) const{
   RealVect vn = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;       // Morrow-Lowke wants E in V/cm
@@ -478,7 +512,7 @@ RealVect morrow_mc::compute_vn(const RealVect a_E) const{
   return vn;
 }
 
-Real morrow_mc::compute_alpha(const RealVect a_E) const{
+Real morrow_zheleznyak::compute_alpha(const RealVect a_E) const{
   Real alpha    = 0.;
   Real alphabyN = 0.;
 
@@ -501,7 +535,7 @@ Real morrow_mc::compute_alpha(const RealVect a_E) const{
   return alpha;
 }
 
-Real morrow_mc::compute_eta(const RealVect a_E) const{
+Real morrow_zheleznyak::compute_eta(const RealVect a_E) const{
 
   const Real eta2 = this->compute_eta2(a_E); 
   const Real eta3 = this->compute_eta3(a_E);
@@ -510,7 +544,7 @@ Real morrow_mc::compute_eta(const RealVect a_E) const{
   return eta;
 }
 
-Real morrow_mc::compute_eta2(const RealVect a_E) const{
+Real morrow_zheleznyak::compute_eta2(const RealVect a_E) const{
   Real eta2    = 0.;
   Real eta2byN = 0.;
 
@@ -534,7 +568,7 @@ Real morrow_mc::compute_eta2(const RealVect a_E) const{
   return eta2;
 }
 
-Real morrow_mc::compute_eta3(const RealVect a_E) const{
+Real morrow_zheleznyak::compute_eta3(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;         // Morrow-Lowke wants E in V/cm
   const Real Emag  = E.vectorLength();  //
   const Real N     = m_N*1.E-6;         // Morrow-Lowke weants N in cm^3
@@ -551,13 +585,13 @@ Real morrow_mc::compute_eta3(const RealVect a_E) const{
   return eta3;
 }
 
-Real morrow_mc::compute_beta(const RealVect a_E) const{
+Real morrow_zheleznyak::compute_beta(const RealVect a_E) const{
   Real beta = 2.0E-7;
   beta *= 1.E-6; // Morrow-Lowke expression is in cm^3. Make it m^3
   return beta;
 }
 
-Real morrow_mc::compute_De(const RealVect a_E) const{
+Real morrow_zheleznyak::compute_De(const RealVect a_E) const{
   const RealVect E  = a_E*1.E-2;                 // Morrow-Lowke wants E in V/cm
   const Real Emag   = E.vectorLength();          //
   const Real N      = m_N*1.E-6;                 // Morrow-Lowke weants N in cm^3
@@ -574,7 +608,7 @@ Real morrow_mc::compute_De(const RealVect a_E) const{
 }
 
 
-Vector<Real> morrow_mc::compute_cdr_diffusion_coefficients(const Real         a_time,
+Vector<Real> morrow_zheleznyak::compute_cdr_diffusion_coefficients(const Real         a_time,
 								const RealVect     a_pos,
 								const RealVect     a_E,
 								const Vector<Real> a_cdr_densities) const{
@@ -586,7 +620,7 @@ Vector<Real> morrow_mc::compute_cdr_diffusion_coefficients(const Real         a_
   return diffCo;
 }
 
-Vector<Real> morrow_mc::compute_cdr_fluxes(const Real         a_time,
+Vector<Real> morrow_zheleznyak::compute_cdr_fluxes(const Real         a_time,
 						const RealVect     a_pos,
 						const RealVect     a_normal,
 						const RealVect     a_E,
@@ -621,7 +655,7 @@ Vector<Real> morrow_mc::compute_cdr_fluxes(const Real         a_time,
   return fluxes;
 }
 
-Vector<Real> morrow_mc::compute_cdr_domain_fluxes(const Real           a_time,
+Vector<Real> morrow_zheleznyak::compute_cdr_domain_fluxes(const Real           a_time,
 						       const RealVect       a_pos,
 						       const int            a_dir,
 						       const Side::LoHiSide a_side,
@@ -655,14 +689,14 @@ Vector<Real> morrow_mc::compute_cdr_domain_fluxes(const Real           a_time,
     }
   }
   else{
-    MayDay::Abort("morrow_mc::compute_cdr_domain_fluxes - uknown domain bc requested");
+    MayDay::Abort("morrow_zheleznyak::compute_cdr_domain_fluxes - uknown domain bc requested");
   }
 
   
   return fluxes;
 }
 
-Vector<Real> morrow_mc::compute_cdr_electrode_fluxes(const Real         a_time,
+Vector<Real> morrow_zheleznyak::compute_cdr_electrode_fluxes(const Real         a_time,
 							  const RealVect     a_pos,
 							  const RealVect     a_normal,
 							  const RealVect     a_E,
@@ -676,7 +710,7 @@ Vector<Real> morrow_mc::compute_cdr_electrode_fluxes(const Real         a_time,
 				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
-Vector<Real> morrow_mc::compute_cdr_dielectric_fluxes(const Real         a_time,
+Vector<Real> morrow_zheleznyak::compute_cdr_dielectric_fluxes(const Real         a_time,
 							   const RealVect     a_pos,
 							   const RealVect     a_normal,
 							   const RealVect     a_E,
@@ -690,7 +724,7 @@ Vector<Real> morrow_mc::compute_cdr_dielectric_fluxes(const Real         a_time,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
-int morrow_mc::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+int morrow_zheleznyak::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   int value = 0;
   const Real mean = a_propensity*a_dt;
 
@@ -706,11 +740,11 @@ int morrow_mc::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   return value;
 }
 
-Real morrow_mc::initial_sigma(const Real a_time, const RealVect a_pos) const{
+Real morrow_zheleznyak::initial_sigma(const Real a_time, const RealVect a_pos) const{
   return 0.;
 }
 
-morrow_mc::electron::electron(){
+morrow_zheleznyak::electron::electron(){
   m_name      = "electron";
   m_charge    = -1;
   m_diffusive = true;
@@ -720,7 +754,7 @@ morrow_mc::electron::electron(){
   Vector<Real> pos(SpaceDim);
   std::string str;
 
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
   pp.get("uniform_density",     m_uniform_density);
   pp.get("seed_density",        m_seed_density);
   pp.get("seed_radius",         m_seed_radius);
@@ -729,7 +763,7 @@ morrow_mc::electron::electron(){
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
 
-morrow_mc::positive_species::positive_species(){
+morrow_zheleznyak::positive_species::positive_species(){
   m_name      = "positive_species";
   m_charge    = 1;
   m_diffusive = false;
@@ -739,7 +773,7 @@ morrow_mc::positive_species::positive_species(){
   Vector<Real> pos(SpaceDim);
   std::string str;
 
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
   pp.get("uniform_density", m_uniform_density);
   pp.get("seed_density",    m_seed_density);
   pp.get("seed_radius",     m_seed_radius);
@@ -748,7 +782,7 @@ morrow_mc::positive_species::positive_species(){
   pp.getarr("seed_position", pos, 0, SpaceDim); m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
 
-morrow_mc::negative_species::negative_species(){
+morrow_zheleznyak::negative_species::negative_species(){
   m_name      = "negative_species";
   m_charge    = -1;
   m_diffusive = false;
@@ -757,46 +791,46 @@ morrow_mc::negative_species::negative_species(){
 
   std::string str;
 
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
   pp.get("mobile_ions",    str); m_mobile    = (str == "true") ? true : false;
 }
 
-morrow_mc::electron::~electron(){
+morrow_zheleznyak::electron::~electron(){
   
 }
 
-morrow_mc::positive_species::~positive_species(){
+morrow_zheleznyak::positive_species::~positive_species(){
   
 }
 
-morrow_mc::negative_species::~negative_species(){
+morrow_zheleznyak::negative_species::~negative_species(){
   
 }
 
-Real morrow_mc::electron::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_zheleznyak::electron::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
 
   return m_uniform_density + seed;
 }
 
-Real morrow_mc::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_zheleznyak::positive_species::initial_data(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   
   return m_uniform_density + seed;
 }
 
-Real morrow_mc::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
+Real morrow_zheleznyak::negative_species::initial_data(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 
-morrow_mc::uv_photon::uv_photon(){
+morrow_zheleznyak::uv_photon::uv_photon(){
   m_name   = "uv_photon";
 
   Real pressure, O2_frac;
   
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
   pp.get("photoi_f1",      m_f1);
   pp.get("photoi_f2",      m_f2);
   pp.get("photoi_K1",      m_K1);
@@ -817,21 +851,21 @@ morrow_mc::uv_photon::uv_photon(){
   m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
 }
 
-morrow_mc::uv_photon::~uv_photon(){
+morrow_zheleznyak::uv_photon::~uv_photon(){
   
 }
 
-Real morrow_mc::uv_photon::get_kappa(const RealVect a_pos) const {
-  MayDay::Abort("morrow_mc::uv_photon::get_kappa - should not be called. morrow_mc is used with the mc_photo module");
+Real morrow_zheleznyak::uv_photon::get_kappa(const RealVect a_pos) const {
+  MayDay::Abort("morrow_zheleznyak::uv_photon::get_kappa - should not be called. morrow_zheleznyak is used with the mc_photo module");
 }
 
-Real morrow_mc::uv_photon::get_random_kappa() const {
+Real morrow_zheleznyak::uv_photon::get_random_kappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 }
 
-void morrow_mc::parse_gas_params(){
-  ParmParse pp("morrow_mc");
+void morrow_zheleznyak::parse_gas_params(){
+  ParmParse pp("morrow_zheleznyak");
   std::string str;
   pp.get("gas_temperature",            m_T);
   pp.get("gas_N2_frac",                m_fracN2);
@@ -842,9 +876,9 @@ void morrow_mc::parse_gas_params(){
   pp.get("photoionization_efficiency", m_photoi_eff);
 }
 
-void morrow_mc::parse_see(){
+void morrow_zheleznyak::parse_see(){
 
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
 
   pp.get("electrode_townsend2",           m_townsend2_electrode);
   pp.get("dielectric_townsend2",          m_townsend2_dielectric);
@@ -852,9 +886,9 @@ void morrow_mc::parse_see(){
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void morrow_mc::parse_domain_bc(){
+void morrow_zheleznyak::parse_domain_bc(){
 
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
   std::string str;
 
   m_wallbc.resize(2*SpaceDim, 0); 
@@ -900,8 +934,8 @@ void morrow_mc::parse_domain_bc(){
   }
 }
 
-void morrow_mc::parse_reaction_settings(){
-  ParmParse pp("morrow_mc");
+void morrow_zheleznyak::parse_reaction_settings(){
+  ParmParse pp("morrow_zheleznyak");
   std::string str;
 
   pp.get("chemistry", str);
@@ -915,7 +949,7 @@ void morrow_mc::parse_reaction_settings(){
     m_scomp = source_comp::rre;
   }
   else{
-    MayDay::Abort("morrow_mc::parse_reaction_settings - stop!");
+    MayDay::Abort("morrow_zheleznyak::parse_reaction_settings - stop!");
   }
 
   pp.get("seed",           m_seed);
@@ -923,7 +957,7 @@ void morrow_mc::parse_reaction_settings(){
   pp.get("cutoff_poisson", m_cutoff_poisson);
 }
 
-void morrow_mc::parse_initial_particles(){
+void morrow_zheleznyak::parse_initial_particles(){
 
   List<Particle> p;
 
@@ -936,7 +970,7 @@ void morrow_mc::parse_initial_particles(){
   m_species[m_nplus_idx]->get_initial_particles() = p;
 
   // Get the initial deposition scheme
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
   std::string str;
   InterpType deposition;
 
@@ -951,14 +985,14 @@ void morrow_mc::parse_initial_particles(){
     deposition = InterpType::TSC;
   }
   else{
-    MayDay::Abort("morrow_mc::parse_initial_particles - unknown deposition type requested");
+    MayDay::Abort("morrow_zheleznyak::parse_initial_particles - unknown deposition type requested");
   }
   
   m_species[m_nelec_idx]->get_deposition() = deposition;
   m_species[m_nplus_idx]->get_deposition() = deposition;
 }
 
-void morrow_mc::add_uniform_particles(List<Particle>& a_particles){
+void morrow_zheleznyak::add_uniform_particles(List<Particle>& a_particles){
   
   // Get lo/hi sides
   Real weight;
@@ -983,7 +1017,7 @@ void morrow_mc::add_uniform_particles(List<Particle>& a_particles){
   Real num_particles;
   
   // Create uniform particles
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
   pp.get("uniform_particles",  num_particles);
   pp.get("particle_weight", weight);
   num_uniform_particles = round(num_particles);
@@ -1005,10 +1039,10 @@ void morrow_mc::add_uniform_particles(List<Particle>& a_particles){
 #endif
 }
 
-void morrow_mc::add_gaussian_particles(List<Particle>& a_particles){
+void morrow_zheleznyak::add_gaussian_particles(List<Particle>& a_particles){
 
   // Create uniform particles
-  ParmParse pp("morrow_mc");
+  ParmParse pp("morrow_zheleznyak");
 
   int num_gaussian_particles;
   Real num_particles;
@@ -1032,13 +1066,13 @@ void morrow_mc::add_gaussian_particles(List<Particle>& a_particles){
 
 }
  
-RealVect morrow_mc::random_gaussian(const Real a_rad){
+RealVect morrow_zheleznyak::random_gaussian(const Real a_rad){
 
   const Real rad = m_gauss(*m_rng);
   return rad*random_direction();
 }
 
-RealVect morrow_mc::random_direction(){
+RealVect morrow_zheleznyak::random_direction(){
 #if CH_SPACEDIM == 2
   return random_direction2D();
 #else
@@ -1047,7 +1081,7 @@ RealVect morrow_mc::random_direction(){
 }
 
 #if CH_SPACEDIM == 2
-RealVect morrow_mc::random_direction2D(){
+RealVect morrow_zheleznyak::random_direction2D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
@@ -1063,7 +1097,7 @@ RealVect morrow_mc::random_direction2D(){
 #endif
 
 #if CH_SPACEDIM==3
-RealVect morrow_mc::random_direction3D(){
+RealVect morrow_zheleznyak::random_direction3D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
