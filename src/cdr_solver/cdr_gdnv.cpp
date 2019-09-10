@@ -172,7 +172,7 @@ void cdr_gdnv::allocate_internals(){
 
   cdr_solver::allocate_internals();
 
-  if(m_which_divFnc == 1){
+  if(m_which_divFnc == 1 && m_mobile){
     this->delete_covered();
     this->allocate_covered();
   }

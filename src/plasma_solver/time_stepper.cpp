@@ -19,18 +19,6 @@ time_stepper::time_stepper(){
   m_class_name = "time_stepper";
   m_verbosity  = -1;
   m_solver_verbosity = -1;
-  // parse_verbosity();
-  // parse_solver_verbosity();
-  // parse_cfl();
-  // parse_relax_time();
-  // parse_source_growth();
-  // parse_source_tolerance();
-  // parse_min_dt();
-  // parse_max_dt();
-  // parse_fast_rte();
-  // parse_fast_rte();
-  // parse_fast_poisson();
-  // parse_source_comp();
 
   m_subcycle = false;
 }
@@ -705,27 +693,18 @@ void time_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffc
 
   // Call the cell version
   compute_cdr_diffco_cell(diffco, a_cdr_densities, a_E, a_time);
-#if 0 // Debug
-  Real max, min;
-  data_ops::get_max_min(max, min, diffco[0], 0);
-  if(procID() == 0) std::cout << "min = " << min << "\t max = " << max << std::endl;
-#endif
 
   // Now compute face-centered things by taking the average of cell-centered things
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     const int idx = solver_it.get_solver();
 
-    data_ops::set_value(*a_diffco_face[idx], 1.0);
     if(solver->is_diffusive()){ // Only need to do this for diffusive things
+      data_ops::set_value(*a_diffco_face[idx], 1.0);
       m_amr->average_down(diffco[idx], m_cdr->get_phase());
       m_amr->interp_ghost(diffco[idx], m_cdr->get_phase()); 
 
       data_ops::average_cell_to_face_allcomps(*a_diffco_face[idx], diffco[idx], m_amr->get_domains());
-#if 0 // Debug
-      data_ops::set_value(*a_diffco_face[idx], 1.E-5);
-      m_amr->average_down(*a_diffco_face[idx], m_cdr->get_phase());
-#endif
     }
   }
 }
@@ -915,11 +894,9 @@ void time_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&          a_
       
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-#if 0 // Original code
-      (*a_diffco_cell[idx])(vof, comp) = coeffs[idx];
-#else // Debug code
-      (*a_diffco_cell[idx])(vof, comp) = 1.E-5;
-#endif
+      if(solver_it()->is_diffusive()){
+	(*a_diffco_cell[idx])(vof, comp) = coeffs[idx];
+      }
     }
   }
 }
@@ -1008,11 +985,13 @@ void time_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >& 
 										  
       for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.get_solver();
+	if(solver_it()->is_diffusive()){
 #if 0 // Original code
-	(*a_diffco_eb[idx])[dit()](vof, comp) = diffco[idx];
+	  (*a_diffco_eb[idx])[dit()](vof, comp) = diffco[idx];
 #else // Debug code
-	(*a_diffco_eb[idx])[dit()](vof, comp) = 0.0;//1.E-5;
+	  (*a_diffco_eb[idx])[dit()](vof, comp) = 0.0;//1.E-5;
 #endif
+	}
       }
     }
   }

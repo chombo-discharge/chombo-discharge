@@ -458,6 +458,8 @@ void plasma_engine::grid_report(){
   int result1 = MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
   int result2 = MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
 #endif
+
+  ReportUnfreedMemory(pout());
 #endif
 
   

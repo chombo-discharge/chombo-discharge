@@ -182,29 +182,53 @@ void cdr_solver::allocate_internals(){
 
   m_amr->allocate(m_state,      m_phase, sca);
   m_amr->allocate(m_source,     m_phase, sca);
-  m_amr->allocate(m_velo_face,  m_phase, sca);
-  m_amr->allocate(m_velo_cell,  m_phase, vec); 
-  m_amr->allocate(m_ebflux,     m_phase, sca);
-  m_amr->allocate(m_aco,        m_phase, sca);
-  m_amr->allocate(m_diffco,     m_phase, sca);
-  m_amr->allocate(m_diffco_eb,  m_phase, sca);
   m_amr->allocate(m_scratch,    m_phase, sca);
+
+  if(m_mobile){
+    m_amr->allocate(m_velo_face,  m_phase, sca);
+  }
+  else{
+    m_amr->allocate_ptr(m_velo_face);
+  }
+  m_amr->allocate(m_velo_cell,  m_phase, vec); 
+
+  if(m_diffusive){
+    m_amr->allocate(m_aco,        m_phase, sca);
+    m_amr->allocate(m_diffco,     m_phase, sca);
+    m_amr->allocate(m_diffco_eb,  m_phase, sca);
+  }
+  else{
+    m_amr->allocate_ptr(m_aco);
+    m_amr->allocate_ptr(m_diffco);
+    m_amr->allocate_ptr(m_diffco_eb);
+  }
+  
+  m_amr->allocate(m_ebflux,     m_phase, sca);
   m_amr->allocate(m_domainflux, m_phase, sca);
 
   data_ops::set_value(m_state,      0.0);
   data_ops::set_value(m_source,     0.0);
-  data_ops::set_value(m_velo_face,  0.0);
-  data_ops::set_value(m_velo_cell,  0.0);
-  data_ops::set_value(m_ebflux,     0.0);
-  data_ops::set_value(m_ebflux,     0.0);
-  data_ops::set_value(m_aco,        0.0);
-  data_ops::set_value(m_diffco,     0.0);
-  data_ops::set_value(m_diffco_eb,  0.0);
-  data_ops::set_value(m_domainflux, 0.0);
   data_ops::set_value(m_scratch,    0.0);
 
-  this->define_interp_stencils();
-  this->define_divFnc_stencils();
+  if(m_mobile){
+    data_ops::set_value(m_velo_face,  0.0);
+  }
+  data_ops::set_value(m_velo_cell,  0.0);
+
+  if(m_diffusive){
+    data_ops::set_value(m_aco,        0.0);
+    data_ops::set_value(m_diffco,     0.0);
+    data_ops::set_value(m_diffco_eb,  0.0);
+  }
+  
+  data_ops::set_value(m_ebflux,     0.0);
+  data_ops::set_value(m_domainflux, 0.0);
+
+
+  if(m_mobile){
+    this->define_interp_stencils();
+    this->define_divFnc_stencils();
+  }
 }
 
 void cdr_solver::deallocate_internals(){
@@ -975,6 +999,7 @@ void cdr_solver::initial_data_distribution(){
   m_amr->interp_ghost(m_state, m_phase);
 
   data_ops::set_covered_value(m_state, 0, 0.0);
+
 }
 
 void cdr_solver::initial_data_particles(){
@@ -1898,6 +1923,7 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     data_ops::incr(m_scratch, m_ebflux, 1.0);
     write_data(a_output, a_comp, m_scratch, false);
   }
+
 }
 
 void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
