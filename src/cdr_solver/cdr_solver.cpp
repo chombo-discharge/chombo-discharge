@@ -184,15 +184,18 @@ void cdr_solver::allocate_internals(){
   m_amr->allocate(m_source,     m_phase, sca);
   m_amr->allocate(m_scratch,    m_phase, sca);
 
-  if(m_mobile){
+  
+  if(true){//m_mobile){
     m_amr->allocate(m_velo_face,  m_phase, sca);
+    m_amr->allocate(m_velo_cell,  m_phase, vec); 
   }
   else{
     m_amr->allocate_ptr(m_velo_face);
+    m_amr->allocate_ptr(m_velo_cell);
   }
-  m_amr->allocate(m_velo_cell,  m_phase, vec); 
 
-  if(m_diffusive){
+
+  if(true){//m_diffusive){
     m_amr->allocate(m_aco,        m_phase, sca);
     m_amr->allocate(m_diffco,     m_phase, sca);
     m_amr->allocate(m_diffco_eb,  m_phase, sca);
@@ -1983,89 +1986,91 @@ Real cdr_solver::compute_cfl_dt(){
     pout() << m_name + "::compute_cfl_dt" << endl;
   }
 
-  const Real SAFETY = 1.E-10; 
-
   Real min_dt = 1.E99;
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-  const Interval interv(comp, comp);
+  if(m_mobile){
+    const Real SAFETY = 1.E-10; 
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
+    const int comp  = 0;
+    const int ncomp = 1;
+    const int finest_level = m_amr->get_finest_level();
+    const Interval interv(comp, comp);
 
-    Real max_vel = 0.0;
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(ebisbox.getIrregIVS(box));
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+      const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+      const Real dx                = m_amr->get_dx()[lvl];
+
+      Real max_vel = 0.0;
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	const EBCellFAB& velo  = (*m_velo_cell[lvl])[dit()];
+	const Box box          = dbl.get(dit());
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet ivs(ebisbox.getIrregIVS(box));
 
 #if 0 // I think this is wrong, the CFL should be dx/(|vx| + |vy| + |vz|)
-      int fab_type;
-      const BaseFab<char>& mask     = ebgraph.getMask(fab_type);
-      const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
+	int fab_type;
+	const BaseFab<char>& mask     = ebgraph.getMask(fab_type);
+	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
 
-      if(fab_type != -1){// not all covered
-	if(fab_type == 0){ // Has irregular cells
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    FORT_GET_MAX_VEL(CHF_REAL(max_vel),
-			     CHF_CONST_FRA1(velo_fab, dir),
-			     CHF_BOX(box),
-			     CHF_CONST_FBA1(mask, 0));
-	  }
-	  for (VoFIterator vofit(ebisbox.getMultiCells(box), ebgraph); vofit.ok(); ++vofit){
-	    const VolIndex& vof = vofit();
+	if(fab_type != -1){// not all covered
+	  if(fab_type == 0){ // Has irregular cells
 	    for (int dir = 0; dir < SpaceDim; dir++){
-	      max_vel = Max(max_vel, Abs(velo(vof, dir)));
+	      FORT_GET_MAX_VEL(CHF_REAL(max_vel),
+			       CHF_CONST_FRA1(velo_fab, dir),
+			       CHF_BOX(box),
+			       CHF_CONST_FBA1(mask, 0));
+	    }
+	    for (VoFIterator vofit(ebisbox.getMultiCells(box), ebgraph); vofit.ok(); ++vofit){
+	      const VolIndex& vof = vofit();
+	      for (int dir = 0; dir < SpaceDim; dir++){
+		max_vel = Max(max_vel, Abs(velo(vof, dir)));
+	      }
+	    }
+	  }
+	  else { // all regular
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      FORT_GET_MAXNORM(CHF_REAL(max_vel),
+			       CHF_CONST_FRA1(velo_fab, dir),
+			       CHF_BOX(box));
 	    }
 	  }
 	}
-	else { // all regular
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    FORT_GET_MAXNORM(CHF_REAL(max_vel),
-			     CHF_CONST_FRA1(velo_fab, dir),
-			     CHF_BOX(box));
-	  }
-	}
-      }
 #else // This is the correct way of computing this (I think)
-      const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-      FORT_ADVECTIVE_CFL_DT(CHF_CONST_FRA(velo_fab),
-			    CHF_CONST_REAL(dx),
-			    CHF_BOX(box),
-			    CHF_REAL(min_dt));
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
+	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
+	FORT_ADVECTIVE_CFL_DT(CHF_CONST_FRA(velo_fab),
+			      CHF_CONST_REAL(dx),
+			      CHF_BOX(box),
+			      CHF_REAL(min_dt));
+	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
 	
-	Real vel = 0.0;
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  vel += Abs(velo(vof, dir));
+	  Real vel = 0.0;
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    vel += Abs(velo(vof, dir));
+	  }
+	  const Real thisdt = dx/vel;
+	  min_dt = Min(thisdt, min_dt);
 	}
-	const Real thisdt = dx/vel;
-	min_dt = Min(thisdt, min_dt);
-      }
 #endif
-    }
+      }
 
     
-    max_vel = Max(max_vel, SAFETY);
-    min_dt  = Min(min_dt, dx/max_vel);
-  }
+      max_vel = Max(max_vel, SAFETY);
+      min_dt  = Min(min_dt, dx/max_vel);
+    }
 
   
 #ifdef CH_MPI
-  Real tmp = 1.;
-  int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("cdr_solver::compute_cfl_dt() - communication error on norm");
-  }
-  min_dt = tmp;
+    Real tmp = 1.;
+    int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    if(result != MPI_SUCCESS){
+      MayDay::Error("cdr_solver::compute_cfl_dt() - communication error on norm");
+    }
+    min_dt = tmp;
 #endif
+  }
 
 
   return min_dt;

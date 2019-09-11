@@ -435,7 +435,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
 
   // Compute extrapolated velocities and fluxes at the domain faces
   this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), states);
-  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  this->extrapolate_velo_to_domain_faces(extrap_cdr_velocities,   m_cdr->get_phase(), cdr_velocities);
   this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     states,             cdr_velocities, m_cdr->get_phase());
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 

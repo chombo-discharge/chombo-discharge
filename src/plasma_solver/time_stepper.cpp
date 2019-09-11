@@ -1402,13 +1402,37 @@ void time_stepper::extrapolate_vector_to_domain_faces(EBAMRIFData&             a
 void time_stepper::extrapolate_vector_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
 						      const phase::which_phase      a_phase,
 						      const Vector<EBAMRCellData*>& a_data){
-  CH_TIME("time_stepper::extrapolate_to_domain_faces(vec)");
+  CH_TIME("time_stepper::extrapolate_vector_to_domain_faces");
   if(m_verbosity > 5){
-    pout() << "time_stepper::extrapolate_to_domain_faces(vec)" << endl;
+    pout() << "time_stepper::extrapolate_vector_to_domain_faces" << endl;
   }
 
-  for(int i = 0; i < a_extrap.size(); i++){
-    extrapolate_vector_to_domain_faces(*a_extrap[i], a_phase, *a_data[i]);
+  //  for(int i = 0; i < a_extrap.size(); i++){
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    extrapolate_vector_to_domain_faces(*a_extrap[idx], a_phase, *a_data[idx]);
+  }
+}
+
+void time_stepper::extrapolate_velo_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+						    const phase::which_phase      a_phase,
+						    const Vector<EBAMRCellData*>& a_velocities){
+  CH_TIME("time_stepper::extrapolate_velo_to_domain_faces");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::extrapolate_velo_to_domain_faces)" << endl;
+  }
+
+  //  for(int i = 0; i < a_extrap.size(); i++){
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    if(solver->is_mobile()){
+      extrapolate_vector_to_domain_faces(*a_extrap[idx], a_phase, *a_velocities[idx]);
+    }
+    else{
+      data_ops::set_value(*a_extrap[idx], 0.0);
+    }
   }
 }
 
@@ -1983,15 +2007,19 @@ void time_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>&       
   const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl       = m_amr->get_ebisl(cdr_phase)[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
+
+  const int num_species = m_plaskin->get_num_species();
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-    Vector<EBCellFAB*> vel;
-    Vector<EBCellFAB*> phi;
+    Vector<EBCellFAB*> vel(num_species);
+    Vector<EBCellFAB*> phi(num_species);;
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      vel.push_back(&(*a_velocities[idx])[dit()]);
-      phi.push_back(&(*a_cdr_densities[idx])[dit()]);
+      if(solver_it()->is_mobile()){
+	vel[idx] = &(*a_velocities[idx])[dit()];
+      }
+      phi[idx] = &(*a_cdr_densities[idx])[dit()];
     }
 
     // Separate calls for regular and irregular
@@ -2675,19 +2703,27 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
   m_amr->allocate(eb_vel, a_phase, SpaceDim);
   m_amr->allocate(eb_phi, a_phase, 1);
 
-  for (int i = 0; i < a_fluxes.size(); i++){
-    const irreg_amr_stencil<eb_centroid_interp>& interp_stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
+  //  for (int i = 0; i < a_fluxes.size(); i++){
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    if(solver->is_mobile()){
+      const irreg_amr_stencil<eb_centroid_interp>& interp_stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
 
-    interp_stencils.apply(eb_vel, *a_velocities[i]);
-    interp_stencils.apply(eb_phi, *a_densities[i]);
+      interp_stencils.apply(eb_vel, *a_velocities[idx]);
+      interp_stencils.apply(eb_phi, *a_densities[idx]);
 
-    data_ops::set_value(eb_flx, 0.0);
-    data_ops::incr(eb_flx, eb_vel, 1.0);
-    data_ops::multiply_scalar(eb_flx, eb_phi);
+      data_ops::set_value(eb_flx, 0.0);
+      data_ops::incr(eb_flx, eb_vel, 1.0);
+      data_ops::multiply_scalar(eb_flx, eb_phi);
 
-    this->project_flux(*a_fluxes[i], eb_flx);
+      this->project_flux(*a_fluxes[idx], eb_flx);
 
-    m_amr->average_down(*a_fluxes[i], a_phase);
+      m_amr->average_down(*a_fluxes[idx], a_phase);
+    }
+    else{
+      data_ops::set_value(*a_fluxes[idx], 0.0);
+    }
   }
 #endif
 }
@@ -2703,9 +2739,14 @@ void time_stepper::compute_extrapolated_velocities(Vector<EBAMRIVData*>&        
   EBAMRIVData scratch;
   m_amr->allocate(scratch, a_phase, SpaceDim);
 
-  for (int i = 0; i < a_ebvelo.size(); i++){
-    this->extrapolate_to_eb(scratch, a_phase, *a_cell_vel[i]);
-    this->project_flux(*a_ebvelo[i], scratch);
+  //  for (int i = 0; i < a_ebvelo.size(); i++){
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    if(solver->is_mobile()){
+      this->extrapolate_to_eb(scratch, a_phase, *a_cell_vel[idx]);
+      this->project_flux(*a_ebvelo[idx], scratch);
+    }
   }
 }
 
@@ -2724,15 +2765,23 @@ void time_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&     
   m_amr->allocate(cell_flux,   a_phase, SpaceDim);
   m_amr->allocate(domain_flux, a_phase, SpaceDim);
 
-  for (int i = 0; i < a_fluxes.size(); i++){
-    data_ops::copy(cell_flux, *a_velocities[i]);
-    data_ops::multiply_scalar(cell_flux, *a_densities[i]); // cell_flux = n*v
+  //  for (int i = 0; i < a_fluxes.size(); i++){
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    if(solver->is_mobile()){
+      data_ops::copy(cell_flux, *a_velocities[idx]);
+      data_ops::multiply_scalar(cell_flux, *a_densities[idx]); // cell_flux = n*v
 
-    // Extrapolate cell-centered to domain faces
-    this->extrapolate_to_domain_faces(domain_flux, a_phase, cell_flux);
+      // Extrapolate cell-centered to domain faces
+      this->extrapolate_to_domain_faces(domain_flux, a_phase, cell_flux);
 
-    // Project normal component onto domain face
-    this->project_domain(*a_fluxes[i], domain_flux);
+      // Project normal component onto domain face
+      this->project_domain(*a_fluxes[idx], domain_flux);
+    }
+    else{
+      data_ops::set_value(*a_fluxes[idx], 0.0);
+    }
   }
 }
 
@@ -2802,33 +2851,35 @@ void time_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     RefCountedPtr<species>& spec      = solver_it.get_species();
-    
-    const int q                       = spec->get_charge();
-    const EBAMRCellData& density      = solver->get_state();
-    const EBAMRCellData& velo         = solver->get_velo_cell();
 
-    if(q != 0){
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box& box         = dbl.get(dit());
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	const IntVectSet ivs(box);
+    if(solver->is_mobile()){
+      const int q                       = spec->get_charge();
+      const EBAMRCellData& density      = solver->get_state();
+      const EBAMRCellData& velo         = solver->get_velo_cell();
+
+      if(q != 0){
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  const Box& box         = dbl.get(dit());
+	  const EBISBox& ebisbox = ebisl[dit()];
+	  const EBGraph& ebgraph = ebisbox.getEBGraph();
+	  const IntVectSet ivs(box);
       
-	EBCellFAB& J       = a_J[dit()];
-	const EBCellFAB& n = (*density[a_lvl])[dit()];
-	const EBCellFAB& v = (*velo[a_lvl])[dit()];
+	  EBCellFAB& J       = a_J[dit()];
+	  const EBCellFAB& n = (*density[a_lvl])[dit()];
+	  const EBCellFAB& v = (*velo[a_lvl])[dit()];
       
-	EBCellFAB cdr_j(ebisbox, box, SpaceDim);
-	cdr_j.setVal(0.0);
-	for (int comp = 0; comp < SpaceDim; comp++){
-	  cdr_j.plus(n, 0, comp, 1);
+	  EBCellFAB cdr_j(ebisbox, box, SpaceDim);
+	  cdr_j.setVal(0.0);
+	  for (int comp = 0; comp < SpaceDim; comp++){
+	    cdr_j.plus(n, 0, comp, 1);
+	  }
+	  cdr_j *= v;
+	  cdr_j *= q;
+      
+	  J += cdr_j;
+
+	  // Should we monkey with irregular cells??? 
 	}
-	cdr_j *= v;
-	cdr_j *= q;
-      
-	J += cdr_j;
-
-	// Should we monkey with irregular cells??? 
       }
     }
   }

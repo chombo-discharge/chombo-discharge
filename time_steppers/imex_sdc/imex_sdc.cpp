@@ -23,6 +23,7 @@ typedef imex_sdc::sigma_storage   sigma_storage;
 
 imex_sdc::imex_sdc(){
   m_class_name = "imex_sdc";
+  m_subcycle = false;
 }
 
 imex_sdc::~imex_sdc(){
@@ -1628,7 +1629,7 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states,
 
   // Compute extrapolated velocities and fluxes at the domain faces
   this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), a_states);
-  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  this->extrapolate_velo_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
   this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_states,           cdr_velocities, m_cdr->get_phase());
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
