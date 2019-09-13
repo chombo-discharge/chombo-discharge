@@ -343,7 +343,7 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
     if(ebisbox.isRegular(iv)){
     
       // Position and E
-      pos    = origin + iv*a_dx;
+      pos    = origin + RealVect(iv)*a_dx;
       E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
 
       // Fill vectors with densities

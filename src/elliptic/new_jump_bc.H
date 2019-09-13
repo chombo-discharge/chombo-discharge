@@ -1,45 +1,48 @@
 /*!
-  @file jump_bc.H
+  @file new_jump_bc.H
   @brief Declaration of a multifluid boundary condition class for the poisson equation
   @author Robert Marskar
   @date Dec. 2017
 */
 
-#ifndef _JUMP_BC_
-#define _JUMP_BC_
+#ifndef _NEW_JUMP_BC_
+#define _NEW_JUMP_BC_
 
 #include "mfis.H"
 #include "MFLevelGrid.H"
 #include "MFInterfaceFAB.H"
 #include "MFBaseIVFAB.H"
 
+
 #include <Stencils.H>
 #include <EBISBox.H>
+#include <AggStencil.H>
 
 /*!
   @brief Class matching the surface potential with multifluid poisson
 */
-class jump_bc {
+class new_jump_bc {
 public:
 
   /*!
     @brief Empty constructor, must call define
   */
-  jump_bc();
+  new_jump_bc();
 
   /*!
     @brief Full constructor
   */
-  jump_bc(const MFLevelGrid&            a_mflg,
+  new_jump_bc(const MFLevelGrid&            a_mflg,
 	  const LevelData<MFBaseIVFAB>& a_bco,
 	  const Real&                   a_dx,
 	  const int                     a_order,
 	  const LayoutData<IntVectSet>* a_cfivs);
 
+
   /*!
     @brief Destructor
   */
-  virtual ~jump_bc();
+  virtual ~new_jump_bc();
 
   /*!
     @brief Switch between quadrant-based and non-quadrant based least squares stencils
@@ -59,6 +62,11 @@ public:
 		      const Real&                   a_dx,
 		      const int                     a_order,
 		      const LayoutData<IntVectSet>* a_cfivs);
+
+  /*!
+    @brief Build aggregate stencils
+  */
+  virtual void define_agg_stencils(const LevelData<BaseIVFAB<Real> >& a_dst, const LevelData<MFCellFAB>& a_src, const int a_phase);
 
   /*!
     @brief Match the boundary condition
@@ -202,6 +210,11 @@ protected:
   LayoutData<MFInterfaceFAB<VoFStencil> > m_stencils;
 
   /*!
+    @brief Factor stencil
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_factor;
+
+  /*!
     @brief VoFIterator for gas-side cells
   */
   LayoutData<VoFIterator> m_vofit_gas;
@@ -215,6 +228,26 @@ protected:
     @brief VoFIterator for bcs
   */
   LayoutData<VoFIterator> m_vofit_bc;
+
+  /*!
+    @brief Gas-side stencils
+  */
+  LayoutData<Vector<RefCountedPtr<VoFStencil> > > m_vofsten_gas;
+
+  /*!
+    @brief Solid-side stencils
+  */
+  LayoutData<Vector<RefCountedPtr<VoFStencil> > > m_vofsten_sol;
+
+  /*!
+    @brief Aggregate stencils for gas phase
+  */
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real> > > > m_aggsten_gas;
+
+  /*!
+    @brief Aggregate stencils for solid phase
+  */
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, BaseIVFAB<Real> > > > m_aggsten_sol;
 
   /*!
     @brief Define VoFIterators

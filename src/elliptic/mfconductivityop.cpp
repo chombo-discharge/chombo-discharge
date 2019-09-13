@@ -223,7 +223,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 
   EBArith::getMultiColors(m_colors);
 
-#if 1 // Define aggregate stencils in jump_bc object
+#if 0 // Define aggregate stencils in jump_bc object. Only for the new jump_bc class
   LevelData<MFCellFAB> dummy(a_aco->disjointBoxLayout(), 1, a_ghost_phi*IntVect::Unit, *factory);
   for (int iphase = 0; iphase < num_phases; iphase++){
     m_jumpbc->define_agg_stencils(*m_dirival[iphase], dummy, iphase);
