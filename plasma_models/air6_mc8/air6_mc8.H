@@ -17,9 +17,9 @@ public:
   class electron;
   class M_plus;
   class M_minus;
-  class N2_c4_v0;
-  class N2_c4_v1;
-  class N2_b1_v1;
+  class N2_c4v0;
+  class N2_c4v1;
+  class N2_b1v1;
 
   class phot_c4v0_X1v0;
   class phot_c4v0_X1v1;
@@ -44,18 +44,18 @@ public:
 				const Real             a_dx,
 				const Real             a_dt,
 				const Real             a_time,
-				const Real             a_kappa) const;
+				const Real             a_kappa) const {}
 
 
   Vector<Real> compute_cdr_diffusion_coefficients(const Real         a_time,
 						  const RealVect     a_pos,
 						  const RealVect     a_E,
-						  const Vector<Real> a_cdr_densities) const;
+						  const Vector<Real> a_cdr_densities) const{}
   
   Vector<RealVect> compute_cdr_velocities(const Real         a_time,
 					  const RealVect     a_pos,
 					  const RealVect     a_E,
-					  const Vector<Real> a_cdr_densities) const;
+					  const Vector<Real> a_cdr_densities) const{}
   
   Vector<Real> compute_cdr_domain_fluxes(const Real           a_time,
 					 const RealVect       a_pos,
@@ -66,7 +66,7 @@ public:
 					 const Vector<Real>   a_cdr_velocities,
 					 const Vector<Real>   a_cdr_gradients,
 					 const Vector<Real>   a_rte_fluxes,
-					 const Vector<Real>   a_extrap_cdr_fluxes) const;
+					 const Vector<Real>   a_extrap_cdr_fluxes) const{}
   
   Vector<Real> compute_cdr_electrode_fluxes(const Real         a_time,
 					    const RealVect     a_pos,
@@ -76,7 +76,7 @@ public:
 					    const Vector<Real> a_cdr_velocities,
 					    const Vector<Real> a_cdr_gradients,
 					    const Vector<Real> a_rte_fluxes,
-					    const Vector<Real> a_extrap_cdr_fluxes) const;
+					    const Vector<Real> a_extrap_cdr_fluxes) const{}
 
   Vector<Real> compute_cdr_dielectric_fluxes(const Real         a_time,
 					     const RealVect     a_pos,
@@ -86,7 +86,7 @@ public:
 					     const Vector<Real> a_cdr_velocities,
 					     const Vector<Real> a_cdr_gradients,
 					     const Vector<Real> a_rte_fluxes,
-					     const Vector<Real> a_extrap_cdr_fluxes) const;
+					     const Vector<Real> a_extrap_cdr_fluxes) const{}
 
   Vector<Real> compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
 					 const Vector<Real> a_ion_densities,
@@ -95,9 +95,9 @@ public:
 					 const RealVect     a_E,
 					 const RealVect     a_pos,
 					 const RealVect     a_normal,
-					 const Real         a_time) const;
+					 const Real         a_time) const{}
 
-  Real initial_sigma(const Real a_time, const RealVect a_pos) const;
+  Real initial_sigma(const Real a_time, const RealVect a_pos) const{}
 
 protected:
 
@@ -118,6 +118,7 @@ protected:
 
   // Tables built from BOLSIG+
   lookup_table m_e_mobility;
+  lookup_table m_e_diffco;
   lookup_table m_e_alpha;
   lookup_table m_e_eta;
 
@@ -165,8 +166,8 @@ protected:
   Real m_N;      // Neutral number density
   Real m_p;      // Pressure
   Real m_T;      // Temperature
-  Real m_fracO2; // O2 fraction
-  Real m_fracN2; // N2 fraction
+  Real m_O2frac; // O2 fraction
+  Real m_N2frac; // N2 fraction
   Real m_pO2;    // Partial O2 pressure
 
   // Excitation efficiencies for various states
@@ -229,6 +230,7 @@ protected:
   void parse_transport();
   void parse_gas_params();
   void parse_electron_mobility();
+  void parse_electron_diffco();
   void parse_alpha();
   void parse_eta();
   void parse_photoi();

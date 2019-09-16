@@ -5,6 +5,8 @@ air6_mc8.gas_pressure        = 1.0                         # Gas pressure
 air6_mc8.transport_file      = transport_data.txt          # Transport file
 air6_mc8.uniform_tables      = 100	                   #  Converted # of points in transport file
 
+air6_mc8.
+
 air6_mc8.rng_seed            = -1                          # RNG seed
 air6_mc8.chemistry           = tau                         # Chemistry type
 air6_mc8.poisson_exp_swap    = 100                         # Switch from Poisson to Gaussian to save flops
@@ -21,9 +23,10 @@ air6_mc8.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 
 
 
-# ----------------------------------------------------------------
-# Photoionization efficiencies, lifetimes, and predissociation lifetime, and absorption lengths
-# ----------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
+# Exitation efficiencies, photoionization efficiences, quenching pressure, radiative lifetimes,
+# and predissociation lifetime, and absorption lengths. These are pressure independent. 
+# ----------------------------------------------------------------------------------------------------
 air6_mc8.c4v0_exc_eff         = 0.08      # Excitation probability per ionization event
 air6_mc8.c4v1_exc_eff         = 0.0034    # Excitation probability per ionization event
 air6_mc8.b1v1_exc_eff         = 0.0051    # Excitation probability per ionization event
@@ -57,11 +60,14 @@ air6_mc8.c4v1_X1v3_tau_pre    = 0.56E-9   # Predissociation lifetime
 air6_mc8.b1v1_X1v0_tau_pre    = 2.13E-9   # Predissociation lifetime
 air6_mc8.b1v1_X1v1_tau_pre    = 2.13E-9   # Predissociation lifetime
 
-air6_mc8.c4v0_X1v0_beer       = 19E-6    # Beer's length
-air6_mc8.c4v0_X1v1_beer       = 146E-6   # Beer's length 
-air6_mc8.c4v1_X1v0_beer       = 30E-6    # Beer's length 
-air6_mc8.c4v1_X1v1_beer       = 21E-6    # Beer's length 
-air6_mc8.c4v1_X1v2_beer       = 58E-6    # Beer's length 
-air6_mc8.c4v1_X1v3_beer       = 158E-6   # Beer's length
-air6_mc8.b1v1_X1v0_beer       = 236E-6   # Beer's length 
-air6_mc8.b1v1_X1v1_beer       = 298E-6   # Beer's length 
+# ------------------------------------------------------------
+# Radiative transitions Beers length. These are scaled per bar
+# ------------------------------------------------------------
+air6_mc8.c4v0_X1v0_beer       = 19E-6    # Beer's length per bar
+air6_mc8.c4v0_X1v1_beer       = 146E-6   # Beer's length per bar
+air6_mc8.c4v1_X1v0_beer       = 30E-6    # Beer's length per bar
+air6_mc8.c4v1_X1v1_beer       = 21E-6    # Beer's length per bar
+air6_mc8.c4v1_X1v2_beer       = 58E-6    # Beer's length per bar
+air6_mc8.c4v1_X1v3_beer       = 158E-6   # Beer's length per bar
+air6_mc8.b1v1_X1v0_beer       = 236E-6   # Beer's length per bar
+air6_mc8.b1v1_X1v1_beer       = 298E-6   # Beer's length per bar
