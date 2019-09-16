@@ -107,6 +107,7 @@ protected:
     tau = 1,
     rre = 2
   };
+  
   source_comp m_scomp;
 
   // Tables built from BOLSIG+
@@ -140,6 +141,7 @@ protected:
   int m_c4v1_idx; // N2 c4(v=1) excited state
   int m_b1v1_idx; // N2 b1(v=0) excited state
 
+  // Indicates for various photons
   int m_c4v0_X1v0_idx; // Transition c4(v=0) -> X1(v=0)
   int m_c4v0_X1v1_idx; // Transition c4(v=0) -> X1(v=0)
   int m_c4v1_X1v0_idx; // Transition c4(v=1) -> X1(v=0)
@@ -160,6 +162,36 @@ protected:
   Real m_fracO2; // O2 fraction
   Real m_fracN2; // N2 fraction
   Real m_pO2;    // Partial O2 pressure
+
+  // Lifetimes for various transitions
+  Real m_c4v0_X1v0_tau_r; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v0_X1v1_tau_r; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v1_X1v0_tau_r; // Transition c4(v=1) -> X1(v=0)
+  Real m_c4v1_X1v1_tau_r; // Transition c4(v=1) -> X1(v=1)
+  Real m_c4v1_X1v2_tau_r; // Transition c4(v=1) -> X1(v=2)
+  Real m_c4v1_X1v3_tau_r; // Transition c4(v=1) -> X1(v=3)
+  Real m_b1v1_X1v0_tau_r; // Transition b1(v=1) -> X1(v=0)
+  Real m_b1v1_X1v1_tau_r; // Transition b1(v=1) -> X1(v=1)
+
+  // Quenching lifetimes for various transitions
+  Real m_c4v0_X1v0_tau_q; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v0_X1v1_tau_q; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v1_X1v0_tau_q; // Transition c4(v=1) -> X1(v=0)
+  Real m_c4v1_X1v1_tau_q; // Transition c4(v=1) -> X1(v=1)
+  Real m_c4v1_X1v2_tau_q; // Transition c4(v=1) -> X1(v=2)
+  Real m_c4v1_X1v3_tau_q; // Transition c4(v=1) -> X1(v=3)
+  Real m_b1v1_X1v0_tau_q; // Transition b1(v=1) -> X1(v=0)
+  Real m_b1v1_X1v1_tau_q; // Transition b1(v=1) -> X1(v=1)
+
+  // Photoionization efficiency for various transitions
+  Real m_c4v0_X1v0_eff; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v0_X1v1_eff; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v1_X1v0_eff; // Transition c4(v=1) -> X1(v=0)
+  Real m_c4v1_X1v1_eff; // Transition c4(v=1) -> X1(v=1)
+  Real m_c4v1_X1v2_eff; // Transition c4(v=1) -> X1(v=2)
+  Real m_c4v1_X1v3_eff; // Transition c4(v=1) -> X1(v=3)
+  Real m_b1v1_X1v0_eff; // Transition b1(v=1) -> X1(v=0)
+  Real m_b1v1_X1v1_eff; // Transition b1(v=1) -> X1(v=1)
 
   Real m_pq;         // Quenching pressure
   Real m_exc_eff;    // Excitation efficiency
@@ -193,7 +225,6 @@ protected:
   void parse_dissociation_rates();
   void parse_radiative_rates();
   void parse_photoi_eff();
-  void parse_
 
 private:
 

@@ -1,0 +1,60 @@
+# ====================================================================================================
+# AIR6_MC8 CLASS OPTIONS
+# ====================================================================================================	
+air6_mc8.gas_pressure       = 1.0                          # Gas pressure
+air6_mc8.transport_file     = transport_data.txt           # Transport file
+air6_mc8.uniform_tables     = 100	                   #  Converted # of points in transport file
+
+air6_mc8.mobile_electrons    = true                        # Mobile electrons or not
+air6_mc8.diffusive_electrons = true                        # Diffusive electrons or not
+air6_mc8.mobile_ions         = false                       # Mobile ions or not
+air6_mc8.diffusive_ions      = false                       # Diffusive ions or not
+air6_mc8.ion_mobility        = 2.E-4                       # Ion mobility
+
+air6_mc8.electrode_townsend2           = 1.E-6             # SEE on electrodes
+air6_mc8.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
+air6_mc8.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
+air6_mc8.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
+
+
+
+# ----------------------------------------------------------------
+# Photoionization efficiencies, lifetimes, and predissociation lifetime, and absorption lengths
+# ----------------------------------------------------------------
+air6_mc8.excite_eff    = 0.1       # Excitation efficiency
+
+air6_mc8.c4v0_X1v0_eff = 0.23      # Photoionization efficiency
+air6_mc8.c4v0_X1v1_eff = 0.77      # Photoionization efficiency
+air6_mc8.c4v1_X1v0_eff = 0.045     # Photoionization efficiency
+air6_mc8.c4v1_X1v1_eff = 0.10      # Photoionization efficiency
+air6_mc8.c4v1_X1v2_eff = 0.75      # Photoionization efficiency
+air6_mc8.c4v1_X1v3_eff = 0.69      # Photoionization efficiency
+air6_mc8.b1v1_X1v0_eff = 0.72      # Photoionization efficiency
+air6_mc8.b1v1_X1v1_eff = 0.69      # Photoionization efficiency
+
+air6_mc8.c4v0_X1v0_tau = 0.89E-9   # Radiative lifetime
+air6_mc8.c4v0_X1v1_tau = 5.29E-9   # Radiative lifetime
+air6_mc8.c4v1_X1v0_tau = 24.3E-9   # Radiative lifetime
+air6_mc8.c4v1_X1v1_tau = 1.43E-9   # Radiative lifetime
+air6_mc8.c4v1_X1v2_tau = 2.46E-9   # Radiative lifetime
+air6_mc8.c4v1_X1v3_tau = 6.89E-9   # Radiative lifetime
+air6_mc8.b1v1_X1v0_tau = 23.8E-9   # Radiative lifetime
+air6_mc8.b1v1_X1v1_tau = 12.5E-9   # Radiative lifetime
+
+air6_mc8.c4v0_X1v0_pre = 4.20E-9   # Predissociation lifetime
+air6_mc8.c4v0_X1v1_pre = 4.20E-9   # Predissociation lifetime
+air6_mc8.c4v1_X1v0_pre = 0.56E-9   # Predissociation lifetime
+air6_mc8.c4v1_X1v1_pre = 0.56E-9   # Predissociation lifetime
+air6_mc8.c4v1_X1v2_pre = 0.56E-9   # Predissociation lifetime
+air6_mc8.c4v1_X1v3_pre = 0.56E-9   # Predissociation lifetime
+air6_mc8.b1v1_X1v0_pre = 2.13E-9   # Predissociation lifetime
+air6_mc8.b1v1_X1v1_pre = 2.13E-9   # Predissociation lifetime
+
+air6_mc8.c4v0_X1v0_beer = 19E-6    # Beer's length
+air6_mc8.c4v0_X1v1_beer = 146E-6   # Beer's length 
+air6_mc8.c4v1_X1v0_beer = 30E-6    # Beer's length 
+air6_mc8.c4v1_X1v1_beer = 21E-6    # Beer's length 
+air6_mc8.c4v1_X1v2_beer = 58E-6    # Beer's length 
+air6_mc8.c4v1_X1v3_beer = 158E-6   # Beer's length
+air6_mc8.b1v1_X1v0_beer = 236E-6   # Beer's length 
+air6_mc8.b1v1_X1v1_beer = 298E-6   # Beer's length 
