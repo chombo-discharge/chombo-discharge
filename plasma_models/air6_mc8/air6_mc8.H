@@ -1,12 +1,12 @@
 /*!
-  @file   air6_mc8_bourdon.H
+  @file   air6_mc8.H
   @brief  6-species (3/3 charged/excited) and 8-photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
 
 #ifndef _AIR6_MC8_
-#ifndef _AIR6_MC8_
+#define _AIR6_MC8_
 
 #include "network_kinetics.H"
 #include "lookup_table.H"
@@ -30,8 +30,12 @@ public:
   class phot_b1v1_X1v0;
   class phot_b1v1_X1v1;
 
-  void advance_reaction_network(Vector<Real>&           a_particle_sources,
-				Vector<Real>&           a_photon_sources,
+  air6_mc8();
+  ~air6_mc8();
+  
+
+  void advance_reaction_network(Vector<Real>&          a_particle_sources,
+				Vector<Real>&          a_photon_sources,
 				const Vector<Real>     a_particle_densities,
 				const Vector<RealVect> a_particle_gradients,
 				const Vector<Real>     a_photon_densities,
@@ -110,6 +114,8 @@ protected:
   
   source_comp m_scomp;
 
+  std::string m_transport_file;
+
   // Tables built from BOLSIG+
   lookup_table m_e_mobility;
   lookup_table m_e_alpha;
@@ -117,12 +123,12 @@ protected:
 
   Vector<int> m_wallbc; // Wall boundary conditions
 
+  bool m_mobile_electrons;    // Mobile electrons or not
   bool m_mobile_ions;         // Mobile ions or not
   bool m_diffusive_ions;      // Diffusive ions or not
   bool m_diffusive_electrons; // Diffusive electrons or not
   
-  Real m_seed;
-  Real m_cutoff_poisson;
+  Real m_rng_seed;
   Real m_poiss_exp_swap;
 
   // Random number generator and some distributions
@@ -163,6 +169,11 @@ protected:
   Real m_fracN2; // N2 fraction
   Real m_pO2;    // Partial O2 pressure
 
+  // Excitation efficiencies for various states
+  Real m_c4v0_exc_eff;
+  Real m_c4v1_exc_eff;
+  Real m_b1v1_exc_eff;
+
   // Lifetimes for various transitions
   Real m_c4v0_X1v0_tau_r; // Transition c4(v=0) -> X1(v=0)
   Real m_c4v0_X1v1_tau_r; // Transition c4(v=0) -> X1(v=0)
@@ -172,6 +183,16 @@ protected:
   Real m_c4v1_X1v3_tau_r; // Transition c4(v=1) -> X1(v=3)
   Real m_b1v1_X1v0_tau_r; // Transition b1(v=1) -> X1(v=0)
   Real m_b1v1_X1v1_tau_r; // Transition b1(v=1) -> X1(v=1)
+
+  // Predissociation lifetimes for various transitions
+  Real m_c4v0_X1v0_tau_p; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v0_X1v1_tau_p; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v1_X1v0_tau_p; // Transition c4(v=1) -> X1(v=0)
+  Real m_c4v1_X1v1_tau_p; // Transition c4(v=1) -> X1(v=1)
+  Real m_c4v1_X1v2_tau_p; // Transition c4(v=1) -> X1(v=2)
+  Real m_c4v1_X1v3_tau_p; // Transition c4(v=1) -> X1(v=3)
+  Real m_b1v1_X1v0_tau_p; // Transition b1(v=1) -> X1(v=0)
+  Real m_b1v1_X1v1_tau_p; // Transition b1(v=1) -> X1(v=1)
 
   // Quenching lifetimes for various transitions
   Real m_c4v0_X1v0_tau_q; // Transition c4(v=0) -> X1(v=0)
@@ -184,14 +205,14 @@ protected:
   Real m_b1v1_X1v1_tau_q; // Transition b1(v=1) -> X1(v=1)
 
   // Photoionization efficiency for various transitions
-  Real m_c4v0_X1v0_eff; // Transition c4(v=0) -> X1(v=0)
-  Real m_c4v0_X1v1_eff; // Transition c4(v=0) -> X1(v=0)
-  Real m_c4v1_X1v0_eff; // Transition c4(v=1) -> X1(v=0)
-  Real m_c4v1_X1v1_eff; // Transition c4(v=1) -> X1(v=1)
-  Real m_c4v1_X1v2_eff; // Transition c4(v=1) -> X1(v=2)
-  Real m_c4v1_X1v3_eff; // Transition c4(v=1) -> X1(v=3)
-  Real m_b1v1_X1v0_eff; // Transition b1(v=1) -> X1(v=0)
-  Real m_b1v1_X1v1_eff; // Transition b1(v=1) -> X1(v=1)
+  Real m_c4v0_X1v0_photoi_eff; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v0_X1v1_photoi_eff; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v1_X1v0_photoi_eff; // Transition c4(v=1) -> X1(v=0)
+  Real m_c4v1_X1v1_photoi_eff; // Transition c4(v=1) -> X1(v=1)
+  Real m_c4v1_X1v2_photoi_eff; // Transition c4(v=1) -> X1(v=2)
+  Real m_c4v1_X1v3_photoi_eff; // Transition c4(v=1) -> X1(v=3)
+  Real m_b1v1_X1v0_photoi_eff; // Transition b1(v=1) -> X1(v=0)
+  Real m_b1v1_X1v1_photoi_eff; // Transition b1(v=1) -> X1(v=1)
 
   Real m_pq;         // Quenching pressure
   Real m_exc_eff;    // Excitation efficiency
@@ -206,13 +227,14 @@ protected:
   void read_file_entries(lookup_table& a_table, const std::string a_string);
   void parse_transport_file();
   void parse_transport();
-  void read_gas_params();
+  void parse_gas_params();
   void parse_electron_mobility();
   void parse_alpha();
   void parse_eta();
+  void parse_photoi();
   void parse_see();
   void parse_domain_bc();
-  void parse_reaction_settings();
+  void parse_chemistry();
   void parse_initial_particles();
   void instantiate_species();
   void init_rng();
@@ -221,18 +243,7 @@ protected:
   void add_uniform_excited(List<Particle>& a_particles);
   void add_gaussian_excited(List<Particle>& a_particles);
 
-  void parse_photoi();
-  void parse_dissociation_rates();
-  void parse_radiative_rates();
-  void parse_photoi_eff();
 
-private:
-
-  void read_file_entries(lookup_table& a_table, const std::string a_string);
-  
-  /*!
-    @brief Common function for dielectric and electrode fluxes, only difference is the secondary emission coefficients
-  */
   Vector<Real> compute_cdr_fluxes(const Real         a_time,
 				  const RealVect     a_pos,
 				  const RealVect     a_normal,
