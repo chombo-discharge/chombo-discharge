@@ -10,7 +10,19 @@ mechanical_shaft.electrode_inner_radius    = 7.E-3           # Electrode inner r
 mechanical_shaft.electrode_outer_radius    = 1.E-2           # Electrode outer radius
 mechanical_shaft.electrode_height          = 1.E-2           # Electrode height
 mechanical_shaft.electrode_center          = 0.0 0.0 7.E-3   # Electrode center
+mechanical_shaft.shaft_shape               = polygon         # 'polygon', 'cylinder', or 'cyl_profile'
 mechanical_shaft.dielectric_permittivity   = 4.0             # Dielectric permittivity
-mechanical_shaft.dielectric_rod_sides      = 6               # Number of sides
+mechanical_shaft.dielectric_rod_sides      = 6               # Number of sides for polygon shape
 mechanical_shaft.dielectric_rod_radius     = 5E-3            # Dielectric rod radius
 mechanical_shaft.dielectric_rod_length     = 1.0             # Dielectric rod length
+
+# Options for the profile cylinder shaft shape
+# --------------------------------------------
+mechanical_shaft.cylprofile_center         = 0.0 0.0 0.0
+mechanical_shaft.cylprofile_nleft          = 10
+mechanical_shaft.cylprofile_nright         = 10
+mechanical_shaft.cylprofile_rad            = 300E-6,
+mechanical_shaft.cylprofile_offset         = 0.0
+mechanical_shaft.cylprofile_shift          = 0.0
+mechanical_shaft.cylprofile_dist           = 0.0
+mechanical_shaft.cylprofile_curv           = 0.0	

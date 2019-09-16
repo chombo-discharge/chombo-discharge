@@ -17,7 +17,8 @@
 
 #include "perlin_sphere_if.H"
 #include "box_if.H"
-#include "new_sphere_if.H"
+#include "cylinder_if.H"
+#include "profile_cylinder_if.H"
 #include "polygon_rod_if.H"
 #include "hollow_cylinder_if.H"
 
@@ -30,72 +31,44 @@ mechanical_shaft::mechanical_shaft(){
   m_dielectrics.resize(0);
 
   std::string str;
-  Real eps0         = 1.0;
-  Real corner_curv  = 250E-6;
-  {
-    ParmParse pp("mechanical_shaft");
-    pp.get("eps0", eps0);
-    pp.get("corner_curvatures", corner_curv);
-    this->set_eps0(eps0);
-  }
-
+  Vector<Real> vec;
   
+  Real eps0;
+  Real corner_curv;
+
+  ParmParse pp("mechanical_shaft");
+
+
+  std::string shape;
+  int dielectric_num_sides     = 6;       // Number of sides for the rod rod
+  bool electrode_live          = true;
   bool has_electrode           = false;
-  bool electrode_live         = true;
+  bool has_dielectric          = false;
+  Real dielectric_radius       = 5.E-3;   // Rod radius
+  Real dielectric_length       = 1;       // Rod length
+  Real dielectric_permittivity = 4.0;     // Rod permittivity
   Real electrode_inner_rad    = 7.E-3;
   Real electrode_outer_rad    = 1.E-2;
   Real electrode_height       = 7.E-3;
   RealVect electrode_center   = RealVect(D_DECL(0., 0., 0.7));
 
-  { // Get parameters for the electrode
-    ParmParse pp("mechanical_shaft");
-    Vector<Real> center;
-    pp.get("electrode_inner_radius", electrode_inner_rad);
-    pp.get("electrode_outer_radius", electrode_outer_rad);
-    pp.get("electrode_height",       electrode_height);
-    pp.get("turn_off_electrode",     str);
-    if(str == "true"){
-      has_electrode = false;
-    }
-    else if(str == "false"){
-      has_electrode = true;
-    }
-
-    if(pp.contains("electrode_center")){
-      pp.getarr("electrode_center", center, 0, SpaceDim);
-      electrode_center = RealVect(D_DECL(center[0], center[1], center[2]));
-    }
-
-    pp.get("electrode_live", str);
-    if(str == "true"){
-      electrode_live = true;
-    }
-    else if(str == "false"){
-      electrode_live = false;
-    }
-      
-  }
   
-  bool has_dielectric           = false;
-  int dielectric_num_sides     = 6;       // Number of sides for the rod rod
-  Real dielectric_radius       = 5.E-3;    // Rod radius
-  Real dielectric_length       = 1;      // Rod length
-  Real dielectric_permittivity = 4.0;     // Rod permittivity
+  pp.get("eps0", eps0);
+  pp.get("shaft_shape", shape);
+  pp.get("corner_curvatures", corner_curv);
+  pp.get("electrode_inner_radius", electrode_inner_rad);
+  pp.get("electrode_outer_radius", electrode_outer_rad);
+  pp.get("electrode_height",       electrode_height);
+  pp.get("dielectric_rod_sides",    dielectric_num_sides);
+  pp.get("dielectric_rod_radius",   dielectric_radius);
+  pp.get("dielectric_rod_length",   dielectric_length);
+  pp.get("dielectric_permittivity", dielectric_permittivity);
 
-  { // Get parameters for dielectric
-    ParmParse pp("mechanical_shaft");
-    pp.get("dielectric_rod_sides",    dielectric_num_sides);
-    pp.get("dielectric_rod_radius",   dielectric_radius);
-    pp.get("dielectric_rod_length",   dielectric_length);
-    pp.get("dielectric_permittivity", dielectric_permittivity);
-    pp.get("turn_off_dielectric",     str);
-    if(str == "false"){
-      has_dielectric = true;
-    }
-    else if(str == "true"){
-      has_dielectric = false;
-    }
-  }
+  pp.get("turn_off_dielectric",     str);           has_dielectric   = (str == "true") ? false : true;
+  pp.get("turn_off_electrode",  str);               has_electrode    = (str == "true") ? false : true;
+  pp.get("electrode_live",      str);               electrode_live   = (str == "true") ? true : false;
+  pp.getarr("electrode_center", vec, 0, SpaceDim);  electrode_center = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+
   
 
   if(has_electrode){ // Define electrode
@@ -112,15 +85,51 @@ mechanical_shaft::mechanical_shaft(){
   
   if(has_dielectric){ // Define dielectric
     m_dielectrics.resize(1);
-    RefCountedPtr<BaseIF> dielectric = RefCountedPtr<BaseIF> (new polygon_rod_if(dielectric_num_sides,
-    										 dielectric_radius,
-    										 dielectric_length,
-    										 corner_curv,
-    										 0));
+    RefCountedPtr<BaseIF> shaft;
+    
+    if(shape == "polygon"){
+      shaft = RefCountedPtr<BaseIF> (new polygon_rod_if(dielectric_num_sides,
+							dielectric_radius,
+							dielectric_length,
+							corner_curv,
+							0));
+    }
+    else if(shape == "cylinder"){
+      const RealVect zhat = RealVect(BASISV(2));
+      shaft = RefCountedPtr<BaseIF> (new cylinder_if(electrode_center - 0.5*dielectric_length*zhat,
+						     electrode_center + 0.5*dielectric_length*zhat,
+						     dielectric_radius,
+						     false));
+						     
+    }
+    else if(shape == "cyl_profile"){
+      int nleft, nright;
+      Real rad, offset, shift, dist, curv;
+      pp.get("cylprofile_nleft", nleft);
+      pp.get("cylprofile_nright", nright);
+      pp.get("cylprofile_rad", rad);
+      pp.get("cylprofile_offset", offset);
+      pp.get("cylprofile_shift", shift);
+      pp.get("cylprofile_dist", dist);
+      pp.get("cylprofile_curv", curv);
+      shaft = RefCountedPtr<BaseIF> (new profile_cylinder_if(electrode_center,
+							     dielectric_length,
+							     dielectric_radius,
+							     nleft,
+							     nright,
+							     rad,
+							     offset,
+							     shift,
+							     dist, 
+							     curv,
+							     false));
+    }
 
 
-    m_dielectrics[0].define(dielectric, dielectric_permittivity);
+    m_dielectrics[0].define(shaft, dielectric_permittivity);
   }
+
+  set_eps0(eps0);
 }
 
 mechanical_shaft::~mechanical_shaft(){
