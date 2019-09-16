@@ -2047,8 +2047,6 @@ E/N (Td)	Mean energy (eV)
 2988.	44.73	42.42
 2994.	44.82	42.49
 3000.	44.92	42.56
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -2.885      0.8285       5.831       10.71      -1.127    
  
  
 E/N (Td)	Mobility *N (1/m/V/s)
@@ -2552,8 +2550,6 @@ E/N (Td)	Mobility *N (1/m/V/s)
 2988.	0.4576E+24	0.4632E+24
 2994.	0.4573E+24	0.4629E+24
 3000.	0.4570E+24	0.4626E+24
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-   57.01     -0.3142      -9.795       52.40      -5.141    
  
  
 E/N (Td)	Diffusion coefficient *N (1/m/s)
@@ -3057,8 +3053,7 @@ E/N (Td)	Diffusion coefficient *N (1/m/s)
 2988.	0.1381E+26	0.1323E+26
 2994.	0.1383E+26	0.1324E+26
 3000.	0.1385E+26	0.1326E+26
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-   53.91      0.4917       9.580      -18.49       1.756    
+
  
  
 E/N (Td)	Energy mobility *N (1/m/V/s)
@@ -3562,8 +3557,6 @@ E/N (Td)	Energy mobility *N (1/m/V/s)
 2988.	0.7196E+24	0.7232E+24
 2994.	0.7192E+24	0.7227E+24
 3000.	0.7188E+24	0.7223E+24
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-   57.26     -0.2900      -5.918       31.42      -3.082    
  
  
 E/N (Td)	Energy diffusion coef. D*N (1/m/s)
@@ -4067,8 +4060,6 @@ E/N (Td)	Energy diffusion coef. D*N (1/m/s)
 2988.	0.2233E+26	0.2044E+26
 2994.	0.2237E+26	0.2047E+26
 3000.	0.2241E+26	0.2049E+26
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-   53.78      0.5619       11.50      -28.55       2.743    
  
  
 E/N (Td)	Total collision freq. /N (m3/s)
@@ -4572,8 +4563,6 @@ E/N (Td)	Total collision freq. /N (m3/s)
 2988.	0.2859E-12	0.2873E-12
 2994.	0.2861E-12	0.2875E-12
 3000.	0.2862E-12	0.2876E-12
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -30.88      0.2501      -9.703       54.08      -5.312    
  
  
 E/N (Td)	Momentum frequency /N (m3/s)
@@ -5077,8 +5066,6 @@ E/N (Td)	Momentum frequency /N (m3/s)
 2988.	0.3844E-12	0.3797E-12
 2994.	0.3846E-12	0.3799E-12
 3000.	0.3849E-12	0.3802E-12
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -31.12      0.3142       9.795      -52.40       5.141    
  
  
 E/N (Td)	Total ionization freq. /N (m3/s)
@@ -5582,8 +5569,6 @@ E/N (Td)	Total ionization freq. /N (m3/s)
 2988.	0.5741E-13	0.6083E-13
 2994.	0.5754E-13	0.6100E-13
 3000.	0.5767E-13	0.6117E-13
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -38.93       1.096      -824.0      0.1201E+05 -0.1539E+06
  
  
 E/N (Td)	Total attachment freq. /N (m3/s)
@@ -6087,8 +6072,6 @@ E/N (Td)	Total attachment freq. /N (m3/s)
 2988.	0.7102E-17	0.6494E-17
 2994.	0.7104E-17	0.6491E-17
 3000.	0.7107E-17	0.6489E-17
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -37.82     -0.2180      -43.95     -0.1000E+05  0.1047E+06
  
  
 E/N (Td)	Townsend ioniz. coef. alpha/N (m2)
@@ -6592,8 +6575,6 @@ E/N (Td)	Townsend ioniz. coef. alpha/N (m2)
 2988.	0.4199E-19	0.4457E-19
 2994.	0.4203E-19	0.4464E-19
 3000.	0.4207E-19	0.4470E-19
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -47.92      0.4522      -782.9      0.1058E+05 -0.1363E+06
  
  
 E/N (Td)	Townsend attach. coef. eta/N (m2)
@@ -7097,8 +7078,6 @@ E/N (Td)	Townsend attach. coef. eta/N (m2)
 2988.	0.5194E-23	0.4752E-23
 2994.	0.5189E-23	0.4743E-23
 3000.	0.5184E-23	0.4735E-23
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -46.76     -0.8674      -8.692     -0.1101E+05  0.1144E+06
  
  
 E/N (Td)	Power /N (eV m3/s)
@@ -7602,8 +7581,6 @@ E/N (Td)	Power /N (eV m3/s)
 2988.	0.4086E-11	0.4136E-11
 2994.	0.4099E-11	0.4150E-11
 3000.	0.4113E-11	0.4164E-11
-Fit coefficients y=exp(A+B*ln(x)+C/x+D/x^2+E/x^3)
-  -39.70       1.686      -9.795       52.40      -5.141    
  
  
 E/N (Td)	Elastic power loss /N (eV m3/s)

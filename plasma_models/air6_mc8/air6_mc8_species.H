@@ -1,7 +1,7 @@
-#include "air6_mc8.H"
-
 #ifndef _AIR6_MC8_SPECIES_
 #define _AIR6_MC8_SPECIES_
+
+#include "air6_mc8.H"
 
 class air6_mc8::electron : public species {
 public:

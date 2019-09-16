@@ -16,7 +16,7 @@
 
 #include <ParmParse.H>
 
-std::string air6_mc8::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";
+std::string air6_mc8::s_bolsig_mobility = "E/N (Td)	Mobility *N (1/m/V/s)";
 std::string air6_mc8::s_bolsig_diffco   = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
 std::string air6_mc8::s_bolsig_alpha    = "E/N (Td)	Total ionization freq. /N (m3/s)";
 std::string air6_mc8::s_bolsig_eta      = "E/N (Td)	Total attachment freq. /N (m3/s)";
@@ -24,21 +24,35 @@ std::string air6_mc8::s_bolsig_eta      = "E/N (Td)	Total attachment freq. /N (m
 
 air6_mc8::air6_mc8() {
 
-  parse_transport_file();
+  if(procID() == 0) std::cout << "insta_species\n" ;
+  instantiate_species();      
+
+  if(procID() == 0) std::cout << "parse transport file\n" ;
+  parse_transport_file(); 
+  if(procID() == 0) std::cout << "parse transport\n" ;
   parse_transport();
+  if(procID() == 0) std::cout << "parse gas parans\n" ;
   parse_gas_params();
+  if(procID() == 0) std::cout << "parse mobility\n" ;
   parse_electron_mobility();
+  if(procID() == 0) std::cout << "parse diffco\n" ;
   parse_electron_diffco();
+  if(procID() == 0) std::cout << "parse alpha\n" ;
   parse_alpha();
+  if(procID() == 0) std::cout << "parse eta\n" ;
   parse_eta();
-  
+
+  if(procID() == 0) std::cout << "parse photoi\n" ;
   parse_photoi();
+  if(procID() == 0) std::cout << "parse chemistry\n" ;
   parse_chemistry();
+  if(procID() == 0) std::cout << "parse see\n" ;
   parse_see();
   //  parse_domain_bc();
 
+  if(procID() == 0) std::cout << "init rng\n" ;
   init_rng();                 // Initialize random number generators
-  //  instantiate_species();      // Instantiate species
+  
   //   parse_initial_particles();  // Parse initial particles
 
 }
@@ -52,6 +66,7 @@ void air6_mc8::read_file_entries(lookup_table& a_table, const std::string a_stri
   bool read_line = false;
   std::ifstream infile(m_transport_file);
   std::string line;
+
   while (std::getline(infile, line)){
 
     // Right trim string
@@ -79,7 +94,6 @@ void air6_mc8::parse_transport_file(){
   ParmParse pp("air6_mc8");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables",  m_uniform_entries);
-
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
     MayDay::Abort("air6_mc8::parse_transport_file - could not find transport data");
@@ -119,7 +133,12 @@ void air6_mc8::parse_gas_params(){
 
 void air6_mc8::parse_electron_mobility(){
   ParmParse pp("air6_mc8");
+  pout() << "reading entries" << endl;
   read_file_entries(m_e_mobility, air6_mc8::s_bolsig_mobility);
+#if 1 // Debug
+  m_e_mobility.dump_table();
+#endif
+  pout() << "dumped table" << endl;
   m_e_mobility.scale_y(1./m_N); 
   m_e_mobility.make_uniform(m_uniform_entries);
 }
@@ -127,7 +146,7 @@ void air6_mc8::parse_electron_mobility(){
 void air6_mc8::parse_electron_diffco(){
   ParmParse pp("air6_mc8");
   
-  read_file_entries(m_e_diffco, air6_mc8::s_bolsig_mobility);
+  read_file_entries(m_e_diffco, air6_mc8::s_bolsig_diffco);
   m_e_diffco.scale_y(1./m_N); 
   m_e_diffco.make_uniform(m_uniform_entries);
 }
@@ -163,25 +182,25 @@ void air6_mc8::parse_photoi(){
   pp.get("b1v1_X1v0_photoi_eff", m_b1v1_X1v0_photoi_eff);
   pp.get("b1v1_X1v1_photoi_eff", m_b1v1_X1v1_photoi_eff);
 
-  pp.get("c4v0_X1v0_tau", m_c4v0_X1v0_tau_r);
-  pp.get("c4v0_X1v1_tau", m_c4v0_X1v1_tau_r);
-  pp.get("c4v1_X1v0_tau", m_c4v1_X1v0_tau_r);
-  pp.get("c4v1_X1v1_tau", m_c4v1_X1v1_tau_r);
-  pp.get("c4v1_X1v2_tau", m_c4v1_X1v2_tau_r);
-  pp.get("c4v1_X1v3_tau", m_c4v1_X1v3_tau_r);
-  pp.get("b1v1_X1v0_tau", m_b1v1_X1v0_tau_r);
-  pp.get("b1v1_X1v1_tau", m_b1v1_X1v1_tau_r);
+  pp.get("c4v0_X1v0_tau_rad", m_c4v0_X1v0_tau_r);
+  pp.get("c4v0_X1v1_tau_rad", m_c4v0_X1v1_tau_r);
+  pp.get("c4v1_X1v0_tau_rad", m_c4v1_X1v0_tau_r);
+  pp.get("c4v1_X1v1_tau_rad", m_c4v1_X1v1_tau_r);
+  pp.get("c4v1_X1v2_tau_rad", m_c4v1_X1v2_tau_r);
+  pp.get("c4v1_X1v3_tau_rad", m_c4v1_X1v3_tau_r);
+  pp.get("b1v1_X1v0_tau_rad", m_b1v1_X1v0_tau_r);
+  pp.get("b1v1_X1v1_tau_rad", m_b1v1_X1v1_tau_r);
 
-  pp.get("c4v0_X1v0_pre", m_c4v0_X1v0_tau_p);
-  pp.get("c4v0_X1v1_pre", m_c4v0_X1v1_tau_p);
-  pp.get("c4v1_X1v0_pre", m_c4v1_X1v0_tau_p);
-  pp.get("c4v1_X1v1_pre", m_c4v1_X1v1_tau_p);
-  pp.get("c4v1_X1v2_pre", m_c4v1_X1v2_tau_p);
-  pp.get("c4v1_X1v3_pre", m_c4v1_X1v3_tau_p);
-  pp.get("b1v1_X1v0_pre", m_b1v1_X1v0_tau_p);
-  pp.get("b1v1_X1v1_pre", m_b1v1_X1v1_tau_p);
+  pp.get("c4v0_X1v0_tau_pre", m_c4v0_X1v0_tau_p);
+  pp.get("c4v0_X1v1_tau_pre", m_c4v0_X1v1_tau_p);
+  pp.get("c4v1_X1v0_tau_pre", m_c4v1_X1v0_tau_p);
+  pp.get("c4v1_X1v1_tau_pre", m_c4v1_X1v1_tau_p);
+  pp.get("c4v1_X1v2_tau_pre", m_c4v1_X1v2_tau_p);
+  pp.get("c4v1_X1v3_tau_pre", m_c4v1_X1v3_tau_p);
+  pp.get("b1v1_X1v0_tau_pre", m_b1v1_X1v0_tau_p);
+  pp.get("b1v1_X1v1_tau_pre", m_b1v1_X1v1_tau_p);
 
-  pp.get("quenching_photoi_effssure", m_pq);
+  pp.get("quenching_pressure", m_pq);
 
   // Set all quenching lifetimes to radiative lifetime x p/pq
   m_c4v0_X1v0_tau_q = m_c4v0_X1v0_tau_r*m_p/m_pq;
@@ -212,7 +231,7 @@ void air6_mc8::parse_chemistry(){
     MayDay::Abort("air6_mc8::parse_reaction_settings - stop!");
   }
 
-  pp.get("poiss_exp_swap", m_poiss_exp_swap);
+  pp.get("poisson_exp_swap", m_poiss_exp_swap);
 }
 
 void air6_mc8::parse_see(){
@@ -256,6 +275,7 @@ void air6_mc8::instantiate_species(){
   m_b1v1_X1v0_idx = 6;
   m_b1v1_X1v1_idx = 7;
 
+  m_species.resize(m_num_species);
   m_species[m_elec_idx]  = RefCountedPtr<species>      (new air6_mc8::electron());
   m_species[m_plus_idx]  = RefCountedPtr<species>      (new air6_mc8::M_plus());
   m_species[m_minu_idx]  = RefCountedPtr<species>      (new air6_mc8::M_minus());
@@ -263,6 +283,7 @@ void air6_mc8::instantiate_species(){
   m_species[m_c4v1_idx]  = RefCountedPtr<species>      (new air6_mc8::N2_c4v1());
   m_species[m_b1v1_idx]  = RefCountedPtr<species>      (new air6_mc8::N2_b1v1());
 
+  m_photons.resize(m_num_photons);
   m_photons[m_c4v0_X1v0_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v0_X1v0());
   m_photons[m_c4v0_X1v1_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v0_X1v0());
   m_photons[m_c4v1_X1v0_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v1_X1v0());

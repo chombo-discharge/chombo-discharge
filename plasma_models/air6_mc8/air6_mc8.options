@@ -1,32 +1,51 @@
 # ====================================================================================================
 # AIR6_MC8 CLASS OPTIONS
 # ====================================================================================================	
-air6_mc8.gas_pressure        = 1.0                         # Gas pressure
+
+# ----------------------------------------------------------------------------------------------------	
+# Transport file and # of points to use when converting files to uniform spacings
+# ----------------------------------------------------------------------------------------------------
 air6_mc8.transport_file      = transport_data.txt          # Transport file
 air6_mc8.uniform_tables      = 100	                   #  Converted # of points in transport file
 
-air6_mc8.
+# ----------------------------------------------------------------------------------------------------	
+# Gas composition. This should match your BOLSIG stuff!
+# ----------------------------------------------------------------------------------------------------
+air6_mc8.pressure            = 1.0                         # Gas pressure
+air6_mc8.temperature         = 1.0                         # Gas temperature
+air6_mc8.frac_N2             = 1.0                         # N2 fraction
+air6_mc8.frac_O2             = 1.0                         # O2 fraction
 
-air6_mc8.rng_seed            = -1                          # RNG seed
+
+# ----------------------------------------------------------------------------------------------------	
+# Gas composition. This should match your BOLSIG stuff!
+# ----------------------------------------------------------------------------------------------------
 air6_mc8.chemistry           = tau                         # Chemistry type
+air6_mc8.rng_seed            = -1                          # RNG seed  
 air6_mc8.poisson_exp_swap    = 100                         # Switch from Poisson to Gaussian to save flops
+
+# ----------------------------------------------------------------------------------------------------	
+# Transport properties
+# ----------------------------------------------------------------------------------------------------
 air6_mc8.mobile_electrons    = true                        # Mobile electrons or not
 air6_mc8.diffusive_electrons = true                        # Diffusive electrons or not
 air6_mc8.mobile_ions         = false                       # Mobile ions or not
 air6_mc8.diffusive_ions      = false                       # Diffusive ions or not
 air6_mc8.ion_mobility        = 2.E-4                       # Ion mobility
 
+# ----------------------------------------------------------------------------------------------------	
+# SEE coefficients
+# ----------------------------------------------------------------------------------------------------
 air6_mc8.electrode_townsend2           = 1.E-6             # SEE on electrodes
 air6_mc8.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
 air6_mc8.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
 air6_mc8.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 
 
-
-# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------	
 # Exitation efficiencies, photoionization efficiences, quenching pressure, radiative lifetimes,
-# and predissociation lifetime, and absorption lengths. These are pressure independent. 
-# ----------------------------------------------------------------------------------------------------
+# and predissociation lifetime, and absorption lengths. These are pressure independent.
+# ----------------------------------------------------------------------------------------------------	
 air6_mc8.c4v0_exc_eff         = 0.08      # Excitation probability per ionization event
 air6_mc8.c4v1_exc_eff         = 0.0034    # Excitation probability per ionization event
 air6_mc8.b1v1_exc_eff         = 0.0051    # Excitation probability per ionization event
@@ -60,9 +79,10 @@ air6_mc8.c4v1_X1v3_tau_pre    = 0.56E-9   # Predissociation lifetime
 air6_mc8.b1v1_X1v0_tau_pre    = 2.13E-9   # Predissociation lifetime
 air6_mc8.b1v1_X1v1_tau_pre    = 2.13E-9   # Predissociation lifetime
 
-# ------------------------------------------------------------
-# Radiative transitions Beers length. These are scaled per bar
-# ------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------	
+# Radiative transitions Beers length. These are given per bar. Converted automatically if you
+# change the pressure. 
+# ----------------------------------------------------------------------------------------------------		
 air6_mc8.c4v0_X1v0_beer       = 19E-6    # Beer's length per bar
 air6_mc8.c4v0_X1v1_beer       = 146E-6   # Beer's length per bar
 air6_mc8.c4v1_X1v0_beer       = 30E-6    # Beer's length per bar
