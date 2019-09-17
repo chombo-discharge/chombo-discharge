@@ -3,7 +3,7 @@
 
 air6_mc8::electron::electron(){
   m_name = "electron";
-  
+  m_charge = -1;
   ParmParse pp("air6_mc8");
   std::string str;
   
@@ -13,7 +13,7 @@ air6_mc8::electron::electron(){
 
 air6_mc8::M_plus::M_plus(){
   m_name = "M_plus";
-  
+  m_charge = 1;
   ParmParse pp("air6_mc8");
   std::string str;
   
@@ -23,7 +23,7 @@ air6_mc8::M_plus::M_plus(){
 
 air6_mc8::M_minus::M_minus(){
   m_name = "M_minus";
-  
+  m_charge = -1;
   ParmParse pp("air6_mc8");
   std::string str;
   
@@ -58,7 +58,6 @@ air6_mc8::phot_c4v0_X1v0::phot_c4v0_X1v0(){
 
   pp.get("pressure", p);
   pp.get("c4v0_X1v0_beer", m_kappa);
-
   m_kappa = 1./(m_kappa*p);
 }
 
@@ -70,7 +69,6 @@ air6_mc8::phot_c4v0_X1v1::phot_c4v0_X1v1(){
   
   pp.get("pressure", p);
   pp.get("c4v0_X1v1_beer", m_kappa);
-  
   m_kappa = 1./(m_kappa*p);
 }
 
@@ -144,4 +142,5 @@ air6_mc8::phot_b1v1_X1v1::phot_b1v1_X1v1(){
   pp.get("b1v1_X1v1_beer", m_kappa);
   
   m_kappa = 1./(m_kappa*p);
+
 }

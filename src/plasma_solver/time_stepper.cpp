@@ -171,15 +171,16 @@ void time_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       a_part
     pout() << "time_stepper::advance_reaction_network(amr)" << endl;
   }
 
-  const int num_photons = m_plaskin->get_num_photons();
+
   const int num_species = m_plaskin->get_num_species();
+  const int num_photons = m_plaskin->get_num_photons();
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     Vector<LevelData<EBCellFAB>* > particle_sources(num_species);
-    Vector<LevelData<EBCellFAB>* > photon_sources(num_species);
     Vector<LevelData<EBCellFAB>* > particle_densities(num_species);
     Vector<LevelData<EBCellFAB>* > particle_gradients(num_species);
-    Vector<LevelData<EBCellFAB>* > photon_densities(num_species);
+    Vector<LevelData<EBCellFAB>* > photon_sources(num_photons);
+    Vector<LevelData<EBCellFAB>* > photon_densities(num_photons);
 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
@@ -250,9 +251,9 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     Vector<EBCellFAB*> particle_sources(num_species);
-    Vector<EBCellFAB*> photon_sources(num_photons);
     Vector<EBCellFAB*> particle_densities(num_species);
     Vector<EBCellFAB*> particle_gradients(num_species);
+    Vector<EBCellFAB*> photon_sources(num_photons);
     Vector<EBCellFAB*> photon_densities(num_photons);
     
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -312,8 +313,9 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
 
   const Real zero = 0.0;
     
-  const int num_photons  = m_plaskin->get_num_photons();
+
   const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_photons();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -323,9 +325,9 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
   // Things that are passed into plasma_kinetics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species);
-  Vector<Real>     photon_sources(num_photons);
   Vector<Real>     particle_densities(num_species);
   Vector<RealVect> particle_gradients(num_species);
+  Vector<Real>     photon_sources(num_photons);
   Vector<Real>     photon_densities(num_photons);
 
   // Computed source terms onto here
@@ -1012,7 +1014,7 @@ void time_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>&     
   }
 
   const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_photons();
   const int comp         = 0;
   const int ncomp        = 1;
 
@@ -1143,7 +1145,7 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
   }
 
   const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_photons();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1164,6 +1166,7 @@ void time_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
       extrap_cdr_velocities[idx] = (*a_extrap_cdr_velocities[idx])[lvl];
       extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[lvl];
     }
+
 
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
@@ -1190,7 +1193,7 @@ void time_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a_fluxe
   }
 
   const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_photons();
   const int finest_level = m_amr->get_finest_level();
 
   // Things that will be passed into plaskin
@@ -1245,7 +1248,7 @@ void time_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIFFAB>*>
   }
 
   const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_photons();
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();

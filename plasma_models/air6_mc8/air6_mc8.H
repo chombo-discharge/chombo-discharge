@@ -44,18 +44,18 @@ public:
 				const Real             a_dx,
 				const Real             a_dt,
 				const Real             a_time,
-				const Real             a_kappa) const {}
+				const Real             a_kappa) const;
 
 
   Vector<Real> compute_cdr_diffusion_coefficients(const Real         a_time,
 						  const RealVect     a_pos,
 						  const RealVect     a_E,
-						  const Vector<Real> a_cdr_densities) const{}
+						  const Vector<Real> a_cdr_densities) const;
   
   Vector<RealVect> compute_cdr_velocities(const Real         a_time,
 					  const RealVect     a_pos,
 					  const RealVect     a_E,
-					  const Vector<Real> a_cdr_densities) const{}
+					  const Vector<Real> a_cdr_densities) const;
   
   Vector<Real> compute_cdr_domain_fluxes(const Real           a_time,
 					 const RealVect       a_pos,
@@ -66,7 +66,7 @@ public:
 					 const Vector<Real>   a_cdr_velocities,
 					 const Vector<Real>   a_cdr_gradients,
 					 const Vector<Real>   a_rte_fluxes,
-					 const Vector<Real>   a_extrap_cdr_fluxes) const{}
+					 const Vector<Real>   a_extrap_cdr_fluxes) const;
   
   Vector<Real> compute_cdr_electrode_fluxes(const Real         a_time,
 					    const RealVect     a_pos,
@@ -76,7 +76,7 @@ public:
 					    const Vector<Real> a_cdr_velocities,
 					    const Vector<Real> a_cdr_gradients,
 					    const Vector<Real> a_rte_fluxes,
-					    const Vector<Real> a_extrap_cdr_fluxes) const{}
+					    const Vector<Real> a_extrap_cdr_fluxes) const;
 
   Vector<Real> compute_cdr_dielectric_fluxes(const Real         a_time,
 					     const RealVect     a_pos,
@@ -86,18 +86,9 @@ public:
 					     const Vector<Real> a_cdr_velocities,
 					     const Vector<Real> a_cdr_gradients,
 					     const Vector<Real> a_rte_fluxes,
-					     const Vector<Real> a_extrap_cdr_fluxes) const{}
+					     const Vector<Real> a_extrap_cdr_fluxes) const;
 
-  Vector<Real> compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
-					 const Vector<Real> a_ion_densities,
-					 const Vector<Real> a_ion_velocities,
-					 const Vector<Real> a_photon_fluxes,
-					 const RealVect     a_E,
-					 const RealVect     a_pos,
-					 const RealVect     a_normal,
-					 const Real         a_time) const{}
-
-  Real initial_sigma(const Real a_time, const RealVect a_pos) const{}
+  Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
 protected:
 
@@ -111,7 +102,7 @@ protected:
     tau = 1,
     rre = 2
   };
-  
+
   source_comp m_scomp;
 
   std::string m_transport_file;
@@ -186,14 +177,9 @@ protected:
   Real m_b1v1_X1v1_tau_r; // Transition b1(v=1) -> X1(v=1)
 
   // Predissociation lifetimes for various transitions
-  Real m_c4v0_X1v0_tau_p; // Transition c4(v=0) -> X1(v=0)
-  Real m_c4v0_X1v1_tau_p; // Transition c4(v=0) -> X1(v=0)
-  Real m_c4v1_X1v0_tau_p; // Transition c4(v=1) -> X1(v=0)
-  Real m_c4v1_X1v1_tau_p; // Transition c4(v=1) -> X1(v=1)
-  Real m_c4v1_X1v2_tau_p; // Transition c4(v=1) -> X1(v=2)
-  Real m_c4v1_X1v3_tau_p; // Transition c4(v=1) -> X1(v=3)
-  Real m_b1v1_X1v0_tau_p; // Transition b1(v=1) -> X1(v=0)
-  Real m_b1v1_X1v1_tau_p; // Transition b1(v=1) -> X1(v=1)
+  Real m_c4v0_tau_p; // Transition c4(v=0) -> X1(v=0)
+  Real m_c4v1_tau_p; // Transition c4(v=1) -> X1(v=2)
+  Real m_b1v1_tau_p; // Transition b1(v=1) -> X1(v=1)
 
   // Quenching lifetimes for various transitions
   Real m_c4v0_X1v0_tau_q; // Transition c4(v=0) -> X1(v=0)
@@ -225,6 +211,16 @@ protected:
   Real m_ion_mobility;  // Ion mobility
   Real m_ion_diffusion; // Ion diffusion coefficient
 
+  Real ran01() const;
+  Real ran11() const;
+  RealVect random_gaussian();
+  RealVect random_direction();
+#if CH_SPACEDIM==2
+  RealVect random_direction2D();
+#elif CH_SPACEDIM==3
+  RealVect random_direction3D();
+#endif
+
   void read_file_entries(lookup_table& a_table, const std::string a_string);
   void parse_transport_file();
   void parse_transport();
@@ -240,10 +236,16 @@ protected:
   void parse_initial_particles();
   void instantiate_species();
   void init_rng();
-  void add_uniform_pairs(List<Particle>& a_particles);
-  void add_gaussian_pairs(List<Particle>& a_particles);
-  void add_uniform_excited(List<Particle>& a_particles);
-  void add_gaussian_excited(List<Particle>& a_particles);
+  void add_uniform_particles(List<Particle>& a_particles, const int a_num, const Real a_weight);
+  void add_gaussian_particles(List<Particle>& a_particles,
+			      const int       a_num,
+			      const Real      a_weight,
+			      const Real      a_rad,
+			      const RealVect  a_center);
+
+  
+  inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
+  inline int binomial_trials(const int a_trials, const Real a_p) const;
 
 
   Vector<Real> compute_cdr_fluxes(const Real         a_time,
@@ -257,6 +259,48 @@ protected:
 				  const Vector<Real> a_extrap_cdr_fluxes,
 				  const Real         a_townsend2,
 				  const Real         a_quantum_efficiency) const;
+
+  // Tau leaping method
+  void network_tau(Vector<Real>&          a_particle_sources,
+		   Vector<Real>&          a_photon_sources,
+		   const Vector<Real>     a_particle_densities,
+		   const Vector<RealVect> a_particle_gradients,
+		   const Vector<Real>     a_photon_densities,
+		   const RealVect         a_E,
+		   const RealVect         a_pos,
+		   const Real             a_dx,
+		   const Real             a_dt,
+		   const Real             a_time,
+		   const Real             a_kappa) const;
+
+  // stochastic simulation algorithm
+  void network_ssa(Vector<Real>&          a_particle_sources,
+		   Vector<Real>&          a_photon_sources,
+		   const Vector<Real>     a_particle_densities,
+		   const Vector<RealVect> a_particle_gradients,
+		   const Vector<Real>     a_photon_densities,
+		   const RealVect         a_E,
+		   const RealVect         a_pos,
+		   const Real             a_dx,
+		   const Real             a_dt,
+		   const Real             a_time,
+		   const Real             a_kappa) const;
+
+  // stochastic simulation algorithm
+  void network_rre(Vector<Real>&          a_particle_sources,
+		   Vector<Real>&          a_photon_sources,
+		   const Vector<Real>     a_particle_densities,
+		   const Vector<RealVect> a_particle_gradients,
+		   const Vector<Real>     a_photon_densities,
+		   const RealVect         a_E,
+		   const RealVect         a_pos,
+		   const Real             a_dx,
+		   const Real             a_dt,
+		   const Real             a_time,
+		   const Real             a_kappa) const;
+
+
+  
 };
 
 #endif
