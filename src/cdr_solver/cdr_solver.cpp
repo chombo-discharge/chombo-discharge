@@ -658,21 +658,48 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRF
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
 
+  Real t_consdiv = 0.0;
+  Real t_total = -MPI_Wtime();
+  Real t_setup = 0.0;
+  Real t_interp = 0.0;
+  Real t_irreg = 0.0;
+
+  Real t1, t2;
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
 
     // Compute div(F) on regular cells
+    t1 = MPI_Wtime();
     this->consdiv_regular(*a_cons_div[lvl], *a_flux[lvl], lvl);
+    t2 = MPI_Wtime();
+    t_consdiv += t2 - t1;
 
+    t1 = MPI_Wtime();
     LevelData<BaseIFFAB<Real> > flux[SpaceDim];
     this->setup_flux_interpolant(flux, *a_flux[lvl], lvl);
+    t2 = MPI_Wtime();
+    t_setup += t2-t1;
+
+    t1 = MPI_Wtime();
     this->interpolate_flux_to_centroids(flux, lvl);
+    t2 = MPI_Wtime();
+    t_interp += t2 - t1;
+
+    t1 = MPI_Wtime();
     this->compute_divF_irreg(*a_cons_div[lvl], flux, *m_ebflux[lvl], lvl);
+    t2 = MPI_Wtime();
+    t_irreg += t2-t1;
 
     a_cons_div[lvl]->exchange();
   }
+  t_total += MPI_Wtime();
+
+  pout() << "regular consdiv consumption = " << t_consdiv/t_total << endl;
+  pout() << "setup consumption = " << t_setup/t_total << endl;
+  pout() << "interp consumption = " << t_interp/t_total << endl;
+  pout() << "irreg consumption = " << t_irreg/t_total << endl;
 }
 
 void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
@@ -739,6 +766,7 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
       else{
 	Vector<int> tilesize(SpaceDim);
 	pp.getarr("tile_size", tilesize, 0, SpaceDim);
+	pout() << tilesize << endl;
 	Vector<Box> boxes = m_amr->make_tiles(box, IntVect(D_DECL(tilesize[0], tilesize[1], tilesize[2])));
 	for (int ibox = 0; ibox < boxes.size(); ibox++){
 	  FORT_CONSDIV_REG(CHF_FRA1(divJ_fab, comp),
@@ -1739,8 +1767,16 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
   const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
 
+  Real setup_time;
+  Real compute_time;
+
+  Real total_time = -MPI_Wtime();
+
+
   for (int dir = 0; dir < SpaceDim; dir++){
     // Define interpolant
+
+    const Real t1 = MPI_Wtime();
     LayoutData<IntVectSet> grown_set;
     EBArith::defineFluxInterpolant(a_interpolant[dir],
 				   grown_set,
@@ -1749,6 +1785,7 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
 				   domain,
 				   ncomp,
 				   dir);
+    const Real t2 = MPI_Wtime();
 
     // Compute interpolant
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1764,7 +1801,17 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
 	const FaceIndex& face = faceit();
 	interpol(face, comp) = flux(face, comp);
       }
+      const Real t3 = MPI_Wtime();
+
+      setup_time += t2 - t1; 
+      compute_time += t3 - t2; 
     }
+    total_time += MPI_Wtime();
+
+
+    pout() << "fluxinterpolant::setup time = " << setup_time/total_time << endl;
+    pout() << "fluxinterpolant::compute time = " << compute_time/total_time << endl;
+    pout() << "fluxinterpolant::total time = " << total_time << endl;
 
     a_interpolant[dir].exchange();
   }
