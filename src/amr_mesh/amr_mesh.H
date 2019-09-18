@@ -597,6 +597,11 @@ public:
   */
   virtual Vector<RefCountedPtr<Copier> >& get_reverse_copier(phase::which_phase a_phase);
 
+  /*!
+    @brief Build tiles from a box
+  */
+  virtual Vector<Box> make_tiles(const Box a_box, const IntVect a_tilesize);
+
   
 protected:
 

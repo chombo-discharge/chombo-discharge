@@ -2151,3 +2151,43 @@ Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(phase::which_phase a_phase)
 Vector<RefCountedPtr<Copier> >& amr_mesh::get_reverse_copier(phase::which_phase a_phase){
   return m_reverse_copier[a_phase];
 }
+
+Vector<Box> amr_mesh::make_tiles(const Box a_box, const IntVect a_tilesize){
+
+  // Modify the input tilesize to something sensible
+  IntVect tilesize = a_tilesize;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(tilesize[dir] > a_box.size(dir)){
+      tilesize[dir] = a_box.size(dir);
+    }
+  }
+
+  // Compute number of tiles along each coordinate
+  Vector<int> num_tiles_dir(SpaceDim);
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(a_box.size(dir)%tilesize[dir] == 0){
+      num_tiles_dir[dir] = a_box.size(dir)/tilesize[dir];
+    }
+    else{
+      MayDay::Abort("amr_mesh::make_tiles - logic bust when building tiles. Tile size was not divisible by blocking factor");
+    }
+  }
+
+  // Make the tiles
+  Vector<Box> tiles;
+#if CH_SPACEDIM==3
+  for (int k = 0; k < num_tiles_dir[2]; k++){
+#endif
+    for (int j = 0; j < num_tiles_dir[1]; j++){
+      for (int i = 0; i < num_tiles_dir[0]; i++){
+	const IntVect ivlo = a_box.smallEnd() + IntVect(D_DECL(i,j,k))*tilesize;
+	const IntVect ivhi = a_box.smallEnd() + IntVect(D_DECL(i+1,j+1,k+1))*tilesize - IntVect::Unit;
+	tiles.push_back(Box(ivlo, ivhi));
+      }
+    }
+#if CH_SPACEDIM==3
+  }
+#endif
+
+  return tiles;
+}

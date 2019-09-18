@@ -725,12 +725,29 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
       const EBFaceFAB& flx         = a_flux[dit()][dir];
       const BaseFab<Real>& flx_fab = flx.getSingleValuedFAB();
 
-      FORT_CONSDIV_REG(CHF_FRA1(divJ_fab, comp),
-		       CHF_CONST_FRA1(flx_fab, comp),
-		       CHF_CONST_INT(dir),
-		       CHF_CONST_INT(ncomp),
-		       CHF_CONST_REAL(dx),
-		       CHF_BOX(box));
+      ParmParse pp ("cache_blocking");
+
+      int block_loops = 0;
+      pp.query("tile_loops", block_loops);
+      if(block_loops=0){
+	FORT_CONSDIV_REG(CHF_FRA1(divJ_fab, comp),
+			 CHF_CONST_FRA1(flx_fab, comp),
+			 CHF_CONST_INT(dir),
+			 CHF_CONST_REAL(dx),
+			 CHF_BOX(box));
+      }
+      else{
+	Vector<int> tilesize(SpaceDim);
+	pp.getarr("tile_size", tilesize, 0, SpaceDim);
+	Vector<Box> boxes = m_amr->make_tiles(box, IntVect(D_DECL(tilesize[0], tilesize[1], tilesize[2])));
+	for (int ibox = 0; ibox < boxes.size(); ibox++){
+	  FORT_CONSDIV_REG(CHF_FRA1(divJ_fab, comp),
+			   CHF_CONST_FRA1(flx_fab, comp),
+			   CHF_CONST_INT(dir),
+			   CHF_CONST_REAL(dx),
+			   CHF_BOX(boxes[ibox]));
+	}
+      }
     }
 
     // Reset irregular cells - these contain bogus values and will be set elsewhere. 
