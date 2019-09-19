@@ -273,7 +273,6 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
     
     // This does all cells
 #if USE_FAST_REACTIONS
-
     Real fast_time = -MPI_Wtime();
     advance_reaction_network_reg_fast(particle_sources,
 				      photon_sources,
@@ -515,94 +514,109 @@ void time_stepper::advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a
   const IntVect hi     = a_box.bigEnd();
   const int n0         = dims[0];
   const int n1         = dims[1];
-  const int offset_cdr = lo[0] + n0*lo[1];
-  const int offset_E   = lo[0] + n0*lo[1];
-  const int offset_rte = lo[0] + n0*lo[1];
-
-  // C style variable-length array conversion magic
-  auto vla_cdr_src = (Real (*__restrict__)[n1][n0]) (cdr_src.dataPtr() - offset_cdr);
-  auto vla_rte_src = (Real (*__restrict__)[n1][n0]) (rte_src.dataPtr() - offset_rte);
-  auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset_cdr);
-  auto vla_rte_phi = (Real (*__restrict__)[n1][n0]) (rte_phi.dataPtr() - offset_rte);
-  auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset_E);
-
-  for (int j = lo[1]; j <= hi[1]; ++j){
-    for (int i = lo[0]; i <= hi[0]; ++i){
-      
-#if 0 // Debug
-      for (int idx = 0; idx < num_species; idx++){
-	if(&(vla_cdr_phi[idx][j][i]) != &(cdr_phi(IntVect(i,j), idx))){
-	  MayDay::Abort("something is wrong");
-	}
-      }
+#if CH_SPACEDIM==2
+  const int offset     = lo[0] + n0*lo[1];
+#else
+  const int n2         = dims[2];
+  const int offset     = lo[0] + n0*(lo[1] + n1*lo[2]);
 #endif
 
+  // C style variable-length array conversion magic
+#if CH_SPACEDIM==2
+  auto vla_cdr_src = (Real (*__restrict__)[n1][n0]) (cdr_src.dataPtr() - offset);
+  auto vla_rte_src = (Real (*__restrict__)[n1][n0]) (rte_src.dataPtr() - offset);
+  auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
+  auto vla_rte_phi = (Real (*__restrict__)[n1][n0]) (rte_phi.dataPtr() - offset);
+  auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
+#else
+  auto vla_cdr_src = (Real (*__restrict__)[n2][n1][n0]) (cdr_src.dataPtr() - offset);
+  auto vla_rte_src = (Real (*__restrict__)[n2][n1][n0]) (rte_src.dataPtr() - offset);
+  auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
+  auto vla_rte_phi = (Real (*__restrict__)[n2][n1][n0]) (rte_phi.dataPtr() - offset);
+  auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
+#endif
 
-      // Particle densities
-      for (int idx = 0; idx < num_species; ++idx){
-	particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
-	particle_gradients[idx] = RealVect::Zero;
-      }
+#if CH_SPACEDIM==3
+  for (int k = lo[2]; k <= hi[2]; k++){
+#endif
+    for (int j = lo[1]; j <= hi[1]; ++j){
+      for (int i = lo[0]; i <= hi[0]; ++i){
+      
+	// Particle densities
+	for (int idx = 0; idx < num_species; ++idx){
+#if CH_SPACEDIM==2
+	  particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
+#else
+	  particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
+#endif
+	  particle_gradients[idx] = RealVect::Zero;
+	}
 
-      // Photon densities
-      for (int idx = 0; idx < num_photons; ++idx){
-	photon_densities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
-      }
+	// Photon densities
+	for (int idx = 0; idx < num_photons; ++idx){
+#if CH_SPACEDIM==2
+	  photon_densities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
+#else
+	  photon_densities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
+#endif
+	}
 
-      E   = RealVect(D_DECL(vla_E[0][j][i], vla_E[1][j][i], vla_E[2][j][i]));
+#if CH_SPACEDIM==2
+	E = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
+#else
+	E = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[1][k][j][i]);
+#endif
 
-      pos = origin + RealVect(IntVect(i,j))*a_dx;
+	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
-      m_plaskin->advance_reaction_network(particle_sources,
-					  photon_sources,
-					  particle_densities,
-					  particle_gradients,
-					  photon_densities,
-					  E,
-					  pos,
-					  a_dx,
-					  a_dt,
-					  a_time,
-					  1.0);
+	m_plaskin->advance_reaction_network(particle_sources,
+					    photon_sources,
+					    particle_densities,
+					    particle_gradients,
+					    photon_densities,
+					    E,
+					    pos,
+					    a_dx,
+					    a_dt,
+					    a_time,
+					    1.0);
 
-      // Put result in correct palce
-      for (int idx = 0; idx < num_species; ++idx){
-	vla_cdr_src[idx][j][i] = particle_sources[idx];
-      }
+	// Put result in correct palce
+	for (int idx = 0; idx < num_species; ++idx){
+#if CH_SPACEDIM==2
+	  vla_cdr_src[idx][j][i] = particle_sources[idx];
+#else
+	  vla_cdr_src[idx][k][j][i] = particle_sources[idx];
+#endif
+	}
 
-      // Put result in correct palce
-      for (int idx = 0; idx < num_photons; ++idx){
-	vla_rte_src[idx][j][i] = photon_sources[idx];
+	// Put result in correct palce
+	for (int idx = 0; idx < num_photons; ++idx){
+#if CH_SPACEDIM==2
+	  vla_rte_src[idx][j][i] = photon_sources[idx];
+#else
+	  vla_rte_src[idx][k][j][i] = photon_sources[idx];
+#endif
+	}
       }
     }
+#if CH_SPACEDIM==3
   }
+#endif
 
   // Copy result back to solvers
   for (int i = 0; i < num_species; i++){
     FArrayBox& src = a_particle_sources[i]->getFArrayBox();
-
-#if 1 // Original code
     src.setVal(0.0);
     src.copy(cdr_src, a_box, i, a_box, 0, 1);
-#else
-    src.setVal(0.0, 0);
-    src.plus(cdr_src, i, 0, 1);
-#endif
-
     a_particle_sources[i]->setCoveredCellVal(0.0, 0);
   }
 
   // Copy result back to solvers
   for (int i = 0; i < num_photons; i++){
     FArrayBox& src = a_photon_sources[i]->getFArrayBox();
-
-#if 1 // Original code
     src.setVal(0.0);
     src.copy(rte_src, a_box, i, a_box, 0, 1);
-#else
-    src.setVal(0.0, 0);
-    src.plus(rte_src, i, 0, 1);
-#endif
   }
 }
 
