@@ -14,6 +14,8 @@
 #include <ParmParse.H>
 #include <EBLevelDataOps.H>
 
+#define USE_FAST_REACTIONS 1
+
 
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";
@@ -270,6 +272,23 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
     }
     
     // This does all cells
+#if USE_FAST_REACTIONS
+
+    Real fast_time = -MPI_Wtime();
+    advance_reaction_network_reg_fast(particle_sources,
+				      photon_sources,
+				      particle_densities,
+				      particle_gradients,
+				      photon_densities,
+				      a_E[dit()],
+				      a_time,
+				      a_dt,
+				      dx,
+				      dbl.get(dit()));
+    fast_time += MPI_Wtime();
+
+#if 0
+    Real slow_time = -MPI_Wtime();
     advance_reaction_network_reg(particle_sources,
 				 photon_sources,
 				 particle_densities,
@@ -280,6 +299,22 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
 				 a_dt,
 				 dx,
 				 dbl.get(dit()));
+
+    slow_time += MPI_Wtime();
+    pout() << "slow_time = " << slow_time << "\t fast time = " << fast_time << "\t speedup = " << slow_time/fast_time << endl;
+#endif
+#else
+    advance_reaction_network_reg(particle_sources,
+				 photon_sources,
+				 particle_densities,
+				 particle_gradients,
+				 photon_densities,
+				 a_E[dit()],
+				 a_time,
+				 a_dt,
+				 dx,
+				 dbl.get(dit()));
+#endif
 
     // This overwrites irregular celles
     advance_reaction_network_irreg(particle_sources,
@@ -337,12 +372,15 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
   part_src.setVal(0.0);
   phot_src.setVal(0.0);
 
+
+
   const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
+
   
   // Grid loop
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-    if(ebisbox.isRegular(iv)){
+    //    if(ebisbox.isRegular(iv)){
     
       // Position and E
       pos    = origin + RealVect(iv)*a_dx;
@@ -388,7 +426,7 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
 	const int idx = solver_it.get_solver();
 	phot_src.getSingleValuedFAB()(iv,idx) = photon_sources[idx];
       }
-    }
+      //    }
   }
 
   // Copy temporary storage back to solvers
@@ -409,6 +447,162 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
 
     // Covered cells are bogus. 
     (*a_photon_sources[idx]).setCoveredCellVal(0.0, 0);
+  }
+}
+
+void time_stepper::advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a_particle_sources,
+						     Vector<EBCellFAB*>&       a_photon_sources,
+						     const Vector<EBCellFAB*>& a_particle_densities,
+						     const Vector<EBCellFAB*>& a_particle_gradients,
+						     const Vector<EBCellFAB*>& a_photon_densities,
+						     const EBCellFAB&          a_E,
+						     const Real&               a_time,
+						     const Real&               a_dt,
+						     const Real&               a_dx,
+						     const Box&                a_box){
+  CH_TIME("time_stepper::advance_reaction_network_reg_fast(patch)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network_reg_fast(patch)" << endl;
+  }
+
+  const Real zero = 0.0;
+    
+
+  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_photons();
+
+  // EBISBox and graph
+  const EBISBox& ebisbox = a_E.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  // Things that are passed into plasma_kinetics. 
+  RealVect         pos = RealVect::Zero;
+  RealVect         E   = RealVect::Zero;
+  Vector<Real>     particle_sources(num_species);
+  Vector<Real>     particle_densities(num_species);
+  Vector<RealVect> particle_gradients(num_species);
+  Vector<Real>     photon_sources(num_photons);
+  Vector<Real>     photon_densities(num_photons);
+
+  // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
+  
+  // Temps for source terms and particle densities
+  FArrayBox cdr_src(a_box, num_species);
+  FArrayBox cdr_phi(a_box, num_species);
+  cdr_phi.setVal(0.0);
+  cdr_src.setVal(0.0);
+  for (int i = 0; i < num_species; i++){
+    cdr_phi.copy(a_particle_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  }
+
+  // Temps for photon source terms and densities
+  FArrayBox rte_phi(a_box, num_photons);
+  FArrayBox rte_src(a_box, num_photons);
+  rte_phi.setVal(0.0);
+  rte_src.setVal(0.0);
+  for (int i = 0; i < num_photons; i++){
+    rte_phi.copy(a_photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  }
+
+  // Temp for electric field
+  FArrayBox Efab(a_box, SpaceDim);
+  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
+
+  // Pointer offsets
+  const IntVect dims   = a_box.size();
+  const IntVect lo     = a_box.smallEnd();
+  const IntVect hi     = a_box.bigEnd();
+  const int n0         = dims[0];
+  const int n1         = dims[1];
+  const int offset_cdr = lo[0] + n0*lo[1];
+  const int offset_E   = lo[0] + n0*lo[1];
+  const int offset_rte = lo[0] + n0*lo[1];
+
+  // C style variable-length array conversion magic
+  auto vla_cdr_src = (Real (*__restrict__)[n1][n0]) (cdr_src.dataPtr() - offset_cdr);
+  auto vla_rte_src = (Real (*__restrict__)[n1][n0]) (rte_src.dataPtr() - offset_rte);
+  auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset_cdr);
+  auto vla_rte_phi = (Real (*__restrict__)[n1][n0]) (rte_phi.dataPtr() - offset_rte);
+  auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset_E);
+
+  for (int j = lo[1]; j <= hi[1]; ++j){
+    for (int i = lo[0]; i <= hi[0]; ++i){
+      
+#if 0 // Debug
+      for (int idx = 0; idx < num_species; idx++){
+	if(&(vla_cdr_phi[idx][j][i]) != &(cdr_phi(IntVect(i,j), idx))){
+	  MayDay::Abort("something is wrong");
+	}
+      }
+#endif
+
+
+      // Particle densities
+      for (int idx = 0; idx < num_species; ++idx){
+	particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
+	particle_gradients[idx] = RealVect::Zero;
+      }
+
+      // Photon densities
+      for (int idx = 0; idx < num_photons; ++idx){
+	photon_densities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
+      }
+
+      E   = RealVect(D_DECL(vla_E[0][j][i], vla_E[1][j][i], vla_E[2][j][i]));
+
+      pos = origin + RealVect(IntVect(i,j))*a_dx;
+
+      m_plaskin->advance_reaction_network(particle_sources,
+					  photon_sources,
+					  particle_densities,
+					  particle_gradients,
+					  photon_densities,
+					  E,
+					  pos,
+					  a_dx,
+					  a_dt,
+					  a_time,
+					  1.0);
+
+      // Put result in correct palce
+      for (int idx = 0; idx < num_species; ++idx){
+	vla_cdr_src[idx][j][i] = particle_sources[idx];
+      }
+
+      // Put result in correct palce
+      for (int idx = 0; idx < num_photons; ++idx){
+	vla_rte_src[idx][j][i] = photon_sources[idx];
+      }
+    }
+  }
+
+  // Copy result back to solvers
+  for (int i = 0; i < num_species; i++){
+    FArrayBox& src = a_particle_sources[i]->getFArrayBox();
+
+#if 1 // Original code
+    src.setVal(0.0);
+    src.copy(cdr_src, a_box, i, a_box, 0, 1);
+#else
+    src.setVal(0.0, 0);
+    src.plus(cdr_src, i, 0, 1);
+#endif
+
+    a_particle_sources[i]->setCoveredCellVal(0.0, 0);
+  }
+
+  // Copy result back to solvers
+  for (int i = 0; i < num_photons; i++){
+    FArrayBox& src = a_photon_sources[i]->getFArrayBox();
+
+#if 1 // Original code
+    src.setVal(0.0);
+    src.copy(rte_src, a_box, i, a_box, 0, 1);
+#else
+    src.setVal(0.0, 0);
+    src.plus(rte_src, i, 0, 1);
+#endif
   }
 }
 
@@ -549,7 +743,11 @@ void time_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&    
 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
+#if 1 // Original code
       (*a_particle_sources[idx])(vof, 0) = particle_sources[idx];
+#else // Debug
+      (*a_particle_sources[idx])(vof, 0) = 1.2345;
+#endif
     }
     
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){

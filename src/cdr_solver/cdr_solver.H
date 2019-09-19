@@ -233,9 +233,9 @@ public:
 			     const EBAMRCellData& a_source,
 			     const Real           a_dt) = 0;
 
-    /*!
+  /*!
     @brief Explicit Euler advance with source terms
-    */
+  */
   virtual void advance_explicit_euler(EBAMRCellData&       a_new_state,
 				      const EBAMRCellData& a_old_state,
 				      const EBAMRCellData& a_source,

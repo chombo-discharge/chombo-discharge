@@ -136,6 +136,20 @@ public:
 					    const Real&               a_dx,
 					    const Box&                a_box);
 
+    /*!
+    @brief Compute reaction network sources. Fast patch version. 
+  */
+  virtual void advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a_particle_sources,
+						 Vector<EBCellFAB*>&       a_photon_sources,
+						 const Vector<EBCellFAB*>& a_particle_densities,
+						 const Vector<EBCellFAB*>& a_particle_gradients,
+						 const Vector<EBCellFAB*>& a_photon_densities,
+						 const EBCellFAB&          a_E,
+						 const Real&               a_time,
+						 const Real&               a_dt,
+						 const Real&               a_dx,
+						 const Box&                a_box);
+
   /*!
     @brief Compute reaction network sources. Irregular patch version.
   */
