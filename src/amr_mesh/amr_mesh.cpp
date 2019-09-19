@@ -823,7 +823,7 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
 		  CHF_BOX(region));
 
 
-#if 0 // Old code
+#if 1 // Old code
     // We can't REALLY trust ghost cells on the boundary. Do the boundary cells using safer stencils.
     IntVectSet bndry_ivs = ebisbox.getIrregIVS(dbl.get(dit()));
     for (int dir = 0; dir < SpaceDim; dir++){
@@ -860,24 +860,31 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
       }
     }
 #else // New code
-    auto& grad_stencils = (a_phase == phase::gas) ? (*m_gradsten_gas[a_lvl])[dit()] : (*m_gradsten_sol[a_lvl])[dit()];
+    BaseIVFAB<VoFStencil>* grad_stencils;
+    if(a_phase == phase::gas){
+      (*m_gradsten_gas[a_lvl])[dit());
+    }
+    else if(a_phase == phase::solid){
+      (*m_gradsten_sol[a_lvl])[dit());
+    }
+
 
     for (VoFIterator vofit(grad_stencils.getIVS(), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof    = vofit();
-      const VoFStencil& sten = grad_stencils(vof, 0);
+      const VoFStencil& sten = (*grad_stencils)(vof, 0);
 
       
       for (int dir = 0; dir < SpaceDim; dir++){
 	grad(vof, dir) = 0.0;
       }
 
-	for (int i = 0; i < sten.size(); i++){
-	  const VolIndex& ivof = sten.vof(i);
-	  const Real& iweight  = sten.weight(i);
-	  const int ivar       = sten.variable(i);
+      for (int i = 0; i < sten.size(); i++){
+	const VolIndex& ivof = sten.vof(i);
+	const Real& iweight  = sten.weight(i);
+	const int ivar       = sten.variable(i);
 
-	  grad(vof, ivar) += phi(ivof, comp)*iweight;
-	}
+	grad(vof, ivar) += phi(ivof, comp)*iweight;
+      }
     }
 #endif
 
@@ -934,7 +941,8 @@ void amr_mesh::define_gradsten(const int a_lmin){
 
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_mfis->get_ebis(phase::solid);
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_grids[lvl];
     const ProblemDomain& domain  = m_domains[lvl];
     const Real dx                = m_dx[lvl];
@@ -1888,6 +1896,7 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   this->define_ebpwl_interp(a_lmin); // Define interpolator for piecewise interpolation of interior points
   this->define_flux_reg(a_lmin,a_regsize);     // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
+  this->define_gradsten(a_lmin);
   this->define_irreg_sten();            // Define irregular stencils
   this->define_copier(a_lmin);                // Define copiers
 

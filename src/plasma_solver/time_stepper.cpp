@@ -275,8 +275,12 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
     
     // This does all cells
 #if USE_FAST_REACTIONS
-    Real fast_time = -MPI_Wtime();
-    advance_reaction_network_reg_fast(particle_sources,
+    ParmParse pp ("cache_blocking");
+
+    int block_loops = 0;
+    pp.query("tile_loops", block_loops);
+    if(block_loops == 0){
+      advance_reaction_network_reg_fast(particle_sources,
 				      photon_sources,
 				      particle_densities,
 				      particle_gradients,
@@ -286,24 +290,24 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
 				      a_dt,
 				      dx,
 				      dbl.get(dit()));
-    fast_time += MPI_Wtime();
-
-#if 0
-    Real slow_time = -MPI_Wtime();
-    advance_reaction_network_reg(particle_sources,
-				 photon_sources,
-				 particle_densities,
-				 particle_gradients,
-				 photon_densities,
-				 a_E[dit()],
-				 a_time,
-				 a_dt,
-				 dx,
-				 dbl.get(dit()));
-
-    slow_time += MPI_Wtime();
-    pout() << "slow_time = " << slow_time << "\t fast time = " << fast_time << "\t speedup = " << slow_time/fast_time << endl;
-#endif
+    }
+    else{
+      Vector<int> tilesize(SpaceDim);
+      pp.getarr("tile_size", tilesize, 0, SpaceDim);
+      Vector<Box> boxes = m_amr->make_tiles(dbl.get(dit()), IntVect(D_DECL(tilesize[0], tilesize[1], tilesize[2])));
+      for (int ibox = 0; ibox < boxes.size(); ibox++){
+	advance_reaction_network_reg_fast(particle_sources,
+					  photon_sources,
+					  particle_densities,
+					  particle_gradients,
+					  photon_densities,
+					  a_E[dit()],
+					  a_time,
+					  a_dt,
+					  dx,
+					  boxes[ibox]);
+      }
+    }
 #else
     advance_reaction_network_reg(particle_sources,
 				 photon_sources,
@@ -381,7 +385,7 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
   // Grid loop
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-    //    if(ebisbox.isRegular(iv)){
+    if(ebisbox.isRegular(iv)){
     
       // Position and E
       pos    = origin + RealVect(iv)*a_dx;
@@ -427,7 +431,7 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
 	const int idx = solver_it.get_solver();
 	phot_src.getSingleValuedFAB()(iv,idx) = photon_sources[idx];
       }
-      //    }
+    }
   }
 
   // Copy temporary storage back to solvers
@@ -718,7 +722,7 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
 	  photon_densities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
 	}
 
-	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[1][k][j][i]);
+	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
 	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
 	m_plaskin->advance_reaction_network(particle_sources,
@@ -1297,13 +1301,17 @@ void time_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       
       }
     }
   }
-
+  
   // Copy result back to solvers
-  for (int idx = 0; idx < num_species; idx++){
-    FArrayBox& dco = a_diffco_cell[idx]->getFArrayBox();
-    dco.setVal(0.0);
-    dco.copy(cdr_dco, a_box, idx, a_box, 0, 1);
-    a_diffco_cell[idx]->setCoveredCellVal(0.0, 0);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    if(solver->is_diffusive()){
+      const int idx = solver_it.get_solver();
+      FArrayBox& dco = a_diffco_cell[idx]->getFArrayBox();
+      dco.setVal(0.0);
+      dco.copy(cdr_dco, a_box, idx, a_box, 0, 1);
+      a_diffco_cell[idx]->setCoveredCellVal(0.0, 0);
+    }
   }
 #endif
 }
@@ -1375,13 +1383,18 @@ void time_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       
 	}
       }
     }
+  }
     
-    // Copy result back to solvers
-    for (int i = 0; i < num_species; i++){
-      FArrayBox& dco = a_diffco_cell[i]->getFArrayBox();
+  // Copy result back to solvers
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    if(solver->is_diffusive()){
+      const int idx = solver_it.get_solver();
+      FArrayBox& dco = a_diffco_cell[idx]->getFArrayBox();
       dco.setVal(0.0);
-      dco.copy(cdr_dco, a_box, i, a_box, 0, 1);
-      a_diffco_cell[i]->setCoveredCellVal(0.0, 0);
+      dco.copy(cdr_dco, a_box, idx, a_box, 0, 1);
+
+      a_diffco_cell[idx]->setCoveredCellVal(0.0, 0);
     }
   }
 #endif
@@ -2712,6 +2725,10 @@ void time_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&       a
 
       v.copy(cdr_vx, a_box, 0, a_box, 0, 1);
       v.copy(cdr_vy, a_box, 0, a_box, 1, 1);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	a_velocities[idx]->setCoveredCellVal(0.0, dir);
+      }
     }
   }
 #endif
@@ -2770,7 +2787,7 @@ void time_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&       a
       for (int i = lo[0]; i <= hi[0]; ++i){
 
 	const RealVect pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
-	const RealVect E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[1][k][j][i]);
+	const RealVect E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
 
 	Vector<Real> cdr_densities(num_species);
 	for (int idx = 0; idx < num_species; idx++){
@@ -2799,6 +2816,10 @@ void time_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&       a
       v.copy(cdr_vx, a_box, 0, a_box, 0, 1);
       v.copy(cdr_vy, a_box, 0, a_box, 1, 1);
       v.copy(cdr_vz, a_box, 0, a_box, 2, 1);
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	a_velocities[idx]->setCoveredCellVal(0.0, dir);
+      }      
     }
   }
 #endif
