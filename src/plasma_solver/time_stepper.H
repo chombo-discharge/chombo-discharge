@@ -520,6 +520,27 @@ public:
 					  const Real&               a_time,
 					  const Real&               a_dx);
 
+  virtual void compute_cdr_velocities_reg_fast(Vector<EBCellFAB*>&       a_velocities,
+					       const Vector<EBCellFAB*>& a_cdr_densities,
+					       const EBCellFAB&          a_E,
+					       const Box&                a_box,
+					       const Real&               a_time,
+					       const Real&               a_dx);
+
+  virtual void compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&       a_velocities,
+						 const Vector<EBCellFAB*>& a_cdr_densities,
+						 const EBCellFAB&          a_E,
+						 const Box&                a_box,
+						 const Real&               a_time,
+						 const Real&               a_dx);
+  
+  virtual void compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&       a_velocities,
+						 const Vector<EBCellFAB*>& a_cdr_densities,
+						 const EBCellFAB&          a_E,
+						 const Box&                a_box,
+						 const Real&               a_time,
+						 const Real&               a_dx);
+
   virtual void compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       a_velocities,
 					    const Vector<EBCellFAB*>& a_cdr_densities,
 					    const EBCellFAB&          a_E,

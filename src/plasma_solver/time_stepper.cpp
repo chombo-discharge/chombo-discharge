@@ -15,6 +15,7 @@
 #include <EBLevelDataOps.H>
 
 #define USE_FAST_REACTIONS 1
+#define USE_FAST_VELOCITIES 1
 
 
 time_stepper::time_stepper(){
@@ -2238,7 +2239,11 @@ void time_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>&       
     }
 
     // Separate calls for regular and irregular
+#if USE_FAST_VELOCITIES
+    compute_cdr_velocities_reg_fast(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+#else
     compute_cdr_velocities_reg(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+#endif
     compute_cdr_velocities_irreg(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx);
   }
 }
@@ -2298,6 +2303,186 @@ void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_veloci
     }
   }
 }
+
+void time_stepper::compute_cdr_velocities_reg_fast(Vector<EBCellFAB*>&       a_velocities,
+						   const Vector<EBCellFAB*>& a_cdr_densities,
+						   const EBCellFAB&          a_E,
+						   const Box&                a_box,
+						   const Real&               a_time,
+						   const Real&               a_dx){
+#if CH_SPACEDIM==2
+  compute_cdr_velocities_reg_fast2D(a_velocities, a_cdr_densities, a_E, a_box, a_time, a_dx);
+#elif CH_SPACEDIM==3
+  compute_cdr_velocities_reg_fast3D(a_velocities, a_cdr_densities, a_E, a_box, a_time, a_dx);
+#endif
+}
+
+void time_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&       a_velocities,
+						     const Vector<EBCellFAB*>& a_cdr_densities,
+						     const EBCellFAB&          a_E,
+						     const Box&                a_box,
+						     const Real&               a_time,
+						     const Real&               a_dx){
+  CH_TIME("time_stepper::compute_cdr_velocities_reg_fast2D");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_velocities_reg_fast2D" << endl;
+  }
+  
+#if CH_SPACEDIM==2
+  const int num_species  = m_plaskin->get_num_species();
+  const int comp         = 0;
+  const RealVect origin  = m_physdom->get_prob_lo();
+  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+
+  // I need contiguous memory for the nasty stuff that is about to happen, so begin by copying things onto smaller
+  // data holders
+  FArrayBox cdr_phi(a_box, num_species);
+  FArrayBox cdr_vx(a_box,  num_species);
+  FArrayBox cdr_vy(a_box,  num_species);
+  for (int idx = 0; idx < num_species; idx++){
+    cdr_phi.copy(a_cdr_densities[idx]->getFArrayBox(), a_box, 0, a_box, idx, 1);
+  }
+
+  FArrayBox Efab(a_box, SpaceDim);
+  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
+
+
+  // Pointer offsets
+  const IntVect dims   = a_box.size();
+  const IntVect lo     = a_box.smallEnd();
+  const IntVect hi     = a_box.bigEnd();
+  const int n0         = dims[0];
+  const int n1         = dims[1];
+  const int offset     = lo[0] + n0*lo[1];
+
+  // C style variable-length array conversion magic
+  auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
+  auto vla_cdr_vx  = (Real (*__restrict__)[n1][n0]) (cdr_vx.dataPtr() - offset);
+  auto vla_cdr_vy  = (Real (*__restrict__)[n1][n0]) (cdr_vy.dataPtr() - offset);
+  auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
+  
+    for (int j = lo[1]; j <= hi[1]; ++j){
+      for (int i = lo[0]; i <= hi[0]; ++i){
+
+	const RealVect pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
+	const RealVect E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
+
+	Vector<Real> cdr_densities(num_species);
+	for (int idx = 0; idx < num_species; idx++){
+	  cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
+	}
+
+	const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, E, cdr_densities);
+
+	// Put result in correct palce
+	for (int idx = 0; idx < num_species; ++idx){
+	  vla_cdr_vx[idx][j][i] = velocities[idx][0];
+	  vla_cdr_vy[idx][j][i] = velocities[idx][1];
+	}
+      }
+    }
+
+  // Put the results back into solvers
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    if(solver->is_mobile()){
+      FArrayBox& v = a_velocities[idx]->getFArrayBox();
+
+      v.copy(cdr_vx, a_box, 0, a_box, 0, 1);
+      v.copy(cdr_vy, a_box, 0, a_box, 1, 1);
+    }
+  }
+#endif
+}
+
+
+
+void time_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&       a_velocities,
+						     const Vector<EBCellFAB*>& a_cdr_densities,
+						     const EBCellFAB&          a_E,
+						     const Box&                a_box,
+						     const Real&               a_time,
+						     const Real&               a_dx){
+  CH_TIME("time_stepper::compute_cdr_velocities_reg_fast3D");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_velocities_reg_fast3D" << endl;
+  }
+
+#if CH_SPACEDIM==3
+  const int num_species  = m_plaskin->get_num_species();
+  const int comp         = 0;
+  const RealVect origin  = m_physdom->get_prob_lo();
+  const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+
+  // I need contiguous memory for the nasty stuff that is about to happen, so begin by copying things onto smaller
+  // data holders
+  FArrayBox cdr_phi(a_box, num_species);
+  FArrayBox cdr_vx(a_box,  num_species);
+  FArrayBox cdr_vy(a_box,  num_species);
+  FArrayBox cdr_vz(a_box,  num_species);
+  for (int idx = 0; idx < num_species; idx++){
+    cdr_phi.copy(a_cdr_densities[idx]->getFArrayBox(), a_box, 0, a_box, idx, 1);
+  }
+
+  FArrayBox Efab(a_box, SpaceDim);
+  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
+
+
+  // Pointer offsets
+  const IntVect dims   = a_box.size();
+  const IntVect lo     = a_box.smallEnd();
+  const IntVect hi     = a_box.bigEnd();
+  const int n0         = dims[0];
+  const int n1         = dims[1];
+  const int n2         = dims[2];
+  const int offset     = lo[0] + n0*(lo[1] + n1*lo[2]);
+
+  auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
+  auto vla_cdr_vx  = (Real (*__restrict__)[n2][n1][n0]) (cdr_vx.dataPtr()  - offset);
+  auto vla_cdr_vy  = (Real (*__restrict__)[n2][n1][n0]) (cdr_vy.dataPtr()  - offset);
+  auto vla_cdr_vz  = (Real (*__restrict__)[n2][n1][n0]) (cdr_vz.dataPtr()  - offset);
+  auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
+  
+  for (int k = lo[2]; k <= hi[2]; k++){
+    for (int j = lo[1]; j <= hi[1]; ++j){
+      for (int i = lo[0]; i <= hi[0]; ++i){
+
+	const RealVect pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
+	const RealVect E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[1][k][j][i]);
+
+	Vector<Real> cdr_densities(num_species);
+	for (int idx = 0; idx < num_species; idx++){
+	  cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
+	}
+
+	const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, E, cdr_densities);
+
+	// Put result in correct palce
+	for (int idx = 0; idx < num_species; ++idx){
+	  vla_cdr_vx[idx][j][i] = velocities[idx][0];
+	  vla_cdr_vy[idx][j][i] = velocities[idx][1];
+	  vla_cdr_vz[idx][j][i] = velocities[idx][2];
+	}
+      }
+    }
+  }
+  
+  // Put the results back into solvers
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    if(solver->is_mobile()){
+      FArrayBox& v = a_velocities[idx]->getFArrayBox();
+      
+      v.copy(cdr_vx, a_box, 0, a_box, 0, 1);
+      v.copy(cdr_vy, a_box, 0, a_box, 1, 1);
+      v.copy(cdr_vz, a_box, 0, a_box, 2, 1);
+    }
+  }
+#endif
+}
+
 
 void time_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       a_velocities,
 						const Vector<EBCellFAB*>& a_cdr_densities,
@@ -3145,7 +3330,7 @@ void time_stepper::compute_rho(){
 void time_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase){
   CH_TIME("time_stepper::compute_rho(ebamrcelldata, phase)");
   if(m_verbosity > 5){
-    pout() << "time_stepper::compute_rho(ebamrcelldata, phase)" << endl;;
+    pout() << "time_stepper::compute_rho(ebamrcelldata, phase)" << endl;
   }
 
   CH_assert(a_phase == m_cdr->get_phase());
