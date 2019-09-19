@@ -53,7 +53,7 @@ void ultralw_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
 
   m_timestepper->compute_E(a_E, m_phase);
   data_ops::vector_length(m_scratch, a_E);
-  m_amr->compute_gradient(a_grad_E, m_scratch);
+  m_amr->compute_gradient(a_grad_E, m_scratch, phase::gas);
 
   m_amr->average_down(a_grad_E, m_phase);
   m_amr->interp_ghost(a_grad_E, m_phase);
@@ -167,7 +167,7 @@ void ultralw_tagger::compute_tracers(){
 
   // Compute gradient of tracers
   for (int i = 0; i < m_num_tracers; i++){
-    m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i]);
+    m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i], phase::gas);
     m_amr->average_down(m_grad_tracer[i], m_phase);
   }
 

@@ -137,7 +137,7 @@ void poisson_staircase_gmg::solve(){
   // Compute gradient
   m_amr->average_down(phi, phase);
   m_amr->interp_ghost(phi, phase);
-  m_amr->compute_gradient(E, phi);
+  m_amr->compute_gradient(E, phi, phase);
   m_amr->average_down(E, phase);
   m_amr->interp_ghost(E, phase);
 

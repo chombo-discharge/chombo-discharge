@@ -899,7 +899,7 @@ void eddington_sp1::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_s
 
   const int finest_level = m_amr->get_finest_level();
 
-  m_amr->compute_gradient(a_flux, a_state); // flux = grad(phi)
+  m_amr->compute_gradient(a_flux, a_state, m_phase); // flux = grad(phi)
   for (int lvl = 0; lvl <= finest_level; lvl++){
     data_ops::divide_scalar(*a_flux[lvl], *m_aco[lvl]);   // flux = grad(phi)/(c*kappa)
     data_ops::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.

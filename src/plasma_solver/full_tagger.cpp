@@ -312,7 +312,7 @@ void full_tagger::compute_tracers(){
 
   // Compute gradient of tracers
   for (int i = 0; i < m_num_tracers; i++){
-    m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i]);
+    m_amr->compute_gradient(m_grad_tracer[i], m_tracer[i], phase::gas);
     m_amr->average_down(m_grad_tracer[i], m_phase);
   }
 
@@ -354,7 +354,7 @@ void full_tagger::compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients){
     RefCountedPtr<cdr_solver>& solver = solver_it();
 
     const int idx = solver_it.get_solver();    
-    m_amr->compute_gradient(a_cdr_gradients[idx], solver->get_state());
+    m_amr->compute_gradient(a_cdr_gradients[idx], solver->get_state(), phase::gas);
   }
 }
 
@@ -366,7 +366,7 @@ void full_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
 
   m_timestepper->compute_E(a_E, m_phase);
   data_ops::vector_length(m_scratch, a_E);
-  m_amr->compute_gradient(a_grad_E, m_scratch);
+  m_amr->compute_gradient(a_grad_E, m_scratch, phase::gas);
 
   m_amr->average_down(a_grad_E, m_phase);
   m_amr->interp_ghost(a_grad_E, m_phase);
@@ -384,7 +384,7 @@ void full_tagger::compute_rho(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho){
 
   // Compute cell-centered rho and its gradient
   m_timestepper->compute_rho(a_rho, m_phase);
-  m_amr->compute_gradient(a_grad_rho, a_rho);
+  m_amr->compute_gradient(a_grad_rho, a_rho, phase::gas);
 
   // Transform to centroids
   m_amr->interpolate_to_centroids(a_rho,      m_phase);

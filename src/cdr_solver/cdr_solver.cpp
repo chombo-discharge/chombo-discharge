@@ -1884,7 +1884,7 @@ void cdr_solver::tag_gradient(Vector<IntVectSet>& a_tags, const Real a_grad){
   EBAMRCellData grad, grad_norm;
   m_amr->allocate(grad,      m_phase, SpaceDim);
   m_amr->allocate(grad_norm, m_phase, 1);
-  m_amr->compute_gradient(grad, m_state);
+  m_amr->compute_gradient(grad, m_state, m_phase);
   data_ops::vector_length(grad_norm, grad);
 
   a_tags.resize(1+finest_level);

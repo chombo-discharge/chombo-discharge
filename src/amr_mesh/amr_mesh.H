@@ -89,14 +89,17 @@ public:
   /*!
     @brief Compute gradient on level
   */
-  virtual void compute_gradient(LevelData<EBCellFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
+  virtual void compute_gradient(LevelData<EBCellFAB>& a_gradient,
+				const LevelData<EBCellFAB>& a_phi,
+				const phase::which_phase a_phase,
+				const int a_lvl);
 
   /*!
     @brief Compute cell-centered gradient. 
     @details User must make sure ghost cells are updated when entering this routine. On output, the result is not averaged down, 
     nor are ghost cells updated. 
   */
-  virtual void compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi);
+  virtual void compute_gradient(EBAMRCellData& a_gradient, const EBAMRCellData& a_phi, const phase::which_phase a_phase);
 
     /*!
     @brief Compute cell-centered gradient. 
@@ -202,6 +205,11 @@ public:
     @brief Define the MG stuff
   */
   virtual void define_mg_stuff();
+
+  /*!
+    @brief Define stencils for gradients
+  */
+  virtual void define_gradsten(const int a_lmin);
   
   /*!
     @brief Define EBLevelGrid
@@ -894,6 +902,16 @@ protected:
     @brief EBLevelgrids for the multigrid pre-coarsening
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
+
+  /*!
+    @brief Gradient stencils at irregular cells
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten_gas;
+
+  /*!
+    @brief Gradient stencils at irregular cells
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten_sol;
 
   /*!
     @brief Load balance grids

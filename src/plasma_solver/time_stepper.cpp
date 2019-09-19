@@ -14,8 +14,9 @@
 #include <ParmParse.H>
 #include <EBLevelDataOps.H>
 
-#define USE_FAST_REACTIONS 1
+#define USE_FAST_REACTIONS  1
 #define USE_FAST_VELOCITIES 1
+#define USE_FAST_DIFFUSION  1
 
 
 time_stepper::time_stepper(){
@@ -139,7 +140,7 @@ void time_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       a_part
     grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
     m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);  // Allocate
 
-    m_amr->compute_gradient(*grad_cdr[idx], *a_particle_densities[idx]); // Compute grad()
+    m_amr->compute_gradient(*grad_cdr[idx], *a_particle_densities[idx], phase::gas); // Compute grad()
     m_amr->average_down(*grad_cdr[idx], m_cdr->get_phase());        // Average down
     m_amr->interp_ghost(*grad_cdr[idx], m_cdr->get_phase());        // Interpolate ghost cells
   }
@@ -485,6 +486,7 @@ void time_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&      
 							 const Real&               a_dt,
 							 const Real&               a_dx,
 							 const Box&                a_box){
+#if CH_SPACEDIM==2
   CH_TIME("time_stepper::advance_reaction_network_reg_fast2D(patch)");
   if(m_verbosity > 5){
     pout() << "time_stepper::advance_reaction_network_reg_fast2D(patch)" << endl;
@@ -515,10 +517,14 @@ void time_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&      
   // Temps for source terms and particle densities
   FArrayBox cdr_src(a_box, num_species);
   FArrayBox cdr_phi(a_box, num_species);
+  FArrayBox cdr_gx(a_box, num_species);  // Gradient in x-direction
+  FArrayBox cdr_gy(a_box, num_species);  // Gradient in y-direction
   cdr_phi.setVal(0.0);
   cdr_src.setVal(0.0);
   for (int i = 0; i < num_species; i++){
     cdr_phi.copy(a_particle_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+    cdr_gx.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
+    cdr_gy.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
   }
 
   // Temps for photon source terms and densities
@@ -548,6 +554,8 @@ void time_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&      
   auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
   auto vla_rte_phi = (Real (*__restrict__)[n1][n0]) (rte_phi.dataPtr() - offset);
   auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
+  auto vla_cdr_gx  = (Real (*__restrict__)[n1][n0]) (cdr_gx.dataPtr()  - offset);
+  auto vla_cdr_gy  = (Real (*__restrict__)[n1][n0]) (cdr_gy.dataPtr()  - offset);
 
     for (int j = lo[1]; j <= hi[1]; ++j){
       for (int i = lo[0]; i <= hi[0]; ++i){
@@ -555,7 +563,8 @@ void time_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&      
 	// Particle densities
 	for (int idx = 0; idx < num_species; ++idx){
 	  particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
-	  particle_gradients[idx] = RealVect::Zero;
+	  particle_gradients[idx][0] = vla_cdr_gx[idx][j][i];
+	  particle_gradients[idx][1] = vla_cdr_gy[idx][j][i];
 	}
 
 	// Photon densities
@@ -604,6 +613,7 @@ void time_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&      
     src.setVal(0.0);
     src.copy(rte_src, a_box, i, a_box, 0, 1);
   }
+#endif
 }
 
 
@@ -617,13 +627,13 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
 							 const Real&               a_dt,
 							 const Real&               a_dx,
 							 const Box&                a_box){
+#if CH_SPACEDIM==3
   CH_TIME("time_stepper::advance_reaction_network_reg_fast3D(patch)");
   if(m_verbosity > 5){
     pout() << "time_stepper::advance_reaction_network_reg_fast3D(patch)" << endl;
   }
 
   const Real zero = 0.0;
-    
 
   const int num_species  = m_plaskin->get_num_species();
   const int num_photons  = m_plaskin->get_num_photons();
@@ -647,10 +657,16 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
   // Temps for source terms and particle densities
   FArrayBox cdr_src(a_box, num_species);
   FArrayBox cdr_phi(a_box, num_species);
+  FArrayBox cdr_gx(a_box, num_species);  // Gradient in x-direction
+  FArrayBox cdr_gy(a_box, num_species);  // Gradient in y-direction
+  FArrayBox cdr_gz(a_box, num_species);  // Gradient in z-direction
   cdr_phi.setVal(0.0);
   cdr_src.setVal(0.0);
   for (int i = 0; i < num_species; i++){
     cdr_phi.copy(a_particle_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+    cdr_gx.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 0, a_box, i, 1);
+    cdr_gy.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
+    cdr_gz.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 2, a_box, i, 1);
   }
 
   // Temps for photon source terms and densities
@@ -681,6 +697,9 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
   auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
   auto vla_rte_phi = (Real (*__restrict__)[n2][n1][n0]) (rte_phi.dataPtr() - offset);
   auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
+  auto vla_cdr_gx  = (Real (*__restrict__)[n2][n1][n0]) (cdr_gx.dataPtr()  - offset);
+  auto vla_cdr_gy  = (Real (*__restrict__)[n2][n1][n0]) (cdr_gy.dataPtr()  - offset);
+  auto vla_cdr_gz  = (Real (*__restrict__)[n2][n1][n0]) (cdr_gz.dataPtr()  - offset);
 
   for (int k = lo[2]; k <= hi[2]; k++){
     for (int j = lo[1]; j <= hi[1]; ++j){
@@ -688,8 +707,10 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
       
 	// Particle densities
 	for (int idx = 0; idx < num_species; ++idx){
-	  particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
-	  particle_gradients[idx] = RealVect::Zero;
+	  particle_densities[idx]    = Max(0.0, vla_cdr_phi[idx][k][j][i]);
+	  particle_gradients[idx][0] = vla_cdr_gx[idx][k][j][i];
+	  particle_gradients[idx][1] = vla_cdr_gy[idx][k][j][i];
+	  particle_gradients[idx][2] = vla_cdr_gz[idx][k][j][i];
 	}
 
 	// Photon densities
@@ -697,12 +718,7 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
 	  photon_densities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
 	}
 
-#if CH_SPACEDIM==2
-	E = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
-#else
-	E = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[1][k][j][i]);
-#endif
-
+	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[1][k][j][i]);
 	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
 	m_plaskin->advance_reaction_network(particle_sources,
@@ -719,26 +735,16 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
 
 	// Put result in correct palce
 	for (int idx = 0; idx < num_species; ++idx){
-#if CH_SPACEDIM==2
-	  vla_cdr_src[idx][j][i] = particle_sources[idx];
-#else
 	  vla_cdr_src[idx][k][j][i] = particle_sources[idx];
-#endif
 	}
 
 	// Put result in correct palce
 	for (int idx = 0; idx < num_photons; ++idx){
-#if CH_SPACEDIM==2
-	  vla_rte_src[idx][j][i] = photon_sources[idx];
-#else
 	  vla_rte_src[idx][k][j][i] = photon_sources[idx];
-#endif
 	}
       }
     }
-#if CH_SPACEDIM==3
   }
-#endif
 
   // Copy result back to solvers
   for (int i = 0; i < num_species; i++){
@@ -754,6 +760,8 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
     src.setVal(0.0);
     src.copy(rte_src, a_box, i, a_box, 0, 1);
   }
+
+#endif
 }
 
 
@@ -1128,7 +1136,11 @@ void time_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&      
     }
 
     // Regular cells
+#if USE_FAST_DIFFUSION
+    compute_cdr_diffco_cell_reg_fast(diffco, cdr_densities, E, dbl.get(dit()), m_amr->get_dx()[a_lvl], a_time);
+#else
     compute_cdr_diffco_cell_reg(diffco, cdr_densities, E, dbl.get(dit()), m_amr->get_dx()[a_lvl], a_time);
+#endif
 
     // Irregular cells
     compute_cdr_diffco_cell_irreg(diffco, cdr_densities, E, dbl.get(dit()), m_amr->get_dx()[a_lvl],
@@ -1201,6 +1213,178 @@ void time_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffc
       (*a_diffco_cell[idx]).setCoveredCellVal(0.0, 0);
     }
   }
+}
+
+void time_stepper::compute_cdr_diffco_cell_reg_fast(Vector<EBCellFAB*>&       a_diffco_cell,
+						    const Vector<EBCellFAB*>& a_cdr_densities,
+						    const EBCellFAB&          a_E,
+						    const Box                 a_box,
+						    const Real                a_dx,
+						    const Real                a_time){
+  CH_TIME("time_stepper::compute_cdr_diffco_cell_reg_fast");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_diffco_cell_reg_fast" << endl;
+  }
+
+#if CH_SPACEDIM==2
+  compute_cdr_diffco_cell_reg_fast2D(a_diffco_cell, a_cdr_densities, a_E, a_box, a_dx, a_time);
+#elif CH_SPACEDIM==3
+  compute_cdr_diffco_cell_reg_fast3D(a_diffco_cell, a_cdr_densities, a_E, a_box, a_dx, a_time);
+#endif
+}
+
+void time_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       a_diffco_cell,
+						      const Vector<EBCellFAB*>& a_cdr_densities,
+						      const EBCellFAB&          a_E,
+						      const Box                 a_box,
+						      const Real                a_dx,
+						      const Real                a_time){
+#if CH_SPACEDIM==2
+  CH_TIME("time_stepper::compute_cdr_diffco_cell_reg_fast2D");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_diffco_cell_reg_fast2D" << endl;
+  }
+
+  const int comp        = 0;
+  const int num_species = m_plaskin->get_num_species();
+  const RealVect origin = m_physdom->get_prob_lo();
+
+  // Things that are passed into plasma_kinetics
+  RealVect     pos, E;
+  Vector<Real> cdr_densities(num_species);
+
+  // I need contiguous memory for the nasty that is about to happen. So begin by copying things onto smaller data holders
+  FArrayBox cdr_dco(a_box, num_species);
+  FArrayBox cdr_phi(a_box, num_species);
+  FArrayBox Efab(a_box, SpaceDim);
+  for (int i = 0; i < num_species; i++){
+    cdr_phi.copy(a_cdr_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  }
+  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
+
+    // Pointer offsets
+  const IntVect dims = a_box.size();
+  const IntVect lo   = a_box.smallEnd();
+  const IntVect hi   = a_box.bigEnd();
+  const int n0       = dims[0];
+  const int n1       = dims[1];
+  const int offset   = lo[0] + n0*lo[1];
+
+  // C style variable-length array conversion magic
+  auto vla_cdr_dco = (Real (*__restrict__)[n1][n0]) (cdr_dco.dataPtr() - offset);
+  auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
+  auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
+
+  for (int j = lo[1]; j <= hi[1]; ++j){
+    for (int i = lo[0]; i <= hi[0]; ++i){
+      
+      // Particle densities
+      for (int idx = 0; idx < num_species; ++idx){
+	cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
+      }
+
+      E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
+      pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
+
+      const Vector<Real> coeffs = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
+										pos,
+										E,
+										cdr_densities);
+
+      // Put result in correct palce
+      for (int idx = 0; idx < num_species; ++idx){
+	vla_cdr_dco[idx][j][i] = coeffs[idx];
+      }
+    }
+  }
+
+  // Copy result back to solvers
+  for (int idx = 0; idx < num_species; idx++){
+    FArrayBox& dco = a_diffco_cell[idx]->getFArrayBox();
+    dco.setVal(0.0);
+    dco.copy(cdr_dco, a_box, idx, a_box, 0, 1);
+    a_diffco_cell[idx]->setCoveredCellVal(0.0, 0);
+  }
+#endif
+}
+
+void time_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       a_diffco_cell,
+						      const Vector<EBCellFAB*>& a_cdr_densities,
+						      const EBCellFAB&          a_E,
+						      const Box                 a_box,
+						      const Real                a_dx,
+						      const Real                a_time){
+#if CH_SPACEDIM==3
+  CH_TIME("time_stepper::compute_cdr_diffco_cell_reg_fast3D");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::compute_cdr_diffco_cell_reg_fast3D" << endl;
+  }
+
+  const int comp        = 0;
+  const int num_species = m_plaskin->get_num_species();
+  const RealVect origin = m_physdom->get_prob_lo();
+
+  // Things that are passed into plasma_kinetics
+  RealVect     pos, E;
+  Vector<Real> cdr_densities(num_species);
+
+  // I need contiguous memory for the nasty that is about to happen. So begin by copying things onto smaller data holders
+  FArrayBox cdr_dco(a_box, num_species);
+  FArrayBox cdr_phi(a_box, num_species);
+  FArrayBox Efab(a_box, SpaceDim);
+  for (int i = 0; i < num_species; i++){
+    cdr_phi.copy(a_cdr_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  }
+  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
+
+    // Pointer offsets
+  const IntVect dims = a_box.size();
+  const IntVect lo   = a_box.smallEnd();
+  const IntVect hi   = a_box.bigEnd();
+  const int n0         = dims[0];
+  const int n1         = dims[1];
+  const int n2         = dims[2];
+  const int offset     = lo[0] + n0*(lo[1] + n1*lo[2]);
+
+
+  // C style variable-length array conversion magic
+  auto vla_cdr_dco = (Real (*__restrict__)[n2][n1][n0]) (cdr_dco.dataPtr() - offset);
+  auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
+  auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
+
+  for (int k = lo[2]; k <= hi[2]; k++){
+    for (int j = lo[1]; j <= hi[1]; ++j){
+      for (int i = lo[0]; i <= hi[0]; ++i){
+      
+	// Particle densities
+	for (int idx = 0; idx < num_species; ++idx){
+	  cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
+	}
+	
+	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
+	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
+
+	const Vector<Real> coeffs = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
+										  pos,
+										  E,
+										  cdr_densities);
+	
+	// Put result in correct palce
+	for (int idx = 0; idx < num_species; ++idx){
+	  vla_cdr_dco[idx][k][j][i] = coeffs[idx];
+	}
+      }
+    }
+    
+    // Copy result back to solvers
+    for (int i = 0; i < num_species; i++){
+      FArrayBox& dco = a_diffco_cell[i]->getFArrayBox();
+      dco.setVal(0.0);
+      dco.copy(cdr_dco, a_box, i, a_box, 0, 1);
+      a_diffco_cell[i]->setCoveredCellVal(0.0, 0);
+    }
+  }
+#endif
 }
 
 void time_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&          a_diffco_cell,
@@ -1696,7 +1880,7 @@ void time_stepper::compute_gradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
     CH_assert(grad_density[0]->nComp() == 1);
     CH_assert(density[0]->nComp()      == 1);
     
-    m_amr->compute_gradient(gradient, density);                         // Compute cell-centered gradient
+    m_amr->compute_gradient(gradient, density, a_phase);                // Compute cell-centered gradient
     m_amr->average_down(gradient, a_phase);                             // Average down - shouldn't be necesasry
     m_amr->interp_ghost(gradient, a_phase);                             // Interpolate ghost cells (have to do this before interp)
     this->extrapolate_to_eb(eb_gradient, a_phase, gradient);            // Extrapolate to EB
@@ -1726,7 +1910,7 @@ void time_stepper::compute_gradients_at_domain_faces(Vector<EBAMRIFData*>&      
     CH_assert(grad_density[0]->nComp() == 1);
     CH_assert(density[0]->nComp()      == 1);
     
-    m_amr->compute_gradient(gradient, density);                         
+    m_amr->compute_gradient(gradient, density, a_phase);                         
     m_amr->average_down(gradient, a_phase);                             
     m_amr->interp_ghost(gradient, a_phase);                             
     
@@ -1808,7 +1992,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
     grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
     m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);  // Allocate
 
-    m_amr->compute_gradient(*grad_cdr[idx], *a_cdr_densities[idx]); // Compute grad()
+    m_amr->compute_gradient(*grad_cdr[idx], *a_cdr_densities[idx], phase::gas); // Compute grad()
     m_amr->average_down(*grad_cdr[idx], m_cdr->get_phase());        // Average down
     m_amr->interp_ghost(*grad_cdr[idx], m_cdr->get_phase());        // Interpolate ghost cells
   }
@@ -1844,7 +2028,7 @@ void time_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
   m_amr->average_down(E_norm, m_cdr->get_phase());  // Average down
   m_amr->interp_ghost(E_norm, m_cdr->get_phase());  // Interpolate ghost cells. 
 
-  m_amr->compute_gradient(grad_E, E_norm);           // Compute grad(|E|)
+  m_amr->compute_gradient(grad_E, E_norm, phase::gas);           // Compute grad(|E|)
   m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
   m_amr->interp_ghost(grad_E, m_cdr->get_phase());   // Interpolate ghost cells
 
@@ -2597,9 +2781,9 @@ void time_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&       a
 
 	// Put result in correct palce
 	for (int idx = 0; idx < num_species; ++idx){
-	  vla_cdr_vx[idx][j][i] = velocities[idx][0];
-	  vla_cdr_vy[idx][j][i] = velocities[idx][1];
-	  vla_cdr_vz[idx][j][i] = velocities[idx][2];
+	  vla_cdr_vx[idx][k][j][i] = velocities[idx][0];
+	  vla_cdr_vy[idx][k][j][i] = velocities[idx][1];
+	  vla_cdr_vz[idx][k][j][i] = velocities[idx][2];
 	}
       }
     }
@@ -3104,7 +3288,7 @@ void time_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phas
   m_amr->allocate_ptr(pot_gas);
   m_amr->alias(pot_gas, a_phase, a_potential);
 
-  m_amr->compute_gradient(a_E, pot_gas);
+  m_amr->compute_gradient(a_E, pot_gas, a_phase);
   data_ops::scale(a_E, -1.0);
 
   m_amr->average_down(a_E, a_phase);

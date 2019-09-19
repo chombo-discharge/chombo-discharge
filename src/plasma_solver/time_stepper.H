@@ -305,6 +305,36 @@ public:
 					   const Real                a_time);
 
   /*!
+    @brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
+  */
+  virtual void compute_cdr_diffco_cell_reg_fast(Vector<EBCellFAB*>&       a_diffco_cell,
+						const Vector<EBCellFAB*>& a_cdr_densities,
+						const EBCellFAB&          a_E,
+						const Box                 a_box,
+						const Real                a_dx,
+						const Real                a_time);
+
+  /*!
+    @brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
+  */
+  virtual void compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       a_diffco_cell,
+						  const Vector<EBCellFAB*>& a_cdr_densities,
+						  const EBCellFAB&          a_E,
+						  const Box                 a_box,
+						  const Real                a_dx,
+						  const Real                a_time);
+
+  /*!
+    @brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
+  */
+  virtual void compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       a_diffco_cell,
+						  const Vector<EBCellFAB*>& a_cdr_densities,
+						  const EBCellFAB&          a_E,
+						  const Box                 a_box,
+						  const Real                a_dx,
+						  const Real                a_time);
+
+  /*!
     @brief Compute diffusion coefficients on cell centers. Regular cells. 
   */
   virtual void compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&           a_diffco_cell,

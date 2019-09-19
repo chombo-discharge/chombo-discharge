@@ -286,7 +286,7 @@ void euler_maruyama::compute_cdr_gradients(){
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
 
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->compute_gradient(grad, solver->get_state());
+    m_amr->compute_gradient(grad, solver->get_state(), phase::gas);
     m_amr->average_down(grad, m_cdr->get_phase());
     m_amr->interp_ghost(grad, m_cdr->get_phase());
   }
