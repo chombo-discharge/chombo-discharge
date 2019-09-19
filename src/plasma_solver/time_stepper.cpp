@@ -465,6 +465,31 @@ void time_stepper::advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a
     pout() << "time_stepper::advance_reaction_network_reg_fast(patch)" << endl;
   }
 
+#if CH_SPACEDIM==2
+  advance_reaction_network_reg_fast2D(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients,
+				      a_photon_densities, a_E, a_time, a_dt, a_dx, a_box);
+#elif CH_SPACEDIM==3
+  advance_reaction_network_reg_fast3D(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients,
+				      a_photon_densities, a_E, a_time, a_dt, a_dx, a_box);
+#endif
+  
+}
+
+void time_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&       a_particle_sources,
+							 Vector<EBCellFAB*>&       a_photon_sources,
+							 const Vector<EBCellFAB*>& a_particle_densities,
+							 const Vector<EBCellFAB*>& a_particle_gradients,
+							 const Vector<EBCellFAB*>& a_photon_densities,
+							 const EBCellFAB&          a_E,
+							 const Real&               a_time,
+							 const Real&               a_dt,
+							 const Real&               a_dx,
+							 const Box&                a_box){
+  CH_TIME("time_stepper::advance_reaction_network_reg_fast2D(patch)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network_reg_fast2D(patch)" << endl;
+  }
+
   const Real zero = 0.0;
     
 
@@ -515,51 +540,161 @@ void time_stepper::advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a
   const IntVect hi     = a_box.bigEnd();
   const int n0         = dims[0];
   const int n1         = dims[1];
-#if CH_SPACEDIM==2
   const int offset     = lo[0] + n0*lo[1];
-#else
-  const int n2         = dims[2];
-  const int offset     = lo[0] + n0*(lo[1] + n1*lo[2]);
-#endif
 
   // C style variable-length array conversion magic
-#if CH_SPACEDIM==2
   auto vla_cdr_src = (Real (*__restrict__)[n1][n0]) (cdr_src.dataPtr() - offset);
   auto vla_rte_src = (Real (*__restrict__)[n1][n0]) (rte_src.dataPtr() - offset);
   auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
   auto vla_rte_phi = (Real (*__restrict__)[n1][n0]) (rte_phi.dataPtr() - offset);
   auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
-#else
-  auto vla_cdr_src = (Real (*__restrict__)[n2][n1][n0]) (cdr_src.dataPtr() - offset);
-  auto vla_rte_src = (Real (*__restrict__)[n2][n1][n0]) (rte_src.dataPtr() - offset);
-  auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
-  auto vla_rte_phi = (Real (*__restrict__)[n2][n1][n0]) (rte_phi.dataPtr() - offset);
-  auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
-#endif
 
-#if CH_SPACEDIM==3
-  for (int k = lo[2]; k <= hi[2]; k++){
-#endif
     for (int j = lo[1]; j <= hi[1]; ++j){
       for (int i = lo[0]; i <= hi[0]; ++i){
       
 	// Particle densities
 	for (int idx = 0; idx < num_species; ++idx){
-#if CH_SPACEDIM==2
 	  particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
-#else
-	  particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
-#endif
 	  particle_gradients[idx] = RealVect::Zero;
 	}
 
 	// Photon densities
 	for (int idx = 0; idx < num_photons; ++idx){
-#if CH_SPACEDIM==2
 	  photon_densities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
-#else
+	}
+
+	E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
+	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
+
+	m_plaskin->advance_reaction_network(particle_sources,
+					    photon_sources,
+					    particle_densities,
+					    particle_gradients,
+					    photon_densities,
+					    E,
+					    pos,
+					    a_dx,
+					    a_dt,
+					    a_time,
+					    1.0);
+
+	// Put result in correct palce
+	for (int idx = 0; idx < num_species; ++idx){
+	  vla_cdr_src[idx][j][i] = particle_sources[idx];
+	}
+
+	// Put result in correct palce
+	for (int idx = 0; idx < num_photons; ++idx){
+	  vla_rte_src[idx][j][i] = photon_sources[idx];
+	}
+      }
+    }
+
+  // Copy result back to solvers
+  for (int i = 0; i < num_species; i++){
+    FArrayBox& src = a_particle_sources[i]->getFArrayBox();
+    src.setVal(0.0);
+    src.copy(cdr_src, a_box, i, a_box, 0, 1);
+    a_particle_sources[i]->setCoveredCellVal(0.0, 0);
+  }
+
+  // Copy result back to solvers
+  for (int i = 0; i < num_photons; i++){
+    FArrayBox& src = a_photon_sources[i]->getFArrayBox();
+    src.setVal(0.0);
+    src.copy(rte_src, a_box, i, a_box, 0, 1);
+  }
+}
+
+
+void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&       a_particle_sources,
+							 Vector<EBCellFAB*>&       a_photon_sources,
+							 const Vector<EBCellFAB*>& a_particle_densities,
+							 const Vector<EBCellFAB*>& a_particle_gradients,
+							 const Vector<EBCellFAB*>& a_photon_densities,
+							 const EBCellFAB&          a_E,
+							 const Real&               a_time,
+							 const Real&               a_dt,
+							 const Real&               a_dx,
+							 const Box&                a_box){
+  CH_TIME("time_stepper::advance_reaction_network_reg_fast3D(patch)");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::advance_reaction_network_reg_fast3D(patch)" << endl;
+  }
+
+  const Real zero = 0.0;
+    
+
+  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_photons();
+
+  // EBISBox and graph
+  const EBISBox& ebisbox = a_E.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+  const RealVect origin  = m_physdom->get_prob_lo();
+
+  // Things that are passed into plasma_kinetics. 
+  RealVect         pos = RealVect::Zero;
+  RealVect         E   = RealVect::Zero;
+  Vector<Real>     particle_sources(num_species);
+  Vector<Real>     particle_densities(num_species);
+  Vector<RealVect> particle_gradients(num_species);
+  Vector<Real>     photon_sources(num_photons);
+  Vector<Real>     photon_densities(num_photons);
+
+  // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
+  
+  // Temps for source terms and particle densities
+  FArrayBox cdr_src(a_box, num_species);
+  FArrayBox cdr_phi(a_box, num_species);
+  cdr_phi.setVal(0.0);
+  cdr_src.setVal(0.0);
+  for (int i = 0; i < num_species; i++){
+    cdr_phi.copy(a_particle_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  }
+
+  // Temps for photon source terms and densities
+  FArrayBox rte_phi(a_box, num_photons);
+  FArrayBox rte_src(a_box, num_photons);
+  rte_phi.setVal(0.0);
+  rte_src.setVal(0.0);
+  for (int i = 0; i < num_photons; i++){
+    rte_phi.copy(a_photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  }
+
+  // Temp for electric field
+  FArrayBox Efab(a_box, SpaceDim);
+  Efab.copy(a_E.getFArrayBox(), a_box, 0, a_box, 0, SpaceDim);
+
+  // Pointer offsets
+  const IntVect dims   = a_box.size();
+  const IntVect lo     = a_box.smallEnd();
+  const IntVect hi     = a_box.bigEnd();
+  const int n0         = dims[0];
+  const int n1         = dims[1];
+  const int n2         = dims[2];
+  const int offset     = lo[0] + n0*(lo[1] + n1*lo[2]);
+
+  // C style variable-length array conversion magic
+  auto vla_cdr_src = (Real (*__restrict__)[n2][n1][n0]) (cdr_src.dataPtr() - offset);
+  auto vla_rte_src = (Real (*__restrict__)[n2][n1][n0]) (rte_src.dataPtr() - offset);
+  auto vla_cdr_phi = (Real (*__restrict__)[n2][n1][n0]) (cdr_phi.dataPtr() - offset);
+  auto vla_rte_phi = (Real (*__restrict__)[n2][n1][n0]) (rte_phi.dataPtr() - offset);
+  auto vla_E       = (Real (*__restrict__)[n2][n1][n0]) (Efab.dataPtr()    - offset);
+
+  for (int k = lo[2]; k <= hi[2]; k++){
+    for (int j = lo[1]; j <= hi[1]; ++j){
+      for (int i = lo[0]; i <= hi[0]; ++i){
+      
+	// Particle densities
+	for (int idx = 0; idx < num_species; ++idx){
+	  particle_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
+	  particle_gradients[idx] = RealVect::Zero;
+	}
+
+	// Photon densities
+	for (int idx = 0; idx < num_photons; ++idx){
 	  photon_densities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
-#endif
 	}
 
 #if CH_SPACEDIM==2
@@ -620,6 +755,8 @@ void time_stepper::advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a
     src.copy(rte_src, a_box, i, a_box, 0, 1);
   }
 }
+
+
 
 void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a_particle_sources,
 						  Vector<EBCellFAB*>&          a_photon_sources,
