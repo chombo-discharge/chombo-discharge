@@ -233,6 +233,14 @@ public:
 			     const EBAMRCellData& a_source,
 			     const Real           a_dt) = 0;
 
+    /*!
+    @brief Explicit Euler advance with source terms
+    */
+  virtual void advance_explicit_euler(EBAMRCellData&       a_new_state,
+				      const EBAMRCellData& a_old_state,
+				      const EBAMRCellData& a_source,
+				      const Real           a_dt) = 0;
+
   /*!
     @brief Explicit RK2 advance
   */
@@ -473,6 +481,16 @@ protected:
     @brief Stencils for computing the non-conservative divergence
   */
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_stencils_nc;
+
+  /*!
+    @brief Storage for flux interpolant
+  */
+  Vector<RefCountedPtr<LevelData<BaseIFFAB<Real> > > > m_interpolant[SpaceDim];
+
+  /*!
+    @brief Cells on which to compute the flux interpolant
+  */
+  Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_interp_sets[SpaceDim];
 
   /*!
     @brief Phase
@@ -729,6 +747,11 @@ protected:
     @brief Define stencils for computing the non-conservative divergence
   */
   virtual void define_divFnc_stencils();
+
+  /*!
+    @brief Define interpolant
+  */
+  virtual void define_interpolant();
 
   /*!
     @brief Options for parsing some class options

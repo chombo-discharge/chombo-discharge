@@ -236,6 +236,22 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
   }
 }
 
+void cdr_tga::advance_explicit_euler(EBAMRCellData&       a_new_state,
+				     const EBAMRCellData& a_old_state,
+				     const EBAMRCellData& a_source,
+				     const Real           a_dt){
+  CH_TIME("cdr_tga::advance_explicit_euler");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_explicit_euler" << endl;
+  }
+  
+  if(m_diffusive){
+    compute_divD(m_scratch, a_old_state);
+    data_ops::copy(a_new_state, a_old_state);
+    data_ops::incr(a_new_state, m_scratch, a_dt);
+  }
+}
+
 void cdr_tga::advance_tga(EBAMRCellData& a_state, const Real a_dt){
   CH_TIME("cdr_tga::advance_tga");
   if(m_verbosity > 5){

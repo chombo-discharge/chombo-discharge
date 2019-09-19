@@ -48,6 +48,8 @@ protected:
 
   bool m_extrap_advect;
 
+  bool m_implicit_diffusion;
+
   // Get functions for storage
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
   RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
@@ -71,6 +73,7 @@ protected:
   void compute_cdr_diffco(const Real a_time);
 
   // Various option parsing
+  void parse_diffusion();
   
 };
 

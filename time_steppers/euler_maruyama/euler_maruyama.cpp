@@ -10,6 +10,8 @@
 #include "data_ops.H"
 #include "units.H"
 
+#include <ParmParse.H>
+
 typedef euler_maruyama::cdr_storage     cdr_storage;
 typedef euler_maruyama::poisson_storage poisson_storage;
 typedef euler_maruyama::rte_storage     rte_storage;
@@ -40,6 +42,28 @@ void euler_maruyama::parse_options(){
   parse_min_dt();
   parse_max_dt();
   parse_source_comp();
+  parse_diffusion();
+}
+
+void euler_maruyama::parse_diffusion(){
+  CH_TIME("euler_maruyama::parse_diffusion");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::parse_diffusion" << endl;
+  }
+
+  ParmParse pp("euler_maruyama");
+
+  std::string str;
+  pp.get("diffusion", str);
+  if(str == "explicit"){
+    m_implicit_diffusion = false;
+  }
+  else if(str == "implicit"){
+    m_implicit_diffusion = true;
+  }
+  else{
+    MayDay::Abort("euler_maruayama::parse_diffusion - unknown diffusion type requested");
+  }
 }
 
 bool euler_maruyama::need_to_regrid(){
@@ -514,6 +538,12 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     EBAMRCellData& scratch  = storage->get_scratch();
     EBAMRCellData& scratch2 = storage->get_scratch2();
 
+    // If we do explicit diffusion, we'll need need the diffusive term as well
+    if(!m_implicit_diffusion){
+      solver->compute_divD(scratch2, phi);
+    }
+
+
     // Compute hyperbolic term into scratch
     t0 = MPI_Wtime();
     if(solver->is_mobile()){
@@ -534,22 +564,32 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F) + dt*R
     t1 = MPI_Wtime();
     t_sour += t1 - t0;
+
+    // Increment with diffusive term, IF we did explicit diffusion
+    if(!m_implicit_diffusion){
+      data_ops::incr(phi, scratch2, a_dt);
+    }
     data_ops::floor(phi, 0.0);
 
 
-    // Solve diffusion equation. This looks weird but we're solving
-    //
-    // phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
-    //
-    // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
-    // so we just use that for simplicity
-    t0 = MPI_Wtime();
-    if(solver->is_diffusive()){
-      data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
-      data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
-      solver->advance_euler(phi, scratch, scratch2, a_dt); 
+    if(m_implicit_diffusion){
+      // Solve implicit diffusion equation. This looks weird but we're solving
+      //
+      // phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
+      //
+      // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
+      // so we just use that for simplicity
+      t0 = MPI_Wtime();
+      if(solver->is_diffusive()){
+	data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
+	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
+	solver->advance_euler(phi, scratch, scratch2, a_dt); 
+      }
+      t1 = MPI_Wtime();
     }
-    t1 = MPI_Wtime();
+    else{ // Explicit diffusion
+
+    }
     t_diff += t1 - t0;
 
     t0 = MPI_Wtime();
