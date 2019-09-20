@@ -18,6 +18,10 @@ rod_if::rod_if(const RealVect& a_center1,
 	       const RealVect& a_center2,
 	       const Real&     a_radius,
 	       const bool&     a_inside){
+  m_center1 = a_center1;
+  m_center2 = a_center2;
+  m_radius  = a_radius;
+
   
   // Create a union and store it
   const RealVect axis    = (a_center2 - a_center1);
@@ -51,7 +55,10 @@ rod_if::rod_if(const RealVect& a_center1,
 rod_if::rod_if(const rod_if& a_inputIF){
   
   // Copy if
-  this->m_baseif = a_inputIF.m_baseif;
+  this->m_baseif  = a_inputIF.m_baseif;
+  this->m_center2 = a_inputIF.m_center2;
+  this->m_center1 = a_inputIF.m_center1;
+  this->m_radius  = a_inputIF.m_radius;
 }
 
 //
