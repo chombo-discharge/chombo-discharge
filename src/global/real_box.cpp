@@ -66,17 +66,33 @@ Vector<RealVect> real_box::get_corners() const {
 
 bool real_box::intersect(const real_box& a_box) const {
 
-  bool ret = false;
+  //  bool ret = false;
 
-  const Vector<RealVect> corners = a_box.get_corners();
-  
-  for (int i = 0; i < corners.size(); i++){
-    if(is_point_inside(corners[i])){
-      ret = true;
-    }
+  const RealVect LO = a_box.get_lo();
+  const RealVect HI = a_box.get_hi();
+
+  if (   LO[0] < m_hi[0] && HI[0] > m_lo[0]  //  Input x-edges either to left or righ
+      && LO[1] < m_hi[1] && HI[1] > m_lo[1]
+#if CH_SPACEDIM==3
+      && LO[2] < m_hi[2] && HI[2] > m_lo[2]
+#endif
+	 ){
+    return true;
   }
+  else{
+    return false;
+  }
+      
+    
+  // const Vector<RealVect> corners = a_box.get_corners();
+  
+  // for (int i = 0; i < corners.size(); i++){
+  //   if(is_point_inside(corners[i])){
+  //     ret = true;
+  //   }
+  // }
 
-  return ret;
+  // return ret;
 }
 
 

@@ -39,7 +39,7 @@ public:
   Vector<RealVect> get_corners() const;
 
   /*!
-    @brief Check if a_box intersects this box
+    @brief Check if a_box intersects this box. This is done by checking if 
   */
   bool intersect(const real_box& a_box) const;
 
@@ -49,7 +49,8 @@ public:
   bool is_point_inside(const RealVect a_point) const;
 
   /*!
-    @brief Check if a_box is completely inside this box
+    @brief Check if a_box is completely inside this box. For this to be true, all the corners of a_box must be 
+    completely inside this box
   */
   bool is_box_inside(const real_box& a_box) const;
   

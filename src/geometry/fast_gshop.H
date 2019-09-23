@@ -19,7 +19,8 @@
 class fast_gshop : public GeometryShop {
 public:
 
-  static bool s_recursive;
+  static bool s_recursive;  // Use recursive box division in order to lighten the load on Copier
+  static int  s_grow;       // Used to grow boxes when testing for real/covered/other. Ideally, should equal EBIS ghosts
 
   fast_gshop(const BaseIF&       a_localGeom,
 	     const int           a_verbosity,
@@ -34,13 +35,14 @@ public:
 		 const int&                a_maxGridSize,
 		 const int&                a_maxIrregGridSize);
 
-  void set_bboxes(const Vector<real_box> a_bboxes);
 
+  void set_bounded_boxes(const Vector<real_box> a_bboxes);
+  
   void set_regular_boxes(const Vector<real_box> a_regboxes);
-
+  
   void set_covered_boxes(const Vector<real_box> a_regboxes);
 
-  void add_bbox(const real_box a_rbox);
+  void add_bounded_box(const real_box a_rbox);
 
   void add_regular_box(const real_box a_rbox);
 
@@ -60,7 +62,7 @@ protected:
   Vector<Real>          m_dx;      // Index 0 is the finest EBIS level
   Vector<ProblemDomain> m_domains; // Index 0 is the finest EBIS level
 
-  Vector<real_box> m_bboxes;         // Bou
+  Vector<real_box> m_bounded_boxes; // Bounded boxes
   Vector<real_box> m_covered_boxes; // Boxes that are known to be fully regular
   Vector<real_box> m_regular_boxes; // Boxes that are known to be fully covered
 
@@ -77,12 +79,7 @@ protected:
   /*!
     @brief Check if a box intersects a bounding box
   */
-  bool is_bounding_box(const real_box& a_box) const;
-
-  /*!
-    @brief Check if power of two
-  */
-  bool isPowerOfTwo(int x) const;
+  bool is_bounded_box(const real_box& a_box) const;
 
   /*!
     @brief Make grids with domain splitting
@@ -107,6 +104,7 @@ protected:
 		 Vector<Box>&         a_irreg_boxes,
 		 const Box&           a_box,
 		 const ProblemDomain& a_domain,
+		 const Real           a_dx,
 		 const int            a_maxGridSize);
 
 

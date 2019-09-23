@@ -12,7 +12,8 @@
 
 #include <ParmParse.H>
 
-bool fast_gshop::s_recursive = false;
+bool fast_gshop::s_recursive = true;
+int fast_gshop::s_grow = 4;
 
 fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
 		       const int           a_verbosity,
@@ -40,7 +41,7 @@ fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
     
     if(domain.domainBox().coarsenable(ref)){
       domain.coarsen(ref);
-      dx *= 1./ref;
+      dx *= ref;
       
       m_dx.push_back(dx);
       m_domains.push_back(domain);
@@ -51,6 +52,7 @@ fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
   }
 
 
+  m_bounded_boxes.resize(0);
   m_regular_boxes.resize(0);
   m_covered_boxes.resize(0);
   
@@ -72,10 +74,10 @@ fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
     RealVect lo = RealVect::Zero;
     RealVect hi = RealVect(0, 0, 1);
 
-    lo = lo - radius*1.1*RealVect::Unit;
-    hi = hi + radius*1.1*RealVect::Unit;
+    lo = lo - radius*1.001*RealVect::Unit;
+    hi = hi + radius*1.001*RealVect::Unit;
 
-    m_bboxes.push_back(real_box(lo, hi));
+    m_bounded_boxes.push_back(real_box(lo, hi));
   }
 
 #endif
@@ -85,9 +87,8 @@ fast_gshop::~fast_gshop(){
 
 }
 
-
-void fast_gshop::set_bboxes(const Vector<real_box> a_bboxes){
-  m_bboxes = a_bboxes;
+void fast_gshop::set_bounded_boxes(const Vector<real_box> a_bounded_boxes){
+  m_bounded_boxes = a_bounded_boxes;
 }
 
 void fast_gshop::set_regular_boxes(const Vector<real_box> a_regular_boxes){
@@ -98,8 +99,8 @@ void fast_gshop::set_covered_boxes(const Vector<real_box> a_covered_boxes){
   m_covered_boxes = a_covered_boxes;
 }
 
-void fast_gshop::add_bbox(const real_box a_rbox){
-  m_bboxes.push_back(a_rbox);
+void fast_gshop::add_bounded_box(const real_box a_rbox){
+  m_bounded_boxes.push_back(a_rbox);
 }
 
 void fast_gshop::add_regular_box(const real_box a_rbox){
@@ -114,14 +115,7 @@ void fast_gshop::makeGrids(const ProblemDomain&      a_domain,
 			   DisjointBoxLayout&        a_grids,
 			   const int&                a_maxGridSize,
 			   const int&                a_maxIrregGridSize){
-
-  bool allPowersOfTwo = true;
-  for(int idir = 0; idir < SpaceDim; idir++){
-    bool powerOfTwoThisDir = isPowerOfTwo(a_domain.size(idir));
-    allPowersOfTwo = allPowersOfTwo && powerOfTwoThisDir;
-  }
-  
-  if(fast_gshop::s_recursive && allPowersOfTwo){
+  if(fast_gshop::s_recursive){
     makeGrids_recursive(a_domain, a_grids, a_maxGridSize, a_maxIrregGridSize);
   }
   else{
@@ -135,7 +129,7 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
 				     const int&                a_maxIrregGridSize){
 
 
-    // 1. Find the resolution that corresponds to a_domain
+  // 1. Find the resolution that corresponds to a_domain
   Real dx;
   bool found_dx;
   for (int lvl = 0 ; lvl < m_domains.size(); lvl++){
@@ -158,7 +152,17 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
   Vector<int> irregular_procs;
 
   // Make boxes recursively
-  makeBoxes(regular_boxes, irregular_boxes, a_domain.domainBox(), a_domain, a_maxGridSize);
+#if 0
+  pout() << "starting make boxes" << endl;
+  pout() << "dx = " << dx << endl;
+  pout() << "domain = " << a_domain.domainBox() << endl;
+#endif
+  makeBoxes(regular_boxes, irregular_boxes, a_domain.domainBox(), a_domain, dx, a_maxGridSize);
+#if 0
+  pout() << "end make boxes" << endl;
+  pout() << "num boxes = " << regular_boxes.size() + irregular_boxes.size() << endl;
+#endif
+
 
   mortonOrdering(regular_boxes);
   mortonOrdering(irregular_boxes);
@@ -184,35 +188,59 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
 			   Vector<Box>&         a_irreg_boxes,
 			   const Box&           a_region,
 			   const ProblemDomain& a_domain,
+			   const Real           a_dx, 
 			   const int            a_maxGridSize){
 
   int longdir;
   int length = a_region.longside(longdir); // Not necessarily multiple of two, but always multiple of a_maxGridSize
 
   //  std::cout << length << "\t" << a_maxGridSize << std::endl;
+#if 0
   if(length % a_maxGridSize != 0){
     MayDay::Abort("fast_gshop::makeBoxes - shouldn't happen!");
   }
+#endif
 
   // Split domain along the longest direction. We happen to know that a_region[longdir] is a integer multiple of maxgridsize
   if(length > a_maxGridSize){
-    const int npatches = length/a_maxGridSize;
-    const int n_left   = npatches/2;
-    const int n_right  = npatches - n_left;
 
-    //    std::cout << "nleft = " << n_left << "\t nright = " << n_right << std::endl;
+    Box box = a_region;
+    box.grow(s_grow);
+    const real_box rbox(box, m_origin, a_dx);
+    const bool regular  = is_regular_box(rbox);
+    const bool covered  = is_covered_box(rbox);
+    const bool bounded  = is_bounded_box(rbox);
 
-    // Divide the input box into two halves, left and right with n_left and n_right patches each
-    Box lo(a_region), hi;
-    hi = lo.chop(longdir, a_region.smallEnd(longdir) + n_left*a_maxGridSize);
+    if((regular || covered) && !bounded){
+#if 0
+      pout() << "pushing regular box = " << rbox.get_lo() << "\t" << rbox.get_hi() << endl;
+      pout() << "dx = " << a_dx << endl;
+      pout() << "domain box = " << a_region << endl;
+      pout() << "regular = " << regular << endl;
+      pout() << "covered = " << covered << endl;
+      pout() << "bounded = " << bounded << endl;
+#endif
+      a_reg_boxes.push_back(a_region);
+    }
+    else{
+      //      pout() << "splitting boxes" << endl;
+      const int npatches = length/a_maxGridSize;
+      const int n_left   = npatches/2;
+      const int n_right  = npatches - n_left;
 
-    // Do again on hi and lo end
-    makeBoxes(a_reg_boxes, a_irreg_boxes, lo, a_domain, a_maxGridSize);
-    makeBoxes(a_reg_boxes, a_irreg_boxes, hi, a_domain, a_maxGridSize);
+
+      // Divide the input box into two halves, left and right with n_left and n_right patches each
+      Box lo(a_region), hi;
+      hi = lo.chop(longdir, a_region.smallEnd(longdir) + n_left*a_maxGridSize);
+      
+      makeBoxes(a_reg_boxes, a_irreg_boxes, lo, a_domain, a_dx, a_maxGridSize);
+      makeBoxes(a_reg_boxes, a_irreg_boxes, hi, a_domain, a_dx, a_maxGridSize);
+    }
   }
   else{
     // Just put them somewhere, not important right now
-    a_reg_boxes.push_back(a_region);
+    //    pout() << "pushing irregular box" << endl;
+    a_irreg_boxes.push_back(a_region);
   }
 }
 
@@ -251,9 +279,17 @@ void fast_gshop::makeGrids_domainSplit(const ProblemDomain&      a_domain,
   
   for (int ibox = 0; ibox < boxes.size(); ibox++){
     const Box cur_box = boxes[ibox];
+    Box grown_box = cur_box;
+    grown_box.grow(s_grow);
     
-    const real_box rbox = real_box(cur_box, m_origin, dx);
-    if(is_regular_box(rbox) || is_covered_box(rbox)){
+    
+    const real_box rbox = real_box(grown_box, m_origin, dx);
+
+    const bool regular = is_regular_box(rbox);
+    const bool covered = is_covered_box(rbox);
+    const bool bounded = is_bounded_box(rbox);
+    
+    if((regular || covered) && !bounded){
       regular_boxes.push_back(cur_box);
     }
     else{
@@ -291,14 +327,6 @@ void fast_gshop::makeGrids_domainSplit(const ProblemDomain&      a_domain,
 #endif
 }
 
-bool fast_gshop::isPowerOfTwo (int x) const {
-  while (((x % 2) == 0) && (x > 1)) /* While x is even and > 1 */
-    {
-      x /= 2;
-    }
-  return (x == 1);
-}
-
 bool fast_gshop::is_covered_box(const real_box& a_rbox) const {
 
   bool is_covered = false;
@@ -331,12 +359,12 @@ bool fast_gshop::is_regular_box(const real_box& a_rbox) const {
   return is_regular;
 }
 
-bool fast_gshop::is_bounding_box(const real_box& a_rbox) const {
+bool fast_gshop::is_bounded_box(const real_box& a_rbox) const {
 
   bool is_bbox = false;
 
-  for(int ibox = 0; ibox < m_bboxes.size(); ibox++){
-    const real_box& bbox = m_bboxes[ibox];
+  for(int ibox = 0; ibox < m_bounded_boxes.size(); ibox++){
+    const real_box& bbox = m_bounded_boxes[ibox];
 
     if(bbox.intersect(a_rbox)){
       is_bbox = true;
@@ -354,19 +382,25 @@ GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
 
   // Check if a_region falls outside of any of the bounding boxes. If it does, this is a regular box. If we
   // don't have any bounding boxes, we call GeometryShop parent function which does a point-wise iteration
-  const real_box rbox(a_region, a_origin, a_dx);
+  Box box = a_region;
+  box.grow(s_grow);
+  const real_box rbox(box, a_origin, a_dx);
 
   const bool regular  = is_regular_box(rbox);
   const bool covered  = is_covered_box(rbox);
-  const bool bounding = is_bounding_box(rbox);
+  const bool bounded = is_bounded_box(rbox);
 
-  if(regular && !bounding){
+#if 1 // Original code
+  if(regular && !bounded){
     return GeometryService::Regular;
   }
-  else if(covered && !bounding){
+  else if(covered && !bounded){
     return GeometryService::Covered;
   }
   else{
     return GeometryShop::InsideOutside(a_region, a_domain, a_origin, a_dx);
   }
+#else // This code defaults to GeometryShops insideoutside stuff
+  return GeometryShop::InsideOutside(a_region, a_domain, a_origin, a_dx);
+#endif
 }
