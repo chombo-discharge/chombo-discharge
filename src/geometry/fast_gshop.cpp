@@ -12,6 +12,8 @@
 
 #include <ParmParse.H>
 
+bool fast_gshop::s_recursive = false;
+
 fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
 		       const int           a_verbosity,
 		       const Real          a_dx,
@@ -113,6 +115,113 @@ void fast_gshop::makeGrids(const ProblemDomain&      a_domain,
 			   const int&                a_maxGridSize,
 			   const int&                a_maxIrregGridSize){
 
+  bool allPowersOfTwo = true;
+  for(int idir = 0; idir < SpaceDim; idir++){
+    bool powerOfTwoThisDir = isPowerOfTwo(a_domain.size(idir));
+    allPowersOfTwo = allPowersOfTwo && powerOfTwoThisDir;
+  }
+  
+  if(fast_gshop::s_recursive && allPowersOfTwo){
+    makeGrids_recursive(a_domain, a_grids, a_maxGridSize, a_maxIrregGridSize);
+  }
+  else{
+    makeGrids_domainSplit(a_domain, a_grids, a_maxGridSize, a_maxIrregGridSize);
+  }
+}
+
+void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
+				     DisjointBoxLayout&        a_grids,
+				     const int&                a_maxGridSize,
+				     const int&                a_maxIrregGridSize){
+
+
+    // 1. Find the resolution that corresponds to a_domain
+  Real dx;
+  bool found_dx;
+  for (int lvl = 0 ; lvl < m_domains.size(); lvl++){
+    if(a_domain == m_domains[lvl]){
+      dx = m_dx[lvl];
+      found_dx = true;
+      break;
+    }
+  }
+
+  // 1.1 Debug
+  if(!found_dx){
+    MayDay::Abort("fast_gshop::makeGrids_recursive - logic bust");
+  }
+
+  Vector<Box> regular_boxes;
+  Vector<Box> irregular_boxes;
+
+  Vector<int> regular_procs;
+  Vector<int> irregular_procs;
+
+  // Make boxes recursively
+  makeBoxes(regular_boxes, irregular_boxes, a_domain.domainBox(), a_domain, a_maxGridSize);
+
+  mortonOrdering(regular_boxes);
+  mortonOrdering(irregular_boxes);
+
+  LoadBalance(regular_procs, regular_boxes);
+  LoadBalance(irregular_procs, irregular_boxes);
+
+  Vector<int> procs;
+  Vector<Box> boxes;
+  
+  procs.append(regular_procs);
+  procs.append(irregular_procs);
+
+  boxes.append(regular_boxes);
+  boxes.append(irregular_boxes);
+
+  a_grids.define(boxes, procs, a_domain);
+
+  //  MayDay::Abort("fast_gshop::makeGrids_recursive - not implemented");
+}
+
+void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
+			   Vector<Box>&         a_irreg_boxes,
+			   const Box&           a_region,
+			   const ProblemDomain& a_domain,
+			   const int            a_maxGridSize){
+
+  int longdir;
+  int length = a_region.longside(longdir); // Not necessarily multiple of two, but always multiple of a_maxGridSize
+
+  //  std::cout << length << "\t" << a_maxGridSize << std::endl;
+  if(length % a_maxGridSize != 0){
+    MayDay::Abort("fast_gshop::makeBoxes - shouldn't happen!");
+  }
+
+  // Split domain along the longest direction. We happen to know that a_region[longdir] is a integer multiple of maxgridsize
+  if(length > a_maxGridSize){
+    const int npatches = length/a_maxGridSize;
+    const int n_left   = npatches/2;
+    const int n_right  = npatches - n_left;
+
+    //    std::cout << "nleft = " << n_left << "\t nright = " << n_right << std::endl;
+
+    // Divide the input box into two halves, left and right with n_left and n_right patches each
+    Box lo(a_region), hi;
+    hi = lo.chop(longdir, a_region.smallEnd(longdir) + n_left*a_maxGridSize);
+
+    // Do again on hi and lo end
+    makeBoxes(a_reg_boxes, a_irreg_boxes, lo, a_domain, a_maxGridSize);
+    makeBoxes(a_reg_boxes, a_irreg_boxes, hi, a_domain, a_maxGridSize);
+  }
+  else{
+    // Just put them somewhere, not important right now
+    a_reg_boxes.push_back(a_region);
+  }
+}
+
+
+void fast_gshop::makeGrids_domainSplit(const ProblemDomain&      a_domain,
+				       DisjointBoxLayout&        a_grids,
+				       const int&                a_maxGridSize,
+				       const int&                a_maxIrregGridSize){
+  
 
     
   // 1. Find the resolution that corresponds to a_domain
@@ -128,7 +237,7 @@ void fast_gshop::makeGrids(const ProblemDomain&      a_domain,
 
   // 1.1 Debug
   if(!found_dx){
-    MayDay::Abort("fast_gshop::makeGrids - logic bust");
+    MayDay::Abort("fast_gshop::makeGrids_split - logic bust");
   }
 
   
@@ -182,6 +291,14 @@ void fast_gshop::makeGrids(const ProblemDomain&      a_domain,
 #endif
 }
 
+bool fast_gshop::isPowerOfTwo (int x) const {
+  while (((x % 2) == 0) && (x > 1)) /* While x is even and > 1 */
+    {
+      x /= 2;
+    }
+  return (x == 1);
+}
+
 bool fast_gshop::is_covered_box(const real_box& a_rbox) const {
 
   bool is_covered = false;
@@ -229,8 +346,6 @@ bool fast_gshop::is_bounding_box(const real_box& a_rbox) const {
 
   return is_bbox;
 }
-
-
 
 GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
 						 const ProblemDomain& a_domain,

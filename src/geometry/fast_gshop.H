@@ -19,6 +19,8 @@
 class fast_gshop : public GeometryShop {
 public:
 
+  static bool s_recursive;
+
   fast_gshop(const BaseIF&       a_localGeom,
 	     const int           a_verbosity,
 	     const Real          a_dx,
@@ -76,6 +78,40 @@ protected:
     @brief Check if a box intersects a bounding box
   */
   bool is_bounding_box(const real_box& a_box) const;
+
+  /*!
+    @brief Check if power of two
+  */
+  bool isPowerOfTwo(int x) const;
+
+  /*!
+    @brief Make grids with domain splitting
+  */
+  void makeGrids_domainSplit(const ProblemDomain&      a_domain,
+			     DisjointBoxLayout&        a_grids,
+			     const int&                a_maxGridSize,
+			     const int&                a_maxIrregGridSize);
+
+  /*!
+    @brief Make grids with recursive stuff
+  */
+  void makeGrids_recursive(const ProblemDomain&      a_domain,
+			   DisjointBoxLayout&        a_grids,
+			   const int&                a_maxGridSize,
+			   const int&                a_maxIrregGridSize);
+
+  /*!
+    @brief Make boxes recursively by splitting the domain
+  */
+  void makeBoxes(Vector<Box>&         a_reg_boxes,
+		 Vector<Box>&         a_irreg_boxes,
+		 const Box&           a_box,
+		 const ProblemDomain& a_domain,
+		 const int            a_maxGridSize);
+
+
+		 
+  
 };
 
 #endif
