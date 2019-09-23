@@ -8,7 +8,8 @@
 #ifndef _REAL_BOX_
 #define _REAL_BOX_
 
-#include "RealVect.H"
+#include <RealVect.H>
+#include <Box.H>
 
 /*!
   @brief Rectangular box
@@ -16,42 +17,41 @@
 class real_box{
 public:
 
-  /*!
-    @brief Constructor
-  */
-  real_box(){
-    m_lo = RealVect::Zero;
-    m_hi = RealVect::Zero;
-  }
+  real_box();
+  real_box(const RealVect a_lo, const RealVect a_hi);
+  real_box(const Box a_box, const RealVect a_origin, const Real a_dx);
+  
+  ~real_box();
 
   /*!
-    @brief Constructor
+    @brief Get low corner
   */
-  real_box(const RealVect a_lo, const RealVect a_hi){
-    m_lo = a_lo;
-    m_hi = a_hi;
-  }
+  RealVect get_lo() const;
 
   /*!
-    @brief Destructor
+    @brief Get high corner
   */
-  ~real_box(){
-
-  }
+  RealVect get_hi() const;
 
   /*!
-    @brief Get lo corner
+    @brief Get all the corners of this box (4 in 2D, 8 in 3D);
   */
-  RealVect get_lo() const {
-    return m_lo;
-  }
+  Vector<RealVect> get_corners() const;
 
   /*!
-    @brief Get hi corner
+    @brief Check if a_box intersects this box
   */
-  RealVect get_hi() const {
-    return m_hi;
-}
+  bool intersect(const real_box& a_box) const;
+
+  /*!
+    @brief Check if a_point is inside this box
+  */
+  bool is_point_inside(const RealVect a_point) const;
+
+  /*!
+    @brief Check if a_box is completely inside this box
+  */
+  bool is_box_inside(const real_box& a_box) const;
   
 protected:
 

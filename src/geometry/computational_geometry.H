@@ -18,6 +18,7 @@
 #include "electrode.H"
 #include "physical_domain.H"
 #include "mfis.H"
+#include "real_box.H"
 
 /*!
   @brief Abstract base class for geometries
@@ -143,6 +144,11 @@ protected:
     @brief The solid-phase implicit function
   */
   RefCountedPtr<BaseIF> m_sol_if;
+
+  /*!
+    @brief Bounding boxes
+  */
+  Vector<real_box> m_bboxes;
 
   /*!
     @brief Geometry server for gas phase

@@ -15,9 +15,8 @@
 #include <ComplementIF.H>
 
 #include "computational_geometry.H"
+#include "fast_gshop.H"
 
-int computational_geometry::s_minRef  = 0;
-int computational_geometry::s_maxRef  = 0;
 #if CH_USE_DOUBLE
 Real computational_geometry::s_thresh = 1.E-15;
 #elif CH_USE_FLOAT
@@ -140,10 +139,12 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
   else {
     //    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
     m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
-#if 0
-    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
-#endif
+
+#if 0 // Original code
     a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
+#else // New code
+    a_geoserver = static_cast<GeometryService*> (new fast_gshop(*m_gas_if, 0, a_dx, a_origin, a_finestDomain, s_thresh));
+#endif
   }
 }
 
@@ -176,10 +177,11 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     parts.push_back(&(*elec_baseif)); // Parts for intersection
     
     m_sol_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
+
 #if 0
-    a_geoserver = static_cast<GeometryService*> (new WrappedGShop(baseif, a_origin, a_dx, a_finestDomain, s_minRef, s_maxRef));
-#endif
-    
     a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_sol_if, 0, a_dx*RealVect::Unit, s_thresh));
+#else // New code
+    a_geoserver = static_cast<GeometryService*> (new fast_gshop(*m_sol_if, 0, a_dx, a_origin, a_finestDomain, s_thresh));
+#endif
   }
 }

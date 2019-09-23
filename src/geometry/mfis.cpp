@@ -28,6 +28,10 @@ void mfis::define(const Box                     & a_domain,
 
 
 #if 1
+#if 1 // Debug
+  MayDay::Warning("mfis::define - setting distributed data. This is development code");
+  m_ebis[phase::gas]->setDistributedData();
+#endif
   m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
 
   if(a_geoservers[phase::solid] == NULL){
