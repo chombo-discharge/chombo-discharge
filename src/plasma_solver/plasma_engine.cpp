@@ -477,10 +477,19 @@ void plasma_engine::grid_report(){
 			    finest_level,
 			    grids);
 
+  const ProblemDomain finest_domain = m_amr->get_domains()[finest_level];
+  const Box box = finest_domain.domainBox();
+
   // Write a report
   pout() << "-----------------------------------------------------------------------" << endl
-	 << "plasma_engine::Grid report - timestep = " << m_step << endl 
+	 << "plasma_engine::Grid report - timestep = " << m_step << endl
 	 << "\t\t\t        Finest level           = " << finest_level << endl
+	 << "\t\t\t        Finest domain          = " << box.size()[0] << " x " << box.size()[1] <<
+#if CH_SPACEDIM==2
+    endl
+#elif CH_SPACEDIM==3
+    " x " << box.size()[2] << endl
+#endif
     	 << "\t\t\t        Total number boxes     = " << totBoxes << endl
     	 << "\t\t\t        Total number of cells  = " << totPoints << " (" << totPointsGhosts << ")" << endl
 	 << "\t\t\t        Proc. # of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
