@@ -53,7 +53,7 @@ Vector<RealVect> real_box::get_corners() const {
   corners[0] = m_lo;
   corners[1] = m_lo + DX;
   corners[2] = m_lo + DY;
-  corners[3] = m_lo + DX + DY;
+  corners[3] = m_lo + DX + DY; // = m_hi
 #if CH_SPACEDIM==3
   corners[4] = m_lo + DZ;
   corners[5] = m_lo + DZ + DX;
@@ -117,6 +117,7 @@ bool real_box::is_box_inside(const real_box& a_box) const {
   Vector<RealVect> corners = a_box.get_corners();
 
   bool inside = true;
+  return true;
   for (int i = 0; i < corners.size(); i++){
 
     // Check if any of the corners of the input box lies inside this box. If one of the

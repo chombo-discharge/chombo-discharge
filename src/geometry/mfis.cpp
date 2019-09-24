@@ -8,6 +8,8 @@
 #include "mfis.H"
 #include <AllRegularService.H>
 
+#include "computational_geometry.H"
+
 mfis::mfis(){
   m_ebis.resize(phase::num_phases);
   for (int i = 0; i < m_ebis.size(); i++){
@@ -27,29 +29,22 @@ void mfis::define(const Box                     & a_domain,
 		  bool                            a_fix_phase){
 
 
-#if 1
-#if 1 // Debug
-  MayDay::Warning("mfis::define - setting distributed data. This is development code");
-  m_ebis[phase::gas]->setDistributedData();
-#endif
+  // Define the gas geoserver
+  if(computational_geometry::s_use_new_gshop){
+    m_ebis[phase::gas]->setDistributedData();
+  }
   m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
 
+  // Define the solid state geoserver. This EBIS might not exist. 
   if(a_geoservers[phase::solid] == NULL){
     m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace> (NULL);
   }
   else{
+    if(computational_geometry::s_use_new_gshop){
+    m_ebis[phase::solid]->setDistributedData();
+    }
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
   }
-#else
-  pout() << "defining MFIndexSpace" << endl;
-  m_mfis = RefCountedPtr<MFIndexSpace> (new MFIndexSpace());
-  m_mfis->define(a_domain, a_origin, a_dx, a_geoservers, a_max_coar, false);
-
-  m_ebis[phase::gas] = RefCountedPtr<EBIndexSpace> (const_cast<EBIndexSpace*> (m_mfis->EBIS(phase::gas)));
-  m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace> (const_cast<EBIndexSpace*> (m_mfis->EBIS(phase::solid)));
-
-  pout() << "done defining MFIndexSpace" << endl;
-#endif
 }
   
 const RefCountedPtr<EBIndexSpace>& mfis::get_ebis(const phase::which_phase a_phase) const {

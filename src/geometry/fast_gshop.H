@@ -28,7 +28,10 @@ public:
 	     const RealVect      a_origin,
 	     const ProblemDomain a_finest_domain,
 	     const Real          a_thrshdVoF = 1.0e-16);
+  
   ~fast_gshop();
+
+
     
   void makeGrids(const ProblemDomain&      a_domain,
 		 DisjointBoxLayout&        a_grids,

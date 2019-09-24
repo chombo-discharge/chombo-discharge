@@ -23,79 +23,26 @@ rod_sphere::rod_sphere(){
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
   
-  Real eps0        = 1.0;
-  {
-    ParmParse pp("rod_sphere");
-    pp.query("eps0",              eps0);
-  }
-  this->set_eps0(eps0);
-  
-  // Electrode parameters
-  bool live          = true;
-  bool has_electrode = true;
-  Real elec_radius   = 1.E-2;
-  RealVect center1   = RealVect::Zero;
-#if CH_SPACEDIM == 2
-  RealVect center2   = RealVect(0.0, 1.0);
-#else
-  RealVect center2   = RealVect(0.0, 0.0, 1.0);
-#endif
 
-  { // Get parameterse for electrode rod
-    ParmParse pp("rod_sphere");
-    std::string str;
-    Vector<Real> vec(SpaceDim);
-    pp.query("electrode_radius", elec_radius);
-    if(pp.contains("electrode_center1")){
-      pp.getarr("electrode_center1", vec, 0, SpaceDim);
-      center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
-    if(pp.contains("electrode_center2")){
-      pp.getarr("electrode_center2", vec, 0, SpaceDim);
-      center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
-    pp.query("turn_off_electrode", str);
-    if(str == "true"){
-      has_electrode = false;
-    }
-    else if(str == "false"){
-      has_electrode = true;
-    }
-    pp.query("electrode_live", str);
-    if(str == "true"){
-      live = true;
-    }
-    else if(str == "false"){
-      live = false;
-    }
-  }
-  
-  //Dielectric sphere
-  bool has_dielectric = true;
-  Real dielectric_permittivity = 5.0;
-  Real radius = 1.0;
-  RealVect center = RealVect::Zero;
+  std::string str;
+  Vector<Real> vec(SpaceDim);
+  bool live, has_electrode, has_dielectric;
+  Real eps0, elec_radius, radius, eps;
+  RealVect center1, center2, centerD;
 
-  {
-    ParmParse pp("rod_sphere");
-    Vector<Real> vec(SpaceDim);
-    std::string str;
-    pp.query("dielectric_permittivity", dielectric_permittivity);
+  ParmParse pp("rod_sphere");
+  pp.get("eps0",eps0);
+  pp.get("dielectric_permittivity", eps);
+  pp.get("dielectric_radius", radius);
+  pp.get("electrode_radius", elec_radius);
+  pp.getarr("electrode_center1", vec, 0, SpaceDim); center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("electrode_center2", vec, 0, SpaceDim); center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("dielectric_center", vec, 0, SpaceDim); centerD = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.get("turn_off_electrode", str);                has_electrode  = (str == "true") ? false : true;
+  pp.get("turn_off_dielectric", str);               has_dielectric = (str == "true") ? false : true;
+  pp.get("electrode_live", str);                    live = (str == "true") ? true : false;
 
-    if(pp.contains("dielectric_center")){
-      pp.getarr("dielectric_center", vec, 0, SpaceDim);
-      center = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-    }
-    pp.query("dielectric_radius", radius);
-    pp.query("turn_off_dielectric", str);
-    if(str == "true"){
-      has_dielectric = false;
-    }
-    else if(str == "false"){
-      has_dielectric = true;
-    }
-  }
-
+  set_eps0(eps0);
   if(has_electrode){
     m_electrodes.resize(1);
     RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(center1, center2, elec_radius, false));
@@ -103,8 +50,37 @@ rod_sphere::rod_sphere(){
   }
   if(has_dielectric){
     m_dielectrics.resize(1);
-    RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF> (new new_sphere_if(center, radius, false));
-    m_dielectrics[0].define(slab, dielectric_permittivity);
+    RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF> (new new_sphere_if(centerD, radius, false));
+    m_dielectrics[0].define(slab, eps);
+  }
+
+  // Check if we should use the new gshop functionality
+  bool new_gshop = false;
+  pp.get("use_new_gshop", str);
+  const bool use_new_gshop = (str == "true") ? true : false;
+
+  // Make the bounding boxes for fast gshop implementation
+  if(use_new_gshop){
+    computational_geometry::s_use_new_gshop = true;
+    
+    RealVect lo, hi;
+    for (int dir = 0; dir < SpaceDim; dir++){
+      lo[dir] = Min(center1[dir], center2[dir]);
+      hi[dir] = Max(center1[dir], center2[dir]);
+    }
+    real_box reg_gas(-100*RealVect::Unit, 100*RealVect::Unit);
+    real_box rod_gas(lo-elec_radius*RealVect::Unit, hi+elec_radius*RealVect::Unit);
+    real_box sph_gas(centerD-2*radius*RealVect::Unit, centerD+2*radius*RealVect::Unit);
+
+    m_regular_boxes_gas.push_back(reg_gas);
+    if(has_electrode)  m_bounded_boxes_gas.push_back(rod_gas);
+    if(has_dielectric) m_bounded_boxes_gas.push_back(sph_gas);
+
+
+    if(has_dielectric){
+      m_covered_boxes_sol.push_back(reg_gas);
+      m_bounded_boxes_sol.push_back(sph_gas);
+    }
   }
 }
 

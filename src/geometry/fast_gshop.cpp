@@ -56,7 +56,7 @@ fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
   m_regular_boxes.resize(0);
   m_covered_boxes.resize(0);
   
-#if 1 // Debug code
+#if 0 // Debug code
   ParmParse pp("devel");
   int use_bbox = 0;
   pp.get("use_bbox", use_bbox);
@@ -70,6 +70,7 @@ fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
     // Except this boxc
 
     // Everything below needle
+#if 0
     Real radius = 1.E-3;
     RealVect lo = RealVect::Zero;
     RealVect hi = RealVect(0, 0, 1);
@@ -77,7 +78,8 @@ fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
     lo = lo - radius*1.001*RealVect::Unit;
     hi = hi + radius*1.001*RealVect::Unit;
 
-    m_bounded_boxes.push_back(real_box(lo, hi));
+    //    m_bounded_boxes.push_back(real_box(lo, hi));
+#endif
   }
 
 #endif
@@ -93,10 +95,19 @@ void fast_gshop::set_bounded_boxes(const Vector<real_box> a_bounded_boxes){
 
 void fast_gshop::set_regular_boxes(const Vector<real_box> a_regular_boxes){
   m_regular_boxes = a_regular_boxes;
+
+  
+#if 0
+  std::cout << m_regular_boxes.size() << std::endl;
+#endif
 }
 
 void fast_gshop::set_covered_boxes(const Vector<real_box> a_covered_boxes){
+
   m_covered_boxes = a_covered_boxes;
+#if 0
+    std::cout << m_covered_boxes.size() << std::endl;
+#endif
 }
 
 void fast_gshop::add_bounded_box(const real_box a_rbox){
@@ -115,6 +126,7 @@ void fast_gshop::makeGrids(const ProblemDomain&      a_domain,
 			   DisjointBoxLayout&        a_grids,
 			   const int&                a_maxGridSize,
 			   const int&                a_maxIrregGridSize){
+
   if(fast_gshop::s_recursive){
     makeGrids_recursive(a_domain, a_grids, a_maxGridSize, a_maxIrregGridSize);
   }
@@ -179,9 +191,10 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
   boxes.append(regular_boxes);
   boxes.append(irregular_boxes);
 
+  pout() << "fast_gshop::makeGrids_recursive - domain = " << a_domain << "\t num boxes = " << boxes.size() << endl;
+
   a_grids.define(boxes, procs, a_domain);
 
-  //  MayDay::Abort("fast_gshop::makeGrids_recursive - not implemented");
 }
 
 void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
@@ -194,7 +207,7 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
   int longdir;
   int length = a_region.longside(longdir); // Not necessarily multiple of two, but always multiple of a_maxGridSize
 
-  //  std::cout << length << "\t" << a_maxGridSize << std::endl;
+  // std::cout << length << "\t" << a_maxGridSize << std::endl;
 #if 0
   if(length % a_maxGridSize != 0){
     MayDay::Abort("fast_gshop::makeBoxes - shouldn't happen!");
@@ -211,7 +224,7 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
     const bool covered  = is_covered_box(rbox);
     const bool bounded  = is_bounded_box(rbox);
 
-    if((regular || covered) && !bounded){
+    if((regular || covered) && !bounded && length < 1024){
 #if 0
       pout() << "pushing regular box = " << rbox.get_lo() << "\t" << rbox.get_hi() << endl;
       pout() << "dx = " << a_dx << endl;
@@ -346,15 +359,18 @@ bool fast_gshop::is_covered_box(const real_box& a_rbox) const {
 bool fast_gshop::is_regular_box(const real_box& a_rbox) const {
 
   bool is_regular = false;
-
+  
   for(int ibox = 0; ibox < m_regular_boxes.size(); ibox++){
     const real_box& regular_box = m_regular_boxes[ibox];
 
-    if(regular_box.is_box_inside(a_rbox)){
+    const bool inside_box = regular_box.is_box_inside(a_rbox);
+    if(inside_box){
       is_regular = true;
       break;
     }
   }
+  
+  //  std::cout << is_regular << "\t" << m_regular_boxes[0].get_lo() << "\t" << m_regular_boxes[0].get_hi() << std::endl;
 
   return is_regular;
 }
@@ -370,6 +386,7 @@ bool fast_gshop::is_bounded_box(const real_box& a_rbox) const {
       is_bbox = true;
       break;
     }
+
   }
 
   return is_bbox;
@@ -386,8 +403,8 @@ GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
   box.grow(s_grow);
   const real_box rbox(box, a_origin, a_dx);
 
-  const bool regular  = is_regular_box(rbox);
-  const bool covered  = is_covered_box(rbox);
+  const bool regular = is_regular_box(rbox);
+  const bool covered = is_covered_box(rbox);
   const bool bounded = is_bounded_box(rbox);
 
 #if 1 // Original code

@@ -26,6 +26,8 @@
 class computational_geometry {
 public:
 
+  static bool s_use_new_gshop;
+
   /*!
     @brief Constructor
   */
@@ -145,15 +147,20 @@ protected:
   */
   RefCountedPtr<BaseIF> m_sol_if;
 
-  /*!
-    @brief Bounding boxes
-  */
-  Vector<real_box> m_bboxes;
+  // Voxels for gas phase
+  Vector<real_box> m_regular_boxes_gas;
+  Vector<real_box> m_covered_boxes_gas;
+  Vector<real_box> m_bounded_boxes_gas;
+
+  // Voxels for solid phase
+  Vector<real_box> m_regular_boxes_sol;
+  Vector<real_box> m_covered_boxes_sol;
+  Vector<real_box> m_bounded_boxes_sol;
 
   /*!
     @brief Geometry server for gas phase
   */
-  virtual void build_gas_geoserv(GeometryService*&     a_geoserver,
+  virtual void build_gas_geoserv(GeometryService*&    a_geoserver,
 				 const ProblemDomain& a_finestDomain,
 				 const RealVect&      a_origin,
 				 const Real&          a_dx);

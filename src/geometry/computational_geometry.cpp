@@ -23,6 +23,8 @@ Real computational_geometry::s_thresh = 1.E-15;
 Real computational_geometry::s_thresh = 1.E-6;
 #endif
 
+bool computational_geometry::s_use_new_gshop = false;
+
 computational_geometry::computational_geometry(){
 
   //
@@ -140,11 +142,18 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
     //    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
     m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
 
-#if 0 // Original code
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
-#else // New code
-    a_geoserver = static_cast<GeometryService*> (new fast_gshop(*m_gas_if, 0, a_dx, a_origin, a_finestDomain, s_thresh));
-#endif
+    if(s_use_new_gshop){
+      fast_gshop* gshop = new fast_gshop(*m_gas_if, 0, a_dx, a_origin, a_finestDomain, s_thresh);
+
+      gshop->set_regular_boxes(m_regular_boxes_gas);
+      gshop->set_covered_boxes(m_covered_boxes_gas);
+      gshop->set_bounded_boxes(m_bounded_boxes_gas);
+    
+      a_geoserver = static_cast<GeometryService*> (gshop);
+    }
+    else{
+      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
+    }
   }
 }
 
@@ -178,10 +187,16 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     
     m_sol_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
 
-#if 0
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_sol_if, 0, a_dx*RealVect::Unit, s_thresh));
-#else // New code
-    a_geoserver = static_cast<GeometryService*> (new fast_gshop(*m_sol_if, 0, a_dx, a_origin, a_finestDomain, s_thresh));
-#endif
+    if(s_use_new_gshop){
+      fast_gshop* gshop = new fast_gshop(*m_sol_if, 0, a_dx, a_origin, a_finestDomain, s_thresh);
+      gshop->set_regular_boxes(m_regular_boxes_sol);
+      gshop->set_covered_boxes(m_covered_boxes_sol);
+      gshop->set_bounded_boxes(m_bounded_boxes_sol);
+    
+      a_geoserver = static_cast<GeometryService*> (gshop);
+    }
+    else{
+      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_sol_if, 0, a_dx*RealVect::Unit, s_thresh));
+    }
   }
 }
