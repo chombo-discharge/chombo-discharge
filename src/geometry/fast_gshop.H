@@ -110,6 +110,11 @@ protected:
 		 const Real           a_dx,
 		 const int            a_maxGridSize);
 
+  /*!
+    @brief Send boxes in parallel
+  */
+  void send_boxes_parallel(int* a_send_buffer, int& send_size, int& a_send_count, const std::list<Box>& a_boxes);
+
 
 		 
   

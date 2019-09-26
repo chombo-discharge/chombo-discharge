@@ -608,8 +608,14 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     domainSplit(m_domains[0], old_boxes[0], m_max_box_size, m_blocking_factor);
 
     if(!m_has_grids){
+
       for (int lvl = 1; lvl <= top_level; lvl++){
+#if 0
 	domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
+#else
+	old_boxes[lvl].resize(0);
+	old_boxes[lvl].push_back(m_domains[lvl].domainBox());
+#endif
       }
     }
     else{
@@ -1886,6 +1892,8 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
     m_grids[lvl].define(a_boxes[lvl], proc_assign[lvl], m_domains[lvl]);
     m_grids[lvl].close();
   }
+
+  m_has_grids = true;
 
   const int a_lmin = 0;
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases

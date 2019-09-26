@@ -37,6 +37,7 @@ morrow_zheleznyak::morrow_zheleznyak(){
   parse_gas_params();
   parse_see();
   parse_domain_bc();
+  parse_ebbc();
   parse_reaction_settings();
 
   // Init RNG
@@ -72,7 +73,9 @@ void morrow_zheleznyak::advance_reaction_network(Vector<Real>&          a_partic
 					 const Real             a_dt,
 					 const Real             a_time,
 					 const Real             a_kappa) const{
-
+  for (int i = 0; i < a_particle_densities.size(); i++){
+    if(a_particle_densities[i] < 0.0) MayDay::Abort("morrow_zheleznyak::advance_network - shouldn't happen");
+  }
   // Six reactions for this plasma model:
   // ===================================
   // 1. e + M   => 2e + M+ 
@@ -705,9 +708,13 @@ Vector<Real> morrow_zheleznyak::compute_cdr_electrode_fluxes(const Real         
 							  const Vector<Real> a_cdr_gradients,
 							  const Vector<Real> a_rte_fluxes,
 							  const Vector<Real> a_extrap_cdr_fluxes) const {
-
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+  if(m_extrap_electrode_ebbc){
+    return a_extrap_cdr_fluxes;
+  }
+  else{
+    return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
+				    a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+  }
 }
 
 Vector<Real> morrow_zheleznyak::compute_cdr_dielectric_fluxes(const Real         a_time,
@@ -719,9 +726,13 @@ Vector<Real> morrow_zheleznyak::compute_cdr_dielectric_fluxes(const Real        
 							   const Vector<Real> a_cdr_gradients,
 							   const Vector<Real> a_rte_fluxes,
 							   const Vector<Real> a_extrap_cdr_fluxes) const {
-
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
+  if(m_extrap_dielectric_ebbc){
+    return a_extrap_cdr_fluxes;
+  }
+  else{
+    return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
+				    a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
+  }
 }
 
 int morrow_zheleznyak::poisson_reaction(const Real a_propensity, const Real a_dt) const{
@@ -933,6 +944,18 @@ void morrow_zheleznyak::parse_domain_bc(){
     }
   }
 }
+
+void morrow_zheleznyak::parse_ebbc(){
+
+  ParmParse pp("morrow_zheleznyak");
+
+  std::string str;
+
+  pp.get("extrap_electrode", str);  m_extrap_electrode_ebbc  = (str == "true") ? true : false;
+  pp.get("extrap_dielectric", str); m_extrap_dielectric_ebbc = (str == "true") ? true : false;
+}
+
+  
 
 void morrow_zheleznyak::parse_reaction_settings(){
   ParmParse pp("morrow_zheleznyak");

@@ -12,6 +12,7 @@
 #include "mfalias.H"
 #include "tags_factory.H"
 #include "units.H"
+#include "memrep.H"
 
 #include <EBArith.H>
 #include <EBAlias.H>
@@ -2828,9 +2829,9 @@ void plasma_engine::write_checkpoint_level(HDF5Handle& a_handle, const int a_lev
 }
 
 void plasma_engine::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("plasma_engine::write_checkpoint_level");
+  CH_TIME("plasma_engine::read_checkpoint_level");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::write_checkpoint_level" << endl;
+    pout() << "plasma_engine::read_checkpoint_level" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];

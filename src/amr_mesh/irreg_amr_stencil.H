@@ -64,7 +64,7 @@ public:
   virtual void apply(LevelData<EBCellFAB>&       a_dst,
 		     const LevelData<EBCellFAB>& a_src,
 		     const int                   a_lvl,
-		     const bool                  a_limit = true) const;
+		     const bool                  a_limit = false) const;
 
   /*!
     @brief Apply stencils to data holder. This replaces original data
@@ -74,7 +74,7 @@ public:
   */
   virtual void apply(LevelData<EBCellFAB>& a_data,
 		     const int             a_lvl,
-		     const bool            a_limit = true) const;
+		     const bool            a_limit = false) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -87,7 +87,7 @@ public:
   virtual void apply(LevelData<BaseIVFAB<Real> >& a_dst,
 		     const LevelData<EBCellFAB>&  a_src,
 		     const int                    a_lvl,
-		     const bool                   a_limit = true) const;
+		     const bool                   a_limit = false) const;
   
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -98,7 +98,7 @@ public:
   */
   virtual void apply(EBAMRCellData&       a_dst,
 		     const EBAMRCellData& a_src,
-		     const bool         a_limit = true) const;
+		     const bool         a_limit = false) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. This replaces original data.
@@ -106,7 +106,7 @@ public:
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
   virtual void apply(EBAMRCellData& a_dst,
-		     const bool   a_limit = true) const;
+		     const bool   a_limit = false) const;
 
   /*!
     @brief Apply the stencils to an existing data holder
@@ -116,7 +116,7 @@ public:
   */
   virtual void apply(EBAMRIVData&         a_dst,
 		     const EBAMRCellData& a_src,
-		     const bool         a_limit = true) const;
+		     const bool         a_limit = false) const;
 
   /*!
     @brief Apply stencils to an existing data holders. This replaces original data
@@ -124,7 +124,7 @@ public:
     @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
   virtual void apply(Vector<EBAMRCellData*>& a_data,
-		     const bool            a_limit = true) const;
+		     const bool            a_limit = false) const;
 
   /*!
     @brief Apply stencils to existing data holders
@@ -134,7 +134,7 @@ public:
   */
   virtual void apply(Vector<EBAMRCellData*>&       a_dst,
 		     const Vector<EBAMRCellData*>& a_src,
-		     const bool                  a_limit = true) const;
+		     const bool                  a_limit = false) const;
 
   /*!
     @brief Apply stencils to existing data holders
@@ -144,7 +144,7 @@ public:
   */
   virtual void apply(Vector<EBAMRIVData*>&         a_dst,
 		     const Vector<EBAMRCellData*>& a_src,
-		     const bool                  a_limit = true) const;
+		     const bool                  a_limit = false) const;
 
   /*!
     @brief Get the stencils over an AMR level

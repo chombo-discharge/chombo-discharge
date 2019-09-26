@@ -9,11 +9,15 @@
 
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
+#include <EBLevelDataOps.H>
 
 #include <ParmParse.H>
 
 bool fast_gshop::s_recursive = true;
 int fast_gshop::s_grow = 4;
+
+std::list<int*> send_buffers;
+std::list<int>  box_count;
 
 fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
 		       const int           a_verbosity,
@@ -191,9 +195,50 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
   boxes.append(regular_boxes);
   boxes.append(irregular_boxes);
 
-  pout() << "fast_gshop::makeGrids_recursive - domain = " << a_domain << "\t num boxes = " << boxes.size() << endl;
+  //  pout() << "fast_gshop::makeGrids_recursive - domain = " << a_domain << "\t num boxes = " << boxes.size() << endl;
 
+  // 1. Original load balance
   a_grids.define(boxes, procs, a_domain);
+#if 0
+
+  // 2. Iterate through the initial grid and check if what we called irregular boxes above are REALLY irregular by calling
+  //    the GeometryShop::InsideOutside function
+  std::list<Box> reg_boxes; // These are LOCAL to each rank
+  std::list<Box> irr_boxes; // These are LOCAL to each rank
+
+  for (DataIterator dit = a_grids.dataIterator(); dit.ok(); ++dit){
+    const Box box = a_grids.get(dit());
+    GeometryService::InOut inout = this->InsideOutside(box, a_domain, m_origin, dx);
+    if(inout == GeometryService::Irregular){
+      irr_boxes.push_back(box);
+    }
+    else{
+      reg_boxes.push_back(box);
+    }
+  }
+
+  // Each rank writes to their MPI buffer std::list<int*> which contains box corners
+  int* send_buffer;
+  int  send_count;
+  int  send_size;
+  send_boxes_parallel(send_buffer, send_size, send_count, irr_boxes); // Linearize boxes onto send buffer
+
+  // Allocate the buffer size
+  int recv_buffer_size;
+  int send_buffer_size = send_count*send_size;
+  MPI_Allreduce(&send_buffer_size, &recv_buffer_size, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+
+  int* recv_buffer = new int[recv_buffer_size];
+  MPI_Gather(send_buffer, send_size, MPI_INT, recv_buffer, send_size, MPI_INT, 0, Chombo_MPI::comm);
+
+
+  // Gather all boxes on this rank
+  const int dest_proc = uniqueProc(SerialTask::compute);
+#endif
+  
+
+  // Compute the size of the receive buffer
+  //  std::cout << send_count << std::endl;
 
 }
 
@@ -330,6 +375,9 @@ void fast_gshop::makeGrids_domainSplit(const ProblemDomain&      a_domain,
   boxes.append(irregular_boxes);
 
   a_grids.define(boxes, procs, a_domain);
+
+
+
   
 #if 0 // Debug
   if(procID() == 0 && dx == m_dx[0]){
@@ -420,4 +468,21 @@ GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
 #else // This code defaults to GeometryShops insideoutside stuff
   return GeometryShop::InsideOutside(a_region, a_domain, a_origin, a_dx);
 #endif
+}
+
+void fast_gshop::send_boxes_parallel(int* a_send_buffer, int& a_send_size, int& a_send_count, const std::list<Box>& a_boxes){
+  a_send_count  = a_boxes.size();
+  a_send_size   = 2*CH_SPACEDIM;
+  a_send_buffer = new int[a_send_count*a_send_size];
+  
+  std::list<Box>::const_iterator it = a_boxes.begin();
+  for (; it!=a_boxes.end(); ++it, a_send_buffer+=a_send_size){
+    Box b = *it;
+    D_TERM6(a_send_buffer[0]=b.smallEnd(0);a_send_buffer[1]=b.bigEnd(0);,
+	    a_send_buffer[2]=b.smallEnd(1);a_send_buffer[3]=b.bigEnd(1);,
+	    a_send_buffer[4]=b.smallEnd(2);a_send_buffer[5]=b.bigEnd(2);,
+	    a_send_buffer[6]=b.smallEnd(3);a_send_buffer[7]=b.bigEnd(3);,
+	    a_send_buffer[8]=b.smallEnd(4);a_send_buffer[9]=b.bigEnd(4);,
+	    a_send_buffer[10]=b.smallEnd(5);a_send_buffer[11]=b.bigEnd(5););
+  }
 }

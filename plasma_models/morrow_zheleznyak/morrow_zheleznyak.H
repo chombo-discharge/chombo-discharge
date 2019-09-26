@@ -104,6 +104,9 @@ protected:
   int m_nminu_idx;      // Negative ion index
   int m_photon1_idx;    // UV photon index
 
+  bool m_extrap_electrode_ebbc;
+  bool m_extrap_dielectric_ebbc;
+
   Real m_background_rate;               // Background ionization
   Real m_townsend2_electrode;           // 2nd Townsend coefficient on electrodes
   Real m_townsend2_dielectric;          // 2nd Townsend coefficient on dielectrics
@@ -186,6 +189,7 @@ protected:
   void parse_gas_params();
   void parse_see();
   void parse_domain_bc();
+  void parse_ebbc();
   void parse_reaction_settings();
   void parse_initial_particles();
   void add_uniform_particles(List<Particle>& a_particles);

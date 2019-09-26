@@ -18,6 +18,7 @@
 #define USE_FAST_VELOCITIES 1
 #define USE_FAST_DIFFUSION  1
 
+#define USE_CENTROID_VELOCITIES 1
 
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";
@@ -2530,6 +2531,14 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
 
     compute_cdr_velocities(velocities, cdr_densities, *a_E[lvl], lvl, a_time);
   }
+
+#if USE_CENTROID_VELOCITIES // Move to centroids???
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->interpolate_to_centroids(*a_velocities[idx], phase::gas);
+  }
+#endif
+
 
   // Average down and interpolate ghost cells
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){

@@ -37,7 +37,7 @@ morrow_zheleznyak.photoionization_efficiency    = 0.1                   # Photo-
 morrow_zheleznyak.photoi_seed                   = 0                     # RNG seed
 morrow_zheleznyak.photoi_f1                     = 2.925E15              # Lower frequency
 morrow_zheleznyak.photoi_f2                     = 3.059E15              # High frequency
-morrow_zheleznyak.photoi_K1                     = 2.1939E-2             # Converted to (mPa)^-1
+morrow_zheleznyak.photoi_K1                     = 2.65E-2               # Converted to (mPa)^-1
 morrow_zheleznyak.photoi_K2                     = 1.5                   # Converted to (mPa)^-1
 
 morrow_zheleznyak.domain_bc_x_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
@@ -46,3 +46,6 @@ morrow_zheleznyak.domain_bc_y_lo                = extrap                # Switch
 morrow_zheleznyak.domain_bc_y_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
 morrow_zheleznyak.domain_bc_z_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
 morrow_zheleznyak.domain_bc_z_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+
+morrow_zheleznyak.extrap_electrode              = true                  # Switch for BC on electrode. 
+morrow_zheleznyak.extrap_dielectric             = false                 # Switch for BC on dielectric.
