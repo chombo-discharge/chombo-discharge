@@ -3445,7 +3445,9 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
     
     this->project_flux(*a_fluxes[i], eb_flux);
   }
-#else // New way of doing this. Extrapolate everything to the BC first. Then compute the flux and project it.
+#else // New way of doing this. Extrapolate everything to the BC first. Then compute the flux and project it. We do this because
+      // extrapolation stencils may have negative weights, and v*n may therefore nonphysically change sign. Better to compute
+      // F = v_extrap*Max(0.0, phi_extrap)
   EBAMRIVData eb_flx; 
   EBAMRIVData eb_vel;
   EBAMRIVData eb_phi;
@@ -3463,6 +3465,8 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
 
       interp_stencils.apply(eb_vel, *a_velocities[idx]);
       interp_stencils.apply(eb_phi, *a_densities[idx]);
+
+      data_ops::floor(eb_phi);
 
       data_ops::set_value(eb_flx, 0.0);
       data_ops::incr(eb_flx, eb_vel, 1.0);
