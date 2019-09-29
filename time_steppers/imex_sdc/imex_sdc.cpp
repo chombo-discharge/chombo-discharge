@@ -1357,7 +1357,7 @@ void imex_sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_states){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->compute_gradient(grad, *a_states[idx]);
+    m_amr->compute_gradient(grad, *a_states[idx], m_cdr->get_phase());
     //    m_amr->average_down(grad, m_cdr->get_phase());
     m_amr->interp_ghost(grad, m_cdr->get_phase());
   }

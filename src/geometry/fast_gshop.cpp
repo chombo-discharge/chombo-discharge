@@ -199,30 +199,90 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
 
   // 1. Original load balance
   a_grids.define(boxes, procs, a_domain);
-#if 0
+  
+#if 1
 
   // 2. Iterate through the initial grid and check if what we called irregular boxes above are REALLY irregular by calling
   //    the GeometryShop::InsideOutside function
   std::list<Box> reg_boxes; // These are LOCAL to each rank
   std::list<Box> irr_boxes; // These are LOCAL to each rank
 
+  Vector<Box> test_boxes;
+
   for (DataIterator dit = a_grids.dataIterator(); dit.ok(); ++dit){
     const Box box = a_grids.get(dit());
     GeometryService::InOut inout = this->InsideOutside(box, a_domain, m_origin, dx);
     if(inout == GeometryService::Irregular){
       irr_boxes.push_back(box);
+      test_boxes.push_back(box);
     }
     else{
       reg_boxes.push_back(box);
     }
   }
 
-  // Each rank writes to their MPI buffer std::list<int*> which contains box corners
-  int* send_buffer;
-  int  send_count;
-  int  send_size;
+  gather_boxes_parallel(test_boxes);
+
+  // 3. We must now gather boxes on each rank so that everyone has the same grid view.
+
+  // 3 Linearize the memory to be sent
+  int* send_buffer;  // Buffer that gets sent. This is the linearized version of irr_boxes
+  int  send_count;   // Number of elemenets that this rank sends. Equal to irr_boxes.size()
+  int  send_size;    // Size of each message. Equal to 2*SpaceDim. 
   send_boxes_parallel(send_buffer, send_size, send_count, irr_boxes); // Linearize boxes onto send buffer
 
+
+  // 4. Compute the total number of elements received. send_size is the same for every process so we may compute
+  //    the message sizes from each rank immediately. 
+  int* proc_count = new int[numProc()];
+  MPI_Allgather(&send_count, 1, MPI_INT, proc_count, 1, MPI_INT, Chombo_MPI::comm);
+  for (int i = 0; i < numProc(); i++){
+    proc_count[i] *= send_size;
+  }
+
+  // 5. Compute the offsets
+  int* offsets = new int[numProc()];
+  offsets[0] = 0;
+  for (int i = 0; i < numProc()-1; i++){
+    offsets[i+1] = offsets[i] + proc_count[i];
+  }
+
+#if 0 // Debug
+  for (int i = 0; i < numProc(); i++){
+    if(procID() == 0) std::cout << "procID = " << i << "\t offset = " << offsets[i] << std::endl;
+  }
+#endif
+
+  // 6. Allocate the receive buffer
+  int total_count = 0;
+  for (int i = 0; i < numProc(); i++){
+    total_count += proc_count[i];
+  }
+  //  std::cout << total_count << std::endl;
+  int* recv_buffer = (int*) malloc(total_count*sizeof(int));
+
+  //  std::cout << "rank = " << procID() << "\t send_count = " << send_count << std::endl;
+
+  //  std::cout << "rank = " << procID() << "\t total_count = " << total_count << std::endl;
+  if(procID() == 0){
+    for (int i = 0; i < numProc(); i++){
+      //      std::cout << proc_count[i] << std::endl;
+      //      std::cout << offsets[i] << std::endl;
+    }
+  }
+
+  //  std::cout << send_buffer[0] << std::endl;
+  //  int a = 1;
+  MPI_Allgatherv(send_buffer, send_count*send_size, MPI_INT, recv_buffer, proc_count, offsets, MPI_INT, Chombo_MPI::comm);
+
+  // for (int i = 0; i < numProc(); i++){
+  //   std::cout << "rank = " << procID() << " tcount from rank " << i << " = " << proc_count[i] << std::endl;
+  // }
+  //  std::cout << "rank " << procID() << " sent " << send_count << " and received " << total_count << std::endl;
+      
+  
+  
+#if 0
   // Allocate the buffer size
   int recv_buffer_size;
   int send_buffer_size = send_count*send_size;
@@ -235,11 +295,16 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
   // Gather all boxes on this rank
   const int dest_proc = uniqueProc(SerialTask::compute);
 #endif
+#endif
   
 
   // Compute the size of the receive buffer
   //  std::cout << send_count << std::endl;
-
+#if 0
+  MPI_Barrier(Chombo_MPI::comm);
+  MayDay::Abort("stop here");
+#endif
+  
 }
 
 void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
@@ -470,7 +535,7 @@ GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
 #endif
 }
 
-void fast_gshop::send_boxes_parallel(int* a_send_buffer, int& a_send_size, int& a_send_count, const std::list<Box>& a_boxes){
+void fast_gshop::send_boxes_parallel(int*& a_send_buffer, int& a_send_size, int& a_send_count, const std::list<Box>& a_boxes){
   a_send_count  = a_boxes.size();
   a_send_size   = 2*CH_SPACEDIM;
   a_send_buffer = new int[a_send_count*a_send_size];
@@ -484,5 +549,51 @@ void fast_gshop::send_boxes_parallel(int* a_send_buffer, int& a_send_size, int& 
 	    a_send_buffer[6]=b.smallEnd(3);a_send_buffer[7]=b.bigEnd(3);,
 	    a_send_buffer[8]=b.smallEnd(4);a_send_buffer[9]=b.bigEnd(4);,
 	    a_send_buffer[10]=b.smallEnd(5);a_send_buffer[11]=b.bigEnd(5););
+  }
+}
+
+
+void fast_gshop::gather_boxes_parallel(Vector<Box>& a_boxes){
+
+  // 1. Linearize local boxes
+  int send_size    = 2*CH_SPACEDIM;                 // Message size for one box
+  int send_count   = a_boxes.size()*send_size;      // Number of elements sent from this rank
+  int* send_buffer = new int[send_count*send_size]; // Send buffer for this rank
+
+  for (int i = 0; i < a_boxes.size(); i++, send_buffer+=send_size){
+    const Box& b = a_boxes[i];
+    D_TERM6(send_buffer[0] =b.smallEnd(0); send_buffer[1] =b.bigEnd(0);,
+	    send_buffer[2] =b.smallEnd(1); send_buffer[3] =b.bigEnd(1);,
+	    send_buffer[4] =b.smallEnd(2); send_buffer[5] =b.bigEnd(2);,
+	    send_buffer[6] =b.smallEnd(3); send_buffer[7] =b.bigEnd(3);,
+	    send_buffer[8] =b.smallEnd(4); send_buffer[9] =b.bigEnd(4);,
+	    send_buffer[10]=b.smallEnd(5); send_buffer[11]=b.bigEnd(5););
+  }
+
+  // 2. Get the number of elements sent from each rank
+  int* send_counts = new int[numProc()];
+  MPI_Allgather(&send_count, 1, MPI_INT, send_counts, 1, MPI_INT, Chombo_MPI::comm);
+
+  // 3. Compute offsets
+  int* offsets = new int[numProc()];
+  offsets[0] = 0;
+  for (int i = 0; i < numProc()-1; i++){
+    offsets[i+1] = offsets[i] + send_counts[i];
+  }
+
+  // 4. Allocate storage for total buffer size
+  int total_count = 0;
+  for (int i = 0; i < numProc(); i++){
+    total_count += send_counts[i];
+  }
+  int* recv_buffer = new int[total_count];
+
+  // 5. MPI send
+  MPI_Allgatherv(send_buffer, send_count, MPI_INT, recv_buffer, send_counts, offsets, MPI_INT, Chombo_MPI::comm);
+
+  // 6. Delinearize buffer, make it into boxes
+  a_boxes.resize(0);
+  for (int i = 0; i < total_count; i++, recv_buffer+=send_size){
+    
   }
 }

@@ -113,7 +113,13 @@ protected:
   /*!
     @brief Send boxes in parallel
   */
-  void send_boxes_parallel(int* a_send_buffer, int& send_size, int& a_send_count, const std::list<Box>& a_boxes);
+  void send_boxes_parallel(int*& a_send_buffer, int& send_size, int& a_send_count, const std::list<Box>& a_boxes);
+
+  /*!
+    @brief Gather boxes in parallel.
+    @details On input, a_boxes contains the local boxes. On output, boxes have been gather on every rank
+  */
+  void gather_boxes_parallel(Vector<Box>& a_boxes);
 
 
 		 

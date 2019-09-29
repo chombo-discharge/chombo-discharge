@@ -3466,7 +3466,7 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
       interp_stencils.apply(eb_vel, *a_velocities[idx]);
       interp_stencils.apply(eb_phi, *a_densities[idx]);
 
-      data_ops::floor(eb_phi);
+      data_ops::floor(eb_phi, 0.0);
 
       data_ops::set_value(eb_flx, 0.0);
       data_ops::incr(eb_flx, eb_vel, 1.0);
