@@ -8,10 +8,14 @@
 #ifndef _MEMREP_
 #define _MEMREP_
 
+#include "RealVect.H"
+
 class memrep {
 public:
   
   static void get_max_min_memory();
+
+  static void get_max_min_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed);
 };
 
 #endif

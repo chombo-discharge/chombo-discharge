@@ -19,8 +19,9 @@
 class fast_gshop : public GeometryShop {
 public:
 
-  static bool s_recursive;  // Use recursive box division in order to lighten the load on Copier
-  static int  s_grow;       // Used to grow boxes when testing for real/covered/other. Ideally, should equal EBIS ghosts
+  static bool s_irregular_balance; // Balance with irregular grid 
+  static bool s_recursive;         // Use recursive box division in order to lighten the load on Copier
+  static int  s_grow;              // Used to grow boxes when testing for real/covered/other. Ideally, should equal EBIS ghosts
 
   fast_gshop(const BaseIF&       a_localGeom,
 	     const int           a_verbosity,
@@ -39,17 +40,17 @@ public:
 		 const int&                a_maxIrregGridSize);
 
 
-  void set_bounded_boxes(const Vector<real_box> a_bboxes);
+  void set_bounded_voxels(const Vector<real_box> a_bboxes);
   
-  void set_regular_boxes(const Vector<real_box> a_regboxes);
+  void set_regular_voxels(const Vector<real_box> a_regboxes);
   
-  void set_covered_boxes(const Vector<real_box> a_regboxes);
+  void set_covered_voxels(const Vector<real_box> a_regboxes);
 
-  void add_bounded_box(const real_box a_rbox);
+  void add_bounded_voxel(const real_box a_rbox);
 
-  void add_regular_box(const real_box a_rbox);
+  void add_regular_voxel(const real_box a_rbox);
 
-  void add_covered_box(const real_box a_rbox);
+  void add_covered_voxel(const real_box a_rbox);
 
   GeometryService::InOut InsideOutside(const Box&           a_region,
 				       const ProblemDomain& a_domain,
@@ -65,17 +66,17 @@ protected:
   Vector<Real>          m_dx;      // Index 0 is the finest EBIS level
   Vector<ProblemDomain> m_domains; // Index 0 is the finest EBIS level
 
-  Vector<real_box> m_bounded_boxes; // Bounded boxes
-  Vector<real_box> m_covered_boxes; // Boxes that are known to be fully regular
-  Vector<real_box> m_regular_boxes; // Boxes that are known to be fully covered
+  Vector<real_box> m_bounded_voxels; // Bounded boxes
+  Vector<real_box> m_covered_voxels; // Boxes that are known to be fully regular
+  Vector<real_box> m_regular_voxels; // Boxes that are known to be fully covered
 
   /*!
-    @brief Check if a box is regular, i.e. lies COMPLETELY within one of m_regular_boxes
+    @brief Check if a box is regular, i.e. lies COMPLETELY within one of m_regular_voxels
   */
   bool is_regular_box(const real_box& a_box) const;
 
   /*!
-    @brief Check if a box is fully covered, i.e. lies COMPLETELY within one of m_covered_boxes
+    @brief Check if a box is fully covered, i.e. lies COMPLETELY within one of m_covered_voxels
   */
   bool is_covered_box(const real_box& a_box) const;
 
@@ -120,10 +121,6 @@ protected:
     @details On input, a_boxes contains the local boxes. On output, boxes have been gather on every rank
   */
   void gather_boxes_parallel(Vector<Box>& a_boxes);
-
-
-		 
-  
 };
 
 #endif

@@ -13,11 +13,10 @@
 
 #include <ParmParse.H>
 
-bool fast_gshop::s_recursive = true;
-int fast_gshop::s_grow = 4;
 
-std::list<int*> send_buffers;
-std::list<int>  box_count;
+bool fast_gshop::s_irregular_balance = true;
+bool fast_gshop::s_recursive         = true;
+int fast_gshop::s_grow               = 4;
 
 fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
 		       const int           a_verbosity,
@@ -56,74 +55,37 @@ fast_gshop::fast_gshop(const BaseIF&       a_localGeom,
   }
 
 
-  m_bounded_boxes.resize(0);
-  m_regular_boxes.resize(0);
-  m_covered_boxes.resize(0);
-  
-#if 0 // Debug code
-  ParmParse pp("devel");
-  int use_bbox = 0;
-  pp.get("use_bbox", use_bbox);
-  if(use_bbox != 0){
-
-
-
-    // Evertying to regular
-    m_regular_boxes.push_back(real_box(-RealVect::Unit, RealVect::Unit));
-
-    // Except this boxc
-
-    // Everything below needle
-#if 0
-    Real radius = 1.E-3;
-    RealVect lo = RealVect::Zero;
-    RealVect hi = RealVect(0, 0, 1);
-
-    lo = lo - radius*1.001*RealVect::Unit;
-    hi = hi + radius*1.001*RealVect::Unit;
-
-    //    m_bounded_boxes.push_back(real_box(lo, hi));
-#endif
-  }
-
-#endif
+  m_bounded_voxels.resize(0);
+  m_regular_voxels.resize(0);
+  m_covered_voxels.resize(0);
 }
 
 fast_gshop::~fast_gshop(){
 
 }
 
-void fast_gshop::set_bounded_boxes(const Vector<real_box> a_bounded_boxes){
-  m_bounded_boxes = a_bounded_boxes;
+void fast_gshop::set_bounded_voxels(const Vector<real_box> a_bounded_voxels){
+  m_bounded_voxels = a_bounded_voxels;
 }
 
-void fast_gshop::set_regular_boxes(const Vector<real_box> a_regular_boxes){
-  m_regular_boxes = a_regular_boxes;
-
-  
-#if 0
-  std::cout << m_regular_boxes.size() << std::endl;
-#endif
+void fast_gshop::set_regular_voxels(const Vector<real_box> a_regular_voxels){
+  m_regular_voxels = a_regular_voxels;
 }
 
-void fast_gshop::set_covered_boxes(const Vector<real_box> a_covered_boxes){
-
-  m_covered_boxes = a_covered_boxes;
-#if 0
-    std::cout << m_covered_boxes.size() << std::endl;
-#endif
+void fast_gshop::set_covered_voxels(const Vector<real_box> a_covered_voxels){
+  m_covered_voxels = a_covered_voxels;
 }
 
-void fast_gshop::add_bounded_box(const real_box a_rbox){
-  m_bounded_boxes.push_back(a_rbox);
+void fast_gshop::add_bounded_voxel(const real_box a_rbox){
+  m_bounded_voxels.push_back(a_rbox);
 }
 
-void fast_gshop::add_regular_box(const real_box a_rbox){
-  m_regular_boxes.push_back(a_rbox);
+void fast_gshop::add_regular_voxel(const real_box a_rbox){
+  m_regular_voxels.push_back(a_rbox);
 }
 
-void fast_gshop::add_covered_box(const real_box a_rbox){
-  m_covered_boxes.push_back(a_rbox);
+void fast_gshop::add_covered_voxel(const real_box a_rbox){
+  m_covered_voxels.push_back(a_rbox);
 }
 
 void fast_gshop::makeGrids(const ProblemDomain&      a_domain,
@@ -145,7 +107,7 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
 				     const int&                a_maxIrregGridSize){
 
 
-  // 1. Find the resolution that corresponds to a_domain
+  // Find the resolution that corresponds to a_domain
   Real dx;
   bool found_dx;
   for (int lvl = 0 ; lvl < m_domains.size(); lvl++){
@@ -156,29 +118,18 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
     }
   }
 
-  // 1.1 Debug
-  if(!found_dx){
-    MayDay::Abort("fast_gshop::makeGrids_recursive - logic bust");
-  }
+  if(!found_dx) MayDay::Abort("fast_gshop::makeGrids_recursive - logic bust");
 
   Vector<Box> regular_boxes;
   Vector<Box> irregular_boxes;
+  Vector<Box> boxes;
 
   Vector<int> regular_procs;
   Vector<int> irregular_procs;
+  Vector<int> procs;
 
-  // Make boxes recursively
-#if 0
-  pout() << "starting make boxes" << endl;
-  pout() << "dx = " << dx << endl;
-  pout() << "domain = " << a_domain.domainBox() << endl;
-#endif
+  // Make boxes recursively and load balance them
   makeBoxes(regular_boxes, irregular_boxes, a_domain.domainBox(), a_domain, dx, a_maxGridSize);
-#if 0
-  pout() << "end make boxes" << endl;
-  pout() << "num boxes = " << regular_boxes.size() + irregular_boxes.size() << endl;
-#endif
-
 
   mortonOrdering(regular_boxes);
   mortonOrdering(irregular_boxes);
@@ -186,125 +137,58 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
   LoadBalance(regular_procs, regular_boxes);
   LoadBalance(irregular_procs, irregular_boxes);
 
-  Vector<int> procs;
-  Vector<Box> boxes;
-  
+  // Define grids based on bounding voxels 
   procs.append(regular_procs);
   procs.append(irregular_procs);
 
   boxes.append(regular_boxes);
   boxes.append(irregular_boxes);
 
-  //  pout() << "fast_gshop::makeGrids_recursive - domain = " << a_domain << "\t num boxes = " << boxes.size() << endl;
-
-  // 1. Original load balance
   a_grids.define(boxes, procs, a_domain);
+
+  //  pout() << "fast_gshop::makeGrids_recursive - domain = " << a_domain << "\t num boxes = " << boxes.size() << endl;
   
-#if 1
+  // 2. If we're load balancing with the irregular boxes, each grid now looks through his current boxes and reassign these
+  //    by calling the GeometryShop::InsideOutside function for boxes that intersect with one of the bounded voxels
+  if(s_irregular_balance){ 
 
-  // 2. Iterate through the initial grid and check if what we called irregular boxes above are REALLY irregular by calling
-  //    the GeometryShop::InsideOutside function
-  std::list<Box> reg_boxes; // These are LOCAL to each rank
-  std::list<Box> irr_boxes; // These are LOCAL to each rank
+    Vector<Box> reg_boxes; // Currently local to each rank
+    Vector<Box> irr_boxes; // Currently local to each rank
 
-  Vector<Box> test_boxes;
-
-  for (DataIterator dit = a_grids.dataIterator(); dit.ok(); ++dit){
-    const Box box = a_grids.get(dit());
-    GeometryService::InOut inout = this->InsideOutside(box, a_domain, m_origin, dx);
-    if(inout == GeometryService::Irregular){
-      irr_boxes.push_back(box);
-      test_boxes.push_back(box);
+    for (DataIterator dit = a_grids.dataIterator(); dit.ok(); ++dit){
+      const Box box = a_grids.get(dit());
+      GeometryService::InOut inout = this->InsideOutside(box, a_domain, m_origin, dx);
+      if(inout == GeometryService::Irregular){
+	irr_boxes.push_back(box);
+      }
+      else{
+	reg_boxes.push_back(box);
+      }
     }
-    else{
-      reg_boxes.push_back(box);
-    }
+    
+    // Gather the irregular and regular boxes
+    gather_boxes_parallel(irr_boxes);
+    gather_boxes_parallel(reg_boxes);
+
+    // Load balance again
+    Vector<int> irr_procs;
+    Vector<int> reg_procs;
+
+    LoadBalance(reg_procs, reg_boxes);
+    LoadBalance(irr_procs, irr_boxes);
+
+    boxes.resize(0);
+    procs.resize(0);
+
+    boxes.append(reg_boxes);
+    boxes.append(irr_boxes);
+
+    procs.append(reg_procs);
+    procs.append(irr_procs);
+
+    a_grids = DisjointBoxLayout();
+    a_grids.define(boxes, procs, a_domain);
   }
-
-  gather_boxes_parallel(test_boxes);
-
-  // 3. We must now gather boxes on each rank so that everyone has the same grid view.
-
-  // 3 Linearize the memory to be sent
-  int* send_buffer;  // Buffer that gets sent. This is the linearized version of irr_boxes
-  int  send_count;   // Number of elemenets that this rank sends. Equal to irr_boxes.size()
-  int  send_size;    // Size of each message. Equal to 2*SpaceDim. 
-  send_boxes_parallel(send_buffer, send_size, send_count, irr_boxes); // Linearize boxes onto send buffer
-
-
-  // 4. Compute the total number of elements received. send_size is the same for every process so we may compute
-  //    the message sizes from each rank immediately. 
-  int* proc_count = new int[numProc()];
-  MPI_Allgather(&send_count, 1, MPI_INT, proc_count, 1, MPI_INT, Chombo_MPI::comm);
-  for (int i = 0; i < numProc(); i++){
-    proc_count[i] *= send_size;
-  }
-
-  // 5. Compute the offsets
-  int* offsets = new int[numProc()];
-  offsets[0] = 0;
-  for (int i = 0; i < numProc()-1; i++){
-    offsets[i+1] = offsets[i] + proc_count[i];
-  }
-
-#if 0 // Debug
-  for (int i = 0; i < numProc(); i++){
-    if(procID() == 0) std::cout << "procID = " << i << "\t offset = " << offsets[i] << std::endl;
-  }
-#endif
-
-  // 6. Allocate the receive buffer
-  int total_count = 0;
-  for (int i = 0; i < numProc(); i++){
-    total_count += proc_count[i];
-  }
-  //  std::cout << total_count << std::endl;
-  int* recv_buffer = (int*) malloc(total_count*sizeof(int));
-
-  //  std::cout << "rank = " << procID() << "\t send_count = " << send_count << std::endl;
-
-  //  std::cout << "rank = " << procID() << "\t total_count = " << total_count << std::endl;
-  if(procID() == 0){
-    for (int i = 0; i < numProc(); i++){
-      //      std::cout << proc_count[i] << std::endl;
-      //      std::cout << offsets[i] << std::endl;
-    }
-  }
-
-  //  std::cout << send_buffer[0] << std::endl;
-  //  int a = 1;
-  MPI_Allgatherv(send_buffer, send_count*send_size, MPI_INT, recv_buffer, proc_count, offsets, MPI_INT, Chombo_MPI::comm);
-
-  // for (int i = 0; i < numProc(); i++){
-  //   std::cout << "rank = " << procID() << " tcount from rank " << i << " = " << proc_count[i] << std::endl;
-  // }
-  //  std::cout << "rank " << procID() << " sent " << send_count << " and received " << total_count << std::endl;
-      
-  
-  
-#if 0
-  // Allocate the buffer size
-  int recv_buffer_size;
-  int send_buffer_size = send_count*send_size;
-  MPI_Allreduce(&send_buffer_size, &recv_buffer_size, 1, MPI_INT, MPI_SUM, Chombo_MPI::comm);
-
-  int* recv_buffer = new int[recv_buffer_size];
-  MPI_Gather(send_buffer, send_size, MPI_INT, recv_buffer, send_size, MPI_INT, 0, Chombo_MPI::comm);
-
-
-  // Gather all boxes on this rank
-  const int dest_proc = uniqueProc(SerialTask::compute);
-#endif
-#endif
-  
-
-  // Compute the size of the receive buffer
-  //  std::cout << send_count << std::endl;
-#if 0
-  MPI_Barrier(Chombo_MPI::comm);
-  MayDay::Abort("stop here");
-#endif
-  
 }
 
 void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
@@ -334,7 +218,7 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
     const bool covered  = is_covered_box(rbox);
     const bool bounded  = is_bounded_box(rbox);
 
-    if((regular || covered) && !bounded && length < 1024){
+    if((regular || covered) && !bounded && length){
 #if 0
       pout() << "pushing regular box = " << rbox.get_lo() << "\t" << rbox.get_hi() << endl;
       pout() << "dx = " << a_dx << endl;
@@ -361,8 +245,6 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
     }
   }
   else{
-    // Just put them somewhere, not important right now
-    //    pout() << "pushing irregular box" << endl;
     a_irreg_boxes.push_back(a_region);
   }
 }
@@ -440,25 +322,14 @@ void fast_gshop::makeGrids_domainSplit(const ProblemDomain&      a_domain,
   boxes.append(irregular_boxes);
 
   a_grids.define(boxes, procs, a_domain);
-
-
-
-  
-#if 0 // Debug
-  if(procID() == 0 && dx == m_dx[0]){
-    for (int i = 0; i < irregular_boxes.size(); i++){
-      std::cout << i << "\t" << irregular_procs[i] << std::endl;
-    }
-  }
-#endif
 }
 
 bool fast_gshop::is_covered_box(const real_box& a_rbox) const {
 
   bool is_covered = false;
 
-  for(int ibox = 0; ibox < m_covered_boxes.size(); ibox++){
-    const real_box& covered_box = m_covered_boxes[ibox];
+  for(int ibox = 0; ibox < m_covered_voxels.size(); ibox++){
+    const real_box& covered_box = m_covered_voxels[ibox];
 
     if(covered_box.is_box_inside(a_rbox)){
       is_covered = true;
@@ -473,8 +344,8 @@ bool fast_gshop::is_regular_box(const real_box& a_rbox) const {
 
   bool is_regular = false;
   
-  for(int ibox = 0; ibox < m_regular_boxes.size(); ibox++){
-    const real_box& regular_box = m_regular_boxes[ibox];
+  for(int ibox = 0; ibox < m_regular_voxels.size(); ibox++){
+    const real_box& regular_box = m_regular_voxels[ibox];
 
     const bool inside_box = regular_box.is_box_inside(a_rbox);
     if(inside_box){
@@ -482,8 +353,6 @@ bool fast_gshop::is_regular_box(const real_box& a_rbox) const {
       break;
     }
   }
-  
-  //  std::cout << is_regular << "\t" << m_regular_boxes[0].get_lo() << "\t" << m_regular_boxes[0].get_hi() << std::endl;
 
   return is_regular;
 }
@@ -492,8 +361,8 @@ bool fast_gshop::is_bounded_box(const real_box& a_rbox) const {
 
   bool is_bbox = false;
 
-  for(int ibox = 0; ibox < m_bounded_boxes.size(); ibox++){
-    const real_box& bbox = m_bounded_boxes[ibox];
+  for(int ibox = 0; ibox < m_bounded_voxels.size(); ibox++){
+    const real_box& bbox = m_bounded_voxels[ibox];
 
     if(bbox.intersect(a_rbox)){
       is_bbox = true;
@@ -520,7 +389,6 @@ GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
   const bool covered = is_covered_box(rbox);
   const bool bounded = is_bounded_box(rbox);
 
-#if 1 // Original code
   if(regular && !bounded){
     return GeometryService::Regular;
   }
@@ -530,26 +398,8 @@ GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
   else{
     return GeometryShop::InsideOutside(a_region, a_domain, a_origin, a_dx);
   }
-#else // This code defaults to GeometryShops insideoutside stuff
-  return GeometryShop::InsideOutside(a_region, a_domain, a_origin, a_dx);
-#endif
-}
-
-void fast_gshop::send_boxes_parallel(int*& a_send_buffer, int& a_send_size, int& a_send_count, const std::list<Box>& a_boxes){
-  a_send_count  = a_boxes.size();
-  a_send_size   = 2*CH_SPACEDIM;
-  a_send_buffer = new int[a_send_count*a_send_size];
-  
-  std::list<Box>::const_iterator it = a_boxes.begin();
-  for (; it!=a_boxes.end(); ++it, a_send_buffer+=a_send_size){
-    Box b = *it;
-    D_TERM6(a_send_buffer[0]=b.smallEnd(0);a_send_buffer[1]=b.bigEnd(0);,
-	    a_send_buffer[2]=b.smallEnd(1);a_send_buffer[3]=b.bigEnd(1);,
-	    a_send_buffer[4]=b.smallEnd(2);a_send_buffer[5]=b.bigEnd(2);,
-	    a_send_buffer[6]=b.smallEnd(3);a_send_buffer[7]=b.bigEnd(3);,
-	    a_send_buffer[8]=b.smallEnd(4);a_send_buffer[9]=b.bigEnd(4);,
-	    a_send_buffer[10]=b.smallEnd(5);a_send_buffer[11]=b.bigEnd(5););
-  }
+  // This code defaults to GeometryShops insideoutside stuff
+  // return GeometryShop::InsideOutside(a_region, a_domain, a_origin, a_dx);
 }
 
 
@@ -559,7 +409,9 @@ void fast_gshop::gather_boxes_parallel(Vector<Box>& a_boxes){
   int send_size    = 2*CH_SPACEDIM;                 // Message size for one box
   int send_count   = a_boxes.size()*send_size;      // Number of elements sent from this rank
   int* send_buffer = new int[send_count*send_size]; // Send buffer for this rank
+  int* send_buf2   = send_buffer;                   // Backup address. Going to monkey with pointer increments on send buffer
 
+  // Linearize a_boxes onto send_buffer
   for (int i = 0; i < a_boxes.size(); i++, send_buffer+=send_size){
     const Box& b = a_boxes[i];
     D_TERM6(send_buffer[0] =b.smallEnd(0); send_buffer[1] =b.bigEnd(0);,
@@ -569,6 +421,8 @@ void fast_gshop::gather_boxes_parallel(Vector<Box>& a_boxes){
 	    send_buffer[8] =b.smallEnd(4); send_buffer[9] =b.bigEnd(4);,
 	    send_buffer[10]=b.smallEnd(5); send_buffer[11]=b.bigEnd(5););
   }
+  send_buffer = send_buf2; // Revert point to start of array
+
 
   // 2. Get the number of elements sent from each rank
   int* send_counts = new int[numProc()];
@@ -593,7 +447,20 @@ void fast_gshop::gather_boxes_parallel(Vector<Box>& a_boxes){
 
   // 6. Delinearize buffer, make it into boxes
   a_boxes.resize(0);
-  for (int i = 0; i < total_count; i++, recv_buffer+=send_size){
-    
+  int* recv_buf2 = recv_buffer; // Going to monkey with pointer increments again
+  for (int i = 0; i < total_count/send_size; i++, recv_buffer+=send_size){
+    IntVect lo, hi;
+    D_TERM6(lo[0] = recv_buffer[0];  hi[0] = recv_buffer[1];,
+	    lo[1] = recv_buffer[2];  hi[1] = recv_buffer[3];,
+	    lo[2] = recv_buffer[4];  hi[2] = recv_buffer[5];,
+	    lo[3] = recv_buffer[6];  hi[3] = recv_buffer[7];,
+	    lo[4] = recv_buffer[8];  hi[4] = recv_buffer[9];,
+	    lo[5] = recv_buffer[10]; hi[5] = recv_buffer[11];);
+
+    a_boxes.push_back(Box(lo, hi));
   }
+  recv_buffer = recv_buf2;
+
+  delete recv_buffer;
+  delete send_buffer;
 }

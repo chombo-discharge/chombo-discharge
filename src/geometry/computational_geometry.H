@@ -148,14 +148,14 @@ protected:
   RefCountedPtr<BaseIF> m_sol_if;
 
   // Voxels for gas phase
-  Vector<real_box> m_regular_boxes_gas;
-  Vector<real_box> m_covered_boxes_gas;
-  Vector<real_box> m_bounded_boxes_gas;
+  Vector<real_box> m_regular_voxels_gas;
+  Vector<real_box> m_covered_voxels_gas;
+  Vector<real_box> m_bounded_voxels_gas;
 
   // Voxels for solid phase
-  Vector<real_box> m_regular_boxes_sol;
-  Vector<real_box> m_covered_boxes_sol;
-  Vector<real_box> m_bounded_boxes_sol;
+  Vector<real_box> m_regular_voxels_sol;
+  Vector<real_box> m_covered_voxels_sol;
+  Vector<real_box> m_bounded_voxels_sol;
 
   /*!
     @brief Geometry server for gas phase

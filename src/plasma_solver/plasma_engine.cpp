@@ -1823,13 +1823,25 @@ void plasma_engine::setup_geometry_only(){
   }
 
   this->get_geom_tags();       // Get geometric tags.
+#if 1 // Remove this code
+  pout() << "after getting tags" << endl;
+  memrep::get_max_min_memory();
+#endif
   //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   
   Vector<IntVectSet> tags = m_geom_tags;
   const int a_lmin = 0;
   const int a_lmax = m_geom_tag_depth;
   m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
+#if 1 // Remove this code
+  pout() << "after build grids" << endl;
+  memrep::get_max_min_memory();
+#endif
   m_amr->define_eblevelgrid(a_lmin);
+#if 1 // Remove this code
+  pout() << "after levelgrid" << endl;
+  memrep::get_max_min_memory();
+#endif
   //  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
   if(m_verbosity > 0){

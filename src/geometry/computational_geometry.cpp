@@ -92,7 +92,7 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
 		 geoservers,
 		 a_nCellMax,
 		 a_maxCoarsen);
-#if 0 // Debug
+#if 1 // Debug
   memrep::get_max_min_memory();
 #endif
 
@@ -149,9 +149,9 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
     if(s_use_new_gshop){
       fast_gshop* gshop = new fast_gshop(*m_gas_if, 0, a_dx, a_origin, a_finestDomain, s_thresh);
 
-      gshop->set_regular_boxes(m_regular_boxes_gas);
-      gshop->set_covered_boxes(m_covered_boxes_gas);
-      gshop->set_bounded_boxes(m_bounded_boxes_gas);
+      gshop->set_regular_voxels(m_regular_voxels_gas);
+      gshop->set_covered_voxels(m_covered_voxels_gas);
+      gshop->set_bounded_voxels(m_bounded_voxels_gas);
     
       a_geoserver = static_cast<GeometryService*> (gshop);
     }
@@ -193,9 +193,9 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
 
     if(s_use_new_gshop){
       fast_gshop* gshop = new fast_gshop(*m_sol_if, 0, a_dx, a_origin, a_finestDomain, s_thresh);
-      gshop->set_regular_boxes(m_regular_boxes_sol);
-      gshop->set_covered_boxes(m_covered_boxes_sol);
-      gshop->set_bounded_boxes(m_bounded_boxes_sol);
+      gshop->set_regular_voxels(m_regular_voxels_sol);
+      gshop->set_covered_voxels(m_covered_voxels_sol);
+      gshop->set_bounded_voxels(m_bounded_voxels_sol);
     
       a_geoserver = static_cast<GeometryService*> (gshop);
     }

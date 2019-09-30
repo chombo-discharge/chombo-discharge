@@ -56,12 +56,14 @@ rod_sphere::rod_sphere(){
 
   // Check if we should use the new gshop functionality
   bool new_gshop = false;
+  bool gshop_mem = false;
   pp.get("use_new_gshop", str);
   const bool use_new_gshop = (str == "true") ? true : false;
 
   // Make the bounding boxes for fast gshop implementation
   if(use_new_gshop){
     computational_geometry::s_use_new_gshop = true;
+
     
     RealVect lo, hi;
     for (int dir = 0; dir < SpaceDim; dir++){
@@ -72,14 +74,14 @@ rod_sphere::rod_sphere(){
     real_box rod_gas(lo-elec_radius*RealVect::Unit, hi+elec_radius*RealVect::Unit);
     real_box sph_gas(centerD-2*radius*RealVect::Unit, centerD+2*radius*RealVect::Unit);
 
-    m_regular_boxes_gas.push_back(reg_gas);
-    if(has_electrode)  m_bounded_boxes_gas.push_back(rod_gas);
-    if(has_dielectric) m_bounded_boxes_gas.push_back(sph_gas);
+    m_regular_voxels_gas.push_back(reg_gas);
+    if(has_electrode)  m_bounded_voxels_gas.push_back(rod_gas);
+    if(has_dielectric) m_bounded_voxels_gas.push_back(sph_gas);
 
 
     if(has_dielectric){
-      m_covered_boxes_sol.push_back(reg_gas);
-      m_bounded_boxes_sol.push_back(sph_gas);
+      m_covered_voxels_sol.push_back(reg_gas);
+      m_bounded_voxels_sol.push_back(sph_gas);
     }
   }
 }
