@@ -697,6 +697,11 @@ protected:
   virtual void write_plot_file();
 
   /*!
+    @brief Write the memory usage to file
+  */
+  virtual void write_memory_usage();
+
+  /*!
     @brief Write a checkpoint file
   */
   virtual void write_checkpoint_file();

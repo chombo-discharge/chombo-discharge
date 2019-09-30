@@ -1095,6 +1095,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       if(m_dt < 1.0E-5*init_dt){
 	m_step++;
 
+	this->write_memory_usage();
 #ifdef CH_USE_HDF5
 	this->write_plot_file();
 	this->write_checkpoint_file();
@@ -1146,6 +1147,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	if(m_verbosity > 2){
 	  pout() << "plasma_engine::run -- Writing plot file" << endl;
 	}
+	this->write_memory_usage();
 	this->write_plot_file();
       }
 
@@ -1484,7 +1486,7 @@ void plasma_engine::parse_output_directory(){
       std::cout << "plasma_engine::set_output_directory - master could not create checkpoint directory" << std::endl;
     }
 
-    cmd = "mkdir -p " + m_output_dir + "/proc";
+    cmd = "mkdir -p " + m_output_dir + "/mpi";
     success = system(cmd.c_str());
     if(success != 0){
       std::cout << "plasma_engine::set_output_directory - master could not create proc directory" << std::endl;
@@ -1789,6 +1791,7 @@ void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const 
       this->setup_fresh(a_init_regrids);
 #ifdef CH_USE_HDF5
       if(m_plot_interval > 0){
+	this->write_memory_usage();
 	this->write_plot_file();
       }
 #endif
@@ -1821,33 +1824,26 @@ void plasma_engine::setup_geometry_only(){
   if(m_write_ebis){
     this->write_ebis();
   }
+  this->write_memory_usage();
 
   this->get_geom_tags();       // Get geometric tags.
-#if 1 // Remove this code
-  pout() << "after getting tags" << endl;
-  memrep::get_max_min_memory();
-#endif
+  
+  this->write_memory_usage();
+
   //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   
   Vector<IntVectSet> tags = m_geom_tags;
   const int a_lmin = 0;
   const int a_lmax = m_geom_tag_depth;
   m_amr->build_grids(tags, a_lmin, a_lmax);//m_geom_tag_depth);
-#if 1 // Remove this code
-  pout() << "after build grids" << endl;
-  memrep::get_max_min_memory();
-#endif
   m_amr->define_eblevelgrid(a_lmin);
-#if 1 // Remove this code
-  pout() << "after levelgrid" << endl;
-  memrep::get_max_min_memory();
-#endif
   //  m_amr->regrid(m_geom_tags, m_geom_tag_depth);       // Regrid using geometric tags for now
 
   if(m_verbosity > 0){
     this->grid_report();
   }
 
+  //  this->write_memory_usage();
   this->write_geometry();                             // Write geometry only
 }
 
@@ -2354,6 +2350,43 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
 #endif
 }
 
+void plasma_engine::write_memory_usage(){
+  CH_TIME("plasma_engine::write_memory_usage");
+  if(m_verbosity > 3){
+    pout() << "plasma_engine::write_memory_usage" << endl;
+  }
+
+  char file_char[1000];
+  const std::string prefix = m_output_dir + "/mpi/" + m_output_names;
+  sprintf(file_char, "%s.memory.step%07d.%dd.dat", prefix.c_str(), m_step, SpaceDim);
+  std::string fname(file_char);
+
+  // Get memory stuff
+  Vector<Real> peak, unfreed;
+  memrep::get_memory(peak, unfreed);
+  
+  // Begin writing output
+  if(procID() == 0){
+    std::ofstream f;
+    f.open(fname, std::ios_base::trunc);
+    const int width = 12;
+
+    // Write header
+    f << std::left << std::setw(width) << "# MPI rank" << "\t"
+      << std::left << std::setw(width) << "Peak memory" << "\t"
+      << std::left << std::setw(width) << "Unfreed memory" << "\t"
+      << endl;
+
+    // Write memory 
+    for (int i = 0; i < numProc(); i++){
+      f << std::left << std::setw(width) << i << "\t"
+	<< std::left << std::setw(width) << peak[i] << "\t"
+	<< std::left << std::setw(width) << unfreed[i] << "\t"
+	<< endl;
+    }
+  }
+}
+
 void plasma_engine::write_geometry(){
   CH_TIME("plasma_engine::write_geometry");
   if(m_verbosity > 3){
@@ -2398,7 +2431,6 @@ void plasma_engine::write_geometry(){
 	      covered_values,
 	      m_num_plot_ghost*IntVect::Unit);
 }
-
 
 void plasma_engine::write_plot_file(){
   CH_TIME("plasma_engine::new_write_plot_file");

@@ -47,3 +47,30 @@ void memrep::get_max_min_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_
   a_max_unfreed = 1.0*max_unfreed_mem/BytesPerMB;
   a_min_unfreed = 1.0*min_unfreed_mem/BytesPerMB;
 }
+
+void memrep::get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
+  const int BytesPerMB = 1024*1024;
+
+  long long curMem, peakMem;
+  overallMemoryUsage(curMem, peakMem);
+
+  const int unfreed_mem = curMem;
+  const int peak_mem    = peakMem;
+
+
+  int* unfreed = (int*) malloc(numProc()*sizeof(int));//new int[numProc()];
+  int* peak    = (int*) malloc(numProc()*sizeof(int));//new int[numProc()];
+
+  MPI_Allgather(&peak_mem,    1, MPI_INT, peak,    1, MPI_INT, Chombo_MPI::comm);
+  MPI_Allgather(&unfreed_mem, 1, MPI_INT, unfreed, 1, MPI_INT, Chombo_MPI::comm);
+
+  a_peak.resize(numProc());
+  a_unfreed.resize(numProc());
+  for (int i = 0; i < numProc(); i++){
+    a_peak[i]    = 1.0*peak[i]/BytesPerMB;
+    a_unfreed[i] = 1.0*unfreed[i]/BytesPerMB;
+  }
+
+  delete unfreed;
+  delete peak;
+}
