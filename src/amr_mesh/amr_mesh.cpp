@@ -9,6 +9,7 @@
 #include "mfalias.H"
 #include "load_balance.H"
 #include "gradientF_F.H"
+#include "ebfinetocoar_redist.H"
 #include "DomainFluxIFFABFactory.H"
 
 #include <BRMeshRefine.H>
@@ -19,7 +20,8 @@
 #include <ParmParse.H>
 #include <BaseIFFactory.H>
 
-#define AMR_MESH_DEBUG 0
+#define AMR_MESH_DEBUG 1
+#define USE_NEW_REDIST 1
 
 amr_mesh::amr_mesh(){
 
@@ -1384,6 +1386,16 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	  //       obviously lives on the fine level. But since a_lmin is the coarsest level that changed, we only
 	  //       need to update this if lvl >= a_lmin
 	  if(lvl >= a_lmin){
+#if USE_NEW_REDIST
+	    auto redist = RefCountedPtr<ebfinetocoar_redist> (new ebfinetocoar_redist());
+	    redist->new_define(*m_eblg[phase::gas][lvl],
+			       *m_eblg[phase::gas][lvl-1],
+			       m_ref_ratios[lvl-1],
+			       comps,
+			       m_redist_rad);
+	    m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (redist);
+#else
+	    
 	    m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (new EBFineToCoarRedist());
 	    m_fine_to_coar_redist[phase::gas][lvl]->define(m_grids[lvl],
 							   m_grids[lvl-1],
@@ -1394,6 +1406,7 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 							   comps,
 							   m_redist_rad,
 							   ebis_gas);
+#endif
 
 	    // Set register to zero
 	    m_fine_to_coar_redist[phase::gas][lvl]->setToZero();
