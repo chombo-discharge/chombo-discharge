@@ -54,7 +54,7 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
   //the fine set is that within one fine box.
   //the refcoar set is that set within one refined coarse box.
   IntVectSet fineShell;
-#if 1 // Debug code
+#if 0 // Debug code
   IntVectSet fineShell2;
 #endif
   
@@ -65,8 +65,7 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
     EBArith::shrinkIVS(fineInterior, m_redistRad);
     fineShell = a_eblgFine.getCoveringIVS();
     fineShell -= fineInterior;
-#else // New way of doing this
-
+#else // New way of getting the fine shell
 
     // Get the strip of cells immediately on the outside of this DBL. No restriction to ProblemDomain here! 
     LayoutData<IntVectSet> outsideCFIVS;
@@ -89,16 +88,17 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
       IntVectSet grown_cfivs;
       for (IVSIterator ivsIt(cfivs); ivsIt.ok(); ++ivsIt){
 	const IntVect iv = ivsIt();
-
+	
 	Box grownBox(iv, iv);
 	grownBox.grow(m_redistRad);
-
+	
 	grown_cfivs |= IntVectSet(grownBox);
       }
       
 
       // Intersect the cube-grown CFIVS with the grid. This will discard everything on the outside of the CFIVS but
-      // we keep everything on the inside. Importantly, we also grew the corner cells. 
+      // we keep everything on the inside. Importantly, we also grew the corner cells so there shouldn't be any issues
+      // with internal corners on the fine shell. 
       for (LayoutIterator lit = m_gridsFine.layoutIterator(); lit.ok(); ++lit){
 	const Box fineBox = m_gridsFine.get(dit());
 	grown_cfivs &= fineBox;
@@ -113,15 +113,20 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
     gather(all_shells, localShell, dest_proc);
     if(procID() == dest_proc){
       for (int i = 0; i < all_shells.size(); i++){
-	fineShell2 |= all_shells[i];
+	fineShell |= all_shells[i];
       }
+      fineShell.compact();
+    }
+    broadcast(fineShell, dest_proc);
 
-      fineShell2.compact();
+    // Define fine sets
+    for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
+      const Box& fineBox = m_gridsFine.get(dit());
+      m_setsFine[dit()]  = m_ebislFine[dit()].getIrregIVS(fineBox);
+      m_setsFine[dit()] &= fineShell;
     }
 
-    broadcast(fineShell2, dest_proc);
-
-#if 0 // Debug
+#if 0 // Debug hook
     if(procID() == 0){
       const int numShell  = fineShell.numPts();
       const int numShell2 = fineShell2.numPts();

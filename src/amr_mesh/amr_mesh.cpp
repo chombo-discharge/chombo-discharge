@@ -1364,18 +1364,24 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
+  Real t_level = 0.0;
+  Real t_coar2fine = 0.0;
+  Real t_coar2coar = 0.0;
+  Real t_fine2coar = 0.0;
   for (int lvl = Max(0, a_lmin-1); lvl <= m_finest_level; lvl++){
 
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < m_finest_level;
 
     if(!ebis_gas.isNull()){
-      if(lvl >= a_lmin){ 
+      if(lvl >= a_lmin){
+	t_level -= MPI_Wtime();
 	m_level_redist[phase::gas][lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
 											  m_ebisl[phase::gas][lvl],
 											  m_domains[lvl],
 											  comps,
 											  m_redist_rad));
+	t_level += MPI_Wtime();
       }
 
     
@@ -1386,6 +1392,7 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	  //       obviously lives on the fine level. But since a_lmin is the coarsest level that changed, we only
 	  //       need to update this if lvl >= a_lmin
 	  if(lvl >= a_lmin){
+	    t_fine2coar -= MPI_Wtime();
 #if USE_NEW_REDIST
 	    auto redist = RefCountedPtr<ebfinetocoar_redist> (new ebfinetocoar_redist());
 	    redist->new_define(*m_eblg[phase::gas][lvl],
@@ -1407,6 +1414,7 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 							   m_redist_rad,
 							   ebis_gas);
 #endif
+	    t_fine2coar += MPI_Wtime();
 
 	    // Set register to zero
 	    m_fine_to_coar_redist[phase::gas][lvl]->setToZero();
@@ -1418,6 +1426,7 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	  //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
 	  //       if lvl >= a_lmin-1
 	  if(lvl >= a_lmin-1){
+	    t_coar2fine -= MPI_Wtime();
 	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
 	    m_coar_to_fine_redist[phase::gas][lvl]->define(m_grids[lvl+1],
 							   m_grids[lvl],
@@ -1427,14 +1436,17 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 							   comps,
 							   m_redist_rad,
 							   ebis_gas);
+	    t_coar2fine += MPI_Wtime();
 
 	    // Coarse to coarse redistribution
+	    t_coar2coar -= MPI_Wtime();
 	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
 	    m_coar_to_coar_redist[phase::gas][lvl]->define(*m_eblg[phase::gas][lvl+1],
 							   *m_eblg[phase::gas][lvl],
 							   m_ref_ratios[lvl],
 							   comps,
 							   m_redist_rad);
+	    t_coar2coar += MPI_Wtime();
 
 
 	    // Set registers to zero
@@ -1445,6 +1457,14 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
       }
     }
   }
+
+#if AMR_MESH_DEBUG
+  pout() << "amr_mesh::define_redist_oper breakdown by operator: " << endl
+	 << "t_level = " << t_level << endl
+    	 << "t_fine2coar = " << t_fine2coar << endl
+    	 << "t_coar2fine = " << t_coar2fine << endl
+    	 << "t_coar2coar = " << t_coar2coar << endl;
+#endif
 }
 
 void amr_mesh::define_irreg_sten(){
