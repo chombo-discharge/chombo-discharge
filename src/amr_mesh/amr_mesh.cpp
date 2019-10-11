@@ -10,6 +10,8 @@
 #include "load_balance.H"
 #include "gradientF_F.H"
 #include "ebfinetocoar_redist.H"
+#include "ebcoartofine_redist.H"
+#include "ebcoartocoar_redist.H"
 #include "DomainFluxIFFABFactory.H"
 
 #include <BRMeshRefine.H>
@@ -21,7 +23,9 @@
 #include <BaseIFFactory.H>
 
 #define AMR_MESH_DEBUG 1
-#define USE_NEW_REDIST 1
+#define USE_NEW_F2C_REDIST 1
+#define USE_NEW_C2F_REDIST 1
+#define USE_NEW_C2C_REDIST 1
 
 amr_mesh::amr_mesh(){
 
@@ -1393,7 +1397,7 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	  //       need to update this if lvl >= a_lmin
 	  if(lvl >= a_lmin){
 	    t_fine2coar -= MPI_Wtime();
-#if USE_NEW_REDIST
+#if USE_NEW_F2C_REDIST
 	    auto redist = RefCountedPtr<ebfinetocoar_redist> (new ebfinetocoar_redist());
 	    redist->new_define(*m_eblg[phase::gas][lvl],
 			       *m_eblg[phase::gas][lvl-1],
@@ -1427,6 +1431,15 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	  //       if lvl >= a_lmin-1
 	  if(lvl >= a_lmin-1){
 	    t_coar2fine -= MPI_Wtime();
+#if USE_NEW_C2F_REDIST
+	    auto c2f_redist = RefCountedPtr<ebcoartofine_redist> (new ebcoartofine_redist());
+	    c2f_redist->new_define(*m_eblg[phase::gas][lvl+1],
+				   *m_eblg[phase::gas][lvl],
+				   m_ref_ratios[lvl],
+				   comps,
+				   m_redist_rad);
+	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
+#else
 	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
 	    m_coar_to_fine_redist[phase::gas][lvl]->define(m_grids[lvl+1],
 							   m_grids[lvl],
@@ -1436,16 +1449,27 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 							   comps,
 							   m_redist_rad,
 							   ebis_gas);
+#endif
 	    t_coar2fine += MPI_Wtime();
 
 	    // Coarse to coarse redistribution
 	    t_coar2coar -= MPI_Wtime();
+#if USE_NEW_C2C_REDIST
+	    auto c2c_redist = RefCountedPtr<ebcoartocoar_redist> (new ebcoartocoar_redist());
+	    c2c_redist->new_define(*m_eblg[phase::gas][lvl+1],
+				   *m_eblg[phase::gas][lvl],
+				   m_ref_ratios[lvl],
+				   comps,
+				   m_redist_rad);
+	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
+#else
 	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
 	    m_coar_to_coar_redist[phase::gas][lvl]->define(*m_eblg[phase::gas][lvl+1],
 							   *m_eblg[phase::gas][lvl],
 							   m_ref_ratios[lvl],
 							   comps,
 							   m_redist_rad);
+#endif
 	    t_coar2coar += MPI_Wtime();
 
 

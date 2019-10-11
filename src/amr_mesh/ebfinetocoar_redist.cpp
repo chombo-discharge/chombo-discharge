@@ -54,19 +54,10 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
   //the fine set is that within one fine box.
   //the refcoar set is that set within one refined coarse box.
   IntVectSet fineShell;
-#if 0 // Debug code
-  IntVectSet fineShell2;
-#endif
   
   {
     CH_TIME("make_fine_sets");
-#if 0 // Old way of building the shell
-    IntVectSet fineInterior = a_eblgFine.getCoveringIVS();
-    EBArith::shrinkIVS(fineInterior, m_redistRad);
-    fineShell = a_eblgFine.getCoveringIVS();
-    fineShell -= fineInterior;
-#else // New way of getting the fine shell
-
+    
     // Get the strip of cells immediately on the outside of this DBL. No restriction to ProblemDomain here! 
     LayoutData<IntVectSet> outsideCFIVS;
     outsideCFIVS.define(m_gridsFine);
@@ -79,11 +70,10 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
     }
 
     IntVectSet localShell;
-
     for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
       const IntVectSet& cfivs = outsideCFIVS[dit()];
 
-      // Loop through the CFIVS and grow point into a cube in each direction. The length of the cube
+      // Loop through the CFIVS and grow each point into a cube. The length of the cube
       // in each direction is 1+2*m_redistRad. 
       IntVectSet grown_cfivs;
       for (IVSIterator ivsIt(cfivs); ivsIt.ok(); ++ivsIt){
@@ -107,7 +97,7 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
       localShell |= grown_cfivs;
     }
 
-    // Gather-broadcast the local shells
+    // Gather-broadcast the local shells to a global shell. 
     Vector<IntVectSet> all_shells;
     const int dest_proc = uniqueProc(SerialTask::compute);
     gather(all_shells, localShell, dest_proc);
@@ -125,24 +115,6 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&  a_eblgFine,
       m_setsFine[dit()]  = m_ebislFine[dit()].getIrregIVS(fineBox);
       m_setsFine[dit()] &= fineShell;
     }
-
-#if 0 // Debug hook
-    if(procID() == 0){
-      const int numShell  = fineShell.numPts();
-      const int numShell2 = fineShell2.numPts();
-      std::cout << "fineShell.numPts() = << " << numShell << "\t fineShell2.numPts() = " << numShell2 << std::endl;
-    }
-
-    IntVectSet diffShell  = fineShell;
-    diffShell -= fineShell2;
-
-    IntVectSet diffShell2 = fineShell2;
-    diffShell2 -= fineShell;
-    if(diffShell.numPts() != 0 || diffShell2.numPts() != 0){
-      MayDay::Abort("stop");
-    }
-#endif
-#endif
   }
   {
     CH_TIME("make_coar_sets");
