@@ -23,9 +23,9 @@
 #include <BaseIFFactory.H>
 
 #define AMR_MESH_DEBUG 1
-#define USE_NEW_F2C_REDIST 0
-#define USE_NEW_C2F_REDIST 0
-#define USE_NEW_C2C_REDIST 0
+#define USE_NEW_F2C_REDIST 1
+#define USE_NEW_C2F_REDIST 1
+#define USE_NEW_C2C_REDIST 1
 
 amr_mesh::amr_mesh(){
 
