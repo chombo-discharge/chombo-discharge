@@ -216,6 +216,7 @@ public:
   */
   virtual void define_eblevelgrid(const int a_lmin);
 
+
   /*!
     @brief Interpolate ghost vectors
   */
@@ -536,6 +537,11 @@ public:
   virtual Vector<EBISLayout>& get_ebisl(phase::which_phase a_phase);
 
   /*!
+    @brief Get neighbor boxes
+  */
+  virtual Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& get_neighbors();
+
+  /*!
     @brief Get the coarsening utility
   */
   virtual Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(phase::which_phase a_phase);
@@ -789,6 +795,12 @@ protected:
   Vector<ProblemDomain> m_domains;
 
   /*!
+    @brief Neighbor boxes. 
+    @details m_neighbors[lvl][lit()] contains all boxes that border this box. 
+  */
+  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > > m_neighbors;
+
+  /*!
     @brief AMR resolutions
   */
   Vector<int> m_ref_ratios;
@@ -947,6 +959,11 @@ protected:
     @brief Define redistribution operators
   */
   virtual void define_redist_oper(const int a_lmin, const int a_regsize);
+    
+  /*!
+    @brief Define neighbor boxes
+  */
+  virtual void define_neighbors(const int a_lmin);
 
   /*!
     @brief Define flux registers

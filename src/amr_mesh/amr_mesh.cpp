@@ -402,6 +402,7 @@ void amr_mesh::build_domains(){
   m_dx.resize(nlevels);
   m_grids.resize(nlevels);
   m_mflg.resize(nlevels);
+  m_neighbors.resize(nlevels);
 
   m_eblg.resize(phase::num_phases);
   m_ebisl.resize(phase::num_phases);
@@ -486,6 +487,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   pout() << endl;
 #endif
   this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
+  this->define_neighbors(a_lmin);
 #if AMR_MESH_DEBUG
   const Real t1 = MPI_Wtime();
   pout() << "amr_mesh::regrid - memory before define_eblevelgrid" << endl;
@@ -1045,6 +1047,37 @@ void amr_mesh::define_gradsten(const int a_lmin){
       }
     }
     
+  }
+}
+
+void amr_mesh::define_neighbors(const int a_lmin){
+  CH_TIME("amr_mesh::define_neighbors");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_neighbors" << endl;
+  }
+
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+    m_neighbors[lvl] = RefCountedPtr<LayoutData<Vector<LayoutIndex> > > (new LayoutData<Vector<LayoutIndex> >(m_grids[lvl]));
+
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box& box = dbl.get(dit());
+
+      Vector<LayoutIndex>& curNeighbors = (*m_neighbors[lvl])[dit()];
+
+      for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit){
+	const Box& otherBox = dbl.get(lit());
+
+	if(otherBox != box){
+	  Box grownBox = otherBox;
+	  grownBox.grow(1);
+
+	  if(box.intersects(grownBox)){
+	    curNeighbors.push_back(lit());
+	  }
+	}
+      }
+    }
   }
 }
 
@@ -2280,6 +2313,10 @@ Vector<ProblemDomain>& amr_mesh::get_mg_domains(){
 
 Vector<EBISLayout>& amr_mesh::get_ebisl(phase::which_phase a_phase){
   return m_ebisl[a_phase];
+}
+
+Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& amr_mesh::get_neighbors(){
+  return m_neighbors;
 }
 
 Vector<RefCountedPtr<EBLevelGrid> >& amr_mesh::get_eblg(phase::which_phase a_phase){
