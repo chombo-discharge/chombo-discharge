@@ -1,22 +1,22 @@
 /*!
-  @file   ebfinetocoar_redist.H
+  @file   EBFastFineToCoarRedist.H
   @brief  New EBFineToCoarRedist class with faster defines
   @author Robert Marskar
 */
 
-#ifndef _ebfinetocoar_redist_
-#define _ebfinetocoar_redist_
+#ifndef _EBFastFineToCoarRedist_
+#define _EBFastFineToCoarRedist_
 
 #include <EBFineToCoarRedist.H>
 
 /*!
   @brief EBFineToCoarRedist with faster define function
 */
-class ebfinetocoar_redist : public EBFineToCoarRedist {
+class EBFastFineToCoarRedist : public EBFineToCoarRedist {
 public:
 
-  ebfinetocoar_redist();
-  ~ebfinetocoar_redist();
+  EBFastFineToCoarRedist();
+  ~EBFastFineToCoarRedist();
 
   void new_define(const EBLevelGrid&                      a_eblgFine,
 		  const EBLevelGrid&                      a_eblgCoar,
@@ -36,8 +36,8 @@ public:
 
 protected:
 
-  LevelData<BaseFab<bool> > m_fineShell;
-  LevelData<BaseFab<bool> > m_refCoarShell;
+  LevelData<BaseFab<bool> >* m_fineShell;    // Transitory memory
+  LevelData<BaseFab<bool> >* m_refCoarShell; // Transitory memory
 
   void makeEmptyFineShell();
   void makeEmptyRefCoarShell();

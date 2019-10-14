@@ -1,23 +1,23 @@
 /*!
-  @file   ebfinetocoar_redist.cpp
-  @brief  Implementation of ebfinetocoar_redist
+  @file   EBFastFineToCoarRedist.cpp
+  @brief  Implementation of EBFastFineToCoarRedist
   @author Robert Marskar
 */
 
-#include "ebfinetocoar_redist.H"
+#include "EBFastFineToCoarRedist.H"
 
 #include <EBArith.H>
 
 
-ebfinetocoar_redist::ebfinetocoar_redist() : EBFineToCoarRedist(){
+EBFastFineToCoarRedist::EBFastFineToCoarRedist() : EBFineToCoarRedist(){
 
 }
 
-ebfinetocoar_redist::~ebfinetocoar_redist(){
+EBFastFineToCoarRedist::~EBFastFineToCoarRedist(){
 
 }
 
-void ebfinetocoar_redist::new_define(const EBLevelGrid&                      a_eblgFine,
+void EBFastFineToCoarRedist::new_define(const EBLevelGrid&                      a_eblgFine,
 				     const EBLevelGrid&                      a_eblgCoar,
 				     const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
 				     const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
@@ -129,7 +129,7 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&                      a_e
   }
 
   // Call old stuff
-  EBFineToCoarRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
+  //  EBFineToCoarRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
 
 #if 0 // Debugging hook for coarse set. Make sure we have the correct amount of cells
   IntVectSet localSetsCoar, globalSetsCoar;
@@ -184,14 +184,14 @@ void ebfinetocoar_redist::new_define(const EBLevelGrid&                      a_e
   setToZero();
 }
 
-void ebfinetocoar_redist::define(const EBLevelGrid&                      a_eblgFine,
+void EBFastFineToCoarRedist::define(const EBLevelGrid&                      a_eblgFine,
 				 const EBLevelGrid&                      a_eblgCoar,
 				 const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
 				 const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
 				 const int&                              a_nref,
 				 const int&                              a_nvar,
 				 const int&                              a_redistRad){
-  CH_TIME("ebfinetocoar_redist::define");
+  CH_TIME("EBFastFineToCoarRedist::define");
   
   m_isDefined = true;
   m_nComp     = a_nvar;
@@ -222,18 +222,22 @@ void ebfinetocoar_redist::define(const EBLevelGrid&                      a_eblgF
   //global set consists of redistrad on the fine side of the coarse-fine interface interface, but is not computed
   //the fine set is that within one fine box, using local information about the CFIVS 
   //the refcoar set is that set same within one refined coarse box. This needs to be computed using a slower computation
-  m_fineShell.define(m_gridsFine,       1, IntVect::Zero);
-  m_refCoarShell.define(m_gridsRefCoar, 1, IntVect::Zero);
+  m_fineShell    = new LevelData<BaseFab<bool> >(m_gridsFine,    1, IntVect::Zero);
+  m_refCoarShell = new LevelData<BaseFab<bool> >(m_gridsRefCoar, 1, IntVect::Zero);
   
   makeEmptyFineShell();    // Init bits to zero
   makeEmptyRefCoarShell(); // Init bits to zero
   
   makeFineSets(a_neighborsFine);
-  makeCoarSets(a_neighborsCoar);
+  makeCoarSets(a_neighborsCoar); // a_neighborsCoar is not used. 
+
+  delete m_fineShell;
+  delete m_refCoarShell;
 
   // Define data as usual
   defineDataHolders();
   setToZero();
+
 
 #if 0 // Debugging hook. Make sure we have the correct amount of cells
   IntVectSet localSetsCoar, globalSetsCoar;
@@ -282,23 +286,23 @@ void ebfinetocoar_redist::define(const EBLevelGrid&                      a_eblgF
 #endif
 }
 
-void ebfinetocoar_redist::makeEmptyFineShell(){
-  CH_TIME("ebfinetocoar_redist::makeEmptyFineShell");
-    for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
-    m_fineShell[dit()].setVal(false);
+void EBFastFineToCoarRedist::makeEmptyFineShell(){
+  CH_TIME("EBFastFineToCoarRedist::makeEmptyFineShell");
+  for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
+    (*m_fineShell)[dit()].setVal(false);
   }
 }
 
-void ebfinetocoar_redist::makeEmptyRefCoarShell(){
-  CH_TIME("ebfinetocoar_redist::makeEmptyCoarShell");
+void EBFastFineToCoarRedist::makeEmptyRefCoarShell(){
+  CH_TIME("EBFastFineToCoarRedist::makeEmptyCoarShell");
 
   for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
-    m_refCoarShell[dit()].setVal(false);
+    (*m_refCoarShell)[dit()].setVal(false);
   }
 }
 
-void ebfinetocoar_redist::makeFineSets(const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
-  CH_TIME("ebfinetocoar_redist::makeFineSets");
+void EBFastFineToCoarRedist::makeFineSets(const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
+  CH_TIME("EBFastFineToCoarRedist::makeFineSets");
 
   for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
     const Box& fineBox = m_gridsFine.get(dit());
@@ -324,7 +328,7 @@ void ebfinetocoar_redist::makeFineSets(const LayoutData<Vector<LayoutIndex> >& a
 
     // Cache the fineShell
     for (IVSIterator ivsIt(localShell); ivsIt.ok(); ++ivsIt){
-      m_fineShell[dit()](ivsIt(), 0) = true;
+      (*m_fineShell)[dit()](ivsIt(), 0) = true;
     }
     
     // Define the fine set
@@ -333,41 +337,13 @@ void ebfinetocoar_redist::makeFineSets(const LayoutData<Vector<LayoutIndex> >& a
   }
 }
 
-void ebfinetocoar_redist::makeCoarSets(const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar){
-  CH_TIME("ebfinetocoar_redist::makeCoarSets");
+void EBFastFineToCoarRedist::makeCoarSets(const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar){
+  CH_TIME("EBFastFineToCoarRedist::makeCoarSets");
 
   const Box domainFine = refine(m_domainCoar, m_refRat);
 
-  m_fineShell.copyTo(m_refCoarShell);
-
-#if 0 // Try to gather the fucking thing to see if that works
-  IntVectSet globalShell, localShell;
-  Vector<IntVectSet> procShells;
-
-  for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
-    //    const DenseIntVectSet& divs = m_refCoarShell[dit()].get_ivs();
-    //    const IntVectSet ivs = IntVectSet(divs);
-    for (BoxIterator bit(m_gridsRefCoar.get(dit())); bit.ok(); ++bit){
-      const IntVect iv = bit();
-      if(m_refCoarShell[dit()](iv, 0)) localShell |= iv;
-    }
-  }
-
-  const int dest_proc = uniqueProc(SerialTask::compute);
-  gather(procShells, localShell, dest_proc);
-  if(procID() == dest_proc){
-    for (int i = 0; i < procShells.size(); i++){
-	globalShell |= procShells[i];
-    }
-  }
-  broadcast(globalShell, dest_proc);
-
-  if(procID() == dest_proc) {
-    //    std::cout << "global shell size = " << globalShell.numPts() << std::endl;
-  }
-#endif
-  
-
+  // Copy mask onto coarsened fine grids
+  m_fineShell->copyTo(*m_refCoarShell);
   
   for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
     const Box& refCoarBox = m_gridsRefCoar.get(dit());
@@ -376,14 +352,13 @@ void ebfinetocoar_redist::makeCoarSets(const LayoutData<Vector<LayoutIndex> >& a
     IntVectSet localShell;
     for (BoxIterator bit(refCoarBox); bit.ok(); ++bit){
       const IntVect iv = bit();
-      if(m_refCoarShell[dit()](iv,0)) localShell |= iv;
+      if((*m_refCoarShell)[dit()](iv,0)) localShell |= iv;
     }
 
     // Make the coar set
-    Box gbox = grow(m_gridsRefCoar.get(dit()), m_redistRad);
-    gbox &= domainFine;
-    m_setsRefCoar[dit()] = m_ebislRefCoar[dit()].getIrregIVS(gbox);
+    Box grownBox = grow(m_gridsRefCoar.get(dit()), m_redistRad);
+    grownBox &= domainFine;
+    m_setsRefCoar[dit()] = m_ebislRefCoar[dit()].getIrregIVS(grownBox);
     m_setsRefCoar[dit()] &= localShell;
-    //    m_setsRefCoar[dit()] &= divs;;
   }
 }
