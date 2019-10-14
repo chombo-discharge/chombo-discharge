@@ -23,9 +23,9 @@
 #include <BaseIFFactory.H>
 
 #define AMR_MESH_DEBUG 1
-#define USE_NEW_F2C_REDIST 1
-#define USE_NEW_C2F_REDIST 1
-#define USE_NEW_C2C_REDIST 1
+#define USE_NEW_F2C_REDIST 0
+#define USE_NEW_C2F_REDIST 0
+#define USE_NEW_C2C_REDIST 0
 
 amr_mesh::amr_mesh(){
 
@@ -1431,17 +1431,6 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	    t_fine2coar -= MPI_Wtime();
 #if USE_NEW_F2C_REDIST
 	    auto redist = RefCountedPtr<EBFastFineToCoarRedist> (new EBFastFineToCoarRedist());
-	    const Real T_start = MPI_Wtime();
-#if 0
-	    redist->new_define(*m_eblg[phase::gas][lvl],
-			       *m_eblg[phase::gas][lvl-1],
-			       *m_neighbors[lvl],
-			       *m_neighbors[lvl-1],
-			       m_ref_ratios[lvl-1],
-			       comps,
-			       m_redist_rad);
-#endif
-	    const Real T_middle = MPI_Wtime();
 	    redist->define(*m_eblg[phase::gas][lvl],
 			   *m_eblg[phase::gas][lvl-1],
 			   *m_neighbors[lvl],
@@ -1449,15 +1438,6 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 			   m_ref_ratios[lvl-1],
 			   comps,
 			   m_redist_rad);
-	    const Real T_end = MPI_Wtime();
-
-	    const Real T_new = T_end-T_middle;
-	    const Real T_old = T_middle-T_start;
-
-	    pout() << "   old define = " << T_old
-		   << "\t new define = " << T_new
-		   << "\t efficiency = " << T_new/T_old
-		   << endl;
 	    m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (redist);
 #else
 	    
