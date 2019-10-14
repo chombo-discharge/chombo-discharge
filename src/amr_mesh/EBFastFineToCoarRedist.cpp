@@ -51,41 +51,21 @@ void EBFastFineToCoarRedist::define(const EBLevelGrid&                      a_eb
   m_setsFine.define(m_gridsFine);
   m_setsRefCoar.define(m_gridsCoar);
 
-  //make sets
-  m_fineShell    = new LevelData<BaseFab<bool> >(m_gridsFine,    1, IntVect::Zero);
-  m_refCoarShell = new LevelData<BaseFab<bool> >(m_gridsRefCoar, 1, IntVect::Zero);
-  
-  makeEmptyFineShell();    // Init mask to zero
-  makeEmptyRefCoarShell(); // Init mask to zero
-  
-  makeFineSets(a_neighborsFine); // a_neighborsFine is used for rapidly building the inside CFIVS 
-  makeCoarSets(a_neighborsCoar); // a_neighborsCoar is not used. 
+  IntVectSet globalShell;
+  globalShell.makeEmpty();
 
-  delete m_fineShell;
-  delete m_refCoarShell;
+  makeFineSets(globalShell, a_neighborsFine); // a_neighborsFine is used for rapidly building the inside CFIVS 
+  makeCoarSets(globalShell, a_neighborsCoar); // a_neighborsCoar is not used. 
 
   // Define data as usual
   defineDataHolders();
   setToZero();
 }
 
-void EBFastFineToCoarRedist::makeEmptyFineShell(){
-  CH_TIME("EBFastFineToCoarRedist::makeEmptyFineShell");
-  for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
-    (*m_fineShell)[dit()].setVal(false);
-  }
-}
-
-void EBFastFineToCoarRedist::makeEmptyRefCoarShell(){
-  CH_TIME("EBFastFineToCoarRedist::makeEmptyCoarShell");
-  for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
-    (*m_refCoarShell)[dit()].setVal(false);
-  }
-}
-
-void EBFastFineToCoarRedist::makeFineSets(const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
+void EBFastFineToCoarRedist::makeFineSets(IntVectSet& a_globalShell, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
   CH_TIME("EBFastFineToCoarRedist::makeFineSets");
 
+  IntVectSet localShell;
   for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
     const Box& fineBox = m_gridsFine.get(dit());
     
@@ -99,48 +79,46 @@ void EBFastFineToCoarRedist::makeFineSets(const LayoutData<Vector<LayoutIndex> >
     }
     
     // Make the local shell by growing the CFISV and restricting to box
-    IntVectSet localShell;
+    IntVectSet curShell;
     for (IVSIterator ivsIt(localCFIVS); ivsIt.ok(); ++ivsIt){
       const IntVect iv = ivsIt();
       Box b(iv,iv);
       b.grow(m_redistRad);
-      localShell |= IntVectSet(b);
+      curShell |= IntVectSet(b);
     }
-    localShell &= fineBox;
-
-    // Cache the fineShell
-    for (IVSIterator ivsIt(localShell); ivsIt.ok(); ++ivsIt){
-      (*m_fineShell)[dit()](ivsIt(), 0) = true;
-    }
+    curShell &= fineBox;
+    localShell |= curShell;
     
     // Define the fine set
     m_setsFine[dit()]  = m_ebislFine[dit()].getIrregIVS(fineBox);
     m_setsFine[dit()] &= localShell;
   }
+
+#ifdef CH_MPI  // Build the global view of the shell
+  Vector<IntVectSet> procShells;
+  const int destProc = uniqueProc(SerialTask::compute);
+  gather(procShells, localShell, destProc);
+  if(procID() == destProc){
+    for (int i = 0; i < procShells.size(); i++){
+      a_globalShell |= procShells[i];
+    }
+  }
+  broadcast(a_globalShell, destProc);
+#endif
 }
 
-void EBFastFineToCoarRedist::makeCoarSets(const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar){
+void EBFastFineToCoarRedist::makeCoarSets(const IntVectSet& a_globalShell,
+					  const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar){
   CH_TIME("EBFastFineToCoarRedist::makeCoarSets");
 
   const Box domainFine = refine(m_domainCoar, m_refRat);
-
-  // Copy mask onto coarsened fine grids
-  m_fineShell->copyTo(*m_refCoarShell);
-  
   for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
     const Box& refCoarBox = m_gridsRefCoar.get(dit());
 
-    // Gather the shell here
-    IntVectSet localShell;
-    for (BoxIterator bit(refCoarBox); bit.ok(); ++bit){
-      const IntVect iv = bit();
-      if((*m_refCoarShell)[dit()](iv,0)) localShell |= iv;
-    }
-
     // Make the coar set
-    Box grownBox = grow(m_gridsRefCoar.get(dit()), m_redistRad);
+    Box grownBox = grow(refCoarBox, m_redistRad);
     grownBox &= domainFine;
-    m_setsRefCoar[dit()] = m_ebislRefCoar[dit()].getIrregIVS(grownBox);
-    m_setsRefCoar[dit()] &= localShell;
+    m_setsRefCoar[dit()]  = m_ebislRefCoar[dit()].getIrregIVS(grownBox);
+    m_setsRefCoar[dit()] &= a_globalShell;
   }
 }
