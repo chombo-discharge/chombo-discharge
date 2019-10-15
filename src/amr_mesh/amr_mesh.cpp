@@ -11,7 +11,7 @@
 #include "gradientF_F.H"
 #include "EBFastFineToCoarRedist.H"
 #include "EBFastCoarToFineRedist.H"
-#include "ebcoartocoar_redist.H"
+#include "EBFastCoarToCoarRedist.H"
 #include "DomainFluxIFFABFactory.H"
 
 #include <BRMeshRefine.H>
@@ -1506,12 +1506,14 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	    // Coarse to coarse redistribution
 	    t_coar2coar -= MPI_Wtime();
 #if USE_NEW_C2C_REDIST
-	    auto c2c_redist = RefCountedPtr<ebcoartocoar_redist> (new ebcoartocoar_redist());
+	    auto c2c_redist = RefCountedPtr<EBFastCoarToCoarRedist> (new EBFastCoarToCoarRedist());
 	    c2c_redist->define(*m_eblg[phase::gas][lvl+1],
-				   *m_eblg[phase::gas][lvl],
-				   m_ref_ratios[lvl],
-				   comps,
-				   m_redist_rad);
+			       *m_eblg[phase::gas][lvl],
+			       *m_neighbors[lvl+1],
+			       *m_neighbors[lvl],
+			       m_ref_ratios[lvl],
+			       comps,
+			       m_redist_rad);
 	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
 #else
 	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());

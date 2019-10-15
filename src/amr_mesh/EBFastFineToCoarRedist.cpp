@@ -94,17 +94,9 @@ void EBFastFineToCoarRedist::makeFineSets(IntVectSet& a_globalShell, const Layou
     m_setsFine[dit()] &= localShell;
   }
 
-#ifdef CH_MPI  // Build the global view of the shell
-  Vector<IntVectSet> procShells;
-  const int destProc = uniqueProc(SerialTask::compute);
-  gather(procShells, localShell, destProc);
-  if(procID() == destProc){
-    for (int i = 0; i < procShells.size(); i++){
-      a_globalShell |= procShells[i];
-    }
-  }
-  broadcast(a_globalShell, destProc);
-#endif
+  //
+  a_globalShell = localShell;
+  gatherBroadcast(a_globalShell);
 }
 
 void EBFastFineToCoarRedist::makeCoarSets(const IntVectSet& a_globalShell,
@@ -121,4 +113,20 @@ void EBFastFineToCoarRedist::makeCoarSets(const IntVectSet& a_globalShell,
     m_setsRefCoar[dit()]  = m_ebislRefCoar[dit()].getIrregIVS(grownBox);
     m_setsRefCoar[dit()] &= a_globalShell;
   }
+}
+
+void EBFastFineToCoarRedist::gatherBroadcast(IntVectSet& a_set){
+  CH_TIME("EBFastFineToCoarRedist::gatherBroadcast");
+#ifdef CH_MPI
+  Vector<IntVectSet> procSet;
+  const int destProc = uniqueProc(SerialTask::compute);
+  gather(procSet, a_set, destProc);
+  a_set.makeEmpty();
+  if(procID() == destProc){
+    for (int i = 0; i < procSet.size(); i++){
+      a_set |= procSet[i];
+    }
+  }
+  broadcast(a_set, destProc);
+#endif
 }

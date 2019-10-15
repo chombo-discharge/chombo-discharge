@@ -27,7 +27,8 @@ public:
 	      const int&                              a_redistRad);
 
 protected:
-  
+
+  void gatherBroadcast(   IntVectSet& a_set);
   void makeFineSets(      IntVectSet& a_globalShell, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
   void makeCoarSets(const IntVectSet& a_globalShell, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
   

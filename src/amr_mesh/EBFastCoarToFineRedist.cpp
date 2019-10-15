@@ -147,7 +147,7 @@ void EBFastCoarToFineRedist::printCedFineSets(){
 }
 
 void EBFastCoarToFineRedist::gatherBroadcast(IntVectSet& a_set){
-
+  CH_TIME("EBFastFineToCoarRedist::gatherBroadcast");
 #ifdef CH_MPI
   Vector<IntVectSet> procSet;
   const int destProc = uniqueProc(SerialTask::compute);
