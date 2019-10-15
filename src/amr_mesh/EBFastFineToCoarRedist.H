@@ -28,9 +28,15 @@ public:
 
 protected:
 
-  void gatherBroadcast(   IntVectSet& a_set);
-  void makeFineSets(      IntVectSet& a_globalShell, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
-  void makeCoarSets(const IntVectSet& a_globalShell, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
+  void makeFineMask(LevelData<BaseFab<bool> >& a_fineShellMask, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
+  void makeFineSets(const LevelData<BaseFab<bool> >& a_fineMask);
+  void makeCoarSets(const LevelData<BaseFab<bool> >& a_refCoarMask);
+
+  // These are debugging functions, these are never called unless you activate debugging in the .cpp file
+  void gatherBroadcast(  IntVectSet& a_set);
+  void gatherSetsFine(   IntVectSet& a_setsFine);   
+  void gatherSetsRefCoar(IntVectSet& a_setsRefCoar);
+  
   
 };
 

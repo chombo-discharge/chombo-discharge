@@ -1468,9 +1468,6 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 							   ebis_gas);
 #endif
 	    t_fine2coar += MPI_Wtime();
-
-	    // Set register to zero
-	    m_fine_to_coar_redist[phase::gas][lvl]->setToZero();
 	  }
 	}
 
@@ -1524,11 +1521,6 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 							   m_redist_rad);
 #endif
 	    t_coar2coar += MPI_Wtime();
-
-
-	    // Set registers to zero
-	    m_coar_to_fine_redist[phase::gas][lvl]->setToZero();
-	    m_coar_to_coar_redist[phase::gas][lvl]->setToZero();
 	  }
 	}
       }

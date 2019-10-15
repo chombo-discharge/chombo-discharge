@@ -108,7 +108,7 @@ void EBFastCoarToCoarRedist::gatherBroadcast(IntVectSet& a_set){
 }
 
 void EBFastCoarToCoarRedist::gatherCoarSet(IntVectSet& a_coarSet){
-  CH_TIME("EBFastToCoarCoarRedist::gatherCoarSet");
+  CH_TIME("EBFastCoarToCoarRedist::gatherCoarSet");
 
   a_coarSet.makeEmpty();
   for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
