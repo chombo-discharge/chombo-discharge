@@ -23,7 +23,6 @@
 #include <BinItem.H>
 
 #include "DomainFluxIFFAB.H"
-#include "tags.H"
 #include "MFBaseIVFAB.H"
 #include "photon.H"
 
@@ -190,7 +189,8 @@ typedef Vector<RefCountedPtr<LevelData<EBFluxFAB> > >        EBAMRFluxData;
 typedef Vector<RefCountedPtr<LevelData<EBFaceFAB> > >        EBAMRFaceData;
 typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;
 typedef Vector<RefCountedPtr<LevelData<DomainFluxIFFAB > > > EBAMRIFData;
-typedef Vector<RefCountedPtr<LevelData<tags> > >             EBAMRTags;
+typedef Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >   EBAMRBool;
+typedef Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > > EBAMRTags;
 typedef Vector<RefCountedPtr<ParticleData<Particle> > >      EBAMRParticles;
 typedef Vector<RefCountedPtr<ParticleData<photon> > >        EBAMRPhotons;
 typedef Vector<RefCountedPtr<ParticleValidRegion> >          EBAMRPVR;

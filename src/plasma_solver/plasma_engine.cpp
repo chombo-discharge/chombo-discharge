@@ -10,7 +10,6 @@
 #include "rte_iterator.H"
 #include "data_ops.H"
 #include "mfalias.H"
-#include "tags_factory.H"
 #include "units.H"
 #include "memrep.H"
 
@@ -170,9 +169,12 @@ void plasma_engine::allocate_internals(){
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    m_tags[lvl] = RefCountedPtr<LayoutData<DenseIntVectSet> > (new LayoutData<DenseIntVectSet>(dbl));
 
-    tags_factory fact = tags_factory();
-    m_tags[lvl] = RefCountedPtr<LevelData<tags> > (new LevelData<tags>(dbl, ncomp, ghost, fact));
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      DenseIntVectSet& divs = (*m_tags[lvl])[dit()];
+      divs.makeEmptyBits();
+    }
   }
 }
 
@@ -184,17 +186,26 @@ void plasma_engine::cache_tags(const EBAMRTags& a_tags){
 
   const int ncomp         = 1;
   const int finest_level  = m_amr->get_finest_level();
-  const IntVect ghost     = IntVect::Zero;
+  const int ghost         = 0;
 
-  m_cached_tags.resize(1 + finest_level);
+
+  m_amr->allocate(m_cached_tags, ncomp, ghost);
+  m_cached_tags.resize(1+finest_level);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
 
-    tags_factory fact = tags_factory();
-    m_cached_tags[lvl] = RefCountedPtr<LevelData<tags> > (new LevelData<tags>(dbl, ncomp, ghost, fact));
+    // Copy tags onto boolean mask
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      BaseFab<bool>& cached_tags  = (*m_cached_tags[lvl])[dit()];
+      cached_tags.setVal(false);
 
-    a_tags[lvl]->localCopyTo(*m_cached_tags[lvl]);
+      const IntVectSet divs = IntVectSet((*m_tags[lvl])[dit()]);
+      for (IVSIterator ivsIt(divs); ivsIt.ok(); ++ivsIt){
+	const IntVect iv = ivsIt();
+	cached_tags(iv,0) = true;
+      }
+    }
   }
 }
 
@@ -653,7 +664,7 @@ void plasma_engine::old_read_checkpoint_file(const std::string& a_restart_file){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs(box);
 
-      DenseIntVectSet& tagged_cells = (*m_tags[lvl])[dit()].get_ivs();
+      DenseIntVectSet& tagged_cells = (*m_tags[lvl])[dit()];
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
@@ -934,15 +945,18 @@ void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_n
 
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
-    m_cached_tags[lvl]->copyTo(*m_tags[lvl]);
-
-#if 1 // For some reason this needs to happen, but I don't really see how the DenseIntVectSet leaks over
-      // when I copy from the old grids to the new. Anyways, this fixes it (somehow).
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      (*m_tags[lvl])[dit()].get_ivs() &= dbl.get(dit());
+    
+    LevelData<BaseFab<bool> > tmp;
+    tmp.define(dbl, 1, IntVect::Zero);
+    m_cached_tags[lvl]->copyTo(tmp);
+    for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const BaseFab<bool>& tmpFab = tmp[dit()];
+      const Box& box = dbl.get(dit());
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+	const IntVect iv = bit();
+      }
     }
-#endif
   }
 }
 
@@ -2318,7 +2332,7 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
   // Gather tags from a_tags
   for (int lvl = 0; lvl <= finest_level; lvl++){
     for (DataIterator dit = a_cell_tags[lvl]->dataIterator(); dit.ok(); ++dit){
-      a_all_tags[lvl] |= IntVectSet((*a_cell_tags[lvl])[dit()].get_ivs());
+      a_all_tags[lvl] |= IntVectSet((*a_cell_tags[lvl])[dit()]);//
     }
 
     // Grow tags with cell taggers buffer
@@ -2568,7 +2582,7 @@ void plasma_engine::write_tags(EBAMRCellData& a_output, int& a_comp){
     const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()].get_ivs();
+      const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];
       const Box box              = dbl.get(dit());
 
       // Do regular cells only.
@@ -2714,7 +2728,7 @@ void plasma_engine::old_write_checkpoint_file(){
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = IntVectSet((*m_tags[lvl])[dit()].get_ivs());
+      const IntVectSet ivs   = IntVectSet((*m_tags[lvl])[dit()]);
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
@@ -2855,7 +2869,7 @@ void plasma_engine::write_checkpoint_level(HDF5Handle& a_handle, const int a_lev
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
-    const DenseIntVectSet& tags = (*m_tags[a_level])[dit()].get_ivs();
+    const DenseIntVectSet& tags = (*m_tags[a_level])[dit()];
 
     BaseFab<Real>& scratch_fab = scratch[dit()].getSingleValuedFAB();
     for (BoxIterator bit(box); bit.ok(); ++bit){
@@ -2897,7 +2911,7 @@ void plasma_engine::read_checkpoint_level(HDF5Handle& a_handle, const int a_leve
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs(box);
 
-    DenseIntVectSet& tagged_cells = (*m_tags[a_level])[dit()].get_ivs();
+    DenseIntVectSet& tagged_cells = (*m_tags[a_level])[dit()];
 
     BaseFab<Real>& scratch_fab = scratch[dit()].getSingleValuedFAB();
     for (BoxIterator bit(box); bit.ok(); ++bit){

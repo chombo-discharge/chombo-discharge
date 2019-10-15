@@ -222,6 +222,21 @@ void amr_mesh::allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, c
   }
 }
 
+void amr_mesh::allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost){
+  CH_TIME("amr_mesh::allocate(EBAMRBool)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(EBAMRBool)" << endl;
+  }
+
+  a_data.resize(1 + m_finest_level);
+
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+
+    a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
+      (new LevelData<BaseFab<bool> >(m_grids[lvl], a_ncomp, a_ghost*IntVect::Unit));
+  }
+}
+
 void amr_mesh::allocate(MFAMRCellData& a_data, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(mf cell)");
   if(m_verbosity > 5){

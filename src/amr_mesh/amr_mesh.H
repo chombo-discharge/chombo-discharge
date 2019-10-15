@@ -138,6 +138,11 @@ public:
   virtual void allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
+    @Allocate Boolean data
+  */
+  virtual void allocate(EBAMRBool& a_data, const int a_ncomp, const int a_ghost);
+
+  /*!
     @brief Allocate a data holder. 
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */

@@ -1,4 +1,4 @@
- /*!
+/*!
   @file   cell_tagger.cpp
   @brief  Implementation of cell_tagger.H
   @author Robert marskar
@@ -169,7 +169,7 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
 
 	const IntVectSet irreg_ivs = ebisbox.getIrregIVS(box);
-	const IntVectSet prev_tags = IntVectSet((*a_tags[lvl])[dit()].get_ivs());
+	const IntVectSet prev_tags = IntVectSet((*a_tags[lvl])[dit()]);
 
 	DenseIntVectSet coarsen_tags(box, false); // Cells that will be coarsened
 	DenseIntVectSet refine_tags(box, false);  // Cells that will be refined
@@ -182,7 +182,7 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 	  gtracers.push_back(&((*m_grad_tracer[i][lvl])[dit()]));
 	}
 
-	DenseIntVectSet& tags = (*a_tags[lvl])[dit()].get_ivs();
+	DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
 	
 	// Refinement and coarsening
 	refine_cells_box(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
@@ -296,14 +296,14 @@ void cell_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tags,
 }
 
 void cell_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_tags,
-				   const Vector<EBCellFAB*>& a_tracers,
-				   const Vector<EBCellFAB*>& a_grad_tracers,
-				   const int                 a_lvl,
-				   const Box                 a_box,
-				   const EBISBox&            a_ebisbox,
-				   const Real                a_time,
-				   const Real                a_dx,
-				   const RealVect            a_origin){
+				    const Vector<EBCellFAB*>& a_tracers,
+				    const Vector<EBCellFAB*>& a_grad_tracers,
+				    const int                 a_lvl,
+				    const Box                 a_box,
+				    const EBISBox&            a_ebisbox,
+				    const Real                a_time,
+				    const Real                a_dx,
+				    const RealVect            a_origin){
 
 
   

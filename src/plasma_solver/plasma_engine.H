@@ -17,7 +17,6 @@
 #include "amr_mesh.H"
 #include "cell_tagger.H"
 #include "mfis.H"
-#include "tags.H"
 #include "geo_coarsener.H"
 
 #include <iostream>
@@ -383,7 +382,7 @@ protected:
   /*!
     @brief Cached tags. Needed when we regrid and change box ownership.
   */
-  EBAMRTags m_cached_tags;
+  EBAMRBool m_cached_tags;
 
   /*!
     @brief Potential
