@@ -10,7 +10,7 @@
 #include "load_balance.H"
 #include "gradientF_F.H"
 #include "EBFastFineToCoarRedist.H"
-#include "ebcoartofine_redist.H"
+#include "EBFastCoarToFineRedist.H"
 #include "ebcoartocoar_redist.H"
 #include "DomainFluxIFFABFactory.H"
 
@@ -24,8 +24,8 @@
 
 #define AMR_MESH_DEBUG 1
 #define USE_NEW_F2C_REDIST 1
-#define USE_NEW_C2F_REDIST 0
-#define USE_NEW_C2C_REDIST 0
+#define USE_NEW_C2F_REDIST 1
+#define USE_NEW_C2C_REDIST 1
 
 amr_mesh::amr_mesh(){
 
@@ -1481,12 +1481,14 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	  if(lvl >= a_lmin-1){
 	    t_coar2fine -= MPI_Wtime();
 #if USE_NEW_C2F_REDIST
-	    auto c2f_redist = RefCountedPtr<ebcoartofine_redist> (new ebcoartofine_redist());
-	    c2f_redist->new_define(*m_eblg[phase::gas][lvl+1],
-				   *m_eblg[phase::gas][lvl],
-				   m_ref_ratios[lvl],
-				   comps,
-				   m_redist_rad);
+	    auto c2f_redist = RefCountedPtr<EBFastCoarToFineRedist> (new EBFastCoarToFineRedist());
+	    c2f_redist->define(*m_eblg[phase::gas][lvl+1],
+			       *m_eblg[phase::gas][lvl],
+			       *m_neighbors[lvl+1],
+			       *m_neighbors[lvl],
+			       m_ref_ratios[lvl],
+			       comps,
+			       m_redist_rad);
 	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
 #else
 	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
@@ -1505,7 +1507,7 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 	    t_coar2coar -= MPI_Wtime();
 #if USE_NEW_C2C_REDIST
 	    auto c2c_redist = RefCountedPtr<ebcoartocoar_redist> (new ebcoartocoar_redist());
-	    c2c_redist->new_define(*m_eblg[phase::gas][lvl+1],
+	    c2c_redist->define(*m_eblg[phase::gas][lvl+1],
 				   *m_eblg[phase::gas][lvl],
 				   m_ref_ratios[lvl],
 				   comps,

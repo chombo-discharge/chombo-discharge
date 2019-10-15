@@ -1,22 +1,22 @@
 /*!
-  @file   EBFastFineToCoarRedist.H
+  @file   EBFastCoarToFineRedist.H
   @brief  New EBFineToCoarRedist class with faster defines
   @author Robert Marskar
 */
 
-#ifndef _EBFASTFINETOCOARREDIST_H_
-#define _EBFASTFINETOCOARREDIST_H_
+#ifndef _EBFASTCOARTOFINEREDIST_H_
+#define _EBFASTCOARTOFINEREDIST_H_
 
-#include <EBFineToCoarRedist.H>
+#include "EBCoarToFineRedist.H"
 
 /*!
   @brief EBFineToCoarRedist with faster define function
 */
-class EBFastFineToCoarRedist : public EBFineToCoarRedist {
+class EBFastCoarToFineRedist : public EBCoarToFineRedist {
 public:
 
-  EBFastFineToCoarRedist();
-  ~EBFastFineToCoarRedist();
+  EBFastCoarToFineRedist();
+  ~EBFastCoarToFineRedist();
 
   void define(const EBLevelGrid&                      a_eblgFine,
 	      const EBLevelGrid&                      a_eblgCoar,
@@ -27,10 +27,16 @@ public:
 	      const int&                              a_redistRad);
 
 protected:
-  
-  void makeFineSets(      IntVectSet& a_globalShell, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
-  void makeCoarSets(const IntVectSet& a_globalShell, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
-  
+
+  void gatherBroadcast(   IntVectSet& a_set);
+  void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
+  void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
+
+  // Debugging functions
+  void printCoarSets();
+  void printCedFineSets();
+
+
 };
 
 #endif
