@@ -28,11 +28,12 @@ public:
 
 protected:
 
-  void gatherBroadcast(   IntVectSet& a_set);
+
   void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
   void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
 
   // Debugging functions
+  void gatherBroadcast(IntVectSet& a_set);
   void printCoarSets();
   void printCedFineSets();
 

@@ -1998,6 +1998,7 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   m_has_grids = true;
 
   const int a_lmin = 0;
+  this->define_neighbros(a_lmin);    
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
   this->define_eb_coar_ave(a_lmin);  // Define ebcoarseaverage on both phases
