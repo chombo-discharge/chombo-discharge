@@ -17,7 +17,7 @@ typedef euler_maruyama::poisson_storage poisson_storage;
 typedef euler_maruyama::rte_storage     rte_storage;
 typedef euler_maruyama::sigma_storage   sigma_storage;
 
-#define EULER_MARUYAMA_TIMER 1
+#define EULER_MARUYAMA_TIMER 0
 
 euler_maruyama::euler_maruyama(){
   m_class_name = "euler_maruyama";

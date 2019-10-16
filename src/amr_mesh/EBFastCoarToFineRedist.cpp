@@ -6,7 +6,7 @@
 
 #include "EBFastCoarToFineRedist.H"
 
-#define EBFASTC2F_DEBUG 1
+#define EBFASTC2F_DEBUG 0
 
 EBFastCoarToFineRedist::EBFastCoarToFineRedist() : EBCoarToFineRedist(){
 

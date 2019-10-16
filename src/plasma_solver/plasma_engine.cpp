@@ -489,19 +489,32 @@ void plasma_engine::grid_report(){
 			    finest_level,
 			    grids);
 
-  const ProblemDomain finest_domain = m_amr->get_domains()[finest_level];
-  const Box box = finest_domain.domainBox();
+  const ProblemDomain coarsest_domain = m_amr->get_domains()[0];
+  const ProblemDomain finest_domain   = m_amr->get_domains()[finest_level];
+  const Box finestBox   = finest_domain.domainBox();
+  const Box coarsestBox = coarsest_domain.domainBox();
+  const Vector<int> refRat = m_amr->get_ref_rat();
 
   // Write a report
+  
   pout() << "-----------------------------------------------------------------------" << endl
 	 << "plasma_engine::Grid report - timestep = " << m_step << endl
 	 << "\t\t\t        Finest level           = " << finest_level << endl
-	 << "\t\t\t        Finest domain          = " << box.size()[0] << " x " << box.size()[1] <<
+	 << "\t\t\t        Finest domain          = " << finestBox.size()[0] << " x " << finestBox.size()[1] <<
 #if CH_SPACEDIM==2
     endl
 #elif CH_SPACEDIM==3
-    " x " << box.size()[2] << endl
+    " x " << finestBox.size()[2] << endl
 #endif
+    	 << "\t\t\t        Coarsest domain        = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] <<
+#if CH_SPACEDIM==2
+    endl
+#elif CH_SPACEDIM==3
+    " x " << coarsestBox.size()[2] << endl
+#endif
+	 << "\t\t\t        Refinement ratios      = " << refRat << endl
+    	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
+	 << "\t\t\t        Finest dx              = " << dx[finest_level] << endl
     	 << "\t\t\t        Total number boxes     = " << totBoxes << endl
     	 << "\t\t\t        Total number of cells  = " << totPoints << " (" << totPointsGhosts << ")" << endl
 	 << "\t\t\t        Proc. # of cells       = " << myPoints << " (" << myPointsGhosts << ")" << endl
@@ -510,8 +523,6 @@ void plasma_engine::grid_report(){
     	 << "\t\t\t        Proc. # of boxes (lvl) = " << my_level_boxes << endl
     	 << "\t\t\t        Total # of cells (lvl) = " << total_level_points << endl
 	 << "\t\t\t        Proc. # of cells (lvl) = " << my_level_points << endl
-	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
-	 << "\t\t\t        Finest dx              = " << dx[finest_level] << endl
 #ifdef CH_USE_MEMORY_TRACKING
 	 << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
     	 << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
@@ -2474,6 +2485,11 @@ void plasma_engine::write_plot_file(){
   
 
   // Allocate storage
+  Real t_assemble = -MPI_Wtime();
+  if(m_verbosity >= 3){
+    pout() << "plasma_engine::write_plot_file - assembling data..." << endl;
+  }
+
   EBAMRCellData output;
   m_amr->allocate(output, phase::gas, ncomp);
   data_ops::set_value(output, 0.0);
@@ -2507,6 +2523,7 @@ void plasma_engine::write_plot_file(){
 
   names.append(get_plotvar_names());
   write_plot_data(output, icomp);
+  t_assemble += MPI_Wtime();
 									       
   
   // Filename
@@ -2533,7 +2550,7 @@ void plasma_engine::write_plot_file(){
   if(m_verbosity >= 3){
     pout() << "plasma_engine::write_plot_file - writing plot file..." << endl;
   }
-  const Real t0 = MPI_Wtime();
+  Real t_write = -MPI_Wtime();
   writeEBHDF5(fname, 
 	      m_amr->get_grids(),
 	      output_ptr,
@@ -2547,9 +2564,11 @@ void plasma_engine::write_plot_file(){
 	      false,
 	      Vector<Real>(),
 	      m_num_plot_ghost*IntVect::Unit);
-  const Real t1 = MPI_Wtime();
+  t_write += MPI_Wtime();
   if(m_verbosity >= 3){
-    pout() << "plasma_engine::write_plot_file - writing plot file... DONE!. Write time = " << t1 - t0 << " seconds." << endl;
+    pout() << "plasma_engine::write_plot_file - writing plot file... DONE!. " << endl
+	   << "\t Assemble data = " << t_assemble << " seconds." << endl
+      	   << "\t Write time    = " << t_write << " seconds." << endl;
   }
 }
 
@@ -2811,6 +2830,13 @@ void plasma_engine::new_write_checkpoint_file(){
   HDF5Handle handle_out(str, HDF5Handle::CREATE);
   header.writeToFile(handle_out);
 
+  Real t_amr = 0.0;
+  Real t_cdr = 0.0;
+  Real t_rte = 0.0;
+  Real t_poi = 0.0;
+  Real t_sig = 0.0;
+  Real t_pla = 0.0;
+
   // Write stuff level by level
   const Real t0 = MPI_Wtime();
   if(m_verbosity >= 3){
@@ -2820,33 +2846,51 @@ void plasma_engine::new_write_checkpoint_file(){
     handle_out.setGroupToLevel(lvl);
 
     // Write level grids
+    t_amr -= MPI_Wtime();
     write(handle_out, m_amr->get_grids()[lvl]);
+    t_amr += MPI_Wtime();
 
     // CDR solvers write their checkpoint data
+    t_cdr -= MPI_Wtime();
     for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
       const RefCountedPtr<cdr_solver>& solver = solver_it();
       solver->write_checkpoint_level(handle_out, lvl);
     }
+    t_cdr += MPI_Wtime();
 
     // RTE solvers write their checkpoint data
+    t_rte -= MPI_Wtime();
     for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
       const RefCountedPtr<rte_solver>& solver = solver_it();
       solver->write_checkpoint_level(handle_out, lvl);
     }
+    t_rte += MPI_Wtime();
 
     // Poisson solver checkpoints its data
+    t_poi -= MPI_Wtime();
     poisson->write_checkpoint_level(handle_out, lvl);
+    t_poi += MPI_Wtime();
     
     // Sigma solver writes its checkpoint data
+    t_sig -= MPI_Wtime();
     sig->write_checkpoint_level(handle_out, lvl);
+    t_sig += MPI_Wtime();
 
     // plasma_engine checkpoints its internal data
+    t_pla -= MPI_Wtime();
     write_checkpoint_level(handle_out, lvl);
+    t_pla += MPI_Wtime();
   }
-  const Real t1 = MPI_Wtime();
   if(m_verbosity >= 3){
-    pout() << "plasma_engine::new_write_checkpoint_file - writing checkpoint file... DONE! Write time = "
-	   << t1-t0<< " seconds." << endl;
+    const Real t_tot = t_amr + t_cdr + t_rte + t_poi + t_sig + t_pla;
+    pout() << "plasma_engine::new_write_checkpoint_file - writing checkpoint file... DONE! " << endl
+	   << "\t Total time    = " << t_tot << " seconds" << endl
+	   << "\t AMR time      = " << t_amr*100./t_tot << "%" << endl
+      	   << "\t CDR time      = " << t_cdr*100./t_tot << "%" << endl
+	   << "\t RTE time      = " << t_rte*100./t_tot << "%" << endl
+      	   << "\t Poisson time  = " << t_poi*100./t_tot << "%" << endl
+	   << "\t Sigma time    = " << t_sig*100./t_tot << "%" << endl
+	   << "\t Internal time = " << t_pla*100./t_tot << "%" << endl;
   }
   
   handle_out.close();
