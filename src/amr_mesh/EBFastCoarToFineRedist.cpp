@@ -6,7 +6,7 @@
 
 #include "EBFastCoarToFineRedist.H"
 
-#define EBFASTC2F_DEBUG 0
+#define EBFASTC2F_DEBUG 1
 
 EBFastCoarToFineRedist::EBFastCoarToFineRedist() : EBCoarToFineRedist(){
 
@@ -24,15 +24,6 @@ void EBFastCoarToFineRedist::define(const EBLevelGrid&                      a_eb
 				    const int&                              a_nvar,
 				    const int&                              a_redistRad){
   CH_TIME("EBFastCoarToFineRedist::define");
-#if EBFASTC2F_DEBUG // Original code
-  EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
-  if(procID() == 0) std::cout << "coar sets with OLD define functions = " << std::endl;
-  printCoarSets();
-  if(procID() == 0) std::cout << "fine sets with OLD define functions = " << std::endl;
-  printCedFineSets();
-#endif
-
-  
 
   //from here we can assume the redistRad == 1
   m_isDefined  = true;
@@ -68,11 +59,27 @@ void EBFastCoarToFineRedist::define(const EBLevelGrid&                      a_eb
   defineDataHolders();
   setToZero();
 
-#if EBFASTC2F_DEBUG // Original code
-  if(procID() == 0) std::cout << "coar sets with NEW define functions = " << std::endl;
-  printCoarSets();
-  if(procID() == 0) std::cout << "fine sets with NEW define functions = " << std::endl;
-  printCedFineSets();
+#if EBFASTFC2F_DEBUG // This debugging hook calls the original function and checks that the sets completely overlap. 
+  IntVectSet newCedFineSet, oldCedFineSet;
+  IntVectSet newCoarSet,    oldCoarSet;
+  
+  gatherSetsCedFine(newCedFineSet);
+  gatherSetsCoar(   newCoarSet);
+
+  // Call old define
+  EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_redistRad);
+  gatherSetsCedFine(oldCedFineSet);
+  gatherSetsCoar(   oldCoarSet);
+
+  const IntVectSet diffSet1 = newCedFineSet - oldCedFineSet;
+  const IntVectSet diffSet2 = oldCedFineSet - newCedFineSet;
+  const IntVectSet diffSet3 = newCoarSet    - oldCoarSet;
+  const IntVectSet diffSet4 = oldCoarSet    - newCoarSet;
+
+  if(diffSet1.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet1 not empty");
+  if(diffSet2.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet2 not empty");
+  if(diffSet3.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet3 not empty");
+  if(diffSet4.numPts() != 0) MayDay::Abort("EBFastCoarToFineRedist::define - diffSet4 not empty");
 #endif
 }
 
@@ -118,36 +125,8 @@ void EBFastCoarToFineRedist::makeCoarSets(const IntVectSet& a_cfivs, const Layou
   }
 }
 
-void EBFastCoarToFineRedist::printCoarSets(){
-  CH_TIME("EBFastToCoarFineRedist::printCoarSets");
-
-  IntVectSet globalCoarSet;
-  for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
-    globalCoarSet |= m_setsCoar[dit()];
-  }
-  gatherBroadcast(globalCoarSet);
-
-  if(procID() == 0){
-    std::cout << globalCoarSet << std::endl;
-  }
-}
-
-void EBFastCoarToFineRedist::printCedFineSets(){
-  CH_TIME("EBFastToCoarFineRedist::printCedFineSets");
-
-  IntVectSet globalFineSet;
-  for (DataIterator dit = m_gridsCedFine.dataIterator(); dit.ok(); ++dit){
-    globalFineSet |= m_setsCedFine[dit()];
-  }
-  gatherBroadcast(globalFineSet);
-
-  if(procID() == 0){
-    std::cout << globalFineSet << std::endl;
-  }
-}
-
 void EBFastCoarToFineRedist::gatherBroadcast(IntVectSet& a_set){
-  CH_TIME("EBFastFineToCoarRedist::gatherBroadcast");
+  CH_TIME("EBFastCoarToFine::gatherBroadcast");
 #ifdef CH_MPI
   Vector<IntVectSet> procSet;
   const int destProc = uniqueProc(SerialTask::compute);
@@ -160,4 +139,24 @@ void EBFastCoarToFineRedist::gatherBroadcast(IntVectSet& a_set){
   }
   broadcast(a_set, destProc);
 #endif
+}
+
+void EBFastCoarToFineRedist::gatherSetsCedFine(IntVectSet& a_setsCedFine){
+  CH_TIME("EBFastCoarToFineRedist::gatherSetsCedFine");
+
+  a_setsCedFine.makeEmpty();
+  for (DataIterator dit = m_gridsCedFine.dataIterator(); dit.ok(); ++dit){
+    a_setsCedFine |= m_setsCedFine[dit()];
+  }
+  gatherBroadcast(a_setsCedFine);
+}
+
+void EBFastCoarToFineRedist::gatherSetsCoar(IntVectSet& a_setsCoar){
+  CH_TIME("EBFastCoarToFineRedist::gatherSetsCoar");
+
+  a_setsCoar.makeEmpty();
+  for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
+    a_setsCoar |= m_setsCoar[dit()];
+  }
+  gatherBroadcast(a_setsCoar);
 }

@@ -28,14 +28,13 @@ public:
 
 protected:
 
-
   void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
   void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
 
   // Debugging functions
-  void gatherBroadcast(IntVectSet& a_set);
-  void printCoarSets();
-  void printCedFineSets();
+  void gatherBroadcast(  IntVectSet& a_set);
+  void gatherSetsCedFine(IntVectSet& a_setsCedFine);
+  void gatherSetsCoar(   IntVectSet& a_setsCoar);
 
 
 };
