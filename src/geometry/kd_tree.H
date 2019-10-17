@@ -38,6 +38,8 @@ public:
   */
   virtual Vector<RefCountedPtr<T> > find_closest(const RealVect a_x0);
 
+  virtual int get_depth(){return m_depth;}
+
 protected:
 
   /*!

@@ -1,0 +1,7 @@
+# ====================================================================================================
+# TESSELLATION GEOMETRY CLASS (mostly used for testing)
+# ====================================================================================================
+tessellation.mesh_file    = big_porsche.ply
+tessellation.tree_depth   = 10
+tessellation.max_elements = 50
+

@@ -11,6 +11,8 @@
 
 #include <PolyGeom.H>
 
+#include <chrono>
+
 #if 1
 #include <ParmParse.H>
 #endif
@@ -242,20 +244,21 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 #define print_time 0
 #if print_time
   Real t0, t1, t2, t3, t4;
-  t0 = MPI_Wtime();
+  auto start = std::chrono::system_clock::now(); 
 #endif
 
   Real min_dist = 1.E99;
   if(m_sphere.inside(a_x0)){
     if(m_use_tree){ // Fast kd-tree search
 #if print_time
-      t1 = MPI_Wtime();
+      auto start_search = std::chrono::system_clock::now(); 
 #endif
       //      Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->get_candidates(a_x0);
       Vector<RefCountedPtr<dcel_poly> > candidates = m_tree->find_closest(a_x0);
-#if print_time
-      t2 = MPI_Wtime();
-#endif
+      //#if print_time
+      auto stop_search = std::chrono::system_clock::now();
+      auto start_comp = std::chrono::system_clock::now(); 
+      //#endif
       for (int i = 0; i < candidates.size(); i++){
 	const Real cur_dist = candidates[i]->signed_distance(a_x0);
 	if(Abs(cur_dist) < Abs(min_dist)){
@@ -263,7 +266,18 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
 	}
       }
 #if print_time
-      t3 = MPI_Wtime();
+      auto stop_comp = std::chrono::system_clock::now(); 
+#endif
+
+#if print_time
+      auto stop = std::chrono::system_clock::now();
+      std::chrono::duration<double> total_time = stop - start;
+      std::chrono::duration<double> total_search = stop_search - start_search;
+      std::chrono::duration<double> total_comp = stop_comp - start_comp;
+      pout() << "Search time = "     << total_search.count()
+	     << "\t #candidates = "    << candidates.size() 
+	     << "\t Compute time = " << total_comp.count()
+	     << "\t Search/Comp = "     << 1.0*total_search.count()/total_comp.count() << endl;
 #endif
     }
     else{ // Brute force search
@@ -276,19 +290,9 @@ Real dcel_mesh::signed_distance(const RealVect a_x0){
     }
   }
   else{ // We are outside every bounding box, simply return the distance to the bounding sphere
-#if print_time
-    t1 = MPI_Wtime();
-    t2 = t1;
-#endif
     min_dist = (a_x0 - m_sphere.get_center()).vectorLength() - m_sphere.get_radius();
-#if print_time
-    t3 = MPI_Wtime();
-#endif
   }
-#if print_time
-  t4 = MPI_Wtime();
-  pout() << "Search time = " << t2 - t1 << "\t Compute time = " << t3 - t2 << "\t Fraction = " << (t2 - t1)/(t3-t2) << endl;
-#endif
+
 
   return min_dist;
 }

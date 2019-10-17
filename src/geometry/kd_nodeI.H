@@ -200,7 +200,7 @@ template <typename T> void kd_node<T>::split_data(){
     }
   }
 
-  // Find the longest dimension
+  // Split along the longest dimension
   Real longest_len = 0.0;
   int longest_dir = 0;
   for (int dir = 0; dir < SpaceDim; dir++){

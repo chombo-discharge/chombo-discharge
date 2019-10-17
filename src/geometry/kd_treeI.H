@@ -6,8 +6,15 @@
 */
 
 #include "kd_tree.H"
+#include <chrono>
+#include <ctime> 
+#include <iostream>
+#include <random>
 
 #include <ParmParse.H>
+#include <PolyGeom.H>
+
+#include <chrono>
 
 #define TREE_EPSILON 1.E-6
 
@@ -66,7 +73,7 @@ template<typename T> void kd_tree<T>::build_tree(const Vector<RefCountedPtr<T> >
 	node->set_left(left);
 	node->set_right(right);
 	node->split_data(); // This also computes bounding boxes for children
-	node->clear_data();
+	node->clear_data(); // Clears data for this node
 
 	// Update who is the leaf
 	node->set_leaf(false);
@@ -119,7 +126,17 @@ template<typename T> Vector<RefCountedPtr<T> > kd_tree<T>::find_closest(const Re
   queue.push_back(m_root);
   dist.push_back(m_root->dist(a_x0));
 
+#if 0  
+  auto start = std::chrono::system_clock::now();
+  const Real schme = 5*5 - PolyGeom::dot(a_x0, a_x0);
+  auto end = std::chrono::system_clock::now();
+  
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  std::cout << "elapsed time: " << elapsed_seconds.count() << "s"
+	    << "\t #candiates = " << queue[0]->get_data().size() << std::endl;
+#endif
   this->tree_search(queue, dist, a_x0);
+
 
   return queue[0]->get_data();
 }
@@ -129,7 +146,7 @@ template<typename T> void kd_tree<T>::tree_search(Vector<RefCountedPtr<kd_node<T
 						   const RealVect                       a_x0){
 
   // We assume that a_queue and a_distances is sorted on the way in
-  const int Qmax = 20;
+  const int Qmax = 10;
 
   if(!a_queue[0]->is_leaf()){ // Examine children
     RefCountedPtr<kd_node<T> > left  = a_queue[0]->get_left();
@@ -155,7 +172,6 @@ template<typename T> void kd_tree<T>::tree_search(Vector<RefCountedPtr<kd_node<T
     
     this->insertion_sort(a_queue, a_distances);
     this->trim(a_queue, a_distances, Qmax);
-    
 
     // After sorting, if the first element is a node, we need to keep going
     // There's more to this because there can be multiple nodes/leaves with the same priority

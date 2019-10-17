@@ -7,6 +7,8 @@
 
 #include "dcel_if.H"
 
+#include <chrono>
+
 dcel_if::dcel_if(){
 
 }
@@ -26,7 +28,19 @@ dcel_if::~dcel_if(){
 }
 
 Real dcel_if::value(const RealVect& a_point) const{
+#define schme 0
+#if schme
+  auto mesh_start = std::chrono::system_clock::now(); 
+#endif
   Real retval = m_mesh->signed_distance(a_point);
+#if schme
+  auto mesh_stop = std::chrono::system_clock::now();
+  const Real blah = a_point.vectorLength() - 1.0;
+  auto imp_stop = std::chrono::system_clock::now();
+  std::chrono::duration<double> decl_time = mesh_stop - mesh_start;
+  std::chrono::duration<double> impfunc_time = imp_stop-mesh_stop;
+  pout() << "Ratio = " << 1.0*decl_time.count()/impfunc_time.count() << endl;
+#endif
   if(m_inside){
     retval *= -1;
   }
