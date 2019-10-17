@@ -41,7 +41,7 @@ PlasmaC comes with controls for adjusting output. Through the :ref:`Chap:plasma_
 
 * :file:`output_directory/plt` contains all plot files.
 * :file:`output_directory/chk` contains all checkpoint files, which are used for restarting.
-* :file:`output_directory/proc` contains graphical information of patch distributions among the MPI ranks. 
+* :file:`output_directory/mpi` contains information about individual MPI ranks. 
 * :file:`output_directory/geo` contains geometric files that are written by PlasmaC (if you enable ``plasma_engine.write_ebis``).
 
 The files in :file:`output_directory/geo` do *not* represent your geometry in the form of level sets. Instead, the files that are placed here are HDF5 representations of your embedded boundary graph, which can be *read* by PlasmaC if you enable ``plasma_engine.read_ebis``. This is a shortcut that allows faster geometry generation when you restart simulations.
@@ -54,7 +54,7 @@ The reason for this design is that PlasmaC can end up writing thousands of files
 
    cdr_gdnv.plt_vars = phi vel dco src ebflux # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
 
-where ``phi`` is the state density, ``vel`` is the drift velocity, ``dco`` is the diffusion coefficient, ``src`` is the source term, and ``ebflux`` is the flux at embedded boundaries. Which variables are available for output changes for one class to the next. If you only want to plot the density, then you should put ``cdr_gdnv.plt_vars = phi``. 
+where ``phi`` is the state density, ``vel`` is the drift velocity, ``dco`` is the diffusion coefficient, ``src`` is the source term, and ``ebflux`` is the flux at embedded boundaries. Which variables are available for output changes for one class to the next. If you only want to plot the density, then you should put ``cdr_gdnv.plt_vars = phi``. An empty entry like ``cdr_gdnv.plt_vars =`` will lead to run-time errors, so if you do not want a class to provide plot data you may put ``cdr_gdnv.plt_vars = -1``. 
 
 Controlling processor output
 ----------------------------
@@ -76,7 +76,7 @@ Restarting simulations is done in exactly the same way as running simulations, a
 
 .. code-block:: bash
 
-   mpirun -np 32 <application_executable> <input_file> plasma_engine.restart=true plasma_engine.restart=10
+   mpirun -np 32 <application_executable> <input_file> plasma_engine.restart=10
 
 will restart from step 10. If you set ``plasma_engine.restart=0``, you will get a fresh simulation. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and `PlasmaC` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` or ``plasma_engine.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory. 
 

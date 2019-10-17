@@ -5,10 +5,23 @@ Setting up simulations
 
 In `PlasmaC`, most of the action occurs through the physics interface :ref:`Chap:plasma_kinetics`.
 
+.. _Chap:NewGeometry:
+
 Setting up a geometry
 ---------------------
 
+Fast geometry generation with pre-voxelization
+______________________________________________
 
+Geometry generation is a non-negligible part of `PlasmaC`. Many geometries consist of small object in large domains, and it is generally desireable to make geometry generation scale according to the size of the object rather than the size of the domain. To achieve this, we have introduced the concept of a *voxel*. A voxel consists of a Cartesian grid box described by its two corners, and a flag that describes the nature of that box. The user may provide three types of voxels to his :ref:`Chap:computational_geometry` class; covered voxels, regular voxels, and cut voxels. The default behavior of the pre-voxelization is as follows:
+
+1. All grid boxes that intersect a cut voxel are load balanced among the available MPI ranks and queried for geometric information. 
+2. All grid boxes that are completely contained inside a regular (or covered) voxel box is set to regular (or covered) *if* the regular voxel does not intersect a cut voxel. 
+
+The advantage of using a pre-voxelization is that we can supply meta-information to the mesh generator so that all the parts of the domain that do not intersect an object are not actually queried for geometric information. This can lead to orders of magnitude improvements in the geometry generation step.
+
+The user may set the voxels manually when he defines his geometry, or he may use our voxel-generating tool for defining them. 
+   
 Defining your chemistry
 -----------------------
 

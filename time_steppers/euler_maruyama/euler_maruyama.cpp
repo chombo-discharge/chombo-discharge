@@ -17,7 +17,7 @@ typedef euler_maruyama::poisson_storage poisson_storage;
 typedef euler_maruyama::rte_storage     rte_storage;
 typedef euler_maruyama::sigma_storage   sigma_storage;
 
-#define EULER_MARUYAMA_TIMER 0
+#define EULER_MARUYAMA_TIMER 1
 
 euler_maruyama::euler_maruyama(){
   m_class_name = "euler_maruyama";
@@ -93,6 +93,7 @@ Real euler_maruyama::restrict_dt(){
 }
 
 Real euler_maruyama::advance(const Real a_dt){
+  CH_TIME("euler_maruyama::advance");
   if(m_verbosity > 5){
     pout() << "euler_maruyama::advance" << endl;
   }

@@ -70,13 +70,13 @@ ___________________________
 
 In `Chombo`,the system information is supplied through a file known as Make.defs.local, which resides in the `Chombo` library itself. This file contains a number of build settings, such as dimension, compilers, paths to HDF5 and so on. The configuration file is /lib/mk/Make.defs.local in your `Chombo` folder. The build parameters can also be controlled through the command line. 
 
-Here are the configuration variables that have been used used on the ``fram`` supercomputer
+Here are the configuration variables that have been used used on the `fram <https://www.top500.org/system/179072>`_ supercomputer
 
 .. code-block:: c++
 
 		DIM           = 3
 		DEBUG         = FALSE
-		OPT           = TRUE
+		OPT           = HIGH
 		#PRECISION     =
 		#PROFILE       =
 		CXX            = icpc
@@ -110,11 +110,11 @@ Here are the configuration variables that have been used used on the ``fram`` su
 		#cppoptflags   =
 		#cxxcppflags   =
 		#cxxdbgflags   =
-		cxxoptflags    = -O2 -xCORE-AVX2
+		cxxoptflags    = -Ofast -xCORE-AVX2 -march=native
 		#cxxprofflags  =
 		#fcppflags     =
 		#fdbgflags     =
-		foptflags      = -O2 -xCORE-AVX2
+		foptflags      = -Ofast -xCORE-AVX2
 		#fprofflags    =
 		flibflags      = -lblas -llapack
 		#lddbgflags    =
@@ -141,8 +141,9 @@ In `PlasmaC`, each problem is compiled as a mini-application into a subfolder. M
 
 .. code-block:: bash
 
-   make -s -j 16 DIM=2 <application_name>
+   make -s -j8 DIM=2 OPT=HIGH <application_name>
 
+We generally recommend that you compile with ``OPT=HIGH`` for performance reasons. 
 
 .. _Chap:Visualization:
 
