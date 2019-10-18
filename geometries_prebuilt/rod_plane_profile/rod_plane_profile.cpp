@@ -19,6 +19,7 @@
 #include "rod_if.H"
 
 rod_plane_profile::rod_plane_profile(){
+  if(SpaceDim == 3) MayDay::Abort("rod_plane_profile::rod_plane_profile - this is currently for 2D only");
   std::string str;
   Vector<Real> vec(SpaceDim);
   
@@ -84,6 +85,46 @@ rod_plane_profile::rod_plane_profile(){
   }
 
   this->set_eps0(1.0);
+
+  // Check if we should use the new gshop
+  bool new_gshop = false;
+  pp.get("use_new_gshop", str);
+  const bool use_new_gshop = (str == "true") ? true : false;
+  if(use_new_gshop){
+    computational_geometry::s_use_new_gshop = true;
+    
+
+    
+    RealVect lo, hi;
+
+    // Make lo, hi cover the needle
+    for (int dir = 0; dir < SpaceDim; dir++){
+      lo[dir] = Min(center1[dir], center2[dir]);
+      hi[dir] = Max(center1[dir], center2[dir]);
+    }
+
+    const real_box reg_gas(-100*RealVect::Unit, 100*RealVect::Unit);
+    const real_box rod_gas(lo-rod_rad*RealVect::Unit, hi+rod_rad*RealVect::Unit);
+
+    // Make lo, hi cover the plane
+    lo = point - 0.5*width*RealVect(BASISV(0));
+    hi = point + 0.5*width*RealVect(BASISV(0));
+    hi += rad*RealVect::Unit;
+    lo -= rad*RealVect::Unit;
+
+    lo -= 100*RealVect(BASISV(1));
+
+    m_regular_voxels_gas.push_back(reg_gas);
+    if(has_rod)  m_bounded_voxels_gas.push_back(rod_gas);
+    if(has_plane) m_bounded_voxels_gas.push_back(real_box(lo,hi));
+
+    if(has_plane){
+      m_covered_voxels_sol.push_back(reg_gas);
+
+      //      std::cout << lo << "\t" << hi << std::endl;
+      m_bounded_voxels_sol.push_back(real_box(lo,hi));
+    }
+  }
 }
 
 rod_plane_profile::~rod_plane_profile(){

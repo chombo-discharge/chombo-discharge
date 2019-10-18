@@ -1950,7 +1950,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
 
     // Compute the capacitance
     if(m_new_io){
-      m_capacitance = poisson->compute_capacitance();
+      //      m_capacitance = poisson->compute_capacitance();
     }
   }
 
