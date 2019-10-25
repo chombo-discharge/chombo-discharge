@@ -64,7 +64,6 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   parse_restart();
   parse_memrep();
   parse_output_directory();
-  parse_output_mode();
   parse_output_file_names();
   parse_verbosity();
   parse_output_intervals();
@@ -561,158 +560,6 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
   CH_TIME("plasma_engine::read_checkpoint_file");
   if(m_verbosity > 3){
     pout() << "plasma_engine::read_checkpoint_file" << endl;
-  }
-  
-  if(m_new_io){
-    this->new_read_checkpoint_file(a_restart_file);
-  }
-  else{
-    this->old_read_checkpoint_file(a_restart_file);
-  }
-}
-
-void plasma_engine::old_read_checkpoint_file(const std::string& a_restart_file){
-  CH_TIME("plasma_engine::old_read_checkpoint_file");
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::old_read_checkpoint_file" << endl;
-  }
-
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
-  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  RefCountedPtr<sigma_solver>& sigma     = m_timestepper->get_sigma();
-
-  HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
-  HDF5HeaderData header;
-  header.readFromFile(handle_in);
-
-  // Base resolution should not have changed. If it did, issue an error
-  const Real coarsest_dx = header.m_real["coarsest_dx"];
-  if(!coarsest_dx == m_amr->get_dx()[0]){
-    MayDay::Abort("plasma_engine::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
-  }
-
-  m_time        = header.m_real["time"];
-  m_dt          = header.m_real["dt"];
-  m_step        = header.m_int["step"];
-
-  int finest_level = header.m_int["finest_level"];
-
-  // Read in grids
-  Vector<Vector<Box> > boxes(1 + finest_level);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    handle_in.setGroupToLevel(lvl);
-
-    const int status = read(handle_in, boxes[lvl]);
-
-    if(status != 0){
-      MayDay::Error("plasma_engine::read_checkpoint_file - file has no grids");
-    }
-  }
-
-  m_amr->set_finest_level(finest_level); // Set finest level
-  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
-  m_amr->set_grids(boxes, regsize);               // Set up amr
-  m_timestepper->setup_solvers();  // Instantiate solvrs, they can now be filled with data
-
-  this->allocate_internals();            // Allocate internal storage which also needs to be filled
-
-
-  // Transient storage
-  EBAMRCellData sig, tags;
-  m_amr->allocate(sig, phase::gas, 1);
-  m_amr->allocate(tags, phase::gas, 1);
-  data_ops::set_value(sig, 0.0);
-  data_ops::set_value(tags,  0.0);
-
-  finest_level = m_amr->get_finest_level();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    handle_in.setGroupToLevel(lvl);
-
-    // CDR solver
-    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_solver>& solver = solver_it();
-      EBAMRCellData& solver_state       = solver->get_state();
-      const std::string solver_name     = solver->get_name();
-
-      if(m_restart_mode != restart_mode::surface_charge_only){
-	read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
-      }
-    }
-
-    // RTE solvers
-    if(!m_timestepper->stationary_rte()){
-      for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-	RefCountedPtr<rte_solver>& solver = solver_it();
-	EBAMRCellData& solver_state       = solver->get_state();
-	const std::string solver_name     = solver->get_name();
-
-	read<EBCellFAB>(handle_in, *solver_state[lvl], solver_name, dbl, Interval(), false);
-      }
-    }
-
-    // Read in sigma and tags
-    read<EBCellFAB>(handle_in, *sig[lvl],  "sigma", dbl, Interval(), false);
-    read<EBCellFAB>(handle_in, *tags[lvl], "tags",  dbl, Interval(), false);
-  }
-
-  // Copy data to sigma solver
-  data_ops::set_value(sigma->get_state(), 0.0);
-  if(m_restart_mode != restart_mode::volume_charge_only){
-    data_ops::incr(sigma->get_state(), sig, 1.0);
-  }
-  sigma->reset_cells(sigma->get_state());
-
-  // Instantiate m_tags
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBCellFAB& tmp   = (*tags[lvl])[dit()];
-      const EBISBox& ebisbox = tmp.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
-
-      DenseIntVectSet& tagged_cells = (*m_tags[lvl])[dit()];
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	if(tmp(vof, 0) >= 0.9999){
-	  tagged_cells |= vof.gridIndex();
-	}
-      }
-    }
-  }
-
-  // Make CDR data consistent
-  for (cdr_iterator solver_it = m_timestepper->get_cdr()->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-
-    m_amr->average_down(solver->get_state(), phase::gas);
-    m_amr->interp_ghost(solver->get_state(), phase::gas);
-  }
-
-  // Average down and update ghost cells for Poisson
-  m_amr->average_down(poisson->get_state());
-  m_amr->interp_ghost(poisson->get_state());
-
-  // Average down and update ghost cells for RTE
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-
-    m_amr->average_down(solver->get_state(), phase::gas);
-    m_amr->interp_ghost(solver->get_state(), phase::gas);
-  }
-
-  handle_in.close();
-}
-
-void plasma_engine::new_read_checkpoint_file(const std::string& a_restart_file){
-  CH_TIME("plasma_engine::new_read_checkpoint_file");
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::new_read_checkpoint_file" << endl;
   }
 
   // Reference to all solvers
@@ -1399,20 +1246,6 @@ void plasma_engine::parse_verbosity(){
   pp.get("verbosity", m_verbosity);
 }
 
-void plasma_engine::parse_output_mode(){
-  CH_TIME("plasma_engine::parse_output_mode");
-  if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_output_mode" << endl;
-  }
-  std::string str;
-  ParmParse pp("plasma_engine");
-
-  // Old or new IO mode
-  m_new_io = false;
-  pp.get("use_new_io", str);
-  if(str == "true") m_new_io = true;
-}
-
 void plasma_engine::parse_regrid(){
   CH_TIME("plasma_engine::parse_regrid");
   if(m_verbosity > 5){
@@ -1539,7 +1372,6 @@ void plasma_engine::parse_output_intervals(){
   if(m_verbosity > 5){
     pout() << "plasma_engine::set_plot_interval" << endl;
   }
-  
 
   ParmParse pp("plasma_engine");
   pp.get("plot_interval", m_plot_interval);
@@ -1949,9 +1781,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
 #endif
 
     // Compute the capacitance
-    if(m_new_io){
       //      m_capacitance = poisson->compute_capacitance();
-    }
   }
 
   if(!m_celltagger.isNull()){
@@ -2368,6 +2198,12 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
   }
 #endif
 
+  // Get the total number of tags
+  Vector<int> num_local_tags(1+finest_level);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    num_local_tags[lvl] = a_all_tags[lvl].numPts();
+  }
+
 #if 0 // Debug
   return true;
 #else // Original code
@@ -2694,112 +2530,6 @@ void plasma_engine::write_checkpoint_file(){
   CH_TIME("plasma_engine::write_checkpoint_file");
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_checkpoint_file" << endl;
-  }
-  
-  if(m_new_io){
-    this->new_write_checkpoint_file();
-  }
-  else{
-    this->old_write_checkpoint_file();
-  }
-}
-
-void plasma_engine::old_write_checkpoint_file(){
-  CH_TIME("plasma_engine::write_checkpoint_file");
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::write_checkpoint_file" << endl;
-  }
-  
-  const int finest_level = m_amr->get_finest_level();
-  int finest_chk_level  = Min(m_max_chk_depth, finest_level);
-  if(m_max_chk_depth < 0){
-    finest_chk_level = finest_level;
-  }
-
-  const phase::which_phase cur_phase = phase::gas;
-  
-  RefCountedPtr<cdr_layout>& cdr   = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte   = m_timestepper->get_rte();
-  RefCountedPtr<sigma_solver>& sig = m_timestepper->get_sigma();
-
-  HDF5HeaderData header;
-  header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
-  header.m_real["time"]        = m_time;
-  header.m_real["dt"]          = m_dt;
-  header.m_int["step"]         = m_step;
-  header.m_int["finest_level"] = finest_level;
-
-  // Storage for sigma and m_tags - these are things that can't be written directly
-  EBAMRCellData sigma, tags;
-  m_amr->allocate(sigma, cur_phase, 1);
-  m_amr->allocate(tags,  cur_phase, 1);
-
-  // Copy data from sigma solver to sigma
-  data_ops::set_value(sigma, 0.0);
-  data_ops::incr(sigma, sig->get_state(), 1.0);
-
-
-  // Set tagged cells = 1
-  for (int lvl = 0; lvl <= finest_chk_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(cur_phase)[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = IntVectSet((*m_tags[lvl])[dit()]);
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	(*tags[lvl])[dit()](vof, 0) = 1.;
-      }
-    }
-  }
-
-  // Output file name
-  char str[100];
-  const std::string prefix = m_output_dir + "/chk/" + m_output_names;
-  sprintf(str, "%s.check%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
-
-
-  HDF5Handle handle_out(str, HDF5Handle::CREATE);
-  header.writeToFile(handle_out);
-
-  for (int lvl = 0; lvl <= finest_chk_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    handle_out.setGroupToLevel(lvl);
-    write(handle_out, dbl);
-
-    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-      const RefCountedPtr<cdr_solver>& solver = solver_it();
-      const EBAMRCellData& state              = solver->get_state();
-      const std::string name                  = solver->get_name();
-
-      write(handle_out, *state[lvl], name);
-    }
-
-    if(!m_timestepper->stationary_rte()){ // Must write RTE data if the solvers are transient
-      for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-	const RefCountedPtr<rte_solver>& solver = solver_it();
-	const EBAMRCellData& state              = solver->get_state();
-	const std::string name                  = solver->get_name();
-	
-	write(handle_out, *state[lvl], name);
-      }
-    }
-
-    write(handle_out, *sigma[lvl], "sigma");
-    write(handle_out, *tags[lvl],  "tags");
-  }
-
-  
-  handle_out.close();
-}
-
-void plasma_engine::new_write_checkpoint_file(){
-  CH_TIME("plasma_engine::new_write_checkpoint_file");
-  if(m_verbosity > 3){
-    pout() << "plasma_engine::new_write_checkpoint_file" << endl;
   }
   
   const int finest_level = m_amr->get_finest_level();

@@ -273,6 +273,11 @@ public:
   virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
 
   /*!
+    @brief Parse the grid generation algorithm
+  */
+  virtual void parse_grid_generation();
+
+  /*!
     @brief Set verbosity
   */
   virtual void parse_verbosity();
@@ -623,6 +628,16 @@ public:
 
   
 protected:
+
+  /*!
+    @brief Enum for having understandable notation for grid generation
+  */
+  enum grid_generation{
+    berger_rigoustous = 0,
+    tiled             = 1,
+  };
+
+  grid_generation m_gridgen;
 
   /*!
     @brief mfis

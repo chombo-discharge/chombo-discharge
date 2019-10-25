@@ -25,34 +25,6 @@
 /*!
   @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
   regrid intervals etc. 
-
-  Class options
-  -------------
-
-      plasma_engine.verbosity                       = 1             # Engine verbosity
-      plasma_engine.plot_interval                   = 10            # Plot interval
-      plasma_engine.regrid_interval                 = 10            # Regrid interval
-      plasma_engine.checkpoint_interval             = 10            # Checkpoint interval
-      plasma_engine.init_regrids                    = 0             # Number of initial regrids
-      plasma_engine.start_time                      = 0             # Start time (fresh simulations only)
-      plasma_engine.stop_time                       = 1.0           # Stop time
-      plasma_engine.max_steps                       = 100           # Maximum number of steps
-      plasma_engine.geometry_only                   = false         # Special option that ONLY plots the geometry
-      plasma_engine.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
-      plasma_engine.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
-      plasma_engine.output_mode                     = full          # Output mode
-      plasma_engine.output_directory                = ./            # Output directory
-      plasma_engine.output_names                    = simulation    # Simulation output names
-      plasma_engine.restart                         = false         # Do restart or not
-      plasma_engine.restart_file                    = default_file  # Restart file
-      plasma_engine.restart_mode                    = full          # Restart mode. 
-      plasma_engine.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
-      plasma_engine.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
-      plasma_engine.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
-      plasma_engine.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
-      plasma_engine.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
-      plasma_engine.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
-      plasma_engine.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
 */
 class plasma_engine {
 public:
@@ -100,7 +72,6 @@ public:
   virtual void parse_memrep();
   virtual void parse_output_directory();
   virtual void parse_geo_refinement();
-  virtual void parse_output_mode();
   virtual void parse_verbosity();
   virtual void parse_output_file_names();
   virtual void parse_output_intervals();
@@ -512,11 +483,6 @@ protected:
   bool m_dump_charge;
 
   /*!
-    @brief Use the old or new IO functions
-  */
-  bool m_new_io;
-
-  /*!
     @brief Plot tagged cells
   */
   bool m_plot_tags;
@@ -603,16 +569,6 @@ protected:
     @brief Read checkpoint file
   */
   virtual void read_checkpoint_file(const std::string& a_restart_file);
-
-  /*!
-    @brief Read checkpoint file
-  */
-  virtual void old_read_checkpoint_file(const std::string& a_restart_file);
-  
-  /*!
-    @brief Read checkpoint file
-  */
-  virtual void new_read_checkpoint_file(const std::string& a_restart_file);
 
   /*!
     @brief Read vector data up to and including a_step
@@ -705,16 +661,6 @@ protected:
   */
   virtual void write_checkpoint_file();
   
-  /*!
-    @brief Write a checkpoint file
-  */
-  virtual void old_write_checkpoint_file();
-
-  /*!
-    @brief Write a checkpoint file
-  */
-  virtual void new_write_checkpoint_file();
-
   /*!
     @brief Write checkpoint data
   */

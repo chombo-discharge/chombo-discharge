@@ -40,6 +40,7 @@ amr_mesh::amr_mesh(){
   parse_blocking_factor();
   parse_max_box_size();
   parse_max_ebis_box_size();
+  parse_grid_generation();
   parse_buffer_size();
   parse_irreg_growth();
   parse_fill_ratio();
@@ -2050,6 +2051,22 @@ void amr_mesh::parse_buffer_size(){
   pp.get("buffer_size", buffer);
   if(buffer > 0){
     m_buffer_size = buffer;
+  }
+}
+
+void amr_mesh::parse_grid_generation(){
+
+  ParmParse pp("amr_mesh");
+  std::string str;
+  pp.get("grid_generation", str);
+  if(str == "br"){
+    m_gridgen = grid_generation::berger_rigoustous;
+  }
+  else if(str == "tiled"){
+    m_gridgen = grid_generation::tiled;
+  }
+  else{
+    MayDay::Abort("amr_mesh::parse_grid_generation - unknown grid generation method requested");
   }
 }
 
