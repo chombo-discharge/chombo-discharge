@@ -34,8 +34,9 @@ public:
 protected:
 
   Vector<ProblemDomain> m_vectDomains;  // Domains
-  Vector<int>   m_refRatios;            // Refinement ratios
-  IntVect       m_tileSize;             // Tile size
+  Vector<Box>           m_tileDomains;  // Tile domains
+  Vector<int>           m_refRatios;    // Refinement ratios
+  IntVect               m_tileSize;     // Tile size
 
   void sanityCheck();
 

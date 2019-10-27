@@ -54,8 +54,8 @@ void memrep::get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
   long long curMem, peakMem;
   overallMemoryUsage(curMem, peakMem);
 
-  const int unfreed_mem = curMem;
-  const int peak_mem    = peakMem;
+  int unfreed_mem = curMem;
+  int peak_mem    = peakMem;
 
 
   int* unfreed = (int*) malloc(numProc()*sizeof(int));//new int[numProc()];

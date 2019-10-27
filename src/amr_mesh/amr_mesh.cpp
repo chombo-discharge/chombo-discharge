@@ -2070,7 +2070,7 @@ void amr_mesh::parse_grid_generation(){
 
   ParmParse pp("amr_mesh");
   std::string str;
-  pp.get("grid_generation", str);
+  pp.get("grid_algorithm", str);
   if(str == "br"){
     m_gridgen = grid_generation::berger_rigoustous;
   }
