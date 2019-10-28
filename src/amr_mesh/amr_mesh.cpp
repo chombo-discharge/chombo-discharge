@@ -865,7 +865,7 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
 		  CHF_BOX(region));
 
 
-#if 1 // Old code
+#if 0 // Old code
     // We can't REALLY trust ghost cells on the boundary. Do the boundary cells using safer stencils.
     IntVectSet bndry_ivs = ebisbox.getIrregIVS(dbl.get(dit()));
     for (int dir = 0; dir < SpaceDim; dir++){
@@ -904,18 +904,18 @@ void amr_mesh::compute_gradient(LevelData<EBCellFAB>& a_gradient,
 #else // New code
     BaseIVFAB<VoFStencil>* grad_stencils;
     if(a_phase == phase::gas){
-      (*m_gradsten_gas[a_lvl])[dit());
+      grad_stencils = &((*m_gradsten_gas[a_lvl])[dit()]);
     }
     else if(a_phase == phase::solid){
-      (*m_gradsten_sol[a_lvl])[dit());
+      grad_stencils = &((*m_gradsten_sol[a_lvl])[dit()]);
     }
 
 
-    for (VoFIterator vofit(grad_stencils.getIVS(), ebgraph); vofit.ok(); ++vofit){
+    for (VoFIterator vofit(grad_stencils->getIVS(), ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof    = vofit();
       const VoFStencil& sten = (*grad_stencils)(vof, 0);
 
-      
+
       for (int dir = 0; dir < SpaceDim; dir++){
 	grad(vof, dir) = 0.0;
       }

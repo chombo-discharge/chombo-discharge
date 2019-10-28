@@ -109,20 +109,31 @@ Real euler_maruyama::advance(const Real a_dt){
   // 8. Update the Poisson equation
   // 9. Recompute solver velocities and diffusion coefficients
 
+  Real t_grad = 0.0;
   Real t_fil1 = 0.0;
   Real t_reac = 0.0;
   Real t_cdr  = 0.0;
   Real t_rte  = 0.0;
   Real t_sig  = 0.0;
   Real t_pois = 0.0;
-  Real t_fil2 = 0.0;
+  Real t_filE = 0.0;
+  Real t_filV = 0.0;
+  Real t_filD = 0.0;
   Real t_tot  = 0.0;
 
   Real t0, t1;
   t0 = MPI_Wtime();
   t_tot  = -t0;
 
+  // These calls are responsible for filling CDR and sigma solver boundary conditions
+  // on the EB and on the domain walls
+  t0 = MPI_Wtime();
   euler_maruyama::compute_E_into_scratch();       // Compute the electric field
+  euler_maruyama::compute_cdr_gradients();        // Extrapolate cell-centered stuff to EB centroids
+  t1 = MPI_Wtime();
+  t_grad = t1 - t0;
+
+  t0 = MPI_Wtime();
   euler_maruyama::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   euler_maruyama::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
   euler_maruyama::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
@@ -160,23 +171,32 @@ Real euler_maruyama::advance(const Real a_dt){
 
   t0 = MPI_Wtime();
   euler_maruyama::compute_E_into_scratch();       // Update electric fields too
+  t1 = MPI_Wtime();
+  t_filE = t1-t0;
 
-  // Update velocities and diffusion coefficients. We don't do sources here. 
+  // Update velocities and diffusion coefficients. We don't do sources here.
+  t0 = MPI_Wtime();
   euler_maruyama::compute_cdr_velo(m_time + a_dt);
+  t1 = MPI_Wtime();
+  t_filV = t1 - t0;
+  t0 = MPI_Wtime();
   euler_maruyama::compute_cdr_diffco(m_time + a_dt);
   t1 = MPI_Wtime();
-  t_fil2 = t1 - t0;
+  t_filD = t1 - t0;
   t_tot += t1;
 
 #if EULER_MARUYAMA_TIMER
   pout() << endl;
   pout() << "euler_maruyama::advance breakdown:" << endl
+    	 << "E & grad  = " << 100.0*t_grad/t_tot << "%" << endl
 	 << "BC fill   = " << 100.0*t_fil1/t_tot << "%" << endl
 	 << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
 	 << "CDR adv.  = " << 100.*t_cdr/t_tot << "%" << endl
 	 << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
 	 << "Poisson   = " << 100.*t_pois/t_tot << "%" << endl
-	 << "Vel/Dco   = " << 100.*t_fil2/t_tot << "%" << endl
+	 << "Ecomp     = " << 100.*t_filE/t_tot << "%" << endl
+	 << "Vel       = " << 100.*t_filV/t_tot << "%" << endl
+    	 << "Dco       = " << 100.*t_filD/t_tot << "%" << endl
 	 << "TOTAL = " << t_tot << "seconds" << endl;
   pout() << endl;
 #endif
@@ -362,7 +382,6 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
     extrap_cdr_gradients.push_back(&grad_eb);  // Computed in compute_cdr_eb_states
   }
 
-
   // Compute extrapolated fluxes and velocities at the EB
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
   time_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, states, cdr_velocities, m_cdr->get_phase());
@@ -513,7 +532,25 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
     pout() << "euler_maruaya::compute_reaction_network" << endl;
   }
 
-  time_stepper::advance_reaction_network(m_time, a_dt);
+  // We have already computed E and the gradients of the CDR equations, so we will call the
+  // time_stepper version where all that crap is inputs. Saves memory and flops. 
+
+  Vector<EBAMRCellData*> cdr_src = m_cdr->get_sources();
+  Vector<EBAMRCellData*> cdr_phi = m_cdr->get_states();
+  Vector<EBAMRCellData*> rte_src = m_rte->get_sources();
+  Vector<EBAMRCellData*> rte_phi = m_rte->get_states();
+  const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+
+  Vector<EBAMRCellData*> cdr_grad;
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& gradient = storage->get_gradient();
+    cdr_grad.push_back(&gradient);
+  }
+
+  //  time_stepper::advance_reaction_network(m_time, a_dt);
+  time_stepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
 }
 
 void euler_maruyama::advance_cdr(const Real a_dt){
@@ -540,8 +577,12 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     EBAMRCellData& scratch2 = storage->get_scratch2();
 
     // If we do explicit diffusion, we'll need need the diffusive term as well
+
     if(!m_implicit_diffusion){
+      t0 = MPI_Wtime();
       solver->compute_divD(scratch2, phi);
+      t1 = MPI_Wtime();
+      t_diff += t1-t0;
     }
 
 
@@ -587,11 +628,12 @@ void euler_maruyama::advance_cdr(const Real a_dt){
 	solver->advance_euler(phi, scratch, scratch2, a_dt); 
       }
       t1 = MPI_Wtime();
+      t_diff += t1 - t0;
     }
-    else{ // Explicit diffusion
+    else{ // Explicit diffusion is above
 
     }
-    t_diff += t1 - t0;
+
 
     t0 = MPI_Wtime();
     data_ops::floor(phi, 0.0);
@@ -599,8 +641,6 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     m_amr->interp_ghost(phi, m_cdr->get_phase());
     t1 = MPI_Wtime();
     t_sync += t1 - t0;
-
-    
   }
   t_tot += MPI_Wtime();
 
