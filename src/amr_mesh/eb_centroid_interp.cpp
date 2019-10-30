@@ -78,6 +78,10 @@ void eb_centroid_interp::build_stencil(VoFStencil&              a_sten,
     found_stencil = this->get_lsq_grad_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
   }
 
+#if 0 // Only meant for testing but left in place: This code averages several neighbors over the EB. Only ment for testing so far
+  found_stencil = this->get_ebavg_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+#endif
+
   if(!found_stencil){ // Drop to zeroth order.
     a_sten.clear();
     a_sten.add(a_vof, 1.0);
@@ -191,7 +195,7 @@ bool eb_centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
   a_sten.clear();
   a_sten.add(a_vof, 1.0);
 
-  const Real thresh = 1.E-8;
+  const Real thresh = 1.E-5;
   
   const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -204,17 +208,90 @@ bool eb_centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
     if(hasLo || hasHi){
       if(centroid[dir] > thresh && hasHi){ // Deriv is to the right
 	a_sten.add(hiVoF,  centroid[dir]);
-	a_sten.add(hiVoF, -centroid[dir]);
+	a_sten.add(a_vof, -centroid[dir]);
       }
-      else if(centroid[dir] < thresh && hasLo){ // Deriv is to the left
-	a_sten.add(loVoF,  centroid[dir]);
+      else if(centroid[dir] < -thresh && hasLo){ // Deriv is to the left
 	a_sten.add(loVoF, -centroid[dir]);
+	a_sten.add(a_vof,  centroid[dir]);
       }
-      else if(centroid[dir] == 0.0){
+      else if(Abs(centroid[dir]) < thresh){
 	// No deriv in this direction
       }
     }
   }
+
+  return true;
+}
+
+
+
+bool eb_centroid_interp::get_ebavg_stencil(VoFStencil&              a_sten,
+					   const VolIndex&          a_vof,
+					   const DisjointBoxLayout& a_dbl,
+					   const ProblemDomain&     a_domain,
+					   const EBISBox&           a_ebisbox,
+					   const Box&               a_box,
+					   const Real&              a_dx,
+					   const IntVectSet&        a_cfivs){
+
+  const int avg_radius = 1;
+
+  a_sten.clear();
+
+  // Get all the other VoFs
+  Vector<VolIndex> candidateVoFs;
+  EBArith::getAllVoFsInMonotonePath(candidateVoFs, a_vof, a_ebisbox, avg_radius);
+  //  std::cout << candidateVoFs.size() << std::endl;
+  const IntVect IV = a_vof.gridIndex();
+
+  // Make sure the other VoFs lie on the domain
+  Vector<VolIndex> goodVoFs;
+  for (int i = 0; i < candidateVoFs.size(); i++){
+    const VolIndex vof = candidateVoFs[i];
+    const IntVect iv   = vof.gridIndex();
+
+    if(vof != a_vof){
+      if(a_ebisbox.isIrregular(iv) && !a_cfivs.contains(iv)){
+	goodVoFs.push_back(vof);
+      }
+    }
+  }
+  //  goodVoFs.push_back(a_vof);
+
+  const RealVect c0 = a_ebisbox.bndryCentroid(a_vof);
+
+  ///  std::cout << goodVoFs.size() << std::endl;
+  // Build the basic stencil
+  a_sten.clear();
+  Real sumweights = 0.0;
+
+  const bool found_stencil = this->get_pwl_stencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+  const Real w0 = a_ebisbox.bndryArea(a_vof);
+  a_sten *= w0;
+  sumweights += w0;
+
+  // Now do the other stencils
+  for (int i = 0; i < goodVoFs.size(); i++){
+    VoFStencil curSten;
+    VolIndex curVoF = goodVoFs[i];
+    const bool found_stencil = this->get_pwl_stencil(curSten, curVoF, a_dbl, a_domain, a_ebisbox, a_box, a_dx, a_cfivs);
+
+    if(found_stencil){
+      Real weight = a_ebisbox.bndryArea(curVoF);
+      RealVect c = a_ebisbox.bndryCentroid(curVoF);
+
+      RealVect d = (RealVect(IV) + c0) - (RealVect(curVoF.gridIndex())+c);
+      //      weight *= 1./(1+d.vectorLength());
+      
+      curSten *= weight;
+
+      sumweights += weight;
+      a_sten += curSten;
+    }
+  }
+
+  a_sten *= 1./sumweights;
+
 
   return true;
 }

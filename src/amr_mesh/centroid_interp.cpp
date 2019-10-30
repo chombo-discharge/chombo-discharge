@@ -213,22 +213,23 @@ bool centroid_interp::get_pwl_stencil(VoFStencil&              a_sten,
     if(hasLo || hasHi){
       if(centroid[dir] > thresh && hasHi){ // Deriv is to the right
 	a_sten.add(hiVoF,  centroid[dir]);
-	a_sten.add(hiVoF, -centroid[dir]);
+	a_sten.add(a_vof, -centroid[dir]);
       }
-      else if(centroid[dir] < thresh && hasLo){ // Deriv is to the left
-	a_sten.add(loVoF,  centroid[dir]);
+      else if(centroid[dir] < -thresh && hasLo){ // Deriv is to the left
 	a_sten.add(loVoF, -centroid[dir]);
+	a_sten.add(a_vof,  centroid[dir]);
       }
-#if 0
-      else if(centroid[dir] == 0.0){
+      else if(Abs(centroid[dir]) < thresh){
 	// No deriv in this direction
       }
+#if 0
       else{ // Logic bust, shouldn't happen
 	MayDay::Abort("centroid_interp::get_pwl_stencil - logic bust, shouldn't happen");
       }
 #endif
     }
   }
+
 
   return true;
 }

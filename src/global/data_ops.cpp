@@ -172,6 +172,24 @@ void data_ops::average_face_to_cell(LevelData<EBCellFAB>&       a_celldata,
       for (int ic = 0; ic < nc; ic++){
 	celldata(vof, ic) = 0.0;
       }
+
+      int nfaces = 0;
+      for (int dir = 0; dir < SpaceDim; dir++){
+	for (SideIterator sit; sit.ok(); ++sit){
+	  Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+
+	  nfaces += faces.size();
+
+	  for (int iface = 0; iface < faces.size(); iface++){
+	    for (int ic = 0; ic < nc; ic++){
+	      celldata(vof, ic) += fluxdata[dir](faces[iface],ic);
+	    }
+	  }
+	}
+      }
+      for (int ic = 0; ic < nc; ic++){
+	celldata(vof,ic) *= 1./(nfaces);
+      }
     }
   }
 }

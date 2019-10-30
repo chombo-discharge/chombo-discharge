@@ -105,6 +105,18 @@ protected:
 			       const Box&               a_box,
 			       const Real&              a_dx,
 			       const IntVectSet&        a_cfivs);
+
+  /*!
+    @brief Get the average stencil
+  */
+  virtual bool get_ebavg_stencil(VoFStencil&              a_sten,
+				 const VolIndex&          a_vof,
+				 const DisjointBoxLayout& a_dbl,
+				 const ProblemDomain&     a_domain,
+				 const EBISBox&           a_ebisbox,
+				 const Box&               a_box,
+				 const Real&              a_dx,
+				 const IntVectSet&        a_cfivs);
   
 };
 #endif
