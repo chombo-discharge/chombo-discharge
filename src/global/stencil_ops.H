@@ -66,6 +66,12 @@ public:
 					const VolIndex&      a_vof,
 					const ProblemDomain& a_domain,
 					const EBISBox&       a_ebisbox);
+
+    static bool new_compute_interp_stencil_3D(VoFStencil&          a_stencil,
+					const RealVect&      a_centroid,
+					const VolIndex&      a_vof,
+					const ProblemDomain& a_domain,
+					const EBISBox&       a_ebisbox);
 };
 
 #endif
