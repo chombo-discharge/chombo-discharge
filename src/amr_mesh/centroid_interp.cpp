@@ -83,10 +83,10 @@ void centroid_interp::build_stencil(VoFStencil&              a_sten,
     a_sten.add(a_vof, 1.0);
   }
 
-#if 0 // Debug
+#if 1 // Debug
   for (int i = 0; i < a_sten.size(); i++){
     const Real w = a_sten.weight(i);
-    if(w < 0.0) MayDay::Abort("stop, wtf");
+    if(w < 0.0) MayDay::Warning("centroid_interp::build_stencils - I got negative weights!!!");
   }
 #endif
 }
