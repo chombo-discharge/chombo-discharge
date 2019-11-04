@@ -865,15 +865,17 @@ void time_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&    
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
 
-      Real phi = Max(0.0, (*a_particle_densities[idx])(vof,0));;
+      Real phi = 0.0;
       RealVect grad = RealVect::Zero;
       for (int i = 0; i < stencil.size(); i++){
 	const VolIndex& ivof = stencil.vof(i);
 	const Real& iweight  = stencil.weight(i);
 	      
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  grad[dir] += (*a_particle_gradients[idx])(ivof, dir);
+	  grad[dir] += (*a_particle_gradients[idx])(ivof, dir)*iweight;
 	}
+
+	phi += (*a_particle_densities[idx])(ivof,0)*iweight;
       }
       
       particle_densities[idx] = Max(zero, phi);
