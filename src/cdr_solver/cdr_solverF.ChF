@@ -48,12 +48,13 @@
       integer chf_ddecl[i; j; k]
       integer chf_ddecl[ioff; joff; koff]
       integer spacedim,iv
-      real_t  uave, rhodiff, hival, loval
+      real_t  uave, rhodiff, hival, loval, idx
       chf_dterm[
       ioff = chf_id(0,facedir);
       joff = chf_id(1,facedir);
       koff = chf_id(2,facedir)]
 
+      idx = 1.0/dx
       spacedim = CH_SPACEDIM
 
       chf_multido[dcalc;i;j;k]
@@ -61,7 +62,7 @@
          loval = faceflux(chf_ix[i     ;j     ;k     ]);
 
 
-         udelrho(chf_ix[i;j;k]) = udelrho(chf_ix[i;j;k]) + (hival-loval)/dx
+         udelrho(chf_ix[i;j;k]) = udelrho(chf_ix[i;j;k]) + (hival-loval)*idx
       chf_enddo
       return
       end

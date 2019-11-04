@@ -47,5 +47,5 @@ morrow_zheleznyak.domain_bc_y_hi                = extrap                # Switch
 morrow_zheleznyak.domain_bc_z_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
 morrow_zheleznyak.domain_bc_z_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
 
-morrow_zheleznyak.extrap_electrode              = true                  # Switch for BC on electrode. 
+morrow_zheleznyak.extrap_electrode              = false                 # Switch for BC on electrode. 
 morrow_zheleznyak.extrap_dielectric             = false                 # Switch for BC on dielectric.

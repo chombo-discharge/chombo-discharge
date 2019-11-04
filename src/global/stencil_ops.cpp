@@ -395,7 +395,6 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
   // This code is crude as balls, and is only guaranteed to be correct if there aren't multivalued cells. We'll rewrite this
   // code when we get the chance. 
   if(really3D){
-
     const int HiLoDir2 = a_centroid[2] > 0. ? 1 : -1;
 
     // Compute bilinear stencils for two rows of VoFs 
@@ -424,10 +423,30 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
 
       a_stencil += sten0;
       a_stencil += sten1;
+
+#if 0
+      std::cout << "vof = " << a_vof.gridIndex() << std::endl;
+      std::cout << "stencil size = " << a_stencil.size() << std::endl;
+      std::cout << "stencil0 size = " << sten0.size() << std::endl;
+      std::cout << "stencil1 size = " << sten1.size() << std::endl;
+      for (int i = 0; i < a_stencil.size(); i++){
+	//	std::cout << a_stencil.vof(i).gridIndex() << "\t" << a_stencil.weight(i) << std::endl;
+      }
+
+      for (int i = 0; i < sten0.size(); i++){
+	std::cout << sten0.vof(i).gridIndex() << "\t" << sten0.weight(i) << std::endl;
+      }
+      for (int i = 0; i < sten1.size(); i++){
+	std::cout << sten1.vof(i).gridIndex() << "\t" << sten1.weight(i) << std::endl;
+      }
+      MayDay::Abort("stop");
+#endif
     }
     else{
       found_stencil = false;
     }
+
+
   }
   else if(!really3D){ // Find a direction in which we shouldn't interpolate and get a 2D stencil. This might be several
                       // directions but that is taken care of in the 2D computation. 
