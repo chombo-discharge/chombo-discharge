@@ -3391,6 +3391,7 @@ void time_stepper::compute_Emax(Real& a_Emax, const phase::which_phase a_phase){
   m_amr->allocate(E, a_phase, SpaceDim);
 
   this->compute_E(E, a_phase, m_poisson->get_state());
+  m_amr->interpolate_to_centroids(E, a_phase);
 
   Real max, min;
   data_ops::get_max_min_norm(max, min, E);
