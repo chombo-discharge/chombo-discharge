@@ -315,7 +315,33 @@ void data_ops::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_r
   EBLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
+void data_ops::incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+  }
+}
+
+void data_ops::incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, const Real& a_scale){
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    data_ops::incr(a_lhs[dit()], a_rhs[dit()], a_scale);
+  }
+}
+
+void data_ops::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale){
+
+  EBFluxFAB rhsClone;
+  rhsClone.clone(a_rhs);
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    EBFaceFAB& lhs       = a_lhs[dir];
+    
+    rhsClone[dir] *= a_scale;
+    lhs += rhsClone[dir];
+  }
+}
+
 void data_ops::incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale){
+
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }

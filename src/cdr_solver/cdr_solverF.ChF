@@ -239,3 +239,32 @@
       enddo
 #endif
       end
+
+      subroutine dflux_reg(
+     &     chf_fra1[divD],
+     &     chf_const_fra1[state],
+     &     chf_const_fra1[dco],     
+     &     chf_const_int[facedir],
+     &     chf_const_real[dx],
+     &     chf_box[facebox],
+     &)
+
+      integer chf_ddecl[i; j; k]
+      integer chf_ddecl[ioff; joff; koff]
+      real_t  hival, loval, idx
+      
+      chf_dterm[
+      ioff = chf_id(0,facedir);
+      joff = chf_id(1,facedir);
+      koff = chf_id(2,facedir)]
+
+      idx = 1.0/dx
+
+      chf_multido[facebox;i;j;k]
+         loval = state(chf_ix[i-ioff;j-joff;k-koff]);
+         hival = state(chf_ix[i     ;j     ;k     ]);
+
+         divD(chf_ix[i;j;k]) = dco(chf_ix[i;j;k])*(hival-loval)*idx
+      chf_enddo
+      return
+      end      

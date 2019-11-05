@@ -14,8 +14,6 @@
 #include <NeumannConductivityEBBC.H>
 #include <NeumannConductivityDomainBC.H>
 
-#define CDR_TGA_DEBUG_TIMER 0
-
 cdr_tga::cdr_tga() : cdr_solver() {
   m_name       = "cdr_tga";
   m_class_name = "cdr_tga";
@@ -441,22 +439,51 @@ void cdr_tga::setup_euler(){
   // Note: If this crashes, try to init gmg first
 }
 
-void cdr_tga::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG){
-  CH_TIME("cdr_tga::compute_divG");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_divG" << endl;
-  }
-
-  cdr_solver::compute_divG(a_divG, a_G, a_ebG);
-}
-
 void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_tga::compute_divJ(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divJ(divF, state)" << endl;
   }
 
-  const Real t0 = MPI_Wtime();
+  const int comp  = 0;
+  const int ncomp = 1;
+
+
+  EBAMRFluxData flux;
+  EBAMRFluxData total_flux;
+
+  if(m_mobile || m_diffusive){
+    m_amr->allocate(flux, m_phase, ncomp);
+    m_amr->allocate(total_flux, m_phase, ncomp);
+    data_ops::set_value(total_flux, 0.0);
+    
+    // Compute advection flux and put it in total_flux
+    if(m_mobile){
+      EBAMRFluxData face_state;
+      m_amr->allocate(face_state,     m_phase, ncomp);
+
+      average_velo_to_faces(m_velo_face, m_velo_cell);
+      advect_to_faces(face_state, a_state, a_extrap_dt);
+      compute_flux(flux, m_velo_face, face_state, m_domainflux);
+
+      data_ops::incr(total_flux, flux, 1.0);
+    }
+
+    // Compute the diffusion flux and put it in total_flux
+    if(m_diffusive){
+      compute_diffusion_flux(flux, a_state);
+      data_ops::incr(total_flux, flux, -1.0);
+    }
+
+    // General divergence computation. EB flux comes into 
+    compute_divG(a_divJ, total_flux, m_ebflux);
+  }
+  else{
+    data_ops::set_value(a_divJ, 0.0);
+  }
+
+  return;
+#if 0
   const int comp  = 0;
   const int ncomp = 1;
 
@@ -469,7 +496,6 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
     m_amr->allocate(diffusion_term, m_phase, ncomp);
   }
 
-  const Real t1 = MPI_Wtime();
 
   // Compute advective term
   if(this->is_mobile()){
@@ -477,24 +503,14 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
     data_ops::incr(a_divJ, advective_term, 1.0);
   }
 
-  const Real t2 = MPI_Wtime();
 
   // Add in diffusion term
   if(this->is_diffusive()){
     this->compute_divD(diffusion_term, a_state); // This already does refluxing. 
     data_ops::incr(a_divJ, diffusion_term, -1.0);
   }
-
-  const Real t3 = MPI_Wtime();
-#if CDR_TGA_DEBUG_TIMER
-  const Real T = t3 - t0;
-  pout() << endl;
-  pout() << "cdr_tga::compute_divJ" << endl;
-  pout() << "Allocations:  " << 100.*(t1 - t0)/T << "%" << endl;
-  pout() << "Compute divF: " << 100.*(t2 - t1)/T << "%" << endl;
-  pout() << "compute divD: " << 100.*(t3 - t2)/T << "%" << endl;
-  pout() << "Total:        " << T << endl;
 #endif
+
 }
 
 void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt){
@@ -504,33 +520,16 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
   }
 
   if(m_mobile){
-    const Real t0 = MPI_Wtime();
-  
-    const int comp       = 0;
     const int ncomp      = 1;
-    const int redist_rad = m_amr->get_redist_rad();
 
     EBAMRFluxData face_state;
     EBAMRFluxData flux;
-    EBAMRIVData   div_nc;
-    EBAMRIVData   mass_diff;
-    EBAMRCellData weights;
 
     m_amr->allocate(face_state, m_phase, ncomp);
     m_amr->allocate(flux, m_phase, ncomp);
-    m_amr->allocate(div_nc,     m_phase, ncomp);
-    m_amr->allocate(mass_diff,  m_phase, ncomp);
-    m_amr->allocate(weights,    m_phase, ncomp, 2*redist_rad);
 
     data_ops::set_value(a_divF,     0.0); 
     data_ops::set_value(face_state, 0.0);
-    data_ops::set_value(div_nc,     0.0);
-    data_ops::set_value(mass_diff,  0.0);
-    data_ops::set_value(weights,    0.0);
-
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      a_state[lvl]->localCopyTo(*weights[lvl]);
-    }
 
     // Compute the advective derivative
     this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
@@ -538,25 +537,6 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     this->compute_flux(flux, m_velo_face, face_state, m_domainflux);  // Compute face-centered fluxes
     
     this->compute_divG(a_divF, flux, m_ebflux); // When we're done, flux contains 
-    // All the stuff below here is fairly general stuff
-    // this->conservative_divergence(a_divF, flux, m_ebflux);
-    // this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
-    // this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
-    // this->increment_flux_register(flux);           // Increment flux registers
-    // this->increment_redist(mass_diff);                                // Increment redistribution objects
-
-    // const bool ebcf = m_amr->get_ebcf();
-    // if(ebcf){ 
-    //   this->coarse_fine_increment(mass_diff);     // Increment the coarse-fine redistribution objects
-    //   this->increment_redist_flux();              // Increment flux registers with the redistribution stuff
-    //   this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
-    //   this->coarse_fine_redistribution(a_divF);   // Redistribute
-    //   this->reflux(a_divF);
-    // }
-    // else{
-    //   this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
-    //   this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
-    // }
   }
   else{
     data_ops::set_value(a_divF, 0.0);
@@ -571,48 +551,29 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
 
 }
 
-void cdr_tga::compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state){
+void cdr_tga::compute_divD(EBAMRCellData& a_divD, const EBAMRCellData& a_state){
   CH_TIME("cdr_tga::compute_divD");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divD" << endl;
   }
 
   if(m_diffusive){
-    const int ncomp        = 1;
-    const int finest_level = m_amr->get_finest_level();
+    const int ncomp = 1;
 
-    // Copy a_state because AMRMultiGrid may do exchange operations
-    EBAMRCellData clone;
-    m_amr->allocate(clone, m_phase, ncomp);
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      a_state[lvl]->localCopyTo(*clone[lvl]);
-    }
+    EBAMRIVData   zeroEBflux;
+    EBAMRFluxData flux;
+    m_amr->allocate(zeroEBflux, m_phase, ncomp);
+    m_amr->allocate(flux,       m_phase, ncomp);
 
-    // Multigrid doesn't want smart pointers, so do aliasing. 
-    Vector<LevelData<EBCellFAB>* > res, phi, zero;
-    m_amr->alias(res,  a_diffusive_term);
-    m_amr->alias(phi,  clone);
-    m_amr->alias(zero, m_scratch);
+    data_ops::set_value(zeroEBflux, 0.0);
+    compute_diffusion_flux(flux, a_state);  // Compute the face-centered diffusion flux
+    compute_divG(a_divD, flux, zeroEBflux); // General face-centered flux to divergence magic. 
 
-    // TGA can mess with alpha and beta so I need to reset them to the appropriate values
-    const Real alpha =  0.0;
-    const Real beta  = -1.0; // Minus one because the AMRMultiGrid computes the residual as resid = rhs - L(phi)
-  
-    if(m_use_tga){
-      m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    }
-    else{
-      m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    }
-    data_ops::set_value(m_scratch, 0.0);
-    m_gmg_solver->computeAMRResidual(res, phi, zero, finest_level, 0); // Computes res = L(phi) - zero
-    data_ops::set_value(m_scratch, 0.0);
-
-    m_amr->average_down(a_diffusive_term, m_phase);
-    m_amr->interp_ghost(a_diffusive_term, m_phase);
+    m_amr->average_down(a_divD, m_phase);
+    m_amr->interp_ghost(a_divD, m_phase);
   }
   else{
-    data_ops::set_value(a_diffusive_term, 0.0);
+    data_ops::set_value(a_divD, 0.0);
   }
 }
 

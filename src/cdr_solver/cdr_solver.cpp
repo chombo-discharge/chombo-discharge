@@ -368,9 +368,9 @@ void cdr_solver::compute_divG_irreg(LevelData<EBCellFAB>&              a_divG,
 }
 
 void cdr_solver::compute_flux(EBAMRFluxData&       a_flux,
-				  const EBAMRFluxData& a_face_state,
-				  const EBAMRFluxData& a_face_vel,
-				  const EBAMRIFData&   a_domain_flux){
+			      const EBAMRFluxData& a_face_state,
+			      const EBAMRFluxData& a_face_vel,
+			      const EBAMRIFData&   a_domain_flux){
   CH_TIME("cdr_solver::compute_flux");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_flux" << endl;
@@ -511,6 +511,89 @@ void cdr_solver::compute_flux(LevelData<EBFluxFAB>&              a_flux,
       }
     }
   }
+}
+
+void cdr_solver::compute_diffusion_flux(EBAMRFluxData& a_flux, const EBAMRCellData& a_state){
+  CH_TIME("cdr_solver::compute_diffusion_flux");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_diffusion_flux" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  // I want linearly interpolated ghost cells. Go get them. 
+  EBAMRCellData copy_state; 
+  m_amr->allocate(copy_state, m_phase, ncomp);
+  data_ops::set_value(copy_state, 0.0);
+  data_ops::incr(copy_state, a_state, 1.0);
+  m_amr->interp_ghost_pwl(copy_state, m_phase);
+
+  // We have linearly interpolated ghost cells. Do level-by-level magic
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    compute_diffusion_flux(*a_flux[lvl], *copy_state[lvl], lvl);
+  }
+}
+
+
+
+void cdr_solver::compute_diffusion_flux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_state, const int a_lvl){
+  CH_TIME("cdr_solver::compute_diffusion_flux(level)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_diffusion_flux(level)" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  const Real dx                = m_amr->get_dx()[a_lvl];
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& cellbox = dbl.get(dit());
+
+    const EBCellFAB& state = a_state[dit()];
+    const EBISBox& ebisbox = state.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& flux = a_flux[dit()][dir];
+      const EBFaceFAB& dco = (*m_diffco[a_lvl])[dit()][dir];
+
+      // Do regular cells
+      Box facebox = cellbox;
+      facebox.surroundingNodes(dir);
+
+      BaseFab<Real>& regFlux        = flux.getSingleValuedFAB();
+      const BaseFab<Real>& regState = state.getSingleValuedFAB();
+      const BaseFab<Real>& regDco   = dco.getSingleValuedFAB();
+      FORT_DFLUX_REG(CHF_FRA1(regFlux, comp),
+		     CHF_CONST_FRA1(regState, comp),
+		     CHF_CONST_FRA1(regDco, comp),
+		     CHF_CONST_INT(dir),
+		     CHF_CONST_REAL(dx),
+		     CHF_BOX(facebox));
+
+
+      // Now redo the irregular faces
+      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
+      for (FaceIterator faceit(ebisbox.getIrregIVS(cellbox), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	const FaceIndex& face = faceit();
+
+	if(face.isBoundary()){ // No boundary flux for diffusion stuff. Could be changed but that's the current status. 
+	  flux(face, comp) = 0.0;
+	}
+	else{
+
+	  const VolIndex hiVoF = face.getVoF(Side::Hi);
+	  const VolIndex loVoF = face.getVoF(Side::Lo);
+
+	  flux(face, comp) = dco(face,comp)*(state(hiVoF,comp) - state(loVoF, comp))/dx;
+	}
+      }
+    }
+  }
+  
 }
 
 void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebflux){

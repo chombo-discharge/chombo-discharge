@@ -281,6 +281,40 @@ inline void FORTRAN_NAME(inlineCONSDIV_BLOCK, inlineCONSDIV_BLOCK)(
 }
 #endif  // GUARDCONSDIV_BLOCK 
 
+#ifndef GUARDDFLUX_REG 
+#define GUARDDFLUX_REG 
+// Prototype for Fortran procedure dflux_reg ...
+//
+void FORTRAN_NAME( DFLUX_REG ,dflux_reg )(
+      CHFp_FRA1(divD)
+      ,CHFp_CONST_FRA1(state)
+      ,CHFp_CONST_FRA1(dco)
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(facebox) );
+
+#define FORT_DFLUX_REG FORTRAN_NAME( inlineDFLUX_REG, inlineDFLUX_REG)
+#define FORTNT_DFLUX_REG FORTRAN_NAME( DFLUX_REG, dflux_reg)
+
+inline void FORTRAN_NAME(inlineDFLUX_REG, inlineDFLUX_REG)(
+      CHFp_FRA1(divD)
+      ,CHFp_CONST_FRA1(state)
+      ,CHFp_CONST_FRA1(dco)
+      ,CHFp_CONST_INT(facedir)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(facebox) )
+{
+ CH_TIMELEAF("FORT_DFLUX_REG");
+ FORTRAN_NAME( DFLUX_REG ,dflux_reg )(
+      CHFt_FRA1(divD)
+      ,CHFt_CONST_FRA1(state)
+      ,CHFt_CONST_FRA1(dco)
+      ,CHFt_CONST_INT(facedir)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_BOX(facebox) );
+}
+#endif  // GUARDDFLUX_REG 
+
 }
 
 #endif

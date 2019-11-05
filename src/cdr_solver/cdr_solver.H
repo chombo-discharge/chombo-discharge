@@ -554,6 +554,16 @@ protected:
 			    const int                          a_lvl);
 
   /*!
+    @brief Compute the face-centered diffusion flux
+  */
+  virtual void compute_diffusion_flux(EBAMRFluxData& a_flux, const EBAMRCellData& a_state);
+
+  /*!
+    @brief Compute the face-centered difufsion flux
+  */
+  virtual void compute_diffusion_flux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_state, const int a_lvl);
+
+  /*!
     @brief Compute conservative divergence from fluxes. 
   */
   virtual void conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebflux);

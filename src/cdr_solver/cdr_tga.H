@@ -59,11 +59,6 @@ public:
   virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
 
   /*!
-    @brief Compute divG
-  */
-  virtual void compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG);
-
-  /*!
     @brief Set implicit diffusion solver solver parameters. These are normally good for this class. 
   */
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
