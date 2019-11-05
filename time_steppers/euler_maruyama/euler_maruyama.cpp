@@ -571,7 +571,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
-    if(m_implicit_diffusion){
+    if(!m_implicit_diffusion){
       solver->compute_divJ(scratch, phi, extrap_dt);
     }
     else{

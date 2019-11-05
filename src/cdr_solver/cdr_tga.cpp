@@ -23,82 +23,26 @@ cdr_tga::~cdr_tga(){
 
 }
 
-void cdr_tga::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
-  CH_TIME("cdr_tga::advance_tga");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_tga" << endl;
-  }
 
-  if(m_diffusive){
-    bool converged = false;
-
-    const int comp         = 0;
-    const int ncomp        = 1;
-    const int finest_level = m_amr->get_finest_level();
-
-    // Create a source term = S = 0.0;
-    EBAMRCellData src;
-    m_amr->allocate(src, m_phase, ncomp);
-    data_ops::set_value(src, 0.0);
-
-    // Do the aliasing stuff
-    Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
-    m_amr->alias(new_state, a_new_state);
-    m_amr->alias(old_state, a_old_state);
-    m_amr->alias(source,    src);
-
-    const Real alpha = 0.0;
-    const Real beta  = 1.0;
-
-    data_ops::set_value(m_diffco_eb, 0.0);
-
-    // TGA solve
-    m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
-
-    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
-      converged = true;
-    }
-  }
-}
 
 void cdr_tga::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
-  CH_TIME("cdr_tga::advance_euler");
+  CH_TIME("cdr_tga::advance_euler(no source)");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_euler" << endl;
+    pout() << m_name + "::advance_euler(no source)" << endl;
   }
+  
   if(m_diffusive){
-    bool converged = false;
-
-    const int comp         = 0;
-    const int ncomp        = 1;
-    const int finest_level = m_amr->get_finest_level();
-
     // Create a source term = S = 0.0;
+    const int ncomp = 1;
     EBAMRCellData src;
     m_amr->allocate(src, m_phase, ncomp);
     data_ops::set_value(src, 0.0);
 
-    // Do the aliasing stuff
-    Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
-    m_amr->alias(new_state, a_new_state);
-    m_amr->alias(old_state, a_old_state);
-    m_amr->alias(source,    src);
-
-    const Real alpha = 0.0;
-    const Real beta  = 1.0;
-
-    data_ops::set_value(m_diffco_eb, 0.0);
-
-    // TGA solve
-    m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
-
-    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
-      converged = true;
-    }
+    // Call version with source term
+    advance_euler(a_new_state, a_old_state, src, a_dt);
+  }
+  else{
+    data_ops::copy(a_new_state, a_old_state);
   }
 }
 
@@ -132,12 +76,35 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
     
     // Euler solve
     m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
-
-
     const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
       converged = true;
     }
+  }
+  else{
+    data_ops::copy(a_new_state, a_old_state);
+  }
+}
+
+void cdr_tga::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
+  CH_TIME("cdr_tga::advance_tga(no source)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_tga(no source)" << endl;
+  }
+
+  if(m_diffusive){
+
+    // Dummy source term
+    const int ncomp = 1;
+    EBAMRCellData src;
+    m_amr->allocate(src, m_phase, ncomp);
+    data_ops::set_value(src, 0.0);
+
+    // Call other version
+    advance_tga(a_new_state, a_old_state, src, a_dt);
+  }
+  else{
+    data_ops::copy(a_new_state, a_old_state);
   }
 }
 
@@ -469,48 +436,21 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
       data_ops::incr(total_flux, flux, 1.0);
     }
 
-    // Compute the diffusion flux and put it in total_flux
+    // Add diffusion flux to total flux
     if(m_diffusive){
       compute_diffusion_flux(flux, a_state);
       data_ops::incr(total_flux, flux, -1.0);
     }
 
-    // General divergence computation. EB flux comes into 
+    // General divergence computation. Also inject charge. Domain fluxes came in through the compute
+    // advective flux function. 
     compute_divG(a_divJ, total_flux, m_ebflux);
   }
-  else{
+  else{ 
     data_ops::set_value(a_divJ, 0.0);
   }
 
   return;
-#if 0
-  const int comp  = 0;
-  const int ncomp = 1;
-
-  data_ops::set_value(a_divJ, 0.0);
-
-  EBAMRCellData advective_term;
-  EBAMRCellData diffusion_term;
-  m_amr->allocate(advective_term, m_phase, ncomp);
-  if(this->is_diffusive()){
-    m_amr->allocate(diffusion_term, m_phase, ncomp);
-  }
-
-
-  // Compute advective term
-  if(this->is_mobile()){
-    this->compute_divF(advective_term, a_state, 0.0);
-    data_ops::incr(a_divJ, advective_term, 1.0);
-  }
-
-
-  // Add in diffusion term
-  if(this->is_diffusive()){
-    this->compute_divD(diffusion_term, a_state); // This already does refluxing. 
-    data_ops::incr(a_divJ, diffusion_term, -1.0);
-  }
-#endif
-
 }
 
 void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt){

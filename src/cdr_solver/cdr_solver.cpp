@@ -835,56 +835,6 @@ void cdr_solver::initial_data(){
     initial_data_distribution();
   }
 
-#if 0
-  const RealVect origin  = m_physdom->get_prob_lo();
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-
-    for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& state       = (*m_state[lvl])[dit()];
-      const Box box          = m_state[lvl]->disjointBoxLayout().get(dit());
-      const EBISBox& ebisbox = state.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-#if 0
-      BaseFab<Real>& reg_state = state.getSingleValuedFAB();
-
-      const IntVect lo = box.smallEnd();
-      const IntVect hi = box.bigEnd();
-
-#if CH_SPACEDIM==3
-      for (int k = lo[2]; k <= hi[2]; k++){
-#endif
-	for (int j = lo[1]; j <= hi[1]; j++){
-	  for (int i = lo[0]; i <= hi[0]; i++){
-	    const IntVect iv(D_DECL(i,j,k));
-	    const RealVect pos = origin + m_amr->get_dx()[lvl]*RealVect::Unit;
-
-	    for (int comp = 0; comp < state.nComp(); comp++){
-	      reg_state(iv, comp) = m_species->initial_data(pos, m_time);
-	    }
-	  }
-	}
-#if CH_SPACEDIM==3
-      }
-#endif
-#endif
-
-      // Irreg and multicells
-      for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
-	
-	for (int comp = 0; comp < state.nComp(); comp++){
-	  state(vof, comp) = m_species->initial_data(pos, m_time);
-	}
-      }
-    }
-  }
-
-#endif
-
   m_amr->average_down(m_state, m_phase);
   m_amr->interp_ghost(m_state, m_phase);
 }
@@ -902,6 +852,7 @@ void cdr_solver::initial_data_distribution(){
   data_ops::copy(m_scratch, m_state);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx = m_amr->get_dx()[lvl];
 
     for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
       EBCellFAB& state         = (*m_state[lvl])[dit()];
@@ -910,13 +861,14 @@ void cdr_solver::initial_data_distribution(){
       const EBISBox& ebisbox   = state.getEBISBox();
       const EBGraph& ebgraph   = ebisbox.getEBGraph();
 
+
       BaseFab<Real>& reg_state   = state.getSingleValuedFAB();
       const BaseFab<Real>& reg_scratch = scratch.getSingleValuedFAB();
 
       // Regular cells
       for (BoxIterator bit(box); bit.ok(); ++bit){
 	const IntVect iv = bit();
-	const RealVect pos = origin + RealVect(iv)*m_amr->get_dx()[lvl]*RealVect::Unit;
+	const RealVect pos = origin + RealVect(iv)*dx + 0.5*dx*RealVect::Unit;
 
 	for (int comp = 0; comp < state.nComp(); comp++){
 	  reg_state(iv, comp) = reg_scratch(iv, comp) + m_species->initial_data(pos, m_time);
@@ -1368,7 +1320,7 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
     }
   }
 
-  data_ops::floor(m_state, 0.0);
+  //  data_ops::floor(m_state, 0.0);
   m_amr->average_down(m_state, m_phase);
   m_amr->interp_ghost(m_state, m_phase);
 
