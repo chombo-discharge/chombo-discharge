@@ -3,8 +3,7 @@
   @brief  Implementation of cdr_solver.H
   @author Robert Marskar
   @date   Nov. 2017
-  @todo   The diffusive dt computations use a faceiterator box. This should be replaced by fortran routines (or internal ebcell fab functions)
-  @todo   The set_velocity(RealVect) function breaks sometimes when I have multicells. We should figure out why. 
+  @todo   The diffusive dt computations use a faceiterator box. This should be replaced by fortran routines (or internal ebcell fa functions)
 */
 
 #include "cdr_solver.H"
@@ -15,9 +14,6 @@
 #include <EBAMRIO.H>
 #include <EBArith.H>
 #include <EBAlias.H>
-
-#define USE_DOMAIN_FLUX 1
-#define USE_NEW_INTERPOLANT 1
 
 cdr_solver::cdr_solver(){
   m_name       = "cdr_solver";
@@ -81,93 +77,6 @@ int cdr_solver::get_num_plotvars() const {
   if(m_plot_ebf && m_mobile)    num_output = num_output + 1;
 
   return num_output;
-}
-
-void cdr_solver::advance(const Real& a_dt){
-  CH_TIME("cdr_solver::advance(dt)");
-  if(m_verbosity > 1){
-    pout() << m_name + "::advance(dt)" << endl;
-  }
-  
-  this->advance(m_state, a_dt);
-}
-
-void cdr_solver::advance(EBAMRCellData& a_state, const Real& a_dt){
-  CH_TIME("cdr_solver::advance(state, dt)");
-  if(m_verbosity > 1){
-    pout() << m_name + "::advance(state, dt)" << endl;
-  }
-
-  const Real midpoint = 0.5;
-  this->advance_rk2(a_state, a_dt, midpoint);
-
-  const int finest_level = m_amr->get_finest_level();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::floor(*a_state[lvl], 0.0); // This adds mass!
-
-    a_state[lvl]->exchange();
-  }
-  
-  m_amr->average_down(a_state, m_phase);
-  m_amr->interp_ghost(a_state, m_phase);
-
-  m_time += a_dt;
-  m_step++;
-}
-
-void cdr_solver::advance_advect(const Real a_dt){
-  CH_TIME("cdr_solver::advance_advect(dt)");
-  if(m_verbosity > 1){
-    pout() << m_name + "::advance_advect(dt)" << endl;
-  }
-
-  this->advance_advect(m_state, a_dt);
-}
-
-void cdr_solver::advance_diffusion(const Real a_dt){
-  CH_TIME("cdr_solver::advance_diffusion(dt)");
-  if(m_verbosity > 1){
-    pout() << m_name + "::advance_diffusion(dt)" << endl;
-  }
-
-  EBAMRCellData error;
-  m_amr->allocate(error, m_phase, 1);
-  this->advance_diffusion(m_state, error, a_dt);
-}
-
-void cdr_solver::advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real a_alpha){
-  CH_TIME("cdr_solver::advance_rk2");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_rk2" << endl;
-  }
-  
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  // Compute right-hand-side
-  EBAMRCellData k1, k2, phi;
-  m_amr->allocate(k1,  m_phase, ncomp);
-  m_amr->allocate(k2,  m_phase, ncomp);
-  m_amr->allocate(phi, m_phase, ncomp);
-
-  // Compute f(yn, tn);
-  this->compute_rhs(k1, a_state, a_dt);
-
-  //  phi = yn + a_alpha*dt*f(tn, yn)
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_state[lvl]->copyTo(*phi[lvl]);
-    data_ops::incr(*phi[lvl], *k1[lvl], a_alpha*a_dt);
-  }
-
-  // Compute f(tn + alpha*dt, yn + alpha*dt*f(yn, tn)) = f(tn + alpha*dt, phi)
-  this->compute_rhs(k2, phi, a_dt);
-
-  // Make y(n+1) = y(n) 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::incr(*a_state[lvl], *k1[lvl], (1. - 1./(2*a_alpha))*a_dt);
-    data_ops::incr(*a_state[lvl], *k2[lvl], 1./(2*a_alpha)*a_dt);
-  }
 }
 
 void cdr_solver::allocate_internals(){
@@ -366,13 +275,49 @@ void cdr_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
   }
 }
 
-void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
-				    const LevelData<BaseIFFAB<Real> >  a_flux[SpaceDim],
+void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG){
+  CH_TIME("cdr_solver::compute_divG");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_divG" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  EBAMRIVData divG_nc;
+  EBAMRIVData mass_diff;
+  EBAMRCellData weights;
+
+  m_amr->allocate(divG_nc,   m_phase, ncomp);
+  m_amr->allocate(mass_diff, m_phase, ncomp);
+  m_amr->allocate(weights,   m_phase, ncomp);
+
+  conservative_divergence(a_divG, a_G, a_ebG);   // Make the conservative divergence. 
+  nonconservative_divergence(divG_nc, a_divG);   // Non-conservative divergence
+  hybrid_divergence(a_divG, mass_diff, divG_nc); // a_divG becomes hybrid divergence. Mass diff computed. 
+  increment_flux_register(a_G);                  // Increment flux register
+  increment_redist(mass_diff);                   // Increment level redistribution register
+
+  const bool ebcf = m_amr->get_ebcf();
+  if(ebcf){ // If we have EBCF, much more work with the CF interface
+    coarse_fine_increment(mass_diff);                      // Compute C2F, F2C, and C2C mass transfers
+    increment_redist_flux();                               // Tell flux register about whats going on
+    hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
+    coarse_fine_redistribution(a_divG);                    // Do the coarse-fine redistribution
+    reflux(a_divG);                                        // Reflux
+  }
+  else{ // Much simpler if we don't have EBCF
+    hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
+    reflux(a_divG);                                        // Reflux
+  }
+}
+
+void cdr_solver::compute_divG_irreg(LevelData<EBCellFAB>&              a_divG,
 				    const LevelData<BaseIVFAB<Real> >& a_ebflux,
 				    const int                          a_lvl){
-  CH_TIME("cdr_solver::compute_divF_irreg");
+  CH_TIME("cdr_solver::compute_divG_irreg");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_divF_irreg" << endl;
+    pout() << m_name + "::compute_divG_irreg" << endl;
   }
 
   const int comp  = 0;
@@ -389,7 +334,7 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
-    EBCellFAB& divF               = a_divF[dit()];
+    EBCellFAB& divG               = a_divG[dit()];
     const BaseIVFAB<Real>& ebflux = a_ebflux[dit()];
 
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
@@ -397,16 +342,12 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
       const Real area     = ebisbox.bndryArea(vof);
 
       // EB flux
-      divF(vof, comp) = ebflux(vof,comp)*area;
+      divG(vof, comp) = ebflux(vof,comp)*area;
 
       // Face fluxes
       for (int dir = 0; dir < SpaceDim; dir++){
 
-#if USE_NEW_INTERPOLANT
 	const BaseIFFAB<Real>& flux = (*(m_interpolant[dir])[a_lvl])[dit()];
-#else
-	const BaseIFFAB<Real>& flux = a_flux[dir][dit()];
-#endif
 
 	for (SideIterator sit; sit.ok(); ++sit){
 	  const int isign = sign(sit());
@@ -415,18 +356,21 @@ void cdr_solver::compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
 	  for (int iface = 0; iface < faces.size(); iface++){
 	    const FaceIndex face = faces[iface];
 	    const Real face_area = ebisbox.areaFrac(face);
-	    divF(vof, comp) += isign*face_area*flux(face, comp);
+	    divG(vof, comp) += isign*face_area*flux(face, comp);
 	  }
 	}
       }
 
-      // Scale divF by dx but not by kappa.
-      divF(vof, comp) *= 1./dx;
+      // Scale divG by dx but not by kappa.
+      divG(vof, comp) *= 1./dx;
     }
   }
 }
 
-void cdr_solver::compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_face_vel){
+void cdr_solver::compute_flux(EBAMRFluxData&       a_flux,
+				  const EBAMRFluxData& a_face_state,
+				  const EBAMRFluxData& a_face_vel,
+				  const EBAMRIFData&   a_domain_flux){
   CH_TIME("cdr_solver::compute_flux");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_flux" << endl;
@@ -437,60 +381,9 @@ void cdr_solver::compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
-
-      for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& flx       = (*a_flux[lvl])[dit()][dir];
-	const EBFaceFAB& phi = (*a_face_state[lvl])[dit()][dir];
-	const EBFaceFAB& vel = (*a_face_vel[lvl])[dit()][dir];
-
-#if 1 // Optimized code
-	flx.setVal(0.0, comp);
-	flx += phi;
-	flx *= vel;
-
-	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-	for (FaceIterator faceit(ebisbox.getIrregIVS(box), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  flx(face, comp) = vel(face, comp)*phi(face, comp);
-	}
-#else // Original code
-	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-	for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  flx(face, comp) = vel(face, comp)*phi(face, comp);
-	}
-#endif
-      }
-    }
-  }
-}
-
-void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
-				  const EBAMRFluxData& a_face_state,
-				  const EBAMRFluxData& a_face_vel,
-				  const EBAMRIFData&   a_domain_flux){
-  CH_TIME("cdr_solver::new_compute_flux");
-  if(m_verbosity > 5){
-    pout() << m_name + "::new_compute_flux" << endl;
-  }
-
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
 
 #if 1 // New code
-    new_compute_flux(*a_flux[lvl], *a_face_state[lvl], *a_face_vel[lvl], *a_domain_flux[lvl], lvl);
+    compute_flux(*a_flux[lvl], *a_face_state[lvl], *a_face_vel[lvl], *a_domain_flux[lvl], lvl);
 #else // Old code (that we know works)
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
@@ -543,7 +436,7 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
 	      // Don't do anything, the solver should have extrapolated the face-centered state
 	    }
 	    else {
-	      MayDay::Abort("cdr_solver::new_compute_flux - stop this madness!");
+	      MayDay::Abort("cdr_solver::compute_flux - stop this madness!");
 	    }
 	  }
 	}
@@ -553,11 +446,11 @@ void cdr_solver::new_compute_flux(EBAMRFluxData&       a_flux,
   }
 }
 
-void cdr_solver::new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
-				  const LevelData<EBFluxFAB>&        a_face_state,
-				  const LevelData<EBFluxFAB>&        a_face_vel,
-				  const LevelData<DomainFluxIFFAB>&  a_domain_flux,
-				  const int                          a_lvl){
+void cdr_solver::compute_flux(LevelData<EBFluxFAB>&              a_flux,
+			      const LevelData<EBFluxFAB>&        a_face_state,
+			      const LevelData<EBFluxFAB>&        a_face_vel,
+			      const LevelData<DomainFluxIFFAB>&  a_domain_flux,
+			      const int                          a_lvl){
 
   const int comp  = 0;
   const int ncomp = 1;
@@ -612,7 +505,7 @@ void cdr_solver::new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
 	    // Don't do anything, the solver should have extrapolated the face-centered state
 	  }
 	  else {
-	    MayDay::Abort("cdr_solver::new_compute_flux - stop this madness!");
+	    MayDay::Abort("cdr_solver::compute_flux - stop this madness!");
 	  }
 	}
       }
@@ -620,40 +513,7 @@ void cdr_solver::new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
   }
 }
 
-void cdr_solver::new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
-				  const LevelData<EBFluxFAB>&        a_face_state,
-				  const int                          a_lvl){
-  CH_TIME("cdr_solver::new_compute_flux(internal velocities)");
-  if(m_verbosity > 5){
-    pout() << "cdr_solver::new_compute_flux(internal velocities)" << endl;
-  }
-  cdr_solver::new_compute_flux(a_flux, a_face_state, *m_velo_face[a_lvl], *m_domainflux[a_lvl], a_lvl);
-}
-
-void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt){
-  CH_TIME("cdr_solver::compute_rhs(rhs, dt)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_rhs(rhs, dt)" << endl;
-  }
-  
-  this->compute_rhs(a_rhs, m_state, a_dt);
-}
-
-void cdr_solver::compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt){
-  CH_TIME("cdr_solver::compute_rhs(rhs, state, dt)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::compute_rhs(rhs, state, dt)" << endl;
-  }
-  
-  this->compute_divJ(a_rhs, a_state, a_dt); // a_rhs = div(J)
-  data_ops::scale(a_rhs, -1.0);             // a_rhs = -div(J)
-  data_ops::incr(a_rhs, m_source, 1.0);     // a_rhs = -div(J) + S
-
-  m_amr->average_down(a_rhs, m_phase);
-  m_amr->interp_ghost(a_rhs, m_phase);
-}
-
-void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRFluxData& a_flux){
+void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebflux){
   CH_TIME("cdr_solver::conservative_divergence");
   if(m_verbosity > 5){
     pout() << m_name + "::conservative_divergence" << endl;
@@ -663,78 +523,18 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRF
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
 
-#if 0
-  Real t_consdiv = 0.0;
-  Real t_total = -MPI_Wtime();
-  Real t_setup = 0.0;
-  Real t_interp = 0.0;
-  Real t_irreg = 0.0;
-#endif
-
-  Real t1, t2;
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
 
-    // Compute div(F) on regular cells
-    //    t1 = MPI_Wtime();
     this->consdiv_regular(*a_cons_div[lvl], *a_flux[lvl], lvl);
-    // t2 = MPI_Wtime();
-    // t_consdiv += t2 - t1;
-
-    //    t1 = MPI_Wtime();
-    LevelData<BaseIFFAB<Real> > flux[SpaceDim];
-    this->setup_flux_interpolant(flux, *a_flux[lvl], lvl);
-    // t2 = MPI_Wtime();
-    // t_setup += t2-t1;
-
-    //    pout() << "done interpolant" << endl;
-
-    //    t1 = MPI_Wtime();
-    this->interpolate_flux_to_centroids(flux, lvl);
-    // t2 = MPI_Wtime();
-    // t_interp += t2 - t1;
-
-    //    pout() << "done centroid" << endl;
-
-    //    t1 = MPI_Wtime();
-    this->compute_divF_irreg(*a_cons_div[lvl], flux, *m_ebflux[lvl], lvl);
-    // t2 = MPI_Wtime();
-    // t_irreg += t2-t1;
+    this->setup_flux_interpolant(*a_flux[lvl], lvl);                 // Copy face-centered fluxes in a_flux to m_interpolant
+    this->interpolate_flux_to_centroids(*a_flux[lvl], lvl);          // Interpolate fluxes w m_interpolant. Copy 2 a_flux
+    this->compute_divG_irreg(*a_cons_div[lvl], *a_ebflux[lvl], lvl); // Recompute divergence on irregular cells
 
     a_cons_div[lvl]->exchange();
   }
-  // t_total += MPI_Wtime();
-
-  // pout() << "regular consdiv consumption = " << t_consdiv/t_total << endl;
-  // pout() << "setup consumption = " << t_setup/t_total << endl;
-  // pout() << "interp consumption = " << t_interp/t_total << endl;
-  // pout() << "irreg consumption = " << t_irreg/t_total << endl;
-}
-
-void cdr_solver::conservative_divergence(EBAMRCellData&       a_cons_div,
-					 const EBAMRFluxData& a_face_vel,
-					 const EBAMRFluxData& a_face_state){
-  CH_TIME("cdr_solver::conservative_divergence");
-  if(m_verbosity > 5){
-    pout() << m_name + "::conservative_divergence" << endl;
-  }
-
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  // Use some transient storage
-  EBAMRFluxData flux;
-  m_amr->allocate(flux, m_phase, ncomp);
-
-#if USE_DOMAIN_FLUX
-  this->new_compute_flux(flux, a_face_vel, a_face_state, m_domainflux);
-#else // This version ignores what's in the domain flux data holder
-  this->compute_flux(flux, a_face_vel, a_face_state);
-#endif
-  this->conservative_divergence(a_cons_div, flux);
 }
 
 void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
@@ -1240,8 +1040,7 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
   }
 }
 
-void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
-					       const int                         a_lvl){
+void cdr_solver::interpolate_flux_to_centroids(LevelData<EBFluxFAB>& a_flux, const int a_lvl){
   CH_TIME("cdr_solver::interpolate_flux_to_centroids");
   if(m_verbosity > 5){
     pout() << m_name + "::interpolate_flux_to_centroids" << endl;
@@ -1264,12 +1063,9 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >      
     const IntVectSet ivs   = ebisbox.getIrregIVS(box);
     
     for (int dir = 0; dir < SpaceDim; dir++){
-#if USE_NEW_INTERPOLANT // New code
-      BaseIFFAB<Real>& flux = (*(m_interpolant[dir])[a_lvl])[dit()];
-#else // Original code
-      BaseIFFAB<Real>& flux = a_flux[dir][dit()];
-#endif
+      BaseIFFAB<Real>& interpolant = (*(m_interpolant[dir])[a_lvl])[dit()]; // Holds the face-centered flux
       BaseIFFAB<Real> centroid_flux;
+      EBFaceFAB& faceFlux = a_flux[dit()][dir];
 
       // Compute face centroid flux
       centroid_flux.define(ivs, ebgraph, dir, ncomp);
@@ -1282,13 +1078,15 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >      
 	  const FaceIndex& iface = sten.face(i);
 	  const Real iweight     = sten.weight(i);
 	  
-	  centroid_flux(face, comp) += iweight*flux(iface, comp);
+	  centroid_flux(face, comp) += iweight*interpolant(iface, comp);
 	}
+
+	faceFlux(face, comp) = centroid_flux(face, comp);
       }
 
       // Copy centroid flux into a_flux
-      flux.setVal(0.0);
-      flux.copy(box, interv, box, centroid_flux, interv);
+      interpolant.setVal(0.0);
+      interpolant.copy(box, interv, box, centroid_flux, interv);
     }
   }
 }
@@ -1421,9 +1219,7 @@ void cdr_solver::increment_redist(const EBAMRIVData& a_mass_diff){
   }
 }
 
-void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
-					    const EBAMRCellData& a_divF,
-					    const EBAMRFluxData& a_face_state){
+void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divG){
   CH_TIME("cdr_solver::nonconservative_divergence");
   if(m_verbosity > 5){
     pout() << m_name + "::nonconservative_divergence" << endl;
@@ -1440,7 +1236,7 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
     
     for (DataIterator dit = a_div_nc[lvl]->dataIterator(); dit.ok(); ++dit){
       BaseIVFAB<Real>& div_nc = (*a_div_nc[lvl])[dit()];
-      EBCellFAB& divF         = (*a_divF[lvl])[dit()];
+      EBCellFAB& divG         = (*a_divG[lvl])[dit()];
 
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
@@ -1455,14 +1251,12 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData&         a_div_nc,
 	for (int i = 0; i < sten.size(); i++){
 	  const VolIndex& ivof = sten.vof(i);
 	  const Real& iweight  = sten.weight(i);
-	  div_nc(vof,comp) += iweight*divF(ivof, comp);
+	  div_nc(vof,comp) += iweight*divG(ivof, comp);
 	}
       }
     }
   }
 }
-
-
 
 void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("cdr_solver::regrid");
@@ -1767,9 +1561,7 @@ void cdr_solver::set_verbosity(const int a_verbosity){
   }
 }
 
-void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
-					const LevelData<EBFluxFAB>&   a_flux,
-					const int                     a_lvl){
+void cdr_solver::setup_flux_interpolant(const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
   CH_TIME("cdr_solver::setup_flux_interpolant");
   if(m_verbosity > 5){
     pout() << m_name + "::setup_flux_interpolant" << endl;
@@ -1782,39 +1574,11 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
   const ProblemDomain& domain  = m_amr->get_domains()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[a_lvl];
 
-  // Real setup_time;
-  // Real compute_time;
-
-  // Real total_time = -MPI_Wtime();
-
-
   for (int dir = 0; dir < SpaceDim; dir++){
-    // Define interpolant
-
-    const Real t1 = MPI_Wtime();
-#if USE_NEW_INTERPOLANT
-#else
-    LayoutData<IntVectSet> grown_set;
-    EBArith::defineFluxInterpolant(a_interpolant[dir],
-				   grown_set,
-				   dbl,
-				   ebisl,
-				   domain,
-				   ncomp,
-				   dir);
-#endif
-    //    const Real t2 = MPI_Wtime();
-
-    // Compute interpolant
-#if USE_NEW_INTERPOLANT
+    
     const LayoutData<IntVectSet>& grown_set = (*(m_interp_sets[dir])[a_lvl]);
-#endif
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-#if USE_NEW_INTERPOLANT // New code
       BaseIFFAB<Real>& interpol   = (*(m_interpolant[dir])[a_lvl])[dit()];
-#else // Original code
-      BaseIFFAB<Real>& interpol   = a_interpolant[dir][dit()];
-#endif
       const Box& box              = dbl.get(dit());
       const EBISBox& ebisbox      = ebisl[dit()];
       const EBGraph& ebgraph      = ebisbox.getEBGraph();
@@ -1826,24 +1590,9 @@ void cdr_solver::setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpol
 	const FaceIndex& face = faceit();
 	interpol(face, comp) = flux(face, comp);
       }
-      // const Real t3 = MPI_Wtime();
-
-      // setup_time += t2 - t1; 
-      // compute_time += t3 - t2; 
     }
-    // total_time += MPI_Wtime();
 
-
-    // pout() << "fluxinterpolant::setup time = " << setup_time/total_time << endl;
-    // pout() << "fluxinterpolant::compute time = " << compute_time/total_time << endl;
-    // pout() << "fluxinterpolant::total time = " << total_time << endl;
-
-#if USE_NEW_INTERPOLANT
     (*(m_interpolant[dir])[a_lvl]).exchange();
-#else
-    a_interpolant[dir].exchange();
-#endif
-
   }
 }
 
@@ -1868,75 +1617,6 @@ void cdr_solver::set_plot_variables(){
     else if(str[i] == "vel") m_plot_vel = true;
     else if(str[i] == "dco") m_plot_dco = true; 
     else if(str[i] == "src") m_plot_src = true;
-  }
-}
-
-void cdr_solver::tag_gradient(Vector<IntVectSet>& a_tags, const Real a_grad){
-  CH_TIME("cdr_solver::tag_gradient");
-  if(m_verbosity > 5){
-    pout() << m_name + "::tag_gradient" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  EBAMRCellData grad, grad_norm;
-  m_amr->allocate(grad,      m_phase, SpaceDim);
-  m_amr->allocate(grad_norm, m_phase, 1);
-  m_amr->compute_gradient(grad, m_state, m_phase);
-  data_ops::vector_length(grad_norm, grad);
-
-  a_tags.resize(1+finest_level);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const Real dx = m_amr->get_dx()[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[lvl][dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-      const EBCellFAB& gradfab  = (*grad_norm[lvl])[dit()];
-      
-      const IntVectSet ivs(box);
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-
-	if(abs(gradfab(vof, 0)) > a_grad){
-	  a_tags[lvl] |= vof.gridIndex();
-	}
-      }
-    }
-  }
-}
-
-void cdr_solver::tag_value(Vector<IntVectSet>& a_tags, const Real a_value){
-  CH_TIME("cdr_solver::tag_value");
-  if(m_verbosity > 5){
-    pout() << m_name + "::tag_value" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-
-  a_tags.resize(1+finest_level);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = m_amr->get_ebisl(m_phase)[lvl][dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-      const EBCellFAB& state  = (*m_state[lvl])[dit()];
-      
-      const IntVectSet ivs(box);
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-
-	if(state(vof,0) > a_value){
-	  a_tags[lvl] |= vof.gridIndex();
-	}
-      }
-    }
   }
 }
 

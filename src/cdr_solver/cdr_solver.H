@@ -36,6 +36,56 @@ public:
   virtual void parse_options() = 0;
 
   /*!
+    @brief Implicit diffusion TGA advance without source terms
+  */
+  virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt) = 0;
+
+  /*!
+    @brief Implicit diffusion TGA advance with source terms
+  */
+  virtual void advance_tga(EBAMRCellData&       a_new_state,
+			   const EBAMRCellData& a_old_state,
+			   const EBAMRCellData& a_source,
+			   const Real           a_dt) = 0;
+
+  /*!
+    @brief Implicit diffusion Euler advance without source terms
+  */
+  virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt) = 0;
+
+  /*!
+    @brief Implicit diffusion Euler advance with source terms
+  */
+  virtual void advance_euler(EBAMRCellData&       a_new_state,
+			     const EBAMRCellData& a_old_state,
+			     const EBAMRCellData& a_source,
+			     const Real           a_dt) = 0;
+
+  /*!
+    @brief Compute div(nv - D*grad(n)) explicitly
+  */
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+
+  /*!
+    @brief Compute div(v*phi) explicitly
+  */
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+
+  /*!
+    @brief Compute div(D*grad(phi)) explicitly
+  */
+  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state) = 0;
+
+  /*!
+    @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers
+    @param[in]    a_divG div(G). This includes redistribution
+    @param[inout] a_G Must contain face-centered fluxes on input. Contains face-centroid fluxes on output. 
+    @param[in]    a_ebG Flux on the EB centroids
+    @note If you also want charge injection through the domain sides, you must put those in a_G before entering this routine
+  */
+  virtual void compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG);
+
+  /*!
     @brief Average velocities to faces
   */
   virtual void average_velo_to_faces();
@@ -44,27 +94,6 @@ public:
     @brief Cache internal state
   */
   virtual void cache_state();
-
-  /*!
-    @brief Compute div(nv - D*grad(n))
-  */
-  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
-
-  /*!
-    @brief Compute advective derivative
-  */
-  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist) = 0;
-
-  /*!
-    @brief Compute advective derivative with subcycling. This computes divF as the subcycled forward Euler advance 
-    @details The output is state new = old - a_dt*div(F)
-  */
-  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist) = 0;
-
-  /*!
-    @brief Compute diffusion term
-  */
-  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state) = 0;
 
   /*!
     @brief Deallocate internal storage
@@ -167,7 +196,7 @@ public:
   */
   virtual void initial_data_distribution();
 
-    /*!
+  /*!
     @brief Fill initial data from particles
   */
   virtual void initial_data_particles();
@@ -176,86 +205,6 @@ public:
     @brief Allocate internal storage
   */
   virtual void allocate_internals();
-  
-  /*!
-    @brief Advance method
-  */
-  virtual void advance(const Real& a_dt);
-
-  /*!
-    @brief Advance state. Default is second order Runge-Kutta.
-  */
-  virtual void advance(EBAMRCellData& a_state, const Real& a_dt);
-
-  /*!
-    @brief Advective advance on internal data holder
-  */
-  virtual void advance_advect(const Real a_dt);
-
-  /*!
-    @brief Pure advective advance. I.e. advance with D = 0 and S = 0
-  */
-  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt) = 0;
-  
-  /*!
-    @brief Diffusion advance on internal data holder
-  */
-  virtual void advance_diffusion(const Real a_dt);
-
-  /*!
-    @brief Pure diffusion advance. I.e. advance with div(nv) = 0 and S = 0
-  */
-  virtual void advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt) = 0;
-
-  /*!
-    @brief Pure TGA advance without source terms
-  */
-  virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt) = 0;
-
-  /*!
-    @brief Pure Euler advance with source terms
-  */
-  virtual void advance_tga(EBAMRCellData&       a_new_state,
-			   const EBAMRCellData& a_old_state,
-			   const EBAMRCellData& a_source,
-			   const Real           a_dt) = 0;
-
-  /*!
-    @brief Pure Euler advance without source terms
-  */
-  virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt) = 0;
-
-  /*!
-    @brief Pure Euler advance with source terms
-  */
-  virtual void advance_euler(EBAMRCellData&       a_new_state,
-			     const EBAMRCellData& a_old_state,
-			     const EBAMRCellData& a_source,
-			     const Real           a_dt) = 0;
-
-  /*!
-    @brief Explicit Euler advance with source terms
-  */
-  virtual void advance_explicit_euler(EBAMRCellData&       a_new_state,
-				      const EBAMRCellData& a_old_state,
-				      const EBAMRCellData& a_source,
-				      const Real           a_dt) = 0;
-
-  /*!
-    @brief Explicit RK2 advance
-  */
-  virtual void advance_rk2(EBAMRCellData& a_state, const Real a_dt, const Real a_alpha);
-
-  /*!
-    @brief Compute right-hand side using the internal state.
-  */
-  virtual void compute_rhs(EBAMRCellData& a_rhs, const Real& a_dt); 
-
-  /*!
-    @brief Compute the right-hand side using supplied solution. This is the basic function that is required for using the method
-    of lines (MOL)
-  */
-  virtual void compute_rhs(EBAMRCellData& a_rhs, const EBAMRCellData& a_state, const Real& a_dt);
 
   /*!
     @brief Write plot file
@@ -267,7 +216,7 @@ public:
   */
   virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
 
-    /*!
+  /*!
     @brief Write data to output. Convenience function. 
   */
   virtual void write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
@@ -291,16 +240,6 @@ public:
     @brief Regrid internals
   */
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-
-  /*!
-    @brief Tag solution data based on the gradient
-  */
-  virtual void tag_gradient(Vector<IntVectSet>& a_tags, const Real a_grad);
-
-  /*!
-    @brief Tag solution data based on the value
-  */
-  virtual void tag_value(Vector<IntVectSet>& a_tags, const Real a_value);
 
   /*!
     @brief Set which variables to output
@@ -407,43 +346,6 @@ public:
   */
   virtual EBAMRIFData& get_domainflux();
 
-  /*!
-    @brief Fill fluxes 
-  */
-  virtual void new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
-				const LevelData<EBFluxFAB>&        a_face_state,
-				const int                          a_lvl);
-
-  /*!
-    @brief Conservative divergence over regular cells
-  */
-  virtual void consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
-
-  virtual void hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
-				 LevelData<BaseIVFAB<Real> >&       a_mass_diff,
-				 const LevelData<BaseIVFAB<Real> >& a_divF_nc,
-				 const int                          a_lvl);
-
-  /*!
-    @brief Compute flux interpolant
-  */
-  virtual void setup_flux_interpolant(LevelData<BaseIFFAB<Real> >   a_interpolant[SpaceDim],
-				      const LevelData<EBFluxFAB>&   a_flux,
-				      const int                     a_lvl);
-
-  /*!
-    @brief Interpolate flux to centroids
-  */
-  virtual void interpolate_flux_to_centroids(LevelData<BaseIFFAB<Real> >       a_flux[SpaceDim],
-					     const int                         a_lvl);
-
-  /*!
-    @brief Compute div(F) on irregular cells
-  */
-  virtual void compute_divF_irreg(LevelData<EBCellFAB>&              a_divF,
-				  const LevelData<BaseIFFAB<Real> >  a_flux[SpaceDim],
-				  const LevelData<BaseIVFAB<Real> >& a_ebflux,
-				  const int                          a_lvl);
 
 protected:
   
@@ -637,50 +539,30 @@ protected:
   */
   virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
 
-
-  /*!
-    @brief Compute the conservative divergence using face-centered states and velocities
-  */
-  virtual void conservative_divergence(EBAMRCellData&       a_cons_div,
-				       const EBAMRFluxData& a_face_vel,
-				       const EBAMRFluxData& a_face_state);
-  
   /*!
     @brief Set up flux
   */
-  virtual void compute_flux(EBAMRFluxData& a_flux, const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_face_vel);
+  virtual void compute_flux(EBAMRFluxData&       a_flux,
+			    const EBAMRFluxData& a_face_state,
+			    const EBAMRFluxData& a_face_vel,
+			    const EBAMRIFData&   a_domain_flux);
 
-  /*!
-    @brief Set up flux
-  */
-  virtual void new_compute_flux(EBAMRFluxData&       a_flux,
-				const EBAMRFluxData& a_face_state,
-				const EBAMRFluxData& a_face_vel,
-				const EBAMRIFData&   a_domain_flux);
-
-  virtual void new_compute_flux(LevelData<EBFluxFAB>&              a_flux,
-				const LevelData<EBFluxFAB>&        a_face_state,
-				const LevelData<EBFluxFAB>&        a_face_vel,
-				const LevelData<DomainFluxIFFAB>&  a_domain_flux,
-				const int                          a_lvl);
+  virtual void compute_flux(LevelData<EBFluxFAB>&              a_flux,
+			    const LevelData<EBFluxFAB>&        a_face_state,
+			    const LevelData<EBFluxFAB>&        a_face_vel,
+			    const LevelData<DomainFluxIFFAB>&  a_domain_flux,
+			    const int                          a_lvl);
 
   /*!
     @brief Compute conservative divergence from fluxes. 
   */
-  virtual void conservative_divergence(EBAMRCellData& a_cons_div, const EBAMRFluxData& a_flux);
+  virtual void conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebflux);
 
 
-
-
-
-
-
-				  
   /*!
     @brief Compute the non-conservative divergence
   */
-  virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
-
+  virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divG);
 
   /*!
     @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence
@@ -689,7 +571,36 @@ protected:
 				 EBAMRIVData&         a_mass_diff,
 				 const EBAMRIVData&   a_noncons_div);
 
+  
+  /*!
+    @brief Conservative divergence over regular cells
+  */
+  virtual void consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
+  /*!
+    @brief Make the hybrid divergence. On the way in, a_divF_H must hold the conservative divergence
+  */
+  virtual void hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
+				 LevelData<BaseIVFAB<Real> >&       a_mass_diff,
+				 const LevelData<BaseIVFAB<Real> >& a_divF_nc,
+				 const int                          a_lvl);
+
+  /*!
+    @brief Compute flux interpolant
+  */
+  virtual void setup_flux_interpolant(const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
+
+  /*!
+    @brief Interpolate flux to centroids
+  */
+  virtual void interpolate_flux_to_centroids(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
+
+  /*!
+    @brief Compute div(F) on irregular cells
+  */
+  virtual void compute_divG_irreg(LevelData<EBCellFAB>&              a_divG,
+				  const LevelData<BaseIVFAB<Real> >& a_ebflux,
+				  const int                          a_lvl);
 
   /*!
     @brief Increment flux registers. 

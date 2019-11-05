@@ -590,7 +590,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     t0 = MPI_Wtime();
     if(solver->is_mobile()){
       const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
-      solver->compute_divF(scratch, phi, extrap_dt, true);
+      solver->compute_divF(scratch, phi, extrap_dt);
       data_ops::scale(scratch, -1.0);
     }
     else{

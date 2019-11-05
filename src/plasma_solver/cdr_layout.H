@@ -173,11 +173,6 @@ public:
   virtual void write_plot_file();
 
   /*!
-    @brief Convenience function. Call advance method for each solver
-  */
-  virtual void advance(const Real a_dt);
-
-  /*!
     @brief Get largest possible time step for advection part
   */
   virtual Real compute_cfl_dt();

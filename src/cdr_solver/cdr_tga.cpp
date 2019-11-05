@@ -25,96 +25,6 @@ cdr_tga::~cdr_tga(){
 
 }
 
-void cdr_tga::advance(EBAMRCellData& a_state, const Real& a_dt){
-  CH_TIME("cdr_tga::advance(state, dt)");
-  if(m_verbosity > 1){
-    pout() << m_name + "::advance(state, dt)" << endl;
-  }
-  
-  if(this->is_diffusive()){
-    bool m_needs_setup = false;
-    if(m_needs_setup){
-      this->setup_gmg();
-    }
-    if(m_use_tga){
-      this->advance_tga(a_state, a_dt);
-    }
-  }
-  else{
-    const Real midpoint = 0.5;
-    cdr_solver::advance_rk2(a_state, a_dt, midpoint);
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::floor(*a_state[lvl], 0.0); // This removes mass!
-  }
-  
-  m_amr->average_down(a_state, m_phase);
-  m_amr->interp_ghost(a_state, m_phase);
-
-  m_time += a_dt;
-  m_step++;
-}
-
-void cdr_tga::advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt){
-  CH_TIME("cdr_tga::advance_diffusion");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_diffusion" << endl;
-  }
-
-  if(m_diffusive){
-    bool converged = false;
-
-    const int comp         = 0;
-    const int ncomp        = 1;
-    const int finest_level = m_amr->get_finest_level();
-
-    // Create a source term = S = 0.0;
-    EBAMRCellData src, phi_euler, phi_tga;
-    m_amr->allocate(src,       m_phase, ncomp);
-    m_amr->allocate(phi_euler, m_phase, ncomp);
-    m_amr->allocate(phi_tga,   m_phase, ncomp); 
-
-    data_ops::set_value(src, 0.0);
-    data_ops::copy(phi_tga, a_state);
-
-    // Do the aliasing stuff
-    Vector<LevelData<EBCellFAB>* > euler_state, tga_state, old_state, source;
-    m_amr->alias(euler_state, phi_euler);
-    m_amr->alias(tga_state,   phi_tga);
-    m_amr->alias(old_state, a_state);
-    m_amr->alias(source,    src);
-
-    const Real alpha = 0.0;
-    const Real beta  = 1.0;
-
-    data_ops::set_value(m_diffco_eb, 0.0);
-
-    // TGA solve
-    m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(tga_state, old_state, source, a_dt, 0, finest_level, false);
-
-    // Euler solve
-    data_ops::copy(phi_euler, phi_tga); // I assume that phi_tga is a very good initial guess
-    m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(euler_state, old_state, source, a_dt, 0, finest_level, false);
-
-    // Compute error
-    data_ops::copy(a_error, phi_euler);
-    data_ops::scale(a_error, -1.0);
-    data_ops::incr(a_error, phi_tga, 1.0);
-
-    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
-      converged = true;
-    }
-
-    data_ops::copy(a_state, phi_tga);
-  }
-}
-
-
 void cdr_tga::advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
   CH_TIME("cdr_tga::advance_tga");
   if(m_verbosity > 5){
@@ -216,9 +126,6 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
     m_amr->alias(old_state, a_old_state);
     m_amr->alias(source,    a_source);
 
-#if 0 // Debug
-    setup_gmg();
-#endif
     const Real alpha = 0.0;
     const Real beta  = 1.0;
 
@@ -236,85 +143,10 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
   }
 }
 
-void cdr_tga::advance_explicit_euler(EBAMRCellData&       a_new_state,
-				     const EBAMRCellData& a_old_state,
-				     const EBAMRCellData& a_source,
-				     const Real           a_dt){
-  CH_TIME("cdr_tga::advance_explicit_euler");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_explicit_euler" << endl;
-  }
-  
-  if(m_diffusive){
-    compute_divD(m_scratch, a_old_state);
-    data_ops::copy(a_new_state, a_old_state);
-    data_ops::incr(a_new_state, m_scratch, a_dt);
-  }
-}
-
-void cdr_tga::advance_tga(EBAMRCellData& a_state, const Real a_dt){
-  CH_TIME("cdr_tga::advance_tga");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_tga" << endl;
-  }
-
-  bool converged = false;
-
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  // Create a source term = S - div(n*v)
-  EBAMRCellData src, phi, divF;
-  m_amr->allocate(src,  m_phase, ncomp);
-  m_amr->allocate(phi,  m_phase, ncomp);
-  m_amr->allocate(divF, m_phase, ncomp);
-
-  data_ops::set_value(src,  0.0);
-  data_ops::set_value(phi,  0.0);
-  data_ops::set_value(divF, 0.0);
-
-  this->compute_divF(divF, a_state, 0.5*a_dt, true); // extrapolate div(n*v) to 0.5*a_dt and use it as a source term for TGA
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::incr(*phi[lvl], *a_state[lvl],  1.0);
-    data_ops::incr(*src[lvl], *m_source[lvl], 1.0);
-    data_ops::incr(*src[lvl], *divF[lvl],    -1.0);
-  }
-
-  // Do the aliasing stuff
-  Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
-  m_amr->alias(new_state, phi);
-  m_amr->alias(old_state, a_state);
-  m_amr->alias(source,    src);
-
-  // Advance
-  const Real alpha = 0.0;
-  const Real beta  = 1.0;
-
-  data_ops::set_value(m_diffco_eb, 0.0);
-  
-  if(m_use_tga){
-    m_tgasolver->resetAlphaAndBeta(alpha, beta);
-    m_tgasolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
-  }
-  else{
-    m_eulersolver->resetAlphaAndBeta(alpha, beta);
-    m_eulersolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
-  }
-
-  const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-  if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
-    converged = true;
-  }
-
-  data_ops::copy(a_state, phi);
-}
-
 void cdr_tga::advance_tga(EBAMRCellData&       a_new_state,
-			    const EBAMRCellData& a_old_state,
-			    const EBAMRCellData& a_source,
-			    const Real           a_dt){
+			  const EBAMRCellData& a_old_state,
+			  const EBAMRCellData& a_source,
+			  const Real           a_dt){
   CH_TIME("cdr_tga::advance_tga(full)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance_tga(full)" << endl;
@@ -609,6 +441,15 @@ void cdr_tga::setup_euler(){
   // Note: If this crashes, try to init gmg first
 }
 
+void cdr_tga::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG){
+  CH_TIME("cdr_tga::compute_divG");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_divG" << endl;
+  }
+
+  cdr_solver::compute_divG(a_divG, a_G, a_ebG);
+}
+
 void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_tga::compute_divJ(divF, state)");
   if(m_verbosity > 5){
@@ -632,7 +473,7 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
 
   // Compute advective term
   if(this->is_mobile()){
-    this->compute_divF(advective_term, a_state, 0.0, true);
+    this->compute_divF(advective_term, a_state, 0.0);
     data_ops::incr(a_divJ, advective_term, 1.0);
   }
 
@@ -656,7 +497,7 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
 #endif
 }
 
-void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist){
+void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_tga::compute_divF(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divF(divF, state)" << endl;
@@ -691,36 +532,31 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
       a_state[lvl]->localCopyTo(*weights[lvl]);
     }
 
-
     // Compute the advective derivative
     this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
     this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
-    this->new_compute_flux(flux, m_velo_face, face_state, m_domainflux);
-    this->conservative_divergence(a_divF, flux);
-    //    this->conservative_divergence(a_divF, face_state, m_velo_face);   // a_divF holds the conservative divergence
-    this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
-    this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
-    //    this->increment_flux_register(face_state, m_velo_face);           // Increment flux registers
-    this->increment_flux_register(flux);           // Increment flux registers
-    this->increment_redist(mass_diff);                                // Increment redistribution objects
+    this->compute_flux(flux, m_velo_face, face_state, m_domainflux);  // Compute face-centered fluxes
+    
+    this->compute_divG(a_divF, flux, m_ebflux); // When we're done, flux contains 
+    // All the stuff below here is fairly general stuff
+    // this->conservative_divergence(a_divF, flux, m_ebflux);
+    // this->nonconservative_divergence(div_nc, a_divF, face_state);     // Compute non-conservative divergence
+    // this->hybrid_divergence(a_divF, mass_diff, div_nc);               // Make divF = hybrid divergence. Compute mass diff.
+    // this->increment_flux_register(flux);           // Increment flux registers
+    // this->increment_redist(mass_diff);                                // Increment redistribution objects
 
-    // Mass weights.
-    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      //      data_ops::incr(*weights[lvl], *a_state[lvl], 1.0);
-    }
-
-    const bool ebcf = m_amr->get_ebcf();
-    if(ebcf){ 
-      this->coarse_fine_increment(mass_diff);     // Increment the coarse-fine redistribution objects
-      this->increment_redist_flux();              // Increment flux registers with the redistribution stuff
-      this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
-      this->coarse_fine_redistribution(a_divF);   // Redistribute
-      this->reflux(a_divF);
-    }
-    else{
-      this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
-      this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
-    }
+    // const bool ebcf = m_amr->get_ebcf();
+    // if(ebcf){ 
+    //   this->coarse_fine_increment(mass_diff);     // Increment the coarse-fine redistribution objects
+    //   this->increment_redist_flux();              // Increment flux registers with the redistribution stuff
+    //   this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
+    //   this->coarse_fine_redistribution(a_divF);   // Redistribute
+    //   this->reflux(a_divF);
+    // }
+    // else{
+    //   this->hyperbolic_redistribution(a_divF, mass_diff, weights);  // Redistribute mass into hybrid divergence
+    //   this->reflux(a_divF);                                         // Reflux at coarse-fine interfaces
+    // }
   }
   else{
     data_ops::set_value(a_divF, 0.0);
@@ -898,9 +734,9 @@ void cdr_tga::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellDa
 
   this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise
   this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis
-   data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis
-   data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis
-   data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis)
+  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis
+  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis
+  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis)
 
 #if 1 // Debug
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -908,7 +744,7 @@ void cdr_tga::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellDa
       Real max, min;
       EBLevelDataOps::getMaxMin(max, min, *ranflux[lvl], 0, dir);
       if(min < 0.0 || max < 0.0){
-	MayDay::Abort("stop - negative face value");
+	MayDay::Abort("cdr_tga::GWN_diffusion_source - negative face value");
       }
     }
   }
@@ -918,22 +754,17 @@ void cdr_tga::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellDa
   // Source term. 
   // I want to re-use conservative_divergence(), but that also computes with the EB fluxes. Back that up
   // first and use the already written and well-tested routine. Then copy back
-  EBAMRIVData backup;
-  m_amr->allocate(backup, m_phase, 1);
-  data_ops::copy(backup, m_ebflux);
-  data_ops::set_value(m_ebflux, 0.0);
+  EBAMRIVData zeroflux;
+  m_amr->allocate(zeroflux, m_phase, 1);
+  data_ops::set_value(zeroflux, 0.0);
   data_ops::set_value(a_ransource, 0.0);
-  conservative_divergence(a_ransource, ranflux); // Compute the conservative divergence. This also refluxes. 
-  data_ops::copy(m_ebflux, backup);
-
-  //  data_ops::set_value(a_ransource, 0.0);
-
+  conservative_divergence(a_ransource, ranflux, zeroflux); // Compute the conservative divergence. This also refluxes. 
   
 #if 1 // Debug
   m_amr->average_down(a_ransource, m_phase);
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     if(EBLevelDataOps::checkNANINF(*a_ransource[lvl])){
-      MayDay::Abort("something is wrong");
+      MayDay::Abort("cdr_tga::GWN_diffusion_source - something is wrong");
     }
   }
 #endif
@@ -1096,42 +927,6 @@ void cdr_tga::fill_GWN(EBAMRFluxData& a_noise, const Real a_sigma){
       }
     }
   }
-}
-
-void cdr_tga::GWN_advection_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states){
-  CH_TIME("cdr_tga::GWN_advection_source");
-  if(m_verbosity > 5){
-    pout() << m_name + "::GWN_advection_source" << endl;
-  }
-
-  const int comp  = 0;
-  const int ncomp = 1;
-  
-  EBAMRFluxData ranflux;
-  EBAMRFluxData GWN;
-  
-  m_amr->allocate(ranflux,   m_phase, ncomp);
-  m_amr->allocate(GWN,       m_phase, ncomp);
-  
-  data_ops::set_value(a_ransource, 0.0);
-  data_ops::set_value(ranflux,   0.0);
-  data_ops::set_value(GWN,       0.0);
-      
-  this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise
-  this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis
-  data_ops::square_root(ranflux);                       // ranflux = sqrt(phis)
-  data_ops::multiply(ranflux, GWN);                     // ranflux = sqrt(phis)*W/sqrt(dV)
-  data_ops::multiply(ranflux, m_velo_face);             // ranflux = v*sqrt(phis)*W/sqrt(dV)
-
-  // Source term. 
-  // I want to re-use conservative_divergence(), but that also computes with the EB fluxes. Back that up
-  // first and use the already written and well-tested routine. Then copy back.
-  EBAMRIVData backup;
-  m_amr->allocate(backup, m_phase, 1);
-  data_ops::copy(backup, m_ebflux);
-  data_ops::set_value(m_ebflux, 0.0);
-  conservative_divergence(a_ransource, ranflux); // Compute the conservative divergence. This also refluxes. 
-  data_ops::copy(m_ebflux, backup);
 }
 
 void cdr_tga::write_plot_data(EBAMRCellData& a_output, int& a_comp){

@@ -13,16 +13,7 @@
 #include <EBAdvectLevelIntegrator.H>
 
 /*!
-  @brief Godunov implementation for convection-diffusion-reaction equations. 
-
-  @details Options that are available for this class
-  
-  Class options
-  -------------
-
-      cdr_gdnv.divF_nc      = covered_face    # Valid options are "covered_face" and "conservative_average"
-      cdr_gdnv.limit_slopes = false           # Use van Leer slope limiter or not (default is false)
-
+  @brief Godunov implementation for advection. 
 */
 class cdr_gdnv : public cdr_tga {
 public:
@@ -43,16 +34,6 @@ public:
   virtual void parse_options();
 
   /*!
-    @brief Advective advance
-  */
-  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt);
-
-  /*!
-    @brief Advective advance using subcycling
-  */
-  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist);
-
-  /*!
     @brief Query number of ghost cells
   */
   virtual int query_ghost() const;
@@ -61,11 +42,6 @@ public:
     @brief Allocate internal stuff
   */
   virtual void allocate_internals();
-
-  /*!
-    @brief Set the nonconservative divergence method. Use = 0 for div(F)_nc = sum(divF(c))/norm, 1 for covered face extrapolation.
-  */
-  virtual void set_divF_nc(const int a_which_divFnc);
 
   /*!
     @brief Regrid internals
@@ -77,29 +53,21 @@ public:
   */
   virtual void average_velo_to_faces();
 
-    /*!
-    @brief Face extrapolation method used for subcycling
-    @details This routine fills a_state with face-centered states. On CF interfaces the 
-    states used time-interpolated state from the coarse cells. Very useful routine. 
-  */
-  virtual void advect_to_faces(LevelData<EBFluxFAB>&        a_state,
-			       const LevelData<EBCellFAB>&  a_cell_state,
-			       const LevelData<EBCellFAB>*  a_state_coarse_old,
-			       const LevelData<EBCellFAB>*  a_state_coarse_new,
-			       const Real                   a_time,
-			       const Real                   a_coarse_time_old,
-			       const Real                   a_coarse_time_new,
-			       const int                    a_lvl,
-			       const Real                   a_extrap_dt = 0.0);
-
   /*!
-    @brief Level-wise non-conservative divergence. Only for covered face stuff
+    @brief Compute divF
+    @note This function is implemented because cdr_gdnv has several ways of computing the nonconservative divergence
   */
-  virtual void nonconservative_divergence(LevelData<BaseIVFAB<Real> >& a_divF_nc,
-					  const LevelData<EBFluxFAB>&  a_face_state,
-					  const int                    a_lvl);
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt);
   
 protected:
+
+  /*!
+    @brief Simple switch for nonconservative average computation
+  */
+  enum nonConsDiv {
+    conservative_average = 0,
+    covered_face = 1,
+  };
 
   /*!
     @brief Allocate covered stuff
@@ -126,80 +94,10 @@ protected:
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
-
-
-  virtual void advance_subcycle_amr(EBAMRCellData& a_state,
-				    EBAMRFluxData& a_flux,
-				    EBAMRFluxData& a_face_states,
-				    EBAMRCellData& a_coar_old_state,
-				    EBAMRCellData& a_divF_c,
-				    EBAMRCellData& a_weights,
-				    EBAMRIVData&   a_divF_nc,
-				    EBAMRIVData&   a_mass_diff,
-				    int            a_lvl,
-				    Vector<Real>&  a_tnew,
-				    Vector<Real>&  a_told,
-				    const int      a_coarsest_level,
-				    const int      a_finest_level,
-				    const Real     a_dt);
-
-  virtual void advance_subcycle_level(LevelData<EBCellFAB>&        a_state,
-				      LevelData<EBFluxFAB>&        a_flux,
-				      LevelData<EBFluxFAB>&        a_face_states,
-				      LevelData<EBCellFAB>&        a_divF_c,
-				      LevelData<EBCellFAB>&        a_weights,
-				      LevelData<BaseIVFAB<Real> >& a_mass_diff,
-				      LevelData<BaseIVFAB<Real> >& a_divF_nc,
-				      const LevelData<EBCellFAB>*  a_coar_old_state,
-				      const LevelData<EBCellFAB>*  a_coar_new_state,
-				      const int                    a_lvl,
-				      const int                    a_coarsest_level,
-				      const int                    a_finest_level,
-				      const Real                   a_coar_time_old,
-				      const Real                   a_coar_time_new,
-				      const Real                   a_time,
-				      const Real                   a_dt);
-
-  /*!
-    @brief Reflux a_state with flux registers from finer level (if we have it)
-  */
-  virtual void reflux_level(EBAMRCellData& a_state,
-			    const int      a_level,
-			    const int      a_coarsest_level,
-			    const int      a_finest_level,
-			    const Real     a_scale);
-
-  /*!
-    @brief Level redistribution
-  */
-  virtual void redist_level(LevelData<EBCellFAB>& a_state, const LevelData<EBCellFAB>& a_weights, const int a_level);
-				      
-
-  /*!
-    @brief Compute div(J)
-  */
-  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
-
   /*!
     @brief Non-conservative divergence. Overwriting because this class has two ways of doing this. 
   */
   virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
-
-
-
-  /*!
-    @brief Update flux registers 
-  */
-  virtual void update_flux_registers(LevelData<EBFluxFAB>& a_flux,
-				     const int             a_lvl,
-				     const int             a_coarsest_lvl,
-				     const int             a_finest_lvl,
-				     const Real            a_dt);
-
-  /*!
-    @brief Update the mass redistribution register
-  */
-  virtual void update_redist_register(const LevelData<BaseIVFAB<Real> >& a_mass_diff, const int a_lvl);
 
   /*!
     @brief Covered faces on side Lo
@@ -249,9 +147,9 @@ protected:
   Vector<RefCountedPtr<EBAdvectLevelIntegrator> > m_level_advect;
 
   /*!
-    @brief Switch between Trebotich and Colella nonconservative divergence
+    @brief Switch between nonconservative divergence methods
   */
-  int m_which_divFnc;
+  nonConsDiv m_nonConsDiv;
 
   /*!
     @brief Turn on/off slope limiting

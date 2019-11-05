@@ -44,43 +44,27 @@ public:
   virtual void parse_options() = 0;
 
   /*!
-    @brief Advance state. Current is explicit Euler.
-    @details Make the default RK2 for non-diffusive media and semi-implicit TGA for diffusive media. 
-  */
-  virtual void advance(EBAMRCellData& a_state, const Real& a_dt);
-
-  /*!
-    @brief Advective advance. This must be implemented by the solver. 
-  */
-  virtual void advance_advect(EBAMRCellData& a_state, const Real a_dt) = 0;
-
-  /*!
-    @brief Diffusion advance
-  */
-  virtual void advance_diffusion(EBAMRCellData& a_state, EBAMRCellData& a_error, const Real a_dt);
-
-  /*!
-    @brief Compute div(nv - D*grad(n))
+    @brief Compute div(nv - D*grad(n)) explicitly
   */
   virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
   /*!
-    @brief Compute advective derivative
+    @brief Compute advective derivative explicitly
   */
-  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_redist);
+  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt);
 
   /*!
-    @brief Compute pure hyperbolic Euler advance using subcycling in time
-  */
-  virtual void eulerF_subcycle(EBAMRCellData& a_state, const Real a_dt, const bool a_redist) = 0;
-
-  /*!
-    @brief Compute diffusion term
+    @brief Compute diffusion term explicitly
   */
   virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state);
 
   /*!
-    @brief Set solver parameters. These are normally good for this class. 
+    @brief Compute divG
+  */
+  virtual void compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG);
+
+  /*!
+    @brief Set implicit diffusion solver solver parameters. These are normally good for this class. 
   */
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,
 					 amrmg::which_mg a_gmg_type      = amrmg::vcycle,
@@ -120,12 +104,12 @@ public:
   virtual int query_ghost() const = 0;
 
   /*!
-    @brief Pure TGA advance without source terms
+    @brief Implicit diffusion TGA advance with source terms
   */
   virtual void advance_tga(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
 
   /*!
-    @brief Pure Euler advance with source terms
+    @brief Implicit diffusion TGA advance with source terms
   */
   virtual void advance_tga(EBAMRCellData&       a_new_state,
 			     const EBAMRCellData& a_old_state,
@@ -133,20 +117,12 @@ public:
 			     const Real           a_dt);
 
   /*!
-    @brief Pure Euler advance without source terms
+    @brief Implicit diffusion Euler advance without source terms
   */
   virtual void advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt);
 
-    /*!
-    @brief Explicit Euler advance with source terms
-  */
-  virtual void advance_explicit_euler(EBAMRCellData&       a_new_state,
-				      const EBAMRCellData& a_old_state,
-				      const EBAMRCellData& a_source,
-				      const Real           a_dt);
-
   /*!
-    @brief Pure Euler advance with source terms
+    @brief Implicit diffusion Euler advance with source terms
   */
   virtual void advance_euler(EBAMRCellData&       a_new_state,
 			     const EBAMRCellData& a_old_state,
@@ -215,13 +191,15 @@ protected:
   */
   bool m_plot_numbers;
 
-
-
+  /*!
+    @brief RNG engine
+  */
   std::mt19937_64* m_rng;     // Engine
-  int  m_seed;                // RNG seed
 
-  // Various routines for setting class options. 
-
+  /*!
+    @brief RNG seed
+  */
+  int m_seed;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -284,11 +262,6 @@ protected:
   Real m_gmg_hang;
 
   /*!
-    @brief TGA advancement algorithm
-  */
-  virtual void advance_tga(EBAMRCellData& a_state, const Real a_dt);
-
-  /*!
     @brief Advection-only extrapolation to faces
   */
   virtual void advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
@@ -337,11 +310,6 @@ protected:
     @brief Parse plot mode
   */
   virtual void parse_plotmode();    
-
-  /*!
-    @brief Source for advection
-  */
-  virtual void GWN_advection_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
 
   /*!
     @brief Random source for diffusion

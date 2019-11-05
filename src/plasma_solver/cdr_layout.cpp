@@ -324,18 +324,6 @@ void cdr_layout::write_plot_file(){
   }
 }
 
-void cdr_layout::advance(const Real a_dt){
-  CH_TIME("cdr_layout::advance");
-  if(m_verbosity > 6){
-    pout() << "cdr_layout::advance" << endl;
-  }
-
-  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->advance(a_dt);
-  }
-}
-
 Real cdr_layout::compute_cfl_dt(){
   CH_TIME("cdr_layout::compute_cfl_dt");
   if(m_verbosity > 5){
