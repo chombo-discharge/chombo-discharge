@@ -18,7 +18,7 @@
 #define USE_FAST_VELOCITIES 1
 #define USE_FAST_DIFFUSION  1
 
-#define USE_CENTROID_VELOCITIES 1
+#define USE_CENTROID_VELOCITIES 0
 
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";

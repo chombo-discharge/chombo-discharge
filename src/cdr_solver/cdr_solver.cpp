@@ -181,54 +181,52 @@ void cdr_solver::allocate_internals(){
   const int sca = 1;
   const int vec = SpaceDim;
 
+  // This is allocated no matter what. 
   m_amr->allocate(m_state,      m_phase, sca);
   m_amr->allocate(m_source,     m_phase, sca);
   m_amr->allocate(m_scratch,    m_phase, sca);
+  data_ops::set_value(m_state,      0.0);
+  data_ops::set_value(m_source,     0.0);
+  data_ops::set_value(m_scratch,    0.0);
 
-  
-  if(true){//m_mobile){
+  // Only allocate memory for cell-centered and face-centered velocities if the solver is mobile. Otherwise, allocate
+  // a NULL pointer that we can pass around in time_stepper in order to handle special cases
+  if(m_mobile){
     m_amr->allocate(m_velo_face,  m_phase, sca);
-    m_amr->allocate(m_velo_cell,  m_phase, vec); 
+    m_amr->allocate(m_velo_cell,  m_phase, vec);
+    
+    data_ops::set_value(m_velo_face,  0.0);
+    data_ops::set_value(m_velo_cell,  0.0);
   }
   else{
     m_amr->allocate_ptr(m_velo_face);
     m_amr->allocate_ptr(m_velo_cell);
   }
 
-
-  if(true){//m_diffusive){
+  // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
+  // pass around in time_stepper in order to handle special cases
+  if(m_diffusive){
     m_amr->allocate(m_aco,        m_phase, sca);
     m_amr->allocate(m_diffco,     m_phase, sca);
     m_amr->allocate(m_diffco_eb,  m_phase, sca);
+    
+    data_ops::set_value(m_aco,        0.0);
+    data_ops::set_value(m_diffco,     0.0);
+    data_ops::set_value(m_diffco_eb,  0.0);
   }
   else{
     m_amr->allocate_ptr(m_aco);
     m_amr->allocate_ptr(m_diffco);
     m_amr->allocate_ptr(m_diffco_eb);
   }
-  
+
+  // These don't consume (much) memory so just allocate them 
   m_amr->allocate(m_ebflux,     m_phase, sca);
   m_amr->allocate(m_domainflux, m_phase, sca);
-
-  data_ops::set_value(m_state,      0.0);
-  data_ops::set_value(m_source,     0.0);
-  data_ops::set_value(m_scratch,    0.0);
-
-  if(m_mobile){
-    data_ops::set_value(m_velo_face,  0.0);
-  }
-  data_ops::set_value(m_velo_cell,  0.0);
-
-  if(m_diffusive){
-    data_ops::set_value(m_aco,        0.0);
-    data_ops::set_value(m_diffco,     0.0);
-    data_ops::set_value(m_diffco_eb,  0.0);
-  }
-  
   data_ops::set_value(m_ebflux,     0.0);
   data_ops::set_value(m_domainflux, 0.0);
 
-
+  // This defines interpolation stencils and space for interpolants
   if(m_mobile){
     this->define_interp_stencils();
     this->define_divFnc_stencils();
