@@ -846,7 +846,7 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
 
     if(solver->is_mobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
-      solver->compute_divF(scratch, phi_m, extrap_dt, true);                     // scratch =  Div(v_m*phi_m^(k+1))
+      solver->compute_divF(scratch, phi_m, extrap_dt);                           // scratch =  Div(v_m*phi_m^(k+1))
     
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
@@ -963,7 +963,7 @@ void imex_sdc::reconcile_integrands(){
 
     if(solver->is_mobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
-      solver->compute_divF(FAR_p, phi_p, extrap_dt, true); // FAR_p =  Div(v_p*phi_p)
+      solver->compute_divF(FAR_p, phi_p, extrap_dt);       // FAR_p =  Div(v_p*phi_p)
       data_ops::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
     }
     else{
