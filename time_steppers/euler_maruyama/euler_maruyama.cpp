@@ -559,13 +559,6 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     pout() << "euler_maruaya::advance_cdr" << endl;
   }
 
-  Real t0, t1;
-
-  Real t_divF = 0.0;
-  Real t_sour = 0.0;
-  Real t_diff = 0.0;
-  Real t_sync = 0.0;
-  Real t_tot  = -MPI_Wtime();
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
     RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
@@ -576,44 +569,23 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     EBAMRCellData& scratch  = storage->get_scratch();
     EBAMRCellData& scratch2 = storage->get_scratch2();
 
-    // If we do explicit diffusion, we'll need need the diffusive term as well
-
-    if(!m_implicit_diffusion){
-      t0 = MPI_Wtime();
-      solver->compute_divD(scratch2, phi);
-      t1 = MPI_Wtime();
-      t_diff += t1-t0;
-    }
-
-
-    // Compute hyperbolic term into scratch
-    t0 = MPI_Wtime();
-    if(solver->is_mobile()){
-      const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
-      solver->compute_divF(scratch, phi, extrap_dt);
-      data_ops::scale(scratch, -1.0);
+    // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
+    const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
+    if(m_implicit_diffusion){
+      solver->compute_divJ(scratch, phi, extrap_dt);
     }
     else{
-      data_ops::set_value(scratch, 0.0);
+      solver->compute_divF(scratch, phi, extrap_dt);
     }
-    t1 = MPI_Wtime();
-    t_divF += t1-t0;
+    data_ops::scale(scratch, -1.0);
 
-    // Also include the source term
-    t0 = MPI_Wtime();
-    data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F) + R]
-    data_ops::scale(scratch, a_dt);     // scratch = [-div(F) + R]*dt
-    data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F) + dt*R
-    t1 = MPI_Wtime();
-    t_sour += t1 - t0;
-
-    // Increment with diffusive term, IF we did explicit diffusion
-    if(!m_implicit_diffusion){
-      data_ops::incr(phi, scratch2, a_dt);
-    }
+    // Increment with source term
+    data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F/J) + R]
+    data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J) + R]*dt
+    data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J) + dt*R
     data_ops::floor(phi, 0.0);
 
-
+    // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
     if(m_implicit_diffusion){
       // Solve implicit diffusion equation. This looks weird but we're solving
       //
@@ -621,39 +593,16 @@ void euler_maruyama::advance_cdr(const Real a_dt){
       //
       // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
       // so we just use that for simplicity
-      t0 = MPI_Wtime();
       if(solver->is_diffusive()){
 	data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
 	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
 	solver->advance_euler(phi, scratch, scratch2, a_dt); 
       }
-      t1 = MPI_Wtime();
-      t_diff += t1 - t0;
     }
-    else{ // Explicit diffusion is above
-
-    }
-
-
-    t0 = MPI_Wtime();
     data_ops::floor(phi, 0.0);
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());
-    t1 = MPI_Wtime();
-    t_sync += t1 - t0;
   }
-  t_tot += MPI_Wtime();
-
-#if EULER_MARUYAMA_TIMER
-  pout() << endl;
-  pout() << "euler_maruayama::advance_cdr breakdown:" << endl
-	 << "divF       = " << 100.*t_divF/t_tot << "%" << endl
-	 << "source     = " << 100.*t_sour/t_tot << "%" << endl
-	 << "diffusion  = " << 100.*t_diff/t_tot << "%" << endl
-	 << "avg/interp = " << 100.*t_sync/t_tot << "%" << endl
-	 << "TOTAL = " << t_tot << "seconds" << endl;
-  pout() << endl;
-#endif
 }
 
 void euler_maruyama::advance_rte(const Real a_dt){
