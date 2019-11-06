@@ -11,17 +11,7 @@
 #include "ultralw_tagger.H"
 
 /*!
-  @brief Class that tags cells based on the relative curvature of the electric field and on the impact ionization coefficient
-  @details This classes uses casting to morrow_lowke and is only usable with that specific plasma kinetic scheme. 
-
-  Class options
-  -------------
-
-      ml_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
-      ml_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-      ml_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
-      ml_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
-
+  @brief Refinement class for morrow_zheleznyak plasma model only
 */
 class ml_tagger : public ultralw_tagger {
 public:
@@ -37,37 +27,42 @@ public:
   virtual ~ml_tagger();
 
   /*!
+    @brief Parse class options
+  */
+  virtual void parse_options();
+
+  /*!
     @brief Return tracer field
   */
-  virtual Vector<Real> tracer(const RealVect&         a_pos,
-			      const Real&             a_time,
-			      const Real&             a_dx,
-			      const RealVect&         a_E,
-			      const Real&             a_min_E,
-			      const Real&             a_max_E,
-			      const RealVect&         a_grad_E,
-			      const Real&             a_min_grad_E,
-			      const Real&             a_max_grad_E);
+  virtual Vector<Real> tracer(const RealVect         a_pos,
+			      const Real             a_time,
+			      const Real             a_dx,
+			      const RealVect         a_E,
+			      const Real             a_min_E,
+			      const Real             a_max_E,
+			      const RealVect         a_grad_E,
+			      const Real             a_min_grad_E,
+			      const Real             a_max_grad_E);
 
   /*!
     @brief Return coarsening criterion. 
   */
-  virtual bool coarsen_cell(const RealVect&         a_pos,
-			    const Real&             a_time,
-			    const Real&             a_dx,
-			    const int&              a_lvl,
-			    const Vector<Real>&     a_tracer,
-			    const Vector<RealVect>& a_grad_tracer);
+  virtual bool coarsen_cell(const RealVect         a_pos,
+			    const Real             a_time,
+			    const Real             a_dx,
+			    const int              a_lvl,
+			    const Vector<Real>     a_tracer,
+			    const Vector<RealVect> a_grad_tracer);
 
   /*!
     @brief Return refinement criterion. 
   */
-  virtual bool refine_cell(const RealVect&         a_pos,
-			   const Real&             a_time,
-			   const Real&             a_dx,
-			   const int&              a_lvl,
-			   const Vector<Real>&     a_tracer,
-			   const Vector<RealVect>& a_grad_tracer);
+  virtual bool refine_cell(const RealVect         a_pos,
+			   const Real             a_time,
+			   const Real             a_dx,
+			   const int              a_lvl,
+			   const Vector<Real>     a_tracer,
+			   const Vector<RealVect> a_grad_tracer);
 protected:
 
   /*!
@@ -85,9 +80,9 @@ protected:
   */
   Real m_refi_alpha;
 
-    /*!
-    @brief Power factor for ionization refinement
+  /*!
+    @brief Threshold for ionization coarsening
   */
-  Real m_refi_fudge;
+  Real m_coar_alpha;
 };
 #endif

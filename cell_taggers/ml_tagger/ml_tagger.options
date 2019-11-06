@@ -1,7 +1,8 @@
 # ====================================================================================================
 # ML_TAGGER CLASS OPTIONS
 # ====================================================================================================
-ml_tagger.coarsen_curvature = 0.1    # Curvature coarsening
-ml_tagger.refine_curvature  = 0.1    # Curvature refinement
+ml_tagger.verbosity         = -1     # Verbose
+ml_tagger.coarsen_curvature = 1.0    # Curvature coarsening
+ml_tagger.refine_curvature  = 1.0    # Curvature refinement
 ml_tagger.refine_alpha      = 1.0    # Set alpha refinement
-ml_tagger.refine_fudge      = 1.0    # Set alpha fudge refinement
+ml_tagger.coarsen_alpha     = 1.0    # Set alpha fudge refinement

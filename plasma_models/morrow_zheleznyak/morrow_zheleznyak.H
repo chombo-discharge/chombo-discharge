@@ -86,7 +86,6 @@ public:
 
   Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
-protected:
   
   Vector<int> m_wallbc; // Wall boundary conditions
 
@@ -204,19 +203,19 @@ protected:
   RealVect random_direction3D();
 #endif
   
-  inline int poisson_reaction(const Real a_propensity, const Real a_dt) const;
+   int poisson_reaction(const Real a_propensity, const Real a_dt) const;
   
-  inline Real compute_alpha(const RealVect a_E) const;
-  inline Real compute_eta(const RealVect a_E)   const;
-  inline Real compute_eta2(const RealVect a_E)  const;
-  inline Real compute_eta3(const RealVect a_E)  const;
-  inline Real compute_beta(const RealVect a_E)  const;
+   Real compute_alpha(const RealVect a_E) const;
+   Real compute_eta(const RealVect a_E)   const;
+   Real compute_eta2(const RealVect a_E)  const;
+   Real compute_eta3(const RealVect a_E)  const;
+   Real compute_beta(const RealVect a_E)  const;
 
-  inline Real compute_De(const RealVect a_E) const;
+   Real compute_De(const RealVect a_E) const;
 
-  inline RealVect compute_ve(const RealVect a_E) const;
-  inline RealVect compute_vp(const RealVect a_E) const;
-  inline RealVect compute_vn(const RealVect a_E) const;
+   RealVect compute_ve(const RealVect a_E) const;
+   RealVect compute_vp(const RealVect a_E) const;
+   RealVect compute_vn(const RealVect a_E) const;
 
   class electron : public species {
   public:
@@ -269,7 +268,7 @@ protected:
     Real get_kappa(const RealVect a_pos) const;
     Real get_random_kappa() const;
 
-    inline Real get_pO2() const { return m_pO2; }
+     Real get_pO2() const { return m_pO2; }
 
   protected:
     Real m_pO2;

@@ -172,7 +172,7 @@ void plasma_engine::allocate_internals(){
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       DenseIntVectSet& divs = (*m_tags[lvl])[dit()];
-      divs.makeEmptyBits();
+      divs = DenseIntVectSet(dbl.get(dit()), false);
     }
   }
 }
@@ -186,7 +186,6 @@ void plasma_engine::cache_tags(const EBAMRTags& a_tags){
   const int ncomp         = 1;
   const int finest_level  = m_amr->get_finest_level();
   const int ghost         = 0;
-
 
   m_amr->allocate(m_cached_tags, ncomp, ghost);
   m_cached_tags.resize(1+finest_level);
@@ -804,15 +803,26 @@ void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_n
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= Min(a_old_finest_level, a_new_finest_level); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    
+
+    // Copy mask
     LevelData<BaseFab<bool> > tmp;
     tmp.define(dbl, 1, IntVect::Zero);
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      tmp[dit()].setVal(false);
+    }
     m_cached_tags[lvl]->copyTo(tmp);
+    
     for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const BaseFab<bool>& tmpFab = tmp[dit()];
       const Box& box = dbl.get(dit());
+
+      DenseIntVectSet& tags = (*m_tags[lvl])[dit()];
+      
       for (BoxIterator bit(box); bit.ok(); ++bit){
 	const IntVect iv = bit();
+	if(tmpFab(iv,0)){
+	  tags |= iv;
+	}
       }
     }
   }
@@ -2173,7 +2183,7 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
   // Gather tags from a_tags
   for (int lvl = 0; lvl <= finest_level; lvl++){
     for (DataIterator dit = a_cell_tags[lvl]->dataIterator(); dit.ok(); ++dit){
-      a_all_tags[lvl] |= IntVectSet((*a_cell_tags[lvl])[dit()]);//
+      a_all_tags[lvl] |= IntVectSet((*a_cell_tags[lvl])[dit()]);// This should become a TreeIntVectSet
     }
 
     // Grow tags with cell taggers buffer
@@ -2185,7 +2195,7 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
 
   // Add geometric tags. 
   for (int lvl = 0; lvl < finest_level; lvl++){
-    a_all_tags[lvl].grow(m_grow_tags);
+    //    a_all_tags[lvl].grow(m_grow_tags);
     a_all_tags[lvl] |= m_geom_tags[lvl];
   }
 
@@ -2204,11 +2214,7 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
     num_local_tags[lvl] = a_all_tags[lvl].numPts();
   }
 
-#if 0 // Debug
-  return true;
-#else // Original code
   return got_new_tags;
-#endif
 }
 
 void plasma_engine::write_memory_usage(){
@@ -2428,6 +2434,7 @@ void plasma_engine::write_tags(EBAMRCellData& a_output, int& a_comp){
   if(m_verbosity > 3){
     pout() << "plasma_engine::write_tags" << endl;
   }
+
   
   // Alloc some temporary storage
   EBAMRCellData tags;
