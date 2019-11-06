@@ -429,22 +429,22 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
       EBAMRFluxData face_state;
       m_amr->allocate(face_state,     m_phase, ncomp);
 
-      average_velo_to_faces(m_velo_face, m_velo_cell);
-      advect_to_faces(face_state, a_state, a_extrap_dt);
-      compute_flux(flux, m_velo_face, face_state, m_domainflux);
+      this->average_velo_to_faces();
+      this->advect_to_faces(face_state, a_state, a_extrap_dt);
+      this->compute_flux(flux, m_velo_face, face_state, m_domainflux);
 
       data_ops::incr(total_flux, flux, 1.0);
     }
 
     // Add diffusion flux to total flux
     if(m_diffusive){
-      compute_diffusion_flux(flux, a_state);
+      this->compute_diffusion_flux(flux, a_state);
       data_ops::incr(total_flux, flux, -1.0);
     }
 
     // General divergence computation. Also inject charge. Domain fluxes came in through the compute
     // advective flux function. 
-    compute_divG(a_divJ, total_flux, m_ebflux);
+    this->compute_divG(a_divJ, total_flux, m_ebflux);
   }
   else{ 
     data_ops::set_value(a_divJ, 0.0);
@@ -472,7 +472,7 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
     data_ops::set_value(face_state, 0.0);
 
     // Compute the advective derivative
-    this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
+    this->average_velo_to_faces();
     this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
     this->compute_flux(flux, m_velo_face, face_state, m_domainflux);  // Compute face-centered fluxes
     
@@ -506,8 +506,8 @@ void cdr_tga::compute_divD(EBAMRCellData& a_divD, const EBAMRCellData& a_state){
     m_amr->allocate(flux,       m_phase, ncomp);
 
     data_ops::set_value(zeroEBflux, 0.0);
-    compute_diffusion_flux(flux, a_state);  // Compute the face-centered diffusion flux
-    compute_divG(a_divD, flux, zeroEBflux); // General face-centered flux to divergence magic. 
+    this->compute_diffusion_flux(flux, a_state);  // Compute the face-centered diffusion flux
+    this->compute_divG(a_divD, flux, zeroEBflux); // General face-centered flux to divergence magic. 
 
     m_amr->average_down(a_divD, m_phase);
     m_amr->interp_ghost(a_divD, m_phase);

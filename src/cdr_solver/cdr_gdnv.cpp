@@ -70,6 +70,7 @@ void cdr_gdnv::average_velo_to_faces(){
     pout() << m_name + "::average_velo_to_faces(public, full)" << endl;
   }
 
+
   this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
 
   if(m_nonConsDiv == nonConsDiv::covered_face){
@@ -508,6 +509,7 @@ void cdr_gdnv::nonconservative_divergence(EBAMRIVData&         a_div_nc,
 	EBAdvectPatchIntegrator& patcher = leveladvect.getPatchAdvect(dit());
 	EBCellFAB divF(ebisbox, box, ncomp); // Temporary storage
 
+	divF.setVal(0.0);
 	patcher.advectiveDerivative(divF,
 				    (*a_face_state[lvl])[dit()],
 				    (*m_velo_face[lvl])[dit()],
@@ -532,11 +534,48 @@ void cdr_gdnv::nonconservative_divergence(EBAMRIVData&         a_div_nc,
   }
 }
 
+void cdr_gdnv::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
+  CH_TIME("cdr_gdnv::compute_divJ(divF, state)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_divJ(divF, state)" << endl;
+  }
+
+  if(m_nonConsDiv == nonConsDiv::conservative_average){
+    cdr_tga::compute_divJ(a_divJ, a_state, a_extrap_dt);
+  }
+  else if(m_nonConsDiv == nonConsDiv::covered_face){
+
+    const int comp  = 0;
+    const int ncomp = 1;
+
+    // Have to do advection and diffusion separately because the use differnet nonconservative divergences
+    if(m_mobile || m_diffusive){
+      EBAMRCellData divG;
+      if(m_mobile){
+	m_amr->allocate(divG, m_phase, ncomp);
+	compute_divF(divG, a_state, a_extrap_dt);
+	data_ops::incr(a_divJ, divG, 1.0);
+      }
+      if(m_diffusive){
+	compute_divD(divG, a_state);
+	data_ops::scale(divG, -1.0);
+	data_ops::incr(a_divJ, divG, 1.0);
+      }
+    }
+    else{
+      data_ops::set_value(a_divJ, 0.0);
+    }
+  }
+
+  return;
+}
+
 void cdr_gdnv::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt){
   CH_TIME("cdr_gdnv::compute_divF");
   if(m_verbosity > 5){
     pout() << "cdr_gdnv::compute_divF" << endl;
   }
+
 
   if(m_mobile){
     if(m_nonConsDiv == nonConsDiv::conservative_average){
@@ -573,7 +612,7 @@ void cdr_gdnv::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state,
       }
 
       // Compute the advective derivative
-      this->average_velo_to_faces(m_velo_face, m_velo_cell);            // Average cell-centered velocities to face centers
+      this->average_velo_to_faces();
       this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
       this->compute_flux(flux, m_velo_face, face_state, m_domainflux);  // Compute face-centered fluxes
       this->conservative_divergence(a_divF, flux, m_ebflux);            // Compute conservative divergence
@@ -594,6 +633,36 @@ void cdr_gdnv::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state,
 	this->hyperbolic_redistribution(a_divF, mass_diff, weights);    // Redistribute that was left out
 	this->reflux(a_divF);                                           // Reflux at coarse-fine interfaces
       }
+
+      // Do a test
+#if 1
+      for (int i = 0; i < 3; i++){
+	const DisjointBoxLayout& dbl = m_amr->get_grids()[0];
+	data_ops::set_value(mass_diff, 0.0);
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  EBCellFAB& state = (*m_state[0])[dit()];
+	  EBCellFAB& divF = (*a_divF[0])[dit()];
+	  const EBISBox& ebisbox = state.getEBISBox();
+	  const EBGraph& ebgraph = ebisbox.getEBGraph();
+	  const Box box = dbl.get(dit());
+	  const IntVectSet ivs = ebisbox.getIrregIVS(box);
+	  const int comp = 0;
+	
+	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	    const VolIndex& vof = vofit();
+	    const Real kappa = ebisbox.volFrac(vof);
+	    const Real phiNew = state(vof,0) - divF(vof,0)*a_extrap_dt;
+	    if(phiNew <= 0.0){
+	      const Real diff = phiNew/a_extrap_dt;
+	      divF(vof,comp) += diff;
+	      (*mass_diff[0])[dit()](vof,comp) = -kappa*diff;
+	    }
+	  }
+	}
+	this->increment_redist(mass_diff);
+	this->hyperbolic_redistribution(a_divF, mass_diff, weights);
+      }
+#endif
     }
     else{
       MayDay::Abort("cdr_gdnv::compute_divF - unknown nonconsdiv");

@@ -80,7 +80,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
 
 
   // About-to-be-deprecated features
-  this->set_dump_mass(false);                                // Dump mass to file
+  this->set_dump_mass(true);                                // Dump mass to file
   this->set_dump_charge(false);                              // Dump charges to file
   this->set_output_centroids(true);                          // Use cell centroids for output
 

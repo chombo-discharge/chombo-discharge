@@ -15,6 +15,8 @@
 #include <EBArith.H>
 #include <EBAlias.H>
 
+#define USE_NONCONS_DIV 0
+
 cdr_solver::cdr_solver(){
   m_name       = "cdr_solver";
   m_class_name = "cdr_solver";
@@ -166,6 +168,8 @@ void cdr_solver::average_velo_to_faces(){
     pout() << m_name + "::average_velo_to_faces(public, full)" << endl;
   }
 
+  MayDay::Abort("stop");
+
   this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
 }
 
@@ -292,23 +296,26 @@ void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const E
   m_amr->allocate(mass_diff, m_phase, ncomp);
   m_amr->allocate(weights,   m_phase, ncomp);
 
-  conservative_divergence(a_divG, a_G, a_ebG);   // Make the conservative divergence. 
-  nonconservative_divergence(divG_nc, a_divG);   // Non-conservative divergence
-  hybrid_divergence(a_divG, mass_diff, divG_nc); // a_divG becomes hybrid divergence. Mass diff computed. 
-  increment_flux_register(a_G);                  // Increment flux register
-  increment_redist(mass_diff);                   // Increment level redistribution register
+  data_ops::set_value(a_divG, 0.0);
+  data_ops::set_value(mass_diff, 0.0);
+  
+  this->conservative_divergence(a_divG, a_G, a_ebG);   // Make the conservative divergence.
+  this->nonconservative_divergence(divG_nc, a_divG);   // Non-conservative divergence
+  this->hybrid_divergence(a_divG, mass_diff, divG_nc); // a_divG becomes hybrid divergence. Mass diff computed. 
+  this->increment_flux_register(a_G);                  // Increment flux register
+  this->increment_redist(mass_diff);                   // Increment level redistribution register
 
   const bool ebcf = m_amr->get_ebcf();
   if(ebcf){ // If we have EBCF, much more work with the CF interface
-    coarse_fine_increment(mass_diff);                      // Compute C2F, F2C, and C2C mass transfers
-    increment_redist_flux();                               // Tell flux register about whats going on
-    hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
-    coarse_fine_redistribution(a_divG);                    // Do the coarse-fine redistribution
-    reflux(a_divG);                                        // Reflux
+    this->coarse_fine_increment(mass_diff);                      // Compute C2F, F2C, and C2C mass transfers
+    this->increment_redist_flux();                               // Tell flux register about whats going on
+    this->hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
+    this->coarse_fine_redistribution(a_divG);                    // Do the coarse-fine redistribution
+    this->reflux(a_divG);                                        // Reflux
   }
   else{ // Much simpler if we don't have EBCF
-    hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
-    reflux(a_divG);                                        // Reflux
+    this->hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
+    this->reflux(a_divG);                                        // Reflux
   }
 }
 
@@ -607,6 +614,8 @@ void cdr_solver::conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxDat
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
+    a_flux[lvl]->exchange();
+    
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& domain  = m_amr->get_domains()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
@@ -1036,14 +1045,22 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
+    const EBCellFAB& state = (*m_state[0])[dit()];
+
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real kappa    = ebisbox.volFrac(vof);
       const Real dc       = divH(vof, comp);
       const Real dnc      = divNC(vof, comp);
+      Real phi = state(vof,comp);
 
+#if USE_NONCONS_DIV
+      divH(vof,comp) = dnc;
+      deltaM(vof, comp) = 0.0;
+#else // Actual code
       divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
       deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
+#endif
 
       // Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
       // which it would be otherwise. 
@@ -1109,9 +1126,11 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<EBFluxFAB>& a_flux, con
 	const FaceStencil& sten = (*m_interp_stencils[dir][a_lvl])[dit()](face, comp);
 
 	centroid_flux(face, comp) = 0.;
+	Real sum = 0.0;
 	for (int i = 0; i < sten.size(); i++){
 	  const FaceIndex& iface = sten.face(i);
 	  const Real iweight     = sten.weight(i);
+	  sum += iweight;
 	  
 	  centroid_flux(face, comp) += iweight*interpolant(iface, comp);
 	}

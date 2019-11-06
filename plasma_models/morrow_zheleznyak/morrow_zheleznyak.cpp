@@ -99,6 +99,10 @@ void morrow_zheleznyak::advance_reaction_network(Vector<Real>&          a_partic
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
 
+  for (int i = 0; i < a_particle_sources.size(); i++){
+    a_particle_sources[i] = 0.0;
+  }
+
   return;
 }
 
@@ -633,7 +637,7 @@ Vector<Real> morrow_zheleznyak::compute_cdr_fluxes(const Real         a_time,
 						   const Vector<Real> a_extrap_cdr_fluxes,
 						   const Real         a_townsend2,
 						   const Real         a_quantum_efficiency) const {
-  Vector<Real> fluxes(m_num_species, 0.0);
+  Vector<Real> fluxes(m_num_species, 0.0);return fluxes;
   
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;

@@ -54,6 +54,12 @@ public:
   virtual void average_velo_to_faces();
 
   /*!
+    @brief Compute div(nv - D*grad(n)) explicitly
+    @note Overriden because cdr_gdnv has other ways of computing the nonconservative divergence
+  */
+  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt);
+
+  /*!
     @brief Compute divF
     @note This function is implemented because cdr_gdnv has several ways of computing the nonconservative divergence
   */
@@ -97,7 +103,7 @@ protected:
   /*!
     @brief Non-conservative divergence. Overwriting because this class has two ways of doing this. 
   */
-  virtual void nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
+  virtual void nonconservative_divergence(EBAMRIVData& a_div, const EBAMRCellData& a_divF, const EBAMRFluxData& a_face_state);
 
   /*!
     @brief Covered faces on side Lo
