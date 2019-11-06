@@ -669,6 +669,14 @@ void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::cfl;
   }
 
+  if(!m_implicit_diffusion){
+    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
+    if(dt_diffusion < dt){
+      dt = dt_diffusion;
+      a_timecode = time_code::diffusion;
+    }
+  }
+
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;

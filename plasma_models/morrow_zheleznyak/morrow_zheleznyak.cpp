@@ -63,16 +63,16 @@ morrow_zheleznyak::~morrow_zheleznyak(){
 }
 
 void morrow_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					 Vector<Real>&          a_photon_sources,
-					 const Vector<Real>     a_particle_densities,
-					 const Vector<RealVect> a_particle_gradients,
-					 const Vector<Real>     a_photon_densities,
-					 const RealVect         a_E,
-					 const RealVect         a_pos,
-					 const Real             a_dx,
-					 const Real             a_dt,
-					 const Real             a_time,
-					 const Real             a_kappa) const{
+						 Vector<Real>&          a_photon_sources,
+						 const Vector<Real>     a_particle_densities,
+						 const Vector<RealVect> a_particle_gradients,
+						 const Vector<Real>     a_photon_densities,
+						 const RealVect         a_E,
+						 const RealVect         a_pos,
+						 const Real             a_dx,
+						 const Real             a_dt,
+						 const Real             a_time,
+						 const Real             a_kappa) const{
   for (int i = 0; i < a_particle_densities.size(); i++){
     if(a_particle_densities[i] < 0.0) MayDay::Abort("morrow_zheleznyak::advance_network - shouldn't happen");
   }
@@ -106,16 +106,16 @@ void morrow_zheleznyak::advance_reaction_network(Vector<Real>&          a_partic
 
 // Deterministic reaction-rate equation
 void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
-				 Vector<Real>&          a_photon_sources,
-				 const Vector<Real>     a_particle_densities,
-				 const Vector<RealVect> a_particle_gradients,
-				 const Vector<Real>     a_photon_densities,
-				 const RealVect         a_E,
-				 const RealVect         a_pos,
-				 const Real             a_dx,
-				 const Real             a_dt,
-				 const Real             a_time,
-				 const Real             a_kappa) const{
+				    Vector<Real>&          a_photon_sources,
+				    const Vector<Real>     a_particle_densities,
+				    const Vector<RealVect> a_particle_gradients,
+				    const Vector<Real>     a_photon_densities,
+				    const RealVect         a_E,
+				    const RealVect         a_pos,
+				    const Real             a_dx,
+				    const Real             a_dt,
+				    const Real             a_time,
+				    const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
 
   Vector<Real> rest(m_num_species, 0.0);
@@ -177,16 +177,16 @@ void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
 }
 
 void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
-				 Vector<Real>&          a_photon_sources,
-				 const Vector<Real>     a_particle_densities,
-				 const Vector<RealVect> a_particle_gradients,
-				 const Vector<Real>     a_photon_densities,
-				 const RealVect         a_E,
-				 const RealVect         a_pos,
-				 const Real             a_dx,
-				 const Real             a_dt,
-				 const Real             a_time,
-				 const Real             a_kappa) const{
+				    Vector<Real>&          a_photon_sources,
+				    const Vector<Real>     a_particle_densities,
+				    const Vector<RealVect> a_particle_gradients,
+				    const Vector<Real>     a_photon_densities,
+				    const RealVect         a_E,
+				    const RealVect         a_pos,
+				    const Real             a_dx,
+				    const Real             a_dt,
+				    const Real             a_time,
+				    const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
 
   Vector<int> particle_numbers(m_num_species, 0);
@@ -285,16 +285,16 @@ void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
 
 // Tau leaping method
 void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
-				 Vector<Real>&          a_photon_sources,
-				 const Vector<Real>     a_particle_densities,
-				 const Vector<RealVect> a_particle_gradients,
-				 const Vector<Real>     a_photon_densities,
-				 const RealVect         a_E,
-				 const RealVect         a_pos,
-				 const Real             a_dx,
-				 const Real             a_dt,
-				 const Real             a_time,
-				 const Real             a_kappa) const{
+				    Vector<Real>&          a_photon_sources,
+				    const Vector<Real>     a_particle_densities,
+				    const Vector<RealVect> a_particle_gradients,
+				    const Vector<Real>     a_photon_densities,
+				    const RealVect         a_E,
+				    const RealVect         a_pos,
+				    const Real             a_dx,
+				    const Real             a_dt,
+				    const Real             a_time,
+				    const Real             a_kappa) const{
 
   const Real volume = pow(a_dx, 3);
 
@@ -446,10 +446,10 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
 }
 
 Vector<RealVect> morrow_zheleznyak::compute_cdr_velocities(const Real         a_time,
-							const RealVect     a_pos,
-							const RealVect     a_E,
-							const Vector<Real> a_cdr_densities) const{
-  Vector<RealVect> velocities(m_num_species);
+							   const RealVect     a_pos,
+							   const RealVect     a_E,
+							   const Vector<Real> a_cdr_densities) const{
+  Vector<RealVect> velocities(m_num_species, RealVect::Zero);
   
   velocities[m_nelec_idx] = this->compute_ve(a_E);
   velocities[m_nplus_idx] = this->compute_vp(a_E);
@@ -491,7 +491,6 @@ RealVect morrow_zheleznyak::compute_vp(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;           // E in V/cm
   RealVect vp = 2.34*E*m_p/units::s_atm2pascal;  // Morrow-Lowke wants V/cm
   vp *= 0.01;                             // Morrow-Lowke expression is in cm/s
-
   return vp;  
 }
 
@@ -612,9 +611,9 @@ Real morrow_zheleznyak::compute_De(const RealVect a_E) const{
 
 
 Vector<Real> morrow_zheleznyak::compute_cdr_diffusion_coefficients(const Real         a_time,
-								const RealVect     a_pos,
-								const RealVect     a_E,
-								const Vector<Real> a_cdr_densities) const{
+								   const RealVect     a_pos,
+								   const RealVect     a_E,
+								   const Vector<Real> a_cdr_densities) const{
   Vector<Real> diffCo(m_num_species, 0.0);
   diffCo[m_nelec_idx] = this->compute_De(a_E);
   diffCo[m_nplus_idx] = 0.;
@@ -624,16 +623,16 @@ Vector<Real> morrow_zheleznyak::compute_cdr_diffusion_coefficients(const Real   
 }
 
 Vector<Real> morrow_zheleznyak::compute_cdr_fluxes(const Real         a_time,
-						const RealVect     a_pos,
-						const RealVect     a_normal,
-						const RealVect     a_E,
-						const Vector<Real> a_cdr_densities,
-						const Vector<Real> a_cdr_velocities,
-						const Vector<Real> a_cdr_gradients,
-						const Vector<Real> a_rte_fluxes,
-						const Vector<Real> a_extrap_cdr_fluxes,
-						const Real         a_townsend2,
-						const Real         a_quantum_efficiency) const {
+						   const RealVect     a_pos,
+						   const RealVect     a_normal,
+						   const RealVect     a_E,
+						   const Vector<Real> a_cdr_densities,
+						   const Vector<Real> a_cdr_velocities,
+						   const Vector<Real> a_cdr_gradients,
+						   const Vector<Real> a_rte_fluxes,
+						   const Vector<Real> a_extrap_cdr_fluxes,
+						   const Real         a_townsend2,
+						   const Real         a_quantum_efficiency) const {
   Vector<Real> fluxes(m_num_species, 0.0);
   
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
@@ -654,21 +653,20 @@ Vector<Real> morrow_zheleznyak::compute_cdr_fluxes(const Real         a_time,
   for (int i = 0; i < m_num_species; i++){
     fluxes[i] = aj[i]*(a_extrap_cdr_fluxes[i]);
   }
-
-  // For electrons, add diffusion flux
+  
   return fluxes;
 }
 
 Vector<Real> morrow_zheleznyak::compute_cdr_domain_fluxes(const Real           a_time,
-						       const RealVect       a_pos,
-						       const int            a_dir,
-						       const Side::LoHiSide a_side,
-						       const RealVect       a_E,
-						       const Vector<Real>   a_cdr_densities,
-						       const Vector<Real>   a_cdr_velocities,
-						       const Vector<Real>   a_cdr_gradients,
-						       const Vector<Real>   a_rte_fluxes,
-						       const Vector<Real>   a_extrap_cdr_fluxes) const{
+							  const RealVect       a_pos,
+							  const int            a_dir,
+							  const Side::LoHiSide a_side,
+							  const RealVect       a_E,
+							  const Vector<Real>   a_cdr_densities,
+							  const Vector<Real>   a_cdr_velocities,
+							  const Vector<Real>   a_cdr_gradients,
+							  const Vector<Real>   a_rte_fluxes,
+							  const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_num_species, 0.0); 
 
   int idx;
@@ -701,14 +699,14 @@ Vector<Real> morrow_zheleznyak::compute_cdr_domain_fluxes(const Real           a
 }
 
 Vector<Real> morrow_zheleznyak::compute_cdr_electrode_fluxes(const Real         a_time,
-							  const RealVect     a_pos,
-							  const RealVect     a_normal,
-							  const RealVect     a_E,
-							  const Vector<Real> a_cdr_densities,
-							  const Vector<Real> a_cdr_velocities,
-							  const Vector<Real> a_cdr_gradients,
-							  const Vector<Real> a_rte_fluxes,
-							  const Vector<Real> a_extrap_cdr_fluxes) const {
+							     const RealVect     a_pos,
+							     const RealVect     a_normal,
+							     const RealVect     a_E,
+							     const Vector<Real> a_cdr_densities,
+							     const Vector<Real> a_cdr_velocities,
+							     const Vector<Real> a_cdr_gradients,
+							     const Vector<Real> a_rte_fluxes,
+							     const Vector<Real> a_extrap_cdr_fluxes) const {
   if(m_extrap_electrode_ebbc){
     return a_extrap_cdr_fluxes;
   }
@@ -719,14 +717,14 @@ Vector<Real> morrow_zheleznyak::compute_cdr_electrode_fluxes(const Real         
 }
 
 Vector<Real> morrow_zheleznyak::compute_cdr_dielectric_fluxes(const Real         a_time,
-							   const RealVect     a_pos,
-							   const RealVect     a_normal,
-							   const RealVect     a_E,
-							   const Vector<Real> a_cdr_densities,
-							   const Vector<Real> a_cdr_velocities,
-							   const Vector<Real> a_cdr_gradients,
-							   const Vector<Real> a_rte_fluxes,
-							   const Vector<Real> a_extrap_cdr_fluxes) const {
+							      const RealVect     a_pos,
+							      const RealVect     a_normal,
+							      const RealVect     a_E,
+							      const Vector<Real> a_cdr_densities,
+							      const Vector<Real> a_cdr_velocities,
+							      const Vector<Real> a_cdr_gradients,
+							      const Vector<Real> a_rte_fluxes,
+							      const Vector<Real> a_extrap_cdr_fluxes) const {
   if(m_extrap_dielectric_ebbc){
     return a_extrap_cdr_fluxes;
   }

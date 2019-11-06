@@ -18,8 +18,6 @@
 #define USE_FAST_VELOCITIES 1
 #define USE_FAST_DIFFUSION  1
 
-#define USE_CENTROID_VELOCITIES 0
-
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";
   m_verbosity  = -1;
@@ -2534,14 +2532,6 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
     compute_cdr_velocities(velocities, cdr_densities, *a_E[lvl], lvl, a_time);
   }
 
-#if USE_CENTROID_VELOCITIES // Move to centroids???
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    m_amr->interpolate_to_centroids(*a_velocities[idx], phase::gas);
-  }
-#endif
-
-
   // Average down and interpolate ghost cells
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -2623,7 +2613,9 @@ void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_veloci
     }
 
     // Compute velocities
-    const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
+    Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
+
+    velocities[1] = RealVect::Zero;
 
     // Put velocities in the appropriate place. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2702,8 +2694,8 @@ void time_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&       a
 
   // C style variable-length array conversion magic
   auto vla_cdr_phi = (Real (*__restrict__)[n1][n0]) (cdr_phi.dataPtr() - offset);
-  auto vla_cdr_vx  = (Real (*__restrict__)[n1][n0]) (cdr_vx.dataPtr() - offset);
-  auto vla_cdr_vy  = (Real (*__restrict__)[n1][n0]) (cdr_vy.dataPtr() - offset);
+  auto vla_cdr_vx  = (Real (*__restrict__)[n1][n0]) (cdr_vx.dataPtr()  - offset);
+  auto vla_cdr_vy  = (Real (*__restrict__)[n1][n0]) (cdr_vy.dataPtr()  - offset);
   auto vla_E       = (Real (*__restrict__)[n1][n0]) (Efab.dataPtr()    - offset);
   
     for (int j = lo[1]; j <= hi[1]; ++j){
@@ -2734,8 +2726,8 @@ void time_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&       a
     if(solver->is_mobile()){
       FArrayBox& v = a_velocities[idx]->getFArrayBox();
 
-      v.copy(cdr_vx, a_box, 0, a_box, 0, 1);
-      v.copy(cdr_vy, a_box, 0, a_box, 1, 1);
+      v.copy(cdr_vx, a_box, idx, a_box, 0, 1);
+      v.copy(cdr_vy, a_box, idx, a_box, 1, 1);
 
       for (int dir = 0; dir < SpaceDim; dir++){
 	a_velocities[idx]->setCoveredCellVal(0.0, dir);
