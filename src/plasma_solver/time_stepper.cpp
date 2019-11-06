@@ -106,6 +106,7 @@ void time_stepper::advance_reaction_network(const Real a_time, const Real a_dt){
   m_amr->allocate(E, m_cdr->get_phase(), SpaceDim);
   this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
 
+
   Vector<EBAMRCellData*> particle_sources = m_cdr->get_sources();
   Vector<EBAMRCellData*> photon_sources   = m_rte->get_sources();
   Vector<EBAMRCellData*> particle_states  = m_cdr->get_states();
@@ -1960,7 +1961,6 @@ void time_stepper::extrapolate_vector_to_domain_faces(Vector<EBAMRIFData*>&     
     pout() << "time_stepper::extrapolate_vector_to_domain_faces" << endl;
   }
 
-  //  for(int i = 0; i < a_extrap.size(); i++){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     const int idx = solver_it.get_solver();
@@ -3450,7 +3450,7 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
   }
 #else // New way of doing this. Extrapolate everything to the BC first. Then compute the flux and project it. We do this because
       // extrapolation stencils may have negative weights, and v*n may therefore nonphysically change sign. Better to compute
-      // F = v_extrap*Max(0.0, phi_extrap)
+      // F = v_extrap*Max(0.0, phi_extrap) since we expect v to be "smooth" and phi_extrap to be a noisy bastard
   EBAMRIVData eb_flx; 
   EBAMRIVData eb_vel;
   EBAMRIVData eb_phi;
@@ -3459,13 +3459,13 @@ void time_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fl
   m_amr->allocate(eb_vel, a_phase, SpaceDim);
   m_amr->allocate(eb_phi, a_phase, 1);
 
+  const irreg_amr_stencil<eb_centroid_interp>& interp_stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
+
   //  for (int i = 0; i < a_fluxes.size(); i++){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     const int idx = solver_it.get_solver();
     if(solver->is_mobile()){
-      const irreg_amr_stencil<eb_centroid_interp>& interp_stencils = m_amr->get_eb_centroid_interp_stencils(a_phase);
-
       interp_stencils.apply(eb_vel, *a_velocities[idx]);
       interp_stencils.apply(eb_phi, *a_densities[idx]);
 

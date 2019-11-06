@@ -2401,10 +2401,13 @@ void plasma_engine::write_plot_file(){
 	      Vector<Real>(),
 	      m_num_plot_ghost*IntVect::Unit);
   t_write += MPI_Wtime();
+
+  const Real t_tot = t_write + t_assemble;
   if(m_verbosity >= 3){
     pout() << "plasma_engine::write_plot_file - writing plot file... DONE!. " << endl
-	   << "\t Assemble data = " << t_assemble << " seconds." << endl
-      	   << "\t Write time    = " << t_write << " seconds." << endl;
+      	   << "\t Total time    = " << t_tot << " seconds" << endl
+	   << "\t Assemble data = " << 100.*t_assemble/t_tot << "%" << endl
+      	   << "\t Write time    = " << 100.*t_write/t_tot << "%" << endl;
   }
 }
 

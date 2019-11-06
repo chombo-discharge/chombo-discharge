@@ -80,14 +80,12 @@ euler_maruyama::poisson_storage::~poisson_storage(){
 
 void euler_maruyama::poisson_storage::allocate_storage(){
   m_amr->allocate(m_E_cell,   m_phase, SpaceDim);
-  m_amr->allocate(m_E_face,   m_phase, SpaceDim);
   m_amr->allocate(m_E_eb,     m_phase, SpaceDim);
   m_amr->allocate(m_E_dom,    m_phase, SpaceDim);
 }
 
 void euler_maruyama::poisson_storage::deallocate_storage(){
   m_amr->deallocate(m_E_cell);
-  m_amr->deallocate(m_E_face);
   m_amr->deallocate(m_E_eb);
   m_amr->deallocate(m_E_dom);
 }

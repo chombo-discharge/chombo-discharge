@@ -55,7 +55,7 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
 
   CH_assert(a_facedata.nComp() == a_celldata.nComp());
 
-#if 0 // New code, should perform 5x faster than the crap below. 
+#if 1 // New code, should perform 5x faster than the crap below. 
   const int ncomp = a_facedata.nComp();
   for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
     const EBCellFAB& celldata = a_celldata[dit()];

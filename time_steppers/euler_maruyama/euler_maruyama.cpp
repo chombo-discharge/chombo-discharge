@@ -110,7 +110,7 @@ Real euler_maruyama::advance(const Real a_dt){
   // 9. Recompute solver velocities and diffusion coefficients
 
   Real t_grad = 0.0;
-  Real t_fil1 = 0.0;
+  Real t_filBC= 0.0;
   Real t_reac = 0.0;
   Real t_cdr  = 0.0;
   Real t_rte  = 0.0;
@@ -140,7 +140,7 @@ Real euler_maruyama::advance(const Real a_dt){
   euler_maruyama::compute_cdr_domain_fluxes();    // Extrapolate cell-centered fluxes to domain edges
   euler_maruyama::compute_sigma_flux();           // Update charge flux for sigma solver
   t1 = MPI_Wtime();
-  t_fil1 = t1 - t0;
+  t_filBC = t1 - t0;
 
   t0 = MPI_Wtime();
   euler_maruyama::compute_reaction_network(a_dt); // Advance the reaction network
@@ -189,7 +189,7 @@ Real euler_maruyama::advance(const Real a_dt){
   pout() << endl;
   pout() << "euler_maruyama::advance breakdown:" << endl
     	 << "E & grad  = " << 100.0*t_grad/t_tot << "%" << endl
-	 << "BC fill   = " << 100.0*t_fil1/t_tot << "%" << endl
+	 << "BC fill   = " << 100.0*t_filBC/t_tot << "%" << endl
 	 << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
 	 << "CDR adv.  = " << 100.*t_cdr/t_tot << "%" << endl
 	 << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
@@ -283,14 +283,12 @@ void euler_maruyama::compute_E_into_scratch(){
   }
   
   EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_poisson_scratch->get_E_face();
   EBAMRIVData&   E_eb   = m_poisson_scratch->get_E_eb();
   EBAMRIFData&   E_dom  = m_poisson_scratch->get_E_domain();
 
   const MFAMRCellData& phi = m_poisson->get_state();
-  
+
   time_stepper::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  time_stepper::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
   time_stepper::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
   time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell); // Domain centered field
 }
@@ -432,12 +430,19 @@ void euler_maruyama::compute_cdr_domain_states(){
   // Extrapolate states to the domain faces
   time_stepper::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
 
-  // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
+  // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
   m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
-  for (int i = 0; i < cdr_states.size(); i++){
-    time_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
-    time_stepper::project_domain(*domain_gradients[i], grad);
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    const int idx = solver_it.get_solver();
+    if(solver->is_mobile()){
+      time_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
+      time_stepper::project_domain(*domain_gradients[idx], grad);
+    }
+    else{
+      data_ops::set_value(*domain_gradients[idx], 0.0);
+    }
   }
 }
 

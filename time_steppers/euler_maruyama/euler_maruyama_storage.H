@@ -73,7 +73,6 @@ public:
   void deallocate_storage();
 
   EBAMRCellData& get_E_cell()      {return m_E_cell;   }
-  EBAMRFluxData& get_E_face()      {return m_E_face;   }
   EBAMRIVData& get_E_eb()          {return m_E_eb;     }
   EBAMRIFData& get_E_domain()      {return m_E_dom;    }
 
@@ -84,7 +83,6 @@ protected:
   int m_ncomp;                   // with this many components
 
   EBAMRCellData m_E_cell;        // Cell-centered E
-  EBAMRFluxData m_E_face;        // Face-centered E
   EBAMRIVData m_E_eb;            // EB-centered E
   EBAMRIFData m_E_dom;           // E-field on domain faces
 };
