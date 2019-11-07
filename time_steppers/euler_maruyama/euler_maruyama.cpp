@@ -18,8 +18,6 @@ typedef euler_maruyama::poisson_storage poisson_storage;
 typedef euler_maruyama::rte_storage     rte_storage;
 typedef euler_maruyama::sigma_storage   sigma_storage;
 
-#define EULER_MARUYAMA_TIMER 1
-
 euler_maruyama::euler_maruyama(){
   m_class_name = "euler_maruyama";
   m_extrap_advect = true;
@@ -44,6 +42,9 @@ void euler_maruyama::parse_options(){
   parse_max_dt();
   parse_source_comp();
   parse_diffusion();
+  parse_advection();
+  parse_floor();
+  parse_debug();
 }
 
 void euler_maruyama::parse_diffusion(){
@@ -64,6 +65,69 @@ void euler_maruyama::parse_diffusion(){
   }
   else{
     MayDay::Abort("euler_maruayama::parse_diffusion - unknown diffusion type requested");
+  }
+}
+
+void euler_maruyama::parse_advection(){
+  CH_TIME("euler_maruyama::parse_advection");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::parse_advection" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("extrap_advect", str);
+  if(str == "true"){
+    m_extrap_advect = true;
+  }
+  else if(str == "false"){
+    m_extrap_advect = false;
+  }
+  else{
+    MayDay::Abort("euler_maruyama::parse_advection - unknown argument");
+  }
+}
+
+void euler_maruyama::parse_floor(){
+  CH_TIME("euler_maruyama::parse_floor");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::parse_floor" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("floor_cdr", str);
+  if(str == "true"){
+    m_floor = true;
+  }
+  else if(str == "false"){
+    m_floor = false;
+  }
+  else{
+    MayDay::Abort("euler_maruayma::parse_floor - unknown argument requested.");
+  }
+}
+
+void euler_maruyama::parse_debug(){
+  CH_TIME("euler_maruyama::parse_debug");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::parse_debug" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("debug", str);
+  if(str == "true"){
+    m_debug = true;
+  }
+  else if(str == "false"){
+    m_debug = false;
+  }
+  else{
+    MayDay::Abort("euler_maruayma::parse_debug - unknown argument requested.");
   }
 }
 
@@ -186,21 +250,21 @@ Real euler_maruyama::advance(const Real a_dt){
   t_filD = t1 - t0;
   t_tot += t1;
 
-#if EULER_MARUYAMA_TIMER
-  pout() << endl;
-  pout() << "euler_maruyama::advance breakdown:" << endl
-    	 << "E & grad  = " << 100.0*t_grad/t_tot << "%" << endl
-	 << "BC fill   = " << 100.0*t_filBC/t_tot << "%" << endl
-	 << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
-	 << "CDR adv.  = " << 100.*t_cdr/t_tot << "%" << endl
-	 << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
-	 << "Poisson   = " << 100.*t_pois/t_tot << "%" << endl
-	 << "Ecomp     = " << 100.*t_filE/t_tot << "%" << endl
-	 << "Vel       = " << 100.*t_filV/t_tot << "%" << endl
-    	 << "Dco       = " << 100.*t_filD/t_tot << "%" << endl
-	 << "TOTAL = " << t_tot << "seconds" << endl;
-  pout() << endl;
-#endif
+  if(m_debug){
+    pout() << endl;
+    pout() << "euler_maruyama::advance breakdown:" << endl
+	   << "E & grad  = " << 100.0*t_grad/t_tot << "%" << endl
+	   << "BC fill   = " << 100.0*t_filBC/t_tot << "%" << endl
+	   << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
+	   << "CDR adv.  = " << 100.*t_cdr/t_tot << "%" << endl
+	   << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
+	   << "Poisson   = " << 100.*t_pois/t_tot << "%" << endl
+	   << "Ecomp     = " << 100.*t_filE/t_tot << "%" << endl
+	   << "Vel       = " << 100.*t_filV/t_tot << "%" << endl
+	   << "Dco       = " << 100.*t_filD/t_tot << "%" << endl
+	   << "TOTAL = " << t_tot << "seconds" << endl;
+    pout() << endl;
+  }
   
   return a_dt;
 }
@@ -589,8 +653,22 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F/J) + R]
     data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J) + R]*dt
     data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J) + dt*R
-    //    //    data_ops::floor(phi, 0.0);
-    solver->make_non_negative(phi);
+
+    //    solver->make_non_negative(phi);
+
+    if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
+      if(m_debug){
+	const Real mass_before = solver->compute_mass();
+	data_ops::floor(phi, 0.0);
+	const Real mass_after = solver->compute_mass();
+	const Real rel_mass = (mass_after-mass_before)/mass_before;
+	pout() << "euler_maruayma::injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+      }
+      else{
+	data_ops::floor(phi, 0.0);
+      }
+    }
+    
 
     // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
     if(m_implicit_diffusion){
@@ -603,12 +681,25 @@ void euler_maruyama::advance_cdr(const Real a_dt){
       if(solver->is_diffusive()){
 	data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
 	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
-	solver->advance_euler(phi, scratch, scratch2, a_dt); 
+	solver->advance_euler(phi, scratch, scratch2, a_dt);
+
+	//	solver->make_non_negative(phi);
+
+	if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
+	  if(m_debug){
+	    const Real mass_before = solver->compute_mass();
+	    data_ops::floor(phi, 0.0);
+	    const Real mass_after = solver->compute_mass();
+	    const Real rel_mass = (mass_after-mass_before)/mass_before;
+	    pout() << "euler_maruayma::injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	  }
+	  else{
+	    data_ops::floor(phi, 0.0);
+	  }
+	}
       }
     }
 
-    //    data_ops::floor(phi, 0.0);
-    solver->make_non_negative(phi);
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());
   }
@@ -699,3 +790,4 @@ void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   a_dt = dt;
 }
+

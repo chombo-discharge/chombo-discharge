@@ -47,7 +47,8 @@ protected:
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
   bool m_extrap_advect;
-
+  bool m_debug;
+  bool m_floor;
   bool m_implicit_diffusion;
 
   // Get functions for storage
@@ -74,7 +75,9 @@ protected:
 
   // Various option parsing
   void parse_diffusion();
-  
+  void parse_advection();
+  void parse_floor();
+  void parse_debug();
 };
 
 #endif

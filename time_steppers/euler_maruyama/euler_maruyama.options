@@ -10,3 +10,6 @@ euler_maruyama.diffusion        = implicit  # Diffusion. 'explicit' or 'implicit
 euler_maruyama.relax_time       = 1.0       # Relaxation time constant
 euler_maruyama.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
 euler_maruyama.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+euler_maruyama.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
+euler_maruyama.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
+euler_maruyama.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 

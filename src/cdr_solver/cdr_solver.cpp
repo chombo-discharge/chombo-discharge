@@ -2285,6 +2285,4 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
 
   this->increment_concentration_redist(mass_diff);
   this->concentration_redistribution(a_phi, mass_diff, weights);
-
-  data_ops::floor(a_phi, 0.0);
 }
