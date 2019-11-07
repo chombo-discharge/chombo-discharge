@@ -10,6 +10,7 @@
 #include "DisjointBoxLayout.H"
 #include "ProblemDomain.H"
 #include "EBISLayout.H"
+#include "ConcentrationStencil.H"
 
 
 /*!
@@ -77,7 +78,7 @@ protected:
   bool m_isDefined;
 
   int m_redistRad;
-  int m_nComp;
+  int m_ncomp;
   
   DisjointBoxLayout m_grids;
   ProblemDomain     m_domain;
@@ -85,6 +86,8 @@ protected:
 
   LevelData<BaseIVFAB<Real> > m_buffer;
   LayoutData<IntVectSet>      m_sets;
+
+  ConcentrationStencil m_stencil;
 
 private:
 

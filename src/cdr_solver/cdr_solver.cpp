@@ -168,8 +168,6 @@ void cdr_solver::average_velo_to_faces(){
     pout() << m_name + "::average_velo_to_faces(public, full)" << endl;
   }
 
-  MayDay::Abort("stop");
-
   this->average_velo_to_faces(m_velo_face, m_velo_cell); // Average velocities to face centers for all levels
 }
 
@@ -1045,14 +1043,11 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
-    const EBCellFAB& state = (*m_state[0])[dit()];
-
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real kappa    = ebisbox.volFrac(vof);
       const Real dc       = divH(vof, comp);
       const Real dnc      = divNC(vof, comp);
-      Real phi = state(vof,comp);
 
 #if USE_NONCONS_DIV
       divH(vof,comp) = dnc;
@@ -1080,7 +1075,6 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
-
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
@@ -2254,6 +2248,10 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
     pout() << m_name + "::make_non_negative" << endl;
   }
 
+  // TLDR: This function injects mass into cut-cells where the state is negative, and removes mass from neighboring
+  //       regular cells. This is essentially like flooring, with the exception that total mass is conserved. Very useful
+  //       stuff for cut-cells where non-negativity can not be guaranteed. 
+
   const int comp  = 0;
   const int ncomp = 1;
 
@@ -2285,11 +2283,8 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
     }
   }
 
-#if 1 // Code that will use the concentration redistribution register
   this->increment_concentration_redist(mass_diff);
-#else // Other code
-  this->increment_mass_redist(mass_diff);
-  this->hyperbolic_redistribution(a_phi, mass_diff, weights);
-#endif
+  this->concentration_redistribution(a_phi, mass_diff, weights);
 
+  data_ops::floor(a_phi, 0.0);
 }

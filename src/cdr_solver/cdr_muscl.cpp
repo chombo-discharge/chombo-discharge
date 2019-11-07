@@ -110,14 +110,16 @@ void cdr_muscl::allocate_internals(){
   }
 }
 
-void cdr_muscl::compute_slopes(EBCellFAB& a_deltaC,
-			       const EBCellFAB& a_state,
-			       const Box& a_box,
+void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
+			       const EBCellFAB&     a_state,
+			       const Box&           a_box,
 			       const ProblemDomain& a_domain){
   CH_TIME("cdr_muscl::compute_slopes");
   if(m_verbosity > 99){
     pout() << m_name + "::compute_slopes" << endl;
   }
+
+  MayDay::Warning("cdr_muscl::compute_slopes - reason to believe there is a bug in this routine...");
 
   const int comp         = 0;
   const int ncomp        = 1;
@@ -135,7 +137,6 @@ void cdr_muscl::compute_slopes(EBCellFAB& a_deltaC,
 		      CHF_CONST_INT(dir),
 		      CHF_BOX(cellbox));
   }
-
 
   // Irregular cells
   const Box& domain_box      = a_domain.domainBox();
@@ -223,7 +224,7 @@ void cdr_muscl::compute_slopes(EBCellFAB& a_deltaC,
 	MayDay::Abort("cdr_muscl::compute_slopes - dwc != dwc.");
       }
 
-      a_deltaC(vof, comp) = 0.0;//dwc;
+      a_deltaC(vof, comp) = dwc;
     }
   }
 }
@@ -357,6 +358,7 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
 	  const Real extrap = 2.0*f1 - f2;
 
 	  flux(face, comp) = Min(extrap, zero); // No inflow
+	  flux(face, comp) = 0.0;
 	}
       }
 
@@ -389,6 +391,7 @@ void cdr_muscl::compute_bndry_outflow(LevelData<EBFluxFAB>&       a_flux,
 	  const Real extrap = 2.0*f1 - f2;
 
 	  flux(face, comp) = Max(extrap, zero); // No inflow
+	  flux(face, comp) = 0.0;
 	}
       }
     }

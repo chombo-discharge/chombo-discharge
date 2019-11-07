@@ -1761,6 +1761,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
     this->grid_report();
   }
 
+  
   m_timestepper->set_amr(m_amr);
   m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
@@ -1776,6 +1777,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
 #endif
   m_timestepper->setup_solvers();                   // Instantiate sigma and cdr with initial data (and rte if transient)
   m_timestepper->initial_data();                          // Fill cdr and rte with initial data
+  m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
 
   if (a_init_regrids >= 0){
     RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
