@@ -3,7 +3,10 @@
 The `PlasmaC` model
 ===================
 
-`PlasmaC` aims at being a moderately flexible framework for fluid plasma simulations. There are several abstractions in place that ensure that the code covers non-trivial geometries, multiple time stepping schemes, and fairly general plasma-kinetic couplings. The equation set that `PlasmaC` (currently) solves is
+Supported solvers
+-----------------
+
+`PlasmaC` aims at being a moderately flexible framework for fluid plasma simulations. There are several abstractions in place that ensure that the code covers non-trivial geometries, multiple time stepping schemes, and fairly general plasma-kinetic couplings. The equation set that `PlasmaC` is (currently) capable of solving is
 
 .. math::
    :nowrap:
@@ -16,7 +19,7 @@ The `PlasmaC` model
 
 where :math:`\sqrt{2D\phi}\mathbf{Z}` is a stochastic diffusion flux suitable for fluctuating hydrodynamics models (the user may turn off this flux). The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces (on which the surface charge :math:`\sigma` lives).
 
-In addition, the user can choose to include radiative transport, which is done either in the diffusive approximation or by means of Monte Carlo methods. Diffusive RTE methods involve solving
+Radiative transport is also supported, which is done either in the diffusive approximation or by means of Monte Carlo methods. Diffusive RTE methods involve solving
 
 .. math::
    :nowrap:
@@ -25,9 +28,14 @@ In addition, the user can choose to include radiative transport, which is done e
       \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) &= \frac{\eta}{c},
    \end{align}
    
-where :math:`\Psi` is the isotropic photon density, :math:`\kappa` is an absorption length and :math:`\eta` is an isotropic source term. The time dependent term can be turned off and the equations can be solved stationary. As an alternative, we also provide discrete photon methods that solve for the photoionization profile on a mesh by sampling discrete photons. Our discrete photon methods are capable of including far more physics; they can easily be adapted to e.g. scattering media and also provide much better qualitative features (like shadows, for example). They are, on the other hand, inherently stochastic which implies that some extra care must be taken when integrating the equations of motion. 
+where :math:`\Psi` is the isotropic photon density, :math:`\kappa` is an absorption length and :math:`\eta` is an isotropic source term. The time dependent term can be turned off and the equations can be solved stationary. As an alternative, we also provide discrete photon methods that solve for the photoionization profile on a mesh by sampling discrete photons. Our discrete photon methods are capable of including far more physics; they can easily be adapted to e.g. scattering media and also provide much better qualitative features (like shadows, for example). They are, on the other hand, inherently stochastic which implies that some extra care must be taken when integrating the equations of motion.
 
-The number of advected species and radiative transport equations is arbitrary; the user can select the coupling through our interface. The coupling that is (currently) available in `PlasmaC` is
+.. _Chap:PlasmaInterface
+      
+Plasma interface
+----------------
+
+Solvers in `PlasmaC` are stand-alone solvers that require a geometry, a mesh, and boundary conditions. Although they can be run on their own, we have prepared an interface where the user can implement his own plasma problem. The coupling that is (currently) available in `PlasmaC` is
 
 .. math::
    :nowrap:
@@ -43,8 +51,7 @@ The number of advected species and radiative transport equations is arbitrary; t
 
 where :math:`F` is the boundary flux on insulators or electrodes (which must be separately implemented).
 
-
-`PlasmaC` works by embedding the equations above into an abstract C++ framework that the user must implement or reuse existing pieces of, and then compile into a *mini-application*. For most users, this will mostly include implementing a new geometry or a new plasma-kinetic scheme. It is our goal that the user does not need to worry about temporal or spatial discretization of these equations, but rather focus on the actual setup of the geometry and physics. 
+`PlasmaC` works by embedding the equations above into an abstract C++ framework that the user must implement or reuse existing pieces of, and then compile into a *mini-application*. For most users, this will mostly include implementing a new geometry or a new plasma-kinetic scheme. It is possible to generate entirely new physics interfaces, too. Our goal is that the user does not need to worry about temporal or spatial discretization of these equations, but rather focus on the actual setup of the geometry and physics. 
 
 .. _Chap:SpatialDiscretization:
 
@@ -59,8 +66,18 @@ Embedded boundary applications are supported by additionally describing the mesh
    :width: 480px
    :align: center
 
-   Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit. 
+   Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit.
 
+`PlasmaC` offers two algorithm for AMR grid generation. Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags. The first algorithm that we support is the classical Berger-Rigoustous grid algorithm that ships with Chombo, see the figure below. The classical Berger-Rigoustous algorithm is serial-like in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes. The algorithm is typically not used at large scale because of its memory consumption. As an alternative, we also support a 
+
+.. figure:: figures/amr.png
+   :width: 240px
+   :align: center
+
+   Classical cartoon of patch-based refinement. Bold lines indicate entire grid blocks. 
+
+
+	   
 .. _Chap:EBMesh:
 
 Geometry generation
@@ -70,9 +87,14 @@ Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometr
 
 In `Chombo`, geometry generation is done by first constructing a set of boxes that covers the finest AMR level. If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box. The box is allocated in full, so using a smaller box will reduce the memory consumption. Chombo uses sparse storage for the EB mesh information; graphs are only stored in boxes that intersect with the implicit function. There are no graphs in boxes that are all-covered or all-regular. 
 
-Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. Arbitrarily with fine grids geometries are not possible. Consider for example a cubic domain of :math:`(16384)^3` cells which is decomposed into :math:`(32)^3` cell size patches. This yields :math:`(512)^3` patches. Now consider that this domain is cut in half by a plane with normal vector :math:`\mathbf{n} = \hat{\mathbf{x}}`. This surface will require allocation of :math:`512\times512\times 1` patches for the geometry. If each patch is padded with 4 ghost cells, this yields :math:`512^2\times(40)^3 \approx 1.6\times 10^{10}` cells. Inside each cell we must store volume fractions, area fractions, cell centroids positions and so one. Although the surface is simple, the required memory easily ranges in the terabyte range.
+Even with sparse storage of the graph information, the memory overhead associated with the EB graph is not negligible. Memory consumption generally depends on the complexity of the geometry, and arbitrarily fine grids with cut-cell geometries are not possible. Consider for example a cubic domain of :math:`(16384)^3` cells which is decomposed into :math:`(32)^3` cell size patches. This yields :math:`(512)^3` possible patches in total. Now consider that this domain is cut in half by a plane with normal vector :math:`\mathbf{n} = \hat{\mathbf{x}}`. This surface will require allocation of :math:`512\times512\times 1` patches for the geometry. If each patch is padded with 4 ghost cells, this yields :math:`512^2\times(40)^3 \approx 1.6\times 10^{10}` cells. Inside each cell we must store volume fractions, area fractions, cell centroids positions and so one. Although the surface is simple, the required memory easily ranges in the terabyte range. 
 
-The default load-balancing for geometry generation in `Chombo` is an even division of the uniform finest-level grid among all the available. This is a reasonable approach for porous media, but the approach is not scalable for geometries that consist of small objects in otherwise large domains. To achieve scalable geometry generation, our computational geometry abstractions also support the concept of *voxels* that describe a single type of material; *inside*, *outside*, or *cut-cell*. Proper use of voxels lead to much better load balancing and usually leads to orders of magnitude improvement in the time it takes to generate a geometry. How to set up geometries is discussed more closely in :ref:`Chap:NewGeometry`. 
+The default load-balancing for geometry generation in `Chombo` is an even division of the uniform finest-level grid among all the available. This is a reasonable approach for porous media where the cut-cells distribute evenly through the computational domain, but the approach is not scalable for geometries that consist of small objects in otherwise large domains. To achieve scalable geometry generation, our computational geometry abstractions also support the concept of *voxels* that describe a single type of material; *inside*, *outside*, or *cut-cell*. Proper use of voxels lead to much better load balancing and usually leads to orders of magnitude improvement in the time it takes to generate a geometry. How to set up geometries is discussed more closely in :ref:`Chap:NewGeometry`.
+
+Grid generation
+_______________
+
+
 
 .. _Chap:AdvectiveDiscretization:
 
