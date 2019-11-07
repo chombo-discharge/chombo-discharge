@@ -428,6 +428,7 @@ void amr_mesh::build_domains(){
   m_flux_reg.resize(phase::num_phases);
   m_old_quadcfi.resize(phase::num_phases);
   m_level_redist.resize(phase::num_phases);
+  m_concentration_redist.resize(phase::num_phases);
   m_pwl_fillpatch.resize(phase::num_phases);
   m_pwl_interp.resize(phase::num_phases);
   m_centroid_interp.resize(phase::num_phases);
@@ -447,12 +448,13 @@ void amr_mesh::build_domains(){
   m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
   m_old_quadcfi[phase::gas].resize(nlevels);
-  m_level_redist[phase::gas].resize(nlevels);
   m_pwl_fillpatch[phase::gas].resize(nlevels);
   m_pwl_interp[phase::gas].resize(nlevels);
+  m_level_redist[phase::gas].resize(nlevels);
   m_coar_to_fine_redist[phase::gas].resize(nlevels);
   m_coar_to_coar_redist[phase::gas].resize(nlevels);
   m_fine_to_coar_redist[phase::gas].resize(nlevels);
+  m_concentration_redist[phase::gas].resize(nlevels);
   m_copier[phase::gas].resize(nlevels);
   m_reverse_copier[phase::gas].resize(nlevels);
 
@@ -469,6 +471,7 @@ void amr_mesh::build_domains(){
   m_coar_to_fine_redist[phase::solid].resize(nlevels);
   m_coar_to_coar_redist[phase::solid].resize(nlevels);
   m_fine_to_coar_redist[phase::solid].resize(nlevels);
+  m_concentration_redist[phase::solid].resize(nlevels);
   m_copier[phase::solid].resize(nlevels);
   m_reverse_copier[phase::solid].resize(nlevels);
 
@@ -1445,6 +1448,15 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
 											  m_domains[lvl],
 											  comps,
 											  m_redist_rad));
+
+	m_concentration_redist[phase::gas][lvl] = RefCountedPtr<EBLevelConcentrationRedist>
+	  (new EBLevelConcentrationRedist(m_grids[lvl],
+					  m_ebisl[phase::gas][lvl],
+					  m_domains[lvl],
+					  comps,
+					  m_redist_rad));
+
+
 	t_level += MPI_Wtime();
       }
 
@@ -2423,6 +2435,11 @@ Vector<RefCountedPtr<EBFineToCoarRedist> >&  amr_mesh::get_fine_to_coar_redist(p
   CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase.
 
   return m_fine_to_coar_redist[a_phase];;
+}
+
+Vector<RefCountedPtr<EBLevelConcentrationRedist> >& amr_mesh::get_concentration_redist(phase::which_phase a_phase){
+  CH_assert(a_phase == phase::gas); // This is disabled since we only solve cdr in gas phase. 
+  return m_concentration_redist[a_phase];
 }
 
 irreg_amr_stencil<centroid_interp>& amr_mesh::get_centroid_interp_stencils(phase::which_phase a_phase){

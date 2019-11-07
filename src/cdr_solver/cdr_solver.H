@@ -86,6 +86,11 @@ public:
   virtual void compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG);
 
   /*!
+    @brief Make a_phi non-negative by redistributing mass in the vicinity of the cut cells
+  */
+  virtual void make_non_negative(EBAMRCellData& a_phi);
+
+  /*!
     @brief Average velocities to faces
   */
   virtual void average_velo_to_faces();
@@ -635,6 +640,13 @@ protected:
 					 const EBAMRCellData& a_redist_weights);
 
   /*!
+    @brief Mass injection from regular cells into cut cells in order to avoid negative densities. Preserves mass. 
+  */
+  virtual void concentration_redistribution(EBAMRCellData&       a_phi,
+					    const EBAMRIVData&   a_mass_diff,
+					    const EBAMRCellData& a_redist_weights);
+
+  /*!
     @brief Increment redistribution flux registers
   */
   virtual void increment_redist_flux();
@@ -643,6 +655,11 @@ protected:
     @brief Increment redistribution objects with mass to be redistributed
   */
   virtual void increment_redist(const EBAMRIVData& a_mass_diff);
+
+  /*!
+    @brief Increment redistribution register to ensure non-negative densities in cut cells
+  */
+  virtual void increment_concentration_redist(const EBAMRIVData& a_mass_diff);
 
   /*!
     @brief Do coarse-fine redistribution

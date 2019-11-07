@@ -18,6 +18,7 @@
 #include "ebcoarseaverage.H"
 #include "DomainFluxIFFAB.H"
 #include "DomainFluxIFFABFactory.H"
+#include "EBLevelConcentrationRedist.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
@@ -602,6 +603,11 @@ public:
   virtual Vector<RefCountedPtr<EBFineToCoarRedist> >&  get_fine_to_coar_redist(phase::which_phase a_phase);
 
   /*!
+    @brief Get concentration redisitribution object
+  */
+  virtual Vector<RefCountedPtr<EBLevelConcentrationRedist> >& get_concentration_redist(phase::which_phase a_phase);
+
+  /*!
     @brief Get interpolation stencils
   */
   virtual irreg_amr_stencil<centroid_interp>& get_centroid_interp_stencils(phase::which_phase a_phase);
@@ -904,6 +910,11 @@ protected:
     @brief Fine to coarse redistribution
   */
   Vector<Vector<RefCountedPtr<EBFineToCoarRedist> > > m_fine_to_coar_redist;
+
+  /*!
+    @brief Redistribution objects for ensuring non-negative densities in cut cells
+  */
+  Vector<Vector<RefCountedPtr<EBLevelConcentrationRedist> > > m_concentration_redist;
 
   /*!
     @brief Interpolation stencil for interpolating to cell centroid

@@ -1092,6 +1092,30 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
   }
 }
 
+void cdr_solver::concentration_redistribution(EBAMRCellData&       a_phi,
+					      const EBAMRIVData&   a_mass_diff,
+					      const EBAMRCellData& a_redist_weights){
+  CH_TIME("cdr_solver::concentration_redistribution");
+  if(m_verbosity > 5){
+    pout() << m_name + "::concentration_redistribution" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    EBLevelConcentrationRedist& redist = *(m_amr->get_concentration_redist(m_phase)[lvl]);
+    if(m_mass_redist){
+      redist.resetWeights(*a_redist_weights[lvl], comp);
+    }
+    redist.redistribute(*a_phi[lvl], interv);
+    redist.setToZero();
+  }
+}
+
 void cdr_solver::interpolate_flux_to_centroids(LevelData<EBFluxFAB>& a_flux, const int a_lvl){
   CH_TIME("cdr_solver::interpolate_flux_to_centroids");
   if(m_verbosity > 5){
@@ -1269,6 +1293,29 @@ void cdr_solver::increment_redist(const EBAMRIVData& a_mass_diff){
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       level_redist.increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+    }
+  }
+}
+
+void cdr_solver::increment_concentration_redist(const EBAMRIVData& a_mass_diff){
+  CH_TIME("cdr_solver::increment_redist");
+  if(m_verbosity > 5){
+    pout() << m_name + "::increment_redist" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    
+    EBLevelConcentrationRedist& redist = *(m_amr->get_concentration_redist(m_phase)[lvl]);
+    redist.setToZero();
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      redist.increment((*a_mass_diff[lvl])[dit()], dit(), interv);
     }
   }
 }
@@ -2199,4 +2246,50 @@ void cdr_solver::define_interpolant(){
 				     dir);
     }
   }
+}
+
+void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
+  CH_TIME("cdr_solver::make_non_negative");
+  if(m_verbosity > 5){
+    pout() << m_name + "::make_non_negative" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  EBAMRIVData mass_diff;
+  EBAMRCellData weights;
+  m_amr->allocate(mass_diff, m_phase, ncomp);
+  m_amr->allocate(weights, m_phase, ncomp);
+  data_ops::set_value(mass_diff, 0.0);
+  data_ops::set_value(weights, 0.0);
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& state = (*a_phi[lvl])[dit()];
+      const EBISBox& ebisbox = state.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const Box box = dbl.get(dit());
+      const IntVectSet ivs = ebisbox.getIrregIVS(box);
+	
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const Real kappa = ebisbox.volFrac(vof);
+	const Real phi = state(vof, comp);
+	if(phi < 0.0){
+	  state(vof,comp) = 0.0;
+	  (*mass_diff[lvl])[dit()](vof,comp) = kappa*phi;
+	}
+      }
+    }
+  }
+
+#if 1 // Code that will use the concentration redistribution register
+  this->increment_concentration_redist(mass_diff);
+#else // Other code
+  this->increment_mass_redist(mass_diff);
+  this->hyperbolic_redistribution(a_phi, mass_diff, weights);
+#endif
+
 }

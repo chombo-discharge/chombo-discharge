@@ -633,36 +633,6 @@ void cdr_gdnv::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state,
 	this->hyperbolic_redistribution(a_divF, mass_diff, weights);    // Redistribute that was left out
 	this->reflux(a_divF);                                           // Reflux at coarse-fine interfaces
       }
-
-      // Do a test
-#if 1
-      for (int i = 0; i < 3; i++){
-	const DisjointBoxLayout& dbl = m_amr->get_grids()[0];
-	data_ops::set_value(mass_diff, 0.0);
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	  EBCellFAB& state = (*m_state[0])[dit()];
-	  EBCellFAB& divF = (*a_divF[0])[dit()];
-	  const EBISBox& ebisbox = state.getEBISBox();
-	  const EBGraph& ebgraph = ebisbox.getEBGraph();
-	  const Box box = dbl.get(dit());
-	  const IntVectSet ivs = ebisbox.getIrregIVS(box);
-	  const int comp = 0;
-	
-	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	    const VolIndex& vof = vofit();
-	    const Real kappa = ebisbox.volFrac(vof);
-	    const Real phiNew = state(vof,0) - divF(vof,0)*a_extrap_dt;
-	    if(phiNew <= 0.0){
-	      const Real diff = phiNew/a_extrap_dt;
-	      divF(vof,comp) += diff;
-	      (*mass_diff[0])[dit()](vof,comp) = -kappa*diff;
-	    }
-	  }
-	}
-	this->increment_redist(mass_diff);
-	this->hyperbolic_redistribution(a_divF, mass_diff, weights);
-      }
-#endif
     }
     else{
       MayDay::Abort("cdr_gdnv::compute_divF - unknown nonconsdiv");

@@ -589,7 +589,8 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F/J) + R]
     data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J) + R]*dt
     data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J) + dt*R
-    //    data_ops::floor(phi, 0.0);
+    //    //    data_ops::floor(phi, 0.0);
+    solver->make_non_negative(phi);
 
     // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
     if(m_implicit_diffusion){
@@ -607,6 +608,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     }
 
     //    data_ops::floor(phi, 0.0);
+    solver->make_non_negative(phi);
     m_amr->average_down(phi, m_cdr->get_phase());
     m_amr->interp_ghost(phi, m_cdr->get_phase());
   }
