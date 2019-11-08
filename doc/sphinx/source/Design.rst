@@ -1,4 +1,4 @@
-xo.. _Chap:Design:
+.. _Chap:Design:
 
 `PlasmaC` Software Design
 ===========================

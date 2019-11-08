@@ -1,12 +1,12 @@
 .. _Chap:Control:
 
-Controlling PlasmaC
-===================
+PlasmaC basics
+==============
 
 In this chapter we show how to run a `PlasmaC` simulation and control its behavior through input scripts or command line options.
 
-Compiling and running
----------------------
+Basic compiling and running
+---------------------------
 
 To run simulations, the user must first compile his application. Once the application has been defined, the user may compile is by
 
@@ -14,13 +14,13 @@ To run simulations, the user must first compile his application. Once the applic
 
    make -s -j 32 DIM=N <application_name>
 
-where *N* may be 2 or 3, and <application_name> is the name of the mini-application. This will compile an executable whose name depends on your application name and compiler settings. Please refer to the Chombo manual for explanation of the executable name. You may, of course, rename your application.
+where *N* may be 2 or 3, and <application_name> is the name of the file that holds the ``main()`` function. This will compile an executable whose name depends on your application name and compiler settings. Please refer to the Chombo manual for explanation of the executable name. You may, of course, rename your application.
 
 Next, applications are run by
 
 .. code-block:: bash
 
-		mpirun -np 32 <application_executable> <input_file>
+   mpirun -np 32 <application_executable> <input_file>
 
 where <input_file> is your input file. On clusters, this is a little bit different and usually requires passing the above command through a batch system. Note that if you define a parameter multiple times in the input file, the last definition is canon. 
 
@@ -37,7 +37,7 @@ will set the ``plasma_engine.max_steps`` parameter to 10. Command-line parameter
 Controlling output
 ------------------
 
-PlasmaC comes with controls for adjusting output. Through the :ref:`Chap:plasma_engine` class the user may adjust the option ``plasma_engine.output_directory`` to adjust where output files will be placed. If this directory does not exist, PlasmaC does it's best at creating it. In addition, it will create three more directories
+`PlasmaC` comes with controls for adjusting output. Through the :ref:`Chap:plasma_engine` class the user may adjust the option ``plasma_engine.output_directory`` to specify where output files will be placed. This directory is relative to the location where the application is run. If this directory does not exist, PlasmaC does it's best at creating it. In addition, it will create four more directories
 
 * :file:`output_directory/plt` contains all plot files.
 * :file:`output_directory/chk` contains all checkpoint files, which are used for restarting.
@@ -55,6 +55,7 @@ The reason for this design is that PlasmaC can end up writing thousands of files
    cdr_gdnv.plt_vars = phi vel dco src ebflux # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
 
 where ``phi`` is the state density, ``vel`` is the drift velocity, ``dco`` is the diffusion coefficient, ``src`` is the source term, and ``ebflux`` is the flux at embedded boundaries. Which variables are available for output changes for one class to the next. If you only want to plot the density, then you should put ``cdr_gdnv.plt_vars = phi``. An empty entry like ``cdr_gdnv.plt_vars =`` will lead to run-time errors, so if you do not want a class to provide plot data you may put ``cdr_gdnv.plt_vars = -1``. 
+
 
 Controlling processor output
 ----------------------------
@@ -78,7 +79,14 @@ Restarting simulations is done in exactly the same way as running simulations, a
 
    mpirun -np 32 <application_executable> <input_file> plasma_engine.restart=10
 
-will restart from step 10. If you set ``plasma_engine.restart=0``, you will get a fresh simulation. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and `PlasmaC` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` or ``plasma_engine.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory. 
+will restart from step 10. If you set ``plasma_engine.restart=0``, you will get a fresh simulation. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and `PlasmaC` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` or ``plasma_engine.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory.
+
+.. _Chap:Visualization:
+
+Visualization
+-------------
+
+`PlasmaC` output files are written to HDF5 files in the format ``<simulation_name>.step#.dimension.hdf5`` and the files will be written to the directory specified by :ref:`plasma_engine` runtime parameters. Currently, we have only used VisIt for visualizing the plot files.    
 
 ..
    Changing your physics

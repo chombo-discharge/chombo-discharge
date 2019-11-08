@@ -16,14 +16,14 @@ Welcome to `PlasmaC`'s user documentation!
 * Deterministic and fluctuating advection-diffusion-reaction solvers
 * Various time integration schemes
 
-   * Implicit-explicit spectral deferred corrections (SISDC)
+   * Implicit-explicit spectral deferred corrections (IMEX-SDC)
    * Modified Euler-Maruyama for fluctuating hydrodynamics
    * Godunov splitting
    * Strang splitting based on high-order SSPRK schemes
 * Parallel I/O with HDF5
 * Sensible and simple-to-use physics interfaces
 
-Solvers are designed to run on their own, or they can be coupled through our physics interfaces. 
+Solvers are designed to run on their own, or they can be coupled through our physics interface. 
 
 For scalability, `PlasmaC` is built on top of `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_, and therefore additionally features
 
@@ -38,12 +38,32 @@ This documentation is the user documentation `PlasmaC`. There is a separate :dox
 
 .. toctree::
    :maxdepth: 4
-   
+   :caption: PlasmaC introduction
+
    GettingStarted
    Model
-   Design
+	     
+.. toctree::
+   :maxdepth: 4
+   :caption: Using PlasmaC
+
    Control
    TemporalDiscretization
    NewSimulations
    Tutorials
+   Visualization	     
+
+
+.. toctree::
+   :maxdepth: 4
+   :caption: PlasmaC technical details
+	  
+   Design
    ClassAPI
+   SolverAPI
+
+.. toctree::
+   :maxdepth: 4
+   :caption: References
+
+   References

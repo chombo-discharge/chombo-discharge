@@ -30,7 +30,7 @@ Radiative transport is also supported, which is done either in the diffusive app
    
 where :math:`\Psi` is the isotropic photon density, :math:`\kappa` is an absorption length and :math:`\eta` is an isotropic source term. The time dependent term can be turned off and the equations can be solved stationary. As an alternative, we also provide discrete photon methods that solve for the photoionization profile on a mesh by sampling discrete photons. Our discrete photon methods are capable of including far more physics; they can easily be adapted to e.g. scattering media and also provide much better qualitative features (like shadows, for example). They are, on the other hand, inherently stochastic which implies that some extra care must be taken when integrating the equations of motion.
 
-.. _Chap:PlasmaInterface
+.. _Chap:PlasmaInterface:
       
 Plasma interface
 ----------------
@@ -60,7 +60,7 @@ Spatial discretization
 
 `PlasmaC` uses structured adaptive mesh refinement (SAMR provided by Chombo :cite:`ebchombo`. SAMR exists in two separate categories, patch-based and tree-based AMR. Patch-based AMR is the more general type and contain tree-based grids as a subset; they can use refinement factors other than 2, as well as accomodate anisotropic resolutions and non-cubic patches. In patch-based AMR the domain is subdivided into a collection of hierarchically nested overlapping patches (or boxes). Each patch is a rectangular block of cells which, in space, exists on a subdomain of the union of patches with a coarser resolution. Patch-based grids generally do not have unique parent-children relations: A fine-level patch may have multiple coarse-level parents. An obvious advantage of a patch-based approach is that entire Cartesian blocks are sent into solvers, and that the patches are not restricted to squares or cubes that align with the coarse-grid boundary. A notable disadvantage is that additional logic is required when updating a coarse grid level from the overlapping region of a finer level. Tree-based AMR use quadtree or octree data structures that describe a hierarchy of unique parent-children relations throughout the AMR levels: Each child has exactly one parent, whereas each parent has multiple children (4 in 2D, 8 in 3D). In `PlasmaC` and Chombo, computations occur over a set of levels with different resolutions, where the resolution refinement between levels can be a factor 2 or 4. On each level, the mesh is described by a set of disjoint patches (rectangular box in space), where the patches are distributed among MPI processes.
 
-Embedded boundary applications are supported by additionally describing the mesh with a graph near cut-cells. This allows us to combine the efficiency of patch-based AMR with complex geometries. 
+
 
 .. figure:: figures/complex_patches.png
    :width: 480px
@@ -68,7 +68,9 @@ Embedded boundary applications are supported by additionally describing the mesh
 
    Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit.
 
-`PlasmaC` offers two algorithm for AMR grid generation. Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags. The first algorithm that we support is the classical Berger-Rigoustous grid algorithm that ships with Chombo, see the figure below. The classical Berger-Rigoustous algorithm is serial-like in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes. The algorithm is typically not used at large scale because of its memory consumption. As an alternative, we also support a 
+Embedded boundary applications are supported by additionally describing the mesh with a graph near cut-cells. This allows us to combine the efficiency of patch-based AMR with complex geometries. However, there is significant overhead with the embedded boundary approach and, furthermore, arbitrarily complex geometries are not possible.
+
+`PlasmaC` offers two algorithm for AMR grid generation. Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags. The first algorithm that we support is the classical Berger-Rigoustous grid algorithm that ships with Chombo, see the figure below. The classical Berger-Rigoustous algorithm is serial-like in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes. The algorithm is typically not used at large scale because of its memory consumption. As an alternative, we also support a tiled algorithm where the grid boxes on each block are generated according to a predefined tiled pattern. If a tile contains a single tag, the entire tile is flagged for refinement. The tiled algorithm produces grids that are similar to octrees, but it is more general since it also supports refinement factors other than 2, and is not restricted to cubic domains. 
 
 .. figure:: figures/amr.png
    :width: 240px
@@ -76,7 +78,11 @@ Embedded boundary applications are supported by additionally describing the mesh
 
    Classical cartoon of patch-based refinement. Bold lines indicate entire grid blocks. 
 
+.. figure:: figures/tiled.png
+   :width: 360px
+   :align: center
 
+   Classical cartoon of tiled patch-based refinement. Bold lines indicate entire grid blocks. 
 	   
 .. _Chap:EBMesh:
 
@@ -91,169 +97,231 @@ Even with sparse storage of the graph information, the memory overhead associate
 
 The default load-balancing for geometry generation in `Chombo` is an even division of the uniform finest-level grid among all the available. This is a reasonable approach for porous media where the cut-cells distribute evenly through the computational domain, but the approach is not scalable for geometries that consist of small objects in otherwise large domains. To achieve scalable geometry generation, our computational geometry abstractions also support the concept of *voxels* that describe a single type of material; *inside*, *outside*, or *cut-cell*. Proper use of voxels lead to much better load balancing and usually leads to orders of magnitude improvement in the time it takes to generate a geometry. How to set up geometries is discussed more closely in :ref:`Chap:NewGeometry`.
 
-Grid generation
-_______________
+.. _Chap:CDR:
 
+Convection-Diffusion-Reaction Equations
+---------------------------------------
 
-
-.. _Chap:AdvectiveDiscretization:
-
-Advective discretization
-------------------------
-
-Here, we discuss the discretization of advective derivates
+Here, we discuss the discretization of the equation 
 
 .. math::
-   \frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v}\phi\right) = 0
+   \frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v}\phi - D\nabla\phi\right) = S
 
-We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries). We use the finite volume method to construct fluxes in a cut cell and discretize the advective derivative as
+We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in a cut-cells and regular cells.
+
+.. _Chap:ExplicitDivergence:   
+
+Computing explicit divergences
+______________________________
+
+Computing explicit divergences for equations like
 
 .. math::
-   \int_V\nabla\cdot\left(\mathbf{v}\phi\right)dV =\sum_{f\in f(V)}\left(\mathbf{v}_f\cdot \mathbf{n}_f\right)\phi_f\alpha_f\Delta x^{D -1},
+   \frac{\partial \phi}{\partial t} + \nabla\cdot\mathbf{G} = 0
+
+is problematic because of the arbitarily small volume fractions of cut cells. In general, we seek to update :math:`\phi^{k+1} = \phi^k - \Delta t \left[\nabla\cdot \mathbf{G}^k\right]` where :math:`\left[\nabla\cdot\mathbf{G}\right]` is a numerical approximation based on some finite volume approximation. Recall that in finite volume methods we usually seek the update
+
+.. math::
+   \phi^{k+1} = \phi^k - \frac{\Delta t}{\kappa \Delta x^{\textrm{DIM}}}\int_V\nabla\cdot\mathbf{G}dV,
+   :label: conservativeUpdate
    
-where the sum runs over all cell edges (faces in 3D) of the cell, :math:`F_f(\phi) = \left(\mathbf{v}_f\cdot \mathbf{n}_f\right)\phi_f` is the edge (face) centroid flux, :math:`\alpha_f` is the edge (face) aperture, and :math:`D` is the dimension. The evaluation of this expression requires knowledge of the state at the face, which in the current version of `PlasmaC` is given by a Godunov method.  
+where :math:`\kappa` is the volume fraction of a grid cell, :math:`\textrm{DIM}` is the spatial dimension and the volume integral is written as discretized surface integral
+   
+.. math::
+   \int_V\nabla\cdot\mathbf{G}dV =\sum_{f\in f(V)}\left(\mathbf{G}_f\cdot \mathbf{n}_f\right)\alpha_f\Delta x^{\textrm{DIM} -1}.
+   
+The sum runs over all cell edges (faces in 3D) of the cell where :math:`G_f` is the flux on the edge centroid and :math:`\alpha_f` is the edge (face) aperture.
 
 .. figure:: figures/cutCell.png
    :width: 480px
    :align: center
 
-The possibility of arbitrarily small volume fractions :math:`\kappa` requires modification of the advective discretization in the cut cells. We use the Chombo approach and expand the range of influence of the cut cells. First, we compute the conservative divergence
+   Location of centroid fluxes for cut cells. 
+
+However, taking :math:`[\nabla\cdot\mathbf{G}^k]` to be this sum leads to a time step constraint proportional to :math:`\kappa`, which can be arbitrarily small. This leads to an unacceptable time step constraint for :eq:`conservativeUpdate`. We use the Chombo approach and expand the range of influence of the cut cells in order to stabilize the discretization and allow the use of a normal time step constraint. First, we compute the conservative divergence
 
 .. math::
-  D_{\mathbf{i}}^c(\phi) =  \sum_fF_f(\phi)\alpha_f\Delta x^{D -1}.
+  \kappa_{\mathbf{i}} D_\mathbf{i}^c =  \sum_f G_f\alpha_f\Delta x^{\textrm{DIM} -1},
 
-Next, we compute a non-conservative divergence :math:`D_{\mathbf{i}}^{nc}` that uses an extended state on covered cell faces and thereby ignores the presence of the boundaries. The extended states are extrapolated from the interior. We then use a hybrid divergence
-
-.. math::
-  D_{\mathbf{i}}^H = \kappa_{\mathbf{i}} D_{\mathbf{i}}^c + (1-\kappa_{\mathbf{i}})D_{\mathbf{i}}^{nc}.
-
-The hybrid divergence fails to conserve mass by an amount :math:`\delta M_{\mathbf{i}} = \kappa_{\mathbf{i}}\left(1-\kappa_{\mathbf{i}}\right)\left(D_{\mathbf{i}}^c - D_{\mathbf{i}}^{nc}\right)`, which is redistributed into neighboring cells that can be reached with a monotone path of radius one. Let :math:`\delta M_{\mathbf{i}, \mathbf{j}}` be the redistributed mass from :math:`\mathbf{i}` to :math:`\mathbf{j}`. The advective discretization of cell :math:`\mathbf{j}` is then
+where :math:`G_f = \mathbf{G}_f\cdot \mathbf{n}_f`. Next, we compute a non-conservative divergence :math:`D_{\mathbf{i}}^{nc}`
 
 .. math::
-   D_{\mathbf{j}} = D_{\mathbf{j}}^H + \delta M_{\mathbf{i}, \mathbf{j}}.
+   D_\mathbf{i}^{nc} =  \frac{\sum_{\mathbf{j}\in{N}\left(\mathbf{i}\right)}\kappa_{\mathbf{j}}D_\mathbf{i}^c}{\sum_{\mathbf{j}\in{N}\left(\mathbf{i}\right)}\kappa_{\mathbf{j}}}
 
-With these definitions, the forward Euler method on :math:`\partial_t\phi = \nabla\cdot\left(\mathbf{v} \phi\right)` can now be written as :math:`\phi_{\mathbf{i}}^{n+1} = \phi_{\mathbf{i}}^n + \Delta t D_{\mathbf{i}}`. 
-
-Charge injection and extraction in `PlasmaC` is currently handled through the advective discretization. In the future, there might exist solvers options to injects this charge though the diffusion operator instead. This would be straightforward to modify in the `PlasmaC` source code. To construct boundary fluxes, the user computes :math:`F_{\textrm{EB}}` through the physics module :ref:`Chap:plasma_kinetics`. This provides a straightforward way of handling charge injection boundary conditions. 
-
-In order to conserve charge on solid insulators, `PlasmaC` always updates the total injection current as
+where :math:`N(\mathbf{i}` indicates some neighborhood of cells around cell :math:`\mathbf{i}`. Next, we compute a hybridization of the divergences, 
 
 .. math::
-   F_\sigma(\phi) = \sum_{\phi}q_\phi F_{\textrm{EB}}(\phi),
+  D_{\mathbf{i}}^H = \kappa_{\mathbf{i}} D_{\mathbf{i}}^c + (1-\kappa_{\mathbf{i}})D_{\mathbf{i}}^{nc},
 
-where :math:`q_\phi` is the charge of a species :math:`\phi`. This ensures strong conservation on insulating surfaces.
-
-.. _Chap:EllipticDiscretization:
-
-Elliptic discretization
------------------------
-
-The elliptic discretization in `PlasmaC` follows the Chombo cut-cell approach where cell-centered data is used to construct face centroid centered fluxes. 
-
-Next, we discuss the discretization of the Helmholtz equation
-
+and perform an intermediate update
+  
 .. math::
-   \alpha a(\mathbf{x})\phi + \beta\nabla\cdot\left(b(\mathbf{x})\phi\right) = \rho.
+   \phi_{\mathbf{i}}^{k+1} = \phi_{\mathbf{i}}^k - \Delta tD_{\mathbf{i}}^H.
    
-For example, the Poisson equation is represented by :math:`\alpha = 0`, :math:`\beta = -\epsilon_0`, :math:`b(\mathbf{x}) = \epsilon_r(\mathbf{x})`. Furthermore temporal discretizations of parabolic equations are also underpinned by a Helmholtz solver. 
-
-We use the finite volume method for the Helmholtz equation. For ease of notation, we restrict the discussion below to the case :math:`a=0` which yields the Poisson equation. Extensions to the full Helmholtz problem is straightforward by adding in another diagonal term. Our implementation of the Helmholtz equation also supports multi-fluids, i.e. cases in which :math:`b(\mathbf{x})` is additionally discontinuous across a level-set surface. The multifluid problem needs additional encapsulation of a quasi-boundary condition on the interface between two materials :math:`p` and :math:`p^\prime`, given by
-
+The hybrid divergence update fails to conserve mass by an amount :math:`\delta M_{\mathbf{i}} = \kappa_{\mathbf{i}}\left(1-\kappa_{\mathbf{i}}\right)\left(D_{\mathbf{i}}^c - D_{\mathbf{i}}^{nc}\right)`. In order to main overall conservation, the excess mass is redistributed into neighboring grid cells. Let :math:`\delta M_{\mathbf{i}, \mathbf{j}}` be the redistributed mass from :math:`\mathbf{j}` to :math:`\mathbf{i}` where
+   
 .. math::
-   b_p\frac{\partial \phi}{\partial n_p} +   b_{p^\prime}\frac{\partial \phi}{\partial n_{p^\prime}} = \sigma,
+   \delta M_{\mathbf{i}} = \sum_{\mathbf{j} \in N(\mathbf{i})}\delta M_{\mathbf{i}, \mathbf{i}}.
 
-where :math:`\mathbf{n}_p` and :math:`\mathbf{n}_{p^\prime}` are unit normals that point into each fluid, with :math:`\mathbf{n}_{p^\prime} = -\mathbf{n}_p`, and :math:`\sigma` is a surface source term. In integral, the Poisson equation is
-
+This mass is used as a local correction in the vicinity of the cut cells, i.e.
+   
 .. math::
-   \oint_A b(\mathbf{x})\nabla\phi\cdot d\mathbf{A} = \frac{1}{\beta}\int_V\rho d V. 
+   \phi_{\mathbf{i}}^{k+1} \rightarrow \phi_{\mathbf{i}}^{k+1} + \delta M_{\mathbf{j}\in N(\mathbf{i}), \mathbf{i}},
 
-
-We consider the cell shown in the figure above. Here, the volume :math:`V_{\mathbf{i}}` is a cut-cell at a domain boundary. Integration of the above integral equation over this cell yields
-
+where :math:`\delta M_{\mathbf{j}\in N(\mathbf{i}), \mathbf{i}}` is the total mass redistributed to cell :math:`\mathbf{i}` from the other cells. After these steps, we define
+   
 .. math::
-   \oint_A b(\mathbf{x})\nabla\phi\cdot d\mathbf{A} = \left(\alpha_1F_1 + \alpha_2F_2 + \alpha_3F_3 + \alpha_{\textrm{D}}F_{\textrm{D}} + \alpha_{\textrm{EB}}F_{\textrm{EB}}\right)\Delta x,
+   \left[\nabla\cdot\mathbf{G}^k\right]_{\mathbf{i}} \equiv \frac{1}{\Delta t}\left(\phi_{\mathbf{i}}^{k+1} - \phi_{\mathbf{i}}^k\right)
 
-where the fluxes are centroid-centered on their respective faces and :math:`\alpha_i` are face area fractions. The centroid fluxes are evaluated by constructing second order accurate face-centered fluxes, which are then interpolated to the respective centroids. For example, for the flux through the top face in the figure above we find a standard expression for second order accurate approximations of the first derivative:
+Numerically, the above steps for computing a conservative divergence of a one-component flux :math:`\mathbf{G}` are implemented in the convection-diffusion-reaction solvers, which also respects boundary conditions (e.g. charge injection). The user will need to call the function
 
-.. math::
-   F_3 = F_{i,j+\frac{1}{2}} = b_{i, j+\frac{1}{2}}\frac{\phi_{i, j+1} - \phi_{i,j}}{\Delta x},
+.. code-block:: c++
+		
+   virtual void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG)
 
-For fluxes through face centroids we interpolate the face-centered fluxes. For example, the flux :math:`F_2` in the figure above is given by
+where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebG`` is the flux on the embedded boundary. The above steps are performed by interpolating ``a_G`` to face centroids in the cut cells for computing the conservative divergence, and the remaining steps are then performed successively. The result is put in ``a_divG``. 
+   
+.. _Chap:NonNegative:
+      
+Maintaining non-negative densities
+__________________________________
 
-.. math::
-   F_2 = \left[F_{i+\frac{1}{2},j }(1-s) + sF_{i+\frac{1}{2}, j+1}\right],
+Although the redistribution functionality is conservative, the cut-cells represent boundaries that make the evolution non-monotone. In particular, explicit discretization of divergences in cut-cells do not necessarily lead to non-negative densities in the cut cells themselves. In some cases, negative values of :math:`\phi` are non-physical and the lack of non-negativeness can lead to serious numerical issues.
 
-where :math:`s` is the normalized distance from the face center to the face centroid, and :math:`F_{i+\frac{1}{2},j }` and :math:`F_{i+\frac{1}{2}, j+1}` are face-centered fluxes. 
+In order to handle this case, we support another redistribution step in the cut cells that redistributes mass from regular cells and into the cut cells in order to maintain non-negative densities.
 
-Flux evaluation on coarse-fine boundaries is slightly more involved. The AMR way of handling this is to reflux the coarse side by setting the flux into the coarse cell to be the sum of fluxes from the abutting finer cells. In Chombo, this is done by precomputing a set of flux registers that hold the face centered fluxes on both sides of the coarse-fine interface. Refluxing is then a matter of subtracting the coarse flux from the divergence computation, and adding in the sum of the fine face fluxes. I.e. let :math:`\{f_{\textrm{f}}(f_{\textrm{c}})\}` be the set of fine faces that are obtained when coarsening of a coarse face :math:`f_{\textrm{c}}`. In the reflux step, the divergence operator in the coarse cell is modified as
+.. code-block:: c++
+		
+   void make_non_negative(EBAMRCellData& a_phi)
 
-.. math::
-   \nabla\cdot\mathbf{F} \rightarrow \nabla\cdot\mathbf{F} + \frac{1}{\Delta x}\left(\sum_{f} F_{f} - F_c\right),
+Again, the functionality for redistributing negative mass in a conservative way is owned by the convection-diffusion-reaction solvers. 
 
-where :math:`F_{c}` and :math:`F_{f}` are the coarse and fine-face fluxes, and the sum runs over all the fine faces that abut the coarse face.
+.. _Chap:ExplicitAdvection:
 
-.. _Chap:EllipticBoundaryConditions:
+Explicit advection
+__________________
 
-Elliptic boundary conditions
-----------------------------
-Next, we discuss four types of boundary conditions for the Helmholtz equation: Neumann, Dirichlet, Robin, and multifluid type boundary conditions. For Neumann boundary conditions the domain and embedded boundary fluxes are specified directly. For Dirichlet boundary co
-nditions the process is more involved. For Dirichlet conditions on domain faces we apply finite differences in order to evaluate the flux through the face. For example, for a constant Dirichlet boundary condition :math:`\phi = \phi_0` the face-centered flux at the bottom face is, to second order
+Scalar advective updates follows the computation of the explicit divergence discussed in :ref:`Chap:ExplicitDivergence`. The face-centered fluxes :math:`\mathbf{G} = \phi\mathbf{v}` are computed by instantiation classes for the convection-diffusion-reaction solvers. These solvers may compute :math:`\mathbf{G}` in different ways. There is, for example, support for low-order upwind methods as well as Godunov methods. The function signature for explicit advection is
 
-.. math::
-  F_{i,j-\frac{1}{2}} = -\frac{b_{i,j-\frac{1}{2}}}{\Delta x}\left(3\phi_{i,j+1} -\frac{1}{3}\phi_{i,j} - \frac{8}{3}\phi_0\right)
+.. code-block:: c++
+		
+   void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt)
 
-As with the flux :math:`F_2` on the interior face, fluxes on domain faces are also interpolated to face centroids. Thus, :math:`F_{\textrm{D}}` becomes
+where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF`` using the procedure outlined above. For example, in order to perform an advective advance over a time step :math:`\Delta t`, one would perform the following:
 
-.. math::
-  F_{\textrm{D}} = \left[F_{i,j-\frac{1}{2}}(1-t) + tF_{i-1,j-\frac{1}{2}}\right],
+.. code-block:: c++
 
-where :math:`t` is the distance from the face center to the face centroid.
+   // Assume that data holders divF and phi are defined, and that 'solver' is
+   // a valid convection-diffusion reaction solver with defined velocities. 
+   solver->compute_divF(divF, phi, 0.0); // Computes divF
+   data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
+   solver->make_non_negative(phi);	 // Redist negative mass in cut cells
 
-.. figure:: figures/raycast.png
-   :width: 480px
-   :align: center
+.. _Chap:ExplicitDiffusion:
+   
+Explicit diffusion
+__________________
 
-   Ray casting at the EB for obtaining the normal gradient.
+Explicit diffusion is performed in much the same way as implicit advection, with the exception that the general flux :math:`\mathbf{G} = D\nabla\phi` is computed by using centered differences on face centers. The function signature for explicit diffusion is
 
-The evaluation of Dirichlet boundary conditions on the EB is more complicated because the EB normal does not align with any of the coordinate directions. To evaluate the flux on the boundary we construct ray based or least squares based stencils for evaluating :math:`\partial_n\phi` (see \cite{Johansen1998} or \cite{ebchombo} for details). Regardless of which approach is used, we have
+.. code-block:: c++
+		
+   void compute_divD(EBAMRCellData& a_divF, const EBAMRCellData& a_state)
 
-.. math::
-  \frac{\partial\phi}{\partial n} = w_0\phi_0 + \sum_{{\mathbf{i}} \in \Psi}w_{{\mathbf{i}}}\phi_{{\mathbf{i}}},
+and we increment in the same way as for explicit advection:
 
-where :math:`\phi_0` is the Dirichlet value on the boundary, :math:`w_0` is a boundary weight and :math:`\Psi` is a stencil that contains only interior points. The weights :math:`w_{{\mathbf{i}}}` are weights for these points. As an example, consider the flux in the figure above. The first order accurate partial derivative on the boundary is given by
+.. code-block:: c++
 
-.. math::
-  \frac{\partial\phi}{\partial n} = \frac{\phi_0 - \overline{\phi}}{l},
+   // Assume that data holders divD and phi are defined, and that 'solver' is
+   // a valid convection-diffusion reaction solver with defined diffusion coefficients
+   solver->compute_divD(divD, phi); // Computes divD
+   data_ops:incr(phi, divD, dt);    // makes phi -> phi + dt*divD
+   solver->make_non_negative(phi);  // Redist negative mass in cut cells
 
-where :math:`\overline{\phi}` is the interpolated value at the intersection of the ray and the line that connects :math:`\mathbf{x}_{i-1, j}` and :math:`\mathbf{x}_{i-1, j+1}`. Since :math:`\overline{\phi}` can be linearly interpolated by using these two interior points only, this is clearly in the form of Eq.~\eqref{eq:bndry_stencil}. The boundary derivative stencils are well separated from the boundary (i.e. they do not use the values of the irregular cell itself). For the Poisson equation this is a requirement in order to achieve good conditioning of the discretized system as the volume fraction approaches zero \cite{Johansen1998}. 
+.. _Chap:ExplicitAdvectionDiffusion:
+   
+Explicit advection-diffusion
+____________________________
 
-Higher-order approximations to the flux are built in a similar way by including more interior cells. In our experience, the best convergence results come from using second order accurate ray-based boundary stencils, which requires 3 ghost cells in the general case. If we cannot find a stencil for computing the normal derivative by ray-casting, which can occur if there aren't enough cells available, we use quadrant-based least squares for computing the normal derivative (again, see \cite{Johansen1998} or \cite{ebchombo}).
+There is also functionality for aggregating explicit advection and diffusion advances. The reason for this is that the cut-cell overhead is only applied once on the combined flux :math:`\phi\mathbf{v} - D\nabla\phi` rather than on the individual fluxes. For non-split methods this leads to some performance improvement. The signature for this is precisely the same as for explicit advection only:
 
-We have also implemented Robin boundary conditions of the type
+.. code-block:: c++
+		
+   void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt)
 
-.. math::
-  a_1\phi + a_2\frac{\partial \phi}{\partial n} = a_3,
+where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF``. For example, in order to perform an advective advance over a time step :math:`\Delta t`, one would perform the following:
 
-which is an appropriate type of boundary condition for the radiative transfer equation. The normal derivative is given by :math:`\partial_n\phi = (a_3 - a_1\phi)/a_2` so that extrapolation of :math:`\phi` to the boundary is sufficient for imposing the boundary flux. Our way of doing this is simply to extrapolate :math:`\phi` to the boundary by using either least squares or Taylor-based stencils. 
+.. code-block:: c++
 
-On multifluid boundaries the boundary condition is neither Dirichlet, Neumann, or Robin. Multifluid boundaries are more complex since the state at the boundary is not known, but rather depends on the solution inside both fluids. Our approach follows that of \cite{Crockett2011} where we first compute stencils for the normal derivative on each side of the boundary,
+   // Assume that data holders divJ and phi are defined, and that 'solver' is
+   // a valid convection-diffusion reaction solver with defined velocities and
+   // diffusion coefficients
+   solver->compute_divJ(divJ, phi, 0.0); // Computes divF
+   data_ops:incr(phi, divJ, -dt);        // makes phi -> phi - dt*divJ
+   solver->make_non_negative(phi);	 // Redist negative mass in cut cells
 
-.. math::
-  \frac{\partial\phi}{\partial n_q} = w_0^q\phi_B + \sum_{{\mathbf{i}} \in \Psi_q}w_{{\mathbf{i}}}^q\phi_{{\mathbf{i}}},
+Often, time integrators have the option of using implicit or explicit diffusion. If the time-evolution is non-split (i.e. not using a Strang or Godunov splitting), the integrators will often call ``compute_divJ`` rather separately calling ``compute_divF`` and ``compute_divD``. If you had a split-step Godunov method, the above procedure for a forward Euler method for both parts would be:
 
-where :math:`q = p` or :math:`q=p^\prime` and :math:`\phi_B` is the solution on the surface centroid, and the stencil only reaches into one of the fluids. The linear nature of this equation allows one to obtain the surface state :math:`\phi_B` from the matching condition, which can then be eliminated in order to evaluate :math:`\partial\phi/\partial n_p`. 
+.. code-block:: c++
 
+   solver->compute_divF(divF, phi, 0.0); // Computes divF = div(n*phi)
+   data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
 
-.. _Chap:GMG:
+   solver->compute_divD(divD, phi);      // Computes divD = div(D*nabla(phi))
+   data_ops:incr(phi, divD, dt);         // makes phi -> phi + dt*divD
+   solver->make_non_negative(phi);	 // Redist negative mass in cut cells
 
-Geometric multigrid
--------------------
+However, the cut-cell redistribution dance (flux interpolation, hybrid divergence, and redistribution) would be performed twice. 
 
-To solve the discretized Helmholtz equation we use the geometric multigrid (GMG) solver template that ships with Chombo :cite:`ebchombo`. GMG involves smoothing of the solutions on progressively coarsened grids and is compatible with AMR. Smoothing on each level involves relaxation (e.g. Jacobi or Gauss-Seidel), which primarily reduces the magnitude of high freqency errors. Removal of low-frequency errors from the solution is much slower. Because of this, multigrid accelerates convergence by projecting the error onto a coarser grid where the error has, from the viewpoint of the grid, a shorter wavelength, making relaxation more efficient. Once a bottom grid level has been reached and an approximate bottom-level solution has been found, the error is prolongated onto a finer grid and relaxation is then re-applied. Geometric multigrid works best when the long wavelength modes of the fine grid operator are well represented as short wavelength modes on the coarse grid operator. For EB applications however, coarsening can result in the removal of finer geometric features so that the relaxation step cannot sufficiently dampen the error modes at which GMG is aimed at. Because of this, geometric multigrid for EB applications usually involve lower convergence rates between each multigrid cycle than it does for geometry-less domains and, moreover, typically involves dropping to the bottom solver sooner. Currently, we only support relaxation solvers as the bottom solver for multi-phase problems, whereas we use the built-in BiCGStab and GMRES solvers in Chombo :cite:`ebchombo` for single-phase elliptic problems. In the future, we would like to use algebraic multigrid from e.g. PETSc as a bottom solver in the V-cycle in order to enhance solver efficiency for very complex geometries. 
+.. _Chap:ImplicitDiffusion:
 
+Implicit diffusion
+__________________
+
+Occasionally, the use of implicit diffusion is necessary. The convection-diffusion-reaction solvers support two basic diffusion solves: Backward Euler and the Twizel-Gumel-Arigu (TGA) methods. The function signatures for these are
+
+.. code-block:: c++
+		
+   void advance_euler(EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const EBAMRCellData& src, const Real dt)
+   void advance_tga(  EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const EBAMRCellData& src, const Real dt)
+		
+   void advance_euler(EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const Real dt)
+   void advance_tga(  EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const Real dt)
+		
+where ``phiNew`` is the state at the new time :math:`t + \Delta t`, ``phiOld`` is the state at time :math:`t` and ``src`` is the source term which strictly speaking should be centered at time :math:`t + \Delta t` for the Euler update and at time :math:`t + \Delta t/2` for the TGA update. This may or may not be possible for your particular problem. 
+
+For example, performing a split step Godunov method for advection-diffusion is as simple as:
+
+.. code-block:: c++
+
+   solver->compute_divF(divF, phi, 0.0); // Computes divF = div(n*phi)
+   data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
+   solver->make_non_negative(phi);	 // Redist negative mass in cut cells
+		
+   data_ops::copy(phiOld, phi);            // Copy state
+   solver->advance_euler(phi, phiOld, dt); // Backward Euler diffusion solve
+
+.. _Chap:FieldSolver:
+   
+Field solver
+------------
+
+The `PlasmaC` field solver has a lot of supporting functionality, but essentially relies on only one critical function: Solving for the potential. This is done by calling a class-specific function
+
+.. code-block:: c++
+
+   bool solve(MFAMRCellData& phi, const MFAMRCellData& rho, const EBAMRIVData& sigma);
+
+where ``phi`` is the resulting potential that was computing with the space charge density ``rho`` and surface charge density ``sigma``.
+
+Currently, only one field solver is implemented and this solver uses a geometric multigrid method for solving for the potential. The solver supports three phases: electrodes, gas, and dielectric. Boundary conditions for the solver must be set by the user through an input script. 
+
+.. _Chap:RadiativeTransfer:
 
 Radiative transfer
 ------------------
+
+Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons. The solvers share a common interface but since diffusion RTE is deterministic and discrete Monte Carlo photons are stochastic, not all temporal integration methods will support both. The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach currently only solves for instantaneous photon transport. However, it would be straightforward to include transient photons. 
 
 Diffusion approximation
 _______________________
@@ -264,18 +332,24 @@ In the diffusion approximation, the radiative transport equation is
 
       \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
 
-which is called the Eddington approximation. The radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`. In the stationary case the Eddington approximation yields a Helmholtz equation
+which is called the Eddington approximation. The radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`. We do not currently support flux-limited diffusion radiative transfer. In the stationary case this yields a Helmholtz equation
 
 .. math::
 
    \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
 
-which is solved by using the multigrid methods discussed above. For fully transient radiative transport, we offer discretizations based on the backward Euler and TGA schemes as discussed above. 
+which is solved by a geometric multigrid method. The default boundary conditions are of the Robin type. For fully transient radiative transport, we offer discretizations based on the backward Euler and TGA schemes as discussed above. 
 
 Monte Carlo methods
 ___________________
 
 All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable). For example, in the diffusion approximation the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`, implying that photons can leak around boundaries. I.e. the diffusion approximation does not correctly describe shadows. It is possible to go beyond the diffusion approximation by also solving for higher-order moments like the radiative flux. While such methods can describe shadows, they contain other nonphysical features.
+
+.. figure:: figures/rte_comp.png
+   :width: 720px
+   :align: center
+
+   Qualitative comparison between predictions made with a diffusion RTE solver and a Monte Carlo RTE solver. Left: Source term: Middle: Solution computed in the diffusion approximation with homogeneous Robin boundary conditions. Right: Solution computed with a Monte Carlo method. 
 
 Monte Carlo methods are offered as an alternative to the diffusion approximation. Currently, we have a fully developed stationary Monte Carlo method and a transient method (which tracks photons in time) is also under development. Neither method currently includes scattering, although this would be comparatively straightforward to incorporate. As with the diffusion approximation, we do not include interaction with the plasma state in the time-of-flight of the photon. That is, we do not support e.g. scattering of a photon off electron densities. The reason for this design choice is that the velocity of a photon is much greater than the velocity of an electron, and we would have to rebin discrete photons in parallel several thousand times for each fluid advance. Thus, once a photon is created, it is invisible for the remaining solvers until it is absorbed at a point in the mesh.
 
@@ -284,7 +358,7 @@ Stationary Monte Carlo
 
 The stationary Monte Carlo method proceeds as follows.
 
-1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` where :math:`\mathcal{P}` is a Poisson distribution. The user may also choose to use pseudophotons rather than physical photons. Each photon is generated in the cell centroid :math:`\mathbf{x}_0` and given a random propagation direction :math:`\mathbf{n}`.
+1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` where :math:`\mathcal{P}` is a Poisson distribution. The user may also choose to use pseudophotons rather than physical photons by modifying photon weights. Each photon is generated in the cell centroid :math:`\mathbf{x}_0` and given a random propagation direction :math:`\mathbf{n}`.
 
 2. Draw a propagation distance :math:`r` by drawing random numbers from an exponential distribution :math:`p(r) = \kappa \exp\left(-\kappa r\right)`. The absorbed position of the photon is :math:`\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}`.
 
@@ -292,8 +366,11 @@ The stationary Monte Carlo method proceeds as follows.
 
 4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
 
-5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell). 
+5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).
+      
 
+The Monte Carlo methods use computational particles for advancing the photons in exactly the same way a Particle-In-Cell method would use them for advancing electrons. Although a computational photon would normally live on the finest grid level that overlaps its position, this is not practical for all particle deposition kernels. For example, for cloud-in-cell deposition schemes it is useful to have the restrict the interpolation kernels to the grid level where the particle lives. In Chombo-speak, we therefore use a buffer region that extends some cells from a refinement boundary where the photons are not allowed to live. Instead, photons in that buffer region are transferred to a coarser level, and their deposition clouds are first interpolated to the fine level before deposition on the fine level happens. Selecting a deposition scheme and adjusting the buffer region is done through an input script associated with the solver. 
+   
 Transient Monte Carlo
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -311,7 +388,17 @@ The transient Monte Carlo method is almost identical to the stationary method, e
 
 4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
 
-5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell). 
+5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).
+      
+.. _Chap:SigmaSolver:
 
+Surface charge solver
+---------------------
+In order to conserve charge on solid insulators, `PlasmaC` has a solver that is defined on the gas-dielectric interface where the surface charge is updated with the incoming flux
+
+.. math::
+   F_\sigma(\phi) = \sum_{\phi}q_\phi F_{\textrm{EB}}(\phi),
+
+where :math:`q_\phi` is the charge of a species :math:`\phi`. This ensures strong conservation on insulating surfaces.
 
 .. bibliography:: references.bib

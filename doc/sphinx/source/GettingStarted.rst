@@ -184,4 +184,15 @@ Output files should now appear in :file:`advection2d/plt`.
 Troubleshooting
 ---------------
 
-If the prerequisites are in place, compilation of `PlasmaC` is usually straightforward. However, due to dependencies on `Chombo` and HDF5, compilation can be a drag. Our experience is that if `Chombo` compiles, so does `PlasmaC`. For that reason we refer you to the `Chombo` user guide for troubleshooting. 
+If the prerequisites are in place, compilation of `PlasmaC` is usually straightforward. However, due to dependencies on `Chombo` and HDF5, compilation can be a drag. Our experience is that if `Chombo` compiles, so does `PlasmaC`. For that reason we refer you to the `Chombo` user guide for troubleshooting.
+
+Using this documentation
+------------------------
+
+This documentation was built using `reStructuredText` with `Sphinx`. If you want to build a PDF version of this documentation, please navigate to :file:`plasmac/doc/sphinx` and execute
+
+.. code-block:: bash
+   
+   make latexpdf
+
+A PDF version of this documentation named :file:`PlasmaC.pdf` will appear in :file:`plasma/doc/sphinx/build/latex`. 

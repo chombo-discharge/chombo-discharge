@@ -321,7 +321,11 @@ void cell_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_tags,
     const RealVect pos = a_origin + a_dx*RealVect(iv);
     
     // If position is inside any of the tagging boxes, we can refine
-    if(inside_tag_box(pos) && a_ebisbox.isRegular(iv)){
+    const bool inside = inside_tag_box(pos);
+    if(!inside){
+      a_coarsened_tags |= iv;
+    }
+    else if(inside && a_ebisbox.isRegular(iv)){
       
       // Build point-wise tracer fields
       Vector<Real>     tr(m_num_tracers); 
@@ -349,7 +353,11 @@ void cell_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_tags,
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
 
     // If position is inside any of the tagging boxes, we can refine
-    if(inside_tag_box(pos)){
+    const bool inside = inside_tag_box(pos);
+    if(!inside){
+      a_coarsened_tags |= vof.gridIndex();
+    }
+    else if(inside){
       
       // Build point-wise tracer fields
       Vector<Real>     tr(m_num_tracers); 

@@ -1,7 +1,7 @@
 .. _Chap:ClassAPI:
 
-Class API
-=========
+`PlasmaC` API
+=============
 
 Here, we discuss the base classes that makes up the foundation of `PlasmaC`.
 
@@ -457,7 +457,7 @@ The following is a full implementation of the :ref:`Chap:photon` class:
 By default, there are no input parameters available for the :ref:`Chap:photon` class, but the user will often want to include these, for example by modifying the absorption coefficient. Note that you are allowed to use a spatially varying absorption coefficient. Please see :ref:`Chap:MiniApplications` for how to pass input parameters into your classes.
 
 
-.. _Chap::time_stepper:
+.. _Chap:time_stepper:
 
 time_stepper
 ------------

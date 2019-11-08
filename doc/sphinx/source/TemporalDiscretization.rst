@@ -250,10 +250,10 @@ Deterministic CFD integrators are generally not suitable for stochastic ODEs. Fo
 
 For fluctuating hydrodynamics we are preparing several temporal integrators. Currently, we only support the Euler-Maruyama integrator which is first order accurate in time (although with an accurate advective integrator).
 
-.. _Chap:euler_maruyama
+.. _Chap:euler_maruyama:
 
 euler_maruyama
-_____________
+______________
 
 :ref:`Chap:euler_maruyama` implements the Euler-Maruyama method. This method is based on a semi-implicit Euler method with implicit diffusion. 
 

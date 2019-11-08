@@ -216,7 +216,7 @@ latex_documents = [
    u'Robert Marskar', 'manual'),
 ]
 
-numfig = True
+
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -280,3 +280,8 @@ extlinks = {'doxy': ('../doxygen/html/%s.html', None) }
 sys.path.append(os.path.abspath("/home/marskar/plasmac"))
 def setup(app):
     app.add_stylesheet('my_theme.css')
+
+numfig = True
+math_numfig = True
+numfig_secnum_depth = 2
+math_eqref_format = "Eq.{number}"
