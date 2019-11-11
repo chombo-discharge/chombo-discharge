@@ -29,12 +29,13 @@ void cdr_gdnv::parse_options(){
     pout() << m_name + "::parse_options" << endl;
   }
   
-  parse_domain_bc();    // Parses domain BC options
-  parse_mass_redist();  // Parses mass redistribution
-  parse_hybrid_div();   // Parses options for hybrid divergence
-  parse_slopelim();     // Parses slope limiter settings
-  parse_plot_vars();    // Parses plot variables
-  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parse_domain_bc();     // Parses domain BC options
+  parse_mass_redist();   // Parses mass redistribution
+  parse_hybrid_div();    // Parses options for hybrid divergence
+  parse_slopelim();      // Parses slope limiter settings
+  parse_plot_vars();     // Parses plot variables
+  parse_gmg_settings();  // Parses solver parameters for geometric multigrid
+  parse_extrap_source(); // Parse source term extrapolation for time-centering advective comps
 }
 
 void cdr_gdnv::parse_hybrid_div(){
@@ -58,6 +59,14 @@ void cdr_gdnv::parse_slopelim(){
   std::string str;
   pp.get("limit_slopes", str);
   m_slopelim = (str == "true") ? true : false;
+}
+
+void cdr_gdnv::parse_extrap_source(){
+  ParmParse pp(m_class_name.c_str());
+
+  std::string str;
+  pp.get("extrap_source", str);
+  m_extrap_source = (str == "true") ? true : false;
 }
 
 int cdr_gdnv::query_ghost() const {
@@ -397,15 +406,14 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_phase, 1);
   data_ops::set_value(scratch, 0.0);
-#if 0 // Development feature
-  if(a_extrap_dt > 0.0){
+  
+  if(a_extrap_dt > 0.0 && m_extrap_source){
     compute_divD(scratch, a_state);
     data_ops::incr(scratch, m_source, 1.0);
 
     m_amr->average_down(scratch, m_phase);
     m_amr->interp_ghost(scratch, m_phase);
   }
-#endif
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RefCountedPtr<EBAdvectLevelIntegrator>& leveladvect = m_level_advect[lvl];

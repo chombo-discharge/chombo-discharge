@@ -39,6 +39,7 @@ morrow_zheleznyak::morrow_zheleznyak(){
   parse_domain_bc();
   parse_ebbc();
   parse_reaction_settings();
+  parse_alpha_corr();
 
   // Init RNG
   if(m_seed < 0) {
@@ -140,14 +141,25 @@ void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
   Se = 0.0;
   Sp = 0.0;
   Sm = 0.0;
+
+  Real fcorr = 1.0;
+  if(m_alpha_corr){
+    const Real De        = compute_De(a_E);
+    const RealVect ve    = compute_ve(a_E);
+    const RealVect gradE = a_particle_gradients[m_nelec_idx];
+    
+    fcorr = 1.0 - (De*PolyGeom::dot(a_E, De*gradE))/((1.0 + Xe)*PolyGeom::dot(a_E, ve));
+    fcorr = Min(fcorr, 1.0);
+    fcorr = Max(0.0, fcorr);
+  }
   
   // Reaction 1: e + M => 2e + M+
-  const Real a1 = Xe*alpha*ve;
+  const Real a1 = Xe*alpha*fcorr*ve;
   Se += a1;
   Sp += a1;
   
   // Reaction 2: e + M   => M-
-  const Real a2 = Xe*eta*ve;
+  const Real a2 = Xe*eta*fcorr*ve;
   Se -= a2;
   Sm += a2;
 
@@ -884,6 +896,15 @@ void morrow_zheleznyak::parse_gas_params(){
   pp.get("gas_quenching_pressure",     m_pq);
   pp.get("excitation_efficiency",      m_exc_eff);
   pp.get("photoionization_efficiency", m_photoi_eff);
+}
+
+void morrow_zheleznyak::parse_alpha_corr(){
+  ParmParse pp("morrow_zheleznyak");
+
+  std::string str;
+  pp.get("use_alpha_correction", str);
+
+  m_alpha_corr = (str == "true") ? true : false;
 }
 
 void morrow_zheleznyak::parse_see(){

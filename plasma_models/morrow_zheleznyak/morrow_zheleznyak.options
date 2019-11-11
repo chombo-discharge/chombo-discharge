@@ -8,6 +8,7 @@ morrow_zheleznyak.gas_pressure                  = 1.0                   # Gas pr
 
 morrow_zheleznyak.mobile_ions                   = false                 # Turn off ion mobility (true/false)
 morrow_zheleznyak.diffusive_electrons           = true                  # Electron diffusion on/off
+morrow_zheleznyak.use_alpha_correction          = true                  # Soloviev et. al alpha correction
 
 morrow_zheleznyak.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
 morrow_zheleznyak.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes

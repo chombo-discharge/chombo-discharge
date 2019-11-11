@@ -23,8 +23,6 @@ cdr_tga::~cdr_tga(){
 
 }
 
-
-
 void cdr_tga::advance_euler(EBAMRCellData& a_new_state, const EBAMRCellData& a_old_state, const Real a_dt){
   CH_TIME("cdr_tga::advance_euler(no source)");
   if(m_verbosity > 5){

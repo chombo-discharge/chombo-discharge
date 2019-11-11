@@ -163,6 +163,11 @@ protected:
   bool m_slopelim;
 
   /*!
+    @brief Turn on/off source terms when time-extrapolating
+  */
+  bool m_extrap_source;
+
+  /*!
     @brief Parse options for setting the hybrid divergence
   */
   virtual void parse_hybrid_div();   
@@ -172,6 +177,10 @@ protected:
   */
   virtual void parse_slopelim();     // Parses slope limiter settings
 
+  /*!
+    ®brief Parse source term stuff
+  */
+  virtual void parse_extrap_source();
 };
 
 #endif

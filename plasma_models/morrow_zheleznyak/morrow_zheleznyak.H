@@ -90,6 +90,8 @@ public:
   Vector<int> m_wallbc; // Wall boundary conditions
 
   bool m_ssa; // Using SSA or not
+
+  bool m_alpha_corr; // Use alpha correction (Soloviev et. al paper)
   
   Real m_seed;
   Real m_cutoff_poisson;
@@ -191,6 +193,7 @@ public:
   void parse_ebbc();
   void parse_reaction_settings();
   void parse_initial_particles();
+  void parse_alpha_corr();
   void add_uniform_particles(List<Particle>& a_particles);
   void add_gaussian_particles(List<Particle>& a_particles);
 
