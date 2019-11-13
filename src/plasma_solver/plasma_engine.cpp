@@ -2302,9 +2302,9 @@ void plasma_engine::write_geometry(){
 }
 
 void plasma_engine::write_plot_file(){
-  CH_TIME("plasma_engine::new_write_plot_file");
+  CH_TIME("plasma_engine::write_plot_file");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::new_write_plot_file" << endl;
+    pout() << "plasma_engine::write_plot_file" << endl;
   }
 
   // Handle to solvers
@@ -2582,7 +2582,7 @@ void plasma_engine::write_checkpoint_file(){
   // Write stuff level by level
   const Real t0 = MPI_Wtime();
   if(m_verbosity >= 3){
-    pout() << "plasma_engine::new_write_checkpoint_file - writing checkpoint file..." << endl;
+    pout() << "plasma_engine::write_checkpoint_file - writing checkpoint file..." << endl;
   }
   for (int lvl = 0; lvl <= finest_chk_level; lvl++){
     handle_out.setGroupToLevel(lvl);
@@ -2625,7 +2625,7 @@ void plasma_engine::write_checkpoint_file(){
   }
   if(m_verbosity >= 3){
     const Real t_tot = t_amr + t_cdr + t_rte + t_poi + t_sig + t_pla;
-    pout() << "plasma_engine::new_write_checkpoint_file - writing checkpoint file... DONE! " << endl
+    pout() << "plasma_engine::write_checkpoint_file - writing checkpoint file... DONE! " << endl
 	   << "\t Total time    = " << t_tot << " seconds" << endl
 	   << "\t AMR time      = " << t_amr*100./t_tot << "%" << endl
       	   << "\t CDR time      = " << t_cdr*100./t_tot << "%" << endl
