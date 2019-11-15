@@ -11,3 +11,4 @@ air3_mc8_tagger.coarsen_curvature = 2.0          # Curvature coarsening
 air3_mc8_tagger.refine_curvature  = 2.0          # Curvature refinement
 air3_mc8_tagger.refine_alpha      = 0.75         # Set alpha coarsening
 air3_mc8_tagger.coarsen_alpha     = 1.5          # Set alpha fudge refinement
+air3_mc8_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth

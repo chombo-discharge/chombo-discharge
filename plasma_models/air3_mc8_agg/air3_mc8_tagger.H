@@ -84,5 +84,10 @@ protected:
     @brief Threshold for ionization coarsening
   */
   Real m_coar_alpha;
+
+  /*!
+    @brief Set coarsening level
+  */
+  int m_max_coarsen_level;
 };
 #endif
