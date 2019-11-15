@@ -11,6 +11,9 @@
 #include "network_kinetics.H"
 #include "lookup_table.H"
 
+#include <random>
+#include <chrono>
+
 class air3_mc8_agg : public network_kinetics {
 public:
 

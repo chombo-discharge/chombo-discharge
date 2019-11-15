@@ -10,7 +10,6 @@ def copy_dependencies(args):
     kin_name = args.streamer_home + "/plasma_models" + "/" + args.plasma_kinetics + "/" + args.plasma_kinetics
 
     if os.path.exists(kin_name + ".inc"): # Read file and copy all listed dependencies
-        print kin_name + ".inc"
         f = open(kin_name + ".inc", 'r')
         incf = f.readline();
         while incf:

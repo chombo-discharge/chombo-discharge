@@ -2,6 +2,8 @@
 #define _AIR3_MC8_AGG_SPECIES_
 
 #include "air3_mc8_agg.H"
+
+#include <chrono>
 #include <random>
 
 class air3_mc8_agg::electron : public species {
