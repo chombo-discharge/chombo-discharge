@@ -64,7 +64,7 @@ air3_mc8_agg.c4v0_exc_eff         = 0.08      # Excitation probability per ioniz
 air3_mc8_agg.c4v1_exc_eff         = 0.0034    # Excitation probability per ionization event
 air3_mc8_agg.b1v1_exc_eff         = 0.0051    # Excitation probability per ionization event
 
-air3_mc8_agg.quenching_pressure   = 0.04      # Quenching pressure
+air3_mc8_agg.quenching_pressure   = 0.04      # Quenching pressure (in atm)
 
 air3_mc8_agg.c4v0_X1v0_photoi_eff = 0.23      # Photoionization efficiency
 air3_mc8_agg.c4v0_X1v1_photoi_eff = 0.77      # Photoionization efficiency
@@ -76,7 +76,7 @@ air3_mc8_agg.b1v1_X1v0_photoi_eff = 0.72      # Photoionization efficiency
 air3_mc8_agg.b1v1_X1v1_photoi_eff = 0.69      # Photoionization efficiency
 
 # ----------------------------------------------------------------------------------------------------	
-# Radiative transitions Beers length. These are given per bar. Converted automatically if you
+# Radiative transitions Beers length. These are given per atm. Converted automatically if you
 # change the pressure. 
 # ----------------------------------------------------------------------------------------------------		
 air3_mc8_agg.c4v0_X1v0_beer       = 19E-6    # Beer's length per bar

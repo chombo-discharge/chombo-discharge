@@ -72,6 +72,7 @@ public:
   virtual void parse_memrep();
   virtual void parse_output_directory();
   virtual void parse_geo_refinement();
+  virtual void parse_coarsen();
   virtual void parse_verbosity();
   virtual void parse_output_file_names();
   virtual void parse_output_intervals();
@@ -433,6 +434,11 @@ protected:
   Real m_wallclock2;
 
   /*!
+    @brief Allow grid coarsening
+  */
+  bool m_allow_coarsen;
+
+  /*!
     @brief Use recursive regrid (true) or regrid all levels at once (false)
   */
   bool m_recursive_regrid;
@@ -751,9 +757,14 @@ protected:
   */
   virtual void write_ranks(EBAMRCellData& a_output, int& a_comp);
 
-    /*!
+  /*!
     @brief Write space charge current to output
   */
   virtual void write_J(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Return the finest tag level
+  */
+  virtual int get_finest_tag_level(const EBAMRTags& a_cell_tags) const;
 };
 #endif

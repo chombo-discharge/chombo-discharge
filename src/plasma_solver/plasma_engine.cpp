@@ -63,6 +63,7 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   parse_regrid();
   parse_restart();
   parse_memrep();
+  parse_coarsen();
   parse_output_directory();
   parse_output_file_names();
   parse_verbosity();
@@ -1449,6 +1450,23 @@ void plasma_engine::parse_num_plot_ghost(){
   m_num_plot_ghost = (m_num_plot_ghost > 3) ? 3 : m_num_plot_ghost;
 }
 
+void plasma_engine::parse_coarsen(){
+    CH_TIME("plasma_engine::parse_coarsen");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_coarsen" << endl;
+  }
+
+  std::string str;
+  ParmParse pp("plasma_engine");
+  pp.get("allow_coarsening", str);
+  if(str == "true"){
+    m_allow_coarsen = true;
+  }
+  else if(str == "false"){
+    m_allow_coarsen = false;
+  }
+}
+
 void plasma_engine::parse_grow_tags(){
   CH_TIME("plasma_engine::parse_grow_tags");
   if(m_verbosity > 5){
@@ -2167,6 +2185,35 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
 
 }
 
+int plasma_engine::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
+  CH_TIME("plasma_engine::get_finest_tag_level");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::get_finest_tag_level" << endl;
+  }
+
+  int finest_tag_level = -1;
+  for (int lvl = 0; lvl < a_cell_tags.size(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const DenseIntVectSet& tags = (*a_cell_tags[lvl])[dit()];
+
+      if(!tags.isEmpty()){
+	finest_tag_level = Max(finest_tag_level, lvl);
+      }
+    }
+  }
+
+#ifdef CH_MPI
+  int finest;
+  MPI_Allreduce(&finest_tag_level, &finest, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+
+  finest_tag_level = finest;
+#endif
+
+  return finest_tag_level;
+}
+
 bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
   CH_TIME("plasma_engine::tag_cells");
   if(m_verbosity > 5){
@@ -2182,6 +2229,7 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
     got_new_tags = m_celltagger->tag_cells(a_cell_tags);
   }
 
+
   // Gather tags from a_tags
   for (int lvl = 0; lvl <= finest_level; lvl++){
     for (DataIterator dit = a_cell_tags[lvl]->dataIterator(); dit.ok(); ++dit){
@@ -2195,10 +2243,12 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
     }
   }
 
-  // Add geometric tags. 
-  for (int lvl = 0; lvl < finest_level; lvl++){
-    //    a_all_tags[lvl].grow(m_grow_tags);
-    a_all_tags[lvl] |= m_geom_tags[lvl];
+  // Add geometric tags.
+  int tag_level = get_finest_tag_level(a_cell_tags);
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    if(lvl <= tag_level && m_allow_coarsen){
+      a_all_tags[lvl] |= m_geom_tags[lvl];
+    }
   }
 
 #if 0 // Debug - if this fails, you have tags on m_amr->m_max_amr_depth and something has gone wrong. 

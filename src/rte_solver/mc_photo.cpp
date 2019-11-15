@@ -421,13 +421,13 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   List<photon>& base_cache = m_photocache[0]->outcast();
   base_cache.clear();
   for (int lvl = base_level; lvl <= a_old_finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      for (ListIterator<photon> li((*m_photons[lvl])[dit()].listItems()); li.ok(); ){
+    for (DataIterator dit = m_photocache[lvl]->dataIterator(); dit.ok(); ++dit){
+      for (ListIterator<photon> li((*m_photocache[lvl])[dit()].listItems()); li.ok(); ){
 	m_photocache[base_level]->outcast().transfer(li);
       }
     }
   }
+    
 
 #if 0 // Debug, count number of photons
   long long num_posttransfer = 0;
