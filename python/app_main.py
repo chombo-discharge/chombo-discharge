@@ -64,9 +64,12 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Get potential from input script \n")
+    mainf.write("  std::string basename; \n");
     mainf.write("  {\n")
     mainf.write('     ParmParse pp("' + args.app_name + '");\n')
     mainf.write('     pp.get("potential", g_potential);\n')
+    mainf.write('     pp.get("basename",  basename);\n')
+    mainf.write('     setPoutBaseName(basename);\n')
     mainf.write("  }\n")
 
     mainf.write("\n")

@@ -12,6 +12,7 @@ def write_template(args):
     optf.write('# POTENTIAL CURVE\n')
     optf.write("# ====================================================================================================\n")
     optf.write(args.app_name + ".potential = 1\n")
+    optf.write(args.app_name + ".basename  = pout\n")
     optf.write('\n')
     options_files = [args.streamer_home + "/src/geometry/physical_domain.options", \
                      args.streamer_home + "/src/amr_mesh/amr_mesh.options", \
