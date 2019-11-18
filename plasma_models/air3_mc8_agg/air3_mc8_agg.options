@@ -20,6 +20,7 @@ air3_mc8_agg.frac_O2             = 0.8                         # O2 fraction
 # ----------------------------------------------------------------------------------------------------	
 # Transport properties
 # ----------------------------------------------------------------------------------------------------
+air3_mc8_agg.use_alpha_corr      = false                       # Use alpha correction due to Soloviev
 air3_mc8_agg.mobile_electrons    = true                        # Mobile electrons or not
 air3_mc8_agg.diffusive_electrons = true                        # Diffusive electrons or not
 air3_mc8_agg.mobile_ions         = false                       # Mobile ions or not

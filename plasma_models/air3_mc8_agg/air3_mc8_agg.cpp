@@ -141,6 +141,10 @@ void air3_mc8_agg::parse_alpha(){
   m_e_alpha.scale_x(m_N*units::s_Td);
   m_e_alpha.scale_y(m_N); 
   m_e_alpha.make_uniform(m_uniform_entries);
+
+  std::string str;
+  pp.get("use_alpha_corr",str);
+  m_use_alpha_corr = (str == "true") ? true : false;
 }
 
 void air3_mc8_agg::parse_eta(){
@@ -415,11 +419,24 @@ void air3_mc8_agg::advance_reaction_network(Vector<Real>&          a_particle_so
   // R4: e + M -> c4v1        alpha*Xe*exc_eff(c4v1)
   // R5: e + M -> b1v1        alpha*Xe*exc_eff(b1v1)
   const Real volume = pow(a_dx, SpaceDim);
-
-  // Ionization and attachment coefficients
-  const Real alpha  = m_e_alpha.get_entry(a_E.vectorLength());
-  const Real eta    = m_e_eta.get_entry(a_E.vectorLength());
   const Real ve     = (a_E*m_e_mobility.get_entry(a_E.vectorLength())).vectorLength();
+
+  // alpha correction
+  Real fcorr = 1.0;
+  if(m_use_alpha_corr){
+    const RealVect Eunit = a_E/a_E.vectorLength();
+    const Real De        = m_e_diffco.get_entry(a_E.vectorLength());
+    const RealVect gNe   = a_particle_gradients[m_elec_idx];
+    
+    fcorr = 1.0 - PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
+    fcorr = Min(fcorr, 1.0);
+    fcorr = Max(0.0, fcorr);
+  }
+  
+  // Ionization and attachment coefficients
+  const Real alpha  = m_e_alpha.get_entry(a_E.vectorLength())*fcorr;
+  const Real eta    = m_e_eta.get_entry(a_E.vectorLength());
+
 
   const Real R1 = alpha*ve*a_particle_densities[m_elec_idx];
   const Real R2 = eta*ve*a_particle_densities[m_elec_idx];

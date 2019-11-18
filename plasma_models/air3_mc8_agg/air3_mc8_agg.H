@@ -102,6 +102,7 @@ protected:
 
   Vector<int> m_wallbc; // Wall boundary conditions
 
+  bool m_use_alpha_corr;      // Use alpha correction due to Soloviev et. al
   bool m_mobile_electrons;    // Mobile electrons or not
   bool m_mobile_ions;         // Mobile ions or not
   bool m_diffusive_ions;      // Diffusive ions or not
