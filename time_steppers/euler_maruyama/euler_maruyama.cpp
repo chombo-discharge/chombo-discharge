@@ -59,9 +59,15 @@ void euler_maruyama::parse_diffusion(){
   pp.get("diffusion", str);
   if(str == "explicit"){
     m_implicit_diffusion = false;
+    m_whichDiffusion = whichDiffusion::Explicit;
   }
   else if(str == "implicit"){
     m_implicit_diffusion = true;
+    m_whichDiffusion = whichDiffusion::Implicit;
+  }
+  else if(str == "auto"){
+    m_implicit_diffusion = true;
+    m_whichDiffusion = whichDiffusion::Automatic;
   }
   else{
     MayDay::Abort("euler_maruayama::parse_diffusion - unknown diffusion type requested");
@@ -764,14 +770,6 @@ void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::cfl;
   }
 
-  if(!m_implicit_diffusion){
-    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
-    if(dt_diffusion < dt){
-      dt = dt_diffusion;
-      a_timecode = time_code::diffusion;
-    }
-  }
-
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
@@ -786,6 +784,24 @@ void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   if(dt > m_max_dt){
     dt = m_max_dt;
     a_timecode = time_code::hardcap;
+  }
+
+  // Diffusion step step constraint. If diffusion dt is the shortest scale, 
+  if(m_whichDiffusion == whichDiffusion::Explicit){ // Have to accept time step constraint
+    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
+    if(dt_diffusion < dt){
+      dt = dt_diffusion;
+      a_timecode = time_code::diffusion;
+    }
+  }
+  else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit
+    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
+    if(dt_diffusion < dt){ // Use implicit diffusion
+      m_implicit_diffusion = true;
+    }
+    else{ // Use explicit diffusion
+      m_implicit_diffusion = false;
+    }
   }
 
   a_dt = dt;

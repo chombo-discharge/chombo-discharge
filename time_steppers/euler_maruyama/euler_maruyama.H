@@ -40,6 +40,12 @@ public:
 
 protected:
 
+  enum whichDiffusion{
+    Explicit  = 0,
+    Implicit  = 1,
+    Automatic = 2
+  };
+
   // Scratch storage
   Vector<RefCountedPtr<cdr_storage> > m_cdr_scratch;
   Vector<RefCountedPtr<rte_storage> > m_rte_scratch;
@@ -50,6 +56,8 @@ protected:
   bool m_debug;
   bool m_floor;
   bool m_implicit_diffusion;
+
+  whichDiffusion m_whichDiffusion;
 
   // Get functions for storage
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
