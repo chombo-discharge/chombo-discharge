@@ -16,7 +16,7 @@
 
 class air_eed : public network_kinetics {
 public:
-
+  
   class eed;
   class electron;
   class M_plus;
@@ -84,14 +84,18 @@ public:
 
   Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
-  Real compute_alpha_eff(const RealVect a_E) const;
-
+  Real compute_alpha_eff(const Real a_energy) const;
+  Real compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const;
+  Real compute_electron_temperature(const Real a_electron_energy) const;
+  
 protected:
 
   static std::string s_bolsig_mobility;
   static std::string s_bolsig_diffco;
   static std::string s_bolsig_alpha;
   static std::string s_bolsig_eta;
+  static std::string s_bolsig_elastic;
+  static std::string s_bolsig_inelastic;
 
   std::string m_transport_file;
 
@@ -100,6 +104,7 @@ protected:
   lookup_table m_e_diffco;
   lookup_table m_e_alpha;
   lookup_table m_e_eta;
+  lookup_table m_e_losses;
 
   Vector<int> m_wallbc; // Wall boundary conditions
 
@@ -113,6 +118,7 @@ protected:
 
   Real m_min_energy; // Minium energy that is tracked
   Real m_max_energy; // Maximum energy that is tracked
+
 
   // Random number generator and some distributions
   std::mt19937_64*                      m_rng; 
@@ -133,6 +139,9 @@ protected:
   Real m_townsend2_dielectric;          // 2nd Townsend coefficient on dielectrics
   Real m_electrode_quantum_efficiency;  // Quantum yield on electrodes
   Real m_dielectric_quantum_efficiency; // Quantum yield on dielectircs
+
+  Real m_photoi_gain;     // Electron energy when appearing through photoionization
+  Real m_ionization_loss; // Equal to 15.6*frac(N2) + 12.06*frac(O2). Hard-coded. 
   
   Real m_N;      // Neutral number density
   Real m_p;      // Pressure
@@ -180,6 +189,7 @@ protected:
   void parse_electron_diffco();
   void parse_alpha();
   void parse_eta();
+  void parse_losses();
   void parse_photoi();
   void parse_see();
   void parse_domain_bc();

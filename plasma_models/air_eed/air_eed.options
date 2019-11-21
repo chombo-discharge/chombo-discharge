@@ -8,7 +8,7 @@
 air_eed.transport_file      = transport_data.txt          # Transport file
 air_eed.min_energy          = 0.5                         # Minimum energy that will be used in sims
 air_eed.max_energy          = 20.0                        # Maximum energy that will be used in sims
-air_eed.uniform_tables      = 100	                  # Converted # of points for lookup tables
+air_eed.uniform_tables      = 200	                  # Converted # of points for lookup tables
 
 # ----------------------------------------------------------------------------------------------------	
 # Gas composition. This should match your BOLSIG stuff!
@@ -28,6 +28,7 @@ air_eed.diffusive_electrons = true                        # Diffusive electrons 
 air_eed.mobile_ions         = false                       # Mobile ions or not
 air_eed.diffusive_ions      = false                       # Diffusive ions or not
 air_eed.ion_mobility        = 2.E-4                       # Ion mobility
+air_eed.photoi_gain         = 1                           # Gain (eV) through Y + M -> e + M+
 
 # ----------------------------------------------------------------------------------------------------
 # RNG stuff

@@ -87,6 +87,13 @@ void lookup_table::operator-=(const lookup_table& a_table){
   }
 }
 
+void lookup_table::operator=(const lookup_table& a_table){
+  m_num_entries = a_table.m_num_entries;
+  m_dx = a_table.m_dx;
+  m_x = a_table.m_x;
+  m_y = a_table.m_y;
+}
+
 Real lookup_table::get_entry(const Real a_x) const {
 
   Real value;

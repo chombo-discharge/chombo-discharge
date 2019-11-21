@@ -20,33 +20,47 @@
 #include <PolyGeom.H>
 
 // Bulk stuff
-std::string air_eed::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";
-std::string air_eed::s_bolsig_diffco   = "Energy (eV)	Diffusion coefficient *N (1/m/s)";
-std::string air_eed::s_bolsig_alpha    = "Energy (eV)	Townsend ioniz. coef. alpha/N (m2)";
-std::string air_eed::s_bolsig_eta      = "Energy (eV)	Townsend attach. coef. eta/N (m2)";
+std::string air_eed::s_bolsig_mobility  = "Energy (eV)	Mobility *N (1/m/V/s)";
+std::string air_eed::s_bolsig_diffco    = "Energy (eV)	Diffusion coefficient *N (1/m/s)";
+std::string air_eed::s_bolsig_alpha     = "Energy (eV)	Townsend ioniz. coef. alpha/N (m2)";
+std::string air_eed::s_bolsig_eta       = "Energy (eV)	Townsend attach. coef. eta/N (m2)";
+std::string air_eed::s_bolsig_elastic   = "Energy (eV)	Elastic power loss /N (eV m3/s)";
+std::string air_eed::s_bolsig_inelastic = "Energy (eV)	Inelastic power loss /N (eV m3/s)";
 
-std::string air_eed::s_C2  = "C2    N2    Excitation    0.020 eV";
-std::string air_eed::s_C3  = "C3    N2    Excitation    0.29 eV";
-std::string air_eed::s_C4  = "C4    N2    Excitation    0.29 eV";
-std::string air_eed::s_C5  = "C5    N2    Excitation    0.59 eV";
 
 air_eed::air_eed() {
   instantiate_species();
-
-  parse_transport_file(); 
+  pout() << "done insta species" << endl;
+  parse_transport_file();
+  pout() << "done insta transport file" << endl;
   parse_transport();
+  pout() << "done parse transpot" << endl;
   parse_gas_params();
+  pout() << "done parse gasparams" << endl;
   parse_electron_mobility();
+  pout() << "done parse emob" << endl;
   parse_electron_diffco();
+  pout() << "done parse diffco" << endl;
   parse_alpha();
+  pout() << "done parse alpha" << endl;
   parse_eta();
+  pout() << "done parse eta" << endl;
+  parse_losses();
+  pout() << "done parse losses" << endl;
   parse_photoi();
+  pout() << "done parse photoi" << endl;
   parse_see();
+  pout() << "done parse see" << endl;
   parse_domain_bc();
+  pout() << "done parse dombc" << endl;
 
   init_rng();                 // Initialize random number generators
+  pout() << "done init rng" << endl;
   
   parse_initial_particles();  // Parse initial particles
+  pout() << "done init particles" << endl;
+
+  MayDay::Abort("stop");
 }
 
 air_eed::~air_eed() {
@@ -107,6 +121,7 @@ void air_eed::parse_transport(){
   pp.get("diffusive_ions", str);      m_diffusive_ions      = (str == "true") ? true : false;
   pp.get("mobile_ions", str);         m_mobile_ions         = (str == "true") ? true : false;
   pp.get("ion_mobility", m_ion_mobility);
+  pp.get("photoi_gain", m_photoi_gain);
 
   m_ion_diffusion = m_ion_mobility*(units::s_kb*m_T)/units::s_Qe;
 }
@@ -128,7 +143,6 @@ void air_eed::parse_electron_mobility(){
   ParmParse pp("air_eed");
 
   read_file_entries(m_e_mobility, air_eed::s_bolsig_mobility);
-  m_e_mobility.scale_x(m_N*units::s_Td);
   m_e_mobility.scale_y(1./m_N); 
   m_e_mobility.make_uniform(m_uniform_entries);
 }
@@ -137,29 +151,42 @@ void air_eed::parse_electron_diffco(){
   ParmParse pp("air_eed");
   
   read_file_entries(m_e_diffco, air_eed::s_bolsig_diffco);
-  m_e_diffco.scale_x(m_N*units::s_Td);
-  m_e_diffco.scale_y(1./m_N); 
+  m_e_diffco.scale_y(1./m_N);
   m_e_diffco.make_uniform(m_uniform_entries);
 }
 
 void air_eed::parse_alpha(){
   ParmParse pp("air_eed");
   read_file_entries(m_e_alpha, air_eed::s_bolsig_alpha);
-  m_e_alpha.scale_x(m_N*units::s_Td);
   m_e_alpha.scale_y(m_N); 
   m_e_alpha.make_uniform(m_uniform_entries);
-
-  std::string str;
-  pp.get("use_alpha_corr",str);
-  m_use_alpha_corr = (str == "true") ? true : false;
 }
 
 void air_eed::parse_eta(){
   ParmParse pp("air_eed");
   read_file_entries(m_e_eta, air_eed::s_bolsig_eta);
-  m_e_eta.scale_x(m_N*units::s_Td);
+
   m_e_eta.scale_y(m_N); 
   m_e_eta.make_uniform(m_uniform_entries);
+}
+
+void air_eed::parse_losses(){
+  ParmParse pp("air_eed");
+
+  // First read elastic losses, then inelastic losses
+  lookup_table elastic_losses;
+  lookup_table inelastic_losses;
+  read_file_entries(elastic_losses,   air_eed::s_bolsig_elastic);
+  read_file_entries(inelastic_losses, air_eed::s_bolsig_inelastic);
+
+  m_e_losses = elastic_losses;
+  m_e_losses.add_table(inelastic_losses, 1.0);
+
+  m_e_losses.scale_y(m_N);
+
+  m_ionization_loss = m_N2frac*15.6 + m_O2frac*12.06;
+
+  //  m_e_losses.dump_table();
 }
 
 void air_eed::parse_photoi(){
@@ -206,16 +233,18 @@ void air_eed::init_rng(){
 }
 
 void air_eed::instantiate_species(){
-  m_num_species = 3;
+  m_num_species = 4;
   m_num_photons = 1;
 
-  m_elec_idx = 0;
-  m_plus_idx = 1;
-  m_minu_idx = 2;
+  m_eed_idx  = 0;
+  m_elec_idx = 1;
+  m_plus_idx = 2;
+  m_minu_idx = 3;
 
   m_photon_idx = 0;
 
   m_species.resize(m_num_species);
+  m_species[m_eed_idx]   = RefCountedPtr<species>      (new air_eed::eed());
   m_species[m_elec_idx]  = RefCountedPtr<species>      (new air_eed::electron());
   m_species[m_plus_idx]  = RefCountedPtr<species>      (new air_eed::M_plus());
   m_species[m_minu_idx]  = RefCountedPtr<species>      (new air_eed::M_minus());
@@ -226,11 +255,9 @@ void air_eed::instantiate_species(){
 
 void air_eed::parse_initial_particles(){
 
-
-
   // Get some parameters from the input script
   Vector<Real> vec;
-  Real weight, uniform_pairs, rad_pairs, gaussian_pairs;
+  Real weight, uniform_pairs, rad_pairs, gaussian_pairs, init_energy;
   RealVect center_pairs;
 
   ParmParse pp("air_eed");
@@ -238,6 +265,7 @@ void air_eed::parse_initial_particles(){
   pp.get("uniform_pairs",              uniform_pairs);
   pp.get("gaussian_pairs",             gaussian_pairs);
   pp.get("gaussian_pairs_radius",      rad_pairs);
+  pp.get("init_energy",                init_energy);
   pp.getarr("gaussian_pairs_center",   vec, 0, SpaceDim); center_pairs   = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   
   List<Particle> electron_ion_pairs;
@@ -245,8 +273,17 @@ void air_eed::parse_initial_particles(){
   // Add various types of particles
   add_uniform_particles(electron_ion_pairs,  round(uniform_pairs),    weight);
   add_gaussian_particles(electron_ion_pairs, round(gaussian_pairs),   weight, rad_pairs,   center_pairs);
+
+  // Give electrons some energies
+  List<Particle> electron_energies = electron_ion_pairs;
+  for (ListIterator<Particle> li(electron_energies); li.ok(); ){
+    Particle& p = li();
+    Real& mass = p.mass();
+    mass *= init_energy;
+  }
   
   // Set initial particles
+  m_species[m_eed_idx]->get_initial_particles()  = electron_energies;
   m_species[m_elec_idx]->get_initial_particles() = electron_ion_pairs;
   m_species[m_plus_idx]->get_initial_particles() = electron_ion_pairs;
 
@@ -299,10 +336,10 @@ void air_eed::add_uniform_particles(List<Particle>& a_particles, const int a_num
 }
 
 void air_eed::add_gaussian_particles(List<Particle>& a_particles,
-					  const int       a_num,
-					  const Real      a_weight,
-					  const Real      a_rad,
-					  const RealVect  a_center){
+				     const int       a_num,
+				     const Real      a_weight,
+				     const Real      a_rad,
+				     const RealVect  a_center){
   m_gauss = std::normal_distribution<Real>(0., a_rad);
 
   for (int i = 0; i < a_num; i++){
@@ -420,28 +457,17 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
 					    const Real             a_dt,
 					    const Real             a_time,
 					    const Real             a_kappa) const{
-  // R1: e + M -> e + e + M+  alpha*Xe
-  // R2: e + M -> M-+         eta*Xe
-  // R3: e + M -> c4v0        alpha*Xe*exc_eff(c4v0)
-  // R4: e + M -> c4v1        alpha*Xe*exc_eff(c4v1)
-  // R5: e + M -> b1v1        alpha*Xe*exc_eff(b1v1)
+  // R1: e + M -> e + e + M+  alpha*Xe. Loss is m_ionization_loss, which is a bulk avlue
+  // R2: e + M -> M-+         eta*Xe. Loss is equal to the mean energy.
+  // R3: e + M -> e + M       "Friction" loss. Tabulated with bulk value
+  // R4: e + M -> e + M + Y   No loss, taken care of through friction losses
+  // R5: Y + M -> e + M+      Energy gain equal to input value (1eV is fine)
+  
   const Real volume = pow(a_dx, SpaceDim);
   const Real ve     = (a_E*m_e_mobility.get_entry(a_E.vectorLength())).vectorLength();
-
-  // alpha correction
-  Real fcorr = 1.0;
-  if(m_use_alpha_corr){
-    const RealVect Eunit = a_E/a_E.vectorLength();
-    const Real De        = m_e_diffco.get_entry(a_E.vectorLength());
-    const RealVect gNe   = a_particle_gradients[m_elec_idx];
-    
-    fcorr = 1.0 - PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
-    fcorr = Min(fcorr, 1.0);
-    fcorr = Max(0.0, fcorr);
-  }
   
   // Ionization and attachment coefficients
-  const Real alpha  = m_e_alpha.get_entry(a_E.vectorLength())*fcorr;
+  const Real alpha  = m_e_alpha.get_entry(a_E.vectorLength());
   const Real eta    = m_e_eta.get_entry(a_E.vectorLength());
 
 
@@ -513,19 +539,38 @@ int air_eed::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   return value;
 }
 
+Real air_eed::compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const {
+  return a_electron_energy/(1.0 + a_electron_density);
+}
+
+Real air_eed::compute_electron_temperature(const Real a_electron_energy) const {
+  return Max(300., 2.0*(a_electron_energy*units::s_Qe)/(3.0*units::s_kb));  // Kelvin
+}
+
+Real air_eed::compute_alpha_eff(const Real a_energy) const{
+ const Real alpha = m_e_alpha.get_entry(a_energy);
+ const Real eta   = m_e_eta.get_entry(a_energy);
+
+ return (alpha-eta);
+}
+
 
 Vector<Real> air_eed::compute_cdr_diffusion_coefficients(const Real         a_time,
-							      const RealVect     a_pos,
-							      const RealVect     a_E,
-							      const Vector<Real> a_cdr_densities) const {
+							 const RealVect     a_pos,
+							 const RealVect     a_E,
+							 const Vector<Real> a_cdr_densities) const {
 
+  const Real electron_energy_density = a_cdr_densities[m_eed_idx];
+  const Real electron_density        = a_cdr_densities[m_elec_idx];
+  const Real electron_energy         = compute_electron_energy(electron_energy_density, electron_density);
+  
   Vector<Real> dco(m_num_species, 0.0);
-  dco[m_elec_idx] = m_e_diffco.get_entry(a_E.vectorLength());
+  dco[m_eed_idx]  = m_e_diffco.get_entry(electron_energy)*5.0/3.0;
+  dco[m_elec_idx] = m_e_diffco.get_entry(electron_energy);
   dco[m_plus_idx] = m_ion_diffusion;
   dco[m_minu_idx] = m_ion_diffusion;
   
   return dco;
-
 }
   
 Vector<RealVect> air_eed::compute_cdr_velocities(const Real         a_time,
@@ -533,8 +578,13 @@ Vector<RealVect> air_eed::compute_cdr_velocities(const Real         a_time,
 						      const RealVect     a_E,
 						      const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_num_species, RealVect::Zero);
+  
+  const Real electron_energy_density = a_cdr_densities[m_eed_idx];
+  const Real electron_density        = a_cdr_densities[m_elec_idx];
+  const Real electron_energy         = compute_electron_energy(electron_energy_density, electron_density);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(a_E.vectorLength());
+  vel[m_eed_idx]  = -a_E*m_e_mobility.get_entry(electron_energy);
+  vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(electron_energy);
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;
   
@@ -620,23 +670,9 @@ Vector<Real> air_eed::compute_cdr_fluxes(const Real         a_time,
 					      const Real         a_quantum_efficiency) const{
   Vector<Real> fluxes(m_num_species, 0.0);
 
-  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
-  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
-
-  // Switch for setting drift flux to zero for charge species
-  Vector<Real> aj(m_num_species, 0.0);
-  for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
-      aj[i] = 1.0;
-    }
-    else {
-      aj[i] = 0.0;
-    }
-  }
-
   // Drift outflow for now
   for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
+    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
   }
 
   return fluxes;
@@ -646,8 +682,4 @@ Real air_eed::initial_sigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
 }
 
-Real air_eed::compute_alpha_eff(const RealVect a_E) const{
-  const Real alpha = m_e_alpha.get_entry(a_E.vectorLength());
-  const Real eta   = m_e_eta.get_entry(a_E.vectorLength());
-  return (alpha-eta);
-}
+

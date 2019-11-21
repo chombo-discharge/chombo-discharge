@@ -32,7 +32,7 @@ public:
   /*!
     @brief Destructor
   */
-  virtual ~lookup_table();
+  ~lookup_table();
 
   /*!
     @brief Make the table into a uniform table with the number of entries
@@ -88,6 +88,11 @@ public:
     @brief Subtract a table from this one
   */
   void operator-=(const lookup_table& a_table);
+
+  /*!
+    @brief Assignment operator
+  */
+  void operator=(const lookup_table& a_table);
 
 protected:
 
