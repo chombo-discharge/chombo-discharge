@@ -38,6 +38,12 @@ void lookup_table::add_entry(const Real& a_x, const Real& a_y){
   }
 }
 
+void lookup_table::add_table(const lookup_table& a_otherTable, const Real a_scale){
+  for (int i = 0; i < m_x.size(); i++){
+    m_y[i] += a_scale*a_otherTable.get_entry(m_x[i]);
+  }
+}
+
 void lookup_table::scale_x(const Real& a_scale){
   for (int i = 0; i < m_x.size(); i++){
     m_x[i] *= a_scale;

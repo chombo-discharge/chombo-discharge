@@ -55,6 +55,11 @@ public:
   virtual void add_entry(const Real& a_x, const Real& a_y);
 
   /*!
+    @brief Add other table. 
+  */
+  virtual void add_table(const lookup_table& a_otherTable, const Real a_scale);
+
+  /*!
     @brief Dump table to pout()
   */
   virtual void dump_table();
