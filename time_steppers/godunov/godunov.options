@@ -1,0 +1,15 @@
+# ====================================================================================================
+# GODUNOV CLASS OPTIONS
+# ====================================================================================================
+godunov.verbosity        = -1        # Class verbosity
+godunov.solver_verbosity = -1        # Individual solver verbosities
+godunov.min_dt           = 0.        # Minimum permitted time step
+godunov.max_dt           = 1.E99     # Maximum permitted time step
+godunov.cfl              = 0.5       # CFL number
+godunov.diffusion        = auto      # Diffusion. 'explicit', 'implicit', or 'auto'
+godunov.relax_time       = 1.0       # Relaxation time constant
+godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
+godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+godunov.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
+godunov.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
+godunov.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 

@@ -18,6 +18,11 @@ air_eed.temperature         = 300                         # Gas temperature
 air_eed.frac_N2             = 0.2                         # N2 fraction
 air_eed.frac_O2             = 0.8                         # O2 fraction
 
+# ----------------------------------------------------------------------------------------------------	
+# Integration options for chemistry
+# ----------------------------------------------------------------------------------------------------
+air_eed.chemistry_dt        = 1.0                         # Chemistry dt
+air_eed.chemistry_algorithm = euler                       # Algorithm. 'euler', 'rk2', 'rk4', 'crank-nicholson'
 
 # ----------------------------------------------------------------------------------------------------	
 # Transport properties

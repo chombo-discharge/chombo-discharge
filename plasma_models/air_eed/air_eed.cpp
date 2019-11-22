@@ -41,6 +41,7 @@ air_eed::air_eed() {
   parse_photoi();
   parse_see();
   parse_domain_bc();
+  parse_chemistry();
 
   init_rng();                 // Initialize random number generators
   
@@ -295,6 +296,27 @@ void air_eed::parse_initial_particles(){
   }
 }
 
+void air_eed::parse_chemistry(){
+  ParmParse pp("air_eed");
+
+  std::string str;
+  pp.get("chemistry_dt", m_chemistry_dt);
+  pp.get("chemistry_algorithm", str);
+
+  if(str == "euler"){
+    m_chemistryAlgorithm = chemistryAlgorithm::euler;
+  }
+  else if(str == "rk2"){
+    m_chemistryAlgorithm = chemistryAlgorithm::rk2;
+  }
+  else if(str == "rk4"){
+    m_chemistryAlgorithm = chemistryAlgorithm::rk4;
+  }
+  else{
+    MayDay::Abort("air_eed::parse_chemistry - unknown chemistry algorithm requested");
+  }
+}
+
 void air_eed::add_uniform_particles(List<Particle>& a_particles, const int a_num, const Real a_weight){
 
   // Get Lo/Hi sides of domain
@@ -444,6 +466,124 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
 				       const Real             a_time,
 				       const Real             a_kappa) const{
 
+  Vector<Real>     cdr_src(m_num_species, 0.0);
+  Vector<Real>     rte_src(m_num_photons, 0.0);
+  Vector<Real>     cdr_phi(m_num_species, 0.0);
+  Vector<Real>     rte_phi(m_num_photons, 0.0);
+  Vector<RealVect> cdr_grad(m_num_species, RealVect::Zero);
+
+
+  // Copy starting data
+  for (int i = 0; i < m_num_species; i++){
+    cdr_phi[i]  = a_particle_densities[i];
+    cdr_grad[i] = a_particle_gradients[i];
+  }
+  
+  rte_phi[m_photon_idx]          = a_photon_densities[m_photon_idx];
+  a_photon_sources[m_photon_idx] = 0.0;
+
+
+
+  int nsteps = ceil(a_dt/m_chemistry_dt);
+  Real dt    = a_dt/nsteps;
+  Real time  = a_time;
+  
+  for (int istep = 0; istep < nsteps; istep++){
+    if(m_chemistryAlgorithm == chemistryAlgorithm::euler){
+      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+
+      // Increment
+      for (int i = 0; i < m_num_species; i++){
+	cdr_phi[i] += cdr_src[i]*dt;
+	cdr_phi[i] = Max(0.0, cdr_phi[i]);
+      }
+
+      // Add photons produced in the substep
+      a_photon_sources[m_photon_idx] += rte_src[m_photon_idx];
+    }
+    else if(m_chemistryAlgorithm == chemistryAlgorithm::rk2){
+
+      // Compute slope at k
+      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      Vector<Real> k1 = cdr_src;
+
+      // Euler update to k+1
+      for (int i = 0; i < m_num_species; i++){
+	cdr_phi[i] += cdr_src[i]*dt;
+	cdr_phi[i] = Max(0.0, cdr_phi[i]);
+      }
+
+      // Photons only use the Euler update
+      a_photon_sources[m_photon_idx] += rte_src[m_photon_idx];
+
+      // Re-compute slope at k
+      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+
+      // Funky notation, but checks out
+      for (int i = 0; i < m_num_species; i++){
+	cdr_phi[i] = cdr_phi[i] + dt*(0.5*cdr_src[i] - 0.5*k1[i]);
+      }
+    }
+    else if(m_chemistryAlgorithm == chemistryAlgorithm::rk4){
+      const Vector<Real> cdr_phi0 = cdr_phi;
+      
+      // Compute k1 slope
+      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      const Vector<Real> k1 = cdr_src;
+
+      // Only Euler update for photons. 
+      a_photon_sources[m_photon_idx] += rte_src[m_photon_idx];
+
+      // Compute k2 slope
+      for (int i = 0; i < m_num_species; i++){
+	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k1[i];
+      }
+      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      const Vector<Real> k2 = cdr_src;
+
+      // Compute k3 slope
+      for (int i = 0; i < m_num_species; i++){
+	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k2[i];
+      }
+      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      const Vector<Real> k3 = cdr_src;
+
+      // Compute k4 slope
+      for (int i = 0; i < m_num_species; i++){
+	cdr_phi[i] = cdr_phi0[i] + dt*k3[i];
+      }
+      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      const Vector<Real> k4 = cdr_src;
+
+      for (int i = 0; i < m_num_species; i++){
+	cdr_phi[i] = cdr_phi0[i] + dt*(k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6.;
+      }
+    }
+    else{
+      MayDay::Abort("advance_reaction_network - not supporting other chemistry algorithm yet");
+    }
+
+    // Time at next substep
+    time += dt;
+  }
+
+  // Linearize source term
+  for (int i = 0; i < m_num_species; i++){
+    a_particle_sources[i] = (cdr_phi[i] - a_particle_densities[i])/a_dt;
+  }
+}
+
+void air_eed::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
+				      Vector<Real>&          a_photon_sources,
+				      Vector<Real>&          a_particle_densities,
+				      const Vector<RealVect> a_particle_gradients,
+				      const Vector<Real>     a_photon_densities,
+				      const RealVect         a_E,
+				      const RealVect         a_pos,
+				      const Real             a_dx,
+				      const Real             a_dt,
+				      const Real             a_time,
+				      const Real             a_kappa) const{
   // R0: E.J -> heating
   // R1: e + M -> e + e + M+  alpha*Xe. Loss is m_ionization_loss, which is a bulk avlue
   // R2: e + M -> M-+         eta*Xe. Loss is equal to the mean energy.
@@ -455,7 +595,7 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
 
   const Real De     = m_e_diffco.get_entry(energy);
   const RealVect Ve = -m_e_mobility.get_entry(energy)*a_E;
-  const RealVect Je = Ve*a_particle_densities[m_elec_idx];// - De*a_particle_gradients[m_elec_idx];
+  const RealVect Je = Ve*a_particle_densities[m_elec_idx] - De*a_particle_gradients[m_elec_idx];
   const Real ve     = Ve.vectorLength();
   
   // Ionization and attachment coefficients
@@ -493,7 +633,7 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
   Sm += R2;
 
   // R3: e + M => e + M + losses
-  SE -= R3;
+  SE -= R3/10;
 
   // R4: Photoionization, M + y => e + M+
   SE += m_photoi_gain*R4;

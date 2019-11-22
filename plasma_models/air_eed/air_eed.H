@@ -96,6 +96,14 @@ protected:
   static std::string s_bolsig_elastic;
   static std::string s_bolsig_inelastic;
 
+  enum chemistryAlgorithm {
+    euler = 0,
+    rk2   = 1,
+    rk4   = 2
+  };
+
+  chemistryAlgorithm m_chemistryAlgorithm;
+
   std::string m_transport_file;
 
   // Tables built from BOLSIG+
@@ -117,6 +125,9 @@ protected:
 
   Real m_min_energy; // Minium energy that is tracked
   Real m_max_energy; // Maximum energy that is tracked
+
+
+  Real m_chemistry_dt; // Chemistry dt
 
 
   // Random number generator and some distributions
@@ -193,6 +204,7 @@ protected:
   void parse_see();
   void parse_domain_bc();
   void parse_initial_particles();
+  void parse_chemistry();
   void instantiate_species();
   void init_rng();
   void add_uniform_particles(List<Particle>& a_particles, const int a_num, const Real a_weight);
@@ -214,6 +226,20 @@ protected:
 				  const Vector<Real> a_extrap_cdr_fluxes,
 				  const Real         a_townsend2,
 				  const Real         a_quantum_efficiency) const;
+
+  void advance_chemistry_euler(Vector<Real>&          a_particle_sources,
+			       Vector<Real>&          a_photon_sources,
+			       Vector<Real>&          a_particle_densities,
+			       const Vector<RealVect> a_particle_gradients,
+			       const Vector<Real>     a_photon_densities,
+			       const RealVect         a_E,
+			       const RealVect         a_pos,
+			       const Real             a_dx,
+			       const Real             a_dt,
+			       const Real             a_time,
+			       const Real             a_kappa) const;
+
+  //  void advance_chemistry_rk4(
 };
 
 #endif

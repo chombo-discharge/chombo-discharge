@@ -1,36 +1,36 @@
 /*!
-  @file   euler_maruyama.cpp
-  @brief  Implementation of euler_maruyama.H
+  @file   godunov.cpp
+  @brief  Implementation of godunov.H
   @author Robert Marskar
   @date   Aug. 2019
 */
 
-#include "euler_maruyama.H"
-#include "euler_maruyama_storage.H"
+#include "godunov.H"
+#include "godunov_storage.H"
 #include "data_ops.H"
 #include "units.H"
 #include "cdr_gdnv.H"
 
 #include <ParmParse.H>
 
-typedef euler_maruyama::cdr_storage     cdr_storage;
-typedef euler_maruyama::poisson_storage poisson_storage;
-typedef euler_maruyama::rte_storage     rte_storage;
-typedef euler_maruyama::sigma_storage   sigma_storage;
+typedef godunov::cdr_storage     cdr_storage;
+typedef godunov::poisson_storage poisson_storage;
+typedef godunov::rte_storage     rte_storage;
+typedef godunov::sigma_storage   sigma_storage;
 
-euler_maruyama::euler_maruyama(){
-  m_class_name = "euler_maruyama";
+godunov::godunov(){
+  m_class_name = "godunov";
   m_extrap_advect = true;
 }
 
-euler_maruyama::~euler_maruyama(){
+godunov::~godunov(){
 
 }
 
-void euler_maruyama::parse_options(){
-  CH_TIME("euler_maruyama::parse_options");
+void godunov::parse_options(){
+  CH_TIME("godunov::parse_options");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::parse_options" << endl;
+    pout() << "godunov::parse_options" << endl;
   }
 
   parse_verbosity();
@@ -47,13 +47,13 @@ void euler_maruyama::parse_options(){
   parse_debug();
 }
 
-void euler_maruyama::parse_diffusion(){
-  CH_TIME("euler_maruyama::parse_diffusion");
+void godunov::parse_diffusion(){
+  CH_TIME("godunov::parse_diffusion");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::parse_diffusion" << endl;
+    pout() << "godunov::parse_diffusion" << endl;
   }
 
-  ParmParse pp("euler_maruyama");
+  ParmParse pp("godunov");
 
   std::string str;
   pp.get("diffusion", str);
@@ -70,14 +70,14 @@ void euler_maruyama::parse_diffusion(){
     m_whichDiffusion = whichDiffusion::Automatic;
   }
   else{
-    MayDay::Abort("euler_maruayama::parse_diffusion - unknown diffusion type requested");
+    MayDay::Abort("godunov_maruyama::parse_diffusion - unknown diffusion type requested");
   }
 }
 
-void euler_maruyama::parse_advection(){
-  CH_TIME("euler_maruyama::parse_advection");
+void godunov::parse_advection(){
+  CH_TIME("godunov::parse_advection");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::parse_advection" << endl;
+    pout() << "godunov::parse_advection" << endl;
   }
 
   ParmParse pp(m_class_name.c_str());
@@ -91,14 +91,14 @@ void euler_maruyama::parse_advection(){
     m_extrap_advect = false;
   }
   else{
-    MayDay::Abort("euler_maruyama::parse_advection - unknown argument");
+    MayDay::Abort("godunov::parse_advection - unknown argument");
   }
 }
 
-void euler_maruyama::parse_floor(){
-  CH_TIME("euler_maruyama::parse_floor");
+void godunov::parse_floor(){
+  CH_TIME("godunov::parse_floor");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::parse_floor" << endl;
+    pout() << "godunov::parse_floor" << endl;
   }
 
   ParmParse pp(m_class_name.c_str());
@@ -112,14 +112,14 @@ void euler_maruyama::parse_floor(){
     m_floor = false;
   }
   else{
-    MayDay::Abort("euler_maruayma::parse_floor - unknown argument requested.");
+    MayDay::Abort("godunov::parse_floor - unknown argument requested.");
   }
 }
 
-void euler_maruyama::parse_debug(){
-  CH_TIME("euler_maruyama::parse_debug");
+void godunov::parse_debug(){
+  CH_TIME("godunov::parse_debug");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::parse_debug" << endl;
+    pout() << "godunov::parse_debug" << endl;
   }
 
   ParmParse pp(m_class_name.c_str());
@@ -133,40 +133,40 @@ void euler_maruyama::parse_debug(){
     m_debug = false;
   }
   else{
-    MayDay::Abort("euler_maruayma::parse_debug - unknown argument requested.");
+    MayDay::Abort("godunov::parse_debug - unknown argument requested.");
   }
 }
 
-bool euler_maruyama::need_to_regrid(){
-  CH_TIME("euler_maruyama::deallocate_internals");
+bool godunov::need_to_regrid(){
+  CH_TIME("godunov::deallocate_internals");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::need_to_regrid" << endl;
+    pout() << "godunov::need_to_regrid" << endl;
   }
 
   return false;
 }
 
-RefCountedPtr<cdr_storage>& euler_maruyama::get_cdr_storage(const cdr_iterator& a_solverit){
+RefCountedPtr<cdr_storage>& godunov::get_cdr_storage(const cdr_iterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& euler_maruyama::get_rte_storage(const rte_iterator& a_solverit){
+RefCountedPtr<rte_storage>& godunov::get_rte_storage(const rte_iterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
-Real euler_maruyama::restrict_dt(){
-  CH_TIME("euler_maruyama::euler_maruyama");
+Real godunov::restrict_dt(){
+  CH_TIME("godunov::godunov");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::euler_maruyama" << endl;
+    pout() << "godunov::godunov" << endl;
   }
 
   return 1.E99;
 }
 
-Real euler_maruyama::advance(const Real a_dt){
-  CH_TIME("euler_maruyama::advance");
+Real godunov::advance(const Real a_dt){
+  CH_TIME("godunov::advance");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::advance" << endl;
+    pout() << "godunov::advance" << endl;
   }
 
   // INFO: Solvers should have been filled with velocities and diffusion coefficients. We must still do:
@@ -199,37 +199,39 @@ Real euler_maruyama::advance(const Real a_dt){
   // These calls are responsible for filling CDR and sigma solver boundary conditions
   // on the EB and on the domain walls
   t0 = MPI_Wtime();
-  euler_maruyama::compute_E_into_scratch();       // Compute the electric field
-  euler_maruyama::compute_cdr_gradients();        // Extrapolate cell-centered stuff to EB centroids
+  godunov::compute_E_into_scratch();       // Compute the electric field
+  godunov::compute_cdr_gradients();        // Compute cdr gradients
   t1 = MPI_Wtime();
   t_grad = t1 - t0;
 
   t0 = MPI_Wtime();
-  euler_maruyama::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
-  euler_maruyama::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
-  euler_maruyama::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
-  euler_maruyama::compute_cdr_domain_fluxes();    // Extrapolate cell-centered fluxes to domain edges
-  euler_maruyama::compute_sigma_flux();           // Update charge flux for sigma solver
-  t1 = MPI_Wtime();
-  t_filBC = t1 - t0;
-
-  t0 = MPI_Wtime();
-  euler_maruyama::compute_reaction_network(a_dt); // Advance the reaction network
+  godunov::compute_reaction_network(a_dt); // Advance the reaction network. Put the result in solvers
   t1 = MPI_Wtime();
   t_reac = t1-t0;
 
   t0 = MPI_Wtime();
-  euler_maruyama::advance_cdr(a_dt);              // Update cdr equations
+  godunov::compute_cdr_gradients();        // Recompute cdr gradients after reaction advance (these might have changed)
+  godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
+  godunov::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
+  godunov::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
+  godunov::compute_cdr_domain_fluxes();    // Extrapolate cell-centered fluxes to domain edges
+  godunov::compute_sigma_flux();           // Update charge flux for sigma solver
+  t1 = MPI_Wtime();
+  t_filBC = t1 - t0;
+
+
+  t0 = MPI_Wtime();
+  godunov::advance_cdr(a_dt);              // Update cdr equations
   t1 = MPI_Wtime();
   t_cdr = t1 - t0;
 
   t0 = MPI_Wtime();
-  euler_maruyama::advance_rte(a_dt);              // Update RTE equations
+  godunov::advance_rte(a_dt);              // Update RTE equations
   t1 = MPI_Wtime();
   t_rte = t1-t0;
 
   t0 = MPI_Wtime();
-  euler_maruyama::advance_sigma(a_dt);            // Update sigma equation
+  godunov::advance_sigma(a_dt);            // Update sigma equation
   t1 = MPI_Wtime();
   t_sig = t1 - t0;
   
@@ -241,24 +243,24 @@ Real euler_maruyama::advance(const Real a_dt){
   t_pois = t1 - t0;
 
   t0 = MPI_Wtime();
-  euler_maruyama::compute_E_into_scratch();       // Update electric fields too
+  godunov::compute_E_into_scratch();       // Update electric fields too
   t1 = MPI_Wtime();
   t_filE = t1-t0;
 
   // Update velocities and diffusion coefficients. We don't do sources here.
   t0 = MPI_Wtime();
-  euler_maruyama::compute_cdr_velo(m_time + a_dt);
+  godunov::compute_cdr_velo(m_time + a_dt);
   t1 = MPI_Wtime();
   t_filV = t1 - t0;
   t0 = MPI_Wtime();
-  euler_maruyama::compute_cdr_diffco(m_time + a_dt);
+  godunov::compute_cdr_diffco(m_time + a_dt);
   t1 = MPI_Wtime();
   t_filD = t1 - t0;
   t_tot += t1;
 
   if(m_debug){
     pout() << endl;
-    pout() << "euler_maruyama::advance breakdown:" << endl
+    pout() << "godunov::advance breakdown:" << endl
 	   << "E & grad  = " << 100.0*t_grad/t_tot << "%" << endl
 	   << "BC fill   = " << 100.0*t_filBC/t_tot << "%" << endl
 	   << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
@@ -275,19 +277,19 @@ Real euler_maruyama::advance(const Real a_dt){
   return a_dt;
 }
 
-void euler_maruyama::init_source_terms(){
-  CH_TIME("euler_maruyama::init_source_terms");
+void godunov::init_source_terms(){
+  CH_TIME("godunov::init_source_terms");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::init_source_terms" << endl;
+    pout() << "godunov::init_source_terms" << endl;
   }
 
   // No need to do anything in this routine yet
 }
 
-void euler_maruyama::regrid_internals(){
-  CH_TIME("euler_maruyama::regrid_internals");
+void godunov::regrid_internals(){
+  CH_TIME("godunov::regrid_internals");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::regrid_internals" << endl;
+    pout() << "godunov::regrid_internals" << endl;
   }
 
   const int ncomp       = 1;
@@ -319,10 +321,10 @@ void euler_maruyama::regrid_internals(){
   m_sigma_scratch->allocate_storage();
 }
 
-void euler_maruyama::deallocate_internals(){
-  CH_TIME("euler_maruyama::deallocate_internals");
+void godunov::deallocate_internals(){
+  CH_TIME("godunov::deallocate_internals");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::deallocate_internals" << endl;
+    pout() << "godunov::deallocate_internals" << endl;
   }
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
@@ -347,10 +349,10 @@ void euler_maruyama::deallocate_internals(){
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
 }
 
-void euler_maruyama::compute_E_into_scratch(){
-  CH_TIME("euler_maruyama::compute_E_into_scratch");
+void godunov::compute_E_into_scratch(){
+  CH_TIME("godunov::compute_E_into_scratch");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_E_into_scratch" << endl;
+    pout() << "godunov::compute_E_into_scratch" << endl;
   }
   
   EBAMRCellData& E_cell = m_poisson_scratch->get_E_cell();
@@ -364,16 +366,16 @@ void euler_maruyama::compute_E_into_scratch(){
   time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell); // Domain centered field
 }
 
-void euler_maruyama::compute_cdr_gradients(){
-  CH_TIME("euler_maruyama::compute_cdr_gradients");
+void godunov::compute_cdr_gradients(){
+  CH_TIME("godunov::compute_cdr_gradients");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_gradients" << endl;
+    pout() << "godunov::compute_cdr_gradients" << endl;
   }
 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     EBAMRCellData& grad = storage->get_gradient();
     m_amr->compute_gradient(grad, solver->get_state(), phase::gas);
@@ -382,10 +384,10 @@ void euler_maruyama::compute_cdr_gradients(){
   }
 }
 
-void euler_maruyama::compute_cdr_eb_states(){
-  CH_TIME("euler_maruyama::compute_cdr_eb_states");
+void godunov::compute_cdr_eb_states(){
+  CH_TIME("godunov::compute_cdr_eb_states");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_eb_states" << endl;
+    pout() << "godunov::compute_cdr_eb_states" << endl;
   }
 
   Vector<EBAMRCellData*> cdr_states = m_cdr->get_states();
@@ -396,7 +398,7 @@ void euler_maruyama::compute_cdr_eb_states(){
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     eb_states.push_back(&(storage->get_eb_state()));
     eb_gradients.push_back(&(storage->get_eb_grad()));
@@ -420,10 +422,10 @@ void euler_maruyama::compute_cdr_eb_states(){
   }
 }
 
-void euler_maruyama::compute_cdr_eb_fluxes(){
-  CH_TIME("euler_maruyama::compute_cdr_eb_fluxes()");
+void godunov::compute_cdr_eb_fluxes(){
+  CH_TIME("godunov::compute_cdr_eb_fluxes()");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_eb_fluxes()";
+    pout() << "godunov::compute_cdr_eb_fluxes()";
   }
 
   Vector<EBAMRCellData*> states = m_cdr->get_states();
@@ -477,10 +479,10 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
 				   m_time);
 }
 
-void euler_maruyama::compute_cdr_domain_states(){
-  CH_TIME("euler_maruyama::compute_cdr_domain_states");
+void godunov::compute_cdr_domain_states(){
+  CH_TIME("godunov::compute_cdr_domain_states");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_domain_states" << endl;
+    pout() << "godunov::compute_cdr_domain_states" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -490,7 +492,7 @@ void euler_maruyama::compute_cdr_domain_states(){
   
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     cdr_states.push_back(&(solver->get_state()));
     domain_states.push_back(&(storage->get_domain_state()));
@@ -517,10 +519,10 @@ void euler_maruyama::compute_cdr_domain_states(){
   }
 }
 
-void euler_maruyama::compute_cdr_domain_fluxes(){
-  CH_TIME("euler_maruyama::compute_cdr_domain_fluxes()");
+void godunov::compute_cdr_domain_fluxes(){
+  CH_TIME("godunov::compute_cdr_domain_fluxes()");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_domain_fluxes()" << endl;
+    pout() << "godunov::compute_cdr_domain_fluxes()" << endl;
   }
 
   Vector<EBAMRCellData*> states = m_cdr->get_states();
@@ -582,10 +584,10 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
 					  m_time);
 }
 
-void euler_maruyama::compute_sigma_flux(){
-  CH_TIME("euler_maruyama::compute_sigma_flux");
+void godunov::compute_sigma_flux(){
+  CH_TIME("godunov::compute_sigma_flux");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_sigma_flux" << endl;
+    pout() << "godunov::compute_sigma_flux" << endl;
   }
 
   EBAMRIVData& flux = m_sigma->get_flux();
@@ -602,10 +604,10 @@ void euler_maruyama::compute_sigma_flux(){
   m_sigma->reset_cells(flux);
 }
 
-void euler_maruyama::compute_reaction_network(const Real a_dt){
-  CH_TIME("euler_maruyama::compute_reaction_network");
+void godunov::compute_reaction_network(const Real a_dt){
+  CH_TIME("godunov::compute_reaction_network");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::compute_reaction_network" << endl;
+    pout() << "godunov::compute_reaction_network" << endl;
   }
 
   // We have already computed E and the gradients of the CDR equations, so we will call the
@@ -625,19 +627,48 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
     cdr_grad.push_back(&gradient);
   }
 
-  //  time_stepper::advance_reaction_network(m_time, a_dt);
+  // Compute all source terms
   time_stepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
+
+  // Make phi = phi + S*dt
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+
+    EBAMRCellData& phi = solver->get_state();
+    const EBAMRCellData& src = solver->get_source();
+
+    data_ops::incr(phi, src, a_dt);
+
+    m_amr->average_down(phi, m_cdr->get_phase());
+    m_amr->interp_ghost(phi, m_cdr->get_phase());
+
+    solver->make_non_negative(phi);
+
+    if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
+      if(m_debug){
+	const Real mass_before = solver->compute_mass();
+	data_ops::floor(phi, 0.0);
+	const Real mass_after = solver->compute_mass();
+	const Real rel_mass = (mass_after-mass_before)/mass_before;
+	pout() << "godunov::compute_reaction_network - injecting relative "
+	       << solver->get_name() << " mass = " << rel_mass << endl;
+      }
+      else{
+	data_ops::floor(phi, 0.0);
+      }
+    }
+  }
 }
 
-void euler_maruyama::advance_cdr(const Real a_dt){
-  CH_TIME("euler_maruyama::advance_cdr");
+void godunov::advance_cdr(const Real a_dt){
+  CH_TIME("godunov::advance_cdr");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::advance_cdr" << endl;
+    pout() << "godunov::advance_cdr" << endl;
   }
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     EBAMRCellData& phi = solver->get_state();
     EBAMRCellData& src = solver->get_source();
@@ -648,17 +679,14 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
     if(!m_implicit_diffusion){
-      solver->compute_divJ(scratch, phi, extrap_dt);
+      solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
     }
     else{
-      solver->compute_divF(scratch, phi, extrap_dt);
+      solver->compute_divF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
     }
-    data_ops::scale(scratch, -1.0);
-
-    // Increment with source term
-    data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F/J) + R]
-    data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J) + R]*dt
-    data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J) + dt*R
+    data_ops::scale(scratch, -1.0);     // scratch = -[div(F/J)]
+    data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
+    data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
 
     solver->make_non_negative(phi);
 
@@ -668,7 +696,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
 	data_ops::floor(phi, 0.0);
 	const Real mass_after = solver->compute_mass();
 	const Real rel_mass = (mass_after-mass_before)/mass_before;
-	pout() << "euler_maruayma::injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	pout() << "godunov::advance_cdr - injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
       }
       else{
 	data_ops::floor(phi, 0.0);
@@ -697,7 +725,8 @@ void euler_maruyama::advance_cdr(const Real a_dt){
 	    data_ops::floor(phi, 0.0);
 	    const Real mass_after = solver->compute_mass();
 	    const Real rel_mass = (mass_after-mass_before)/mass_before;
-	    pout() << "euler_maruayma::injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	    pout() << "godunov::advance_cdr (implicit diffusion) - inecting relative  "
+		   << solver->get_name() << " mass = " << rel_mass << endl;
 	  }
 	  else{
 	    data_ops::floor(phi, 0.0);
@@ -711,10 +740,10 @@ void euler_maruyama::advance_cdr(const Real a_dt){
   }
 }
 
-void euler_maruyama::advance_rte(const Real a_dt){
-  CH_TIME("euler_maruyama::advance_rte");
+void godunov::advance_rte(const Real a_dt){
+  CH_TIME("godunov::advance_rte");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::advance_rte" << endl;
+    pout() << "godunov::advance_rte" << endl;
   }
 
   // Source terms should already be in place so we can solve directly.
@@ -724,10 +753,10 @@ void euler_maruyama::advance_rte(const Real a_dt){
   }
 }
 
-void euler_maruyama::advance_sigma(const Real a_dt){
-  CH_TIME("euler_maruyama::advance_sigma");
+void godunov::advance_sigma(const Real a_dt){
+  CH_TIME("godunov::advance_sigma");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::advance_sigma" << endl;
+    pout() << "godunov::advance_sigma" << endl;
   }
 
   // Advance the sigma equation
@@ -736,29 +765,29 @@ void euler_maruyama::advance_sigma(const Real a_dt){
   data_ops::incr(sigma, rhs, a_dt);
 }
 
-void euler_maruyama::compute_cdr_velo(const Real a_time){
-  CH_TIME("euler_maruyama::compute_cdr_velo");
+void godunov::compute_cdr_velo(const Real a_time){
+  CH_TIME("godunov::compute_cdr_velo");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::compute_cdr_velo" << endl;
+    pout() << "godunov::compute_cdr_velo" << endl;
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
   time_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_poisson_scratch->get_E_cell(), a_time);
 }
 
-void euler_maruyama::compute_cdr_diffco(const Real a_time){
-  CH_TIME("euler_maruyama::compute_cdr_diffco");
+void godunov::compute_cdr_diffco(const Real a_time){
+  CH_TIME("godunov::compute_cdr_diffco");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::compute_cdr_diffco" << endl;
+    pout() << "godunov::compute_cdr_diffco" << endl;
   }
 
   time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 }
 
-void euler_maruyama::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  CH_TIME("euler_maruyama::compute_dt");
+void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
+  CH_TIME("godunov::compute_dt");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_dt" << endl;
+    pout() << "godunov::compute_dt" << endl;
   }
 
   Real dt = 1.E99;
