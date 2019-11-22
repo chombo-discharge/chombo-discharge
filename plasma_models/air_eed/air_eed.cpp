@@ -26,6 +26,7 @@ std::string air_eed::s_bolsig_alpha     = "Energy (eV)	Townsend ioniz. coef. alp
 std::string air_eed::s_bolsig_eta       = "Energy (eV)	Townsend attach. coef. eta/N (m2)";
 std::string air_eed::s_bolsig_elastic   = "Energy (eV)	Elastic power loss /N (eV m3/s)";
 std::string air_eed::s_bolsig_inelastic = "Energy (eV)	Inelastic power loss /N (eV m3/s)";
+std::string air_eed::s_bolsig_lfa       = "Energy (eV) 	Electric field / N (Td)";
 
 
 air_eed::air_eed() {
@@ -38,6 +39,7 @@ air_eed::air_eed() {
   parse_alpha();
   parse_eta();
   parse_losses();
+  parse_lfa();
   parse_photoi();
   parse_see();
   parse_domain_bc();
@@ -132,8 +134,6 @@ void air_eed::parse_electron_mobility(){
   read_file_entries(m_e_mobility, air_eed::s_bolsig_mobility);
   m_e_mobility.scale_y(1./m_N); 
   m_e_mobility.make_uniform(m_uniform_entries);
-
-  m_e_mobility.dump_table();
 }
 
 void air_eed::parse_electron_diffco(){
@@ -174,6 +174,16 @@ void air_eed::parse_losses(){
   m_e_losses.make_uniform(m_uniform_entries);
 
   m_ionization_loss = m_N2frac*15.6 + m_O2frac*12.06;
+}
+
+void air_eed::parse_lfa(){
+  ParmParse pp("air_eed");
+  read_file_entries(m_lfa, air_eed::s_bolsig_lfa);
+
+  m_lfa.swap_xy();
+  m_lfa.make_uniform(m_uniform_entries);
+
+  m_lfa.dump_table();
 }
 
 void air_eed::parse_photoi(){
@@ -633,7 +643,7 @@ void air_eed::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
   Sm += R2;
 
   // R3: e + M => e + M + losses
-  SE -= R3/10;
+  SE -= R3;
 
   // R4: Photoionization, M + y => e + M+
   SE += m_photoi_gain*R4;
@@ -685,16 +695,17 @@ int air_eed::poisson_reaction(const Real a_propensity, const Real a_dt) const{
 }
 
 Real air_eed::compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const {
-  Real energy = a_electron_energy/(Max(1.0, a_electron_density));
+  Real energy = a_electron_energy/(Max(1E3, a_electron_density));
   energy = Min(Max(energy, m_min_energy), m_max_energy);
 
-  if (energy < 1.5) MayDay::Abort("wtf");
   return energy;
 }
 
-Real air_eed::compute_alpha_eff(const Real a_energy) const{
-  const Real alpha = m_e_alpha.get_entry(a_energy);
-  const Real eta   = m_e_eta.get_entry(a_energy);
+Real air_eed::compute_alpha_eff(const Real a_E) const{
+  const Real energy = m_lfa.get_entry(a_E); // Get energy in the LFA approximation
+  
+  const Real alpha = m_e_alpha.get_entry(energy);
+  const Real eta   = m_e_eta.get_entry(energy);
 
   return (alpha-eta);
 }

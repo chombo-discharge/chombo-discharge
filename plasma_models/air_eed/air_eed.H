@@ -84,7 +84,7 @@ public:
 
   Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
-  Real compute_alpha_eff(const Real a_energy) const;
+  Real compute_alpha_eff(const Real a_E) const;
   Real compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const;
   
 protected:
@@ -95,6 +95,7 @@ protected:
   static std::string s_bolsig_eta;
   static std::string s_bolsig_elastic;
   static std::string s_bolsig_inelastic;
+  static std::string s_bolsig_lfa;
 
   enum chemistryAlgorithm {
     euler = 0,
@@ -112,6 +113,7 @@ protected:
   lookup_table m_e_alpha;
   lookup_table m_e_eta;
   lookup_table m_e_losses;
+  lookup_table m_lfa; // Local field approximation table
 
   Vector<int> m_wallbc; // Wall boundary conditions
 
@@ -200,6 +202,7 @@ protected:
   void parse_alpha();
   void parse_eta();
   void parse_losses();
+  void parse_lfa();
   void parse_photoi();
   void parse_see();
   void parse_domain_bc();
