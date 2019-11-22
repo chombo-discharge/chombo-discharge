@@ -180,6 +180,7 @@ void air_eed::parse_lfa(){
   ParmParse pp("air_eed");
   read_file_entries(m_lfa, air_eed::s_bolsig_lfa);
 
+  m_lfa.scale_y(m_N*units::s_Td);
   m_lfa.swap_xy();
   m_lfa.make_uniform(m_uniform_entries);
 
@@ -738,9 +739,11 @@ Vector<RealVect> air_eed::compute_cdr_velocities(const Real         a_time,
   const Real electron_energy_density = a_cdr_densities[m_eed_idx];
   const Real electron_density        = a_cdr_densities[m_elec_idx];
   const Real electron_energy         = compute_electron_energy(electron_energy_density, electron_density);
+  Real electron_mobility       = m_e_mobility.get_entry(electron_energy);
 
-  vel[m_eed_idx]  = -a_E*m_e_mobility.get_entry(electron_energy)*5.0/3.0;
-  vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(electron_energy);
+
+  vel[m_eed_idx]  = -(5.0/3.0)*electron_mobility*a_E;
+  vel[m_elec_idx] = -electron_mobility*a_E;
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;
   

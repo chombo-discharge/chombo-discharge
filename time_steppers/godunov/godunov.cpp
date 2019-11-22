@@ -834,5 +834,11 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   }
 
   a_dt = dt;
+
+#if 1 // debug
+  if(procID() == 0){
+    std::cout << "godunov::compute_dt - step = " << m_step << "\t dt = " << a_dt << std::endl;
+  }
+#endif
 }
 
