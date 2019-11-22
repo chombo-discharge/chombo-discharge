@@ -30,37 +30,23 @@ std::string air_eed::s_bolsig_inelastic = "Energy (eV)	Inelastic power loss /N (
 
 air_eed::air_eed() {
   instantiate_species();
-  pout() << "done insta species" << endl;
   parse_transport_file();
-  pout() << "done insta transport file" << endl;
   parse_transport();
-  pout() << "done parse transpot" << endl;
   parse_gas_params();
-  pout() << "done parse gasparams" << endl;
   parse_electron_mobility();
-  pout() << "done parse emob" << endl;
   parse_electron_diffco();
-  pout() << "done parse diffco" << endl;
   parse_alpha();
-  pout() << "done parse alpha" << endl;
   parse_eta();
-  pout() << "done parse eta" << endl;
   parse_losses();
-  pout() << "done parse losses" << endl;
   parse_photoi();
-  pout() << "done parse photoi" << endl;
   parse_see();
-  pout() << "done parse see" << endl;
   parse_domain_bc();
-  pout() << "done parse dombc" << endl;
 
   init_rng();                 // Initialize random number generators
-  pout() << "done init rng" << endl;
   
   parse_initial_particles();  // Parse initial particles
-  pout() << "done init particles" << endl;
 
-  MayDay::Abort("stop");
+  //  MayDay::Abort("stop");
 }
 
 air_eed::~air_eed() {
@@ -145,6 +131,8 @@ void air_eed::parse_electron_mobility(){
   read_file_entries(m_e_mobility, air_eed::s_bolsig_mobility);
   m_e_mobility.scale_y(1./m_N); 
   m_e_mobility.make_uniform(m_uniform_entries);
+
+  m_e_mobility.dump_table();
 }
 
 void air_eed::parse_electron_diffco(){
@@ -181,12 +169,10 @@ void air_eed::parse_losses(){
 
   m_e_losses = elastic_losses;
   m_e_losses.add_table(inelastic_losses, 1.0);
-
   m_e_losses.scale_y(m_N);
+  m_e_losses.make_uniform(m_uniform_entries);
 
   m_ionization_loss = m_N2frac*15.6 + m_O2frac*12.06;
-
-  //  m_e_losses.dump_table();
 }
 
 void air_eed::parse_photoi(){
@@ -447,56 +433,75 @@ void air_eed::parse_domain_bc(){
 }
 
 void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_photon_sources,
-					    const Vector<Real>     a_particle_densities,
-					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_photon_densities,
-					    const RealVect         a_E,
-					    const RealVect         a_pos,
-					    const Real             a_dx,
-					    const Real             a_dt,
-					    const Real             a_time,
-					    const Real             a_kappa) const{
+				       Vector<Real>&          a_photon_sources,
+				       const Vector<Real>     a_particle_densities,
+				       const Vector<RealVect> a_particle_gradients,
+				       const Vector<Real>     a_photon_densities,
+				       const RealVect         a_E,
+				       const RealVect         a_pos,
+				       const Real             a_dx,
+				       const Real             a_dt,
+				       const Real             a_time,
+				       const Real             a_kappa) const{
+
+  // R0: E.J -> heating
   // R1: e + M -> e + e + M+  alpha*Xe. Loss is m_ionization_loss, which is a bulk avlue
   // R2: e + M -> M-+         eta*Xe. Loss is equal to the mean energy.
   // R3: e + M -> e + M       "Friction" loss. Tabulated with bulk value
-  // R4: e + M -> e + M + Y   No loss, taken care of through friction losses
-  // R5: Y + M -> e + M+      Energy gain equal to input value (1eV is fine)
-  
+  // R4: Y + M -> e + M+      Energy gain equal to input value (1eV is fine)
+  // R5: e + M -> e + M + Y   Excitation losses are a part of R3
   const Real volume = pow(a_dx, SpaceDim);
-  const Real ve     = (a_E*m_e_mobility.get_entry(a_E.vectorLength())).vectorLength();
+  const Real energy = compute_electron_energy(a_particle_densities[m_eed_idx], a_particle_densities[m_elec_idx]);
+
+  const Real De     = m_e_diffco.get_entry(energy);
+  const RealVect Ve = -m_e_mobility.get_entry(energy)*a_E;
+  const RealVect Je = Ve*a_particle_densities[m_elec_idx];// - De*a_particle_gradients[m_elec_idx];
+  const Real ve     = Ve.vectorLength();
   
   // Ionization and attachment coefficients
-  const Real alpha  = m_e_alpha.get_entry(a_E.vectorLength());
-  const Real eta    = m_e_eta.get_entry(a_E.vectorLength());
+  const Real alpha  = m_e_alpha.get_entry(energy);
+  const Real eta    = m_e_eta.get_entry(energy);
 
+  const Real R0 = -PolyGeom::dot(Je, a_E);                    // This is a energy/volume rate. Units of ev/(m^3s)
+  const Real R1 = alpha*ve*a_particle_densities[m_elec_idx];  // This is a volume rate, units of 1/(m^3s)
+  const Real R2 = eta*ve*a_particle_densities[m_elec_idx];    // This is a volume rate, units of 1/(m^3s)
+  const Real R3 = m_e_losses.get_entry(energy)*a_particle_densities[m_elec_idx]; //Loss rate. Units of eV/(m^3s)
+  const Real R4 = a_photon_densities[m_photon_idx]/a_dt;
 
-  const Real R1 = alpha*ve*a_particle_densities[m_elec_idx];
-  const Real R2 = eta*ve*a_particle_densities[m_elec_idx];
-
+  Real& SE = a_particle_sources[m_eed_idx];
   Real& Se = a_particle_sources[m_elec_idx];
   Real& Sp = a_particle_sources[m_plus_idx];
   Real& Sm = a_particle_sources[m_minu_idx];
 
+  // Heating. 
+  SE = 0.0;
   Se = 0.0;
   Sp = 0.0;
   Sm = 0.0;
 
-  // e + M => e + e + M+
+  // R0: E.J -> Heating
+  SE += R0;
+
+  // R1: e + M => e + e + M+
+  //SE -= R1*m_ionization_loss;
   Se += R1;
   Sp += R1;
 
-  // e + M => M-
+  // R2: e + M => M-
+  //  SE -= R2*energy;
   Se -= R2;
   Sm += R2;
 
-  // Photoionization, M + y => e + M+
-  for (int i = 0; i < a_photon_densities.size(); i++){
-    Se += a_photon_densities[i]/a_dt;
-    Sp += a_photon_densities[i]/a_dt;
-  }
+  // R3: e + M => e + M + losses
+  SE -= R3;
 
-  // Propensity functions for photon emission
+  // R4: Photoionization, M + y => e + M+
+  SE += m_photoi_gain*R4;
+  Se += R4;
+  Sp += R4;
+
+  
+  // R5: Propensity functions for photon emission
   const Real quench         = m_pq/(m_pq+m_p);
   const Real prop_c4v0_X1v0 = quench*m_c4v0_X1v0_photoi_eff*m_c4v0_exc_eff*R1*volume;
   const Real prop_c4v0_X1v1 = quench*m_c4v0_X1v1_photoi_eff*m_c4v0_exc_eff*R1*volume;
@@ -507,7 +512,7 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
   const Real prop_b1v1_X1v0 = quench*m_b1v1_X1v0_photoi_eff*m_b1v1_exc_eff*R1*volume;
   const Real prop_b1v1_X1v1 = quench*m_b1v1_X1v1_photoi_eff*m_b1v1_exc_eff*R1*volume;
 
-  // Draw total number of photons. The photon type is late-resolved. 
+  // R5: Draw total number of photons. The photon type is late-resolved. 
   int num_photons = 0;
   num_photons += poisson_reaction(prop_c4v0_X1v0, a_dt);
   num_photons += poisson_reaction(prop_c4v0_X1v1, a_dt);
@@ -519,7 +524,7 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
   num_photons += poisson_reaction(prop_b1v1_X1v1, a_dt);
 
   a_photon_sources[m_photon_idx] = 1.0*num_photons;
-  
+
   return;
 }
 
@@ -540,18 +545,18 @@ int air_eed::poisson_reaction(const Real a_propensity, const Real a_dt) const{
 }
 
 Real air_eed::compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const {
-  return a_electron_energy/(1.0 + a_electron_density);
-}
+  Real energy = a_electron_energy/(Max(1.0, a_electron_density));
+  energy = Min(Max(energy, m_min_energy), m_max_energy);
 
-Real air_eed::compute_electron_temperature(const Real a_electron_energy) const {
-  return Max(300., 2.0*(a_electron_energy*units::s_Qe)/(3.0*units::s_kb));  // Kelvin
+  if (energy < 1.5) MayDay::Abort("wtf");
+  return energy;
 }
 
 Real air_eed::compute_alpha_eff(const Real a_energy) const{
- const Real alpha = m_e_alpha.get_entry(a_energy);
- const Real eta   = m_e_eta.get_entry(a_energy);
+  const Real alpha = m_e_alpha.get_entry(a_energy);
+  const Real eta   = m_e_eta.get_entry(a_energy);
 
- return (alpha-eta);
+  return (alpha-eta);
 }
 
 
@@ -574,16 +579,16 @@ Vector<Real> air_eed::compute_cdr_diffusion_coefficients(const Real         a_ti
 }
   
 Vector<RealVect> air_eed::compute_cdr_velocities(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities) const{
+						 const RealVect     a_pos,
+						 const RealVect     a_E,
+						 const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_num_species, RealVect::Zero);
   
   const Real electron_energy_density = a_cdr_densities[m_eed_idx];
   const Real electron_density        = a_cdr_densities[m_elec_idx];
   const Real electron_energy         = compute_electron_energy(electron_energy_density, electron_density);
 
-  vel[m_eed_idx]  = -a_E*m_e_mobility.get_entry(electron_energy);
+  vel[m_eed_idx]  = -a_E*m_e_mobility.get_entry(electron_energy)*5.0/3.0;
   vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(electron_energy);
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;
@@ -592,15 +597,15 @@ Vector<RealVect> air_eed::compute_cdr_velocities(const Real         a_time,
 }
   
 Vector<Real> air_eed::compute_cdr_domain_fluxes(const Real           a_time,
-						     const RealVect       a_pos,
-						     const int            a_dir,
-						     const Side::LoHiSide a_side,
-						     const RealVect       a_E,
-						     const Vector<Real>   a_cdr_densities,
-						     const Vector<Real>   a_cdr_velocities,
-						     const Vector<Real>   a_cdr_gradients,
-						     const Vector<Real>   a_rte_fluxes,
-						     const Vector<Real>   a_extrap_cdr_fluxes) const{
+						const RealVect       a_pos,
+						const int            a_dir,
+						const Side::LoHiSide a_side,
+						const RealVect       a_E,
+						const Vector<Real>   a_cdr_densities,
+						const Vector<Real>   a_cdr_velocities,
+						const Vector<Real>   a_cdr_gradients,
+						const Vector<Real>   a_rte_fluxes,
+						const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_num_species, 0.0);
 
   int idx, sgn;
@@ -632,42 +637,42 @@ Vector<Real> air_eed::compute_cdr_domain_fluxes(const Real           a_time,
 }
   
 Vector<Real> air_eed::compute_cdr_electrode_fluxes(const Real         a_time,
-							const RealVect     a_pos,
-							const RealVect     a_normal,
-							const RealVect     a_E,
-							const Vector<Real> a_cdr_densities,
-							const Vector<Real> a_cdr_velocities,
-							const Vector<Real> a_cdr_gradients,
-							const Vector<Real> a_rte_fluxes,
-							const Vector<Real> a_extrap_cdr_fluxes) const{
+						   const RealVect     a_pos,
+						   const RealVect     a_normal,
+						   const RealVect     a_E,
+						   const Vector<Real> a_cdr_densities,
+						   const Vector<Real> a_cdr_velocities,
+						   const Vector<Real> a_cdr_gradients,
+						   const Vector<Real> a_rte_fluxes,
+						   const Vector<Real> a_extrap_cdr_fluxes) const{
   return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
 Vector<Real> air_eed::compute_cdr_dielectric_fluxes(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_normal,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities,
-							 const Vector<Real> a_cdr_velocities,
-							 const Vector<Real> a_cdr_gradients,
-							 const Vector<Real> a_rte_fluxes,
-							 const Vector<Real> a_extrap_cdr_fluxes) const{
+						    const RealVect     a_pos,
+						    const RealVect     a_normal,
+						    const RealVect     a_E,
+						    const Vector<Real> a_cdr_densities,
+						    const Vector<Real> a_cdr_velocities,
+						    const Vector<Real> a_cdr_gradients,
+						    const Vector<Real> a_rte_fluxes,
+						    const Vector<Real> a_extrap_cdr_fluxes) const{
   return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
 Vector<Real> air_eed::compute_cdr_fluxes(const Real         a_time,
-					      const RealVect     a_pos,
-					      const RealVect     a_normal,
-					      const RealVect     a_E,
-					      const Vector<Real> a_cdr_densities,
-					      const Vector<Real> a_cdr_velocities,
-					      const Vector<Real> a_cdr_gradients,
-					      const Vector<Real> a_rte_fluxes,
-					      const Vector<Real> a_extrap_cdr_fluxes,
-					      const Real         a_townsend2,
-					      const Real         a_quantum_efficiency) const{
+					 const RealVect     a_pos,
+					 const RealVect     a_normal,
+					 const RealVect     a_E,
+					 const Vector<Real> a_cdr_densities,
+					 const Vector<Real> a_cdr_velocities,
+					 const Vector<Real> a_cdr_gradients,
+					 const Vector<Real> a_rte_fluxes,
+					 const Vector<Real> a_extrap_cdr_fluxes,
+					 const Real         a_townsend2,
+					 const Real         a_quantum_efficiency) const{
   Vector<Real> fluxes(m_num_species, 0.0);
 
   // Drift outflow for now

@@ -86,7 +86,6 @@ public:
 
   Real compute_alpha_eff(const Real a_energy) const;
   Real compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const;
-  Real compute_electron_temperature(const Real a_electron_energy) const;
   
 protected:
 
