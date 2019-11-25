@@ -830,11 +830,10 @@ void cdr_solver::initial_data(){
   const bool deposit_function  = m_species->init_with_function();
   const bool deposit_particles = m_species->init_with_particles();
 
+  data_ops::set_value(m_state, 0.0);
+  
   if(deposit_particles){
     initial_data_particles();
-  }
-  else{
-    data_ops::set_value(m_state, 0.0);
   }
 
   // Increment with function values if this is also called for

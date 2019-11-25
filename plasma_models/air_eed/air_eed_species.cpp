@@ -182,7 +182,6 @@ Real air_eed::agg_photon::get_random_kappa() const{
 
 Real air_eed::eed::initial_data(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
-
   return m_init_energy*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }
 

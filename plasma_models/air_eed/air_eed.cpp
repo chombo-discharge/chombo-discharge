@@ -48,6 +48,9 @@ air_eed::air_eed() {
   init_rng();                 // Initialize random number generators
   
   parse_initial_particles();  // Parse initial particles
+  parse_initial_energy();
+
+
 
   //  MayDay::Abort("stop");
 }
@@ -184,7 +187,7 @@ void air_eed::parse_lfa(){
   m_lfa.swap_xy();
   m_lfa.make_uniform(m_uniform_entries);
 
-  m_lfa.dump_table();
+  //  m_lfa.dump_table();
 }
 
 void air_eed::parse_photoi(){
@@ -234,8 +237,8 @@ void air_eed::instantiate_species(){
   m_num_species = 4;
   m_num_photons = 1;
 
-  m_eed_idx  = 0;
-  m_elec_idx = 1;
+  m_elec_idx = 0;
+  m_eed_idx  = 1;
   m_plus_idx = 2;
   m_minu_idx = 3;
 
@@ -249,6 +252,16 @@ void air_eed::instantiate_species(){
 
   m_photons.resize(m_num_photons);
   m_photons[m_photon_idx] = RefCountedPtr<photon_group> (new air_eed::agg_photon());
+}
+
+void air_eed::parse_initial_energy(){
+  ParmParse pp("air_eed");
+  std::string str;
+
+  pp.get("use_lfa_init", str);
+  m_eed_solve = (str == "true") ? true : false;
+  m_eed_index = m_eed_idx;
+
 }
 
 void air_eed::parse_initial_particles(){
@@ -493,8 +506,6 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
   rte_phi[m_photon_idx]          = a_photon_densities[m_photon_idx];
   a_photon_sources[m_photon_idx] = 0.0;
 
-
-
   int nsteps = ceil(a_dt/m_chemistry_dt);
   Real dt    = a_dt/nsteps;
   Real time  = a_time;
@@ -505,8 +516,7 @@ void air_eed::advance_reaction_network(Vector<Real>&          a_particle_sources
 
       // Increment
       for (int i = 0; i < m_num_species; i++){
-	cdr_phi[i] += cdr_src[i]*dt;
-	cdr_phi[i] = Max(0.0, cdr_phi[i]);
+	cdr_phi[i] = cdr_phi[i] + cdr_src[i]*dt;
       }
 
       // Add photons produced in the substep
@@ -606,7 +616,7 @@ void air_eed::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
 
   const Real De     = m_e_diffco.get_entry(energy);
   const RealVect Ve = -m_e_mobility.get_entry(energy)*a_E;
-  const RealVect Je = Ve*a_particle_densities[m_elec_idx] - De*a_particle_gradients[m_elec_idx];
+  const RealVect Je = Ve*a_particle_densities[m_elec_idx];// - De*a_particle_gradients[m_elec_idx];
   const Real ve     = Ve.vectorLength();
   
   // Ionization and attachment coefficients
@@ -634,12 +644,12 @@ void air_eed::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
   SE += R0;
 
   // R1: e + M => e + e + M+
-  //SE -= R1*m_ionization_loss;
+  SE -= R1*m_ionization_loss;
   Se += R1;
   Sp += R1;
 
   // R2: e + M => M-
-  //  SE -= R2*energy;
+  SE -= R2*energy;
   Se -= R2;
   Sm += R2;
 
@@ -742,7 +752,7 @@ Vector<RealVect> air_eed::compute_cdr_velocities(const Real         a_time,
   Real electron_mobility       = m_e_mobility.get_entry(electron_energy);
 
 
-  vel[m_eed_idx]  = -(5.0/3.0)*electron_mobility*a_E;
+  vel[m_eed_idx]  = -electron_mobility*a_E*5.0/3.0;;
   vel[m_elec_idx] = -electron_mobility*a_E;
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;

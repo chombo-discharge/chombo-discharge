@@ -27,7 +27,6 @@ air_eed.chemistry_algorithm = euler                       # Algorithm. 'euler', 
 # ----------------------------------------------------------------------------------------------------	
 # Transport properties
 # ----------------------------------------------------------------------------------------------------
-air_eed.use_alpha_corr      = false                       # Use alpha correction due to Soloviev
 air_eed.mobile_electrons    = true                        # Mobile electrons or not
 air_eed.diffusive_electrons = true                        # Diffusive electrons or not
 air_eed.mobile_ions         = false                       # Mobile ions or not
@@ -44,6 +43,7 @@ air_eed.poiss_exp_swap      = 100  # Swap from Poisson to exponential distributi
 # ----------------------------------------------------------------------------------------------------
 # Initial data
 # ----------------------------------------------------------------------------------------------------
+air_eed.use_lfa_init          = true         # Initialize electron energy with LFA computations
 air_eed.init_energy           = 1.0          # Initial electron mean energy (in eV)
 air_eed.uniform_density       = 1.E4         # Uniform density
 air_eed.seed_density          = 1.E18        # Gaussian seed density

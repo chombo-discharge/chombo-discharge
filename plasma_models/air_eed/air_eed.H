@@ -86,6 +86,10 @@ public:
 
   Real compute_alpha_eff(const Real a_E) const;
   Real compute_electron_energy(const Real a_electron_energy, const Real a_electron_density) const;
+
+  Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
+    return m_lfa.get_entry(a_E.vectorLength())*m_species[m_elec_idx]->initial_data(a_pos, a_time);
+  }
   
 protected:
 
@@ -208,6 +212,7 @@ protected:
   void parse_domain_bc();
   void parse_initial_particles();
   void parse_chemistry();
+  void parse_initial_energy();
   void instantiate_species();
   void init_rng();
   void add_uniform_particles(List<Particle>& a_particles, const int a_num, const Real a_weight);

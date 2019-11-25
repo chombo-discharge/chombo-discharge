@@ -492,7 +492,11 @@ void plasma_engine::grid_report(){
   const ProblemDomain finest_domain   = m_amr->get_domains()[finest_level];
   const Box finestBox   = finest_domain.domainBox();
   const Box coarsestBox = coarsest_domain.domainBox();
-  const Vector<int> refRat = m_amr->get_ref_rat();
+  Vector<int> refRat = m_amr->get_ref_rat();
+  Vector<int> ref_rat(1 + finest_level);
+  for (int lvl = 0; lvl < finest_level; lvl++){
+    ref_rat[lvl] = refRat[lvl];
+  }
 
   // Write a report
   
@@ -511,7 +515,7 @@ void plasma_engine::grid_report(){
 #elif CH_SPACEDIM==3
     " x " << coarsestBox.size()[2] << endl
 #endif
-	 << "\t\t\t        Refinement ratios      = " << refRat << endl
+	 << "\t\t\t        Refinement ratios      = " << ref_rat << endl
     	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
 	 << "\t\t\t        Finest dx              = " << dx[finest_level] << endl
     	 << "\t\t\t        Total number boxes     = " << totBoxes << endl
