@@ -131,7 +131,7 @@ html_theme_path = ['/usr/local/lib/python2.7/dist-packages']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = './figures/rod_sphere3d.png'
+html_logo = './figures/20kv_15mm_15ns_autocrop.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

@@ -20,6 +20,8 @@ physical_domain
 
 .. literalinclude:: links/physical_domain.options
 
+The :ref:`Chap:physical_domain` class was written very early on in `PlasmaC` and was intended to contain much more functionality than two corners (e.g. boundary conditions). Because the class contains so little information, the class will be integrated with :ref:`Chap:amr_mesh` in the future. 
+
 .. _Chap:plasma_engine:
 
 plasma_engine
