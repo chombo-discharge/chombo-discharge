@@ -2518,6 +2518,12 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
   const int num_species  = m_plaskin->get_num_species();
   const int finest_level = m_amr->get_finest_level();
 
+  // Interpolate E to centroids
+  EBAMRCellData E;
+  m_amr->allocate(E, phase::gas, SpaceDim);
+  data_ops::copy(E, a_E);
+  m_amr->interpolate_to_centroids(E, phase::gas);
+
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
     Vector<LevelData<EBCellFAB>* > velocities(num_species);
@@ -2529,7 +2535,7 @@ void time_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_veloci
       cdr_densities[idx] = (*a_cdr_densities[idx])[lvl];
     }
 
-    compute_cdr_velocities(velocities, cdr_densities, *a_E[lvl], lvl, a_time);
+    compute_cdr_velocities(velocities, cdr_densities, *E[lvl], lvl, a_time);
   }
 
   // Average down and interpolate ghost cells
@@ -2562,7 +2568,6 @@ void time_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>&       
   const int num_species = m_plaskin->get_num_species();
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
     Vector<EBCellFAB*> vel(num_species);
     Vector<EBCellFAB*> phi(num_species);;
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2614,8 +2619,6 @@ void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_veloci
 
     // Compute velocities
     Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
-
-    velocities[1] = RealVect::Zero;
 
     // Put velocities in the appropriate place. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){

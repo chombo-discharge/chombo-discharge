@@ -2883,7 +2883,7 @@ void plasma_engine::initialize_eed(){
   EBAMRCellData Ecell;
   m_amr->allocate(Ecell, phase::gas, SpaceDim);
   m_timestepper->compute_E(Ecell, phase::gas);
-  //  m_amr->interpolate_to_centroids(Ecell, phase::gas);
+  m_amr->interpolate_to_centroids(Ecell, phase::gas);
 
   const int eed_index = m_plaskin->get_eed_index();
 
