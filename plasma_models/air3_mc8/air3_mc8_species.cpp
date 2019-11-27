@@ -6,9 +6,15 @@ air3_mc8::electron::electron(){
   m_charge = -1;
   ParmParse pp("air3_mc8");
   std::string str;
+  Vector<Real> vec(SpaceDim);
   
   pp.get("mobile_electrons", str);    m_mobile    = (str == "true") ? true : false;
   pp.get("diffusive_electrons", str); m_diffusive = (str == "true") ? true : false;
+
+  pp.get("uniform_density", m_uniform_density);
+  pp.get("seed_density", m_seed_density);
+  pp.get("seed_radius",   m_seed_rad);
+  pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
 air3_mc8::M_plus::M_plus(){
@@ -16,9 +22,15 @@ air3_mc8::M_plus::M_plus(){
   m_charge = 1;
   ParmParse pp("air3_mc8");
   std::string str;
+  Vector<Real> vec(SpaceDim);
   
   pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+
+  pp.get("uniform_density", m_uniform_density);
+  pp.get("seed_density", m_seed_density);
+  pp.get("seed_radius",   m_seed_rad);
+  pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
 air3_mc8::M_minus::M_minus(){
@@ -29,6 +41,18 @@ air3_mc8::M_minus::M_minus(){
   
   pp.get("mobile_ions", str);    m_mobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_diffusive = (str == "true") ? true : false;
+}
+
+Real air3_mc8::electron::initial_data(const RealVect a_pos, const Real a_time) const{
+  const Real factor = (a_pos - m_seed_pos).vectorLength();
+
+  return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
+}
+
+Real air3_mc8::M_plus::initial_data(const RealVect a_pos, const Real a_time) const{
+  const Real factor = (a_pos - m_seed_pos).vectorLength();
+
+  return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
 }
 
 air3_mc8::phot_c4v0_X1v0::phot_c4v0_X1v0(){
@@ -125,3 +149,4 @@ air3_mc8::phot_b1v1_X1v1::phot_b1v1_X1v1(){
   
   m_kappa = 1./(m_kappa*p);
 }
+

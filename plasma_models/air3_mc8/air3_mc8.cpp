@@ -159,6 +159,19 @@ void air3_mc8::parse_photoi(){
   pp.get("c4v1_exc_eff", m_c4v1_exc_eff);
   pp.get("b1v1_exc_eff", m_b1v1_exc_eff);
 
+  pp.get("c4v0_kp", m_c4v0_kp);
+  pp.get("c4v1_kp", m_c4v0_kp);
+  pp.get("b1v1_kp", m_b1v1_kp);
+
+  pp.get("c4v0_X1v0_kr", m_c4v0_X1v0_kr); 
+  pp.get("c4v0_X1v1_kr", m_c4v0_X1v1_kr);
+  pp.get("c4v1_X1v0_kr", m_c4v1_X1v0_kr);
+  pp.get("c4v1_X1v1_kr", m_c4v1_X1v1_kr);
+  pp.get("c4v1_X1v2_kr", m_c4v1_X1v2_kr);
+  pp.get("c4v1_X1v3_kr", m_c4v1_X1v3_kr);
+  pp.get("b1v1_X1v0_kr", m_b1v1_X1v0_kr); 
+  pp.get("b1v1_X1v1_kr", m_b1v1_X1v1_kr);
+
   pp.get("c4v0_X1v0_photoi_eff", m_c4v0_X1v0_photoi_eff);
   pp.get("c4v0_X1v1_photoi_eff", m_c4v0_X1v1_photoi_eff);
   pp.get("c4v1_X1v0_photoi_eff", m_c4v1_X1v0_photoi_eff);
@@ -168,9 +181,18 @@ void air3_mc8::parse_photoi(){
   pp.get("b1v1_X1v0_photoi_eff", m_b1v1_X1v0_photoi_eff);
   pp.get("b1v1_X1v1_photoi_eff", m_b1v1_X1v1_photoi_eff);
 
-  pp.get("quenching_pressure", m_pq);
+  pp.get("k_quench", m_kq);
 
-  m_pq *= units::s_atm2pascal;
+  m_kq *= m_N;
+
+  m_c4v0_kr = m_c4v0_X1v0_kr + m_c4v0_X1v1_kr;
+  m_c4v0_k  = m_c4v0_kr + m_c4v0_kp + m_kq;
+
+  m_c4v1_kr = m_c4v1_X1v0_kr + m_c4v1_X1v1_kr + m_c4v1_X1v2_kr + m_c4v1_X1v3_kr;
+  m_c4v1_k  = m_c4v1_kr + m_c4v1_kp + m_kq;
+
+  m_b1v1_kr = m_b1v1_X1v0_kr + m_b1v1_X1v1_kr;
+  m_b1v1_k  = m_b1v1_kr + m_b1v1_kp + m_kq;
 }
 
 void air3_mc8::parse_see(){
@@ -460,25 +482,54 @@ void air3_mc8::advance_reaction_network(Vector<Real>&          a_particle_source
     Sp += a_photon_densities[i]/a_dt;
   }
 
-  // Propensity functions for photon emission
-  const Real quench         = m_pq/(m_pq+m_p);
-  const Real prop_c4v0_X1v0 = quench*m_c4v0_X1v0_photoi_eff*m_c4v0_exc_eff*R1*volume;
-  const Real prop_c4v0_X1v1 = quench*m_c4v0_X1v1_photoi_eff*m_c4v0_exc_eff*R1*volume;
-  const Real prop_c4v1_X1v0 = quench*m_c4v1_X1v0_photoi_eff*m_c4v1_exc_eff*R1*volume;
-  const Real prop_c4v1_X1v1 = quench*m_c4v1_X1v1_photoi_eff*m_c4v1_exc_eff*R1*volume;
-  const Real prop_c4v1_X1v2 = quench*m_c4v1_X1v2_photoi_eff*m_c4v1_exc_eff*R1*volume;
-  const Real prop_c4v1_X1v3 = quench*m_c4v1_X1v3_photoi_eff*m_c4v1_exc_eff*R1*volume;
-  const Real prop_b1v1_X1v0 = quench*m_b1v1_X1v0_photoi_eff*m_b1v1_exc_eff*R1*volume;
-  const Real prop_b1v1_X1v1 = quench*m_b1v1_X1v1_photoi_eff*m_b1v1_exc_eff*R1*volume;
+
+
+  // NEW CODE HERE
+  // # of excitations into each excited state
+  const int num_exc_c4v0 = poisson_reaction(R1*volume*m_c4v0_exc_eff, a_dt);
+  const int num_exc_c4v1 = poisson_reaction(R1*volume*m_c4v1_exc_eff, a_dt);
+  const int num_exc_b1v1 = poisson_reaction(R1*volume*m_b1v1_exc_eff, a_dt);
   
-  a_photon_sources[m_c4v0_X1v0_idx] = 1.0*poisson_reaction(prop_c4v0_X1v0, a_dt);
-  a_photon_sources[m_c4v0_X1v1_idx] = 1.0*poisson_reaction(prop_c4v0_X1v1, a_dt);
-  a_photon_sources[m_c4v1_X1v0_idx] = 1.0*poisson_reaction(prop_c4v1_X1v0, a_dt);
-  a_photon_sources[m_c4v1_X1v1_idx] = 1.0*poisson_reaction(prop_c4v1_X1v1, a_dt);
-  a_photon_sources[m_c4v1_X1v2_idx] = 1.0*poisson_reaction(prop_c4v1_X1v2, a_dt);
-  a_photon_sources[m_c4v1_X1v3_idx] = 1.0*poisson_reaction(prop_c4v1_X1v3, a_dt);
-  a_photon_sources[m_b1v1_X1v0_idx] = 1.0*poisson_reaction(prop_b1v1_X1v0, a_dt);
-  a_photon_sources[m_b1v1_X1v1_idx] = 1.0*poisson_reaction(prop_b1v1_X1v1, a_dt);
+  // Determine number of radiative de-excitations
+  const int num_c4v0_rad = binomial_trials(num_exc_c4v0, m_c4v0_kr/m_c4v0_k);
+  const int num_c4v1_rad = binomial_trials(num_exc_c4v1, m_c4v1_kr/m_c4v1_k);
+  const int num_b1v1_rad = binomial_trials(num_exc_b1v1, m_b1v1_kr/m_b1v1_k);
+
+  // For c4v0, determine distribution of radiative de-excitations
+  int num_c4v0_X1v0 = binomial_trials(num_c4v0_rad, m_c4v0_X1v0_kr/m_c4v0_kr);
+  int num_c4v0_X1v1 = num_c4v0_rad - num_c4v0_X1v0; // Rest must be other transition
+
+  // For b1v1, determine distribution of radiative de-excitations
+  int num_b1v1_X1v0 = binomial_trials(num_b1v1_rad, m_b1v1_X1v0_kr/m_b1v1_kr);
+  int num_b1v1_X1v1 = num_b1v1_rad - num_b1v1_X1v0; // Rest must be other transition
+
+  // 4 transitions for c4v1. C++ doesn't have a multinomial implementation, so do some nested binomial magic instead
+  int num_c4v1_X1v0 = binomial_trials(num_c4v1_rad, m_c4v1_X1v0_kr/m_c4v1_kr);
+  int num_c4v1_X1v1 = binomial_trials(num_c4v1_rad - num_c4v1_X1v0,
+				      m_c4v1_X1v1_kr/(m_c4v1_X1v1_kr + m_c4v1_X1v2_kr, m_c4v1_X1v3_kr));
+  int num_c4v1_X1v2 = binomial_trials(num_c4v1_rad - (num_c4v1_X1v0 + num_c4v1_X1v1),
+				      m_c4v1_X1v2_kr/(m_c4v1_X1v2_kr, m_c4v1_X1v3_kr));
+  int num_c4v1_X1v3 = num_c4v1_rad - (num_c4v1_X1v0 + num_c4v1_X1v1 + num_c4v1_X1v2);
+
+
+  // Check if the transitions lead to photoionization
+  num_c4v0_X1v0 = binomial_trials(num_c4v0_X1v0, m_c4v0_X1v0_photoi_eff);
+  num_c4v0_X1v1 = binomial_trials(num_c4v0_X1v1, m_c4v0_X1v1_photoi_eff);
+  num_c4v1_X1v0 = binomial_trials(num_c4v1_X1v0, m_c4v1_X1v0_photoi_eff);
+  num_c4v1_X1v1 = binomial_trials(num_c4v1_X1v1, m_c4v1_X1v1_photoi_eff);
+  num_c4v1_X1v2 = binomial_trials(num_c4v1_X1v2, m_c4v1_X1v2_photoi_eff);
+  num_c4v1_X1v3 = binomial_trials(num_c4v1_X1v3, m_c4v1_X1v3_photoi_eff);
+  num_b1v1_X1v0 = binomial_trials(num_b1v1_X1v0, m_b1v1_X1v0_photoi_eff);
+  num_b1v1_X1v1 = binomial_trials(num_b1v1_X1v1, m_b1v1_X1v1_photoi_eff);
+
+  a_photon_sources[m_c4v0_X1v0_idx] = 1.0*num_c4v0_X1v0;
+  a_photon_sources[m_c4v0_X1v1_idx] = 1.0*num_c4v0_X1v1;
+  a_photon_sources[m_c4v1_X1v0_idx] = 1.0*num_c4v1_X1v0;
+  a_photon_sources[m_c4v1_X1v1_idx] = 1.0*num_c4v1_X1v1;
+  a_photon_sources[m_c4v1_X1v2_idx] = 1.0*num_c4v1_X1v2;
+  a_photon_sources[m_c4v1_X1v3_idx] = 1.0*num_c4v1_X1v3;
+  a_photon_sources[m_b1v1_X1v0_idx] = 1.0*num_b1v1_X1v0;
+  a_photon_sources[m_b1v1_X1v1_idx] = 1.0*num_b1v1_X1v1;
 
   return;
 }
@@ -497,6 +548,11 @@ int air3_mc8::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   }
 
   return value;
+}
+
+int air3_mc8::binomial_trials(const int a_trials, const Real a_p) const{
+  std::binomial_distribution<int> dist(a_trials, a_p);
+  return dist(*m_rng);
 }
 
 

@@ -7,14 +7,25 @@ class air3_mc8::electron : public species {
 public:
   electron();
   ~electron() {}
-  Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
+  Real initial_data(const RealVect a_pos, const Real a_time) const;
+
+protected:
+  Real m_uniform_density;
+  Real m_seed_density;
+  Real m_seed_rad;
+  RealVect m_seed_pos;
 };
 
 class air3_mc8::M_plus : public species {
 public:
   M_plus();
   ~M_plus(){}
-  Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
+  Real initial_data(const RealVect a_pos, const Real a_time) const;
+protected:
+    Real m_uniform_density;
+  Real m_seed_density;
+  Real m_seed_rad;
+  RealVect m_seed_pos;
 };
 
 class air3_mc8::M_minus : public species {

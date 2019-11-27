@@ -33,15 +33,20 @@ air3_mc8.rng_seed            = 0    # RNG seed. < 0 gives a random seed
 air3_mc8.poiss_exp_swap      = 100  # Swap from Poisson to exponential distribution
 
 # ----------------------------------------------------------------------------------------------------
-# Initial particles
+# Initial data
 # ----------------------------------------------------------------------------------------------------
-air3_mc8.particle_deposition           = ngp                   # 'ngp', 'cic', or 'tsc'
-air3_mc8.particle_weight               = 1.0                   # Initial particle weights
+air3_mc8.uniform_density       = 1.E4         # Uniform density
+air3_mc8.seed_density          = 1.E18        # Gaussian seed density
+air3_mc8.seed_radius           = 100E-6       # Gaussian seed radius
+air3_mc8.seed_position         = 0.0 0.0 0.0  # Gaussian seed position
 
-air3_mc8.uniform_pairs                 = 0                     # Number of uniformly distributed electron-ion pairs
-air3_mc8.gaussian_pairs                = 10000                 # Number of Gaussian distributed electron-ion pairs
-air3_mc8.gaussian_pairs_center         = 0.0 0.0 0.0           # Center of seeded electron-ion pairs
-air3_mc8.gaussian_pairs_radius         = 500.E-6               # Radius of seeded electron-ion pairs
+
+air3_mc8.particle_weight       = 1.0                   # Initial particle weights
+air3_mc8.uniform_pairs         = 0                     # Number of uniformly distributed electron-ion pairs
+air3_mc8.gaussian_pairs        = 0                     # Number of Gaussian distributed electron-ion pairs
+air3_mc8.gaussian_pairs_center = 0.0 0.0 0.0           # Center of seeded electron-ion pairs
+air3_mc8.gaussian_pairs_radius = 500.E-6               # Radius of seeded electron-ion pairs
+air3_mc8.particle_deposition   = ngp                   # 'ngp', 'cic', or 'tsc'	       
 
 # ----------------------------------------------------------------------------------------------------	
 # SEE coefficients
@@ -58,9 +63,22 @@ air3_mc8.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 # ----------------------------------------------------------------------------------------------------	
 air3_mc8.c4v0_exc_eff         = 0.08      # Excitation probability per ionization event
 air3_mc8.c4v1_exc_eff         = 0.0034    # Excitation probability per ionization event
-air3_mc8.b1v1_exc_eff         = 0.0051    # Excitation probability per ionization event
+air3_mc8.b1v1_exc_eff         = 0.008     # Excitation probability per ionization event. 
 
-air3_mc8.quenching_pressure   = 0.04      # Quenching pressure
+air3_mc8.c4v0_kp              = 2.39E8    # Predissociation rate
+air3_mc8.c4v1_kp              = 17.7E8    # Predissociation rate
+air3_mc8.b1v1_kp              = 4.68E8    # Predissociation rate
+
+air3_mc8.c4v0_X1v0_kr         = 11.2E8    # Radiative rate
+air3_mc8.c4v0_X1v1_kr         = 1.89E8    # Radiative rate
+air3_mc8.c4v1_X1v0_kr         = 0.41E8    # Radiative rate
+air3_mc8.c4v1_X1v1_kr         = 6.97E8    # Radiative rate
+air3_mc8.c4v1_X1v2_kr         = 4.06E8    # Radiative rate
+air3_mc8.c4v1_X1v3_kr         = 1.45E8    # Radiative rate
+air3_mc8.b1v1_X1v0_kr         = 0.42E8    # Radiative rate
+air3_mc8.b1v1_X1v1_kr         = 0.80E8    # Radiative rate
+
+air3_mc8.k_quench             = 1.E-17    # Collisional quenching rate/N
 
 air3_mc8.c4v0_X1v0_photoi_eff = 0.23      # Photoionization efficiency
 air3_mc8.c4v0_X1v1_photoi_eff = 0.77      # Photoionization efficiency
@@ -71,10 +89,12 @@ air3_mc8.c4v1_X1v3_photoi_eff = 0.69      # Photoionization efficiency
 air3_mc8.b1v1_X1v0_photoi_eff = 0.72      # Photoionization efficiency
 air3_mc8.b1v1_X1v1_photoi_eff = 0.69      # Photoionization efficiency
 
-# ----------------------------------------------------------------------------------------------------	
-# Radiative transitions Beers length. These are given per bar. Converted automatically if you
-# change the pressure. 
-# ----------------------------------------------------------------------------------------------------		
+air3_mc8.quenching_pressure   = 0.04      # Quenching pressure
+
+# --
+# Radiative transitions Beers length. These are given per bar. They are converted automatically if you
+# change the pressure.
+# --
 air3_mc8.c4v0_X1v0_beer       = 19E-6    # Beer's length per bar
 air3_mc8.c4v0_X1v1_beer       = 146E-6   # Beer's length per bar
 air3_mc8.c4v1_X1v0_beer       = 30E-6    # Beer's length per bar

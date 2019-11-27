@@ -147,10 +147,35 @@ protected:
   Real m_N2frac; // N2 fraction
   Real m_pO2;    // Partial O2 pressure
 
-  // Excitation efficiencies for various states
+  // Excitation efficiencies into various states
   Real m_c4v0_exc_eff;
   Real m_c4v1_exc_eff;
   Real m_b1v1_exc_eff;
+
+  // Predissociation rates for various transitions
+  Real m_c4v0_kp;
+  Real m_c4v1_kp;
+  Real m_b1v1_kp;
+
+  // Radiation rates for various transitions
+  Real m_c4v0_X1v0_kr;
+  Real m_c4v0_X1v1_kr;
+  Real m_c4v1_X1v0_kr;
+  Real m_c4v1_X1v1_kr;
+  Real m_c4v1_X1v2_kr;
+  Real m_c4v1_X1v3_kr;
+  Real m_b1v1_X1v0_kr;
+  Real m_b1v1_X1v1_kr;
+
+  // Total deactivation rates for excited states
+  Real m_c4v0_k;
+  Real m_c4v1_k;
+  Real m_b1v1_k;
+
+  // Total radiation rates for excited states
+  Real m_c4v0_kr;
+  Real m_c4v1_kr;
+  Real m_b1v1_kr;
 
   // Photoionization efficiency for various transitions
   Real m_c4v0_X1v0_photoi_eff; // Transition c4(v=0) -> X1(v=0) + electron-ion pair
@@ -162,7 +187,7 @@ protected:
   Real m_b1v1_X1v0_photoi_eff; // Transition b1(v=1) -> X1(v=0) + electron-ion pair
   Real m_b1v1_X1v1_photoi_eff; // Transition b1(v=1) -> X1(v=1) + electron-ion pair
 
-  Real m_pq;         // Quenching pressure
+  Real m_kq; // Quenching rate constant
 
   Real m_ion_mobility;  // Ion mobility
   Real m_ion_diffusion; // Ion diffusion coefficient
@@ -177,6 +202,7 @@ protected:
 #endif
 
   int poisson_reaction(const Real a_propensity, const Real a_dt) const;
+  int binomial_trials(const int a_trials, const Real a_p) const; // a_p is chance of success
 
   void read_file_entries(lookup_table& a_table, const std::string a_string);
   void parse_transport_file();
