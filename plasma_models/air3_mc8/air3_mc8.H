@@ -98,6 +98,14 @@ protected:
 
   std::string m_transport_file;
 
+  enum chemistryAlgorithm {
+    euler = 0,
+    rk2   = 1,
+    rk4   = 2
+  };
+
+  chemistryAlgorithm m_chemistryAlgorithm;
+
   // Tables built from BOLSIG+
   lookup_table m_e_mobility;
   lookup_table m_e_diffco;
@@ -151,6 +159,8 @@ protected:
   Real m_pO2;    // Partial O2 pressure
 
   Real m_2dfactor;
+
+  Real m_chemistry_dt;
 
   // Excitation efficiencies into various states
   Real m_c4v0_exc_eff;
@@ -221,6 +231,7 @@ protected:
   void parse_see();
   void parse_domain_bc();
   void parse_initial_particles();
+  void parse_chemistry();
   void instantiate_species();
   void init_rng();
   void add_uniform_particles(List<Particle>& a_particles, const int a_num, const Real a_weight);
@@ -242,6 +253,19 @@ protected:
 				  const Vector<Real> a_extrap_cdr_fluxes,
 				  const Real         a_townsend2,
 				  const Real         a_quantum_efficiency) const;
+
+  void advance_chemistry_euler(Vector<Real>&          a_particle_sources,
+			       Vector<Real>&          a_photon_sources,
+			       Vector<Real>&          a_particle_densities,
+			       const Vector<RealVect> a_particle_gradients,
+			       const Vector<Real>     a_photon_densities,
+			       const RealVect         a_E,
+			       const RealVect         a_pos,
+			       const Real             a_dx,
+			       const Real             a_dt,
+			       const Real             a_time,
+			       const Real             a_kappa) const;
 };
+
 
 #endif
