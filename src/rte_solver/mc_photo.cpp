@@ -46,11 +46,25 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   int num_photons, num_outcast;
 
   // Generate photons
+  //  Real t1 = MPI_Wtime();
   this->clear(m_photons);                                           // Clear internal data
+  //  Real t2 = MPI_Wtime();
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
+  //  Real t3 = MPI_Wtime();
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
+  //  Real t4 = MPI_Wtime();
   this->remap_photons(m_photons);                                   // Remap photons
+  //  Real t5 = MPI_Wtime();
   this->deposit_photons(a_state, m_photons, m_deposition);          // Compute photoionization profile
+  //  Real t6 = MPI_Wtime();
+
+  // Real T = t6-t1;
+  // pout() << "total time = " << T << endl
+  // 	 << "clear = " << 100.*(t2-t1)/T << endl
+  //   	 << "gener = " << 100.*(t3-t2)/T << endl
+  // 	 << "move  = " << 100.*(t4-t3)/T << endl
+  //   	 << "remap = " << 100.*(t5-t4)/T << endl
+  // 	 << "depos = " << 100.*(t6-t5)/T << endl;
   
   return true;
 }
@@ -632,37 +646,63 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs   = IntVectSet(box);
 
-      FArrayBox& source = (*a_source[lvl])[dit()].getFArrayBox();
+      const EBCellFAB& source = (*a_source[lvl])[dit()];
+      const FArrayBox& srcFAB = source.getFArrayBox();
 
+      Real sum = srcFAB.sum(0);
+      
       // Generate new particles in this box
       List<photon> particles;
-      for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const IntVect iv    = vof.gridIndex();
-	const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
-	const Real kappa    = ebisbox.volFrac(vof);
+      if(sum > 0){
 
-#if 0 // Original code
-	const Real mean = source(iv,0)*vol*a_dt;//*kappa;
-	const int num_phys_photons = random_poisson(mean);
-#else // New code
-	const int num_phys_photons = draw_photons(source(iv,0), vol, a_dt);
-#endif
-	if(num_phys_photons > 0){
+	// Regular cells
+	for (BoxIterator bit(box); bit.ok(); ++bit){
+	  const IntVect iv   = bit();
+	  const RealVect pos = origin + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
 
-	  const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
-	  const Real weight      = (1.0*num_phys_photons)/num_photons;
+	  const int num_phys_photons = draw_photons(srcFAB(iv,0), vol, a_dt);
+	  
+	  if(num_phys_photons > 0){
+	    const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
+	    const Real weight      = (1.0*num_phys_photons)/num_photons;
 
-	  // Generate computational photons
-	  for (int i = 0; i < num_photons; i++){
-	    const RealVect dir = random_direction();
-	    if(m_random_kappa){
-	      particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_random_kappa(), weight));
-	    }
-	    else{
-	      particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+	    // Generate computational photons 
+	    for (int i = 0; i < num_photons; i++){
+	      const RealVect dir = random_direction();
+	      if(m_random_kappa){
+		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_random_kappa(), weight));
+	      }
+	      else{
+		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+	      }
 	    }
 	  }
+	}
+
+	// Irregular cells
+	for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, origin);
+	  const Real kappa    = ebisbox.volFrac(vof);
+
+	  const int num_phys_photons = draw_photons(source(vof,0), vol, a_dt);
+	  
+	  if(num_phys_photons > 0){
+	    const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
+	    const Real weight      = (1.0*num_phys_photons)/num_photons;
+
+	    // Generate computational photons 
+	    for (int i = 0; i < num_photons; i++){
+	      const RealVect dir = random_direction();
+	      if(m_random_kappa){
+		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_random_kappa(), weight));
+	      }
+	      else{
+		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+	      }
+	    }
+	  }
+
 	}
       }
 

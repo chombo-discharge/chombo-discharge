@@ -20,8 +20,8 @@
 
 std::string air3_mc8::s_bolsig_mobility = "E/N (Td)	Mobility *N (1/m/V/s)";
 std::string air3_mc8::s_bolsig_diffco   = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
-std::string air3_mc8::s_bolsig_alpha    = "E/N (Td)	Total ionization freq. /N (m3/s)";
-std::string air3_mc8::s_bolsig_eta      = "E/N (Td)	Total attachment freq. /N (m3/s)";
+std::string air3_mc8::s_bolsig_alpha    = "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)";
+std::string air3_mc8::s_bolsig_eta      = "E/N (Td)	Townsend attach. coef. eta/N (m2)";
 
 air3_mc8::air3_mc8() {
 
@@ -94,6 +94,7 @@ void air3_mc8::parse_transport(){
 
   std::string str;
 
+  pp.get("use_alpha_corr", str);      m_alpha_corr          = (str == "true") ? true : false;
   pp.get("mobile_electrons", str);    m_mobile_electrons    = (str == "true") ? true : false;
   pp.get("diffusive_electrons", str); m_diffusive_electrons = (str == "true") ? true : false;
   pp.get("diffusive_ions", str);      m_diffusive_ions      = (str == "true") ? true : false;
@@ -181,7 +182,9 @@ void air3_mc8::parse_photoi(){
   pp.get("b1v1_X1v0_photoi_eff", m_b1v1_X1v0_photoi_eff);
   pp.get("b1v1_X1v1_photoi_eff", m_b1v1_X1v1_photoi_eff);
 
-  pp.get("k_quench", m_kq);
+  pp.get("k_quench",  m_kq);
+  pp.get("2d_factor", m_2dfactor);
+  
 
   m_kq *= m_N;
 
@@ -451,14 +454,30 @@ void air3_mc8::advance_reaction_network(Vector<Real>&          a_particle_source
   // R4: e + M -> c4v1        alpha*Xe*exc_eff(c4v1)
   // R5: e + M -> b1v1        alpha*Xe*exc_eff(b1v1)
   const Real volume = pow(a_dx, SpaceDim);
-
+  const Real E      = a_E.vectorLength();
+  const Real ve     = E*m_e_mobility.get_entry(E);
+  
   // Ionization and attachment coefficients
-  const Real alpha  = m_e_alpha.get_entry(a_E.vectorLength());
-  const Real eta    = m_e_eta.get_entry(a_E.vectorLength());
-  const Real ve     = (a_E*m_e_mobility.get_entry(a_E.vectorLength())).vectorLength();
+  Real alpha  = m_e_alpha.get_entry(E);
+  Real eta    = m_e_eta.get_entry(E);
 
-  const Real R1 = alpha*a_particle_densities[m_elec_idx];
-  const Real R2 = eta*a_particle_densities[m_elec_idx];
+  // Modify alpha
+  if(m_alpha_corr){
+    const RealVect Eunit = a_E/a_E.vectorLength();
+    const Real De        = m_e_diffco.get_entry(E);
+    const RealVect gNe   = a_particle_gradients[m_elec_idx];
+
+    Real fcorr = 1.0;
+    fcorr = 1.0 - PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
+    fcorr = Min(fcorr, 1.0);
+    fcorr = Max(0.0, fcorr);
+
+    alpha = alpha*fcorr;
+  }
+  
+
+  const Real R1 = alpha*ve*a_particle_densities[m_elec_idx];
+  const Real R2 = eta*ve*a_particle_densities[m_elec_idx];
 
   Real& Se = a_particle_sources[m_elec_idx];
   Real& Sp = a_particle_sources[m_plus_idx];
@@ -486,9 +505,16 @@ void air3_mc8::advance_reaction_network(Vector<Real>&          a_particle_source
 
   // NEW CODE HERE
   // # of excitations into each excited state
-  const int num_exc_c4v0 = poisson_reaction(R1*volume*m_c4v0_exc_eff, a_dt);
-  const int num_exc_c4v1 = poisson_reaction(R1*volume*m_c4v1_exc_eff, a_dt);
-  const int num_exc_b1v1 = poisson_reaction(R1*volume*m_b1v1_exc_eff, a_dt);
+  Real factor;
+  if(SpaceDim==2){
+    factor = m_2dfactor;
+  }
+  else{
+    factor = 1.0;
+  }
+  const int num_exc_c4v0 = poisson_reaction(R1*volume*m_c4v0_exc_eff*factor, a_dt);
+  const int num_exc_c4v1 = poisson_reaction(R1*volume*m_c4v1_exc_eff*factor, a_dt);
+  const int num_exc_b1v1 = poisson_reaction(R1*volume*m_b1v1_exc_eff*factor, a_dt);
   
   // Determine number of radiative de-excitations
   const int num_c4v0_rad = binomial_trials(num_exc_c4v0, m_c4v0_kr/m_c4v0_k);
@@ -686,4 +712,12 @@ Vector<Real> air3_mc8::compute_cdr_fluxes(const Real         a_time,
 
 Real air3_mc8::initial_sigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
+}
+
+Real air3_mc8::compute_alpha_eff(const RealVect a_E) const{
+  const Real E     = a_E.vectorLength();
+  const Real alpha = m_e_alpha.get_entry(E);
+  const Real eta   = m_e_eta.get_entry(E);
+
+  return (alpha-eta);
 }

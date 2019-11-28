@@ -20,6 +20,7 @@ air3_mc8.frac_O2             = 0.8                         # O2 fraction
 # ----------------------------------------------------------------------------------------------------	
 # Transport properties
 # ----------------------------------------------------------------------------------------------------
+air3_mc8.use_alpha_corr      = false                       # Soloviev alpha correction	
 air3_mc8.mobile_electrons    = true                        # Mobile electrons or not
 air3_mc8.diffusive_electrons = true                        # Diffusive electrons or not
 air3_mc8.mobile_ions         = false                       # Mobile ions or not
@@ -60,10 +61,12 @@ air3_mc8.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 # ----------------------------------------------------------------------------------------------------	
 # Exitation efficiencies, photoionization efficiences, quenching pressure, radiative lifetimes,
 # and predissociation lifetime, and absorption lengths. These are pressure independent.
-# ----------------------------------------------------------------------------------------------------	
+# ----------------------------------------------------------------------------------------------------
+air3_mc8.2d_factor            = 1E-3      # Correction factor for 2D. Could be computed analytically but I'm too lazy
+
 air3_mc8.c4v0_exc_eff         = 0.08      # Excitation probability per ionization event
 air3_mc8.c4v1_exc_eff         = 0.0034    # Excitation probability per ionization event
-air3_mc8.b1v1_exc_eff         = 0.008     # Excitation probability per ionization event. 
+air3_mc8.b1v1_exc_eff         = 0.01     # Excitation probability per ionization event. 
 
 air3_mc8.c4v0_kp              = 2.39E8    # Predissociation rate
 air3_mc8.c4v1_kp              = 17.7E8    # Predissociation rate

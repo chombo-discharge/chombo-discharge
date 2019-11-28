@@ -6,7 +6,7 @@
 */
 
 #include "air3_mc8_tagger.H"
-#include "air3_mc8_agg.H"
+#include "air3_mc8.H"
 
 #include <ParmParse.H>
 
@@ -43,7 +43,7 @@ Vector<Real> air3_mc8_tagger::tracer(const RealVect         a_pos,
 				     const Real             a_min_grad_E,
 				     const Real             a_max_grad_E){
 
-  const air3_mc8_agg* plaskin = static_cast<air3_mc8_agg*> (&(*m_plaskin));
+  const air3_mc8* plaskin = static_cast<air3_mc8*> (&(*m_plaskin));
   
   Vector<Real> tracers(m_num_tracers);
   tracers[0] = a_E.vectorLength()/a_max_E;
@@ -81,6 +81,6 @@ bool air3_mc8_tagger::refine_cell(const RealVect         a_pos,
 				  const Vector<RealVect> a_grad_tracer){
   const bool refine1  = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] > m_refi_curv;
   const bool refine2 = a_tracer[1]*a_dx > m_refi_alpha;
-    
+
   return refine1 || refine2;
 }

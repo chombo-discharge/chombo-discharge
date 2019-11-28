@@ -7,8 +7,8 @@ air3_mc8_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall bet
 air3_mc8_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
 air3_mc8_tagger.buffer            = 0            # Grow tagged cells
 
-air3_mc8_tagger.coarsen_curvature = 2.0          # Curvature coarsening
-air3_mc8_tagger.refine_curvature  = 2.0          # Curvature refinement
+air3_mc8_tagger.coarsen_curvature = 5.0          # Curvature coarsening
+air3_mc8_tagger.refine_curvature  = 5.0          # Curvature refinement
 air3_mc8_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-air3_mc8_tagger.coarsen_alpha     = 1.0          # Set alpha coarsening. Higher => Less mesh
+air3_mc8_tagger.coarsen_alpha     = 0.5          # Set alpha coarsening. Higher => Less mesh
 air3_mc8_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth
