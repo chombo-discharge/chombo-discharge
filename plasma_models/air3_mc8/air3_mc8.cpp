@@ -1,6 +1,6 @@
 /*!
   @file   air3_mc8.H
-  @brief  6-species (3/3 charged/excited) and 8-photon model for air
+  @brief  3-species and 8-photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -22,6 +22,8 @@ std::string air3_mc8::s_bolsig_mobility = "E/N (Td)	Mobility *N (1/m/V/s)";
 std::string air3_mc8::s_bolsig_diffco   = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
 std::string air3_mc8::s_bolsig_alpha    = "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)";
 std::string air3_mc8::s_bolsig_eta      = "E/N (Td)	Townsend attach. coef. eta/N (m2)";
+std::string air3_mc8::s_bolsig_b1_exc   = "C25   N2    Excitation    13.00 eV";
+std::string air3_mc8::s_bolsig_c4_exc   = "C26   N2    Excitation    13.00 eV";                              
 
 air3_mc8::air3_mc8() {
 
@@ -35,6 +37,7 @@ air3_mc8::air3_mc8() {
   parse_electron_diffco();
   parse_alpha();
   parse_eta();
+  parse_excitations();
   parse_photoi();
   parse_see();
   parse_domain_bc();
@@ -170,20 +173,36 @@ void air3_mc8::parse_eta(){
   ParmParse pp("air3_mc8");
   read_file_entries(m_e_eta, air3_mc8::s_bolsig_eta);
   m_e_eta.scale_x(m_N*units::s_Td);
-  m_e_eta.scale_y(m_N); 
+  m_e_eta.scale_y(m_N);
   m_e_eta.make_uniform(m_uniform_entries);
+}
+
+void air3_mc8::parse_excitations(){
+  ParmParse pp("air3_mc8");
+  
+  read_file_entries(m_b1_exc, air3_mc8::s_bolsig_b1_exc);
+  m_b1_exc.scale_x(m_N*units::s_Td);
+  m_b1_exc.scale_y(m_N); 
+  m_b1_exc.make_uniform(m_uniform_entries);
+
+  read_file_entries(m_c4_exc, air3_mc8::s_bolsig_c4_exc);
+
+  m_c4_exc.scale_x(m_N*units::s_Td);
+  m_c4_exc.scale_y(m_N);
+
+  m_c4_exc.make_uniform(m_uniform_entries);
 }
 
 void air3_mc8::parse_photoi(){
 
   ParmParse pp("air3_mc8");
 
-  pp.get("c4v0_exc_eff", m_c4v0_exc_eff);
-  pp.get("c4v1_exc_eff", m_c4v1_exc_eff);
-  pp.get("b1v1_exc_eff", m_b1v1_exc_eff);
+  pp.get("c4v0_exc_rep", m_c4v0_exc_rep);
+  pp.get("c4v1_exc_rep", m_c4v1_exc_rep);
+  pp.get("b1v1_exc_rep", m_b1v1_exc_rep);
 
   pp.get("c4v0_kp", m_c4v0_kp);
-  pp.get("c4v1_kp", m_c4v0_kp);
+  pp.get("c4v1_kp", m_c4v1_kp);
   pp.get("b1v1_kp", m_b1v1_kp);
 
   pp.get("c4v0_X1v0_kr", m_c4v0_X1v0_kr); 
@@ -206,7 +225,6 @@ void air3_mc8::parse_photoi(){
 
   pp.get("k_quench",  m_kq);
   pp.get("2d_factor", m_2dfactor);
-  
 
   m_kq *= m_N;
 
@@ -647,8 +665,6 @@ void air3_mc8::advance_chemistry_euler(Vector<Real>&          a_particle_sources
     Sp += a_photon_densities[i]/a_dt;
   }
 
-
-
   // NEW CODE HERE
   // # of excitations into each excited state
   Real factor;
@@ -658,9 +674,13 @@ void air3_mc8::advance_chemistry_euler(Vector<Real>&          a_particle_sources
   else{
     factor = 1.0;
   }
-  const int num_exc_c4v0 = poisson_reaction(R1*volume*m_c4v0_exc_eff*factor, a_dt);
-  const int num_exc_c4v1 = poisson_reaction(R1*volume*m_c4v1_exc_eff*factor, a_dt);
-  const int num_exc_b1v1 = poisson_reaction(R1*volume*m_b1v1_exc_eff*factor, a_dt);
+
+  const Real Rb1    = m_b1_exc.get_entry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for b1
+  const Real Rc4    = m_c4_exc.get_entry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for c4
+  
+  const int num_exc_c4v0 = poisson_reaction(Rc4*volume*m_c4v0_exc_rep*factor, a_dt);
+  const int num_exc_c4v1 = poisson_reaction(Rc4*volume*m_c4v1_exc_rep*factor, a_dt);
+  const int num_exc_b1v1 = poisson_reaction(Rb1*volume*m_b1v1_exc_rep*factor, a_dt);
   
   // Determine number of radiative de-excitations
   const int num_c4v0_rad = binomial_trials(num_exc_c4v0, m_c4v0_kr/m_c4v0_k);

@@ -95,6 +95,8 @@ protected:
   static std::string s_bolsig_diffco;
   static std::string s_bolsig_alpha;
   static std::string s_bolsig_eta;
+  static std::string s_bolsig_b1_exc;
+  static std::string s_bolsig_c4_exc;
 
   std::string m_transport_file;
 
@@ -111,6 +113,8 @@ protected:
   lookup_table m_e_diffco;
   lookup_table m_e_alpha;
   lookup_table m_e_eta;
+  lookup_table m_b1_exc;
+  lookup_table m_c4_exc;
 
   Vector<int> m_wallbc; // Wall boundary conditions
 
@@ -163,9 +167,9 @@ protected:
   Real m_chemistry_dt;
 
   // Excitation efficiencies into various states
-  Real m_c4v0_exc_eff;
-  Real m_c4v1_exc_eff;
-  Real m_b1v1_exc_eff;
+  Real m_c4v0_exc_rep;
+  Real m_c4v1_exc_rep;
+  Real m_b1v1_exc_rep;
 
   // Predissociation rates for various transitions
   Real m_c4v0_kp;
@@ -227,6 +231,7 @@ protected:
   void parse_electron_diffco();
   void parse_alpha();
   void parse_eta();
+  void parse_excitations();
   void parse_photoi();
   void parse_see();
   void parse_domain_bc();

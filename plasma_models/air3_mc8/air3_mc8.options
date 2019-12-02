@@ -27,6 +27,12 @@ air3_mc8.mobile_ions         = false                       # Mobile ions or not
 air3_mc8.diffusive_ions      = false                       # Diffusive ions or not
 air3_mc8.ion_mobility        = 2.E-4                       # Ion mobility
 
+# ----------------------------------------------------------------------------------------------------	
+# Chemistry algorithm
+# ----------------------------------------------------------------------------------------------------
+air3_mc8.chemistry_algorithm = rk2  # 'euler', 'rk2', or 'rk4'
+air3_mc8.chemistry_dt        = 1.0  # Minimum dt used for chemistry
+
 # ----------------------------------------------------------------------------------------------------
 # RNG stuff
 # ----------------------------------------------------------------------------------------------------
@@ -64,9 +70,9 @@ air3_mc8.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 # ----------------------------------------------------------------------------------------------------
 air3_mc8.2d_factor            = 1E-3      # Correction factor for 2D. Could be computed analytically but I'm too lazy
 
-air3_mc8.c4v0_exc_eff         = 0.08      # Excitation probability per ionization event
-air3_mc8.c4v1_exc_eff         = 0.0034    # Excitation probability per ionization event
-air3_mc8.b1v1_exc_eff         = 0.01     # Excitation probability per ionization event. 
+air3_mc8.c4v0_exc_rep         = 0.8       # Relative excitation probability
+air3_mc8.c4v1_exc_rep         = 0.034     # Relative excitation probability
+air3_mc8.b1v1_exc_rep         = 0.014     # Relative excitation probability
 
 air3_mc8.c4v0_kp              = 2.39E8    # Predissociation rate
 air3_mc8.c4v1_kp              = 17.7E8    # Predissociation rate

@@ -200,16 +200,6 @@ Real godunov::advance(const Real a_dt){
   // on the EB and on the domain walls
   t0 = MPI_Wtime();
   godunov::compute_E_into_scratch();       // Compute the electric field
-  godunov::compute_cdr_gradients();        // Compute cdr gradients
-  t1 = MPI_Wtime();
-  t_grad = t1 - t0;
-
-  t0 = MPI_Wtime();
-  godunov::compute_reaction_network(a_dt); // Advance the reaction network. Put the result in solvers
-  t1 = MPI_Wtime();
-  t_reac = t1-t0;
-
-  t0 = MPI_Wtime();
   godunov::compute_cdr_gradients();        // Recompute cdr gradients after reaction advance (these might have changed)
   godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   godunov::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
@@ -218,17 +208,11 @@ Real godunov::advance(const Real a_dt){
   godunov::compute_sigma_flux();           // Update charge flux for sigma solver
   t1 = MPI_Wtime();
   t_filBC = t1 - t0;
-
-
+  
   t0 = MPI_Wtime();
   godunov::advance_cdr(a_dt);              // Update cdr equations
   t1 = MPI_Wtime();
   t_cdr = t1 - t0;
-
-  t0 = MPI_Wtime();
-  godunov::advance_rte(a_dt);              // Update RTE equations
-  t1 = MPI_Wtime();
-  t_rte = t1-t0;
 
   t0 = MPI_Wtime();
   godunov::advance_sigma(a_dt);            // Update sigma equation
@@ -237,7 +221,7 @@ Real godunov::advance(const Real a_dt){
   
   t0 = MPI_Wtime();
   if((m_step +1) % m_fast_poisson == 0){
-    time_stepper::solve_poisson();                  // Update the Poisson equation
+    time_stepper::solve_poisson();         // Update the Poisson equation
   }
   t1 = MPI_Wtime();
   t_pois = t1 - t0;
@@ -247,6 +231,18 @@ Real godunov::advance(const Real a_dt){
   t1 = MPI_Wtime();
   t_filE = t1-t0;
 
+  t0 = MPI_Wtime();
+  godunov::compute_cdr_gradients();        // Compute cdr gradients
+  godunov::compute_reaction_network(a_dt); // Advance the reaction network. Put the result in solvers
+  t1 = MPI_Wtime();
+  t_reac = t1-t0;
+
+  // Move photons
+  t0 = MPI_Wtime();
+  godunov::advance_rte(a_dt);              // Update RTE equations
+  t1 = MPI_Wtime();
+  t_rte = t1-t0;
+  
   // Update velocities and diffusion coefficients. We don't do sources here.
   t0 = MPI_Wtime();
   godunov::compute_cdr_velo(m_time + a_dt);
@@ -261,7 +257,6 @@ Real godunov::advance(const Real a_dt){
   if(m_debug){
     pout() << endl;
     pout() << "godunov::advance breakdown:" << endl
-	   << "E & grad  = " << 100.0*t_grad/t_tot << "%" << endl
 	   << "BC fill   = " << 100.0*t_filBC/t_tot << "%" << endl
 	   << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
 	   << "CDR adv.  = " << 100.*t_cdr/t_tot << "%" << endl
@@ -835,7 +830,7 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
   a_dt = dt;
 
-#if 1 // debug
+#if 0 // debug
   if(procID() == 0){
     std::cout << "godunov::compute_dt - step = " << m_step << "\t dt = " << a_dt << std::endl;
   }
