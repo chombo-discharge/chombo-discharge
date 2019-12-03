@@ -20,6 +20,7 @@ Welcome to `PlasmaC`'s user documentation!
    * Modified Euler-Maruyama for fluctuating hydrodynamics
    * Godunov splitting
    * Strang splitting based on high-order SSPRK schemes
+   * Subcycling in time is not (yet) supported
 * Parallel I/O with HDF5
 * Sensible and simple-to-use physics interfaces
 
@@ -42,13 +43,13 @@ This documentation is the user documentation `PlasmaC`. There is a separate :dox
 
    GettingStarted
    Model
+   TemporalDiscretization
 	     
 .. toctree::
    :maxdepth: 4
    :caption: Using PlasmaC
 
    Control
-   TemporalDiscretization
    NewSimulations
    Tutorials
    Visualization	     

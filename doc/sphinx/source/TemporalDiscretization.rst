@@ -3,10 +3,15 @@
 Temporal discretization
 =======================
 
-In this chapter we discuss the supported temporal integrators for `PlasmaC`, and discuss their input parameters. These integrators differ in their level of efficiency and accuracy.
+In this chapter we discuss the supported temporal integrators for `PlasmaC`, and discuss their input parameters. These integrators differ in their level of efficiency and accuracy. Currently, none of the integrators can subcycle in time.
 
-For deterministic CFD we recommend the ``SISDC`` which is an adaptive high-order discretization with variable order and variable step functionality. The efficiency and adaptivity of ``SISDC`` has displaced our Godunov (``rk2_tga``) and Strang (``strang2``)  operator splitting methods, and these are likely to be removed in future versions of `PlasmaC`. The multirate method ``MISDC`` (a variety of ``SISDC``) is under development, and is intended for applications where chemistry terms are faster than advective and diffusive time scales.
+Time step limitations
+---------------------
 
+Our time integrators have different time step limitations. Fully explicit codes are limited by the advective and diffusive CFL constraints and usually also the dielectric relaxation time. However, some of the `PlasmaC` integrators eliminate the dielectric relaxation time, and all integrators can handle diffusion either implicitly or explicitly. In some cases only the advective CFL constraint is the only time step restriction.
+
+
+  
 Deterministic integrators
 -------------------------
 
@@ -14,21 +19,16 @@ Deterministic integrators
 
 godunov
 _______
-The ``rk2_tga`` temporal integrator is our least sophisticated temporal integrator. ``rk2_tga`` uses a Godunov splitting between advection-reaction and diffusion, and advances the equations of motion as follows:
+The ``godunov`` temporal integrator is a rather unsophisticated, but very stable, temporal integrator. ``godunov`` uses an operator splitting between charge transport and plasma chemistry in the following way:
 
-1. Advance :math:`\phi^\ast = \phi^k + \Delta t\left[S^k - \nabla\cdot\left(\mathbf{v}^k\phi^k\right)\right]` and :math:`\sigma^\ast = \sigma^k + \Delta tF_\sigma^k`
-2. Compute the new electric field :math:`\mathbf{E}^\ast` by solving the Poisson equation with the new space and surface charge densities :math:`\rho^\ast`, :math:`\sigma^\ast`.
-3. Compute radiative transfer source terms :math:`\eta^\ast = \eta\left(\phi^\ast, \mathbf{E}^\ast\right)`.
-4. Obtain :math:`\Psi_\gamma^\ast` by solving the RTE equations
-5. Compute :math:`S^\ast = S(E^\ast,\phi^\ast,\Psi_\gamma^\ast, \nabla \phi^\ast)` and :math:`\mathbf{v}^\ast = \mathbf{v}\left(\mathbf{E}^\ast, \phi^\ast\right)`. Also recompute boundary fluxes on domains and internal boundaries. 
-6. Advance :math:`\phi^\dagger = \frac{1}{2}\left(\phi^k + \phi^\ast + \Delta t\left[S^\ast - \nabla\cdot\left(\mathbf{v}^\ast \phi^\ast\right)\right]\right)` and :math:`\sigma^{k+1} = \frac{1}{2}\left(\sigma^k + \sigma^\ast + \Delta tF_\sigma^\ast\right)`.
-7. Obtain the new electric field :math:`\mathbf{E}^\dagger` by solving the Poisson equation with :math:`\rho^\dagger` and :math:`\sigma^{k+1}`.
-8. For diffusive species, obtain :math:`\phi^{k+1}` with a implicit diffusion advance (see Eq.~\eqref{eq:tga}). Otherwise, :math:`\phi^{k+1} = \phi^\dagger`.
-9. Obtain the final electric field :math:`\mathbf{E}^{k+1}` by solving the Poisson equation with :math:`\phi^{k+1}` and :math:`\sigma^{k+1}`.
-10. Compute radiative transfer source terms :math:`\eta^\ast = \eta\left(\phi^{k+1}, \mathbf{E}^{k+1}\right)`.   
-11. Obtain :math:`\Psi_\gamma^{k+1}` by solving the RTE equations
+1. Advance :math:`\partial_t\phi = -\nabla\cdot\left(\mathbf{v}\phi - D\nabla\phi + \sqrt{2D\phi}\mathbf{Z}\right)` (and the surface charge solver) over a time step :math:`\Delta t`.
+2. Compute the electric field 
+3. Advance the plasma chemistry over the same time step using the field computed in 2). I.e. advance :math:`\partial_t\phi = S` over a time step :math:`\Delta t`.   
+4. Move photons and deposit them on the mesh. 
+      
+Various integration options for the transport and chemistry steps are available but are discussed elsewhere. Note that the ``godunov`` integrator uses a semi-implicit coupling between the plasma chemistry terms and the electric field, and therefore eliminates the so-called dielectric relaxation time. The formal order of convergence of the ``godunov`` integrator is 1, but the accuracy can be quite good depending on the transport and chemistry schemes that are chosen.
 
-Steps 1 through 7 describes a second order Runge-Kutta method (Heun's method); step 8 and 9 represent the diffusion advance and steps 10 and 11 performs the final update of the RTE and Poisson equations.
+
 
 .. _Chap:strang2:
     
@@ -85,9 +85,9 @@ Finally, note that the advective advance is performed with :math:`\Delta t/2`, a
 
 .. _Chap:SISDC:
 
-SISDC
-_____
-``SISDC`` is a semi-implicit spectral deferred correction method for the `PlasmaC` equation set and is an adaptive high-order discretization with implicit diffusion. This method integrates the advection-diffusion-reaction equations in the following way.
+IMEX SDC
+________
+``imex_sdc`` is a semi-implicit spectral deferred correction method for the `PlasmaC` equation set and is an adaptive high-order discretization with implicit diffusion. This method integrates the advection-diffusion-reaction equations in the following way.
 
 Spectral deferred corrections
 *****************************
@@ -132,7 +132,7 @@ We now discuss the semi-implicit SDC (SISDC) method. First, we apply the method 
 where :math:`\phi_{\mathbf{i}}` denotes a cell-averaged variable, :math:`\mathcal{F}_{\sigma}` is as described in :ref:`Chap:SpatialDiscretization`, :math:`\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}\right) = -D^c_{\mathbf{i}} + S_{\mathbf{i}}` is the advection-reaction operator , and :math:`\mathcal{F}_{\textrm{D}}(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}) = \frac{1}{\kappa_{\mathbf{i}}}\int_{V_{\mathbf{i}}}\left[\nabla\cdot\left(D\nabla\phi\right)\right]dV_{\mathbf{i}}` is the diffusion operator. Note that the advective operator contains the hybrid divergence discussed in :ref:`Chap:AdvectiveDiscretization` and :math:`\mathcal{F}_{\textrm{D}}` is parametrically coupled to :math:`\mathbf{E}` through :math:`D = D\left(\mathbf{E}\right)` (we use a semi-colon to indicate this dependence). Strictly speaking, :math:`\mathcal{F}_{\textrm{AR}}` is parametrically coupled in the same way through the  mobilities and boundary conditions, and additionally coupled to :math:`\Psi` through source terms so that the notation :math:`\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}, \Psi_{\mathbf{i}}\right)` would be appropriate. However, charge injection, advection, and chemistry will be integrated explicitly so this dependence is notationally suppressed. On the other hand, the diffusion part will be solved with the backward Euler method - which yields a Helmholtz equation - and so we need to maintain this dependence for now. Later, we will clarify how this dependence is resolved. The rationale for solving diffusion implicitly is due to the numerical time step constraint of explicit diffusion methods which scales as :math:`\mathcal{O}\left(\Delta x^2\right)`, whereas advection scales more favorably at :math:`\mathcal{O}\left(\Delta x\right)`. We have chosen to integrate the reactive terms explicitly. The reason is that the reactive terms can be non-local, i.e. they can depend on the electron gradient. This is for example the case for fluid models in the local energy approximation where the electron energy source term contains terms that are proportional to the electron diffusion term :math:`D_e\nabla\phi_e`. Implicit discretization of the reactive terms then yield a fully coupled system rather than systems coupled only within individual cells. Charge injection is also handled explicitly. This design choice is mandated by the fact that implicit charge injection through the diffusion terms couples every diffusive species, leading to a system of diffusion equations that are fully coupled through their boundary conditions. Although charge injection could reasonably be performed as a separate step, this leads to numerical instabilities for cut-cell methods since the injected charge must be normalized by the volume fraction of the cell (which can be arbitrarily small). 
 
 SISDC predictor
-_______________
+***************
 Next, we present the SISDC method. In what follows, we suppress the index :math:`{\mathbf{i}}` as it is not explicitly needed. Given an interval :math:`[t_n, t_{n+1}]` on which a solution is sought, SDC methods divide this interval into :math:`p` subintervals :math:`t_n = t_{n,0} < t_{n,1} < \ldots < t_{n,p} = t_{n+1}`. Our discussion, however, pertains only to the interval :math:`[t_n, t_{n+1}]` so we compress the notation to :math:`t_m\equiv t_{n,m}`. We obtain an initial solution :math:`\phi_{m}^0, m=0,1,\ldots,p` as the semi-implicit advance
 
 .. math::
@@ -239,22 +239,21 @@ We have implemented the SISDC algorithm in the ``sisdc`` class in :file:`/time_s
 
 .. _Chap:MISDC:
 
-MISDC
-______
-`MISDC` is a semi-implicit spectral deferred correction method for the :math:`PlasmaC` equation set and is an adaptive high-order discretization with implicit diffusion and multirate substepping for reactive terms. This integrator is currently under development. 
 
 Stochastic integrators
 ----------------------
 
 Deterministic CFD integrators are generally not suitable for stochastic ODEs. For example, the recursive nature of Heun's method or spectral deferred corrections hardly make sense for stochastic ODEs.
 
-For fluctuating hydrodynamics we are preparing several temporal integrators. Currently, we only support the Euler-Maruyama integrator which is first order accurate in time (although with an accurate advective integrator).
+For fluctuating hydrodynamics we are preparing several temporal integrators. ``godunov`` is generally useful for FHD but we also provide an Euler-Maruyama integrator (``euler_maruyama``) which is first order accurate in time (although with an accurate advective integrator). Although ``euler_maruyama`` is functionally similar to ``godunov``, it does not eliminate the dielectric relaxation time and is therefore less stable for some simulation cases. 
 
 .. _Chap:euler_maruyama:
 
 euler_maruyama
 ______________
 
-:ref:`Chap:euler_maruyama` implements the Euler-Maruyama method. This method is based on a semi-implicit Euler method with implicit diffusion. 
+:ref:`Chap:euler_maruyama` implements the Euler-Maruyama method. This method is based on an Euler method with explicit or implicit diffusion.
 
+
+  
 .. bibliography:: references.bib

@@ -42,13 +42,13 @@ Controlling output
 * :file:`output_directory/plt` contains all plot files.
 * :file:`output_directory/chk` contains all checkpoint files, which are used for restarting.
 * :file:`output_directory/mpi` contains information about individual MPI ranks. 
-* :file:`output_directory/geo` contains geometric files that are written by PlasmaC (if you enable ``plasma_engine.write_ebis``).
+* :file:`output_directory/geo` contains geometric files that are written by PlasmaC (if you enable ``plasma_engine.write_ebis``). 
 
-The files in :file:`output_directory/geo` do *not* represent your geometry in the form of level sets. Instead, the files that are placed here are HDF5 representations of your embedded boundary graph, which can be *read* by PlasmaC if you enable ``plasma_engine.read_ebis``. This is a shortcut that allows faster geometry generation when you restart simulations.
+The files in :file:`output_directory/geo` do *not* represent your geometry in the form of level sets. Instead, the files that are placed here are HDF5 representations of your embedded boundary graph, which can be *read* by PlasmaC if you enable ``plasma_engine.read_ebis``. This is a shortcut that allows faster geometry generation when you restart simulations, but geometry generation is typically so fast that it is never used. 
 
-The reason for this design is that PlasmaC can end up writing thousands of files per simulation and we feel that having a directory structure helps us navigate the simulation data.
+The reason for this structure is that PlasmaC can end up writing thousands of files per simulation and we feel that having a directory structure helps us navigate simulation data.
 
-:ref:`Chap:plasma_engine` is responsible for writing output files at specified intervals. However, *you* are responsible for specifying what goes into those files. Since not all variables are always of interest, the solver classes themselves have options ``plt_vars`` that specify which output variables will be written to the output file. For example, our CDR integrators have output options
+The driver class :ref:`Chap:plasma_engine` is responsible for writing output files at specified intervals, but the user is responsible for specifying what goes into those files. Since not all variables are always of interest, the solver classes themselves have options ``plt_vars`` that specify which output variables will be written to the output file. For example, our convection-diffusion-reaction solver classes have the following output options:
 
 .. code-block:: bash
 
@@ -79,7 +79,7 @@ Restarting simulations is done in exactly the same way as running simulations, a
 
    mpirun -np 32 <application_executable> <input_file> plasma_engine.restart=10
 
-will restart from step 10. If you set ``plasma_engine.restart=0``, you will get a fresh simulation. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and `PlasmaC` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` or ``plasma_engine.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory.
+will restart from step 10. If you set ``plasma_engine.restart=0``, you will get a fresh simulation. Specifying anything but an integer is an error. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and `PlasmaC` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` or ``plasma_engine.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory.
 
 .. _Chap:Visualization:
 

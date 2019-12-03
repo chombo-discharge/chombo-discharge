@@ -43,7 +43,57 @@ The must implement a set of :ref:`Chap:species` that describes the various chemi
 					 const Real             a_time,
 					 const Real             a_kappa) const = 0;
 
-This function is called for all grid cells in a `PlasmaC` simulation. Here, the first two arguments are output arguments that hold the particle and photon sources. The third and fourth argument are input arguments that hold the densities in the grid cell. We have chosen this format since source terms can then be filled using a variety of algorithms. For example, particle source terms can be filled using reaction-rate equations, tau-leaping schemes, or even stochastic simulation algorithms. We would like to remark that the input and output from these functions can be interpreted in different ways by different solvers. For example, the Monte-Carlo radiative transfer solver can take ``a_photon_source`` to be either a number per grid cell, or a volumetric source term. For example, if you use a stochastic simulation algorithm it is natural to describe ``a_photon_sources`` as the number of photons produced in the cell, and the Monte-Carlo solver needs to be informed that its source term contains a number rather than a rate. 
+This function is called for all grid cells in a `PlasmaC` simulation. Here, the first two arguments are output arguments that hold the particle and photon sources. The third and fourth argument are input arguments that hold the densities in the grid cell. We have chosen this format since source terms can then be filled using a variety of algorithms. For example, particle source terms can be filled using reaction-rate equations, tau-leaping schemes, or even stochastic simulation algorithms. We would like to remark that the input and output from these functions can be interpreted in different ways by different solvers. For example, the Monte-Carlo radiative transfer solver can take ``a_photon_source`` to be either a number per grid cell, or a volumetric source term. For example, if you use a stochastic simulation algorithm it is natural to describe ``a_photon_sources`` as the number of photons produced in the cell, and the Monte-Carlo solver needs to be informed that its source term contains a number rather than a rate.
+
+Implicit plasma chemistry
+_________________________
+
+Implicit treatment of plasma chemistry *is* possible for the ``godunov`` integrator but is not natively supported. The reason for this is that the plasma chemistry terms can be non-local in space, and even stochastic. If the user wants to use implicit chemistry, he will have to implement it himself.
+
+In `PlasmaC` the plasma chemistry is always advanced through a routine
+
+.. code-block:: c++
+
+  virtual void advance_reaction_network(Vector<Real>&          a_cdr_sources,
+					Vector<Real>&          a_photon_sources,
+					const Vector<Real>     a_cdr_densities,
+					const Vector<RealVect> a_cdr_gradients,
+					const Vector<Real>     a_photon_densities,
+					const RealVect         a_E,
+					const RealVect         a_pos,
+					const Real             a_dx,
+					const Real             a_dt,
+					const Real             a_time,
+					const Real             a_kappa) const = 0;		
+
+and the assumption is that this routine will provide source terms for the convection-diffusion-reaction solvers and the radiative transport solvers for advancement over a time step ``a_dt``. In all of `PlasmaC` this routine is used such that the plasma chemistry is *always* implies the advance
+
+.. math::
+
+   \phi^{k+1} = \phi^{k} + \Delta t S,
+
+where :math:`\phi^k` is ``a_cdr_densities`` in the function call above and :math:`S` is the output argument ``a_cdr_sources`` in the ``advance_reaction_network`` routine above. However, we make no assumptions about how :math:`S` is computed. Usually, :math:`S` is computed in some explicit form using tabulated values for ionization coefficients or somesuch, and the above equation becomes a forward Euler method. This is the assumption that we make in e.g. the ``imex_sdc`` class. However, one may certainly perform an implicit advance over the time step ``a_dt`` inside the ``advance_reaction_network`` call, and then set the source term as :math:`S = (\phi^{k+1}-\phi^{k})/\Delta t`. This is perfectly consistent will all the `PlasmaC` integrators and it implies that each plasma chemistry update is done using the internals of ``advance_reaction_network``. 
+
+As an example, consider that one wants to advance :math:`\partial_t\phi = \alpha\phi` implicitly by using the backward Euler method. The solution is :math:`\phi^{k+1} = \phi^k/(1-\alpha\Delta t)` and :math:`S = \frac{\alpha}{1-\alpha \Delta t}\phi^k`, although this latter step would simply be done numerically using :math:`S = \left(\phi^{k+1}-\phi^k\right)/\Delta t`, as implemented below:
+
+.. code-block:: c++
+		
+  virtual void advance_reaction_network(Vector<Real>&          a_cdr_sources,
+					Vector<Real>&          a_photon_sources,
+					const Vector<Real>     a_cdr_densities,
+					const Vector<RealVect> a_cdr_gradients,
+					const Vector<Real>     a_photon_densities,
+					const RealVect         a_E,
+					const RealVect         a_pos,
+					const Real             a_dx,
+					const Real             a_dt,
+					const Real             a_time,
+					const Real             a_kappa) const{
+
+     Real phiOld = a_cdr_densities[0];
+     Real phiNew = phiOld/(1-alpha*a_dt);
+     a_cdr_sources[0] = (phiNew - phiOld)/a_dt
+  }					 
 
 Electrostatic boundary and initial conditions
 ---------------------------------------------
