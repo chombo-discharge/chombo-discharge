@@ -7,6 +7,7 @@ godunov.min_dt           = 0.        # Minimum permitted time step
 godunov.max_dt           = 1.E99     # Maximum permitted time step
 godunov.cfl              = 0.5       # CFL number
 godunov.diffusion        = auto      # Diffusion. 'explicit', 'implicit', or 'auto'
+godunov.transport        = rk2       # Transport algorithm. 'euler' or 'rk2'
 godunov.relax_time       = 1.0       # Relaxation time constant
 godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
 godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations

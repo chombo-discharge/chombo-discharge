@@ -408,7 +408,13 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
   data_ops::set_value(scratch, 0.0);
   
   if(a_extrap_dt > 0.0 && m_extrap_source){
-    compute_divD(scratch, a_state);
+    //    compute_divD(scratch, a_state);
+    if(m_diffusive){
+      Vector<LevelData<EBCellFAB>* > scratchAlias, stateAlias;
+      m_amr->alias(scratchAlias, scratch);
+      m_amr->alias(stateAlias,   a_state);
+      m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
+    }
     data_ops::incr(scratch, m_source, 1.0);
 
     m_amr->average_down(scratch, m_phase);

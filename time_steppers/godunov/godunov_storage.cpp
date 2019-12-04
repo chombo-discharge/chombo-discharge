@@ -27,6 +27,7 @@ godunov::cdr_storage::~cdr_storage(){
 void godunov::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_scratch2, m_phase, m_ncomp);
+  m_amr->allocate(m_scratch3, m_phase, m_ncomp);
   m_amr->allocate(m_gradient, m_phase, SpaceDim);
 
   m_amr->allocate(m_scratchIVs,  m_phase, m_ncomp);
@@ -46,6 +47,7 @@ void godunov::cdr_storage::allocate_storage(){
 void godunov::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
+  m_amr->deallocate(m_scratch3);
   m_amr->deallocate(m_gradient);
 
   m_amr->deallocate(m_scratchIVs);
@@ -131,11 +133,11 @@ godunov::sigma_storage::sigma_storage(const RefCountedPtr<amr_mesh>& a_amr,
 godunov::sigma_storage::~sigma_storage(){
 
 }
-  
-void godunov::sigma_storage::allocate_storage(){
 
+void godunov::sigma_storage::allocate_storage(){
+  m_amr->allocate(m_scratch,  m_phase, m_ncomp);
 }
 
 void godunov::sigma_storage::deallocate_storage(){
-
+  m_amr->deallocate(m_scratch);
 }

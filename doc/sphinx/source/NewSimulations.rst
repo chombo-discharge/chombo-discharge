@@ -48,7 +48,7 @@ This function is called for all grid cells in a `PlasmaC` simulation. Here, the 
 Implicit plasma chemistry
 _________________________
 
-Implicit treatment of plasma chemistry *is* possible for the ``godunov`` integrator but is not natively supported. The reason for this is that the plasma chemistry terms can be non-local in space, and even stochastic. If the user wants to use implicit chemistry, he will have to implement it himself.
+In cases where transport and plasma chemistry is split, implicit treatment of the plasma chemistry terms is possible. However, it is not natively supported. The reason for this is that the plasma chemistry terms can be non-local in space, and even stochastic. If the user wants to use implicit chemistry, he will have to implement it himself.
 
 In `PlasmaC` the plasma chemistry is always advanced through a routine
 

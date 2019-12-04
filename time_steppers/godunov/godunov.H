@@ -40,6 +40,11 @@ public:
 
 protected:
 
+  enum whichTransport{
+    euler = 0,
+    rk2   = 1,
+  };
+
   enum whichDiffusion{
     Explicit  = 0,
     Implicit  = 1,
@@ -58,6 +63,7 @@ protected:
   bool m_implicit_diffusion;
 
   whichDiffusion m_whichDiffusion;
+  whichTransport m_whichTransport;
 
   // Get functions for storage
   RefCountedPtr<cdr_storage>& get_cdr_storage(const cdr_iterator& a_solverit);
@@ -74,9 +80,11 @@ protected:
   void compute_cdr_domain_fluxes();
   void compute_sigma_flux();
   void compute_reaction_network(const Real a_dt);
-  void advance_cdr(const Real a_dt);
+
+  void advance_transport(const Real a_dt);
+  void advance_transport_euler(const Real a_dt);
+  void advance_transport_rk2(const Real a_dt);
   void advance_rte(const Real a_dt);
-  void advance_sigma(const Real a_dt);
 
   void compute_cdr_velo(const Real a_time);
   void compute_cdr_diffco(const Real a_time);
@@ -84,6 +92,7 @@ protected:
   // Various option parsing
   void parse_diffusion();
   void parse_advection();
+  void parse_transport();
   void parse_floor();
   void parse_debug();
 };

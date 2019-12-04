@@ -25,6 +25,7 @@ public:
 
   EBAMRCellData& get_scratch()  { return m_scratch;    }
   EBAMRCellData& get_scratch2() { return m_scratch2;   }
+  EBAMRCellData& get_scratch3() { return m_scratch3;   }
   EBAMRCellData& get_gradient() { return m_gradient;   }
 
   EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
@@ -47,6 +48,7 @@ protected:
 
   EBAMRCellData m_scratch;  // Scratch data
   EBAMRCellData m_scratch2; // Scratch data
+  EBAMRCellData m_scratch3; // Scratch data
   EBAMRCellData m_gradient; // Storage for holding gradient
 
   EBAMRIVData m_scratchIVs; // Scratch data
@@ -119,12 +121,16 @@ public:
   
   void allocate_storage();
   void deallocate_storage();
+
+  EBAMRIVData& get_scratch() {return m_scratch;}
   
 protected:
 
   RefCountedPtr<amr_mesh> m_amr; // Needed for allocation. Will allocate
   phase::which_phase m_phase;    // on this phase
   int m_ncomp;                   // with this many components
+
+  EBAMRIVData m_scratch;
 };
 
 #endif
