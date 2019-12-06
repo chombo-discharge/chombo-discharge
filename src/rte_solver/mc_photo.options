@@ -36,7 +36,7 @@ mc_photo.bc_z_low          = outflow       # Boundary condition
 mc_photo.bc_z_high         = outflow       # Boundary condition
 mc_photo.poiss_exp_swap    = 100           # Swap out Poisson with exponential distribution above this mean
 mc_photo.photon_generation = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
-mc_photo.source_type       = volume_rate   # 'number'      = Source term contains the number of photons produced
+mc_photo.source_type       = number        # 'number'      = Source term contains the number of photons produced
                                            # 'volume'      = Source terms contains the number of photons produced per unit volume
                                            # 'volume_rate' = Source terms contains the volumetric rate
                                            # 'rate'        = Source terms contains the rate
