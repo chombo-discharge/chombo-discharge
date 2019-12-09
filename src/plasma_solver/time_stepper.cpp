@@ -15,7 +15,7 @@
 #include <EBLevelDataOps.H>
 
 #define USE_FAST_REACTIONS  1
-#define USE_FAST_VELOCITIES 1
+#define USE_FAST_VELOCITIES 0 // I think there's a bug in the C-style VLA methods. Please don't use this until this is clarified.
 #define USE_FAST_DIFFUSION  1
 
 time_stepper::time_stepper(){
@@ -257,15 +257,24 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
     Vector<EBCellFAB*> particle_sources(num_species);
     Vector<EBCellFAB*> particle_densities(num_species);
     Vector<EBCellFAB*> particle_gradients(num_species);
+    Vector<EBCellFAB*> particle_velocities(num_species, NULL);
     Vector<EBCellFAB*> photon_sources(num_photons);
     Vector<EBCellFAB*> photon_densities(num_photons);
+
     
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const RefCountedPtr<cdr_solver>& solver = solver_it();
       const int idx = solver_it.get_solver();
       particle_sources[idx]   = &(*a_particle_sources[idx])[dit()];
       particle_densities[idx] = &(*a_particle_densities[idx])[dit()];
       particle_gradients[idx] = &(*a_particle_gradients[idx])[dit()];
+
+      if(solver->is_mobile()){
+	const EBAMRCellData& velo = solver->get_velo_cell();
+	particle_velocities[idx] = &((*velo[a_lvl])[dit()]);
+      }
     }
+
     
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
@@ -326,6 +335,7 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
 				   photon_sources,
 				   particle_densities,
 				   particle_gradients,
+				   particle_velocities,
 				   photon_densities,
 				   interp_stencils[a_lvl][dit()],
 				   a_E[dit()],
@@ -774,6 +784,7 @@ void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a
 						  Vector<EBCellFAB*>&          a_photon_sources,
 						  const Vector<EBCellFAB*>&    a_particle_densities,
 						  const Vector<EBCellFAB*>&    a_particle_gradients,
+						  const Vector<EBCellFAB*>&    a_particle_velocities,
 						  const Vector<EBCellFAB*>&    a_photon_densities,
 						  const BaseIVFAB<VoFStencil>& a_interp_stencils,
 						  const EBCellFAB&             a_E,
@@ -786,6 +797,7 @@ void time_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a
 					  a_photon_sources,
 					  a_particle_densities,
 					  a_particle_gradients,
+					  a_particle_velocities,
 					  a_photon_densities,
 					  a_interp_stencils,
 					  a_E,
@@ -813,6 +825,7 @@ void time_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&    
 							 Vector<EBCellFAB*>&          a_photon_sources,
 							 const Vector<EBCellFAB*>&    a_particle_densities,
 							 const Vector<EBCellFAB*>&    a_particle_gradients,
+							 const Vector<EBCellFAB*>&    a_particle_velocities,
 							 const Vector<EBCellFAB*>&    a_photon_densities,
 							 const BaseIVFAB<VoFStencil>& a_interp_stencils,
 							 const EBCellFAB&             a_E,
@@ -862,23 +875,47 @@ void time_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&    
 
     // Compute cdr_densities and their gradients on centroids
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const RefCountedPtr<cdr_solver>& solver = solver_it();
       const int idx = solver_it.get_solver();
 
-      Real phi = 0.0;
-      RealVect grad = RealVect::Zero;
-      for (int i = 0; i < stencil.size(); i++){
-	const VolIndex& ivof = stencil.vof(i);
-	const Real& iweight  = stencil.weight(i);
-	      
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  grad[dir] += (*a_particle_gradients[idx])(ivof, dir)*iweight;
-	}
+      bool applyStencil = true;
 
-	phi += (*a_particle_densities[idx])(ivof,0)*iweight;
+      if(solver->is_mobile()){
+	const EBCellFAB& velo = *a_particle_velocities[idx];
+	const RealVect v = RealVect(D_DECL(velo(vof,0), velo(vof,1), velo(vof,2)));
+	if(PolyGeom::dot(v,ebisbox.normal(vof)) > 0.0){ // Flow away from the boundary.
+	  applyStencil = false;
+	}
+	else{
+	  applyStencil = true;
+	}
       }
+      else{
+	applyStencil = true;
+      }
+
+      if(applyStencil){
+	Real phi = 0.0;
+	RealVect grad = RealVect::Zero;
+	for (int i = 0; i < stencil.size(); i++){
+	  const VolIndex& ivof = stencil.vof(i);
+	  const Real& iweight  = stencil.weight(i);
+
+	  phi += (*a_particle_densities[idx])(ivof,0)*iweight;
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    grad[dir] += (*a_particle_gradients[idx])(ivof, dir)*iweight;
+	  }
+	}
       
-      particle_densities[idx] = Max(zero, phi);
-      particle_gradients[idx] = grad;
+	particle_densities[idx] = Max(zero, phi);
+	particle_gradients[idx] = grad;
+      }
+      else{
+	particle_densities[idx] = Max(zero, (*a_particle_densities[idx])(vof,0));
+	particle_gradients[idx] = RealVect(D_DECL((*a_particle_gradients[idx])(vof,0),
+						  (*a_particle_gradients[idx])(vof,1),
+						  (*a_particle_gradients[idx])(vof,2)));
+      }
     }
 
     // Compute RTE densities on the centroids
@@ -909,11 +946,7 @@ void time_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&    
 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-#if 1 // Original code
       (*a_particle_sources[idx])(vof, 0) = particle_sources[idx];
-#else // Debug
-      (*a_particle_sources[idx])(vof, 0) = 1.2345;
-#endif
     }
     
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -2126,20 +2159,25 @@ void time_stepper::compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_s
   const Real dx                = m_amr->get_dx()[a_lvl];
   const RealVect origin        = m_physdom->get_prob_lo();
 
-
-  
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
     Vector<EBCellFAB*> sources(num_species);
     Vector<EBCellFAB*> cdr_densities(num_species);
     Vector<EBCellFAB*> cdr_gradients(num_species);
     Vector<EBCellFAB*> rte_densities(num_photons);
+    Vector<EBCellFAB*> cdr_velocities(num_species, NULL);
     
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const RefCountedPtr<cdr_solver>& solver = solver_it();
       const int idx = solver_it.get_solver();
       sources[idx]       = &(*a_sources[idx])[dit()];
       cdr_densities[idx] = &(*a_cdr_densities[idx])[dit()];
       cdr_gradients[idx] = &(*a_cdr_gradients[idx])[dit()];
+      
+      if(solver->is_mobile()){
+	const EBAMRCellData& velo = solver->get_velo_cell();
+	cdr_velocities[idx] = &((*velo[a_lvl])[dit()]);
+      }
     }
     
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -2166,6 +2204,7 @@ void time_stepper::compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_s
       time_stepper::compute_cdr_sources_irreg(sources,
 					      cdr_densities,
 					      cdr_gradients,
+					      cdr_velocities,
 					      rte_densities,
 					      E,
 					      gE,
@@ -2275,6 +2314,7 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
 void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sources,
 					     const Vector<EBCellFAB*>&     a_cdr_densities,
 					     const Vector<EBCellFAB*>&     a_cdr_gradients,
+					     const Vector<EBCellFAB*>&     a_cdr_velocities,
 					     const Vector<EBCellFAB*>&     a_rte_densities,
 					     const EBCellFAB&              a_E,
 					     const EBCellFAB&              a_gradE,
@@ -2286,6 +2326,7 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
     this->compute_cdr_sources_irreg_interp(a_sources,
 					   a_cdr_densities,
 					   a_cdr_gradients,
+					   a_cdr_velocities,
 					   a_rte_densities,
 					   a_E,
 					   a_gradE,
@@ -2311,6 +2352,7 @@ void time_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sou
 void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&           a_sources,
 						    const Vector<EBCellFAB*>&     a_cdr_densities,
 						    const Vector<EBCellFAB*>&     a_cdr_gradients,
+						    const Vector<EBCellFAB*>&     a_cdr_velocities,
 						    const Vector<EBCellFAB*>&     a_rte_densities,
 						    const EBCellFAB&              a_E,
 						    const EBCellFAB&              a_gradE,
@@ -2357,23 +2399,48 @@ void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&         
       }
     }
 
-    // Compute cdr_densities and their gradients on centroids
+    // Compute cdr_densities and their gradients on centroids. If the flow is towards the boundary, we apply a recentering
+    // stencil. If the flow is AWAY from the boundary, applying a stencils means that we extrapolate using downwind information.
+    // This is typically bad so we try to eliminate those cases. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+      const RefCountedPtr<cdr_solver>& solver = solver_it();
       const int idx = solver_it.get_solver();
 
-      Real phi = Max(0.0, (*a_cdr_densities[idx])(vof,0));;
-      RealVect grad = RealVect::Zero;
-      for (int i = 0; i < stencil.size(); i++){
-	const VolIndex& ivof = stencil.vof(i);
-	const Real& iweight  = stencil.weight(i);
-	      
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  grad[dir] += (*a_cdr_gradients[idx])(ivof, dir);
+      bool applyStencil = true;
+
+      if(solver->is_mobile()){
+	const EBCellFAB& velo = *a_cdr_velocities[idx];
+	const RealVect v = RealVect(D_DECL(velo(vof,0), velo(vof,1), velo(vof,2)));
+	if(PolyGeom::dot(v,ebisbox.normal(vof)) > 0.0){ // Flow away from the boundary.
+	  applyStencil = false;
+	}
+	else{
+	  applyStencil = true;
 	}
       }
+
+      if(applyStencil){
+	Real phi = 0.0;
+	RealVect grad = RealVect::Zero;
+	for (int i = 0; i < stencil.size(); i++){
+	  const VolIndex& ivof = stencil.vof(i);
+	  const Real& iweight  = stencil.weight(i);
+
+	  phi += (*a_cdr_densities[idx])(ivof,0)*iweight;
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    grad[dir] += (*a_cdr_gradients[idx])(ivof, dir)*iweight;
+	  }
+	}
       
-      cdr_densities[idx] = Max(zero, phi);
-      cdr_grad[idx] = grad;
+	cdr_densities[idx] = Max(zero, phi);
+	cdr_grad[idx] = grad;
+      }
+      else{
+	cdr_densities[idx] = Max(zero, (*a_cdr_densities[idx])(vof,0));
+	cdr_grad[idx] = RealVect(D_DECL((*a_cdr_gradients[idx])(vof,0),
+					(*a_cdr_gradients[idx])(vof,1),
+					(*a_cdr_gradients[idx])(vof,2)));
+      }
     }
 
     // Compute RTE densities on the centroids
