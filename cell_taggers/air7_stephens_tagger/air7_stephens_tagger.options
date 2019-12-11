@@ -1,0 +1,14 @@
+# ====================================================================================================
+# AIR7_STEPHENS_TAGGER CLASS OPTIONS
+# ====================================================================================================
+air7_stephens_tagger.verbosity         = -1           # Verbosity
+air7_stephens_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+air7_stephens_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
+air7_stephens_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+air7_stephens_tagger.buffer            = 0            # Grow tagged cells
+
+air7_stephens_tagger.coarsen_curvature = 5.0          # Curvature coarsening
+air7_stephens_tagger.refine_curvature  = 5.0          # Curvature refinement
+air7_stephens_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+air7_stephens_tagger.coarsen_alpha     = 0.5          # Set alpha coarsening. Higher => Less mesh
+air7_stephens_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth
