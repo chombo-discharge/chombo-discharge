@@ -206,19 +206,22 @@ public:
   RealVect random_direction3D();
 #endif
   
-   int poisson_reaction(const Real a_propensity, const Real a_dt) const;
+  int poisson_reaction(const Real a_propensity, const Real a_dt) const;
   
-   Real compute_alpha(const RealVect a_E) const;
-   Real compute_eta(const RealVect a_E)   const;
-   Real compute_eta2(const RealVect a_E)  const;
-   Real compute_eta3(const RealVect a_E)  const;
-   Real compute_beta(const RealVect a_E)  const;
+  Real compute_alpha(const RealVect a_E) const;
+  Real compute_eta(const RealVect a_E)   const;
+  Real compute_eta2(const RealVect a_E)  const;
+  Real compute_eta3(const RealVect a_E)  const;
+  Real compute_beta(const RealVect a_E)  const;
 
-   Real compute_De(const RealVect a_E) const;
+  Real compute_De(const RealVect a_E) const;
 
-   RealVect compute_ve(const RealVect a_E) const;
-   RealVect compute_vp(const RealVect a_E) const;
-   RealVect compute_vn(const RealVect a_E) const;
+  RealVect compute_ve(const RealVect a_E) const;
+  RealVect compute_vp(const RealVect a_E) const;
+  RealVect compute_vn(const RealVect a_E) const;
+
+  Real excitation_rates(const Real a_E) const;
+  Real sergey_factor(const Real a_O2frac) const;
 
   class electron : public species {
   public:
@@ -271,7 +274,7 @@ public:
     Real get_kappa(const RealVect a_pos) const;
     Real get_random_kappa() const;
 
-     Real get_pO2() const { return m_pO2; }
+    Real get_pO2() const { return m_pO2; }
 
   protected:
     Real m_pO2;

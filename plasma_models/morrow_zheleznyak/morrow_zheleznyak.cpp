@@ -103,6 +103,21 @@ void morrow_zheleznyak::advance_reaction_network(Vector<Real>&          a_partic
   return;
 }
 
+Real morrow_zheleznyak::excitation_rates(const Real a_E) const{
+  const Real Etd = a_E/(m_N*units::s_Td);
+
+  Real y = 1.0;
+  if(Etd > 100){
+    y = 0.1*exp(233/Etd);
+  }
+
+  return y;
+}
+
+Real morrow_zheleznyak::sergey_factor(const Real a_O2frac) const{
+  return 3E-2 + 0.4*pow(a_O2frac, 0.6);
+}
+
 
 
 // Deterministic reaction-rate equation
@@ -126,6 +141,7 @@ void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
   // Get some aux stuff for propensity functions
   const RealVect Ve = compute_ve(a_E);
   const Real ve     = Ve.vectorLength();
+  const Real E      = a_E.vectorLength();
   const Real alpha  = compute_alpha(a_E);
   const Real eta    = compute_eta(a_E);
   const Real beta   = compute_beta(a_E);
@@ -181,7 +197,7 @@ void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
 
   // Reaction 6: e + M => e + M + y
   //  const Real a6 = a1*m_exc_eff*m_pq/(m_p+m_pq);
-  const Real a6 = floor(a1*volume*m_exc_eff*m_pq/(m_p+m_pq));
+  const Real a6 = a1*volume*(m_pq/(m_p+m_pq))*sergey_factor(m_fracO2)*excitation_rates(E);
   const int S6  = poisson_reaction(a6, a_dt);
   a_photon_sources[0] = 1.0*S6;
 
@@ -227,6 +243,7 @@ void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
   // Get some aux stuff for propensity functions
   const RealVect Ve = compute_ve(a_E);
   const Real ve     = Ve.vectorLength();
+  const Real E      = a_E.vectorLength();
   const Real alpha  = compute_alpha(a_E);
   const Real eta    = compute_eta(a_E);
   const Real beta   = compute_beta(a_E);
@@ -273,7 +290,7 @@ void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
 
   // Reaction 6: e + M => e + M + y
   const Real quench = m_pq/(m_p+m_pq);
-  const Real a6     = Xe*alpha*ve*m_exc_eff*m_photoi_eff*quench;
+  const Real a6     = Xe*alpha*ve*sergey_factor(m_fracO2)*excitation_rates(E);
   const int S6      = poisson_reaction(a6, a_dt);
   a_photon_sources[0] = 1.0*S6;
 
@@ -318,10 +335,11 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
   //
   const RealVect Ve = compute_ve(a_E);
   const Real ve     = Ve.vectorLength();
+  const Real E      = a_E.vectorLength();
   const Real alpha  = compute_alpha(a_E);
   const Real eta    = compute_eta(a_E);
   const Real beta   = compute_beta(a_E);
-  const Real eff    = m_exc_eff*m_photoi_eff*m_pq/(m_p+m_pq);
+  const Real eff    = sergey_factor(m_fracO2)*excitation_rates(E)*m_pq/(m_p+m_pq);
 
 
   // Six reactions for this plasma model:
@@ -895,8 +913,6 @@ void morrow_zheleznyak::parse_gas_params(){
   pp.get("gas_O2_frac",                m_fracO2);
   pp.get("gas_pressure",               m_p);
   pp.get("gas_quenching_pressure",     m_pq);
-  pp.get("excitation_efficiency",      m_exc_eff);
-  pp.get("photoionization_efficiency", m_photoi_eff);
 }
 
 void morrow_zheleznyak::parse_alpha_corr(){

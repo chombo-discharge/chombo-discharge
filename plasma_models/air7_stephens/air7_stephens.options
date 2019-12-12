@@ -13,8 +13,8 @@ air7_stephens.uniform_tables      = 100	                   #  Converted # of poi
 # ----------------------------------------------------------------------------------------------------
 air7_stephens.pressure            = 1.0                         # Gas pressure
 air7_stephens.temperature         = 300                         # Gas temperature
-air7_stephens.frac_N2             = 0.2                         # N2 fraction
-air7_stephens.frac_O2             = 0.8                         # O2 fraction
+air7_stephens.frac_N2             = 0.8                         # N2 fraction
+air7_stephens.frac_O2             = 0.2                         # O2 fraction
 
 
 # ----------------------------------------------------------------------------------------------------	

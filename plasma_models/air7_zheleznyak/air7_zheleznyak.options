@@ -13,9 +13,8 @@ air7_zheleznyak.uniform_tables      = 100	                   #  Converted # of p
 # ----------------------------------------------------------------------------------------------------
 air7_zheleznyak.pressure            = 1.0                         # Gas pressure
 air7_zheleznyak.temperature         = 300                         # Gas temperature
-air7_zheleznyak.frac_N2             = 0.2                         # N2 fraction
-air7_zheleznyak.frac_O2             = 0.8                         # O2 fraction
-
+air7_zheleznyak.frac_N2             = 0.8                         # N2 fraction
+air7_zheleznyak.frac_O2             = 0.2                         # O2 fraction
 
 # ----------------------------------------------------------------------------------------------------	
 # Transport properties
