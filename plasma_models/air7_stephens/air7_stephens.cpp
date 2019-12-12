@@ -32,35 +32,20 @@ std::string air7_stephens::s_bolsig_alphaO2  = "# O2 Ionization (E/N, rate/N)";
 air7_stephens::air7_stephens() {
 
   instantiate_species();
-  pout() << "done insta species" << endl;
   parse_transport_file();
-  pout() << "done parse transport file" << endl;
   parse_transport();
-  pout() << "done parse transport" << endl;
   parse_chemistry();
-  pout() << "done parse chmiestyr" << endl;
   parse_gas_params();
-  pout() << "done parse gas params" << endl;
   parse_electron_mobility();
-  pout() << "done parse mobility" << endl;
   parse_electron_diffco();
-  pout() << "done parse diffco" << endl;
   parse_alpha();
-  pout() << "done parse alpha" << endl;
   parse_eta();
-  pout() << "done parse eta" << endl;
   parse_excitations();
-  pout() << "done parse excitations" << endl;
   parse_photoi();
-  pout() << "done parse photoi" << endl;
   parse_temperature();
-  pout() << "done parse temperature" << endl;
   parse_see();
-  pout() << "done parse see" << endl;
   parse_domain_bc();
-  pout() << "done parse bc" << endl;
   init_rng();                 // Initialize random number generators
-  pout() << "done consturctor" << endl;
 }
 
 air7_stephens::~air7_stephens() {
@@ -571,7 +556,7 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   const Real R2  = fcorr*m_e_alphaO2.get_entry(E)*Ne;
   const Real R3  = (5.E-41)*N2p*N2*M;
   const Real R4  = 2.5E-16*N4p*O2;
-  const Real R5  = 6E-17*N4p*O2;
+  const Real R5  = 6E-17*N2p*O2;
   const Real R6  = 9E-43*O2p*N2*N2;
   const Real R7  = 4.3E-16*O2pN2*N2;
   const Real R8  = 1E-15*O2pN2*O2;
@@ -873,6 +858,5 @@ Real air7_stephens::compute_alpha_eff(const RealVect a_E) const{
   const Real alpha = m_e_alpha.get_entry(E);
   const Real eta   = m_e_eta.get_entry(E);
 
-  //return (alpha-eta);
-    return alpha;
+  return alpha;
 }

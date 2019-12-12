@@ -18,13 +18,13 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-std::string air7_zheleznyak::s_bolsig_mobility = "E/N (Td)	Mobility *N (1/m/V/s)";
-std::string air7_zheleznyak::s_bolsig_diffco   = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
-std::string air7_zheleznyak::s_bolsig_alpha    = "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)";
-std::string air7_zheleznyak::s_bolsig_eta      = "E/N (Td)	Townsend attach. coef. eta/N (m2)";
-std::string air7_zheleznyak::s_bolsig_alphaN2  = "C27   N2    Ionization    15.60 eV";
-std::string air7_zheleznyak::s_bolsig_alphaO2  = "C44   O2    Ionization    12.06 eV";
-std::string air7_zheleznyak::s_bolsig_energy   = "E/N (Td)	Mean energy (eV)";
+std::string air7_zheleznyak::s_bolsig_energy   = "# Electron mean energy (E/N, eV)";
+std::string air7_zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
+std::string air7_zheleznyak::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
+std::string air7_zheleznyak::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";
+std::string air7_zheleznyak::s_bolsig_eta      = "# Townsend attachment coeff (E/N, eta/N)";
+std::string air7_zheleznyak::s_bolsig_alphaN2  = "# N2 ionization (E/N, rate/N)";
+std::string air7_zheleznyak::s_bolsig_alphaO2  = "# O2 ionization (E/N, rate/N)";
 
 air7_zheleznyak::air7_zheleznyak() {
 
@@ -475,13 +475,13 @@ void air7_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_
   const Real R2  = fcorr*m_e_alphaO2.get_entry(E)*Ne;
   const Real R3  = (5.E-41)*N2p*N2*M;
   const Real R4  = 2.5E-16*N4p*O2;
-  const Real R5  = 6E-17*N4p*O2;
+  const Real R5  = 6E-17*N2p*O2;
   const Real R6  = 9E-43*O2p*N2*N2;
   const Real R7  = 4.3E-16*O2pN2*N2;
   const Real R8  = 1E-15*O2pN2*O2;
   const Real R9  = 2.4E-42*O2p*O2*M;
   const Real R10 = 1.4E-12*sqrt(300./Te)*Ne*O4p;
-  const Real R11 = 2E-13*(300./Te)*Ne*O2p;
+  const Real R11 = 2.E-13*(300./Te)*Ne*O2p;
   const Real R12 = 2E-41*(300./Te)*Ne*O2*O2;
   const Real R13 = 1E-13*O2m*O4p;
   const Real R14 = 2E-37*O2m*O4p*M;
@@ -495,9 +495,11 @@ void air7_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_
   S_e   += R2;
   S_O2p += R2;
 
+
   // R3:  N2plus + N2 + M -> N4plus + M
   S_N2p -= R3;
   S_N4p += R3;
+
 
   // R4:  N4plus + O2 -> O2plus + N2 + N2
   S_N4p -= R4;
@@ -680,7 +682,6 @@ Vector<Real> air7_zheleznyak::compute_cdr_dielectric_fluxes(const Real         a
 							    const Vector<Real> a_cdr_gradients,
 							    const Vector<Real> a_rte_fluxes,
 							    const Vector<Real> a_extrap_cdr_fluxes) const{
-  return Vector<Real>(m_num_species, 0.0);
   return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
@@ -698,23 +699,10 @@ Vector<Real> air7_zheleznyak::compute_cdr_fluxes(const Real         a_time,
 						 const Real         a_quantum_efficiency) const{
   Vector<Real> fluxes(m_num_species, 0.0);
 
-  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
-  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
-
-  // Switch for setting drift flux to zero for charge species
-  Vector<Real> aj(m_num_species, 0.0);
-  for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
-      aj[i] = 1.0;
-    }
-    else {
-      aj[i] = 0.0;
-    }
-  }
 
   // Drift outflow for now
   for (int i = 0; i < m_num_species; i++){
-    fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
+    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
   }
 
   return fluxes;
@@ -729,7 +717,7 @@ Real air7_zheleznyak::compute_alpha_eff(const RealVect a_E) const{
   const Real alpha = m_e_alpha.get_entry(E);
   const Real eta   = m_e_eta.get_entry(E);
 
-  return (alpha-eta);
+  return alpha;
 }
 
 Real air7_zheleznyak::excitation_rates(const Real a_E) const{

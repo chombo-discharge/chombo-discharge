@@ -7,8 +7,8 @@ air7_zheleznyak_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that f
 air7_zheleznyak_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
 air7_zheleznyak_tagger.buffer            = 0            # Grow tagged cells
 
-air7_zheleznyak_tagger.coarsen_curvature = 5.0          # Curvature coarsening
-air7_zheleznyak_tagger.refine_curvature  = 5.0          # Curvature refinement
-air7_zheleznyak_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-air7_zheleznyak_tagger.coarsen_alpha     = 0.5          # Set alpha coarsening. Higher => Less mesh
+air7_zheleznyak_tagger.coarsen_curvature = 10.0         # Curvature coarsening
+air7_zheleznyak_tagger.refine_curvature  = 10.0         # Curvature refinement
+air7_zheleznyak_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
+air7_zheleznyak_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
 air7_zheleznyak_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth

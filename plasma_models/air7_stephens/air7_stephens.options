@@ -16,7 +16,6 @@ air7_stephens.temperature         = 300                         # Gas temperatur
 air7_stephens.frac_N2             = 0.8                         # N2 fraction
 air7_stephens.frac_O2             = 0.2                         # O2 fraction
 
-
 # ----------------------------------------------------------------------------------------------------	
 # Transport properties
 # ----------------------------------------------------------------------------------------------------
@@ -30,8 +29,8 @@ air7_stephens.ion_mobility        = 2.E-4                       # Ion mobility
 # ----------------------------------------------------------------------------------------------------	
 # Chemistry algorithm
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.chemistry_algorithm = rk2  # 'euler', 'rk2', or 'rk4'
-air7_stephens.chemistry_dt        = 1.0  # Minimum dt used for chemistry
+air7_stephens.chemistry_algorithm = euler # 'euler', 'rk2', or 'rk4'
+air7_stephens.chemistry_dt        = 1.0   # Minimum dt used for chemistry
 
 # ----------------------------------------------------------------------------------------------------
 # RNG stuff
