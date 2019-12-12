@@ -752,7 +752,7 @@ Real air3_zheleznyak::compute_alpha_eff(const RealVect a_E) const{
   const Real alpha = m_e_alpha.get_entry(E);
   const Real eta   = m_e_eta.get_entry(E);
 
-  return (alpha-eta);
+  return alpha;
 }
 
 Real air3_zheleznyak::excitation_rates(const Real a_E) const{
