@@ -42,11 +42,10 @@ air3_zheleznyak.poiss_exp_swap      = 100  # Swap from Poisson to exponential di
 # ----------------------------------------------------------------------------------------------------
 # Initial data
 # ----------------------------------------------------------------------------------------------------
-air3_zheleznyak.uniform_density       = 1.E4         # Uniform density
-air3_zheleznyak.seed_density          = 1.E18        # Gaussian seed density
+air3_zheleznyak.uniform_density       = 1.E0         # Uniform density
+air3_zheleznyak.seed_density          = 1.E17        # Gaussian seed density
 air3_zheleznyak.seed_radius           = 100E-6       # Gaussian seed radius
 air3_zheleznyak.seed_position         = 0.0 0.0 0.0  # Gaussian seed position
-
 
 air3_zheleznyak.particle_weight       = 1.0                   # Initial particle weights
 air3_zheleznyak.uniform_pairs         = 0                     # Number of uniformly distributed electron-ion pairs

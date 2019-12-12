@@ -18,10 +18,10 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-std::string air3_zheleznyak::s_bolsig_mobility = "E/N (Td)	Mobility *N (1/m/V/s)";
-std::string air3_zheleznyak::s_bolsig_diffco   = "E/N (Td)	Diffusion coefficient *N (1/m/s)";
-std::string air3_zheleznyak::s_bolsig_alpha    = "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)";
-std::string air3_zheleznyak::s_bolsig_eta      = "E/N (Td)	Townsend attach. coef. eta/N (m2)";
+std::string air3_zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
+std::string air3_zheleznyak::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
+std::string air3_zheleznyak::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";
+std::string air3_zheleznyak::s_bolsig_eta      = "# Townsend attachment coeff (E/N, eta/N)";
 
 air3_zheleznyak::air3_zheleznyak() {
 
