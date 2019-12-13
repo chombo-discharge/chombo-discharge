@@ -291,10 +291,10 @@ void air3_zheleznyak::add_uniform_particles(List<Particle>& a_particles, const i
 }
 
 void air3_zheleznyak::add_gaussian_particles(List<Particle>& a_particles,
-				      const int       a_num,
-				      const Real      a_weight,
-				      const Real      a_rad,
-				      const RealVect  a_center){
+					     const int       a_num,
+					     const Real      a_weight,
+					     const Real      a_rad,
+					     const RealVect  a_center){
   m_gauss = std::normal_distribution<Real>(0., a_rad);
 
   for (int i = 0; i < a_num; i++){
@@ -402,17 +402,17 @@ void air3_zheleznyak::parse_domain_bc(){
 }
 
 void air3_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					Vector<Real>&          a_photon_sources,
-					const Vector<Real>     a_particle_densities,
-					const Vector<RealVect> a_particle_gradients,
-					const Vector<Real>     a_photon_densities,
-					const RealVect         a_E,
-					const RealVect         a_pos,
-					const Real             a_dx,
-					const Real             a_dt,
-					const Real             a_time,
-					const Real             a_kappa) const{
-    Vector<Real>     cdr_src(m_num_species, 0.0);
+					       Vector<Real>&          a_photon_sources,
+					       const Vector<Real>     a_particle_densities,
+					       const Vector<RealVect> a_particle_gradients,
+					       const Vector<Real>     a_photon_densities,
+					       const RealVect         a_E,
+					       const RealVect         a_pos,
+					       const Real             a_dx,
+					       const Real             a_dt,
+					       const Real             a_time,
+					       const Real             a_kappa) const{
+  Vector<Real>     cdr_src(m_num_species, 0.0);
   Vector<Real>     rte_src(m_num_photons, 0.0);
   Vector<Real>     cdr_phi(m_num_species, 0.0);
   Vector<Real>     rte_phi(m_num_photons, 0.0);
@@ -526,16 +526,16 @@ void air3_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
 }
 
 void air3_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-				       Vector<Real>&          a_photon_sources,
-				       Vector<Real>&          a_particle_densities,
-				       const Vector<RealVect> a_particle_gradients,
-				       const Vector<Real>     a_photon_densities,
-				       const RealVect         a_E,
-				       const RealVect         a_pos,
-				       const Real             a_dx,
-				       const Real             a_dt,
-				       const Real             a_time,
-				       const Real             a_kappa) const{
+					      Vector<Real>&          a_photon_sources,
+					      Vector<Real>&          a_particle_densities,
+					      const Vector<RealVect> a_particle_gradients,
+					      const Vector<Real>     a_photon_densities,
+					      const RealVect         a_E,
+					      const RealVect         a_pos,
+					      const Real             a_dx,
+					      const Real             a_dt,
+					      const Real             a_time,
+					      const Real             a_kappa) const{
   // R1: e + M -> e + e + M+  alpha*Xe
   // R2: e + M -> M-+         eta*Xe
   // R3: e + M -> c4v0        alpha*Xe*exc_eff(c4v0)
@@ -589,7 +589,8 @@ void air3_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_
     Sp += a_photon_densities[i]/a_dt;
   }
 
-  const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_factor;
+  const Real quench  = m_pq/(m_p + m_pq);
+  const Real xfactor = quench*excitation_rates(E)*sergey_factor(m_O2frac)*m_factor;
   const Real Rgamma  = R1*xfactor;
   const int num_phot = poisson_reaction(Rgamma*volume, a_dt);
   a_photon_sources[m_phot_idx] = 1.0*num_phot;
@@ -616,9 +617,9 @@ int air3_zheleznyak::poisson_reaction(const Real a_propensity, const Real a_dt) 
 
 
 Vector<Real> air3_zheleznyak::compute_cdr_diffusion_coefficients(const Real         a_time,
-							  const RealVect     a_pos,
-							  const RealVect     a_E,
-							  const Vector<Real> a_cdr_densities) const {
+								 const RealVect     a_pos,
+								 const RealVect     a_E,
+								 const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_num_species, 0.0);
   dco[m_elec_idx] = m_e_diffco.get_entry(a_E.vectorLength());
@@ -630,9 +631,9 @@ Vector<Real> air3_zheleznyak::compute_cdr_diffusion_coefficients(const Real     
 }
   
 Vector<RealVect> air3_zheleznyak::compute_cdr_velocities(const Real         a_time,
-						  const RealVect     a_pos,
-						  const RealVect     a_E,
-						  const Vector<Real> a_cdr_densities) const{
+							 const RealVect     a_pos,
+							 const RealVect     a_E,
+							 const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_num_species, RealVect::Zero);
 
   vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(a_E.vectorLength());
@@ -643,15 +644,15 @@ Vector<RealVect> air3_zheleznyak::compute_cdr_velocities(const Real         a_ti
 }
   
 Vector<Real> air3_zheleznyak::compute_cdr_domain_fluxes(const Real           a_time,
-						 const RealVect       a_pos,
-						 const int            a_dir,
-						 const Side::LoHiSide a_side,
-						 const RealVect       a_E,
-						 const Vector<Real>   a_cdr_densities,
-						 const Vector<Real>   a_cdr_velocities,
-						 const Vector<Real>   a_cdr_gradients,
-						 const Vector<Real>   a_rte_fluxes,
-						 const Vector<Real>   a_extrap_cdr_fluxes) const{
+							const RealVect       a_pos,
+							const int            a_dir,
+							const Side::LoHiSide a_side,
+							const RealVect       a_E,
+							const Vector<Real>   a_cdr_densities,
+							const Vector<Real>   a_cdr_velocities,
+							const Vector<Real>   a_cdr_gradients,
+							const Vector<Real>   a_rte_fluxes,
+							const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_num_species, 0.0);
 
   int idx, sgn;
@@ -683,42 +684,42 @@ Vector<Real> air3_zheleznyak::compute_cdr_domain_fluxes(const Real           a_t
 }
   
 Vector<Real> air3_zheleznyak::compute_cdr_electrode_fluxes(const Real         a_time,
-						    const RealVect     a_pos,
-						    const RealVect     a_normal,
-						    const RealVect     a_E,
-						    const Vector<Real> a_cdr_densities,
-						    const Vector<Real> a_cdr_velocities,
-						    const Vector<Real> a_cdr_gradients,
-						    const Vector<Real> a_rte_fluxes,
-						    const Vector<Real> a_extrap_cdr_fluxes) const{
+							   const RealVect     a_pos,
+							   const RealVect     a_normal,
+							   const RealVect     a_E,
+							   const Vector<Real> a_cdr_densities,
+							   const Vector<Real> a_cdr_velocities,
+							   const Vector<Real> a_cdr_gradients,
+							   const Vector<Real> a_rte_fluxes,
+							   const Vector<Real> a_extrap_cdr_fluxes) const{
   return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
 Vector<Real> air3_zheleznyak::compute_cdr_dielectric_fluxes(const Real         a_time,
-						     const RealVect     a_pos,
-						     const RealVect     a_normal,
-						     const RealVect     a_E,
-						     const Vector<Real> a_cdr_densities,
-						     const Vector<Real> a_cdr_velocities,
-						     const Vector<Real> a_cdr_gradients,
-						     const Vector<Real> a_rte_fluxes,
-						     const Vector<Real> a_extrap_cdr_fluxes) const{
+							    const RealVect     a_pos,
+							    const RealVect     a_normal,
+							    const RealVect     a_E,
+							    const Vector<Real> a_cdr_densities,
+							    const Vector<Real> a_cdr_velocities,
+							    const Vector<Real> a_cdr_gradients,
+							    const Vector<Real> a_rte_fluxes,
+							    const Vector<Real> a_extrap_cdr_fluxes) const{
   return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
 Vector<Real> air3_zheleznyak::compute_cdr_fluxes(const Real         a_time,
-					  const RealVect     a_pos,
-					  const RealVect     a_normal,
-					  const RealVect     a_E,
-					  const Vector<Real> a_cdr_densities,
-					  const Vector<Real> a_cdr_velocities,
-					  const Vector<Real> a_cdr_gradients,
-					  const Vector<Real> a_rte_fluxes,
-					  const Vector<Real> a_extrap_cdr_fluxes,
-					  const Real         a_townsend2,
-					  const Real         a_quantum_efficiency) const{
+						 const RealVect     a_pos,
+						 const RealVect     a_normal,
+						 const RealVect     a_E,
+						 const Vector<Real> a_cdr_densities,
+						 const Vector<Real> a_cdr_velocities,
+						 const Vector<Real> a_cdr_gradients,
+						 const Vector<Real> a_rte_fluxes,
+						 const Vector<Real> a_extrap_cdr_fluxes,
+						 const Real         a_townsend2,
+						 const Real         a_quantum_efficiency) const{
   Vector<Real> fluxes(m_num_species, 0.0);
 
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
