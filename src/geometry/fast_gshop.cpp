@@ -199,7 +199,7 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
 			   const int            a_maxGridSize){
 
   int longdir;
-  int length = a_region.longside(longdir); // Not necessarily multiple of two, but always multiple of a_maxGridSize
+  int length = a_region.longside(longdir); // Not necessarily multiple of a_maxGridSize
 
   // std::cout << length << "\t" << a_maxGridSize << std::endl;
 #if 0
@@ -209,7 +209,7 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
 #endif
 
   // Split domain along the longest direction. We happen to know that a_region[longdir] is a integer multiple of maxgridsize
-  if(length > a_maxGridSize){
+  if(length > a_maxGridSize && length%a_maxGridSize == 0){
 
     Box box = a_region;
     box.grow(s_grow);
@@ -244,7 +244,7 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
       makeBoxes(a_reg_boxes, a_irreg_boxes, hi, a_domain, a_dx, a_maxGridSize);
     }
   }
-  else{
+  else{ // This might cause the box size to exceed a_maxGridSize. This shouldn't be a problem. 
     a_irreg_boxes.push_back(a_region);
   }
 }

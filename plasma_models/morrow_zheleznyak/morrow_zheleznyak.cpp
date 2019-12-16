@@ -165,7 +165,7 @@ void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
     const RealVect gNe  = a_particle_gradients[m_nelec_idx];
     const RealVect Eunit = a_E/a_E.vectorLength();
 
-    fcorr = 1.0 - PolyGeom::dot(Eunit, De*gNe)/((1.0 + Xe)*ve);
+    fcorr = 1.0 + PolyGeom::dot(Eunit, De*gNe)/((1.0 + Xe)*ve);
     fcorr = Min(fcorr, 1.0);
     fcorr = Max(0.0, fcorr);
   }

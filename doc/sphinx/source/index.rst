@@ -50,8 +50,8 @@ This documentation is the user documentation `PlasmaC`. There is a separate :dox
    :caption: Using PlasmaC
 
    Control
-   NewSimulations
    Tutorials
+   NewSimulations
    Visualization	     
 
 

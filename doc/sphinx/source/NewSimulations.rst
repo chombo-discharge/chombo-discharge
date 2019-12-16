@@ -10,6 +10,18 @@ In `PlasmaC`, most of the action occurs through the physics interface :ref:`Chap
 Setting up a geometry
 ---------------------
 
+The creation of a geometry in `PlasmaC` consists of the implementation of a abstraction layer that describes the surface of electrodes and dielectrics, whic is done by implementing the :ref:`Chap:computational_geometry`. This class will ask the user to instantiate objects :ref:`Chap:electrode` and :ref:`Chap:dielectric`. Each of these objects contain an implicit function that describes the level-set surface of the boundary. If the implicit function does not exist in `Chombo` or in `PlasmaC`, the user will have to implement it himself using elements of computational geometry. Often, however, you will be able to re-use consisting implicit functions. These are located in ``src/geometry``. 
+
+Creating a new geometry
+_______________________
+
+Creating a new geometry consists of the following steps:
+
+1. Create a new inherited class of :ref:`Chap:computational_geometry`.
+2. In the constructor, fill the internal data holders ``m_electrodes`` and ``m_dielectrics``, see :ref:`Chap:computational_geometry` for details.
+
+Often, the geometry will be parametrized and the user will want to add an option file where the inherited class can fetch options at run-time. As an example, the code snippet below describes a complete implementation of an electrode geometry consisting of a single sphere at the center.
+
 Fast geometry generation with pre-voxelization
 ______________________________________________
 
@@ -20,7 +32,48 @@ Geometry generation is a non-negligible part of `PlasmaC`. Many geometries consi
 
 The advantage of using a pre-voxelization is that we can supply meta-information to the mesh generator so that all the parts of the domain that do not intersect an object are not actually queried for geometric information. This can lead to orders of magnitude improvements in the geometry generation step.
 
-The user may set the voxels manually when he defines his geometry, or he may use our voxel-generating tool for defining them. 
+The user may set the voxels manually when he defines his geometry, or he may use our voxel-generating tool for defining them.
+
+.. _Chap:GridResolutions:
+
+Setting the grid resolution
+---------------------------
+
+Setting the grid resolution in `PlasmaC` is done by selecting a base domain for :ref:`Chap:amr_mesh`, a blocking factor (i.e. the minimum box size), the maximum number of refinement levels, and the refinement factor between each level. The *base domains* is the coarsest grid level on which all equations are solved (there are special rules for the multigrid).
+
+Depending on how many cores is used in a simulation, there might be reasons to select quite large base levels. Typically, one should aim to have at least one grid patch on the base level per MPI rank. 
+
+Selecting a base domain
+_______________________
+
+Usually, the blocking factor is 8, 16, or 32. Note that `PlasmaC` uses a patch-based formalism and domain sizes are therefore not limited to the conventional :math:`2^N` grids encountered in octrees. In `PlasmaC`, the base level must instead be divisible by the blocking factor along each coordinate direction. For example, you may have a domain which is :math:`112^3` cells with a blocking factor of :math:`16`, but you may *not* use a domain size of :math:`112\times112\times56` since :math:`56` is not (integer) divisible by 16. In this case, the solution would be to use a slightly higher resolution and using a domain size of :math:`128\times128\times64` instead.
+
+The base domain is selected by setting the following run-time parameters:
+
+.. code-block:: bash
+
+		amr_mesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+		amr_mesh.max_box_size    = 16          # Maximum allowed box size
+
+Setting the grid refinement
+___________________________
+
+The grid refinement is set by selecting a number of refinement levels *and* the refinement factor between each level. Refinement factors of 2 and 4 are supported. Note that using refinement factors of 4 reduce the number of AMR levels, but lead to additional noise in the solutions and, furthermore, usually leads to many more grid cells.
+
+Setting the grid refinement is done through run-time parameters in :ref:`Chap:amr_mesh`:
+
+.. code-block:: bash
+
+		amr_mesh.max_amr_depth   = 4           # Maximum amr depth
+		amr_mesh.ref_rat         = 4 2 4 2 4 2 # Refinement ratios
+
+
+Multigrid coarsening
+____________________
+
+The multigrid solvers in `PlasmaC` use grids that are coarser than the base grid in order to facilitate better convergence. In multigrid, the base grid is usually coarsened as far as possible, but the user also has the option to call the bottom solver on a coarser grid level. In `PlasmaC`, this is achieved by first coarsening the base level by a factor of two as far as possible, while keeping the grid coarsenable by the blocking factor. For the example of :math:`128\times128\times64` grid cells with blocking factor 16, we may reach levels down to :math:`4\times4\times2`. For the example of :math:`112\times112\times112` cells the base grid is divided into :math:`7\times7\times7` boxes with a blocking factor of :math:`16`. Coarsening by a factor of two is not possible since the domain :math:`56\times56\times56` is not divisible by a blocking factor of :math:`16`. Instead, the multigrid coarsening routines is allowed to use smaller box sizes by maintaing the :math:`7\times7\times7` box structure and then coarsening the boxes themselves. I.e. the :math:`56\times56\times56` domain is obtained by a :math:`7\times7\times7` box decomposition with a box size of :math:`8`. The next multigrid level uses a box size of :math:`4`, and so on. 
+
+Conflicts may occur if the user attempts to exit multigrid on a coarsened level that does not exist. For the above example of :math:`112\times112\times112` cells the coarsened multigrid levels are :math:`56^3` and :math:`28^3`, so if the user attempts to call the multigrid bottom solver at a coarsening of :math:`32\times32\times32` cells, a run-time error will occur since this level cannot be reached by standard grid coarsening procedures. 
    
 Defining your chemistry
 -----------------------

@@ -756,7 +756,7 @@ void amr_mesh::define_mg_stuff(){
     const ProblemDomain coar = fine.coarsen(coar_ref);
     const Box coar_box       = coar.domainBox();
     for (int dir = 0; dir < SpaceDim; dir++){
-      if(coar_box.size()[dir] < m_max_box_size){
+      if(coar_box.size()[dir] < m_max_box_size || coar_box.size()[dir]%m_max_box_size != 0){
 	has_coar = false;
       }
     }

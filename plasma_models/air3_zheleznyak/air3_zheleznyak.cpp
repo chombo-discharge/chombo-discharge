@@ -556,7 +556,7 @@ void air3_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_
     const RealVect gNe   = a_particle_gradients[m_elec_idx];
 
     Real fcorr = 1.0;
-    fcorr = 1.0 - PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
+    fcorr = 1.0 + PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
     fcorr = Min(fcorr, 1.0);
     fcorr = Max(0.0, fcorr);
 
