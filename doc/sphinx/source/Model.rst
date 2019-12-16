@@ -70,6 +70,11 @@ Spatial discretization
 
 Embedded boundary applications are supported by additionally describing the mesh with a graph near cut-cells. This allows us to combine the efficiency of patch-based AMR with complex geometries. However, there is significant overhead with the embedded boundary approach and, furthermore, arbitrarily complex geometries are not possible.
 
+.. _Chap:MeshGeneration:
+
+Mesh generation
+_______________
+
 `PlasmaC` offers two algorithm for AMR grid generation. Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags. The first algorithm that we support is the classical Berger-Rigoustous grid algorithm that ships with Chombo, see the figure below. The classical Berger-Rigoustous algorithm is serial-like in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes. The algorithm is typically not used at large scale because of its memory consumption. As an alternative, we also support a tiled algorithm where the grid boxes on each block are generated according to a predefined tiled pattern. If a tile contains a single tag, the entire tile is flagged for refinement. The tiled algorithm produces grids that are similar to octrees, but it is more general since it also supports refinement factors other than 2, and is not restricted to cubic domains. 
 
 .. figure:: figures/amr.png
