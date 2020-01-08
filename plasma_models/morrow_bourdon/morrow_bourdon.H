@@ -195,36 +195,36 @@ public:
   Real m_temp;
 
 
-  inline Vector<Real> compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
-					   const Vector<Real> a_ion_densities,
-					   const Vector<Real> a_ion_velocities,
-					   const Vector<Real> a_photon_fluxes,
-					   const RealVect     a_E,
-					   const RealVect     a_pos,
-					   const RealVect     a_normal,
-					   const Real         a_time) const;
+  Vector<Real> compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
+				    const Vector<Real> a_ion_densities,
+				    const Vector<Real> a_ion_velocities,
+				    const Vector<Real> a_photon_fluxes,
+				    const RealVect     a_E,
+				    const RealVect     a_pos,
+				    const RealVect     a_normal,
+				    const Real         a_time) const;
 
-  inline Vector<Real> compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
-					 const Vector<Real> a_ion_densities,
-					 const Vector<Real> a_ion_velocities,
-					 const Vector<Real> a_photon_fluxes,
-					 const RealVect     a_E,
-					 const RealVect     a_pos,
-					 const RealVect     a_normal,
-					 const Real         a_time) const;
+  Vector<Real> compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
+				  const Vector<Real> a_ion_densities,
+				  const Vector<Real> a_ion_velocities,
+				  const Vector<Real> a_photon_fluxes,
+				  const RealVect     a_E,
+				  const RealVect     a_pos,
+				  const RealVect     a_normal,
+				  const Real         a_time) const;
 
 
 
-  inline Real compute_alpha(const RealVect a_E) const;
-  inline Real compute_eta(const RealVect a_E) const;
-  inline Real compute_eta2(const RealVect a_E) const;
-  inline Real compute_eta3(const RealVect a_E) const;
-  inline Real compute_beta(const RealVect a_E) const;
-  inline Real compute_De(const RealVect a_E) const;
+  Real compute_alpha(const RealVect a_E) const;
+  Real compute_eta(const RealVect a_E) const;
+  Real compute_eta2(const RealVect a_E) const;
+  Real compute_eta3(const RealVect a_E) const;
+  Real compute_beta(const RealVect a_E) const;
+  Real compute_De(const RealVect a_E) const;
   
-  inline RealVect compute_ve(const RealVect a_E) const;
-  inline RealVect compute_vp(const RealVect a_E) const;
-  inline RealVect compute_vn(const RealVect a_E) const;
+  RealVect compute_ve(const RealVect a_E) const;
+  RealVect compute_vp(const RealVect a_E) const;
+  RealVect compute_vn(const RealVect a_E) const;
 
   void instantiate_species();
   
