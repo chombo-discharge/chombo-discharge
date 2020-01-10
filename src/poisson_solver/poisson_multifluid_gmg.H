@@ -118,9 +118,39 @@ public:
   virtual void set_botsolver_smooth(const int a_smooth);
 
   /*!
+    @brief Get a-coefficient
+  */
+  virtual MFAMRCellData& get_aco();
+
+  /*!
+    @brief Get b-coefficient
+  */
+  virtual MFAMRFluxData& get_bco();
+
+  /*!
     @brief Return require number of ghost cells. 
   */
   virtual int query_ghost() const;
+  
+  /*!
+    @brief Set coefficients
+  */
+  virtual void set_coefficients();
+
+  /*!
+    @brief Set up the operator factory
+  */
+  virtual void setup_operator_factory();
+
+  /*!
+    @brief Set up AMRMultiGrid
+  */
+  virtual void setup_solver();
+
+  /*!
+    @brief Check if solver needs setup
+  */
+  virtual void set_needs_setup(const bool& a_needs_setup);
   
 protected:
 
@@ -279,10 +309,6 @@ protected:
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
-  /*!
-    @brief Set coefficients
-  */
-  virtual void set_coefficients();
 
   /*!
     @brief Set the permittivities
@@ -307,15 +333,7 @@ protected:
 			   const Real&               a_dx,
 			   const Vector<dielectric>& a_dielectrics);
 
-  /*!
-    @brief Set up the operator factory
-  */
-  virtual void setup_operator_factory();
 
-  /*!
-    @brief Set up AMRMultiGrid
-  */
-  virtual void setup_solver();
 
   // Option parsing functions
   virtual void parse_autotune();     // Parse autotuning

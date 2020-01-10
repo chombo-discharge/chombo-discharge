@@ -74,7 +74,7 @@ public:
   */
   template <typename T> void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
 
-    /*!
+  /*!
     @brief Alias an entire hierarchy of data. 
   */
   virtual void alias(EBAMRCellData&           a_data,
@@ -86,6 +86,11 @@ public:
     @brief Alias an entire hierarchy of data
   */
   virtual void alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata);
+
+  /*!
+    @brief Alias an entire hierarchy of data
+  */
+  virtual void alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata);
 
   /*!
     @brief Compute gradient on level

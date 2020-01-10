@@ -707,7 +707,7 @@ void poisson_multifluid_gmg::setup_gmg(){
   if(m_verbosity > 5){
     pout() << "poisson_multifluid_gmg::setup_gmg" << endl;
   }
-  
+
   this->set_coefficients();       // Set coefficients
   this->setup_operator_factory(); // Set the operator factory
   this->setup_solver();           // Set up the AMR multigrid solver
@@ -776,6 +776,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   RefCountedPtr<dirichlet_func> pot = RefCountedPtr<dirichlet_func> (new dirichlet_func(m_potential,
 											s_constant_one,
 											RealVect::Zero));
+  
   bcfact->set_wallbc(m_wallbc);
   bcfact->set_potentials(m_wall_bcfunc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
@@ -866,4 +867,16 @@ void poisson_multifluid_gmg::setup_solver(){
   // Init solver
   m_gmg_solver.init(phi, rhs, finest_level, 0);
 
+}
+
+MFAMRCellData& poisson_multifluid_gmg::get_aco(){
+  return m_aco;
+}
+
+MFAMRFluxData& poisson_multifluid_gmg::get_bco(){
+  return m_bco;
+}
+
+void poisson_multifluid_gmg::set_needs_setup(const bool& a_needs_setup){
+  m_needs_setup = a_needs_setup;
 }
