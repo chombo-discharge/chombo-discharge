@@ -208,10 +208,10 @@ Real imex_sdc::get_max_node_distance(){
   return max_dist;
 }
 
-void imex_sdc::init_source_terms(){
-  CH_TIME("imex_sdc::init_source_terms");
+void imex_sdc::init(){
+  CH_TIME("imex_sdc::init");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::init_source_terms" << endl;
+    pout() << "imex_sdc::init" << endl;
   }
 
   advance_reaction_network(m_time, m_dt);

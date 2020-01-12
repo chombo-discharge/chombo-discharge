@@ -59,6 +59,16 @@ public:
   virtual bool stationary_rte();
 
   /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocate_internals();
+
+  /*!
+    @brief Deallocate internals
+  */
+  virtual void deallocate_internals();
+
+  /*!
     @brief Parse options.
   */
   virtual void parse_options() = 0;
@@ -67,6 +77,11 @@ public:
     @brief Cache states
   */
   virtual void cache_states();
+
+  /*!
+    @brief Cache internal states
+  */
+  virtual void cache_internals();
 
   /*!
     @brief Solve the poisson equation. This calls compute_rho() 
@@ -220,7 +235,7 @@ public:
   /*!
     @brief Compute all source terms. This either does a decoupled cdr/rte solve or tight reaction advance
   */
-  virtual void init_source_terms() = 0;
+  virtual void init() = 0;
 
   /*!
     @brief Compute the time step and how it was restricted
@@ -712,10 +727,7 @@ public:
 			   const Vector<EBAMRCellData*>&  a_densities,
 			   const centering::which_center  a_centering);
 
-  /*!
-    @brief Deallocate internals
-  */
-  virtual void deallocate_internals(){}
+
   
   /*!
     @brief Deallocate internal solver storages
@@ -817,6 +829,7 @@ public:
   */
   virtual void project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
 
+
   /*!
     @brief Regrid
   */
@@ -825,7 +838,7 @@ public:
   /*!
     @brief Regrid internal storage. This MUST be overwritten.
   */
-  virtual void regrid_internals() = 0;
+  virtual void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
 
   /*!
     @brief Regrid individual solvers

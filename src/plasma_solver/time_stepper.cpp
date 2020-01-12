@@ -93,6 +93,25 @@ bool time_stepper::solve_poisson(MFAMRCellData&                a_potential,
   return converged;
 }
 
+
+void time_stepper::allocate_internals(){
+  CH_TIME("time_stepper::allocate_internals"); 
+  if(m_verbosity > 5){
+    pout() << "time_stepper::allocate_internals" << endl;
+  }
+
+  /// Do nothing
+}
+
+void time_stepper::deallocate_internals(){
+  CH_TIME("time_stepper::deallocate_internals"); 
+  if(m_verbosity > 5){
+    pout() << "time_stepper::deallocate_internals" << endl;
+  }
+
+  /// Do nothing
+}
+
 void time_stepper::advance_reaction_network(const Real a_time, const Real a_dt){
   CH_TIME("time_stepper::advance_reaction_network(solvers)");
   if(m_verbosity > 5){
@@ -1055,10 +1074,10 @@ void time_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>&     
   }
 }
 
-void time_stepper::init_source_terms(){
-  CH_TIME("time_stepper::init_source_terms");
+void time_stepper::init(){
+  CH_TIME("time_stepper::init");
   if(m_verbosity > 5){
-    pout() << "time_stepper::init_source_terms" << endl;
+    pout() << "time_stepper::init" << endl;
   }
 
 #if 0
@@ -3180,6 +3199,14 @@ void time_stepper::cache_states(){
   m_sigma->cache_state();
 }
 
+
+void time_stepper::cache_internals(){
+  CH_TIME("time_stepper::cache_internals");
+  if(m_verbosity > 5){
+    pout() << "time_stepper::cache_internals" << endl;
+  }
+}
+
 void time_stepper::compute_cdr_sources(){
   CH_TIME("time_stepper::compute_cdr_sources()");
   if(m_verbosity > 5){
@@ -4130,7 +4157,7 @@ void time_stepper::regrid(const int a_lmin, const int a_old_finest, const int a_
   }
 
   this->regrid_solvers(a_lmin, a_old_finest, a_new_finest);
-  this->regrid_internals();
+  this->regrid_internals(a_lmin, a_old_finest, a_new_finest);
 }
 
 void time_stepper::regrid_solvers(const int a_lmin, const int a_old_finest, const int a_new_finest){

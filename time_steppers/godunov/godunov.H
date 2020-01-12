@@ -32,7 +32,7 @@ public:
   // Pure functions that must be overwritten
   Real advance(const Real a_dt);
   void parse_options();
-  void init_source_terms();
+  void init();
   void regrid_internals();
   void deallocate_internals();
   void compute_dt(Real& a_dt, time_code::which_code& a_timecode);

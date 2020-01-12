@@ -42,8 +42,10 @@ public:
   
   Real advance(const Real a_dt);
 
-  void init_source_terms();
-  void regrid_internals();
+  void init();
+  void cache_internals();
+  void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+  void allocate_internals();
   void deallocate_internals();
   void parse_options();
   bool need_to_regrid();
@@ -58,8 +60,10 @@ protected:
   RefCountedPtr<sigma_storage>        m_sigma_scratch;
 
   // Extra storage outside of solver storage
-  EBAMRCellData scratch1;
-  EBAMRCellData scratchD;
+  EBAMRCellData m_scratch1;
+  EBAMRCellData m_scratchD;
+
+  Vector<EBAMRCellData> m_cache_FR0;
 
   int m_max_retries;
   int m_p;
@@ -155,10 +159,12 @@ protected:
   void sweep_explicit(const Real a_dt, const Real a_time, const bool a_lagged_terms);
   void sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_lagged_terms);
 
-
   // Explicit divergence routines
   void compute_divD(const int a_m, const bool a_corrector);
   void compute_divF(const int a_m, const bool a_corrector);
+
+  // Advance routine for SDC step
+  void substep_cdr(const int a_m, const bool a_corrector);
 
   // Semi-implicit routines for Poisson equation
   void compute_semi_implicit_mobilities(const int a_m, const bool a_corrector);

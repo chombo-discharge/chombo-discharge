@@ -40,12 +40,13 @@ public:
   Vector<EBAMRCellData>& get_FR()      { return m_FR;  }
   Vector<EBAMRCellData>& get_F()       { return m_F;   }
 
+  EBAMRIVData& get_eb_mob()     { return m_eb_mob;     }
   EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
   EBAMRIVData& get_eb_scratchD(){ return m_scratchIVD; }
-  EBAMRIVData& get_eb_state(){    return m_scratchIV1; }
-  EBAMRIVData& get_eb_velo(){     return m_scratchIV2; }
-  EBAMRIVData& get_eb_flux(){     return m_scratchIV3; }
-  EBAMRIVData& get_eb_grad(){     return m_scratchIV4; }
+  EBAMRIVData& get_eb_state()   { return m_scratchIV1; }
+  EBAMRIVData& get_eb_velo()    { return m_scratchIV2; }
+  EBAMRIVData& get_eb_flux()    { return m_scratchIV3; }
+  EBAMRIVData& get_eb_grad()    { return m_scratchIV4; }
 
   EBAMRIFData& get_domain_state(){  return m_scratchIF1; }
   EBAMRIFData& get_domain_velo(){   return m_scratchIF2; }
@@ -77,6 +78,7 @@ protected:
   Vector<EBAMRCellData> m_FR;       // FR in the SDC notation
   Vector<EBAMRCellData> m_F;        // F = FA + FD + FR
 
+  EBAMRIVData m_eb_mob;     // EB mobility
   EBAMRIVData m_scratchIVs; // Scratch data
   EBAMRIVData m_scratchIVD; // Scratch data
   EBAMRIVData m_scratchIV1; // Scratch data

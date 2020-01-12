@@ -877,6 +877,10 @@ MFAMRFluxData& poisson_multifluid_gmg::get_bco(){
   return m_bco;
 }
 
+MFAMRIVData& poisson_multifluid_gmg::get_bco_irreg(){
+  return m_bco_irreg;
+}
+
 void poisson_multifluid_gmg::set_needs_setup(const bool& a_needs_setup){
   m_needs_setup = a_needs_setup;
 }

@@ -193,9 +193,11 @@ void cdr_solver::cache_state(){
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
   
-  m_amr->allocate(m_cache, m_phase, ncomp);
+  m_amr->allocate(m_cache_state, m_phase, ncomp);
+  m_amr->allocate(m_cache_source, m_phase, ncomp);
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    m_state[lvl]->localCopyTo(*m_cache[lvl]);
+    m_state[lvl]->localCopyTo(*m_cache_state[lvl]);
+    m_source[lvl]->localCopyTo(*m_cache_source[lvl]);
   }
 }
 
@@ -1368,20 +1370,26 @@ void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
 
   // These levels have not changed
   for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
-    m_cache[lvl]->copyTo(*m_state[lvl]); // Base level should never change, but ownership can.
+    m_cache_state[lvl]->copyTo(*m_state[lvl]); // Base level should never change, but ownership can.
+    m_cache_source[lvl]->copyTo(*m_source[lvl]); // Base level should never change, but ownership can.
   }
 
   // These levels have changed
   for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
     interpolator[lvl]->interpolate(*m_state[lvl], *m_state[lvl-1], interv);
+    interpolator[lvl]->interpolate(*m_source[lvl], *m_source[lvl-1], interv);
     if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
-      m_cache[lvl]->copyTo(*m_state[lvl]);
+      m_cache_state[lvl]->copyTo(*m_state[lvl]);
+      m_cache_source[lvl]->copyTo(*m_source[lvl]);
     }
   }
 
   //  data_ops::floor(m_state, 0.0);
   m_amr->average_down(m_state, m_phase);
   m_amr->interp_ghost(m_state, m_phase);
+
+  m_amr->average_down(m_source, m_phase);
+  m_amr->interp_ghost(m_source, m_phase);
 
 }
 
@@ -1837,6 +1845,7 @@ void cdr_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
 
   // Write state vector
   write(a_handle, *m_state[a_level], m_name);
+  write(a_handle, *m_source[a_level],   m_name+"_src");
 }
 
 void cdr_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -1846,6 +1855,7 @@ void cdr_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   }
 
   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->get_grids()[a_level], Interval(0,0), false);
 }
 
 Real cdr_solver::compute_cfl_dt(){

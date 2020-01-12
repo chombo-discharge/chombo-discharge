@@ -715,6 +715,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
     }
   }
 
+  m_timestepper->cache_internals();      // Cache stuff necessary that are necesary for regridding the time stepper
   m_timestepper->deallocate_internals(); // Deallocate internal storage for the time stepper.
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
   this->deallocate_internals();          // Deallocate internal storage for plasma_engine
@@ -731,10 +732,11 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   const int new_finest_level = m_amr->get_finest_level();
-  this->regrid_internals(old_finest_level, new_finest_level);                // Regrid internals for plasma_engine
-  m_timestepper->regrid_solvers(a_lmin, old_finest_level, new_finest_level); // Regrid solvers
-  m_timestepper->regrid_internals();                                         // Regrid internal storage for time_stepper
-  m_celltagger->regrid();                                                    // Regrid cell tagger
+  this->regrid_internals(old_finest_level, new_finest_level);                  // Regrid internals for plasma_engine
+  m_timestepper->regrid_solvers(a_lmin, old_finest_level, new_finest_level);   // Regrid solvers
+  m_timestepper->allocate_internals();                                         // Allocate internal storage for time_stepper
+  m_timestepper->regrid_internals(a_lmin, old_finest_level, new_finest_level); // Regrid internal storage for time_stepper
+  m_celltagger->regrid();                                                      // Regrid cell tagger
 
   if(a_use_initial_data){
     m_timestepper->initial_data();
@@ -1821,7 +1823,8 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   if(!m_celltagger.isNull()){
     m_celltagger->regrid();
   }
-  m_timestepper->regrid_internals();
+  m_timestepper->allocate_internals();
+
 
   // If the plasma_kinetics module solves for the electron energy density, it should be initialized
   if(m_plaskin->solve_eed()){
@@ -1833,7 +1836,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   m_timestepper->compute_cdr_diffusion();
   m_timestepper->compute_dt(m_dt, m_timecode);
   m_plaskin->set_dt(m_dt);
-  m_timestepper->init_source_terms();
+  m_timestepper->init();
   if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
     const Real dummy_dt = 1.0;
 
@@ -1907,7 +1910,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
     const Real dummy_dt = 0.0;
     m_timestepper->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
   }
-  m_timestepper->regrid_internals();    // Prepare internal storage for time stepper
+  m_timestepper->allocate_internals();  // Prepare internal storage for time stepper
   if(!m_celltagger.isNull()){
     m_celltagger->regrid();             // Prepare internal storage for cell tagger
   }
@@ -1917,7 +1920,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   m_timestepper->compute_cdr_diffusion();
   m_timestepper->compute_dt(m_dt, m_timecode);
   m_plaskin->set_dt(m_dt);
-  m_timestepper->init_source_terms();
+  m_timestepper->init();
 
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){

@@ -128,6 +128,11 @@ public:
   virtual MFAMRFluxData& get_bco();
 
   /*!
+    @brief Get irregular b coefficient
+  */
+  virtual MFAMRIVData& get_bco_irreg();
+
+  /*!
     @brief Return require number of ghost cells. 
   */
   virtual int query_ghost() const;
@@ -151,6 +156,11 @@ public:
     @brief Check if solver needs setup
   */
   virtual void set_needs_setup(const bool& a_needs_setup);
+
+  /*!
+    @brief Set the permittivities
+  */
+  virtual void set_permittivities(const Vector<dielectric>& a_dielectrics);
   
 protected:
 
@@ -309,11 +319,6 @@ protected:
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
-
-  /*!
-    @brief Set the permittivities
-  */
-  virtual void set_permittivities(const Vector<dielectric>& a_dielectrics);
 
   /*!
     @brief Set face-centered permittivities

@@ -92,6 +92,11 @@ public:
   */
   virtual void alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata);
 
+    /*!
+    @brief Alias an entire hierarchy of data
+  */
+  virtual void alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata);
+
   /*!
     @brief Compute gradient on level
   */

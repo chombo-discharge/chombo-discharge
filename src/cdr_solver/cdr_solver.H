@@ -440,9 +440,14 @@ protected:
   EBAMRCellData m_scratch;
 
   /*!
-    @brief Cached internal state. DO NOT TOUCH!
+    @brief Cached state vector for regrid. DO NOT TOUCH!
   */
-  EBAMRCellData m_cache;
+  EBAMRCellData m_cache_state;
+
+  /*!
+    @brief Cached source term for regrids. DO NOT TOUCH!
+  */
+  EBAMRCellData m_cache_source;
 
   /*!
     @brief Face-centered velocities (only normal components)

@@ -39,6 +39,7 @@ void sdc::cdr_storage::allocate_storage(const int a_p){
   m_amr->allocate(m_gradient, m_phase, SpaceDim);
   m_amr->allocate(m_scratchD, m_phase, SpaceDim);
 
+  m_amr->allocate(m_eb_mob,      m_phase, m_ncomp);
   m_amr->allocate(m_scratchIVs,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIVD,  m_phase, SpaceDim);
 
@@ -80,7 +81,7 @@ void sdc::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_gradient);
   m_amr->deallocate(m_scratchD);
 
-
+  m_amr->deallocate(m_eb_mob);
   m_amr->deallocate(m_scratchIVs);
   m_amr->deallocate(m_scratchIVD);
   m_amr->deallocate(m_scratchIV1);

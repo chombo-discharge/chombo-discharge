@@ -288,10 +288,10 @@ Real godunov::advance(const Real a_dt){
   return a_dt;
 }
 
-void godunov::init_source_terms(){
-  CH_TIME("godunov::init_source_terms");
+void godunov::init(){
+  CH_TIME("godunov::init");
   if(m_verbosity > 5){
-    pout() << "godunov::init_source_terms" << endl;
+    pout() << "godunov::init" << endl;
   }
 
   // No need to do anything in this routine yet

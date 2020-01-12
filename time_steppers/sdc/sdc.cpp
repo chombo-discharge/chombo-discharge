@@ -206,10 +206,10 @@ Real sdc::get_max_node_distance(){
   return max_dist;
 }
 
-void sdc::init_source_terms(){
-  CH_TIME("sdc::init_source_terms");
+void sdc::init(){
+  CH_TIME("sdc::init");
   if(m_verbosity > 5){
-    pout() << "sdc::init_source_terms" << endl;
+    pout() << "sdc::init" << endl;
   }
 
   advance_reaction_network(m_time, m_dt);
@@ -462,7 +462,7 @@ Real sdc::advance(const Real a_dt){
     pout() << "sdc::advance" << endl;
   }
 
-#if 1 // Development debug
+#if 0 // Development debug
   return a_dt;
 #endif
 
@@ -497,6 +497,7 @@ Real sdc::advance(const Real a_dt){
 
     // SDC correction sweeps. Need to take care of lagged terms. 
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
+      MayDay::Abort("sdc::advance - stop, corrector is not implemented yet. ");
       num_corrections++;
 
       // Initialize error and reconcile integrands (i.e. make them quadrature-ready)
@@ -607,40 +608,45 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
   }
 
   // For the semi-implicit coupling we are solving
-  // phi_(m+1)^(k+1) = phi_m^(k+1) + dt*[ div(D*grad(phi_m^(k+1))) - div(mu*E^(k+1)_(m+1)*phi_m^(k+1))]
-  //                               - dt*[ div(D*grad(phi_m^k)) - div(mu*E^k_(m+1)*phi_m^k)]
-  //                               + I_m^(m+1)(phi^k)
+  //
+  //    phi_(m+1)^(k+1) = phi_m^(k+1) + dt*[ div(D*grad(phi_m^(k+1))) - div(mu*E^(k+1)_(m+1)*phi_m^(k+1))]
+  //                                  - dt*[ div(D*grad(phi_m^k)) - div(mu*E^k_(m+1)*phi_m^k)]
+  //                                  + I_m^(m+1)(phi^k)
   //
   // We then obtain E^(k+1)_(m+1) through the Poisson equation by inserting phi_(m+1)^(k+1) as rho^(k+1)_(m+1). Charge
   // injection onto dielectrics is handled explicitly so that the CDR BCs are updated BEFORE computing E. Here are all the
   // stages for one SDC substep:
   //
-  // 1. Update boundary conditions
+  // 1.  Update boundary conditions
   //
-  // 2. Compute the explicit diffusion operator div(D*grad(phi_m^(k+1))) = DivD
+  // 2.  Compute the explicit diffusion operator div(D*grad(phi_m^(k+1))) = DivD
   //
-  // 3. Make the right-hand side for the Poisson equation. This is
+  // 3.  Make the right-hand side for the Poisson equation. This is
   //
-  //       rho^(k+1)_(m+1) = Sum[q*(phi_m^(k+1) + dtm*divD - dtm*(FA(phi^k) + FD(phi^k) + I(phi^k))
+  //        rho^(k+1)_(m+1) = Sum[q*(phi_m^(k+1) + dtm*divD - dtm*(FA(phi^k) + FD(phi^k) + I(phi^k))
   //
-  // 4. Compute mobilities as mu = |v|/|E|. Beware division by zero. 
+  // 4.  Compute mobilities as mu = |v|/|E|. Beware division by zero. 
   //
-  // 5. Adjust the permittivity, i.e. re-initilizae multigrid, for the Poisson equation as
+  // 5.  Adjust the permittivity, i.e. re-initilizae multigrid, for the Poisson equation as
   //
-  //       bco = eps + dtm/eps0*Sum[q*mu_phi*phi_m^(k+1)]
+  //        bco = eps + dtm/eps0*Sum[q*mu_phi*phi_m^(k+1)]
   //
-  // 6. Advance sigma equation to sigma_(m+1)^(k+1)
+  // 6.  Advance sigma equation to sigma_(m+1)^(k+1)
   // 
-  // 7. Solve for E_(m+1)^(k+1)
+  // 7.  Solve for E_(m+1)^(k+1)
   //
-  // 8. Compute new CDR velocities using E_(m+1)^(k+1)
+  // 8.  Advance the reaction network to get the source
   //
-  // 9. Compute FA and FR using E_(m+1)^(k+1)
+  // 9.  Compute new cdr velocities
   //
-  // 10. Solve for phi_(m+1)^(k+1)
+  // 10. Compute DivF
+  //
+  // 11. Solve the equation above for phi_(m+1)^(k+1)
   //
 
   Real time = a_time;
+
+  // This loop solves for phi_(m+1)^(k+1). 
   for (int m = 0; m < m_p; m++){
 
     // We must have this for doing mu = |v|/|E|
@@ -678,11 +684,14 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
     sdc::compute_semi_implicit_cdr_velocities(m, time);
 
     // 10. Compute div(v*phi)
-    //    sdc::compute_divF(m, a_corrector);
+    sdc::compute_divF(m, a_corrector);
 
+    // 11. Solve the stinking equation
+    sdc::substep_cdr(m, a_corrector);
+
+    // Increment time
     time = time + m_dtm[m];
   }
-
 }
 
 void sdc::compute_divD(const int a_m, const bool a_corrector){
@@ -734,13 +743,11 @@ void sdc::compute_divF(const int a_m, const bool a_corrector){
     if(solver->is_mobile()){
       if(a_corrector && a_m > 0){
 	solver->compute_divF(divF, phi, extrap_dt);
-	data_ops::scale(divF, -1.0);
       }
       else if(a_m == 0 && !a_corrector){
 	solver->compute_divF(divF, phi, extrap_dt);
-	data_ops::scale(divF, -1.0);
       }
-      else{ // Maybe this is 
+      else{ // Maybe this is sufficient
 	data_ops::copy(divF, FA0);
       }
     }
@@ -763,33 +770,44 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
 
   // Compute |E| first
   const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
-  data_ops::vector_length(scratch1, E);
+  data_ops::vector_length(m_scratch1, E);
 
   // This is the dt for m->m+1
   const Real dtm = m_dtm[a_m];
   
-
+  // This iterates over solvers. If they are mobile and have charge != 0 we extact a mobility
+  // by computing mobility = |v|/|E|
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver   = solver_it();
     const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
 
     const int q = (solver_it.get_species())->get_charge();
 
-    if(q > 0){
+    if(q != 0 && solver->is_mobile()){
       EBAMRCellData& cell_mob   = storage->get_cell_mob();
       EBAMRFluxData& face_mob   = storage->get_face_mob();
+      EBAMRIVData&   eb_mob     = storage->get_eb_mob();
       const EBAMRCellData& velo = solver->get_velo_cell();
       const EBAMRCellData& phi  = storage->get_phi()[a_m];
 
       data_ops::vector_length(cell_mob, velo);
-      data_ops::divide_scalar(cell_mob, scratch1); // This gives the cell-centered mobility
+      data_ops::divide_scalar(cell_mob, m_scratch1); // This gives the cell-centered mobility
 
       // Now make the cell-centered mobility equal to
       data_ops::multiply(cell_mob, phi);
-      data_ops::scale(cell_mob, q*dtm/units::s_eps0);
+      data_ops::scale(cell_mob, q*dtm*units::s_Qe/units::s_eps0);
 
-      // Get the face-centered mobility
-      data_ops::average_cell_to_face(face_mob, cell_mob, m_amr->get_domains());
+      data_ops::set_value(cell_mob, 0.0);
+
+      // Get valid ghost cells before averaging
+      m_amr->average_down(cell_mob, phase::gas);
+      m_amr->interp_ghost(cell_mob, phase::gas);
+
+      // Compute face-centered "mobility"
+      data_ops::average_cell_to_face_allcomps(face_mob, cell_mob, m_amr->get_domains());
+
+      // Compute EB-centered mobility
+      time_stepper::extrapolate_to_eb(eb_mob, phase::gas, cell_mob);
     }
   }
   
@@ -825,34 +843,45 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
 
     const int q = (solver_it.get_species())->get_charge();
     
-    if(q > 0){
+    if(q != 0){
 
       // This adds the term q*phi_m^k
       const EBAMRCellData& phi = storage->get_phi()[a_m];
       data_ops::incr(rho_gas, phi, 1.0*q);
 
+#if 0 // Debug, take out everything
+      // Add diffusive term. This is not a lagged term
+      if(solver->is_diffusive()){
+	const EBAMRCellData& divD = storage->get_divD();
+	data_ops::incr(rho_gas, divD, dtm*q);
+      }
+
       // This adds the other terms. The quadrature required for I_m(phi^k) is performed in place. 
       if(a_corrector){
-	const EBAMRCellData& divD = storage->get_divD();
 	const EBAMRCellData& FA   = storage->get_FA()[a_m];
 	const EBAMRCellData& FD   = storage->get_FD()[a_m];
 
-	data_ops::incr(rho_gas, divD, dtm*q);
+	// Compute the quadrature
+	EBAMRCellData& scratch = storage->get_scratch();
+	sdc::quad(scratch, storage->get_F(), a_m);
 
-	if(a_corrector){
-
-	  // Compute the quadrature
-	  EBAMRCellData& scratch = storage->get_scratch();
-	  sdc::quad(scratch, storage->get_F(), a_m);
-
-	  // Increment
+	// Increment
+	if(solver->is_mobile()){
 	  data_ops::incr(rho_gas, FA,     -dtm*q);
-	  data_ops::incr(rho_gas, FD,     -dtm*q);
-	  data_ops::incr(rho_gas, scratch,  0.5*q*dtm); // Scaled by 0.5*dt since quadrature takes place on [-1,1]
 	}
+	if(solver->is_diffusive()){
+	  data_ops::incr(rho_gas, FD,     -dtm*q);
+	}
+	data_ops::incr(rho_gas, scratch,  0.5*q*dtm); // Scaled by 0.5*dt since quadrature takes place on [-1,1]
       }
+
+#endif
     }
   }
+
+  // Now do the scaling
+  data_ops::scale(rho_gas, units::s_Qe);
+  m_amr->interpolate_to_centroids(rho_gas, phase::gas);
 }
 
 void sdc::set_semi_implicit_permittivities(){
@@ -867,11 +896,18 @@ void sdc::set_semi_implicit_permittivities(){
   poisson->set_coefficients();
 
   // Get bco and increment with mobilities
-  MFAMRFluxData& bco = poisson->get_bco();
+  MFAMRFluxData& bco   = poisson->get_bco();
+  MFAMRIVData& bco_irr = poisson->get_bco_irreg();
+  
   EBAMRFluxData bco_gas;
-  m_amr->allocate_ptr(bco_gas); 
-  m_amr->alias(bco_gas, phase::gas, bco);
-
+  EBAMRIVData   bco_irr_gas;
+  
+  m_amr->allocate_ptr(bco_gas);
+  m_amr->allocate_ptr(bco_irr_gas);
+  
+  m_amr->alias(bco_gas,     phase::gas, bco);
+  m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
+  
   // Increment that shit. 
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver   = solver_it();
@@ -879,9 +915,12 @@ void sdc::set_semi_implicit_permittivities(){
 
     const int q = (solver_it.get_species())->get_charge();
     
-    if(q > 0){
+    if(q != 0 && solver->is_mobile()){
       const EBAMRFluxData& face_mob = storage->get_face_mob();
-      data_ops::incr(bco_gas, face_mob, 1.0);
+      const EBAMRIVData& eb_mob     = storage->get_eb_mob();
+      
+      data_ops::incr(bco_gas,     face_mob, 1.0);
+      data_ops::incr(bco_irr_gas, eb_mob,   1.0);
     }
   }
 
@@ -945,12 +984,79 @@ void sdc::compute_semi_implicit_cdr_velocities(const int a_m, const Real a_time)
   sdc::compute_cdr_velo(states, a_time);
 }
 
+void sdc::substep_cdr(const int a_m, const bool a_corrector){
+  CH_TIME("sdc::substep_cdr");
+  if(m_verbosity > 5){
+    pout() << "sdc::substep_cdr" << endl;
+  }
+
+  const Real dtm = m_dtm[a_m];
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
+    EBAMRCellData& I_m         = storage->get_scratch();  
+    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
+    const EBAMRCellData& divF  = storage->get_divF();     // Beware the sign, FA = -DivF
+    const EBAMRCellData& divD  = storage->get_divD();  
+    const EBAMRCellData& R     = solver->get_source();
+
+    const EBAMRCellData& FA_lag    = storage->get_FA()[a_m];
+    const EBAMRCellData& FD_lag    = storage->get_FD()[a_m];
+    const EBAMRCellData& FR_lag    = storage->get_FR()[a_m+1]; // Beware the centering monster for implicit reactions
+    const Vector<EBAMRCellData>& F = storage->get_F();
+
+    // Do the lagged term high-order quadrature
+    if(a_corrector){
+      sdc::quad(I_m, F, a_m);
+      data_ops::scale(I_m, 0.5*dtm);
+    }
+
+    // phi_(m+1) = phi_m - dt*divF - dt*FA^k
+    data_ops::copy(phi_m1, phi_m);
+    if(solver->is_mobile()){
+      data_ops::incr(phi_m1, divF, -dtm);
+      
+      if(a_corrector){ // Do lagged term if this is the corrector
+	data_ops::incr(phi_m1, FA_lag, -dtm);
+      }
+    }
+
+    // phi_(m+1) = phi_m - dt*divF - dt*FA^k + dt*divD -dt*FD^k
+    if(solver->is_diffusive()){
+      data_ops::incr(phi_m1, divD, dtm);
+      
+      if(a_corrector){ // Do lagged term if this is the corrector
+	data_ops::incr(phi_m1, FD_lag, -dtm);
+      }
+    }
+
+    // phi_(m+1) = phi_m - dt*divF - dt*FA^k + dt*divD -dt*FD^k + dt*FR - dt*FR^k
+    data_ops::incr(phi_m1, R,       dtm);
+    if(a_corrector){
+      data_ops::incr(phi_m1, FR_lag, -dtm);
+    }
+
+    // phi_(m+1) = phi_m - dt*divF - dt*FA^k + dt*divD -dt*FD^k + dt*FR - dt*FR^k + I_m(phi^k)
+    if(a_corrector){
+      data_ops::incr(phi_m1, I_m, 1.0);
+    }
+
+    // Non-negative magic stencil
+    solver->make_non_negative(phi_m1);
+    data_ops::floor(phi_m1, 0.0);
+  }
+}
+
 void sdc::sweep_explicit(const Real a_dt, const Real a_time, const bool a_lagged_terms){
   CH_TIME("sdc::sweep_explicit");
   if(m_verbosity > 5){
     pout() << "sdc::sweep_explicit" << endl;
   }
 
+  MayDay::Abort("sdc::sweep_explicit - not implemented yet");
 }
 
 void sdc::initialize_errors(){
@@ -1191,13 +1297,35 @@ void sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 #endif
 }
 
-void sdc::regrid_internals(){
-  CH_TIME("sdc::regrid_internals");
+void sdc::cache_internals(){
+  CH_TIME("sdc::cache_internals");
   if(m_verbosity > 5){
-    pout() << "sdc::regrid_internals" << endl;
+    pout() << "sdc::cache_internals" << endl;
   }
 
+  m_cache_FR0.resize(m_plaskin->get_num_species());
+
+  //
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const int idx = solver_it.get_solver();
+    m_amr->allocate(m_cache_FR0[idx], phase::gas, 1);
+
+    // Storage the reactive slope
+    const EBAMRCellData& FR0 = storage->get_FR()[0];
+    data_ops::copy(m_cache_FR0[idx], FR0);
+  }
+}
+
+void sdc::allocate_internals(){
+  CH_TIME("sdc::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "sdc::allocate_internals" << endl;
+  }
   m_cdr_error.resize(m_plaskin->get_num_species());
+
+  m_amr->allocate(m_scratch1,  phase::gas, 1);
+  m_amr->allocate(m_scratchD,  phase::gas, SpaceDim);
   
   sdc::allocate_cdr_storage();
   sdc::allocate_poisson_storage();
@@ -1206,6 +1334,51 @@ void sdc::regrid_internals(){
 
   sdc::setup_quadrature_nodes(m_p);
   sdc::setup_qmj(m_p);
+}
+
+void sdc::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("sdc::regrid_internals");
+  if(m_verbosity > 5){
+    pout() << "sdc::regrid_internals" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const Interval interv(comp, comp);
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const int idx = solver_it.get_solver();
+
+    // This is data on the new grids which needs to be filled
+    EBAMRCellData& FR0 = storage->get_FR()[0];
+
+
+    // Get the interpolator from amr
+    Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->get_eb_pwl_interp(phase::gas);
+    
+
+    // These levels have not changed and can be copied
+    for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
+      m_cache_FR0[idx][lvl]->copyTo(*FR0[lvl]); // Base level should never change, but ownership can.
+    }
+
+    // These levels have changed and need to be interpolated. End by copying regions that didn't change
+    for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+      interpolator[lvl]->interpolate(*FR0[lvl], *FR0[lvl-1], interv);
+      if(lvl <= Min(a_old_finest_level, a_new_finest_level)){
+	m_cache_FR0[idx][lvl]->copyTo(*FR0[lvl]);
+      }
+    }
+
+    m_amr->average_down(FR0, phase::gas);
+    m_amr->interp_ghost(FR0, phase::gas);
+
+
+    m_amr->deallocate(m_cache_FR0[idx]);
+  }
+
+
 }
 
 void sdc::allocate_cdr_storage(){
@@ -1250,6 +1423,9 @@ void sdc::deallocate_internals(){
   if(m_verbosity > 5){
     pout() << "sdc::deallocate_internals" << endl;
   }
+
+  m_amr->deallocate(m_scratch1);
+  m_amr->deallocate(m_scratchD);
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();

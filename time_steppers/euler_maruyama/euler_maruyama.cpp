@@ -275,10 +275,10 @@ Real euler_maruyama::advance(const Real a_dt){
   return a_dt;
 }
 
-void euler_maruyama::init_source_terms(){
-  CH_TIME("euler_maruyama::init_source_terms");
+void euler_maruyama::init(){
+  CH_TIME("euler_maruyama::init");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::init_source_terms" << endl;
+    pout() << "euler_maruyama::init" << endl;
   }
 
   // No need to do anything in this routine yet
