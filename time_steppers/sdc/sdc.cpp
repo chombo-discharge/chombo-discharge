@@ -716,7 +716,8 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
     sdc::compute_E_into_scratch();
       
     // 1. Update boundary conditions and charge fluxes
-    sdc::compute_cdr_eb_states();
+    sdc::compute_cdr_gradients();
+    sdc::compute_cdr_eb_states(); 
     sdc::compute_cdr_fluxes(a_time);
     sdc::compute_cdr_domain_states();
     sdc::compute_cdr_domain_fluxes(a_time);
@@ -746,6 +747,16 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
     // 9. Compute the new cdr velocities
     sdc::compute_semi_implicit_cdr_velocities(m, time);
 
+    // 9b. Compute new boundary conditions using the new field and velocities. Really need to rework this one. 
+#if 1
+    sdc::compute_cdr_gradients();
+    sdc::compute_cdr_eb_states();
+    sdc::compute_cdr_fluxes(a_time);
+    sdc::compute_cdr_domain_states();
+    sdc::compute_cdr_domain_fluxes(a_time);
+    sdc::compute_sigma_flux();
+#endif
+
     // 10. Compute div(v*phi)
     sdc::compute_divF(m, a_corrector);
 
@@ -772,18 +783,20 @@ void sdc::compute_divD(const int a_m, const bool a_corrector){
 
     EBAMRCellData& divD = storage->get_divD();
     const EBAMRCellData& phi = storage->get_phi()[a_m];
-    const EBAMRCellData& FD0 = storage->get_phi()[0];
+    const EBAMRCellData& FD0 = storage->get_FD()[0];
     
     // If a_m==0 we should only have to compute divD once, and this happens during the initial SDC sweep. For the corrector
     // we should always be able to use the m_FD[0] slope so we simply copy that over
-    if(a_corrector && a_m > 0){
-      solver->compute_divD(divD, phi);
-    }
-    else if(a_m == 0 && !a_corrector){
-      solver->compute_divD(divD, phi);
-    }
-    else{
-      data_ops::copy(divD, FD0);
+    if(solver->is_diffusive()){
+      if(a_corrector && a_m > 0){
+	solver->compute_divD(divD, phi);
+      }
+      else if(a_m == 0 && !a_corrector){
+	solver->compute_divD(divD, phi);
+      }
+      else{
+	data_ops::copy(divD, FD0);
+      }
     }
   }
 }
@@ -800,7 +813,7 @@ void sdc::compute_divF(const int a_m, const bool a_corrector){
 
     EBAMRCellData& divF      = storage->get_divF();
     const EBAMRCellData& phi = storage->get_phi()[a_m];
-    const EBAMRCellData& FA0 = storage->get_phi()[0];
+    const EBAMRCellData& FA0 = storage->get_FA()[0];
 
     const Real extrap_dt = (m_extrap_advect) ? m_dtm[a_m] : 0.0;
     
@@ -813,7 +826,7 @@ void sdc::compute_divF(const int a_m, const bool a_corrector){
       else if(a_m == 0 && !a_corrector){
 	solver->compute_divF(divF, phi, extrap_dt);
       }
-      else{ // Maybe this is sufficient
+      else{
 	data_ops::copy(divF, FA0);
       }
     }
@@ -915,7 +928,6 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
       const EBAMRCellData& phi = storage->get_phi()[a_m];
       data_ops::incr(rho_gas, phi, 1.0*q);
 
-#if 0 // Debug, take out everything
       // Add diffusive term. This is not a lagged term
       if(solver->is_diffusive()){
 	const EBAMRCellData& divD = storage->get_divD();
@@ -940,8 +952,6 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
 	}
 	data_ops::incr(rho_gas, scratch,  0.5*q*dtm); // Scaled by 0.5*dt since quadrature takes place on [-1,1]
       }
-
-#endif
     }
   }
 
@@ -984,7 +994,7 @@ void sdc::set_semi_implicit_permittivities(){
     if(q != 0 && solver->is_mobile()){
       const EBAMRFluxData& face_mob = storage->get_face_mob();
       const EBAMRIVData& eb_mob     = storage->get_eb_mob();
-      
+
       data_ops::incr(bco_gas,     face_mob, 1.0);
       data_ops::incr(bco_irr_gas, eb_mob,   1.0);
     }
@@ -1090,7 +1100,7 @@ void sdc::substep_cdr(const int a_m, const bool a_corrector){
       }
     }
 
-    // phi_(m+1) = phi_m - dt*divF - dt*FA^k + dt*divD -dt*FD^k
+    // phi_(m+1) = phi_m - dt*divF - dt*FA^k + dt*divD - dt*FD^k
     if(solver->is_diffusive()){
       data_ops::incr(phi_m1, divD, dtm);
       
@@ -1100,7 +1110,7 @@ void sdc::substep_cdr(const int a_m, const bool a_corrector){
     }
 
     // phi_(m+1) = phi_m - dt*divF - dt*FA^k + dt*divD -dt*FD^k + dt*FR - dt*FR^k
-    data_ops::incr(phi_m1, R,       dtm);
+    data_ops::incr(phi_m1, R, dtm);
     if(a_corrector){
       data_ops::incr(phi_m1, FR_lag, -dtm);
     }
@@ -1111,7 +1121,7 @@ void sdc::substep_cdr(const int a_m, const bool a_corrector){
     }
 
     // Non-negative magic stencil
-    solver->make_non_negative(phi_m1);
+    //    solver->make_non_negative(phi_m1);
     data_ops::floor(phi_m1, 0.0);
 
     // Overwrite the slopes. Could probably save some m=0 computations here since divF and divD doesn't change there

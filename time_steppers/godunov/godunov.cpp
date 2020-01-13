@@ -297,10 +297,19 @@ void godunov::init(){
   // No need to do anything in this routine yet
 }
 
-void godunov::regrid_internals(){
+void godunov::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("godunov::regrid_internals");
   if(m_verbosity > 5){
     pout() << "godunov::regrid_internals" << endl;
+  }
+
+  // Nothing to see here
+}
+
+void godunov::allocate_internals(){
+  CH_TIME("godunov::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "godunov::allocate_internals" << endl;
   }
 
   const int ncomp       = 1;

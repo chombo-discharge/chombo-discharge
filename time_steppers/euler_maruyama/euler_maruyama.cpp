@@ -284,10 +284,19 @@ void euler_maruyama::init(){
   // No need to do anything in this routine yet
 }
 
-void euler_maruyama::regrid_internals(){
+void euler_maruyama::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("euler_maruyama::regrid_internals");
   if(m_verbosity > 5){
     pout() << "euler_maruyama::regrid_internals" << endl;
+  }
+
+  // These aren't the droids you're looking for. 
+}
+
+void euler_maruyama::allocate_internals(){
+  CH_TIME("euler_maruyama::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "euler_maruyama::allocate_internals" << endl;
   }
 
   const int ncomp       = 1;
