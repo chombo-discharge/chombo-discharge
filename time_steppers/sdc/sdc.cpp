@@ -53,6 +53,7 @@ void sdc::parse_options(){
   parse_adaptive_options();
   parse_debug_options();
   parse_advection_options();
+  parse_photoi_options();
 
   // Setup nodes
   sdc::setup_quadrature_nodes(m_p);
@@ -169,6 +170,18 @@ void sdc::parse_semi_implicit(){
   std::string str;
 
   pp.get("semi_implicit", str); m_semi_implicit = (str == "true") ? true : false;
+}
+
+void sdc::parse_photoi_options(){
+  CH_TIME("sdc::parse_photoi_options");
+  if(m_verbosity > 5){
+    pout() << "sdc::parse_photoi_options" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+
+  pp.get("freeze_photoi", str); m_freeze_photoi = (str == "true") ? true : false;
 }
 
 RefCountedPtr<cdr_storage>& sdc::get_cdr_storage(const cdr_iterator& a_solverit){
@@ -445,6 +458,22 @@ void sdc::copy_phi_p_to_cdr(){
   }
 }
 
+void sdc::copy_phi_p_to_rte(){
+  CH_TIME("sdc::copy_phi_p_to_rte");
+  if(m_verbosity > 5){
+    pout() << "sdc::copy_phi_p_to_rte" << endl;
+  }
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>&  solver  = solver_it();
+    RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
+
+    EBAMRCellData& phi = solver->get_state();
+    const EBAMRCellData& phip = storage->get_phi()[m_p];
+    data_ops::copy(phi, phip);
+  }
+}
+
 void sdc::copy_sigma_p_to_sigma(){
   CH_TIME("sdc::copy_sigma_p_to_sigma");
   if(m_verbosity > 5){
@@ -456,15 +485,26 @@ void sdc::copy_sigma_p_to_sigma(){
   data_ops::copy(sigma, sigmap);
 }
 
+void sdc::copy_FRp_to_FR0(){
+  CH_TIME("sdc::copy_FRp_to_FR0");
+  if(m_verbosity > 5){
+    pout() << "sdc::copy_FRp_to_FR0" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+
+    EBAMRCellData& FR0       = storage->get_FR()[0];
+    const EBAMRCellData& FRp = storage->get_FR()[m_p];
+    data_ops::copy(FR0, FRp);
+  }
+}
+
 Real sdc::advance(const Real a_dt){
   CH_TIME("sdc::advance");
   if(m_verbosity > 2){
     pout() << "sdc::advance" << endl;
   }
-
-#if 0 // Development debug
-  return a_dt;
-#endif
 
   // ---------------------------------------------------------------------------------------------------
   // TLDR:  When we enter this routine, solvers SHOULD have been filled with valid ready and be ready 
@@ -477,6 +517,7 @@ Real sdc::advance(const Real a_dt){
   // Initialize integrations. If we do corrections
   sdc::copy_cdr_to_phi_m0();
   sdc::copy_sigma_to_sigma_m0();
+  sdc::copy_rte_to_phi_m0();
 
   // SDC advance
   Real first_dt       = a_dt;
@@ -497,12 +538,11 @@ Real sdc::advance(const Real a_dt){
 
     // SDC correction sweeps. Need to take care of lagged terms. 
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
-      MayDay::Abort("sdc::advance - stop, corrector is not implemented yet. ");
       num_corrections++;
 
       // Initialize error and reconcile integrands (i.e. make them quadrature-ready)
       sdc::initialize_errors();
-      //      sdc::reconcile_integrands();
+      sdc::reconcile_integrands();
 
       // SDC correction along whole interval
       sdc::sweep(a_dt, m_time, true);
@@ -537,9 +577,14 @@ Real sdc::advance(const Real a_dt){
     }
   }
 
-  // Copy results back to solvers
+  // Copy results back to solvers. Also add the reactive slope for the next iteration. This is needed because I_m needs slopes
+  // at all nodes for the high-order quadrature so we take the reactive slope at m=p at the end of this step and put it
+  // on m=0 for the next step. If this step is the last step before a regrid, this class will regrid the FR_0 slope and
+  // put it back where it belongs. 
+  sdc::copy_phi_p_to_rte();
   sdc::copy_phi_p_to_cdr();
   sdc::copy_sigma_p_to_sigma();
+  sdc::copy_FRp_to_FR0();       
 
   // Always recompute velocities and diffusion coefficients before the next time step. The Poisson and RTE equations
   // have been updated when we come in here. 
@@ -568,6 +613,23 @@ void sdc::copy_cdr_to_phi_m0(){
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>&  solver  = solver_it();
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    
+    EBAMRCellData& phi0 = storage->get_phi()[0];
+    const EBAMRCellData& phi = solver->get_state();
+    data_ops::copy(phi0, phi);
+  }
+}
+
+void sdc::copy_rte_to_phi_m0(){
+  CH_TIME("sdc::copy_rte_to_phi_m0");
+  if(m_verbosity > 5){
+    pout() << "sdc::copy_rte_to_phi_m0" << endl;
+  }
+
+  // RTE solvers
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>&  solver  = solver_it();
+    RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
     
     EBAMRCellData& phi0 = storage->get_phi()[0];
     const EBAMRCellData& phi = solver->get_state();
@@ -643,6 +705,7 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
   //
   // 11. Solve the equation above for phi_(m+1)^(k+1)
   //
+  // 12. Solve the radiative transfer equations
 
   Real time = a_time;
 
@@ -678,7 +741,7 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
     sdc::solve_semi_implicit_poisson(m);
 
     // 8. Advance the reaction network to get source terms
-    sdc::compute_reaction_network(m, time, m_dtm[m]);
+    sdc::compute_reaction_network(m, time, m_dtm[m], a_corrector);
 
     // 9. Compute the new cdr velocities
     sdc::compute_semi_implicit_cdr_velocities(m, time);
@@ -688,6 +751,9 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
 
     // 11. Solve the stinking equation
     sdc::substep_cdr(m, a_corrector);
+
+    // 12. Solve the RTE equation
+    sdc::substep_rte(m, a_corrector);
 
     // Increment time
     time = time + m_dtm[m];
@@ -1003,9 +1069,9 @@ void sdc::substep_cdr(const int a_m, const bool a_corrector){
     const EBAMRCellData& divD  = storage->get_divD();  
     const EBAMRCellData& R     = solver->get_source();
 
-    const EBAMRCellData& FA_lag    = storage->get_FA()[a_m];
-    const EBAMRCellData& FD_lag    = storage->get_FD()[a_m];
-    const EBAMRCellData& FR_lag    = storage->get_FR()[a_m+1]; // Beware the centering monster for implicit reactions
+    EBAMRCellData& FA_lag    = storage->get_FA()[a_m];
+    EBAMRCellData& FD_lag    = storage->get_FD()[a_m];
+    EBAMRCellData& FR_lag    = storage->get_FR()[a_m+1]; // Beware the centering monster for implicit reactions
     const Vector<EBAMRCellData>& F = storage->get_F();
 
     // Do the lagged term high-order quadrature
@@ -1047,6 +1113,117 @@ void sdc::substep_cdr(const int a_m, const bool a_corrector){
     // Non-negative magic stencil
     solver->make_non_negative(phi_m1);
     data_ops::floor(phi_m1, 0.0);
+
+    // Overwrite the slopes. Could probably save some m=0 computations here since divF and divD doesn't change there
+    data_ops::copy(FA_lag,   divF); 
+    data_ops::scale(FA_lag, -1.0); 
+    data_ops::copy(FD_lag,   divD);
+    data_ops::copy(FR_lag,   R);
+  }
+}
+
+void sdc::substep_rte(const int a_m, const bool a_corrector){
+  CH_TIME("sdc::substep_rte");
+  if(m_verbosity > 5){
+    pout() << "sdc::substep_rte" << endl;
+  }
+
+  const Real dtm = m_dtm[a_m];
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
+
+
+    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
+    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
+    
+    if(!m_freeze_photoi){
+      data_ops::copy(phi_m1, phi_m); // Faster MG solve (if MG is used)
+      solver->advance(dtm, phi_m1);
+    }
+    else if(m_freeze_photoi && !a_corrector){
+      data_ops::copy(phi_m1, phi_m); // Faster MG solve (if MG is used)
+      solver->advance(dtm, phi_m1);
+    }
+  }
+}
+
+void sdc::reconcile_integrands(){
+  CH_TIME("sdc::reconcile_integrands");
+  if(m_verbosity > 5){
+    pout() << "sdc::reconcile_integrands" << endl;
+  }
+
+  // TLDR: When we come in here, all solutions (Poisson, CDR, RTE, Sigma) are known at node m_p. But we
+  //       do need the extra slopes for the explicit operators so we have to compute divF and divD again. 
+
+  Vector<EBAMRCellData*> cdr_densities_p = sdc::get_cdr_phik(m_p);
+  EBAMRIVData& sigma_p = sdc::get_sigmak(m_p);
+  const Real t_p = m_tm[m_p];
+
+  // Update boundary conditions for cdr and sigma equations before getting the slope at the final node
+  sdc::compute_cdr_eb_states(cdr_densities_p);
+  sdc::compute_cdr_fluxes(cdr_densities_p, t_p);
+  sdc::compute_cdr_domain_states(cdr_densities_p);
+  sdc::compute_cdr_domain_fluxes(cdr_densities_p, t_p);
+  sdc::compute_sigma_flux();
+
+  // Now compute FAR_p - that wasn't done when we integrated
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver   = solver_it();
+    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const int idx = solver_it.get_solver();
+
+    // This has not been computed yet. Do it.
+    EBAMRCellData& FA_p       = storage->get_FA()[m_p];
+    EBAMRCellData& FD_p       = storage->get_FD()[m_p];
+    const EBAMRCellData& phi_p = *cdr_densities_p[idx] ;
+
+    if(solver->is_mobile()){
+      const Real extrap_dt = m_extrap_advect ? m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
+      solver->compute_divF(FA_p, phi_p, extrap_dt);                // FAR_p =  Div(v_p*phi_p)
+      data_ops::scale(FA_p, -1.0);                                 // FAR_p = -Div(v_p*phi_p)
+    }
+    else{
+      data_ops::set_value(FA_p, 0.0);
+    }
+
+    if(solver->is_diffusive()){
+      solver->compute_divD(FD_p, phi_p);
+    }
+    else{
+      data_ops::set_value(FD_p, 0.0);
+    }
+
+    // Build the integrand required for the lagged high-order quadrature
+    for (int m = 0; m <= m_p; m++){
+      EBAMRCellData& F_m        = storage->get_F()[m];
+      const EBAMRCellData& FA_m = storage->get_FA()[m];
+      const EBAMRCellData& FD_m = storage->get_FD()[m];
+      const EBAMRCellData& FR_m = storage->get_FR()[m];
+
+      data_ops::copy(F_m, FR_m);
+      if(solver->is_diffusive()){
+	data_ops::incr(F_m, FD_m, 1.0);
+      }
+      if(solver->is_mobile()){
+	data_ops::incr(F_m, FA_m, 1.0);
+      }
+
+      // Shouldn't be necessary
+      m_amr->average_down(F_m, m_cdr->get_phase());
+      m_amr->interp_ghost(F_m, m_cdr->get_phase());
+    }
+  }
+
+  // Compute Fsig_p - that wasn't done either
+  EBAMRIVData& Fnew_p = m_sigma_scratch->get_Fnew()[m_p];
+  m_sigma->compute_rhs(Fnew_p);
+  for (int m = 0; m <= m_p; m++){
+    EBAMRIVData& Fold_m = m_sigma_scratch->get_Fold()[m];
+    EBAMRIVData& Fnew_m = m_sigma_scratch->get_Fnew()[m];
+    data_ops::copy(Fold_m, Fnew_m);
   }
 }
 
@@ -1322,7 +1499,15 @@ void sdc::allocate_internals(){
   if(m_verbosity > 5){
     pout() << "sdc::allocate_internals" << endl;
   }
+  
   m_cdr_error.resize(m_plaskin->get_num_species());
+  m_dummy_rte.resize(m_plaskin->get_num_photons());
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_dummy_rte[idx] = new EBAMRCellData();
+    m_amr->allocate(*m_dummy_rte[idx], phase::gas, 1);
+  }
 
   m_amr->allocate(m_scratch1,  phase::gas, 1);
   m_amr->allocate(m_scratchD,  phase::gas, SpaceDim);
@@ -1427,6 +1612,11 @@ void sdc::deallocate_internals(){
   m_amr->deallocate(m_scratch1);
   m_amr->deallocate(m_scratchD);
 
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const int idx = solver_it.get_solver();
+    m_amr->deallocate(*m_dummy_rte[idx]);
+  }
+
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
@@ -1439,6 +1629,7 @@ void sdc::deallocate_internals(){
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
   }
 
+  m_dummy_rte.resize(0);
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
@@ -1807,18 +1998,29 @@ void sdc::compute_sigma_flux(){
   m_sigma->reset_cells(flux);
 }
 
-void sdc::compute_reaction_network(const int a_m, const Real a_time, const Real a_dt){
+void sdc::compute_reaction_network(const int a_m, const Real a_time, const Real a_dt, const bool a_corrector){
   CH_TIME("sdc::compute_reaction_network");
   if(m_verbosity > 5){
     pout() << "sdc::compute_reaction_network";
   }
 
   Vector<EBAMRCellData*> cdr_sources = m_cdr->get_sources();
-  Vector<EBAMRCellData*> rte_sources = m_rte->get_sources();
+  Vector<EBAMRCellData*> rte_sources;
+
+  // If we freeze the photoionization profile in the first sweep, avoid filling the solver source terms
+  if(m_freeze_photoi && a_corrector){
+    if(procID() == 0) std::cout << "filling dummy" << std::endl;
+    rte_sources = m_dummy_rte;
+  }
+  else{
+    if(procID() == 0) std::cout << "filling sources" << std::endl;
+    rte_sources = m_rte->get_sources();
+  }
 
   const Vector<EBAMRCellData*> cdr_densities = get_cdr_phik(a_m);
-  const Vector<EBAMRCellData*> rte_densities = m_rte->get_states();
+  const Vector<EBAMRCellData*> rte_densities = get_rte_phik(a_m);
   const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
+
 
   time_stepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
 }
@@ -1923,6 +2125,21 @@ Vector<EBAMRCellData*> sdc::get_cdr_phik(const int a_m){
   Vector<EBAMRCellData*> ret;
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    ret.push_back(&(storage->get_phi()[a_m]));
+  }
+
+  return ret;
+}
+
+Vector<EBAMRCellData*> sdc::get_rte_phik(const int a_m){
+  CH_TIME("sdc::get_rte_phik");
+  if(m_verbosity > 5){
+    pout() << "sdc::get_rte_phik" << endl;
+  }
+  
+  Vector<EBAMRCellData*> ret;
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_storage>& storage = sdc::get_rte_storage(solver_it);
     ret.push_back(&(storage->get_phi()[a_m]));
   }
 

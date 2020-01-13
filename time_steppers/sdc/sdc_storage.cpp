@@ -162,12 +162,22 @@ void sdc::rte_storage::allocate_storage(const int a_p){
   m_amr->allocate(m_previous,   m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIF,  m_phase, m_ncomp);
+
+  m_phi.resize(1+m_p);
+
+  for (int m = 0; m <= m_p; m++){
+    m_amr->allocate(m_phi[m], m_phase, m_ncomp);
+  }
 }
 
 void sdc::rte_storage::deallocate_storage(){
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
+
+  for (int m = 0; m <= m_p; m++){
+    m_amr->deallocate(m_phi[m]);
+  }
 }
 
 sdc::sigma_storage::sigma_storage(){

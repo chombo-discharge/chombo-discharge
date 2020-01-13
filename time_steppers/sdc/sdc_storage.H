@@ -131,10 +131,11 @@ public:
 
   void allocate_storage(const int a_p);
   void deallocate_storage();
-  
-  EBAMRCellData& get_previous(){  return m_previous;  }
-  EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
-  EBAMRIFData& get_domain_flux(){ return m_scratchIF; }
+
+  Vector<EBAMRCellData>& get_phi()   {return m_phi;       }
+  EBAMRCellData& get_previous()      {return m_previous;  }
+  EBAMRIVData& get_eb_flux()         {return m_scratchIV; }
+  EBAMRIFData& get_domain_flux()     {return m_scratchIF; }
 
 protected:
 
@@ -143,6 +144,7 @@ protected:
   int m_ncomp;                   // with this many components
   int m_p;                   // SDC order
 
+  Vector<EBAMRCellData> m_phi;
   EBAMRCellData m_previous;  // Solution at previous time step
   EBAMRIVData m_scratchIV;   // Used for EB-centered isotropic density
   EBAMRIFData m_scratchIF;   // Used for domain-centered isotropic density

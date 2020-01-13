@@ -63,7 +63,8 @@ protected:
   EBAMRCellData m_scratch1;
   EBAMRCellData m_scratchD;
 
-  Vector<EBAMRCellData> m_cache_FR0;
+  Vector<EBAMRCellData*> m_dummy_rte;
+  Vector<EBAMRCellData>  m_cache_FR0;
 
   int m_max_retries;
   int m_p;
@@ -84,6 +85,7 @@ protected:
   Real m_extrap_dt;
 
   bool m_semi_implicit;
+  bool m_freeze_photoi;
   bool m_extrap_advect;
   bool m_adaptive_dt;
   bool m_print_report;
@@ -132,6 +134,7 @@ protected:
 
   // Get functions for substep data. 
   Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
+  Vector<EBAMRCellData*> get_rte_phik(const int a_m);
   EBAMRIVData& get_sigmak(const int a_m);
 
   // Routines for intervals and quadrature
@@ -147,9 +150,12 @@ protected:
   // Routines for copying data at tm[0] and tm[p]
   void copy_cdr_to_phi_m0();
   void copy_sigma_to_sigma_m0();
+  void copy_rte_to_phi_m0();
 
   void copy_phi_p_to_cdr();
+  void copy_phi_p_to_rte();
   void copy_sigma_p_to_sigma();
+  void copy_FRp_to_FR0();
 
   void integrate_rte_transient(const Real a_dt);
   void integrate_rte_stationary();
@@ -164,6 +170,7 @@ protected:
   void compute_divF(const int a_m, const bool a_corrector);
 
   // Advance routine for SDC step
+  void substep_rte(const int a_m, const bool a_corrector);
   void substep_cdr(const int a_m, const bool a_corrector);
 
   // Semi-implicit routines for Poisson equation
@@ -197,7 +204,7 @@ protected:
   void restore_solvers();
 
   // Aux functions
-  void compute_reaction_network(const int a_m, const Real a_time, const Real a_dt);
+  void compute_reaction_network(const int a_m, const Real a_time, const Real a_dt, const bool a_corrector);
   void compute_E_into_scratch();
   void compute_cdr_eb_states();
   void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_states);
@@ -232,6 +239,7 @@ protected:
   void parse_adaptive_options();
   void parse_debug_options();
   void parse_advection_options();
+  void parse_photoi_options();
 };
 
 #endif

@@ -20,6 +20,7 @@ sdc.cfl              = 0.5     # CFL number
 sdc.relax_time       = 1.0     # Relaxation time constant
 sdc.semi_implicit    = false   # Use semi-implicit formulation
 sdc.source_comp      = interp  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+sdc.freeze_photoi    = false   # If true, compute photoionization in 1st sweep only (freeze them for later sweeps)
 
 # ------------------------------------
 # Nodes, subintervals, and corrections
