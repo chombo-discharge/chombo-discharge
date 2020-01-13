@@ -846,7 +846,6 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
   //
   //    mobility = |v|/|E|*q*dt/eps0*phi
 
-
   // Compute |E| first
   const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
   data_ops::vector_length(m_scratch1, E);
@@ -860,7 +859,8 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
     const RefCountedPtr<cdr_solver>& solver   = solver_it();
     const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
 
-    const int q = (solver_it.get_species())->get_charge();
+    const int q      = (solver_it.get_species())->get_charge();
+    const int q_sign = q > 0 ? 1 : -1;
 
     if(q != 0 && solver->is_mobile()){
       EBAMRCellData& cell_mob   = storage->get_cell_mob();
@@ -870,13 +870,12 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
       const EBAMRCellData& phi  = storage->get_phi()[a_m];
 
       data_ops::vector_length(cell_mob, velo);
-      data_ops::divide_scalar(cell_mob, m_scratch1); // This gives the cell-centered mobility
+      data_ops::divide_scalar(cell_mob, m_scratch1); // This gives the magnitude of the cell-centered mobility
+      data_ops::scale(cell_mob, q_sign);             // Set the correct sign, i.e. v = sgn(q)*mobility*E
 
       // Now make the cell-centered mobility equal to
       data_ops::multiply(cell_mob, phi);
       data_ops::scale(cell_mob, q*dtm*units::s_Qe/units::s_eps0);
-
-      data_ops::set_value(cell_mob, 0.0);
 
       // Get valid ghost cells before averaging
       m_amr->average_down(cell_mob, phase::gas);
