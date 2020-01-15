@@ -11,6 +11,8 @@
 #include "network_kinetics.H"
 #include "lookup_table.H"
 
+#include <random>
+
 class air7_stephens : public network_kinetics {
 public:
 
