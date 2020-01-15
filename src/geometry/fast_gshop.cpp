@@ -146,7 +146,7 @@ void fast_gshop::makeGrids_recursive(const ProblemDomain&      a_domain,
 
   a_grids.define(boxes, procs, a_domain);
 
-  //  pout() << "fast_gshop::makeGrids_recursive - domain = " << a_domain << "\t num boxes = " << boxes.size() << endl;
+  pout() << "fast_gshop::makeGrids_recursive - domain = " << a_domain << "\t num boxes = " << boxes.size() << endl;
   
   // 2. If we're load balancing with the irregular boxes, each grid now looks through his current boxes and reassign these
   //    by calling the GeometryShop::InsideOutside function for boxes that intersect with one of the bounded voxels
@@ -218,7 +218,7 @@ void fast_gshop::makeBoxes(Vector<Box>&         a_reg_boxes,
     const bool covered  = is_covered_box(rbox);
     const bool bounded  = is_bounded_box(rbox);
 
-    if((regular || covered) && !bounded && length){
+    if((regular || covered) && !bounded){
 #if 0
       pout() << "pushing regular box = " << rbox.get_lo() << "\t" << rbox.get_hi() << endl;
       pout() << "dx = " << a_dx << endl;

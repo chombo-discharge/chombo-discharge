@@ -44,8 +44,9 @@ public:
   Real advance(const Real a_dt);
 
   void init();
-  void regrid_internals();
+  void allocate_internals();
   void deallocate_internals();
+  void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
   void parse_options();
   bool need_to_regrid();
 

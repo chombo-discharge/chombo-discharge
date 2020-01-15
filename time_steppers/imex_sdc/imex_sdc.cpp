@@ -1236,10 +1236,19 @@ void imex_sdc::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 #endif
 }
 
-void imex_sdc::regrid_internals(){
+void imex_sdc::regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   CH_TIME("imex_sdc::regrid_internals");
   if(m_verbosity > 5){
     pout() << "imex_sdc::regrid_internals" << endl;
+  }
+
+  // Nothing to see here
+}
+
+void imex_sdc::allocate_internals(){
+  CH_TIME("imex_sdc::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "imex_sdc::allocate_internals" << endl;
   }
 
   m_cdr_error.resize(m_plaskin->get_num_species());

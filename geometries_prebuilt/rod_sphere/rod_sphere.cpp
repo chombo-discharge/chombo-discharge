@@ -72,13 +72,14 @@ rod_sphere::rod_sphere(){
     }
     real_box reg_gas(-100*RealVect::Unit, 100*RealVect::Unit);
     real_box rod_gas(lo-elec_radius*RealVect::Unit, hi+elec_radius*RealVect::Unit);
-    real_box sph_gas(centerD-2*radius*RealVect::Unit, centerD+2*radius*RealVect::Unit);
+    real_box sph_gas(centerD-1.1*radius*RealVect::Unit, centerD+1.1*radius*RealVect::Unit);
 
+    // Boxes for the gas stuff
     m_regular_voxels_gas.push_back(reg_gas);
     if(has_electrode)  m_bounded_voxels_gas.push_back(rod_gas);
     if(has_dielectric) m_bounded_voxels_gas.push_back(sph_gas);
 
-
+    // Boxes for the solid phase stuff
     if(has_dielectric){
       m_covered_voxels_sol.push_back(reg_gas);
       m_bounded_voxels_sol.push_back(sph_gas);
