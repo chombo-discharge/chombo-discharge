@@ -207,7 +207,7 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
 
 #if STENCIL_OPS_DEBUG
       if(!foundFirstStencil0 || !foundFirstStencil1){ // If we made it into this loop, this shouldn't happen
-	MayDay::Abort("stencil_ops::compute_interp_stencil_2D - logic bust");
+	MayDay::Warning("stencil_ops::compute_interp_stencil_2D - logic bust");
       }
 #endif
 
@@ -286,21 +286,21 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
       a_stencil.clear();
       if(foundFirstStencil0 && !foundFirstStencil1){ // It shouldn't be possible for this to happen
 #if DEBUG_STENCIL_OPS
-	MayDay::Abort("stencil_ops::compute_interp_stencil2D - logic bust, foundFirstStencil0 && !foundFirstStencil1");
+	MayDay::Warning("stencil_ops::compute_interp_stencil2D - logic bust, foundFirstStencil0 && !foundFirstStencil1");
 #endif
 	a_stencil += curStenDir0;
 	found_stencil = true;
       }
       else if(!foundFirstStencil0 && foundFirstStencil1){ // It shouldn't be possible for this to happen
 #if DEBUG_STENCIL_OPS
-	MayDay::Abort("stencil_ops::compute_interp_stencil2D - logic bust, !foundFirstStencil0 && foundFirstStencil1");
+	MayDay::Warning("stencil_ops::compute_interp_stencil2D - logic bust, !foundFirstStencil0 && foundFirstStencil1");
 #endif
 	a_stencil += curStenDir1;
 	found_stencil = true;
       }
       else if(!foundFirstStencil0 && !foundFirstStencil1){ // Might already have covered this case but not sure
 #if DEBUG_STENCIL_OPS
-	MayDay::Abort("stencil_ops::compute_interp_stencil2D - logic bust, thought this case was covered");
+	MayDay::Warning("stencil_ops::compute_interp_stencil2D - logic bust, thought this case was covered");
 #endif
 	a_stencil.add(a_vof, 1.0);
 	found_stencil = false;
@@ -356,7 +356,7 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
       found_stencil = true;
     }
     else{
-      MayDay::Abort("stencil_ops::compute_interp_stencil_2d - logic bust");
+      MayDay::Warning("stencil_ops::compute_interp_stencil_2d - logic bust");
     }
   }
 
@@ -399,7 +399,7 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
   // code when we get the chance.
   if(really3D){
 
-    //    MayDay::Abort("stencil_ops::compute_interp_stencil_3D - fix this code");
+    //    MayDay::Warning("stencil_ops::compute_interp_stencil_3D - fix this code");
     const int HiLoInterpDir   = a_centroid[interpDir3D] > 0. ? 1 : -1;
     const Side::LoHiSide side = (a_centroid[interpDir3D] > 0.) ? Side::Hi : Side::Lo;
 
@@ -483,7 +483,7 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
       for (int i = 0; i < stenOtherPlane.size(); i++){
 	std::cout << stenOtherPlane.vof(i).gridIndex() << "\t" << stenOtherPlane.weight(i) << std::endl;
       }
-      MayDay::Abort("stop");
+      MayDay::Warning("stop");
 #endif
     }
     else if(foundFirstStencil && !foundSecondStencil){ // This does bilinear interpolation instead of trilinear interpolation
@@ -495,7 +495,7 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
       found_stencil = false;
     }
     else{
-      MayDay::Abort("stencil_ops::compute_interp_stencil_3d - logic bust");
+      MayDay::Warning("stencil_ops::compute_interp_stencil_3d - logic bust");
     }
   }
   else if(!really3D){ // Find a direction in which we shouldn't interpolate and get a 2D stencil. This might be several
@@ -525,7 +525,7 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
     if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_3d - trilinear stencil weight < 0.0");
     sumweights += w;
   }
-  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Abort("stencil_ops::compute_interp_stencil_3d - sum of weights not equal to one");
+  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("stencil_ops::compute_interp_stencil_3d - sum of weights not equal to one");
 #endif
   
   return found_stencil;
