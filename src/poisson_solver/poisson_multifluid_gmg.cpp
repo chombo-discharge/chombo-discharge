@@ -243,7 +243,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
-  // Must have a dummy for checking initial residual
+  // We've scaled the Poisson equation with a length scale so we must also scale the right-hand sides
   MFAMRCellData mfzero;
   MFAMRCellData source;
   EBAMRIVData sigma;
@@ -794,6 +794,12 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   // Set the length scale for the Poisson equation. This is equivalent to solving the Poisson equation
   // on the domain [-1,1] in the x-direction
   m_length_scale = 2./(domains[0].size(0)*dx[0]);
+#if 0 // Debug hook
+  ParmParse pp("poisson");
+  pp.query("length_scale", m_length_scale);
+  std::cout << m_length_scale << std::endl;
+#endif
+
 
 
   const int bc_order = 2;
