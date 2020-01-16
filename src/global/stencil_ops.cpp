@@ -307,7 +307,7 @@ bool stencil_ops::compute_interp_stencil_2D(VoFStencil&          a_stencil,
       }
       else if(foundFirstStencil0 && foundFirstStencil1 && !(foundSecondStencil0 || foundSecondStencil1)){
 #if DEBUG_STENCIL_OPS
-	MayDay::Abort("stencil_ops::compute_interp_stencil2D - could not find stencil BC or CD. This shouldn't happen");
+	MayDay::Warning("stencil_ops::compute_interp_stencil2D - could not find stencil BC or CD. Defaulting to linear stencil");
 #endif
 	// Here, we could find stencil AB and AD but not BC or CD. This shouldn't happen but if it does, we default to 1D
 	// interpolation along the axis with the largest displacement. 
@@ -384,6 +384,8 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
   
   bool found_stencil = false;
 
+  const int interpDir3D = 2;
+
 
   // Check if centroid lies in one of the coordinate planes connecting cell centers
   const Real tol = stencil_ops::tolerance;
@@ -392,61 +394,109 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
     really3D = false;
   }
 
-  // This code is crude as balls, and is only guaranteed to be correct if there aren't multivalued cells. We'll rewrite this
-  // code when we get the chance. 
+  // This code is crude as balls, and is only guaranteed to be correct if there aren't multivalued cells. When there are
+  // multivalued cells in play, I'm not really sure how to do this because the 
+  // code when we get the chance.
   if(really3D){
-    const int HiLoDir2 = a_centroid[2] > 0. ? 1 : -1;
 
-    // Compute bilinear stencils for two rows of VoFs 
+    //    MayDay::Abort("stencil_ops::compute_interp_stencil_3D - fix this code");
+    const int HiLoInterpDir   = a_centroid[interpDir3D] > 0. ? 1 : -1;
+    const Side::LoHiSide side = (a_centroid[interpDir3D] > 0.) ? Side::Hi : Side::Lo;
+
+    // Compute bilinear stencils for two rows of VoFs. stenThisPlane is the bilinear stencil in the plane of this VoF,
+    // and stenOtherPlane is the bilinear stencil in the plane of the neighboring vof
+#if 0
     const IntVect iv0 = a_vof.gridIndex();
-    const IntVect iv1 = iv0 + BASISV(2)*HiLoDir2;
+    const IntVect iv1 = iv0 + BASISV(interpDir3D)*HiLoDir2;
     const VolIndex vof0 = VolIndex(iv0,0);
     const VolIndex vof1 = VolIndex(iv1,0);
+#endif
 
-    VoFStencil sten0;
-    VoFStencil sten1;
-    const bool foundFirstStencil  = stencil_ops::compute_interp_stencil_2D(sten0, a_centroid, vof0, a_domain, a_ebisbox, 2);
-    const bool foundSecondStencil = stencil_ops::compute_interp_stencil_2D(sten1, a_centroid, vof1, a_domain, a_ebisbox, 2);
 
+    // This is the bilinear stencil in the xy-plane of this VoF. This will always return true (right..?) because
+    // of how we handle pathological cases for 2D
+    VoFStencil stenThisPlane;
+    const bool foundFirstStencil  = stencil_ops::compute_interp_stencil_2D(stenThisPlane,
+									   a_centroid,
+									   a_vof,
+									   a_domain,
+									   a_ebisbox,
+									   interpDir3D);
+
+
+    // This code tries to compute a bilinear stencil in the xy plane but for the cell (i,j,k+-1). There can be multiple if
+    // the cell (i,j,k+1) is multivalued, hence the loop. We take the other bilinear stencil to be the average of those
+    // stencils. 
+    VoFStencil stenOtherPlane;       // This is the (possibly averaged) bilinear interpolation stencil in the other plane
+    bool foundSecondStencil = false; // Stupid flag
+    int numOtherStencils    = 0;     // Number of stencils that we got (possibly > 1 if multivalued)
+    const Vector<VolIndex> otherVoFs = a_ebisbox.getVoFs(a_vof, interpDir3D, side, 1); 
+    for (int ivof = 0; ivof < otherVoFs.size(); ivof++){
+      VoFStencil otherStencil;
+      const bool foundOtherStencil = stencil_ops::compute_interp_stencil_2D(otherStencil,
+									    a_centroid,
+									    otherVoFs[ivof],
+									    a_domain,
+									    a_ebisbox,
+									    interpDir3D);
+
+      if(foundOtherStencil){
+	foundSecondStencil = true;
+	stenOtherPlane += otherStencil;
+	numOtherStencils++;
+      }
+    }
+    if(foundSecondStencil){ // Do the average
+      stenOtherPlane *= 1./numOtherStencils;
+    }
+    
+
+    // First hook: If we got both stencils we can interpolate them safely. If this fails, we have to do bilinear interpolation
     if(foundFirstStencil && foundSecondStencil){
       found_stencil = true;
       a_stencil.clear();
 
-      // Interpolation distances
-      const Real z = a_centroid[2]*HiLoDir2;
-      // Linearly interpolate the stencil
+      // If we made it here, we have bilinear interpolation stencils in both planes and we can
+      // do linear interpolation of those two in order to get the 3D stencil
+      const Real z  = a_centroid[2]*sign(side);//HiLoDir2;
       const Real w0 = (1 - z);
       const Real w1 = z;
 
-      sten0 *= w0;
-      sten1 *= w1;
+      stenThisPlane  *= w0;
+      stenOtherPlane *= w1;
 
-      a_stencil += sten0;
-      a_stencil += sten1;
+      a_stencil += stenThisPlane;
+      a_stencil += stenOtherPlane;
 
-#if 0
+#if 0 // debugging hook
       std::cout << "vof = " << a_vof.gridIndex() << std::endl;
       std::cout << "stencil size = " << a_stencil.size() << std::endl;
-      std::cout << "stencil0 size = " << sten0.size() << std::endl;
-      std::cout << "stencil1 size = " << sten1.size() << std::endl;
+      std::cout << "stencil0 size = " << stenThisPlane.size() << std::endl;
+      std::cout << "stencil1 size = " << stenOtherPlane.size() << std::endl;
       for (int i = 0; i < a_stencil.size(); i++){
 	//	std::cout << a_stencil.vof(i).gridIndex() << "\t" << a_stencil.weight(i) << std::endl;
       }
 
-      for (int i = 0; i < sten0.size(); i++){
-	std::cout << sten0.vof(i).gridIndex() << "\t" << sten0.weight(i) << std::endl;
+      for (int i = 0; i < stenThisPlane.size(); i++){
+	std::cout << stenThisPlane.vof(i).gridIndex() << "\t" << stenThisPlane.weight(i) << std::endl;
       }
-      for (int i = 0; i < sten1.size(); i++){
-	std::cout << sten1.vof(i).gridIndex() << "\t" << sten1.weight(i) << std::endl;
+      for (int i = 0; i < stenOtherPlane.size(); i++){
+	std::cout << stenOtherPlane.vof(i).gridIndex() << "\t" << stenOtherPlane.weight(i) << std::endl;
       }
       MayDay::Abort("stop");
 #endif
     }
-    else{
+    else if(foundFirstStencil && !foundSecondStencil){ // This does bilinear interpolation instead of trilinear interpolation
+      a_stencil.clear();
+      a_stencil += stenThisPlane;
+      found_stencil = true;
+    }
+    else if(!foundFirstStencil && !foundSecondStencil){ // Could not find any stencils
       found_stencil = false;
     }
-
-
+    else{
+      MayDay::Abort("stencil_ops::compute_interp_stencil_3d - logic bust");
+    }
   }
   else if(!really3D){ // Find a direction in which we shouldn't interpolate and get a 2D stencil. This might be several
                       // directions but that is taken care of in the 2D computation. 
@@ -472,10 +522,10 @@ bool stencil_ops::compute_interp_stencil_3D(VoFStencil&          a_stencil,
   Real sumweights = 0.0;
   for (int i = 0; i < a_stencil.size(); i++){
     const Real w = a_stencil.weight(i);
-    if(w < 0.0) MayDay::Warning("trilinear stencil weight < 0.0");
+    if(w < 0.0) MayDay::Warning("stencil_ops::compute_interp_stencil_3d - trilinear stencil weight < 0.0");
     sumweights += w;
   }
-  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Abort("trilinear sumweights is fucked up");
+  if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Abort("stencil_ops::compute_interp_stencil_3d - sum of weights not equal to one");
 #endif
   
   return found_stencil;

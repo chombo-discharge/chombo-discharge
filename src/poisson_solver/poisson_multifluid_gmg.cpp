@@ -236,7 +236,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-  m_opfact->set_jump(a_sigma, 1.0/units::s_eps0);
+
   const Real t1 = MPI_Wtime();
 
 
@@ -246,13 +246,22 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   // Must have a dummy for checking initial residual
   MFAMRCellData mfzero;
   MFAMRCellData source;
+  EBAMRIVData sigma;
   m_amr->allocate(mfzero, ncomp);
   m_amr->allocate(source, ncomp);
+  m_amr->allocate(sigma, phase::gas, ncomp);
   data_ops::set_value(mfzero, 0.0);
   data_ops::set_value(source, 0.0);
   data_ops::incr(source,     a_source, 1.0);
   data_ops::scale(source, 1./(units::s_eps0));
   data_ops::kappa_scale(source);
+  data_ops::scale(source, 1./(m_length_scale*m_length_scale));
+
+
+  // Do the scaled surface charge
+  data_ops::copy(sigma, a_sigma);
+  data_ops::scale(sigma, 1./(m_length_scale*m_length_scale));
+  m_opfact->set_jump(sigma, 1.0/units::s_eps0);
   
 #if 0 // Debug
   MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
@@ -781,6 +790,12 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   bcfact->set_potentials(m_wall_bcfunc);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 
+
+  // Set the length scale for the Poisson equation. This is equivalent to solving the Poisson equation
+  // on the domain [-1,1] in the x-direction
+  m_length_scale = 2./(domains[0].size(0)*dx[0]);
+
+
   const int bc_order = 2;
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
@@ -792,7 +807,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 m_bco_irreg,
 										 alpha,
 										 beta,
-										 dx[0],
+										 dx[0]*m_length_scale,
 										 domains[0],
 										 domfact,
 										 origin,

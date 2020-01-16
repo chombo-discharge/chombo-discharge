@@ -230,6 +230,11 @@ protected:
   int m_bottom_drop;
 
   /*!
+    @brief Length scale for the Poisson equation
+  */
+  Real m_length_scale;
+
+  /*!
     @brief Target residue. If they residue is greater than this, we have a problematic cell. 
   */
   Real m_converged_resid;
