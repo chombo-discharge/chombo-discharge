@@ -11,6 +11,8 @@ bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;
 int  mfdirichletconductivityebbc::s_lsq_radius       = 1;
 
+#define ADJUST_STENCILS 1
+
 mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_domain,
 							 const EBISLayout&    a_ebisl,
 							 const RealVect&      a_dx,
@@ -139,10 +141,12 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 
       VoFStencil& cur_stencil     = m_irreg_stencils[dit()](vof, comp);
 
+#if ADJUST_STENCIL
       VoFStencil addsten(jump_sten);
       addsten *= -1.0*factor;
 
       cur_stencil += addsten;
+#endif
     }
 
     // Scale stencils appropriately. They should be scaled by beta*bco*area_frac*a_factor
@@ -270,11 +274,20 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     const Real beta       = m_beta;
     const Real bco        = (*m_bcoe)[a_dit](vof, comp);
     const Real area_frac  = ebisbox.bndryArea(vof);
-    
+
+
+#if ADJUST_STENCILS
     Real value = inhomo.get_ivfab(m_phase)(vof, comp);
     if(!a_useHomogeneous){
       value += homog.get_ivfab(m_phase)(vof,comp);
     }
+#else
+    Real value = 0.0;
+    if(!a_useHomogeneous){
+      value = (*m_data)[a_dit](vof,comp);
+    }
+#endif
+
 
     // Flux - this contains the contribution from the surface charge (inhomogeneous bc) and the
     // other side of the interface (quasi-homogeneous bc). 

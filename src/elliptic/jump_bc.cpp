@@ -9,9 +9,6 @@
 
 #include <EBArith.H>
 
-#define VOFIT_PREBUILT 1
-#define verb 1
-
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
 
@@ -315,6 +312,9 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const EBCellFAB& phi1              = a_phi.getPhase(phase1);
   const EBCellFAB& phi2              = a_phi.getPhase(phase2);
 
+  const EBISBox& ebisbox1            = phi1.getEBISBox();
+  const EBISBox& ebisbox2            = phi2.getEBISBox();
+
   const EBGraph& graph1              = bco1.getEBGraph();
   const EBGraph& graph2              = bco2.getEBGraph();
 
@@ -338,50 +338,46 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
   // First phase loop. Add first stencil stuff
   //  const Real t1 = MPI_Wtime();
-#if VOFIT_PREBUILT
   {
-  VoFIterator& vofit = m_vofit_gas[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-#else
-  for (VoFIterator vofit(ivs, graph1); vofit.ok(); ++vofit){
-#endif
-    const VolIndex& vof = vofit();
+    VoFIterator& vofit = m_vofit_gas[a_dit];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
 
-    const VoFStencil& sten = sten1(vof, comp);
-    for (int i = 0; i < sten.size(); i++){
-      const VolIndex& ivof = sten.vof(i);
-      const Real& iweight  = sten.weight(i);
-      a_phibc(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
-      inhomo2(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
+      const VoFStencil& sten = sten1(vof, comp);
+      for (int i = 0; i < sten.size(); i++){
+	const VolIndex& ivof = sten.vof(i);
+	const Real& iweight  = sten.weight(i);
+	a_phibc(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
+	inhomo2(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
+      }
     }
   }
-#if VOFIT_PREBUILT
-  }
-#endif
   
   // Second phase loop. Add second stencil stuff
   //  const Real t2 = MPI_Wtime();
-#if VOFIT_PREBUILT
   {
-  VoFIterator& vofit = m_vofit_sol[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-#else
-  for (VoFIterator vofit(ivs, graph2); vofit.ok(); ++vofit){
+    VoFIterator& vofit = m_vofit_sol[a_dit];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+#if 0 // testing some things
+      const IntVect iv = vof.gridIndex();
+      if(graph2.isMultiValued(iv)){
+	pout() << iv << "\t" << ebisbox2.normal(vof) << "\t" << ebisbox1.normal(VolIndex(iv,0)) << endl;
+	//	pout() << graph1.isRegular(iv) << "\t" << graph1.isIrregular(iv) << "\t" << graph1.isCovered(iv) << endl;
+      }
 #endif
-    const VolIndex& vof = vofit();
     
-    const VoFStencil& sten = sten2(vof, comp);
-    for (int i = 0; i < sten.size(); i++){
-      const VolIndex& ivof = sten.vof(i);
-      const Real& iweight  = sten.weight(i);
-      a_phibc(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
-      inhomo1(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
+      const VoFStencil& sten = sten2(vof, comp);
+      for (int i = 0; i < sten.size(); i++){
+	const VolIndex& ivof = sten.vof(i);
+	const Real& iweight  = sten.weight(i);
+	a_phibc(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
+	inhomo1(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
+      }
     }
   }
-#if VOFIT_PREBUILT
-  }
-#endif
-  
+
   // Divide by weights
   //  const Real t3 = MPI_Wtime();
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
