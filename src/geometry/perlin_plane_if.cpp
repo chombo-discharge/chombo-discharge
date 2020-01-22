@@ -21,11 +21,11 @@ perlin_plane_if::perlin_plane_if(const RealVect& a_normal,
 				 const bool&     a_reseed){
   
   // Create plane Perlin noise
-  m_point  = a_point;
+  m_point  = a_point - 0.5*a_normal*a_noiseAmp; // Perlin noise is on [0,1]
   m_normal = a_normal;
-  m_plane  = RefCountedPtr<BaseIF> (new PlaneIF(a_normal, a_point, a_inside));
+
+  m_plane  = RefCountedPtr<BaseIF> (new PlaneIF(m_normal, m_point, a_inside));
   m_perlin = RefCountedPtr<BaseIF> (new perlin_if(a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
-  
 }
 
 perlin_plane_if::perlin_plane_if(const perlin_plane_if& a_inputIF){

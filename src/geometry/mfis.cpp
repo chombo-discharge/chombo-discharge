@@ -6,9 +6,12 @@
 */
 
 #include "mfis.H"
+#include "computational_geometry.H"
+#include "memrep.H"
+
 #include <AllRegularService.H>
 
-#include "computational_geometry.H"
+
 
 mfis::mfis(){
   m_ebis.resize(phase::num_phases);
@@ -34,6 +37,10 @@ void mfis::define(const Box                     & a_domain,
     m_ebis[phase::gas]->setDistributedData();
   }
   m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
+#if 1 // Debug
+  memrep::get_max_min_memory();
+#endif
+
 
   // Define the solid state geoserver. This EBIS might not exist. 
   if(a_geoservers[phase::solid] == NULL){
@@ -44,6 +51,9 @@ void mfis::define(const Box                     & a_domain,
     m_ebis[phase::solid]->setDistributedData();
     }
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
+#if 1 // Debug
+    memrep::get_max_min_memory();
+#endif
   }
 }
   

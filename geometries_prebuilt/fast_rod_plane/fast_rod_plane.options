@@ -1,0 +1,19 @@
+# ====================================================================================================
+# FAST_ROD_PLANE CLASS OPTIONS
+# ====================================================================================================
+fast_rod_plane.eps0                      = 1                                # Background permittivity
+fast_rod_plane.turn_off_electrode        = false                            # Turn on/off electrode
+fast_rod_plane.turn_off_dielectric       = false                            # Turn on/off dielectric
+fast_rod_plane.electrode_live            = true                             # Live electrode or not
+fast_rod_plane.electrode_radius          = 5.E-3                            # Electrode inner radius
+fast_rod_plane.electrode_center1         = 0.0 0.0 1E-2                     # Center 1
+fast_rod_plane.electrode_center2         = 0.0 0.0 0E-2                     # Center 2
+fast_rod_plane.permittivity              = 4.0                              # Dielectric permittivity
+fast_rod_plane.plane_normal              = +y                               # '+-x', '+-y', '+-z'
+fast_rod_plane.plane_point               = 0.0 0.0 0.0                      # Point on plane
+fast_rod_plane.noise_amplitude           = 0.0                              # Surface roughness base amplitude
+fast_rod_plane.noise_frequency           = 1.0 1.0 1.0                      # Surface roughness frequency
+fast_rod_plane.noise_persistence         = 0.5                              # Drop-off factor between each octave
+fast_rod_plane.noise_octaves             = 1                                # Number of octaves to use for noise
+fast_rod_plane.noise_reseed              = false                            # Reseed the RNG
+fast_rod_plane.use_new_gshop             = true                             # Use the new gshop

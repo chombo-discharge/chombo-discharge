@@ -389,10 +389,10 @@ GeometryService::InOut fast_gshop::InsideOutside(const Box&           a_region,
   const bool covered = is_covered_box(rbox);
   const bool bounded = is_bounded_box(rbox);
 
-  if(regular && !bounded){
+  if(regular && !covered && !bounded){
     return GeometryService::Regular;
   }
-  else if(covered && !bounded){
+  else if(covered && !regular && !bounded){
     return GeometryService::Covered;
   }
   else{

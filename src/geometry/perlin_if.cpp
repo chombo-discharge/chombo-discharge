@@ -189,7 +189,7 @@ Real perlin_if::octaveNoise(const RealVect& a_pos) const {
   }
 
   // Normalize
-  result *= m_noiseAmp/normFrac;
+  result *= m_noiseAmp;///normFrac;
   
   return result;
 }

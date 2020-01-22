@@ -92,9 +92,6 @@ void computational_geometry::build_geometries(const physical_domain& a_physDom,
 		 geoservers,
 		 a_nCellMax,
 		 a_maxCoarsen);
-#if 1 // Debug
-  memrep::get_max_min_memory();
-#endif
 
   for (int i = 0; i < 2; i++){
     if(geoservers[i] != NULL){
