@@ -449,7 +449,7 @@ void jump_bc::compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
     const VolIndex& vof = vofit();
 
     // Apply stencil wb*phi_B + sum(wi*phi_i)
-    Real dphidn = wb(vof, comp)*a_phi(vof,comp);
+    Real dphidn = wb(vof, comp)*a_phibc(vof,comp);
 
     const VoFStencil& sten = stencils(vof, comp);
     for (int i = 0; i < sten.size(); i++){
