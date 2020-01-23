@@ -38,8 +38,8 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 				   const VolIndex&   a_vof,
 				   const EBISBox&    a_ebisbox,
 				   const IntVectSet& a_cfivs){
-  const RealVect& normal   = a_ebisbox.normal(a_vof);
-  const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
+  const RealVect normal   = a_ebisbox.normal(a_vof);
+  const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
 
   if(s_quadrant_based){
     EBArith::getLeastSquaresGradSten(a_stencil, a_weight, a_vof, a_ebisbox, m_dx*RealVect::Unit, m_domain, 0);
@@ -55,13 +55,20 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 					       m_domain,
 					       0,
 					       s_lsq_radius);
+
+
   }
 
   if(a_stencil.size() == 0){
-    //    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
+#if DEBUG
+    pout() << "jump_bc::get_first_order sten - no sten on domain = "
+	   << m_domain << "\t vof = "
+	   << a_vof.gridIndex() << endl;
+    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil.");
+#endif
 
-    // Get an approximation for the cell-centered gradient
-    a_stencil.clear();
+    // Make an approximation to the cell-centered gradient
+#if 1 // Original code
     for (int dir = 0; dir < SpaceDim; dir++){
       VoFStencil sten; 
       EBArith::getFirstDerivStencilWidthOne(sten, a_vof, a_ebisbox, dir, m_dx, (IntVectSet*) &a_cfivs, 0);
@@ -71,9 +78,11 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 	a_stencil += sten;
       }
     }
-
-
     a_weight = 0.0;
+#else
+    a_stencil.clear();
+    a_weight = 0.0;
+#endif
   }
 }
 
@@ -284,6 +293,7 @@ void jump_bc::build_stencils(){
 
 	curStencil *= 1./totalArea;
 	curWeight  *= 1./totalArea;
+	curBco     *= 1./totalArea;
 
 	// Put average stuff on the first vof component. No multicell storage for the average stencils
 	const VolIndex vof(iv,0);
@@ -514,7 +524,7 @@ void jump_bc::new_match_bc(BaseIVFAB<Real>&                  a_phibc,
     const Vector<VolIndex> vofs1 = ebisbox1.getVoFs(iv);
     const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
 
-    // Phase 1 
+    // Phase 1 -- should the contributions be weighted somehow...?
     for (int v = 0; v < vofs1.size(); v++){
       const VolIndex vof = vofs1[v];
 
@@ -530,7 +540,7 @@ void jump_bc::new_match_bc(BaseIVFAB<Real>&                  a_phibc,
 #endif
     }
 
-    // Phase 2
+    // Phase 2 -- should the contributions be weighted somehow...?
     for (int v = 0; v < vofs2.size(); v++){
       const VolIndex vof = vofs2[v];
 

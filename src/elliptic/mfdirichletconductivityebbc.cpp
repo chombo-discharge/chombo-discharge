@@ -12,7 +12,7 @@ bool mfdirichletconductivityebbc::s_quadrant_based   = true;
 int  mfdirichletconductivityebbc::s_lsq_radius       = 1;
 
 #define ADJUST_STENCILS 1
-#define DEBUG 1
+#define DEBUG 0
 
 mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_domain,
 							 const EBISLayout&    a_ebisl,
@@ -121,17 +121,13 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	if(drop_order){
 #if DEBUG
-	  std::cout << "dropping order on domain = " << m_domain << " and cell = " << vof.gridIndex() << std::endl;
+	  pout() << "dropping order on domain = " << m_domain << " and cell = " << vof.gridIndex() << endl;
 #endif
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
       }
       else if(m_order == 1){
 	this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
-      }
-
-      if(cur_stencil.size() == 0){
-	MayDay::Abort("mfdirichletconductivityebbc::define - could not find a stencil!!");
       }
     }
 
@@ -229,8 +225,8 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
 						       const IntVectSet& a_cfivs){
   CH_TIME("mfdirichletconductivityebbc::get_first_order_sten");
 
-  const RealVect& normal   = a_ebisbox.normal(a_vof);
-  const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
+  const RealVect normal   = a_ebisbox.normal(a_vof);
+  const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
 
   if(s_quadrant_based){
     EBArith::getLeastSquaresGradSten(a_stencil, a_weight, a_vof, a_ebisbox, m_dx, m_domain, 0);
@@ -248,11 +244,17 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
 					       s_lsq_radius);
   }
 
-  if(a_stencil.size() == 0){
-    //    MayDay::Warning("mfdirichletconductivityebbc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
 
+  if(a_stencil.size() == 0){
+#if DEBUG
+    pout() << "mfdirichletconductivityebbc::get_first_order sten - no sten on domain = "
+	   << m_domain << "\t vof = "
+	   << a_vof.gridIndex() << endl;
+    MayDay::Warning("mfdirichletconductivityebbc::get_first_order_sten - could not find a stencil. ");
+#endif
+
+#if 1 // Original code. Do an approximation for the gradient at the boundary
     // Get an approximation for the cell-centered gradient
-    a_stencil.clear();
     for (int dir = 0; dir < SpaceDim; dir++){
       VoFStencil sten; 
       EBArith::getFirstDerivStencilWidthOne(sten, a_vof, a_ebisbox, dir, m_dx[dir], (IntVectSet*) &a_cfivs, 0);
@@ -261,10 +263,14 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
 	sten *= normal[dir];
 	a_stencil += sten;
       }
-
-      a_weight = 0.0;
     }
+    a_weight = 0.0;
+#else
+    a_stencil.clear();
+    a_weight = 0.0;
+#endif
   }
+
 }
 
 void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,

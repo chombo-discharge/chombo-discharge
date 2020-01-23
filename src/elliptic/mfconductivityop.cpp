@@ -819,7 +819,9 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
       this->update_bc(a_e, homogeneous);
       //      const Real t1 = MPI_Wtime();
 
+
       for (int icolor = 0; icolor < m_colors.size(); icolor++){
+#if 0
 	// Get coarse-fine boundary conditions
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	  for (int dir = 0; dir < SpaceDim; dir++){
@@ -829,6 +831,7 @@ void mfconductivityop::relax(LevelData<MFCellFAB>&       a_e,
 	    }
 	  }
 	}
+#endif
 
 #if verb
 	pout() << "mfconducitivyop::relax - applying operator gas" << endl;
