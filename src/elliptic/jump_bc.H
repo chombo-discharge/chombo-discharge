@@ -69,13 +69,6 @@ public:
 			const bool                         a_homogeneous);
 
   /*!
-    @brief Match the boundary condition. No surface charge.
-  */
-  virtual void match_bc(LevelData<BaseIVFAB<Real> >& a_phibc,
-			const LevelData<MFCellFAB>&  a_phi,
-			const bool                   a_homogeneous);
-
-  /*!
     @brief Compute dphidn for all phases
   */
   virtual void compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&        a_dphidn,

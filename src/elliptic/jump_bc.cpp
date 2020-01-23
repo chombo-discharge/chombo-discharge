@@ -10,7 +10,7 @@
 #include <EBArith.H>
 
 #define USE_NEW_MATCHING 1
-#define DEBUG 1
+#define DEBUG 0
 
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
@@ -239,12 +239,10 @@ void jump_bc::build_stencils(){
       const EBISBox& ebisbox  = ebisl[dit()];
       const IntVectSet& cfivs = (*m_cfivs)[dit()];
 
-
       for (VoFIterator vofit(weights.getIVS(), weights.getEBGraph()); vofit.ok(); ++vofit){
 	const VolIndex& vof     = vofit();
 	Real& cur_weight        = weights(vof, comp);
 	VoFStencil& cur_stencil = stencils(vof, comp);
-
 
 	bool drop_order = false;
 	
@@ -260,7 +258,7 @@ void jump_bc::build_stencils(){
 	}
       }
 
-      // Now build the average stencils
+      // Now build the average stencils, weights, and coefficients
       const IntVectSet& ivs = avgWeights.getIVS();
       for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
 	const IntVect iv = ivsit();
@@ -323,28 +321,6 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		   a_homogeneous,
 		   dit());
 #endif
-  }
-}
-
-void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >& a_phibc,
-		       const LevelData<MFCellFAB>&  a_phi,
-		       const bool                   a_homogeneous){
-  CH_TIME("jump_bc::match_bc(2)");
-
-  const int ncomp = 1;
-
-  for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
-    BaseIVFAB<Real> zero(a_phibc[dit()].getIVS(), a_phibc[dit()].getEBGraph(), ncomp);
-    this->match_bc(a_phibc[dit()],
-		   m_inhomo[dit()],
-		   m_homog[dit()],
-		   zero,
-		   a_phi[dit()],
-		   m_bco[dit()],
-		   m_weights[dit()],
-		   m_stencils[dit()],
-		   a_homogeneous,
-		   dit());
   }
 }
 
@@ -456,18 +432,12 @@ void jump_bc::new_match_bc(BaseIVFAB<Real>&                  a_phibc,
   // First, compute the area-weighted jump coefficient
   jump_bc::compute_avg_jump(a_jump, a_phi, a_dit);
   
-  const BaseIVFAB<Real>& bco1        = m_bco[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<Real>& bco2        = m_bco[a_dit].get_ivfab(phase2);
   const BaseIVFAB<Real>& avg_bco1    = m_avgBco[a_dit].get_ivfab(phase1);
   const BaseIVFAB<Real>& avg_bco2    = m_avgBco[a_dit].get_ivfab(phase2);
   
-  const BaseIVFAB<Real>& w1          = m_weights[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<Real>& w2          = m_weights[a_dit].get_ivfab(phase2);
   const BaseIVFAB<Real>& avg_w1      = m_avgWeights[a_dit].get_ivfab(phase1);
   const BaseIVFAB<Real>& avg_w2      = m_avgWeights[a_dit].get_ivfab(phase2);
   
-  const BaseIVFAB<VoFStencil>& sten1     = m_stencils[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<VoFStencil>& sten2     = m_stencils[a_dit].get_ivfab(phase2);
   const BaseIVFAB<VoFStencil>& avg_sten1 = m_avgStencils[a_dit].get_ivfab(phase1);
   const BaseIVFAB<VoFStencil>& avg_sten2 = m_avgStencils[a_dit].get_ivfab(phase2);
 
@@ -479,9 +449,6 @@ void jump_bc::new_match_bc(BaseIVFAB<Real>&                  a_phibc,
 
   const EBISBox& ebisbox1            = phi1.getEBISBox();
   const EBISBox& ebisbox2            = phi2.getEBISBox();
-
-  const EBGraph& graph1              = bco1.getEBGraph();
-  const EBGraph& graph2              = bco2.getEBGraph();
   
   BaseIVFAB<Real>& inhomo1 = m_inhomo[a_dit].get_ivfab(phase1);
   BaseIVFAB<Real>& inhomo2 = m_inhomo[a_dit].get_ivfab(phase2);
@@ -542,8 +509,6 @@ void jump_bc::new_match_bc(BaseIVFAB<Real>&                  a_phibc,
     if(apply_sten1 != apply_sten1) MayDay::Abort("got sten1 NaN");
     if(apply_sten2 != apply_sten2) MayDay::Abort("got sten2 NaN");
 #endif
-    
-
 
     // Now make the "inhomogeneous" and "homogeneous" contributions
     const Vector<VolIndex> vofs1 = ebisbox1.getVoFs(iv);
@@ -683,15 +648,27 @@ void jump_bc::compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
 }
 
 LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_stencils(){
+#if USE_NEW_MATCHING
+  return m_avgStencils;
+#else
   return m_stencils;
+#endif
 }
 
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_weights(){
+#if USE_NEW_MATCHING
+  return m_avgWeights;
+#else
   return m_weights;
+#endif
 }
 
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_bco(){
+#if USE_NEW_MATCHING
+  return m_avgBco;
+#else
   return m_bco;
+#endif
 }
 
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_inhomo(){
