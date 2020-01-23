@@ -12,6 +12,7 @@ bool mfdirichletconductivityebbc::s_quadrant_based   = true;
 int  mfdirichletconductivityebbc::s_lsq_radius       = 1;
 
 #define ADJUST_STENCILS 1
+#define DEBUG 1
 
 mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_domain,
 							 const EBISLayout&    a_ebisl,
@@ -125,6 +126,10 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       else if(m_order == 1){
 	this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
+
+      if(cur_stencil.size() == 0){
+	MayDay::Abort("mfdirichletconductivityebbc::define - could not find a stencil!!");
+      }
     }
 
     // Adjust stencils for matching cells
@@ -141,11 +146,21 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
 
       VoFStencil& cur_stencil     = m_irreg_stencils[dit()](vof, comp);
 
-#if ADJUST_STENCIL
+#if ADJUST_STENCILS
       VoFStencil addsten(jump_sten);
       addsten *= -1.0*factor;
 
       cur_stencil += addsten;
+#endif
+#if DEBUG
+      const Real denom = 1./(bp*wp + bq*wq);
+      if(denom      != denom     ) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN denom");
+      if(cur_weight != cur_weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN cur_weight");
+      if(bp         != bp        ) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN bp");
+      for (int i = 0; i < cur_stencil.size(); i++){
+	const Real weight = cur_stencil.weight(i);
+	if(weight != weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN weight");
+      }
 #endif
     }
 
@@ -281,10 +296,11 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     if(!a_useHomogeneous){
       value += homog.get_ivfab(m_phase)(vof,comp);
     }
+
 #else
     Real value = 0.0;
     if(!a_useHomogeneous){
-      value = (*m_data)[a_dit](vof,comp);
+      Real value = 1.E4;
     }
 #endif
 

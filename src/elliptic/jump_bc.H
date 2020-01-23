@@ -202,6 +202,15 @@ protected:
   LayoutData<MFInterfaceFAB<VoFStencil> > m_stencils;
 
   /*!
+    @brief Average derivative stencil
+  */
+  LayoutData<MFInterfaceFAB<VoFStencil> > m_avgStencils;
+  LayoutData<MFInterfaceFAB<Real> >       m_avgWeights;
+  LayoutData<MFInterfaceFAB<Real> >       m_avgBco;
+  LayoutData<MFInterfaceFAB<Real> >       m_avgJump;
+  LayoutData<MFInterfaceFAB<Real> >       m_avgFactor;
+
+  /*!
     @brief VoFIterator for gas-side cells
   */
   LayoutData<VoFIterator> m_vofit_gas;
@@ -262,6 +271,20 @@ protected:
 			const MFInterfaceFAB<VoFStencil>& a_stencils,
 			const bool                        a_homogeneous,
 			const DataIndex&                  a_dit);
+
+
+  /*!
+    @brief Match the boundary condition
+  */
+  virtual void new_match_bc(BaseIVFAB<Real>&                  a_phibc,
+			    const BaseIVFAB<Real>&            a_jump,
+			    const MFCellFAB&                  a_phi,
+			    const DataIndex&                  a_dit);
+
+  /*!
+    @brief Compute the average jump condition
+  */
+  virtual void compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit);
 };
 
 #endif

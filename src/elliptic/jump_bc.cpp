@@ -9,6 +9,9 @@
 
 #include <EBArith.H>
 
+#define USE_NEW_MATCHING 1
+#define DEBUG 1
+
 bool jump_bc::s_quadrant_based = true;
 int  jump_bc::s_lsq_radius     = 1;
 
@@ -28,6 +31,50 @@ jump_bc::jump_bc(const MFLevelGrid&            a_mflg,
 
 jump_bc::~jump_bc(){
   CH_TIME("jump_bc::~jump_bc");
+}
+
+void jump_bc::get_first_order_sten(Real&             a_weight,
+				   VoFStencil&       a_stencil,
+				   const VolIndex&   a_vof,
+				   const EBISBox&    a_ebisbox,
+				   const IntVectSet& a_cfivs){
+  const RealVect& normal   = a_ebisbox.normal(a_vof);
+  const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
+
+  if(s_quadrant_based){
+    EBArith::getLeastSquaresGradSten(a_stencil, a_weight, a_vof, a_ebisbox, m_dx*RealVect::Unit, m_domain, 0);
+  }
+  else{
+    EBArith::getLeastSquaresGradStenAllVoFsRad(a_stencil,
+					       a_weight,
+					       normal,
+					       centroid,
+					       a_vof,
+					       a_ebisbox,
+					       m_dx*RealVect::Unit,
+					       m_domain,
+					       0,
+					       s_lsq_radius);
+  }
+
+  if(a_stencil.size() == 0){
+    //    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
+
+    // Get an approximation for the cell-centered gradient
+    a_stencil.clear();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      VoFStencil sten; 
+      EBArith::getFirstDerivStencilWidthOne(sten, a_vof, a_ebisbox, dir, m_dx, (IntVectSet*) &a_cfivs, 0);
+
+      if(sten.size() > 0){
+	sten *= normal[dir];
+	a_stencil += sten;
+      }
+    }
+
+
+    a_weight = 0.0;
+  }
 }
 
 bool jump_bc::get_second_order_sten(Real&             a_weight,
@@ -90,24 +137,37 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
   m_homog.define(m_grids);
   m_vofit_gas.define(m_grids);
   m_vofit_sol.define(m_grids);
+  m_avgWeights.define(m_grids);
+  m_avgStencils.define(m_grids);
+  m_avgBco.define(m_grids);
+  m_avgFactor.define(m_grids);
+  m_avgJump.define(m_grids);
 
   int num = 0;
 
   // If we only have one phase, there are no jump cells and we don't need to do anything. 
   if(m_mfis->num_phases() > 1){
     for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
-      MFInterfaceFAB<Real>& bco         = m_bco[dit()];
-      MFInterfaceFAB<Real>& weights     = m_weights[dit()];
-      MFInterfaceFAB<Real>& inhomo      = m_inhomo[dit()];
-      MFInterfaceFAB<Real>& homog       = m_homog[dit()];
-      MFInterfaceFAB<VoFStencil>& stens = m_stencils[dit()];
+      MFInterfaceFAB<Real>& bco            = m_bco[dit()];
+      MFInterfaceFAB<Real>& weights        = m_weights[dit()];
+      MFInterfaceFAB<Real>& inhomo         = m_inhomo[dit()];
+      MFInterfaceFAB<Real>& homog          = m_homog[dit()];
+      MFInterfaceFAB<Real>& avgWeights     = m_avgWeights[dit()];
+      MFInterfaceFAB<Real>& avgFactor      = m_avgFactor[dit()];
+      MFInterfaceFAB<Real>& avgBco         = m_avgBco[dit()];
+      MFInterfaceFAB<Real>& avgJump        = m_avgJump[dit()];
+      MFInterfaceFAB<VoFStencil>& stens    = m_stencils[dit()];
+      MFInterfaceFAB<VoFStencil>& avgStens = m_avgStencils[dit()];
 
-
-      bco.define(m_mflg,     dit());
-      weights.define(m_mflg, dit());
-      inhomo.define(m_mflg,  dit());
-      homog.define(m_mflg,   dit());
-      stens.define(m_mflg,   dit());
+      bco.define(m_mflg,        dit());
+      homog.define(m_mflg,      dit());
+      stens.define(m_mflg,      dit());
+      inhomo.define(m_mflg,     dit());
+      avgBco.define(m_mflg,     dit());
+      avgJump.define(m_mflg,    dit());
+      weights.define(m_mflg,    dit());
+      avgStens.define(m_mflg,   dit());
+      avgWeights.define(m_mflg, dit());
 
       m_ivs[dit()] = bco.get_ivs();
     }
@@ -166,8 +226,12 @@ void jump_bc::build_stencils(){
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_mfis->num_phases(); iphase ++){
 
-      BaseIVFAB<Real>& weights        = m_weights[dit()].get_ivfab(iphase);
-      BaseIVFAB<VoFStencil>& stencils = m_stencils[dit()].get_ivfab(iphase);
+      BaseIVFAB<Real>& bco               = m_bco[dit()].get_ivfab(iphase);
+      BaseIVFAB<Real>& avgBco            = m_avgBco[dit()].get_ivfab(iphase);
+      BaseIVFAB<Real>& weights           = m_weights[dit()].get_ivfab(iphase);
+      BaseIVFAB<Real>& avgWeights        = m_avgWeights[dit()].get_ivfab(iphase);
+      BaseIVFAB<VoFStencil>& stencils    = m_stencils[dit()].get_ivfab(iphase);
+      BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].get_ivfab(iphase);
 
       const EBLevelGrid& eblg = m_mflg.get_eblg(iphase);
       const EBISLayout ebisl  = eblg.getEBISL();
@@ -195,51 +259,46 @@ void jump_bc::build_stencils(){
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
       }
-    }
-  }
-}
 
-void jump_bc::get_first_order_sten(Real&             a_weight,
-				   VoFStencil&       a_stencil,
-				   const VolIndex&   a_vof,
-				   const EBISBox&    a_ebisbox,
-				   const IntVectSet& a_cfivs){
-  const RealVect& normal   = a_ebisbox.normal(a_vof);
-  const RealVect& centroid = a_ebisbox.bndryCentroid(a_vof);
+      // Now build the average stencils
+      const IntVectSet& ivs = avgWeights.getIVS();
+      for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+	const IntVect iv = ivsit();
+	const Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
 
-  if(s_quadrant_based){
-    EBArith::getLeastSquaresGradSten(a_stencil, a_weight, a_vof, a_ebisbox, m_dx*RealVect::Unit, m_domain, 0);
-  }
-  else{
-    EBArith::getLeastSquaresGradStenAllVoFsRad(a_stencil,
-					       a_weight,
-					       normal,
-					       centroid,
-					       a_vof,
-					       a_ebisbox,
-					       m_dx*RealVect::Unit,
-					       m_domain,
-					       0,
-					       s_lsq_radius);
-  }
+	Real totalArea = 0.0;
+	Real curWeight = 0.0;
+	Real curBco    = 0.0;
+	VoFStencil curStencil;
+	for (int v = 0; v < vofs.size(); v++){
+	  const VolIndex vof = vofs[v];
 
-  if(a_stencil.size() == 0){
-    //    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil. Your Poisson problem will probably not converge");
+	  const Real area = ebisbox.bndryArea(vof);
 
-    // Get an approximation for the cell-centered gradient
-    a_stencil.clear();
-    for (int dir = 0; dir < SpaceDim; dir++){
-      VoFStencil sten; 
-      EBArith::getFirstDerivStencilWidthOne(sten, a_vof, a_ebisbox, dir, m_dx, (IntVectSet*) &a_cfivs, 0);
+	  totalArea += area;
+	  curWeight += area*weights(vof, comp);
+	  curBco    += area*bco(vof,comp);
 
-      if(sten.size() > 0){
-	sten *= normal[dir];
-	a_stencil += sten;
+	  VoFStencil sten = stencils(vof,comp);
+	  sten *= area;
+	  curStencil += sten;
+	}
+
+	curStencil *= 1./totalArea;
+	curWeight  *= 1./totalArea;
+
+	// Put average stuff on the first vof component. No multicell storage for the average stencils
+	const VolIndex vof(iv,0);
+	avgWeights(vof, comp) = curWeight;
+	avgStencils(vof,comp) = curStencil;
+	avgBco(vof,comp)      = curBco;
+
+#if DEBUG
+	if(curWeight != curWeight) MayDay::Abort("jumpc_bc::build_stencils - got NaN weight");
+	if(curBco    != curBco)    MayDay::Abort("jumpc_bc::build_stencils - got NaN bco");
+#endif
       }
     }
-
-
-    a_weight = 0.0;
   }
 }
 
@@ -250,6 +309,9 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
   CH_TIME("jump_bc::match_bc(1)");
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
+#if USE_NEW_MATCHING
+    this->new_match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], dit());
+#else
     this->match_bc(a_phibc[dit()],
 		   m_inhomo[dit()],
 		   m_homog[dit()],
@@ -260,12 +322,13 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		   m_stencils[dit()],
 		   a_homogeneous,
 		   dit());
+#endif
   }
 }
 
-void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
-		       const LevelData<MFCellFAB>&        a_phi,
-		       const bool                         a_homogeneous){
+void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >& a_phibc,
+		       const LevelData<MFCellFAB>&  a_phi,
+		       const bool                   a_homogeneous){
   CH_TIME("jump_bc::match_bc(2)");
 
   const int ncomp = 1;
@@ -325,9 +388,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
   inhomo1.setVal(0.0);
   inhomo2.setVal(0.0);
-  
-  // Set phibc = a_jump
-  //  const Real t0 = MPI_Wtime();
+
+  // Set phibc = 
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit(); 
     a_phibc(vof, comp) = a_jump(vof, comp);
@@ -337,7 +399,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 
 
   // First phase loop. Add first stencil stuff
-  //  const Real t1 = MPI_Wtime();
   {
     VoFIterator& vofit = m_vofit_gas[a_dit];
     for (vofit.reset(); vofit.ok(); ++vofit){
@@ -354,19 +415,10 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   }
   
   // Second phase loop. Add second stencil stuff
-  //  const Real t2 = MPI_Wtime();
   {
     VoFIterator& vofit = m_vofit_sol[a_dit];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
-
-#if 0 // testing some things
-      const IntVect iv = vof.gridIndex();
-      if(graph2.isMultiValued(iv)){
-	pout() << iv << "\t" << ebisbox2.normal(vof) << "\t" << ebisbox1.normal(VolIndex(iv,0)) << endl;
-	//	pout() << graph1.isRegular(iv) << "\t" << graph1.isIrregular(iv) << "\t" << graph1.isCovered(iv) << endl;
-      }
-#endif
     
       const VoFStencil& sten = sten2(vof, comp);
       for (int i = 0; i < sten.size(); i++){
@@ -379,7 +431,6 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   }
 
   // Divide by weights
-  //  const Real t3 = MPI_Wtime();
   for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
@@ -391,21 +442,194 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     homog1(vof, comp)  *= factor;
     homog2(vof, comp)  *= factor;
   }
+}
 
-  //  const Real t4 = MPI_Wtime();
 
-#if 0
-  pout() << "vofiter 1 = " << 100.*(t1-t0)/(t4-t0) << endl;
-  pout() << "vofiter 2 = " << 100.*(t2-t1)/(t4-t0) << endl;
-  pout() << "vofiter 3 = " << 100.*(t3-t2)/(t4-t0) << endl;
-  pout() << "vofiter 4 = " << 100.*(t4-t3)/(t4-t0) << endl;
+void jump_bc::new_match_bc(BaseIVFAB<Real>&                  a_phibc,
+			   const BaseIVFAB<Real>&            a_jump,
+			   const MFCellFAB&                  a_phi,
+			   const DataIndex&                  a_dit){
+  const int comp   = 0;
+  const int phase1 = 0;
+  const int phase2 = 1;
+
+  // First, compute the area-weighted jump coefficient
+  jump_bc::compute_avg_jump(a_jump, a_phi, a_dit);
+  
+  const BaseIVFAB<Real>& bco1        = m_bco[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<Real>& bco2        = m_bco[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<Real>& avg_bco1    = m_avgBco[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<Real>& avg_bco2    = m_avgBco[a_dit].get_ivfab(phase2);
+  
+  const BaseIVFAB<Real>& w1          = m_weights[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<Real>& w2          = m_weights[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<Real>& avg_w1      = m_avgWeights[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<Real>& avg_w2      = m_avgWeights[a_dit].get_ivfab(phase2);
+  
+  const BaseIVFAB<VoFStencil>& sten1     = m_stencils[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<VoFStencil>& sten2     = m_stencils[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<VoFStencil>& avg_sten1 = m_avgStencils[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<VoFStencil>& avg_sten2 = m_avgStencils[a_dit].get_ivfab(phase2);
+
+  const BaseIVFAB<Real>& avg_jump1   = m_avgJump[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<Real>& avg_jump2   = m_avgJump[a_dit].get_ivfab(phase2);
+  
+  const EBCellFAB& phi1              = a_phi.getPhase(phase1);
+  const EBCellFAB& phi2              = a_phi.getPhase(phase2);
+
+  const EBISBox& ebisbox1            = phi1.getEBISBox();
+  const EBISBox& ebisbox2            = phi2.getEBISBox();
+
+  const EBGraph& graph1              = bco1.getEBGraph();
+  const EBGraph& graph2              = bco2.getEBGraph();
+  
+  BaseIVFAB<Real>& inhomo1 = m_inhomo[a_dit].get_ivfab(phase1);
+  BaseIVFAB<Real>& inhomo2 = m_inhomo[a_dit].get_ivfab(phase2);
+
+  BaseIVFAB<Real>& homog1  = m_homog[a_dit].get_ivfab(phase1);
+  BaseIVFAB<Real>& homog2  = m_homog[a_dit].get_ivfab(phase2);
+
+  homog1.setVal(0.0); // This is the contribution of the surface charge for phase1
+  homog2.setVal(0.0); // This is the contribution of the surface charge for phase2
+
+  inhomo1.setVal(0.0); // This is the contribution from the other side for phase1
+  inhomo2.setVal(0.0); // This is the contribution from the other side for phase2
+  
+  // Do average matching in multivalued cells.
+  const IntVectSet& ivs = m_bco[a_dit].get_ivs();
+  for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+    const IntVect iv = ivsit();
+
+    const VolIndex vof0 = VolIndex(iv, 0);
+
+    // Apply the stencils
+    Real apply_sten1 = 0.0; // This result will be an EB flux contribution to phase 2
+    Real apply_sten2 = 0.0; // This result will be an EB flux contribution to phase 1
+
+    const VoFStencil& avgStencil1 = avg_sten1(vof0, 0);
+    const VoFStencil& avgStencil2 = avg_sten2(vof0, 0);
+
+    // Apply stencil on the gas side
+    for (int i = 0; i < avgStencil1.size(); i++){
+      const VolIndex ivof    = avgStencil1.vof(i);
+      const Real     iweight = avgStencil1.weight(i);
+      apply_sten1 += iweight*phi1(ivof,comp);
+#if DEBUG
+      const IntVect iiv = ivof.gridIndex();
+      if(iweight != iweight)      MayDay::Abort("got weight2 NaN");
+      if(ebisbox1.isCovered(iiv)) MayDay::Abort("reaching into covered cell for phase1");
 #endif
+    }
+
+    // Apply stencil on the other side
+    for (int i = 0; i < avgStencil2.size(); i++){
+      const VolIndex ivof    = avgStencil2.vof(i);
+      const Real     iweight = avgStencil2.weight(i);
+      apply_sten2 += iweight*phi2(ivof,comp);
+#if DEBUG
+      const IntVect iiv = ivof.gridIndex();
+      if(iweight != iweight)      MayDay::Abort("got weight2 NaN");
+      if(ebisbox2.isCovered(iiv)) MayDay::Abort("reaching into covered cell for phase2");
+#endif
+    }
+
+
+    // Compute the factor 1/(bp*wb + bq*wq)
+    const Real factor = 1.0/(avg_bco1(vof0,0)*avg_w1(vof0,0) + avg_bco2(vof0,0)*avg_w2(vof0,0));
+
+#if DEBUG 
+    if(factor      != factor)      MayDay::Abort("got factor NaN");
+    if(apply_sten1 != apply_sten1) MayDay::Abort("got sten1 NaN");
+    if(apply_sten2 != apply_sten2) MayDay::Abort("got sten2 NaN");
+#endif
+    
+
+
+    // Now make the "inhomogeneous" and "homogeneous" contributions
+    const Vector<VolIndex> vofs1 = ebisbox1.getVoFs(iv);
+    const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
+
+    // Phase 1 
+    for (int v = 0; v < vofs1.size(); v++){
+      const VolIndex vof = vofs1[v];
+
+      homog1(vof,comp)  = avg_jump1(vof0, 0);
+      inhomo1(vof,comp) = -avg_bco2(vof0,0)*apply_sten2;
+
+      homog1(vof,comp)  *= factor;
+      inhomo1(vof,comp) *= factor;
+
+#if DEBUG
+      if(homog1(vof,comp)  != homog1(vof,comp))  MayDay::Abort("got homo1 NaN");
+      if(inhomo1(vof,comp) != inhomo1(vof,comp)) MayDay::Abort("got inhomo1 NaN");
+#endif
+    }
+
+    // Phase 2
+    for (int v = 0; v < vofs2.size(); v++){
+      const VolIndex vof = vofs2[v];
+
+      homog2(vof,comp)  = avg_jump2(vof0, 0);
+      inhomo2(vof,comp) = -avg_bco1(vof0,0)*apply_sten1;
+
+      homog2(vof,comp)  *= factor;
+      inhomo2(vof,comp) *= factor;
+
+#if DEBUG
+      if(homog2(vof,comp)  != homog2(vof,comp))  MayDay::Abort("got homo2 NaN");
+      if(inhomo2(vof,comp) != inhomo2(vof,comp)) MayDay::Abort("got inhomo2 NaN");
+#endif
+    }
+  }
+}
+
+void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
+
+  const IntVectSet ivs = m_avgJump[a_dit].get_ivs();
+
+  const int phase1 = 0;
+  const int phase2 = 1;
+  
+  const BaseIVFAB<Real>& bco1 = m_bco[a_dit].get_ivfab(phase1);
+  const BaseIVFAB<Real>& bco2 = m_bco[a_dit].get_ivfab(phase2);
+
+  BaseIVFAB<Real>& avg1 = m_avgJump[a_dit].get_ivfab(phase1);
+  BaseIVFAB<Real>& avg2 = m_avgJump[a_dit].get_ivfab(phase2);
+  
+  const EBISBox& ebisbox1 = a_phi.getPhase(phase1).getEBISBox();
+  const EBISBox& ebisbox2 = a_phi.getPhase(phase2).getEBISBox();
+
+  
+  for (IVSIterator ivsit(ivs); ivsit.ok(); ++ivsit){
+    const IntVect iv = ivsit();
+    
+    const Vector<VolIndex> vofs1 = ebisbox1.getVoFs(iv);
+    const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
+
+    // Compute average jump condition
+    Real totalArea = 0.0;
+    Real totalJump = 0.0;
+    for (int v = 0; v < vofs1.size(); v++){
+      const VolIndex vof = vofs1[v];
+
+      const Real area = ebisbox1.bndryArea(vof);
+
+      totalArea += area;
+      totalJump += area*a_jump(vof,0);
+    }
+    totalJump = totalJump/totalArea;
+
+
+    // Set the jump
+    const VolIndex vof0(iv, 0);
+    avg1(vof0,0) = totalJump;
+    avg2(vof0,0) = totalJump;
+  }
 }
 
 void jump_bc::compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&       a_dphidn,
 			     const Vector<LevelData<BaseIVFAB<Real> > >& a_phibc,
 			     const LevelData<MFCellFAB>&                 a_phi){
-
   for (int iphase = 0; iphase < m_mfis->num_phases(); iphase++){
     this->compute_dphidn(a_dphidn[iphase], a_phibc[iphase], a_phi, iphase);
   }
