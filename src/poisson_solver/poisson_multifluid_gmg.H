@@ -230,6 +230,11 @@ protected:
   int m_bottom_drop;
 
   /*!
+    @brief Set bc order 
+  */
+  int m_bc_order;
+
+  /*!
     @brief Length scale for the Poisson equation
   */
   Real m_length_scale;

@@ -120,6 +120,9 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       if(m_order == 2){
 	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	if(drop_order){
+#if DEBUG
+	  std::cout << "dropping order on domain = " << m_domain << " and cell = " << vof.gridIndex() << std::endl;
+#endif
 	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
       }
@@ -292,22 +295,18 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 
 
 #if ADJUST_STENCILS
-    Real value = inhomo.get_ivfab(m_phase)(vof, comp);
+    Real value = inhomo.get_ivfab(m_phase)(vof, comp); // This is the flux from the other side. Always use it. 
     if(!a_useHomogeneous){
       value += homog.get_ivfab(m_phase)(vof,comp);
     }
 
-#else
-    Real value = 0.0;
-    if(!a_useHomogeneous){
-      Real value = 1.E4;
-    }
-#endif
-
-
     // Flux - this contains the contribution from the surface charge (inhomogeneous bc) and the
     // other side of the interface (quasi-homogeneous bc). 
-    Real flux = weight*value*beta*bco*area_frac*a_factor;
+    Real flux = -weight*value*bco*area_frac*a_factor;
+#else // This shouldn't work...
+    Real flux = inhomo.get_ivfab(m_phase)(vof, comp);
+    flux *= beta*weight*bco*area_frac*a_factor;
+#endif
 
     if(mfdirichletconductivityebbc::s_areaFracWeighted){
       flux *= ebisbox.areaFracScaling(vof);
@@ -316,7 +315,6 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     // Increment
     a_lphi(vof, comp) += flux;
   }
-
 
   // Pure Dirichlet irregular cells
   if(!a_useHomogeneous){

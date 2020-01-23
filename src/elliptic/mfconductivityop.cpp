@@ -603,104 +603,110 @@ Real mfconductivityop::norm(const LevelData<MFCellFAB>& a_x, int a_ord){
 #if verb
   pout() << "mfconductivityop::norm"<< endl;
 #endif
-  this->update_bc(a_x, true);
   Real volume;
-  Real rtn = this->kappaNorm(volume, a_x, a_ord);
+  //  Real rtn = this->kappaNorm(volume, a_x, a_ord);
 #if verb
   pout() << "mfconductivityop::norm - done"<< endl;
 #endif
+
+#if 1
+  Real rtn = 0.0;
+  for (int iphase=0; iphase<m_phases;iphase++){
+    LevelData<EBCellFAB> alias;
+    mfalias::aliasMF(alias, iphase, a_x);
+
+    Real phaseNorm = m_ebops[iphase]->norm(alias, 0);
+    rtn = Max(rtn, phaseNorm);
+  }
+#endif
+
   return rtn;
 }
 
-Real mfconductivityop::kappaNorm(Real&                       a_volume,
-				 const LevelData<MFCellFAB>& a_data,
-				 int                         a_p) const {
-
+Real mfconductivityop::kappaNorm(Real& a_volume, const LevelData<MFCellFAB>& a_data, int a_p) const {
 #if verb
   pout() << "mfconductivityop::kappaNorm"<< endl;
 #endif
+  
   Real accum = 0.0;
-
+  
   a_volume = 0.0;
   int ncomp=a_data.nComp();
-  for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit)
-    {
-      DataIndex d = dit();
-      Vector<Real> cur(ncomp,0.0);
-      Real curVolume = 0.0;
-      Vector<Real> phaseCur(ncomp,0.0);
-      Real phaseVolume;
-      for (int i=0; i<m_phases; i++)
-	{
-	  const EBCellFAB& data = a_data[d].getPhase(i);
-	  const Box& box = a_data.getBoxes().get(d);
-	  phaseCur = EBLevelDataOps::vectorSumKappaPow(phaseVolume,data,box,
-						       EBLEVELDATAOPS_ALLVOFS,m_domain,a_p);
-	  for (int i=0; i<ncomp; i++){
-	    if (a_p == 0){
-	      if ( phaseCur[i] > cur[i]){
-		cur[i] = phaseCur[i];
-	      }
-	    }
-	    else{
-	      cur[i]+= phaseCur[i];
-	    }
-	  }
-	  curVolume += phaseVolume;
-	}
-      a_volume += curVolume;
+  for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit){
+    DataIndex d = dit();
+    Vector<Real> cur(ncomp,0.0);
+    Real curVolume = 0.0;
+    Vector<Real> phaseCur(ncomp,0.0);
+    Real phaseVolume;
 
-      for (int i=0; i<ncomp; i++) {
+    
+    for (int i=0; i<m_phases; i++){
+      const EBCellFAB& data = a_data[d].getPhase(i);
+      const Box& box = a_data.getBoxes().get(d);
+      phaseCur = EBLevelDataOps::vectorSumKappaPow(phaseVolume,data,box,
+      						   EBLEVELDATAOPS_ALLVOFS,m_domain,a_p);
+
+
+      for (int i=0; i<ncomp; i++){
 	if (a_p == 0){
-	  if (cur[i] > accum){
-	    accum = cur[i];
+	  if(phaseCur[i] > cur[i]){
+	    cur[i] = phaseCur[i];
 	  }
 	}
-	else {
-	  accum += cur[i];
+	else{
+	  cur[i]+= phaseCur[i];
 	}
       }
+      curVolume += phaseVolume;
     }
+    a_volume += curVolume;
+    
+    for (int i=0; i<ncomp; i++) {
+      if(a_p == 0){
+	if (cur[i] > accum){
+	  accum = cur[i];
+	}
+      }
+      else {
+	accum += cur[i];
+      }
+    }
+  }
+  
 #ifdef CH_MPI
-  if (a_p == 0)
-    {
-      Real recv;
-      int result;
-
-      result = MPI_Allreduce(&accum, &recv, 1, MPI_CH_REAL,
-			     MPI_MAX, Chombo_MPI::comm);
-      accum = recv;
-    }
-  else
-    {
-      Real recv;
-      int result;
-
-      result = MPI_Allreduce(&accum, &recv, 1, MPI_CH_REAL,
-			     MPI_SUM, Chombo_MPI::comm);
-      accum = recv;
-
-      result = MPI_Allreduce(&a_volume, &recv, 1, MPI_CH_REAL,
-			     MPI_SUM, Chombo_MPI::comm);
-      a_volume = recv;
-    }
+  if(a_p == 0){
+    Real recv;
+    int result;
+    
+    result = MPI_Allreduce(&accum, &recv, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+    accum = recv;
+  }
+  else{
+    Real recv;
+    int result;
+    
+    result = MPI_Allreduce(&accum, &recv, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
+    accum = recv;
+    
+    result = MPI_Allreduce(&a_volume, &recv, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
+    a_volume = recv;
+  }
 #endif
-  if (a_p != 0)
-    {
-      if (a_volume > 0.0)
-	{
-	  accum = accum / a_volume;
-	}
-      else
-	{
-	  accum = 0;
-	}
-      Real invPow = 1.0/a_p;
-      accum = pow(accum,invPow);
+  
+  if(a_p != 0){
+    if (a_volume > 0.0){
+      accum = accum / a_volume;
     }
+    else{
+      accum = 0;
+    }
+    Real invPow = 1.0/a_p;
+    accum = pow(accum,invPow);
+  }
 
   return accum;
 }
+
 
 void mfconductivityop::setToZero(LevelData<MFCellFAB>& a_x){
   CH_TIME("mfconductivityop::setToZero");
@@ -987,9 +993,6 @@ void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
     pout() << "mfconductivityop::AMROperator - apply ebconductivityops - done" << endl;
 #endif
   }
-
-										 
-
 
 #if verb
   pout() << "mfconductivityop::amroperator - done" << endl;

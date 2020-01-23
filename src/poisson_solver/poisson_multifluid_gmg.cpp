@@ -23,7 +23,7 @@
 #include <DirichletConductivityEBBC.H>
 #include <ParmParse.H>
 
-#define POISSON_MF_GMG_TIMER 0
+#define POISSON_MF_GMG_TIMER 1
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
@@ -165,6 +165,11 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
   pp.get("gmg_tolerance",   m_gmg_eps);
   pp.get("gmg_hang",        m_gmg_hang);
   pp.get("gmg_bottom_drop", m_bottom_drop);
+  pp.get("gmg_bc_order",    m_bc_order);
+
+  if(!(m_bc_order == 1 || m_bc_order == 2)){
+    MayDay::Abort("poisson_multifluid_gmg::parse_gmg_settings - boundary condition order must be 1 or 2");
+  }
 
   // Bottom solver
   pp.get("gmg_bottom_solver", str);
@@ -794,15 +799,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   // Set the length scale for the Poisson equation. This is equivalent to solving the Poisson equation
   // on the domain [-1,1] in the x-direction
   m_length_scale = 2./(domains[0].size(0)*dx[0]);
-#if 0 // Debug hook
-  ParmParse pp("poisson");
-  pp.query("length_scale", m_length_scale);
-  std::cout << m_length_scale << std::endl;
-#endif
 
-
-
-  const int bc_order = 2;
   m_opfact = RefCountedPtr<mfconductivityopfactory> (new mfconductivityopfactory(m_mfis,
 										 mflg,
 										 mfquadcfi,
@@ -819,7 +816,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 origin,
 										 ghost_phi,
 										 ghost_rhs,
-										 bc_order,
+										 m_bc_order,
 										 m_bottom_drop,
 										 1 + finest_level,
 										 mg_levelgrids));
