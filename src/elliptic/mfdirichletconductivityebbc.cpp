@@ -302,7 +302,7 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
 
     // Flux - this contains the contribution from the surface charge (inhomogeneous bc) and the
     // other side of the interface (quasi-homogeneous bc). 
-    Real flux = -weight*value*bco*area_frac*a_factor;
+    Real flux = beta*weight*value*bco*area_frac*a_factor;
 #else // This shouldn't work...
     Real flux = inhomo.get_ivfab(m_phase)(vof, comp);
     flux *= beta*weight*bco*area_frac*a_factor;
