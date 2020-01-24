@@ -27,6 +27,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
 						 const IntVect&                            a_ghost_phi,
 						 const IntVect&                            a_ghost_rhs,
 						 const int                                 a_order_ebbc,
+						 const int                                 a_relax_type,
 						 const int                                 a_drop_bottom,
 						 const int                                 a_num_levels,
 						 const Vector<MFLevelGrid>&                a_mg_mflg){
@@ -53,7 +54,6 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   m_origin     = a_origin;
   m_ebbc_order = a_order_ebbc;
   m_mg_mflg    = a_mg_mflg;
-
     
   m_domains.resize(m_num_levels);
   m_dx.resize(m_num_levels);
@@ -71,7 +71,7 @@ mfconductivityopfactory::mfconductivityopfactory(const RefCountedPtr<mfis>&     
   const int botdrop  = (a_drop_bottom == -1) ? a_coarsest_domain.size()[0]/4 : a_drop_bottom;
 
   this->set_ebbc_order(m_ebbc_order); // Default is second order BCs
-  this->set_relax_type(2);            // Default relaxation type
+  this->set_relax_type(a_relax_type); // Default relaxation type
   this->set_bottom_drop(botdrop);     // Default bottom drop
   this->set_max_box_size(32);         // Default max box size
   this->define_jump_stuff();          // Define jump cell stuff

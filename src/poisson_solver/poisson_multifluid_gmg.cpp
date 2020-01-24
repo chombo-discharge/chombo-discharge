@@ -817,6 +817,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
 										 ghost_phi,
 										 ghost_rhs,
 										 m_bc_order,
+										 m_gmg_relax_type,
 										 m_bottom_drop,
 										 1 + finest_level,
 										 mg_levelgrids));

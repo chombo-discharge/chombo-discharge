@@ -62,6 +62,7 @@ public:
 			  const IntVect&                            a_ghost_phi,
 			  const IntVect&                            a_ghost_rhs,
 			  const int                                 a_ebbc_order,
+			  const int                                 a_relax_type,
 			  const int                                 a_drop_bottom = -1,
 			  const int                                 a_num_levels = -1,
 			  const Vector<MFLevelGrid>&                a_mg_mflg = Vector<MFLevelGrid>(0));
