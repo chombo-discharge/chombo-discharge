@@ -276,8 +276,10 @@ void jump_bc::build_stencils(){
 	Real totalArea = 0.0;
 	Real curWeight = 0.0;
 	Real curBco    = 0.0;
+	int num        = 0;
 	VoFStencil curStencil;
 	for (int v = 0; v < vofs.size(); v++){
+	  num++;
 	  const VolIndex vof = vofs[v];
 
 	  const Real area = ebisbox.bndryArea(vof);
@@ -291,9 +293,15 @@ void jump_bc::build_stencils(){
 	  curStencil += sten;
 	}
 
+#if 0 // Test scale
+	totalArea = totalArea/num;
+#endif
+
 	curStencil *= 1./totalArea;
 	curWeight  *= 1./totalArea;
 	curBco     *= 1./totalArea;
+
+
 
 	// Put average stuff on the first vof component. No multicell storage for the average stencils
 	const VolIndex vof(iv,0);
@@ -658,6 +666,18 @@ void jump_bc::compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
 }
 
 LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_stencils(){
+  return m_stencils;
+}
+
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_weights(){
+  return m_weights;
+}
+
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_bco(){
+  return m_bco;
+}
+
+LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_avgStencils(){
 #if USE_NEW_MATCHING
   return m_avgStencils;
 #else
@@ -665,7 +685,7 @@ LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_stencils(){
 #endif
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_weights(){
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_avgWeights(){
 #if USE_NEW_MATCHING
   return m_avgWeights;
 #else
@@ -673,7 +693,7 @@ LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_weights(){
 #endif
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_bco(){
+LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_avgBco(){
 #if USE_NEW_MATCHING
   return m_avgBco;
 #else

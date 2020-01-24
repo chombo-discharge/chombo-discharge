@@ -91,9 +91,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
     const IntVectSet& cfivs = a_cfivs[dit()];
 
-    const MFInterfaceFAB<VoFStencil>& jumpstens = m_jumpbc->get_stencils()[dit()];
-    const MFInterfaceFAB<Real>& jumpweights     = m_jumpbc->get_weights()[dit()];
-    const MFInterfaceFAB<Real>& jump_coef       = m_jumpbc->get_bco()[dit()];
+
 
     IntVectSet irreg_ivs;  // All irregular cells
     IntVectSet diri_ivs;   // Pure dirichlet cells (i.e. non-matched irregular cells)
@@ -132,18 +130,23 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     }
 
     // Adjust stencils for matching cells
+    const MFInterfaceFAB<VoFStencil>& avgStens = m_jumpbc->get_avgStencils()[dit()];
+    const MFInterfaceFAB<Real>& avgWeights     = m_jumpbc->get_avgWeights()[dit()];
+    const MFInterfaceFAB<Real>& avgBco         = m_jumpbc->get_avgBco()[dit()];
     for (VoFIterator vofit(match_ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof   = vofit();
+      const VolIndex& vof = vofit();
+      const VolIndex vof0(vof.gridIndex(), 0); // Multi-cell averages stored on first component
 
-      const Real& cur_weight      = m_irreg_weights[dit()](vof, comp);
-      const Real& wp              = jumpweights.get_ivfab(m_phase)(vof, comp);
-      const Real& wq              = jumpweights.get_ivfab(otherphase)(vof, comp);
-      const Real& bp              = jump_coef.get_ivfab(m_phase)(vof, comp);
-      const Real& bq              = jump_coef.get_ivfab(otherphase)(vof, comp);
-      const Real factor           = cur_weight*bp/(bp*wp + bq*wq);
-      const VoFStencil& jump_sten = jumpstens.get_ivfab(m_phase)(vof, comp);
-
+      // Everything that comes from jump_bc is from vof0, as it should!!!
       VoFStencil& cur_stencil     = m_irreg_stencils[dit()](vof, comp);
+      const VoFStencil& jump_sten = avgStens.get_ivfab(m_phase)(vof0, comp);
+      const Real cur_weight       = m_irreg_weights[dit()](vof, comp); 
+      const Real wp               = avgWeights.get_ivfab(m_phase)(vof0, comp);
+      const Real wq               = avgWeights.get_ivfab(otherphase)(vof0, comp);
+      const Real bp               = avgBco.get_ivfab(m_phase)(vof0, comp);
+      const Real bq               = avgBco.get_ivfab(otherphase)(vof0, comp);
+      const Real factor           = cur_weight*bp/(bp*wp + bq*wq);
+
 
 #if ADJUST_STENCILS
       VoFStencil addsten(jump_sten);

@@ -105,14 +105,29 @@ public:
   virtual LayoutData<MFInterfaceFAB<VoFStencil> >& get_stencils();
 
   /*!
+    @brief Get stencils
+  */
+  virtual LayoutData<MFInterfaceFAB<VoFStencil> >& get_avgStencils();
+
+  /*!
     @brief Get weights
   */
   virtual LayoutData<MFInterfaceFAB<Real> >& get_weights();
+
+    /*!
+    @brief Get weights
+  */
+  virtual LayoutData<MFInterfaceFAB<Real> >& get_avgWeights();
 
   /*!
     @brief Get b-coefficient on each side
   */
   virtual LayoutData<MFInterfaceFAB<Real> >& get_bco();
+
+    /*!
+    @brief Get b-coefficient on each side
+  */
+  virtual LayoutData<MFInterfaceFAB<Real> >& get_avgBco();
 
   /*!
     @brief Get inhomogeneous contribution on each side

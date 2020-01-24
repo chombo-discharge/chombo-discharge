@@ -50,8 +50,8 @@ fast_rod_plane::fast_rod_plane(){
 
   set_eps0(eps0);
 
-  m_electrodes.resize(1);
-  m_dielectrics.resize(1);
+  m_electrodes.resize(0);
+  m_dielectrics.resize(0);
 
   // Set the plane normal
   if(normal == "+x"){
@@ -89,8 +89,13 @@ fast_rod_plane::fast_rod_plane(){
 									   noise_persistence,
 									   noise_octaves,
 									   noise_reseed));
-  m_electrodes[0].define (rod,   live);
-  m_dielectrics[0].define(plane, eps);
+
+  if(!has_electrode){
+    m_electrodes.push_back(electrode(rod,   live));
+  }
+  if(!has_dielectric){
+    m_dielectrics.push_back(dielectric(plane, eps));
+  }
 
 
   if(use_new_gshop){
