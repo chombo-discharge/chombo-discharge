@@ -152,11 +152,11 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
       gshop->set_bounded_voxels(m_bounded_voxels_gas);
     
       a_geoserver = static_cast<GeometryService*> (gshop);
-    }
-    else{
-      // Development stuff
+
+#if 1 // Scan shop things
       ProblemDomain scanLevel = a_finestDomain;
 
+      scanLevel.coarsen(2);
       scanLevel.coarsen(2);
       scanLevel.coarsen(2);
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
@@ -166,7 +166,10 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
 								a_finestDomain,
 								scanLevel,
 								s_thresh));
-      //      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
+#endif
+    }
+    else{
+      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
     }
   }
 }
@@ -208,9 +211,24 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
       gshop->set_bounded_voxels(m_bounded_voxels_sol);
     
       a_geoserver = static_cast<GeometryService*> (gshop);
+
+#if 1 // Scan shop things
+      ProblemDomain scanLevel = a_finestDomain;
+
+      scanLevel.coarsen(2);
+      scanLevel.coarsen(2);
+      scanLevel.coarsen(2);
+      a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_sol_if,
+								0,
+								a_dx,
+								a_origin,
+								a_finestDomain,
+								scanLevel,
+								s_thresh));
+#endif
     }
     else{
-      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_sol_if, 0, a_dx*RealVect::Unit, s_thresh));
+      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
     }
   }
 }

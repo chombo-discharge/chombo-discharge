@@ -31,7 +31,6 @@ void mfis::define(const Box                     & a_domain,
 		  int                             a_max_coar,
 		  bool                            a_fix_phase){
 
-
   // Define the gas geoserver
   if(computational_geometry::s_use_new_gshop){
     m_ebis[phase::gas]->setDistributedData();
@@ -48,7 +47,7 @@ void mfis::define(const Box                     & a_domain,
   }
   else{
     if(computational_geometry::s_use_new_gshop){
-    m_ebis[phase::solid]->setDistributedData();
+      m_ebis[phase::solid]->setDistributedData();
     }
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
 #if 1 // Debug

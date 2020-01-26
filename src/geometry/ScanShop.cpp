@@ -16,7 +16,7 @@
 
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
-int ScanShop::s_grow              = 6;
+int ScanShop::s_grow              = 8;
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
@@ -27,12 +27,13 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const Real          a_thrshdVoF)
   : GeometryShop(a_localGeom, a_verbosity, a_dx*RealVect::Unit, a_thrshdVoF) {
 
-  // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
-  // need to construct these here, and then extract the proper resolution when we actually do makeGrids
-  
-  ScanShop::makeDomains(a_dx, a_origin, a_finestDomain, a_scanLevel);
 
-  std::cout << "using scanshop" << std::endl;
+  m_baseif = &a_localGeom;
+  m_hasScanLevel = false;
+
+    // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
+  // need to construct these here, and then extract the proper resolution when we actually do makeGrids
+  ScanShop::makeDomains(a_dx, a_origin, a_finestDomain, a_scanLevel);
 }
 
 ScanShop::~ScanShop(){
@@ -73,23 +74,141 @@ void ScanShop::makeDomains(const Real          a_dx,
       break;
     }
   }
+
+  // These will be built when they are needed. 
+  m_grids.resize(m_domains.size());
+  m_boxMaps.resize(m_domains.size());
+  m_hasThisLevel.resize(m_domains.size(), 0);
 }
 
-void ScanShop::makeGrids(const ProblemDomain&      a_domain,
-			 DisjointBoxLayout&        a_grids,
-			 const int&                a_maxGridSize,
-			 const int&                a_maxIrregGridSize){
+void ScanShop::makeGrids(const ProblemDomain& a_domain,
+			 DisjointBoxLayout&   a_grids,
+			 const int&           a_maxGridSize,
+			 const int&           a_maxIrregGridSize){
 
+
+  // Build the scan level first
+  if(!m_hasScanLevel){
+    for (int lvl = m_domains.size()-1; lvl >= m_scanLevel; lvl--){
+      ScanShop::buildCoarseLevel(lvl, a_maxGridSize); // Coarser levels built in the same way as the scan level
+    }
+    ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
+  }
 
   // Development code. Break up a_domnain in a_maxGridSize chunks, load balance trivially and return the dbl
   Vector<Box> boxes;
   Vector<int> procs;
   
-  domainSplit(a_domain, boxes, a_maxGridSize, a_maxIrregGridSize);
+  domainSplit(a_domain, boxes, a_maxGridSize, 1);
+  mortonOrdering(boxes);
   LoadBalance(procs, boxes);
 
   a_grids.define(boxes, procs, a_domain);
+}
 
+void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
+  CH_TIME("ScanShop::buildCoarseLevel");
+
+  // This function does the following:
+  // 1. Break up the domain into chunks of max size a_maxGridSize and load balance them trivially
+  // 2. Search through all the boxes and label them as regular/covered/irregular. Store the result in a LevelData map
+  // 3. Gather cut-cell and regular/covered boxes separately and load balance them separately
+  // 4. Create a new DBL with the newly load-balanced boxes; there should be approximately the same amount
+  //    of cut-cell boxes for each rank
+  // 5. Copy the map created over the initial DisjointBoxLayout onto the final grid
+  
+  // 1. 
+  Vector<Box> boxes;
+  Vector<int> procs;
+  domainSplit(m_domains[a_level], boxes, a_maxGridSize, 1);
+  LoadBalance(procs, boxes);
+
+  // 2. 
+  DisjointBoxLayout dbl(boxes, procs, m_domains[a_level]);
+  LevelData<BoxType> map(dbl, 1, IntVect::Zero, BoxTypeFactory());
+  Vector<Box> CutCellBoxes;
+  Vector<Box> ReguCovBoxes;
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box box = dbl.get(dit());
+    
+    Box grownBox = box;
+    grownBox.grow(ScanShop::s_grow);
+    
+    bool foundNegative = false;
+    bool foundPositive = false;
+    for (BoxIterator bit(grownBox); bit.ok(); ++bit){
+      const IntVect iv   = bit();
+      const RealVect pos = m_origin + RealVect(iv)*m_dx[a_level];
+
+      const Real value = m_baseif->value(pos);
+
+      if(value < 0.0){
+	foundNegative = true;
+      }
+      else if(value > 0.0){
+	foundPositive = true;
+      }
+    }
+
+    if(foundNegative && !foundPositive){ // Box must be covered
+      map[dit()].setCovered();
+      ReguCovBoxes.push_back(box);
+    }
+    else if(!foundNegative && foundPositive){ // Box is all regular
+      map[dit()].setRegular();
+      ReguCovBoxes.push_back(box);
+    }
+    else{ // Box must be a cut-cell box
+      map[dit()].setCutCell();
+      CutCellBoxes.push_back(box);
+    }
+  }
+
+  // 3. Gather the uncut boxes and the cut boxes separately
+  ScanShop::gatherBoxesParallel(CutCellBoxes);
+  ScanShop::gatherBoxesParallel(ReguCovBoxes);
+
+  Vector<int> CutCellProcs;
+  Vector<int> ReguCovProcs;
+
+  LoadBalance(CutCellProcs, CutCellBoxes);
+  LoadBalance(ReguCovProcs, ReguCovBoxes);
+
+  Vector<Box> allBoxes;
+  Vector<int> allProcs;
+
+  allBoxes.append(CutCellBoxes);
+  allBoxes.append(ReguCovBoxes);
+
+  allProcs.append(CutCellProcs);
+  allProcs.append(ReguCovProcs);
+
+  // 4. Define the grids on this level
+  m_grids[a_level]   = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
+  m_boxMaps[a_level] = RefCountedPtr<LevelData<BoxType> >
+    (new LevelData<BoxType>(m_grids[a_level], 1, IntVect::Zero, BoxTypeFactory()));
+
+  // 5. Finally, copy the map
+  map.copyTo(*m_boxMaps[a_level]);
+
+  // We're done!
+  m_hasThisLevel[a_level] = 1;
+}
+
+void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize){
+  CH_TIME("ScanShop::buildFinerLevels");
+
+
+  if(a_coarserLevel > 0){
+    const int coarLvl = a_coarserLevel;
+    const int fineLvl = coarLvl - 1;
+
+
+    m_hasThisLevel[fineLvl] = 1;
+
+    // This does the next level, we stop when level 0 has been built
+    ScanShop::buildFinerLevels(fineLvl-1, a_maxGridSize);
+  }
 }
 
 GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,

@@ -11,7 +11,7 @@
 #include <GeometryShop.H>
 #include <GeometryService.H>
 
-#include "real_box.H"
+#include "BoxType.H"
 
 /*!
   @brief Derived version of GeometryShop that load balances based on the cut cells themselves. The internals of this class
@@ -67,30 +67,31 @@ public:
 
 protected:
 
-  /*!
-    @brief Enum for holding box types
-  */
-  enum {
-    Regular = 0,
-    Covered = 1,
-    CutCell = 2
-  };
-
 
   /*!
     @brief Scan level where we first begin to break up boxes
   */
-  int                   m_scanLevel;
+  int m_scanLevel;
 
   /*!
     @brief Origin
   */
-  RealVect              m_origin;
+  RealVect m_origin;
+
+  /*!
+    @brief BaseIF function
+  */
+  const BaseIF* m_baseif;
+
+  /*!
+    @brief Check if scan level has been built
+  */
+  bool m_hasScanLevel;
 
   /*!
     @brief Level resolutions. Index 0 is the finest level
   */
-  Vector<Real>          m_dx;         // Index 0 is the finest EBIS level
+  Vector<Real> m_dx;         // Index 0 is the finest EBIS level
 
   /*!
     @brief Level domains. Index 0 is the finest level
@@ -105,7 +106,12 @@ protected:
   /*!
     @brief Box maps
   */
-  Vector<LayoutData<int> > m_boxMap;
+  Vector<RefCountedPtr<LevelData<BoxType> > > m_boxMaps;
+
+  /*!
+    @brief Check if level has been scanned. 0 = false, != 0 implies true
+  */
+  Vector<int> m_hasThisLevel;
 
   /*!
     @brief Create the problem domain and resolutions
@@ -113,9 +119,14 @@ protected:
   void makeDomains(const Real a_dx, const RealVect a_origin, const ProblemDomain a_finestDomain, const ProblemDomain a_scanLevel);
 
   /*!
-    @brief Create the box maps
+    @brief Refine levels recursively down to the finest level
   */
-  void makeBoxMaps();
+  void buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize);
+
+  /*!
+    @brief Refine levels recursively down to the finest level
+  */
+  void buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
 
   /*!
     @brief Gather boxes in parallel.
