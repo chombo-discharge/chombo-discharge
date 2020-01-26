@@ -16,6 +16,7 @@
 
 #include "computational_geometry.H"
 #include "fast_gshop.H"
+#include "ScanShop.H"
 #include "memrep.H"
 
 #if CH_USE_DOUBLE
@@ -153,7 +154,19 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
       a_geoserver = static_cast<GeometryService*> (gshop);
     }
     else{
-      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
+      // Development stuff
+      ProblemDomain scanLevel = a_finestDomain;
+
+      scanLevel.coarsen(2);
+      scanLevel.coarsen(2);
+      a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
+								0,
+								a_dx,
+								a_origin,
+								a_finestDomain,
+								scanLevel,
+								s_thresh));
+      //      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
     }
   }
 }
