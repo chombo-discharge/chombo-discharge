@@ -85,6 +85,7 @@ public:
   virtual void parse_simulation_time();
   virtual void parse_file_depth();
   virtual void parse_plot_vars();
+  virtual void parse_geometry_generation();
   
   /*!
     @brief Run the solvers untils a_time or a_max_steps has been reached
@@ -227,6 +228,11 @@ protected:
   memory_report_mode::which_mode m_memory_mode;
 
   /*!
+    @brief Geometry generation method
+  */
+  std::string m_geometry_generation;
+
+  /*!
     @brief Output directory
   */
   std::string m_output_dir;
@@ -250,6 +256,11 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
+
+  /*!
+    @brief Geometry scan level
+  */
+  int m_geo_scan_level;
 
   /*!
     @brief Time step

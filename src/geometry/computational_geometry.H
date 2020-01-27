@@ -27,6 +27,7 @@ class computational_geometry {
 public:
 
   static bool s_use_new_gshop;
+  static ProblemDomain s_ScanDomain;
 
   /*!
     @brief Constructor

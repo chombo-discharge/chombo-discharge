@@ -90,6 +90,8 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
   m_amr->build_domains();                // Build domains and resolutions, nothing else
 
+  parse_geometry_generation();
+
   // Define the cell tagger
   if(!m_celltagger.isNull()){ 
     m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
@@ -1254,6 +1256,28 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth1,
   m_geom_tag_depth = Max(m_geom_tag_depth, a_depth4);
   m_geom_tag_depth = Max(m_geom_tag_depth, a_depth5);
   m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
+}
+
+void plasma_engine::parse_geometry_generation(){
+  CH_TIME("plasma_engine::parse_geometry_generation");
+  if(m_verbosity > 5){
+    pout() << "plasma_engine::parse_geometry_generation" << endl;
+  }
+
+  ParmParse pp("plasma_engine");
+  pp.get("geometry_generation", m_geometry_generation);
+  pp.get("geometry_scan_level", m_geo_scan_level);
+  
+
+  if(m_geometry_generation == "plasmac"){
+    computational_geometry::s_use_new_gshop = true;
+    computational_geometry::s_ScanDomain = m_amr->get_domains()[m_geo_scan_level];
+  }
+  else if(m_geometry_generation == "chombo"){
+  }
+  else{
+    MayDay::Abort("plasma_engine:parse_geometry_generation - unsupported argument requested");
+  }
 }
 
 void plasma_engine::parse_verbosity(){

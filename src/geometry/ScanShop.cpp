@@ -16,7 +16,7 @@
 
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
-int ScanShop::s_grow              = 2;
+int ScanShop::s_grow              = 4;
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
@@ -194,10 +194,9 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
     }
   }
 
-#if 1 // Debug first map
+#if DEBUG // Debug first map
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     if(map[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - initial map shouldn't get -1");
-    //    std::cout << map[dit()].m_which << std::endl;
   }
 #endif
 
@@ -231,10 +230,9 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   // 5. Finally, copy the map
   map.copyTo(*m_boxMaps[a_level]);
 
-#if 1 // Debug first map
+#if DEBUG // Debug first map
   for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
     if((*m_boxMaps[a_level])[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - final map shouldn't get -1");
-    //    std::cout << (*m_boxMaps[a_level])[dit()].m_which << std::endl;
   }
 #endif
 
@@ -345,7 +343,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     mapFineCoar.copyTo(*m_boxMaps[fineLvl]);
     CutCellMap.copyTo(*m_boxMaps[fineLvl]);
 
-#if 0 // Dummy check the box maps
+#if DEBUG // Dummy check the box maps
     for (DataIterator dit = CutCellDBL.dataIterator(); dit.ok(); ++dit){
       if(CutCellMap[dit()].m_which == -1) MayDay::Abort("ScanShop::buildFinerLevels - CutCellMap shouldn't get -1");
     }
@@ -381,12 +379,9 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
     }
   }
 
-  //  return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx, a_dit);
-
   if(m_hasThisLevel[whichLevel] != 0){
     const LevelData<BoxType>& map = (*m_boxMaps[whichLevel]);
     const BoxType& boxType       = map[a_dit];
-    //    return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx, a_dit);
 
     if(boxType.isRegular() && !boxType.isCovered() && !boxType.isCutCell()){
       return GeometryService::Regular;
@@ -395,7 +390,8 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
       return GeometryService::Covered;
     }
     else{
-      return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx);
+      return GeometryService::Irregular;//
+      //return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx);
     }
   }
   else{

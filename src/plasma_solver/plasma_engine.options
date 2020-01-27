@@ -2,6 +2,8 @@
 # PLASMA_ENGINE OPTIONS
 # ====================================================================================================
 plasma_engine.verbosity                       = 2             # Engine verbosity
+plasma_engine.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
+plasma_engine.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 plasma_engine.recursive_regrid                = false         # Recursive regrids
 plasma_engine.plot_interval                   = 10            # Plot interval
 plasma_engine.regrid_interval                 = 10            # Regrid interval

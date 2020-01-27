@@ -25,7 +25,8 @@ Real computational_geometry::s_thresh = 1.E-15;
 Real computational_geometry::s_thresh = 1.E-6;
 #endif
 
-bool computational_geometry::s_use_new_gshop = false;
+bool          computational_geometry::s_use_new_gshop = false;
+ProblemDomain computational_geometry::s_ScanDomain = ProblemDomain(); // Needs to be set
 
 computational_geometry::computational_geometry(){
 
@@ -154,17 +155,12 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
       a_geoserver = static_cast<GeometryService*> (gshop);
 
 #if 1 // Scan shop things
-      ProblemDomain scanLevel = a_finestDomain;
-
-      scanLevel.coarsen(2);
-      scanLevel.coarsen(2);
-      scanLevel.coarsen(2);
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
 								0,
 								a_dx,
 								a_origin,
 								a_finestDomain,
-								scanLevel,
+								s_ScanDomain,
 								s_thresh));
 #endif
     }
@@ -213,17 +209,12 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
       a_geoserver = static_cast<GeometryService*> (gshop);
 
 #if 1 // Scan shop things
-      ProblemDomain scanLevel = a_finestDomain;
-
-      scanLevel.coarsen(2);
-      scanLevel.coarsen(2);
-      scanLevel.coarsen(2);
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_sol_if,
 								0,
 								a_dx,
 								a_origin,
 								a_finestDomain,
-								scanLevel,
+								s_ScanDomain,
 								s_thresh));
 #endif
     }
