@@ -129,6 +129,11 @@ protected:
   void buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
 
   /*!
+    @brief Prints number of boxes of each type on this level
+  */
+  void printNumBoxesLevel(const int a_level);
+
+  /*!
     @brief Gather boxes in parallel.
     @details On input, a_boxes contains the local boxes. On output, boxes have been gather on every rank
   */

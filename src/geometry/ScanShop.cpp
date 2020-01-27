@@ -13,10 +13,11 @@
 
 #include <ParmParse.H>
 
+#define DEBUG 1
 
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
-int ScanShop::s_grow              = 4;
+int ScanShop::s_grow              = 0;
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
@@ -92,6 +93,12 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
       ScanShop::buildCoarseLevel(lvl, a_maxGridSize); // Coarser levels built in the same way as the scan level
     }
     ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
+
+#if DEBUG
+    for (int lvl = 0; lvl < m_domains.size(); lvl++){
+      ScanShop::printNumBoxesLevel(lvl);
+    }
+#endif
 
     m_hasScanLevel = true;
   }
@@ -281,6 +288,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
     // Make a DBL out of the cut-cell boxes and again check if they actually contain cut cells
     gatherBoxesParallel(CutCellBoxes);
+    mortonOrdering(CutCellBoxes);
     LoadBalance(CutCellProcs, CutCellBoxes);
     DisjointBoxLayout  CutCellDBL(CutCellBoxes, CutCellProcs, m_domains[fineLvl]);
     LevelData<BoxType> CutCellMap(CutCellDBL, 1, IntVect::Zero, BoxTypeFactory());
@@ -352,7 +360,6 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     }
     for (DataIterator dit = m_grids[fineLvl].dataIterator(); dit.ok(); ++dit){
       if((*m_boxMaps[fineLvl])[dit()].m_which == -1){ MayDay::Abort("ScanShop::buildFinerLevels - final map shouldn't get -1");}
-      std::cout << (*m_boxMaps[fineLvl])[dit()].m_which << std::endl;
     }
 #endif
     
@@ -383,20 +390,58 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
     const LevelData<BoxType>& map = (*m_boxMaps[whichLevel]);
     const BoxType& boxType       = map[a_dit];
 
-    if(boxType.isRegular() && !boxType.isCovered() && !boxType.isCutCell()){
+    if(boxType.isRegular()){
       return GeometryService::Regular;
     }
-    else if(boxType.isCovered() && !boxType.isRegular() && !boxType.isCutCell()){
+    else if(boxType.isCovered()){
       return GeometryService::Covered;
     }
     else{
-      return GeometryService::Irregular;//
-      //return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx);
+      return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx);
+
     }
   }
   else{
     return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx, a_dit);
   }
+}
+
+void ScanShop::printNumBoxesLevel(const int a_level){
+  CH_TIME("ScanShop::printNumBoxesLevel");
+
+  const DisjointBoxLayout&     dbl = m_grids[a_level];
+  const LevelData<BoxType>& boxMap = *m_boxMaps[a_level];
+
+  int myNumRegular = 0;
+  int myNumCovered = 0;
+  int myNumCutCell = 0;
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const BoxType& bType = boxMap[dit()];
+
+    if(bType.isRegular()){
+      myNumRegular++;
+    }
+    else if(bType.isCovered()){
+      myNumCovered++;
+    }
+    else if(bType.isCutCell()){
+      myNumCutCell++;
+    }
+  }
+
+  const int numRegular = EBLevelDataOps::parallelSum(myNumRegular);
+  const int numCovered = EBLevelDataOps::parallelSum(myNumCovered);
+  const int numCutCell = EBLevelDataOps::parallelSum(myNumCutCell);
+
+  if(procID() == 0){
+    std::cout << "ScanShop::printNumBoxesLevel on domain = " << m_domains[a_level] << "\n"
+	      << "\t Regular boxes = " << numRegular << "\n"
+      	      << "\t Covered boxes = " << numCovered << "\n"
+	      << "\t CutCell boxes = " << numCutCell << "\n"
+	      << std::endl;
+  }
+    
 }
 
 void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
