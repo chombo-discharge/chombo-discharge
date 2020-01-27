@@ -13,7 +13,7 @@
 
 #include <ParmParse.H>
 
-#define DEBUG 1
+#define DEBUG 0
 
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
