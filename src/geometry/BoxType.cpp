@@ -55,7 +55,13 @@ void BoxType::copy(const Box&      a_RegionFrom,
 		   const Box&      a_RegionTo,
 		   const BoxType&  a_src,
 		   const Interval& a_Csrc){
-  m_which = a_src.m_which;
+
+  if(a_RegionFrom.contains(a_RegionTo)){
+    m_which = a_src.m_which;
+  }
+  else{
+    m_which = -1;
+  }
 }
 
 int BoxType::size(const Box& R, const Interval& comps) const{
@@ -73,6 +79,10 @@ void BoxType::linearIn(void* buf, const Box& R, const Interval& comps){
   int* buffer = (int*) buf;
   m_which = *buffer;
   buffer++;
+}
+
+void BoxType::operator=(const BoxType& a_src){
+  m_which = a_src.m_which;
 }
 
 BoxTypeFactory::BoxTypeFactory(){

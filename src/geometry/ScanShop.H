@@ -133,6 +133,16 @@ protected:
     @details On input, a_boxes contains the local boxes. On output, boxes have been gather on every rank
   */
   void gatherBoxesParallel(Vector<Box>& a_boxes);
+
+  /*!
+    @brief Check if every point in box is regular
+  */
+  bool isRegular(const Box a_box, const RealVect m_origin, const Real a_dx);
+
+  /*!
+    @brief Check if every point in box is covered
+  */
+  bool isCovered(const Box a_box, const RealVect m_origin, const Real a_dx);
 };
 
 #endif

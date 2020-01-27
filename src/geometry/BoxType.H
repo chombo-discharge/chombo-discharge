@@ -74,7 +74,7 @@ public:
   /*!
     @brief Copy function
   */
-  void copy(const Box& a_RegionFrom, const Interval& a_Cdest,  const Box& a_RegionTo, const BoxType& a_src, const Interval& a_Csrc);
+  void copy(const Box& a_RegionFrom, const Interval& a_Cdest, const Box& a_RegionTo, const BoxType& a_src, const Interval& a_Csrc);
 
   /*!
     @brief Size function
@@ -91,7 +91,12 @@ public:
   */
   void linearIn(void* buf, const Box& R, const Interval& comps);
 
-protected:
+  /*!
+    @brief Copy function
+  */
+  void operator=(const BoxType& a_src);
+
+  //protected:
 
   int m_which;
 };

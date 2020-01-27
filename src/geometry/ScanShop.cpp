@@ -16,7 +16,7 @@
 
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
-int ScanShop::s_grow              = 8;
+int ScanShop::s_grow              = 2;
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
@@ -86,24 +86,63 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 			 const int&           a_maxGridSize,
 			 const int&           a_maxIrregGridSize){
 
-
   // Build the scan level first
   if(!m_hasScanLevel){
     for (int lvl = m_domains.size()-1; lvl >= m_scanLevel; lvl--){
       ScanShop::buildCoarseLevel(lvl, a_maxGridSize); // Coarser levels built in the same way as the scan level
     }
     ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
+
+    m_hasScanLevel = true;
   }
 
-  // Development code. Break up a_domnain in a_maxGridSize chunks, load balance trivially and return the dbl
-  Vector<Box> boxes;
-  Vector<int> procs;
-  
-  domainSplit(a_domain, boxes, a_maxGridSize, 1);
-  mortonOrdering(boxes);
-  LoadBalance(procs, boxes);
+  // Find the level corresponding to a_domain
+  int whichLevel;
+  for (int lvl = 0; lvl < m_domains.size(); lvl++){
+    if(m_domains[lvl].domainBox() == a_domain.domainBox()){
+      whichLevel = lvl;
+      break;
+    }
+  }
 
-  a_grids.define(boxes, procs, a_domain);
+  if(m_hasThisLevel[whichLevel] != 0){
+    a_grids = m_grids[whichLevel];
+  }
+  else{
+
+    // Development code. Break up a_domnain in a_maxGridSize chunks, load balance trivially and return the dbl
+    Vector<Box> boxes;
+    Vector<int> procs;
+  
+    domainSplit(a_domain, boxes, a_maxGridSize, 1);
+    mortonOrdering(boxes);
+    LoadBalance(procs, boxes);
+
+    a_grids.define(boxes, procs, a_domain);
+  }
+}
+
+bool ScanShop::isRegular(const Box a_box, const RealVect a_origin, const Real a_dx){
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+    const RealVect a_point = a_origin + a_dx*RealVect(iv);
+    if(m_baseif->value(a_point) > 0.0){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool ScanShop::isCovered(const Box a_box, const RealVect a_origin, const Real a_dx){
+  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+    const IntVect iv = bit();
+    const RealVect a_point = a_origin + a_dx*RealVect(iv);
+
+    if(m_baseif->value(a_point) < 0.0) return false;
+  }
+
+  return true;
 }
 
 void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
@@ -133,40 +172,41 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
     
     Box grownBox = box;
     grownBox.grow(ScanShop::s_grow);
-    
-    bool foundNegative = false;
-    bool foundPositive = false;
-    for (BoxIterator bit(grownBox); bit.ok(); ++bit){
-      const IntVect iv   = bit();
-      const RealVect pos = m_origin + RealVect(iv)*m_dx[a_level];
+    grownBox &= m_domains[a_level];
 
-      const Real value = m_baseif->value(pos);
+    const bool isRegular = ScanShop::isRegular(grownBox, m_origin, m_dx[a_level]);
+    const bool isCovered = ScanShop::isCovered(grownBox, m_origin, m_dx[a_level]);
 
-      if(value < 0.0){
-	foundNegative = true;
-      }
-      else if(value > 0.0){
-	foundPositive = true;
-      }
-    }
-
-    if(foundNegative && !foundPositive){ // Box must be covered
-      map[dit()].setCovered();
-      ReguCovBoxes.push_back(box);
-    }
-    else if(!foundNegative && foundPositive){ // Box is all regular
+    if(isRegular && !isCovered){
       map[dit()].setRegular();
       ReguCovBoxes.push_back(box);
     }
-    else{ // Box must be a cut-cell box
+    else if(isCovered && !isRegular){
+      map[dit()].setCovered();
+      ReguCovBoxes.push_back(box);
+    }
+    else if(!isRegular && !isCovered){
       map[dit()].setCutCell();
       CutCellBoxes.push_back(box);
     }
+    else{
+      MayDay::Abort("ScanShop::buildCoarseLevel - logic bust");
+    }
   }
+
+#if 1 // Debug first map
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    if(map[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - initial map shouldn't get -1");
+    //    std::cout << map[dit()].m_which << std::endl;
+  }
+#endif
 
   // 3. Gather the uncut boxes and the cut boxes separately
   ScanShop::gatherBoxesParallel(CutCellBoxes);
   ScanShop::gatherBoxesParallel(ReguCovBoxes);
+
+  mortonOrdering(CutCellBoxes);
+  mortonOrdering(ReguCovBoxes);
 
   Vector<int> CutCellProcs;
   Vector<int> ReguCovProcs;
@@ -184,12 +224,19 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   allProcs.append(ReguCovProcs);
 
   // 4. Define the grids on this level
-  m_grids[a_level]   = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
+  m_grids[a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
   m_boxMaps[a_level] = RefCountedPtr<LevelData<BoxType> >
     (new LevelData<BoxType>(m_grids[a_level], 1, IntVect::Zero, BoxTypeFactory()));
 
   // 5. Finally, copy the map
   map.copyTo(*m_boxMaps[a_level]);
+
+#if 1 // Debug first map
+  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
+    if((*m_boxMaps[a_level])[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - final map shouldn't get -1");
+    //    std::cout << (*m_boxMaps[a_level])[dit()].m_which << std::endl;
+  }
+#endif
 
   // We're done!
   m_hasThisLevel[a_level] = 1;
@@ -200,14 +247,121 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
 
   if(a_coarserLevel > 0){
+
     const int coarLvl = a_coarserLevel;
     const int fineLvl = coarLvl - 1;
 
+    // Coar stuff
+    const DisjointBoxLayout& dblCoar  = m_grids[coarLvl];
+    const LevelData<BoxType>& mapCoar = *m_boxMaps[coarLvl];
 
+
+    Vector<Box> CutCellBoxes;
+    Vector<Box> ReguCovBoxes;
+
+    Vector<int> CutCellProcs;
+    Vector<int> ReguCovProcs;
+
+    // Refined coarse stuff.
+    DisjointBoxLayout dblFineCoar;
+    refine(dblFineCoar, dblCoar, 2);
+    LevelData<BoxType> mapFineCoar(dblFineCoar, 1, IntVect::Zero, BoxTypeFactory());
+
+    // Break up cut cell boxes
+    for (DataIterator dit = dblFineCoar.dataIterator(); dit.ok(); ++dit){
+      mapFineCoar[dit()] = mapCoar[dit()];
+      const Box box = dblFineCoar.get(dit());
+      if(mapFineCoar[dit()].isCutCell()){
+	Vector<Box> boxes;
+	domainSplit(box, boxes, a_maxGridSize, 1);
+	CutCellBoxes.append(boxes);
+      }
+      else{
+	ReguCovBoxes.push_back(box);
+      }
+    }
+
+    // Make a DBL out of the cut-cell boxes and again check if they actually contain cut cells
+    gatherBoxesParallel(CutCellBoxes);
+    LoadBalance(CutCellProcs, CutCellBoxes);
+    DisjointBoxLayout  CutCellDBL(CutCellBoxes, CutCellProcs, m_domains[fineLvl]);
+    LevelData<BoxType> CutCellMap(CutCellDBL, 1, IntVect::Zero, BoxTypeFactory());
+
+    // Redo the cut cell boxes
+    CutCellBoxes.resize(0);
+    for (DataIterator dit = CutCellDBL.dataIterator(); dit.ok(); ++dit){
+      const Box box = CutCellDBL.get(dit());
+      
+      Box grownBox = box;
+      grownBox.grow(ScanShop::s_grow);
+      grownBox &= m_domains[fineLvl];
+
+      const bool isRegular = ScanShop::isRegular(grownBox, m_origin, m_dx[fineLvl]);
+      const bool isCovered = ScanShop::isCovered(grownBox, m_origin, m_dx[fineLvl]);
+
+      if(isRegular){
+	CutCellMap[dit()].setRegular();
+	ReguCovBoxes.push_back(box);
+      }
+      else if(isCovered){
+	CutCellMap[dit()].setCovered();
+	ReguCovBoxes.push_back(box);
+      }
+      else if(!isRegular && !isCovered){
+	CutCellMap[dit()].setCutCell();
+	CutCellBoxes.push_back(box);
+      }
+      else{
+	MayDay::Abort("ScanShop::buildCoarseLevel - logic bust");
+      }
+    }
+    
+    // Gather boxes with cut cells and the ones don't contain cut cells
+    ScanShop::gatherBoxesParallel(CutCellBoxes);
+    ScanShop::gatherBoxesParallel(ReguCovBoxes);
+
+    mortonOrdering(CutCellBoxes);
+    mortonOrdering(ReguCovBoxes);
+    
+    LoadBalance(CutCellProcs, CutCellBoxes);
+    LoadBalance(ReguCovProcs, ReguCovBoxes);
+    
+    Vector<Box> allBoxes;
+    Vector<int> allProcs;
+    
+    allBoxes.append(CutCellBoxes);
+    allBoxes.append(ReguCovBoxes);
+    
+    allProcs.append(CutCellProcs);
+    allProcs.append(ReguCovProcs);
+
+
+    // Define the grids and copy the maps over. First copy the refine coarse map, then update with the
+    // cut cell map
+    m_grids[fineLvl] = DisjointBoxLayout(allBoxes, allProcs, m_domains[fineLvl]);
+    m_boxMaps[fineLvl] = RefCountedPtr<LevelData<BoxType> >
+      (new LevelData<BoxType>(m_grids[fineLvl], 1, IntVect::Zero, BoxTypeFactory()));
+
+    mapFineCoar.copyTo(*m_boxMaps[fineLvl]);
+    CutCellMap.copyTo(*m_boxMaps[fineLvl]);
+
+#if 0 // Dummy check the box maps
+    for (DataIterator dit = CutCellDBL.dataIterator(); dit.ok(); ++dit){
+      if(CutCellMap[dit()].m_which == -1) MayDay::Abort("ScanShop::buildFinerLevels - CutCellMap shouldn't get -1");
+    }
+    for (DataIterator dit = dblFineCoar.dataIterator(); dit.ok(); ++dit){
+      if(mapFineCoar[dit()].m_which == -1) MayDay::Abort("ScanShop::buildFinerLevels - mapFineCoar shouldn't get -1");
+    }
+    for (DataIterator dit = m_grids[fineLvl].dataIterator(); dit.ok(); ++dit){
+      if((*m_boxMaps[fineLvl])[dit()].m_which == -1){ MayDay::Abort("ScanShop::buildFinerLevels - final map shouldn't get -1");}
+      std::cout << (*m_boxMaps[fineLvl])[dit()].m_which << std::endl;
+    }
+#endif
+    
     m_hasThisLevel[fineLvl] = 1;
 
     // This does the next level, we stop when level 0 has been built
-    ScanShop::buildFinerLevels(fineLvl-1, a_maxGridSize);
+    ScanShop::buildFinerLevels(fineLvl, a_maxGridSize);
   }
 }
 
@@ -218,8 +372,35 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
 					       const DataIndex&     a_dit) const{
   CH_TIME("ScanShop::InsideOutSide");
 
-  // During development stage, return the standard stuff
-  return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx, a_dit);
+  // Find the level corresponding to a_domain
+  int whichLevel;
+  for (int lvl = 0; lvl < m_domains.size(); lvl++){
+    if(m_domains[lvl].domainBox() == a_domain.domainBox()){
+      whichLevel = lvl;
+      break;
+    }
+  }
+
+  //  return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx, a_dit);
+
+  if(m_hasThisLevel[whichLevel] != 0){
+    const LevelData<BoxType>& map = (*m_boxMaps[whichLevel]);
+    const BoxType& boxType       = map[a_dit];
+    //    return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx, a_dit);
+
+    if(boxType.isRegular() && !boxType.isCovered() && !boxType.isCutCell()){
+      return GeometryService::Regular;
+    }
+    else if(boxType.isCovered() && !boxType.isRegular() && !boxType.isCutCell()){
+      return GeometryService::Covered;
+    }
+    else{
+      return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx);
+    }
+  }
+  else{
+    return GeometryService::InsideOutside(a_region, a_domain, a_origin, a_dx, a_dit);
+  }
 }
 
 void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
