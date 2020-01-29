@@ -147,18 +147,32 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       const Real bq               = avgBco.get_ivfab(otherphase)(vof0, comp);
       const Real factor           = cur_weight*bp/(bp*wp + bq*wq);
 
-
+      
+#if DEBUG // Debug. Check if anything is NaN
+      for (int i = 0; i < cur_stencil.size(); i++){
+	const Real weight = cur_stencil.weight(i);
+	if(weight != weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN weight in BC stencil");
+      }
+      for (int i = 0; i < jump_sten.size(); i++){
+	const Real weight = jump_sten.weight(i);
+	if(weight != weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN weight in matching stencil");
+      }
+      if(cur_weight != cur_weight) MayDay::Abort("mfdirichletconductivityebbc::define - cur_weight is NaN");
+      if(bp         != bp)         MayDay::Abort("mfdirichletconductivityebbc::define - bp is NaN");
+      if(bq         != bq)         MayDay::Abort("mfdirichletconductivityebbc::define - bq is NaN");
+      if(wp         != wp)         MayDay::Abort("mfdirichletconductivityebbc::define - wp is NaN");
+      if(wq         != wq)         MayDay::Abort("mfdirichletconductivityebbc::define - wq is NaN");
+      if(factor     != factor)     MayDay::Abort("mfdirichletconductivityebbc::define - factor is NaN");
+#endif
 #if ADJUST_STENCILS
       VoFStencil addsten(jump_sten);
       addsten *= -1.0*factor;
 
       cur_stencil += addsten;
 #endif
+
+      // Debug after adjust. 
 #if DEBUG
-      const Real denom = 1./(bp*wp + bq*wq);
-      if(denom      != denom     ) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN denom");
-      if(cur_weight != cur_weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN cur_weight");
-      if(bp         != bp        ) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN bp");
       for (int i = 0; i < cur_stencil.size(); i++){
 	const Real weight = cur_stencil.weight(i);
 	if(weight != weight) MayDay::Abort("mfdirichletconductivityebbc::define - got NaN weight");
