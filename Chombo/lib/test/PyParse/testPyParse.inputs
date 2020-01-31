@@ -1,0 +1,14 @@
+foo = 1
+goo = 'bob'
+bar = [1,2,3,4,5,6]
+def F(x):
+  return x*x
+def G(x,y):
+  return x*x + 2*sin(y)
+
+box1 = Box([0]*SpaceDim, [64]*SpaceDim)
+boxes = [box1, Box([65]*SpaceDim, [128]*SpaceDim)]
+boxHierarchy = [[box1, Box([65]*SpaceDim, [128]*SpaceDim)],
+                [box1, Box([65]*SpaceDim, [128]*SpaceDim)]]
+boxBlockHierarchy = [boxHierarchy, boxHierarchy, boxHierarchy]
+

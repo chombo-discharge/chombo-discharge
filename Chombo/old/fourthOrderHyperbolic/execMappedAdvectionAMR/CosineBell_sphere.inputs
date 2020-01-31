@@ -1,0 +1,66 @@
+assert(SpaceDim == 2)
+
+multiblock = True
+verbosity = 1
+
+# Time stepping
+max_step = 10
+max_time = 2.0
+fixed_dt = 0.005
+cfl = 0.75
+initial_cfl = 0.75
+max_dt_growth = 1.1
+dt_tolerance_factor = 1.1
+
+# Computational domain and coordinate system.
+coord_sys = 'cubed_sphere'
+num_cells = 10
+
+# AMR
+max_level = 0
+ref_ratio = 4 
+
+useHyperviscosity = 0
+hyperviscosity = 0.01
+
+limitFaceValues = 1
+enforceMinVal = 1
+minVal = 0.0
+
+# Which test case are we running?
+testCase = 1
+
+# Problem specifications in lon/lat coordinates
+hmax = 1
+radius = 0.5       # Base radius of bells
+b = 0.1            # Background value
+c = 0.9            # Bell amplificiation factor
+if testCase == 1:
+    center1 = (0.5, 0) # Center of first bell
+    center2 = (0.5, 0) # Center of second bell
+    velocity = (1.0, 1.0)
+else:
+    raise RuntimeError, 'test case %d not yet supported!'%testCase
+
+# Cosine Bell initial conditions.
+def phi0(x, t):
+    lam,theta = x[0],x[1]
+    lam1,theta1 = center1[0],center1[1]
+    lam2,theta2 = center2[0],center2[1]
+    r1 = acos(sin(theta1)*sin(theta) + cos(theta1)*cos(theta)*cos(lam-lam1))
+    r2 = acos(sin(theta2)*sin(theta) + cos(theta2)*cos(theta)*cos(lam-lam2))
+    if r1 < radius:
+        h1 = 0.5*hmax*(1 + cos(pi*r1/radius))
+        return b + c*h1
+    elif r2 < radius:
+        h2 = 0.5*hmax*(1 + cos(pi*r2/radius))
+        return b + c*h2
+    else:
+        return b
+
+# Output
+checkpoint_interval = -1
+plot_interval = 1
+plot_prefix  = 'CosineBell-case-%d.64.'%testCase
+chk_prefix = 'CosineBell--case-%d.64.'%testCase
+

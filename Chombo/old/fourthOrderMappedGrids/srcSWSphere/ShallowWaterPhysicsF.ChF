@@ -1,0 +1,468 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "SWintegrator.H"
+
+      subroutine SHALLOWWATERSETF(
+     &     CHF_CONST_REAL[auGravity],
+     &     CHF_CONST_REAL[auOmega],
+     &     CHF_CONST_REAL[auAlpha])
+
+#include "SWEosCommon.fh"
+
+!     gravity has dimensions L/T^2
+      gravity = auGravity
+!     omega has dimensions 1/T
+      omega = auOmega
+!     alpha is an angle, dimensionless
+      alpha = auAlpha
+!     smallh in terms of sphere radii
+      smallh = small
+
+      return
+      end
+
+
+      subroutine SWMAXWAVESPEEDF(
+     &     CHF_REAL[cmax],
+     &     CHF_CONST_FRA[U],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t  CHF_DDECL[uu;vv;ww]
+      real_t  umax,cspeed,h,invh
+
+      cmax = zero
+
+      CHF_AUTOMULTIDO[box; i]
+!         h = max(U(CHF_AUTOIX[i],UHGT), smallh)
+!         invh = one / h
+!         CHF_DTERM[
+!         uu = U(CHF_AUTOIX[i],UMOMX)*invh;
+!         vv = U(CHF_AUTOIX[i],UMOMY)*invh;
+!         ww = U(CHF_AUTOIX[i],UMOMZ)*invh]
+
+!     petermc, 1 Sep 2011
+         h = U(CHF_AUTOIX[i], UHGT)
+!     petermc, 6 Sep 2011, condition |h| >= smallh, not h > smallh
+         if (abs(h) .gt. smallh) then
+            invh = one / h
+            CHF_DTERM[
+            uu = U(CHF_AUTOIX[i],UMOMX)*invh;
+            vv = U(CHF_AUTOIX[i],UMOMY)*invh;
+            ww = U(CHF_AUTOIX[i],UMOMZ)*invh]
+         else
+            CHF_DTERM[
+            uu = zero ;
+            vv = zero ;
+            ww = zero ]
+         endif
+
+         cspeed = sqrt(gravity*h)
+
+         CHF_DTERM[
+         umax =     abs(uu)      ;
+         umax = max(abs(vv),umax);
+         umax = max(abs(ww),umax)]
+
+         cmax = max(umax + cspeed,cmax)
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWSOUNDSPEEDF(
+     &     CHF_FRA1[c],
+     &     CHF_CONST_FRA[U],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t  h
+
+      CHF_AUTOMULTIDO[box; i]
+
+         h = U(CHF_AUTOIX[i], UHGT)
+
+         c(CHF_AUTOIX[i]) = sqrt(gravity*h)
+
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWCONSTOPRIMF(
+     &     CHF_FRA[W],
+     &     CHF_CONST_FRA[U],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t CHF_DDECL[uu;vv;ww]
+      real_t h, invh
+
+      CHF_AUTOMULTIDO[box; i]
+!         h = max(U(CHF_AUTOIX[i],UHGT), smallh)
+!         invh = one / h
+!         CHF_DTERM[
+!         uu = U(CHF_AUTOIX[i],UMOMX)*invh;
+!         vv = U(CHF_AUTOIX[i],UMOMY)*invh;
+!         ww = U(CHF_AUTOIX[i],UMOMZ)*invh]
+
+!     petermc, 1 Sep 2011
+         h = U(CHF_AUTOIX[i], UHGT)
+!     petermc, 6 Sep 2011, condition |h| >= smallh, not h > smallh
+         if (abs(h) .gt. smallh) then
+            invh = one / h
+            CHF_DTERM[
+            uu = U(CHF_AUTOIX[i],UMOMX)*invh;
+            vv = U(CHF_AUTOIX[i],UMOMY)*invh;
+            ww = U(CHF_AUTOIX[i],UMOMZ)*invh]
+         else
+            CHF_DTERM[
+            uu = zero ;
+            vv = zero ;
+            ww = zero ]
+         endif
+
+         CHF_DTERM[
+         W(CHF_AUTOIX[i], WVELX) = uu ;
+         W(CHF_AUTOIX[i], WVELY) = vv ;
+         W(CHF_AUTOIX[i], WVELZ) = ww ]
+
+         W(CHF_AUTOIX[i], WHGT)  = h
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWPRIMTOCONSF(
+     &     CHF_FRA[U],
+     &     CHF_CONST_FRA[W],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t  CHF_DDECL[uu;vv;ww]
+      real_t  h
+
+      CHF_AUTOMULTIDO[box; i]
+         h = W(CHF_AUTOIX[i], WHGT)
+
+         CHF_DTERM[
+         uu = W(CHF_AUTOIX[i], WVELX) ;
+         vv = W(CHF_AUTOIX[i], WVELY) ;
+         ww = W(CHF_AUTOIX[i], WVELZ) ]
+
+         U(CHF_AUTOIX[i], UHGT) = h
+
+         CHF_DTERM[
+         U(CHF_AUTOIX[i], UMOMX) = h*uu ;
+         U(CHF_AUTOIX[i], UMOMY) = h*vv ;
+         U(CHF_AUTOIX[i], UMOMZ) = h*ww ]
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWRIEMANNROEF(
+     &     CHF_FRA[Wgdnv],
+     &     CHF_CONST_FRA[WLeft],
+     &     CHF_CONST_FRA[WRight],
+     &     CHF_CONST_INT[idir],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      integer CHF_DDECL[inorm; itan1; itan2]
+      real_t hlam,hl,hr
+      real_t ulam,ul,ur
+      real_t vlam,vl,vr
+      real_t roeavg,roec,roeu,roev
+      real_t deltah, deltahu
+      real_t alpha0, alpha2
+
+      integer spacedim
+
+      spacedim = CH_SPACEDIM
+
+c     Roe Riemann solver
+
+      CHF_DTERM[
+      inorm = WVELX + idir;
+      itan1 = WVELX + mod(idir + 1, spacedim);
+      itan2 = WVELX + mod(idir + 2, spacedim)]
+
+      CHF_AUTOMULTIDO[box; i]
+         hl  = WLeft (CHF_AUTOIX[i], WHGT)
+         hr  = WRight(CHF_AUTOIX[i], WHGT)
+
+         ul  = WLeft(CHF_AUTOIX[i], inorm)
+         vl  = WLeft(CHF_AUTOIX[i], itan1)
+
+         ur  = WRight(CHF_AUTOIX[i], inorm)
+         vr  = WRight(CHF_AUTOIX[i], itan1)
+
+         roeavg = sqrt(hr/hl)
+         roec = sqrt(half*gravity*(hl+hr))
+
+         roeu = (ul + roeavg*ur)/(one + roeavg)
+         roev = (vl + roeavg*vr)/(one + roeavg)
+
+         deltah = hr - hl
+         deltahu = hr*ur - hl*ul
+
+         alpha0 = - half / roec * (deltahu - (roeu+roec)*deltah)
+         alpha2 = half / roec * (deltahu - (roeu-roec)*deltah)
+
+         if ((roeu+roec) .gt. zero) then
+            Wgdnv(CHF_AUTOIX[i], WHGT)  = hl
+            Wgdnv(CHF_AUTOIX[i], inorm) = ul
+            Wgdnv(CHF_AUTOIX[i], itan1) = vl
+
+         elseif (roeu .gt. zero) then
+            Wgdnv(CHF_AUTOIX[i], WHGT)  = hl + alpha0
+            Wgdnv(CHF_AUTOIX[i], inorm) = ul + alpha0 * (roeu - roec)
+            Wgdnv(CHF_AUTOIX[i], itan1) = vl + alpha0 * roev
+
+         elseif ((roeu-roec) .gt. zero) then
+            Wgdnv(CHF_AUTOIX[i], WHGT)  = hr - alpha2
+            Wgdnv(CHF_AUTOIX[i], inorm) = ur - alpha2 * (roeu + roec)
+            Wgdnv(CHF_AUTOIX[i], itan1) = vr - alpha2 * roev
+
+         else
+            Wgdnv(CHF_AUTOIX[i], WHGT)  = hr
+            Wgdnv(CHF_AUTOIX[i], inorm) = ur
+            Wgdnv(CHF_AUTOIX[i], itan1) = vr
+         endif
+
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWGETFLUXF(
+     &     CHF_FRA[F],
+     &     CHF_CONST_FRA[Wgdnv],
+     &     CHF_CONST_FRA[metric],
+     &     CHF_CONST_INT[idir],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t vx, vy, hvnorm
+      real_t h, ghh
+
+      CHF_AUTOMULTIDO[box; i]
+         h = Wgdnv(CHF_AUTOIX[i], WHGT)
+         vx = Wgdnv(CHF_AUTOIX[i], WVELX)
+         vy = Wgdnv(CHF_AUTOIX[i], WVELY)
+
+         ghh = half * gravity * h * h
+
+         if (idir .eq. 0) then
+            hvnorm = h * vx
+         elseif (idir .eq. 1) then
+            hvnorm = h * vy
+         endif
+         F(CHF_AUTOIX[i], UHGT) = hvnorm
+         F(CHF_AUTOIX[i], UMOMX) = hvnorm * vx +
+     &        metric(CHF_AUTOIX[i], 0) * ghh
+         F(CHF_AUTOIX[i], UMOMY) = hvnorm * vy +
+     &        metric(CHF_AUTOIX[i], 1) * ghh
+
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWGETORTHOFLUXF(
+     &     CHF_FRA[F],
+     &     CHF_CONST_FRA[Wgdnv],
+     &     CHF_CONST_INT[idir],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t h, vnorm, vtan
+
+      CHF_AUTOMULTIDO[box; i]
+!     WVELX for velocity in normal direction,
+!     WVELY for velocity in tangential direction
+         h = Wgdnv(CHF_AUTOIX[i], WHGT)
+         vnorm = Wgdnv(CHF_AUTOIX[i], WVNORM)
+         vtan = Wgdnv(CHF_AUTOIX[i], WVTAN)
+
+         if (idir .eq. 0) then
+!     idir = 0 specifies normal direction
+            F(CHF_AUTOIX[i], UHGT) = h*vnorm
+            F(CHF_AUTOIX[i], UMOMNORM) = h*vnorm*vnorm + half*gravity*h*h
+            F(CHF_AUTOIX[i], UMOMTAN) = h*vnorm*vtan
+         elseif (idir .eq. 1) then
+!     idir = 1 specifies tangential direction
+            F(CHF_AUTOIX[i], UHGT) = h*vtan
+            F(CHF_AUTOIX[i], UMOMNORM) = h*vnorm*vtan
+            F(CHF_AUTOIX[i], UMOMTAN) = h*vtan*vtan + half*gravity*h*h
+         else
+            print *, 'Error: invalid direction ', idir
+            call MAYDAY_ERROR()
+         endif
+
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWADDMETRICSOURCE(
+     &     CHF_FRA[S],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[W],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t xi0, xi1, dgx, dgy, delta2
+      real_t h, CHF_DDECL[uu;vv;ww]
+      real_t fac, src
+
+      CHF_AUTOMULTIDO[box; i]
+
+         xi0 = xi(CHF_AUTOIX[i], 0)
+         xi1 = xi(CHF_AUTOIX[i], 1)
+
+         dgx = tan(xi0 - fourth*Pi)
+         dgy = tan(xi1 - fourth*Pi)
+         delta2 = one + dgx*dgx + dgy*dgy
+
+         h  = W(CHF_AUTOIX[i], WHGT) ;
+         CHF_DTERM[
+         uu = W(CHF_AUTOIX[i], WVELX) ;
+         vv = W(CHF_AUTOIX[i], WVELY) ;
+         ww = W(CHF_AUTOIX[i], WVELZ) ]
+
+         fac = two/delta2
+
+         src = fac *
+     &        (-dgx*dgy*dgy * h*uu*uu + dgy*(one + dgy*dgy) * h*uu*vv)
+         S(CHF_AUTOIX[i], 1) = S(CHF_AUTOIX[i], 1) + src
+
+         src = fac *
+     &        (dgx*(one + dgx*dgx) * h*uu*vv - dgx*dgx*dgy * h*vv*vv)
+         S(CHF_AUTOIX[i], 2) = S(CHF_AUTOIX[i], 2) + src
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SWADDCORIOLISSOURCE(
+     &     CHF_FRA[S],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[U],
+     &     CHF_CONST_INT[npanel],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+      real_t xi0, xi1, dgx, dgy, delta2
+      real_t CHF_DDECL[hu; hv; hw]
+      real_t fac, src
+
+      CHF_AUTOMULTIDO[box; i]
+
+         xi0 = xi(CHF_AUTOIX[i], 0)
+         xi1 = xi(CHF_AUTOIX[i], 1)
+
+         dgx = tan(xi0 - fourth*Pi)
+         dgy = tan(xi1 - fourth*Pi)
+         delta2 = one + dgx*dgx + dgy*dgy
+
+         CHF_DTERM[
+         hu = U(CHF_AUTOIX[i], UMOMX) ;
+         hv = U(CHF_AUTOIX[i], UMOMY) ;
+         hw = U(CHF_AUTOIX[i], UMOMZ) ]
+
+         fac = two * omega / delta2
+         if (npanel .eq. 4) then
+!     north polar panel
+            fac = fac
+         elseif (npanel .eq. 5) then
+!     south polar panel
+            fac = -fac
+         else
+!     equatorial panel
+            fac = dgy * fac
+         endif
+
+         src = fac * (-dgx*dgy * hu + (one + dgy*dgy) * hv)
+         S(CHF_AUTOIX[i], 1) = S(CHF_AUTOIX[i], 1) + src
+
+         src = fac * (-(one + dgx*dgx) * hu + dgx*dgy * hv)
+         S(CHF_AUTOIX[i], 2) = S(CHF_AUTOIX[i], 2) + src
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine CORIOLISPARAMETER(
+     &     CHF_CONST_FRA[lonlat],
+     &     CHF_FRA1[f],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+      integer CHF_AUTODECL[i]
+      real_t lat
+
+      CHF_AUTOMULTIDO[box; i]
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         f(CHF_AUTOIX[i]) = two * omega * sin(lat)
+      CHF_ENDDO
+
+      return
+      end
+
+
+
+      subroutine SWTOTALENERGY(
+!
+!     Total energy E = 1/2 * h * ((v dot v) + G*h)
+!
+     &     CHF_CONST_FRA1[vdotv],
+     &     CHF_CONST_FRA1[height],
+     &     CHF_FRA1[E],
+     &     CHF_BOX[box])
+
+#include "SWEosCommon.fh"
+      integer CHF_AUTODECL[i]
+      real_t h
+
+      CHF_AUTOMULTIDO[box; i]
+         h = height(CHF_AUTOIX[i])
+         E(CHF_AUTOIX[i]) = half * h *
+     &     (vdotv(CHF_AUTOIX[i]) + gravity * h)
+      CHF_ENDDO
+
+      return
+      end

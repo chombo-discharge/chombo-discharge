@@ -1,0 +1,531 @@
+//
+// $Id: StateDescriptor.cpp,v 1.1 2007-05-24 18:12:03 tdsternberg Exp $
+//
+#include <winstd.H>
+
+#include <algorithm>
+#include <string>
+#include <iostream>
+
+#include <StateDescriptor.H>
+#include <Interpolater.H>
+#include <BCRec.H>
+
+StateDescriptor::BndryFunc::BndryFunc ()
+    :
+    m_func(0),
+    m_gfunc(0)
+{}
+
+StateDescriptor::BndryFunc::BndryFunc (BndryFuncDefault inFunc)
+    :
+    m_func(inFunc),
+    m_gfunc(0)
+{}
+
+StateDescriptor::BndryFunc::BndryFunc (BndryFuncDefault inFunc,
+                                       BndryFuncDefault gFunc)
+    :
+    m_func(inFunc),
+    m_gfunc(gFunc)
+{}
+
+StateDescriptor::BndryFunc*
+StateDescriptor::BndryFunc::clone () const
+{
+    return new BndryFunc(*this);
+}
+
+StateDescriptor::BndryFunc::~BndryFunc () {}
+
+void
+StateDescriptor::BndryFunc::operator () (Real* data,const int* lo,const int* hi,
+                                         const int* dom_lo, const int* dom_hi,
+                                         const Real* dx, const Real* grd_lo,
+                                         const Real* time, const int* bc) const
+{
+    BL_ASSERT(m_func != 0);
+
+    m_func(data,ARLIM(lo),ARLIM(hi),dom_lo,dom_hi,dx,grd_lo,time,bc);
+}
+
+void
+StateDescriptor::BndryFunc::operator () (Real* data,const int* lo,const int* hi,
+                                         const int* dom_lo, const int* dom_hi,
+                                         const Real* dx, const Real* grd_lo,
+                                         const Real* time, const int* bc, bool) const
+{
+    BL_ASSERT(m_gfunc != 0);
+
+    m_gfunc(data,ARLIM(lo),ARLIM(hi),dom_lo,dom_hi,dx,grd_lo,time,bc);
+}
+
+DescriptorList::DescriptorList ()
+    :
+    desc(PArrayManage)
+{}
+
+void
+DescriptorList::clear ()
+{
+    desc.clear();
+}
+
+int
+DescriptorList::size () const
+{
+    return desc.size();
+}
+
+void
+DescriptorList::resetComponentBCs (int                               indx,
+                                   int                               comp,
+                                   const BCRec&                      bc,
+                                   const StateDescriptor::BndryFunc& func)
+{
+    desc[indx].resetComponentBCs(comp,bc,func);
+}
+
+void
+DescriptorList::setComponent (int                               indx,
+                              int                               comp,
+                              const std::string&                nm,
+                              const BCRec&                      bc,
+                              const StateDescriptor::BndryFunc& func,
+                              Interpolater*                     interp,
+                              int                               max_map_start_comp,
+                              int                               min_map_end_comp)
+{
+    desc[indx].setComponent(comp,nm,bc,func,interp,max_map_start_comp,min_map_end_comp);
+}
+
+void
+DescriptorList::setComponent (int                               indx,
+                              int                               comp,
+                              const Array<std::string>&         nm,
+                              const Array<BCRec>&               bc,
+                              const StateDescriptor::BndryFunc& func,
+                              Interpolater*                     interp)
+{
+    for (int i = 0; i < nm.size(); i++)
+    {
+        const bool master = (i == 0) ? true : false;
+
+        desc[indx].setComponent(comp+i,nm[i],bc[i],func,interp,master,nm.size());
+    }
+}
+
+const StateDescriptor&
+DescriptorList::operator[] (int k) const
+{
+    return desc[k];
+}
+
+void
+DescriptorList::addDescriptor (int                         indx,
+                               IndexType                   typ,
+                               StateDescriptor::TimeCenter ttyp,
+                               int                         nextra,
+                               int                         num_comp, 
+                               Interpolater*               interp,
+                               bool                        extrap)
+{
+    if (indx >= desc.size())
+        desc.resize(indx+1);
+    desc.set(indx,new StateDescriptor(typ,ttyp,indx,nextra,num_comp,interp,extrap));
+}  
+
+StateDescriptor::StateDescriptor ()
+    :
+    id(-1),
+    ncomp(0),
+    ngrow(0),
+    mapper(0),
+    m_extrap(false),
+    bc_func(PArrayManage),
+    t_type(Point)
+{}
+
+StateDescriptor::StateDescriptor (IndexType                   btyp,
+                                  StateDescriptor::TimeCenter ttyp,
+                                  int                         ident,
+                                  int                         nextra, 
+                                  int                         num_comp,
+                                  Interpolater*               interp,
+                                  bool                        extrap)
+    :
+    type(btyp),
+    t_type(ttyp),
+    id(ident),
+    ngrow(nextra),
+    ncomp(num_comp),
+    mapper(interp),
+    m_extrap(extrap),
+    bc_func(PArrayManage)
+{
+    BL_ASSERT (num_comp > 0);
+   
+    names.resize(num_comp);
+    bc.resize(num_comp);
+    bc_func.resize(num_comp);
+    mapper_comp.resize(num_comp);
+    m_master.resize(num_comp);
+    m_groupsize.resize(num_comp);
+    max_map_start_comp.resize(num_comp);
+    min_map_end_comp.resize(num_comp);
+}
+
+StateDescriptor::~StateDescriptor ()
+{
+    mapper = 0;
+}
+
+void
+StateDescriptor::resetComponentBCs (int              comp,
+                                    const BCRec&     bcr,
+                                    const BndryFunc& func)
+{
+    BL_ASSERT(comp >= 0 && comp < ncomp);
+
+    bc_func.clear(comp);
+    bc_func.set(comp,func.clone());
+    bc[comp] = bcr;
+}
+
+IndexType
+StateDescriptor::getType () const
+{
+    return type;
+}
+
+StateDescriptor::TimeCenter
+StateDescriptor::timeType () const
+{
+    return t_type;
+}
+
+int
+StateDescriptor::nComp () const
+{
+    return ncomp;
+}
+
+int
+StateDescriptor::nExtra () const
+{
+    return ngrow;
+}
+
+Interpolater*
+StateDescriptor::interp () const
+{
+    return mapper;
+}
+
+Interpolater*
+StateDescriptor::interp (int i) const
+{
+    return mapper_comp[i] == 0 ? mapper : mapper_comp[i];
+}
+
+const std::string&
+StateDescriptor::name (int i) const
+{
+    return names[i];
+}
+
+const BCRec&
+StateDescriptor::getBC (int i) const
+{
+    return bc[i];
+}
+
+const Array<BCRec>&
+StateDescriptor::getBCs () const
+{
+    return bc;
+}
+
+bool
+StateDescriptor::extrap () const
+{
+    return m_extrap;
+}
+
+const StateDescriptor::BndryFunc&
+StateDescriptor::bndryFill (int i) const
+{
+    return bc_func[i];
+}
+
+int
+StateDescriptor::inRange (int sc, int nc) const
+{
+    return sc>=0 && sc+nc<=ncomp;
+}
+
+void
+StateDescriptor::define (IndexType                   btyp,
+                         StateDescriptor::TimeCenter ttyp,
+                         int                         ident,
+                         int                         nextra,
+                         int                         num_comp,
+                         Interpolater*               interp,
+                         bool                        extrap) 
+{
+    type     = btyp;
+    t_type   = ttyp;
+    id       = ident;
+    ngrow    = nextra;
+    ncomp    = num_comp;
+    mapper   = interp;
+    m_extrap = extrap;
+
+    BL_ASSERT (num_comp > 0);
+   
+    names.resize(num_comp);
+    bc.resize(num_comp);
+    bc_func.resize(num_comp);
+    mapper_comp.resize(num_comp);
+    m_master.resize(num_comp);
+    m_groupsize.resize(num_comp);
+    max_map_start_comp.resize(num_comp);
+    min_map_end_comp.resize(num_comp);
+}
+
+void
+StateDescriptor::setComponent (int                               comp,
+                               const std::string&                nm,
+                               const BCRec&                      bcr,
+                               const StateDescriptor::BndryFunc& func,
+                               Interpolater*                     interp, 
+                               int                               max_map_start_comp_,
+                               int                               min_map_end_comp_)
+{
+    bc_func.clear(comp);
+    bc_func.set(comp,func.clone());
+
+    names[comp]       = nm;
+    bc[comp]          = bcr;
+    mapper_comp[comp] = interp;
+    m_master[comp]    = false;
+    m_groupsize[comp] = 0;
+
+    if (max_map_start_comp_>=0 && min_map_end_comp_>=0)
+    {
+        BL_ASSERT(comp >= max_map_start_comp_ &&
+                  comp <= min_map_end_comp_   &&
+                  min_map_end_comp_ < ncomp);
+        max_map_start_comp[comp] = max_map_start_comp_;
+        min_map_end_comp[comp]   = min_map_end_comp_;
+    }
+    else
+    {
+        max_map_start_comp[comp] = comp;
+        min_map_end_comp[comp]   = comp;
+    }
+}
+
+
+void
+StateDescriptor::setComponent (int                               comp,
+                               const std::string&                nm,
+                               const BCRec&                      bcr,
+                               const StateDescriptor::BndryFunc& func,
+                               Interpolater*                     interp,
+                               bool                              master,
+                               int                               groupsize)
+{
+    setComponent(comp,nm,bcr,func,interp,-1,-1);
+
+    m_master[comp]    = master;
+    m_groupsize[comp] = groupsize;
+}
+
+void
+StateDescriptor::dumpNames (std::ostream& os,
+                            int           start_comp,
+                            int           num_comp) const
+{
+    BL_ASSERT(start_comp >= 0 && start_comp+num_comp <= ncomp);
+
+    for (int k = 0; k < num_comp; k++)
+    {
+        os << names[start_comp+k] << ' ';
+    }
+}
+
+void
+StateDescriptor::setUpMaps (int&                use_default_map,
+                            const Interpolater* default_map,
+                            int                 start_comp,
+                            int                 num_comp,
+                            Interpolater**&     maps, 
+                            int&                nmaps,
+                            int*&               map_start_comp,
+                            int*&               map_num_comp, 
+                            int*&               max_start_comp,
+                            int*&               min_end_comp) const
+{
+    BL_ASSERT(start_comp>=0 && start_comp+num_comp-1 < ncomp && num_comp>0);
+
+    maps           = 0;
+    map_start_comp = 0;
+    map_num_comp   = 0;
+    max_start_comp = 0;
+    min_end_comp   = 0;
+    //
+    // First, count number of interpolaters needed and allocate.
+    //
+    Interpolater* map = mapper_comp[start_comp];
+    if (!map) map = (Interpolater*) default_map;
+    nmaps = 1; 
+    int icomp = start_comp+1;
+
+    use_default_map = 1;
+    while (icomp < start_comp+num_comp)
+    {
+        Interpolater* mapper_icomp = mapper_comp[icomp];
+        if (!mapper_icomp)
+        {
+            mapper_icomp = (Interpolater *) default_map;
+        }
+        else
+        {
+            use_default_map = 0;
+        }
+        if (map != mapper_icomp)
+        {
+            map = mapper_icomp;
+            nmaps++;
+        }
+        icomp++;
+    }
+
+    if (use_default_map) return;
+
+    maps           = new Interpolater*[nmaps];
+    map_start_comp = new int[nmaps];
+    map_num_comp   = new int[nmaps];
+    min_end_comp   = new int[nmaps];
+    max_start_comp = new int[nmaps];
+    //
+    // Now fill the slots.
+    //
+    int imap             = 0;
+
+    if (mapper_comp[start_comp])
+    {
+        maps[imap] = mapper_comp[start_comp];
+    }
+    else
+    {
+        maps[imap] = (Interpolater *) default_map;
+    }
+
+    icomp                = start_comp+1;
+    map_start_comp[imap] = start_comp;
+    map_num_comp[imap]   = 1;
+    min_end_comp[imap]   = min_map_end_comp[start_comp];
+    max_start_comp[imap] = max_map_start_comp[start_comp];
+
+    while (icomp < start_comp+num_comp)
+    {
+        Interpolater* mapper_icomp = mapper_comp[icomp];
+
+        if (!mapper_icomp)
+            mapper_icomp = (Interpolater *) default_map;
+
+        if (maps[imap] != mapper_icomp)
+        {
+            imap++;
+
+            BL_ASSERT (imap < nmaps);
+
+            maps[imap]           = mapper_icomp;
+            map_start_comp[imap] = icomp;
+            map_num_comp[imap]   = 1;
+            min_end_comp[imap]   = min_map_end_comp[icomp];
+            max_start_comp[imap] = max_map_start_comp[icomp];
+
+        }
+        else
+        {
+            map_num_comp[imap]++;
+            min_end_comp[imap]   = std::max(min_end_comp[imap],min_map_end_comp[icomp]);
+            max_start_comp[imap] = std::min(max_start_comp[imap],max_map_start_comp[icomp]);
+        }
+        icomp++;
+    }
+}
+
+void
+StateDescriptor::cleanUpMaps (Interpolater**& maps, 
+                              int*&           map_start_comp,
+                              int*&           map_num_comp,
+                              int*&           max_start_comp,
+                              int*&           min_end_comp) const
+{
+    delete [] maps;
+    delete [] map_start_comp;
+    delete [] map_num_comp;
+    delete [] max_start_comp;
+    delete [] min_end_comp;
+}
+
+bool
+StateDescriptor::identicalInterps (int scomp,
+                                   int ncomp) const
+{
+    BL_ASSERT(scomp >= 0);
+    BL_ASSERT(ncomp >= 1);
+
+    Interpolater* map = interp(scomp);
+
+    for (int i = scomp+1; i < scomp+ncomp; i++)
+        if (!(map == interp(i)))
+            return false;
+
+    return true;
+}
+
+std::vector< std::pair<int,int> >
+StateDescriptor::sameInterps (int scomp,
+                              int ncomp) const
+{
+    BL_ASSERT(scomp >= 0);
+    BL_ASSERT(ncomp >= 1);
+
+    std::vector< std::pair<int,int> > range;
+
+    Interpolater* map = interp(scomp);
+
+    int SComp = scomp, NComp = 1;
+
+    for (int i = scomp+1; i < scomp+ncomp; i++)
+    {
+        if (map == interp(i))
+        {
+            NComp++;
+        }
+        else
+        {
+            range.push_back(std::pair<int,int>(SComp,NComp));
+
+            map   = interp(i);
+            SComp = i;
+            NComp = 1;
+        }
+    }
+
+    range.push_back(std::pair<int,int>(SComp,NComp));
+
+#ifndef NDEBUG
+    int sum = 0;
+    for (int i = 0; i < range.size(); i++)
+        sum += range[i].second;
+    BL_ASSERT(sum == ncomp);
+#endif
+
+    return range;
+}

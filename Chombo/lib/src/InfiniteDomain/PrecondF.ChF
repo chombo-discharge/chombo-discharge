@@ -1,0 +1,29 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+!=======================================================
+!     subroutine PRECONDRHS
+!     Replace rhs at interior points of its domain by
+!     rhs + (h^2/12) * L_h(rhs)
+!     where L_h is the 7-point discrete laplacian.
+!
+!     => inputs, <= outputs
+!     rhs     <=> right-hand side, modified in interior
+!     bx       => NODE-centered interior of box holding rhs
+!
+!     petermc, 27 Aug 2004
+      subroutine PRECOND(
+     &     CHF_FRA1[rhs],
+     &     CHF_BOX[bx])
+
+      call precondrhs(rhs,
+     &     CHF_LBOUND[bx; 0], CHF_LBOUND[bx; 1], CHF_LBOUND[bx; 2],
+     &     CHF_UBOUND[bx; 0], CHF_UBOUND[bx; 1], CHF_UBOUND[bx; 2])
+
+      return
+      end

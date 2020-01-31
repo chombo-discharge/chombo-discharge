@@ -1,0 +1,8 @@
+infile  = in.2d.H5
+
+outfile = out.2d.hdf5
+
+num_levels = 3
+
+lo_end =  6  4  0
+hi_end = 13 11 15

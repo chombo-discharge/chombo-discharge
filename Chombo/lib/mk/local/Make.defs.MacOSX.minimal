@@ -1,0 +1,16 @@
+MPI=TRUE
+DIM=2
+# for lapack and diagnostics, etc. (required)
+USE_PETSC=TRUE
+MPICXX        = /Users/markadams/homebrew/bin/mpicxx -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -g -O0   -fPIC 
+#CXX           = /Users/markadams/homebrew/bin/mpicxx -Wall -Wwrite-strings -Wno-strict-aliasing -Wno-unknown-pragmas -g -O0   -fPIC 
+FC            = /Users/markadams/homebrew/bin/mpif90 -fPIC -Wall -Wno-unused-variable -ffree-line-length-0 -Wno-unused-dummy-argument
+USE_HDF       = TRUE
+HDFINCFLAGS   = -I${HDF5_DIR}/include 
+HDFLIBFLAGS   = -L${HDF5_DIR}/lib -lhdf5 -lhdf5_hl -lz
+HDFMPIINCFLAGS   = -I${HDF5_DIR}/include 
+HDFMPILIBFLAGS   = -L${HDF5_DIR}/lib -lhdf5 -lhdf5_hl -lz
+#USE_MT        = TRUE
+#lddbgflags    =  -L/opt/local/lib/
+#ldoptflags    =  -L/opt/local/lib/
+

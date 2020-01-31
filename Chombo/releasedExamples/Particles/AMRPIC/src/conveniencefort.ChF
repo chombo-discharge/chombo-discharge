@@ -1,0 +1,24 @@
+
+
+        subroutine INTERPOLATEINTIME(
+     &    CHF_FRA[phi],
+     &    CHF_CONST_FRA[phiNew],
+     &    CHF_CONST_FRA[phiOld],
+     &    CHF_CONST_REAL[alpha],
+     &    CHF_CONST_INT[srcComp],
+     &    CHF_CONST_INT[dstComp],
+     &    CHF_CONST_INT[sizeComp],
+     &    CHF_BOX[box])
+
+        integer ic,id,is, CHF_DDECL[i;j;k]
+
+      do ic = 0,sizeComp-1
+        id = ic+dstComp
+        is = ic+srcComp
+        CHF_MULTIDO[box;i;j;k]
+          phi(CHF_IX[i;j;k],id) =    alpha   *phiNew(CHF_IX[i;j;k],is)+
+     &                            (one-alpha)*phiOld(CHF_IX[i;j;k],is)
+        CHF_ENDDO
+      enddo
+        return
+        end

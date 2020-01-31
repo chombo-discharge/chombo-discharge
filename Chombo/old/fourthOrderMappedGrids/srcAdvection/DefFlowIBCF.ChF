@@ -1,0 +1,38 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "REAL.H"
+#include "CONSTANTS.H"
+
+      subroutine veclatlondefflow(
+!
+!     => inputs,  <= outputs
+!     vecRLL <= vector field in longitude-latitude basis
+!     ptRLL  => longitude-latitude points
+!     kappa  => factor
+!     time   => time
+!     period => period
+     &     CHF_FRA[vecRLL],
+     &     CHF_CONST_FRA[ptRLL],
+     &     CHF_CONST_REAL[kappa],
+     &     CHF_CONST_REAL[time],
+     &     CHF_CONST_REAL[period])
+
+      integer CHF_AUTODECL[i]
+      real_t lon, lat
+
+      CHF_AUTOMULTIDO[vecRLL; i]
+      lon = ptRLL(CHF_AUTOIX[i], 0) - two*Pi*time/period
+      lat = ptRLL(CHF_AUTOIX[i], 1)
+      vecRLL(CHF_AUTOIX[i], 0) =
+     &     kappa * sin(lon)*sin(lon)*sin(two*lat)*cos(Pi*time/period)
+     &     + two*Pi*cos(lat) / period
+      vecRLL(CHF_AUTOIX[i], 1) =
+     &     kappa * sin(two*lon)*cos(lat)*cos(Pi*time/period)
+      CHF_ENDDO
+
+      return
+      end

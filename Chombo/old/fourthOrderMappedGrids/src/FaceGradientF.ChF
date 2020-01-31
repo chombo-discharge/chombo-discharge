@@ -1,0 +1,241 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+c ----------------------------------------------------------------------
+c  Simple gradients in a tangential direction
+c ----------------------------------------------------------------------
+
+      subroutine tangradface(CHF_FRA1[gradPhi],
+     &                       CHF_CONST_FRA1[phi],
+     &                       CHF_BOX[gradBox],
+     &                       CHF_INT[gradDir],
+     &                       CHF_CONST_REAL[dx])
+
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+      REAL_T halfOnDx
+
+      halfOnDx = half/dx
+
+      CHF_AUTOID[ii; gradDir]
+      CHF_AUTOMULTIDO[gradBox; i]
+         gradPhi(CHF_AUTOIX[i]) = halfOnDx *
+     &     ( phi(CHF_OFFSETIX[i;+ii]) - phi(CHF_OFFSETIX[i;-ii]) )
+      CHF_ENDDO
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Compute the tangential gradients of 'phi'
+c  Phi is is considered to be a flux dyad and it may be stored
+c  as (var, space) or (space, var).  The latter is indicated
+c  by having spaceStride == 1.  The variables considered
+c  range from varStart to varNum-1.  The output is always placed
+c  starting from 0 in the Fortran order (tanDir, space, var)
+c
+c  INPUTS/OUTPUTS:
+c  gradphi     <=  Output of gradients
+c  phi          => Quantity to differentiate.  Phi is treated
+c                  as a flux dyad.
+c  varStart     => Index of first variable in the flux dyad
+c  varNum       => Number of variables to consider in the flux
+c                  dyad
+c  spaceStride  => The stride of the space component in
+c                  phi.  Describes how the dyad is stored in
+c                  memory
+c  NNum         => Number of components to multiply
+c                  between F & N.  This can be thought of as
+c                  describing the space dimensions and for most
+c                  calculations, this is == SpaceDim.
+c  gradBox      => The box on which the gradient is computed
+c  tanDirs      => List of tangential directions on which to
+c                  compute the gradients
+c  dx           => Cell spacing
+c ----------------------------------------------------------------------
+
+      subroutine gradFaceTanDirs(CHF_FRA[gradPhi],
+     &                           CHF_CONST_FRA[phi],
+     &                           CHF_CONST_INT[varStart],
+     &                           CHF_CONST_INT[varNum],
+     &                           CHF_CONST_INT[spaceStride],
+     &                           CHF_CONST_INT[NNum],
+     &                           CHF_BOX[gradBox],
+     &                           CHF_I1D[tanDirs],
+     &                           CHF_CONST_REAL[dx])
+
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+      real_t factor
+c     To loop over solution variables
+      integer iVar
+c     To loop over space directions (in the flux dyad)
+      integer iSpace
+c     Index into component of phi
+      integer iCompPhi
+c     Index into component of gradPhi
+      integer iCompGradPhi
+c     Maximum index into tanDirs (SpaceDim-2 for faces)
+      integer maxTanDirs
+c     The index into tanDirs
+      integer iTanDir
+c     And the tangential direction given by tanDirs[iTanDir]
+      integer tanDir
+
+      factor = half/dx
+      maxTanDirs = CHF_UBOUND[tanDirs]
+
+c     iCompGradPhi is incremented sequentially since all results are
+c     stored in the order
+      iCompGradPhi = 0
+      do iVar = varStart, varStart + varNum - 1
+c        Get the start location of variable iVar in space
+         iCompPhi = iVar
+         if (spaceStride .eq. 1) then
+            iCompPhi = iCompPhi*CH_SPACEDIM
+         endif
+c        Loop over space directions in phi
+         do iSpace = 0, NNum - 1
+c           Now for variable iCompPhi, loop over tangential directions
+            do iTanDir = 0, maxTanDirs
+               tanDir = tanDirs(iTanDir)
+               CHF_AUTOID[ii; tanDir]
+               CHF_AUTOMULTIDO[gradBox; i]
+                  gradPhi(CHF_AUTOIX[i], iCompGradPhi) = factor*(
+     &               phi(CHF_OFFSETIX[i;+ii], iCompPhi) -
+     &               phi(CHF_OFFSETIX[i;-ii], iCompPhi))
+               CHF_ENDDO
+c              We move sequentially through gradPhi
+               iCompGradPhi = iCompGradPhi + 1
+            enddo
+c           And by spaceStride through phi
+            iCompPhi = iCompPhi + spaceStride
+         enddo
+      enddo
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Compute the tangential gradients of 'phi' in a direciton
+c  Phi is is considered to be a flux dyad and it may be stored
+c  as (var, space) or (space, var).  The latter is indicated
+c  by having spaceStride == 1.  The variables considered
+c  range from varStart to varNum-1.  The output is always placed
+c  starting from 0 in the Fortran order (tanDir, space, var)
+c
+c  Unlike the previous routine, this one only works on a single
+c  tangential directions but it can use one-sided differences at
+c  the lo and hi boundaries.
+c
+c  INPUTS/OUTPUTS:
+c  gradphi     <=  Output of gradients
+c  phi          => Quantity to differentiate.  Phi is treated
+c                  as a flux dyad.
+c  varStart     => Index of first variable in the flux dyad
+c  varNum       => Number of variables to consider in the flux
+c                  dyad
+c  spaceStride  => The stride of the space component in
+c                  phi.  Describes how the dyad is stored in
+c                  memory
+c  NNum         => Number of components to multiply
+c                  between F & N.  This can be thought of as
+c                  describing the space dimensions and for most
+c                  calculations, this is == SpaceDim.
+c  gradBoxLo    => The lo box on which the gradient is computed
+c                  by one-sided differences
+c  hasLo        => 1 - The lo box exists
+c  gradBoxHi    => The hi box on which the gradient is computed
+c                  by one-sided differences
+c  hasLo        => 1 - The hi box exists
+c  gradBoxCen   => The box on which the gradient is computed by
+c                  centered differences
+c  iTanDir      => Sequential index of the tangential direction
+c  tanDir       => A single tangential directions on which to
+c                  compute the gradients
+c  dx           => Cell spacing
+c ----------------------------------------------------------------------
+
+      subroutine gradFaceTanDir(CHF_FRA[gradPhi],
+     &                          CHF_CONST_FRA[phi],
+     &                          CHF_CONST_INT[varStart],
+     &                          CHF_CONST_INT[varNum],
+     &                          CHF_CONST_INT[spaceStride],
+     &                          CHF_CONST_INT[NNum],
+     &                          CHF_BOX[gradBoxLo],
+     &                          CHF_CONST_INT[hasLo],
+     &                          CHF_BOX[gradBoxHi],
+     &                          CHF_CONST_INT[hasHi],
+     &                          CHF_BOX[gradBoxCen],
+     &                          CHF_CONST_INT[iTanDir],
+     &                          CHF_CONST_INT[tanDir],
+     &                          CHF_CONST_REAL[dx])
+
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+      real_t factor
+c     To loop over solution variables
+      integer iVar
+c     To loop over space directions (in the flux dyad)
+      integer iSpace
+c     Index into component of phi
+      integer iCompPhi
+c     Index into component of gradPhi
+      integer iCompGradPhi
+c     Number of tangential directions
+      integer numTanDirs
+
+      parameter (numTanDirs = CH_SPACEDIM - 1)
+
+      factor = half/dx
+
+      do iVar = varStart, varStart + varNum - 1
+c        Get the start location of variable iVar in space
+         iCompPhi = iVar
+         if (spaceStride .eq. 1) then
+            iCompPhi = iCompPhi*CH_SPACEDIM
+         endif
+c        Loop over space directions in phi
+         do iSpace = 0, NNum - 1
+c           Set iCompGradPhi to the right location (see previous
+c           routine for understanding)
+            iCompGradPhi = (iVar*NNum + iSpace)*numTanDirs + iTanDir
+            CHF_AUTOID[ii; tanDir]
+
+c           One-sided gradients on the low side
+            if (hasLo .eq. 1) then
+               CHF_AUTOMULTIDO[gradBoxLo; i]
+                  gradPhi(CHF_AUTOIX[i], iCompGradPhi) = factor*(
+     &               -3*phi(CHF_AUTOIX[i], iCompPhi) +
+     &                4*phi(CHF_OFFSETIX[i;+ii], iCompPhi) -
+     &                  phi(CHF_OFFSETIX[i;+2*ii], iCompPhi))
+               CHF_ENDDO
+            endif
+
+c           One-sided gradients on the hi side
+            if (hasHi .eq. 1) then
+               CHF_AUTOMULTIDO[gradBoxHi; i]
+                  gradPhi(CHF_AUTOIX[i], iCompGradPhi) = factor*(
+     &               3*phi(CHF_AUTOIX[i], iCompPhi) -
+     &               4*phi(CHF_OFFSETIX[i;-ii], iCompPhi) +
+     &                 phi(CHF_OFFSETIX[i;-2*ii], iCompPhi))
+               CHF_ENDDO
+            endif
+
+c           Centered gradients
+            CHF_AUTOMULTIDO[gradBoxCen; i]
+               gradPhi(CHF_AUTOIX[i], iCompGradPhi) = factor*(
+     &            phi(CHF_OFFSETIX[i;+ii], iCompPhi) -
+     &            phi(CHF_OFFSETIX[i;-ii], iCompPhi))
+            CHF_ENDDO
+
+c           And by spaceStride through phi
+            iCompPhi = iCompPhi + spaceStride
+         enddo
+      enddo
+
+      return
+      end

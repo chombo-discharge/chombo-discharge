@@ -1,0 +1,85 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine cylindersetf(
+     &     CHF_CONST_REALVECT[aucenter],
+     &     CHF_CONST_REALVECT[aureclen],
+     &     CHF_CONST_REAL[auradius])
+
+#include "CylinderCommon.fh"
+      integer iblock
+
+      CHF_DTERM[
+      centerx = aucenter(0);
+      centery = aucenter(1);
+      centerz = aucenter(2)]
+
+      CHF_DTERM[
+      reclenx = aureclen(0);
+      recleny = aureclen(1);
+      reclenz = aureclen(2)]
+
+      radius = auradius
+
+!     block CENTRAL = 0
+      CHF_DTERM[
+      maplox(0) = zero ;
+      maploy(0) = zero ;
+      maploz(0) = zero ]
+
+!     block XPOS = 1
+      CHF_DTERM[
+      maplox(1) = two ;
+      maploy(1) = zero ;
+      maploz(1) = zero ]
+
+!     block YPOS = 2
+      CHF_DTERM[
+      maplox(2) = zero ;
+      maploy(2) = two ;
+      maploz(2) = zero ]
+
+!     block XNEG = 3
+      CHF_DTERM[
+      maplox(3) = -two ;
+      maploy(3) = zero ;
+      maploz(3) = zero ]
+
+!     block YNEG = 4
+      CHF_DTERM[
+      maplox(4) = zero ;
+      maploy(4) = -two ;
+      maploz(4) = zero ]
+
+      do iblock = 0, 4
+         if ( (iblock .eq. 1) .or. (iblock .eq. 3) ) then
+            indb(iblock) = 0
+            inda(iblock) = 1
+         else if ( (iblock .eq. 2) .or. (iblock .eq. 4) ) then
+            indb(iblock) = 1
+            inda(iblock) = 0
+         endif
+
+         CHF_DTERM[
+         if ( (iblock .eq. 2) .or. (iblock .eq. 3) ) then
+            sgncrx(iblock) = -1
+         else
+            sgncrx(iblock) = 1
+         endif
+         ;
+         if ( (iblock .eq. 3) .or. (iblock .eq. 4) ) then
+            sgncry(iblock) = -1
+         else
+            sgncry(iblock) = 1
+         endif
+         ;
+         sgncrz(iblock) = 1 ]
+      enddo
+
+      return
+      end

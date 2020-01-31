@@ -1,0 +1,669 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+c ----------------------------------------------------------------------
+c  Rewrite of a Fab so that the components are contiguous in memory.
+c
+c  phiC       <=  Phi with components contiguous in memory
+c  phi         => Original FAB
+c  box         => Box of indices to rewrite
+c  idxPhiCBeg  => Start of component index in phiC
+c  idxPhiBeg   => Start of component index in phi
+c  numComp     => Number of components to rewrite
+c ----------------------------------------------------------------------
+
+      subroutine reverseFABComponentStride(
+     &   CHF_RCHARRAY[RANK_SPACEDIM_PLUS_1, phiC],
+     &   CHF_CONST_FRA[phi],
+     &   CHF_BOX[box],
+     &   CHF_CONST_INT[idxPhiCBeg],
+     &   CHF_CONST_INT[idxPhiBeg],
+     &   CHF_CONST_INT[numComp])
+
+      integer iComp
+      integer CHF_AUTODECL[i]
+
+      CHF_AUTOMULTIDO[box;i]
+         do iComp = 0, numComp-1
+            phiC(idxPhiCBeg+iComp, CHF_AUTOIX[i]) =
+     &         phi(CHF_AUTOIX[i], idxPhiBeg+iComp)
+         enddo
+      CHF_ENDDO
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Find the physical length corresponding to the distance between two
+c  cells in computational space.  Store on the faces between the cells
+c ----------------------------------------------------------------------
+
+      subroutine physicalCellSpacingOnFace(
+     &   CHF_FRA1[dx],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, Nctg],
+     &   CHF_CONST_FRA1[J],
+     &   CHF_BOX[loFaceBox],
+     &   CHF_CONST_INT[hasLo],
+     &   CHF_BOX[hiFaceBox],
+     &   CHF_CONST_INT[hasHi],
+     &   CHF_BOX[centerFaceBox],
+     &   CHF_CONST_INT[dir],
+     &   CHF_CONST_REAL[dxi])
+
+      integer idxNDir
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+
+      real_t Jface
+
+      idxNDir = dir*CH_SPACEDIM
+      CHF_AUTOID[ii; dir]
+
+c     Low side box
+      if (hasLo .eq. 1) then
+         CHF_AUTOMULTIDO[loFaceBox;i]
+            dx(CHF_AUTOIX[i]) = dxi*J(CHF_AUTOIX[i])/magN()
+         CHF_ENDDO
+      endif
+
+c     Center face box
+      CHF_AUTOMULTIDO[centerFaceBox;i]
+         Jface = half*(J(CHF_OFFSETIX[i;-ii]) + J(CHF_AUTOIX[i]))
+         dx(CHF_AUTOIX[i]) = dxi*Jface/magN()
+      CHF_ENDDO
+
+c     High side box
+      if (hasHi .eq. 1) then
+         CHF_AUTOMULTIDO[hiFaceBox;i]
+            dx(CHF_AUTOIX[i]) = dxi*J(CHF_OFFSETIX[i;-ii])/magN()
+         CHF_ENDDO
+      endif
+
+      return
+
+c- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+      contains
+
+c-----Magnitude of a row of N^T
+
+         function magN()
+         real_t magN
+         magN = sqrt(CHF_DTERM[  Nctg(idxNDir  , CHF_AUTOIX[i])**2;
+     &                         + Nctg(idxNDir+1, CHF_AUTOIX[i])**2;
+     &                         + Nctg(idxNDir+2, CHF_AUTOIX[i])**2;
+     &                         + Nctg(idxNDir+3, CHF_AUTOIX[i])**2;
+     &                         + Nctg(idxNDir+4, CHF_AUTOIX[i])**2;
+     &                         + Nctg(idxNDir+5, CHF_AUTOIX[i])**2])
+         end function
+
+      end
+
+c ----------------------------------------------------------------------
+c  Find the divergence of the velocity on a mapped grid
+c
+c  divVel       <=  Divergence of the velocity on a face
+c  Nctg          => Metric terms on the faces (direction 'dir'), stored
+c                   with components contiguous.  A row of N^T is
+c                   contiguous.
+c  gradVel       => Gradient of velocity in the cells, stored as
+c                   (velocity component, gradient direction) using
+c                   Fortran ordering.  The components are contiguous.
+c  vel           => Velocity in the cells
+c  J             => Metrics Jacobian in the cells
+c  loFaceBox     => Layer of faces on the lower domain boundary in
+c                   direction 'dir'
+c  hasLo         => 1 loFaceBox exists, 0 doesn't exist
+c  hiCellBox     => Layer of faces on the upper domain boundary in
+c                   direction 'dir'
+c  hasHi         => 1 hiCellBox exists, 0 doesn't exist
+c  centerFaceBox => Faces in direction 'dir' that are no on the domain
+c                   boundary
+c  dir           => Direction of faces to consider
+c  dxi        => Computational mesh spacing
+c
+c  Note:
+c    - gradVel must have O(h^2) centered differences where possible
+c      and O(h) one-sided differences at domain boundaries.
+c ----------------------------------------------------------------------
+
+      subroutine mappedDivVel(
+     &   CHF_FRA1[divVel],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, Nctg],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, gradVel],
+     &   CHF_CONST_FRA[vel],
+     &   CHF_CONST_FRA1[J],
+     &   CHF_BOX[loFaceBox],
+     &   CHF_CONST_INT[hasLo],
+     &   CHF_BOX[hiFaceBox],
+     &   CHF_CONST_INT[hasHi],
+     &   CHF_BOX[centerFaceBox],
+     &   CHF_CONST_INT[dir],
+     &   CHF_CONST_REAL[dxi])
+
+      integer gradDir, velComp, idxGradDirDyad
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+
+      real_t factor, temp
+c     The gradient in a single direction of all velocity components on a face
+      real_t gradVelDirFace(0:CH_SPACEDIM-1)
+
+      CHF_AUTOID[ii; dir]
+
+c-----Compute N*Gradient(Velocity)
+
+      factor = one/dxi
+
+c     Low side box
+      if (hasLo .eq. 1) then
+         CHF_AUTOMULTIDO[loFaceBox;i]
+            temp = zero
+c           Implies zeroth-order extrapolation for d(vel)/d(dir)
+            call NgradVelAllDir(Nctg(0, CHF_AUTOIX[i]),
+     &                          gradVel(0, CHF_AUTOIX[i]))
+            divVel(CHF_AUTOIX[i]) = temp/J(CHF_AUTOIX[i])
+         CHF_ENDDO
+      endif
+
+c     Center face box
+      CHF_AUTOMULTIDO[centerFaceBox;i]
+         temp = zero
+         do gradDir = 0, CH_SPACEDIM-1
+c           Get the index into gradVel for this gradient direction
+            idxGradDirDyad = gradDir*CH_SPACEDIM
+            if (gradDir .eq. dir) then
+               do velComp = 0, CH_SPACEDIM-1
+                  gradVelDirFace(velComp) = factor*
+     &               (vel(CHF_AUTOIX[i], velComp) -
+     &                vel(CHF_OFFSETIX[i;-ii], velComp))
+               enddo
+            else
+               do velComp = 0, CH_SPACEDIM-1
+                  gradVelDirFace(velComp) = half*
+     &               (gradVel(idxGradDirDyad + velComp,
+     &                        CHF_OFFSETIX[i;-ii]) +
+     &                gradVel(idxGradDirDyad + velComp, CHF_AUTOIX[i]))
+               enddo
+            endif
+            call NgradVelDir(Nctg(gradDir*CH_SPACEDIM, CHF_AUTOIX[i]))
+         enddo
+         divVel(CHF_AUTOIX[i]) = two*temp/
+     &      (J(CHF_OFFSETIX[i;-ii]) +  J(CHF_AUTOIX[i]))
+      CHF_ENDDO
+
+c     High side box
+      if (hasHi .eq. 1) then
+         CHF_AUTOMULTIDO[hiFaceBox;i]
+            temp = zero
+c           Implies zeroth-order extrapolation for d(vel)/d(dir)
+            call NgradVelAllDir(Nctg(0, CHF_AUTOIX[i]),
+     &                          gradVel(0, CHF_OFFSETIX[i;-ii]))
+            divVel(CHF_AUTOIX[i]) = temp/J(CHF_OFFSETIX[i;-ii])
+         CHF_ENDDO
+      endif
+
+      return
+
+c- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+      contains
+
+c-----Multiplication of a row of (N^T) times d(vel)/dxi.
+
+         subroutine NgradVelDir(NTrow)  ! NO_CHF
+            real_t NTrow(0:CH_SPACEDIM-1)
+            temp = temp + CHF_DTERM[
+     &           NTrow(0)*gradVelDirFace(0);
+     &         + NTrow(1)*gradVelDirFace(1);
+     &         + NTrow(2)*gradVelDirFace(2);
+     &         + NTrow(3)*gradVelDirFace(3);
+     &         + NTrow(4)*gradVelDirFace(4);
+     &         + NTrow(5)*gradVelDirFace(5)]
+         end subroutine
+
+c-----Multiplication of a row of (N^T) times d(vel)/dxi.  Results for all
+c-----gradient directions are summed
+
+         subroutine NgradVelAllDir(NFace, gradVelFaceAll)  ! NO_CHF
+            integer iRow
+
+            real_t NFace(0:CH_SPACEDIM-1, 0:CH_SPACEDIM-1)
+            real_t gradVelFaceAll(0:CH_SPACEDIM, 0:CH_SPACEDIM-1)
+
+            do iRow = 0, CH_SPACEDIM-1
+               temp = temp + CHF_DTERM[
+     &              NFace(0,iRow)*gradVelFaceAll(0,iRow);
+     &            + NFace(1,iRow)*gradVelFaceAll(1,iRow);
+     &            + NFace(2,iRow)*gradVelFaceAll(2,iRow);
+     &            + NFace(3,iRow)*gradVelFaceAll(3,iRow);
+     &            + NFace(4,iRow)*gradVelFaceAll(4,iRow);
+     &            + NFace(5,iRow)*gradVelFaceAll(5,iRow)]
+            enddo
+         end subroutine
+
+      end
+
+c ----------------------------------------------------------------------
+c  Compute gradients of the phi in a given direction in the cells.  The
+c  gradients are determined using centered differences, O(h^2), or one-
+c  sided differences, O(h), at domain boundaries.
+c
+c  gradPhi   <=  Gradients of velocity in the chosen direction
+c                (components of phi are stored contigouously for this
+c                gradient direction)
+c  phi        => Velocity in physical space at the cell centers
+c  loBox      => Layer of cells at lower 'dir' direction domain boundary
+c  hasLo      => 1 loBox exists, 0 doesn't exist
+c  hiBox      => Layer of cells at upper 'dir' direction domain boundary
+c  hasHi      => 1 hiBox exists, 0 doesn't exist
+c  centerBox  => Everywhere a centered difference can be used to compute
+c                gradients
+c  dir        => Direction
+c  numPhiComp => Number of components of phi
+c  idxDPhiBeg => Start of component index for storing gradient in
+c                gradPhi
+c  idxDPhiStr => Stride through the components
+c  dxi        => Computational mesh spacing
+c ----------------------------------------------------------------------
+
+      subroutine cellGradDir(
+     &   CHF_RCHARRAY[RANK_SPACEDIM_PLUS_1, gradPhi],
+     &   CHF_CONST_FRA[phi],
+     &   CHF_BOX[loBox],
+     &   CHF_CONST_INT[hasLo],
+     &   CHF_BOX[hiBox],
+     &   CHF_CONST_INT[hasHi],
+     &   CHF_BOX[centerBox],
+     &   CHF_CONST_INT[dir],
+     &   CHF_CONST_INT[numPhiComp],
+     &   CHF_CONST_INT[idxDPhiBeg],
+     &   CHF_CONST_INT[idxDPhiStr],
+     &   CHF_CONST_REAL[dxi])
+
+      integer idxGradPhi, iComp
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+
+      real_t factorSide, factorCen
+
+      CHF_AUTOID[ii; dir]
+      factorSide = one/dxi
+      factorCen  = half/dxi
+
+      idxGradPhi = idxDPhiBeg
+      do iComp = 0, numPhiComp-1
+c        Low side box
+         if (hasLo .eq. 1) then
+            CHF_AUTOMULTIDO[loBox;i]
+               gradPhi(idxGradPhi, CHF_AUTOIX[i]) = factorSide*
+     &            (phi(CHF_OFFSETIX[i;+ii], iComp) -
+     &             phi(CHF_AUTOIX[i], iComp))
+            CHF_ENDDO
+         endif
+
+c        Center box
+         CHF_AUTOMULTIDO[centerBox;i]
+            gradPhi(idxGradPhi, CHF_AUTOIX[i]) = factorCen*
+     &         (phi(CHF_OFFSETIX[i;+ii], iComp) -
+     &          phi(CHF_OFFSETIX[i;-ii], iComp))
+         CHF_ENDDO
+
+c        High side box
+         if (hasHi .eq. 1) then
+            CHF_AUTOMULTIDO[hiBox;i]
+               gradPhi(idxGradPhi, CHF_AUTOIX[i]) = factorSide*
+     &            (phi(CHF_AUTOIX[i], iComp) -
+     &             phi(CHF_OFFSETIX[i;-ii], iComp))
+            CHF_ENDDO
+         endif
+         idxGradPhi = idxGradPhi + idxDPhiStr
+      enddo
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Compute artificial viscosity flux on a face in computational space
+c  for mapped grids.
+c
+c  NtF          <=  Flux due to artificial viscosity on the face
+c  Nctg          => Metric terms on the faces (direction 'dir'), stored
+c                   with components contiguous.  A row of N^T is
+c                   contiguous.
+c  gradU         => Gradient of conserved variables in the cells, stored
+c                   as (gradient direction, conserved variable) using
+c                   Fortran ordering.  The components are contiguous.
+c  U             => Conservative state in the cells
+c  divVel        => Divergence of the velocity on the faces
+c  c             => Sound speed in the cells
+c  J             => Metrics Jacobian in the cells
+c  dx            => Approx. physical space distance between cell
+c                   centers in direction 'dir', stored on faces.
+c  alpha         => Art. Visc. coefficient
+c  beta          => Art. Visc. coefficient
+c  loFaceBox     => Layer of faces on the lower domain boundary in
+c                   direction 'dir'
+c  hasLo         => 1 loFaceBox exists, 0 doesn't exist
+c  hiCellBox     => Layer of faces on the upper domain boundary in
+c                   direction 'dir'
+c  hasHi         => 1 hiCellBox exists, 0 doesn't exist
+c  centerFaceBox => Faces in direction 'dir' that are no on the domain
+c                   boundary
+c  dir           => Direction of faces to consider
+c  dxi           => Computational mesh spacing
+c ----------------------------------------------------------------------
+
+      subroutine mappedArtVisc(
+     &   CHF_FRA[NtF],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, Nctg],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, gradU],
+     &   CHF_CONST_FRA[U],
+     &   CHF_CONST_FRA1[divVel],
+     &   CHF_CONST_FRA1[c],
+     &   CHF_CONST_FRA1[J],
+     &   CHF_CONST_FRA1[dx],
+     &   CHF_CONST_REAL[alpha],
+     &   CHF_CONST_REAL[beta],
+     &   CHF_BOX[loFaceBox],
+     &   CHF_CONST_INT[hasLo],
+     &   CHF_BOX[hiFaceBox],
+     &   CHF_CONST_INT[hasHi],
+     &   CHF_BOX[centerFaceBox],
+     &   CHF_CONST_INT[dir],
+     &   CHF_CONST_REAL[dxi])
+
+      integer iComp, numComp, gradDir, idxCompDyad, idxNDir
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+
+      real_t faceDivVel, minc, Jface, dxFace, artViscCoef, factor
+      real_t gradUFace(0:CH_SPACEDIM-1)
+      real_t NgradU(0:CH_SPACEDIM-1)
+
+      CHF_AUTOID[ii; dir]
+      factor = one/dxi
+      idxNDir = dir*CH_SPACEDIM
+      numComp = CHF_NCOMP[NtF]
+
+c-----Compute <N^T>alpha nu<N><Grad(U)> for row 'dir' of N^T
+
+c     Low side face box
+      if (hasLo .eq. 1) then
+         CHF_AUTOMULTIDO[loFaceBox;i]
+c           Compute parameters for nu on the face
+            faceDivVel = divVel(CHF_AUTOIX[i])
+            if (faceDivVel < zero) then
+               minc = c(CHF_AUTOIX[i])
+c              Compute J on the face
+               Jface = J(CHF_AUTOIX[i])
+c              Representative dx for the face
+               dxFace = dx(CHF_AUTOIX[i])
+c              Compute coefficient from scalars
+               artViscCoef = alpha*nuFace()/Jface
+               do iComp = 0, numComp-1
+                  idxCompDyad = iComp*CH_SPACEDIM
+c                 Implies zeroth-order extrapolation for gradU
+                  call gemtvC(Nctg(0, CHF_AUTOIX[i]),
+     &                        gradU(idxCompDyad, CHF_AUTOIX[i]))
+c                 Multiply by a row of N^T for this direction and alpha*nu/J to
+c                 get the flux
+                  NtF(CHF_AUTOIX[i], iComp) = artViscCoef*dxFace*
+     &               gevvC(Nctg(idxNDir, CHF_AUTOIX[i]))
+               enddo
+            else
+               do iComp = 0, numComp-1
+                  NtF(CHF_AUTOIX[i], iComp) = zero
+               enddo
+            endif
+         CHF_ENDDO
+      endif
+
+c     Center face box
+      CHF_AUTOMULTIDO[centerFaceBox;i]
+c        Compute parameters for nu on the face
+         faceDivVel = divVel(CHF_AUTOIX[i])
+         if (faceDivVel < zero) then
+            minc = min(c(CHF_OFFSETIX[i;-ii]), c(CHF_AUTOIX[i]))
+c           Compute J on the face
+            Jface = half*(J(CHF_OFFSETIX[i;-ii]) + J(CHF_AUTOIX[i]))
+c           Representative dx for the face
+            dxFace = dx(CHF_AUTOIX[i])
+c           Compute coefficient from scalars
+            artViscCoef = alpha*nuFace()/Jface
+            do iComp = 0, numComp-1
+               idxCompDyad = iComp*CH_SPACEDIM
+c              Need gradU on the face
+c              Generally an average of adjacent cell values
+               do gradDir = 0, CH_SPACEDIM-1
+                  gradUFace(gradDir) = half*
+     &               (gradU(idxCompDyad+gradDir, CHF_OFFSETIX[i;-ii]) +
+     &                gradU(idxCompDyad+gradDir, CHF_AUTOIX[i]));
+               enddo
+c              But overwrite in face direction with O(h) difference
+               gradUFace(dir) = factor*
+     &            (U(CHF_AUTOIX[i], iComp) -
+     &             U(CHF_OFFSETIX[i;-ii], iComp))
+               call gemtvC(Nctg(0, CHF_AUTOIX[i]), gradUFace)
+c              Multiply by a row of N^T for this direction and alpha*nu/J to
+c              get the flux
+               NtF(CHF_AUTOIX[i], iComp) = artViscCoef*dxFace*
+     &            gevvC(Nctg(idxNDir, CHF_AUTOIX[i]))
+            enddo
+         else
+            do iComp = 0, numComp-1
+               NtF(CHF_AUTOIX[i], iComp) = zero
+            enddo
+         endif
+      CHF_ENDDO
+
+c     High side face box
+      if (hasHi .eq. 1) then
+         CHF_AUTOMULTIDO[hiFaceBox;i]
+c           Compute parameters for nu on the face
+            faceDivVel = divVel(CHF_AUTOIX[i])
+            if (faceDivVel < zero) then
+               minc = c(CHF_OFFSETIX[i;-ii])
+c              Compute J on the face
+               Jface = J(CHF_OFFSETIX[i;-ii])
+c              Representative dx for the face
+               dxFace = dx(CHF_AUTOIX[i])
+c              Compute coefficient from scalars
+               artViscCoef = alpha*nuFace()/Jface
+               do iComp = 0, numComp-1
+                  idxCompDyad = iComp*CH_SPACEDIM
+c                 Implies zeroth-order extrapolation for gradU
+                  call gemtvC(Nctg(0, CHF_AUTOIX[i]),
+     &                        gradU(idxCompDyad, CHF_OFFSETIX[i;-ii]))
+c                 Multiply by a row of N^T for this direction and alpha*nu/J to
+c                 get the flux
+                  NtF(CHF_AUTOIX[i], iComp) = artViscCoef*dxFace*
+     &               gevvc(Nctg(idxNDir, CHF_AUTOIX[i]))
+               enddo
+            else
+               do iComp = 0, numComp-1
+                  NtF(CHF_AUTOIX[i], iComp) = zero
+               enddo
+            endif
+         CHF_ENDDO
+      endif
+
+      return
+
+c- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+      contains
+
+c-----Matrix-vector multiply of N*grad(U)
+
+         subroutine gemtvC(NFace, gradUFaceC)  ! NO_CHF
+         integer i
+c        Arguments at faces
+         real_t NFace(0:CH_SPACEDIM-1, 0:CH_SPACEDIM-1)
+         real_t gradUFaceC(0:CH_SPACEDIM-1)
+
+         do i = 0, CH_SPACEDIM-1
+            NgradU(i) = CHF_DTERM[  NFace(i,0)*gradUFaceC(0);
+     &                            + NFace(i,1)*gradUFaceC(1);
+     &                            + NFace(i,2)*gradUFaceC(2);
+     &                            + NFace(i,3)*gradUFaceC(3);
+     &                            + NFace(i,4)*gradUFaceC(4);
+     &                            + NFace(i,5)*gradUFaceC(5)]
+         enddo
+         end subroutine
+
+c-----Vector-vector multiply of row of N^T * (NgradU)
+
+         function gevvC(NTRow)
+         real_t gevvc
+         real_t NTRow(0:CH_SPACEDIM-1)
+         gevvc = CHF_DTERM[  NTRow(0)*NgradU(0);
+     &                     + NTRow(1)*NgradU(1);
+     &                     + NTRow(2)*NgradU(2);
+     &                     + NTRow(3)*NgradU(3);
+     &                     + NTRow(4)*NgradU(4);
+     &                     + NTRow(5)*NgradU(5)]
+         end function
+
+c-----Artificial viscosity parameter
+
+         function nuFace()
+         real_t nuFace
+         nuFace = dxFace*faceDivVel*
+     &      min(((dxFace*faceDivVel)**2)/(beta*(minc**2)), one)
+         end function
+
+      end
+
+c ----------------------------------------------------------------------
+c  Compute artificial viscosity flux on a domain boundary face
+c  representing an inviscid wall in computational space for mapped
+c  grids.
+c  WARNING - some of the variables have different centerings from
+c            similarly named ones in mappedArtVisc
+c
+c  NtF          <=> Flux due to artificial viscosity on the faces (must
+c                   be initialized to zero on entry)
+c  Nctg          => Metric terms on the faces (direction 'dir'), stored
+c                   with components contiguous.  A row of N^T is
+c                   contiguous.
+c  gradU         => Gradient of conserved variables in the cells, stored
+c                   as (gradient direction, conserved variable) using
+c                   Fortran ordering.  The components are contiguous.
+c                   This is a cell centered quantity.
+c  unitNormals   => Face-centered unit normals for boFaceBox
+c  divVel        => Divergence of the velocity on the faces
+c  c             => Sound speed on the *faces*
+c  J             => Metrics Jacobian on the *faces*
+c  alpha         => Art. Visc. coefficient
+c  beta          => Art. Visc. coefficient
+c  boFaceBox     => Layer of faces on the domain boundary
+c  lohisign      => High (1) or low (-1) side of a box
+c  dir           => Direction of faces to consider
+c  dxi           => Computational mesh spacing
+c ----------------------------------------------------------------------
+
+      subroutine mappedArtViscInviscidWall(
+     &   CHF_FRA[NtFMom],
+     &   CHF_FRA[UMom],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, Nctg],
+     &   CHF_CONST_FRA[unitNormalBasis],
+     &   CHF_CONST_FRA1[divVel],
+     &   CHF_CONST_FRA1[c],
+     &   CHF_CONST_FRA1[dx],
+     &   CHF_CONST_REAL[alpha],
+     &   CHF_CONST_REAL[beta],
+     &   CHF_BOX[boFaceBox],
+     &   CHF_CONST_INT[dir])
+
+      integer idxNDir, idxNormalBase
+      integer iComp, iDir
+      integer CHF_AUTODECL[i]
+
+      real_t faceDivVel, minc, dxFace, artViscCoef
+      real_t gradUX(0:CH_SPACEDIM-1)
+
+      idxNDir = dir*CH_SPACEDIM
+      idxNormalBase = dir*CH_SPACEDIM
+
+c-----Set tangential components of the momentum to zero
+
+c     Transform the momemtum components into a basis with the first
+c     vector normal to the face
+      CHF_CALL FORWARDTRANSFORMF(CHF_FRA[UMom],
+     &                           CHF_CONST_FRA[unitNormalBasis],
+     &                           CHF_BOX[boFaceBox])
+c     Set tangential components to zero
+      do iDir = 0, CH_SPACEDIM-1
+c        Normal basis vector is in direction 'dir'
+         if (iDir .ne. dir) then
+            CHF_AUTOMULTIDO[boFaceBox;i]
+               UMom(CHF_AUTOIX[i], iDir) = zero
+            CHF_ENDDO
+         endif
+      enddo
+c     Reverse transform
+      CHF_CALL REVERSETRANSFORMF(CHF_FRA[UMom],
+     &                           CHF_CONST_FRA[unitNormalBasis],
+     &                           CHF_BOX[boFaceBox])
+
+c-----Proceed with computing the flux due to artificial viscosity
+
+      CHF_AUTOMULTIDO[boFaceBox;i]
+c        Compute parameters for nu on the face
+         faceDivVel = divVel(CHF_AUTOIX[i])
+         if (faceDivVel < zero) then
+            minc = c(CHF_AUTOIX[i])
+c           Representative dx for the face
+            dxFace = dx(CHF_AUTOIX[i])
+c           Compute coefficient from scalars
+            artViscCoef = alpha*nuFace()
+            do iComp = 0, CH_SPACEDIM - 1
+c              Directly compute grad_x(<U>)
+               do iDir = 0, CH_SPACEDIM-1
+                  gradUX(iDir) = two*UMom(CHF_AUTOIX[i], iComp)*
+     &               abs(unitNormalBasis(CHF_AUTOIX[i],
+     &                                   idxNormalBase + iDir))
+               enddo
+c              Multiply by a row of N^T for this direction and alpha*nu to
+c              get the flux.  Only retain the normal components
+               NtFMom(CHF_AUTOIX[i], iComp) = artViscCoef*
+     &            gevvC(Nctg(idxNDir, CHF_AUTOIX[i]))
+            enddo
+         endif
+      CHF_ENDDO
+
+      return
+
+c- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+c-----These are simlar to those in mappedArtVisc
+
+      contains
+
+c-----Vector-vector multiply of row of N^T * (NgradU)
+
+         function gevvC(NTRow)
+         real_t gevvc
+         real_t NTRow(0:CH_SPACEDIM-1)
+         gevvc = CHF_DTERM[  NTRow(0)*gradUX(0);
+     &                     + NTRow(1)*gradUX(1);
+     &                     + NTRow(2)*gradUX(2);
+     &                     + NTRow(3)*gradUX(3);
+     &                     + NTRow(4)*gradUX(4);
+     &                     + NTRow(5)*gradUX(5)]
+         end function
+
+c-----Artificial viscosity parameter
+
+         function nuFace()
+         real_t nuFace
+         nuFace = dxFace*faceDivVel*
+     &      min(((dxFace*faceDivVel)**2)/(beta*(minc**2)), one)
+         end function
+
+      end

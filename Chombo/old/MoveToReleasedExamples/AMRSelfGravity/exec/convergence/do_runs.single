@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+print("doing 32 run \n");
+system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.32 > run.32");
+print("doing 64 run \n");
+system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.64 > run.64");
+print("doing 128 run \n");
+system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.128 > run.128");
+print("doing 256 run \n");
+system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.256 > run.256");
+#print("doing 512 run \n");
+#system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.512 > run.512");
+#print("doing 1024 run \n");
+#system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.1024 > run.1024");

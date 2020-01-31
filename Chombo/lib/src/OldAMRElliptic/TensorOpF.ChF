@@ -1,0 +1,302 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+C     --------------------------------------------------------------
+C     subroutine GSRBLEVELTENSORLAP
+C     performs GSRB on a level for the Tensor solve -- just the laplacian piece
+C
+C     INPUTS/OUTPUTS:
+C     phi      <=> phi
+C     rhs       => rhs
+C     divPhi    => face-centered divergence of phi
+C     region    => region on which to relax
+C     dx        => grid spacing
+C     redBlack  => which pass we are on
+C     nComp     => number of components in phi, rhs
+C     dir       => direction of operator
+C
+C     Warning: phi, rhs must have the same number
+C     of components and span region.  Phi needs one more cell on
+C     all sides
+C
+C     dfmartin April 11,2002
+C     --------------------------------------------------------------
+      subroutine GSRBLEVELTENSORLAP(
+     &     CHF_FRA[phi],
+     &     CHF_CONST_FRA[rhs],
+     &     CHF_BOX[region],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_INT[redBlack])
+
+
+      REAL_T  lambda
+      REAL_T  dxsqrinv,dxinv,sum_b, lphi
+      integer CHF_DDECL[ii,i;jj,j;kk,k]
+      integer n,ncomp,phidir,indtot,imin,imax,temp
+      integer dir
+
+      dxsqrinv = one/(dx*dx)
+      dxinv = one/dx
+
+      sum_b = 0.0
+      do phidir = 0, CH_SPACEDIM-1
+         sum_b = sum_b + two*dxsqrinv
+      enddo
+
+
+c  need to check this again
+c ::: extra 2 is from grad(div) term
+      sum_b = sum_b+two*dxsqrinv
+      lambda = one/sum_b
+
+      ncomp = CHF_NCOMP[phi]
+      if(ncomp .ne. CHF_NCOMP[rhs]) then
+C         print*, 'GSRBLEVELHELM:phi and rhs incompatible'
+C         stop
+         call MAYDAYERROR()
+      endif
+
+      do n = 0, ncomp - 1
+
+         temp = (n/CH_SPACEDIM)*CH_SPACEDIM
+         phidir = n-temp
+
+
+#if CH_SPACEDIM==3
+         do k=CHF_LBOUND[region; 2], CHF_UBOUND[region; 2]
+#endif
+#if CH_SPACEDIM > 1
+            do j=CHF_LBOUND[region; 1], CHF_UBOUND[region; 1]
+#endif
+               imin = CHF_LBOUND[region; 0]
+               CHF_DTERM[indtot = imin; + j ; + k ]
+C     add 0 or 1 to imin, so that imin+j+k has same parity as redBlack
+C     petermc, 26 april 2001
+               imin = imin + mod(indtot + redBlack, 2)
+               imax = CHF_UBOUND[region; 0]
+               do i = imin, imax, 2
+
+                  lphi = zero
+
+                  do dir=0,  CH_SPACEDIM-1
+
+                     CHF_DTERM[
+                     ii = CHF_ID(dir, 0);
+                     jj = CHF_ID(dir, 1);
+                     kk = CHF_ID(dir, 2)]
+
+                     lphi = lphi +dxsqrinv*(phi(CHF_IX[i+ii;j+jj;k+kk],n)
+     &                                     +phi(CHF_IX[i-ii;j-jj;k-kk],n)
+     &                                 -two*phi(CHF_IX[i   ;j   ;k   ],n))
+                  enddo
+
+                  phi(CHF_IX[i;j;k],n) = phi(CHF_IX[i;j;k],n) +
+     &                 lambda*(lphi - rhs(CHF_IX[i;j;k],n))
+
+               enddo
+
+            enddo
+#if CH_SPACEDIM > 1
+         enddo
+#endif
+#if CH_SPACEDIM==3
+      enddo
+#endif
+
+      return
+      end
+
+
+C     --------------------------------------------------------------
+C     subroutine GSRBLEVELTENSORDIR
+C     performs GSRB on a level for the Tensor solve -- just the
+C     directional grad(div) piece
+C
+C     INPUTS/OUTPUTS:
+C     phi      <=> phi
+C     divPhi    => face-centered divergence of phi
+C     region    => region on which to relax
+C     dx        => grid spacing
+C     redBlack  => which pass we are on
+C     nComp     => number of components in phi, rhs
+C     dir       => direction of operator
+C
+C     Warning: phi, divPhi must have the same number
+C     of components and span region.  Phi needs one more cell on
+C     all sides
+C
+C     dfmartin, April 11, 2002
+C     --------------------------------------------------------------
+
+      subroutine GSRBLEVELTENSORDIR(
+     &     CHF_FRA[phi],
+     &     CHF_CONST_FRA[divPhi],
+     &     CHF_BOX[region],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_INT[redBlack],
+     &     CHF_CONST_INT[dir])
+
+
+      REAL_T  lambda
+      REAL_T  dxsqrinv,dxinv,sum_b, lphi
+      integer CHF_DDECL[ii,i;jj,j;kk,k]
+      integer n,ncomp,phidir,indtot,imin,imax,temp,divcomp
+
+      dxsqrinv = one/(dx*dx)
+      dxinv = one/dx
+
+      CHF_DTERM[
+               ii = CHF_ID(dir, 0);
+               jj = CHF_ID(dir, 1);
+               kk = CHF_ID(dir, 2)]
+
+      sum_b = 0.0
+      do phidir = 0, CH_SPACEDIM-1
+         sum_b = sum_b + two*dxsqrinv
+      enddo
+
+C  ::: extra 2 is from grad(div) term
+      sum_b = sum_b+two*dxsqrinv
+      lambda = one/sum_b
+
+      ncomp = CHF_NCOMP[phi]
+C     if(ncomp .ne. CHF_NCOMP[rhs]) then
+C         print*, 'GSRBLEVELHELM:phi and rhs incompatible'
+C     stop
+C        call MAYDAYERROR()
+C     endif
+
+      do n = 0, ncomp - 1
+
+         temp = (n/CH_SPACEDIM)*CH_SPACEDIM
+         phidir = n-temp
+
+#if CH_SPACEDIM==3
+         do k=CHF_LBOUND[region; 2], CHF_UBOUND[region; 2]
+#endif
+#if CH_SPACEDIM > 1
+            do j=CHF_LBOUND[region; 1], CHF_UBOUND[region; 1]
+#endif
+               imin = CHF_LBOUND[region; 0]
+               CHF_DTERM[indtot = imin; + j ; + k ]
+C     add 0 or 1 to imin, so that imin+j+k has same parity as redBlack
+C     petermc, 26 april 2001
+               imin = imin + mod(indtot + redBlack, 2)
+               imax = CHF_UBOUND[region; 0]
+
+c     if we're in a normal direction, add grad(div(phi)) term
+               if (phidir.eq.dir) then
+                  divcomp = n/CH_SPACEDIM
+                  do i = imin, imax, 2
+                     lphi = dxinv*(divPhi(CHF_IX[i+ii;j+jj;k+kk],divcomp)
+     &                            -divPhi(CHF_IX[i;j;k],divcomp))
+
+                     phi(CHF_IX[i;j;k],n) = phi(CHF_IX[i;j;k],n) + lambda*lphi
+                  enddo
+               endif
+            enddo
+#if CH_SPACEDIM > 1
+         enddo
+#endif
+#if CH_SPACEDIM==3
+      enddo
+#endif
+
+      return
+      end
+
+
+C     -----------------------------------------------------------------
+C     subroutine INCREMENTTENSOROP
+C     computes directional component of (Laplacian(phi) + grad(div(phi))
+C
+C     INPUTS/OUTPUTS:
+C     phi       =>  phi
+C     dirPhi    =>  face-centered divergence of Phi
+C     lofphi   <=   laplacian
+C     dx        =>  cell spacing
+C     region    =>  cell-centered region on which to compute lofphi
+C     dir       =>  direction in which to compute
+C
+C     Warning: phi, lofphi must have the same number
+C     of components and span region.  Phi needs one more cell on
+C     all sides
+C
+C     ------------------------------------------------------------------
+      subroutine INCREMENTTENSOROP(
+     &                             CHF_FRA[lofphi],
+     &                             CHF_CONST_FRA[phi],
+     &                             CHF_CONST_FRA[divPhi],
+     &                             CHF_BOX[region],
+     &                             CHF_CONST_REAL[dx],
+     &                             CHF_CONST_INT[dir])
+
+
+      REAL_T dxsqrinv,dxinv,lphi
+      integer n,ncomp,phidir, temp, divcomp
+
+      integer CHF_DDECL[ii,i;jj,j;kk,k]
+
+      ncomp = CHF_NCOMP[phi]
+      if(ncomp .ne. CHF_NCOMP[lofphi]) then
+C         print*, 'GSRBLEVELHELM:phi and rhs incompatible'
+C         stop
+         call MAYDAYERROR()
+      endif
+
+
+      CHF_DTERM[
+          ii = CHF_ID(dir, 0);
+          jj = CHF_ID(dir, 1);
+          kk = CHF_ID(dir, 2)]
+
+
+      dxsqrinv = one/(dx*dx)
+      dxinv = one/dx
+
+      do n = 0, ncomp-1
+
+c figure out which direction this phi is in (assume that phi is stored
+c (phi0x, phi0y, phi0z, phi1x, phi1y, phi1z...) )
+         temp = (n/CH_SPACEDIM)*CH_SPACEDIM
+         phidir = n - temp
+
+
+         CHF_MULTIDO[region; i; j; k]
+
+c     directional part of Laplacian(phi)
+            lphi = dxsqrinv*(phi(CHF_IX[i+ii;j+jj;k+kk],n)
+     &                      +phi(CHF_IX[i-ii;j-jj;k-kk],n)
+     &                  -two*phi(CHF_IX[i   ;j   ;k   ],n))
+
+
+
+            lofphi(CHF_IX[i;j;k],n) =  lofphi(CHF_IX[i;j;k],n) + lphi
+
+         CHF_ENDDO
+
+c now add in gradient(div(phi)) term if appropriate
+         if (phidir.eq.dir) then
+            divcomp = n/CH_SPACEDIM
+
+
+            CHF_MULTIDO[region;i;j;k]
+               lphi = dxinv*(divPhi(CHF_IX[i+ii;j+jj;k+kk],divcomp)
+     &                      -divPhi(CHF_IX[i   ;j   ;k   ],divcomp))
+
+               lofphi(CHF_IX[i;j;k],n) =  lofphi(CHF_IX[i;j;k],n) + lphi
+            CHF_ENDDO
+         endif
+
+      enddo
+
+      return
+      end
+
+
+

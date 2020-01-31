@@ -1,0 +1,108 @@
+ifeq ($(MACHINE), OSF1)
+  #MPI_HOME:=/usr/local/mpi
+  MPI_HOME:=/usr/opt/mpi
+  #BL_MPI_LIBS += -lmpich
+  BL_MPI_LIBS += -lmpi -lpmpi
+  LIBRARY_LOCATIONS += $(MPI_HOME)/lib
+  INCLUDE_LOCATIONS += $(MPI_HOME)/include
+endif
+#ifeq ($(MACHINE), OSF1)
+#  MPI_HOME:=/usr/local/mpi
+#  BL_MPI_LIBS += -lmpich
+#  LIBRARY_LOCATIONS += $(MPI_HOME)/lib
+#  INCLUDE_LOCATIONS += $(MPI_HOME)/include
+#endif
+
+ifeq ($(MACHINE), AIX)
+  MPI_HOME:=/usr/lpp/ppe.poe
+  BL_MPI_LIBS += -lmpi
+  LIBRARY_LOCATIONS += $(MPI_HOME)/lib
+  INCLUDE_LOCATIONS += $(MPI_HOME)/include
+endif
+
+ifeq ($(MACHINE), IRIX64)
+  BL_MPI_LIBS += -lmpi
+endif
+
+ifeq ($(MACHINE), Linux)
+  ifdef WHICHLINUX
+    ifeq ($(WHICHLINUX), PCCLUSTER)
+      MPI_HOME=/usr/local/pkg/mpich
+      LIBRARY_LOCATIONS += $(MPI_HOME)/lib/LINUX/ch_p4
+      INCLUDE_LOCATIONS += $(MPI_HOME)/lib/LINUX/ch_p4
+    endif
+    ifeq ($(WHICHLINUX), ALPHACLUSTER)
+      MPI_HOME=/usr/local/pkg/mpich
+      LIBRARY_LOCATIONS += $(MPI_HOME)/build/LINUX/ch_p4/lib
+      INCLUDE_LOCATIONS += $(MPI_HOME)/build/LINUX/ch_p4/include
+    endif
+    ifeq ($(WHICHLINUX), NUGIGAN)
+      MPI_HOME=/usr/local/mpi
+      LIBRARY_LOCATIONS += $(MPI_HOME)/lib
+      INCLUDE_LOCATIONS += $(MPI_HOME)/include
+    endif
+# JFG 2006/05/04: CAR added the following ifeq block for the 64 bit
+# Intel compilers on hive
+    ifeq ($(HOST),hive)
+      MPI_HOME=/usr/lib/mpi/mpi_gnu
+      LIBRARY_LOCATIONS += $(MPI_HOME)/lib
+      INCLUDE_LOCATIONS += $(MPI_HOME)/include
+      BL_MPI_LIBS += -lmpifarg
+      BL_MPI_LIBS += -lmpi
+    endif
+    ifeq ($(HOST),davinci)
+# JFG 2006/10/10: must also get intel compilers: modolue load intel
+      BL_MPI_LIBS += -lmpi++
+      BL_MPI_LIBS += -lmpi
+    endif
+    ifeq ($(HOST),naphta)
+      mpihome=$(HOME)/mpich2
+      LIBRARY_LOCATIONS += $(mpihome)/lib
+      INCLUDE_LOCATIONS += $(mpihome)/include
+      CPPFLAGS += -DMPICH_SKIP_MPICXX
+    endif
+    ifndef MPI_HOME
+      MPI_HOME=/usr/local/mpich
+    endif
+    ifneq ($(WHICHLINUX), JACQUARD)
+      ifneq ($(WHICHLINUX), COLUMBIA)
+        ifneq ($(HOST),davinci)
+          BL_MPI_LIBS += -lmpich
+        endif
+      endif
+    endif
+    ifeq ($(WHICHLINUX), COLUMBIA)
+      BL_MPI_LIBS += -lmpi
+    endif
+    ifeq ($(WHICHLINUX), GENERICLINUX)
+      LIBRARY_LOCATIONS += $(MPI_HOME)/build/LINUX/ch_p4/lib
+    endif
+  else
+    ifdef LAMHOME
+      BL_MPI_LIBS += -lmpi -ltstdio -ltrillium -largs -lt
+      #
+      # If the above line doesn't work give the following a try.
+      # It worked on someone's Linux cluster with LAM version 7.0.6
+      #
+      #BL_MPI_LIBS += -lmpi -llammpi++ -llamf77mpi -llammpio -lpthread
+      LIBRARY_LOCATIONS += $(LAMHOME)/lib
+      INCLUDE_LOCATIONS += $(LAMHOME)/include
+    endif
+    ifdef MPI_HOME
+      BL_MPI_LIBS += -lmpich
+      LIBRARY_LOCATIONS += $(MPI_HOME)/build/LINUX/ch_p4/lib
+      INCLUDE_LOCATIONS += $(MPI_HOME)/include
+    endif
+    ifdef MPICHHOME
+      mpicharch := $(shell $(MPICHHOME)/bin/tarch)
+      mpichdevice := $(shell $(MPICHHOME)/bin/tdevice)
+      BL_MPI_LIBS += -lmpich
+      # 1.2.0 locations
+      INCLUDE_LOCATIONS += $(MPICHHOME)/include
+      LIBRARY_LOCATIONS += $(MPICHHOME)/lib
+      # not needed in 1.2.0
+      # INCLUDE_LOCATIONS += $(MPICHHOME)/build/$(mpicharch)/$(mpichdevice)/include
+      # LIBRARY_LOCATIONS += $(MPICHHOME)/build/$(mpicharch)/$(mpichdevice)/lib
+    endif
+  endif
+endif

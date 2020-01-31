@@ -1,0 +1,107 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine SETFUNCTIONSPHERICAL(
+!     Evaluates spherical harmonic function from physical coordinates.
+!
+!     => inputs,  <= outputs
+!     values <= function values, neqns components on bx
+!     coords => space coordinates, 3 * neqns components on bx
+!     bx => indices of coords and values
+!     coeffs => coefficients of Legendre function
+!     l => l for Legendre function
+!     m => m for Legendre function
+!
+!     petermc, 21 Feb 2008
+     &     CHF_FRA[values],
+     &     CHF_CONST_FRA[coords],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_R1D[coeffs],
+     &     CHF_CONST_INT[l],
+     &     CHF_CONST_INT[m])
+
+      integer CHF_DDECL[i;j;k]
+      integer ieqn, ieqn3, neqns
+      REAL_T x, y, z
+      REAL_T r2, r, th
+      REAL_T legendreeval
+      external legendreeval
+
+      neqns = CHF_NCOMP[values]
+      if (CHF_NCOMP[coords] .ne. 3 * neqns) then
+         print *, 'SETFUNCTIONSPHERICAL:  coords must have ',
+     &        (3 * neqns), ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      CHF_MULTIDO[bx; i; j; k]
+         do ieqn = 0, neqns - 1
+
+            ieqn3 = 3 * ieqn
+
+            x = coords(CHF_IX[i;j;k], ieqn3    )
+            y = coords(CHF_IX[i;j;k], ieqn3 + 1)
+            z = coords(CHF_IX[i;j;k], ieqn3 + 2)
+
+            r2 = x*x + y*y + z*z
+            r = sqrt(r2)
+            th = atan2(y, x)
+!            phi = acos(z / r)
+!     and we call legendreeval(cos(phi), coeffs, l, m)
+
+            values(CHF_IX[i;j;k], ieqn) =
+     &           r**l * cos(m * th) * legendreeval(z/r, coeffs, l, m)
+         enddo
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine MAXFUNCTIONSPHERICAL(
+!     Returns maximum of spherical harmonic function on valid domain.
+!
+!     => inputs,  <= outputs
+!     funmax <= maximum of function
+!     bxwid => width of box
+!     outr => radius of cylinder
+!     coeffs => coefficients of Legendre function
+!     l => l for Legendre function
+!     m => m for Legendre function
+!
+!     petermc, 15 Mar 2008
+     &     CHF_REAL[funmax],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_CONST_R1D[coeffs],
+     &     CHF_CONST_INT[l],
+     &     CHF_CONST_INT[m])
+      REAL_T legmax, legtry, costry, h, cbest
+      integer itry, ntries
+      parameter (ntries = 1000000)
+      REAL_T legendreeval
+      external legendreeval
+
+!     can't do data statement because 'zero' corresponds to (0.0d0)
+!     and the compiler rejects parentheses in data!
+
+      h = one / (ntries * one)
+      legmax = zero
+      do itry = -ntries, ntries
+         costry = itry * h
+         legtry = abs(legendreeval(costry, coeffs, l, m))
+         if (legtry .gt. legmax) then
+            legmax = legtry
+            cbest = costry
+         endif
+      enddo
+
+      funmax = (outr**l) * legmax
+
+      return
+      end

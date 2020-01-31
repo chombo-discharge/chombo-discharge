@@ -1,0 +1,2 @@
+all:
+	cd facade; $(MAKE) $(MAKEFLAGS) all

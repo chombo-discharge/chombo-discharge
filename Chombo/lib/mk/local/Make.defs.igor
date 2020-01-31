@@ -1,0 +1,15 @@
+#it is prounouced eye-gore
+makefiles+=local/Make.defs.igor
+USE_HDF=TRUE
+USE_MF=TRUE
+USE_EB=TRUE
+USE_64=TRUE
+CXX=g++
+CPP=cpp
+FC=gfortran
+HDFINCFLAGS   = -I/home/graves/_hdf5/include
+HDFLIBFLAGS   = -L/home/graves/_hdf5/lib -lhdf5 -lhdf5_hl -ldl -lz
+HDFMPIINCFLAGS= -I/home/graves/_hdf5/include
+HDFMPILIBFLAGS= -L/home/graves/_hdf5/lib -lhdf5 -lhdf5_hl -ldl -lz
+
+

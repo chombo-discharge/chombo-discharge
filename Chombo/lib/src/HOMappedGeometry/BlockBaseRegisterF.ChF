@@ -1,0 +1,47 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine TRANSFILLREGISTER(
+     &    CHF_FRA[dst],
+     &    CHF_CONST_FRA[src],
+     &    CHF_BOX[fillBox],
+     &    CHF_CONST_INTVECT[perm],
+     &    CHF_CONST_INTVECT[sign],
+     &    CHF_CONST_INTVECT[shift],
+     &    CHF_CONST_INT[ncomp])
+
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+
+      integer var, j(0:CH_SPACEDIM-1)
+
+      do var=0, ncomp-1
+
+          CHF_AUTOMULTIDO[fillBox;i]
+          CHF_DTERM[
+          j(0)=i0;
+          j(1)=i1;
+          j(2)=i2;
+          j(3)=i3;
+          j(4)=i4;
+          j(5)=i5]
+          CHF_DTERM[
+          ii0=sign(0)*j(perm(0))+shift(0);
+          ii1=sign(1)*j(perm(1))+shift(1);
+          ii2=sign(2)*j(perm(2))+shift(2);
+          ii3=sign(3)*j(perm(3))+shift(3);
+          ii4=sign(4)*j(perm(4))+shift(4);
+          ii5=sign(5)*j(perm(5))+shift(5)]
+
+          dst(CHF_AUTOIX[i],var)=src(CHF_AUTOIX[ii],var)
+
+          CHF_ENDDO
+      enddo
+
+      return
+      end

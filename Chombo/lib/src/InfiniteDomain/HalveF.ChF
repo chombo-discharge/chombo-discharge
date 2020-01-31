@@ -1,0 +1,50 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+!=======================================================
+!     subroutine HALVEFACES
+!     Divide arr by two on faces of bxsupp;
+!     also by four on edges and by eight on corners.
+!
+!     => inputs,  <= outputs
+!     arr <=> NODE-centered array
+!     bxsupp => NODE-centered box of nodes on which to halve on faces
+!
+!     petermc, 19 Aug 2004
+      subroutine halvefaces(
+     &     CHF_FRA1[arr],
+     &     CHF_BOX[bxsupp])
+      integer i, j, k
+
+      do k = CHF_LBOUND[bxsupp; 2], CHF_UBOUND[bxsupp; 2]
+         do j = CHF_LBOUND[bxsupp; 1], CHF_UBOUND[bxsupp; 1]
+            i = CHF_LBOUND[bxsupp; 0]
+            arr(CHF_IX[i; j; k]) = arr(CHF_IX[i; j; k]) * half
+            i = CHF_UBOUND[bxsupp; 0]
+            arr(CHF_IX[i; j; k]) = arr(CHF_IX[i; j; k]) * half
+         enddo
+      enddo
+      do k = CHF_LBOUND[bxsupp; 2], CHF_UBOUND[bxsupp; 2]
+         do i = CHF_LBOUND[bxsupp; 0], CHF_UBOUND[bxsupp; 0]
+            j = CHF_LBOUND[bxsupp; 1]
+            arr(CHF_IX[i; j; k]) = arr(CHF_IX[i; j; k]) * half
+            j = CHF_UBOUND[bxsupp; 1]
+            arr(CHF_IX[i; j; k]) = arr(CHF_IX[i; j; k]) * half
+         enddo
+      enddo
+      do j = CHF_LBOUND[bxsupp; 1], CHF_UBOUND[bxsupp; 1]
+         do i = CHF_LBOUND[bxsupp; 0], CHF_UBOUND[bxsupp; 0]
+            k = CHF_LBOUND[bxsupp; 2]
+            arr(CHF_IX[i; j; k]) = arr(CHF_IX[i; j; k]) * half
+            k = CHF_UBOUND[bxsupp; 2]
+            arr(CHF_IX[i; j; k]) = arr(CHF_IX[i; j; k]) * half
+         enddo
+      enddo
+
+      return
+      end

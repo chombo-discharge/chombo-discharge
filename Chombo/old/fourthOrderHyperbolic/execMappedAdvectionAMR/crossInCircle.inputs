@@ -1,0 +1,95 @@
+assert(SpaceDim == 2)
+
+multiblock = True
+verbosity = 1
+
+# Time stepping
+max_step = 200000
+max_time = 2.0
+fixed_dt = 0.005
+cfl = 0.75
+initial_cfl = 0.75
+max_dt_growth = 1.1
+dt_tolerance_factor = 1.1
+
+# Computational domain
+domain_length = 1.0
+num_cells = (64, 64, 64)
+is_periodic = (1, 1, 1)
+
+# Coordinate system
+if multiblock:
+    coordSys = 'triple_cartesian'
+
+    # We use a fixed set of boxes. Indexing is
+    # boxes[blockID][refinementLevel][dataIndex].
+    # For now, we refine in the center of each of the 9 blocks.
+    block1 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block2 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block3 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block4 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block5 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block6 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block7 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block8 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    block9 = [[], # AMR level 0
+              [], # AMR level 1
+              []] # AMR level 2
+    boxes = [block1, block2, block3, 
+             block4, block5, block6, 
+             block7, block8, block9]
+
+# AMR
+max_level = 1
+ref_ratio = 4 
+
+# Output
+checkpoint_interval = -1
+plot_interval = 10
+plot_prefix  = 'crossInCircle.64.'
+chk_prefix = 'crossInCircleCheck.64.'
+
+useHyperviscosity = 0
+hyperviscosity = 0.01
+
+limitFaceValues = 1
+enforceMinVal = 1
+minVal = 0.0
+
+# Advection velocity
+velocity = (1.0, 1.0)
+
+# Initial condition
+radius = 0.125
+magnitude = 1.0
+center = (0.5, 0.5)
+def phi0(x, t):
+    r0 = [center[i] + velocity[i]*t for i in xrange(2)]
+    r = sqrt((x[0]-r0[0])**2 + (x[1]-r0[1])**2)
+    if r > radius:
+        return 0
+    else:
+        if (abs(x[0] - center[0]) < 0.75*radius and \
+            abs(x[1] - center[1]) < 0.20*radius) or \
+           (abs(x[0] - center[0]) < 0.20*radius and \
+            abs(x[1] - center[1]) < 0.75*radius):
+            return 0
+        else:
+            return magnitude
+

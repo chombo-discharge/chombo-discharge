@@ -1,0 +1,20 @@
+main.verbosity = 0
+main.write_output = 0
+main.file_name = "out.hdf5"
+main.cell_centers = 0
+# length of base domain, whatever that is.  in cylindrical case,
+# it is length of the central block.
+main.domain_length = 32
+# radius of boxes
+# main.radius = 1
+# max degree of moments
+# main.degree = 2
+# domain length for each block
+# number of boxes into which to split each block along its length
+# main.domain_split = 2
+# width of ghost layer
+# main.ghost = 2
+# function parameter
+main.function = "doublecartesian"
+# quadrature
+main.quadrature = "gaussian"

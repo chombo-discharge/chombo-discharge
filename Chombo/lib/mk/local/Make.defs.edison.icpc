@@ -1,0 +1,49 @@
+## This file defines variables for use on the login nodes of the NERSC Linux
+## machine 'edison'.  
+##
+## NOTE: everything is always in 64bit mode
+
+makefiles+=local/Make.defs.edison.icpc
+
+CXX=icpc
+FC=ftn
+MPICXX=icpc -I$(CRAY_MPICH_DIR)/include 
+USE_64=TRUE
+
+CH_CPP=$(CXX) -E -P -C
+
+RUN = srun -n 2 ./#
+
+# Compiler flags
+cxxoptflags += -O2 -no-ipo
+cxxdbgflags += -g
+foptflags += -O2
+fdbgflags += -g
+flibflags += -lifport -lifcore -limf -lsvml -lm -lipgo -lirc -lsvml
+
+# Compile with OpenMP
+ifeq ($(OPENMPCC),TRUE)
+  cxxoptflags += -qopenmp
+  cxxdbgflags += -qopenmp
+  foptflags += -qopenmp
+  fdbgflags += -qopenmp
+  XTRALDFLAGS += -qopenmp
+else
+  cxxoptflags += -Wno-unknown-pragmas -diag-disable 3180
+  cxxdbgflags += -Wno-unknown-pragmas -diag-disable 3180
+  foptflags += -Wno-unknown-pragmas -diag-disable 3180
+  fdbgflags += -Wno-unknown-pragmas -diag-disable 3180
+endif
+
+XTRALDFLAGS += -Wl,-zmuldefs  -L$(CRAY_MPICH_DIR)/lib -lmpich_intel -mkl
+#syslibflags = -mkl
+
+USE_HDF=TRUE
+#HDF5_DIR = $(CRAY_HDF5_DIR)/INTEL/140
+#HDF5_DIR = $(HDF5_ROOT)
+# use module-environment-defined HDF5_DIR, so no need to set it here
+
+HDFLIBFLAGS=   -L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFMPILIBFLAGS=-L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFINCFLAGS=   -I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS) 
+HDFMPIINCFLAGS=-I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS)

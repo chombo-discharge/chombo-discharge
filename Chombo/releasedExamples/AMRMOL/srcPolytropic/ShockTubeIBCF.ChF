@@ -1,0 +1,109 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+        subroutine SHOCKTUBESETF(
+     &    CHF_REAL[ausmallPressure],
+     %    CHF_CONST_REAL[augamma],
+     &    CHF_CONST_REAL[aurhoLeft],
+     &    CHF_CONST_REAL[aurhoRight],
+     &    CHF_CONST_REAL[aueLeft],
+     &    CHF_CONST_REAL[aueRight],
+     &    CHF_CONST_REAL[aucenter],
+     &    CHF_CONST_INT[audirection],
+     &    CHF_CONST_REALVECT[auvelocity],
+     &    CHF_CONST_REAL[auartvisc])
+
+#include "ShockTubeCommon.fh"
+#include "EosCommon.fh"
+
+        real_t r0, p0, umag
+
+        gamma = augamma
+
+        rhoLeft = aurhoLeft
+        rhoRight = aurhoRight
+
+        eLeft = aueLeft
+        eRight = aueRight
+
+        center = aucenter
+
+        direction = audirection
+
+        CHF_DTERM[
+        velx = auvelocity(0);
+        vely = auvelocity(1);
+        velz = auvelocity(2)]
+
+        artvisc = auartvisc
+
+        r0 = min(rhoLeft, rhoRight)
+        p0 = min(rhoLeft*eLeft, rhoRight*eRight)
+        p0 = p0 * (gamma - one)
+
+c  umag is really c
+        umag = sqrt(gamma*p0/r0);
+
+        smallr = small*r0
+        smallu = small*umag
+        smallp = small*r0*half*umag*umag
+        ausmallPressure = smallp
+
+        return
+        end
+
+        subroutine SHOCKTUBEINITF(
+     &    CHF_FRA[U],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_BOX[box])
+
+#include "ShockTubeCommon.fh"
+#include "EosCommon.fh"
+
+        real_t ke
+        real_t CHF_DDECL[uu;vv;ww]
+        integer CHF_DDECL[i;j;k]
+        real_t x(0:CH_SPACEDIM-1)
+
+        CHF_DTERM[
+        uu = velx;
+        vv = vely;
+        ww = velz]
+
+        ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+        CHF_MULTIDO[box;i;j;k]
+          CHF_DTERM[
+          x(0) = (i + half) * dx;
+          x(1) = (j + half) * dx;
+          x(2) = (k + half) * dx]
+
+          if (x(direction).lt.center) then
+            U(CHF_IX[i;j;k],URHO) = rhoLeft
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = uu * rhoLeft;
+            U(CHF_IX[i;j;k],UMOMY) = vv * rhoLeft;
+            U(CHF_IX[i;j;k],UMOMZ) = ww * rhoLeft]
+
+            U(CHF_IX[i;j;k],UENG) = eLeft + rhoLeft * ke
+          else
+            U(CHF_IX[i;j;k],URHO) = rhoRight
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = uu * rhoRight;
+            U(CHF_IX[i;j;k],UMOMY) = vv * rhoRight;
+            U(CHF_IX[i;j;k],UMOMZ) = ww * rhoRight]
+
+            U(CHF_IX[i;j;k],UENG) = eRight + rhoRight * ke
+          endif
+        CHF_ENDDO
+
+        return
+        end

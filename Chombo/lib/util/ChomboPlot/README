@@ -1,0 +1,4 @@
+This contour plotter is built upon Libsx, a product 
+of Dominic Giampaolo.    We needed to bundle the libsx
+code with the contour plotter but this in no way means
+we are trying to take credit for libsx.  

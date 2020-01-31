@@ -1,0 +1,196 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine SIMPLESOURCESINK(
+     &     CHF_FRA1[source],
+     &     CHF_CONST_FRA1[soln],
+     &     CHF_CONST_REAL[sourceScaling],
+     &     CHF_CONST_REAL[sinkScaling],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_REALVECT[origin],
+     &     CHF_BOX[box])
+
+      integer CHF_DDECL[i;j;k]
+      real_t  x,y,z
+
+C
+C Loop through the current box computing the (source - sink) for the
+C "simple" VCell problem at each cell center and store that in the
+C "source" array
+C
+      CHF_MULTIDO[box;i;j;k]
+        CHF_DTERM[
+        x = (i + half)*dx + origin(0);
+        y = (j + half)*dx + origin(1);
+        z = (k + half)*dx + origin(2)]
+
+        if (CH_SPACEDIM .lt. 3) then
+          z = 0.5
+        endif
+
+        if (x .lt. zero) then
+          source(CHF_IX[i;j;k]) = sourceScaling
+        else
+          source(CHF_IX[i;j;k]) = -sinkScaling * soln(CHF_IX[i;j;k])
+        endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SIMPLESOURCESINKPOINT(
+     &     CHF_REAL[source],
+     &     CHF_CONST_REAL[soln],
+     &     CHF_CONST_REAL[sourceScaling],
+     &     CHF_CONST_REAL[sinkScaling],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_REALVECT[origin],
+     &     CHF_CONST_INTVECT[iv])
+
+      integer CHF_DDECL[i;j;k]
+      real_t  x,y,z
+
+C
+C Compute the (source - sink) for the "simple" VCell problem at given
+C cell center and return it in "source"
+C
+      CHF_DTERM[
+      i = iv(0);
+      j = iv(1);
+      k = iv(2)]
+
+      CHF_DTERM[
+      x = (i + half)*dx + origin(0);
+      y = (j + half)*dx + origin(1);
+      z = (k + half)*dx + origin(2)]
+
+      if (CH_SPACEDIM .lt. 3) then
+        z = 0.5
+      endif
+
+      if (x .lt. zero) then
+        source = sourceScaling
+      else
+        source = -sinkScaling * soln
+      endif
+
+      return
+      end
+
+
+      subroutine KERASOURCESINK(
+     &     CHF_FRA1[source],
+     &     CHF_CONST_FRA1[soln],
+     &     CHF_CONST_REAL[sourceScaling],
+     &     CHF_CONST_REAL[sinkScaling],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_REALVECT[origin],
+     &     CHF_BOX[box])
+
+      integer CHF_DDECL[i;j;k]
+      real_t  x,y,z
+      real_t  sourceFunc1,sourceFunc2,sourceFunc
+      real_t  sinkFunc1,sinkFunc2,sinkFunc
+
+C
+C Loop through the current box computing the (source - sink) for the
+C "keratocyte" VCell problem at each cell center and store that in the
+C "source" array
+C
+      CHF_MULTIDO[box;i;j;k]
+        CHF_DTERM[
+        x = (i + half)*dx + origin(0);
+        y = (j + half)*dx + origin(1);
+        z = (k + half)*dx + origin(2)]
+
+        if (CH_SPACEDIM .lt. 3) then
+          z = 0.2002
+        endif
+
+        sourceFunc1 = ((x+3.5)/3.5)**2 + (y/5.0)**2 + ((z-1.0)/3.5)**2 - 1.0
+        sourceFunc2 = 0.2 - z
+
+        sourceFunc = max(sourceFunc1,sourceFunc2);
+
+        if (sourceFunc .lt. zero) then
+          source(CHF_IX[i;j;k]) = sourceScaling
+        else
+          source(CHF_IX[i;j;k]) = zero
+        endif
+
+        sinkFunc1 = 1.0 - (x/4.7)**2 - (y/19.7)**2
+        sinkFunc2 = -2.0 - x
+
+        sinkFunc = max(sinkFunc1,sinkFunc2)
+
+        if (sinkFunc .lt. zero) then
+          source(CHF_IX[i;j;k]) = source(CHF_IX[i;j;k])
+     &                          - sinkScaling * soln(CHF_IX[i;j;k])
+        endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine KERASOURCESINKPOINT(
+     &     CHF_REAL[source],
+     &     CHF_CONST_REAL[soln],
+     &     CHF_CONST_REAL[sourceScaling],
+     &     CHF_CONST_REAL[sinkScaling],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_REALVECT[origin],
+     &     CHF_CONST_INTVECT[iv])
+
+      integer CHF_DDECL[i;j;k]
+      real_t  x,y,z
+      real_t  sourceFunc1,sourceFunc2,sourceFunc
+      real_t  sinkFunc1,sinkFunc2,sinkFunc
+
+C
+C Compute the (source - sink) for the "keratocyte" VCell problem at given
+C cell center and return it in "source"
+C
+      CHF_DTERM[
+      i = iv(0);
+      j = iv(1);
+      k = iv(2)]
+
+      CHF_DTERM[
+      x = (i + half)*dx + origin(0);
+      y = (j + half)*dx + origin(1);
+      z = (k + half)*dx + origin(2)]
+
+      if (CH_SPACEDIM .lt. 3) then
+        z = 0.2002
+      endif
+
+      sourceFunc1 = ((x+3.5)/3.5)**2 + (y/5.0)**2 + ((z-1.0)/3.5)**2 - 1.0
+      sourceFunc2 = 0.2 - z
+
+      sourceFunc = max(sourceFunc1,sourceFunc2);
+
+      if (sourceFunc .lt. zero) then
+        source = sourceScaling
+      else
+        source = zero
+      endif
+
+      sinkFunc1 = 1.0 - (x/4.7)**2 - (y/19.7)**2
+      sinkFunc2 = -2.0 - z
+
+      sinkFunc = max(sinkFunc1,sinkFunc2)
+
+      if (sinkFunc .lt. zero) then
+        source = source
+     &         - sinkScaling * soln
+      endif
+
+      return
+      end

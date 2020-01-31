@@ -1,0 +1,88 @@
+maximum step = 10
+maximum time = 1.2
+number of cells = 32  128  
+maximum level = 2
+refinement ratio = 2 2 2 
+regrid interval = 2 2 
+refinement threshold = 0.1
+blocking factor = 2
+max grid size = 500
+fill ratio = 0.7
+checkpoint interval = 100
+plot interval = 1
+desired CFL = 0.9
+
+CLAWPACK PARAMETERS : 
+Initial dt 0.015
+maximum cfl 1
+method(2:3) (order of integration) = 2 2
+method(5) (source term splitting) = 0
+method(6) (mcapa) = 7
+method(7) (maux) = 7
+
+meqn (number of equations) = 4
+maux (number of auxiliary variables) = 7
+mcapa (location of capacity function) = 7
+mwaves (number of waves) = 3
+mthlim(mwaves) (limiters) = 3 3 3 
+
+mbc (number of ghost cells) = 2
+State names : 
+  rho
+  rhou
+  rhov
+  energy
+
+Domain values 
+xlower, xupper = 0 0.25
+ylower, yupper = 0 1
+Auxiliary array type : 
+  xleft
+  xleft
+  xleft
+  yleft
+  yleft
+  yleft
+  capacity
+
+mthbc(2*dim) (boundary conditions) = 3 1 2 2 
+
+rho_r =       1.40000000
+u_r   =       0.00000000
+p_r   =       1.00000000
+  
+rho_l =       7.00000000
+u_l   =       4.00000000
+p_l   =      29.00000000
+ shockspeed =   5.
+Courant number =    0.792  dt =    0.01500
+
+coarse time step   0  old time = 0.000000e+00  old dt = 1.500000e-02
+Courant number =    0.901  dt =    0.01705
+
+coarse time step   1  old time = 1.500000e-02  old dt = 1.705236e-02
+Courant number =    0.904  dt =    0.01704
+
+coarse time step   2  old time = 3.205236e-02  old dt = 1.704148e-02
+Courant number =    0.899  dt =    0.01697
+
+coarse time step   3  old time = 4.909384e-02  old dt = 1.697385e-02
+Courant number =    0.903  dt =    0.01699
+
+coarse time step   4  old time = 6.606769e-02  old dt = 1.698588e-02
+Courant number =    0.903  dt =    0.01694
+
+coarse time step   5  old time = 8.305357e-02  old dt = 1.693703e-02
+Courant number =    0.901  dt =    0.01688
+
+coarse time step   6  old time = 9.999060e-02  old dt = 1.688478e-02
+Courant number =    0.896  dt =    0.01677
+
+coarse time step   7  old time = 1.168754e-01  old dt = 1.676989e-02
+Courant number =    0.877  dt =    0.01574
+
+coarse time step   8  old time = 1.336453e-01  old dt = 1.573535e-02
+Courant number =    0.882  dt =    0.01485
+
+coarse time step   9  old time = 1.493806e-01  old dt = 1.484929e-02
+peak memory usage: 6500068 bytes (6 Mb)

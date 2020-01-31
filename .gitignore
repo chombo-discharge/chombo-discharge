@@ -1,5 +1,6 @@
 *.ex
 *.hdf5
+**/Make.defs.local
 /doc/html/*.html
 /doc/html/**
 /doc/html/*

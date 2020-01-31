@@ -1,0 +1,56 @@
+<head>
+<title>AMRElliptic Tutorial</title>
+</head>
+<body>
+<h1>  AMRElliptic Example </h1>
+<p>
+
+We present an example of how to use the elliptic library
+(AMRElliptic) in the Chombo distribution.
+
+To compile this example, first change directory to
+its executable directory.  
+<pre>
+<font face="Courier">
+cd Chombo/example/AMRPoisson/exec
+</font>
+</pre>
+Now edit the GNUmakefile.  The single line
+you have to change is the first line which  looks like:
+<pre>
+<font face="Courier">
+CHOMBO_HOME = ../../../lib
+</font>
+</pre>
+Change the variable CHOMBO_HOME to the directory name where
+you have installed Chombo/lib.   Then, in your shell, type 
+<pre>
+<font face="Courier">
+make all
+</font>
+</pre>
+This will produce an executable of the form "poisson(configurationstuff).ex".
+The executable takes no one argument, its ParmParse inputs file.  
+Just run it by typing in your shell
+<pre>
+<font face="Courier">
+poisson(configurationstuff).ex input_file_name
+</font>
+</pre>
+where inputs_file_name is the input file name.  A default input file
+(called "inputs") is provided.
+
+The example is split up into two pieces, the main routine and 
+the utility functions.
+<p>
+The <a href="mainamre.html"> driving routine </a> is given
+here.   This shows the basics of how to set up an elliptic operator
+in the Chombo system and how to run the solver.
+<p>
+The <a href="amrefunc.html"> utility functions </a> show the
+details of the same stuff.
+<p>
+
+</html>
+</body>
+

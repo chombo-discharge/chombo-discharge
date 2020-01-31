@@ -1,0 +1,186 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine THIRDDERIVFACES(
+     &     CHF_FRA[U3h3],
+     &     CHF_CONST_FRA[U],
+     &     CHF_CONST_INT[dir],
+     &     CHF_BOX[box])
+      
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[f2cLo]
+      integer CHF_AUTODECL[f2c1Lo]
+      integer CHF_AUTODECL[f2cHi]
+      integer CHF_AUTODECL[f2c1Hi]
+      integer comp
+
+!     +f2cLo from face to adjacent cell on low side (index is 1 lower)
+      CHF_AUTOID[f2cLo; dir; -1]
+      CHF_AUTOID[f2c1Lo; dir; -2]
+
+!     +f2cHi from face to adjacent cell on high side (index is same)
+      CHF_AUTOID[f2cHi; dir; 0]
+      CHF_AUTOID[f2c1Hi; dir; 1]
+
+!     Compute <\frac{\partial^3 U}{\partial x_{dir}^3} h^3> on 
+!     each (low) dir-face.
+!     For example, if dir = 0 (x), the averages computed below will 
+!     be defined on indicies (i-1/2, j, k), where (i, j, k) corresponds 
+!     to a cell center.
+!     Make sure that the Box over which U is defined is at least two 
+!     cells wider in all directions than the argument box
+
+      do comp = 0, (CHF_NCOMP[U3h3]-1)
+         CHF_AUTOMULTIDO[box; i]
+            U3h3(CHF_AUTOIX[i], comp) =
+     &                (   U(CHF_OFFSETIX[i; +f2c1Hi], comp)
+     &                  - U(CHF_OFFSETIX[i; +f2c1Lo], comp) )
+     &        - three * ( U(CHF_OFFSETIX[i; +f2cHi],  comp)
+     &                  - U(CHF_OFFSETIX[i; +f2cLo],  comp) )
+         CHF_ENDDO
+      end do
+
+      return
+      end
+
+
+      subroutine FIFTHDERIVFACES(
+     &     CHF_FRA[U5h5],
+     &     CHF_CONST_FRA[U],
+     &     CHF_CONST_INT[numSlopes],
+     &     CHF_CONST_INT[idir],
+     &     CHF_BOX[farLoBox],
+     &     CHF_BOX[midLoBox],
+     &     CHF_BOX[nearLoBox],
+     &     CHF_CONST_INT[hasLo],
+     &     CHF_BOX[farHiBox],
+     &     CHF_BOX[midHiBox],
+     &     CHF_BOX[nearHiBox],
+     &     CHF_CONST_INT[hasHi],
+     &     CHF_BOX[centerBox])
+
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[f2cLo]
+      integer CHF_AUTODECL[f2c1Lo]
+      integer CHF_AUTODECL[f2c2Lo]
+      integer CHF_AUTODECL[f2c3Lo]
+      integer CHF_AUTODECL[f2c4Lo]
+      integer CHF_AUTODECL[f2c5Lo]
+      integer CHF_AUTODECL[f2cHi]
+      integer CHF_AUTODECL[f2c1Hi]
+      integer CHF_AUTODECL[f2c2Hi]
+      integer CHF_AUTODECL[f2c3Hi]
+      integer CHF_AUTODECL[f2c4Hi]
+      integer CHF_AUTODECL[f2c5Hi]
+      integer lvar
+      real_t UL, UR, ULL, URR, ULLL, URRR
+
+!     +f2cLo from face to adjacent cell on low side (index is 1 lower)
+      CHF_AUTOID[f2cLo; idir; -1]
+      CHF_AUTOID[f2c1Lo; idir; -2]
+      CHF_AUTOID[f2c2Lo; idir; -3]
+      CHF_AUTOID[f2c3Lo; idir; -4]
+      CHF_AUTOID[f2c4Lo; idir; -5]
+      CHF_AUTOID[f2c5Lo; idir; -6]
+
+!     +f2cHi from face to adjacent cell on high side (index is same)
+      CHF_AUTOID[f2cHi; idir; 0]
+      CHF_AUTOID[f2c1Hi; idir; 1]
+      CHF_AUTOID[f2c2Hi; idir; 2]
+      CHF_AUTOID[f2c3Hi; idir; 3]
+      CHF_AUTOID[f2c4Hi; idir; 4]
+      CHF_AUTOID[f2c5Hi; idir; 5]
+
+      do lvar = 0, numSlopes - 1
+
+!     Compute <\frac{\partial^5 U}{\partial x_{dir}^5} h^5> on 
+!     each (low) dir-face.
+!     For example, if dir = 0 (x), the averages computed below will 
+!     be defined on indicies (i-1/2, j, k), where (i, j, k) corresponds 
+!     to a cell center.
+!     Make sure that the Box over which U is defined is at least three 
+!     cells wider in all directions than the argument box
+
+         CHF_AUTOMULTIDO[centerBox; i]
+            ULLL = U(CHF_OFFSETIX[i; +f2c2Lo], lvar)
+            ULL  = U(CHF_OFFSETIX[i; +f2c1Lo], lvar)
+            UL   = U(CHF_OFFSETIX[i; +f2cLo],  lvar)
+            UR   = U(CHF_OFFSETIX[i; +f2cHi],  lvar)
+            URR  = U(CHF_OFFSETIX[i; +f2c1Hi], lvar)
+            URRR = U(CHF_OFFSETIX[i; +f2c2Hi], lvar)
+            U5h5(CHF_AUTOIX[i], lvar) =
+     &           (URRR - ULLL) - five*(URR - ULL) + ten*(UR - UL)
+         CHF_ENDDO
+         if (hasLo .eq. 1) then
+            CHF_AUTOMULTIDO[farLoBox; i]
+               ULLL = U(CHF_OFFSETIX[i; +f2cHi], lvar)
+               ULL  = U(CHF_OFFSETIX[i; +f2c1Hi], lvar)
+               UL   = U(CHF_OFFSETIX[i; +f2c2Hi],  lvar)
+               UR   = U(CHF_OFFSETIX[i; +f2c3Hi],  lvar)
+               URR  = U(CHF_OFFSETIX[i; +f2c4Hi], lvar)
+               URRR = U(CHF_OFFSETIX[i; +f2c5Hi], lvar)
+               U5h5(CHF_AUTOIX[i], lvar) =
+     &              (URRR - ULLL) - five*(URR - ULL) + ten*(UR - UL)
+            CHF_ENDDO
+            CHF_AUTOMULTIDO[midLoBox; i]
+               ULLL = U(CHF_OFFSETIX[i; +f2cLo], lvar)
+               ULL  = U(CHF_OFFSETIX[i; +f2cHi], lvar)
+               UL   = U(CHF_OFFSETIX[i; +f2c1Hi],  lvar)
+               UR   = U(CHF_OFFSETIX[i; +f2c2Hi],  lvar)
+               URR  = U(CHF_OFFSETIX[i; +f2c3Hi], lvar)
+               URRR = U(CHF_OFFSETIX[i; +f2c4Hi], lvar)
+               U5h5(CHF_AUTOIX[i], lvar) =
+     &              (URRR - ULLL) - five*(URR - ULL) + ten*(UR - UL)
+            CHF_ENDDO
+            CHF_AUTOMULTIDO[nearLoBox; i]
+               ULLL = U(CHF_OFFSETIX[i; +f2c1Lo], lvar)
+               ULL  = U(CHF_OFFSETIX[i; +f2cLo], lvar)
+               UL   = U(CHF_OFFSETIX[i; +f2cHi],  lvar)
+               UR   = U(CHF_OFFSETIX[i; +f2c1Hi],  lvar)
+               URR  = U(CHF_OFFSETIX[i; +f2c2Hi], lvar)
+               URRR = U(CHF_OFFSETIX[i; +f2c3Hi], lvar)
+               U5h5(CHF_AUTOIX[i], lvar) =
+     &              (URRR - ULLL) - five*(URR - ULL) + ten*(UR - UL)
+            CHF_ENDDO
+         endif
+         if (hasHi .eq. 1) then
+            CHF_AUTOMULTIDO[farHiBox; i]
+               ULLL = U(CHF_OFFSETIX[i; +f2c5Lo], lvar)
+               ULL  = U(CHF_OFFSETIX[i; +f2c4Lo], lvar)
+               UL   = U(CHF_OFFSETIX[i; +f2c3Lo],  lvar)
+               UR   = U(CHF_OFFSETIX[i; +f2c2Lo],  lvar)
+               URR  = U(CHF_OFFSETIX[i; +f2c1Lo], lvar)
+               URRR = U(CHF_OFFSETIX[i; +f2cLo], lvar)
+               U5h5(CHF_AUTOIX[i], lvar) =
+     &              (URRR - ULLL) - five*(URR - ULL) + ten*(UR - UL)
+            CHF_ENDDO
+            CHF_AUTOMULTIDO[midHiBox; i]
+               ULLL = U(CHF_OFFSETIX[i; +f2c4Lo], lvar)
+               ULL  = U(CHF_OFFSETIX[i; +f2c3Lo], lvar)
+               UL   = U(CHF_OFFSETIX[i; +f2c2Lo],  lvar)
+               UR   = U(CHF_OFFSETIX[i; +f2c1Lo],  lvar)
+               URR  = U(CHF_OFFSETIX[i; +f2cLo], lvar)
+               URRR = U(CHF_OFFSETIX[i; +f2cHi], lvar)
+               U5h5(CHF_AUTOIX[i], lvar) =
+     &              (URRR - ULLL) - five*(URR - ULL) + ten*(UR - UL)
+            CHF_ENDDO
+            CHF_AUTOMULTIDO[nearHiBox; i]
+               ULLL = U(CHF_OFFSETIX[i; +f2c3Lo], lvar)
+               ULL  = U(CHF_OFFSETIX[i; +f2c2Lo], lvar)
+               UL   = U(CHF_OFFSETIX[i; +f2c1Lo],  lvar)
+               UR   = U(CHF_OFFSETIX[i; +f2cLo],  lvar)
+               URR  = U(CHF_OFFSETIX[i; +f2cHi], lvar)
+               URRR = U(CHF_OFFSETIX[i; +f2c1Hi], lvar)
+               U5h5(CHF_AUTOIX[i], lvar) =
+     &              (URRR - ULLL) - five*(URR - ULL) + ten*(UR - UL)
+            CHF_ENDDO
+         endif
+      enddo
+
+      return
+      end

@@ -1,0 +1,112 @@
+# NOTES
+# The limiter fails with the mapped code under the twist or warp mappings.
+# It fails regardless of artificial viscosity (currently OFF)
+# It fails with an initial bump of height 10 or 0.1 (currently 0.1)
+# 1) Currently, this is one grid.  Normally I set max_grid_size to 32 or 64.
+# 2) The examples you saw this afternoon had delta_density = 10.  The failure
+#    happens faster with delta_density = 10, but it still occurs with
+#    delta_density = 0.1.
+
+# Do the gaussian blob problem
+godunov.problem = gaussiansmooth
+
+# Gas gamma and initial conditions
+godunov.gamma = 1.4
+godunov.ambient_density = 1.4
+godunov.delta_density = 10.0
+godunov.initial_pressure = isentropic
+godunov.initial_center = 0.5 0.5 0.5
+godunov.initial_size = 0.05
+godunov.initial_velocity = 0.0 0.0 0.0
+# need to convert initial conditions to average
+godunov.initial_average = 1
+
+# Turn on some output
+godunov.verbosity = 1
+
+# Number of steps, final time, and time step
+godunov.max_step = 60
+godunov.max_time = 100.0
+# godunov.fixed_dt = 0.07154916
+# godunov.fixed_dt = 0.0012359
+# godunov.fixed_dt = 0.0006886
+
+# Size of the domain's longest dimension
+godunov.domain_length = 1.0
+
+# Coarsest grid
+godunov.num_cells = 256 256 256
+godunov.is_periodic = 1 1 1
+
+# Grid refinement
+godunov.max_level = 0
+# For 2D
+godunov.ref_ratio = 4 4 4 4 4
+# For 3D
+# godunov.ref_ratio = 2 2 2 2 2
+
+# Regridding parameters
+# godunov.regrid_interval = 2 2 2 2 2 2
+godunov.regrid_interval = -1 -1 -1 -1 -1
+godunov.tag_buffer_size = 3
+godunov.refine_thresh = 0.05
+
+# Grid generation parameters
+godunov.block_factor = 4
+# godunov.max_grid_size = 64
+godunov.max_grid_size = 100000
+godunov.fill_ratio = 0.75
+
+# Normal predictor method - PLM or PPM
+godunov.normal_predictor = PPM
+
+# Slope computation parameters
+godunov.use_fourth_order_slopes = 1
+# godunov.use_prim_limiting = 1
+godunov.use_prim_limiting = 0
+godunov.use_char_limiting = 0
+# godunov.use_flattening = 1
+godunov.use_flattening = 0
+
+# Artificial viscosity
+godunov.use_artificial_viscosity = 0
+godunov.artificial_viscosity = 0.3
+godunov.fourth_order_artificial_viscosity_parameter = 0.42
+
+# Plot file information
+godunov.plot_interval = 1
+#godunov.plot_interval = 1
+godunov.plot_prefix  = gaussian64limiter.
+godunov.plot_prefix  = gaussian64flat.
+
+# Checkpoint file information
+godunov.checkpoint_interval = 50
+# godunov.checkpoint_interval = 1
+godunov.chk_prefix = chkflat.
+
+# Restart file information
+# godunov.restart_file = chknolim.50.2d.hdf5
+
+# CFL multipliers
+godunov.cfl = 0.5
+godunov.initial_cfl = 0.3
+
+# Variable time step parameters
+godunov.max_dt_growth = 1.1
+godunov.dt_tolerance_factor = 1.1
+
+# just have this line present
+godunov.fixed_hierarchy = 1
+
+#coordsys.type = warped
+# warped coordsys parameters
+#coordsys.scale = 0.1 0.1 0.0
+#coordsys.relative_tolerance = 1.0e-12
+#coordsys.absolute_tolerance = 1.0e-13
+#coordsys.maximum_iterations = 100
+
+#coordsys.type = cartesian
+
+coordsys.type = twisted
+coordsys.radius = 0.5
+coordsys.twist = 0.5

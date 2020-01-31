@@ -1,0 +1,10 @@
+The loadBalancer utility is a standalone interface to the Chombo load balancing
+functions which may be called in serial or in parallel.  Code takes an inputs 
+file which is processed using ParmParse in the usual way (prefix is "main").
+Example inputs files provided are "inputs.2d.2Proc" and "inputs.3d.2Proc" 
+which take the grids in "testGrids.2d" and "testGrids.3d" respectively, 
+distribute them among two processors, then write the resulting grids and 
+associated processor assignments out to "testGrids.2d.2Proc" and "testGrids.3d.2Proc" respectively.
+
+The input and output grid files use the same format as is read by the 
+AMRPoisson example code.

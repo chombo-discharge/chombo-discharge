@@ -1,0 +1,350 @@
+# file: Make.defs
+
+################################################################
+###
+### Variable defitions for all Chombo makefiles
+###
+### None of the variables are exported because this makefile is intended
+### to be `include'd by all the makefiles in the system.
+###
+### This file assumes that $(CHOMBO_HOME) has already be set, and
+### points to the full path of the Chombo/lib directory.
+###
+### There are two kinds of variables set in the Chombo makefile system
+###   UPPER case vars are for the user to set, although they may be initialized here
+###   lower case vars are for the makefiles to set
+###
+### The UPPER case vars are documented in: Chombo/lib/mk/Make.defs.local.template
+### The lower case vars are documented here and in:   mk/compiler/Make.defs.example
+###
+### The compiler flags are handled in a multi-stage process:
+###  1) The compiler files define variables with names  of the for "$def*flags".
+###  2) Make.defs.local and Make.defs.<hostname> can define variables with
+###     the same names without the "def" (i.e. $*flags) (but they don't have to)
+###     The $def*flags vars are used if the corresponding $*flags var is not set.
+###  3) The user can define the $*FLAGS variables on the command line, and these
+###     will override everything else.
+###
+### Note:
+###  There are separate $def*flags and $*flags variables for debug and
+###  optimization cases (e.g. $defcxxdbgflags and $cxxdbgflags) but there
+###  is only one corresponding user variable (i.e $CXXFLAGS).
+###
+################################################################
+.SUFFIXES:
+	MAKEFLAGS += -R
+
+# for debugging
+makefiles+=Make.defs
+
+################################################################
+
+##
+## Load installation-dependent variable definitions.  This is the
+## file that most users will do their customizations in.
+##
+##[NOTE: this file will be built from the Make.defs.local.template file
+##       if it doesn't already exist.  The template is all comments.]
+ifeq ($(wildcard $(CHOMBO_HOME)/mk/Make.defs.local),)
+	_foo:=$(info )
+	_foo:=$(info You do not appear to have a 'Make.defs.local' file in lib/mk)
+	_foo:=$(info This is where the Chombo build system looks for configuration)
+	_foo:=$(info information specific to your system. See the documentation in)
+	_foo:=$(info doc/chomboDesign.pdf.)
+	_foo:=$(info )
+	_foo:=$(info There is a 'Make.defs.local.template' file available in lib/mk)
+	_foo:=$(info which can be used as starting point for customization, and there)
+	_foo:=$(info are tested configurations specific to various commonly used)
+	_foo:=$(info machines (hopper, jaguar, etc) in lib/mk/local)
+	_foo:=$(info )
+	_foo:=$(error no 'Make.defs.local')
+endif
+
+include $(CHOMBO_HOME)/mk/Make.defs.local
+
+################################################################
+################################################################
+
+## pick up default values for things NOT set in Make.defs.local
+
+include $(CHOMBO_HOME)/mk/Make.defs.defaults
+
+# the names of the compilers: these should be used for
+# setting options but not for running the compiler
+#[NOTE: these use "=" instead of ":=" to delay rhs expansion
+#       until the variable names are used.  This may not be best.]
+#cxxname = $(notdir $(firstword $(CXX --version)))
+#fname   = $(notdir $(firstword $(FC --version)))
+cxxname := $(firstword $(shell $(CXX) --version))
+fname   := $(firstword $(shell $(FC) --version))
+
+# default the linker to be the same as the C++ compiler (serial or parallel)
+ifeq ($(words $(LD)),0)
+  LD = $(cxxc)#   #cxxc is $CXX or $MPICXX, depending on $MPI
+endif
+ld = IS_THIS_UNUSED?  #[<dbs> I cant find any uses of this variable]
+
+# standard utility programs
+#[NOTE: these use "=" instead of ":=" to delay variable expansion
+#       until the commands are used, in case the RHS variables get
+#       modified.]
+chfpp_src      = $(PERL) -I $(CHOMBO_HOME)/util/chfpp $(CHOMBO_HOME)/util/chfpp/uber.pl
+stripsharp_src = $(PERL) -I $(CHOMBO_HOME)/util/chfpp $(CHOMBO_HOME)/util/chfpp/stripsharpmain.pl
+chfpp_hdr      = $(PERL) -I $(CHOMBO_HOME)/util/chfpp $(CHOMBO_HOME)/util/chfpp/uber.pl
+fortpost       = $(PERL) -I $(CHOMBO_HOME)/util/chfpp $(CHOMBO_HOME)/util/chfpp/fort72
+mkdep          = $(PERL) $(CHOMBO_HOME)/util/mkdep/mkdep
+cupp_src       = $(PERL) $(CHOMBO_HOME)/util/cupp/embedstr.pl
+
+################################################################
+
+## $(system) also will be used to set a `CH_' cpp macro in Make.rules.
+##
+system := $(filter AIX Linux OSF1 SunOS CYGWIN% Darwin HP-UX IRIX IRIX64 FreeBSD NetBSD OpenBSD,$(shell uname))
+unamea := $(shell uname -a)
+  arch := $(shell uname -m)
+
+
+
+
+
+##
+## Next, load variable definitions for this particular computer, if any.
+## This file should only contain definitions that are specific to a
+## single computer, like directory names.  For multiple computers
+## sharing the same filesystem (like the front-end computers on
+## seaborg.nersc.gov), you can use Make.defs.local or make symbolic
+## links so all computers can share a single file.
+
+#hostnm := $(shell uname -n)
+#ifeq ($(hostnm),)
+#  hostnm := $(shell hostname)
+#endif
+#ifneq ($(wildcard $(CHOMBO_HOME)/mk/local/Make.defs.$(hostnm)),)
+#  # $warning appeared in 3.78 (or 3.79??)
+#  _makemajorver := $(word 1,$(subst ., ,$(MAKE_VERSION)))
+#  _makeminorver := $(word 2,$(subst ., ,$(MAKE_VERSION)))
+#  ifeq (3-0,$(_makemajorver)-$(shell test $(_makeminorver) -gt 77 ; echo $$?))
+#    ifneq (@,$(ECHO))
+#      $(warning Loading host-specific customization file $(CHOMBO_HOME)/mk/local/Make.defs.$(hostnm) ...)
+#    endif
+#  endif
+#  include $(CHOMBO_HOME)/mk/local/Make.defs.$(hostnm)
+#endif
+
+################################################################
+
+##
+## Load compiler-specific default values and apply them as necessary.
+##
+
+# These don't have defaults variables; if they have to be changed,
+# the compiler file should change them directly.
+#[NOTE: keep the comments because they force a space into the variable;
+#       some compilers require no space so these variables will have to
+#       be reset in the compiler-specific defs file.]
+cxxcompflag = -c
+fcompflag   = -c
+cxxobjflag  = -o #
+fobjflag    = -o #
+cxxexeflag  = -o #
+
+# The naming scheme used to call Fortran from C++
+# (used only by `lib/src/BaseTools/FORT_PROTO.H').
+cppcallsfort = -DCH_FORT_UNDERSCORE#  #-DCH_FORT_UPPERCASE is the other option
+
+# Turn off MPI C++ bindings because we don't need them and they don't compile always.
+#[NOTE: just put all MPI implementations here since it is easier.]
+mpicppflags = -DMPICH_SKIP_MPICXX -ULAM_WANT_MPI2CPP -DMPI_NO_CPPBIND
+
+# Is the FFTW library used?
+#[NOTE: this isn't the right way to do this -- need support for other FFT libs. <dbs>]
+ifeq ($(USE_FFTW),TRUE)
+  fftincflags = -DFFTW_3 -I$(FFTWDIR)/include
+  fftlibflags = -L$(FFTWDIR)/lib $(subst FLOAT,-lfftw3f,$(subst DOUBLE,-lfftw3,$(PRECISION))) -lm
+  # special cpp macro for Fortran code that uses FFTW plans
+  ifneq ($(USE_64),TRUE)
+    fftincflags += -DFFTW_PLAN_TYPE=integer
+  else
+    fftincflags += -DFFTW_PLAN_TYPE='integer*8'
+  endif
+endif
+
+
+## Initialize all the defaults variables, in case there is no compiler file.
+## Note: don't change these without fixing _all_ the compiler files!!!
+defcppcomflags  =
+defcppdbgflags  =
+defcppoptflags  =
+defcxxcppflags  =
+defcxxcomflags  =
+defcxxdbgflags  = -g
+defcxxoptflags  = -O
+defcxxprofflags = -pg
+deffcppflags    =
+deffcomflags    =
+deffdbgflags    = -g
+deffoptflags    = -O
+deffprofflags   = -pg
+defflibflags    =
+defldcomflags   =
+deflddbgflags   =
+defldoptflags   =
+
+## Select a compiler file based on the compiler names.
+
+# PathScale compilers
+ifeq ($(cxxname),pathCC)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.PathScale
+else
+  ifeq ($(fname),pathf90)
+    include $(CHOMBO_HOME)/mk/compiler/Make.defs.PathScale
+  endif
+endif
+
+# GNU compilers
+ifeq ($(cxxname),g++)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.GNU
+else
+  ifeq ($(fname),g77)
+    include $(CHOMBO_HOME)/mk/compiler/Make.defs.GNU
+  endif
+  # GNU Fortran95 compiler in GCC V4 suite
+  ifeq ($(fname),gfortran)
+    include $(CHOMBO_HOME)/mk/compiler/Make.defs.GNU
+  endif
+endif
+
+ifeq ($(cxxname),icpc)
+ include $(CHOMBO_HOME)/mk/compiler/Make.defs.Intel
+endif
+
+# IBM compiler goes by several names
+ifeq ($(findstring xlC,$(cxxname)),xlC)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.IBM
+else
+  ifeq ($(findstring xlf,$(fname)),xlf)
+    include $(CHOMBO_HOME)/mk/compiler/Make.defs.IBM
+  endif
+endif
+
+# HP-UX compiler
+ifeq ($(cxxname),aCC)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.aCC
+endif
+
+
+# Tru64,OSF1,DEC Unix C++ compiler
+ifeq ($(cxxname),cxx)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.cxx
+  #[Note: DEC Fortran compiler is handled by the f90 file]
+endif
+
+# Portland Group compilers
+ifeq ($(cxxname),pgCC)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.PGI
+else
+  ifeq ($(findstring pgf,$(fname)),pgf)
+    include $(CHOMBO_HOME)/mk/compiler/Make.defs.PGI
+  endif
+endif
+
+# this handles the Fortran compiler from Lahey
+#ifeq ($(findstring $(fname),lf90 lf95),$(fname))
+#  include $(CHOMBO_HOME)/mk/compiler/Make.defs.Lahey
+#endif
+
+# this handles all compilers named CC from various vendors
+#ifeq ($(cxxname),CC)
+#  include $(CHOMBO_HOME)/mk/compiler/Make.defs.CC
+#endif
+
+ifeq ($(fname),f90)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.f90
+endif
+
+ifeq ($(cxxname),Apple)
+  cxxname:=clang++
+endif 
+
+# Apple clang++ compiler
+ifeq ($(cxxname),clang++)
+  include $(CHOMBO_HOME)/mk/compiler/Make.defs.clang++
+endif
+## Finally, set the compiler variables to the defaults if they aren't set.
+
+ifeq ($(cppcomflags),)
+  cppcomflags = $(defcppcomflags)
+endif
+ifeq ($(cppdbgflags),)
+  cppdbgflags = $(defcppdbgflags)
+endif
+ifeq ($(cppoptflags),)
+  cppoptflags = $(defcppoptflags)
+endif
+ifeq ($(cxxcppflags),)
+  cxxcppflags = $(defcxxcppflags)
+endif
+ifeq ($(cxxcomflags),)
+  cxxcomflags = $(defcxxcomflags)
+endif
+ifeq ($(cxxdbgflags),)
+  cxxdbgflags = $(defcxxdbgflags)
+endif
+ifeq ($(cxxoptflags),)
+  cxxoptflags = $(defcxxoptflags)
+endif
+ifeq ($(cxxprofflags),)
+  cxxprofflags = $(defcxxprofflags)
+endif
+ifeq ($(fcppflags),)
+  fcppflags = $(deffcppflags)
+endif
+ifeq ($(fcomflags),)
+  fcomflags = $(deffcomflags)
+endif
+ifeq ($(fdbgflags),)
+  fdbgflags = $(deffdbgflags)
+endif
+ifeq ($(foptflags),)
+  foptflags = $(deffoptflags)
+endif
+ifeq ($(fprofflags),)
+  fprofflags = $(deffprofflags)
+endif
+ifeq ($(flibflags),)
+  flibflags = $(defflibflags)
+endif
+ifeq ($(ldcomflags),)
+  ldcomflags = $(defldcomflags)
+endif
+ifeq ($(lddbgflags),)
+  lddbgflags = $(deflddbgflags)
+endif
+ifeq ($(ldoptflags),)
+  ldoptflags = $(defldoptflags)
+endif
+ifeq ($(ldprofflags),)
+  ldprofflags = $(defldprofflags)
+endif
+
+ifeq ($(USE_PETSC),TRUE)
+
+# v3.6 (?) version of PETSc includes
+include $(PETSC_DIR)/lib/petsc/conf/variables
+petscincflags = $(PETSC_CC_INCLUDES)
+petsclibflags = $(PETSC_KSP_LIB) 
+
+endif
+
+# This variable is used to run programs in Make.rules
+ifeq ($(RUN),)
+  ifeq ($(MPI),TRUE)
+    RUN = mpirun -np 2 ./#
+  else
+    RUN = ./#
+  endif
+endif
+
+## This is deprecated, but is necessary until the next redesign.
+## Don't change this variable!
+AUTONAME = TRUE

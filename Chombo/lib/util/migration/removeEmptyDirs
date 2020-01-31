@@ -1,0 +1,53 @@
+#!/bin/csh -f
+#
+# This script explicitly removes empty directories that we no longer want
+# under CVS.  When we clean up the Chombo CVS repository, we will actually
+# remove these directories.
+#
+# Each empty directory should contain a "README" file whose contents is:
+#
+#   This directory was intentionally left empty.  It will be removed when the
+#   Chombo CVS repository is next cleaned.
+#
+#   The script "removeEmptyDirs" in the top level directory will delete all
+#   such empty directories (including this one).'
+#
+echo "Removing empty directories..."
+foreach i ( \
+            example/AMRClaw/exec \
+            example/OldAMRGodunov/Unsplit/diffusionSolvers \
+            example/OldAMRGodunov/Unsplit/srcAdvectDiffuse/save \
+            example/EBAMRPoisson/tests/multigrid/exact/results \
+            example/EBAMRPoisson/tests/multigrid/mono/results \
+            example/EBAMRPoisson/tests/multigrid/point/results \
+            example/EBAMRPoisson/tests/multigrid/trig/results \
+            example/EBAMRPoisson/tests/multigrid/johan/results \
+            example/EBAMRPoisson/tests/trunc/mono/results \
+            example/EBAMRPoisson/tests/trunc/point/results \
+            example/EBAMRPoisson/tests/trunc/trig/results \
+            example/EBAMRPoisson/tests/trunc/johan/results \
+            example/EBAMRPoisson/tests/amr/solutionError/profiles \
+            example/AMRGodunov/testPolytropic/singleLevel/truncationError/results \
+            example/AMRGodunov/testPolytropic/singleLevel/solutionError/results \
+            example/MappedGridPPMAMRGodunov/testPolytropic/singleLevel/truncationError/results \
+            example/MappedGridPPMAMRGodunov/testPolytropic/singleLevel/solutionError/results \
+            lib/doc/AMRElliptic \
+            lib/doc/AMRTimeDependent \
+            lib/doc/AMRUtils \
+            lib/doc/BoxTools \
+            lib/doc/BoxToolsUG \
+            lib/doc/Chombo \
+            lib/doc/ChomboFortran \
+            lib/doc/CodeStandards \
+            lib/doc/Common \
+            lib/doc/Users \
+            lib/doc/Users/figs \
+            lib/doc/Util \
+            lib/doc/doxygen \
+            lib/doc/html \
+            lib/doc/mk \
+            lib/regression \
+  )
+  echo "  $i"
+  /bin/rm -rf $i
+end

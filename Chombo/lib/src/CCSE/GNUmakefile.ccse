@@ -1,0 +1,24 @@
+#
+# Gets copied, by make_ccse_all.sh, to ../CCSE_all directory.
+#
+
+# included makefiles need an absolute path
+CHOMBO_HOME := $(shell pwd)/../..
+
+lbase := ccse
+
+LibNames :=
+
+include $(CHOMBO_HOME)/mk/Make.lib
+
+ccse_fort_punctuation := $(subst CH_FORT_,CH_FORT_USE_,$(cppcallsfort))
+CXXFLAGS += -I. $(ccse_fort_punctuation)
+FFLAGS += $(ccse_fort_punctuation)
+
+%.BL_cpre : %.BL_F
+	$(CCSE_CPP) $(CPPFLAGS) -I. $(XTRACPPFLAGS) $(fcppflags) -DCH_LANG_FORT $<  > $@
+#	cp $@ ./latest_$@
+
+%.f : %.BL_cpre
+	python ../../util/chfpp/ccse/cpre2f.py $< $@ $(DIM)
+#	cp $@ ./latest_$@

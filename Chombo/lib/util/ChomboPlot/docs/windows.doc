@@ -1,0 +1,208 @@
+This file contains descriptions of the main high level startup and
+window creation functions.
+
+-----------------------------------------------------------
+
+int    OpenDisplay(int argc, char **argv);
+
+This function initiates everything with libsx.  You should call this 
+function before you call any of the other functions.  A correctly
+written application will call OpenDisplay(), passing its command line
+arguments and count.  The return value from this function is the new
+number of arguments (or zero if an error occurred).  The X libraries
+accept various standard command line options such as -display or
+-font, and if your application passes the command line arguments to
+OpenDisplay(), these will be handled properly.  Any X options are
+removed from the argv array, therefore it is best if you do your
+command line processing _after_ calling OpenDisplay().
+
+You only need to call this function once to initialize the first
+window your program uses.  Any other windows you need should be
+created with MakeWindow().
+
+Technically, calling OpenDisplay() is optional (the MakeXXX() routines
+will call it for you if you didn't), but it's usually a good idea to
+call it (since it is only one line of code and it's pretty
+straightforward. 
+
+This function returns FALSE (0) if something went wrong (like being
+unable to open the display, etc). If everything went ok, it returns
+the new number of arguments in argv.
+
+
+SEE ALSO: MakeWindow()
+-----------------------------------------------------------
+
+void   ShowDisplay(void);
+
+This function displays the currently active window (user interface)
+you've created with the MakeXXX() calls.  After this call completes,
+the interface will be visible on the display.
+
+Until you call this function, your interface will not be visible and
+drawing into a draw area will have no effect.
+
+Usually one calls ShowDisplay(), allocates some colors and then
+immediately calls MainLoop().  If you do not call ShowDisplay(), but
+just directly call MainLoop(), then MainLoop() implicitly calls
+ShowDisplay().  
+
+SEE ALSO: MainLoop(), MakeWindow() 
+-----------------------------------------------------------
+
+void   MainLoop(void);
+
+After calling this function, your program yields control to the user
+interface, and it is entirely driven by what the user does and the
+callbacks associated with the various widgets.  For a single window
+application, the general flow of events is:
+
+    OpenDisplay(argc, argv);   /* initialize the first window */
+
+    MakeButton(....);          /* create widgets */
+
+    ShowDisplay();             /* put the window on the screen */
+                               /* optionally allocate colors */
+    MainLoop();                /* start the main loop going */
+
+
+When you call this after calling ShowDisplay() for your first window
+(created by OpenDisplay()), the MainLoop() function never returns and
+your application should have some callback function that will exit()
+the program (such as a quit button or menu option).
+
+If you did not call ShowDisplay(), MainLoop() will call it for you and
+then launch into the main loop.
+
+You should not call MainLoop() for NONEXCLUSIVE mode windows created
+with MakeWindow().  Those type of windows have their callbacks handled
+by the MainLoop() function that is already executing (i.e. the one you
+called for your original window).
+
+If the window is an EXCLUSIVE mode window, then MainLoop() keeps
+executing until CloseWindow() is called on the EXCLUSIVE mode window.
+That is, MainLoop() blocks until the EXCLUSIVE mode window is closed,
+and then it returns.
+
+If you create a non-exclusive mode window, the general order of events
+is:
+
+      MakeWindow(NONEXCLUSIVE_WINDOW, ....);
+      MakeButton(...);
+      ShowDisplay();
+
+This creates a window, puts interface objects into it, and then puts
+that window on the screen.  No other actions need to be taken, and
+when the callback that created this new window returns, all processing
+takes place normally, including the processing of the new window and
+its callbacks.
+
+
+For a window of EXCLUSIVE_WINDOW mode (like a popup), the general
+order execution is:
+
+      MakeWindow(EXCLUSIVE_WINDOW, ....);
+      MakeButton(...);
+      ShowDisplay();
+
+      MainLoop();     /* blocks until CloseWindow() is called */
+
+      /* do something with whatever values the popup got for us */
+
+When MainLoop() returns for an EXCLUSIVE_WINDOW, the window has been
+closed.
+
+SEE ALSO: MakeWindow(), ShowDisplay().
+-----------------------------------------------------------
+
+void   SyncDisplay(void);
+
+This function synchronizes the display with all drawing requests you
+have made.  Normally it is not necessary to call this function, but if
+you make many repeated function calls to draw graphics, they will be
+updated in a chunky fashion because X buffers drawing requests and
+sends a bunch of them at once.
+
+After this function completes, all drawing requests you have made are
+visible on the screen.
+
+NOTE: Normally you do not need to call this function because X ensures
+      that everything you request gets drawn, but sometimes it is
+      necessary to insure the synchronization of the display.
+
+-----------------------------------------------------------
+
+Widget MakeWindow(char *window_name, char *display_name, int exclusive);
+
+NOTE: Do not call this function to open your first window. Your
+      application's first window is opened for you by OpenDisplay().
+      If your application only needs one window, do NOT call this
+      function. 
+
+This function opens a new window, possibly on a different display
+(workstation).  The new window has the name specified by the argument
+window_name and is opened on the display named by display_name (a
+string usually in the form of, "machine_name:0.0").  The final
+argument indicates whether the window should be an exclusive window or
+not (described below).
+
+After this functions returns, the current window is the one you just
+created and you can begin adding widgets to it with the MakeXXX()
+calls.  After have created and added any widgets you want, you should
+call ShowDisplay(), and if the window is an EXCLUSIVE_MODE window,
+then you should call MainLoop() (which blocks until the window is
+closed).  If you opened the window with the NONEXCLUSIVE_WINDOW
+option, you should NOT call MainLoop().
+
+If you pass a NULL for the window_name, it receives a default title of
+"Untitled".
+
+If you pass the #define, SAME_DISPLAY, for the display name, the
+window opens on the same display as the original window opened by
+OpenDisplay(). 
+
+The argument, exclusive, indicates what type of window to open.  A
+normal window is a NONEXCLUSIVE_WINDOW.  That is, it will not block
+the user from interacting with your existing window.  An
+EXCLUSIVE_WINDOW is a popup window that blocks input to your main
+window until the popup is closed with CloseWindow().
+
+The EXCLUSIVE_WINDOW mode is useful for requestors that need an answer
+and the user should not be able to do other things in the application.
+Of course some user-interface folks don't think modal windows like
+this are good, but tough cookies for them because some times it's
+necessary. 
+
+
+SEE ALSO: SetCurrentWindow()
+-----------------------------------------------------------
+void   SetCurrentWindow(Widget w);
+  
+This function sets the currently active window for other function
+calls such as CloseWindow().  If you have multiple windows open on
+several displays, you must call this function switch the currently
+active one when you wish to manipulate the various windows. 
+
+The argument, w, must be a valid value returned by MakeWindow().  If
+you would like to set the current window to be the original window
+opened by OpenDisplay(), you can pass the #define, ORIGINAL_WINDOW.
+
+When you change windows, the current drawing area is also changed to
+be the last current drawing area in the new window (if there is a
+drawing area in the new window).
+
+
+SEE ALSO: MakeWindow(), CloseWindow()
+-----------------------------------------------------------
+void   CloseWindow(void);
+
+This function closes and removes from the display, the currently
+active window.
+
+After calling this function, you should not refer to any of the
+widgets contained in the window as they are invalid (as is the window
+handle). 
+
+SEE ALSO: SetCurrentWindow(), MakeWindow()
+-----------------------------------------------------------
+

@@ -1,0 +1,25 @@
+verbosity = 1
+
+#grading function parameters 
+max_step = 50
+dt = 0.1
+tolerance = 0.7
+speed = 0.02
+radius = 1.3
+subradius = 0.75
+
+#problem domain details
+domain_length = 1.0
+num_cells = 16 16 16
+
+
+# gridding control
+fixed_hierarchy = 0
+max_level = 3
+ref_ratio = 2 2 2 2
+tag_buffer_size = 1
+block_factor = 4
+max_grid_size = 16
+fill_ratio = 0.75
+grid_buffer_size = 2
+prefix = plots.

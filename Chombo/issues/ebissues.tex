@@ -1,0 +1,113 @@
+\section{Intro}
+
+This is the file in which you should put documentation of anything
+that is not working in EB.
+
+
+\begin{itemize}
+\item{4-20-2009}  EBAMRPoissonOp multigrid convergence
+Terry J Ligocki wrote:
+ I'm a bit concerned about this example/test.  Basically, the 2D multigrid convergence with 4 smooths (up and down?) was ~3.3 per V-cycle.  Increasing the smooths to 8 (in the commit), improves this to ~7.8 per cycle.  That's not bad but it seems like an lot of smooths for a domain which is the outside of circle using constant Dirichlet BCs everywhere.
+ In 3D, I'm more concerned.  The convergence was ~1.3 per cycle (86 cycles to overall convergence) and the increased smooths moves this to ~3.0 per cycle (22 cycles to overall convergence).  Although this is much better (as you said), it still seems poor for this problem.
+ I can't help thinking that the smooths may be hiding some other problem(s).  I tried a few experiments.
+ First, I got rid of the AMR (originally there were 3 levels total) and started with a single level at the resolution on of the finest level in the original problem.  Of course, this covered the domain unlike the original finest level - in 2D the number of points went up by a factor of 4 and in 3D by a factor of 20!  In 2D the convergence went to ~6.7 per cycle and in 3D it only went to 2.0 per cycle *(and each cycle took forever).
+ Second, I specified some other geometries (all with 3 levels total):
+    * All regular - 40-60 per cycle (2D and 3D)
+    * Ramp (as given) - 4.1 in 2D and 2.8 in 3D
+    * Tilted cylinder (as given) - 1.7 in 2D and 4.2 in 3D
+    * Sphere (as above) - 3.3 in 2D and 1.3 in 3D 
+
+\item{4-24-2009}  For Dirchlet BC EBConductivityOp single vs. multi cylinder seem to
+  get different answers at the single-valued cell (9,6).example/EBAMRPoissonOp/ condExec using realm.inputs and toggling ebis_file between single and multi.
+Also the multigrid behavior is quite a bit better in multi-cylinder than in single-cylinder. The behavior should be the same.
+
+For Neumann BC, using the SimpleBottomSolver causes multigrid to diverge. 
+
+\item{4-24-2009}  EBConductivityOp multigrid convergence.
+  EBConductivityOp seems to have some issues when the a coefficient is
+  strongly variable.
+
+\item {Reading in an EBIS fails (or LinearIn for fluxFAB is broken)}
+In schwartz/ReadingEBIS,  there is an input file and complete
+instructions on the six debugger steps necessary to observe a failure
+in linearIn for FluxFAB that reflects a multicell related failure to
+read in the EBIS correctly. The problem disappears if the the box
+boundary is moved. Hence I assume the bug is activated by a multicell
+on a box boundary.   fixed 10-26-09
+
+\item{4-30-2009}  Many EB unit tests are broken when run in parallel
+  with two processes.  See ``unit_tests.MPI.2.txt'' for details.  Most
+  failing tests had assert failures but some tried to use over 12 GB of
+  memory and had to be killed, for example ``ldBaseIFFABTest''.
+
+
+\item {5-03-2009}realm/shallow/exec/ebamrdriver...ex is broken for two processors. The code crashes early on at an exchange (faceDir = 0) of m_fluxInterpolants:
+
+ for(int faceDir = 0; faceDir < SpaceDim; faceDir++)
+    {
+      m_fluxInterpolants[faceDir].exchange(fluxInterv);
+    }
+(Line 544 in the ShallowWaterLevelSolver.)
+
+ Here is the debugger trail:
+
+     0x00000000007f0d4d in AttachDebugger (a_sig=6) at CH_Attach.cpp:120
+(gdb) 
+#2  0x00002b195782cbd0 in killpg () from /lib64/libc.so.6
+(gdb) 
+#3  0x00002b195782cb45 in raise () from /lib64/libc.so.6
+(gdb) 
+#4  0x00002b195782e0e0 in abort () from /lib64/libc.so.6
+(gdb) 
+#5  0x00000000007f8c8a in MayDay::Error (
+    a_msg=0xa53be0 "Chomb MPI Error handler called \n", exit_code=255)
+    at MayDay.cpp:71
+(gdb) 
+#6  0x00000000007f0a94 in mpierrorfunction (a_comm=0xe0e3f8, 
+    a_error=0x7fff540f7704) at CH_Attach.cpp:169
+(gdb) 
+#7  0x00000000008c2ccf in MPIR_Error ()
+(gdb) 
+#8  0x00000000008c32af in PMPI_Waitall ()
+(gdb) 
+#9  0x000000000050c105 in BoxLayoutData<BaseIFFAB<double> >::unpackReceivesToMe (this=0xb910428, a_dest=@0xb910428, a_destComps=@0x7fff540f8e50, 
+    a_op=@0x7fff540f7960) at BoxLayoutDataI.H:751
+(gdb) 
+#10 0x000000000050c292 in BoxLayoutData<BaseIFFAB<double> >::makeItSoEnd (
+    this=0xb910428, a_dest=@0xb910428, a_destComps=@0x7fff540f8e50, 
+    a_op=@0x7fff540f7960) at BoxLayoutDataI.H:306
+(gdb) 
+#11 0x000000000050d473 in BoxLayoutData<BaseIFFAB<double> >::makeItSo (
+    this=0xb910428, a_srcComps=@0x7fff540f8e50, a_src=@0xb910428, 
+    a_dest=@0xb910428, a_destComps=@0x7fff540f8e50, a_copier=@0xb910638, 
+    a_op=@0x7fff540f7960) at BoxLayoutDataI.H:228
+(gdb) 
+#12 0x000000000050d4f5 in LevelData<BaseIFFAB<double> >::exchange (
+    this=0xb910428, comps=@0x7fff540f8e50, copier=@0xb910638)
+    at LevelDataI.H:311
+(gdb) 
+#13 0x000000000050ab0c in LevelData<BaseIFFAB<double> >::exchange (
+    this=0xb910428, comps=@0x7fff540f8e50) at LevelDataI.H:285
+(gdb) up
+#14 0x000000000050141b in ShallowWaterLevelSolver::doRegularUpdate (
+    this=0xb910230, a_fineFluxRegister=@0xb912cd0, 
+    a_coarFluxRegister=@0xb12c1c0, a_saltRHS=@0xb90dd10, 
+    a_saltSource=@0x7fff540fd410, a_cellCentered3DGeomInfo=@0xb90e150, 
+    a_faceCentered3DGeomInfo=@0xb90e578, a_referenceHeight=@0xb90f278, 
+    a_time=@0xb90d1a0, a_dt=@0xb90d198)
+    at ../../src/ShallowWaterLevelSolver.cpp:546
+(gdb) down
+#13 0x000000000050ab0c in LevelData<BaseIFFAB<double> >::exchange (
+    this=0xb910428, comps=@0x7fff540f8e50) at LevelDataI.H:285
+(gdb) up
+#14 0x000000000050141b in ShallowWaterLevelSolver::doRegularUpdate (
+    this=0xb910230, a_fineFluxRegister=@0xb912cd0, 
+    a_coarFluxRegister=@0xb12c1c0, a_saltRHS=@0xb90dd10, 
+    a_saltSource=@0x7fff540fd410, a_cellCentered3DGeomInfo=@0xb90e150, 
+    a_faceCentered3DGeomInfo=@0xb90e578, a_referenceHeight=@0xb90f278, 
+    a_time=@0xb90d1a0, a_dt=@0xb90d198)
+    at ../../src/ShallowWaterLevelSolver.cpp:546
+
+
+    }
+\end{itemize}

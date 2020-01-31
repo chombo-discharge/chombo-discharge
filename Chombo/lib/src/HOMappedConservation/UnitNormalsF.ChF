@@ -1,0 +1,218 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine GETUNITNORMALS(
+     &     CHF_FRA[unitNormal],
+     &     CHF_CONST_FRA[faceMetric],
+     &     CHF_CONST_INTVECT[normalComponents],
+     &     CHF_CONST_INT[dirn],
+     &     CHF_BOX[box])
+
+      integer CHF_AUTODECL[comp]
+      integer CHF_AUTODECL[i]
+      integer idir
+      integer CHF_AUTODECL[base]
+      real_t CHF_AUTODECL[norml]
+      real_t CHF_AUTODECL[nvec]
+      real_t nmag
+#if CH_SPACEDIM >= 3
+      integer indmin
+      real_t ndir, nmin, tanvec(0:2), tmag
+#endif
+
+!     Use compx, compy, compz to index into faceMetric.
+      CHF_DTERM[
+      comp0 = normalComponents(0) ;
+      comp1 = normalComponents(1) ;
+      comp2 = normalComponents(2) ;
+      comp3 = normalComponents(3) ;
+      comp4 = normalComponents(4) ;
+      comp5 = normalComponents(5) ]
+
+!     base0, base1, base2 are the base indices within unitNormal
+!     of the first, second, and third basis vectors.
+      CHF_DTERM[
+      base0 = CH_SPACEDIM * dirn ;
+      base1 = mod(base0 + CH_SPACEDIM, CH_SPACEDIM*CH_SPACEDIM) ;
+      base2 = mod(base1 + CH_SPACEDIM, CH_SPACEDIM*CH_SPACEDIM) ]
+
+      CHF_AUTOMULTIDO[box;i]
+!     Start with NON-unit normal vector nvec, of magnitude nmag.
+         CHF_DTERM[
+         nvec0 = faceMetric(CHF_AUTOIX[i], comp0) ;
+         nvec1 = faceMetric(CHF_AUTOIX[i], comp1) ;
+         nvec2 = faceMetric(CHF_AUTOIX[i], comp2) ;
+         nvec3 = faceMetric(CHF_AUTOIX[i], comp3) ;
+         nvec4 = faceMetric(CHF_AUTOIX[i], comp4) ;
+         nvec5 = faceMetric(CHF_AUTOIX[i], comp5) ]
+
+         nmag = sqrt(CHF_DTERM[
+     &        nvec0*nvec0 ;
+     &        + nvec1*nvec1 ;
+     &        + nvec2*nvec2 ;
+     &        + nvec3*nvec3 ;
+     &        + nvec4*nvec4 ;
+     &        + nvec5*nvec5 ])
+
+!     FIRST basis vector in unitNormal :  normalized nvec.
+         CHF_DTERM[
+         norml0 = nvec0 / nmag ;
+         norml1 = nvec1 / nmag ;
+         norml2 = nvec2 / nmag ;
+         norml3 = nvec3 / nmag ;
+         norml4 = nvec4 / nmag ;
+         norml5 = nvec5 / nmag ]
+
+         CHF_DTERM[
+         unitNormal(CHF_AUTOIX[i], base0    ) = norml0 ;
+         unitNormal(CHF_AUTOIX[i], base0 + 1) = norml1 ;
+         unitNormal(CHF_AUTOIX[i], base0 + 2) = norml2 ]
+
+#if (CH_SPACEDIM == 2)
+!     In 2D, SECOND basis vector is (norml1, -norml0).
+         unitNormal(CHF_AUTOIX[i], base1    ) = norml1
+         unitNormal(CHF_AUTOIX[i], base1 + 1) = -norml0
+#elif (CH_SPACEDIM >= 3)
+!     In 3D, SECOND basis vector is normalized e^d - (n dot e^d) n
+!     where n is the first basis vector, and d is the index of n's
+!     smallest component in absolute value.
+
+!     indmin is index of smallest component of (nx, ny, nz).
+!     initial indmin and nmin are bogus and WILL be replaced.
+         indmin = -1
+         nmin = two
+         do idir = 0, CH_SPACEDIM-1
+            ndir = unitNormal(CHF_AUTOIX[i], base0 + idir)
+            if (ndir*ndir .lt. nmin*nmin) then
+               indmin = idir
+               nmin = ndir
+            endif
+         enddo
+!     Work it out:  magnitude of unnormalized tanvec is sqrt(1 - nmin^2).
+         tmag = sqrt(one - nmin*nmin)
+         do idir = 0, CH_SPACEDIM-1
+            if (idir .eq. indmin) then
+               tanvec(idir) = (one - nmin*nmin) / tmag
+            else
+               tanvec(idir) = -nmin *
+     &              unitNormal(CHF_AUTOIX[i], base0 + idir) / tmag
+            endif
+         enddo
+         unitNormal(CHF_AUTOIX[i], base1    ) = tanvec(0)
+         unitNormal(CHF_AUTOIX[i], base1 + 1) = tanvec(1)
+         unitNormal(CHF_AUTOIX[i], base1 + 2) = tanvec(2)
+
+!     The THIRD basis vector is the cross product of the first two.
+         unitNormal(CHF_AUTOIX[i], base2    ) =
+     &        norml1*tanvec(2) - norml2*tanvec(1)
+         unitNormal(CHF_AUTOIX[i], base2 + 1) =
+     &        norml2*tanvec(0) - norml0*tanvec(2)
+         unitNormal(CHF_AUTOIX[i], base2 + 2) =
+     &        norml0*tanvec(1) - norml1*tanvec(0)
+#endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+!     Simplified from MappedGridPPMAMRGodunov
+      subroutine FORWARDTRANSFORMF(
+     &     CHF_FRA[data],
+     &     CHF_CONST_FRA[basis],
+     &     CHF_BOX[box])
+
+      integer CHF_AUTODECL[i]
+      real_t CHF_AUTODECL[dat]
+      integer icomp
+
+      CHF_AUTOMULTIDO[box;i]
+         CHF_DTERM[
+         dat0 = data(CHF_AUTOIX[i], 0) ;
+         dat1 = data(CHF_AUTOIX[i], 1) ;
+         dat2 = data(CHF_AUTOIX[i], 2) ;
+         dat3 = data(CHF_AUTOIX[i], 3) ;
+         dat4 = data(CHF_AUTOIX[i], 4) ;
+         dat5 = data(CHF_AUTOIX[i], 5) ]
+
+         CHF_DSELECT[
+!     1D:  set 0
+         data(CHF_AUTOIX[i], 0) =
+     &          dat0 * basis(CHF_AUTOIX[i], 0) ;
+!     2D:  set 0 and 1
+         data(CHF_AUTOIX[i], 0) =
+     &          dat0 * basis(CHF_AUTOIX[i], 0)
+     &        + dat1 * basis(CHF_AUTOIX[i], 1)
+         data(CHF_AUTOIX[i], 1) =
+     &          dat0 * basis(CHF_AUTOIX[i], 2)
+     &        + dat1 * basis(CHF_AUTOIX[i], 3) ;
+!     3D:  set 0 and 1 and 2
+         data(CHF_AUTOIX[i], 0) =
+     &          dat0 * basis(CHF_AUTOIX[i], 0)
+     &        + dat1 * basis(CHF_AUTOIX[i], 1)
+     &        + dat2 * basis(CHF_AUTOIX[i], 2)
+         data(CHF_AUTOIX[i], 1) =
+     &          dat0 * basis(CHF_AUTOIX[i], 3)
+     &        + dat1 * basis(CHF_AUTOIX[i], 4)
+     &        + dat2 * basis(CHF_AUTOIX[i], 5)
+         data(CHF_AUTOIX[i], 2) =
+     &          dat0 * basis(CHF_AUTOIX[i], 6)
+     &        + dat1 * basis(CHF_AUTOIX[i], 7)
+     &        + dat2 * basis(CHF_AUTOIX[i], 8) ]
+      CHF_ENDDO
+
+      return
+      end
+
+
+!     Simplified from MappedGridPPMAMRGodunov
+      subroutine REVERSETRANSFORMF(
+     &     CHF_FRA[data],
+     &     CHF_CONST_FRA[basis],
+     &     CHF_BOX[box])
+
+      integer CHF_AUTODECL[i]
+      real_t CHF_AUTODECL[dat]
+
+      CHF_AUTOMULTIDO[box;i]
+         CHF_DTERM[
+         dat0 = data(CHF_AUTOIX[i], 0) ;
+         dat1 = data(CHF_AUTOIX[i], 1) ;
+         dat2 = data(CHF_AUTOIX[i], 2) ;
+         dat3 = data(CHF_AUTOIX[i], 3) ;
+         dat4 = data(CHF_AUTOIX[i], 4) ;
+         dat5 = data(CHF_AUTOIX[i], 5) ]
+
+         CHF_DSELECT[
+!     1D:  set 0
+         data(CHF_AUTOIX[i], 0) =
+     &          dat0 * basis(CHF_AUTOIX[i], 0) ;
+!     2D:  set 0 and 1
+         data(CHF_AUTOIX[i], 0) =
+     &          dat0 * basis(CHF_AUTOIX[i], 0)
+     &        + dat1 * basis(CHF_AUTOIX[i], 2)
+         data(CHF_AUTOIX[i], 1) =
+     &          dat0 * basis(CHF_AUTOIX[i], 1)
+     &        + dat1 * basis(CHF_AUTOIX[i], 3) ;
+!     3D:  set 0 and 1 and 2
+         data(CHF_AUTOIX[i], 0) =
+     &          dat0 * basis(CHF_AUTOIX[i], 0)
+     &        + dat1 * basis(CHF_AUTOIX[i], 3)
+     &        + dat2 * basis(CHF_AUTOIX[i], 6)
+         data(CHF_AUTOIX[i], 1) =
+     &          dat0 * basis(CHF_AUTOIX[i], 1)
+     &        + dat1 * basis(CHF_AUTOIX[i], 4)
+     &        + dat2 * basis(CHF_AUTOIX[i], 7)
+         data(CHF_AUTOIX[i], 2) =
+     &          dat0 * basis(CHF_AUTOIX[i], 2)
+     &        + dat1 * basis(CHF_AUTOIX[i], 5)
+     &        + dat2 * basis(CHF_AUTOIX[i], 8) ]
+        CHF_ENDDO
+
+        return
+        end

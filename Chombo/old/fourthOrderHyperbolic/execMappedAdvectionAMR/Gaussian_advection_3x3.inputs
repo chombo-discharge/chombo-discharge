@@ -1,0 +1,62 @@
+assert(SpaceDim == 2)
+
+verbosity = 3
+
+# Time stepping
+max_step = 100000
+max_time = 1.0
+fixed_dt = 0.005
+cfl = 0.75
+initial_cfl = 0.75
+max_dt_growth = 1.1
+dt_tolerance_factor = 1.1
+
+# Computational domain.
+coord_sys = 'triple_cartesian'
+num_cells = 32
+
+# Start from corners? 
+corners = False
+
+# AMR
+max_level = 0
+ref_ratio = 4 
+
+use_subcycling = True
+initial_average = True
+useHyperviscosity = 0
+hyperviscosity = 0.01
+
+limitFaceValues = 1
+enforceMinVal = 1
+minVal = 0.0
+
+# Initial condition
+radius = 0.25
+magnitude = 1.0
+if not corners:
+    center = (1, 1)
+    def phi0(x, t):
+        r = sqrt((x[0]-center[0])**2 + (x[1]-center[1])**2)
+        return exp(-40*r*r)
+
+# Alternate version -- starts at corners
+else:
+    centers = [(1./3, 1./3), (-1./3, 1./3), (-1./3, -1./3), (1./3, -1./3)]
+    def phi0(x, t):
+        rs = [sqrt((x[0]-c[0])**2 + (x[1]-c[1])**2) for c in centers]
+        return sum([exp(-40*r*r) for r in rs])
+
+# Velocity function: pure advection.
+velocity = (1,1)
+
+# Output
+checkpoint_interval = -1
+plot_interval = 10
+if corners:
+    plot_prefix = 'Gaussian-advection-3x3-corners.%d.'%num_cells
+    chk_prefix  = 'Gaussian-advection-3x3-corners.%d.'%num_cells
+else:
+    plot_prefix = 'Gaussian-advection-3x3.%d.'%num_cells
+    chk_prefix  = 'Gaussian-advection-3x3.%d.'%num_cells
+

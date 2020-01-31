@@ -1,0 +1,345 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+!     -----------------------------------------------------------------
+!     subroutine APPLYLAP
+!
+!     Computes the 1-dimensional 2nd-order approximation of d^2\phi/dx^2
+!     in the specified direction and accumulates into the destination arg,
+!     computing and storing the fluxes as a side-effect.
+!
+!     INPUTS/OUTPUTS:
+!     lofphi   <=>  laplacian of phi to be incremented by this subroutine.
+!     flux     <=   flux in direction idir thru the face to the left
+!     phi       =>  phi
+!     region    =>  index range over which Laplacian is computed.
+!     fluxregion=>  index range over which flux is computed.
+!     dx        =>  cell spacing
+!     idir      =>  direction
+!
+!     Warning: phi, lofphi, flux must have the same number
+!     of components and span region.  Phi needs one more cell on
+!     all sides. Flux is asumed to be shifted by -1/2 to have
+!     cell-centered alignment.  This implies that fluxregion has one
+!     more cell in the idir direction than region.
+!
+!
+!     PC: copied from PoissonOpF.ChF , 7/19/2002.
+!     ------------------------------------------------------------------
+      subroutine APPLYLAP(
+     &     CHF_FRA[lofphi],
+     &     CHF_FRA[flux],
+     &     CHF_CONST_FRA[phi],
+     &     CHF_BOX[region],
+     &     CHF_BOX[fluxregion],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_INT[idir])
+
+
+      !XXX -- unused var
+      !XXXREAL_T lphi
+      REAL_T dxinv
+      integer n,ncomp
+
+      integer CHF_DDECL[ii,i;jj,j;kk,k;ll,l]
+
+      ncomp = CHF_NCOMP[phi]
+      if ((ncomp .ne. CHF_NCOMP[lofphi]).or.(ncomp.ne.CHF_NCOMP[flux])) then
+!         print*, 'phi, flux, or lOfPhi are incompatible'
+!         stop
+         call MAYDAYERROR()
+      endif
+
+      dxinv = one/dx
+      CHF_DTERM[
+      ii = CHF_ID(idir, 0);
+      jj = CHF_ID(idir, 1);
+      kk = CHF_ID(idir, 2);
+      ll = CHF_ID(idir, 3)]
+      do n = 0, ncomp-1
+         CHF_MULTIDO[fluxregion; i; j; k; l]
+
+             flux(CHF_IX[i;j;k;l],n) =
+     &           ( -phi(CHF_IX[i   ;j   ;k   ;l],n)
+     &           + (phi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n))
+     &           )*dxinv
+
+         CHF_ENDDO
+
+         CHF_MULTIDO[region; i; j; k; l]
+
+            lofphi(CHF_IX[i;j;k;l],n) =
+     &           lofphi(CHF_IX[i;j;k;l],n) -
+     &           ( (flux(CHF_IX[i+ii;j+jj;k+kk;l+ll],n)
+     &            - flux(CHF_IX[i   ;j   ;k   ;l],n))
+     &           )*dxinv
+
+         CHF_ENDDO
+       enddo
+
+      return
+      end
+!     -----------------------------------------------------------------
+!     subroutine HOAVGDOWN
+!     computes a 4th order average of phi using the formula
+!     phicoarse = <phi> - h^2 <Laplacian(phi)>/24
+!
+!     INPUTS/OUTPUTS:
+!     phi       =>  phi on fine grid
+!     phicoarse<=   phi on coarsened grid.
+!     region    =>  index range over which phicoarse is defined.
+!     avstencil =>  index range over which averaging of phi is done.
+!     navstencil=>  number of points in avstencil
+!     lapstencil=>  index range over which averaging of laplacian(phi) is done.
+!     nlapstencil=>  number of points in lapstencil
+!
+!     PC: 8/29/2002.
+!     ------------------------------------------------------------------
+      subroutine HOAVGDOWN(
+     &     CHF_CONST_FRA[phi],
+     &     CHF_FRA[phicoarse],
+     &     CHF_CONST_INT[nrefine],
+     &     CHF_BOX[region],
+     &     CHF_BOX[avstencil],
+     &     CHF_CONST_INT[navstencil],
+     &     CHF_BOX[lapstencil],
+     &     CHF_CONST_INT[nlapstencil])
+
+      !XXX -- unused var
+      !XXXREAL_T dxinv,lofphi,avlphi
+      REAL_T lofphi,avlphi
+      integer n,ncomp,spacedim
+
+      integer CHF_DDECL[i,ic,is;j,jc,js;k,kc,ks;l,lc,ls]
+
+      ncomp = CHF_NCOMP[phi]
+      if (ncomp .ne. CHF_NCOMP[phicoarse]) then
+!         print*, 'phi, flux, or phiCoarse are incompatible'
+!         stop
+         call MAYDAYERROR()
+      endif
+
+      ncomp = CHF_NCOMP[phi]
+      spacedim = CH_SPACEDIM
+      avlphi = 0.0
+      do n = 0, ncomp-1
+         CHF_MULTIDO[region; ic; jc; kc; lc]
+
+! Compute average of (h^2 Laplacian(phi)).
+
+         CHF_MULTIDO[lapstencil;is;js;ks;ls]
+
+             CHF_DTERM[
+             i = ic*nrefine + is;
+             j = jc*nrefine + js;
+             k = kc*nrefine + ks;
+             l = lc*nrefine + ls]
+             lofphi =
+     &              -2*spacedim*phi(CHF_IX[i   ;j ;k   ],n) CHF_DTERM[
+     &           +  phi(CHF_IX[i+1 ;j   ;k   ],n)
+     &           +  phi(CHF_IX[i-1 ;j   ;k   ],n) ;
+     &           +  phi(CHF_IX[i   ;j+1 ;k   ],n)
+     &           +  phi(CHF_IX[i   ;j-1 ;k   ],n) ;
+     &           +  phi(CHF_IX[i   ;j   ;k+1 ],n)
+     &           +  phi(CHF_IX[i   ;j   ;k-1 ],n) ]
+             avlphi = avlphi + lofphi
+
+         CHF_ENDDO
+         avlphi = avlphi / nlapstencil
+
+         phicoarse(CHF_IX[ic;jc;kc;lc],n) = zero
+         CHF_MULTIDO[avstencil;is;js;ks;ls]
+
+             CHF_DTERM[
+             i = ic*nrefine + is;
+             j = jc*nrefine + js;
+             k = kc*nrefine + ks;
+             l = lc*nrefine + ls]
+             phicoarse(CHF_IX[ic;jc;kc;lc],n) =
+     &                      phicoarse(CHF_IX[ic;jc;kc;lc],n) +
+     &                      phi(CHF_IX[i;j;k;l],n)
+         CHF_ENDDO
+
+             phicoarse(CHF_IX[ic;jc;kc;lc],n) =
+     &                      phicoarse(CHF_IX[ic;jc;kc;lc],n)/navstencil
+     &                      -avlphi/24
+
+
+         CHF_ENDDO
+       enddo
+
+      return
+      end
+
+
+
+c -------------------------------------------------------------
+c  increment with hyperviscous flux in dir direction:
+c  prod = prod + u_i * v_j
+c
+c  flux  <=> n-by-D tensor (result)
+c  u      => n vector
+c  box    => box over which prod is modified
+c  dx     => grid spacing used in derivative
+c  dir    => derivative direction
+c -----------------------------------------------------------
+
+      subroutine ADDHYPERVISCOUSFLUX(CHF_FRA[flux],
+     &                               CHF_CONST_FRA[u],
+     &                               CHF_BOX[box],
+     &                               CHF_REAL[mu],
+     &                               CHF_REAL[dx],
+     &                               CHF_CONST_INT[dir])
+
+      integer CHF_DDECL[i;j;k;l], n, s, d
+      integer CHF_DDECL[in;jn;kn;ln]
+      integer CHF_DDECL[it;jt;kt;lt]
+      REAL_T hvflux, coeff
+
+      coeff = mu
+
+      CHF_DTERM[in = CHF_ID(0,dir);
+      jn = CHF_ID(1,dir);
+      kn = CHF_ID(2,dir);
+      ln = CHF_ID(3,dir)]
+
+      do n=0, CHF_NCOMP[u]-1
+
+         CHF_MULTIDO[box;i;j;k]
+#if 0
+c h^3 hyperviscous terms
+          if (dir.eq.0) then
+             hvflux =
+     &                       ( u(i+1,j  ,n) - u(i-2,j  ,n) )
+     &              -  5.0 * ( u(i  ,j  ,n) - u(i-1,j  ,n) )
+     &              +        ( u(i  ,j+1,n) - u(i-1,j+1,n) )
+     &              +        ( u(i  ,j-1,n) - u(i-1,j-1,n) )
+          else
+             hvflux =
+     &                       ( u(i  ,j+1,n) - u(i  ,j-2,n) )
+     &              -  5.0 * ( u(i  ,j  ,n) - u(i  ,j-1,n) )
+     &              +        ( u(i+1,j  ,n) - u(i+1,j-1,n) )
+     &              +        ( u(i-1,j  ,n) - u(i-1,j-1,n) )
+          endif
+#else
+c h^5 hyperviscous terms
+          if (dir.eq.0) then
+c (dfm 7/17/09) -- note that I added a k component to the indices for u,
+c but it's almost certainly not correct. Its only purpose is to allow the
+c code to compile in something besides 2d.
+             hvflux =
+     &              -        ( u(CHF_IX[i+2;j  ;k],n) - u(CHF_IX[i-3;j  ;k],n) )
+     &              +  9.0 * ( u(CHF_IX[i+1;j  ;k],n) - u(CHF_IX[i-2;j  ;k],n) )
+     &              - 28.0 * ( u(CHF_IX[i  ;j  ;k],n) - u(CHF_IX[i-1;j  ;k],n) )
+     &              -  2.0 * ( u(CHF_IX[i+1;j+1;k],n) - u(CHF_IX[i-2;j+1;k],n) )
+     &              + 10.0 * ( u(CHF_IX[i  ;j+1;k],n) - u(CHF_IX[i-1;j+1;k],n) )
+     &              -  2.0 * ( u(CHF_IX[i+1;j-1;k],n) - u(CHF_IX[i-2;j-1;k],n) )
+     &              + 10.0 * ( u(CHF_IX[i  ;j-1;k],n) - u(CHF_IX[i-1;j-1;k],n) )
+     &              -        ( u(CHF_IX[i  ;j+2;k],n) - u(CHF_IX[i-1;j+2;k],n) )
+     &              -        ( u(CHF_IX[i  ;j-2;k],n) - u(CHF_IX[i-1;j-2;k],n) )
+          else
+             hvflux =
+     &              -        ( u(CHF_IX[i  ;j+2;k],n) - u(CHF_IX[i  ;j-3;k],n) )
+     &              +  9.0 * ( u(CHF_IX[i  ;j+1;k],n) - u(CHF_IX[i  ;j-2;k],n) )
+     &              - 28.0 * ( u(CHF_IX[i  ;j  ;k],n) - u(CHF_IX[i  ;j-1;k],n) )
+     &              -  2.0 * ( u(CHF_IX[i+1;j+1;k],n) - u(CHF_IX[i+1;j-2;k],n) )
+     &              + 10.0 * ( u(CHF_IX[i+1;j  ;k],n) - u(CHF_IX[i+1;j-1;k],n) )
+     &              -  2.0 * ( u(CHF_IX[i-1;j+1;k],n) - u(CHF_IX[i-1;j-2;k],n) )
+     &              + 10.0 * ( u(CHF_IX[i-1;j  ;k],n) - u(CHF_IX[i-1;j-1;k],n) )
+     &              -        ( u(CHF_IX[i+2;j  ;k],n) - u(CHF_IX[i+2;j-1;k],n) )
+     &              -        ( u(CHF_IX[i-2;j  ;k],n) - u(CHF_IX[i-2;j-1;k],n) )
+          endif
+#endif
+          hvflux = coeff * hvflux
+          flux(CHF_IX[i;j;k],n) = flux(CHF_IX[i;j;k],n) + hvflux
+
+          CHF_ENDDO
+
+      enddo
+      return
+      end
+
+
+c -------------------------------------------------------------
+c  compute second-order face gradients in all directions:
+c
+c  grad_u <=> n-by-D tensor (result)
+c  u       => n vector
+c  box     => box over which prod is modified
+c  dx      => mesh size
+c  facedir => normal direction of face
+c -----------------------------------------------------------
+
+      subroutine SECONDORDERGRADIENT(CHF_FRA[grad_u],
+     &                               CHF_CONST_FRA[u],
+     &                               CHF_BOX[box],
+     &                               CHF_CONST_REALVECT[dx],
+     &                               CHF_CONST_INT[facedir])
+
+      integer CHF_DDECL[i;j;k;l], n, m, d
+      integer CHF_DDECL[in;jn;kn;ln], CHF_DDECL[it;jt;kt;lt]
+      REAL_T avghi, avglo, factor(0:CH_SPACEDIM-1), result
+
+      CHF_DTERM[
+      in = CHF_ID(0,facedir);
+      jn = CHF_ID(1,facedir);
+      kn = CHF_ID(2,facedir);
+      ln = CHF_ID(3,facedir)]
+
+      do d=0, CH_SPACEDIM-1
+        factor(d) = 1.0 / dx(d)
+        if (facedir.ne.d) then
+          factor(d) = factor(d) * 0.25
+        endif
+      enddo
+
+      do n = 0, CHF_NCOMP[u]-1
+        do d=0, CH_SPACEDIM-1
+          m = d + n * CH_SPACEDIM
+
+          CHF_MULTIDO[box;i;j;k;l]
+
+            if (facedir.eq.d) then
+              result = ( u(CHF_IX[i;j;k;l],n) - u(CHF_IX[i-in;j-jn;k-kn;l-ln],n) )
+     &               * factor(d)
+           else
+              CHF_DTERM[
+              it = CHF_ID(0,d);
+              jt = CHF_ID(1,d);
+              kt = CHF_ID(2,d);
+              lt = CHF_ID(3,d)]
+
+              avghi = u(CHF_IX[i+it;j+jt;k+kt;l+lt],n)
+     &              + u(CHF_IX[i+it-in;j+jt-jn;k+kt-kn;l+lt-ln],n)
+              avglo = u(CHF_IX[i-it;j-jt;k-kt;l-lt],n)
+     &              + u(CHF_IX[i-it-in;j-jt-jn;k-kt-kn;l-lt-ln],n)
+              result = factor(d) * ( avghi - avglo );
+            endif
+
+            grad_u(CHF_IX[i;j;k;l],m) = result;
+
+          CHF_ENDDO
+        enddo
+      enddo
+      return
+      end
+
+      subroutine SCALARFIELDMULTIPLY(CHF_FRA[vector_field],
+     &                               CHF_CONST_FRA[scalar_field],
+     &                               CHF_BOX[box])
+
+      integer CHF_DDECL[i;j;k;l], n
+
+      do n = 0, CHF_NCOMP[vector_field]-1
+        CHF_MULTIDO[box;i;j;k;l]
+              vector_field(CHF_IX[i;j;k;l],n) = vector_field(CHF_IX[i;j;k;l],n)
+     &                                      * scalar_field(CHF_IX[i;j;k;l],0)
+        CHF_ENDDO
+      enddo
+      return
+      end

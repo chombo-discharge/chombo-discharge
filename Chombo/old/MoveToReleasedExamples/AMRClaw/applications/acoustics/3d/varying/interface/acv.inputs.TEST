@@ -1,0 +1,55 @@
+claw.problem = acoustics
+
+claw.mx = 16
+claw.my = 16
+claw.mz = 16
+
+claw.plot_interval = 1
+claw.max_step = 2
+claw.max_time = 1.2
+
+# claw.fixed_dt = 0.04
+claw.initial_dt = 0.04
+claw.max_cfl = 1.0
+claw.cfl = 0.9
+
+claw.order = 2 2 2
+claw.src = 0
+claw.verbosity = 1
+claw.mcapa = 0
+claw.maux = 2
+claw.auxtype = "center" "center"
+
+claw.meqn = 4
+claw.mwaves = 2
+claw.mthlim = 4 4
+
+claw.mbc = 2
+claw.mthbc = 1 1 1 1 1 1
+
+claw.xlower = 0
+claw.xupper = 1
+claw.ylower = 0
+claw.yupper = 1
+claw.zlower = 0
+claw.zupper = 1
+
+claw.stateNames = "p" "u" "v" "w"
+
+# Parameters controlling the local mesh refining strategy
+claw.max_level = 2
+claw.ref_ratio = 2 2 2 2
+
+claw.regrid_interval = 2 2 2
+claw.tag_buffer_size = 3
+
+claw.refine_thresh = .01
+
+claw.block_factor = 2
+claw.max_grid_size = 100
+claw.fill_ratio = 0.75
+
+claw.checkpoint_interval = -1
+# claw.restart_file = chk20.2d.hdf5
+claw.plot_prefix  = plotNEW
+claw.chk_prefix = check

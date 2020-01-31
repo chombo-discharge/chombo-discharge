@@ -1,0 +1,264 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+
+C     -----------------------------------------------------------------
+C     subroutine OPERATORLAP4
+C     4th-order 5-point operator for the Helmholtz equation
+C
+C     INPUTS/OUTPUTS:
+C     phi       =>  phi
+C     lofphi   <=   laplacian
+C     dx        =>  cell spacing
+C
+C     Warning: phi, lofphi must have the same number
+C              of components and span region.
+C     Phi needs two more cells on all sides
+C
+C     Qinghai Zhang May 08, 2009
+C     ------------------------------------------------------------------
+      subroutine OPERATORLAP4(
+     &     CHF_FRA[lofphi],
+     &     CHF_CONST_FRA[phi],
+     &     CHF_BOX[region],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_REAL[alpha],
+     &     CHF_CONST_REAL[beta])
+
+      REAL_T dxinv, lap
+      integer n,ncomp
+      integer CHF_DDECL[i;j;k]
+
+      ncomp = CHF_NCOMP[phi]
+      if(ncomp .ne. CHF_NCOMP[lofphi]) then
+C         print*, 'OPERATORLAP4:phi and rhs incompatible'
+         call MAYDAYERROR()
+      endif
+
+      dxinv = one/(dx*dx)
+      do n = 0, ncomp-1
+        CHF_MULTIDO[region; i; j; k]
+
+          lap = ( CHF_DTERM[
+     &   sixteen*phi(CHF_IX[i-1;j  ;k  ],n) - phi(CHF_IX[i-2;j  ;k  ],n)
+     & + sixteen*phi(CHF_IX[i+1;j  ;k  ],n) - phi(CHF_IX[i+2;j  ;k  ],n);
+     & + sixteen*phi(CHF_IX[i  ;j-1;k  ],n) - phi(CHF_IX[i  ;j-2;k  ],n)
+     & + sixteen*phi(CHF_IX[i  ;j+1;k  ],n) - phi(CHF_IX[i  ;j+2;k  ],n);
+     & + sixteen*phi(CHF_IX[i  ;j  ;k-1],n) - phi(CHF_IX[i  ;j  ;k-2],n)
+     & + sixteen*phi(CHF_IX[i  ;j  ;k+1],n) - phi(CHF_IX[i  ;j  ;k+2],n)]
+     &                     -(thirty*CH_SPACEDIM)*phi(CHF_IX[i;j;k],n) )
+     &       * twelfth * dxinv
+
+          lofphi(CHF_IX[i;j;k],n) = alpha*phi(CHF_IX[i;j;k],n)+beta*lap
+        CHF_ENDDO
+      enddo
+
+      return
+      end
+
+
+C     -----------------------------------------------------------------
+C     subroutine RESTRICTRES4
+C     computes 4th-order restriction of residual to a coarser multgrid level
+C        res[2h] = I[h->2h] (rhs[h] - L(phi[h]))
+C     INPUTS/OUTPUTS:
+C     res       <=  res[2h]
+C     rhs       =>  rhs[h]
+C     phi       =>  phi[h]
+C     alpha     =>  Coefficient of the identity operator
+C     beta      =>  Coefficient of the laplacian operator
+C     region    =>  Box over which rhs is defined (in h index space)
+C     dx        =>  grid spacing in h
+C
+C     Qinghai Zhang July 06, 2009
+C     ------------------------------------------------------------------
+      subroutine RESTRICTRES4(
+     &     CHF_FRA[res],
+     &     CHF_CONST_FRA[phi],
+     &     CHF_CONST_FRA[rhs],
+     &     CHF_CONST_REAL[alpha],
+     &     CHF_CONST_REAL[beta],
+     &     CHF_BOX[region],
+     &     CHF_CONST_REAL[dx])
+
+      REAL_T denom,dxinv,lofphi,lap
+      integer n,ncomp
+
+      integer CHF_DDECL[i;j;k]
+      integer CHF_DDECL[ii;jj;kk]
+
+      ncomp = CHF_NCOMP[phi]
+
+      dxinv = one / (dx*dx)
+      denom = D_TERM(2, *2, *2)
+
+      do n = 0, ncomp-1
+        CHF_MULTIDO[region; i; j; k]
+          CHF_DTERM[
+          ii = i/2 ;
+          jj = j/2 ;
+          kk = k/2 ]
+
+          lap = ( CHF_DTERM[
+     &   sixteen*phi(CHF_IX[i-1;j  ;k  ],n) - phi(CHF_IX[i-2;j  ;k  ],n)
+     & + sixteen*phi(CHF_IX[i+1;j  ;k  ],n) - phi(CHF_IX[i+2;j  ;k  ],n);
+     & + sixteen*phi(CHF_IX[i  ;j-1;k  ],n) - phi(CHF_IX[i  ;j-2;k  ],n)
+     & + sixteen*phi(CHF_IX[i  ;j+1;k  ],n) - phi(CHF_IX[i  ;j+2;k  ],n);
+     & + sixteen*phi(CHF_IX[i  ;j  ;k-1],n) - phi(CHF_IX[i  ;j  ;k-2],n)
+     & + sixteen*phi(CHF_IX[i  ;j  ;k+1],n) - phi(CHF_IX[i  ;j  ;k+2],n)]
+     &                     -(thirty*CH_SPACEDIM)*phi(CHF_IX[i;j;k],n) )
+     &       * twelfth * dxinv
+
+          lofphi = alpha*phi(CHF_IX[i;j;k],n) + beta*lap
+
+          res(CHF_IX[ii;jj;kk],n) = res(CHF_IX[ii;jj;kk],n)
+     &                            + (rhs(CHF_IX[i;j;k],n) - lofphi) / denom
+        CHF_ENDDO
+      enddo
+
+      return
+      end
+
+C     -----------------------------------------------------------------
+C     subroutine GSRBLAPLACIAN4
+C     4th-order GSRB smoother for Laplacian equation.
+C
+C     INPUTS/OUTPUTS:
+C     phi      <=   phi
+C     rhs       =>  laplacian(phi)
+C     region    =>  box smoothed
+C     dx        =>  cell spacing
+C     tmp       =>  a copy of phi used for scratch space
+C     redBlack  =>  0 for red pass; 1 for black pass
+C
+C     Warning: phi, rhs, tmp must have the same number
+C              of components and span region.
+C     Phi needs two more cells on all sides
+C
+C     Qinghai Zhang July 06, 2009
+C     ------------------------------------------------------------------
+      subroutine GSRBLAPLACIAN4(
+     &     CHF_FRA[phi],
+     &     CHF_CONST_FRA[rhs],
+     &     CHF_BOX[region],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_FRA[tmp],
+     &     CHF_CONST_INT[redBlack])
+
+      REAL_T dx2t, thD
+      integer CHF_DDECL[i;j;k]
+      integer n,ncomp,indtot,imin,imax,red,black
+
+      red = 0
+      black = 1
+      dx2t = twelve*dx*dx
+      thD  = thirtieth/CH_SPACEDIM
+
+      ncomp = CHF_NCOMP[phi]
+      if(ncomp .ne. CHF_NCOMP[rhs]) then
+C         print*, 'GSRBLAPLACIAN4:phi and rhs incompatible'
+         call MAYDAYERROR()
+      endif
+
+      do n = 0, ncomp - 1
+C
+C     the red pass
+C
+         if (redBlack .eq. red) then
+#if CH_SPACEDIM > 2
+        do k=CHF_LBOUND[region; 2], CHF_UBOUND[region; 2]
+#endif
+#if CH_SPACEDIM > 1
+          do j=CHF_LBOUND[region; 1], CHF_UBOUND[region; 1]
+#endif
+            imin = CHF_LBOUND[region; 0]
+            indtot = CHF_DTERM[imin; + j; + k]
+            imin = imin + abs(mod(indtot+red, 2))
+            imax = CHF_UBOUND[region; 0]
+            do i = imin, imax, 2
+
+               tmp(CHF_IX[i;j;k],n) = thD*( CHF_DTERM[
+     &           sixteen*phi(CHF_IX[i+1;j;k],n) - phi(CHF_IX[i+2;j;k],n)
+     &         + sixteen*phi(CHF_IX[i-1;j;k],n) - phi(CHF_IX[i-2;j;k],n);
+     &         + sixteen*phi(CHF_IX[i;j+1;k],n) - phi(CHF_IX[i;j+2;k],n)
+     &         + sixteen*phi(CHF_IX[i;j-1;k],n) - phi(CHF_IX[i;j-2;k],n);
+     &         + sixteen*phi(CHF_IX[i;j;k+1],n) - phi(CHF_IX[i;j;k+2],n)
+     &         + sixteen*phi(CHF_IX[i;j;k-1],n) - phi(CHF_IX[i;j;k-2],n) ]
+     &         - dx2t*rhs(CHF_IX[i;j;k],n) )
+
+            enddo
+#if CH_SPACEDIM > 1
+          enddo
+#endif
+#if CH_SPACEDIM > 2
+        enddo
+#endif
+C
+C     the black pass
+C
+        else if (redBlack .eq. black) then
+#if CH_SPACEDIM > 2
+        do k=CHF_LBOUND[region; 2], CHF_UBOUND[region; 2]
+#endif
+#if CH_SPACEDIM > 1
+          do j=CHF_LBOUND[region; 1], CHF_UBOUND[region; 1]
+#endif
+            imin = CHF_LBOUND[region; 0]
+            indtot = CHF_DTERM[imin; + j; + k]
+            imin = imin + abs(mod(indtot+black, 2))
+            imax = CHF_UBOUND[region; 0]
+            do i = imin, imax, 2
+
+               phi(CHF_IX[i;j;k],n) = thD*( CHF_DTERM[
+     &           sixteen*tmp(CHF_IX[i+1;j;k],n) - tmp(CHF_IX[i+2;j;k],n)
+     &         + sixteen*tmp(CHF_IX[i-1;j;k],n) - tmp(CHF_IX[i-2;j;k],n);
+     &         + sixteen*tmp(CHF_IX[i;j+1;k],n) - tmp(CHF_IX[i;j+2;k],n)
+     &         + sixteen*tmp(CHF_IX[i;j-1;k],n) - tmp(CHF_IX[i;j-2;k],n);
+     &         + sixteen*tmp(CHF_IX[i;j;k+1],n) - tmp(CHF_IX[i;j;k+2],n)
+     &         + sixteen*tmp(CHF_IX[i;j;k-1],n) - tmp(CHF_IX[i;j;k-2],n) ]
+     &         - dx2t*rhs(CHF_IX[i;j;k],n) )
+
+            enddo
+#if CH_SPACEDIM > 1
+          enddo
+#endif
+#if CH_SPACEDIM > 2
+        enddo
+#endif
+C
+C    assign the red points
+C
+#if CH_SPACEDIM > 2
+        do k=CHF_LBOUND[region; 2], CHF_UBOUND[region; 2]
+#endif
+#if CH_SPACEDIM > 1
+          do j=CHF_LBOUND[region; 1], CHF_UBOUND[region; 1]
+#endif
+            imin = CHF_LBOUND[region; 0]
+            indtot = CHF_DTERM[imin; + j; + k]
+            imin = imin + abs(mod(indtot+red, 2))
+            imax = CHF_UBOUND[region; 0]
+            do i = imin, imax, 2
+               phi(CHF_IX[i;j;k],n) = tmp(CHF_IX[i;j;k],n)
+            enddo
+#if CH_SPACEDIM > 1
+          enddo
+#endif
+#if CH_SPACEDIM > 2
+        enddo
+#endif
+
+        else
+           call MAYDAYERROR()
+        end if
+      enddo
+
+      return
+      end
+
+

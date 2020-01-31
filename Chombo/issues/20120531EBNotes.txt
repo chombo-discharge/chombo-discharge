@@ -1,0 +1,19 @@
+Performance 
+	CPU
+	Load Balance
+Stencil (H) (BVS ZipIterator evaluation)
+Multifluid (ok interface) (HSJ)
+Moving (ok interface)
+HO (ok interface) (HSJ)
+Geometry Shop (H) (HSJ will design interface) + (POS + TJL)
+Solver APIs
+ADIOS I/O (H) + (BVS + TJL)
+Sparse output format (H) + (BVS + TJL)
+Labeling boundaries (H) + (TJL)
+**Thread safety (ok interface)
+EB x CF (H) + (1, DTG)
+Boundary Condition API
+MOL AMR INS (2, DTG)
+
+
+

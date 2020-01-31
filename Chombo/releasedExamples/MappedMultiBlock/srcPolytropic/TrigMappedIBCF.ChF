@@ -1,0 +1,68 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+
+c ----------------------------------------------------------------------
+c  Sets the initial conservative solution on the grid
+c
+c  U      <=  Conservative state
+c  coords  => Coordinates of the grid in physical space
+c  box     => Where to initialize
+c ----------------------------------------------------------------------
+
+      subroutine TRIGMAPPEDINITF(
+     &   CHF_FRA[U],
+     &   CHF_CONST_FRA[coords],
+     &   CHF_BOX[box])
+
+#include "TrigCommon.fh"
+#include "EosCommon.fh"
+
+      real_t ke,rho0,p0,rho,p,kemax
+      integer CHF_AUTODECL[i]
+      real_t CHF_DDECL[uu;vv;ww]
+      real_t CHF_DDECL[x;y;z]
+
+      rho0 = ambientdensity
+      p0 = one
+
+      rho = rho0
+      kemax = half * rho
+      p = ten * kemax
+
+      CHF_AUTOMULTIDO[box; i]
+         CHF_DTERM[
+         uu = zero;
+         vv = zero;
+         ww = zero]
+
+         CHF_DTERM[
+         x = coords(CHF_AUTOIX[i], 0);
+         y = coords(CHF_AUTOIX[i], 1);
+         z = coords(CHF_AUTOIX[i], 2)]
+
+#if CH_SPACEDIM>=2
+         uu = cos(two*Pi*y)
+         vv = cos(two*Pi*x)
+#endif
+
+         ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+         U(CHF_AUTOIX[i],URHO) = rho
+
+         CHF_DTERM[
+         U(CHF_AUTOIX[i],UMOMX) = uu*rho ;
+         U(CHF_AUTOIX[i],UMOMY) = vv*rho ;
+         U(CHF_AUTOIX[i],UMOMZ) = ww*rho ]
+
+         U(CHF_AUTOIX[i],UENG) = p/(gamma - one) + rho*ke
+      CHF_ENDDO
+
+      return
+      end

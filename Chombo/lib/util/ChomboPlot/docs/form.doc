@@ -1,0 +1,136 @@
+-----------------------------------------------------------
+
+Widget MakeForm(Widget parent, int where1, Widget from1
+                int where2, Widget from2)
+
+
+This function lets you create a new "form" widget in which to put
+child widgets.  A form widget is a container that holds other widgets.
+Normally there is no need to call this function, but if you want to
+have separate "groups" of widgets in your display and you can't lay
+them out that way with SetWidgetPos(), then using multiple form
+widgets may be the right thing.  In addition, a nifty little box gets
+drawn around the form widget (and all the children) and this can be a
+nice visual cue in your interface indicating what groups of widgets
+belong together.  A form widget creates a box that surrounds all the
+widgets contained inside of it (but the form widget itself is inactive
+and can't be clicked on by the user).
+
+If you use multiple form widgets in your display, the basic logic of
+how you create the display is a little different.  You can think of
+form widgets as miniature windows inside a larger window.
+
+Once you create a form widget, any other widgets you create with calls
+like MakeButton() and MakeLabel() become children of this form widget.
+Before you create another form widget, you must lay out all the
+children of the current form widget with calls to SetWidgetPos().
+After you lay out all the children of the current widget, then you can
+create another form widget, and repeat the process (or call SetForm()).
+
+Form widgets are layed out in a manner similar to regular widgets,
+except that usually their placement is relative to other form widgets. 
+When you create a new form widget (after the first one), you specify
+where it should be placed relative to other form widgets that you
+created.  The first form widget is always placed in the top left
+corner of the window.
+
+The `parent' argument to MakeForm() specifies at what level the new
+form should be created.  If you specify TOP_LEVEL_FORM (which is the
+usual thing to do) the new form is created at the top level of the
+window.  If you pass another form widget for `parent', then this new
+form widget will be a child of the other form widget.  This lets you
+create hierarchical "boxes" in your display.
+
+The arguments where1, from1, where2, from2 are the same as in
+SetWidgetPos().  That is, you specify either NO_CARE, PLACE_UNDER, or
+PLACE_RIGHT for where1 and where2 and the from1/from2 arguments are
+the widgets you would like to place something to the right of or under
+(or they are NULL if you specified NO_CARE).  See SetWidgetPos() for
+more documentation.
+
+Now for an example:
+
+Let's say we want a display something like this:
+
+      +------------+   +-----------------------+ 
+      | +--------+ |   | +-------------------+ |  
+      | |  Btn1  | |   | |                   | |   
+      | +--------+ |   | |                   | |  
+      |            |   | |                   | |  
+      | +--------+ |   | |                   | |  
+      | |  Btn2  | |   | |                   | |  
+      | +--------+ |   | |                   | |   
+      +------------+   | |                   | |  
+                       | |                   | |  
+                       | |                   | |  
+                       | +-------------------+ |  
+                       +-----------------------+  
+
+
+We have two rectangles (forms) which contain other widgets.  Inside
+the leftmost form are two buttons.  The form on the right has a single
+drawing area.  Skipping some of the unnecessary details, we could
+accomplish the above display with the following code:
+
+
+  form1 = MakeForm(TOP_LEVEL_FORM, NO_CARE, NULL, NO_CARE, NULL);
+  w[0]  = MakeButton("Btn1", NULL, NULL);
+  w[1]  = MakeButton("Btn2", NULL, NULL);
+  
+  SetWidgetPos(w[1], PLACE_UNDER, w[0], NO_CARE, NULL);
+  
+
+  form2 = MakeForm(TOP_LEVEL_FORM, PLACE_RIGHT, form1, NO_CARE, NULL); 
+  w[2]  = MakeDrawArea(200, 200, NULL, NULL);
+
+
+As you can see, we create the first form and specify that we don't
+care where it goes (the first form widget is always placed in the top
+left corner of the window).  Then we create some widgets to place
+inside of our new form.  Next, and this is important, we layout all
+the widgets inside of the first form.  In this case we only need to
+make one call to SetWidgetPos().  Then we create the next form, and
+specify that we want to place it to the right of form1.  Finally we
+create a drawing area widget, which is placed inside of form2.  
+
+If you want to create hiearchies of form widgets, you would specify
+the form widget that should be the parent for the first argument to
+MakeForm().  This can get quite complicted, so you should make sure
+you know what you're doing if you want to create big hierarchies.
+
+NOTE: It is important that you layout all your widgets before you
+      create a new form (unless you're creating a child form).
+
+
+SEE ALSO:  SetForm(), MakeWindow()
+-----------------------------------------------------------
+
+void SetForm(Widget w)
+
+  The SetForm() function allows you to change what is considered the
+current form.  Normally you only use this function to set the current
+form to be TOP_LEVEL_FORM.  You can cause your program to crash if you
+are not careful about what you set as the current form.
+
+  The main purpose of this function is to let you create displays that
+have both form widgets and other "normal" widgets at the same level.
+Mainly you would want to do this if you wanted a large drawing area
+(or some other type of widget) but didn't want to bother creating an
+form widget just to hold that one widget.
+
+  After calling this function, you can position any new widgets
+relative to other widgets (usually form widgets) created at the top
+level of the window.
+
+  The normal calling sequence is: SetForm(TOP_LEVEL_FORM), although
+you can specify any other form widget you like.  Be careful, as it is
+possible to confuse the X layout routines and cause your program to
+crash. 
+
+NOTE: Before you call SetForm() and start creating new widgets and
+      positioning them, any previous form widgets should be completely
+      layed out (i.e. you called SetWidgetPos() for all child widgets
+      of any previously created form widgets).
+
+SEE ALSO: MakeForm()
+-----------------------------------------------------------

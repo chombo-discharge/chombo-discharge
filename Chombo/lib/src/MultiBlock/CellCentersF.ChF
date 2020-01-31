@@ -1,0 +1,36 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine SETCELLCENTERS(
+!     Set centers of cells.
+!
+!     => inputs,  <= outputs
+!     cen <= coordinates  of centers of cells, CH_SPACEDIM components on bx
+!     bx => CELL-centered box
+!
+!     petermc, 14 Apr 2008
+     &     CHF_FRA[cen],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+
+      if (CHF_NCOMP[cen] .ne. CH_SPACEDIM) then
+         print *, 'SETCELLCENTERS:  cen must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      CHF_MULTIDO[bx; i; j; k]
+         CHF_DTERM[
+         cen(CHF_IX[i;j;k], 0) = i*one + half ;
+         cen(CHF_IX[i;j;k], 1) = j*one + half ;
+         cen(CHF_IX[i;j;k], 2) = k*one + half ]
+      CHF_ENDDO
+
+      return
+      end

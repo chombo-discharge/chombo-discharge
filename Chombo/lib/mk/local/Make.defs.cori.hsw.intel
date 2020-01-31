@@ -1,0 +1,44 @@
+## This file defines variables for use on the login nodes of the NERSC  Cori system (Haswell partition)  
+##
+## NOTE: everything is always in 64bit mode
+
+makefiles+=local/Make.defs.cori.hsw.intel
+
+CXX=CC
+FC=ftn
+MPICXX=CC
+USE_64=TRUE
+
+CH_CPP=$(CXX) -E -P -C
+
+RUN = srun -n 2 ./#
+
+# Compiler flags
+cxxoptflags += -xCORE-AVX2 -O3 -no-ipo
+foptflags += -xCORE-AVX2 -O3
+flibflags += -lifport -lifcore -limf -lsvml -lm -lipgo -lirc -lsvml
+
+# Compile with OpenMP
+ifeq ($(OPENMPCC),TRUE)
+  cxxoptflags += -qopenmp
+  foptflags += -qopenmp
+  flibflags += -lpthread -liomp5
+endif
+
+#XTRALDFLAGS += -Wl,-zmuldefs
+XTRALDFLAGS += -Wl,-zmuldefs, -Wl, -Bstatic -Wl,--start-group \
+/opt/intel/compilers_and_libraries_2017.2.174/linux/mkl/lib/intel64/libmkl_blacs_intelmpi_ilp64.a
+\
+#syslibflags = -mkl
+
+USE_HDF=TRUE
+#HDF5_DIR = $(CRAY_HDF5_DIR)/INTEL/140
+#HDF5_DIR = $(HDF5_ROOT)
+# use module-environment-defined HDF5_DIR, so no need to set it here
+
+HDFLIBFLAGS=   -L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFMPILIBFLAGS=-L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFINCFLAGS=   -I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS) 
+HDFMPIINCFLAGS=-I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS)
+
+FFTWDIR = /opt/cray/fftw/3.3.4.5/haswell

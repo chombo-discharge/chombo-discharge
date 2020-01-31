@@ -1,0 +1,3 @@
+This tests two interfaces to PETSc: a level solver calls 'PetscSolver' and an AMR matrix construction class 'testPetscCompGrid'.
+testPetscCompGrid.cpp tests the PetscCompGridPois class to create Jacobean for the Laplace(u) with Dirichlet BCs, and a PETSc solver to solve them.
+testPetscSolver.cpp tests the Level solver class.

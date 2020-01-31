@@ -1,0 +1,46 @@
+assert(SpaceDim == 2)
+
+verbosity = 3
+
+# Time stepping
+max_step = 100000
+max_time = 1.0
+fixed_dt = 0.005
+cfl = 0.75
+initial_cfl = 0.75
+max_dt_growth = 1.1
+dt_tolerance_factor = 1.1
+
+# Computational domain.
+num_cells = (32,32)
+
+# AMR
+max_level = 1
+ref_ratio = 4 
+
+use_subcycling = True
+initial_average = True
+useHyperviscosity = 0
+hyperviscosity = 0.01
+
+limitFaceValues = 1
+enforceMinVal = 1
+minVal = 0.0
+
+# Initial condition
+radius = 0.25
+magnitude = 1.0
+center = (0.5, 0.5)
+def phi0(x, t):
+    r = sqrt((x[0]-center[0])**2 + (x[1]-center[1])**2)
+    return exp(-32*r*r)
+
+# Velocity function: pure advection.
+velocity = (1,1)
+
+# Output
+checkpoint_interval = -1
+plot_interval = 10
+plot_prefix = 'Gaussian-advection.%d.'%num_cells[0]
+chk_prefix  = 'Gaussian-advection.%d.'%num_cells[0]
+

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+## make symbolic links for the login nodes on halem
+
+for s in halem1 halem2 halem3 halem4 halem5 ; do
+  ln -s Make.defs.halem Make.defs.$s
+done

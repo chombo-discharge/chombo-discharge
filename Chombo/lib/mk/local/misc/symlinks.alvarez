@@ -1,0 +1,7 @@
+#!/bin/sh
+
+## make symbolic links for the login nodes on alvarez
+
+for s in alvin01 alvin02 ; do
+  ln -s Make.defs.alvarez Make.defs.$s.alv.nersc.gov
+done

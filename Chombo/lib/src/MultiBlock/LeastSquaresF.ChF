@@ -1,0 +1,148 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+!=======================================================
+!     Fills in ghost values using interpolation and least squares.
+!
+!     => inputs,  <= outputs
+!     gval <= value at ghost cell
+!     cond <= condition number of least-squares problem
+!     avg <= average value over cells
+!     bxnbrs => box of neighbors, containing neqns cells
+!     moment => moments of displacement from each ghost cell to each of
+!        its valid neighbors; nvars components
+!     gmom => ghost cell moments for average
+!     vval => valid function values at neighbors
+!     avgflg => 1 if compute ghost cell averages avg, 0 if not
+!     neqns => number of valid cell values contributing to each ghost
+!     nvars => number of moments of each expansion
+!     lwork => length of work vector, lsworksize(nvars, neqns)
+!     work => work vector; length lwork
+!
+!     petermc, 21 Apr 2008
+      subroutine LSGHOSTVALUES(
+     &     CHF_REAL[gval],
+     &     CHF_REAL[cond],
+     &     CHF_REAL[avg],
+     &     CHF_BOX[bxnbrs],
+     &     CHF_CONST_FRA[moment],
+     &     CHF_CONST_R1D[gmom],
+     &     CHF_CONST_FRA1[vval],
+     &     CHF_CONST_INT[avgflg],
+     &     CHF_CONST_INT[neqns],
+     &     CHF_CONST_INT[nvars],
+     &     CHF_CONST_INT[lwork],
+     &     CHF_R1D[work])
+      integer CHF_DDECL[inbr; jnbr; knbr]
+      integer ieqn, ivar
+      REAL_T mat(neqns, nvars), vec(neqns)
+
+!     fill in matrix mat(nvars, neqns) by copying moment
+      do ivar = 1, nvars
+         ieqn = 0
+         CHF_MULTIDO[bxnbrs; inbr; jnbr; knbr]
+!     copy moments (nvars of them) from ghost cell to
+!     the ieqn'th valid cell in the neighborhood of ghost cell
+            ieqn = ieqn + 1
+            mat(ieqn, ivar) = moment(CHF_IX[inbr; jnbr; knbr], ivar-1)
+         CHF_ENDDO
+      enddo
+
+!     fill in vector vec:  input neqns > nvars
+!     (we don't just use vval, because it'll be overwritten)
+      ieqn = 0
+      CHF_MULTIDO[bxnbrs; inbr; jnbr; knbr]
+         ieqn = ieqn + 1
+         vec(ieqn) = vval(CHF_IX[inbr; jnbr; knbr])
+      CHF_ENDDO
+
+!     subroutine solvels in LeastSquaresCall.F calls LAPACK routine
+!     with the appropriate precision depending on #ifdef CH_USE_DOUBLE
+      call solvels(neqns, nvars, mat, vec, lwork, work)
+
+!     on output, vec has nvars < neqns components.
+!     the FIRST component contains the ghost value,
+!     because it is the coefficient of x^0 * y^0 * z^0.
+      gval = vec(1)
+      cond = work(0)
+      if (avgflg .eq. 1) then
+         avg = zero
+         do ivar = 1, nvars
+            avg = avg + vec(ivar)*gmom(ivar-1)
+         enddo
+      endif
+
+      return
+      end
+
+
+!=======================================================
+!     Fills in ghost values using interpolation and least squares.
+!
+!     => inputs,  <= outputs
+!     gval <= value at ghost cell
+!     cond <= condition number of least-squares problem
+!     avg <= average value over cells
+!     moment => moments of displacement from each ghost cell to each of
+!        its valid neighbors; neqns * nvars components
+!     gmom => ghost cell moments for average; nvars components
+!     vval => valid function values at neighbors
+!     avgflg => 1 if compute ghost cell averages avg, 0 if not
+!     nvars => number of moments of each expansion
+!     lwork => length of work vector, lsworksize(nvars, neqns)
+!     work => work vector; length lwork
+!
+!     petermc, 5 May 2008
+      subroutine LSGHOST(
+     &     CHF_REAL[gval],
+     &     CHF_REAL[cond],
+     &     CHF_REAL[avg],
+     &     CHF_CONST_VR[moment],
+     &     CHF_CONST_VR[gmom],
+     &     CHF_CONST_VR[vval],
+     &     CHF_CONST_INT[avgflg],
+     &     CHF_CONST_INT[neqns],
+     &     CHF_CONST_INT[nvars],
+     &     CHF_CONST_INT[lwork],
+     &     CHF_R1D[work])
+      integer ieqn, ivar
+      REAL_T mat(neqns, nvars), vec(neqns)
+
+!     fill in matrix mat(nvars, neqns) by copying moment
+      do ivar = 1, nvars
+         do ieqn = 1, neqns
+!     copy moments (nvars of them) from ghost cell to
+!     the ieqn'th valid cell in the neighborhood of ghost cell
+            mat(ieqn, ivar) = moment((ieqn - 1)*nvars + ivar-1)
+         enddo
+      enddo
+
+!     fill in vector vec:  input neqns > nvars
+!     (we don't just use vval, because it'll be overwritten)
+      do ieqn = 1, neqns
+         vec(ieqn) = vval(ieqn - 1)
+      enddo
+
+!     subroutine solvels in LeastSquaresCall.F calls LAPACK routine
+!     with the appropriate precision depending on #ifdef CH_USE_DOUBLE
+      call solvels(neqns, nvars, mat, vec, lwork, work)
+
+!     on output, vec has nvars < neqns components.
+!     the FIRST component contains the ghost value,
+!     because it is the coefficient of x^0 * y^0 * z^0.
+      gval = vec(1)
+      cond = work(0)
+      if (avgflg .eq. 1) then
+         avg = zero
+         do ivar = 1, nvars
+            avg = avg + vec(ivar)*gmom(ivar-1)
+         enddo
+      endif
+
+      return
+      end

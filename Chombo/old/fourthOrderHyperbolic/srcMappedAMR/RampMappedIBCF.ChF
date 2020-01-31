@@ -1,0 +1,298 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+c ----------------------------------------------------------------------
+c  Sets the Fortran common block
+c ----------------------------------------------------------------------
+
+      subroutine RAMPMAPPEDSETF(
+     &   CHF_REAL[ausmallPressure],
+     &   CHF_CONST_REAL[augamma],
+     &   CHF_CONST_REAL[aualpha],
+     &   CHF_CONST_REAL[aums],
+     &   CHF_CONST_REAL[auxStart],
+     &   CHF_CONST_REAL[auartvisc])
+
+#include "RampCommon.fh"
+#include "EosCommon.fh"
+
+      real_t p0,r0,p,r,umag,ke
+      real_t CHF_DDECL[uu;vv;ww]
+
+      gamma = augamma
+
+      alpha = aualpha
+      ms = aums
+c     For mapped grid this is the x-Dir. start location of the shock
+      xcorner = auxStart
+      artvisc = auartvisc
+
+      p0 = one
+      r0 = gamma
+
+      p = ((ms**2 - one) * (two * gamma) / (gamma + one) + one) * p0
+      r = one / (one / r0 - (p - p0) / (ms * r0)**2)
+
+      umag = (p - p0) / (ms * r0)
+
+      CHF_DTERM[
+         uu = umag;
+         vv = zero;
+         ww = zero]
+
+      ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+      smallr = small * r0
+      smallu = small * umag
+      smallp = small * r0 * ke
+
+      ausmallPressure = smallp
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Sets the initial conservative solution on the grid
+c
+c  U      <=  Conservative state
+c  coords  => Coordinates of the grid in physical space
+c  box     => Where to initialize
+c ----------------------------------------------------------------------
+
+      subroutine RAMPMAPPEDINITF(
+     &   CHF_FRA[U],
+     &   CHF_CONST_FRA[coords],
+     &   CHF_BOX[box])
+
+#include "RampCommon.fh"
+#include "EosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+
+      real_t p0,r0,p,r,umag,ke
+      real_t CHF_DDECL[uu;vv;ww]
+      real_t CHF_DDECL[x;y;z]
+
+      p0 = one
+      r0 = gamma
+
+      p = ((ms**2 - one) * (two * gamma) / (gamma + one) + one) * p0
+      r = one / (one / r0 - (p - p0) / (ms * r0)**2)
+
+      umag = (p - p0) / (ms * r0)
+
+      CHF_DTERM[
+         uu = umag;
+         vv = zero;
+         ww = zero]
+
+      ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+      CHF_AUTOMULTIDO[box;i]
+
+      CHF_DTERM[
+         x = coords(CHF_AUTOIX[i], 0);
+         y = coords(CHF_AUTOIX[i], 1);
+         z = coords(CHF_AUTOIX[i], 2)]
+
+      if (x .ge. xcorner) then
+         U(CHF_AUTOIX[i],URHO ) = r0
+
+         CHF_DTERM[
+         U(CHF_AUTOIX[i],UMOMX) = zero * r0 ;
+         U(CHF_AUTOIX[i],UMOMY) = zero * r0 ;
+         U(CHF_AUTOIX[i],UMOMZ) = zero * r0 ]
+
+         U(CHF_AUTOIX[i],UENG ) = p0 / (gamma - one)
+      else
+         U(CHF_AUTOIX[i],URHO ) = r
+
+         CHF_DTERM[
+         U(CHF_AUTOIX[i],UMOMX) = uu   * r ;
+         U(CHF_AUTOIX[i],UMOMY) = zero * r ;
+         U(CHF_AUTOIX[i],UMOMZ) = zero * r ]
+
+         U(CHF_AUTOIX[i],UENG ) = p / (gamma - one) + r * ke
+      endif
+      CHF_ENDDO
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Sets state on boundary faces
+c
+c  Wgdnv    <=  State on boundary face
+c  Wextrap   => State extrapolated to the face by the scheme
+c  Wtmp      => Temporary that may be filled instead of Wgdnv (E.g.,
+c               when Wgdnv is determined from a Riemann solve)
+c  coords    => Coordinates of the grid in physical space
+c  time      => solution time
+c  lohisign  => High or low side of a box
+c  dir       => Dir of the face
+c  box       => Face centered box on which to compute Wgdnv
+c ----------------------------------------------------------------------
+
+      subroutine RAMPMAPPEDBCF(
+     &   CHF_FRA[Wgdnv],
+     &   CHF_CONST_FRA[Wextrap],
+     &   CHF_CONST_FRA[Wtmp],
+     &   CHF_CONST_FRA[coords],
+     &   CHF_CONST_REAL[time],
+     &   CHF_CONST_INT[lohisign],
+     &   CHF_CONST_REAL[dx],
+     &   CHF_CONST_INT[dir],
+     &   CHF_BOX[box])
+
+#include "RampCommon.fh"
+#include "EosCommon.fh"
+
+      integer CHF_AUTODECL[i]
+
+      real_t cosalpha, sinalpha
+      real_t p0,r0,p,r,umag,c0,ke
+      real_t CHF_DDECL[uu;vv;ww]
+      real_t x
+      real_t xloc,pres,rho,c
+      real_t unorm
+
+      p0 = one
+      r0 = gamma
+
+      p = ((ms**2 - one) * two * gamma / (gamma + one) + one) * p0
+      r = one / (one / r0 - (p - p0) / (ms * r0)**2)
+
+      umag = (p - p0) / (ms * r0)
+
+      c0 = sqrt(gamma*p0/r0)
+
+      CHF_DTERM[
+         uu = umag;
+         vv = zero;
+         ww = zero]
+
+      ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+      if (dir .eq. 0) then
+         if (lohisign .eq. -1) then
+
+c-----Inflow
+
+            CHF_AUTOMULTIDO[box;i]
+               Wgdnv(CHF_AUTOIX[i],WRHO ) = r
+
+               CHF_DTERM[
+                  Wgdnv(CHF_AUTOIX[i],WVELX) = uu ;
+                  Wgdnv(CHF_AUTOIX[i],WVELY) = vv ;
+                  Wgdnv(CHF_AUTOIX[i],WVELZ) = ww ]
+
+               Wgdnv(CHF_AUTOIX[i],WPRES) = p
+            CHF_ENDDO
+
+         else
+
+c-----Outflow
+
+            CHF_AUTOMULTIDO[box;i]
+               Wgdnv(CHF_AUTOIX[i],WRHO ) = r0
+
+               CHF_DTERM[
+                  Wgdnv(CHF_AUTOIX[i],WVELX) = zero ;
+                  Wgdnv(CHF_AUTOIX[i],WVELY) = zero ;
+                  Wgdnv(CHF_AUTOIX[i],WVELZ) = zero ]
+
+               Wgdnv(CHF_AUTOIX[i],WPRES) = p0
+            CHF_ENDDO
+         endif
+
+      elseif (dir .eq. 1) then
+         if (lohisign .eq. 1) then
+
+c-----Top boundary (Dirichlet)
+
+            xloc = xcorner + ms * c0 * time
+            CHF_AUTOMULTIDO[box;i]
+               x = coords(CHF_AUTOIX[i], 0);
+               if (x .ge. xloc) then
+                  Wtmp(CHF_AUTOIX[i],WRHO ) = r0
+                  CHF_DTERM[
+                     Wtmp(CHF_AUTOIX[i],WVELX) = zero;
+                     Wtmp(CHF_AUTOIX[i],WVELY) = zero;
+                     Wtmp(CHF_AUTOIX[i],WVELZ) = zero]
+                  Wtmp(CHF_AUTOIX[i],WPRES) = p0
+               else
+                  Wtmp(CHF_AUTOIX[i],WRHO ) = r
+                  CHF_DTERM[
+                     Wtmp(CHF_AUTOIX[i],WVELX) = uu;
+                     Wtmp(CHF_AUTOIX[i],WVELY) = vv;
+                     Wtmp(CHF_AUTOIX[i],WVELZ) = ww]
+                  Wtmp(CHF_AUTOIX[i],WPRES) = p
+               endif
+            CHF_ENDDO
+
+         else
+
+c-----Bottom solid boundary (Ramp)
+
+            cosalpha = cos(alpha)
+            sinalpha = sin(alpha)
+
+            CHF_AUTOMULTIDO[box;i]
+               x = coords(CHF_AUTOIX[i], 0);
+               if (x .gt. zero) then
+c                 On ramp
+                  unorm = cosalpha*Wextrap(CHF_AUTOIX[i],WVELY) -
+     &               sinalpha*Wextrap(CHF_AUTOIX[i],WVELX)
+               else
+c                 Before ramp
+                  unorm = Wextrap(CHF_AUTOIX[i],WVELY)
+               endif
+               rho    = max(Wextrap(CHF_AUTOIX[i],WRHO ),smallr)
+               pres   = max(Wextrap(CHF_AUTOIX[i],WPRES),smallp)
+
+               c = sqrt(gamma * pres / rho)
+
+               Wgdnv(CHF_AUTOIX[i],WRHO ) = rho
+
+               CHF_DTERM[
+                  Wgdnv(CHF_AUTOIX[i],WVELX) = zero;
+                  Wgdnv(CHF_AUTOIX[i],WVELY) = zero;
+                  Wgdnv(CHF_AUTOIX[i],WVELZ) = zero]
+
+c              Acoustic correction: delta u = delta p/(rho*c)
+               Wgdnv(CHF_AUTOIX[i],WPRES) = pres
+     &            + lohisign * rho * unorm * c
+            CHF_ENDDO
+         endif
+
+      else
+
+c-----Solid boundary (orthogonal to 2-D ramp problem)
+
+         CHF_AUTOMULTIDO[box;i]
+            unorm  = Wextrap(CHF_AUTOIX[i],WVELX + dir)
+            rho    = max(Wextrap(CHF_AUTOIX[i],WRHO ),smallr)
+            pres   = max(Wextrap(CHF_AUTOIX[i],WPRES),smallp)
+
+            c = sqrt(gamma * pres / rho)
+
+            Wgdnv(CHF_AUTOIX[i],WRHO ) = rho
+
+            CHF_DTERM[
+               Wgdnv(CHF_AUTOIX[i],WVELX) = zero;
+               Wgdnv(CHF_AUTOIX[i],WVELY) = zero;
+               Wgdnv(CHF_AUTOIX[i],WVELZ) = zero]
+
+            Wgdnv(CHF_AUTOIX[i],WPRES) = pres
+     &         + lohisign * rho * unorm * c
+         CHF_ENDDO
+      endif
+
+      return
+      end

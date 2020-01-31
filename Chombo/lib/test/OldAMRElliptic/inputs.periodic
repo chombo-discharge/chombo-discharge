@@ -1,0 +1,31 @@
+#main parameters
+main.iprob              = 1       #form of rhs to use
+main.num_v_cycles_bottom = 1
+main.iterations          = 1  #number of times to solve (for benchmarking)
+main.max_iterations      = 20 # max of times to iterate on one solve
+#iprob == 0, const rhs within r<rno, zero outside        
+#iprob == 1, cubic rhs within r<rno, zero outside        
+main.rhono              = 0.75    #coefficient of rhs
+main.rno                = 0.5     #radius input to rhs
+#iprob = 0 const rho in center, zero outside
+#iprob = 1 cubic rho in center, zero outside
+main.bc_lo              = 0 0 0   #bcs for lo faces 1==neumann, 0 == dirc
+main.bc_hi              = 0 0 0   #bcs for hi faces 1==neumann, 0 == dirc
+main.max_level          = 2           # maximum level number
+#main.max_level          = 0           # maximum level number
+main.maxboxsize         = 16           # maximum linear size of boxes
+#main.maxboxsize         = 8           # maximum linear size of boxes
+#main.ref_ratio          = 4 4 4 4 4 4 4    # refinement ratio
+#main.ref_ratio          = 2 2 2 2 2 2 2 2    # refinement ratio
+main.ref_ratio          = 4 2 2 2 2 2 2 2    # refinement ratio
+main.n_cell             = 16 16 16    # num. cells in base grid dirs
+#main.n_cell             = 8 8 8 8    # num. cells in base grid dirs
+main.is_periodic        = 1 1 1   # 1 for periodic BCs, 0 for physical BCs
+#main.is_periodic        = 0 0 0   # 1 for periodic BCs, 0 for physical BCs
+main.prob_lo            = 0.0 0.0 0.0 # coords. of lower left. 
+main.prob_hi            = 1.0 1.0 1.0 # coords. of upper right.
+main.lbase              = 0          #lbase for solves
+main.verbose            = 1          #if this is == 1, verbose is true
+main.fill_ratio         = 0.85     #fill ratio for meshrefine
+main.ncomp              = 1        # number of components in solve
+#main.presetGrids       = 1        #1 for preset grids to test configurations

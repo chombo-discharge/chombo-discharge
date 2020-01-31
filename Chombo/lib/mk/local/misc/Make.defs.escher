@@ -1,0 +1,11 @@
+# -*- Mode: Makefile; Modified: "Wed 30 Jul 2003 14:22:59 by dbs"; -*-
+
+# escher is a SGI IRIX64 system at NERSC in the Vis. group
+# `uname -a` is:
+
+makefiles+=local/Make.defs.escher
+
+HDFINCFLAGS    = -I$(HDF5_DIR)/include
+HDFLIBFLAGS    = -L$(HDF5_DIR)/lib -lhdf5 -lz
+HDFMPIINCFLAGS =
+HDFMPILIBFLAGS =

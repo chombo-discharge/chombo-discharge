@@ -1,0 +1,268 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+        subroutine SETTESTS(
+     &    CHF_CONST_REAL[aums],
+     &    CHF_CONST_REALVECT[aucenter],
+     &    CHF_CONST_REAL[ausize],
+     &    CHF_CONST_REALVECT[auvelocity],
+     &    CHF_CONST_REAL[auartvisc])
+
+#include "TestsCommon.fh"
+
+        ms = aums
+        size = ausize
+        artvisc = auartvisc
+
+        CHF_DTERM[
+        centerx = aucenter(0);
+        centery = aucenter(1);
+        centerz = aucenter(2)]
+
+        size = ausize
+
+        CHF_DTERM[
+        velx = auvelocity(0);
+        vely = auvelocity(1);
+        velz = auvelocity(2)]
+
+        return
+        end
+
+
+!-----------------------------------------------------------------------
+
+
+        subroutine EXPLOSIONINITC(
+     &    CHF_FRA[U],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_BOX[box])
+
+        real_t ke,r0,p0,s0,p,uu,vv,ww,umag,r,s
+        integer CHF_DDECL[i;j;k]
+        real_t CHF_DDECL[x;y;z]
+        real_t CHF_DDECL[xcenter;ycenter;zcenter]
+        real_t rad0sqr,radsqr
+
+#include "TestsCommon.fh"
+#include "EosCommon.fh"
+
+        CHF_DTERM[
+        xcenter = centerx;
+        ycenter = centery;
+        zcenter = centerz]
+
+        rad0sqr = size*size
+
+        p0 = one
+        r0 = gamma
+        s0 = p0 *exp(-(gamma-ONE)*log(r0))
+
+        ww = ms*r0
+
+        p = ((ms**2 - one)*(two*gamma)/(gamma + one) + one)*p0
+        r = one/(one/r0 - (p - p0)/ww**2)
+        s = p *exp(-(gamma-ONE)*log(r))
+
+        umag = (p - p0)/ww
+
+        CHF_DTERM[
+        uu = velx;
+        vv = vely;
+        ww = velz]
+
+        ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+        CHF_MULTIDO[box;i;j;k]
+          CHF_DTERM[
+          x = (i + half)*dx - xcenter;
+          y = (j + half)*dx - ycenter;
+          z = (k + half)*dx - zcenter]
+
+          radsqr = CHF_DTERM[x*x; + y*y; + z*z]
+
+          if (radsqr .ge. rad0sqr) then
+            U(CHF_IX[i;j;k],URHO) = r0
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = uu*r0;
+            U(CHF_IX[i;j;k],UMOMY) = vv*r0;
+            U(CHF_IX[i;j;k],UMOMZ) = ww*r0]
+
+            U(CHF_IX[i;j;k],UENG) = p0/(gamma - one) + r0*ke
+            U(CHF_IX[i;j;k],UENTR)= s0
+          else
+            U(CHF_IX[i;j;k],URHO) = r
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = uu*r;
+            U(CHF_IX[i;j;k],UMOMY) = vv*r;
+            U(CHF_IX[i;j;k],UMOMZ) = ww*r]
+
+            U(CHF_IX[i;j;k],UENG) = p/(gamma - one) + r*ke
+            U(CHF_IX[i;j;k],UENTR)= s
+          endif
+        CHF_ENDDO
+
+        return
+        end
+
+!-----------------------------------------------------------------------
+
+
+        subroutine WINDCOLLISION(
+     &    CHF_FRA[U],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_BOX[box])
+
+        real_t kel,ker,rr,pr,sr,pl,uu,vv,ww,rl,sl
+        integer CHF_DDECL[i;j;k]
+        real_t CHF_DDECL[x;y;z]
+        real_t CHF_DDECL[xcenter;ycenter;zcenter]
+        real_t csr,vl,vr
+
+#include "TestsCommon.fh"
+#include "EosCommon.fh"
+
+        CHF_DTERM[
+        xcenter = centerx;
+        ycenter = centery;
+        zcenter = centerz]
+
+        pr = one
+        rr = gamma
+        sr = pr *exp(-(gamma-ONE)*log(rr))
+        csr= sqrt(gamma*pr/rr)
+        vr =-csr * ms
+
+        pl = pr
+        rl = rr
+        sl = sr
+        vl = csr * ms
+
+        WRITE(*,*) 'ms csr = ',ms,csr
+
+        CHF_DTERM[
+        uu = velx ;
+        vv = vely ;
+        ww = velz ]
+
+        ker = half*(CHF_DTERM[(uu+vr)**2; + vv*vv; + ww*ww])
+        kel = half*(CHF_DTERM[(uu+vl)**2; + vv*vv; + ww*ww])
+
+        CHF_MULTIDO[box;i;j;k]
+          CHF_DTERM[
+          x = (i + half)*dx - xcenter;
+          y = (j + half)*dx - ycenter;
+          z = (k + half)*dx - zcenter]
+
+          if (x .ge. zero) then
+            U(CHF_IX[i;j;k],URHO) = rr
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = (uu+vr)*rr;
+            U(CHF_IX[i;j;k],UMOMY) = vv*rr;
+            U(CHF_IX[i;j;k],UMOMZ) = ww*rr]
+
+            U(CHF_IX[i;j;k],UENG) = pr/(gamma - one) + rr*ker
+            U(CHF_IX[i;j;k],UENTR)= sr
+          else
+            U(CHF_IX[i;j;k],URHO) = rl
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = (uu+vl)*rl;
+            U(CHF_IX[i;j;k],UMOMY) = vv*rl;
+            U(CHF_IX[i;j;k],UMOMZ) = ww*rl]
+
+            U(CHF_IX[i;j;k],UENG) = pl/(gamma - one) + rl*kel
+            U(CHF_IX[i;j;k],UENTR)= sl
+          endif
+        CHF_ENDDO
+
+        return
+        end
+
+
+!-----------------------------------------------------------------------
+
+
+        subroutine EXPANDINGSHOCK(
+     &    CHF_FRA[U],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_BOX[box])
+
+        real_t ke,r0,p0,s0,p,uu,vv,ww,umag,r,s
+        integer CHF_DDECL[i;j;k]
+        real_t CHF_DDECL[x;y;z]
+        real_t CHF_DDECL[xcenter;ycenter;zcenter]
+        real_t rad0sqr,cs0
+
+#include "TestsCommon.fh"
+#include "EosCommon.fh"
+
+        CHF_DTERM[
+        xcenter = centerx;
+        ycenter = centery;
+        zcenter = centerz]
+
+        rad0sqr = size*size
+
+        p0 = one
+        r0 = gamma
+        s0 = p0 *exp(-(gamma-ONE)*log(r0))
+        cs0= sqrt(gamma*p0/r0)
+
+        ww = ms*r0
+
+        p = ((ms**2 - one)*(two*gamma)/(gamma + one) + one)*p0
+        r = one/(one/r0 - (p - p0)/ww**2)
+        s = p *exp(-(gamma-ONE)*log(r))
+
+        umag = (p - p0)/ww
+
+        WRITE(*,*) 'ms = ',ms,cs0,velx
+
+        CHF_DTERM[
+        uu = velx ;
+        vv = vely ;
+        ww = velz ]
+
+        ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+        CHF_MULTIDO[box;i;j;k]
+          CHF_DTERM[
+          x = (i + half)*dx - xcenter;
+          y = (j + half)*dx - ycenter;
+          z = (k + half)*dx - zcenter]
+
+          if (abs(x) .gt. size) then
+            U(CHF_IX[i;j;k],URHO) = r0
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = uu*r0;
+            U(CHF_IX[i;j;k],UMOMY) = vv*r0;
+            U(CHF_IX[i;j;k],UMOMZ) = ww*r0]
+
+            U(CHF_IX[i;j;k],UENG) = p0/(gamma - one) + r0*ke
+            U(CHF_IX[i;j;k],UENTR)= s0
+          else
+            U(CHF_IX[i;j;k],URHO) = r
+
+            CHF_DTERM[
+            U(CHF_IX[i;j;k],UMOMX) = uu*r;
+            U(CHF_IX[i;j;k],UMOMY) = vv*r;
+            U(CHF_IX[i;j;k],UMOMZ) = ww*r]
+
+            U(CHF_IX[i;j;k],UENG) = p/(gamma - one) + r*ke
+            U(CHF_IX[i;j;k],UENTR)= s
+          endif
+        CHF_ENDDO
+
+        return
+        end

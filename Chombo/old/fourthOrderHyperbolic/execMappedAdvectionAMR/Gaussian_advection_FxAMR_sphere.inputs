@@ -1,0 +1,83 @@
+assert(SpaceDim == 2)
+
+verbosity = 1
+
+# Time stepping
+max_step = 1000
+max_time = 2.0
+fixed_dt = 0.06  # Use dt ~ 1.6/num_cells
+cfl = 0.75
+initial_cfl = 0.75
+max_dt_growth = 1.1
+dt_tolerance_factor = 1.1
+
+# Computational domain and coordinate system.
+coord_sys = 'cubed_sphere'
+num_cells = 24
+
+# AMR
+max_level = 1
+ref_ratio = 2 
+
+# Fixed box layouts.
+# ------------------
+
+boxes = [[Box(lo = (           0, 0), hi = (   num_cells-1, num_cells-1)),
+          Box(lo = ( 2*num_cells, 0), hi = ( 3*num_cells-1, num_cells-1)),
+          Box(lo = ( 4*num_cells, 0), hi = ( 5*num_cells-1, num_cells-1)),
+          Box(lo = ( 6*num_cells, 0), hi = ( 7*num_cells-1, num_cells-1)),
+          Box(lo = ( 8*num_cells, 0), hi = ( 9*num_cells-1, num_cells-1)),
+          Box(lo = (10*num_cells, 0), hi = (11*num_cells-1, num_cells-1))], # Level 0
+         [Box(lo = ( 3*ref_ratio*num_cells/4,   ref_ratio*num_cells/4), hi = ( 4*ref_ratio*num_cells/4-1, 3*ref_ratio*num_cells/4-1)),
+          Box(lo = ( 8*ref_ratio*num_cells/4,   ref_ratio*num_cells/4), hi = ( 9*ref_ratio*num_cells/4-1, 3*ref_ratio*num_cells/4-1)),
+          Box(lo = (   ref_ratio*num_cells/4, 3*ref_ratio*num_cells/4), hi = ( 3*ref_ratio*num_cells/4-1, 4*ref_ratio*num_cells/4-1)),
+          Box(lo = (33*ref_ratio*num_cells/4,                     0  ), hi = (35*ref_ratio*num_cells/4-1,   ref_ratio*num_cells/4-1))]] # Level 1
+#          Box(lo = (11*ref_ratio*num_cells/4,   ref_ratio*num_cells/4), hi = (12*ref_ratio*num_cells/4-1, 3*ref_ratio*num_cells/4-1)),
+#          Box(lo = (16*ref_ratio*num_cells/4,   ref_ratio*num_cells/4), hi = (17*ref_ratio*num_cells/4-1, 3*ref_ratio*num_cells/4-1))]] # Level 1
+
+#use_subcycling = False
+useHyperviscosity = 0
+hyperviscosity = 0.01
+
+limitFaceValues = 1
+enforceMinVal = 1
+minVal = 0.0
+
+# Great circle distance between two points on the unit sphere.
+# (This uses the Vincenty formula.)
+def gcd(ll1, ll2):
+    lambda1, lambda2 = ll1[0], ll2[0] # Longitudes
+    phi1, phi2 = ll1[1], ll2[1]       # Latitudes
+    deltaLambda = lambda2-lambda1
+    cosDeltaLambda, sinDeltaLambda = cos(deltaLambda),sin(deltaLambda)
+    cosPhi1, sinPhi1 = cos(phi1),sin(phi1)
+    cosPhi2, sinPhi2 = cos(phi2),sin(phi2)
+    return atan2(sqrt((cosPhi2*sinDeltaLambda)**2 + \
+                      (cosPhi1*sinPhi2 - sinPhi1*cosPhi2*cosDeltaLambda)**2), \
+                 sinPhi1*sinPhi2 + cosPhi1*cosPhi2*cosDeltaLambda)
+
+# Gaussian initial conditions in (lon, lat) coordinates.
+center = (0,0)
+def phi0(ll, t):
+#    return 1
+    if ll[0] > pi: # Fix the longtitude to the interval [-pi, pi]
+        ll = (ll[0]-2*pi, ll[1])
+    r = gcd(ll, center)
+    return exp(-8*r*r)
+
+# Let's go around the equator.
+# velocity = (vlambda, vphi)
+def velocity(ll, t):
+    lon, lat = ll
+    return (cos(lat),0)
+
+# Velocity stream function.
+#def stream_function(ll, t):
+#    return 0
+
+# Output
+checkpoint_interval = -1
+plot_interval = 1
+plot_prefix = 'plot/Gaussian-advection-sphere.%d.'%num_cells
+chk_prefix  = 'checkpoint/Gaussian-advection-sphere.%d.'%num_cells
+

@@ -1,0 +1,57 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+
+c  ---------------------------------------------------------
+c  computes Donor Cell Upwind flux
+c
+c  pPhi        <=> cell-centered phi
+c  cellBox      => face-centered box over which to compute lapPhi
+c  neighborBox  => cell-centered box of neightbors over which to
+c                  redistribute negative values
+c ----------------------------------------------------------
+      subroutine DCUFLUX(CHF_FRA[flux],
+     &                   CHF_BOX[fluxBox],
+     &                   CHF_CONST_FRA[phi],
+     &                   CHF_CONST_FRA[ntvel],
+     &                   CHF_INT[dir],
+     &                   CHF_REAL[dt])
+
+      integer n
+      integer CHF_DDECL[i;j;k;l]
+      integer CHF_DDECL[ii;jj;kk;ll]
+      REAL_T facephi, facevel
+
+      CHF_DTERM[
+        ii = CHF_ID(0,dir);
+        jj = CHF_ID(1,dir);
+        kk = CHF_ID(2,dir);
+        ll = CHF_ID(3,dir);]
+
+      do n=0, (CHF_NCOMP[phi]-1)
+        CHF_MULTIDO[fluxBox;i;j;k;l]
+
+          facevel = ntvel(CHF_IX[i;j;k;l],0)
+          if (facevel.lt.zero) then
+
+            facephi = phi(CHF_IX[i;j;k;l],n);
+
+          else
+
+            facephi = phi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n);
+
+          endif
+
+          flux(CHF_IX[i;j;k;l],n) = facevel * facephi;
+
+        CHF_ENDDO
+
+      enddo
+
+      return
+      end

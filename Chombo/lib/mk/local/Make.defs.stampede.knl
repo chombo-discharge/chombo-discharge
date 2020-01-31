@@ -1,0 +1,23 @@
+## This file defines variables for use on the login nodes of the TACC Linux
+## machine 'Stampede-2'  
+##
+## NOTE: everything is always in 64bit mode
+
+makefiles+=local/Make.defs.stampede.knl
+
+CXX=icpc
+FC=ifort
+MPICXX=mpicxx
+USE_64=TRUE
+
+cxxoptflags+= -xMIC-AVX512
+foptflags += -xMIC-AVX512
+
+RUN = ibrun -n 2 -o 0 ./#
+
+USE_HDF=TRUE
+HDFLIBFLAGS=   -L$(TACC_HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFMPILIBFLAGS= -L$(TACC_HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFINCFLAGS=   -I$(TACC_HDF5_DIR)/include $(HDF_INCLUDE_OPTS) 
+HDFMPIINCFLAGS= -I$(TACC_HDF5_DIR)/include $(HDF_INCLUDE_OPTS) 
+

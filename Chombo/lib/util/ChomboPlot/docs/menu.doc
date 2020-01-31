@@ -1,0 +1,87 @@
+Menus provide standard drop-down style menus that let the user select
+from a variety of choices.  The Athena widgets do not support cascaded
+menus, so a menu is only a single list of items.  A menu contains menu
+items that are tied to callback functions in the application.  Menu
+items must be text and can not be bitmaps.
+
+
+----------------------------------------------------------------------
+
+Widget MakeMenu(char *name);
+
+This function creates a menu button that contains the text pointed to
+by the character string name.  When the button is clicked, a menu pops
+up.  The menu contains items created with MakeMenuItem().
+
+You need to save the return value of this function to be able to pass
+it to MakeMenuItem() so that menu items can attached to a menu.
+
+If this function fails, it returns NULL.
+
+SEE ALSO: MakeMenuItem(), MakeButton(), SetWidgetPos()
+----------------------------------------------------------------------
+
+Widget MakeMenuItem(Widget menu, char *name, ButtonCB func, void *arg);
+
+This function adds a menu item to a menu.  The menu item contains the
+text pointed to by the string name.  Whenever the user selects this
+menu item, the callback function, func, is called.  The final argument
+is an arbitrary void pointer that is passed to the callback function.
+
+The first argument must be a widget returned by MakeMenu() (results
+are undefined if it is not).
+
+If MakeMenuItem() fails for any reason, a NULL is returned.
+
+
+The callback function for the menu item should be declared as follows: 
+
+       void  func(Widget w, void *data)
+       {
+       }
+
+Whenever the user selects this menu item, the callback will be called.
+
+Setting of widget attributes with SetFgColor(), SetBgColor(), etc work 
+normally except that only one background color may be specified and it
+takes effect for the entire menu.  You can set different fonts for
+each menu item.
+
+
+NOTE: You do not need to call SetWidgetPos() for menu items.
+      Successive menu items are placed below previous menu items.
+
+
+SEE ALSO: SetMenuItemChecked(), GetMenuItemChecked(), MakeMenu().
+----------------------------------------------------------------------
+
+void   SetMenuItemChecked(Widget w, int state);
+
+This function sets the ``checked'' state of a menu item.  If a menu
+item is in the checked state, a bitmap of a check mark appears to the
+left of the menu item text.
+
+The first argument, w, is a menu item widget created with
+MakeMenuItem().  The second argument, state, is a boolean value of
+either TRUE (1) or FALSE (0) indicating whether or not the check mark
+should be drawn to the left of the menu item.  If the state argument
+is TRUE, the check mark is drawn.  If the state argument is FALSE, the
+check mark is removed.
+
+
+SEE ALSO: GetMenuItemChecked(), MakeMenuItem()
+----------------------------------------------------------------------
+
+int    GetMenuItemChecked(Widget w);
+
+This function returns a boolean result indicating whether the menu
+item referred to by the Widget w, is checked or not.
+
+If the menu item referred to by `w' is checked, a value of TRUE (1) is
+returned.  If the menu item does not currently have a check mark next
+to it, a value of FALSE (0) is returned.
+
+
+SEE ALSO: SetMenuItemChecked(), MakeMenuItem()
+----------------------------------------------------------------------
+

@@ -1,0 +1,32 @@
+#
+# $Id: Make.package,v 1.1 2007-05-24 18:12:03 tdsternberg Exp $
+#
+
+AMRLIB_BASE=EXE
+ifeq ($(LBASE),amr)
+  AMRLIB_BASE=LIB
+endif
+
+C$(AMRLIB_BASE)_sources += Amr.cpp AmrLevel.cpp BCRec.cpp Cluster.cpp \
+                Derive.cpp ErrorList.cpp FluxRegister.cpp \
+                Interpolater.cpp SlabStat.cpp StateData.cpp \
+                StateDescriptor.cpp StationData.cpp TagBox.cpp
+
+C$(AMRLIB_BASE)_headers += Amr.H AmrLevel.H BCRec.H BC_TYPES.H \
+                Cluster.H Derive.H ErrorList.H FluxRegister.H \
+                LevelBld.H Interpolater.H SlabStat.H StateData.H \
+                StateDescriptor.H StationData.H TagBox.H PROB_AMR_F.H 
+
+F$(AMRLIB_BASE)_headers += FLUXREG_F.H INTERP_F.H MAKESLICE_F.H SLABSTAT_F.H
+
+F$(AMRLIB_BASE)_sources += FILCC_$(DIM)D.F FLUXREG_$(DIM)D.F INTERP_$(DIM)D.F \
+                           SLABSTAT_$(DIM)D.F ARRAYLIM_$(DIM)D.F
+
+ifeq ($(DIM),3)
+  F$(AMRLIB_BASE)_sources += MAKESLICE_$(DIM)D.F
+endif
+
+ifeq ($(USE_ARRAYVIEW),TRUE)
+  C$(AMRLIB_BASE)_headers += DatasetClient.H
+  C$(AMRLIB_BASE)_sources += DatasetClient.cpp
+endif

@@ -1,0 +1,283 @@
+<BODY TEXT=#000000 BGCOLOR=#ffffff LINK=#06117F VLINK=#046664 ALINK=#7F0523>
+
+<html>
+
+<head>
+<title>Single Grid Tutorial</title>
+</head>
+<body>
+<p>
+<h1>Full Chombo Explicit Equation Solver </h1>
+<p>
+Now let us use all the tools of Chombo 
+Chombo to perform a domain-decompositon explicit heat equation solver.
+To our <a href="domCompHeat.html"> our original domain decomposition 
+example</a>, we will include the automatic routines that Chombo
+has to do domain decomposition and load balancing.  We will also
+use Chombo Fortran to facilitate the calls to fortran,
+Our comments are given in bold font, the code is in normal font.
+<p>
+First we include all the header files.  The Chombo Fortran lies 
+in a file called "heatfort.ChF" so the Chombo makefiles automatically
+generate the "heatfort_F.H" file.  It includes all the necessary
+prototype information.
+<pre><font face="Courier">
+
+#include "LevelData.H"
+#include "FArrayBox.H"
+#include "SPMD.H"
+#include "UGIO.H"
+#include "MeshRefine.H"
+#include "LoadBalance.H"
+#include "Misc.H"
+#include "Vector.H"
+#include "REAL.H"
+#include "Box.H"
+#include "heatfort_F.H"
+
+int main(int argc, char* argv[])
+{
+#ifdef MPI
+  MPI_Init(&argc, &argv);
+#endif
+</font>
+</pre>
+This is the same scoping trick we explained in 
+<a href = "domCompHeat.html"> domCompHeat.html</a>.  
+ Putting curly braces between
+ MPI_Init and MPI_Finalize  makes certain all
+ the Chombo classes which require MPI are destructed
+ before MPI_Finalize gets called.
+<pre><font face="Courier">
+  {//scoping trick
+
+</font>
+</pre>
+Define the  number of points in each direction, domain length
+    and diffusion coefficient.      Define the domain.
+    Define stopping conditions.
+    and set grid spacing and time step.
+<pre>
+<font face="Courier">
+    int nx = 64;
+    Real domainLen = 1.0;
+    Real coeff = 1.0e-3;
+    Real tfinal = 3.33;
+    int nstepmax = 100;
+    Real dx = domainLen/nx;
+    Real dt = 0.8*dx*dx/(2.*SpaceDim*coeff);
+    Box domain(IntVect::TheZeroVector(), (nx-1)*IntVect::TheUnitVector());
+</font>
+</pre>
+Call domainSplit (a Chombo function) to get the list
+of boxes in the divided domain.  call LoadBalance (also
+a Chombo function to balance the layout according to the
+Kernighan-Lin knapsack algorithm.  Create the layout
+from the processor assignment and box list.
+<pre>
+<font face="Courier">
+    // number of processors
+    int nproc = numProc();
+    // make maximum box size 
+    int maxsize = Max(nx/nproc, 4);
+    // this is the domain of the computation
+    // this is the list of boxes in the layout
+    Vector<Box> vbox;
+    domainSplit(domain, vbox, maxsize);
+    //load balance the boxes
+    Vector<int> procAssign;
+    LoadBalance(procAssign, vbox);
+    /// create layout
+    DisjointBoxLayout dbl(vbox, procAssign);
+    ///make the data with one ghost cell for convenience
+    LevelData<FArrayBox> phi(dbl, 1, IntVect::TheUnitVector());
+    LevelData<FArrayBox> lph(dbl, 1, IntVect::TheZeroVector());
+    
+</font>
+</pre>
+   Set phi to 1 for an initial condition.
+<pre>
+<font face="Courier">
+    DataIterator dit = dbl.dataIterator();
+    for(dit.reset(); dit.ok(); ++dit)
+      {
+        phi[dit()].setVal(1.0);
+      }
+
+</font>
+</pre>
+   Advance the solution in time
+<pre>
+<font face="Courier">
+    Real time = 0;
+    int nstep = 0;
+    while((time < tfinal) && (nstep < nstepmax))
+      {
+        //advance the time and step counter
+        time += dt;
+        nstep++;
+        cout << "nstep = " << nstep << "  time = " << time << endl;;
+    
+</font>
+</pre>
+Exchange ghost cell information
+<pre>
+<font face="Courier">
+        phi.exchange(phi.interval());
+</font>
+</pre>
+Enforce domain boundary conditions.
+<pre>
+<font face="Courier">
+        for(dit.reset(); dit.ok(); ++dit)
+          {
+            FArrayBox& soln = phi[dit()];
+            FArrayBox& lphi = lph[dit()];
+            const Box& region = dbl.get(dit());
+            for(int idir = 0; idir < SpaceDim; idir++)
+              {
+                Box bcbox;
+                if(region.smallEnd(idir) == domain.smallEnd(idir))
+                  {
+                    int ichop = domain.smallEnd(idir);
+                    bcbox = soln.box();
+                    bcbox.chop(idir, ichop);
+                    int iside = -1;
+                    FORT_BNDRYSUB(CHF_FRA1(soln,0),
+                                  CHF_BOX(bcbox),
+                                  CHF_INT(idir), 
+                                  CHF_INT(iside)); 
+                  }
+                if(region.bigEnd(idir) == domain.bigEnd(idir))
+                  {
+                    int ichop = domain.bigEnd(idir)+1;
+                    Box chop_box = soln.box();
+                    bcbox = chop_box.chop(idir,ichop);
+                    int iside = 1;
+                    FORT_BNDRYSUB(CHF_FRA1(soln,0),
+                                  CHF_BOX(bcbox),
+                                  CHF_INT(idir), 
+                                  CHF_INT(iside)); 
+                  }
+              }
+          }
+</font>
+</pre>
+Advance the solution in time
+<pre>
+<font face="Courier">
+        for(dit.reset(); dit.ok(); ++dit)
+          {
+            FArrayBox& soln = phi[dit()];
+            FArrayBox& lphi = lph[dit()];
+            const Box& region = dbl.get(dit());
+            FORT_HEATSUB(CHF_FRA1(soln,0),
+                         CHF_FRA1(lphi,0),
+                         CHF_BOX(region),
+                         CHF_REAL(dt), 
+                         CHF_REAL(dx), 
+                         CHF_REAL(coeff));
+          }
+      } //end loop through time
+
+</font>
+</pre>
+Output the solution using HDF5 and exit.
+<pre>
+<font face="Courier">
+    string filename("phi.hdf5");
+    WriteUGHDF5(filename, dbl, phi, domain);
+
+  }//end scoping trick
+#ifdef MPI
+  MPI_Finalize();
+#endif
+  return(0);
+}
+</font>
+</pre>
+For completeness, here is the Chombo Fortran code
+from "heatfort.ChF".  Notice that the code is dimension-
+independent so there is no need for different subroutines
+for two and three dimensional versions.
+<pre>
+<font face="Courier">
+
+      subroutine heatsub(
+     &     CHF_FRA1[phi],
+     &     CHF_FRA1[lph],
+     &     CHF_BOX[reg],
+     &     CHF_CONST_REAL[dt],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_REAL[nu])
+ 
+      REAL_T lapphi
+      integer CHF_DDECL[i;j;k], idir
+      integer CHF_DDECL[ii;jj;kk]
+
+
+c      advance solution
+      CHF_MULTIDO[reg;i;j;k]
+
+      lapphi = zero
+      do idir = 0,CH_SPACEDIM-1
+
+      CHF_DTERM[
+         ii = CHF_ID(idir, 0);
+         jj = CHF_ID(idir, 1);
+         kk = CHF_ID(idir, 2)]
+
+         lapphi = lapphi +
+     &        (phi(CHF_IX[i+ii;j+jj;k+kk])
+     &        +phi(CHF_IX[i-ii;j-jj;k-kk])
+     &        -two*phi(CHF_IX[i;j;k]))/dx/dx
+      enddo
+
+      lph(CHF_IX[i;j;k]) = lapphi
+
+      CHF_ENDDO
+
+c      advance solution
+      CHF_MULTIDO[reg;i;j;k]
+
+      phi(CHF_IX[i;j;k]) = phi(CHF_IX[i;j;k]) +
+     &        nu*dt*lph(CHF_IX[i;j;k])
+
+      CHF_ENDDO
+
+      return 
+      end
+
+
+      subroutine bndrysub(
+     &     CHF_FRA1[phi],
+     &     CHF_BOX[reg],
+     &     CHF_CONST_INT[idir],
+     &     CHF_CONST_INT[iside])
+ 
+      integer CHF_DDECL[i;j;k]
+      integer CHF_DDECL[ii;jj;kk]
+
+      CHF_DTERM[
+      ii = iside*CHF_ID(0,idir);
+      jj = iside*CHF_ID(1,idir);
+      kk = iside*CHF_ID(2,idir)]
+
+c      advance solution
+      CHF_MULTIDO[reg;i;j;k]
+
+      phi(CHF_IX[i;j;k]) = -phi(CHF_IX[i-ii;j-jj;k-kk])
+
+      CHF_ENDDO
+
+      return 
+      end
+
+
+
+
+
+</pre>
+</html>
+</body>
+

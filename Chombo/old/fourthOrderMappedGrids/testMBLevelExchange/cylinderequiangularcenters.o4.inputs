@@ -1,0 +1,27 @@
+main.verbosity = 0
+main.write_output = 1
+main.file_name = "out.hdf5"
+main.cell_centers = 1
+# length of base domain, whatever that is.  in cylindrical case,
+# it is length of the central block.
+main.domain_length = 32
+# radius of boxes
+# main.radius = 1
+# max degree of moments
+# main.degree = 2
+main.order = 4
+# domain length for each block
+# number of boxes into which to split each block along its length
+# main.domain_split = 2
+# width of ghost layer
+main.ghost = 4
+# function parameter
+main.function = "cylinderequiangular"
+main.center_point = 0. 0. 0.
+main.central_rect_size = 2. 2. 3.
+main.outer_radius = 3.
+# these are parameters of the function (not of the coordinate system)
+cylinder.n = 4
+cylinder.k = 1
+# quadrature
+main.quadrature = "gaussian"

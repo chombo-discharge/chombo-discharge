@@ -1,0 +1,55 @@
+claw.problem = shockbubble
+
+claw.mx = 120
+claw.my = 30
+claw.mz = 30
+
+claw.plot_interval = 1
+claw.max_step = 5
+claw.max_time = 1.0
+
+# claw.fixed_dt = 0.1
+claw.initial_cfl = 0.1
+claw.initial_dt = 0.005
+claw.cfl = 0.9
+claw.max_cfl = 1.0
+
+claw.order = 2 2 2
+claw.src = 0
+claw.verbosity = 1
+claw.mcapa = 0
+claw.maux = 0
+
+claw.meqn = 5
+claw.mwaves = 3
+claw.mthlim = 4 4 4
+
+claw.mbc = 2
+claw.mthbc = 1 1 1 1 3 1
+
+claw.xlower = 0
+claw.ylower = 0
+claw.zlower = 0
+claw.xupper = 2.0
+claw.yupper = 0.5
+claw.zupper = 0.5
+
+claw.stateNames = "rho" "u-momentum" "v-momentum" "w-momentum" "energy"
+
+# Parameters controlling the local mesh refining strategy
+claw.max_level = 0
+claw.ref_ratio = 2 2 2 2
+
+claw.regrid_interval = 2 2 2
+claw.tag_buffer_size = 3
+
+claw.refine_thresh = .25
+
+claw.block_factor = 2
+claw.max_grid_size = 400
+claw.fill_ratio = 0.70
+
+claw.checkpoint_interval = -1
+# claw.restart_file = chk20.2d.hdf5
+claw.plot_prefix  = plotNEW
+claw.chk_prefix = check

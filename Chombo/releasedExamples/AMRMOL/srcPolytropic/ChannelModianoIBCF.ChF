@@ -1,0 +1,278 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+        subroutine CHANNELMODIANOSETF(
+     &    CHF_REAL[ausmallPressure],
+     &    CHF_CONST_REAL[augamma],
+     &    CHF_CONST_REAL[auambientDensity],
+     &    CHF_CONST_REAL[audeltaDensity],
+     &    CHF_CONST_REAL[aucenter],
+     &    CHF_CONST_REAL[auwidth],
+     &    CHF_CONST_REAL[auartvisc])
+
+#include "ChannelModianoCommon.fh"
+#include "EosCommon.fh"
+
+        real_t p0,r0
+        real_t umag
+
+        gamma = augamma
+
+        ambientdensity = auambientDensity
+        deltadensity = audeltaDensity
+        center = aucenter
+        width = auwidth
+
+        artvisc = auartvisc
+
+        p0 = half
+        r0 = ambientdensity
+
+        umag = sqrt(gamma*p0/r0)
+
+        smallr = small * r0
+        smallu = small * umag
+        smallp = small * r0 * half * umag*umag
+
+        ausmallPressure = smallp
+
+        return
+        end
+
+        subroutine CHANNELMODIANOINITF(
+     &    CHF_FRA[U],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_BOX[box])
+
+#include "ChannelModianoCommon.fh"
+#include "EosCommon.fh"
+
+        integer CHF_DDECL[i;j;k]
+
+        real_t p0,r0
+        real_t p,r,dr
+        real_t CHF_DDECL[x;y;z]
+        real_t xbar,fx
+
+        p0 = half
+        r0 = ambientdensity
+        dr = deltadensity
+
+        CHF_MULTIDO[box;i;j;k]
+          CHF_DTERM[
+          x = (i + half) * dx ;
+          y = (j + half) * dx ;
+          z = (k + half) * dx ]
+
+          xbar = (x - center) / (half * width)
+
+          if (xbar .lt. -one) then
+            fx = zero
+          elseif (xbar .le. one) then
+            fx = (xbar**2 - 1)**4
+          else
+            fx = zero
+          endif
+
+          r = r0 * (one + dr * fx)
+          p = (r/r0)**gamma * p0
+
+          U(CHF_IX[i;j;k],URHO ) = r
+
+          CHF_DTERM[
+          U(CHF_IX[i;j;k],UMOMX) = zero ;
+          U(CHF_IX[i;j;k],UMOMY) = zero ;
+          U(CHF_IX[i;j;k],UMOMZ) = zero ]
+
+          U(CHF_IX[i;j;k],UENG ) = p / (gamma - one)
+        CHF_ENDDO
+
+        return
+        end
+
+        subroutine CHANNELMODIANOBCF(
+     &    CHF_FRA[Wgdnv],
+     &    CHF_CONST_FRA[Wextrap],
+     &    CHF_CONST_FRA[W],
+     &    CHF_CONST_INT[lohisign],
+     &    CHF_CONST_INT[dir],
+     &    CHF_BOX[box])
+
+#include "ChannelModianoCommon.fh"
+#include "EosCommon.fh"
+
+        integer CHF_DDECL[i;j;k]
+
+        real_t p0,r0
+        real_t pres,rho,speed
+        real_t unorm
+
+        p0 = half
+        r0 = gamma
+
+        if (dir .eq. 0) then
+          CHF_MULTIDO[box;i;j;k]
+            if (lohisign .eq. -1) then
+C
+C             Inflow boundary
+C
+              Wgdnv(CHF_IX[i;j;k],WRHO ) = r0
+
+              CHF_DTERM[
+              Wgdnv(CHF_IX[i;j;k],WVELX) = zero ;
+              Wgdnv(CHF_IX[i;j;k],WVELY) = zero ;
+              Wgdnv(CHF_IX[i;j;k],WVELZ) = zero ]
+
+              Wgdnv(CHF_IX[i;j;k],WPRES) = p0
+            else
+C
+C             Outflow boundary
+C
+              Wgdnv(CHF_IX[i;j;k],WRHO ) = r0
+
+              CHF_DTERM[
+              Wgdnv(CHF_IX[i;j;k],WVELX) = zero ;
+              Wgdnv(CHF_IX[i;j;k],WVELY) = zero ;
+              Wgdnv(CHF_IX[i;j;k],WVELZ) = zero ]
+
+              Wgdnv(CHF_IX[i;j;k],WPRES) = p0
+            endif
+          CHF_ENDDO
+        else
+          CHF_MULTIDO[box;i;j;k]
+C
+C           Solid boundary
+C
+            unorm  =     Wextrap(CHF_IX[i;j;k],WVELX + dir)
+            rho    = max(Wextrap(CHF_IX[i;j;k],WRHO       ),smallr)
+            pres   = max(Wextrap(CHF_IX[i;j;k],WPRES      ),smallp)
+
+            speed = sqrt(gamma * pres / rho)
+
+            Wgdnv(CHF_IX[i;j;k],WRHO ) = rho
+
+            CHF_DTERM[
+            Wgdnv(CHF_IX[i;j;k],WVELX) = zero ;
+            Wgdnv(CHF_IX[i;j;k],WVELY) = zero ;
+            Wgdnv(CHF_IX[i;j;k],WVELZ) = zero ]
+
+            Wgdnv(CHF_IX[i;j;k],WPRES) = pres
+     &                                 + lohisign * rho * unorm * speed
+          CHF_ENDDO
+        endif
+
+        return
+        end
+
+        subroutine CHANNELMODIANOSLOPEBCSF(
+     &    CHF_FRA[dW],
+     &    CHF_CONST_FRA[W],
+     &    CHF_CONST_INT[dir],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi])
+
+#include "ChannelModianoCommon.fh"
+
+        integer CHF_DDECL[i;j;k]
+        integer CHF_DDECL[ioff;joff;koff]
+        integer CHF_DDECL[inorm;itan1;itan2]
+        integer spacedim
+
+        real_t dvhi,dvlo,dvmin
+
+        spacedim = CH_SPACEDIM
+
+        CHF_DTERM[
+        ioff = CHF_ID(0,dir) ;
+        joff = CHF_ID(1,dir) ;
+        koff = CHF_ID(2,dir) ]
+
+        CHF_DTERM[
+        inorm = WVELX +     dir               ;
+        itan1 = WVELX + mod(dir + 1,spacedim) ;
+        itan2 = WVELX + mod(dir + 2,spacedim) ]
+
+        if (dir .gt. 0) then
+          if (hasLo .eq. 1) then
+            CHF_MULTIDO[loBox;i;j;k]
+              dW(CHF_IX[i;j;k],WRHO ) = zero
+
+              dvhi = W(CHF_IX[i + ioff;j + joff;k + koff],inorm) -
+     &               W(CHF_IX[i       ;j       ;k       ],inorm)
+              dvlo = W(CHF_IX[i       ;j       ;k       ],inorm) * two
+
+              dvmin = min(two * abs(dvhi),abs(dvlo)) * sign(one,dvlo)
+
+              if (dvlo*dvhi .lt. zero) dvmin = zero
+
+              CHF_DTERM[
+              dW(CHF_IX[i;j;k],inorm) = dvmin ;
+              dW(CHF_IX[i;j;k],itan1) = zero  ;
+              dW(CHF_IX[i;j;k],itan2) = zero  ]
+
+              dW(CHF_IX[i;j;k],WPRES) = zero
+            CHF_ENDDO
+          endif
+
+          if (hasHi .eq. 1) then
+            CHF_MULTIDO[hiBox;i;j;k]
+              dW(CHF_IX[i;j;k],WRHO ) = zero
+
+              dvhi =  W(CHF_IX[i       ;j       ;k       ],inorm) -
+     &                W(CHF_IX[i - ioff;j - joff;k - koff],inorm)
+              dvlo = -W(CHF_IX[i       ;j       ;k       ],inorm) * two
+
+              dvmin = min(two * abs(dvhi),abs(dvlo)) * sign(one,dvlo)
+
+              if (dvlo*dvhi .lt. zero) dvmin = zero
+
+              CHF_DTERM[
+              dW(CHF_IX[i;j;k],inorm) = dvmin ;
+              dW(CHF_IX[i;j;k],itan1) = zero  ;
+              dW(CHF_IX[i;j;k],itan2) = zero  ]
+
+              dW(CHF_IX[i;j;k],WPRES) = zero
+            CHF_ENDDO
+          endif
+        endif
+
+        return
+        end
+
+        subroutine CHANNELMODIANOARTVISCF(
+     &    CHF_FRA[F],
+     &    CHF_CONST_FRA[U],
+     &    CHF_CONST_FRA1[divu],
+     &    CHF_CONST_INT[lohisign],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_CONST_INT[dir],
+     &    CHF_BOX[box])
+
+#include "ChannelModianoCommon.fh"
+#include "EosCommon.fh"
+
+        integer CHF_DDECL[i;j;k]
+
+        real_t fc,dv,s
+
+        if (dir .gt. 0) then
+          CHF_MULTIDO[box;i;j;k]
+            fc = F   (CHF_IX[i; j; k],UMOMX + dir)
+            dv = divu(CHF_IX[i; j; k])
+            s  = U   (CHF_IX[i; j; k],UMOMX + dir)
+
+            F(CHF_IX[i;j;k],UMOMX + dir) = fc
+     &              - lohisign * artvisc * min(dv,zero) * (two * s)
+          CHF_ENDDO
+        endif
+
+        return
+        end

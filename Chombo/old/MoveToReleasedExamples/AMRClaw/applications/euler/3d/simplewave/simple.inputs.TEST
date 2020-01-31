@@ -1,0 +1,61 @@
+claw.problem = simplewave
+
+claw.mx = 30
+claw.my = 10
+claw.mz = 10
+
+claw.plot_interval = 2
+claw.max_step = 2
+claw.max_time = 1.0
+
+# claw.fixed_dt = 0.015
+claw.initial_dt = 0.03
+claw.cfl = 0.9
+claw.max_cfl = 1.0
+
+claw.order = 2 2 2
+claw.src = 0
+claw.verbosity = 1
+claw.mcapa = 22
+claw.maux = 22
+claw.auxtype = "xleft" "xleft" "xleft" "xleft" "xleft" "xleft"
+               "yleft" "yleft" "yleft" "yleft" "yleft" "yleft"
+               "zleft" "zleft" "zleft" "zleft" "zleft" "zleft"
+               "xleft" "yleft" "zleft" "capacity"
+
+claw.meqn = 5
+claw.mwaves = 3
+claw.mthlim = 3 3 3
+
+# ghost cells
+claw.mbc = 2
+
+# boundary conditions
+claw.mthbc = 1 1 1 1 1 1
+
+claw.xlower = -3
+claw.xupper = 3
+claw.ylower = -1
+claw.yupper = 1
+claw.zlower = -1
+claw.zupper = 1
+
+claw.stateNames = "rho" "u-momentum" "v-momentum" "w-momentum" "energy"
+
+# Parameters controlling the local mesh refining strategy
+claw.max_level = 2
+claw.ref_ratio = 2 2 2 2
+
+claw.regrid_interval = 2 2 2
+claw.tag_buffer_size = 3
+
+claw.refine_thresh = .25
+
+claw.block_factor = 2
+claw.max_grid_size = 400
+claw.fill_ratio = 0.70
+
+claw.checkpoint_interval = -1
+# claw.restart_file = chk20.2d.hdf5
+claw.plot_prefix  = simple
+claw.chk_prefix = check

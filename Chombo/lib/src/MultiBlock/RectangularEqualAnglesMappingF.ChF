@@ -1,0 +1,155 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine MAPRECTANGULAREQUALANGLES(
+!     Computes physical coordinates from Cartesian coordinates.
+!
+!     => inputs,  <= outputs
+!     coords <= physical coordinates, CH_SPACEDIM components on bx
+!     mapco => cartesian coordinates, CH_SPACEDIM components on bx
+!     mapcrn => cartesian coordinates of lower corner of rectangle
+!     lenmap => cartesian length of rectangle
+!     corner => physical coordinates of lower corner of rectangle
+!     bxwid => physical length of rectangle
+!     bx => indices of points
+!
+!     petermc, 27 Mar 2008
+     &     CHF_FRA[coords],
+     &     CHF_CONST_FRA[mapco],
+     &     CHF_CONST_REALVECT[mapcrn],
+     &     CHF_CONST_REALVECT[lenmap],
+     &     CHF_CONST_REALVECT[corner],
+     &     CHF_CONST_REALVECT[bxwid],
+     &     CHF_BOX[bx])
+
+      integer idir, CHF_DDECL[i;j;k]
+      real_t offctr
+
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM) then
+         print *, 'MAPRECTANGULAREQUALANGLES:  coords must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      do idir = 0, 1
+         CHF_MULTIDO[bx; i; j; k]
+!     offctr in range [-1/2:+1/2]
+         offctr = (mapco(CHF_IX[i;j;k], idir) - mapcrn(idir)) /
+     &        lenmap(idir) - half
+!     half*tan(Pi*half*[-1/2:+1/2]) in range [-1/2:+1/2]
+         coords(CHF_IX[i;j;k], idir) = corner(idir) +
+     &        bxwid(idir) * (half * tan(Pi*half*offctr) + half)
+         CHF_ENDDO
+      enddo
+
+#if CH_SPACEDIM == 3
+      idir = 2
+      CHF_MULTIDO[bx; i; j; k]
+!     offctr in range [0:1]
+         offctr = (mapco(CHF_IX[i;j;k], idir) - mapcrn(idir)) /
+     &        lenmap(idir)
+         coords(CHF_IX[i;j;k], idir) = corner(idir) +
+     &        bxwid(idir) * offctr
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine MAPINVRECTANGULAREQUALANGLES(
+!     Computes Cartesian coordinates from physical coordinates.
+!
+!     => inputs,  <= outputs
+!     mapco <= cartesian coordinates, CH_SPACEDIM components on bx
+!     coords => physical coordinates, CH_SPACEDIM components on bx
+!     mapcrn => cartesian coordinates of lower corner of rectangle
+!     lenmap => cartesian length of rectangle
+!     corner => physical coordinates of lower corner of rectangle
+!     bxwid => physical length of rectangle
+!     bx => indices of points
+!
+!     petermc, 7 Apr 2008
+     &     CHF_FRA[mapco],
+     &     CHF_CONST_FRA[coords],
+     &     CHF_CONST_REALVECT[mapcrn],
+     &     CHF_CONST_REALVECT[lenmap],
+     &     CHF_CONST_REALVECT[corner],
+     &     CHF_CONST_REALVECT[bxwid],
+     &     CHF_BOX[bx])
+
+      integer idir, CHF_DDECL[i;j;k]
+      real_t offctr, stret
+
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM) then
+         print *, 'MAPINVRECTANGULAREQUALANGLES:  coords must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      do idir = 0, 1
+         CHF_MULTIDO[bx; i; j; k]
+!     offctr in range [0:1]
+         offctr = (coords(CHF_IX[i;j;k], idir) - corner(idir)) /
+     &        bxwid(idir)
+!     stret in range [0:1]
+         stret = (two/Pi) * atan(two*offctr - one) + half
+         mapco(CHF_IX[i;j;k], idir) = mapcrn(idir) +
+     &        lenmap(idir) * stret
+         CHF_ENDDO
+      enddo
+
+#if CH_SPACEDIM == 3
+      idir = 2
+      CHF_MULTIDO[bx; i; j; k]
+!     offctr in range [0:1]
+      offctr = (coords(CHF_IX[i;j;k], idir) - corner(idir)) /
+     &     bxwid(idir)
+      mapco(CHF_IX[i;j;k], idir) = mapcrn(idir) +
+     &     lenmap(idir) * offctr
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine JACOBIANRECTANGULAREQUALANGLES(
+!     Computes Jacobian from Cartesian coordinates.
+!
+!     => inputs,  <= outputs
+!     jacob <= Jacobian, 1 component
+!     mapco => map space coordinates, CH_SPACEDIM coordinates on bx
+!     mapcrn => cartesian coordinates of lower corner of rectangle
+!     lenmap => cartesian length of rectangle
+!     bxwid => physical box width
+!     bx => indices of points
+!
+!     petermc, 4 Apr 2008
+     &     CHF_FRA1[jacob],
+     &     CHF_CONST_FRA[mapco],
+     &     CHF_CONST_REALVECT[mapcrn],
+     &     CHF_CONST_REALVECT[lenmap],
+     &     CHF_CONST_REALVECT[bxwid],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      real_t stretchjacobian
+      external stretchjacobian
+
+      CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[
+     &     stretchjacobian(
+     &     mapco(CHF_IX[i;j;k], 0), mapcrn(0), lenmap(0), bxwid(0)) ;
+     &     * stretchjacobian(
+     &     mapco(CHF_IX[i;j;k], 1), mapcrn(1), lenmap(1), bxwid(1)) ;
+     &     * bxwid(2) ]
+      CHF_ENDDO
+
+      return
+      end

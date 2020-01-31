@@ -1,0 +1,313 @@
+<BODY TEXT=#000000 BGCOLOR=#ffffff LINK=#06117F VLINK=#046664 ALINK=#7F0523>
+
+<html>
+
+<head>
+<title>Single Grid Tutorial</title>
+</head>
+<body>
+<p>
+ 
+<h1> Single-Grid Explicit Heat Equation Solver </h1>
+ 
+<p>
+ 
+Say you want to use Chombo 
+to simply make single-grid data and call a Fortran routine.
+Chombo contains simple mechanisms for doing this but for
+many reasons, one might want to do these things manually.
+Our comments are given in bold font, the code is in normal
+font.
+<p>
+First we include all the header files:
+ 
+
+<pre>
+<br><font face="Courier">
+#include "FArrayBox.H"
+#include "Vector.H"
+#include "REAL.H"
+#include "Box.H"
+</font>
+</pre>
+ 
+Now we specify all the stuff that we need to define
+so that C++ can call our Fortran subroutine.  We
+call our two-dimensional Fortran subroutine heatsub2d
+and our three-dimensional Fortran subroutine heatsub3d.
+Our Fortran compiler adds an underscore to it's subroutine
+names.
+ 
+<pre>
+<br><font face="Courier">
+#if CH_SPACEDIM==2
+#define FORT_HEATSUB heatsub2d_
+#elif CH_SPACEDIM==3
+#define FORT_HEATSUB heatsub3d_
+#endif
+extern "C"
+{
+  void FORT_HEATSUB(
+                    Real* const phi,
+                    const int*  const philo,
+                    const int*  const phihi,
+                    Real* const lph,
+                    const int*  const lphlo,
+                    const int*  const lphhi,
+                    const int*  const boxlo,
+                    const int*  const boxhi,
+                    const int*  const domlo,
+                    const int*  const domhi,
+                    const Real* const dt,
+                    const Real* const dx,
+                    const Real* const nu);
+}
+int main(int argc, char* argv[])
+{
+</font>
+</pre>
+        
+  We define number of points in each direction, the domain length
+  the diffusion coefficient, and stopping conditions. 
+  We then set the grid spacing and the time step.
+  We have compiled Chombo with
+  PRECISION=DOUBLE so Real is doubleprecision  in Fortran
+  and double in C++.  Recall SpaceDim is a Chombo variable
+  which is the dimensionality of the problem.
+        
+<pre>
+<br><font face="Courier">
+  int nx = 64;
+  Real domainLen = 1.0;
+  Real coeff = 1.0e-3;
+  Real tfinal = 3.33;
+  int nstepmax = 100;
+  Real dx = domainLen/nx;
+  Real dt = 0.8*dx*dx/(2.*SpaceDim*coeff);
+
+</font>
+</pre>
+        
+  This defines the domain of the computation and the data holder.
+  The data holder has one row of ghost cells for convenience.
+        
+<pre>
+<br><font face="Courier">
+  Box domain(IntVect::TheZeroVector(), (nx-1)*IntVect::TheUnitVector());
+  FArrayBox soln(grow(domain,1), 1);
+  FArrayBox lphi(domain, 1);
+</font>    
+</pre>
+ 
+ We set the solution everywhere to 1 for an initial condition.
+        
+<pre>
+<br><font face="Courier">
+  soln.setVal(1.0);
+</font>
+</pre>
+        
+   Now we advance the solution in time by calling
+   our Fortran routine.
+        
+<pre>
+<br><font face="Courier">
+  Real time = 0;
+  int nstep = 0;
+  while((time < tfinal) && (nstep < nstepmax))
+    {
+      time += dt;
+      nstep++;
+      FORT_HEATSUB(
+                   soln.dataPtr(0), 
+                   soln.loVect(), soln.hiVect(), 
+                   lphi.dataPtr(0), 
+                   lphi.loVect(), lphi.hiVect(), 
+                   domain.loVect(), domain.hiVect(),
+                   domain.loVect(), domain.hiVect(),
+                   &dt, &dx, &coeff);
+    } 
+</font>
+</pre>
+        
+        At this point, one would send the data in soln
+        to her favorite output routine.
+        
+<pre>
+<br><font face="Courier">
+  return 0;
+}
+</font>
+</pre>
+        
+   For completeness, we include our Fortran routines here.
+        
+<pre>
+<br><font face="Courier">
+
+      subroutine heatsub2d(
+     &     phi, nlphi, nhphi,
+     &     lph, nllph, nhlph,
+     &     nlreg, nhreg,
+     &     nldom, nhdom,
+     &     dt, dx, nu)
+ 
+      implicit none
+      integer nlphi(2), nhphi(2)
+      integer nllph(2), nhlph(2)
+      integer nlreg(2), nhreg(2)
+      integer nldom(2), nhdom(2)
+
+      real*8 phi(nlphi(1):nhphi(1), nlphi(2):nhphi(2))
+      real*8 lph(nllph(1):nhlph(1), nllph(2):nhlph(2))
+      real*8 dt, dx, nu, lapphi
+      integer i,j
+
+c      enforce boundary conditions
+c     phi(ghost) = -phi(interior)
+      if(nlreg(1) .eq. nldom(1)) then
+         do j = nlreg(2), nhreg(2)
+            phi(nlreg(1)-1,j) = -phi(nlreg(1),j)
+         enddo
+      endif
+      if(nhreg(1) .eq. nhdom(1)) then
+         do j = nlreg(2), nhreg(2)
+            phi(nhreg(1)+1,j) = -phi(nhreg(1),j)
+         enddo
+      endif
+
+      if(nlreg(2) .eq. nldom(2)) then
+         do i = nlreg(1), nhreg(1)
+            phi(i,nlreg(2)-1) = -phi(i, nlreg(2))
+         enddo
+      endif
+      if(nhreg(2) .eq. nhdom(2)) then
+         do i = nlreg(1), nhreg(1)
+            phi(i, nhreg(2)+1) = -phi(i, nhreg(2))
+         enddo
+      endif
+
+c      advance solution
+      do j = nlreg(2), nhreg(2)
+         do i = nlreg(1), nhreg(1)
+            lapphi =
+     &           (phi(i+1,j)+phi(i,j+1)
+     &           +phi(i-1,j)+phi(i,j-1)
+     &           -4.0d0*phi(i,j))/(dx*dx)
+
+            lph(i,j) = lapphi
+         enddo
+      enddo
+
+      do j = nlreg(2), nhreg(2)
+         do i = nlreg(1), nhreg(1)
+            phi(i,j) = phi(i,j) + nu*dt*lph(i,j)
+         enddo
+      enddo
+
+      return 
+      end
+
+      subroutine heatsub3d(
+     &     phi, nlphi, nhphi,
+     &     lph, nllph, nhlph,
+     &     nlreg, nhreg,
+     &     nldom, nhdom,
+     &     dt, dx, nu)
+      
+      implicit none
+      integer nlphi(3), nhphi(3)
+      integer nllph(3), nhlph(3)
+      integer nlreg(3), nhreg(3)
+      integer nldom(3), nhdom(3)
+      integer i,j,k
+      real*8 phi(nlphi(1):nhphi(1),nlphi(2):nhphi(2),nlphi(3):nhphi(3))
+      real*8 lph(nllph(1):nhlph(1),nllph(2):nhlph(2),nllph(3):nhlph(3))
+      real*8 dt, dx, nu, lapphi
+      
+c     enforce boundary conditions
+c     phi(ghost) = -phi(interior)
+      if(nlreg(1) .eq. nldom(1)) then
+         do k = nlreg(3), nhreg(3)
+            do j = nlreg(2), nhreg(2)
+               phi(nlreg(1)-1,j,k) = -phi(nlreg(1),j,k)
+            enddo
+         enddo
+      endif
+
+      if(nhreg(1) .eq. nhdom(1)) then
+         do k = nlreg(3), nhreg(3)
+            do j = nlreg(2), nhreg(2)
+               phi(nhreg(1)+1,j,k) = -phi(nhreg(1),j,k)
+            enddo
+         enddo
+      endif
+
+      if(nlreg(2) .eq. nldom(2)) then
+         do k = nlreg(3), nhreg(3)
+            do i = nlreg(1), nhreg(1)
+               phi(i,nlreg(2)-1,k) = -phi(i, nlreg(2),k)
+            enddo
+         enddo
+      endif
+
+      if(nhreg(2) .eq. nhdom(2)) then
+         do k = nlreg(3), nhreg(3)
+            do i = nlreg(1), nhreg(1)
+               phi(i, nhreg(2)+1,k) = -phi(i, nhreg(2),k)
+            enddo
+         enddo
+      endif
+
+      if(nlreg(3) .eq. nldom(3)) then
+         do j = nlreg(2), nhreg(2)
+            do i = nlreg(1), nhreg(1)
+               phi(i,j,nlreg(3)-1) = -phi(i,j,nlreg(3))
+            enddo
+         enddo
+      endif
+
+      if(nhreg(3) .eq. nhdom(3)) then
+         do j = nlreg(2), nhreg(2)
+            do i = nlreg(1), nhreg(1)
+               phi(i,j,nhreg(3)+1) = -phi(i,j,nhreg(3))
+            enddo
+         enddo
+      endif
+
+c      advance solution
+      do k = nlreg(3), nhreg(3)
+         do j = nlreg(2), nhreg(2)
+            do i = nlreg(1), nhreg(1)
+
+               lapphi =
+     &              (phi(i+1,j  ,k  )+phi(i-1,j  ,k  )
+     &              +phi(i  ,j+1,k  )+phi(i  ,j-1,k  )
+     &              +phi(i  ,j  ,k+1)+phi(i  ,j  ,k-1)
+     &              -6.0d0*phi(i,j,k))/(dx*dx)
+
+               lph(i,j,k) = lapphi
+            enddo
+         enddo
+      enddo
+
+
+      do k = nlreg(3), nhreg(3)
+         do j = nlreg(2), nhreg(2)
+            do i = nlreg(1), nhreg(1)
+               phi(i,j,k) = phi(i,j,k) + nu*dt*lph(i,j,k)
+            enddo
+         enddo
+      enddo
+
+      return 
+      end
+
+
+
+
+</font>
+</pre>
+</html>
+</body>
+

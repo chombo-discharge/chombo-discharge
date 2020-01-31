@@ -1,0 +1,47 @@
+## This file contains compiler variables for the Apple clang++ compiler   
+
+## It sets values for the defaults variables ($def*), which will be used
+## if the calling makefile doesn't set the corresponding variables.
+## The corresponding variables are the ones without the "def" prefix.
+
+## Compiler defaults variables:
+##  defcxxdbgflags : for C++ compiling and linking when DEBUG=TRUE
+##  defcxxoptflags : for C++ compiling and linking when OPT=TRUE or HIGH
+##  defcxxprofflags: for C++ compiling and linking when PROFILE=TRUE
+##  defldflags     : options for linking
+##  cppcallsfort: preprocessor macro as used in FORT_PROTO.H to specify
+##                    how the C++ code should construct names for calling Fortran
+##
+
+makefiles+=local/Make.defs.clang++
+
+defcxxdbgflags = -std=c++11 -g -Wall -Wno-overloaded-virtual -Wno-sign-compare
+#defcxxoptflags = -std=c++11 -O3 -march=native -Rpass-analysis=loop-vectorize -Wno-sign-compare
+defcxxoptflags = -std=c++11 -O3 -ffast-math -march=native -Rpass=loop-vectorize -Wno-sign-compare
+
+ifeq ($(OPENMPCC),TRUE)
+  defcxxdbgflags+= -fopenmp
+  defcxxoptflags+= -fopenmp
+else
+  defcxxdbgflags+= -Wno-unknown-pragmas
+  defcxxoptflags+= -Wno-unknown-pragmas
+endif
+
+
+CH_CPP = cpp -E -P 
+
+fname   := $(notdir $(firstword $(subst -, ,$(FC))))
+
+ifeq ($(fname),gfortran)
+  deffcomflags = -Wno-line-truncation -fno-second-underscore 
+  # these flags get rid of unused variables warnings. (-Wno-unused-parameter -Wno-unused-variable)
+  deffcomflags += -Wno-unused-parameter -Wno-unused-variable
+  deffoptflags = -O3 -funroll-loops -march=native
+  deffdbgflags = -g -ggdb -Wall -W
+  defflibflags  += -lgfortran -lm
+else
+  deffdbgflags = -g 
+  defoptflags = -O2 -march=native
+#  I don't know what library flag you need if this is gfortran
+endif
+

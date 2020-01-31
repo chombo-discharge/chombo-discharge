@@ -1,0 +1,260 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+        subroutine gsmulticolor(
+     &    chf_fra1[newphi],
+     &    chf_const_fra1[oldphi],
+     &    chf_const_real[weight],
+     &    chf_const_fra1[resid],
+     &    chf_box[coloredbox])
+
+        integer chf_ddecl[i;j;k]
+
+        chf_multido[coloredbox;i;j;k;2]
+
+          newphi(chf_ix[i;j;k]) = oldphi(chf_ix[i;j;k])
+     &                          + weight * resid(chf_ix[i;j;k])
+
+        chf_enddo
+
+        return
+        end
+
+C     --------------------------------------------------------------
+C     subroutine GSRBLEVELLAP
+C     performs GSRB on a level for the Poisson equation
+C
+C     INPUTS/OUTPUTS:
+C     phi      <=> phi
+C     rhs       => rhs
+C     region    => region on which to relax
+C     dx        => grid spacing
+C     redBlack  => which pass we are on
+C     nComp     => number of components in phi, rhs
+C
+C     Warning: phi, rhs must have the same number
+C     of components and span region.  Phi needs one more cell on
+C     all sides
+C
+C     dtgraves nov 2, 1999
+C     --------------------------------------------------------------
+      subroutine OLDGSRBLEVELLAP(
+     &     CHF_FRA[phi],
+     &     CHF_CONST_FRA[rhs],
+     &     CHF_BOX[region],
+     &     CHF_CONST_REAL[dx],
+     &     CHF_CONST_INT[redBlack])
+
+      REAL_T lambda
+      REAL_T dxinv,sum_b, lphi
+      !XXX -- remove unused variables
+      !XXXinteger CHF_DDECL[ii,i;jj,j;kk,k]
+      integer CHF_DDECL[i;j;k]
+      integer n,ncomp,idir,indtot,imin,imax
+
+      dxinv = one/(dx*dx)
+
+      sum_b = 0.0
+      do idir = 0, CH_SPACEDIM-1
+         sum_b = sum_b + two*dxinv
+      enddo
+
+      lambda = one/sum_b
+
+      ncomp = CHF_NCOMP[phi]
+      if(ncomp .ne. CHF_NCOMP[rhs]) then
+C         print*, 'GSRBLEVELHELM:phi and rhs incompatible'
+C         stop
+         call MAYDAYERROR()
+      endif
+
+      do n = 0, ncomp - 1
+#if CH_SPACEDIM==3
+         do k=CHF_LBOUND[region; 2], CHF_UBOUND[region; 2]
+#endif
+#if CH_SPACEDIM > 1
+            do j=CHF_LBOUND[region; 1], CHF_UBOUND[region; 1]
+#endif
+               imin = CHF_LBOUND[region; 0]
+               CHF_DTERM[indtot = imin; + j ; + k ]
+C     add 0 or 1 to imin, so that imin+j+k has same parity as redBlack
+C     petermc, 26 april 2001
+               imin = imin + abs(mod(indtot + redBlack, 2))
+               imax = CHF_UBOUND[region; 0]
+               do i = imin, imax, 2
+
+c     Unrolling the Space dimension loop and getting rid of temporaries
+c     (ii,jj,kk) for performance. (ndk)
+                 CHF_DTERM[
+                 lphi =  ((phi(CHF_IX[i+1;j;k],n)
+     &                   - phi(CHF_IX[i;j;k],n))
+     &                   -(phi(CHF_IX[i;j;k],n)
+     &                   - phi(CHF_IX[i-1;j;k],n)))*dxinv;
+     &                +  ((phi(CHF_IX[i;j+1;k],n)
+     &                   - phi(CHF_IX[i;j;k],n))
+     &                   -(phi(CHF_IX[i;j;k],n)
+     &                   - phi(CHF_IX[i;j-1;k],n)))*dxinv;
+     &                +  ((phi(CHF_IX[i;j;k+1],n)
+     &                   - phi(CHF_IX[i;j;k],n))
+     &                   -(phi(CHF_IX[i;j;k],n)
+     &                   - phi(CHF_IX[i;j;k-1],n)))*dxinv ]
+
+                  phi(CHF_IX[i;j;k],n) = phi(CHF_IX[i;j;k],n) +
+     &                 lambda*(lphi - rhs(CHF_IX[i;j;k],n))
+
+               enddo
+            enddo
+#if CH_SPACEDIM > 1
+         enddo
+#endif
+#if CH_SPACEDIM==3
+      enddo
+#endif
+
+      return
+      end
+
+C     -----------------------------------------------------------------
+C     subroutine OPERATORLAP
+C     computes 5-point operator for the Helmholtz equation
+C
+C     INPUTS/OUTPUTS:
+C     phi       =>  phi
+C     lofphi   <=   laplacian
+C     dx        =>  cell spacing
+C
+C     Warning: phi, lofphi must have the same number
+C     of components and span region.  Phi needs one more cell on
+C     all sides
+C
+C     dtgraves nov 2, 1999
+C     ------------------------------------------------------------------
+      subroutine OLDOPERATORLAP(
+     &     CHF_FRA[lofphi],
+     &     CHF_CONST_FRA[phi],
+     &     CHF_BOX[region],
+     &     CHF_CONST_REAL[dx])
+
+      REAL_T dxinv,lphi
+
+      !XXX -- remove unused variables
+      !XXXinteger CHF_DDECL[ii,i;jj,j;kk,k]
+      !XXXinteger n,ncomp,idir
+      integer CHF_DDECL[i;j;k]
+      integer n,ncomp
+
+      ncomp = CHF_NCOMP[phi]
+      if(ncomp .ne. CHF_NCOMP[lofphi]) then
+C         print*, 'GSRBLEVELHELM:phi and rhs incompatible'
+C         stop
+         call MAYDAYERROR()
+      endif
+
+      dxinv = one/(dx*dx)
+      do n = 0, ncomp-1
+         CHF_MULTIDO[region; i; j; k]
+
+         CHF_DTERM[
+            lphi =  ((phi(CHF_IX[i+1;j;k],n)
+     &              - phi(CHF_IX[i;j;k],n))
+     &              -(phi(CHF_IX[i;j;k],n)
+     &              - phi(CHF_IX[i-1;j;k],n)))*dxinv;
+     &           +  ((phi(CHF_IX[i;j+1;k],n)
+     &              - phi(CHF_IX[i;j;k],n))
+     &              -(phi(CHF_IX[i;j;k],n)
+     &              - phi(CHF_IX[i;j-1;k],n)))*dxinv;
+     &           +  ((phi(CHF_IX[i;j;k+1],n)
+     &              - phi(CHF_IX[i;j;k],n))
+     &              -(phi(CHF_IX[i;j;k],n)
+     &              - phi(CHF_IX[i;j;k-1],n)))*dxinv ]
+
+         lofphi(CHF_IX[i;j;k],n) =  lphi
+
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+
+      subroutine OLDINTERPHOMO(
+     &    CHF_FRA[phi],
+     &    CHF_BOX[region],
+     &    CHF_CONST_REAL[x1],
+     &    CHF_CONST_REAL[m_dxCrse],
+     &    CHF_CONST_INT[a_idir],
+     &    CHF_CONST_INT[ihilo])
+
+      REAL_T x2, denom, idenom, x, xsquared, m1, m2
+      REAL_T q1, q2
+      REAL_T pa, pb, a, b
+      INTEGER ncomp,  n
+      INTEGER CHF_DDECL[ii,i;jj,j;kk,k]
+
+      x2 = half*(three*x1+m_dxCrse)
+      denom = one-((x1+x2)/x1)
+      idenom = one/(denom)
+      x = two*x1
+      xsquared = x*x
+
+      m1 = one/(x1*x1)
+      m2 = one/(x1*(x1-x2))
+
+      q1 = one/(x1-x2)
+      q2 = x1+x2
+      ihilo = ihilo*(-1)
+
+      ncomp = CHF_NCOMP[phi]
+      CHF_DTERM[
+      ii = CHF_ID(a_idir, 0)*ihilo;
+      jj = CHF_ID(a_idir, 1)*ihilo;
+      kk = CHF_ID(a_idir, 2)*ihilo]
+
+      do n = 0, ncomp-1
+          CHF_MULTIDO[region; i; j; k]
+          pa=phi(CHF_IX[i+2*ii;j+2*jj;k+2*kk],n)
+          pb=phi(CHF_IX[i+ii;j+jj;k+kk],n)
+          a=((pb-pa)*m1 - (pb)*m2)*idenom
+          b=(pb)*q1 - a*q2
+          phi(CHF_IX[i;j;k],n) = a*xsquared + b*x + pa
+          CHF_ENDDO
+      enddo
+
+      return
+
+      end
+
+      subroutine OLDGETFLUX(
+     &    CHF_FRA[flux],
+     &    CHF_CONST_FRA[phi],
+     &    CHF_BOX[box],
+     &    CHF_CONST_REAL[m_dx],
+     &    CHF_CONST_INT[a_idir])
+
+      INTEGER ncomp,n
+      integer CHF_DDECL[ii; jj; kk]
+      integer CHF_DDECL[i ; j ; k ]
+
+      ncomp = CHF_NCOMP[phi]
+
+      CHF_DTERM[
+      ii = CHF_ID(a_idir, 0);
+      jj = CHF_ID(a_idir, 1);
+      kk = CHF_ID(a_idir, 2)]
+
+      do n = 0, ncomp-1
+          CHF_MULTIDO[box; i; j; k]
+
+          flux(CHF_IX[i;j;k],n) =
+     &        (phi(CHF_IX[i;j;k],n)-
+     &         phi(CHF_IX[i-ii;j-jj;k-kk],n))/m_dx
+          CHF_ENDDO
+      enddo
+
+      return
+
+      end

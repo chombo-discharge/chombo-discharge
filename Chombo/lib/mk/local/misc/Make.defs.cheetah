@@ -1,0 +1,14 @@
+# -*- Mode: Makefile; Modified: "Wed 30 Jul 2003 14:14:33 by dbs"; -*-
+
+makefiles+=local/Make.defs.cheetah
+
+CXX=xlC
+FC=xlf
+MPICXX=mpCC_r
+mpicppflags=
+
+# my own HDF5 libraries (ndk)
+HDFMPIINCFLAGS = -I$(HOME)/local/hdf5/parallel/include
+HDFMPILIBFLAGS = -L$(HOME)/local/hdf5/parallel/lib -lhdf5 -lz
+HDFINCFLAGS    = -I$(HOME)/local/hdf5/serial/include
+HDFLIBFLAGS    = -L$(HOME)/local/hdf5/serial/lib -lhdf5 -lz

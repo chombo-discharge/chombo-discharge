@@ -1,0 +1,738 @@
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+smallBoxTools        -lsmallboxtools
+BoxTools             -lboxtools
+AMRTools             BoxTools -lamrtools
+AMRElliptic          AMRTools -lamrelliptic
+AMRTimeDependent     AMRElliptic -lamrtimedependent
+EllipticDesign       AMRTimeDependent -lellipticdesign
+ParticleTools        AMRTools -lparticletools
+MultiBlock           -lmultiblock
+MultiDim             -lmultidim
+smallMultiDim        -lsmallmultidim
+
+EBTools              EllipticDesign -lebtools
+EBAMRTools           EBTools -lebamrtools
+EBAMRElliptic        EBAMRTools -lebamrelliptic
+EBAMRTimeDependent   EBAMRElliptic -lebamrtimedependent
+Workshop             EBAMRTools -lworkshop
+
+MFTools              EBAMRTimeDependent -lmftools
+MFElliptic           MFTools -lmfelliptic
+
+InfiniteDomain       MFTools -linfinitedomain
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+smallBoxTools        -lsmallboxtools
+BoxTools             -lboxtools
+AMRTools             BoxTools -lamrtools
+AMRElliptic          AMRTools -lamrelliptic
+AMRTimeDependent     AMRElliptic -lamrtimedependent
+EllipticDesign       AMRTimeDependent -lellipticdesign
+ParticleTools        AMRTools -lparticletools
+MultiBlock           -lmultiblock
+MultiDim             -lmultidim
+smallMultiDim        -lsmallmultidim
+
+EBTools              EllipticDesign -lebtools
+EBAMRTools           EBTools -lebamrtools
+EBAMRElliptic        EBAMRTools -lebamrelliptic
+EBAMRTimeDependent   EBAMRElliptic -lebamrtimedependent
+Workshop             EBAMRTools -lworkshop
+
+MFTools              EBAMRTimeDependent -lmftools
+MFElliptic           MFTools -lmfelliptic
+
+InfiniteDomain       MFTools -linfinitedomain
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+smallBoxTools        -lsmallboxtools
+BoxTools             -lboxtools
+AMRTools             BoxTools -lamrtools
+AMRElliptic          AMRTools -lamrelliptic
+AMRTimeDependent     AMRElliptic -lamrtimedependent
+EllipticDesign       AMRTimeDependent -lellipticdesign
+ParticleTools        AMRTools -lparticletools
+MultiBlock           -lmultiblock
+MultiDim             -lmultidim
+smallMultiDim        -lsmallmultidim
+
+EBTools              EllipticDesign -lebtools
+EBAMRTools           EBTools -lebamrtools
+EBAMRElliptic        EBAMRTools -lebamrelliptic
+EBAMRTimeDependent   EBAMRElliptic -lebamrtimedependent
+Workshop             EBAMRTools -lworkshop
+
+MFTools              EBAMRTimeDependent -lmftools
+MFElliptic           MFTools -lmfelliptic
+
+InfiniteDomain       MFTools -linfinitedomain
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+smallBoxTools        -lsmallboxtools
+BoxTools             -lboxtools
+AMRTools             BoxTools -lamrtools
+AMRElliptic          AMRTools -lamrelliptic
+AMRTimeDependent     AMRElliptic -lamrtimedependent
+EllipticDesign       AMRTimeDependent -lellipticdesign
+ParticleTools        AMRTools -lparticletools
+MultiBlock           -lmultiblock
+MultiDim             -lmultidim
+smallMultiDim        -lsmallmultidim
+
+EBTools              EllipticDesign -lebtools
+EBAMRTools           EBTools -lebamrtools
+EBAMRElliptic        EBAMRTools -lebamrelliptic
+EBAMRTimeDependent   EBAMRElliptic -lebamrtimedependent
+Workshop             EBAMRTools -lworkshop
+
+MFTools              EBAMRTimeDependent -lmftools
+MFElliptic           MFTools -lmfelliptic
+
+InfiniteDomain       MFTools -linfinitedomain
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+smallBoxTools        -lsmallboxtools
+BoxTools             -lboxtools
+AMRTools             BoxTools -lamrtools
+AMRElliptic          AMRTools -lamrelliptic
+AMRTimeDependent     AMRElliptic -lamrtimedependent
+EllipticDesign       AMRTimeDependent -lellipticdesign
+ParticleTools        AMRTools -lparticletools
+MultiBlock           -lmultiblock
+MultiDim             -lmultidim
+smallMultiDim        -lsmallmultidim
+
+EBTools              EllipticDesign -lebtools
+EBAMRTools           EBTools -lebamrtools
+EBAMRElliptic        EBAMRTools -lebamrelliptic
+EBAMRTimeDependent   EBAMRElliptic -lebamrtimedependent
+Workshop             EBAMRTools -lworkshop
+
+MFTools              EBAMRTimeDependent -lmftools
+MFElliptic           MFTools -lmfelliptic
+
+InfiniteDomain       MFTools -linfinitedomain
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+smallBoxTools        -lsmallboxtools
+BoxTools             -lboxtools
+AMRTools             BoxTools -lamrtools
+AMRElliptic          AMRTools -lamrelliptic
+AMRTimeDependent     AMRElliptic -lamrtimedependent
+EllipticDesign       AMRTimeDependent -lellipticdesign
+ParticleTools        AMRTools -lparticletools
+MultiBlock           -lmultiblock
+MultiDim             -lmultidim
+smallMultiDim        -lsmallmultidim
+
+EBTools              EllipticDesign -lebtools
+EBAMRTools           EBTools -lebamrtools
+EBAMRElliptic        EBAMRTools -lebamrelliptic
+EBAMRTimeDependent   EBAMRElliptic -lebamrtimedependent
+Workshop             EBAMRTools -lworkshop
+
+MFTools              EBAMRTimeDependent -lmftools
+MFElliptic           MFTools -lmfelliptic
+
+InfiniteDomain       MFTools -linfinitedomain
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib
+#
+# This file is input for chombo_utils.py, when called by src_makemakefile_am.py.
+# The first column is the name of a directory under lib/src.  Subsequent columns
+# are the names of libraries (built under lib/src) to which we need to link the
+# library defined in the directory named by the first column.
+# Directory names in columns after column 1 are expanded according
+# to the dependencies listed for them in earlier lines.  So make sure you
+# don't list any "forward dependencies".
+#
+# This file, and what we do with it, is only necessary when building in a
+# --disable-shared configuration.  (But even when we're using shared libraries,
+# it doesn't hurt.)
+#
+
+BoxLib               -lboxlib
+amrlib               BoxLib -lamrlib
+bndrylib             BoxLib -lbndrylib
+demoted_headers      -ldemoted_headers
+iamrlib              amrlib -liamrlib
+iamrlib_inflowforce  iamrlib -liamrlib_inflowforce
+mglib                iamrlib_inflowforce -lmglib
+facade               -lboxlib

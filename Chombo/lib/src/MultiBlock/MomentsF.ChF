@@ -1,0 +1,858 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine SETCENTERMOMENTS(
+!     Computes moments of displacement.
+!
+!     => inputs,  <= outputs
+!     moment <= moments, nvars components on bxnbrs
+!     disp => space coordinates of displacement, CH_SPACEDIM components
+!     bxnbrs => indices of CELLs in neighborhood
+!     degree => max degree of moment
+!     neqns => number of neighbors
+!     nvars => number of coeffs = C(degree + CH_SPACEDIM, CH_SPACEDIM)
+!     degbx => box from 0 to degree in all dimensions
+!
+!     2D example with degree=2.
+!     components       0:  neqns-1:   x^0 * y^0 = 1
+!     components   neqns:2*neqns-1:   x^1 * y^0 = x
+!     components 2*neqns:3*neqns-1:   x^2 * y^0 = x^2
+!     components 3*neqns:4*neqns-1:   x^0 * y^1 = y
+!     components 4*neqns:5*neqns-1:   x^1 * y^1 = xy
+!     components 5*neqns:6*neqns-1:   x^0 * y^2 = y^2
+!     With neqns=9:  x 9:17, y 27:35
+!
+!     3D example with degree=2.
+!     components       0:  neqns-1:   x^0 * y^0 * z^0 = 1
+!     components   neqns:2*neqns-1:   x^1 * y^0 * z^0 = x
+!     components 2*neqns:3*neqns-1:   x^2 * y^0 * z^0 = x^2
+!     components 3*neqns:4*neqns-1:   x^0 * y^1 * z^0 = y
+!     components 4*neqns:5*neqns-1:   x^1 * y^1 * z^0 = xy
+!     components 5*neqns:6*neqns-1:   x^0 * y^2 * z^0 = y^2
+!     components 6*neqns:7*neqns-1:   x^0 * y^0 * z^1 = z
+!     components 7*neqns:8*neqns-1:   x^1 * y^0 * z^1 = xz
+!     components 8*neqns:9*neqns-1:   x^0 * y^1 * z^1 = yz
+!     components 9*neqns:10*neqns-1:  x^0 * y^0 * z^2 = z^2
+!     With neqns=27:  x 27:53, y 81:107, z 162:188
+!
+!     petermc, 21 Apr 2008
+     &     CHF_FRA[moment],
+     &     CHF_CONST_FRA[disp],
+     &     CHF_BOX[bxnbrs],
+     &     CHF_CONST_INT[degree],
+     &     CHF_CONST_INT[neqns],
+     &     CHF_CONST_INT[nvars],
+     &     CHF_BOX[degbx])
+
+      integer CHF_DDECL[inbr; jnbr; knbr]
+      integer CHF_DDECL[ipow; jpow; kpow]
+      integer ind
+      real_t CHF_DDECL[dispx; dispy; dispz]
+
+      if (CHF_NCOMP[moment] .ne. nvars) then
+         print *, 'Error in setcentermoments:  need ',
+     &        nvars, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      ind = 0
+      CHF_MULTIDO[degbx; ipow; jpow; kpow]
+         if (CHF_DTERM[ipow; +jpow; +kpow] .le. degree) then
+            CHF_MULTIDO[bxnbrs; inbr; jnbr; knbr]
+
+               CHF_DTERM[
+               dispx = disp(CHF_IX[inbr; jnbr; knbr], 0) ;
+               dispy = disp(CHF_IX[inbr; jnbr; knbr], 1) ;
+               dispz = disp(CHF_IX[inbr; jnbr; knbr], 2) ]
+
+               moment(CHF_IX[inbr; jnbr; knbr], ind) =
+     &           CHF_DTERM[(dispx**ipow) ;
+     &              * (dispy**jpow) ;
+     &              * (dispz**kpow) ]
+            CHF_ENDDO
+            ind = ind + 1
+         endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+
+      subroutine SETMOMENTS(
+!     Computes moments of displacement.
+!
+!     => inputs,  <= outputs
+!     moment <= moments, nvars components/point
+!     disp => space coordinates of displacement, CH_SPACEDIM components/point
+!     degree => max degree of moment
+!     nvars => number of coeffs = C(degree + CH_SPACEDIM, CH_SPACEDIM)
+!     degbx => box from 0 to degree in all dimensions
+!
+!     2D example with degree=2.
+!     components       0:  neqns-1:   x^0 * y^0 = 1
+!     components   neqns:2*neqns-1:   x^1 * y^0 = x
+!     components 2*neqns:3*neqns-1:   x^2 * y^0 = x^2
+!     components 3*neqns:4*neqns-1:   x^0 * y^1 = y
+!     components 4*neqns:5*neqns-1:   x^1 * y^1 = xy
+!     components 5*neqns:6*neqns-1:   x^0 * y^2 = y^2
+!     With neqns=9:  x 9:17, y 27:35
+!
+!     3D example with degree=2.
+!     components       0:  neqns-1:   x^0 * y^0 * z^0 = 1
+!     components   neqns:2*neqns-1:   x^1 * y^0 * z^0 = x
+!     components 2*neqns:3*neqns-1:   x^2 * y^0 * z^0 = x^2
+!     components 3*neqns:4*neqns-1:   x^0 * y^1 * z^0 = y
+!     components 4*neqns:5*neqns-1:   x^1 * y^1 * z^0 = xy
+!     components 5*neqns:6*neqns-1:   x^0 * y^2 * z^0 = y^2
+!     components 6*neqns:7*neqns-1:   x^0 * y^0 * z^1 = z
+!     components 7*neqns:8*neqns-1:   x^1 * y^0 * z^1 = xz
+!     components 8*neqns:9*neqns-1:   x^0 * y^1 * z^1 = yz
+!     components 9*neqns:10*neqns-1:  x^0 * y^0 * z^2 = z^2
+!     With neqns=27:  x 27:53, y 81:107, z 162:188
+!
+!     petermc, 5 May 2008
+     &     CHF_VR[moment],
+     &     CHF_CONST_VR[disp],
+     &     CHF_CONST_INT[degree],
+     &     CHF_CONST_INT[nvars],
+     &     CHF_BOX[degbx])
+
+      integer CHF_DDECL[ipow; jpow; kpow]
+      integer ind, ieqn, neqns
+      real_t CHF_DDECL[dispx; dispy; dispz]
+
+      neqns = (CHF_UBOUND[disp; 0] + 1) / CH_SPACEDIM
+      if (CHF_UBOUND[moment; 0] + 1 .ne. neqns * nvars) then
+         print *, 'Error in setmoments:  need ',
+     &        nvars, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      ind = 0
+      CHF_MULTIDO[degbx; ipow; jpow; kpow]
+         if (CHF_DTERM[ipow; +jpow; +kpow] .le. degree) then
+            do ieqn = 0, neqns - 1
+
+               CHF_DTERM[
+               dispx = disp(CH_SPACEDIM * ieqn    ) ;
+               dispy = disp(CH_SPACEDIM * ieqn + 1) ;
+               dispz = disp(CH_SPACEDIM * ieqn + 2) ]
+
+!     moment ind of point ieqn
+               moment(ieqn * nvars + ind) =
+     &              CHF_DTERM[(dispx**ipow) ;
+     &              * (dispy**jpow) ;
+     &              * (dispz**kpow) ]
+            enddo
+            ind = ind + 1
+         endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+
+      subroutine SETPOWERS(
+!     Computes powers.
+!
+!     => inputs,  <= outputs
+!     dpow => powers of physical displacements, center to integration points
+!     disp => physical displacements from center to integration points
+!     bx => indices of integration points
+!     degree => max degree of moment
+!
+!     petermc, 11 Mar 2008
+     &     CHF_FRA[dpow],
+     &     CHF_CONST_FRA[disp],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[degree])
+      integer CHF_DDECL[i; j; k]
+      integer ind, p, idir, indpre
+
+      if (degree .ge. 0) then
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               dpow(CHF_IX[i;j;k], idir) = one
+            CHF_ENDDO
+         enddo
+      endif
+
+      if (degree .ge. 1) then
+         ind = CH_SPACEDIM
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               dpow(CHF_IX[i;j;k], ind) = disp(CHF_IX[i;j;k], idir)
+            CHF_ENDDO
+            ind = ind + 1
+         enddo
+      endif
+
+      if (degree .ge. 2) then
+         ind = 2*CH_SPACEDIM
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               dpow(CHF_IX[i;j;k], ind) =
+     &           disp(CHF_IX[i;j;k], idir) * disp(CHF_IX[i;j;k], idir)
+            CHF_ENDDO
+            ind = ind + 1
+         enddo
+      endif
+
+      do p = 3, degree
+         ind = p*CH_SPACEDIM
+         indpre = ind - CH_SPACEDIM
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               dpow(CHF_IX[i;j;k], ind) = disp(CHF_IX[i;j;k], idir)
+     &           * dpow(CHF_IX[i;j;k], indpre)
+            CHF_ENDDO
+            ind = ind + 1
+            indpre = indpre + 1
+         enddo
+      enddo
+
+      return
+      end
+
+
+      subroutine SETPOWERS2PLUS(
+!     Computes powers of displacement.
+!
+!     => inputs,  <= outputs
+!     dpow <=> powers of physical displacements, center to integration points;
+!              power p in components (p-1)*CH_SPACEDIM : p*CH_SPACEDIM - 1;
+!              components 0:CH_SPACEDIM-1 given as input
+!     bx => indices of integration points
+!     degree => max degree of moment
+!
+!     petermc, 28 Mar 2008
+     &     CHF_FRA[dpow],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[degree])
+      integer CHF_DDECL[i; j; k]
+      integer ind, p, idir, indpre
+      real_t disp
+
+      if (degree .ge. 2) then
+!     fill in components CH_SPACEDIM : 2*CH_SPACEDIM-1
+         ind = CH_SPACEDIM
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               disp = dpow(CHF_IX[i;j;k], idir)
+               dpow(CHF_IX[i;j;k], ind) = disp * disp
+            CHF_ENDDO
+            ind = ind + 1
+         enddo
+      endif
+
+      do p = 3, degree
+!     fill in components (p-1)*CH_SPACEDIM : p*CH_SPACEDIM-1
+         ind = (p - 1) * CH_SPACEDIM
+         indpre = (p - 2) * CH_SPACEDIM
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               dpow(CHF_IX[i;j;k], ind) = dpow(CHF_IX[i;j;k], idir)
+     &           * dpow(CHF_IX[i;j;k], indpre)
+            CHF_ENDDO
+            ind = ind + 1
+            indpre = indpre + 1
+         enddo
+      enddo
+
+      return
+      end
+
+
+      subroutine SETDISPLACEMENTPOWERS(
+!     Computes normalized displacement and powers thereof.
+!
+!     => inputs,  <= outputs
+!     dpow <= powers of physical displacements, center to integration points;
+!             power p in components (p-1)*CH_SPACEDIM : p*CH_SPACEDIM - 1;
+!             components 0:CH_SPACEDIM-1 given as input
+!     pts => physical coordinates of integration points
+!     bx => indices of integration points
+!     center => physical coordinates of ghost cell center
+!     width => physical dimensions of cell
+!     degree => max degree of moment
+!
+!     petermc, 30 May 2008
+     &     CHF_FRA[dpow],
+     &     CHF_CONST_FRA[pts],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[center],
+     &     CHF_CONST_REALVECT[width],
+     &     CHF_CONST_INT[degree])
+      integer CHF_DDECL[i; j; k]
+      integer ind, p, idir, indpre
+      real_t disp
+
+      do idir = 0, CH_SPACEDIM-1
+         CHF_MULTIDO[bx; i; j; k]
+            dpow(CHF_IX[i;j;k], idir) =
+     &        (pts(CHF_IX[i;j;k], idir) - center(idir)) / width(idir)
+         CHF_ENDDO
+      enddo
+
+      if (degree .ge. 2) then
+!     fill in components CH_SPACEDIM : 2*CH_SPACEDIM-1
+         ind = CH_SPACEDIM
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               disp = dpow(CHF_IX[i;j;k], idir)
+               dpow(CHF_IX[i;j;k], ind) = disp * disp
+            CHF_ENDDO
+            ind = ind + 1
+         enddo
+      endif
+
+      do p = 3, degree
+!     fill in components (p-1)*CH_SPACEDIM : p*CH_SPACEDIM-1
+         ind = (p - 1) * CH_SPACEDIM
+         indpre = (p - 2) * CH_SPACEDIM
+         do idir = 0, CH_SPACEDIM-1
+            CHF_MULTIDO[bx; i; j; k]
+               dpow(CHF_IX[i;j;k], ind) = dpow(CHF_IX[i;j;k], idir)
+     &           * dpow(CHF_IX[i;j;k], indpre)
+            CHF_ENDDO
+            ind = ind + 1
+            indpre = indpre + 1
+         enddo
+      enddo
+
+      return
+      end
+
+
+      subroutine SETAVGMOMENTS(
+!     Computes moments of displacement.
+!
+!     => inputs,  <= outputs
+!     moment <= moments, neqns * nvars components
+!     dest => index of fixed destination cell
+!     dpow => powers of physical displacements, center to integration points
+!     weight => integration weights, includes jacobian and / cell volume
+!     vol => cell volume
+!     bx => indices of integration points
+!     degree => max degree of moment
+!     inbr => index of neighbor, in 0:neqns-1
+!     neqns => number of neighbors
+!     nvars => number of coeffs = C(degree + CH_SPACEDIM, CH_SPACEDIM)
+!     degbx => box from 0 to degree in all dimensions
+!
+!     petermc, 7 Mar 2008
+     &     CHF_FRA[moment],
+     &     CHF_CONST_INTVECT[dest],
+     &     CHF_CONST_FRA[dpow],
+     &     CHF_CONST_FRA1[weight],
+     &     CHF_CONST_REAL[vol],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[degree],
+     &     CHF_CONST_INT[inbr],
+     &     CHF_CONST_INT[neqns],
+     &     CHF_CONST_INT[nvars],
+     &     CHF_BOX[degbx])
+
+      integer CHF_DDECL[i; j; k]
+      integer CHF_DDECL[idest; jdest; kdest]
+      integer CHF_DDECL[ipow; jpow; kpow]
+      integer CHF_DDECL[icomp; jcomp; kcomp]
+      integer ind
+      REAL_T intgrl
+
+      if (CHF_NCOMP[moment] .ne. (neqns * nvars)) then
+         print *, 'Error in setavgmoments:  need ',
+     &        (neqns * nvars), ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      CHF_DTERM[
+      idest = dest(0) ;
+      jdest = dest(1) ;
+      kdest = dest(2) ]
+
+      ind = inbr
+      CHF_MULTIDO[degbx; ipow; jpow; kpow]
+         if (CHF_DTERM[ipow; +jpow; +kpow] .le. degree) then
+            CHF_DTERM[
+            icomp = CH_SPACEDIM*ipow ;
+            jcomp = CH_SPACEDIM*jpow + 1 ;
+            kcomp = CH_SPACEDIM*kpow + 2 ]
+!     Set intgrl to integral over bx of xdif^ipow * ydif^jpow * zdif^kpow.
+            intgrl = zero
+#if (CH_SPACEDIM == 3)
+            if (kpow .eq. 0) then
+               if (jpow .eq. 0) then
+                  if (ipow .eq. 0) then ! kpow=0, jpow=0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k])
+                     CHF_ENDDO
+                  else ! kpow=0, jpow=0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], icomp) )
+                     CHF_ENDDO
+                  endif
+               else ! kpow=0, jpow>0
+                  if (ipow .eq. 0) then ! kpow=0, jpow>0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], jcomp) )
+                     CHF_ENDDO
+                  else ! kpow=0, jpow>0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], icomp)
+     &                    * dpow(CHF_IX[i;j;k], jcomp) )
+                     CHF_ENDDO
+                  endif
+               endif
+            else
+#endif
+#if (CH_SPACEDIM >= 2)
+               if (jpow .eq. 0) then ! kpow>0, jpow=0
+                  if (ipow .eq. 0) then ! kpow>0, jpow=0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl +
+     &                    CHF_DTERM[ weight(CHF_IX[i;j;k]) ; ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ]
+                     CHF_ENDDO
+                  else ! kpow>0, jpow=0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( CHF_DTERM[ dpow(CHF_IX[i;j;k], icomp) ; ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  endif
+               else ! kpow>0, jpow>0
+#endif
+                  if (ipow .eq. 0) then ! kpow>0, jpow>0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl +
+     &                    ( CHF_DTERM[ weight(CHF_IX[i;j;k]) ;
+     &                    * dpow(CHF_IX[i;j;k], jcomp) ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  else ! kpow>0, jpow>0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( CHF_DTERM[ dpow(CHF_IX[i;j;k], icomp) ;
+     &                    * dpow(CHF_IX[i;j;k], jcomp) ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  endif
+#if (CH_SPACEDIM >= 2)
+               endif
+#endif
+#if (CH_SPACEDIM == 3)
+            endif
+#endif
+            moment(CHF_IX[idest;jdest;kdest], ind) = intgrl / vol
+            ind = ind + neqns
+         endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SETVECTORAVGMOMENTS(
+!     Computes moments of displacement for a cell.
+!
+!     => inputs,  <= outputs
+!     moment <= moments, nvars components
+!     dpow => powers of physical displacements, center to integration points;
+!             length CH_SPACEDIM * (degree + 1)
+!     weight => integration weights, includes jacobian and / cell volume
+!     vol => cell volume
+!     bx => indices of integration points
+!     degree => max degree of moment
+!     nvars => number of coeffs = C(degree + CH_SPACEDIM, CH_SPACEDIM)
+!     degbx => box from 0 to degree in all dimensions
+!
+!     petermc, 7 Mar 2008
+     &     CHF_VR[moment],
+     &     CHF_CONST_FRA[dpow],
+     &     CHF_CONST_FRA1[weight],
+     &     CHF_CONST_REAL[vol],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[degree],
+     &     CHF_CONST_INT[nvars],
+     &     CHF_BOX[degbx])
+
+      integer CHF_DDECL[i; j; k]
+      integer CHF_DDECL[ipow; jpow; kpow]
+      integer CHF_DDECL[icomp; jcomp; kcomp]
+      integer ind
+      REAL_T intgrl
+
+      if (CHF_UBOUND[moment; 0] + 1 .ne. nvars) then
+         print *, 'Error in setvectoravgmoments:  need ',
+     &        nvars, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      ind = 0
+      CHF_MULTIDO[degbx; ipow; jpow; kpow]
+         if (CHF_DTERM[ipow; +jpow; +kpow] .le. degree) then
+!     These will be indices into dpow.
+            CHF_DTERM[
+            icomp = CH_SPACEDIM*ipow ;
+            jcomp = CH_SPACEDIM*jpow + 1 ;
+            kcomp = CH_SPACEDIM*kpow + 2 ]
+!     Set intgrl to integral over bx of xdif^ipow * ydif^jpow * zdif^kpow.
+            intgrl = zero
+#if (CH_SPACEDIM == 3)
+            if (kpow .eq. 0) then
+               if (jpow .eq. 0) then
+                  if (ipow .eq. 0) then ! kpow=0, jpow=0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k])
+                     CHF_ENDDO
+                  else ! kpow=0, jpow=0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], icomp) )
+                     CHF_ENDDO
+                  endif
+               else ! kpow=0, jpow>0
+                  if (ipow .eq. 0) then ! kpow=0, jpow>0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], jcomp) )
+                     CHF_ENDDO
+                  else ! kpow=0, jpow>0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], icomp)
+     &                    * dpow(CHF_IX[i;j;k], jcomp) )
+                     CHF_ENDDO
+                  endif
+               endif
+            else
+#endif
+#if (CH_SPACEDIM >= 2)
+               if (jpow .eq. 0) then ! kpow>0, jpow=0
+                  if (ipow .eq. 0) then ! kpow>0, jpow=0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl +
+     &                    CHF_DTERM[ weight(CHF_IX[i;j;k]) ; ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ]
+                     CHF_ENDDO
+                  else ! kpow>0, jpow=0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( CHF_DTERM[ dpow(CHF_IX[i;j;k], icomp) ; ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  endif
+               else ! kpow>0, jpow>0
+#endif
+                  if (ipow .eq. 0) then ! kpow>0, jpow>0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl +
+     &                    ( CHF_DTERM[ weight(CHF_IX[i;j;k]) ;
+     &                    * dpow(CHF_IX[i;j;k], jcomp) ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  else ! kpow>0, jpow>0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( CHF_DTERM[ dpow(CHF_IX[i;j;k], icomp) ;
+     &                    * dpow(CHF_IX[i;j;k], jcomp) ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  endif
+#if (CH_SPACEDIM >= 2)
+               endif
+#endif
+#if (CH_SPACEDIM == 3)
+            endif
+#endif
+            moment(ind) = intgrl / vol
+            ind = ind + 1
+         endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SETVECTORAVGMOMENTS1PLUS(
+!     Computes moments of displacement for a cell.
+!
+!     => inputs,  <= outputs
+!     moment <= moments, nvars components
+!     dpow => powers of physical displacements, center to integration points;
+!             length CH_SPACEDIM * degree
+!     weight => integration weights, includes jacobian and / cell volume
+!     vol => cell volume
+!     bx => indices of integration points
+!     degree => max degree of moment
+!     nvars => number of coeffs = C(degree + CH_SPACEDIM, CH_SPACEDIM)
+!     degbx => box from 0 to degree in all dimensions
+!
+!     petermc, 28 May 2008
+     &     CHF_VR[moment],
+     &     CHF_CONST_FRA[dpow],
+     &     CHF_CONST_FRA1[weight],
+     &     CHF_CONST_REAL[vol],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[degree],
+     &     CHF_CONST_INT[nvars],
+     &     CHF_BOX[degbx])
+
+      integer CHF_DDECL[i; j; k]
+      integer CHF_DDECL[ipow; jpow; kpow]
+      integer CHF_DDECL[icomp; jcomp; kcomp]
+      integer ind
+      REAL_T intgrl
+
+      if (CHF_UBOUND[moment; 0] + 1 .ne. nvars) then
+         print *, 'Error in setvectoravgmoments1plus:  need ',
+     &        nvars, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      ind = 0
+      CHF_MULTIDO[degbx; ipow; jpow; kpow]
+         if (CHF_DTERM[ipow; +jpow; +kpow] .le. degree) then
+!     These will be indices into dpow.
+!     We won't use any that are < 0.
+            CHF_DTERM[
+            icomp = CH_SPACEDIM*(ipow - 1)     ;
+            jcomp = CH_SPACEDIM*(jpow - 1) + 1 ;
+            kcomp = CH_SPACEDIM*(kpow - 1) + 2 ]
+!     Set intgrl to integral over bx of xdif^ipow * ydif^jpow * zdif^kpow.
+            intgrl = zero
+#if (CH_SPACEDIM == 3)
+            if (kpow .eq. 0) then
+               if (jpow .eq. 0) then
+                  if (ipow .eq. 0) then ! kpow=0, jpow=0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k])
+                     CHF_ENDDO
+                  else ! kpow=0, jpow=0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], icomp) )
+                     CHF_ENDDO
+                  endif
+               else ! kpow=0, jpow>0
+                  if (ipow .eq. 0) then ! kpow=0, jpow>0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], jcomp) )
+                     CHF_ENDDO
+                  else ! kpow=0, jpow>0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + weight(CHF_IX[i;j;k]) *
+     &                    ( dpow(CHF_IX[i;j;k], icomp)
+     &                    * dpow(CHF_IX[i;j;k], jcomp) )
+                     CHF_ENDDO
+                  endif
+               endif
+            else
+#endif
+#if (CH_SPACEDIM >= 2)
+               if (jpow .eq. 0) then ! kpow>0, jpow=0
+                  if (ipow .eq. 0) then ! kpow>0, jpow=0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl +
+     &                    CHF_DTERM[
+     &                    weight(CHF_IX[i;j;k]) ; ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ]
+                     CHF_ENDDO
+                  else          ! kpow>0, jpow=0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl +
+     &                    weight(CHF_IX[i;j;k]) * ( CHF_DTERM[
+     &                    dpow(CHF_IX[i;j;k], icomp) ; ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  endif
+               else ! kpow>0, jpow>0
+#endif
+                  if (ipow .eq. 0) then ! kpow>0, jpow>0, ipow=0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl + CHF_DTERM[
+     &                    weight(CHF_IX[i;j;k]) ;
+     &                    * dpow(CHF_IX[i;j;k], jcomp) ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ]
+                     CHF_ENDDO
+                  else ! kpow>0, jpow>0, ipow>0
+                     CHF_MULTIDO[bx; i; j; k]
+                     intgrl = intgrl +
+     &                    weight(CHF_IX[i;j;k]) * ( CHF_DTERM[
+     &                    dpow(CHF_IX[i;j;k], icomp) ;
+     &                    * dpow(CHF_IX[i;j;k], jcomp) ;
+     &                    * dpow(CHF_IX[i;j;k], kcomp) ] )
+                     CHF_ENDDO
+                  endif
+#if (CH_SPACEDIM >= 2)
+               endif
+#endif
+#if (CH_SPACEDIM == 3)
+            endif
+#endif
+            moment(ind) = intgrl / vol
+            ind = ind + 1
+         endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine SETAVGMOMENTSDISP(
+!     Computes moments of displacement.
+!
+!     => inputs,  <= outputs
+!     moment <= moments, neqns * nvars components
+!     dest => index of fixed destination cell
+!     disp => physical displacements from center to integration points
+!     weight => integration weights, includes jacobian and / cell volume
+!     vol => cell volume
+!     work <=> work array on bx with CH_SPACEDIM components
+!     bx => indices of integration points
+!     degree => max degree of moment
+!     inbr => index of neighbor, in 0:neqns-1
+!     neqns => number of neighbors
+!     nvars => number of coeffs = C(degree + CH_SPACEDIM, CH_SPACEDIM)
+!
+!     petermc, 7 Mar 2008
+     &     CHF_FRA[moment],
+     &     CHF_CONST_INTVECT[dest],
+     &     CHF_CONST_FRA[disp],
+     &     CHF_CONST_FRA1[weight],
+     &     CHF_CONST_REAL[vol],
+     &     CHF_FRA[work],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[degree],
+     &     CHF_CONST_INT[inbr],
+     &     CHF_CONST_INT[neqns],
+     &     CHF_CONST_INT[nvars])
+
+      integer CHF_DDECL[i; j; k]
+      integer CHF_DDECL[idest; jdest; kdest]
+      integer CHF_DDECL[ipow; jpow; kpow]
+      integer ind, degnew
+      REAL_T intgrl
+
+      if (CHF_NCOMP[moment] .ne. (neqns * nvars)) then
+         print *, 'Error in setavgmoments:  need ',
+     &        (neqns * nvars), ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      CHF_DTERM[
+      idest = dest(0) ;
+      jdest = dest(1) ;
+      kdest = dest(2) ]
+
+      ind = CH_SPACEDIM - 1
+      CHF_MULTIDO[bx; i; j; k]
+         work(CHF_IX[i;j;k], ind) = weight(CHF_IX[i;j;k])
+      CHF_ENDDO
+
+      ind = inbr
+      degnew = degree
+#if (CH_SPACEDIM == 3)
+      do kpow = 0, degree
+         CHF_MULTIDO[bx; i; j; k]
+            work(CHF_IX[i;j;k], 1) = work(CHF_IX[i;j;k], 2)
+         CHF_ENDDO
+         degnew = degree - kpow
+#endif
+#if (CH_SPACEDIM >= 2)
+         do jpow = 0, degnew
+            CHF_MULTIDO[bx; i; j; k]
+               work(CHF_IX[i;j;k], 0) = work(CHF_IX[i;j;k], 1)
+            CHF_ENDDO
+            do ipow = 0, degnew - jpow
+               intgrl = zero
+               CHF_MULTIDO[bx; i; j; k]
+                  intgrl = intgrl + work(CHF_IX[i;j;k], 0)
+               CHF_ENDDO
+               moment(CHF_IX[idest;jdest;kdest], ind) = intgrl / vol
+               ind = ind + neqns
+               if (ipow .lt. degnew - jpow) then
+                  CHF_MULTIDO[bx; i; j; k]
+                     work(CHF_IX[i;j;k], 0) = work(CHF_IX[i;j;k], 0) *
+     &                 disp(CHF_IX[i;j;k], 0)
+                  CHF_ENDDO
+               endif
+            enddo
+            if (jpow .lt. degnew) then
+               CHF_MULTIDO[bx; i; j; k]
+                  work(CHF_IX[i;j;k], 1) = work(CHF_IX[i;j;k], 1) *
+     &              disp(CHF_IX[i;j;k], 1)
+               CHF_ENDDO
+            endif
+         enddo
+#endif
+#if (CH_SPACEDIM == 3)
+         if (kpow .lt. degree) then
+            CHF_MULTIDO[bx; i; j; k]
+               work(CHF_IX[i;j;k], 2) = work(CHF_IX[i;j;k], 2) *
+     &           disp(CHF_IX[i;j;k], 2)
+            CHF_ENDDO
+         endif
+      enddo
+#endif
+
+      return
+      end
+
+
+
+      subroutine FIXMOMENTS(
+!     Computes moments of displacement.
+!
+!     => inputs,  <= outputs
+!     moment <=> moments, neqns * nvars components
+!     width => width of cell
+!     bx => indices of CELLs
+!     degree => max degree of moment
+!     neqns => number of neighbors
+!     degbx => box from 0 to degree in all dimensions
+!
+!     petermc, 14 Mar 2008
+     &     CHF_FRA[moment],
+     &     CHF_CONST_REAL[width],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[degree],
+     &     CHF_CONST_INT[neqns],
+     &     CHF_BOX[degbx])
+
+      integer CHF_DDECL[i; j; k]
+      integer CHF_DDECL[ipow; jpow; kpow]
+      integer sumpow, ind, inbr
+      real_t fac
+
+      ind = 0
+      CHF_MULTIDO[degbx; ipow; jpow; kpow]
+         sumpow = CHF_DTERM[ipow; +jpow; +kpow]
+         if (sumpow .le. degree) then
+            fac = one / (width**sumpow)
+            do inbr = 0, neqns - 1
+               if (sumpow .gt. 0) then
+                  CHF_MULTIDO[bx; i; j; k]
+                     moment(CHF_IX[i;j;k], ind) = fac *
+     &                 moment(CHF_IX[i;j;k], ind)
+                  CHF_ENDDO
+               endif
+               ind = ind + 1
+            enddo
+         endif
+      CHF_ENDDO
+
+      return
+      end

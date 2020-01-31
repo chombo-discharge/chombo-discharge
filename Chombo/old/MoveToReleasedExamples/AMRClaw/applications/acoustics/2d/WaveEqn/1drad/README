@@ -1,0 +1,32 @@
+# --------------------------------------------------------------------
+# 1D radially symmetric solution used to compare results to 2d problem
+# --------------------------------------------------------------------
+This is the results of using 1d Clawpack to solve the radially symmetric
+wave equation.
+
+        - Initial pulse : presssure = H(r),
+
+where r = abs(x-2.5).
+
+Data file for input parameters  : claw1ez.data
+
+Data file for physical parameters : setprob.data (same as 2d problem)
+
+Riemann solver : rp1.f
+
+Initial conditions are in : qinit.f
+
+Source term (metric term for radially symmetric case) : src1.f
+
+# -----------------------------------------------------------------
+This version was compiled using gcc 3.4, on an Intel P4, under Linux.
+
+To compile a new version, download 1d library files at
+
+                   http:://www.amath.washington.edu/~claw
+
+Set environment variable "CLAW", and compile using 'gmake'.
+
+# --------------------------------------------------------------------
+DAC, 12/20/2004.
+# --------------------------------------------------------------------

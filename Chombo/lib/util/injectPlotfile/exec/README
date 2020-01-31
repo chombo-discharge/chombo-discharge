@@ -1,0 +1,11 @@
+the injectPlotFile utility uses the Chombo multidimensionality support to inject a 1D plotfile into 2D, which is easier for tools like VisIt to work with. 
+
+Note that since this is a multidim application, the executable has no inherent dimension. As currently configured, it reads in a 1D plotfile and writes out a 2D plotfile.
+
+USAGE: 
+./injectPlot.<config>.ex <filename.1d.hdf5> (num_width)
+
+Where filename.1d.hdf5 is the name of the 1d plotfile,
+num_width is the optional width to make the (new) transverse direction. If left blank, injectPlot will use the 1D domainLength, creating a square 2D domain.
+
+Output:  filename.2d.hdf5 -- 2D plotfile with 1D data spread in the transverse direction.

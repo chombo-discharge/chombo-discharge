@@ -1,0 +1,24 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+        subroutine SETCELLCENTERS(
+     &    CHF_FRA[coords],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+
+        CHF_MULTIDO[box;i;j;k]
+           CHF_DTERM[
+           coords(CHF_IX[i;j;k], 0) = (i + half) * dx ;
+           coords(CHF_IX[i;j;k], 1) = (j + half) * dx ;
+           coords(CHF_IX[i;j;k], 2) = (k + half) * dx ]
+        CHF_ENDDO
+
+        return
+        end

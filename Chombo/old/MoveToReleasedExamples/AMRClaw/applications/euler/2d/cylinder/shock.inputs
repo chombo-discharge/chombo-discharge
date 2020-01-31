@@ -1,0 +1,55 @@
+claw.problem = shock_past_cylinder
+
+claw.mx = 32
+claw.my =  128
+
+claw.plot_interval = 10
+claw.max_step = 2000
+claw.max_time = 1.8
+
+# claw.fixed_dt = 0.00125
+claw.initial_dt = 0.005
+claw.max_cfl = 1.0
+claw.cfl = 0.9
+
+claw.order = 2 2
+claw.src = 0
+claw.verbosity = 1
+claw.mcapa = 7
+claw.maux = 7   # need extra for (u,v,w)
+claw.auxtype = "xleft" "xleft" "xleft" "yleft" "yleft" "yleft" "capacity"
+
+claw.meqn = 4
+claw.mwaves = 3
+claw.mthlim = 3 3 3
+
+claw.mbc = 2
+claw.mthbc = 3 1 2 2
+
+claw.xlower = 0
+claw.xupper = 0.25
+
+claw.ylower = 0
+claw.yupper = 1.0
+
+# --------------------------------------------------------
+# Parameters for I/O
+claw.stateNames = "rho" "rhou" "rhov" "energy"
+claw.plot_prefix  = plotFINE
+
+claw.checkpoint_interval = 100
+claw.chk_prefix = check
+
+# ---------------------------------------------------------
+# Parameters controlling the local mesh refining strategy
+claw.max_level = 2
+claw.ref_ratio = 2 2 2 2
+
+claw.regrid_interval = 2 2 2
+claw.tag_buffer_size = 3
+
+claw.refine_thresh = 0.1
+
+claw.block_factor = 2
+claw.max_grid_size = 500
+claw.fill_ratio = 0.70

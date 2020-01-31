@@ -1,0 +1,55 @@
+swsphere.verbosity = 1
+swsphere.write_map = 0
+
+swsphere.max_step = 20000
+swsphere.max_time = 14.0
+swsphere.fixed_dt = 0.008
+# swsphere.cfl = 0.75
+swsphere.cfl = 1.0
+# swsphere.initial_cfl = 0.75
+# swsphere.max_dt_growth = 1.1
+# swsphere.dt_tolerance_factor = 1.1
+# need to convert initial conditions to average
+swsphere.initial_average = 1
+
+swsphere.problem = "rossby"
+
+coordsys.type = "cubedsphere2d"
+swsphere.fixed_hierarchy = 1
+
+# swsphere.domain_length = 1.0
+# swsphere.num_cells = 128 128 128 
+# swsphere.num_cells = 64 64 64 
+swsphere.num_cells = 32 32 32
+# swsphere.is_periodic = 0 0 0 
+# swsphere.is_periodic = 1 1 1 
+
+swsphere.max_level = 0
+swsphere.ref_ratio = 4 4 4 2 2
+swsphere.regrid_interval = 2 2 2 2 2 2
+swsphere.tag_buffer_size = 1
+swsphere.refine_thresh = 10.
+swsphere.block_factor = 8
+swsphere.max_grid_size = 32
+swsphere.fill_ratio = 0.75
+
+swsphere.checkpoint_interval = -1
+swsphere.plot_interval = 5
+swsphere.plot_prefix  = rossbyhaurwitz.032.
+swsphere.chk_prefix = check.rossbyhaurwitz.032.
+
+swsphere.useHyperviscosity = 0
+swsphere.hyperviscosity = 0.01
+
+swsphere.limitFaceValues = 0
+swsphere.enforceMinVal = 1
+swsphere.minVal = 0.0
+
+# Artificial viscosity
+swsphere.use_artificial_viscosity = 0
+swsphere.artificial_viscosity = 0.3
+swsphere.fourth_order_artificial_viscosity_parameter = 0.42
+
+
+#######################################################################
+

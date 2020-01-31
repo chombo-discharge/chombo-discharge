@@ -1,0 +1,24 @@
+#!/bin/sh
+
+#
+# Migration utility by DBS
+#
+
+if [ $1 -eq 1 ] ; then
+  sed 's/^\(^#.*[^_"]\)HDF5/\1CH_USE_HDF5/' $2 > tmp.$$
+fi
+
+if [ $1 -eq 2 ] ; then
+  sed 's/^\(^[ \t]*#[^#]*[^_"A-Z]\)MPI\($\|[^_]\)/\1CH_MPI\2/' $2 > tmp.$$
+fi
+
+if [ $1 -eq 3 ] ; then
+  sed 's/TheZeroVector[ \t]*([ \t]*)/Zero/g' $2 | sed 's/TheUnitVector[ \t]*([ \t]*)/Unit/g' > tmp.$$
+fi
+
+if [ $1 -eq 4 ] ; then
+  sed 's/ENABLE_MEMORY_TRACKING/CH_USE_MEMORY_TRACKING/g' $2 > tmp.$$
+fi
+
+mv $2 $2.save$1
+mv tmp.$$ $2

@@ -1,0 +1,58 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+
+c -------------------------------------------------------
+c  this subroutine computes the cell-centered divergence
+c  from the edge centered velocity field -- does this in
+c  a direction-by-direction basis; increments div with
+c  du/dx or dv/dy or dw/dz. actually assumes that dx=dy=dz
+c
+c  INPUTS/OUTPUTS:
+c  uEdge   => edge-centered vector field in direction idir
+c  div    <=  cell-centered divergence
+c  gridInt => cell-centered box which defines interior of grid
+c  dx      => cell spacing in direction idir
+c  idir    => coordinate direction
+c -------------------------------------------------------
+      subroutine DIVERGENCE(CHF_CONST_FRA[uEdge],
+     &                      CHF_FRA[div],
+     &                      CHF_BOX[gridInt],
+     &                      CHF_CONST_REAL[dx],
+     &                      CHF_INT[idir])
+
+c ::: local variables
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[c2fLo]
+      integer CHF_AUTODECL[c2fHi]
+      integer comp
+      REAL_T one_on_dx
+
+!     +c2fLo from cell to adjacent face on low side (index is same)
+      CHF_AUTOID[c2fLo; idir; 0]
+!     +c2fHi from cell to adjacent face on high side (index is 1 higher)
+      CHF_AUTOID[c2fHi; idir; 1]
+
+      one_on_dx = one/dx
+
+      do comp = 0, CHF_NCOMP[div]-1
+
+         CHF_AUTOMULTIDO[gridInt; i]
+
+            div(CHF_AUTOIX[i], comp) = div(CHF_AUTOIX[i], comp)
+     &        + one_on_dx *
+     &        ( uEdge(CHF_OFFSETIX[i; +c2fHi], comp)
+     &        - uEdge(CHF_OFFSETIX[i; +c2fLo], comp) )
+
+         CHF_ENDDO
+
+      enddo
+
+      return
+      end
+

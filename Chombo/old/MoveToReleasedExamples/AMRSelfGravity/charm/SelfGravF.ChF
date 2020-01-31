@@ -1,0 +1,362 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+#define SMALL 1.0d-10
+#define LARGE 1.0d10
+
+        subroutine SETSELFGRAV(
+     &    CHF_CONST_REAL[augamma],
+     &    CHF_CONST_REAL[auartvisc],
+     &    CHF_CONST_REAL[auRsTolerance],
+     &    CHF_CONST_REAL[aumaxRsIter],
+     &    CHF_CONST_REAL[aumaxMach])
+
+#include "TestsCommon.fh"
+#include "EosCommon.fh"
+
+        rs_tolerance = auRsTolerance
+        max_Mach     = aumaxMach
+        max_rs_iter  = aumaxRsIter
+
+        gamma   = augamma
+        artvisc = auartvisc
+
+        return
+        end
+
+!-----------------------------------------------------------------------------
+
+        subroutine SETFLOORS(
+     &    CHF_CONST_REAL[ausmallr0],
+     &    CHF_CONST_REAL[ausmallu0],
+     &    CHF_CONST_REAL[ausmallp0],
+     &    CHF_CONST_REAL[ausmalls0])
+
+#include "EosCommon.fh"
+
+        smallr = ausmallr0
+        smallu = ausmallu0
+        smallp = ausmallp0
+        smalls = ausmalls0
+
+        return
+        end
+
+!-----------------------------------------------------------------------------
+
+        subroutine COMPUTEPRESSUREF(
+     &    CHF_FRA1[PRES],
+     &    CHF_CONST_FRA[U],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+        real_t r,p,s
+
+#include "EosCommon.fh"
+
+        CHF_MULTIDO[box;i;j;k]
+          r = U(CHF_IX[i;j;k],URHO)
+          r = max(r,smallr)
+
+          s = U(CHF_IX[i;j;k],UENTR) /r
+          s = max(s,smalls)
+          p = s * exp(gamma * log(r))
+
+          PRES(CHF_IX[i;j;k]) = p
+        CHF_ENDDO
+
+        return
+        end
+
+!-----------------------------------------------------------------------------
+!     Interpolate in time
+        subroutine INTERPOLATEINTIME(
+     &    CHF_FRA[phi],
+     &    CHF_CONST_FRA[phiNew],
+     &    CHF_CONST_FRA[phiOld],
+     &    CHF_CONST_REAL[alpha],
+     &    CHF_CONST_INT[srcComp],
+     &    CHF_CONST_INT[dstComp],
+     &    CHF_CONST_INT[sizeComp],
+     &    CHF_BOX[box])
+
+        integer ic,id,is, CHF_DDECL[i;j;k]
+
+      do ic = 0,sizeComp-1
+        id = ic+dstComp
+        is = ic+srcComp
+        CHF_MULTIDO[box;i;j;k]
+          phi(CHF_IX[i;j;k],id) =    alpha   *phiNew(CHF_IX[i;j;k],is)+
+     &                            (one-alpha)*phiOld(CHF_IX[i;j;k],is)
+        CHF_ENDDO
+      enddo
+        return
+        end
+
+!-----------------------------------------------------------------------------
+
+        subroutine COMPUTEPLOTVARS(
+     &    CHF_FRA[W],
+     &    CHF_CONST_FRA[U],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+        real_t CHF_DDECL[uu;vv;ww]
+        real_t r,p,ke,s
+
+#include "EosCommon.fh"
+
+        CHF_MULTIDO[box;i;j;k]
+          r = U(CHF_IX[i;j;k],URHO)
+          r = max(r,smallr)
+
+          CHF_DTERM[
+          uu = U(CHF_IX[i;j;k],UMOMX)/r;
+          vv = U(CHF_IX[i;j;k],UMOMY)/r;
+          ww = U(CHF_IX[i;j;k],UMOMZ)/r]
+
+          ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+          s = max(U(CHF_IX[i;j;k],UENTR)/r, smalls)
+          p = s * exp(gamma*log(r))
+          p = max(p,smallp)
+
+          CHF_DTERM[
+          W(CHF_IX[i;j;k],WVELX) = uu;
+          W(CHF_IX[i;j;k],WVELY) = vv;
+          W(CHF_IX[i;j;k],WVELZ) = ww]
+
+          W(CHF_IX[i;j;k],WRHO)  = log10(r)
+          W(CHF_IX[i;j;k],WPRES) = log10(p)
+          W(CHF_IX[i;j;k],WENTR) = log10(s)
+
+        CHF_ENDDO
+
+        return
+        end
+
+c!---------------------------------------------------------------------------
+
+        subroutine GETRELGRADF(
+     &    CHF_FRA1[du],
+     &    CHF_CONST_FRA1[u],
+     &    CHF_CONST_INT[idir],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi],
+     &    CHF_BOX[centerBox])
+
+        integer CHF_DDECL[i   ;j   ;k   ]
+        integer CHF_DDECL[ioff;joff;koff]
+        real_t diff,aver
+
+        CHF_DTERM[
+        ioff = CHF_ID(0,idir);
+        joff = CHF_ID(1,idir);
+        koff = CHF_ID(2,idir)]
+
+c       Perform first difference calculation in the interior.
+
+        CHF_MULTIDO[centerBox;i;j;k]
+          diff = half*(u(CHF_IX[i+ioff;j+joff;k+koff])
+     &                -u(CHF_IX[i-ioff;j-joff;k-koff]))
+          aver = half*(u(CHF_IX[i+ioff;j+joff;k+koff])
+     &                +u(CHF_IX[i-ioff;j-joff;k-koff]))
+               if (aver.gt.SMALL) then
+                 du(CHF_IX[i;j;k]) = diff / aver
+               else
+                 du(CHF_IX[i;j;k]) = diff*LARGE
+               endif
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+            diff = (u(CHF_IX[i+ioff;j+joff;k+koff])
+     &             -u(CHF_IX[i     ;j     ;k     ]))
+            aver = half*(u(CHF_IX[i+ioff;j+joff;k+koff])
+     &                  +u(CHF_IX[i     ;j     ;k     ]))
+            if (aver.gt.SMALL) then
+               du(CHF_IX[i;j;k]) = diff / aver
+            else
+               du(CHF_IX[i;j;k]) = diff*LARGE
+            endif
+            CHF_ENDDO
+         endif
+
+         if (hasHi .eq. 1) then
+            CHF_MULTIDO[hiBox;i;j;k]
+            diff = (u(CHF_IX[i     ;j     ;k     ])
+     &           -u(CHF_IX[i-ioff;j-joff;k-koff]))
+            aver = half*(u(CHF_IX[i     ;j     ;k     ])
+     &           +u(CHF_IX[i-ioff;j-joff;k-koff]))
+            if (aver.gt.SMALL) then
+               du(CHF_IX[i;j;k]) = diff / aver
+            else
+               du(CHF_IX[i;j;k]) = diff*LARGE
+            endif
+            CHF_ENDDO
+         endif
+
+         return
+         end
+
+c!---------------------------------------------------------------------------
+
+        subroutine MAGNITUDEF(
+     &    CHF_FRA1[magdata],
+     &    CHF_CONST_FRA[data],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+        integer iv
+        real_t cur,sum
+
+        CHF_MULTIDO[box;i;j;k]
+          sum = zero
+
+          do iv = 0,CHF_NCOMP[data]-1
+            cur = data(CHF_IX[i;j;k],iv)
+            sum = sum + cur*cur
+          enddo
+
+          magdata(CHF_IX[i;j;k]) = sqrt(sum)
+        CHF_ENDDO
+
+        return
+        end
+
+c!------------------------------------------------------------------
+c! Simplified shock identification:
+c!------------------------------------------------------------------
+        subroutine SHOCKPRESJUMPF(
+     &    CHF_FRA1[pjump],
+     &    CHF_FRA[wrk],
+     &    CHF_CONST_FRA[U],
+     &    CHF_BOX[gbox],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+        integer CHF_DDECL[wx;wy;wz], wp
+        real_t CHF_DDECL[du;dv;dw]
+        real_t CHF_DDECL[dpx;dpy;dpz]
+        real_t dp,divU
+        !real_t mjmp,pjmp,ujmp,pmin
+
+#include "EosCommon.fh"
+
+        CHF_DTERM[
+        wx = 0;
+        wy = 1;
+        wz = 2]
+        wp = CH_SPACEDIM
+
+        CHF_MULTIDO[box;i;j;k]
+
+          CHF_DTERM[
+          wrk(CHF_IX[i;j;k],wx) = U(CHF_IX[i;j;k],UMOMX)/U(CHF_IX[i;j;k],URHO);
+          wrk(CHF_IX[i;j;k],wy) = U(CHF_IX[i;j;k],UMOMY)/U(CHF_IX[i;j;k],URHO);
+          wrk(CHF_IX[i;j;k],wz) = U(CHF_IX[i;j;k],UMOMZ)/U(CHF_IX[i;j;k],URHO)]
+          wrk(CHF_IX[i;j;k],wp)= U(CHF_IX[i;j;k],UENTR)
+     &                          *U(CHF_IX[i;j;k],URHO)**(gamma-one);
+        CHF_ENDDO
+
+
+        CHF_MULTIDO[gbox;i;j;k]
+
+          CHF_DTERM[
+          dpx = abs(WRK(CHF_IX[i+1;j;k],WP)-WRK(CHF_IX[i-1;j;k],WP))
+     &         /min(WRK(CHF_IX[i+1;j;k],WP),WRK(CHF_IX[i-1;j;k],WP));
+          dpy = abs(WRK(CHF_IX[i;j+1;k],WP)-WRK(CHF_IX[i;j-1;k],WP))
+     &         /min(WRK(CHF_IX[i;j+1;k],WP),WRK(CHF_IX[i;j-1;k],WP));
+          dpz = abs(WRK(CHF_IX[i;j;k+1],WP)-WRK(CHF_IX[i;j;k-1],WP))
+     &         /min(WRK(CHF_IX[i;j;k+1],WP),WRK(CHF_IX[i;j;k-1],WP))]
+
+
+          dp = CHF_DTERM[dpx*dpx; +dpy*dpy; +dpz*dpz];
+          if (dp.gt.zero) dp = sqrt(dp)
+
+          CHF_DTERM[
+          du = WRK(CHF_IX[i+1;j;k],WX)-WRK(CHF_IX[i-1;j;k],WX);
+          dv = WRK(CHF_IX[i;j+1;k],WY)-WRK(CHF_IX[i;j-1;k],WY);
+          dw = WRK(CHF_IX[i;j;k+1],WZ)-WRK(CHF_IX[i;j;k-1],WZ)]
+
+          divU = half *(CHF_DTERM[du; +dv; +dw])
+
+c          ! already set pjump=0 in the calling routine
+          if (divU.LT.zero) pjump(CHF_IX[i;j;k]) = dp
+
+        CHF_ENDDO
+
+        return
+        end
+
+c!------------------------------------------------------------------
+c! Simplified vorticity calculation:
+c!------------------------------------------------------------------
+        subroutine VORTICITYF(
+     &    CHF_FRA1[vorticity],
+     &    CHF_FRA[wrk],
+     &    CHF_CONST_FRA[U],
+     &    CHF_BOX[gbox],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+        integer CHF_DDECL[wx;wy;wz]
+        real_t ww,uu
+
+#include "EosCommon.fh"
+
+        CHF_DTERM[
+        wx = 0;
+        wy = 1;
+        wz = 2]
+
+        CHF_MULTIDO[box;i;j;k]
+          CHF_DTERM[
+          wrk(CHF_IX[i;j;k],wx)= U(CHF_IX[i;j;k],UMOMX)/U(CHF_IX[i;j;k],URHO);
+          wrk(CHF_IX[i;j;k],wy)= U(CHF_IX[i;j;k],UMOMY)/U(CHF_IX[i;j;k],URHO);
+          wrk(CHF_IX[i;j;k],wz)= U(CHF_IX[i;j;k],UMOMZ)/U(CHF_IX[i;j;k],URHO)]
+        CHF_ENDDO
+
+        CHF_MULTIDO[gbox;i;j;k]
+#if (CH_SPACEDIM == 3)
+          CHF_DTERM[
+          wx = WRK(CHF_IX[i;j;k+1],WY)-WRK(CHF_IX[i;j;k-1],WY)
+     &        -WRK(CHF_IX[i;j+1;k],WZ)-WRK(CHF_IX[i;j-1;k],WZ);
+          wy = WRK(CHF_IX[i+1;j;k],WZ)-WRK(CHF_IX[i-1;j;k],WZ)
+     &        -WRK(CHF_IX[i;j;k+1],WX)-WRK(CHF_IX[i;j;k-1],WX);
+          wz = WRK(CHF_IX[i;j+1;k],WX)-WRK(CHF_IX[i;j-1;k],WX)
+     &        -WRK(CHF_IX[i+1;j;k],WY)-WRK(CHF_IX[i-1;j;k],WY)]
+
+          ww = half *(CHF_DTERM[wx*wx; +wy*wy; +wz*wz])
+#else
+          ww = WRK(CHF_IX[i;j+1;k],WX)-WRK(CHF_IX[i;j-1;k],WX)
+     &        -WRK(CHF_IX[i+1;j;k],WY)-WRK(CHF_IX[i-1;j;k],WY)
+          ww = half *ww*ww
+#endif
+
+          CHF_DTERM[
+          uu =      WRK(CHF_IX[i;j;k],WX)*WRK(CHF_IX[i;j;k],WX);
+          uu = uu + WRK(CHF_IX[i;j;k],WY)*WRK(CHF_IX[i;j;k],WY);
+          uu = uu + WRK(CHF_IX[i;j;k],WZ)*WRK(CHF_IX[i;j;k],WZ)]
+
+c          ! already set vorticity=0 in the calling routine
+          if (uu.gt.zero) then
+            ww = ww/uu
+            vorticity(CHF_IX[i;j;k]) = sqrt(ww)
+          endif
+
+        CHF_ENDDO
+
+        return
+        end

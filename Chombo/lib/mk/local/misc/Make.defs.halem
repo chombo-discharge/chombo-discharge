@@ -1,0 +1,29 @@
+# -*- Mode: Makefile; Modified: "Fri 08 Aug 2003 11:24:23 by dbs"; -*-
+
+# halem is a Compaq Alpha cluster at NASA/Goddard
+# `uname -a` is:
+
+makefiles+=local/Make.defs.halem
+
+CXX=g++
+FC=f90
+MPICXX=$(CXX)
+
+# because we use g++
+mpilibflags = -lmpi -lmpio
+XTRALIBFLAGS += -L/usr/opt/F55A/usr/shlib
+
+# my own HDF5 libraries (ndk)
+HDFINCFLAGS    = -I/usr/local/unsupported/stow/hdf5-1.6.1/include
+HDFLIBFLAGS    = -L/usr/local/unsupported/stow/hdf5-1.6.1/lib -lhdf5
+HDFMPIINCFLAGS = -I/usr/local/unsupported/stow/hdf5-1.6.1-parallel/include
+HDFMPILIBFLAGS = -L/usr/local/unsupported/stow/hdf5-1.6.1-parallel/lib -lhdf5
+
+# InfiniteDomain lib needs FFTW version 3.
+# 'Make.defs' uses FFTWDIR.
+ifeq ($(USE_FFTW),TRUE)
+    FFTWDIR:=/u1/dfmartin/fftw
+endif
+
+
+# see Make.defs.cxx and Make.defs.f90 for other Tru64 defs

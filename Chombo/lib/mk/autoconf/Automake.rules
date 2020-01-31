@@ -1,0 +1,73 @@
+#
+# Users should not edit this file.  Edit Make.defs instead.
+#
+
+if CH_EXAMPLE_AM
+  chfpp_dir = $(CHOMBO_INSTALLDIR)/share/Chombo/chfpp
+else
+  chfpp_dir = $(top_srcdir)/lib/util/chfpp
+endif !CH_EXAMPLE_AM
+
+LIBSRC=$(top_srcdir)/lib/src
+LIBSRC_BASIC_LIBS = -lboxtools$(DIM)D -lamrtools$(DIM)D -lamrelliptic$(DIM)D -lamrtimedependent$(DIM)D -lparticletools$(DIM)D
+LIBSRC_EB_LIBS = -lebtools$(DIM)D -lebamrtools$(DIM)D -lebamrelliptic$(DIM)D -lworkshop$(DIM)D 
+LIBSRC_MF_LIBS = -lmftools$(DIM)D -lmfelliptic$(DIM)D
+LIBSRC_LIBS = $(LIBSRC_BASIC_LIBS) $(LIBSRC_EB_LIBS) $(LIBSRC_MF_LIBS)
+
+if CH_EXAMPLE_AM
+  DASH_I = -I$(CHOMBO_INSTALLDIR)/include/Chombo -I$(srcdir) -I$(pkgincludedir) -I$(HDF5INCPATH) -I$(EXTRA_INC_PATHS)
+else
+  DASH_I = -I$(srcdir) -I$(pkgincludedir) -I$(HDF5INCPATH) -I$(EXTRA_INC_PATHS)
+endif !CH_EXAMPLE_AM
+DASH_I_CHOMBOFACADE = -I$(srcdir) -I$(pkgincludedir) -I$(HDF5INCPATH) -I$(EXTRA_INC_PATHS)
+
+AM_CPPFLAGS = $(CH_KPPFLAGS) $(DASH_I)
+AM_CXXFLAGS =
+AM_CFLAGS = $(CH_KPPFLAGS) $(DASH_I)
+AM_FFLAGS= $(CH_EFFLAGS) $(DASH_I)
+
+# It's considered bad practice to set these in Makefile.am (which
+# this file gets included into), but without doing this, the AM_
+# versions alone don't do the whole job; whether we go debug or
+# not, we always get a "-g -O2" near the end of every compile line.
+# On the other hand, if we define both AM_CPPFLAGS and CPPFLAGS
+# (and define them to the same thing) then we get a really long
+# repetitive compile line.
+CPPFLAGS =
+CXXFLAGS =
+CFLAGS =
+FFLAGS =
+
+AM_LDFLAGS = -L$(HDF5LIBPATH) -L$(pkglibdir) $(LG2C) $(LEXTRA)
+
+%_F.H: $(srcdir)/%.ChF
+	$(PERL) -I $(chfpp_dir) $(chfpp_dir)/uber.pl -f $< $(CHFFLAGS) -p /dev/null -c $*_F.H -D $(DIM)
+
+%.C : $(srcdir)/%.ChF %_F.H
+	$(PERL) -I $(chfpp_dir) $(chfpp_dir)/uber.pl $(CHFPP_MULTIDIM_FLAG) -f $<  -p $@ -c /dev/null -D $(DIM)
+#	cp $@ ./latest_$@
+
+%.cpre : %.C
+	gcc -C -E -P $(DASH_I) $(CH_KPPFLAGS_NOLANGCC) -DCH_LANG_FORT $< | awk 'NF>0' > $@
+#	cp $@ ./latest_$@
+# That's right, in this step we want gcc, not whatever compiler's been selected
+# as CXX or CC.  There'll be some warnings from gcc about not understanding
+# another compiler's flags (in CH_KPPFLAGS_NOLANGCC), but so far those warnings
+# have been innocuous.
+
+%.f : %.cpre
+	/bin/csh -f -c "cat $< | $(PERL) -I $(chfpp_dir) $(chfpp_dir)/stripsharpmain.pl  | $(PERL) -I $(chfpp_dir) $(chfpp_dir)/fort72  > $@"	
+
+
+MOSTLYCLEANFILES = *.C *.cpre installed_multidim.flag
+
+EXTRA_DIST = makefile.anag
+
+
+if CH_EXAMPLE_AM
+  headerstampdir = $(CHOMBO_INSTALLDIR)/share/Chombo
+else
+  headerstampdir = $(top_srcdir)/lib/mk/autoconf
+endif !CH_EXAMPLE_AM
+install-data-hook:
+	sh $(headerstampdir)/header_stamp.sh $(pkgincludedir) $(srcdir)

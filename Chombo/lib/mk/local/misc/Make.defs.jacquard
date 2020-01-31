@@ -1,0 +1,88 @@
+# -*- Mode: Makefile; Modified: "Fri 29 Jul 2005 15:14:39 by dbs"; -*-
+
+## This file defines variables for use on the login nodes of the NERSC Linux
+## cluster 'jacquard'.  The 'symlinks' target must be run first by explicitly
+## accessing this makefile with the commands:
+##
+##    cd <Chombo-home>/lib/mk/local
+##    make -f Make.defs.jacquard symlinks
+##
+## NOTE: everything is always in 64bit mode
+
+makefiles+=local/Make.defs.jacquard
+
+# NOTE:  Recent difficulties compiling on jacquard with pathscale compiler.  (ndk)
+# One fix that has been working is to use g++ for C++ compiler, and pathf90
+# for the fortran compiler.  _One_ way to do this is:
+#   1) change the CXX=pathCC below to be CXX=g++ (or perhaps on the make command line)
+#   2) Load the gcc compiler, order is important:  module load path; module load gcc 
+#      (ie make sure gcc is loaded AFTER pathscale)
+#   3) make sure mpicxx is using g++, by trying "mpicxx -v" and checking that it is using GNU compilers
+#   4) Need to tell the linker where the pathscale fortran library is.  Try
+#      XTRALIBFLAGS="-L/usr/common/usg/pathscale/3.0/lib/3.0/" on the make command line.
+
+CXX=pathCC
+FC=pathf90
+MPICXX=mpicxx
+USE_64=TRUE
+
+ifeq ($(USE_64),FALSE)
+  $(error All programs on jacquard are 64bit so you cannot set USE_64=FALSE)
+endif
+
+# The appropriate 'module' must be loaded for this to work.
+# For serial, do    'module load hdf5'
+# For parallel, do  'module load hdf5_par'
+
+##NOTE: The hdf5 modules on jacquard make some really bad choices, so don't use 
+##      the env.vars that specify options.  <dbs>
+
+# Check that the right HDF module is loaded.
+ifneq ($(USE_HDF),FALSE)
+  ifeq ($(HDF5_DIR),)
+    $(error The HDF5_DIR env.var. is not defined.   Did you load one of the hdf5 modules?)
+  endif
+  ifeq ($(MPI),TRUE)
+    ifeq ($(findstring parallel,$(HDF5_DIR)),)
+      $(error HDF5 directory [$(HDF5_DIR)] is not parallel but MPI is TRUE.  Did you load the right module?)
+    endif
+  else
+    ifeq ($(findstring serial,$(HDF5_DIR)),)
+      $(error HDF5 directory [$(HDF5_DIR)] is not serial but MPI is FALSE.  Did you load the right module?)
+    endif
+  endif
+
+  HDFINCFLAGS=-I$(HDF5_DIR)/include
+  HDFLIBFLAGS=-L$(HDF5_DIR)/lib -lhdf5 -lsz -lz -lm
+  HDFMPIINCFLAGS=$(HDFINCFLAGS)
+  # gpfs is the parallel global file system
+  HDFMPILIBFLAGS=$(HDFLIBFLAGS) -lgpfs
+endif
+
+ifeq ($(findstring TRUE,$(USE_FFT) $(USE_FFTW)),TRUE)
+  ifeq ($(FFTW),)
+    $(error error: FFTW env.var. undefined.  Did you load a fftw module?)
+  endif
+  ifeq ($(findstring fftw/3,$(FFTW)),fftw/3)
+    fftincflags=-DFFTW_3 $(FFTW)
+    fftlibflags=$(FFTW) -lfftw3
+    XTRACONFIG:=$(XTRACONFIG).fftw3
+  else
+    fftincflags=-DFFTW_2 $(FFTW)
+    fftlibflags=$(FFTW) -lrfftw -lfftw
+    XTRACONFIG:=$(XTRACONFIG).fftw2
+  endif
+
+  fftincflags+=-DFFTW_PLAN_TYPE=integer*8
+endif
+
+# Use the AMD math library if the user loaded it
+ifneq ($(ACML),)
+  syslibflags += $(AMCL)
+endif
+
+# the login computers on seaborg have different names, so make
+# symlinks to this file for each computer name
+#[NOTE: assumes current directory is 'mk/local'
+symlinks:
+	$(QUIET)./symlinks.jacquard

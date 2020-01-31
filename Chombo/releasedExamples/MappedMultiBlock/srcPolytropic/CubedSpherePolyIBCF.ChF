@@ -1,0 +1,58 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+c ----------------------------------------------------------------------
+c  Sets the Fortran common block
+c ----------------------------------------------------------------------
+
+      subroutine CUBEDSPHERECOSBSETF(
+     &   CHF_REAL[ausmallPressure],
+     &   CHF_CONST_REAL[augamma])
+
+#include "EosCommon.fh"
+
+      gamma = augamma
+
+      smallr = small
+      smallu = small
+      smallp = small
+      ausmallPressure = small
+
+      return
+      end
+
+      subroutine cspveclonlatsolidbodyflow(
+!
+!     => inputs,  <= outputs
+!     vecRLL <= vector field in longitude-latitude basis
+!     ptRLL  => longitude-latitude points
+!     magnitude  => maximum velocity (I think)
+!     angle  => tilt from equator
+!     shift  => shift from lon = 0
+     &     CHF_FRA[vecRLL],
+     &     CHF_CONST_FRA[ptRLL],
+     &     CHF_CONST_REAL[magnitude],
+     &     CHF_CONST_REAL[angle],
+     &     CHF_CONST_REAL[shift])
+
+      integer CHF_AUTODECL[i]
+      real_t lon, lat
+
+      CHF_AUTOMULTIDO[vecRLL; i]
+      lon = ptRLL(CHF_AUTOIX[i], 0) - shift
+      lat = ptRLL(CHF_AUTOIX[i], 1)
+      vecRLL(CHF_AUTOIX[i], 0) =
+     &     magnitude * cos(lat) * 
+     &     (cos(angle) +  cos(lon) * tan(lat) * sin(angle))
+      vecRLL(CHF_AUTOIX[i], 1) =
+     &     -magnitude * sin(lon) * sin(angle)
+      CHF_ENDDO
+
+      return
+      end

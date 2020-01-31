@@ -1,0 +1,1737 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "REAL.H"
+#include "CONSTANTS.H"
+
+      subroutine cubedsphereshellmappedtoreal(
+!
+!     In 3D, the radius is 1 + xi[2],
+!     so inner radius is 1, and outer radius is 2.
+!
+!     => inputs,  <= outputs
+!     coords <= real coordinates, in physical space
+!     xi     => mapped coordinates
+!     panel  => panel number
+!     bx     => box
+!     dx     => mesh spacing
+!     offset => offset of 0 for nodes, dx/2 for cell centers
+!     base   => base of panel
+     &     CHF_FRA[coords],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_REALVECT[offset],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t dGX, dGY, dInvDelta, R
+
+      if (panel .eq. 0) then
+         CHF_AUTOMULTIDO[bx; i]
+         dGX = tan(xi(CHF_AUTOIX[i], 0) - fourth*Pi)
+         dGY = tan(xi(CHF_AUTOIX[i], 1) - fourth*Pi)
+         CHF_DSELECT[
+         R = one ;
+         R = one ;
+         R = one + (i2 - base(2)) * dx(2) + offset(2) ]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         coords(CHF_AUTOIX[i], 0) = dInvDelta
+         coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+         coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         CHF_ENDDO
+      elseif (panel .eq. 1) then
+         CHF_AUTOMULTIDO[bx; i]
+         dGX = tan(xi(CHF_AUTOIX[i], 0) - fourth*Pi)
+         dGY = tan(xi(CHF_AUTOIX[i], 1) - fourth*Pi)
+         CHF_DSELECT[
+         R = one ;
+         R = one ;
+         R = one + (i2 - base(2)) * dx(2) + offset(2) ]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         coords(CHF_AUTOIX[i], 0) = - dGX * dInvDelta
+         coords(CHF_AUTOIX[i], 1) = dInvDelta
+         coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         CHF_ENDDO
+      elseif (panel .eq. 2) then
+         CHF_AUTOMULTIDO[bx; i]
+         dGX = tan(xi(CHF_AUTOIX[i], 0) - fourth*Pi)
+         dGY = tan(xi(CHF_AUTOIX[i], 1) - fourth*Pi)
+         CHF_DSELECT[
+         R = one ;
+         R = one ;
+         R = one + (i2 - base(2)) * dx(2) + offset(2) ]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         coords(CHF_AUTOIX[i], 0) = - dInvDelta
+         coords(CHF_AUTOIX[i], 1) = - dGX * dInvDelta
+         coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         CHF_ENDDO
+      elseif (panel .eq. 3) then
+         CHF_AUTOMULTIDO[bx; i]
+         dGX = tan(xi(CHF_AUTOIX[i], 0) - fourth*Pi)
+         dGY = tan(xi(CHF_AUTOIX[i], 1) - fourth*Pi)
+         CHF_DSELECT[
+         R = one ;
+         R = one ;
+         R = one + (i2 - base(2)) * dx(2) + offset(2) ]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         coords(CHF_AUTOIX[i], 0) = dGX * dInvDelta
+         coords(CHF_AUTOIX[i], 1) = - dInvDelta
+         coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         CHF_ENDDO
+      elseif (panel .eq. 4) then
+         CHF_AUTOMULTIDO[bx; i]
+         dGX = tan(xi(CHF_AUTOIX[i], 0) - fourth*Pi)
+         dGY = tan(xi(CHF_AUTOIX[i], 1) - fourth*Pi)
+         CHF_DSELECT[
+         R = one ;
+         R = one ;
+         R = one + (i2 - base(2)) * dx(2) + offset(2) ]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         coords(CHF_AUTOIX[i], 0) = - dGY * dInvDelta
+         coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+         coords(CHF_AUTOIX[i], 2) = dInvDelta
+         CHF_ENDDO
+      elseif (panel .eq. 5) then
+         CHF_AUTOMULTIDO[bx; i]
+         dGX = tan(xi(CHF_AUTOIX[i], 0) - fourth*Pi)
+         dGY = tan(xi(CHF_AUTOIX[i], 1) - fourth*Pi)
+         CHF_DSELECT[
+         R = one ;
+         R = one ;
+         R = one + (i2 - base(2)) * dx(2) + offset(2) ]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         coords(CHF_AUTOIX[i], 0) = dGY * dInvDelta
+         coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+         coords(CHF_AUTOIX[i], 2) = - dInvDelta
+         CHF_ENDDO
+      else
+         print *, 'Error: invalid panel ', panel
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellnoderealforviz(
+!
+!     => inputs,  <= outputs
+!     coords <= real coordinates, in physical space, of nodes
+!     panel  => panel number
+!     bx     => box
+!     dx     => mesh spacing
+!     base   => base of panel
+     &     CHF_FRA[coords],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t X, Y, R, dGX, dGY, dInvDelta
+      CHF_AUTOMULTIDO[bx; i]
+         X = (i0 - base(0))* dx(0)
+         Y = (i1 - base(1))* dx(1)
+         dGX = tan(X - fourth*Pi)
+         dGY = tan(Y - fourth*Pi)
+!    Use constant dR to render with constant thickness layers
+         R = CHF_DTERM[one; ; + (i2 - base(2))* dx(2)]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         if (panel .eq. 0) then
+            coords(CHF_AUTOIX[i], 0) = dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 1) then
+            coords(CHF_AUTOIX[i], 0) = - dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 2) then
+            coords(CHF_AUTOIX[i], 0) = - dInvDelta
+            coords(CHF_AUTOIX[i], 1) = - dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 3) then
+            coords(CHF_AUTOIX[i], 0) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = - dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 4) then
+            coords(CHF_AUTOIX[i], 0) = - dGY * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dInvDelta
+         elseif (panel .eq. 5) then
+            coords(CHF_AUTOIX[i], 0) = dGY * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = - dInvDelta
+         else
+            print *, 'Error: invalid panel ', panel
+            call MAYDAY_ERROR()
+         endif
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellvertmapnoderealforviz(
+!
+!     => inputs,  <= outputs
+!     coords <= real coordinates, in physical space, of nodes.
+!     panel  => panel number
+!     bx     => box
+!     pts    => mesh point locations in vertical mapping
+!     dx     => mesh spacing
+!     base   => base of panel
+     &     CHF_FRA[coords],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_R1D[points],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t X, Y, R, dGX, dGY, dInvDelta
+      CHF_AUTOMULTIDO[bx; i]
+         X = (i0 - base(0))* dx(0)
+         Y = (i1 - base(1))* dx(1)
+         dGX = tan(X - fourth*Pi)
+         dGY = tan(Y - fourth*Pi)
+!    Use constant dR to render with constant thickness layers
+         R = CHF_DTERM[one; ; + points(i2 - base(2))]
+         dInvDelta = R / sqrt(one + dGX*dGX + dGY*dGY)
+         if (panel .eq. 0) then
+            coords(CHF_AUTOIX[i], 0) = dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 1) then
+            coords(CHF_AUTOIX[i], 0) = - dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 2) then
+            coords(CHF_AUTOIX[i], 0) = - dInvDelta
+            coords(CHF_AUTOIX[i], 1) = - dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 3) then
+            coords(CHF_AUTOIX[i], 0) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = - dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dGY * dInvDelta
+         elseif (panel .eq. 4) then
+            coords(CHF_AUTOIX[i], 0) = - dGY * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = dInvDelta
+         elseif (panel .eq. 5) then
+            coords(CHF_AUTOIX[i], 0) = dGY * dInvDelta
+            coords(CHF_AUTOIX[i], 1) = dGX * dInvDelta
+            coords(CHF_AUTOIX[i], 2) = - dInvDelta
+         else
+            print *, 'Error: invalid panel ', panel
+            call MAYDAY_ERROR()
+         endif
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellcellvol(
+!
+!     => inputs,  <= outputs
+!     vol    <= cell volumes
+!     panel  => panel number
+!     bx     => box
+!     points => mesh point locations in vertical mapping
+!     dx     => mesh spacing
+!     height => vertical scaling
+!     radius => constant radius scaling
+!     base   => base of panel
+     &     CHF_FRA1[vol],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_R1D[points],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t Xlo, Ylo, Xhi, Yhi
+      real_t Xlo2, Ylo2, Xhi2, Yhi2
+      real_t coef
+      real_t dR
+
+!     Version with radius and height included
+      coef = CHF_DTERM[one; *radius*radius; *height]
+!      coef = CHF_DTERM[one; ; *dx(2)] 
+      CHF_AUTOMULTIDO[bx; i]
+         !    Use constant dR to render with constant thickness layers
+         dR = CHF_DTERM[one; ;*(points(i2+1-base(2)) - points(i2-base(2)))]
+         Xlo = (i0 - base(0)) * dx(0) - fourth*Pi
+         Ylo = (i1 - base(1)) * dx(1) - fourth*Pi
+         Xhi = Xlo + dx(0)
+         Yhi = Ylo + dx(1)
+         Xlo = tan(Xlo)
+         Ylo = tan(Ylo)
+         Xhi = tan(Xhi)
+         Yhi = tan(Yhi)
+         Xlo2 = Xlo * Xlo
+         Ylo2 = Ylo * Ylo
+         Xhi2 = Xhi * Xhi
+         Yhi2 = Yhi * Yhi
+         vol(CHF_AUTOIX[i]) = dR*coef * (
+     &        atan(Xhi * Yhi / sqrt(one + Xhi2 + Yhi2))
+     &        - atan(Xlo * Yhi / sqrt(one + Xlo2 + Yhi2))
+     &        - atan(Xhi * Ylo / sqrt(one + Xhi2 + Ylo2))
+     &        + atan(Xlo * Ylo / sqrt(one + Xlo2 + Ylo2)))
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshelllinemetrics(
+!     NOTE: ignores radius, height paramaters
+!
+!     => inputs,  <= outputs
+!     metric <= line metric in each coordinate direction
+!     panel  => panel number
+!     bx     => box
+!     dx     => mesh spacing
+!     height => vertical scaling
+!     radius => constant radius scaling
+!     offset => offset of 0 for nodes, dx/2 for cell centers
+!     base   => base of panel
+     &     CHF_FRA[metric],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_REALVECT[offset],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t Xc, Yc
+      real_t Xc2, Yc2
+      real_t coef
+
+      CHF_AUTOMULTIDO[bx; i]
+         Xc = (i0 + half - base(0)) * dx(0) + offset(0) - fourth*Pi
+         Yc = (i1 + half - base(1)) * dx(1) + offset(1) - fourth*Pi
+         Xc = tan(Xc)
+         Yc = tan(Yc)
+         Xc2 = Xc * Xc
+         Yc2 = Yc * Yc
+         coef = radius / (one + Xc2 + Yc2);
+         CHF_DTERM[
+         metric(CHF_AUTOIX[i],0) = coef * (one + Xc2) * sqrt(one + Yc2) ;
+         metric(CHF_AUTOIX[i],1) = coef * (one + Yc2) * sqrt(one + Xc2) ;
+         metric(CHF_AUTOIX[i],2) = height ]
+
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellmappedcoords(
+!
+!     => inputs,  <= outputs
+!     coords <= mapped coordinates of centers
+!     panel  => panel number
+!     bx     => box
+!     dx     => mesh spacing
+!     offset => offset of 0 for nodes, dx/2 for cell centers
+!     base   => base of panel
+     &     CHF_FRA[coords],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_REALVECT[offset],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t X, Y, Z
+
+      CHF_AUTOMULTIDO[bx; i]
+         CHF_DTERM[
+         X = (i0 - base(0)) * dx(0) + offset(0) ;
+         Y = (i1 - base(1)) * dx(1) + offset(1) ;
+         Z = (i2 - base(2)) * dx(2) + offset(2) ; ; ; ]
+         CHF_DTERM[
+         coords(CHF_AUTOIX[i], 0) = X ;
+         coords(CHF_AUTOIX[i], 1) = Y ;
+         coords(CHF_AUTOIX[i], 2) = Z ; ; ; ]
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+
+      subroutine cubedsphereshellnormal(
+!
+!     => inputs,  <= outputs
+!     normal <= normal vector
+!     panel  => panel number
+!     bx     => box
+!     dir    => direction of normal
+!     dx     => mesh spacing
+!     base   => base of panel
+     &     CHF_FRA[normal],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[dir],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t Xnode, Ynode, Xlo, Ylo, Xhi, Yhi, denlo, denhi
+      real_t shellfaceintegral
+      if (dir .lt. 2) then
+      CHF_AUTOMULTIDO[bx; i]
+         Xnode = (i0 - base(0)) * dx(0) - fourth * Pi
+         Ynode = (i1 - base(1)) * dx(1) - fourth * Pi
+         Xlo = Xnode
+         Xhi = Xnode
+         Ylo = Ynode
+         Yhi = Ynode
+         if (dir .eq. 0) then
+            Yhi = Yhi + dx(1)
+         elseif (dir .eq. 1) then
+            Xhi = Xhi + dx(0)
+         endif
+         Xlo = tan( Xlo )
+         Xhi = tan( Xhi )
+         Ylo = tan( Ylo )
+         Yhi = tan( Yhi )
+         denlo = sqrt(one + Xlo*Xlo + Ylo*Ylo)
+         denhi = sqrt(one + Xhi*Xhi + Yhi*Yhi)
+         if (dir .eq. 0) then
+            normal(CHF_AUTOIX[i], 0) = Yhi/denhi - Ylo/denlo
+            normal(CHF_AUTOIX[i], 3) = zero
+         elseif (dir .eq. 1) then
+            normal(CHF_AUTOIX[i], 0) = zero
+            normal(CHF_AUTOIX[i], 3) = Xhi/denhi - Xlo/denlo
+         endif
+         normal(CHF_AUTOIX[i], 1) = zero
+         normal(CHF_AUTOIX[i], 2) = zero
+      CHF_ENDDO
+      elseif (dir .eq. 2) then
+         CHF_AUTOMULTIDO[bx; i]
+            Xnode = (i0 - base(0)) * dx(0) - fourth * Pi
+            Ynode = (i1 - base(1)) * dx(1) - fourth * Pi
+            Xlo = Xnode
+            Xhi = Xnode + dx(0)
+            Ylo = Ynode
+            Yhi = Ynode + dx(1)
+            Ylo = tan( Ylo )
+            Yhi = tan( Yhi )
+            Xlo = tan( Xlo )
+            Xhi = tan( Xhi )
+!     Xlo and Xhi are low and high alpha.
+!     Ylo and Yhi are low and high Y = tan(beta).
+            normal(CHF_AUTOIX[i], 8) =
+     &             atan(Xhi*Yhi/sqrt(1+Xhi*Xhi+Yhi*Yhi))
+     &           - atan(Xlo*Yhi/sqrt(1+Xlo*Xlo+Yhi*Yhi))
+     &           - atan(Xhi*Ylo/sqrt(1+Xhi*Xhi+Ylo*Ylo))
+     &           + atan(Xlo*Ylo/sqrt(1+Xlo*Xlo+Ylo*Ylo))
+!     &           shellfaceintegral(Xlo, Xhi, Ylo, Yhi)
+!     Other components are zero.
+         CHF_ENDDO
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellavgjinv(
+!
+!     => inputs,  <= outputs
+!     avjinv <= average of 1/J on cells
+!     panel  => panel number
+!     bx     => box
+!     dir    => direction of face
+!     dx     => mesh spacing
+!     offset => offset of 0 for nodes, dx/2 for cell centers
+!     base   => base of panel
+     &     CHF_FRA1[avjinv],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[dir],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_REALVECT[offset],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t X, Y, X2, Y2, delta, aji, fac0, fac1
+      fac0 = (dx(0)*dx(0)) / (twenty + four)
+      fac1 = (dx(1)*dx(1)) / (twenty + four)
+      CHF_AUTOMULTIDO[bx; i]
+         X = (i0 - base(0)) * dx(0) + offset(0)
+         Y = (i1 - base(1)) * dx(1) + offset(1)
+         X = tan(X - fourth * Pi)
+         Y = tan(Y - fourth * Pi)
+         X2 = X * X
+         Y2 = Y * Y
+         delta = sqrt(one + X2 + Y2)
+
+         aji = delta * delta * delta / ((one + X2) * (one + Y2))
+         aji = aji + fac0 *
+     &        ((one + X2) * (one + X2) * (one + two * X2)
+     &        + Y2 * (X2 - one) * (one + X2 + two * Y2)) /
+     &        (delta * (one + X2) * (one + Y2))
+         aji = aji + fac1 *
+     &        ((one + Y2) * (one + Y2) * (one + two * Y2)
+     &        + X2 * (Y2 - one) * (one + Y2 + two * X2)) /
+     &        (delta * (one + X2) * (one + Y2))
+         avjinv(CHF_AUTOIX[i]) = aji
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellpointj(
+!     NOTE: ignores radius, height paramaters
+!
+!     => inputs,  <= outputs
+!     avjinv <= J at points in mapped space
+!     xi     => points in mapped space
+!     panel  => panel number
+!     bx     => box
+!     dx     => mesh spacing
+!     base   => base of panel
+!     height => vertical scaling factor
+!     radius => constant radius of the domain
+     &     CHF_FRA1[pointj],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_INTVECT[base],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[radius])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t X, Y, X2, Y2, delta, coef
+      coef = one
+!     CHF_DSELECT[ ;
+!     coef = radius * radius; 
+!     In 3D, need to do a radial scaling, too
+      coef = radius * radius * height
+!     ]
+      CHF_AUTOMULTIDO[bx; i]
+         X = tan( xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+         Y = tan( xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+         X2 = X * X
+         Y2 = Y * Y
+         delta = sqrt(one + X2 + Y2)
+         pointj(CHF_AUTOIX[i]) = coef *
+     &        (one + X2) * (one + Y2) /
+     &        (delta*delta*delta)
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellvectorrealtomappedcenter(
+!
+!     => inputs,  <= outputs
+!     vec   <=> vectors to transform
+!     xi     => points in mapped space
+!     panel  => panel number
+!     bx     => box
+!     dx     => mesh spacing
+!     base   => base of panel
+     &     CHF_FRA[vec],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_INTVECT[base])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t xi, eta, vx, vy, vz, tvxi, tveta
+#if CH_SPACEDIM == 3
+      real_t xu, yu, zu
+#endif
+
+      CHF_AUTOMULTIDO[bx; i]
+         xi = i0 * dx(0) + half * dx(0)
+         eta = i1 * dx(1) + half * dx(1)
+         vx = vec(CHF_AUTOIX[i], 0)
+         vy = vec(CHF_AUTOIX[i], 1)
+         vz = vec(CHF_AUTOIX[i], 2)
+         call vectorcartesiantoequiangular(
+     &        tvxi, tveta, xi, eta, panel, vx, vy, vz)
+         vec(CHF_AUTOIX[i], 0) = tvxi
+         vec(CHF_AUTOIX[i], 1) = tveta
+         vec(CHF_AUTOIX[i], 2) = zero
+#if CH_SPACEDIM == 3
+!     Vector is vx*ihat + vy*jhat + vz*khat.
+!     Need to set vec(CHF_AUTOIX[i], 2) to radial component of this vector,
+!     which is rhat dot (vx*ihat + vy*jhat + vz*khat).
+!     Find xu, yu, zu on unit sphere:
+         call equiangulartocartesian(xu, yu, zu, xi, eta, panel)
+!     Then rhat = xu*ihat + yu*jhat + zu*khat.
+!     So radial component of our vector is
+!     (xu*ihat + yu*jhat + zu*khat) dot ((vx*ihat + vy*jhat + vz*khat).
+         vec(CHF_AUTOIX[i], 2) = xu*vx + yu*vy + zu*vz
+#endif
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellequiangulartocartesian(
+     &     CHF_R1D[xyz],
+     &     CHF_CONST_REALVECT[xi],
+     &     CHF_CONST_INT[panel],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_REAL[height])
+
+#if CH_SPACEDIM == 2
+      call equiangulartocartesian(
+     &     xyz(0),
+     &     xyz(1),
+     &     xyz(2),
+     &     xi(0),
+     &     xi(1),
+     &     panel)
+#elif CH_SPACEDIM == 3
+      call equiangulartocartesian3d(
+     &     xyz(0),
+     &     xyz(1),
+     &     xyz(2),
+     &     xi(0),
+     &     xi(1),
+     &     xi(2),
+     &     panel,
+     &     radius,
+     &     height)
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellequiangulartolonlat(
+     &     CHF_REALVECT[lonlat],
+     &     CHF_CONST_REALVECT[xi],
+     &     CHF_CONST_INT[panel],
+     &     CHF_CONST_REAL[eps])
+
+#if CH_SPACEDIM >= 2
+      call equiangulartolonlat(
+     &     lonlat(0), lonlat(1), xi(0), xi(1), panel, eps)
+#endif
+      CHF_DSELECT[ ; ;
+! do the height scaling separately
+      lonlat(2) = xi(2)
+      ]
+
+      return
+      end
+
+
+      subroutine cubedsphereshellfabequiangulartocartesian(
+     &     CHF_FRA[xyz],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_INT[panel],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_REAL[height])
+
+#if CH_SPACEDIM == 2
+      integer CHF_AUTODECL[i]
+
+      CHF_AUTOMULTIDO[xi; i]
+      call equiangulartocartesian(
+     &     xyz(CHF_AUTOIX[i], 0),
+     &     xyz(CHF_AUTOIX[i], 1),
+     &     xyz(CHF_AUTOIX[i], 2),
+     &     xi(CHF_AUTOIX[i], 0),
+     &     xi(CHF_AUTOIX[i], 1),
+     &     panel)
+      CHF_ENDDO
+#elif CH_SPACEDIM == 3
+      integer CHF_AUTODECL[i]
+
+      CHF_AUTOMULTIDO[xi; i]
+      call equiangulartocartesian3d(
+     &     xyz(CHF_AUTOIX[i], 0),
+     &     xyz(CHF_AUTOIX[i], 1),
+     &     xyz(CHF_AUTOIX[i], 2),
+     &     xi(CHF_AUTOIX[i], 0),
+     &     xi(CHF_AUTOIX[i], 1),
+     &     xi(CHF_AUTOIX[i], 2),
+     &     panel,
+     &     radius,
+     &     height)
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+!     NOTE: ignores height paramaters
+      subroutine cubedsphereshellfabequiangulartolonlat(
+     &     CHF_FRA[lonlat],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_INT[panel],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[eps])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+
+      CHF_AUTOMULTIDO[xi; i]
+      call equiangulartolonlat(
+     &     lonlat(CHF_AUTOIX[i], 0),
+     &     lonlat(CHF_AUTOIX[i], 1),
+     &     xi(CHF_AUTOIX[i], 0),
+     &     xi(CHF_AUTOIX[i], 1),
+     &     panel, eps)
+      CHF_DSELECT[ ; ;
+! do the height scaling separately
+      lonlat(CHF_AUTOIX[i], 2) = xi(CHF_AUTOIX[i], 2)
+      ]
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellfabvectorlatlontoequiangular(
+!     NOTE: ignores height paramaters
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     vecRLL => vector in longitude-latitude basis
+!     vecCS  <= vector in equiangular coordinate basis
+!     height => vertical scaling factor
+!     panel  => panel number
+!
+!     Convert from longitude and latitude to equiangular coordinates.
+!
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[vecRLL],
+     &     CHF_FRA[vecCS],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[box])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer sgnpol
+      real_t dgx, dgy, delta2, lat, x2p1, y2p1, gnor2, gnor, srx2p1
+      real_t veclon, veclat
+
+      CHF_AUTOMULTIDO[box; i]
+      dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+      dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+      x2p1 = one + dgx*dgx
+      y2p1 = one + dgy*dgy
+      gnor2 = dgx*dgx + dgy*dgy
+      delta2 = one + gnor2
+      veclat = vecRLL(CHF_AUTOIX[i], 1)
+      if (panel .lt. 4) then
+!     equatorial panel
+        srx2p1 = sqrt(x2p1)
+        lat = atan(dgy / srx2p1)
+        veclon = vecRLL(CHF_AUTOIX[i], 0) / cos(lat)
+
+        vecCS(CHF_AUTOIX[i], 0) = veclon
+        vecCS(CHF_AUTOIX[i], 1) = (one/y2p1) *
+     &      (dgx * dgy * veclon + delta2 / srx2p1 * veclat)
+      else
+!     polar panel
+         if (panel .eq. 4) then
+            sgnpol = 1
+         else
+            sgnpol = -1
+         endif
+         gnor = sqrt(gnor2)
+         lat = sgnpol * (half * Pi - atan(gnor))
+         veclon = vecRLL(CHF_AUTOIX[i], 0) / cos(lat)
+
+         vecCS(CHF_AUTOIX[i], 0) = sgnpol * (one/x2p1) *
+     &        (-dgy * veclon
+     &        - delta2 * dgx / gnor * veclat)
+         vecCS(CHF_AUTOIX[i], 1) = sgnpol * (one/y2p1) *
+     &        (dgx * veclon
+     &        - delta2 * dgy / gnor * veclat)
+      endif
+!     In 3D, ignore scaling the last component (radial) with height
+!          vecCS(CHF_AUTOIX[i], 2) = vecRLL(CHF_AUTOIX[i], 2)]
+         vecCS(CHF_AUTOIX[i], 0) = vecCS(CHF_AUTOIX[i], 0) / radius
+         vecCS(CHF_AUTOIX[i], 1) = vecCS(CHF_AUTOIX[i], 1) / radius
+      CHF_DSELECT[ ; ;
+! do the height scaling separately
+      vecCS(CHF_AUTOIX[i], 2) = vecRLL(CHF_AUTOIX[i], 2)
+      ]
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellfabvectorequiangulartolatlon(
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     vecCS  => vector in equiangular coordinate basis
+!     vecRLL <= vector in longitude-latitude basis
+!     panel  => panel number
+!
+!     Convert from longitude and latitude to equiangular coordinates.
+!
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[vecCS],
+     &     CHF_FRA[vecRLL],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[box])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer sgnpol
+      real_t dgx, dgy, delta2, x2p1, srx2p1, y2p1, lat
+      real_t gnor, gnor2
+      real_t veca, vecb
+
+      CHF_AUTOMULTIDO[box; i]
+      dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+      dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+      delta2 = one + dgx*dgx + dgy*dgy
+      veca = vecCS(CHF_AUTOIX[i], 0)
+      vecb = vecCS(CHF_AUTOIX[i], 1)
+      x2p1 = one + dgx*dgx
+      y2p1 = one + dgy*dgy
+      if (panel .lt. 4) then
+!     equatorial panel
+         srx2p1 = sqrt(x2p1)
+         lat = atan(dgy / srx2p1)
+
+         vecRLL(CHF_AUTOIX[i], 0) = cos(lat) * veca
+         vecRLL(CHF_AUTOIX[i], 1) = (srx2p1 / delta2) *
+     &        (-dgx*dgy * veca + y2p1 * vecb)
+      else
+!     polar panel
+         if (panel .eq. 4) then
+            sgnpol = 1
+         else
+            sgnpol = -1
+         endif
+         gnor2 = dgx*dgx + dgy*dgy
+         gnor = sqrt(gnor2)
+         lat = sgnpol * (half * Pi - atan(gnor))
+
+         vecRLL(CHF_AUTOIX[i], 0) = sgnpol * (cos(lat)/gnor2) *
+     &        (-x2p1 * dgy * veca + dgx * y2p1 * vecb)
+         vecRLL(CHF_AUTOIX[i], 1) = sgnpol * (one/(gnor*delta2)) *
+     &        (-dgx * x2p1 * veca - dgy * y2p1 * vecb)
+
+      endif
+
+         vecRLL(CHF_AUTOIX[i], 0) = vecRLL(CHF_AUTOIX[i], 0) * radius
+         vecRLL(CHF_AUTOIX[i], 1) = vecRLL(CHF_AUTOIX[i], 1) * radius
+
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellcontravariantmetric(
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     metric <= contravariant metric
+!     idir   => direction
+!     height => atmospheric height
+!     radius => earth radius
+!
+!     Return contravariant metric at specified points.
+!     g^{ij} = (dDelta2/((1+X^2)*(1+Y^2))) * [1+Y^2, X*Y; X*Y, 1+X^2]
+!
+     &     CHF_CONST_FRA[xi],
+     &     CHF_FRA[metric],
+     &     CHF_CONST_INT[idir],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[radius])
+
+      integer CHF_AUTODECL[i]
+      real_t dgx, dgy, delta2, x2p1, y2p1, invradius2
+
+      invradius2=one/(radius*radius)
+
+      CHF_AUTOMULTIDO[xi; i]
+         CHF_DTERM[
+         dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi) ;
+         dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi) ; ]
+         x2p1 = one + dgx*dgx
+         y2p1 = one + dgy*dgy
+         delta2 = one + dgx*dgx + dgy*dgy
+         if (idir .eq. 0) then
+            CHF_DTERM[
+            metric(CHF_AUTOIX[i], 0) = invradius2 * delta2 / x2p1 ;
+            metric(CHF_AUTOIX[i], 1) = invradius2 * delta2*dgx*dgy / (x2p1*y2p1) ;
+            metric(CHF_AUTOIX[i], 2) = zero ]
+         elseif (idir .eq. 1) then
+            CHF_DTERM[
+            metric(CHF_AUTOIX[i], 0) = invradius2 * delta2*dgx*dgy / (x2p1*y2p1) ;
+            metric(CHF_AUTOIX[i], 1) = invradius2 * delta2 / y2p1 ;
+            metric(CHF_AUTOIX[i], 2) = zero ]
+         elseif (idir .eq. 2) then
+            CHF_DTERM[
+            metric(CHF_AUTOIX[i], 0) = zero ;
+            metric(CHF_AUTOIX[i], 1) = zero ;
+            metric(CHF_AUTOIX[i], 2) = one ]
+         else
+            print *, 'Error: invalid direction ', idir
+            call MAYDAY_ERROR()
+         endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine cubedsphereshellmappedtocartesian(
+!
+!     In 3D, the radius is 1 + xi[2],
+!     so inner radius is 1, and outer radius is 2.
+!
+!     => inputs,  <= outputs
+!     x, y, z <= Cartesian coordinates
+!     xi      => mapped coordinates
+!     panel   => panel number
+     &     CHF_REAL[x],
+     &     CHF_REAL[y],
+     &     CHF_REAL[z],
+     &     CHF_CONST_REALVECT[xi],
+     &     CHF_CONST_INT[panel],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_REAL[height])
+
+#if CH_SPACEDIM >= 2
+      real_t rreal
+      call equiangulartocartesian(x, y, z, xi(0), xi(1), panel)
+      rreal = radius
+#if CH_SPACEDIM==3
+      rreal = rreal + height*xi(2)
+#endif
+      x = rreal * x
+      y = rreal * y
+      z = rreal * z
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshelldisplacements(
+!
+!     => inputs,  <= outputs
+!     disp   <= displacements in some kind of real space, source to destinations
+!     dCoord => mapped coordinates of destination points
+!     dPanel => panel indices of destination points
+!     sCoord => mapped coordinates of source point
+!     sPanel => panel indices of source point
+     &     CHF_VR[disp],
+     &     CHF_CONST_VR[dCoord],
+     &     CHF_CONST_VI[dPanel],
+     &     CHF_CONST_REALVECT[sCoord],
+     &     CHF_CONST_INT[sPanel])
+
+#if CH_SPACEDIM >= 2
+      real_t xusrc, yusrc, zusrc, denom, xfinal, xaxis, yaxis, zaxis
+      real_t dxi, deta, xdst, ydst, zdst, saxdst
+      real_t yrot, zrot, lat, lon
+      integer dind, diMax, arrind, panel
+
+!     Get (xusrc, yusrc, zusrc) on unit sphere.
+      call equiangulartocartesian(xusrc, yusrc, zusrc,
+     &     sCoord(0), sCoord(1), sPanel)
+!     Find the matrix that rotates points on the unit sphere
+!     in such a way that (xusrc, yusrc, zusrc) gets rotated to (1, 0, 0).
+
+!     Because of a singularity at (-1, 0, 0), if xusrc < 0 then
+!     first map (xusrc, yusrc, zusrc) to (-1, 0, 0), then later to (1, 0, 0).
+      xfinal = one
+      if (xusrc .lt. zero) xfinal = -one
+      
+      denom = sqrt((xusrc + xfinal)**2 + yusrc**2 + zusrc**2)
+!     Set (xaxis, yaxis, zaxis) to unit vector in direction of axis of rotation.
+      xaxis = (xusrc + xfinal) / denom
+      yaxis = yusrc / denom
+      zaxis = zusrc / denom
+      diMax = CHF_UBOUND[dPanel]
+      arrind = 0
+      do dind = 0, diMax
+         dxi = dCoord(arrind)
+         deta = dCoord(arrind + 1)
+         panel = dPanel(dind)
+         call equiangulartocartesian(xdst, ydst, zdst,
+     &        dxi, deta, panel)
+         saxdst = xaxis * xdst + yaxis * ydst + zaxis * zdst
+         yrot = xfinal * ( (two*yaxis) * saxdst - ydst )
+         zrot = (two*zaxis) * saxdst - zdst
+         lat = acos(zrot)
+         lon = asin(yrot / sin(lat))
+         disp(arrind) = lon
+         disp(arrind + 1) = half*Pi - lat
+#if CH_SPACEDIM >= 3
+!     In third dimension, displacement is merely the difference in
+!     third mapped coordinate, because we assume shallow atmosphere.
+         disp(arrind + 2) = dCoord(arrind + 2) - sCoord(2)
+#endif
+         arrind = arrind + CH_SPACEDIM
+      enddo
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellorthonormalize(
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     csVec  => vector in frame of mapped coordinates
+!     onVec  <= vector in orthonormal frame
+!     idir   => normal direction
+!     csComp => indices of components of vector in csVec
+!     onComp => indices of components of vector in onVec
+!
+!     Convert vectors from frame of mapped coordinates to orthonormal frame.
+!
+!     If we call the mapped coordinates alpha and beta, where the valid
+!     ranges are alpha in (0:pi/2)+iblock*pi, beta in (0:pi/2), then
+!     setting X = tan(alpha-pi/4), Y = tan(beta-pi/4), delta = sqrt(1+X*X+Y*Y),
+!     the orthonormalization matrix on grid lines of constant alpha is
+!     O1 = sqrt(1+X*X)/(delta*delta) * (delta    0  )
+!                                      (-X*Y   1+Y*Y)
+!     and the orthonormalization matrix on grid lines of constant beta is
+!     O2 = sqrt(1+Y*Y)/(delta*delta) * (  0    delta)
+!                                      (1+X*X  -X*Y )
+!
+!     Source:  Ullrich et al., "High-order finite volume methods for the
+!     shallow-water equations on the sphere", JCP, 229:6104--6134 (2010),
+!     equations (27)--(28).
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[csVec],
+     &     CHF_FRA[onVec],
+     &     CHF_CONST_INT[idir],
+     &     CHF_CONST_INTVECT[csComp],
+     &     CHF_CONST_INTVECT[onComp])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer ion0, ion1, ics0, ics1
+      real_t dgx, dgy, delta2, delta, x2p1, y2p1, srx2p1, sry2p1
+      real_t csVec0, csVec1
+
+      ics0 = csComp(0)
+      ics1 = csComp(1)
+      ion0 = onComp(0)
+      ion1 = onComp(1)
+      CHF_AUTOMULTIDO[xi; i]
+         csVec0 = csVec(CHF_AUTOIX[i], ics0)
+         csVec1 = csVec(CHF_AUTOIX[i], ics1)
+#if CH_SPACEDIM == 3
+         onVec(CHF_AUTOIX[i], 2) = csVec(CHF_AUTOIX[i], 2)
+#endif
+         if ((idir .eq. 0) .or. (idir .eq. 1)) then
+            dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+            dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+            delta2 = one + dgx*dgx + dgy*dgy
+            delta = sqrt(delta2)
+            x2p1 = one + dgx*dgx
+            y2p1 = one + dgy*dgy
+            if (idir .eq. 0) then
+               srx2p1 = sqrt(x2p1)
+               onVec(CHF_AUTOIX[i], ion0) = srx2p1/delta * csVec0
+               onVec(CHF_AUTOIX[i], ion1) = (srx2p1/delta2) *
+     &              ( -dgx*dgy * csVec0 + y2p1 * csVec1 )
+            elseif (idir .eq. 1) then
+               sry2p1 = sqrt(y2p1)
+               onVec(CHF_AUTOIX[i], ion0) = sry2p1/delta * csVec1
+               onVec(CHF_AUTOIX[i], ion1) = (sry2p1/delta2) *
+     &              ( x2p1 * csVec0 - dgx*dgy * csVec1 )
+            endif
+#if CH_SPACEDIM == 3
+         elseif (idir .eq. 2) then
+            onVec(CHF_AUTOIX[i], ion0) = csVec0
+            onVec(CHF_AUTOIX[i], ion1) = csVec1
+#endif
+         else
+            print *, 'Error: invalid direction ', idir
+            call MAYDAY_ERROR()
+         endif
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshelldeorthonormalize(
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     onVec  => vector in orthonormal frame
+!     csVec  <= vector in frame of mapped coordinates
+!     idir   => normal direction
+!     onComp => indices of components of vector in onVec
+!     csComp => indices of components of vector in csVec
+!
+!     Convert vectors from orthonormal frame to frame of mapped coordinates.
+!
+!     If we call the mapped coordinates alpha and beta, where the valid
+!     ranges are alpha in (0:pi/2)+iblock*pi, beta in (0:pi/2), then
+!     setting X = tan(alpha-pi/4), Y = tan(beta-pi/4), delta = sqrt(1+X*X+Y*Y),
+!     the deorthonormalization matrix on grid lines of constant alpha is
+!     inv(O1) = delta/((1+Y*Y)*sqrt(1+X*X)) * (1+Y*Y   0  )
+!                                             ( X*Y  delta)
+!     and the deorthonormalization matrix on grid lines of constant beta is
+!     inv(O2) = delta/((1+X*X)*sqrt(1+Y*Y)) * ( X*Y  delta)
+!                                             (1+X*X   0  )
+!
+!     Source:  Ullrich et al., "High-order finite volume methods for the
+!     shallow-water equations on the sphere", JCP, 229:6104--6134 (2010),
+!     equations (27)--(28).
+!
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[onVec],
+     &     CHF_FRA[csVec],
+     &     CHF_CONST_INT[idir],
+     &     CHF_CONST_INTVECT[onComp],
+     &     CHF_CONST_INTVECT[csComp])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer ion0, ion1, ics0, ics1
+      real_t dgx, dgy, delta2, delta, x2p1, y2p1, srx2p1, sry2p1
+      real_t onVec0, onVec1
+
+      ion0 = onComp(0)
+      ion1 = onComp(1)
+      ics0 = csComp(0)
+      ics1 = csComp(1)
+      CHF_AUTOMULTIDO[xi; i]
+         onVec0 = onVec(CHF_AUTOIX[i], ion0)
+         onVec1 = onVec(CHF_AUTOIX[i], ion1)
+#if CH_SPACEDIM == 3
+         csVec(CHF_AUTOIX[i], 2) = onVec(CHF_AUTOIX[i], 2)
+#endif
+         if ((idir .eq. 0) .or. (idir .eq. 1)) then
+            dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+            dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+            delta2 = one + dgx*dgx + dgy*dgy
+            delta = sqrt(delta2)
+            x2p1 = one + dgx*dgx
+            y2p1 = one + dgy*dgy
+            if (idir .eq. 0) then
+               srx2p1 = sqrt(x2p1)
+               csVec(CHF_AUTOIX[i], ics0) = delta/srx2p1 * onVec0
+               csVec(CHF_AUTOIX[i], ics1) = (delta/(y2p1*srx2p1)) *
+     &              ( dgx*dgy * onVec0 + delta * onVec1 )
+            elseif (idir .eq. 1) then
+               sry2p1 = sqrt(y2p1)
+               csVec(CHF_AUTOIX[i], ics0) = (delta/(x2p1*sry2p1)) *
+     &              ( dgx*dgy * onVec0 + delta * onVec1 )
+               csVec(CHF_AUTOIX[i], ics1) = delta/sry2p1 * onVec0
+            endif
+#if CH_SPACEDIM == 3
+         elseif (idir .eq. 2) then
+            csVec(CHF_AUTOIX[i], ics0) = onVec0
+            csVec(CHF_AUTOIX[i], ics1) = onVec1
+#endif
+         else
+            print *, 'Error: invalid direction ', idir
+            call MAYDAY_ERROR()
+         endif
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellorthonormalizeframe(
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     flux  <=> normal components of flux
+!     idir   => normal direction
+!
+!     Convert normal and tangential components of fluxes in block frame
+!     to normal and tangential components of fluxes in orthonormal frame.
+!
+!     If we call the mapped coordinates alpha and beta, where the valid
+!     ranges are alpha in (0:pi/2)+iblock*pi, beta in (0:pi/2), then
+!     setting X = tan(alpha-pi/4), Y = tan(beta-pi/4), delta = sqrt(1+X*X+Y*Y),
+!     on grid lines of constant alpha, we multiply by sqrt(1+X*X)/delta;
+!     on grid lines of constant beta, we multiply by sqrt(1+Y*Y)/delta;
+!     on grid lines of constant z, we do nothing.
+     &     CHF_CONST_FRA[xi],
+     &     CHF_FRA[flux],
+     &     CHF_CONST_INT[idir])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer ncomp, comp
+      real_t dgx, dgy, delta2, delta, fac
+
+      ncomp = CHF_NCOMP[flux]
+      if ((idir .eq. 0) .or. (idir .eq. 1)) then
+         CHF_AUTOMULTIDO[xi; i]
+            dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+            dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+            delta2 = one + dgx*dgx + dgy*dgy
+            delta = sqrt(delta2)
+            if (idir .eq. 0) then
+               fac = sqrt(one + dgx*dgx) / delta
+            elseif (idir .eq. 1) then
+               fac = sqrt(one + dgy*dgy) / delta
+            endif
+            do comp = 0, ncomp-1
+               flux(CHF_AUTOIX[i], comp) =
+     &              fac * flux(CHF_AUTOIX[i], comp)
+            enddo
+         CHF_ENDDO
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshelldeorthonormalizeframe(
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     flux  <=> normal components of flux
+!     idir   => normal direction
+!
+!     Convert normal and tangential components of fluxes in orthonormal frame
+!     to normal and tangential components of fluxes in block frame.
+!
+!     If we call the mapped coordinates alpha and beta, where the valid
+!     ranges are alpha in (0:pi/2)+iblock*pi, beta in (0:pi/2), then
+!     setting X = tan(alpha-pi/4), Y = tan(beta-pi/4), delta = sqrt(1+X*X+Y*Y),
+!     on grid lines of constant alpha, we divide by sqrt(1+X*X)/delta;
+!     on grid lines of constant beta, we divide by sqrt(1+Y*Y)/delta;
+!     on grid lines of constant z, we do nothing.
+     &     CHF_CONST_FRA[xi],
+     &     CHF_FRA[flux],
+     &     CHF_CONST_INT[idir])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer ncomp, comp
+      real_t dgx, dgy, delta2, delta, fac
+
+      ncomp = CHF_NCOMP[flux]
+      if ((idir .eq. 0) .or. (idir .eq. 1)) then
+         CHF_AUTOMULTIDO[xi; i]
+            dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+            dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+            delta2 = one + dgx*dgx + dgy*dgy
+            delta = sqrt(delta2)
+            if (idir .eq. 0) then
+               fac = delta / sqrt(one + dgx*dgx)
+            elseif (idir .eq. 1) then
+               fac = delta / sqrt(one + dgy*dgy)
+            endif
+            do comp = 0, ncomp-1
+               flux(CHF_AUTOIX[i], comp) =
+     &              fac * flux(CHF_AUTOIX[i], comp)
+            enddo
+         CHF_ENDDO
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellpartials(
+!
+!     Returns dalpha/dlon, dbeta/dlon, dalpha/dlat, dbeta/dlat.
+!     
+     &     CHF_CONST_FRA[lonlat],
+     &     CHF_FRA[derivs],
+     &     CHF_CONST_INT[panel],
+     &     CHF_BOX[bx])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t lon, lat
+
+      if (panel .eq. 0) then
+         CHF_AUTOMULTIDO[bx; i]
+         lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         derivs(CHF_AUTOIX[i], 0) = one
+         derivs(CHF_AUTOIX[i], 1) =
+     &        one/(Cos(lon)/Tan(lat)/Tan(lon) + Tan(lat)/Sin(lon))
+         derivs(CHF_AUTOIX[i], 2) = zero
+         derivs(CHF_AUTOIX[i], 3) =
+     &        one/(Cos(lat)**2*Cos(lon) + Sin(lat)**2/Cos(lon))
+         CHF_ENDDO
+      elseif (panel .eq. 1) then
+         CHF_AUTOMULTIDO[bx; i]
+         lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         derivs(CHF_AUTOIX[i], 0) = one
+         derivs(CHF_AUTOIX[i], 1) = 
+     &        -((Tan(lat)/Tan(lon)/Sin(lon))/
+     &        (one + Tan(lat)**2/Sin(lon)**2))
+         derivs(CHF_AUTOIX[i], 2) = zero
+         derivs(CHF_AUTOIX[i], 3) =
+     &        one/(Sin(lat)**2/Sin(lon) + Cos(lat)**2*Sin(lon))
+         CHF_ENDDO
+      elseif (panel .eq. 2) then
+         CHF_AUTOMULTIDO[bx; i]
+         lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         derivs(CHF_AUTOIX[i], 0) = one
+         derivs(CHF_AUTOIX[i], 1) =
+     &        -(one/(Cos(lon)/Tan(lat)/Tan(lon) + Tan(lat)/Sin(lon)))
+         derivs(CHF_AUTOIX[i], 2) = zero
+         derivs(CHF_AUTOIX[i], 3) =
+     &        -(one/(Cos(lat)**2*Cos(lon) + Sin(lat)**2/Cos(lon)))
+         CHF_ENDDO
+      elseif (panel .eq. 3) then
+         CHF_AUTOMULTIDO[bx; i]
+         lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         derivs(CHF_AUTOIX[i], 0) = one
+         derivs(CHF_AUTOIX[i], 1) =
+     &        (Tan(lat)/Tan(lon)/Sin(lon))/
+     &        (one + Tan(lat)**2/Sin(lon)**2)
+         derivs(CHF_AUTOIX[i], 2) = zero
+         derivs(CHF_AUTOIX[i], 3) =
+     &        -(one/(Sin(lat)**2/Sin(lon) + Cos(lat)**2*Sin(lon)))
+         CHF_ENDDO
+      elseif (panel .eq. 4) then
+         CHF_AUTOMULTIDO[bx; i]
+         lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         derivs(CHF_AUTOIX[i], 0) =
+     &        (Cos(lon)/Tan(lat))/(one + Sin(lon)**2/Tan(lat)**2)
+         derivs(CHF_AUTOIX[i], 1) =
+     &        (Sin(lon)/Tan(lat))/(one + Cos(lon)**2/Tan(lat)**2)
+         derivs(CHF_AUTOIX[i], 2) =
+     &        -(one/(Sin(lat)**2/Sin(lon) + Cos(lat)**2*Sin(lon)))
+         derivs(CHF_AUTOIX[i], 3) =
+     &        (Cos(lon)/Sin(lat)**2)/(one + Cos(lon)**2/Tan(lat)**2)
+         CHF_ENDDO
+      elseif (panel .eq. 5) then
+         CHF_AUTOMULTIDO[bx; i]
+         lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         derivs(CHF_AUTOIX[i], 0) =
+     &        -((Cos(lon)/Tan(lat))/(one + Sin(lon)**2/Tan(lat)**2))
+         derivs(CHF_AUTOIX[i], 1) =
+     &        (Sin(lon)/Tan(lat))/(one + Cos(lon)**2/Tan(lat)**2)
+         derivs(CHF_AUTOIX[i], 2) =
+     &        one/(Sin(lat)**2/Sin(lon) + Cos(lat)**2*Sin(lon))
+         derivs(CHF_AUTOIX[i], 3) =
+     &        (Cos(lon)/Sin(lat)**2)/(one + Cos(lon)**2/Tan(lat)**2)
+         CHF_ENDDO
+      else
+         print *, 'Error: invalid panel ', panel
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshelldelta(
+!
+!     Return delta at each point.
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     delta  <= sqrt(1+X*X+Y*Y), where X = tan(alpha-pi/4), Y = tan(beta-pi/4)
+!
+     &     CHF_CONST_FRA[xi],
+     &     CHF_FRA1[delta])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      real_t dgx, dgy, delta2
+
+      CHF_AUTOMULTIDO[xi; i]
+         dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+         dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+         delta2 = one + dgx*dgx + dgy*dgy
+         delta(CHF_AUTOIX[i]) = sqrt(delta2)
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshelldivonfaces(
+!
+!     Return divergence on faces.
+!
+!     => inputs,  <= outputs
+!     div    <= divergence
+!     gradVec => face-centered gradient of vector * (1/delta, 1/delta, r^2)
+!     xi     => mapped coordinates
+!     bx     => face-centered box on which to find divergence
+!     dirFace => direction of face
+!
+     &     CHF_FRA1[div],
+     &     CHF_CONST_FRA[gradVec],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[dirFace])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[f2cLo]
+      integer CHF_AUTODECL[f2cHi]
+      integer dir, comp
+      real_t dgx, dgy, delta2, delta, x2p1, y2p1, srx2p1, sry2p1, r
+      real_t part
+
+      CHF_AUTOMULTIDO[xi; i]
+         dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+         dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+         delta2 = one + dgx*dgx + dgy*dgy
+         delta = sqrt(delta2)
+         x2p1 = one + dgx*dgx
+         y2p1 = one + dgy*dgy
+         srx2p1 = sqrt(x2p1)
+         sry2p1 = sqrt(y2p1)
+
+         dir = 0
+         comp = CH_SPACEDIM*dir + dir
+         part = gradVec(CHF_AUTOIX[i], comp) / (x2p1 * sry2p1)
+
+         dir = 1
+         comp = CH_SPACEDIM*dir + dir
+         part = part + gradVec(CHF_AUTOIX[i], comp) / (srx2p1 * y2p1)
+
+         part = (delta**3) * part
+#if CH_SPACEDIM >= 3
+         dir = 2
+         comp = CH_SPACEDIM*dir + dir
+
+         r = xi(CHF_AUTOIX[i], dir) + one
+         part = part / r + gradVec(CHF_AUTOIX[i], comp) / (r*r)
+#endif
+
+         div(CHF_AUTOIX[i]) = part
+
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellccgradient(
+!
+!     Return cell-centered gradient from cell-centered divided differences.
+!     Get difff, divided differences, from UDiv{{Lo|Hi}Side|CenterGrad}
+!     and dividing by dx.
+!     The components of the gradient are for directions alpha, beta, r.
+!
+!     => inputs,  <= outputs
+!     gradf <=  gradient of function, SpaceDim*ncomp components
+!     difff  => divided differences of function, SpaceDim*ncomp components
+!     xi     => mapped coordinates
+!     bx     => cell-centered box on which to find gradient
+!
+     &     CHF_FRA[gradf],
+     &     CHF_CONST_FRA[difff],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_BOX[bx])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+      integer dir, ncomp, comp
+      real_t dgx, dgy, x2p1, y2p1, srx2p1, sry2p1
+      real_t dfda, dfdb
+
+      ncomp = CHF_NCOMP[difff] / CH_SPACEDIM
+      CHF_AUTOMULTIDO[bx; i]
+         dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+         dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+         x2p1 = one + dgx*dgx
+         y2p1 = one + dgy*dgy
+         srx2p1 = sqrt(x2p1)
+         sry2p1 = sqrt(y2p1)
+
+         do comp = 0, ncomp-1
+            dfda = difff(CHF_AUTOIX[i], comp)
+            dfdb = difff(CHF_AUTOIX[i], comp + ncomp)
+
+            gradf(CHF_AUTOIX[i], comp) =
+     &           sry2p1 * dfda + (dgx*dgy/sry2p1) * dfdb
+
+            gradf(CHF_AUTOIX[i], comp + ncomp) =
+     &           (dgx*dgy/srx2p1) * dfda + srx2p1 * dfdb
+
+#if CH_SPACEDIM >= 3
+            gradf(CHF_AUTOIX[i], comp + 2*ncomp) =
+     &           difff(CHF_AUTOIX[i], comp + 2*ncomp)
+#endif
+         end do
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellmagnitude(
+!
+!     Return magnitude of a vector with components in directions
+!     alpha, beta, r IN UNIT BASIS.
+!
+!     => inputs,  <= outputs
+!     mag <=  magnitude of vector, ncomp components
+!     vec  => vector, SpaceDim*ncomp components, in groups of ncomp
+!             IN UNIT BASIS
+!     xi   => mapped coordinates
+!     bx   => cell-centered box on which to find magnitude
+!
+     &     CHF_FRA[mag],
+     &     CHF_CONST_FRA[vec],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_BOX[bx])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+      integer dir, ncomp, comp
+      real_t dgx, dgy, fac, veca, vecb, mag2
+
+      ncomp = CHF_NCOMP[mag]
+      CHF_AUTOMULTIDO[bx; i]
+         dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+         dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+         fac = two * dgx * dgy /
+     &        (sqrt(one + dgx*dgx) * sqrt(one + dgy*dgy))
+
+         do comp = 0, ncomp-1
+            veca = vec(CHF_AUTOIX[i], comp)
+            vecb = vec(CHF_AUTOIX[i], comp + ncomp)
+
+            mag2 = veca**2 + vecb**2 - fac*veca*vecb
+#if CH_SPACEDIM >= 3
+            mag2 = mag2 + vec(CHF_AUTOIX[i], comp + 2*ncomp)**2
+#endif
+            mag(CHF_AUTOIX[i], comp) = sqrt(mag2)
+         end do
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellcurlr(
+!
+!     Return radial component of curl of a function with components u, v.
+!
+!     => inputs,  <= outputs
+!     xi    => mapped coordinates
+!     gradu => gradient of u IN UNIT BASIS
+!     gradv => gradient of v IN UNIT BASIS
+!     curl <=  curl of (u, v)
+!     bx    => cell-centered box on which to find curl
+!
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[gradu],
+     &     CHF_CONST_FRA[gradv],
+     &     CHF_FRA1[curl],
+     &     CHF_BOX[bx])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+      real_t dgx, dgy, delta2, delta, x2p1, y2p1, srx2p1, sry2p1
+      real_t fac, duda, dvda, dudb, dvdb
+
+      CHF_AUTOMULTIDO[bx; i]
+         dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+         dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+         delta2 = one + dgx*dgx + dgy*dgy
+         delta = sqrt(delta2)
+         x2p1 = one + dgx*dgx
+         y2p1 = one + dgy*dgy
+         srx2p1 = sqrt(x2p1)
+         sry2p1 = sqrt(y2p1)
+         fac = (dgx*dgy) / (srx2p1*sry2p1)
+         duda = gradu(CHF_AUTOIX[i], 0)
+         dudb = gradu(CHF_AUTOIX[i], 1)
+         dvda = gradv(CHF_AUTOIX[i], 0)
+         dvdb = gradv(CHF_AUTOIX[i], 1)
+         curl(CHF_AUTOIX[i]) = delta *
+     &        ( fac * (dvdb/sry2p1 - duda/srx2p1)
+     &        - dudb/sry2p1 + dvda/srx2p1 )
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine cubedsphereshellvectortounitbasis(
+!
+!     Converts a FAB of components of vectors from the natural basis
+!     to the unit basis.
+!
+!     => inputs,  <= outputs
+!     xi     => mapped coordinates
+!     vecnat => FAB of components of vector in natural basis
+!     vecu  <= FAB of components of vector in unit basis
+!     bx     => cell-centered box on which to return vecu
+!
+     &     CHF_CONST_FRA[xi],
+     &     CHF_CONST_FRA[vecnat],
+     &     CHF_FRA[vecu],
+     &     CHF_BOX[bx])
+
+#if CH_SPACEDIM >= 2
+      integer CHF_AUTODECL[i]
+      integer CHF_AUTODECL[ii]
+      real_t dgx, dgy, delta2, x2p1, y2p1, srx2p1, sry2p1
+      real_t fac, duda, dvda, dudb, dvdb
+
+      CHF_AUTOMULTIDO[bx; i]
+         dgx = tan(xi(CHF_AUTOIX[i], 0) - fourth * Pi)
+         dgy = tan(xi(CHF_AUTOIX[i], 1) - fourth * Pi)
+         delta2 = one + dgx*dgx + dgy*dgy
+         x2p1 = one + dgx*dgx
+         y2p1 = one + dgy*dgy
+         srx2p1 = sqrt(x2p1)
+         sry2p1 = sqrt(y2p1)
+         vecu(CHF_AUTOIX[i], 0) = vecnat(CHF_AUTOIX[i], 0) *
+     &        (x2p1 * sry2p1) / delta2
+         vecu(CHF_AUTOIX[i], 1) = vecnat(CHF_AUTOIX[i], 1) *
+     &        (y2p1 * srx2p1) / delta2
+#if CH_SPACEDIM == 3
+         vecu(CHF_AUTOIX[i], 2) = vecnat(CHF_AUTOIX[i], 2)
+#endif
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+      subroutine cubedspheremetricjprodavg(
+!assumes matrix is 0 initially
+     &     CHF_FRA[matrix],
+     &     CHF_CONST_FRA[xi],
+     &     CHF_BOX[facebx],
+     &     CHF_CONST_REALVECT[dx],
+     &     CHF_CONST_REAL[height],
+     &     CHF_CONST_REAL[radius],
+     &     CHF_CONST_INT[dirFace])
+      
+      integer CHF_AUTODECL[i]
+      real_t x,xlo,xhi,sx2p1
+      real_t y,ylo,yhi,sy2p1
+      real_t dlo,dhi
+
+#if CH_SPACEDIM >= 2
+      CHF_AUTOMULTIDO[facebx; i]
+         if(dirFace .eq. 0) then
+            x=tan(xi(CHF_AUTOIX[i],0) -fourth*Pi)
+            ylo=tan(xi(CHF_AUTOIX[i],1) -fourth*Pi -half*dx(1))
+            yhi=tan(xi(CHF_AUTOIX[i],1) -fourth*Pi +half*dx(1))
+
+            dlo=sqrt(1+x*x+ylo*ylo)
+            dhi=sqrt(1+x*x+yhi*yhi)
+!            print *,x,ylo,yhi,dlo,dhi
+
+            matrix(CHF_AUTOIX[i],0) = height/dx(1)*(
+     &           log(yhi+dhi)
+     &          -log(ylo+dlo))
+
+            matrix(CHF_AUTOIX[i],CH_SPACEDIM) = half*height/dx(1)*(
+     &          -log(-(x+dhi)/(x-dhi))
+     &          +log(-(x+dlo)/(x-dlo)))
+
+         elseif(dirFace .eq. 1) then
+            y=tan(xi(CHF_AUTOIX[i],1) -fourth*Pi)
+            xlo=tan(xi(CHF_AUTOIX[i],0) -fourth*Pi -half*dx(0))
+            xhi=tan(xi(CHF_AUTOIX[i],0) -fourth*Pi +half*dx(0))
+
+            dlo=sqrt(1+xlo*xlo+y*y)
+            dhi=sqrt(1+xhi*xhi+y*y)
+!            print *,y,xlo,xhi,dlo,dhi
+
+            matrix(CHF_AUTOIX[i],CH_SPACEDIM+1) = height/dx(0)*(
+     &           log(xhi+dhi)
+     &          -log(xlo+dlo))
+
+            matrix(CHF_AUTOIX[i],1) = half*height/dx(0)*(
+     &          -log(-(y+dhi)/(y-dhi))
+     &          +log(-(y+dlo)/(y-dlo)))
+!            print *,y,xlo,xhi,dlo,dhi,matrix(CHF_AUTOIX[i],1)
+
+#if CH_SPACEDIM==3
+         else
+            xlo=tan(xi(CHF_AUTOIX[i],0) -fourth*Pi -half*dx(0))
+            xhi=tan(xi(CHF_AUTOIX[i],0) -fourth*Pi +half*dx(0))
+            ylo=tan(xi(CHF_AUTOIX[i],1) -fourth*Pi -half*dx(1))
+            yhi=tan(xi(CHF_AUTOIX[i],1) -fourth*Pi +half*dx(1))            
+
+            matrix(CHF_AUTOIX[i],2*CH_SPACEDIM+2) = radius*radius/(height*dx(0)*dx(1))*(
+     &           asin((xhi*xhi*yhi*yhi-xhi*xhi-yhi*yhi-1)/((1+xhi*xhi)*(1+yhi*yhi)))
+     &          -asin((xhi*xhi*ylo*ylo-xhi*xhi-ylo*ylo-1)/((1+xhi*xhi)*(1+ylo*ylo)))
+     &          -asin((xlo*xlo*yhi*yhi-xlo*xlo-yhi*yhi-1)/((1+xlo*xlo)*(1+yhi*yhi)))
+     &          +asin((xlo*xlo*ylo*ylo-xlo*xlo-ylo*ylo-1)/((1+xlo*xlo)*(1+ylo*ylo))))
+
+#endif
+         endif
+      CHF_ENDDO
+#endif
+
+      return
+      end

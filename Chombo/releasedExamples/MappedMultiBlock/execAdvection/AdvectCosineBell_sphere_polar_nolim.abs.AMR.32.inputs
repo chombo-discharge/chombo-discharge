@@ -1,0 +1,73 @@
+# multiblock = True
+run.verbosity = 1
+
+# Time stepping
+run.max_step = 20000
+run.max_time = 12.0
+# amr.fixed_dt = 0.192 / num_cells
+amr.fixed_dt = 0.006
+amrlevelfactory.cfl = 1.0
+amrlevelfactory.initial_cfl = 0.75
+amr.max_dt_growth = 1.1
+amr.dt_tolerance_factor = 1.1
+
+run.domain_length = 1.0
+run.num_cells = 32 32 32
+
+# Computational domain and coordinate system.
+# coord_sys = 'cubed_sphere'
+coordsys.type = cubedsphere2d
+# is_periodic is unused
+# run.is_periodic = 0 0 0
+
+# AMR
+amr.max_level = 1
+amr.ref_ratio = 4 4
+
+# Regridding parameters
+amr.regrid_interval = 2
+# advect.tagging_strategy = 'absolute'
+amrlevelfactory.tag_buffer_size = 2
+amrlevelfactory.refine_thresh = 1.
+
+# Grid generation parameters
+amr.block_factor = 8
+amr.max_grid_size = 32
+amr.fill_ratio = 0.75
+amr.grid_buffer_size = 0
+
+# Output
+amr.checkpoint_interval = 100
+amr.plot_interval = 1
+amr.plot_prefix  = AdvectCosineBell.polar_nolim.abs.AMR.32.
+amr.chk_prefix = chkAdvectCosineBell.polar_nolim.abs.AMR.32.
+
+# amrlevelfactory.use_hyperviscosity = 0
+# amrlevelfactory.hyperviscosity = 0.01
+
+# use_prim_limiting = 0
+amrlevelfactory.limit_face_values = 0
+amrlevelfactory.enforce_min_val = 1
+amrlevelfactory.min_val = 0.0
+
+#######################################################################
+
+# Set which problem to solve
+run.ibc.problem = cosinebelladvection
+
+run.ibc.ambient_density = 0.
+run.ibc.delta_density = 1000.0
+run.ibc.size = 0.3
+# this is default velocity: takes time 12.0 to go all the way round (2*pi).
+# run.ibc.vel = pi / 6.0
+run.ibc.angle = 1.5707963267948966
+run.ibc.time = 0.0
+
+# These are in (longitude, latitude) coordinates.
+# center point
+# center = (0.0, 0.7853981633974483)
+# center = (pi/2.0, 0.)
+run.ibc.center_point = 0. 1.5707963267948966 
+# center = (pi/2.0, 0.)
+# advection velocity
+# velocity = (1.0, 1.0)

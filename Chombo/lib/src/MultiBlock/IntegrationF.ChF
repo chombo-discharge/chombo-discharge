@@ -1,0 +1,186 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+!=======================================================
+!     subroutine INTEGRATIONWEIGHTS
+!
+!     Returns weights of integration on a region or face or edge.
+!
+!     => inputs,  <= outputs
+!     weight <= integration weights
+!     bx => NODEs on which you integrate
+!     h => mesh spacing in each dimension
+!     irules => integration rule in each dimension
+!
+!     Integration rules are as follows.
+!     Whether a rule can be used depends on patch length (in cells):
+!     0 for just setting weight to 1 (do this for normal dimension)
+!     1 for trapezoidal rule, O(h^2) error
+!     2 for Simpson's rule, O(h^4) error, need 2 to divide patch length
+!     4 for Boole's rule, O(h^6) error, need 4 to divide patch length
+!     8 for Newton-Cotes-9, O(h^8) error, need 8 to divide patch length
+!=======================================================
+      subroutine INTEGRATIONWEIGHTS(
+     &     CHF_FRA1[weight],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[h],
+     &     CHF_CONST_INTVECT[irules])
+      REAL_T CHF_DDECL[
+     &     wtx(CHF_LBOUND[bx; 0] : CHF_UBOUND[bx; 0]) ;
+     &     wty(CHF_LBOUND[bx; 1] : CHF_UBOUND[bx; 1]) ;
+     &     wtz(CHF_LBOUND[bx; 2] : CHF_UBOUND[bx; 2]) ]
+      integer CHF_DDECL[i; j; k]
+      integer ier
+
+!     If any dimension has length 0, then that's OK:
+!     the weight will just be set to one.
+      CHF_DTERM[
+      call getintegral1dweights(wtx,
+     &     CHF_LBOUND[bx; 0], CHF_UBOUND[bx; 0],
+     &     h(0), irules(0), ier)
+      if (ier .ne. 0) then
+         print *, 'bad integration rule in INTEGRATIONWEIGHTS'
+         call MAYDAYERROR()
+      endif ;
+      call getintegral1dweights(wty,
+     &     CHF_LBOUND[bx; 1], CHF_UBOUND[bx; 1],
+     &     h(1), irules(1), ier)
+      if (ier .ne. 0) then
+         print *, 'bad integration rule in INTEGRATIONWEIGHTS'
+         call MAYDAYERROR()
+      endif ;
+      call getintegral1dweights(wtz,
+     &     CHF_LBOUND[bx; 2], CHF_UBOUND[bx; 2],
+     &     h(2), irules(2), ier)
+      if (ier .ne. 0) then
+         print *, 'bad integration rule in INTEGRATIONWEIGHTS'
+         call MAYDAYERROR()
+      endif ]
+
+      CHF_MULTIDO[bx; i; j; k]
+
+         weight(CHF_IX[i; j; k]) = CHF_DTERM[
+     &     wtx(i) ; * wty(j) ; * wtz(k) ]
+
+      CHF_ENDDO
+
+      ier = 0
+
+      return
+      end
+
+
+!=======================================================
+!     subroutine INTEGRATIONPOINTS
+!
+!     Returns equally spaced points of evaluation to be used
+!     in computing integral on a NODE-centered box.
+!
+!     => inputs,  <= outputs
+!     coords <= coordinates of integration points, CH_SPACEDIM components
+!     bx => NODEs on which you integrate
+!     h => mesh spacing in each dimension
+!=======================================================
+      subroutine INTEGRATIONPOINTS(
+     &     CHF_FRA[coords],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[base],
+     &     CHF_CONST_REALVECT[h])
+      integer CHF_DDECL[i; j; k]
+
+      CHF_MULTIDO[bx; i; j; k]
+
+         CHF_DTERM[
+         coords(CHF_IX[i; j; k], 0) = base(0) + i*h(0) ;
+         coords(CHF_IX[i; j; k], 1) = base(1) + j*h(1) ;
+         coords(CHF_IX[i; j; k], 2) = base(2) + k*h(2) ]
+
+      CHF_ENDDO
+
+      return
+      end
+
+
+!=======================================================
+!     subroutine BESTINTEGRATIONRULE
+!
+!     Returns best Newton-Cotes integration rule for a particular length.
+!
+!     => inputs,  <= outputs
+!     irule <= integration rule code to send to integrationweights
+!     length => length of domain
+      subroutine BESTINTEGRATIONRULE(
+     &     CHF_INT[irule],
+     &     CHF_CONST_INT[length])
+
+      if (mod(length, 4) .eq. 0) then
+!     Boole's rule, O(h^6)
+         irule = 4
+      elseif (mod(length, 2) .eq. 0) then
+!     Simpsons's rule, O(h^4)
+         irule = 2
+      else
+!     trapezoidal rule, O(h^2)
+         irule = 1
+      endif
+
+      return
+      end
+
+
+!=======================================================
+!     subroutine GAUSSQUADRATURE
+!
+!     Returns points and weights for Gaussian quadrature.
+!
+!     => inputs,  <= outputs
+!     coords <= coordinates of evaluation points, CH_SPACEDIM components
+!     weight <= weights
+!     bx => indices of CELLs, on which coords and weight live
+!     cornlo => coordinates of low corner of box
+!     cornhi => coordinates of high corner of box
+!=======================================================
+      subroutine GAUSSQUADRATURE(
+     &     CHF_FRA[coords],
+     &     CHF_FRA1[weight],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_REALVECT[cornlo],
+     &     CHF_CONST_REALVECT[cornhi])
+      REAL_T CHF_DDECL[
+     &     x(CHF_LBOUND[bx; 0] : CHF_UBOUND[bx; 0]) ;
+     &     y(CHF_LBOUND[bx; 1] : CHF_UBOUND[bx; 1]) ;
+     &     z(CHF_LBOUND[bx; 2] : CHF_UBOUND[bx; 2]) ]
+      REAL_T CHF_DDECL[
+     &     wtx(CHF_LBOUND[bx; 0] : CHF_UBOUND[bx; 0]) ;
+     &     wty(CHF_LBOUND[bx; 1] : CHF_UBOUND[bx; 1]) ;
+     &     wtz(CHF_LBOUND[bx; 2] : CHF_UBOUND[bx; 2]) ]
+      integer CHF_DDECL[i; j; k]
+
+      CHF_DTERM[
+      call getgaussquad1d(x, wtx,
+     &     CHF_LBOUND[bx; 0], CHF_UBOUND[bx; 0],
+     &     cornlo(0), cornhi(0)) ;
+      call getgaussquad1d(y, wty,
+     &     CHF_LBOUND[bx; 1], CHF_UBOUND[bx; 1],
+     &     cornlo(1), cornhi(1)) ;
+      call getgaussquad1d(z, wtz,
+     &     CHF_LBOUND[bx; 2], CHF_UBOUND[bx; 2],
+     &     cornlo(2), cornhi(2)) ]
+
+      CHF_MULTIDO[bx; i; j; k]
+         CHF_DTERM[
+         coords(CHF_IX[i; j; k], 0) = x(i) ;
+         coords(CHF_IX[i; j; k], 1) = y(j) ;
+         coords(CHF_IX[i; j; k], 2) = z(k) ]
+
+         weight(CHF_IX[i; j; k]) = CHF_DTERM[
+     &     wtx(i) ; * wty(j) ; * wtz(k) ]
+      CHF_ENDDO
+
+      return
+      end

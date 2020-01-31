@@ -1,0 +1,132 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+
+c  ---------------------------------------------------------
+c  applies Hilditch and Colella redistribution scheme to enforce
+c  positivity
+c
+c  phi         <=> cell-centered phi
+c  interiorBox  => cell-centered box of interior
+c  neighborBox  => cell-centered box of neightbors over which to
+c                  redistribute negative values
+c  minVal       => minimum value
+c  unable      <=  number of values below minVal that cannot be
+c                  redistributed
+c ----------------------------------------------------------
+      subroutine REDISTRIBUTENEGATIVES(CHF_FRA[phi],
+     &                                 CHF_BOX[interiorBox],
+     &                                 CHF_BOX[neighborBox],
+     &                                 CHF_CONST_REAL[refVal],
+     &                                 CHF_INT[unable])
+
+      integer n
+      integer CHF_DDECL[i;j;k;l]
+      integer CHF_DDECL[m1;m2;m3;m4]
+      REAL_T deltaPhi
+      REAL_T xisum,scale
+      REAL_T xi(CHF_DDECL[-3:3;-3:3;-3:3;-3:3])
+
+      do n=0, (CHF_NCOMP[phi]-1)
+        CHF_MULTIDO[interiorBox;i;j;k;l]
+
+          if (phi(CHF_IX[i;j;k;l],n).lt.zero) then
+
+            deltaPhi = -phi(CHF_IX[i;j;k;l],n)
+
+            if ((refVal+deltaPhi).ne.refVal) then
+
+              xisum = zero
+              CHF_MULTIDO[neighborBox;m1;m2;m3;m4]
+                 xi(CHF_DDECL[m1;m2;m3;m4])
+     &             = max(zero,phi(CHF_IX[i+m1;j+m2;k+m3;l+m4],n))
+                 xisum = xisum + xi(CHF_DDECL[m1;m2;m3;m4])
+              CHF_ENDDO
+
+              if (xisum.ge.deltaPhi) then
+                scale = deltaPhi / xisum
+                CHF_MULTIDO[neighborBox;m1;m2;m3;m4]
+                   xi(CHF_DDECL[m1;m2;m3;m4])
+     &               = xi(CHF_DDECL[m1;m2;m3;m4]) * scale
+                CHF_ENDDO
+
+                CHF_MULTIDO[neighborBox;m1;m2;m3;m4]
+                   phi(CHF_IX[i+m1;j+m2;k+m3;l+m4],n)
+     &               = phi(CHF_IX[i+m1;j+m2;k+m3;l+m4],n)
+     &                   - xi(CHF_DDECL[m1;m2;m3;m4])
+                CHF_ENDDO
+                phi(CHF_IX[i;j;k;l],n) = zero
+
+              else
+                unable = unable + 1
+              endif
+            else
+              phi(CHF_IX[i;j;k;l],n) = zero
+            endif
+          endif
+
+        CHF_ENDDO
+
+      enddo
+
+      return
+      end
+
+
+c  ---------------------------------------------------------
+c  returns with count=1 if one or more values less than minVal
+c
+c  count       <=> number of values below minVal
+c  phi          => cell-centered phi
+c  interiorBox  => cell-centered box of interior
+c ----------------------------------------------------------
+      subroutine FINDANYNEGATIVES(CHF_INT[count],
+     &                            CHF_CONST_FRA[phi],
+     &                            CHF_BOX[interiorBox])
+c
+      integer n
+      integer CHF_DDECL[i;j;k;l]
+      REAL_T val
+c
+      do n=0, (CHF_NCOMP[phi]-1)
+        CHF_MULTIDO[interiorBox;i;j;k;l]
+          if (phi(CHF_IX[i;j;k;l],n).lt.zero) then
+            count = count + 1
+            return
+          endif
+        CHF_ENDDO
+      enddo
+      return
+      end
+
+
+c  ---------------------------------------------------------
+c  finds number of values less than minVal
+c
+c  count       <=> number of values below minVal
+c  phi          => cell-centered phi
+c  interiorBox  => cell-centered box of interior
+c ----------------------------------------------------------
+      subroutine FINDALLNEGATIVES(CHF_INT[count],
+     &                            CHF_CONST_FRA[phi],
+     &                            CHF_BOX[interiorBox])
+c
+      integer n
+      integer CHF_DDECL[i;j;k;l]
+c
+      do n=0, (CHF_NCOMP[phi]-1)
+        CHF_MULTIDO[interiorBox;i;j;k;l]
+          if (phi(CHF_IX[i;j;k;l],n).lt.zero) then
+            count = count + 1
+          endif
+        CHF_ENDDO
+      enddo
+      return
+      end
+
+

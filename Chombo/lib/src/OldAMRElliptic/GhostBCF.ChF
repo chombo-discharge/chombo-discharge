@@ -1,0 +1,144 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+C=======================================================
+C    subroutine BOXGHOSTBC
+C    general  bc routine to fill ghost cells
+C    on the face of a fab
+C    for a boundary condition of the form
+C     a*phi + b*(dphi/dn) = c
+C     => inputs,  <= outputs
+C     state   <=> phi
+C     dircfac  => a
+C     neumfac  => b
+C     inhmval  => c
+C     facebox  => ghost cells to fill
+C     interiorBox => box which defines where interior of grid is
+C     idir     => direction of face (0 to SpaceDim-1)
+C     side     => side of face (-1 low 1 high)
+C     dx       => grid spacing
+C     startcomp => first component of state to apply BC's to
+C     endcomp  => final component of state to apply BC's to
+C     WARNING: the input FABS must have the same
+C     number of components and span edgebox
+C
+C     for high side, when filling in a ghost value phi_{n+m} (m > 0)
+C     where phi_n is the value at the interior cell on the boundary,
+C     we use the boundary approximations
+C           phi_B = ( (m - 1/2)*phi_n + 1/2*phi_{n+m} ) / m ,
+C     (dphi/dn)_B = (phi_{n+m} - phi_n) / (m * dx) .
+C
+C     for low side, when filling in a ghost value phi_{-m} (m > 0)
+C     where phi_0 is the value at the interior cell on the boundary,
+C     we use the boundary approximations
+C           phi_B = ( (m - 1/2)*phi_0 + 1/2*phi_{-m} ) / m ,
+C     (dphi/dn)_B = (phi_0 - phi_{-m}) / (m * dx) .
+C
+C     dtgraves nov 2, 1999
+C=======================================================
+      subroutine BOXGHOSTBC(
+     &     CHF_FRA[state],
+     &     CHF_CONST_FRA[neumfac],
+     &     CHF_CONST_FRA[dircfac],
+     &     CHF_CONST_FRA[inhmval],
+     &     CHF_BOX[facebox],
+     &     CHF_BOX[interiorBox],
+     &     CHF_CONST_INT[idir],
+     $     CHF_CONST_INT[side],
+     $     CHF_CONST_REAL[dx],
+     $     CHF_CONST_INT[startcomp],
+     $     CHF_CONST_INT[endcomp])
+
+      REAL_T nfac, dfac, ival, sval,denom,numer
+      integer ncomp,nc
+
+      integer CHF_DDECL[ii,i;jj,j;kk,k]
+      integer steplength
+
+      ncomp = CHF_NCOMP[state]
+
+C     incomplete error checking
+      if(ncomp .ne. CHF_NCOMP[neumfac]) then
+          call MAYDAYERROR()
+      endif
+      if(ncomp .ne. CHF_NCOMP[dircfac]) then
+          call MAYDAYERROR()
+      endif
+      if(ncomp .ne. CHF_NCOMP[inhmval]) then
+          call MAYDAYERROR()
+      endif
+      if((side .ne. -1).and.(side.ne.1)) then
+          call MAYDAYERROR()
+      endif
+
+C      do nc = 0, ncomp - 1
+      do nc = startcomp, endcomp
+
+         CHF_MULTIDO[facebox; i; j; k]
+
+C  moved this inside so that we can handle more than one layer
+C  of ghost cells
+C    note that we take different sign of ii,jj,kk into account here
+C    (step should always be positive)
+         if (side.eq.-1) then
+C     low side:  in direction 0, we'll have ii in range -g to -1 and jj=0, kk=0
+C     if g is the depth of the ghost cell layer in this direction,
+C     and we'll set steplength = abs(ii).
+            CHF_DTERM[
+            ii = CHF_ID(0,idir)*(i-CHF_LBOUND[interiorBox;0])
+            steplength = -CHF_ID(0,idir)*ii;
+            jj = CHF_ID(1,idir)*(j-CHF_LBOUND[interiorBox;1])
+            steplength = steplength - CHF_ID(1,idir)*jj;
+            kk = CHF_ID(2,idir)*(k-CHF_LBOUND[interiorBox;2])
+            steplength = steplength - CHF_ID(2,idir)*kk
+            ]
+         else if (side.eq.1) then
+C     high side:  in direction 0, we'll have ii in range 1 to g and jj=0, kk=0
+C     if g is the depth of the ghost cell layer in this direction,
+C     and we'll set steplength = abs(ii).
+            CHF_DTERM[
+            ii = CHF_ID(0,idir)*(i-CHF_UBOUND[interiorBox;0])
+            steplength = CHF_ID(0,idir)*ii;
+            jj = CHF_ID(1,idir)*(j-CHF_UBOUND[interiorBox;1])
+            steplength = steplength + CHF_ID(1,idir)*jj;
+            kk = CHF_ID(2,idir)*(k-CHF_UBOUND[interiorBox;2])
+            steplength = steplength + CHF_ID(2,idir)*kk
+            ]
+          endif
+
+         nfac = neumfac(CHF_IX[i;j;k],nc)
+         dfac = dircfac(CHF_IX[i;j;k],nc)
+         ival = inhmval(CHF_IX[i;j;k],nc)
+
+C     value of state at closest interior cell to ghost cell [i; j; k]
+         sval = state(CHF_IX[i-ii;j-jj;k-kk],nc)
+
+C     Solve for ghostval from boundary condition equation and
+C           phi_B = ( (steplength-half)*sval + half*ghostval ) / steplength ,
+C     (dphi/dn)_B = side * ( ghostval - sval ) / (steplength * dx) .
+
+         denom = (half*dfac + side*nfac/dx)/steplength
+         numer = ival - sval*((steplength-half)*dfac -
+     &                        side*nfac/dx)/(steplength)
+
+#ifndef NDEBUG
+         if(abs(denom).lt. 1.0e-9) then
+C            print*, 'fort_boxghostbc: bogus values set.'
+C            print*, 'denominator of boundary condition is zero'
+C            print*, 'gacking...'
+C            stop
+            call MAYDAYERROR()
+         endif
+#endif
+         state(CHF_IX[i;j;k],nc) = numer/denom
+
+         CHF_ENDDO
+      enddo
+
+      return
+      end

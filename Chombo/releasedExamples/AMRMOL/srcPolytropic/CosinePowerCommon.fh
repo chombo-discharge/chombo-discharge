@@ -1,0 +1,39 @@
+#ifdef CH_LANG_CC
+/*
+ *      _______              __
+ *     / ___/ /  ___  __ _  / /  ___
+ *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+ *    \___/_//_/\___/_/_/_/_.__/\___/
+ *    Please refer to Copyright.txt, in Chombo's root directory.
+ */
+#endif
+
+C
+C   Fortran parameters for the cosine power density distribution example:
+C
+C     ambientdensity - Ambient density add to the density cosine power
+C     deltadensity   - Height of the density cosine power
+C     center[xyz]    - Center of the cosine power
+C     radmax         - Cutoff radius of the cosine power
+C     power          - Power of cosine (use 6)
+C     vel[xyz]       - Initial velocity of the gas
+C     artvisc        - Artificial viscosity coefficient
+C     pressure       - If 0, use isentropic pressure
+C                      if 1, use the constant pressure of 1.0
+C
+        real_t ambientdensity,deltadensity
+        real_t centerx,centery,centerz
+        real_t radmax
+        real_t velx,vely,velz
+        real_t artvisc
+C     put integer variables after real_t variables
+        integer pressure
+        integer power
+        common /cosinepowercm/
+     &                      ambientdensity,deltadensity,
+     &                      centerx,centery,centerz,
+     &                      radmax,
+     &                      velx,vely,velz,
+     &                      artvisc,
+     &                      pressure,
+     &                      power

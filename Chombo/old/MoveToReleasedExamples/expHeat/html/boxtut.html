@@ -1,0 +1,52 @@
+<html>
+<HEAD>
+<TITLE>Applied Numerical Algorithms Group at LBNL</TITLE>
+</HEAD>
+<BODY TEXT=#000000 BGCOLOR=#ffffff LINK=#06117F VLINK=#046664 ALINK=#7F0523>
+
+<head>
+<title>BoxTools Tutorial</title>
+</head>
+<body>
+<h1>  BoxTools Examples </h1>
+<p>
+We present the same application done three different ways
+to illustrate how  Chombo can be used to make applications.
+We have implemented an explicit heat equation solver 
+with single-grid only implementation, a very basic
+domain-decomposition method, and a method that uses 
+all the relevant Chombo tools.
+
+To compile any of these examples, go into the 
+appropriate directory and edit GNUmakefile.  The single line
+you have to change is the first line which  looks like:
+<pre>
+<font face="Courier">
+CHOMBO_HOME = /home/graves/users/graves/_anag/_dev/Chombo/lib
+</font>
+</pre>
+Change the variable CHOMBO_HOME to the directory name where
+you have installed Chombo.   Then, in your shell, type "make".
+This will produce an executable of the form "heat(some other stuff).ex".
+The executable takes no arguments.  Just run it by typing its name
+in your shell.
+
+<p>
+The <a href="singleGridHeat.html"> single-grid version</a> is given
+here.   This only uses the IntVect, Box, and FArrayBox classes
+of Chombo.
+<p>
+The <a href="domCompHeat.html"> domain decomposition version</a> is given
+here.   In this version, the Fortran interface is still done
+manually as is  the processor mapping.
+<p>
+
+The <a href="slickHeat.html"> full Chombo version</a> is given
+here.   In this version, the Fortran interface is  done using
+Chombo Fortran and we use the Chombo utilities for load balancing
+and domain decomposition.
+<p>
+
+</html>
+</body>
+

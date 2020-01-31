@@ -1,0 +1,83 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine cartesiantorll(
+!
+!     => inputs,  <= outputs
+!     rll <= radius, longitude, latitude
+!     xyz => real coordinates
+     &     CHF_FRA[rll],
+     &     CHF_CONST_FRA[xyz])
+
+      integer CHF_AUTODECL[i]
+      real_t r2, r
+#if CH_SPACEDIM >= 2
+      real_t lon
+#endif
+#if CH_SPACEDIM >= 3
+      real_t rad2, rad, lat
+#endif
+      real_t CHF_DDECL[x; y; z]
+
+      CHF_AUTOMULTIDO[rll; i]
+         CHF_DTERM[
+         x = xyz(CHF_AUTOIX[i], 0) ;
+         y = xyz(CHF_AUTOIX[i], 1) ;
+         z = xyz(CHF_AUTOIX[i], 2) ]
+         r2 = CHF_DTERM[x*x; + y*y; + z*z]
+         r = sqrt(r2)
+#if CH_SPACEDIM >= 2
+         lon = atan2(y, x)
+#endif
+#if CH_SPACEDIM >= 3
+         rad2 = CHF_DTERM[x*x ; + y*y;]
+         rad = sqrt(rad2)
+         lat = atan2(rad, z)
+#endif
+         CHF_DSELECT[
+         rll(CHF_AUTOIX[i], 0) = r ;
+         rll(CHF_AUTOIX[i], 0) = lon
+         rll(CHF_AUTOIX[i], 1) = r ;
+         rll(CHF_AUTOIX[i], 0) = lon
+         rll(CHF_AUTOIX[i], 1) = lat
+         rll(CHF_AUTOIX[i], 2) = r ]
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine cspveclonlatsolidbodyflow(
+!
+!     => inputs,  <= outputs
+!     vecRLL <= vector field in longitude-latitude basis
+!     ptRLL  => longitude-latitude points
+!     magnitude  => maximum velocity (I think)
+!     angle  => tilt from equator
+!     shift  => shift from lon = 0
+     &     CHF_FRA[vecRLL],
+     &     CHF_CONST_FRA[ptRLL],
+     &     CHF_CONST_REAL[magnitude],
+     &     CHF_CONST_REAL[angle],
+     &     CHF_CONST_REAL[shift])
+
+      integer CHF_AUTODECL[i]
+      real_t lon, lat
+
+      CHF_AUTOMULTIDO[vecRLL; i]
+      lon = ptRLL(CHF_AUTOIX[i], 0) - shift
+      lat = ptRLL(CHF_AUTOIX[i], 1)
+      vecRLL(CHF_AUTOIX[i], 0) = 
+     &     magnitude * cos(lat) * 
+     &     (cos(angle) +  cos(lon) * tan(lat) * sin(angle))
+      vecRLL(CHF_AUTOIX[i], 1) = 
+     &     -magnitude * sin(lon) * sin(angle)
+      CHF_ENDDO
+
+      return
+      end

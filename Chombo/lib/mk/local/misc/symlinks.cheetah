@@ -1,0 +1,7 @@
+#!/bin/sh
+
+## make symbolic links for the login nodes on cheetah
+
+for s in cheetah001 cheetah002 cheetah003 cheetah004 ; do
+  ln -s Make.defs.seaborg Make.defs.$s
+done

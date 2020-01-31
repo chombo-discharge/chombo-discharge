@@ -1,0 +1,164 @@
+<html>
+<head>
+<title>Full AMR I/O Tutorial</title>
+</head>
+<body>
+<p>
+<h1>Full AMR Hierarchy I/O Example </h1>
+<p>
+This example shows how to use Chombo to do parallel
+input/output for a full adaptive hierarchy.   We
+generate a hierarchy and fill it with data.  We
+then output the data to a file and read it back 
+in and check its correctness.  The auxilliary
+functions and header information is given in 
+<a href="http:amrfunc.html"> amrfunc.html</a>.
+
+<pre><font face="Courier">
+int main(int argc, char* argv[])
+{
+</font></pre>
+Here we call MPI_Init and start the scoping trick
+that puts all Chombo code within braces inside
+MPI_Init and MPI_Finalize.  This forces the destructors
+for Chombo classes to be called before MPI_Finalize. 
+<pre><font face="Courier">
+#ifdef MPI
+  MPI_Init(&argc, &argv);
+#endif
+  {//scoping trick
+  </font></pre>
+    Here we set grid spacing, and define all the layouts
+    and refinement ratios by calling setGrids
+     which is defined in <a href="http:amrfunc.html"> amrfunc.html</a>.
+<pre><font face="Courier">
+    Vector< DisjointBoxLayout >vectGrids;
+    Box domain;
+    Real dx = 1.0;
+    Vector<int> refRatio;
+    int numlevels;
+    int eekflag= setGrids(vectGrids, domain, dx, refRatio, numlevels);
+    if(eekflag !=0)
+      {
+        cerr << "problem in setgrids" << endl;
+        return -1;
+      }
+</font></pre>
+    Here we create the data holders. 
+    We then call getDataVal to get the data values at each point.
+    This function is defined in <a href="http:amrfunc.html"> amrfunc.html</a>.
+<pre><font face="Courier">
+    Vector< LevelData< FArrayBox >* > dataPtrs(numlevels, NULL);
+    Real dxlevel = dx;
+    for(int ilev = 0; ilev < numlevels; ilev++)
+      {
+        const DisjointBoxLayout& dbl = vectGrids[ilev];
+        dataPtrs[ilev] = new LevelData< FArrayBox >(dbl, 1);
+        LevelData< FArrayBox >& data = *dataPtrs[ilev];
+        if(ilev > 0)
+          dxlevel /= Real(refRatio[ilev-1]);
+        DataIterator dit = dbl.dataIterator();
+        for(dit.reset(); dit.ok(); ++dit)
+          {
+            FArrayBox& fab = data[dit()];
+            const Box& fabbox = fab.box();
+            BoxIterator bit(fabbox);
+            for(bit.reset(); bit.ok(); ++bit)
+              {
+                const IntVect& iv = bit();
+                Tuple<Real, SpaceDim> location;
+                for(int idir = 0; idir <  SpaceDim; idir++)
+                  {
+                    location[idir]= dxlevel*(Real(iv[idir]) + 0.5);
+                  }
+                fab(iv, 0) = getDataVal(location);
+              }
+          }
+      }
+</font></pre>
+   Here we output data to a file  using the WriteAMRHierarchy function 
+   and remove the original data holders.
+<pre><font face="Courier">
+    string filename("dataout.hdf5");
+    WriteAMRHierarchyHDF5(filename, vectGrids, dataPtrs, 
+                          domain, refRatio, numlevels);
+    for(int ilev = 0; ilev < numlevels; ilev++)
+      delete dataPtrs[ilev];
+</font></pre>
+   Here we read the data back in using new data holders and 
+   layouts.  Notice that the layouts, domains, refinement ratios
+   and data holders and defined within the ReadAMRHierarchy function.
+   We then check to see that the data is correct.
+<pre><font face="Courier">
+    Vector<DisjointBoxLayout> vectGridsin;
+    Box domainin;
+    Vector<int> refRatioin;
+    Vector<LevelData<FArrayBox>* > dataPtrsin;
+    int numlevelsin;
+    ReadAMRHierarchyHDF5(filename, vectGridsin, dataPtrsin, 
+                         domainin, refRatioin, numlevelsin);
+
+    //check to see that it matches.
+    if(domainin != domain)
+      {
+        cerr << "domains do not match" << endl;
+        return -1;
+      }
+    if(numlevelsin != numlevels)
+      {
+        cerr << "numlevels do not match" << endl;
+        return -2;
+      }
+    for(int ilev; ilev < numlevels; ilev++)
+      {
+        if(refRatioin[ilev]!=refRatio[ilev])
+          {
+            cerr << "refinement ratios do not match" << endl;
+            return -3;
+          }
+      }
+    dxlevel = dx;
+    for(int ilev = 0; ilev < numlevels; ilev++)
+      {
+        const DisjointBoxLayout& dbl = vectGridsin[ilev];
+        LevelData<FArrayBox>& data = *dataPtrsin[ilev];
+        if(ilev > 0)
+          dxlevel /= Real(refRatioin[ilev-1]);
+
+        DataIterator dit = dbl.dataIterator();
+        for(dit.reset(); dit.ok(); ++dit)
+          {
+            FArrayBox& fab = data[dit()];
+            const Box& fabbox = fab.box();
+            BoxIterator bit(fabbox);
+            for(bit.reset(); bit.ok(); ++bit)
+              {
+                const IntVect& iv = bit();
+                Tuple<Real, SpaceDim> location;
+                for(int idir = 0; idir <  SpaceDim; idir++)
+                  {
+                    location[idir]= dxlevel*(Real(iv[idir]) + 0.5);
+                  }
+                Real rightans = getDataVal(location);
+                Real dataans = fab(iv, 0);
+                Real eps = 1.0e-9;
+                if(Abs(dataans - rightans) > eps)
+                  {
+                    cerr << "data does not match" << endl;
+                    return -4;
+                  }
+              }
+          }
+      }
+  }//end scoping trick
+#ifdef MPI
+  MPI_Finalize();
+#endif
+  return(0);
+}
+
+</font></pre>
+</html>
+</body>
+
+

@@ -1,0 +1,331 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine cylinderequiangularreal(
+!
+!     => inputs,  <= outputs
+!     x     <= real coordinates, in physical space
+!     iblock => block number
+!     xi     => mapped coordinates, in cartesian space
+     &     CHF_REALVECT[x],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[xi])
+#if CH_SPACEDIM >= 2
+#include "CylinderCommon.fh"
+
+      real_t rin, r
+      real_t rfrac, thfrac, thcen, th
+
+      if (iblock .eq. 0) then
+!     central block
+!     Valid xi in range [0:1]^D.
+!     tan(([0:1]-half)*Pi*half)*half is in range [-1/2:1/2].
+         CHF_DTERM[
+         x(0) = tan((xi(0) - half)*Pi*half)*half * reclenx + centerx ;
+         x(1) = tan((xi(1) - half)*Pi*half)*half * recleny + centery ;
+         x(2) =     (xi(2) - half)               * reclenz + centerz ;
+         ; ; ]
+      else
+!     Get rfrac in range [0:1]
+!     and thfrac in range [-1/2:1/2].
+         if (iblock .eq. 1) then
+!     Valid xi in range [2:3, 0:1, 0:1].
+            CHF_DTERM[
+            rfrac = xi(0) - two ;
+            thfrac = xi(1) - half ; ; ; ; ]
+         elseif (iblock .eq. 2) then
+!     Valid xi in range [0:1, 2:3, 0:1].
+            CHF_DTERM[
+            thfrac = half - xi(0) ;
+            rfrac = xi(1) - two ; ; ; ; ]
+         elseif (iblock .eq. 3) then
+!     Valid xi in range [-2:-1, 0:1, 0:1].
+            CHF_DTERM[
+            rfrac = -one - xi(0) ;
+            thfrac = half - xi(1) ; ; ; ; ]
+         elseif (iblock .eq. 4) then
+!     Valid xi in range [0:1, -2:-1, 0:1].
+            CHF_DTERM[
+            thfrac = xi(0) - half ;
+            rfrac = -one - xi(1) ; ; ; ; ]
+         else
+            print *, 'Error: invalid block ', iblock
+            call MAYDAY_ERROR()
+         endif
+!     ASSUME reclenx == recleny
+!     rin is radius at point where ray from center meets block 0
+         rin = reclenx * half / cos(thfrac*Pi*half)
+         r = (one - rfrac)*rin + rfrac*radius
+!     for block 1, thcen =    0
+!     for block 2, thcen =   pi/2
+!     for block 3, thcen =   pi
+!     for block 4, thcen = 3*pi/2
+         thcen = (iblock-1)*Pi*half
+         th = thcen + thfrac*Pi*half
+         CHF_DTERM[
+         x(0) = r*cos(th) ;
+         x(1) = r*sin(th) ;
+         x(2) = (xi(2) - half)*reclenz + centerz ; ; ; ]
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine cylinderequiangularmapped(
+!
+!     => inputs,  <= outputs
+!     xi    <=  mapped coordinates, in cartesian space
+!     iblock => block number
+!     x      => real coordinates, in physical space
+     &     CHF_REALVECT[xi],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[x])
+
+#if CH_SPACEDIM >= 2
+#include "CylinderCommon.fh"
+
+      real_t CHF_AUTODECL[trans]
+      real_t r, th, r0, thfrac, rfrac
+      real_t t0, t1
+!     thbase, thoff, rin, rfrac, thfrac
+
+      CHF_DTERM[
+      trans0 = x(0) - centerx ;
+      trans1 = x(1) - centery ;
+      trans2 = x(2) - centerz ;
+      trans3 = x(3) ;
+      trans4 = x(4) ;
+      trans5 = x(5) ]
+
+      if (iblock .eq. 0) then
+!     central block
+!     Valid xi in range [0:1]^D.
+!     tan(([0:1]-half)*Pi*half)*half is in range [-1/2:1/2].
+!         CHF_DTERM[
+!         x(0) = tan((xi(0) - half)*Pi*half)*half * reclenx + centerx ;
+!         x(1) = tan((xi(1) - half)*Pi*half)*half * recleny + centery ;
+!         x(2) =     (xi(2) - half)               * reclenz + centerz ]
+         CHF_DTERM[
+         xi(0) = half + two/Pi * atan(two*trans0/reclenx) ;
+         xi(1) = half + two/Pi * atan(two*trans1/recleny) ; ; ; ; ]
+      else
+         r = sqrt(trans0*trans0 + trans1*trans1)
+!     Valid ranges of angle for each block:
+!     block 1 range   -Pi/4 :   Pi/4
+!     block 2 range    Pi/4 : 3*Pi/4
+!     block 3 range  3*Pi/4 : 5*Pi/4
+!     block 4 range  5*Pi/4 : 7*Pi/4
+!     block iblock range (2*iblock-3)*Pi/4 : (2*iblock-1)*Pi/4,
+!     centered at (iblock-1)*Pi/2.
+
+!     function atan2 has range -Pi : Pi.
+!     Rotate trans0, trans1 to t0, t1,
+!     where t0 should be like the radial (x) in block 1
+!     and t1 should be like the angular (y) in block 1.
+         if (iblock .eq. 1) then
+            t0 = trans0
+            t1 = trans1
+         elseif (iblock .eq. 2) then
+            t0 = trans1
+            t1 = -trans0
+         elseif (iblock .eq. 3) then
+            t0 = -trans0
+            t1 = -trans1
+         elseif (iblock .eq. 4) then
+            t0 = -trans1
+            t1 = trans0
+         endif
+
+         th = atan2(t1, t0)
+!     Now th should be in -Pi : Pi.
+!     Valid th range is -Pi/4 : +Pi/4.
+
+         r0 = reclenx * half / cos(th)
+
+!     Valid thfrac range is 0 : 1.
+         thfrac = half + th / (Pi * half)
+!     rfrac in range 0:1
+         rfrac = (r - r0) / (radius - r0)
+         if (iblock .eq. 1) then
+            CHF_DTERM[
+            xi(0) = two + rfrac ;
+            xi(1) = thfrac ; ; ; ; ]
+         elseif (iblock .eq. 2) then
+            CHF_DTERM[
+            xi(0) = one - thfrac
+            xi(1) = two + rfrac ; ; ; ; ]
+         elseif (iblock .eq. 3) then
+            CHF_DTERM[
+            xi(0) = -one - rfrac
+            xi(1) = one - thfrac ; ; ; ; ]
+         elseif (iblock .eq. 4) then
+            CHF_DTERM[
+            xi(0) = thfrac
+            xi(1) = -one - rfrac ; ; ; ; ]
+         endif
+
+      endif
+!     same linear transformation in every block to get xi(2)
+      CHF_DTERM[ ; ; xi(2) = trans2 / reclenz + half ; ; ; ]
+#endif
+
+      return
+      end
+
+
+      subroutine cylinderequiangularderiv(
+!
+!     => inputs,  <= outputs
+!     deriv <=  derivative dx[indx]/dxi[indxi]
+!     iblock => block number
+!     xi     => mapped coordinates, in cartesian space
+!     indx   => index of X for derivative
+!     indxi  => index of xi for derivative
+     &     CHF_REAL[deriv],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[xi],
+     &     CHF_CONST_INT[indx],
+     &     CHF_CONST_INT[indxi])
+
+#if CH_SPACEDIM >= 2
+#include "CylinderCommon.fh"
+
+      real_t rin, r
+      real_t rfrac, thfrac, thcen, th
+      real_t drfdxi, dtfdxi, drdxi, dthdxi
+      real_t ang, cosang, sinang
+
+      if (iblock .eq. 0) then
+!     central block
+!     Valid xi in range [0:1]^D.
+!         CHF_DTERM[
+!         x(0) = tan((xi(0) - half)*Pi*half)*half * reclenx + centerx ;
+!         x(1) = tan((xi(1) - half)*Pi*half)*half * recleny + centery ;
+!         x(2) =     (xi(2) - half)               * reclenz + centerz ]
+!     Note x(i) depends on xi(i) only, and not on other components.
+         if (indx .ne. indxi) then
+            deriv = zero
+         else
+!     indx == indxi
+!     cos(([0:1]-half)*Pi*half)**2 is in range [1/2:1].
+            if (indx .eq. 0) then
+               deriv = reclenx*Pi*fourth /
+     &              ((cos((xi(0) - half)*Pi*half))**2)
+            elseif (indx .eq. 1) then
+               deriv = recleny*Pi*fourth /
+     &              ((cos((xi(1) - half)*Pi*half))**2)
+            else
+!     This is for SpaceDim > 2
+               deriv = reclenz
+            endif
+         endif
+      else
+         if ((indxi .eq. 2) .or. (indx .eq. 2)) then
+            CHF_DSELECT[ ; ;
+            if (indx .ne. indxi) then
+               deriv = zero
+            else
+               deriv = reclenz
+            endif ]
+         else
+!     Get rfrac in range [0:1]
+!     and thfrac in range [-1/2:1/2].
+!     Find drfdxi = d(rfrac) / d(xi[indxi])
+!     and dtfdxi = d(thfrac) / d(xi[indxi])
+            if (iblock .eq. 1) then
+!     Valid xi in range [2:3, 0:1, 0:1].
+               CHF_DTERM[
+               rfrac = xi(0) - two ;
+               thfrac = xi(1) - half ; ; ; ; ]
+               if (indxi .eq. 0) then
+                  drfdxi = one
+                  dtfdxi = zero
+               elseif (indxi .eq. 1) then
+                  drfdxi = zero
+                  dtfdxi = one
+               endif
+            elseif (iblock .eq. 2) then
+!     Valid xi in range [0:1, 2:3, 0:1].
+               CHF_DTERM[
+               thfrac = half - xi(0) ;
+               rfrac = xi(1) - two ; ; ; ; ]
+               if (indxi .eq. 0) then
+                  drfdxi = zero
+                  dtfdxi = -one
+               elseif (indxi .eq. 1) then
+                  drfdxi = one
+                  dtfdxi = zero
+               endif
+            elseif (iblock .eq. 3) then
+!     Valid xi in range [-2:-1, 0:1, 0:1].
+               CHF_DTERM[
+               rfrac = -one - xi(0) ;
+               thfrac = half - xi(1) ; ; ; ; ]
+               if (indxi .eq. 0) then
+                  drfdxi = -one
+                  dtfdxi = zero
+               elseif (indxi .eq. 1) then
+                  drfdxi = zero
+                  dtfdxi = -one
+               endif
+            elseif (iblock .eq. 4) then
+!     Valid xi in range [0:1, -2:-1, 0:1].
+               CHF_DTERM[
+               thfrac = xi(0) - half ;
+               rfrac = -one - xi(1) ; ; ; ; ]
+               if (indxi .eq. 0) then
+                  drfdxi = zero
+                  dtfdxi = one
+               elseif (indxi .eq. 1) then
+                  drfdxi = -one
+                  dtfdxi = zero
+               endif
+            else
+               print *, 'Error: invalid block ', iblock
+               call MAYDAY_ERROR()
+            endif
+            ang = thfrac * Pi * half
+            cosang = cos(ang)
+            sinang = sin(ang)
+!     ASSUME reclenx == recleny
+!     rin is radius at point where ray from center meets block 0
+            rin = reclenx * half / cos(thfrac*Pi*half)
+            r = (one - rfrac)*rin + rfrac*radius
+            drdxi = drfdxi *
+     &           (-reclenx*half / cosang + radius) +
+     &           dtfdxi *
+     &           ((one-rfrac)*reclenx*Pi*fourth*sinang/(cosang**2))
+            dthdxi = dtfdxi * Pi*half
+!     for block 1, thcen =    0
+!     for block 2, thcen =   pi/2
+!     for block 3, thcen =   pi
+!     for block 4, thcen = 3*pi/2
+            thcen = (iblock-1)*Pi*half
+            th = thcen + thfrac*Pi*half
+!            CHF_DTERM[
+!            x(0) = r*cos(th) ;
+!            x(1) = r*sin(th) ;
+!            x(2) = (xi(2) - half)*reclenz + centerz ]
+            if (indx .eq. 0) then
+!     Finding derivative of X[0].
+               deriv = drdxi * cos(th) + dthdxi * (-r * sin(th))
+            elseif (indx .eq. 1) then
+!     Finding derivative of X[1].
+               deriv = drdxi * sin(th) + dthdxi * (r * cos(th))
+            else
+               print *, 'Error: invalid indx ', indx
+               call MAYDAY_ERROR()
+            endif
+         endif
+      endif
+#endif
+
+      return
+      end

@@ -1,0 +1,610 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine STENCILAVGPOWERS(
+!
+!     => inputs,  <= outputs
+!     powers  <=  <(z - z0)^p>j for each stencil cell j
+!     inds     => indices of offsets of stencil cells
+!     npts     => number of stencil cells
+!     npwrs    => number of nonzero powers
+!     degree   => degree of approximation
+!     degbox   => box of degrees, = [0:degree]^D or slice thereof
+!
+!     petermc, 15 Jul 2013
+     &     CHF_VR[powers],
+     &     CHF_CONST_VI[inds],
+     &     CHF_CONST_INT[npts],
+     &     CHF_CONST_INT[npwrs],
+     &     CHF_CONST_INT[degree],
+     &     CHF_BOX[degbox])
+
+      integer CHF_AUTODECL[i]
+      integer ipwr, sump, inbr, idim, ic
+      integer nbrs(npts, CH_SPACEDIM)
+      integer pwrs(npwrs, CH_SPACEDIM)
+      real_t xpowc(npts, npwrs)
+      
+!     Set pwrs.
+      ipwr = 0
+      CHF_AUTOMULTIDO[degbox; i]
+         sump = CHF_DTERM[i0; +i1; +i2; +i3; +i4; +i5]
+         if ((sump .gt. 0) .and. (sump .le. degree))then
+            ipwr = ipwr + 1
+            CHF_DTERM[
+            pwrs(ipwr, 1) = i0 ;
+            pwrs(ipwr, 2) = i1 ;
+            pwrs(ipwr, 3) = i2 ;
+            pwrs(ipwr, 4) = i3 ;
+            pwrs(ipwr, 5) = i4 ;
+            pwrs(ipwr, 6) = i5 ]
+         endif
+      CHF_ENDDO
+
+!     Set nbrs from inds.  First index of inds is 0.
+      ic = 0
+      do inbr = 1, npts
+         do idim = 1, CH_SPACEDIM
+            nbrs(inbr, idim) = inds(ic)
+            ic = ic + 1
+         end do
+      end do
+
+!     Set xpowc(inbr, ipwr) to
+!     average of x^(pwrs(ipwr, 1:D)) on cell nbrs(inbr, 1:D).
+      call xpowercoarseind0avg(npts, npwrs, nbrs, pwrs, xpowc)
+
+!     Set powers from xpowc.  First index of powers is 0.
+      ic = 0
+      do inbr = 1, npts
+         do ipwr = 1, npwrs
+            powers(ic) = xpowc(inbr, ipwr)
+            ic = ic + 1
+         end do
+      end do
+
+      return
+      end
+
+
+      subroutine FINEAVGPOWERS(
+!
+!     => inputs,  <= outputs
+!     powers  <=  <(z - z0)^p>k for each fine cell k in fbox; npwrs components
+!     nref     => refinement ratio
+!     nfine    => number of fine cells in fbox
+!     npwrs    => number of nonzero powers, that is, size of fbox
+!     degree   => degree of approximation
+!     fbox     => base box of fine cells, = [-1:nref]^D or slice thereof
+!     degbox   => box of degrees, = [0:degree]^D or slice thereof
+!
+!     petermc, 16 Jul 2013
+     &     CHF_FRA[powers],
+     &     CHF_CONST_INT[nref],
+     &     CHF_CONST_INT[nfine],
+     &     CHF_CONST_INT[npwrs],
+     &     CHF_CONST_INT[degree],
+     &     CHF_BOX[fbox],
+     &     CHF_BOX[degbox])
+
+      integer CHF_AUTODECL[i]
+      integer ipwr, sump, ifine, ic
+      integer pwrs(0:npwrs-1, CH_SPACEDIM)
+      integer fine(0:nfine-1, CH_SPACEDIM)
+      real_t xpowf(0:nfine-1, 0:npwrs-1)
+
+!     FIXME: This is a duplication of code.
+!     Set pwrs.
+      ipwr = 0
+      CHF_AUTOMULTIDO[degbox; i]
+         sump = CHF_DTERM[i0; +i1; +i2; +i3; +i4; +i5]
+         if ((sump .gt. 0) .and. (sump .le. degree))then
+            CHF_DTERM[
+            pwrs(ipwr, 1) = i0 ;
+            pwrs(ipwr, 2) = i1 ;
+            pwrs(ipwr, 3) = i2 ;
+            pwrs(ipwr, 4) = i3 ;
+            pwrs(ipwr, 5) = i4 ;
+            pwrs(ipwr, 6) = i5 ]
+            ipwr = ipwr + 1
+         endif
+      CHF_ENDDO
+
+!     FIXME: This is duplication of code.
+!     Set fine from fbox.
+      ifine = 0
+      CHF_AUTOMULTIDO[fbox; i]
+         CHF_DTERM[
+         fine(ifine, 1) = i0 ;
+         fine(ifine, 2) = i1 ;
+         fine(ifine, 3) = i2 ;
+         fine(ifine, 4) = i3 ;
+         fine(ifine, 5) = i4 ;
+         fine(ifine, 6) = i5 ]
+         ifine = ifine + 1
+      CHF_ENDDO
+
+!     Set xpowf(ifine, ipwr) to
+!     average of x^(pwrs(ipwr, 1:D)) on cell ifine.
+      call xpowerfineind0avg(nfine, npwrs, nref, pwrs, fine, xpowf)
+
+      ifine = 0
+      CHF_AUTOMULTIDO[fbox; i]
+         do ipwr = 0, npwrs-1
+            powers(CHF_AUTOIX[i], ipwr) = xpowf(ifine, ipwr)
+         end do
+         ifine = ifine + 1
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine REPEATPRODFAB(
+!
+!     => inputs,  <= outputs
+!     prodFab <=  product FAB
+!     fullFab  => full FAB
+!     unitFab  => FAB on unit
+!     refvec   => refinement ratio vector
+!     fineBox  => fine box on which prodFab and fullFab live
+!
+!     petermc, 23 Jul 2013
+     &     CHF_FRA[prodFab],
+     &     CHF_CONST_FRA[fullFab],
+     &     CHF_CONST_FRA[unitFab],
+     &     CHF_CONST_INTVECT[refvec],
+     &     CHF_BOX[fineBox])
+
+      integer CHF_AUTODECL[ifine]
+      integer CHF_AUTODECL[icrse]
+      integer CHF_AUTODECL[ioff]
+      integer nprod, nfull, nunit, comp
+      integer modnn
+
+      nprod = CHF_NCOMP[prodFab]
+      nfull = CHF_NCOMP[fullFab]
+      nunit = CHF_NCOMP[unitFab]
+
+      if ( (nfull .eq. nprod) .and. (nunit .eq. nprod) ) then
+         do comp = 0, nprod-1
+            CHF_AUTOMULTIDO[fineBox; ifine]
+               CHF_DTERM[
+               ioff0 = modnn(ifine0, refvec(0)) ;
+               ioff1 = modnn(ifine1, refvec(1)) ;
+               ioff2 = modnn(ifine2, refvec(2)) ;
+               ioff3 = modnn(ifine3, refvec(3)) ;
+               ioff4 = modnn(ifine4, refvec(4)) ;
+               ioff5 = modnn(ifine5, refvec(5)) ]
+               prodFab(CHF_AUTOIX[ifine], comp) =
+     &              fullFab(CHF_AUTOIX[ifine], comp) *
+     &              unitFab(CHF_AUTOIX[ioff], comp)
+            CHF_ENDDO
+         end do
+      elseif ( (nfull .eq. 1) .and. (nunit .eq. nprod) ) then
+         do comp = 0, nprod-1
+            CHF_AUTOMULTIDO[fineBox; ifine]
+               CHF_DTERM[
+               ioff0 = modnn(ifine0, refvec(0)) ;
+               ioff1 = modnn(ifine1, refvec(1)) ;
+               ioff2 = modnn(ifine2, refvec(2)) ;
+               ioff3 = modnn(ifine3, refvec(3)) ;
+               ioff4 = modnn(ifine4, refvec(4)) ;
+               ioff5 = modnn(ifine5, refvec(5)) ]
+               prodFab(CHF_AUTOIX[ifine], comp) =
+     &              fullFab(CHF_AUTOIX[ifine], 0) *
+     &              unitFab(CHF_AUTOIX[ioff], comp)
+            CHF_ENDDO
+         end do
+      elseif ( (nfull .eq. nprod) .and. (nunit .eq. 1) ) then
+         do comp = 0, nprod-1
+            CHF_AUTOMULTIDO[fineBox; ifine]
+               CHF_DTERM[
+               ioff0 = modnn(ifine0, refvec(0)) ;
+               ioff1 = modnn(ifine1, refvec(1)) ;
+               ioff2 = modnn(ifine2, refvec(2)) ;
+               ioff3 = modnn(ifine3, refvec(3)) ;
+               ioff4 = modnn(ifine4, refvec(4)) ;
+               ioff5 = modnn(ifine5, refvec(5)) ]
+               prodFab(CHF_AUTOIX[ifine], comp) =
+     &              fullFab(CHF_AUTOIX[ifine], comp) *
+     &              unitFab(CHF_AUTOIX[ioff], 0)
+            CHF_ENDDO
+         end do
+      else
+         print *, 'Error in REPEATPRODFAB: incompatible array sizes'
+         call MAYDAY_ERROR()
+      endif
+
+      return
+      end
+
+
+      subroutine AVGWITHIN(
+!
+!     => inputs,  <= outputs
+!     sumFab  <=  average of fineFab within each cell
+!     fineFab  => fine FAB
+!     refvec   => refinement ratio vector
+!     crseBox  => coarsened box on which sumFab lives
+!     fineBox  => box on which fineFab lives
+!
+!     petermc, 17 Jul 2013
+     &     CHF_FRA[sumFab],
+     &     CHF_CONST_FRA[fineFab],
+     &     CHF_CONST_INTVECT[refvec],
+     &     CHF_BOX[crseBox],
+     &     CHF_BOX[fineBox])
+
+      integer CHF_AUTODECL[ifine]
+      integer CHF_AUTODECL[icrse]
+      integer CHF_AUTODECL[ioff]
+      integer ncomp, comp, nfine
+      real_t sumin
+
+      ncomp = CHF_NCOMP[fineFab]
+
+      do comp = 0, ncomp-1
+         CHF_AUTOMULTIDO[crseBox; icrse]
+            sumin = zero
+            nfine = 0
+            CHF_AUTOMULTIDO[fineBox; ioff]
+               CHF_DTERM[
+               ifine0 = refvec(0) * icrse0 + ioff0 ;
+               ifine1 = refvec(1) * icrse1 + ioff1 ;
+               ifine2 = refvec(2) * icrse2 + ioff2 ;
+               ifine3 = refvec(3) * icrse3 + ioff3 ;
+               ifine4 = refvec(4) * icrse4 + ioff4 ;
+               ifine5 = refvec(5) * icrse5 + ioff5 ]
+               sumin = sumin + fineFab(CHF_AUTOIX[ifine], comp)
+               nfine = nfine + 1
+            CHF_ENDDO
+            sumFab(CHF_AUTOIX[icrse], comp) = sumin / (nfine * one)
+         CHF_ENDDO
+      end do
+
+      return
+      end
+
+
+      subroutine GETMAPPEDCFINTERPARRAYS(
+!
+!     => inputs,  <= outputs
+!     normB   <=  norm of vector B at each cell
+!     alpha   <=  alpha = B(0) - norm(B) at each cell
+!     beta    <=  2*alpha*(alpha-B(0)) at each cell
+!     JFab     => J at each cell
+!     BFab     => B_{pvec} = sum_{k in F(i)} <J*zvec**pvec>k^f at cell i
+!     bx       => box on which the FABs live
+!
+!     petermc, 17 Jul 2013
+     &     CHF_FRA1[normB],
+     &     CHF_FRA1[alpha],
+     &     CHF_FRA1[beta],
+     &     CHF_CONST_FRA1[JFab],
+     &     CHF_CONST_FRA[BFab],
+     &     CHF_BOX[bx])
+
+      integer CHF_AUTODECL[i]
+      integer ncompB, comp
+      real_t Jhere, Bcomp, sum2, alph1, bet1, normB1
+
+      ncompB = CHF_NCOMP[BFab]
+
+      CHF_AUTOMULTIDO[bx; i]
+         Jhere = JFab(CHF_AUTOIX[i])
+         sum2 = Jhere * Jhere
+         do comp = 0, ncompB-1
+            Bcomp = BFab(CHF_AUTOIX[i], comp)
+            sum2 = sum2 + Bcomp * Bcomp
+         end do
+         normB1 = sqrt(sum2)
+         alph1 = Jhere - normB1
+         bet1 = two * alph1 * (alph1 - Jhere)
+         normB(CHF_AUTOIX[i]) = normB1
+         alpha(CHF_AUTOIX[i]) = alph1
+         beta(CHF_AUTOIX[i]) = bet1
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine GETMAPPEDCFINTERPQR(
+!
+!     => inputs,  <= outputs
+!     A1      <=  the vector A1, length npts
+!     A2vec   <=  QR decomposition
+!     tau     <=  QR reflection information; fill in at icrse only
+!     avgPowers => <zvec**pvec>j^c for stencil cell j and powers pvec
+!     alpha    =>  alpha = B(0) - norm(B) at each cell
+!     beta     =>  2*alpha*(alpha-B(0)) at each cell
+!     BFab     => B_{pvec} = sum_{k in F(i)} <J*zvec**pvec>k^f at cell i
+!     icrse    => coarse cell where we have alpha, beta, BFab and set tau
+!     npts     => number of stencil cells
+!     npwrs    => number of nonzero powers
+!
+!     petermc, 23 Jul 2013
+     &     CHF_VR[A1],
+     &     CHF_VR[A2vec],
+     &     CHF_FRA[tau],
+     &     CHF_CONST_VR[avgPowers],
+     &     CHF_CONST_FRA1[alpha],
+     &     CHF_CONST_FRA1[beta],
+     &     CHF_CONST_FRA[BFab],
+     &     CHF_CONST_INTVECT[icrse],
+     &     CHF_CONST_INT[npts],
+     &     CHF_CONST_INT[npwrs])
+
+      integer CHF_AUTOIX[icrse]
+      integer ipt, ipwr, ic, icbase, info
+      real_t A2(0:npts-1, 0:npwrs-1)
+      real_t work(npwrs), tauvec(0:npwrs-1)
+      real_t alph1, bet1, term, sumABa
+
+      CHF_DTERM[
+      icrse0 = icrse(0) ;
+      icrse1 = icrse(1) ;
+      icrse2 = icrse(2) ;
+      icrse3 = icrse(3) ;
+      icrse4 = icrse(4) ;
+      icrse5 = icrse(5) ]
+
+      alph1 = alpha(CHF_AUTOIX[icrse])
+      bet1 = beta(CHF_AUTOIX[icrse])
+
+!     Calculate all npts components of A1.
+      do ipt = 0, npts-1
+         icbase = ipt * npwrs
+         term = alph1
+!     avgPowers grouped by stencil cell, then within by power
+         do ipwr = 0, npwrs-1
+            term = term +
+     &           avgPowers(icbase + ipwr) *
+     &           BFab(CHF_AUTOIX[icrse], ipwr)
+         end do
+         A1(ipt) = one - (two * alph1 / bet1) * term
+      end do
+
+!     Calculate A2, one row at a time.
+      do ipt = 0, npts-1
+         icbase = ipt * npwrs
+         sumABa = alph1
+         do ipwr = 0, npwrs-1
+            sumABa = sumABa +
+     &           avgPowers(icbase + ipwr) *
+     &           BFab(CHF_AUTOIX[icrse], ipwr)
+         end do
+         do ipwr = 0, npwrs-1
+            A2(ipt, ipwr) = avgPowers(icbase + ipwr) -
+     &           (two/bet1) * BFab(CHF_AUTOIX[icrse], ipwr) * sumABa
+         end do
+      end do
+
+#ifdef CH_USE_DOUBLE
+      call DGEQRF
+#else
+      call SGEQRF
+#endif
+     &     (npts, npwrs, A2, npts, tauvec, work, npwrs, info)
+
+      if (info .ne. 0) then
+         print *, 'Error in QR factorization in GETMAPPEDCFINTERPQR'
+         call MAYDAY_ERROR()
+      endif
+
+      do ipwr = 0, npwrs-1
+         tau(CHF_AUTOIX[icrse], ipwr) = tauvec(ipwr)
+      end do
+
+!     A2vec must have the numbers in A2 in the same order.
+!     First index on A2vec is 0.
+      ic = 0
+      do ipwr = 0, npwrs-1
+         do ipt = 0, npts-1
+            A2vec(ic) = A2(ipt, ipwr)
+            ic = ic + 1
+         end do
+      end do
+
+      return
+      end
+
+
+      subroutine GETMAPPEDCFINTERPCOEFFS(
+!
+!     Returns coefficients of interpolation for interpolating to
+!     fine cells within a particular coarse cell.
+!
+!     => inputs,  <= outputs
+!     coeff0  <=  constant coefficient
+!     coeffs  <=  coefficients of higher powers
+!     crseU    => <U>
+!     crseJU   => <JU>
+!     BFab     => B_{pvec} = sum_{k in F(i)} <J*zvec**pvec>k^f at cell i
+!     normB    => norm of vector B at each cell
+!     alpha    => alpha = B(0) - norm(B) at each cell
+!     beta     => 2*alpha*(alpha-B(0)) at each cell
+!     icrse    => coarse cell where we are setting coefficients
+!     inds     => indices of stencil cells
+!     npts     => number of stencil cells
+!     npwrs    => number of nonzero powers
+!     ncomp    => number of components of <U>, and also of <JU>
+!     QRmat    => A2 returned by GETMAPPEDCFINTERPQR
+!     QRtau    => tau returned by GETMAPPEDCFINTERPQR
+!     A1       => the vector A1, length npts
+!
+!     petermc, 23 Jul 2013
+     &     CHF_FRA[coeff0],
+     &     CHF_FRA[coeffs],
+     &     CHF_CONST_FRA[crseU],
+     &     CHF_CONST_FRA[crseJU],
+     &     CHF_CONST_FRA[BFab],
+     &     CHF_CONST_FRA1[normB],
+     &     CHF_CONST_FRA1[alpha],
+     &     CHF_CONST_FRA1[beta],
+     &     CHF_CONST_INTVECT[icrse],
+     &     CHF_CONST_VI[inds],
+     &     CHF_CONST_INT[npts],
+     &     CHF_CONST_INT[npwrs],
+     &     CHF_CONST_INT[ncomp],
+     &     CHF_CONST_VR[QRmat],
+     &     CHF_CONST_FRA[QRtau],
+     &     CHF_CONST_VR[A1])
+
+      integer CHF_AUTOIX[icrse]
+      integer CHF_AUTOIX[nbr]
+      integer comp, ipt, ipwr, ii, info, icbase
+      real_t y(0:ncomp-1), rhs(0:npts-1, 0:ncomp-1), tau(0:npwrs-1)
+      real_t work(npts)
+      real_t sumbz, alph1, bet1
+
+      CHF_DTERM[
+      icrse0 = icrse(0) ;
+      icrse1 = icrse(1) ;
+      icrse2 = icrse(2) ;
+      icrse3 = icrse(3) ;
+      icrse4 = icrse(4) ;
+      icrse5 = icrse(5) ]
+
+      do comp = 0, ncomp-1
+         y(comp) = crseJU(CHF_AUTOIX[icrse], comp) /
+     &        normB(CHF_AUTOIX[icrse])
+         ii = 0
+         do ipt = 0, npts-1
+!     nbr holds indices of ipt'th stencil cell
+            CHF_DTERM[
+            nbr0 = icrse(0) + inds(ii)   ;
+            nbr1 = icrse(1) + inds(ii+1) ;
+            nbr2 = icrse(2) + inds(ii+2) ;
+            nbr3 = icrse(3) + inds(ii+3) ;
+            nbr4 = icrse(4) + inds(ii+4) ;
+            nbr5 = icrse(5) + inds(ii+5) ]
+            rhs(ipt, comp) =  
+     &           crseU(CHF_AUTOIX[nbr], comp) - A1(ipt) * y(comp)
+            ii = ii + CH_SPACEDIM
+         end do
+      enddo
+
+      do ipwr = 0, npwrs-1
+         tau(ipwr) = QRtau(CHF_AUTOIX[icrse], ipwr)
+      end do
+
+#ifdef CH_USE_DOUBLE
+      call DORMQR
+#else
+      call SORMQR
+#endif
+     &     ('L', 'T', npts, ncomp, npwrs, QRmat, npts, tau,
+     &     rhs, npts, work, npts, info)
+
+      if (info .ne. 0) then
+         print *, 'In GETMAPPEDCFINTERPCOEFFS, illegal arg ', info
+         call MAYDAY_ERROR()
+      endif
+
+!     Answer is stored in overwritten rhs(1:npts, 1:ncomp).
+!     But only the first npwrs rows are nonzero, I think.
+
+!     OK, now I need to do an upper-triangular solve for z, with
+!     right-hand side rhs(1:npwrs, 1:ncomp).
+#ifdef CH_USE_DOUBLE
+      call DTRTRS
+#else
+      call STRTRS
+#endif
+     &     ('U', 'N', 'N', npwrs, ncomp, QRmat, npts, rhs, npts, info)
+      if (info .lt. 0) then
+         print *, 'In GETMAPPEDCFINTERPCOEFFS, illegal arg ', -info
+         call MAYDAY_ERROR()
+      elseif (info .gt. 0) then
+         print *, 'In GETMAPPEDCFINTERPCOEFFS, zero at diagonal ', info
+         print *, 'Matrix is singular.'
+         call MAYDAY_ERROR()
+      endif
+
+!     coeffs(ipwr) = Q1 * y + Q2 * z
+      alph1 = alpha(CHF_AUTOIX[icrse])
+      bet1 = beta(CHF_AUTOIX[icrse])
+      do comp = 0, ncomp-1
+         icbase = comp * npwrs
+         sumbz = zero
+         do ipwr = 0, npwrs-1
+            sumbz = sumbz +
+     &           BFab(CHF_AUTOIX[icrse], ipwr) * rhs(ipwr, comp)
+         end do
+         coeff0(CHF_AUTOIX[icrse], comp) =
+     &        (one - two*alph1*alph1/bet1) * y(comp)
+     &        - (two*alph1/bet1) * sumbz
+         do ipwr = 0, npwrs-1
+            coeffs(CHF_AUTOIX[icrse], icbase + ipwr) =
+     &           rhs(ipwr, comp)
+     &           - (two/bet1) * BFab(CHF_AUTOIX[icrse], ipwr) *
+     &           (alph1*y(comp) + sumbz)
+         end do
+      end do
+         
+      return
+      end
+
+
+      subroutine SOLVEMAPPEDCFINTERP(
+!
+!     Interpolates fine <JU> using coefficients from GETMAPPEDCFINTERPCOEFFS.
+!
+!     => inputs,  <= outputs
+!     JUFab   <=  interpolated <JU> on fine level
+!     coeff0   => constant coefficient at each coarse cell
+!     coeffs   => coefficients of higher powers at each coarse cell
+!     Jfine    => <J> on fine level
+!     JfinePow => <J*zvec**pvec> on fine level
+!     refvec   => vector refinement ratio
+!     ncomp    => number of components of <U>, and also of <JU>
+!     npwrs    => number of nonzero powers
+!     fineBox  => box of cells on which to fill in JUFab
+!
+!     petermc, 23 Jul 2013
+     &     CHF_FRA[JUFab],
+     &     CHF_CONST_FRA[coeff0],
+     &     CHF_CONST_FRA[coeffs],
+     &     CHF_CONST_FRA1[Jfine],
+     &     CHF_CONST_FRA[JfinePow],
+     &     CHF_CONST_INTVECT[refvec],
+     &     CHF_CONST_INT[ncomp],
+     &     CHF_CONST_INT[npwrs],
+     &     CHF_BOX[fineBox])
+
+      integer CHF_AUTOIX[icrse]
+      integer CHF_AUTOIX[ifine]
+      integer comp, ipwr, icbase
+      real_t jufine
+      integer coarsendown
+
+      do comp = 0, ncomp-1
+         icbase = comp * npwrs
+         CHF_AUTOMULTIDO[fineBox; ifine]
+            CHF_DTERM[
+            icrse0 = coarsendown(ifine0, refvec(0)) ;
+            icrse1 = coarsendown(ifine1, refvec(1)) ;
+            icrse2 = coarsendown(ifine2, refvec(2)) ;
+            icrse3 = coarsendown(ifine3, refvec(3)) ;
+            icrse4 = coarsendown(ifine4, refvec(4)) ;
+            icrse5 = coarsendown(ifine5, refvec(5)) ]
+            jufine = coeff0(CHF_AUTOIX[icrse], comp) *
+     &           Jfine(CHF_AUTOIX[ifine])
+            do ipwr = 0, npwrs-1
+               jufine = jufine +
+     &              coeffs(CHF_AUTOIX[icrse], icbase + ipwr) * 
+     &              JfinePow(CHF_AUTOIX[ifine], ipwr)
+            end do
+            JUFab(CHF_AUTOIX[ifine], comp) = jufine
+         CHF_ENDDO
+      end do
+
+      return
+      end

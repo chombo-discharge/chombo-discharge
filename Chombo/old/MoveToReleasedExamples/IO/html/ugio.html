@@ -1,0 +1,149 @@
+<html>
+<head>
+<title>Uniform Grid Parallel I/O Tutorial</title>
+</head>
+<body>
+<p>
+<h1>Uniform Grid Parallel I/O Example </h1>
+<p>
+This example shows how to use Chombo to do parallel
+input/output for a single union of rectangles.
+We break up a single box into that union and then
+create data over that union.  We output the data
+into a file, read it back in and check that
+it is the same.
+
+First we include all the header files we need.
+We then define the function we will use to fill
+the data values.
+<pre><font face="Courier">
+#include "LevelData.H"
+#include "FArrayBox.H"
+#include "SPMD.H"
+#include "UGIO.H"
+#include "BRMeshRefine.H"
+#include "LoadBalance.H"
+#include "Misc.H"
+#include "Vector.H"
+#include "REAL.H"
+#include "Box.H"
+#include "BoxIterator.H"
+Real getDataVal(const IntVect& a_iv)
+{
+  Real retval  = 7.23;
+  Real dx = 0.001;
+  for(int idir = 0; idir < SpaceDim; idir++)
+    {
+      Real arg = Real(idir + a_iv[idir]*a_iv[idir]);
+      retval += sin(dx*arg)+ 2.*cos(dx*arg);
+    }
+  return retval;
+}
+int main(int argc, char* argv[])
+{
+</font></pre>
+Here we call MPI_Init and start the scoping trick
+that puts all Chombo code within braces inside
+MPI_Init and MPI_Finalize.  This forces the destructors
+for Chombo classes to be called before MPI_Finalize. 
+<pre><font face="Courier">
+#ifdef MPI
+  MPI_Init(&argc, &argv);
+#endif
+  {//scoping trick
+
+</font></pre>
+Here we set number of points in each direction.
+The variable nproc is the number of processors
+The varaible maxsize is the maximum box size.
+We set the domain of the computation.
+We use domainSplit to generate the list of 
+boxes in the layout.  We use LoadBalance to 
+generate processor assignments.   From these
+we can generate the layouts.
+<pre><font face="Courier">
+    int nx = 64;
+    int nproc = numProc();
+    int maxsize = Max(nx/(2*nproc), 4);
+    Box domain(IntVect::TheZeroVector(), (nx-1)*IntVect::TheUnitVector());
+    Vector<Box> vbox;
+    domainSplit(domain, vbox, maxsize);
+    Vector<int> procAssign;
+    LoadBalance(procAssign, vbox);
+    DisjointBoxLayout dbl(vbox, procAssign);
+</font></pre>
+    Make the data to output and set its values.
+<pre><font face="Courier">
+    LevelData<FArrayBox> data(dbl, 1);
+    DataIterator dit = dbl.dataIterator();
+    for(dit.reset(); dit.ok(); ++dit)
+      {
+        FArrayBox& fab = data[dit()];
+        const Box& fabbox = fab.box();
+        BoxIterator bit(fabbox);
+        for(bit.reset(); bit.ok(); ++bit)
+          {
+            const IntVect& iv = bit();
+            fab(iv, 0) = getDataVal(iv);
+          }
+      }
+</font></pre>
+    Output data to a file in HDF5 format.
+    Then generate another data holder and read the
+    data back in.
+<pre><font face="Courier">
+    string filename("dataout.hdf5");
+    WriteUGHDF5(filename, dbl, data, domain);
+
+    //Read it back in.
+    DisjointBoxLayout dblin;
+    LevelData<FArrayBox> datain;
+    Box domainin;
+</font></pre>
+Here we read the data back in and 
+check to see that it matches.  Notice that
+the data holder and layout is defined inside
+the read function.
+<pre><font face="Courier">
+    ReadUGHDF5(filename, dblin, datain, domainin);
+    if(domainin != domain)
+      {
+        cerr << "domains do not match" << endl;
+        return -1;
+      }
+    if(datain.nComp() != 1)
+      {
+        cerr << "input data has the wrong number of components" << endl;
+        return -2;
+        
+      }
+    DataIterator ditin = dblin.dataIterator();
+    for(ditin.reset(); ditin.ok(); ++ditin)
+      {
+        const FArrayBox& fabin = datain[ditin()];
+        const Box& fabbox = fabin.box();
+        BoxIterator bit(fabbox);
+        for(bit.reset(); bit.ok(); ++bit)
+          {
+            const IntVect& iv = bit();
+            Real rightans = getDataVal(iv);
+            Real dataans = fabin(iv, 0);
+            Real eps = 1.0e-9;
+            if(Abs(dataans - rightans) > eps)
+              {
+                cerr << "data does not match" << endl;
+                return -3;
+              }
+          }
+      }
+  }//end scoping trick
+#ifdef MPI
+  MPI_Finalize();
+#endif
+  return(0);
+}
+
+</font></pre>
+</html>
+</body>
+

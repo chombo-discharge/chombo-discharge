@@ -1,0 +1,26 @@
+#!/bin/bash -l
+#SBATCH --nodes=4
+#SBATCH -C haswell
+#SBATCH --partition=regular
+#SBATCH --time=00:20:00
+#SBATCH --mail-type=ALL
+
+export OMP_NUM_THREADS=1 
+
+PROGNAME=
+PROGARGS=
+export CH_TIMER=1
+export CH_OUTPUT_INTERVAL=16
+export MPICH_RANK_REORDER_METHOD=1
+export MPICH_GNI_NDREG_MAXSIZE=16777216
+
+export KMP_AFFINITY=verbose,granularity=core,compact,1
+
+tasks=$((SLURM_JOB_NUM_NODES*32/$OMP_NUM_THREADS))
+tasksPerNode=$((32/$OMP_NUM_THREADS))
+uname -a
+date 
+
+srun --ntasks=$tasks --ntasks-per-node=$tasksPerNode --cpus-per-task=$OMP_NUM_THREADS -m block:block $PROGNAME $PROGARGS
+
+date

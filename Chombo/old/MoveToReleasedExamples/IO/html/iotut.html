@@ -1,0 +1,54 @@
+<html>
+<head>
+<title>Chombo Parallel I/O with HDF5 Tutorial</title>
+</head>
+<body>
+<h1>Chombo Parallel I/O with HDF5 Examples </h1>
+<p>
+
+We present two instances of how to do parallel
+input/output in HDF5 using the  Chombo infrastructure.
+The first is a simple domain-decomposition example which
+outputs data from a single union of rectangles.  The
+second outputs data from a complete adaptive hierarchy
+of data.
+To compile any of these examples, go into the 
+appropriate directory 
+<pre>
+<font face="Courier">
+cd Chombo/example/IO/AMR
+</font>
+</pre>
+and edit GNUmakefile.  The single line
+you have to change is the first line which  looks like:
+<pre>
+<font face="Courier">
+CHOMBO_HOME = /home/graves/users/graves/_anag/_dev/Chombo/lib
+</font>
+</pre>
+Change the variable CHOMBO_HOME to the directory name where
+you have installed Chombo.   Then, in your shell, type 
+<pre>
+<font face="Courier">
+make all
+</font>
+</pre>
+This will produce an executable of the form "amrio(some other stuff).ex".
+The executable takes no arguments.  Just run it by typing its name
+in your shell.
+
+<p>
+The <a href="ugio.html"> uniform-grid version</a> is given
+here.  This example breaks a single domain into a union of rectangles,
+generates and outputs data over these grids.  It then reads 
+the data back in and checks its correctness.
+<p>
+The <a href="amrio.html"> adaptive hierarchy version</a> is given
+here.  This example generates a hierarchy of grids and data
+over that hierarchy. It then outputs the data and reads
+the data back in and checks its correctness.
+<p>
+
+</html>
+</body>
+

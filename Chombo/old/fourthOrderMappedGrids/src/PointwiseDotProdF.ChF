@@ -1,0 +1,218 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+c --------------------------------------------------------------
+c  this subroutine computes the pointwise dot product of A
+c  (from astart.. astart+SpaceDim-1 )
+c  and B (from bstart..bstart+SpaceDim-1)
+c  and places the result in c.
+c
+c  INPUTS/OUTPUTS:
+c  c  <=  pointwise dot product of a and b
+c  a   =>
+c  astart => component of a at which to start
+c  b   =>
+c  bstart => component of b at which to start
+c  gridbox => box over which to operate
+c --------------------------------------------------------------
+      subroutine pointdotprod(CHF_FRA1[c],
+     &                        CHF_CONST_FRA[a],
+     &                        CHF_CONST_INT[astart],
+     &                        CHF_CONST_FRA[b],
+     &                        CHF_CONST_INT[bstart],
+     &                        CHF_CONST_INT[ncomp],
+     &                        CHF_BOX[gridbox])
+
+      integer CHF_AUTODECL[i]
+      integer comp, na, nb
+
+      CHF_AUTOMULTIDO[gridbox; i]
+         c(CHF_AUTOIX[i]) = zero
+      CHF_ENDDO
+
+      do comp=0, ncomp-1
+         na = astart+comp
+         nb = bstart+comp
+         CHF_AUTOMULTIDO[gridbox; i]
+            c(CHF_AUTOIX[i]) = c(CHF_AUTOIX[i]) +
+     &        a(CHF_AUTOIX[i], na) * b(CHF_AUTOIX[i], nb)
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+
+c --------------------------------------------------------------
+c  This subroutine computes the pointwise dot product of a flux
+c  dyad and the metrics term N.  The flux dyad is a space vector
+c  (termed 'space' components) of solution vectors (termed 'var'
+c  components).
+c
+c  INPUTS/OUTPUTS:
+c  prod         <=  The dot product of F and N
+c  varProdStart  => The start of the first variable index in
+c                   'prod'
+c  varNum        => The number of solution variables
+c  F             => The flux dyad can be stored as either
+c                     (var, space)
+c                   or
+c                     (space, var)
+c                   'space' has size NNum for special
+c                   purposes.
+c  varFStart     => The start of the first variable index in
+*                   'F'
+c  FSpaceStride  => The stride of the space component in
+c                   F.  Describes how the dyad is stored in
+c                   memory
+c  N             => The metric terms
+c  Nstart        => Start of access into N
+c  NNum          => Number of components to multiply
+c                   between F & N.  For most calculations, this
+c                   is SpaceDim.
+c  box           => The box on which to operate
+c --------------------------------------------------------------
+      subroutine pointFDotN(CHF_FRA[prod],
+     &                      CHF_CONST_INT[varProdStart],
+     &                      CHF_CONST_INT[varNum],
+     &                      CHF_CONST_FRA[F],
+     &                      CHF_CONST_INT[varFStart],
+     &                      CHF_CONST_INT[FSpaceStride],
+     &                      CHF_CONST_FRA[N],
+     &                      CHF_CONST_INT[NStart],
+     &                      CHF_CONST_INT[NNum],
+     &                      CHF_BOX[box])
+
+      integer CHF_AUTODECL[i]
+c     Variable components loop
+      integer iVar
+c     To loop through space components of a flux dyad
+      integer iFlux
+c     Dot product loop
+      integer iN
+
+      do iVar = varProdStart, varProdStart + varNum - 1
+c        Get the start location of the flux for this variable
+         iFlux = (iVar - varProdStart) + varFStart
+         if (FSpaceStride .eq. 1) then
+            iFlux = iFlux*CH_SPACEDIM
+         endif
+c        Assign the first term
+         CHF_AUTOMULTIDO[box; i]
+            prod(CHF_AUTOIX[i], iVar) =
+     &         F(CHF_AUTOIX[i], iFlux)*N(CHF_AUTOIX[i], NStart)
+         CHF_ENDDO
+c        Add the rest
+         do iN = Nstart + 1, NStart + NNum - 1
+c           Advance the flux index to the next space component of
+c           this same solution variable
+            iFlux = iFlux + FSpaceStride
+            CHF_AUTOMULTIDO[box; i]
+               prod(CHF_AUTOIX[i], iVar) = prod(CHF_AUTOIX[i], iVar) +
+     &            F(CHF_AUTOIX[i], iFlux)*N(CHF_AUTOIX[i], iN)
+            CHF_ENDDO
+         enddo
+      enddo
+
+      return
+      end
+
+c  -----------------------------------------------------------
+c    pointwise reduced-dimensional dot product
+c  -----------------------------------------------------------
+      subroutine POINTWISEREDUCEDDOTPROD(CHF_FRA1[c],
+     &                                   CHF_CONST_FRA[a],
+     &                                   CHF_CONST_INT[astart],
+     &                                   CHF_CONST_FRA[b],
+     &                                   CHF_CONST_INT[bstart],
+     &                                   CHF_CONST_INT[numcomp],
+     &                                   CHF_BOX[gridbox])
+
+
+      integer CHF_AUTODECL[i]
+      integer comp, na, nb
+
+      CHF_AUTOMULTIDO[gridbox; i]
+         c(CHF_AUTOIX[i]) = zero
+      CHF_ENDDO
+
+      do comp=0, numcomp-1
+         na = comp + astart;
+         nb = comp + bstart;
+         CHF_AUTOMULTIDO[gridbox; i]
+            c(CHF_AUTOIX[i]) = c(CHF_AUTOIX[i]) +
+     &        a(CHF_AUTOIX[i], na) * b(CHF_AUTOIX[i], nb)
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+
+c --------------------------------------------------------------
+c  Adds the dot product of the tangential gradients of F and N
+c  into 'prod'
+c
+c  INPUTS/OUTPUTS:
+c  prod         <=  The fourth-order results <NF>
+c  dotTanGrads   =  Temporary space for storing the dot product
+c  varProdStart  => The start of the first variable index in
+c                   'prod'
+c  varNum        => The number of solution variables
+c  tanGradF      => Gradients of the flux dyad.  Here the
+c                   components are (numDotTerms, var)
+c  tanGradN      => Gradients of the metrics N.  Here the
+c                   components are (numDotTerms)
+c  numDotTerms   => Number of components to multiply
+c                   between F & N for each solution variables.
+c                   For most calculations, this is
+c                   SpaceDim*(SpaceDim-1).
+c  box           => The box on which to operate
+c --------------------------------------------------------------
+      subroutine ReducedFDotN(CHF_FRA[prod],
+     &                        CHF_FRA1[dotTanGrads],
+     &                        CHF_CONST_INT[varProdStart],
+     &                        CHF_CONST_INT[varNum],
+     &                        CHF_CONST_FRA[tanGradF],
+     &                        CHF_CONST_FRA[tanGradN],
+     &                        CHF_CONST_INT[numDotTerms],
+     &                        CHF_BOX[box])
+
+      integer CHF_AUTODECL[i]
+c     Variable components loop
+      integer iVar
+c     Dot product terms loop
+      integer j
+c     Location in tanGradF for the current variable
+      integer jGradF
+c     Multiplication factor
+      real_t factor
+
+      parameter (factor = ONE/TWELVE)
+
+      do iVar = varProdStart, varProdStart + varNum - 1
+         jGradF = (iVar - varProdStart)*numDotTerms
+         CHF_AUTOMULTIDO[box; i]
+            dotTanGrads(CHF_AUTOIX[i]) =
+     &         tanGradF(CHF_AUTOIX[i], jGradF)*
+     &         tanGradN(CHF_AUTOIX[i], 0)
+         CHF_ENDDO
+         do j = 1, numDotTerms - 1
+            jGradF = jGradF + 1
+            CHF_AUTOMULTIDO[box; i]
+               dotTanGrads(CHF_AUTOIX[i]) = dotTanGrads(CHF_AUTOIX[i]) +
+     &            tanGradF(CHF_AUTOIX[i], jGradF)*
+     &            tanGradN(CHF_AUTOIX[i], j)
+            CHF_ENDDO
+         enddo
+         CHF_AUTOMULTIDO[box; i]
+            prod(CHF_AUTOIX[i], iVar) = prod(CHF_AUTOIX[i], iVar) +
+     &         factor*dotTanGrads(CHF_AUTOIX[i])
+         CHF_ENDDO
+      enddo
+
+      return
+      end

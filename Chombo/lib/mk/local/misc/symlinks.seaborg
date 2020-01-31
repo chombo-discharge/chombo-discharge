@@ -1,0 +1,7 @@
+#!/bin/sh
+
+## make symbolic links for the login nodes on seaborg
+
+for s in s00505 s00509 s00513 s00605 s00609 s00613 ; do
+  ln -s Make.defs.seaborg Make.defs.$s
+done

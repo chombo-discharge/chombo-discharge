@@ -1,0 +1,79 @@
+turn_off_multigrid_for_nwoc = true
+use_simple_solver = true
+#solver stuff
+#1 gsrb, 0 point jacobi	
+num_smooth = 16
+num_mg = 1
+max_iterations = 7
+tolerance = 1.0e-6
+hang = 1.0e-10
+#1 vcycle, 2 wcycle and so on
+mg_num_cycles = 1
+acoef_value  = 0.5
+bcoef_value  = 0.5
+which_acoef = 0
+which_bcoef = 0
+testverbosity = 1
+do_error_output = 0
+
+# bc flags
+#    0 = Neumann with value
+#    1 = Dirichlet with value 
+#    2 = Neumann Trig
+#    3 = Dirichlet Trig
+eb_bc_type     = 0
+domain_bc_type = 1
+order_ebbc     = 2
+
+# Sine frequency multipliers to use
+# for when bcs are trig
+trig = 2.0 2.0 2.0
+
+# alpha*I + beta*laplacian
+alpha = 0.5
+beta =  -0.5
+
+#values for when bcs are value
+domain_bc_value = 0.0
+eb_bc_value     = 0.0
+
+
+###GRID STUFF
+max_level    = 0
+ref_ratio    = 2 2 2 2 2 
+#n_cells      = 32 32 32
+#n_cells      = 64 64 64
+n_cells      = 128 128 128
+
+
+
+block_factor = 8
+fill_ratio   = 0.7
+buffer_size  = 2
+max_grid_size = 16
+
+##GEOMETRY STUFF
+domain_length = 1.0 1.0 1.0
+which_geom = 6
+
+num_spheres = 6
+sphere_radius_0 = 0.3
+sphere_center_0 = 1.0 0.2 0.5
+sphere_radius_1 = 0.2
+sphere_center_1 = 1.5 0.2 0.5
+sphere_radius_2 = 0.2
+sphere_center_2 = 0.5 0.4 0.5
+sphere_radius_3 = 0.3
+sphere_center_3 = 0.3 0.8 0.8
+sphere_radius_4 = 0.3
+sphere_center_4 = 1.2 0.2 0.8
+sphere_radius_5 = 0.3
+sphere_center_5 = 1.6 0.6 0.3
+
+
+do_file_output = false
+#auto gen ghost
+ghostPhi = 4 4 4 
+ghostRhs = 0 0 0
+#auto gen num_precond
+num_pre_cond_iters = 4

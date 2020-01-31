@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+print("doing 32-64 run \n");
+system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.32-64 > run.32-64");
+print("doing 64-128 run \n");
+system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.64-128 > run.64-128");
+print("doing 128-256 run \n");
+system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.128-256 > run.128-256");
+#print("doing 256-512 run \n");
+#system("./amrSelfGravity3d.Linux.g++.g77.64.ex  inputs.256-512 > run.256-512");
+

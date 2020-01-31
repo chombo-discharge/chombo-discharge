@@ -1,0 +1,246 @@
+<BODY TEXT=#000000 BGCOLOR=#ffffff LINK=#06117F VLINK=#046664 ALINK=#7F0523>
+
+<html>
+
+<head>
+<title>Single Grid Tutorial</title>
+</head>
+<body>
+<p>
+ 
+<h1> Domain Decomposition Explicit Heat Equation Solver </h1>
+ 
+<p>
+ 
+Say you want to use Chombo to perform a domain-decompositon
+version of <a href="singleGridHeat.html"> our single-grid example</a>.   
+With this example, we will use exactly the same Fortran 
+But we will divide the domain into sections and call the Fortran
+for each section.  
+Chombo contains simple mechanisms for domain decomposition
+and for Fortran calling but one might want to do this manually
+for whatever reason.
+Our comments are given in bold font, the code is in normal
+font.
+<p>
+First we include all the header files:
+ 
+<pre>
+<font face="Courier">
+#include "LevelData.H"
+#include "FArrayBox.H"
+#include "SPMD.H"
+#include "UGIO.H"
+#include "BoxIterator.H"
+#include "Misc.H"
+#include "Vector.H"
+#include "REAL.H"
+#include "Box.H"
+</font>
+</pre>
+ 
+Now we specify all the stuff that we need to define
+so that C++ can call our Fortran subroutine.  We
+call our two-dimensional Fortran subroutine heatsub2d
+and our three-dimensional Fortran subroutine heatsub3d.
+Our Fortran compiler adds an underscore to it's subroutine
+names.
+ 
+<pre>
+<font face="Courier">
+#if CH_SPACEDIM==2
+#define FORT_HEATSUB heatsub2d_
+#elif CH_SPACEDIM==3
+#define FORT_HEATSUB heatsub3d_
+#endif
+extern "C"
+{
+  void FORT_HEATSUB(Real* const phi,
+                    const int*  const philo,
+                    const int*  const phihi,
+                    Real* const lph,
+                    const int*  const lphlo,
+                    const int*  const lphhi,
+                    const int*  const boxlo,
+                    const int*  const boxhi,
+                    const int*  const domlo,
+                    const int*  const domhi,
+                    const Real* const dt,
+                    const Real* const dx,
+                    const Real* const nu);
+}
+</font>
+</pre>
+
+Now we define the function which will define the domain
+and split up the domain 
+and make a DisjointBoxLayout.
+
+<pre>
+<font face="Courier">
+void makeGrids(Box& domain, DisjointBoxLayout& dbl, int& len)
+{
+  int p = 4; 
+  int Nx = 16;
+  len = Nx*p;
+  
+  Box    patch(IntVect::TheZeroVector(), (Nx-1)*IntVect::TheUnitVector());
+  Box skeleton(IntVect::TheZeroVector(), (p-1)*IntVect::TheUnitVector());
+  domain = Box(IntVect::TheZeroVector(), (len-1)*IntVect::TheUnitVector());
+</font>
+</pre>
+
+p is the number of patches in each direction.<br>
+Nx is the number of grid points in each direction per local 
+patch. <br> len is the length of the entire domain.<br>
+skeleton  is the box outline of the grids.<br>
+patch is the grid which fills each outline in skeleton.<br>
+See <a href = "skeleton.html"> for a picture of this.</a>
+
+<pre>
+<font face="Courier">
+  BoxIterator bit(skeleton);
+  int thisProc = 0;
+  Vector<Box> vbox;
+  Vector<int> procId;
+  for (bit.begin();bit.ok();++bit)
+  {
+    Box thisBox = patch + bit()*Nx;
+    vbox.push_back(thisBox);
+    procId.push_back(thisProc);
+    thisProc = (thisProc + 1) % numProc();
+  }
+
+  dbl.define(vbox, procId);
+  dbl.close();
+
+  if (thisProc != 0) 
+  {
+    cout << "warning: load is imbalanced, with " << thisProc << 
+      "processors having one extra Box" << endl;
+  }
+}
+</font>
+</pre>
+
+Now we have the main routine.
+
+<pre>
+<font face="Courier">
+int main(int argc, char* argv[])
+{
+</font>
+</pre>
+
+ This initial stuff is to get MPI and chombo to work.
+ The scoping trick of putting curly braces between
+ MPI_Init and MPI_Finalize is to make sure all
+ the Chombo classes which require MPI to be destructed
+ before MPI_Finalize gets called.
+
+<pre>
+<font face="Courier">
+#ifdef MPI
+  MPI_Init(&argc, &argv);
+#endif
+  {//scoping trick
+
+</font>
+</pre>
+
+Define the  number of points in each direction, domain length
+    and diffusion coefficient.      Define stopping conditions.
+    and set grid spacing and time step.
+    Call makeGrids to make domain and grid layout
+
+<pre>
+<font face="Courier">
+    Box domain;
+    DisjointBoxLayout dbl;
+    int nx;
+    makeGrids(domain, dbl, nx);
+    Real domainLen = 1.0;
+    Real coeff = 1.0e-3;
+    Real tfinal = 3.33;
+    int nstepmax = 100;
+    Real dx = domainLen/nx;
+    Real dt = 0.8*dx*dx/(2.*SpaceDim*coeff);
+
+</font>
+</pre>
+
+    Make the data with one ghost cell for convenience.
+    Set phi to 1 for an initial condition.  
+    Also allocate space for the laplacian.
+
+<pre>
+<font face="Courier">
+    LevelData<FArrayBox> phi(dbl, 1, IntVect::TheUnitVector());
+    LevelData<FArrayBox> lph(dbl, 1, IntVect::TheZeroVector());
+    
+    DataIterator dit = dbl.dataIterator();
+    for(dit.reset(); dit.ok(); ++dit)
+      {
+        phi[dit()].setVal(1.0);
+      }
+
+</font>
+</pre>
+
+    Advance the solution in time.
+
+<pre>
+<font face="Courier">
+    Real time = 0;
+    int nstep = 0;
+    while((time < tfinal) && (nstep < nstepmax))
+      {
+        time += dt;
+        nstep++;
+</font>
+</pre>
+
+Exchange ghost cell information.  This puts data from the non-ghost
+regions of phi into ghost cells  where they overlap.
+Then loop through each grid and advance the solution in time
+
+<pre>
+<font face="Courier">
+        phi.exchange(phi.interval());
+        for(dit.reset(); dit.ok(); ++dit)
+          {
+            FArrayBox& soln = phi[dit()];
+            FArrayBox& lphi = lph[dit()];
+            const Box& region = dbl.get(dit());
+            FORT_HEATSUB(soln.dataPtr(0), 
+                         soln.loVect(), soln.hiVect(), 
+                         lphi.dataPtr(0), 
+                         lphi.loVect(), lphi.hiVect(), 
+                         region.loVect(), region.hiVect(),
+                         domain.loVect(), domain.hiVect(),
+                         &dt, &dx, &coeff);
+          }
+      } //end loop through time
+</font>
+</pre>
+
+Call the Chombo function to output the solution using HDF5.
+
+<pre>
+<font face="Courier">
+    string filename("phi.hdf5");
+    WriteUGHDF5(filename, dbl, phi, domain);
+
+  }//end scoping trick
+#ifdef MPI
+  MPI_Finalize();
+#endif
+  return(0);
+}
+</font>
+</pre>
+The Fortran code is the same as that shown in <a
+href="singleGridHeat.html"> the single grid example</a>.
+</html>
+</body>
+

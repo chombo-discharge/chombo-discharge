@@ -1,0 +1,25 @@
+advect.verbosity = 3
+
+max_step = 0
+
+domain_length = 1.0
+num_cells = 128 128
+# is_periodic = 0 0
+is_periodic = 1 1
+
+# just have this line present
+fixed_hierarchy = 0
+max_level = 2
+ref_ratio = 4 4 4
+tag_buffer_size = 1
+block_factor = 8
+max_grid_size = 16
+fill_ratio = 0.75
+grid_buffer_size = 1
+
+
+#######################################################################
+
+# Set center and radius of tags on level 0 (in index space)
+center = 15 15
+patch_radius = 6

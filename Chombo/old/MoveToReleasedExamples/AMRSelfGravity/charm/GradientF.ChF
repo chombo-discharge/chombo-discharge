@@ -1,0 +1,506 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+!---------------------------------------------------------------------------
+
+        subroutine TWOPTSGRAD(
+     &    CHF_FRA1[dphi],
+     &    CHF_CONST_FRA1[phi],
+     &    CHF_CONST_INT[idir],
+     &    CHF_CONST_REAL[dl],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi],
+     &    CHF_BOX[centerBox])
+
+        integer CHF_DDECL[i   ;j   ;k   ]
+        integer CHF_DDECL[ioff;joff;koff]
+        real_t dli
+
+        CHF_DTERM[
+        ioff = CHF_ID(0,idir);
+        joff = CHF_ID(1,idir);
+        koff = CHF_ID(2,idir)]
+
+c       Perform first difference calculation in the interior.
+
+        dli = one/dl
+
+        CHF_MULTIDO[centerBox;i;j;k]
+        dphi(CHF_IX[i;j;k]) = half*(phi(CHF_IX[i+ioff;j+joff;k+koff])
+     &                             -phi(CHF_IX[i-ioff;j-joff;k-koff]))
+     &                        * dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = (phi(CHF_IX[i+ioff;j+joff;k+koff])
+     &                           - phi(CHF_IX[i     ;j     ;k     ]))
+     &                        * dli
+          CHF_ENDDO
+        endif
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = (phi(CHF_IX[i     ;j     ;k     ])
+     &                           - phi(CHF_IX[i-ioff;j-joff;k-koff]))
+     &                        * dli
+          CHF_ENDDO
+        endif
+
+        return
+        end
+
+!---------------------------------------------------------------------------
+
+        subroutine TWOPTSSTAGGRAD(
+     &    CHF_FRA1[dphi],
+     &    CHF_CONST_FRA1[phi],
+     &    CHF_CONST_INT[idir],
+     &    CHF_CONST_REAL[dl],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi],
+     &    CHF_BOX[centerBox])
+
+        integer CHF_DDECL[i   ;j   ;k   ]
+        integer CHF_DDECL[ioff;joff;koff]
+        real_t dli
+
+        CHF_DTERM[
+        ioff = CHF_ID(0,idir);
+        joff = CHF_ID(1,idir);
+        koff = CHF_ID(2,idir)]
+
+c       Perform first difference calculation in the interior.
+
+        dli = one/dl
+
+        CHF_MULTIDO[centerBox;i;j;k]
+        dphi(CHF_IX[i;j;k]) = ( phi(CHF_IX[i     ;j     ;k     ])
+     &                         -phi(CHF_IX[i-ioff;j-joff;k-koff]))
+     &                        * dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+
+        return
+        end
+
+!---------------------------------------------------------------------------
+
+        subroutine FOURPTSGRAD(
+     &    CHF_FRA1[dphi],
+     &    CHF_CONST_FRA1[phi],
+     &    CHF_CONST_INT[idir],
+     &    CHF_CONST_REAL[dl],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi],
+     &    CHF_BOX[centerBox])
+
+        integer CHF_DDECL[i   ;j   ;k   ]
+        integer CHF_DDECL[ioff;joff;koff]
+        integer CHF_DDECL[iof2;jof2;kof2]
+        real_t dli
+
+        CHF_DTERM[
+        ioff = CHF_ID(0,idir);
+        joff = CHF_ID(1,idir);
+        koff = CHF_ID(2,idir)]
+
+        CHF_DTERM[
+        iof2 = 2*ioff;
+        jof2 = 2*joff;
+        kof2 = 2*koff]
+
+c       Perform first difference calculation in the interior.
+
+        dli = one/dl
+
+        CHF_MULTIDO[centerBox;i;j;k]
+        dphi(CHF_IX[i;j;k]) = (four*(phi(CHF_IX[i+ioff;j+joff;k+koff])
+     &                              -phi(CHF_IX[i-ioff;j-joff;k-koff]))
+     &                        -half*(phi(CHF_IX[i+iof2;j+jof2;k+kof2])
+     &                              -phi(CHF_IX[i-iof2;j-jof2;k-kof2]))
+     &                        ) * sixth*dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = (phi(CHF_IX[i+ioff;j+joff;k+koff])
+     &                           - phi(CHF_IX[i     ;j     ;k     ]))
+     &                        * dli
+          CHF_ENDDO
+        endif
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = (phi(CHF_IX[i     ;j     ;k     ])
+     &                           - phi(CHF_IX[i-ioff;j-joff;k-koff]))
+     &                        * dli
+          CHF_ENDDO
+        endif
+
+        return
+        end
+
+!---------------------------------------------------------------------------
+
+        subroutine FOURPTSSTAGGRAD(
+     &    CHF_FRA1[dphi],
+     &    CHF_CONST_FRA1[phi],
+     &    CHF_CONST_INT[idir],
+     &    CHF_CONST_REAL[dl],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi],
+     &    CHF_BOX[centerBox])
+
+        integer CHF_DDECL[i   ;j   ;k   ]
+        integer CHF_DDECL[ioff;joff;koff]
+        integer CHF_DDECL[iof2;jof2;kof2]
+        real_t dli
+
+        CHF_DTERM[
+        ioff = CHF_ID(0,idir);
+        joff = CHF_ID(1,idir);
+        koff = CHF_ID(2,idir)]
+
+        CHF_DTERM[
+        iof2 = 2*ioff;
+        jof2 = 2*joff;
+        kof2 = 2*koff]
+
+c       Perform first difference calculation in the interior.
+
+        dli = one/dl
+
+        CHF_MULTIDO[centerBox;i;j;k]
+        dphi(CHF_IX[i;j;k]) = ( nine*(phi(CHF_IX[i     ;j     ;k     ])
+     &                               -phi(CHF_IX[i-ioff;j-joff;k-koff]))
+     &                        -third*(phi(CHF_IX[i+ioff;j+joff;k+koff])
+     &                               -phi(CHF_IX[i-iof2;j-jof2;k-kof2]))
+     &                        ) * eighth*dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+
+        return
+        end
+
+!---------------------------------------------------------------------------
+
+        subroutine TENPTSGRAD(
+     &    CHF_FRA1[dphi],
+     &    CHF_CONST_FRA1[phi],
+     &    CHF_CONST_INT[idir],
+     &    CHF_CONST_REAL[dl],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi],
+     &    CHF_BOX[centerBox])
+
+        integer CHF_DDECL[i   ;j   ;k   ]
+        integer CHF_DDECL[ioff;joff;koff]
+        integer CHF_DDECL[ip;jp;kp]
+        real_t dli
+
+c       10 PTS difference operator. All different directions cases
+c       could be dealt with in one block but it's messy ...
+c
+        CHF_DTERM[
+        ioff = CHF_ID(0,idir);
+        joff = CHF_ID(1,idir);
+        koff = CHF_ID(2,idir)]
+
+        CHF_DTERM[
+        ip = CHF_ID(0,idir);
+        jp = CHF_ID(1,idir);
+        kp = CHF_ID(2,idir)]
+
+        dli = one/dl
+
+c       Perform first difference calculation in the interior.
+
+#if CH_SPACEDIM ==2
+
+        CHF_MULTIDO[centerBox;i;j;k]
+        dphi(CHF_IX[i;j;k]) =
+     &   fourth *(
+     &            (phi(CHF_IX[i+ip;j+jp;k])
+     &            -phi(CHF_IX[i-ip;j-jp;k])
+     &            )
+     &            +half *(
+     &                    phi(CHF_IX[i+ip-jp; j+jp-ip; k])
+     &                   -phi(CHF_IX[i-ip-jp; j-jp-ip; k])
+     &                   +phi(CHF_IX[i+ip+jp; j+jp+ip; k])
+     &                   -phi(CHF_IX[i-ip+jp; j-jp+ip; k])
+     &                   )
+     &           )* dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+          dphi(CHF_IX[i;j;k]) =
+     &      half *(
+     &             (phi(CHF_IX[i+ip;j+jp;k])
+     &             -phi(CHF_IX[i   ;j   ;k])
+     &             )
+     &             + half *(
+     &                      phi(CHF_IX[i+ip-jp; j+jp-ip; k])
+     &                     -phi(CHF_IX[i   -jp; j   -ip; k])
+     &                     +phi(CHF_IX[i+ip+jp; j+jp+ip; k])
+     &                     -phi(CHF_IX[i   +jp; j   +ip; k])
+     &                     )
+     &            )* dli
+          CHF_ENDDO
+        endif
+
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+          dphi(CHF_IX[i;j;k]) =
+     &      half *(
+     &             (phi(CHF_IX[i   ;j   ;k])
+     &             -phi(CHF_IX[i-ip;j-jp;k])
+     &             )
+     &            + half *(
+     &                     phi(CHF_IX[i   -jp; j   -ip; k])
+     &                    -phi(CHF_IX[i-ip-jp; j-jp-ip; k])
+     &                    +phi(CHF_IX[i   +jp; j   +ip; k])
+     &                    -phi(CHF_IX[i-ip+jp; j-jp+ip; k])
+     &                    )
+     &            )* dli
+          CHF_ENDDO
+        endif
+#endif
+
+
+#if CH_SPACEDIM ==3
+
+        CHF_MULTIDO[centerBox;i;j;k]
+        dphi(CHF_IX[i;j;k]) =
+     &   sixth *(
+     &           (phi(CHF_IX[i+ip;j+jp;k+kp])
+     &           -phi(CHF_IX[i-ip;j-jp;k-kp])
+     &           )
+     &          + half *(
+     &                   phi(CHF_IX[i+ip-kp; j+jp-ip; k+kp-jp])
+     &                  -phi(CHF_IX[i-ip-kp; j-jp-ip; k-kp-jp])
+     &                  +phi(CHF_IX[i+ip+kp; j+jp+ip; k+kp+jp])
+     &                  -phi(CHF_IX[i-ip+kp; j-jp+ip; k-kp+jp])
+     &                  +phi(CHF_IX[i+ip-jp; j+jp-kp; k+kp-ip])
+     &                  -phi(CHF_IX[i-ip-jp; j-jp-kp; k-kp-ip])
+     &                  +phi(CHF_IX[i+ip+jp; j+jp+kp; k+kp+ip])
+     &                  -phi(CHF_IX[i-ip+jp; j-jp+kp; k-kp+ip])
+     &                  )
+     &          )* dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+          dphi(CHF_IX[i;j;k]) =
+     &      third *(
+     &              (phi(CHF_IX[i+ip;j+jp;k+kp])
+     &              -phi(CHF_IX[i   ;j   ;k   ])
+     &              )
+     &             + half *(
+     &                      phi(CHF_IX[i+ip-kp; j+jp-ip; k+kp-jp])
+     &                     -phi(CHF_IX[i   -kp; j   -ip; k   -jp])
+     &                     +phi(CHF_IX[i+ip+kp; j+jp+ip; k+kp+jp])
+     &                     -phi(CHF_IX[i   +kp; j   +ip; k   +jp])
+     &                     +phi(CHF_IX[i+ip-jp; j+jp-kp; k+kp-ip])
+     &                     -phi(CHF_IX[i   -jp; j   -kp; k   -ip])
+     &                     +phi(CHF_IX[i+ip+jp; j+jp+kp; k+kp+ip])
+     &                     -phi(CHF_IX[i   +jp; j   +kp; k   +ip])
+     &                     )
+     &             )* dli
+        CHF_ENDDO
+        endif
+
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+          dphi(CHF_IX[i;j;k]) =
+     &      third *(
+     &              (phi(CHF_IX[i   ;j   ;k   ])
+     &              -phi(CHF_IX[i-ip;j-jp;k-kp])
+     &              )
+     &             + half *(
+     &                      phi(CHF_IX[i   -kp; j   -ip; k   -jp])
+     &                     -phi(CHF_IX[i-ip-kp; j-jp-ip; k-kp-jp])
+     &                     +phi(CHF_IX[i   +kp; j   +ip; k   +jp])
+     &                     -phi(CHF_IX[i-ip+kp; j-jp+ip; k-kp+jp])
+     &                     +phi(CHF_IX[i   -jp; j   -kp; k   -ip])
+     &                     -phi(CHF_IX[i-ip-jp; j-jp-kp; k-kp-ip])
+     &                     +phi(CHF_IX[i   +jp; j   +kp; k   +ip])
+     &                     -phi(CHF_IX[i-ip+jp; j-jp+kp; k-kp+ip])
+     &                     )
+     &             )* dli
+          CHF_ENDDO
+        endif
+#endif
+
+        return
+        end
+
+!---------------------------------------------------------------------------
+
+        subroutine TENPTSSTAGGRAD(
+     &    CHF_FRA1[dphi],
+     &    CHF_CONST_FRA1[phi],
+     &    CHF_CONST_INT[idir],
+     &    CHF_CONST_REAL[dl],
+     &    CHF_BOX[loBox],
+     &    CHF_CONST_INT[hasLo],
+     &    CHF_BOX[hiBox],
+     &    CHF_CONST_INT[hasHi],
+     &    CHF_BOX[centerBox])
+
+        integer CHF_DDECL[i   ;j   ;k   ]
+        integer CHF_DDECL[ioff;joff;koff]
+        integer CHF_DDECL[ip;jp;kp]
+        real_t dli
+
+c       10 PTS difference operator. All different directions cases
+c       could be dealt with in one block but it's messy ...
+c
+        CHF_DTERM[
+        ioff = CHF_ID(0,idir);
+        joff = CHF_ID(1,idir);
+        koff = CHF_ID(2,idir)]
+
+        CHF_DTERM[
+        ip = CHF_ID(0,idir);
+        jp = CHF_ID(1,idir);
+        kp = CHF_ID(2,idir)]
+
+        dli = one/dl
+
+c       Perform first difference calculation in the interior.
+
+#if CH_SPACEDIM ==2
+
+        CHF_MULTIDO[centerBox;i;j;k]
+          dphi(CHF_IX[i;j;k]) =
+     &    half *(
+     &           (phi(CHF_IX[i   ;j   ;k])
+     &           -phi(CHF_IX[i-ip;j-jp;k])
+     &           )
+     &          + half *(
+     &                   phi(CHF_IX[i   -jp; j   -ip; k])
+     &                  -phi(CHF_IX[i-ip-jp; j-jp-ip; k])
+     &                  +phi(CHF_IX[i   +jp; j   +ip; k])
+     &                  -phi(CHF_IX[i-ip+jp; j-jp+ip; k])
+     &                  )
+     &          )* dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+#endif
+
+
+#if CH_SPACEDIM ==3
+
+        CHF_MULTIDO[centerBox;i;j;k]
+          dphi(CHF_IX[i;j;k]) =
+     &      third *(
+     &              (phi(CHF_IX[i   ;j   ;k   ])
+     &              -phi(CHF_IX[i-ip;j-jp;k-kp])
+     &              )
+     &             + half *(
+     &                      phi(CHF_IX[i   -kp; j   -ip; k   -jp])
+     &                     -phi(CHF_IX[i-ip-kp; j-jp-ip; k-kp-jp])
+     &                     +phi(CHF_IX[i   +kp; j   +ip; k   +jp])
+     &                     -phi(CHF_IX[i-ip+kp; j-jp+ip; k-kp+jp])
+     &                     +phi(CHF_IX[i   -jp; j   -kp; k   -ip])
+     &                     -phi(CHF_IX[i-ip-jp; j-jp-kp; k-kp-ip])
+     &                     +phi(CHF_IX[i   +jp; j   +kp; k   +ip])
+     &                     -phi(CHF_IX[i-ip+jp; j-jp+kp; k-kp+ip])
+     &                     )
+     &             )* dli
+        CHF_ENDDO
+
+c       Perform calculation on the cells adjacent to the domain boundary in
+c       current direction, if required.
+
+        if (hasLo .eq. 1) then
+          CHF_MULTIDO[loBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+
+
+        if (hasHi .eq. 1) then
+          CHF_MULTIDO[hiBox;i;j;k]
+            dphi(CHF_IX[i;j;k]) = zero
+          CHF_ENDDO
+        endif
+#endif
+
+        return
+        end

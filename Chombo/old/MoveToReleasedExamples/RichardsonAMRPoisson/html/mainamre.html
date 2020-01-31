@@ -1,0 +1,164 @@
+<head>
+<title>AMRElliptic Tutorial (main routine)</title>
+</head>
+<body>
+<p>
+<h1>AMR Poisson Solver </h1>
+<p>
+This page is to tell the user how to build a Poisson 
+operator and run AMRSolver with the operator.  This
+page relies upon several auxilliary functions which 
+are presented in <a href="amrefunc.html"> amrefunc.html </a>.
+
+First we include all the header files we need. 
+The PoissProb_F.H file is generated automatically 
+by Chombo Fortran from parsing the file PoissProb.ChF.
+That source file is also given in 
+ <a href="amrefunc.html"> amrefunc.html </a>.
+<pre><font face="Courier">
+#include "LevelOp.H"
+#include "LevelData.H"
+#include "FArrayBox.H"
+#include "PoissonBC.H"
+#include "ParmParse.H"
+#include "AMRSolver.H"
+#include "PoissonOp.H"
+#include "Vector.H"
+#include "AMRIO.H"
+#include "SPMD.H"
+#include "MeshRefine.H"
+#include "LoadBalance.H"
+#include "localFuncs.H"
+#include "PoissProb_F.H"
+int main(int argc, char* argv[])
+{
+</font></pre>
+Here we call MPI_Init and start the scoping trick
+that puts all Chombo code within braces inside
+MPI_Init and MPI_Finalize.  This forces the destructors
+for Chombo classes to be called before MPI_Finalize. 
+<pre><font face="Courier">
+#ifdef MPI
+  MPI_Init(&argc, &argv);
+#endif
+  {//scoping trick
+  if (argc < 2) 
+    {
+      cerr<< " usage " << argv[0] << " \<input_file_name\> " << endl;
+      exit(0);
+    }
+  char* in_file = argv[1];
+</font></pre>
+Here we declare a ParmParse object which reads the input file
+and puts its contents into a static table.  After this point, all
+ParmParse objects will read input data from this table.
+<pre><font face="Courier">
+  ParmParse pp(argc-2,argv+2,NULL,in_file);
+
+  int lbase;
+  int iverbose;
+  ParmParse pp2("main");
+  pp2.get("lbase", lbase);
+  pp2.get("verbose", iverbose);
+  bool verbose = (iverbose == 1);
+  
+</font></pre>
+Set up the Poisson operator.  We set the boundary conditions
+through the DomainGhostBC class.  It holds a series of virtual
+base classes (one for each side of the domain) which have
+functions defined to set ghost cell boundary conditions.
+We then insert this boundary condition class into the elliptic
+operator.
+<pre><font face="Courier">
+  DomainGhostBC domghostbc;
+  int eekflag = setDomainBC(domghostbc, verbose);
+  if(eekflag != 0)
+    {
+      cerr << "error: setDomainBC returned error code  " 
+           << eekflag << endl;
+      exit(1);
+    }
+  PoissonOp levelop;
+  levelop.setDomainGhostBC(domghostbc);
+  int numlevels;
+</font></pre>
+Here we call our local function which sets all
+the domain parameters from the input file.
+For each level, this sets the domains, the
+layouts, the refinement ratio between levels, 
+and the grid spacing.  This includes load 
+balancing in parallel.
+<pre><font face="Courier">
+  Vector<DisjointBoxLayout> vectGrids;
+  Vector<Box> vectDomain;
+  Vector<int> vectRefRatio;
+  Vector<Real> vectDx;
+  eekflag = setGrids(vectGrids, vectDomain, vectDx, 
+                     vectRefRatio, numlevels, verbose);
+  if(eekflag != 0)
+    {
+      cerr << "error: setGrids returned error code " 
+           << eekflag << endl;
+      exit(2);
+    }
+
+</font></pre>
+Define the data holders and fill the right-hand side
+holder (rhs) by calling a local function.
+<pre><font face="Courier">
+  Vector<LevelData<FArrayBox>* > phi(numlevels, NULL);
+  Vector<LevelData<FArrayBox>* > rhs(numlevels, NULL);
+  for(int ilev = 0; ilev < numlevels; ilev++)
+    {
+      phi[ilev] = new LevelData<FArrayBox>(vectGrids[ilev], 1, IntVect::TheUnitVector());
+      rhs[ilev] = new LevelData<FArrayBox>(vectGrids[ilev], 1, IntVect::TheZeroVector());
+    }
+
+  eekflag = setRHS(rhs, vectDx, vectDomain, numlevels, verbose);
+  if(eekflag != 0)
+    {
+      cerr << "error: setRHS returned error code " 
+           << eekflag << endl;
+      exit(3);
+    }
+    
+</font></pre>
+Define the elliptic solver and its parameters.  Then
+call the solveAMR member function to generate
+the solution array (phi).
+<pre><font face="Courier">
+
+  AMRSolver amrSolver(vectGrids,  vectDomain,
+                      vectDx,     vectRefRatio, 
+                      numlevels, lbase, &levelop);
+  amrSolver.setVerbose(verbose);
+  amrSolver.setMaxIter(100);
+
+  amrSolver.solveAMR(phi, rhs);
+
+</font></pre>
+Output both the solution and the right-hand side in
+HDF5 format and exit.
+<pre><font face="Courier">
+  eekflag = outputData(phi, rhs, vectGrids, vectDomain,
+                       vectRefRatio, numlevels, verbose);
+  if(eekflag != 0)
+    {
+      cerr << "error: outputData returned error code " 
+           << eekflag << endl;
+      exit(4);
+    }
+  for(int ilev = 0; ilev < numlevels; ilev++)
+    {
+      delete phi[ilev];
+      delete rhs[ilev];
+    }
+  }//end scoping trick
+#ifdef MPI
+  MPI_Finalize();
+#endif
+
+  return(0);
+}
+
+</font></pre>

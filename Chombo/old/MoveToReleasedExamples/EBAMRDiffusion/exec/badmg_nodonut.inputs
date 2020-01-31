@@ -1,0 +1,58 @@
+# Geometry to use
+geometry = keratocyte
+
+use_variable_coeff = false
+diffusion_eps = 0.
+# D (micrometers^2 / s)
+diffusion_constant = 5.0
+
+# J (micromoles / s)
+source_scaling = 1.0
+
+# k (1 / s)
+sink_scaling = 3.0
+
+# G (initially)
+initial_value = 0.0
+
+# Domain information (micrometers)
+lo_corner = -7.3 -25.6 -0.8
+dx = 0.2
+
+# AMR levels, coarsest domain size, and refinement ratios
+num_levels = 4
+num_cells = 64 256 32 
+
+ref_ratio = 2 2 2 2 2
+
+# Time information
+dt       =  0.1
+end_time = 0.1
+
+# Output options (set output_interval = -1 to turn off output)
+output_interval = 10
+output_prefix   = keratocyte
+
+# Parameters for grid generation
+max_box_size = 32
+block_factor = 8
+
+# Parameters for AMR generation
+fill_ratio = 0.80
+tag_type = boundary
+
+# Multigrid parameters
+#  1 -> v-cycle, 2 -> w-cycle
+mg_num_cycles       = 1
+mg_num_smooths      = 3
+mg_relax_type       = 2
+mg_lazy_relax       = true
+mg_toler            = 1.0e-09
+mg_hang_toler       = 1.0e-15
+mg_iter_max         = 4
+mg_num_precond_iter = 4
+
+# AMR solver reflux option
+#   0 -> EB doesn't cross coarse-fine grid boundaries (fast)
+#   2 -> EB does    cross coarse-fine grid boundaries (slow)
+which_reflux = 0

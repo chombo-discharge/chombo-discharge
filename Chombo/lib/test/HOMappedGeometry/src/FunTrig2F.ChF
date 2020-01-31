@@ -1,0 +1,52 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine SETFUNCTIONTRIG2(
+!     Evaluates trigonometric function from physical coordinates.
+!
+!     => inputs,  <= outputs
+!     values <= function values, neqns components on bx
+!     coords => space coordinates, neqns * CH_SPACEDIM components on bx
+!     bx => indices of coords and values
+!
+!     petermc, 3 Sep 2010
+     &     CHF_FRA[values],
+     &     CHF_CONST_FRA[coords],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      integer ieqn, ieqn3, neqns
+      REAL_T CHF_DDECL[x;y;z]
+
+      neqns = CHF_NCOMP[values]
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM * neqns) then
+         print *, 'SETFUNCTIONTRIG2:  coords must have ',
+     &        (CH_SPACEDIM * neqns), ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      CHF_MULTIDO[bx; i; j; k]
+         do ieqn = 0, neqns - 1
+
+            ieqn3 = CH_SPACEDIM * ieqn
+
+            CHF_DTERM[
+            x = coords(CHF_IX[i;j;k], ieqn3    ) ;
+            y = coords(CHF_IX[i;j;k], ieqn3 + 1) ;
+            z = coords(CHF_IX[i;j;k], ieqn3 + 2) ]
+
+            values(CHF_IX[i;j;k], ieqn) = CHF_DTERM[
+     &           cos(Pi * x) ;
+     &           + cos(Pi * y) ;
+     &           + cos(Pi * z) ]
+
+         enddo
+      CHF_ENDDO
+
+      return
+      end

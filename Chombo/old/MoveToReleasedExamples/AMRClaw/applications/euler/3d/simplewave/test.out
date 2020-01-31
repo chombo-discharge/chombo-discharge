@@ -1,0 +1,79 @@
+maximum step = 2
+maximum time = 1
+number of cells = 30  10  10
+maximum level = 2
+refinement ratio = 2 2 2 
+regrid interval = 2 2 
+refinement threshold = 0.25
+blocking factor = 2
+max grid size = 400
+fill ratio = 0.7
+checkpoint interval = -1
+plot interval = 2
+desired CFL = 0.9
+
+CLAWPACK PARAMETERS : 
+Initial dt 0.03
+maximum cfl 1
+method(2:3) (order of integration) = 2 22
+method(5) (source term splitting) = 0
+method(6) (mcapa) = 22
+method(7) (maux) = 22
+
+meqn (number of equations) = 5
+maux (number of auxiliary variables) = 22
+mcapa (location of capacity function) = 22
+mwaves (number of waves) = 3
+mthlim(mwaves) (limiters) = 3 3 3 
+
+mbc (number of ghost cells) = 2
+State names : 
+  rho
+  u-momentum
+  v-momentum
+  w-momentum
+  energy
+
+Domain values 
+xlower, xupper = -3 3
+ylower, yupper = -1 1
+zlower, zupper = -1 1
+Auxiliary array type : 
+  xleft
+  xleft
+  xleft
+  xleft
+  xleft
+  xleft
+  yleft
+  yleft
+  yleft
+  yleft
+  yleft
+  yleft
+  zleft
+  zleft
+  zleft
+  zleft
+  zleft
+  zleft
+  xleft
+  yleft
+  zleft
+  capacity
+
+mthbc(2*dim) (boundary conditions) = 1 1 1 1 1 1 
+
+ Done with qinit
+ Done with qinit
+ Done with qinit
+ Done with qinit
+ Done with qinit
+ Done with qinit
+Courant number =    0.802  dt =    0.03000
+
+coarse time step   0  old time = 0.000000e+00  old dt = 3.000000e-02
+Courant number =    0.900  dt =    0.03365
+
+coarse time step   1  old time = 3.000000e-02  old dt = 3.364970e-02
+peak memory usage: 74701000 bytes (71 Mb)

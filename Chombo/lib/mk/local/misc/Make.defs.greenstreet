@@ -1,0 +1,41 @@
+# -*- Mode: Makefile; Modified: "Thu 13 Apr 2006 17:32:09 by dbs"; -*-
+
+###  This file is for 'greenstreet', an AMD64 Opteron running Linux.
+
+###  It assumes that "Chombo/lib/mk/Make.defs.local" is copied or
+###  symlink'd from "Chombo/lib/mk/local/Make.defs.ANAG"
+
+###  See "Make.defs.ANAG" for other customizations for ANAG machines
+
+################################################################
+
+makefiles+=local/Make.defs.greenstreet
+
+ifeq ($(findstring Make.defs.ANAG,$(makefiles)),)
+  $(error Make.defs.ANAG must be copied/symlinked to Make.defs.local)
+endif
+
+# Intel v8.x is a 32bit-only compiler
+ifeq ($(cxxname),icpc)
+  ifeq (8,$(word 1,$(subst ., ,$(shell $(CXX) -V 2>&1 | awk '/^Intel.*Version/{if($$7~/Version/){print $$8};if($$8~/Version/){print $$9}}'))))
+    USE_64=FALSE
+  endif
+endif
+
+# PathScale compilers break when doing dynamic linking
+ifeq ($(cxxname),pathCC)
+  #XXX -- this is done in Make.defs now
+  #XXXinclude $(CHOMBO_HOME)/mk/compiler/Make.defs.PathScale
+  # dynamic linking doesn't work because of the version of Linux on greenstreet
+  #XXX -- this may be not true any more since Chip updated -- need to check this <dbs> 9Mar04
+  lddbgflags+=-static
+  ldoptflags+=-static
+endif
+
+
+# ElectricFence is off by default and only works in 64bit mode
+ifeq ($(EFENCE),TRUE)
+  ifneq ($(USE_64),TRUE)
+    $(error no ElectricFence library for 32bit mode)
+  endif
+endif

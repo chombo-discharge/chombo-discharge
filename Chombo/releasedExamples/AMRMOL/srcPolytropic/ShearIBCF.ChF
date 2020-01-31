@@ -1,0 +1,111 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "LGintegrator.H"
+
+        subroutine SHEARSETF(
+     &    CHF_REAL[ausmallPressure],
+     &    CHF_CONST_REAL[augamma],
+     &    CHF_CONST_REAL[auambientDensity],
+     &    CHF_CONST_INT[aupressure],
+     &    CHF_CONST_REAL[auwidthinv],
+     &    CHF_CONST_REAL[audelt],
+     &    CHF_CONST_REAL[auartvisc])
+
+#include "ShearCommon.fh"
+#include "EosCommon.fh"
+
+        real_t r0,p0,umag
+
+        gamma = augamma
+
+        ambientdensity = auambientDensity
+
+        pressure = aupressure
+
+        artvisc = auartvisc
+
+        r0 = ambientdensity
+        p0 = one
+
+        umag = sqrt(gamma*p0/r0)
+
+        widthinv = auwidthinv
+        delt = audelt
+
+        smallr = small*r0
+        smallu = small*umag
+        smallp = small*r0*half*umag*umag
+
+        ausmallPressure = smallp
+
+        return
+        end
+
+        subroutine SHEARINITF(
+     &    CHF_FRA[U],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_BOX[box])
+
+#include "ShearCommon.fh"
+#include "EosCommon.fh"
+
+        real_t ke,rho0,p0,rho,p,kemax
+        integer CHF_DDECL[i;j;k]
+        real_t CHF_DDECL[uu;vv;ww]
+        real_t CHF_DDECL[x;y;z]
+
+        rho0 = ambientdensity
+        p0 = one
+
+        rho = rho0
+        kemax = half * rho
+        p = ten * kemax
+
+        CHF_MULTIDO[box;i;j;k]
+           CHF_DTERM[
+           uu = zero ;
+           vv = zero ;
+           ww = zero ]
+
+           CHF_DTERM[
+           x = (i*one + half)*dx ;
+           y = (j*one + half)*dx ;
+           z = (k*one + half)*dx ]
+
+#if CH_SPACEDIM>=2
+           if (y .le. half) then
+              uu = tanh(widthinv * (y - fourth))
+           else
+              uu = tanh(widthinv * (three*fourth - y))
+           endif
+           vv = delt * sin(two*Pi*x)
+#if CH_SPACEDIM==3
+           ww = zero
+#endif
+#endif
+
+c           if (pressure .eq. 0) then
+c              p = (rho/rho0)**gamma * p0
+c           else
+c              p = p0
+c           endif
+
+           ke = half*(CHF_DTERM[uu*uu; + vv*vv; + ww*ww])
+
+           U(CHF_IX[i;j;k],URHO) = rho
+
+           CHF_DTERM[
+           U(CHF_IX[i;j;k],UMOMX) = uu*rho ;
+           U(CHF_IX[i;j;k],UMOMY) = vv*rho ;
+           U(CHF_IX[i;j;k],UMOMZ) = ww*rho ]
+
+           U(CHF_IX[i;j;k],UENG) = p/(gamma - one) + rho*ke
+        CHF_ENDDO
+
+        return
+        end

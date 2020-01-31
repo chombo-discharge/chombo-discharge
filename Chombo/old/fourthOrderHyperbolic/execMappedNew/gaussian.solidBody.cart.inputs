@@ -1,0 +1,80 @@
+godunov.verbosity = 1
+
+godunov.max_step = 20000
+godunov.max_time = 1.0
+godunov.fixed_dt = 0.0060
+godunov.cfl = 0.75
+godunov.cfl = 1.0
+godunov.initial_cfl = 0.75
+godunov.max_dt_growth = 1.1
+godunov.dt_tolerance_factor = 1.1
+# need to convert initial conditions to average
+godunov.initial_average = 1
+
+godunov.domain_length = 1.0
+godunov.num_cells = 128 128 128 
+godunov.num_cells = 64 64 64 
+#godunov.num_cells = 32 32 32
+# godunov.is_periodic = 0 0 0 
+godunov.is_periodic = 1 1 1 
+
+godunov.max_level = 0
+godunov.ref_ratio = 4 4 4 2 2
+godunov.regrid_interval = 2 2 2 2 2 2
+godunov.tag_buffer_size = 1
+godunov.refine_thresh = 10.
+godunov.block_factor = 8
+godunov.max_grid_size = 128
+godunov.fill_ratio = 0.75
+
+godunov.checkpoint_interval = -1
+godunov.plot_interval = 1
+godunov.plot_prefix  = gaussian.solidBody.cart.064.
+godunov.chk_prefix = check.64.
+
+godunov.useHyperviscosity = 0
+godunov.hyperviscosity = 0.01
+
+godunov.limitFaceValues = 0
+godunov.enforceMinVal = 1
+godunov.minVal = 0.0
+
+# Artificial viscosity
+godunov.use_artificial_viscosity = 0
+godunov.artificial_viscosity = 0.3
+godunov.fourth_order_artificial_viscosity_parameter = 0.42
+
+
+#######################################################################
+
+# Set which problem to solve
+godunov.problem = gaussianadvection
+gaussian.velType = solidBody
+#gaussian.velType = uniform
+gaussian.radius = .075
+gaussian.center = 0.75 0.5 0.5
+coordsys.type = cartesian
+#coordsys.type = twisted
+
+# additional initial condition parameters
+#compact.width = 0.25
+#compact.center = 0.75 0.5 0.0
+#sinusoidal.wavenumber = 1 1 0 
+
+# uniform velocity parameters
+gaussian.vel = 1.0 0.5 0 
+
+# solidBody velocity parameters
+gaussian.omega = 1.0
+gaussian.rotationCenter = 0.5 0.5 0.5
+
+# coordinate system inputs
+# twisted coordsys parameters
+coordsys.radius = 0.5
+coordsys.twist = 0.5
+
+# warped coordsys parameters
+#coordsys.scale = 0.1 0.1 0.0
+#coordsys.relative_tolerance = 1.0e-12
+#coordsys.absolute_tolerance = 1.0e-13
+#coordsys.maximum_iterations = 100

@@ -1,0 +1,48 @@
+## This file defines variables for compiling on the login nodes of the UK Linux
+## machine 'archer'. It was adapted from Make.defs.hopper, which has a similar set of modules,
+## and also calls its compilers CC, cc, and ftn, which point to the cray, gnu, or intel compilers
+## depending on which of the PrgEnv-cray,PrgEnv-gnu, or PrgEnv-intel is loaded
+
+makefiles+=local/Make.defs.archer
+
+#default to MPI=TRUE,OPT=TRUE,DEBUG=FALSE 
+MPI=TRUE
+OPT=TRUE
+DEBUG=FALSE
+
+#this seems to be the Cray way
+CXX=CC
+FC=ftn
+MPICXX=CC
+USE_64=TRUE
+
+#just GNU for now, intel next, then maybe cray (right now crayftn segfaults, I think something to do with CPP not removing #)
+ifeq ($(PE_ENV),GNU)
+
+#need to load the PrgEnv-gnu module, PrgEnv-cray is default 
+#e.g module swap PrgEnv-cray PrgEnv-gnu
+
+CH_CPP=$(CXX) -E -P -C
+XTRACONFIG=.GNU
+
+#the archer docs suggest the following (apart from the march-ivybridge)
+cxxoptflags += -march=ivybridge -O2 -mavx -ftree-vectorize -ffast-math -funroll-loops
+foptflags += -march=ivybridge -O2 -mavx -ftree-vectorize -ffast-math -funroll-loops
+
+else ifeq ($(PE_ENV),INTEL)
+
+CH_CPP=$(CXX) -EP -C
+XTRACONFIG=.INTEL
+cxxoptflags += -O2 -xAVX
+foptflags += -O2 -xAVX
+
+else
+$(ECHO) "UNKNOWN PROGRAMMING ENVIRONMENT!"
+endif
+
+# The appropriate module (cray-hdf5-parallel) must be loaded for this to work.
+USE_HDF=TRUE
+HDFLIBFLAGS=   -L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFMPILIBFLAGS=-L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFINCFLAGS=   -I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS)
+HDFMPIINCFLAGS=-I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS)

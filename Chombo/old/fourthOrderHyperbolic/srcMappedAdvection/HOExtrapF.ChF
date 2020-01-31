@@ -1,0 +1,48 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+c ------------------------------------------------------
+c  fills in phi values in destBox with quadratically extrapolated
+c  values in the idir direction.
+c
+c  phi    <-> phi
+c  destBox -> box over which to compute extrapolated values
+c  idir    -> direction in which to do extrapolation
+c  hiLo    -> 1 if extrapolating in the positive direction,
+c            -1 if extrapolating in the negative direction
+c ------------------------------------------------------
+      subroutine quadExtrap(CHF_FRA[phi],
+     &                      CHF_BOX[destBox],
+     &                      CHF_INT[idir],
+     &                      CHF_INT[hiLo])
+
+      REAL_T nearval, midval, farval
+      integer CHF_AUTODECL[i], CHF_AUTODECL[ii]
+      integer n
+
+
+      CHF_DTERM[ii0 = -hiLo*CHF_ID(0,idir);
+                ii1 = -hiLo*CHF_ID(1,idir);
+                ii2 = -hiLo*CHF_ID(2,idir);
+                ii3 = -hiLo*CHF_ID(3,idir);
+                ii4 = -hiLo*CHF_ID(4,idir);
+                ii5 = -hiLo*CHF_ID(5,idir)]
+
+      do n=0, CHF_NCOMP[phi]-1
+         CHF_AUTOMULTIDO[destBox;i]
+            nearval = phi(CHF_OFFSETIX[i;+ii],n)
+            midval = phi(CHF_OFFSETIX[i;+2*ii],n)
+            farval = phi(CHF_OFFSETIX[i;+3*ii],n)
+
+            phi(CHF_AUTOIX[i],n) = three*(nearval - midval) + farval
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+

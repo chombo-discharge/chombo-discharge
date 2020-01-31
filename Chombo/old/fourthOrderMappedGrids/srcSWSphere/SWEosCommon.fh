@@ -1,0 +1,16 @@
+#ifdef CH_LANG_CC
+/*
+ *      _______              __
+ *     / ___/ /  ___  __ _  / /  ___
+ *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+ *    \___/_//_/\___/_/_/_/_.__/\___/
+ *    Please refer to Copyright.txt, in Chombo's root directory.
+ */
+#endif
+
+C
+C   Equation of state Fortran constants and small/cutoff values.
+C
+        real_t gravity, omega, alpha, smallh, small
+        parameter (small = 1e-8)
+        common /sweos/ gravity, omega, alpha, smallh

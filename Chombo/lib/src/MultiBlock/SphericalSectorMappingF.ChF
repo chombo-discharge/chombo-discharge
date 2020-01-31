@@ -1,0 +1,451 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine MAPSPHERICALSECTOR(
+!     Computes physical coordinates from Cartesian coordinates.
+!
+!     => inputs,  <= outputs
+!     coords <= space coordinates, CH_SPACEDIM components on bx
+!     mapco => mapped coordinates, CH_SPACEDIM components on bx
+!     iblock => index of block
+!     maplo => cartesian coordinates of lower corner of sector domain
+!     maplen => cartesian coordinate lengths of sector domain
+!     cylorg => physical coordinates of center of sphere
+!     bxwid => physical box width
+!     outr => radius of circle
+!     bx => indices of points
+!
+!     petermc, 21 May 2008
+     &     CHF_FRA[coords],
+     &     CHF_CONST_FRA[mapco],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[maplo],
+     &     CHF_CONST_REALVECT[maplen],
+     &     CHF_CONST_REALVECT[cylorg],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      real_t xorg, yorg, zorg, rlo, alo, blo, rlen, alen, blen
+      real_t maphi(0:2)
+
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM) then
+         print *, 'MAPSPHERICALSECTOR:  coords must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+#if CH_SPACEDIM == 3
+      xorg = cylorg(0)
+      yorg = cylorg(1)
+      zorg = cylorg(2)
+
+      maphi(0) = maplo(0) + maplen(0)
+      maphi(1) = maplo(1) + maplen(1)
+      maphi(2) = maplo(2) + maplen(2)
+
+!     Subroutine spokesmap takes mapco in the order RADIAL, ADIR, BDIR.
+      if (iblock .eq. 0) then
+!     RADIAL on +X, ADIR on +Z, BDIR on +Y
+         rlo = maplo(0)
+         alo = maplo(2)
+         blo = maplo(1)
+         rlen = maplen(0)
+         alen = maplen(2)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spheremap(
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 1) then
+!     RADIAL on +Y, ADIR on +Z, BDIR on -X
+         rlo = maplo(1)
+         alo = maplo(2)
+         blo = -maphi(0)
+         rlen = maplen(1)
+         alen = maplen(2)
+         blen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call spheremap(
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        -mapco(CHF_IX[i;j;k], 0),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 2) then
+!     RADIAL on -X, ADIR on +Z, BDIR on -Y
+         rlo = -maphi(0)
+         alo = maplo(2)
+         blo = -maphi(1)
+         rlen = maplen(0)
+         alen = maplen(2)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spheremap(
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        -mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        -mapco(CHF_IX[i;j;k], 1),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 3) then
+!     RADIAL on -Y, ADIR on +Z, BDIR on +X
+         rlo = -maphi(1)
+         alo = maplo(2)
+         blo = maplo(0)
+         rlen = maplen(1)
+         alen = maplen(2)
+         blen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call spheremap(
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        -mapco(CHF_IX[i;j;k], 1),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 4) then
+!     RADIAL on +Z, ADIR on -X, BDIR on +Y
+         rlo = maplo(2)
+         alo = -maphi(0)
+         blo = maplo(1)
+         rlen = maplen(2)
+         alen = maplen(0)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spheremap(
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        -mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 5) then
+!     RADIAL on -Z, ADIR on +X, BDIR on +Y
+         rlo = -maphi(2)
+         alo = maplo(0)
+         blo = maplo(1)
+         rlen = maplen(2)
+         alen = maplen(0)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spheremap(
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        -mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr)
+         CHF_ENDDO
+      else
+         print *, 'MAPSPHERICALSECTOR:  ',
+     &        'iblock must be in range 0:5'
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine MAPINVSPHERICALSECTOR(
+!     Computes Cartesian coordinates from physical coordinates.
+!
+!     => inputs,  <= outputs
+!     mapco <= mapped coordinates, CH_SPACEDIM components on bx
+!     coords => space coordinates, CH_SPACEDIM components on bx
+!     iblock => index of block
+!     maplo => cartesian coordinates of lower corner of sector domain
+!     maplen => cartesian coordinate lengths of sector domain
+!     cylorg => physical coordinates of center of sphere
+!     bxwid => physical box width
+!     outr => radius of circle
+!     bx => indices of points
+!
+!     petermc, 21 May 2008
+     &     CHF_FRA[mapco],
+     &     CHF_CONST_FRA[coords],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[maplo],
+     &     CHF_CONST_REALVECT[maplen],
+     &     CHF_CONST_REALVECT[cylorg],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      real_t xorg, yorg, zorg, rlo, alo, blo, rlen, alen, blen
+      real_t maphi(0:2)
+
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM) then
+         print *, 'MAPINVSPHERICALSECTOR:  coords must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+#if CH_SPACEDIM == 3
+      xorg = cylorg(0)
+      yorg = cylorg(1)
+      zorg = cylorg(2)
+
+      maphi(0) = maplo(0) + maplen(0)
+      maphi(1) = maplo(1) + maplen(1)
+      maphi(2) = maplo(2) + maplen(2)
+
+!     Subroutine spokesmap takes mapco in the order RADIAL, ADIR, BDIR.
+      if (iblock .eq. 0) then
+!     RADIAL on +X, ADIR on +Z, BDIR on +Y
+         rlo = maplo(0)
+         alo = maplo(2)
+         blo = maplo(1)
+         rlen = maplen(0)
+         alen = maplen(2)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call sphereinvmap(
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr, 1, 1, 1)
+         CHF_ENDDO
+      elseif (iblock .eq. 1) then
+!     RADIAL on +Y, ADIR on +Z, BDIR on -X
+         rlo = maplo(1)
+         alo = maplo(2)
+         blo = -maphi(0)
+         rlen = maplen(1)
+         alen = maplen(2)
+         blen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call sphereinvmap(
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr, 1, 1, -1)
+         CHF_ENDDO
+      elseif (iblock .eq. 2) then
+!     RADIAL on -X, ADIR on +Z, BDIR on -Y
+         rlo = -maphi(0)
+         alo = maplo(2)
+         blo = -maphi(1)
+         rlen = maplen(0)
+         alen = maplen(2)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call sphereinvmap(
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr, -1, 1, -1)
+         CHF_ENDDO
+      elseif (iblock .eq. 3) then
+!     RADIAL on -Y, ADIR on +Z, BDIR on +X
+         rlo = -maphi(1)
+         alo = maplo(2)
+         blo = maplo(0)
+         rlen = maplen(1)
+         alen = maplen(2)
+         blen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call sphereinvmap(
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr, -1, 1, 1)
+         CHF_ENDDO
+      elseif (iblock .eq. 4) then
+!     RADIAL on +Z, ADIR on -X, BDIR on +Y
+         rlo = maplo(2)
+         alo = -maphi(0)
+         blo = maplo(1)
+         rlen = maplen(2)
+         alen = maplen(0)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call sphereinvmap(
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr, 1, -1, 1)
+         CHF_ENDDO
+      elseif (iblock .eq. 5) then
+!     RADIAL on -Z, ADIR on +X, BDIR on +Y
+         rlo = -maphi(2)
+         alo = maplo(0)
+         blo = maplo(1)
+         rlen = maplen(2)
+         alen = maplen(0)
+         blen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call sphereinvmap(
+     &        mapco(CHF_IX[i;j;k], 2),
+     &        mapco(CHF_IX[i;j;k], 0),
+     &        mapco(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 2),
+     &        rlo, alo, blo, rlen, alen, blen, xorg, yorg, zorg,
+     &        iblock, bxwid, outr, -1, 1, 1)
+         CHF_ENDDO
+      else
+         print *, 'MAPINVSPHERICALSECTOR:  ',
+     &        'iblock must be in range 0:5'
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+      return
+      end
+
+
+      subroutine JACOBIANSPHERICALSECTOR(
+!     Computes Jacobian from Cartesian coordinates.
+!
+!     => inputs,  <= outputs
+!     jacob <= Jacobian, 1 component
+!     mapco => map space coordinates, CH_SPACEDIM components in 0:2
+!     iblock => index of block
+!     maplo => cartesian coordinates of lower corner of sector domain
+!     maplen => cartesian coordinate lengths of sector domain
+!     bxwid => physical box width
+!     outr => radius of circle
+!     bx => indices of points
+!
+!     petermc, 21 May 2008
+     &     CHF_FRA1[jacob],
+     &     CHF_CONST_FRA[mapco],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[maplo],
+     &     CHF_CONST_REALVECT[maplen],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      real_t anglo, radlo, anglen, radlen
+      real_t maphi(0:2)
+      real_t spokesjacobian
+      external spokesjacobian
+
+      if (CHF_NCOMP[mapco] .ne. CH_SPACEDIM) then
+         print *, 'JACOBIANSPHERICALSECTOR:  ',
+     &        'mapco must have ', CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+#if CH_SPACEDIM == 3
+      maphi(0) = maplo(0) + maplen(0)
+      maphi(1) = maplo(1) + maplen(1)
+      maphi(2) = maplo(2) + maplen(2)
+
+!     Subroutine spokesjacobian takes mapco in the order
+!     ANGULAR, RADIAL.
+      if (iblock .eq. 0) then
+!     angle from +y, radius from +x
+         anglo = maplo(1)
+         radlo = maplo(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        mapco(CHF_IX[i;j;k], 1), mapco(CHF_IX[i;j;k], 0),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      elseif (iblock .eq. 1) then
+!     angle from -x, radius from +y
+         anglo = -maphi(0)
+         radlo = maplo(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        -mapco(CHF_IX[i;j;k], 0), mapco(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      elseif (iblock .eq. 2) then
+!     angle from -y, radius from -x
+         anglo = -maphi(1)
+         radlo = -maphi(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        -mapco(CHF_IX[i;j;k], 1), -mapco(CHF_IX[i;j;k], 0),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      elseif (iblock .eq. 3 .or. iblock .eq. 4 .or. iblock .eq. 5) then
+!     angle from +x, radius from -y
+         anglo = maplo(0)
+         radlo = -maphi(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        mapco(CHF_IX[i;j;k], 0), -mapco(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      else
+         print *, 'JACOBIANSPHERICALSECTOR:  ',
+     &        'iblock must be in range 0:5'
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+      return
+      end

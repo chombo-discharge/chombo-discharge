@@ -1,0 +1,79 @@
+Fonts are different type styles that can be used in various widgets.
+You load a font by name and get a handle in return. The handle you get
+allows you to set the font in the various widgets and font information
+calls. 
+
+
+------------------------------------------------------------------------
+
+XFont GetFont(char *fontname);
+
+This function loads the font named by fontname and returns a handle to
+the font or NULL if there is an error.  The handle returned by this
+function is an XFontStruct pointer, but should be treated as an opaque
+data type.
+
+After you've loaded a font, you can then set that font in any widget
+that displays text.  You can also use the handle in calls to
+TextWidget() and FontHeight().
+
+When you are done with a font, you should free it with FreeFont(). 
+
+
+SEE ALSO: SetWidgetFont(), FreeFont(), GetWidgetFont(),
+          FontHeight(), TextWidth()
+------------------------------------------------------------------------
+
+void  SetWidgetFont(Widget w, XFont f);
+
+This functions sets the font used by the widget `w', to be the font
+referred to by the argument `f'.  The argument f should have been
+obtained with GetFont().
+
+
+SEE ALSO: GetFont(), FreeFont(), FontHeight(), TextWidth()
+------------------------------------------------------------------------
+
+XFont  GetWidgetFont(Widget w);
+
+This function returns a handle to the font currently used by the
+Widget w.  If an error occurs or there is no default font for the
+widget, a NULL is returned.
+
+You should NOT call FreeFont() on any value returned by this function
+unless you are sure that you allocated the font with GetFont().
+
+
+SEE ALSO: GetFont(), SetWidgetFont(), FontHeight(), TextWidth()
+------------------------------------------------------------------------
+void  FreeFont(XFont f);
+
+This function frees the resources associated with the font, f.  You
+should call this function when your application is done using a
+particular font.
+
+Of course you should make sure that no widget still uses the
+identified font.
+
+SEE ALSO: SetWidgetFont(), GetFont()
+------------------------------------------------------------------------
+
+int   FontHeight(XFont f);
+
+This function returns an integer value that is the height in pixels of
+the specified font.   The height is defined to be the ascent of the
+characters (from the baseline to the top of a capital letter) plus the
+descent of the characters (the distance from the baseline to bottom of
+a descender character like `g' or `p'). 
+
+SEE ALSO: TextWidth(), GetFont(), SetWidgetFont()
+------------------------------------------------------------------------
+
+int   TextWidth(XFont f, char *txt);
+
+This functions returns the width in pixels used by the string pointed
+to by txt in the font f.  The string should be null-terminated and the
+entire string is used to determine the width.
+
+SEE ALSO: FontHeight(), GetFont(), GetWidgetFont()
+------------------------------------------------------------------------

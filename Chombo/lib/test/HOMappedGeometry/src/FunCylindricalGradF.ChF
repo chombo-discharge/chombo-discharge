@@ -1,0 +1,127 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine SETFUNCTIONCYLINDRICALGRAD(
+!     Evaluates cylindrical harmonic function from physical coordinates.
+!
+!     => inputs,  <= outputs
+!     values <= function values, neqns * CH_SPACEDIM components on bx
+!     coords => space coordinates, neqns * CH_SPACEDIM components on bx
+!     bx => indices of coords and values
+!     n => n for cosine of angle
+!     kk => k for exponent, in 3D cylindrical
+!
+!     petermc, 30 Jun 2010
+     &     CHF_FRA[values],
+     &     CHF_CONST_FRA[coords],
+     &     CHF_BOX[bx],
+     &     CHF_CONST_INT[n],
+     &     CHF_CONST_INT[kk])
+
+      integer CHF_DDECL[i;j;k]
+      integer ieqn, ieqn3, neqns
+      REAL_T CHF_DDECL[x;y;z]
+      REAL_T r, th, r2
+
+#if CH_SPACEDIM == 3
+      REAL_T dfdr, dfdthr, dfdz
+      REAL_T besr, besdif
+!     Intel compiler ifort has besjn returning garbage if the function
+!     is declared REAL_T in double precision.
+!     REAL_T besjn
+#ifdef CH_USE_DOUBLE
+      double precision dbesjn
+#else
+      real besjn
+#endif
+#endif
+
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM) then
+         print *, 'SETFUNCTIONCYLINDRICALGRAD:  coords must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+      if (CHF_NCOMP[values] .ne. CH_SPACEDIM) then
+         print *, 'SETFUNCTIONCYLINDRICALGRAD:  values must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+      CHF_MULTIDO[bx; i; j; k]
+         CHF_DTERM[
+         x = coords(CHF_IX[i;j;k], 0) ;
+         y = coords(CHF_IX[i;j;k], 1) ;
+         z = coords(CHF_IX[i;j;k], 2) ]
+
+         r2 = CHF_DTERM[
+     &        x*x ;
+     &        + y*y ; ]
+         r = sqrt(r2)
+
+         CHF_DTERM [ ;
+         th = atan2(y, x) ; ]
+
+#if CH_SPACEDIM == 3
+#ifdef CH_USE_DOUBLE
+         besr = dbesjn(n, kk * r)
+         besdif = dbesjn(n-1, kk * r) - dbesjn(n+1, kk * r)
+#else
+         besr = besjn(n, kk * r)
+         besdif = besjn(n-1, kk * r) - besjn(n+1, kk * r)
+#endif
+         dfdr = kk * half * besdif
+     &        * exp(-kk * z)
+         dfdthr = -n / r * besr * sin(n*th)
+     &        * exp(-kk*z)
+         dfdz = -kk * besr * cos(n*th)
+     &        * exp(-kk*z)
+
+         values(CHF_IX[i;j;k], 0) = cos(th) * dfdr - sin(th) * dfdthr
+         values(CHF_IX[i;j;k], 1) = sin(th) * dfdr + cos(th) * dfdthr
+         values(CHF_IX[i;j;k], 2) = dfdz
+#elif CH_SPACEDIM == 2
+         values(CHF_IX[i;j;k], 0) =
+     &        n * r**(n-1) * (cos(n*th)*cos(th) + sin(n*th)*sin(th))
+         values(CHF_IX[i;j;k], 1) =
+     &        n * r**(n-1) * (cos(n*th)*sin(th) - sin(n*th)*cos(th))
+#endif
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine MAXFUNCTIONCYLINDRICALGRAD(
+!     Returns maximum of cylindrical harmonic function on valid domain.
+!
+!     => inputs,  <= outputs
+!     funmax <= maximum of function
+!     bxwid => width of box
+!     outr => radius of cylinder
+!     n => n for cosine of angle
+!     kk => k for exponent, in 3D cylindrical
+!
+!     petermc, 30 Jun 2010
+     &     CHF_REALVECT[funmax],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_CONST_INT[n],
+     &     CHF_CONST_INT[kk])
+
+#if CH_SPACEDIM == 3
+!      REAL_T besjn
+#endif
+
+#if CH_SPACEDIM == 3
+!      funmax = besjn(n, kk*outr) * exp(kk*half*bxwid)
+#elif CH_SPACEDIM == 2
+!      funmax = outr**n
+#endif
+
+      return
+      end

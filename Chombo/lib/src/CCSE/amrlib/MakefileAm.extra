@@ -1,0 +1,5 @@
+EXTRA_DIST +=  *.fi
+
+if SMALLBUILD_AM
+CPP_FILES = BCRec.cpp 
+endif SMALLBUILD_AM

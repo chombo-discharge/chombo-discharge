@@ -1,0 +1,1024 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+
+c ======================================================================
+c   BLAS & LAPACK ROUTINES
+c ======================================================================
+
+#ifdef CH_USE_DOUBLE
+#define BLAS1_NRM2 DNRM2
+#define BLAS1_DOT DDOT
+#define BLAS2_GEMV DGEMV
+#define BLAS3_GEMM DGEMM
+#define BLAS3_SYRK DSYRK
+#define BLAS3_SYMM DSYMM
+#define LAPACK_POTRF DPOTRF
+#define LAPACK_POTRI DPOTRI
+#define LAPACK_GGLSE DGGLSE
+#define LAPACK_GELS DGELS
+#else
+#define BLAS1_NRM2 SNRM2
+#define BLAS1_DOT SDOT
+#define BLAS2_GEMV SGEMV
+#define BLAS3_GEMM SGEMM
+#define BLAS3_SYRK SSYRK
+#define BLAS3_SYMM SSYMM
+#define LAPACK_POTRF SPOTRF
+#define LAPACK_POTRI SPOTRI
+#define LAPACK_GGLSE SGGLSE
+#define LAPACK_GELS SGELS
+#endif
+
+c ----------------------------------------------------------------------
+c  Interpolate the solution in the fine cells within a single coarse
+c  cell
+c
+c  JUFine   <=  solution on the fine cells
+c  JFine     => metric terms on the fine mesh
+c  xctm      => coordinate transformation matrix
+c  fineBoxInCr
+c            => box of fine cells in each coarse cell
+c               (Zero:refRatio-Unit)
+c  fineSmlEnd
+c            => where the lower corner of fineBoxInCr is located for
+c               the fine FArrays
+c  LSbl      => 'b' for the minimization of Ax=b (0:lenN-1,0:nComp-1)
+c  LSd       => 'd' for the constraint Bx=d (0:nComp-1)
+c  At        => transpose of 'A' for the minimization of Ax=b.  Size
+c               (0:lenN-1,0:lenMMax-1) but filled to
+c               (0:lenN-1,0:lenM-1)
+c  Xip       => <xi_i^p> for the fine cells
+c                 (p[0:lenN-1], cell[fineBox])
+c  gradXip   => gradients (note that dir and p are together in 1
+c               dimensions to support 6 space dimensions)
+c                 (dir[0:SpaceDim-1] (,/*) p[0:lenN-1],
+c                  cell[fineBox])
+c  lenM      => number of cells in stencil (At = lenN x lenM)
+c  stat     <=  return status
+c               -1 - mismatch between Lapack computation and internal
+c                    computation
+c                0 - success
+c               >0 - Lapack error
+c ----------------------------------------------------------------------
+
+cDBG
+c     Define LSE_USE_LAPACK to solve with Lapack's [SD]GGLSE
+c#define LSE_USE_LAPACK
+c     Define LSE_USE_INTERNAL to solve with the custom solver
+#define LSE_USE_INTERNAL
+c     If both are defined, the results are compared to this many significant
+c     digits.
+#ifdef CH_USE_DOUBLE
+#define LSE_COMPARE_TOL 10
+#else
+#define LSE_COMPARE_TOL 4
+#endif
+cDBG-end
+
+      subroutine maplsinterp(
+     &   CHF_FRA[JUFine],
+     &   CHF_CONST_FRA[JFine],
+     &   CHF_CONST_I1D[xctm],
+     &   CHF_BOX[fineBoxInCr],
+     &   CHF_CONST_INTVECT[fineSmlEnd],
+     &   CHF_CONST_RCHARRAY[2, LSbl],
+     &   CHF_CONST_R1D[LSd],
+     &   CHF_CONST_MATRIX[At],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, Xip],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, gradXip],
+     &   CHF_CONST_INT[lenM],
+     &   CHF_INT[stat])
+
+c---- Declarations
+
+c     Error
+      integer ier
+c     Generic loop
+      integer i
+c     Direction loop
+      integer d
+c     Powers loop
+      integer p
+c     Components loop
+      integer iComp
+c     Row and columns of a matrix
+      integer ic, ir
+c     Matrix At is lenN x lenM but stored as lenN x lenMMax
+      integer lenN, lenMMax, lenNmP, nComp
+c     Number of fine cells in a coarse cell
+      integer numFn
+c     Index over the fine box
+      integer CHF_AUTODECL[ifb]
+      integer ifbSa(0:CH_SPACEDIM-1), ifbPa(0:CH_SPACEDIM-1)
+c     Index into the FArrays on the fine grid
+      integer CHF_AUTODECL[ifn]
+c     Offset to next cell in a direction
+      integer CHF_AUTODECL[i1P]
+      integer i1Sa(0:CH_SPACEDIM-1), i1Pa(0:CH_SPACEDIM-1)
+
+c     Factor for multiplication rule
+      real_t factor
+c     Parameters for specifying Q from QR factorization
+      real_t alpha, beta
+c     Temporary real
+      real_t rtmp1
+
+c     Gradients of J in a fine cell (dir, fine cell)  The gradients of J are
+c     stored if we are filling ghost cells, in which case <U> is interpolated
+c     and <JU> is computed via a product average
+      real_t gradJ(0:CH_SPACEDIM-1,
+     &             CHF_DDECL[
+     &                ifineBoxInCrlo0:ifineBoxInCrhi0;
+     &                ifineBoxInCrlo1:ifineBoxInCrhi1;
+     &                ifineBoxInCrlo2:ifineBoxInCrhi2;
+     &                ifineBoxInCrlo3:ifineBoxInCrhi3;
+     &                ifineBoxInCrlo4:ifineBoxInCrhi4;
+     &                ifineBoxInCrlo5:ifineBoxInCrhi5])
+c     Accumulator for product of gradients of <J> and <Xip>
+      real_t JXipGradSum
+c     Product of <J Xip> (power, fine cell)
+      real_t JXip(iAtlo0:iAthi0,
+     &            CHF_DDECL[
+     &               ifineBoxInCrlo0:ifineBoxInCrhi0;
+     &               ifineBoxInCrlo1:ifineBoxInCrhi1;
+     &               ifineBoxInCrlo2:ifineBoxInCrhi2;
+     &               ifineBoxInCrlo3:ifineBoxInCrhi3;
+     &               ifineBoxInCrlo4:ifineBoxInCrhi4;
+     &               ifineBoxInCrlo5:ifineBoxInCrhi5])
+
+c     All arrays are defined based on matrix At which has size
+c     lenN x lenMMax.  Components are taken from LSd
+
+c     B = Sum <J Xip> (power)
+      real_t LSBu(iAtlo0:iAthi0)
+c     R, y
+      real_t LSR, LSy
+c     Q
+      real_t Q(iAtlo0:iAthi0, iAtlo0:iAthi0)
+c     Q2tAt
+      real_t Q2tAt(iAtlo0:iAthi0-1, iAtlo1:iAthi1)
+c     Q2tAtA
+      real_t Q2tAtA(iAtlo0:iAthi0-1, iAtlo0:iAthi0)
+c     Q2tAtAQ2
+      real_t M1(iAtlo0:iAthi0-1, iAtlo0:iAthi0-1)
+c     Q2tAtAQ1
+      real_t vQ(iAtlo0:iAthi0-1)
+c     vb = Q2tAtb - Q2tAtAQ1y
+      real_t vb(iAtlo0:iAthi0-1)
+c     Qtx
+      real_t vQtx(iAtlo0:iAthi0)
+c     x
+      real_t vLSx(iAtlo0:iAthi0)
+c     <U> (an interpolated result if opType == 1)
+      real_t avgU
+
+cDBG
+#ifdef LSE_USE_LAPACK
+      integer lwork
+      real_t A_x(iAtlo1:iAthi1, iAtlo0:iAthi0)
+      real_t LSBu_x(iAtlo0:iAthi0)
+      real_t LSbl_x(iAtlo1:iAthi1)
+      real_t LSd_x(0:9)
+      real_t LSx_x(iAtlo0:iAthi0, 0:iLSdhi0)
+      real_t, allocatable, dimension(:) :: work
+c     Floating point comparision
+      logical FPCompare1
+      logical cmptest
+      character*22 xfmtstr
+#endif
+cDBG-end
+
+c---- Required blas & lapack routines
+
+      real_t BLAS1_NRM2
+      real_t BLAS1_DOT
+
+c---- Constants
+
+c     These provide equivalence between scalar spatial indices and
+c     arrays of spatial indices.  The arrays are used with Transform
+c     and the scalars can be used with Chombo Fortran.
+      CHF_DTERM[
+         equivalence(ifb0, ifbSa(0));
+         equivalence(ifb1, ifbSa(1));
+         equivalence(ifb2, ifbSa(2));
+         equivalence(ifb3, ifbSa(3));
+         equivalence(ifb4, ifbSa(4));
+         equivalence(ifb5, ifbSa(5))]
+      CHF_DTERM[
+         equivalence(i1P0, i1Pa(0));
+         equivalence(i1P1, i1Pa(1));
+         equivalence(i1P2, i1Pa(2));
+         equivalence(i1P3, i1Pa(3));
+         equivalence(i1P4, i1Pa(4));
+         equivalence(i1P5, i1Pa(5))]
+
+      parameter (factor = ONE/TWELVE)
+
+c     At least here there are no errors
+      stat = 0
+
+c     Matrix sizes
+      lenN    = iAthi0 - iAtlo0 + 1
+      lenMMax = iAthi1 - iAtlo1 + 1
+      lenNmP  = lenN - 1
+      nComp   = iLSdhi0 + 1
+cDBG
+c      write(*,*) 'Vals, ', lenN, lenM, lenMMax, iAtlo0, iAthi0,
+c     &     iAtlo1, iAthi1
+c      write(*,*) 'Working with iFineSmall = ', fineSmlEnd(0),
+c     &     fineSmlEnd(1)
+cDBG-end
+
+      numFn = CHF_DTERM[
+     &            (ifineBoxInCrhi0 - ifineBoxInCrlo0 + 1);
+     &           *(ifineBoxInCrhi1 - ifineBoxInCrlo1 + 1);
+     &           *(ifineBoxInCrhi2 - ifineBoxInCrlo2 + 1);
+     &           *(ifineBoxInCrhi3 - ifineBoxInCrlo3 + 1);
+     &           *(ifineBoxInCrhi4 - ifineBoxInCrlo4 + 1);
+     &           *(ifineBoxInCrhi5 - ifineBoxInCrlo5 + 1)]
+
+c---- Compute <JXi^p> for the fine cells
+
+      do p = 0, lenN-1
+         LSBu(p) = ZERO
+      enddo
+
+c     Loop over the fine cells in a coarse cell
+      CHF_AUTOMULTIDO[fineBoxInCr; ifb]
+
+c        Transform and add offset.  'ifn' then indexes fine FArrayBox.
+         call ctTransformStoP(ifbPa, ifbSa, xctm)
+         CHF_DTERM[
+            ifn0 = fineSmlEnd(0) + ifbPa(0);
+            ifn1 = fineSmlEnd(1) + ifbPa(1);
+            ifn2 = fineSmlEnd(2) + ifbPa(2);
+            ifn3 = fineSmlEnd(3) + ifbPa(3);
+            ifn4 = fineSmlEnd(4) + ifbPa(4);
+            ifn5 = fineSmlEnd(5) + ifbPa(5)]
+
+c        Loop over the space dimensions to get the gradients.  We
+c        loop over the stencil directions and convert this to
+c        physical directions.
+         do d = 0, CH_SPACEDIM-1
+            CHF_DTERM[
+               i1Sa(0) = CHF_ID(0,d);
+               i1Sa(1) = CHF_ID(1,d);
+               i1Sa(2) = CHF_ID(2,d);
+               i1Sa(3) = CHF_ID(3,d);
+               i1Sa(4) = CHF_ID(4,d);
+               i1Sa(5) = CHF_ID(5,d)]
+            call ctTransformStoP(i1Pa, i1Sa, xctm)
+c           Compute the gradients of J in gradJ(d)
+c           23Sep11 Added half - don't you need that for centered differences?
+            gradJ(d, CHF_AUTOIX[ifb]) = half*(
+     &         JFine(CHF_OFFSETIX[ifn;+i1P], 0) -
+     &         JFine(CHF_OFFSETIX[ifn;-i1P], 0))
+         enddo
+
+c        For each power (this is completely in stencil directions)
+         do p = 0, lenN-1
+c           Compute the products <J Xip>_{i^l+1} in JXip(p, ifb)
+            JXipGradSum = ZERO
+            do d = 0, CH_SPACEDIM-1
+               JXipGradSum = JXipGradSum + gradJ(d, CHF_AUTOIX[ifb])*
+     &            gradXip(p + d*lenN, CHF_AUTOIX[ifb])
+            enddo
+            JXip(p, CHF_AUTOIX[ifb]) =
+     &         JFine(CHF_AUTOIX[ifn], 0)*Xip(p, CHF_AUTOIX[ifb]) +
+     &         factor*JXipGradSum
+
+c           Add to the vector B
+            LSBu(p) = LSBu(p) + JXip(p, CHF_AUTOIX[ifb])
+         enddo
+      CHF_ENDDO  ! Loop over fine cells
+c     Weight the averages by volume.
+      do p = 0, lenN-1
+         LSBu(p) = LSBu(p)/numFn
+      enddo
+
+cDBG
+#ifdef LSE_USE_LAPACK
+
+c---- See what LAPACK can do
+
+c     Get work size
+      call LAPACK_GGLSE(lenM, lenN, 1, A_x, lenMMax, LSBu_x, 1,
+     &        LSbl_x, LSd_x, LSx_x, rtmp1, -1, ier)
+      if (ier .ne. ZERO) then
+         stat = ier
+         return
+      endif
+      lwork = rtmp1
+      allocate(work(lwork))
+
+      do iComp = 0, nComp-1
+         do ir = 0, lenN-1
+            LSBu_x(ir) = LSBu(ir)
+         enddo
+         do ir = 0, lenM-1
+            LSbl_x(ir) = LSbl(ir, iComp)
+            do ic = 0, lenN-1
+               A_x(ir, ic) = At(ic, ir)
+            enddo
+         enddo
+         LSd_x(0) = LSd(iComp)
+
+cDBG
+c         write(*,*) 'For component', iComp
+c         write(*,*) 'This is A'
+c         do ir = 0, lenM-1
+c            write(*, "(13(ES9.2, 1X))") (A_x(ir, ic), ic = 0, lenN-1)
+c         enddo
+c         write(*,*) 'This is B'
+c         write(*, "(10(ES9.2, 1X))") (LSBu_x(ic), ic = 0, lenN-1)
+c         write(*,*) 'This is b'
+c         write(*, "(13(ES9.2, 1X))") (LSbl_x(ic), ic = 0, lenM-1)
+c         write(*,*) 'This is d'
+c         write(*, "(ES9.1)") LSd_x(0)
+cDBG-end
+
+c         call DGELS('N', lenM, lenN, 1, A_x, lenMMax, LSbl_x, lenM,
+c     &           work, lwork, ier)
+c         do ic = 0, lenN-1
+c            LSx_x(ic, iComp) = LSbl_x(ic)
+c         enddo
+         call LAPACK_GGLSE(lenM, lenN, 1, A_x, lenMMax, LSBu_x, 1,
+     &           LSbl_x, LSd_x(0), LSx_x(0, iComp), work, lwork, ier)
+         if (ier .ne. ZERO) then
+            stat = ier
+            return
+         endif
+cDBG
+c         write(*, "(/A, /10(ES13.6, 1X))") 'LAPACK X:',
+c     &        (LSx_x(ic, iComp), ic = 0, lenN-1)
+cDBG-end
+
+c---- If we are generating a solution with GGLSE, use the coefficients x to
+c---- interpolate the solution everywhere.
+
+#ifndef LSE_USE_INTERNAL
+c         write(*, '(/''For component '', I3)') iComp
+
+c        Loop over the fine cells in a coarse cell
+         CHF_AUTOMULTIDO[fineBoxInCr; ifb]
+
+c           Transform and add offset.  'ifn' then indexes fine FArrayBox.
+            call ctTransformStoP(ifbPa, ifbSa, xctm)
+            CHF_DTERM[
+               ifn0 = fineSmlEnd(0) + ifbPa(0);
+               ifn1 = fineSmlEnd(1) + ifbPa(1);
+               ifn2 = fineSmlEnd(2) + ifbPa(2);
+               ifn3 = fineSmlEnd(3) + ifbPa(3);
+               ifn4 = fineSmlEnd(4) + ifbPa(4);
+               ifn5 = fineSmlEnd(5) + ifbPa(5)]
+            JUFine(CHF_AUTOIX[ifn], iComp) =
+     &         BLAS1_DOT(lenN, LSx_x(0, iComp), 1,
+     &                   JXip(0, CHF_AUTOIX[ifb]), 1)
+cDBG
+c            if (iComp .eq. 0) then
+c            write(*, '(''Interpolated '', ES22.15, '' at cell '', '//
+c     &           '6(I4, :, '',''))')
+c     &           JUFine(CHF_AUTOIX[ifn], iComp), CHF_AUTOIX[ifn]
+c            endif
+cDBG-end
+         CHF_ENDDO
+#endif
+      enddo
+      deallocate(work)
+
+c     End if using LAPACK
+#endif
+cDBG-end
+
+#ifdef LSE_USE_INTERNAL
+
+c---- Solve the constrained least-square probles for the coefficients
+c---- 'x'
+
+cDBG
+c      write(*,*) 'This is A'
+c      do ir = 0, lenM-1
+c         write(*, "(13(ES9.2, 1X))") (At(ic, ir), ic = 0, lenN-1)
+c      enddo
+c      write(*,*) 'This is B'
+c      write(*, "(10(ES9.2, 1X))") (LSBu(ic), ic = 0, lenN-1)
+cDBG-end
+
+c     For the QR factorization of B,
+c     LSR is the L_2 norm of B
+      LSR = BLAS1_NRM2(lenN, LSBu, 1)
+
+c     Q is directly specified from LSBu -- split into Q1_{(p,0)} and
+c     Q2_{(p,1:n)}
+      alpha = LSBu(0) - LSR
+      beta = 2*alpha*(alpha - LSBu(0))
+
+c     ir = row of Q and ic = col of Q
+c     row 0 and col 0
+      Q(0,0) = ONE - 2*alpha**2/beta
+      do ir = 1, lenN-1
+         rtmp1 = -2*alpha*LSBu(ir)/beta
+         Q(ir, 0) = rtmp1
+         Q(0, ir) = rtmp1
+      enddo
+
+c     remaining rows and columns
+      do ir = 1, lenN-1
+         Q(ir, ir) = ONE - 2*LSBu(ir)**2/beta
+         do ic = ir+1, lenN-1
+            rtmp1 = -2*LSBu(ir)*LSBu(ic)/beta
+            Q(ir, ic) = rtmp1
+            Q(ic, ir) = rtmp1
+         enddo
+      enddo
+cDBG
+c      write(*,*) 'This is our Q'
+c      do ir = 0, lenN-1
+c         write(*, "(10(ES9.2, 1X))") (Q(ir, ic), ic = 0, lenN-1)
+c      enddo
+
+c      ! Check that Q is orthogonal
+c      call BLAS3_GEMM('T', 'N', lenN, lenN, lenN, ONE, Q, lenN, Q,
+c     &                lenN, ZERO, Axx, lenN)
+c      write(*,*) 'Is Q orthogonal?'
+c      do ir = 0, lenN-1
+c         write(*, "(10(ES9.2, 1X))") (Axx(ir, ic), ic = 0, lenN-1)
+c      enddo
+cDBG-end
+
+c     Q2tAt
+      call BLAS3_GEMM('T', 'N', lenNmP, lenM, lenN, ONE, Q(0,1), lenN,
+     &                At, lenN, ZERO, Q2tAt, lenNmP)
+c     Q2tAtA
+      call BLAS3_GEMM('N', 'T', lenNmP, lenN, lenM, ONE, Q2tAt, lenNmP,
+     &                At, lenN, ZERO, Q2tAtA, lenNmP)
+c     M1 = Q2tAtAQ2
+      call BLAS3_GEMM('N', 'N', lenNmP, lenNmP, lenN, ONE, Q2tAtA,
+     &                lenNmP, Q(0,1), lenN, ZERO, M1, lenNmP)
+c     Compute M1^{-1} using a Cholesky factorization
+      call LAPACK_POTRF('L', lenNmP, M1, lenNmP, ier)
+      if (ier .ne. ZERO) then
+         stat = ier
+         return
+      endif
+      call LAPACK_POTRI('L', lenNmP, M1, lenNmP, ier)
+      if (ier .ne. ZERO) then
+         stat = ier
+         return
+      endif
+c     Symmetric BLAS routines seem quite slow -- populate the upper section of
+c     M1 so we can use the general routines.
+      call sy2ge(lenNmP, M1, lenNmP)
+c     Compute vQ = Q2tAtAQ1
+      call BLAS2_GEMV('N', lenNmP, lenN, ONE, Q2tAtA, lenNmP, Q, 1,
+     &                ZERO, vQ, 1)
+
+c     Loop over the components
+      do iComp = 0, nComp-1
+
+cDBG
+c         write(*,*) 'For component', iComp
+c         write(*,*) 'This is b'
+c         write(*, "(13(ES9.2, 1X))") (LSbl(ic, iComp), ic = 0, lenM-1)
+c         write(*,*) 'This is d'
+c         write(*, "(ES9.1)") LSd(iComp)
+cDBG-end
+
+         LSy = LSd(iComp)/LSR
+
+c        Compute vb = Q2tAtb - Q2tAtAQ1y
+c                   = Q2tAtb - vQy
+         do ir = 0, lenNmP-1
+            vb(ir) = vQ(ir)
+         enddo
+         call BLAS2_GEMV('N', lenNmP, lenM, ONE, Q2tAt, lenNmP,
+     &                   LSbl(0, iComp), 1, -LSy, vb, 1)
+
+c        Qtx (composed of y and least squares solution, z)
+         vQtx(0) = LSy
+         call BLAS2_GEMV('N', lenNmP, lenNmP, ONE, M1, lenNmP, vb, 1,
+     &                   ZERO, vQtx(1), 1)
+c        Now finally, vLSx = Q.Qtx
+         call BLAS2_GEMV('N', lenN, lenN, ONE, Q, lenN, vQtx, 1, ZERO,
+     &                   vLSx, 1)
+cDBG
+c         write(*, "(/A, /10(ES13.6, 1X))") 'Internal X:',
+c     &        (vLSx(ir), ir = 0, lenN-1)
+cDBG-end
+
+cDBG
+#ifdef LSE_USE_LAPACK
+
+c---- Compare LAPACK with internal if solutions were computed with both
+
+         write(xfmtstr,
+     &   '(''('', I4, ''(ES'', I2, ''.'', I2, '', :, 1X))'')')
+     &        lenN, LSE_COMPARE_TOL+7, LSE_COMPARE_TOL
+         cmptest = .false.
+         do ir = 0, lenN-1
+            if (FPCompare1(vLSx(ir), LSx_x(ir, iComp), LSE_COMPARE_TOL))
+     &         then
+               cmptest = .true.
+            endif
+         enddo
+         if (cmptest) then
+            stat = -1
+            write(*, '(''LSE solutions by internal and lapack do '//
+     &           'not agree for component '', I2, '' at lower fine '//
+     &           'box '', 6(I3, :, '',''))')
+     &           iComp, (fineSmlEnd(d), d=0, CH_SPACEDIM-1)
+            write(*, '(A)') 'LAPACK'
+            write(*, xfmtstr) (LSx_x(ir, iComp), ir = 0, lenN-1)
+            write(*, '(A)') 'Internal'
+            write(*, xfmtstr) (vLSx(ir), ir = 0, lenN-1)
+         endif
+#endif
+c         write(*, '(/''For component '', I3)') iComp
+cDBG-end
+
+c---- Now use the coefficients x to interpolate the solution, <JU>, everywhere.
+
+c        Loop over the fine cells in a coarse cell
+         CHF_AUTOMULTIDO[fineBoxInCr; ifb]
+
+c           Transform and add offset.  'ifn' then indexes fine FArrayBox.
+            call ctTransformStoP(ifbPa, ifbSa, xctm)
+            CHF_DTERM[
+               ifn0 = fineSmlEnd(0) + ifbPa(0);
+               ifn1 = fineSmlEnd(1) + ifbPa(1);
+               ifn2 = fineSmlEnd(2) + ifbPa(2);
+               ifn3 = fineSmlEnd(3) + ifbPa(3);
+               ifn4 = fineSmlEnd(4) + ifbPa(4);
+               ifn5 = fineSmlEnd(5) + ifbPa(5)]
+            JUFine(CHF_AUTOIX[ifn], iComp) =
+     &         BLAS1_DOT(lenN, vLSx, 1, JXip(0, CHF_AUTOIX[ifb]), 1)
+cDBG
+c            write(*, '(''Interpolated '', ES22.15, '' at cell '', '//
+c     &           '6(I4, :, '',''))')
+c     &           JUFine(CHF_AUTOIX[ifn], iComp), CHF_AUTOIX[ifn]
+cDBG-end
+         CHF_ENDDO
+
+      enddo  ! Loop over components
+
+c     End if using internal
+#endif
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Compute F * (A^T * A)^{-1} * A^T where F is the displacements or
+c  gradients of the displacements in the fine cells.  The answers, when
+c  multiplied by LSbl, yield the interpolated solution in the fine cells
+c  The inverse of (A^T * A) is determined using a Cholesky decomposition
+c
+c  All RCHARRAY arrays store information continguously per fine cell
+c
+c  fnXiLSx     <=  If the final answer in a fine cell is Xi * LSx * LSb,
+c                  this is (Xi * LSx)
+c  fnGradXiLSx <=  If the gradients in a fine cell is grad(Xi) * LSx *
+c                  LSb, this is (grad(Xi) * LSx).  The 1D component
+c                  index has storage (lenN, CH_SPACEDIM) following
+c                  column ordering
+c  At           => N x M matrix At from coarse cells - essentially
+c                  the displacements of the coarse cells from the
+c                  center coarse cell.
+c              <=  Modified (so do not reuse!)
+c  fineBoxInCr  => A box of all the fine cells in a coarse cell
+c  fnXip        => Average displacements of the fine cell (with constant
+c                  modification K)
+c  fnGradXip    => Average of gradients of displacements for each fine
+c                  cell (gradient removes constant K).
+c  idxCenCrCell => The index of the center coarse cell in M (counting
+c                  from zero).  The order of M is whatever an IVS
+c                  of all the coarse cells produces using an iterator.
+c  lenM         => Actual number of coarse cells used to construct
+c                  the polynomial
+c  stat        <=  return status
+c                   0 - success
+c                  !0 - Lapack error
+c ----------------------------------------------------------------------
+
+      subroutine maplsatainvat(
+c     &   CHF_CONST_INT[debug],
+     &   CHF_RCHARRAY[RANK_SPACEDIM_PLUS_1, fnXiLSx],
+     &   CHF_RCHARRAY[RANK_SPACEDIM_PLUS_1, fnGradXiLSx],
+     &   CHF_MATRIX[At],
+     &   CHF_BOX[fineBoxInCr],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, fnXip],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, fnGradXip],
+     &   CHF_CONST_INT[idxCenCrCell],
+     &   CHF_CONST_INT[lenM],
+     &   CHF_INT[stat])
+
+c---- Declarations
+
+c     Debug
+      integer ir, ic
+c     Error
+      integer ier
+c     Direction loop invariant
+      integer iDir
+c     Matrix At is lenN x lenM
+      integer lenN, lenMMax, lenNmP, lenMmP
+c     Index over the fine box
+      integer CHF_AUTODECL[ifb]
+
+c     Sum values in a row
+      real_t sumrow
+
+c     All arrays are defined based on matrix At which has size
+c     lenN x lenMMax.
+
+c     Matrix AtAinv is lenNmP x lenNmP
+      real_t AtAinv(iAtlo0:iAthi0-1, iAtlo0:iAthi0-1)
+c     Matrix AtAinvAt is lenN x lenM
+      real_t AtAinvAt(iAtlo0:iAthi0, iAtlo1:iAthi1)
+
+c---- End of declarations
+
+c     Start with no errors
+      stat = 0
+
+c     Matrix sizes
+      lenN    = iAthi0 - iAtlo0 + 1
+      lenMMax = iAthi1 - iAtlo1 + 1
+      lenNmP  = lenN - 1
+
+c     Get (A^T * A)
+c     Row of A^T is removed.  This is a result of splitting A via A*Q but here
+c     Q is diagonal.  This removes the row of 1s and now size is lenNmP
+      call BLAS3_SYRK('L', 'N', lenNmP, lenM, ONE, At(1, 0), lenN,
+     &                ZERO, AtAInv, lenNmP)
+
+c     Compute (A^T * A)^{-1} using a Cholesky factorization
+      call LAPACK_POTRF('L', lenNmP, AtAInv, lenNmP, ier)
+      if (ier .ne. ZERO) then
+         stat = ier
+         return
+      endif
+      call LAPACK_POTRI('L', lenNmP, AtAInv, lenNmP, ier)
+      if (ier .ne. ZERO) then
+         stat = ier
+         return
+      endif
+cDBG
+c      if (debug .eq. 1) then
+c         write(*, '(''This is (A^T A)^{-1}'')')
+c         do ir = 0, lenNmP-1
+c            write(*, '(10('' '', ES17.10))')
+c     &         (AtAInv(ir, ic), ic = 0, lenNmP-1)
+c         end do
+c      end if
+cDBG-End
+
+c     This routine also populates the upper section of AtAinvAt during the
+c     multiplication.  Note that we leave row 0 blank in AtAinvAt.
+      call BLAS3_SYMM('L', 'L', lenNmP, lenM, ONE, AtAinv, lenNmP,
+     &                At(1, 0), lenN, ZERO, AtAinvAt(1, 0), lenN)
+
+c     Sum the rows and subtract from the column associated with the principal
+c     cell.  This is really the - A_1 y part of the operation (b - A_1 y) where
+c     A1 is just a column of 1s and y is the solution in the principal cell.
+c     Note:  y is really x/R^T but Q is diagonal and R is 1 so these
+c     transformations are unnecessary
+      do ir = 1, lenN-1
+         sumrow = ZERO
+         do ic = 0, lenM-1
+            sumrow = sumrow + AtAinvAt(ir, ic)
+         enddo
+         AtAinvAt(ir, idxCenCrCell) =
+     &      AtAinvAt(ir, idxCenCrCell) - sumrow
+      enddo
+
+c     Add a row to represent the known solution 'y'.  This is equivalent to
+c     reconstructing x from Q*[y, z]^T
+c     Add in row of 0s
+      do ic = 0, lenM-1
+         AtAInvAt(0, ic) = ZERO
+      enddo
+c     Set the principal cell location to 1
+      AtAInvAt(0, idxCenCrCell) = ONE
+cDBG
+c      if (debug .eq. 1) then
+c         write(*, '(''This is (A^T A)^{-1} A^T'')')
+c         do ir = 0, lenN-1
+c            write(*, '(13('' '', ES12.5))')
+c     &         (AtAInvAt(ir, ic), ic = 0, lenM-1)
+c         end do
+c      end if
+cDBG-End
+
+cDBG
+cc     AtAInvAt is an N x M matrix.  All rows should sum to zero except row
+cc     0 which must sum to one.
+c      do ir = 0, lenN-1
+c         sumrow = ZERO
+c         do ic = 0, lenM-1
+c            sumrow = sumrow + AtAinvAt(ir, ic)
+c         enddo
+c         write(*, '(''Sum for row '', I2, 1X, ES12.5)'), ir, sumrow
+c      enddo
+cDBG-End
+
+c     Pre-multiply with fine cell displacements to set fnXiLSx
+      CHF_AUTOMULTIDO[fineBoxInCr; ifb]
+         call BLAS2_GEMV('T', lenN, lenM, ONE, AtAInvAt, lenN,
+     &                   fnXip(0, CHF_AUTOIX[ifb]), 1, ZERO,
+     &                   fnXiLSx(0, CHF_AUTOIX[ifb]), 1)
+      CHF_ENDDO
+cDBG
+c      if (debug .eq. 1) then
+c         write(*, '(''This is fnXiLSx'')')
+c         CHF_AUTOMULTIDO[fineBoxInCr; ifb]
+c            write(*, '(13('' '', ES12.5))')
+c     &         (fnXiLSx(ic, CHF_AUTOIX[ifb]), ic = 0, lenM-1)
+c         CHF_ENDDO
+c      end if
+cDBG-End
+
+c     Pre-multiply with gradients of fine cell displacements to set fnGradXiLSx
+      do iDir = 0, CH_SPACEDIM-1
+         CHF_AUTOMULTIDO[fineBoxInCr; ifb]
+            call BLAS2_GEMV('T', lenN, lenM, ONE, AtAInvAt, lenN,
+     &                      fnGradXip(lenN*iDir, CHF_AUTOIX[ifb]), 1,
+     &                      ZERO,
+     &                      fnGradXiLSx(lenMMax*iDir, CHF_AUTOIX[ifb]),
+     &                      1)
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+
+c ----------------------------------------------------------------------
+c  Interpolate the solution in the fine cells within a single coarse
+c  cell
+c
+c  UFine    <=  solution on the fine cells
+c  JUFine   <=  metrics & solution product on the fine cells.  The
+c               box defining JUFine can be smaller than UFine and not
+c               contain fineBoxInCr (when transformed and offset in
+c               physical space).  JUFine is not computed for any cells
+c               that are not contained.
+c  JFine     => metric terms on the fine mesh
+c  xctm      => coordinate transformation matrix
+c  fineBoxInCr
+c            => box of fine cells in each coarse cell
+c               (Zero:refRatio-Unit)
+c  fineSmlEnd
+c            => where the lower corner of fineBoxInCr is located for
+c               the fine FArrays
+c  LSbl      => 'b' for the minimization of Ax=b (0:lenN-1,0:nComp-1)
+c  LSd       => 'd' for the constraint Bx=d (0:nComp-1)
+c  At        => transpose of 'A' for the minimization of Ax=b.  Size
+c               (0:lenN-1,0:lenMMax-1) but filled to
+c               (0:lenN-1,0:lenM-1)
+c  Xip       => <xi_i^p> for the fine cells
+c                 (p[0:lenN-1], cell[fineBox])
+c  gradXip   => gradients (note that dir and p are together in 1
+c               dimensions to support 6 space dimensions)
+c                 (dir[0:SpaceDim-1] (,/*) p[0:lenN-1],
+c                  cell[fineBox])
+c  lenM      => number of cells in stencil (At = lenN x lenM)
+c  stat     <=  return status
+c               -1 - mismatch between Lapack computation and internal
+c                    computation
+c                0 - success
+c               >0 - Lapack error
+c ----------------------------------------------------------------------
+
+      subroutine maplsfillghosts(
+     &   CHF_FRA[UFine],
+     &   CHF_FRA[JUFine],
+     &   CHF_CONST_FRA[JFine],
+     &   CHF_CONST_I1D[xctm],
+     &   CHF_BOX[fineBoxInCr],
+     &   CHF_CONST_INTVECT[fineSmlEnd],
+     &   CHF_CONST_RCHARRAY[2, LSbl],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, fnXiLSx],
+     &   CHF_CONST_RCHARRAY[RANK_SPACEDIM_PLUS_1, fnGradXiLSx],
+     &   CHF_CONST_INT[lenM],
+     &   CHF_INT[stat])
+
+c---- Declarations
+
+c     Error
+      integer ier
+c     Generic loop
+      integer i
+c     Direction loops (in stencil space, physical space, and sign change)
+      integer dS, dP, dSign
+c     Components loop
+      integer iComp
+c     Row and columns of a matrix
+      integer ic, ir
+c     Matrix LSbl is lenM x nComp but stored as lenMMax x nComp
+      integer lenMMax, nComp
+c     A count of which sides can be used for a gradient
+      integer gradOffsetCount
+c     Index over the fine box
+      integer CHF_AUTODECL[ifb]
+      integer ifbSa(0:CH_SPACEDIM-1), ifbPa(0:CH_SPACEDIM-1)
+c     Index into the FArrays on the fine grid
+      integer CHF_AUTODECL[ifn]
+      integer ifna(0:CH_SPACEDIM-1)
+c     Offset to next cell in a direction
+      integer CHF_AUTODECL[i1P]
+      integer i1Sa(0:CH_SPACEDIM-1), i1Pa(0:CH_SPACEDIM-1)
+c     Array description of bounds for JFine
+      integer JFnLoa(0:CH_SPACEDIM-1), JFnHia(0:CH_SPACEDIM-1)
+
+c     Factor for multiplication rule
+      real_t factor
+c     Temporary real
+      real_t rtmp1
+
+c     Gradients of J in a fine cell (dir)
+      real_t gradJ(0:CH_SPACEDIM-1)
+c     Accumulator for product of gradients of <J> and <U>
+      real_t JUGradSum
+
+c     <U> (an interpolated result if opType == 1)
+      real_t avgU
+
+c     Flag if a cell (in physical space) in fineBoxInCr is contained in JUFine
+      logical fnCellInJU
+
+c---- Required routines from FourthOrderMappedFineInterpSupF.F
+
+      integer ctIndexAt
+      integer ctSignAt
+
+c---- Required blas & lapack routines
+
+      real_t BLAS1_DOT
+
+c---- Constants
+
+c     These provide equivalence between scalar spatial indices and
+c     arrays of spatial indices.  The arrays are used with Transform
+c     and the scalars can be used with Chombo Fortran.
+      CHF_DTERM[
+         equivalence(ifb0, ifbSa(0));
+         equivalence(ifb1, ifbSa(1));
+         equivalence(ifb2, ifbSa(2));
+         equivalence(ifb3, ifbSa(3));
+         equivalence(ifb4, ifbSa(4));
+         equivalence(ifb5, ifbSa(5))]
+      CHF_DTERM[
+         equivalence(ifn0, ifna(0));
+         equivalence(ifn1, ifna(1));
+         equivalence(ifn2, ifna(2));
+         equivalence(ifn3, ifna(3));
+         equivalence(ifn4, ifna(4));
+         equivalence(ifn5, ifna(5))]
+      CHF_DTERM[
+         equivalence(i1P0, i1Pa(0));
+         equivalence(i1P1, i1Pa(1));
+         equivalence(i1P2, i1Pa(2));
+         equivalence(i1P3, i1Pa(3));
+         equivalence(i1P4, i1Pa(4));
+         equivalence(i1P5, i1Pa(5))]
+
+      parameter (factor = ONE/TWELVE)
+
+c     At least here there are no errors
+      stat = 0
+
+c     Bounds of JFine in an array
+      CHF_DTERM[
+         JFnLoa(0) = CHF_LBOUND[JFine;0];
+         JFnLoa(1) = CHF_LBOUND[JFine;1];
+         JFnLoa(2) = CHF_LBOUND[JFine;2];
+         JFnLoa(3) = CHF_LBOUND[JFine;3];
+         JFnLoa(4) = CHF_LBOUND[JFine;4];
+         JFnLoa(5) = CHF_LBOUND[JFine;5]]
+      CHF_DTERM[
+         JFnHia(0) = CHF_UBOUND[JFine;0];
+         JFnHia(1) = CHF_UBOUND[JFine;1];
+         JFnHia(2) = CHF_UBOUND[JFine;2];
+         JFnHia(3) = CHF_UBOUND[JFine;3];
+         JFnHia(4) = CHF_UBOUND[JFine;4];
+         JFnHia(5) = CHF_UBOUND[JFine;5]]
+
+c     Matrix sizes
+      lenMMax = CHF_UBOUND[LSbl; 0] - CHF_LBOUND[LSbl; 0] + 1
+      nComp   = CHF_UBOUND[LSbl; 1] - CHF_LBOUND[LSbl; 1] + 1
+
+c---- Now use the coefficients x to interpolate <U>, d<U>dxi and compute <JU>
+c---- for filling fine ghost cells
+
+c     Loop over the fine cells in a coarse cell
+      CHF_AUTOMULTIDO[fineBoxInCr; ifb]
+
+c        Transform and add offset.  'ifn' then indexes fine FArrayBox.
+         call ctTransformStoP(ifbPa, ifbSa, xctm)
+         CHF_DTERM[
+            ifn0 = fineSmlEnd(0) + ifbPa(0);
+            ifn1 = fineSmlEnd(1) + ifbPa(1);
+            ifn2 = fineSmlEnd(2) + ifbPa(2);
+            ifn3 = fineSmlEnd(3) + ifbPa(3);
+            ifn4 = fineSmlEnd(4) + ifbPa(4);
+            ifn5 = fineSmlEnd(5) + ifbPa(5)]
+
+c        Check if this fine cell is in JUFine (if not, only return U)
+         fnCellInJU = CHF_DTERM[
+     &             ((ifn0 - CHF_LBOUND[JUFine;0])*
+     &              (ifn0 - CHF_UBOUND[JUFine;0]) .le. 0);
+     &      .and.  ((ifn1 - CHF_LBOUND[JUFine;1])*
+     &              (ifn1 - CHF_UBOUND[JUFine;1]) .le. 0);
+     &      .and.  ((ifn2 - CHF_LBOUND[JUFine;2])*
+     &              (ifn2 - CHF_UBOUND[JUFine;2]) .le. 0);
+     &      .and.  ((ifn3 - CHF_LBOUND[JUFine;3])*
+     &              (ifn3 - CHF_UBOUND[JUFine;3]) .le. 0);
+     &      .and.  ((ifn4 - CHF_LBOUND[JUFine;4])*
+     &              (ifn4 - CHF_UBOUND[JUFine;4]) .le. 0);
+     &      .and.  ((ifn5 - CHF_LBOUND[JUFine;5])*
+     &              (ifn5 - CHF_UBOUND[JUFine;5]) .le. 0)]
+
+         if (fnCellInJU) then
+c           Get the gradients of J
+            do dS = 0, CH_SPACEDIM-1
+c              Convert stencil directions to physical directions for computing
+c              the gradients
+               CHF_DTERM[
+                  i1Sa(0) = CHF_ID(0,dS);
+                  i1Sa(1) = CHF_ID(1,dS);
+                  i1Sa(2) = CHF_ID(2,dS);
+                  i1Sa(3) = CHF_ID(3,dS);
+                  i1Sa(4) = CHF_ID(4,dS);
+                  i1Sa(5) = CHF_ID(5,dS)]
+               call ctTransformStoP(i1Pa, i1Sa, xctm)
+c              Compute the gradients of J for this directionu using first-order
+c              gradient orthogonal to coarse-fine interface (if J doesn't exist
+c              at +2 ghost outside fine grid)
+               gradJ(dS) = ZERO
+               gradOffsetCount = 0
+c              Get the coordinate direction in physical space and the sign of
+c              the transformation
+               dP    = ctIndexAt(dS, xctm)
+               dSign = ctSignAt(dS, xctm)
+               if ((ifna(dP) + dSign - JFnLoa(dP))*
+     &             (ifna(dP) + dSign - JFnHia(dP)) .le. 0) then
+c                 The selection of JFine using i1P is always on the high side
+c                 according to the gradient in the stencil direction.  The
+c                 other side must be subtracted which is why gradOffsetCount is
+c                 decremented
+                  gradOffsetCount = gradOffsetCount - 1
+                  gradJ(dS) = gradJ(dS) +
+     &               JFine(CHF_OFFSETIX[ifn;+i1P], 0)
+               endif
+               if ((ifna(dP) - dSign - JFnLoa(dP))*
+     &             (ifna(dP) - dSign - JFnHia(dP)) .le. 0) then
+c                 The selection of JFine using i1P is always on the low side
+c                 according to the gradient in the stencil direction.  The
+c                 other side must be added which is why gradOffsetCount is
+c                 incremented
+                  gradOffsetCount = gradOffsetCount + 1
+                  gradJ(dS) = gradJ(dS) -
+     &               JFine(CHF_OFFSETIX[ifn;-i1P], 0)
+               endif
+               if (gradOffsetCount .eq. 0) then
+c                 If zero, this is a centered difference
+                  gradJ(dS) = half*gradJ(dS)
+               else
+c                 Otherwise this is a one-sided difference
+                  gradJ(dS) = gradJ(dS) +
+     &               gradOffsetCount*JFine(CHF_AUTOIX[ifn], 0)
+               endif
+            enddo
+         endif
+
+c        Compute <U> for each component and the product of <U> and <J>
+c        if 'ifn' is contained in JUFine
+
+         do iComp = 0, nComp-1
+            avgU = BLAS1_DOT(lenM, fnXiLSx(0, CHF_AUTOIX[ifb]), 1,
+     &                       LSbl(0, iComp), 1)
+            if (fnCellInJU) then
+              JUGradSum = ZERO
+c             Add to product of gradU and gradJ
+              do dS = 0, CH_SPACEDIM-1
+                 JUGradSum = JUGradSum + gradJ(dS)*
+     &              BLAS1_DOT(lenM,
+     &                        fnGradXiLSx(dS*lenMMax, CHF_AUTOIX[ifb]),
+     &                        1, LSbl(0, iComp), 1)
+              enddo
+              JUFine(CHF_AUTOIX[ifn], iComp) =
+     &           JFine(CHF_AUTOIX[ifn], 0)*avgU + factor*JUGradSum
+            endif
+            UFine(CHF_AUTOIX[ifn], iComp) = avgU
+         enddo
+      CHF_ENDDO
+
+      return
+      end

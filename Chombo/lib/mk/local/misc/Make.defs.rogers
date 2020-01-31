@@ -1,0 +1,7 @@
+ifeq ($(MPI),TRUE)
+  ifeq ($(ANAG_HDF5_DIR),)
+    _hdf_root=/usr/local/src/hdf5-1.6.1
+    HDFMPIINCFLAGS=-I$(_hdf_root).parallel/include
+    HDFMPILIBFLAGS=-L$(_hdf_root).parallel/lib -lhdf5 -lz
+  endif
+endif

@@ -1,0 +1,35 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+c ----------------------------------------------------------------------
+c  Computes a maximum acoustic speed from a fluid speed and sound speed
+c  where the sound speed can be scaled.
+c
+c  speed    <=  Maximum acoustic speed
+c            => Fluid speed
+c  sound     => Sound speed
+c  scale     => Scaling for the sound speed
+c  box       => Box to compute on
+c ----------------------------------------------------------------------
+
+      subroutine MAXSCALEDACOUSTICSPEED(
+     &     CHF_FRA1[speed],
+     &     CHF_CONST_FRA1[sound],
+     &     CHF_CONST_FRA1[scale],
+     &     CHF_BOX[box])
+
+c     Index over the box
+      integer CHF_AUTODECL[i]
+
+      CHF_AUTOMULTIDO[box; i]
+         speed(CHF_AUTOIX[i]) = abs(speed(CHF_AUTOIX[i])) +
+     &      scale(CHF_AUTOIX[i])*sound(CHF_AUTOIX[i])
+      CHF_ENDDO
+
+      return
+      end

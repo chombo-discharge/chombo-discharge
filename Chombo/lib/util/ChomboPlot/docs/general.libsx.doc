@@ -1,0 +1,140 @@
+			-- How to Use libsx --
+
+Using libsx is pretty simple.  At the minimum, you #include "libsx.h"
+and link with libsx.a.  To actually have X windows pop open and such,
+you need to do the following:
+
+   1) To get everything started, you should call OpenDisplay().
+      If OpenDisplay() returns a non-zero value, it's ok to go on.
+      OpenDisplay() creates what will eventually be your first 
+      window. 
+     
+   2) After calling OpenDisplay(), you can go on to create all sorts
+      of widgets with the MakeXXX() calls.  You can lay them out with
+      calls to SetWidgetPos().
+
+   3) When you are done creating the user interface, call
+      ShowDisplay().  This causes the window and components you've
+      created to be displayed on the workstation screen.
+
+      Until you call ShowDisplay(), the user can _NOT_ see your
+      window, and drawing into drawing areas has _NO_ effect.
+
+   3.5) If you need to, you can call any of the color allocation
+        functions such as GetStandardColors(), etc.
+
+   4) Finally, once the window is displayed and you've done all the
+      initializations you wish, you must then call MainLoop(). After
+      you call MainLoop(), events get processed as they come in and
+      your callback functions are called as necessary.
+
+      After calling MainLoop(), the correct way for your program to
+      exit is to have one of your callback routines call exit() when
+      appropriate (like after the user clicks on a "Quit" button).
+
+
+That's all you need to do.  Even though that may look like a lot to
+do, it's really pretty simple in practice.  For example, here is a
+hello world program with libsx:
+
+------------------------------------------------------------------
+#include "libsx.h"
+
+main()
+{
+  MakeLabel("Hello World!");
+  MainLoop();
+}
+
+------------------------------------------------------------------
+ 
+Granted it's one more line than a standard printf() type of hello
+world program, but it's not all that bad. 
+
+
+Hello world programs are nice, but you don't tend to write very many
+of them.  Real applications need to be able to do much more.  Even
+these "real" programs aren't all that bad in libsx. 
+
+Here is a simple program that opens a window with a quit button and a
+drawing area that you could use to draw whatever graphics you wanted: 
+
+
+------------------------------------------------------------------
+
+#include <stdio.h>
+#include "libsx.h"
+
+
+void quit(Widget w, void *data)
+{
+  exit(0);
+}
+
+
+void draw_stuff(Widget w, int width, int height, void *data)
+{
+  ClearDrawArea();
+  DrawLine(0,0, width, height);   /* just draw a diagonal line */
+}
+  
+
+
+int main(int argc, char **argv)
+{
+  Widget w[2];
+
+
+  argc = OpenDisplay(argc, argv);
+  if (argc == 0)                   /* woops, couldn't get started */
+    exit(5);
+  
+  
+  w[0] = MakeButton("Quit", quit, NULL);
+  w[1] = MakeDrawArea(300,300, draw_stuff, NULL);
+
+  SetWidgetPos(w[1], PLACE_UNDER, w[0], NO_CARE, NULL);
+
+  ShowDisplay();
+  GetStandardColors();
+
+  MainLoop();   /* off we go! */
+}
+
+------------------------------------------------------------------
+
+The code above is the basic skeleton for a libsx program, even
+complicated ones.  First you open the display with OpenDisplay().
+Then you build your interface by creating a bunch of widgets with the
+MakeXXX() calls.  Next you layout the display by specifying the
+relative positions of the widgets to each other.  Then you would get
+any fonts or colors you may need, and finally you just enter the main
+loop.
+
+In libsx, your callback functions are where all the real work happens.
+The program above has two callback functions, quit() and draw_stuff().
+They are tied to events that happen in the interface.  When the user
+clicks on the "Quit" button, your quit() function is called.  When the
+drawing area gets resized or needs to be redrawn, your draw_stuff()
+function gets called.
+
+Usually the process of creating the interface would get separated into
+a separate function that is easy to modify (instead of cluttering up
+main).   However, the basic outline is the same as above.  The only
+real difference with more complicated interfaces is that they usually
+have a lot more calls to the MakeXXX() functions and they tend to make
+use of the extra void pointer argument in the callback routines.
+
+If you'd like more examples, take a look at the provided source code.
+There are several reasonable examples of varying complexity that you
+can take and modify as you like.  Each of the demos tries to
+demonstrate a certain group of features, so take a look at each to
+find the one that most closely matches what you want to do and start
+hacking from there!
+
+
+Have fun.
+
+
+Dominic Giampaolo
+dbg@sgi.com

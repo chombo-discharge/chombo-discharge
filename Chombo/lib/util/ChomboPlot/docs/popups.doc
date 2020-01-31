@@ -1,0 +1,40 @@
+Popup windows are simple dialog boxes that get a simple yes/no or
+string answer from the user.  When these windows popup, they block
+input to the previously active window.
+
+
+-----------------------------------------------------------
+
+int GetYesNo(char *question);
+
+This function allows you to prompt the user for the answer to a simple
+yes or no type of question.  It simply pops up a dialog box with the
+text contained in the string question, and two okay/cancel buttons.
+
+If the user clicks Okay, this function returns TRUE.  If the user
+clicks Cancel, this function returns FALSE.  The text in the question
+string can have embedded newlines (\n characters) to break things up
+or to add spacing.
+
+
+SEE ALSO : GetString()
+-----------------------------------------------------------
+
+char *GetString(char *msg, char *default);
+
+This function allows you to prompt the user for a string of input.
+The first argument, msg, is a pointer to a string which will be
+displayed in the dialog box.  The next argument, default, is the
+default string to place in the text string box (it can be NULL or ""). 
+
+When you call this function, it pops up a small dialog box on the
+screen, and the user can enter the line of text.  When the user clicks
+ok or cancel, the function returns a pointer to the string of text the
+user entered.
+
+If the user clicks cancel, you get a NULL return value.
+
+
+SEE ALSO : GetYesNo()
+-----------------------------------------------------------
+

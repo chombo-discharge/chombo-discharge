@@ -1,0 +1,28 @@
+# -*- Mode: Makefile; Modified: "Fri 29 Jul 2005 15:14:39 by dbs"; -*-
+
+## This file defines variables for use on the login nodes of the NERSC Linux
+## cluster 'jacquard'.  The 'symlinks' target must be run first by explicitly
+## accessing this makefile with the commands:
+##
+##    cd <Chombo-home>/lib/mk/local
+##    make -f Make.defs.jacquard symlinks
+##
+## NOTE: everything is always in 64bit mode
+
+makefiles+=local/Make.defs.silence
+
+CXX=pgCC
+FC=ftn
+MPICXX=CC -target=catamount
+USE_64=TRUE
+
+CH_CPP=$(CXX) -E
+
+# not working, must set in Make.defs.local
+#cxxcomflags += -g -DCH_DISABLE_SIGNALS
+#cppdbgflags += -DCH_DISABLE_SIGNALS
+#cxxdbgflags += -DCH_DISABLE_SIGNALS
+
+ifeq ($(USE_64),FALSE)
+  $(error Are you sure you want to run non-64bit?)
+endif

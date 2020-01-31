@@ -1,0 +1,88 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+#include "SWintegrator.H"
+
+      subroutine BAROTROPICINSTABILITYSETPARAMS(
+     &     CHF_CONST_REAL[auphi0],
+     &     CHF_CONST_REAL[auphi1],
+     &     CHF_CONST_REAL[auphi2],
+     &     CHF_CONST_REAL[auumax],
+     &     CHF_CONST_REAL[auhmean],
+     &     CHF_CONST_REAL[auhhat],
+     &     CHF_CONST_REAL[auBIalpha],
+     &     CHF_CONST_REAL[auBIbeta])
+
+#include "SWEosCommon.fh"
+#include "SWEBICommon.fh"
+      real_t rombergintegral, romint
+      external BIintegrand2
+
+      phi0 = auphi0
+      phi1 = auphi1
+      phi2 = auphi2
+      umax = auumax
+      hhat = auhhat
+      bia = auBIalpha
+      bib = auBIbeta
+      en = exp(-four / ((phi1 - phi0)**2))
+!     Integral over the whole sphere
+!     of integral from -pi/2 to phi of
+!     u(eta)*(2*omega*sin(eta) + tan(eta)*u(eta)) deta
+!     is 0.2852658400627121d0.
+      romint = rombergintegral(BIintegrand2, -half*Pi, half*Pi, 12)
+      h0 = auhmean + romint/gravity
+
+      return
+      end
+
+
+      subroutine BAROTROPICINSTABILITYVELOCITY(
+     &     CHF_FRA[vel],
+     &     CHF_CONST_FRA[lonlat],
+     &     CHF_BOX[bx])
+
+      integer CHF_AUTODECL[i]
+      real_t lat, ulon, BIzonalvelocity
+      
+      CHF_AUTOMULTIDO[bx; i]
+!        lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         ulon = BIzonalvelocity(lat)
+         vel(CHF_AUTOIX[i], 0) = ulon
+         vel(CHF_AUTOIX[i], 1) = zero
+      CHF_ENDDO
+
+      return
+      end
+
+
+      subroutine BAROTROPICINSTABILITYHEIGHT(
+     &     CHF_FRA1[height],
+     &     CHF_CONST_FRA[lonlat],
+     &     CHF_BOX[bx])
+
+#include "SWEosCommon.fh"
+#include "SWEBICommon.fh"
+
+      integer CHF_AUTODECL[i]
+      integer itns
+      external BIintegrand
+      parameter (itns=10)
+      real_t lon, lat, rombergintegral, hint
+
+      CHF_AUTOMULTIDO[bx; i]
+         lon = lonlat(CHF_AUTOIX[i], 0)
+         lat = lonlat(CHF_AUTOIX[i], 1)
+         hint = rombergintegral(BIintegrand, -Pi*half, lat, itns)
+         height(CHF_AUTOIX[i]) = h0 - hint / gravity
+     &        + hhat * cos(lat) * 
+     &        exp(-((lon/bia)**2) - ((phi2-lat)/bib)**2)
+      CHF_ENDDO
+
+      return
+      end

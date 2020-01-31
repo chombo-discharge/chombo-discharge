@@ -1,0 +1,88 @@
+#-- WARNING -- The blockfactor used in this simulation may have performance
+#              implications and may affect the results.  It should be greater
+#              than the number of ghost cells.  4 is only used to make the movie
+#              work out nicely and does not visually affect the solution.
+# NEED TO HAVE THESE or equivalent:
+godunov.num_cells = 32 32 32
+godunov.max_step = 300
+# Max speed is 2 ('u', 'v' is 1 and 'a' is 1) and use dx from fine and you
+# should be okay
+godunov.fixed_dt = 0.004
+godunov.plot_interval = 1
+godunov.plot_prefix = plot/gaussianadvect32.
+
+# Do the gaussian blob problem 
+# (do the smooth one to ensure periodicity)
+godunov.problem = gaussiansmooth
+
+# Gas gamma and initial conditions
+godunov.gamma = 1.4
+godunov.ambient_density = 1.4
+godunov.delta_density = 0.14
+# "initial_pressure" can be "isentropic" or "constant"
+godunov.initial_pressure = constant
+godunov.initial_center = 0.25 0.25 0.25
+godunov.initial_size = 0.1
+godunov.initial_velocity = 1.0 1.0 1.0
+# need to convert initial conditions to average
+godunov.initial_average = 1
+
+# Turn on some output
+godunov.verbosity = 1
+
+# Number of steps, final time, and time step
+godunov.max_time = 1.0
+
+# Size of the domain's longest dimension
+godunov.domain_length = 1.0
+
+# Coarsest grid
+godunov.is_periodic = 1 1 1
+
+# Grid refinement
+godunov.max_level = 2
+godunov.ref_ratio = 2 2 2 2 2
+
+# Regridding parameters
+godunov.regrid_interval = 8 8 4 4 4 4
+godunov.tag_buffer_size = 2
+godunov.refine_thresh = 1.E-3
+
+# Grid generation parameters
+godunov.block_factor = 4
+godunov.max_grid_size = 32
+godunov.fill_ratio = 0.8
+
+# Normal predictor method - PLM or PPM
+godunov.normal_predictor = PPM
+
+# Slope computation parameters
+godunov.use_fourth_order_slopes = 1
+godunov.use_prim_limiting = 1
+godunov.use_char_limiting = 0
+godunov.use_flattening = 1
+
+# Artificial viscosity
+godunov.use_artificial_viscosity = 0
+godunov.artificial_viscosity = 0.3
+# 0.3 * gamma
+godunov.fourth_order_artificial_viscosity_parameter = 0.42
+
+# high-order limiter
+godunov.high_order_limiter = 1
+
+# Checkpoint file information
+godunov.checkpoint_interval = -1
+
+# CFL multipliers
+godunov.cfl = 1.0
+godunov.initial_cfl = 1.0
+
+# Variable time step parameters
+godunov.max_dt_growth = 1.1
+godunov.dt_tolerance_factor = 1.1
+
+# Twisted coordsys parameters
+coordsys.type = twisted
+coordsys.radius = 0.5
+coordsys.twist = 0.5

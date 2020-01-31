@@ -1,0 +1,68 @@
+### This is a compiler-specific definitions file for Intel compilers (icc/ifc)
+
+## It sets values for the defaults variables ($def*), which will be used
+## if the calling makefile doesn't set the corresponding variables.
+## The corresponding variables are the ones without the "def" prefix.
+
+## Defaults variables:
+##  defcxxcomflags = C++ compiler/linker options
+##  defcxxdbgflags : for C++ compiling and linking when DEBUG=TRUE
+##  defcxxoptflags : for C++ compiling and linking when OPT=TRUE or HIGH
+##  defcxxprofflags: for C++ compiling and linking when PROFILE=TRUE
+##  deffcomflags   = Fortran compiler options
+##  deffdbgflags   : for Fortran compiling when DEBUG=TRUE
+##  deffoptflags   : for Fortran compiling when OPT=TRUE or HIGH
+##  deffprofflags  : for Fortran compiling when PROFILE=TRUE
+##  defflibflags   : library options needed to link the Fortran code
+##  defldflags     : options for linking
+##  cppcallsfort   : preprocessor macro as used in FORT_PROTO.H to specify
+##                    how the C++ code should construct names for calling Fortran
+## Notes:
+##  The Intel C/C++ and Fortran compilers set the preprocessor macros:
+##   __INTEL_COMPILER == (int) compiler version number
+##   __i386           == (1) Intel ia32 x86 processors
+##   __ia64           == (1) Intel Itanium processors
+##  The C/C++ compiler sets:
+##   __ICC, __ECC     == (?) ix86, itanium architecture
+##  The Fortran compiler sets:
+##   __IFC, _EFC      == (?) ix86, itanium architecture
+##  Use 'icc -E -dM' to see all predefined macros.
+##
+##  Versions deprecated: 9,10,11
+##  Versions tried: 16.0.1
+##
+
+makefiles+=compiler/Make.defs.Intel
+
+
+
+getcompilerversion := $(CHOMBO_HOME)/mk/compilerVersion.pl
+
+# '-EP' is different from '-E -P' in icc	
+# -C disable stripping out C++ comments, which are valid code in Fortran
+CH_CPP = $(CXX) -EP 
+
+_cxxbaseflags = -restrict -m64 -std=c++11
+
+cxxdbgflags += -g -Wall -Wextra -pedantic -fstack-protector-all $(_cxxbaseflags)
+cxxoptflags += -O3 -qopt-multi-version-aggressive $(_cxxbaseflags)
+
+defldflags = -static-intel
+
+foptflags += -O3
+fdbgflags += -g -check bounds -check uninit -ftrapuv
+
+flibflags += -lifport -lifcore -limf -lsvml -lm -lipgo -lirc -lsvml
+# Compile with OpenMP
+ifeq ($(OPENMPCC),TRUE)
+  cxxoptflags += -qopenmp
+  cxxdbgflags += -qopenmp
+  foptflags += -qopenmp
+  fdbgflags += -qopenmp
+else
+  cxxoptflags += -Wno-unknown-pragmas -diag-disable 3180
+  cxxdbgflags += -Wno-unknown-pragmas -diag-disable 3180
+  foptflags += -Wno-unknown-pragmas -diag-disable 3180
+  fdbgflags += -Wno-unknown-pragmas -diag-disable 3180
+endif
+

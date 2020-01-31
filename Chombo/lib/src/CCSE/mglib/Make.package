@@ -1,0 +1,23 @@
+#
+# $Id: Make.package,v 1.1 2007-05-24 18:12:03 tdsternberg Exp $
+#
+
+MGLIB_BASE=EXE
+
+CEXE_sources += ABecLaplacian.cpp BndryData.cpp CGSolver.cpp \
+                          InterpBndryData.cpp LinOp.cpp  \
+                          Mask.cpp MultiGrid.cpp
+CEXE_sources += Laplacian.cpp
+
+CEXE_headers += ABecLaplacian.H BndryData.H BoundCond.H \
+                          CGSolver.H InterpBndryData.H LO_BCTYPES.H \
+                          LinOp.H Mask.H MultiGrid.H
+CEXE_headers += Laplacian.H
+
+FEXE_headers += ABec_F.H CG_F.H INTERPBNDRYDATA_F.H LO_F.H \
+                          LP_F.H MG_F.H
+
+FEXE_sources += ABec_$(DIM)D.F ABec_UTIL.F CG_$(DIM)D.F \
+                          INTERPBNDRYDATA_$(DIM)D.F LO_$(DIM)D.F \
+                          LO_UTIL.F LP_$(DIM)D.F MG_$(DIM)D.F
+

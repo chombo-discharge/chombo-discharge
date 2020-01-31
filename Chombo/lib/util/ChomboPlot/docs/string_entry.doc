@@ -1,0 +1,91 @@
+A string entry widget is a widget that lets a user enter a single line
+of ASCII text.  When the user presses return in the widget, a callback
+is made to your application with a pointer to the new text.  Support
+routines also exist to Set and Get the text in the widget.
+
+If you want multiple lines of text, see the text edit widget
+documentation. 
+
+-----------------------------------------------------------------------
+
+Widget MakeStringEntry(char *txt, int size, StringCB func, void *data);
+
+This function makes a string input widget.  A string input widget is a
+widget that lets a user enter/edit a single line string value such as
+a filename.   
+
+The first argument is any default text you would like in the string
+entry widget.  You can specify NULL or "" if you don't want anything
+to appear.
+
+The next argument is the width in pixels of the string entry area.  Be
+careful in specifying the width since the default font used by the
+widget may not be wide enough to contain the text you want.  It is
+best if you call GetWidgetFont() and then call TextWidth() on a string
+of reasonable length and use the value returned by TextWidth() to be
+the width of the widget.  If you're lazy, a value of 150-200 is
+usually pretty good.
+
+
+The next argument is a callback function that is called whenever the
+user presses return in the string entry widget.  The callback function
+should be declared as follows:
+
+     void func(Widget w, char *string, void *data)
+     {
+     }
+
+The first argument to the callback is the widget where the user
+pressed return.  For the most part you can ignore this (unless you
+want to change the text).  The second argument is a pointer to the
+string of text the user entered.  The final argument is the user data
+pointer you passed in to MakeStringEntry().
+
+The string of text passed to your callback function should be copied
+elsewhere (using strdup() if necessary) because it is internal to the
+widget.  The string passed to your callback function should _never_ be
+modified directly.
+
+
+SEE ALSO : SetStringEntry(), GetStringEntry(), SetWidgetPos(),
+           GetWidgetFont(), TextWidth(), SetWidgetFont(),
+	   SetFgColor(), SetBgColor(), SetBorderColor() 
+
+----------------------------------------------------------------------
+
+void  SetStringEntry(Widget w, char *new_text);
+
+This function allows you to change the string of text displayed in a
+string entry widget.
+
+The first argument is the widget in which you would like to change the
+string (this widget should be a string entry widget).  The second
+argument is a pointer to the new text you would like displayed in the
+string entry area.
+
+After calling this function, the new text is displayed in the string
+entry area and any old strings are gone.
+
+SEE ALSO : GetStringEntry(), MakeStringEntry(), 
+
+-----------------------------------------------------------
+
+char *GetStringEntry(Widget w)
+
+This function lets you retrieve the text a user entered in a string
+widget.  The widget argument, w, should be a string entry widget.
+
+The return value of this function is a char pointer to a
+null-terminated string that is the contents of the string entry
+widget.
+
+If there is a problem, the function returns NULL.
+
+NOTE: You should not free the string returned to you by this function.
+      If you need to modify the string or otherwise use, you should
+      make a copy with strdup() or some other method.
+
+
+SEE ALSO : SetStringEntry(), MakeStringEntry(), 
+
+-----------------------------------------------------------

@@ -1,0 +1,88 @@
+# example from example/fourthOrderMappedGrids/execAdvection/cosinebelladvection.cubedsphere2d.032.inputs
+assert(SpaceDim == 2)
+
+multiblock = True
+verbosity = 1
+
+# Time stepping
+max_step = 20000
+max_time = 12.0
+cfl = 1.0
+initial_cfl = 0.75
+max_dt_growth = 1.1
+dt_tolerance_factor = 1.1
+
+# Computational domain and coordinate system.
+coord_sys = 'cubed_sphere'
+domain_length = 1.0
+num_cells = 32
+# fixed_dt = 3.84 / num_cells
+fixed_dt = 0.192 / num_cells
+
+# AMR
+max_level = 0
+ref_ratio = 4
+
+# Regridding parameters
+regrid_interval = 2
+tag_buffer_size = 2
+refine_thresh = 10.
+refinement_is_scaled = 1
+relative_gradient = 0	
+
+# Grid generation parameters
+block_factor = 8
+max_grid_size = 32
+fill_ratio = 0.75
+grid_buffer_size = 0
+
+useHyperviscosity = 0
+hyperviscosity = 0.01
+
+# REMOVED limitFaceValues setting!  Set use_prim_limiting instead.
+# limitFaceValues = 0
+use_prim_limiting = 1
+enforceMinVal = 1
+minVal = 0.0
+
+ambientDensity = 0.
+deltaDensity = 1000.0
+bellSize = 0.3
+advectVelocity = pi / 6.0
+advectAngle = pi / 2.0
+evalTime = 0.0
+
+# These are in (longitude, latitude) coordinates.
+# center point
+# center = (0.0, 0.7853981633974483)
+center = (pi/2.0, 0.0)
+# advection velocity
+# velocity = (1.0, 1.0)
+
+# Advect Cosine Bell initial conditions.
+def phi0(lonlat, t):
+    lon = lonlat[0]
+    lat = lonlat[1]
+    lonc = center[0]
+    latc = center[1]
+#   great circle distance between (lon, lat) and center (lonc, latc).
+    arc = acos(sin(latc)*sin(lat) + cos(latc)*cos(lat)*cos(lon-lonc))
+    dens = ambientDensity
+    if arc <= bellSize:
+        fac = (1.0 + cos(pi * arc / bellSize)) / 2.0
+        dens = dens + deltaDensity * fac*fac*fac
+    return dens
+
+def velocity(lonlat, t):
+    lon = lonlat[0]
+    lat = lonlat[1]
+    vlon = advectVelocity * cos(lat) * \
+           ( cos(advectAngle) + cos(lon) * tan(lat) * sin(advectAngle) )
+    vlat = -advectVelocity * sin(lon) * sin(advectAngle)
+    return (vlon, vlat)
+
+# Output
+checkpoint_interval = -1
+plot_interval = 1
+plot_prefix  = 'AdvectCosineBell.polar_lim.%d.'%num_cells
+chk_prefix = 'chkAdvectCosineBell.polar_lim.%d.'%num_cells

@@ -1,0 +1,70 @@
+#### For this specific test problem
+run.max_step = 60
+run.max_time = 100.0
+# Size of the domain's longest dimension
+run.domain_length = 1.0
+# Coarsest grid
+# run.num_cells = 32 8 4
+run.num_cells = 16 16 16
+run.is_periodic = 1 1 1
+# Do the line/plane (sine) wave problem
+run.ibc.problem = wave
+run.ibc.ambient_density = 1.4
+run.ibc.delta_density = 0.70
+# "initial_pressure" can be "isentropic" or "constant"
+run.ibc.initial_pressure = isentropic
+run.ibc.wave_number = 1 2 3
+run.ibc.initial_center = 0.6 0.5 0.4
+run.ibc.initial_velocity = 0.0 0.0 0.0
+
+#### Polytropic gas
+polytropic.gamma = 1.4
+
+#### AMR
+# Turn on some output
+amr.verbosity = 1
+# Grid refinement
+amr.max_level = 2
+# For 2D
+amr.ref_ratio = 4 4 4 4 4
+# For 3D
+# amr.ref_ratio = 2 2 2 2 2
+# Regridding parameters
+amr.regrid_interval = 2 2 2 2 2 2
+# Grid generation parameters
+amr.block_factor = 4
+amr.max_grid_size = 32
+amr.fill_ratio = 0.75
+# amr.fixed_dt = 0.002
+# Variable time step parameters
+amr.max_dt_growth = 1.1
+amr.dt_tolerance_factor = 1.1
+# Plot file information
+amr.plot_interval = 10
+# amr.plot_interval = 1
+amr.plot_prefix  = wave.
+# Checkpoint file information
+amr.checkpoint_interval = -1
+# amr.checkpoint_interval = 1
+# amr.chk_prefix = check.
+# Restart file information
+# amr.restart_file = check.20.2d.hdf5
+
+#### AMRLevelFactory
+amrlevelfactory.tag_buffer_size = 3
+amrlevelfactory.refine_thresh = 0.05
+# Initialize with averages
+amrlevelfactory.initial_average = 1
+# Slope computation parameters
+amrlevelfactory.use_fourth_order_slopes = 1
+amrlevelfactory.use_prim_limiting = 1
+amrlevelfactory.use_char_limiting = 0
+amrlevelfactory.use_flattening = 1
+# Artificial viscosity
+amrlevelfactory.use_artificial_viscosity = 1
+amrlevelfactory.artificial_viscosity = 0.1
+# high-order limiter
+amrlevelfactory.high_order_limiter = 1
+# CFL multipliers
+amrlevelfactory.cfl = 0.8
+amrlevelfactory.initial_cfl = 0.3

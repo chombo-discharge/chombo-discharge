@@ -1,0 +1,722 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+cccccccccccccccccccccccccccccccccc
+c warning: this routine may be triggering for those
+c     with sensitivities about code aesthetics
+ccccccccccccccccccccccccccccccccc
+      subroutine nwoebvtopointlph(
+     &     chf_realvect[lphi],
+     $     chf_const_intvect[iv],
+     &     chf_const_fra[phi],
+     &     chf_const_fra1[acofab],
+     $     chf_const_fra1[eta0fab],
+     $     chf_const_fra1[eta1fab],
+     $     chf_const_fra1[eta2fab],
+     $     chf_const_fra1[lam0fab],
+     $     chf_const_fra1[lam1fab],
+     $     chf_const_fra1[lam2fab],
+     $     chf_const_real[dx],
+     $     chf_const_real[alpha],
+     $     chf_const_real[beta])
+
+
+c     gee, that is a lot of temporary variables.
+c     I wonder what fiendish hell awaits me?
+c     
+c     phi, divf---0 1 2 are variables
+      real_t divf(0:CH_SPACEDIM-1)
+      real_t aphi(0:CH_SPACEDIM-1)
+c     here 0, 1 2 refers to the face directions.  charming, no?
+      real_t  etaL(0:CH_SPACEDIM-1)
+      real_t  etaH(0:CH_SPACEDIM-1)
+      real_t  lamL(0:CH_SPACEDIM-1)
+      real_t  lamH(0:CH_SPACEDIM-1)
+
+c     here the first index is the variable, the second is the face direction
+      real_t  fluxL(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+      real_t  fluxH(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+
+c     here the first index is the variable, the second is the derivative direction, third is the face direction
+      real_t  gphiL(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+      real_t  gphiH(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+
+c     index refers face direction
+      real_t  divuL(0:CH_SPACEDIM-1)
+      real_t  divuH(0:CH_SPACEDIM-1)
+
+      integer chf_ddecl[i;j;k], facedir, derivdir, veldir
+      integer chf_ddecl[iif;jjf;kkf]
+      integer chf_ddecl[iid;jjd;kkd]
+
+      chf_dterm[
+      i = iv(0);
+      j = iv(1);
+      k = iv(2)]
+      
+      chf_dterm[
+      etaL(0) =eta0fab(CHF_IX[i   ;j   ;k   ]);
+      etaL(1) =eta1fab(CHF_IX[i   ;j   ;k   ]);
+      etaL(2) =eta2fab(CHF_IX[i   ;j   ;k   ])]
+      chf_dterm[                            
+      etaH(0) =eta0fab(CHF_IX[i+1 ;j   ;k   ]);
+      etaH(1) =eta1fab(CHF_IX[i   ;j+1 ;k   ]);
+      etaH(2) =eta2fab(CHF_IX[i   ;j   ;k+1 ])]
+      chf_dterm[
+      lamL(0) =lam0fab(CHF_IX[i   ;j   ;k   ]);
+      lamL(1) =lam1fab(CHF_IX[i   ;j   ;k   ]);
+      lamL(2) =lam2fab(CHF_IX[i   ;j   ;k   ])]
+      chf_dterm[                            
+      lamH(0) =lam0fab(CHF_IX[i+1 ;j   ;k   ]);
+      lamH(1) =lam1fab(CHF_IX[i   ;j+1 ;k   ]);
+      lamH(2) =lam2fab(CHF_IX[i   ;j   ;k+1 ])]
+      
+
+c     here the first index is the variable, the second is the derivative direction, third is the face direction
+      do facedir = 0, CH_SPACEDIM-1
+         chf_dterm[
+         iif = chf_id(facedir, 0);
+         jjf = chf_id(facedir, 1);
+         kkf = chf_id(facedir, 2)]
+
+         do derivdir = 0, CH_SPACEDIM-1
+            chf_dterm[
+            iid = chf_id(derivdir, 0);
+            jjd = chf_id(derivdir, 1);
+            kkd = chf_id(derivdir, 2)]
+
+            do veldir = 0, CH_SPACEDIM-1
+
+               if(facedir .eq. derivdir) then
+
+                  gphiH(veldir, derivdir ,facedir) = (phi(chf_ix[i+iid;j+jjd;k+kkd],veldir) - phi(chf_ix[i    ;j    ;k    ],veldir))/dx
+                  gphiL(veldir, derivdir ,facedir) = (phi(chf_ix[i    ;j    ;k    ],veldir) - phi(chf_ix[i-iid;j-jjd;k-kkd],veldir))/dx
+
+               else
+
+                  gphiH(veldir, derivdir ,facedir) = (one/(four*dx))*(
+     $                 phi(chf_ix[i+iid+iif;j+jjd+jjf;k+kkd+kkf],veldir) - phi(chf_ix[i-iid+iif;j-jjd+jjf;k-kkd+kkf],veldir) + 
+     $                 phi(chf_ix[i+iid    ;j+jjd    ;k+kkd    ],veldir) - phi(chf_ix[i-iid    ;j-jjd    ;k-kkd    ],veldir)  )
+
+                  gphiL(veldir, derivdir ,facedir) = (one/(four*dx))*(
+     $                 phi(chf_ix[i+iid-iif;j+jjd-jjf;k+kkd-kkf],veldir) - phi(chf_ix[i-iid-iif;j-jjd-jjf;k-kkd-kkf],veldir) + 
+     $                 phi(chf_ix[i+iid    ;j+jjd    ;k+kkd    ],veldir) - phi(chf_ix[i-iid    ;j-jjd    ;k-kkd    ],veldir)  )
+
+               endif
+            enddo
+         enddo
+      enddo
+
+      do facedir = 0, CH_SPACEDIM-1
+         divuL(facedir) = zero
+         divuH(facedir) = zero
+         do veldir = 0, CH_SPACEDIM-1
+            divuL(facedir)= divuL(facedir) + gphiL(veldir, veldir, facedir)
+            divuH(facedir)= divuH(facedir) + gphiH(veldir, veldir, facedir)
+         enddo
+      enddo
+
+c     here the first index is the variable, the second is the face direction
+      do facedir = 0, CH_SPACEDIM-1
+         do veldir = 0, CH_SPACEDIM-1
+            fluxL(veldir, facedir) = etaL(facedir)*(gphiL(facedir, veldir, facedir) + gphiL(veldir, facedir, facedir))
+            fluxH(veldir, facedir) = etaH(facedir)*(gphiH(facedir, veldir, facedir) + gphiH(veldir, facedir, facedir))
+            if(veldir .eq. facedir) then
+               fluxL(veldir, facedir) = fluxL(veldir, facedir) + lamL(facedir)*divuL(facedir)
+               fluxH(veldir, facedir) = fluxH(veldir, facedir) + lamH(facedir)*divuH(facedir)
+            endif
+         enddo
+      enddo
+
+      do veldir = 0, CH_SPACEDIM-1
+         divf(veldir) = zero
+         do facedir = 0, CH_SPACEDIM-1
+            divf(veldir) = divf(veldir)
+     $           + (fluxH(veldir, facedir)-fluxL(veldir, facedir))/dx
+         enddo
+      enddo
+
+      chf_dterm[
+      aphi(0) = acofab(CHF_IX[i;j;k])*phi(CHF_IX[i;j;k], 0);
+      aphi(1) = acofab(CHF_IX[i;j;k])*phi(CHF_IX[i;j;k], 1);
+      aphi(2) = acofab(CHF_IX[i;j;k])*phi(CHF_IX[i;j;k], 2)]
+
+      chf_dterm[
+      lphi(0) =  alpha*aphi(0) + beta*divf(0);
+      lphi(1) =  alpha*aphi(1) + beta*divf(1);
+      lphi(2) =  alpha*aphi(2) + beta*divf(2)]
+
+
+      ch_flops=ch_flops + 4 + 6*CH_SPACEDIM + 12*(CH_SPACEDIM*CH_SPACEDIM)
+      return
+
+      end
+cccccccccc
+c this one, too
+ccccccccccc
+      subroutine gsrbnwoebvtop(
+     &     chf_fra[phi],
+     &     chf_const_fra[rhs],
+     &     chf_const_fra[lambda],
+     &     chf_const_fra1[acofab],
+     $     chf_const_fra1[eta0fab],
+     $     chf_const_fra1[eta1fab],
+     $     chf_const_fra1[eta2fab],
+     $     chf_const_fra1[lam0fab],
+     $     chf_const_fra1[lam1fab],
+     $     chf_const_fra1[lam2fab],
+     $     chf_const_real[dx],
+     $     chf_const_real[alpha],
+     $     chf_const_real[beta],
+     &     chf_box[coloredbox])
+
+c     gee, that is a lot of temporary variables.
+c     I wonder what fiendish hell awaits me?
+
+      REAL_T lphi(0:CH_SPACEDIM-1)
+
+c     phi, divf---0 1 2 are variables
+      real_t divf(0:CH_SPACEDIM-1)
+      real_t aphi(0:CH_SPACEDIM-1)
+c     here 0, 1 2 refers to the face directions.  charming, no?
+      real_t  etaL(0:CH_SPACEDIM-1)
+      real_t  etaH(0:CH_SPACEDIM-1)
+      real_t  lamL(0:CH_SPACEDIM-1)
+      real_t  lamH(0:CH_SPACEDIM-1)
+
+c     here the first index is the variable, the second is the face direction
+      real_t  fluxL(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+      real_t  fluxH(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+
+c     here the first index is the variable, the second is the derivative direction, third is the face direction
+      real_t  gphiL(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+      real_t  gphiH(0:CH_SPACEDIM-1,0:CH_SPACEDIM-1,0:CH_SPACEDIM-1)
+
+c     index refers face direction
+      real_t  divuL(0:CH_SPACEDIM-1)
+      real_t  divuH(0:CH_SPACEDIM-1)
+
+      integer chf_ddecl[i;j;k], facedir, derivdir, veldir
+      integer chf_ddecl[iif;jjf;kkf]
+      integer chf_ddecl[iid;jjd;kkd], ncolors
+
+
+      chf_multido[coloredbox;i;j;k;2]
+
+      
+      chf_dterm[
+      etaL(0) =eta0fab(CHF_IX[i   ;j   ;k   ]);
+      etaL(1) =eta1fab(CHF_IX[i   ;j   ;k   ]);
+      etaL(2) =eta2fab(CHF_IX[i   ;j   ;k   ])]
+      chf_dterm[                            
+      etaH(0) =eta0fab(CHF_IX[i+1 ;j   ;k   ]);
+      etaH(1) =eta1fab(CHF_IX[i   ;j+1 ;k   ]);
+      etaH(2) =eta2fab(CHF_IX[i   ;j   ;k+1 ])]
+      chf_dterm[
+      lamL(0) =lam0fab(CHF_IX[i   ;j   ;k   ]);
+      lamL(1) =lam1fab(CHF_IX[i   ;j   ;k   ]);
+      lamL(2) =lam2fab(CHF_IX[i   ;j   ;k   ])]
+      chf_dterm[                            
+      lamH(0) =lam0fab(CHF_IX[i+1 ;j   ;k   ]);
+      lamH(1) =lam1fab(CHF_IX[i   ;j+1 ;k   ]);
+      lamH(2) =lam2fab(CHF_IX[i   ;j   ;k+1 ])]
+      
+
+c     here the first index is the variable, the second is the derivative direction, third is the face direction
+      do facedir = 0, CH_SPACEDIM-1
+         chf_dterm[
+         iif = chf_id(facedir, 0);
+         jjf = chf_id(facedir, 1);
+         kkf = chf_id(facedir, 2)]
+
+         do derivdir = 0, CH_SPACEDIM-1
+            chf_dterm[
+            iid = chf_id(derivdir, 0);
+            jjd = chf_id(derivdir, 1);
+            kkd = chf_id(derivdir, 2)]
+
+            do veldir = 0, CH_SPACEDIM-1
+
+               if(facedir .eq. derivdir) then
+
+                  gphiH(veldir, derivdir ,facedir) = (phi(chf_ix[i+iid;j+jjd;k+kkd],veldir) - phi(chf_ix[i    ;j    ;k    ],veldir))/dx
+                  gphiL(veldir, derivdir ,facedir) = (phi(chf_ix[i    ;j    ;k    ],veldir) - phi(chf_ix[i-iid;j-jjd;k-kkd],veldir))/dx
+
+               else
+
+                  gphiH(veldir, derivdir ,facedir) = (one/(four*dx))*(
+     $                 phi(chf_ix[i+iid+iif;j+jjd+jjf;k+kkd+kkf],veldir) - phi(chf_ix[i-iid+iif;j-jjd+jjf;k-kkd+kkf],veldir) + 
+     $                 phi(chf_ix[i+iid    ;j+jjd    ;k+kkd    ],veldir) - phi(chf_ix[i-iid    ;j-jjd    ;k-kkd    ],veldir)  )
+
+                  gphiL(veldir, derivdir ,facedir) = (one/(four*dx))*(
+     $                 phi(chf_ix[i+iid-iif;j+jjd-jjf;k+kkd-kkf],veldir) - phi(chf_ix[i-iid-iif;j-jjd-jjf;k-kkd-kkf],veldir) + 
+     $                 phi(chf_ix[i+iid    ;j+jjd    ;k+kkd    ],veldir) - phi(chf_ix[i-iid    ;j-jjd    ;k-kkd    ],veldir)  )
+
+               endif
+            enddo
+         enddo
+      enddo
+
+      do facedir = 0, CH_SPACEDIM-1
+         divuL(facedir) = zero
+         divuH(facedir) = zero
+         do veldir = 0, CH_SPACEDIM-1
+            divuL(facedir)= divuL(facedir) + gphiL(veldir, veldir, facedir)
+            divuH(facedir)= divuH(facedir) + gphiH(veldir, veldir, facedir)
+         enddo
+      enddo
+
+c     here the first index is the variable, the second is the face direction
+      do facedir = 0, CH_SPACEDIM-1
+         do veldir = 0, CH_SPACEDIM-1
+            fluxL(veldir, facedir) = etaL(facedir)*(gphiL(facedir, veldir, facedir) + gphiL(veldir, facedir, facedir))
+            fluxH(veldir, facedir) = etaH(facedir)*(gphiH(facedir, veldir, facedir) + gphiH(veldir, facedir, facedir))
+            if(veldir .eq. facedir) then
+               fluxL(veldir, facedir) = fluxL(veldir, facedir) + lamL(facedir)*divuL(facedir)
+               fluxH(veldir, facedir) = fluxH(veldir, facedir) + lamH(facedir)*divuH(facedir)
+            endif
+         enddo
+      enddo
+
+      do veldir = 0, CH_SPACEDIM-1
+         divf(veldir) = zero
+         do facedir = 0, CH_SPACEDIM-1
+            divf(veldir) = divf(veldir)
+     $           + (fluxH(veldir, facedir)-fluxL(veldir, facedir))/dx
+         enddo
+      enddo
+
+      chf_dterm[
+      aphi(0) = acofab(CHF_IX[i;j;k])*phi(CHF_IX[i;j;k], 0);
+      aphi(1) = acofab(CHF_IX[i;j;k])*phi(CHF_IX[i;j;k], 1);
+      aphi(2) = acofab(CHF_IX[i;j;k])*phi(CHF_IX[i;j;k], 2)]
+
+      chf_dterm[
+      lphi(0) =  alpha*aphi(0) + beta*divf(0);
+      lphi(1) =  alpha*aphi(1) + beta*divf(1);
+      lphi(2) =  alpha*aphi(2) + beta*divf(2)]
+
+      chf_dterm[
+      phi(chf_ix[i;j;k], 0) =  phi(chf_ix[i;j;k],0) + lambda(chf_ix[i;j;k],0)*(rhs(chf_ix[i;j;k],0) - lphi(0));
+      phi(chf_ix[i;j;k], 1) =  phi(chf_ix[i;j;k],1) + lambda(chf_ix[i;j;k],1)*(rhs(chf_ix[i;j;k],1) - lphi(1));
+      phi(chf_ix[i;j;k], 2) =  phi(chf_ix[i;j;k],2) + lambda(chf_ix[i;j;k],2)*(rhs(chf_ix[i;j;k],2) - lphi(2))]
+
+      chf_enddo
+      ncolors = CHF_DTERM[2; *2; *2]
+      ch_flops=ch_flops+CHF_POINTS[coloredbox]*(4 + 9*CH_SPACEDIM + 12*(CH_SPACEDIM*CH_SPACEDIM))/ncolors
+
+      return
+      end
+
+      subroutine cellgradebvtop(
+     $     chf_fra1[grad],
+     $     chf_const_fra1[vel],
+     $     chf_const_real[dx],
+     $     chf_box[lobox],
+     $     chf_box[hibox],
+     $     chf_box[centerbox],
+     $     chf_const_int[haslo],
+     $     chf_const_int[hashi],
+     $     chf_const_int[divdir])
+
+      integer chf_ddecl[ii,i;jj,j;kk,k]
+
+      chf_dterm[
+      ii = chf_id(divdir, 0);
+      jj = chf_id(divdir, 1);
+      kk = chf_id(divdir, 2)]
+
+      chf_multido[centerbox;i;j;k]
+
+      grad(chf_ix[i;j;k]) =
+     $     (    vel(chf_ix[i+ii;j+jj;k+kk])
+     $     -    vel(chf_ix[i-ii;j-jj;k-kk]) )/(two*dx)
+
+
+      chf_enddo
+
+      if(haslo.eq.1) then
+         chf_multido[lobox;i;j;k]
+
+         grad(chf_ix[i;j;k]) =
+     $        (    vel(chf_ix[i+ii;j+jj;k+kk])
+     $        -    vel(chf_ix[i   ;j   ;k   ]) )/(dx)
+
+         chf_enddo
+      endif
+
+      if(hashi.eq.1) then
+         chf_multido[hibox;i;j;k]
+
+         grad(chf_ix[i;j;k]) =
+     $        (    vel(chf_ix[i   ;j   ;k   ])
+     $        -    vel(chf_ix[i-ii;j-jj;k-kk]) )/(dx)
+
+         chf_enddo
+      endif
+
+      return
+      end
+
+      subroutine incrapplyebvtop(
+     $     chf_fra1[lhs],
+     $     chf_const_fra1[interiorflux],
+     $     chf_const_fra1[domainfluxlo],
+     $     chf_const_fra1[domainfluxhi],
+     $     chf_const_real[beta],
+     $     chf_const_real[dx],
+     $     chf_box[lobox],
+     $     chf_box[hibox],
+     $     chf_box[centerbox],
+     $     chf_const_int[haslo],
+     $     chf_const_int[hashi],
+     $     chf_const_int[facedir])
+
+      integer chf_ddecl[ii,i;jj,j;kk,k]
+
+
+      chf_dterm[
+      ii = chf_id(facedir, 0);
+      jj = chf_id(facedir, 1);
+      kk = chf_id(facedir, 2)]
+
+      chf_multido[centerbox; i; j; k]
+
+      lhs(chf_ix[i;j;k]) = lhs(chf_ix[i;j;k])
+     $     +beta*
+     $     (interiorflux(chf_ix[i+ii;j+jj;k+kk])
+     $     -interiorflux(chf_ix[i   ;j   ;k   ]))/dx
+
+      chf_enddo
+
+
+      if(haslo .eq. 1) then
+         chf_multido[lobox; i; j; k]
+
+         lhs(chf_ix[i;j;k]) = lhs(chf_ix[i;j;k])
+     $        + beta*
+     $        (interiorflux(chf_ix[i+ii;j+jj;k+kk])
+     $        -domainfluxlo(chf_ix[i   ;j   ;k   ]))/dx
+
+         chf_enddo
+      endif
+
+      if(hashi .eq. 1) then
+         chf_multido[hibox; i; j; k]
+
+         lhs(chf_ix[i;j;k]) = lhs(chf_ix[i;j;k])
+     $        + beta*
+     $        (domainfluxhi(chf_ix[i+ii;j+jj;k+kk])
+     $        -interiorflux(chf_ix[i   ;j   ;k   ]))/dx
+
+         chf_enddo
+      endif
+
+
+      return
+      end
+
+
+
+      subroutine normalgradviscdirch(
+     $     chf_fra1[gradvelface],
+     $     chf_const_fra1[velcomp],
+     $     chf_const_fra1[velvalu],
+     $     chf_box[facebox],
+     $     chf_const_real[dx],
+     $     chf_const_int[iside],
+     $     chf_const_int[divdir]
+     $     )
+
+      integer chf_ddecl[i,id;j,jd;k,kd]
+      real_t val0, val1, val2, denom
+
+
+
+      chf_dterm[
+      id = chf_id(divdir, 0);
+      jd = chf_id(divdir, 1);
+      kd = chf_id(divdir, 2)]
+
+      if(iside.eq.-1) then
+
+         chf_multido[facebox;i;j;k]
+
+         val0 = velvalu(chf_ix[i   ;j   ;k   ])
+         val1 = velcomp(chf_ix[i   ;j   ;k   ])
+         val2 = velcomp(chf_ix[i+id;j+jd;k+kd])
+c         denom = three*dx
+c         gradvelface(chf_ix[i;j;k]) = (nine*(val1-val0)-(val2-val0))/denom
+         denom = half*dx
+         gradvelface(chf_ix[i;j;k]) = (val1-val0)/denom
+
+         chf_enddo
+
+      else
+
+         chf_multido[facebox;i;j;k]
+
+         val0 = velvalu(chf_ix[i     ;j     ;k     ])
+         val1 = velcomp(chf_ix[i-  id;j-  jd;k-  kd])
+         val2 = velcomp(chf_ix[i-2*id;j-2*jd;k-2*kd])
+c         denom = -three*dx
+c         gradvelface(chf_ix[i;j;k]) = (nine*(val1-val0)-(val2-val0))/denom
+         denom = -half*dx
+         gradvelface(chf_ix[i;j;k]) = (val1-val0)/denom
+
+         chf_enddo
+
+      endif
+
+
+      return
+      end
+
+      subroutine slipwallgrad(
+     $     chf_fra1[gradvelface],
+     $     chf_const_fra1[velcomp],
+     $     chf_box[facebox],
+     $     chf_const_real[dx],
+     $     chf_const_int[veldir],
+     $     chf_const_int[divdir],
+     $     chf_const_int[iside],
+     $     chf_box[lobox],
+     $     chf_box[hibox],
+     $     chf_box[centerbox],
+     $     chf_const_int[haslo],
+     $     chf_const_int[hashi],
+     $     chf_const_int[facedir]
+     $     )
+
+      integer chf_ddecl[i,id,iv;j,jd,jv;k,kd,kv]
+      real_t  val1, val2
+
+
+
+      chf_dterm[
+      id = chf_id(facedir, 0);
+      jd = chf_id(facedir, 1);
+      kd = chf_id(facedir, 2)]
+
+      chf_dterm[
+      iv = chf_id(divdir, 0);
+      jv = chf_id(divdir, 1);
+      kv = chf_id(divdir, 2)]
+
+      if(facedir.eq.veldir) then
+
+         if(iside.eq.-1) then
+
+            chf_multido[facebox;i;j;k]
+
+            val1 = velcomp(chf_ix[i   ;j   ;k   ])
+            gradvelface(chf_ix[i;j;k]) = two*val1/dx
+
+            chf_enddo
+
+         else
+
+            chf_multido[facebox;i;j;k]
+
+            val1 = velcomp(chf_ix[i-  id;j-  jd;k-  kd])
+            gradvelface(chf_ix[i;j;k]) = -two*val1/dx
+
+            chf_enddo
+
+         endif
+c     facedir != veldir
+      else
+
+         if(iside.eq.-1) then
+
+            chf_multido[centerbox;i;j;k]
+
+            val1 = velcomp(chf_ix[i+iv;j+jv;k+kv])
+            val2 = velcomp(chf_ix[i-iv;j-jv;k-kv])
+            gradvelface(chf_ix[i;j;k]) = (val1-val2)/(two*dx)
+
+            chf_enddo
+
+            if(haslo.eq.1) then
+
+               chf_multido[lobox;i;j;k]
+
+               val1 = velcomp(chf_ix[i+iv;j+jv;k+kv])
+               val2 = velcomp(chf_ix[i   ;j   ;k   ])
+               gradvelface(chf_ix[i;j;k]) = (val1-val2)/(dx)
+
+               chf_enddo
+
+            endif
+
+            if(hashi.eq.1) then
+
+               chf_multido[hibox;i;j;k]
+
+               val1 = velcomp(chf_ix[i   ;j   ;k   ])
+               val2 = velcomp(chf_ix[i-iv;j-jv;k-kv])
+               gradvelface(chf_ix[i;j;k]) = (val1-val2)/(dx)
+
+               chf_enddo
+
+            endif
+
+c     hi side
+         else
+
+         chf_multido[centerbox;i;j;k]
+
+            val1 = velcomp(chf_ix[i-id+iv;j-jd+jv;k-kd+kv])
+            val2 = velcomp(chf_ix[i-id-iv;j-jd-jv;k-kd-kv])
+            gradvelface(chf_ix[i;j;k]) = (val1-val2)/(two*dx)
+
+         chf_enddo
+
+         if(haslo.eq.1) then
+            chf_multido[lobox;i;j;k]
+
+            val1 = velcomp(chf_ix[i-id+iv;j-jd+jv;k-kd+kv])
+            val2 = velcomp(chf_ix[i-id   ;j-jd   ;k-kd   ])
+            gradvelface(chf_ix[i;j;k]) = (val1-val2)/(dx)
+
+            chf_enddo
+         endif
+
+         if(hashi.eq.1) then
+            chf_multido[hibox;i;j;k]
+
+            val1 = velcomp(chf_ix[i-id   ;j-jd   ;k-kd   ])
+            val2 = velcomp(chf_ix[i-id-iv;j-jd-jv;k-kd-kv])
+            gradvelface(chf_ix[i;j;k]) = (val1-val2)/(dx)
+
+            chf_enddo
+         endif
+
+         endif
+      endif
+
+      return
+      end
+
+      subroutine veldotsigma(
+     $     chf_fra[veldotsig],
+     $     chf_const_fra[vel],
+     $     chf_const_fra[sig],
+     $     chf_box[facebox])
+
+      integer chf_ddecl[i;j;k]
+      integer icomp
+      real_t sum
+
+
+
+      chf_multido[facebox;i;j;k]
+
+      sum = zero
+      do icomp = 0, CH_SPACEDIM-1
+         sum = sum + vel(chf_ix[i;j;k], icomp)*sig(chf_ix[i;j;k], icomp)
+      enddo
+
+      veldotsig(chf_ix[i;j;k], 0) = sum
+
+      chf_enddo
+
+      return
+      end
+
+
+
+      subroutine incrpointdotprod(
+     $     chf_fra1[sigmadotgradu],
+     $     chf_const_fra1[gradu],
+     $     chf_const_fra1[sigma],
+     $     chf_box[box])
+
+      integer chf_ddecl[i;j;k]
+      real_t incr
+
+      chf_multido[box;i;j;k]
+
+      incr =  gradu(chf_ix[i;j;k])*sigma(chf_ix[i;j;k])
+
+      sigmadotgradu(chf_ix[i;j;k]) = sigmadotgradu(chf_ix[i;j;k]) + incr
+
+      chf_enddo
+
+      return
+      end
+
+
+
+      subroutine incrccsigmalambda(
+     $     chf_fra1[sigma],
+     $     chf_const_fra[gradu],
+     $     chf_const_fra1[lambda],
+     $     chf_box[grid],
+     $     chf_const_int[diagcomp])
+
+      integer chf_ddecl[i;j;k]
+
+
+      chf_multido[grid; i; j; k]
+
+        sigma(chf_ix[i;j;k]) = sigma(chf_ix[i;j;k])
+     $     + lambda(chf_ix[i;j;k])*gradu(chf_ix[i;j;k], diagcomp)
+
+      chf_enddo
+
+      return
+      end
+
+
+      subroutine incrccsigmaeta(
+     $     chf_fra1[sigma],
+     $     chf_const_fra[gradu],
+     $     chf_const_fra1[eta],
+     $     chf_box[grid],
+     $     chf_const_int[gradcomp],
+     $     chf_const_int[trancomp])
+
+      integer chf_ddecl[i;j;k]
+
+
+      chf_multido[grid; i; j; k]
+
+      sigma(chf_ix[i;j;k]) = sigma(chf_ix[i;j;k])
+     $     +  eta(chf_ix[i;j;k])*
+     $     (gradu(chf_ix[i;j;k], gradcomp)
+     $     +gradu(chf_ix[i;j;k], trancomp))
+
+      chf_enddo
+
+      return
+      end
+      subroutine incrfacetocellaverage(
+     $     chf_fra1[cellcoef],
+     $     chf_const_fra1[facecoef],
+     $     chf_const_int[facedir],
+     $     chf_box[grid],
+     $     chf_real[nfacesper])
+
+      integer chf_ddecl[ii,i;jj,j;kk,k]
+
+
+      chf_dterm[
+      ii = chf_id(facedir, 0);
+      jj = chf_id(facedir, 1);
+      kk = chf_id(facedir, 2)]
+
+      chf_multido[grid; i; j; k]
+
+        cellcoef(chf_ix[i;j;k]) = cellcoef(chf_ix[i;j;k])   +
+     $     (facecoef(chf_ix[i+ii;j+jj;k+kk])
+     $     +facecoef(chf_ix[i   ;j   ;k   ]))/nfacesper
+
+      chf_enddo
+
+      return
+      end

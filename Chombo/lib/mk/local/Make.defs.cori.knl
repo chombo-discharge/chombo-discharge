@@ -1,0 +1,27 @@
+## This file defines variables for use on the login nodes of the NERSC Linux
+## machine 'cori knl partition'.  
+##
+
+makefiles+=local/Make.defs.cori.knl
+
+CXX=CC
+FC=ftn
+MPICXX=CC
+
+cxxoptflags+= -xMIC-AVX512
+foptflags += -xMIC-AVX512
+cxxcppflags += -ffreestanding
+fcppflags += -ffreestanding
+
+RUN = srun -n 2 ./#
+
+
+USE_HDF=TRUE
+#HDF5_DIR = $(CRAY_HDF5_DIR)/INTEL/140
+#HDF5_DIR = $(HDF5_ROOT)
+# use module-environment-defined HDF5_DIR, so no need to set it here
+
+HDFLIBFLAGS=   -L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFMPILIBFLAGS=-L$(HDF5_DIR)/lib     $(HDF_POST_LINK_OPTS)  -lhdf5 -lz
+HDFINCFLAGS=   -I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS) 
+HDFMPIINCFLAGS=-I$(HDF5_DIR)/include $(HDF_INCLUDE_OPTS)

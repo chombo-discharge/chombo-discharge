@@ -1,0 +1,346 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+      subroutine MAPCYLINDRICALSPOKESSECTOR(
+!     Computes physical coordinates from Cartesian coordinates.
+!
+!     => inputs,  <= outputs
+!     coords <= space coordinates, CH_SPACEDIM components on bx
+!     mapco => mapped coordinates, CH_SPACEDIM components on bx
+!     iblock => index of block
+!     maplo => cartesian coordinates of lower corner of sector domain
+!     maplen => cartesian coordinate lengths of sector domain
+!     cylorg => physical coordinates of center of cylinder
+!     bxwid => physical box width
+!     outr => radius of circle
+!     bx => indices of points
+!
+!     petermc, 27 Mar 2008
+     &     CHF_FRA[coords],
+     &     CHF_CONST_FRA[mapco],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[maplo],
+     &     CHF_CONST_REALVECT[maplen],
+     &     CHF_CONST_REALVECT[cylorg],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      real_t thoff, xorg, yorg, anglo, radlo, anglen, radlen
+      real_t maphi(0:1)
+      real_t sectoroffset
+      external sectoroffset
+
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM) then
+         print *, 'MAPCYLINDRICALSPOKESSECTOR:  coords must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+#if CH_SPACEDIM > 1
+      xorg = cylorg(0)
+      yorg = cylorg(1)
+
+      maphi(0) = maplo(0) + maplen(0)
+      maphi(1) = maplo(1) + maplen(1)
+
+      thoff = sectoroffset(iblock)
+
+!     Subroutine spokesmap takes mapco in the order ANGULAR, RADIAL.
+      if (iblock .eq. 1) then
+!     angle from +y, radius from +x
+         anglo = maplo(1)
+         radlo = maplo(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesmap(
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        mapco(CHF_IX[i;j;k], 1), mapco(CHF_IX[i;j;k], 0),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 2) then
+!     angle from -x, radius from +y
+         anglo = -maphi(0)
+         radlo = maplo(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesmap(
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        -mapco(CHF_IX[i;j;k], 0), mapco(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 3) then
+!     angle from -y, radius from -x
+         anglo = -maphi(1)
+         radlo = -maphi(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesmap(
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        -mapco(CHF_IX[i;j;k], 1), -mapco(CHF_IX[i;j;k], 0),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr)
+         CHF_ENDDO
+      elseif (iblock .eq. 4) then
+!     angle from +x, radius from -y
+         anglo = maplo(0)
+         radlo = -maphi(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesmap(
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        mapco(CHF_IX[i;j;k], 0), -mapco(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr)
+         CHF_ENDDO
+      else
+         print *, 'MAPCYLINDRICALSPOKESSECTOR:  ',
+     &        'iblock must be in range 1:4'
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+#if CH_SPACEDIM == 3
+      CHF_MULTIDO[bx; i; j; k]
+      coords(CHF_IX[i;j;k], 2) = cylorg(2) +
+     &     ((mapco(CHF_IX[i;j;k], 2) - maplo(2))/maplen(2) - half)
+     &     * bxwid
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine MAPINVCYLINDRICALSPOKESSECTOR(
+!     Computes Cartesian coordinates from physical coordinates.
+!
+!     => inputs,  <= outputs
+!     mapco <= mapped coordinates, CH_SPACEDIM components on bx
+!     coords => space coordinates, CH_SPACEDIM components on bx
+!     iblock => index of block
+!     maplo => cartesian coordinates of lower corner of sector domain
+!     maplen => cartesian coordinate lengths of sector domain
+!     cylorg => physical coordinates of center of cylinder
+!     bxwid => physical box width
+!     outr => radius of circle
+!     bx => indices of points
+!
+!     petermc, 27 Mar 2008
+     &     CHF_FRA[mapco],
+     &     CHF_CONST_FRA[coords],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[maplo],
+     &     CHF_CONST_REALVECT[maplen],
+     &     CHF_CONST_REALVECT[cylorg],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      real_t thoff, xorg, yorg, anglo, radlo, anglen, radlen
+      real_t maphi(0:1)
+      real_t sectoroffset
+      external sectoroffset
+
+      if (CHF_NCOMP[coords] .ne. CH_SPACEDIM) then
+         print *, 'MAPCYLINDRICALSPOKESSECTOR:  coords must have ',
+     &        CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+#if CH_SPACEDIM > 1
+      xorg = cylorg(0)
+      yorg = cylorg(1)
+
+      maphi(0) = maplo(0) + maplen(0)
+      maphi(1) = maplo(1) + maplen(1)
+
+      thoff = sectoroffset(iblock)
+
+!     Subroutine spokesinvmap returns mapco in the order ANGULAR, RADIAL.
+      if (iblock .eq. 1) then
+!     angle from +y, radius from +x
+         anglo = maplo(1)
+         radlo = maplo(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesinvmap(
+     &        mapco(CHF_IX[i;j;k], 1), mapco(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr, 1, 1)
+         CHF_ENDDO
+      elseif (iblock .eq. 2) then
+!     angle from -x, radius from +y
+         anglo = -maphi(0)
+         radlo = maplo(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesinvmap(
+     &        mapco(CHF_IX[i;j;k], 0), mapco(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr, -1, 1)
+         CHF_ENDDO
+      elseif (iblock .eq. 3) then
+!     angle from -y, radius from -x
+         anglo = -maphi(1)
+         radlo = -maphi(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesinvmap(
+     &        mapco(CHF_IX[i;j;k], 1), mapco(CHF_IX[i;j;k], 0),
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr, -1, -1)
+         CHF_ENDDO
+      elseif (iblock .eq. 4) then
+!     angle from +x, radius from -y
+         anglo = maplo(0)
+         radlo = -maphi(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         call spokesinvmap(
+     &        mapco(CHF_IX[i;j;k], 0), mapco(CHF_IX[i;j;k], 1),
+     &        coords(CHF_IX[i;j;k], 0), coords(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, xorg, yorg,
+     &        thoff, bxwid, outr, 1, -1)
+         CHF_ENDDO
+      else
+         print *, 'MAPCYLINDRICALSPOKESSECTOR:  ',
+     &        'iblock must be in range 1:4'
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+#if CH_SPACEDIM == 3
+      CHF_MULTIDO[bx; i; j; k]
+      mapco(CHF_IX[i;j;k], 2) = maplo(2) +
+     &     ((coords(CHF_IX[i;j;k], 2) - cylorg(2))/bxwid + half)
+     &     * maplen(2)
+      CHF_ENDDO
+#endif
+
+      return
+      end
+
+
+      subroutine JACOBIANCYLINDRICALSPOKESSECTOR(
+!     Computes Jacobian from Cartesian coordinates.
+!
+!     => inputs,  <= outputs
+!     jacob <= Jacobian, 1 component
+!     mapco => map space coordinates, CH_SPACEDIM components in 0:1
+!     iblock => index of block
+!     maplo => cartesian coordinates of lower corner of sector domain
+!     maplen => cartesian coordinate lengths of sector domain
+!     bxwid => physical box width
+!     outr => radius of circle
+!     bx => indices of points
+!
+!     petermc, 27 Mar 2008
+     &     CHF_FRA1[jacob],
+     &     CHF_CONST_FRA[mapco],
+     &     CHF_CONST_INT[iblock],
+     &     CHF_CONST_REALVECT[maplo],
+     &     CHF_CONST_REALVECT[maplen],
+     &     CHF_CONST_REAL[bxwid],
+     &     CHF_CONST_REAL[outr],
+     &     CHF_BOX[bx])
+
+      integer CHF_DDECL[i;j;k]
+      real_t anglo, radlo, anglen, radlen
+      real_t maphi(0:1)
+      real_t spokesjacobian
+      external spokesjacobian
+
+      if (CHF_NCOMP[mapco] .ne. CH_SPACEDIM) then
+         print *, 'JACOBIANCYLINDRICALSPOKESSECTOR:  ',
+     &        'mapco must have ', CH_SPACEDIM, ' components'
+         call MAYDAY_ERROR()
+      endif
+
+#if CH_SPACEDIM > 1
+      maphi(0) = maplo(0) + maplen(0)
+      maphi(1) = maplo(1) + maplen(1)
+
+!     Subroutine spokesjacobian takes mapco in the order
+!     ANGULAR, RADIAL.
+      if (iblock .eq. 1) then
+!     angle from +y, radius from +x
+         anglo = maplo(1)
+         radlo = maplo(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        mapco(CHF_IX[i;j;k], 1), mapco(CHF_IX[i;j;k], 0),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      elseif (iblock .eq. 2) then
+!     angle from -x, radius from +y
+         anglo = -maphi(0)
+         radlo = maplo(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        -mapco(CHF_IX[i;j;k], 0), mapco(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      elseif (iblock .eq. 3) then
+!     angle from -y, radius from -x
+         anglo = -maphi(1)
+         radlo = -maphi(0)
+         anglen = maplen(1)
+         radlen = maplen(0)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        -mapco(CHF_IX[i;j;k], 1), -mapco(CHF_IX[i;j;k], 0),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      elseif (iblock .eq. 4) then
+!     angle from +x, radius from -y
+         anglo = maplo(0)
+         radlo = -maphi(1)
+         anglen = maplen(0)
+         radlen = maplen(1)
+         CHF_MULTIDO[bx; i; j; k]
+         jacob(CHF_IX[i;j;k]) = CHF_DTERM[ ;
+     &        spokesjacobian(
+     &        mapco(CHF_IX[i;j;k], 0), -mapco(CHF_IX[i;j;k], 1),
+     &        anglo, radlo, anglen, radlen, bxwid, outr) ;
+     &        * bxwid ]
+         CHF_ENDDO
+      else
+         print *, 'JACOBIANCYLINDRICALSPOKESSECTOR:  ',
+     &        'iblock must be in range 1:4'
+         call MAYDAY_ERROR()
+      endif
+#endif
+
+      return
+      end

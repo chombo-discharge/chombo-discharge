@@ -1,0 +1,65 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "EBLGIntegrator.H"
+#include "CONSTANTS.H"
+cccccccccccccccc
+      subroutine gettransportcoeffs(
+     &     chf_box[dcalc],
+     &     chf_fra1[mu],
+     &     chf_fra1[lambda],
+     &     chf_fra1[bco],
+     &     chf_const_fra1[temp],
+     &     chf_const_real[mu0],
+     &     chf_const_real[lambda0],
+     &     chf_const_real[bco0],
+     &     chf_const_real[temp0]
+     &     )
+
+      integer chf_ddecl[i; j; k]
+
+      real_t  ptmu, ptlambda, ptbco, pttemp
+
+      chf_multido[dcalc;i;j;k]
+
+      pttemp = temp(chf_ix[i;j;k])
+      
+      call pointgettransportcoeffs(ptmu, ptlambda, ptbco, pttemp, mu0, lambda0, bco0, temp0)
+
+      
+      mu(    chf_ix[i;j;k])    = ptmu
+      lambda(chf_ix[i;j;k])    = ptlambda
+      bco  (chf_ix[i;j;k])    = ptbco
+
+      chf_enddo
+
+      return
+      end
+cccccccccccccccc
+      subroutine pointgettransportcoeffs(
+     $     chf_real[mu],
+     $     chf_real[lambda],
+     $     chf_real[bco],
+     $     chf_const_real[temp],
+     $     chf_const_real[mu0],
+     $     chf_const_real[lambda0],
+     $     chf_const_real[bco0],
+     $     chf_const_real[temp0])
+
+      real_t factor, arg, expon
+
+      arg = abs(temp/temp0)
+      expon = seven/ten
+      factor = arg**expon
+
+      mu     =     mu0 * factor
+      lambda = lambda0 * factor
+      bco    =    bco0 * factor
+      
+      return
+      end
+
+cccccccccccccccc

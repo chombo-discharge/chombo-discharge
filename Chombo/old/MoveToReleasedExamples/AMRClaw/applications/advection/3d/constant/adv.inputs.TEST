@@ -1,0 +1,58 @@
+claw.problem = scalar_advection
+
+claw.mx = 20
+claw.my = 20
+claw.mz = 20
+
+claw.plot_interval = 1
+claw.max_step = 10
+claw.max_time = 0.02
+
+# claw.fixed_dt = 0.1
+claw.initial_cfl = 0.1
+claw.initial_dt = 0.01
+claw.max_cfl = 1.0
+claw.cfl = 0.9
+claw.max_dt_growth = 1.1
+claw.dt_tolerance_factor = 1.1
+
+claw.order = 2 2 2
+claw.src = 0
+claw.verbosity = 1
+claw.mcapa = 0
+claw.maux = 3
+claw.auxtype = "xleft" "yleft" "zleft"
+
+claw.meqn = 1
+claw.mwaves = 1
+claw.mthlim = 4
+
+claw.mbc = 2
+claw.mthbc = 2 2 2 2 2 2
+
+claw.xlower = 0
+claw.ylower = 0
+claw.zlower = 0
+claw.xupper = 1.0
+claw.yupper = 1.0
+claw.zupper = 1.0
+
+claw.stateNames = "rho"
+
+# Parameters controlling the local mesh refining strategy
+claw.max_level = 2
+claw.ref_ratio = 2 2 2 2
+
+claw.regrid_interval = 2 2 2
+claw.tag_buffer_size = 3
+
+claw.refine_thresh = .1
+
+claw.block_factor = 4
+claw.max_grid_size = 100
+claw.fill_ratio = 0.70
+
+claw.checkpoint_interval = -1
+# claw.restart_file = chk20.2d.hdf5
+claw.plot_prefix  = plotNEW
+claw.chk_prefix = check

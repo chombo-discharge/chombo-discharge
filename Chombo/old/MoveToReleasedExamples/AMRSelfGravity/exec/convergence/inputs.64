@@ -1,0 +1,136 @@
+
+# Set which problem to solve
+
+charm.problem = dustcollapse
+charm.cloud_density= 1.00
+charm.cloud_radius = 0.125  #  0.0625
+#charm.grid_shift   = 0.250 0.650 0.350
+charm.grid_shift   = 0.0 0.0 0.0
+
+#
+# verbosity
+# 
+
+charm.verbosity = 3
+
+#
+# Simulation Set-up
+# 
+
+charm.num_cells = 64 64 64
+charm.max_step = 16
+charm.plot_prefix  = plot.064.
+charm.fixed_dt = 4.0e-2
+
+charm.max_time = 100000.0
+charm.domain_length = 1.0
+charm.is_periodic = 0 0 0    # 0= non-periodic
+
+#
+# AMR
+# 
+
+charm.max_level          = 0
+charm.max_init_ref_level = 0
+
+charm.ref_ratio       = 2 2 2 2 2 2 2 2
+charm.regrid_interval = 4 4 4 4 4 4 4 4 
+
+charm.tag_buffer_size      = 2
+
+charm.block_factor  = 4
+charm.max_grid_size = 32
+charm.fill_ratio    = 0.8
+
+# One thing you can do to speed things up is to turn off gradient refine
+# as a result the cloud boundary will be smoothed by numerical diffusion,
+# but that's OK for a demonstration...
+charm.use_gradient_refine  = 0
+
+
+charm.use_num_part_refine  = 0
+charm.use_shock_refine     = 0
+charm.use_over_dense_refine= 1
+charm.use_jeans_refine     = 0
+
+charm.pres_jump_thresh     = 1.0      # dp/<p>= (M^2-1)/(M^2+3/5)
+
+# note that if you change the number of cells you have to change the
+# mass threshold for refinement according to the following expression:
+# charm.cell_mass_thresh = 1.5e-5 # = rho*dx^Dim = 3.8e-6*rho *(64/nx)^3
+# where rho is the cloud density and it is 1, and nx is the number of 
+# cells in the base box. A box length =1 is assumed.
+
+charm.cell_mass_thresh = 1.5e-5 # = rho*dx^Dim = 3.8e-6*rho *(64/nx)^3
+
+charm.jeans_resol_thresh   = 4
+charm.grad_refine_thresh   = 0.02
+charm.grad_var_interv      = 0 4  # > UNUM means phi (potential)
+#charm.refine_region_mode   = 1  # 0=FIX=this region and no more; 1=AND=tagged cells within 
+                          # this region only; 2=OR=tagged cells and this region
+#charm.ref_box_lo_0 = 4 4 4    # buffer layer removed automatically
+#charm.ref_box_hi_0 = 11 11 11  
+# charm.ref_box_lo_1 = 32 32 32
+# charm.ref_box_hi_1 = 96 96 96
+
+#
+# Hydro
+# 
+# gamma
+charm.gamma = 1.6666666666667
+
+# Slope computation parameters
+charm.use_fourth_order_slopes = 0
+#no limiting for convergence testing
+charm.use_prim_limiting = 0
+charm.use_char_limiting = 0
+charm.use_flattening    = 0
+
+# Artificial viscosity
+charm.use_artificial_viscosity = 0
+charm.artificial_viscosity = 0.2
+
+# Normal predictor method - PLM or PPM
+charm.normal_predictor = PLM
+
+#
+# Output
+#
+
+charm.checkpoint_interval = -1 
+charm.plot_interval       = 100
+charm.chk_prefix   = check
+#charm.restart_file = check40.3d.hdf5
+
+#
+# Time-step
+#
+
+charm.cfl     = 0.5
+charm.initial_cfl   = 0.5
+charm.max_dt_growth = 1.10
+charm.dt_tolerance_factor = 1.10
+
+#
+# Hydro: Riemann-Solver
+#
+
+charm.rs_tolerance = 1.e-6
+charm.max_rs_iter  = 10
+charm.max_mach     = 50
+
+#
+# AMR Poisson solver
+# 
+
+charm.bc_lo = 3 3 3  #bcs for lo faces 0==dirc, 1==neumann, 2==inf bc, 3==gauss
+charm.bc_hi = 3 3 3  #bcs for hi faces 0==dirc, 1==neumann, 2==inf bc, 3==gauss
+
+#
+# Gravity
+# 
+# StencilType {TwoPts, FourPts, TenPts}
+# 
+
+charm.force_stencil        = 0
+charm.use_delta_phi_corr   = 1 # 1=true; 0=false

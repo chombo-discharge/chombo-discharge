@@ -1,0 +1,436 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+
+c  ---------------------------------------------------------
+c  increments lapPhi with centered 2nd derivative in direction dir
+c  from Colella and Sekora (note that this includes the factor of 3
+c  in the definition of D^2(phi), so it's actually 3*(2ndDeriv)
+c
+c  lapPhi <=  face-centered 2nd derivative of phi
+c  facePhi => face-centered value of phi
+c  cellPhi => cell-centered phi
+c  faceBox => face-centered box over which to compute lapPhi
+c  idir    => direction of derivative
+c  dx      => cell spacing
+c ----------------------------------------------------------
+      subroutine CENTEREDLAPLACIAN(CHF_FRA[lapPhi],
+     &                             CHF_CONST_FRA[facePhi],
+     &                             CHF_CONST_FRA[cellPhi],
+     &                             CHF_BOX[faceBox],
+     &                             CHF_CONST_INT[idir],
+     &                             CHF_CONST_REAL[dx])
+
+      integer n, CHF_DDECL[i;j;k;l]
+      integer CHF_DDECL[ii;jj;kk;ll]
+      REAL_T factor
+
+      CHF_DTERM[
+      ii = CHF_ID(idir, 0);
+      jj = CHF_ID(idir, 1);
+      kk = CHF_ID(idir, 2);
+      ll = CHF_ID(idir, 3)]
+
+      factor = three/(dx*dx)
+
+      do n=0, (CHF_NCOMP[facePhi]-1)
+         CHF_MULTIDO[faceBox;i;j;k;l]
+            lapPhi(CHF_IX[i;j;k;l],n)
+     &        = lapPhi(CHF_IX[i;j;k;l],n)
+     &        + factor * ( cellPhi(CHF_IX[i;j;k;l],n)
+     &                   + cellPhi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+     &                   - two * facePhi(CHF_IX[i;j;k;l],n) )
+         CHF_ENDDO
+
+      enddo
+
+      return
+      end
+
+
+c  ----------------------------------------------------------------
+c  computes cell-centered 2nd-derviatives from Colella & Sekora
+c  (essentially standard 3-point cell-centered 2nd derivatives)
+c
+c  lapPhi <=  cell-centered 2nd-derivative of phi in direction idir
+c  cellPhi => cell-centered phi
+c  cellBox => cell-centered box over which to compute lapPhi
+c  idir    => direction
+c  dx      => cell spacing
+c  ----------------------------------------------------------------
+      subroutine CCLAPLACIAN(CHF_FRA[lapPhi],
+     &                       CHF_CONST_FRA[cellPhi],
+     &                       CHF_BOX[cellBox],
+     &                       CHF_CONST_INT[idir],
+     &                       CHF_CONST_REAL[dx])
+
+
+      integer n, CHF_DDECL[i;j;k;l]
+      integer CHF_DDECL[ii;jj;kk;ll]
+      REAL_T factor
+
+      CHF_DTERM[
+      ii = CHF_ID(idir, 0);
+      jj = CHF_ID(idir, 1);
+      kk = CHF_ID(idir, 2);
+      ll = CHF_ID(idir, 3)]
+
+      factor = one/(dx*dx)
+
+      do n=0, (CHF_NCOMP[lapPhi]-1)
+         CHF_MULTIDO[cellBox;i;j;k;l]
+            lapPhi(CHF_IX[i;j;k;l],n)
+     &        = lapPhi(CHF_IX[i;j;k;l],n)
+     &        + factor * ( cellPhi(CHF_IX[i+ii;j+jj;k+kk;l+ll],n)
+     &                   + cellPhi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+     &                   - two * cellPhi(CHF_IX[i;j;k;l],n) )
+         CHF_ENDDO
+
+      enddo
+
+      return
+      end
+
+
+c ----------------------------------------------------------
+c  limits face values based on 2nd-derivatives of phi a la Colella & Sekora
+c
+c  facePhi <=> face-centered phi value
+c  cellPhi  => cell-centered phi
+c  centeredLap => "centered" 2nd derivatives
+c  LRLap    => "left" and "right" 2nd derivatives
+c  faceBox  =>
+c  idir     =>
+c  limitC   => constant "C" for weighting LRLap
+c  -------------------------------------------------------------
+      subroutine LIMITFACEVALUES(CHF_FRA[facePhi],
+     &                           CHF_CONST_FRA[cellPhi],
+     &                           CHF_CONST_FRA[centeredLap],
+     &                           CHF_CONST_FRA[LRLap],
+     &                           CHF_BOX[faceBox],
+     &                           CHF_CONST_INT[idir],
+     &                           CHF_CONST_REAL[dx],
+     &                           CHF_CONST_REAL[limitC])
+
+
+      integer n, CHF_DDECL[i;j;k;l]
+      integer CHF_DDECL[ii;jj;kk;ll]
+      REAL_T d2phi, d2C, d2L, d2R
+      REAL_T h2On3
+      REAL_T diffl, diffr
+      REAL_T s
+      logical sameSign
+
+      CHF_DTERM[
+      ii = CHF_ID(idir, 0);
+      jj = CHF_ID(idir, 1);
+      kk = CHF_ID(idir, 2);
+      ll = CHF_ID(idir, 3)]
+
+
+c      write (*,*) 'temp, d2c, d2l, d2r, d2phi'
+      do n=0, (CHF_NCOMP[facePhi]-1)
+         CHF_MULTIDO[faceBox;i;j;k;l]
+
+           diffl = facePhi(CHF_IX[i;j;k;l],n)
+     &           - cellPhi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+           diffr = cellPhi(CHF_IX[i;j;k;l],n)
+     &           - facePhi(CHF_IX[i;j;k;l],n)
+
+c  only do limiting if at a local max/min
+           if (diffl*diffr.lt.zero) then
+
+              d2L = LRLap(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+              d2R = LRLap(CHF_IX[i;j;k;l],n)
+              d2C = centeredLap(CHF_IX[i;j;k;l],n)
+
+c  (DFM - 5/19/10) new condition following petermc:
+c      apply limiter iff d2C is NOT between d2L and d2R
+c      (additional test of whether we're at a "real" local max/min
+              if ((d2R - d2C)*(d2C-d2L) .lt.zero) then
+                 s = sign(one,d2C)
+                 d2phi = s*max(min(limitC*s*d2L,limitC*s*d2R,s*d2C),zero)
+
+                 facePhi(CHF_IX[i;j;k;l],n)
+     &                = half * ( cellPhi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+     &                      + cellPhi(CHF_IX[i;j;k;l],n) )
+     &                - sixth * d2phi * dx**2
+              endif
+           endif
+c     end if at a local max/min
+
+        CHF_ENDDO
+      enddo
+
+      return
+      end
+
+
+c  -------------------------------------------------------
+c   computes a_6 from Colella and Sekora (eqn 5)
+c
+c  a6     <=  (cell-centered) a_6 from Colella and Sekora
+c  cellPhi => cell-centered cell-averaged phi
+c  facePhi => face-centered phi (on dir-direction faces)
+c  ccbox   => cell-centered box over which to compute a_6
+c  dir     => coordinate direction
+c --------------------------------------------------------
+      subroutine COMPUTEA6(CHF_FRA[a6],
+     &                     CHF_CONST_FRA[cellPhi],
+     &                     CHF_CONST_FRA[facePhi],
+     &                     CHF_BOX[ccbox],
+     &                     CHF_CONST_INT[dir])
+
+
+      integer CHF_DDECL[i;j;k;l], n
+      integer CHF_DDECL[ii;jj;kk;ll]
+
+      CHF_DTERM[ii = CHF_ID(dir,0);
+                jj = CHF_ID(dir,1);
+                kk = CHF_ID(dir,2);
+                ll = CHF_ID(dir,3)]
+
+      do n=0, CHF_NCOMP[a6]-1
+         CHF_MULTIDO[ccbox;i;j;k;l]
+
+           a6(CHF_IX[i;j;k;l],n)
+     &       = six * cellPhi(CHF_IX[i;j;k;l],n)
+     &       - three * ( facePhi(CHF_IX[i;j;k;l],n)
+     &                 + facePhi(CHF_IX[i+ii;j+jj;k+kk;l+ll],n) )
+
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+
+c -----------------------------------------------------------------
+c  does 2nd-derivative limiting a la Colella and Sekora eqn 18
+c  D2aLim <=  limited second derivative
+c  D2a     => 2nd-derivative estimate based on face-centered values (a_6)
+c  lapPhi  => cell-centered centered derivatives
+c  cellBox => box over which to compute limited D2a
+c  dir     => coordinate direction
+c  limitC  => limiter constant for weighting alternate stencils
+c -----------------------------------------------------------------
+      subroutine LIMITD2a(CHF_FRA[D2PhiLim], CHF_CONST_FRA[D2Phi],
+     &                    CHF_CONST_FRA[lapPhi],
+     &                    CHF_BOX[cellBox], CHF_CONST_INT[dir],
+     &                    CHF_CONST_REAL[limitC])
+
+
+      integer CHF_DDECL[i;j;k;l],n
+      integer CHF_DDECL[ii;jj;kk;ll]
+      REAL_T d2al, d2ar, d2ac, d2a, minVal
+      REAL_T s
+      logical sameSign
+
+      CHF_DTERM[ii = CHF_ID(dir,0);
+                jj = CHF_ID(dir,1);
+                kk = CHF_ID(dir,2);
+                ll = CHF_ID(dir,3)]
+
+      do n=0, CHF_NCOMP[D2PhiLim]-1
+         CHF_MULTIDO[cellBox;i;j;k;l]
+
+           d2a  = D2Phi(CHF_IX[i;j;k;l],n)
+           d2al = lapPhi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+           d2ar = lapPhi(CHF_IX[i+ii;j+jj;k+kk;l+ll],n)
+           d2ac = lapPhi(CHF_IX[i;j;k;l],n)
+
+c (DFM - 5/20/10) new condition following petermc
+c     apply limiter iff d2ac is NOT between d2al and d2ar
+           if ((d2ac - d2al)*(d2ar - d2ac) .lt. zero) then
+              s = sign(one,d2a)
+              minVal = min(s*d2a,limitC*s*d2al,limitC*s*d2ar,limitC*s*d2ac)
+              D2PhiLim(CHF_IX[i;j;k;l],n) = max(minVal,zero)
+           else
+c (JAFH - 8/17/10) D2PhiLim should be magnitude only; used to return d2a
+c
+              D2PhiLim(CHF_IX[i;j;k;l],n) = abs(d2a)
+           endif
+
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+
+
+
+c -----------------------------------------------------------------
+c  compute limited left and right face values a la Colella and Sekora
+c
+c  phiLeft  <= left face-centered interpolated state
+c  phiRight <= right face-centered interpolated state
+c  facePhi   => single-valued face-centered interpolated state
+c  cellPhi   => cell-centered cell-average phi
+c  D2PhiLim  => limited 2nd derivative of phi in direction dir
+c  D2Phi     => unlimited 2nd derivative of phi in direction dir
+c  faceBox   => face-centered box over which to do computation
+c  dir       => coordinate direction
+c ------------------------------------------------------------------
+      subroutine LEFTRIGHTSTATES(CHF_FRA[phiLeft],
+     &                           CHF_FRA[phiRight],
+     &                           CHF_CONST_FRA[facePhi],
+     &                           CHF_CONST_FRA[cellPhi],
+     &                           CHF_CONST_FRA[D2PhiLim],
+     &                           CHF_CONST_FRA[D2Phi],
+     &                           CHF_BOX[cellBox],
+     &                           CHF_CONST_INT[dir])
+
+      integer CHF_DDECL[i;j;k;l],n
+      integer CHF_DDECL[ii;jj;kk;ll]
+      REAL_T ratio, leftVal, rightVal, cellVal
+      REAL_T maxCheckFC, maxCheckCC
+      REAL_T zeroTol
+      REAL_T phil, phir
+      REAL_T dphifacel, dphifacer, dphifacemin
+      REAL_T dphibarl, dphibarr, dphibarmin
+      REAL_T dphichkl, dphichkr
+      REAL_T delphil, delphir
+      REAL_T phimax, root, diff
+      logical bigl,bigr,extremum
+
+      zeroTol = 1.0d-10
+
+      CHF_DTERM[ii = CHF_ID(dir,0);
+                jj = CHF_ID(dir,1);
+                kk = CHF_ID(dir,2);
+                ll = CHF_ID(dir,3)]
+
+      do n=0, CHF_NCOMP[D2PhiLim]-1
+c
+c Note that we compute on a cel-by-cell basis.  Results are asigned to
+c face-indexed storage at the end
+c
+        CHF_MULTIDO[cellBox;i;j;k;l]
+
+          phil = facePhi(CHF_IX[i;j;k;l],n)
+     &         - cellPhi(CHF_IX[i;j;k;l],n)
+          phir = facePhi(CHF_IX[i+ii;j+jj;k+kk;l+ll],n)
+     &         - cellPhi(CHF_IX[i;j;k;l],n)
+
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c First, we determine if this is an extremum
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+          bigl = abs(phil).gt.2*abs(phir)
+          bigr = abs(phir).gt.2*abs(phil)
+          extremum = .false.
+
+          if (phil*phir.ge.zero) then
+c
+c         Definite extremum.
+c
+            extremum = .true.
+
+          else if (bigl.or.bigr) then
+c
+c         Possible extremum.
+c
+c         We look at cell-centered values and face-centered values for a
+c         change in sign in the differences adjacent to the cell.  We use
+c         the pair of differences whose minimum magnitude is the largest,
+c         and thus least susceptible to sensitivity to roundoff.
+c
+            dphifacel = facePhi(CHF_IX[i;j;k;l],n)
+     &                - facePhi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+            dphifacer = facePhi(CHF_IX[i+2*ii;j+2*jj;k+2*kk;l+2*ll],n)
+     &                - facePhi(CHF_IX[i+ii;j+jj;k+kk;l+ll],n)
+            dphifacemin = min(abs(dphifacel),abs(dphifacer))
+
+            dphibarr = cellPhi(CHF_IX[i+ii;j+jj;k+kk;l+ll],n)
+     &               - cellPhi(CHF_IX[i;j;k;l],n)
+            dphibarl = cellPhi(CHF_IX[i;j;k;l],n)
+     &               - cellPhi(CHF_IX[i-ii;j-jj;k-kk;l-ll],n)
+            dphibarmin = min(abs(dphibarl),abs(dphibarr))
+
+            if (dphifacemin.ge.dphibarmin) then
+              dphichkl = dphifacel
+              dphichkr = dphifacer
+            else
+              dphichkl = dphibarl
+              dphichkr = dphibarr
+            endif
+            if (dphichkl*dphichkr.le.zero) then
+               extremum = .true.
+            else
+c     added by petermc, 20 Aug 2010:
+c     phir and phil have opposite signs, because phil*phir < 0.
+c     If one difference is more than 2x the other, then reduce it to 2x.
+               if (bigl) then
+                  phil = -two * phir
+               endif
+               if (bigr) then
+                  phir = -two * phil
+               endif
+            endif
+        endif
+
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c Now, we form limited face values as necessary.
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+        if (extremum) then
+
+          ratio = D2PhiLim(CHF_IX[i;j;k;l],n)
+     &          / max(abs(D2Phi(CHF_IX[i;j;k;l],n)),zeroTol)
+          phil = phil * ratio
+          phir = phir * ratio
+
+        endif
+
+        phiLeft(CHF_IX[i+ii;j+jj;k+kk;l+ll],n)
+     &    = phir + cellPhi(CHF_IX[i;j;k;l],n);
+        phiRight(CHF_IX[i;j;k;l],n)
+     &    = phil + cellPhi(CHF_IX[i;j;k;l],n)
+
+        CHF_ENDDO
+      enddo
+
+      return
+      end
+
+
+c  -----------------------------------------------------------------
+c
+c  facePhi <=  upwinded face-centered value
+c  phiLeft  => face-centered value traced from the left
+c  phiRight => face-centered value traced from the right
+c  faceVel  => normal velocities on faces
+c  faceBox  => face-centered box over which to do computation
+c  ------------------------------------------------------------------
+      subroutine SELECTUPWIND(CHF_FRA[facePhi],
+     &                        CHF_CONST_FRA[phiLeft],
+     &                        CHF_CONST_FRA[phiRight],
+     &                        CHF_CONST_FRA1[faceVel],
+     &                        CHF_BOX[faceBox])
+
+      integer CHF_DDECL[i;j;k;l], n
+
+      do n=0, CHF_NCOMP[facePhi]-1
+         CHF_MULTIDO[faceBox; i;j;k;l]
+
+           if (faceVel(CHF_IX[i;j;k;l]).gt.zero) then
+              facePhi(CHF_IX[i;j;k;l],n)
+     &          = phiLeft(CHF_IX[i;j;k;l],n)
+           else if (faceVel(CHF_IX[i;j;k;l]).lt.zero) then
+              facePhi(CHF_IX[i;j;k;l],n)
+     &          = phiRight(CHF_IX[i;j;k;l],n)
+           else
+              facePhi(CHF_IX[i;j;k;l],n)
+     &          = half * ( phiRight(CHF_IX[i;j;k;l],n)
+     &                   + phiLeft(CHF_IX[i;j;k;l],n) )
+           endif
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+

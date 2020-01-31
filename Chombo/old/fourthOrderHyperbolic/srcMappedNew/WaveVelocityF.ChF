@@ -1,0 +1,35 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+
+        subroutine WAVEVELOCITY(
+     &    CHF_FRA[wave],
+     &    CHF_CONST_FRA[vel],
+     &    CHF_CONST_FRA1[c],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+        integer dir
+        real_t chere, vhere, vpc, vmc
+
+        CHF_MULTIDO[box;i;j;k]
+           chere = c(CHF_IX[i;j;k])
+           do dir = 0, CH_SPACEDIM - 1
+              vhere = vel(CHF_IX[i;j;k], dir)
+              vpc = vhere + chere
+              vmc = vhere - chere
+!     Pick vpc or vmc, whichever is greater in abs value
+              if (abs(vpc) .gt. abs(vmc)) then
+                 wave(CHF_IX[i;j;k], dir) = vpc
+              else
+                 wave(CHF_IX[i;j;k], dir) = vmc
+              endif
+           enddo
+        CHF_ENDDO
+
+        return
+        end

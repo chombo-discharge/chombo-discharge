@@ -1,0 +1,170 @@
+C      _______              __
+C     / ___/ /  ___  __ _  / /  ___
+C    / /__/ _ \/ _ \/  V \/ _ \/ _ \
+C    \___/_//_/\___/_/_/_/_.__/\___/
+C    Please refer to Copyright.txt, in Chombo's root directory.
+
+#include "CONSTANTS.H"
+c     added by dmartin, 11 Oct 2007
+#define SMALLNUMBER 1.0d-9
+
+        subroutine MAPPEDADVRIEMANNF(
+     &    CHF_FRA[Wgdnv],
+     &    CHF_CONST_FRA[WLeft],
+     &    CHF_CONST_FRA[WRight],
+     &    CHF_CONST_FRA1[advVel],
+     &    CHF_CONST_INT[idir],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i; j; k]
+        integer n
+        real_t sl,sr
+        real_t so
+        real_t ustar
+
+        integer spacedim
+
+        spacedim = CH_SPACEDIM
+
+c       predictor step.
+
+        do n=0, CHF_NCOMP[WLeft]-1
+
+          CHF_MULTIDO[box;i;j;k]
+c     don't need floors in this simple problem
+c           sl = max(smallr,WLeft(CHF_IX[i;j;k],n))
+            sl =  WLeft(CHF_IX[i;j;k],n)
+
+c     don't need floors in this simple problem
+c           sr = max(smallr,WRight(CHF_IX[i;j;k],n) )
+            sr = WRight(CHF_IX[i;j;k],n)
+
+c assumption for this function is that advection velocity is a
+c single-component face-centered FAB containing the normal advection
+c velocity
+            ustar = advVel(CHF_IX[i;j;k])
+
+            if (ustar .gt. zero) then
+              so = sl
+            else
+              so = sr
+            endif
+
+c if ustar is "zero", average left and right states
+c     added by dmartin, 11 Oct 2007
+            if (abs(ustar).lt.SMALLNUMBER) then
+               so = half*(sl+sr)
+            endif
+
+            Wgdnv(CHF_IX[i;j;k],n) = so
+
+c don't need floor for this simple problem
+c           Wgdnv(CHF_IX[i;j;k],n) = max(Wgdnv(CHF_IX[i;j;k],n) ,smallr)
+          CHF_ENDDO
+        end do
+
+        return
+        end
+
+        subroutine MAPPEDADVQUASILINEARUPDATE(
+     &    CHF_FRA[AdWdx],
+     &    CHF_CONST_FRA[WHalf],
+     &    CHF_CONST_FRA1[cellVel],
+     &    CHF_CONST_REAL[scale],
+     &    CHF_CONST_REAL[dx],
+     &    CHF_CONST_INT[idir],
+     &    CHF_BOX[box])
+
+        integer CHF_DDECL[i;j;k]
+        integer CHF_DDECL[ii;jj;kk]
+        integer n
+
+        CHF_DTERM[
+        ii = CHF_ID(idir,0);
+        jj = CHF_ID(idir,1);
+        kk = CHF_ID(idir,2)]
+
+        do n=0, CHF_NCOMP[AdWdx]-1
+          CHF_MULTIDO[box;i;j;k]
+c    conservative form:
+c            AdWdx(CHF_IX[i;j;k],n) = scale *
+c     &        (faceVel(CHF_IX[i+ii;j+jj;k+kk])*WHalf(CHF_IX[i+ii;j+jj;k+kk],n)
+c     &         -faceVel(CHF_IX[i;j;k])*WHalf(CHF_IX[i;j;k],n))/dx
+
+c    advective form
+            AdWdx(CHF_IX[i;j;k],n) = scale*cellVel(CHF_IX[i;j;k])*
+     &         (WHalf(CHF_IX[i+ii;j+jj;k+kk],n) -WHalf(CHF_IX[i;j;k],n))/dx
+          CHF_ENDDO
+        end do
+
+        return
+        end
+
+
+c -----------------------------------------------
+c  this is a kluge -- test to see if W + dW is less than zero. If it is,
+c  then limit dW to to preserve positivity (dW = -W)
+c
+c inputs/outputs:
+c dW <=> increment to W
+c W   =>
+c box => box over which to do this
+c --------------------------------------------------------
+      subroutine MAPPEDADVPOSITIVITYFIX(CHF_FRA[dW], CHF_CONST_FRA[W],
+     &                                  CHF_BOX[box])
+
+      integer CHF_DDECL[i;j;k], n
+
+      do n=0, CHF_NCOMP[W]-1
+      CHF_MULTIDO[box;i;j;k]
+        if ((W(CHF_IX[i;j;k],n)+dW(CHF_IX[i;j;k],n)) .lt.0) then
+           dW(CHF_IX[i;j;k],n) = -W(CHF_IX[i;j;k],n)
+        endif
+      CHF_ENDDO
+
+      enddo
+
+      return
+      end
+
+
+c -----------------------------------------
+c  simple MAC-centered gradient
+c
+c  gradPhi <=  grad(phi) in the dir direction
+c  phi      => face-centered phi
+c  h        => cell spacing
+c  dir      => direction in which to take gradient
+c  gradBox  => cell-centered box over which to compute gradient
+c -------------------------------------------
+      subroutine MAPPEDADVSIMPLEGRAD(CHF_FRA[gradPhi],
+     &                      CHF_CONST_FRA[phi],
+     &                      CHF_CONST_REAL[h],
+     &                      CHF_CONST_INT[dir],
+     &                      CHF_BOX[gradBox])
+
+      integer CHF_AUTODECL[i], n
+      integer CHF_AUTODECL[ii]
+      REAL_T hInv
+
+      hInv = one/h
+
+      CHF_DTERM[ii0 = CHF_ID(dir,0);
+                ii1 = CHF_ID(dir,1);
+                ii2 = CHF_ID(dir,2);
+                ii3 = CHF_ID(dir,3);
+                ii4 = CHF_ID(dir,4);
+                ii5 = CHF_ID(dir,5)]
+
+      do n = 0, CHF_NCOMP[phi]-1
+         CHF_AUTOMULTIDO[gradbox;i]
+           gradPhi(CHF_AUTOIX[i],n) = hInv*(phi(CHF_OFFSETIX[i;+ii],n)
+     &                                     -phi(CHF_AUTOIX[i],n))
+         CHF_ENDDO
+      enddo
+
+      return
+      end
+
+c
+c
