@@ -11,4 +11,3 @@ rod_sphere.electrode_center2         = 0.0 0.0 0E-2     # Center 2.
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
 rod_sphere.dielectric_center         = 0.0 0.0 0.0      # Dielectric center
 rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
-rod_sphere.use_new_gshop             = true             # Use new gshop

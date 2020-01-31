@@ -22,7 +22,7 @@ aerosol::aerosol(){
   RealVect noise_frequency, sphere_center;
   int noise_octaves;
   int num_spheres;
-  bool noise_reseed, turn_off_sphere, live, use_new_gshop, inside;
+  bool noise_reseed, turn_off_sphere, live, inside;
 
   std::string str, which_material;
   Vector<Real> v0(SpaceDim);
@@ -37,7 +37,6 @@ aerosol::aerosol(){
   pp.get   ("noise_octaves",     noise_octaves);
   pp.get   ("noise_persistence", noise_persistence);
   pp.get   ("noise_reseed",      str);              noise_reseed    = (str == "true") ? true : false;
-  pp.get   ("use_new_gshop",     str);              use_new_gshop   = (str == "true") ? true : false;
   pp.getarr("noise_frequency",   v0, 0, SpaceDim);  noise_frequency = RealVect(D_DECL(v0[0], v0[1], v0[2]));
 
 
@@ -52,12 +51,6 @@ aerosol::aerosol(){
   if(num_spheres > 0){
     const real_box full_box(-1E10*RealVect::Unit, 1.E10*RealVect::Unit);
     const int ndigits = (int) log10((double) num_spheres) + 1;
-
-    if(use_new_gshop == true){
-      computational_geometry::s_use_new_gshop = true;
-      m_regular_voxels_gas.push_back(full_box);
-      m_covered_voxels_sol.push_back(full_box);
-    }
 
     // Add spheres as we go
     for (int i = 0; i < num_spheres; i++){
@@ -87,11 +80,6 @@ aerosol::aerosol(){
 
       // Add dielectric sphere
       m_dielectrics.push_back(dielectric(sph, eps));
-
-      if(use_new_gshop){
-	m_bounded_voxels_gas.push_back(sph_box);
-	m_bounded_voxels_sol.push_back(sph_box);
-      }
     }
   }
 }

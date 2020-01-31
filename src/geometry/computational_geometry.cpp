@@ -15,7 +15,6 @@
 #include <ComplementIF.H>
 
 #include "computational_geometry.H"
-#include "fast_gshop.H"
 #include "ScanShop.H"
 #include "memrep.H"
 
@@ -29,8 +28,6 @@ bool          computational_geometry::s_use_new_gshop = false;
 ProblemDomain computational_geometry::s_ScanDomain = ProblemDomain(); // Needs to be set
 
 computational_geometry::computational_geometry(){
-
-  //
   m_eps0 = 1.0;
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
@@ -38,8 +35,7 @@ computational_geometry::computational_geometry(){
   m_mfis = RefCountedPtr<mfis> (new mfis());
 }
 
-computational_geometry::~computational_geometry(){
-}
+computational_geometry::~computational_geometry(){}
 
 const Vector<dielectric>& computational_geometry::get_dielectrics() const  {
   return m_dielectrics;
@@ -138,23 +134,12 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
   }
 
   // Create geoshop; either all regular or an intersection
-  if(parts.size() == 0){
+  if(parts.size() == 0){ 
     a_geoserver = new AllRegularService();
   }
   else {
-    //    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
     m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
-
-    if(s_use_new_gshop){
-      fast_gshop* gshop = new fast_gshop(*m_gas_if, 0, a_dx, a_origin, a_finestDomain, s_thresh);
-
-      gshop->set_regular_voxels(m_regular_voxels_gas);
-      gshop->set_covered_voxels(m_covered_voxels_gas);
-      gshop->set_bounded_voxels(m_bounded_voxels_gas);
-    
-      a_geoserver = static_cast<GeometryService*> (gshop);
-
-#if 1 // Scan shop things
+    if(s_use_new_gshop){ // PlasmaC geometry generation
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
 								0,
 								a_dx,
@@ -162,9 +147,8 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
 								a_finestDomain,
 								s_ScanDomain,
 								s_thresh));
-#endif
     }
-    else{
+    else{ // Chombo geometry generation
       a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
     }
   }
@@ -200,15 +184,7 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
     
     m_sol_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
 
-    if(s_use_new_gshop){
-      fast_gshop* gshop = new fast_gshop(*m_sol_if, 0, a_dx, a_origin, a_finestDomain, s_thresh);
-      gshop->set_regular_voxels(m_regular_voxels_sol);
-      gshop->set_covered_voxels(m_covered_voxels_sol);
-      gshop->set_bounded_voxels(m_bounded_voxels_sol);
-    
-      a_geoserver = static_cast<GeometryService*> (gshop);
-
-#if 1 // Scan shop things
+    if(s_use_new_gshop){ // PlasmaC geometry generation
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_sol_if,
 								0,
 								a_dx,
@@ -216,9 +192,8 @@ void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserve
 								a_finestDomain,
 								s_ScanDomain,
 								s_thresh));
-#endif
     }
-    else{
+    else{ // Chombo geometry generation
       a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
     }
   }

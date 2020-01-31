@@ -23,7 +23,7 @@
 #include <DirichletConductivityEBBC.H>
 #include <ParmParse.H>
 
-#define POISSON_MF_GMG_TIMER 1
+#define POISSON_MF_GMG_TIMER 0
 
 poisson_multifluid_gmg::poisson_multifluid_gmg(){
   m_needs_setup = true;
@@ -308,7 +308,7 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
 
   const Real t4 = MPI_Wtime();
 
-#if 1 // Why is this required??? Is it because of op->zeroCovered()????
+#if 0 // Why is this required??? Is it because of op->zeroCovered()????
   Real new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
   new_resid = m_gmg_solver.computeAMRResidual(phi, rhs, finest_level, 0);
 #endif

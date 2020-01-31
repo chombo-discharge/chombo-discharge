@@ -53,38 +53,6 @@ rod_sphere::rod_sphere(){
     RefCountedPtr<BaseIF> slab = RefCountedPtr<BaseIF> (new new_sphere_if(centerD, radius, false));
     m_dielectrics[0].define(slab, eps);
   }
-
-  // Check if we should use the new gshop functionality
-  bool new_gshop = false;
-  bool gshop_mem = false;
-  pp.get("use_new_gshop", str);
-  const bool use_new_gshop = (str == "true") ? true : false;
-
-  // Make the bounding boxes for fast gshop implementation
-  if(use_new_gshop){
-    computational_geometry::s_use_new_gshop = true;
-
-    
-    RealVect lo, hi;
-    for (int dir = 0; dir < SpaceDim; dir++){
-      lo[dir] = Min(center1[dir], center2[dir]);
-      hi[dir] = Max(center1[dir], center2[dir]);
-    }
-    real_box reg_gas(-100*RealVect::Unit, 100*RealVect::Unit);
-    real_box rod_gas(lo-elec_radius*RealVect::Unit, hi+elec_radius*RealVect::Unit);
-    real_box sph_gas(centerD-1.1*radius*RealVect::Unit, centerD+1.1*radius*RealVect::Unit);
-
-    // Boxes for the gas stuff
-    m_regular_voxels_gas.push_back(reg_gas);
-    if(has_electrode)  m_bounded_voxels_gas.push_back(rod_gas);
-    if(has_dielectric) m_bounded_voxels_gas.push_back(sph_gas);
-
-    // Boxes for the solid phase stuff
-    if(has_dielectric){
-      m_covered_voxels_sol.push_back(reg_gas);
-      m_bounded_voxels_sol.push_back(sph_gas);
-    }
-  }
 }
 
 rod_sphere::~rod_sphere(){
