@@ -23,20 +23,18 @@ Obtaining `PlasmaC`
 Prerequisites
 -------------
 
-From the ground up, `PlasmaC` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework. To compile `PlasmaC`, you must first install the following:
+From the ground up, `PlasmaC` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework.
+To compile `PlasmaC`, you must first install the following:
 
 * A Fortran compiler, usually gfortran or Intel Fortran
 * A C++ compiler, usually g++ or Intel C++
 * An MPI installation
 * A parallel HDF5 installation
 * LAPACK and BLAS
-* A `Chombo` library
 
-Usually, laptops and desktops already have appropriate Fortran and C++ compilers installed, as well as a version of MPI. On clusters, HDF5 is (usually) preinstalled, and in this case, it will be sufficient to modify the `Chombo` build files in order to compile `PlasmaC`. You will also need a version of `Chombo`, which you may download online or from here:
-
-.. code-block:: bash
-
-   git clone ssh://git@git.code.sintef.no/~robertm/mf-chombo
+Usually, laptops and desktops already have appropriate Fortran and C++ compilers installed, as well as a version of MPI.
+On clusters, HDF5 is (usually) preinstalled, and in this case, it will be sufficient to modify the `Chombo` build files in order to compile `PlasmaC`.
+Following some changes that we've made to the way `Chombo` generates its embedded boundaries, `Chombo` is released together with `PlasmaC`. 
 
 If you already have HDF5 installed, you may skip directly to :ref:`Chap:Environment`. 
 
@@ -68,7 +66,10 @@ If you do not have HDF5 installed, you may do the following:
 Setting up your environment
 ___________________________
 
-In `Chombo`,the system information is supplied through a file known as Make.defs.local, which resides in the `Chombo` library itself. This file contains a number of build settings, such as dimension, compilers, paths to HDF5 and so on. The configuration file is /lib/mk/Make.defs.local in your `Chombo` folder. The build parameters can also be controlled through the command line. 
+In `Chombo`,the system information is supplied through a file known as Make.defs.local, which resides in the `Chombo` library itself.
+This file contains a number of build settings, such as dimension, compilers, paths to HDF5 and so on.
+The configuration file is /lib/mk/Make.defs.local in your `Chombo` folder.
+The build parameters can also be controlled through the command line. 
 
 Here are the configuration variables that have been used used on the `fram <https://www.top500.org/system/179072>`_ supercomputer
 
@@ -123,21 +124,24 @@ Here are the configuration variables that have been used used on the `fram <http
 		syslibflags    = -ldl -lm -lz
 
 
-We also recommend that you create environment variables that hold the path to your `Chombo` and `PlasmaC` libraries. For example,
+We also recommend that you create environment variables that hold the path to your `PlasmaC` version. For example,
 
 .. code-block:: c++
 
-		CHOMBO_HOME=/usr/local/Chombo-3.2
 		PLASMAC_HOME=/home/foo/plasmac
 
-These two environment variables are used in the `PlasmaC` makefile system so that our makefiles can find both `Chombo` and `PlasmaC`.
+This environment variables is used in the `PlasmaC` makefile system so that our makefiles can find `PlasmaC` and `Chombo`.
 
 .. _Chap:Compiling:
 
 Compiling `PlasmaC`
 ---------------------
 
-In `PlasmaC`, each problem is compiled as a mini-application into a subfolder. Mini-apps are usually set up through a Python pre-compilation script that generates the required source code, makefiles, and simulation parameters. There is no separate build for the `PlasmaC` source code and your own application files and you will *not* be able to install `PlasmaC` separately. Once an application has been set up, the makefile system tracks the necessary `Chombo` and `PlasmaC` source files. Compiling is done in the subfolder that houses your mini-app:
+In `PlasmaC`, each problem is compiled as a mini-application into a subfolder.
+Mini-apps are usually set up through a Python pre-compilation script that generates the required source code, makefiles, and simulation parameters.
+There is no separate build for the `PlasmaC` source code and your own application files and you will *not* be able to install `PlasmaC` separately.
+Once an application has been set up, the makefile system tracks the necessary `Chombo` and `PlasmaC` source files.
+Compiling is done in the subfolder that houses your mini-app:
 
 .. code-block:: bash
 

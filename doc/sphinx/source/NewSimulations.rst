@@ -22,18 +22,18 @@ Creating a new geometry consists of the following steps:
 
 Often, the geometry will be parametrized and the user will want to add an option file where the inherited class can fetch options at run-time. As an example, the code snippet below describes a complete implementation of an electrode geometry consisting of a single sphere at the center.
 
-Fast geometry generation with pre-voxelization
-______________________________________________
+Load balancing geometry generation
+__________________________________
 
-Geometry generation is a non-negligible part of `PlasmaC`. Many geometries consist of small object in large domains, and it is generally desireable to make geometry generation scale according to the size of the object rather than the size of the domain. To achieve this, we have introduced the concept of a *voxel*. A voxel consists of a Cartesian grid box described by its two corners, and a flag that describes the nature of that box. The user may provide three types of voxels to his :ref:`Chap:computational_geometry` class; covered voxels, regular voxels, and cut voxels. The default behavior of the pre-voxelization is as follows:
+For load-balancing the geometry generation step, we have added an additional geometry generator to `PlasmaC`. To select between the geometry generators, the user will do
 
-1. All grid boxes that intersect a cut voxel are load balanced among the available MPI ranks and queried for geometric information. 
-2. All grid boxes that are completely contained inside a regular (or covered) voxel box is set to regular (or covered) *if* the regular voxel does not intersect a cut voxel. 
+.. code-block:: bash
 
-The advantage of using a pre-voxelization is that we can supply meta-information to the mesh generator so that all the parts of the domain that do not intersect an object are not actually queried for geometric information. This can lead to orders of magnitude improvements in the geometry generation step.
+   plasma_engine.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
+   plasma_engine.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 
-The user may set the voxels manually when he defines his geometry, or he may use our voxel-generating tool for defining them.
-
+where the argument ``geometry_scan_level`` indicates how many refinements of the base domain will be used when recursively load balancing the cut cells as discussed in :ref:`Chap:EBMesh`. 
+		
 .. _Chap:GridResolutions:
 
 Setting the grid resolution

@@ -1,7 +1,7 @@
 .. _Chap:ClassAPI:
 
-`PlasmaC` API
-=============
+`PlasmaC` full API
+==================
 
 Here, we discuss the base classes that makes up the foundation of `PlasmaC`.
 

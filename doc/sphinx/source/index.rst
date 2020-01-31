@@ -10,17 +10,17 @@ Welcome to `PlasmaC`'s user documentation!
 	      
 `PlasmaC` is a (reasonably) modular and (fairly) scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries. `PlasmaC` evolves deterministic or fluctuating equations of hydrodynamics and features
 
-* Electrostatic field solver with support for electrodes and dielectrics
-* Stationary or transient diffusive radiative transport
-* Stationary or transient Monte Carlo based radiative transport
-* Deterministic and fluctuating advection-diffusion-reaction solvers
+* Electrostatics
+  
+   * Support for electrodes
+   * Support dielectrics with discontinuous coefficients
+* Radiative transport
+       
+   * Stationary or transient diffusive or Monte Carlo transport
+* Advection-diffusion-reaction transport in complex geometries.
+       
+   * Deterministic transport or with fluctuating hydrodynamics
 * Various time integration schemes
-
-   * Implicit-explicit spectral deferred corrections (IMEX-SDC)
-   * Modified Euler-Maruyama for fluctuating hydrodynamics
-   * Godunov splitting
-   * Strang splitting based on high-order SSPRK schemes
-   * Subcycling in time is not (yet) supported
 * Parallel I/O with HDF5
 * Sensible and simple-to-use physics interfaces
 
