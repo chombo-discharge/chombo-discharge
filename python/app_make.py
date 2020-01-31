@@ -6,8 +6,9 @@ def write_template(args):
     make_filename = app_dir + "/GNUmakefile"
     makef = open(make_filename, "w")
     makef.write("# Chombo and chombo-streamer directories \n")
-    makef.write("CHOMBO_HOME   := " + args.chombo_home + "/lib\n")
+#    makef.write("CHOMBO_HOME   := " + args.chombo_home + "/lib\n")
     makef.write("STREAMER_HOME := " + args.streamer_home + "\n")
+    makef.write("CHOMBO_HOME   := " + args.streamer_home + "/Chombo/lib\n")
     
     # Make rules
     makef.write("\n")

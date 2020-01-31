@@ -15,7 +15,7 @@ parser.add_argument('-procs',           type=int,  help='Processors to use when 
 parser.add_argument('-use_mpi',         type=bool, help='MPI enabled (default true)', default=True)
 parser.add_argument('-build',           type=bool, help='Build executable at end', default=False)
 parser.add_argument('-silent',          type=bool, help='Silent build of executable', default=False)
-parser.add_argument('-chombo_home',     type=str,  help="Chombo source code base directory", default=os.environ.get('CHOMBO_HOME', os.getcwd()))
+#parser.add_argument('-chombo_home',     type=str,  help="Chombo source code base directory", default=os.environ.get('CHOMBO_HOME', os.getcwd()))
 parser.add_argument('-streamer_home',   type=str,  help="Source code base directory", default=os.environ.get('PLASMAC_HOME', os.getcwd()))
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
