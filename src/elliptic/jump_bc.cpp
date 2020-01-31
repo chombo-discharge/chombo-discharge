@@ -55,10 +55,23 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 					       m_domain,
 					       0,
 					       s_lsq_radius);
-
-
   }
 
+  // Oh shit, couldn't find a stencil. Try including more cells
+  if(s_quadrant_based && a_stencil.size() == 0){
+    EBArith::getLeastSquaresGradStenAllVoFsRad(a_stencil,
+					       a_weight,
+					       normal,
+					       centroid,
+					       a_vof,
+					       a_ebisbox,
+					       m_dx*RealVect::Unit,
+					       m_domain,
+					       0,
+					       s_lsq_radius);
+  }
+
+  // Damn, still haven't found a stencil. Approximate using one side only
   if(a_stencil.size() == 0){
 #if DEBUG
     pout() << "jump_bc::get_first_order sten - no sten on domain = "
@@ -68,21 +81,15 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
 #endif
 
     // Make an approximation to the cell-centered gradient
-#if 1 // Original code
     for (int dir = 0; dir < SpaceDim; dir++){
       VoFStencil sten; 
       EBArith::getFirstDerivStencilWidthOne(sten, a_vof, a_ebisbox, dir, m_dx, (IntVectSet*) &a_cfivs, 0);
 
       if(sten.size() > 0){
-	sten *= normal[dir];
+	sten      *= normal[dir];
 	a_stencil += sten;
       }
     }
-    a_weight = 0.0;
-#else
-    a_stencil.clear();
-    a_weight = 0.0;
-#endif
   }
 }
 
@@ -325,124 +332,14 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
   CH_TIME("jump_bc::match_bc(1)");
 
   for (DataIterator dit = a_phibc.dataIterator(); dit.ok(); ++dit){
-#if USE_NEW_MATCHING
-    this->new_match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], dit());
-#else
-    this->match_bc(a_phibc[dit()],
-		   m_inhomo[dit()],
-		   m_homog[dit()],
-		   a_jump[dit()],
-		   a_phi[dit()],
-		   m_bco[dit()],
-		   m_weights[dit()],
-		   m_stencils[dit()],
-		   a_homogeneous,
-		   dit());
-#endif
+    this->match_bc(a_phibc[dit()], a_jump[dit()], a_phi[dit()], dit());
   }
 }
 
 void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
-		       MFInterfaceFAB<Real>&             a_inhomo,
-		       MFInterfaceFAB<Real>&             a_homog,
 		       const BaseIVFAB<Real>&            a_jump,
 		       const MFCellFAB&                  a_phi,
-		       const MFInterfaceFAB<Real>&       a_bco,
-		       const MFInterfaceFAB<Real>&       a_weights,
-		       const MFInterfaceFAB<VoFStencil>& a_stencils,
-		       const bool                        a_homogeneous,
 		       const DataIndex&                  a_dit){
-  const int comp   = 0;
-  const int phase1 = 0;
-  const int phase2 = 1;
-  
-  const IntVectSet& ivs = a_bco.get_ivs();
-  
-  const BaseIVFAB<Real>& bco1        = a_bco.get_ivfab(phase1);
-  const BaseIVFAB<Real>& bco2        = a_bco.get_ivfab(phase2);
-  const BaseIVFAB<Real>& w1          = a_weights.get_ivfab(phase1);
-  const BaseIVFAB<Real>& w2          = a_weights.get_ivfab(phase2);
-  
-  const BaseIVFAB<VoFStencil>& sten1 = a_stencils.get_ivfab(phase1);
-  const BaseIVFAB<VoFStencil>& sten2 = a_stencils.get_ivfab(phase2);
-  
-  const EBCellFAB& phi1              = a_phi.getPhase(phase1);
-  const EBCellFAB& phi2              = a_phi.getPhase(phase2);
-
-  const EBISBox& ebisbox1            = phi1.getEBISBox();
-  const EBISBox& ebisbox2            = phi2.getEBISBox();
-
-  const EBGraph& graph1              = bco1.getEBGraph();
-  const EBGraph& graph2              = bco2.getEBGraph();
-
-  BaseIVFAB<Real>& inhomo1 = a_inhomo.get_ivfab(phase1);
-  BaseIVFAB<Real>& inhomo2 = a_inhomo.get_ivfab(phase2);
-  BaseIVFAB<Real>& homog1  = a_homog.get_ivfab(phase1);
-  BaseIVFAB<Real>& homog2  = a_homog.get_ivfab(phase2);
-
-  inhomo1.setVal(0.0);
-  inhomo2.setVal(0.0);
-
-  // Set phibc = 
-  for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit(); 
-    a_phibc(vof, comp) = a_jump(vof, comp);
-    homog1(vof, comp)  = a_jump(vof, comp);
-    homog2(vof, comp)  = a_jump(vof, comp);
-  }
-
-
-  // First phase loop. Add first stencil stuff
-  {
-    VoFIterator& vofit = m_vofit_gas[a_dit];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-
-      const VoFStencil& sten = sten1(vof, comp);
-      for (int i = 0; i < sten.size(); i++){
-	const VolIndex& ivof = sten.vof(i);
-	const Real& iweight  = sten.weight(i);
-	a_phibc(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
-	inhomo2(vof, comp) -= bco1(vof, comp)*phi1(ivof,comp)*iweight;
-      }
-    }
-  }
-  
-  // Second phase loop. Add second stencil stuff
-  {
-    VoFIterator& vofit = m_vofit_sol[a_dit];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-    
-      const VoFStencil& sten = sten2(vof, comp);
-      for (int i = 0; i < sten.size(); i++){
-	const VolIndex& ivof = sten.vof(i);
-	const Real& iweight  = sten.weight(i);
-	a_phibc(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
-	inhomo1(vof, comp) -= bco2(vof, comp)*phi2(ivof,comp)*iweight;
-      }
-    }
-  }
-
-  // Divide by weights
-  for (VoFIterator vofit(ivs, a_phibc.getEBGraph()); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-
-    const Real factor   = 1.0/(bco1(vof, comp)*w1(vof,comp) + bco2(vof, comp)*w2(vof, comp));
-    
-    a_phibc(vof, comp) *= factor;
-    inhomo1(vof, comp) *= factor;
-    inhomo2(vof, comp) *= factor;
-    homog1(vof, comp)  *= factor;
-    homog2(vof, comp)  *= factor;
-  }
-}
-
-
-void jump_bc::new_match_bc(BaseIVFAB<Real>&                  a_phibc,
-			   const BaseIVFAB<Real>&            a_jump,
-			   const MFCellFAB&                  a_phi,
-			   const DataIndex&                  a_dit){
   const int comp   = 0;
   const int phase1 = 0;
   const int phase2 = 1;
@@ -678,27 +575,15 @@ LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_bco(){
 }
 
 LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_avgStencils(){
-#if USE_NEW_MATCHING
   return m_avgStencils;
-#else
-  return m_stencils;
-#endif
 }
 
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_avgWeights(){
-#if USE_NEW_MATCHING
   return m_avgWeights;
-#else
-  return m_weights;
-#endif
 }
 
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_avgBco(){
-#if USE_NEW_MATCHING
   return m_avgBco;
-#else
-  return m_bco;
-#endif
 }
 
 LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_inhomo(){

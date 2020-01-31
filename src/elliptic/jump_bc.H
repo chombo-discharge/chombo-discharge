@@ -270,24 +270,9 @@ protected:
     @brief Match the boundary condition
   */
   virtual void match_bc(BaseIVFAB<Real>&                  a_phibc,
-			MFInterfaceFAB<Real>&             a_inhomo,
-			MFInterfaceFAB<Real>&             a_homog,
 			const BaseIVFAB<Real>&            a_jump,
 			const MFCellFAB&                  a_phi,
-			const MFInterfaceFAB<Real>&       a_bco,
-			const MFInterfaceFAB<Real>&       a_weights,
-			const MFInterfaceFAB<VoFStencil>& a_stencils,
-			const bool                        a_homogeneous,
 			const DataIndex&                  a_dit);
-
-
-  /*!
-    @brief Match the boundary condition
-  */
-  virtual void new_match_bc(BaseIVFAB<Real>&                  a_phibc,
-			    const BaseIVFAB<Real>&            a_jump,
-			    const MFCellFAB&                  a_phi,
-			    const DataIndex&                  a_dit);
 
   /*!
     @brief Compute the average jump condition

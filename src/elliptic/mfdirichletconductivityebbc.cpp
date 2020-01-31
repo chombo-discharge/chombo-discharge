@@ -11,7 +11,6 @@ bool mfdirichletconductivityebbc::s_areaFracWeighted = false;
 bool mfdirichletconductivityebbc::s_quadrant_based   = true;
 int  mfdirichletconductivityebbc::s_lsq_radius       = 1;
 
-#define ADJUST_STENCILS 1
 #define DEBUG 0
 
 mfdirichletconductivityebbc::mfdirichletconductivityebbc(const ProblemDomain& a_domain,
@@ -90,9 +89,7 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
     const EBISBox& ebisbox  = m_ebisl[dit()];
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
     const IntVectSet& cfivs = a_cfivs[dit()];
-
-
-
+    
     IntVectSet irreg_ivs;  // All irregular cells
     IntVectSet diri_ivs;   // Pure dirichlet cells (i.e. non-matched irregular cells)
     IntVectSet match_ivs;  // Quasi-dirichlet cells (i.e. matched irregular cells)
@@ -164,12 +161,12 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       if(wq         != wq)         MayDay::Abort("mfdirichletconductivityebbc::define - wq is NaN");
       if(factor     != factor)     MayDay::Abort("mfdirichletconductivityebbc::define - factor is NaN");
 #endif
-#if ADJUST_STENCILS
-      VoFStencil addsten(jump_sten);
-      addsten *= -1.0*factor;
 
+      // Adjust stencil for BC jump
+      VoFStencil addsten(jump_sten);
+      addsten     *= -1.0*factor;
       cur_stencil += addsten;
-#endif
+
 
       // Debug after adjust. 
 #if DEBUG
@@ -261,7 +258,21 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
 					       s_lsq_radius);
   }
 
+  // Damn, couldn't find a stencil. Try including more cells
+  if(s_quadrant_based && a_stencil.size() == 0){
+    EBArith::getLeastSquaresGradStenAllVoFsRad(a_stencil,
+					       a_weight,
+					       normal,
+					       centroid,
+					       a_vof,
+					       a_ebisbox,
+					       m_dx*RealVect::Unit,
+					       m_domain,
+					       0,
+					       s_lsq_radius);
+  }
 
+  // Still haven't found a stencil. Approximate using one side only. If both sides do this then we can't solve. 
   if(a_stencil.size() == 0){
 #if DEBUG
     pout() << "mfdirichletconductivityebbc::get_first_order sten - no sten on domain = "
@@ -270,22 +281,17 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
     MayDay::Warning("mfdirichletconductivityebbc::get_first_order_sten - could not find a stencil. ");
 #endif
 
-#if 1 // Original code. Do an approximation for the gradient at the boundary
-    // Get an approximation for the cell-centered gradient
+    // Do an approximation for the gradient at the boundary by taking the gradient at the cell center and dotting it with the normal vector
     for (int dir = 0; dir < SpaceDim; dir++){
       VoFStencil sten; 
       EBArith::getFirstDerivStencilWidthOne(sten, a_vof, a_ebisbox, dir, m_dx[dir], (IntVectSet*) &a_cfivs, 0);
 
       if(sten.size() > 0){
-	sten *= normal[dir];
+	sten      *= normal[dir];
 	a_stencil += sten;
       }
     }
     a_weight = 0.0;
-#else
-    a_stencil.clear();
-    a_weight = 0.0;
-#endif
   }
 
 }
@@ -317,7 +323,6 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     const Real area_frac  = ebisbox.bndryArea(vof);
 
 
-#if ADJUST_STENCILS
     Real value = inhomo.get_ivfab(m_phase)(vof, comp); // This is the flux from the other side. Always use it. 
     if(!a_useHomogeneous){
       value += homog.get_ivfab(m_phase)(vof,comp);
@@ -326,10 +331,6 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
     // Flux - this contains the contribution from the surface charge (inhomogeneous bc) and the
     // other side of the interface (quasi-homogeneous bc). 
     Real flux = beta*weight*value*bco*area_frac*a_factor;
-#else // This shouldn't work...
-    Real flux = inhomo.get_ivfab(m_phase)(vof, comp);
-    flux *= beta*weight*bco*area_frac*a_factor;
-#endif
 
     if(mfdirichletconductivityebbc::s_areaFracWeighted){
       flux *= ebisbox.areaFracScaling(vof);
