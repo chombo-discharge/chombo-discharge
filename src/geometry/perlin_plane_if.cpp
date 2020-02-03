@@ -20,8 +20,14 @@ perlin_plane_if::perlin_plane_if(const RealVect& a_normal,
 				 const int&      a_octaves,
 				 const bool&     a_reseed){
   
-  // Create plane Perlin noise
-  m_point  = a_point - 0.5*a_normal*a_noiseAmp; // Perlin noise is on [0,1]
+  // This is the maximum noise the Perlin will spit out
+  Real amp = 0.0;
+  for (int i = 0; i < a_octaves; i++){
+    amp += a_noiseAmp*pow(a_persistence, i);
+  }
+
+  // Adjust point so noise amplitude does not affect the average position of the plane
+  m_point  = a_point - 0.5*a_normal*amp; // Perlin noise is on [0,1] so do this scaling
   m_normal = a_normal;
 
   m_plane  = RefCountedPtr<BaseIF> (new PlaneIF(m_normal, m_point, a_inside));
