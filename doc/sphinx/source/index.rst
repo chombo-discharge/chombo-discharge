@@ -8,7 +8,8 @@
 Welcome to `PlasmaC`'s user documentation!
 ============================================
 	      
-`PlasmaC` is a (reasonably) modular and (fairly) scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries. `PlasmaC` evolves deterministic or fluctuating equations of hydrodynamics and features
+`PlasmaC` is a (reasonably) modular and (fairly) scalable computer code for Cartesian two- and three-dimensional simulations of low-temperature plasmas in complex geometries.
+`PlasmaC` evolves deterministic or fluctuating equations of hydrodynamics and features
 
 * Electrostatics
   

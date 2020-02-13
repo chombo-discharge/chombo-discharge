@@ -28,61 +28,6 @@ The ``godunov`` temporal integrator is a rather unsophisticated, but very stable
       
 Various integration options for the transport and chemistry steps are available but are discussed elsewhere. Note that the ``godunov`` integrator uses a semi-implicit coupling between the plasma chemistry terms and the electric field, and therefore eliminates the so-called dielectric relaxation time. The formal order of convergence of the ``godunov`` integrator is 1, but the accuracy can be quite good depending on the transport and chemistry schemes that are chosen.
 
-
-
-.. _Chap:strang2:
-    
-strang2
-_______
-The ``strang2`` temporal integrator uses a second order Strang splitting between advection-reaction and diffusion, and supports up to fifth order Runge-Kutta schemes for the advection-reaction part. The ``strang2`` integrator integrates the equations of motion in the following way:
-
-.. math::
-   \phi^{k+1} = \exp\left(\frac{\Delta t}{2}\mathcal{F}_{\textrm{AR}}\right)\exp\left(\Delta t\mathcal{F}_{\textrm{D}}\right)\exp\left(\frac{\Delta t}{2}\mathcal{F}_{\textrm{AR}}\right)\phi^k,
-
-where :math:`\mathcal{A}` is the advection-reaction operator and :math:`\mathcal{D}` is the diffusion operator. To perform the advection-reaction advance, we use of various forms strongly stability preserving Runge-Kutta (SSPRK) methods of order :math:`p` and stages :math:`s`. The SSPRK methods advance in the form
-
-.. math::
-   :nowrap:
-   
-   \begin{align}
-   \phi^{(0)} &= \phi^k, \\
-   \phi^{(i)} &= \sum_{k=0}^{i-1}\left[\alpha_{ik}\phi^{(k)} + \Delta t\mathcal{A}\left(\phi^{(k)}\right)\right], \quad i=1,2,\ldots, s,\\
-   \phi^{(k+1)} &= \phi^{(s)}.
-   \end{align}
-      
-In `PlasmaC`, charge injection is a part of the advective discretization so that the temporal discretization of :math:`\partial_t\sigma` follows the same discretization. 
-
-The use of higher order methods for the advection-reaction advance allows use of longer time steps than for lower order methods for the same accuracy. However SSPRK methods with :math:`s=p` have a CFL constraint of 1, so that their relative efficiency is :math:`1/p` when compared to the explicit Euler method. Higher-order methods are therefore not always equivalent to better solver performance since the extra accuracy is traded for extra right hand side evaluations. We therefore explore the use of :math:`s>p` SSPRK methods that use more stages in order to gain efficiencies closer to the Euler method. The complete list of the SSPRK methods that we support, together with the CFL limits and effective CFL numbers are provided in the table below. For SSPRK methods of order 2 the CFL stability limit is given :math:`s-1` which yields an effective CFL of :math:`(s-1)/s`. For :math:`s=5`, for example, this gives a scheme that performs 60 percent faster than the equivalent two-stage method (provided one maximizes the CFL in each case). Likewise, the SSPRK(4,3) scheme has a CFL stability limit of 2, which gives an effective CFL of 0.5, being equivalent to the two-stage second-order method. However, the SSPRK(4,3) provides better accuracy of the advective advancement. 
-
-
-==========  =============   ===============
-Method      CFL             Effective CFL
-==========  =============   ===============
-SSPRK(s,2)  :math:`s-1`     :math:`(s-1)/s`
-SSPRK(3,3)  :math:`1`       :math:`1/3` 
-SSPRK(4,3)  :math:`2`       :math:`1/2` 
-SSPRK(5,3)  :math:`2.65`    :math:`0.53`
-SSPRK(5,4)  :math:`1.508`   :math:`0.3`
-==========  =============   ===============
-
-The diffusion advance uses the implicit scheme by Twizel, Gumel, and Arigu (TGA) and discretizes as
-
-.. math::
-   \left(I - \mu_1\mathcal{F}_{\textrm{D}}\right)\left(I - \mu_2\mathcal{F}_{\textrm{D}}\right)\phi^{k+1} = \left(I + \mu_3\mathcal{F}_{\textrm{D}}\right)\phi^k,
-
-where :math:`\mu_1`, :math:`\mu_2`, :math:`\mu_3` are
-
-.. math::
-   :nowrap:
-   
-   \begin{align}
-   \mu_1 &= \frac{a - \sqrt{a^2 - 4a + 2}}{2}\Delta t,\\
-   \mu_2 &= \frac{a + \sqrt{a^2 - 4a + 2}}{2}\Delta t,\\
-   \mu_3 &= (1-a)\Delta t. 
-   \end{align}
-
-Finally, note that the advective advance is performed with :math:`\Delta t/2`, and that the advancement can be made with twice the CFL number indicated in the table above. In order to estimate the numerical cost of the splitting method with :math:`s` Runge-Kutta stages, we remark that each Runge-Kutta stages requires one electric field update and one radiative transfer update for each RTE . In addition, there should be one electric field update after the diffusion update, and there will be two elliptic solves for each diffusive species. E.g. if only electrons are diffusive and we use a three-term RTE model , the :math:`s=4` method of order 3 will perform 35 elliptic updates per time step at a maximum CFL up to 4.
-
 .. _Chap:SISDC:
 
 IMEX SDC
@@ -252,7 +197,7 @@ For fluctuating hydrodynamics we are preparing several temporal integrators. ``g
 euler_maruyama
 ______________
 
-:ref:`Chap:euler_maruyama` implements the Euler-Maruyama method. This method is based on an Euler method with explicit or implicit diffusion.
+:ref:`Chap:euler_maruyama` implements the Euler-Maruyama method. This method is based on an Euler method with explicit or implicit diffusion. 
 
 
   
