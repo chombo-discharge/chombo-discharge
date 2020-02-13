@@ -2276,8 +2276,15 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
 
   // Add geometric tags.
   int tag_level = get_finest_tag_level(a_cell_tags);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    if(lvl <= tag_level && m_allow_coarsen){
+  if(m_allow_coarsen){
+    for (int lvl = 0; lvl <= finest_level; lvl++){
+      if(lvl <= tag_level){
+	a_all_tags[lvl] |= m_geom_tags[lvl];
+      }
+    }
+  }
+  else{
+    for (int lvl = 0; lvl < m_amr->get_max_amr_depth(); lvl++){
       a_all_tags[lvl] |= m_geom_tags[lvl];
     }
   }
