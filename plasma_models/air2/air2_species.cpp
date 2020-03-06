@@ -97,12 +97,12 @@ air2::photon_three::~photon_three(){
 
 Real air2::electron::initial_data(const RealVect a_pos, const Real a_time) const {
   const RealVect p = (a_pos - m_seed_position)/(m_seed_radius);
-  return m_initial_ionization + m_seed_density*exp(-0.5*PolyGeom::dot(p, p));
+  return m_initial_ionization + m_seed_density*exp(-PolyGeom::dot(p, p));
 }
 
 Real air2::positive_ion::initial_data(const RealVect a_pos, const Real a_time) const {
   const RealVect p = (a_pos - m_seed_position)/(m_seed_radius);
-  return m_initial_ionization + m_seed_density*exp(-0.5*PolyGeom::dot(p, p));
+  return m_initial_ionization + m_seed_density*exp(-PolyGeom::dot(p, p));
 }
 
 Real air2::photon_one::get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}

@@ -244,7 +244,7 @@ void cell_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tags,
   // Regular box loop
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv   = bit();
-    const RealVect pos = a_origin + a_dx*RealVect(iv);
+    const RealVect pos = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect::Unit;
     
     // If position is inside any of the tagging boxes, we can refine
     if(inside_tag_box(pos) && a_ebisbox.isRegular(iv)){

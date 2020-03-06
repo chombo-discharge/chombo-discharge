@@ -4,10 +4,6 @@
 air2.gas_temperature    = 300                      # Gas temperature
 air2.gas_pressure       = 1.0                      # Gas pressure
 
-air2.use_fhd            = false                    # Use stochastic reactions
-air2.rng_seed           = 0                        # Set seed. -1 => random seed
-air2.poiss_exp_swap     = 500.                     # Switch from Poisson to exponential distribution
-
 air2.initial_ionization  = 1.E10                   # Initial uniform ionization
 air2.seed_density        = 1.E18                   # Initial seed density
 air2.seed_radius         = 250.E-6                 # Seed radius

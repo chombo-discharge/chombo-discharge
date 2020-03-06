@@ -36,6 +36,7 @@ void godunov::parse_options(){
   parse_verbosity();
   parse_solver_verbosity();
   parse_fast_poisson();
+  parse_fast_rte();
   parse_cfl();
   parse_relax_time();
   parse_min_dt();
@@ -255,7 +256,9 @@ Real godunov::advance(const Real a_dt){
 
   // Move photons
   t0 = MPI_Wtime();
-  godunov::advance_rte(a_dt);              // Update RTE equations
+  if((m_step +1) % m_fast_rte == 0){
+    godunov::advance_rte(a_dt);              // Update RTE equations
+  }
   t1 = MPI_Wtime();
   t_rte = t1-t0;
   

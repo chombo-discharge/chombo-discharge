@@ -491,7 +491,7 @@ Real imex_sdc::advance(const Real a_dt){
     imex_sdc::setup_subintervals(m_time, actual_dt);
 
     // First SDC sweep. No lagged slopes here. 
-    imex_sdc::integrate(a_dt, m_time, false);
+    imex_sdc::integrate(actual_dt, m_time, false);
 
     // SDC correction sweeps. Need to take care of lagged terms. 
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
@@ -502,7 +502,7 @@ Real imex_sdc::advance(const Real a_dt){
       imex_sdc::reconcile_integrands();
 
       // SDC correction along whole interval
-      imex_sdc::integrate(a_dt, m_time, true);
+      imex_sdc::integrate(actual_dt, m_time, true);
 
       // Compute error and check if we need to keep iterating
       imex_sdc::finalize_errors();
