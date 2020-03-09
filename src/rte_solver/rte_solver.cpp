@@ -89,7 +89,6 @@ void rte_solver::sanity_check(){
   }
 
   CH_assert(!m_compgeom.isNull());
-  CH_assert(!m_physdom.isNull());
   CH_assert(!m_amr.isNull());
   CH_assert(!m_photon_group.isNull());
   CH_assert(!m_ebis.isNull());
@@ -115,15 +114,6 @@ void rte_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
   }
 
   m_ebis = a_ebis;
-}
-
-void rte_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("rte_solver::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_physical_domain" << endl;
-  }
-
-  m_physdom = a_physdom;
 }
 
 void rte_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){

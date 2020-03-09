@@ -73,19 +73,19 @@ void computational_geometry::set_eps0(const Real a_eps0){
   m_eps0 = a_eps0;
 }
 
-void computational_geometry::build_geometries(const physical_domain& a_physDom,
-					      const ProblemDomain&   a_finestDomain,
-					      const Real&            a_finestDx,
-					      const int&             a_nCellMax,
-					      const int&             a_maxCoarsen){
+void computational_geometry::build_geometries(const ProblemDomain   a_finestDomain,
+					      const RealVect        a_origin,
+					      const Real            a_finestDx,
+					      const int             a_nCellMax,
+					      const int             a_maxCoarsen){
 
   // Build geoservers
   Vector<GeometryService*> geoservers(2, NULL);
-  this->build_gas_geoserv(geoservers[phase::gas],     a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
-  this->build_solid_geoserv(geoservers[phase::solid], a_finestDomain, a_physDom.get_prob_lo(), a_finestDx);
+  this->build_gas_geoserv(geoservers[phase::gas],     a_finestDomain, a_origin, a_finestDx);
+  this->build_solid_geoserv(geoservers[phase::solid], a_finestDomain, a_origin, a_finestDx);
 
   m_mfis->define(a_finestDomain.domainBox(), // Define MF
-		 a_physDom.get_prob_lo(),
+		 a_origin,
 		 a_finestDx,
 		 geoservers,
 		 a_nCellMax,
@@ -119,10 +119,10 @@ void computational_geometry::build_geo_from_files(const std::string&   a_gas_fil
   }
 }
 
-void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
-					       const ProblemDomain& a_finestDomain,
-					       const RealVect&      a_origin,
-					       const Real&          a_dx){
+void computational_geometry::build_gas_geoserv(GeometryService*&   a_geoserver,
+					       const ProblemDomain a_finestDomain,
+					       const RealVect      a_origin,
+					       const Real          a_dx){
   
   // The gas ebis is the intersection of electrodes and dielectrics
   Vector<BaseIF*> parts;
@@ -154,10 +154,10 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
   }
 }
 
-void computational_geometry::build_solid_geoserv(GeometryService*&    a_geoserver,
-						 const ProblemDomain& a_finestDomain,
-						 const RealVect&      a_origin,
-						 const Real&          a_dx){
+void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver,
+						 const ProblemDomain a_finestDomain,
+						 const RealVect      a_origin,
+						 const Real          a_dx){
 
   // The gas ebis is the intersection of dielectrics
   Vector<BaseIF*> parts_dielectrics, parts_electrodes;

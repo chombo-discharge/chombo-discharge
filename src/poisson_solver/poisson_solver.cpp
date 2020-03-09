@@ -114,7 +114,7 @@ void poisson_solver::compute_D(MFAMRCellData& a_D, const MFAMRCellData& a_E){
       // Now scale by relative epsilon
       if(dielectrics.size() > 0){
 	const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
-	const RealVect origin        = m_physdom->get_prob_lo();
+	const RealVect origin        = m_amr->get_prob_lo();
 	const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -289,7 +289,6 @@ void poisson_solver::sanity_check(){
   }
 
   CH_assert(!m_compgeom.isNull());
-  CH_assert(!m_physdom.isNull());
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sideit; sideit.ok(); ++sideit){
@@ -310,15 +309,6 @@ void poisson_solver::set_computational_geometry(const RefCountedPtr<computationa
   m_compgeom = a_compgeom;
 
   this->set_mfis(m_compgeom->get_mfis());
-}
-
-void poisson_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("poisson_solver::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << "poisson_solver::set_physical_domain" << endl;
-  }
-
-  m_physdom = a_physdom;
 }
 
 void poisson_solver::set_mfis(const RefCountedPtr<mfis>& a_mfis){
@@ -453,7 +443,7 @@ void poisson_solver::set_covered_potential(EBAMRCellData& a_phi, const int a_com
 
 	  for (BoxIterator bit(box); bit.ok(); ++bit){
 	    const IntVect& iv  = bit();
-	    const RealVect pos = m_physdom->get_prob_lo() + dx*RealVect(iv)*RealVect::Unit;
+	    const RealVect pos = m_amr->get_prob_lo() + dx*RealVect(iv)*RealVect::Unit;
 
 	    if(ebisbox_gas.isCovered(iv) && ebisbox_sol.isCovered(iv)){
 	      int closest;

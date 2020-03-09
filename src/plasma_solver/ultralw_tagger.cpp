@@ -71,7 +71,7 @@ void ultralw_tagger::compute_tracers(){
 
   this->allocate_storage();
   
-  const RealVect origin = m_physdom->get_prob_lo();
+  const RealVect origin = m_amr->get_prob_lo();
   const Real time       = m_timestepper->get_time();
 
   // Compute electric field on volumetric centroids

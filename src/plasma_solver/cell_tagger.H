@@ -11,7 +11,6 @@
 
 #include "type_definitions.H"
 #include "computational_geometry.H"
-#include "physical_domain.H"
 #include "time_stepper.H"
 #include "plasma_kinetics.H"
 #include "amr_mesh.H"
@@ -39,13 +38,11 @@ public:
     @param[in] a_timestepper Time stepper
     @param[in] a_amr         amr_mesh instance
     @param[in] a_compgeom    Computational geometry
-    @param[in] a_physdom     Physical domain
   */
   virtual void define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 		      const RefCountedPtr<time_stepper>&           a_timestepper,
 		      const RefCountedPtr<amr_mesh>&               a_amr,
-		      const RefCountedPtr<computational_geometry>& a_compgeom,
-		      const RefCountedPtr<physical_domain>&        a_physdom);
+		      const RefCountedPtr<computational_geometry>& a_compgeom);
 
 
   /*!
@@ -109,11 +106,6 @@ protected:
     @brief Computational geometry. Needed for what exactly?
   */
   RefCountedPtr<computational_geometry> m_compgeom;
-
-  /*!
-    @brief Physical domain. 
-  */
-  RefCountedPtr<physical_domain> m_physdom;
 
   /*!
     @brief Phase

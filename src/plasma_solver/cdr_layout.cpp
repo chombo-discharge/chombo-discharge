@@ -168,18 +168,6 @@ void cdr_layout::set_bc(cdr_bc::which_bc a_bc){
   }
 }
 
-void cdr_layout::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("cdr_layout::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << "cdr_layout::set_physical_domain" << endl;
-  }
-
-  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->set_physical_domain(a_physdom);
-  }
-}
-
 void cdr_layout::sanity_check(){
   CH_TIME("cdr_layout::sanity_check");
   if(m_verbosity > 5){

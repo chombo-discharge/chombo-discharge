@@ -352,7 +352,7 @@ int poisson_multifluid_gmg::query_ghost() const {
 void poisson_multifluid_gmg::set_potential(Real (*a_potential)(const Real a_time)){
   poisson_solver::set_potential(a_potential);
 
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   m_bcfunc = RefCountedPtr<dirichlet_func>(new dirichlet_func(m_potential, s_constant_one, origin));
 
@@ -589,7 +589,7 @@ void poisson_multifluid_gmg::set_permittivities(const Vector<dielectric>& a_diel
   }
 
   if(a_dielectrics.size() > 0){
-    const RealVect origin  = m_physdom->get_prob_lo();
+    const RealVect origin  = m_amr->get_prob_lo();
     const Vector<Real> dx  = m_amr->get_dx();
     const int finest_level = m_amr->get_finest_level();
 
@@ -741,7 +741,7 @@ void poisson_multifluid_gmg::setup_operator_factory(){
   const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
-  const RealVect& origin                 = m_physdom->get_prob_lo();
+  const RealVect& origin                 = m_amr->get_prob_lo();
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);

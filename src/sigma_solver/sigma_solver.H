@@ -11,7 +11,6 @@
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
-#include "physical_domain.H"
 #include "plasma_kinetics.H"
 
 /*!
@@ -91,14 +90,9 @@ public:
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
   /*!
-    @brief Set the physical domain
+    @brief Set the plasma kinetics
   */
   virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
-  
-  /*!
-    @brief Set the physical domain
-  */
-  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
 
   /*!
     @brief Set phase
@@ -187,11 +181,6 @@ protected:
     @brief Computational geometry
   */
   RefCountedPtr<computational_geometry> m_compgeom;
-
-  /*!
-    @brief Physical domain
-  */
-  RefCountedPtr<physical_domain> m_physdom;
 
   /*!
     @brief AMR; needed for grid stuff

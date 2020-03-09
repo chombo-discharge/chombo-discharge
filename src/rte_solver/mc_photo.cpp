@@ -33,7 +33,7 @@ mc_photo::~mc_photo(){
 bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
   data_ops::set_value(a_state, 0.0);
 
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
   const int boxsize      = m_amr->get_max_box_size();
   if(boxsize != m_amr->get_blocking_factor()){
@@ -373,7 +373,7 @@ void mc_photo::cache_state(){
 			  m_amr->get_dx()[lvl]*RealVect::Unit,
 			  1,
 			  false, 
-			  m_physdom->get_prob_lo());
+			  m_amr->get_prob_lo());
     m_photocache[lvl]->remapOutcast();
 
     // Clear old photons
@@ -421,7 +421,7 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   // 4. Redeposit photons
   
   const int base_level  = Max(0, a_lmin-1);
-  const RealVect origin = m_physdom->get_prob_lo();
+  const RealVect origin = m_amr->get_prob_lo();
 
 #if 0 // Debug, count number of photons
   long long num_pretransfer = 0;
@@ -617,7 +617,7 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
     pout() << m_name + "::generate_photons" << endl;
   }
 
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -762,7 +762,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
   const int comp = 0;
   const Interval interv(comp, comp);
 
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
   data_ops::set_value(a_state, 0.0);
@@ -833,8 +833,8 @@ void mc_photo::move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a
   }
 
   const int finest_level = m_amr->get_finest_level();
-  const RealVect origin  = m_physdom->get_prob_lo();
-  const RealVect prob_hi = m_physdom->get_prob_hi();
+  const RealVect origin  = m_amr->get_prob_lo();
+  const RealVect prob_hi = m_amr->get_prob_hi();
   const RefCountedPtr<BaseIF>& impfunc = m_compgeom->get_gas_if();
 
   // Advance over levels
@@ -993,7 +993,7 @@ void mc_photo::remap_photons(EBAMRPhotons& a_photons){
   }
 
   const int finest_level = m_amr->get_finest_level();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // 1. Gather everything on the coarsest level
   List<photon>& coarsest_outcast = a_photons[0]->outcast();

@@ -152,18 +152,6 @@ void rte_layout::set_verbosity(const int a_verbosity){
   }
 }
 
-void rte_layout::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("rte_layout::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << "rte_layout::set_physical_domain" << endl;
-  }
-
-  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    solver->set_physical_domain(a_physdom);
-  }
-}
-
 void rte_layout::sanity_check(){
   CH_TIME("rte_layout::sanity_check");
   if(m_verbosity > 5){

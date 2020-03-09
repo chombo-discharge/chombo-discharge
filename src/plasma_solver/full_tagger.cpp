@@ -95,7 +95,7 @@ void full_tagger::compute_tracers(){
 
   this->allocate_storage();
   
-  const RealVect origin = m_physdom->get_prob_lo();
+  const RealVect origin = m_amr->get_prob_lo();
   const Real time       = m_timestepper->get_time();
   const int num_species = m_plaskin->get_num_species();
   const int num_photons = m_plaskin->get_num_photons();

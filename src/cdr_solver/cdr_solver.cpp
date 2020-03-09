@@ -853,7 +853,7 @@ void cdr_solver::initial_data_distribution(){
     pout() << m_name + "::initial_data_distribution" << endl;
   }
 
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
   // Copy this
@@ -911,7 +911,7 @@ void cdr_solver::initial_data_particles(){
   }
 
   const int finest_level = m_amr->get_finest_level();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   InterpType deposition  = m_species->get_deposition();
 
   const int comp = 0;
@@ -1427,7 +1427,6 @@ void cdr_solver::sanity_check(){
   }
 
   CH_assert(!m_compgeom.isNull());
-  CH_assert(!m_physdom.isNull());
   CH_assert(!m_amr.isNull());
   CH_assert(!m_species.isNull());
   CH_assert(!m_ebis.isNull());
@@ -1542,15 +1541,6 @@ void cdr_solver::set_mass_redist(const bool a_mass_redist){
   }
 
   m_mass_redist = a_mass_redist;
-}
-
-void cdr_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("cdr_solver::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_physical_domain" << endl;
-  }
-
-  m_physdom = a_physdom;
 }
 
 void cdr_solver::set_species(const RefCountedPtr<species> a_species){

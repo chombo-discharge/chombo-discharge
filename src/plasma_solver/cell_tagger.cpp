@@ -89,8 +89,7 @@ void cell_tagger::parse_buffer(){
 void cell_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 			 const RefCountedPtr<time_stepper>&           a_timestepper,
 			 const RefCountedPtr<amr_mesh>&               a_amr,
-			 const RefCountedPtr<computational_geometry>& a_compgeom,
-			 const RefCountedPtr<physical_domain>&        a_physdom){
+			 const RefCountedPtr<computational_geometry>& a_compgeom){
   CH_TIME("cell_tagger::define");
   if(m_verbosity > 5){
     pout() << m_name + "::define" << endl;
@@ -100,7 +99,6 @@ void cell_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
   m_timestepper = a_timestepper;
   m_amr         = a_amr;
   m_compgeom    = a_compgeom;
-  m_physdom     = a_physdom;
 }
 
 void cell_tagger::regrid(){
@@ -147,7 +145,7 @@ bool cell_tagger::tag_cells(EBAMRTags& a_tags){
 
   bool got_new_tags = false;
 
-  const RealVect origin      = m_physdom->get_prob_lo();
+  const RealVect origin      = m_amr->get_prob_lo();
   const Real time            = m_timestepper->get_time();
   const int finest_level     = m_amr->get_finest_level();
   const int max_depth        = m_amr->get_max_amr_depth();

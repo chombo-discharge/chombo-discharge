@@ -1,5 +1,0 @@
-# ====================================================================================================
-# PHYSICAL_DOMAIN CLASS OPTIONS
-# ====================================================================================================
-physical_domain.lo_corner = -1 -1 -1    # Low corner of problem domain
-physical_domain.hi_corner =  1  1  1    # High corner of problem domain

@@ -75,11 +75,6 @@ public:
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
 
   /*!
-    @brief Set the physical domain
-  */
-  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
-
-  /*!
     @brief Do a sanity check
   */
   virtual void sanity_check();

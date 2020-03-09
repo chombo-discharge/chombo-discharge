@@ -270,7 +270,7 @@ void time_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&     
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
   const Real dx                = m_amr->get_dx()[a_lvl];
-  const RealVect origin        = m_physdom->get_prob_lo();
+  const RealVect origin        = m_amr->get_prob_lo();
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     Vector<EBCellFAB*> particle_sources(num_species);
@@ -389,7 +389,7 @@ void time_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_part
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E;
@@ -534,7 +534,7 @@ void time_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&      
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics. 
   RealVect         pos = RealVect::Zero;
@@ -674,7 +674,7 @@ void time_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&      
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics. 
   RealVect         pos = RealVect::Zero;
@@ -865,7 +865,7 @@ void time_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&    
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E;
@@ -999,7 +999,7 @@ void time_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>&     
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E;
@@ -1175,7 +1175,7 @@ void time_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&      
   const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
-  const RealVect origin         = m_physdom->get_prob_lo();
+  const RealVect origin         = m_amr->get_prob_lo();
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box          = dbl.get(dit());
@@ -1225,7 +1225,7 @@ void time_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffc
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E;
@@ -1305,7 +1305,7 @@ void time_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       
 
   const int comp        = 0;
   const int num_species = m_plaskin->get_num_species();
-  const RealVect origin = m_physdom->get_prob_lo();
+  const RealVect origin = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect     pos, E;
@@ -1384,7 +1384,7 @@ void time_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       
 
   const int comp        = 0;
   const int num_species = m_plaskin->get_num_species();
-  const RealVect origin = m_physdom->get_prob_lo();
+  const RealVect origin = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect     pos, E;
@@ -1472,7 +1472,7 @@ void time_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&          a_
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E;
@@ -1558,7 +1558,7 @@ void time_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >& 
   const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
-  const RealVect origin         = m_physdom->get_prob_lo();
+  const RealVect origin         = m_amr->get_prob_lo();
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box            = dbl.get(dit());
@@ -1632,7 +1632,7 @@ void time_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>&     
   const ProblemDomain& domain   = m_amr->get_domains()[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
   const MFLevelGrid& mflg       = *(m_amr->get_mflg()[a_lvl]);
-  const RealVect origin         = m_physdom->get_prob_lo();
+  const RealVect origin         = m_amr->get_prob_lo();
 
   // Patch loop
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1865,7 +1865,7 @@ void time_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIFFAB>*>
   const EBISLayout& ebisl       = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
   const ProblemDomain& domain   = m_amr->get_domains()[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
-  const RealVect origin         = m_physdom->get_prob_lo();
+  const RealVect origin         = m_amr->get_prob_lo();
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box         = dbl.get(dit());
@@ -2176,7 +2176,7 @@ void time_stepper::compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_s
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
   const Real dx                = m_amr->get_dx()[a_lvl];
-  const RealVect origin        = m_physdom->get_prob_lo();
+  const RealVect origin        = m_amr->get_prob_lo();
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       
@@ -2258,7 +2258,7 @@ void time_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sourc
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E, grad_E;
@@ -2390,7 +2390,7 @@ void time_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&         
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E, grad_E;
@@ -2514,7 +2514,7 @@ void time_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&          
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos, E, grad_E;
@@ -2686,7 +2686,7 @@ void time_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_veloci
   }
 
   const int comp         = 0;
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
 
 
@@ -2757,7 +2757,7 @@ void time_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&       a
 #if CH_SPACEDIM==2
   const int num_species  = m_plaskin->get_num_species();
   const int comp         = 0;
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
 
   // I need contiguous memory for the nasty stuff that is about to happen, so begin by copying things onto smaller
@@ -2842,7 +2842,7 @@ void time_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&       a
 #if CH_SPACEDIM==3
   const int num_species  = m_plaskin->get_num_species();
   const int comp         = 0;
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
 
   // I need contiguous memory for the nasty stuff that is about to happen, so begin by copying things onto smaller
@@ -2932,7 +2932,7 @@ void time_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       a_velo
   const int comp         = 0;
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
@@ -3074,7 +3074,7 @@ void time_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sourc
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
 
   // Things that are passed into plasma_kinetics
@@ -3139,7 +3139,7 @@ void time_stepper::compute_rte_sources_irreg(Vector<EBCellFAB*>&           a_sou
 
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
   RealVect         pos,E;
@@ -4208,7 +4208,6 @@ void time_stepper::sanity_check(){
   }
 
   CH_assert(!m_compgeom.isNull());
-  CH_assert(!m_physdom.isNull());
   CH_assert(!m_amr.isNull());
   CH_assert(!m_plaskin.isNull());
 }
@@ -4238,15 +4237,6 @@ void time_stepper::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_p
   }
 
   m_plaskin = a_plaskin;
-}
-
-void time_stepper::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("time_stepper::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::set_physical_domain" << endl;
-  }
-
-  m_physdom = a_physdom;
 }
 
 void time_stepper::set_potential(Real (*a_potential)(const Real a_time)){
@@ -4523,7 +4513,6 @@ void time_stepper::setup_cdr(){
   m_cdr->parse_options();
   m_cdr->set_amr(m_amr);
   m_cdr->set_computational_geometry(m_compgeom);
-  m_cdr->set_physical_domain(m_physdom);
   m_cdr->set_phase(phase::gas);
   m_cdr->sanity_check();
   m_cdr->allocate_internals();
@@ -4539,7 +4528,6 @@ void time_stepper::setup_poisson(){
   m_poisson->parse_options();
   m_poisson->set_amr(m_amr);
   m_poisson->set_computational_geometry(m_compgeom);
-  m_poisson->set_physical_domain(m_physdom);
 
   m_poisson->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_poisson->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -4566,7 +4554,6 @@ void time_stepper::setup_rte(){
   m_rte->set_phase(phase::gas);
   m_rte->set_amr(m_amr);
   m_rte->set_computational_geometry(m_compgeom);
-  m_rte->set_physical_domain(m_physdom);
   m_rte->sanity_check();
   m_rte->allocate_internals();
 }
@@ -4582,7 +4569,6 @@ void time_stepper::setup_sigma(){
   m_sigma->set_verbosity(m_solver_verbosity);
   m_sigma->set_computational_geometry(m_compgeom);
   m_sigma->set_plasma_kinetics(m_plaskin);
-  m_sigma->set_physical_domain(m_physdom);
   m_sigma->allocate_internals();
 }
 

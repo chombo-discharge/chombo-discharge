@@ -35,13 +35,12 @@ driver::driver(){
 
 }
 
-driver::driver(const RefCountedPtr<physical_domain>&        a_physdom,
-			     const RefCountedPtr<computational_geometry>& a_compgeom,
-			     const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-			     const RefCountedPtr<time_stepper>&           a_timestepper,
-			     const RefCountedPtr<amr_mesh>&               a_amr,
-			     const RefCountedPtr<cell_tagger>&            a_celltagger,
-			     const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
+driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
+	       const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+	       const RefCountedPtr<time_stepper>&           a_timestepper,
+	       const RefCountedPtr<amr_mesh>&               a_amr,
+	       const RefCountedPtr<cell_tagger>&            a_celltagger,
+	       const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
   CH_TIME("driver::driver(full)");
 
   parse_verbosity();
@@ -49,8 +48,6 @@ driver::driver(const RefCountedPtr<physical_domain>&        a_physdom,
     pout() << "driver::driver(full)" << endl;
   }
   
-
-  set_physical_domain(a_physdom);                      // Set physical domain
   set_computational_geometry(a_compgeom);              // Set computational geometry
   set_plasma_kinetics(a_plaskin);                      // Set plasma kinetics
   set_time_stepper(a_timestepper);                     // Set time stepper
@@ -93,7 +90,7 @@ driver::driver(const RefCountedPtr<physical_domain>&        a_physdom,
 
   // Define the cell tagger
   if(!m_celltagger.isNull()){ 
-    m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom, m_physdom);
+    m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom);
   }
 
   // Ok we're ready to go. 
@@ -331,7 +328,7 @@ void driver::get_geom_tags(){
 
   // Remove tags using the geocoarsener if we have it
   if(!m_geocoarsen.isNull()){
-    m_geocoarsen->coarsen_tags(m_geom_tags, m_amr->get_dx(), m_physdom->get_prob_lo());
+    m_geocoarsen->coarsen_tags(m_geom_tags, m_amr->get_dx(), m_amr->get_prob_lo());
   }
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
@@ -343,17 +340,17 @@ void driver::get_geom_tags(){
 }
 
 void driver::get_loads_and_boxes(long long& a_myPoints,
-					long long& a_myPointsGhosts,
-					long long& a_myBoxes,
-					long long& a_totalPoints,
-					long long& a_totalPointsGhosts,
-					long long& a_totalBoxes,
-					Vector<long long>& a_my_level_boxes,
-					Vector<long long>& a_total_level_boxes,
-					Vector<long long>& a_my_level_points,
-					Vector<long long>& a_total_level_points,
-					const int& a_finestLevel,
-					const Vector<DisjointBoxLayout>& a_grids){
+				 long long& a_myPointsGhosts,
+				 long long& a_myBoxes,
+				 long long& a_totalPoints,
+				 long long& a_totalPointsGhosts,
+				 long long& a_totalBoxes,
+				 Vector<long long>& a_my_level_boxes,
+				 Vector<long long>& a_total_level_boxes,
+				 Vector<long long>& a_my_level_points,
+				 Vector<long long>& a_total_level_points,
+				 const int& a_finestLevel,
+				 const Vector<DisjointBoxLayout>& a_grids){
   CH_TIME("driver::get_loads_and_boxes");
   if(m_verbosity > 5){
     pout() << "driver::get_loads_and_boxes" << endl;
@@ -837,11 +834,11 @@ void driver::regrid_internals(const int a_old_finest_level, const int a_new_fine
 }
 
 void driver::regrid_report(const Real a_total_time,
-				  const Real a_tag_time,
-				  const Real a_base_regrid_time,
-				  const Real a_solver_regrid_time,
-				  const Real a_elliptic_solve_time,
-				  const Real a_solver_filling_time){
+			   const Real a_tag_time,
+			   const Real a_base_regrid_time,
+			   const Real a_solver_regrid_time,
+			   const Real a_elliptic_solve_time,
+			   const Real a_solver_filling_time){
   CH_TIME("driver::regrid_report");
   if(m_verbosity > 5){
     pout() << "driver::regrid_report" << endl;
@@ -1105,8 +1102,8 @@ void driver::setup_poisson_only(){
   }
   
   if(!m_read_ebis){
-    m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
-				 m_amr->get_finest_domain(),
+    m_compgeom->build_geometries(m_amr->get_finest_domain(),
+				 m_amr->get_prob_lo(),
 				 m_amr->get_finest_dx(),
 				 m_amr->get_max_ebis_box_size());
     if(m_write_ebis){
@@ -1140,7 +1137,6 @@ void driver::setup_poisson_only(){
   m_timestepper->set_amr(m_amr);
   m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
-  m_timestepper->set_physical_domain(m_physdom);               // Physical domain
   m_timestepper->set_potential(m_potential);                   // Potential
   m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -1228,11 +1224,11 @@ void driver::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
 }
 
 void driver::set_geom_refinement_depth(const int a_depth1,
-					      const int a_depth2,
-					      const int a_depth3,
-					      const int a_depth4,
-					      const int a_depth5,
-					      const int a_depth6){
+				       const int a_depth2,
+				       const int a_depth3,
+				       const int a_depth4,
+				       const int a_depth5,
+				       const int a_depth6){
   CH_TIME("driver::set_geom_refinement_depth(full");
   if(m_verbosity > 5){
     pout() << "driver::set_geom_refinement_depth(full)" << endl;
@@ -1480,7 +1476,7 @@ void driver::parse_num_plot_ghost(){
 }
 
 void driver::parse_coarsen(){
-    CH_TIME("driver::parse_coarsen");
+  CH_TIME("driver::parse_coarsen");
   if(m_verbosity > 5){
     pout() << "driver::parse_coarsen" << endl;
   }
@@ -1730,8 +1726,8 @@ void driver::setup_geometry_only(){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
-  m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
-			       m_amr->get_finest_domain(),
+  m_compgeom->build_geometries(m_amr->get_finest_domain(),
+			       m_amr->get_prob_lo(),
 			       m_amr->get_finest_dx(),
 			       m_amr->get_max_ebis_box_size());
   if(m_write_ebis){
@@ -1776,8 +1772,8 @@ void driver::setup_fresh(const int a_init_regrids){
   }
 
   if(!m_read_ebis){
-    m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
-				 m_amr->get_finest_domain(),
+    m_compgeom->build_geometries(m_amr->get_finest_domain(),
+				 m_amr->get_prob_lo(),
 				 m_amr->get_finest_dx(),
 				 m_amr->get_max_ebis_box_size());
     if(m_write_ebis){
@@ -1811,7 +1807,6 @@ void driver::setup_fresh(const int a_init_regrids){
   m_timestepper->set_amr(m_amr);
   m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
-  m_timestepper->set_physical_domain(m_physdom);               // Physical domain
   m_timestepper->set_potential(m_potential);                   // Potential
   m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -1839,7 +1834,7 @@ void driver::setup_fresh(const int a_init_regrids){
 #endif
 
     // Compute the capacitance
-      //      m_capacitance = poisson->compute_capacitance();
+    //      m_capacitance = poisson->compute_capacitance();
   }
 
   if(!m_celltagger.isNull()){
@@ -1890,8 +1885,8 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   this->sanity_check();                                    // Sanity check before doing anything expensive
 
   if(!m_read_ebis){
-    m_compgeom->build_geometries(*m_physdom,                 // Build the multifluid geometries
-				 m_amr->get_finest_domain(),
+    m_compgeom->build_geometries(m_amr->get_finest_domain(),
+				 m_amr->get_prob_lo(),
 				 m_amr->get_finest_dx(),
 				 m_amr->get_max_ebis_box_size());
   }
@@ -1906,7 +1901,6 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   m_timestepper->set_amr(m_amr);                         // Set amr
   m_timestepper->set_plasma_kinetics(m_plaskin);         // Set plasma kinetics
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
-  m_timestepper->set_physical_domain(m_physdom);         // Physical domain
   m_timestepper->set_potential(m_potential);             // Potential
   m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -1958,14 +1952,6 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
       this->grid_report();
     }
   }
-}
-
-void driver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("driver::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << "driver::set_physical_domain" << endl;
-  }
-  m_physdom = a_physdom;
 }
 
 void driver::set_dump_mass(const bool a_dump_mass){
@@ -2154,7 +2140,7 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
 	  advMs);
   pout() << metrics << endl;
 
-    // Hours, minutes, seconds and millisecond of the previous iteration
+  // Hours, minutes, seconds and millisecond of the previous iteration
   const Real wt_ns = (m_wallclock2 - m_wallclock1)*1.E-9/m_dt;
   const int wt_Hrs = floor(wt_ns/3600);
   const int wt_Min = floor((wt_ns - 3600*wt_Hrs)/60);
@@ -2796,9 +2782,9 @@ void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
 }
 
 void driver::write_vector_data(HDF5HeaderData&     a_header,
-				      const Vector<Real>& a_data,
-				      const std::string   a_name,
-				      const int           a_elements){
+			       const Vector<Real>& a_data,
+			       const std::string   a_name,
+			       const int           a_elements){
   CH_TIME("driver::write_vector_data");
   if(m_verbosity > 3){
     pout() << "driver::write_vector_data" << endl;
@@ -2816,9 +2802,9 @@ void driver::write_vector_data(HDF5HeaderData&     a_header,
 }
 
 void driver::read_vector_data(HDF5HeaderData& a_header,
-				     Vector<Real>&         a_data,
-				     const std::string     a_name,
-				     const int             a_elements){
+			      Vector<Real>&         a_data,
+			      const std::string     a_name,
+			      const int             a_elements){
   CH_TIME("driver::read_vector_data");
   if(m_verbosity > 3){
     pout() << "driver::read_vector_data" << endl;
@@ -2909,7 +2895,7 @@ void driver::initialize_eed(){
   }
 
   const int finest_level = m_amr->get_finest_level();
-  const RealVect origin = m_physdom->get_prob_lo();
+  const RealVect origin = m_amr->get_prob_lo();
 
   // Compute E
   EBAMRCellData Ecell;
@@ -3122,5 +3108,3 @@ void driver::compute_coarse_norm(const std::string a_chk_coarse, const std::stri
   
   handle_in.close();
 }
-
-

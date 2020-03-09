@@ -105,7 +105,7 @@ void sigma_solver::initial_data(){
     pout() << "sigma_solver::initial_data" << endl;
   }
 
-  const RealVect origin  = m_physdom->get_prob_lo();
+  const RealVect origin  = m_amr->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -283,15 +283,6 @@ void sigma_solver::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_p
   }
 
   m_plaskin = a_plaskin;
-}
-
-void sigma_solver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("sigma_solver::set_physical_domain");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::set_physical_domain" << endl;
-  }
-
-  m_physdom = a_physdom;
 }
 
 void sigma_solver::set_phase(phase::which_phase a_phase){

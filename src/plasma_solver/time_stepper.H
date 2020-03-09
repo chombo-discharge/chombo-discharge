@@ -10,7 +10,6 @@
 
 #include "computational_geometry.H"
 #include "plasma_kinetics.H"
-#include "physical_domain.H"
 #include "amr_mesh.H"
 #include "mfis.H"
 #include "cdr_layout.H"
@@ -911,11 +910,6 @@ public:
   virtual void set_source_growth_tolerance(const Real a_src_tolerance);
 
   /*!
-    @brief Set the physical domain
-  */
-  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
-
-  /*!
     @brief Set plasma kinetics
   */
   virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
@@ -1090,11 +1084,6 @@ protected:
     @brief Plasma kinetics
   */
   RefCountedPtr<plasma_kinetics> m_plaskin;
-
-  /*!
-    @brief Physical domain
-  */
-  RefCountedPtr<physical_domain> m_physdom;
 
   /*!
     @brief Physical domain

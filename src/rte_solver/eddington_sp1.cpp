@@ -507,7 +507,7 @@ void eddington_sp1::set_aco_and_bco(){
   }
   else{ // If kappa is not constant, we need to go through each cell to determine it
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-      const RealVect origin = m_physdom->get_prob_lo();
+      const RealVect origin = m_amr->get_prob_lo();
       const Real dx         = m_amr->get_dx()[lvl];
     
       LevelData<EBCellFAB>& aco            = *m_aco[lvl];
@@ -662,7 +662,7 @@ void eddington_sp1::setup_operator_factory(){
   const Vector<int>& refinement_ratios   = m_amr->get_ref_rat();
   const Vector<ProblemDomain>& domains   = m_amr->get_domains();
   const Vector<Real>& dx                 = m_amr->get_dx();
-  const RealVect& origin                 = m_physdom->get_prob_lo();
+  const RealVect& origin                 = m_amr->get_prob_lo();
   const Vector<EBISLayout>& ebisl        = m_amr->get_ebisl(m_phase);
   const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->get_old_quadcfi(m_phase);
 

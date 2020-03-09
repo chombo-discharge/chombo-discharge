@@ -16,7 +16,6 @@
 
 #include "dielectric.H"
 #include "electrode.H"
-#include "physical_domain.H"
 #include "mfis.H"
 #include "real_box.H"
 
@@ -104,11 +103,11 @@ public:
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_origin, a_origin + a_box*a_dx)
   */
-  virtual void build_geometries(const physical_domain& a_physDom,
-				const ProblemDomain&   a_finestDomain,
-				const Real&            a_finestDx,
-  				const int&             a_nCellMax = -1,
-  				const int&             a_maxCoarsen = -1);
+  virtual void build_geometries(const ProblemDomain   a_finestDomain,
+				const RealVect        a_origin,
+				const Real            a_finestDx,
+  				const int             a_nCellMax = -1,
+  				const int             a_maxCoarsen = -1);
 
   /*!
     @brief Build geometries from files
@@ -161,18 +160,18 @@ protected:
   /*!
     @brief Geometry server for gas phase
   */
-  virtual void build_gas_geoserv(GeometryService*&    a_geoserver,
-				 const ProblemDomain& a_finestDomain,
-				 const RealVect&      a_origin,
-				 const Real&          a_dx);
+  virtual void build_gas_geoserv(GeometryService*&   a_geoserver,
+				 const ProblemDomain a_finestDomain,
+				 const RealVect      a_origin,
+				 const Real          a_dx);
 
   /*!
     @brief Geometry server for solid phas
   */
-  virtual void build_solid_geoserv(GeometryService*&     a_geoserver,
-				   const ProblemDomain& a_finestDomain,
-				   const RealVect&      a_origin,
-				   const Real&          a_dx);
+  virtual void build_solid_geoserv(GeometryService*&   a_geoserver,
+				   const ProblemDomain a_finestDomain,
+				   const RealVect      a_origin,
+				   const Real          a_dx);
 
 };
 #endif

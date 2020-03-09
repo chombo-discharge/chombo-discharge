@@ -13,7 +13,6 @@
 #include "computational_geometry.H"
 #include "plasma_kinetics.H"
 #include "time_stepper.H"
-#include "physical_domain.H"
 #include "amr_mesh.H"
 #include "cell_tagger.H"
 #include "mfis.H"
@@ -34,13 +33,12 @@ public:
   /*!
     @brief Full constructor. 
   */
-  driver(const RefCountedPtr<physical_domain>&        a_physdom,
-		const RefCountedPtr<computational_geometry>& a_compgeom,
-		const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-		const RefCountedPtr<time_stepper>&           a_timestepper,
-		const RefCountedPtr<amr_mesh>&               a_amr,
-		const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL),
-		const RefCountedPtr<geo_coarsener>&          a_geocoarsen = RefCountedPtr<geo_coarsener>(NULL));
+  driver(const RefCountedPtr<computational_geometry>& a_compgeom,
+	 const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+	 const RefCountedPtr<time_stepper>&           a_timestepper,
+	 const RefCountedPtr<amr_mesh>&               a_amr,
+	 const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL),
+	 const RefCountedPtr<geo_coarsener>&          a_geocoarsen = RefCountedPtr<geo_coarsener>(NULL));
 
   /*!
     @brief Constructor
@@ -140,7 +138,7 @@ public:
   */
   virtual void set_dump_mass(const bool a_dump_mass);
 
-    /*!
+  /*!
     @brief Dump charge for cdr and sigma solvers
   */
   virtual void set_dump_charge(const bool a_dump_charge);
@@ -188,11 +186,6 @@ protected:
   RefCountedPtr<plasma_kinetics> m_plaskin;
 
   /*!
-    @brief Physical domain
-  */
-  RefCountedPtr<physical_domain> m_physdom;
-
-  /*!
     @brief Time stepper
   */
   RefCountedPtr<time_stepper> m_timestepper;
@@ -202,7 +195,7 @@ protected:
   */
   RefCountedPtr<cell_tagger> m_celltagger;
 
-    /*!
+  /*!
     @brief Geometric coarsener
   */
   RefCountedPtr<geo_coarsener> m_geocoarsen;
@@ -247,7 +240,7 @@ protected:
   */
   std::string m_ebis_gas_file;
 
-    /*!
+  /*!
     @brief Name of the file holding the finest EBIS info for the gas phase
   */
   std::string m_ebis_sol_file;
@@ -377,12 +370,12 @@ protected:
   */
   Real (*m_wall_func_x_lo)(const RealVect a_pos);
 
-    /*!
+  /*!
     @brief Function pointer for Poisson BC on domain walls
   */
   Real (*m_wall_func_x_hi)(const RealVect a_pos);
 
-    /*!
+  /*!
     @brief Function pointer for Poisson BC on domain walls
   */
   Real (*m_wall_func_y_lo)(const RealVect a_pos);
@@ -627,11 +620,6 @@ protected:
     @brief Set the time stepper
   */
   virtual void set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper);
-  
-    /*!
-    @brief Set physical domain
-  */
-  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
 
   /*!
     @brief Set the cell tagger
@@ -723,7 +711,7 @@ protected:
   */
   virtual void close_mass_dump_file(ofstream& a_file);
 
-    /*!
+  /*!
     @brief Close file for mass dump
   */
   virtual void close_charge_dump_file(ofstream& a_file);
