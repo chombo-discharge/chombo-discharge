@@ -25,7 +25,7 @@ def write_template(args):
         # Write main file. This should be a separate routine. 
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
-    mainf.write('#include "plasma_engine.H"\n')
+    mainf.write('#include "driver.H"\n')
     mainf.write('#include "geo_coarsener.H"\n')
     mainf.write('#include "poisson_factoryI.H"\n')
     mainf.write('#include "' + args.poisson_solver + '.H"\n')
@@ -84,7 +84,7 @@ def write_template(args):
     mainf.write("  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());\n")
     mainf.write("  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());\n")
     mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")
-    mainf.write("  RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom, compgeom, plaskin, timestepper, amr, tagger, geocoarsen));\n")
+    mainf.write("  RefCountedPtr<driver> engine                   = RefCountedPtr<driver> (new driver(physdom, compgeom, plaskin, timestepper, amr, tagger, geocoarsen));\n")
     mainf.write("\n")
 
     mainf.write("  // Create solver factories\n")

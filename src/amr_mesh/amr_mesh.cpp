@@ -49,6 +49,7 @@ amr_mesh::amr_mesh(){
   parse_num_ghost();
   parse_eb_ghost();
   parse_load_balance();
+  parse_domain();
   parse_ghost_interpolation();
 #if 1 // new code
   parse_centroid_stencils();
@@ -396,6 +397,16 @@ void amr_mesh::set_mfis(const RefCountedPtr<mfis>& a_mfis){
   m_mfis = a_mfis;
 }
 
+void amr_mesh::parse_domain(){
+
+  std::string balance;
+  ParmParse pp("amr_mesh");
+
+  Vector<Real> v(SpaceDim);
+  pp.getarr("lo_corner", v, 0, SpaceDim); m_prob_lo = RealVect(D_DECL(v[0], v[1], v[2]));
+  pp.getarr("hi_corner", v, 0, SpaceDim); m_prob_hi = RealVect(D_DECL(v[0], v[1], v[2]));
+}
+
 void amr_mesh::parse_load_balance(){
 
   std::string balance;
@@ -497,7 +508,7 @@ void amr_mesh::build_domains(){
   m_copier[phase::solid].resize(nlevels);
   m_reverse_copier[phase::solid].resize(nlevels);
 
-  m_dx[0] = (m_physdom->get_prob_hi()[0] - m_physdom->get_prob_lo()[0])/m_num_cells[0];
+  m_dx[0] = (m_prob_hi[0] - m_prob_lo[0])/m_num_cells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_num_cells - IntVect::Unit);
 
   m_gradsten_gas.resize(nlevels);
@@ -2255,10 +2266,6 @@ void amr_mesh::set_irreg_sten_radius(const int a_irreg_sten_radius){
   }
 }
 
-void amr_mesh::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  m_physdom = a_physdom;
-}
-
 void amr_mesh::sanity_check(){
   CH_TIME("amr_mesh::sanity_check");
   if(m_verbosity > 1){
@@ -2273,17 +2280,18 @@ void amr_mesh::sanity_check(){
   CH_assert(m_max_box_size >= 8 && m_max_box_size % m_blocking_factor == 0);
   CH_assert(m_fill_ratio > 0. && m_fill_ratio <= 1.0);
   CH_assert(m_buffer_size > 0);
-
-  // Make sure that the isotropic constraint isn't violated
-  CH_assert(!m_physdom.isNull());
-  const RealVect realbox = m_physdom->get_prob_hi() - m_physdom->get_prob_lo();
-  for (int dir = 0; dir < SpaceDim - 1; dir++){
-    //    CH_assert(realbox[dir]/m_num_cells[dir] == realbox[dir+1]/m_num_cells[dir+1]);
-  }
 }
 
 bool amr_mesh::get_ebcf(){
   return m_ebcf;
+}
+
+RealVect amr_mesh::get_prob_lo(){
+  return m_prob_lo;
+}
+
+RealVect amr_mesh::get_prob_hi(){
+  return m_prob_hi;
 }
 
 int amr_mesh::get_finest_level(){

@@ -59,7 +59,7 @@ template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
 									    m_domains[lvl],
 									    m_blocking_factor,
 									    m_dx[lvl]*RealVect::Unit,
-									    m_physdom->get_prob_lo()));
+									    m_prob_lo));
   }
 }
 

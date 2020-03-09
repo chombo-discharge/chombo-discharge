@@ -135,9 +135,9 @@ void computational_geometry::build_gas_geoserv(GeometryService*&    a_geoserver,
 
   // Create geoshop; either all regular or an intersection
   if(parts.size() == 0){ 
-  //   a_geoserver = new AllRegularService();
-  // }
-  // else {
+    a_geoserver = new AllRegularService();
+  }
+  else {
     m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
     if(s_use_new_gshop){ // PlasmaC geometry generation
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,

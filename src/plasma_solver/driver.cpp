@@ -1,11 +1,11 @@
 /*!
-  @file   plasma_engine.cpp
-  @brief  Implementation of plasma_engine.H
+  @file   driver.cpp
+  @brief  Implementation of driver.H
   @author Robert Marskar
   @date   Nov. 2017
 */
 
-#include "plasma_engine.H"
+#include "driver.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 #include "data_ops.H"
@@ -21,32 +21,32 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
-Real plasma_engine::s_constant_one(const RealVect a_pos){
+Real driver::s_constant_one(const RealVect a_pos){
   return 1.0;
 }
 
-plasma_engine::plasma_engine(){
-  CH_TIME("plasma_engine::plasma_engine(weak)");
+driver::driver(){
+  CH_TIME("driver::driver(weak)");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::plasma_engine(weak)" << endl;
+    pout() << "driver::driver(weak)" << endl;
   }
 
-  MayDay::Abort("plasma_engine::plasma_engine - weak construction is not allowed (yet)");
+  MayDay::Abort("driver::driver - weak construction is not allowed (yet)");
 
 }
 
-plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_physdom,
+driver::driver(const RefCountedPtr<physical_domain>&        a_physdom,
 			     const RefCountedPtr<computational_geometry>& a_compgeom,
 			     const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 			     const RefCountedPtr<time_stepper>&           a_timestepper,
 			     const RefCountedPtr<amr_mesh>&               a_amr,
 			     const RefCountedPtr<cell_tagger>&            a_celltagger,
 			     const RefCountedPtr<geo_coarsener>&          a_geocoarsen){
-  CH_TIME("plasma_engine::plasma_engine(full)");
+  CH_TIME("driver::driver(full)");
 
   parse_verbosity();
   if(m_verbosity > 5){
-    pout() << "plasma_engine::plasma_engine(full)" << endl;
+    pout() << "driver::driver(full)" << endl;
   }
   
 
@@ -102,14 +102,14 @@ plasma_engine::plasma_engine(const RefCountedPtr<physical_domain>&        a_phys
   m_time          = 0.0;
 }
 
-plasma_engine::~plasma_engine(){
-  CH_TIME("plasma_engine::~plasma_engine");
+driver::~driver(){
+  CH_TIME("driver::~driver");
 }
 
-int plasma_engine::get_num_plotvars() const {
-  CH_TIME("plasma_engine::get_num_plotvars");
+int driver::get_num_plotvars() const {
+  CH_TIME("driver::get_num_plotvars");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::get_num_plotvars" << endl;
+    pout() << "driver::get_num_plotvars" << endl;
   }
 
   int num_output = 0;
@@ -125,10 +125,10 @@ int plasma_engine::get_num_plotvars() const {
 
 }
 
-Vector<std::string> plasma_engine::get_plotvar_names() const {
-  CH_TIME("plasma_engine::get_plotvar_names");
+Vector<std::string> driver::get_plotvar_names() const {
+  CH_TIME("driver::get_plotvar_names");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::get_plotvar_names" << endl;
+    pout() << "driver::get_plotvar_names" << endl;
   }
   
   Vector<std::string> names(0);
@@ -156,10 +156,10 @@ Vector<std::string> plasma_engine::get_plotvar_names() const {
   return names;
 }
 
-void plasma_engine::allocate_internals(){
-  CH_TIME("plasma_engine::allocate_internals");
+void driver::allocate_internals(){
+  CH_TIME("driver::allocate_internals");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::allocate_internals" << endl;
+    pout() << "driver::allocate_internals" << endl;
   }
   
   const int ncomp        = 1;
@@ -179,10 +179,10 @@ void plasma_engine::allocate_internals(){
   }
 }
 
-void plasma_engine::cache_tags(const EBAMRTags& a_tags){
-  CH_TIME("plasma_engine::cache_tags");
+void driver::cache_tags(const EBAMRTags& a_tags){
+  CH_TIME("driver::cache_tags");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::cache_tags" << endl;
+    pout() << "driver::cache_tags" << endl;
   }
 
   const int ncomp         = 1;
@@ -209,19 +209,19 @@ void plasma_engine::cache_tags(const EBAMRTags& a_tags){
   }
 }
 
-void plasma_engine::deallocate_internals(){
-  CH_TIME("plasma_engine::deallocate_internals");
+void driver::deallocate_internals(){
+  CH_TIME("driver::deallocate_internals");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::deallocate_internals" << endl;
+    pout() << "driver::deallocate_internals" << endl;
   }
 
   //  m_amr->deallocate(m_tags);
 }
 
-void plasma_engine::write_ebis(){
-  CH_TIME("plasma_engine::write_ebis");
+void driver::write_ebis(){
+  CH_TIME("driver::write_ebis");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::write_ebis" << endl;
+    pout() << "driver::write_ebis" << endl;
   }
 
   const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
@@ -242,10 +242,10 @@ void plasma_engine::write_ebis(){
   }
 }
 
-void plasma_engine::get_geom_tags(){
-  CH_TIME("plasma_engine::get_geom_tags");
+void driver::get_geom_tags(){
+  CH_TIME("driver::get_geom_tags");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::get_geom_tags" << endl;
+    pout() << "driver::get_geom_tags" << endl;
   }
 
   const int maxdepth = m_amr->get_max_amr_depth();
@@ -342,7 +342,7 @@ void plasma_engine::get_geom_tags(){
   }
 }
 
-void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
+void driver::get_loads_and_boxes(long long& a_myPoints,
 					long long& a_myPointsGhosts,
 					long long& a_myBoxes,
 					long long& a_totalPoints,
@@ -354,9 +354,9 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
 					Vector<long long>& a_total_level_points,
 					const int& a_finestLevel,
 					const Vector<DisjointBoxLayout>& a_grids){
-  CH_TIME("plasma_engine::get_loads_and_boxes");
+  CH_TIME("driver::get_loads_and_boxes");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::get_loads_and_boxes" << endl;
+    pout() << "driver::get_loads_and_boxes" << endl;
   }
 
   a_myPoints          = 0;
@@ -425,10 +425,10 @@ void plasma_engine::get_loads_and_boxes(long long& a_myPoints,
   }
 }
 
-void plasma_engine::grid_report(){
-  CH_TIME("plasma_engine::grid_report");
+void driver::grid_report(){
+  CH_TIME("driver::grid_report");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::grid_report" << endl;
+    pout() << "driver::grid_report" << endl;
   }
 
   pout() << endl;
@@ -502,7 +502,7 @@ void plasma_engine::grid_report(){
   // Write a report
   
   pout() << "-----------------------------------------------------------------------" << endl
-	 << "plasma_engine::Grid report - timestep = " << m_step << endl
+	 << "driver::Grid report - timestep = " << m_step << endl
 	 << "\t\t\t        Finest level           = " << finest_level << endl
 	 << "\t\t\t        Finest domain          = " << finestBox.size()[0] << " x " << finestBox.size()[1] <<
 #if CH_SPACEDIM==2
@@ -541,11 +541,11 @@ void plasma_engine::grid_report(){
   pout() << endl;
 }
 
-void plasma_engine::memory_report(const memory_report_mode::which_mode a_mode){
+void driver::memory_report(const memory_report_mode::which_mode a_mode){
 #ifdef CH_USE_MEMORY_TRACKING
-  CH_TIME("plasma_engine::grid_report");
+  CH_TIME("driver::grid_report");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::grid_report" << endl;
+    pout() << "driver::grid_report" << endl;
   }
 
   if(a_mode == memory_report_mode::overall){
@@ -561,10 +561,10 @@ void plasma_engine::memory_report(const memory_report_mode::which_mode a_mode){
 #endif
 }
 
-void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
-  CH_TIME("plasma_engine::read_checkpoint_file");
+void driver::read_checkpoint_file(const std::string& a_restart_file){
+  CH_TIME("driver::read_checkpoint_file");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::read_checkpoint_file" << endl;
+    pout() << "driver::read_checkpoint_file" << endl;
   }
 
   // Reference to all solvers
@@ -588,7 +588,7 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
 
   // Abort if base resolution has changed. 
   if(!coarsest_dx == m_amr->get_dx()[0]){
-    MayDay::Abort("plasma_engine::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
+    MayDay::Abort("driver::read_checkpoint_file - coarsest_dx != dx[0], did you change the base level resolution?!?");
   }
 
   // Read in grids. If the file has no grids we must abort. 
@@ -599,7 +599,7 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
     const int status = read(handle_in, boxes[lvl]);
     
     if(status != 0) {
-      MayDay::Error("plasma_engine::read_checkpoint_file - file has no grids");
+      MayDay::Error("driver::read_checkpoint_file - file has no grids");
     }
   }
 
@@ -667,10 +667,10 @@ void plasma_engine::read_checkpoint_file(const std::string& a_restart_file){
   handle_in.close();
 }
 
-void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data){
-  CH_TIME("plasma_engine::regrid");
+void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial_data){
+  CH_TIME("driver::regrid");
   if(m_verbosity > 2){
-    pout() << "plasma_engine::regrid" << endl;
+    pout() << "driver::regrid" << endl;
   }
 
   // We need to be careful with memory allocations here. Therefore we do:
@@ -686,7 +686,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   // 5.  Cache solver states
   // 6.  Deallocate internal storage for solver. This should free up a bunch of memory. 
   // 7.  Regrid amr_mesh - this shouldn't cause any extra memory issues
-  // 8.  Regrid plasma_engine - this
+  // 8.  Regrid driver - this
   // 9.  Regrid the cell tagger. I'm not explicitly releasing storage from here since it's so small.
   // 10. Solve elliptic equations and fill solvers
 
@@ -706,7 +706,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
     }
 
     if(m_verbosity > 1){
-      pout() << "\nplasma_engine::regrid - Didn't find any new cell tags. Skipping the regrid step\n" << endl;
+      pout() << "\ndriver::regrid - Didn't find any new cell tags. Skipping the regrid step\n" << endl;
     }
     return;
   }
@@ -719,7 +719,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   m_timestepper->cache_internals();      // Cache stuff necessary that are necesary for regridding the time stepper
   m_timestepper->deallocate_internals(); // Deallocate internal storage for the time stepper.
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
-  this->deallocate_internals();          // Deallocate internal storage for plasma_engine
+  this->deallocate_internals();          // Deallocate internal storage for driver
 
   m_timestepper->cache_states();                // Cache solver states
   m_timestepper->deallocate_solver_internals(); // Deallocate solver internals
@@ -733,7 +733,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   const int new_finest_level = m_amr->get_finest_level();
-  this->regrid_internals(old_finest_level, new_finest_level);                  // Regrid internals for plasma_engine
+  this->regrid_internals(old_finest_level, new_finest_level);                  // Regrid internals for driver
   m_timestepper->regrid_solvers(a_lmin, old_finest_level, new_finest_level);   // Regrid solvers
   m_timestepper->allocate_internals();                                         // Allocate internal storage for time_stepper
   m_timestepper->regrid_internals(a_lmin, old_finest_level, new_finest_level); // Regrid internal storage for time_stepper
@@ -750,7 +750,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   
   if(!converged){ // If we don't converge, try new solver settings
     if(m_verbosity > 0){
-      pout() << "plasma_engine::regrid - Poisson solver failed to converge. Trying to auto-tune new settings." << endl;
+      pout() << "driver::regrid - Poisson solver failed to converge. Trying to auto-tune new settings." << endl;
     }
 	  
     RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
@@ -759,7 +759,7 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
 
     if(!converged){
       if(m_verbosity > 0){
-	pout() << "plasma_engine::regrid - Poisson solver fails to converge" << endl;
+	pout() << "driver::regrid - Poisson solver fails to converge" << endl;
       }
     }
   }
@@ -800,10 +800,10 @@ void plasma_engine::regrid(const int a_lmin, const int a_lmax, const bool a_use_
   }
 }
 
-void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_new_finest_level){
-  CH_TIME("plasma_engine::regrid_internals");
+void driver::regrid_internals(const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("driver::regrid_internals");
   if(m_verbosity > 2){
-    pout() << "plasma_engine::regrid_internals" << endl;
+    pout() << "driver::regrid_internals" << endl;
   }
 
   this->allocate_internals();
@@ -836,15 +836,15 @@ void plasma_engine::regrid_internals(const int a_old_finest_level, const int a_n
   }
 }
 
-void plasma_engine::regrid_report(const Real a_total_time,
+void driver::regrid_report(const Real a_total_time,
 				  const Real a_tag_time,
 				  const Real a_base_regrid_time,
 				  const Real a_solver_regrid_time,
 				  const Real a_elliptic_solve_time,
 				  const Real a_solver_filling_time){
-  CH_TIME("plasma_engine::regrid_report");
+  CH_TIME("driver::regrid_report");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::regrid_report" << endl;
+    pout() << "driver::regrid_report" << endl;
   }
 
   const Real elapsed    = a_total_time;
@@ -861,7 +861,7 @@ void plasma_engine::regrid_report(const Real a_total_time,
 	  elapsed_ms);
 
   pout() << "-----------------------------------------------------------------------" << endl
-	 << "plasma_engine::regrid_report breakdown - Time step #" << m_step << endl
+	 << "driver::regrid_report breakdown - Time step #" << m_step << endl
 	 << "\t\t\t" << "Total regrid time : " << metrics << endl
 	 << "\t\t\t" << "Cell tagging      : " << 100.*(a_tag_time/a_total_time) << "%" << endl
     	 << "\t\t\t" << "Base regrid       : " << 100.*(a_base_regrid_time/a_total_time) << "%" << endl
@@ -871,19 +871,19 @@ void plasma_engine::regrid_report(const Real a_total_time,
 	 << "-----------------------------------------------------------------------" << endl;
 }
 
-void plasma_engine::run(const Real a_start_time, const Real a_end_time, const int a_max_steps){
-  CH_TIME("plasma_engine::run");
+void driver::run(const Real a_start_time, const Real a_end_time, const int a_max_steps){
+  CH_TIME("driver::run");
   if(m_verbosity > 1){
-    pout() << "plasma_engine::run" << endl;
+    pout() << "driver::run" << endl;
   }
 
   if(m_verbosity > 0){
     pout() << "=================================" << endl;
     if(!m_restart){
-      pout() << "plasma_engine::run -- starting run" << endl;
+      pout() << "driver::run -- starting run" << endl;
     }
     else{
-      pout() << "plasma_engine::run -- restarting run" << endl;
+      pout() << "driver::run -- restarting run" << endl;
     }
   }
 
@@ -991,7 +991,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 	this->write_checkpoint_file();
 #endif
 
-	MayDay::Abort("plasma_engine::run - the time step became too small");
+	MayDay::Abort("driver::run - the time step became too small");
       }
 
       // Last time step can be smaller than m_dt so that we end on a_end_time
@@ -1035,7 +1035,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 #ifdef CH_USE_HDF5
       if(m_step%m_plot_interval == 0 && m_plot_interval > 0 || last_step == true && m_plot_interval > 0){
 	if(m_verbosity > 2){
-	  pout() << "plasma_engine::run -- Writing plot file" << endl;
+	  pout() << "driver::run -- Writing plot file" << endl;
 	}
 	this->write_memory_usage();
 	this->write_plot_file();
@@ -1044,7 +1044,7 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
       // Write checkpoint file
       if(m_step % m_chk_interval == 0 && m_chk_interval > 0 || last_step == true && m_chk_interval > 0){
 	if(m_verbosity > 2){
-	  pout() << "plasma_engine::run -- Writing checkpoint file" << endl;
+	  pout() << "driver::run -- Writing checkpoint file" << endl;
 	}
 	this->write_checkpoint_file();
       }
@@ -1067,15 +1067,15 @@ void plasma_engine::run(const Real a_start_time, const Real a_end_time, const in
 
   if(m_verbosity > 0){
     pout() << "==================================" << endl;
-    pout() << "plasma_engine::run -- ending run  " << endl;
+    pout() << "driver::run -- ending run  " << endl;
     pout() << "==================================" << endl;
   }
 }
 
-void plasma_engine::setup_and_run(){
-  CH_TIME("plasma_engine::setup_and_run");
+void driver::setup_and_run(){
+  CH_TIME("driver::setup_and_run");
   if(m_verbosity > 0){
-    pout() << "plasma_engine::setup_and_run" << endl;
+    pout() << "driver::setup_and_run" << endl;
   }
 
   char iter_str[100];
@@ -1089,10 +1089,10 @@ void plasma_engine::setup_and_run(){
   }
 }
 
-void plasma_engine::setup_poisson_only(){
-  CH_TIME("plasma_engine::setup_poisson_only");
+void driver::setup_poisson_only(){
+  CH_TIME("driver::setup_poisson_only");
   if(m_verbosity > 0){
-    pout() << "plasma_engine::setup_poisson_only" << endl;
+    pout() << "driver::setup_poisson_only" << endl;
   }
 
   this->sanity_check();                                    // Sanity check before doing anything expensive
@@ -1177,40 +1177,40 @@ void plasma_engine::setup_poisson_only(){
 
   if(m_verbosity > 0){
     pout() << "=========================================" << endl;
-    pout() << "plasma_engine::setup_poisson_only -- done" << endl;
+    pout() << "driver::setup_poisson_only -- done" << endl;
     pout() << "=========================================" << endl;
   }
 }
 
-void plasma_engine::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("plasma_engine::set_computational_geometry");
+void driver::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
+  CH_TIME("driver::set_computational_geometry");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_computational_geometry" << endl;
+    pout() << "driver::set_computational_geometry" << endl;
   }
   m_compgeom = a_compgeom;
   m_mfis     = a_compgeom->get_mfis();
 }
 
-void plasma_engine::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
-  CH_TIME("plasma_engine::set_plasma_kinetics");
+void driver::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
+  CH_TIME("driver::set_plasma_kinetics");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_plasma_kinetics" << endl;
+    pout() << "driver::set_plasma_kinetics" << endl;
   }
   m_plaskin = a_plaskin;
 }
 
-void plasma_engine::set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper){
-  CH_TIME("plasma_engine::set_time_stepper");
+void driver::set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper){
+  CH_TIME("driver::set_time_stepper");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_time_stepper" << endl;
+    pout() << "driver::set_time_stepper" << endl;
   }
   m_timestepper = a_timestepper;
 }
 
-void plasma_engine::set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger){
-  CH_TIME("plasma_engine::set_cell_tagger");
+void driver::set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagger){
+  CH_TIME("driver::set_cell_tagger");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_cell_tagger" << endl;
+    pout() << "driver::set_cell_tagger" << endl;
   }
 
   m_celltagger = a_celltagger;
@@ -1219,23 +1219,23 @@ void plasma_engine::set_cell_tagger(const RefCountedPtr<cell_tagger>& a_celltagg
   }
 }
 
-void plasma_engine::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
-  CH_TIME("plasma_engine::set_geo_coarsen");
+void driver::set_geo_coarsen(const RefCountedPtr<geo_coarsener>& a_geocoarsen){
+  CH_TIME("driver::set_geo_coarsen");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_geo_coarsen" << endl;
+    pout() << "driver::set_geo_coarsen" << endl;
   }
   m_geocoarsen = a_geocoarsen;
 }
 
-void plasma_engine::set_geom_refinement_depth(const int a_depth1,
+void driver::set_geom_refinement_depth(const int a_depth1,
 					      const int a_depth2,
 					      const int a_depth3,
 					      const int a_depth4,
 					      const int a_depth5,
 					      const int a_depth6){
-  CH_TIME("plasma_engine::set_geom_refinement_depth(full");
+  CH_TIME("driver::set_geom_refinement_depth(full");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_geom_refinement_depth(full)" << endl;
+    pout() << "driver::set_geom_refinement_depth(full)" << endl;
   }
   
   const int max_depth = m_amr->get_max_amr_depth();
@@ -1257,13 +1257,13 @@ void plasma_engine::set_geom_refinement_depth(const int a_depth1,
   m_geom_tag_depth = Max(m_geom_tag_depth, a_depth6);
 }
 
-void plasma_engine::parse_geometry_generation(){
-  CH_TIME("plasma_engine::parse_geometry_generation");
+void driver::parse_geometry_generation(){
+  CH_TIME("driver::parse_geometry_generation");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_geometry_generation" << endl;
+    pout() << "driver::parse_geometry_generation" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("geometry_generation", m_geometry_generation);
   pp.get("geometry_scan_level", m_geo_scan_level);
   
@@ -1275,24 +1275,24 @@ void plasma_engine::parse_geometry_generation(){
   else if(m_geometry_generation == "chombo"){
   }
   else{
-    MayDay::Abort("plasma_engine:parse_geometry_generation - unsupported argument requested");
+    MayDay::Abort("driver:parse_geometry_generation - unsupported argument requested");
   }
 }
 
-void plasma_engine::parse_verbosity(){
-  CH_TIME("plasma_engine::parse_verbosity");
+void driver::parse_verbosity(){
+  CH_TIME("driver::parse_verbosity");
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("verbosity", m_verbosity);
 }
 
-void plasma_engine::parse_regrid(){
-  CH_TIME("plasma_engine::parse_regrid");
+void driver::parse_regrid(){
+  CH_TIME("driver::parse_regrid");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_regrid" << endl;
+    pout() << "driver::parse_regrid" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
 
   std::string str;
   pp.get("regrid_interval", m_regrid_interval);
@@ -1300,13 +1300,13 @@ void plasma_engine::parse_regrid(){
   pp.get("recursive_regrid", str); m_recursive_regrid = (str == "true") ? true : false;
 }
 
-void plasma_engine::parse_restart(){
-  CH_TIME("plasma_engine::parse_restart");
+void driver::parse_restart(){
+  CH_TIME("driver::parse_restart");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_restart" << endl;
+    pout() << "driver::parse_restart" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
 
   // Get restart step
   pp.get("restart", m_restart_step); // Get restart step
@@ -1326,14 +1326,14 @@ void plasma_engine::parse_restart(){
   }
 }
 
-void plasma_engine::parse_memrep(){
-  CH_TIME("plasma_engine::parse_memrep");
+void driver::parse_memrep(){
+  CH_TIME("driver::parse_memrep");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_memrep" << endl;
+    pout() << "driver::parse_memrep" << endl;
   }
 
   std::string str;
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.query("memory_report_mode", str);
   if(str == "overall"){
     m_memory_mode = memory_report_mode::overall;
@@ -1346,13 +1346,13 @@ void plasma_engine::parse_memrep(){
   }
 }
 
-void plasma_engine::parse_output_directory(){
-  CH_TIME("plasma_engine::parse_output_directory");
+void driver::parse_output_directory(){
+  CH_TIME("driver::parse_output_directory");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_output_directory" << endl;
+    pout() << "driver::parse_output_directory" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("output_directory", m_output_dir);
 
   // If directory does not exist, create it
@@ -1363,65 +1363,65 @@ void plasma_engine::parse_output_directory(){
     cmd = "mkdir -p " + m_output_dir;
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "plasma_engine::set_output_directory - master could not create directory" << std::endl;
+      std::cout << "driver::set_output_directory - master could not create directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_output_dir + "/plt";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "plasma_engine::set_output_directory - master could not create plot directory" << std::endl;
+      std::cout << "driver::set_output_directory - master could not create plot directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_output_dir + "/geo";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "plasma_engine::set_output_directory - master could not create geo directory" << std::endl;
+      std::cout << "driver::set_output_directory - master could not create geo directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_output_dir + "/chk";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "plasma_engine::set_output_directory - master could not create checkpoint directory" << std::endl;
+      std::cout << "driver::set_output_directory - master could not create checkpoint directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_output_dir + "/mpi";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "plasma_engine::set_output_directory - master could not create proc directory" << std::endl;
+      std::cout << "driver::set_output_directory - master could not create proc directory" << std::endl;
     }    
   }
   
   MPI_Barrier(Chombo_MPI::comm);
   if(success != 0){
-    MayDay::Abort("plasma_engine::set_output_directory - could not create directories for output");
+    MayDay::Abort("driver::set_output_directory - could not create directories for output");
   }
 }
 
-void plasma_engine::parse_output_file_names(){
-  CH_TIME("plasma_engine::set_output_names");
+void driver::parse_output_file_names(){
+  CH_TIME("driver::set_output_names");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_output_names" << endl;
+    pout() << "driver::set_output_names" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("output_names", m_output_names);
 }
 
-void plasma_engine::parse_output_intervals(){
-  CH_TIME("plasma_engine::set_plot_interval");
+void driver::parse_output_intervals(){
+  CH_TIME("driver::set_plot_interval");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_plot_interval" << endl;
+    pout() << "driver::set_plot_interval" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("plot_interval", m_plot_interval);
   pp.get("checkpoint_interval", m_chk_interval);
 }
 
-void plasma_engine::parse_geo_refinement(){
-  CH_TIME("plasma_engine::set_geom_refinement_depth");
+void driver::parse_geo_refinement(){
+  CH_TIME("driver::set_geom_refinement_depth");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_geom_refinement_depth" << endl;
+    pout() << "driver::set_geom_refinement_depth" << endl;
   }
 
   const int max_depth = m_amr->get_max_amr_depth();
@@ -1435,7 +1435,7 @@ void plasma_engine::parse_geo_refinement(){
   int depth6    = depth;
 
   { // Get parameter from input script
-    ParmParse pp("plasma_engine");
+    ParmParse pp("driver");
     pp.get("refine_geometry", depth);
     depth  = (depth < 0) ? max_depth : depth;
     depth1 = depth;
@@ -1447,7 +1447,7 @@ void plasma_engine::parse_geo_refinement(){
   }
 
   { // Get fine controls from input script
-    ParmParse pp("plasma_engine");
+    ParmParse pp("driver");
     pp.get("refine_electrodes",               depth1);
     pp.get("refine_dielectrics",              depth2);
     pp.get("refine_electrode_gas_interface",  depth3);
@@ -1466,27 +1466,27 @@ void plasma_engine::parse_geo_refinement(){
   set_geom_refinement_depth(depth1, depth2, depth3, depth4, depth5, depth6);
 }
 
-void plasma_engine::parse_num_plot_ghost(){
-  CH_TIME("plasma_engine::parse_num_plot_ghost");
+void driver::parse_num_plot_ghost(){
+  CH_TIME("driver::parse_num_plot_ghost");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_num_plot_ghost" << endl;
+    pout() << "driver::parse_num_plot_ghost" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("num_plot_ghost", m_num_plot_ghost);
 
   m_num_plot_ghost = (m_num_plot_ghost < 0) ? 0 : m_num_plot_ghost;
   m_num_plot_ghost = (m_num_plot_ghost > 3) ? 3 : m_num_plot_ghost;
 }
 
-void plasma_engine::parse_coarsen(){
-    CH_TIME("plasma_engine::parse_coarsen");
+void driver::parse_coarsen(){
+    CH_TIME("driver::parse_coarsen");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_coarsen" << endl;
+    pout() << "driver::parse_coarsen" << endl;
   }
 
   std::string str;
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("allow_coarsening", str);
   if(str == "true"){
     m_allow_coarsen = true;
@@ -1496,26 +1496,26 @@ void plasma_engine::parse_coarsen(){
   }
 }
 
-void plasma_engine::parse_grow_tags(){
-  CH_TIME("plasma_engine::parse_grow_tags");
+void driver::parse_grow_tags(){
+  CH_TIME("driver::parse_grow_tags");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_grow_tags" << endl;
+    pout() << "driver::parse_grow_tags" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("grow_tags", m_grow_tags);
 
   m_grow_tags = Max(0, m_grow_tags);
 }
 
-void plasma_engine::parse_geom_only(){
-  CH_TIME("plasma_engine::parse_geom_only");
+void driver::parse_geom_only(){
+  CH_TIME("driver::parse_geom_only");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_geom_only" << endl;
+    pout() << "driver::parse_geom_only" << endl;
   }
 
   std::string str;
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("geometry_only", str);
   if(str == "true"){
     m_geometry_only = true;
@@ -1525,14 +1525,14 @@ void plasma_engine::parse_geom_only(){
   }
 }
 
-void plasma_engine::parse_ebis_memory_load_balance(){
-  CH_TIME("plasma_engine::parse_ebis_memory_load_balance");
+void driver::parse_ebis_memory_load_balance(){
+  CH_TIME("driver::parse_ebis_memory_load_balance");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_ebis_memory_load_balance" << endl;
+    pout() << "driver::parse_ebis_memory_load_balance" << endl;
   }
 
   std::string str;
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("ebis_memory_load_balance", str);
   if(str == "true"){
     m_ebis_memory_load_balance = true;
@@ -1542,17 +1542,17 @@ void plasma_engine::parse_ebis_memory_load_balance(){
   }
 }
 
-void plasma_engine::parse_write_ebis(){
-  CH_TIME("plasma_engine::parse_write_ebis");
+void driver::parse_write_ebis(){
+  CH_TIME("driver::parse_write_ebis");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_write_ebis" << endl;
+    pout() << "driver::parse_write_ebis" << endl;
   }
 
   m_ebis_gas_file = m_output_names + ".ebis.gas.hdf5";
   m_ebis_sol_file = m_output_names + ".ebis.sol.hdf5";
 
   std::string str;
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("write_ebis", str);
   if(str == "true"){
     m_write_ebis = true;
@@ -1562,14 +1562,14 @@ void plasma_engine::parse_write_ebis(){
   }
 }
 
-void plasma_engine::parse_read_ebis(){
-  CH_TIME("plasma_engine::parse_read_ebis");
+void driver::parse_read_ebis(){
+  CH_TIME("driver::parse_read_ebis");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_read_ebis" << endl;
+    pout() << "driver::parse_read_ebis" << endl;
   }
 
   std::string str;
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("read_ebis", str);
   if(str == "true"){
     m_read_ebis = true;
@@ -1579,31 +1579,31 @@ void plasma_engine::parse_read_ebis(){
   }
 }
 
-void plasma_engine::parse_simulation_time(){
-  CH_TIME("plasma_engine::parse_simulation_time");
+void driver::parse_simulation_time(){
+  CH_TIME("driver::parse_simulation_time");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_simulation_time" << endl;
+    pout() << "driver::parse_simulation_time" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("max_steps", m_max_steps);
   pp.get("start_time", m_start_time);
   pp.get("stop_time", m_stop_time);
 }
 
-void plasma_engine::parse_file_depth(){
-  CH_TIME("plasma_engine::parse_file_depth");
+void driver::parse_file_depth(){
+  CH_TIME("driver::parse_file_depth");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::parse_file_depth" << endl;
+    pout() << "driver::parse_file_depth" << endl;
   }
 
-  ParmParse pp("plasma_engine");
+  ParmParse pp("driver");
   pp.get("max_plot_depth", m_max_plot_depth);
   pp.get("max_chk_depth", m_max_chk_depth);
 }
 
-void plasma_engine::parse_plot_vars(){
-  ParmParse pp("plasma_engine");
+void driver::parse_plot_vars(){
+  ParmParse pp("driver");
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
@@ -1623,30 +1623,30 @@ void plasma_engine::parse_plot_vars(){
 
 
 
-void plasma_engine::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
-  CH_TIME("plasma_engine::set_amr");
+void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
+  CH_TIME("driver::set_amr");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_amr" << endl;
+    pout() << "driver::set_amr" << endl;
   }
 
   m_amr = a_amr;
   m_amr->set_mfis(m_compgeom->get_mfis());
 }
 
-void plasma_engine::set_potential(Real (*a_potential)(const Real a_time)){
-  CH_TIME("plasma_engine::set_potential");
+void driver::set_potential(Real (*a_potential)(const Real a_time)){
+  CH_TIME("driver::set_potential");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_potential" << endl;
+    pout() << "driver::set_potential" << endl;
   }
   
   m_potential     = a_potential;
   m_potential_set = true;
 }
 
-void plasma_engine::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("plasma_engine::set_poisson_wall_func(dir, side, func)");
+void driver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("driver::set_poisson_wall_func(dir, side, func)");
   if(m_verbosity > 4){
-    pout() << "plasma_engine::set_poisson_wall_func(dir, side, func)" << endl;
+    pout() << "driver::set_poisson_wall_func(dir, side, func)" << endl;
   }
 
   if(a_dir == 0){
@@ -1677,10 +1677,10 @@ void plasma_engine::set_poisson_wall_func(const int a_dir, const Side::LoHiSide 
 #endif
 }
 
-void plasma_engine::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("plasma_engine::set_poisson_wall_func(func)");
+void driver::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("driver::set_poisson_wall_func(func)");
   if(m_verbosity > 4){
-    pout() << "plasma_engine::set_poisson_wall_func(func)" << endl;
+    pout() << "driver::set_poisson_wall_func(func)" << endl;
   }
 
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -1690,10 +1690,10 @@ void plasma_engine::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
   }
 }
 
-void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
-  CH_TIME("plasma_engine::setup");
+void driver::setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
+  CH_TIME("driver::setup");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::setup" << endl;
+    pout() << "driver::setup" << endl;
   }
 
   if(m_geometry_only){
@@ -1715,10 +1715,10 @@ void plasma_engine::setup(const int a_init_regrids, const bool a_restart, const 
   }
 }
 
-void plasma_engine::setup_geometry_only(){
-  CH_TIME("plasma_engine::setup_geometry_only");
+void driver::setup_geometry_only(){
+  CH_TIME("driver::setup_geometry_only");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::setup_geometry_only" << endl;
+    pout() << "driver::setup_geometry_only" << endl;
   }
 
   this->sanity_check();
@@ -1760,10 +1760,10 @@ void plasma_engine::setup_geometry_only(){
   this->write_geometry();                             // Write geometry only
 }
 
-void plasma_engine::setup_fresh(const int a_init_regrids){
-  CH_TIME("plasma_engine::setup_fresh");
+void driver::setup_fresh(const int a_init_regrids){
+  CH_TIME("driver::setup_fresh");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::setup_fresh" << endl;
+    pout() << "driver::setup_fresh" << endl;
   }
 
   this->sanity_check();                                    // Sanity check before doing anything expensive
@@ -1868,7 +1868,7 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
     if(m_verbosity > 5){
-      pout() << "plasma_engine::initial_regrids" << endl;
+      pout() << "driver::initial_regrids" << endl;
     }
 
     const int lmin = 1;
@@ -1881,10 +1881,10 @@ void plasma_engine::setup_fresh(const int a_init_regrids){
   }
 }
 
-void plasma_engine::setup_for_restart(const int a_init_regrids, const std::string a_restart_file){
-  CH_TIME("plasma_engine::setup_for_restart");
+void driver::setup_for_restart(const int a_init_regrids, const std::string a_restart_file){
+  CH_TIME("driver::setup_for_restart");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::setup_for_restart" << endl;
+    pout() << "driver::setup_for_restart" << endl;
   }
 
   this->sanity_check();                                    // Sanity check before doing anything expensive
@@ -1947,7 +1947,7 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
     if(m_verbosity > 0){
-      pout() << "plasma_engine -- initial regrid # " << i + 1 << endl;
+      pout() << "driver -- initial regrid # " << i + 1 << endl;
     }
 
     const int lmin = 1;
@@ -1960,25 +1960,25 @@ void plasma_engine::setup_for_restart(const int a_init_regrids, const std::strin
   }
 }
 
-void plasma_engine::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
-  CH_TIME("plasma_engine::set_physical_domain");
+void driver::set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom){
+  CH_TIME("driver::set_physical_domain");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_physical_domain" << endl;
+    pout() << "driver::set_physical_domain" << endl;
   }
   m_physdom = a_physdom;
 }
 
-void plasma_engine::set_dump_mass(const bool a_dump_mass){
-  CH_TIME("plasma_engine::set_dump_mass");
+void driver::set_dump_mass(const bool a_dump_mass){
+  CH_TIME("driver::set_dump_mass");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_dump_mass" << endl;
+    pout() << "driver::set_dump_mass" << endl;
   }
 
   m_dump_mass = a_dump_mass;
 
   { // get parameter from input script
     std::string str;
-    ParmParse pp("plasma_engine");
+    ParmParse pp("driver");
     pp.query("dump_mass", str);
     if(str == "true"){
       m_dump_mass = true;
@@ -1989,17 +1989,17 @@ void plasma_engine::set_dump_mass(const bool a_dump_mass){
   }
 }
 
-void plasma_engine::set_dump_charge(const bool a_dump_charge){
-  CH_TIME("plasma_engine::set_dump_charge");
+void driver::set_dump_charge(const bool a_dump_charge){
+  CH_TIME("driver::set_dump_charge");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_dump_charge" << endl;
+    pout() << "driver::set_dump_charge" << endl;
   }
 
   m_dump_charge = a_dump_charge;
 
   { // get parameter from input script
     std::string str;
-    ParmParse pp("plasma_engine");
+    ParmParse pp("driver");
     pp.query("dump_charge", str);
     if(str == "true"){
       m_dump_charge = true;
@@ -2010,17 +2010,17 @@ void plasma_engine::set_dump_charge(const bool a_dump_charge){
   }
 }
 
-void plasma_engine::set_output_centroids(const bool a_output_centroids){
-  CH_TIME("plasma_engine::set_output_centroids");
+void driver::set_output_centroids(const bool a_output_centroids){
+  CH_TIME("driver::set_output_centroids");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::set_output_centroids" << endl;
+    pout() << "driver::set_output_centroids" << endl;
   }
 
   m_output_centroids = a_output_centroids;
 
   { // get parameter from input script
     std::string str;
-    ParmParse pp("plasma_engine");
+    ParmParse pp("driver");
     pp.query("output_centroids", str);
     if(str == "true"){
       m_output_centroids = true;
@@ -2033,20 +2033,20 @@ void plasma_engine::set_output_centroids(const bool a_output_centroids){
 
 
 
-void plasma_engine::sanity_check(){
-  CH_TIME("plasma_engine::sanity_check");
+void driver::sanity_check(){
+  CH_TIME("driver::sanity_check");
   if(m_verbosity > 4){
-    pout() << "plasma_engine::sanity_check" << endl;
+    pout() << "driver::sanity_check" << endl;
   }
 
   CH_assert(!m_timestepper.isNull());
   CH_assert(m_potential_set);
 }
 
-void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps){
-  CH_TIME("plasma_engine::step_report");
+void driver::step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps){
+  CH_TIME("driver::step_report");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::step_report" << endl;
+    pout() << "driver::step_report" << endl;
   }
 
   // Compute the maximum electric field
@@ -2072,7 +2072,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
     str = " (Restricted by diffusion)";
   }
   if(m_timecode == time_code::source){
-    MayDay::Abort("plasma_engine::step_report - shouldn't happen, source term has been taken out of the design");
+    MayDay::Abort("driver::step_report - shouldn't happen, source term has been taken out of the design");
     str = " (Restricted by source term)";
   }
   if(m_timecode == time_code::relaxation_time){
@@ -2084,7 +2084,7 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
   if(m_timecode == time_code::hardcap){
     str = " (Restricted by a hardcap)";
   }
-  pout() << "plasma_engine::Time step report -- Time step #" << m_step << endl
+  pout() << "driver::Time step report -- Time step #" << m_step << endl
 	 << "                                   Time  = " << m_time << endl
 	 << "                                   dt    = " << m_dt << str << endl
     	 << "                                   cfl   = " << m_dt/cfl_dt << endl
@@ -2214,10 +2214,10 @@ void plasma_engine::step_report(const Real a_start_time, const Real a_end_time, 
 
 }
 
-int plasma_engine::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
-  CH_TIME("plasma_engine::get_finest_tag_level");
+int driver::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
+  CH_TIME("driver::get_finest_tag_level");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::get_finest_tag_level" << endl;
+    pout() << "driver::get_finest_tag_level" << endl;
   }
 
   int finest_tag_level = -1;
@@ -2243,10 +2243,10 @@ int plasma_engine::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
   return finest_tag_level;
 }
 
-bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
-  CH_TIME("plasma_engine::tag_cells");
+bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
+  CH_TIME("driver::tag_cells");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::tag_cells" << endl;
+    pout() << "driver::tag_cells" << endl;
   }
 
   bool got_new_tags = false;
@@ -2305,10 +2305,10 @@ bool plasma_engine::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_
   return got_new_tags;
 }
 
-void plasma_engine::write_memory_usage(){
-  CH_TIME("plasma_engine::write_memory_usage");
+void driver::write_memory_usage(){
+  CH_TIME("driver::write_memory_usage");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_memory_usage" << endl;
+    pout() << "driver::write_memory_usage" << endl;
   }
 
   char file_char[1000];
@@ -2342,10 +2342,10 @@ void plasma_engine::write_memory_usage(){
   }
 }
 
-void plasma_engine::write_geometry(){
-  CH_TIME("plasma_engine::write_geometry");
+void driver::write_geometry(){
+  CH_TIME("driver::write_geometry");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_geometry" << endl;
+    pout() << "driver::write_geometry" << endl;
   }
 
   EBAMRCellData output;
@@ -2387,10 +2387,10 @@ void plasma_engine::write_geometry(){
 	      m_num_plot_ghost*IntVect::Unit);
 }
 
-void plasma_engine::write_plot_file(){
-  CH_TIME("plasma_engine::write_plot_file");
+void driver::write_plot_file(){
+  CH_TIME("driver::write_plot_file");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_plot_file" << endl;
+    pout() << "driver::write_plot_file" << endl;
   }
 
   // Handle to solvers
@@ -2417,7 +2417,7 @@ void plasma_engine::write_plot_file(){
   // Allocate storage
   Real t_assemble = -MPI_Wtime();
   if(m_verbosity >= 3){
-    pout() << "plasma_engine::write_plot_file - assembling data..." << endl;
+    pout() << "driver::write_plot_file - assembling data..." << endl;
   }
 
   EBAMRCellData output;
@@ -2478,7 +2478,7 @@ void plasma_engine::write_plot_file(){
 
   // Write HDF5 file
   if(m_verbosity >= 3){
-    pout() << "plasma_engine::write_plot_file - writing plot file..." << endl;
+    pout() << "driver::write_plot_file - writing plot file..." << endl;
   }
   Real t_write = -MPI_Wtime();
   writeEBHDF5(fname, 
@@ -2498,17 +2498,17 @@ void plasma_engine::write_plot_file(){
 
   const Real t_tot = t_write + t_assemble;
   if(m_verbosity >= 3){
-    pout() << "plasma_engine::write_plot_file - writing plot file... DONE!. " << endl
+    pout() << "driver::write_plot_file - writing plot file... DONE!. " << endl
       	   << "\t Total time    = " << t_tot << " seconds" << endl
 	   << "\t Assemble data = " << 100.*t_assemble/t_tot << "%" << endl
       	   << "\t Write time    = " << 100.*t_write/t_tot << "%" << endl;
   }
 }
 
-void plasma_engine::write_plot_data(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("plasma_engine::write_plot_data");
+void driver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("driver::write_plot_data");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_plot_data" << endl;
+    pout() << "driver::write_plot_data" << endl;
   }
 
   if(m_plot_tags)   write_tags(a_output, a_comp);
@@ -2517,10 +2517,10 @@ void plasma_engine::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   if(m_plot_J)      write_J(a_output, a_comp);
 }
 
-void plasma_engine::write_tags(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("plasma_engine::write_tags");
+void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("driver::write_tags");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_tags" << endl;
+    pout() << "driver::write_tags" << endl;
   }
 
   
@@ -2560,10 +2560,10 @@ void plasma_engine::write_tags(EBAMRCellData& a_output, int& a_comp){
   a_comp++;
 }
 
-void plasma_engine::write_tracer(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("plasma_engine::write_tracer");
+void driver::write_tracer(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("driver::write_tracer");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_tracer" << endl;
+    pout() << "driver::write_tracer" << endl;
   }
 
   if(!m_celltagger.isNull()){
@@ -2584,10 +2584,10 @@ void plasma_engine::write_tracer(EBAMRCellData& a_output, int& a_comp){
   }
 }
 
-void plasma_engine::write_ranks(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("plasma_engine::write_ranks");
+void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("driver::write_ranks");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_ranks" << endl;
+    pout() << "driver::write_ranks" << endl;
   }
 
   EBAMRCellData scratch;
@@ -2605,10 +2605,10 @@ void plasma_engine::write_ranks(EBAMRCellData& a_output, int& a_comp){
   a_comp++; 
 }
 
-void plasma_engine::write_J(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("plasma_engine::write_J");
+void driver::write_J(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("driver::write_J");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_J" << endl;
+    pout() << "driver::write_J" << endl;
   }
 
   // Allocates storage and computes J
@@ -2624,10 +2624,10 @@ void plasma_engine::write_J(EBAMRCellData& a_output, int& a_comp){
   a_comp += SpaceDim;
 }
 
-void plasma_engine::write_checkpoint_file(){
-  CH_TIME("plasma_engine::write_checkpoint_file");
+void driver::write_checkpoint_file(){
+  CH_TIME("driver::write_checkpoint_file");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_checkpoint_file" << endl;
+    pout() << "driver::write_checkpoint_file" << endl;
   }
   
   const int finest_level = m_amr->get_finest_level();
@@ -2668,7 +2668,7 @@ void plasma_engine::write_checkpoint_file(){
   // Write stuff level by level
   const Real t0 = MPI_Wtime();
   if(m_verbosity >= 3){
-    pout() << "plasma_engine::write_checkpoint_file - writing checkpoint file..." << endl;
+    pout() << "driver::write_checkpoint_file - writing checkpoint file..." << endl;
   }
   for (int lvl = 0; lvl <= finest_chk_level; lvl++){
     handle_out.setGroupToLevel(lvl);
@@ -2704,14 +2704,14 @@ void plasma_engine::write_checkpoint_file(){
     sig->write_checkpoint_level(handle_out, lvl);
     t_sig += MPI_Wtime();
 
-    // plasma_engine checkpoints its internal data
+    // driver checkpoints its internal data
     t_pla -= MPI_Wtime();
     write_checkpoint_level(handle_out, lvl);
     t_pla += MPI_Wtime();
   }
   if(m_verbosity >= 3){
     const Real t_tot = t_amr + t_cdr + t_rte + t_poi + t_sig + t_pla;
-    pout() << "plasma_engine::write_checkpoint_file - writing checkpoint file... DONE! " << endl
+    pout() << "driver::write_checkpoint_file - writing checkpoint file... DONE! " << endl
 	   << "\t Total time    = " << t_tot << " seconds" << endl
 	   << "\t AMR time      = " << t_amr*100./t_tot << "%" << endl
       	   << "\t CDR time      = " << t_cdr*100./t_tot << "%" << endl
@@ -2724,10 +2724,10 @@ void plasma_engine::write_checkpoint_file(){
   handle_out.close();
 }
 
-void plasma_engine::write_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("plasma_engine::write_checkpoint_level");
+void driver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("driver::write_checkpoint_level");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::write_checkpoint_level" << endl;
+    pout() << "driver::write_checkpoint_level" << endl;
   }
 
   // Create some scratch data = 0 which can grok
@@ -2758,10 +2758,10 @@ void plasma_engine::write_checkpoint_level(HDF5Handle& a_handle, const int a_lev
   write(a_handle, scratch, "tagged_cells");
 }
 
-void plasma_engine::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("plasma_engine::read_checkpoint_level");
+void driver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("driver::read_checkpoint_level");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::read_checkpoint_level" << endl;
+    pout() << "driver::read_checkpoint_level" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
@@ -2795,13 +2795,13 @@ void plasma_engine::read_checkpoint_level(HDF5Handle& a_handle, const int a_leve
   }
 }
 
-void plasma_engine::write_vector_data(HDF5HeaderData&     a_header,
+void driver::write_vector_data(HDF5HeaderData&     a_header,
 				      const Vector<Real>& a_data,
 				      const std::string   a_name,
 				      const int           a_elements){
-  CH_TIME("plasma_engine::write_vector_data");
+  CH_TIME("driver::write_vector_data");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::write_vector_data" << endl;
+    pout() << "driver::write_vector_data" << endl;
   }
 
   char step[100];
@@ -2815,13 +2815,13 @@ void plasma_engine::write_vector_data(HDF5HeaderData&     a_header,
   }
 }
 
-void plasma_engine::read_vector_data(HDF5HeaderData& a_header,
+void driver::read_vector_data(HDF5HeaderData& a_header,
 				     Vector<Real>&         a_data,
 				     const std::string     a_name,
 				     const int             a_elements){
-  CH_TIME("plasma_engine::read_vector_data");
+  CH_TIME("driver::read_vector_data");
   if(m_verbosity > 3){
-    pout() << "plasma_engine::read_vector_data" << endl;
+    pout() << "driver::read_vector_data" << endl;
   }
 
   char step[100];
@@ -2835,7 +2835,7 @@ void plasma_engine::read_vector_data(HDF5HeaderData& a_header,
   }
 }
 
-void plasma_engine::open_mass_dump_file(ofstream& a_file){
+void driver::open_mass_dump_file(ofstream& a_file){
   if(procID() == 0){
     const std::string prefix = m_output_dir + "/" + "mass_dump.txt";
     a_file.open(prefix);
@@ -2850,7 +2850,7 @@ void plasma_engine::open_mass_dump_file(ofstream& a_file){
   }
 }
 
-void plasma_engine::open_charge_dump_file(ofstream& a_file){
+void driver::open_charge_dump_file(ofstream& a_file){
   if(procID() == 0){
     const std::string prefix = m_output_dir + "/" + "charge_dump.txt";
     a_file.open(prefix);
@@ -2866,7 +2866,7 @@ void plasma_engine::open_charge_dump_file(ofstream& a_file){
   }
 }
 
-void plasma_engine::dump_mass(ofstream& a_file){
+void driver::dump_mass(ofstream& a_file){
   const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
   if(procID() == 0){
     a_file << m_step << "\t" << m_time;
@@ -2877,7 +2877,7 @@ void plasma_engine::dump_mass(ofstream& a_file){
   }
 }
 
-void plasma_engine::dump_charge(ofstream& a_file){
+void driver::dump_charge(ofstream& a_file){
   const Real surface_charge  = m_timestepper->get_sigma()->compute_charge();
   const Vector<Real> charges = m_timestepper->get_cdr()->compute_charge();
   if(procID() == 0){
@@ -2890,22 +2890,22 @@ void plasma_engine::dump_charge(ofstream& a_file){
   }
 }
 
-void plasma_engine::close_mass_dump_file(ofstream& a_file){
+void driver::close_mass_dump_file(ofstream& a_file){
   if(procID() == 0){
     a_file.close();
   }
 }
 
-void plasma_engine::close_charge_dump_file(ofstream& a_file){
+void driver::close_charge_dump_file(ofstream& a_file){
   if(procID() == 0){
     a_file.close();
   }
 }
 
-void plasma_engine::initialize_eed(){
-  CH_TIME("plasma_engine::initialize_eed");
+void driver::initialize_eed(){
+  CH_TIME("driver::initialize_eed");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::initialize_eed_" << endl;
+    pout() << "driver::initialize_eed_" << endl;
   }
 
   const int finest_level = m_amr->get_finest_level();
@@ -2950,10 +2950,10 @@ void plasma_engine::initialize_eed(){
   m_amr->interp_ghost(eed_density, phase::gas);
 }
 
-void plasma_engine::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
-  CH_TIME("plasma_engine::compute_norm");
+void driver::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
+  CH_TIME("driver::compute_norm");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::compute_norm" << endl;
+    pout() << "driver::compute_norm" << endl;
   }
 
   // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
@@ -3031,10 +3031,10 @@ void plasma_engine::compute_norm(std::string a_chk_coarse, std::string a_chk_fin
   handle_in.close();
 }
 
-void plasma_engine::compute_coarse_norm(const std::string a_chk_coarse, const std::string a_chk_fine, const int a_species){
-  CH_TIME("plasma_engine::compute_coarse_norm");
+void driver::compute_coarse_norm(const std::string a_chk_coarse, const std::string a_chk_fine, const int a_species){
+  CH_TIME("driver::compute_coarse_norm");
   if(m_verbosity > 5){
-    pout() << "plasma_engine::compute_coarse_norm" << endl;
+    pout() << "driver::compute_coarse_norm" << endl;
   }
 
   // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file

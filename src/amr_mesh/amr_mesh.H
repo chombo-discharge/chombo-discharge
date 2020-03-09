@@ -269,6 +269,11 @@ public:
   virtual void parse_load_balance();
 
   /*!
+    @brief Parse domain
+  */
+  virtual void parse_domain();
+
+  /*!
     @brief Set ghost cell interpolation type. Either piecewise linear or quadratic. 
   */
   virtual void parse_ghost_interpolation();
@@ -277,11 +282,6 @@ public:
     @brief Build domains
   */
   virtual void build_domains();
-
-  /*!
-    @brief Set the physical domain
-  */
-  virtual void set_physical_domain(const RefCountedPtr<physical_domain>& a_physdom);
 
   /*!
     @brief Parse the grid generation algorithm
@@ -493,6 +493,16 @@ public:
   virtual Real get_finest_dx();
 
   /*!
+    @brief Get origin
+  */
+  virtual RealVect get_prob_lo();
+
+  /*!
+    @brief Get high end
+  */
+  virtual RealVect get_prob_hi();
+
+  /*!
     @brief Get finest domain
   */
   virtual ProblemDomain get_finest_domain();
@@ -661,11 +671,6 @@ protected:
   RefCountedPtr<mfis> m_mfis;
 
   /*!
-    @brief Physical domain (needed for computing dx)
-  */
-  RefCountedPtr<physical_domain> m_physdom;
-
-  /*!
     @brief Load balance type
   */
   load_balance::which_balance m_which_balance;
@@ -699,6 +704,16 @@ protected:
     @brief Fill ratio
   */
   Real m_fill_ratio;
+
+  /*!
+    @brief Domain simulation corner
+  */
+  RealVect m_prob_lo;
+
+  /*!
+    @brief Domain simulation corner
+  */
+  RealVect m_prob_hi;
 
   /*!
     @brief Refinement ratio
