@@ -14,9 +14,8 @@ def write_template(args):
     optf.write(args.app_name + ".potential = 1\n")
     optf.write(args.app_name + ".basename  = pout\n")
     optf.write('\n')
-    options_files = [args.streamer_home + "/src/geometry/physical_domain.options", \
-                     args.streamer_home + "/src/amr_mesh/amr_mesh.options", \
-                     args.streamer_home + "/src/plasma_solver/plasma_engine.options", \
+    options_files = [args.streamer_home + "/src/amr_mesh/amr_mesh.options", \
+                     args.streamer_home + "/src/plasma_solver/driver.options", \
                      args.streamer_home + "/src/poisson_solver/" + args.poisson_solver + ".options",\
                      args.streamer_home + "/src/cdr_solver/" + args.cdr_solver + ".options",\
                      args.streamer_home + "/src/rte_solver/" + args.rte_solver + ".options",\

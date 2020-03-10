@@ -81,10 +81,9 @@ def write_template(args):
         mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "());\n")
     else:
         mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);\n")
-    mainf.write("  RefCountedPtr<physical_domain> physdom         = RefCountedPtr<physical_domain> (new physical_domain());\n")
     mainf.write("  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());\n")
     mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")
-    mainf.write("  RefCountedPtr<driver> engine                   = RefCountedPtr<driver> (new driver(physdom, compgeom, plaskin, timestepper, amr, tagger, geocoarsen));\n")
+    mainf.write("  RefCountedPtr<driver> engine                   = RefCountedPtr<driver> (new driver(compgeom, plaskin, timestepper, amr, tagger, geocoarsen));\n")
     mainf.write("\n")
 
     mainf.write("  // Create solver factories\n")
