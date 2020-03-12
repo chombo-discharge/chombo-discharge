@@ -94,8 +94,8 @@ template<int dim> void LSProblem<dim>::monoMaxMin(Real                   & a_max
 template<int dim> void LSProblem<dim>::computeBounds(const IndexTM<Real,dim>   & a_dx,
                                                      const CutCellMoments<dim> & a_ccm)
 {
-  m_lowerBound.assign(-HUGE);
-  m_upperBound.assign(HUGE);
+  m_lowerBound.assign(-HUGE_VAL);
+  m_upperBound.assign(HUGE_VAL);
 
   int nEBBounds = 0;
   if (m_degreeP == 0 && dim == 2) // || m_degreeP == 1)
@@ -146,7 +146,7 @@ template<int dim> void LSProblem<dim>::computeBounds(const IndexTM<Real,dim>   &
       int ndx = 0; // todo: guarantee there should be only one for (0,0)
       int variableNdx = ndx;
       m_lowerBound[variableNdx]=lobnd;
-      m_upperBound[variableNdx]=HUGE;
+      m_upperBound[variableNdx]=HUGE_VAL;
 
     }
 
