@@ -143,9 +143,9 @@ ConstrainedLS::LSResult ConstrainedLS::solveUnconstrained(Vector<Real>       & a
                                            const Vector<Real> & a_rhs)
 {
   Vector<Real>  lowBound(a_x.size());
-  lowBound.assign(-HUGE);
+  lowBound.assign(-HUGE_VAL);
   Vector<Real> highBound(a_x.size());
-  highBound.assign(HUGE);
+  highBound.assign(HUGE_VAL);
   return solveBoundConstrained(a_x,a_A,a_rhs,lowBound,highBound);
 }
 
@@ -221,11 +221,11 @@ ConstrainedLS::LSResult ConstrainedLS::solveBoundConstrained(Vector<Real>      &
         {
           x[k] = 0.0;
         }
-      else if (lowerBound[k] == -HUGE)
+      else if (lowerBound[k] == -HUGE_VAL)
         {
           x[k]=upperBound[k] - eps;
         }
-      else if (upperBound[k] == HUGE)
+      else if (upperBound[k] == HUGE_VAL)
         {
           x[k] = lowerBound[k] + eps;
         }
