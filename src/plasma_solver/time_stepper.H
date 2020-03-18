@@ -28,6 +28,7 @@ public:
 
   // New functions for driver
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const;
+  virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl);
 
   /*!
     @brief Constructor

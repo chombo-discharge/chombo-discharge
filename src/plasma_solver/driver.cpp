@@ -564,11 +564,6 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
     pout() << "driver::read_checkpoint_file" << endl;
   }
 
-  // Reference to all solvers
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
-  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  RefCountedPtr<sigma_solver>& sigma     = m_timestepper->get_sigma();
 
   // Read the header that was written by new_read_checkpoint_file
   HDF5Handle handle_in(a_restart_file, HDF5Handle::OPEN_RDONLY);
@@ -608,56 +603,19 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   m_timestepper->setup_solvers();  
 
   // Allocate internal stuff (e.g. space for tags)
-  this->allocate_internals();            
+  this->allocate_internals();
 
   // Go through level by level and have solvers extract their data
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     handle_in.setGroupToLevel(lvl);
 
-    // CDR solvers reads checkpointed data
-    if(m_restart_mode != restart_mode::surface_charge_only){
-      for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-	RefCountedPtr<cdr_solver>& solver = solver_it();
-	solver->read_checkpoint_level(handle_in, lvl);
-      }
-    }
-
-    // RTE solvers reads checkpointed data
-    for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-      RefCountedPtr<rte_solver>& solver = solver_it();
-      solver->read_checkpoint_level(handle_in, lvl);
-    }
-
-    // Read in sigma
-    if(m_restart_mode != restart_mode::volume_charge_only){
-      sigma->read_checkpoint_level(handle_in, lvl);
-    }
+    // time stepper reads in data
+    m_timestepper->read_checkpoint_data(handle_in, lvl);
 
     // Read in internal data
     read_checkpoint_level(handle_in, lvl);
   }
-  sigma->reset_cells(sigma->get_state());
-
-  // Synchronize cdr data
-  for (cdr_iterator solver_it = m_timestepper->get_cdr()->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-
-    m_amr->average_down(solver->get_state(), phase::gas);
-    m_amr->interp_ghost(solver->get_state(), phase::gas);
-  }
-
-  // Synchronize RTE data
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-
-    m_amr->average_down(solver->get_state(), phase::gas);
-    m_amr->interp_ghost(solver->get_state(), phase::gas);
-  }
-
-  // Synchronize Poisson data
-  m_amr->average_down(poisson->get_state());
-  m_amr->interp_ghost(poisson->get_state());
 
   // Close input file
   handle_in.close();

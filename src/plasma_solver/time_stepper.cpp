@@ -4952,3 +4952,23 @@ void time_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) 
   m_poisson->write_checkpoint_level(a_handle, a_lvl);
   m_sigma->write_checkpoint_level(a_handle, a_lvl);
 }
+
+void time_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
+  CH_TIME("driver::read_checkpoint_data");
+  if(m_verbosity > 3){
+    pout() << "driver::read_checkpoint_data" << endl;
+  }
+
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->read_checkpoint_level(a_handle, a_lvl);
+  }
+
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    solver->read_checkpoint_level(a_handle, a_lvl);
+  }
+
+  m_poisson->read_checkpoint_level(a_handle, a_lvl);
+  m_sigma->read_checkpoint_level(a_handle, a_lvl);
+}
