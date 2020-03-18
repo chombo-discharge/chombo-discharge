@@ -4972,3 +4972,81 @@ void time_stepper::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
   m_poisson->read_checkpoint_level(a_handle, a_lvl);
   m_sigma->read_checkpoint_level(a_handle, a_lvl);
 }
+
+int time_stepper::get_num_plot_vars() const{
+  CH_TIME("time_stepper::get_num_plot_vars");
+  if(m_verbosity > 3){
+    pout() << "time_stepper::get_num_plot_vars" << endl;
+  }
+  int ncomp = 0;
+  
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    ncomp += solver->get_num_plotvars();
+  }
+  
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    ncomp += solver->get_num_plotvars();
+  }
+
+  ncomp += m_poisson->get_num_plotvars();
+  ncomp += m_sigma->get_num_plotvars();
+
+  return ncomp;
+}
+
+void time_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+  CH_TIME("time_stepper::write_plot_data");
+  if(m_verbosity > 3){
+    pout() << "time_stepper::write_plot_data" << endl;
+  }
+
+    // Poisson solver copies over its output data
+  a_plotvar_names.append(m_poisson->get_plotvar_names());
+  m_poisson->write_plot_data(a_output, a_icomp);
+
+  // Surface charge solver writes
+  a_plotvar_names.append(m_sigma->get_plotvar_names());
+  m_sigma->write_plot_data(a_output, a_icomp);
+
+  // CDR solvers copy their output data
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    a_plotvar_names.append(solver->get_plotvar_names());
+    solver->write_plot_data(a_output, a_icomp);
+
+  }
+
+  // RTE solvers copy their output data
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    a_plotvar_names.append(solver->get_plotvar_names());
+    solver->write_plot_data(a_output, a_icomp);
+  }
+}
+
+void time_stepper::post_regrid(){
+  CH_TIME("time_stepper::post_regrid");
+  if(m_verbosity > 3){
+    pout() << "time_stepper::post_regrid" << endl;
+  }
+
+  // Solve the Poisson equation
+  bool converged = this->solve_poisson();
+  
+  if(!converged){ // If we don't converge, try new solver settings
+    if(m_verbosity > 0){
+      pout() << "driver::regrid - Poisson solver failed to converge. Trying to auto-tune new settings." << endl;
+    }
+	  
+    m_poisson->auto_tune();
+    converged = this->solve_poisson();
+
+    if(!converged){
+      if(m_verbosity > 0){
+	pout() << "time_stepper::post_regrid - Poisson solver fails to converge" << endl;
+      }
+    }
+  }
+}

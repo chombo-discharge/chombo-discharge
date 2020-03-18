@@ -700,23 +700,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   const Real solver_regrid = MPI_Wtime(); // Timer
 
   // Solve the elliptic parts
-  bool converged = m_timestepper->solve_poisson();
-  
-  if(!converged){ // If we don't converge, try new solver settings
-    if(m_verbosity > 0){
-      pout() << "driver::regrid - Poisson solver failed to converge. Trying to auto-tune new settings." << endl;
-    }
-	  
-    RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
-    poisson->auto_tune();
-    converged = m_timestepper->solve_poisson();
-
-    if(!converged){
-      if(m_verbosity > 0){
-	pout() << "driver::regrid - Poisson solver fails to converge" << endl;
-      }
-    }
-  }
+  m_timestepper->post_regrid();
 
 
   const Real elliptic_solve = MPI_Wtime(); // Elliptic solve time
@@ -2336,81 +2320,46 @@ void driver::write_plot_file(){
     pout() << "driver::write_plot_file" << endl;
   }
 
-  // Handle to solvers
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
-  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  RefCountedPtr<sigma_solver>& sig       = m_timestepper->get_sigma();
-
-  // Get total number of components for output
-  int ncomp = 0;
-  ncomp += poisson->get_num_plotvars();
-  ncomp += sig->get_num_plotvars();
-  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    ncomp += solver->get_num_plotvars();
-  }
-  for (rte_iterator solver_it = rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    ncomp += solver->get_num_plotvars();
-  }
-  ncomp += get_num_plotvars();
-  
-
-  // Allocate storage
-  Real t_assemble = -MPI_Wtime();
-  if(m_verbosity >= 3){
-    pout() << "driver::write_plot_file - assembling data..." << endl;
-  }
-
-  EBAMRCellData output;
-  m_amr->allocate(output, phase::gas, ncomp);
-  data_ops::set_value(output, 0.0);
-
-
-  Vector<std::string> names; // Names for output variables
-  int icomp = 0;             // Used as reference for output components
-
-  // Poisson solver copies over its output data
-  names.append(poisson->get_plotvar_names());
-  poisson->write_plot_data(output, icomp);
-
-  // Surface charge solver writes
-  names.append(sig->get_plotvar_names());
-  sig->write_plot_data(output, icomp);
-
-  // CDR solvers copy their output data
-  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    names.append(solver->get_plotvar_names());
-    solver->write_plot_data(output, icomp);
-
-  }
-
-  // RTE solvers copy their output data
-  for (rte_iterator solver_it = rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    names.append(solver->get_plotvar_names());
-    solver->write_plot_data(output, icomp);
-  }
-
-  names.append(get_plotvar_names());
-  write_plot_data(output, icomp);
-  t_assemble += MPI_Wtime();
-									       
-  
   // Filename
   char file_char[1000];
   const std::string prefix = m_output_dir + "/plt/" + m_output_names;
   sprintf(file_char, "%s.step%07d.%dd.hdf5", prefix.c_str(), m_step, SpaceDim);
   string fname(file_char);
 
-  // Write data file
+  // Output file
+  EBAMRCellData output;
+
+  // Names for output variables  
+  Vector<std::string> names(0);
+
+  // Get total number of components for output
+  int ncomp = m_timestepper->get_num_plot_vars();
+  ncomp += this->get_num_plotvars();
+
+  // Allocate storage
+  m_amr->allocate(output, phase::gas, ncomp);
+  data_ops::set_value(output, 0.0);
+
+  // Assemble data
+  int icomp = 0;             // Used as reference for output components
+  Real t_assemble = -MPI_Wtime();
+  if(m_verbosity >= 3){
+    pout() << "driver::write_plot_file - assembling data..." << endl;
+  }
+  
+  // Time stepper writes its data
+  m_timestepper->write_plot_data(output, names, icomp);
+
+  // Write internal data
+  names.append(this->get_plotvar_names());
+  this->write_plot_data(output, icomp);
+  t_assemble += MPI_Wtime();
+									       
+  // Data file aliasing, because Chombo IO wants dumb pointers. 
   Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->get_finest_level());
   m_amr->alias(output_ptr, output);
 
-
-  // Restrict plot depth
+  // Restrict plot depth if need be
   int plot_depth;
   if(m_max_plot_depth < 0){
     plot_depth = m_amr->get_finest_level();

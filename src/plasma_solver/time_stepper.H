@@ -29,6 +29,9 @@ public:
   // New functions for driver
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const;
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl);
+  virtual int get_num_plot_vars() const;
+  virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
+  virtual void post_regrid();
 
   /*!
     @brief Constructor
