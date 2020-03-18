@@ -49,8 +49,8 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   }
   
   set_computational_geometry(a_compgeom);              // Set computational geometry
-  set_plasma_kinetics(a_plaskin);                      // Set plasma kinetics
   set_time_stepper(a_timestepper);                     // Set time stepper
+  set_plasma_kinetics(a_plaskin);                      // Set plasma kinetics
   set_amr(a_amr);                                      // Set amr
   set_cell_tagger(a_celltagger);                       // Set cell tagger
   set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
