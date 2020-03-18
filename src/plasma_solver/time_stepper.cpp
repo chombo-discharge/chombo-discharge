@@ -4929,3 +4929,11 @@ RefCountedPtr<rte_layout>& time_stepper::get_rte(){
 RefCountedPtr<sigma_solver>& time_stepper::get_sigma(){
   return m_sigma;
 }
+
+// New functions for driver
+void time_stepper::write_checkpoint_data(HDF5Handle& a_file) const{
+  CH_TIME("driver::write_checkpoint_data");
+  if(m_verbosity > 3){
+    pout() << "driver::write_checkpoint_data" << endl;
+  }
+}

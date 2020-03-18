@@ -2622,10 +2622,7 @@ void driver::write_checkpoint_file(){
     finest_chk_level = finest_level;
   }
   
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
-  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  RefCountedPtr<sigma_solver>& sig       = m_timestepper->get_sigma();
+
 
   HDF5HeaderData header;
   header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
@@ -2643,6 +2640,11 @@ void driver::write_checkpoint_file(){
   // Output file
   HDF5Handle handle_out(str, HDF5Handle::CREATE);
   header.writeToFile(handle_out);
+
+  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
+  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
+  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
+  RefCountedPtr<sigma_solver>& sig       = m_timestepper->get_sigma();
 
   Real t_amr = 0.0;
   Real t_cdr = 0.0;

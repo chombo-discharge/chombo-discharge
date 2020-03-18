@@ -27,8 +27,6 @@
 */
 class driver {
 public:
-
-
   
   /*!
     @brief Full constructor. 

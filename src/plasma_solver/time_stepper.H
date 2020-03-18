@@ -16,14 +16,18 @@
 #include "rte_layout.H"
 #include "poisson_solver.H"
 #include "sigma_solver.H"
+#include "time_integrator.H"
 
 #include <RealVect.H>
 
 /*!
   @brief Abstract class for evolving plasma equations in time
 */
-class time_stepper {
+class time_stepper : public time_integrator {
 public:
+
+  // New functions for driver
+  virtual void write_checkpoint_data(HDF5Handle& a_file) const;
 
   /*!
     @brief Constructor
