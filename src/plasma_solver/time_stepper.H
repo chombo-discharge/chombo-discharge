@@ -27,7 +27,7 @@ class time_stepper : public time_integrator {
 public:
 
   // New functions for driver
-  virtual void write_checkpoint_data(HDF5Handle& a_file) const;
+  virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const;
 
   /*!
     @brief Constructor

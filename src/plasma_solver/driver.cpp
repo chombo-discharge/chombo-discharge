@@ -577,7 +577,6 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
 
   m_time        = header.m_real["time"];
   m_dt          = header.m_real["dt"];
-  m_capacitance = header.m_real["capacitance"];
   m_step        = header.m_int["step"];
   
   const Real coarsest_dx = header.m_real["coarsest_dx"];
@@ -2621,13 +2620,10 @@ void driver::write_checkpoint_file(){
   if(m_max_chk_depth < 0){
     finest_chk_level = finest_level;
   }
-  
-
 
   HDF5HeaderData header;
   header.m_real["coarsest_dx"] = m_amr->get_dx()[0];
   header.m_real["time"]        = m_time;
-  header.m_real["capacitance"] = m_capacitance;
   header.m_real["dt"]          = m_dt;
   header.m_int["step"]         = m_step;
   header.m_int["finest_level"] = finest_level;
@@ -2641,72 +2637,29 @@ void driver::write_checkpoint_file(){
   HDF5Handle handle_out(str, HDF5Handle::CREATE);
   header.writeToFile(handle_out);
 
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte         = m_timestepper->get_rte();
-  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-  RefCountedPtr<sigma_solver>& sig       = m_timestepper->get_sigma();
-
-  Real t_amr = 0.0;
-  Real t_cdr = 0.0;
-  Real t_rte = 0.0;
-  Real t_poi = 0.0;
-  Real t_sig = 0.0;
-  Real t_pla = 0.0;
-
   // Write stuff level by level
   const Real t0 = MPI_Wtime();
   if(m_verbosity >= 3){
     pout() << "driver::write_checkpoint_file - writing checkpoint file..." << endl;
   }
+  
   for (int lvl = 0; lvl <= finest_chk_level; lvl++){
     handle_out.setGroupToLevel(lvl);
 
-    // Write level grids
-    t_amr -= MPI_Wtime();
-    write(handle_out, m_amr->get_grids()[lvl]);
-    t_amr += MPI_Wtime();
+    // write amr grids
+    write(handle_out, m_amr->get_grids()[lvl]); // write AMR grids
 
-    // CDR solvers write their checkpoint data
-    t_cdr -= MPI_Wtime();
-    for (cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
-      const RefCountedPtr<cdr_solver>& solver = solver_it();
-      solver->write_checkpoint_level(handle_out, lvl);
-    }
-    t_cdr += MPI_Wtime();
+    // time stepper checkpoints data
+    m_timestepper->write_checkpoint_data(handle_out, lvl); 
 
-    // RTE solvers write their checkpoint data
-    t_rte -= MPI_Wtime();
-    for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-      const RefCountedPtr<rte_solver>& solver = solver_it();
-      solver->write_checkpoint_level(handle_out, lvl);
-    }
-    t_rte += MPI_Wtime();
-
-    // Poisson solver checkpoints its data
-    t_poi -= MPI_Wtime();
-    poisson->write_checkpoint_level(handle_out, lvl);
-    t_poi += MPI_Wtime();
-    
-    // Sigma solver writes its checkpoint data
-    t_sig -= MPI_Wtime();
-    sig->write_checkpoint_level(handle_out, lvl);
-    t_sig += MPI_Wtime();
-
-    // driver checkpoints its internal data
-    t_pla -= MPI_Wtime();
-    write_checkpoint_level(handle_out, lvl);
-    t_pla += MPI_Wtime();
+    // driver checkpoints internal data
+    this->write_checkpoint_level(handle_out, lvl); 
   }
+  const Real t1 = MPI_Wtime();
+
   if(m_verbosity >= 3){
-    const Real t_tot = t_amr + t_cdr + t_rte + t_poi + t_sig + t_pla;
     pout() << "driver::write_checkpoint_file - writing checkpoint file... DONE! " << endl
-	   << "\t Total time    = " << t_tot << " seconds" << endl
-	   << "\t AMR time      = " << t_amr*100./t_tot << "%" << endl
-      	   << "\t CDR time      = " << t_cdr*100./t_tot << "%" << endl
-	   << "\t RTE time      = " << t_rte*100./t_tot << "%" << endl
-      	   << "\t Poisson time  = " << t_poi*100./t_tot << "%" << endl
-	   << "\t Sigma time    = " << t_sig*100./t_tot << "%" << endl
-	   << "\t Internal time = " << t_pla*100./t_tot << "%" << endl;
+	   << "\t Total time    = " << t1 - t0 << " seconds" << endl;
   }
   
   handle_out.close();

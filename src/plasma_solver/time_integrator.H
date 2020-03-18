@@ -29,7 +29,7 @@ public:
 
   virtual ~time_integrator(){};
 
-  virtual void write_checkpoint_data(HDF5Handle& a_file) const = 0;
+  virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;
   //  virtual void write_plot_data() const = 0;
 };
 

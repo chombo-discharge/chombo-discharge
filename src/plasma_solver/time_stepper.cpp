@@ -4931,9 +4931,24 @@ RefCountedPtr<sigma_solver>& time_stepper::get_sigma(){
 }
 
 // New functions for driver
-void time_stepper::write_checkpoint_data(HDF5Handle& a_file) const{
+void time_stepper::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const{
   CH_TIME("driver::write_checkpoint_data");
   if(m_verbosity > 3){
     pout() << "driver::write_checkpoint_data" << endl;
   }
+
+  // CDR solvers checkpoint their data
+  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->write_checkpoint_level(a_handle, a_lvl);
+  }
+
+  // RTE solvers checkpoint their data
+  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<rte_solver>& solver = solver_it();
+    solver->write_checkpoint_level(a_handle, a_lvl);
+  }
+
+  m_poisson->write_checkpoint_level(a_handle, a_lvl);
+  m_sigma->write_checkpoint_level(a_handle, a_lvl);
 }
