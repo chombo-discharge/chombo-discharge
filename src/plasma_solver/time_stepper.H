@@ -32,6 +32,7 @@ public:
   virtual int get_num_plot_vars() const;
   virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
   virtual void post_regrid();
+  virtual void post_checkpoint_setup();
 
   /*!
     @brief Constructor
@@ -42,16 +43,6 @@ public:
     @brief Destructor
   */
   ~time_stepper();
-
-  /*!
-    @brief Check if time stepper does subcycling
-  */
-  virtual bool do_subcycle();
-
-  /*!
-    @brief Check if time stepper needs to regrid
-  */
-  virtual bool need_to_regrid();
 
   /*!
     @brief Advance method, advances equations.
@@ -863,16 +854,6 @@ public:
   virtual void sanity_check();
 
   /*!
-    @brief Set amr
-  */
-  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
-
-  /*!
-    @brief Set the physical domain
-  */
-  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
-
-  /*!
     @brief Set fast rte
   */
   virtual void set_fast_rte(const int a_fast_rte);
@@ -1084,19 +1065,9 @@ protected:
   RefCountedPtr<mfis> m_mfis;
 
   /*!
-    @brief AMR
-  */
-  RefCountedPtr<amr_mesh> m_amr;
-
-  /*!
     @brief Plasma kinetics
   */
   RefCountedPtr<plasma_kinetics> m_plaskin;
-
-  /*!
-    @brief Physical domain
-  */
-  RefCountedPtr<computational_geometry> m_compgeom;
 
   /*!
     @brief CDR solvers
@@ -1204,11 +1175,6 @@ protected:
     @brief Finest level on which to impose relaxation time constraints
   */
   int m_relax_level;
-
-  /*!
-    @brief Verbosity
-  */
-  int m_verbosity;
 
   /*!
     @brief Verbosity for solvers

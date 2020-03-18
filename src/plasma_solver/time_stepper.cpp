@@ -34,24 +34,6 @@ int time_stepper::query_ghost(){
   return 3;
 }
 
-bool time_stepper::need_to_regrid(){
-  CH_TIME("time_stepper::need_to_regrid");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::need_to_regrid" << endl;
-  }
-
-  return false;
-}
-
-bool time_stepper::do_subcycle(){
-  CH_TIME("time_stepper::do_subcycle");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::do_subcycle" << endl;
-  }
-
-  return m_subcycle;
-}
-
 bool time_stepper::stationary_rte(){
   CH_TIME("time_stepper::stationary_rte");
   if(m_verbosity > 5){
@@ -4036,6 +4018,25 @@ void time_stepper::initial_data(){
     m_rte->initial_data();
   }
   m_sigma->initial_data();
+
+  // Solve Poisson equation
+  this->solve_poisson();
+
+  // Fill solvers with important stuff
+  this->compute_cdr_velocities();
+  this->compute_cdr_diffusion();
+  this->compute_dt(m_dt, m_timecode);
+
+  // Inform plaskin what is going on
+  m_plaskin->set_dt(m_dt);
+
+  // Do stationary RTE solve if we must
+  this->init();
+  if(this->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
+    const Real dummy_dt = 1.0;
+
+    this->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
+  }
 }
 
 void time_stepper::initial_cdr_data(){
@@ -4210,24 +4211,6 @@ void time_stepper::sanity_check(){
   CH_assert(!m_compgeom.isNull());
   CH_assert(!m_amr.isNull());
   CH_assert(!m_plaskin.isNull());
-}
-
-void time_stepper::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
-  CH_TIME("time_stepper::set_amr");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::set_amr" << endl;
-  }
-
-  m_amr = a_amr;
-}
-
-void time_stepper::set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom){
-  CH_TIME("time_stepper::set_computational_geometry");
-  if(m_verbosity > 5){
-    pout() << "time_stepper::set_computational_geometry" << endl;
-  }
-
-  m_compgeom = a_compgeom;
 }
 
 void time_stepper::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
@@ -5049,4 +5032,45 @@ void time_stepper::post_regrid(){
       }
     }
   }
+
+  // Compute cdr velocities
+  this->compute_cdr_velocities();
+  this->compute_cdr_diffusion();
+  this->compute_dt(m_dt, m_timecode);
+
+  // If we're doing a stationary RTE solve, recompute source terms
+  if(this->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
+    const Real dummy_dt = 1.0;
+
+    // Need new source terms for RTE equations
+    this->advance_reaction_network(m_time, dummy_dt);
+    this->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
+  }
+
+  m_plaskin->set_dt(m_dt);
+}
+
+void time_stepper::post_checkpoint_setup(){
+  CH_TIME("time_stepper::post_checkpoint_setup");
+  if(m_verbosity > 3){
+    pout() << "time_stepper::post_checkpoint_setup" << endl;
+  }
+
+  this->solve_poisson();       // Solve Poisson equation by 
+  if(this->stationary_rte()){  // Solve RTE equations if stationary solvers
+    const Real dummy_dt = 0.0;
+    this->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
+  }
+  this->allocate_internals();  // Prepare internal storage for time stepper
+
+  // Fill solvers with important stuff
+  this->compute_cdr_velocities();
+  this->compute_cdr_diffusion();
+  this->compute_dt(m_dt, m_timecode);
+
+  // Tell plaskin what is going on
+  m_plaskin->set_dt(m_dt);
+
+  // Derived class stuff
+  this->init();
 }

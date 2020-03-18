@@ -595,7 +595,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   }
 
   // Define amr_mesh
-  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
+  const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->set_finest_level(finest_level); 
   m_amr->set_grids(boxes, regsize);      
   
@@ -654,9 +654,6 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   if(!got_new_tags){
     if(a_use_initial_data){
       m_timestepper->initial_data();
-      if(m_plaskin->solve_eed()){
-	this->initialize_eed();
-      }
     }
 
     if(m_verbosity > 1){
@@ -682,7 +679,7 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 
   // Regrid base. Only levels [lmin, lmax] are allowed to change. 
   const int old_finest_level = m_amr->get_finest_level();
-  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
+  const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->regrid(tags, a_lmin, a_lmax, regsize, old_finest_level + 1);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
@@ -699,42 +696,18 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
 
   const Real solver_regrid = MPI_Wtime(); // Timer
 
-  // Solve the elliptic parts
+  // Post-regrid things (e.g. resolve Poisson equation, fill solvers with important stuff etc)
   m_timestepper->post_regrid();
 
+  const Real post_regrid = MPI_Wtime(); // Elliptic solve time
 
-  const Real elliptic_solve = MPI_Wtime(); // Elliptic solve time
-
-  if(m_plaskin->solve_eed() && a_use_initial_data){
-    this->initialize_eed();
-  }
-
-  // Fill solvers with important stuff
-  m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion();
-  m_timestepper->compute_dt(m_dt, m_timecode);
-  m_plaskin->set_dt(m_dt);
-
-  if(m_timestepper->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
-    const Real dummy_dt = 1.0;
-
-    // Need new source terms for RTE equations
-    m_timestepper->advance_reaction_network(m_time, dummy_dt);
-    m_timestepper->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
-  }
-
-  const Real solver_filling = MPI_Wtime();
-
-
-  const Real stop_time = MPI_Wtime();
 
   if(m_verbosity > 1){
-    this->regrid_report(stop_time - start_time,
+    this->regrid_report(post_regrid - start_time,
 			cell_tags - start_time,
 			base_regrid - cell_tags,
 			solver_regrid - base_regrid,
-			elliptic_solve - solver_regrid,
-			solver_filling - elliptic_solve);
+			post_regrid - solver_regrid);
   }
 }
 
@@ -778,8 +751,7 @@ void driver::regrid_report(const Real a_total_time,
 			   const Real a_tag_time,
 			   const Real a_base_regrid_time,
 			   const Real a_solver_regrid_time,
-			   const Real a_elliptic_solve_time,
-			   const Real a_solver_filling_time){
+			   const Real a_post_regrid_time){
   CH_TIME("driver::regrid_report");
   if(m_verbosity > 5){
     pout() << "driver::regrid_report" << endl;
@@ -804,8 +776,7 @@ void driver::regrid_report(const Real a_total_time,
 	 << "\t\t\t" << "Cell tagging      : " << 100.*(a_tag_time/a_total_time) << "%" << endl
     	 << "\t\t\t" << "Base regrid       : " << 100.*(a_base_regrid_time/a_total_time) << "%" << endl
 	 << "\t\t\t" << "Solver regrid     : " << 100.*(a_solver_regrid_time/a_total_time) << "%" << endl
-    	 << "\t\t\t" << "Elliptic solve    : " << 100.*(a_elliptic_solve_time/a_total_time) << "%" << endl
-	 << "\t\t\t" << "Solver filling    : " << 100.*(a_solver_filling_time/a_total_time) << "%" << endl
+    	 << "\t\t\t" << "Post regrid       : " << 100.*(a_post_regrid_time/a_total_time) << "%" << endl
 	 << "-----------------------------------------------------------------------" << endl;
 }
 
@@ -1024,98 +995,6 @@ void driver::setup_and_run(){
 
   if(!m_geometry_only){
     this->run(m_start_time, m_stop_time, m_max_steps);
-  }
-}
-
-void driver::setup_poisson_only(){
-  CH_TIME("driver::setup_poisson_only");
-  if(m_verbosity > 0){
-    pout() << "driver::setup_poisson_only" << endl;
-  }
-
-  this->sanity_check();                                    // Sanity check before doing anything expensive
-
-  if(m_ebis_memory_load_balance){
-    EBIndexSpace::s_useMemoryLoadBalance = true;
-  }
-  else {
-    EBIndexSpace::s_useMemoryLoadBalance = false;
-  }
-  
-  if(!m_read_ebis){
-    m_compgeom->build_geometries(m_amr->get_finest_domain(),
-				 m_amr->get_prob_lo(),
-				 m_amr->get_finest_dx(),
-				 m_amr->get_max_ebis_box_size());
-    if(m_write_ebis){
-      this->write_ebis();        // Write EBIndexSpace's for later use
-    }
-  }
-  else{
-    const std::string path_gas = m_output_dir + "/geo/" + m_ebis_gas_file;
-    const std::string path_sol = m_output_dir + "/geo/" + m_ebis_sol_file;
-
-    m_compgeom->build_geo_from_files(path_gas, path_sol);
-  }
-    
-
-  this->get_geom_tags();       // Get geometric tags.
-  
-  //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
-
-  // This is a "fresh" regrid in which there is no coarser level
-  const int lmin = 0;
-  const int lmax = m_geom_tag_depth;
-  const int regsize = 1;
-  m_amr->regrid(m_geom_tags, lmin, lmax, regsize, m_geom_tag_depth);       // Regrid using geometric tags for now
-
-  this->allocate_internals();
-
-  if(m_verbosity > 0){
-    this->grid_report();
-  }
-
-  m_timestepper->set_amr(m_amr);
-  m_timestepper->set_plasma_kinetics(m_plaskin);
-  m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
-  m_timestepper->set_potential(m_potential);                   // Potential
-  m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_timestepper->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_timestepper->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
-#if CH_SPACEDIM==3
-  m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
-#endif
-
-  m_timestepper->sanity_check();
-  m_timestepper->setup_poisson();
-
-  MFAMRCellData rhs;
-  EBAMRIVData sigma;
-
-  m_amr->allocate(rhs, 1);
-  m_amr->allocate(sigma, phase::gas, 1);
-
-  data_ops::set_value(rhs, 0.0);
-  data_ops::set_value(sigma, 0.0);
-    
-
-  RefCountedPtr<poisson_solver>& poisson = m_timestepper->get_poisson();
-
-  poisson->solve(poisson->get_state(), rhs, sigma, true);
-
-
-  if(m_verbosity > 0){
-    this->grid_report();
-  }
-
-  poisson->write_plot_file();
-
-  if(m_verbosity > 0){
-    pout() << "=========================================" << endl;
-    pout() << "driver::setup_poisson_only -- done" << endl;
-    pout() << "=========================================" << endl;
   }
 }
 
@@ -1728,26 +1607,32 @@ void driver::setup_fresh(const int a_init_regrids){
     m_compgeom->build_geo_from_files(path_gas, path_sol);
   }
 
-  this->get_geom_tags();       // Get geometric tags.
+  // Get geometry tags
+  this->get_geom_tags();
   
-  //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
-  const int regsize = m_timestepper->do_subcycle() ? m_plaskin->get_num_species() : 1;
+  // Determine the redistribution register size
+  const int regsize = m_timestepper->get_redistribution_regsize();
 
-  // When we're setting up fresh, we need to regrid everything
+  // When we're setting up fresh, we need to regrid everything from the base level
+  // and upwards. We have tags on m_geom_tag_depth, so that is our current finest level. 
   const int lmin = 0;
   const int lmax = m_geom_tag_depth;
-  m_amr->regrid(m_geom_tags, lmin, lmax, regsize, m_geom_tag_depth);       // Regrid using geometric tags for now
+  m_amr->regrid(m_geom_tags, lmin, lmax, regsize, m_geom_tag_depth);
 
+  // Allocate internal storage 
   this->allocate_internals();
 
+  // Do a grid report of the initial grid
   if(m_verbosity > 0){
     this->grid_report();
   }
 
-  
+  // Provide time_stepper with amr and geometry
   m_timestepper->set_amr(m_amr);
-  m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
+
+#if 1 // This should somehow be moved to the new interface
+  m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_potential(m_potential);                   // Potential
   m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -1757,48 +1642,17 @@ void driver::setup_fresh(const int a_init_regrids){
   m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
   m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
 #endif
-  m_timestepper->setup_solvers();                   // Instantiate sigma and cdr with initial data (and rte if transient)
-  m_timestepper->initial_data();                          // Fill cdr and rte with initial data
-  m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);
-
-  if (a_init_regrids >= 0){
-    RefCountedPtr<poisson_solver> poisson = m_timestepper->get_poisson();
-    poisson->auto_tune();
-    m_timestepper->solve_poisson();                       // Solve Poisson equation by using initial data
-#if 0
-    if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
-      const Real dummy_dt = 1.0;
-
-      m_timestepper->advance_reaction_network(m_time, dummy_dt);
-      m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
-    }
 #endif
 
-    // Compute the capacitance
-    //      m_capacitance = poisson->compute_capacitance();
-  }
+  // time_stepper setup
+  m_timestepper->setup_solvers();                                 // Instantiate solvers
+  m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);  // Sync solver times
+  m_timestepper->initial_data();                                  // Fill solvers with initial data
+  m_timestepper->allocate_internals();                            // Allocate internal data in time_stepper-derived classes
 
+  // cell_tagger
   if(!m_celltagger.isNull()){
     m_celltagger->regrid();
-  }
-  m_timestepper->allocate_internals();
-
-
-  // If the plasma_kinetics module solves for the electron energy density, it should be initialized
-  if(m_plaskin->solve_eed()){
-    this->initialize_eed();
-  }
-
-  // Fill solvers with important stuff
-  m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion();
-  m_timestepper->compute_dt(m_dt, m_timecode);
-  m_plaskin->set_dt(m_dt);
-  m_timestepper->init();
-  if(m_timestepper->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
-    const Real dummy_dt = 1.0;
-
-    m_timestepper->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
   }
 
   // Initial regrids
@@ -1840,8 +1694,10 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   this->get_geom_tags();       // Get geometric tags.
 
   m_timestepper->set_amr(m_amr);                         // Set amr
-  m_timestepper->set_plasma_kinetics(m_plaskin);         // Set plasma kinetics
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
+
+#if 1 // This should somehow be moved to the new interface
+  m_timestepper->set_plasma_kinetics(m_plaskin);         // Set plasma kinetics
   m_timestepper->set_potential(m_potential);             // Potential
   m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -1851,33 +1707,19 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
   m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
 #endif
-  //  m_amr->set_num_ghost(m_timestepper->query_ghost());    // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
+  
+#endif
 
+  // Read checkpoint file
   this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
 
-  if(m_restart_mode == restart_mode::surface_charge_only){
-    m_timestepper->initial_cdr_data();
-    if(!m_timestepper->stationary_rte()){
-      m_timestepper->initial_rte_data();
-    }
-  }
-
-  m_timestepper->solve_poisson();       // Solve Poisson equation by 
-  if(m_timestepper->stationary_rte()){  // Solve RTE equations if stationary solvers
-    const Real dummy_dt = 0.0;
-    m_timestepper->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
-  }
-  m_timestepper->allocate_internals();  // Prepare internal storage for time stepper
+  // Time stepper does post checkpoint setup
+  m_timestepper->post_checkpoint_setup();
+  
+  // Prepare storage for cell_tagger
   if(!m_celltagger.isNull()){
-    m_celltagger->regrid();             // Prepare internal storage for cell tagger
+    m_celltagger->regrid();         
   }
-
-  // Fill solvers with important stuff
-  m_timestepper->compute_cdr_velocities();
-  m_timestepper->compute_cdr_diffusion();
-  m_timestepper->compute_dt(m_dt, m_timecode);
-  m_plaskin->set_dt(m_dt);
-  m_timestepper->init();
 
   // Initial regrids
   for (int i = 0; i < a_init_regrids; i++){
@@ -2748,54 +2590,6 @@ void driver::close_charge_dump_file(ofstream& a_file){
   if(procID() == 0){
     a_file.close();
   }
-}
-
-void driver::initialize_eed(){
-  CH_TIME("driver::initialize_eed");
-  if(m_verbosity > 5){
-    pout() << "driver::initialize_eed_" << endl;
-  }
-
-  const int finest_level = m_amr->get_finest_level();
-  const RealVect origin = m_amr->get_prob_lo();
-
-  // Compute E
-  EBAMRCellData Ecell;
-  m_amr->allocate(Ecell, phase::gas, SpaceDim);
-  m_timestepper->compute_E(Ecell, phase::gas);
-  m_amr->interpolate_to_centroids(Ecell, phase::gas);
-
-  const int eed_index = m_plaskin->get_eed_index();
-
-  // Get the eed solver
-  RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
-  RefCountedPtr<cdr_solver>& eed_solver = cdr->get_solvers()[eed_index];
-
-  EBAMRCellData& eed_density = eed_solver->get_state();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const Real dx = m_amr->get_dx()[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBCellFAB& E = (*Ecell[lvl])[dit()];
-      const EBISBox& ebisbox = E.getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const Box box = dbl.get(dit());
-      const IntVectSet ivs(box);
-      
-      EBCellFAB& density = (*eed_density[lvl])[dit()];
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect Evec = RealVect(D_DECL(E(vof, 0), E(vof, 1), E(vof, 2)));
-	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->get_dx()[lvl]*RealVect::Unit, origin);
-
-	density(vof,0) = m_plaskin->init_eed(pos, m_time, Evec);
-      }
-    }
-  }
-
-  m_amr->average_down(eed_density, phase::gas);
-  m_amr->interp_ghost(eed_density, phase::gas);
 }
 
 void driver::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){

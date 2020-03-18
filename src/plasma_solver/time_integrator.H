@@ -32,6 +32,8 @@ public:
   // Setup routines
   virtual void setup_solvers() = 0;
   virtual void initial_data() = 0;
+  virtual void post_checkpoint_setup() = 0;
+  virtual int get_redistribution_regsize() const;
 
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;
@@ -42,9 +44,11 @@ public:
   // Advance routines
   virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode) = 0;
   virtual Real advance(const Real a_dt) = 0;
+  virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) = 0;
 
 
   // Regrid routines
+  virtual bool need_to_regrid();
   virtual void cache_internals() = 0;
   virtual void deallocate_internals() = 0;
   virtual void cache_states() = 0;
@@ -54,7 +58,47 @@ public:
   virtual void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
   virtual void post_regrid() = 0;
 
+  /*!
+    @brief Set amr
+  */
+  virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
+
+  /*!
+    @brief Set the physical domain
+  */
+  virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
+
 protected:
+
+  /*!
+    @brief Class verbosity
+  */
+  int m_verbosity;
+  
+  /*!
+    @brief TIme
+  */
+  Real m_time;
+
+  /*!
+    @brief Previous time step size
+  */
+  Real m_dt;
+
+  /*!
+    @brief Time code for
+  */
+  time_code::which_code m_timecode;
+
+  /*!
+    @brief AMR
+  */
+  RefCountedPtr<amr_mesh> m_amr;
+
+  /*!
+    @brief Physical domain
+  */
+  RefCountedPtr<computational_geometry> m_compgeom;
 };
 
 #endif

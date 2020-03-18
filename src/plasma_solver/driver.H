@@ -49,11 +49,6 @@ public:
   virtual void setup_and_run();
 
   /*!
-    @brief Only set up and solve the Poisson equation
-  */
-  virtual void setup_poisson_only();
-
-  /*!
     @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
   */
   virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
@@ -601,8 +596,7 @@ protected:
 			     const Real a_tag_time,
 			     const Real a_base_regrid_time,
 			     const Real a_solver_regrid_time,
-			     const Real a_elliptic_solve_time,
-			     const Real a_solver_filling_time);
+			     const Real a_post_regrid_time);
   
   /*!
     @brief Set the computational geometry
@@ -713,11 +707,6 @@ protected:
     @brief Close file for mass dump
   */
   virtual void close_charge_dump_file(ofstream& a_file);
-
-  /*!
-    @brief Initialize eed
-  */
-  virtual void initialize_eed();
 
   /*!
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
