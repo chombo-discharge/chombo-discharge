@@ -8,12 +8,12 @@
 #ifndef _ULTRALW_TAGGER_
 #define _ULTRALW_TAGGER_
 
-#include "cell_tagger.H"
+#include "cdr_plasma_tagger.H"
 
 /*!
   @brief Lightweight tagging class. Only tags cells based on cdr densities and field magnitude.
 */
-class ultralw_tagger : public cell_tagger {
+class ultralw_tagger : public cdr_plasma_tagger {
 public:
 
   /*!

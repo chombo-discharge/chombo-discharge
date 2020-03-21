@@ -36,7 +36,6 @@ driver::driver(){
 }
 
 driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
-	       const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 	       const RefCountedPtr<time_stepper>&           a_timestepper,
 	       const RefCountedPtr<amr_mesh>&               a_amr,
 	       const RefCountedPtr<cell_tagger>&            a_celltagger,
@@ -85,12 +84,8 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   m_amr->sanity_check();                 // Sanity check, make sure everything is set up correctly
   m_amr->build_domains();                // Build domains and resolutions, nothing else
 
+  // Parse the geometry generation method
   parse_geometry_generation();
-
-  // Define the cell tagger
-  if(!m_celltagger.isNull()){ 
-    m_celltagger->define(a_plaskin, m_timestepper, m_amr, m_compgeom);
-  }
 
   // Ok we're ready to go. 
   m_potential_set = false;
@@ -102,23 +97,19 @@ driver::~driver(){
   CH_TIME("driver::~driver");
 }
 
-int driver::get_num_plotvars() const {
-  CH_TIME("driver::get_num_plotvars");
+int driver::get_num_plot_vars() const {
+  CH_TIME("driver::get_num_plot_vars");
   if(m_verbosity > 5){
-    pout() << "driver::get_num_plotvars" << endl;
+    pout() << "driver::get_num_plot_vars" << endl;
   }
 
   int num_output = 0;
 
-  if(m_plot_tags) num_output = num_output + 1;
-  if(m_plot_tracer && !m_celltagger.isNull()){
-    num_output += m_celltagger->get_num_tracers();
-  }
-  if(m_plot_ranks) num_output = num_output+1;
-  if(m_plot_J) num_output = num_output + SpaceDim;
+  if(m_plot_tags)            num_output = num_output + 1;
+  if(m_plot_ranks)           num_output = num_output+1;
+  if(m_plot_J)               num_output = num_output + SpaceDim;
 
   return num_output;
-
 }
 
 Vector<std::string> driver::get_plotvar_names() const {
@@ -130,17 +121,6 @@ Vector<std::string> driver::get_plotvar_names() const {
   Vector<std::string> names(0);
   
   if(m_plot_tags) names.push_back("cell_tags");
-  if(m_plot_tracer && !m_celltagger.isNull()){
-    for (int i = 0; i < m_celltagger->get_num_tracers(); i++){
-      std::string one = "Tracer field-";
-      long int j = i;
-      char s[2]; 
-      sprintf(s,"%ld", j);
-
-      std::string two(s);
-      names.push_back(one + two); 
-    }
-  }
   if(m_plot_ranks) names.push_back("mpi_rank");
   if(m_plot_J){
     names.push_back("x-J");
@@ -1416,13 +1396,11 @@ void driver::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   m_plot_tags   = false;
-  m_plot_tracer = false;
   m_plot_J      = false;
   m_plot_ranks  = false;
   
   for (int i = 0; i < num; i++){
     if(     str[i] == "tags")     m_plot_tags   = true;
-    else if(str[i] == "tracer")   m_plot_tracer = true;
     else if(str[i] == "J")        m_plot_J      = true;
     else if(str[i] == "mpi_rank") m_plot_ranks  = true;
   }
@@ -2165,7 +2143,10 @@ void driver::write_plot_file(){
 
   // Get total number of components for output
   int ncomp = m_timestepper->get_num_plot_vars();
-  ncomp += this->get_num_plotvars();
+  if(!m_celltagger.isNull()) {
+    ncomp += m_celltagger->get_num_plot_vars();
+  }
+  ncomp += this->get_num_plot_vars();
 
   // Allocate storage
   m_amr->allocate(output, phase::gas, ncomp);
@@ -2180,6 +2161,11 @@ void driver::write_plot_file(){
   
   // Time stepper writes its data
   m_timestepper->write_plot_data(output, names, icomp);
+
+  // Cell tagger writes data
+  if(!m_celltagger.isNull()){
+    m_celltagger->write_plot_data(output, names, icomp);
+  }
 
   // Write internal data
   names.append(this->get_plotvar_names());
@@ -2235,7 +2221,6 @@ void driver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_tags)   write_tags(a_output, a_comp);
-  if(m_plot_tracer) write_tracer(a_output, a_comp);
   if(m_plot_ranks)  write_ranks(a_output, a_comp);
   if(m_plot_J)      write_J(a_output, a_comp);
 }
@@ -2281,30 +2266,6 @@ void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
   }
 
   a_comp++;
-}
-
-void driver::write_tracer(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("driver::write_tracer");
-  if(m_verbosity > 3){
-    pout() << "driver::write_tracer" << endl;
-  }
-
-  if(!m_celltagger.isNull()){
-    m_celltagger->compute_tracers();
-    for (int i = 0; i < m_celltagger->get_num_tracers(); i++){
-      const EBAMRCellData& tracer = m_celltagger->get_tracer_fields()[i];
-
-      const Interval src_interv(0, 0);
-      const Interval dst_interv(a_comp, a_comp);
-      
-      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-	tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-	data_ops::set_covered_value(*a_output[lvl], a_comp, 0.0);
-      }
-
-      a_comp++;
-    }
-  }
 }
 
 void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){

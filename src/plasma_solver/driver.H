@@ -32,7 +32,6 @@ public:
     @brief Full constructor. 
   */
   driver(const RefCountedPtr<computational_geometry>& a_compgeom,
-	 const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 	 const RefCountedPtr<time_stepper>&           a_timestepper,
 	 const RefCountedPtr<amr_mesh>&               a_amr,
 	 const RefCountedPtr<cell_tagger>&            a_celltagger = RefCountedPtr<cell_tagger>(NULL),
@@ -486,11 +485,6 @@ protected:
   bool m_plot_tags;
 
   /*!
-    @brief Plot tracer fields
-  */
-  bool m_plot_tracer;
-
-  /*!
     @brief Plot MPI ranks
   */
   bool m_plot_ranks;
@@ -706,7 +700,7 @@ protected:
   /*!
     @brief Get number of plot variables
   */
-  virtual int get_num_plotvars() const;
+  virtual int get_num_plot_vars() const;
 
   /*!
     @brief Get names for the plot variables
@@ -722,11 +716,6 @@ protected:
     @brief Write cell tags to file
   */
   virtual void write_tags(EBAMRCellData& a_output, int& a_comp);
-
-  /*!
-    @brief Write tracer fields to output
-  */
-  virtual void write_tracer(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write MPI ranks to output

@@ -32,6 +32,14 @@ public:
   field_tagger();
 
   /*!
+    @brief Full constructor
+  */
+  field_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+	       const RefCountedPtr<time_stepper>&           a_timestepper,
+	       const RefCountedPtr<amr_mesh>&               a_amr,
+	       const RefCountedPtr<computational_geometry>& a_compgeom);
+
+  /*!
     @brief Destructor
   */
   virtual ~field_tagger();

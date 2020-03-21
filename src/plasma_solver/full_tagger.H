@@ -9,12 +9,12 @@
 #ifndef _FULL_TAGGER_
 #define _FULL_TAGGER_
 
-#include "cell_tagger.H"
+#include "cdr_plasma_tagger.H"
 
 /*!
   @brief Abstract class for tagging cells across an AMR hierarchy
 */
-class full_tagger : public cell_tagger {
+class full_tagger : public cdr_plasma_tagger {
 public:
 
   /*!
