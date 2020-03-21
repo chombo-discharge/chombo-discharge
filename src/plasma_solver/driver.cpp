@@ -71,8 +71,8 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 
 
   // Debugging stuff
-  this->set_dump_mass(false);                                // Dump mass to file
-  this->set_dump_charge(false);                              // Dump charges to file
+  // this->set_dump_mass(false);                                // Dump mass to file
+  // this->set_dump_charge(false);                              // Dump charges to file
   this->set_output_centroids(true);                          // Use cell centroids for output
 
   // AMR does its thing
@@ -783,12 +783,12 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
     // This is actually a debugging
     ofstream mass_dump_file;
     ofstream charge_dump_file;
-    if(m_dump_mass){
-      this->open_mass_dump_file(mass_dump_file);
-    }
-    if(m_dump_charge){
-      this->open_charge_dump_file(charge_dump_file);
-    }
+    // if(m_dump_mass){
+    //   this->open_mass_dump_file(mass_dump_file);
+    // }
+    // if(m_dump_charge){
+    //   this->open_charge_dump_file(charge_dump_file);
+    // }
 
     while(m_time < a_end_time && m_step < a_max_steps && !last_step){
       const int max_sim_depth = m_amr->get_max_sim_depth();
@@ -839,12 +839,12 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	}
       }
 
-      if(m_dump_mass){
-	this->dump_mass(mass_dump_file);
-      }
-      if(m_dump_charge){
-	this->dump_charge(charge_dump_file);
-      }
+      // if(m_dump_mass){
+      // 	this->dump_mass(mass_dump_file);
+      // }
+      // if(m_dump_charge){
+      // 	this->dump_charge(charge_dump_file);
+      // }
 
 
       if(!first_step){
@@ -925,12 +925,12 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 #endif
     }
 
-    if(m_dump_mass){
-      this->close_mass_dump_file(mass_dump_file);
-    }
-    if(m_dump_charge){
-      this->close_charge_dump_file(charge_dump_file);
-    }
+    // if(m_dump_mass){
+    //   this->close_mass_dump_file(mass_dump_file);
+    // }
+    // if(m_dump_charge){
+    //   this->close_charge_dump_file(charge_dump_file);
+    // }
   }
 
   m_timestepper->deallocate_internals();
@@ -1084,19 +1084,6 @@ void driver::parse_restart(){
   // Get restart step
   pp.get("restart", m_restart_step); // Get restart step
   m_restart = (m_restart_step > 0) ? true : false;
-
-  // Get restart mode
-  std::string str;
-  pp.get("restart_mode", str);
-  if(str == "full"){
-    m_restart_mode = restart_mode::full;
-  }
-  else if(str == "surface_only"){
-    m_restart_mode = restart_mode::surface_charge_only;
-  }
-  else if(str == "volume_only"){
-    m_restart_mode = restart_mode::volume_charge_only; 
-  }
 }
 
 void driver::parse_memrep(){
@@ -1606,47 +1593,47 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   }
 }
 
-void driver::set_dump_mass(const bool a_dump_mass){
-  CH_TIME("driver::set_dump_mass");
-  if(m_verbosity > 5){
-    pout() << "driver::set_dump_mass" << endl;
-  }
+// void driver::set_dump_mass(const bool a_dump_mass){
+//   CH_TIME("driver::set_dump_mass");
+//   if(m_verbosity > 5){
+//     pout() << "driver::set_dump_mass" << endl;
+//   }
 
-  m_dump_mass = a_dump_mass;
+//   m_dump_mass = a_dump_mass;
 
-  { // get parameter from input script
-    std::string str;
-    ParmParse pp("driver");
-    pp.query("dump_mass", str);
-    if(str == "true"){
-      m_dump_mass = true;
-    }
-    else if(str == "false"){
-      m_dump_mass = false;
-    }
-  }
-}
+//   { // get parameter from input script
+//     std::string str;
+//     ParmParse pp("driver");
+//     pp.query("dump_mass", str);
+//     if(str == "true"){
+//       m_dump_mass = true;
+//     }
+//     else if(str == "false"){
+//       m_dump_mass = false;
+//     }
+//   }
+// }
 
-void driver::set_dump_charge(const bool a_dump_charge){
-  CH_TIME("driver::set_dump_charge");
-  if(m_verbosity > 5){
-    pout() << "driver::set_dump_charge" << endl;
-  }
+// void driver::set_dump_charge(const bool a_dump_charge){
+//   CH_TIME("driver::set_dump_charge");
+//   if(m_verbosity > 5){
+//     pout() << "driver::set_dump_charge" << endl;
+//   }
 
-  m_dump_charge = a_dump_charge;
+//   m_dump_charge = a_dump_charge;
 
-  { // get parameter from input script
-    std::string str;
-    ParmParse pp("driver");
-    pp.query("dump_charge", str);
-    if(str == "true"){
-      m_dump_charge = true;
-    }
-    else if(str == "false"){
-      m_dump_charge = false;
-    }
-  }
-}
+//   { // get parameter from input script
+//     std::string str;
+//     ParmParse pp("driver");
+//     pp.query("dump_charge", str);
+//     if(str == "true"){
+//       m_dump_charge = true;
+//     }
+//     else if(str == "false"){
+//       m_dump_charge = false;
+//     }
+//   }
+// }
 
 void driver::set_output_centroids(const bool a_output_centroids){
   CH_TIME("driver::set_output_centroids");
@@ -1686,47 +1673,9 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
     pout() << "driver::step_report" << endl;
   }
 
-  // Compute the maximum electric field
-  Real Emax;
-  m_timestepper->compute_Emax(Emax, phase::gas);
 
-  //
-  Real nmax;
-  std::string solver_max;
-  m_timestepper->get_cdr_max(nmax, solver_max);
-
-  const Real cfl_dt = m_timestepper->get_cfl_dt();
-
-  pout() << endl;
-  std::string str;
-  if(m_timecode == time_code::cfl){
-    str = " (Restricted by CFL)";
-  }
-  if(m_timecode == time_code::error){
-    str = " (Restricted by error)";
-  }
-  if(m_timecode == time_code::diffusion){
-    str = " (Restricted by diffusion)";
-  }
-  if(m_timecode == time_code::source){
-    MayDay::Abort("driver::step_report - shouldn't happen, source term has been taken out of the design");
-    str = " (Restricted by source term)";
-  }
-  if(m_timecode == time_code::relaxation_time){
-    str = " (Restricted by relaxation time)";
-  }
-  if(m_timecode == time_code::restricted){
-    str = " (Restricted by time stepper)";
-  }
-  if(m_timecode == time_code::hardcap){
-    str = " (Restricted by a hardcap)";
-  }
-  pout() << "driver::Time step report -- Time step #" << m_step << endl
-	 << "                                   Time  = " << m_time << endl
-	 << "                                   dt    = " << m_dt << str << endl
-    	 << "                                   cfl   = " << m_dt/cfl_dt << endl
-	 << "                                   Emax  = " << Emax << endl
-	 << "                                   n_max = " << nmax << "(" + solver_max + ")" << endl;
+  // Time stepper writes report first
+  m_timestepper->print_step_report();
 
   // Get the total number of poitns across all levels
   const int finest_level                 = m_amr->get_finest_level();
@@ -2007,7 +1956,6 @@ void driver::write_geometry(){
   const std::string prefix = m_output_dir + "/geo/" + m_output_names;
   sprintf(file_char, "%s.geometry.%dd.hdf5", prefix.c_str(), SpaceDim);
   string fname(file_char);
-
 
   writeEBHDF5(fname, 
 	      grids,
@@ -2356,72 +2304,72 @@ void driver::read_vector_data(HDF5HeaderData& a_header,
   }
 }
 
-void driver::open_mass_dump_file(ofstream& a_file){
-  if(procID() == 0){
-    const std::string prefix = m_output_dir + "/" + "mass_dump.txt";
-    a_file.open(prefix);
+// void driver::open_mass_dump_file(ofstream& a_file){
+//   if(procID() == 0){
+//     const std::string prefix = m_output_dir + "/" + "mass_dump.txt";
+//     a_file.open(prefix);
 
-    const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
+//     const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
 
-    a_file << "# time step" << "\t" << "time";
-    for (int i = 0; i < names.size(); i++){
-      a_file << "\t" << names[i];
-    }
-    a_file << endl;
-  }
-}
+//     a_file << "# time step" << "\t" << "time";
+//     for (int i = 0; i < names.size(); i++){
+//       a_file << "\t" << names[i];
+//     }
+//     a_file << endl;
+//   }
+// }
 
-void driver::open_charge_dump_file(ofstream& a_file){
-  if(procID() == 0){
-    const std::string prefix = m_output_dir + "/" + "charge_dump.txt";
-    a_file.open(prefix);
+// void driver::open_charge_dump_file(ofstream& a_file){
+//   if(procID() == 0){
+//     const std::string prefix = m_output_dir + "/" + "charge_dump.txt";
+//     a_file.open(prefix);
 
-    const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
+//     const Vector<std::string> names = m_timestepper->get_cdr()->get_names();
 
-    a_file << "# time step" << "\t" << "time";
-    for (int i = 0; i < names.size(); i++){
-      a_file << "\t" << names[i];
-    }
-    a_file << "\t" << "surface charge" << endl;
-    a_file << endl;
-  }
-}
+//     a_file << "# time step" << "\t" << "time";
+//     for (int i = 0; i < names.size(); i++){
+//       a_file << "\t" << names[i];
+//     }
+//     a_file << "\t" << "surface charge" << endl;
+//     a_file << endl;
+//   }
+// }
 
-void driver::dump_mass(ofstream& a_file){
-  const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
-  if(procID() == 0){
-    a_file << m_step << "\t" << m_time;
-    for (int i = 0; i < masses.size(); i++){
-      a_file << "\t" << masses[i];
-    }
-    a_file << endl;
-  }
-}
+// void driver::dump_mass(ofstream& a_file){
+//   const Vector<Real> masses = m_timestepper->get_cdr()->compute_mass();
+//   if(procID() == 0){
+//     a_file << m_step << "\t" << m_time;
+//     for (int i = 0; i < masses.size(); i++){
+//       a_file << "\t" << masses[i];
+//     }
+//     a_file << endl;
+//   }
+// }
 
-void driver::dump_charge(ofstream& a_file){
-  const Real surface_charge  = m_timestepper->get_sigma()->compute_charge();
-  const Vector<Real> charges = m_timestepper->get_cdr()->compute_charge();
-  if(procID() == 0){
-    a_file << m_step << "\t" << m_time;
-    for (int i = 0; i < charges.size(); i++){
-      a_file << "\t" << charges[i]/units::s_Qe;
-    }
-    a_file << "\t" << surface_charge/units::s_Qe;
-    a_file << endl;
-  }
-}
+// void driver::dump_charge(ofstream& a_file){
+//   const Real surface_charge  = m_timestepper->get_sigma()->compute_charge();
+//   const Vector<Real> charges = m_timestepper->get_cdr()->compute_charge();
+//   if(procID() == 0){
+//     a_file << m_step << "\t" << m_time;
+//     for (int i = 0; i < charges.size(); i++){
+//       a_file << "\t" << charges[i]/units::s_Qe;
+//     }
+//     a_file << "\t" << surface_charge/units::s_Qe;
+//     a_file << endl;
+//   }
+// }
 
-void driver::close_mass_dump_file(ofstream& a_file){
-  if(procID() == 0){
-    a_file.close();
-  }
-}
+// void driver::close_mass_dump_file(ofstream& a_file){
+//   if(procID() == 0){
+//     a_file.close();
+//   }
+// }
 
-void driver::close_charge_dump_file(ofstream& a_file){
-  if(procID() == 0){
-    a_file.close();
-  }
-}
+// void driver::close_charge_dump_file(ofstream& a_file){
+//   if(procID() == 0){
+//     a_file.close();
+//   }
+// }
 
 // void driver::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
 //   CH_TIME("driver::compute_norm");

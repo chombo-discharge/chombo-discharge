@@ -244,7 +244,7 @@ Real godunov::advance(const Real a_dt){
   
   t0 = MPI_Wtime();
   if((m_step +1) % m_fast_poisson == 0){
-    time_stepper::solve_poisson();         // Update the Poisson equation
+    cdr_plasma_stepper::solve_poisson();         // Update the Poisson equation
   }
   t1 = MPI_Wtime();
   t_pois = t1 - t0;
@@ -390,9 +390,9 @@ void godunov::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_poisson->get_state();
 
-  time_stepper::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  time_stepper::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
-  time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell); // Domain centered field
+  cdr_plasma_stepper::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
+  cdr_plasma_stepper::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+  cdr_plasma_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell); // Domain centered field
 }
 
 void godunov::compute_cdr_gradients(){
@@ -436,7 +436,7 @@ void godunov::compute_cdr_eb_states(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  time_stepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+  cdr_plasma_stepper::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -446,8 +446,8 @@ void godunov::compute_cdr_eb_states(){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    time_stepper::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
-    time_stepper::project_flux(*eb_gradients[i], eb_gradient);
+    cdr_plasma_stepper::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    cdr_plasma_stepper::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
 
@@ -484,8 +484,8 @@ void godunov::compute_cdr_eb_fluxes(){
 
   // Compute extrapolated fluxes and velocities at the EB
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  time_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, states, cdr_velocities, m_cdr->get_phase());
-  time_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
+  cdr_plasma_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, states, cdr_velocities, m_cdr->get_phase());
+  cdr_plasma_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -498,7 +498,7 @@ void godunov::compute_cdr_eb_fluxes(){
   }
 
   const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+  cdr_plasma_stepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
 				   extrap_cdr_velocities,
@@ -530,7 +530,7 @@ void godunov::compute_cdr_domain_states(){
   }
 
   // Extrapolate states to the domain faces
-  time_stepper::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+  cdr_plasma_stepper::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux.
   EBAMRIFData grad;
@@ -539,8 +539,8 @@ void godunov::compute_cdr_domain_states(){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
     const int idx = solver_it.get_solver();
     if(solver->is_mobile()){
-      time_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
-      time_stepper::project_domain(*domain_gradients[idx], grad);
+      cdr_plasma_stepper::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[idx]);
+      cdr_plasma_stepper::project_domain(*domain_gradients[idx], grad);
     }
     else{
       data_ops::set_value(*domain_gradients[idx], 0.0);
@@ -603,7 +603,7 @@ void godunov::compute_cdr_domain_fluxes(){
   const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
-  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+  cdr_plasma_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
 					  extrap_cdr_fluxes,
 					  extrap_cdr_densities,
 					  extrap_cdr_velocities,
@@ -640,7 +640,7 @@ void godunov::compute_reaction_network(const Real a_dt){
   }
 
   // We have already computed E and the gradients of the CDR equations, so we will call the
-  // time_stepper version where all that crap is inputs. Saves memory and flops. 
+  // cdr_plasma_stepper version where all that crap is inputs. Saves memory and flops. 
 
   Vector<EBAMRCellData*> cdr_src = m_cdr->get_sources();
   Vector<EBAMRCellData*> cdr_phi = m_cdr->get_states();
@@ -657,7 +657,7 @@ void godunov::compute_reaction_network(const Real a_dt){
   }
 
   // Compute all source terms
-  time_stepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
+  cdr_plasma_stepper::advance_reaction_network(cdr_src, rte_src, cdr_phi, cdr_grad, rte_phi, E, m_time, a_dt);
 
   // Make phi = phi + S*dt
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -865,7 +865,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
 
   // 2. Compute the electric field and update boundary conditions and kinetic coefficients
   if((m_step +1) % m_fast_poisson == 0){
-    time_stepper::solve_poisson();         // Update the Poisson equation
+    cdr_plasma_stepper::solve_poisson();         // Update the Poisson equation
     godunov::compute_E_into_scratch();       // Update electric fields too
   }
   godunov::compute_cdr_velo(m_time + a_dt);
@@ -968,7 +968,7 @@ void godunov::compute_cdr_velo(const Real a_time){
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
-  time_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_poisson_scratch->get_E_cell(), a_time);
+  cdr_plasma_stepper::compute_cdr_velocities(velocities, m_cdr->get_states(), m_poisson_scratch->get_E_cell(), a_time);
 }
 
 void godunov::compute_cdr_diffco(const Real a_time){
@@ -977,7 +977,7 @@ void godunov::compute_cdr_diffco(const Real a_time){
     pout() << "godunov::compute_cdr_diffco" << endl;
   }
 
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 }
 
 void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){

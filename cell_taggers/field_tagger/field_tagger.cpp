@@ -15,7 +15,7 @@ field_tagger::field_tagger(){
 }
 
 field_tagger::field_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-			   const RefCountedPtr<time_stepper>&           a_timestepper,
+			   const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 			   const RefCountedPtr<amr_mesh>&               a_amr,
 			   const RefCountedPtr<computational_geometry>& a_compgeom) : field_tagger() {
   this->define(a_plaskin, a_timestepper, a_amr, a_compgeom);

@@ -10,14 +10,14 @@
 
 #include "type_definitions.H"
 #include "amr_mesh.H"
-#include "time_stepper.H"
+#include "cdr_plasma_stepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
 /*!
   @brief Class for evolving plasma equations using the Euler-Maruyama scheme
 */
-class godunov : public time_stepper {
+class godunov : public cdr_plasma_stepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.

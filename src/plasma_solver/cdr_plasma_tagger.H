@@ -9,7 +9,8 @@
 #ifndef _CDR_PLASMA_TAGGER_
 #define _CDR_PLASMA_TAGGER_
 
-#include "cell_tagger.H" 
+#include "cell_tagger.H"
+#include "cdr_plasma_stepper.H"
 
 /*!
   @brief Abstract class for tagging cells across an AMR hierarchy
@@ -26,7 +27,7 @@ public:
     @brief Full constructor
   */
   cdr_plasma_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-		    const RefCountedPtr<time_stepper>&           a_timestepper,
+		    const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 		    const RefCountedPtr<amr_mesh>&               a_amr,
 		    const RefCountedPtr<computational_geometry>& a_compgeom);
 
@@ -43,7 +44,7 @@ public:
     @param[in] a_compgeom    Computational geometry
   */
   virtual void define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-		      const RefCountedPtr<time_stepper>&           a_timestepper,
+		      const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 		      const RefCountedPtr<amr_mesh>&               a_amr,
 		      const RefCountedPtr<computational_geometry>& a_compgeom);
 
@@ -100,7 +101,7 @@ protected:
   /*!
     @brief Time stepper
   */
-  RefCountedPtr<time_stepper> m_timestepper;
+  RefCountedPtr<cdr_plasma_stepper> m_timestepper;
 
   /*!
     @brief amr_mesh. Needed for computing tracer stuff

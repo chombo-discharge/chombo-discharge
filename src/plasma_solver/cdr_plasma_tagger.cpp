@@ -25,7 +25,7 @@ cdr_plasma_tagger::cdr_plasma_tagger(){
 }
 
 cdr_plasma_tagger::cdr_plasma_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-				     const RefCountedPtr<time_stepper>&           a_timestepper,
+				     const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 				     const RefCountedPtr<amr_mesh>&               a_amr,
 				     const RefCountedPtr<computational_geometry>& a_compgeom) : cdr_plasma_tagger() {
   this->define(a_plaskin, a_timestepper, a_amr, a_compgeom);
@@ -36,7 +36,7 @@ cdr_plasma_tagger::~cdr_plasma_tagger(){
 }
 
 void cdr_plasma_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
-			       const RefCountedPtr<time_stepper>&           a_timestepper,
+			       const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 			       const RefCountedPtr<amr_mesh>&               a_amr,
 			       const RefCountedPtr<computational_geometry>& a_compgeom){
   CH_TIME("cdr_plasma_tagger::define");
@@ -200,14 +200,14 @@ bool cdr_plasma_tagger::tag_cells(EBAMRTags& a_tags){
 }
 
 void cdr_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tags,
-				   const Vector<EBCellFAB*>& a_tracers,
-				   const Vector<EBCellFAB*>& a_grad_tracers,
-				   const int                 a_lvl,
-				   const Box                 a_box,
-				   const EBISBox&            a_ebisbox,
-				   const Real                a_time,
-				   const Real                a_dx,
-				   const RealVect            a_origin){
+					 const Vector<EBCellFAB*>& a_tracers,
+					 const Vector<EBCellFAB*>& a_grad_tracers,
+					 const int                 a_lvl,
+					 const Box                 a_box,
+					 const EBISBox&            a_ebisbox,
+					 const Real                a_time,
+					 const Real                a_dx,
+					 const RealVect            a_origin){
 
 
   
@@ -274,14 +274,14 @@ void cdr_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
 }
 
 void cdr_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_tags,
-				    const Vector<EBCellFAB*>& a_tracers,
-				    const Vector<EBCellFAB*>& a_grad_tracers,
-				    const int                 a_lvl,
-				    const Box                 a_box,
-				    const EBISBox&            a_ebisbox,
-				    const Real                a_time,
-				    const Real                a_dx,
-				    const RealVect            a_origin){
+					  const Vector<EBCellFAB*>& a_tracers,
+					  const Vector<EBCellFAB*>& a_grad_tracers,
+					  const int                 a_lvl,
+					  const Box                 a_box,
+					  const EBISBox&            a_ebisbox,
+					  const Real                a_time,
+					  const Real                a_dx,
+					  const RealVect            a_origin){
 
 
   

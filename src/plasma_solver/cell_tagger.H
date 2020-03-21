@@ -11,8 +11,6 @@
 
 #include "type_definitions.H"
 #include "computational_geometry.H"
-#include "time_stepper.H"
-#include "plasma_kinetics.H"
 #include "amr_mesh.H"
 #include "real_box.H"
 

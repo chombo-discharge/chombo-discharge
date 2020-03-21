@@ -108,15 +108,15 @@ public:
 					 const int a_depth5,
 					 const int a_depth6);
 
-  /*!
-    @brief Dump mass for cdr solvers
-  */
-  virtual void set_dump_mass(const bool a_dump_mass);
+  // /*!
+  //   @brief Dump mass for cdr solvers
+  // */
+  // virtual void set_dump_mass(const bool a_dump_mass);
 
-  /*!
-    @brief Dump charge for cdr and sigma solvers
-  */
-  virtual void set_dump_charge(const bool a_dump_charge);
+  // /*!
+  //   @brief Dump charge for cdr and sigma solvers
+  // */
+  // virtual void set_dump_charge(const bool a_dump_charge);
 
   /*!
     @brief Output on centroids or cell centers
@@ -598,35 +598,35 @@ protected:
   */
   virtual void write_geometry();
   
-  /*!
-    @brief Open file for mass dump
-  */
-  virtual void open_mass_dump_file(ofstream& a_file);
+  // /*!
+  //   @brief Open file for mass dump
+  // */
+  // virtual void open_mass_dump_file(ofstream& a_file);
 
-  /*!
-    @brief Open file for mass dump
-  */
-  virtual void open_charge_dump_file(ofstream& a_file);
+  // /*!
+  //   @brief Open file for mass dump
+  // */
+  // virtual void open_charge_dump_file(ofstream& a_file);
 
-  /*!
-    @brief Dump mass
-  */
-  virtual void dump_mass(ofstream& a_file);
+  // /*!
+  //   @brief Dump mass
+  // */
+  // virtual void dump_mass(ofstream& a_file);
 
-  /*!
-    @brief Dump charge
-  */
-  virtual void dump_charge(ofstream& a_file);
+  // /*!
+  //   @brief Dump charge
+  // */
+  // virtual void dump_charge(ofstream& a_file);
 
-  /*!
-    @brief Close file for mass dump
-  */
-  virtual void close_mass_dump_file(ofstream& a_file);
+  // /*!
+  //   @brief Close file for mass dump
+  // */
+  // virtual void close_mass_dump_file(ofstream& a_file);
 
-  /*!
-    @brief Close file for mass dump
-  */
-  virtual void close_charge_dump_file(ofstream& a_file);
+  // /*!
+  //   @brief Close file for mass dump
+  // */
+  // virtual void close_charge_dump_file(ofstream& a_file);
 
   /*!
     @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
