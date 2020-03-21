@@ -23,6 +23,12 @@ godunov::godunov(){
   m_extrap_advect = true;
 }
 
+godunov::godunov(RefCountedPtr<plasma_kinetics>& a_plaskin){
+  m_class_name    = "godunov";
+  m_plaskin       = a_plaskin;
+  m_extrap_advect = true;
+}
+
 godunov::~godunov(){
 
 }

@@ -48,15 +48,15 @@ public:
   */
   virtual void setup_and_run();
 
-  /*!
-    @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
-  */
-  virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
+  // /*!
+  //   @brief This function will read two checkpoint files, and compute the error norms on the finest level in a_chk_coar data 
+  // */
+  // virtual void compute_norm(std::string a_chk_coarse, std::string a_chk_fine);
 
-  /*!
-    @brief Compute the error norm on the coarsest level 
-  */
-  virtual void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2, const int a_species = -1);
+  // /*!
+  //   @brief Compute the error norm on the coarsest level 
+  // */
+  // virtual void compute_coarse_norm(const std::string a_chk1, const std::string a_chk2, const int a_species = -1);
 
   virtual void parse_regrid();
   virtual void parse_restart();
@@ -172,11 +172,6 @@ protected:
     @brief Geometry
   */
   RefCountedPtr<computational_geometry> m_compgeom;
-
-  /*!
-    @brief Plasma kinetics
-  */
-  RefCountedPtr<plasma_kinetics> m_plaskin;
 
   /*!
     @brief Time stepper
@@ -602,11 +597,6 @@ protected:
     @brief Set the computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
-
-  /*!
-    @brief Set the plasma kinetics
-  */
-  virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
 
   /*!
     @brief Set the time stepper

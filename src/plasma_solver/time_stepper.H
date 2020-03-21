@@ -39,6 +39,11 @@ public:
   */
   time_stepper();
 
+    /*!
+    @brief Constructor
+  */
+  time_stepper(RefCountedPtr<plasma_kinetics>& a_plaskin);
+
   /*!
     @brief Destructor
   */

@@ -50,7 +50,6 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   
   set_computational_geometry(a_compgeom);              // Set computational geometry
   set_time_stepper(a_timestepper);                     // Set time stepper
-  set_plasma_kinetics(a_plaskin);                      // Set plasma kinetics
   set_amr(a_amr);                                      // Set amr
   set_cell_tagger(a_celltagger);                       // Set cell tagger
   set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
@@ -90,7 +89,7 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
 
   // Define the cell tagger
   if(!m_celltagger.isNull()){ 
-    m_celltagger->define(m_plaskin, m_timestepper, m_amr, m_compgeom);
+    m_celltagger->define(a_plaskin, m_timestepper, m_amr, m_compgeom);
   }
 
   // Ok we're ready to go. 
@@ -1007,14 +1006,6 @@ void driver::set_computational_geometry(const RefCountedPtr<computational_geomet
   m_mfis     = a_compgeom->get_mfis();
 }
 
-void driver::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
-  CH_TIME("driver::set_plasma_kinetics");
-  if(m_verbosity > 5){
-    pout() << "driver::set_plasma_kinetics" << endl;
-  }
-  m_plaskin = a_plaskin;
-}
-
 void driver::set_time_stepper(const RefCountedPtr<time_stepper>& a_timestepper){
   CH_TIME("driver::set_time_stepper");
   if(m_verbosity > 5){
@@ -1632,7 +1623,6 @@ void driver::setup_fresh(const int a_init_regrids){
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
 
 #if 1 // This should somehow be moved to the new interface
-  m_timestepper->set_plasma_kinetics(m_plaskin);
   m_timestepper->set_potential(m_potential);                   // Potential
   m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -1697,7 +1687,6 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
 
 #if 1 // This should somehow be moved to the new interface
-  m_timestepper->set_plasma_kinetics(m_plaskin);         // Set plasma kinetics
   m_timestepper->set_potential(m_potential);             // Potential
   m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
   m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
@@ -2592,175 +2581,175 @@ void driver::close_charge_dump_file(ofstream& a_file){
   }
 }
 
-void driver::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
-  CH_TIME("driver::compute_norm");
-  if(m_verbosity > 5){
-    pout() << "driver::compute_norm" << endl;
-  }
+// void driver::compute_norm(std::string a_chk_coarse, std::string a_chk_fine){
+//   CH_TIME("driver::compute_norm");
+//   if(m_verbosity > 5){
+//     pout() << "driver::compute_norm" << endl;
+//   }
 
-  // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
-  // into those solvers.
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
+//   // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
+//   // into those solvers.
+//   RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
 
-  this->read_checkpoint_file(a_chk_fine); // This reads the fine-level data
+//   this->read_checkpoint_file(a_chk_fine); // This reads the fine-level data
 
-  Vector<EBISLayout>& fine_ebisl        = m_amr->get_ebisl(phase::gas);
-  Vector<DisjointBoxLayout>& fine_grids = m_amr->get_grids();
-  Vector<ProblemDomain>& fine_domains   = m_amr->get_domains();
+//   Vector<EBISLayout>& fine_ebisl        = m_amr->get_ebisl(phase::gas);
+//   Vector<DisjointBoxLayout>& fine_grids = m_amr->get_grids();
+//   Vector<ProblemDomain>& fine_domains   = m_amr->get_domains();
 
-  // Read the second file header
-  HDF5Handle handle_in(a_chk_coarse, HDF5Handle::OPEN_RDONLY);
-  HDF5HeaderData header;
-  header.readFromFile(handle_in);
-  int finest_coar_level = header.m_int["finest_level"];
+//   // Read the second file header
+//   HDF5Handle handle_in(a_chk_coarse, HDF5Handle::OPEN_RDONLY);
+//   HDF5HeaderData header;
+//   header.readFromFile(handle_in);
+//   int finest_coar_level = header.m_int["finest_level"];
 
 
-  // Read coarse data into these data holders
-  Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
-  for (int i = 0; i < cdr_densities.size(); i++){
-    cdr_densities[i].resize(1+finest_coar_level);
-  }
+//   // Read coarse data into these data holders
+//   Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
+//   for (int i = 0; i < cdr_densities.size(); i++){
+//     cdr_densities[i].resize(1+finest_coar_level);
+//   }
 
-  // Read cdr data
-  for (int lvl = 0; lvl <= finest_coar_level; lvl++){
-    handle_in.setGroupToLevel(lvl);
+//   // Read cdr data
+//   for (int lvl = 0; lvl <= finest_coar_level; lvl++){
+//     handle_in.setGroupToLevel(lvl);
     
-    for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      RefCountedPtr<cdr_solver>& solver = solver_it();
-      const std::string solver_name = solver->get_name();
+//     for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+//       const int idx = solver_it.get_solver();
+//       RefCountedPtr<cdr_solver>& solver = solver_it();
+//       const std::string solver_name = solver->get_name();
       
-      EBCellFactory cellfact(fine_ebisl[lvl]);
-      cdr_densities[idx][lvl] = RefCountedPtr<LevelData<EBCellFAB> > 
-	(new LevelData<EBCellFAB>(fine_grids[lvl], 1, 3*IntVect::Unit, cellfact));
+//       EBCellFactory cellfact(fine_ebisl[lvl]);
+//       cdr_densities[idx][lvl] = RefCountedPtr<LevelData<EBCellFAB> > 
+// 	(new LevelData<EBCellFAB>(fine_grids[lvl], 1, 3*IntVect::Unit, cellfact));
       
-      read<EBCellFAB>(handle_in, *cdr_densities[idx][lvl], solver_name, fine_grids[lvl], Interval(), false);
-    }
-  }
+//       read<EBCellFAB>(handle_in, *cdr_densities[idx][lvl], solver_name, fine_grids[lvl], Interval(), false);
+//     }
+//   }
 
 
-  // We will now compute n_2h - A(n_h)
-  pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
-  EBCellFactory cellfact(fine_ebisl[finest_coar_level]);
-  LevelData<EBCellFAB> diff(fine_grids[finest_coar_level], 1, 0*IntVect::Unit, cellfact);
-  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const std::string solver_name = solver->get_name();
+//   // We will now compute n_2h - A(n_h)
+//   pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
+//   EBCellFactory cellfact(fine_ebisl[finest_coar_level]);
+//   LevelData<EBCellFAB> diff(fine_grids[finest_coar_level], 1, 0*IntVect::Unit, cellfact);
+//   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+//     const int idx = solver_it.get_solver();
+//     RefCountedPtr<cdr_solver>& solver = solver_it();
+//     const std::string solver_name = solver->get_name();
 
-    LevelData<EBCellFAB>& fine_sol = *solver->get_state()[finest_coar_level];
-    LevelData<EBCellFAB>& coar_sol = *cdr_densities[idx][finest_coar_level];
+//     LevelData<EBCellFAB>& fine_sol = *solver->get_state()[finest_coar_level];
+//     LevelData<EBCellFAB>& coar_sol = *cdr_densities[idx][finest_coar_level];
 
-    data_ops::set_value(diff, 0.0);
-    data_ops::incr(diff, coar_sol,   1.0);
-    data_ops::incr(diff, fine_sol,  -1.0);
-    data_ops::scale(diff, 1.E-18);
+//     data_ops::set_value(diff, 0.0);
+//     data_ops::incr(diff, coar_sol,   1.0);
+//     data_ops::incr(diff, fine_sol,  -1.0);
+//     data_ops::scale(diff, 1.E-18);
 
-    writeEBLevelname (&diff, "diff.hdf5");
-    Real volume;
+//     writeEBLevelname (&diff, "diff.hdf5");
+//     Real volume;
 
-    Real Linf;
-    Real L1;
-    Real L2;
+//     Real Linf;
+//     Real L1;
+//     Real L2;
 
-    Linf = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 0);
-    L1   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 1);
-    L2   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 2);
+//     Linf = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 0);
+//     L1   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 1);
+//     L2   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[finest_coar_level], 2);
     
-    pout() << idx << "\t Linf = " << Linf << "\t L1 = " << L1 << "\t L2 = " << L2 << endl;
-  }
+//     pout() << idx << "\t Linf = " << Linf << "\t L1 = " << L1 << "\t L2 = " << L2 << endl;
+//   }
   
-  handle_in.close();
-}
+//   handle_in.close();
+// }
 
-void driver::compute_coarse_norm(const std::string a_chk_coarse, const std::string a_chk_fine, const int a_species){
-  CH_TIME("driver::compute_coarse_norm");
-  if(m_verbosity > 5){
-    pout() << "driver::compute_coarse_norm" << endl;
-  }
+// void driver::compute_coarse_norm(const std::string a_chk_coarse, const std::string a_chk_fine, const int a_species){
+//   CH_TIME("driver::compute_coarse_norm");
+//   if(m_verbosity > 5){
+//     pout() << "driver::compute_coarse_norm" << endl;
+//   }
 
-  // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
-  // into those solvers.
-  RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
+//   // TLDR: This routine is long and ugly. In short, it instantiates a all solvers and read the fine-level checkpoint file
+//   // into those solvers.
+//   RefCountedPtr<cdr_layout>& cdr         = m_timestepper->get_cdr();
 
-  this->read_checkpoint_file(a_chk_fine); // This reads the fine-level data
+//   this->read_checkpoint_file(a_chk_fine); // This reads the fine-level data
 
-  Vector<EBISLayout>& fine_ebisl        = m_amr->get_ebisl(phase::gas);
-  Vector<DisjointBoxLayout>& fine_grids = m_amr->get_grids();
-  Vector<ProblemDomain>& fine_domains   = m_amr->get_domains();
+//   Vector<EBISLayout>& fine_ebisl        = m_amr->get_ebisl(phase::gas);
+//   Vector<DisjointBoxLayout>& fine_grids = m_amr->get_grids();
+//   Vector<ProblemDomain>& fine_domains   = m_amr->get_domains();
 
-  // Read the second file header
-  HDF5Handle handle_in(a_chk_coarse, HDF5Handle::OPEN_RDONLY);
-  HDF5HeaderData header;
-  header.readFromFile(handle_in);
-  int finest_coar_level = 0;
-  Real dt = header.m_real["dt"];
+//   // Read the second file header
+//   HDF5Handle handle_in(a_chk_coarse, HDF5Handle::OPEN_RDONLY);
+//   HDF5HeaderData header;
+//   header.readFromFile(handle_in);
+//   int finest_coar_level = 0;
+//   Real dt = header.m_real["dt"];
 
-  // Read coarse data into these data holders
-  Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
-  for (int i = 0; i < cdr_densities.size(); i++){
-    cdr_densities[i].resize(1+finest_coar_level);
-  }
+//   // Read coarse data into these data holders
+//   Vector<EBAMRCellData> cdr_densities(1 + m_plaskin->get_num_species());
+//   for (int i = 0; i < cdr_densities.size(); i++){
+//     cdr_densities[i].resize(1+finest_coar_level);
+//   }
 
-  // Read cdr data
-  for (int lvl = 0; lvl <= finest_coar_level; lvl++){
-    handle_in.setGroupToLevel(lvl);
+//   // Read cdr data
+//   for (int lvl = 0; lvl <= finest_coar_level; lvl++){
+//     handle_in.setGroupToLevel(lvl);
     
-    for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      RefCountedPtr<cdr_solver>& solver = solver_it();
-      const std::string solver_name = solver->get_name();
+//     for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+//       const int idx = solver_it.get_solver();
+//       RefCountedPtr<cdr_solver>& solver = solver_it();
+//       const std::string solver_name = solver->get_name();
       
-      EBCellFactory cellfact(fine_ebisl[lvl]);
-      cdr_densities[idx][lvl] = RefCountedPtr<LevelData<EBCellFAB> > 
-	(new LevelData<EBCellFAB>(fine_grids[lvl], 1, 3*IntVect::Unit, cellfact));
+//       EBCellFactory cellfact(fine_ebisl[lvl]);
+//       cdr_densities[idx][lvl] = RefCountedPtr<LevelData<EBCellFAB> > 
+// 	(new LevelData<EBCellFAB>(fine_grids[lvl], 1, 3*IntVect::Unit, cellfact));
       
-      read<EBCellFAB>(handle_in, *cdr_densities[idx][lvl], solver_name, fine_grids[lvl], Interval(), false);
-    }
-  }
+//       read<EBCellFAB>(handle_in, *cdr_densities[idx][lvl], solver_name, fine_grids[lvl], Interval(), false);
+//     }
+//   }
 
 
-  // For each of the
-  if(a_species == -1){
-    pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
-  }
-  const int compute_level = 0;
-  EBCellFactory cellfact(fine_ebisl[compute_level]);
-  LevelData<EBCellFAB> diff(fine_grids[compute_level], 1, 0*IntVect::Unit, cellfact);
-  if(a_species == -1){
-    pout() << "Linf" << "\t L1" << "\t L2" << endl;
-  }
-  for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    const std::string solver_name = solver->get_name();
+//   // For each of the
+//   if(a_species == -1){
+//     pout() << "files are '"  << a_chk_coarse << "' and '" << a_chk_fine << "'" << endl;
+//   }
+//   const int compute_level = 0;
+//   EBCellFactory cellfact(fine_ebisl[compute_level]);
+//   LevelData<EBCellFAB> diff(fine_grids[compute_level], 1, 0*IntVect::Unit, cellfact);
+//   if(a_species == -1){
+//     pout() << "Linf" << "\t L1" << "\t L2" << endl;
+//   }
+//   for (cdr_iterator solver_it = cdr->iterator(); solver_it.ok(); ++solver_it){
+//     const int idx = solver_it.get_solver();
+//     RefCountedPtr<cdr_solver>& solver = solver_it();
+//     const std::string solver_name = solver->get_name();
 
-    LevelData<EBCellFAB>& fine_sol = *solver->get_state()[compute_level];
-    LevelData<EBCellFAB>& coar_sol = *cdr_densities[idx][compute_level];
+//     LevelData<EBCellFAB>& fine_sol = *solver->get_state()[compute_level];
+//     LevelData<EBCellFAB>& coar_sol = *cdr_densities[idx][compute_level];
 
-    data_ops::set_value(diff, 0.0);
-    data_ops::incr(diff, coar_sol,   1.0);
-    data_ops::incr(diff, fine_sol,  -1.0);
+//     data_ops::set_value(diff, 0.0);
+//     data_ops::incr(diff, coar_sol,   1.0);
+//     data_ops::incr(diff, fine_sol,  -1.0);
 
-    writeEBLevelname (&diff, "diff.hdf5");
-    Real volume;
+//     writeEBLevelname (&diff, "diff.hdf5");
+//     Real volume;
 
 
-    const Real Linf = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 0);
-    const Real L1   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 1);
-    const Real L2   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 2);
+//     const Real Linf = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 0);
+//     const Real L1   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 1);
+//     const Real L2   = EBLevelDataOps::kappaNorm(volume, diff, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 2);
 
-    const Real sLinf = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 0);
-    const Real sL1   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 1);
-    const Real sL2   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 2);
+//     const Real sLinf = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 0);
+//     const Real sL1   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 1);
+//     const Real sL2   = EBLevelDataOps::kappaNorm(volume, fine_sol, EBLEVELDATAOPS_ALLVOFS, fine_domains[compute_level], 2);
 
-    if(a_species == -1){
-      pout() << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
-    }
-    else if(idx == a_species){
-      pout() << dt << "\t" << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
-    }
-  }
+//     if(a_species == -1){
+//       pout() << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
+//     }
+//     else if(idx == a_species){
+//       pout() << dt << "\t" << Linf/sLinf << "\t" << L1/sL1 << "\t" << L2/sL2 << endl;
+//     }
+//   }
   
-  handle_in.close();
-}
+//   handle_in.close();
+// }

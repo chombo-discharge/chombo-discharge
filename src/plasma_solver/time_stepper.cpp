@@ -26,6 +26,10 @@ time_stepper::time_stepper(){
   m_subcycle = false;
 }
 
+time_stepper::time_stepper(RefCountedPtr<plasma_kinetics>& a_plaskin) : time_stepper() {
+  m_plaskin = a_plaskin;
+}
+
 time_stepper::~time_stepper(){
   deallocate_internals();
 }
@@ -74,7 +78,6 @@ bool time_stepper::solve_poisson(MFAMRCellData&                a_potential,
 
   return converged;
 }
-
 
 void time_stepper::allocate_internals(){
   CH_TIME("time_stepper::allocate_internals"); 
