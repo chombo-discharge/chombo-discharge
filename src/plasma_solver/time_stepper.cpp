@@ -3649,7 +3649,7 @@ void time_stepper::compute_flux(LevelData<EBCellFAB>&       a_flux,
   data_ops::multiply_scalar(a_flux, a_density);
 }
 
-void time_stepper::compute_J(EBAMRCellData& a_J){
+void time_stepper::compute_J(EBAMRCellData& a_J) const{
   CH_TIME("time_stepper::compute_J(amr)");
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_J(amr)" << endl;
@@ -3666,7 +3666,7 @@ void time_stepper::compute_J(EBAMRCellData& a_J){
   m_amr->interp_ghost(a_J, m_cdr->get_phase());
 }
 
-void time_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl){
+void time_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) const{
   CH_TIME("time_stepper::compute_J(level)");
   if(m_verbosity > 5){
     pout() << "time_stepper::compute_J(level)" << endl;
@@ -3678,8 +3678,7 @@ void time_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl){
 
   const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
   const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
-
-
+  
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
     RefCountedPtr<species>& spec      = solver_it.get_species();
@@ -4978,6 +4977,7 @@ int time_stepper::get_num_plot_vars() const{
 
   ncomp += m_poisson->get_num_plotvars();
   ncomp += m_sigma->get_num_plotvars();
+  ncomp += SpaceDim; // For plotting the current density
 
   return ncomp;
 }
@@ -5010,6 +5010,34 @@ void time_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::string>&
     a_plotvar_names.append(solver->get_plotvar_names());
     solver->write_plot_data(a_output, a_icomp);
   }
+
+  // Write the current to the output
+  this->write_J(a_output, a_icomp);
+  a_plotvar_names.push_back("x-J");
+  a_plotvar_names.push_back("y-J");
+  if(SpaceDim == 3){
+    a_plotvar_names.push_back("z-J");
+  }
+  
+}
+
+void time_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
+  CH_TIME("time_stepper::write_J");
+  if(m_verbosity > 3){
+    pout() << "time_stepper::write_J" << endl;
+  }
+
+  // Allocates storage and computes J
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, phase::gas, SpaceDim);
+  this->compute_J(scratch);
+
+  const Interval src_interv(0, SpaceDim-1);
+  const Interval dst_interv(a_icomp, a_icomp + SpaceDim -1);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+  }
+  a_icomp += SpaceDim;
 }
 
 void time_stepper::post_regrid(){

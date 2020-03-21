@@ -489,11 +489,6 @@ protected:
   */
   bool m_plot_ranks;
 
-  /*!
-    @brief Plot space charge current
-  */
-  bool m_plot_J;
-
   // Output parameters that go into checkpoint files
   Vector<Real> m_time_history;        // Simulation time
   Vector<Real> m_voltage_history;     // Applied voltage
@@ -722,10 +717,6 @@ protected:
   */
   virtual void write_ranks(EBAMRCellData& a_output, int& a_comp);
 
-  /*!
-    @brief Write space charge current to output
-  */
-  virtual void write_J(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Return the finest tag level

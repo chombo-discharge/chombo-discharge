@@ -31,6 +31,7 @@ public:
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl);
   virtual int get_num_plot_vars() const;
   virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
+  virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
   virtual void post_regrid();
   virtual void post_checkpoint_setup();
 
@@ -278,12 +279,12 @@ public:
   /*!
     @brief Compute the current density
   */
-  virtual void compute_J(EBAMRCellData& a_J);
+  virtual void compute_J(EBAMRCellData& a_J) const;
 
   /*!
     @brief Compute the current density. Level version. 
   */
-  virtual void compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl);
+  virtual void compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) const;
 
   
   /*!

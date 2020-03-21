@@ -107,7 +107,6 @@ int driver::get_num_plot_vars() const {
 
   if(m_plot_tags)            num_output = num_output + 1;
   if(m_plot_ranks)           num_output = num_output+1;
-  if(m_plot_J)               num_output = num_output + SpaceDim;
 
   return num_output;
 }
@@ -122,13 +121,6 @@ Vector<std::string> driver::get_plotvar_names() const {
   
   if(m_plot_tags) names.push_back("cell_tags");
   if(m_plot_ranks) names.push_back("mpi_rank");
-  if(m_plot_J){
-    names.push_back("x-J");
-    names.push_back("y-J");
-    if(SpaceDim == 3){
-      names.push_back("z-J");
-    }
-  }
   return names;
 }
 
@@ -1396,12 +1388,10 @@ void driver::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   m_plot_tags   = false;
-  m_plot_J      = false;
   m_plot_ranks  = false;
   
   for (int i = 0; i < num; i++){
     if(     str[i] == "tags")     m_plot_tags   = true;
-    else if(str[i] == "J")        m_plot_J      = true;
     else if(str[i] == "mpi_rank") m_plot_ranks  = true;
   }
 }
@@ -2222,7 +2212,6 @@ void driver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   if(m_plot_tags)   write_tags(a_output, a_comp);
   if(m_plot_ranks)  write_ranks(a_output, a_comp);
-  if(m_plot_J)      write_J(a_output, a_comp);
 }
 
 void driver::write_tags(EBAMRCellData& a_output, int& a_comp){
@@ -2287,25 +2276,6 @@ void driver::write_ranks(EBAMRCellData& a_output, int& a_comp){
   }
 
   a_comp++; 
-}
-
-void driver::write_J(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("driver::write_J");
-  if(m_verbosity > 3){
-    pout() << "driver::write_J" << endl;
-  }
-
-  // Allocates storage and computes J
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, phase::gas, SpaceDim);
-  m_timestepper->compute_J(scratch);
-
-  const Interval src_interv(0, SpaceDim-1);
-  const Interval dst_interv(a_comp, a_comp + SpaceDim -1);
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-  }
-  a_comp += SpaceDim;
 }
 
 void driver::write_checkpoint_file(){
