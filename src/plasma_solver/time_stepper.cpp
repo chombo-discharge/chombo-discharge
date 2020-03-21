@@ -18,12 +18,18 @@
 #define USE_FAST_VELOCITIES 0 // I think there's a bug in the C-style VLA methods. Please don't use this until this is clarified.
 #define USE_FAST_DIFFUSION  1
 
+Real time_stepper::s_constant_one(const RealVect a_pos){
+  return 1.0;
+}
+
 time_stepper::time_stepper(){
   m_class_name = "time_stepper";
   m_verbosity  = -1;
   m_solver_verbosity = -1;
 
   m_subcycle = false;
+
+  set_poisson_wall_func(s_constant_one);
 }
 
 time_stepper::time_stepper(RefCountedPtr<plasma_kinetics>& a_plaskin) : time_stepper() {
@@ -4232,40 +4238,6 @@ void time_stepper::set_potential(Real (*a_potential)(const Real a_time)){
   m_potential     = a_potential;
 }
 
-void time_stepper::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("time_stepper::set_poisson_wall_func(dir, side, func)");
-  if(m_verbosity > 4){
-    pout() << "time_stepper::set_poisson_wall_func(dir, side, func)" << endl;
-  }
-
-  if(a_dir == 0){
-    if(a_side == Side::Lo){
-      m_wall_func_x_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_x_hi = a_func;
-    }
-  }
-  else if(a_dir == 1){
-    if(a_side == Side::Lo){
-      m_wall_func_y_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_y_hi = a_func;
-    }
-  }
-#if CH_SPACEDIM==3
-  else if(a_dir == 2){
-    if(a_side == Side::Lo){
-      m_wall_func_z_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_z_hi = a_func;
-    }
-  }
-#endif
-}
-
 void time_stepper::parse_verbosity(){
   CH_TIME("time_stepper::parse_verbosity");
   if(m_verbosity > 5){
@@ -5104,4 +5076,51 @@ void time_stepper::post_checkpoint_setup(){
 
   // Derived class stuff
   this->init();
+}
+
+void time_stepper::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("time_stepper::set_poisson_wall_func(dir, side, func)");
+  if(m_verbosity > 4){
+    pout() << "time_stepper::set_poisson_wall_func(dir, side, func)" << endl;
+  }
+
+  if(a_dir == 0){
+    if(a_side == Side::Lo){
+      m_wall_func_x_lo = a_func;
+    }
+    else if(a_side == Side::Hi){
+      m_wall_func_x_hi = a_func;
+    }
+  }
+  else if(a_dir == 1){
+    if(a_side == Side::Lo){
+      m_wall_func_y_lo = a_func;
+    }
+    else if(a_side == Side::Hi){
+      m_wall_func_y_hi = a_func;
+    }
+  }
+#if CH_SPACEDIM==3
+  else if(a_dir == 2){
+    if(a_side == Side::Lo){
+      m_wall_func_z_lo = a_func;
+    }
+    else if(a_side == Side::Hi){
+      m_wall_func_z_hi = a_func;
+    }
+  }
+#endif
+}
+
+void time_stepper::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
+  CH_TIME("time_stepper::set_poisson_wall_func(func)");
+  if(m_verbosity > 4){
+    pout() << "time_stepper::set_poisson_wall_func(func)" << endl;
+  }
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      this->set_poisson_wall_func(dir, sit(), a_func);
+    }
+  }
 }

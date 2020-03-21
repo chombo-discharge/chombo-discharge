@@ -26,6 +26,11 @@
 class time_stepper : public time_integrator {
 public:
 
+  /*!
+    @brief Default function that is passed to mapped boundary conditions
+  */
+  static Real s_constant_one(const RealVect a_pos);
+
   // New functions for new driver interface
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const;
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl);
@@ -34,6 +39,8 @@ public:
   virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
   virtual void post_regrid();
   virtual void post_checkpoint_setup();
+  virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
+  virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
 
   /*!
     @brief Constructor
@@ -943,11 +950,6 @@ public:
     @brief Set potential
   */
   virtual void set_potential(Real (*a_potential)(const Real a_time));
-
-  /*!
-    @brief Set wall function for Poisson equation boundary conditions
-  */
-  virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
 
   /*!
     @brief RTE advance using data existing in other solvers

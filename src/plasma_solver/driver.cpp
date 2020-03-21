@@ -21,10 +21,6 @@
 #include <EBAMRDataOps.H>
 #include <ParmParse.H>
 
-Real driver::s_constant_one(const RealVect a_pos){
-  return 1.0;
-}
-
 driver::driver(){
   CH_TIME("driver::driver(weak)");
   if(m_verbosity > 5){
@@ -52,7 +48,6 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   set_amr(a_amr);                                      // Set amr
   set_cell_tagger(a_celltagger);                       // Set cell tagger
   set_geo_coarsen(a_geocoarsen);                       // Set geo coarsener
-  set_poisson_wall_func(s_constant_one);               // Set wall function
 
   // Parse some class options
   parse_regrid();
@@ -88,7 +83,6 @@ driver::driver(const RefCountedPtr<computational_geometry>& a_compgeom,
   parse_geometry_generation();
 
   // Ok we're ready to go. 
-  m_potential_set = false;
   m_step          = 0;
   m_time          = 0.0;
 }
@@ -1408,63 +1402,6 @@ void driver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr->set_mfis(m_compgeom->get_mfis());
 }
 
-void driver::set_potential(Real (*a_potential)(const Real a_time)){
-  CH_TIME("driver::set_potential");
-  if(m_verbosity > 5){
-    pout() << "driver::set_potential" << endl;
-  }
-  
-  m_potential     = a_potential;
-  m_potential_set = true;
-}
-
-void driver::set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("driver::set_poisson_wall_func(dir, side, func)");
-  if(m_verbosity > 4){
-    pout() << "driver::set_poisson_wall_func(dir, side, func)" << endl;
-  }
-
-  if(a_dir == 0){
-    if(a_side == Side::Lo){
-      m_wall_func_x_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_x_hi = a_func;
-    }
-  }
-  else if(a_dir == 1){
-    if(a_side == Side::Lo){
-      m_wall_func_y_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_y_hi = a_func;
-    }
-  }
-#if CH_SPACEDIM==3
-  else if(a_dir == 2){
-    if(a_side == Side::Lo){
-      m_wall_func_z_lo = a_func;
-    }
-    else if(a_side == Side::Hi){
-      m_wall_func_z_hi = a_func;
-    }
-  }
-#endif
-}
-
-void driver::set_poisson_wall_func(Real (*a_func)(const RealVect a_pos)){
-  CH_TIME("driver::set_poisson_wall_func(func)");
-  if(m_verbosity > 4){
-    pout() << "driver::set_poisson_wall_func(func)" << endl;
-  }
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      this->set_poisson_wall_func(dir, sit(), a_func);
-    }
-  }
-}
-
 void driver::setup(const int a_init_regrids, const bool a_restart, const std::string a_restart_file){
   CH_TIME("driver::setup");
   if(m_verbosity > 5){
@@ -1590,18 +1527,6 @@ void driver::setup_fresh(const int a_init_regrids){
   m_timestepper->set_amr(m_amr);
   m_timestepper->set_computational_geometry(m_compgeom);       // Set computational geometry
 
-#if 1 // This should somehow be moved to the new interface
-  m_timestepper->set_potential(m_potential);                   // Potential
-  m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_timestepper->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_timestepper->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
-#if CH_SPACEDIM==3
-  m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
-#endif
-#endif
-
   // time_stepper setup
   m_timestepper->setup_solvers();                                 // Instantiate solvers
   m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);  // Sync solver times
@@ -1653,19 +1578,6 @@ void driver::setup_for_restart(const int a_init_regrids, const std::string a_res
 
   m_timestepper->set_amr(m_amr);                         // Set amr
   m_timestepper->set_computational_geometry(m_compgeom); // Set computational geometry
-
-#if 1 // This should somehow be moved to the new interface
-  m_timestepper->set_potential(m_potential);             // Potential
-  m_timestepper->set_poisson_wall_func(0, Side::Lo, m_wall_func_x_lo); // Set function-based Poisson on xlo
-  m_timestepper->set_poisson_wall_func(0, Side::Hi, m_wall_func_x_hi); // Set function-based Poisson on xhi
-  m_timestepper->set_poisson_wall_func(1, Side::Lo, m_wall_func_y_lo); // Set function-based Poisson on ylo
-  m_timestepper->set_poisson_wall_func(1, Side::Hi, m_wall_func_y_hi); // Set function-based Poisson on yhi
-#if CH_SPACEDIM==3
-  m_timestepper->set_poisson_wall_func(2, Side::Lo, m_wall_func_z_lo); // Set function-based Poisson on zlo
-  m_timestepper->set_poisson_wall_func(2, Side::Hi, m_wall_func_z_hi); // Set function-based Poisson on zhi
-#endif
-  
-#endif
 
   // Read checkpoint file
   this->read_checkpoint_file(a_restart_file); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
@@ -1766,7 +1678,6 @@ void driver::sanity_check(){
   }
 
   CH_assert(!m_timestepper.isNull());
-  CH_assert(m_potential_set);
 }
 
 void driver::step_report(const Real a_start_time, const Real a_end_time, const int a_max_steps){
