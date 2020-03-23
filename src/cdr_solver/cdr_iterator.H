@@ -81,7 +81,7 @@ public:
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<species>& get_species();
+  virtual RefCountedPtr<cdr_species>& get_species();
 
   /*!
     @brief Get current data
@@ -118,7 +118,7 @@ protected:
   /*!
     @brief Ions
   */
-  Vector<RefCountedPtr<species> > m_species;
+  Vector<RefCountedPtr<cdr_species> > m_species;
 
   /*!
     @brief Cell-centered data

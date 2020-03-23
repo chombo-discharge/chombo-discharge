@@ -11,7 +11,7 @@
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
-#include "species.H"
+#include "cdr_species.H"
 
 /*!
   @brief Abstract class for cdr-equations. This is (almost) a whole solver. 
@@ -112,7 +112,7 @@ public:
   /*!
     @brief Set species
   */
-  virtual void set_species(const RefCountedPtr<species> a_species);
+  virtual void set_species(const RefCountedPtr<cdr_species> a_species);
   
   /*!
     @brief Set computational geometry
@@ -356,7 +356,7 @@ protected:
   /*!
     @brief Species
   */
-  RefCountedPtr<species> m_species;
+  RefCountedPtr<cdr_species> m_species;
   
   /*!
     @brief Computational geometry

@@ -670,10 +670,10 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	    for (int i = 0; i < num_photons; i++){
 	      const RealVect dir = random_direction();
 	      if(m_random_kappa){
-		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_random_kappa(), weight));
+		particles.append(photon(pos, dir*units::s_c0, m_rte_species->get_random_kappa(), weight));
 	      }
 	      else{
-		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+		particles.append(photon(pos, dir*units::s_c0, m_rte_species->get_kappa(pos), weight));
 	      }
 	    }
 	  }
@@ -695,10 +695,10 @@ void mc_photo::generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& 
 	    for (int i = 0; i < num_photons; i++){
 	      const RealVect dir = random_direction();
 	      if(m_random_kappa){
-		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_random_kappa(), weight));
+		particles.append(photon(pos, dir*units::s_c0, m_rte_species->get_random_kappa(), weight));
 	      }
 	      else{
-		particles.append(photon(pos, dir*units::s_c0, m_photon_group->get_kappa(pos), weight));
+		particles.append(photon(pos, dir*units::s_c0, m_rte_species->get_kappa(pos), weight));
 	      }
 	    }
 	  }

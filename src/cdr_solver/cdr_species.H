@@ -1,12 +1,12 @@
 /*!
-  @file species.H
-  @brief Declaration of a species class that passes in names and initial data to the cdr_solver
+  @file   cdr_species.H
+  @brief  Declaration of a cdr_species class that passes in names and initial data to the cdr_solver
   @author Robert Marskar
-  @date Jan. 2018
+  @date   Jan. 2018
 */
 
-#ifndef _SPECIES_
-#define _SPECIES_
+#ifndef _CDR_SPECIES_
+#define _CDR_SPECIES_
 
 #include <RealVect.H>
 #include <Particle.H>
@@ -14,28 +14,28 @@
 #include <MeshInterp.H>
 
 /*!
-  @brief Abstract class that describes an electron or species
+  @brief Abstract class that describes an electron or cdr_species
 */
-class species {
+class cdr_species {
 public:
   /*!
     @brief Weak constructor. 
   */
-  species();
+  cdr_species();
 
   /*!
     @brief Full constructor
   */
-  species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
+  cdr_species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
 
   /*!
     @brief Destructor
   */
-  virtual ~species();
+  virtual ~cdr_species();
 
   /*!
     @brief Initial data. You really should overwrite this one. 
-    @param[in] a_pos Positspecies
+    @param[in] a_pos Positcdr_species
     @param[in] a_time Time
   */
   virtual Real initial_data(const RealVect a_pos, const Real a_time) const = 0;
@@ -61,12 +61,12 @@ public:
   virtual bool is_diffusive() const;
 
   /*!
-    @brief Mobile species or not
+    @brief Mobile cdr_species or not
   */
   virtual bool is_mobile() const;
 
   /*!
-    @brief Flag species for output to the plasma solver
+    @brief Flag cdr_species for output to the plasma solver
   */
   virtual bool force_output() const;
 
@@ -93,7 +93,7 @@ public:
 protected:
 
   /*!
-    @brief Species name
+    @brief Cdr_Species name
   */
   std::string m_name;
 
@@ -108,17 +108,17 @@ protected:
   int m_charge;
 
   /*!
-    @brief Diffusive species or not
+    @brief Diffusive cdr_species or not
   */
   bool m_diffusive;
 
   /*!
-    @brief Mobile species or not
+    @brief Mobile cdr_species or not
   */
   bool m_mobile;
 
   /*!
-    @brief Force output of species. This is relevant for plasma_engine only. 
+    @brief Force output of cdr_species. This is relevant for plasma_engine only. 
   */
   bool m_force_output;
 

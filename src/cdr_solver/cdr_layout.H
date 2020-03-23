@@ -8,7 +8,6 @@
 #ifndef _CDR_LAYOUT_
 #define _CDR_LAYOUT_
 
-#include "plasma_kinetics.H"
 #include "cdr_solver.H"
 
 class cdr_iterator;
@@ -19,10 +18,12 @@ class cdr_iterator;
 class cdr_layout {
 public:
 
+  cdr_layout();
+
   /*!
     @brief Full constructor
   */
-  cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin);
+  cdr_layout(const Vector<RefCountedPtr<cdr_species> >& a_plaskin);
 
   /*!
     @brief Destructor
@@ -203,7 +204,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<species> >& get_species();
+  virtual Vector<RefCountedPtr<cdr_species> >& get_species();
 
   /*!
     @brief Get all source terms
@@ -255,7 +256,7 @@ protected:
   /*!
     @brief Species
   */
-  Vector<RefCountedPtr<species> > m_species;
+  Vector<RefCountedPtr<cdr_species> > m_species;
 
   /*!
     @brief Verbosity
@@ -288,7 +289,7 @@ class cdr_factory {
 public:
   cdr_factory();
   ~cdr_factory();
-  RefCountedPtr<cdr_layout> new_layout(const RefCountedPtr<plasma_kinetics> a_plaskin) const;
+  RefCountedPtr<cdr_layout> new_layout(const Vector<RefCountedPtr<cdr_species> > a_species) const;
 };
 
 #endif

@@ -142,7 +142,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
     pout() << "cdr_plasma_stepper::advance_reaction_network(nograd)" << endl;
   }
 
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
 
   Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -186,8 +186,8 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
   }
 
 
-  const int num_species = m_plaskin->get_num_species();
-  const int num_photons = m_plaskin->get_num_photons();
+  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_photons = m_plaskin->get_num_rte_species();
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     Vector<LevelData<EBCellFAB>* > particle_sources(num_species);
@@ -251,8 +251,8 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
   const Real zero = 0.0;
 
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
 
   // Stencils for extrapolating things to cell centroids
@@ -374,8 +374,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
   const Real zero = 0.0;
     
 
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -519,8 +519,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
   const Real zero = 0.0;
     
 
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -659,8 +659,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
 
   const Real zero = 0.0;
 
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -850,8 +850,8 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
 
   const Real zero = 0.0;
   
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -984,8 +984,8 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
 
     const Real zero = 0.0;
   
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -1088,7 +1088,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
 
   // Allocate data for cell-centered diffusion coefficients
@@ -1129,7 +1129,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<EBAMRCellData>&       a_
   
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1158,7 +1158,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
 
@@ -1211,7 +1211,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a
   }
 
   const int comp        = 0;
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -1295,7 +1295,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>& 
   }
 
   const int comp        = 0;
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
   const RealVect origin = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
@@ -1374,7 +1374,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>& 
   }
 
   const int comp        = 0;
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
   const RealVect origin = m_amr->get_prob_lo();
 
   // Things that are passed into plasma_kinetics
@@ -1458,7 +1458,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&      
   }
 
   const int comp = 0;
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -1506,7 +1506,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_dif
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
   const Real zero        = 0.0;
 
@@ -1543,7 +1543,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> 
   }
 
   const int comp = 0;
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
 
   
   const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
@@ -1605,8 +1605,8 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
     pout() << "cdr_plasma_stepper::compute_cdr_fluxes(full, level)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
   const int comp         = 0;
   const int ncomp        = 1;
 
@@ -1736,8 +1736,8 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
     pout() << "cdr_plasma_stepper::compute_cdr_fluxes(full)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1784,8 +1784,8 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a
     pout() << "cdr_plasma_stepper::compute_cdr_domain_fluxes(level)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
   const int finest_level = m_amr->get_finest_level();
 
   // Things that will be passed into plaskin
@@ -1839,8 +1839,8 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
     pout() << "cdr_plasma_stepper::compute_cdr_domain_fluxes(level)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
@@ -2041,7 +2041,7 @@ void cdr_plasma_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_so
     pout() << "cdr_plasma_stepper::compute_cdr_sources(full, nograd)" << endl;
   }
 
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
 
   Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2106,8 +2106,8 @@ void cdr_plasma_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_so
     pout() << "cdr_plasma_stepper::compute_cdr_sources(full)" << endl;
   }
 
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
 
@@ -2157,8 +2157,8 @@ void cdr_plasma_stepper::compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&    
 
   const Real zero = 0.0;
 
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
 
   // Stencils for extrapolating things to cell centroids
@@ -2243,8 +2243,8 @@ void cdr_plasma_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a
 
   const Real zero = 0.0;
   
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -2372,8 +2372,8 @@ void cdr_plasma_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&   
 						    const Real                    a_dx){
   const Real zero = 0.0;
   
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   // Interpolation stencils
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
@@ -2496,8 +2496,8 @@ void cdr_plasma_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&    
 						   const Real                    a_dx){
   const Real zero = 0.0;
   
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   // Interpolation stencils
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
@@ -2592,7 +2592,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_
     pout() << "cdr_plasma_stepper::compute_cdr_velocities(full)" << endl;
   }
   
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
 
   // Interpolate E to centroids
@@ -2642,7 +2642,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>& 
   const EBISLayout& ebisl       = m_amr->get_ebisl(cdr_phase)[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
 
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     Vector<EBCellFAB*> vel(num_species);
@@ -2746,7 +2746,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&  
   }
   
 #if CH_SPACEDIM==2
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
   const int comp         = 0;
   const RealVect origin  = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
@@ -2831,7 +2831,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&  
   }
 
 #if CH_SPACEDIM==3
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
   const int comp         = 0;
   const RealVect origin  = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
@@ -2963,8 +2963,8 @@ void cdr_plasma_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_sou
   }
 
   const Real zero = 0.0;
-  const int num_species  = m_plaskin->get_num_species();
-  const int num_photons  = m_plaskin->get_num_photons();
+  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
   const int finest_level = m_amr->get_finest_level();
 
   if(num_photons > 0){
@@ -3008,8 +3008,8 @@ void cdr_plasma_stepper::compute_rte_sources(Vector<LevelData<EBCellFAB>* >&    
 
   // This routine should be split in regular and non-regular stuff....
 
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
 
@@ -3059,8 +3059,8 @@ void cdr_plasma_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a
   }
 
   const int comp         = 0;
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -3125,8 +3125,8 @@ void cdr_plasma_stepper::compute_rte_sources_irreg(Vector<EBCellFAB*>&          
   }
 
   const int comp         = 0;
-  const int num_photons  = m_plaskin->get_num_photons();
-  const int num_species  = m_plaskin->get_num_species();
+  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_plaskin->get_num_cdr_species();
 
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
@@ -3248,7 +3248,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
   }
 
   const int ncomp       = 1;
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
 
   EBAMRCellData E_cell;
   EBAMRIVData   E_eb;
@@ -3294,7 +3294,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   }
 
   const int ncomp       = 1;
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_plaskin->get_num_cdr_species();
 
   Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
 
@@ -3493,7 +3493,7 @@ void cdr_plasma_stepper::compute_charge_flux(EBAMRIVData& a_flux, Vector<EBAMRIV
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const RefCountedPtr<cdr_species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = *a_cdr_fluxes[solver_it.get_solver()];
 
     data_ops::incr(a_flux, solver_flux, spec->get_charge()*units::s_Qe);
@@ -3687,7 +3687,7 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    RefCountedPtr<species>& spec      = solver_it.get_species();
+    RefCountedPtr<cdr_species>& spec      = solver_it.get_species();
 
     if(solver->is_mobile()){
       const int q                       = spec->get_charge();
@@ -3782,7 +3782,7 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
     // Add volumetric charge 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const EBAMRCellData& density       = *(densities[solver_it.get_solver()]);
-      const RefCountedPtr<species>& spec = solver_it.get_species();
+      const RefCountedPtr<cdr_species>& spec = solver_it.get_species();
 
       if(spec->get_charge() != 0){
 	data_ops::incr(*a_rho[lvl], *density[lvl], spec->get_charge());
@@ -3816,7 +3816,7 @@ void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
     // Add volumetric charge 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const EBAMRCellData& density       = *(a_densities[solver_it.get_solver()]);
-      const RefCountedPtr<species>& spec = solver_it.get_species();
+      const RefCountedPtr<cdr_species>& spec = solver_it.get_species();
 
       if(spec->get_charge() != 0){
 	data_ops::incr(*rho_gas[lvl], *density[lvl], spec->get_charge());
@@ -4613,7 +4613,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const RefCountedPtr<cdr_species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->get_ebflux();
 
     data_ops::incr(charge_flux, solver_flux, spec->get_charge()*units::s_Qe);
@@ -4661,7 +4661,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const RefCountedPtr<cdr_species>& spec      = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->get_ebflux();
 
     data_ops::incr(charge_flux, solver_flux, spec->get_charge()*units::s_Qe);
@@ -4711,7 +4711,7 @@ Real cdr_plasma_stepper::compute_domain_current(){
   
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const RefCountedPtr<cdr_species>& spec      = solver_it.get_species();
     const EBAMRIFData& solver_flux          = solver->get_domainflux();
 
     data_ops::incr(charge_flux, solver_flux, spec->get_charge()*units::s_Qe);

@@ -1543,7 +1543,7 @@ void cdr_solver::set_mass_redist(const bool a_mass_redist){
   m_mass_redist = a_mass_redist;
 }
 
-void cdr_solver::set_species(const RefCountedPtr<species> a_species){
+void cdr_solver::set_species(const RefCountedPtr<cdr_species> a_species){
   CH_TIME("cdr_solver::set_species");
   if(m_verbosity > 5){
     pout() << m_name + "::set_species" << endl;

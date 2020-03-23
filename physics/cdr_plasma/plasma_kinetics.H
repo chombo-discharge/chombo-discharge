@@ -12,8 +12,8 @@
 #include <RefCountedPtr.H>
 #include <LoHiSide.H>
 
-#include "species.H"
-#include "photon_group.H"
+#include "cdr_species.H"
+#include "rte_species.H"
 
 /*!
   @brief Abstract base class for specifying plasma kinetics
@@ -204,29 +204,29 @@ public:
   /*!
     @brief Get all ions
   */
-  const Vector<RefCountedPtr<species> >& get_species() const { 
-    return m_species; 
+  const Vector<RefCountedPtr<cdr_species> >& get_cdr_species() const { 
+    return m_cdr_species; 
   }
 
   /*!
     @brief Get all photons
   */
-  const Vector<RefCountedPtr<photon_group> >& get_photons() const {
-    return m_photons;
+  const Vector<RefCountedPtr<rte_species> >& get_rte_species() const {
+    return m_rte_species;
   }
 
   /*!
     @brief Return number of ion equations
   */
-  int get_num_species() const{
-    return m_species.size();
+  int get_num_cdr_species() const{
+    return m_cdr_species.size();
   }
 
   /*!
     @brief Return number of RTE equations
   */
-  int get_num_photons() const {
-    return m_photons.size();
+  int get_num_rte_species() const {
+    return m_rte_species.size();
   }
 
   /*!
@@ -263,22 +263,22 @@ protected:
   /*!
     @brief List of species
   */
-  Vector<RefCountedPtr<species> > m_species;
+  Vector<RefCountedPtr<cdr_species> > m_cdr_species;
 
   /*!
     @brief List of optical transitions between species
   */
-  Vector<RefCountedPtr<photon_group> > m_photons;
+  Vector<RefCountedPtr<rte_species> > m_rte_species;
 
   /*!
     @brief Number of species
   */
-  int m_num_species;
+  int m_num_cdr_species;
 
   /*!
-    @brief Number of RTE groups
+    @brief Number of RTE species
   */
-  int m_num_photons;
+  int m_num_rte_species;
 };
 
 #endif

@@ -1,12 +1,12 @@
 /*!
-  @file   photon_group.H
+  @file   rte_species.H
   @brief  Declaration of a photon-group class. 
   @author Robert Marskar
   @date   Jan. 2018
 */
 
-#ifndef _PHOTON_GROUP_
-#define _PHOTON_GROUP_
+#ifndef _RTE_SPECIES_
+#define _RTE_SPECIES_
 
 #include "RealVect.H"
 
@@ -14,22 +14,22 @@
   @brief Declaration of a class that defines a group within the multigroup approximation
   @details This is a lightweight class - it just holds a name for the group and the kappa for the group
 */
-class photon_group {
+class rte_species {
 public:
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  photon_group();
+  rte_species();
 
   /*!
     @brief Constructor, constant kappa
   */
-  photon_group(const std::string a_name, const Real a_kappa);
+  rte_species(const std::string a_name, const Real a_kappa);
 
   /*!
     @brief Constructor, spatially dependent kappa
   */
-  photon_group(const std::string a_name, Real (*a_kappa)(const RealVect a_pos));
+  rte_species(const std::string a_name, Real (*a_kappa)(const RealVect a_pos));
 
   /*!
     @brief Define function

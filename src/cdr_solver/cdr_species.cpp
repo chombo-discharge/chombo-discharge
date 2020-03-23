@@ -1,14 +1,14 @@
 /*!
-  @file species.cpp
-  @brief Implementation of species.H
+  @file cdr_species.cpp
+  @brief Implementation of cdr_species.H
   @author Robert Marskar
   @date Jan. 2018
 */
 
-#include "species.H"
+#include "cdr_species.H"
 
-species::species(){
-  m_name         = "default_species";
+cdr_species::cdr_species(){
+  m_name         = "default_cdr_species";
   m_unit         = "default_unit";
   m_charge       = 0;
   m_diffusive    = true;
@@ -23,7 +23,7 @@ species::species(){
   m_initial_particles.clear();
 }
 
-species::species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive){
+cdr_species::cdr_species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive){
   m_name      = a_name;
   m_charge    = a_charge;
   m_mobile    = a_mobile;
@@ -36,50 +36,50 @@ species::species(const std::string a_name, const int a_charge, const bool a_mobi
   m_initial_particles.clear();
 }
 
-species::~species(){
+cdr_species::~cdr_species(){
 
 }
 
-Real species::initial_data(const RealVect a_pos, const Real a_time) const{
+Real cdr_species::initial_data(const RealVect a_pos, const Real a_time) const{
   return 0.;
 }
 
-std::string species::get_name() const {
+std::string cdr_species::get_name() const {
   return m_name;
 }
 
-std::string species::get_unit() const {
+std::string cdr_species::get_unit() const {
   return m_unit;
 }
 
-int species::get_charge() const {
+int cdr_species::get_charge() const {
   return m_charge;
 }
 
-bool species::is_diffusive() const {
+bool cdr_species::is_diffusive() const {
   return m_diffusive;
 }
 
-bool species::is_mobile() const {
+bool cdr_species::is_mobile() const {
   return m_mobile;
 }
 
-bool species::force_output() const {
+bool cdr_species::force_output() const {
   return m_force_output;
 }
 
-bool species::init_with_particles() const {
+bool cdr_species::init_with_particles() const {
   return m_init_with_particles;
 }
 
-bool species::init_with_function() const{
+bool cdr_species::init_with_function() const{
   return m_init_with_function;
 }
 
-InterpType& species::get_deposition() {
+InterpType& cdr_species::get_deposition() {
   return m_deposition;
 }
 
-List<Particle>& species::get_initial_particles() {
+List<Particle>& cdr_species::get_initial_particles() {
   return m_initial_particles;
 }

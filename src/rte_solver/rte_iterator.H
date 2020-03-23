@@ -30,7 +30,7 @@ public:
     CH_TIME("rte_iterator::rte_iterator");
     
     m_solvers  = a_layout.get_solvers();
-    m_photons  = a_layout.get_photons();
+    m_species  = a_layout.get_species();
     m_num      = m_solvers.size();
     m_defined  = true;
 
@@ -96,10 +96,10 @@ public:
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<photon_group>& get_photon() {
+  virtual RefCountedPtr<rte_species>& get_species() {
     CH_assert(m_defined == true);
     CH_assert(m_isolver < m_num);
-    return m_photons[m_isolver];
+    return m_species[m_isolver];
   }
   
 protected:
@@ -127,7 +127,7 @@ protected:
   /*!
     @brief Ions
   */
-  Vector<RefCountedPtr<photon_group> > m_photons;
+  Vector<RefCountedPtr<rte_species> > m_species;
 
 };
 #endif

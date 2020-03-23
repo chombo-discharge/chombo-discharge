@@ -10,7 +10,7 @@
 #include "air7_stephens.H"
 #include <random>
 
-class air7_stephens::electron : public species {
+class air7_stephens::electron : public cdr_species {
 public:
   electron();
   ~electron() {}
@@ -23,7 +23,7 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air7_stephens::N2plus : public species {
+class air7_stephens::N2plus : public cdr_species {
 public:
   N2plus();
   ~N2plus(){}
@@ -36,7 +36,7 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air7_stephens::O2plus : public species {
+class air7_stephens::O2plus : public cdr_species {
 public:
   O2plus();
   ~O2plus(){}
@@ -49,7 +49,7 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air7_stephens::N4plus : public species {
+class air7_stephens::N4plus : public cdr_species {
 public:
   N4plus();
   ~N4plus(){}
@@ -57,7 +57,7 @@ public:
 protected:
 };
 
-class air7_stephens::O4plus : public species {
+class air7_stephens::O4plus : public cdr_species {
 public:
   O4plus();
   ~O4plus(){}
@@ -65,7 +65,7 @@ public:
 protected:
 };
 
-class air7_stephens::O2plusN2 : public species {
+class air7_stephens::O2plusN2 : public cdr_species {
 public:
   O2plusN2();
   ~O2plusN2(){}
@@ -73,14 +73,14 @@ public:
 protected:
 };
 
-class air7_stephens::O2minus : public species {
+class air7_stephens::O2minus : public cdr_species {
 public:
   O2minus();
   ~O2minus(){}
   Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
 };
 
-class air7_stephens::phot_c4v0_X1v0 : public photon_group {
+class air7_stephens::phot_c4v0_X1v0 : public rte_species {
 public:
   phot_c4v0_X1v0();
   ~phot_c4v0_X1v0(){}
@@ -90,7 +90,7 @@ protected:
   Real m_kappa;
 };
 
-class air7_stephens::phot_c4v0_X1v1 : public photon_group {
+class air7_stephens::phot_c4v0_X1v1 : public rte_species {
 public:
   phot_c4v0_X1v1();
   ~phot_c4v0_X1v1(){}
@@ -100,7 +100,7 @@ protected:
   Real m_kappa;
 };
 
-class air7_stephens::phot_c4v1_X1v0 : public photon_group {
+class air7_stephens::phot_c4v1_X1v0 : public rte_species {
 public:
   phot_c4v1_X1v0();
   ~phot_c4v1_X1v0(){};
@@ -110,7 +110,7 @@ protected:
   Real m_kappa;
 };
 
-class air7_stephens::phot_c4v1_X1v1 : public photon_group {
+class air7_stephens::phot_c4v1_X1v1 : public rte_species {
 public:
   phot_c4v1_X1v1();
   ~phot_c4v1_X1v1(){}
@@ -120,7 +120,7 @@ protected:
   Real m_kappa;
 };
 
-class air7_stephens::phot_c4v1_X1v2 : public photon_group {
+class air7_stephens::phot_c4v1_X1v2 : public rte_species {
 public:
   phot_c4v1_X1v2();
   ~phot_c4v1_X1v2(){}
@@ -130,7 +130,7 @@ protected:
   Real m_kappa;
 };
 
-class air7_stephens::phot_c4v1_X1v3 : public photon_group {
+class air7_stephens::phot_c4v1_X1v3 : public rte_species {
 public:
   phot_c4v1_X1v3();
   ~phot_c4v1_X1v3(){}
@@ -140,7 +140,7 @@ protected:
   Real m_kappa;
 };
 
-class air7_stephens::phot_b1v1_X1v0 : public photon_group {
+class air7_stephens::phot_b1v1_X1v0 : public rte_species {
 public:
   phot_b1v1_X1v0();
   ~phot_b1v1_X1v0(){}
@@ -150,7 +150,7 @@ protected:
   Real m_kappa;
 };
 
-class air7_stephens::phot_b1v1_X1v1 : public photon_group {
+class air7_stephens::phot_b1v1_X1v1 : public rte_species {
 public:
   phot_b1v1_X1v1();
   ~phot_b1v1_X1v1();

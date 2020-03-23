@@ -13,33 +13,9 @@
 
 #include <ParmParse.H>
 
-rte_layout::rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
-  m_photons = a_plaskin->get_photons();
+rte_layout::rte_layout(const Vector<RefCountedPtr<rte_species> >& a_rte_species){
+  m_species = a_rte_species;
   m_solvers.resize(0); // Solvers added through the add_solver function
-#if 0  
-  m_solvers.resize(m_photons.size());
-
-  std::string solver     = "eddington_sp1";
-  
-  ParmParse pp("rte_layout");
-  pp.get("which_solver", solver);
-  
-  for (int i = 0; i < a_plaskin->get_num_photons(); i++){
-    if(solver == "eddington_sp1"){
-      m_solvers[i] = RefCountedPtr<rte_solver> (new eddington_sp1());
-    }
-    else if(solver == "mc_photo"){
-      m_solvers[i] = RefCountedPtr<rte_solver> (new mc_photo());
-    }
-    else {
-      MayDay::Abort("rte_layout::rte_layout - unknown solver type requested");
-    }
-    m_solvers[i]->set_photon_group(m_photons[i]);
-  }
-
-  this->set_verbosity(-1);
-  this->set_phase(phase::gas);
-#endif
 }
 
 rte_layout::~rte_layout(){
@@ -72,7 +48,7 @@ void rte_layout::allocate_internals(){
     pout() << "rte_layout::allocate_internals" << endl;
   }
 
-  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+  for (rte_iterator solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
     solver->allocate_internals();
   }
@@ -296,8 +272,8 @@ Vector<RefCountedPtr<rte_solver> >& rte_layout::get_solvers(){
   return m_solvers;
 }
 
-Vector<RefCountedPtr<photon_group> >& rte_layout::get_photons(){
-  return m_photons;
+Vector<RefCountedPtr<rte_species> >& rte_layout::get_species(){
+  return m_species;
 }
 
 Vector<EBAMRCellData*> rte_layout::get_sources(){

@@ -9,7 +9,7 @@
 #define _LARSEN_COEFS_
 
 #include "robin_coef.H"
-#include "photon_group.H"
+#include "rte_species.H"
 
 #include <RefCountedPtr.H>
 
@@ -22,7 +22,7 @@ public:
   /*!
     @brief Constructor
   */
-  larsen_coefs(const RefCountedPtr<photon_group>& a_photon_group,
+  larsen_coefs(const RefCountedPtr<rte_species>& a_rte_species,
 	       const Real                         a_r1,
 	       const Real                         a_r2);
 
@@ -48,7 +48,7 @@ public:
     
 protected:
 
-  RefCountedPtr<photon_group> m_photon_group;
+  RefCountedPtr<rte_species> m_rte_species;
 
   Real m_r1;
     

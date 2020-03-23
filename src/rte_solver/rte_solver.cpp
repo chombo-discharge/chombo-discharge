@@ -63,14 +63,14 @@ bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_state, const bool a_z
   return converged;
 }
 
-void rte_solver::set_photon_group(const RefCountedPtr<photon_group> a_photon_group){
-  CH_TIME("rte_solver::set_photon_group");
+void rte_solver::set_rte_species(const RefCountedPtr<rte_species> a_rte_species){
+  CH_TIME("rte_solver::set_rte_species");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_photon_group" << endl;
+    pout() << m_name + "::set_rte_species" << endl;
   }
 
-  m_photon_group = a_photon_group;
-  m_name = m_photon_group->get_name();
+  m_rte_species = a_rte_species;
+  m_name = m_rte_species->get_name();
 }
 
 void rte_solver::set_phase(const phase::which_phase a_phase){
@@ -90,7 +90,7 @@ void rte_solver::sanity_check(){
 
   CH_assert(!m_compgeom.isNull());
   CH_assert(!m_amr.isNull());
-  CH_assert(!m_photon_group.isNull());
+  CH_assert(!m_rte_species.isNull());
   CH_assert(!m_ebis.isNull());
 }
 

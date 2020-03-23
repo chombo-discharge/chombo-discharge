@@ -73,7 +73,7 @@ void cdr_iterator::operator++(){
 
     for (int isolver = m_isolver; this->ok(); ++isolver){
       const RefCountedPtr<cdr_solver>& solver = m_solvers[isolver];
-      const RefCountedPtr<species>& species   = m_species[isolver];
+      const RefCountedPtr<cdr_species>& species   = m_species[isolver];
       
       if(m_mode = species_iteration::charged){
 	if(species->get_charge() != 0){
@@ -103,7 +103,7 @@ RefCountedPtr<cdr_solver>& cdr_iterator::operator() () {
   return m_solvers[m_isolver];
 }
 
-RefCountedPtr<species>& cdr_iterator::get_species() {
+RefCountedPtr<cdr_species>& cdr_iterator::get_species() {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_species[m_isolver];

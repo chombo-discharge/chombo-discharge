@@ -22,7 +22,7 @@ public:
   /*!
     @brief Full constructor
   */
-  rte_layout(const RefCountedPtr<plasma_kinetics> a_plaskin);
+  rte_layout(const Vector<RefCountedPtr<rte_species> >& a_rte_species);
 
   /*!
     @brief Destructor
@@ -144,7 +144,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<photon_group> >& get_photons();
+  virtual Vector<RefCountedPtr<rte_species> >& get_species();
 
   /*!
     @brief Get all source terms
@@ -166,7 +166,7 @@ protected:
   /*!
     @brief Species
   */
-  Vector<RefCountedPtr<photon_group> > m_photons;
+  Vector<RefCountedPtr<rte_species> > m_species;
 
   /*!
     @brief Verbosity
@@ -184,7 +184,7 @@ class rte_factory {
 public:
   rte_factory();
   ~rte_factory();
-  RefCountedPtr<rte_layout> new_layout(const RefCountedPtr<plasma_kinetics> a_plaskin) const;
+  RefCountedPtr<rte_layout> new_layout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
 };
 
 #endif

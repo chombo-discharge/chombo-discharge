@@ -499,8 +499,8 @@ void eddington_sp1::set_aco_and_bco(){
 #define USE_NEW_ACO_AND_BCO 1
 
   // This loop fills aco with kappa and bco_irreg with 1./kappa
-  if(m_photon_group->constant_kappa()){
-    const Real kap = m_photon_group->get_kappa(RealVect::Zero);
+  if(m_rte_species->constant_kappa()){
+    const Real kap = m_rte_species->get_kappa(RealVect::Zero);
     data_ops::set_value(m_aco, kap);
     data_ops::set_value(m_bco, 1./kap);
     data_ops::set_value(m_bco_irreg, 1./kap);
@@ -526,7 +526,7 @@ void eddington_sp1::set_aco_and_bco(){
       }
     }
 
-#if USE_NEW_ACO_AND_BCO // New way of doing this. This saves us a LOT of calls to photon_group->get_kappa
+#if USE_NEW_ACO_AND_BCO // New way of doing this. This saves us a LOT of calls to rte_species->get_kappa
     m_amr->average_down(m_aco, m_phase);
     m_amr->interp_ghost(m_aco, m_phase);
     data_ops::average_cell_to_face_allcomps(m_bco, m_aco, m_amr->get_domains()); // Average aco onto face
@@ -567,7 +567,7 @@ void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
     const IntVect iv = bit();
 
     const RealVect pos = a_origin + iv*a_dx*RealVect::Unit;
-    aco_fab(iv, comp) = m_photon_group->get_kappa(pos);
+    aco_fab(iv, comp) = m_rte_species->get_kappa(pos);
   }
 
   // Regular bco
@@ -578,7 +578,7 @@ void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
     const VolIndex& vof = vofit();
 
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
-    const Real tmp = m_photon_group->get_kappa(pos);
+    const Real tmp = m_rte_species->get_kappa(pos);
     a_aco(vof, comp) = tmp;
     a_bco(vof, comp) = 1./tmp;
   }
@@ -600,7 +600,7 @@ void eddington_sp1::set_aco(EBCellFAB& a_aco, const RealVect a_origin, const Rea
     const VolIndex& vof = vofit();
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
 
-    a_aco(vof, comp) = m_photon_group->get_kappa(pos);
+    a_aco(vof, comp) = m_rte_species->get_kappa(pos);
   }
 }
 
@@ -622,7 +622,7 @@ void eddington_sp1::set_bco_face(EBFluxFAB& a_bco, const RealVect a_origin, cons
       const IntVect iv       = face.gridIndex(Side::Lo);
       const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
 
-      const Real kappa = m_photon_group->get_kappa(pos);
+      const Real kappa = m_rte_species->get_kappa(pos);
       
       a_bco[dir](face, comp) = 1./kappa;
     }
@@ -645,7 +645,7 @@ void eddington_sp1::set_bco_eb(BaseIVFAB<Real>&          a_bco,
     const VolIndex& vof = vofit();
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx, a_origin); // This is strictly speaking not on the boundary...
 
-    const Real kappa = m_photon_group->get_kappa(pos);
+    const Real kappa = m_rte_species->get_kappa(pos);
     a_bco(vof, comp) = 1./kappa;
   }
 }
@@ -683,7 +683,7 @@ void eddington_sp1::setup_operator_factory(){
   const Real beta  = -1.0;
 
   // Appropriate coefficients for this type of Robin BC
-  m_robinco = RefCountedPtr<larsen_coefs> (new larsen_coefs(m_photon_group, m_r1, m_r2));
+  m_robinco = RefCountedPtr<larsen_coefs> (new larsen_coefs(m_rte_species, m_r1, m_r2));
 
   // Domain BC
 #if 0

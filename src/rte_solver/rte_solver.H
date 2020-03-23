@@ -11,7 +11,7 @@
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
-#include "photon_group.H"
+#include "rte_species.H"
 
 /*!
   @brief Abstract RTE solver class. This is essentially just an interface. 
@@ -62,7 +62,7 @@ public:
   /*!
     @brief Set the photon group
   */
-  virtual void set_photon_group(const RefCountedPtr<photon_group> a_photon_group);
+  virtual void set_rte_species(const RefCountedPtr<rte_species> a_rte_species);
 
   /*!
     @brief Set computational geometry
@@ -244,7 +244,7 @@ protected:
   /*!
     @brief Photon group
   */
-  RefCountedPtr<photon_group> m_photon_group;
+  RefCountedPtr<rte_species> m_rte_species;
 
   /*!
     @brief Computational geometry. 

@@ -12,8 +12,12 @@
 
 #include <ParmParse.H>
 
-cdr_layout::cdr_layout(const RefCountedPtr<plasma_kinetics> a_plaskin){
-  m_species = a_plaskin->get_species();
+cdr_layout::cdr_layout(){
+
+}
+
+cdr_layout::cdr_layout(const Vector<RefCountedPtr<cdr_species> >& a_species){
+  m_species = a_species;
   m_solvers.resize(0);
 }
 
@@ -452,7 +456,7 @@ Vector<RefCountedPtr<cdr_solver> >& cdr_layout::get_solvers(){
   return m_solvers;
 }
 
-Vector<RefCountedPtr<species> >& cdr_layout::get_species(){
+Vector<RefCountedPtr<cdr_species> >& cdr_layout::get_species(){
   return m_species;
 }
 

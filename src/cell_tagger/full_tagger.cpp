@@ -44,9 +44,9 @@ void full_tagger::allocate_storage(){
   m_amr->allocate(m_rho,      m_phase, sca_ncomp);
   m_amr->allocate(m_grad_rho, m_phase, vec_ncomp);
 
-  m_cdr_densities.resize(m_plaskin->get_num_species());
-  m_cdr_gradients.resize(m_plaskin->get_num_species());
-  m_rte_densities.resize(m_plaskin->get_num_photons());
+  m_cdr_densities.resize(m_plaskin->get_num_cdr_species());
+  m_cdr_gradients.resize(m_plaskin->get_num_cdr_species());
+  m_rte_densities.resize(m_plaskin->get_num_rte_species());
 
   for(cdr_iterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -97,8 +97,8 @@ void full_tagger::compute_tracers(){
   
   const RealVect origin = m_amr->get_prob_lo();
   const Real time       = m_timestepper->get_time();
-  const int num_species = m_plaskin->get_num_species();
-  const int num_photons = m_plaskin->get_num_photons();
+  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_photons = m_plaskin->get_num_rte_species();
 
   RefCountedPtr<cdr_layout>& cdr = m_timestepper->get_cdr();
   RefCountedPtr<rte_layout>& rte = m_timestepper->get_rte();
@@ -135,9 +135,9 @@ void full_tagger::compute_tracers(){
   Vector<Real>     cdr_phi;
   Vector<RealVect> cdr_gra;
   Vector<Real>     rte_phi;
-  cdr_phi.resize(m_plaskin->get_num_species());
-  cdr_gra.resize(m_plaskin->get_num_species());
-  rte_phi.resize(m_plaskin->get_num_photons());
+  cdr_phi.resize(m_plaskin->get_num_cdr_species());
+  cdr_gra.resize(m_plaskin->get_num_cdr_species());
+  rte_phi.resize(m_plaskin->get_num_rte_species());
 
   const int finest_level = m_amr->get_finest_level();
   for (int lvl = 0; lvl <= finest_level; lvl++){
