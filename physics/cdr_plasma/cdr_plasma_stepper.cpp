@@ -4036,11 +4036,11 @@ void cdr_plasma_stepper::initial_data(){
     pout() << "cdr_plasma_stepper::initial_data" << endl;
   }
 
-  m_cdr->initial_data();
+  m_cdr->initial_data();        // Initial data comes in through cdr_species, in this case supplied by plaskin
   if(!m_rte->is_stationary()){
     m_rte->initial_data();
   }
-  m_sigma->initial_data();
+  this->initial_sigma();
 
   // Solve Poisson equation
   this->solve_poisson();
@@ -4055,6 +4055,44 @@ void cdr_plasma_stepper::initial_data(){
 
     this->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
   }
+}
+
+void cdr_plasma_stepper::initial_sigma(){
+  CH_TIME("cdr_plasma_stepper::initial_sigma");
+  if(m_verbosity > 5){
+    pout() << "cdr_plasma_stepper::initial_sigma" << endl;
+  }
+
+  const RealVect origin  = m_amr->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  EBAMRIVData& sigma = m_sigma->get_state();
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      BaseIVFAB<Real>& state = (*sigma[lvl])[dit()];
+
+      const EBISBox& ebisbox = ebisl[dit()];
+      const IntVectSet& ivs  = state.getIVS();
+      const EBGraph& ebgraph = state.getEBGraph();
+      
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const RealVect pos  = origin + vof.gridIndex()*dx + ebisbox.bndryCentroid(vof)*dx;
+	
+	for (int comp = 0; comp < state.nComp(); comp++){
+	  state(vof, comp) = m_plaskin->initial_sigma(m_time, pos);
+	}
+      }
+    }
+  }
+
+  m_amr->average_down(sigma, phase::gas);
+  m_sigma->reset_cells(sigma);
 }
 
 void cdr_plasma_stepper::project_flux(LevelData<BaseIVFAB<Real> >&       a_projected_flux,
@@ -4542,7 +4580,6 @@ void cdr_plasma_stepper::setup_sigma(){
   m_sigma->set_amr(m_amr);
   m_sigma->set_verbosity(m_solver_verbosity);
   m_sigma->set_computational_geometry(m_compgeom);
-  m_sigma->set_plasma_kinetics(m_plaskin);
   m_sigma->allocate_internals();
 }
 

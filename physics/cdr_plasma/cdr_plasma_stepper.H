@@ -818,6 +818,8 @@ public:
   */
   virtual void initial_data();
 
+  virtual void initial_sigma();
+
   /*!
     @brief Project flux
   */

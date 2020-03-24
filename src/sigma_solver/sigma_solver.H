@@ -30,21 +30,6 @@ public:
   ~sigma_solver();
 
   /*!
-    @brief Advance method
-  */
-  virtual void advance(const Real a_dt);
-
-  /*!
-    @brief Advance method. This calls advance_rk2
-  */
-  virtual void advance(EBAMRIVData& a_state, const Real a_dt);
-
-  /*!
-    @brief Second order Runge-Kutta advance method
-  */
-  virtual void advance_rk2(EBAMRIVData& a_state, const Real a_dt, const Real a_alpha);
-
-  /*!
     @brief Allocate internal storage
   */
   virtual void allocate_internals();
@@ -65,11 +50,6 @@ public:
   virtual void deallocate_internals();
 
   /*!
-    @brief Fill with initial data
-  */
-  virtual void initial_data();
-
-  /*!
     @brief Regrid method
   */
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
@@ -88,11 +68,6 @@ public:
     @brief Set computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);
-
-  /*!
-    @brief Set the plasma kinetics
-  */
-  virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
 
   /*!
     @brief Set phase
@@ -171,11 +146,6 @@ protected:
     @brief Index spaces
   */
   RefCountedPtr<mfis> m_mfis;
-
-  /*!
-    @brief Plasma kinetics
-  */
-  RefCountedPtr<plasma_kinetics> m_plaskin;
 
   /*!
     @brief Computational geometry

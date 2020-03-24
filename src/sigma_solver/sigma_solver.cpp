@@ -21,35 +21,6 @@ sigma_solver::~sigma_solver(){
 
 }
 
-void sigma_solver::advance(const Real a_dt){
-  CH_TIME("sigma_solver::advance(dt)");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::advance(dt)" << endl;
-  }
-
-  this->advance(m_state, a_dt);
-}
-
-void sigma_solver::advance(EBAMRIVData& a_state, const Real a_dt){
-  CH_TIME("sigma_solver::advance(state, dt)");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::advance(state, dt)" << endl;
-  }
-
-  const Real midpoint = 0.5;
-
-  this->advance_rk2(a_state, a_dt, midpoint);
-}
-
-void sigma_solver::advance_rk2(EBAMRIVData& a_state, const Real a_dt, const Real a_alpha){
-  CH_TIME("sigma_solver::advance_rk2");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::advance_rk2" << endl;
-  }
-
-  MayDay::Abort("sigma_solver::advance_rk2 - not implemented (yet)");
-}
-
 void sigma_solver::allocate_internals(){
   CH_TIME("sigma_solver::allocate_internals");
   if(m_verbosity > 5){
@@ -97,42 +68,6 @@ void sigma_solver::deallocate_internals(){
   
   m_amr->deallocate(m_state);
   m_amr->deallocate(m_flux);
-}
-
-void sigma_solver::initial_data(){
-  CH_TIME("sigma_solver::initial_data");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::initial_data" << endl;
-  }
-
-  const RealVect origin  = m_amr->get_prob_lo();
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    const Real dx                = m_amr->get_dx()[lvl];
-    
-    for (DataIterator dit = m_state[lvl]->dataIterator(); dit.ok(); ++dit){
-      BaseIVFAB<Real>& state = (*m_state[lvl])[dit()];
-
-      const EBISBox& ebisbox = ebisl[dit()];
-      const IntVectSet& ivs  = state.getIVS();
-      const EBGraph& ebgraph = state.getEBGraph();
-      
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect pos  = origin + vof.gridIndex()*dx + ebisbox.bndryCentroid(vof)*dx;
-	
-	for (int comp = 0; comp < state.nComp(); comp++){
-	  state(vof, comp) = m_plaskin->initial_sigma(m_time, pos);
-	}
-      }
-    }
-  }
-
-  m_amr->average_down(m_state, m_phase);
-  this->reset_cells(m_state);
 }
 
 void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -274,15 +209,6 @@ void sigma_solver::set_computational_geometry(const RefCountedPtr<computational_
 
   m_compgeom = a_compgeom;
   m_mfis     = m_compgeom->get_mfis();
-}
-
-void sigma_solver::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
-  CH_TIME("sigma_solver::set_plasma_kinetics");
-  if(m_verbosity > 5){
-    pout() << "sigma_solver::set_plasma_kinetics" << endl;
-  }
-
-  m_plaskin = a_plaskin;
 }
 
 void sigma_solver::set_phase(phase::which_phase a_phase){

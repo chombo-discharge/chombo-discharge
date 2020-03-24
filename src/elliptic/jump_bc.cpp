@@ -9,7 +9,6 @@
 
 #include <EBArith.H>
 
-#define USE_NEW_MATCHING 1
 #define DEBUG 0
 
 bool jump_bc::s_quadrant_based = true;
@@ -325,7 +324,7 @@ void jump_bc::build_stencils(){
   }
 }
 
-void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 		       const LevelData<BaseIVFAB<Real> >& a_jump,
 		       const LevelData<MFCellFAB>&        a_phi,
 		       const bool                         a_homogeneous){
@@ -336,7 +335,7 @@ void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
   }
 }
 
-void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
+inline void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
 		       const BaseIVFAB<Real>&            a_jump,
 		       const MFCellFAB&                  a_phi,
 		       const DataIndex&                  a_dit){
@@ -463,7 +462,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   }
 }
 
-void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
+inline void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
 
   const IntVectSet ivs = m_avgJump[a_dit].get_ivs();
 
