@@ -8,12 +8,12 @@
 #ifndef _AIR7_STEPHENS_
 #define _AIR7_STEPHENS_
 
-#include "network_kinetics.H"
+#include "cdr_plasma_physics.H"
 #include "lookup_table.H"
 
 #include <random>
 
-class air7_stephens : public network_kinetics {
+class air7_stephens : public cdr_plasma_physics {
 public:
 
   class electron;

@@ -32,8 +32,8 @@ cdr_plasma_stepper::cdr_plasma_stepper(){
   set_poisson_wall_func(s_constant_one);
 }
 
-cdr_plasma_stepper::cdr_plasma_stepper(RefCountedPtr<plasma_kinetics>& a_plaskin) : cdr_plasma_stepper() {
-  m_plaskin = a_plaskin;
+cdr_plasma_stepper::cdr_plasma_stepper(RefCountedPtr<cdr_plasma_physics>& a_physics) : cdr_plasma_stepper() {
+  m_physics = a_physics;
 }
 
 cdr_plasma_stepper::~cdr_plasma_stepper(){
@@ -141,7 +141,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
     pout() << "cdr_plasma_stepper::advance_reaction_network(nograd)" << endl;
   }
 
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
 
   Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
   for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -185,8 +185,8 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
   }
 
 
-  const int num_species = m_plaskin->get_num_cdr_species();
-  const int num_photons = m_plaskin->get_num_rte_species();
+  const int num_species = m_physics->get_num_cdr_species();
+  const int num_photons = m_physics->get_num_rte_species();
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     Vector<LevelData<EBCellFAB>* > particle_sources(num_species);
@@ -250,8 +250,8 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
   const Real zero = 0.0;
 
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
 
 
   // Stencils for extrapolating things to cell centroids
@@ -373,15 +373,15 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
   const Real zero = 0.0;
     
 
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics
+  // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species);
   Vector<Real>     particle_densities(num_species);
@@ -427,7 +427,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
 
       // Compute source terms
       const Real kappa = 1.0; // Kappa for regular cells
-      m_plaskin->advance_reaction_network(particle_sources,
+      m_physics->advance_reaction_network(particle_sources,
 					  photon_sources,
 					  particle_densities,
 					  particle_gradients,
@@ -518,15 +518,15 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
   const Real zero = 0.0;
     
 
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics. 
+  // Things that are passed into cdr_plasma_physics. 
   RealVect         pos = RealVect::Zero;
   RealVect         E   = RealVect::Zero;
   Vector<Real>     particle_sources(num_species);
@@ -598,7 +598,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
       E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
       pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
-      m_plaskin->advance_reaction_network(particle_sources,
+      m_physics->advance_reaction_network(particle_sources,
 					  photon_sources,
 					  particle_densities,
 					  particle_gradients,
@@ -658,15 +658,15 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
 
   const Real zero = 0.0;
 
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics. 
+  // Things that are passed into cdr_plasma_physics. 
   RealVect         pos = RealVect::Zero;
   RealVect         E   = RealVect::Zero;
   Vector<Real>     particle_sources(num_species);
@@ -744,7 +744,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
 	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
 	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
-	m_plaskin->advance_reaction_network(particle_sources,
+	m_physics->advance_reaction_network(particle_sources,
 					    photon_sources,
 					    particle_densities,
 					    particle_gradients,
@@ -849,15 +849,15 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
 
   const Real zero = 0.0;
   
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics
+  // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species);
   Vector<Real>     photon_sources(num_photons);
@@ -941,7 +941,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
     }
 
     // Compute source terms
-    m_plaskin->advance_reaction_network(particle_sources,
+    m_physics->advance_reaction_network(particle_sources,
 					photon_sources,
 					particle_densities,
 					particle_gradients,
@@ -983,15 +983,15 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
 
   const Real zero = 0.0;
   
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics
+  // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species);
   Vector<Real>     photon_sources(num_photons);
@@ -1040,7 +1040,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
     }
 
     // Compute source terms
-    m_plaskin->advance_reaction_network(particle_sources,
+    m_physics->advance_reaction_network(particle_sources,
 					photon_sources,
 					particle_densities,
 					particle_gradients,
@@ -1075,7 +1075,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
 
   // Allocate data for cell-centered diffusion coefficients
@@ -1116,7 +1116,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<EBAMRCellData>&       a_
   
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1145,7 +1145,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
 
   const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
 
@@ -1198,14 +1198,14 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a
   }
 
   const int comp        = 0;
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics
+  // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
   Vector<Real>     cdr_densities(num_species);
 
@@ -1226,7 +1226,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a
       cdr_densities[idx] = Max(0.0, phi);
     }
 
-    const Vector<Real> coeffs = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
+    const Vector<Real> coeffs = m_physics->compute_cdr_diffusion_coefficients(a_time,
     									      pos,
     									      E,
     									      cdr_densities);
@@ -1282,10 +1282,10 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>& 
   }
 
   const int comp        = 0;
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
   const RealVect origin = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics
+  // Things that are passed into cdr_plasma_physics
   RealVect     pos, E;
   Vector<Real> cdr_densities(num_species);
 
@@ -1322,7 +1322,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>& 
       E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
       pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
-      const Vector<Real> coeffs = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
+      const Vector<Real> coeffs = m_physics->compute_cdr_diffusion_coefficients(a_time,
 										pos,
 										E,
 										cdr_densities);
@@ -1361,10 +1361,10 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>& 
   }
 
   const int comp        = 0;
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
   const RealVect origin = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics
+  // Things that are passed into cdr_plasma_physics
   RealVect     pos, E;
   Vector<Real> cdr_densities(num_species);
 
@@ -1404,7 +1404,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>& 
 	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
 	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
-	const Vector<Real> coeffs = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
+	const Vector<Real> coeffs = m_physics->compute_cdr_diffusion_coefficients(a_time,
 										  pos,
 										  E,
 										  cdr_densities);
@@ -1445,14 +1445,14 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&      
   }
 
   const int comp = 0;
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
   const RealVect origin  = m_amr->get_prob_lo();
 
-  // Things that are passed into plasma_kinetics
+  // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
   Vector<Real>     cdr_densities(num_species);
 
@@ -1468,7 +1468,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&      
       cdr_densities[idx] = (*a_cdr_densities[idx])(vof, comp);
     }
       
-    const Vector<Real> coeffs = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
+    const Vector<Real> coeffs = m_physics->compute_cdr_diffusion_coefficients(a_time,
 									      pos,
 									      E,
 									      cdr_densities);
@@ -1493,7 +1493,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_dif
 
   const int comp         = 0;
   const int ncomp        = 1;
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
   const Real zero        = 0.0;
 
@@ -1530,7 +1530,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> 
   }
 
   const int comp = 0;
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
 
   
   const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
@@ -1559,7 +1559,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> 
       }
 
 
-      const Vector<Real> diffco = m_plaskin->compute_cdr_diffusion_coefficients(a_time,
+      const Vector<Real> diffco = m_physics->compute_cdr_diffusion_coefficients(a_time,
 										pos,
 										e,
 										cdr_densities);
@@ -1592,12 +1592,12 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
     pout() << "cdr_plasma_stepper::compute_cdr_fluxes(full, level)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
   const int comp         = 0;
   const int ncomp        = 1;
 
-  // Things that will be passed into plaskin
+  // Things that will be passed into physics
   Vector<Real> extrap_cdr_fluxes(num_species);
   Vector<Real> extrap_cdr_densities(num_species);
   Vector<Real> extrap_cdr_velocities(num_species);
@@ -1647,7 +1647,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
       }
 
-      const Vector<Real> fluxes = m_plaskin->compute_cdr_electrode_fluxes(a_time,
+      const Vector<Real> fluxes = m_physics->compute_cdr_electrode_fluxes(a_time,
 									  pos,
 									  normal,
 									  e,
@@ -1691,7 +1691,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
       }
 
-      const Vector<Real> fluxes = m_plaskin->compute_cdr_dielectric_fluxes(a_time,
+      const Vector<Real> fluxes = m_physics->compute_cdr_dielectric_fluxes(a_time,
 									   pos,
 									   normal,
 									   e,
@@ -1723,8 +1723,8 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
     pout() << "cdr_plasma_stepper::compute_cdr_fluxes(full)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
   const int finest_level = m_amr->get_finest_level();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1771,11 +1771,11 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a
     pout() << "cdr_plasma_stepper::compute_cdr_domain_fluxes(level)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
   const int finest_level = m_amr->get_finest_level();
 
-  // Things that will be passed into plaskin
+  // Things that will be passed into physics
   Vector<Real> extrap_cdr_fluxes(num_species);
   Vector<Real> extrap_cdr_densities(num_species);
   Vector<Real> extrap_cdr_velocities(num_species);
@@ -1826,13 +1826,13 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
     pout() << "cdr_plasma_stepper::compute_cdr_domain_fluxes(level)" << endl;
   }
 
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
+  const int num_species  = m_physics->get_num_cdr_species();
+  const int num_photons  = m_physics->get_num_rte_species();
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
-  // Things that will be passed into plaskin
+  // Things that will be passed into physics
   Vector<Real> extrap_cdr_fluxes(num_species);
   Vector<Real> extrap_cdr_densities(num_species);
   Vector<Real> extrap_cdr_velocities(num_species);
@@ -1880,8 +1880,8 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
 	    extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](dir, sit())(face,comp);
 	  }
 
-	  // Call plasma_kinetics
-	  const Vector<Real> fluxes = m_plaskin->compute_cdr_domain_fluxes(a_time,
+	  // Call cdr_plasma_physics
+	  const Vector<Real> fluxes = m_physics->compute_cdr_domain_fluxes(a_time,
 									   pos,
 									   dir,
 									   sit(),
@@ -2017,559 +2017,6 @@ void cdr_plasma_stepper::extrapolate_velo_to_domain_faces(Vector<EBAMRIFData*>& 
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
-					     const Vector<EBAMRCellData*>&  a_cdr_densities,
-					     const Vector<EBAMRCellData*>&  a_rte_densities,
-					     const EBAMRCellData&           a_E,
-					     const Real&                    a_time,
-					     const centering::which_center  a_centering){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_sources(full, nograd)");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_sources(full, nograd)" << endl;
-  }
-
-  const int num_species = m_plaskin->get_num_cdr_species();
-
-  Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
-    m_amr->allocate(*grad_cdr[idx], m_cdr->get_phase(), SpaceDim);  // Allocate
-
-    m_amr->compute_gradient(*grad_cdr[idx], *a_cdr_densities[idx], phase::gas); // Compute grad()
-    m_amr->average_down(*grad_cdr[idx], m_cdr->get_phase());        // Average down
-    m_amr->interp_ghost(*grad_cdr[idx], m_cdr->get_phase());        // Interpolate ghost cells
-  }
-
-  this->compute_cdr_sources(a_sources, a_cdr_densities, grad_cdr, a_rte_densities, a_E, a_time, a_centering);
-
-  // Delete extra storage - didn't use smart pointers for this...
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    m_amr->deallocate(*grad_cdr[idx]);
-    delete grad_cdr[idx];
-  }
-}
-
-void cdr_plasma_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
-					     const Vector<EBAMRCellData*>&  a_cdr_densities,
-					     const Vector<EBAMRCellData*>&  a_cdr_gradients,
-					     const Vector<EBAMRCellData*>&  a_rte_densities,
-					     const EBAMRCellData&           a_E,
-					     const Real&                    a_time,
-					     const centering::which_center  a_centering){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_sources(full)");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_sources(full)" << endl;
-  }
-
-  // Compute grad(|E|)
-  EBAMRCellData grad_E, E_norm;
-  m_amr->allocate(grad_E, m_cdr->get_phase(), SpaceDim);  // Allocate storage for grad(|E|)
-  m_amr->allocate(E_norm, m_cdr->get_phase(), 1);         // Allocate storage for |E|
-
-  data_ops::vector_length(E_norm, a_E);             // Compute |E|
-  m_amr->average_down(E_norm, m_cdr->get_phase());  // Average down
-  m_amr->interp_ghost(E_norm, m_cdr->get_phase());  // Interpolate ghost cells. 
-
-  m_amr->compute_gradient(grad_E, E_norm, phase::gas);           // Compute grad(|E|)
-  m_amr->average_down(grad_E, m_cdr->get_phase());   // Average down
-  m_amr->interp_ghost(grad_E, m_cdr->get_phase());   // Interpolate ghost cells
-
-  // Call full versions
-  compute_cdr_sources(a_sources, a_cdr_densities, a_cdr_gradients, a_rte_densities, a_E, grad_E, a_time, a_centering);
-}
-
-void cdr_plasma_stepper::compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
-					     const Vector<EBAMRCellData*>&  a_cdr_densities,
-					     const Vector<EBAMRCellData*>&  a_cdr_gradients,
-					     const Vector<EBAMRCellData*>&  a_rte_densities,
-					     const EBAMRCellData&           a_E,
-					     const EBAMRCellData&           a_grad_E,
-					     const Real&                    a_time,
-					     const centering::which_center  a_centering){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_sources(full)");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_sources(full)" << endl;
-  }
-
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-
-    Vector<LevelData<EBCellFAB>* > sources(num_species);
-    Vector<LevelData<EBCellFAB>* > cdr_densities(num_species);
-    Vector<LevelData<EBCellFAB>* > cdr_gradients(num_species);
-    Vector<LevelData<EBCellFAB>* > rte_densities(num_photons);
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      sources[idx]       = (*a_sources[idx])[lvl];
-      cdr_densities[idx] = (*a_cdr_densities[idx])[lvl];
-      cdr_gradients[idx] = (*a_cdr_gradients[idx])[lvl];
-    }
-
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      rte_densities[idx] = (*a_rte_densities[idx])[lvl];
-    }
-
-    // Call the level versions
-    compute_cdr_sources(sources, cdr_densities, cdr_gradients, rte_densities,
-			*a_E[lvl], *a_grad_E[lvl], a_time, lvl, a_centering);
-  }
-
-  // Average down
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    m_amr->average_down(*a_sources[idx], m_cdr->get_phase());
-    m_amr->interp_ghost(*a_sources[idx], m_cdr->get_phase()); // This MAY be necessary if we extrapolate advection to faces
-  }
-}
-
-void cdr_plasma_stepper::compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_sources,
-					     const Vector<LevelData<EBCellFAB>*>&  a_cdr_densities,
-					     const Vector<LevelData<EBCellFAB>*>&  a_cdr_gradients,
-					     const Vector<LevelData<EBCellFAB>*>&  a_rte_densities,
-					     const LevelData<EBCellFAB>&           a_E,
-					     const LevelData<EBCellFAB>&           a_gradE,
-					     const Real&                           a_time,
-					     const int                             a_lvl,
-					     const centering::which_center         a_centering){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_sources(level)");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_sources(level)" << endl;
-  }
-
-  const Real zero = 0.0;
-
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-
-  // Stencils for extrapolating things to cell centroids
-  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
-
-  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->get_ebisl(m_cdr->get_phase())[a_lvl];
-  const Real dx                = m_amr->get_dx()[a_lvl];
-  const RealVect origin        = m_amr->get_prob_lo();
-
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      
-    Vector<EBCellFAB*> sources(num_species);
-    Vector<EBCellFAB*> cdr_densities(num_species);
-    Vector<EBCellFAB*> cdr_gradients(num_species);
-    Vector<EBCellFAB*> rte_densities(num_photons);
-    Vector<EBCellFAB*> cdr_velocities(num_species, NULL);
-    
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const RefCountedPtr<cdr_solver>& solver = solver_it();
-      const int idx = solver_it.get_solver();
-      sources[idx]       = &(*a_sources[idx])[dit()];
-      cdr_densities[idx] = &(*a_cdr_densities[idx])[dit()];
-      cdr_gradients[idx] = &(*a_cdr_gradients[idx])[dit()];
-      
-      if(solver->is_mobile()){
-	const EBAMRCellData& velo = solver->get_velo_cell();
-	cdr_velocities[idx] = &((*velo[a_lvl])[dit()]);
-      }
-    }
-    
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      rte_densities[idx] = &(*a_rte_densities[idx])[dit()];
-    }
-    
-    const EBCellFAB& E  = a_E[dit()];
-    const EBCellFAB& gE = a_gradE[dit()];
-
-    // This does all cells
-    cdr_plasma_stepper::compute_cdr_sources_reg(sources,
-						cdr_densities,
-						cdr_gradients,
-						rte_densities,
-						E,
-						gE,
-						dbl.get(dit()),
-						a_time,
-						dx);
-    
-    // Have to redo irregular cells
-    if(a_centering == centering::cell_center){
-      cdr_plasma_stepper::compute_cdr_sources_irreg(sources,
-						    cdr_densities,
-						    cdr_gradients,
-						    cdr_velocities,
-						    rte_densities,
-						    E,
-						    gE,
-						    interp_stencils[a_lvl][dit()],
-						    dbl.get(dit()),
-						    a_time,
-						    dx);
-    }
-  }
-}
-
-void cdr_plasma_stepper::compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sources,
-						 const Vector<EBCellFAB*>&     a_cdr_densities,
-						 const Vector<EBCellFAB*>&     a_cdr_gradients,
-						 const Vector<EBCellFAB*>&     a_rte_densities,
-						 const EBCellFAB&              a_E,
-						 const EBCellFAB&              a_gradE,
-						 const Box                     a_box,
-						 const Real                    a_time,
-						 const Real                    a_dx){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_sources_reg");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_sources_reg" << endl;
-  }
-
-
-  const Real zero = 0.0;
-  
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-  // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  // Things that are passed into plasma_kinetics
-  RealVect         pos, E, grad_E;
-  Vector<Real>     cdr_densities(num_species);
-  Vector<Real>     rte_densities(num_photons);
-  Vector<RealVect> cdr_grad(num_species);
-
-  // Computed source terms onto here
-  EBCellFAB tmp(ebisbox, a_E.getRegion(), num_species);
-  BaseFab<Real>& tmpFAB = tmp.getSingleValuedFAB();
-
-  const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
-  const BaseFab<Real>& gradEfab = a_gradE.getSingleValuedFAB();
-  
-  // VOFITERATOR LOOP
-  const IntVectSet ivs(a_box);
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-
-    if(ebisbox.isRegular(iv)){
-      // Position, E, and grad(|E|)
-      pos    = origin + iv*a_dx;
-      E      = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
-      grad_E = RealVect(D_DECL(gradEfab(iv, 0), gradEfab(iv, 1), gradEfab(iv, 2)));
-
-      // Fill vectors with densities
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx  = solver_it.get_solver();
-	const Real phi = (*a_cdr_densities[idx]).getSingleValuedFAB()(iv, 0);
-	cdr_densities[idx] = Max(zero, phi);
-	cdr_grad[idx]      = RealVect(D_DECL((*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 0),
-					     (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 1),
-					     (*a_cdr_gradients[idx]).getSingleValuedFAB()(iv, 2)));
-      }
-      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	const int idx  = solver_it.get_solver();
-	const Real phi = (*a_rte_densities[idx]).getSingleValuedFAB()(iv, 0);
-	rte_densities[idx] = Max(zero, phi);
-      }
-
-      // Compute source terms
-      const Real kappa = 1.0; // Kappa for regular cells
-      const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
-								       kappa,
-								       a_dx,
-								       pos,
-								       E,
-								       grad_E,
-								       cdr_densities,
-								       rte_densities,
-								       cdr_grad);
-
-
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	tmpFAB(iv,idx) = sources[idx];
-      }
-    }
-  }
-
-  // Copy temporary storage back to solvers
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    (*a_sources[idx]).setVal(0.0);
-    (*a_sources[idx]).plus(tmp, idx, 0, 1);
-
-    // Covered cells are bogus. 
-    (*a_sources[idx]).setCoveredCellVal(0.0, 0);
-  }
-}
-
-void cdr_plasma_stepper::compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sources,
-						   const Vector<EBCellFAB*>&     a_cdr_densities,
-						   const Vector<EBCellFAB*>&     a_cdr_gradients,
-						   const Vector<EBCellFAB*>&     a_cdr_velocities,
-						   const Vector<EBCellFAB*>&     a_rte_densities,
-						   const EBCellFAB&              a_E,
-						   const EBCellFAB&              a_gradE,
-						   const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-						   const Box                     a_box,
-						   const Real                    a_time,
-						   const Real                    a_dx){
-  if(m_interp_sources){
-    this->compute_cdr_sources_irreg_interp(a_sources,
-					   a_cdr_densities,
-					   a_cdr_gradients,
-					   a_cdr_velocities,
-					   a_rte_densities,
-					   a_E,
-					   a_gradE,
-					   a_interp_stencils,
-					   a_box,
-					   a_time,
-					   a_dx);
-  }
-  else{ // Cell-ave has already been done
-    this->compute_cdr_sources_irreg_kappa(a_sources,
-					  a_cdr_densities,
-					  a_cdr_gradients,
-					  a_rte_densities,
-					  a_E,
-					  a_gradE,
-					  a_interp_stencils,
-					  a_box,
-					  a_time,
-					  a_dx);
-  }
-}
-
-void cdr_plasma_stepper::compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&           a_sources,
-							  const Vector<EBCellFAB*>&     a_cdr_densities,
-							  const Vector<EBCellFAB*>&     a_cdr_gradients,
-							  const Vector<EBCellFAB*>&     a_cdr_velocities,
-							  const Vector<EBCellFAB*>&     a_rte_densities,
-							  const EBCellFAB&              a_E,
-							  const EBCellFAB&              a_gradE,
-							  const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-							  const Box                     a_box,
-							  const Real                    a_time,
-							  const Real                    a_dx){
-  const Real zero = 0.0;
-  
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-  // Interpolation stencils
-  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
-
-  // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  // Things that are passed into plasma_kinetics
-  RealVect         pos, E, grad_E;
-  Vector<Real>     cdr_densities(num_species);
-  Vector<Real>     rte_densities(num_photons);
-  Vector<RealVect> cdr_grad(num_species);
-  Vector<Real>     sources(num_species);
-
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof       = vofit();
-    const Real kappa          = ebisbox.volFrac(vof);
-    const VoFStencil& stencil = a_interp_stencils(vof, 0);
-
-    pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
-
-    // Compute electric field on centroids
-    E      = RealVect::Zero;
-    grad_E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++){
-      const VolIndex& ivof = stencil.vof(i);
-      const Real& iweight  = stencil.weight(i);
-      for (int dir = 0; dir < SpaceDim; dir++){
-	E[dir] += a_E(ivof, dir)*iweight;
-	grad_E[dir] += a_gradE(ivof, dir)*iweight;
-      }
-    }
-
-    // Compute cdr_densities and their gradients on centroids. If the flow is towards the boundary, we apply a recentering
-    // stencil. If the flow is AWAY from the boundary, applying a stencils means that we extrapolate using downwind information.
-    // This is typically bad so we try to eliminate those cases. 
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const RefCountedPtr<cdr_solver>& solver = solver_it();
-      const int idx = solver_it.get_solver();
-
-      bool applyStencil = true;
-
-      if(solver->is_mobile()){
-	const EBCellFAB& velo = *a_cdr_velocities[idx];
-	const RealVect v = RealVect(D_DECL(velo(vof,0), velo(vof,1), velo(vof,2)));
-	if(PolyGeom::dot(v,ebisbox.normal(vof)) > 0.0){ // Flow away from the boundary.
-	  applyStencil = false;
-	}
-	else{
-	  applyStencil = true;
-	}
-      }
-
-      if(applyStencil){
-	Real phi = 0.0;
-	RealVect grad = RealVect::Zero;
-	for (int i = 0; i < stencil.size(); i++){
-	  const VolIndex& ivof = stencil.vof(i);
-	  const Real& iweight  = stencil.weight(i);
-
-	  phi += (*a_cdr_densities[idx])(ivof,0)*iweight;
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    grad[dir] += (*a_cdr_gradients[idx])(ivof, dir)*iweight;
-	  }
-	}
-      
-	cdr_densities[idx] = Max(zero, phi);
-	cdr_grad[idx] = grad;
-      }
-      else{
-	cdr_densities[idx] = Max(zero, (*a_cdr_densities[idx])(vof,0));
-	cdr_grad[idx] = RealVect(D_DECL((*a_cdr_gradients[idx])(vof,0),
-					(*a_cdr_gradients[idx])(vof,1),
-					(*a_cdr_gradients[idx])(vof,2)));
-      }
-    }
-
-    // Compute RTE densities on the centroids
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-
-      Real phi = 0.0;
-      for (int i = 0; i < stencil.size(); i++){
-	const VolIndex& ivof = stencil.vof(i);
-	const Real& iweight  = stencil.weight(i);
-	phi += (*a_rte_densities[idx])(ivof, 0)*iweight;
-      }
-      rte_densities[idx] = Max(zero, phi);
-    }
-
-    // Compute sources
-    const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
-								     kappa,
-								     a_dx,
-								     pos,
-								     E,
-								     grad_E,
-								     cdr_densities,
-								     rte_densities,
-								     cdr_grad);
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      (*a_sources[idx])(vof, 0) = sources[idx];
-    }
-  }
-}
-
-void cdr_plasma_stepper::compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&           a_sources,
-							 const Vector<EBCellFAB*>&     a_cdr_densities,
-							 const Vector<EBCellFAB*>&     a_cdr_gradients,
-							 const Vector<EBCellFAB*>&     a_rte_densities,
-							 const EBCellFAB&              a_E,
-							 const EBCellFAB&              a_gradE,
-							 const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-							 const Box                     a_box,
-							 const Real                    a_time,
-							 const Real                    a_dx){
-  const Real zero = 0.0;
-  
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-  // Interpolation stencils
-  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
-
-  // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  // Things that are passed into plasma_kinetics
-  RealVect         pos, E, grad_E;
-  Vector<Real>     cdr_densities(num_species);
-  Vector<Real>     rte_densities(num_photons);
-  Vector<RealVect> cdr_grad(num_species);
-  Vector<Real>     sources(num_species);
-
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof       = vofit();
-    const VoFStencil& stencil = a_interp_stencils(vof, 0);
-    const Real kappa          = ebisbox.volFrac(vof);
-    pos = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
-
-    // Compute electric field on centroids
-    E      = RealVect::Zero;
-    grad_E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++){
-      const VolIndex& ivof = stencil.vof(i);
-      const Real& iweight  = stencil.weight(i);
-      for (int dir = 0; dir < SpaceDim; dir++){
-	E[dir] += a_E(ivof, dir)*iweight;
-	grad_E[dir] += a_gradE(ivof, dir)*iweight;
-      }
-    }
-
-    // Compute cdr_densities as averages and their gradients on centroids
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-
-      Real phi = 0.0;
-      RealVect grad = RealVect::Zero;
-      for (int i = 0; i < stencil.size(); i++){
-	const VolIndex& ivof = stencil.vof(i);
-	const Real& iweight  = stencil.weight(i);
-	      
-	//	phi += (*a_cdr_densities[idx])(ivof, 0)*iweight;
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  grad[dir] += (*a_cdr_gradients[idx])(ivof, dir)*iweight;
-	}
-      }
-      cdr_densities[idx] = Max(zero, (*a_cdr_densities[idx])(vof, 0));
-      //      cdr_densities[idx] = Max(zero, phi);
-      cdr_grad[idx] = grad;
-    }
-
-    // Compute RTE densities on the centroids
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-
-      Real phi = 0.0;
-      for (int i = 0; i < stencil.size(); i++){
-	const VolIndex& ivof = stencil.vof(i);
-	const Real& iweight  = stencil.weight(i);
-	phi += (*a_rte_densities[idx])(ivof, 0)*iweight;
-      }
-      rte_densities[idx] = Max(zero, phi);
-    }
-
-    // Compute sources
-    const Vector<Real> sources = m_plaskin->compute_cdr_source_terms(a_time,
-								     kappa,
-								     a_dx,
-								     pos,
-								     E,
-								     grad_E,
-								     cdr_densities,
-								     rte_densities,
-								     cdr_grad);
-
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      (*a_sources[idx])(vof, 0) = sources[idx];
-    }
-  }
-}
-
 void cdr_plasma_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_velocities,
 						const Vector<EBAMRCellData*>& a_cdr_densities,
 						const EBAMRCellData&          a_E,
@@ -2579,7 +2026,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_
     pout() << "cdr_plasma_stepper::compute_cdr_velocities(full)" << endl;
   }
   
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
   const int finest_level = m_amr->get_finest_level();
 
   // Interpolate E to centroids
@@ -2629,7 +2076,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>& 
   const EBISLayout& ebisl       = m_amr->get_ebisl(cdr_phase)[a_lvl];
   const Real dx                 = m_amr->get_dx()[a_lvl];
 
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     Vector<EBCellFAB*> vel(num_species);
@@ -2682,7 +2129,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_reg(Vector<EBCellFAB*>&       a_
     }
 
     // Compute velocities
-    Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
+    Vector<RealVect> velocities = m_physics->compute_cdr_velocities(a_time, pos, e, cdr_densities);
 
     // Put velocities in the appropriate place. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2733,7 +2180,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&  
   }
   
 #if CH_SPACEDIM==2
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
   const int comp         = 0;
   const RealVect origin  = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
@@ -2776,7 +2223,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_reg_fast2D(Vector<EBCellFAB*>&  
 	cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][j][i]);
       }
 
-      const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, E, cdr_densities);
+      const Vector<RealVect> velocities = m_physics->compute_cdr_velocities(a_time, pos, E, cdr_densities);
 
       // Put result in correct palce
       for (int idx = 0; idx < num_species; ++idx){
@@ -2818,7 +2265,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&  
   }
 
 #if CH_SPACEDIM==3
-  const int num_species  = m_plaskin->get_num_cdr_species();
+  const int num_species  = m_physics->get_num_cdr_species();
   const int comp         = 0;
   const RealVect origin  = m_amr->get_prob_lo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
@@ -2864,7 +2311,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_reg_fast3D(Vector<EBCellFAB*>&  
 	  cdr_densities[idx] = Max(0.0, vla_cdr_phi[idx][k][j][i]);
 	}
 
-	const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, E, cdr_densities);
+	const Vector<RealVect> velocities = m_physics->compute_cdr_velocities(a_time, pos, E, cdr_densities);
 
 	// Put result in correct palce
 	for (int idx = 0; idx < num_species; ++idx){
@@ -2925,7 +2372,7 @@ void cdr_plasma_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       
     }
     
     // Compute velocities
-    const Vector<RealVect> velocities = m_plaskin->compute_cdr_velocities(a_time, pos, e, cdr_densities);
+    const Vector<RealVect> velocities = m_physics->compute_cdr_velocities(a_time, pos, e, cdr_densities);
 
     // Put velocities in the appropriate place. 
     for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2935,232 +2382,6 @@ void cdr_plasma_stepper::compute_cdr_velocities_irreg(Vector<EBCellFAB*>&       
 	  (*a_velocities[idx])(vof, dir) = velocities[idx][dir];
 	}
       }
-    }
-  }
-}
-
-void cdr_plasma_stepper::compute_rte_sources(Vector<EBAMRCellData*>        a_source,
-					     const Vector<EBAMRCellData*>& a_cdr_states,
-					     const EBAMRCellData&          a_E,
-					     const Real&                   a_time,
-					     const centering::which_center a_centering){
-  CH_TIME("cdr_plasma_stepper::compute_rte_sources(amr)");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rte_sources(amr)" << endl;
-  }
-
-  const Real zero = 0.0;
-  const int num_species  = m_plaskin->get_num_cdr_species();
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int finest_level = m_amr->get_finest_level();
-
-  if(num_photons > 0){
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      
-      Vector<LevelData<EBCellFAB>* > sources(num_photons);
-      Vector<LevelData<EBCellFAB>* > species(num_species);
-
-      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	RefCountedPtr<rte_solver>& solver = solver_it();
-	sources[idx] = solver->get_source()[lvl];
-      }
-
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	species[idx] = (*a_cdr_states[idx])[lvl];
-      }
-
-      // Call the level version
-      compute_rte_sources(sources, species, *a_E[lvl], a_time, lvl, a_centering);
-    }
-  
-    for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      m_amr->average_down(*a_source[idx], m_rte->get_phase());
-    }
-  }
-}
-
-void cdr_plasma_stepper::compute_rte_sources(Vector<LevelData<EBCellFAB>* >&       a_source,
-					     const Vector<LevelData<EBCellFAB>* >& a_cdr_states,
-					     const LevelData<EBCellFAB>&           a_E,
-					     const Real&                           a_time,
-					     const int                             a_lvl,
-					     const centering::which_center         a_centering){
-  CH_TIME("cdr_plasma_stepper::compute_rte_sources(level)");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rte_sources(level)" << endl;
-  }
-
-  // This routine should be split in regular and non-regular stuff....
-
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-  const irreg_amr_stencil<centroid_interp>& interp_stencils = m_amr->get_centroid_interp_stencils(m_cdr->get_phase());
-
-  if(num_photons > 0){
-    const DisjointBoxLayout& dbl  = m_amr->get_grids()[a_lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      Vector<EBCellFAB*> rte_sources(num_photons);
-      Vector<EBCellFAB*> cdr_densities(num_species);
-
-      for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	cdr_densities[idx] = &(*a_cdr_states[idx])[dit()];
-      }
-      for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	const int idx = solver_it.get_solver();
-	rte_sources[idx] = &(*a_source[idx])[dit()];
-      }
-      const EBCellFAB& E = a_E[dit()];
-
-      // All cells in box
-      compute_rte_sources_reg(rte_sources, cdr_densities, E, dbl.get(dit()), m_amr->get_dx()[a_lvl], a_time);
-
-      // Redo irregular cells
-      if(a_centering == centering::cell_center){
-	compute_rte_sources_irreg(rte_sources,
-				  cdr_densities,
-				  E,
-				  interp_stencils[a_lvl][dit()],
-				  dbl.get(dit()),
-				  a_time,
-				  m_amr->get_dx()[a_lvl]);
-      }
-    }
-  }
-}
-
-void cdr_plasma_stepper::compute_rte_sources_reg(Vector<EBCellFAB*>&           a_source,
-						 const Vector<EBCellFAB*>&     a_cdr_densities,
-						 const EBCellFAB&              a_E,
-						 const Box&                    a_box,
-						 const Real                    a_dx,
-						 const Real                    a_time){
-  CH_TIME("cdr_plasma_stepper::compute_rte_sources_reg");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rte_sources_reg" << endl;
-  }
-
-  const int comp         = 0;
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-  // EBISBox and graph
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_amr->get_prob_lo();
-
-
-  // Things that are passed into plasma_kinetics
-  RealVect     pos, E;
-  Vector<Real> cdr_densities(num_species, 0.0);
-  Vector<Real> sources(num_photons, 0.0);
-
-  const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
-
-  // Computed source terms onto here
-  EBCellFAB tmp(ebisbox, a_E.getRegion(), num_species);
-  BaseFab<Real>& tmpFAB = tmp.getSingleValuedFAB();
-
-  // Loop over all points
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-
-    pos = origin + iv*a_dx;
-    E   = RealVect(D_DECL(EFab(iv, 0),     EFab(iv, 1),     EFab(iv, 2)));
-
-    // Fill vectors with densities
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx  = solver_it.get_solver();
-      const Real phi = (*a_cdr_densities[idx]).getSingleValuedFAB()(iv, 0);
-      cdr_densities[idx] = Max(0.0, phi);
-    }
-
-    // Call plaskin
-    sources = m_plaskin->compute_rte_source_terms(a_time, 1.0, a_dx, pos, E, cdr_densities);
-    
-    // Put into temporary data holder
-    for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      tmpFAB(iv, idx) = sources[idx];
-    }
-  }
-
-  // Copy result back to solvers
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const int idx = solver_it.get_solver();
-    a_source[idx]->setVal(0.0);
-    a_source[idx]->plus(tmp, idx, 0, 1);
-    a_source[idx]->setCoveredCellVal(0.0, comp);
-  }
-}
-
-void cdr_plasma_stepper::compute_rte_sources_irreg(Vector<EBCellFAB*>&           a_source,
-						   const Vector<EBCellFAB*>&     a_cdr_densities,
-						   const EBCellFAB&              a_E,
-						   const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-						   const Box                     a_box,
-						   const Real                    a_time,
-						   const Real                    a_dx){
-  CH_TIME("cdr_plasma_stepper::compute_rte_sources_irreg");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rte_sources_irreg" << endl;
-  }
-
-  const int comp         = 0;
-  const int num_photons  = m_plaskin->get_num_rte_species();
-  const int num_species  = m_plaskin->get_num_cdr_species();
-
-  const EBISBox& ebisbox = a_E.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  // Things that are passed into plasma_kinetics
-  RealVect         pos,E;
-  Vector<Real>     cdr_densities(num_species);
-  Vector<Real>     sources(num_photons);
-
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    const VoFStencil& stencil = a_interp_stencils(vof, comp);
-    const Real kappa = ebisbox.volFrac(vof);
-    
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, origin);
-    
-    // Compute CDR densities
-    for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx             = solver_it.get_solver();
-      
-      Real phi = 0.0;
-      for (int i = 0; i < stencil.size(); i++){
-	const VolIndex& ivof = stencil.vof(i);
-	const Real& iweight  = stencil.weight(i);
-	phi += (*a_cdr_densities[idx])(ivof, comp)*iweight;
-      }
-      cdr_densities[idx] = Max(0.0, phi);
-    }
-
-    // Compute E
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++){
-      const VolIndex& ivof = stencil.vof(i);
-      const Real& iweight  = stencil.weight(i);
-      for (int dir = 0; dir < SpaceDim; dir++){
-	E[dir] += a_E(ivof, dir)*iweight;
-      }
-    }
-
-    // Call Plaskin
-    Vector<Real> sources = m_plaskin->compute_rte_source_terms(a_time, kappa, a_dx, pos, E, cdr_densities);
-
-    // Put source term in place
-    for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.get_solver();
-      (*a_source[idx])(vof, comp) = sources[idx];
     }
   }
 }
@@ -3183,32 +2404,6 @@ void cdr_plasma_stepper::cache_internals(){
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::cache_internals" << endl;
   }
-}
-
-void cdr_plasma_stepper::compute_cdr_sources(){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_sources()");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_sources()" << endl;
-  }
-
-  Vector<EBAMRCellData*> sources, cdr_densities, rte_densities;
-  EBAMRCellData E;
-
-  m_amr->allocate(E, m_cdr->get_phase(), SpaceDim);
-  this->compute_E(E, m_cdr->get_phase(), m_poisson->get_state());
-
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    sources.push_back(&(solver->get_source()));
-    cdr_densities.push_back(&(solver->get_state()));
-  }
-
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    rte_densities.push_back(&(solver->get_state()));
-  }
-
-  this->compute_cdr_sources(sources, cdr_densities, rte_densities, E, m_time, centering::cell_center);
 }
 
 void cdr_plasma_stepper::compute_cdr_velocities(){
@@ -3235,7 +2430,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
   }
 
   const int ncomp       = 1;
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
 
   EBAMRCellData E_cell;
   EBAMRIVData   E_eb;
@@ -3281,7 +2476,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   }
 
   const int ncomp       = 1;
-  const int num_species = m_plaskin->get_num_cdr_species();
+  const int num_species = m_physics->get_num_cdr_species();
 
   Vector<EBAMRCellData*> cdr_states  = m_cdr->get_states();
 
@@ -3711,31 +2906,6 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
   data_ops::scale(a_J, units::s_Qe);
 }
 
-void cdr_plasma_stepper::compute_rte_sources(){
-  CH_TIME("cdr_plasma_stepper::compute_rte_sources(full)");
-  if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rte_sources(full)" << endl;
-  }
-
-  EBAMRCellData E;
-  m_amr->allocate(E, m_rte->get_phase(), SpaceDim);
-  this->compute_E(E, m_rte->get_phase(), m_poisson->get_state());
-
-  Vector<EBAMRCellData*> cdr_states;
-  for (cdr_iterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    cdr_states.push_back(&(solver->get_state()));
-  }
-  
-  Vector<EBAMRCellData*> sources;
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
-    sources.push_back(&(solver->get_source()));
-  }
-
-  this->compute_rte_sources(sources, cdr_states, E, m_time, centering::cell_center);
-}
-
 void cdr_plasma_stepper::compute_rho(){
   CH_TIME("cdr_plasma_stepper::compute_rho()");
   if(m_verbosity > 5){
@@ -4036,7 +3206,7 @@ void cdr_plasma_stepper::initial_data(){
     pout() << "cdr_plasma_stepper::initial_data" << endl;
   }
 
-  m_cdr->initial_data();        // Initial data comes in through cdr_species, in this case supplied by plaskin
+  m_cdr->initial_data();        // Initial data comes in through cdr_species, in this case supplied by physics
   if(!m_rte->is_stationary()){
     m_rte->initial_data();
   }
@@ -4085,7 +3255,7 @@ void cdr_plasma_stepper::initial_sigma(){
 	const RealVect pos  = origin + vof.gridIndex()*dx + ebisbox.bndryCentroid(vof)*dx;
 	
 	for (int comp = 0; comp < state.nComp(); comp++){
-	  state(vof, comp) = m_plaskin->initial_sigma(m_time, pos);
+	  state(vof, comp) = m_physics->initial_sigma(m_time, pos);
 	}
       }
     }
@@ -4272,16 +3442,16 @@ void cdr_plasma_stepper::sanity_check(){
 
   CH_assert(!m_compgeom.isNull());
   CH_assert(!m_amr.isNull());
-  CH_assert(!m_plaskin.isNull());
+  CH_assert(!m_physics.isNull());
 }
 
-void cdr_plasma_stepper::set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin){
-  CH_TIME("cdr_plasma_stepper::set_plasma_kinetics");
+void cdr_plasma_stepper::set_cdr_plasma_physics(const RefCountedPtr<cdr_plasma_physics>& a_physics){
+  CH_TIME("cdr_plasma_stepper::set_cdr_plasma_physics");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::set_plasma_kinetics" << endl;
+    pout() << "cdr_plasma_stepper::set_cdr_plasma_physics" << endl;
   }
 
-  m_plaskin = a_plaskin;
+  m_physics = a_physics;
 }
 
 void cdr_plasma_stepper::set_potential(Real (*a_potential)(const Real a_time)){

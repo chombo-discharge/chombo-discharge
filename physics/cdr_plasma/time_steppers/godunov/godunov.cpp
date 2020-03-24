@@ -23,9 +23,9 @@ godunov::godunov(){
   m_extrap_advect = true;
 }
 
-godunov::godunov(RefCountedPtr<plasma_kinetics>& a_plaskin){
+godunov::godunov(RefCountedPtr<cdr_plasma_physics>& a_physics){
   m_class_name    = "godunov";
-  m_plaskin       = a_plaskin;
+  m_physics       = a_physics;
   m_extrap_advect = true;
 }
 
@@ -322,8 +322,8 @@ void godunov::allocate_internals(){
   }
 
   const int ncomp       = 1;
-  const int num_species = m_plaskin->get_num_cdr_species();
-  const int num_photons = m_plaskin->get_num_rte_species();
+  const int num_species = m_physics->get_num_cdr_species();
+  const int num_photons = m_physics->get_num_rte_species();
 
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);

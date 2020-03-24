@@ -1,31 +1,38 @@
 /*!
-  @file network_kinetics.H
+  @file cdr_plasma_physics.H
   @brief Declarationof the plasma kinetics class
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#ifndef _NETWORK_KINETICS_
-#define _NETWORK_KINETICS_
+#ifndef _CDR_PLASMA_PHYSICS_
+#define _CDR_PLASMA_PHYSICS_
 
-#include "plasma_kinetics.H"
+#include <RealVect.H>
+#include <RefCountedPtr.H>
+#include <LoHiSide.H>
+
+#include "cdr_species.H"
+#include "rte_species.H"
 
 /*!
   @brief Abstract base class for specifying plasma kinetics
 */
-class network_kinetics : public plasma_kinetics {
+class cdr_plasma_physics {
 public:
 
   /*!
     @brief Constructor
   */
-  network_kinetics() : plasma_kinetics() {
+  cdr_plasma_physics(){
+    m_eed_solve     = false;
+    m_eed_index = 0;
   }
 
   /*!
     @brief Destructor
   */
-  virtual ~network_kinetics(){}
+  virtual ~cdr_plasma_physics(){}
 
   /*!
     @brief Routine intended for advancing a full reaction network simultaneous. 
@@ -54,29 +61,6 @@ public:
 					const Real             a_dt,
 					const Real             a_time,
 					const Real             a_kappa) const = 0;
-
-  // Calling this is an error
-  Vector<Real> compute_cdr_source_terms(const Real              a_time,
-					const Real              a_kappa,
-					const Real              a_dx,
-					const RealVect         a_pos,
-					const RealVect         a_E,
-					const RealVect         a_gradE,
-					const Vector<Real>     a_cdr_densities,
-					const Vector<Real>     a_rte_densities,
-					const Vector<RealVect> a_grad_cdr) const {
-    MayDay::Abort("network_kinetics::compute_cdr_source_terms - Calling this is an error");
-  }
-
-  // Calling this is an error
-  Vector<Real> compute_rte_source_terms(const Real         a_time,
-					const Real         a_kappa,
-					const Real         a_dx,
-					const RealVect     a_pos,
-					const RealVect     a_E,
-					const Vector<Real> a_cdr_densities) const {
-    MayDay::Abort("network_kinetics::compute_rte_source_terms - Calling this is an error");
-  }
 
   /*!
     @brief Compute velocities for the CDR equations
@@ -169,15 +153,7 @@ public:
 						 const Vector<Real>   a_cdr_velocities,
 						 const Vector<Real>   a_cdr_gradients,
 						 const Vector<Real>   a_rte_fluxes,
-						 const Vector<Real>   a_extrap_cdr_fluxes) const {
-    Vector<Real> fluxes(m_num_cdr_species, 0.0); 
-    const int sgn = sign(a_side);
-    for (int i = 0; i < fluxes.size(); i++){
-      fluxes[i] = sgn*Max(sgn*a_extrap_cdr_fluxes[i], 0.); // Outflow
-    }
-    return fluxes;
-  }
-
+						 const Vector<Real>   a_extrap_cdr_fluxes) const = 0;
 
 
   /*!
@@ -194,6 +170,85 @@ public:
   virtual Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
     return 0.0;
   }
+
+  /*!
+    @brief Get all ions
+  */
+  const Vector<RefCountedPtr<cdr_species> >& get_cdr_species() const { 
+    return m_cdr_species; 
+  }
+
+  /*!
+    @brief Get all photons
+  */
+  const Vector<RefCountedPtr<rte_species> >& get_rte_species() const {
+    return m_rte_species;
+  }
+
+  /*!
+    @brief Return number of ion equations
+  */
+  int get_num_cdr_species() const{
+    return m_cdr_species.size();
+  }
+
+  /*!
+    @brief Return number of RTE equations
+  */
+  int get_num_rte_species() const {
+    return m_rte_species.size();
+  }
+
+  /*!
+    @brief Check if solver solves for eed
+  */
+  bool solve_eed(){
+    return m_eed_solve;
+  }
+
+  /*!
+    @brief Get eed solver index
+  */
+  int get_eed_index(){
+    return m_eed_index;
+  }
+
+  void set_dt(const Real a_dt){
+    m_dt = a_dt;
+  }
+
+  void set_finest_dx(const Real a_finest_dx){
+    m_finest_dx = a_finest_dx;
+  }
+
+  
+protected:
+  bool m_eed_solve;     // Doing EED solve or not?
+  
+  int m_eed_index;      // EED solver index
+  
+  Real m_dt;            // FHD kinetics need access to time steps
+  Real m_finest_dx;     // Finest dx
+
+  /*!
+    @brief List of species
+  */
+  Vector<RefCountedPtr<cdr_species> > m_cdr_species;
+
+  /*!
+    @brief List of optical transitions between species
+  */
+  Vector<RefCountedPtr<rte_species> > m_rte_species;
+
+  /*!
+    @brief Number of species
+  */
+  int m_num_cdr_species;
+
+  /*!
+    @brief Number of RTE species
+  */
+  int m_num_rte_species;
 };
 
 #endif

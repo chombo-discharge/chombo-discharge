@@ -9,7 +9,7 @@
 #define _CDR_PLASMA_STEPPER_
 
 #include "computational_geometry.H"
-#include "plasma_kinetics.H"
+#include "cdr_plasma_physics.H"
 #include "amr_mesh.H"
 #include "mfis.H"
 #include "cdr_layout.H"
@@ -47,10 +47,10 @@ public:
   */
   cdr_plasma_stepper();
 
-    /*!
+  /*!
     @brief Constructor
   */
-  cdr_plasma_stepper(RefCountedPtr<plasma_kinetics>& a_plaskin);
+  cdr_plasma_stepper(RefCountedPtr<cdr_plasma_physics>& a_physics);
 
   /*!
     @brief Destructor
@@ -175,7 +175,7 @@ public:
 					    const Real&               a_dx,
 					    const Box&                a_box);
 
-    /*!
+  /*!
     @brief Compute reaction network sources. Fast patch version. 
   */
   virtual void advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a_particle_sources,
@@ -227,7 +227,7 @@ public:
 					      const Real&                  a_dx,
 					      const Box&                   a_box);
 
-    /*!
+  /*!
     @brief Compute reaction network sources. Irregular patch version.
   */
   virtual void advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&          a_particle_sources,
@@ -471,117 +471,6 @@ public:
 						 const Vector<EBAMRCellData*>& a_phi);
 
   /*!
-    @brief Compute CDR source terms
-  */
-  virtual void compute_cdr_sources();
-
-
-
-  /*!
-    @brief Compute cdr source terms. This version computes the cdr_gradients and then calls the full compute_cdr_sources
-  */
-  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
-				   const Vector<EBAMRCellData*>&  a_cdr_densities,
-				   const Vector<EBAMRCellData*>&  a_rte_densities,
-				   const EBAMRCellData&           a_E,
-				   const Real&                    a_time,
-				   const centering::which_center  a_centering);
-
-  /*!
-    @brief Compute cdr source terms. Computes grad(E) and then calls the full version
-  */
-  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
-				   const Vector<EBAMRCellData*>&  a_cdr_densities,
-				   const Vector<EBAMRCellData*>&  a_cdr_gradients,
-				   const Vector<EBAMRCellData*>&  a_rte_densities,
-				   const EBAMRCellData&           a_E,
-				   const Real&                    a_time,
-				   const centering::which_center  a_centering);
-
-  /*!
-    @brief Compute cdr source terms. Computes grad(E) and then calls the full version
-  */
-  virtual void compute_cdr_sources(Vector<EBAMRCellData*>&        a_sources,
-				   const Vector<EBAMRCellData*>&  a_cdr_densities,
-				   const Vector<EBAMRCellData*>&  a_cdr_gradients,
-				   const Vector<EBAMRCellData*>&  a_rte_densities,
-				   const EBAMRCellData&           a_E,
-				   const EBAMRCellData&           a_gradE,
-				   const Real&                    a_time,
-				   const centering::which_center  a_centering);
-
-  /*!
-    @brief Compute source terms. Level version.
-  */
-  virtual void compute_cdr_sources(Vector<LevelData<EBCellFAB>* >&       a_sources,
-				   const Vector<LevelData<EBCellFAB>*>&  a_cdr_densities,
-				   const Vector<LevelData<EBCellFAB>*>&  a_cdr_gradients,
-				   const Vector<LevelData<EBCellFAB>*>&  a_rte_densities,
-				   const LevelData<EBCellFAB>&           a_E,
-				   const LevelData<EBCellFAB>&           a_gradE,
-				   const Real&                           a_time,
-				   const int                             a_lvl,
-				   const centering::which_center         a_centering);
-
-
-  /*!
-    @brief Compute source terms on regular cells
-  */
-  virtual void compute_cdr_sources_reg(Vector<EBCellFAB*>&           a_sources,
-				       const Vector<EBCellFAB*>&     a_cdr_densities,
-				       const Vector<EBCellFAB*>&     a_cdr_gradients,
-				       const Vector<EBCellFAB*>&     a_rte_densities,
-				       const EBCellFAB&              a_E,
-				       const EBCellFAB&              a_gradE,
-				       const Box                     a_box,
-				       const Real                    a_dx,
-				       const Real                    a_time);
-
-  /*!
-    @brief Compute source terms on irregular cells
-  */
-  virtual void compute_cdr_sources_irreg(Vector<EBCellFAB*>&           a_sources,
-					 const Vector<EBCellFAB*>&     a_cdr_densities,
-					 const Vector<EBCellFAB*>&     a_cdr_gradients,
-					 const Vector<EBCellFAB*>&     a_cdr_velocities,
-					 const Vector<EBCellFAB*>&     a_rte_densities,
-					 const EBCellFAB&              a_E,
-					 const EBCellFAB&              a_gradE,
-					 const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-					 const Box                     a_box,
-					 const Real                    a_time,
-					 const Real                    a_dx);
-
-  /*!
-    @brief Compute source terms on irregular cells
-  */
-  virtual void compute_cdr_sources_irreg_interp(Vector<EBCellFAB*>&           a_sources,
-						const Vector<EBCellFAB*>&     a_cdr_densities,
-						const Vector<EBCellFAB*>&     a_cdr_gradients,
-						const Vector<EBCellFAB*>&     a_cdr_velocities,
-						const Vector<EBCellFAB*>&     a_rte_densities,
-						const EBCellFAB&              a_E,
-						const EBCellFAB&              a_gradE,
-						const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-						const Box                     a_box,
-						const Real                    a_time,
-						const Real                    a_dx);
-
-  /*!
-    @brief Compute source terms on irregular cells
-  */
-  virtual void compute_cdr_sources_irreg_kappa(Vector<EBCellFAB*>&           a_sources,
-					       const Vector<EBCellFAB*>&     a_cdr_densities,
-					       const Vector<EBCellFAB*>&     a_cdr_gradients,
-					       const Vector<EBCellFAB*>&     a_rte_densities,
-					       const EBCellFAB&              a_E,
-					       const EBCellFAB&              a_gradE,
-					       const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-					       const Box                     a_box,
-					       const Real                    a_time,
-					       const Real                    a_dx);
-
-  /*!
     @brief Compute cdr velocities
   */
   virtual void compute_cdr_velocities();
@@ -638,48 +527,6 @@ public:
 					    const Real&               a_time,
 					    const Real&               a_dx);
 
-
-  /*!
-    @brief Compute photon source terms. Calls the level version. 
-  */
-  virtual void compute_rte_sources(Vector<EBAMRCellData*>        a_source,
-				   const Vector<EBAMRCellData*>& a_cdr_states,
-				   const EBAMRCellData&          a_E,
-				   const Real&                   a_time,
-				   const centering::which_center a_centering);
-
-  /*!
-    @brief Compute photon source terms. Level version. 
-  */
-  virtual void compute_rte_sources(Vector<LevelData<EBCellFAB>* >&       a_source,
-				   const Vector<LevelData<EBCellFAB>* >& a_cdr_states,
-				   const LevelData<EBCellFAB>&           a_E,
-				   const Real&                           a_time,
-				   const int                             a_lvl,
-				   const centering::which_center         a_centering);
-
-    /*!
-    @brief Compute source terms on regular cells
-  */
-  virtual void compute_rte_sources_reg(Vector<EBCellFAB*>&           a_sources,
-				       const Vector<EBCellFAB*>&     a_cdr_densities,
-				       const EBCellFAB&              a_E,
-				       const Box&                    a_box,
-				       const Real                    a_dx,
-				       const Real                    a_time);
-
-  /*!
-    @brief Compute source terms on irregular cells
-  */
-  virtual void compute_rte_sources_irreg(Vector<EBCellFAB*>&           a_sources,
-					 const Vector<EBCellFAB*>&     a_cdr_densities,
-					 const EBCellFAB&              a_E,
-					 const BaseIVFAB<VoFStencil>&  a_interp_stencils,
-					 const Box                     a_box,
-					 const Real                    a_time,
-					 const Real                    a_dx);
-
-
   /*!
     @brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
   */
@@ -721,10 +568,6 @@ public:
   */
   virtual void compute_charge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
 
-  /*!
-    @brief Compute RTE source terms
-  */
-  virtual void compute_rte_sources();
 
   /*!
     @brief Compute the cell-centered space charge density by using data inside cdr_layout. 
@@ -908,7 +751,7 @@ public:
   /*!
     @brief Set plasma kinetics
   */
-  virtual void set_plasma_kinetics(const RefCountedPtr<plasma_kinetics>& a_plaskin);
+  virtual void set_cdr_plasma_physics(const RefCountedPtr<cdr_plasma_physics>& a_physics);
 
   /*!
     @brief Set solver verbosity
@@ -1080,7 +923,7 @@ protected:
   /*!
     @brief Plasma kinetics
   */
-  RefCountedPtr<plasma_kinetics> m_plaskin;
+  RefCountedPtr<cdr_plasma_physics> m_physics;
 
   /*!
     @brief CDR solvers

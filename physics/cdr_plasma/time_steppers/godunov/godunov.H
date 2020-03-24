@@ -27,7 +27,7 @@ public:
   class sigma_storage;
 
   godunov();
-  godunov(RefCountedPtr<plasma_kinetics>& a_plaskin);
+  godunov(RefCountedPtr<cdr_plasma_physics>& a_physics);
   ~godunov();
 
   // Pure functions that must be overwritten
