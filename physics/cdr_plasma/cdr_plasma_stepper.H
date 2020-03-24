@@ -37,7 +37,6 @@ public:
   virtual int get_num_plot_vars() const;
   virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const;
   virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
-  virtual void post_regrid();
   virtual void post_checkpoint_setup();
   virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
   virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
@@ -73,17 +72,30 @@ public:
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocate_internals();
+  virtual void allocate_internals() = 0;
 
   /*!
     @brief Deallocate internals
   */
-  virtual void deallocate_internals();
+  virtual void deallocate_internals() = 0;
 
   /*!
     @brief Parse options.
   */
   virtual void parse_options() = 0;
+
+  /*!
+    @brief New caching function for regridding
+  */
+  virtual void cache(){
+    this->cache_states();
+    this->cache_internals();
+  }
+
+  virtual void deallocate(){
+    this->deallocate_internals();
+    this->deallocate_solver_internals();
+  }
 
   /*!
     @brief Cache states
@@ -243,11 +255,6 @@ public:
 						    const Real&                  a_dx,
 						    const Box&                   a_box);
 
-  
-  /*!
-    @brief Compute all source terms. This either does a decoupled cdr/rte solve or tight reaction advance
-  */
-  virtual void init() = 0;
 
   /*!
     @brief Compute the time step and how it was restricted
@@ -812,21 +819,6 @@ public:
   virtual void initial_data();
 
   /*!
-    @brief Fill initial cdr data
-  */
-  virtual void initial_cdr_data();
-
-  /*!
-    @brief Fill initial rte data
-  */
-  virtual void initial_rte_data();
-
-  /*!
-    @brief Fill initial sigma data
-  */
-  virtual void initial_sigma_data();
-
-  /*!
     @brief Project flux
   */
   virtual void project_flux(LevelData<BaseIVFAB<Real> >& a_proj_flux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
@@ -840,7 +832,6 @@ public:
     @brief Project flux on the boundary normal
   */
   virtual void project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
-
 
   /*!
     @brief Regrid

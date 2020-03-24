@@ -520,8 +520,7 @@ protected:
   virtual void regrid_report(const Real a_total_time,
 			     const Real a_tag_time,
 			     const Real a_base_regrid_time,
-			     const Real a_solver_regrid_time,
-			     const Real a_post_regrid_time);
+			     const Real a_solver_regrid_time);
   
   /*!
     @brief Set the computational geometry

@@ -632,47 +632,40 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
     }
   }
 
-  m_timestepper->cache_internals();      // Cache stuff necessary that are necesary for regridding the time stepper
-  m_timestepper->deallocate_internals(); // Deallocate internal storage for the time stepper.
-  this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
-  this->deallocate_internals();          // Deallocate internal storage for driver
 
-  m_timestepper->cache_states();                // Cache solver states
-  m_timestepper->deallocate_solver_internals(); // Deallocate solver internals
+  // Store things that need to be regridded
+  this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
+  m_timestepper->cache();
+
+  // Deallocate unnecessary storage
+  this->deallocate_internals();          // Deallocate internal storage for driver
+  m_timestepper->deallocate();           // Deallocate storage for time_stepper
   
   const Real cell_tags = MPI_Wtime();    // Timer
 
-  // Regrid base. Only levels [lmin, lmax] are allowed to change. 
+  // Regrid AMR. Only levels [lmin, lmax] are allowed to change. 
   const int old_finest_level = m_amr->get_finest_level();
   const int regsize = m_timestepper->get_redistribution_regsize();
   m_amr->regrid(tags, a_lmin, a_lmax, regsize, old_finest_level + 1);
+  const int new_finest_level = m_amr->get_finest_level();
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
-  const int new_finest_level = m_amr->get_finest_level();
-  this->regrid_internals(old_finest_level, new_finest_level);                  // Regrid internals for driver
-  m_timestepper->regrid_solvers(a_lmin, old_finest_level, new_finest_level);   // Regrid solvers
-  m_timestepper->allocate_internals();                                         // Allocate internal storage for time_stepper
-  m_timestepper->regrid_internals(a_lmin, old_finest_level, new_finest_level); // Regrid internal storage for time_stepper
-  m_celltagger->regrid();                                                      // Regrid cell tagger
+  
+  // Regrid driver, timestepper, and celltagger
+  this->regrid_internals(old_finest_level, new_finest_level);          // Regrid internals for driver
+  m_timestepper->regrid(a_lmin, old_finest_level, new_finest_level);   // Regrid solvers
+  m_celltagger->regrid();                                              // Regrid cell tagger
 
   if(a_use_initial_data){
     m_timestepper->initial_data();
   }
-
   const Real solver_regrid = MPI_Wtime(); // Timer
 
-  // Post-regrid things (e.g. resolve Poisson equation, fill solvers with important stuff etc)
-  m_timestepper->post_regrid();
-
-  const Real post_regrid = MPI_Wtime(); // Elliptic solve time
-
-
   if(m_verbosity > 1){
-    this->regrid_report(post_regrid - start_time,
+    this->regrid_report(solver_regrid - start_time,
 			cell_tags - start_time,
 			base_regrid - cell_tags,
-			solver_regrid - base_regrid,
-			post_regrid - solver_regrid);
+			solver_regrid - base_regrid);
   }
 }
 
@@ -715,8 +708,7 @@ void driver::regrid_internals(const int a_old_finest_level, const int a_new_fine
 void driver::regrid_report(const Real a_total_time,
 			   const Real a_tag_time,
 			   const Real a_base_regrid_time,
-			   const Real a_solver_regrid_time,
-			   const Real a_post_regrid_time){
+			   const Real a_solver_regrid_time){
   CH_TIME("driver::regrid_report");
   if(m_verbosity > 5){
     pout() << "driver::regrid_report" << endl;
@@ -741,7 +733,6 @@ void driver::regrid_report(const Real a_total_time,
 	 << "\t\t\t" << "Cell tagging      : " << 100.*(a_tag_time/a_total_time) << "%" << endl
     	 << "\t\t\t" << "Base regrid       : " << 100.*(a_base_regrid_time/a_total_time) << "%" << endl
 	 << "\t\t\t" << "Solver regrid     : " << 100.*(a_solver_regrid_time/a_total_time) << "%" << endl
-    	 << "\t\t\t" << "Post regrid       : " << 100.*(a_post_regrid_time/a_total_time) << "%" << endl
 	 << "-----------------------------------------------------------------------" << endl;
 }
 
@@ -933,7 +924,7 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
     // }
   }
 
-  m_timestepper->deallocate_internals();
+  m_timestepper->deallocate();
 
   if(m_verbosity > 0){
     this->grid_report();
@@ -1518,7 +1509,6 @@ void driver::setup_fresh(const int a_init_regrids){
   m_timestepper->setup_solvers();                                 // Instantiate solvers
   m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);  // Sync solver times
   m_timestepper->initial_data();                                  // Fill solvers with initial data
-  m_timestepper->allocate_internals();                            // Allocate internal data in time_stepper-derived classes
 
   // cell_tagger
   if(!m_celltagger.isNull()){

@@ -47,17 +47,11 @@ public:
   virtual void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) = 0;
   virtual void print_step_report() = 0;
 
-
-  // Regrid routines
+  // New regrid routines
   virtual bool need_to_regrid();
-  virtual void cache_internals() = 0;
-  virtual void deallocate_internals() = 0;
-  virtual void cache_states() = 0;
-  virtual void deallocate_solver_internals() = 0;
-  virtual void regrid_solvers(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
-  virtual void allocate_internals() = 0;
-  virtual void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
-  virtual void post_regrid() = 0;
+  virtual void cache() = 0;
+  virtual void deallocate() = 0;
+  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
 
   /*!
     @brief Set amr
