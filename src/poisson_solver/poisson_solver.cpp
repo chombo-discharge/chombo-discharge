@@ -18,6 +18,10 @@
 #include <MFAMRIO.H>
 #include <EBAMRIO.H>
 
+Real poisson_solver::s_potential_one(const Real a_time){
+  return 1.0;
+}
+
 Real poisson_solver::s_constant_one(const RealVect a_pos){
   return 1.0;
 }

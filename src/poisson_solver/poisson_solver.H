@@ -19,7 +19,7 @@
 class poisson_solver {
 public:
 
-  static Real potential_one(const Real a_time){return 1.0;}
+  static Real s_potential_one(const Real a_time);
 
   static Real s_constant_one(const RealVect a_pos);
 

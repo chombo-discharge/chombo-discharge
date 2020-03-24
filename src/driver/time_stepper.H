@@ -75,6 +75,11 @@ protected:
     @brief Class verbosity
   */
   int m_verbosity;
+
+  /*!
+    @brief Time step
+  */
+  int m_step;
   
   /*!
     @brief TIme

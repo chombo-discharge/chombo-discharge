@@ -3999,6 +3999,30 @@ void cdr_plasma_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name
   }
 }
 
+void cdr_plasma_stepper::set_cdr(RefCountedPtr<cdr_layout>& a_cdr){
+  CH_TIME("cdr_plasma_stepper::set_cdr");
+  if(m_verbosity > 5){
+    pout() << "cdr_plasma_stepper::set_cdr" << endl;
+  }
+  m_cdr = a_cdr;
+}
+
+void cdr_plasma_stepper::set_poisson(RefCountedPtr<poisson_solver>& a_poisson){
+  CH_TIME("cdr_plasma_stepper::set_poisson");
+  if(m_verbosity > 5){
+    pout() << "cdr_plasma_stepper::set_poisson" << endl;
+  }
+  m_poisson = a_poisson;
+}
+
+void cdr_plasma_stepper::set_rte(RefCountedPtr<rte_layout>& a_rte){
+  CH_TIME("cdr_plasma_stepper::set_rte");
+  if(m_verbosity > 5){
+    pout() << "cdr_plasma_stepper::set_rte" << endl;
+  }
+  m_rte = a_rte;
+}
+
 void cdr_plasma_stepper::setup_solvers(){
   CH_TIME("cdr_plasma_stepper::setup_solvers");
   if(m_verbosity > 5){

@@ -957,9 +957,20 @@ public:
   */
   virtual void solve_rte(const Real a_dt);
 
-  virtual void set_cdr(RefCountedPtr<cdr_layout>& a_cdr){m_cdr = a_cdr;}
-  virtual void set_poisson(RefCountedPtr<poisson_solver>& a_poisson){m_poisson = a_poisson;}
-  virtual void set_rte(RefCountedPtr<rte_layout>& a_rte){m_rte = a_rte;}
+  /*!
+    @brief Set the cdr layout
+  */
+  virtual void set_cdr(RefCountedPtr<cdr_layout>& a_cdr);
+
+  /*!
+    @brief Set the Poisson solver
+  */
+  virtual void set_poisson(RefCountedPtr<poisson_solver>& a_poisson);
+
+  /*!
+    @brief Set the RTE layout
+  */
+  virtual void set_rte(RefCountedPtr<rte_layout>& a_rte);
 
   /*!
     @brief General RTE advance routine
@@ -1199,11 +1210,6 @@ protected:
     @brief Fast RTE solver
   */
   int m_fast_poisson;
-
-  /*!
-    @brief Current step
-  */
-  int m_step;
 
   /*!
     @brief Do source term time step restriction only for electrons
