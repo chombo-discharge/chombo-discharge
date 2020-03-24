@@ -8,7 +8,6 @@
 #ifndef _RTE_LAYOUT_
 #define _RTE_LAYOUT_
 
-#include "plasma_kinetics.H"
 #include "rte_solver.H"
 
 class rte_iterator;

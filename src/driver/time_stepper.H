@@ -9,18 +9,11 @@
 #define _TIME_STEPPER_
 
 #include "computational_geometry.H"
-#include "plasma_kinetics.H"
 #include "amr_mesh.H"
 #include "mfis.H"
-#include "cdr_layout.H"
-#include "rte_layout.H"
-#include "poisson_solver.H"
-#include "sigma_solver.H"
-
-#include <RealVect.H>
 
 /*!
-  @brief Abstract class for evolving plasma equations in time
+  @brief Abstract class for performing time stepping
 */
 class time_stepper {
 public:

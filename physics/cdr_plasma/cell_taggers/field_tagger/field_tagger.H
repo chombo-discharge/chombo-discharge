@@ -12,16 +12,6 @@
 
 /*!
   @brief Class that tags cells based on the relative curvature of the electric field
-  @details This class tets if \f$|\nabla E|\Delta x/|E| > \epsilon_{\textrm{curv}}\f$ OR \f$|E|/E_{\textrm{max}} > \epsilon_{\textrm{mag}}\f$ are fulfilled. If so, the cell is refined. The same tests is used for coarsening, with different epsilons and opposite inequality sign. However, for coarsening, both tests must be fulfilled. 
-
-  Class options
-  -------------
-
-      field_tagger.coarsen_curvature = 0.1    # Sets eps_curv for coarsening
-      field_tagger.coarsen_magnitude = 0.1    # Sets eps_mag for coarsening 
-      field_tagger.refine_curvature  = 0.2    # Sets eps_curv for refinement
-      field_tagger.refine_magnitude  = 0.75   # Sets eps_mag for refinement
-
 */
 class field_tagger : public ultralw_tagger {
 public:
@@ -34,7 +24,7 @@ public:
   /*!
     @brief Full constructor
   */
-  field_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+  field_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 	       const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 	       const RefCountedPtr<amr_mesh>&               a_amr,
 	       const RefCountedPtr<computational_geometry>& a_compgeom);

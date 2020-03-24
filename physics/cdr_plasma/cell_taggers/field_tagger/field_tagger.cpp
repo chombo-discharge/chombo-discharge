@@ -14,7 +14,7 @@ field_tagger::field_tagger(){
   m_num_tracers = 1;
 }
 
-field_tagger::field_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+field_tagger::field_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_plaskin,
 			   const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 			   const RefCountedPtr<amr_mesh>&               a_amr,
 			   const RefCountedPtr<computational_geometry>& a_compgeom) : field_tagger() {

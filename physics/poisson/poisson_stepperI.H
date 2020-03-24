@@ -20,7 +20,9 @@ Real poisson_stepper<T>::s_potential_one(const Real a_time){
 
 template <class T>
 void poisson_stepper<T>::setup_solvers(){
-  const int verb = 10;
+  int verb;
+  ParmParse pp("poisson_stepper");
+  pp.get("verbosity", verb);
 
   // Poisson setup
   m_poisson = RefCountedPtr<poisson_solver> (new T());
@@ -98,13 +100,21 @@ void poisson_stepper<T>::synchronize_solver_times(const int a_step, const Real a
 }
 
 template <class T>
-void poisson_stepper<T>::cache_states(){
+void poisson_stepper<T>::cache(){
   m_poisson->cache_state();
   m_sigma->cache_state();
 }
 
 template <class T>
-void poisson_stepper<T>::regrid_solvers(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+void poisson_stepper<T>::deallocate(){
+  m_poisson->deallocate_internals();
+  m_sigma->deallocate_internals();
+}
+
+template <class T>
+void poisson_stepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
   m_poisson->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
-  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);  
+  m_sigma->regrid(a_lmin,   a_old_finest_level, a_new_finest_level);
+
+  m_poisson->solve();
 }

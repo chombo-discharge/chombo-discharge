@@ -11,7 +11,6 @@
 #include <RefCountedPtr.H>
 
 #include "computational_geometry.H"
-#include "plasma_kinetics.H"
 #include "time_stepper.H"
 #include "amr_mesh.H"
 #include "cell_tagger.H"

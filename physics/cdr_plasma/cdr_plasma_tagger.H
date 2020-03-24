@@ -26,7 +26,7 @@ public:
   /*!
     @brief Full constructor
   */
-  cdr_plasma_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+  cdr_plasma_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 		    const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 		    const RefCountedPtr<amr_mesh>&               a_amr,
 		    const RefCountedPtr<computational_geometry>& a_compgeom);
@@ -38,12 +38,12 @@ public:
 
   /*!
     @brief Define function
-    @param[in] a_plaskin     Plasma kinetics
+    @param[in] a_physics     Plasma kinetics
     @param[in] a_timestepper Time stepper
     @param[in] a_amr         amr_mesh instance
     @param[in] a_compgeom    Computational geometry
   */
-  virtual void define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+  virtual void define(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 		      const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 		      const RefCountedPtr<amr_mesh>&               a_amr,
 		      const RefCountedPtr<computational_geometry>& a_compgeom);
@@ -74,12 +74,12 @@ public:
   */
   virtual bool tag_cells(EBAMRTags& a_tags);
 
-    /*!
+  /*!
     @brief Set phase
   */
   virtual void set_phase(const phase::which_phase a_phase);
 
-    /*!
+  /*!
     @brief Tracer fields
   */
   virtual Vector<EBAMRCellData>& get_tracer_fields();
@@ -96,7 +96,7 @@ protected:
   /*!
     @brief Plasma kinetics. 
   */
-  RefCountedPtr<plasma_kinetics> m_plaskin;
+  RefCountedPtr<cdr_plasma_physics> m_physics;
 
   /*!
     @brief Time stepper
@@ -113,7 +113,7 @@ protected:
   */
   RefCountedPtr<computational_geometry> m_compgeom;
 
-    /*!
+  /*!
     @brief Number of tracer fields
   */
   int m_num_tracers;

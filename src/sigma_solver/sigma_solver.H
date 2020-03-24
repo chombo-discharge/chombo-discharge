@@ -11,7 +11,6 @@
 #include "type_definitions.H"
 #include "computational_geometry.H"
 #include "amr_mesh.H"
-#include "plasma_kinetics.H"
 
 /*!
   @brief Surface charge solver

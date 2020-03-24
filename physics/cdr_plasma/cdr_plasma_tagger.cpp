@@ -24,18 +24,18 @@ cdr_plasma_tagger::cdr_plasma_tagger(){
   m_phase = phase::gas;
 }
 
-cdr_plasma_tagger::cdr_plasma_tagger(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+cdr_plasma_tagger::cdr_plasma_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 				     const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 				     const RefCountedPtr<amr_mesh>&               a_amr,
 				     const RefCountedPtr<computational_geometry>& a_compgeom) : cdr_plasma_tagger() {
-  this->define(a_plaskin, a_timestepper, a_amr, a_compgeom);
+  this->define(a_physics, a_timestepper, a_amr, a_compgeom);
 }
 
 cdr_plasma_tagger::~cdr_plasma_tagger(){
 
 }
 
-void cdr_plasma_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
+void cdr_plasma_tagger::define(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 			       const RefCountedPtr<cdr_plasma_stepper>&     a_timestepper,
 			       const RefCountedPtr<amr_mesh>&               a_amr,
 			       const RefCountedPtr<computational_geometry>& a_compgeom){
@@ -44,7 +44,7 @@ void cdr_plasma_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_pl
     pout() << m_name + "::define" << endl;
   }
 
-  m_plaskin     = a_plaskin;
+  m_physics     = a_physics;
   m_timestepper = a_timestepper;
   m_amr         = a_amr;
   m_compgeom    = a_compgeom;

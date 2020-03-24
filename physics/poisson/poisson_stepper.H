@@ -45,14 +45,9 @@ public:
 
   // Regrid routines
   bool need_to_regrid(){return false;}
-  void cache_internals(){}
-  void deallocate_internals(){}
-  void cache_states();
-  void deallocate_solver_internals(){}
-  void regrid_solvers(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
-  void allocate_internals(){}
-  void regrid_internals(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){}
-  void post_regrid(){}
+  void cache();
+  void deallocate();
+  void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
 protected:
 
