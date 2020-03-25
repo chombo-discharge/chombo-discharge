@@ -3,11 +3,10 @@ import sys
 
 def write_template(args):
     # Make sure that every class can be found where they should
-    app_dir = args.base_dir + "/" + args.app_name
-    geofile = args.streamer_home + "/geometries_prebuilt" + "/" + args.geometry + "/" + args.geometry + ".H"
-    tsfile  = args.streamer_home + "/time_steppers" + "/" + args.time_stepper + "/" + args.time_stepper + ".H"
-    kinfile = args.streamer_home + "/plasma_models" + "/" + args.plasma_kinetics + "/" + args.plasma_kinetics + ".H"
-    tagfile = args.streamer_home + "/cell_taggers" +  "/" + args.cell_tagger + "/" + args.cell_tagger + ".H"
+    geofile = args.plasmac_home + "/geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
+    tsfile  = args.plasmac_home + "/physics/cdr_plasma/time_steppers" + "/" + args.time_stepper + "/" + args.time_stepper + ".H"
+    kinfile = args.plasmac_home + "/physics/cdr_plasma/plasma_models" + "/" + args.physics + "/" + args.physics + ".H"
+    tagfile = args.plasmac_home + "/physics/cdr_plasma/cell_taggers" +  "/" + args.cell_tagger + "/" + args.cell_tagger + ".H"
     if not os.path.exists(geofile):
         print 'Could not find ' + geofile
     if not os.path.exists(tsfile):
@@ -18,7 +17,7 @@ def write_template(args):
         print 'Could not find ' + tagfile
                     
     # Create app directory if it does not exist
-    app_dir = args.base_dir + "/" + args.app_name
+    app_dir = args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
                         
@@ -33,7 +32,7 @@ def write_template(args):
     mainf.write('#include "' + args.cdr_solver + '.H"\n')
     mainf.write('#include "rte_layoutI.H"\n')
     mainf.write('#include "' + args.rte_solver + '.H"\n')
-    mainf.write('#include "' + args.plasma_kinetics + '.H"\n')
+    mainf.write('#include "' + args.physics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.time_stepper + '.H"\n')
     if not args.cell_tagger == "none":
@@ -48,6 +47,7 @@ def write_template(args):
     mainf.write("}\n")
 
     mainf.write("\n")
+    mainf.write("using namespace physics::cdr_plasma;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
@@ -73,17 +73,20 @@ def write_template(args):
     mainf.write("  }\n")
 
     mainf.write("\n")
-    mainf.write("  // Set up everything \n")
-    mainf.write("  RefCountedPtr<plasma_kinetics> plaskin         = RefCountedPtr<plasma_kinetics> (new " + args.plasma_kinetics + "());\n")
+    mainf.write("  // Set geometry and AMR \n")
     mainf.write("  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new " + args.geometry + "());\n")
-    mainf.write("  RefCountedPtr<time_stepper> timestepper        = RefCountedPtr<time_stepper> (new " + args.time_stepper + "());\n")
-    if args.cell_tagger != "none":
-        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "());\n")
-    else:
-        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);\n")
     mainf.write("  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());\n")
     mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")
-    mainf.write("  RefCountedPtr<driver> engine                   = RefCountedPtr<driver> (new driver(compgeom, plaskin, timestepper, amr, tagger, geocoarsen));\n")
+
+    mainf.write("\n")
+    mainf.write("  // Set up physics \n")
+    mainf.write("  RefCountedPtr<cdr_plasma_physics> physics      = RefCountedPtr<cdr_plasma_physics> (new " + args.physics + "());\n")
+    mainf.write("  RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new " + args.time_stepper + "(physics));\n")
+    if args.cell_tagger != "none":
+        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (new " + args.cell_tagger + "(physics, timestepper, amr, compgeom));\n")
+    else:
+        mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);\n")
+
     mainf.write("\n")
 
     mainf.write("  // Create solver factories\n")
@@ -94,8 +97,8 @@ def write_template(args):
     
     mainf.write("  // Instantiate solvers\n")
     mainf.write("  auto poi = poi_fact->new_solver();\n");
-    mainf.write("  auto cdr = cdr_fact->new_layout(plaskin);\n");
-    mainf.write("  auto rte = rte_fact->new_layout(plaskin);\n");
+    mainf.write("  auto cdr = cdr_fact->new_layout(physics->get_cdr_species());\n");
+    mainf.write("  auto rte = rte_fact->new_layout(physics->get_rte_species());\n");
     mainf.write("\n")
 
     mainf.write("  // Send solvers to time_stepper \n")
@@ -103,9 +106,13 @@ def write_template(args):
     mainf.write("  timestepper->set_cdr(cdr);\n");
     mainf.write("  timestepper->set_rte(rte);\n");
     mainf.write("\n")
+
+    mainf.write("  // Set potential \n")
+    mainf.write("timestepper->set_potential(potential_curve);\n")
+    mainf.write("\n")
     
-    mainf.write("  // Run the plasma engine\n")
-    mainf.write("  engine->set_potential(potential_curve);\n");
+    mainf.write("  // Set up the driver and run it\n")
+    mainf.write("  RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));\n")
     mainf.write("  engine->setup_and_run();\n");
     mainf.write("\n")
 

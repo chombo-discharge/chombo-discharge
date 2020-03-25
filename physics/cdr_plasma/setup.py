@@ -15,33 +15,32 @@ parser.add_argument('-procs',           type=int,  help='Processors to use when 
 parser.add_argument('-use_mpi',         type=bool, help='MPI enabled (default true)', default=True)
 parser.add_argument('-build',           type=bool, help='Build executable at end', default=False)
 parser.add_argument('-silent',          type=bool, help='Silent build of executable', default=False)
-#parser.add_argument('-chombo_home',     type=str,  help="Chombo source code base directory", default=os.environ.get('CHOMBO_HOME', os.getcwd()))
-parser.add_argument('-streamer_home',   type=str,  help="Source code base directory", default=os.environ.get('PLASMAC_HOME', os.getcwd()))
+parser.add_argument('-plasmac_home',    type=str,  help="Source code base directory", default=os.environ.get('PLASMAC_HOME', os.getcwd()))
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
-parser.add_argument('-poisson_solver',  type=str,  help="CDR solver implementation", default="poisson_multifluid_gmg")
+parser.add_argument('-poisson_solver',  type=str,  help="Poisson solver implementation", default="poisson_multifluid_gmg")
 parser.add_argument('-cdr_solver',      type=str,  help="CDR solver implementation", default="cdr_gdnv")
-parser.add_argument('-rte_solver',      type=str,  help="RTE solver implementation", default="eddington_sp1")
-parser.add_argument('-plasma_kinetics', type=str,  help="Plasma kinetics class", default="")
+parser.add_argument('-rte_solver',      type=str,  help="RTE solver implementation", default="mc_photo")
+parser.add_argument('-physics',         type=str,  help="Plasma kinetics class", default="")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
-parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="sisdc")
+parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="imex_sdc")
 parser.add_argument('-cell_tagger',     type=str,  help="Cell tagging method", default="none")
 args = parser.parse_args()
 
+app_main.write_template(args)    # Write main file
+app_make.write_template(args)    # Write makefile
+app_options.write_template(args) # Write options file
+app_inc.copy_dependencies(args)  # Copy depencies
 
-app_main.write_template(args)
-app_make.write_template(args)
-app_options.write_template(args)
-app_inc.copy_dependencies(args)
-
+# Build executable if called for it
 if args.build:
-    os.chdir(args.streamer_home + "/" + args.base_dir + "/" + args.app_name)
+    os.chdir(args.plasmac_home + "/" + args.base_dir + "/" + args.app_name)
     os.system('pwd')
     if args.silent:
         os.system('make -s -j ' + str(args.procs) + ' ' + args.filename)
     else:
         os.system('make -j ' + str(args.procs) + ' ' + args.filename)
-    print 'Created and built your mini app - it resides in ' + args.streamer_home + "/" + args.base_dir + "/" + args.app_name
+    print 'Created and built your mini app - it resides in ' + args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
 else:
-    print 'Created (but did not build) your mini app - it resides in ' + args.streamer_home + "/" + args.base_dir + "/" + args.app_name
+    print 'Created (but did not build) your mini app - it resides in ' + args.plasmac_home + args.base_dir + "/" + args.app_name
