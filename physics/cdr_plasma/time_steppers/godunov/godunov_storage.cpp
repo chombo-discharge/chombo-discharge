@@ -8,6 +8,8 @@
 #include "godunov.H"
 #include "godunov_storage.H"
 
+using namespace physics::cdr_plasma;
+
 godunov::cdr_storage::cdr_storage(){
 
 }

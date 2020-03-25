@@ -8,6 +8,8 @@
 #include "imex_sdc.H"
 #include "imex_sdc_storage.H"
 
+using namespace physics::cdr_plasma;
+
 imex_sdc::cdr_storage::cdr_storage(){
 
 }

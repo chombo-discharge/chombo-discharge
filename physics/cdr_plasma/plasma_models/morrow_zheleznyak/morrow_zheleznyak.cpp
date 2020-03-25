@@ -15,6 +15,8 @@
 
 #include <chrono>
 
+using namespace physics::cdr_plasma;
+
 morrow_zheleznyak::morrow_zheleznyak(){
   m_num_cdr_species = 3;
   m_num_rte_species = 1;

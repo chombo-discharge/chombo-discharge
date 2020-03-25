@@ -9,6 +9,8 @@
 
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 field_tagger::field_tagger(){
   m_name = "field_tagger";
   m_num_tracers = 1;

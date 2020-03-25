@@ -18,6 +18,8 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+using namespace physics::cdr_plasma;
+
 std::string air3_zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
 std::string air3_zheleznyak::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
 std::string air3_zheleznyak::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";

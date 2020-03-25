@@ -13,6 +13,8 @@
 
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 typedef godunov::cdr_storage     cdr_storage;
 typedef godunov::poisson_storage poisson_storage;
 typedef godunov::rte_storage     rte_storage;

@@ -8,6 +8,8 @@
 
 #include <chrono>
 
+using namespace physics::cdr_plasma;
+
 air7_stephens::electron::electron(){
   m_name = "electron";
   m_charge = -1;

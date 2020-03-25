@@ -8,6 +8,7 @@
 
 #include <chrono>
 
+using namespace physics::cdr_plasma;
 
 air3_zheleznyak::electron::electron(){
   m_name = "electron";

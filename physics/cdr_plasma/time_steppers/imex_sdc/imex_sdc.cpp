@@ -16,6 +16,8 @@
 #include <iomanip>
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 typedef imex_sdc::cdr_storage     cdr_storage;
 typedef imex_sdc::poisson_storage poisson_storage;
 typedef imex_sdc::rte_storage     rte_storage;

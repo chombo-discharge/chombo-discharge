@@ -10,6 +10,8 @@
 
 #include <EBArith.H>
 
+using namespace physics::cdr_plasma;
+
 cdr_plasma_field_tagger::cdr_plasma_field_tagger(){
   CH_TIME("cdr_plasma_field_tagger::cdr_plasma_field_tagger");
   if(m_verbosity > 5){

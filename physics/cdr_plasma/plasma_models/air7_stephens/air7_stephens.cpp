@@ -18,6 +18,8 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+using namespace physics::cdr_plasma;
+
 std::string air7_stephens::s_bolsig_energy   = "# Mean energy (E/N, eV)";
 std::string air7_stephens::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
 std::string air7_stephens::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
@@ -27,7 +29,6 @@ std::string air7_stephens::s_bolsig_b1_exc   = "# b1 excitation (E/N, rate/N)";
 std::string air7_stephens::s_bolsig_c4_exc   = "# c4 excitation (E/N, rate/N)";
 std::string air7_stephens::s_bolsig_alphaN2  = "# N2 Ionization (E/N, rate/N)";
 std::string air7_stephens::s_bolsig_alphaO2  = "# O2 Ionization (E/N, rate/N)";
-
 
 air7_stephens::air7_stephens() {
 

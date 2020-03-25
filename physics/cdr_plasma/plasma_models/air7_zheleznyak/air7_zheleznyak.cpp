@@ -18,6 +18,8 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+using namespace physics::cdr_plasma;
+
 std::string air7_zheleznyak::s_bolsig_energy   = "# Electron mean energy (E/N, eV)";
 std::string air7_zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
 std::string air7_zheleznyak::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";

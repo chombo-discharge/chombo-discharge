@@ -18,6 +18,8 @@
 #define USE_FAST_VELOCITIES 0 // I think there's a bug in the C-style VLA methods. Please don't use this until this is clarified.
 #define USE_FAST_DIFFUSION  1
 
+using namespace physics::cdr_plasma;
+
 Real cdr_plasma_stepper::s_constant_one(const RealVect a_pos){
   return 1.0;
 }

@@ -13,6 +13,8 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 cdr_plasma_tagger::cdr_plasma_tagger(){
   CH_TIME("cdr_plasma_tagger::cdr_plasma_tagger");
   m_verbosity = 10;

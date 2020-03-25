@@ -9,8 +9,11 @@
 
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 streamer_tagger::streamer_tagger(){
   m_name = "streamer_tagger";
+
   m_num_tracers = 2;
 }
 

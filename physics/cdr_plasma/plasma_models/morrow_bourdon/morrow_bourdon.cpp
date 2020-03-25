@@ -12,6 +12,8 @@
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
+using namespace physics::cdr_plasma;
+
 morrow_bourdon::morrow_bourdon(){
   CH_TIME("morrow_bourdon::morrow_bourdon");
 
