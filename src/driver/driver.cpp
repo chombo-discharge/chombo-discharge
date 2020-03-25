@@ -6,8 +6,6 @@
 */
 
 #include "driver.H"
-#include "cdr_iterator.H"
-#include "rte_iterator.H"
 #include "data_ops.H"
 #include "mfalias.H"
 #include "units.H"
@@ -850,7 +848,9 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
       if(m_dt < 1.0E-5*init_dt){
 	m_step++;
 
-	this->write_memory_usage();
+	if(m_write_memory){
+	  this->write_memory_usage();
+	}
 #ifdef CH_USE_HDF5
 	this->write_plot_file();
 	this->write_checkpoint_file();
@@ -902,7 +902,9 @@ void driver::run(const Real a_start_time, const Real a_end_time, const int a_max
 	if(m_verbosity > 2){
 	  pout() << "driver::run -- Writing plot file" << endl;
 	}
-	this->write_memory_usage();
+	if(m_write_memory){
+	  this->write_memory_usage();
+	}
 	this->write_plot_file();
       }
 
@@ -1095,6 +1097,7 @@ void driver::parse_memrep(){
   else if(str == "allocated"){
     m_memory_mode = memory_report_mode::allocated;
   }
+  pp.get("write_memory", m_write_memory);
 }
 
 void driver::parse_output_directory(){
@@ -1394,7 +1397,9 @@ void driver::setup(const int a_init_regrids, const bool a_restart, const std::st
       this->setup_fresh(a_init_regrids);
 #ifdef CH_USE_HDF5
       if(m_plot_interval > 0){
-	this->write_memory_usage();
+	if(m_write_memory){
+	  this->write_memory_usage();
+	}
 	this->write_plot_file();
       }
 #endif
@@ -1427,11 +1432,15 @@ void driver::setup_geometry_only(){
   if(m_write_ebis){
     this->write_ebis();
   }
-  this->write_memory_usage();
+  if(m_write_memory){
+    this->write_memory_usage();
+  }
 
   this->get_geom_tags();       // Get geometric tags.
-  
-  this->write_memory_usage();
+
+  if(m_write_memory){
+    this->write_memory_usage();
+  }
 
   //  m_amr->set_num_ghost(m_timestepper->query_ghost()); // Query solvers for ghost cells. Give it to amr_mesh before grid gen.
   

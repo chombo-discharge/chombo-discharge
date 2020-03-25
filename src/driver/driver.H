@@ -370,6 +370,11 @@ protected:
   bool m_allow_coarsen;
 
   /*!
+    @brief Write memory report
+  */
+  bool m_write_memory;
+
+  /*!
     @brief Use recursive regrid (true) or regrid all levels at once (false)
   */
   bool m_recursive_regrid;
