@@ -47,7 +47,7 @@ driver.write_ebis                      = false         # Write geometry to an HD
 driver.read_ebis                       = false         # Read EBIS when restarting a simulation
 driver.output_directory                = ./            # Output directory
 driver.grow_tags                       = 0             # Grow tagged by this in every direction
-driver.output_names                    = simulation    # Simulation output names
+driver.output_names                    = advection2d   # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
@@ -103,14 +103,14 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_SPHERE CLASS OPTIONS
 # ====================================================================================================
 rod_sphere.eps0                      = 1                # Background permittivity
-rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
+rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
 rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
 rod_sphere.electrode_radius          = 0.1              # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0.5            # Center 1
 rod_sphere.electrode_center2         = 0 2.0            # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0.0 -0.5         # Dielectric center
+rod_sphere.dielectric_center         = 0.0 0            # Dielectric center
 rod_sphere.dielectric_radius         = 0.1              # Dielectric radius
 
 # ====================================================================================================
@@ -121,7 +121,7 @@ rod_sphere.dielectric_radius         = 0.1              # Dielectric radius
 # ====================================================================================================
 advection_diffusion_stepper.blob_amplitude = 1.0     # Blob amplitude
 advection_diffusion_stepper.blob_radius    = 0.1     # Blob radius
-advection_diffusion_stepper.blob_center    = 0 0     # Blob center
+advection_diffusion_stepper.blob_center    = 0 0.5   # Blob center
 advection_diffusion_stepper.diffusion      = true    # Turn on/off diffusion
 advection_diffusion_stepper.advection      = true    # Turn on/off advection
 

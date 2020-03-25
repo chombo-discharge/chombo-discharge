@@ -31,11 +31,6 @@ public:
   virtual ~cell_tagger();
 
   /*!
-    @brief Compute tracer fields
-  */
-  virtual void compute_tracers() = 0;
-
-  /*!
     @brief Regrid storage for tracer field
   */
   virtual void regrid() = 0;

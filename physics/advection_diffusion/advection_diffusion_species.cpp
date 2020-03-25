@@ -36,5 +36,5 @@ Real advection_diffusion_species::initial_data(const RealVect a_pos, const Real 
   const Real d2 = PolyGeom::dot(d,d);
   const Real r2 = m_blob_radius*m_blob_radius;
 
-  return m_blob_amplitude*exp(-0.5*d2*d2/r2*r2);
+  return m_blob_amplitude*exp(-0.5*d2*d2/(r2*r2));
 }

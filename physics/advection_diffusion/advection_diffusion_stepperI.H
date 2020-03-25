@@ -82,7 +82,7 @@ namespace physics::advection_diffusion {
 	const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
 
 	const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
-	const Real theta = atan(pos[1]/pos[0]);
+	const Real theta = atan2(pos[1],pos[0]);
 
 	vel_reg(iv,0) = -r*m_omega*sin(theta);
 	vel_reg(iv,1) =  r*m_omega*cos(theta);
@@ -98,7 +98,7 @@ namespace physics::advection_diffusion {
 	const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
 
 	const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
-	const Real theta = atan(pos[1]/pos[0]);
+	const Real theta = atan2(pos[1],pos[0]);
 
 	vel(vof,0) = -r*m_omega*sin(theta);
 	vel(vof,1) =  r*m_omega*cos(theta);
