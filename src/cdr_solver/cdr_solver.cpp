@@ -1945,9 +1945,9 @@ Real cdr_solver::compute_cfl_dt(){
 }
 
 Real cdr_solver::compute_diffusive_dt(){
-  CH_TIME("cdr_solver::compute_dt");
+  CH_TIME("cdr_solver::compute_diffusive_dt");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_dt" << endl;
+    pout() << m_name + "::compute_diffusive_dt" << endl;
   }
 
   Real min_dt = 1.E99;

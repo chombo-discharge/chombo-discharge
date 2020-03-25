@@ -1,0 +1,15 @@
+# ====================================================================================================
+# ADVECTION_DIFFUSION_STEPPER CLASS OPTIONS
+#
+# This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
+# wall flow BCs.
+# ====================================================================================================
+advection_diffusion_stepper.blob_amplitude = 1.0     # Blob amplitude
+advection_diffusion_stepper.blob_radius    = 0.1     # Blob radius
+advection_diffusion_stepper.blob_center    = 0 0     # Blob center
+advection_diffusion_stepper.diffusion      = true    # Turn on/off diffusion
+advection_diffusion_stepper.advection      = true    # Turn on/off advection
+
+advection_diffusion_stepper.diffco         = 1.0     # Diffusion coefficient
+advection_diffusion_stepper.omega          = 1.0     # Rotation velocity
+advection_diffusion_stepper.cfl            = 0.5     # CFL number
