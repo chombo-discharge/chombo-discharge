@@ -26,6 +26,10 @@ imex_sdc::imex_sdc(){
   m_subcycle = false;
 }
 
+imex_sdc::imex_sdc(RefCountedPtr<cdr_plasma_physics>& a_physics) : imex_sdc() {
+  m_physics = a_physics;
+}
+
 imex_sdc::~imex_sdc(){
 
 }
@@ -36,7 +40,7 @@ void imex_sdc::parse_options(){
     pout() << "imex_sdc::parse_options" << endl;
   }
 
-  // Regular stuff from time_stepper that we almost always need
+  // Regular stuff from cdr_plasma_stepper that we almost always need
   parse_verbosity();
   parse_solver_verbosity();
   parse_cfl();
@@ -524,7 +528,7 @@ Real imex_sdc::advance(const Real a_dt){
 	  imex_sdc::compute_E_into_scratch();
 	  imex_sdc::compute_cdr_gradients();
 	  imex_sdc::compute_cdr_velo(m_time);
-	  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+	  cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 	}
       }
     }
@@ -541,7 +545,7 @@ Real imex_sdc::advance(const Real a_dt){
   // Always recompute velocities and diffusion coefficients before the next time step. The Poisson and RTE equations
   // have been updated when we come in here. 
   imex_sdc::compute_cdr_velo(m_time + actual_dt);
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 
 
   // Profile step
@@ -1251,7 +1255,7 @@ void imex_sdc::allocate_internals(){
     pout() << "imex_sdc::allocate_internals" << endl;
   }
 
-  m_cdr_error.resize(m_plaskin->get_num_species());
+  m_cdr_error.resize(m_physics->get_num_cdr_species());
   
   imex_sdc::allocate_cdr_storage();
   imex_sdc::allocate_poisson_storage();
@@ -1264,7 +1268,7 @@ void imex_sdc::allocate_internals(){
 
 void imex_sdc::allocate_cdr_storage(){
   const int ncomp       = 1;
-  const int num_species = m_plaskin->get_num_species();
+  const int num_species = m_physics->get_num_cdr_species();
 
   m_cdr_scratch.resize(num_species);
   
@@ -1283,7 +1287,7 @@ void imex_sdc::allocate_poisson_storage(){
 
 void imex_sdc::allocate_rte_storage(){
   const int ncomp       = 1;
-  const int num_photons = m_plaskin->get_num_photons();
+  const int num_photons = m_physics->get_num_rte_species();
   m_rte_scratch.resize(num_photons);
   
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -1344,7 +1348,7 @@ void imex_sdc::compute_E_into_scratch(){
   imex_sdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
   imex_sdc::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
 
-  time_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
+  cdr_plasma_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
 }
 
 void imex_sdc::compute_cdr_gradients(){
@@ -1569,8 +1573,8 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const 
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  time_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
-  time_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
+  cdr_plasma_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_states, cdr_velocities, m_cdr->get_phase());
+  cdr_plasma_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -1583,7 +1587,7 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_states, const 
   }
 
   const EBAMRIVData& E = m_poisson_scratch->get_E_eb();
-  time_stepper::compute_cdr_fluxes(cdr_fluxes,
+  cdr_plasma_stepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
 				   extrap_cdr_velocities,
@@ -1655,7 +1659,7 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_states,
   const EBAMRIFData& E = m_poisson_scratch->get_E_domain();
 
   // This fills the solvers' domain fluxes
-  time_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
+  cdr_plasma_stepper::compute_cdr_domain_fluxes(cdr_fluxes,
 					  extrap_cdr_fluxes,
 					  extrap_cdr_densities,
 					  extrap_cdr_velocities,
@@ -1676,7 +1680,7 @@ void imex_sdc::compute_sigma_flux(){
 
   for (cdr_iterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<cdr_solver>& solver = solver_it();
-    const RefCountedPtr<species>& spec      = solver_it.get_species();
+    const RefCountedPtr<cdr_species>& spec  = solver_it.get_species();
     const EBAMRIVData& solver_flux          = solver->get_ebflux();
 
     data_ops::incr(flux, solver_flux, spec->get_charge()*units::s_Qe);
@@ -1698,7 +1702,7 @@ void imex_sdc::compute_reaction_network(const int a_m, const Real a_time, const 
   const Vector<EBAMRCellData*> rte_densities = m_rte->get_states();
   const EBAMRCellData& E = m_poisson_scratch->get_E_cell();
 
-  time_stepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
+  cdr_plasma_stepper::advance_reaction_network(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
 }
 
 void imex_sdc::update_poisson(){
@@ -1709,7 +1713,7 @@ void imex_sdc::update_poisson(){
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson();
+      cdr_plasma_stepper::solve_poisson();
       this->compute_E_into_scratch();
     }
   }
@@ -1723,7 +1727,7 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_step +1) % m_fast_poisson == 0){
-      time_stepper::solve_poisson(m_poisson->get_state(),
+      cdr_plasma_stepper::solve_poisson(m_poisson->get_state(),
 				  m_poisson->get_source(),
 				  a_densities,
 				  a_sigma,
@@ -1774,7 +1778,7 @@ void imex_sdc::update_diffusion_coefficients(){
   if(m_verbosity > 5){
     pout() << "imex_sdc::update_diffusion_coefficients" << endl;
   }
-  time_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
+  cdr_plasma_stepper::compute_cdr_diffusion(m_poisson_scratch->get_E_cell(), m_poisson_scratch->get_E_eb());
 }
 
 Vector<EBAMRCellData*> imex_sdc::get_cdr_errors(){

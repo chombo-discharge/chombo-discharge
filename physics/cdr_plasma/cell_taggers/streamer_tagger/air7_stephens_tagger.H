@@ -1,30 +1,30 @@
 /*!
-  @file   air7_stephens_tagger.H
+  @file   streamer_tagger.H
   @brief  Implementation of cell_tagger that tags cells based on the gradient of the electric field
   @author Robert Marskar
   @date   Feb. 2018
 */
 
-#ifndef _AIR7_STEPHENS_TAGGER_
-#define _AIR7_STEPHENS_TAGGER_
+#ifndef _STREAMER_TAGGER_
+#define _STREAMER_TAGGER_
 
-#include "ultralw_tagger.H"
+#include "cdr_plasma_field_tagger.H"
 
 /*!
   @brief Refinement class for morrow_stephens plasma model only
 */
-class air7_stephens_tagger : public ultralw_tagger {
+class streamer_tagger : public cdr_plasma_field_tagger {
 public:
   
   /*!
     @brief Constructor
   */
-  air7_stephens_tagger();
+  streamer_tagger();
 
   /*!
     @brief Destructor
   */
-  virtual ~air7_stephens_tagger();
+  virtual ~streamer_tagger();
 
   /*!
     @brief Parse class options

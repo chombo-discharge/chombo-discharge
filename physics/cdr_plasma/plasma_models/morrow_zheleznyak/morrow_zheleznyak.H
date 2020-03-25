@@ -8,21 +8,21 @@
 #ifndef _MORROW_ZHELEZNYAK_
 #define _MORROW_ZHELEZNYAK_
 
-#include "network_kinetics.H"
+#include "cdr_plasma_physics.H"
 
 #include <random>
 
 /*!
   @brief Class that implements the fluctuating Morrow-Lowke discharge model for air.
 */
-class morrow_zheleznyak : public network_kinetics {
+class morrow_zheleznyak : public cdr_plasma_physics {
 public:
 
   morrow_zheleznyak();
   ~morrow_zheleznyak();
 
-  void advance_reaction_network(Vector<Real>&           a_particle_sources,
-				Vector<Real>&           a_photon_sources,
+  void advance_reaction_network(Vector<Real>&          a_particle_sources,
+				Vector<Real>&          a_photon_sources,
 				const Vector<Real>     a_particle_densities,
 				const Vector<RealVect> a_particle_gradients,
 				const Vector<Real>     a_photon_densities,
@@ -223,7 +223,7 @@ public:
   Real excitation_rates(const Real a_E) const;
   Real sergey_factor(const Real a_O2frac) const;
 
-  class electron : public species {
+  class electron : public cdr_species {
   public:
     electron();
     ~electron();
@@ -237,7 +237,7 @@ public:
     RealVect m_seed_pos;
   };
 
-  class positive_species : public species {
+  class positive_species : public cdr_species {
   public:
     positive_species();
     ~positive_species();
@@ -251,7 +251,7 @@ public:
     RealVect m_seed_pos;
   };
 
-  class negative_species : public species {
+  class negative_species : public cdr_species {
   public:
     negative_species();
     ~negative_species();
@@ -265,7 +265,7 @@ public:
     RealVect m_seed_pos;
   };
 
-  class uv_photon : public photon_group {
+  class uv_photon : public rte_species {
   public:
     uv_photon();
     ~uv_photon();

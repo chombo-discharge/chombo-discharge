@@ -10,7 +10,7 @@
 
 #include "type_definitions.H"
 #include "amr_mesh.H"
-#include "time_stepper.H"
+#include "cdr_plasma_stepper.H"
 #include "cdr_iterator.H"
 #include "rte_iterator.H"
 
@@ -26,7 +26,7 @@ extern "C" void dgesv_(int*    N,
 /*!
   @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
 */
-class imex_sdc : public time_stepper {
+class imex_sdc : public cdr_plasma_stepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.
@@ -39,6 +39,7 @@ public:
 public:
 
   imex_sdc();
+  imex_sdc(RefCountedPtr<cdr_plasma_physics>& a_physics);
   ~imex_sdc();
   
   Real advance(const Real a_dt);

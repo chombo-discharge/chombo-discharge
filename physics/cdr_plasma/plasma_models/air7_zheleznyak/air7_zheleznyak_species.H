@@ -10,7 +10,7 @@
 #include "air7_zheleznyak.H"
 #include <random>
 
-class air7_zheleznyak::electron : public species {
+class air7_zheleznyak::electron : public cdr_species {
 public:
   electron();
   ~electron() {}
@@ -23,7 +23,7 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air7_zheleznyak::N2plus : public species {
+class air7_zheleznyak::N2plus : public cdr_species {
 public:
   N2plus();
   ~N2plus(){}
@@ -36,7 +36,7 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air7_zheleznyak::O2plus : public species {
+class air7_zheleznyak::O2plus : public cdr_species {
 public:
   O2plus();
   ~O2plus(){}
@@ -49,7 +49,7 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air7_zheleznyak::N4plus : public species {
+class air7_zheleznyak::N4plus : public cdr_species {
 public:
   N4plus();
   ~N4plus(){}
@@ -57,7 +57,7 @@ public:
 protected:
 };
 
-class air7_zheleznyak::O4plus : public species {
+class air7_zheleznyak::O4plus : public cdr_species {
 public:
   O4plus();
   ~O4plus(){}
@@ -65,7 +65,7 @@ public:
 protected:
 };
 
-class air7_zheleznyak::O2plusN2 : public species {
+class air7_zheleznyak::O2plusN2 : public cdr_species {
 public:
   O2plusN2();
   ~O2plusN2(){}
@@ -73,14 +73,14 @@ public:
 protected:
 };
 
-class air7_zheleznyak::O2minus : public species {
+class air7_zheleznyak::O2minus : public cdr_species {
 public:
   O2minus();
   ~O2minus(){}
   Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
 };
 
-class air7_zheleznyak::uv_photon : public photon_group {
+class air7_zheleznyak::uv_photon : public rte_species {
 public:
   uv_photon();
   ~uv_photon();

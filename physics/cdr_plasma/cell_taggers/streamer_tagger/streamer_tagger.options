@@ -1,11 +1,14 @@
 # ====================================================================================================
 # STREAMER_TAGGER CLASS OPTIONS
-#
-# (Different refinement criteria can be used on different levels. Simply use
-#  something like streamer_tagger.refine_source = 0.5 0.4 0.3. If the entry
-#  vector is too short, it will be padded with the last entry.)
 # ====================================================================================================
-streamer_tagger.refine_source     = 0.5    # Refinement factor for electron source term 
-streamer_tagger.refine_E_curv     = 0.25   # Refinement factor for E-field curvature
-streamer_tagger.relative_factor   = 1.E-4  # Factor for avoiding division by zero
-streamer_tagger.electron_index    = 0      # Electron index in your plasma_kinetics 
+streamer_tagger.verbosity         = -1           # Verbosity
+streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
+streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+streamer_tagger.buffer            = 0            # Grow tagged cells
+
+streamer_tagger.tagger.refine_curvature  = 10.0         # Curvature refinement
+streamer_tagger.coarsen_curvature        = 10.0         # Curvature coarsening	
+streamer_tagger.tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
+streamer_tagger.tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+streamer_tagger.tagger.max_coarsen_lvl   = 0            # Set max coarsening depth

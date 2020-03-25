@@ -8,15 +8,14 @@
 #ifndef _MORROW_BOURDON_
 #define _MORROW_BOURDON_
 
-#include "simple_kinetics.H"
-#include "network_kinetics.H"
+#include "cdr_plasma_physics.H"
 #include "perlin_if.H"
 
 /*!
   @brief Class that implements the Morrow-Lowke discharge model for air.
   @details This class uses the Morrow-Lowke kinetic scheme for air and the three-group Bourdon model for the RTE equations. 
 */
-class morrow_bourdon : public network_kinetics {
+class morrow_bourdon : public cdr_plasma_physics {
 public:
 
   morrow_bourdon();
@@ -82,7 +81,7 @@ public:
 
 
 
-  class electron : public species {
+  class electron : public cdr_species {
   public:
 
     electron();
@@ -96,7 +95,7 @@ public:
     RealVect m_seed_pos;
   };
 
-  class positive_species : public species {
+  class positive_species : public cdr_species {
   public:
     positive_species();
     ~positive_species();
@@ -109,7 +108,7 @@ public:
     RealVect m_seed_pos;
   };
 
-  class negative_species : public species {
+  class negative_species : public cdr_species {
   public:
     negative_species();
     ~negative_species();
@@ -122,7 +121,7 @@ public:
     RealVect m_seed_pos;
   };
 
-  class photon_one : public photon_group {
+  class photon_one : public rte_species {
   public:
     photon_one();
     ~photon_one();
@@ -137,7 +136,7 @@ public:
     Real m_pO2;
   };
 
-  class photon_two : public photon_group {
+  class photon_two : public rte_species {
   public:
     photon_two();
     ~photon_two();
@@ -152,7 +151,7 @@ public:
     Real m_pO2;
   };
 
-  class photon_three : public photon_group {
+  class photon_three : public rte_species {
   public:
     photon_three();
     ~photon_three();

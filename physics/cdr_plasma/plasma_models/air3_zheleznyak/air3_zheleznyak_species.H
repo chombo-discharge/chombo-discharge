@@ -10,7 +10,7 @@
 #include "air3_zheleznyak.H"
 #include <random>
 
-class air3_zheleznyak::electron : public species {
+class air3_zheleznyak::electron : public cdr_species {
 public:
   electron();
   ~electron() {}
@@ -23,7 +23,7 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air3_zheleznyak::M_plus : public species {
+class air3_zheleznyak::M_plus : public cdr_species {
 public:
   M_plus();
   ~M_plus(){}
@@ -35,14 +35,14 @@ protected:
   RealVect m_seed_pos;
 };
 
-class air3_zheleznyak::M_minus : public species {
+class air3_zheleznyak::M_minus : public cdr_species {
 public:
   M_minus();
   ~M_minus(){}
   Real initial_data(const RealVect a_pos, const Real a_time) const {return 0.0;}
 };
 
-class air3_zheleznyak::uv_photon : public photon_group {
+class air3_zheleznyak::uv_photon : public rte_species {
 public:
   uv_photon();
   ~uv_photon();

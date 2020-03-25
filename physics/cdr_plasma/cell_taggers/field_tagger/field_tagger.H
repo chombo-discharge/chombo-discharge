@@ -8,12 +8,12 @@
 #ifndef _FIELD_TAGGER_
 #define _FIELD_TAGGER_
 
-#include "ultralw_tagger.H"
+#include "cdr_plasma_field_tagger.H"
 
 /*!
   @brief Class that tags cells based on the relative curvature of the electric field
 */
-class field_tagger : public ultralw_tagger {
+class field_tagger : public cdr_plasma_field_tagger {
 public:
   
   /*!

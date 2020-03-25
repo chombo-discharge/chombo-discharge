@@ -35,6 +35,12 @@ public:
   virtual ~cdr_plasma_physics(){}
 
   /*!
+    @brief Compute alpha. 
+    @details This function is mostly used for the cell tagging classes
+  */
+  virtual Real compute_alpha(const RealVect a_E) const = 0;
+
+  /*!
     @brief Routine intended for advancing a full reaction network simultaneous. 
     @details This is the routine that sometimes the reaction network in the FHD description. Things
              that come in/out of this routine are DENSITIES, but you should translate this to number

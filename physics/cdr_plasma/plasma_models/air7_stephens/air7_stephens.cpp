@@ -853,7 +853,7 @@ Real air7_stephens::initial_sigma(const Real a_time, const RealVect a_pos) const
   return 0.0;
 }
 
-Real air7_stephens::compute_alpha_eff(const RealVect a_E) const{
+Real air7_stephens::compute_alpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
   const Real alpha = m_e_alpha.get_entry(E);
   const Real eta   = m_e_eta.get_entry(E);

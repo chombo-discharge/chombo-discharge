@@ -1,0 +1,11 @@
+# ====================================================================================================
+# STREAMER_TAGGER CLASS OPTIONS
+#
+# (Different refinement criteria can be used on different levels. Simply use
+#  something like streamer_tagger.refine_source = 0.5 0.4 0.3. If the entry
+#  vector is too short, it will be padded with the last entry.)
+# ====================================================================================================
+streamer_tagger.refine_source     = 0.5    # Refinement factor for electron source term 
+streamer_tagger.refine_E_curv     = 0.25   # Refinement factor for E-field curvature
+streamer_tagger.relative_factor   = 1.E-4  # Factor for avoiding division by zero
+streamer_tagger.electron_index    = 0      # Electron index in your plasma_kinetics 

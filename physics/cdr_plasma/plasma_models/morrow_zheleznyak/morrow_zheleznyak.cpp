@@ -16,11 +16,11 @@
 #include <chrono>
 
 morrow_zheleznyak::morrow_zheleznyak(){
-  m_num_species = 3;
-  m_num_photons = 1;
+  m_num_cdr_species = 3;
+  m_num_rte_species = 1;
 
-  m_species.resize(m_num_species);
-  m_photons.resize(m_num_photons);
+  m_cdr_species.resize(m_num_cdr_species);
+  m_rte_species.resize(m_num_rte_species);
 
   m_nelec_idx   = 0;
   m_nplus_idx   = 1;
@@ -28,10 +28,10 @@ morrow_zheleznyak::morrow_zheleznyak(){
   m_photon1_idx = 0;
 
   // Instantiate species
-  m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_zheleznyak::electron());
-  m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_zheleznyak::positive_species());
-  m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_zheleznyak::negative_species());
-  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_zheleznyak::uv_photon());
+  m_cdr_species[m_nelec_idx]    = RefCountedPtr<cdr_species> (new morrow_zheleznyak::electron());
+  m_cdr_species[m_nplus_idx]    = RefCountedPtr<cdr_species> (new morrow_zheleznyak::positive_species());
+  m_cdr_species[m_nminu_idx]    = RefCountedPtr<cdr_species> (new morrow_zheleznyak::negative_species());
+  m_rte_species[m_photon1_idx]  = RefCountedPtr<rte_species> (new morrow_zheleznyak::uv_photon());
 
   // Parse some basic settings
   parse_gas_params();
@@ -134,9 +134,9 @@ void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
 				    const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
 
-  Vector<Real> rest(m_num_species, 0.0);
-  Vector<int> particle_numbers(m_num_species, 0);
-  Vector<int> photon_numbers(m_num_photons, 0);
+  Vector<Real> rest(m_num_cdr_species, 0.0);
+  Vector<int> particle_numbers(m_num_cdr_species, 0);
+  Vector<int> photon_numbers(m_num_rte_species, 0);
 
   // Get some aux stuff for propensity functions
   const RealVect Ve = compute_ve(a_E);
@@ -218,21 +218,21 @@ void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
 				    const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
 
-  Vector<int> particle_numbers(m_num_species, 0);
-  Vector<int> photon_numbers(m_num_photons, 0);
+  Vector<int> particle_numbers(m_num_cdr_species, 0);
+  Vector<int> photon_numbers(m_num_rte_species, 0);
 
-  Vector<Real> x(m_num_species, 0.0);
-  Vector<int> X(m_num_species, 0);
-  Vector<int> Y(m_num_photons, 0);
+  Vector<Real> x(m_num_cdr_species, 0.0);
+  Vector<int> X(m_num_cdr_species, 0);
+  Vector<int> Y(m_num_rte_species, 0);
 
   const Real thresh = 1.E-2;
   
-  for (int i = 0; i < m_num_species; i++){
+  for (int i = 0; i < m_num_cdr_species; i++){
     X[i] = floor(thresh + a_particle_densities[i]*volume); // Integer particles
     x[i] = a_particle_densities[i] - X[i]*volume;          // "Partial particles"
   }
 
-  for (int i = 0; i < m_num_photons; i++){
+  for (int i = 0; i < m_num_rte_species; i++){
     Y[i] = floor(thresh + a_photon_densities[i]);
   }
 
@@ -328,9 +328,9 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
 
   const Real volume = pow(a_dx, 3);
 
-  Vector<Real> x(m_num_species, 0.0);
-  Vector<int>  X(m_num_species, 0);
-  Vector<int>  Y(m_num_photons, 0);
+  Vector<Real> x(m_num_cdr_species, 0.0);
+  Vector<int>  X(m_num_cdr_species, 0);
+  Vector<int>  Y(m_num_rte_species, 0);
 
   //
   const RealVect Ve = compute_ve(a_E);
@@ -353,7 +353,7 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
   const Real thresh = 1.E-2;
   
   // Initial particle densities
-  for (int i = 0; i < m_num_species; i++){
+  for (int i = 0; i < m_num_cdr_species; i++){
     x[i] = a_particle_densities[i] - X[i]*volume;
     X[i] = floor(thresh + a_particle_densities[i]*volume);
   }
@@ -361,7 +361,7 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
 
 
   // Initial photon densities
-  for (int i = 0; i < m_num_photons; i++){
+  for (int i = 0; i < m_num_rte_species; i++){
     Y[i] = floor(thresh + a_photon_densities[i]);
   }
 
@@ -460,7 +460,7 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
   const Real a4 = xp*xm*beta;
   
   const Real factor = 1./(volume*a_dt);
-  for (int i = 0; i < m_num_species; i++){
+  for (int i = 0; i < m_num_cdr_species; i++){
     a_particle_sources[i] = factor*(X[i] - X0[i]);
   }
 
@@ -480,7 +480,7 @@ Vector<RealVect> morrow_zheleznyak::compute_cdr_velocities(const Real         a_
 							   const RealVect     a_pos,
 							   const RealVect     a_E,
 							   const Vector<Real> a_cdr_densities) const{
-  Vector<RealVect> velocities(m_num_species, RealVect::Zero);
+  Vector<RealVect> velocities(m_num_cdr_species, RealVect::Zero);
   
   velocities[m_nelec_idx] = this->compute_ve(a_E);
   velocities[m_nplus_idx] = this->compute_vp(a_E);
@@ -645,7 +645,7 @@ Vector<Real> morrow_zheleznyak::compute_cdr_diffusion_coefficients(const Real   
 								   const RealVect     a_pos,
 								   const RealVect     a_E,
 								   const Vector<Real> a_cdr_densities) const{
-  Vector<Real> diffCo(m_num_species, 0.0);
+  Vector<Real> diffCo(m_num_cdr_species, 0.0);
   diffCo[m_nelec_idx] = this->compute_De(a_E);
   diffCo[m_nplus_idx] = 0.;
   diffCo[m_nminu_idx] = 0.;
@@ -664,15 +664,15 @@ Vector<Real> morrow_zheleznyak::compute_cdr_fluxes(const Real         a_time,
 						   const Vector<Real> a_extrap_cdr_fluxes,
 						   const Real         a_townsend2,
 						   const Real         a_quantum_efficiency) const {
-  Vector<Real> fluxes(m_num_species, 0.0);
+  Vector<Real> fluxes(m_num_cdr_species, 0.0);
   
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
 
   // Switch for setting drift flux to zero for charge species
-  Vector<Real> aj(m_num_species, 0.0);
-  for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+  Vector<Real> aj(m_num_cdr_species, 0.0);
+  for (int i = 0; i < m_num_cdr_species; i++){
+    if(data_ops::sgn(m_cdr_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -681,7 +681,7 @@ Vector<Real> morrow_zheleznyak::compute_cdr_fluxes(const Real         a_time,
   }
 
   // Drift outflow for now
-  for (int i = 0; i < m_num_species; i++){
+  for (int i = 0; i < m_num_cdr_species; i++){
     fluxes[i] = aj[i]*(a_extrap_cdr_fluxes[i]);
   }
   
@@ -698,7 +698,7 @@ Vector<Real> morrow_zheleznyak::compute_cdr_domain_fluxes(const Real           a
 							  const Vector<Real>   a_cdr_gradients,
 							  const Vector<Real>   a_rte_fluxes,
 							  const Vector<Real>   a_extrap_cdr_fluxes) const{
-  Vector<Real> fluxes(m_num_species, 0.0); 
+  Vector<Real> fluxes(m_num_cdr_species, 0.0); 
 
   int idx;
   int sgn;
@@ -1026,8 +1026,8 @@ void morrow_zheleznyak::parse_initial_particles(){
   add_gaussian_particles(p);
   
   // Copy initial particles to various species
-  m_species[m_nelec_idx]->get_initial_particles() = p;
-  m_species[m_nplus_idx]->get_initial_particles() = p;
+  m_cdr_species[m_nelec_idx]->get_initial_particles() = p;
+  m_cdr_species[m_nplus_idx]->get_initial_particles() = p;
 
   // Get the initial deposition scheme
   ParmParse pp("morrow_zheleznyak");
@@ -1048,8 +1048,8 @@ void morrow_zheleznyak::parse_initial_particles(){
     MayDay::Abort("morrow_zheleznyak::parse_initial_particles - unknown deposition type requested");
   }
   
-  m_species[m_nelec_idx]->get_deposition() = deposition;
-  m_species[m_nplus_idx]->get_deposition() = deposition;
+  m_cdr_species[m_nelec_idx]->get_deposition() = deposition;
+  m_cdr_species[m_nplus_idx]->get_deposition() = deposition;
 }
 
 void morrow_zheleznyak::add_uniform_particles(List<Particle>& a_particles){

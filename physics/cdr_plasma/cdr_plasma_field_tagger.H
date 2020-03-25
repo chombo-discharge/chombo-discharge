@@ -1,30 +1,30 @@
 /*!
-  @file   ultralw_tagger.H
-  @brief  Declaration of a memory-lightweight tagging class. 
+  @file   cdr_plasma_field_tagger.H
+  @brief  Declaration of a field-only tagging class for cdr plasmas
   @author Robert Marskar
   @date   May. 2018
 */
 
-#ifndef _ULTRALW_TAGGER_
-#define _ULTRALW_TAGGER_
+#ifndef _CDR_PLASMA_FIELD_TAGGER_
+#define _CDR_PLASMA_FIELD_TAGGER_
 
 #include "cdr_plasma_tagger.H"
 
 /*!
-  @brief Lightweight tagging class. Only tags cells based on cdr densities and field magnitude.
+  @brief Lightweight tagging class. Only tags cells based on electric field. 
 */
-class ultralw_tagger : public cdr_plasma_tagger {
+class cdr_plasma_field_tagger : public cdr_plasma_tagger {
 public:
 
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  ultralw_tagger();
+  cdr_plasma_field_tagger();
 
   /*!
     @brief Destructor
   */
-  ~ultralw_tagger();
+  ~cdr_plasma_field_tagger();
 
   /*!
     @brief Compute tracer fields

@@ -8,12 +8,12 @@
 #ifndef _AIR3_ZHELEZNYAK_
 #define _AIR3_ZHELEZNYAK_
 
-#include "network_kinetics.H"
+#include "cdr_plasma_physics.H"
 #include "lookup_table.H"
 
 #include <random>
 
-class air3_zheleznyak : public network_kinetics {
+class air3_zheleznyak : public cdr_plasma_physics {
 public:
 
   class electron;
@@ -83,7 +83,7 @@ public:
 
   Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
-  Real compute_alpha_eff(const RealVect a_E) const;
+  Real compute_alpha(const RealVect a_E) const;
 
 protected:
 

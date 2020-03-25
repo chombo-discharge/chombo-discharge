@@ -1,30 +1,30 @@
 /*!
-  @file   ultralw_tagger.cpp
-  @brief  Implementation of ultralw_tagger.H
+  @file   cdr_plasma_field_tagger.cpp
+  @brief  Implementation of cdr_plasma_field_tagger.H
   @author Robert Marskar
   @date   May. 2018
 */
 
-#include "ultralw_tagger.H"
+#include "cdr_plasma_field_tagger.H"
 #include "data_ops.H"
 
 #include <EBArith.H>
 
-ultralw_tagger::ultralw_tagger(){
-  CH_TIME("ultralw_tagger::ultralw_tagger");
+cdr_plasma_field_tagger::cdr_plasma_field_tagger(){
+  CH_TIME("cdr_plasma_field_tagger::cdr_plasma_field_tagger");
   if(m_verbosity > 5){
-    pout() << "ultralw_tagger::ultralw_tagger" << endl;
+    pout() << "cdr_plasma_field_tagger::cdr_plasma_field_tagger" << endl;
   }
 
-  m_name = "ultralw_tagger";
+  m_name = "cdr_plasma_field_tagger";
 }
 
-ultralw_tagger::~ultralw_tagger(){
+cdr_plasma_field_tagger::~cdr_plasma_field_tagger(){
 
 }
 
-void ultralw_tagger::allocate_storage(){
-  CH_TIME("ultralw_tagger::allocate_storage");
+void cdr_plasma_field_tagger::allocate_storage(){
+  CH_TIME("cdr_plasma_field_tagger::allocate_storage");
   if(m_verbosity > 5){
     pout() << m_name + "::allocate_storage" << endl;
   }
@@ -34,8 +34,8 @@ void ultralw_tagger::allocate_storage(){
   m_amr->allocate(m_grad_E,   m_phase, SpaceDim);
 }
 
-void ultralw_tagger::deallocate_storage(){
-  CH_TIME("ultralw_tagger::deallocate_storage");
+void cdr_plasma_field_tagger::deallocate_storage(){
+  CH_TIME("cdr_plasma_field_tagger::deallocate_storage");
   if(m_verbosity > 5){
     pout() << m_name + "::deallocate_storage" << endl;
   }
@@ -45,8 +45,8 @@ void ultralw_tagger::deallocate_storage(){
   m_amr->deallocate(m_grad_E);
 }
 
-void ultralw_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
-  CH_TIME("ultralw_tagger::compute_E");
+void cdr_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
+  CH_TIME("cdr_plasma_field_tagger::compute_E");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_E" << endl;
   }
@@ -63,8 +63,8 @@ void ultralw_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
   m_amr->interpolate_to_centroids(a_grad_E, m_phase);
 }
 
-void ultralw_tagger::compute_tracers(){
-  CH_TIME("ultralw_tagger::compute_tracers");
+void cdr_plasma_field_tagger::compute_tracers(){
+  CH_TIME("cdr_plasma_field_tagger::compute_tracers");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_tracers" << endl;
   }

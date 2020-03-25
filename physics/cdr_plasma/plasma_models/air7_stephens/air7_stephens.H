@@ -94,7 +94,7 @@ public:
 
   Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
-  Real compute_alpha_eff(const RealVect a_E) const;
+  Real compute_alpha(const RealVect a_E) const;
 
 protected:
 
