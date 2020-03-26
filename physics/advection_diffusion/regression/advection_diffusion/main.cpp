@@ -23,9 +23,9 @@ int main(int argc, char* argv[]){
   RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
 
   // Set up basic advection_diffusion 
-  RefCountedPtr<cdr_solver> solver                       = RefCountedPtr<cdr_solver> (new cdr_gdnv());
-  RefCountedPtr<advection_diffusion_stepper> timestepper = RefCountedPtr<advection_diffusion_stepper>
-     (new advection_diffusion_stepper(solver));
+  RefCountedPtr<cdr_solver> = RefCountedPtr<cdr_solver> (new cdr_gdnv());
+  auto timestepper = RefCountedPtr<advection_diffusion_stepper<cdr_gdnv> >
+     (new advection_diffusion_stepper<cdr_gdnv>());
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));

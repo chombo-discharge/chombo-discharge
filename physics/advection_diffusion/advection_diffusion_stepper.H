@@ -16,11 +16,11 @@ namespace physics::advection_diffusion {
   /*!
     @brief Class that just solves the advection_diffusion equation
   */
-  template <class T>
   class advection_diffusion_stepper : public time_stepper {
   public:
 
     advection_diffusion_stepper();
+    advection_diffusion_stepper(RefCountedPtr<cdr_solver>& a_solver);
     ~advection_diffusion_stepper();
 
     // Setup routines
@@ -61,7 +61,5 @@ namespace physics::advection_diffusion {
     void set_velocity(const int a_level);
   };
 }
-
-#include "advection_diffusion_stepperI.H"
 
 #endif

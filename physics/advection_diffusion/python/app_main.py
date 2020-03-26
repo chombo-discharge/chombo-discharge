@@ -44,8 +44,9 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic advection_diffusion \n")
-    mainf.write("  auto timestepper = RefCountedPtr<advection_diffusion_stepper<" + args.cdr_solver + "> >\n")
-    mainf.write("     (new advection_diffusion_stepper<" + args.cdr_solver + ">());\n")
+    mainf.write("  RefCountedPtr<cdr_solver> solver                       = RefCountedPtr<cdr_solver> (new " + args.cdr_solver + "());\n")
+    mainf.write("  RefCountedPtr<advection_diffusion_stepper> timestepper = RefCountedPtr<advection_diffusion_stepper>\n")
+    mainf.write("     (new advection_diffusion_stepper(solver));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the driver and run it\n")
