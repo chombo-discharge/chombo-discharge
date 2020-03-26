@@ -652,11 +652,11 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
   // Regrid driver, timestepper, and celltagger
   this->regrid_internals(old_finest_level, new_finest_level);          // Regrid internals for driver
   m_timestepper->regrid(a_lmin, old_finest_level, new_finest_level);   // Regrid solvers
-  m_celltagger->regrid();                                              // Regrid cell tagger
-
   if(a_use_initial_data){
     m_timestepper->initial_data();
   }
+  m_celltagger->regrid();                                              // Regrid cell tagger
+
   const Real solver_regrid = MPI_Wtime(); // Timer
 
   if(m_verbosity > 1){

@@ -4199,7 +4199,6 @@ void cdr_plasma_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::st
     RefCountedPtr<cdr_solver>& solver = solver_it();
     a_plotvar_names.append(solver->get_plotvar_names());
     solver->write_plot_data(a_output, a_icomp);
-
   }
 
   // RTE solvers copy their output data

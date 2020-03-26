@@ -9,6 +9,7 @@
 
 #include "advection_diffusion_stepper.H"
 #include "advection_diffusion_species.H"
+#include "data_ops.H"
 
 using namespace physics::advection_diffusion;
 
@@ -33,8 +34,8 @@ void advection_diffusion_stepper::setup_solvers(){
 
   // Solver setup
   m_solver->set_verbosity(-1);
-  m_solver->parse_options();
   m_solver->set_species(m_species);
+  m_solver->parse_options();
   m_solver->set_amr(m_amr);
   m_solver->set_phase(phase::gas);
   m_solver->set_computational_geometry(m_compgeom);
@@ -48,12 +49,15 @@ void advection_diffusion_stepper::setup_solvers(){
 
 void advection_diffusion_stepper::initial_data(){
   m_solver->initial_data();       // Fill initial through the cdr species
-  m_solver->set_diffco(m_diffco);
+
   m_solver->set_source(0.0);
   m_solver->set_ebflux(0.0);
-
-  // Set the velocity
-  this->set_velocity();
+  if(m_solver->is_diffusive()){
+    m_solver->set_diffco(m_diffco);
+  }
+  if(m_solver->is_mobile()){
+    this->set_velocity();
+  }
 }
 
 void advection_diffusion_stepper::set_velocity(){

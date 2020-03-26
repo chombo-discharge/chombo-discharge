@@ -1763,7 +1763,6 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     pout() << m_name + "::write_plot_data" << endl;
   }
 
-
   // Plot state
   if(m_plot_phi) {
     write_data(a_output, a_comp, m_state, true);
@@ -1792,7 +1791,6 @@ void cdr_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     data_ops::incr(m_scratch, m_ebflux, 1.0);
     write_data(a_output, a_comp, m_scratch, false);
   }
-
 }
 
 void cdr_solver::write_data(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){

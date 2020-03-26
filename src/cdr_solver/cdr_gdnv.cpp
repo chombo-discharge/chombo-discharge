@@ -34,6 +34,7 @@ void cdr_gdnv::parse_options(){
   parse_hybrid_div();    // Parses options for hybrid divergence
   parse_slopelim();      // Parses slope limiter settings
   parse_plot_vars();     // Parses plot variables
+  parse_plotmode();      // Parse plot mdoe
   parse_gmg_settings();  // Parses solver parameters for geometric multigrid
   parse_extrap_source(); // Parse source term extrapolation for time-centering advective comps
 }

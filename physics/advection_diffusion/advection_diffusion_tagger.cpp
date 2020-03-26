@@ -25,7 +25,7 @@ advection_diffusion_tagger::~advection_diffusion_tagger(){
 }
 
 void advection_diffusion_tagger::regrid(){
-
+  pout() << "regridding cell tagger" << endl;
 }
 
 void advection_diffusion_tagger::parse_options(){
@@ -37,7 +37,6 @@ void advection_diffusion_tagger::parse_options(){
 }
 
 bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
-
   EBAMRCellData sca;
   EBAMRCellData vec;
 
@@ -83,7 +82,7 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
 
 	const Real crit = Abs(cReg(iv,0))/(SAFETY + Abs(phiReg(iv,0)));
 	if(crit > m_refi_curv && Abs(phiReg(iv,0)) > m_refi_magn){
-	  //	  tags |= iv;
+	  tags |= iv;
 	  found_tags = true;
 	}
       }
@@ -99,6 +98,16 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
     }
   }
 
-  pout() << "done tags" << endl;
-  return false;
+    // Some ranks may have gotten new tags while others have not. This little code snippet
+  // sets got_new_tags = true for all ranks if any rank originally had got_new_tags = true
+#ifdef CH_MPI
+  int glo = 1;
+  int loc = found_tags ? 1 : 0;
+
+  const int result = MPI_Allreduce(&loc, &glo, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+
+  found_tags = (glo == 1) ? true : false;
+#endif
+
+  return found_tags;
 }
