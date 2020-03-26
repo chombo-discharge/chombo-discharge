@@ -67,7 +67,7 @@ template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
 template<typename T > void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data){
   CH_TIME("amr_mesh::allocate_ptr");
   if(m_verbosity > 5){
-    pout() << "amr_mesh::allocate_ptr";
+    pout() << "amr_mesh::allocate_ptr" << endl;
   }
 
   a_data.resize(1 + m_finest_level);

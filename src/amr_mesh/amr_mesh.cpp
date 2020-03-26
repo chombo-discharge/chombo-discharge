@@ -671,7 +671,7 @@ void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const i
     if(!m_has_grids){
 
       for (int lvl = 1; lvl <= top_level; lvl++){
-#if 0
+#if 1
 	domainSplit(m_domains[lvl], old_boxes[lvl], m_max_box_size, m_blocking_factor);
 #else
 	old_boxes[lvl].resize(0);
@@ -1694,7 +1694,6 @@ void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
 
       m_coarave[a_phase][lvl]->average(*a_data[lvl-1], *a_data[lvl], interv);
     }
-
     for (int lvl = 0; lvl <= m_finest_level; lvl++){
       a_data[lvl]->exchange();
     }
