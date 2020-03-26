@@ -2,6 +2,7 @@
 #include "cdr_gdnv.H"
 #include "rod_sphere.H"
 #include "advection_diffusion_stepper.H"
+#include "advection_diffusion_tagger.H"
 #include "ParmParse.H"
 
 using namespace physics::advection_diffusion;
@@ -20,12 +21,13 @@ int main(int argc, char* argv[]){
   RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new rod_sphere());
   RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
-  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);
 
   // Set up basic advection_diffusion 
   RefCountedPtr<cdr_solver> solver                       = RefCountedPtr<cdr_solver> (new cdr_gdnv());
   RefCountedPtr<advection_diffusion_stepper> timestepper = RefCountedPtr<advection_diffusion_stepper>
      (new advection_diffusion_stepper(solver));
+  RefCountedPtr<cell_tagger> tagger                      = RefCountedPtr<cell_tagger>
+      (new advection_diffusion_tagger(solver));
 
   // Set up the driver and run it
   RefCountedPtr<driver> engine = RefCountedPtr<driver> (new driver(compgeom, timestepper, amr, tagger, geocoarsen));

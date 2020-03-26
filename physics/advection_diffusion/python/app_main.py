@@ -17,6 +17,7 @@ def write_template(args):
     mainf.write('#include "' + args.cdr_solver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "advection_diffusion_stepper.H"\n')
+    mainf.write('#include "advection_diffusion_tagger.H"\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
@@ -40,13 +41,15 @@ def write_template(args):
     mainf.write("  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new " + args.geometry + "());\n")
     mainf.write("  RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());\n")
     mainf.write("  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());\n")
-    mainf.write("  RefCountedPtr<cell_tagger> tagger              = RefCountedPtr<cell_tagger> (NULL);\n")
+
 
     mainf.write("\n")
     mainf.write("  // Set up basic advection_diffusion \n")
     mainf.write("  RefCountedPtr<cdr_solver> solver                       = RefCountedPtr<cdr_solver> (new " + args.cdr_solver + "());\n")
     mainf.write("  RefCountedPtr<advection_diffusion_stepper> timestepper = RefCountedPtr<advection_diffusion_stepper>\n")
     mainf.write("     (new advection_diffusion_stepper(solver));\n")
+    mainf.write("  RefCountedPtr<cell_tagger> tagger                      = RefCountedPtr<cell_tagger>\n")
+    mainf.write("      (new advection_diffusion_tagger(solver));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the driver and run it\n")

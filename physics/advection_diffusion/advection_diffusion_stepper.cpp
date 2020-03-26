@@ -13,7 +13,7 @@
 using namespace physics::advection_diffusion;
 
 advection_diffusion_stepper::advection_diffusion_stepper(){
-  ParmParse pp("advection_diffusion_stepper");
+  ParmParse pp("advection_diffusion");
 
   pp.get("diffco",   m_diffco);
   pp.get("omega",    m_omega);
@@ -32,6 +32,7 @@ void advection_diffusion_stepper::setup_solvers(){
   m_species = RefCountedPtr<cdr_species> (new advection_diffusion_species());
 
   // Solver setup
+  m_solver->set_verbosity(-1);
   m_solver->parse_options();
   m_solver->set_species(m_species);
   m_solver->set_amr(m_amr);

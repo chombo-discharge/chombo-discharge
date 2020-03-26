@@ -14,10 +14,10 @@ using namespace physics::advection_diffusion;
 
 advection_diffusion_species::advection_diffusion_species(){
 
-  ParmParse pp("advection_diffusion_stepper");
+  ParmParse pp("advection_diffusion");
 
   m_charge = 0;
-  m_name   = "advection_diffusion_species";
+  m_name   = "scalar species";
 
   Vector<Real> v;
   pp.get   ("diffusion",      m_diffusive);

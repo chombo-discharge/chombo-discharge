@@ -36,7 +36,7 @@ driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 10            # Plot interval
 driver.regrid_interval                 = 10            # Regrid interval
 driver.checkpoint_interval             = 10            # Checkpoint interval
-driver.initial_regrids                 = 0             # Number of initial regrids
+driver.initial_regrids                 = 5             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
 driver.max_steps                       = 0             # Maximum number of steps
@@ -114,17 +114,25 @@ rod_sphere.dielectric_center         = 0.0 0            # Dielectric center
 rod_sphere.dielectric_radius         = 0.1              # Dielectric radius
 
 # ====================================================================================================
-# ADVECTION_DIFFUSION_STEPPER CLASS OPTIONS
+# ADVECTION_DIFFUSION CLASS OPTIONS
 #
 # This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
 # wall flow BCs.
 # ====================================================================================================
-advection_diffusion_stepper.blob_amplitude = 1.0     # Blob amplitude
-advection_diffusion_stepper.blob_radius    = 0.1     # Blob radius
-advection_diffusion_stepper.blob_center    = 0 0.5   # Blob center
-advection_diffusion_stepper.diffusion      = true    # Turn on/off diffusion
-advection_diffusion_stepper.advection      = true    # Turn on/off advection
+advection_diffusion.blob_amplitude = 1.0     # Blob amplitude
+advection_diffusion.blob_radius    = 0.1     # Blob radius
+advection_diffusion.blob_center    = 0 0.5   # Blob center
+advection_diffusion.diffusion      = true    # Turn on/off diffusion
+advection_diffusion.advection      = true    # Turn on/off advection
 
-advection_diffusion_stepper.diffco         = 1.0     # Diffusion coefficient
-advection_diffusion_stepper.omega          = 1.0     # Rotation velocity
-advection_diffusion_stepper.cfl            = 0.5     # CFL number
+# Velocity, diffusion, and CFL
+# ----------------------------
+advection_diffusion.diffco         = 1.0     # Diffusion coefficient
+advection_diffusion.omega          = 1.0     # Rotation velocity
+advection_diffusion.cfl            = 0.5     # CFL number
+
+# Cell tagging stuff
+# ------------------
+advection_diffusion.refine_curv = 0.1          # Refine if curvature exceeds this
+advection_diffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this
+advection_diffusion.buffer      = 0            # Grow tagged cells     
