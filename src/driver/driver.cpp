@@ -1672,9 +1672,10 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
     pout() << "driver::step_report" << endl;
   }
 
-
-  // Time stepper writes report first
-  m_timestepper->print_step_report();
+  pout() << endl;
+  pout() << "driver::Time step report -- Time step #" << m_step << endl
+	 << "                                   Time  = " << m_time << endl
+	 << "                                   dt    = " << m_dt << endl;
 
   // Get the total number of poitns across all levels
   const int finest_level                 = m_amr->get_finest_level();
@@ -1693,7 +1694,6 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
   }
 
   char metrics[300];
-  pout() << endl;
 
   // Percentage completed of time steps
   const Real percentStep = (1.0*m_step/a_max_steps)*100.;
@@ -1797,6 +1797,9 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
 #endif
 #endif
 
+  // Time stepper writes his report now
+  m_timestepper->print_step_report();
+
 }
 
 int driver::get_finest_tag_level(const EBAMRTags& a_cell_tags) const{
@@ -1871,7 +1874,9 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
   else{
     // Loop only goes to the current finest level because we only add one level at a time
     for (int lvl = 0; lvl <= finest_level; lvl++){
-      a_all_tags[lvl] |= m_geom_tags[lvl];
+      if(lvl < m_amr->get_max_amr_depth()){ // Geometric tags don't exist on amr_mesh.m_max_amr_depth
+	a_all_tags[lvl] |= m_geom_tags[lvl];
+      }
     }
   }
 

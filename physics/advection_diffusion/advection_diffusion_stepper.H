@@ -59,6 +59,12 @@ namespace physics::advection_diffusion {
 
     void set_velocity();
     void set_velocity(const int a_level);
+
+  private:
+
+    EBAMRCellData m_tmp;
+    EBAMRCellData m_k1;
+    EBAMRCellData m_k2;
   };
 }
 

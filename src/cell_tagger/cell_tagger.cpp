@@ -84,7 +84,7 @@ void cell_tagger::parse_verbosity(){
 }
 
 void cell_tagger::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp){
-  CH_TIME("cell_tagger::parse_verbosity");
+  CH_TIME("cell_tagger::write_plot_data");
   if(m_verbosity > 3){
     pout() << "cell_tagger::write_plot_data" << endl;
   }

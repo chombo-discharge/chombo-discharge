@@ -4343,10 +4343,8 @@ void cdr_plasma_stepper::print_step_report(){
   if(m_timecode == time_code::hardcap){
     str = " (Restricted by a hardcap)";
   }
-  pout() << "driver::Time step report -- Time step #" << m_step << endl
-	 << "                                   Time  = " << m_time << endl
-	 << "                                   dt    = " << m_dt << str << endl
-    	 << "                                   cfl   = " << m_dt/cfl_dt << endl
+  pout() << "                               restrict  = " << str << endl
+         << "                                   cfl   = " << m_dt/cfl_dt << endl
 	 << "                                   Emax  = " << Emax << endl
 	 << "                                   n_max = " << nmax << "(" + solver_max + ")" << endl;
 }

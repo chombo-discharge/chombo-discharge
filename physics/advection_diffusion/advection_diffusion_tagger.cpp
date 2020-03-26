@@ -15,10 +15,12 @@ using namespace physics::advection_diffusion;
 
 advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
 						       RefCountedPtr<amr_mesh>&   a_amr){
-  m_solver = a_solver;
-  m_amr    = a_amr;
-  m_name   = "advection_diffusion";
+  m_solver    = a_solver;
+  m_amr       = a_amr;
+  m_name      = "advection_diffusion";
+  m_verbosity = -1;
 }
+
 
 advection_diffusion_tagger::~advection_diffusion_tagger(){
 
@@ -72,9 +74,9 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
 
       const Box box = dbl.get(dit());
 
-
       // These are the tags
       DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+      tags.makeEmptyBits(); // Clear all previous tags
 
       // Do regular cells
       for (BoxIterator bit(box); bit.ok(); ++bit){
@@ -108,6 +110,5 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
 
   found_tags = (glo == 1) ? true : false;
 #endif
-    
-  return true;
+  return found_tags;
 }

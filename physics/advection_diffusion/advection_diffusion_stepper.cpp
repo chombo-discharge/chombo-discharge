@@ -45,6 +45,11 @@ void advection_diffusion_stepper::setup_solvers(){
   if(!m_solver->is_mobile() && !m_solver->is_diffusive()){
     MayDay::Abort("advection_diffusion_stepper::setup_solvers - can't turn off both advection AND diffusion");
   }
+
+  // Allocate memory for RK steps
+  m_amr->allocate(m_tmp, phase::gas, 1);
+  m_amr->allocate(m_k1,  phase::gas, 1);
+  m_amr->allocate(m_k2,  phase::gas, 1);
 }
 
 void advection_diffusion_stepper::initial_data(){
@@ -65,6 +70,10 @@ void advection_diffusion_stepper::set_velocity(){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     this->set_velocity(lvl);
   }
+
+  EBAMRCellData& vel = m_solver->get_velo_cell();
+  m_amr->average_down(vel, phase::gas);
+  m_amr->interp_ghost(vel, phase::gas);
 }
 
 void advection_diffusion_stepper::set_velocity(const int a_level){
@@ -134,17 +143,16 @@ void advection_diffusion_stepper::write_plot_data(EBAMRCellData&       a_output,
 }
 
 void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-  MayDay::Abort("advection_diffusion_stepper::post_checkpoint_setup - need to restrict dt");
 
   // CFL on advection
   if(m_solver->is_mobile()){
-    a_dt       = m_solver->compute_cfl_dt();
+    a_dt       = m_cfl*m_solver->compute_cfl_dt();
     a_timecode = time_code::cfl;
   }
     
   // CFL on diffusion, if explicit diffusion
   if(m_solver->is_diffusive()){
-    const Real diff_dt = m_solver->compute_diffusive_dt();
+    const Real diff_dt = m_cfl*m_solver->compute_diffusive_dt();
 
     if(diff_dt < a_dt){
       a_dt = diff_dt;
@@ -154,11 +162,32 @@ void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& 
 }
 
 Real advection_diffusion_stepper::advance(const Real a_dt){
-  MayDay::Abort("advection_diffusion_stepper::advance - not implemented");
-  return 0.0;
+
+  // Use Heun's method
+  EBAMRCellData& state = m_solver->get_state();
+  m_solver->compute_divJ(m_k1, state, 0.0);
+
+  data_ops::copy(m_tmp, state);
+  data_ops::incr(m_tmp, m_k1, -a_dt); // m_tmp = phi - dt*div(J)
+
+  m_solver->compute_divJ(m_k2, m_tmp, 0.0);
+
+
+  data_ops::incr(state, m_k1, -0.5*a_dt);
+  data_ops::incr(state, m_k2, -0.5*a_dt);
+  
+  m_amr->average_down(state, phase::gas);
+  m_amr->interp_ghost(state, phase::gas);
+
+  
+  return a_dt;
 }
 
 void advection_diffusion_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt){
+  m_step = a_step;
+  m_time = a_time;
+  m_dt   = a_dt;
+  
   m_solver->set_time(a_step, a_time, a_dt);
 }
 
@@ -166,7 +195,6 @@ void advection_diffusion_stepper::print_step_report(){
 
 }
 
-// Regrid routines
 bool advection_diffusion_stepper::need_to_regrid(){
   return false;
 }
@@ -180,5 +208,20 @@ void advection_diffusion_stepper::deallocate(){
 }
 
 void advection_diffusion_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+
+  // Regrid CDR solver
   m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  m_solver->set_source(0.0);
+  m_solver->set_ebflux(0.0);
+  if(m_solver->is_diffusive()){
+    m_solver->set_diffco(m_diffco);
+  }
+  if(m_solver->is_mobile()){
+    this->set_velocity();
+  }
+
+  // Allocate memory for RK steps
+  m_amr->allocate(m_tmp, phase::gas, 1);
+  m_amr->allocate(m_k1,  phase::gas, 1);
+  m_amr->allocate(m_k2,  phase::gas, 1);
 }
