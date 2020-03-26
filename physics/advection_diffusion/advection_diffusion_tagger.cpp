@@ -98,7 +98,7 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
     }
   }
 
-    // Some ranks may have gotten new tags while others have not. This little code snippet
+  // Some ranks may have gotten new tags while others have not. This little code snippet
   // sets got_new_tags = true for all ranks if any rank originally had got_new_tags = true
 #ifdef CH_MPI
   int glo = 1;
@@ -108,6 +108,6 @@ bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
 
   found_tags = (glo == 1) ? true : false;
 #endif
-
-  return found_tags;
+    
+  return true;
 }

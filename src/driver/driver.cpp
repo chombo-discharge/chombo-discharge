@@ -1836,6 +1836,8 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
 
   bool got_new_tags = false;
 
+  // Note that when we regrid we add at most one level at a time. This means that if we have a
+  // simulation with AMR depth l and we want to add a level l+1, we need tags on levels 0 through l.
   const int finest_level  = m_amr->get_finest_level();
   a_all_tags.resize(1 + finest_level, IntVectSet());
 
@@ -1867,7 +1869,8 @@ bool driver::tag_cells(Vector<IntVectSet>& a_all_tags, EBAMRTags& a_cell_tags){
     }
   }
   else{
-    for (int lvl = 0; lvl < m_amr->get_max_amr_depth(); lvl++){
+    // Loop only goes to the current finest level because we only add one level at a time
+    for (int lvl = 0; lvl <= finest_level; lvl++){
       a_all_tags[lvl] |= m_geom_tags[lvl];
     }
   }
