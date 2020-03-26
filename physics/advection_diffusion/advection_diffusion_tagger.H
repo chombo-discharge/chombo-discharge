@@ -10,6 +10,7 @@
 
 #include "cell_tagger.H"
 #include "cdr_solver.H"
+#include "amr_mesh.H"
 
 namespace physics::advection_diffusion {
 
@@ -19,7 +20,8 @@ namespace physics::advection_diffusion {
   class advection_diffusion_tagger : public cell_tagger {
   public:
 
-    advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver);
+    advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
+			       RefCountedPtr<amr_mesh>&   a_amr);
     ~advection_diffusion_tagger();
 
     void regrid();
@@ -28,6 +30,7 @@ namespace physics::advection_diffusion {
 
   protected:
     RefCountedPtr<cdr_solver> m_solver;
+    RefCountedPtr<amr_mesh>   m_amr;
 
   private:
     advection_diffusion_tagger(){

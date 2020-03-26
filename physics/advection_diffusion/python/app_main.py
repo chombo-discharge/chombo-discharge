@@ -49,7 +49,7 @@ def write_template(args):
     mainf.write("  RefCountedPtr<advection_diffusion_stepper> timestepper = RefCountedPtr<advection_diffusion_stepper>\n")
     mainf.write("     (new advection_diffusion_stepper(solver));\n")
     mainf.write("  RefCountedPtr<cell_tagger> tagger                      = RefCountedPtr<cell_tagger>\n")
-    mainf.write("      (new advection_diffusion_tagger(solver));\n")
+    mainf.write("      (new advection_diffusion_tagger(solver, amr));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the driver and run it\n")

@@ -7,14 +7,17 @@
 */
 
 #include "advection_diffusion_tagger.H"
+#include "data_ops.H"
 
 #include <ParmParse.H> 
 
 using namespace physics::advection_diffusion;
 
-advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver){
+advection_diffusion_tagger::advection_diffusion_tagger(RefCountedPtr<cdr_solver>& a_solver,
+						       RefCountedPtr<amr_mesh>&   a_amr){
   m_solver = a_solver;
-  m_name = "advection_diffusion";
+  m_amr    = a_amr;
+  m_name   = "advection_diffusion";
 }
 
 advection_diffusion_tagger::~advection_diffusion_tagger(){
@@ -34,5 +37,68 @@ void advection_diffusion_tagger::parse_options(){
 }
 
 bool advection_diffusion_tagger::tag_cells(EBAMRTags& a_tags){
-  return true;
+
+  EBAMRCellData sca;
+  EBAMRCellData vec;
+
+  m_amr->allocate(sca, phase::gas, 1);
+  m_amr->allocate(vec, phase::gas, SpaceDim);
+
+  const EBAMRCellData& state = m_solver->get_state();
+
+  // Compute the gradient, vec = grad(phi)
+  m_amr->compute_gradient(vec, state, phase::gas); // vec = grad(phi)
+  data_ops::vector_length(sca, vec);               // sca = |grad(phi)|
+  data_ops::set_covered_value(sca, 0, 0.0);        // covered cell values are set to 0.0
+
+  bool found_tags = false;
+
+  // Never tag on max_amr_depth
+  const int finest_level     = m_amr->get_finest_level();
+  const int max_depth        = m_amr->get_max_amr_depth();
+  const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth
+
+  for (int lvl = 0; lvl <= finest_tag_level; lvl++){
+    data_ops::scale(*sca[lvl], m_amr->get_dx()[lvl]); // sca = |grad(phi)|*dx
+
+    const Real SAFETY = 1.E-6;
+    
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBCellFAB& c   = (*sca[lvl])[dit()];
+      const EBCellFAB& phi = (*state[lvl])[dit()];
+
+      const BaseFab<Real>& cReg   = c.getSingleValuedFAB();
+      const BaseFab<Real>& phiReg = phi.getSingleValuedFAB();
+
+      const Box box = dbl.get(dit());
+
+
+      // These are the tags
+      DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+
+      // Do regular cells
+      for (BoxIterator bit(box); bit.ok(); ++bit){
+	const IntVect iv = bit();
+
+	const Real crit = Abs(cReg(iv,0))/(SAFETY + Abs(phiReg(iv,0)));
+	if(crit > m_refi_curv && Abs(phiReg(iv,0)) > m_refi_magn){
+	  //	  tags |= iv;
+	  found_tags = true;
+	}
+      }
+
+      tags &= box;
+
+      // Do irregular cells
+      const EBISBox& ebisbox = c.getEBISBox();
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+      }
+    }
+  }
+
+  pout() << "done tags" << endl;
+  return false;
 }
