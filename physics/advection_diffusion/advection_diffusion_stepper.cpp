@@ -33,7 +33,7 @@ void advection_diffusion_stepper::setup_solvers(){
   m_species = RefCountedPtr<cdr_species> (new advection_diffusion_species());
 
   // Solver setup
-  m_solver->set_verbosity(10);
+  m_solver->set_verbosity(-1);
   m_solver->set_species(m_species);
   m_solver->parse_options();
   m_solver->set_amr(m_amr);
@@ -144,19 +144,26 @@ void advection_diffusion_stepper::write_plot_data(EBAMRCellData&       a_output,
 
 void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
 
+  Real cfl_dt;
+  Real diff_dt;
+  
   // CFL on advection
   if(m_solver->is_mobile()){
-    a_dt       = m_cfl*m_solver->compute_cfl_dt();
+    cfl_dt = m_solver->compute_cfl_dt();
     a_timecode = time_code::cfl;
+
+    a_dt = m_cfl*cfl_dt;
   }
     
   // CFL on diffusion, if explicit diffusion
   if(m_solver->is_diffusive()){
-    const Real diff_dt = m_cfl*m_solver->compute_diffusive_dt();
+    diff_dt = m_cfl*m_solver->compute_diffusive_dt();
 
     if(diff_dt < a_dt){
       a_dt = diff_dt;
       a_timecode = time_code::diffusion;
+
+      pout() << "advection_diffusion_stepper::compute_dt - dt limited by diffusion, dt/dt_cfl = " << a_dt/cfl_dt << endl;
     }
   }
 }
