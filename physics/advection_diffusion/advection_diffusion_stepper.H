@@ -25,7 +25,7 @@ namespace physics {
       ~advection_diffusion_stepper();
 
       // Setup routines
-      void setup_solvers();
+
       void initial_data();
 
       // IO routines
@@ -37,7 +37,7 @@ namespace physics {
 
       // Advance routines
       void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
-      Real advance(const Real a_dt);
+
       void synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt);
       void print_step_report();
 
@@ -45,7 +45,12 @@ namespace physics {
       bool need_to_regrid();
       void cache();
       void deallocate();
-      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+
+      // Pure routines for derived classes
+      void setup_solvers() = 0;
+      Real advance(const Real a_dt) = 0;
+      void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
+      
 
     protected:
 
