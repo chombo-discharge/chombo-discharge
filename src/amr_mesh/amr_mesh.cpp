@@ -23,7 +23,7 @@
 #include <ParmParse.H>
 #include <BaseIFFactory.H>
 
-#define AMR_MESH_DEBUG 0
+#define AMR_MESH_DEBUG 1
 #define USE_NEW_F2C_REDIST 1
 #define USE_NEW_C2F_REDIST 1
 #define USE_NEW_C2C_REDIST 1

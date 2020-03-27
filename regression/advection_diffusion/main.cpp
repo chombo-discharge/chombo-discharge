@@ -1,7 +1,7 @@
 #include "driver.H"
 #include "cdr_gdnv.H"
 #include "rod_sphere.H"
-#include "rk2.H"
+#include "euler_subcycle.H"
 #include "advection_diffusion_tagger.H"
 #include "ParmParse.H"
 
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
 
   // Set up basic advection_diffusion 
   RefCountedPtr<cdr_solver> solver        = RefCountedPtr<cdr_solver>   (new cdr_gdnv());
-  RefCountedPtr<time_stepper> timestepper = RefCountedPtr<time_stepper> (new rk2(solver));
+  RefCountedPtr<time_stepper> timestepper = RefCountedPtr<time_stepper> (new euler_subcycle(solver));
   RefCountedPtr<cell_tagger> tagger       = RefCountedPtr<cell_tagger>  (new advection_diffusion_tagger(solver, amr));
 
   // Set up the driver and run it
@@ -35,4 +35,5 @@ int main(int argc, char* argv[]){
   CH_TIMER_REPORT();
   MPI_Finalize();
 #endif
+  
 }
