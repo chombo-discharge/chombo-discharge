@@ -186,6 +186,11 @@ public:
   virtual void set_ebflux(const Real a_ebflux);
 
   /*!
+    @brief Set the domain flux
+  */
+  virtual void set_domain_flux(const Real a_domain_flux);
+
+  /*!
     @brief Fill internal state with initial data
   */
   virtual void initial_data();

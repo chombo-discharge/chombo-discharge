@@ -57,6 +57,7 @@ void advection_diffusion_stepper::initial_data(){
 
   m_solver->set_source(0.0);
   m_solver->set_ebflux(0.0);
+  m_solver->set_domain_flux(0.0);
   if(m_solver->is_diffusive()){
     m_solver->set_diffco(m_diffco);
   }
@@ -220,6 +221,7 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_old_fines
   m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
   m_solver->set_source(0.0);
   m_solver->set_ebflux(0.0);
+  m_solver->set_domain_flux(0.0);
   if(m_solver->is_diffusive()){
     m_solver->set_diffco(m_diffco);
   }

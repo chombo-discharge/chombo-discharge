@@ -30,7 +30,6 @@ namespace physics {
 
     protected:
 
-      EBAMRCellData m_tmp;
       EBAMRCellData m_k1;
       EBAMRCellData m_k2;
     };

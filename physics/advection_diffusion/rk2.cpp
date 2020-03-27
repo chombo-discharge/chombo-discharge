@@ -32,32 +32,23 @@ rk2::~rk2(){
 void rk2::setup_solvers(){
   advection_diffusion_stepper::setup_solvers();
 
-  // Allocate memory for RK steps
-  m_amr->allocate(m_tmp, phase::gas, 1);
   m_amr->allocate(m_k1,  phase::gas, 1);
   m_amr->allocate(m_k2,  phase::gas, 1);
 }
 
 Real rk2::advance(const Real a_dt){
-
-  // Use Heun's method
   EBAMRCellData& state = m_solver->get_state();
-  m_solver->compute_divJ(m_k1, state, 0.0);
-
-  data_ops::copy(m_tmp, state);
-  data_ops::incr(m_tmp, m_k1, -a_dt); // m_tmp = phi - dt*div(J)
-  m_solver->make_non_negative(m_tmp);
-
-  m_solver->compute_divJ(m_k2, m_tmp, 0.0);
-
-  data_ops::incr(state, m_k1, -0.5*a_dt);
+  
+  m_solver->compute_divJ(m_k1, state, 0.0);  
+  data_ops::incr(state, m_k1, -a_dt);        
+  m_solver->compute_divJ(m_k2, state, 0.0);  
+  data_ops::incr(state, m_k1,  0.5*a_dt);    
   data_ops::incr(state, m_k2, -0.5*a_dt);
 
   m_solver->make_non_negative(state);
   
   m_amr->average_down(state, phase::gas);
   m_amr->interp_ghost(state, phase::gas);
-
   
   return a_dt;
 }
@@ -75,8 +66,6 @@ void rk2::regrid(const int a_lmin, const int a_old_finest_level, const int a_new
     this->set_velocity();
   }
 
-  // Allocate memory for RK steps
-  m_amr->allocate(m_tmp, phase::gas, 1);
   m_amr->allocate(m_k1,  phase::gas, 1);
   m_amr->allocate(m_k2,  phase::gas, 1);
 }

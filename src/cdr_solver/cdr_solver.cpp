@@ -1526,6 +1526,15 @@ void cdr_solver::set_ebflux(const Real a_ebflux){
   }
 }
 
+void cdr_solver::set_domain_flux(const Real a_domain_flux){
+  CH_TIME("cdr_solver::set_domain_flux(constant)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_domain_flux(constant)" << endl;
+  }
+
+  data_ops::set_value(m_domainflux, 0.0);
+}
+
 void cdr_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
   CH_TIME("cdr_solver::set_ebis");
   if(m_verbosity > 5){
