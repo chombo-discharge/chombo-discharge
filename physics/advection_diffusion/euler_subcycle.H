@@ -23,7 +23,7 @@ namespace physics {
       euler_subcycle(RefCountedPtr<cdr_solver>& a_solver);
       ~euler_subcycle();
 
-      // Pure routines for derived classes
+      void compute_dt(Real& a_dt, time_code::which_code& a_timecode);
       Real advance(const Real a_dt) final;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) final;
       void setup_solvers() final;
