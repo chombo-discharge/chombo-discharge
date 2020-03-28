@@ -1,7 +1,3 @@
-# Chombo and chombo-streamer directories 
-PLASMAC_HOME := /home/robertm/Projects/plasmac/physics/advection_diffusion
-CHOMBO_HOME   := /home/robertm/Projects/plasmac/physics/advection_diffusion/Chombo/lib
-
 include $(CHOMBO_HOME)/mk/Make.defs
 
 USE_EB=TRUE

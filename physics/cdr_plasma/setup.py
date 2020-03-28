@@ -26,21 +26,33 @@ parser.add_argument('-physics',         type=str,  help="Plasma kinetics class",
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
 parser.add_argument('-time_stepper',    type=str,  help="Time stepping method", default="imex_sdc")
 parser.add_argument('-cell_tagger',     type=str,  help="Cell tagging method", default="none")
+
 args = parser.parse_args()
 
-app_main.write_template(args)    # Write main file
-app_make.write_template(args)    # Write makefile
-app_options.write_template(args) # Write options file
-app_inc.copy_dependencies(args)  # Copy depencies
-
-# Build executable if called for it
-if args.build:
-    os.chdir(args.plasmac_home + "/" + args.base_dir + "/" + args.app_name)
-    os.system('pwd')
-    if args.silent:
-        os.system('make -s -j ' + str(args.procs) + ' ' + args.filename)
-    else:
-        os.system('make -j ' + str(args.procs) + ' ' + args.filename)
-    print 'Created and built your mini app - it resides in ' + args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
+# Check if PLASMAC_HOME and CHOMBO_HOME has been set
+plasmac_home = args.plasmac_home
+if not args.plasmac_home:
+    print "Error: Cannot set application because the PLASMAC_HOME environment variable has not been set."
+    print "       Please set PLASMAC_HOME, for example:"
+    print "       >export  PLASMAC_HOME=<directory>"
 else:
-    print 'Created (but did not build) your mini app - it resides in ' + args.plasmac_home + args.base_dir + "/" + args.app_name
+    print "PLASMAC_HOME is " + args.plasmac_home
+    print 'Setting up problem in directory ' + args.plasmac_home + "/" args.base_dir + "/" + args.app_name
+
+    app_main.write_template(args)    # Write main file
+    app_make.write_template(args)    # Write makefile
+    app_options.write_template(args) # Write options file
+    app_inc.copy_dependencies(args)  # Copy depencies
+
+    # Build executable if called for it
+    if args.build:
+        os.chdir(args.plasmac_home + "/" + args.base_dir + "/" + args.app_name)
+        os.system('pwd')
+        if args.silent:
+            os.system('make -s -j ' + str(args.procs) + ' ' + args.filename)
+        else:
+            os.system('make -j ' + str(args.procs) + ' ' + args.filename)
+            print 'Created and built your mini app - it resides in ' + args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
+    else:
+        print 'Problem setup successful'
+        
