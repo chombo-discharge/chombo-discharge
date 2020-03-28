@@ -150,7 +150,13 @@ void euler_subcycle::regrid(const int a_lmin, const int a_old_finest_level, cons
     m_solver->set_diffco(m_diffco);
   }
   if(m_solver->is_mobile()){
-    this->set_velocity();
+    for (int lvl = a_lmin; lvl <= a_new_finest_level; lvl++){
+      this->set_velocity(lvl);
+    }
+
+    // Fill ghost cells
+    EBAMRCellData& vel = m_solver->get_velo_cell();
+    m_amr->interp_ghost(vel, phase::gas);
   }
 
   // Allocate memory for RK steps
