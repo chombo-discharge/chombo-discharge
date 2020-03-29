@@ -1,0 +1,5 @@
+[poisson2D]
+inputFile     = regression2D
+benchmarkName = benchmark2D
+numProcs      = 6
+
