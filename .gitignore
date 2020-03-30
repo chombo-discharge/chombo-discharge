@@ -1,6 +1,5 @@
 *.ex
 *.hdf5
-!benchmark*.hdf5
 *.MPI
 **/Make.defs.local
 /doc/html/*.html
