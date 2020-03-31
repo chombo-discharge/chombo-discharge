@@ -76,15 +76,21 @@ def compile_test(silent, build_procs, dim, clean, main):
     if not silent:
         print("\t Compiling with = '" + str(makeCommand) + "'\n")
 
-    try:
-    exit_code = subprocess.check_call(makeCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+    if args.silent:
+        exit_code = subprocess.call(makeCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+    else:
+        exit_code = subprocess.call(makeCommand, shell=True)
     return exit_code
 
-# Do a sanity check before trying tests. 
+# --------------------------------------------------
+# Do a sanity check before trying tests.
+# --------------------------------------------------
 pre_check(args.silent)
 
 
+# --------------------------------------------------
 # Run all tests
+# --------------------------------------------------
 for test in config.sections():
 
     # --------------------------------------------------
@@ -157,71 +163,81 @@ for test in config.sections():
         # Check if executable exists. Recompile test if
         # user has called for it
         # --------------------------------------------------
-        if args.compile:
-            compile_test(silent=args.silent,
-                         build_procs=args.build_procs,
-                         dim=args.dim,
-                         clean=args.clean,
-                         main = str(config[str(test)]['exec']))
+        run_suite = True
+        if args.compile or not os.path.isfile(executable):
+            compile_code = compile_test(silent=args.silent,
+                                        build_procs=args.build_procs,
+                                        dim=args.dim,
+                                        clean=args.clean,
+                                        main = str(config[str(test)]['exec']))
+            if not compile_code is 0:
+                print("\t Compilation of test '" + str(test) + "' failed. Aborting this regresison test.")
+                run_suite = False
 
         # --------------------------------------------------
-        # Set up the run command
+        # Run the test suite
         # --------------------------------------------------
-        runCommand = args.run   + " -np "                  + str(cores) + " " + executable + " " + input
-        runCommand = runCommand + " driver.output_names="  + str(output)
-        runCommand = runCommand + " driver.plot_interval=" + str(nplot)
-        runCommand = runCommand + " driver.max_steps="     + str(nsteps)
-        if not args.silent:
-            print("\t Executing with '" + str(runCommand) + "'")
+        if run_suite:
+            # --------------------------------------------------
+            # Set up the run command
+            # --------------------------------------------------
+            runCommand = args.run   + " -np "                  + str(cores) + " " + executable + " " + input
+            runCommand = runCommand + " driver.output_names="  + str(output)
+            runCommand = runCommand + " driver.plot_interval=" + str(nplot)
+            runCommand = runCommand + " driver.max_steps="     + str(nsteps)
+            if not args.silent:
+                print("\t Executing with '" + str(runCommand) + "'")
 
-        # --------------------------------------------------
-        # Run the executable and print the exit code
-        # --------------------------------------------------
-#        exit_code = os.system(runCommand)
-        exit_code = subprocess.call(str(runCommand), shell=True, stdout=DEVNULL)
-        # exit_code = subprocess.call([str(args.run),
-        #                              '-np',
-        #                              str(cores),
-        #                              str(executable),
-        #                              str(input)])
-        
-        if not exit_code is 0:
-            print("\t Test run failed with exit code = " + str(exit_code))
-        else:
             # --------------------------------------------------
-            # Do file comparison if the test ran successfully
+            # Run the executable and print the exit code
             # --------------------------------------------------
-            if args.benchmark:
-                print("Regression test '" + str(test) + "' has generated benchmark files.")
+            #        exit_code = os.system(runCommand)
+            exit_code = subprocess.call(str(runCommand), shell=True, stdout=DEVNULL)
+            # exit_code = subprocess.call([str(args.run),
+            #                              '-np',
+            #                              str(cores),
+            #                              str(executable),
+            #                              str(input)])
+                
+            if not exit_code is 0:
+                print("\t Test run failed with exit code = " + str(exit_code))
             else:
                 # --------------------------------------------------
-                # Loop through all files that were generated and
-                # compare them with h5diff. Print an error message
+                # Do file comparison if the test ran successfully
                 # --------------------------------------------------
-                for i in range (0, nsteps+nplot, nplot):
-                    
+                if args.benchmark:
+                    print("Regression test '" + str(test) + "' has generated benchmark files.")
+                else:
                     # --------------------------------------------------
-                    # Get the two files that will be compared
+                    # Loop through all files that were generated and
+                    # compare them with h5diff. Print an error message
                     # --------------------------------------------------
-                    regFile =  "plt/" + str(config[str(test)]['output'])
-                    benFile =  "plt/" + str(config[str(test)]['benchmark'])
-                    
-                    regFile = regFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
-                    benFile = benFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
-                    
-                    if not args.silent:
-                        print("\t Comparing files " + regFile +  " and " + str(benFile))
+                    for i in range (0, nsteps+nplot, nplot):
                         
+                        # --------------------------------------------------
+                        # Get the two files that will be compared
+                        # --------------------------------------------------
+                        regFile =  "plt/" + str(config[str(test)]['output'])
+                        benFile =  "plt/" + str(config[str(test)]['benchmark'])
                         
-                    # --------------------------------------------------
-                    # Run h5diff and compare the two files. Print a
-                    # petite message if they match, and a huge-ass 
-                    # warning if they don't. 
-                    # --------------------------------------------------
-                    compare_code = os.system("h5diff " + regFile + " " + benFile)
-                    
-                    if not compare_code is 0:
-                        print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
-                    else:
-                        if not args.silent:
-                            print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+                        regFile = regFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
+                        benFile = benFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
+
+                        if not os.path.exists(benFile):
+                            print("\t Benchmark file(s) not found, generate them with --benchmark")
+                        else:
+                            if not args.silent:
+                                print("\t Comparing files " + regFile +  " and " + str(benFile))
+                                
+                            # --------------------------------------------------
+                            # Run h5diff and compare the two files. Print a
+                            # petite message if they match, and a huge-ass 
+                            # warning if they don't. 
+                            # --------------------------------------------------
+                            compare_code = os.system("h5diff " + regFile + " " + benFile)
+                            
+                            if not compare_code is 0:
+                                print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
+                            else:
+                                if not args.silent:
+                                    print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
