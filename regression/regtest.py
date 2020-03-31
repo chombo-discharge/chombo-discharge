@@ -3,6 +3,7 @@ import argparse
 import sys
 import configparser
 import subprocess
+from subprocess import DEVNULL
 
 # This script requires Python3.5 to work properly
 MIN_PYTHON = (3,5)
@@ -62,18 +63,22 @@ def pre_check(silent):
 # --------------------------------------------------
 def compile_test(silent, build_procs, dim, clean, main):
     """ Set up and run a compilation of the target test. """
-    if args.compile:
-        makeCommand = "make "
-        if silent:
-            makeCommand += "-s "
-        makeCommand += "-j" + str(build_procs) + " "
-        makeCommand += "DIM=" + str(dim) + " "
-        if clean:
-            makeCommand += "clean "
-        makeCommand += str(main)
 
+    makeCommand = "make "
+    if silent:
+        makeCommand += "-s "
+    makeCommand += "-j" + str(build_procs) + " "
+    makeCommand += "DIM=" + str(dim) + " "
+    if clean:
+        makeCommand += "clean "
+    makeCommand += str(main)
+
+    if not silent:
         print("\t Compiling with = '" + str(makeCommand) + "'\n")
-        os.system(makeCommand)
+
+    try:
+    exit_code = subprocess.check_call(makeCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+    return exit_code
 
 # Do a sanity check before trying tests. 
 pre_check(args.silent)
@@ -135,7 +140,7 @@ for test in config.sections():
         # Print some information about the regression test 
         # being run. 
         # --------------------------------------------------
-        print("Running regression test '" + str(test) + "' with dim=" + str(args.dim))
+        print("Running regression test '" + str(test) + "' with dim=" + str(args.dim) + "...")
         if not args.silent:
             if args.benchmark:
                 print("\t Running benchmark!")
@@ -149,7 +154,8 @@ for test in config.sections():
         os.chdir(baseDir + "/" + directory) 
 
         # --------------------------------------------------
-        # Compile test if user has called for it
+        # Check if executable exists. Recompile test if
+        # user has called for it
         # --------------------------------------------------
         if args.compile:
             compile_test(silent=args.silent,
@@ -171,14 +177,14 @@ for test in config.sections():
         # --------------------------------------------------
         # Run the executable and print the exit code
         # --------------------------------------------------
-        exit_code = os.system(runCommand)
-        # exit_code = subprocess.call([str(runCommand)],shell=True)
+#        exit_code = os.system(runCommand)
+        exit_code = subprocess.call(str(runCommand), shell=True, stdout=DEVNULL)
         # exit_code = subprocess.call([str(args.run),
         #                              '-np',
         #                              str(cores),
         #                              str(executable),
-        #                              str(input)],
-        #                             shell=True)
+        #                              str(input)])
+        
         if not exit_code is 0:
             print("\t Test run failed with exit code = " + str(exit_code))
         else:
