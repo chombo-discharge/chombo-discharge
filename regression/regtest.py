@@ -29,7 +29,6 @@ parser.add_argument('--benchmark',            help="Generate benchmark files onl
 parser.add_argument('-tests',                 help="Run one or more regression tests", nargs='+', required=False)
 parser.add_argument('--silent',               help="Turn off unnecessary output", action='store_true')
 parser.add_argument('--clean',                help="Do a clean compile", action='store_true')
-parser.add_argument('-dim',                   help="Regression suite dimensions", type=int, default=2)
 parser.add_argument('-run',                   help="MPI run command", type=str, default="mpirun")
 
 # --------------------------------------------------
@@ -132,8 +131,9 @@ for test in config.sections():
         # convert them to the types that they represent. 
         # --------------------------------------------------
         directory  = str(config[str(test)]['directory'])
-        executable = str(config[str(test)]['exec']) + str(args.dim) + "d.*.ex"
-        input      = str(config[str(test)]['input']) + str(args.dim) + "d.inputs"
+        dim        = int(config[str(test)]['dim'])
+        executable = str(config[str(test)]['exec']) + str(dim) + "d.*.ex"
+        input      = str(config[str(test)]['input'])
         nplot      = int(config[str(test)]['plot_interval'])
         nsteps     = int(config[str(test)]['nsteps'])
         cores      = int(config[str(test)]['num_procs'])
@@ -146,13 +146,13 @@ for test in config.sections():
         # Print some information about the regression test 
         # being run. 
         # --------------------------------------------------
-        print("Running regression test '" + str(test) + "' with dim=" + str(args.dim) + "...")
+        print("\nRunning regression test '" + str(test) + "...")
         if not args.silent:
             if args.benchmark:
                 print("\t Running benchmark!")
             print("\t Directory is  = " + directory)
             print("\t Input file is = " + input)
-            print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(args.dim) + "d.hdf5")
+            print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
 
         # --------------------------------------------------
         # Now change to test directory
@@ -164,10 +164,10 @@ for test in config.sections():
         # user has called for it
         # --------------------------------------------------
         run_suite = True
-        if args.compile or not os.path.isfile(executable):
+        if args.compile:
             compile_code = compile_test(silent=args.silent,
                                         build_procs=args.build_procs,
-                                        dim=args.dim,
+                                        dim=dim,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
             if not compile_code is 0:
@@ -192,7 +192,11 @@ for test in config.sections():
             # Run the executable and print the exit code
             # --------------------------------------------------
             #        exit_code = os.system(runCommand)
-            exit_code = subprocess.call(str(runCommand), shell=True, stdout=DEVNULL)
+            if args.silent:
+                exit_code = subprocess.call(runCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+            else:
+                exit_code = subprocess.call(runCommand, shell=True)
+#            exit_code = subprocess.call(str(runCommand), shell=True, stdout=DEVNULL)
             # exit_code = subprocess.call([str(args.run),
             #                              '-np',
             #                              str(cores),
@@ -211,6 +215,7 @@ for test in config.sections():
                     # --------------------------------------------------
                     # Loop through all files that were generated and
                     # compare them with h5diff. Print an error message
+                    # if files don't match. 
                     # --------------------------------------------------
                     for i in range (0, nsteps+nplot, nplot):
                         
@@ -220,8 +225,8 @@ for test in config.sections():
                         regFile =  "plt/" + str(config[str(test)]['output'])
                         benFile =  "plt/" + str(config[str(test)]['benchmark'])
                         
-                        regFile = regFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
-                        benFile = benFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
+                        regFile = regFile + (".step{0:07}.".format(i)) + str(dim) + "d.hdf5"
+                        benFile = benFile + (".step{0:07}.".format(i)) + str(dim) + "d.hdf5"
 
                         if not os.path.exists(benFile):
                             print("\t Benchmark file(s) not found, generate them with --benchmark")
@@ -234,7 +239,11 @@ for test in config.sections():
                             # petite message if they match, and a huge-ass 
                             # warning if they don't. 
                             # --------------------------------------------------
-                            compare_code = os.system("h5diff " + regFile + " " + benFile)
+                            compare_command = "h5diff " + regFile + " " + benFile
+                            if args.silent:
+                                compare_code = subprocess.call(compare_command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+                            else:
+                                compare_code = subprocess.call(compare_command, shell=True)
                             
                             if not compare_code is 0:
                                 print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
