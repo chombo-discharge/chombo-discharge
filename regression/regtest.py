@@ -3,13 +3,23 @@ import argparse
 import sys
 import configparser
 import subprocess
-#from subprocess import DEVNULL, STDOUT, check_call
-sys.path.append('./python')
 
+# This script requires Python3.5 to work properly
+MIN_PYTHON = (3,5)
+if sys.version_info < MIN_PYTHON:
+    sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
+    
+# --------------------------------------------------
+# File holding regression tests, and the name of
+# this script
+# --------------------------------------------------
 tests_file       = "tests.ini"
 regression_rules = "regression_rules.py"
 
-# Arguments for this script
+# --------------------------------------------------
+# Set up arguments that can be passed into this
+# script
+# --------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('-all', '--all',          help="Run all tests", action='store_true', )
 parser.add_argument('-compile', '--compile',  help="Compile executables", action='store_true')
@@ -21,12 +31,17 @@ parser.add_argument('--clean',                help="Do a clean compile", action=
 parser.add_argument('-dim',                   help="Regression suite dimensions", type=int, default=2)
 parser.add_argument('-run',                   help="MPI run command", type=str, default="mpirun")
 
+# --------------------------------------------------
 # Read arguments and configuration files
+# --------------------------------------------------
 args = parser.parse_args()
 config = configparser.ConfigParser()
 config.read(tests_file)
 baseDir = os.getcwd()
 
+# --------------------------------------------------
+# Moron check for running the test suite
+# --------------------------------------------------
 def pre_check(silent):
     """ Check that PLASMAC has been appropriately set up with an environment variable. 
         Print some error messages and what to do if we can't run anything. """
@@ -42,8 +57,10 @@ def pre_check(silent):
             print("CWD          = " + os.getcwd())
             print("PLASMAC_HOME = " + plasmac_home)
 
-
-def compile_test(silent, build_procs, dim, clean):
+# --------------------------------------------------
+# Function that compiles a test
+# --------------------------------------------------
+def compile_test(silent, build_procs, dim, clean, main):
     """ Set up and run a compilation of the target test. """
     if args.compile:
         makeCommand = "make "
@@ -53,7 +70,7 @@ def compile_test(silent, build_procs, dim, clean):
         makeCommand += "DIM=" + str(dim) + " "
         if clean:
             makeCommand += "clean "
-        makeCommand += "main"
+        makeCommand += str(main)
 
         print("\t Compiling with = '" + str(makeCommand) + "'\n")
         os.system(makeCommand)
@@ -114,90 +131,91 @@ for test in config.sections():
         else:
             output     = str(config[str(test)]['output'])
         
-            # --------------------------------------------------
-            # Print some information about the regression test 
-            # being run. 
-            # --------------------------------------------------
-            print("Running regression test '" + str(test) + "' with dim=" + str(args.dim))
-            if not args.silent:
-                if args.benchmark:
-                    print("\t Running benchmark!")
-                    print("\t Directory is  = " + directory)
-                    print("\t Input file is = " + input)
-                    print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(args.dim) + "d.hdf5")
+        # --------------------------------------------------
+        # Print some information about the regression test 
+        # being run. 
+        # --------------------------------------------------
+        print("Running regression test '" + str(test) + "' with dim=" + str(args.dim))
+        if not args.silent:
+            if args.benchmark:
+                print("\t Running benchmark!")
+            print("\t Directory is  = " + directory)
+            print("\t Input file is = " + input)
+            print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(args.dim) + "d.hdf5")
 
-            # --------------------------------------------------
-            # Now change to test directory
-            # --------------------------------------------------
-            os.chdir(baseDir + "/" + directory) 
+        # --------------------------------------------------
+        # Now change to test directory
+        # --------------------------------------------------
+        os.chdir(baseDir + "/" + directory) 
 
-            # --------------------------------------------------
-            # Compile test if user has called for it
-            # --------------------------------------------------
-            if args.compile:
-                compile_test(silent=args.silent,
-                             build_procs=args.build_procs,
-                             dim=args.dim,
-                             clean=args.clean)
+        # --------------------------------------------------
+        # Compile test if user has called for it
+        # --------------------------------------------------
+        if args.compile:
+            compile_test(silent=args.silent,
+                         build_procs=args.build_procs,
+                         dim=args.dim,
+                         clean=args.clean,
+                         main = str(config[str(test)]['exec']))
 
-            # --------------------------------------------------
-            # Set up the run command
-            # --------------------------------------------------
-            runCommand = args.run   + " -np "                  + str(cores) + " " + executable + " " + input
-            runCommand = runCommand + " driver.output_names="  + str(output)
-            runCommand = runCommand + " driver.plot_interval=" + str(nplot)
-            runCommand = runCommand + " driver.max_steps="     + str(nsteps)
-            if not args.silent:
-                print("\t Executing with '" + str(runCommand) + "'")
+        # --------------------------------------------------
+        # Set up the run command
+        # --------------------------------------------------
+        runCommand = args.run   + " -np "                  + str(cores) + " " + executable + " " + input
+        runCommand = runCommand + " driver.output_names="  + str(output)
+        runCommand = runCommand + " driver.plot_interval=" + str(nplot)
+        runCommand = runCommand + " driver.max_steps="     + str(nsteps)
+        if not args.silent:
+            print("\t Executing with '" + str(runCommand) + "'")
 
+        # --------------------------------------------------
+        # Run the executable and print the exit code
+        # --------------------------------------------------
+        exit_code = os.system(runCommand)
+        # exit_code = subprocess.call([str(runCommand)],shell=True)
+        # exit_code = subprocess.call([str(args.run),
+        #                              '-np',
+        #                              str(cores),
+        #                              str(executable),
+        #                              str(input)],
+        #                             shell=True)
+        if not exit_code is 0:
+            print("\t Test run failed with exit code = " + str(exit_code))
+        else:
             # --------------------------------------------------
-            # Run the executable and print the exit code
+            # Do file comparison if the test ran successfully
             # --------------------------------------------------
-            exit_code = os.system(runCommand)
-            # exit_code = subprocess.call([str(runCommand)],shell=True)
-            # exit_code = subprocess.call([str(args.run),
-            #                              '-np',
-            #                              str(cores),
-            #                              str(executable),
-            #                              str(input)],
-            #                             shell=True)
-            if not exit_code is 0:
-                print("\t Test run failed with exit code = " + str(exit_code))
+            if args.benchmark:
+                print("Regression test '" + str(test) + "' has generated benchmark files.")
             else:
                 # --------------------------------------------------
-                # Do file comparison if the test ran successfully
+                # Loop through all files that were generated and
+                # compare them with h5diff. Print an error message
                 # --------------------------------------------------
-                if args.benchmark:
-                    print("Regression test '" + str(test) + "' has generated benchmark files.")
-                else:
+                for i in range (0, nsteps+nplot, nplot):
+                    
                     # --------------------------------------------------
-                    # Loop through all files that were generated and
-                    # compare them with h5diff. Print an error message
+                    # Get the two files that will be compared
                     # --------------------------------------------------
-                    for i in range (0, nsteps+nplot, nplot):
-
-                        # --------------------------------------------------
-                        # Get the two files that will be compared
-                        # --------------------------------------------------
-                        regFile =  "plt/" + str(config[str(test)]['output'])
-                        benFile =  "plt/" + str(config[str(test)]['benchmark'])
+                    regFile =  "plt/" + str(config[str(test)]['output'])
+                    benFile =  "plt/" + str(config[str(test)]['benchmark'])
+                    
+                    regFile = regFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
+                    benFile = benFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
+                    
+                    if not args.silent:
+                        print("\t Comparing files " + regFile +  " and " + str(benFile))
                         
-                        regFile = regFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
-                        benFile = benFile + (".step{0:07}.".format(i)) + str(args.dim) + "d.hdf5"
-
+                        
+                    # --------------------------------------------------
+                    # Run h5diff and compare the two files. Print a
+                    # petite message if they match, and a huge-ass 
+                    # warning if they don't. 
+                    # --------------------------------------------------
+                    compare_code = os.system("h5diff " + regFile + " " + benFile)
+                    
+                    if not compare_code is 0:
+                        print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
+                    else:
                         if not args.silent:
-                            print("\t Comparing files " + regFile +  " and " + str(benFile))
-
-
-                        # --------------------------------------------------
-                        # Run h5diff and compare the two files. Print a
-                        # petite message if they match, and a huge-ass 
-                        # warning if they don't. 
-                        # --------------------------------------------------
-                        compare_code = os.system("h5diff " + regFile + " " + benFile)
-                        
-                        if not compare_code is 0:
-                            print("\t FILES '" + regFile +  "' AND '" + benFile + "' DO NOT MATCH - REGRESSION TEST FAILED")
-                        else:
-                            if not args.silent:
-                                print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
+                            print("\t Benchmark test succeded for files " + regFile +  " and " + str(benFile))
