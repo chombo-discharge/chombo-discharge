@@ -121,6 +121,9 @@ for test in config.sections():
     if not config.has_option(str(test), 'plot_interval'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][plot_interval]. Skipping this test")
+    if not config.has_option(str(test), 'restart'):
+        do_test = False
+        print(tests_file + " does not contain option [" + str(test) + "][restart]. Skipping this test")
         
     # --------------------------------------------------
     # If moron check passed, try to run the test
@@ -137,6 +140,7 @@ for test in config.sections():
         nplot      = int(config[str(test)]['plot_interval'])
         nsteps     = int(config[str(test)]['nsteps'])
         cores      = int(config[str(test)]['num_procs'])
+        restart    = int(config[str(test)]['restart'])
         if args.benchmark:
             output     = str(config[str(test)]['benchmark'])
         else:
@@ -146,7 +150,7 @@ for test in config.sections():
         # Print some information about the regression test 
         # being run. 
         # --------------------------------------------------
-        print("\nRunning regression test '" + str(test) + "...")
+        print("\nRunning regression test '" + str(test) + "'...")
         if not args.silent:
             if args.benchmark:
                 print("\t Running benchmark!")
@@ -184,7 +188,12 @@ for test in config.sections():
             runCommand = args.run   + " -np "                  + str(cores) + " " + executable + " " + input
             runCommand = runCommand + " driver.output_names="  + str(output)
             runCommand = runCommand + " driver.plot_interval=" + str(nplot)
+            runCommand = runCommand + " driver.checkpoint_interval=" + str(nplot)
             runCommand = runCommand + " driver.max_steps="     + str(nsteps)
+            if args.benchmark:
+                runCommand = runCommand + " driver.restart=0"
+            else:
+                runCommand = runCommand + " driver.restart="     + str(restart)
             if not args.silent:
                 print("\t Executing with '" + str(runCommand) + "'")
 
@@ -196,12 +205,6 @@ for test in config.sections():
                 exit_code = subprocess.call(runCommand, shell=True, stdout=DEVNULL, stderr=DEVNULL)
             else:
                 exit_code = subprocess.call(runCommand, shell=True)
-#            exit_code = subprocess.call(str(runCommand), shell=True, stdout=DEVNULL)
-            # exit_code = subprocess.call([str(args.run),
-            #                              '-np',
-            #                              str(cores),
-            #                              str(executable),
-            #                              str(input)])
                 
             if not exit_code is 0:
                 print("\t Test run failed with exit code = " + str(exit_code))

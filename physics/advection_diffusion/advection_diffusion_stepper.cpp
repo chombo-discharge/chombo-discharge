@@ -128,8 +128,16 @@ void advection_diffusion_stepper::read_checkpoint_data(HDF5Handle& a_handle, con
 }
 
 void advection_diffusion_stepper::post_checkpoint_setup(){
+  m_solver->set_source(0.0);
+  m_solver->set_ebflux(0.0);
+  m_solver->set_domain_flux(0.0);
+  if(m_solver->is_diffusive()){
+    m_solver->set_diffco(m_diffco);
+  }
+  if(m_solver->is_mobile()){
+    this->set_velocity();
+  }
 
-  MayDay::Abort("advection_diffusion_stepper::post_checkpoint_setup - need to fill velo/diffco");
 }
 
 int advection_diffusion_stepper::get_num_plot_vars() const{
