@@ -544,13 +544,16 @@ protected:
   virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
 
   /*!
-    @brief Set up flux
+    @brief Set up face-centered advection flux
   */
   virtual void compute_flux(EBAMRFluxData&       a_flux,
 			    const EBAMRFluxData& a_face_state,
 			    const EBAMRFluxData& a_face_vel,
 			    const EBAMRIFData&   a_domain_flux);
 
+  /*!
+    @brief Set up face-centered advection flux
+  */
   virtual void compute_flux(LevelData<EBFluxFAB>&              a_flux,
 			    const LevelData<EBFluxFAB>&        a_face_state,
 			    const LevelData<EBFluxFAB>&        a_face_vel,

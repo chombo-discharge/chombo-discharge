@@ -518,6 +518,11 @@ public:
   virtual Vector<int>& get_ref_rat();
 
   /*!
+    @brief Get refinement factor between two levels
+  */
+  virtual int get_refinement_ratio(const int a_level1, const int a_level2);
+
+  /*!
     @brief Get ALL irregular tags
   */
   virtual Vector<IntVectSet> get_irreg_tags() const;

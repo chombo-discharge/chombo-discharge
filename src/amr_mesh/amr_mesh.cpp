@@ -2353,6 +2353,18 @@ Vector<int>& amr_mesh::get_ref_rat(){
   return m_ref_ratios;
 }
 
+int amr_mesh::get_refinement_ratio(const int a_level1, const int a_level2){
+  int coarLevel = Min(a_level1, a_level2);
+  int fineLevel = Max(a_level1, a_level2);
+
+  int ref = 1;
+  for (int lvl = coarLevel; lvl < fineLevel; lvl++){
+    ref = ref*m_ref_ratios[lvl];
+  }
+
+  return ref;
+}
+
 Vector<IntVectSet> amr_mesh::get_irreg_tags() const {
   CH_TIME("amr_mesh::get_irreg_tags");
   if(m_verbosity > 5){

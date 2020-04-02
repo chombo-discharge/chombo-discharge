@@ -32,6 +32,17 @@ namespace physics {
 
       EBAMRCellData m_k1;
       EBAMRCellData m_k2;
+
+      EBAMRCellData m_stateNew;
+      EBAMRCellData m_stateOld;
+      EBAMRFluxData m_flux;
+      EBAMRFluxData m_advectionFlux;
+      EBAMRFluxData m_diffusionFlux;
+      
+      Vector<Real> m_tNew;
+      Vector<Real> m_tOld;
+
+      void integrateLevel(const int a_level, const Real a_time, const Real a_dt);
     };
   }
 }

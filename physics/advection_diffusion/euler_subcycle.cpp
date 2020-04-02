@@ -49,17 +49,46 @@ void euler_subcycle::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   //  a_dt = bigstep_dt;
 }
 
+void euler_subcycle::integrateLevel(const int a_level, const Real a_time, const Real a_dt){
+
+  // 1. Fill patch boundary conditions
+
+  // 2. Call the next level
+  if(a_level < m_amr->get_finest_level()){
+    //    integrateLevel(a_level + 1, a_time + a_dt, 
+  }
+}
+
 Real euler_subcycle::advance(const Real a_dt){
 
+  // TLDR: This is development code, so it is long nasty, and not broken into pieces for the sane mind.
+  //
+  
   // a_dt is the coarse step. Each level takes its own steps
   const int finest_level = m_amr->get_finest_level();
   const Vector<int> ref_rat = m_amr->get_ref_rat();
   Vector<int> steps(1+finest_level, 1);
   Vector<Real> dt(1 + finest_level, a_dt);
   for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
-    dt[lvl]    = dt[lvl-1]*m_amr->get_ref_rat()[lvl-1];
-    steps[lvl] = steps[lvl-1]*ref_rat[lvl-1];
+    steps[lvl] = m_amr->get_refinement_ratio(0, lvl);
+    dt[lvl] = a_dt/steps[lvl];
   }
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    if(procID() == 0){
+      //      std::cout << steps[lvl] << std::endl;
+    }
+  }
+
+  // Set the times
+  m_tNew = 0.0;
+  m_tOld = 0.0;
+
+  // Copy initial state
+  data_ops::copy(m_stateOld, m_solver->get_state());
+
+  //
+
+
 
   // Here are the algorithmic steps for an explicit code
   //  for (int lvl = 0; lvl <= m_amr->get_finest_level()){
@@ -123,7 +152,8 @@ Real euler_subcycle::advance(const Real a_dt){
   // * Per-level refluxing, which includes redistribution registers
   // * Per-level redistribution
   // * Per-level averaging
-  
+
+  // This code executes
   EBAMRCellData& state = m_solver->get_state();
   
   m_solver->compute_divJ(m_k1, state, 0.0);  
@@ -162,4 +192,12 @@ void euler_subcycle::regrid(const int a_lmin, const int a_old_finest_level, cons
   // Allocate memory for RK steps
   m_amr->allocate(m_k1,  phase::gas, 1);
   m_amr->allocate(m_k2,  phase::gas, 1);
+
+  // Allocate memory for subcycling algorithm
+  m_amr->allocate(m_stateNew, phase::gas, 1);
+  m_amr->allocate(m_stateOld, phase::gas, 1);
+
+  m_amr->allocate(m_flux, phase::gas, 1);
+  m_amr->allocate(m_advectionFlux, phase::gas, 1);
+  m_amr->allocate(m_diffusionFlux, phase::gas, 1);
 }
