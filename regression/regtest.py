@@ -22,7 +22,6 @@ regression_rules = "regression_rules.py"
 # script
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('-all', '--all',          help="Run all tests", action='store_true', )
 parser.add_argument('-compile', '--compile',  help="Compile executables", action='store_true')
 parser.add_argument('-build_procs',           help="Number of processors to use for compiling compiling", type=int, default=1)
 parser.add_argument('--benchmark',            help="Generate benchmark files only", action='store_true')
@@ -124,6 +123,16 @@ for test in config.sections():
     if not config.has_option(str(test), 'restart'):
         do_test = False
         print(tests_file + " does not contain option [" + str(test) + "][restart]. Skipping this test")
+
+    # --------------------------------------------------
+    # If we're not running all tests, check that the test string equals args.test
+    # --------------------------------------------------
+    if not args.tests:
+        do_test = True
+    else:
+        do_test = False
+        if str(test) in args.tests:
+            do_test = True
         
     # --------------------------------------------------
     # If moron check passed, try to run the test
