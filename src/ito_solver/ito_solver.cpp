@@ -34,7 +34,6 @@ void ito_solver::parse_options(){
   this->parse_plot_vars();
   this->parse_deposition();
   this->parse_bisect_step();
-  this->parse_domain_bc();
   this->parse_pvr_buffer();
 }
 
@@ -76,13 +75,6 @@ void ito_solver::parse_bisect_step(){
   CH_TIME("ito_solver::parse_bisect_step");
   if(m_verbosity > 5){
     pout() << m_name + "::parse_bisect_step" << endl;
-  }
-}
-
-void ito_solver::parse_domain_bc(){
-  CH_TIME("ito_solver::parse_domain_bc");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parse_domain_bc" << endl;
   }
 }
 
@@ -152,4 +144,31 @@ void ito_solver::set_time(const int a_step, const Real a_time, const Real a_dt) 
   m_step = a_step;
   m_time = a_time;
   m_dt   = a_dt;
+}
+
+void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("ito_solver::write_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_checkpoint_level" << endl;
+  }
+
+  MayDay::Abort("ito_solver::write_checkpoint_level - checkpointing not implemented");
+}
+
+void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("ito_solver::read_checkpoint_level");
+  if(m_verbosity > 5){
+    pout() << m_name + "::read_checkpoint_level" << endl;
+  }
+
+  MayDay::Abort("ito_solver::read_checkpoint_level - checkpointing not implemented");
+}
+
+void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("ito_solver::write_plot_data");
+  if(m_verbosity > 5){
+    pout() << m_name + "::write_plot_data" << endl;
+  }
+
+  MayDay::Abort("ito_solver::write_plot_data - plotting not yet implemented");
 }

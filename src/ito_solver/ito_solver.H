@@ -64,7 +64,6 @@ public:
 
   /*!
     @brief Set phase
-    @details This must be done BEFORE callilng set_computational_geometry
   */
   virtual void set_phase(phase::which_phase a_phase);
 
@@ -77,6 +76,21 @@ public:
     @brief Get current time
   */
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
+
+  /*!
+    @brief Write plot data
+  */
+  virtual void write_plot_data(EBAMRCellData& a_output, int& a_comp);
+
+  /*!
+    @brief Write checkpoint data into handle
+  */
+  virtual void write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const;
+
+  /*!
+    @brief Read checkpoint data from handle
+  */
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);  
 
   
 protected:
@@ -157,7 +171,7 @@ protected:
   Real m_dt;
 
   /*!
-    @brief Also solve for diffusion
+    @brief Solver is diffusive
   */
   bool m_diffusive;
 
@@ -180,6 +194,11 @@ protected:
     @brief Plot deposition type
   */
   InterpType m_plot_deposition;
+
+  /*!
+    @brief Deposited particles
+  */
+  EBAMRCellData m_state;
 
   /*!
     @brief Particles
@@ -210,11 +229,6 @@ protected:
     @brief Parse bisection step
   */
   void parse_bisect_step();
-
-  /*!
-    @brief Parse domain bc
-  */
-  void parse_domain_bc();
 
   /*!
     @brief Parse PVR buffer
