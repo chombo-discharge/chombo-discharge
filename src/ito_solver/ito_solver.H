@@ -18,6 +18,8 @@
 #include <BinItem.H>
 #include <MeshInterp.H>
 
+#include <random>
+
 
 /*!
   @brief Base class for Ito diffusion particle models
@@ -70,11 +72,6 @@ public:
     @brief Set verbosity.
   */
   virtual void set_verbosity(const int a_verbosity);
-
-  /*!
-    @brief Set which variables to output
-  */
-  virtual void set_plot_variables();
 
   /*!
     @brief Get current time
@@ -138,6 +135,41 @@ protected:
     @brief Bisection step for particle trajectories
   */
   Real m_bisect_step;
+
+  /*!
+    @brief Verbosity
+  */
+  int m_verbosity;
+
+  /*!
+    @brief Time step
+  */
+  int m_step;
+
+  /*!
+    @brief Current time
+  */
+  Real m_time;
+
+  /*!
+    @brief Time step
+  */
+  Real m_dt;
+
+  /*!
+    @brief Also solve for diffusion
+  */
+  bool m_diffusive;
+
+  /*!
+    @brief Also solve for advection/convection
+  */
+  bool m_mobile;
+
+  /*!
+    @brief Output state
+  */
+  bool m_plot_phi;
 
   /*!
     @brief Mass/charge deposition type

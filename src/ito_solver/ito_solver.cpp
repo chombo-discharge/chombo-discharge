@@ -9,6 +9,8 @@
 
 #include <ParmParse.H>
 
+#include <chrono>
+
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
   m_class_name = "ito_solver";
@@ -22,7 +24,7 @@ std::string ito_solver::get_name(){
   return m_name;
 }
 
-void ito_solvre::parse_options(){
+void ito_solver::parse_options(){
   CH_TIME("ito_solver::parse_options");
   if(m_verbosity > 5){
     pout() << m_name + "::parse_options" << endl;
@@ -51,10 +53,12 @@ void ito_solver::parse_plot_vars(){
 
   // Seed the RNG
   ParmParse pp(m_class_name.c_str());
-  pp.get("seed", m_seed);
-  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
+  pp.get("seed", m_seed_rng);
+  if(m_seed_rng < 0) { // Random seed if input < 0
+    m_seed_rng = std::chrono::system_clock::now().time_since_epoch().count();
+  }
   
-  m_rng = std::mt19937_64(m_seed);
+  m_rng = std::mt19937_64(m_seed_rng);
 
   m_udist01 = std::uniform_real_distribution<Real>( 0.0, 1.0);
   m_udist11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
@@ -95,7 +99,7 @@ Vector<std::string> ito_solver::get_plotvar_names() const {
     pout() << m_name + "::get_plotvar_names" << endl;
   }
 
-  Vector<std::string> m_names(0);
+  Vector<std::string> names(0);
   if(m_plot_phi) names.push_back(m_name + " phi");
 
   return names;
@@ -118,7 +122,7 @@ void ito_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr = a_amr;
 }
 
-void set_phase(phase::which_phase a_phase){
+void ito_solver::set_phase(phase::which_phase a_phase){
   CH_TIME("ito_solver::set_phase");
   if(m_verbosity > 5){
     pout() << m_name + "::set_phase" << endl;
