@@ -193,5 +193,6 @@ protected:
     @brief Parse plot variables
   */
   void parse_plot_vars();
+
 };
 #endif
