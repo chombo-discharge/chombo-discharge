@@ -38,12 +38,25 @@ brownian_walker_species::~brownian_walker_species(){
 
 void brownian_walker_species::draw_initial_particles(){
 
+  // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
+  m_seed += procID();
+
   // Set up the RNG
   m_rng = std::mt19937_64(m_seed);
   m_gauss = std::normal_distribution<Real>(0.0, m_blob_radius);
   m_udist11 = std::uniform_real_distribution<Real>(-1., 1.);
 
   // Each MPI process draws the desired number of particles from a distribution
+  const int quotient  = m_num_particles/numProc();
+  const int remainder = m_num_particles % numProc();
+  
+  Vector<int> particlesPerRank(numProc(), quotient);
+  
+  for (int i = 0; i < remainder; i++){ 
+    particlesPerRank[i] += 1;
+  }
+
+
 }
 
 RealVect brownian_walker_species::random_gaussian(){
