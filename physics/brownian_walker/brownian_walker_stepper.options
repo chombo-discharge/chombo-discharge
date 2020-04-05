@@ -9,6 +9,7 @@ brownian_walker.advection      = true    # Turn on/off advection
 brownian_walker.blob_amplitude = 1.0     # Blob amplitude
 brownian_walker.blob_radius    = 0.1     # Blob radius
 brownian_walker.blob_center    = 0 0     # Blob center
+brownian_walker.seed           = 0       # RNG seed
 
 # Velocity, diffusion, and CFL
 # ----------------------------

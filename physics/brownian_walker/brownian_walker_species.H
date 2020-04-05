@@ -10,6 +10,8 @@
 
 #include "ito_species.H"
 
+#include <random>
+
 namespace physics {
   namespace brownian_walker {
 
@@ -22,6 +24,15 @@ namespace physics {
       Real     m_blob_amplitude;
       int      m_num_particles;
       RealVect m_blob_center;
+
+      int m_seed;
+      std::mt19937_64 m_rng;
+      std::uniform_real_distribution<Real> m_udist11;
+      std::normal_distribution<Real> m_gauss;
+
+      void draw_initial_particles();
+      RealVect random_gaussian();
+      RealVect random_direction();
     };
   }
 }
