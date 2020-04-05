@@ -27,9 +27,9 @@ src_dirs = $(PLASMAC_HOME)/src \
 	$(PLASMAC_HOME)/src/sigma_solver \
 	$(PLASMAC_HOME)/src/global \
 	$(PLASMAC_HOME)/src/poisson_solver \
-	$(PLASMAC_HOME)/src/ito_solver \
 	$(PLASMAC_HOME)/geometries/rod_sphere\
 	$(PLASMAC_HOME)/physics/poisson \
-
+	$(PLASMAC_HOME)/src/ito_solver \
+	$(PLASMAC_HOME)/physics/brownian_walker \
 
 include $(CHOMBO_HOME)/mk/Make.example
