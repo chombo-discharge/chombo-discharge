@@ -11,6 +11,7 @@
 #include "amr_mesh.H"
 #include "type_definitions.H"
 #include "computational_geometry.H"
+#include "ito_species.H" 
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -19,7 +20,6 @@
 #include <MeshInterp.H>
 
 #include <random>
-
 
 /*!
   @brief Base class for Ito diffusion particle models
@@ -104,6 +104,11 @@ protected:
     @brief AMR; needed for grid stuff
   */
   RefCountedPtr<amr_mesh> m_amr;
+
+  /*!
+    @brief Species
+  */
+  RefCountedPtr<ito_species> m_species;
 
   /*!
     @brief Phase
@@ -239,6 +244,5 @@ protected:
     @brief Parse plot variables
   */
   void parse_plot_vars();
-
 };
 #endif
