@@ -43,7 +43,12 @@ void brownian_walker_stepper::post_checkpoint_setup() {
 }
 
 int brownian_walker_stepper::get_num_plot_vars() const {
-
+  CH_TIME("brownian_walker_stepper::get_num_plot_vars");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::get_num_plot_vars" << endl;
+  }
+  
+  return m_solver->get_num_plotvars();
 }
 
 void brownian_walker_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
@@ -55,11 +60,25 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("brownian_walker_stepper::synchronize_solver_times");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::synchronize_solver_times" << endl;
+  }
+  
+  m_solver->set_time(a_step, a_time, a_dt);
 
+  m_step = a_step;
+  m_time = a_time;
+  m_dt   = a_dt;
 }
 
 void brownian_walker_stepper::print_step_report() {
+  CH_TIME("brownian_walker_stepper::print_step_report");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::print_step_report" << endl;
+  }
 
+  // Do nothing
 }
 
 bool brownian_walker_stepper::need_to_regrid() {
@@ -71,11 +90,19 @@ void brownian_walker_stepper::cache() {
 }
 
 void brownian_walker_stepper::deallocate() {
-
+  CH_TIME("brownian_walker_stepper::deallocate");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::deallocate" << endl;
+  }
 }
 
 void brownian_walker_stepper::setup_solvers() {
+  CH_TIME("brownian_walker_stepper::setup_solvers");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::setup_solvers" << endl;
+  }
 
+  m_solver->allocate_internals();
 }
 
 Real brownian_walker_stepper::advance(const Real a_dt) {

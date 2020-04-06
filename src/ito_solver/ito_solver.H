@@ -53,6 +53,26 @@ public:
   virtual Vector<std::string> get_plotvar_names() const;
 
   /*!
+    @brief Set the initial data
+  */
+  virtual void initial_data();
+
+  /*!
+    @brief Regrid solver
+  */
+  virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
+
+  /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocate_internals();
+
+  /*!
+    @brief Get number of plot variables
+  */
+  virtual int get_num_plotvars() const;
+
+  /*!
     @brief Set computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
@@ -164,6 +184,11 @@ protected:
     @brief Time step
   */
   int m_step;
+
+  /*!
+    @brief Buffer for PVR
+  */
+  int m_pvr_buffer;
 
   /*!
     @brief Current time

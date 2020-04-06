@@ -42,15 +42,8 @@ void ito_solver::parse_rng(){
   if(m_verbosity > 5){
     pout() << m_name + "::parse_rng" << endl;
   }
-}
 
-void ito_solver::parse_plot_vars(){
-  CH_TIME("ito_solver::parse_plot_vars");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parse_plot_vars" << endl;
-  }
-
-  // Seed the RNG
+    // Seed the RNG
   ParmParse pp(m_class_name.c_str());
   pp.get("seed", m_seed_rng);
   if(m_seed_rng < 0) { // Random seed if input < 0
@@ -64,10 +57,68 @@ void ito_solver::parse_plot_vars(){
   m_gauss01 = std::normal_distribution<Real>(0.0, 1.0);
 }
 
+void ito_solver::parse_plot_vars(){
+  CH_TIME("mc_photo::parse_plot_vars");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_plot_vars" << endl;
+  }
+
+  m_plot_phi = false;
+
+  ParmParse pp(m_class_name.c_str());
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  for (int i = 0; i < num; i++){
+    if(     str[i] == "phi") m_plot_phi = true;
+  }
+}
+
 void ito_solver::parse_deposition(){
   CH_TIME("ito_solver::parse_rng");
   if(m_verbosity > 5){
     pout() << m_name + "::parse_rng" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+  std::string str;
+
+  // Deposition for particle-mesh operations
+  pp.get("deposition", str);
+  if(str == "ngp"){
+    m_deposition = InterpType::NGP;
+  }
+  else if(str == "cic"){
+    m_deposition = InterpType::CIC;
+  }
+  else if(str == "tsc"){
+    m_deposition = InterpType::TSC;
+  }
+  else if(str == "w4"){
+    m_deposition = InterpType::W4;
+  }
+  else{
+    MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
+  }
+
+  // Deposition for plotting only
+  pp.get("plot_deposition", str);
+
+  if(str == "ngp"){
+    m_plot_deposition = InterpType::NGP;
+  }
+  else if(str == "cic"){
+    m_plot_deposition = InterpType::CIC;
+  }
+  else if(str == "tsc"){
+    m_plot_deposition = InterpType::TSC;
+  }
+  else if(str == "w4"){
+    m_plot_deposition = InterpType::W4;
+  }
+  else{
+    MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
   }
 }
 
@@ -76,6 +127,9 @@ void ito_solver::parse_bisect_step(){
   if(m_verbosity > 5){
     pout() << m_name + "::parse_bisect_step" << endl;
   }
+
+  ParmParse pp(m_class_name.c_str());
+  pp.get("bisect_step", m_bisect_step);
 }
 
 void ito_solver::parse_pvr_buffer(){
@@ -83,6 +137,9 @@ void ito_solver::parse_pvr_buffer(){
   if(m_verbosity > 5){
     pout() << m_name + "::parse_pvr_buffer" << endl;
   }
+
+    ParmParse pp(m_class_name.c_str());
+  pp.get("pvr_buffer", m_pvr_buffer);
 }
 
 Vector<std::string> ito_solver::get_plotvar_names() const {
@@ -95,6 +152,19 @@ Vector<std::string> ito_solver::get_plotvar_names() const {
   if(m_plot_phi) names.push_back(m_name + " phi");
 
   return names;
+}
+
+int ito_solver::get_num_plotvars() const {
+  CH_TIME("ito_solver::get_num_plotvars");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_plotvars" << endl;
+  }
+
+  int num_plotvars = 0;
+  
+  if(m_plot_phi) num_plotvars++;
+
+  return num_plotvars;
 }
 
 void ito_solver::set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom){
@@ -130,10 +200,6 @@ void ito_solver::set_verbosity(const int a_verbosity){
     pout() << m_name + "::set_verbosity" << endl;
   }
 }
-  
-void set_plot_variables(){
-
-}
 
 void ito_solver::set_time(const int a_step, const Real a_time, const Real a_dt) {
   CH_TIME("ito_solver::set_time");
@@ -145,6 +211,28 @@ void ito_solver::set_time(const int a_step, const Real a_time, const Real a_dt) 
   m_time = a_time;
   m_dt   = a_dt;
 }
+
+void ito_solver::initial_data(){
+  CH_TIME("ito_solver::initial_data");
+    if(m_verbosity > 5){
+    pout() << m_name + "::initial_data" << endl;
+  }
+}
+
+void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
+  CH_TIME("ito_solver::regrid");
+  if(m_verbosity > 5){
+    pout() << m_name + "::regrid" << endl;
+  }
+}
+
+void ito_solver::allocate_internals(){
+  CH_TIME("ito_solver::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << m_name + "::allocate_internals" << endl;
+  }
+}
+
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("ito_solver::write_checkpoint_level");
@@ -172,3 +260,5 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   MayDay::Abort("ito_solver::write_plot_data - plotting not yet implemented");
 }
+
+
