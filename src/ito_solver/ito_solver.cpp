@@ -214,8 +214,27 @@ void ito_solver::set_time(const int a_step, const Real a_time, const Real a_dt) 
 
 void ito_solver::initial_data(){
   CH_TIME("ito_solver::initial_data");
-    if(m_verbosity > 5){
+  if(m_verbosity > 5){
     pout() << m_name + "::initial_data" << endl;
+  }
+
+  // Put the initial particles on the coarsest grid level
+  List<Particle>& outcastBase = m_particles[0]->outcast();
+  outcastBase.catenate(m_species->get_initial_particles()); // This destroys the initial partcies
+  m_particles[0]->remapOutcast(); 
+
+  // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
+  // and onto the outcast list on level lvl. Then, we remap the outcast list
+  for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
+    collectValidParticles(m_particles[lvl]->outcast(),
+			  *m_particles[lvl-1],
+			  m_pvr[lvl]->mask(),
+			  m_amr->get_dx()[lvl]*RealVect::Unit,
+			  m_amr->get_ref_rat()[lvl-1],
+			  false,
+			  m_amr->get_prob_lo());
+    m_particles[lvl]->remapOutcast();
+			  
   }
 }
 
@@ -231,6 +250,9 @@ void ito_solver::allocate_internals(){
   if(m_verbosity > 5){
     pout() << m_name + "::allocate_internals" << endl;
   }
+
+  m_amr->allocate(m_particles);
+  m_amr->allocate(m_pvr, m_pvr_buffer);
 }
 
 
