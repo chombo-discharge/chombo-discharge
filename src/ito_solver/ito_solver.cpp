@@ -6,6 +6,8 @@
 */
 
 #include "ito_solver.H"
+#include "data_ops.H"
+#include "EBAlias.H"
 
 #include <ParmParse.H>
 
@@ -234,7 +236,6 @@ void ito_solver::initial_data(){
 			  false,
 			  m_amr->get_prob_lo());
     m_particles[lvl]->remapOutcast();
-			  
   }
 }
 
@@ -251,6 +252,11 @@ void ito_solver::allocate_internals(){
     pout() << m_name + "::allocate_internals" << endl;
   }
 
+  const int ncomp = 1;
+
+  m_amr->allocate(m_state,   m_phase, ncomp);
+  m_amr->allocate(m_scratch, m_phase, ncomp);
+  
   m_amr->allocate(m_particles);
   m_amr->allocate(m_pvr, m_pvr_buffer);
 }
@@ -280,7 +286,72 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     pout() << m_name + "::write_plot_data" << endl;
   }
 
+  // Deposit data directly onto a_output
+
   MayDay::Abort("ito_solver::write_plot_data - plotting not yet implemented");
 }
 
+void ito_solver::deposit_particles(EBAMRCellData&        a_state,
+				   const EBAMRParticles& a_particles,
+				   const InterpType&     a_deposition){
+  CH_TIME("ito_solver::deposit_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_particles" << endl;
+  }
 
+  MayDay::Warning("ito_solver::deposit_particles - this is non-EB code. Please include EB mesh deposition.");
+
+  // TLDR: This code deposits on the entire AMR mesh. For all levels l > 0 the data on the coarser grids are interpolated
+  //       to the current grid first. Then we deposit.
+  //
+  //       We always assume that a_state is a scalar, i.e. a_state has only one component. 
+
+  const int comp = 0;
+  const Interval interv(comp, comp);
+
+  const RealVect origin  = m_amr->get_prob_lo();
+  const int finest_level = m_amr->get_finest_level();
+
+  data_ops::set_value(a_state,    0.0);
+  data_ops::set_value(m_scratch,  0.0);
+
+  InterpType deposition = a_deposition;
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+
+    const bool has_coar = (lvl > 0);
+    const bool has_fine = (lvl < finest_level);
+
+    // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
+    if(has_coar){
+      RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
+      interp->interpolate(*a_state[lvl], *m_scratch[lvl-1], interv);
+    }
+    
+    // 2. Deposit this levels particles and exchange ghost cells
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box          = dbl.get(dit());
+      MeshInterp interp(box, dx*RealVect::Unit, origin);
+      interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), deposition);
+    }
+
+    // Exchange ghost cells. 
+    const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
+    LDaddOp<FArrayBox> addOp;
+    LevelData<FArrayBox> aliasFAB;
+    aliasEB(aliasFAB, *a_state[lvl]);
+    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
+
+    // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
+    //    interpolation of "hanging clouds"
+    if(has_fine){
+      a_state[lvl]->copyTo(*m_scratch[lvl]);
+    }
+  }
+
+  // Do a kappa scaling
+  data_ops::kappa_scale(a_state);
+}

@@ -68,6 +68,13 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
+  */
+  virtual void deposit_particles(EBAMRCellData&        a_state,
+				 const EBAMRParticles& a_particles,
+				 const InterpType&     a_deposition);
+
+  /*!
     @brief Get number of plot variables
   */
   virtual int get_num_plotvars() const;
@@ -229,6 +236,11 @@ protected:
     @brief Deposited particles
   */
   EBAMRCellData m_state;
+
+  /*!
+    @brief Scratch data
+  */
+  EBAMRCellData m_scratch;
 
   /*!
     @brief Particles
