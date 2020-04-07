@@ -459,7 +459,11 @@ void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
   // 1. Linearize local boxes
   int send_size    = 2*CH_SPACEDIM;                 // Message size for one box
   int send_count   = a_boxes.size()*send_size;      // Number of elements sent from this rank
-  int* send_buffer = new int[send_count*send_size]; // Send buffer for this rank
+#if 0 // Why did I multiply by send_size TWICE...?
+  int* send_buffer = new int[send_count*send_size]; // Send buffer for this rank. 
+#else
+  int* send_buffer = new int[send_count]; // Send buffer for this rank
+#endif
   int* send_buf2   = send_buffer;                   // Backup address. Going to monkey with pointer increments on send buffer
 
   // Linearize a_boxes onto send_buffer

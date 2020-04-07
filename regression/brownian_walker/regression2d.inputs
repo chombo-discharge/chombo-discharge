@@ -70,8 +70,8 @@ ito_solver.pvr_buffer        = 1             # Buffer for PVR. Prevents clouds f
 ito_solver.plt_vars          = phi           # Currently available is 'phi' only
 ito_solver.bisect_step       = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed              = 0             # Seed for RNG
-ito_solver.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
-ito_solver.deposition        = cic           # 'ngp' = nearest grid point
+ito_solver.plot_deposition   = ngp           # Cloud-in-cell for plotting particles. 
+ito_solver.deposition        = ngp           # 'ngp' = nearest grid point
                                              # 'cic' = cloud-in-cell
                                              # 'tsc' = triangle-shaped-cloud
                                              # 'w4'  = 3rd order interpolation
@@ -108,10 +108,10 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 brownian_walker.diffusion      = true    # Turn on/off diffusion
 brownian_walker.advection      = true    # Turn on/off advection
 brownian_walker.blob_amplitude = 1.0     # Blob amplitude
-brownian_walker.blob_radius    = 0.05    # Blob radius
+brownian_walker.blob_radius    = 0.15    # Blob radius
 brownian_walker.blob_center    = 0 0.5   # Blob center
 brownian_walker.seed           = 0       # RNG seed
-brownian_walker.num_particles  = 500     # Number of initial particles
+brownian_walker.num_particles  = 10     # Number of initial particles
 
 # Velocity, diffusion, and CFL
 # ----------------------------

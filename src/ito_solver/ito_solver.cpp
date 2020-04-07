@@ -220,6 +220,11 @@ void ito_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
+  // This allocates parallel data holders using the load balancing in amr_mesh. This will give very poor
+  // load balancing, but we will rectify that by rebalancing later. 
+  m_amr->allocate(m_particles);
+  m_amr->allocate(m_pvr, m_pvr_buffer);
+
   // Put the initial particles on the coarsest grid level
   List<Particle>& outcastBase = m_particles[0]->outcast();
   outcastBase.catenate(m_species->get_initial_particles()); // This destroys the initial partcies
@@ -236,7 +241,28 @@ void ito_solver::initial_data(){
 			  false,
 			  m_amr->get_prob_lo());
     m_particles[lvl]->remapOutcast();
+
+
   }
+#if 1 // Experimental code. Compute the number of particles in each box
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    Vector<Box> localBoxes(0);
+    Vector<int> localNumParticles(0);
+    int numParticlesThisProc = 0;
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box thisBox = dbl.get(dit());
+      const int numPart = (*m_particles[lvl])[dit()].numItems();
+
+      localBoxes.push_back(thisBox);
+      localNumParticles.push_back(numPart);
+      //      const int numParticlesInThisBox = m_particles[lvl][
+
+      numParticlesThisProc += numPart;
+    }
+    pout() << "on level = " << lvl << "\t num particles = " << numParticlesThisProc << endl;
+  }
+#endif
 }
 
 void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -268,9 +294,7 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_velo_cell,   m_phase, SpaceDim);
   m_amr->allocate(m_diffco_cell, m_phase, 1);
 
-  // This allocates parallel data holders using the load balancing in amr_mesh. This will give very poor load balancing. 
-  m_amr->allocate(m_particles);
-  m_amr->allocate(m_pvr, m_pvr_buffer);
+
 }
 
 
