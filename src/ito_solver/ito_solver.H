@@ -117,8 +117,12 @@ public:
   /*!
     @brief Read checkpoint data from handle
   */
-  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);  
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
 
+  /*!
+    @brief Set the species
+  */
+  virtual void set_species(RefCountedPtr<ito_species>& a_species);
   
 protected:
 

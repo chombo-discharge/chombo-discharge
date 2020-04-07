@@ -73,7 +73,7 @@ void ito_solver::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plot_phi = true;
+    if(str[i] == "phi") m_plot_phi = true;
   }
 }
 
@@ -246,6 +246,15 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 }
 
+void ito_solver::set_species(RefCountedPtr<ito_species>& a_species){
+  CH_TIME("ito_solver::set_species");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_species" << endl;
+  }
+  
+  m_species = a_species;
+}
+
 void ito_solver::allocate_internals(){
   CH_TIME("ito_solver::allocate_internals");
   if(m_verbosity > 5){
@@ -287,8 +296,18 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   // Deposit data directly onto a_output
+  this->deposit_particles(m_state, m_particles, m_plot_deposition);
+  
+  const Interval src(0,0);
+  const Interval dst(a_comp, a_comp);
 
-  MayDay::Abort("ito_solver::write_plot_data - plotting not yet implemented");
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    m_state[lvl]->localCopyTo(src, *a_output[lvl], dst);
+  }
+
+  //  data_ops::set_covered_value(a_output, a_comp, 0.0);
+  
+  a_comp++;
 }
 
 void ito_solver::deposit_particles(EBAMRCellData&        a_state,
@@ -299,7 +318,14 @@ void ito_solver::deposit_particles(EBAMRCellData&        a_state,
     pout() << m_name + "::deposit_particles" << endl;
   }
 
-  MayDay::Warning("ito_solver::deposit_particles - this is non-EB code. Please include EB mesh deposition.");
+  // TODO: How should we deposit particles near the EB? We should not
+  //
+  //          1. Deposit into covered cells since this is equivalent to losing mass
+  //          2. Deposit into cells that can't be reached through the EBGraph of distance 1.
+  //
+  //       Should we just take the cut-cell particles and deposit them with an NGP scheme...? 
+  
+           
 
   // TLDR: This code deposits on the entire AMR mesh. For all levels l > 0 the data on the coarser grids are interpolated
   //       to the current grid first. Then we deposit.

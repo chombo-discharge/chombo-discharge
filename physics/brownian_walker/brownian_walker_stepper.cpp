@@ -11,7 +11,7 @@
 using namespace physics::brownian_walker;
 
 brownian_walker_stepper::brownian_walker_stepper(){
-
+  
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver){
@@ -23,10 +23,12 @@ brownian_walker_stepper::~brownian_walker_stepper(){
 }
 
 void brownian_walker_stepper::initial_data(){
-  m_species = RefCountedPtr<ito_species> (new brownian_walker_species());
-
+  CH_TIME("brownian_walker_stepper::initial_data");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::initial_data" << endl;
+  }
   
-  MayDay::Abort("brownian_walker_stepper::initial_data - not implemented");
+  m_solver->initial_data();
 }
 
 
@@ -47,12 +49,14 @@ int brownian_walker_stepper::get_num_plot_vars() const {
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::get_num_plot_vars" << endl;
   }
-  
+
   return m_solver->get_num_plotvars();
 }
 
 void brownian_walker_stepper::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
 
+  a_plotvar_names.append(m_solver->get_plotvar_names());
+  m_solver->write_plot_data(a_output, a_icomp);
 }
 
 void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode) {
@@ -102,6 +106,15 @@ void brownian_walker_stepper::setup_solvers() {
     pout() << "brownian_walker_stepper::setup_solvers" << endl;
   }
 
+  m_species = RefCountedPtr<ito_species> (new brownian_walker_species());
+
+  m_solver->set_verbosity(-1);
+  m_solver->parse_options();
+  m_solver->set_amr(m_amr);
+  m_solver->set_species(m_species);
+  m_solver->set_amr(m_amr);
+  m_solver->set_phase(phase::gas);
+  m_solver->set_computational_geometry(m_compgeom);
   m_solver->allocate_internals();
 }
 
