@@ -263,9 +263,12 @@ void ito_solver::allocate_internals(){
 
   const int ncomp = 1;
 
-  m_amr->allocate(m_state,   m_phase, ncomp);
-  m_amr->allocate(m_scratch, m_phase, ncomp);
-  
+  m_amr->allocate(m_state,       m_phase, ncomp);
+  m_amr->allocate(m_scratch,     m_phase, ncomp);
+  m_amr->allocate(m_velo_cell,   m_phase, SpaceDim);
+  m_amr->allocate(m_diffco_cell, m_phase, 1);
+
+  // This allocates parallel data holders using the load balancing in amr_mesh. This will give very poor load balancing. 
   m_amr->allocate(m_particles);
   m_amr->allocate(m_pvr, m_pvr_buffer);
 }
@@ -298,14 +301,14 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   // Deposit data directly onto a_output
   this->deposit_particles(m_state, m_particles, m_plot_deposition);
   
-  const Interval src(0,0);
+  const Interval src(0, 0);
   const Interval dst(a_comp, a_comp);
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     m_state[lvl]->localCopyTo(src, *a_output[lvl], dst);
   }
 
-  //  data_ops::set_covered_value(a_output, a_comp, 0.0);
+  data_ops::set_covered_value(a_output, a_comp, 0.0);
   
   a_comp++;
 }
@@ -324,7 +327,7 @@ void ito_solver::deposit_particles(EBAMRCellData&        a_state,
   //          2. Deposit into cells that can't be reached through the EBGraph of distance 1.
   //
   //       Should we just take the cut-cell particles and deposit them with an NGP scheme...? 
-  
+  MayDay::Warning("ito_solver::deposit_particles - not EB supported yet");
            
 
   // TLDR: This code deposits on the entire AMR mesh. For all levels l > 0 the data on the coarser grids are interpolated
@@ -380,4 +383,22 @@ void ito_solver::deposit_particles(EBAMRCellData&        a_state,
 
   // Do a kappa scaling
   data_ops::kappa_scale(a_state);
+}
+
+bool ito_solver::is_mobile() const{
+  CH_TIME("ito_solver::is_mobile");
+  if(m_verbosity > 5){
+    pout() << m_name + "::is_mobile" << endl;
+  }
+  
+  return m_mobile;
+}
+  
+
+bool ito_solver::is_diffusive() const{
+  CH_TIME("ito_solver::is_diffusive");
+  if(m_verbosity > 5){
+    pout() << m_name + "::is_diffusive" << endl;
+  }
+  return m_diffusive;
 }

@@ -123,6 +123,16 @@ public:
     @brief Set the species
   */
   virtual void set_species(RefCountedPtr<ito_species>& a_species);
+
+  /*!
+    @brief Check if solver is mobile
+  */
+  virtual bool is_mobile() const;
+  
+  /*!
+    @brief Check if solver is diffusive
+  */
+  virtual bool is_diffusive() const;
   
 protected:
 
@@ -245,6 +255,16 @@ protected:
     @brief Scratch data
   */
   EBAMRCellData m_scratch;
+
+  /*!
+    @brief Cell-centered field used for interpolating velocities
+  */
+  EBAMRCellData m_velo_cell;
+
+  /*!
+    @brief Diffusion-centerer field used for interpolating diffusion coefficients
+  */
+  EBAMRCellData m_diffco_cell;
 
   /*!
     @brief Particles

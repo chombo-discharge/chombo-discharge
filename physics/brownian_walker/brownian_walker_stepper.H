@@ -55,6 +55,11 @@ namespace physics {
       // Ito solver & species
       RefCountedPtr<ito_solver>  m_solver;
       RefCountedPtr<ito_species> m_species;
+
+      // Diffusion coefficient and velocity
+      Real m_cfl;
+      Real m_diffco;
+      Real m_omega;
     };
   }
 }
