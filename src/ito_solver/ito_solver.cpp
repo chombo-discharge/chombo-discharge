@@ -650,4 +650,21 @@ void ito_solver::interpolate_velocities(){
   if(m_verbosity > 5){
     pout() << m_name + "::interpolate_velocities" << endl;
   }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
+    const RealVect origin        = m_amr->get_prob_lo();
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box              = dbl.get(dit());
+      const EBCellFAB& velo_cell = (*m_velo_cell[lvl])[dit()];
+      const FArrayBox& vel_fab   = velo_cell.getFArrayBox();
+
+      List<ito_particle>& particleList = (*m_particles[lvl])[dit()].listItems();
+
+      MeshInterp meshInterp(box, dx, origin);
+      meshInterp.interpolate(particleList, vel_fab, m_deposition);
+    }
+  }
 }

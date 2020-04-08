@@ -227,6 +227,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
     pout() << "brownian_walker_stepper::advance" << endl;
   }
 
+  m_solver->interpolate_velocities();
   MayDay::Warning("brownian_walker_stepper::advance - not implemented");
 }
 

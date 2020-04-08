@@ -88,6 +88,13 @@ public:
   void setVelocity(const Real& a_velocity, const int a_dir);
 
   /*!
+    @brief This is a fucking hack that sets the velocity 
+  */
+  void setAcceleration(const RealVect& a_velocity){
+    setVelocity(a_velocity);
+  }
+
+  /*!
     @brief Get reference velocity field
   */
   RealVect& velocity();
