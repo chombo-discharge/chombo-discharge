@@ -111,7 +111,7 @@ brownian_walker.blob_amplitude = 1.0     # Blob amplitude
 brownian_walker.blob_radius    = 0.15    # Blob radius
 brownian_walker.blob_center    = 0 0.5   # Blob center
 brownian_walker.seed           = 0       # RNG seed
-brownian_walker.num_particles  = 10     # Number of initial particles
+brownian_walker.num_particles  = 100     # Number of initial particles
 
 # Velocity, diffusion, and CFL
 # ----------------------------

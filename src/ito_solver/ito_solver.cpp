@@ -247,20 +247,52 @@ void ito_solver::initial_data(){
 #if 1 // Experimental code. Compute the number of particles in each box
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    Vector<Box> localBoxes(0);
-    Vector<int> localNumParticles(0);
+    Vector<Box> oldBoxes(0);
+    Vector<int> oldLoads(0);
     int numParticlesThisProc = 0;
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box thisBox = dbl.get(dit());
       const int numPart = (*m_particles[lvl])[dit()].numItems();
 
-      localBoxes.push_back(thisBox);
-      localNumParticles.push_back(numPart);
+      oldBoxes.push_back(thisBox);
+      oldLoads.push_back(numPart);
       //      const int numParticlesInThisBox = m_particles[lvl][
 
       numParticlesThisProc += numPart;
     }
     pout() << "on level = " << lvl << "\t num particles = " << numParticlesThisProc << endl;
+
+
+    // Gather boxes and loads
+    load_balance::gather_boxes(oldBoxes);
+    load_balance::gather_loads(oldLoads);
+
+    Vector<Box> newBoxes = oldBoxes;
+    Vector<int> newLoads = oldLoads;
+
+    mortonOrdering(oldBoxes);
+    for (int i = 0; i < newBoxes.size(); i++){
+      for (int j = 0; j < oldBoxes.size(); j++){
+	if(newBoxes[i] == oldBoxes[j]){
+	  newLoads[i] = newLoads[j];
+	}
+      }
+    }
+
+    Vector<int> procs;
+    load_balance::load_balance_boxes(procs, newLoads, newBoxes);
+
+    int sum = 0;
+    for (int i = 0; i < oldLoads.size(); i++){
+      sum += oldLoads[i];
+    }
+
+    if(procID() == 0){
+      std::cout << "num particles on this level = " << sum << std::endl;
+      std::cout << "procs" << std::endl;
+    }
+
+
   }
 #endif
 }

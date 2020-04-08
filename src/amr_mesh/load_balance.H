@@ -26,6 +26,29 @@ public:
   };
 
   /*!
+    @brief Convenience function. 
+    @details This just calls Chombo code. 
+  */
+  static void load_balance_boxes(Vector<int>&       a_procs,
+				 const Vector<int>& a_loads,
+				 const Vector<Box>& a_boxes);
+  
+  /*!
+    @brief Gather boxes
+  */
+  static void gather_boxes(Vector<Box>& a_boxes);
+
+  /*!
+    @brief Gather compute loads
+  */
+  static void gather_loads(Vector<Real>& a_loads);
+
+  /*!
+    @brief Gather compute loads
+  */
+  static void gather_loads(Vector<int>& a_loads);
+
+  /*!
     @brief Conventional load balancing
   */
   static void balance_volume(Vector<int>& a_procs, const Vector<Box>& a_boxes);
