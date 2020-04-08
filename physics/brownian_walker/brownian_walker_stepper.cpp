@@ -156,7 +156,7 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
     pout() << "brownian_walker_stepper::compute_dt" << endl;
   }
   
-  MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
+  //  MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
 
   a_dt = 0.1;
 }
@@ -252,11 +252,17 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
       }
       m_solver->interpolate_velocities(lvl, dit()); 
 
-      // FInal stage
+      // Final stage
       for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
 	ito_particle& p    = particleList[lit];
 	ito_particle& oldP = particleCopy[litC];
 	p.position() = oldP.position() + p.velocity()*a_dt;
+      }
+
+      // Add diffusion hop
+      for (lit.rewind(); lit; ++lit){ 
+	ito_particle& p = particleList[lit];
+	p.position() += 0.5*p.velocity()*a_dt;
       }
     }
 
@@ -264,8 +270,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
     particles.gatherOutcast();
     particles.remapOutcast();
   }
-  //  m_solver->move_particles_eulerf(a_dt);
+
   m_solver->deposit_particles();
+
+  return a_dt;
 }
 
 void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {

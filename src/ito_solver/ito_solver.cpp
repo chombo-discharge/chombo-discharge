@@ -3,6 +3,7 @@
   @brief  Declaration of an abstract class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
+  @todo   Interpolate diffusion coefficients
   @todo   Compute CFL time step
   @todo   Compute diffusion time step, do this based on chance that a particle will move more than 1 cell
   @todo   Boundary conditions on EBs
@@ -518,7 +519,7 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
   //          2. Deposit into cells that can't be reached through the EBGraph of distance 1.
   //
   //       Should we just take the cut-cell particles and deposit them with an NGP scheme...? 
-  MayDay::Warning("ito_solver::deposit_particles - not EB supported yet");
+  //  MayDay::Warning("ito_solver::deposit_particles - not EB supported yet");
            
 
   // TLDR: This code deposits on the entire AMR mesh. For all levels l > 0 the data on the coarser grids are interpolated
@@ -729,3 +730,41 @@ void ito_solver::move_particles_eulerf(const int a_lvl, const DataIndex& a_dit, 
     p.position() += p.velocity()*a_dt;
   }
 }
+
+
+inline RealVect ito_solver::random_gaussian(){
+  const double d = m_gauss01(m_rng);
+  return d*this->random_direction();
+}
+
+inline RealVect ito_solver::random_direction(){
+  const Real EPS = 1.E-8;
+#if CH_SPACEDIM==2
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = m_udist11(m_rng);
+    x2 = m_udist11(m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  return RealVect(x1,x2)/sqrt(r);
+#elif CH_SPACEDIM==3
+  Real x1 = 2.0;
+  Real x2 = 2.0;
+  Real r  = x1*x1 + x2*x2;
+  while(r >= 1.0 || r < EPS){
+    x1 = m_udist11(m_rng);
+    x2 = m_udist11(m_rng);
+    r  = x1*x1 + x2*x2;
+  }
+
+  const Real x = 2*x1*sqrt(1-r);
+  const Real y = 2*x2*sqrt(1-r);
+  const Real z = 1 - 2*r;
+
+  return RealVect(x,y,z);
+#endif
+}
+  
