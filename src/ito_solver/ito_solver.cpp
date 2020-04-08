@@ -3,6 +3,10 @@
   @brief  Declaration of an abstract class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
+  @todo   Compute CFL time step
+  @todo   Compute diffusion time step, do this based on chance that a particle will move more than 1 cell
+  @todo   Boundary conditions on EBs
+  @todo   Boundary conditions on domain edges/sides
 */
 
 #include "ito_solver.H"
@@ -66,6 +70,8 @@ void ito_solver::parse_plot_vars(){
   }
 
   m_plot_phi = false;
+  m_plot_vel = false;
+  m_plot_dco = false;
 
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
@@ -73,7 +79,9 @@ void ito_solver::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(str[i] == "phi") m_plot_phi = true;
+    if(     str[i] == "phi") m_plot_phi = true;
+    else if(str[i] == "vel") m_plot_vel = true;
+    else if(str[i] == "dco") m_plot_dco = true;
   }
 }
 
@@ -151,7 +159,19 @@ Vector<std::string> ito_solver::get_plotvar_names() const {
   }
 
   Vector<std::string> names(0);
-  if(m_plot_phi) names.push_back(m_name + " phi");
+  if(m_plot_phi) {
+    names.push_back(m_name + " phi");
+  }
+  if(m_plot_dco){
+    names.push_back(m_name + " diffusion_coefficient");
+  }
+  if(m_plot_vel){
+    names.push_back("x-Velocity " + m_name);
+    names.push_back("y-Velocity " + m_name);
+    if(SpaceDim == 3){
+      names.push_back("z-Velocity " + m_name);
+    }
+  }
 
   return names;
 }
@@ -164,7 +184,9 @@ int ito_solver::get_num_plotvars() const {
 
   int num_plotvars = 0;
   
-  if(m_plot_phi) num_plotvars++;
+  if(m_plot_phi) num_plotvars += 1;
+  if(m_plot_vel) num_plotvars += SpaceDim;
+  if(m_plot_dco) num_plotvars += 1;
 
   return num_plotvars;
 }
@@ -220,8 +242,6 @@ void ito_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
-
-
   // Put the initial particles on the coarsest grid level
   List<Particle>& outcastBase = m_particles[0]->outcast();
   outcastBase.catenate(m_species->get_initial_particles()); // This destroys the initial partcies
@@ -241,6 +261,9 @@ void ito_solver::initial_data(){
 
 
   }
+
+  // Deposit the particles
+  this->deposit_particles(m_state, m_particles, m_deposition);
   
 #if 0 // Experimental code. Compute the number of particles in each box
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -254,7 +277,6 @@ void ito_solver::initial_data(){
 
       oldBoxes.push_back(thisBox);
       oldLoads.push_back(numPart);
-      //      const int numParticlesInThisBox = m_particles[lvl][
 
       numParticlesThisProc += numPart;
     }
@@ -305,7 +327,6 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   // is m_particleCache, which has all the photons in the old data holders.
   this->allocate_internals();
 
-
   // Here are the steps:
   // 
   // 1. We are regridding a_lmin and above, so we need to move all photons onto level a_lmin-1. There's
@@ -314,18 +335,9 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   // 2. Levels 0 through a_lmin-1 did not change. Copy photons back into those levels. 
   // 
   // 3. Levels a_lmin-1 through a_new_finest_level changed. Remap photons into the correct boxes. 
-  //
-  // 4. Redeposit photons
   
   const int base_level  = Max(0, a_lmin-1);
   const RealVect origin = m_amr->get_prob_lo();
-
-#if 0 // Debug, count number of photons
-  long long num_pretransfer = 0;
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
-    num_pretransfer += m_photocache[lvl]->numParticles();
-  }
-#endif
 
   // 1. Move all particles from cache and onto the coarsest level
   List<Particle>& base_cache = m_particleCache[0]->outcast();
@@ -338,17 +350,6 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
     }
   }
     
-
-#if 0 // Debug, count number of photons
-  long long num_posttransfer = 0;
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
-    num_posttransfer += m_photocache[lvl]->numParticles();
-  }
-
-  if(procID() == 0){
-    std::cout << "pre = " << num_pretransfer << "\t post = " << num_posttransfer << std::endl;
-  }
-#endif
 
   // 2. Levels 0 through base_level did not change, so copy photons back onto those levels. 
   for (int lvl = 0; lvl <= base_level; lvl++){
@@ -383,7 +384,10 @@ void ito_solver::set_species(RefCountedPtr<ito_species>& a_species){
     pout() << m_name + "::set_species" << endl;
   }
   
-  m_species = a_species;
+  m_species   = a_species;
+  m_name      = a_species->get_name();
+  m_diffusive = m_species->is_diffusive();
+  m_mobile    = m_species->is_mobile();
 }
 
 void ito_solver::allocate_internals(){
@@ -391,13 +395,29 @@ void ito_solver::allocate_internals(){
   if(m_verbosity > 5){
     pout() << m_name + "::allocate_internals" << endl;
   }
-
   const int ncomp = 1;
 
   m_amr->allocate(m_state,       m_phase, ncomp);
   m_amr->allocate(m_scratch,     m_phase, ncomp);
-  m_amr->allocate(m_velo_cell,   m_phase, SpaceDim);
-  m_amr->allocate(m_diffco_cell, m_phase, 1);
+
+  data_ops::set_value(m_state,   0.0);
+  data_ops::set_value(m_scratch, 0.0);
+
+  // Only allocate memory if we actually have a mobile solver
+  if(m_mobile){
+    m_amr->allocate(m_velo_cell, m_phase, SpaceDim);
+  }
+  else{ 
+    m_amr->allocate_ptr(m_velo_cell);
+  }
+
+  // Only allocate memory if we actually a diffusion solver
+  if(m_diffusive){
+    m_amr->allocate(m_diffco_cell, m_phase, 1);
+  }
+  else{
+    m_amr->allocate_ptr(m_diffco_cell);
+  }
   
   // This allocates parallel data holders using the load balancing in amr_mesh. This will give very poor
   // load balancing, but we will rectify that by rebalancing later. 
@@ -430,19 +450,50 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     pout() << m_name + "::write_plot_data" << endl;
   }
 
-  // Deposit data directly onto a_output
-  this->deposit_particles(m_state, m_particles, m_plot_deposition);
-  
-  const Interval src(0, 0);
-  const Interval dst(a_comp, a_comp);
-
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    m_state[lvl]->localCopyTo(src, *a_output[lvl], dst);
+  // Write phi
+  if(m_plot_phi){
+    //    this->deposit_particles(m_state, m_particles, m_plot_deposition);
+    
+    const Interval src(0, 0);
+    const Interval dst(a_comp, a_comp);
+    
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      m_state[lvl]->localCopyTo(src, *a_output[lvl], dst);
+    }
+    data_ops::set_covered_value(a_output, a_comp, 0.0);
+    a_comp++;
   }
 
-  data_ops::set_covered_value(a_output, a_comp, 0.0);
-  
-  a_comp++;
+  // Plot diffusion coefficient
+  if(m_plot_dco && m_diffusive){
+    //    this->deposit_particles(m_state, m_particles, m_plot_deposition);
+    
+    const Interval src(0, 0);
+    const Interval dst(a_comp, a_comp);
+    
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      m_diffco_cell[lvl]->localCopyTo(src, *a_output[lvl], dst);
+    }
+    data_ops::set_covered_value(a_output, a_comp, 0.0);
+    a_comp++;
+  }
+
+  // Write velocities
+  if(m_plot_vel && m_mobile){
+    const int ncomp = SpaceDim;
+    const Interval src(0, ncomp-1);
+    const Interval dst(a_comp, a_comp + ncomp-1);
+
+    for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      m_velo_cell[lvl]->localCopyTo(src, *a_output[lvl], dst);
+    }
+
+    for (int c = 0; c < SpaceDim; c++){
+      data_ops::set_value(a_output, a_comp + c, 0.0);
+    }
+
+    a_comp += ncomp;
+  }
 }
 
 void ito_solver::deposit_particles(EBAMRCellData&        a_state,
@@ -553,5 +604,50 @@ void ito_solver::cache_state(){
 			  false, 
 			  m_amr->get_prob_lo());
     m_particleCache[lvl]->remapOutcast();
+  }
+}
+
+EBAMRCellData& ito_solver::get_velo_cell(){
+  CH_TIME("ito_solver::get_velo_cell");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_velo_cell" << endl;
+  }
+
+  return m_velo_cell;
+}
+
+EBAMRCellData& ito_solver::get_diffco_cell(){
+  CH_TIME("ito_solver::get_diffco_cell");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_diffco_cell" << endl;
+  }
+
+  return m_diffco_cell;
+}
+
+void ito_solver::set_diffco(const Real a_diffco){
+  CH_TIME("ito_solver::set_diffco");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_diffco" << endl;
+  }
+
+  data_ops::set_value(m_diffco_cell, a_diffco);
+}
+
+void ito_solver::set_velocity(const RealVect a_vel){
+  CH_TIME("ito_solver::set_velocity");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_velocity" << endl;
+  }
+
+  for (int comp = 0; comp < SpaceDim; comp++){
+    data_ops::set_value(m_velo_cell, a_vel[comp], comp);
+  }
+}
+
+void ito_solver::interpolate_velocities(){
+  CH_TIME("ito_solver::interpolate_velocities");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolate_velocities" << endl;
   }
 }

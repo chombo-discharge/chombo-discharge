@@ -138,6 +138,41 @@ public:
     @brief Check if solver is diffusive
   */
   virtual bool is_diffusive() const;
+
+  /*!
+    @brief Get cell-centered velocity
+  */
+  virtual EBAMRCellData& get_velo_cell();
+
+  /*!
+    @brief Get cell-centered velocity
+  */
+  virtual EBAMRCellData& get_diffco_cell();
+
+  /*!
+    @brief Set diffusion coefficient
+  */
+  virtual void set_diffco(const Real a_diffco);
+
+  /*!
+    @brief Set velocity
+  */
+  virtual void set_velocity(const RealVect a_vel);
+
+  /*!
+    @brief Advance particles
+  */
+  //  virtual void advance_particles(const Real a_dt);
+
+  /*!
+    @brief Interpolate velocities
+  */
+  virtual void interpolate_velocities();
+
+  /*!
+    @brief Interpolate diffusion
+  */
+  //  virtual void interpolate_diffusion();
   
 protected:
 
@@ -240,6 +275,16 @@ protected:
     @brief Output state
   */
   bool m_plot_phi;
+
+  /*!
+    @brief Output state
+  */
+  bool m_plot_vel;
+
+  /*!
+    @brief Output state
+  */
+  bool m_plot_dco;
 
   /*!
     @brief Mass/charge deposition type

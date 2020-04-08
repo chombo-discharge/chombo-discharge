@@ -60,6 +60,9 @@ namespace physics {
       Real m_cfl;
       Real m_diffco;
       Real m_omega;
+
+      void set_velocity();
+      void set_velocity(const int a_level);
     };
   }
 }

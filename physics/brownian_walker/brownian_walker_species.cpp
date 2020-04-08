@@ -12,8 +12,6 @@
 using namespace physics::brownian_walker;
 
 brownian_walker_species::brownian_walker_species() : m_rng(), m_gauss(0., 1.) {
-
-
   m_name   = "scalar species";
   m_charge = 0;
 
@@ -55,7 +53,6 @@ void brownian_walker_species::draw_initial_particles(){
   for (int i = 0; i < remainder; i++){ 
     particlesPerRank[i] += 1;
   }
-
 
   // Now make the particles
   m_initial_particles.clear();

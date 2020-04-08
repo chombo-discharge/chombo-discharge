@@ -13,14 +13,14 @@
 using namespace physics::brownian_walker;
 
 brownian_walker_stepper::brownian_walker_stepper(){
-  ParmParse pp("advection_diffusion");
+  ParmParse pp("brownian_walker");
 
   pp.get("diffco",   m_diffco);
   pp.get("omega",    m_omega);
   pp.get("cfl",      m_cfl);
 }
 
-brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver){
+brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
   m_solver = a_solver;
 }
 
@@ -37,10 +37,71 @@ void brownian_walker_stepper::initial_data(){
   m_solver->initial_data();
 
   if(m_solver->is_diffusive()){
-
+    m_solver->set_diffco(m_diffco);
   }
   if(m_solver->is_mobile()){
+    this->set_velocity();
+  }
+}
 
+void brownian_walker_stepper::set_velocity(){
+  CH_TIME("brownian_walker_stepper::set_velocity");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::set_velocity" << endl;
+  }
+  const int finest_level = m_amr->get_finest_level();
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    this->set_velocity(lvl);
+  }
+
+  EBAMRCellData& vel = m_solver->get_velo_cell();
+  m_amr->average_down(vel, phase::gas);
+  m_amr->interp_ghost(vel, phase::gas);
+}
+
+void brownian_walker_stepper::set_velocity(const int a_level){
+  CH_TIME("brownian_walker_stepper::set_velocity(level)");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::set_velocity(level)" << endl;
+  }
+
+  // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_level];
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Box& box = dbl.get(dit());
+
+    EBCellFAB& vel = (*(m_solver->get_velo_cell())[a_level])[dit()];
+    BaseFab<Real>& vel_reg = vel.getSingleValuedFAB();
+
+    vel.setVal(0.0);
+      
+    // Regular cells
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
+
+      const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
+      const Real theta = atan2(pos[1],pos[0]);
+
+      vel_reg(iv,0) = -r*m_omega*sin(theta);
+      vel_reg(iv,1) =  r*m_omega*cos(theta);
+    }
+
+    // Irregular and multicells
+    const EBISBox& ebisbox = vel.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+
+      const VolIndex vof = vofit();
+      const IntVect iv   = vof.gridIndex();
+      const RealVect pos = m_amr->get_prob_lo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->get_dx()[a_level];
+
+      const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
+      const Real theta = atan2(pos[1],pos[0]);
+
+      vel(vof,0) = -r*m_omega*sin(theta);
+      vel(vof,1) =  r*m_omega*cos(theta);
+    }
   }
 }
 
@@ -95,7 +156,9 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
     pout() << "brownian_walker_stepper::compute_dt" << endl;
   }
   
-  MayDay::Abort("brownian_walker_stepper::compute_dt - not implemented yet");
+  MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
+
+  a_dt = 0.0;
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -159,9 +222,25 @@ void brownian_walker_stepper::setup_solvers() {
 }
 
 Real brownian_walker_stepper::advance(const Real a_dt) {
+  CH_TIME("brownian_walker_stepper::advance");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::advance" << endl;
+  }
 
+  MayDay::Warning("brownian_walker_stepper::advance - not implemented");
 }
 
 void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+  CH_TIME("brownian_walker_stepper::regrid");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::regrid" << endl;
+  }
 
+  m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+  if(m_solver->is_diffusive()){
+    m_solver->set_diffco(m_diffco);
+  }
+  if(m_solver->is_mobile()){
+    this->set_velocity();
+  }
 }
