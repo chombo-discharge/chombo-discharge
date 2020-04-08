@@ -3,7 +3,6 @@
   @brief  Declaration of a particle class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
-
 */
 
 #ifndef _ITO_PARTICLE_
@@ -15,7 +14,6 @@
 #include <cmath>
 
 #include "BinItem.H"
-#include "NamespaceHeader.H"
 
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers

@@ -13,6 +13,8 @@
 #include <BinItem.H>
 #include <MeshInterp.H>
 
+#include "ito_particle.H" 
+
 /*!
   @brief Metadata class that parses for ito_solver
   @details The ito_solver takes it's information from this class, e.g. mobile/diffusive, charge, name, initial particles etc. 
@@ -57,7 +59,7 @@ public:
   /*!
     @brief Get initial particles
   */
-  List<Particle>& get_initial_particles();
+  List<ito_particle>& get_initial_particles();
 
 protected:
 
@@ -84,7 +86,7 @@ protected:
   /*!
     @brief Initial particles
   */
-  List<Particle> m_initial_particles;
+  List<ito_particle> m_initial_particles;
 
 };
 

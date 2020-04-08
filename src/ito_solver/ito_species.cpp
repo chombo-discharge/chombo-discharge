@@ -39,6 +39,6 @@ bool ito_species::is_mobile() const {
   return m_mobile;
 }
 
-List<Particle>& ito_species::get_initial_particles() {
+List<ito_particle>& ito_species::get_initial_particles() {
   return m_initial_particles;
 }

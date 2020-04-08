@@ -243,7 +243,7 @@ void ito_solver::initial_data(){
   }
 
   // Put the initial particles on the coarsest grid level
-  List<Particle>& outcastBase = m_particles[0]->outcast();
+  List<ito_particle>& outcastBase = m_particles[0]->outcast();
   outcastBase.catenate(m_species->get_initial_particles()); // This destroys the initial partcies
   m_particles[0]->remapOutcast(); 
 
@@ -340,11 +340,11 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   const RealVect origin = m_amr->get_prob_lo();
 
   // 1. Move all particles from cache and onto the coarsest level
-  List<Particle>& base_cache = m_particleCache[0]->outcast();
+  List<ito_particle>& base_cache = m_particleCache[0]->outcast();
   base_cache.clear();
   for (int lvl = base_level; lvl <= a_old_finest_level; lvl++){
     for (DataIterator dit = m_particleCache[lvl]->dataIterator(); dit.ok(); ++dit){
-      for (ListIterator<Particle> li((*m_particleCache[lvl])[dit()].listItems()); li.ok(); ){
+      for (ListIterator<ito_particle> li((*m_particleCache[lvl])[dit()].listItems()); li.ok(); ){
 	m_particleCache[base_level]->outcast().transfer(li);
       }
     }
@@ -497,7 +497,7 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 }
 
 void ito_solver::deposit_particles(EBAMRCellData&        a_state,
-				   const EBAMRParticles& a_particles,
+				   const EBAMRItoParticles& a_particles,
 				   const InterpType&     a_deposition){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){

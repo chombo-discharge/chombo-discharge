@@ -11,7 +11,8 @@
 #include "amr_mesh.H"
 #include "type_definitions.H"
 #include "computational_geometry.H"
-#include "ito_species.H" 
+#include "ito_species.H"
+#include "ito_particle.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -20,6 +21,8 @@
 #include <MeshInterp.H>
 
 #include <random>
+
+typedef Vector<RefCountedPtr<ParticleData<ito_particle> > > EBAMRItoParticles;
 
 /*!
   @brief Base class for Ito diffusion particle models
@@ -71,7 +74,7 @@ public:
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   virtual void deposit_particles(EBAMRCellData&        a_state,
-				 const EBAMRParticles& a_particles,
+				 const EBAMRItoParticles& a_particles,
 				 const InterpType&     a_deposition);
 
   /*!
@@ -319,12 +322,12 @@ protected:
   /*!
     @brief Particles
   */
-  EBAMRParticles m_particles;     
+  EBAMRItoParticles m_particles;     
 
   /*!
     @brief Particle cache
   */
-  EBAMRParticles m_particleCache; 
+  EBAMRItoParticles m_particleCache; 
 
   /*!
     @brief Particle valid region
