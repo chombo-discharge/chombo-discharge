@@ -220,10 +220,7 @@ void ito_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
-  // This allocates parallel data holders using the load balancing in amr_mesh. This will give very poor
-  // load balancing, but we will rectify that by rebalancing later. 
-  m_amr->allocate(m_particles);
-  m_amr->allocate(m_pvr, m_pvr_buffer);
+
 
   // Put the initial particles on the coarsest grid level
   List<Particle>& outcastBase = m_particles[0]->outcast();
@@ -244,7 +241,8 @@ void ito_solver::initial_data(){
 
 
   }
-#if 1 // Experimental code. Compute the number of particles in each box
+  
+#if 0 // Experimental code. Compute the number of particles in each box
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     Vector<Box> oldBoxes(0);
@@ -302,6 +300,81 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
   }
+
+  // This reallocates all internal stuff. After this, the only object with any knowledge of the past
+  // is m_particleCache, which has all the photons in the old data holders.
+  this->allocate_internals();
+
+
+  // Here are the steps:
+  // 
+  // 1. We are regridding a_lmin and above, so we need to move all photons onto level a_lmin-1. There's
+  //    probably a better way to do this
+  // 
+  // 2. Levels 0 through a_lmin-1 did not change. Copy photons back into those levels. 
+  // 
+  // 3. Levels a_lmin-1 through a_new_finest_level changed. Remap photons into the correct boxes. 
+  //
+  // 4. Redeposit photons
+  
+  const int base_level  = Max(0, a_lmin-1);
+  const RealVect origin = m_amr->get_prob_lo();
+
+#if 0 // Debug, count number of photons
+  long long num_pretransfer = 0;
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+    num_pretransfer += m_photocache[lvl]->numParticles();
+  }
+#endif
+
+  // 1. Move all particles from cache and onto the coarsest level
+  List<Particle>& base_cache = m_particleCache[0]->outcast();
+  base_cache.clear();
+  for (int lvl = base_level; lvl <= a_old_finest_level; lvl++){
+    for (DataIterator dit = m_particleCache[lvl]->dataIterator(); dit.ok(); ++dit){
+      for (ListIterator<Particle> li((*m_particleCache[lvl])[dit()].listItems()); li.ok(); ){
+	m_particleCache[base_level]->outcast().transfer(li);
+      }
+    }
+  }
+    
+
+#if 0 // Debug, count number of photons
+  long long num_posttransfer = 0;
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
+    num_posttransfer += m_photocache[lvl]->numParticles();
+  }
+
+  if(procID() == 0){
+    std::cout << "pre = " << num_pretransfer << "\t post = " << num_posttransfer << std::endl;
+  }
+#endif
+
+  // 2. Levels 0 through base_level did not change, so copy photons back onto those levels. 
+  for (int lvl = 0; lvl <= base_level; lvl++){
+    collectValidParticles(*m_particles[lvl],
+			  *m_particleCache[lvl],
+			  m_pvr[lvl]->mask(),
+			  m_amr->get_dx()[lvl]*RealVect::Unit,
+			  1,
+			  false, 
+			  origin);
+
+    m_particles[lvl]->gatherOutcast();
+    m_particles[lvl]->remapOutcast();
+  }
+
+  // 3. Levels above base_level may have changed, so we need to move the particles into the correct boxes now
+  for (int lvl = base_level; lvl < a_new_finest_level; lvl++){
+    collectValidParticles(m_particles[lvl+1]->outcast(),
+			  *m_particles[lvl],
+			  m_pvr[lvl+1]->mask(),
+			  m_amr->get_dx()[lvl+1]*RealVect::Unit,
+			  m_amr->get_ref_rat()[lvl],
+			  false,
+			  origin);
+    m_particles[lvl+1]->remapOutcast();
+  }
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species>& a_species){
@@ -325,8 +398,11 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_scratch,     m_phase, ncomp);
   m_amr->allocate(m_velo_cell,   m_phase, SpaceDim);
   m_amr->allocate(m_diffco_cell, m_phase, 1);
-
-
+  
+  // This allocates parallel data holders using the load balancing in amr_mesh. This will give very poor
+  // load balancing, but we will rectify that by rebalancing later. 
+  m_amr->allocate(m_particles);
+  m_amr->allocate(m_pvr, m_pvr_buffer);
 }
 
 
@@ -457,4 +533,25 @@ bool ito_solver::is_diffusive() const{
     pout() << m_name + "::is_diffusive" << endl;
   }
   return m_diffusive;
+}
+
+void ito_solver::cache_state(){
+  CH_TIME("ito_solver::cache_state");
+  if(m_verbosity > 5){
+    pout() << m_name + "::cache_state" << endl;
+  }
+
+  m_amr->allocate(m_particleCache);
+
+  // Copy particles onto cache
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    collectValidParticles(m_particleCache[lvl]->outcast(),
+			  *m_particles[lvl],
+			  m_pvr[lvl]->mask(),
+			  m_amr->get_dx()[lvl]*RealVect::Unit,
+			  1,
+			  false, 
+			  m_amr->get_prob_lo());
+    m_particleCache[lvl]->remapOutcast();
+  }
 }

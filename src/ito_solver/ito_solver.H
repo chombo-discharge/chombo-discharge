@@ -125,6 +125,11 @@ public:
   virtual void set_species(RefCountedPtr<ito_species>& a_species);
 
   /*!
+    @brief Cache the particles
+  */
+  virtual void cache_state();
+
+  /*!
     @brief Check if solver is mobile
   */
   virtual bool is_mobile() const;
@@ -279,7 +284,7 @@ protected:
   /*!
     @brief Particle valid region
   */
-  EBAMRPVR m_pvr;               
+  EBAMRPVR m_pvr;
   
   /*!
     @brief Parse RNG options

@@ -37,10 +37,10 @@ void brownian_walker_stepper::initial_data(){
   m_solver->initial_data();
 
   if(m_solver->is_diffusive()){
-    MayDay::Warning("yes, is diffusive");
+
   }
   if(m_solver->is_mobile()){
-    MayDay::Warning("yes, is mobile");
+
   }
 }
 
@@ -125,7 +125,12 @@ bool brownian_walker_stepper::need_to_regrid() {
 }
 
 void brownian_walker_stepper::cache() {
+  CH_TIME("brownian_walker_stepper::deallocate");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::deallocate" << endl;
+  }
 
+  m_solver->cache_state();
 }
 
 void brownian_walker_stepper::deallocate() {
