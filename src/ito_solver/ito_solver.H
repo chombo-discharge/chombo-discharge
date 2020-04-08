@@ -148,6 +148,11 @@ public:
   virtual bool is_diffusive() const;
 
   /*!
+    @brief Get particles
+  */
+  virtual EBAMRItoParticles& get_particles();
+
+  /*!
     @brief Get cell-centered velocity
   */
   virtual EBAMRCellData& get_velo_cell();
@@ -170,12 +175,22 @@ public:
   /*!
     @brief Advance particles
   */
-  virtual void move_particles(const Real a_dt);
+  virtual void move_particles_eulerf(const Real a_dt);
+
+  /*!
+    @brief Advance particles. Level and grid patch version
+  */
+  virtual void move_particles_eulerf(const int a_lvl, const DataIndex& a_dit, const Real a_dt);
 
   /*!
     @brief Interpolate velocities
   */
   virtual void interpolate_velocities();
+
+  /*!
+    @brief Interpolate velocities
+  */
+  virtual void interpolate_velocities(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Interpolate diffusion

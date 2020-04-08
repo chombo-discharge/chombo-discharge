@@ -158,7 +158,7 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
   
   MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
 
-  a_dt = 1.0;
+  a_dt = 0.1;
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -226,9 +226,45 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::advance" << endl;
   }
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
+    ParticleData<ito_particle>& particles = *m_solver->get_particles()[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      // Create a copy. 
+      List<ito_particle>& particleList = particles[dit()].listItems();
+      List<ito_particle>  particleCopy = List<ito_particle>(particleList);
 
-  m_solver->interpolate_velocities();
-  m_solver->move_particles(a_dt);
+      // The list iterator is NOT an indexing iterator but iterates over the list given
+      // in the constructor. So, we need one for velocities and one for the copy
+      ListIterator<ito_particle> lit(particleList);
+      ListIterator<ito_particle> litC(particleCopy);
+
+      
+      // Compute velocities 
+      m_solver->interpolate_velocities(lvl, dit()); 
+
+      // Half Euler step and evaluate velocity at half step
+      for (lit.rewind(); lit; ++lit){ 
+	ito_particle& p = particleList[lit];
+	p.position() += 0.5*p.velocity()*a_dt;
+      }
+      m_solver->interpolate_velocities(lvl, dit()); 
+
+      // FInal stage
+      for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
+	ito_particle& p    = particleList[lit];
+	ito_particle& oldP = particleCopy[litC];
+	p.position() = oldP.position() + p.velocity()*a_dt;
+      }
+    }
+
+    // Remap outcasts
+    particles.gatherOutcast();
+    particles.remapOutcast();
+  }
+  //  m_solver->move_particles_eulerf(a_dt);
   m_solver->deposit_particles();
 }
 
