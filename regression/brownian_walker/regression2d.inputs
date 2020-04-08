@@ -33,7 +33,7 @@ driver.verbosity                       = 2             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 10            # Plot interval
+driver.plot_interval                   = 1            # Plot interval
 driver.regrid_interval                 = 10            # Regrid interval
 driver.checkpoint_interval             = 10            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
@@ -67,7 +67,7 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
 ito_solver.pvr_buffer        = 1             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
-ito_solver.plt_vars          = phi   # Currently available are 'phi', 'vel', and 'dco'
+ito_solver.plt_vars          = phi vel dco   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step       = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed              = 0             # Seed for RNG
 ito_solver.plot_deposition   = ngp           # Cloud-in-cell for plotting particles. 

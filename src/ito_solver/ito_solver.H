@@ -71,6 +71,11 @@ public:
   virtual void allocate_internals();
 
   /*!
+    @brief Deposit particles
+  */
+  virtual void deposit_particles();
+
+  /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   virtual void deposit_particles(EBAMRCellData&        a_state,
@@ -165,7 +170,7 @@ public:
   /*!
     @brief Advance particles
   */
-  //  virtual void advance_particles(const Real a_dt);
+  virtual void move_particles(const Real a_dt);
 
   /*!
     @brief Interpolate velocities

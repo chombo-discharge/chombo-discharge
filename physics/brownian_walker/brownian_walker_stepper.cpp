@@ -158,7 +158,7 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
   
   MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
 
-  a_dt = 0.0;
+  a_dt = 1.0;
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -228,7 +228,8 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   }
 
   m_solver->interpolate_velocities();
-  MayDay::Warning("brownian_walker_stepper::advance - not implemented");
+  m_solver->move_particles(a_dt);
+  m_solver->deposit_particles();
 }
 
 void brownian_walker_stepper::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {

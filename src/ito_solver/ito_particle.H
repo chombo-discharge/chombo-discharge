@@ -3,6 +3,7 @@
   @brief  Declaration of a particle class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
+  @todo   When we have re-written MeshInterp, we should get rid of the setAcceleration stuff
 */
 
 #ifndef _ITO_PARTICLE_

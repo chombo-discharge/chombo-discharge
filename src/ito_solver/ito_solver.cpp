@@ -496,6 +496,15 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 }
 
+void ito_solver::deposit_particles(){
+  CH_TIME("ito_solver::deposit_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_particles" << endl;
+  }
+
+  this->deposit_particles(m_state, m_particles, m_deposition);
+}
+
 void ito_solver::deposit_particles(EBAMRCellData&        a_state,
 				   const EBAMRItoParticles& a_particles,
 				   const InterpType&     a_deposition){
@@ -666,5 +675,35 @@ void ito_solver::interpolate_velocities(){
       MeshInterp meshInterp(box, dx, origin);
       meshInterp.interpolate(particleList, vel_fab, m_deposition);
     }
+  }
+}
+
+void ito_solver::move_particles(const Real a_dt){
+  CH_TIME("ito_solver::move_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::move_particles" << endl;
+  }
+
+  // Move all particles and rebin them
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const RealVect dx            = m_amr->get_dx()[lvl]*RealVect::Unit;
+    const RealVect origin        = m_amr->get_prob_lo();
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box box              = dbl.get(dit());
+      const EBCellFAB& velo_cell = (*m_velo_cell[lvl])[dit()];
+
+      List<ito_particle>& particleList = (*m_particles[lvl])[dit()].listItems();
+      ListIterator<ito_particle> lit(particleList);
+      for (lit.rewind(); lit; ++lit){
+	ito_particle& p = particleList[lit];
+
+	p.position() += p.velocity()*a_dt;
+      }
+    }
+
+    m_particles[lvl]->gatherOutcast();
+    m_particles[lvl]->remapOutcast();
   }
 }
