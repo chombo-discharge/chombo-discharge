@@ -638,10 +638,10 @@ void cdr_tga::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellDa
   data_ops::set_value(GWN,         0.0);
 
   this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise
-  this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis
-  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis
-  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis
-  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis)
+  this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis/dV
+  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis/dV
+  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis/dV
+  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis/dV)
 
 #if 1 // Debug
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){

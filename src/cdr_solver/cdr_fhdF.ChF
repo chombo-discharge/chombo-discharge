@@ -20,7 +20,6 @@
          vol = vol * dx
       enddo	 
 
-      half_v = 0.5/vol
       chf_multido[facebox;i;j;k]
          loval = Max(0.0, vol*celldata(chf_ix[i-ioff; j-joff; k-koff]))
          hival = Max(0.0, vol*celldata(chf_ix[i;j;k]))	 
@@ -33,15 +32,15 @@
             Hlo = loval
          endif
 
-         if(loval <= 0.0) then
+         if(hival <= 0.0) then
             Hhi = 0.0
-         else if (loval >= 1.0) then
+         else if (hival >= 1.0) then
             Hhi = 1.0
          else
-            Hhi = loval
+            Hhi = hival
          endif
 
-         facedata(chf_ix[i;j;k]) = half_v*(loval + hival)*Hlo*Hhi
+         facedata(chf_ix[i;j;k]) = 0.5*(loval + hival)*Hlo*Hhi
       chf_enddo
       
       end      

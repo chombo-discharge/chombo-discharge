@@ -119,7 +119,7 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 # This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
 # wall flow BCs.
 # ====================================================================================================
-advection_diffusion.blob_amplitude = 1.0     # Blob amplitude
+advection_diffusion.blob_amplitude = 20000     # Blob amplitude
 advection_diffusion.blob_radius    = 0.05    # Blob radius
 advection_diffusion.blob_center    = 0 0.25   # Blob center
 advection_diffusion.diffusion      = true    # Turn on/off diffusion
@@ -127,9 +127,9 @@ advection_diffusion.advection      = true    # Turn on/off advection
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-advection_diffusion.diffco         = 0.05     # Diffusion coefficient
+advection_diffusion.diffco         = 0.01     # Diffusion coefficient
 advection_diffusion.omega          = 1.0     # Rotation velocity
-advection_diffusion.cfl            = 0.8     # CFL number
+advection_diffusion.cfl            = 0.7     # CFL number
 
 # Cell tagging stuff
 # ------------------
