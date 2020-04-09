@@ -574,6 +574,9 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 
   // Do a kappa scaling
   data_ops::kappa_scale(a_state);
+
+  m_amr->average_down(a_state, m_phase);
+  m_amr->interp_ghost(a_state, m_phase);
 }
 
 bool ito_solver::is_mobile() const{
@@ -799,4 +802,3 @@ RealVect ito_solver::random_direction(){
   return RealVect(x,y,z);
 #endif
 }
-  

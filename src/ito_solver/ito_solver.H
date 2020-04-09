@@ -26,6 +26,8 @@ typedef Vector<RefCountedPtr<ParticleData<ito_particle> > > EBAMRItoParticles;
 
 /*!
   @brief Base class for Ito diffusion particle models
+  @details This is a particle class for solving Ito diffusion problems dX = vdt + Z*D*t over an AMR hierarchy. The diffusion
+coefficient is related to the hydrodynamic diffusion coefficient by D(fluid = sqrt(2*D(Ito))
 */
 class ito_solver {
 public:

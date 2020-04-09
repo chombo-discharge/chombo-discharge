@@ -1,8 +1,8 @@
 /*!
-  @file mc_photo.H
-  @brief Declaration of a first order Eddington solver
+  @file   mc_photo.H
   @author Robert Marskar
-  @date Jan. 2018
+  @date   Jan. 2018
+  @todo   Particle deposition should use the new EBMeshInterp and not MeshInterp
 */
 
 #ifndef _MC_PHOTO_

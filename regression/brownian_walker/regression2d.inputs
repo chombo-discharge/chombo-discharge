@@ -66,12 +66,12 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ito_solver.pvr_buffer        = 1             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+ito_solver.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 ito_solver.plt_vars          = phi vel dco   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step       = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed              = 0             # Seed for RNG
-ito_solver.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
-ito_solver.deposition        = cic           # 'ngp' = nearest grid point
+ito_solver.plot_deposition   = tsc           # Cloud-in-cell for plotting particles. 
+ito_solver.deposition        = tsc           # 'ngp' = nearest grid point
                                              # 'cic' = cloud-in-cell
                                              # 'tsc' = triangle-shaped-cloud
                                              # 'w4'  = 3rd order interpolation
@@ -108,14 +108,14 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 brownian_walker.diffusion      = true    # Turn on/off diffusion
 brownian_walker.advection      = true    # Turn on/off advection
 brownian_walker.blob_amplitude = 1.0     # Blob amplitude
-brownian_walker.blob_radius    = 0.15    # Blob radius
+brownian_walker.blob_radius    = 0.05    # Blob radius
 brownian_walker.blob_center    = 0 0.5   # Blob center
 brownian_walker.seed           = 0       # RNG seed
-brownian_walker.num_particles  = 100000     # Number of initial particles
+brownian_walker.num_particles  = 1000     # Number of initial particles
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-brownian_walker.diffco         = 0.1    # Diffusion coefficient
+brownian_walker.diffco         = 0.3    # Diffusion coefficient
 brownian_walker.omega          = 1.0     # Rotation velocity
 brownian_walker.cfl            = 0.5     # CFL number
 
