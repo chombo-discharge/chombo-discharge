@@ -33,37 +33,37 @@ void EBMeshInterp::depositParticle(FArrayBox&       a_rho,
 				   const Real&      a_mass,
 				   const InterpType a_interpType){
   switch (a_interpType){
-    case NGP:
-      FORT_NGP_DEPOSIT(CHF_FRA1(a_rho, 0),
-		       CHF_CONST_REALVECT(a_prob_lo),
-		       CHF_CONST_REALVECT(a_dx),
-		       CHF_CONST_REALVECT(a_position),
-		       CHF_CONST_REAL(a_mass));
-      break;
-    case CIC:
-      FORT_CIC_DEPOSIT(CHF_FRA1(a_rho, 0),
-		       CHF_CONST_REALVECT(a_prob_lo),
-		       CHF_CONST_REALVECT(a_dx),
-		       CHF_CONST_REALVECT(a_position),
-		       CHF_CONST_REAL(a_mass));
-      break;
-    case TSC:
-      FORT_TSC_DEPOSIT(CHF_FRA1(a_rho, 0),
-		       CHF_CONST_REALVECT(a_prob_lo),
-		       CHF_CONST_REALVECT(a_dx),
-		       CHF_CONST_REALVECT(a_position),
-		       CHF_CONST_REAL(a_mass));
-      break;
-    case W4:
-      FORT_W4_DEPOSIT(CHF_FRA1(a_rho, 0),
-		      CHF_CONST_REALVECT(a_prob_lo),
-		      CHF_CONST_REALVECT(a_dx),
-		      CHF_CONST_REALVECT(a_position),
-		      CHF_CONST_REAL(a_mass));
-      break;
-    default:
-      MayDay::Error("Invalid interpolation type in MeshInterp::depositParticle");
-    }
+  case NGP:
+    FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_dx),
+			    CHF_CONST_REALVECT(a_position),
+			    CHF_CONST_REAL(a_mass));
+    break;
+  case CIC:
+    FORT_CIC_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_dx),
+			    CHF_CONST_REALVECT(a_position),
+			    CHF_CONST_REAL(a_mass));
+    break;
+  case TSC:
+    FORT_TSC_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			    CHF_CONST_REALVECT(a_prob_lo),
+			    CHF_CONST_REALVECT(a_dx),
+			    CHF_CONST_REALVECT(a_position),
+			    CHF_CONST_REAL(a_mass));
+    break;
+  case W4:
+    FORT_W4_DEPOSIT_SCALAR(CHF_FRA1(a_rho, 0),
+			   CHF_CONST_REALVECT(a_prob_lo),
+			   CHF_CONST_REALVECT(a_dx),
+			   CHF_CONST_REALVECT(a_position),
+			   CHF_CONST_REAL(a_mass));
+    break;
+  default:
+    MayDay::Error("Invalid interpolation type in MeshInterp::depositParticle");
+  }
 }
 
 void EBMeshInterp::interpolateParticle(Real&             a_particleField,
@@ -115,33 +115,33 @@ void EBMeshInterp::interpolateParticle(RealVect&         a_particleField,
 				       const InterpType& a_interpType){
   switch (a_interpType) {
   case NGP:
-    FORT_NGP_INTERPOLATE(CHF_REALVECT(a_particleField),
-			 CHF_CONST_FRA(a_field),
-			 CHF_CONST_REALVECT(a_prob_lo),
-			 CHF_CONST_REALVECT(a_dx),
-			 CHF_CONST_REALVECT(a_position));
+    FORT_NGP_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
+				CHF_CONST_FRA(a_field),
+				CHF_CONST_REALVECT(a_prob_lo),
+				CHF_CONST_REALVECT(a_dx),
+				CHF_CONST_REALVECT(a_position));
 
     break;
   case CIC:
-    FORT_CIC_INTERPOLATE(CHF_REALVECT(a_particleField),
-			 CHF_CONST_FRA(a_field),
-			 CHF_CONST_REALVECT(a_prob_lo),
-			 CHF_CONST_REALVECT(a_dx),
-			 CHF_CONST_REALVECT(a_position));
+    FORT_CIC_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
+				CHF_CONST_FRA(a_field),
+				CHF_CONST_REALVECT(a_prob_lo),
+				CHF_CONST_REALVECT(a_dx),
+				CHF_CONST_REALVECT(a_position));
     break;
   case TSC:
-    FORT_TSC_INTERPOLATE(CHF_REALVECT(a_particleField),
-			 CHF_CONST_FRA(a_field),
-			 CHF_CONST_REALVECT(a_prob_lo),
-			 CHF_CONST_REALVECT(a_dx),
-			 CHF_CONST_REALVECT(a_position));
+    FORT_TSC_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
+				CHF_CONST_FRA(a_field),
+				CHF_CONST_REALVECT(a_prob_lo),
+				CHF_CONST_REALVECT(a_dx),
+				CHF_CONST_REALVECT(a_position));
     break;
   case W4:
-    FORT_W4_INTERPOLATE(CHF_REALVECT(a_particleField),
-			CHF_CONST_FRA(a_field),
-			CHF_CONST_REALVECT(a_prob_lo),
-			CHF_CONST_REALVECT(a_dx),
-			CHF_CONST_REALVECT(a_position));
+    FORT_W4_INTERPOLATE_VECTOR(CHF_REALVECT(a_particleField),
+			       CHF_CONST_FRA(a_field),
+			       CHF_CONST_REALVECT(a_prob_lo),
+			       CHF_CONST_REALVECT(a_dx),
+			       CHF_CONST_REALVECT(a_position));
     break;
   default:
     MayDay::Error("EBMeshInterp::interpolateParticle(RealVect) - Invalid interpolation type.");

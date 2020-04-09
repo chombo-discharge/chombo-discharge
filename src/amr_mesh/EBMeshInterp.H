@@ -18,10 +18,24 @@
 #include "MeshInterp.H" // For getting a view of InterpType
 
 /*!
+  @brief Deposition type
+*/
+namespace DepositionType {
+  enum Which{
+    NGP,
+    CIC,
+    TSC,
+    W4
+  };
+};
+
+/*!
    @brief Currently a shameless rip-off of MeshInterp.H
 */
 class EBMeshInterp{
 public:
+
+
 
   /*!
     @brief ctor
