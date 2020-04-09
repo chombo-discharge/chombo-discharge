@@ -12,9 +12,10 @@
 
 #include "ito_solver.H"
 #include "data_ops.H"
-#include "EBAlias.H"
+#include "EBMeshInterp.H"
 
 #include <ParmParse.H>
+#include <EBAlias.H>
 
 #include <chrono>
 
@@ -555,7 +556,7 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     // 2. Deposit this levels particles and exchange ghost cells
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
-      MeshInterp interp(box, dx*RealVect::Unit, origin);
+      EBMeshInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), deposition);
     }
 
@@ -692,8 +693,41 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
 
   List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
 
-  MeshInterp meshInterp(box, dx, origin);
-  meshInterp.interpolate(particleList, vel_fab, m_deposition);
+  EBMeshInterp meshInterp(box, dx, origin);
+  meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
+}
+
+void ito_solver::interpolate_diffusion(){
+  CH_TIME("ito_solver::interpolate_diffusion");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolate_diffusion" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      this->interpolate_diffusion(lvl, dit());
+    }
+  }
+}
+
+void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
+  CH_TIME("ito_solver::interpolate_diffusion");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolate_diffusion" << endl;
+  }
+
+  const EBCellFAB& velo_cell = (*m_velo_cell[a_lvl])[a_dit];
+  const FArrayBox& vel_fab   = velo_cell.getFArrayBox();
+  const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
+  const RealVect origin      = m_amr->get_prob_lo();
+  const Box box              = m_amr->get_grids()[a_lvl][a_dit];
+
+  List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
+
+  EBMeshInterp meshInterp(box, dx, origin);
+  meshInterp.interpolateDiffusion(particleList, vel_fab, m_deposition);
 }
 
 void ito_solver::move_particles_eulerf(const Real a_dt){

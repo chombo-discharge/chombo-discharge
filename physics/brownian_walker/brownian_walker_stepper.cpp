@@ -242,8 +242,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
       ListIterator<ito_particle> litC(particleCopy);
 
       
-      // Compute velocities 
-      m_solver->interpolate_velocities(lvl, dit()); 
+      // Compute particle velocities and diffusion coefficients
+      m_solver->interpolate_velocities(lvl, dit());
+      m_solver->interpolate_diffusion(lvl, dit());
+      
 
       // Half Euler step and evaluate velocity at half step
       for (lit.rewind(); lit; ++lit){ 

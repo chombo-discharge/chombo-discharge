@@ -193,6 +193,16 @@ public:
   virtual void interpolate_velocities(const int a_level, const DataIndex& a_dit);
 
   /*!
+    @brief Interpolate diffusion
+  */
+  virtual void interpolate_diffusion();
+
+  /*!
+    @brief Interpolate velocities
+  */
+  virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
+
+  /*!
     @brief Random Gaussian
   */
   inline RealVect random_gaussian();
