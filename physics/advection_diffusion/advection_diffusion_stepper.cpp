@@ -16,9 +16,11 @@ using namespace physics::advection_diffusion;
 advection_diffusion_stepper::advection_diffusion_stepper(){
   ParmParse pp("advection_diffusion");
 
-  pp.get("diffco",    m_diffco);
-  pp.get("omega",     m_omega);
-  pp.get("cfl",       m_cfl);
+  pp.get("fhd",        m_fhd); 
+  pp.get("diffco",     m_diffco);
+  pp.get("omega",      m_omega);
+  pp.get("cfl",        m_cfl);
+  pp.get("integrator", m_integrator);
 }
 
 advection_diffusion_stepper::advection_diffusion_stepper(RefCountedPtr<cdr_solver>& a_solver) : advection_diffusion_stepper() {
@@ -33,7 +35,7 @@ void advection_diffusion_stepper::setup_solvers(){
   m_species = RefCountedPtr<cdr_species> (new advection_diffusion_species());
 
   // Solver setup
-  m_solver->set_verbosity(-1);
+  m_solver->set_verbosity(10);
   m_solver->set_species(m_species);
   m_solver->parse_options();
   m_solver->set_amr(m_amr);
@@ -165,7 +167,7 @@ void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& 
   }
     
   // CFL on diffusion, if explicit diffusion
-  if(m_solver->is_diffusive()){
+  if(m_solver->is_diffusive() && m_integrator == 0){
     diff_dt = m_cfl*m_solver->compute_diffusive_dt();
 
     if(diff_dt < a_dt){
@@ -179,21 +181,49 @@ void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& 
 
 Real advection_diffusion_stepper::advance(const Real a_dt){
 
-  // Use Heun's method
-  EBAMRCellData& state = m_solver->get_state();
-  m_solver->compute_divJ(m_k1, state, 0.0);
+  if(m_integrator == 0){ //   Use Heun's method
+    EBAMRCellData& state = m_solver->get_state();
+    m_solver->compute_divJ(m_k1, state, 0.0);
 
-  data_ops::copy(m_tmp, state);
-  data_ops::incr(m_tmp, m_k1, -a_dt); // m_tmp = phi - dt*div(J)
+    data_ops::copy(m_tmp, state);
+    data_ops::incr(m_tmp, m_k1, -a_dt); // m_tmp = phi - dt*div(J)
 
-  m_solver->compute_divJ(m_k2, m_tmp, 0.0);
+    m_solver->compute_divJ(m_k2, m_tmp, 0.0);
 
+    data_ops::incr(state, m_k1, -0.5*a_dt);
+    data_ops::incr(state, m_k2, -0.5*a_dt);
 
-  data_ops::incr(state, m_k1, -0.5*a_dt);
-  data_ops::incr(state, m_k2, -0.5*a_dt);
+    m_solver->make_non_negative(state);
   
-  m_amr->average_down(state, phase::gas);
-  m_amr->interp_ghost(state, phase::gas);
+    m_amr->average_down(state, phase::gas);
+    m_amr->interp_ghost(state, phase::gas);
+  }
+  else if(m_integrator == 1){
+
+    EBAMRCellData& state = m_solver->get_state();
+
+    m_solver->compute_divF(m_k1, state, a_dt);
+    data_ops::incr(state, m_k1, -a_dt);
+
+    if(m_solver->is_diffusive()){
+      data_ops::copy(m_k2, state); // Now holds phiOld - dt*div(F)
+      if(m_fhd){
+	m_solver->GWN_diffusion_source(m_k1, state); // k1 holds random diffusion
+      }
+      else{
+	data_ops::set_value(m_k1, 0.0);
+      }
+      m_solver->advance_euler(state, m_k2, m_k1, a_dt);
+    }
+
+    m_solver->make_non_negative(state);
+
+    m_amr->average_down(state, phase::gas);
+    m_amr->average_down(state, phase::gas);
+  }
+  else{
+    MayDay::Abort("advection_diffusion_stepper - unknown integrator requested");
+  }
 
   
   return a_dt;

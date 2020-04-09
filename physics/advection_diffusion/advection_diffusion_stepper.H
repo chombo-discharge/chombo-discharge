@@ -62,6 +62,12 @@ namespace physics {
       Real m_diffco;
       Real m_omega;
 
+      // Use stochastic diffusion
+      bool m_fhd;
+
+      // Integrator (yes, I'm too lazy to write an enum for holding this)
+      int m_integrator;
+
       void set_velocity();
       void set_velocity(const int a_level);
 

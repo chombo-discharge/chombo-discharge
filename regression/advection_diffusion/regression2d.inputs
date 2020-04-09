@@ -124,6 +124,9 @@ advection_diffusion.blob_radius    = 0.05    # Blob radius
 advection_diffusion.blob_center    = 0 0.25  # Blob center
 advection_diffusion.diffusion      = true    # Turn on/off diffusion
 advection_diffusion.advection      = true    # Turn on/off advection
+advection_diffusion.fhd            = false   # Use FHD or not
+
+advection_diffusion.integrator     = 1       # 0 = Heun's method. 1 = IMEX Euler
 
 # Velocity, diffusion, and CFL
 # ----------------------------

@@ -66,7 +66,6 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # CDR_GDNV SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-cdr_gdnv.stochastic_diffusion = false                   # Stochastic advection. 'true' or 'false'
 cdr_gdnv.seed                 = 0                       # Seed. Random seed with seed < 0
 cdr_gdnv.domain_bc            = kinetic                 # 'kinetic', 'wall', 'outflow', or 'extrap'
 cdr_gdnv.divF_nc              = conservative_average    # 'covered_face' or 'conservative_average'
@@ -75,15 +74,15 @@ cdr_gdnv.limit_slopes         = true                    # Use slope-limiters for
 cdr_gdnv.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 cdr_gdnv.extrap_source        = false                    # Flag for including source term for time-extrapolation
 cdr_gdnv.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
-cdr_gdnv.gmg_verbosity        = 10                      # GMG verbosity
+cdr_gdnv.gmg_verbosity        = 100                     # GMG verbosity
 cdr_gdnv.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
 cdr_gdnv.gmg_post_smooth      = 6                       # Number of relaxations in upsweep
 cdr_gdnv.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
 cdr_gdnv.gmg_min_iter         = 5                       # Minimum number of iterations
 cdr_gdnv.gmg_max_iter         = 32                      # Maximum number of iterations
-cdr_gdnv.gmg_tolerance        = 1.E-8                   # Residue tolerance
+cdr_gdnv.gmg_tolerance        = 1.E-12                  # Residue tolerance
 cdr_gdnv.gmg_hang             = 0.2                     # Solver hang
-cdr_gdnv.gmg_bottom_drop      = 2                       # Bottom drop
+cdr_gdnv.gmg_bottom_drop      = 4                       # Bottom drop
 cdr_gdnv.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 cdr_gdnv.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
 cdr_gdnv.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
@@ -119,17 +118,20 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 # This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
 # wall flow BCs.
 # ====================================================================================================
-advection_diffusion.blob_amplitude = 20000     # Blob amplitude
+advection_diffusion.blob_amplitude = 1.0  # Blob amplitude
 advection_diffusion.blob_radius    = 0.05    # Blob radius
-advection_diffusion.blob_center    = 0 0.25   # Blob center
+advection_diffusion.blob_center    = 0 0.25  # Blob center
 advection_diffusion.diffusion      = true    # Turn on/off diffusion
 advection_diffusion.advection      = true    # Turn on/off advection
+advection_diffusion.fhd            = false   # Use FHD or not
+
+advection_diffusion.integrator     = 1       # 0 = Heun's method. 1 = IMEX Euler
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-advection_diffusion.diffco         = 0.01     # Diffusion coefficient
+advection_diffusion.diffco         = 0.01    # Diffusion coefficient
 advection_diffusion.omega          = 1.0     # Rotation velocity
-advection_diffusion.cfl            = 0.7     # CFL number
+advection_diffusion.cfl            = 0.5     # CFL number
 
 # Cell tagging stuff
 # ------------------

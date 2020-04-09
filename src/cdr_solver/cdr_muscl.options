@@ -1,7 +1,6 @@
 # ====================================================================================================
 # CDR_MUSCL SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
-cdr_muscl.stochastic_diffusion = false                   # Stochastic advection. 'true' or 'false'
 cdr_muscl.seed                 = -1                      # Seed. Random seed with seed < 0
 cdr_muscl.domain_bc            = kinetic                 # 'kinetic', 'wall', 'outflow', or 'extrap'
 cdr_muscl.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
