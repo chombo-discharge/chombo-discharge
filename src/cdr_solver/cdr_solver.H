@@ -13,6 +13,10 @@
 #include "amr_mesh.H"
 #include "cdr_species.H"
 
+#include <random>
+#include <time.h>
+#include <chrono>
+
 /*!
   @brief Abstract class for cdr-equations. This is (almost) a whole solver. 
 */
@@ -83,6 +87,11 @@ public:
     @note If you also want charge injection through the domain sides, you must put those in a_G before entering this routine
   */
   virtual void compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG);
+
+  /*!
+    @brief Random source for diffusion
+  */
+  virtual void GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
 
   /*!
     @brief Make a_phi non-negative by redistributing mass in the vicinity of the cut cells
@@ -539,6 +548,21 @@ protected:
   bool m_plot_src;
 
   /*!
+    @brief Plot numbers or densities
+  */
+  bool m_plot_numbers;
+
+  /*!
+    @brief RNG engine
+  */
+  std::mt19937_64* m_rng;     // Engine
+
+  /*!
+    @brief RNG seed
+  */
+  int m_seed;
+
+  /*!
     @brief Average cell-centered velocities to face centers
   */
   virtual void average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCellData& a_velo_cell);
@@ -694,11 +718,39 @@ protected:
   virtual void define_interpolant();
 
   /*!
+    @brief Smoothed face average
+  */
+  virtual void smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states);
+
+  /*!
+    @brief Gaussian noise field
+  */
+  virtual void fill_GWN(EBAMRFluxData& a_noise, const Real a_mean);
+
+  /*!
     @brief Options for parsing some class options
   */
   virtual void parse_mass_redist();  // Parses mass redistribution
+
+  /*!
+    @brief Parses domain BC options
+  */
   virtual void parse_domain_bc();    // Parses domain BC options
+
+  /*!
+    @brief Parses plot variables
+  */
   virtual void parse_plot_vars();    // Parses plot variables
+
+  /*!
+    @brief Parse random number generator
+  */
+  virtual void parse_rng_seed();
+
+    /*!
+    @brief Parse plot mode
+  */
+  virtual void parse_plotmode();    
 };
 
 #endif

@@ -23,7 +23,6 @@ cdr_muscl::~cdr_muscl(){
 }
 
 void cdr_muscl::parse_options(){
-  parse_diffusion();    // Parses stochastic diffusion
   parse_rng_seed();     // Parses RNG seed
   parse_plotmode();     // Parses plot mode
   parse_domain_bc();    // Parses domain BC options

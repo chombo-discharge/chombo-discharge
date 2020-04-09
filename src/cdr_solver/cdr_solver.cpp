@@ -8,12 +8,15 @@
 
 #include "cdr_solver.H"
 #include "cdr_solverF_F.H"
+#include "cdr_fhdF_F.H"
 #include "data_ops.H"
 
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
 #include <EBAlias.H>
+
+
 
 #define USE_NONCONS_DIV 0
 
@@ -2292,4 +2295,258 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
 
   this->increment_concentration_redist(mass_diff);
   this->concentration_redistribution(a_phi, mass_diff, weights);
+}
+
+void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states){
+  CH_TIME("cdr_solver::GWN_diffusion_source");
+  if(m_verbosity > 5){
+    pout() << m_name + "::GWN_diffusion_source" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  
+  EBAMRFluxData ranflux;
+  EBAMRFluxData GWN;
+
+  // Putting this in here because it is really, really important that we don't send in any stupid ghost cells or negative
+  // values for the diffusion advance
+  EBAMRCellData& states = const_cast<EBAMRCellData&> (a_cell_states);
+  m_amr->average_down(states, m_phase);
+  m_amr->interp_ghost(states, m_phase);
+  data_ops::floor(states, 0.0);
+  
+  m_amr->allocate(ranflux,   m_phase, ncomp);
+  m_amr->allocate(GWN,       m_phase, ncomp);
+  
+  data_ops::set_value(a_ransource, 0.0);
+  data_ops::set_value(ranflux,     0.0);
+  data_ops::set_value(GWN,         0.0);
+
+  this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise
+  this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis/dV
+  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis/dV
+  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis/dV
+  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis/dV)
+
+#if 1 // Debug
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    for (int dir = 0; dir <SpaceDim; dir++){
+      Real max, min;
+      EBLevelDataOps::getMaxMin(max, min, *ranflux[lvl], 0, dir);
+      if(min < 0.0 || max < 0.0){
+	MayDay::Abort("cdr_solver::GWN_diffusion_source - negative face value");
+      }
+    }
+  }
+#endif
+  data_ops::multiply(ranflux, GWN);                     // Holds random, cell-centered flux
+
+  // Source term. 
+  // I want to re-use conservative_divergence(), but that also computes with the EB fluxes. Back that up
+  // first and use the already written and well-tested routine. Then copy back
+  EBAMRIVData zeroflux;
+  m_amr->allocate(zeroflux, m_phase, 1);
+  data_ops::set_value(zeroflux, 0.0);
+  data_ops::set_value(a_ransource, 0.0);
+  conservative_divergence(a_ransource, ranflux, zeroflux); // Compute the conservative divergence. This also refluxes. 
+  
+#if 1 // Debug
+  m_amr->average_down(a_ransource, m_phase);
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    if(EBLevelDataOps::checkNANINF(*a_ransource[lvl])){
+      MayDay::Abort("cdr_solver::GWN_diffusion_source - something is wrong");
+    }
+  }
+#endif
+}
+
+void cdr_solver::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states){
+  CH_TIME("cdr_solver::smooth_heaviside_faces");
+  if(m_verbosity > 5){
+    pout() << m_name + "::smooth_heaviside_faces" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    const Real vol               = pow(dx, SpaceDim);
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box& box = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB& face_states       = (*a_face_states[lvl])[dit()][dir];
+	const EBCellFAB& cell_states = (*a_cell_states[lvl])[dit()];
+
+	BaseFab<Real>& reg_face       = face_states.getSingleValuedFAB();
+	const BaseFab<Real>& reg_cell = cell_states.getSingleValuedFAB();
+
+	Box facebox = box;
+	//	facebox.grow(dir,1);
+	facebox.surroundingNodes(dir);
+
+	// This will also do irregular cells and boundary faces
+	FORT_HEAVISIDE_MEAN(CHF_FRA1(reg_face, comp),  
+			    CHF_CONST_FRA1(reg_cell, comp),
+			    CHF_CONST_INT(dir),
+			    CHF_CONST_REAL(dx),
+			    CHF_BOX(facebox));
+
+	// Fix up irregular cell faces
+	const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary;
+	for (FaceIterator faceit(irreg, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+
+
+	  const VolIndex lovof = face.getVoF(Side::Lo);
+	  const VolIndex hivof = face.getVoF(Side::Hi);
+
+	  const Real loval = Max(0.0, cell_states(lovof, comp));
+	  const Real hival = Max(0.0, cell_states(hivof, comp));
+
+
+	  Real Hlo;
+	  if(loval*vol <= 0.0){
+	    Hlo = 0.0;
+	  }
+	  else if(loval*vol >= 1.0){
+	    Hlo = 1.0;
+	  }
+	  else{
+	    Hlo = loval*vol;
+	  }
+
+	  Real Hhi;
+	  if(hival*vol <= 0.0){
+	    Hhi = 0.0;
+	  }
+	  else if(hival*vol >= 1.0){
+	    Hhi = 1.0;
+	  }
+	  else{
+	    Hhi = hival*vol;
+	  }
+
+	  face_states(face, comp) = 0.5*(hival + loval)*Hlo*Hhi;
+	}
+
+	// No random flux on domain faces. Reset those. 
+	for (SideIterator sit; sit.ok(); ++sit){
+	  Box sidebox;
+	  if(sit() == Side::Lo){
+	    sidebox = bdryLo(domain, dir, 1);
+	  }
+	  else if(sit() == Side::Hi){
+	    sidebox = bdryHi(domain, dir, 1);
+	  }
+	  
+	  sidebox &= facebox;
+
+	  Box cellbox = sidebox.enclosedCells(dir);
+
+	  const IntVectSet ivs(cellbox);
+	  const FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;
+	  for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	    face_states(faceit(), comp) = 0.0;
+	  }
+	}
+      }
+    }
+
+    // Covered is bogus
+    EBLevelDataOps::setCoveredVal(*a_face_states[lvl], 0.0);
+  }
+}
+
+void cdr_solver::fill_GWN(EBAMRFluxData& a_noise, const Real a_sigma){
+  CH_TIME("cdr_solver::fill_GWN");
+  if(m_verbosity > 5){
+    pout() << m_name + "::fill_GWN" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  std::normal_distribution<double> GWN(0.0, a_sigma);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    const Real vol               = pow(dx, SpaceDim);
+    const Real ivol              = sqrt(1./vol);
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const Box& box = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB& noise = (*a_noise[lvl])[dit()][dir];
+
+	Box facebox = box;
+	facebox.surroundingNodes(dir);
+
+	noise.setVal(0.0);
+
+	// Regular faces
+	BaseFab<Real>& noise_reg = noise.getSingleValuedFAB();
+	for (BoxIterator bit(facebox); bit.ok(); ++bit){
+	  const IntVect iv = bit();
+	  noise_reg(iv, comp) = GWN(*m_rng)*ivol;
+	}
+
+	// // Irregular faces
+	const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary;
+	for (FaceIterator faceit(irreg, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+
+	  noise(face, comp) = GWN(*m_rng)*ivol;
+	}
+      }
+    }
+  }
+}
+
+void cdr_solver::parse_rng_seed(){
+  CH_TIME("cdr_solver::parse_rng_seed");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_rng_seed" << endl;
+  }  
+  ParmParse pp(m_class_name.c_str());
+  pp.get("seed", m_seed);
+  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
+
+  m_rng = new std::mt19937_64(m_seed);
+}
+
+void cdr_solver::parse_plotmode(){
+  CH_TIME("cdr_solver::parse_plotmode");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_plotmode" << endl;
+  }  
+  ParmParse pp(m_class_name.c_str());
+
+  m_plot_numbers = false;
+  
+  std::string str;
+  pp.get("plot_mode", str);
+  if(str == "density"){
+    m_plot_numbers = false;
+  }
+  else if(str == "numbers"){
+    m_plot_numbers = true;
+  }
 }

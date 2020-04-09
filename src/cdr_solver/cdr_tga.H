@@ -9,7 +9,6 @@
 #define _CDR_TGA_
 
 #include "cdr_solver.H"
-#include "cdr_fhdF_F.H"
 #include "ebconductivityopfactory.H"
 
 #include <AMRMultiGrid.H>
@@ -172,31 +171,6 @@ protected:
   EBSimpleSolver m_simple_solver;
 
   /*!
-    @brief Stochastic diffusion or not
-  */
-  bool m_stochastic_diffusion;
-
-  /*!
-    @brief
-  */
-  bool m_stochastic_advection;
-
-  /*!
-    @brief Plot numbers or densities
-  */
-  bool m_plot_numbers;
-
-  /*!
-    @brief RNG engine
-  */
-  std::mt19937_64* m_rng;     // Engine
-
-  /*!
-    @brief RNG seed
-  */
-  int m_seed;
-
-  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_gmg_verbosity;
@@ -291,34 +265,6 @@ protected:
   */
   virtual void parse_gmg_settings();
 
-  /*!
-    @brief Parse stochastic diffusion or not
-  */
-  virtual void parse_diffusion();   
 
-  /*!
-    @brief Parse random number generator
-  */
-  virtual void parse_rng_seed();    
-
-  /*!
-    @brief Parse plot mode
-  */
-  virtual void parse_plotmode();    
-
-  /*!
-    @brief Random source for diffusion
-  */
-  virtual void GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
-
-  /*!
-    @brief Smoothed face average
-  */
-  virtual void smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states);
-
-  /*!
-    @brief Gaussian noise field
-  */
-  virtual void fill_GWN(EBAMRFluxData& a_noise, const Real a_mean);
 };
 #endif
