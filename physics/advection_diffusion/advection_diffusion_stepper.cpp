@@ -16,9 +16,9 @@ using namespace physics::advection_diffusion;
 advection_diffusion_stepper::advection_diffusion_stepper(){
   ParmParse pp("advection_diffusion");
 
-  pp.get("diffco",   m_diffco);
-  pp.get("omega",    m_omega);
-  pp.get("cfl",      m_cfl);
+  pp.get("diffco",    m_diffco);
+  pp.get("omega",     m_omega);
+  pp.get("cfl",       m_cfl);
 }
 
 advection_diffusion_stepper::advection_diffusion_stepper(RefCountedPtr<cdr_solver>& a_solver) : advection_diffusion_stepper() {

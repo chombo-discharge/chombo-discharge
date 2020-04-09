@@ -443,6 +443,12 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
     // General divergence computation. Also inject charge. Domain fluxes came in through the compute
     // advective flux function. 
     this->compute_divG(a_divJ, total_flux, m_ebflux);
+    if(m_stochastic_diffusion && m_diffusive){
+      EBAMRCellData GWN;
+      m_amr->allocate(GWN, m_phase, ncomp);
+      this->GWN_diffusion_source(GWN, a_state);
+      data_ops::incr(a_divJ, GWN, 1.0);
+    }
   }
   else{ 
     data_ops::set_value(a_divJ, 0.0);
@@ -815,7 +821,7 @@ void cdr_tga::fill_GWN(EBAMRFluxData& a_noise, const Real a_sigma){
 	  noise_reg(iv, comp) = GWN(*m_rng)*ivol;
 	}
 
-	// Irregular faces
+	// // Irregular faces
 	const IntVectSet& irreg = ebisbox.getIrregIVS(box);
 	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary;
 	for (FaceIterator faceit(irreg, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){

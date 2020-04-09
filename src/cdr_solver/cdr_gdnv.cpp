@@ -37,6 +37,8 @@ void cdr_gdnv::parse_options(){
   parse_plotmode();      // Parse plot mdoe
   parse_gmg_settings();  // Parses solver parameters for geometric multigrid
   parse_extrap_source(); // Parse source term extrapolation for time-centering advective comps
+  parse_diffusion();     // Parse diffusion
+  parse_rng_seed();
 }
 
 void cdr_gdnv::parse_hybrid_div(){
