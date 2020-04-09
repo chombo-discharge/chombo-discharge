@@ -12,7 +12,7 @@
 
 #include "ito_solver.H"
 #include "data_ops.H"
-#include "EBMeshInterp.H"
+#include "EBParticleInterp.H"
 
 #include <ParmParse.H>
 #include <EBAlias.H>
@@ -554,7 +554,7 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     // 2. Deposit this levels particles and exchange ghost cells
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
-      EBMeshInterp interp(box, dx*RealVect::Unit, origin);
+      EBParticleInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
@@ -691,7 +691,7 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
 
   List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
 
-  EBMeshInterp meshInterp(box, dx, origin);
+  EBParticleInterp meshInterp(box, dx, origin);
   meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
 }
 
@@ -716,16 +716,16 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
     pout() << m_name + "::interpolate_diffusion" << endl;
   }
 
-  const EBCellFAB& velo_cell = (*m_velo_cell[a_lvl])[a_dit];
-  const FArrayBox& vel_fab   = velo_cell.getFArrayBox();
+  const EBCellFAB& dco_cell   = (*m_diffco_cell[a_lvl])[a_dit];
+  const FArrayBox& dco_fab   = dco_cell.getFArrayBox();
   const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
   const RealVect origin      = m_amr->get_prob_lo();
   const Box box              = m_amr->get_grids()[a_lvl][a_dit];
 
   List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
 
-  EBMeshInterp meshInterp(box, dx, origin);
-  meshInterp.interpolateDiffusion(particleList, vel_fab, m_deposition);
+  EBParticleInterp meshInterp(box, dx, origin);
+  meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
 }
 
 void ito_solver::move_particles_eulerf(const Real a_dt){
@@ -764,12 +764,12 @@ void ito_solver::move_particles_eulerf(const int a_lvl, const DataIndex& a_dit, 
 }
 
 
-inline RealVect ito_solver::random_gaussian(){
+RealVect ito_solver::random_gaussian() {
   const double d = m_gauss01(m_rng);
   return d*this->random_direction();
 }
 
-inline RealVect ito_solver::random_direction(){
+RealVect ito_solver::random_direction(){
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;

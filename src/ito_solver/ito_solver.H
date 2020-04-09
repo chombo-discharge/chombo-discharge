@@ -13,7 +13,7 @@
 #include "computational_geometry.H"
 #include "ito_species.H"
 #include "ito_particle.H"
-#include "EBMeshInterp.H"
+#include "EBParticleInterp.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -205,12 +205,12 @@ public:
   /*!
     @brief Random Gaussian
   */
-  inline RealVect random_gaussian();
+  RealVect random_gaussian();
 
   /*!
     @brief Random direction
   */
-  inline RealVect random_direction();
+  RealVect random_direction();
 
   
 protected:

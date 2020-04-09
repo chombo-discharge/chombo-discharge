@@ -230,41 +230,51 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
     ParticleData<ito_particle>& particles = *m_solver->get_particles()[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      // Create a copy. 
-      List<ito_particle>& particleList = particles[dit()].listItems();
-      List<ito_particle>  particleCopy = List<ito_particle>(particleList);
 
-      // The list iterator is NOT an indexing iterator but iterates over the list given
-      // in the constructor. So, we need one for velocities and one for the copy
-      ListIterator<ito_particle> lit(particleList);
-      ListIterator<ito_particle> litC(particleCopy);
+    if(m_solver->is_mobile()){
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	// Create a copy. 
+	List<ito_particle>& particleList = particles[dit()].listItems();
+	List<ito_particle>  particleCopy = List<ito_particle>(particleList);
+
+	// The list iterator is NOT an indexing iterator but iterates over the list given
+	// in the constructor. So, we need one for velocities and one for the copy
+	ListIterator<ito_particle> lit(particleList);
+	ListIterator<ito_particle> litC(particleCopy);
 
       
-      // Compute particle velocities and diffusion coefficients
-      m_solver->interpolate_velocities(lvl, dit());
-      m_solver->interpolate_diffusion(lvl, dit());
+	// Compute particle velocities and diffusion coefficients
+	m_solver->interpolate_velocities(lvl, dit());
+	m_solver->interpolate_diffusion(lvl, dit());
       
 
-      // Half Euler step and evaluate velocity at half step
-      for (lit.rewind(); lit; ++lit){ 
-	ito_particle& p = particleList[lit];
-	p.position() += 0.5*p.velocity()*a_dt;
-      }
-      m_solver->interpolate_velocities(lvl, dit()); 
+	// Half Euler step and evaluate velocity at half step
+	for (lit.rewind(); lit; ++lit){ 
+	  ito_particle& p = particleList[lit];
+	  p.position() += 0.5*p.velocity()*a_dt;
+	}
+	m_solver->interpolate_velocities(lvl, dit()); 
 
-      // Final stage
-      for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
-	ito_particle& p    = particleList[lit];
-	ito_particle& oldP = particleCopy[litC];
-	p.position() = oldP.position() + p.velocity()*a_dt;
+	// Final stage
+	for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
+	  ito_particle& p    = particleList[lit];
+	  ito_particle& oldP = particleCopy[litC];
+	  p.position() = oldP.position() + p.velocity()*a_dt;
+	}
       }
+    }
 
-      // Add diffusion hop
-      for (lit.rewind(); lit; ++lit){ 
-	ito_particle& p = particleList[lit];
-	p.position() += 0.5*p.velocity()*a_dt;
+    // Add a diffusion hop
+    if(m_solver->is_diffusive()){
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	List<ito_particle>& particleList = particles[dit()].listItems();
+	ListIterator<ito_particle> lit(particleList);
+
+	for (lit.rewind(); lit; ++lit){ 
+	  ito_particle& p = particleList[lit];
+	  const RealVect ran = m_solver->random_gaussian();
+	  p.position() += ran*p.diffusion()*a_dt;
+	}
       }
     }
 

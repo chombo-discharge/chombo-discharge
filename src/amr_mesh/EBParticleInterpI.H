@@ -1,16 +1,16 @@
 /*!
-  @file   EBMeshInterpI.H
-  @brief  Implementatoin of EBMeshInterp.H
+  @file   EBParticleInterpI.H
+  @brief  Implementatoin of EBParticleInterp.H
   @author Robert Marskar
   @date   April 2020
 */
 
-#ifndef _EBMESHINTERPI_H_
-#define _EBMESHINTERPI_H_
+#ifndef _EBPARTICLEINTERPI_H_
+#define _EBPARTICLEINTERPI_H_
 
 
 template <class P>
-void EBMeshInterp::deposit(const List<P>&        a_particleList,
+void EBParticleInterp::deposit(const List<P>&        a_particleList,
 			   FArrayBox&            a_rho,
 			   DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -27,7 +27,7 @@ void EBMeshInterp::deposit(const List<P>&        a_particleList,
 }
 
 template <class P>
-void EBMeshInterp::interpolateDiffusion(List<P>&              a_particleList,
+void EBParticleInterp::interpolateDiffusion(List<P>&              a_particleList,
 					const FArrayBox&      a_diffusionField,
 					DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -44,7 +44,7 @@ void EBMeshInterp::interpolateDiffusion(List<P>&              a_particleList,
 }
   
 template <class P>
-void EBMeshInterp::interpolateVelocity(List<P>&              a_particleList,
+void EBParticleInterp::interpolateVelocity(List<P>&              a_particleList,
 				       const FArrayBox&      a_velocityField,
 				       DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
@@ -61,7 +61,7 @@ void EBMeshInterp::interpolateVelocity(List<P>&              a_particleList,
 }
 
 template <class P>
-void EBMeshInterp::interpolateAcceleration(List<P>&              a_particleList,
+void EBParticleInterp::interpolateAcceleration(List<P>&              a_particleList,
 					   const FArrayBox&      a_accelerationField,
 					   DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){

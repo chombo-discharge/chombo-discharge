@@ -1,9 +1,8 @@
 /*!
-  @file   EBMeshInterp.H
-  @brief  Currently a shameless rip-off of 
+  @file   EBParticleInterp.H
+  @brief  My clunky attempt at deposition particles in an EB context
   @author Robert Marskar
   @date   April 2020
-  @todo   Remove the dependence of MeshInterp and move the typedef into here when we're ready for that. 
 */
 
 #ifndef _EBMESHINTERP_
@@ -30,18 +29,18 @@ namespace DepositionType {
 /*!
    @brief Currently a shameless rip-off of MeshInterp.H
 */
-class EBMeshInterp{
+class EBParticleInterp{
 public:
 
   /*!
     @brief ctor
   */
-  EBMeshInterp();
+  EBParticleInterp();
 
   /*!
     @brief Full constructor
   */
-  EBMeshInterp(const Box&      a_domain,
+  EBParticleInterp(const Box&      a_domain,
 	       const RealVect& a_dx,
 	       const RealVect& a_prob_lo);
 
@@ -125,6 +124,6 @@ protected:
   RealVect m_prob_lo;
 };
 
-#include "EBMeshInterpI.H"
+#include "EBParticleInterpI.H"
 
 #endif

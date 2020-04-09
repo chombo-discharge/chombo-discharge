@@ -1,24 +1,24 @@
 /*!
-  @file   EBMeshInterp.cpp
-  @brief  Implementationof EBMeshInterp.H
+  @file   EBParticleInterp.cpp
+  @brief  Implementationof EBParticleInterp.H
   @author Robert Marskar
   @date   April 2020
 */
 
-#include "EBMeshInterp.H"
-#include "EBMeshInterpF_F.H"
+#include "EBParticleInterp.H"
+#include "EBParticleInterpF_F.H"
 
 
-EBMeshInterp::EBMeshInterp(){
+EBParticleInterp::EBParticleInterp(){
 }
 
-EBMeshInterp::EBMeshInterp(const Box&      a_domain,
+EBParticleInterp::EBParticleInterp(const Box&      a_domain,
 			   const RealVect& a_dx,
 			   const RealVect& a_prob_lo){
   this->define(a_domain, a_dx, a_prob_lo);
 }
 
-void EBMeshInterp::define(const Box&      a_domain,
+void EBParticleInterp::define(const Box&      a_domain,
 			  const RealVect& a_dx,
 			  const RealVect& a_prob_lo){
   m_domain  = a_domain;
@@ -26,7 +26,7 @@ void EBMeshInterp::define(const Box&      a_domain,
   m_dx      = a_dx;
 }
 
-void EBMeshInterp::depositParticle(FArrayBox&       a_rho,
+void EBParticleInterp::depositParticle(FArrayBox&       a_rho,
 				   const RealVect&  a_prob_lo,
 				   const RealVect&  a_dx,
 				   const RealVect&  a_position,
@@ -66,7 +66,7 @@ void EBMeshInterp::depositParticle(FArrayBox&       a_rho,
   }
 }
 
-void EBMeshInterp::interpolateParticle(Real&             a_particleField,
+void EBParticleInterp::interpolateParticle(Real&             a_particleField,
 				       const FArrayBox&  a_field,
 				       const RealVect&   a_prob_lo,
 				       const RealVect&   a_dx,
@@ -103,11 +103,11 @@ void EBMeshInterp::interpolateParticle(Real&             a_particleField,
 			       CHF_CONST_REALVECT(a_position));
     break;
   default:
-    MayDay::Error("EBMeshInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
+    MayDay::Error("EBParticleInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
   }
 }
 
-void EBMeshInterp::interpolateParticle(RealVect&         a_particleField,
+void EBParticleInterp::interpolateParticle(RealVect&         a_particleField,
 				       const FArrayBox&  a_field,
 				       const RealVect&   a_prob_lo,
 				       const RealVect&   a_dx,
@@ -144,7 +144,7 @@ void EBMeshInterp::interpolateParticle(RealVect&         a_particleField,
 			       CHF_CONST_REALVECT(a_position));
     break;
   default:
-    MayDay::Error("EBMeshInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
+    MayDay::Error("EBParticleInterp::interpolateParticle(RealVect) - Invalid interpolation type.");
   }
 }
   

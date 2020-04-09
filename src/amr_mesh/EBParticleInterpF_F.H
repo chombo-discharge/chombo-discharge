@@ -1,5 +1,5 @@
-#ifndef _EBMESHINTERPF_F_H_
-#define _EBMESHINTERPF_F_H_
+#ifndef _EBPARTICLEINTERPF_F_H_
+#define _EBPARTICLEINTERPF_F_H_
 
 #include "FORT_PROTO.H"
 #include "CH_Timer.H"
