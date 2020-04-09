@@ -13,12 +13,12 @@
 #include "computational_geometry.H"
 #include "ito_species.H"
 #include "ito_particle.H"
+#include "EBMeshInterp.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
 #include <ParticleValidRegion.H>
 #include <BinItem.H>
-#include <MeshInterp.H>
 
 #include <random>
 
@@ -78,9 +78,9 @@ public:
   /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
-  virtual void deposit_particles(EBAMRCellData&        a_state,
-				 const EBAMRItoParticles& a_particles,
-				 const InterpType&     a_deposition);
+  virtual void deposit_particles(EBAMRCellData&              a_state,
+				 const EBAMRItoParticles&    a_particles,
+				 const DepositionType::Which a_deposition);
 
   /*!
     @brief Get number of plot variables
@@ -328,12 +328,12 @@ protected:
   /*!
     @brief Mass/charge deposition type
   */
-  InterpType m_deposition; 
+  DepositionType::Which m_deposition; 
 
   /*!
     @brief Plot deposition type
   */
-  InterpType m_plot_deposition;
+  DepositionType::Which m_plot_deposition; 
 
   /*!
     @brief Deposited particles

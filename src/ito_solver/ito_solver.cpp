@@ -99,16 +99,16 @@ void ito_solver::parse_deposition(){
   // Deposition for particle-mesh operations
   pp.get("deposition", str);
   if(str == "ngp"){
-    m_deposition = InterpType::NGP;
+    m_deposition = DepositionType::NGP;
   }
   else if(str == "cic"){
-    m_deposition = InterpType::CIC;
+    m_deposition = DepositionType::CIC;
   }
   else if(str == "tsc"){
-    m_deposition = InterpType::TSC;
+    m_deposition = DepositionType::TSC;
   }
   else if(str == "w4"){
-    m_deposition = InterpType::W4;
+    m_deposition = DepositionType::W4;
   }
   else{
     MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
@@ -118,16 +118,16 @@ void ito_solver::parse_deposition(){
   pp.get("plot_deposition", str);
 
   if(str == "ngp"){
-    m_plot_deposition = InterpType::NGP;
+    m_plot_deposition = DepositionType::NGP;
   }
   else if(str == "cic"){
-    m_plot_deposition = InterpType::CIC;
+    m_plot_deposition = DepositionType::CIC;
   }
   else if(str == "tsc"){
-    m_plot_deposition = InterpType::TSC;
+    m_plot_deposition = DepositionType::TSC;
   }
   else if(str == "w4"){
-    m_plot_deposition = InterpType::W4;
+    m_plot_deposition = DepositionType::W4;
   }
   else{
     MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
@@ -508,7 +508,7 @@ void ito_solver::deposit_particles(){
 
 void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 				   const EBAMRItoParticles& a_particles,
-				   const InterpType&        a_deposition){
+				   const DepositionType::Which        a_deposition){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
@@ -537,8 +537,6 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
   data_ops::set_value(a_state,    0.0);
   data_ops::set_value(m_scratch,  0.0);
 
-  InterpType deposition = a_deposition;
-
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -557,7 +555,7 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       EBMeshInterp interp(box, dx*RealVect::Unit, origin);
-      interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), deposition);
+      interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
     // Exchange ghost cells. 

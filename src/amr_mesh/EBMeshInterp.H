@@ -15,8 +15,6 @@
 #include "Vector.H"
 #include "RealVect.H"
 
-#include "MeshInterp.H" // For getting a view of InterpType
-
 /*!
   @brief Deposition type
 */
@@ -34,8 +32,6 @@ namespace DepositionType {
 */
 class EBMeshInterp{
 public:
-
-
 
   /*!
     @brief ctor
@@ -61,36 +57,36 @@ public:
     @details This reqires that P has a member function mass()
   */
   template <class P>
-  void deposit(const List<P>& a_particleList,
-	       FArrayBox&     a_rho,
-	       InterpType&    a_interpType);
+  void deposit(const List<P>&        a_particleList,
+	       FArrayBox&            a_rho,
+	       DepositionType::Which a_deposition);
 
   /*!
     @brief Interpolate the field 
     @details This requires that P has a member function setDiffusion() and that a_diffusionField has one component
   */
   template <class P>
-  void interpolateDiffusion(List<P>&         a_particleList,
-			    const FArrayBox& a_diffusionField,
-			    InterpType&      a_interpType);
+  void interpolateDiffusion(List<P>&              a_particleList,
+			    const FArrayBox&      a_diffusionField,
+			    DepositionType::Which a_deposition);
   
   /*!
     @brief Interpolate a velocity field
     @details This requires that P has a member function setVelocity() and that a_velocityField has SpaceDim components
   */
   template <class P>
-  void interpolateVelocity(List<P>&         a_particleList,
-			   const FArrayBox& a_velocityField,
-			   InterpType&      a_interpType);
+  void interpolateVelocity(List<P>&              a_particleList,
+			   const FArrayBox&      a_velocityField,
+			   DepositionType::Which a_deposition);
 
   /*!
     @brief Interpolate an acceleration field
     @details This requires that P has a member function setAcceleration() and that a_accelerationField has SpaceDim components
   */
   template <class P>
-  void interpolateAcceleration(List<P>&         a_particleList,
-			       const FArrayBox& a_accelerationField,
-			       InterpType&      a_interpType);
+  void interpolateAcceleration(List<P>&              a_particleList,
+			       const FArrayBox&      a_accelerationField,
+			       DepositionType::Which a_deposition);
     
 protected:
 
@@ -102,7 +98,7 @@ protected:
 		       const RealVect&  a_dx,
 		       const RealVect&  a_position,
 		       const Real&      a_strength,
-		       const InterpType a_interpType);
+		       const DepositionType::Which a_interpType);
   
   /*!
     @brief Wrapper function that interpolates a scalar field onto the particle position
@@ -112,7 +108,7 @@ protected:
 			   const RealVect&   a_prob_lo,
 			   const RealVect&   a_dx,
 			   const RealVect&   a_position,
-			   const InterpType& a_interpType);
+			   const DepositionType::Which a_deposition);
 
   /*!
     @brief Wrapper function that interpolates a vector field on the particle position
@@ -122,7 +118,7 @@ protected:
 			   const RealVect&   a_prob_lo,
 			   const RealVect&   a_dx,
 			   const RealVect&   a_position,
-			   const InterpType& a_interpType);
+			   const DepositionType::Which a_deposition);
   
   Box      m_domain;
   RealVect m_dx;
