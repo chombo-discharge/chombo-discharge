@@ -3,11 +3,6 @@
   @brief  Declaration of an abstract class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
-  @todo   Interpolate diffusion coefficients
-  @todo   Compute CFL time step
-  @todo   Compute diffusion time step, do this based on chance that a particle will move more than 1 cell
-  @todo   Boundary conditions on EBs
-  @todo   Boundary conditions on domain edges/sides
 */
 
 #include "ito_solver.H"
