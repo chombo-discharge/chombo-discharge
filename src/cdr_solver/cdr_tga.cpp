@@ -54,6 +54,8 @@ void cdr_tga::advance_euler(EBAMRCellData&       a_new_state,
   }
   
   if(m_diffusive){
+    this->setup_gmg(); // Set up gmg again since diffusion coefficients might change 
+    
     bool converged = false;
 
     const int comp         = 0;
@@ -116,6 +118,8 @@ void cdr_tga::advance_tga(EBAMRCellData&       a_new_state,
   }
   
   if(m_diffusive){
+    this->setup_gmg(); // Set up gmg again since diffusion coefficients might change
+    
     bool converged = false;
 
     const int comp         = 0;

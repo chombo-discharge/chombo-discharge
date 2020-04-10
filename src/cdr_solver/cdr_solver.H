@@ -555,7 +555,7 @@ protected:
   /*!
     @brief RNG engine
   */
-  std::mt19937_64* m_rng;     // Engine
+  std::mt19937_64 m_rng;
 
   /*!
     @brief RNG seed

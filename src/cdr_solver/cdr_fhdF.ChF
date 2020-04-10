@@ -7,7 +7,7 @@
 
       integer chf_ddecl[i;j;k]
       integer chf_ddecl[ioff; joff; koff]
-      real_t vol, half_v, hival, loval, Hlo, Hhi
+      real_t vol, half_v, hival, loval, Hlo, Hhi, phiLo, phiHi
       integer spacedim, d
       
       chf_dterm[
@@ -21,8 +21,11 @@
       enddo	 
 
       chf_multido[facebox;i;j;k]
-         loval = Max(0.0, vol*celldata(chf_ix[i-ioff; j-joff; k-koff]))
-         hival = Max(0.0, vol*celldata(chf_ix[i;j;k]))	 
+         phiLo = Max(0.0, celldata(chf_ix[i-ioff; j-joff; k-koff]))
+         phiHi = Max(0.0, celldata(chf_ix[i;j;k]))
+	 
+         loval = vol*phiLo
+         hival = vol*phiHi
 
          if(loval <= 0.0) then
             Hlo = 0.0
@@ -32,15 +35,15 @@
             Hlo = loval
          endif
 
-         if(hival <= 0.0) then
+         if(hival*vol <= 0.0) then
             Hhi = 0.0
-         else if (hival >= 1.0) then
+         else if (hival*vol >= 1.0) then
             Hhi = 1.0
          else
             Hhi = hival
          endif
 
-         facedata(chf_ix[i;j;k]) = 0.5*(loval + hival)*Hlo*Hhi
+         facedata(chf_ix[i;j;k]) = 0.5*(phiLo + phiHi)*Hlo*Hhi
       chf_enddo
       
       end      

@@ -141,11 +141,9 @@ void cdr_solver::allocate_internals(){
   data_ops::set_value(m_domainflux, 0.0);
 
   // This defines interpolation stencils and space for interpolants
-  if(m_mobile){
-    this->define_interp_stencils();
-    this->define_divFnc_stencils();
-    this->define_interpolant();
-  }
+  this->define_interp_stencils();
+  this->define_divFnc_stencils();
+  this->define_interpolant();
 }
 
 void cdr_solver::deallocate_internals(){
@@ -2323,13 +2321,13 @@ void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCel
   data_ops::set_value(ranflux,     0.0);
   data_ops::set_value(GWN,         0.0);
 
-  this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise
-  this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis/dV
-  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis/dV
-  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis/dV
-  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis/dV)
+  this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise = W/sqrt(dV)
+  this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis
+  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis
+  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis
+  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis)
 
-#if 1 // Debug
+#if 0 // Debug
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     for (int dir = 0; dir <SpaceDim; dir++){
       Real max, min;
@@ -2351,7 +2349,7 @@ void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCel
   data_ops::set_value(a_ransource, 0.0);
   conservative_divergence(a_ransource, ranflux, zeroflux); // Compute the conservative divergence. This also refluxes. 
   
-#if 1 // Debug
+#if 0 // Debug
   m_amr->average_down(a_ransource, m_phase);
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     if(EBLevelDataOps::checkNANINF(*a_ransource[lvl])){
@@ -2437,6 +2435,7 @@ void cdr_solver::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAM
 	    Hhi = hival*vol;
 	  }
 
+
 	  face_states(face, comp) = 0.5*(hival + loval)*Hlo*Hhi;
 	}
 
@@ -2504,7 +2503,7 @@ void cdr_solver::fill_GWN(EBAMRFluxData& a_noise, const Real a_sigma){
 	BaseFab<Real>& noise_reg = noise.getSingleValuedFAB();
 	for (BoxIterator bit(facebox); bit.ok(); ++bit){
 	  const IntVect iv = bit();
-	  noise_reg(iv, comp) = GWN(*m_rng)*ivol;
+	  noise_reg(iv, comp) = GWN(m_rng)*ivol;
 	}
 
 	// // Irregular faces
@@ -2513,7 +2512,7 @@ void cdr_solver::fill_GWN(EBAMRFluxData& a_noise, const Real a_sigma){
 	for (FaceIterator faceit(irreg, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 
-	  noise(face, comp) = GWN(*m_rng)*ivol;
+	  noise(face, comp) = GWN(m_rng)*ivol;
 	}
       }
     }
@@ -2529,7 +2528,7 @@ void cdr_solver::parse_rng_seed(){
   pp.get("seed", m_seed);
   if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-  m_rng = new std::mt19937_64(m_seed);
+  m_rng = std::mt19937_64(m_seed);
 }
 
 void cdr_solver::parse_plotmode(){

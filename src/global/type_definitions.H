@@ -106,6 +106,7 @@ namespace time_code {
     restricted      = 4,
     hardcap         = 5,
     error           = 6,
+    adv_diffusion   = 7,
   };
 };
 

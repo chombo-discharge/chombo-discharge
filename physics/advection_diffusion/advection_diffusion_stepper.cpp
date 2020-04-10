@@ -35,7 +35,7 @@ void advection_diffusion_stepper::setup_solvers(){
   m_species = RefCountedPtr<cdr_species> (new advection_diffusion_species());
 
   // Solver setup
-  m_solver->set_verbosity(10);
+  m_solver->set_verbosity(-1);
   m_solver->set_species(m_species);
   m_solver->parse_options();
   m_solver->set_amr(m_amr);
@@ -74,9 +74,13 @@ void advection_diffusion_stepper::set_velocity(){
     this->set_velocity(lvl);
   }
 
+  m_solver->set_velocity(RealVect::Unit);
+
   EBAMRCellData& vel = m_solver->get_velo_cell();
   m_amr->average_down(vel, phase::gas);
   m_amr->interp_ghost(vel, phase::gas);
+
+
 }
 
 void advection_diffusion_stepper::set_velocity(const int a_level){
@@ -157,6 +161,8 @@ void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& 
 
   Real cfl_dt;
   Real diff_dt;
+
+  a_dt = 1.E99;
   
   // CFL on advection
   if(m_solver->is_mobile()){
@@ -168,13 +174,15 @@ void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& 
     
   // CFL on diffusion, if explicit diffusion
   if(m_solver->is_diffusive() && m_integrator == 0){
-    diff_dt = m_cfl*m_solver->compute_diffusive_dt();
+    diff_dt = m_solver->compute_diffusive_dt();
 
-    if(diff_dt < a_dt){
-      a_dt = diff_dt;
+    if(m_solver->is_mobile()){
+      a_dt = m_cfl*1./(1./cfl_dt + 1./diff_dt);
+      a_timecode = time_code::adv_diffusion;
+    }
+    else{
+      a_dt = m_cfl*diff_dt;
       a_timecode = time_code::diffusion;
-
-      pout() << "advection_diffusion_stepper::compute_dt - dt limited by diffusion, dt/dt_cfl = " << a_dt/cfl_dt << endl;
     }
   }
 }
@@ -191,7 +199,7 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
     m_solver->compute_divJ(m_k2, m_tmp, 0.0);
 
     data_ops::incr(state, m_k1, -0.5*a_dt);
-    data_ops::incr(state, m_k2, -0.5*a_dt);
+    data_ops::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
 
     m_solver->make_non_negative(state);
   
@@ -204,6 +212,7 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
 
     m_solver->compute_divF(m_k1, state, a_dt);
     data_ops::incr(state, m_k1, -a_dt);
+    m_amr->average_down(state, phase::gas);
 
     if(m_solver->is_diffusive()){
       data_ops::copy(m_k2, state); // Now holds phiOld - dt*div(F)
@@ -266,6 +275,7 @@ void advection_diffusion_stepper::regrid(const int a_lmin, const int a_old_fines
   if(m_solver->is_mobile()){
     this->set_velocity();
   }
+
 
   // Allocate memory for RK steps
   m_amr->allocate(m_tmp, phase::gas, 1);

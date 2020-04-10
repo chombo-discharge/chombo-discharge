@@ -21,7 +21,7 @@ parser.add_argument('-app_name',        type=str,  help="Mini app name. An error
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
 parser.add_argument('-cdr_solver',      type=str,  help="Poisson solver implementation", default="cdr_gdnv")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
-parser.add_argument('-stepper',         type=str,  help="Time stepper class", default="rk2")
+parser.add_argument('-stepper',         type=str,  help="Time stepper class", default="advection_diffusion_stepper")
 
 args = parser.parse_args()
 
