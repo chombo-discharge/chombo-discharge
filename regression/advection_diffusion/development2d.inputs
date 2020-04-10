@@ -4,8 +4,8 @@
 amr_mesh.lo_corner       = -1 -1       # Low corner of problem domain
 amr_mesh.hi_corner       =  1  1       # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 128 128     # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 0           # Maximum amr depth
+amr_mesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 3           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -33,13 +33,13 @@ driver.verbosity                       = 3             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 1           # Plot interval
+driver.plot_interval                   = 5             # Plot interval
 driver.regrid_interval                 = 5             # Regrid interval
-driver.checkpoint_interval             = 100           # Checkpoint interval
+driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.initial_regrids                 = 4             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
-driver.stop_time                       = 1.0         # Stop time
-driver.max_steps                       = 800           # Maximum number of steps
+driver.stop_time                       = 1.0           # Stop time
+driver.max_steps                       = 8000          # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 driver.write_memory                    = false         # Write MPI memory report 
@@ -47,7 +47,7 @@ driver.write_ebis                      = false         # Write geometry to an HD
 driver.read_ebis                       = false         # Read EBIS when restarting a simulation
 driver.output_directory                = ./            # Output directory
 driver.grow_tags                       = 0             # Grow tagged by this in every direction
-driver.output_names                    = advection2d   # Simulation output names
+driver.output_names                    = development2d # Simulation output names
 driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
@@ -72,9 +72,9 @@ cdr_gdnv.divF_nc              = conservative_average    # 'covered_face' or 'con
 cdr_gdnv.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
 cdr_gdnv.limit_slopes         = true                    # Use slope-limiters for godunov
 cdr_gdnv.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
-cdr_gdnv.extrap_source        = false                    # Flag for including source term for time-extrapolation
+cdr_gdnv.extrap_source        = false                   # Flag for including source term for time-extrapolation
 cdr_gdnv.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
-cdr_gdnv.gmg_verbosity        = 100                     # GMG verbosity
+cdr_gdnv.gmg_verbosity        = -1                      # GMG verbosity
 cdr_gdnv.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
 cdr_gdnv.gmg_post_smooth      = 6                       # Number of relaxations in upsweep
 cdr_gdnv.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
@@ -102,8 +102,8 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_SPHERE CLASS OPTIONS
 # ====================================================================================================
 rod_sphere.eps0                      = 1                # Background permittivity
-rod_sphere.turn_off_electrode        = false             # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
+rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
+rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
 rod_sphere.electrode_radius          = 0.05             # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0.5            # Center 1
@@ -118,23 +118,23 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 # This class does an expcliti AMR advection-diffusion simulation of a super-Gaussian blob with
 # wall flow BCs.
 # ====================================================================================================
-advection_diffusion.blob_amplitude = 1000.0  # Blob amplitude
-advection_diffusion.blob_radius    = 0.05    # Blob radius
-advection_diffusion.blob_center    = -0.75 -0.75  # Blob center
+advection_diffusion.blob_amplitude = 1000.0   # Blob amplitude
+advection_diffusion.blob_radius    = 0.05     # Blob radius
+advection_diffusion.blob_center    = 0.0 0.75 # Blob center
 advection_diffusion.diffusion      = true     # Turn on/off diffusion
 advection_diffusion.advection      = true     # Turn on/off advection
-advection_diffusion.fhd            = true     # Use FHD or not
+advection_diffusion.fhd            = false    # Use FHD or not
 
-advection_diffusion.integrator     = 1       # 0 = Heun's method. 1 = IMEX Euler
+advection_diffusion.integrator     = 0       # 0 = Heun's method. 1 = IMEX Euler
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-advection_diffusion.diffco         = 0.01    # Diffusion coefficient
+advection_diffusion.diffco         = 0.001    # Diffusion coefficient
 advection_diffusion.omega          = 1.0     # Rotation velocity
-advection_diffusion.cfl            = 0.5     # CFL number
+advection_diffusion.cfl            = 0.8     # CFL number
 
 # Cell tagging stuff
 # ------------------
 advection_diffusion.refine_curv = 0.1          # Refine if curvature exceeds this
-advection_diffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this
+advection_diffusion.refine_magn = 100.0         # Only tag if magnitude eceeds this
 advection_diffusion.buffer      = 0            # Grow tagged cells     

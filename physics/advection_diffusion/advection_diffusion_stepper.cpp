@@ -74,8 +74,6 @@ void advection_diffusion_stepper::set_velocity(){
     this->set_velocity(lvl);
   }
 
-  m_solver->set_velocity(RealVect::Unit);
-
   EBAMRCellData& vel = m_solver->get_velo_cell();
   m_amr->average_down(vel, phase::gas);
   m_amr->interp_ghost(vel, phase::gas);
@@ -191,6 +189,8 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
 
   if(m_integrator == 0){ //   Use Heun's method
     EBAMRCellData& state = m_solver->get_state();
+    
+
     m_solver->compute_divJ(m_k1, state, 0.0);
 
     data_ops::copy(m_tmp, state);
@@ -202,6 +202,12 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
     data_ops::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
 
     m_solver->make_non_negative(state);
+
+    // Add random diffusion flux. This is equivalent to a 1st order. Godunov splitting
+    if(m_fhd){
+      m_solver->GWN_diffusion_source(m_k1, state); // k1 holds random diffusion
+      data_ops::incr(state, m_k1, a_dt);
+    }
   
     m_amr->average_down(state, phase::gas);
     m_amr->interp_ghost(state, phase::gas);
@@ -218,10 +224,9 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
       data_ops::copy(m_k2, state); // Now holds phiOld - dt*div(F)
       if(m_fhd){
 	m_solver->GWN_diffusion_source(m_k1, state); // k1 holds random diffusion
+	data_ops::incr(m_k2, m_k1, a_dt);
       }
-      else{
-	data_ops::set_value(m_k1, 0.0);
-      }
+      data_ops::set_value(m_k1, 0.0);
       m_solver->advance_euler(state, m_k2, m_k1, a_dt);
     }
 
