@@ -914,14 +914,14 @@ void cdr_solver::initial_data_particles(){
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_amr->get_prob_lo();
-  InterpType deposition  = m_species->get_deposition();
+  DepositionType::Which deposition  = m_species->get_deposition();
 
   const int comp = 0;
   const Interval interv(comp, comp);
 
   // Need buffer for everything that has non-zero cloud width
   int pvr_buffer = 1;
-  if(deposition == InterpType::NGP){
+  if(deposition == DepositionType::CIC){
     pvr_buffer = 0;
   }
 
@@ -971,7 +971,7 @@ void cdr_solver::initial_data_particles(){
       const bool has_fine = (lvl < finest_level);
 
       // 1. If we have a coarser level whose cloud hangs into this level, interpolate the coarser level here first
-      if(has_coar && deposition != InterpType::NGP){
+      if(has_coar && deposition != DepositionType::NGP){
 	RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
 	interp->interpolate(*m_state[lvl], *m_scratch[lvl-1], interv);
       }
@@ -979,7 +979,7 @@ void cdr_solver::initial_data_particles(){
       // 2. Deposit this levels particles and exchange ghost cells
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box box          = dbl.get(dit());
-	MeshInterp interp(box, dx*RealVect::Unit, origin);
+	EBParticleInterp interp(box, dx*RealVect::Unit, origin);
 	interp.deposit((*amrparticles[lvl])[dit()].listItems(), (*m_state[lvl])[dit()].getFArrayBox(), deposition);
       }
 

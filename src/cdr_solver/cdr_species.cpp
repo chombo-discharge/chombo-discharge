@@ -18,7 +18,7 @@ cdr_species::cdr_species(){
   m_init_with_function  = true;
   m_init_with_particles = true;
   
-  m_deposition = InterpType::NGP;
+  m_deposition = DepositionType::NGP;
 
   m_initial_particles.clear();
 }
@@ -32,7 +32,7 @@ cdr_species::cdr_species(const std::string a_name, const int a_charge, const boo
   m_init_with_function  = true;
   m_init_with_particles = true;
   
-  m_deposition = InterpType::NGP;
+  m_deposition = DepositionType::NGP;
   m_initial_particles.clear();
 }
 
@@ -76,7 +76,7 @@ bool cdr_species::init_with_function() const{
   return m_init_with_function;
 }
 
-InterpType& cdr_species::get_deposition() {
+DepositionType::Which cdr_species::get_deposition() {
   return m_deposition;
 }
 

@@ -134,10 +134,10 @@ void computational_geometry::build_gas_geoserv(GeometryService*&   a_geoserver,
   }
 
   // Create geoshop; either all regular or an intersection
-  if(parts.size() == 0){ 
-    a_geoserver = new AllRegularService();
-  }
-  else {
+  // if(parts.size() == 0){ 
+  //   a_geoserver = new AllRegularService();
+  // }
+  // else {
     m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
     if(s_use_new_gshop){ // PlasmaC geometry generation
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
@@ -151,7 +151,7 @@ void computational_geometry::build_gas_geoserv(GeometryService*&   a_geoserver,
     else{ // Chombo geometry generation
       a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
     }
-  }
+    //  }
 }
 
 void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver,

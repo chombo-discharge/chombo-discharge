@@ -181,20 +181,20 @@ void mc_photo::parse_deposition(){
 
   m_deposit_numbers = false;
   if(str == "num"){
-    m_deposition = InterpType::NGP;
+    m_deposition = DepositionType::NGP;
     m_deposit_numbers = true;
   }
   else if(str == "ngp"){
-    m_deposition = InterpType::NGP;
+    m_deposition = DepositionType::NGP;
   }
   else if(str == "cic"){
-    m_deposition = InterpType::CIC;
+    m_deposition = DepositionType::CIC;
   }
   else if(str == "tsc"){
-    m_deposition = InterpType::TSC;
+    m_deposition = DepositionType::TSC;
   }
   else if(str == "w4"){
-    m_deposition = InterpType::W4;
+    m_deposition = DepositionType::W4;
   }
   else{
     MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
@@ -203,20 +203,20 @@ void mc_photo::parse_deposition(){
   pp.get("plot_deposition", str);
   m_plot_numbers = false;
   if(str == "num"){
-    m_plot_deposition = InterpType::NGP;
+    m_plot_deposition = DepositionType::NGP;
     m_plot_numbers = true;
   }
   else if(str == "ngp"){
-    m_plot_deposition = InterpType::NGP;
+    m_plot_deposition = DepositionType::NGP;
   }
   else if(str == "cic"){
-    m_plot_deposition = InterpType::CIC;
+    m_plot_deposition = DepositionType::CIC;
   }
   else if(str == "tsc"){
-    m_plot_deposition = InterpType::TSC;
+    m_plot_deposition = DepositionType::TSC;
   }
   else if(str == "w4"){
-    m_plot_deposition = InterpType::W4;
+    m_plot_deposition = DepositionType::W4;
   }
   else{
     MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
@@ -753,7 +753,7 @@ int mc_photo::draw_photons(const Real a_source, const Real a_volume, const Real 
   return num_photons;
 }
 
-void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles, const InterpType& a_deposition){
+void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles, const DepositionType::Which& a_deposition){
   CH_TIME("mc_photo::deposit_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_photons" << endl;
@@ -768,7 +768,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
   data_ops::set_value(a_state, 0.0);
   data_ops::set_value(m_crse,  0.0);
 
-  InterpType deposition = a_deposition;
+  DepositionType::Which deposition = a_deposition;
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->get_dx()[lvl];
@@ -787,7 +787,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     // 2. Deposit this levels particles and exchange ghost cells
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
-      MeshInterp interp(box, dx*RealVect::Unit, origin);
+      EBParticleInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), deposition);
     }
 
@@ -808,7 +808,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
     if(has_fine){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const Box box          = dbl.get(dit());
-	MeshInterp interp(box, dx*RealVect::Unit, origin);
+	EBParticleInterp interp(box, dx*RealVect::Unit, origin);
 	interp.deposit((*m_joint_photons[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), deposition);
       }
     }
@@ -816,7 +816,7 @@ void mc_photo::deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_par
   }
 
   // In this case we should deposit numbers and not densities
-  if(m_deposit_numbers && a_deposition == InterpType::NGP){
+  if(m_deposit_numbers && a_deposition == DepositionType::NGP){
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       data_ops::scale(*a_state[lvl], pow(m_amr->get_dx()[lvl], SpaceDim));
     }

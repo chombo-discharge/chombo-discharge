@@ -10,12 +10,13 @@
 
 #include "rte_solver.H"
 #include "joint_photon.H"
+#include "EBParticleInterp.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
 #include <ParticleValidRegion.H>
 #include <BinItem.H>
-#include <MeshInterp.H>
+
 
 #include <random>
 
@@ -162,8 +163,8 @@ protected:
   std::uniform_real_distribution<Real>* m_udist01; // Uniform real distribuion on [0,1]
   std::uniform_real_distribution<Real>* m_udist11; // Uniform real distribuion on [-1,1]
 
-  InterpType m_deposition; // Mass deposition type
-  InterpType m_plot_deposition;
+  DepositionType::Which m_deposition;
+  DepositionType::Which m_plot_deposition;
   
 
   EBAMRPhotons m_photons;    // Particles
@@ -179,7 +180,7 @@ protected:
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
   void remap_photons(EBAMRPhotons& a_photons);
   void aggregate_photons(const EBAMRPhotons& a_photons);
-  void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles, const InterpType& a_deposition);
+  void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles, const DepositionType::Which& a_deposition);
 
   // For mapping photons into bins
   void binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,

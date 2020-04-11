@@ -10,8 +10,7 @@
 
 #include <RealVect.H>
 #include <Particle.H>
-#include <BinItem.H>
-#include <MeshInterp.H>
+#include <EBParticleInterp.H>
 
 /*!
   @brief Abstract class that describes an electron or cdr_species
@@ -83,7 +82,7 @@ public:
   /*!
     @brief Get deposition
   */
-  virtual InterpType& get_deposition();
+  virtual DepositionType::Which get_deposition();
 
   /*!
     @brief Get initial particles
@@ -140,7 +139,7 @@ protected:
   /*!
     @brief Deposition type for initial particles
   */
-  InterpType m_deposition;
+  DepositionType::Which m_deposition;
 };
 
 #endif
