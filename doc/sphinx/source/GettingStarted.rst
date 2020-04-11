@@ -139,7 +139,8 @@ Compiling `PlasmaC`
 
 In `PlasmaC`, each problem is compiled as a mini-application into a subfolder.
 Mini-apps are usually set up through a Python pre-compilation script that generates the required source code, makefiles, and simulation parameters.
-There is no separate build for the `PlasmaC` source code and your own application files and you will *not* be able to install `PlasmaC` separately.
+There is no separate build for the `PlasmaC` source code and your own application files and you will *not* be able to install `PlasmaC` as a separate library.
+
 Once an application has been set up, the makefile system tracks the necessary `Chombo` and `PlasmaC` source files.
 Compiling is done in the subfolder that houses your mini-app:
 
@@ -163,32 +164,37 @@ Our favorite tool for visualization is `VisIt <https://wci.llnl.gov/codes/visit/
 My first compilation
 --------------------
 
-Before moving on with more complex descriptions of `PlasmaC`, we will try to compile a test problem which simply advects a scalar in a geometry-less domain. To set up this application, call the following on the command line:
+Before moving on with more complex descriptions of `PlasmaC`, we will try to compile a test problem which simply advects a scalar.
+The application we will use is a part of the regression testing in `PlasmaC`.
 
-.. code-block:: bash
-
-   ./setup.py -base_dir=./mini_apps -app_name=advection2d -plasma_kinetics=advection_kinetics
-
-This will create a folder in the `PlasmaC` source folder called :file:`advection2d`. Inside that folder you will find three files; a makefile (:file:`GNUmakefile`), a compilation file (:file:`main.cpp`) and an input file (:file:`template.inputs`). The input file contains *all* the available parameters that control your problem. Often, this file will contain hundreds of available options that control many aspects of your simulation. We will not go through these parameterse right now, but you may try to compile that application for two-dimensional execution by navigating to :file:`advection2d` and executing
+To run this application, navigate to :file:`/regression/advection_diffusion` and compile with
 
 .. code-block:: bash
 
    make -s -j4 DIM=2 main
 
-where ``-j4`` is the number of cores used for the compilation. If you want to compile this example in 3D, you should put DIM=3. If that application compiles successfully, you will see a file called :file:`main2d.<bunch_of_options>.ex`. If you see this file, you will be able to compile all of `PlasmaC`. If you don't, you won't be able to compile any of it. Before moving on further, please make sure that your model compiles.
+where ``-j4`` is the number of cores used for the compilation. If you want to compile this example in 3D, you should put DIM=3.
+If the application compiles successfully, you will see a file called :file:`main2d.<bunch_of_options>.ex`.
+If you see this file, you will be able to compile all of `PlasmaC`. If you don't, you won't be able to compile any of it.
+Before moving on further, please make sure that your model compiles.
 
-Once we have compiled our application, we are ready to run it. The example that we will run is a very simple one; it uses the full `PlasmaC` framework for advecting a scalar with velocity :math:`\mathbf{v} = \mathbf{E}`, where :math:`\mathbf{E}` is the electric field. The physics module that describes this example is found in :file:`/plasma_models/advection_kinetics`. We will not go through that module here, except mention that the model just sets the velocity to be equal to the electric field (i.e. unity mobility); turns off diffusion and reactive terms, and initializes the advected species to be a square or Gaussian pulse. You may now run this example by
+Once we have compiled our application, we are ready to run it.
+The example that we will run is a very simple setup of scalar advection and diffusion of a rotating flow, where the base code is provided in :file:`/physics/advection_diffusion`.
+To run the example, you can do
 
 .. code-block:: bash
 
-   mpirun -np4 main2d.<bunch_of_options>.ex template.inputs
+   mpirun -np 4 main2d.<bunch_of_options>.ex regression2d.inputs
 
-Output files should now appear in :file:`advection2d/plt`. 
+Output files should now appear in :file:`/regression/advection_diffusion/plt`. 
 
 Troubleshooting
 ---------------
 
-If the prerequisites are in place, compilation of `PlasmaC` is usually straightforward. However, due to dependencies on `Chombo` and HDF5, compilation can be a drag. Our experience is that if `Chombo` compiles, so does `PlasmaC`. For that reason we refer you to the `Chombo` user guide for troubleshooting.
+If the prerequisites are in place, compilation of `PlasmaC` is usually straightforward.
+However, due to dependencies on `Chombo` and HDF5, compilation can sometimes be an issue.
+Our experience is that if `Chombo` compiles, so does `PlasmaC`.
+For that reason we refer you to the `Chombo` user guide for troubleshooting.
 
 Using this documentation
 ------------------------

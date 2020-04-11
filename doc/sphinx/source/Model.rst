@@ -7,6 +7,8 @@ Supported solvers
 -----------------
 
 `PlasmaC` aims at being a moderately flexible framework for fluid plasma simulations.
+Numerical solvers are constructed such that they essentially provide a method-of-lines (MOL) functionality which the user can either run, or couple to other solvers. 
+
 There are several abstractions in place that ensure that the code covers non-trivial geometries, multiple time stepping schemes, and fairly general plasma-kinetic couplings.
 
 The equation set that `PlasmaC` is (currently) capable of solving is
