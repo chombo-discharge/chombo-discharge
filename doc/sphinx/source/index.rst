@@ -40,7 +40,6 @@ This documentation is the user documentation `PlasmaC`. There is a separate :dox
 
    GettingStarted
    Model
-   TemporalDiscretization
 
 .. toctree::
    :maxdepth: 4
