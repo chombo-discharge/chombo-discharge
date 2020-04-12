@@ -41,6 +41,7 @@ PygmentsBridge.latex_formatter = CustomLatexFormatter
 extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.extlinks',
+    'sphinx.ext.graphviz',
     'sphinxcontrib.bibtex',
 ]
 

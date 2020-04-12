@@ -1,9 +1,9 @@
 .. _Chap:Control:
 
-PlasmaC basics
-==============
+Controlling ``PlasmaC``
+=======================
 
-In this chapter we show how to run a `PlasmaC` simulation and control its behavior through input scripts or command line options.
+In this chapter we show how to run a ``PlasmaC`` simulation and control its behavior through input scripts or command line options.
 
 Basic compiling and running
 ---------------------------
@@ -28,27 +28,27 @@ You may also pass input parameters through the command line. For example, runnin
 
 .. code-block:: bash
 
-   mpirun -np 32 <application_executable> <input_file> plasma_engine.max_steps=10
+   mpirun -np 32 <application_executable> <input_file> driver.max_steps=10
 
-will set the ``plasma_engine.max_steps`` parameter to 10. Command-line parameters override definitions in the input_file. 
+will set the ``driver.max_steps`` parameter to 10. Command-line parameters override definitions in the input_file. 
 
 .. _Chap:ControllingOutput:
 
 Controlling output
 ------------------
 
-`PlasmaC` comes with controls for adjusting output. Through the :ref:`Chap:plasma_engine` class the user may adjust the option ``plasma_engine.output_directory`` to specify where output files will be placed. This directory is relative to the location where the application is run. If this directory does not exist, PlasmaC does it's best at creating it. In addition, it will create four more directories
+`PlasmaC` comes with controls for adjusting output. Through the :ref:`Chap:driver` class the user may adjust the option ``driver.output_directory`` to specify where output files will be placed. This directory is relative to the location where the application is run. If this directory does not exist, PlasmaC does it's best at creating it. In addition, it will create four more directories
 
 * :file:`output_directory/plt` contains all plot files.
 * :file:`output_directory/chk` contains all checkpoint files, which are used for restarting.
 * :file:`output_directory/mpi` contains information about individual MPI ranks. 
-* :file:`output_directory/geo` contains geometric files that are written by PlasmaC (if you enable ``plasma_engine.write_ebis``). 
+* :file:`output_directory/geo` contains geometric files that are written by PlasmaC (if you enable ``driver.write_ebis``). 
 
-The files in :file:`output_directory/geo` do *not* represent your geometry in the form of level sets. Instead, the files that are placed here are HDF5 representations of your embedded boundary graph, which can be *read* by PlasmaC if you enable ``plasma_engine.read_ebis``. This is a shortcut that allows faster geometry generation when you restart simulations, but geometry generation is typically so fast that it is never used. 
+The files in :file:`output_directory/geo` do *not* represent your geometry in the form of level sets. Instead, the files that are placed here are HDF5 representations of your embedded boundary graph, which can be *read* by PlasmaC if you enable ``driver.read_ebis``. This is a shortcut that allows faster geometry generation when you restart simulations, but geometry generation is typically so fast that it is never used. 
 
 The reason for this structure is that PlasmaC can end up writing thousands of files per simulation and we feel that having a directory structure helps us navigate simulation data.
 
-The driver class :ref:`Chap:plasma_engine` is responsible for writing output files at specified intervals, but the user is responsible for specifying what goes into those files. Since not all variables are always of interest, the solver classes themselves have options ``plt_vars`` that specify which output variables will be written to the output file. For example, our convection-diffusion-reaction solver classes have the following output options:
+The driver class :ref:`Chap:driver` is responsible for writing output files at specified intervals, but the user is responsible for specifying what goes into those files. Since not all variables are always of interest, the solver classes themselves have options ``plt_vars`` that specify which output variables will be written to the output file. For example, our convection-diffusion-reaction solver classes have the following output options:
 
 .. code-block:: bash
 
@@ -73,70 +73,15 @@ You can, of course, put the definition in your :file:`.bashrc` file (for Bourne 
 Restarting simulations
 ----------------------
 
-Restarting simulations is done in exactly the same way as running simulations, although the user must set the ``plasma_engine.restart`` parameter. For example,
+Restarting simulations is done in exactly the same way as running simulations, although the user must set the ``driver.restart`` parameter. For example,
 
 .. code-block:: bash
 
-   mpirun -np 32 <application_executable> <input_file> plasma_engine.restart=10
+   mpirun -np 32 <application_executable> <input_file> driver.restart=10
 
-will restart from step 10. If you set ``plasma_engine.restart=0``, you will get a fresh simulation. Specifying anything but an integer is an error. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``plasma_engine.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and `PlasmaC` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``plasma_engine.output_names`` or ``plasma_engine.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory.
-
-.. _Chap:Visualization:
+will restart from step 10. If you set ``driver.restart=0``, you will get a fresh simulation. Specifying anything but an integer is an error. When a simulation is restarted, PlasmaC will look for a checkpoint file with the ``driver.output_names`` variable and the specified restart step. If this file is not found, restarting will not work and ``PlasmaC`` will abort. You must therefore ensure that your executable can locate this file. This also implies that you cannot change the ``driver.output_names`` or ``driver.output_directory`` variables during restarts, unless you also change the name of your checkpoint file and move it to a new directory.
 
 Visualization
 -------------
 
-`PlasmaC` output files are written to HDF5 files in the format ``<simulation_name>.step#.dimension.hdf5`` and the files will be written to the directory specified by :ref:`plasma_engine` runtime parameters. Currently, we have only used VisIt for visualizing the plot files.    
-
-..
-   Changing your physics
-   _____________________
-
-   During the restart step, PlasmaC will load the initial grids and checkpointed data into memory. This data resides in an HDF5 file with where appropriate headers are used to identify where the data belongs. Amongst other things, the names of these headers are taken from :ref:`Chap:plasma_kinetics`, so you cannot change the species during during restarts. Currently, PlasmaC requires the exact same number of species during restarts, as well as consistent names for these. However, you *may* change the :ref:`Chap:plasma_kinetics` core functions, allowing you to change your plasma chemistry during restarts.
-
-..
-   Changing spatial discretization
-   _______________________________
-
-   Spatial discretization may be changed during restarts. **However, you are *not* allowed to change the geometry or physical domain.** Furthermore, the following :ref:`Chap:amr_mesh` input variables are off-limits:
-
-   * ``amr.coarsest_domain``
-   * ``amr.max_amr_depth``
-   * ``amr.ref_rat``
-
-   If you change these variables, the checkpointed data cannot be imported into memory. In principle, we *can* extend PlasmaC so that this will be allowed. 
-
-   Note that whatever changes you otherwise apply to :ref:`Chap:amr_mesh` become active only after the first regrid. 
-
-   Changing other settings
-   _______________________
-
-   Apart from the above variables, most changes are allowed during restarts. For example, you are allowed to use different tagging criteria (or even entirely different tagging classes); you can change the solver settings or applied potential; alter the output routines, and so on.
-
-   For example, here is a code snippet (see :ref:`Chap:MiniApplications` for the full code) that allows you to change your cell tagger during restarts
-
-   .. code-block:: c++
-
-      ParmParse pp("my_application");
-      bool use_my_tagger = false;
-      pp.query("change_tagger", use_my_tagger);
-
-      RefCountedPtr<cell_tagger> tagger;
-      if(use_my_tagger){
-	 tagger = RefCountedPtr<cell_tagger> (new my_tagger());
-      }
-      else{
-	 tagger = RefCountedPtr<cell_tagger> (new field_tagger());
-      }
-
-      RefCountedPtr<amr_mesh> amr                    = RefCountedPtr<amr_mesh> (new amr_mesh());
-      RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<amr_mesh> (new geo_coarsener());
-      RefCountedPtr<plasma_engine> engine            = RefCountedPtr<plasma_engine> (new plasma_engine(physdom,
-												       compgeom,
-												       plaskin,
-												       timestepper,
-												       amr,
-												       tagger,
-												       geocoarsen));
-
-   In the above, we assume that *my_tagger* and *field_tagger* are separate implementations of :ref:`Chap:cell_tagger`, and we have created an input variable ``my_application.change_tagger`` which allows for specification of the cell tagger at run time. 
+`PlasmaC` output files are written to HDF5 files in the format ``<simulation_name>.step#.dimension.hdf5`` and the files will be written to the directory specified by :ref:`Chap:driver` runtime parameters. Currently, we have only used VisIt for visualizing the plot files.    

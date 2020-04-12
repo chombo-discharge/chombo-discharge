@@ -1,7 +1,7 @@
 .. _Chap:MinimalPlasmaModel:
 
 Minimal plasma model
-********************
+====================
 
 The minimal plasma model resides in :file:`/physics/cdr_plasma` and describes plasmas in the drift-diffusion approximation.
 This physics model also includes the following subfolders:
@@ -189,6 +189,7 @@ _______________________________
 In order to define diffusion coefficients, the user implements *compute_cdr_diffusion_coefficients*, which returns the diffusion coefficients for the diffused species. If a species (e.g. positive ions) is not diffusive, it does not matter what diffusion coefficient you set. 
 
 .. code-block:: c++
+		
 		Vector<Real> compute_cdr_diffusion_coefficients(const Real&         a_time,
 		          					const RealVect&     a_pos,
 							        const RealVect&     a_E,
@@ -325,7 +326,7 @@ Usually, these are set through the constructor. The ``m_charge`` unit is in unit
 
 
 
-The members ``m_mobile`` and ``m_diffusive`` are used for optimization in `PlasmaC`: If the user specifies that a species is immobile, `PlasmaC` will skip the advection computation. Note that ``m_diffusive`` and ``m_mobile`` override the specifications in :ref:`Chap:cdr_plasma_physics`. If the user provides a non-zero velocity through :ref:`Chap:cdr_plasma_physics` function *compute_cdr_velocities*, and sets ``m_mobile`` to ``false``, the species velocity will be zero. Of course, the user will often want to provide additional input information to his species, for example by specifying a seed for the initial conditions. Please see :ref:`Chap:MiniApplications` for how to provide input parameters. 
+The members ``m_mobile`` and ``m_diffusive`` are used for optimization in `PlasmaC`: If the user specifies that a species is immobile, `PlasmaC` will skip the advection computation. Note that ``m_diffusive`` and ``m_mobile`` override the specifications in :ref:`Chap:cdr_plasma_physics`. If the user provides a non-zero velocity through :ref:`Chap:cdr_plasma_physics` function *compute_cdr_velocities*, and sets ``m_mobile`` to ``false``, the species velocity will be zero. Of course, the user will often want to provide additional input information to his species, for example by specifying a seed for the initial conditions. 
 
 .. _Chap:photon:
 
@@ -356,7 +357,7 @@ The following is a full implementation of the :ref:`Chap:photon` class:
 		  }
 		};
 
-By default, there are no input parameters available for the :ref:`Chap:photon` class, but the user will often want to include these, for example by modifying the absorption coefficient. Note that you are allowed to use a spatially varying absorption coefficient. Please see :ref:`Chap:MiniApplications` for how to pass input parameters into your classes.
+By default, there are no input parameters available for the :ref:`Chap:photon` class, but the user will often want to include these, for example by modifying the absorption coefficient. Note that you are allowed to use a spatially varying absorption coefficient. 
 
 For most users, this will mostly include implementing a new geometry or a new plasma-kinetic scheme.
 It is possible to generate entirely new physics interfaces, too.
@@ -436,7 +437,7 @@ We now discuss the semi-implicit SDC (SISDC) method. First, we apply the method 
    \frac{d\sigma_{\mathbf{i}}}{dt} &= \mathcal{F}_{\sigma}\left(t, \phi_{\mathbf{i}}\right),
    \end{align}
 
-where :math:`\phi_{\mathbf{i}}` denotes a cell-averaged variable, :math:`\mathcal{F}_{\sigma}` is as described in :ref:`Chap:SpatialDiscretization`, :math:`\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}\right) = -D^c_{\mathbf{i}} + S_{\mathbf{i}}` is the advection-reaction operator , and :math:`\mathcal{F}_{\textrm{D}}(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}) = \frac{1}{\kappa_{\mathbf{i}}}\int_{V_{\mathbf{i}}}\left[\nabla\cdot\left(D\nabla\phi\right)\right]dV_{\mathbf{i}}` is the diffusion operator. Note that the advective operator contains the hybrid divergence discussed in :ref:`Chap:AdvectiveDiscretization` and :math:`\mathcal{F}_{\textrm{D}}` is parametrically coupled to :math:`\mathbf{E}` through :math:`D = D\left(\mathbf{E}\right)` (we use a semi-colon to indicate this dependence). Strictly speaking, :math:`\mathcal{F}_{\textrm{AR}}` is parametrically coupled in the same way through the  mobilities and boundary conditions, and additionally coupled to :math:`\Psi` through source terms so that the notation :math:`\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}, \Psi_{\mathbf{i}}\right)` would be appropriate. However, charge injection, advection, and chemistry will be integrated explicitly so this dependence is notationally suppressed. On the other hand, the diffusion part will be solved with the backward Euler method - which yields a Helmholtz equation - and so we need to maintain this dependence for now. Later, we will clarify how this dependence is resolved. The rationale for solving diffusion implicitly is due to the numerical time step constraint of explicit diffusion methods which scales as :math:`\mathcal{O}\left(\Delta x^2\right)`, whereas advection scales more favorably at :math:`\mathcal{O}\left(\Delta x\right)`. We have chosen to integrate the reactive terms explicitly. The reason is that the reactive terms can be non-local, i.e. they can depend on the electron gradient. This is for example the case for fluid models in the local energy approximation where the electron energy source term contains terms that are proportional to the electron diffusion term :math:`D_e\nabla\phi_e`. Implicit discretization of the reactive terms then yield a fully coupled system rather than systems coupled only within individual cells. Charge injection is also handled explicitly. This design choice is mandated by the fact that implicit charge injection through the diffusion terms couples every diffusive species, leading to a system of diffusion equations that are fully coupled through their boundary conditions. Although charge injection could reasonably be performed as a separate step, this leads to numerical instabilities for cut-cell methods since the injected charge must be normalized by the volume fraction of the cell (which can be arbitrarily small). 
+where :math:`\phi_{\mathbf{i}}` denotes a cell-averaged variable, :math:`\mathcal{F}_{\sigma}` is as described in :ref:`Chap:SpatialDiscretization`, :math:`\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}\right) = -D^c_{\mathbf{i}} + S_{\mathbf{i}}` is the advection-reaction operator , and :math:`\mathcal{F}_{\textrm{D}}(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}) = \frac{1}{\kappa_{\mathbf{i}}}\int_{V_{\mathbf{i}}}\left[\nabla\cdot\left(D\nabla\phi\right)\right]dV_{\mathbf{i}}` is the diffusion operator. Note that the advective operator contains the hybrid divergence discussed in :ref:`Chap:CDR` and :math:`\mathcal{F}_{\textrm{D}}` is parametrically coupled to :math:`\mathbf{E}` through :math:`D = D\left(\mathbf{E}\right)` (we use a semi-colon to indicate this dependence). Strictly speaking, :math:`\mathcal{F}_{\textrm{AR}}` is parametrically coupled in the same way through the  mobilities and boundary conditions, and additionally coupled to :math:`\Psi` through source terms so that the notation :math:`\mathcal{F}_{\textrm{AR}}\left(t, \phi_{\mathbf{i}}; \mathbf{E}_{\mathbf{i}}, \Psi_{\mathbf{i}}\right)` would be appropriate. However, charge injection, advection, and chemistry will be integrated explicitly so this dependence is notationally suppressed. On the other hand, the diffusion part will be solved with the backward Euler method - which yields a Helmholtz equation - and so we need to maintain this dependence for now. Later, we will clarify how this dependence is resolved. The rationale for solving diffusion implicitly is due to the numerical time step constraint of explicit diffusion methods which scales as :math:`\mathcal{O}\left(\Delta x^2\right)`, whereas advection scales more favorably at :math:`\mathcal{O}\left(\Delta x\right)`. We have chosen to integrate the reactive terms explicitly. The reason is that the reactive terms can be non-local, i.e. they can depend on the electron gradient. This is for example the case for fluid models in the local energy approximation where the electron energy source term contains terms that are proportional to the electron diffusion term :math:`D_e\nabla\phi_e`. Implicit discretization of the reactive terms then yield a fully coupled system rather than systems coupled only within individual cells. Charge injection is also handled explicitly. This design choice is mandated by the fact that implicit charge injection through the diffusion terms couples every diffusive species, leading to a system of diffusion equations that are fully coupled through their boundary conditions. Although charge injection could reasonably be performed as a separate step, this leads to numerical instabilities for cut-cell methods since the injected charge must be normalized by the volume fraction of the cell (which can be arbitrarily small). 
 
 SISDC predictor
 ^^^^^^^^^^^^^^^
@@ -543,7 +544,7 @@ Next, we provide some remarks on the extra computational work involved for highe
 
 We have implemented the SISDC algorithm in the ``sisdc`` class in :file:`/time_steppers/sisdc`. The following class options are available:
 
-.. literalinclude:: links/sisdc.options
+.. literalinclude:: links/imex_sdc.options
 
 .. _Chap:MISDC:
 
@@ -561,7 +562,3 @@ euler_maruyama
 ______________
 
 :ref:`Chap:euler_maruyama` implements the Euler-Maruyama method. This method is based on an Euler method with explicit or implicit diffusion. 
-
-
-  
-.. bibliography:: references.bib

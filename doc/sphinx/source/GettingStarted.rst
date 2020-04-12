@@ -1,14 +1,15 @@
 .. _Chap:GettingStarted:
 
+
 Getting started
 ===============
 
-This chapter discusses how you may obtain `PlasmaC` and compile it.
+This chapter discusses how you may obtain ``PlasmaC`` and compile it.
 
 .. _Chap:Obtaining:
 
 Obtaining `PlasmaC`
----------------------
+-------------------
 
 `PlasmaC` is obtained by cloning the following repository:
 
@@ -23,7 +24,7 @@ Obtaining `PlasmaC`
 Prerequisites
 -------------
 
-From the ground up, `PlasmaC` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework.
+From the ground up, ``PlasmaC`` is built on top of the `Chombo <https://commons.lbl.gov/display/chombo/Chombo+-+Software+for+Adaptive+Solutions+of+Partial+Differential+Equations>`_ framework.
 To compile `PlasmaC`, you must first install the following:
 
 * A Fortran compiler, usually gfortran or Intel Fortran
@@ -124,13 +125,16 @@ Here are the configuration variables that have been used used on the `fram <http
 		syslibflags    = -ldl -lm -lz
 
 
-We also recommend that you create environment variables that hold the path to your `PlasmaC` version. For example,
+We also recommend that you create environment variables that hold the path to your ``PlasmaC`` version. For example,
 
 .. code-block:: c++
 
 		PLASMAC_HOME=/home/foo/plasmac
 
-This environment variables is used in the `PlasmaC` makefile system so that our makefiles can find `PlasmaC` and `Chombo`.
+This environment variables is used in the ``PlasmaC`` makefile system so that our makefiles can find ``PlasmaC``.
+
+We recommend that you take care of your :file:`Make.defs.local` for all your computers.
+If you want, you may place your :file:`Make.defs.local` for all your computers into :file:`/src/local` and push to the main repository. 
 
 .. _Chap:Compiling:
 
@@ -139,9 +143,9 @@ Compiling `PlasmaC`
 
 In `PlasmaC`, each problem is compiled as a mini-application into a subfolder.
 Mini-apps are usually set up through a Python pre-compilation script that generates the required source code, makefiles, and simulation parameters.
-There is no separate build for the `PlasmaC` source code and your own application files and you will *not* be able to install `PlasmaC` as a separate library.
+There is no separate build for the ``PlasmaC`` source code and your own application files and you will *not* be able to install ``PlasmaC`` as a separate library.
 
-Once an application has been set up, the makefile system tracks the necessary `Chombo` and `PlasmaC` source files.
+Once an application has been set up, the makefile system tracks the necessary `Chombo` and ``PlasmaC`` source files.
 Compiling is done in the subfolder that houses your mini-app:
 
 .. code-block:: bash
@@ -149,8 +153,6 @@ Compiling is done in the subfolder that houses your mini-app:
    make -s -j8 DIM=2 OPT=HIGH <application_name>
 
 We generally recommend that you compile with ``OPT=HIGH`` for performance reasons. 
-
-.. _Chap:Visualization:
 
 Visualization
 -------------
@@ -191,7 +193,7 @@ Output files should now appear in :file:`/regression/advection_diffusion/plt`.
 Troubleshooting
 ---------------
 
-If the prerequisites are in place, compilation of `PlasmaC` is usually straightforward.
+If the prerequisites are in place, compilation of ``PlasmaC`` is usually straightforward.
 However, due to dependencies on `Chombo` and HDF5, compilation can sometimes be an issue.
 Our experience is that if `Chombo` compiles, so does `PlasmaC`.
 For that reason we refer you to the `Chombo` user guide for troubleshooting.

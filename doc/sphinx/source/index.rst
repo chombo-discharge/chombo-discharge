@@ -33,6 +33,8 @@ As `PlasmaC` evolves, so will these interfaces.
 We aim for (but cannot guarantee) backward compatibility such that existing `PlasmaC` models can be run on future versions. 
 This documentation is the user documentation `PlasmaC`. There is a separate :doxy:`Doxygen API <index>` that can be compiled together with the source code.
 
+Introduction
+************
 
 .. toctree::
    :maxdepth: 4
@@ -40,30 +42,56 @@ This documentation is the user documentation `PlasmaC`. There is a separate :dox
 
    GettingStarted
    Model
+   MeshData
+   ParticleData
+   Driver
+   AmrMesh
+   ComputationalGeometry
+   TimeStepper
+   CellTagger
 
-.. toctree::
-   :maxdepth: 4
-   :caption: Supported models
+Using ``PlasmaC``
+*****************
 
-   MinimalPlasmaModel
-	     
 .. toctree::
    :maxdepth: 4
    :caption: Using PlasmaC
 
    Control
-   Tutorials
-   NewSimulations
-   Visualization	     
+   Visualization	        
 
+
+Supported solvers
+*****************
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Supported solvers
+
+   CDR
+   Poisson
+   RTE
+   Sigma
+   Ito
+
+Implemented models
+******************
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Implemented models
+
+   MinimalPlasmaModel
+
+Technical details
+*****************
 
 .. toctree::
    :maxdepth: 4
    :caption: PlasmaC technical details
-	  
-   Design
-   ClassAPI
-   SolverAPI
+
+References
+**********
 
 .. toctree::
    :maxdepth: 4

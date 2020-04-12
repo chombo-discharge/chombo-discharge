@@ -1,21 +1,63 @@
-.. _Chap:Equations:
+.. _Chap:Model:
 
-The `PlasmaC` model
-*******************
+The ``PlasmaC`` model
+=====================
 
-This chapter discusses the overall `PlasmaC` model, including the spatial decomposition and a summary of supported solvers.
+This chapter discusses the overall ``PlasmaC`` model, including the spatial decomposition and a summary of supported solvers.
 
 Main functionality
-==================
+------------------
 
-In this section we summarize how components in `PlasmaC` are connected, such that users may understand more readily how the code is designed, and how it can be extended. 
+In this section we summarize how components in ``PlasmaC`` are connected, such that users may understand more readily how the code is designed, and how it can be extended.
 
+There are four major components `PlasmaC`:
 
+1. A computational geometry which describes a level-set geometry consisting of electrodes and possibly also dielectrics.
+   This functionality is encapsulated by :ref:`Chap:computational_geometry`. 
+2. An AMR mesh which contains the grids, grid generation routines, and functionality for handling data coarsening and refinement.
+   This functionality is encapsulated by :ref:`Chap:amr_mesh`.
+3. A time stepper which advances the equations of motion (whatever they are).
+   The :ref:`Chap:time_stepper` class is abstract.
+   In order to actually use ``PlasmaC`` for anything the user must either write his own derived :ref:`Chap:time_stepper` class,
+   or use one of the provided physics modules. 
+4. A cell tagger which flags cells for refinement and coarsening.
+   This functionality is encapsulated by the :ref:`Chap:cell_tagger` class. 
 
+Instantiations of the above four classes are fed into the :ref:`Chap:driver` class which contains the functionality for running a simulation.
+The reason for the above division of labor is that we have wanted to segregate responsibilities in order to increase flexibility.
+For that reason, the computational geometry does not have any view of the actual AMR grids; it only contains the level-set functions and some meta-information (such as the permittivity of a dielectric).
+Likewise, the :ref:`Chap:amr_mesh` class only acts a centralized repository of useful functions for AMR simulations.
+These functions include algorithms for generating AMR grids, allocating data across AMR, and synchronizing AMR levels (e.g. interpolating ghost cells).
+
+All the physics is encapsulated by the :ref:`Chap:time_stepper` class. 
+This class will have direct ownership of all the solvers and the functions required to advance them over a time step.
+Instantiations of the class will also contain the routines for setting up a simulation, e.g. instantiating solvers, setting up boundary conditions. 
+
+The :ref:`Chap:driver` class is only responsible for *running* a simulation.
+This class will call for regrids at certain intervals, call the :ref:`Chap:time_stepper` for writing plot and checkpoint data, and call for the :ref:`Chap:time_stepper` to advance the equations of motion.
+In order to understand how ``PlasmaC`` runs a simulation, it will be useful to first understand how :ref:`Chap:driver` works. 
+
+Simulation inputs
+_________________
+
+``PlasmaC`` simulations take their input from a single simulation file, possibly appended with overriding options on the command line.
+Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and physics models in ``PlasmaC`` are therefore equipped with Python setup tools that collect all such options in a single file.
+Generally, these input parameters are fetched from the dependencies of each class or module in a simulation.
+For example, all numerical solvers have independent adjustment of output.
+The input parameters for each solver class is appended in a separate file named :file:`<solver>.options`.
+For example, the input parameters for the default Poisson solver defined in :file:`/src/poisson/poisson_multifluid_gmg.H` is contained in a file :file:`/src/poisson/poisson_multifluid_gmg.options`.
+This means that any time a user wishes to use such a solver, he may fetch all the input options *for that class* directly from the supplementary options file.
+
+Simulation outputs
+__________________
+
+Mesh data from ``PlasmaC`` simulations is by default written to HDF5 files.
+Users that wish to write or output other types of data must supply code themselves. 
+   
 .. _Chap:SpatialDiscretization:
 
 Spatial discretization
-======================
+----------------------
 
 `PlasmaC` uses structured adaptive mesh refinement (SAMR provided by Chombo :cite:`ebchombo`.
 SAMR exists in two separate categories, patch-based and tree-based AMR.
@@ -26,7 +68,7 @@ Patch-based grids generally do not have unique parent-children relations: A fine
 An obvious advantage of a patch-based approach is that entire Cartesian blocks are sent into solvers, and that the patches are not restricted to squares or cubes that align with the coarse-grid boundary.
 A notable disadvantage is that additional logic is required when updating a coarse grid level from the overlapping region of a finer level.
 Tree-based AMR use quadtree or octree data structures that describe a hierarchy of unique parent-children relations throughout the AMR levels: Each child has exactly one parent, whereas each parent has multiple children (4 in 2D, 8 in 3D).
-In `PlasmaC` and Chombo, computations occur over a set of levels with different resolutions, where the resolution refinement between levels can be a factor 2 or 4.
+In ``PlasmaC`` and Chombo, computations occur over a set of levels with different resolutions, where the resolution refinement between levels can be a factor 2 or 4.
 On each level, the mesh is described by a set of disjoint patches (rectangular box in space), where the patches are distributed among MPI processes.
 
 .. figure:: figures/complex_patches.png
@@ -42,7 +84,7 @@ However, there is significant overhead with the embedded boundary approach and, 
 .. _Chap:MeshGeneration:
 
 Mesh generation
----------------
+_______________
 
 `PlasmaC` offers two algorithm for AMR grid generation.
 Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
@@ -69,9 +111,9 @@ The tiled algorithm produces grids that are similar to octrees, but it is more g
 .. _Chap:EBMesh:
 
 Geometry generation
--------------------
+___________________
 
-Geometry generation for `PlasmaC` follows that of Chombo. In Chombo, the geometries are generated from an implicit function :math:`f(\mathbf{x}) = 0` that describes the level-set surface. 
+Geometry generation for ``PlasmaC`` follows that of Chombo. In Chombo, the geometries are generated from an implicit function :math:`f(\mathbf{x}) = 0` that describes the level-set surface. 
 
 In `Chombo`, geometry generation is done by first constructing a set of boxes that covers the finest AMR level.
 If the function intersects one of these boxes, the box will allocate a *graph* that describes the connectivity of the volume-of-fluid indices in the entire box.
@@ -100,431 +142,4 @@ We then proceed towards the next finer level where the cut-cell boxes are identi
 Boxes that resulted from a refinement of the coarse level cut boxes are again broken up into equal-sized chunks, whereas the uncut boxes are not.
 This is again followed by load-balancing of the cut boxes, and this process is repeated recursively down to the finest AMR level.
 In essence, the geometry generation is load balanced based on where the cut cells are going to be.
-For the user, he will be able to switch between the `Chombo` and `PlasmaC` approaches to geometry generation load balancing by flipping a flag in an input script.
-
-.. _Chap:computational_geometry:
-
-computational_geometry
-======================
-
-:ref:`Chap:computational_geometry` is the class that implements that geometry.
-In `PlasmaC`, we use level-set functions for description of surfaces. :ref:`Chap:computational_geometry` is not an abstract class;
-if you pass in an instance of :ref:`Chap:computational_geometry` (rather than a casted instance), you will get a regular geometry without any boundaries.
-A new :ref:`Chap:computational_geometry` class requires that you set the following class members:
-
-.. code-block:: c++
-
-   Real m_eps0;
-   Vector<electrode> m_electrodes;
-   Vector<dielectric> m_dielectrics;
-
-Here, ``m_eps0`` is the gas permittivity, ``m_electrodes`` are the electrodes for the geometry and ``m_dielectrics`` are the dielectrics for the geometry. 
-
-.. _Chap:electrode:
-
-electrode
----------
-
-The :ref:`Chap:electrode` class is responsible for describing an electrode and its boundary conditions. Internally, this class is lightweight and consists only of a tuple that holds a level-set function and an associated boolean value that tells whether or not the level-set function has a live potential or not. The constructor for the electrode class is:
-
-.. code-block:: c++
-   
-  electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
-
-where the first argument is the level-set function and the second argument is responsible for setting the potential. The third argument is an optional argument that allows the user to set the potential to a specified fraction of the applied potential.
-
-.. _Chap:dielectric:
-
-dielectric
-----------
-
-.. _Chap:amr_mesh:
-
-amr_mesh
-========
-
-:ref:`Chap:amr_mesh` handles (almost) all spatial operations in `PlasmaC`.
-Internally, :ref:`Chap:amr_mesh` contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries. :ref:`Chap:amr_mesh` also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory. 
-
-:ref:`Chap:amr_mesh` is an integral part of `PlasmaC`, and users will never have the need to modify it unless they are implementing something entirely new. The behavior of :ref:`Chap:amr_mesh` is modified through it's available input parameters, listed below:
-
-.. literalinclude:: links/amr_mesh.options
-
-We now discuss the various ``amr_mesh`` class options.
-
-* ``amr_mesh.verbosity`` controls the verbosity of this class. ``amr_mesh`` can potentially do a lot of output, so it is best to leave this to the default value (-1) unless you are debugging. 
-* ``amr_mesh.coarsest_domain`` is the partitioning of the *coarsest* grid level that discretizes your problem domain. The entries in this option must all be integers of ``amr_mesh.max_box_size``.
-* ``amr_mesh.blocking_factor`` sets the minimum box size that can be generated by the mesh generation algorithm. We remark that if you are doing particle deposition, ``amr_mesh.blocking_factor`` and ``amr_mesh.max_box_size`` MUST be equal. 
-* ``amr_mesh.max_box_size`` sets the maximum box size that can be generated by the mesh generation algorithm. 
-* ``amr_mesh.max_ebis_box`` sets the maximum box size that will be used in the geometry generation step. A smaller box will consume less memory, but geometry generation runtime will be longer. 
-* ``amr_mesh.max_amr_depth`` defines the largest possible number of grids that can be used. 
-* ``amr_mesh.max_sim_depth`` defines the maximum simulation depth for the simulation. This options exists because you may want to run one part of a simulation using a coarser resolution than ``amr_mesh.max_amr_depth``. 
-* ``amr_mesh.refine_all_lvl`` is deprecated class option. 
-* ``amr_mesh.mg_coarsen`` is a "pre-coarsening" method for multigrid solvers. The deeper multigrids levels are there to facilitate convergence, and it often helps to use fairly large box sizes on some of these levels before aggregating boxes. 
-* ``amr_mesh.fill_ratio`` is the fill ratio for the mesh refinement algorithm. This value must be between 0 and 1; a smaller value will result in larger grids. A higher value results in more compact grids, but possibly with more boxes. 
-* ``amr_mesh.irreg_growth`` controls how much irregular tags (e.g. boundary tags) are grown before being passed into the mesh refinement algorithm. 
-* ``amr_mesh.buffer_size`` is the minimum number of cells between grid levels. 
-* ``amr_mesh.ref_rat`` is the refinement factor between levels. Values 2 and 4 are supported, and you may use mixed refinement ratios. The length of this vector must be at least equal to the number of refinement levels. 
-* ``amr_mesh.num_ghost`` indicates how many ghost cells to use for all data holders. The typical value is 3 for EB-applications, but non-EB applications might get away with fewer ghost cells. 
-* ``amr_mesh.eb_ghost`` controls how ghost cells are used for the EB generation. 
-* ``amr_mesh.centroid_sten`` controls which stencil is used for interpolating data to irregular cell centroids. Currently available options are 'pwl' (piecewise linear), 'linear' (bi/trilinear), 'taylor' (higher order Taylor expansion), and 'lsq' which is a least squares fit. Only 'pwl' is guaranteed to have positive weights in the stencil. 
-* ``amr_mesh.eb_sten`` controls which stencil is used for interpolation/extrapolation to embedded boundary centroids. We cannot guarantee that the stencils have only positive weights. 
-* ``amr_mesh.redist_radius`` is the redistribution radius for hyperbolic redistribution. 
-* ``amr_mesh.ghost_interp`` defines the ghost cell interpolation type. Algorithms that require very specific ghost cell interpolation schemes (advection, for example) use their own interpolation method that is outside user control. The available options are 'pwl' (piecewise linear) and 'quad' (quadratic). 
-* ``amr_mesh.load_balance`` tells ``amr_mesh`` how to load balance the grids. 
-* ``amr_mesh.ebcf`` allows ``amr_mesh`` to turn on certain optimizations when there are **not** crossing between embedded boundaries and grid refinement boundaries. If such crossings exist, and you set this flag to false, `PlasmaC` *will* compute incorrect answers. 
-
-Supported solvers
-*****************
-
-`PlasmaC` aims at being a moderately flexible framework for fluid plasma simulations.
-Numerical solvers are constructed such that they essentially provide a method-of-lines (MOL) functionality which the user can either run, or couple to other solvers. 
-
-.. _Chap:CDR:
-
-Convection-Diffusion-Reaction Equations
-=======================================
-
-Here, we discuss the discretization of the equation 
-
-.. math::
-   \frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n + \sqrt{2D\phi}\mathbf{Z}\right) = S.
-
-We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in a cut-cells and regular cells.
-
-
-.. _Chap:cdr_species:
-
-cdr_species
------------
-
-The `cdr_species` class 
-
-.. _Chap:ExplicitDivergence:   
-
-Computing explicit divergences
-------------------------------
-
-Computing explicit divergences for equations like
-
-.. math::
-   \frac{\partial \phi}{\partial t} + \nabla\cdot\mathbf{G} = 0
-
-is problematic because of the arbitarily small volume fractions of cut cells. In general, we seek to update :math:`\phi^{k+1} = \phi^k - \Delta t \left[\nabla\cdot \mathbf{G}^k\right]` where :math:`\left[\nabla\cdot\mathbf{G}\right]` is a numerical approximation based on some finite volume approximation. Recall that in finite volume methods we usually seek the update
-
-.. math::
-   \phi^{k+1} = \phi^k - \frac{\Delta t}{\kappa \Delta x^{\textrm{DIM}}}\int_V\nabla\cdot\mathbf{G}dV,
-   :label: conservativeUpdate
-   
-where :math:`\kappa` is the volume fraction of a grid cell, :math:`\textrm{DIM}` is the spatial dimension and the volume integral is written as discretized surface integral
-   
-.. math::
-   \int_V\nabla\cdot\mathbf{G}dV =\sum_{f\in f(V)}\left(\mathbf{G}_f\cdot \mathbf{n}_f\right)\alpha_f\Delta x^{\textrm{DIM} -1}.
-   
-The sum runs over all cell edges (faces in 3D) of the cell where :math:`G_f` is the flux on the edge centroid and :math:`\alpha_f` is the edge (face) aperture.
-
-.. figure:: figures/cutCell.png
-   :width: 480px
-   :align: center
-
-   Location of centroid fluxes for cut cells. 
-
-However, taking :math:`[\nabla\cdot\mathbf{G}^k]` to be this sum leads to a time step constraint proportional to :math:`\kappa`, which can be arbitrarily small. This leads to an unacceptable time step constraint for :eq:`conservativeUpdate`. We use the Chombo approach and expand the range of influence of the cut cells in order to stabilize the discretization and allow the use of a normal time step constraint. First, we compute the conservative divergence
-
-.. math::
-  \kappa_{\mathbf{i}} D_\mathbf{i}^c =  \sum_f G_f\alpha_f\Delta x^{\textrm{DIM} -1},
-
-where :math:`G_f = \mathbf{G}_f\cdot \mathbf{n}_f`. Next, we compute a non-conservative divergence :math:`D_{\mathbf{i}}^{nc}`
-
-.. math::
-   D_\mathbf{i}^{nc} =  \frac{\sum_{\mathbf{j}\in{N}\left(\mathbf{i}\right)}\kappa_{\mathbf{j}}D_\mathbf{i}^c}{\sum_{\mathbf{j}\in{N}\left(\mathbf{i}\right)}\kappa_{\mathbf{j}}}
-
-where :math:`N(\mathbf{i})` indicates some neighborhood of cells around cell :math:`\mathbf{i}`. Next, we compute a hybridization of the divergences, 
-
-.. math::
-  D_{\mathbf{i}}^H = \kappa_{\mathbf{i}} D_{\mathbf{i}}^c + (1-\kappa_{\mathbf{i}})D_{\mathbf{i}}^{nc},
-
-and perform an intermediate update
-  
-.. math::
-   \phi_{\mathbf{i}}^{k+1} = \phi_{\mathbf{i}}^k - \Delta tD_{\mathbf{i}}^H.
-   
-The hybrid divergence update fails to conserve mass by an amount :math:`\delta M_{\mathbf{i}} = \kappa_{\mathbf{i}}\left(1-\kappa_{\mathbf{i}}\right)\left(D_{\mathbf{i}}^c - D_{\mathbf{i}}^{nc}\right)`. In order to main overall conservation, the excess mass is redistributed into neighboring grid cells. Let :math:`\delta M_{\mathbf{i}, \mathbf{j}}` be the redistributed mass from :math:`\mathbf{j}` to :math:`\mathbf{i}` where
-   
-.. math::
-   \delta M_{\mathbf{i}} = \sum_{\mathbf{j} \in N(\mathbf{i})}\delta M_{\mathbf{i}, \mathbf{i}}.
-
-This mass is used as a local correction in the vicinity of the cut cells, i.e.
-   
-.. math::
-   \phi_{\mathbf{i}}^{k+1} \rightarrow \phi_{\mathbf{i}}^{k+1} + \delta M_{\mathbf{j}\in N(\mathbf{i}), \mathbf{i}},
-
-where :math:`\delta M_{\mathbf{j}\in N(\mathbf{i}), \mathbf{i}}` is the total mass redistributed to cell :math:`\mathbf{i}` from the other cells. After these steps, we define
-   
-.. math::
-   \left[\nabla\cdot\mathbf{G}^k\right]_{\mathbf{i}} \equiv \frac{1}{\Delta t}\left(\phi_{\mathbf{i}}^{k+1} - \phi_{\mathbf{i}}^k\right)
-
-Numerically, the above steps for computing a conservative divergence of a one-component flux :math:`\mathbf{G}` are implemented in the convection-diffusion-reaction solvers, which also respects boundary conditions (e.g. charge injection). The user will need to call the function
-
-.. code-block:: c++
-		
-   virtual void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG)
-
-where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebG`` is the flux on the embedded boundary. The above steps are performed by interpolating ``a_G`` to face centroids in the cut cells for computing the conservative divergence, and the remaining steps are then performed successively. The result is put in ``a_divG``. 
-   
-.. _Chap:NonNegative:
-      
-Maintaining non-negative densities
-----------------------------------
-
-Although the redistribution functionality is conservative, the cut-cells represent boundaries that make the evolution non-monotone. In particular, explicit discretization of divergences in cut-cells do not necessarily lead to non-negative densities in the cut cells themselves. In some cases, negative values of :math:`\phi` are non-physical and the lack of non-negativeness can lead to serious numerical issues.
-
-In order to handle this case, we support another redistribution step in the cut cells that redistributes mass from regular cells and into the cut cells in order to maintain non-negative densities.
-
-.. code-block:: c++
-		
-   void redistribute_negative(EBAMRCellData& a_phi)
-
-Again, the functionality for redistributing negative mass in a conservative way is owned by the convection-diffusion-reaction solvers. 
-
-.. _Chap:ExplicitAdvection:
-
-Explicit advection
-------------------
-
-Scalar advective updates follows the computation of the explicit divergence discussed in :ref:`Chap:ExplicitDivergence`. The face-centered fluxes :math:`\mathbf{G} = \phi\mathbf{v}` are computed by instantiation classes for the convection-diffusion-reaction solvers. These solvers may compute :math:`\mathbf{G}` in different ways. There is, for example, support for low-order upwind methods as well as Godunov methods. The function signature for explicit advection is
-
-.. code-block:: c++
-		
-   void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt)
-
-where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF`` using the procedure outlined above. For example, in order to perform an advective advance over a time step :math:`\Delta t`, one would perform the following:
-
-.. code-block:: c++
-
-   // Assume that data holders divF and phi are defined, and that 'solver' is
-   // a valid convection-diffusion reaction solver with defined velocities. 
-   solver->compute_divF(divF, phi, 0.0); // Computes divF
-   data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
-
-.. _Chap:ExplicitDiffusion:
-   
-Explicit diffusion
-------------------
-
-Explicit diffusion is performed in much the same way as implicit advection, with the exception that the general flux :math:`\mathbf{G} = D\nabla\phi` is computed by using centered differences on face centers. The function signature for explicit diffusion is
-
-.. code-block:: c++
-		
-   void compute_divD(EBAMRCellData& a_divF, const EBAMRCellData& a_state)
-
-and we increment in the same way as for explicit advection:
-
-.. code-block:: c++
-
-   // Assume that data holders divD and phi are defined, and that 'solver' is
-   // a valid convection-diffusion reaction solver with defined diffusion coefficients
-   solver->compute_divD(divD, phi); // Computes divD
-   data_ops:incr(phi, divD, dt);    // makes phi -> phi + dt*divD
-   solver->redistribute_negative(phi);  // Redist negative mass in cut cells
-
-.. _Chap:ExplicitAdvectionDiffusion:
-   
-Explicit advection-diffusion
-----------------------------
-
-There is also functionality for aggregating explicit advection and diffusion advances. The reason for this is that the cut-cell overhead is only applied once on the combined flux :math:`\phi\mathbf{v} - D\nabla\phi` rather than on the individual fluxes. For non-split methods this leads to some performance improvement. The signature for this is precisely the same as for explicit advection only:
-
-.. code-block:: c++
-		
-   void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt)
-
-where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF``. For example, in order to perform an advective advance over a time step :math:`\Delta t`, one would perform the following:
-
-.. code-block:: c++
-
-   // Assume that data holders divJ and phi are defined, and that 'solver' is
-   // a valid convection-diffusion reaction solver with defined velocities and
-   // diffusion coefficients
-   solver->compute_divJ(divJ, phi, 0.0); // Computes divF
-   data_ops:incr(phi, divJ, -dt);        // makes phi -> phi - dt*divJ
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
-
-Often, time integrators have the option of using implicit or explicit diffusion. If the time-evolution is non-split (i.e. not using a Strang or Godunov splitting), the integrators will often call ``compute_divJ`` rather separately calling ``compute_divF`` and ``compute_divD``. If you had a split-step Godunov method, the above procedure for a forward Euler method for both parts would be:
-
-.. code-block:: c++
-
-   solver->compute_divF(divF, phi, 0.0); // Computes divF = div(n*phi)
-   data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
-
-   solver->compute_divD(divD, phi);      // Computes divD = div(D*nabla(phi))
-   data_ops:incr(phi, divD, dt);         // makes phi -> phi + dt*divD
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
-
-However, the cut-cell redistribution dance (flux interpolation, hybrid divergence, and redistribution) would be performed twice. 
-
-.. _Chap:ImplicitDiffusion:
-
-Implicit diffusion
-------------------
-
-Occasionally, the use of implicit diffusion is necessary. The convection-diffusion-reaction solvers support two basic diffusion solves: Backward Euler and the Twizel-Gumel-Arigu (TGA) methods. The function signatures for these are
-
-.. code-block:: c++
-		
-   void advance_euler(EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const EBAMRCellData& src, const Real dt)
-   void advance_tga(  EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const EBAMRCellData& src, const Real dt)
-		
-   void advance_euler(EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const Real dt)
-   void advance_tga(  EBAMRCellData& phiNew, const EBAMRCellData& phiOld, const Real dt)
-		
-where ``phiNew`` is the state at the new time :math:`t + \Delta t`, ``phiOld`` is the state at time :math:`t` and ``src`` is the source term which strictly speaking should be centered at time :math:`t + \Delta t` for the Euler update and at time :math:`t + \Delta t/2` for the TGA update. This may or may not be possible for your particular problem. 
-
-For example, performing a split step Godunov method for advection-diffusion is as simple as:
-
-.. code-block:: c++
-
-   solver->compute_divF(divF, phi, 0.0); // Computes divF = div(n*phi)
-   data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
-   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
-		
-   data_ops::copy(phiOld, phi);            // Copy state
-   solver->advance_euler(phi, phiOld, dt); // Backward Euler diffusion solve
-
-.. _Chap:FieldSolver:
-   
-Field solver
-============
-
-The `PlasmaC` field solver has a lot of supporting functionality, but essentially relies on only one critical function: Solving for the potential.
-This is done by calling a class-specific function
-
-.. code-block:: c++
-
-   bool solve(MFAMRCellData& phi, const MFAMRCellData& rho, const EBAMRIVData& sigma);
-
-where ``phi`` is the resulting potential that was computing with the space charge density ``rho`` and surface charge density ``sigma``.
-
-Currently, only one field solver is implemented and this solver uses a geometric multigrid method for solving for the potential.
-The solver supports three phases: electrodes, gas, and dielectric.
-Domain boundary conditions for the solver must be set by the user through an input script, whereas the boundary conditions on internal surfaces are Dirichlet by default.
-
-.. _Chap:RadiativeTransfer:
-
-Radiative transfer
-==================
-
-Radiative transfer is supported in the diffusion (i.e. Eddington or Helmholtz) approximation and with Monte Carlo sampling of discrete photons. The solvers share a common interface but since diffusion RTE is deterministic and discrete Monte Carlo photons are stochastic, not all temporal integration methods will support both. The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach currently only solves for instantaneous photon transport. However, it would be straightforward to include transient photons. 
-
-Diffusion approximation
------------------------
-
-In the diffusion approximation, the radiative transport equation is
-
-.. math::
-
-      \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
-
-which is called the Eddington approximation. The radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`. We do not currently support flux-limited diffusion radiative transfer. In the stationary case this yields a Helmholtz equation
-
-.. math::
-
-   \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
-
-which is solved by a geometric multigrid method. The default boundary conditions are of the Robin type. For fully transient radiative transport, we offer discretizations based on the backward Euler and TGA schemes as discussed above. 
-
-Monte Carlo methods
-___________________
-
-All types of moment-closed radiative transfer equations contain nonphysical artifacts (which may or may not be acceptable). For example, in the diffusion approximation the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`, implying that photons can leak around boundaries. I.e. the diffusion approximation does not correctly describe shadows. It is possible to go beyond the diffusion approximation by also solving for higher-order moments like the radiative flux. While such methods can describe shadows, they contain other nonphysical features.
-
-.. figure:: figures/rte_comp.png
-   :width: 720px
-   :align: center
-
-   Qualitative comparison between predictions made with a diffusion RTE solver and a Monte Carlo RTE solver. Left: Source term: Middle: Solution computed in the diffusion approximation with homogeneous Robin boundary conditions. Right: Solution computed with a Monte Carlo method. 
-
-Monte Carlo methods are offered as an alternative to the diffusion approximation. Currently, we have a fully developed stationary Monte Carlo method and a transient method (which tracks photons in time) is also under development. Neither method currently includes scattering, although this would be comparatively straightforward to incorporate. As with the diffusion approximation, we do not include interaction with the plasma state in the time-of-flight of the photon. That is, we do not support e.g. scattering of a photon off electron densities. The reason for this design choice is that the velocity of a photon is much greater than the velocity of an electron, and we would have to rebin discrete photons in parallel several thousand times for each fluid advance. Thus, once a photon is created, it is invisible for the remaining solvers until it is absorbed at a point in the mesh.
-
-Stationary Monte Carlo
-~~~~~~~~~~~~~~~~~~~~~~
-
-The stationary Monte Carlo method proceeds as follows.
-
-1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` where :math:`\mathcal{P}` is a Poisson distribution. The user may also choose to use pseudophotons rather than physical photons by modifying photon weights. Each photon is generated in the cell centroid :math:`\mathbf{x}_0` and given a random propagation direction :math:`\mathbf{n}`.
-
-2. Draw a propagation distance :math:`r` by drawing random numbers from an exponential distribution :math:`p(r) = \kappa \exp\left(-\kappa r\right)`. The absorbed position of the photon is :math:`\mathbf{x} = \mathbf{x}_0 + r\mathbf{n}`.
-
-3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}` or reflect it off symmetry boundaries. 
-
-4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
-
-5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).
-      
-
-The Monte Carlo methods use computational particles for advancing the photons in exactly the same way a Particle-In-Cell method would use them for advancing electrons. Although a computational photon would normally live on the finest grid level that overlaps its position, this is not practical for all particle deposition kernels. For example, for cloud-in-cell deposition schemes it is useful to have the restrict the interpolation kernels to the grid level where the particle lives. In Chombo-speak, we therefore use a buffer region that extends some cells from a refinement boundary where the photons are not allowed to live. Instead, photons in that buffer region are transferred to a coarser level, and their deposition clouds are first interpolated to the fine level before deposition on the fine level happens. Selecting a deposition scheme and adjusting the buffer region is done through an input script associated with the solver. 
-   
-Transient Monte Carlo
-~~~~~~~~~~~~~~~~~~~~~
-
-The transient Monte Carlo method is almost identical to the stationary method, except that it does not deposit all generated photons on the mesh but tracks them through time. The transient method is implemented as follows:
-
-1. For each cell in the mesh, draw a discrete number of photons :math:`\mathcal{P}\left(\eta \Delta V\Delta t\right)` as above, and append these to the already existing photons. Each photon is given a uniformly distributed random creation time within :math:`\Delta t`. 
-   
-2. Each photon is advanced over the time step :math:`\Delta t` by a sequence of :math:`N` substeps (:math:`N` may be different for each photon).
-
-   a. We compute :math:`N` such that we sample :math:`N\Delta \tau = \Delta t` with :math:`c\kappa\Delta\tau < 1`.
-
-   b. A photon at position :math:`\mathbf{x}_0` is moved a distance :math:`\Delta \mathbf{x} = c\mathbf{n}\Delta\tau`. For each step we compute the absorption probability :math:`p = \kappa\left|\Delta\mathbf{x}\right|` where :math:`p\in[0,1]` is a uniform random number. If the photon is absorbed on this interval, draw a new uniform random number :math:`r \in [0,1]` and absorb the photon at the position :math:`\mathbf{x}_0 + r\Delta\mathbf{x}`. If the photon is not absorbed, it is moved to position :math:`\mathbf{x}_0 + r\Delta\mathbf{x}`.
-
-3. Check if the path from :math:`\mathbf{x}_0` to :math:`\mathbf{x}` intersects an internal or domain boundary. If it does, absorb the photon on the boundary. If not, move the photon to :math:`\mathbf{x}`.
-
-4. Rebin the absorbed photons onto the AMR grid. This involves parallel communication. 
-
-5. Compute the resulting photoionization profile. The user may choose between several different deposition schemes (like e.g. cloud-in-cell).
-      
-.. _Chap:SigmaSolver:
-
-Surface charge solver
----------------------
-In order to conserve charge on solid insulators, `PlasmaC` has a solver that is defined on the gas-dielectric interface where the surface charge is updated with the incoming flux
-
-.. math::
-   F_\sigma(\phi) = \sum_{\phi}q_\phi F_{\textrm{EB}}(\phi),
-
-where :math:`q_\phi` is the charge of a species :math:`\phi`. This ensures strong conservation on insulating surfaces.
-
-.. _Chap:ItoDiffusion:
-
-Ito diffusion
-=============
-
-The Ito diffusion model advances computational particles as Brownian walkers with drift:
-
-.. math::
-   d\mathbf{X}_i = \mathbf{v}_idt + \sqrt{2D_i}\mathbf{W}_i dt,
-
-where :math:`\mathbf{X}_i` is the spatial position of a particle :math:`i`, :math:`\mathbf{v}_i` is the drift coefficient and :math:`D_i` is the diffusion coefficient *in the continuum limit*.
-That is, both :math:`\mathbf{v}_i` and :math:`D_i` are the quantities that appear in :ref:`Chap:CDR`.
-The vector term :math:`\mathbf{W}_i` is a Gaussian random field with a mean value of 0 and standard deviation of 1.
-
-The Îto particle
-----------------
-
-The Îto particle is a computational particle class in `PlasmaC` which can be used together with the particle tools in `Chombo`.
-The following data fields are implemented in the particle:
-
-.. code-block:: c++
-   
-   RealVect m_position;
-   RealVect m_velocity;
-   Real m_mass;
-   Real m_diffusion;
-
-
-
-Iterating over particles
-------------------------
-
-.. bibliography:: references.bib
+For the user, he will be able to switch between the `Chombo` and ``PlasmaC`` approaches to geometry generation load balancing by flipping a flag in an input script.
