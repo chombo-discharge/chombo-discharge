@@ -6,17 +6,89 @@ Convection-Diffusion-Reaction
 Here, we discuss the discretization of the equation 
 
 .. math::
-   \frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n + \sqrt{2D\phi}\mathbf{Z}\right) = S.
+   \frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v} \phi - D\nabla \phi + \sqrt{2D\phi}\mathbf{Z}\right) = S.
 
 We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in a cut-cells and regular cells.
 
+Here, :math:`\mathbf{v}` indicates a drift velocity, :math:`D` is the diffusion coefficient, and the term :math:`\sqrt{2D\phi}\mathbf{Z}` is a stochastic diffusion flux. :math:`S` is the source term.
+
+.. _Chap:cdr_solver:
+
+cdr_solver
+----------
+
+The ``cdr_solver`` class contains the interface for solving advection-diffusion-reaction problems.
+The class is abstract and resides in :file:`/src/cdr_solver/cdr_solver.H(cpp)` together with specific implementations.
+Currently, we only use the implementation given in :file:`/src/cdr_solver/cdr_gdnv.H(cpp)` which contains a second order accurate discretization with slope limiters. 
+
+Using cdr_solver
+________________
+
+The ``cdr_solver`` is intended to be used in a method-of-lines context where the user will
+
+1. Fill the solver with relevant data (e.g. velocities, diffusion coefficients, source terms etc.).
+2. Call public member functions for computing advective or diffusive derivates, or perform implicit diffusion advances.
+
+There are on time integration algorithms built into the ``cdr_solver``, and the user will have to supply these through ``time_stepper``.
+It is up to the developer to ensure that the solver is filled with appropriate data before calling the public member functions.
+This would typically look something like this:
+
+.. code-block:: c++
+
+   EBAMRCellData& vel = m_solver->get_velo_cell();
+   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+         EBCellFAB& patchVel = (*vel[lvl])[dit()];
+
+	 // Set velocity of some patch
+	 callSomeFunction(patchVel);
+      }
+   }
+
+   // Compute div(v*phi)
+   compute_divF(....)
+
+More complete code is given in the regression test :file:`/physics/advection_diffusion/advection_diffusion_stepper`. 
+
+Getting data
+____________
+
+In order to obtain mesh data from the ``cdr_solver``, the user should use the following public member functions:
+
+.. code-block:: c++
+
+   EBAMRCellData& get_state();        // Return  phi
+   EBAMRCellData& get_velo_cell();    // Get cell-centered velocity
+   EBAMRFluxData& get_diffco_face();  // Returns D
+   EBAMRCellData& get_source();       // Returns S
+   EBAMRIVData& get_ebflux();         // Returns flux at EB
+   EBAMRIFData& get_domainflux();     // Returns flux at domain boundaries
+
+Adjusting output
+________________
+
+It is possible to adjust solver output when plotting data.
+This is done through the input file for the class that you're using (e.g. :file:`/src/cdr_solver/cdr_gdnv.options`):
+
+.. code-block:: bash
+
+   cdr_gdnv.plt_vars = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
+
+Here, you adjust the plotted variables by adding or omitting them from your input script.
+E.g. if you only want to plot the cell-centered states you would do:
+
+.. code-block:: bash
+
+   cdr_gdnv.plt_vars = phi  # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
 
 .. _Chap:cdr_species:
 
 cdr_species
 -----------
 
-The `cdr_species` class 
+The ``cdr_species`` class is a supporting class that passes information and initial conditions into ``cdr_solver`` instances. 
 
 .. _Chap:ExplicitDivergence:   
 
@@ -99,7 +171,10 @@ The user will need to call the function
 
 where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebG`` is the flux on the embedded boundary.
 The above steps are performed by interpolating ``a_G`` to face centroids in the cut cells for computing the conservative divergence, and the remaining steps are then performed successively.
-The result is put in ``a_divG``. 
+The result is put in ``a_divG``.
+
+Note that when refinement boundaries intersect with embedded boundaries, the redistribution process is far more complicated since it needs to account for mass that moves over refinement boundaries.
+These additional complicated are taken care of inside ``a_divG``, but are not discussed in detail here. 
    
 .. _Chap:NonNegative:
       
@@ -238,3 +313,30 @@ For example, performing a split step Godunov method for advection-diffusion is a
 		
    data_ops::copy(phiOld, phi);            // Copy state
    solver->advance_euler(phi, phiOld, dt); // Backward Euler diffusion solve
+
+   
+Adding a stochastic flux
+------------------------
+
+It is possible to add a stochastic flux through the public member functions of ``cdr_solver`` in the odd case that one wants to use fluctuating hydrodynamics (FHD).
+This is done by calling a function that computes the term :math:`\sqrt{2D\phi}\mathbf{Z}`:
+
+.. code-block:: c++
+		
+   void GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
+
+When FHD is used, there is no guarantee that the evolution leads to non-negative values.
+We do our best to ensure that the stochastic flux is turned off when :math:`\phi \Delta V` approaches 0 by computing the face-centered states for the stochastic term using an arithmetic mean that goes to zero as :math:`\phi` approaches 0.
+
+In the above function, ``a_ransource`` can be used directly in a MOL context, e.g.
+
+.. code-block:: c++
+
+   solver->compute_divF(divF, phi, 0.0); // Computes divF = div(n*phi)
+   data_ops:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
+   solver->redistribute_negative(phi);	 // Redist negative mass in cut cells
+
+   solver->GWN_diffusion_source(ransource, phi); // Compute stochastic flux
+   data_ops::copy(phiOld, phi);                  // phiOld = phi - dt*divF
+   data_ops::incr(phiOld, ransource, a_dt);      // phiOld = phi - dt*divF + dt*sqrt(2D*phi)Z
+   solver->advance_euler(phi, phiOld, dt);       // Backward Euler diffusion solve

@@ -28,7 +28,6 @@ advection_diffusion_stepper::advection_diffusion_stepper(RefCountedPtr<cdr_solve
 }
 
 advection_diffusion_stepper::~advection_diffusion_stepper(){
-  
 }
 
 void advection_diffusion_stepper::setup_solvers(){
@@ -77,8 +76,6 @@ void advection_diffusion_stepper::set_velocity(){
   EBAMRCellData& vel = m_solver->get_velo_cell();
   m_amr->average_down(vel, phase::gas);
   m_amr->interp_ghost(vel, phase::gas);
-
-
 }
 
 void advection_diffusion_stepper::set_velocity(const int a_level){
@@ -156,7 +153,6 @@ void advection_diffusion_stepper::write_plot_data(EBAMRCellData&       a_output,
 }
 
 void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
-
   Real cfl_dt;
   Real diff_dt;
 
@@ -186,18 +182,14 @@ void advection_diffusion_stepper::compute_dt(Real& a_dt, time_code::which_code& 
 }
 
 Real advection_diffusion_stepper::advance(const Real a_dt){
-
+  EBAMRCellData& state = m_solver->get_state();
+  
   if(m_integrator == 0){ //   Use Heun's method
-    EBAMRCellData& state = m_solver->get_state();
-    
-
     m_solver->compute_divJ(m_k1, state, 0.0);
-
     data_ops::copy(m_tmp, state);
     data_ops::incr(m_tmp, m_k1, -a_dt); // m_tmp = phi - dt*div(J)
 
     m_solver->compute_divJ(m_k2, m_tmp, 0.0);
-
     data_ops::incr(state, m_k1, -0.5*a_dt);
     data_ops::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
 
@@ -213,9 +205,6 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
     m_amr->interp_ghost(state, phase::gas);
   }
   else if(m_integrator == 1){
-
-    EBAMRCellData& state = m_solver->get_state();
-
     m_solver->compute_divF(m_k1, state, a_dt);
     data_ops::incr(state, m_k1, -a_dt);
     m_amr->average_down(state, phase::gas);
@@ -238,7 +227,6 @@ Real advection_diffusion_stepper::advance(const Real a_dt){
   else{
     MayDay::Abort("advection_diffusion_stepper - unknown integrator requested");
   }
-
   
   return a_dt;
 }

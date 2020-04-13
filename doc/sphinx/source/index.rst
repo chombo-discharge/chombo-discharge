@@ -67,7 +67,7 @@ Supported solvers
 .. toctree::
    :maxdepth: 4
    :caption: Supported solvers
-
+	     
    CDR
    Poisson
    RTE
@@ -81,17 +81,17 @@ Implemented models
    :maxdepth: 4
    :caption: Implemented models
 
+   AdvectionDiffusionModel
    MinimalPlasmaModel
 
-Technical details
-*****************
+Tutorial
+********
 
 .. toctree::
    :maxdepth: 4
-   :caption: PlasmaC technical details
+   :caption: Tutorial
 
-References
-**********
+   Tutorial
 
 .. toctree::
    :maxdepth: 4

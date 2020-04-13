@@ -94,6 +94,16 @@ public:
   virtual void GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states);
 
   /*!
+    @brief Smoothed face average
+  */
+  virtual void smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states);
+
+  /*!
+    @brief Gaussian noise field
+  */
+  virtual void fill_GWN(EBAMRFluxData& a_noise, const Real a_mean);
+
+  /*!
     @brief Make a_phi non-negative by redistributing mass in the vicinity of the cut cells
   */
   virtual void make_non_negative(EBAMRCellData& a_phi);
@@ -717,15 +727,7 @@ protected:
   */
   virtual void define_interpolant();
 
-  /*!
-    @brief Smoothed face average
-  */
-  virtual void smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states);
 
-  /*!
-    @brief Gaussian noise field
-  */
-  virtual void fill_GWN(EBAMRFluxData& a_noise, const Real a_mean);
 
   /*!
     @brief Options for parsing some class options
