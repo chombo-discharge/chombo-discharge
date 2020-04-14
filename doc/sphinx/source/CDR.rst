@@ -50,7 +50,8 @@ This would typically look something like this:
    // Compute div(v*phi)
    compute_divF(....)
 
-More complete code is given in the regression test :file:`/physics/advection_diffusion/advection_diffusion_stepper`. 
+More complete code is given in the physics module for advection-diffusion problems in :file:`/physics/advection_diffusion/advection_diffusion_stepper`.
+This code is also part of a regression test found in :file:`/regression/advection_diffusion`. 
 
 Getting data
 ____________
@@ -191,7 +192,8 @@ In order to handle this case, we support another redistribution step in the cut 
 		
    void redistribute_negative(EBAMRCellData& a_phi)
 
-Again, the functionality for redistributing negative mass in a conservative way is owned by the convection-diffusion-reaction solvers. 
+Note that this *will* give give an :math:`\mathcal{O}(1)` error in the solution.
+The alternative of maintaining non-negative densities through mass injection introduces the same error, but also has the side-effect of being non-conservative. 
 
 .. _Chap:ExplicitAdvection:
 

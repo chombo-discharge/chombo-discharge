@@ -81,7 +81,9 @@ Implemented models
    :maxdepth: 4
    :caption: Implemented models
 
+   PoissonModel
    AdvectionDiffusionModel
+   BrownianWalkerModel
    MinimalPlasmaModel
 
 Tutorial
