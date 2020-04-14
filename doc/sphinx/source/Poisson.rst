@@ -20,8 +20,23 @@ Creating a solver is often done with smart pointer casts like so:
    RefCountedPtr<poisson_solver> poisson = RefCountedPtr<poisson_solver> (new poisson_multifluid_gmg());
 
 In addition, one must parse run-time options to the class, provide the ``amr_mesh`` and ``computational_geometry`` instances, and set the initial conditions.
+This is done as follows:
 
+.. code-block:: c++
 
+   poisson->parse_options();              // Parse class options
+   poisson->set_amr(amr);                 // Set amr - we assume that `amr` is an object
+   poisson->set_computational_geometry(); // Set the computational geometry
+   poisson->allocate_internals();         // Allocate storage for potential etc.
+   poisson->set_potential(potential);     // Set the potential
+
+The argument in the function ``set_potential(...)`` is a function pointer of the type
+
+.. code-block:: c++
+
+   Real potential(const Real a_time)
+
+and allows setting a time-dependent potential for the solver. 
 
 The `PlasmaC` field solver has a lot of supporting functionality, but essentially relies on only one critical function:
 Solving for the potential.
