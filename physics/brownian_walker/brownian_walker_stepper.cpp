@@ -157,8 +157,24 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
   }
   
   //  MayDay::Warning("brownian_walker_stepper::compute_dt - not implemented yet");
+  m_solver->interpolate_velocities();
+  m_solver->interpolate_diffusion();
 
-  a_dt = 0.1;
+  Real drift_dt = 0.0;
+  Real diffu_dt = 0.0;
+  if(m_solver->is_mobile()){
+    drift_dt = m_solver->compute_min_drift_dt(1.0);
+  }
+  if(m_solver->is_diffusive()){
+    diffu_dt = m_solver->compute_min_diffusion_dt(1.0);
+  }
+
+  a_dt = Min(drift_dt, diffu_dt);
+
+  if(procID() == 0){
+    //    std::cout << "drift dt = " << drift_dt << "\t diffusion_dt = " << diffu_dt << std::endl;
+  }
+  //  MayDay::Abort("stop");
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -226,8 +242,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::advance" << endl;
   }
+
+  const int finest_level = m_amr->get_finest_level();
   
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+  for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
     ParticleData<ito_particle>& particles = *m_solver->get_particles()[lvl];
 
@@ -242,10 +260,12 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	ListIterator<ito_particle> lit(particleList);
 	ListIterator<ito_particle> litC(particleCopy);
 
-      
+
+#if 0 // This was done in the compute_dt routine
 	// Compute particle velocities and diffusion coefficients
 	m_solver->interpolate_velocities(lvl, dit());
 	m_solver->interpolate_diffusion(lvl, dit());
+#endif
       
 
 	// Half Euler step and evaluate velocity at half step
@@ -253,7 +273,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  ito_particle& p = particleList[lit];
 	  p.position() += 0.5*p.velocity()*a_dt;
 	}
-	m_solver->interpolate_velocities(lvl, dit()); 
+#if 0 // Maybe we need this...=?
+	m_solver->remap_amr_particles();
+#endif
+	m_solver->interpolate_velocities(lvl, dit());
 
 	// Final stage
 	for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
@@ -273,16 +296,15 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	for (lit.rewind(); lit; ++lit){ 
 	  ito_particle& p = particleList[lit];
 	  const RealVect ran = m_solver->random_gaussian();
-	  p.position() += ran*p.diffusion()*a_dt;
+	  const RealVect hop = ran*sqrt(2.0*p.diffusion())*a_dt;
+	  p.position() += hop;
 	}
       }
     }
-
-    // Remap outcasts
-    particles.gatherOutcast();
-    particles.remapOutcast();
   }
 
+  // Remap the particles and deposit them
+  m_solver->remap_amr_particles();
   m_solver->deposit_particles();
 
   return a_dt;

@@ -205,6 +205,16 @@ public:
   virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
 
   /*!
+    @brief Remap all particles
+  */
+  void remap_amr_particles();
+
+  /*!
+    @brief Remap "lost" particles
+  */
+  void remap_lost_particles();
+
+  /*!
     @brief Random Gaussian
   */
   RealVect random_gaussian();
@@ -213,6 +223,56 @@ public:
     @brief Random direction
   */
   RealVect random_direction();
+
+  /*!
+    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+  */
+  Real compute_min_drift_dt(const Real a_maxCellsToMove) const;
+
+  /*!
+    @brief Compute the drift dt. This returns (dx/dt)*a_maxCellsToMove
+  */
+  Vector<Real> compute_drift_dt(const Real a_maxCellsToMove) const;
+
+  /*!
+    @brief Compute the drift dt. This computes the minimum dt = dx/v on every level
+  */
+  Vector<Real> compute_drift_dt() const;
+
+  /*!
+    @brief Compute the drift dt. This computes the minimum dt = dx/v on one level
+  */
+  Real compute_drift_dt(const int a_lvl) const;
+
+  /*!
+    @brief Compute the drift dt. This computes the minimum dt = dx/v on one level and one box. 
+  */
+  Real compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
+
+  /*!
+    @brief Compute diffusion dt
+  */
+  Real compute_min_diffusion_dt(const Real a_maxCellsToMove) const;
+
+  /*!
+    @brief Compute diffusion dt as dx*maxCellsToMove/(sqrt(2D)*eps) on all levels
+  */
+  Vector<Real> compute_diffusion_dt(const Real a_maxCellsToMove) const;
+  
+  /*!
+    @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on all levels
+  */
+  Vector<Real> compute_diffusion_dt() const;
+
+  /*!
+    @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level
+  */
+  Real compute_diffusion_dt(const int a_lvl) const;
+
+  /*!
+    @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level and one patch
+  */
+  Real compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
 
   
 protected:
@@ -301,6 +361,21 @@ protected:
     @brief Time step
   */
   Real m_dt;
+
+  /*!
+    @brief Length of maximum diffusion hop relative to the cell size
+  */
+  Real m_max_diffusion_hop;
+
+  /*!
+    @brief Maximum probability that a diffusion hop is m_max_diffusion_hop long
+  */
+  Real m_max_hop_probability;
+
+  /*!
+    @brief Epsilon-parameter for diffusion hopping
+  */
+  Real m_hop_eps;
 
   /*!
     @brief Solver is diffusive
@@ -396,5 +471,10 @@ protected:
     @brief Parse plot variables
   */
   void parse_plot_vars();
+
+  /*!
+    @brief Parse diffusion hop
+  */
+  void parse_diffusion_hop();
 };
 #endif

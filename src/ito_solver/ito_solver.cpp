@@ -8,6 +8,7 @@
 #include "ito_solver.H"
 #include "data_ops.H"
 #include "EBParticleInterp.H"
+#include "units.H"
 
 #include <ParmParse.H>
 #include <EBAlias.H>
@@ -38,6 +39,7 @@ void ito_solver::parse_options(){
   this->parse_deposition();
   this->parse_bisect_step();
   this->parse_pvr_buffer();
+  this->parse_diffusion_hop();
 }
 
 void ito_solver::parse_rng(){
@@ -147,6 +149,28 @@ void ito_solver::parse_pvr_buffer(){
 
   ParmParse pp(m_class_name.c_str());
   pp.get("pvr_buffer", m_pvr_buffer);
+}
+
+void ito_solver::parse_diffusion_hop(){
+  CH_TIME("ito_solver::parse_diffusion_hop");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_diffusion_hop" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  pp.get("max_diffusion_hop",   m_max_diffusion_hop);
+  pp.get("max_hop_probability", m_max_hop_probability);
+
+  // This is the hop parameter (see documentation)
+  m_max_hop_probability = Min(m_max_hop_probability, sqrt(2.0*units::s_pi));
+  m_hop_eps = sqrt(-2.0*log(m_max_hop_probability*sqrt(2.0*units::s_pi)));
+
+#if 1 // Dbeug
+  if(procID() == 0){
+    std::cout << m_hop_eps << std::endl;
+  }
+#endif
 }
 
 Vector<std::string> ito_solver::get_plotvar_names() const {
@@ -796,4 +820,294 @@ RealVect ito_solver::random_direction(){
 
   return RealVect(x,y,z);
 #endif
+}
+
+Real ito_solver::compute_min_drift_dt(const Real a_maxCellsToMove) const{
+  CH_TIME("ito_solver::compute_drift_dt(allAMRlevels, maxCellsToMove)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_drift_dt(allAMRlevels, maxCellsToMove)" << endl;
+  }
+
+  Vector<Real> dt = this->compute_drift_dt(a_maxCellsToMove);
+
+  Real minDt = dt[0];
+  for (int lvl = 0; lvl < dt.size(); lvl++){
+    minDt = Min(minDt, dt[lvl]);
+  }
+
+  return minDt;
+}
+
+Vector<Real> ito_solver::compute_drift_dt(const Real a_maxCellsToMove) const {
+  CH_TIME("ito_solver::compute_drift_dt(amr, maxCellsToMove)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_drift_dt(amr, maxCellsToMove)" << endl;
+  }
+
+  Vector<Real> dt = this->compute_drift_dt();
+  for (int lvl = 0; lvl < dt.size(); lvl++){
+    dt[lvl] = dt[lvl]*a_maxCellsToMove;
+  }
+
+  return dt;
+
+}
+
+Vector<Real> ito_solver::compute_drift_dt() const {
+  CH_TIME("ito_solver::compute_drift_dt(amr)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_drift_dt(amr)" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+
+  Vector<Real> dt(1 + finest_level, 1.2345E6);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    dt[lvl] = this->compute_drift_dt(lvl);
+  }
+
+  return dt;
+}
+
+Real ito_solver::compute_drift_dt(const int a_lvl) const {
+  CH_TIME("ito_solver::compute_drift_dt(level)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_drift_dt(level)" << endl;
+  }
+
+  Real dt = 1.E99;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const RealVect dx = m_amr->get_dx()[a_lvl]*RealVect::Unit;
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Real boxDt = this->compute_drift_dt(a_lvl, dit(), dx);
+    dt = Min(dt, boxDt);
+  }
+
+#ifdef CH_MPI
+    Real tmp = 1.;
+    int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+    if(result != MPI_SUCCESS){
+      MayDay::Error("ito_solver::compute_drift_level(lvl) - communication error on norm");
+    }
+    dt = tmp;
+#endif  
+
+  return dt;
+}
+
+Real ito_solver::compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const{
+  CH_TIME("ito_solver::compute_drift_dt(level, dataindex, dx)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_drift_dt(level, dataindex, dx)" << endl;
+  }
+
+  const List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
+  ListIterator<ito_particle> lit(particleList);
+
+  Real dt = 1.E99;
+  
+  for (lit.rewind(); lit; ++lit){
+    const ito_particle& p = particleList[lit];
+    const RealVect& v = p.velocity();
+
+    const int maxDir = v.maxDir(true);
+    const Real thisDt = a_dx[maxDir]/Abs(v[maxDir]);
+
+    dt = Min(dt, thisDt);
+  }
+
+  return dt;
+}
+
+Real ito_solver::compute_min_diffusion_dt(const Real a_maxCellsToHop) const{
+  CH_TIME("ito_solver::compute_min_diffusion_dt(min, maxCellsToHop)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_min_diffusion_dt(min, maxCellsToHop)" << endl;
+  }
+
+  Vector<Real> dt = this->compute_diffusion_dt(a_maxCellsToHop);
+  Real minDt = dt[0];
+  for (int lvl = 0; lvl < dt.size(); lvl++){
+    minDt = Min(minDt, dt[lvl]);
+  }
+
+  return minDt;
+}
+
+Vector<Real> ito_solver::compute_diffusion_dt(const Real a_maxCellsToHop) const{
+  CH_TIME("ito_solver::compute_min_diffusion_dt(maxCellsToHop)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_min_diffusion_dt(maxCellsToHop)" << endl;
+  }
+
+  Vector<Real> dt = this->compute_diffusion_dt();
+  for (int lvl = 0; lvl < dt.size(); lvl++){
+    dt[lvl] = dt[lvl]*a_maxCellsToHop;
+  }
+
+  return dt;
+}
+
+Vector<Real> ito_solver::compute_diffusion_dt() const{
+  CH_TIME("ito_solver::compute_diffusion_dt");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_diffusion_dt" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+    
+  Vector<Real> dt(1 + finest_level, 1.2345E6);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    dt[lvl] = this->compute_diffusion_dt(lvl);
+  }
+
+  return dt;
+}
+
+Real ito_solver::compute_diffusion_dt(const int a_lvl) const{
+  CH_TIME("ito_solver::compute_diffusion_dt(level)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_diffusion_dt(level)" << endl;
+  }
+
+  
+  Real dt = 1.E99;
+  
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+  const RealVect dx = m_amr->get_dx()[a_lvl]*RealVect::Unit;
+  
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    const Real boxDt = this->compute_diffusion_dt(a_lvl, dit(), dx);
+    dt = Min(dt, boxDt);
+  }
+
+#ifdef CH_MPI
+  Real tmp = 1.;
+  int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("ito_solver::compute_diffusion_level(lvl) - communication error on norm");
+  }
+  dt = tmp;
+#endif
+
+  return dt;
+}
+
+Real ito_solver::compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const{
+  CH_TIME("ito_solver::compute_diffusion_dt(level, dataindex, dx)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::compute_diffusion_dt(level, dataindex, dx)" << endl;
+  }
+
+  const List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
+  ListIterator<ito_particle> lit(particleList);
+
+  Real dt = 1.E99;
+  
+  for (lit.rewind(); lit; ++lit){
+    const ito_particle& p = particleList[lit];
+
+    const Real thisDt = a_dx[0]/(sqrt(2.0*p.diffusion())*m_hop_eps);
+
+    dt = Min(dt, thisDt);
+  }
+
+  return dt;
+}
+
+void ito_solver::remap_amr_particles(){
+  CH_TIME("ito_solver::remap_amr_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remap_amr_particles" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_amr->get_prob_lo();
+
+  bool do_lost_remap = false;
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
+
+    // Put outcasts in outcast list
+    m_particles[lvl]->gatherOutcast();
+
+    // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
+    if(has_coar){
+      collectValidParticles(m_particles[lvl]->outcast(),
+			    *m_particles[lvl-1],
+			    m_pvr[lvl]->mask(),
+			    m_amr->get_dx()[lvl]*RealVect::Unit,
+			    m_amr->get_ref_rat()[lvl-1],
+			    false, 
+			    origin);
+    }
+
+    // There may be particles on this level that belong in the correct Box but not on the correct PVR. Move those
+    // particles to the coarser level and remap that level once more
+    if(has_coar){
+      collectValidParticles(m_particles[lvl-1]->outcast(),
+			    *m_particles[lvl],
+			    m_pvr[lvl]->mask(),
+			    m_amr->get_dx()[lvl]*RealVect::Unit,
+			    1,
+			    true,
+			    origin);
+
+      m_particles[lvl-1]->remapOutcast();
+    }
+
+    // Remap the outcasts on this level
+    m_particles[lvl]->remapOutcast();
+  }
+
+  // Check if we need to also remap "lost" particles
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    if(m_particles[lvl]->numOutcast() > 0){
+      if(procID () == 0) std::cout << "lost some particles" << std::endl;
+      this->remap_lost_particles();
+      break;
+    }
+  }
+}
+
+void ito_solver::remap_lost_particles(){
+  CH_TIME("ito_solver::remap_lost_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remap_lost_particles" << endl;
+  }
+
+  // TLDR: This routine is called because there is a chance that particles might hop across more than one refinement boundary,
+  //       and the remap_amr_particles only performs two-level operations. This piece of code is responsible for gathering
+  //       "lost particles" which were not successfully remapped through two-level operations
+
+  const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_amr->get_prob_lo();
+
+  // Gather all "lost" outcasts on the coarsest level
+  List<ito_particle>& coarsest_outcast = m_particles[0]->outcast();
+  for (int lvl = 1; lvl <= finest_level; lvl++){
+    coarsest_outcast.catenate(m_particles[lvl]->outcast());
+    m_particles[lvl]->outcast().clear();
+  }
+
+  // Remap the coarsest level and discard particles that don't fit in the coarsest level (i.e. ones that have left the domain)
+  m_particles[0]->remapOutcast();
+  m_particles[0]->outcast().clear();
+
+  // Collect the particles 
+  for (int lvl = 1; lvl <= finest_level; lvl++){
+    collectValidParticles(m_particles[lvl]->outcast(),
+			  *m_particles[lvl-1],
+			  m_pvr[lvl]->mask(),
+			  m_amr->get_dx()[lvl]*RealVect::Unit,
+			  m_amr->get_ref_rat()[lvl-1],
+			  false, 
+			  origin);
+  }
 }
