@@ -321,7 +321,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	    const Real fNew = func->value(newPos);
 
 	    // If the particle crossed the boundary, 
-	    if(fOld*fNew < 0.0){
+	    if(fOld*fNew <= 0.0){
 	      const RealVect xb = poly::brent_root_finder(func, oldPos, newPos);
 	      const IntVect iv = locateBin(xb, dx, origin);
 	      const VolIndex vof(iv, 0);
