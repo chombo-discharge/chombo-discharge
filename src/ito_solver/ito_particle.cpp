@@ -15,8 +15,8 @@ ito_particle::ito_particle(const Real      a_mass,
 			   const RealVect& a_position,
 			   const RealVect& a_velocity,
 			   const Real      a_diffusion) : BinItem(a_position){
-  m_mass = a_mass;
-  m_velocity = a_velocity;
+  m_mass    = a_mass;
+  m_velocity  = a_velocity;
   m_diffusion = a_diffusion;
 }
 

@@ -61,6 +61,11 @@ namespace physics {
       Real m_diffco;
       Real m_omega;
 
+      // Maximum hops and stuff like that
+      Real m_max_drift_hop;
+      Real m_max_diffu_hop;
+
+
       void set_velocity();
       void set_velocity(const int a_level);
     };

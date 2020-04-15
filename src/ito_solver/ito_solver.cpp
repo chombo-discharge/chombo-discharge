@@ -159,18 +159,7 @@ void ito_solver::parse_diffusion_hop(){
 
   ParmParse pp(m_class_name.c_str());
 
-  pp.get("max_diffusion_hop",   m_max_diffusion_hop);
-  pp.get("max_hop_probability", m_max_hop_probability);
-
-  // This is the hop parameter (see documentation)
-  m_max_hop_probability = Min(m_max_hop_probability, 0.99/sqrt(2.0*units::s_pi));
-  m_hop_eps = sqrt(-2.0*log(m_max_hop_probability*sqrt(2.0*units::s_pi)));
-
-#if 1 // Dbeug
-  if(procID() == 0){
-    std::cout << m_hop_eps << std::endl;
-  }
-#endif
+  pp.get("max_diffusion_hop", m_max_diffusion_hop);
 }
 
 Vector<std::string> ito_solver::get_plotvar_names() const {
@@ -279,9 +268,48 @@ void ito_solver::initial_data(){
 			  false,
 			  m_amr->get_prob_lo());
     m_particles[lvl]->remapOutcast();
-
-
   }
+
+  // Remove particles that are inside embedded boundaries
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+    RefCountedPtr<BaseIF> func;
+    if(m_phase == phase::gas){
+      func = m_compgeom->get_gas_if();
+    }
+    else{
+      func = m_compgeom->get_sol_if();
+    }
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      
+      List<ito_particle>& particles = (*m_particles[lvl])[dit()].listItems();
+
+      if(ebisbox.isAllCovered()){ // Box is all covered
+	particles.clear();
+      }
+      else if(ebisbox.isAllRegular()){ // Do nothing
+      }
+      else{
+	List<ito_particle>  particleCopy = List<ito_particle>(particles);
+	particles.clear();
+	
+	ListIterator<ito_particle> lit(particleCopy);
+	for (lit.rewind(); lit; ++lit){
+	  ito_particle& p = particles[lit];
+
+	  const Real f = func->value(p.position());
+	  if(f <= 0.0){
+	    particles.add(p);
+	  }
+	}
+      }
+    }
+  }
+  
 
   // Deposit the particles
   this->deposit_particles(m_state, m_particles, m_deposition);
@@ -481,7 +509,7 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       m_state[lvl]->localCopyTo(src, *a_output[lvl], dst);
     }
-    data_ops::set_covered_value(a_output, 0.0, a_comp);
+    //data_ops::set_covered_value(a_output, a_comp, 0.0);
     a_comp++;
   }
 
@@ -494,7 +522,7 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
       m_diffco_cell[lvl]->localCopyTo(src, *a_output[lvl], dst);
     }
-    data_ops::set_covered_value(a_output, 0.0, a_comp);
+    data_ops::set_covered_value(a_output, a_comp, 0.0);
     a_comp++;
   }
 
@@ -509,7 +537,7 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
     }
 
     for (int c = 0; c < SpaceDim; c++){
-      data_ops::set_covered_value(a_output, 0.0, a_comp + c);
+      data_ops::set_covered_value(a_output, a_comp + c, 0.0);
     }
 
     a_comp += ncomp;
@@ -1011,7 +1039,7 @@ Real ito_solver::compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, c
   for (lit.rewind(); lit; ++lit){
     const ito_particle& p = particleList[lit];
 
-    const Real thisDt = a_dx[0]/(sqrt(2.0*p.diffusion())*m_hop_eps);
+    const Real thisDt = a_dx[0]/(sqrt(2.0*p.diffusion()));
 
     dt = Min(dt, thisDt);
   }
@@ -1069,7 +1097,9 @@ void ito_solver::remap_amr_particles(){
   // Check if we need to also remap "lost" particles
   for (int lvl = 0; lvl <= finest_level; lvl++){
     if(m_particles[lvl]->numOutcast() > 0){
+#if 0
       if(procID () == 0) std::cout << "lost some particles" << std::endl;
+#endif
       this->remap_lost_particles();
       break;
     }
@@ -1110,4 +1140,8 @@ void ito_solver::remap_lost_particles(){
 			  false, 
 			  origin);
   }
+}
+
+phase::which_phase ito_solver::get_phase() const{
+  return m_phase;
 }

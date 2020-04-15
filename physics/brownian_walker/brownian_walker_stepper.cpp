@@ -8,16 +8,22 @@
 #include "brownian_walker_stepper.H"
 #include "brownian_walker_species.H"
 
+#include "poly.H"
+
 #include <ParmParse.H>
+#include <PolyGeom.H>
 
 using namespace physics::brownian_walker;
 
 brownian_walker_stepper::brownian_walker_stepper(){
   ParmParse pp("brownian_walker");
 
-  pp.get("diffco",   m_diffco);
-  pp.get("omega",    m_omega);
-  pp.get("cfl",      m_cfl);
+  pp.get("diffco",        m_diffco);
+  pp.get("omega",         m_omega);
+  pp.get("cfl",           m_cfl);
+  
+  pp.get("max_diffu_hop", m_max_diffu_hop);
+  pp.get("max_drift_hop", m_max_drift_hop);
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -160,21 +166,22 @@ void brownian_walker_stepper::compute_dt(Real& a_dt, time_code::which_code& a_ti
   m_solver->interpolate_velocities();
   m_solver->interpolate_diffusion();
 
-  Real drift_dt = 0.0;
-  Real diffu_dt = 0.0;
+  Real drift_dt = 1.E99;
+  Real diffu_dt = 1.E99;
   if(m_solver->is_mobile()){
-    drift_dt = m_solver->compute_min_drift_dt(1.0);
+    drift_dt = m_solver->compute_min_drift_dt(m_max_drift_hop);
   }
   if(m_solver->is_diffusive()){
-    diffu_dt = m_solver->compute_min_diffusion_dt(1.0);
+    diffu_dt = m_solver->compute_min_diffusion_dt(m_max_diffu_hop);
   }
 
-  a_dt = Min(drift_dt, diffu_dt);
+  a_dt = 1./(1./drift_dt + 1./diffu_dt);
 
+#if 0 // Debug
   if(procID() == 0){
-    //    std::cout << "drift dt = " << drift_dt << "\t diffusion_dt = " << diffu_dt << std::endl;
+    std::cout << "drift dt = " << drift_dt << "\t diffusion_dt = " << diffu_dt << "\t a_dt = " << a_dt << std::endl;
   }
-  //  MayDay::Abort("stop");
+#endif
 }
 
 void brownian_walker_stepper::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
@@ -244,10 +251,14 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   }
 
   const int finest_level = m_amr->get_finest_level();
+  const RealVect origin  = m_amr->get_prob_lo();
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
+    const RealVect dx                      = m_amr->get_dx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
     ParticleData<ito_particle>& particles = *m_solver->get_particles()[lvl];
+
+    const EBISLayout& ebisl = m_amr->get_ebisl(m_solver->get_phase())[lvl];
 
     if(m_solver->is_mobile()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -261,21 +272,11 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	ListIterator<ito_particle> litC(particleCopy);
 
 
-#if 0 // This was done in the compute_dt routine
-	// Compute particle velocities and diffusion coefficients
-	m_solver->interpolate_velocities(lvl, dit());
-	m_solver->interpolate_diffusion(lvl, dit());
-#endif
-      
-
 	// Half Euler step and evaluate velocity at half step
 	for (lit.rewind(); lit; ++lit){ 
 	  ito_particle& p = particleList[lit];
 	  p.position() += 0.5*p.velocity()*a_dt;
 	}
-#if 0 // Maybe we need this...=?
-	m_solver->remap_amr_particles();
-#endif
 	m_solver->interpolate_velocities(lvl, dit());
 
 	// Final stage
@@ -284,20 +285,59 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  ito_particle& oldP = particleCopy[litC];
 	  p.position() = oldP.position() + p.velocity()*a_dt;
 	}
-      }
-    }
 
-    // Add a diffusion hop
-    if(m_solver->is_diffusive()){
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	List<ito_particle>& particleList = particles[dit()].listItems();
-	ListIterator<ito_particle> lit(particleList);
+	// Add a diffusion hop
+	if(m_solver->is_diffusive()){
+	  for (lit.rewind(); lit; ++lit){ 
+	    ito_particle& p = particleList[lit];
+	    const RealVect ran = m_solver->random_gaussian();
+	    const RealVect hop = ran*sqrt(2.0*p.diffusion())*a_dt;
+	    p.position() += hop;
+	  }
+	}
 
-	for (lit.rewind(); lit; ++lit){ 
-	  ito_particle& p = particleList[lit];
-	  const RealVect ran = m_solver->random_gaussian();
-	  const RealVect hop = ran*sqrt(2.0*p.diffusion())*a_dt;
-	  p.position() += hop;
+	
+	// Do particle bounceback on the EB
+	const EBISBox& ebisbox = ebisl[dit()];
+	if(!ebisbox.isAllRegular() || !ebisbox.isAllCovered()){ 
+	  
+	  // This is the implicit function
+	  RefCountedPtr<BaseIF> func;
+	  if(m_solver->get_phase() == phase::gas){
+	    func = m_compgeom->get_gas_if();
+	  }
+	  else {
+	    func = m_compgeom->get_sol_if();
+	  }
+
+	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
+	    ito_particle& p    = particleList[lit];
+	    ito_particle& oldP = particleCopy[litC];
+
+	    const RealVect& oldPos = oldP.position();
+	    const RealVect& newPos = p.position();
+
+	    const Real fOld = func->value(oldPos);
+	    const Real fNew = func->value(newPos);
+
+	    // If the particle crossed the boundary, 
+	    if(fOld*fNew < 0.0){
+	      const RealVect xb = poly::brent_root_finder(func, oldPos, newPos);
+	      const IntVect iv = locateBin(xb, dx, origin);
+	      const VolIndex vof(iv, 0);
+
+	      // Do a dummy check
+	      //	      const Box b(iv-IntVect::Unit, iv+IntVect::Unit);
+	      if(!ebisbox.isIrregular(iv)){
+		MayDay::Abort("brownian_walker_stepper::advance - logic bust in EB bounce-back code");
+	      }
+	      else{
+		const RealVect n     = ebisbox.normal(vof);
+		const RealVect bback = 2.0*n*PolyGeom::dot((newPos - xb), n);
+		p.position() -= bback;
+	      }
+	    }
+	  }
 	}
       }
     }
