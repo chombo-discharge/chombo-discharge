@@ -163,7 +163,7 @@ void ito_solver::parse_diffusion_hop(){
   pp.get("max_hop_probability", m_max_hop_probability);
 
   // This is the hop parameter (see documentation)
-  m_max_hop_probability = Min(m_max_hop_probability, sqrt(2.0*units::s_pi));
+  m_max_hop_probability = Min(m_max_hop_probability, 0.99/sqrt(2.0*units::s_pi));
   m_hop_eps = sqrt(-2.0*log(m_max_hop_probability*sqrt(2.0*units::s_pi)));
 
 #if 1 // Dbeug
