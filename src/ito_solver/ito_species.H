@@ -21,10 +21,7 @@
 */
 class ito_species {
 public:
-  /*!
-    @brief Weak constructor. 
-  */
-  ito_species();
+
 
   /*!
     @brief Full constructor
@@ -87,6 +84,11 @@ protected:
     @brief Initial particles
   */
   List<ito_particle> m_initial_particles;
+
+  /*!
+    @brief Weak constructor. 
+  */
+  ito_species();
 
 };
 
