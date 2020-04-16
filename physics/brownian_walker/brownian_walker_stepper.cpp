@@ -335,8 +335,13 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 		const RealVect n     = ebisbox.normal(vof);
 		const RealVect bback = 2.0*n*PolyGeom::dot((newPos - xb), n);
 		p.position() -= bback;
+
+		// If the particle is STILL inside the EB, displace it with the signed distance function
 	      }
+
 	    }
+
+
 	  }
 	}
       }
