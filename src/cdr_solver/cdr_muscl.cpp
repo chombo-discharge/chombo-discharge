@@ -70,6 +70,7 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
   data_ops::set_value(copy_state, 0.0);
   data_ops::incr(copy_state, a_state, 1.0);
 
+  m_amr->average_down(copy_state, m_phase);
   m_amr->interp_ghost_pwl(copy_state, m_phase);
 
   data_ops::set_value(a_face_state, 0.0);
@@ -88,7 +89,7 @@ void cdr_muscl::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData
 
       // Limit slopes and solve Riemann problem
       Box grown_box = box;
-      grown_box.grow(2);
+      grown_box.grow(1);
       EBCellFAB deltaC(ebisbox, grown_box, SpaceDim); // Cell-centered slopes
       deltaC.setVal(0.0);
       if(m_slopelim){
@@ -118,7 +119,7 @@ void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
     pout() << m_name + "::compute_slopes" << endl;
   }
 
-  MayDay::Warning("cdr_muscl::compute_slopes - reason to believe there is a bug in this routine...");
+  //  MayDay::Warning("cdr_muscl::compute_slopes - reason to believe there is a bug in this routine...");
 
   const int comp         = 0;
   const int ncomp        = 1;
@@ -130,7 +131,7 @@ void cdr_muscl::compute_slopes(EBCellFAB&           a_deltaC,
 
   for (int dir = 0; dir < SpaceDim; dir++){
     Box cellbox = a_box;
-    cellbox.grow(1,dir);
+    cellbox.grow(1);
     FORT_MUSCL_SLOPES(CHF_FRA1(regDeltaC, dir),
 		      CHF_CONST_FRA1(regState, comp),
 		      CHF_CONST_INT(dir),
@@ -255,6 +256,8 @@ void cdr_muscl::upwind(EBFluxFAB&           a_face_states,
     const BaseFab<Real>& regVelo   = a_velo[dir].getSingleValuedFAB();
     const Box& face_box            = a_face_states.getRegion();
 
+    Box facebox = a_box;
+    facebox.surroundingNodes();
     // Regular cells
     regFaceStates.setVal(0.0);
     FORT_MUSCL_UPWIND(CHF_FRA1(regFaceStates,   comp),
@@ -262,7 +265,7 @@ void cdr_muscl::upwind(EBFluxFAB&           a_face_states,
 		      CHF_CONST_FRA1(regStates, comp),
 		      CHF_CONST_FRA1(regVelo,   comp),
 		      CHF_CONST_INT(dir),
-		      CHF_BOX(face_box));
+		      CHF_BOX(facebox));
 
     // Irregular cells
     EBFaceFAB& face_states     = a_face_states[dir];

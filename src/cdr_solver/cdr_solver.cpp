@@ -1863,6 +1863,27 @@ Real cdr_solver::compute_cfl_dt(){
     pout() << m_name + "::compute_cfl_dt" << endl;
   }
 
+#if 0
+  Real min_dt = 1.E99;
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const Real dx = m_amr->get_dx()[lvl];
+    Real maxVal = 0.0;
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      Real maxloc = 0.0;
+      Real minloc = 0.0;
+      EBLevelDataOps::getMaxMin(maxloc, minloc, *m_velo_cell[lvl], dir, true);
+      maxVal = std::max(maxVal, maxloc);
+    }
+    if(maxVal > 0.0){
+      min_dt = std::min(min_dt, dx/maxVal);
+    }
+  }
+
+  return min_dt;
+#else
+
   Real min_dt = 1.E99;
 
   if(m_mobile){
@@ -1951,6 +1972,7 @@ Real cdr_solver::compute_cfl_dt(){
 
 
   return min_dt;
+#endif
 }
 
 Real cdr_solver::compute_diffusive_dt(){
