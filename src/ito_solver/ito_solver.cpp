@@ -1062,8 +1062,9 @@ void ito_solver::remap_amr_particles(){
     const bool has_coar = lvl > 0;
     const bool has_fine = lvl < finest_level;
 
-    // Put outcasts in outcast list
+    // Rebin this level
     m_particles[lvl]->gatherOutcast();
+    m_particles[lvl]->remapOutcast();
 
     // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
     if(has_coar){
@@ -1079,6 +1080,9 @@ void ito_solver::remap_amr_particles(){
     // There may be particles on this level that belong in the correct Box but not on the correct PVR. Move those
     // particles to the coarser level and remap that level once more
     if(has_coar){
+#if 0 // debug
+      std::cout << "Outcasts before collect = " << m_particles[lvl]->numOutcast() << std::endl;
+#endif
       collectValidParticles(m_particles[lvl-1]->outcast(),
 			    *m_particles[lvl],
 			    m_pvr[lvl]->mask(),
@@ -1087,7 +1091,36 @@ void ito_solver::remap_amr_particles(){
 			    true,
 			    origin);
 
+#if 0 // debug
+      std::cout << "Outcasts after collect = " << m_particles[lvl]->numOutcast() << std::endl;
+#endif
+
       m_particles[lvl-1]->remapOutcast();
+
+#if 0 // Debug code. It may be that this level still has outcasts that have fallen off the grid. Move those particles
+      // to the outcast list on the coarser level
+      const int postCollectOutcastsFine = m_particles[lvl-1]->numOutcast();
+      const int postCollectOutcastsCoar = m_particles[lvl]->numOutcast();
+
+      std::cout << "post collect Fine/Coar = " << postCollectOutcastsFine << "\t" << postCollectOutcastsCoar << endl;
+      
+      List<ito_particle>& outcastCoar = m_particles[lvl-1]->outcast();
+      List<ito_particle>& outcastFine = m_particles[lvl]->outcast();
+      outcastCoar.catenate(outcastFine);
+      outcastCoar.clear();
+
+      const int outcastsCoar = m_particles[lvl-1]->numOutcast();
+      const int outcastsFine = m_particles[lvl]->numOutcast();
+
+      if(procID() == 0){
+	std::cout << "final Fine/Coar = " << outcastsFine << "\t" << outcastsCoar << endl;
+      }
+
+
+      // Now do a remap
+      m_particles[lvl-1]->remapOutcast();
+
+#endif
     }
 
     // Remap the outcasts on this level
@@ -1104,6 +1137,19 @@ void ito_solver::remap_amr_particles(){
       break;
     }
   }
+
+#if 0 // Count the total number of particles
+  int valid = 0;
+  int out = 0;
+  for (int i = 0; i <= finest_level; i++){
+    valid += m_particles[i]->numValid();
+    out += m_particles[i]->numOutcast();
+  }
+
+  if(procID() == 0){
+    std::cout << "step = " << m_step << "\t #valid = " << valid << "\t #outcast = " << out << std::endl;
+  }
+#endif
 }
 
 void ito_solver::remap_lost_particles(){
