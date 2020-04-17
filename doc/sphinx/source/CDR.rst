@@ -19,7 +19,24 @@ cdr_solver
 
 The ``cdr_solver`` class contains the interface for solving advection-diffusion-reaction problems.
 The class is abstract and resides in :file:`/src/cdr_solver/cdr_solver.H(cpp)` together with specific implementations.
-Currently, we only use the implementation given in :file:`/src/cdr_solver/cdr_gdnv.H(cpp)` which contains a second order accurate discretization with slope limiters. 
+By design ``cdr_solver`` does not contain any specific advective and diffusive discretization, and these are supposed to be added through inheritance.
+For example, ``cdr_tga`` inherits from ``cdr_solver`` and adds a second order diffusive discretization together with multigrid code for performing implicit diffusion. 
+Below that, the classes ``cdr_gdnv`` and ``cdr_muscl`` inherit everything from ``cdr_tga`` and also adds in the advective discretization.
+Thus, adding new advection code is done by inheriting from ``cdr_tga`` and implementing new advection schemes.
+This is much more lightweight than rewriting all of ``cdr_solver`` (which is several thousand lines of code).
+
+.. graphviz::
+   :align: center
+	   
+   digraph {
+      rankdir="LR";
+      "cdr_solver" -> "cdr_tga" -> {"cdr_gdnv", "cdr_muscl"};
+   }
+
+
+
+Currently, we mostly use the implementation given in :file:`/src/cdr_solver/cdr_gdnv.H(cpp)` which contains a second order accurate discretization with slope limiters which was distributed by the Chombo team.
+The alternative implementation in :file:`/src/cdr_muscl.H(cpp)` contains a MUSCL implementation with van Leer slope limiting (i.e. much the same as the Chombo code). 
 
 Using cdr_solver
 ________________

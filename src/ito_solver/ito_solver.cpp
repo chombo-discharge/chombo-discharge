@@ -254,7 +254,7 @@ void ito_solver::initial_data(){
 
   // Put the initial particles on the coarsest grid level
   List<ito_particle>& outcastBase = m_particles[0]->outcast();
-  outcastBase.catenate(m_species->get_initial_particles()); // This destroys the initial partcies
+  outcastBase.join(m_species->get_initial_particles()); 
   m_particles[0]->remapOutcast(); 
 
   // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1

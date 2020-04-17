@@ -42,8 +42,7 @@ Introduction
 
    GettingStarted
    Model
-   MeshData
-   ParticleData
+
    Driver
    AmrMesh
    ComputationalGeometry
@@ -57,6 +56,8 @@ Using ``PlasmaC``
    :maxdepth: 4
    :caption: Using PlasmaC
 
+   MeshData
+   ParticleData
    Control
    Visualization	        
 

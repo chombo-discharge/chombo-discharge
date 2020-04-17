@@ -3,7 +3,7 @@
 Îto diffusion
 =============
 
-The Ito diffusion model advances computational particles as Brownian walkers with drift:
+The Îto diffusion model advances computational particles as Brownian walkers with drift:
 
 .. math::
    d\mathbf{X}_i = \mathbf{v}_idt + \sqrt{2D_i}\mathbf{W}_i dt,
@@ -105,6 +105,68 @@ For example, the code in :file:`/physics/brownian_walker/brownian_walker_species
 
 Computing time steps
 --------------------
+
+The signatures for computing a time step for the ``ito_solver`` are given separately for the drift part and the diffusion part.
+
+Drift
+_____
+
+The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells. 
+
+For the drift, the signatures are
+
+.. code-block:: c++
+		
+  Real compute_min_drift_dt(const Real a_maxCellsToMove) const;
+  Vector<Real> compute_drift_dt(const Real a_maxCellsToMove) const;
+  
+  Vector<Real> compute_drift_dt() const; // Compute dt on all AMR levels, return vector of time step
+  Real compute_drift_dt(const int a_lvl) const;
+  Real compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
+
+These last three functions all compute :math:`\Delta t = \Delta x/Max(v_x, v_y, v_z)` on the the various AMR levels and patches.
+The routine
+
+.. code-block:: c++
+
+   Vector<Real> compute_drift_dt(const Real a_maxCellsToMove) const;
+
+simply scales :math:`\Delta t` by ``a_maxCellsToMove`` on every level.
+Finally, the function ``compute_min_drift_dt(...)`` computes the smallest time step across every AMR level. 
+
+Diffusion
+_________
+
+The signatures for the diffusion time step are similar to the ones for drift:
+
+.. code-block:: c++
+
+   Real compute_min_diffusion_dt(const Real a_maxCellsToMove) const;
+   Vector<Real> compute_diffusion_dt(const Real a_maxCellsToMove) const;
+
+   Vector<Real> compute_diffusion_dt() const;
+   Real compute_diffusion_dt(const int a_lvl) const;
+   Real compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
+
+In these routines, the time step is computed as :math:`\Delta t = \frac{\Delta x}{\sqrt{2D}}`.
+Note that there is still a chance that a particle jumps further than specified by ``a_maxCellsToMove`` since the diffusion hop is
+
+.. math::
+
+   \mathbf{d} = \sqrt{2D}\mathbf{Z}\Delta t,
+
+where :math:`\mathbf{Z}` is a random Gaussian. 
+The probability that a diffusion hop leads to a jump larger than :math:`N` cells can be evaluated and is :math:`P = \textrm{erf}\left(\sqrt{2}N\right)`. It is useful to keep this probability in mind when deciding on the PVR. 
+
+Remapping particles
+-------------------
+
+Particle remapping has been implemented for the whole AMR hierarchy as a two step process.
+
+1. Perform two-level remapping where particles are transferred up or down one grid level if they move out the level PVR.
+2. Gather all particles that are remnant in the outcast list on the coarsest level, and then distribute them back to their appropriate levels. For example, particles that hopped over more than one refinement boundary cannot be transferred with a (clean) two-level transfer. 
+
+
 
 Limitations
 -----------
