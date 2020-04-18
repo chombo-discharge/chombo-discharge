@@ -171,7 +171,7 @@ protected:
 
   EBAMRPhotons m_photons;    // Particles
   EBAMRPhotons m_photocache; // Photon cache
-  EBAMRPVR m_pvr;            // Valid region
+  AMRPVR m_pvr;            // Valid region
   EBAMRCellData m_crse;      // Photoionization profile from the coarse level photons
 
 

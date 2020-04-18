@@ -176,16 +176,6 @@ public:
   virtual void set_velocity(const RealVect a_vel);
 
   /*!
-    @brief Advance particles
-  */
-  virtual void move_particles_eulerf(const Real a_dt);
-
-  /*!
-    @brief Advance particles. Level and grid patch version
-  */
-  virtual void move_particles_eulerf(const int a_lvl, const DataIndex& a_dit, const Real a_dt);
-
-  /*!
     @brief Interpolate velocities
   */
   virtual void interpolate_velocities();
@@ -208,12 +198,7 @@ public:
   /*!
     @brief Remap all particles
   */
-  void remap_amr_particles();
-
-  /*!
-    @brief Remap "lost" particles
-  */
-  void remap_lost_particles();
+  void remap();
 
   /*!
     @brief Random Gaussian
@@ -441,19 +426,12 @@ protected:
   /*!
     @brief Particles
   */
-  EBAMRItoParticles m_particles;
-
-  AMRParticles<ito_particle> particles;
+  particle_container<ito_particle> m_particles;
 
   /*!
     @brief Particle cache
   */
-  EBAMRItoParticles m_particleCache; 
-
-  /*!
-    @brief Particle valid region
-  */
-  EBAMRPVR m_pvr;
+  particle_container<ito_particle> m_particle_cache;
   
   /*!
     @brief Parse RNG options

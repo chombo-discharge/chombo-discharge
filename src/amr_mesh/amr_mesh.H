@@ -71,6 +71,11 @@ public:
   template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
 
   /*!
+    @brief Allocate a particle container
+  */
+  template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer);
+
+  /*!
     @brief Allocate pointer but not memory
   */
   template <typename T> void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
@@ -123,7 +128,7 @@ public:
   /*!
     @brief Allocate particle valid regions
   */
-  virtual void allocate(EBAMRPVR& a_pvr, const int a_buffer);
+  virtual void allocate(AMRPVR& a_pvr, const int a_buffer);
 
   /*!
     @brief Allocate a data holder. 

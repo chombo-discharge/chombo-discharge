@@ -6,6 +6,11 @@
 */
 
 template <class P>
+particle_container<P>::particle_container(){
+  m_is_defined = false;
+}
+
+template <class P>
 particle_container<P>::particle_container(const Vector<DisjointBoxLayout>& a_grids,
 					  const Vector<ProblemDomain>&     a_domains,
 					  const Vector<Real>&              a_dx,
@@ -38,6 +43,7 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_prob_lo      = a_prob_lo;
   m_finest_level = a_finest_level;
   m_buffer       = a_pvr_buffer;
+  m_blocking_factor = a_blocking_factor;
 
   m_dx.resize(1 + m_finest_level);
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
@@ -84,17 +90,32 @@ void particle_container<P>::setup_particle_data(){
 
 template <class P>
 AMRParticles<P>& particle_container<P>::get_particles(){
+  CH_assert(m_is_defined);
+  return m_particles;
+}
+
+template <class P>
+const AMRParticles<P>& particle_container<P>::get_particles() const {
+  CH_assert(m_is_defined);
   return m_particles;
 }
 
 template <class P>
 ParticleData<P>& particle_container<P>::operator[](const int a_lvl){
+  CH_assert(m_is_defined);
   return *m_particles[a_lvl];
 }
 
 template <class P>
-void particle_container<P>::add_particles(const List<P>& a_particles){
+const ParticleData<P>& particle_container<P>::operator[](const int a_level) const {
+  CH_assert(m_is_defined);
+  return *m_particles[a_level];
+}
 
+template <class P>
+void particle_container<P>::add_particles(const List<P>& a_particles){
+  CH_assert(m_is_defined);
+  
   // Put the initial particles on the coarsest grid level
   List<P>& outcastBase = m_particles[0]->outcast();
   outcastBase.join(a_particles);
@@ -116,7 +137,7 @@ void particle_container<P>::add_particles(const List<P>& a_particles){
 
 template <class P>
 void particle_container<P>::add_particles_destructive(List<P>& a_particles){
-  MayDay::Abort("particle_container::add_particles_destructive - not implemented");
+  CH_assert(m_is_defined);
 
   // Put the initial particles on the coarsest grid level
   List<P>& outcastBase = m_particles[0]->outcast();
@@ -139,6 +160,8 @@ void particle_container<P>::add_particles_destructive(List<P>& a_particles){
 
 template <class P>
 void particle_container<P>::cache_particles(particle_container<P>& a_otherContainer){
+  CH_assert(m_is_defined);
+  
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     collectValidParticles(a_otherContainer[lvl],
 			  *m_particles[lvl],
@@ -147,13 +170,14 @@ void particle_container<P>::cache_particles(particle_container<P>& a_otherContai
 			  1,
 			  false, 
 			  m_prob_lo);
-    a_otherContainer[lvl]->remapOutcast();
+    a_otherContainer[lvl].remapOutcast();
   }
 }
 
 template <class P>
 void particle_container<P>::remap(){
-
+  CH_assert(m_is_defined);
+  
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     const bool has_coar = lvl > 0;
 
@@ -188,7 +212,7 @@ void particle_container<P>::remap(){
   // If outcasts lists are not empty (particles could have moved entirely out of the grid through the PVR), we need
   // do collect those, too
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
-    if(m_particles->numOutcast() > 0){
+    if(m_particles[lvl]->numOutcast() > 0){
       this->remap_lost_particles();
       break;
     }
@@ -197,6 +221,8 @@ void particle_container<P>::remap(){
 
 template <class P>
 void particle_container<P>::remap_lost_particles(){
+  CH_assert(m_is_defined);
+  
   // TLDR: This routine is called because there is a chance that particles might hop across more than one refinement boundary,
   //       and the remap_amr_particles only performs two-level operations. This piece of code is responsible for gathering
   //       "lost particles" which were not successfully remapped through two-level operations

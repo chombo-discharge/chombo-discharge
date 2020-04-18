@@ -16,9 +16,8 @@
 #include <DisjointBoxLayout.H>
 
 template <class P>
-using AMRParticles   = Vector<RefCountedPtr<ParticleData<P> > >;
-using EBAMRPVR       = Vector<RefCountedPtr<ParticleValidRegion> >;
-using EBAMRParticles = Vector<RefCountedPtr<ParticleData<Particle> > >;
+using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
+using AMRPVR       = Vector<RefCountedPtr<ParticleValidRegion> >;
 
 /*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping
@@ -27,6 +26,11 @@ template <class P>
 template <class P>
 class particle_container {
 public:
+
+  /*!
+    @brief No need for weak construction
+  */
+  particle_container();
 
   /*!
     @brief Full constructor
@@ -64,9 +68,19 @@ public:
   AMRParticles<P>& get_particles();
 
   /*!
+    @brief Get all particles on a level
+  */
+  const AMRParticles<P>& get_particles() const;
+
+  /*!
     @brief Get data on a level
   */
   ParticleData<P>& operator[](const int a_level);
+
+  /*!
+    @brief Get data on a level
+  */
+  const ParticleData<P>& operator[](const int a_level) const;
 
   /*!
     @brief Add particles to container
@@ -103,12 +117,9 @@ protected:
   bool m_is_defined;
 
   AMRParticles<P> m_particles;
-  EBAMRPVR m_pvr;
+  AMRPVR m_pvr;
   
-  /*!
-    @brief No need for weak construction
-  */
-  particle_container();
+
 
   void setup_pvr();
   void setup_particle_data();
