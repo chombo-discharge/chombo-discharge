@@ -30,17 +30,33 @@ public:
 
   /*!
     @brief Full constructor
+    @note It is extremely important that a_grids uses only square blocks for the grids. 
   */
   particle_container(const Vector<DisjointBoxLayout>& a_grids,
 		     const Vector<ProblemDomain>&     a_domains,
 		     const Vector<Real>&              a_dx,
 		     const Vector<int>&               a_ref_rat,
-		     const RealVect&                  a_origin);
+		     const RealVect&                  a_prob_lo,
+		     const int                        a_blocking_factor,
+		     const int                        a_finest_level,
+		     const int                        a_pvr_buffer);
 
   /*!
     @brief Destructor
   */
   ~particle_container();
+
+  /*!
+    @brief Define the container. This will do a clear-out of all particles. 
+  */
+  void define(const Vector<DisjointBoxLayout>& a_grids,
+	      const Vector<ProblemDomain>&     a_domains,
+	      const Vector<Real>&              a_dx,
+	      const Vector<int>&               a_ref_rat,
+	      const RealVect&                  a_prob_lo,
+	      const int                        a_blocking_factor,
+	      const int                        a_finest_level,
+	      const int                        a_pvr_buffer);
 
   /*!
     @brief Get all particles on all levels
@@ -62,13 +78,29 @@ public:
   */
   void add_particles_destructive(List<P>& a_particles);
 
+  /*!
+    @brief Remap over the entire AMR hierarchy
+  */
+  void remap();
+
+  /*!
+    @brief Move the particles to a different container. 
+    @note  The grids MUST be the same for both containers
+  */
+  void cache_particles(particle_container<P>& a_otherContainer); 
+
 protected:
 
   Vector<DisjointBoxLayout> m_grids;
   Vector<ProblemDomain> m_domains;
   Vector<RealVect> m_dx;
   Vector<int> m_ref_rat;
-  RealVect m_origin;
+  RealVect m_prob_lo;
+  int m_blocking_factor;
+  int m_buffer;
+  int m_finest_level;
+
+  bool m_is_defined;
 
   AMRParticles<P> m_particles;
   EBAMRPVR m_pvr;
@@ -77,6 +109,10 @@ protected:
     @brief No need for weak construction
   */
   particle_container();
+
+  void setup_pvr();
+  void setup_particle_data();
+  void remap_lost_particles();
 };
 
 #include "particle_containerI.H"
