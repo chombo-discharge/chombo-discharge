@@ -14,6 +14,7 @@
 #include "ito_species.H"
 #include "ito_particle.H"
 #include "EBParticleInterp.H"
+#include "particle_container.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -440,7 +441,9 @@ protected:
   /*!
     @brief Particles
   */
-  EBAMRItoParticles m_particles;     
+  EBAMRItoParticles m_particles;
+
+  AMRParticles<ito_particle> particles;
 
   /*!
     @brief Particle cache

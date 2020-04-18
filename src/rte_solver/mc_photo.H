@@ -20,6 +20,8 @@
 
 #include <random>
 
+typedef Vector<RefCountedPtr<ParticleData<photon> > > EBAMRPhotons;
+
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
 */

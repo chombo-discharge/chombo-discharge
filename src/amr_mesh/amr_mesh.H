@@ -19,6 +19,7 @@
 #include "DomainFluxIFFAB.H"
 #include "DomainFluxIFFABFactory.H"
 #include "EBLevelConcentrationRedist.H"
+#include "particle_container.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
