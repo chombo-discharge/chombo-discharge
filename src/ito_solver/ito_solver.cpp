@@ -531,6 +531,7 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     const Real dx                = m_amr->get_dx()[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->get_eblg(m_phase)[lvl];
 
     const bool has_coar = (lvl > 0);
     const bool has_fine = (lvl < finest_level);
@@ -556,13 +557,84 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     aliasEB(aliasFAB, *a_state[lvl]);
     aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
 
-    a_state[lvl]->exchange();
-
     // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
     //    interpolation of "hanging clouds"
     if(has_fine){
       a_state[lvl]->copyTo(*m_scratch[lvl]);
     }
+
+  }
+
+#if 1 // Development code
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const EBLevelGrid& eblg      = *m_amr->get_eblg(m_phase)[lvl];
+
+    const bool has_coar = (lvl > 0);
+    const bool has_fine = (lvl < finest_level);
+    
+    if(has_coar){
+      const DisjointBoxLayout& gridCoar = m_amr->get_grids()[lvl-1];
+      DisjointBoxLayout gridCoFi;
+      EBLevelGrid eblgCoFi;
+
+      coarsen(gridCoFi, dbl, 2);
+      coarsen(eblgCoFi, eblg, 2);
+      
+      Vector<Box> coFiBoxes = gridCoFi.boxArray();
+      Vector<int> coFiProcs = gridCoFi.procIDs();
+
+      for (int i = 0; i < coFiBoxes.size(); i++){
+	coFiBoxes[i].grow(1);
+	coFiBoxes[i] &= dom.domainBox();
+      }
+
+      BoxLayout coFiBl(coFiBoxes, coFiProcs);
+      BoxLayoutData<FArrayBox> dataCoFi(coFiBl, 1);
+
+      // Monkey with the scratch box
+      a_state[lvl]->localCopyTo(*m_scratch[lvl]);
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	FArrayBox& scratchBox = (*m_scratch[lvl])[dit()].getFArrayBox();
+	scratchBox.setVal(0.0, dbl.get(dit()), 0, 1);
+      }
+      m_scratch[lvl]->exchange();
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	
+	Box fineBox = dbl.get(dit());
+	Box bx = fineBox;
+
+	bx.coarsen(2);
+	
+	fineBox.grow(2);
+	Box coFiBox = fineBox;
+	coFiBox.coarsen(2);
+
+	FArrayBox& fabCoFi        = dataCoFi[dit()];
+	const FArrayBox& fabFine = (*m_scratch[lvl])[dit()].getFArrayBox();
+	fabCoFi.setVal(0.0);
+
+	// Iterate over the CoFi box
+	for (BoxIterator bit(fineBox); bit.ok(); ++bit){
+	  IntVect ivFine = bit();
+	  IntVect ivCoar = coarsen(ivFine, 2);
+
+	  fabCoFi(ivCoar, 0) += fabFine(ivFine, 0)/4.;
+	}
+
+	fabCoFi.setVal(0.0, bx, 0, 1);
+      }
+
+      LevelData<FArrayBox> coarAlias;
+      aliasEB(coarAlias, *a_state[lvl-1]);
+      Interval interv(0,0);
+      dataCoFi.addTo(interv, coarAlias, interv, dom.domainBox());
+    }
+#endif
   }
 
   // Do a kappa scaling
