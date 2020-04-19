@@ -12,6 +12,7 @@
 
 #include <ParmParse.H>
 #include <EBAlias.H>
+#include <BaseEBCellFactory.H>
 
 #include <chrono>
 
@@ -409,6 +410,16 @@ void ito_solver::allocate_internals(){
   // This allocates parallel data holders using the load balancing in amr_mesh. This might give poor
   // load balancing, but we will rectify that by rebalancing later.
   m_amr->allocate(m_particles, m_pvr_buffer);
+
+  //
+  Vector<LevelData<BaseEBCellFAB<int> >* > m_ppc(1 + m_amr->get_finest_level());
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl = m_amr->get_ebisl(m_phase)[lvl];
+
+    BaseEBCellFactory<int> fact(ebisl);
+    m_ppc[lvl] = new LevelData<BaseEBCellFAB<int> >(dbl, 1, 3*IntVect::Unit, fact);
+  }
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
@@ -437,8 +448,6 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   // Write phi
   if(m_plot_phi){
-    this->deposit_particles(m_state, m_particles.get_particles(), m_plot_deposition);
-    
     const Interval src(0, 0);
     const Interval dst(a_comp, a_comp);
     
@@ -451,7 +460,6 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   // Plot diffusion coefficient
   if(m_plot_dco && m_diffusive){
-    
     const Interval src(0, 0);
     const Interval dst(a_comp, a_comp);
     
@@ -485,12 +493,11 @@ void ito_solver::deposit_particles(){
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
   }
-
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
 }
 
 void ito_solver::deposit_particles(EBAMRCellData&           a_state,
-				   const EBAMRItoParticles& a_particles,
+				   const AMRParticles<ito_particle>& a_particles,
 				   const DepositionType::Which        a_deposition){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
@@ -534,19 +541,22 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
       interp->interpolate(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
     
-    // 2. Deposit this levels particles and exchange ghost cells
+    // 2. Deposit this levels particles. Note that this will deposit into ghost cells, which must later
+    //    be added to neighboring patches
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       EBParticleInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
-    // Exchange ghost cells. 
+    // This code adds contributions from ghost cels
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
     aliasEB(aliasFAB, *a_state[lvl]);
     aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
+
+    a_state[lvl]->exchange();
 
     // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
     //    interpolation of "hanging clouds"
@@ -560,6 +570,20 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
+}
+
+
+void ito_solver::deposit_weights(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){
+  CH_TIME("ito_solver::is_mobile");
+  if(m_verbosity > 5){
+    pout() << m_name + "::is_mobile" << endl;
+  }
+
+  this->deposit_particles(a_state, a_particles, DepositionType::NGP);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    data_ops::scale(*a_state[lvl], pow(m_amr->get_dx()[lvl], SpaceDim));
+  }
 }
 
 bool ito_solver::is_mobile() const{
@@ -590,7 +614,7 @@ void ito_solver::cache_state(){
   m_particles.cache_particles(m_particle_cache);
 }
 
-EBAMRItoParticles& ito_solver::get_particles(){
+AMRParticles<ito_particle>& ito_solver::get_particles(){
   CH_TIME("ito_solver::get_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::get_particles" << endl;

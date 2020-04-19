@@ -23,8 +23,6 @@
 
 #include <random>
 
-typedef Vector<RefCountedPtr<ParticleData<ito_particle> > > EBAMRItoParticles;
-
 /*!
   @brief Base class for Ito diffusion particle models
   @details This is a particle class for solving Ito diffusion problems dX = vdt + Z*D*t over an AMR hierarchy. The diffusion
@@ -82,8 +80,20 @@ public:
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   virtual void deposit_particles(EBAMRCellData&              a_state,
-				 const EBAMRItoParticles&    a_particles,
+				 const AMRParticles<ito_particle>&    a_particles,
 				 const DepositionType::Which a_deposition);
+
+  
+  /*!
+    @brief Deposit the total weight of the particles in the grid cells
+  */
+  virtual void deposit_weights(EBAMRCellData& a_weights, const AMRParticles<ito_particle>& a_particles);
+
+  /*!
+    @brief Deposit the total number of particles in the grid cells
+  */
+  void deposit_ppc(EBAMRPPC& a_ppc, const AMRParticles<ito_particle>& a_particles);
+
 
   /*!
     @brief Get number of plot variables
@@ -153,7 +163,7 @@ public:
   /*!
     @brief Get particles
   */
-  virtual EBAMRItoParticles& get_particles();
+  virtual AMRParticles<ito_particle>& get_particles();
 
   /*!
     @brief Get cell-centered velocity
@@ -422,6 +432,11 @@ protected:
     @brief Diffusion-centerer field used for interpolating diffusion coefficients
   */
   EBAMRCellData m_diffco_cell;
+
+  /*!
+    @brief Number of particles per cell (note, this is in terms of the WEIGHT of the particles)
+  */
+  EBAMRCellData m_ppc;
 
   /*!
     @brief Particles

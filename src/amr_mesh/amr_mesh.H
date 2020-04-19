@@ -238,7 +238,6 @@ public:
   */
   virtual void define_eblevelgrid(const int a_lmin);
 
-
   /*!
     @brief Interpolate ghost vectors
   */

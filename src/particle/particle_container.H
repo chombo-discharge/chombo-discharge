@@ -18,6 +18,7 @@
 template <class P>
 using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
 using AMRPVR       = Vector<RefCountedPtr<ParticleValidRegion> >;
+using EBAMRPPC     = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
 
 /*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping
