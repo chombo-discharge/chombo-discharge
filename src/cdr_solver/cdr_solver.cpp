@@ -17,7 +17,6 @@
 #include <EBAlias.H>
 
 
-
 #define USE_NONCONS_DIV 0
 
 cdr_solver::cdr_solver(){

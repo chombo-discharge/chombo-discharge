@@ -14,6 +14,7 @@
 #include "ito_species.H"
 #include "ito_particle.H"
 #include "EBParticleInterp.H"
+#include "particle_container.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -21,8 +22,6 @@
 #include <BinItem.H>
 
 #include <random>
-
-typedef Vector<RefCountedPtr<ParticleData<ito_particle> > > EBAMRItoParticles;
 
 /*!
   @brief Base class for Ito diffusion particle models
@@ -81,8 +80,20 @@ public:
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
   virtual void deposit_particles(EBAMRCellData&              a_state,
-				 const EBAMRItoParticles&    a_particles,
+				 const AMRParticles<ito_particle>&    a_particles,
 				 const DepositionType::Which a_deposition);
+
+  
+  /*!
+    @brief Deposit the total weight of the particles in the grid cells
+  */
+  virtual void deposit_weights(EBAMRCellData& a_weights, const AMRParticles<ito_particle>& a_particles);
+
+  /*!
+    @brief Deposit the total number of particles in the grid cells
+  */
+  void deposit_ppc(EBAMRPPC& a_ppc, const AMRParticles<ito_particle>& a_particles);
+
 
   /*!
     @brief Get number of plot variables
@@ -152,7 +163,7 @@ public:
   /*!
     @brief Get particles
   */
-  virtual EBAMRItoParticles& get_particles();
+  virtual AMRParticles<ito_particle>& get_particles();
 
   /*!
     @brief Get cell-centered velocity
@@ -173,16 +184,6 @@ public:
     @brief Set velocity
   */
   virtual void set_velocity(const RealVect a_vel);
-
-  /*!
-    @brief Advance particles
-  */
-  virtual void move_particles_eulerf(const Real a_dt);
-
-  /*!
-    @brief Advance particles. Level and grid patch version
-  */
-  virtual void move_particles_eulerf(const int a_lvl, const DataIndex& a_dit, const Real a_dt);
 
   /*!
     @brief Interpolate velocities
@@ -207,12 +208,7 @@ public:
   /*!
     @brief Remap all particles
   */
-  void remap_amr_particles();
-
-  /*!
-    @brief Remap "lost" particles
-  */
-  void remap_lost_particles();
+  void remap();
 
   /*!
     @brief Random Gaussian
@@ -438,19 +434,19 @@ protected:
   EBAMRCellData m_diffco_cell;
 
   /*!
+    @brief Number of particles per cell (note, this is in terms of the WEIGHT of the particles)
+  */
+  EBAMRCellData m_ppc;
+
+  /*!
     @brief Particles
   */
-  EBAMRItoParticles m_particles;     
+  particle_container<ito_particle> m_particles;
 
   /*!
     @brief Particle cache
   */
-  EBAMRItoParticles m_particleCache; 
-
-  /*!
-    @brief Particle valid region
-  */
-  EBAMRPVR m_pvr;
+  particle_container<ito_particle> m_particle_cache;
   
   /*!
     @brief Parse RNG options

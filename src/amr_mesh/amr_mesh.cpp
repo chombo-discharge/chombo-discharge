@@ -129,7 +129,7 @@ void amr_mesh::alias(EBAMRIVData& a_data, const phase::which_phase a_phase, cons
   }
 }
 
-void amr_mesh::allocate(EBAMRPVR& a_pvr, const int a_buffer){
+void amr_mesh::allocate(AMRPVR& a_pvr, const int a_buffer){
   CH_TIME("amr_mesh::allocate(AMR PVR)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(AMR PVR)" << endl;

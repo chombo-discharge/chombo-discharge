@@ -349,7 +349,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   }
 
   // Remap the particles and deposit them
-  m_solver->remap_amr_particles();
+  m_solver->remap();
   m_solver->deposit_particles();
 
   return a_dt;

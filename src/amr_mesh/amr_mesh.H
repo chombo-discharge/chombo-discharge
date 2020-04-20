@@ -19,6 +19,7 @@
 #include "DomainFluxIFFAB.H"
 #include "DomainFluxIFFABFactory.H"
 #include "EBLevelConcentrationRedist.H"
+#include "particle_container.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
@@ -68,6 +69,11 @@ public:
     @brief Template class for generic allocation of particles
   */
   template <typename T > void allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles);
+
+  /*!
+    @brief Allocate a particle container
+  */
+  template <typename T> void allocate(particle_container<T>& a_container, const int a_buffer);
 
   /*!
     @brief Allocate pointer but not memory
@@ -122,7 +128,7 @@ public:
   /*!
     @brief Allocate particle valid regions
   */
-  virtual void allocate(EBAMRPVR& a_pvr, const int a_buffer);
+  virtual void allocate(AMRPVR& a_pvr, const int a_buffer);
 
   /*!
     @brief Allocate a data holder. 
@@ -231,7 +237,6 @@ public:
     @brief Define EBLevelGrid
   */
   virtual void define_eblevelgrid(const int a_lmin);
-
 
   /*!
     @brief Interpolate ghost vectors

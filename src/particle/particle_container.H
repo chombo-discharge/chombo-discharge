@@ -1,0 +1,132 @@
+/*!
+  @file particle_container.H
+  @brief Declaration of a class for holding particles on an AMR hierarchy
+  @author Robert Marskar
+  @date   April 2020
+*/
+
+#ifndef _PARTICLE_CONTAINER_
+#define _PARTICLE_CONTAINER_
+
+#include <Particle.H>
+#include <ParticleData.H>
+#include <ParticleValidRegion.H>
+#include <BinItem.H>
+#include <ProblemDomain.H>
+#include <DisjointBoxLayout.H>
+
+template <class P>
+using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
+using AMRPVR       = Vector<RefCountedPtr<ParticleValidRegion> >;
+using EBAMRPPC     = Vector<RefCountedPtr<BaseEBCellFAB<int> > >;
+
+/*!
+  @brief Templated class for holding particles on an AMR hierarchy with particle remapping
+template <class P>
+*/
+template <class P>
+class particle_container {
+public:
+
+  /*!
+    @brief No need for weak construction
+  */
+  particle_container();
+
+  /*!
+    @brief Full constructor
+    @note It is extremely important that a_grids uses only square blocks for the grids. 
+  */
+  particle_container(const Vector<DisjointBoxLayout>& a_grids,
+		     const Vector<ProblemDomain>&     a_domains,
+		     const Vector<Real>&              a_dx,
+		     const Vector<int>&               a_ref_rat,
+		     const RealVect&                  a_prob_lo,
+		     const int                        a_blocking_factor,
+		     const int                        a_finest_level,
+		     const int                        a_pvr_buffer);
+
+  /*!
+    @brief Destructor
+  */
+  ~particle_container();
+
+  /*!
+    @brief Define the container. This will do a clear-out of all particles. 
+  */
+  void define(const Vector<DisjointBoxLayout>& a_grids,
+	      const Vector<ProblemDomain>&     a_domains,
+	      const Vector<Real>&              a_dx,
+	      const Vector<int>&               a_ref_rat,
+	      const RealVect&                  a_prob_lo,
+	      const int                        a_blocking_factor,
+	      const int                        a_finest_level,
+	      const int                        a_pvr_buffer);
+
+  /*!
+    @brief Get all particles on all levels
+  */
+  AMRParticles<P>& get_particles();
+
+  /*!
+    @brief Get all particles on a level
+  */
+  const AMRParticles<P>& get_particles() const;
+
+  /*!
+    @brief Get data on a level
+  */
+  ParticleData<P>& operator[](const int a_level);
+
+  /*!
+    @brief Get data on a level
+  */
+  const ParticleData<P>& operator[](const int a_level) const;
+
+  /*!
+    @brief Add particles to container
+  */
+  void add_particles(const List<P>& a_particles);
+
+  /*!
+    @brief Add particles to container destructively
+  */
+  void add_particles_destructive(List<P>& a_particles);
+
+  /*!
+    @brief Remap over the entire AMR hierarchy
+  */
+  void remap();
+
+  /*!
+    @brief Move the particles to a different container. 
+    @note  The grids MUST be the same for both containers
+  */
+  void cache_particles(particle_container<P>& a_otherContainer); 
+
+protected:
+
+  Vector<DisjointBoxLayout> m_grids;
+  Vector<ProblemDomain> m_domains;
+  Vector<RealVect> m_dx;
+  Vector<int> m_ref_rat;
+  RealVect m_prob_lo;
+  int m_blocking_factor;
+  int m_buffer;
+  int m_finest_level;
+
+  bool m_is_defined;
+
+  AMRParticles<P> m_particles;
+  AMRPVR m_pvr;
+  
+
+
+  void setup_pvr();
+  void setup_particle_data();
+  void remap_lost_particles();
+};
+
+#include "particle_containerI.H"
+
+#endif

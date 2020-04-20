@@ -192,8 +192,5 @@ typedef Vector<RefCountedPtr<LevelData<BaseIVFAB<Real> > > > EBAMRIVData;
 typedef Vector<RefCountedPtr<LevelData<DomainFluxIFFAB > > > EBAMRIFData;
 typedef Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >   EBAMRBool;
 typedef Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > > EBAMRTags;
-typedef Vector<RefCountedPtr<ParticleData<Particle> > >      EBAMRParticles;
-typedef Vector<RefCountedPtr<ParticleData<photon> > >        EBAMRPhotons;
-typedef Vector<RefCountedPtr<ParticleValidRegion> >          EBAMRPVR;
 
 #endif

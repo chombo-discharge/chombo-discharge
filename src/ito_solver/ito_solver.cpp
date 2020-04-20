@@ -12,6 +12,7 @@
 
 #include <ParmParse.H>
 #include <EBAlias.H>
+#include <BaseEBCellFactory.H>
 
 #include <chrono>
 
@@ -48,7 +49,7 @@ void ito_solver::parse_rng(){
     pout() << m_name + "::parse_rng" << endl;
   }
 
-    // Seed the RNG
+  // Seed the RNG
   ParmParse pp(m_class_name.c_str());
   pp.get("seed", m_seed_rng);
   if(m_seed_rng < 0) { // Random seed if input < 0
@@ -252,23 +253,8 @@ void ito_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
-  // Put the initial particles on the coarsest grid level
-  List<ito_particle>& outcastBase = m_particles[0]->outcast();
-  outcastBase.join(m_species->get_initial_particles()); 
-  m_particles[0]->remapOutcast(); 
-
-  // Move particles to finer levels if they belong there. This piece of code moves particles from lvl-1
-  // and onto the outcast list on level lvl. Then, we remap the outcast list
-  for (int lvl = 1; lvl <= m_amr->get_finest_level(); lvl++){
-    collectValidParticles(m_particles[lvl]->outcast(),
-			  *m_particles[lvl-1],
-			  m_pvr[lvl]->mask(),
-			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  m_amr->get_ref_rat()[lvl-1],
-			  false,
-			  m_amr->get_prob_lo());
-    m_particles[lvl]->remapOutcast();
-  }
+  // Get initial particles
+  m_particles.add_particles(m_species->get_initial_particles());
 
   // Remove particles that are inside embedded boundaries
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -286,7 +272,7 @@ void ito_solver::initial_data(){
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBISBox& ebisbox = ebisl[dit()];
       
-      List<ito_particle>& particles = (*m_particles[lvl])[dit()].listItems();
+      List<ito_particle>& particles = m_particles[lvl][dit()].listItems();
 
       if(ebisbox.isAllCovered()){ // Box is all covered
 	particles.clear();
@@ -312,7 +298,7 @@ void ito_solver::initial_data(){
   
 
   // Deposit the particles
-  this->deposit_particles(m_state, m_particles, m_deposition);
+  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
   
 #if 0 // Experimental code. Compute the number of particles in each box
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -322,7 +308,7 @@ void ito_solver::initial_data(){
     int numParticlesThisProc = 0;
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box thisBox = dbl.get(dit());
-      const int numPart = (*m_particles[lvl])[dit()].numItems();
+      const int numPart = m_particles[lvl][dit()].numItems();
 
       oldBoxes.push_back(thisBox);
       oldLoads.push_back(numPart);
@@ -372,59 +358,12 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
     pout() << m_name + "::regrid" << endl;
   }
 
+  MayDay::Abort("ito_solver::regrid - not implemented");
+
   // This reallocates all internal stuff. After this, the only object with any knowledge of the past
-  // is m_particleCache, which has all the photons in the old data holders.
+  // is m_particle_cache
   this->allocate_internals();
 
-  // Here are the steps:
-  // 
-  // 1. We are regridding a_lmin and above, so we need to move all photons onto level a_lmin-1. There's
-  //    probably a better way to do this
-  // 
-  // 2. Levels 0 through a_lmin-1 did not change. Copy photons back into those levels. 
-  // 
-  // 3. Levels a_lmin-1 through a_new_finest_level changed. Remap photons into the correct boxes. 
-  
-  const int base_level  = Max(0, a_lmin-1);
-  const RealVect origin = m_amr->get_prob_lo();
-
-  // 1. Move all particles from cache and onto the coarsest level
-  List<ito_particle>& base_cache = m_particleCache[0]->outcast();
-  base_cache.clear();
-  for (int lvl = base_level; lvl <= a_old_finest_level; lvl++){
-    for (DataIterator dit = m_particleCache[lvl]->dataIterator(); dit.ok(); ++dit){
-      for (ListIterator<ito_particle> li((*m_particleCache[lvl])[dit()].listItems()); li.ok(); ){
-	m_particleCache[base_level]->outcast().transfer(li);
-      }
-    }
-  }
-    
-
-  // 2. Levels 0 through base_level did not change, so copy photons back onto those levels. 
-  for (int lvl = 0; lvl <= base_level; lvl++){
-    collectValidParticles(*m_particles[lvl],
-			  *m_particleCache[lvl],
-			  m_pvr[lvl]->mask(),
-			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  1,
-			  false, 
-			  origin);
-
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
-  }
-
-  // 3. Levels above base_level may have changed, so we need to move the particles into the correct boxes now
-  for (int lvl = base_level; lvl < a_new_finest_level; lvl++){
-    collectValidParticles(m_particles[lvl+1]->outcast(),
-			  *m_particles[lvl],
-			  m_pvr[lvl+1]->mask(),
-			  m_amr->get_dx()[lvl+1]*RealVect::Unit,
-			  m_amr->get_ref_rat()[lvl],
-			  false,
-			  origin);
-    m_particles[lvl+1]->remapOutcast();
-  }
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species>& a_species){
@@ -468,12 +407,20 @@ void ito_solver::allocate_internals(){
     m_amr->allocate_ptr(m_diffco_cell);
   }
   
-  // This allocates parallel data holders using the load balancing in amr_mesh. This will give very poor
-  // load balancing, but we will rectify that by rebalancing later. 
-  m_amr->allocate(m_particles);
-  m_amr->allocate(m_pvr, m_pvr_buffer);
-}
+  // This allocates parallel data holders using the load balancing in amr_mesh. This might give poor
+  // load balancing, but we will rectify that by rebalancing later.
+  m_amr->allocate(m_particles, m_pvr_buffer);
 
+  //
+  Vector<LevelData<BaseEBCellFAB<int> >* > m_ppc(1 + m_amr->get_finest_level());
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl = m_amr->get_ebisl(m_phase)[lvl];
+
+    BaseEBCellFactory<int> fact(ebisl);
+    m_ppc[lvl] = new LevelData<BaseEBCellFAB<int> >(dbl, 1, 3*IntVect::Unit, fact);
+  }
+}
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("ito_solver::write_checkpoint_level");
@@ -501,8 +448,6 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   // Write phi
   if(m_plot_phi){
-    this->deposit_particles(m_state, m_particles, m_plot_deposition);
-    
     const Interval src(0, 0);
     const Interval dst(a_comp, a_comp);
     
@@ -515,7 +460,6 @@ void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
 
   // Plot diffusion coefficient
   if(m_plot_dco && m_diffusive){
-    
     const Interval src(0, 0);
     const Interval dst(a_comp, a_comp);
     
@@ -549,12 +493,11 @@ void ito_solver::deposit_particles(){
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
   }
-
-  this->deposit_particles(m_state, m_particles, m_deposition);
+  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
 }
 
 void ito_solver::deposit_particles(EBAMRCellData&           a_state,
-				   const EBAMRItoParticles& a_particles,
+				   const AMRParticles<ito_particle>& a_particles,
 				   const DepositionType::Which        a_deposition){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
@@ -588,6 +531,7 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     const Real dx                = m_amr->get_dx()[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->get_eblg(m_phase)[lvl];
 
     const bool has_coar = (lvl > 0);
     const bool has_fine = (lvl < finest_level);
@@ -598,14 +542,15 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
       interp->interpolate(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
     
-    // 2. Deposit this levels particles and exchange ghost cells
+    // 2. Deposit this levels particles. Note that this will deposit into ghost cells, which must later
+    //    be added to neighboring patches
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       EBParticleInterp interp(box, dx*RealVect::Unit, origin);
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
-    // Exchange ghost cells. 
+    // This code adds contributions from ghost cels
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
@@ -617,6 +562,79 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     if(has_fine){
       a_state[lvl]->copyTo(*m_scratch[lvl]);
     }
+
+  }
+
+#if 1 // Development code
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx                = m_amr->get_dx()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const EBLevelGrid& eblg      = *m_amr->get_eblg(m_phase)[lvl];
+
+    const bool has_coar = (lvl > 0);
+    const bool has_fine = (lvl < finest_level);
+    
+    if(has_coar){
+      const DisjointBoxLayout& gridCoar = m_amr->get_grids()[lvl-1];
+      DisjointBoxLayout gridCoFi;
+      EBLevelGrid eblgCoFi;
+
+      coarsen(gridCoFi, dbl, 2);
+      coarsen(eblgCoFi, eblg, 2);
+      
+      Vector<Box> coFiBoxes = gridCoFi.boxArray();
+      Vector<int> coFiProcs = gridCoFi.procIDs();
+
+      for (int i = 0; i < coFiBoxes.size(); i++){
+	coFiBoxes[i].grow(1);
+	coFiBoxes[i] &= dom.domainBox();
+      }
+
+      BoxLayout coFiBl(coFiBoxes, coFiProcs);
+      BoxLayoutData<FArrayBox> dataCoFi(coFiBl, 1);
+
+      // Monkey with the scratch box
+      a_state[lvl]->localCopyTo(*m_scratch[lvl]);
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	FArrayBox& scratchBox = (*m_scratch[lvl])[dit()].getFArrayBox();
+	scratchBox.setVal(0.0, dbl.get(dit()), 0, 1);
+      }
+      m_scratch[lvl]->exchange();
+
+      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	
+	Box fineBox = dbl.get(dit());
+	Box bx = fineBox;
+
+	bx.coarsen(2);
+	
+	fineBox.grow(2);
+	Box coFiBox = fineBox;
+	coFiBox.coarsen(2);
+
+	FArrayBox& fabCoFi        = dataCoFi[dit()];
+	const FArrayBox& fabFine = (*m_scratch[lvl])[dit()].getFArrayBox();
+	fabCoFi.setVal(0.0);
+
+	// Iterate over the CoFi box
+	for (BoxIterator bit(fineBox); bit.ok(); ++bit){
+	  IntVect ivFine = bit();
+	  IntVect ivCoar = coarsen(ivFine, 2);
+
+	  fabCoFi(ivCoar, 0) += fabFine(ivFine, 0)/4.;
+	}
+
+	fabCoFi.setVal(0.0, bx, 0, 1);
+      }
+
+      LevelData<FArrayBox> coarAlias;
+      aliasEB(coarAlias, *a_state[lvl-1]);
+      Interval interv(0,0);
+      dataCoFi.addTo(interv, coarAlias, interv, dom.domainBox());
+    }
+#endif
   }
 
   // Do a kappa scaling
@@ -624,6 +642,20 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
+}
+
+
+void ito_solver::deposit_weights(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){
+  CH_TIME("ito_solver::is_mobile");
+  if(m_verbosity > 5){
+    pout() << m_name + "::is_mobile" << endl;
+  }
+
+  this->deposit_particles(a_state, a_particles, DepositionType::NGP);
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    data_ops::scale(*a_state[lvl], pow(m_amr->get_dx()[lvl], SpaceDim));
+  }
 }
 
 bool ito_solver::is_mobile() const{
@@ -650,28 +682,17 @@ void ito_solver::cache_state(){
     pout() << m_name + "::cache_state" << endl;
   }
 
-  m_amr->allocate(m_particleCache);
-
-  // Copy particles onto cache
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    collectValidParticles(m_particleCache[lvl]->outcast(),
-			  *m_particles[lvl],
-			  m_pvr[lvl]->mask(),
-			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  1,
-			  false, 
-			  m_amr->get_prob_lo());
-    m_particleCache[lvl]->remapOutcast();
-  }
+  m_amr->allocate(m_particle_cache, m_pvr_buffer);
+  m_particles.cache_particles(m_particle_cache);
 }
 
-EBAMRItoParticles& ito_solver::get_particles(){
+AMRParticles<ito_particle>& ito_solver::get_particles(){
   CH_TIME("ito_solver::get_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::get_particles" << endl;
   }
 
-  return m_particles;
+  return m_particles.get_particles();
 }
 
 EBAMRCellData& ito_solver::get_velo_cell(){
@@ -739,7 +760,7 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
   const RealVect origin      = m_amr->get_prob_lo();
   const Box box              = m_amr->get_grids()[a_lvl][a_dit];
 
-  List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
+  List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
   EBParticleInterp meshInterp(box, dx, origin);
   meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
@@ -772,47 +793,11 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
   const RealVect origin      = m_amr->get_prob_lo();
   const Box box              = m_amr->get_grids()[a_lvl][a_dit];
 
-  List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
+  List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
   EBParticleInterp meshInterp(box, dx, origin);
   meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
 }
-
-void ito_solver::move_particles_eulerf(const Real a_dt){
-  CH_TIME("ito_solver::move_particles_eulerf");
-  if(m_verbosity > 5){
-    pout() << m_name + "::move_particles_eulerf" << endl;
-  }
-
-  // Move all particles and rebin them
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      this->move_particles_eulerf(lvl, dit(), a_dt);
-    }
-
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
-  }
-}
-
-void ito_solver::move_particles_eulerf(const int a_lvl, const DataIndex& a_dit, const Real a_dt){
-  CH_TIME("ito_solver::move_particles_eulerf");
-  if(m_verbosity > 5){
-    pout() << m_name + "::move_particles_eulerf" << endl;
-  }
-
-  List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
-  ListIterator<ito_particle> lit(particleList);
-  
-  for (lit.rewind(); lit; ++lit){
-    ito_particle& p = particleList[lit];
-
-    p.position() += p.velocity()*a_dt;
-  }
-}
-
 
 RealVect ito_solver::random_gaussian() {
   const double d = m_gauss01(m_rng);
@@ -932,7 +917,7 @@ Real ito_solver::compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const
     pout() << m_name + "::compute_drift_dt(level, dataindex, dx)" << endl;
   }
 
-  const List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
+  const List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
   ListIterator<ito_particle> lit(particleList);
 
   Real dt = 1.E99;
@@ -1030,162 +1015,29 @@ Real ito_solver::compute_diffusion_dt(const int a_lvl, const DataIndex& a_dit, c
   if(m_verbosity > 5){
     pout() << m_name + "::compute_diffusion_dt(level, dataindex, dx)" << endl;
   }
-
-  const List<ito_particle>& particleList = (*m_particles[a_lvl])[a_dit].listItems();
+  const List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
   ListIterator<ito_particle> lit(particleList);
 
   Real dt = 1.E99;
   
   for (lit.rewind(); lit; ++lit){
     const ito_particle& p = particleList[lit];
-
+    
     const Real thisDt = a_dx[0]/(sqrt(2.0*p.diffusion()));
-
+    
     dt = Min(dt, thisDt);
   }
 
   return dt;
 }
 
-void ito_solver::remap_amr_particles(){
-  CH_TIME("ito_solver::remap_amr_particles");
+void ito_solver::remap(){
+  CH_TIME("ito_solver::remap");
   if(m_verbosity > 5){
-    pout() << m_name + "::remap_amr_particles" << endl;
+    pout() << m_name + "::remap" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  bool do_lost_remap = false;
-  
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
-
-    // Rebin this level
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
-
-    // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
-    if(has_coar){
-      collectValidParticles(m_particles[lvl]->outcast(),
-			    *m_particles[lvl-1],
-			    m_pvr[lvl]->mask(),
-			    m_amr->get_dx()[lvl]*RealVect::Unit,
-			    m_amr->get_ref_rat()[lvl-1],
-			    false, 
-			    origin);
-    }
-
-    // There may be particles on this level that belong in the correct Box but not on the correct PVR. Move those
-    // particles to the coarser level and remap that level once more
-    if(has_coar){
-#if 0 // debug
-      std::cout << "Outcasts before collect = " << m_particles[lvl]->numOutcast() << std::endl;
-#endif
-      collectValidParticles(m_particles[lvl-1]->outcast(),
-			    *m_particles[lvl],
-			    m_pvr[lvl]->mask(),
-			    m_amr->get_dx()[lvl]*RealVect::Unit,
-			    1,
-			    true,
-			    origin);
-
-#if 0 // debug
-      std::cout << "Outcasts after collect = " << m_particles[lvl]->numOutcast() << std::endl;
-#endif
-
-      m_particles[lvl-1]->remapOutcast();
-
-#if 0 // Debug code. It may be that this level still has outcasts that have fallen off the grid. Move those particles
-      // to the outcast list on the coarser level
-      const int postCollectOutcastsFine = m_particles[lvl-1]->numOutcast();
-      const int postCollectOutcastsCoar = m_particles[lvl]->numOutcast();
-
-      std::cout << "post collect Fine/Coar = " << postCollectOutcastsFine << "\t" << postCollectOutcastsCoar << endl;
-      
-      List<ito_particle>& outcastCoar = m_particles[lvl-1]->outcast();
-      List<ito_particle>& outcastFine = m_particles[lvl]->outcast();
-      outcastCoar.catenate(outcastFine);
-      outcastCoar.clear();
-
-      const int outcastsCoar = m_particles[lvl-1]->numOutcast();
-      const int outcastsFine = m_particles[lvl]->numOutcast();
-
-      if(procID() == 0){
-	std::cout << "final Fine/Coar = " << outcastsFine << "\t" << outcastsCoar << endl;
-      }
-
-
-      // Now do a remap
-      m_particles[lvl-1]->remapOutcast();
-
-#endif
-    }
-
-    // Remap the outcasts on this level
-    m_particles[lvl]->remapOutcast();
-  }
-
-  // Check if we need to also remap "lost" particles
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    if(m_particles[lvl]->numOutcast() > 0){
-#if 0
-      if(procID () == 0) std::cout << "lost some particles" << std::endl;
-#endif
-      this->remap_lost_particles();
-      break;
-    }
-  }
-
-#if 0 // Count the total number of particles
-  int valid = 0;
-  int out = 0;
-  for (int i = 0; i <= finest_level; i++){
-    valid += m_particles[i]->numValid();
-    out += m_particles[i]->numOutcast();
-  }
-
-  if(procID() == 0){
-    std::cout << "step = " << m_step << "\t #valid = " << valid << "\t #outcast = " << out << std::endl;
-  }
-#endif
-}
-
-void ito_solver::remap_lost_particles(){
-  CH_TIME("ito_solver::remap_lost_particles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::remap_lost_particles" << endl;
-  }
-
-  // TLDR: This routine is called because there is a chance that particles might hop across more than one refinement boundary,
-  //       and the remap_amr_particles only performs two-level operations. This piece of code is responsible for gathering
-  //       "lost particles" which were not successfully remapped through two-level operations
-
-  const int finest_level = m_amr->get_finest_level();
-  const RealVect origin  = m_amr->get_prob_lo();
-
-  // Gather all "lost" outcasts on the coarsest level
-  List<ito_particle>& coarsest_outcast = m_particles[0]->outcast();
-  for (int lvl = 1; lvl <= finest_level; lvl++){
-    coarsest_outcast.catenate(m_particles[lvl]->outcast());
-    m_particles[lvl]->outcast().clear();
-  }
-
-  // Remap the coarsest level and discard particles that don't fit in the coarsest level (i.e. ones that have left the domain)
-  m_particles[0]->remapOutcast();
-  m_particles[0]->outcast().clear();
-
-  // Collect the particles 
-  for (int lvl = 1; lvl <= finest_level; lvl++){
-    collectValidParticles(m_particles[lvl]->outcast(),
-			  *m_particles[lvl-1],
-			  m_pvr[lvl]->mask(),
-			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  m_amr->get_ref_rat()[lvl-1],
-			  false, 
-			  origin);
-  }
+  m_particles.remap();
 }
 
 phase::which_phase ito_solver::get_phase() const{

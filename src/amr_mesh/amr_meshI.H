@@ -64,6 +64,18 @@ template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
 }
 
 
+template <typename T>
+void amr_mesh::allocate(particle_container<T>& a_container, const int a_pvr_buffer){
+  a_container.define(m_grids,
+		     m_domains,
+		     m_dx,
+		     m_ref_ratios,
+		     m_prob_lo,
+		     m_blocking_factor,
+		     m_finest_level,
+		     a_pvr_buffer);
+}
+
 template<typename T > void amr_mesh::allocate_ptr(Vector<RefCountedPtr<T> >& a_data){
   CH_TIME("amr_mesh::allocate_ptr");
   if(m_verbosity > 5){
