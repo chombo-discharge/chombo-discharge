@@ -14,7 +14,6 @@
 #include <EBArith.H>
 #include <ParmParse.H>
 
-
 ExtrapAdvectBCFactory s_physibc;
 
 cdr_gdnv::cdr_gdnv() : cdr_tga() {
@@ -33,7 +32,6 @@ void cdr_gdnv::parse_options(){
   }
   
   parse_domain_bc();     // Parses domain BC options
-  parse_mass_redist();   // Parses mass redistribution
   parse_slopelim();      // Parses slope limiter settings
   parse_plot_vars();     // Parses plot variables
   parse_plotmode();      // Parse plot mdoe
@@ -179,20 +177,20 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     pout() << m_name + "::advect_to_faces" << endl;
   }
 
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_phase, 1);
-  data_ops::set_value(scratch, 0.0);
+
 
   // Compute source for extrapolation
   if(m_extrap_source && a_extrap_dt > 0.0){
+    data_ops::set_value(m_scratch, 0.0);
+    
     if(m_diffusive){
       const int finest_level = m_amr->get_finest_level();
       Vector<LevelData<EBCellFAB>* > scratchAlias, stateAlias;
-      m_amr->alias(scratchAlias, scratch);
+      m_amr->alias(scratchAlias, m_scratch);
       m_amr->alias(stateAlias,   a_state);
       m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
     }
-    data_ops::incr(scratch, m_source, 1.0);
+    data_ops::incr(m_scratch, m_source, 1.0);
   }
 
   // Extrapolate face-centered state on every level
@@ -207,7 +205,7 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
       const EBCellFAB& state = (*a_state[lvl])[dit()];
       const EBCellFAB& cell_vel = (*m_velo_cell[lvl])[dit()];
       const EBFluxFAB& face_vel = (*m_velo_face[lvl])[dit()];
-      const EBCellFAB& source = (*scratch[lvl])[dit()];
+      const EBCellFAB& source = (*m_scratch[lvl])[dit()];
       const EBISBox& ebisbox = ebisl[dit()];
       const Box& box = dbl.get(dit());
       const Real time = 0.0;

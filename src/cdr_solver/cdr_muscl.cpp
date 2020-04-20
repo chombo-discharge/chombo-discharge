@@ -26,7 +26,6 @@ void cdr_muscl::parse_options(){
   parse_rng_seed();     // Parses RNG seed
   parse_plotmode();     // Parses plot mode
   parse_domain_bc();    // Parses domain BC options
-  parse_mass_redist();  // Parses mass redistribution
   parse_slopelim();     // Parses slope limiter settings
   parse_plot_vars();    // Parses plot variables
   parse_gmg_settings(); // Parses solver parameters for geometric multigrid

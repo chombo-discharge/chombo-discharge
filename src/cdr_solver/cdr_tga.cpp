@@ -408,7 +408,7 @@ void cdr_tga::setup_euler(){
   // Note: If this crashes, try to init gmg first
 }
 
-void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt){
+void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_ebflux){
   CH_TIME("cdr_tga::compute_divJ(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divJ(divF, state)" << endl;
@@ -417,97 +417,63 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
   const int comp  = 0;
   const int ncomp = 1;
 
-
-  EBAMRFluxData flux;
-  EBAMRFluxData total_flux;
-
-  Real t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11;
-
-
   if(m_mobile || m_diffusive){
 
-    t1 = MPI_Wtime();
-    m_amr->allocate(flux, m_phase, ncomp);
-    m_amr->allocate(total_flux, m_phase, ncomp);
-    data_ops::set_value(total_flux, 0.0);
-    t2 = MPI_Wtime();
-    
-    // Compute advection flux and put it in total_flux
+    // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
+    data_ops::set_value(m_scratchFluxOne, 0.0);
+
+    // Compute advection flux. This is mostly the same as compute_divF
     if(m_mobile){
-      EBAMRFluxData face_state;
-      m_amr->allocate(face_state,     m_phase, ncomp);
+      this->average_velo_to_faces(); // Update m_velo_face from m_velo_cell
+      this->advect_to_faces(m_face_states, a_state, a_extrap_dt); // Advect to faces
+      this->compute_flux(m_scratchFluxTwo, m_velo_face, m_face_states, m_domainflux);
 
-      t3 = MPI_Wtime();
-      this->average_velo_to_faces();
-      t4 = MPI_Wtime();
-      this->advect_to_faces(face_state, a_state, a_extrap_dt);
-      t5 = MPI_Wtime();
-      this->compute_flux(flux, m_velo_face, face_state, m_domainflux);
-      t6 = MPI_Wtime();
-
-      data_ops::incr(total_flux, flux, 1.0);
-      t7 = MPI_Wtime();
+      data_ops::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
     }
 
-    // Add diffusion flux to total flux
+    // Compute diffusion flux. 
     if(m_diffusive){
-      this->compute_diffusion_flux(flux, a_state);
-      data_ops::incr(total_flux, flux, -1.0);
-      t8 = MPI_Wtime();
+      this->compute_diffusion_flux(m_scratchFluxTwo, a_state);
+      data_ops::incr(m_scratchFluxOne, m_scratchFluxTwo, -1.0);
     }
 
     // General divergence computation. Also inject charge. Domain fluxes came in through the compute
-    // advective flux function.
-    t9 = MPI_Wtime();
-    this->compute_divG(a_divJ, total_flux, m_ebflux);
-    t10 = MPI_Wtime();
+    // advective flux function and eb fluxes come in through the divergence computation.
+    EBAMRIVData* ebflux;
+    if(a_ebflux){
+      ebflux = &m_ebflux;
+    }
+    else{
+      ebflux = &m_eb_zero;
+    }
+    this->compute_divG(a_divJ, m_scratchFluxOne, *ebflux);
   }
   else{ 
     data_ops::set_value(a_divJ, 0.0);
   }
 
-
-  pout() << "t2 - t1 = " << t2-t1 << endl
-	 << "t3 - t2 = " << t3-t2 << endl
-    	 << "t4 - t3 = " << t4-t3 << endl
-    	 << "t5 - t4 = " << t5-t4 << endl
-    	 << "t6 - t5 = " << t6-t5 << endl
-    	 << "t7 - t6 = " << t7-t6 << endl
-    	 << "t8 - t7 = " << t8-t7 << endl
-    	 << "t9 - t8 = " << t9-t8 << endl
-	 << "t10 - t9 = " << t10-t9 << endl
-	 << "tot = " << t10 - t1 << endl
-    	 << "allocs = " << 100.*((t2-t1) + (t3-t2))/(t10-t9) << endl
-	 << endl;
-
-
   return;
 }
 
-void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt){
+void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_ebflux){
   CH_TIME("cdr_tga::compute_divF(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
 
   if(m_mobile){
-    const int ncomp      = 1;
-
-    EBAMRFluxData face_state;
-    EBAMRFluxData flux;
-
-    m_amr->allocate(face_state, m_phase, ncomp);
-    m_amr->allocate(flux, m_phase, ncomp);
-
-    data_ops::set_value(a_divF,     0.0); 
-    data_ops::set_value(face_state, 0.0);
-
-    // Compute the advective derivative
     this->average_velo_to_faces();
-    this->advect_to_faces(face_state, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
-    this->compute_flux(flux, m_velo_face, face_state, m_domainflux);  // Compute face-centered fluxes
-    
-    this->compute_divG(a_divF, flux, m_ebflux); // When we're done, flux contains 
+    this->advect_to_faces(m_face_states, a_state, a_extrap_dt);          // Face extrapolation to cell-centered faces
+    this->compute_flux(m_scratchFluxOne, m_velo_face, m_face_states, m_domainflux);  // Compute face-centered fluxes
+
+    EBAMRIVData* ebflux;
+    if(a_ebflux){
+      ebflux = &m_ebflux;
+    }
+    else{
+      ebflux = &m_eb_zero;
+    }
+    this->compute_divG(a_divF, m_scratchFluxOne, *ebflux); 
   }
   else{
     data_ops::set_value(a_divF, 0.0);
@@ -522,7 +488,7 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
 
 }
 
-void cdr_tga::compute_divD(EBAMRCellData& a_divD, const EBAMRCellData& a_state){
+void cdr_tga::compute_divD(EBAMRCellData& a_divD, const EBAMRCellData& a_state, const bool a_ebflux){
   CH_TIME("cdr_tga::compute_divD");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divD" << endl;
@@ -531,14 +497,16 @@ void cdr_tga::compute_divD(EBAMRCellData& a_divD, const EBAMRCellData& a_state){
   if(m_diffusive){
     const int ncomp = 1;
 
-    EBAMRIVData   zeroEBflux;
-    EBAMRFluxData flux;
-    m_amr->allocate(zeroEBflux, m_phase, ncomp);
-    m_amr->allocate(flux,       m_phase, ncomp);
+    this->compute_diffusion_flux(m_scratchFluxOne, a_state);  // Compute the face-centered diffusion flux
 
-    data_ops::set_value(zeroEBflux, 0.0);
-    this->compute_diffusion_flux(flux, a_state);  // Compute the face-centered diffusion flux
-    this->compute_divG(a_divD, flux, zeroEBflux); // General face-centered flux to divergence magic. 
+    EBAMRIVData* ebflux;
+    if(a_ebflux){
+      ebflux = &m_ebflux;
+    }
+    else{
+      ebflux = &m_eb_zero;
+    }
+    this->compute_divG(a_divD, m_scratchFluxOne, *ebflux); // General face-centered flux to divergence magic.
 
     m_amr->average_down(a_divD, m_phase);
     m_amr->interp_ghost(a_divD, m_phase);

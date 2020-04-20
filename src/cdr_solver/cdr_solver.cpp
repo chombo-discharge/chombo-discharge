@@ -105,8 +105,9 @@ void cdr_solver::allocate_internals(){
   // Only allocate memory for cell-centered and face-centered velocities if the solver is mobile. Otherwise, allocate
   // a NULL pointer that we can pass around in time_stepper in order to handle special cases
   if(m_mobile){
-    m_amr->allocate(m_velo_face,  m_phase, sca);
-    m_amr->allocate(m_velo_cell,  m_phase, vec);
+    m_amr->allocate(m_velo_face,     m_phase, sca);
+    m_amr->allocate(m_velo_cell,     m_phase, vec);
+    m_amr->allocate(m_face_states, m_phase, sca);
     
     data_ops::set_value(m_velo_face,  0.0);
     data_ops::set_value(m_velo_cell,  0.0);
@@ -133,10 +134,22 @@ void cdr_solver::allocate_internals(){
     m_amr->allocate_ptr(m_diffco_eb);
   }
 
+  // Allocate stuff for holding fluxes
+  if(m_diffusive || m_mobile){
+    m_amr->allocate(m_scratchFluxOne, m_phase, sca);
+    m_amr->allocate(m_scratchFluxTwo, m_phase, sca);
+
+    m_amr->allocate(m_divG_nc,   m_phase, sca);
+    m_amr->allocate(m_mass_diff, m_phase, sca);
+  }
+
   // These don't consume (much) memory so just allocate them 
   m_amr->allocate(m_ebflux,     m_phase, sca);
+  m_amr->allocate(m_eb_zero,     m_phase, sca);
   m_amr->allocate(m_domainflux, m_phase, sca);
+  
   data_ops::set_value(m_ebflux,     0.0);
+  data_ops::set_value(m_eb_zero,     0.0);
   data_ops::set_value(m_domainflux, 0.0);
 
   // This defines interpolation stencils and space for interpolants
@@ -160,6 +173,9 @@ void cdr_solver::deallocate_internals(){
   m_amr->deallocate(m_diffco);
   m_amr->deallocate(m_diffco_eb);
   m_amr->deallocate(m_scratch);
+  m_amr->deallocate(m_scratchFluxOne);
+  m_amr->deallocate(m_scratchFluxTwo);
+  m_amr->deallocate(m_face_states);
 }
 
 void cdr_solver::average_velo_to_faces(){
@@ -288,34 +304,25 @@ void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const E
   const int comp  = 0;
   const int ncomp = 1;
 
-  EBAMRIVData divG_nc;
-  EBAMRIVData mass_diff;
-  EBAMRCellData weights;
-
-  m_amr->allocate(divG_nc,   m_phase, ncomp);
-  m_amr->allocate(mass_diff, m_phase, ncomp);
-  m_amr->allocate(weights,   m_phase, ncomp);
-
   data_ops::set_value(a_divG, 0.0);
-  data_ops::set_value(mass_diff, 0.0);
   
-  this->conservative_divergence(a_divG, a_G, a_ebG);   // Make the conservative divergence.
-  this->nonconservative_divergence(divG_nc, a_divG);   // Non-conservative divergence
-  this->hybrid_divergence(a_divG, mass_diff, divG_nc); // a_divG becomes hybrid divergence. Mass diff computed. 
-  this->increment_flux_register(a_G);                  // Increment flux register
-  this->increment_redist(mass_diff);                   // Increment level redistribution register
+  this->conservative_divergence(a_divG, a_G, a_ebG);       // Make the conservative divergence.
+  this->nonconservative_divergence(m_divG_nc, a_divG);     // Non-conservative divergence
+  this->hybrid_divergence(a_divG, m_mass_diff, m_divG_nc); // a_divG becomes hybrid divergence. Mass diff computed. 
+  this->increment_flux_register(a_G);                      // Increment flux register
+  this->increment_redist(m_mass_diff);                     // Increment level redistribution register
 
   const bool ebcf = m_amr->get_ebcf();
   if(ebcf){ // If we have EBCF, much more work with the CF interface
-    this->coarse_fine_increment(mass_diff);                      // Compute C2F, F2C, and C2C mass transfers
-    this->increment_redist_flux();                               // Tell flux register about whats going on
-    this->hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
-    this->coarse_fine_redistribution(a_divG);                    // Do the coarse-fine redistribution
-    this->reflux(a_divG);                                        // Reflux
+    this->coarse_fine_increment(m_mass_diff);             // Compute C2F, F2C, and C2C mass transfers
+    this->increment_redist_flux();                        // Tell flux register about whats going on
+    this->hyperbolic_redistribution(a_divG, m_mass_diff); // Level redistribution. Weights is a dummy parameter
+    this->coarse_fine_redistribution(a_divG);             // Do the coarse-fine redistribution
+    this->reflux(a_divG);                                 // Reflux
   }
   else{ // Much simpler if we don't have EBCF
-    this->hyperbolic_redistribution(a_divG, mass_diff, weights); // Level redistribution. Weights is a dummy parameter
-    this->reflux(a_divG);                                        // Reflux
+    this->hyperbolic_redistribution(a_divG, m_mass_diff); // Level redistribution. Weights is a dummy parameter
+    this->reflux(a_divG);                                 // Reflux
   }
 }
 
@@ -526,19 +533,8 @@ void cdr_solver::compute_diffusion_flux(EBAMRFluxData& a_flux, const EBAMRCellDa
     pout() << m_name + "::compute_diffusion_flux" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-
-  // I want linearly interpolated ghost cells. Go get them. 
-  EBAMRCellData copy_state; 
-  m_amr->allocate(copy_state, m_phase, ncomp);
-  data_ops::set_value(copy_state, 0.0);
-  data_ops::incr(copy_state, a_state, 1.0);
-  m_amr->interp_ghost_pwl(copy_state, m_phase);
-
-  // We have linearly interpolated ghost cells. Do level-by-level magic
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    compute_diffusion_flux(*a_flux[lvl], *copy_state[lvl], lvl);
+    this->compute_diffusion_flux(*a_flux[lvl], *a_state[lvl], lvl);
   }
 }
 
@@ -1065,9 +1061,7 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
   }
 }
 
-void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
-					   const EBAMRIVData&   a_mass_diff,
-					   const EBAMRCellData& a_redist_weights){
+void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF, const EBAMRIVData&   a_mass_diff) {
   CH_TIME("cdr_solver::hyberbolic_redistribution");
   if(m_verbosity > 5){
     pout() << m_name + "::hyperbolic_redistribution" << endl;
@@ -1080,17 +1074,12 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF,
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
-    if(m_mass_redist){
-      level_redist.resetWeights(*a_redist_weights[lvl], comp);
-    }
     level_redist.redistribute(*a_divF[lvl], interv);
     level_redist.setToZero();
   }
 }
 
-void cdr_solver::concentration_redistribution(EBAMRCellData&       a_phi,
-					      const EBAMRIVData&   a_mass_diff,
-					      const EBAMRCellData& a_redist_weights){
+void cdr_solver::concentration_redistribution(EBAMRCellData& a_phi, const EBAMRIVData&   a_mass_diff){
   CH_TIME("cdr_solver::concentration_redistribution");
   if(m_verbosity > 5){
     pout() << m_name + "::concentration_redistribution" << endl;
@@ -1101,12 +1090,8 @@ void cdr_solver::concentration_redistribution(EBAMRCellData&       a_phi,
   const int finest_level = m_amr->get_finest_level();
   const Interval interv(comp, comp);
 
-
   for (int lvl = 0; lvl <= finest_level; lvl++){
     EBLevelConcentrationRedist& redist = *(m_amr->get_concentration_redist(m_phase)[lvl]);
-    if(m_mass_redist){
-      redist.resetWeights(*a_redist_weights[lvl], comp);
-    }
     redist.redistribute(*a_phi[lvl], interv);
     redist.setToZero();
   }
@@ -1542,15 +1527,6 @@ void cdr_solver::set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis){
   }
 
   m_ebis = a_ebis;
-}
-
-void cdr_solver::set_mass_redist(const bool a_mass_redist){
-  CH_TIME("cdr_solver::set_mass_redist");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_mass_redist" << endl;
-  }
-
-  m_mass_redist = a_mass_redist;
 }
 
 void cdr_solver::set_species(const RefCountedPtr<cdr_species> a_species){
@@ -2208,13 +2184,6 @@ void cdr_solver::parse_domain_bc(){
   }
 }
 
-void cdr_solver::parse_mass_redist(){
-  ParmParse pp(m_class_name.c_str());
-  std::string str;
-  pp.get("mass_redist", str);
-  m_mass_redist = (str == "true") ? true : false;
-}
-
 void cdr_solver::parse_plot_vars(){
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
@@ -2284,12 +2253,7 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
   const int comp  = 0;
   const int ncomp = 1;
 
-  EBAMRIVData mass_diff;
-  EBAMRCellData weights;
-  m_amr->allocate(mass_diff, m_phase, ncomp);
-  m_amr->allocate(weights, m_phase, ncomp);
-  data_ops::set_value(mass_diff, 0.0);
-  data_ops::set_value(weights, 0.0);
+  data_ops::set_value(m_mass_diff, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -2306,14 +2270,14 @@ void cdr_solver::make_non_negative(EBAMRCellData& a_phi){
 	const Real phi = state(vof, comp);
 	if(phi < 0.0){
 	  state(vof,comp) = 0.0;
-	  (*mass_diff[lvl])[dit()](vof,comp) = kappa*phi;
+	  (*m_mass_diff[lvl])[dit()](vof,comp) = kappa*phi;
 	}
       }
     }
   }
 
-  this->increment_concentration_redist(mass_diff);
-  this->concentration_redistribution(a_phi, mass_diff, weights);
+  this->increment_concentration_redist(m_mass_diff);
+  this->concentration_redistribution(a_phi, m_mass_diff);
 }
 
 void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCellData& a_cell_states){
@@ -2322,53 +2286,30 @@ void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCel
     pout() << m_name + "::GWN_diffusion_source" << endl;
   }
 
+  if(m_diffusive){
   const int comp  = 0;
   const int ncomp = 1;
-  
-  EBAMRFluxData ranflux;
-  EBAMRFluxData GWN;
 
-  // Putting this in here because it is really, really important that we don't send in any stupid ghost cells or negative
-  // values for the diffusion advance
-  EBAMRCellData& states = const_cast<EBAMRCellData&> (a_cell_states);
-  m_amr->average_down(states, m_phase);
-  m_amr->interp_ghost(states, m_phase);
-  data_ops::floor(states, 0.0);
-  
-  m_amr->allocate(ranflux,   m_phase, ncomp);
-  m_amr->allocate(GWN,       m_phase, ncomp);
-  
-  data_ops::set_value(a_ransource, 0.0);
-  data_ops::set_value(ranflux,     0.0);
-  data_ops::set_value(GWN,         0.0);
-
-  this->fill_GWN(GWN, 1.0);                             // Gaussian White Noise = W/sqrt(dV)
-  this->smooth_heaviside_faces(ranflux, a_cell_states); // ranflux = phis
-  data_ops::multiply(ranflux, m_diffco);                // ranflux = D*phis
-  data_ops::scale(ranflux, 2.0);                        // ranflux = 2*D*phis
-  data_ops::square_root(ranflux);                       // ranflux = sqrt(2*D*phis)
+  this->fill_GWN(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
+  this->smooth_heaviside_faces(m_scratchFluxOne, a_cell_states); // m_scratchFluxOne = phis
+  data_ops::multiply(m_scratchFluxOne, m_diffco);                // m_scratchFluxOne = D*phis
+  data_ops::scale(m_scratchFluxOne, 2.0);                        // m_scratchFluxOne = 2*D*phis
+  data_ops::square_root(m_scratchFluxOne);                       // m_scratchFluxOne = sqrt(2*D*phis)
 
 #if 0 // Debug
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     for (int dir = 0; dir <SpaceDim; dir++){
       Real max, min;
-      EBLevelDataOps::getMaxMin(max, min, *ranflux[lvl], 0, dir);
+      EBLevelDataOps::getMaxMin(max, min, *m_scratchFluxOne[lvl], 0, dir);
       if(min < 0.0 || max < 0.0){
 	MayDay::Abort("cdr_solver::GWN_diffusion_source - negative face value");
       }
     }
   }
 #endif
-  data_ops::multiply(ranflux, GWN);                     // Holds random, cell-centered flux
-
-  // Source term. 
-  // I want to re-use conservative_divergence(), but that also computes with the EB fluxes. Back that up
-  // first and use the already written and well-tested routine. Then copy back
-  EBAMRIVData zeroflux;
-  m_amr->allocate(zeroflux, m_phase, 1);
-  data_ops::set_value(zeroflux, 0.0);
-  data_ops::set_value(a_ransource, 0.0);
-  conservative_divergence(a_ransource, ranflux, zeroflux); // Compute the conservative divergence. This also refluxes. 
+  
+  data_ops::multiply(m_scratchFluxOne, m_scratchFluxTwo);                     // Holds random, cell-centered flux
+  this->conservative_divergence(a_ransource, m_scratchFluxOne, m_eb_zero); 
   
 #if 0 // Debug
   m_amr->average_down(a_ransource, m_phase);
@@ -2378,6 +2319,10 @@ void cdr_solver::GWN_diffusion_source(EBAMRCellData& a_ransource, const EBAMRCel
     }
   }
 #endif
+  }
+  else{
+    data_ops::set_value(a_ransource, 0.0);
+  }
 }
 
 void cdr_solver::smooth_heaviside_faces(EBAMRFluxData& a_face_states, const EBAMRCellData& a_cell_states){

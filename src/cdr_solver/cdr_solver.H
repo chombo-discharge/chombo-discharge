@@ -67,17 +67,25 @@ public:
   /*!
     @brief Compute div(nv - D*grad(n)) explicitly
   */
-  virtual void compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+  virtual void compute_divJ(EBAMRCellData&       a_divJ,
+			    const EBAMRCellData& a_state,
+			    const Real           a_extrap_dt,
+			    const bool           a_ebflux = true) = 0;
 
   /*!
     @brief Compute div(v*phi) explicitly
   */
-  virtual void compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt) = 0;
+  virtual void compute_divF(EBAMRCellData&       a_divF,
+			    const EBAMRCellData& a_state,
+			    const Real           a_extrap_dt,
+			    const bool           a_ebflux = true) = 0;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
   */
-  virtual void compute_divD(EBAMRCellData& a_diffusive_term, const EBAMRCellData& a_state) = 0;
+  virtual void compute_divD(EBAMRCellData&       a_diffusive_term,
+			    const EBAMRCellData& a_state,
+			    const bool           a_ebflux = false) = 0;
 
   /*!
     @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers
@@ -253,11 +261,6 @@ public:
     @brief Read checkpoint data from handle
   */
   virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
-
-  /*!
-    @brief Use mass-weighted redistribution
-  */
-  virtual void set_mass_redist(const bool a_mass_redist);
 
   /*!
     @brief Regrid internals
@@ -448,9 +451,39 @@ protected:
   EBAMRCellData m_velo_cell;
 
   /*!
+    @brief Holder for face centered states
+  */
+  EBAMRFluxData m_face_states;
+
+  /*!
     @brief Scratch storage. 
   */
   EBAMRCellData m_scratch;
+
+  /*!
+    @brief Scratch storage
+  */
+  EBAMRFluxData m_scratchFluxOne;
+
+  /*!
+    @brief Scratch storage
+  */
+  EBAMRFluxData m_scratchFluxTwo;
+
+  /*!
+    @brief Scratch storage
+  */
+  EBAMRIVData m_divG_nc;
+
+  /*!
+    @brief Scratch storage
+  */
+  EBAMRIVData m_mass_diff;
+
+  /*!
+    @brief Zero flux
+  */
+  EBAMRIVData m_eb_zero;
 
   /*!
     @brief Cached state vector for regrid. DO NOT TOUCH!
@@ -526,11 +559,6 @@ protected:
     @brief Also solve for advection/convection
   */
   bool m_mobile;
-
-  /*!
-    @brief Use mass-weighted redistribution
-  */
-  bool m_mass_redist;
 
   /*!
     @brief Output state
@@ -671,16 +699,12 @@ protected:
   /*!
     @brief Do mass redistribution
   */
-  virtual void hyperbolic_redistribution(EBAMRCellData&       a_del_vel_rho,
-					 const EBAMRIVData&   a_mass_diff,
-					 const EBAMRCellData& a_redist_weights);
+  virtual void hyperbolic_redistribution(EBAMRCellData& a_del_vel_rho, const EBAMRIVData&   a_mass_diff);
 
   /*!
     @brief Mass injection from regular cells into cut cells in order to avoid negative densities. Preserves mass. 
   */
-  virtual void concentration_redistribution(EBAMRCellData&       a_phi,
-					    const EBAMRIVData&   a_mass_diff,
-					    const EBAMRCellData& a_redist_weights);
+  virtual void concentration_redistribution(EBAMRCellData& a_phi, const EBAMRIVData&   a_mass_diff);
 
   /*!
     @brief Increment redistribution flux registers
@@ -726,13 +750,6 @@ protected:
     @brief Define interpolant
   */
   virtual void define_interpolant();
-
-
-
-  /*!
-    @brief Options for parsing some class options
-  */
-  virtual void parse_mass_redist();  // Parses mass redistribution
 
   /*!
     @brief Parses domain BC options

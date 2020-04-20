@@ -184,18 +184,6 @@ void cdr_layout::sanity_check(){
   }
 }
 
-void cdr_layout::set_mass_redist(const bool a_mass_redist){
-  CH_TIME("cdr_layout::set_mass_redist");
-  if(m_verbosity > 5){
-    pout() << "cdr_layout::set_mass_redist" << endl;
-  }
-
-  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->set_mass_redist(a_mass_redist);
-  }
-}
-
 void cdr_layout::set_time(const int a_step, const Real a_time, const Real a_dt) {
   CH_TIME("cdr_layout::set_time");
   if(m_verbosity > 5){

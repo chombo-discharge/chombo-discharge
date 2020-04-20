@@ -4,8 +4,8 @@
 amr_mesh.lo_corner       = -1 -1       # Low corner of problem domain
 amr_mesh.hi_corner       =  1  1       # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 3           # Maximum amr depth
+amr_mesh.coarsest_domain = 256 256       # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 0           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -22,7 +22,7 @@ amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stu
 amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
-amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr_mesh.ghost_interp    = quad         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
 amr_mesh.ebcf            = false       # If you have EBCF crossing, this must be true. 
 
@@ -33,13 +33,13 @@ driver.verbosity                       = 3             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 100           # Plot interval
-driver.regrid_interval                 = 5             # Regrid interval
+driver.plot_interval                   = 1000           # Plot interval
+driver.regrid_interval                 = -1             # Regrid interval
 driver.checkpoint_interval             = -1             # Checkpoint interval
 driver.initial_regrids                 = 4             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 4.0           # Stop time
-driver.max_steps                       = 8000          # Maximum number of steps
+driver.max_steps                       = 1000          # Maximum number of steps
 driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 driver.write_memory                    = false         # Write MPI memory report 
@@ -103,7 +103,7 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 rod_sphere.eps0                      = 1                # Background permittivity
 rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
+rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
 rod_sphere.electrode_radius          = 0.05             # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0.5            # Center 1
@@ -123,17 +123,17 @@ advection_diffusion.blob_radius    = 0.05     # Blob radius
 advection_diffusion.blob_center    = -0.75 -0.75
 advection_diffusion.blob_radius    = 0.15    # Blob radius
 advection_diffusion.blob_center    = 0 0.25  # Blob center
-advection_diffusion.diffusion      = true     # Turn on/off diffusion
+advection_diffusion.diffusion      = true    # Turn on/off diffusion
 advection_diffusion.advection      = true     # Turn on/off advection
-advection_diffusion.fhd            = false    # Use FHD or not
+advection_diffusion.fhd            = true     # Use FHD or not
 
-advection_diffusion.integrator     = 0       # 0 = Heun's method. 1 = IMEX Euler
+advection_diffusion.integrator     =        # 0 = Heun's method. 1 = IMEX Euler
 
 # Velocity, diffusion, and CFL
 # ----------------------------
 advection_diffusion.diffco         = 0.001    # Diffusion coefficient
 advection_diffusion.omega          = 1.0     # Rotation velocity
-advection_diffusion.cfl            = 0.5
+advection_diffusion.cfl            = 0.1
 
 # Cell tagging stuff
 # ------------------

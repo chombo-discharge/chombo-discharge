@@ -112,11 +112,6 @@ public:
   virtual void set_time(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
-    @brief Use mass-weighted redistribution
-  */
-  virtual void set_mass_redist(const bool a_mass_redist);
-
-  /*!
     @brief Convenience function. Set velocity for all species. Mostly used for debugging.
   */
   virtual void set_velocity(const EBAMRCellData& a_velo);
