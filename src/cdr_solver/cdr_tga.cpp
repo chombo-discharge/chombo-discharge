@@ -421,36 +421,65 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
   EBAMRFluxData flux;
   EBAMRFluxData total_flux;
 
+  Real t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11;
+
+
   if(m_mobile || m_diffusive){
+
+    t1 = MPI_Wtime();
     m_amr->allocate(flux, m_phase, ncomp);
     m_amr->allocate(total_flux, m_phase, ncomp);
     data_ops::set_value(total_flux, 0.0);
+    t2 = MPI_Wtime();
     
     // Compute advection flux and put it in total_flux
     if(m_mobile){
       EBAMRFluxData face_state;
       m_amr->allocate(face_state,     m_phase, ncomp);
 
+      t3 = MPI_Wtime();
       this->average_velo_to_faces();
+      t4 = MPI_Wtime();
       this->advect_to_faces(face_state, a_state, a_extrap_dt);
+      t5 = MPI_Wtime();
       this->compute_flux(flux, m_velo_face, face_state, m_domainflux);
+      t6 = MPI_Wtime();
 
       data_ops::incr(total_flux, flux, 1.0);
+      t7 = MPI_Wtime();
     }
 
     // Add diffusion flux to total flux
     if(m_diffusive){
       this->compute_diffusion_flux(flux, a_state);
       data_ops::incr(total_flux, flux, -1.0);
+      t8 = MPI_Wtime();
     }
 
     // General divergence computation. Also inject charge. Domain fluxes came in through the compute
-    // advective flux function. 
+    // advective flux function.
+    t9 = MPI_Wtime();
     this->compute_divG(a_divJ, total_flux, m_ebflux);
+    t10 = MPI_Wtime();
   }
   else{ 
     data_ops::set_value(a_divJ, 0.0);
   }
+
+
+  pout() << "t2 - t1 = " << t2-t1 << endl
+	 << "t3 - t2 = " << t3-t2 << endl
+    	 << "t4 - t3 = " << t4-t3 << endl
+    	 << "t5 - t4 = " << t5-t4 << endl
+    	 << "t6 - t5 = " << t6-t5 << endl
+    	 << "t7 - t6 = " << t7-t6 << endl
+    	 << "t8 - t7 = " << t8-t7 << endl
+    	 << "t9 - t8 = " << t9-t8 << endl
+	 << "t10 - t9 = " << t10-t9 << endl
+	 << "tot = " << t10 - t1 << endl
+    	 << "allocs = " << 100.*((t2-t1) + (t3-t2))/(t10-t9) << endl
+	 << endl;
+
 
   return;
 }

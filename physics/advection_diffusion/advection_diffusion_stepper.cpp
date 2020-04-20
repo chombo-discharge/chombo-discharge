@@ -138,7 +138,6 @@ void advection_diffusion_stepper::post_checkpoint_setup(){
   if(m_solver->is_mobile()){
     this->set_velocity();
   }
-
 }
 
 int advection_diffusion_stepper::get_num_plot_vars() const{

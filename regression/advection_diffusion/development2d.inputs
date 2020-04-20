@@ -5,7 +5,7 @@ amr_mesh.lo_corner       = -1 -1       # Low corner of problem domain
 amr_mesh.hi_corner       =  1  1       # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 2           # Maximum amr depth
+amr_mesh.max_amr_depth   = 3           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
@@ -103,7 +103,7 @@ geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 rod_sphere.eps0                      = 1                # Background permittivity
 rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
+rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
 rod_sphere.electrode_radius          = 0.05             # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0.5            # Center 1
@@ -123,7 +123,7 @@ advection_diffusion.blob_radius    = 0.05     # Blob radius
 advection_diffusion.blob_center    = -0.75 -0.75
 advection_diffusion.blob_radius    = 0.15    # Blob radius
 advection_diffusion.blob_center    = 0 0.25  # Blob center
-advection_diffusion.diffusion      = false     # Turn on/off diffusion
+advection_diffusion.diffusion      = true     # Turn on/off diffusion
 advection_diffusion.advection      = true     # Turn on/off advection
 advection_diffusion.fhd            = false    # Use FHD or not
 
