@@ -18,6 +18,8 @@
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 std::string air9eed_bourdon::s_bolsig_energy_E = "Energy (eV) 	Electric field / N (Td)";
 std::string air9eed_bourdon::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";
 std::string air9eed_bourdon::s_bolsig_N2_alpha = "C25   N2    Ionization    15.60 eV";
@@ -25,8 +27,8 @@ std::string air9eed_bourdon::s_bolsig_O2_alpha = "C42   O2    Ionization    12.0
 
 
 air9eed_bourdon::air9eed_bourdon(){
-  m_num_species = 9;    // 8 reactive ones plus the eed
-  m_num_photons = 3;    // Bourdon model for photons
+  m_num_cdr_species = 9;    // 8 reactive ones plus the eed
+  m_num_rte_species = 3;    // Bourdon model for photons
   m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
   m_eed_index   = 0;    // Index for the EED equation
 
@@ -112,7 +114,7 @@ void air9eed_bourdon::parse_transport(){
 }
 
 void air9eed_bourdon::instantiate_species(){
-  m_species.resize(m_num_species);
+  m_cdr_species.resize(m_num_cdr_species);
   m_eed_idx      = 0;
   m_electron_idx = 1;
   m_N2plus_idx   = 2;
@@ -123,25 +125,25 @@ void air9eed_bourdon::instantiate_species(){
   m_O2minus_idx  = 7;
   m_Ominus_idx   = 8;
   
-  m_species[m_eed_idx]      = RefCountedPtr<species> (new air9eed_bourdon::eed());
-  m_species[m_electron_idx] = RefCountedPtr<species> (new air9eed_bourdon::electron());
-  m_species[m_N2plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::N2plus());
-  m_species[m_N4plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::N4plus());
-  m_species[m_O2plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::O2plus());
-  m_species[m_O4plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::O4plus());
-  m_species[m_O2plusN2_idx] = RefCountedPtr<species> (new air9eed_bourdon::O2plusN2());
-  m_species[m_O2minus_idx]  = RefCountedPtr<species> (new air9eed_bourdon::O2minus());
-  m_species[m_Ominus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::Ominus());
+  m_cdr_species[m_eed_idx]      = RefCountedPtr<cdr_species> (new air9eed_bourdon::eed());
+  m_cdr_species[m_electron_idx] = RefCountedPtr<cdr_species> (new air9eed_bourdon::electron());
+  m_cdr_species[m_N2plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::N2plus());
+  m_cdr_species[m_N4plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::N4plus());
+  m_cdr_species[m_O2plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2plus());
+  m_cdr_species[m_O4plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::O4plus());
+  m_cdr_species[m_O2plusN2_idx] = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2plusN2());
+  m_cdr_species[m_O2minus_idx]  = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2minus());
+  m_cdr_species[m_Ominus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::Ominus());
 
   // Instantiate photon solvers
-  m_photons.resize(m_num_photons);
+  m_rte_species.resize(m_num_rte_species);
   m_photon1_idx = 0;
   m_photon2_idx = 1;
   m_photon3_idx = 2;
   
-  m_photons[m_photon1_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_one());
-  m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_two());
-  m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_three());
+  m_rte_species[m_photon1_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_one());
+  m_rte_species[m_photon2_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_two());
+  m_rte_species[m_photon3_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_three());
 }
 
 void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string a_string){
@@ -206,12 +208,17 @@ void air9eed_bourdon::read_init_eed(){
   m_init_eed.make_uniform(m_uniform_tables);
 }
 
+Real air9eed_bourdon::compute_alpha(const RealVect a_E) const{
+  return 1.E99;
+  MayDay::Warning("air9eed_bourdon::compute_alpha - not implemented");
+}
+
 Vector<Real> air9eed_bourdon::compute_cdr_diffusion_coefficients(const Real         a_time,
 							 const RealVect     a_pos,
 							 const RealVect     a_E,
 							 const Vector<Real> a_cdr_densities) const {
 
-  Vector<Real> diffco(m_num_species, 0.0);
+  Vector<Real> diffco(m_num_cdr_species, 0.0);
 
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
@@ -232,7 +239,7 @@ Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_ti
 						 const RealVect     a_pos,
 						 const RealVect     a_E,
 						 const Vector<Real> a_cdr_densities) const {
-  Vector<RealVect> velocities(m_num_species, RealVect::Zero);
+  Vector<RealVect> velocities(m_num_cdr_species, RealVect::Zero);
 
 
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
@@ -252,6 +259,20 @@ Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_ti
 
   return velocities;
 }
+
+void air9eed_bourdon::advance_reaction_network(Vector<Real>&          a_particle_sources,
+					       Vector<Real>&          a_photon_sources,
+					       const Vector<Real>     a_particle_densities,
+					       const Vector<RealVect> a_particle_gradients,
+					       const Vector<Real>     a_photon_densities,
+					       const RealVect         a_E,
+					       const RealVect         a_pos,
+					       const Real             a_dx,
+					       const Real             a_dt,
+					       const Real             a_time,
+					       const Real             a_kappa) const{
+
+}
   
 Vector<Real> air9eed_bourdon::compute_cdr_source_terms(const Real              a_time,
 					       const Real             a_kappa,
@@ -262,7 +283,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_source_terms(const Real              a
 					       const Vector<Real>     a_cdr_densities,
 					       const Vector<Real>     a_rte_densities,
 					       const Vector<RealVect> a_grad_cdr) const {
-  Vector<Real> source(m_num_species, 0.0);
+  Vector<Real> source(m_num_cdr_species, 0.0);
 
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
   const Real Te              = Max(300., 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb));  // Kelvin
@@ -442,9 +463,9 @@ Vector<Real> air9eed_bourdon::compute_cdr_source_terms(const Real              a
 
   // Photoionization gamma + O2 -> e + O2+
 #if 1
-  const air9eed_bourdon::photon_one*   photon1 = static_cast<air9eed_bourdon::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const air9eed_bourdon::photon_two*   photon2 = static_cast<air9eed_bourdon::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const air9eed_bourdon::photon_three* photon3 = static_cast<air9eed_bourdon::photon_three*> (&(*m_photons[m_photon3_idx]));
+  const air9eed_bourdon::photon_one*   photon1 = static_cast<air9eed_bourdon::photon_one*>   (&(*m_rte_species[m_photon1_idx]));
+  const air9eed_bourdon::photon_two*   photon2 = static_cast<air9eed_bourdon::photon_two*>   (&(*m_rte_species[m_photon2_idx]));
+  const air9eed_bourdon::photon_three* photon3 = static_cast<air9eed_bourdon::photon_three*> (&(*m_rte_species[m_photon3_idx]));
   products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
 								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
 								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
@@ -473,7 +494,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_domain_fluxes(const Real           a_t
 						const Vector<Real>   a_cdr_gradients,
 						const Vector<Real>   a_rte_fluxes,
 						const Vector<Real>   a_extrap_cdr_fluxes) const{
-  Vector<Real> fluxes(m_num_species, 0.0);
+  Vector<Real> fluxes(m_num_cdr_species, 0.0);
 
   return a_extrap_cdr_fluxes;
 
@@ -496,7 +517,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
 					 const Real         a_townsend2,
 					 const Real         a_quantum_efficiency) const {
 
-  Vector<Real> fluxes(m_num_species, 0.0);
+  Vector<Real> fluxes(m_num_cdr_species, 0.0);
 
   
 #if 1 // debug
@@ -515,9 +536,9 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
 
 
   // Switch for setting drift flux to zero for charge species
-  Vector<Real> aj(m_num_species, 0.0);
-  for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+  Vector<Real> aj(m_num_cdr_species, 0.0);
+  for (int i = 0; i < m_num_cdr_species; i++){
+    if(data_ops::sgn(m_cdr_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {
@@ -526,7 +547,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
   }
 
   // Drift outflow for now
-  for (int i = 0; i < m_num_species; i++){
+  for (int i = 0; i < m_num_cdr_species; i++){
     //fluxes[i] = Max(0.0, aj[i]*a_extrap_cdr_fluxes[i]);
     fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
   }
@@ -570,7 +591,7 @@ Vector<Real> air9eed_bourdon::compute_rte_source_terms(const Real         a_time
 					       const Vector<Real> a_cdr_densities) const {
 
   // We take the source terms as Se = alpha*Ne*ve
-  Vector<Real> ret(m_num_photons, 0.0);
+  Vector<Real> ret(m_num_rte_species, 0.0);
 
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E10 + a_cdr_densities[m_electron_idx]); // eV
   const Real Te              = 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb);  // Kelvin
@@ -776,6 +797,6 @@ Real air9eed_bourdon::compute_e_N2_scattering_loss()              const {return 
 
 Real air9eed_bourdon::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-  return m_init_eed.get_entry(EbyN)*m_species[m_electron_idx]->initial_data(a_pos, a_time);
+  return m_init_eed.get_entry(EbyN)*m_cdr_species[m_electron_idx]->initial_data(a_pos, a_time);
 }
 
