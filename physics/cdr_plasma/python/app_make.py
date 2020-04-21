@@ -45,6 +45,7 @@ def write_template(args):
     makef.write('\t$(PLASMAC_HOME)/src/geometry \\\n')
     makef.write('\t$(PLASMAC_HOME)/src/global \\\n')
     makef.write('\t$(PLASMAC_HOME)/src/driver \\\n')
+    makef.write('\t$(PLASMAC_HOME)/src/particle \\\n')
     makef.write('\t$(PLASMAC_HOME)/src/poisson_solver \\\n')
     makef.write('\t$(PLASMAC_HOME)/src/rte_solver \\\n')
     makef.write('\t$(PLASMAC_HOME)/src/sigma_solver \\\n')

@@ -66,26 +66,29 @@ public:
 
   /*!
     @brief Compute div(nv - D*grad(n)) explicitly
+    @note a_state is non-const because ghost cells will be re-filled
   */
-  virtual void compute_divJ(EBAMRCellData&       a_divJ,
-			    const EBAMRCellData& a_state,
-			    const Real           a_extrap_dt,
-			    const bool           a_ebflux = true) = 0;
+  virtual void compute_divJ(EBAMRCellData& a_divJ,
+			    EBAMRCellData& a_state,
+			    const Real     a_extrap_dt,
+			    const bool     a_ebflux = true) = 0;
 
   /*!
     @brief Compute div(v*phi) explicitly
+    @note a_state is non-const because ghost cells will be re-filled
   */
-  virtual void compute_divF(EBAMRCellData&       a_divF,
-			    const EBAMRCellData& a_state,
-			    const Real           a_extrap_dt,
-			    const bool           a_ebflux = true) = 0;
+  virtual void compute_divF(EBAMRCellData&  a_divF,
+			    EBAMRCellData&  a_state,
+			    const Real      a_extrap_dt,
+			    const bool      a_ebflux = true) = 0;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
+    @note a_state is non-const because ghost cells will be re-filled
   */
-  virtual void compute_divD(EBAMRCellData&       a_diffusive_term,
-			    const EBAMRCellData& a_state,
-			    const bool           a_ebflux = false) = 0;
+  virtual void compute_divD(EBAMRCellData& a_diffusive_term,
+			    EBAMRCellData& a_state,
+			    const bool     a_ebflux = false) = 0;
 
   /*!
     @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers

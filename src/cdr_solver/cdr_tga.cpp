@@ -408,7 +408,7 @@ void cdr_tga::setup_euler(){
   // Note: If this crashes, try to init gmg first
 }
 
-void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_ebflux){
+void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_ebflux){
   CH_TIME("cdr_tga::compute_divJ(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divJ(divF, state)" << endl;
@@ -417,6 +417,9 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
   const int comp  = 0;
   const int ncomp = 1;
 
+  // Fill ghost cells
+  m_amr->interp_ghost_pwl(a_state, m_phase);
+
   if(m_mobile || m_diffusive){
 
     // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
@@ -424,6 +427,8 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
 
     // Compute advection flux. This is mostly the same as compute_divF
     if(m_mobile){
+      m_amr->interp_ghost_pwl(m_velo_cell, m_phase);
+      
       this->average_velo_to_faces(); // Update m_velo_face from m_velo_cell
       this->advect_to_faces(m_face_states, a_state, a_extrap_dt); // Advect to faces
       this->compute_flux(m_scratchFluxTwo, m_velo_face, m_face_states, m_domainflux);
@@ -455,11 +460,15 @@ void cdr_tga::compute_divJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, 
   return;
 }
 
-void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_ebflux){
+void cdr_tga::compute_divF(EBAMRCellData& a_divF, EBAMRCellData& a_state, const Real a_extrap_dt, const bool a_ebflux){
   CH_TIME("cdr_tga::compute_divF(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divF(divF, state)" << endl;
   }
+
+  // Fill ghost cells
+  m_amr->interp_ghost_pwl(a_state,     m_phase);
+  m_amr->interp_ghost_pwl(m_velo_cell, m_phase);
 
   if(m_mobile){
     this->average_velo_to_faces();
@@ -488,11 +497,14 @@ void cdr_tga::compute_divF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, 
 
 }
 
-void cdr_tga::compute_divD(EBAMRCellData& a_divD, const EBAMRCellData& a_state, const bool a_ebflux){
+void cdr_tga::compute_divD(EBAMRCellData& a_divD, EBAMRCellData& a_state, const bool a_ebflux){
   CH_TIME("cdr_tga::compute_divD");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_divD" << endl;
   }
+
+  // Fill ghost cells
+  m_amr->interp_ghost_pwl(a_state, m_phase);
 
   if(m_diffusive){
     const int ncomp = 1;

@@ -45,25 +45,25 @@ public:
   /*!
     @brief Compute div(nv - D*grad(n)) explicitly
   */
-  virtual void compute_divJ(EBAMRCellData&       a_divJ,
-			    const EBAMRCellData& a_state,
-			    const Real           a_extrap_dt,
-			    const bool           a_ebflux = true);
+  virtual void compute_divJ(EBAMRCellData& a_divJ,
+			    EBAMRCellData& a_state,
+			    const Real     a_extrap_dt,
+			    const bool     a_ebflux = true);
 
   /*!
     @brief Compute div(v*phi) explicitly
   */
-  virtual void compute_divF(EBAMRCellData&       a_divF,
-			    const EBAMRCellData& a_state,
-			    const Real           a_extrap_dt,
-			    const bool           a_ebflux = true);
+  virtual void compute_divF(EBAMRCellData& a_divF,
+			    EBAMRCellData& a_state,
+			    const Real     a_extrap_dt,
+			    const bool     a_ebflux = true);
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
   */
-  virtual void compute_divD(EBAMRCellData&       a_diffusive_term,
-			    const EBAMRCellData& a_state,
-			    const bool           a_ebflux = false);
+  virtual void compute_divD(EBAMRCellData& a_diffusive_term,
+			    EBAMRCellData& a_state,
+			    const bool     a_ebflux = false);
 
   /*!
     @brief Set implicit diffusion solver solver parameters. These are normally good for this class. 

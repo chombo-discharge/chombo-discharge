@@ -1677,6 +1677,8 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
 	 << "                                   Time  = " << m_time << endl
 	 << "                                   dt    = " << m_dt << endl;
 
+  m_timestepper->print_step_report();
+
   // Get the total number of poitns across all levels
   const int finest_level                 = m_amr->get_finest_level();
   const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
@@ -1797,8 +1799,7 @@ void driver::step_report(const Real a_start_time, const Real a_end_time, const i
 #endif
 #endif
 
-  // Time stepper writes his report now
-  m_timestepper->print_step_report();
+
 
 }
 

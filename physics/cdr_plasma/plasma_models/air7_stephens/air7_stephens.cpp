@@ -396,12 +396,14 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
   for (int i = 0; i < m_num_cdr_species; i++){
     cdr_phi[i]  = a_particle_densities[i];
     cdr_grad[i] = a_particle_gradients[i];
+    a_particle_sources[i] = 0.0;
   }
 
   for (int i = 0; i < m_num_rte_species; i++){
     rte_phi[i]          = a_photon_densities[i];
     a_photon_sources[i] = 0.0;
   }
+
 
   int nsteps = ceil(a_dt/m_chemistry_dt);
   Real dt    = a_dt/nsteps;
@@ -642,7 +644,8 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   const int num_exc_c4v0 = poisson_reaction(m_photoi_factor*Rc4*volume*m_c4v0_exc_rep, a_dt);
   const int num_exc_c4v1 = poisson_reaction(m_photoi_factor*Rc4*volume*m_c4v1_exc_rep, a_dt);
   const int num_exc_b1v1 = poisson_reaction(m_photoi_factor*Rb1*volume*m_b1v1_exc_rep, a_dt);
-  
+
+#if 0 // Original code
   // Determine number of radiative de-excitations
   const int num_c4v0_rad = binomial_trials(num_exc_c4v0, m_c4v0_kr/m_c4v0_k);
   const int num_c4v1_rad = binomial_trials(num_exc_c4v1, m_c4v1_kr/m_c4v1_k);
@@ -659,11 +662,10 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   // 4 transitions for c4v1. C++ doesn't have a multinomial implementation, so do some nested binomial magic instead
   int num_c4v1_X1v0 = binomial_trials(num_c4v1_rad, m_c4v1_X1v0_kr/m_c4v1_kr);
   int num_c4v1_X1v1 = binomial_trials(num_c4v1_rad - num_c4v1_X1v0,
-				      m_c4v1_X1v1_kr/(m_c4v1_X1v1_kr + m_c4v1_X1v2_kr, m_c4v1_X1v3_kr));
+				      m_c4v1_X1v1_kr/(m_c4v1_X1v1_kr + m_c4v1_X1v2_kr +  m_c4v1_X1v3_kr));
   int num_c4v1_X1v2 = binomial_trials(num_c4v1_rad - (num_c4v1_X1v0 + num_c4v1_X1v1),
-				      m_c4v1_X1v2_kr/(m_c4v1_X1v2_kr, m_c4v1_X1v3_kr));
+				      m_c4v1_X1v2_kr/(m_c4v1_X1v2_kr + m_c4v1_X1v3_kr));
   int num_c4v1_X1v3 = num_c4v1_rad - (num_c4v1_X1v0 + num_c4v1_X1v1 + num_c4v1_X1v2);
-
 
   // Check if the transitions lead to photoionization
   num_c4v0_X1v0 = binomial_trials(num_c4v0_X1v0, m_c4v0_X1v0_photoi_eff);
@@ -674,6 +676,19 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   num_c4v1_X1v3 = binomial_trials(num_c4v1_X1v3, m_c4v1_X1v3_photoi_eff);
   num_b1v1_X1v0 = binomial_trials(num_b1v1_X1v0, m_b1v1_X1v0_photoi_eff);
   num_b1v1_X1v1 = binomial_trials(num_b1v1_X1v1, m_b1v1_X1v1_photoi_eff);
+
+#else
+  const int num_c4v0_X1v0 = poisson_reaction(num_exc_c4v0*m_c4v0_X1v0_kr*m_c4v0_X1v0_photoi_eff/m_c4v0_k, a_dt);
+  const int num_c4v0_X1v1 = poisson_reaction(num_exc_c4v0*m_c4v0_X1v1_kr*m_c4v0_X1v1_photoi_eff/m_c4v0_k, a_dt);
+
+  const int num_c4v1_X1v0 = poisson_reaction(num_exc_c4v1*m_c4v1_X1v0_kr*m_c4v1_X1v0_photoi_eff/m_c4v1_k, a_dt);
+  const int num_c4v1_X1v1 = poisson_reaction(num_exc_c4v1*m_c4v1_X1v1_kr*m_c4v1_X1v1_photoi_eff/m_c4v1_k, a_dt);
+  const int num_c4v1_X1v2 = poisson_reaction(num_exc_c4v1*m_c4v1_X1v2_kr*m_c4v1_X1v2_photoi_eff/m_c4v1_k, a_dt);
+  const int num_c4v1_X1v3 = poisson_reaction(num_exc_c4v1*m_c4v1_X1v3_kr*m_c4v1_X1v3_photoi_eff/m_c4v1_k, a_dt);
+
+  const int num_b1v1_X1v0 = poisson_reaction(num_exc_b1v1*m_b1v1_X1v0_kr*m_b1v1_X1v0_photoi_eff/m_b1v1_k, a_dt);
+  const int num_b1v1_X1v1 = poisson_reaction(num_exc_b1v1*m_b1v1_X1v1_kr*m_b1v1_X1v1_photoi_eff/m_b1v1_k, a_dt);
+#endif
 
   a_photon_sources[m_c4v0_X1v0_idx] = 1.0*num_c4v0_X1v0;
   a_photon_sources[m_c4v0_X1v1_idx] = 1.0*num_c4v0_X1v1;

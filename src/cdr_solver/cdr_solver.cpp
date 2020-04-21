@@ -138,15 +138,14 @@ void cdr_solver::allocate_internals(){
   if(m_diffusive || m_mobile){
     m_amr->allocate(m_scratchFluxOne, m_phase, sca);
     m_amr->allocate(m_scratchFluxTwo, m_phase, sca);
-
-    m_amr->allocate(m_divG_nc,   m_phase, sca);
-    m_amr->allocate(m_mass_diff, m_phase, sca);
   }
 
   // These don't consume (much) memory so just allocate them 
   m_amr->allocate(m_ebflux,     m_phase, sca);
-  m_amr->allocate(m_eb_zero,     m_phase, sca);
+  m_amr->allocate(m_eb_zero,    m_phase, sca);
   m_amr->allocate(m_domainflux, m_phase, sca);
+  m_amr->allocate(m_mass_diff,  m_phase, sca);
+  m_amr->allocate(m_divG_nc,    m_phase, sca);
   
   data_ops::set_value(m_ebflux,     0.0);
   data_ops::set_value(m_eb_zero,     0.0);
@@ -163,7 +162,6 @@ void cdr_solver::deallocate_internals(){
   if(m_verbosity > 5){
     pout() << m_name + "::deallocate_internals" << endl;
   }
-
 
   m_amr->deallocate(m_state);
   m_amr->deallocate(m_source);

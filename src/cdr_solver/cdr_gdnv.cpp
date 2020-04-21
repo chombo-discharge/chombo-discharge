@@ -177,20 +177,27 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     pout() << m_name + "::advect_to_faces" << endl;
   }
 
-
-
   // Compute source for extrapolation
   if(m_extrap_source && a_extrap_dt > 0.0){
-    data_ops::set_value(m_scratch, 0.0);
-    
+#if 0 // R.M. April 2020 - disabling this for now. 
     if(m_diffusive){
       const int finest_level = m_amr->get_finest_level();
       Vector<LevelData<EBCellFAB>* > scratchAlias, stateAlias;
       m_amr->alias(scratchAlias, m_scratch);
       m_amr->alias(stateAlias,   a_state);
       m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
+
+      // computeAMROperator fucks my ghost cells. 
+      m_amr->interp_ghost_pwl(const_cast<EBAMRCellData&> (a_state), m_phase);
     }
+#endif
+
     data_ops::incr(m_scratch, m_source, 1.0);
+    m_amr->interp_ghost_pwl(m_scratch, m_phase);
+
+  }
+  else{
+    data_ops::set_value(m_scratch, 0.0);
   }
 
   // Extrapolate face-centered state on every level
@@ -199,16 +206,17 @@ void cdr_gdnv::advect_to_faces(EBAMRFluxData& a_face_state, const EBAMRCellData&
     const EBISLayout& ebisl = m_amr->get_ebisl(m_phase)[lvl];
     const ProblemDomain& domain = m_amr->get_domains()[lvl];
     const Real dx = m_amr->get_dx()[lvl];
+
     for (DataIterator dit = dbl.dataIterator();dit.ok(); ++dit){
 
-      EBFluxFAB& extrap_state = (*a_face_state[lvl])[dit()];
-      const EBCellFAB& state = (*a_state[lvl])[dit()];
+      EBFluxFAB& extrap_state   = (*a_face_state[lvl])[dit()];
+      const EBCellFAB& state    = (*a_state[lvl])[dit()];
       const EBCellFAB& cell_vel = (*m_velo_cell[lvl])[dit()];
       const EBFluxFAB& face_vel = (*m_velo_face[lvl])[dit()];
-      const EBCellFAB& source = (*m_scratch[lvl])[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
-      const Box& box = dbl.get(dit());
-      const Real time = 0.0;
+      const EBCellFAB& source   = (*m_scratch[lvl])[dit()];
+      const EBISBox& ebisbox    = ebisl[dit()];
+      const Box& box            = dbl.get(dit());
+      const Real time           = 0.0;
 
       EBAdvectPatchIntegrator& ebpatchad = m_level_advect[lvl]->getPatchAdvect(dit());
 

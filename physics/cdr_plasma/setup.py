@@ -37,7 +37,7 @@ if not args.plasmac_home:
     print "       >export  PLASMAC_HOME=<directory>"
 else:
     print "PLASMAC_HOME is " + args.plasmac_home
-    print 'Setting up problem in directory ' + args.plasmac_home + "/" args.base_dir + "/" + args.app_name
+    print 'Setting up problem in directory ' + args.plasmac_home + "/" + args.base_dir + "/" + args.app_name
 
     app_main.write_template(args)    # Write main file
     app_make.write_template(args)    # Write makefile

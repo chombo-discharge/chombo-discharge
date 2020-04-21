@@ -997,6 +997,29 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::cfl;
   }
 
+  // Diffusion step step constraint. If diffusion dt is the shortest scale, 
+  if(m_whichDiffusion == whichDiffusion::Explicit){ // Have to accept time step constraint
+    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
+
+    dt = m_cfl/(1./m_dt_cfl + 1./dt_diffusion);
+    a_timecode = time_code::adv_diffusion;
+#if 0
+    if(dt_diffusion < dt){
+      dt = dt_diffusion;
+      a_timecode = time_code::diffusion;
+    }
+#endif
+  }
+  else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit
+    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
+    if(dt_diffusion < dt){ // Use implicit diffusion
+      m_implicit_diffusion = true;
+    }
+    else{ // Use explicit diffusion
+      m_implicit_diffusion = false;
+    }
+  }
+
   const Real dt_relax = m_relax_time*this->compute_relaxation_time();
   if(dt_relax < dt){
     dt = dt_relax;
@@ -1013,24 +1036,9 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     a_timecode = time_code::hardcap;
   }
 
-  // Diffusion step step constraint. If diffusion dt is the shortest scale, 
-  if(m_whichDiffusion == whichDiffusion::Explicit){ // Have to accept time step constraint
-    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
-    if(dt_diffusion < dt){
-      dt = dt_diffusion;
-      a_timecode = time_code::diffusion;
-    }
-  }
-  else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit
-    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
-    if(dt_diffusion < dt){ // Use implicit diffusion
-      m_implicit_diffusion = true;
-    }
-    else{ // Use explicit diffusion
-      m_implicit_diffusion = false;
-    }
-  }
 
+
+  m_timecode = a_timecode;
   a_dt = dt;
 
 #if 0 // debug

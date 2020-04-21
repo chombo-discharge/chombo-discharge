@@ -14,8 +14,9 @@
 #include <ParmParse.H>
 #include <EBLevelDataOps.H>
 
+// C-style VLA methods can have occasional memory issues. Use them at your own peril. 
 #define USE_FAST_REACTIONS  1
-#define USE_FAST_VELOCITIES 0 // I think there's a bug in the C-style VLA methods. Please don't use this until this is clarified.
+#define USE_FAST_VELOCITIES 0
 #define USE_FAST_DIFFUSION  1
 
 using namespace physics::cdr_plasma;
@@ -397,8 +398,6 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
 
   part_src.setVal(0.0);
   phot_src.setVal(0.0);
-
-
 
   const BaseFab<Real>& EFab     = a_E.getSingleValuedFAB();
 
@@ -861,11 +860,11 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
 
   // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
-  Vector<Real>     particle_sources(num_species);
-  Vector<Real>     photon_sources(num_photons);
-  Vector<Real>     particle_densities(num_species);
-  Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     photon_densities(num_photons);
+  Vector<Real>     particle_sources(num_species, 0.);
+  Vector<Real>     photon_sources(num_photons, 0.);
+  Vector<Real>     particle_densities(num_species, 0.);
+  Vector<RealVect> particle_gradients(num_species, RealVect::Zero);
+  Vector<Real>     photon_densities(num_photons, 0.);
 
   for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebgraph); vofit.ok(); ++vofit){
     const VolIndex& vof       = vofit();
@@ -4319,11 +4318,13 @@ void cdr_plasma_stepper::print_step_report(){
 
   const Real cfl_dt = this->get_cfl_dt();
 
-  pout() << endl;
   std::string str;
   if(m_timecode == time_code::cfl){
     str = " (Restricted by CFL)";
   }
+  if(m_timecode == time_code::adv_diffusion){
+    str = " (Restricted by advection-diffusion)";
+    }
   if(m_timecode == time_code::error){
     str = " (Restricted by error)";
   }
@@ -4343,7 +4344,7 @@ void cdr_plasma_stepper::print_step_report(){
   if(m_timecode == time_code::hardcap){
     str = " (Restricted by a hardcap)";
   }
-  pout() << "                               restrict  = " << str << endl
+  pout() << "                                   mode  = " << str << endl
          << "                                   cfl   = " << m_dt/cfl_dt << endl
 	 << "                                   Emax  = " << Emax << endl
 	 << "                                   n_max = " << nmax << "(" + solver_max + ")" << endl;

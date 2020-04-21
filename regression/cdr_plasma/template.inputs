@@ -1,0 +1,330 @@
+# ====================================================================================================
+# POTENTIAL CURVE
+# ====================================================================================================
+cdr_plasma.potential = 1
+cdr_plasma.basename  = pout
+
+# ====================================================================================================
+# AMR_MESH OPTIONS
+# ====================================================================================================
+amr_mesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
+amr_mesh.hi_corner       =  1  1  1    # High corner of problem domain
+amr_mesh.verbosity       = -1          # Controls verbosity. 
+amr_mesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+amr_mesh.max_amr_depth   = 0           # Maximum amr depth
+amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
+amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
+amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
+amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
+amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
+amr_mesh.buffer_size     = 2           # Number of cells between grid levels
+amr_mesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
+amr_mesh.max_box_size    = 16          # Maximum allowed box size
+amr_mesh.max_ebis_box    = 16          # Maximum allowed box size
+amr_mesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
+amr_mesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+amr_mesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
+amr_mesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+amr_mesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
+amr_mesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+amr_mesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
+amr_mesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
+
+# ====================================================================================================
+# DRIVER OPTIONS
+# ====================================================================================================
+driver.verbosity                       = 2             # Engine verbosity
+driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
+driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
+driver.recursive_regrid                = false         # Recursive regrids
+driver.plot_interval                   = 10            # Plot interval
+driver.regrid_interval                 = 10            # Regrid interval
+driver.checkpoint_interval             = 10            # Checkpoint interval
+driver.initial_regrids                 = 0             # Number of initial regrids
+driver.start_time                      = 0             # Start time (fresh simulations only)
+driver.stop_time                       = 1.0           # Stop time
+driver.max_steps                       = 100           # Maximum number of steps
+driver.geometry_only                   = false         # Special option that ONLY plots the geometry
+driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
+driver.write_memory                    = false         # Write MPI memory report 
+driver.write_ebis                      = false         # Write geometry to an HDF5 file
+driver.read_ebis                       = false         # Read EBIS when restarting a simulation
+driver.output_directory                = ./            # Output directory
+driver.grow_tags                       = 0             # Grow tagged by this in every direction
+driver.output_names                    = simulation    # Simulation output names
+driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
+driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
+driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
+driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
+driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
+driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
+driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
+driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+driver.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
+driver.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
+driver.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
+driver.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
+
+
+# ====================================================================================================
+# POISSON_MULTIFLUID_GMG_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+# ====================================================================================================
+poisson_multifluid_gmg.bc_x_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_x_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_low  = dirichlet_ground  # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_y_high = dirichlet_live    # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_z_low  = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.bc_z_high = neumann           # BC type. "neumann", "dirichlet_ground", "dirichlet_live", or "robin"
+poisson_multifluid_gmg.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+
+poisson_multifluid_gmg.auto_tune         = false     # Do some auto-tuning
+poisson_multifluid_gmg.gmg_verbosity     = -1        # GMG verbosity
+poisson_multifluid_gmg.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
+poisson_multifluid_gmg.gmg_post_smooth   = 12        # Number of relaxations in upsweep
+poisson_multifluid_gmg.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
+poisson_multifluid_gmg.gmg_min_iter      = 5         # Minimum number of iterations
+poisson_multifluid_gmg.gmg_max_iter      = 32        # Maximum number of iterations
+poisson_multifluid_gmg.gmg_tolerance     = 1.E-10    # Residue tolerance
+poisson_multifluid_gmg.gmg_hang          = 0.2       # Solver hang
+poisson_multifluid_gmg.gmg_bottom_drop   = 4         # Bottom drop
+poisson_multifluid_gmg.gmg_bc_order      = 2         # Boundary condition order for multigrid
+poisson_multifluid_gmg.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+poisson_multifluid_gmg.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
+poisson_multifluid_gmg.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
+poisson_multifluid_gmg.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+
+# ====================================================================================================
+# CDR_GDNV SOLVER SETTINGS
+# ----------------------------------------------------------------------------------------------------
+cdr_gdnv.seed                 = -1                      # Seed. Random seed with seed < 0
+cdr_gdnv.domain_bc            = kinetic                 # 'kinetic', 'wall', 'outflow', or 'extrap'
+cdr_gdnv.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
+cdr_gdnv.limit_slopes         = true                    # Use slope-limiters for godunov
+cdr_gdnv.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+cdr_gdnv.extrap_source        = true                    # Flag for including source term for time-extrapolation
+cdr_gdnv.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
+cdr_gdnv.gmg_verbosity        = -1                      # GMG verbosity
+cdr_gdnv.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
+cdr_gdnv.gmg_post_smooth      = 6                       # Number of relaxations in upsweep
+cdr_gdnv.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
+cdr_gdnv.gmg_min_iter         = 5                       # Minimum number of iterations
+cdr_gdnv.gmg_max_iter         = 32                      # Maximum number of iterations
+cdr_gdnv.gmg_tolerance        = 1.E-8                   # Residue tolerance
+cdr_gdnv.gmg_hang             = 0.2                     # Solver hang
+cdr_gdnv.gmg_bottom_drop      = 2                       # Bottom drop
+cdr_gdnv.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+cdr_gdnv.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
+cdr_gdnv.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
+cdr_gdnv.gmg_relax_type       = gsrb                    # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+
+
+# ====================================================================================================
+# MC_PHOTO CLASS OPTIONS
+#
+# The mc_photo class is intended as a flexible RTE solver that may interface into several descriptions.
+# Because of that we allow several deposition types, e.g. cloud-in-cell if one wants to compute photoionization
+# profiles with less noise. If one wants the photoionization profile (which is what gets passed around
+# in the time_stepper framework) to contain just the number of photons in a cell, one would use
+# deposition_type = num. This is useful for SSA type algorithms. 
+#
+# Since the photoproduction source term is filled externally, and the filling of this depends on the
+# CFD/FHD description, mc_photo.source_type species what the solver will expect when drawing photons.
+# For example, if one species 'volume_rate', mc_photo will interpret the internal data so as to contain
+# a rate per unit volume. The number of photons produced in a volume will then be S*dx^3*dt. If you
+# filled the source term with just the number of photons that will be produced in a cell, you should
+# use source_type = number.
+#
+# The photogeneration mechanism can be done stochastically or determinsitically. How this is interpreted
+# depends on how you implemented your source terms through the plasma_kinetics interface (or equivalent).
+# This design makes sense for FHD models because the number of photons produced in a cell can be
+# computed directly, e.g. with SSA algorithms. In this way the stochasticity is provided by the SSA
+# algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
+# work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
+# ====================================================================================================
+mc_photo.max_photons       = 1             # Maximum no. generated in a cell (<= 0 yields physical photons)
+mc_photo.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+mc_photo.random_kappa      = true          # Randomize absorption length (taken from photon implementation)
+mc_photo.plt_vars          = phi src       # Available are 'phi' and 'src'
+mc_photo.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
+mc_photo.bisect_step       = 1.E-4         # Bisection step length for intersection tests
+mc_photo.seed              = 0             # Seed for RNG
+mc_photo.bc_x_low          = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
+mc_photo.bc_x_high         = outflow       # Boundary condition
+mc_photo.bc_y_low          = outflow       # Boundary condition
+mc_photo.bc_y_high         = outflow       # Boundary condition
+mc_photo.bc_z_low          = outflow       # Boundary condition
+mc_photo.bc_z_high         = outflow       # Boundary condition
+mc_photo.poiss_exp_swap    = 100           # Swap out Poisson with exponential distribution above this mean
+mc_photo.photon_generation = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
+mc_photo.source_type       = number        # 'number'      = Source term contains the number of photons produced
+                                           # 'volume'      = Source terms contains the number of photons produced per unit volume
+                                           # 'volume_rate' = Source terms contains the volumetric rate
+                                           # 'rate'        = Source terms contains the rate
+mc_photo.deposition        = cic           # 'ngp' = nearest grid point
+                                           # 'num' = # of photons per cell
+                                           # 'cic' = cloud-in-cell
+                                           # 'tsc' = triangle-shaped-cloud
+                                           # 'w4'  = 3rd order interpolation
+
+
+
+# ====================================================================================================
+# GEO_COARSENER CLASS OPTIONS
+# ====================================================================================================
+geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+geo_coarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
+geo_coarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
+geo_coarsener.box1_lvl    = 0            # up to this level
+geo_coarsener.box1_inv    = false        # Remove except inside box (true)
+
+# ====================================================================================================
+# ROD_SPHERE CLASS OPTIONS
+# ====================================================================================================
+rod_sphere.eps0                      = 1                # Background permittivity
+rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
+rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
+rod_sphere.electrode_live            = true             # Live electrode or not
+rod_sphere.electrode_radius          = 5.E-3            # Electrode inner radius
+rod_sphere.electrode_center1         = 0.0 0.0 0E-2     # Center 1
+rod_sphere.electrode_center2         = 0.0 0.0 0E-2     # Center 2. 
+rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
+rod_sphere.dielectric_center         = 0.0 0.0 0.0      # Dielectric center
+rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
+
+
+# ====================================================================================================
+# GODUNOV CLASS OPTIONS
+# ====================================================================================================
+godunov.verbosity        = -1        # Class verbosity
+godunov.solver_verbosity = -1        # Individual solver verbosities
+godunov.min_dt           = 0.        # Minimum permitted time step
+godunov.max_dt           = 1.E99     # Maximum permitted time step
+godunov.cfl              = 0.5       # CFL number
+godunov.diffusion        = auto      # Diffusion. 'explicit', 'implicit', or 'auto'
+godunov.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
+godunov.relax_time       = 1.0       # Relaxation time constant
+godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
+godunov.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging. 
+godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+godunov.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
+godunov.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
+godunov.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 
+
+
+# ====================================================================================================
+# AIR7_STEPHENS CLASS OPTIONS
+# ====================================================================================================	
+
+# ----------------------------------------------------------------------------------------------------	
+# Transport file and # of points to use when converting files to uniform spacings
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.transport_file      = transport_data.txt          # Transport file
+air7_stephens.uniform_tables      = 100	                   #  Converted # of points in transport file
+
+# ----------------------------------------------------------------------------------------------------	
+# Gas composition. This should match your BOLSIG stuff!
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.pressure            = 1.0                         # Gas pressure
+air7_stephens.temperature         = 300                         # Gas temperature
+air7_stephens.frac_N2             = 0.8                         # N2 fraction
+air7_stephens.frac_O2             = 0.2                         # O2 fraction
+
+# ----------------------------------------------------------------------------------------------------	
+# Transport properties
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.use_alpha_corr      = false                       # Soloviev alpha correction	
+air7_stephens.mobile_electrons    = true                        # Mobile electrons or not
+air7_stephens.diffusive_electrons = true                        # Diffusive electrons or not
+air7_stephens.mobile_ions         = false                       # Mobile ions or not
+air7_stephens.diffusive_ions      = false                       # Diffusive ions or not
+air7_stephens.ion_mobility        = 2.E-4                       # Ion mobility
+
+# ----------------------------------------------------------------------------------------------------	
+# Chemistry algorithm
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.chemistry_algorithm = euler # 'euler', 'rk2', or 'rk4'
+air7_stephens.chemistry_dt        = 1.0   # Minimum dt used for chemistry
+
+# ----------------------------------------------------------------------------------------------------
+# RNG stuff
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.rng_seed            = 0    # RNG seed. < 0 gives a random seed
+air7_stephens.poiss_exp_swap      = 100  # Swap from Poisson to exponential distribution
+
+# ----------------------------------------------------------------------------------------------------
+# Initial data
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.uniform_density       = 1.E4         # Uniform density
+air7_stephens.seed_density          = 1.E18        # Gaussian seed density
+air7_stephens.seed_radius           = 100E-6       # Gaussian seed radius
+air7_stephens.seed_position         = 0.0 0.0 0.0  # Gaussian seed position
+
+# ----------------------------------------------------------------------------------------------------	
+# SEE coefficients
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.electrode_townsend2           = 1.E-6             # SEE on electrodes
+air7_stephens.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
+air7_stephens.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
+air7_stephens.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
+
+# ----------------------------------------------------------------------------------------------------	
+# Exitation efficiencies, photoionization efficiences, quenching pressure, radiative lifetimes,
+# and predissociation lifetime, and absorption lengths. These are pressure independent.
+# ----------------------------------------------------------------------------------------------------
+air7_stephens.photoi_factor        = 1.0       # Correction factor photoionization
+
+air7_stephens.c4v0_exc_rep         = 0.8       # Relative excitation probability
+air7_stephens.c4v1_exc_rep         = 0.034     # Relative excitation probability
+air7_stephens.b1v1_exc_rep         = 0.014     # Relative excitation probability
+
+air7_stephens.c4v0_kp              = 2.39E8    # Predissociation rate
+air7_stephens.c4v1_kp              = 17.7E8    # Predissociation rate
+air7_stephens.b1v1_kp              = 4.68E8    # Predissociation rate
+
+air7_stephens.c4v0_X1v0_kr         = 11.2E8    # Radiative rate
+air7_stephens.c4v0_X1v1_kr         = 1.89E8    # Radiative rate
+air7_stephens.c4v1_X1v0_kr         = 0.41E8    # Radiative rate
+air7_stephens.c4v1_X1v1_kr         = 6.97E8    # Radiative rate
+air7_stephens.c4v1_X1v2_kr         = 4.06E8    # Radiative rate
+air7_stephens.c4v1_X1v3_kr         = 1.45E8    # Radiative rate
+air7_stephens.b1v1_X1v0_kr         = 0.42E8    # Radiative rate
+air7_stephens.b1v1_X1v1_kr         = 0.80E8    # Radiative rate
+
+air7_stephens.k_quench             = 1.E-17    # Collisional quenching rate/N
+
+air7_stephens.c4v0_X1v0_photoi_eff = 0.23      # Photoionization efficiency
+air7_stephens.c4v0_X1v1_photoi_eff = 0.77      # Photoionization efficiency
+air7_stephens.c4v1_X1v0_photoi_eff = 0.045     # Photoionization efficiency
+air7_stephens.c4v1_X1v1_photoi_eff = 0.10      # Photoionization efficiency
+air7_stephens.c4v1_X1v2_photoi_eff = 0.75      # Photoionization efficiency
+air7_stephens.c4v1_X1v3_photoi_eff = 0.69      # Photoionization efficiency
+air7_stephens.b1v1_X1v0_photoi_eff = 0.72      # Photoionization efficiency
+air7_stephens.b1v1_X1v1_photoi_eff = 0.69      # Photoionization efficiency
+
+air7_stephens.c4v0_X1v0_beer       = 19E-6     # Beer's length per bar
+air7_stephens.c4v0_X1v1_beer       = 146E-6    # Beer's length per bar
+air7_stephens.c4v1_X1v0_beer       = 30E-6     # Beer's length per bar
+air7_stephens.c4v1_X1v1_beer       = 21E-6     # Beer's length per bar
+air7_stephens.c4v1_X1v2_beer       = 58E-6     # Beer's length per bar
+air7_stephens.c4v1_X1v3_beer       = 158E-6    # Beer's length per bar
+air7_stephens.b1v1_X1v0_beer       = 236E-6    # Beer's length per bar
+air7_stephens.b1v1_X1v1_beer       = 298E-6    # Beer's length per bar
+
+# ====================================================================================================
+# STREAMER_TAGGER CLASS OPTIONS
+# ====================================================================================================
+streamer_tagger.verbosity         = -1           # Verbosity
+streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
+streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+streamer_tagger.buffer            = 0            # Grow tagged cells
+
+streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
+streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
+streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
+streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth
+
