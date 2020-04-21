@@ -213,6 +213,23 @@ void poisson_multifluid_gmg::parse_gmg_settings(){
   }
 }
 
+void poisson_multifluid_gmg::allocate_internals(){
+  CH_TIME("poisson_multifluid_gmg::allocate_internals");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::allocate_internals" << endl;
+  }
+
+  poisson_solver::allocate_internals();
+
+  const int ncomp = 1;
+  
+  m_amr->allocate(m_zero, ncomp);
+  m_amr->allocate(m_scaled_source, ncomp);
+  m_amr->allocate(m_scaled_sigma, phase::gas, ncomp);
+
+  data_ops::set_value(m_zero, 0.0);
+}
+
 bool poisson_multifluid_gmg::solve(const bool a_zerophi){
   CH_TIME("poisson_multifluid_gmg::solve");
   if(m_verbosity > 5){
@@ -234,39 +251,32 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
     pout() << "poisson_multifluid_gmg::solve(mfamrcell, mfamrcell)" << endl;
   }
 
-  const Real t0 = MPI_Wtime();
   bool converged = false;
 
   if(m_needs_setup){
     this->setup_gmg(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-
-  const Real t1 = MPI_Wtime();
-
+  const Real t0 = MPI_Wtime();
 
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
 
-  // We've scaled the Poisson equation with a length scale so we must also scale the right-hand sides
-  MFAMRCellData mfzero;
-  MFAMRCellData source;
-  EBAMRIVData sigma;
-  m_amr->allocate(mfzero, ncomp);
-  m_amr->allocate(source, ncomp);
-  m_amr->allocate(sigma, phase::gas, ncomp);
-  data_ops::set_value(mfzero, 0.0);
-  data_ops::set_value(source, 0.0);
-  data_ops::incr(source,     a_source, 1.0);
-  data_ops::scale(source, 1./(units::s_eps0));
-  data_ops::kappa_scale(source);
-  data_ops::scale(source, 1./(m_length_scale*m_length_scale));
 
+  const Real t1 = MPI_Wtime();
+
+  // Do the scaled space charge density
+  data_ops::copy(m_scaled_source, a_source);
+  data_ops::scale(m_scaled_source, 1./(units::s_eps0));
+  data_ops::scale(m_scaled_source, 1./(m_length_scale*m_length_scale));
+  data_ops::kappa_scale(m_scaled_source);
 
   // Do the scaled surface charge
-  data_ops::copy(sigma, a_sigma);
-  data_ops::scale(sigma, 1./(m_length_scale*m_length_scale));
-  m_opfact->set_jump(sigma, 1.0/units::s_eps0);
+  data_ops::copy(m_scaled_sigma, a_sigma);
+  data_ops::scale(m_scaled_sigma, 1./(m_length_scale*m_length_scale));
+  m_opfact->set_jump(m_scaled_sigma, 1.0/units::s_eps0);
+
+  const Real t2 = MPI_Wtime();
   
 #if 0 // Debug
   MayDay::Warning("poisson_multifluid_gmg::solve - debug mode");
@@ -277,11 +287,9 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, cpy, rhs, res, zero;
   m_amr->alias(phi,     a_state);
-  m_amr->alias(rhs,     source);
+  m_amr->alias(rhs,     m_scaled_source);
   m_amr->alias(res,     m_resid);
-  m_amr->alias(zero,    mfzero);
-
-  const Real t2 = MPI_Wtime();
+  m_amr->alias(zero,    m_zero);
 
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_gmg_eps
   //  m_gmg_solver.init(phi, rhs, finest_level, 0);
@@ -330,8 +338,8 @@ bool poisson_multifluid_gmg::solve(MFAMRCellData&       a_state,
   const Real T = t5 - t0;
   pout() << endl;
   pout() << "poisson_multifluid_gmg::solve breakdown" << endl;
-  pout() << "set jump:   " << 100.*(t1-t0)/T << "%" << endl;
-  pout() << "alloc/alias:" << 100.*(t2-t1)/T << "%" << endl;
+  pout() << "alloc :     " << 100.*(t1-t0)/T << "%" << endl;
+  pout() << "set jump:   " << 100.*(t2-t1)/T << "%" << endl;
   pout() << "resid:      " << 100.*(t3-t2)/T << "%" << endl;
   pout() << "solve:      " << 100.*(t4-t3)/T << "%" << " = " << t4 - t3 << endl;
   pout() << "revert/avg: " << 100.*(t5-t4)/T << "%" << endl;

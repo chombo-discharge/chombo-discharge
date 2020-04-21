@@ -100,6 +100,11 @@ public:
   */
   virtual void set_botsolver_smooth(const int a_smooth);
 
+    /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocate_internals();
+
   /*!
     @brief Get a-coefficient
   */
@@ -261,6 +266,21 @@ protected:
     @brief b-coefficient
   */
   MFAMRIVData m_bco_irreg;
+
+  /*!
+    @brief Zero
+  */
+  MFAMRCellData m_zero;
+
+  /*!
+    @brief Scaled soruce
+  */
+  MFAMRCellData m_scaled_source;
+
+  /*!
+    @brief Sigma
+  */
+  EBAMRIVData m_scaled_sigma;
 
   /*!
     @brief Geometric multigrid solver

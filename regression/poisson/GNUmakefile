@@ -26,6 +26,7 @@ src_dirs = $(PLASMAC_HOME)/src \
 	$(PLASMAC_HOME)/src/rte_solver \
 	$(PLASMAC_HOME)/src/sigma_solver \
 	$(PLASMAC_HOME)/src/global \
+	$(PLASMAC_HOME)/src/particle \
 	$(PLASMAC_HOME)/src/poisson_solver \
 	$(PLASMAC_HOME)/geometries/rod_sphere\
 	$(PLASMAC_HOME)/physics/poisson \
