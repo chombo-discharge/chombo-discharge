@@ -55,6 +55,7 @@ void godunov::parse_options(){
   parse_advection();
   parse_floor();
   parse_debug();
+  parse_fhd();
 }
 
 void godunov::parse_diffusion(){
@@ -166,6 +167,17 @@ void godunov::parse_debug(){
   else{
     MayDay::Abort("godunov::parse_debug - unknown argument requested.");
   }
+}
+
+void godunov::parse_fhd(){
+  CH_TIME("godunov::parse_fhd");
+  if(m_verbosity > 5){
+    pout() << "godunov::parse_fhd" << endl;
+  }
+
+  ParmParse pp(m_class_name.c_str());
+
+  pp.get("fhd", m_fhd);
 }
 
 bool godunov::need_to_regrid(){
@@ -737,6 +749,12 @@ void godunov::advance_transport_euler(const Real a_dt){
       data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
       data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
 
+      // Add random flux
+      if(m_fhd && solver->is_diffusive()){
+	solver->GWN_diffusion_source(scratch2, phi);
+	data_ops::incr(phi, scratch2, a_dt);
+      }
+
       solver->make_non_negative(phi);
 
       if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
@@ -1004,8 +1022,8 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   if(m_whichDiffusion == whichDiffusion::Explicit){ // Have to accept time step constraint
     const Real dt_diffusion = m_cdr->compute_diffusive_dt();
 
-    dt = m_cfl/(1./m_dt_cfl + 1./dt_diffusion);
-    m_dt_cfl = dt;
+    m_dt_cfl = 1./(1./m_dt_cfl + 1./dt_diffusion);
+    dt = m_cfl*m_dt_cfl;
     a_timecode = time_code::adv_diffusion;
   }
   else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit.

@@ -834,7 +834,6 @@ Vector<Real> air7_stephens::compute_cdr_dielectric_fluxes(const Real         a_t
 							  const Vector<Real> a_cdr_gradients,
 							  const Vector<Real> a_rte_fluxes,
 							  const Vector<Real> a_extrap_cdr_fluxes) const{
-  return Vector<Real>(m_num_cdr_species, 0.0);
   return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }

@@ -64,6 +64,7 @@ namespace physics::cdr_plasma {
     bool m_extrap_advect;
     bool m_debug;
     bool m_floor;
+    bool m_fhd;
     bool m_implicit_diffusion;
 
     whichDiffusion m_whichDiffusion;
@@ -99,6 +100,7 @@ namespace physics::cdr_plasma {
     void parse_transport();
     void parse_floor();
     void parse_debug();
+    void parse_fhd();
   };
 
 }
