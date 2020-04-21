@@ -230,7 +230,7 @@ Real godunov::advance(const Real a_dt){
   // on the EB and on the domain walls
   t0 = MPI_Wtime();
   godunov::compute_E_into_scratch();       // Compute the electric field
-  godunov::compute_cdr_gradients();        // Recompute cdr gradients after reaction advance (these might have changed)
+  godunov::compute_cdr_gradients();        // Compute cdr gradients
   godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
   godunov::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
   godunov::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
@@ -257,7 +257,7 @@ Real godunov::advance(const Real a_dt){
   t_filE = t1-t0;
 
   t0 = MPI_Wtime();
-  godunov::compute_cdr_gradients();        // Compute cdr gradients
+  godunov::compute_cdr_gradients();        // Recompute the cdr gradients, they changed after the transport step. 
   godunov::compute_reaction_network(a_dt); // Advance the reaction network. Put the result in solvers
   t1 = MPI_Wtime();
   t_reac = t1-t0;
@@ -715,75 +715,78 @@ void godunov::advance_transport_euler(const Real a_dt){
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
-    EBAMRCellData& phi = solver->get_state();
-    EBAMRCellData& src = solver->get_source();
+    if(solver->is_mobile() || solver->is_diffusive()){
+      RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
+
+      EBAMRCellData& phi = solver->get_state();
+      EBAMRCellData& src = solver->get_source();
     
-    EBAMRCellData& scratch  = storage->get_scratch();
-    EBAMRCellData& scratch2 = storage->get_scratch2();
+      EBAMRCellData& scratch  = storage->get_scratch();
+      EBAMRCellData& scratch2 = storage->get_scratch2();
 
-    // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
-    if(!m_implicit_diffusion){
-      solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
-    }
-    else{
-      solver->compute_divF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
-    }
-    data_ops::scale(scratch, -1.0);     // scratch = -[div(F/J)]
-    data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
-    data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
-
-    solver->make_non_negative(phi);
-
-    if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
-      if(m_debug){
-	const Real mass_before = solver->compute_mass();
-	data_ops::floor(phi, 0.0);
-	const Real mass_after = solver->compute_mass();
-	const Real rel_mass = (mass_after-mass_before)/mass_before;
-	pout() << "godunov::advance_cdr - injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+      // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
+      const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
+      if(!m_implicit_diffusion){
+	solver->compute_divJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       }
       else{
-	data_ops::floor(phi, 0.0);
+	solver->compute_divF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
       }
-    }
+      data_ops::scale(scratch, -1.0);     // scratch = -[div(F/J)]
+      data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
+      data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J)
+
+      solver->make_non_negative(phi);
+
+      if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
+	if(m_debug){
+	  const Real mass_before = solver->compute_mass();
+	  data_ops::floor(phi, 0.0);
+	  const Real mass_after = solver->compute_mass();
+	  const Real rel_mass = (mass_after-mass_before)/mass_before;
+	  pout() << "godunov::advance_cdr - injecting relative " << solver->get_name() << " mass = " << rel_mass << endl;
+	}
+	else{
+	  data_ops::floor(phi, 0.0);
+	}
+      }
     
 
-    // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
-    if(m_implicit_diffusion){
-      // Solve implicit diffusion equation. This looks weird but we're solving
-      //
-      // phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
-      //
-      // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
-      // so we just use that for simplicity
-      if(solver->is_diffusive()){
-	data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
-	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
-	solver->advance_euler(phi, scratch, scratch2, a_dt);
+      // This is the implicit diffusion code. If we enter this routine then phi = phi^k - dt*div(F) + dt*R
+      if(m_implicit_diffusion){
+	// Solve implicit diffusion equation. This looks weird but we're solving
+	//
+	// phi^(k+1) = phi^k - dt*div(F) + dt*R + dt*div(D*div(phi^k+1))
+	//
+	// This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
+	// so we just use that for simplicity
+	if(solver->is_diffusive()){
+	  data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
+	  data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
+	  solver->advance_euler(phi, scratch, scratch2, a_dt);
 
-	solver->make_non_negative(phi);
+	  solver->make_non_negative(phi);
 
-	if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
-	  if(m_debug){
-	    const Real mass_before = solver->compute_mass();
-	    data_ops::floor(phi, 0.0);
-	    const Real mass_after = solver->compute_mass();
-	    const Real rel_mass = (mass_after-mass_before)/mass_before;
-	    pout() << "godunov::advance_cdr (implicit diffusion) - inecting relative  "
-		   << solver->get_name() << " mass = " << rel_mass << endl;
-	  }
-	  else{
-	    data_ops::floor(phi, 0.0);
+	  if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
+	    if(m_debug){
+	      const Real mass_before = solver->compute_mass();
+	      data_ops::floor(phi, 0.0);
+	      const Real mass_after = solver->compute_mass();
+	      const Real rel_mass = (mass_after-mass_before)/mass_before;
+	      pout() << "godunov::advance_cdr (implicit diffusion) - inecting relative  "
+		     << solver->get_name() << " mass = " << rel_mass << endl;
+	    }
+	    else{
+	      data_ops::floor(phi, 0.0);
+	    }
 	  }
 	}
       }
-    }
 
-    m_amr->average_down(phi, m_cdr->get_phase());
-    m_amr->interp_ghost(phi, m_cdr->get_phase());
+      m_amr->average_down(phi, m_cdr->get_phase());
+      m_amr->interp_ghost(phi, m_cdr->get_phase());
+    }
   }
 
   // Advance the sigma equation
@@ -1002,15 +1005,10 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
     const Real dt_diffusion = m_cdr->compute_diffusive_dt();
 
     dt = m_cfl/(1./m_dt_cfl + 1./dt_diffusion);
+    m_dt_cfl = dt;
     a_timecode = time_code::adv_diffusion;
-#if 0
-    if(dt_diffusion < dt){
-      dt = dt_diffusion;
-      a_timecode = time_code::diffusion;
-    }
-#endif
   }
-  else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit
+  else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit.
     const Real dt_diffusion = m_cdr->compute_diffusive_dt();
     if(dt_diffusion < dt){ // Use implicit diffusion
       m_implicit_diffusion = true;

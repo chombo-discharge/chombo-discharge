@@ -895,8 +895,6 @@ void cdr_solver::initial_data_distribution(){
   m_amr->interp_ghost(m_state, m_phase);
 
   data_ops::set_covered_value(m_state, 0, 0.0);
-  pout() << "init done" << endl;
-
 }
 
 void cdr_solver::initial_data_particles(){

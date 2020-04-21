@@ -10,7 +10,7 @@ cdr_plasma.basename  = pout
 amr_mesh.lo_corner       = -1E-2 -1E-2 # Low corner of problem domain
 amr_mesh.hi_corner       =  1E-2  1E-2 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
-amr_mesh.coarsest_domain = 64 64 64 # Number of cells on coarsest domain
+amr_mesh.coarsest_domain = 64 64 # Number of cells on coarsest domain
 amr_mesh.max_amr_depth   = 6           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
@@ -39,10 +39,10 @@ driver.verbosity                       = 2             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 10            # Plot interval
-driver.regrid_interval                 = 10            # Regrid interval
-driver.checkpoint_interval             = 10            # Checkpoint interval
-driver.initial_regrids                 = 2             # Number of initial regrids
+driver.plot_interval                   = 5            # Plot interval
+driver.regrid_interval                 = 5             # Regrid interval
+driver.checkpoint_interval             = -1            # Checkpoint interval
+driver.initial_regrids                 = 4             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
 driver.max_steps                       = 1             # Maximum number of steps
@@ -59,7 +59,7 @@ driver.max_chk_depth                   = -1            # Restrict chechkpoint de
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
-driver.allow_coarsening                = false         # Allows removal of grid levels according to cell_tagger
+driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
 driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -175,7 +175,7 @@ mc_photo.deposition        = cic           # 'ngp' = nearest grid point
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 geo_coarsener.box1_lo     = -1 500E-6    # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1 1         # between these two corners
-geo_coarsener.box1_lvl    = 0            # up to this level
+geo_coarsener.box1_lvl    = 3            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
@@ -185,7 +185,7 @@ rod_sphere.eps0                      = 1                # Background permittivit
 rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
 rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 500.E-6          # Electrode inner radius
+rod_sphere.electrode_radius          = 250.E-6          # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0              # Center 1
 rod_sphere.electrode_center2         = 0 1              # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
@@ -200,16 +200,16 @@ godunov.verbosity        = -1        # Class verbosity
 godunov.solver_verbosity = -1        # Individual solver verbosities
 godunov.min_dt           = 0.        # Minimum permitted time step
 godunov.max_dt           = 1.E99     # Maximum permitted time step
-godunov.cfl              = 0.9       # CFL number
+godunov.cfl              = 0.8       # CFL number
 godunov.diffusion        = explicit      # Diffusion. 'explicit', 'implicit', or 'auto'
-godunov.transport        = rk2     # Transport algorithm. 'euler' or 'rk2'
+godunov.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
 godunov.relax_time       = 1.0       # Relaxation time constant
 godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
 godunov.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging. 
 godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
-godunov.extrap_advect    = false     # Use time-extrapolation capabilities (if they exist) in the cdr_solver
+godunov.extrap_advect    = false      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
 godunov.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
-godunov.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system. 
+godunov.debug            = true      # Turn on debugging messages. Also monitors mass if it was injected into the system. 
 
 
 # ====================================================================================================
@@ -257,7 +257,7 @@ air7_stephens.poiss_exp_swap      = 100  # Swap from Poisson to exponential dist
 # ----------------------------------------------------------------------------------------------------
 air7_stephens.uniform_density       = 1.E4         # Uniform density
 air7_stephens.seed_density          = 1.E18        # Gaussian seed density
-air7_stephens.seed_radius           = 100E-6       # Gaussian seed radius
+air7_stephens.seed_radius           = 250E-6       # Gaussian seed radius
 air7_stephens.seed_position         = 0.0 0.0 0.0  # Gaussian seed position
 
 # ----------------------------------------------------------------------------------------------------	
@@ -318,10 +318,10 @@ streamer_tagger.verbosity         = -1           # Verbosity
 streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-streamer_tagger.buffer            = 4            # Grow tagged cells
+streamer_tagger.buffer            = 0            # Grow tagged cells
 
-streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
+streamer_tagger.refine_curvature  = 3.0          # Curvature refinement
 streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-streamer_tagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
-streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+streamer_tagger.refine_alpha      = 1.5          # Set alpha refinement. Lower  => More mesh
+streamer_tagger.coarsen_alpha     = 5.0          # Set alpha coarsening. Higher => Less mesh
 streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth

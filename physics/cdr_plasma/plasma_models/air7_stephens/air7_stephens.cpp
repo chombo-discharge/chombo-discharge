@@ -396,7 +396,6 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
   for (int i = 0; i < m_num_cdr_species; i++){
     cdr_phi[i]  = a_particle_densities[i];
     cdr_grad[i] = a_particle_gradients[i];
-    a_particle_sources[i] = 0.0;
   }
 
   for (int i = 0; i < m_num_rte_species; i++){
@@ -640,12 +639,13 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   // Photoionization code below
   const Real Rb1    = m_b1_exc.get_entry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for b1
   const Real Rc4    = m_c4_exc.get_entry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for c4
-  
+
+#if 0 // Original code, not performant. 
   const int num_exc_c4v0 = poisson_reaction(m_photoi_factor*Rc4*volume*m_c4v0_exc_rep, a_dt);
   const int num_exc_c4v1 = poisson_reaction(m_photoi_factor*Rc4*volume*m_c4v1_exc_rep, a_dt);
   const int num_exc_b1v1 = poisson_reaction(m_photoi_factor*Rb1*volume*m_b1v1_exc_rep, a_dt);
 
-#if 0 // Original code
+
   // Determine number of radiative de-excitations
   const int num_c4v0_rad = binomial_trials(num_exc_c4v0, m_c4v0_kr/m_c4v0_k);
   const int num_c4v1_rad = binomial_trials(num_exc_c4v1, m_c4v1_kr/m_c4v1_k);
@@ -678,6 +678,13 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   num_b1v1_X1v1 = binomial_trials(num_b1v1_X1v1, m_b1v1_X1v1_photoi_eff);
 
 #else
+
+  // nu*Ne*REP*dV
+  const Real num_exc_c4v0 = m_photoi_factor*Rc4*volume*m_c4v0_exc_rep;
+  const Real num_exc_c4v1 = m_photoi_factor*Rc4*volume*m_c4v1_exc_rep;
+  const Real num_exc_b1v1 = m_photoi_factor*Rb1*volume*m_b1v1_exc_rep;
+
+  // Poisson distribution from nu*REP*Ne*k_(r,gamma)/k*dV*dt
   const int num_c4v0_X1v0 = poisson_reaction(num_exc_c4v0*m_c4v0_X1v0_kr*m_c4v0_X1v0_photoi_eff/m_c4v0_k, a_dt);
   const int num_c4v0_X1v1 = poisson_reaction(num_exc_c4v0*m_c4v0_X1v1_kr*m_c4v0_X1v1_photoi_eff/m_c4v0_k, a_dt);
 
@@ -692,10 +699,12 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
 
   a_photon_sources[m_c4v0_X1v0_idx] = 1.0*num_c4v0_X1v0;
   a_photon_sources[m_c4v0_X1v1_idx] = 1.0*num_c4v0_X1v1;
+  
   a_photon_sources[m_c4v1_X1v0_idx] = 1.0*num_c4v1_X1v0;
   a_photon_sources[m_c4v1_X1v1_idx] = 1.0*num_c4v1_X1v1;
   a_photon_sources[m_c4v1_X1v2_idx] = 1.0*num_c4v1_X1v2;
   a_photon_sources[m_c4v1_X1v3_idx] = 1.0*num_c4v1_X1v3;
+  
   a_photon_sources[m_b1v1_X1v0_idx] = 1.0*num_b1v1_X1v0;
   a_photon_sources[m_b1v1_X1v1_idx] = 1.0*num_b1v1_X1v1;
 
