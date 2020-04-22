@@ -1004,8 +1004,8 @@ void godunov::compute_dt(Real& a_dt, time_code::which_code& a_timecode){
   if(m_whichDiffusion == whichDiffusion::Explicit){ // Have to accept time step constraint
     const Real dt_diffusion = m_cdr->compute_diffusive_dt();
 
-    dt = m_cfl/(1./m_dt_cfl + 1./dt_diffusion);
-    m_dt_cfl = dt;
+    m_dt_cfl = 1./(1./m_dt_cfl + 1./dt_diffusion);
+    dt = m_cfl*m_dt_cfl;
     a_timecode = time_code::adv_diffusion;
   }
   else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit.

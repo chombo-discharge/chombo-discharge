@@ -1,22 +1,22 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air9eed_bourdon.potential = 1
+air9eed_bourdon.potential = -10E3
 air9eed_bourdon.basename  = pout
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-amr_mesh.lo_corner       = -1E-2 -1E-2 # Low corner of problem domain
-amr_mesh.hi_corner       =  1E-2  1E-2 # High corner of problem domain
+amr_mesh.lo_corner       = -2E-3 -2E-3 # Low corner of problem domain
+amr_mesh.hi_corner       =  2E-3  2E-3 # High corner of problem domain
 amr_mesh.verbosity       = -1          # Controls verbosity. 
 amr_mesh.coarsest_domain = 64 64 # Number of cells on coarsest domain
-amr_mesh.max_amr_depth   = 7           # Maximum amr depth
+amr_mesh.max_amr_depth   = 6           # Maximum amr depth
 amr_mesh.max_sim_depth   = -1          # Maximum simulation depth
 amr_mesh.refine_all_lvl  = 0           # Refine everything down to this level.
 amr_mesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
 amr_mesh.fill_ratio      = 1.0         # Fill ratio for grid generation
-amr_mesh.irreg_growth    = 2           # How much to grow irregular tagged cells
+amr_mesh.irreg_growth    = 8           # How much to grow irregular tagged cells
 amr_mesh.buffer_size     = 2           # Number of cells between grid levels
 amr_mesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 amr_mesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
@@ -39,9 +39,9 @@ driver.verbosity                       = 2             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 5            # Plot interval
-driver.regrid_interval                 = 5             # Regrid interval
-driver.checkpoint_interval             = 5            # Checkpoint interval
+driver.plot_interval                   = 5             # Plot interval
+driver.regrid_interval                 = 10            # Regrid interval
+driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
@@ -59,7 +59,7 @@ driver.max_chk_depth                   = -1            # Restrict chechkpoint de
 driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
 driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
-driver.allow_coarsening                = true          # Allows removal of grid levels according to cell_tagger
+driver.allow_coarsening                = false         # Allows removal of grid levels according to cell_tagger
 driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -151,9 +151,9 @@ eddington_sp1.bc_z_high           = robin     # Boundary on domain. 'neumann' or
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
 geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -1 500E-6    # Remove irregular cell tags 
+geo_coarsener.box1_lo     = -1 300E-6    # Remove irregular cell tags 
 geo_coarsener.box1_hi     =  1 1         # between these two corners
-geo_coarsener.box1_lvl    = 3            # up to this level
+geo_coarsener.box1_lvl    = 2            # up to this level
 geo_coarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
@@ -163,7 +163,7 @@ rod_sphere.eps0                      = 1                # Background permittivit
 rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
 rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
 rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 250.E-6          # Electrode inner radius
+rod_sphere.electrode_radius          = 100.E-6          # Electrode inner radius
 rod_sphere.electrode_center1         = 0 0              # Center 1
 rod_sphere.electrode_center2         = 0 1              # Center 2. 
 rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
@@ -179,16 +179,16 @@ godunov.solver_verbosity = -1        # Individual solver verbosities
 godunov.min_dt           = 0.        # Minimum permitted time step
 godunov.max_dt           = 1.E99     # Maximum permitted time step
 godunov.cfl              = 0.8       # CFL number
-godunov.diffusion        = explicit      # Diffusion. 'explicit', 'implicit', or 'auto'
+godunov.diffusion        = implicit  # Diffusion. 'explicit', 'implicit', or 'auto'
 godunov.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
 godunov.relax_time       = 1.0       # Relaxation time constant
 godunov.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
-godunov.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging. 
+godunov.fast_rte         = 99        # Solve RTE every this time steps. Mostly for debugging. 
 godunov.source_comp      = interp    # Interpolated 'interp' or cell-average 'cell_ave' for source computations
-godunov.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the cdr_solver
+godunov.extrap_advect    = false     # Use time-extrapolation capabilities (if they exist) in the cdr_solver
 godunov.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
-godunov.debug            = false     # Turn on debugging messages. Also monitors mass if it was injected into the system.
-godunov.fhd              = true      # Turn on if you want a stochastic diffusion flux
+godunov.debug            = true      # Turn on debugging messages. Also monitors mass if it was injected into the system.
+godunov.fhd              = false     # Turn on if you want a stochastic diffusion flux
 
 # ====================================================================================================
 # AIR9EED_BOURDON CLASS OPTIONS
@@ -201,13 +201,16 @@ air9eed_bourdon.initial_ionization = 1.E10                        # Initial back
 
 air9eed_bourdon.diffusive_electrons = true                        # Diffusive electrons or not
 air9eed_bourdon.mobile_ions         = true                        # Mobile ions or not
-air9eed_bourdon.diffusive_ions      = true                        # Diffusive ions or not
+air9eed_bourdon.diffusive_ions      = false                       # Diffusive ions or not
 air9eed_bourdon.ion_mobility        = 2.E-4                       # Ion mobility
 
-air9eed_bourdon.electrode_townsend2           = 1.E-6             # SEE on electrodes
+air9eed_bourdon.electrode_townsend2           = 1.E-3             # SEE on electrodes
 air9eed_bourdon.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
 air9eed_bourdon.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
 air9eed_bourdon.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
+
+air9eed_bourdon.cathode_work    = 3                               # Work function (in eV) for electrodes
+air9eed_bourdon.dielectric_work = 1	                          # Work function (in eV) for dielectrics
 
 air9eed_bourdon.quenching_pressure         = 0.03947              # Quenching pressure
 air9eed_bourdon.photoionization_efficiency = 0.1                  # Photoionization efficiency
@@ -221,11 +224,10 @@ streamer_tagger.verbosity         = -1           # Verbosity
 streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-streamer_tagger.buffer            = 0            # Grow tagged cells
+streamer_tagger.buffer            = 8            # Grow tagged cells
 
 streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
 streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-streamer_tagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
+streamer_tagger.refine_alpha      = 0.5          # Set alpha refinement. Lower  => More mesh
+streamer_tagger.coarsen_alpha     = 4.0          # Set alpha coarsening. Higher => Less mesh
 streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth
-

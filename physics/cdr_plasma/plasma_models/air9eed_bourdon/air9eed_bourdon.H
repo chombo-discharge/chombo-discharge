@@ -134,6 +134,7 @@ namespace physics {
       static std::string s_bolsig_mobility;
       static std::string s_bolsig_N2_alpha;
       static std::string s_bolsig_O2_alpha;
+      static std::string s_bolsig_townsend;
 
       std::string m_transport_file;
 
@@ -167,6 +168,9 @@ namespace physics {
       Real m_ion_mobility; // Ion mobility
       Real m_ion_diffusion; // Ion mobility
 
+      Real m_cathode_work;    // Work function for cathodes
+      Real m_dielectric_work; // Work function for dielectrics
+
       Real m_townsend2_electrode;            // 2nd Townsend on electrodes
       Real m_townsend2_dielectric;           // 2nd Townsend on dielectrics
       Real m_electrode_quantum_efficiency;   // Quantum efficiency on electrodes
@@ -184,6 +188,7 @@ namespace physics {
       lookup_table m_e_O2_to_Ominus_O;
       lookup_table m_e_N2_to_e_N2;
       lookup_table m_e_O2_to_e_O2;
+      lookup_table m_alpha_townsend;
 
       void parse_transport_file();
       void parse_photoi();
@@ -248,6 +253,9 @@ namespace physics {
       inline Real compute_e_O2_scattering_loss() const;
       inline Real compute_e_N2_scattering_loss() const;
 
+      // How to compute the electorn energy
+      inline Real compute_electron_energy(const Real a_energy_density, const Real a_electron_density) const;
+
       Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E);
 
       void read_file_entries(lookup_table& a_table, const std::string a_string);
@@ -255,6 +263,7 @@ namespace physics {
       void read_init_eed();
       void read_e_N2_alpha();
       void read_e_O2_alpha();
+      void read_townsend();
   
       /*!
 	@brief Common function for dielectric and electrode fluxes, only difference is the secondary emission coefficients
@@ -270,6 +279,30 @@ namespace physics {
 				      const Vector<Real> a_extrap_cdr_fluxes,
 				      const Real         a_townsend2,
 				      const Real         a_quantum_efficiency) const;
+
+      Vector<Real> compute_anode_fluxes(const Real         a_time,
+					const RealVect     a_pos,
+					const RealVect     a_normal,
+					const RealVect     a_E,
+					const Vector<Real> a_cdr_densities,
+					const Vector<Real> a_cdr_velocities,
+					const Vector<Real> a_cdr_gradients,
+					const Vector<Real> a_rte_fluxes,
+					const Vector<Real> a_extrap_cdr_fluxes,
+					const Real         a_townsend2,
+					const Real         a_quantum_efficiency) const;
+
+      Vector<Real> compute_cathode_fluxes(const Real         a_time,
+					  const RealVect     a_pos,
+					  const RealVect     a_normal,
+					  const RealVect     a_E,
+					  const Vector<Real> a_cdr_densities,
+					  const Vector<Real> a_cdr_velocities,
+					  const Vector<Real> a_cdr_gradients,
+					  const Vector<Real> a_rte_fluxes,
+					  const Vector<Real> a_extrap_cdr_fluxes,
+					  const Real         a_townsend2,
+					  const Real         a_quantum_efficiency) const;
     };
   }
 }
