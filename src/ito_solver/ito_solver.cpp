@@ -257,6 +257,7 @@ void ito_solver::initial_data(){
   m_particles.add_particles(m_species->get_initial_particles());
 
   // Remove particles that are inside embedded boundaries
+#if 1
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
@@ -295,12 +296,13 @@ void ito_solver::initial_data(){
       }
     }
   }
+#endif
   
 
   // Deposit the particles
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
   
-#if 0 // Experimental code. Compute the number of particles in each box
+#if 1 // Experimental code. Compute the number of particles in each box
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     Vector<Box> oldBoxes(0);
@@ -315,12 +317,13 @@ void ito_solver::initial_data(){
 
       numParticlesThisProc += numPart;
     }
-    pout() << "on level = " << lvl << "\t num particles = " << numParticlesThisProc << endl;
+    //    pout() << "on level = " << lvl << "\t num particles = " << numParticlesThisProc << endl;
 
 
     // Gather boxes and loads
     load_balance::gather_boxes(oldBoxes);
     load_balance::gather_loads(oldLoads);
+
 
     Vector<Box> newBoxes = oldBoxes;
     Vector<int> newLoads = oldLoads;
@@ -329,7 +332,7 @@ void ito_solver::initial_data(){
     for (int i = 0; i < newBoxes.size(); i++){
       for (int j = 0; j < oldBoxes.size(); j++){
 	if(newBoxes[i] == oldBoxes[j]){
-	  newLoads[i] = newLoads[j];
+	  newLoads[i] = oldLoads[j];
 	}
       }
     }
@@ -337,17 +340,14 @@ void ito_solver::initial_data(){
     Vector<int> procs;
     load_balance::load_balance_boxes(procs, newLoads, newBoxes);
 
-    int sum = 0;
-    for (int i = 0; i < oldLoads.size(); i++){
-      sum += oldLoads[i];
+
+
+    if(procID() == 0) std::cout << "\nnew load balancing: " << std::endl;
+    for (int i = 0; i < newLoads.size(); i++){
+      if(procID() == 0){
+	std::cout << "box = " << newBoxes[i] << "\t load = " << newLoads[i] << "\t proc = " << procs[i] << std::endl;
+      }
     }
-
-    if(procID() == 0){
-      std::cout << "num particles on this level = " << sum << std::endl;
-      std::cout << "procs" << std::endl;
-    }
-
-
   }
 #endif
 }

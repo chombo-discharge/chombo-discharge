@@ -37,7 +37,7 @@ brownian_walker_species::~brownian_walker_species(){
 void brownian_walker_species::draw_initial_particles(){
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
-  m_seed += procID();
+  //  m_seed += procID();
 
   // Set up the RNG
   m_rng = std::mt19937_64(m_seed);
