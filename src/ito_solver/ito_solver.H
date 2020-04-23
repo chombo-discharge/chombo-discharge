@@ -151,6 +151,26 @@ public:
   virtual void cache_state();
 
   /*!
+    @brief Add particles. Container version. 
+  */
+  virtual void add_particles(particle_container<ito_particle>& a_part, const bool a_destructive);
+
+  /*!
+    @brief Add particles. AMR version. 
+  */
+  virtual void add_particles(AMRParticles<ito_particle>& a_part, const bool a_destructive);
+
+  /*!
+    @brief Add particles. Level version. 
+  */
+  virtual void add_particles(ParticleData<ito_particle>& a_part, const int a_level, const bool a_destructive);
+
+  /*!
+    @brief Add particles. Level and patch version. 
+  */
+  virtual void add_particles(ListBox<ito_particle>& a_part, const int a_lvl, const DataIndex a_dit, const bool a_destructive);
+
+  /*!
     @brief Check if solver is mobile
   */
   virtual bool is_mobile() const;
@@ -164,6 +184,16 @@ public:
     @brief Get particles
   */
   virtual AMRParticles<ito_particle>& get_particles();
+  
+  /*!
+    @brief Get EB particles
+  */
+  virtual AMRParticles<ito_particle>& get_eb_particles();
+
+  /*!
+    @brief Get domain particles
+  */
+  virtual AMRParticles<ito_particle>& get_domain_particles();
 
   /*!
     @brief Get cell-centered velocity
@@ -439,9 +469,19 @@ protected:
   EBAMRCellData m_ppc;
 
   /*!
-    @brief Particles
+    @brief All particles
   */
   particle_container<ito_particle> m_particles;
+
+  /*!
+    @brief This is a particle container which acts as scratch space when you want to add particles through the EB
+  */
+  particle_container<ito_particle> m_eb_particles;
+
+  /*!
+    @brief This is a particle container which acts as scratch space when you want to add particles through the domain side
+  */
+  particle_container<ito_particle> m_domain_particles;
 
   /*!
     @brief Particle cache

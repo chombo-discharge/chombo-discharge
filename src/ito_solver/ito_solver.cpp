@@ -1,5 +1,5 @@
 /*!
-  @file   ito_solver.H
+  @file   ito_solver.cpp
   @brief  Declaration of an abstract class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
@@ -409,9 +409,11 @@ void ito_solver::allocate_internals(){
   
   // This allocates parallel data holders using the load balancing in amr_mesh. This might give poor
   // load balancing, but we will rectify that by rebalancing later.
-  m_amr->allocate(m_particles, m_pvr_buffer);
+  m_amr->allocate(m_particles,        m_pvr_buffer);
+  m_amr->allocate(m_eb_particles,     m_pvr_buffer);
+  m_amr->allocate(m_domain_particles, m_pvr_buffer);
 
-  //
+#if 1 // Experimental code for getting the number of particles per cell
   Vector<LevelData<BaseEBCellFAB<int> >* > m_ppc(1 + m_amr->get_finest_level());
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -420,6 +422,7 @@ void ito_solver::allocate_internals(){
     BaseEBCellFactory<int> fact(ebisl);
     m_ppc[lvl] = new LevelData<BaseEBCellFAB<int> >(dbl, 1, 3*IntVect::Unit, fact);
   }
+#endif
 }
 
 void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) const {
@@ -658,6 +661,56 @@ void ito_solver::deposit_weights(EBAMRCellData& a_state, const AMRParticles<ito_
   }
 }
 
+void ito_solver::add_particles(particle_container<ito_particle>& a_part, const bool a_destructive){
+  CH_TIME("ito_solver::add_particles(container");
+  if(m_verbosity > 5){
+    pout() << m_name + "::add_particles(container)" << endl;
+  }
+
+  this->add_particles(a_part.get_particles(), a_destructive);
+}
+
+void ito_solver::add_particles(AMRParticles<ito_particle>& a_part, const bool a_destructive){
+  CH_TIME("ito_solver::add_particles(amr)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::add_particles(amr)" << endl;
+  }
+
+  const int finest_level = m_amr->get_finest_level();
+  
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    this->add_particles(*a_part[lvl], lvl, a_destructive);
+  }
+}
+
+void ito_solver::add_particles(ParticleData<ito_particle>& a_part, const int a_lvl, const bool a_destructive){
+  CH_TIME("ito_solver::add_particles(lvl)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::add_particles(lvl)" << endl;
+  }
+  const DisjointBoxLayout& dbl = m_amr->get_grids()[a_lvl];
+
+  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    this->add_particles(a_part[dit()], a_lvl, dit(), a_destructive);
+  }
+}
+
+void ito_solver::add_particles(ListBox<ito_particle>& a_part, const int a_lvl, const DataIndex a_dit, const bool a_destructive){
+  CH_TIME("ito_solver::add_particles(lvl, dit)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::add_particles(lvl, dit)" << endl;
+  }
+
+  ListBox<ito_particle>& my_particles = m_particles[a_lvl][a_dit];
+  
+  if(a_destructive){
+    my_particles.addItemsDestructive(a_part.listItems());
+  }
+  else{
+    my_particles.addItems(a_part.listItems());
+  }
+}
+
 bool ito_solver::is_mobile() const{
   CH_TIME("ito_solver::is_mobile");
   if(m_verbosity > 5){
@@ -693,6 +746,24 @@ AMRParticles<ito_particle>& ito_solver::get_particles(){
   }
 
   return m_particles.get_particles();
+}
+
+AMRParticles<ito_particle>& ito_solver::get_eb_particles(){
+  CH_TIME("ito_solver::get_eb_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_eb_particles" << endl;
+  }
+
+  return m_eb_particles.get_particles();
+}
+
+AMRParticles<ito_particle>& ito_solver::get_domain_particles(){
+  CH_TIME("ito_solver::get_domain_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_domain_particles" << endl;
+  }
+
+  return m_domain_particles.get_particles();
 }
 
 EBAMRCellData& ito_solver::get_velo_cell(){
