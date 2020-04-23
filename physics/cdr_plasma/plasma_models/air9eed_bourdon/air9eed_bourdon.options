@@ -17,6 +17,9 @@ air9eed_bourdon.dielectric_townsend2          = 1.E-6             # SEE on diele
 air9eed_bourdon.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
 air9eed_bourdon.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 
+air9eed_bourdon.cathode_work    = 1                               # Work function (in eV) for electrodes
+air9eed_bourdon.dielectric_work = 1	                          # Work function (in eV) for dielectrics
+
 air9eed_bourdon.quenching_pressure         = 0.03947              # Quenching pressure
 air9eed_bourdon.photoionization_efficiency = 0.1                  # Photoionization efficiency
 air9eed_bourdon.excitation_efficiency      = 0.6                  # Excitation efficiency

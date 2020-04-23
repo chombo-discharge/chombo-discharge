@@ -1027,7 +1027,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
 	const VolIndex& ivof = stencil.vof(i);
 	const Real& iweight  = stencil.weight(i);
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  grad[dir] += (*a_particle_gradients[idx])(ivof, dir);
+	  grad[dir] += (*a_particle_gradients[idx])(ivof, dir)*iweight;
 	}
       }
       

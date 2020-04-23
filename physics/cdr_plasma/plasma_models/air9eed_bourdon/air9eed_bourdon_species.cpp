@@ -11,6 +11,8 @@
 
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 air9eed_bourdon::eed::eed(){
   m_name      = "eed";
   m_unit      = "eVm-3";

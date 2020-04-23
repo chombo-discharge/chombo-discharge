@@ -299,9 +299,6 @@ void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const E
     pout() << m_name + "::compute_divG" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-
   data_ops::set_value(a_divG, 0.0);
   
   this->conservative_divergence(a_divG, a_G, a_ebG);       // Make the conservative divergence.
@@ -321,6 +318,69 @@ void cdr_solver::compute_divG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const E
   else{ // Much simpler if we don't have EBCF
     this->hyperbolic_redistribution(a_divG, m_mass_diff); // Level redistribution. Weights is a dummy parameter
     this->reflux(a_divG);                                 // Reflux
+  }
+}
+
+void cdr_solver::inject_ebflux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebG, const Real a_dt){
+  CH_TIME("cdr_solver::inject_ebflux");
+  if(m_verbosity > 5){
+    pout() << m_name + "::inject_ebflux" << endl;
+  }
+
+  MayDay::Warning("cdr_solver::inject_ebflux - routine has not been wetted!");
+
+  this->conservative_divergence_eb(m_scratch, a_ebG);         // Compute conservative divergence, but only EB
+  this->nonconservative_divergence(m_divG_nc, m_scratch);     // Blend with volume fraction
+  this->hybrid_divergence(m_scratch, m_mass_diff, m_divG_nc); // Hybrid divergence
+  this->increment_redist(m_mass_diff);                        // Increment redistribution register
+
+  const bool ebcf = m_amr->get_ebcf();
+  if(ebcf){ // Much more work with the EBCF interface. *Sigh*
+    this->coarse_fine_increment(m_mass_diff);                // Compute C2F, F2C, and C2C mass transfers
+    this->increment_redist_flux();                           // Tell flux register about whats going on
+    this->hyperbolic_redistribution(m_scratch, m_mass_diff); // Level redistribution. 
+    this->coarse_fine_redistribution(m_scratch);             // Do the coarse-fine redistribution
+    this->reflux(m_scratch);                                 // Reflux
+  }
+  else{
+    this->hyperbolic_redistribution(m_scratch, m_mass_diff);
+  }
+
+  // Now do the increment. 
+  data_ops::incr(a_phi, m_scratch, -a_dt);
+}
+
+void cdr_solver::conservative_divergence_eb(EBAMRCellData& a_consdiv, const EBAMRIVData& a_ebflux){
+  CH_TIME("cdr_solver::inject_ebflux");
+  if(m_verbosity > 5){
+    pout() << m_name + "::inject_ebflux" << endl;
+  }
+
+  // TLDR: This sets a_consdiv = a_ebflux*area/dx
+
+  const int comp = 0;
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& divG            = (*a_consdiv[lvl])[dit()];
+      const Box box              = dbl.get(dit());
+      const EBISBox& ebisbox     = ebisl[dit()];
+      const EBGraph& ebgraph     = ebisbox.getEBGraph();
+      const IntVectSet irreg     = ebisbox.getIrregIVS(box);
+      const BaseIVFAB<Real>& flx = (*a_ebflux[lvl])[dit()];
+
+      divG.setVal(0.0);
+      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const Real area     = ebisbox.bndryArea(vof);
+
+	divG(vof, comp) = flx(vof, comp)*area/dx;
+      }
+    }
   }
 }
 
@@ -1144,6 +1204,25 @@ void cdr_solver::interpolate_flux_to_centroids(LevelData<EBFluxFAB>& a_flux, con
       interpolant.copy(box, interv, box, centroid_flux, interv);
     }
   }
+}
+
+void cdr_solver::reset_flux_register(){
+  CH_TIME("cdr_solver::reset_flux_register");
+  if(m_verbosity > 5){
+    pout() << m_name + "::reset_flux_register" << endl;
+  }
+  
+  const int finest_level = m_amr->get_finest_level();
+  
+  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->get_flux_reg(m_phase);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const bool has_fine = lvl < finest_level;
+    if(has_fine){
+      fluxreg[lvl]->setToZero();
+    }
+  }
+  
 }
 
 void cdr_solver::increment_flux_register(const EBAMRFluxData& a_face_state, const EBAMRFluxData& a_velo_face){

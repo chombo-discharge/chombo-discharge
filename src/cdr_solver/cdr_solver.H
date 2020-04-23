@@ -236,6 +236,13 @@ public:
   virtual void initial_data_particles();
 
   /*!
+    @brief Inject the EB flux. 
+    @details This routine is equivalent to an update phi^(k+1) = phi^k - dt*div(G)
+    where G is non-zero only on the EB
+  */
+  virtual void inject_ebflux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebflux, const Real a_dt);
+
+  /*!
     @brief Allocate internal storage
   */
   virtual void allocate_internals();
@@ -640,6 +647,11 @@ protected:
   */
   virtual void conservative_divergence(EBAMRCellData& a_cons_div, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebflux);
 
+  /*!
+    @brief Compute the conservative divergence with the assumption that only the eb-flux is non-zero
+  */
+  virtual void conservative_divergence_eb(EBAMRCellData& a_consdiv, const EBAMRIVData& a_ebflux);
+
 
   /*!
     @brief Compute the non-conservative divergence
@@ -693,6 +705,11 @@ protected:
     @brief Increment flux registers
   */
   virtual void increment_flux_register(const EBAMRFluxData& a_flux);
+
+  /*!
+    @brief Reset the flux register
+  */
+  virtual void reset_flux_register();
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)

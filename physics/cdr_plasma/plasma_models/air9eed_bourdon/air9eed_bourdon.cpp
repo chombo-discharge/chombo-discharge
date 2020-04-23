@@ -18,15 +18,18 @@
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
+using namespace physics::cdr_plasma;
+
 std::string air9eed_bourdon::s_bolsig_energy_E = "Energy (eV) 	Electric field / N (Td)";
 std::string air9eed_bourdon::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";
 std::string air9eed_bourdon::s_bolsig_N2_alpha = "C25   N2    Ionization    15.60 eV";
 std::string air9eed_bourdon::s_bolsig_O2_alpha = "C42   O2    Ionization    12.06 eV";
+std::string air9eed_bourdon::s_bolsig_townsend = "Energy (eV)	Townsend ioniz. coef. alpha/N (m2)";
 
 
 air9eed_bourdon::air9eed_bourdon(){
-  m_num_species = 9;    // 8 reactive ones plus the eed
-  m_num_photons = 3;    // Bourdon model for photons
+  m_num_cdr_species = 9;    // 8 reactive ones plus the eed
+  m_num_rte_species = 3;    // Bourdon model for photons
   m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
   m_eed_index   = 0;    // Index for the EED equation
 
@@ -43,7 +46,7 @@ air9eed_bourdon::air9eed_bourdon(){
   read_init_eed();
   read_e_N2_alpha();
   read_e_O2_alpha();
-
+  read_townsend();
 }
 
 air9eed_bourdon::~air9eed_bourdon(){
@@ -95,6 +98,8 @@ void air9eed_bourdon::parse_see(){
   pp.get("dielectric_townsend2"       ,   m_townsend2_dielectric);
   pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
+  pp.get("cathode_work",                  m_cathode_work);
+  pp.get("dielectric_work",               m_dielectric_work);
 }
 
 void air9eed_bourdon::parse_transport(){
@@ -112,7 +117,7 @@ void air9eed_bourdon::parse_transport(){
 }
 
 void air9eed_bourdon::instantiate_species(){
-  m_species.resize(m_num_species);
+  m_cdr_species.resize(m_num_cdr_species);
   m_eed_idx      = 0;
   m_electron_idx = 1;
   m_N2plus_idx   = 2;
@@ -123,25 +128,25 @@ void air9eed_bourdon::instantiate_species(){
   m_O2minus_idx  = 7;
   m_Ominus_idx   = 8;
   
-  m_species[m_eed_idx]      = RefCountedPtr<species> (new air9eed_bourdon::eed());
-  m_species[m_electron_idx] = RefCountedPtr<species> (new air9eed_bourdon::electron());
-  m_species[m_N2plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::N2plus());
-  m_species[m_N4plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::N4plus());
-  m_species[m_O2plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::O2plus());
-  m_species[m_O4plus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::O4plus());
-  m_species[m_O2plusN2_idx] = RefCountedPtr<species> (new air9eed_bourdon::O2plusN2());
-  m_species[m_O2minus_idx]  = RefCountedPtr<species> (new air9eed_bourdon::O2minus());
-  m_species[m_Ominus_idx]   = RefCountedPtr<species> (new air9eed_bourdon::Ominus());
+  m_cdr_species[m_eed_idx]      = RefCountedPtr<cdr_species> (new air9eed_bourdon::eed());
+  m_cdr_species[m_electron_idx] = RefCountedPtr<cdr_species> (new air9eed_bourdon::electron());
+  m_cdr_species[m_N2plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::N2plus());
+  m_cdr_species[m_N4plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::N4plus());
+  m_cdr_species[m_O2plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2plus());
+  m_cdr_species[m_O4plus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::O4plus());
+  m_cdr_species[m_O2plusN2_idx] = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2plusN2());
+  m_cdr_species[m_O2minus_idx]  = RefCountedPtr<cdr_species> (new air9eed_bourdon::O2minus());
+  m_cdr_species[m_Ominus_idx]   = RefCountedPtr<cdr_species> (new air9eed_bourdon::Ominus());
 
   // Instantiate photon solvers
-  m_photons.resize(m_num_photons);
+  m_rte_species.resize(m_num_rte_species);
   m_photon1_idx = 0;
   m_photon2_idx = 1;
   m_photon3_idx = 2;
   
-  m_photons[m_photon1_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_one());
-  m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_two());
-  m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air9eed_bourdon::photon_three());
+  m_rte_species[m_photon1_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_one());
+  m_rte_species[m_photon2_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_two());
+  m_rte_species[m_photon3_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_three());
 }
 
 void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string a_string){
@@ -198,6 +203,18 @@ void air9eed_bourdon::read_electron_mobility(){
   m_e_mobility.make_uniform(m_uniform_tables);
 }
 
+void air9eed_bourdon::read_townsend(){
+  
+ // Read file entries
+  read_file_entries(m_alpha_townsend, air9eed_bourdon::s_bolsig_townsend);
+
+  // Scale with density and make a uniform table (there's no guarantee that BOLSIG output is uniform!)
+  m_alpha_townsend.make_uniform(m_uniform_tables);
+  m_alpha_townsend.scale_y(m_N);
+
+  m_alpha_townsend.dump_table();
+}
+
 void air9eed_bourdon::read_init_eed(){
   read_file_entries(m_init_eed, air9eed_bourdon::s_bolsig_energy_E);
 
@@ -206,14 +223,27 @@ void air9eed_bourdon::read_init_eed(){
   m_init_eed.make_uniform(m_uniform_tables);
 }
 
+Real air9eed_bourdon::compute_alpha(const RealVect a_E) const{
+  const Real EbyN    = a_E.vectorLength()/(m_N*units::s_Td);
+  const Real energy  = m_init_eed.get_entry(EbyN);
+  const Real alpha = m_alpha_townsend.get_entry(energy);
+  
+  return alpha;
+}
+
+Real air9eed_bourdon::compute_electron_energy(const Real a_energy_density, const Real a_electron_density) const{
+  const Real factor = 1.E8;
+  return a_energy_density/(factor+a_electron_density);
+}
+
 Vector<Real> air9eed_bourdon::compute_cdr_diffusion_coefficients(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities) const {
+								 const RealVect     a_pos,
+								 const RealVect     a_E,
+								 const Vector<Real> a_cdr_densities) const {
 
-  Vector<Real> diffco(m_num_species, 0.0);
+  Vector<Real> diffco(m_num_cdr_species, 0.0);
 
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
+  const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
   
   diffco[m_eed_idx]      = this->compute_eed_diffco(electron_energy);
@@ -229,13 +259,12 @@ Vector<Real> air9eed_bourdon::compute_cdr_diffusion_coefficients(const Real     
 }
 
 Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_time,
-						 const RealVect     a_pos,
-						 const RealVect     a_E,
-						 const Vector<Real> a_cdr_densities) const {
-  Vector<RealVect> velocities(m_num_species, RealVect::Zero);
+							 const RealVect     a_pos,
+							 const RealVect     a_E,
+							 const Vector<Real> a_cdr_densities) const {
+  Vector<RealVect> velocities(m_num_cdr_species, RealVect::Zero);
 
-
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
+  const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
 
   velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy)*(-a_E);
@@ -252,23 +281,30 @@ Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_ti
 
   return velocities;
 }
-  
-Vector<Real> air9eed_bourdon::compute_cdr_source_terms(const Real              a_time,
-					       const Real             a_kappa,
-					       const Real             a_dx,
-					       const RealVect         a_pos,
-					       const RealVect         a_E,
-					       const RealVect         a_gradE,
-					       const Vector<Real>     a_cdr_densities,
-					       const Vector<Real>     a_rte_densities,
-					       const Vector<RealVect> a_grad_cdr) const {
-  Vector<Real> source(m_num_species, 0.0);
 
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E0 + a_cdr_densities[m_electron_idx]); // eV
+void air9eed_bourdon::advance_reaction_network(Vector<Real>&          a_cdr_sources,
+					       Vector<Real>&          a_rte_sources,
+					       const Vector<Real>     a_cdr_densities,
+					       const Vector<RealVect> a_cdr_gradients,
+					       const Vector<Real>     a_rte_densities,
+					       const RealVect         a_E,
+					       const RealVect         a_pos,
+					       const Real             a_dx,
+					       const Real             a_dt,
+					       const Real             a_time,
+					       const Real             a_kappa) const{
+
+  for (int i = 0; i < a_cdr_sources.size(); i++){
+    a_cdr_sources[i] = 0.0;
+  }
+
+  const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
   const Real Te              = Max(300., 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb));  // Kelvin
   const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
 
-  if(electron_energy > 1.E12) std::cout << electron_energy << std::endl;
+#if 1 // Debug
+  if(electron_energy > 1.E6) std::cout << electron_energy << std::endl;
+#endif
 
   // Room for improvement: The best thing would be to store the rate coefficients as matrices and then do S = K*n
   
@@ -321,159 +357,165 @@ Vector<Real> air9eed_bourdon::compute_cdr_source_terms(const Real              a
   // Compute electron velocity, both drift and diffusion
   const RealVect ve = this->compute_e_mobility(electron_energy)*(-a_E);
   const Real     De = this->compute_e_diffco(electron_energy);
-  const RealVect je = ve*n_e - De*a_grad_cdr[m_electron_idx];
+  const RealVect je = ve*n_e - De*a_cdr_gradients[m_electron_idx];
 
   // Joule heating
   loss = PolyGeom::dot(-je, a_E); 
-  source[m_eed_idx] += loss;
+  a_cdr_sources[m_eed_idx] += loss;
 
   // k1 reaction
   loss     = dE_k1;
   products = k1 * n_e * n_N2;
-  source[m_eed_idx]       -= products*loss; 
-  source[m_electron_idx]  += products;
-  source[m_N2plus_idx]    += products;
+  a_cdr_sources[m_eed_idx]       -= products*loss; 
+  a_cdr_sources[m_electron_idx]  += products;
+  a_cdr_sources[m_N2plus_idx]    += products;
 
   // k2 reaction
   loss     = dE_k2; 
   products = k2 * n_e * n_O2;
-  source[m_eed_idx]      -= products*loss;
-  source[m_electron_idx] += products;
-  source[m_O2plus_idx]   += products;
+  a_cdr_sources[m_eed_idx]      -= products*loss;
+  a_cdr_sources[m_electron_idx] += products;
+  a_cdr_sources[m_O2plus_idx]   += products;
 
   // k3 reaction. 
   products = k3 * n_N2p * n_N2 * m_N;
-  source[m_N2plus_idx] -= products;
-  source[m_N4plus_idx] += products;
+  a_cdr_sources[m_N2plus_idx] -= products;
+  a_cdr_sources[m_N4plus_idx] += products;
 
   // k4 reaction
   products = k4 * n_N4p * n_O2;
-  source[m_N4plus_idx]  -= products;
-  source[m_O2plus_idx]  += products;
+  a_cdr_sources[m_N4plus_idx]  -= products;
+  a_cdr_sources[m_O2plus_idx]  += products;
   
   // k5 reaction
   products = k5 * n_N2p * n_O2;
-  source[m_N2plus_idx] -= products;
-  source[m_O2plus_idx] += products;
+  a_cdr_sources[m_N2plus_idx] -= products;
+  a_cdr_sources[m_O2plus_idx] += products;
 
   // k6 reaction
   products = k6 * n_O2p * n_N2 * n_N2;
-  source[m_O2plus_idx]   -= products;
-  source[m_O2plusN2_idx] += products;
+  a_cdr_sources[m_O2plus_idx]   -= products;
+  a_cdr_sources[m_O2plusN2_idx] += products;
 
   // k7 reaction
   products = k7 * n_O2pN2 * n_N2;
-  source[m_O2plusN2_idx] -= products;
-  source[m_O2plus_idx]   += products;
+  a_cdr_sources[m_O2plusN2_idx] -= products;
+  a_cdr_sources[m_O2plus_idx]   += products;
 
   // k8 reaction
   products = k8 * n_O2pN2 * n_O2;
-  source[m_O2plusN2_idx] -= products;
-  source[m_O4plus_idx]   += products;
+  a_cdr_sources[m_O2plusN2_idx] -= products;
+  a_cdr_sources[m_O4plus_idx]   += products;
   
   // k9 reaction
   products = k9 * n_O2p * n_O2 * m_N;
-  source[m_O2plus_idx] -= products;
-  source[m_O4plus_idx] += products;
+  a_cdr_sources[m_O2plus_idx] -= products;
+  a_cdr_sources[m_O4plus_idx] += products;
 
   // k10 reaction
   products = k10 * n_e * n_O4p;
-  source[m_electron_idx] -= products;
-  source[m_O4plus_idx]   -= products;
+  a_cdr_sources[m_electron_idx] -= products;
+  a_cdr_sources[m_O4plus_idx]   -= products;
 
   // k11 reaction
   products = k11 * n_e * n_O2p;
-  source[m_electron_idx] -= products;
-  source[m_O2plus_idx]   -= products;
+  a_cdr_sources[m_electron_idx] -= products;
+  a_cdr_sources[m_O2plus_idx]   -= products;
 
   // k12 reaction
   products = k12 * n_e * n_O2 * n_O2;
-  source[m_electron_idx] -= products;
-  source[m_O2minus_idx]  += products;
+  a_cdr_sources[m_electron_idx] -= products;
+  a_cdr_sources[m_O2minus_idx]  += products;
 
   // k13 reaction
   products = k13 * n_O2m * n_O4p;
-  source[m_O2minus_idx] -= products;
-  source[m_O4plus_idx]  -= products;
+  a_cdr_sources[m_O2minus_idx] -= products;
+  a_cdr_sources[m_O4plus_idx]  -= products;
 
   // k14 reaction
   products = k14 * n_O2m * n_O4p * m_N;
-  source[m_O2minus_idx] -= products;
-  source[m_O4plus_idx]  -= products;
+  a_cdr_sources[m_O2minus_idx] -= products;
+  a_cdr_sources[m_O4plus_idx]  -= products;
 
   // k15 reaction
   products = k15 * n_O2m * n_O2p * m_N;
-  source[m_O2minus_idx] -= products;
-  source[m_O2plus_idx]  -= products;
+  a_cdr_sources[m_O2minus_idx] -= products;
+  a_cdr_sources[m_O2plus_idx]  -= products;
   
+  // This is here because the adapted functions
 #if 1
   // k16 reaction
   loss     = dE_k16;
   products = k16 * n_e * n_O2;
-  source[m_eed_idx] -= products*loss;
+  a_cdr_sources[m_eed_idx] -= products*loss;
 
   // k17 reaction
   loss     = dE_k17;
   products = k17 * n_e * n_O2;
-  source[m_eed_idx] -= products*loss;
+  a_cdr_sources[m_eed_idx] -= products*loss;
 
   // k18 reaction
   loss     = dE_k18;
   products = k18 * n_e * n_O2;
-  source[m_eed_idx]      -= products*loss;
-  source[m_electron_idx] -= products;
-  source[m_Ominus_idx]   += products;
+  a_cdr_sources[m_eed_idx]      -= products*loss;
+  a_cdr_sources[m_electron_idx] -= products;
+  a_cdr_sources[m_Ominus_idx]   += products;
 
   // k19 reaction
   products = k19 * n_Om * n_O2p;
-  source[m_Ominus_idx] -= products;
-  source[m_O2plus_idx] -= products;
+  a_cdr_sources[m_Ominus_idx] -= products;
+  a_cdr_sources[m_O2plus_idx] -= products;
 
   // k20 reaction
   loss     = dE_k20;
   products = k20 * n_e * n_N2;
-  source[m_eed_idx] -= products*loss;
+  a_cdr_sources[m_eed_idx] -= products*loss;
 
   // k21 reaction
   loss     = dE_k21;
   products = k21 * n_e * n_O2;
-  source[m_eed_idx] -= products*loss;
+  a_cdr_sources[m_eed_idx] -= products*loss;
 #endif
 
   // Photoionization gamma + O2 -> e + O2+
-#if 1
-  const air9eed_bourdon::photon_one*   photon1 = static_cast<air9eed_bourdon::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const air9eed_bourdon::photon_two*   photon2 = static_cast<air9eed_bourdon::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const air9eed_bourdon::photon_three* photon3 = static_cast<air9eed_bourdon::photon_three*> (&(*m_photons[m_photon3_idx]));
+  const air9eed_bourdon::photon_one*   photon1 = static_cast<air9eed_bourdon::photon_one*>   (&(*m_rte_species[m_photon1_idx]));
+  const air9eed_bourdon::photon_two*   photon2 = static_cast<air9eed_bourdon::photon_two*>   (&(*m_rte_species[m_photon2_idx]));
+  const air9eed_bourdon::photon_three* photon3 = static_cast<air9eed_bourdon::photon_three*> (&(*m_rte_species[m_photon3_idx]));
   products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
 								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
 								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
 
-  source[m_electron_idx] += products;
-  source[m_O2plus_idx]   += products;
-#endif
+  a_cdr_sources[m_electron_idx] += products;
+  a_cdr_sources[m_O2plus_idx]   += products;
+
+
+  // Photon source terms
+  const Real kphot = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
+
+  a_rte_sources[m_photon1_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  a_rte_sources[m_photon2_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  a_rte_sources[m_photon3_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
 
 
 #if 0 // Debug
   Real sum = 0.0;
-  sum += -source[1] + source[2] + source[3] + source[4] + source[5] + source[6] - source[7] - source[8];
+  sum += -a_cdr_sources[1] + a_cdr_sources[2] + a_cdr_sources[3] + a_cdr_sources[4] + a_cdr_sources[5] + a_cdr_sources[6] - a_cdr_sources[7] - a_cdr_sources[8];
   std::cout << sum << std::endl;
 #endif
 
-  return source;
 }
 
 Vector<Real> air9eed_bourdon::compute_cdr_domain_fluxes(const Real           a_time,
-						const RealVect       a_pos,
-						const int            a_dir,
-						const Side::LoHiSide a_side,
-						const RealVect       a_E,
-						const Vector<Real>   a_cdr_densities,
-						const Vector<Real>   a_cdr_velocities,
-						const Vector<Real>   a_cdr_gradients,
-						const Vector<Real>   a_rte_fluxes,
-						const Vector<Real>   a_extrap_cdr_fluxes) const{
-  Vector<Real> fluxes(m_num_species, 0.0);
+							const RealVect       a_pos,
+							const int            a_dir,
+							const Side::LoHiSide a_side,
+							const RealVect       a_E,
+							const Vector<Real>   a_cdr_densities,
+							const Vector<Real>   a_cdr_velocities,
+							const Vector<Real>   a_cdr_gradients,
+							const Vector<Real>   a_rte_fluxes,
+							const Vector<Real>   a_extrap_cdr_fluxes) const{
+  Vector<Real> fluxes(m_num_cdr_species, 0.0);
 
   return a_extrap_cdr_fluxes;
 
@@ -484,105 +526,22 @@ Vector<Real> air9eed_bourdon::compute_cdr_domain_fluxes(const Real           a_t
   return fluxes;
 }
 
-Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
-					 const RealVect     a_pos,
-					 const RealVect     a_normal,
-					 const RealVect     a_E,
-					 const Vector<Real> a_cdr_densities,
-					 const Vector<Real> a_cdr_velocities,
-					 const Vector<Real> a_cdr_gradients,
-					 const Vector<Real> a_rte_fluxes,
-					 const Vector<Real> a_extrap_cdr_fluxes,
-					 const Real         a_townsend2,
-					 const Real         a_quantum_efficiency) const {
-
-  Vector<Real> fluxes(m_num_species, 0.0);
-
-  
-#if 1 // debug
-  return a_extrap_cdr_fluxes;
-#endif
-  
-  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
-  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
-  
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
-  const Real Te              = 2.0*electron_energy*units::s_Qe/(3.0*units::s_kb);
-  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
-  const Real ion_mass        = 2.65E-26; // kg
-  const Real vth_g           = sqrt(units::s_kb*m_Tg/(units::s_pi*ion_mass));  // Ion thermal velocity
-  const Real vth_e           = sqrt(units::s_kb*Te/(units::s_pi*units::s_me)); // Electron thermal velocity
 
 
-  // Switch for setting drift flux to zero for charge species
-  Vector<Real> aj(m_num_species, 0.0);
-  for (int i = 0; i < m_num_species; i++){
-    if(data_ops::sgn(m_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
-      aj[i] = 1.0;
-    }
-    else {
-      aj[i] = 0.0;
-    }
-  }
 
-  // Drift outflow for now
-  for (int i = 0; i < m_num_species; i++){
-    //fluxes[i] = Max(0.0, aj[i]*a_extrap_cdr_fluxes[i]);
-    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
-  }
-
-  return fluxes;
-}
-
-Vector<Real> air9eed_bourdon::compute_cdr_electrode_fluxes(const Real         a_time,
-						   const RealVect     a_pos,
-						   const RealVect     a_normal,
-						   const RealVect     a_E,
-						   const Vector<Real> a_cdr_densities,
-						   const Vector<Real> a_cdr_velocities,
-						   const Vector<Real> a_cdr_gradients,
-						   const Vector<Real> a_rte_fluxes,
-						   const Vector<Real> a_extrap_cdr_fluxes) const {
-
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-				  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
-}
 
 Vector<Real> air9eed_bourdon::compute_cdr_dielectric_fluxes(const Real         a_time,
-						    const RealVect     a_pos,
-						    const RealVect     a_normal,
-						    const RealVect     a_E,
-						    const Vector<Real> a_cdr_densities,
-						    const Vector<Real> a_cdr_velocities,
-						    const Vector<Real> a_cdr_gradients,
-						    const Vector<Real> a_rte_fluxes,
-						    const Vector<Real> a_extrap_cdr_fluxes) const {
+							    const RealVect     a_pos,
+							    const RealVect     a_normal,
+							    const RealVect     a_E,
+							    const Vector<Real> a_cdr_densities,
+							    const Vector<Real> a_cdr_velocities,
+							    const Vector<Real> a_cdr_gradients,
+							    const Vector<Real> a_rte_fluxes,
+							    const Vector<Real> a_extrap_cdr_fluxes) const {
   
   return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
-}
-
-Vector<Real> air9eed_bourdon::compute_rte_source_terms(const Real         a_time,
-					       const Real             a_kappa,
-					       const Real             a_dx,
-					       const RealVect     a_pos,
-					       const RealVect     a_E,
-					       const Vector<Real> a_cdr_densities) const {
-
-  // We take the source terms as Se = alpha*Ne*ve
-  Vector<Real> ret(m_num_photons, 0.0);
-
-  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.E10 + a_cdr_densities[m_electron_idx]); // eV
-  const Real Te              = 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb);  // Kelvin
-  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
-  const Real k1              = this->compute_electron_N2_alpha(electron_energy); 
-  const Real Se              = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
-
-  ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  ret[m_photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-
-  return ret;
 }
 
 Real air9eed_bourdon::initial_sigma(const Real a_time, const RealVect a_pos) const {return 0.0;}
@@ -776,6 +735,136 @@ Real air9eed_bourdon::compute_e_N2_scattering_loss()              const {return 
 
 Real air9eed_bourdon::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-  return m_init_eed.get_entry(EbyN)*m_species[m_electron_idx]->initial_data(a_pos, a_time);
+  return m_init_eed.get_entry(EbyN)*m_cdr_species[m_electron_idx]->initial_data(a_pos, a_time);
 }
 
+Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
+						 const RealVect     a_pos,
+						 const RealVect     a_normal,
+						 const RealVect     a_E,
+						 const Vector<Real> a_cdr_densities,
+						 const Vector<Real> a_cdr_velocities,
+						 const Vector<Real> a_cdr_gradients,
+						 const Vector<Real> a_rte_fluxes,
+						 const Vector<Real> a_extrap_cdr_fluxes,
+						 const Real         a_townsend2,
+						 const Real         a_quantum_efficiency) const {
+
+  Vector<Real> fluxes(m_num_cdr_species, 0.0);
+
+  
+#if 1 // debug
+  return a_extrap_cdr_fluxes;
+#endif
+  
+  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
+  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
+  
+  const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
+  const Real Te              = 2.0*electron_energy*units::s_Qe/(3.0*units::s_kb);
+  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real ion_mass        = 2.65E-26; // kg
+  const Real vth_g           = sqrt(units::s_kb*m_Tg/(units::s_pi*ion_mass));  // Ion thermal velocity
+  const Real vth_e           = sqrt(units::s_kb*Te/(units::s_pi*units::s_me)); // Electron thermal velocity
+
+
+  // Switch for setting drift flux to zero for charge species
+  Vector<Real> aj(m_num_cdr_species, 0.0);
+  for (int i = 0; i < m_num_cdr_species; i++){
+    if(data_ops::sgn(m_cdr_species[i]->get_charge())*PolyGeom::dot(a_E, a_normal) < 0){
+      aj[i] = 1.0;
+    }
+    else {
+      aj[i] = 0.0;
+    }
+  }
+
+  // Drift outflow for now
+  for (int i = 0; i < m_num_cdr_species; i++){
+    //fluxes[i] = Max(0.0, aj[i]*a_extrap_cdr_fluxes[i]);
+    //    fluxes[i] = Max(0.0, a_extrap_cdr_fluxes[i]);
+  }
+
+  return fluxes;
+}
+
+Vector<Real> air9eed_bourdon::compute_cdr_electrode_fluxes(const Real         a_time,
+							   const RealVect     a_pos,
+							   const RealVect     a_normal,
+							   const RealVect     a_E,
+							   const Vector<Real> a_cdr_densities,
+							   const Vector<Real> a_cdr_velocities,
+							   const Vector<Real> a_cdr_gradients,
+							   const Vector<Real> a_rte_fluxes,
+							   const Vector<Real> a_extrap_cdr_fluxes) const {
+
+  const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
+  const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
+
+  Vector<Real> ret(m_num_cdr_species, 0.0);
+  if(cathode){
+    ret = this->compute_cathode_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
+				       a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+  }
+  else if(anode){
+    ret = this->compute_anode_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
+				     a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+  }
+
+  return ret;
+}
+
+Vector<Real> air9eed_bourdon::compute_anode_fluxes(const Real         a_time,
+						   const RealVect     a_pos,
+						   const RealVect     a_normal,
+						   const RealVect     a_E,
+						   const Vector<Real> a_cdr_densities,
+						   const Vector<Real> a_cdr_velocities,
+						   const Vector<Real> a_cdr_gradients,
+						   const Vector<Real> a_rte_fluxes,
+						   const Vector<Real> a_extrap_cdr_fluxes,
+						   const Real         a_townsend2,
+						   const Real         a_quantum_efficiency) const{
+  return a_extrap_cdr_fluxes;
+}
+
+Vector<Real> air9eed_bourdon::compute_cathode_fluxes(const Real         a_time,
+						     const RealVect     a_pos,
+						     const RealVect     a_normal,
+						     const RealVect     a_E,
+						     const Vector<Real> a_cdr_densities,
+						     const Vector<Real> a_cdr_velocities,
+						     const Vector<Real> a_cdr_gradients,
+						     const Vector<Real> a_rte_fluxes,
+						     const Vector<Real> a_extrap_cdr_fluxes,
+						     const Real         a_townsend2,
+						     const Real         a_quantum_efficiency) const {
+
+  Vector<Real> ret(m_num_cdr_species, 0.0);
+  
+  // Drift outflow for positive species. No inflow for the others just yet. 
+  for (int i = 0; i < m_num_cdr_species; i++){
+    ret[i] = (m_cdr_species[i]->get_charge() > 0) ? a_extrap_cdr_fluxes[i] : 0.0;
+  }
+
+  // Electron inflow due to ion impingement
+  ret[m_electron_idx] = 0.0;
+  ret[m_eed_idx] = 0.0;
+  for (int i = 0; i < m_num_cdr_species; i++){
+    const int q = m_cdr_species[i]->get_charge();
+    if(q > 0){
+      const Real flx = a_extrap_cdr_fluxes[i]*m_townsend2_electrode;
+      ret[m_electron_idx] -= flx;
+      ret[m_eed_idx]      -= (5./3.)*m_cathode_work*flx;
+    }
+  }
+
+  // Secondary emission from photons
+  for (int j = 0; j < m_num_rte_species; j++){
+
+  }
+
+  return ret;
+  // 
+  //  MayDay::Abort("air9eed_bourdon::compute_cathode_fluxes - negative streamer BC not implemented");
+}
