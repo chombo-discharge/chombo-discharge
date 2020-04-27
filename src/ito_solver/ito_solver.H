@@ -148,7 +148,7 @@ public:
   /*!
     @brief Cache the particles
   */
-  virtual void cache_state();
+  virtual void pre_regrid(const int a_base, const int a_old_finest_level);
 
   /*!
     @brief Add particles. Container version. 

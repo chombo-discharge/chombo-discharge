@@ -211,12 +211,15 @@ bool brownian_walker_stepper::need_to_regrid() {
 }
 
 void brownian_walker_stepper::cache() {
-  CH_TIME("brownian_walker_stepper::deallocate");
+  CH_TIME("brownian_walker_stepper::cache");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::deallocate" << endl;
+    pout() << "brownian_walker_stepper::cache" << endl;
   }
 
-  m_solver->cache_state();
+  const int base = 0;
+  const int finest_level = m_amr->get_finest_level();
+  
+  m_solver->pre_regrid(base, finest_level);
 }
 
 void brownian_walker_stepper::deallocate() {

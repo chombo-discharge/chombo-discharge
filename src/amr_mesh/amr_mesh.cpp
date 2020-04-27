@@ -178,6 +178,8 @@ void amr_mesh::allocate(EBAMRCellData& a_data, const phase::which_phase a_phase,
   }
 }
 
+
+
 void amr_mesh::allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost){
   CH_TIME("amr_mesh::allocate(flux)");
   if(m_verbosity > 5){
@@ -355,6 +357,231 @@ void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghos
 
     a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
       (new LevelData<MFBaseIVFAB>(m_grids[lvl], ignored, ghost*IntVect::Unit, factory));
+  }
+}
+
+
+void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_base){
+  CH_TIME("amr_mesh::reallocate(cell)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::reallocate(cell)" << endl;
+  }
+
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp     = a_data[0]->nComp();
+
+  a_data.resize(1 + m_finest_level);
+
+  const int lmin = Max(0, a_base+1);
+  
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+    EBCellFactory fact(m_ebisl[a_phase][lvl]);
+
+    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
+      (new LevelData<EBCellFAB>(m_grids[lvl], ncomp, ghost, fact));
+
+    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+  }
+}
+
+void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_base){
+  CH_TIME("amr_mesh::reallocate(ebamrflux)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::reallocate(ebamrflux)" << endl;
+  }
+
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp     = a_data[0]->nComp();
+
+  a_data.resize(1 + m_finest_level);
+
+  const int lmin = Max(0, a_base+1);
+  
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+    EBFluxFactory fact(m_ebisl[a_phase][lvl]);
+
+    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>(m_grids[lvl], ncomp, ghost, fact));
+
+    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+  }
+}
+
+void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_base){
+  CH_TIME("amr_mesh::allocate(baseiv)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(baseiv)" << endl;
+  }
+
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp     = a_data[0]->nComp();
+
+  a_data.resize(1 + m_finest_level);
+
+  const int lmin = Max(0, a_base+1);
+
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+
+    LayoutData<IntVectSet> irreg_sets(m_grids[lvl]);
+    for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
+      Box box = m_grids[lvl].get(dit());
+      box.grow(ghost);
+      box &= m_domains[lvl];
+
+      irreg_sets[dit()] = m_ebisl[a_phase][lvl][dit()].getIrregIVS(box);
+    }
+
+    BaseIVFactory<Real> fact(m_ebisl[a_phase][lvl], irreg_sets);
+
+    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
+      (new LevelData<BaseIVFAB<Real> >(m_grids[lvl], ncomp, ghost, fact));
+
+    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+  }
+}
+
+void amr_mesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_base){
+  CH_TIME("amr_mesh::reallocate(EBAMRIFData)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::reallocate(EBAMRIFData)" << endl;
+  }
+
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp     = a_data[0]->nComp();
+
+  a_data.resize(1 + m_finest_level);
+
+  const int lmin = Max(0, a_base+1);
+
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+
+    DomainFluxIFFABFactory fact(m_ebisl[a_phase][lvl],m_domains[lvl]);
+
+    a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
+      (new LevelData<DomainFluxIFFAB>(m_grids[lvl], ncomp, ghost, fact));
+  }
+}
+
+void amr_mesh::reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_base){
+  CH_TIME("amr_mesh::reallocate(EBAMRBool)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::reallocate(EBAMRBool)" << endl;
+  }
+  
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp     = a_data[0]->nComp();
+
+  a_data.resize(1 + m_finest_level);
+
+  const int lmin = Max(0, a_base+1);
+
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+
+    a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
+      (new LevelData<BaseFab<bool> >(m_grids[lvl], ncomp, ghost));
+  }
+}
+
+void amr_mesh::reallocate(MFAMRCellData& a_data, const int a_base){
+  CH_TIME("amr_mesh::reallocate(mf cell)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::reallocate(mf cell)" << endl;
+  }
+
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp = a_data[0]->nComp();
+  const int ignored = ncomp;
+  const int nphases = m_mfis->num_phases();
+
+  a_data.resize(1 + m_finest_level);
+
+  const int lmin = Max(0, a_base+1);
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+    Vector<EBISLayout> ebisl(nphases);
+    Vector<int>        comps(nphases, ncomp);
+
+    ebisl[phase::gas]   = this->get_ebisl(phase::gas)[lvl];
+    if(!ebis_sol.isNull()){ // Single phase
+      ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    }
+    
+    MFCellFactory factory(ebisl, comps);
+
+    a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> >
+      (new LevelData<MFCellFAB>(m_grids[lvl], ignored, ghost, factory));
+
+    MFLevelDataOps::setVal(*a_data[lvl], 0.0);
+  }
+}
+
+void amr_mesh::reallocate(MFAMRFluxData& a_data, const int a_base){
+  CH_TIME("amr_mesh::allocate(mf flux)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(mf flux)" << endl;
+  }
+
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp     = a_data[0]->nComp();
+  const int ignored   = ncomp;
+  const int nphases   = m_mfis->num_phases();
+
+  a_data.resize(1 + m_finest_level);
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  const int lmin = Max(0, a_base+1);
+
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+    Vector<EBISLayout> ebisl(nphases);
+    Vector<int>        comps(nphases, ncomp);
+
+    ebisl[phase::gas]   = this->get_ebisl(phase::gas)[lvl];
+    if(!ebis_sol.isNull()){
+      ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    }
+    
+    MFFluxFactory factory(ebisl, comps);
+
+    a_data[lvl] = RefCountedPtr<LevelData<MFFluxFAB> >
+      (new LevelData<MFFluxFAB>(m_grids[lvl], ignored, ghost, factory));
+  }
+}
+
+void amr_mesh::reallocate(MFAMRIVData& a_data, const int a_base){
+  CH_TIME("amr_mesh::allocate(mf baseivfab)");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::allocate(mf baseivfab)" << endl;
+  }
+
+  const IntVect ghost = a_data[0]->ghostVect();
+  const int ncomp     = a_data[0]->nComp();
+  const int ignored   = ncomp;
+  const int nphases   = m_mfis->num_phases();
+
+  a_data.resize(1 + m_finest_level);
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  const int lmin = Max(0, a_base+1);
+
+  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+    Vector<EBISLayout> ebisl(nphases);
+    Vector<int>        comps(nphases, ncomp);
+
+    ebisl[phase::gas]   = this->get_ebisl(phase::gas)[lvl];
+    if(!ebis_sol.isNull()){
+      ebisl[phase::solid] = this->get_ebisl(phase::solid)[lvl];
+    }
+    
+    MFBaseIVFABFactory factory(ebisl, comps);
+
+    a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
+      (new LevelData<MFBaseIVFAB>(m_grids[lvl], ignored, ghost, factory));
   }
 }
 

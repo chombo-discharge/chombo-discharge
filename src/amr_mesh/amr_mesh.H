@@ -132,25 +132,21 @@ public:
 
   /*!
     @brief Allocate a data holder. 
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
   /*!
     @brief Allocate a data holder. 
-    @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_ncomp, const int a_ghost = -1);
 
@@ -176,6 +172,48 @@ public:
     @note This routines _allocates_, so if a_data is not empty you're leaking memory
   */
   virtual void allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghost = -1);
+  
+  /*!
+    @brief Reallocate data. 
+    @details This does not touch levels below or equal to a_base. If a_base is < 0, everything is reallocated. 
+    Size of ghost vectors and components is maintained. 
+  */
+  virtual void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_base);
+
+  /*!
+    @brief Reallocate data. 
+  */
+  virtual void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_base);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_base);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_base);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_base);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(MFAMRCellData& a_data, const int a_base);
+
+  /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(MFAMRFluxData& a_data, const int a_base);
+  
+  /*!
+    @brief Reallocate data above a_base
+  */
+  virtual void reallocate(MFAMRIVData& a_data, const int a_base);
 
   /*!
     @brief Allocate a data holder over the intersecting regions of the mfis

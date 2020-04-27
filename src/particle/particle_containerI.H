@@ -50,16 +50,18 @@ void particle_container<P>::define(const Vector<DisjointBoxLayout>& a_grids,
     m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
   }
 
-  this->setup_pvr();
-  this->setup_particle_data();
+  const int base = 0;
+  
+  this->setup_pvr(base, m_finest_level);
+  this->setup_particle_data(base, m_finest_level);
 
   m_is_defined = true;
 }
 
 template <class P>
-void particle_container<P>::setup_pvr(){
-  m_pvr.resize(1 + m_finest_level);
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+void particle_container<P>::setup_pvr(const int a_base, const int a_finest_level){
+  m_pvr.resize(1 + a_finest_level);
+  for (int lvl = a_base; lvl <= a_finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_grids[lvl];
     const ProblemDomain& domain  = m_domains[lvl];
 
@@ -76,10 +78,10 @@ void particle_container<P>::setup_pvr(){
 }
 
 template <class P>
-void particle_container<P>::setup_particle_data(){
-  m_particles.resize(1 + m_finest_level);
+void particle_container<P>::setup_particle_data(const int a_base, const int a_finest_level){
+  m_particles.resize(1 + a_finest_level);
 
-  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_base; lvl <= a_finest_level; lvl++){
     m_particles[lvl] = RefCountedPtr<ParticleData<P> > (new ParticleData<P>(m_grids[lvl],
 									    m_domains[lvl],
 									    m_blocking_factor,
@@ -247,5 +249,71 @@ void particle_container<P>::remap_lost_particles(){
 			  m_ref_rat[lvl-1],
 			  false, 
 			  m_prob_lo);
+  }
+}
+
+template <class P>
+void particle_container<P>::pre_regrid(const int a_base){
+  CH_assert(m_is_defined);
+
+  // TLDR: This code moves all the particles above level a_base onto level a_base and remaps them there.
+  //       The outcast lists should be empty at the end of this call
+
+  ParticleData<P>& baseParticles = (*m_particles[a_base]);
+  for (int lvl = a_base+1; lvl <= m_finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      ListBox<P>& p = (*m_particles[lvl])[dit()];
+      
+      for (ListIterator<P> li(p.listItems()); li.ok(); ){
+	baseParticles.outcast().transfer(li);
+      }
+    }
+  }
+
+  // Now remap
+  baseParticles.remapOutcast();
+}
+
+template <class P>
+void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
+				   const Vector<ProblemDomain>&     a_domains,
+				   const Vector<Real>&              a_dx,
+				   const Vector<int>&               a_ref_rat,
+				   const int                        a_base,
+				   const int                        a_newFinestLevel){
+
+  // Update this stuff
+  m_grids        = a_grids;
+  m_domains      = a_domains;
+  m_ref_rat      = a_ref_rat;
+  m_finest_level = a_newFinestLevel;
+
+  m_dx.resize(1 + m_finest_level);
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
+  }
+
+  this->setup_pvr(a_base, m_finest_level);
+  this->setup_particle_data(a_base, m_finest_level);
+
+  // Now move particles that are on a_base up to their finest levels if they fit in the PVR
+  for (int lvl = a_base+1; lvl <= m_finest_level; lvl++){
+    const bool has_coar = lvl > 0;
+    
+    if(has_coar){
+      collectValidParticles(m_particles[lvl]->outcast(),
+			    *m_particles[lvl-1],
+			    m_pvr[lvl]->mask(),
+			    m_dx[lvl],
+			    m_ref_rat[lvl],
+			    false, 
+			    m_prob_lo);
+    }
+
+    // Rebin this level
+    m_particles[lvl]->gatherOutcast();
+    m_particles[lvl]->remapOutcast();
   }
 }

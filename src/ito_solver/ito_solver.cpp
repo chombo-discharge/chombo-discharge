@@ -297,12 +297,11 @@ void ito_solver::initial_data(){
     }
   }
 #endif
-  
 
   // Deposit the particles
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
   
-#if 1 // Experimental code. Compute the number of particles in each box
+#if 0 // Experimental code. Compute the number of particles in each box
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     Vector<Box> oldBoxes(0);
@@ -358,12 +357,35 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
     pout() << m_name + "::regrid" << endl;
   }
 
-  MayDay::Abort("ito_solver::regrid - not implemented");
+  // Reallocate mesh data
+  m_amr->reallocate(m_state,   m_phase, a_lmin);
+  m_amr->reallocate(m_scratch, m_phase, a_lmin);
 
-  // This reallocates all internal stuff. After this, the only object with any knowledge of the past
-  // is m_particle_cache
-  this->allocate_internals();
+  // Only allocate memory if we actually have a mobile solver
+  if(m_mobile){
+    m_amr->reallocate(m_velo_cell, m_phase, a_lmin);
+  }
+  else{ 
+    m_amr->allocate_ptr(m_velo_cell);
+  }
 
+  // Only allocate memory if we actually a diffusion solver
+  if(m_diffusive){
+    m_amr->reallocate(m_diffco_cell, m_phase, a_lmin);
+  }
+  else{
+    m_amr->allocate_ptr(m_diffco_cell);
+  }
+
+  // Particle data regrids
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
+
+  m_particles.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_eb_particles.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_domain_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 }
 
 void ito_solver::set_species(RefCountedPtr<ito_species>& a_species){
@@ -413,7 +435,7 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_eb_particles,     m_pvr_buffer);
   m_amr->allocate(m_domain_particles, m_pvr_buffer);
 
-#if 1 // Experimental code for getting the number of particles per cell
+#if 0 // Experimental code for getting the number of particles per cell
   Vector<LevelData<BaseEBCellFAB<int> >* > m_ppc(1 + m_amr->get_finest_level());
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
@@ -729,14 +751,13 @@ bool ito_solver::is_diffusive() const{
   return m_diffusive;
 }
 
-void ito_solver::cache_state(){
-  CH_TIME("ito_solver::cache_state");
+void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
+  CH_TIME("ito_solver::pre_regrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::cache_state" << endl;
+    pout() << m_name + "::pre_regrid" << endl;
   }
 
-  m_amr->allocate(m_particle_cache, m_pvr_buffer);
-  m_particles.cache_particles(m_particle_cache);
+  m_particles.pre_regrid(a_base);
 }
 
 AMRParticles<ito_particle>& ito_solver::get_particles(){

@@ -64,6 +64,21 @@ public:
 	      const int                        a_pvr_buffer);
 
   /*!
+    @brief Regrid function. a_base is the coarsest grid level which did NOT change
+  */
+  void regrid(const Vector<DisjointBoxLayout>& a_grids,
+	      const Vector<ProblemDomain>&     a_domains,
+	      const Vector<Real>&              a_dx,
+	      const Vector<int>&               a_ref_rat,
+	      const int                        a_base,
+	      const int                        a_newFinestLevel);
+
+  /*!
+    @brief Cache particles in a pre-regrid form. a_base is the coarsest grid level which will NOT change
+  */
+  void pre_regrid(const int a_base);
+
+  /*!
     @brief Get all particles on all levels
   */
   AMRParticles<P>& get_particles();
@@ -102,7 +117,7 @@ public:
     @brief Move the particles to a different container. 
     @note  The grids MUST be the same for both containers
   */
-  void cache_particles(particle_container<P>& a_otherContainer); 
+  void cache_particles(particle_container<P>& a_otherContainer);
 
 protected:
 
@@ -119,11 +134,9 @@ protected:
 
   AMRParticles<P> m_particles;
   AMRPVR m_pvr;
-  
 
-
-  void setup_pvr();
-  void setup_particle_data();
+  void setup_pvr(const int a_base, const int a_finest_level);
+  void setup_particle_data(const int a_base, const int a_finest_level);
   void remap_lost_particles();
 };
 
