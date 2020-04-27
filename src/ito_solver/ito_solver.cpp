@@ -339,8 +339,6 @@ void ito_solver::initial_data(){
     Vector<int> procs;
     load_balance::load_balance_boxes(procs, newLoads, newBoxes);
 
-
-
     if(procID() == 0) std::cout << "\nnew load balancing: " << std::endl;
     for (int i = 0; i < newLoads.size(); i++){
       if(procID() == 0){
@@ -360,7 +358,7 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   // Reallocate mesh data
   m_amr->reallocate(m_state,   m_phase, a_lmin);
   m_amr->reallocate(m_scratch, m_phase, a_lmin);
-
+  
   // Only allocate memory if we actually have a mobile solver
   if(m_mobile){
     m_amr->reallocate(m_velo_cell, m_phase, a_lmin);
@@ -669,7 +667,6 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
   m_amr->interp_ghost(a_state, m_phase);
 }
 
-
 void ito_solver::deposit_weights(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){
   CH_TIME("ito_solver::is_mobile");
   if(m_verbosity > 5){
@@ -758,6 +755,15 @@ void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
   }
 
   m_particles.pre_regrid(a_base);
+}
+
+particle_container<ito_particle>& ito_solver::get_particle_container(){
+  CH_TIME("ito_solver::get_particle_container");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_particle_container" << endl;
+  }
+
+  return m_particles;
 }
 
 AMRParticles<ito_particle>& ito_solver::get_particles(){

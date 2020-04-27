@@ -24,6 +24,8 @@ brownian_walker_stepper::brownian_walker_stepper(){
   
   pp.get("max_diffu_hop", m_max_diffu_hop);
   pp.get("max_drift_hop", m_max_drift_hop);
+
+  m_verbosity = -1;
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -216,6 +218,7 @@ void brownian_walker_stepper::cache() {
     pout() << "brownian_walker_stepper::cache" << endl;
   }
 
+  // TLDR: base is the finest level that DOES NOT CHANGE
   const int base = 0;
   const int finest_level = m_amr->get_finest_level();
   
@@ -237,7 +240,7 @@ void brownian_walker_stepper::setup_solvers() {
 
   m_species = RefCountedPtr<ito_species> (new brownian_walker_species());
 
-  m_solver->set_verbosity(-1);
+  m_solver->set_verbosity(-10);
   m_solver->parse_options();
   m_solver->set_amr(m_amr);
   m_solver->set_species(m_species);
@@ -338,21 +341,17 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 		const RealVect n     = ebisbox.normal(vof);
 		const RealVect bback = 2.0*n*PolyGeom::dot((newPos - xb), n);
 		p.position() -= bback;
-
-		// If the particle is STILL inside the EB, displace it with the signed distance function
 	      }
-
 	    }
-
-
 	  }
 	}
       }
     }
   }
 
-  // Remap the particles and deposit them
   m_solver->remap();
+
+  // Deposit particles
   m_solver->deposit_particles();
 
   return a_dt;

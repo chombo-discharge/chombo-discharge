@@ -178,42 +178,42 @@ public:
     @details This does not touch levels below or equal to a_base. If a_base is < 0, everything is reallocated. 
     Size of ghost vectors and components is maintained. 
   */
-  virtual void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_base);
+  virtual void reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data. 
   */
-  virtual void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_base);
+  virtual void reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_base);
+  virtual void reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_base);
+  virtual void reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_base);
+  virtual void reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(MFAMRCellData& a_data, const int a_base);
+  virtual void reallocate(MFAMRCellData& a_data, const int a_lmin);
 
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(MFAMRFluxData& a_data, const int a_base);
+  virtual void reallocate(MFAMRFluxData& a_data, const int a_lmin);
   
   /*!
     @brief Reallocate data above a_base
   */
-  virtual void reallocate(MFAMRIVData& a_data, const int a_base);
+  virtual void reallocate(MFAMRIVData& a_data, const int a_lmin);
 
   /*!
     @brief Allocate a data holder over the intersecting regions of the mfis
@@ -458,6 +458,7 @@ public:
 
   /*!
     @brief Regrid function. Generate new grids. 
+    @details lmin is the finest level that changed. 
   */
   virtual void regrid(const Vector<IntVectSet>& a_tags,
 		      const int a_lmin,

@@ -181,6 +181,11 @@ public:
   virtual bool is_diffusive() const;
 
   /*!
+    @brief Get the particle container
+  */
+  virtual particle_container<ito_particle>& get_particle_container();
+
+  /*!
     @brief Get particles
   */
   virtual AMRParticles<ito_particle>& get_particles();

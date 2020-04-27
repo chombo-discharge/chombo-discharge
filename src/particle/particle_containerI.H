@@ -215,6 +215,9 @@ void particle_container<P>::remap(){
   // do collect those, too
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     if(m_particles[lvl]->numOutcast() > 0){
+#if 0 //
+      if(procID() == 0) std::cout << "particle_container<P>::remap - outcast list not empty" << std::endl;
+#endif
       this->remap_lost_particles();
       break;
     }
@@ -253,6 +256,19 @@ void particle_container<P>::remap_lost_particles(){
 }
 
 template <class P>
+void particle_container<P>::levelRemap(){
+  for (int lvl = 0; lvl <= m_finest_level; lvl++){
+    this->levelRemap(lvl);
+  }
+}
+
+template <class P>
+void particle_container<P>::levelRemap(const int a_lvl){
+  m_particles[a_lvl]->gatherOutcast();
+  m_particles[a_lvl]->remapOutcast();
+}
+
+template <class P>
 void particle_container<P>::pre_regrid(const int a_base){
   CH_assert(m_is_defined);
 
@@ -281,7 +297,7 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
 				   const Vector<ProblemDomain>&     a_domains,
 				   const Vector<Real>&              a_dx,
 				   const Vector<int>&               a_ref_rat,
-				   const int                        a_base,
+				   const int                        a_lmin,
 				   const int                        a_newFinestLevel){
 
   // Update this stuff
@@ -295,11 +311,11 @@ void particle_container<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     m_dx[lvl] = a_dx[lvl]*RealVect::Unit;
   }
 
-  this->setup_pvr(a_base, m_finest_level);
-  this->setup_particle_data(a_base, m_finest_level);
+  this->setup_pvr(a_lmin, m_finest_level);
+  this->setup_particle_data(a_lmin, m_finest_level);
 
   // Now move particles that are on a_base up to their finest levels if they fit in the PVR
-  for (int lvl = a_base+1; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     const bool has_coar = lvl > 0;
     
     if(has_coar){

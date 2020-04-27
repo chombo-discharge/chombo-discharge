@@ -361,7 +361,7 @@ void amr_mesh::allocate(MFAMRIVData& a_data, const int a_ncomp, const int a_ghos
 }
 
 
-void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_base){
+void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(cell)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(cell)" << endl;
@@ -372,9 +372,9 @@ void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phas
 
   a_data.resize(1 + m_finest_level);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
   
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     EBCellFactory fact(m_ebisl[a_phase][lvl]);
 
     a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
@@ -384,7 +384,7 @@ void amr_mesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phas
   }
 }
 
-void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_base){
+void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(ebamrflux)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(ebamrflux)" << endl;
@@ -395,9 +395,9 @@ void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phas
 
   a_data.resize(1 + m_finest_level);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
   
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     EBFluxFactory fact(m_ebisl[a_phase][lvl]);
 
     a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>(m_grids[lvl], ncomp, ghost, fact));
@@ -406,7 +406,7 @@ void amr_mesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phas
   }
 }
 
-void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_base){
+void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::allocate(baseiv)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(baseiv)" << endl;
@@ -417,9 +417,9 @@ void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase,
 
   a_data.resize(1 + m_finest_level);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
 
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
     LayoutData<IntVectSet> irreg_sets(m_grids[lvl]);
     for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
@@ -439,7 +439,7 @@ void amr_mesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase,
   }
 }
 
-void amr_mesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_base){
+void amr_mesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(EBAMRIFData)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(EBAMRIFData)" << endl;
@@ -450,9 +450,9 @@ void amr_mesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase,
 
   a_data.resize(1 + m_finest_level);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
 
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
     DomainFluxIFFABFactory fact(m_ebisl[a_phase][lvl],m_domains[lvl]);
 
@@ -461,7 +461,7 @@ void amr_mesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase,
   }
 }
 
-void amr_mesh::reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_base){
+void amr_mesh::reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(EBAMRBool)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(EBAMRBool)" << endl;
@@ -472,16 +472,16 @@ void amr_mesh::reallocate(EBAMRBool& a_data, const int a_ncomp, const int a_base
 
   a_data.resize(1 + m_finest_level);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
 
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
 
     a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
       (new LevelData<BaseFab<bool> >(m_grids[lvl], ncomp, ghost));
   }
 }
 
-void amr_mesh::reallocate(MFAMRCellData& a_data, const int a_base){
+void amr_mesh::reallocate(MFAMRCellData& a_data, const int a_lmin){
   CH_TIME("amr_mesh::reallocate(mf cell)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::reallocate(mf cell)" << endl;
@@ -494,12 +494,12 @@ void amr_mesh::reallocate(MFAMRCellData& a_data, const int a_base){
 
   a_data.resize(1 + m_finest_level);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
 
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, ncomp);
 
@@ -517,7 +517,7 @@ void amr_mesh::reallocate(MFAMRCellData& a_data, const int a_base){
   }
 }
 
-void amr_mesh::reallocate(MFAMRFluxData& a_data, const int a_base){
+void amr_mesh::reallocate(MFAMRFluxData& a_data, const int a_lmin){
   CH_TIME("amr_mesh::allocate(mf flux)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(mf flux)" << endl;
@@ -533,9 +533,9 @@ void amr_mesh::reallocate(MFAMRFluxData& a_data, const int a_base){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
 
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, ncomp);
 
@@ -551,7 +551,7 @@ void amr_mesh::reallocate(MFAMRFluxData& a_data, const int a_base){
   }
 }
 
-void amr_mesh::reallocate(MFAMRIVData& a_data, const int a_base){
+void amr_mesh::reallocate(MFAMRIVData& a_data, const int a_lmin){
   CH_TIME("amr_mesh::allocate(mf baseivfab)");
   if(m_verbosity > 5){
     pout() << "amr_mesh::allocate(mf baseivfab)" << endl;
@@ -567,9 +567,9 @@ void amr_mesh::reallocate(MFAMRIVData& a_data, const int a_base){
   const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
-  const int lmin = Max(0, a_base+1);
+  const int lmin = Max(0, a_lmin+1);
 
-  for (int lvl = lmin; lvl <= m_finest_level; lvl++){
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, ncomp);
 

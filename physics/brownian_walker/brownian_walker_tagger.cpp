@@ -36,5 +36,5 @@ void brownian_walker_tagger::parse_options(){
 }
 
 bool brownian_walker_tagger::tag_cells(EBAMRTags& a_tags){
-  return false;
+  return true;
 }

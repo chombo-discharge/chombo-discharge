@@ -114,6 +114,16 @@ public:
   void remap();
 
   /*!
+    @brief Only do level remaps
+  */
+  void levelRemap();
+
+  /*!
+    @brief Do a level remap
+  */
+  void levelRemap(const int a_level);
+
+  /*!
     @brief Move the particles to a different container. 
     @note  The grids MUST be the same for both containers
   */
