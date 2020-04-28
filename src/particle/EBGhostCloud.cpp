@@ -75,7 +75,7 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
   m_isDefined = true;
 }
 
-void EBGhostCloud::addGhostsToCoar(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
+void EBGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
   CH_assert(m_isDefined);
   
   // Copy the fine data to scratch and reset interior cells

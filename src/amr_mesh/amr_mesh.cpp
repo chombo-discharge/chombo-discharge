@@ -697,6 +697,7 @@ void amr_mesh::build_domains(){
   m_coar_to_coar_redist.resize(phase::num_phases);
   m_fine_to_coar_redist.resize(phase::num_phases);
   m_copier.resize(phase::num_phases);
+  m_ghostclouds.resize(phase::num_phases);
 
   m_reverse_copier.resize(phase::num_phases);
 
@@ -717,6 +718,7 @@ void amr_mesh::build_domains(){
   m_concentration_redist[phase::gas].resize(nlevels);
   m_copier[phase::gas].resize(nlevels);
   m_reverse_copier[phase::gas].resize(nlevels);
+  m_ghostclouds[phase::gas].resize(nlevels);
 
 
   m_eblg[phase::solid].resize(nlevels);
@@ -734,6 +736,7 @@ void amr_mesh::build_domains(){
   m_concentration_redist[phase::solid].resize(nlevels);
   m_copier[phase::solid].resize(nlevels);
   m_reverse_copier[phase::solid].resize(nlevels);
+  m_ghostclouds[phase::solid].resize(nlevels);
 
   m_dx[0] = (m_prob_hi[0] - m_prob_lo[0])/m_num_cells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_num_cells - IntVect::Unit);
@@ -836,7 +839,9 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   const Real t10 = MPI_Wtime();
 #endif
   this->define_copier(a_lmin);
+  this->define_ghostcloud(a_lmin);
   const Real t11 = MPI_Wtime();
+
 
   if(!m_has_mg_stuff){
     this->define_mg_stuff();
@@ -1907,6 +1912,34 @@ void amr_mesh::define_copier(const int a_lmin){
   }
 }
 
+void amr_mesh::define_ghostcloud(const int a_lmin){
+  CH_TIME("amr_mesh::define_ghostcloud");
+  if(m_verbosity > 3){
+    pout() << "amr_mesh::define_ghostcloud" << endl;
+  }
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
+    const bool has_coar = lvl > 0;
+
+    if(has_coar){
+      if(!ebis_gas.isNull()){
+	m_ghostclouds[phase::gas][lvl] = RefCountedPtr<EBGhostCloud> (new EBGhostCloud(m_grids[lvl-1],
+										       m_grids[lvl],
+										       *(m_eblg[phase::gas][lvl-1]),
+										       *(m_eblg[phase::gas][lvl]),
+										       m_domains[lvl-1],
+										       m_domains[lvl],
+										       m_ref_ratios[lvl-1],
+										       1,
+										       m_num_ghost));
+      }
+    }
+  }
+}
+
 void amr_mesh::average_down(EBAMRCellData& a_data, phase::which_phase a_phase){
   CH_TIME("amr_mesh::average_down");
   if(m_verbosity > 3){
@@ -2659,6 +2692,10 @@ Vector<RefCountedPtr<MFLevelGrid> >& amr_mesh::get_mg_mflg(){
 
 Vector<RefCountedPtr<ebcoarseaverage> >& amr_mesh::get_coarave(phase::which_phase a_phase){
   return m_coarave[a_phase];
+}
+
+Vector<RefCountedPtr<EBGhostCloud> >& amr_mesh::get_ghostcloud(phase::which_phase a_phase){
+  return m_ghostclouds[a_phase];
 }
 
 Vector<RefCountedPtr<nwoebquadcfinterp> >& amr_mesh::get_quadcfi(phase::which_phase a_phase){

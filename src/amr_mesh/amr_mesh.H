@@ -20,6 +20,7 @@
 #include "DomainFluxIFFABFactory.H"
 #include "EBLevelConcentrationRedist.H"
 #include "particle_container.H"
+#include "EBGhostCloud.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
@@ -627,6 +628,11 @@ public:
   virtual Vector<RefCountedPtr<ebcoarseaverage> >& get_coarave(phase::which_phase a_phase);
 
   /*!
+    @brief Get the ghost cloud particle magic
+  */
+  virtual Vector<RefCountedPtr<EBGhostCloud> >& get_ghostcloud(phase::which_phase a_phase);
+
+  /*!
     @brief Get the ghost cell interpolation utility
   */
   virtual Vector<RefCountedPtr<nwoebquadcfinterp> >& get_quadcfi(phase::which_phase a_phase);
@@ -946,6 +952,11 @@ protected:
   Vector<Vector<RefCountedPtr<nwoebquadcfinterp> > > m_quadcfi;
 
   /*!
+    @brief Ghost cloud interpolation stuff. By default only allocated for the gas phase
+  */
+  Vector<Vector<RefCountedPtr<EBGhostCloud> > > m_ghostclouds;
+
+  /*!
     @brief Old type quadcfi. Needed for EBConductivtyOps
   */
   Vector<Vector<RefCountedPtr<EBQuadCFInterp> > > m_old_quadcfi;
@@ -1085,6 +1096,11 @@ protected:
     @brief Define copiers
   */
   virtual void define_copier(const int a_lmin);
+
+  /*!
+    @brief Define operator for copying ghost clouds
+  */
+  virtual void define_ghostcloud(const int a_lmin);
 };
 
 #include "amr_meshI.H"

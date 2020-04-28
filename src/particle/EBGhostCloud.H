@@ -46,7 +46,7 @@ public:
 	      const int                a_nComp,
 	      const int                a_ghost);
 
-  void addGhostsToCoar(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData);
+  void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData);
 
 protected:
 

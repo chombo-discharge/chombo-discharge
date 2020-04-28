@@ -315,18 +315,18 @@ void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particl
     pout() << m_name + "::remove_eb_particles" << endl;
   }
 
+  RefCountedPtr<BaseIF> func;
+  if(m_phase == phase::gas){
+    func = m_compgeom->get_gas_if();
+  }
+  else{
+    func = m_compgeom->get_sol_if();
+  }
+
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
 
-    RefCountedPtr<BaseIF> func;
-    if(m_phase == phase::gas){
-      func = m_compgeom->get_gas_if();
-    }
-    else{
-      func = m_compgeom->get_sol_if();
-    }
-    
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const EBISBox& ebisbox = ebisl[dit()];
       
@@ -593,46 +593,10 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     if(has_fine && m_pvr_buffer > 0){
       a_state[lvl]->localCopyTo(*m_scratch[lvl]);
     }
-  }
-
-  if(m_pvr_buffer <= 0){
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-
-      const Real dx                = m_amr->get_dx()[lvl];
-      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-
-      const EBLevelGrid& eblg      = *m_amr->get_eblg(m_phase)[lvl];
-
-      const bool has_coar = (lvl > 0);
-      const bool has_fine = (lvl < finest_level);
-    
-      if(has_coar){
-
-	const DisjointBoxLayout& gridsCoar = m_amr->get_grids()[lvl-1];
-	const DisjointBoxLayout& gridsFine = m_amr->get_grids()[lvl];
-
-	const EBLevelGrid& eblgCoar = *m_amr->get_eblg(m_phase)[lvl-1];
-	const EBLevelGrid& eblgFine = *m_amr->get_eblg(m_phase)[lvl];
-
-	const ProblemDomain domainCoar = m_amr->get_domains()[lvl-1];
-	const ProblemDomain domainFine = m_amr->get_domains()[lvl];
-
-	const int refRat = m_amr->get_ref_rat()[lvl-1];
-	const int nComp = 1;
-	const int ghost = 1;
-
-	EBGhostCloud ghostcloud(gridsCoar,
-				gridsFine,
-				eblgCoar,
-				eblgFine,
-				domainCoar,
-				domainFine,
-				refRat,
-				nComp,
-				ghost);
-
-	ghostcloud.addGhostsToCoar(*a_state[lvl-1], *a_state[lvl]);
-      }
+    else if(m_pvr_buffer <= 0 && has_coar){
+      EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_phase)[lvl]);
+      ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
+      ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
   }
 
