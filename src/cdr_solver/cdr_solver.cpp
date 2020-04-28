@@ -1119,7 +1119,7 @@ void cdr_solver::hybrid_divergence(LevelData<EBCellFAB>&              a_divF_H,
   }
 }
 
-void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF, const EBAMRIVData&   a_mass_diff) {
+void cdr_solver::hyperbolic_redistribution(EBAMRCellData& a_divF, const EBAMRIVData&   a_mass_diff) {
   CH_TIME("cdr_solver::hyberbolic_redistribution");
   if(m_verbosity > 5){
     pout() << m_name + "::hyperbolic_redistribution" << endl;
@@ -1137,7 +1137,7 @@ void cdr_solver::hyperbolic_redistribution(EBAMRCellData&       a_divF, const EB
   }
 }
 
-void cdr_solver::concentration_redistribution(EBAMRCellData& a_phi, const EBAMRIVData&   a_mass_diff){
+void cdr_solver::concentration_redistribution(EBAMRCellData& a_phi, const EBAMRIVData& a_mass_diff){
   CH_TIME("cdr_solver::concentration_redistribution");
   if(m_verbosity > 5){
     pout() << m_name + "::concentration_redistribution" << endl;

@@ -11,6 +11,7 @@
 #include "units.H"
 #include "EBGhostCloud.H"
 
+#include <EBArith.H>
 #include <ParmParse.H>
 #include <EBAlias.H>
 #include <BaseEBCellFactory.H>
@@ -362,8 +363,13 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 
   // Reallocate mesh data
-  m_amr->reallocate(m_state,   m_phase, a_lmin);
-  m_amr->reallocate(m_scratch, m_phase, a_lmin);
+  m_amr->reallocate(m_state,        m_phase, a_lmin);
+  m_amr->reallocate(m_scratch,      m_phase, a_lmin);
+  m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
+  m_amr->reallocate(m_massDiff,     m_phase, a_lmin);
+
+  // Make stencils
+  this->define_depositionNC_stencils();
   
   // Only allocate memory if we actually have a mobile solver
   if(m_mobile){
@@ -411,13 +417,14 @@ void ito_solver::allocate_internals(){
   }
   const int ncomp = 1;
 
-  m_amr->allocate(m_state,       m_phase, ncomp);
-  m_amr->allocate(m_scratch,     m_phase, ncomp);
+  m_amr->allocate(m_state,        m_phase, ncomp);
+  m_amr->allocate(m_scratch,      m_phase, ncomp);
+  m_amr->allocate(m_depositionNC, m_phase, ncomp);
+  m_amr->allocate(m_massDiff,     m_phase, ncomp);
 
-  data_ops::set_value(m_state,   0.0);
-  data_ops::set_value(m_scratch, 0.0);
+  this->define_depositionNC_stencils();
 
-  // Only allocate memory if we actually have a mobile solver
+  // Only allocate memory for velocity if we actually have a mobile solver
   if(m_mobile){
     m_amr->allocate(m_velo_cell, m_phase, SpaceDim);
   }
@@ -438,6 +445,7 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_particles,        m_pvr_buffer);
   m_amr->allocate(m_eb_particles,     m_pvr_buffer);
   m_amr->allocate(m_domain_particles, m_pvr_buffer);
+
 
 #if 0 // Experimental code for getting the number of particles per cell
   Vector<LevelData<BaseEBCellFAB<int> >* > m_ppc(1 + m_amr->get_finest_level());
@@ -525,16 +533,30 @@ void ito_solver::deposit_particles(){
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
 }
 
-void ito_solver::deposit_particles(EBAMRCellData&           a_state,
+void ito_solver::deposit_particles(EBAMRCellData&                    a_state,
 				   const AMRParticles<ito_particle>& a_particles,
-				   const DepositionType::Which        a_deposition){
+				   const DepositionType::Which       a_deposition){
   CH_TIME("ito_solver::deposit_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_particles" << endl;
   }
 
            
-  this->deposit_kappaConservative(a_state, a_particles, a_deposition); // Fill conservatively but multiplied by kappa
+  this->deposit_kappaConservative(a_state, a_particles, a_deposition); // a_state contains only weights, i.e. not divided by kappa
+  this->deposit_nonConservative(m_depositionNC, a_state);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->deposit_hybrid(a_state, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
+  this->increment_redist(m_massDiff);                                 // Increment level redistribution register
+
+  // Do the redistribution magic
+  const bool ebcf = m_amr->get_ebcf();
+  if(ebcf){ // Mucho stuff to do here...
+    this->coarse_fine_increment(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
+    this->level_redistribution(a_state);           // Level redistribution. Weights is a dummy parameter
+    this->coarse_fine_redistribution(a_state);     // Do the coarse-fine redistribution
+  }
+  else{ // Very simple, redistribute this level.
+    this->level_redistribution(a_state);
+  }
 
   // Average down and interpolate
   m_amr->average_down(a_state, m_phase);
@@ -598,7 +620,203 @@ void ito_solver::deposit_kappaConservative(EBAMRCellData&                    a_s
     else if(m_pvr_buffer <= 0 && has_coar){
       EBGhostCloud& ghostcloud = *(m_amr->get_ghostcloud(m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
-      ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
+    }
+  }
+}
+
+void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
+  CH_TIME("ito_solver::deposit_nonConservative");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_nonConservative" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      BaseIVFAB<Real>& div_nc = (*a_depositionNC[lvl])[dit()];
+      EBCellFAB& divG         = (*a_depositionKappaC[lvl])[dit()];
+
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof    = vofit();
+	const VoFStencil& sten = (*m_stencils_nc[lvl])[dit()](vof, comp);
+
+	div_nc(vof, comp) = 0.;
+	for (int i = 0; i < sten.size(); i++){
+	  const VolIndex& ivof = sten.vof(i);
+	  const Real& iweight  = sten.weight(i);
+	  div_nc(vof,comp) += iweight*divG(ivof, comp);
+	}
+      }
+    }
+  }
+}
+
+void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC){
+  CH_TIME("ito_solver::deposit_hybrid");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_hybrid" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& divH               = (*a_depositionH[lvl])[dit()];  // On input, this contains kappa*depositionWeights
+      BaseIVFAB<Real>& deltaM       = (*a_mass_diff[lvl])[dit()];
+      const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[dit()]; 
+
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const Real kappa    = ebisbox.volFrac(vof);
+	const Real dc       = divH(vof, comp);
+	const Real dnc      = divNC(vof, comp);
+
+	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
+	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
+      }
+    }
+  }
+}
+
+
+void ito_solver::increment_redist(const EBAMRIVData& a_mass_diff){
+  CH_TIME("ito_solver::increment_redist");
+  if(m_verbosity > 5){
+    pout() << m_name + "::increment_redist" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    
+    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
+    level_redist.setToZero();
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      level_redist.increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+    }
+  }
+}
+
+void ito_solver::level_redistribution(EBAMRCellData& a_state){
+  CH_TIME("ito_solver::level_redistribution");
+  if(m_verbosity > 5){
+    pout() << m_name + "::level_redistribution" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    EBLevelRedist& level_redist = *(m_amr->get_level_redist(m_phase)[lvl]);
+    level_redist.redistribute(*a_state[lvl], interv);
+    level_redist.setToZero();
+  }
+}
+
+void ito_solver::coarse_fine_increment(const EBAMRIVData& a_mass_diff){
+  CH_TIME("ito_solver::coarse_fine_increment");
+  if(m_verbosity > 5){
+    pout() << m_name + "::coarse_fine_increment" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(0,0);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_phase)[lvl];
+
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < 0;
+
+    if(has_coar){
+      fine2coar_redist->setToZero();
+
+    }
+    if(has_fine){
+      coar2fine_redist->setToZero();
+      coar2coar_redist->setToZero();
+    }
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      if(has_coar){
+	fine2coar_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+      }
+
+      if(has_fine){
+	coar2fine_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+	coar2coar_redist->increment((*a_mass_diff[lvl])[dit()], dit(), interv);
+      }
+    }
+  }
+}
+
+
+void ito_solver::coarse_fine_redistribution(EBAMRCellData& a_state){
+  CH_TIME("ito_solver::coarse_fine_redistribution");
+  if(m_verbosity > 5){
+    pout() << m_name + "::coarse_fine_redistribution" << endl;
+  }
+
+  const int comp         = 0;
+  const int ncomp        = 1;
+  const int finest_level = m_amr->get_finest_level();
+  const Interval interv(comp, comp);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const Real dx       = m_amr->get_dx()[lvl];
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
+
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->get_coar_to_fine_redist(m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->get_coar_to_coar_redist(m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->get_fine_to_coar_redist(m_phase)[lvl];
+    
+    if(has_coar){
+      fine2coar_redist->redistribute(*a_state[lvl-1], interv);
+      fine2coar_redist->setToZero();
+    }
+
+    if(has_fine){
+      coar2fine_redist->redistribute(*a_state[lvl+1], interv);
+      coar2coar_redist->redistribute(*a_state[lvl],   interv);
+
+      coar2fine_redist->setToZero();
+      coar2coar_redist->setToZero();
     }
   }
 }
@@ -1078,4 +1296,57 @@ void ito_solver::remap(){
 
 phase::which_phase ito_solver::get_phase() const{
   return m_phase;
+}
+
+void ito_solver::define_depositionNC_stencils(){
+  CH_TIME("ito_solver::define_depositionNC_stencils");
+  if(m_verbosity > 5){
+    pout() << m_name + "::define_depositionNC_stencils" << endl;
+  }
+
+  const int rad   = 1;
+  const int comp  = 0;
+  const int ncomp = 1;
+  const int finest_level = m_amr->get_finest_level();
+
+  m_stencils_nc.resize(1 + finest_level);
+
+  for (int lvl = 0; lvl <= finest_level; lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+    m_stencils_nc[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+      const Box box          = dbl.get(dit());
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+
+      BaseIVFAB<VoFStencil>& stens = (*m_stencils_nc[lvl])[dit()];
+      stens.define(ivs, ebgraph, ncomp);
+      
+      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	VoFStencil& sten = stens(vof, comp);
+	sten.clear();
+	
+	Real norm = 0.;
+	Vector<VolIndex> vofs;
+	EBArith::getAllVoFsInMonotonePath(vofs, vof, ebisbox, rad);
+	for (int i = 0; i < vofs.size(); i++){
+	  if(vofs[i] != vof){
+	    const VolIndex& ivof = vofs[i];
+	    const Real iweight   = ebisbox.volFrac(ivof);
+
+	    norm += iweight;
+	    sten.add(ivof, 1.0);
+	  }
+	}
+
+	sten *= 1./norm;
+      }
+    }
+  }
 }

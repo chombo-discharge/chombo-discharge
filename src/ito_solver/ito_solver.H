@@ -91,6 +91,16 @@ public:
 					 const DepositionType::Which       a_deposition);
 
   /*!
+    @brief Make the "non-conservative" kappa deposition
+  */
+  virtual void deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+
+  /*!
+    @brief Make the hybrid deposition. Also compute the mass difference
+  */
+  virtual void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC);
+
+  /*!
     @brief Deposit the total weight of the particles in the grid cells
   */
   virtual void deposit_weights(EBAMRCellData& a_weights, const AMRParticles<ito_particle>& a_particles);
@@ -479,6 +489,16 @@ protected:
   EBAMRCellData m_ppc;
 
   /*!
+    @brief Scratch storage for holding the non-conservative deposition
+  */
+  EBAMRIVData m_depositionNC;
+
+  /*!
+    @brief Scratch storage for holding the mass difference when using hybrid deposition
+  */
+  EBAMRIVData m_massDiff;
+
+  /*!
     @brief All particles
   */
   particle_container<ito_particle> m_particles;
@@ -527,5 +547,35 @@ protected:
     @brief Parse diffusion hop
   */
   void parse_diffusion_hop();
+
+  /*!
+    @brief Make stencils for doing the non-conservative divergence
+  */
+  void define_depositionNC_stencils();
+
+  /*!
+    @brief Increment redistribution objects with mass to be redistributed
+  */
+  void increment_redist(const EBAMRIVData& a_mass_diff);
+
+  /*!
+    @brief Do redistribution on all levels, no coarse-fine stuff
+  */
+  void level_redistribution(EBAMRCellData& a_state);
+
+    /*!
+    @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
+  */
+  void coarse_fine_increment(const EBAMRIVData& m_mass_diff);
+
+  /*!
+    @brief Do coarse-fine redistribution
+  */
+  void coarse_fine_redistribution(EBAMRCellData& a_state);
+
+  /*!
+    @brief Stencils for computing the non-conservative divergence
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_stencils_nc;
 };
 #endif
