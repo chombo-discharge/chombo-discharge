@@ -533,19 +533,21 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     pout() << m_name + "::deposit_particles" << endl;
   }
 
-  // TODO: How should we deposit particles near the EB? We should not
-  //
-  //          1. Deposit into covered cells since this is equivalent to losing mass
-  //          2. Deposit into cells that can't be reached through the EBGraph of distance 1.
-  //
-  //       Should we just take the cut-cell particles and deposit them with an NGP scheme...? 
-  //  MayDay::Warning("ito_solver::deposit_particles - not EB supported yet");
            
+  this->deposit_kappaConservative(a_state, a_particles, a_deposition); // Fill conservatively but multiplied by kappa
 
-  // TLDR: This code deposits on the entire AMR mesh. For all levels l > 0 the data on the coarser grids are interpolated
-  //       to the current grid first. Then we deposit.
-  //
-  //       We always assume that a_state is a scalar, i.e. a_state has only one component. 
+  // Average down and interpolate
+  m_amr->average_down(a_state, m_phase);
+  m_amr->interp_ghost(a_state, m_phase);
+}
+
+void ito_solver::deposit_kappaConservative(EBAMRCellData&                    a_state,
+					   const AMRParticles<ito_particle>& a_particles,
+					   const DepositionType::Which       a_deposition){
+  CH_TIME("ito_solver::deposit_kappaConservative");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_kappaConservative" << endl;
+  }
 
   const int comp = 0;
   const Interval interv(comp, comp);
@@ -599,9 +601,6 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
       ghostcloud.addFineGhostsToCoarse(*a_state[lvl-1], *a_state[lvl]);
     }
   }
-
-  m_amr->average_down(a_state, m_phase);
-  m_amr->interp_ghost(a_state, m_phase);
 }
 
 void ito_solver::deposit_weights(EBAMRCellData& a_state, const AMRParticles<ito_particle>& a_particles){

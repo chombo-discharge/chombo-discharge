@@ -84,6 +84,13 @@ public:
 				 const DepositionType::Which       a_deposition);
 
   /*!
+    @brief This computes the "conservative" deposition, multiplied by kappa
+  */
+  virtual void deposit_kappaConservative(EBAMRCellData&                    a_state,
+					 const AMRParticles<ito_particle>& a_particles,
+					 const DepositionType::Which       a_deposition);
+
+  /*!
     @brief Deposit the total weight of the particles in the grid cells
   */
   virtual void deposit_weights(EBAMRCellData& a_weights, const AMRParticles<ito_particle>& a_particles);

@@ -66,7 +66,7 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ito_solver.pvr_buffer          = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+ito_solver.pvr_buffer          = 0             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 ito_solver.plt_vars            = phi vel dco   # Currently available are 'phi', 'vel', and 'dco'
 ito_solver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
 ito_solver.seed                = 0             # Seed for RNG
