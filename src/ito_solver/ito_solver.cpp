@@ -9,6 +9,7 @@
 #include "data_ops.H"
 #include "EBParticleInterp.H"
 #include "units.H"
+#include "EBGhostCloud.H"
 
 #include <ParmParse.H>
 #include <EBAlias.H>
@@ -19,6 +20,8 @@
 ito_solver::ito_solver(){
   m_name       = "ito_solver";
   m_class_name = "ito_solver";
+
+  EBGhostCloud cloud;
 }
 
 ito_solver::~ito_solver(){
@@ -257,7 +260,6 @@ void ito_solver::initial_data(){
   m_particles.add_particles(m_species->get_initial_particles());
 
   // Remove particles that are inside embedded boundaries
-#if 1
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
@@ -296,7 +298,6 @@ void ito_solver::initial_data(){
       }
     }
   }
-#endif
 
   // Deposit the particles
   this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
@@ -554,13 +555,14 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     const Real dx                = m_amr->get_dx()[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
     const RefCountedPtr<EBLevelGrid>& eblg = m_amr->get_eblg(m_phase)[lvl];
 
     const bool has_coar = (lvl > 0);
     const bool has_fine = (lvl < finest_level);
 
     // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
-    if(has_coar){
+    if(has_coar && m_pvr_buffer > 0){
       RefCountedPtr<EBPWLFineInterp>& interp = m_amr->get_eb_pwl_interp(m_phase)[lvl];
       interp->interpolate(*a_state[lvl], *m_scratch[lvl-1], interv);
     }
@@ -569,11 +571,12 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     //    be added to neighboring patches
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
-      EBParticleInterp interp(box, dx*RealVect::Unit, origin);
+      const EBISBox& ebisbox = ebisl[dit()];
+      EBParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
       interp.deposit((*a_particles[lvl])[dit()].listItems(), (*a_state[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
-    // This code adds contributions from ghost cels
+    // This code adds contributions from ghost cells into the valid region
     const RefCountedPtr<Copier>& reversecopier = m_amr->get_reverse_copier(m_phase)[lvl];
     LDaddOp<FArrayBox> addOp;
     LevelData<FArrayBox> aliasFAB;
@@ -582,86 +585,94 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 
     // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
     //    interpolation of "hanging clouds"
-    if(has_fine){
-      a_state[lvl]->copyTo(*m_scratch[lvl]);
+    if(has_fine && m_pvr_buffer > 0){
+      a_state[lvl]->localCopyTo(*m_scratch[lvl]);
     }
-
   }
 
-#if 1 // Development code
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->get_dx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& dom     = m_amr->get_domains()[lvl];
-    const EBLevelGrid& eblg      = *m_amr->get_eblg(m_phase)[lvl];
+#if 1 // This is some old code for when we don't have a pvr buffer...
+  if(m_pvr_buffer <= 0){
+    for (int lvl = 0; lvl <= finest_level; lvl++){
 
-    const bool has_coar = (lvl > 0);
-    const bool has_fine = (lvl < finest_level);
+      const Real dx                = m_amr->get_dx()[lvl];
+      const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+
+      const EBLevelGrid& eblg      = *m_amr->get_eblg(m_phase)[lvl];
+
+      const bool has_coar = (lvl > 0);
+      const bool has_fine = (lvl < finest_level);
     
-    if(has_coar){
-      const DisjointBoxLayout& gridCoar = m_amr->get_grids()[lvl-1];
-      DisjointBoxLayout gridCoFi;
-      EBLevelGrid eblgCoFi;
+      if(has_coar){
 
-      coarsen(gridCoFi, dbl, 2);
-      coarsen(eblgCoFi, eblg, 2);
+#if 1 // New code
+
+#else
+	const DisjointBoxLayout& gridCoar = m_amr->get_grids()[lvl-1];
+	const ProblemDomain& dom     = m_amr->get_domains()[lvl-1];
+	DisjointBoxLayout gridCoFi;
+	EBLevelGrid eblgCoFi;
+
+	coarsen(gridCoFi, dbl, 2);
+	coarsen(eblgCoFi, eblg, 2);
       
-      Vector<Box> coFiBoxes = gridCoFi.boxArray();
-      Vector<int> coFiProcs = gridCoFi.procIDs();
+	Vector<Box> coFiBoxes = gridCoFi.boxArray();
+	Vector<int> coFiProcs = gridCoFi.procIDs();
 
-      for (int i = 0; i < coFiBoxes.size(); i++){
-	coFiBoxes[i].grow(1);
-	coFiBoxes[i] &= dom.domainBox();
-      }
-
-      BoxLayout coFiBl(coFiBoxes, coFiProcs);
-      BoxLayoutData<FArrayBox> dataCoFi(coFiBl, 1);
-
-      // Monkey with the scratch box
-      a_state[lvl]->localCopyTo(*m_scratch[lvl]);
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	FArrayBox& scratchBox = (*m_scratch[lvl])[dit()].getFArrayBox();
-	scratchBox.setVal(0.0, dbl.get(dit()), 0, 1);
-      }
-      m_scratch[lvl]->exchange();
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	
-	Box fineBox = dbl.get(dit());
-	Box bx = fineBox;
-
-	bx.coarsen(2);
-	
-	fineBox.grow(2);
-	Box coFiBox = fineBox;
-	coFiBox.coarsen(2);
-
-	FArrayBox& fabCoFi        = dataCoFi[dit()];
-	const FArrayBox& fabFine = (*m_scratch[lvl])[dit()].getFArrayBox();
-	fabCoFi.setVal(0.0);
-
-	// Iterate over the CoFi box
-	for (BoxIterator bit(fineBox); bit.ok(); ++bit){
-	  IntVect ivFine = bit();
-	  IntVect ivCoar = coarsen(ivFine, 2);
-
-	  fabCoFi(ivCoar, 0) += fabFine(ivFine, 0)/4.;
+	for (int i = 0; i < coFiBoxes.size(); i++){
+	  coFiBoxes[i].grow(1);
+	  coFiBoxes[i] &= dom.domainBox();
 	}
 
-	fabCoFi.setVal(0.0, bx, 0, 1);
-      }
+	BoxLayout coFiBl(coFiBoxes, coFiProcs);
+	BoxLayoutData<FArrayBox> dataCoFi(coFiBl, 1);
 
-      LevelData<FArrayBox> coarAlias;
-      aliasEB(coarAlias, *a_state[lvl-1]);
-      Interval interv(0,0);
-      dataCoFi.addTo(interv, coarAlias, interv, dom.domainBox());
-    }
+	// Monkey with the scratch box
+	a_state[lvl]->localCopyTo(*m_scratch[lvl]);
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  FArrayBox& scratchBox = (*m_scratch[lvl])[dit()].getFArrayBox();
+	  scratchBox.setVal(0.0, dbl.get(dit()), 0, 1);
+	}
+	m_scratch[lvl]->exchange();
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+
+	
+	  Box fineBox = dbl.get(dit());
+	  Box bx = fineBox;
+
+	  bx.coarsen(2);
+	
+	  fineBox.grow(2);
+	  Box coFiBox = fineBox;
+	  coFiBox.coarsen(2);
+
+	  FArrayBox& fabCoFi        = dataCoFi[dit()];
+	  const FArrayBox& fabFine = (*m_scratch[lvl])[dit()].getFArrayBox();
+	  fabCoFi.setVal(0.0);
+
+	  // Iterate over the CoFi box
+	  for (BoxIterator bit(fineBox); bit.ok(); ++bit){
+	    IntVect ivFine = bit();
+	    IntVect ivCoar = coarsen(ivFine, 2);
+
+	    fabCoFi(ivCoar, 0) += fabFine(ivFine, 0)/4.;
+	  }
+
+	  fabCoFi.setVal(0.0, bx, 0, 1);
+	}
+
+	LevelData<FArrayBox> coarAlias;
+	aliasEB(coarAlias, *a_state[lvl-1]);
+	Interval interv(0,0);
+	dataCoFi.addTo(interv, coarAlias, interv, dom.domainBox());
+      }
 #endif
+    }
   }
+#endif
 
   // Do a kappa scaling
-  data_ops::kappa_scale(a_state);
+  //  data_ops::kappa_scale(a_state);
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);
@@ -853,6 +864,7 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
   }
 
   const EBCellFAB& velo_cell = (*m_velo_cell[a_lvl])[a_dit];
+  const EBISBox& ebisbox     = velo_cell.getEBISBox();
   const FArrayBox& vel_fab   = velo_cell.getFArrayBox();
   const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
   const RealVect origin      = m_amr->get_prob_lo();
@@ -860,7 +872,7 @@ void ito_solver::interpolate_velocities(const int a_lvl, const DataIndex& a_dit)
 
   List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
-  EBParticleInterp meshInterp(box, dx, origin);
+  EBParticleInterp meshInterp(box, ebisbox, dx, origin);
   meshInterp.interpolateVelocity(particleList, vel_fab, m_deposition);
 }
 
@@ -886,6 +898,7 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
   }
 
   const EBCellFAB& dco_cell   = (*m_diffco_cell[a_lvl])[a_dit];
+  const EBISBox& ebisbox     = dco_cell.getEBISBox();
   const FArrayBox& dco_fab   = dco_cell.getFArrayBox();
   const RealVect dx          = m_amr->get_dx()[a_lvl]*RealVect::Unit;
   const RealVect origin      = m_amr->get_prob_lo();
@@ -893,7 +906,7 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
 
   List<ito_particle>& particleList = m_particles[a_lvl][a_dit].listItems();
 
-  EBParticleInterp meshInterp(box, dx, origin);
+  EBParticleInterp meshInterp(box, ebisbox,dx, origin);
   meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
 }
 

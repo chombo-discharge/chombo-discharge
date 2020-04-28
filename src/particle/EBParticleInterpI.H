@@ -11,8 +11,8 @@
 
 template <class P>
 void EBParticleInterp::deposit(const List<P>&        a_particleList,
-			   FArrayBox&            a_rho,
-			   DepositionType::Which a_interpType){
+			       FArrayBox&            a_rho,
+			       DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P& this_particle = lit();
     const RealVect& this_x = this_particle.position();
@@ -28,8 +28,8 @@ void EBParticleInterp::deposit(const List<P>&        a_particleList,
 
 template <class P>
 void EBParticleInterp::interpolateDiffusion(List<P>&              a_particleList,
-					const FArrayBox&      a_diffusionField,
-					DepositionType::Which a_interpType){
+					    const FArrayBox&      a_diffusionField,
+					    DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     Real particleDiffusion(0.0);
     P& p = lit();
@@ -45,8 +45,8 @@ void EBParticleInterp::interpolateDiffusion(List<P>&              a_particleList
   
 template <class P>
 void EBParticleInterp::interpolateVelocity(List<P>&              a_particleList,
-				       const FArrayBox&      a_velocityField,
-				       DepositionType::Which a_interpType){
+					   const FArrayBox&      a_velocityField,
+					   DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     RealVect particleVelocity(D_DECL6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
     P& p = lit();
@@ -62,8 +62,8 @@ void EBParticleInterp::interpolateVelocity(List<P>&              a_particleList,
 
 template <class P>
 void EBParticleInterp::interpolateAcceleration(List<P>&              a_particleList,
-					   const FArrayBox&      a_accelerationField,
-					   DepositionType::Which a_interpType){
+					       const FArrayBox&      a_accelerationField,
+					       DepositionType::Which a_interpType){
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     RealVect particleAcceleration(D_DECL6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
     P& p = lit();

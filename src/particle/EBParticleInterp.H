@@ -9,6 +9,7 @@
 #define _EBMESHINTERP_
 
 #include "Box.H"
+#include "EBISBox.H"
 #include "FArrayBox.H"
 #include "REAL.H"
 #include "Vector.H"
@@ -27,7 +28,7 @@ namespace DepositionType {
 };
 
 /*!
-   @brief Currently a shameless rip-off of MeshInterp.H
+  @brief Currently a shameless rip-off of MeshInterp.H
 */
 class EBParticleInterp{
 public:
@@ -41,13 +42,15 @@ public:
     @brief Full constructor
   */
   EBParticleInterp(const Box&      a_domain,
-	       const RealVect& a_dx,
-	       const RealVect& a_prob_lo);
+		   const EBISBox&  a_ebisbox,
+		   const RealVect& a_dx,
+		   const RealVect& a_prob_lo);
 
   /*!
     @brief Define function
   */
   void define(const Box&      a_domain,
+	      const EBISBox&  a_ebisbox,
 	      const RealVect& a_dx,
 	      const RealVect& a_prob_lo);
 
@@ -120,6 +123,7 @@ protected:
 			   const DepositionType::Which a_deposition);
   
   Box      m_domain;
+  const EBISBox* m_ebisbox;
   RealVect m_dx;
   RealVect m_prob_lo;
 };
