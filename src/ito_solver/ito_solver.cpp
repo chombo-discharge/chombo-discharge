@@ -256,53 +256,12 @@ void ito_solver::initial_data(){
     pout() << m_name + "::initial_data" << endl;
   }
 
-  // Get initial particles
-  m_particles.add_particles(m_species->get_initial_particles());
-
-  // Remove particles that are inside embedded boundaries
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    RefCountedPtr<BaseIF> func;
-    if(m_phase == phase::gas){
-      func = m_compgeom->get_gas_if();
-    }
-    else{
-      func = m_compgeom->get_sol_if();
-    }
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      
-      List<ito_particle>& particles = m_particles[lvl][dit()].listItems();
-
-      if(ebisbox.isAllCovered()){ // Box is all covered
-	particles.clear();
-      }
-      else if(ebisbox.isAllRegular()){ // Do nothing
-      }
-      else{
-	List<ito_particle>  particleCopy = List<ito_particle>(particles);
-	particles.clear();
-	
-	ListIterator<ito_particle> lit(particleCopy);
-	for (lit.rewind(); lit; ++lit){
-	  ito_particle& p = particles[lit];
-
-	  const Real f = func->value(p.position());
-	  if(f <= 0.0){
-	    particles.add(p);
-	  }
-	}
-      }
-    }
-  }
-
-  // Deposit the particles
-  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition);
+  // Add particles, remove the ones that are inside the EB, and then depsit
+  m_particles.add_particles(m_species->get_initial_particles()); 
+  this->remove_eb_particles(m_particles);                        
+  this->deposit_particles(m_state, m_particles.get_particles(), m_deposition); 
   
-#if 0 // Experimental code. Compute the number of particles in each box
+#if 0 // Experimental code. Compute the number of particles in each box for load balancing purposes
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     Vector<Box> oldBoxes(0);
@@ -348,6 +307,52 @@ void ito_solver::initial_data(){
     }
   }
 #endif
+}
+
+void ito_solver::remove_eb_particles(particle_container<ito_particle>& a_particles){
+  CH_TIME("ito_solver::remove_eb_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::remove_eb_particles" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
+
+    RefCountedPtr<BaseIF> func;
+    if(m_phase == phase::gas){
+      func = m_compgeom->get_gas_if();
+    }
+    else{
+      func = m_compgeom->get_sol_if();
+    }
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      
+      List<ito_particle>& particles = a_particles[lvl][dit()].listItems();
+
+      if(ebisbox.isAllCovered()){ // Box is all covered
+	particles.clear();
+      }
+      else if(ebisbox.isAllRegular()){ // Do nothing
+      }
+      else{
+	List<ito_particle>  particleCopy = List<ito_particle>(particles);
+	particles.clear();
+	
+	ListIterator<ito_particle> lit(particleCopy);
+	for (lit.rewind(); lit; ++lit){
+	  ito_particle& p = particles[lit];
+
+	  const Real f = func->value(p.position());
+	  if(f <= 0.0){
+	    particles.add(p);
+	  }
+	}
+      }
+    }
+  }
 }
 
 void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -590,7 +595,6 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     }
   }
 
-#if 1 // This is some old code for when we don't have a pvr buffer...
   if(m_pvr_buffer <= 0){
     for (int lvl = 0; lvl <= finest_level; lvl++){
 
@@ -604,7 +608,6 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
     
       if(has_coar){
 
-#if 1 // New code
 	const DisjointBoxLayout& gridsCoar = m_amr->get_grids()[lvl-1];
 	const DisjointBoxLayout& gridsFine = m_amr->get_grids()[lvl];
 
@@ -629,73 +632,9 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 				ghost);
 
 	ghostcloud.addGhostsToCoar(*a_state[lvl-1], *a_state[lvl]);
-				
-	
-#else
-	const DisjointBoxLayout& gridCoar = m_amr->get_grids()[lvl-1];
-	const ProblemDomain& dom     = m_amr->get_domains()[lvl-1];
-	DisjointBoxLayout gridCoFi;
-	EBLevelGrid eblgCoFi;
-
-	coarsen(gridCoFi, dbl, 2);
-	coarsen(eblgCoFi, eblg, 2);
-      
-	Vector<Box> coFiBoxes = gridCoFi.boxArray();
-	Vector<int> coFiProcs = gridCoFi.procIDs();
-
-	for (int i = 0; i < coFiBoxes.size(); i++){
-	  coFiBoxes[i].grow(1);
-	  coFiBoxes[i] &= dom.domainBox();
-	}
-
-	BoxLayout coFiBl(coFiBoxes, coFiProcs);
-	BoxLayoutData<FArrayBox> dataCoFi(coFiBl, 1);
-
-	// Monkey with the scratch box
-	a_state[lvl]->localCopyTo(*m_scratch[lvl]);
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	  FArrayBox& scratchBox = (*m_scratch[lvl])[dit()].getFArrayBox();
-	  scratchBox.setVal(0.0, dbl.get(dit()), 0, 1);
-	}
-	m_scratch[lvl]->exchange();
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	  Box fineBox = dbl.get(dit());
-	  Box bx = fineBox;
-
-	  bx.coarsen(2);
-	
-	  fineBox.grow(2);
-	  Box coFiBox = fineBox;
-	  coFiBox.coarsen(2);
-
-	  FArrayBox& fabCoFi        = dataCoFi[dit()];
-	  const FArrayBox& fabFine = (*m_scratch[lvl])[dit()].getFArrayBox();
-	  fabCoFi.setVal(0.0);
-
-	  // Iterate over the CoFi box
-	  for (BoxIterator bit(fineBox); bit.ok(); ++bit){
-	    IntVect ivFine = bit();
-	    IntVect ivCoar = coarsen(ivFine, 2);
-
-	    fabCoFi(ivCoar, 0) += fabFine(ivFine, 0)/4.;
-	  }
-
-	  fabCoFi.setVal(0.0, bx, 0, 1);
-	}
-
-	LevelData<FArrayBox> coarAlias;
-	aliasEB(coarAlias, *a_state[lvl-1]);
-	Interval interv(0,0);
-	dataCoFi.addTo(interv, coarAlias, interv, dom.domainBox());
-#endif
       }
     }
   }
-#endif
-
-  // Do a kappa scaling
-  //  data_ops::kappa_scale(a_state);
 
   m_amr->average_down(a_state, m_phase);
   m_amr->interp_ghost(a_state, m_phase);

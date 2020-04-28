@@ -5,8 +5,8 @@
   @date   April 2020
 */
 
-
 #include "EBGhostCloud.H"
+#include "EBGhostCloudF_F.H"
 #include "EBCellFactory.H"
 #include "EBAverageF_F.H"
 #include "EBAlias.H"
@@ -99,42 +99,22 @@ void EBGhostCloud::addGhostsToCoar(LevelData<EBCellFAB>& a_coarData, const Level
 
     const Box refbox(IntVect::Zero, (m_refRat-1)*IntVect::Unit);
 
-    // Do all the regular cells
     coFiFab.setVal(0.0);
 
+    // Do all the regular cells. This also does irregular cells, but not multi-valued ones.
+    // If you have a refinement boundary that also crosses a multi-valued cell, feel free to fuck off. 
     for (int comp = 0; comp < m_nComp; comp++){
-      for (BoxIterator bit(fineBox); bit.ok(); ++bit){
-	IntVect ivFine = bit();
-	IntVect ivCoar = coarsen(ivFine, m_refRat);
-
-	coFiFab(ivCoar, comp) += fineData(ivFine, comp)*factor;
-      }
-#if 0
-      FORT_EBAVERAGE(CHF_FRA1(coFiFab, comp),
-		     CHF_FRA1(fineData, comp),
-		     CHF_BOX(coarBox),
-		     CHF_CONST_INT(m_refRat),
-		     CHF_BOX(refbox));
-#endif
+      FORT_AVERAGE_GHOSTS(CHF_FRA1(coFiFab, comp),
+			  CHF_CONST_FRA1(fineData, comp),
+			  CHF_BOX(fineBox),
+			  CHF_CONST_INT(m_refRat),
+			  CHF_CONST_REAL(factor));
     }
-    
-#if 0 // Debug, reset interior
-    Box bx = fineBox;
-    bx.coarsen(m_refRat);
-    coFiFab.setVal(0.0, bx, 0, m_nComp);
-#endif
-
-    // Now redo the irregular cells. 
   }
 
   // Add the data
-  LevelData<FArrayBox> coarAlias;
-  LevelData<FArrayBox> coFiAlias;
-  
-  aliasEB(coarAlias, a_coarData);
-  //  aliasEB(coFiAlias, m_dataCoFi); // Won't work with BoxLayoutData<EBCellFAB>
-
   const Interval interv(0, m_nComp-1);
-  
+  LevelData<FArrayBox> coarAlias;
+  aliasEB(coarAlias, a_coarData);
   m_dataCoFi.addTo(interv, coarAlias, interv, m_domainCoar.domainBox());
 }

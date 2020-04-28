@@ -79,21 +79,19 @@ public:
   /*!
     @brief Deposit the particles onto a_state. The result is put on the a_comp compoennt
   */
-  virtual void deposit_particles(EBAMRCellData&              a_state,
-				 const AMRParticles<ito_particle>&    a_particles,
-				 const DepositionType::Which a_deposition);
+  virtual void deposit_particles(EBAMRCellData&                    a_state,
+				 const AMRParticles<ito_particle>& a_particles,
+				 const DepositionType::Which       a_deposition);
 
-  
   /*!
     @brief Deposit the total weight of the particles in the grid cells
   */
   virtual void deposit_weights(EBAMRCellData& a_weights, const AMRParticles<ito_particle>& a_particles);
 
   /*!
-    @brief Deposit the total number of particles in the grid cells
+    @brief Remove particles that are inside the EB
   */
-  void deposit_ppc(EBAMRPPC& a_ppc, const AMRParticles<ito_particle>& a_particles);
-
+  virtual void remove_eb_particles(particle_container<ito_particle>& a_particles);
 
   /*!
     @brief Get number of plot variables
