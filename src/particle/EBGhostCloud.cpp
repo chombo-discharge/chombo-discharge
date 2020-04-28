@@ -9,6 +9,7 @@
 #include "EBGhostCloud.H"
 #include "EBCellFactory.H"
 #include "EBAverageF_F.H"
+#include "EBAlias.H"
 
 EBGhostCloud::EBGhostCloud(){
 
@@ -41,20 +42,23 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
 			  const int                a_nComp,
 			  const int                a_ghostFine){
 
-  m_refRat    = a_refRat;
-  m_nComp     = a_nComp;
-  m_ghost     = a_ghostFine;
-  m_gridsFine = a_gridsFine;
+  m_refRat     = a_refRat;
+  m_nComp      = a_nComp;
+  m_ghost      = a_ghostFine;
+  m_gridsFine  = a_gridsFine;
+  m_domainCoar = a_domainCoar;
 
   // Coarsen the grids and make a BoxLayout grid
-  coarsen(m_gridsCoFi, a_gridsFine, m_refRat);
-  coarsen(m_eblgCoFi,  a_eblgFine,  m_refRat);
+  DisjointBoxLayout dblCoFi;
   
-  Vector<Box> coFiBoxes = m_gridsCoFi.boxArray();
-  Vector<int> coFiProcs = m_gridsCoFi.procIDs();
+  coarsen(dblCoFi,    a_gridsFine, m_refRat);
+  coarsen(m_eblgCoFi, a_eblgFine,  m_refRat);
+  
+  Vector<Box> coFiBoxes = dblCoFi.boxArray();
+  Vector<int> coFiProcs = dblCoFi.procIDs();
 
   const int ghostCoFi = (a_ghostFine + m_refRat - 1)/m_refRat;
-  for (int i = 0; i <= coFiBoxes.size(); i++){
+  for (int i = 0; i < coFiBoxes.size(); i++){
     coFiBoxes[i].grow(ghostCoFi);
     coFiBoxes[i] &= a_domainCoar;
   }
@@ -64,14 +68,16 @@ void EBGhostCloud::define(const DisjointBoxLayout& a_gridsCoar,
   const EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
 
   m_scratchFine.define(a_gridsFine, a_nComp, m_ghost*IntVect::Unit, factFine);
+  
   m_gridsCoFi.define(coFiBoxes, coFiProcs);
-  m_dataCoFi.define(m_gridsCoFi, a_nComp, factCoFi);
+  m_dataCoFi.define(m_gridsCoFi, a_nComp);
 
   m_isDefined = true;
 }
 
 void EBGhostCloud::addGhostsToCoar(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
-
+  CH_assert(m_isDefined);
+  
   // Copy the fine data to scratch and reset interior cells
   a_fineData.localCopyTo(m_scratchFine);
   for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
@@ -80,12 +86,12 @@ void EBGhostCloud::addGhostsToCoar(LevelData<EBCellFAB>& a_coarData, const Level
   }
   m_scratchFine.exchange();
 
+  const Real factor = 1./pow(m_refRat, SpaceDim);
 
   // Coarsen the fine grid data
   for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
-
     
-    FArrayBox& coFiFab        = m_dataCoFi[dit()].getFArrayBox();
+    FArrayBox& coFiFab        = m_dataCoFi[dit()];//.getFArrayBox();
     const FArrayBox& fineData = m_scratchFine[dit()].getFArrayBox();
 
     const Box coarBox         = m_gridsCoFi[dit()];
@@ -94,21 +100,41 @@ void EBGhostCloud::addGhostsToCoar(LevelData<EBCellFAB>& a_coarData, const Level
     const Box refbox(IntVect::Zero, (m_refRat-1)*IntVect::Unit);
 
     // Do all the regular cells
+    coFiFab.setVal(0.0);
+
     for (int comp = 0; comp < m_nComp; comp++){
+      for (BoxIterator bit(fineBox); bit.ok(); ++bit){
+	IntVect ivFine = bit();
+	IntVect ivCoar = coarsen(ivFine, m_refRat);
+
+	coFiFab(ivCoar, comp) += fineData(ivFine, comp)*factor;
+      }
+#if 0
       FORT_EBAVERAGE(CHF_FRA1(coFiFab, comp),
 		     CHF_FRA1(fineData, comp),
 		     CHF_BOX(coarBox),
 		     CHF_CONST_INT(m_refRat),
 		     CHF_BOX(refbox));
+#endif
     }
+    
+#if 0 // Debug, reset interior
+    Box bx = fineBox;
+    bx.coarsen(m_refRat);
+    coFiFab.setVal(0.0, bx, 0, m_nComp);
+#endif
 
-
-    // Now redo the irregular cells
+    // Now redo the irregular cells. 
   }
 
   // Add the data
   LevelData<FArrayBox> coarAlias;
+  LevelData<FArrayBox> coFiAlias;
+  
   aliasEB(coarAlias, a_coarData);
-  const Interval interv(0, m_nComp);
-  m_dataCoFi.addTo(interv, coarAlias, interv, m_coarDomain.domainBox());
+  //  aliasEB(coFiAlias, m_dataCoFi); // Won't work with BoxLayoutData<EBCellFAB>
+
+  const Interval interv(0, m_nComp-1);
+  
+  m_dataCoFi.addTo(interv, coarAlias, interv, m_domainCoar.domainBox());
 }

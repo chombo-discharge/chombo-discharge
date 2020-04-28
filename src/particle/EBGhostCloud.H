@@ -52,7 +52,7 @@ protected:
 
   bool                     m_isDefined;
   BoxLayout                m_gridsCoFi;
-  BoxLayoutData<EBCellFAB> m_dataCoFi;
+  BoxLayoutData<FArrayBox> m_dataCoFi;
   DisjointBoxLayout        m_gridsFine;
   EBLevelGrid              m_eblgCoFi;
   LevelData<EBCellFAB>     m_scratchFine;

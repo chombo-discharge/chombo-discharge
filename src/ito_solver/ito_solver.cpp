@@ -605,7 +605,32 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
       if(has_coar){
 
 #if 1 // New code
+	const DisjointBoxLayout& gridsCoar = m_amr->get_grids()[lvl-1];
+	const DisjointBoxLayout& gridsFine = m_amr->get_grids()[lvl];
 
+	const EBLevelGrid& eblgCoar = *m_amr->get_eblg(m_phase)[lvl-1];
+	const EBLevelGrid& eblgFine = *m_amr->get_eblg(m_phase)[lvl];
+
+	const ProblemDomain domainCoar = m_amr->get_domains()[lvl-1];
+	const ProblemDomain domainFine = m_amr->get_domains()[lvl];
+
+	const int refRat = m_amr->get_ref_rat()[lvl-1];
+	const int nComp = 1;
+	const int ghost = 1;
+
+	EBGhostCloud ghostcloud(gridsCoar,
+				gridsFine,
+				eblgCoar,
+				eblgFine,
+				domainCoar,
+				domainFine,
+				refRat,
+				nComp,
+				ghost);
+
+	ghostcloud.addGhostsToCoar(*a_state[lvl-1], *a_state[lvl]);
+				
+	
 #else
 	const DisjointBoxLayout& gridCoar = m_amr->get_grids()[lvl-1];
 	const ProblemDomain& dom     = m_amr->get_domains()[lvl-1];
@@ -635,8 +660,6 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 	m_scratch[lvl]->exchange();
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-	
 	  Box fineBox = dbl.get(dit());
 	  Box bx = fineBox;
 
@@ -665,8 +688,8 @@ void ito_solver::deposit_particles(EBAMRCellData&           a_state,
 	aliasEB(coarAlias, *a_state[lvl-1]);
 	Interval interv(0,0);
 	dataCoFi.addTo(interv, coarAlias, interv, dom.domainBox());
-      }
 #endif
+      }
     }
   }
 #endif
