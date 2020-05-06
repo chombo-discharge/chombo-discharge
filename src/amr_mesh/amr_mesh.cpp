@@ -77,7 +77,8 @@ amr_mesh::amr_mesh(){
   m_ref_ratios.push_back(2);
 #endif
 
-  // Default stuff for development purposes. 
+  // Default stuff for development purposes.
+#if 0
   this->register_operator(s_eb_coar_ave,     phase::gas);
   this->register_operator(s_eb_quad_cfi,     phase::gas);
   this->register_operator(s_eb_fill_patch,   phase::gas);
@@ -100,7 +101,8 @@ amr_mesh::amr_mesh(){
   this->register_operator(s_eb_irreg_interp, phase::solid); 
   this->register_operator(s_eb_copier,       phase::solid); 
   this->register_operator(s_eb_ghostcloud,   phase::solid);
-  this->register_operator(s_eb_noncons_div,  phase::solid); 
+  this->register_operator(s_eb_noncons_div,  phase::solid);
+#endif
 }
 
 amr_mesh::~amr_mesh(){
@@ -785,6 +787,7 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
     pout() << "amr_mesh::regrid" << endl;
   }
 
+#if 0 // Old code
   Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
 
   // This is stuff that always gets done
@@ -792,6 +795,10 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   this->define_neighbors(a_lmin);
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
+  if(!m_has_mg_stuff){ // Define MG stuff
+    this->define_mg_stuff();
+    m_has_mg_stuff = true; // Only needs to be done ONCE per run. 
+  }
 
   // Now allocate operators
   this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
@@ -800,22 +807,54 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
   this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
   this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
-
-  // Allocate stencils
   this->define_gradsten(a_lmin);  // Make stencils for computing gradients
   this->define_irreg_sten();      // Make stencils for doing interpolation to centroids
   this->define_noncons_sten();    // Make stencils for nonconservative averaging
-
-  // Allocate copiers
   this->define_copier(a_lmin);
   this->define_ghostcloud(a_lmin);
+#else // New code
+  this->regrid_amr(a_tags, a_lmin, a_lmax, a_hardcap);
+  this->regrid_operators(a_lmin, a_lmax, a_regsize);
+#endif
+}
 
-
-  // Allocate multigrid stuff
-  if(!m_has_mg_stuff){
-    this->define_mg_stuff();
-    m_has_mg_stuff = true; // Only needs to be done ONCE
+void amr_mesh::regrid_amr(const Vector<IntVectSet>& a_tags,
+			  const int a_lmin,
+			  const int a_lmax,
+			  const int a_hardcap){
+  CH_TIME("amr_mesh::regrid_amr");
+  if(m_verbosity > 1){
+    pout() << "amr_mesh::regrid_amr" << endl;
   }
+  
+  Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
+
+  // This is stuff that always gets done
+  this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
+  this->define_neighbors(a_lmin);
+  this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
+  this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
+  if(!m_has_mg_stuff){ // Define MG stuff
+    this->define_mg_stuff();
+    m_has_mg_stuff = true; // Only needs to be done ONCE per run. 
+  }
+}
+
+void amr_mesh::regrid_operators(const int a_lmin,
+				const int a_lmax,
+				const int a_regsize){
+  // Now allocate operators
+  this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
+  this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
+  this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
+  this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
+  this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
+  this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
+  this->define_gradsten(a_lmin);                // Make stencils for computing gradients
+  this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
+  this->define_noncons_sten();                  // Make stencils for nonconservative averaging
+  this->define_copier(a_lmin);                  // Make stencils for copier
+  this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
 }
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap){

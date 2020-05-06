@@ -494,6 +494,23 @@ public:
 		      const int a_hardcap=123456);
 
   /*!
+    @brief Regrid AMR
+  */
+  virtual void regrid_amr(const Vector<IntVectSet>& a_tags,
+			  const int a_lmin,
+			  const int a_lmax,
+			  const int a_hardcap=123456);
+
+  /*!
+    @brief Regrid AMR operators
+  */
+  virtual void regrid_operators(const int a_lmin,
+				const int a_lmax,
+				const int a_regsize=1);
+
+
+
+  /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
   virtual void sanity_check();

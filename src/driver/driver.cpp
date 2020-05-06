@@ -1500,7 +1500,11 @@ void driver::setup_fresh(const int a_init_regrids){
   // and upwards. We have tags on m_geom_tag_depth, so that is our current finest level. 
   const int lmin = 0;
   const int lmax = m_geom_tag_depth;
+#if 0 // Original code 
   m_amr->regrid(m_geom_tags, lmin, lmax, regsize, m_geom_tag_depth);
+#else
+  m_amr->regrid_amr(m_geom_tags, lmin, lmax, m_geom_tag_depth);
+#endif
 
   // Allocate internal storage 
   this->allocate_internals();
@@ -1517,6 +1521,9 @@ void driver::setup_fresh(const int a_init_regrids){
   // time_stepper setup
   m_timestepper->setup_solvers();                                 // Instantiate solvers
   m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);  // Sync solver times
+  m_amr->regrid_operators(lmin, lmax, regsize);
+
+  // Fill solves with initial data
   m_timestepper->initial_data();                                  // Fill solvers with initial data
 
   // cell_tagger
