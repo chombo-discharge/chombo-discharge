@@ -21,6 +21,7 @@
 #include "EBLevelConcentrationRedist.H"
 #include "particle_container.H"
 #include "EBGhostCloud.H"
+#include "noncons_div.H"
 
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
@@ -33,6 +34,21 @@
 #include <EBFineToCoarRedist.H>
 #include <EBPWLFineInterp.H>
 #include <ProblemDomain.H>
+
+// These are operator that can be defined. 
+static const std::string s_eb_coar_ave     = "eb_coar_ave";
+static const std::string s_eb_quad_cfi     = "eb_quad_cfi";
+static const std::string s_eb_fill_patch   = "eb_fill_patch";
+static const std::string s_eb_pwl_interp   = "eb_pwl_interp";
+static const std::string s_eb_flux_reg     = "eb_flux_reg";
+static const std::string s_eb_redist       = "eb_redist";
+static const std::string s_eb_copier       = "eb_copier";
+static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
+static const std::string s_eb_gradient     = "eb_gradient";
+static const std::string s_eb_irreg_interp = "eb_irreg_interp";
+static const std::string s_eb_noncons_div  = "eb_non_cons_div";
+
+static const std::string s_eb_face_interp  = "eb_face_interp";
 
 /*!
   @brief Class for handling spatial operations for streamer equations.
@@ -80,6 +96,16 @@ public:
     @brief Allocate pointer but not memory
   */
   template <typename T> void allocate_ptr(Vector<RefCountedPtr<T> >& a_data);
+
+  /*!
+    @brief Query operator
+  */
+  virtual bool query_operator(const std::string a_operator, const phase::which_phase a_phase);
+
+  /*!
+    @brief Register an operator
+  */
+  virtual void register_operator(const std::string a_operator, const phase::which_phase a_phase);
 
   /*!
     @brief Alias an entire hierarchy of data. 
@@ -693,6 +719,11 @@ public:
   virtual irreg_amr_stencil<eb_centroid_interp>& get_eb_centroid_interp_stencils(phase::which_phase a_phase);
 
   /*!
+    @brief Get Nonconservative divergence stencils
+  */
+  virtual irreg_amr_stencil<noncons_div>& get_noncons_div_stencils(phase::which_phase a_phase);
+
+  /*!
     @brief Get copier
   */
   virtual Vector<RefCountedPtr<Copier> >& get_copier(phase::which_phase a_phase);
@@ -1012,6 +1043,11 @@ protected:
   Vector<RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> > > m_eb_centroid_interp;
 
   /*!
+    @brief Stencils that can do the nonconservative divergence average
+  */
+  Vector<RefCountedPtr<irreg_amr_stencil<noncons_div> > > m_noncons_div;
+
+  /*!
     @brief Grids for multigrid pre-coarsening
   */
   Vector<DisjointBoxLayout> m_mg_grids;
@@ -1040,6 +1076,16 @@ protected:
     @brief Gradient stencils at irregular cells
   */
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten_sol;
+
+  /*!
+    @brief Non-conservative stencils
+  */
+  Vector<Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > > m_stencils_nc;
+
+  /*!
+    @brief Map for holding the operators
+  */
+  std::map<std::pair<std::string, phase::which_phase>, bool> m_operator_map;
 
   /*!
     @brief Load balance grids
@@ -1091,6 +1137,11 @@ protected:
     @note This routine shouldn't need to define over all AMR levels, but performance-wise this might be negligible
   */
   virtual void define_irreg_sten();
+
+  /*!
+    @brief Define stencils for the nonconservative divergence 
+  */
+  virtual void define_noncons_sten();
 
   /*!
     @brief Define copiers

@@ -76,11 +76,26 @@ amr_mesh::amr_mesh(){
   m_ref_ratios.resize(m_max_amr_depth);
   m_ref_ratios.push_back(2);
 #endif
+
+  // Default stuff so that regression tests can run.  
+  this->register_operator(s_eb_coar_ave,     phase::gas);
+  this->register_operator(s_eb_quad_cfi,     phase::gas);
+  this->register_operator(s_eb_fill_patch,   phase::gas);
+  this->register_operator(s_eb_pwl_interp,   phase::gas);
+  this->register_operator(s_eb_flux_reg,     phase::gas);
+  this->register_operator(s_eb_redist,       phase::gas);
+  this->register_operator(s_eb_gradient,     phase::gas); 
+  this->register_operator(s_eb_irreg_interp, phase::gas); 
+  this->register_operator(s_eb_copier,       phase::gas); 
+  this->register_operator(s_eb_ghostcloud,   phase::gas);
+  this->register_operator(s_eb_noncons_div,  phase::gas); 
 }
 
 amr_mesh::~amr_mesh(){
   
 }
+
+
 
 void amr_mesh::alias(EBAMRCellData&           a_data,
 		     const phase::which_phase a_phase,
@@ -692,19 +707,17 @@ void amr_mesh::build_domains(){
   m_pwl_fillpatch.resize(phase::num_phases);
   m_pwl_interp.resize(phase::num_phases);
   m_centroid_interp.resize(phase::num_phases);
+  m_noncons_div.resize(phase::num_phases);
   m_eb_centroid_interp.resize(phase::num_phases);
   m_coar_to_fine_redist.resize(phase::num_phases);
   m_coar_to_coar_redist.resize(phase::num_phases);
   m_fine_to_coar_redist.resize(phase::num_phases);
   m_copier.resize(phase::num_phases);
   m_ghostclouds.resize(phase::num_phases);
-
   m_reverse_copier.resize(phase::num_phases);
-
 
   m_eblg[phase::gas].resize(nlevels);
   m_ebisl[phase::gas].resize(nlevels);
-
   m_coarave[phase::gas].resize(nlevels);
   m_quadcfi[phase::gas].resize(nlevels);
   m_flux_reg[phase::gas].resize(nlevels);
@@ -719,7 +732,6 @@ void amr_mesh::build_domains(){
   m_copier[phase::gas].resize(nlevels);
   m_reverse_copier[phase::gas].resize(nlevels);
   m_ghostclouds[phase::gas].resize(nlevels);
-
 
   m_eblg[phase::solid].resize(nlevels);
   m_ebisl[phase::solid].resize(nlevels);
@@ -763,109 +775,35 @@ void amr_mesh::regrid(const Vector<IntVectSet>& a_tags,
 
   Vector<IntVectSet> tags = a_tags; // build_grids destroys tags, so copy them
 
-#if AMR_MESH_DEBUG
-  const Real t0 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before build_grids" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
+  // This is stuff that always gets done
   this->build_grids(tags, a_lmin, a_lmax, a_hardcap);
   this->define_neighbors(a_lmin);
-#if AMR_MESH_DEBUG
-  const Real t1 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_eblevelgrid" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
-#if AMR_MESH_DEBUG
-  const Real t2 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_mflevelgrid" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
-#if AMR_MESH_DEBUG
-  const Real t3 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_ebcoarave" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
-  this->define_eb_coar_ave(a_lmin);  // Define ebcoarseaverage on both phases
-#if AMR_MESH_DEBUG
-  const Real t4 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_ebquadcfi" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
-  this->define_eb_quad_cfi(a_lmin);  // Define nwoebquadcfinterp on both phases.
-#if AMR_MESH_DEBUG
-  const Real t5 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_fillpatch" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
-  this->define_fillpatch(a_lmin);    // Define operator for piecewise linear interpolation of ghost cells
-#if AMR_MESH_DEBUG
-  const Real t6 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_ebpwl_interp" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
-  this->define_ebpwl_interp(a_lmin); // Define interpolator for piecewise interpolation of interior points
-#if AMR_MESH_DEBUG
-  const Real t7 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_flux_reg" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
-  this->define_flux_reg(a_lmin,a_regsize);     // Define flux register (phase::gas only)
-#if AMR_MESH_DEBUG
-  const Real t8 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_redist_oper" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
+
+  // Now allocate operators
+  this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
+  this->define_eb_quad_cfi(a_lmin);             // Define nwoebquadcfinterp on both phases.
+  this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
+  this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
+  this->define_flux_reg(a_lmin,a_regsize);      // Define flux register (phase::gas only)
   this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
-#if AMR_MESH_DEBUG
-  const Real t9 = MPI_Wtime();
-  pout() << "amr_mesh::regrid - memory before define_irreg_sten" << endl;
-  overallMemoryUsage();
-  pout() << endl;
-#endif
-  this->define_gradsten(a_lmin);
-  this->define_irreg_sten();   // Define irregular stencils
-#if AMR_MESH_DEBUG
-  const Real t10 = MPI_Wtime();
-#endif
+
+  // Allocate stencils
+  this->define_gradsten(a_lmin);  // Make stencils for computing gradients
+  this->define_irreg_sten();      // Make stencils for doing interpolation to centroids
+  this->define_noncons_sten();    // Make stencils for nonconservative averaging
+
+  // Allocate copiers
   this->define_copier(a_lmin);
   this->define_ghostcloud(a_lmin);
-  const Real t11 = MPI_Wtime();
 
 
+  // Allocate multigrid stuff
   if(!m_has_mg_stuff){
     this->define_mg_stuff();
     m_has_mg_stuff = true; // Only needs to be done ONCE
   }
-  
-#if AMR_MESH_DEBUG
-  const Real T = t11 - t0;
-  pout() << "amr_mesh::regrid breakdown" << endl;
-  pout() << "overall memory usage" << endl;
-  overallMemoryUsage();
-  pout() << "build grids = " << t1-t0   << "\t % =  " << 100.*(t1-t0)/(T) << endl;
-  pout() << "eblevelgrid = " << t2-t1   << "\t % =  " << 100.*(t2-t1)/(T) << endl;
-  pout() << "mflevelgrid = " << t3-t2   << "\t % =  " << 100.*(t3-t2)/(T) << endl;
-  pout() << "ebcoarseave = " << t4-t3   << "\t % =  " << 100.*(t4-t3)/(T) << endl;
-  pout() << "ebquadcfi   = " << t5-t4   << "\t % =  " << 100.*(t5-t4)/(T) << endl;
-  pout() << "fillpatch   = " << t6-t5   << "\t % =  " << 100.*(t6-t5)/(T) << endl;
-  pout() << "pwl_interp  = " << t7-t6   << "\t % =  " << 100.*(t7-t6)/(T) << endl;
-  pout() << "flux_reg    = " << t8-t7   << "\t % =  " << 100.*(t8-t7)/(T) << endl;
-  pout() << "redist_oper = " << t9-t8   << "\t % =  " << 100.*(t9-t8)/(T) << endl;
-  pout() << "irreg_sten  = " << t10-t9  << "\t % =  " << 100.*(t10-t9)/(T) << endl;
-  pout() << "copier      = " << t11-t10 << "\t % =  " << 100.*(t10-t9)/(T) << endl;
-  pout() << "total time  = " << T << endl;
-#endif
 }
 
 void amr_mesh::build_grids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap){
@@ -1258,86 +1196,91 @@ void amr_mesh::define_gradsten(const int a_lmin){
     const Real dx                = m_dx[lvl];
     
     if(!ebis_gas.isNull()){
-      m_gradsten_gas[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
+      if(this->query_operator(s_eb_gradient, phase::gas)){
+	m_gradsten_gas[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
 
-      const EBISLayout& ebisl = m_ebisl[phase::gas][lvl];
+	const EBISLayout& ebisl = m_ebisl[phase::gas][lvl];
 
-      LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box box          = dbl.get(dit());
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  const Box box          = dbl.get(dit());
+	  const EBISBox& ebisbox = ebisl[dit()];
+	  const EBGraph& ebgraph = ebisbox.getEBGraph();
 
 	
-	IntVectSet ivs   = ebisbox.getIrregIVS(box);
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  Box lo_box, hi_box;
-	  int has_lo, has_hi;
-
-	  EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
-
-	  if(has_lo){
-	    ivs |= IntVectSet(lo_box);
-	  }
-	  if(has_hi){
-	    ivs |= IntVectSet(hi_box);
-	  }
-	}
-
-	BaseIVFAB<VoFStencil>& vofstencils = (*m_gradsten_gas[lvl])[dit()];
-	vofstencils.define(ivs, ebgraph, 1);
-
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-
-	  VoFStencil& sten = vofstencils(vof, 0);
-	  sten.clear();
+	  IntVectSet ivs   = ebisbox.getIrregIVS(box);
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    VoFStencil dirsten;
-	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
-	    sten += dirsten;
+	    Box lo_box, hi_box;
+	    int has_lo, has_hi;
+
+	    EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
+
+	    if(has_lo){
+	      ivs |= IntVectSet(lo_box);
+	    }
+	    if(has_hi){
+	      ivs |= IntVectSet(hi_box);
+	    }
+	  }
+
+	  BaseIVFAB<VoFStencil>& vofstencils = (*m_gradsten_gas[lvl])[dit()];
+	  vofstencils.define(ivs, ebgraph, 1);
+
+	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	    const VolIndex& vof = vofit();
+
+	    VoFStencil& sten = vofstencils(vof, 0);
+	    sten.clear();
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      VoFStencil dirsten;
+	      EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
+	      sten += dirsten;
+	    }
 	  }
 	}
       }
     }
+    
     if(!ebis_sol.isNull()){
-      m_gradsten_sol[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
+      if(this->query_operator(s_eb_gradient, phase::solid)){
+	m_gradsten_sol[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
 
-      const EBISLayout& ebisl = m_ebisl[phase::solid][lvl];
+	const EBISLayout& ebisl = m_ebisl[phase::solid][lvl];
 
-      LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box box          = dbl.get(dit());
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  const Box box          = dbl.get(dit());
+	  const EBISBox& ebisbox = ebisl[dit()];
+	  const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-	IntVectSet ivs   = ebisbox.getIrregIVS(box);
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  Box lo_box, hi_box;
-	  int has_lo, has_hi;
-
-	  EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
-
-	  if(has_lo){
-	    ivs |= IntVectSet(lo_box);
-	  }
-	  if(has_hi){
-	    ivs |= IntVectSet(hi_box);
-	  }
-	}
-
-	BaseIVFAB<VoFStencil>& vofstencils = (*m_gradsten_sol[lvl])[dit()];
-	vofstencils.define(ivs, ebgraph, 1);
-
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-
-	  VoFStencil& sten = vofstencils(vof, 0);
-	  sten.clear();
+	  IntVectSet ivs   = ebisbox.getIrregIVS(box);
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    VoFStencil dirsten;
-	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
-	    sten += dirsten;
+	    Box lo_box, hi_box;
+	    int has_lo, has_hi;
+
+	    EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
+
+	    if(has_lo){
+	      ivs |= IntVectSet(lo_box);
+	    }
+	    if(has_hi){
+	      ivs |= IntVectSet(hi_box);
+	    }
+	  }
+
+	  BaseIVFAB<VoFStencil>& vofstencils = (*m_gradsten_sol[lvl])[dit()];
+	  vofstencils.define(ivs, ebgraph, 1);
+
+	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	    const VolIndex& vof = vofit();
+
+	    VoFStencil& sten = vofstencils(vof, 0);
+	    sten.clear();
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      VoFStencil dirsten;
+	      EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
+	      sten += dirsten;
+	    }
 	  }
 	}
       }
@@ -1448,25 +1391,29 @@ void amr_mesh::define_eb_coar_ave(const int a_lmin){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-      	m_coarave[phase::gas][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
-      											 m_grids[lvl-1],
-      											 m_ebisl[phase::gas][lvl],
-      											 m_ebisl[phase::gas][lvl-1],
-      											 m_domains[lvl-1],
-      											 m_ref_ratios[lvl-1],
-      											 comps,
-      											 &(*ebis_gas)));
+	if(this->query_operator(s_eb_coar_ave, phase::gas)){
+	  m_coarave[phase::gas][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
+											   m_grids[lvl-1],
+											   m_ebisl[phase::gas][lvl],
+											   m_ebisl[phase::gas][lvl-1],
+											   m_domains[lvl-1],
+											   m_ref_ratios[lvl-1],
+											   comps,
+											   &(*ebis_gas)));
+	}
       }
 
       if(!ebis_sol.isNull()){
-      	m_coarave[phase::solid][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
-      											   m_grids[lvl-1],
-      											   m_ebisl[phase::solid][lvl],
-      											   m_ebisl[phase::solid][lvl-1],
-      											   m_domains[lvl-1],
-      											   m_ref_ratios[lvl-1],
-      											   comps,
-      											   ebis_sol));
+	if(this->query_operator(s_eb_coar_ave, phase::solid)){
+	  m_coarave[phase::solid][lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
+											     m_grids[lvl-1],
+											     m_ebisl[phase::solid][lvl],
+											     m_ebisl[phase::solid][lvl-1],
+											     m_domains[lvl-1],
+											     m_ref_ratios[lvl-1],
+											     comps,
+											     ebis_sol));
+	}
       }
     }
   }
@@ -1491,57 +1438,57 @@ void amr_mesh::define_eb_quad_cfi(const int a_lmin){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-	if(m_interp_type == ghost_interpolation::quad){
-	  m_quadcfi[phase::gas][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
-											       m_grids[lvl-1],
-											       m_ebisl[phase::gas][lvl],
-											       m_ebisl[phase::gas][lvl-1],
-											       m_domains[lvl-1],
-											       m_ref_ratios[lvl-1],
-											       comps,
-											       m_dx[lvl],
-											       m_num_ghost,
-											       cfivs,
-											       ebis_gas));
-	}
+	if(this->query_operator(s_eb_quad_cfi, phase::gas)){
+	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
 
-	m_old_quadcfi[phase::gas][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
-											   m_grids[lvl-1],
-											   m_ebisl[phase::gas][lvl],
-											   m_ebisl[phase::gas][lvl-1],
-											   m_domains[lvl-1],
-											   m_ref_ratios[lvl-1],
-											   1,
-											   cfivs,
-											   ebis_gas));
-											   
-      }
-      if(!ebis_sol.isNull()){
-	LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	if(m_interp_type == ghost_interpolation::quad){
-	  m_quadcfi[phase::solid][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
+	    m_quadcfi[phase::gas][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
 												 m_grids[lvl-1],
-												 m_ebisl[phase::solid][lvl],
-												 m_ebisl[phase::solid][lvl-1],
+												 m_ebisl[phase::gas][lvl],
+												 m_ebisl[phase::gas][lvl-1],
 												 m_domains[lvl-1],
 												 m_ref_ratios[lvl-1],
 												 comps,
 												 m_dx[lvl],
 												 m_num_ghost,
 												 cfivs,
-												 ebis_sol));
-	}
-	
-	m_old_quadcfi[phase::solid][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
+												 ebis_gas));
+
+	  m_old_quadcfi[phase::gas][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
 											     m_grids[lvl-1],
-											     m_ebisl[phase::solid][lvl],
-											     m_ebisl[phase::solid][lvl-1],
+											     m_ebisl[phase::gas][lvl],
+											     m_ebisl[phase::gas][lvl-1],
 											     m_domains[lvl-1],
 											     m_ref_ratios[lvl-1],
 											     1,
 											     cfivs,
-											     ebis_sol));
+											     ebis_gas));
+	}
+      }
+      if(!ebis_sol.isNull()){
+	if(this->query_operator(s_eb_quad_cfi, phase::solid)){
+	  LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
+	    m_quadcfi[phase::solid][lvl] = RefCountedPtr<nwoebquadcfinterp> (new nwoebquadcfinterp(m_grids[lvl],
+												   m_grids[lvl-1],
+												   m_ebisl[phase::solid][lvl],
+												   m_ebisl[phase::solid][lvl-1],
+												   m_domains[lvl-1],
+												   m_ref_ratios[lvl-1],
+												   comps,
+												   m_dx[lvl],
+												   m_num_ghost,
+												   cfivs,
+												   ebis_sol));
+	
+	  m_old_quadcfi[phase::solid][lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
+											       m_grids[lvl-1],
+											       m_ebisl[phase::solid][lvl],
+											       m_ebisl[phase::solid][lvl-1],
+											       m_domains[lvl-1],
+											       m_ref_ratios[lvl-1],
+											       1,
+											       cfivs,
+											       ebis_sol));
+	}
       }
     }
   }
@@ -1569,32 +1516,37 @@ void amr_mesh::define_fillpatch(const int a_lmin){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
-	m_pwl_fillpatch[phase::gas][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
-												   m_grids[lvl-1],
-												   m_ebisl[phase::gas][lvl],
-												   m_ebisl[phase::gas][lvl-1],
-												   m_domains[lvl-1],
-												   m_ref_ratios[lvl-1],
-												   comps,
-												   radius,
-												   ghost,
-												   !m_ebcf,
-												   ebis_gas));
-      }
-      if(!ebis_sol.isNull()){
-	const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
-	m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
+	if(this->query_operator(s_eb_fill_patch, phase::gas)){
+	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::gas][lvl]->getCFIVS());
+	  m_pwl_fillpatch[phase::gas][lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
 												     m_grids[lvl-1],
-												     m_ebisl[phase::solid][lvl],
-												     m_ebisl[phase::solid][lvl-1],
+												     m_ebisl[phase::gas][lvl],
+												     m_ebisl[phase::gas][lvl-1],
 												     m_domains[lvl-1],
 												     m_ref_ratios[lvl-1],
 												     comps,
 												     radius,
 												     ghost,
 												     !m_ebcf,
-												     ebis_sol));
+												     ebis_gas));
+	}
+      }
+      if(!ebis_sol.isNull()){
+	if(this->query_operator(s_eb_fill_patch, phase::solid)){
+	  const LayoutData<IntVectSet>& cfivs = *(m_eblg[phase::solid][lvl]->getCFIVS());
+	  m_pwl_fillpatch[phase::solid][lvl] = RefCountedPtr<AggEBPWLFillPatch>
+	    (new AggEBPWLFillPatch(m_grids[lvl],
+				   m_grids[lvl-1],
+				   m_ebisl[phase::solid][lvl],
+				   m_ebisl[phase::solid][lvl-1],
+				   m_domains[lvl-1],
+				   m_ref_ratios[lvl-1],
+				   comps,
+				   radius,
+				   ghost,
+				   !m_ebcf,
+				   ebis_sol));
+	}
       }
     }
   }
@@ -1621,24 +1573,28 @@ void amr_mesh::define_ebpwl_interp(const int a_lmin){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-	m_pwl_interp[phase::gas][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
-											    m_grids[lvl-1],
-											    m_ebisl[phase::gas][lvl],
-											    m_ebisl[phase::gas][lvl-1],
-											    m_domains[lvl-1],
-											    m_ref_ratios[lvl-1],
-											    comps,
-											    ebis_gas));
-      }
-      if(!ebis_sol.isNull()){
-	m_pwl_interp[phase::solid][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
+	if(this->query_operator(s_eb_pwl_interp, phase::gas)){
+	  m_pwl_interp[phase::gas][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
 											      m_grids[lvl-1],
-											      m_ebisl[phase::solid][lvl],
-											      m_ebisl[phase::solid][lvl-1],
+											      m_ebisl[phase::gas][lvl],
+											      m_ebisl[phase::gas][lvl-1],
 											      m_domains[lvl-1],
 											      m_ref_ratios[lvl-1],
 											      comps,
-											      ebis_sol));
+											      ebis_gas));
+	}
+      }
+      if(!ebis_sol.isNull()){
+	if(this->query_operator(s_eb_pwl_interp, phase::solid)){
+	  m_pwl_interp[phase::solid][lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
+												m_grids[lvl-1],
+												m_ebisl[phase::solid][lvl],
+												m_ebisl[phase::solid][lvl-1],
+												m_domains[lvl-1],
+												m_ref_ratios[lvl-1],
+												comps,
+												ebis_sol));
+	}
       }
     }
   }
@@ -1664,14 +1620,30 @@ void amr_mesh::define_flux_reg(const int a_lmin, const int a_regsize){
 
     if(!ebis_gas.isNull()){
       if(has_fine){
-	m_flux_reg[phase::gas][lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
-											m_grids[lvl],
-											m_ebisl[phase::gas][lvl+1],
-											m_ebisl[phase::gas][lvl],
-											m_domains[lvl].domainBox(),
-											m_ref_ratios[lvl],
-											comps,
-											ebis_gas));
+	if(this->query_operator(s_eb_flux_reg, phase::gas)){
+	  m_flux_reg[phase::gas][lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
+											  m_grids[lvl],
+											  m_ebisl[phase::gas][lvl+1],
+											  m_ebisl[phase::gas][lvl],
+											  m_domains[lvl].domainBox(),
+											  m_ref_ratios[lvl],
+											  comps,
+											  ebis_gas));
+	}
+      }
+    }
+    if(!ebis_sol.isNull()){
+      if(has_fine){
+	if(this->query_operator(s_eb_flux_reg, phase::solid)){
+	  m_flux_reg[phase::solid][lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
+											    m_grids[lvl],
+											    m_ebisl[phase::solid][lvl+1],
+											    m_ebisl[phase::solid][lvl],
+											    m_domains[lvl].domainBox(),
+											    m_ref_ratios[lvl],
+											    comps,
+											    ebis_sol));
+	}
       }
     }
   }
@@ -1706,111 +1678,228 @@ void amr_mesh::define_redist_oper(const int a_lmin, const int a_regsize){
     const bool has_fine = lvl < m_finest_level;
 
     if(!ebis_gas.isNull()){
-      if(lvl >= a_lmin){
-	t_level -= MPI_Wtime();
-	m_level_redist[phase::gas][lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
-											  m_ebisl[phase::gas][lvl],
-											  m_domains[lvl],
-											  comps,
-											  m_redist_rad));
+      if(this->query_operator(s_eb_redist, phase::gas)){
+	      
+	if(lvl >= a_lmin){
+	  t_level -= MPI_Wtime();
+	  m_level_redist[phase::gas][lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
+											    m_ebisl[phase::gas][lvl],
+											    m_domains[lvl],
+											    comps,
+											    m_redist_rad));
 
-	m_concentration_redist[phase::gas][lvl] = RefCountedPtr<EBLevelConcentrationRedist>
-	  (new EBLevelConcentrationRedist(m_grids[lvl],
-					  m_ebisl[phase::gas][lvl],
-					  m_domains[lvl],
-					  comps,
-					  m_redist_rad));
+	  m_concentration_redist[phase::gas][lvl] = RefCountedPtr<EBLevelConcentrationRedist>
+	    (new EBLevelConcentrationRedist(m_grids[lvl],
+					    m_ebisl[phase::gas][lvl],
+					    m_domains[lvl],
+					    comps,
+					    m_redist_rad));
 
 
-	t_level += MPI_Wtime();
-      }
-
-    
-      if(m_ebcf){
-	if(has_coar){
-
-	  // TLDR: The fine-to-coar redistribution operator that transfers from the fine level to the coar level
-	  //       obviously lives on the fine level. But since a_lmin is the coarsest level that changed, we only
-	  //       need to update this if lvl >= a_lmin
-	  if(lvl >= a_lmin){
-	    t_fine2coar -= MPI_Wtime();
-#if USE_NEW_F2C_REDIST
-	    auto redist = RefCountedPtr<EBFastFineToCoarRedist> (new EBFastFineToCoarRedist());
-	    redist->define(*m_eblg[phase::gas][lvl],
-			   *m_eblg[phase::gas][lvl-1],
-			   *m_neighbors[lvl],
-			   *m_neighbors[lvl-1],
-			   m_ref_ratios[lvl-1],
-			   comps,
-			   m_redist_rad);
-	    m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (redist);
-#else
-	    
-	    m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (new EBFineToCoarRedist());
-	    m_fine_to_coar_redist[phase::gas][lvl]->define(m_grids[lvl],
-							   m_grids[lvl-1],
-							   m_ebisl[phase::gas][lvl],
-							   m_ebisl[phase::gas][lvl-1],
-							   m_domains[lvl-1].domainBox(),
-							   m_ref_ratios[lvl-1],
-							   comps,
-							   m_redist_rad,
-							   ebis_gas);
-#endif
-	    t_fine2coar += MPI_Wtime();
-	  }
+	  t_level += MPI_Wtime();
 	}
 
-	if(has_fine){
-	  // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
-	  //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
-	  //       if lvl >= a_lmin-1
-	  if(lvl >= a_lmin-1){
-	    t_coar2fine -= MPI_Wtime();
-#if USE_NEW_C2F_REDIST
-	    auto c2f_redist = RefCountedPtr<EBFastCoarToFineRedist> (new EBFastCoarToFineRedist());
-	    c2f_redist->define(*m_eblg[phase::gas][lvl+1],
-			       *m_eblg[phase::gas][lvl],
-			       *m_neighbors[lvl+1],
-			       *m_neighbors[lvl],
-			       m_ref_ratios[lvl],
-			       comps,
-			       m_redist_rad);
-	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
-#else
-	    m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
-	    m_coar_to_fine_redist[phase::gas][lvl]->define(m_grids[lvl+1],
-							   m_grids[lvl],
-							   m_ebisl[phase::gas][lvl],
-							   m_domains[lvl].domainBox(),
-							   m_ref_ratios[lvl],
-							   comps,
-							   m_redist_rad,
-							   ebis_gas);
-#endif
-	    t_coar2fine += MPI_Wtime();
+    
+	if(m_ebcf){
+	  if(has_coar){
 
-	    // Coarse to coarse redistribution
-	    t_coar2coar -= MPI_Wtime();
-#if USE_NEW_C2C_REDIST
-	    auto c2c_redist = RefCountedPtr<EBFastCoarToCoarRedist> (new EBFastCoarToCoarRedist());
-	    c2c_redist->define(*m_eblg[phase::gas][lvl+1],
-			       *m_eblg[phase::gas][lvl],
-			       *m_neighbors[lvl+1],
-			       *m_neighbors[lvl],
-			       m_ref_ratios[lvl],
-			       comps,
-			       m_redist_rad);
-	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
+	    // TLDR: The fine-to-coar redistribution operator that transfers from the fine level to the coar level
+	    //       obviously lives on the fine level. But since a_lmin is the coarsest level that changed, we only
+	    //       need to update this if lvl >= a_lmin
+	    if(lvl >= a_lmin){
+	      t_fine2coar -= MPI_Wtime();
+#if USE_NEW_F2C_REDIST
+	      auto redist = RefCountedPtr<EBFastFineToCoarRedist> (new EBFastFineToCoarRedist());
+	      redist->define(*m_eblg[phase::gas][lvl],
+			     *m_eblg[phase::gas][lvl-1],
+			     *m_neighbors[lvl],
+			     *m_neighbors[lvl-1],
+			     m_ref_ratios[lvl-1],
+			     comps,
+			     m_redist_rad);
+	      m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (redist);
 #else
-	    m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
-	    m_coar_to_coar_redist[phase::gas][lvl]->define(*m_eblg[phase::gas][lvl+1],
-							   *m_eblg[phase::gas][lvl],
-							   m_ref_ratios[lvl],
-							   comps,
-							   m_redist_rad);
+	    
+	      m_fine_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBFineToCoarRedist> (new EBFineToCoarRedist());
+	      m_fine_to_coar_redist[phase::gas][lvl]->define(m_grids[lvl],
+							     m_grids[lvl-1],
+							     m_ebisl[phase::gas][lvl],
+							     m_ebisl[phase::gas][lvl-1],
+							     m_domains[lvl-1].domainBox(),
+							     m_ref_ratios[lvl-1],
+							     comps,
+							     m_redist_rad,
+							     ebis_gas);
 #endif
-	    t_coar2coar += MPI_Wtime();
+	      t_fine2coar += MPI_Wtime();
+	    }
+	  }
+
+	  if(has_fine){
+	    // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
+	    //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
+	    //       if lvl >= a_lmin-1
+	    if(lvl >= a_lmin-1){
+	      t_coar2fine -= MPI_Wtime();
+#if USE_NEW_C2F_REDIST
+	      auto c2f_redist = RefCountedPtr<EBFastCoarToFineRedist> (new EBFastCoarToFineRedist());
+	      c2f_redist->define(*m_eblg[phase::gas][lvl+1],
+				 *m_eblg[phase::gas][lvl],
+				 *m_neighbors[lvl+1],
+				 *m_neighbors[lvl],
+				 m_ref_ratios[lvl],
+				 comps,
+				 m_redist_rad);
+	      m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
+#else
+	      m_coar_to_fine_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
+	      m_coar_to_fine_redist[phase::gas][lvl]->define(m_grids[lvl+1],
+							     m_grids[lvl],
+							     m_ebisl[phase::gas][lvl],
+							     m_domains[lvl].domainBox(),
+							     m_ref_ratios[lvl],
+							     comps,
+							     m_redist_rad,
+							     ebis_gas);
+#endif
+	      t_coar2fine += MPI_Wtime();
+
+	      // Coarse to coarse redistribution
+	      t_coar2coar -= MPI_Wtime();
+#if USE_NEW_C2C_REDIST
+	      auto c2c_redist = RefCountedPtr<EBFastCoarToCoarRedist> (new EBFastCoarToCoarRedist());
+	      c2c_redist->define(*m_eblg[phase::gas][lvl+1],
+				 *m_eblg[phase::gas][lvl],
+				 *m_neighbors[lvl+1],
+				 *m_neighbors[lvl],
+				 m_ref_ratios[lvl],
+				 comps,
+				 m_redist_rad);
+	      m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
+#else
+	      m_coar_to_coar_redist[phase::gas][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
+	      m_coar_to_coar_redist[phase::gas][lvl]->define(*m_eblg[phase::gas][lvl+1],
+							     *m_eblg[phase::gas][lvl],
+							     m_ref_ratios[lvl],
+							     comps,
+							     m_redist_rad);
+#endif
+	      t_coar2coar += MPI_Wtime();
+	    }
+	  }
+	}
+      }
+    }
+
+    if(!ebis_sol.isNull()){
+      if(this->query_operator(s_eb_redist, phase::solid)){
+	      
+	if(lvl >= a_lmin){
+	  t_level -= MPI_Wtime();
+	  m_level_redist[phase::solid][lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
+											    m_ebisl[phase::solid][lvl],
+											    m_domains[lvl],
+											    comps,
+											    m_redist_rad));
+
+	  m_concentration_redist[phase::solid][lvl] = RefCountedPtr<EBLevelConcentrationRedist>
+	    (new EBLevelConcentrationRedist(m_grids[lvl],
+					    m_ebisl[phase::solid][lvl],
+					    m_domains[lvl],
+					    comps,
+					    m_redist_rad));
+
+
+	  t_level += MPI_Wtime();
+	}
+
+    
+	if(m_ebcf){
+	  if(has_coar){
+
+	    // TLDR: The fine-to-coar redistribution operator that transfers from the fine level to the coar level
+	    //       obviously lives on the fine level. But since a_lmin is the coarsest level that changed, we only
+	    //       need to update this if lvl >= a_lmin
+	    if(lvl >= a_lmin){
+	      t_fine2coar -= MPI_Wtime();
+#if USE_NEW_F2C_REDIST
+	      auto redist = RefCountedPtr<EBFastFineToCoarRedist> (new EBFastFineToCoarRedist());
+	      redist->define(*m_eblg[phase::solid][lvl],
+			     *m_eblg[phase::solid][lvl-1],
+			     *m_neighbors[lvl],
+			     *m_neighbors[lvl-1],
+			     m_ref_ratios[lvl-1],
+			     comps,
+			     m_redist_rad);
+	      m_fine_to_coar_redist[phase::solid][lvl] = RefCountedPtr<EBFineToCoarRedist> (redist);
+#else
+	    
+	      m_fine_to_coar_redist[phase::solid][lvl] = RefCountedPtr<EBFineToCoarRedist> (new EBFineToCoarRedist());
+	      m_fine_to_coar_redist[phase::solid][lvl]->define(m_grids[lvl],
+							     m_grids[lvl-1],
+							     m_ebisl[phase::solid][lvl],
+							     m_ebisl[phase::solid][lvl-1],
+							     m_domains[lvl-1].domainBox(),
+							     m_ref_ratios[lvl-1],
+							     comps,
+							     m_redist_rad,
+							     ebis_gas);
+#endif
+	      t_fine2coar += MPI_Wtime();
+	    }
+	  }
+
+	  if(has_fine){
+	    // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
+	    //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
+	    //       if lvl >= a_lmin-1
+	    if(lvl >= a_lmin-1){
+	      t_coar2fine -= MPI_Wtime();
+#if USE_NEW_C2F_REDIST
+	      auto c2f_redist = RefCountedPtr<EBFastCoarToFineRedist> (new EBFastCoarToFineRedist());
+	      c2f_redist->define(*m_eblg[phase::solid][lvl+1],
+				 *m_eblg[phase::solid][lvl],
+				 *m_neighbors[lvl+1],
+				 *m_neighbors[lvl],
+				 m_ref_ratios[lvl],
+				 comps,
+				 m_redist_rad);
+	      m_coar_to_fine_redist[phase::solid][lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
+#else
+	      m_coar_to_fine_redist[phase::solid][lvl] = RefCountedPtr<EBCoarToFineRedist> (new EBCoarToFineRedist());
+	      m_coar_to_fine_redist[phase::solid][lvl]->define(m_grids[lvl+1],
+							     m_grids[lvl],
+							     m_ebisl[phase::solid][lvl],
+							     m_domains[lvl].domainBox(),
+							     m_ref_ratios[lvl],
+							     comps,
+							     m_redist_rad,
+							     ebis_gas);
+#endif
+	      t_coar2fine += MPI_Wtime();
+
+	      // Coarse to coarse redistribution
+	      t_coar2coar -= MPI_Wtime();
+#if USE_NEW_C2C_REDIST
+	      auto c2c_redist = RefCountedPtr<EBFastCoarToCoarRedist> (new EBFastCoarToCoarRedist());
+	      c2c_redist->define(*m_eblg[phase::solid][lvl+1],
+				 *m_eblg[phase::solid][lvl],
+				 *m_neighbors[lvl+1],
+				 *m_neighbors[lvl],
+				 m_ref_ratios[lvl],
+				 comps,
+				 m_redist_rad);
+	      m_coar_to_coar_redist[phase::solid][lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
+#else
+	      m_coar_to_coar_redist[phase::solid][lvl] = RefCountedPtr<EBCoarToCoarRedist> (new EBCoarToCoarRedist());
+	      m_coar_to_coar_redist[phase::solid][lvl]->define(*m_eblg[phase::solid][lvl+1],
+							     *m_eblg[phase::solid][lvl],
+							     m_ref_ratios[lvl],
+							     comps,
+							     m_redist_rad);
+#endif
+	      t_coar2coar += MPI_Wtime();
+	    }
 	  }
 	}
       }
@@ -1839,47 +1928,94 @@ void amr_mesh::define_irreg_sten(){
   const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
 
   if(!ebis_gas.isNull()){
-    m_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
-      (new irreg_amr_stencil<centroid_interp>(m_grids,
-					      m_ebisl[phase::gas],
-					      m_domains,
-					      m_dx,
-					      m_finest_level,
-					      m_centroid_sten_order,
-					      m_centroid_sten_rad,
-					      m_centroid_stencil));
+    if(this->query_operator(s_eb_irreg_interp, phase::gas)){
+      m_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
+	(new irreg_amr_stencil<centroid_interp>(m_grids,
+						m_ebisl[phase::gas],
+						m_domains,
+						m_dx,
+						m_finest_level,
+						m_centroid_sten_order,
+						m_centroid_sten_rad,
+						m_centroid_stencil));
 
-    m_eb_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
-      (new irreg_amr_stencil<eb_centroid_interp>(m_grids,
-						 m_ebisl[phase::gas],
-						 m_domains,
-						 m_dx,
-						 m_finest_level,
-						 m_eb_sten_order,
-						 m_eb_sten_rad,
-						 m_eb_stencil));
+      m_eb_centroid_interp[phase::gas] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
+	(new irreg_amr_stencil<eb_centroid_interp>(m_grids,
+						   m_ebisl[phase::gas],
+						   m_domains,
+						   m_dx,
+						   m_finest_level,
+						   m_eb_sten_order,
+						   m_eb_sten_rad,
+						   m_eb_stencil));
+    }
   }
 
   if(!ebis_sol.isNull()){
-    m_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
-      (new irreg_amr_stencil<centroid_interp>(m_grids,
-					      m_ebisl[phase::solid],
-					      m_domains,
-					      m_dx,
-					      m_finest_level,
-					      m_centroid_sten_order,
-					      m_centroid_sten_rad,
-					      m_centroid_stencil));
-    m_eb_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
-      (new irreg_amr_stencil<eb_centroid_interp>(m_grids,
-						 m_ebisl[phase::solid],
-						 m_domains,
-						 m_dx,
-						 m_finest_level,
-						 m_eb_sten_order,
-						 m_eb_sten_rad,
-						 m_eb_stencil));
+    if(this->query_operator(s_eb_irreg_interp, phase::solid)){
+      m_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<centroid_interp> >
+	(new irreg_amr_stencil<centroid_interp>(m_grids,
+						m_ebisl[phase::solid],
+						m_domains,
+						m_dx,
+						m_finest_level,
+						m_centroid_sten_order,
+						m_centroid_sten_rad,
+						m_centroid_stencil));
+      m_eb_centroid_interp[phase::solid] = RefCountedPtr<irreg_amr_stencil<eb_centroid_interp> >
+	(new irreg_amr_stencil<eb_centroid_interp>(m_grids,
+						   m_ebisl[phase::solid],
+						   m_domains,
+						   m_dx,
+						   m_finest_level,
+						   m_eb_sten_order,
+						   m_eb_sten_rad,
+						   m_eb_stencil));
+    }
   }
+}
+
+void amr_mesh::define_noncons_sten(){
+  CH_TIME("amr_mesh::define_noncons_sten");
+  if(m_verbosity > 2){
+    pout() << "amr_mesh::define_noncons_sten" << endl;
+  }
+
+  const int order = 1; // Dummy argument
+  const int rad   = m_redist_rad;
+
+  const RefCountedPtr<EBIndexSpace> ebis_gas = m_mfis->get_ebis(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebis_sol = m_mfis->get_ebis(phase::solid);
+
+  if(!ebis_gas.isNull()){
+    if(this->query_operator(s_eb_noncons_div, phase::gas)){
+      m_noncons_div[phase::gas] = RefCountedPtr<irreg_amr_stencil<noncons_div> >
+	(new irreg_amr_stencil<noncons_div>(m_grids,
+					    m_ebisl[phase::gas],
+					    m_domains,
+					    m_dx,
+					    m_finest_level,
+					    order,                 // Dummy argument
+					    m_redist_rad,
+					    m_centroid_stencil));  // Dummy argumement
+    }
+  }
+
+  if(!ebis_gas.isNull()){
+    if(this->query_operator(s_eb_noncons_div, phase::solid)){
+      m_noncons_div[phase::solid] = RefCountedPtr<irreg_amr_stencil<noncons_div> >
+	(new irreg_amr_stencil<noncons_div>(m_grids,
+					    m_ebisl[phase::solid],
+					    m_domains,
+					    m_dx,
+					    m_finest_level,
+					    order,                 // Dummy argument
+					    m_redist_rad,
+					    m_centroid_stencil));  // Dummy argumement
+    }
+  }
+
+
 }
 
 void amr_mesh::define_copier(const int a_lmin){
@@ -1893,21 +2029,35 @@ void amr_mesh::define_copier(const int a_lmin){
 
   for (int lvl = a_lmin; lvl <= m_finest_level; lvl++){
     if(!ebis_gas.isNull()){
-      m_copier[phase::gas][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
-								    m_grids[lvl],
-								    m_domains[lvl],
-								    m_num_ghost*IntVect::Unit,
-								    true));
-      m_reverse_copier[phase::gas][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
-									    m_grids[lvl],
-									    m_domains[lvl],
-									    m_num_ghost*IntVect::Unit,
-									    true));
-      m_reverse_copier[phase::gas][lvl]->reverse();
+      if(this->query_operator(s_eb_copier, phase::gas)){
+	m_copier[phase::gas][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
+								      m_grids[lvl],
+								      m_domains[lvl],
+								      m_num_ghost*IntVect::Unit,
+								      true));
+	m_reverse_copier[phase::gas][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
+									      m_grids[lvl],
+									      m_domains[lvl],
+									      m_num_ghost*IntVect::Unit,
+									      true));
+	m_reverse_copier[phase::gas][lvl]->reverse();
+      }
     }
 
     if(!ebis_sol.isNull()){
-      
+      if(this->query_operator(s_eb_copier, phase::solid)){
+	m_copier[phase::solid][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
+									m_grids[lvl],
+									m_domains[lvl],
+									m_num_ghost*IntVect::Unit,
+									true));
+	m_reverse_copier[phase::solid][lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
+										m_grids[lvl],
+										m_domains[lvl],
+										m_num_ghost*IntVect::Unit,
+										true));
+	m_reverse_copier[phase::solid][lvl]->reverse();
+      }
     }
   }
 }
@@ -1926,15 +2076,30 @@ void amr_mesh::define_ghostcloud(const int a_lmin){
 
     if(has_coar){
       if(!ebis_gas.isNull()){
-	m_ghostclouds[phase::gas][lvl] = RefCountedPtr<EBGhostCloud> (new EBGhostCloud(m_grids[lvl-1],
-										       m_grids[lvl],
-										       *(m_eblg[phase::gas][lvl-1]),
-										       *(m_eblg[phase::gas][lvl]),
-										       m_domains[lvl-1],
-										       m_domains[lvl],
-										       m_ref_ratios[lvl-1],
-										       1,
-										       m_num_ghost));
+	if(this->query_operator(s_eb_copier, phase::gas)){
+	  m_ghostclouds[phase::gas][lvl] = RefCountedPtr<EBGhostCloud> (new EBGhostCloud(m_grids[lvl-1],
+											 m_grids[lvl],
+											 *(m_eblg[phase::gas][lvl-1]),
+											 *(m_eblg[phase::gas][lvl]),
+											 m_domains[lvl-1],
+											 m_domains[lvl],
+											 m_ref_ratios[lvl-1],
+											 1,
+											 m_num_ghost));
+	}
+      }
+      if(!ebis_sol.isNull()){
+	if(this->query_operator(s_eb_copier, phase::solid)){
+	  m_ghostclouds[phase::solid][lvl] = RefCountedPtr<EBGhostCloud> (new EBGhostCloud(m_grids[lvl-1],
+											   m_grids[lvl],
+											   *(m_eblg[phase::solid][lvl-1]),
+											   *(m_eblg[phase::solid][lvl]),
+											   m_domains[lvl-1],
+											   m_domains[lvl],
+											   m_ref_ratios[lvl-1],
+											   1,
+											   m_num_ghost));
+	}
       }
     }
   }
@@ -2755,6 +2920,10 @@ irreg_amr_stencil<eb_centroid_interp>& amr_mesh::get_eb_centroid_interp_stencils
   return *m_eb_centroid_interp[a_phase];
 }
 
+irreg_amr_stencil<noncons_div>& amr_mesh::get_noncons_div_stencils(phase::which_phase a_phase){
+  return *m_noncons_div[a_phase];
+}
+
 
 Vector<RefCountedPtr<Copier> >& amr_mesh::get_copier(phase::which_phase a_phase){
   return m_copier[a_phase];
@@ -2803,4 +2972,40 @@ Vector<Box> amr_mesh::make_tiles(const Box a_box, const IntVect a_tilesize){
 #endif
 
   return tiles;
+}
+
+void amr_mesh::register_operator(const std::string a_operator, const phase::which_phase a_phase){
+  CH_TIME("amr_mesh::register_operator");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::register_operator" << endl;
+  }
+
+  // These are the supported operators - issue an error if we ask for something that is not supported. 
+  if(!(a_operator.compare(s_eb_coar_ave)     == 0 ||
+       a_operator.compare(s_eb_quad_cfi)     == 0 ||
+       a_operator.compare(s_eb_fill_patch)   == 0 ||
+       a_operator.compare(s_eb_pwl_interp)   == 0 ||
+       a_operator.compare(s_eb_flux_reg)     == 0 ||
+       a_operator.compare(s_eb_redist)       == 0 ||
+       a_operator.compare(s_eb_noncons_div)  == 0 ||
+       a_operator.compare(s_eb_copier)       == 0 ||
+       a_operator.compare(s_eb_ghostcloud)   == 0 ||
+       a_operator.compare(s_eb_gradient)     == 0 ||
+       a_operator.compare(s_eb_irreg_interp) == 0)){
+
+    const std::string str = "amr_mesh::register_operator - unknown operator '" + a_operator + "' requested";
+    MayDay::Abort(str.c_str());
+  }
+     
+
+  m_operator_map.emplace(std::make_pair(a_operator, a_phase), true);
+}
+
+bool amr_mesh::query_operator(const std::string a_operator, const phase::which_phase a_phase) {
+  CH_TIME("amr_mesh::query_operator");
+  if(m_verbosity > 5){
+    pout() << "amr_mesh::query_operator" << endl;
+  }
+  
+  return m_operator_map[std::make_pair(a_operator, a_phase)];
 }
