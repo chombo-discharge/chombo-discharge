@@ -77,7 +77,7 @@ amr_mesh::amr_mesh(){
   m_ref_ratios.push_back(2);
 #endif
 
-  // Default stuff so that regression tests can run.  
+  // Default stuff for development purposes. 
   this->register_operator(s_eb_coar_ave,     phase::gas);
   this->register_operator(s_eb_quad_cfi,     phase::gas);
   this->register_operator(s_eb_fill_patch,   phase::gas);
@@ -88,7 +88,19 @@ amr_mesh::amr_mesh(){
   this->register_operator(s_eb_irreg_interp, phase::gas); 
   this->register_operator(s_eb_copier,       phase::gas); 
   this->register_operator(s_eb_ghostcloud,   phase::gas);
-  this->register_operator(s_eb_noncons_div,  phase::gas); 
+  this->register_operator(s_eb_noncons_div,  phase::gas);
+
+  this->register_operator(s_eb_coar_ave,     phase::solid);
+  this->register_operator(s_eb_quad_cfi,     phase::solid);
+  this->register_operator(s_eb_fill_patch,   phase::solid);
+  this->register_operator(s_eb_pwl_interp,   phase::solid);
+  this->register_operator(s_eb_flux_reg,     phase::solid);
+  this->register_operator(s_eb_redist,       phase::solid);
+  this->register_operator(s_eb_gradient,     phase::solid); 
+  this->register_operator(s_eb_irreg_interp, phase::solid); 
+  this->register_operator(s_eb_copier,       phase::solid); 
+  this->register_operator(s_eb_ghostcloud,   phase::solid);
+  this->register_operator(s_eb_noncons_div,  phase::solid); 
 }
 
 amr_mesh::~amr_mesh(){

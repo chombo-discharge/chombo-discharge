@@ -34,11 +34,11 @@ void advection_diffusion_stepper::setup_solvers(){
   m_species = RefCountedPtr<cdr_species> (new advection_diffusion_species());
 
   // Solver setup
-  m_solver->set_verbosity(-1);
+  m_solver->set_verbosity(10);
   m_solver->set_species(m_species);
   m_solver->parse_options();
-  m_solver->set_amr(m_amr);
   m_solver->set_phase(phase::gas);
+  m_solver->set_amr(m_amr);
   m_solver->set_computational_geometry(m_compgeom);
   m_solver->sanity_check();
   m_solver->allocate_internals();
