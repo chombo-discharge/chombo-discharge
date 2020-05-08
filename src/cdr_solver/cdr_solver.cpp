@@ -153,7 +153,6 @@ void cdr_solver::allocate_internals(){
 
   // This defines interpolation stencils and space for interpolants
   this->define_interp_stencils();
-  this->define_divFnc_stencils();
   this->define_interpolant();
 }
 
@@ -749,59 +748,6 @@ void cdr_solver::consdiv_regular(LevelData<EBCellFAB>& a_divJ, const LevelData<E
   a_divJ.exchange();
 }
 
-void cdr_solver::define_divFnc_stencils(){
-  CH_TIME("cdr_solver::define_divFnc_stencils");
-  if(m_verbosity > 5){
-    pout() << m_name + "::define_divFnc_stencils" << endl;
-  }
-
-  const int rad   = 1;
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  m_stencils_nc.resize(1 + finest_level);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    m_stencils_nc[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-      BaseIVFAB<VoFStencil>& stens = (*m_stencils_nc[lvl])[dit()];
-      stens.define(ivs, ebgraph, ncomp);
-      
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	VoFStencil& sten = stens(vof, comp);
-	sten.clear();
-	
-	Real norm = 0.;
-	Vector<VolIndex> vofs;
-	EBArith::getAllVoFsInMonotonePath(vofs, vof, ebisbox, rad);
-	for (int i = 0; i < vofs.size(); i++){
-	  if(vofs[i] != vof){
-	    const VolIndex& ivof = vofs[i];
-	    const Real iweight   = ebisbox.volFrac(ivof);
-
-	    norm += iweight;
-	    sten.add(ivof, 1.0);
-	  }
-	}
-
-	sten *= 1./norm;
-      }
-    }
-  }
-}
-
 void cdr_solver::define_interp_stencils(){
   CH_TIME("cdr_solver::define_interp_stencils");
   if(m_verbosity > 5){
@@ -1384,37 +1330,8 @@ void cdr_solver::nonconservative_divergence(EBAMRIVData& a_div_nc, const EBAMRCe
     pout() << m_name + "::nonconservative_divergence" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    
-    for (DataIterator dit = a_div_nc[lvl]->dataIterator(); dit.ok(); ++dit){
-      BaseIVFAB<Real>& div_nc = (*a_div_nc[lvl])[dit()];
-      EBCellFAB& divG         = (*a_divG[lvl])[dit()];
-
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof    = vofit();
-	const VoFStencil& sten = (*m_stencils_nc[lvl])[dit()](vof, comp);
-
-	div_nc(vof, comp) = 0.;
-	for (int i = 0; i < sten.size(); i++){
-	  const VolIndex& ivof = sten.vof(i);
-	  const Real& iweight  = sten.weight(i);
-	  div_nc(vof,comp) += iweight*divG(ivof, comp);
-	}
-      }
-    }
-  }
+  irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
+  stencils.apply(a_div_nc, a_divG);
 }
 
 void cdr_solver::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level){
@@ -1522,6 +1439,7 @@ void cdr_solver::register_operators(){
     m_amr->register_operator(s_eb_flux_reg,     m_phase);
     m_amr->register_operator(s_eb_redist,       m_phase);
     m_amr->register_operator(s_eb_irreg_interp, m_phase);
+    m_amr->register_operator(s_eb_noncons_div,  m_phase);
   }
 }
 

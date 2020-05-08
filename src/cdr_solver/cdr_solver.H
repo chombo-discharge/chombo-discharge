@@ -767,11 +767,6 @@ protected:
   virtual void define_interp_stencils();
 
   /*!
-    @brief Define stencils for computing the non-conservative divergence
-  */
-  virtual void define_divFnc_stencils();
-
-  /*!
     @brief Define interpolant
   */
   virtual void define_interpolant();
