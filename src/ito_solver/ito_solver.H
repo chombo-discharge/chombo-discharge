@@ -554,11 +554,6 @@ protected:
   void parse_diffusion_hop();
 
   /*!
-    @brief Make stencils for doing the non-conservative divergence
-  */
-  void define_depositionNC_stencils();
-
-  /*!
     @brief Increment redistribution objects with mass to be redistributed
   */
   void increment_redist(const EBAMRIVData& a_mass_diff);
@@ -577,10 +572,5 @@ protected:
     @brief Do coarse-fine redistribution
   */
   void coarse_fine_redistribution(EBAMRCellData& a_state);
-
-  /*!
-    @brief Stencils for computing the non-conservative divergence
-  */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_stencils_nc;
 };
 #endif

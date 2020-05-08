@@ -387,9 +387,6 @@ void ito_solver::regrid(const int a_lmin, const int a_old_finest_level, const in
   m_amr->reallocate(m_scratch,      m_phase, a_lmin);
   m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
   m_amr->reallocate(m_massDiff,     m_phase, a_lmin);
-
-  // Make stencils
-  this->define_depositionNC_stencils();
   
   // Only allocate memory if we actually have a mobile solver
   if(m_mobile){
@@ -441,8 +438,6 @@ void ito_solver::allocate_internals(){
   m_amr->allocate(m_scratch,      m_phase, ncomp);
   m_amr->allocate(m_depositionNC, m_phase, ncomp);
   m_amr->allocate(m_massDiff,     m_phase, ncomp);
-
-  this->define_depositionNC_stencils();
 
   // Only allocate memory for velocity if we actually have a mobile solver
   if(m_mobile){
@@ -650,42 +645,8 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
     pout() << m_name + "::deposit_nonConservative" << endl;
   }
   
-#if 1 // New code
   irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
   stencils.apply(a_depositionNC, a_depositionKappaC);
-#else // Original code
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-    
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      BaseIVFAB<Real>& div_nc = (*a_depositionNC[lvl])[dit()];
-      EBCellFAB& divG         = (*a_depositionKappaC[lvl])[dit()];
-
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof    = vofit();
-	const VoFStencil& sten = (*m_stencils_nc[lvl])[dit()](vof, comp);
-
-	div_nc(vof, comp) = 0.;
-	for (int i = 0; i < sten.size(); i++){
-	  const VolIndex& ivof = sten.vof(i);
-	  const Real& iweight  = sten.weight(i);
-	  div_nc(vof,comp) += iweight*divG(ivof, comp);
-	}
-      }
-    }
-  }
-#endif
 }
 
 void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC){
@@ -1321,57 +1282,4 @@ void ito_solver::remap(){
 
 phase::which_phase ito_solver::get_phase() const{
   return m_phase;
-}
-
-void ito_solver::define_depositionNC_stencils(){
-  CH_TIME("ito_solver::define_depositionNC_stencils");
-  if(m_verbosity > 5){
-    pout() << m_name + "::define_depositionNC_stencils" << endl;
-  }
-
-  const int rad   = 1;
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->get_finest_level();
-
-  m_stencils_nc.resize(1 + finest_level);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
-    const ProblemDomain& domain  = m_amr->get_domains()[lvl];
-    const EBISLayout& ebisl      = m_amr->get_ebisl(m_phase)[lvl];
-
-    m_stencils_nc[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-      BaseIVFAB<VoFStencil>& stens = (*m_stencils_nc[lvl])[dit()];
-      stens.define(ivs, ebgraph, ncomp);
-      
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	VoFStencil& sten = stens(vof, comp);
-	sten.clear();
-	
-	Real norm = 0.;
-	Vector<VolIndex> vofs;
-	EBArith::getAllVoFsInMonotonePath(vofs, vof, ebisbox, rad);
-	for (int i = 0; i < vofs.size(); i++){
-	  if(vofs[i] != vof){
-	    const VolIndex& ivof = vofs[i];
-	    const Real iweight   = ebisbox.volFrac(ivof);
-
-	    norm += iweight;
-	    sten.add(ivof, 1.0);
-	  }
-	}
-
-	sten *= 1./norm;
-      }
-    }
-  }
 }
