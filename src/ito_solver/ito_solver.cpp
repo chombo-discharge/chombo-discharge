@@ -239,6 +239,7 @@ void ito_solver::register_operators(){
     m_amr->register_operator(s_eb_redist,       m_phase);
     m_amr->register_operator(s_eb_copier,       m_phase);
     m_amr->register_operator(s_eb_ghostcloud,   m_phase);
+    m_amr->register_operator(s_eb_noncons_div,  m_phase);
   }
 }
 
@@ -484,7 +485,7 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
     pout() << m_name + "::write_checkpoint_level" << endl;
   }
 
-  MayDay::Abort("ito_solver::write_checkpoint_level - checkpointing not implemented");
+  //  MayDay::Abort("ito_solver::write_checkpoint_level - checkpointing not implemented");
 }
 
 void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -493,7 +494,7 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << m_name + "::read_checkpoint_level" << endl;
   }
 
-  MayDay::Abort("ito_solver::read_checkpoint_level - checkpointing not implemented");
+  //  MayDay::Abort("ito_solver::read_checkpoint_level - checkpointing not implemented");
 }
 
 void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){
@@ -648,7 +649,11 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_nonConservative" << endl;
   }
-
+  
+#if 1 // New code
+  irreg_amr_stencil<noncons_div>& stencils = m_amr->get_noncons_div_stencils(m_phase);
+  stencils.apply(a_depositionNC, a_depositionKappaC);
+#else // Original code
   const int comp  = 0;
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
@@ -680,6 +685,7 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
       }
     }
   }
+#endif
 }
 
 void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC){
