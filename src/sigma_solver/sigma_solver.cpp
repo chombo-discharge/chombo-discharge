@@ -161,6 +161,20 @@ void sigma_solver::regrid(const int a_lmin, const int a_old_finest_level, const 
   this->reset_cells(m_state);
 }
 
+void sigma_solver::register_operators(){
+  CH_TIME("sigma_solver::register_operators");
+  if(m_verbosity > 5){
+    pout() << "sigma_solver::register_operators" << endl;
+  }
+
+  if(m_amr.isNull()){
+    MayDay::Abort("sigma_solver::register_operators - need to set amr_mesh!");
+  }
+  else{
+    m_amr->register_operator(s_eb_coar_ave,     m_phase);
+  }
+}
+
 void sigma_solver::reset_cells(EBAMRIVData& a_data){
   CH_TIME("sigma_solver::reset_cells");
   if(m_verbosity > 5){

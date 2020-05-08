@@ -42,6 +42,7 @@ namespace physics {
 
       // Regrid routines
       bool need_to_regrid() override;
+      void register_operators() override;
       void cache() override;
       void deallocate() override;
 

@@ -135,6 +135,11 @@ public:
   virtual void deallocate_internals();
 
   /*!
+    @brief Register operators for AMR operations
+  */
+  virtual void register_operators();
+
+  /*!
     @brief Sanity check
   */
   virtual void sanity_check();

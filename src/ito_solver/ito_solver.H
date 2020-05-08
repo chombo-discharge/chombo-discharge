@@ -116,6 +116,11 @@ public:
   virtual int get_num_plotvars() const;
 
   /*!
+    @brief Register operators
+  */
+  virtual void register_operators();
+
+  /*!
     @brief Set computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);

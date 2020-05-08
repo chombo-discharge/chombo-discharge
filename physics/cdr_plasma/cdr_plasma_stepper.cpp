@@ -39,6 +39,20 @@ cdr_plasma_stepper::cdr_plasma_stepper(RefCountedPtr<cdr_plasma_physics>& a_phys
   m_physics = a_physics;
 }
 
+void cdr_plasma_stepper::register_operators(){
+  CH_TIME("cdr_plasma_stepper::register_operators");
+  if(m_verbosity > 5){
+    pout() << "cdr_plasma_stepper::register_operators" << endl;
+  }
+  
+  m_cdr->register_operators();
+  m_poisson->register_operators();
+  m_rte->register_operators();
+#if 0
+  m_sigma->register_operators();
+#endif
+}
+
 cdr_plasma_stepper::~cdr_plasma_stepper(){
 }
 

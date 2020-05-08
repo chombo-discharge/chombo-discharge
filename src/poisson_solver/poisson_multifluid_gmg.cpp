@@ -469,6 +469,27 @@ void poisson_multifluid_gmg::regrid(const int a_lmin, const int a_old_finest_lev
   m_needs_setup = true;
 }
 
+void poisson_multifluid_gmg::register_operators(){
+  CH_TIME("poisson_multifluid_gmg::register_operators");
+  if(m_verbosity > 5){
+    pout() << "poisson_multifluid_gmg::register_operators" << endl;
+  }
+
+  if(m_amr.isNull()){
+    MayDay::Abort("poisson_multifluid_gmg::register_operators - need to set amr_mesh!");
+  }
+  else{
+    m_amr->register_operator(s_eb_coar_ave,     phase::gas);
+    m_amr->register_operator(s_eb_coar_ave,     phase::solid);
+    m_amr->register_operator(s_eb_fill_patch,   phase::gas);
+    m_amr->register_operator(s_eb_fill_patch,   phase::solid);
+    m_amr->register_operator(s_eb_quad_cfi,     phase::gas);
+    m_amr->register_operator(s_eb_quad_cfi,     phase::solid);
+    m_amr->register_operator(s_eb_irreg_interp, phase::gas);
+    m_amr->register_operator(s_eb_irreg_interp, phase::solid);
+  }
+}
+
 void poisson_multifluid_gmg::set_bottom_solver(const int a_whichsolver){
   CH_TIME("poisson_multifluid_gmg::set_bottom_solver");
   if(m_verbosity > 5){

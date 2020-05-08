@@ -42,6 +42,7 @@ public:
 
   // New regrid routines
   virtual bool need_to_regrid();
+  virtual void register_operators() = 0; 
   virtual void cache() = 0;
   virtual void deallocate() = 0;
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;

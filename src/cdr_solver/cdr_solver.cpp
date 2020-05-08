@@ -1503,15 +1503,26 @@ void cdr_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
 
   m_amr = a_amr;
 
-  m_amr->register_operator(s_eb_coar_ave,   m_phase);
-  m_amr->register_operator(s_eb_quad_cfi,   m_phase);
-  m_amr->register_operator(s_eb_quad_cfi,   m_phase);
-  m_amr->register_operator(s_eb_fill_patch, m_phase);
-  m_amr->register_operator(s_eb_pwl_interp, m_phase);
-  m_amr->register_operator(s_eb_flux_reg,   m_phase);
-  m_amr->register_operator(s_eb_redist,     m_phase);
-  m_amr->register_operator(s_eb_gradient,   m_phase);
-  m_amr->register_operator(s_eb_irreg_interp,   m_phase);
+}
+
+void cdr_solver::register_operators(){
+  CH_TIME("cdr_solver::set_amr");
+  if(m_verbosity > 5){
+    pout() << m_name + "::set_amr" << endl;
+  }
+
+  if(m_amr.isNull()){
+    MayDay::Abort("cdr_solver::register_operators - need to set amr_mesh!");
+  }
+  else{
+    m_amr->register_operator(s_eb_coar_ave,     m_phase);
+    m_amr->register_operator(s_eb_quad_cfi,     m_phase);
+    m_amr->register_operator(s_eb_fill_patch,   m_phase);
+    m_amr->register_operator(s_eb_pwl_interp,   m_phase);
+    m_amr->register_operator(s_eb_flux_reg,     m_phase);
+    m_amr->register_operator(s_eb_redist,       m_phase);
+    m_amr->register_operator(s_eb_irreg_interp, m_phase);
+  }
 }
 
 void cdr_solver::set_domain_bc(const cdr_bc::which_bc a_bctype){

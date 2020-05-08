@@ -69,6 +69,11 @@ public:
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
+    @brief Register operators
+  */
+  virtual void register_operators();
+
+  /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
   virtual void compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state);

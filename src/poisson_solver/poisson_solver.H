@@ -88,6 +88,11 @@ public:
   virtual void regrid(const int a_lmin, const int a_old_finest, const int a_new_finest);
 
   /*!
+    @brief Register operators for AMR
+  */
+  virtual void register_operators() = 0;
+
+  /*!
     @brief Set the computational geometry
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry>& a_compgeom);

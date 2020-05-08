@@ -339,6 +339,24 @@ void eddington_sp1::regrid(const int a_lmin, const int a_old_finest_level, const
   m_needs_setup = true;
 }
 
+void eddington_sp1::register_operators(){
+  CH_TIME("eddington_sp1::register_operators");
+  if(m_verbosity > 5){
+    pout() << m_name + "::register_operators" << endl;
+  }
+
+    if(m_amr.isNull()){
+    MayDay::Abort("poisson_multifluid_gmg::register_operators - need to set amr_mesh!");
+  }
+  else{
+    m_amr->register_operator(s_eb_coar_ave,     m_phase);
+    m_amr->register_operator(s_eb_fill_patch,   m_phase);
+    m_amr->register_operator(s_eb_quad_cfi,     m_phase);
+    m_amr->register_operator(s_eb_gradient,     m_phase);
+    m_amr->register_operator(s_eb_irreg_interp, m_phase);
+  }
+}
+
 bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi){
   CH_TIME("eddington_sp1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){

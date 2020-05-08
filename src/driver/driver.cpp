@@ -538,6 +538,7 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   m_step        = header.m_int["step"];
   
   const Real coarsest_dx = header.m_real["coarsest_dx"];
+  const int base_level   = 0;
   const int finest_level = header.m_int["finest_level"];
 
   // Abort if base resolution has changed. 
@@ -562,8 +563,10 @@ void driver::read_checkpoint_file(const std::string& a_restart_file){
   m_amr->set_finest_level(finest_level); 
   m_amr->set_grids(boxes, regsize);      
   
-  // Instantiate solvers
-  m_timestepper->setup_solvers();  
+  // Instantiate solvers and register operators
+  m_timestepper->setup_solvers();
+  m_timestepper->register_operators();
+  m_amr->regrid_operators(base_level, finest_level, regsize);
 
   // Allocate internal stuff (e.g. space for tags)
   this->allocate_internals();
@@ -1521,6 +1524,7 @@ void driver::setup_fresh(const int a_init_regrids){
   // time_stepper setup
   m_timestepper->setup_solvers();                                 // Instantiate solvers
   m_timestepper->synchronize_solver_times(m_step, m_time, m_dt);  // Sync solver times
+  m_timestepper->register_operators();
   m_amr->regrid_operators(lmin, lmax, regsize);
 
   // Fill solves with initial data

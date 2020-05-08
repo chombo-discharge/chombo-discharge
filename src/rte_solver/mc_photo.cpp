@@ -484,6 +484,25 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   deposit_photons(m_state, m_photons, m_deposition);
 }
 
+void mc_photo::register_operators(){
+  CH_TIME("mc_photo::register_operators");
+  if(m_verbosity > 5){
+    pout() << m_name + "::register_operators" << endl;
+  }
+
+    if(m_amr.isNull()){
+    MayDay::Abort("mc_photo::register_operators - need to set amr_mesh!");
+  }
+  else{
+    m_amr->register_operator(s_eb_coar_ave,     m_phase);
+    m_amr->register_operator(s_eb_fill_patch,   m_phase);
+    m_amr->register_operator(s_eb_pwl_interp,   m_phase);
+    m_amr->register_operator(s_eb_redist,       m_phase);
+    m_amr->register_operator(s_eb_copier,       m_phase);
+    m_amr->register_operator(s_eb_ghostcloud,   m_phase);
+  }
+}
+
 void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData& a_state){
   CH_TIME("mc_photo::compute_boundary_flux");
   if(m_verbosity > 5){

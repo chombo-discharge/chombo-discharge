@@ -45,6 +45,11 @@ namespace physics {
     }
 
     template <class T>
+    void poisson_stepper<T>::register_operators(){
+      m_poisson->register_operators();
+    }
+
+    template <class T>
     void poisson_stepper<T>::initial_data(){
       ParmParse pp("poisson_stepper");
       pp.get("init_rho",   m_init_rho);

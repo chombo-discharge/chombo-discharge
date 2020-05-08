@@ -109,6 +109,18 @@ void cdr_layout::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 }
 
+void cdr_layout::register_operators(){
+  CH_TIME("cdr_layout::register_operators");
+  if(m_verbosity > 5){
+    pout() << "cdr_layout::register_operators" << endl;
+  }
+
+  for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<cdr_solver>& solver = solver_it();
+    solver->register_operators();
+  }
+}
+
 void cdr_layout::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   CH_TIME("cdr_layout::set_amr");
   if(m_verbosity > 5){

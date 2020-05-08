@@ -44,6 +44,7 @@ namespace physics {
       virtual void set_poisson_wall_func(const int a_dir, const Side::LoHiSide a_side, Real (*a_func)(const RealVect a_pos));
       virtual void set_poisson_wall_func(Real (*a_func)(const RealVect a_pos));
       virtual void print_step_report();
+      virtual void register_operators();
 
       /*!
 	@brief Constructor

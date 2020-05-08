@@ -53,6 +53,12 @@ void advection_diffusion_stepper::setup_solvers(){
   m_amr->allocate(m_k2,  phase::gas, 1);
 }
 
+void advection_diffusion_stepper::register_operators(){
+  m_solver->register_operators();
+  m_amr->register_operator(s_eb_gradient, phase::gas);
+}
+
+
 void advection_diffusion_stepper::initial_data(){
   m_solver->initial_data();       // Fill initial through the cdr species
 

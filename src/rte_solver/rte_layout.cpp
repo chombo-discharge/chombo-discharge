@@ -164,6 +164,18 @@ void rte_layout::regrid(const int a_lmin, const int a_old_finest_level, const in
   }
 }
 
+void rte_layout::register_operators(){
+  CH_TIME("rte_layout::register_operators");
+  if(m_verbosity > 5){
+    pout() << "rte_layout::register_operators" << endl;
+  }
+
+  for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
+    RefCountedPtr<rte_solver>& solver = solver_it();
+    solver->register_operators();
+  }
+}
+
 void rte_layout::set_source(const EBAMRCellData& a_source){
   CH_TIME("rte_layout::set_source(ebamrcell)");
   if(m_verbosity > 5){

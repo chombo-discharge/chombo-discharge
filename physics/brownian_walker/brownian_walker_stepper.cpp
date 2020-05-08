@@ -250,6 +250,15 @@ void brownian_walker_stepper::setup_solvers() {
   m_solver->allocate_internals(); // Allocate some internal storage
 }
 
+void brownian_walker_stepper::register_operators() {
+  CH_TIME("brownian_walker_stepper::register_operators");
+  if(m_verbosity > 5){
+    pout() << "brownian_walker_stepper::register_operators" << endl;
+  }
+
+  m_solver->register_operators();
+}
+
 Real brownian_walker_stepper::advance(const Real a_dt) {
   CH_TIME("brownian_walker_stepper::advance");
   if(m_verbosity > 5){

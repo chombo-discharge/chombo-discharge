@@ -184,7 +184,7 @@ for test in config.sections():
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
             if not compile_code is 0:
-                print("\t Compilation of test '" + str(test) + "' failed. Aborting this regresison test.")
+                print("\t Compilation of test '" + str(test) + "' failed. Aborting this regression test.")
                 run_suite = False
 
         # --------------------------------------------------

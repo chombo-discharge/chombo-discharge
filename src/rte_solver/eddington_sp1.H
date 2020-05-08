@@ -77,6 +77,11 @@ public:
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
+    @brief Register operators
+  */
+  virtual void register_operators();
+
+  /*!
     @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
   */
   virtual void set_reflection_coefficients(const Real r1, const Real r2);

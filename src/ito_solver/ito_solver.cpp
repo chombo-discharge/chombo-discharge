@@ -223,6 +223,25 @@ void ito_solver::set_amr(const RefCountedPtr<amr_mesh>& a_amr){
   m_amr = a_amr;
 }
 
+void ito_solver::register_operators(){
+  CH_TIME("ito_solver::register_operators");
+  if(m_verbosity > 5){
+    pout() << m_name + "::register_operators" << endl;
+  }
+
+  if(m_amr.isNull()){
+    MayDay::Abort("cdr_solver::register_operators - need to set amr_mesh!");
+  }
+  else{
+    m_amr->register_operator(s_eb_coar_ave,     m_phase);
+    m_amr->register_operator(s_eb_fill_patch,   m_phase);
+    m_amr->register_operator(s_eb_pwl_interp,   m_phase);
+    m_amr->register_operator(s_eb_redist,       m_phase);
+    m_amr->register_operator(s_eb_copier,       m_phase);
+    m_amr->register_operator(s_eb_ghostcloud,   m_phase);
+  }
+}
+
 void ito_solver::set_phase(phase::which_phase a_phase){
   CH_TIME("ito_solver::set_phase");
   if(m_verbosity > 5){

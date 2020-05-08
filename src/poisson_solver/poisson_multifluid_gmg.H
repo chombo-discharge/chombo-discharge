@@ -71,6 +71,11 @@ public:
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
+    @brief Register operators for AMR
+  */
+  virtual void register_operators();
+
+  /*!
     @brief Set solver parameters. These are normally good for this class. 
   */
   virtual void set_gmg_solver_parameters(relax::which_relax a_relax_type = relax::gsrb_fast,

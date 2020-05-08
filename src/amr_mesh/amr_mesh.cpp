@@ -77,32 +77,11 @@ amr_mesh::amr_mesh(){
   m_ref_ratios.push_back(2);
 #endif
 
-  // Default stuff for development purposes.
-#if 0
-  this->register_operator(s_eb_coar_ave,     phase::gas);
-  this->register_operator(s_eb_quad_cfi,     phase::gas);
-  this->register_operator(s_eb_fill_patch,   phase::gas);
-  this->register_operator(s_eb_pwl_interp,   phase::gas);
-  this->register_operator(s_eb_flux_reg,     phase::gas);
-  this->register_operator(s_eb_redist,       phase::gas);
-  this->register_operator(s_eb_gradient,     phase::gas); 
-  this->register_operator(s_eb_irreg_interp, phase::gas); 
-  this->register_operator(s_eb_copier,       phase::gas); 
-  this->register_operator(s_eb_ghostcloud,   phase::gas);
-  this->register_operator(s_eb_noncons_div,  phase::gas);
-
-  this->register_operator(s_eb_coar_ave,     phase::solid);
-  this->register_operator(s_eb_quad_cfi,     phase::solid);
-  this->register_operator(s_eb_fill_patch,   phase::solid);
-  this->register_operator(s_eb_pwl_interp,   phase::solid);
-  this->register_operator(s_eb_flux_reg,     phase::solid);
-  this->register_operator(s_eb_redist,       phase::solid);
-  this->register_operator(s_eb_gradient,     phase::solid); 
-  this->register_operator(s_eb_irreg_interp, phase::solid); 
-  this->register_operator(s_eb_copier,       phase::solid); 
-  this->register_operator(s_eb_ghostcloud,   phase::solid);
-  this->register_operator(s_eb_noncons_div,  phase::solid);
-#endif
+  // Always do this stuff. 
+  this->register_operator(s_eb_gradient,     phase::gas);
+  this->register_operator(s_eb_gradient,     phase::solid);
+  this->register_operator(s_eb_irreg_interp, phase::gas);
+  this->register_operator(s_eb_irreg_interp, phase::solid);
 }
 
 amr_mesh::~amr_mesh(){
@@ -2534,21 +2513,24 @@ void amr_mesh::set_grids(Vector<Vector<Box> >& a_boxes, const int a_regsize){
   this->define_neighbors(a_lmin);    
   this->define_eblevelgrid(a_lmin);  // Define EBLevelGrid objects on both phases
   this->define_mflevelgrid(a_lmin);  // Define MFLevelGrid
-  this->define_eb_coar_ave(a_lmin);  // Define ebcoarseaverage on both phases
-  this->define_eb_quad_cfi(a_lmin);  // Define nwoebquadcfinterp on both phases.
-  this->define_fillpatch(a_lmin);    // Define operator for piecewise linear interpolation of ghost cells
-  this->define_ebpwl_interp(a_lmin); // Define interpolator for piecewise interpolation of interior points
-  this->define_flux_reg(a_lmin,a_regsize);     // Define flux register (phase::gas only)
-  this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
-  this->define_gradsten(a_lmin);
-  this->define_irreg_sten();            // Define irregular stencils
-  this->define_copier(a_lmin);                // Define copiers
-
-  // Do the multilevel stuff
   if(!m_has_mg_stuff){
     this->define_mg_stuff();
     m_has_mg_stuff = true;
   }
+
+#if 0  // Done after the operator shit
+  this->define_eb_coar_ave(a_lmin); 
+  this->define_eb_quad_cfi(a_lmin); 
+  this->define_fillpatch(a_lmin);   
+  this->define_ebpwl_interp(a_lmin);
+  this->define_flux_reg(a_lmin,a_regsize);    
+  this->define_redist_oper(a_lmin, a_regsize);
+  this->define_gradsten(a_lmin);
+  this->define_irreg_sten();            
+  this->define_copier(a_lmin);                
+  this->define_ghostcloud(a_lmin);              
+#endif
+
 }
 
 void amr_mesh::parse_max_box_size(){

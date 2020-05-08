@@ -76,6 +76,11 @@ public:
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level);
 
   /*!
+    @brief Register operators
+  */
+  virtual void register_operators();
+
+  /*!
     @brief Set amr
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
