@@ -17,10 +17,8 @@
 #include <ParticleValidRegion.H>
 #include <BinItem.H>
 
-
 #include <random>
 
-typedef Vector<RefCountedPtr<ParticleData<photon> > > EBAMRPhotons;
 
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
@@ -98,7 +96,17 @@ public:
   /*!
     @brief Clear data holder
   */
-  virtual void clear(EBAMRPhotons& a_photons);
+  virtual void clear();
+
+  /*!
+    @brief Clear data holder
+  */
+  virtual void clear(particle_container<photon>& a_photon);
+
+  /*!
+    @brief Clear data holder
+  */
+  virtual void clear(AMRParticles<photon>& a_photons);
 
   /*!
     @brief Write plot file
@@ -128,12 +136,12 @@ public:
   /*!
     @brief Count number of photons in particle list
   */
-  virtual int count_photons(const EBAMRPhotons& a_photons) const;
+  virtual int count_photons(const AMRParticles<photon>& a_photons) const;
 
   /*!
     @brief Count number of outcast photons in particle list
   */
-  virtual int count_outcast(const EBAMRPhotons& a_photons) const;
+  virtual int count_outcast(const AMRParticles<photon>& a_photons) const;
   
 protected:
 
@@ -149,11 +157,6 @@ protected:
     per_vol  = 2,
     per_s    = 3,
   };
-
-  /*!
-    @brief Use random kappa from rte_species
-  */
-  bool m_random_kappa;
 
   /*!
     @brief If true, the NUMBER of of photons will be deposited in each cell
@@ -233,12 +236,12 @@ protected:
   /*!
     @brief Photons
   */
-  EBAMRPhotons m_photons;   
+  AMRParticles<photon> m_photons;   
 
   /*!
     @brief Photocache for regridding
   */
-  EBAMRPhotons m_photocache;
+  AMRParticles<photon> m_photocache;
 
   /*!
     @brief AMR valid region
@@ -288,17 +291,12 @@ protected:
   /*!
     @brief Generate photons
   */
-  void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  void generate_photons(AMRParticles<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
   /*!
     @brief Move photons
   */
-  void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
-
-  /*!
-    @brief Remap photons
-  */
-  void remap_photons(EBAMRPhotons& a_photons);
+  void move_and_absorb_photons(AMRParticles<photon>& a_absorbed, AMRParticles<photon>& a_original, const Real a_dt);
 
   /*!
     @brief Remap photons
@@ -309,6 +307,13 @@ protected:
     @brief Remap photons
   */
   void remap(particle_container<photon>& a_photons);
+
+  /*!
+    @brief Deposit photons
+  */
+  void deposit_photons(EBAMRCellData&                    a_state,
+		       const particle_container<photon>& a_particles,
+		       const DepositionType::Which&      a_deposition);
   
   /*!
     @brief Deposition photons on mesh
@@ -423,11 +428,6 @@ protected:
     @brief Parse domain BCs
   */
   void parse_domain_bc();
-
-  /*!
-    @brief Parse random kappa
-  */
-  void parse_random_kappa();
 
   /*!
     @brief Parse PVR buffer

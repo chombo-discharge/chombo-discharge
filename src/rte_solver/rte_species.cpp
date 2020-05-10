@@ -61,15 +61,3 @@ Real rte_species::get_scatter(const RealVect a_pos) const{
     return m_varscatter(a_pos);
   }
 }
-
-
-Real rte_species::get_random_kappa() const{
-  MayDay::Abort("rte_species::get_random_kappa - override this method if you want to use it");
-  return 0.0;
-}
-
-
-Real rte_species::get_random_scatter() const{
-  MayDay::Abort("rte_species::get_random_scatter - override this method if you want to use it");
-  return 0.0;
-}

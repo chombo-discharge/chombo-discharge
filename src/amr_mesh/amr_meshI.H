@@ -66,6 +66,9 @@ template<typename T > void amr_mesh::allocate(Vector<RefCountedPtr<ParticleData<
 
 template <typename T>
 void amr_mesh::allocate(particle_container<T>& a_container, const int a_pvr_buffer){
+  if(m_max_box_size != m_blocking_factor){
+    MayDay::Abort("amr_mesh::allocate(particle_container<T>) - only constant box sizes are supported for particle methods");
+  }
   a_container.define(m_grids,
 		     m_domains,
 		     m_dx,
