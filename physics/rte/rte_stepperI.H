@@ -6,64 +6,130 @@
 */
 
 #include "rte_stepper.H"
+#include "rte_physics_species.H"
+
 #include <ParmParse.H>
 
 namespace physics {
   namespace rte {
 
     template <typename T>
-    rte_stepper<T>::rte_stepper(){}
+    rte_stepper<T>::rte_stepper(){
+
+      // Get shit for setting the source term
+      ParmParse pp("rte_stepper");
+      Vector<Real> v;
+
+      pp.get   ("verbosity",      m_verbosity);
+      pp.get   ("blob_amplitude", m_blob_amplitude);
+      pp.get   ("blob_radius",    m_blob_radius);
+      pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
+      
+    }
     
     template <typename T>
     rte_stepper<T>::~rte_stepper(){}
 
     template <typename T>
-    void rte_stepper<T>::setup_solvers(){}
+    void rte_stepper<T>::setup_solvers(){
+      m_species = RefCountedPtr<rte_species> (new rte_physics_species());
+
+      // Solver setup
+      m_solver = RefCountedPtr<rte_solver> (new T());
+      m_solver->set_verbosity(m_verbosity);
+      m_solver->set_rte_species(m_species);
+      m_solver->parse_options();
+      m_solver->set_phase(phase::gas);
+      m_solver->set_amr(m_amr);
+      m_solver->set_computational_geometry(m_compgeom);
+      m_solver->allocate_internals();
+    }
 
     template <typename T>
-    void rte_stepper<T>::initial_data(){}
+    void rte_stepper<T>::initial_data(){
+      m_solver->initial_data();
+
+      this->set_gaussian_source();
+    }
 
     template <typename T>
-    void rte_stepper<T>::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {}
+    void rte_stepper<T>::write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const {
+      m_solver->write_checkpoint_level(a_handle, a_lvl);
+    }
 
     template <typename T>
-    void rte_stepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){}
+    void rte_stepper<T>::read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl){
+      m_solver->read_checkpoint_level(a_handle, a_lvl);
+    }
 
     template <typename T>
     void rte_stepper<T>::post_checkpoint_setup() {}
 
     template <typename T>
-    int rte_stepper<T>::get_num_plot_vars() const {return 0;}
+    int rte_stepper<T>::get_num_plot_vars() const {
+      return m_solver->get_num_plotvars();
+    }
 
     template <typename T>
-    void rte_stepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {}
+    void rte_stepper<T>::write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const {
+      a_plotvar_names.append(m_solver->get_plotvar_names());
+      m_solver->write_plot_data(a_output, a_icomp);
+    }
 
     template <typename T>
     void rte_stepper<T>::compute_dt(Real& a_dt, time_code::which_code& a_timecode) {}
 
     template <typename T>
-    Real rte_stepper<T>::advance(const Real a_dt) {}
+    Real rte_stepper<T>::advance(const Real a_dt) {
+      m_solver->advance(a_dt);
+
+      return a_dt;
+    }
 
     template <typename T>
-    void rte_stepper<T>::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {}
+    void rte_stepper<T>::synchronize_solver_times(const int a_step, const Real a_time, const Real a_dt) {
+      m_step = a_step;
+      m_time = a_time;
+      m_dt   = a_dt;
+    }
 
     template <typename T>
-    void rte_stepper<T>::print_step_report() {}
+    void rte_stepper<T>::print_step_report() {
+    }
 
     // Regrid routines
     template <typename T>
-    bool rte_stepper<T>::need_to_regrid() {}
+    bool rte_stepper<T>::need_to_regrid() {
+      return false;
+    }
 
     template <typename T>
-    void rte_stepper<T>::register_operators() {}
+    void rte_stepper<T>::register_operators() {
+      m_solver->register_operators();
+    }
 
     template <typename T>
-    void rte_stepper<T>::cache() {}
+    void rte_stepper<T>::cache() {
+      m_solver->cache_state();
+    }
 
     template <typename T>
-    void rte_stepper<T>::deallocate() {}
+    void rte_stepper<T>::deallocate() {
+      m_solver->deallocate_internals();
+    }
 
     template <typename T>
-    void rte_stepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {}
+    void rte_stepper<T>::regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) {
+      m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
+
+      // Do the rest of the setup
+    }
+
+    template <typename T>
+    void rte_stepper<T>::set_gaussian_source(){
+
+      MayDay::Abort("rte_stepper<T>::set_gaussian_source - not implemented");
+      
+    }
   }
 }
