@@ -9,8 +9,8 @@
 #define _MC_PHOTO_
 
 #include "rte_solver.H"
-#include "joint_photon.H"
 #include "EBParticleInterp.H"
+#include "particle_container.H"
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -149,72 +149,294 @@ protected:
     per_vol  = 2,
     per_s    = 3,
   };
-    
-  bool m_random_kappa;    // Use random kappa or not
-  bool m_deposit_numbers; // Deposit numbers of photons in each cell
-  bool m_plot_numbers;    // Plot numbers or densities
 
-  int  m_max_photons;     // Number of photons per pseudophoton
-  int  m_seed;            // RNG seed
-  int  m_poiss_exp_swap;  // Threshold for swapping Poisson and exponential distributions
-  int  m_pvr_buffer;      // PVR buffer
+  /*!
+    @brief Use random kappa from rte_species
+  */
+  bool m_random_kappa;
 
+  /*!
+    @brief If true, the NUMBER of of photons will be deposited in each cell
+  */
+  bool m_deposit_numbers;
+
+  /*!
+    @brief Switch for plotting numbers or densities
+  */
+  bool m_plot_numbers;
+
+  /*!
+    @brief Number of photons per pseudophoton
+  */
+  int  m_max_photons;
+
+  /*!
+    @brief RNG seed
+  */
+  int  m_seed;
+
+  /*!
+    @brief Threshold for swapping Poisson and exponential distributions
+  */
+  int  m_poiss_exp_swap;
+
+  /*!
+    @brief PVR bufer
+  */
+  int  m_pvr_buffer;
+
+  /*!
+    @brief Number of photons
+  */
   long long m_num_photons;
 
+  /*!
+    @brief Photon generation type
+  */
   photon_generation m_photogen;
+
+  /*!
+    @brief Source type
+  */
   source_type m_src_type;
 
-  Real m_bisect_step;     // Bisection step length
-  
-  std::mt19937_64* m_rng; // Engine
-  std::uniform_real_distribution<Real>* m_udist01; // Uniform real distribuion on [0,1]
-  std::uniform_real_distribution<Real>* m_udist11; // Uniform real distribuion on [-1,1]
+  /*!
+    @brief Bisection step length for boundary intersections
+  */
+  Real m_bisect_step;
 
+  /*!
+    @brief RNG engine
+  */
+  std::mt19937_64* m_rng; // Engine
+
+  /*!
+    @brief Distribution on [0,1]
+  */
+  std::uniform_real_distribution<Real>* m_udist01; 
+
+  /*!
+    @brief Distribution on [-1,1]
+  */
+  std::uniform_real_distribution<Real>* m_udist11; 
+
+  /*!
+    @brief Deposition type
+  */
   DepositionType::Which m_deposition;
+
+  /*!
+    @brief Plot deposition type
+  */
   DepositionType::Which m_plot_deposition;
   
+  /*!
+    @brief Photons
+  */
+  EBAMRPhotons m_photons;   
 
-  EBAMRPhotons m_photons;    // Particles
-  EBAMRPhotons m_photocache; // Photon cache
-  AMRPVR m_pvr;              // Valid region
-  EBAMRCellData m_crse;      // Photoionization profile from the coarse level photons
-  
+  /*!
+    @brief Photocache for regridding
+  */
+  EBAMRPhotons m_photocache;
+
+  /*!
+    @brief AMR valid region
+  */
+  AMRPVR m_pvr;             
+
+  /*!
+    @brief Coarse data for interpolation of deposition clouds
+  */
+  EBAMRCellData m_scratch;
+
+  /*!
+    @brief Scratch storage for holding the non-conservative deposition
+  */
+  EBAMRIVData m_depositionNC;
+
+  /*!
+    @brief Scratch storage for holding the mass difference when using hybrid deposition
+  */
+  EBAMRIVData m_massDiff;
+
+  /*!
+    @brief All particles
+  */
+  particle_container<photon> m_particles;
+
+  /*!
+    @brief This is a particle container which acts as scratch space when you want to add particles through the EB
+  */
+  particle_container<photon> m_eb_particles;
+
+  /*!
+    @brief This is a particle container which acts as scratch space when you want to add particles through the domain side
+  */
+  particle_container<photon> m_domain_particles;
+
+  /*!
+    @brief Particle cache
+  */
+  particle_container<photon> m_particle_cache;
+
+  /*!
+    @brief Domain boundary conditions
+  */
   Vector<wallbc::which_bc> m_domainbc;
-  
+
+  /*!
+    @brief Generate photons
+  */
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
+  /*!
+    @brief Move photons
+  */
   void move_and_absorb_photons(EBAMRPhotons& a_absorbed, EBAMRPhotons& a_original, const Real a_dt);
+
+  /*!
+    @brief Remap photons
+  */
   void remap_photons(EBAMRPhotons& a_photons);
-  void aggregate_photons(const EBAMRPhotons& a_photons);
-  void deposit_photons(EBAMRCellData& a_state, const EBAMRPhotons& a_particles, const DepositionType::Which& a_deposition);
 
-  // For mapping photons into bins
-  void binmapPhotons(std::map<IntVect, joint_photon, CompIntVect>& a_mip,
-                     const List<photon>&                           a_photons,
-                     const RealVect&                               a_meshSpacing,
-                     const RealVect&                               a_origin);
+  /*!
+    @brief Remap photons
+  */
+  void remap();
 
+  /*!
+    @brief Remap photons
+  */
+  void remap(particle_container<photon>& a_photons);
+  
+  /*!
+    @brief Deposition photons on mesh
+  */
+  void deposit_photons(EBAMRCellData& a_state, const AMRParticles<photon>& a_particles, const DepositionType::Which& a_deposition);
+
+  /*!
+    @brief Draw photons
+  */
   int draw_photons(const Real a_source, const Real a_volume, const Real a_dt);
+
+  /*!
+    @brief Mapping function for domain boundary conditions
+  */
   int domainbc_map(const int a_dir, const Side::LoHiSide a_side);
+
+  /*!
+    @brief Random Poisson trial
+  */
   int random_poisson(const Real& a_mean);
+
+  /*!
+    @brief Random exponential trial
+  */
   Real random_exponential(const Real a_mean);
+
+  /*!
+    @brief Random direction
+  */
   RealVect random_direction();
+
 #if CH_SPACEDIM==2
+  /*!
+    @brief Random direction in 2D
+  */
   RealVect random_direction2D();
 #elif CH_SPACEDIM==3
+  /*!
+    @brief Random direction in 2D
+  */
   RealVect random_direction3D();
 #endif
 
-  // Options parsing functions
+    /*!
+    @brief This computes the "conservative" deposition, multiplied by kappa
+  */
+  void deposit_kappaConservative(EBAMRCellData&              a_state,
+				 const AMRParticles<photon>& a_particles,
+				 const DepositionType::Which a_deposition);
+
+  /*!
+    @brief Make the "non-conservative" kappa deposition
+  */
+  void deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+
+  /*!
+    @brief Make the hybrid deposition. Also compute the mass difference
+  */
+  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC);
+
+  /*!
+    @brief Increment redistribution objects with mass to be redistributed
+  */
+  void increment_redist(const EBAMRIVData& a_mass_diff);
+
+  /*!
+    @brief Do redistribution on all levels, no coarse-fine stuff
+  */
+  void level_redistribution(EBAMRCellData& a_state);
+
+  /*!
+    @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
+  */
+  void coarse_fine_increment(const EBAMRIVData& m_mass_diff);
+
+  /*!
+    @brief Do coarse-fine redistribution
+  */
+  void coarse_fine_redistribution(EBAMRCellData& a_state);
+
+  /*!
+    @brief Parse RNG options
+  */
   void parse_rng();
+
+  /*!
+    @brief Parse pseudophotons
+  */
   void parse_pseudophotons();
+
+  /*!
+    @brief Parse photogeneration type
+  */
   void parse_photogen();
+
+  /*!
+    @brief Parse source type
+  */
   void parse_source_type();
+
+  /*!
+    @brief Parse deposition
+  */
   void parse_deposition();
+
+  /*!
+    @brief Parse bisection step
+  */
   void parse_bisect_step();
+
+  /*!
+    @brief Parse domain BCs
+  */
   void parse_domain_bc();
+
+  /*!
+    @brief Parse random kappa
+  */
   void parse_random_kappa();
+
+  /*!
+    @brief Parse PVR buffer
+  */
   void parse_pvr_buffer();
+
+  /*!
+    @brief Parse plot variables
+  */
   void parse_plot_vars();
 };
 

@@ -26,7 +26,7 @@
 /*!
   @brief Base class for Ito diffusion particle models
   @details This is a particle class for solving Ito diffusion problems dX = vdt + Z*D*t over an AMR hierarchy. The diffusion
-coefficient is related to the hydrodynamic diffusion coefficient by D(fluid = sqrt(2*D(Ito))
+  coefficient is related to the hydrodynamic diffusion coefficient by D(fluid = sqrt(2*D(Ito))
 */
 class ito_solver {
 public:
@@ -83,22 +83,7 @@ public:
 				 const AMRParticles<ito_particle>& a_particles,
 				 const DepositionType::Which       a_deposition);
 
-  /*!
-    @brief This computes the "conservative" deposition, multiplied by kappa
-  */
-  virtual void deposit_kappaConservative(EBAMRCellData&                    a_state,
-					 const AMRParticles<ito_particle>& a_particles,
-					 const DepositionType::Which       a_deposition);
 
-  /*!
-    @brief Make the "non-conservative" kappa deposition
-  */
-  virtual void deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
-
-  /*!
-    @brief Make the hybrid deposition. Also compute the mass difference
-  */
-  virtual void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
@@ -125,7 +110,7 @@ public:
   */
   virtual void set_computational_geometry(const RefCountedPtr<computational_geometry> a_compgeom);
 
-    /*!
+  /*!
     @brief Set the amr object
   */
   virtual void set_amr(const RefCountedPtr<amr_mesh>& a_amr);
@@ -333,7 +318,7 @@ public:
   
 protected:
 
-    /*!
+  /*!
     @brief Computational geometry. 
   */
   RefCountedPtr<computational_geometry> m_compgeom;
@@ -554,6 +539,23 @@ protected:
   void parse_diffusion_hop();
 
   /*!
+    @brief This computes the "conservative" deposition, multiplied by kappa
+  */
+  void deposit_kappaConservative(EBAMRCellData&                    a_state,
+				 const AMRParticles<ito_particle>& a_particles,
+				 const DepositionType::Which       a_deposition);
+
+  /*!
+    @brief Make the "non-conservative" kappa deposition
+  */
+  void deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+
+  /*!
+    @brief Make the hybrid deposition. Also compute the mass difference
+  */
+  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_mass_diff, const EBAMRIVData& a_depositionNC);
+
+  /*!
     @brief Increment redistribution objects with mass to be redistributed
   */
   void increment_redist(const EBAMRIVData& a_mass_diff);
@@ -563,7 +565,7 @@ protected:
   */
   void level_redistribution(EBAMRCellData& a_state);
 
-    /*!
+  /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
   */
   void coarse_fine_increment(const EBAMRIVData& m_mass_diff);

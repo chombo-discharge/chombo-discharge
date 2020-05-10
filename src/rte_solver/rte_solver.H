@@ -343,7 +343,6 @@ protected:
   /*!
     @brief Set ebis
   */
-  virtual void set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis);
-
+  void set_ebis(const RefCountedPtr<EBIndexSpace>& a_ebis);
 };
 #endif
