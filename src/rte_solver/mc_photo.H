@@ -36,7 +36,7 @@ public:
   virtual ~mc_photo();
 
   /*!
-    @brief Advance RTE onto state a_state
+    @brief Advance RTE and deposit photons on a_state
   */
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
@@ -141,6 +141,21 @@ public:
     @brief Count number of outcast photons in particle list
   */
   virtual int count_outcast(const AMRParticles<photon>& a_photons) const;
+
+  /*!
+    @brief Get photons
+  */
+  virtual particle_container<photon>& get_photons();
+
+  /*!
+    @brief Get EB photons
+  */
+  virtual particle_container<photon>& get_eb_photons();
+
+  /*!
+    @brief Get domain photons
+  */
+  virtual particle_container<photon>& get_domain_photons();
   
 protected:
 
@@ -250,22 +265,17 @@ protected:
   /*!
     @brief All particles
   */
-  particle_container<photon> m_particles;
+  particle_container<photon> m_photons;
 
   /*!
     @brief This is a particle container which acts as scratch space when you want to add particles through the EB
   */
-  particle_container<photon> m_eb_particles;
+  particle_container<photon> m_eb_photons;
 
   /*!
-    @brief This is a particle container which acts as scratch space when you want to add particles through the domain side
+    @brief This is a particle container which acts as scratch space when you want to add particles through the EB
   */
-  particle_container<photon> m_domain_particles;
-
-  /*!
-    @brief Particle cache
-  */
-  particle_container<photon> m_particle_cache;
+  particle_container<photon> m_domain_photons;
 
   /*!
     @brief Domain boundary conditions

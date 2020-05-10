@@ -37,11 +37,11 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   }
 
   // Generate photons
-  this->clear(m_particles);
-  this->generate_photons(m_particles, a_source, a_dt);              // Generate photons 
-  this->move_and_absorb_photons(m_eb_particles, m_particles, a_dt); // Move and absorb photons
-  this->remap(m_particles);                                         // Remap photons
-  this->deposit_photons(a_state, m_particles, m_deposition);        // Deposit photons
+  this->clear(m_photons);
+  this->generate_photons(m_photons, a_source, a_dt);              // Generate photons 
+  this->move_and_absorb_photons(m_eb_photons, m_photons, a_dt); // Move and absorb photons
+  this->remap(m_photons);                                         // Remap photons
+  this->deposit_photons(a_state, m_photons, m_deposition);        // Deposit photons
   
   return true;
 }
@@ -290,7 +290,7 @@ void mc_photo::clear(){
     pout() << m_name + "::clear()" << endl;
   }
 
-  this->clear(m_particles);
+  this->clear(m_photons);
 }
 
 void mc_photo::clear(particle_container<photon>& a_photon){
@@ -329,9 +329,9 @@ void mc_photo::allocate_internals(){
   m_amr->allocate(m_massDiff,     m_phase, ncomp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_particles,        m_pvr_buffer);
-  m_amr->allocate(m_eb_particles,     m_pvr_buffer);
-  m_amr->allocate(m_domain_particles, m_pvr_buffer);
+  m_amr->allocate(m_photons,        m_pvr_buffer);
+  m_amr->allocate(m_eb_photons,     m_pvr_buffer);
+  m_amr->allocate(m_domain_photons, m_pvr_buffer);
 }
 
 void mc_photo::pre_regrid(const int a_base, const int a_old_finest_level){
@@ -340,7 +340,7 @@ void mc_photo::pre_regrid(const int a_base, const int a_old_finest_level){
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_particles.pre_regrid(a_base); // TLDR: This moves photons from levels > a_base to a_base
+  m_photons.pre_regrid(a_base); // TLDR: This moves photons from levels > a_base to a_base
 }
 
 void mc_photo::deallocate_internals(){
@@ -375,9 +375,9 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
   const Vector<Real>& dx                 = m_amr->get_dx();
   const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
-  m_particles.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_eb_particles.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
-  m_domain_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_eb_photons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_domain_photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 
   // Deposit
   this->deposit_photons();
@@ -676,7 +676,7 @@ void mc_photo::deposit_photons(){
     pout() << m_name + "::deposit_photons" << endl;
   }
 
-  this->deposit_photons(m_state, m_particles, m_deposition);
+  this->deposit_photons(m_state, m_photons, m_deposition);
 }
 
 void mc_photo::deposit_photons(EBAMRCellData&                    a_state,
@@ -1127,7 +1127,7 @@ void mc_photo::remap(){
     pout() << m_name + "::remap()" << endl;
   }
 
-  this->remap(m_particles);
+  this->remap(m_photons);
 }
 
 void mc_photo::remap(particle_container<photon>& a_photons){
@@ -1176,10 +1176,37 @@ void mc_photo::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_phi) {
-    this->deposit_photons(m_scratch, m_particles.get_particles(), m_plot_deposition);
+    this->deposit_photons(m_scratch, m_photons.get_particles(), m_plot_deposition);
     this->write_data(a_output, a_comp, m_scratch,  true);
   }
   if(m_plot_src) {
     this->write_data(a_output, a_comp, m_source, false);
   }
+}
+
+particle_container<photon>& mc_photo::get_photons(){
+  CH_TIME("mc_photo::get_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_photons" << endl;
+  }
+
+  return m_photons;
+}
+
+particle_container<photon>& mc_photo::get_eb_photons(){
+  CH_TIME("mc_photo::get_eb_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_eb_photons" << endl;
+  }
+
+  return m_eb_photons;
+}
+
+particle_container<photon>& mc_photo::get_domain_photons(){
+  CH_TIME("mc_photo::get_domain_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_domain_photons" << endl;
+  }
+
+  return m_domain_photons;
 }
