@@ -176,10 +176,9 @@ protected:
 
   EBAMRPhotons m_photons;    // Particles
   EBAMRPhotons m_photocache; // Photon cache
-  AMRPVR m_pvr;            // Valid region
+  AMRPVR m_pvr;              // Valid region
   EBAMRCellData m_crse;      // Photoionization profile from the coarse level photons
-
-
+  
   Vector<wallbc::which_bc> m_domainbc;
   
   void generate_photons(EBAMRPhotons& a_particles, const EBAMRCellData& a_source, const Real a_dt);
