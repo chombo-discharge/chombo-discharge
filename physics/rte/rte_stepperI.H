@@ -9,6 +9,7 @@
 #include "rte_physics_species.H"
 
 #include <ParmParse.H>
+#include <PolyGeom.H>
 
 namespace physics {
   namespace rte {
@@ -24,7 +25,6 @@ namespace physics {
       pp.get   ("blob_amplitude", m_blob_amplitude);
       pp.get   ("blob_radius",    m_blob_radius);
       pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
-      
     }
     
     template <typename T>
@@ -63,7 +63,9 @@ namespace physics {
     }
 
     template <typename T>
-    void rte_stepper<T>::post_checkpoint_setup() {}
+    void rte_stepper<T>::post_checkpoint_setup() {
+      this->set_gaussian_source();
+    }
 
     template <typename T>
     int rte_stepper<T>::get_num_plot_vars() const {
@@ -77,7 +79,9 @@ namespace physics {
     }
 
     template <typename T>
-    void rte_stepper<T>::compute_dt(Real& a_dt, time_code::which_code& a_timecode) {}
+    void rte_stepper<T>::compute_dt(Real& a_dt, time_code::which_code& a_timecode) {
+      a_dt = 1.E-10;
+    }
 
     template <typename T>
     Real rte_stepper<T>::advance(const Real a_dt) {
@@ -123,13 +127,39 @@ namespace physics {
       m_solver->regrid(a_lmin, a_old_finest_level, a_new_finest_level);
 
       // Do the rest of the setup
+      this->set_gaussian_source();
     }
 
     template <typename T>
     void rte_stepper<T>::set_gaussian_source(){
 
-      MayDay::Abort("rte_stepper<T>::set_gaussian_source - not implemented");
-      
+      EBAMRCellData& source = m_solver->get_source();
+      const RealVect prob_lo = m_amr->get_prob_lo();
+
+      //
+      for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+	const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+	const EBISLayout& ebisl      = m_amr->get_ebisl(phase::gas)[lvl];
+	const Real dx                = m_amr->get_dx()[lvl];
+
+
+	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+	  const Box box = dbl.get(dit());
+
+	  FArrayBox& fab = (*source[lvl])[dit()].getFArrayBox();
+	  
+	  for (BoxIterator bit(box); bit.ok(); ++bit){
+	    const IntVect iv   = bit();
+	    const RealVect pos = prob_lo + dx*(RealVect(iv) + 0.5*RealVect::Unit);
+
+	    const RealVect v = (pos - m_blob_center)/m_blob_radius;
+	    const Real factor = PolyGeom::dot(v,v);
+	    const Real value = m_blob_amplitude*exp(-0.5*factor);
+
+	    fab(iv,0) = int(value);
+	  }
+	}
+      }
     }
   }
 }

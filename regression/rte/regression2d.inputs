@@ -86,7 +86,7 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
 # work with a volumetric rate, in which one could draw the number of photons from a Poisson distribution. 
 # ====================================================================================================
-mc_photo.max_photons       = 1             # Maximum no. generated in a cell (<= 0 yields physical photons)
+mc_photo.max_photons       = -1            # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 mc_photo.random_kappa      = false         # Randomize absorption length (taken from photon implementation)
 mc_photo.plt_vars          = phi src       # Available are 'phi' and 'src'
@@ -141,5 +141,5 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 rte_stepper.verbosity      = -1      # Verbosity
 rte_stepper.kappa          = 1.0     # Inverse absorption coefficient
 rte_stepper.blob_amplitude = 1E2     # Blob amplitude
-rte_stepper.blob_radius    = 0.1     # Blob radius
+rte_stepper.blob_radius    = 0.05    # Blob radius
 rte_stepper.blob_center    = 0.5 0.5 # Blob center

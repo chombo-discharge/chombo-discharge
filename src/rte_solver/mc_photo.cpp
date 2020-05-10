@@ -46,25 +46,25 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   int num_photons, num_outcast;
 
   // Generate photons
-  //  Real t1 = MPI_Wtime();
+  Real t1 = MPI_Wtime();
   this->clear(m_photons);                                           // Clear internal data
-  //  Real t2 = MPI_Wtime();
+  Real t2 = MPI_Wtime();
   this->generate_photons(m_photons, a_source, a_dt);                // Generate photons
-  //  Real t3 = MPI_Wtime();
+  Real t3 = MPI_Wtime();
   this->move_and_absorb_photons(absorbed_photons, m_photons, a_dt); // Move photons
-  //  Real t4 = MPI_Wtime();
+  Real t4 = MPI_Wtime();
   this->remap_photons(m_photons);                                   // Remap photons
-  //  Real t5 = MPI_Wtime();
+  Real t5 = MPI_Wtime();
   this->deposit_photons(a_state, m_photons, m_deposition);          // Compute photoionization profile
-  //  Real t6 = MPI_Wtime();
+  Real t6 = MPI_Wtime();
 
-  // Real T = t6-t1;
-  // pout() << "total time = " << T << endl
-  // 	 << "clear = " << 100.*(t2-t1)/T << endl
-  //   	 << "gener = " << 100.*(t3-t2)/T << endl
-  // 	 << "move  = " << 100.*(t4-t3)/T << endl
-  //   	 << "remap = " << 100.*(t5-t4)/T << endl
-  // 	 << "depos = " << 100.*(t6-t5)/T << endl;
+  Real T = t6-t1;
+  pout() << "total time = " << T << endl
+  	 << "clear = " << 100.*(t2-t1)/T << endl
+    	 << "gener = " << 100.*(t3-t2)/T << endl
+  	 << "move  = " << 100.*(t4-t3)/T << endl
+    	 << "remap = " << 100.*(t5-t4)/T << endl
+  	 << "depos = " << 100.*(t6-t5)/T << endl;
   
   return true;
 }
