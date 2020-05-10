@@ -422,7 +422,8 @@ void mc_photo::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellDat
 }
 
 void mc_photo::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state){
-  MayDay::Abort("mc_photo::compute_flux - Calling this is an error");
+  const std::string str = "mc_photo::compute_flux - Fluid flux can't be computed with discrete photons. Calling this is an error";
+  MayDay::Abort(str.c_str());
 }
 
 void mc_photo::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state){

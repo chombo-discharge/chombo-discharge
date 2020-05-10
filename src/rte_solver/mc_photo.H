@@ -41,6 +41,45 @@ public:
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
   /*!
+    @brief Generate photons
+  */
+  virtual void generate_photons(particle_container<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+
+  /*!
+    @brief Move photons and absorb them. 
+  */
+  virtual void move_and_absorb_photons(particle_container<photon>& a_absorbed, particle_container<photon>& a_original, const Real a_dt);
+
+  /*!
+    @brief Remap photons
+  */
+  virtual void remap();
+
+  /*!
+    @brief Remap photons
+  */
+  virtual void remap(particle_container<photon>& a_photons);
+
+  /*!
+    @brief Deposit photons
+  */
+  virtual void deposit_photons();
+
+  /*!
+    @brief Deposit photons
+  */
+  virtual void deposit_photons(EBAMRCellData&                    a_state,
+			       const particle_container<photon>& a_particles,
+			       const DepositionType::Which&      a_deposition);
+
+  /*!
+    @brief Deposit photons
+  */
+  virtual void deposit_photons(EBAMRCellData&               a_state,
+			       const AMRParticles<photon>&  a_photons,
+			       const DepositionType::Which& a_deposition);
+
+  /*!
     Parse options
   */
   virtual void parse_options();
@@ -282,42 +321,7 @@ protected:
   */
   Vector<wallbc::which_bc> m_domainbc;
 
-  /*!
-    @brief Generate photons
-  */
-  void generate_photons(particle_container<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
-  /*!
-    @brief Move photons and absorb them. 
-  */
-  void move_and_absorb_photons(particle_container<photon>& a_absorbed, particle_container<photon>& a_original, const Real a_dt);
-
-  /*!
-    @brief Remap photons
-  */
-  void remap();
-
-  /*!
-    @brief Remap photons
-  */
-  void remap(particle_container<photon>& a_photons);
-
-  /*!
-    @brief Deposit photons
-  */
-  void deposit_photons();
-
-  /*!
-    @brief Deposit photons
-  */
-  void deposit_photons(EBAMRCellData&                    a_state,
-		       const particle_container<photon>& a_particles,
-		       const DepositionType::Which&      a_deposition);
-  
-  /*!
-    @brief Deposition photons on mesh
-  */
-  void deposit_photons(EBAMRCellData& a_state, const AMRParticles<photon>& a_particles, const DepositionType::Which& a_deposition);
 
   /*!
     @brief Draw photons
@@ -356,7 +360,7 @@ protected:
   RealVect random_direction3D();
 #endif
 
-    /*!
+  /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   void deposit_kappaConservative(EBAMRCellData&              a_state,
