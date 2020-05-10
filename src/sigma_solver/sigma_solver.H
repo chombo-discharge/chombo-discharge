@@ -36,7 +36,7 @@ public:
   /*!
     @brief Cache state for regridding
   */
-  virtual void cache_state();
+  virtual void pre_regrid(const int a_lbase, const int a_old_finest_level);
 
   /*!
     @brief Compute the right-hand side

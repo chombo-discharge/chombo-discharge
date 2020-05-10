@@ -49,7 +49,7 @@ namespace physics {
       // Regrid routines
       bool need_to_regrid() override {return false;}
       void register_operators() override;
-      void cache() override;
+      void pre_regrid(const int a_lbase, const int a_finest_level) override;
       void deallocate() override;
       void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) override;
 

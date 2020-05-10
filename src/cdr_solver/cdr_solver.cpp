@@ -197,18 +197,19 @@ void cdr_solver::average_velo_to_faces(EBAMRFluxData& a_velo_face, const EBAMRCe
   }
 }
 
-void cdr_solver::cache_state(){
-  CH_TIME("cdr_solver::cache_state");
+void cdr_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  CH_TIME("cdr_solver::pre_regrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::cache_state" << endl;
+    pout() << m_name + "::pre_regrid" << endl;
   }
 
   const int ncomp        = 1;
   const int finest_level = m_amr->get_finest_level();
   
-  m_amr->allocate(m_cache_state, m_phase, ncomp);
+  m_amr->allocate(m_cache_state,  m_phase, ncomp);
   m_amr->allocate(m_cache_source, m_phase, ncomp);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_state[lvl]->localCopyTo(*m_cache_state[lvl]);
     m_source[lvl]->localCopyTo(*m_cache_source[lvl]);
   }

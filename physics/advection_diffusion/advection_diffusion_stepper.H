@@ -43,7 +43,7 @@ namespace physics {
       // Regrid routines
       bool need_to_regrid() override;
       void register_operators() override;
-      void cache() override;
+      void pre_regrid(const int a_lbase, const int a_finest_level) override;
       void deallocate() override;
 
       // Pure routines for derived classes

@@ -34,10 +34,10 @@ void sigma_solver::allocate_internals(){
   m_amr->allocate(m_flux,  m_phase, ncomp);
 }
 
-void sigma_solver::cache_state(){
-  CH_TIME("sigma_solver::allocate_internals");
+void sigma_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  CH_TIME("sigma_solver::pre_regrid");
   if(m_verbosity > 5){
-    pout() << "sigma_solver::allocate_internals" << endl;
+    pout() << "sigma_solver::pre_regrid" << endl;
   }
 
   const int ncomp = 1;
@@ -45,7 +45,7 @@ void sigma_solver::cache_state(){
   
   m_amr->allocate(m_cache, m_phase, ncomp);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }

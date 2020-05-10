@@ -252,8 +252,8 @@ bool advection_diffusion_stepper::need_to_regrid(){
   return false;
 }
 
-void advection_diffusion_stepper::cache(){
-  m_solver->cache_state();
+void advection_diffusion_stepper::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  m_solver->pre_regrid(a_lbase, a_old_finest_level);
 }
 
 void advection_diffusion_stepper::deallocate(){

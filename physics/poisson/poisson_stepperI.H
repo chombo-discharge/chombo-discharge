@@ -104,9 +104,9 @@ namespace physics {
     }
 
     template <class T>
-    void poisson_stepper<T>::cache(){
-      m_poisson->cache_state();
-      m_sigma->cache_state();
+    void poisson_stepper<T>::pre_regrid(const int a_lbase, const int a_old_finest_level){
+      m_poisson->pre_regrid(a_lbase, a_old_finest_level);
+      m_sigma->pre_regrid(a_lbase, a_old_finest_level);
     }
 
     template <class T>

@@ -91,25 +91,20 @@ namespace physics {
       /*!
 	@brief New caching function for regridding
       */
-      virtual void cache(){
-	this->cache_states();
-	this->cache_internals();
-      }
+      virtual void pre_regrid(const int a_lbase, const int a_finest_level);
 
+      /*!
+	@brief pre_regrid internal storage
+      */
+      virtual void pre_regrid_internals(const int a_lbase, const int a_finest_level);
+
+      /*!
+	@brief Deallocation function
+      */
       virtual void deallocate(){
 	this->deallocate_internals();
 	this->deallocate_solver_internals();
       }
-
-      /*!
-	@brief Cache states
-      */
-      virtual void cache_states();
-
-      /*!
-	@brief Cache internal states
-      */
-      virtual void cache_internals();
 
       /*!
 	@brief Solve the poisson equation. This calls compute_rho() 

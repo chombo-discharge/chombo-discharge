@@ -212,10 +212,10 @@ bool brownian_walker_stepper::need_to_regrid() {
   return false;
 }
 
-void brownian_walker_stepper::cache() {
-  CH_TIME("brownian_walker_stepper::cache");
+void brownian_walker_stepper::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  CH_TIME("brownian_walker_stepper::pre_regrid");
   if(m_verbosity > 5){
-    pout() << "brownian_walker_stepper::cache" << endl;
+    pout() << "brownian_walker_stepper::pre_regrid" << endl;
   }
 
   // TLDR: base is the finest level that DOES NOT CHANGE

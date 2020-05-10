@@ -125,9 +125,9 @@ public:
   virtual void average_velo_to_faces();
 
   /*!
-    @brief Cache internal state
+    @brief Pre-regrid
   */
-  virtual void cache_state();
+  virtual void pre_regrid(const int a_lbase, const int a_old_finest_level);
 
   /*!
     @brief Deallocate internal storage

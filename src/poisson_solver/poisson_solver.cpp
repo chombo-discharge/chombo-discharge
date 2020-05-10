@@ -73,17 +73,17 @@ void poisson_solver::allocate_wall_bc(){
   }
 }
 
-void poisson_solver::cache_state(){
-  CH_TIME("poisson_solver::cache_state");
+void poisson_solver::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  CH_TIME("poisson_solver::pre_regrid");
   if(m_verbosity > 5){
-    pout() << "poisson_solver::cache_state" << endl;
+    pout() << "poisson_solver::pre_regrid" << endl;
   }
 
   const int ncomp = 1;
   const int finest_level = m_amr->get_finest_level();
   
   m_amr->allocate(m_cache, ncomp);
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
     m_state[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }

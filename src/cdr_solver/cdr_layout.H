@@ -63,7 +63,7 @@ public:
   /*!
     @brief Cache states before regrid step
   */
-  virtual void cache_states();
+  virtual void pre_regrid(const int a_lbase, const int a_finest_level);
 
   /*!
     @brief Initial data

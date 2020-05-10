@@ -73,15 +73,15 @@ void cdr_layout::deallocate_internals(){
   }
 }
 
-void cdr_layout::cache_states(){
-  CH_TIME("cdr_layout::cache_states");
+void cdr_layout::pre_regrid(const int a_lbase, const int a_old_finest_level){
+  CH_TIME("cdr_layout::pre_regrid");
   if(m_verbosity > 6){
-    pout() << "cdr_layout::cache_states" << endl;
+    pout() << "cdr_layout::pre_regrid" << endl;
   }
 
   for (cdr_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_solver>& solver = solver_it();
-    solver->cache_state();
+    solver->pre_regrid(a_lbase, a_old_finest_level);
   }
 }
 
