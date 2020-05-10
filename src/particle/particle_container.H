@@ -89,6 +89,11 @@ public:
   const AMRParticles<P>& get_particles() const;
 
   /*!
+    @brief Get PVR
+  */
+  const AMRPVR& get_pvr() const;
+
+  /*!
     @brief Get data on a level
   */
   ParticleData<P>& operator[](const int a_level);

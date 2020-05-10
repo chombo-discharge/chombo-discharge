@@ -144,9 +144,9 @@ public:
   virtual void deallocate_internals() = 0;
 
   /*!
-    @brief Cache state
+    @brief Pre regrid
   */
-  virtual void cache_state() = 0;
+  virtual void pre_regrid(const int a_lbase, const int a_old_finest_level) = 0;
 
   /*!
     @brief Regrid function

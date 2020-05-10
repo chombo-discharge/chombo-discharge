@@ -91,6 +91,11 @@ void particle_container<P>::setup_particle_data(const int a_base, const int a_fi
 }
 
 template <class P>
+const AMRPVR& particle_container<P>::get_pvr() const {
+  return m_pvr;
+}
+
+template <class P>
 AMRParticles<P>& particle_container<P>::get_particles(){
   CH_assert(m_is_defined);
   return m_particles;

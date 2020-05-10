@@ -49,9 +49,9 @@ public:
   virtual void allocate_internals();
 
   /*!
-    @brief Cache states before regrid step
+    @brief Pre regrid stuff
   */
-  virtual void cache_states();
+  virtual void pre_regrid(const int a_base, const int a_old_finest_level);
 
     /*!
     @brief Deallocate internal storage for solvers

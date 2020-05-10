@@ -113,8 +113,8 @@ namespace physics {
     }
 
     template <typename T>
-    void rte_stepper<T>::cache() {
-      m_solver->cache_state();
+    void rte_stepper<T>::pre_regrid(const int a_base, const int a_old_finest_level) {
+      m_solver->pre_regrid(a_base, a_old_finest_level);
     }
 
     template <typename T>

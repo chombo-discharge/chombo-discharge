@@ -35,17 +35,13 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
   if(m_verbosity > 5){
     pout() << m_name + "::advance" << endl;
   }
-  
-  AMRParticles<photon>& photons = m_particles.get_particles();
-  AMRParticles<photon> absorbed_photons;
-  m_amr->allocate(absorbed_photons);
 
   // Generate photons
   this->clear(m_particles);
-  this->generate_photons(m_particles.get_particles(), a_source, a_dt); // Generate photons 
-  this->move_and_absorb_photons(absorbed_photons, photons, a_dt);      // Move and absorb photons
-  this->remap(m_particles);                                            // Remap photons
-  this->deposit_photons(a_state, m_particles, m_deposition);           // Deposit photons
+  this->generate_photons(m_particles, a_source, a_dt);              // Generate photons 
+  this->move_and_absorb_photons(m_eb_particles, m_particles, a_dt); // Move and absorb photons
+  this->remap(m_particles);                                         // Remap photons
+  this->deposit_photons(a_state, m_particles, m_deposition);        // Deposit photons
   
   return true;
 }
@@ -324,66 +320,35 @@ void mc_photo::allocate_internals(){
   }
 
   const int ncomp  = 1;
-  
+
+  // Allocate mesh data
   m_amr->allocate(m_state,        m_phase, ncomp); 
   m_amr->allocate(m_source,       m_phase, ncomp);
   m_amr->allocate(m_scratch,      m_phase, ncomp);
   m_amr->allocate(m_depositionNC, m_phase, ncomp);
   m_amr->allocate(m_massDiff,     m_phase, ncomp);
-		  
-  m_amr->allocate(m_photons);
-  m_amr->allocate(m_pvr, m_pvr_buffer);
 
   // Allocate particle data holders
   m_amr->allocate(m_particles,        m_pvr_buffer);
   m_amr->allocate(m_eb_particles,     m_pvr_buffer);
   m_amr->allocate(m_domain_particles, m_pvr_buffer);
 }
-  
-void mc_photo::cache_state(){
-  CH_TIME("mc_photo::cache_state");
+
+void mc_photo::pre_regrid(const int a_base, const int a_old_finest_level){
+  CH_TIME("mc_photo::pre_regrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::cache_state" << endl;
+    pout() << m_name + "::pre_grid" << endl;
   }
 
-  // Allocate cache
-  m_amr->allocate(m_photocache);
-
-#if 0 // Debug, count number of photons
-  long long num_precopy = 0;
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    num_precopy += m_photons[lvl]->numParticles();
-  }
-#endif
-
-  // Copy photons onto cache
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    collectValidParticles(m_photocache[lvl]->outcast(),
-			  *m_photons[lvl],
-			  m_pvr[lvl]->mask(),
-			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  1,
-			  false, 
-			  m_amr->get_prob_lo());
-    m_photocache[lvl]->remapOutcast();
-
-    // Clear old photons
-    m_photons[lvl]->clear();
-  }
-
-#if 0 // Debug, count number of photons
-  long long num_postcopy = 0;
-  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
-    num_postcopy += m_photocache[lvl]->numParticles();
-  }
-
-  if(procID() == 0){
-    std::cout << "precopy = " << num_precopy << "\t postcopy = " << num_postcopy << std::endl;
-  }
-#endif
+  m_particles.pre_regrid(a_base); // TLDR: This moves photons from levels > a_base to a_base
 }
 
 void mc_photo::deallocate_internals(){
+  CH_TIME("mc_photo::deallocate_internals");
+  if(m_verbosity > 5){ 
+    pout() << m_name + "::deallocate_internals" << endl;
+  }
+  
   m_amr->deallocate(m_state);
   m_amr->deallocate(m_source);
   m_amr->deallocate(m_scratch);
@@ -397,85 +362,25 @@ void mc_photo::regrid(const int a_lmin, const int a_old_finest_level, const int 
     pout() << m_name + "::regrid" << endl;
   }
 
+  // Mesh data regrids
+  m_amr->reallocate(m_state,        m_phase, a_lmin); 
+  m_amr->reallocate(m_source,       m_phase, a_lmin);
+  m_amr->reallocate(m_scratch,      m_phase, a_lmin);
+  m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
+  m_amr->reallocate(m_massDiff,     m_phase, a_lmin);
 
-  // This reallocates all internal stuff. After this, the only object with any knowledge of the past
-  // is m_photocache, which has all the photons in the old data holders.
-  this->allocate_internals();
+  // Particle data regrids
+  const Vector<DisjointBoxLayout>& grids = m_amr->get_grids();
+  const Vector<ProblemDomain>& domains   = m_amr->get_domains();
+  const Vector<Real>& dx                 = m_amr->get_dx();
+  const Vector<int>& ref_rat             = m_amr->get_ref_rat();
 
+  m_particles.regrid(       grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_eb_particles.regrid(    grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
+  m_domain_particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_new_finest_level);
 
-  // Here are the steps:
-  // 
-  // 1. We are regridding a_lmin and above, so we need to move all photons onto level a_lmin-1. There's
-  //    probably a better way to do this
-  // 
-  // 2. Levels 0 through a_lmin-1 did not change. Copy photons back into those levels. 
-  // 
-  // 3. Levels a_lmin-1 through a_new_finest_level changed. Remap photons into the correct boxes. 
-  //
-  // 4. Redeposit photons
-  
-  const int base_level  = Max(0, a_lmin-1);
-  const RealVect origin = m_amr->get_prob_lo();
-
-#if 0 // Debug, count number of photons
-  long long num_pretransfer = 0;
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
-    num_pretransfer += m_photocache[lvl]->numParticles();
-  }
-#endif
-  
-
-  // 1. Move all photons (that are in the cache) onto the coarsest grid level
-  List<photon>& base_cache = m_photocache[0]->outcast();
-  base_cache.clear();
-  for (int lvl = base_level; lvl <= a_old_finest_level; lvl++){
-    for (DataIterator dit = m_photocache[lvl]->dataIterator(); dit.ok(); ++dit){
-      for (ListIterator<photon> li((*m_photocache[lvl])[dit()].listItems()); li.ok(); ){
-	m_photocache[base_level]->outcast().transfer(li);
-      }
-    }
-  }
-    
-
-#if 0 // Debug, count number of photons
-  long long num_posttransfer = 0;
-  for (int lvl = 0; lvl <= a_old_finest_level; lvl++){
-    num_posttransfer += m_photocache[lvl]->numParticles();
-  }
-
-  if(procID() == 0){
-    std::cout << "pre = " << num_pretransfer << "\t post = " << num_posttransfer << std::endl;
-  }
-#endif
-
-  // 2. Levels 0 through base_level did not change, so copy photons back onto those levels. 
-  for (int lvl = 0; lvl <= base_level; lvl++){
-    collectValidParticles(*m_photons[lvl],
-			  *m_photocache[lvl],
-			  m_pvr[lvl]->mask(),
-			  m_amr->get_dx()[lvl]*RealVect::Unit,
-			  1,
-			  false, 
-			  origin);
-
-    m_photons[lvl]->gatherOutcast();
-    m_photons[lvl]->remapOutcast();
-  }
-
-  // 3. Levels above base_level may have changed, so we need to move the particles into the correct boxes now
-  for (int lvl = base_level; lvl < a_new_finest_level; lvl++){
-    collectValidParticles(m_photons[lvl+1]->outcast(),
-			  *m_photons[lvl],
-			  m_pvr[lvl+1]->mask(),
-			  m_amr->get_dx()[lvl+1]*RealVect::Unit,
-			  m_amr->get_ref_rat()[lvl],
-			  false,
-			  origin);
-    m_photons[lvl+1]->remapOutcast();
-  }
-
-  // 4. Redeposit photons
-  deposit_photons(m_state, m_photons, m_deposition);
+  // Deposit
+  this->deposit_photons();
 }
 
 void mc_photo::register_operators(){
@@ -484,7 +389,7 @@ void mc_photo::register_operators(){
     pout() << m_name + "::register_operators" << endl;
   }
 
-    if(m_amr.isNull()){
+  if(m_amr.isNull()){
     MayDay::Abort("mc_photo::register_operators - need to set amr_mesh!");
   }
   else{
@@ -503,6 +408,7 @@ void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebflux, const EBAMRCellData&
   if(m_verbosity > 5){
     pout() << m_name + "::compute_boundary_flux" << endl;
   }
+
   data_ops::set_value(a_ebflux, 0.0);
 }
 
@@ -511,15 +417,16 @@ void mc_photo::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellDat
   if(m_verbosity > 5){
     pout() << m_name + "::compute_domain_flux" << endl;
   }
+  
   data_ops::set_value(a_domainflux, 0.0);
 }
 
 void mc_photo::compute_flux(EBAMRCellData& a_flux, const EBAMRCellData& a_state){
-  MayDay::Abort("mc_photo::compute_flux - I don't think this should ever be called.");
+  MayDay::Abort("mc_photo::compute_flux - Calling this is an error");
 }
 
 void mc_photo::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_state){
-  MayDay::Abort("mc_photo::compute_density - I don't think this should ever be called.");
+  MayDay::Abort("mc_photo::compute_density - Calling this is an error");
 }
 
 void mc_photo::write_plot_file(){
@@ -559,7 +466,7 @@ int mc_photo::query_ghost() const {
   return 3;
 }
 
-int mc_photo::random_poisson(const Real& a_mean){
+int mc_photo::random_poisson(const Real a_mean){
   if(a_mean < m_poiss_exp_swap){
     std::poisson_distribution<int> pdist(a_mean);
     return pdist(*m_rng);
@@ -625,35 +532,40 @@ RealVect mc_photo::random_direction3D(){
 }
 #endif
 
-void mc_photo::generate_photons(AMRParticles<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt){
+void mc_photo::generate_photons(particle_container<photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt){
   CH_TIME("mc_photo::generate_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::generate_photons" << endl;
   }
 
-  const RealVect prob_lo  = m_amr->get_prob_lo();
+  const RealVect prob_lo = m_amr->get_prob_lo();
   const int finest_level = m_amr->get_finest_level();
 
+  // Put here. 
+  AMRParticles<photon>& photons = a_photons.get_particles();
+
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->get_dx()[lvl];
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     const ProblemDomain& dom     = m_amr->get_domains()[lvl];
+    const Real dx                = m_amr->get_dx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
-    const bool has_coar          = lvl > 0;
+    const bool has_coar          = (lvl > 0);
 
-    if(has_coar) { // If there is a coarser level, remove particles from the overlapping region
+    // If there is a coarser level, remove particles from the overlapping region and regenerate on this level.
+    if(has_coar) {
+      const AMRPVR& pvr = a_photons.get_pvr();
       const int ref_ratio = m_amr->get_ref_rat()[lvl-1];
-      collectValidParticles(a_particles[lvl]->outcast(),
-      			    *a_particles[lvl-1],
-      			    m_pvr[lvl]->mask(),
+      collectValidParticles(photons[lvl]->outcast(),
+      			    *photons[lvl-1],
+      			    pvr[lvl]->mask(),
       			    dx*RealVect::Unit,
       			    ref_ratio,
 			    false,
 			    prob_lo);
-      a_particles[lvl]->outcast().clear(); // Delete particles generated on the coarser level. We'll regenerate them on this level.
+      photons[lvl]->outcast().clear(); 
     }
 
-    // Create new particles on this level using fine-resolution data
+    // Create new particles on this level. 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = (*a_source[lvl])[dit()].getEBISBox();
@@ -672,23 +584,27 @@ void mc_photo::generate_photons(AMRParticles<photon>& a_particles, const EBAMRCe
 	// Regular cells
 	for (BoxIterator bit(box); bit.ok(); ++bit){
 	  const IntVect iv   = bit();
-	  const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
 
-	  const int num_phys_photons = draw_photons(srcFAB(iv,0), vol, a_dt);
-	  
-	  if(num_phys_photons > 0){
-	    const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
-	    const Real weight      = (1.0*num_phys_photons)/num_photons;
+	  if(ebisbox.isRegular(iv)){
+	    const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
 
-	    // Generate computational photons 
-	    for (int i = 0; i < num_photons; i++){
-	      const RealVect dir = random_direction();
-	      particles.append(photon(pos, dir*units::s_c0, m_rte_species->get_kappa(pos), weight));
+	    // Number of physical photons
+	    const int num_phys_photons = this->draw_photons(srcFAB(iv,0), vol, a_dt);
+
+	    // Make superphotons if we have to
+	    if(num_phys_photons > 0){
+	      const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
+	      const Real weight     = (1.0*num_phys_photons)/num_photons; 
+	      
+	      for (int i = 0; i < num_photons; i++){
+		const RealVect v = units::s_c0*this->random_direction();
+		particles.append(photon(pos, v, m_rte_species->get_kappa(pos), weight));
+	      }
 	    }
 	  }
 	}
 
-	// Irregular cells
+	// Irregular and multicells
 	for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
@@ -702,8 +618,8 @@ void mc_photo::generate_photons(AMRParticles<photon>& a_particles, const EBAMRCe
 
 	    // Generate computational photons 
 	    for (int i = 0; i < num_photons; i++){
-	      const RealVect dir = random_direction();
-	      particles.append(photon(pos, dir*units::s_c0, m_rte_species->get_kappa(pos), weight));
+	      const RealVect v = units::s_c0*this->random_direction();
+	      particles.append(photon(pos, v, m_rte_species->get_kappa(pos), weight));
 	    }
 	  }
 
@@ -711,12 +627,9 @@ void mc_photo::generate_photons(AMRParticles<photon>& a_particles, const EBAMRCe
       }
 
       // Add new particles to data holder
-      (*a_particles[lvl])[dit()].addItemsDestructive(particles);
+      (*photons[lvl])[dit()].addItemsDestructive(particles);
     }
   }
-
-  // Count number of photons
-  m_num_photons = this->count_photons(m_photons);
 }
 
 int mc_photo::draw_photons(const Real a_source, const Real a_volume, const Real a_dt){
@@ -755,6 +668,15 @@ int mc_photo::draw_photons(const Real a_source, const Real a_volume, const Real 
   }
 
   return num_photons;
+}
+
+void mc_photo::deposit_photons(){
+  CH_TIME("mc_photo::deposit_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::deposit_photons" << endl;
+  }
+
+  this->deposit_photons(m_state, m_particles, m_deposition);
 }
 
 void mc_photo::deposit_photons(EBAMRCellData&                    a_state,
@@ -1025,17 +947,19 @@ void mc_photo::coarse_fine_redistribution(EBAMRCellData& a_state){
   }
 }
 
-void mc_photo::move_and_absorb_photons(AMRParticles<photon>& a_absorbed, AMRParticles<photon>& a_original, const Real a_dt){
+void mc_photo::move_and_absorb_photons(particle_container<photon>& a_eb_photons,
+				       particle_container<photon>& a_bulk_photons,
+				       const Real a_dt){
   CH_TIME("mc_photo::move_and_absorb_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::move_and_absorb_photons" << endl;
   }
 
-  const int finest_level = m_amr->get_finest_level();
-  const RealVect prob_lo  = m_amr->get_prob_lo();
+  // Low and high corners
+  const RealVect prob_lo = m_amr->get_prob_lo();
   const RealVect prob_hi = m_amr->get_prob_hi();
 
-  // This is the implicit function
+  // This is the implicit function used for intersection tests
   RefCountedPtr<BaseIF> impfunc;
   if(m_phase == phase::gas){
     impfunc = m_compgeom->get_gas_if();
@@ -1044,9 +968,12 @@ void mc_photo::move_and_absorb_photons(AMRParticles<photon>& a_absorbed, AMRPart
     impfunc = m_compgeom->get_sol_if();
   }
 
+  // Hack. 
+  AMRParticles<photon>& a_absorbed = a_eb_photons.get_particles();
+  AMRParticles<photon>& a_original = a_bulk_photons.get_particles();
 
-  // Advance over levels
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

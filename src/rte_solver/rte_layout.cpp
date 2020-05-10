@@ -54,15 +54,15 @@ void rte_layout::allocate_internals(){
   }
 }
 
-void rte_layout::cache_states(){
-  CH_TIME("rte_layout::cache_states");
+void rte_layout::pre_regrid(const int a_base, const int a_finest_level){
+  CH_TIME("rte_layout::pre_regrid");
   if(m_verbosity > 6){
-    pout() << "rte_layout::cache_states" << endl;
+    pout() << "rte_layout::pre_regrid" << endl;
   }
 
   for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
-    solver->cache_state();
+    solver->pre_regrid(a_base, a_finest_level);
   }
 }
 
@@ -74,7 +74,7 @@ void rte_layout::deallocate_internals(){
 
   for (rte_iterator solver_it(*this); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_solver>& solver = solver_it();
-    //    solver->deallocate_internals();
+    solver->deallocate_internals();
   }
 }
 

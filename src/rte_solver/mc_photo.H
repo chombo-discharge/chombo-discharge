@@ -19,7 +19,6 @@
 
 #include <random>
 
-
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
 */
@@ -50,11 +49,11 @@ public:
     @brief Allocate internal storage
   */
   virtual void allocate_internals();
-  
+
   /*!
-    @brief Cache state
+    @brief Stuff to do before a regrid
   */
-  virtual void cache_state();
+  virtual void pre_regrid(const int a_base, const int a_old_finest_level);
 
   /*!
     @brief Deallocate internal storage
@@ -232,21 +231,6 @@ protected:
     @brief Plot deposition type
   */
   DepositionType::Which m_plot_deposition;
-  
-  /*!
-    @brief Photons
-  */
-  AMRParticles<photon> m_photons;   
-
-  /*!
-    @brief Photocache for regridding
-  */
-  AMRParticles<photon> m_photocache;
-
-  /*!
-    @brief AMR valid region
-  */
-  AMRPVR m_pvr;             
 
   /*!
     @brief Coarse data for interpolation of deposition clouds
@@ -291,12 +275,12 @@ protected:
   /*!
     @brief Generate photons
   */
-  void generate_photons(AMRParticles<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  void generate_photons(particle_container<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
   /*!
-    @brief Move photons
+    @brief Move photons and absorb them. 
   */
-  void move_and_absorb_photons(AMRParticles<photon>& a_absorbed, AMRParticles<photon>& a_original, const Real a_dt);
+  void move_and_absorb_photons(particle_container<photon>& a_absorbed, particle_container<photon>& a_original, const Real a_dt);
 
   /*!
     @brief Remap photons
@@ -307,6 +291,11 @@ protected:
     @brief Remap photons
   */
   void remap(particle_container<photon>& a_photons);
+
+  /*!
+    @brief Deposit photons
+  */
+  void deposit_photons();
 
   /*!
     @brief Deposit photons
@@ -333,7 +322,7 @@ protected:
   /*!
     @brief Random Poisson trial
   */
-  int random_poisson(const Real& a_mean);
+  int random_poisson(const Real a_mean);
 
   /*!
     @brief Random exponential trial

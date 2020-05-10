@@ -31,8 +31,8 @@ public:
   // IO routines
   virtual void write_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) const = 0;
   virtual void read_checkpoint_data(HDF5Handle& a_handle, const int a_lvl) = 0;
-  virtual int get_num_plot_vars() const = 0;
   virtual void write_plot_data(EBAMRCellData& a_output, Vector<std::string>& a_plotvar_names, int& a_icomp) const = 0;
+  virtual int  get_num_plot_vars() const = 0;
 
   // Advance routines
   virtual void compute_dt(Real& a_dt, time_code::which_code& a_timecode) = 0;
@@ -43,7 +43,7 @@ public:
   // New regrid routines
   virtual bool need_to_regrid();
   virtual void register_operators() = 0; 
-  virtual void cache() = 0;
+  virtual void pre_regrid(const int a_lmin, const int a_old_finest_level) = 0;
   virtual void deallocate() = 0;
   virtual void regrid(const int a_lmin, const int a_old_finest_level, const int a_new_finest_level) = 0;
 

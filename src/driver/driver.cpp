@@ -633,10 +633,9 @@ void driver::regrid(const int a_lmin, const int a_lmax, const bool a_use_initial
     }
   }
 
-
   // Store things that need to be regridded
   this->cache_tags(m_tags);              // Cache m_tags because after regrid, ownership will change
-  m_timestepper->cache();
+  m_timestepper->pre_regrid(a_lmin, m_amr->get_finest_level());
 
   // Deallocate unnecessary storage
   this->deallocate_internals();          // Deallocate internal storage for driver
