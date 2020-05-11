@@ -465,6 +465,27 @@ protected:
     @brief Parse plot variables
   */
   void parse_plot_vars();
+
+  /*!
+    @brief Function for performing domain boundary intersection tests
+  */
+  inline bool domain_bc_intersection(const RealVect& a_oldPos,
+				     const RealVect& a_newPos,
+				     const RealVect& a_path,
+				     const RealVect& a_prob_lo,
+				     const RealVect& a_prob_hi,
+				     Real&           a_s);
+
+  /*!
+    @brief Function for performing embedded boundary intersection test
+  */
+  inline bool eb_bc_intersection(const RefCountedPtr<BaseIF>& a_impfunc,
+				 const RealVect&              a_oldPos,
+				 const RealVect&              a_newPos,
+				 const Real&                  a_pathLen,
+				 Real&                        a_s);
+
+
 };
 
 #endif

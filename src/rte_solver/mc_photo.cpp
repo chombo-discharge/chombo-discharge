@@ -38,14 +38,10 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
 
   // Generate photons
   this->clear(m_photons);
-  this->generate_photons(m_photons, a_source, a_dt);           // Generate photons
-#if 0 // Old code
-  this->move_and_absorb_photons(m_eb_photons, m_photons);      // Move and absorb photons
-#else // New code
+  this->generate_photons(m_photons, a_source, a_dt);           
   this->advance_photons_stationary(m_bulk_photons, m_eb_photons, m_domain_photons, m_photons);
-#endif
-  this->remap(m_photons);                                      // Remap photons
-  this->deposit_photons(a_state, m_photons, m_deposition);     // Deposit photons
+  this->remap(m_photons);                                       
+  this->deposit_photons(a_state, m_bulk_photons, m_deposition); 
   
   return true;
 }
@@ -962,9 +958,25 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
     pout() << m_name + "::move_and_absorb_photons" << endl;
   }
 
+  // TLDR: This routine iterates over the levels and boxes and does the following
+  //
+  //       Forall photons in a_photons: {
+  //          1. Draw random absorption position
+  //          2. Check if path intersects boundary, either EB or domain
+  //          3. Move the photon to appropriate data holder:
+  //                 Path crossed EB   => a_eb_photons
+  //                 Path cross domain => a_domain_photons
+  //                 Absorbe in bulk   => a_bulk_photons
+  //       }
+  //
+  //       Remap a_bulk_photons, a_eb_photons, a_domain_photons
+
   // Low and high corners
   const RealVect prob_lo = m_amr->get_prob_lo();
   const RealVect prob_hi = m_amr->get_prob_hi();
+
+  // Safety factor
+  const Real SAFETY = 1.E-6;
 
   // This is the implicit function used for intersection tests
   RefCountedPtr<BaseIF> impfunc;
@@ -975,157 +987,112 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
     impfunc = m_compgeom->get_sol_if();
   }
 
-  // Hack. 
-  AMRParticles<photon>& a_absorbed = a_eb_photons.get_particles();
-  AMRParticles<photon>& a_original = a_photons.get_particles();
-
-
+#if 0 // Debug
+  int photonsBefore = this->count_photons(a_photons.get_particles());
+#endif
+  
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<photon>& deposit_surf = (*a_absorbed[lvl])[dit()].listItems();
-      List<photon>& deposit_bulk = (*a_original[lvl])[dit()].listItems();
+      List<photon>& bulkPhotons = a_bulk_photons[lvl][dit()].listItems();
+      List<photon>& ebPhotons   = a_eb_photons[lvl][dit()].listItems();
+      List<photon>& domPhotons  = a_domain_photons[lvl][dit()].listItems();
+      List<photon>& allPhotons  = a_photons[lvl][dit()].listItems();
 
-      // Copy a list we can iterate through and then clear the list to be filled
-      List<photon>  all_photons = deposit_bulk;
+      // These must be cleared
+      bulkPhotons.clear();
+      ebPhotons.clear();
+      domPhotons.clear();
 
-      // Clear these, they will be filled.
-      deposit_bulk.clear();
-      deposit_surf.clear();
+      // Iterate over the photons that will be moved. 
+      for (ListIterator<photon> lit(allPhotons); lit.ok(); ++lit){
+	photon& p = lit();
 
-      // Iterate through everything
-      for (ListIterator<photon> lit(all_photons); lit.ok(); ++lit){
-	photon& particle = lit();
+	// Draw a new random absorption position
+	const RealVect oldPos  = p.position();
+	const RealVect unitV   = p.velocity()/(p.velocity().vectorLength());
+	const RealVect newPos  = oldPos + unitV*this->random_exponential(p.kappa());
+	const RealVect path    = newPos - oldPos;
+	const Real     pathLen = path.vectorLength();
 
-	// Draw a randomly absorbed position
-	RealVect& pos               = particle.position();
-	const RealVect unit_v       = particle.velocity()/units::s_c0;
-	const RealVect absorbed_pos = pos + unit_v*random_exponential(particle.kappa());
-	const RealVect path         = absorbed_pos - pos;
-	const Real path_len         = path.vectorLength();
+	// Check if we should check of different types of boundary intersections. These are checp initial tests that allow
+	// us to skip intersection tests for some photons.
+	bool checkEB  = false;
+	bool checkDom = false;
 
-
-	// See if we should check for different types of boundary intersections. These are basically
-	// cheap initial tests that allow us to skip computations for some photons. 
-	bool check_eb = false; // Flag for intersection test with eb
-	bool check_bc = false; // Flag for intersection test with domain
-	if(impfunc->value(pos) < path_len){ // This tests if we should check for EB intersections
-	  check_eb = true;
+	if(impfunc->value(oldPos) < pathLen){
+	  checkEB = true;
 	}
-	for (int dir = 0; dir < SpaceDim; dir++){ // This tests if the photon ended up outside the domain
-	  if(absorbed_pos[dir] < prob_lo[dir] || absorbed_pos[dir] > prob_hi[dir]){
-	    check_bc = true; // We are guaranteed that the photon crossed a domain boundary
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  if(newPos[dir] < prob_lo[dir] || newPos[dir] > prob_hi[dir]){
+	    checkDom = true; 
 	  }
 	}
-						  
-	// These two loops do the boundary intersection tests. 
-	if(!check_eb && !check_bc){ // Impossible for this photon to strike a boundary. Yay!
-	  pos = absorbed_pos;
-	  deposit_bulk.add(particle);
+
+
+	if(!checkEB && !checkDom){ // No intersection test necessary, add to bulk absorption
+	  p.position() = newPos;
+	  bulkPhotons.add(p);
 	}
-	else{
-	  // Here are the contact points for the EB and domain stuff.
-	  // We have x(s) = x0 + s*(x1-x0), s=[0,1].
-	  // Take the smallest s to be the intersection points
-	  Real s_eb = 2.0;
-	  Real s_bc = 2.0;
-	  bool contact_bc = false;
-	  bool contact_eb = false;
-	  int contact_dir;
-	  Side::LoHiSide contact_side;
-	  
-	  // 1. Determine if the particle contacts one of the domain walls, and after how long it contacts
-	  if(check_bc){ // This test does a line-plane intersection test on each side and direction
-	    for (int dir = 0; dir < SpaceDim; dir++){
-	      for (SideIterator sit; sit.ok(); ++sit){
-		const Side::LoHiSide side = sit();
+	else{ // Must do nasty intersect test.
+	  Real dom_s = 1.E99;
+	  Real eb_s  = 1.E99;
 
-		const RealVect p0    = (side == Side::Lo) ? prob_lo : prob_hi; // A point on the domain
-		const RealVect n0    = sign(side)*RealVect(BASISV(dir));      // Domain side normal vector
-		const Real norm_path = PolyGeom::dot(n0, path);               // Used for test
+	  bool contact_domain = false;
+	  bool contact_eb     = false;
 
-		if(norm_path > 0.0){ // Moves towards wall
-		  const Real s = PolyGeom::dot(p0-pos, n0)/norm_path; // Intersection test
-		  if(s >= 0.0 && s <= 1.0){
-		    if(s < s_bc){
-		      contact_bc    = true;
-		      contact_side  = side;
-		      contact_dir   = dir;
-		      s_bc          = s;
-		    }
-		  }
-		}
-	      }
-	    }
+	  // Do intersection tests
+	  if(checkDom){
+	    contact_domain = this->domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
 	  }
-	  
-	  // 2. Now check the where we contact the embedded boundary. We do a step-wise increment and
-	  //    check where the photon cross the boundary. If it does, find the position and flag the photon. 
-	  if(check_eb){
-	    const int nsteps  = ceil(path_len/m_bisect_step);
-	    const RealVect dx = (absorbed_pos - pos)/nsteps;
-	    RealVect cur_pos  = pos;
-	    
-	    // Check each interval
-	    for (int istep = 0; istep < nsteps; istep++){
-	      const Real fa = impfunc->value(cur_pos);
-	      const Real fb = impfunc->value(cur_pos+dx);
-
-	      if(fa*fb <= 0.0){ 
-		// We happen to know that f(pos+dx) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
-		// where the photon crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dx].
-		const RealVect xcol = poly::brent_root_finder(impfunc, cur_pos, cur_pos+dx);
-		s_eb = (xcol - pos).vectorLength()/path.vectorLength();
-		contact_eb = true;
-		break;
-	      }
-	      else{ // Move to next interval
-		cur_pos += dx;
-	      }
-	    }
+	  if(checkEB){
+	    contact_eb = this->eb_bc_intersection(impfunc, oldPos, newPos, pathLen, eb_s);
 	  }
 
-	  // 3. If we don't contact either boundary, absorb the particle in the bulk. Otherwise, absorb in on a surface
-	  //    somewhere
-	  if(!contact_eb && !contact_bc){
-	    pos = absorbed_pos;
-	    deposit_bulk.add(particle);
+	  // Move the photon to the data holder where it belongs. 
+	  if(!contact_eb && !contact_domain){
+	    p.position() = newPos;
+	    bulkPhotons.add(p);
 	  }
-	  else{
-	    pos += Min(s_eb, s_bc)*path; // Move the photon to the absorption point. This is either on the boundary
-	    deposit_surf.add(particle);
-
-#if 0 // This code needs to be rewritten, I don't think it does 
-	    // Domain boundaries may be bounce-back. 
-	    if(contact_bc && s_bc < s_eb){ // Photon was absorbed on the domain 
-	      const int idx = domainbc_map(contact_dir, contact_side);
-
-	      // Check the boundary condition type
-	      if(m_domainbc[idx] == wallbc::symmetry){ // Need to bounce back
-
-		// Modify velocity vector
-		RealVect& v  = particle.velocity();
-		const RealVect n0 = sign(contact_side)*RealVect(BASISV(contact_dir));
-
-		v = v - 2.0*PolyGeom::dot(v, n0)*n0; // New direction
-		pos += (1-s_bc)*path_len*v/v.vectorLength();
-	      }
-	      else if(m_domainbc[idx] == wallbc::wall){
-		absorbed.transfer(lit);
-	      }
-	      else if(m_domainbc[idx] == wallbc::outflow){ // Do nothing
-	      }
+	  else {
+	    if(eb_s < dom_s){
+	      p.position() = oldPos + eb_s*path;
+	      ebPhotons.add(p);
 	    }
-	    else if(contact_eb && s_eb < s_bc) { // Photon was absorbed on the EB
-	      absorbed.transfer(lit);
+	    else{
+	      p.position() = oldPos + Max(0.0,dom_s-SAFETY)*path;
+	      domPhotons.add(p);
 	    }
-#endif
 	  }
 	}
       }
+
+      // Should clear these out. 
+      allPhotons.clear();
     }
   }
+
+  // Remap and clear. 
+  a_bulk_photons.remap();
+  a_eb_photons.remap();
+  a_domain_photons.remap();
+
+#if 0 // Debug
+  int bulkPhotons = this->count_photons(a_bulk_photons.get_particles());
+  int ebPhotons = this->count_photons(a_eb_photons.get_particles());
+  int domPhotons = this->count_photons(a_domain_photons.get_particles());
+
+  if(procID() == 0){
+    std::cout << "photons before = " << photonsBefore << "\n"
+	      << "bulk photons = " << bulkPhotons << "\n"
+      	      << "eb photons = " << ebPhotons << "\n"
+	      << "dom photons = " << domPhotons << "\n"
+	      << "photons after = " << domPhotons+ebPhotons+bulkPhotons << "\n" << std::endl;
+  }
+#endif
+
+
 }
 
 void mc_photo::remap(){
@@ -1183,8 +1150,8 @@ void mc_photo::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_phi) {
-    this->deposit_photons(m_scratch, m_photons.get_particles(), m_plot_deposition);
-    this->write_data(a_output, a_comp, m_scratch,  true);
+    this->deposit_photons(m_scratch, m_bulk_photons.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_state,  true);
   }
   if(m_plot_src) {
     this->write_data(a_output, a_comp, m_source, false);
@@ -1225,4 +1192,73 @@ particle_container<photon>& mc_photo::get_domain_photons(){
   }
 
   return m_domain_photons;
+}
+
+bool mc_photo::domain_bc_intersection(const RealVect& a_oldPos,
+				      const RealVect& a_newPos,
+				      const RealVect& a_path,
+				      const RealVect& a_prob_lo,
+				      const RealVect& a_prob_hi,
+				      Real&           a_s){
+
+  // TLDR: This code does a boundary intersection test and returns where on the interval [oldPos, newPos] the intersection
+  //       happened.
+
+  a_s = 1.E99;
+  bool retval = false;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Side::LoHiSide side = sit();
+      const RealVect wallPoint  = (side == Side::Lo) ? a_prob_lo : a_prob_hi; // A point on the domain side
+      const RealVect n0         = sign(side)*RealVect(BASISV(dir));           // Normal vector pointing OUT of the domain
+      const Real norm_path      = PolyGeom::dot(n0, a_path);                  // Component relative to wall
+
+      if(norm_path > 0.0){ 
+	const Real s = PolyGeom::dot(wallPoint-a_oldPos, n0)/norm_path;  
+	if(s >= 0.0 && s <= 1.0){
+	  retval        = true;
+	  if(s < a_s){
+	    a_s     = s;
+	  }
+	}
+      }
+    }
+  }
+
+  return retval;
+}
+
+bool mc_photo::eb_bc_intersection(const RefCountedPtr<BaseIF>& a_impfunc,
+				  const RealVect&              a_oldPos,
+				  const RealVect&              a_newPos,
+				  const Real&                  a_pathLen,
+				  Real&                        a_s){
+
+  bool retval = false;
+  
+  const int nsteps      = ceil(a_pathLen/m_bisect_step);
+  const RealVect dxStep = (a_newPos - a_oldPos)/nsteps;
+	    
+  // Check each interval
+  RealVect cur_pos  = a_oldPos;
+  for (int istep = 0; istep < nsteps; istep++){
+    const Real fa = a_impfunc->value(cur_pos);
+    const Real fb = a_impfunc->value(cur_pos + dxStep);
+    
+    if(fa*fb <= 0.0){ 
+      // We happen to know that f(pos+dxStep) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
+      // where the photon crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep].
+      const RealVect xcol = poly::brent_root_finder(a_impfunc, cur_pos, cur_pos + dxStep);
+      a_s = (xcol - a_oldPos).vectorLength()/a_pathLen;
+      retval = true;
+      
+      break;
+    }
+    else{ // Move to next interval
+      cur_pos += dxStep;
+    }
+  }
+
+  return retval;
 }
