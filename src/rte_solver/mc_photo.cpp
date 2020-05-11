@@ -38,10 +38,14 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
 
   // Generate photons
   this->clear(m_photons);
-  this->generate_photons(m_photons, a_source, a_dt);              // Generate photons 
-  this->move_and_absorb_photons(m_eb_photons, m_photons, a_dt); // Move and absorb photons
-  this->remap(m_photons);                                         // Remap photons
-  this->deposit_photons(a_state, m_photons, m_deposition);        // Deposit photons
+  this->generate_photons(m_photons, a_source, a_dt);           // Generate photons
+#if 0 // Old code
+  this->move_and_absorb_photons(m_eb_photons, m_photons);      // Move and absorb photons
+#else // New code
+  this->advance_photons_stationary(m_bulk_photons, m_eb_photons, m_domain_photons, m_photons);
+#endif
+  this->remap(m_photons);                                      // Remap photons
+  this->deposit_photons(a_state, m_photons, m_deposition);     // Deposit photons
   
   return true;
 }
@@ -330,6 +334,7 @@ void mc_photo::allocate_internals(){
 
   // Allocate particle data holders
   m_amr->allocate(m_photons,        m_pvr_buffer);
+  m_amr->allocate(m_bulk_photons,   m_pvr_buffer);
   m_amr->allocate(m_eb_photons,     m_pvr_buffer);
   m_amr->allocate(m_domain_photons, m_pvr_buffer);
 }
@@ -948,9 +953,10 @@ void mc_photo::coarse_fine_redistribution(EBAMRCellData& a_state){
   }
 }
 
-void mc_photo::move_and_absorb_photons(particle_container<photon>& a_eb_photons,
-				       particle_container<photon>& a_bulk_photons,
-				       const Real a_dt){
+void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_photons,
+					  particle_container<photon>& a_eb_photons,
+					  particle_container<photon>& a_domain_photons,
+					  particle_container<photon>& a_photons){
   CH_TIME("mc_photo::move_and_absorb_photons");
   if(m_verbosity > 5){
     pout() << m_name + "::move_and_absorb_photons" << endl;
@@ -971,7 +977,7 @@ void mc_photo::move_and_absorb_photons(particle_container<photon>& a_eb_photons,
 
   // Hack. 
   AMRParticles<photon>& a_absorbed = a_eb_photons.get_particles();
-  AMRParticles<photon>& a_original = a_bulk_photons.get_particles();
+  AMRParticles<photon>& a_original = a_photons.get_particles();
 
 
   for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
@@ -1192,6 +1198,15 @@ particle_container<photon>& mc_photo::get_photons(){
   }
 
   return m_photons;
+}
+
+particle_container<photon>& mc_photo::get_bulk_photons(){
+  CH_TIME("mc_photo::get_bulk_photons");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_bulk_photons" << endl;
+  }
+
+  return m_bulk_photons;
 }
 
 particle_container<photon>& mc_photo::get_eb_photons(){

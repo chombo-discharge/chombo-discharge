@@ -37,6 +37,7 @@ public:
 
   /*!
     @brief Advance RTE and deposit photons on a_state
+    @details This routine switches between stationary and transient solvers depending on what you ask for. 
   */
   virtual bool advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellData& a_source, const bool a_zerophi = false);
 
@@ -47,8 +48,23 @@ public:
 
   /*!
     @brief Move photons and absorb them. 
+    @details This is the routine that is used to move photons when the solver is stationary. 
   */
-  virtual void move_and_absorb_photons(particle_container<photon>& a_absorbed, particle_container<photon>& a_original, const Real a_dt);
+  virtual void advance_photons_stationary(particle_container<photon>& a_bulk_photons,
+					  particle_container<photon>& a_eb_photons,
+					  particle_container<photon>& a_domain_photons,
+					  particle_container<photon>& a_photons);
+
+  /*!
+    @brief This moves the photons over a time step dt. If a photon is absorbed in the gas, it is put in
+    a_bulk_photons. If it is absorbed on the EB, it is put in a_eb_photons etc. 
+    @details This is the routine that is used to move photons when the solver is transient. 
+  */
+  virtual void advance_photons_transient(particle_container<photon>& a_bulk_photons,
+					 particle_container<photon>& a_eb_photons,
+					 particle_container<photon>& a_domain_photons,
+					 particle_container<photon>& a_ophotons,
+					 const Real                  a_dt){}
 
   /*!
     @brief Remap photons
@@ -187,6 +203,11 @@ public:
   virtual particle_container<photon>& get_photons();
 
   /*!
+    @brief Get bulk photons
+  */
+  virtual particle_container<photon>& get_bulk_photons();
+
+  /*!
     @brief Get EB photons
   */
   virtual particle_container<photon>& get_eb_photons();
@@ -307,6 +328,11 @@ protected:
   particle_container<photon> m_photons;
 
   /*!
+    @brief Photons absorbed in the volume
+  */
+  particle_container<photon> m_bulk_photons;
+
+  /*!
     @brief This is a particle container which acts as scratch space when you want to add particles through the EB
   */
   particle_container<photon> m_eb_photons;
@@ -320,8 +346,6 @@ protected:
     @brief Domain boundary conditions
   */
   Vector<wallbc::which_bc> m_domainbc;
-
-
 
   /*!
     @brief Draw photons
