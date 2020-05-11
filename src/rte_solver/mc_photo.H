@@ -64,7 +64,7 @@ public:
 					 particle_container<photon>& a_eb_photons,
 					 particle_container<photon>& a_domain_photons,
 					 particle_container<photon>& a_ophotons,
-					 const Real                  a_dt){}
+					 const Real                  a_dt);
 
   /*!
     @brief Remap photons
@@ -435,6 +435,11 @@ protected:
     @brief Parse photogeneration type
   */
   void parse_photogen();
+
+  /*!
+    @brief Parse whether stationary or not
+  */
+  void parse_stationary();
 
   /*!
     @brief Parse source type

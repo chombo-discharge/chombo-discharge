@@ -36,12 +36,23 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_state, const EBAMRCellD
     pout() << m_name + "::advance" << endl;
   }
 
-  // Generate photons
-  this->clear(m_photons);
-  this->generate_photons(m_photons, a_source, a_dt);           
-  this->advance_photons_stationary(m_bulk_photons, m_eb_photons, m_domain_photons, m_photons);
-  this->remap(m_photons);                                       
-  this->deposit_photons(a_state, m_bulk_photons, m_deposition); 
+  // If stationary, do a safety cleanout first. Then generate new photons
+  if(m_stationary){
+    this->clear(m_photons);
+  }
+  this->generate_photons(m_photons, a_source, a_dt);
+
+  // Advance stationary or transient
+  if(m_stationary){
+    this->advance_photons_stationary(m_bulk_photons, m_eb_photons, m_domain_photons, m_photons);
+  }
+  else{
+    this->advance_photons_transient(m_bulk_photons, m_eb_photons, m_domain_photons, m_photons, a_dt);
+    this->remap(m_photons);                                       
+  }
+
+  // Deposit volumetric photons. 
+  this->deposit_photons(a_state, m_bulk_photons, m_deposition);
   
   return true;
 }
@@ -61,6 +72,7 @@ void mc_photo::parse_options(){
   this->parse_domain_bc();
   this->parse_pvr_buffer();
   this->parse_plot_vars();
+  this->parse_stationary();
 }
 
 void mc_photo::parse_rng(){
@@ -78,6 +90,17 @@ void mc_photo::parse_rng(){
 
   m_udist01 = new uniform_real_distribution<Real>( 0.0, 1.0);
   m_udist11 = new uniform_real_distribution<Real>(-1.0, 1.0);
+}
+
+void mc_photo::parse_stationary(){
+  CH_TIME("mc_photo::parse_stationary");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parse_stationary" << endl;
+  }
+  
+  ParmParse pp(m_class_name.c_str());
+
+  pp.get("stationary", m_stationary);
 }
 
 void mc_photo::parse_pseudophotons(){
@@ -953,9 +976,9 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 					  particle_container<photon>& a_eb_photons,
 					  particle_container<photon>& a_domain_photons,
 					  particle_container<photon>& a_photons){
-  CH_TIME("mc_photo::move_and_absorb_photons");
+  CH_TIME("mc_photo::advance_photons_stationary");
   if(m_verbosity > 5){
-    pout() << m_name + "::move_and_absorb_photons" << endl;
+    pout() << m_name + "::advance_photons_stationary" << endl;
   }
 
   // TLDR: This routine iterates over the levels and boxes and does the following
@@ -1093,6 +1116,19 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
 #endif
 
 
+}
+
+void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_photons,
+					 particle_container<photon>& a_eb_photons,
+					 particle_container<photon>& a_domain_photons,
+					 particle_container<photon>& a_photons,
+					 const Real                  a_dt){
+  CH_TIME("mc_photo::advance_photons_transient");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advance_photons_transient" << endl;
+  }
+
+  MayDay::Abort("mc_photo::advance_photons_transient - not implemented (yet)");
 }
 
 void mc_photo::remap(){
