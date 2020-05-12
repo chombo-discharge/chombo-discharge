@@ -188,6 +188,10 @@ void particle_container<P>::remap(){
   for (int lvl = 0; lvl <= m_finest_level; lvl++){
     const bool has_coar = lvl > 0;
 
+        // Rebin this level
+    m_particles[lvl]->gatherOutcast();
+    m_particles[lvl]->remapOutcast();
+
     // Collect coarser level particles onto this levels outcast list if they fit in this levels PVR
     if(has_coar){
       collectValidParticles(m_particles[lvl]->outcast(),
@@ -257,6 +261,7 @@ void particle_container<P>::remap_lost_particles(){
 			  m_ref_rat[lvl-1],
 			  false, 
 			  m_prob_lo);
+    m_particles[lvl]->remapOutcast();
   }
 }
 

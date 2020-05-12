@@ -34,7 +34,7 @@ driver.geometry_generation             = plasmac       # Grid generation method,
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
 driver.plot_interval                   = 10            # Plot interval
-driver.regrid_interval                 = 10            # Regrid interval
+driver.regrid_interval                 = -10            # Regrid interval
 driver.checkpoint_interval             = 10            # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
@@ -88,12 +88,12 @@ driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 mc_photo.stationary        = true          # Stationary solver or not
 mc_photo.max_photons       = -1            # Maximum no. generated in a cell (<= 0 yields physical photons)
-mc_photo.pvr_buffer        = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
+mc_photo.pvr_buffer        = 0             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 mc_photo.random_kappa      = false         # Randomize absorption length (taken from photon implementation)
 mc_photo.plt_vars          = phi src       # Available are 'phi' and 'src'
 mc_photo.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
 mc_photo.bisect_step       = 1.E-2         # Bisection step length for intersection tests
-mc_photo.seed              = 0             # Seed for RNG
+mc_photo.seed              = -1            # Seed for RNG
 mc_photo.bc_x_low          = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
 mc_photo.bc_x_high         = outflow       # Boundary condition
 mc_photo.bc_y_low          = outflow       # Boundary condition

@@ -21,6 +21,8 @@
 #include <ParmParse.H>
 #include <ParticleIO.H>
 
+#define MC_PHOTO_DEBUG 0
+
 mc_photo::mc_photo(){
   m_name       = "mc_photo";
   m_class_name = "mc_photo";
@@ -85,7 +87,10 @@ void mc_photo::parse_rng(){
   ParmParse pp(m_class_name.c_str());
   pp.get("seed", m_seed);
   pp.get("poiss_exp_swap", m_poiss_exp_swap);
-  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
+  if(m_seed < 0) {
+    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
+    m_seed += procID(); 
+  }
   m_rng = new std::mt19937_64(m_seed);
 
   m_udist01 = new uniform_real_distribution<Real>( 0.0, 1.0);
@@ -421,9 +426,11 @@ void mc_photo::register_operators(){
     m_amr->register_operator(s_eb_fill_patch,   m_phase);
     m_amr->register_operator(s_eb_pwl_interp,   m_phase);
     m_amr->register_operator(s_eb_redist,       m_phase);
-    m_amr->register_operator(s_eb_copier,       m_phase);
-    m_amr->register_operator(s_eb_ghostcloud,   m_phase);
     m_amr->register_operator(s_eb_noncons_div,  m_phase);
+    m_amr->register_operator(s_eb_copier,       m_phase);
+    if(m_pvr_buffer <= 0){
+      m_amr->register_operator(s_eb_ghostcloud,   m_phase);
+    }
   }
 }
 
@@ -1010,7 +1017,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
     impfunc = m_compgeom->get_sol_if();
   }
 
-#if 0 // Debug
+#if MC_PHOTO_DEBUG // Debug
   int photonsBefore = this->count_photons(a_photons.get_particles());
 #endif
   
@@ -1101,7 +1108,7 @@ void mc_photo::advance_photons_stationary(particle_container<photon>& a_bulk_pho
   a_eb_photons.remap();
   a_domain_photons.remap();
 
-#if 0 // Debug
+#if MC_PHOTO_DEBUG // Debug
   int bulkPhotons = this->count_photons(a_bulk_photons.get_particles());
   int ebPhotons = this->count_photons(a_eb_photons.get_particles());
   int domPhotons = this->count_photons(a_domain_photons.get_particles());
@@ -1128,7 +1135,159 @@ void mc_photo::advance_photons_transient(particle_container<photon>& a_bulk_phot
     pout() << m_name + "::advance_photons_transient" << endl;
   }
 
-  MayDay::Abort("mc_photo::advance_photons_transient - not implemented (yet)");
+  // TLDR: This routine iterates over the levels and boxes and does the following
+  //
+  //       Forall photons in a_photons: {
+  //          1. Check new photon position
+  //          2. Check if the photon was absorbed on the interval
+  //          3. Check if path intersects boundary, either EB or domain
+  //          4. Move the photon to appropriate data holder:
+  //                 Path crossed EB   => a_eb_photons
+  //                 Path cross domain => a_domain_photons
+  //                 Absorbed in bulk  => a_bulk_photons
+  //       }
+  //
+  //       Remap a_bulk_photons, a_eb_photons, a_domain_photons, a_photons
+
+    // Low and high corners
+  const RealVect prob_lo = m_amr->get_prob_lo();
+  const RealVect prob_hi = m_amr->get_prob_hi();
+
+  // Safety factor
+  const Real SAFETY = 1.E-8;
+
+  // This is the implicit function used for intersection tests
+  RefCountedPtr<BaseIF> impfunc;
+  if(m_phase == phase::gas){
+    impfunc = m_compgeom->get_gas_if();
+  }
+  else{
+    impfunc = m_compgeom->get_sol_if();
+  }
+
+#if MC_PHOTO_DEBUG // Debug
+  int photonsBefore = this->count_photons(a_photons.get_particles());
+#endif
+
+  
+  for (int lvl = 0; lvl <= m_amr->get_finest_level(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->get_grids()[lvl];
+    
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      List<photon>& bulkPhotons = a_bulk_photons[lvl][dit()].listItems();
+      List<photon>& ebPhotons   = a_eb_photons[lvl][dit()].listItems();
+      List<photon>& domPhotons  = a_domain_photons[lvl][dit()].listItems();
+      List<photon>& allPhotons  = a_photons[lvl][dit()].listItems();
+
+      
+      // These must be cleared
+      bulkPhotons.clear();
+      ebPhotons.clear();
+      domPhotons.clear();
+      
+
+      // Iterate over the photons that will be moved. 
+      for (ListIterator<photon> lit(allPhotons); lit.ok(); ++lit){
+	photon& p = lit();
+
+	// Move the photon
+	const RealVect oldPos  = p.position();
+	const RealVect v       = p.velocity();
+	const RealVect unitV   = v/v.vectorLength();
+	const RealVect newPos  = oldPos + v*a_dt;
+	const RealVect path    = newPos - oldPos;
+	const Real     pathLen = path.vectorLength();
+
+	// Check if we should check of different types of boundary intersections. These are checp initial tests that allow
+	// us to skip more expensive intersection tests for some photons.
+	bool checkEB  = false;
+	bool checkDom = false;
+
+	if(impfunc->value(oldPos) < pathLen){
+	  checkEB = true;
+	}
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  if(newPos[dir] <= prob_lo[dir] || newPos[dir] >= prob_hi[dir]){
+	    checkDom = true; 
+	  }
+	}
+
+	// Handles for how long the photons move
+	bool absorbed_bulk   = false;
+	bool absorbed_eb     = false;
+	bool absorbed_domain = false;
+
+	Real bulk_s = 1.E99;
+	Real eb_s   = 1.E99;
+	Real dom_s  = 1.E99;
+
+
+	// Check absorption in the bulk
+	const Real travelLen  = this->random_exponential(p.kappa());
+	if(travelLen < pathLen){
+	  absorbed_bulk = true;
+	  bulk_s        = travelLen/pathLen;
+	}
+
+	// Check absorption on EBs and domain
+	if(checkEB){
+	  absorbed_eb = this->eb_bc_intersection(impfunc, oldPos, newPos, pathLen, eb_s);
+	}
+	if(checkDom){
+	  absorbed_domain = this->domain_bc_intersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  dom_s = (absorbed_domain) ? Max(0.0, dom_s - SAFETY) : dom_s;
+	}
+
+	const bool absorb = absorbed_bulk || absorbed_eb || absorbed_domain;
+	if(!absorb){
+	  p.position() = newPos;
+	}
+	else{
+	  const Real s = Min(bulk_s, Min(eb_s, dom_s));
+	  p.position() = oldPos + s*path;
+
+	  // Now check where it was actually absorbed
+	  if(absorbed_bulk && bulk_s < Min(eb_s, dom_s)){ 
+	    bulkPhotons.transfer(lit);
+	  }
+	  else if(absorbed_eb && eb_s < Min(bulk_s, dom_s)){
+	    ebPhotons.transfer(lit);
+	  }
+	  else if(absorbed_domain && dom_s < Min(bulk_s, eb_s)){
+	    domPhotons.transfer(lit);
+	  }
+	  else{
+	    MayDay::Abort("mc_photo::advance_photons_transient - logic bust");
+	  }
+	}
+      }
+    }
+  }
+
+  // Remap and clear. 
+  a_bulk_photons.remap();
+  a_eb_photons.remap();
+  a_domain_photons.remap();
+  a_photons.remap();
+
+#if MC_PHOTO_DEBUG // Debug
+  int bulkPhotons = this->count_photons(a_bulk_photons.get_particles());
+  int ebPhotons = this->count_photons(a_eb_photons.get_particles());
+  int domPhotons = this->count_photons(a_domain_photons.get_particles());
+  int afterPhotons = this->count_photons(a_photons.get_particles());
+
+  if(procID() == 0){
+    std::cout << "photons before = " << photonsBefore << "\n"
+      	      << "photons after = " << afterPhotons << "\n"
+	      << "bulk photons = " << bulkPhotons << "\n"
+      	      << "eb photons = " << ebPhotons << "\n"
+	      << "dom photons = " << domPhotons << "\n"
+	      << "total = " << domPhotons+ebPhotons+bulkPhotons+afterPhotons << "\n" << std::endl;
+  }
+
+
+#endif
+  a_bulk_photons.remap();
 }
 
 void mc_photo::remap(){
@@ -1255,7 +1414,7 @@ bool mc_photo::domain_bc_intersection(const RealVect& a_oldPos,
 	if(s >= 0.0 && s <= 1.0){
 	  retval        = true;
 	  if(s < a_s){
-	    a_s     = s;
+	    a_s = s;
 	  }
 	}
       }
