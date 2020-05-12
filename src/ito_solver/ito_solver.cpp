@@ -15,6 +15,7 @@
 #include <ParmParse.H>
 #include <EBAlias.H>
 #include <BaseEBCellFactory.H>
+#include <ParticleIO.H>
 
 #include <chrono>
 
@@ -480,7 +481,11 @@ void ito_solver::write_checkpoint_level(HDF5Handle& a_handle, const int a_level)
     pout() << m_name + "::write_checkpoint_level" << endl;
   }
 
-  //  MayDay::Abort("ito_solver::write_checkpoint_level - checkpointing not implemented");
+  write(a_handle, *m_state[a_level], m_name);
+
+  // Write particles. Must be implemented.
+  std::string str = m_name + "_particles";
+  writeParticlesToHDF(a_handle, m_particles[a_level], str);
 }
 
 void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -489,7 +494,13 @@ void ito_solver::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
     pout() << m_name + "::read_checkpoint_level" << endl;
   }
 
-  //  MayDay::Abort("ito_solver::read_checkpoint_level - checkpointing not implemented");
+  // Read state vector
+  read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
+
+  // Read particles. Should be implemented
+  std::string str = m_name + "_particles";
+  readParticlesFromHDF(a_handle, m_particles[a_level], str);
+
 }
 
 void ito_solver::write_plot_data(EBAMRCellData& a_output, int& a_comp){

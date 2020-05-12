@@ -298,8 +298,12 @@ void mc_photo::parse_plot_vars(){
     pout() << m_name + "::parse_plot_vars" << endl;
   }
 
-  m_plot_phi = false;
-  m_plot_src = false;
+  m_plot_phi       = false;
+  m_plot_src       = false;
+  m_plot_phot      = false;
+  m_plot_bulk_phot = false;
+  m_plot_eb_phot   = false;
+  m_plot_dom_phot  = false;
 
   ParmParse pp(m_class_name.c_str());
   const int num = pp.countval("plt_vars");
@@ -307,8 +311,12 @@ void mc_photo::parse_plot_vars(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plot_phi = true;
-    else if(str[i] == "src") m_plot_src = true;
+    if(     str[i] == "phi")       m_plot_phi = true;
+    else if(str[i] == "src")       m_plot_src = true;
+    else if(str[i] == "phot")      m_plot_phot = true;
+    else if(str[i] == "bulk_phot") m_plot_bulk_phot = true;
+    else if(str[i] == "eb_phot")   m_plot_eb_phot = true;
+    else if(str[i] == "dom_phot")  m_plot_dom_phot = true;
   }
 }
 
@@ -480,6 +488,8 @@ void mc_photo::write_checkpoint_level(HDF5Handle& a_handle, const int a_level) c
   write(a_handle, *m_state[a_level], m_name);
 
   // Write particles. Must be implemented.
+  std::string str = m_name + "_particles";
+  writeParticlesToHDF(a_handle, m_photons[a_level], str);
 }
 
 void mc_photo::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
@@ -492,6 +502,44 @@ void mc_photo::read_checkpoint_level(HDF5Handle& a_handle, const int a_level){
   read<EBCellFAB>(a_handle, *m_state[a_level], m_name, m_amr->get_grids()[a_level], Interval(0,0), false);
 
   // Read particles. Should be implemented
+  std::string str = m_name + "_particles";
+  readParticlesFromHDF(a_handle, m_photons[a_level], str);
+}
+
+Vector<std::string> mc_photo::get_plotvar_names() const {
+  CH_TIME("mc_photo::get_plotvar_names");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_plotvar_names" << endl;
+  }
+  
+  Vector<std::string> names(0);
+  
+  if(m_plot_phi)       names.push_back(m_name + " phi");
+  if(m_plot_src)       names.push_back(m_name + " source");
+  if(m_plot_phot)      names.push_back(m_name + " photons");
+  if(m_plot_bulk_phot) names.push_back(m_name + " bulk_photons");
+  if(m_plot_eb_phot)   names.push_back(m_name + " eb_photons");
+  if(m_plot_dom_phot)  names.push_back(m_name + " domain_photons");
+
+  return names;
+}
+
+int mc_photo::get_num_plotvars() const{
+  CH_TIME("mc_photo::get_num_plotvars");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_num_plotvars" << endl;
+  }
+
+  int num_output = 0;
+
+  if(m_plot_phi)       num_output = num_output + 1;
+  if(m_plot_src)       num_output = num_output + 1;
+  if(m_plot_phot)      num_output = num_output + 1;
+  if(m_plot_bulk_phot) num_output = num_output + 1;
+  if(m_plot_eb_phot)   num_output = num_output + 1;
+  if(m_plot_dom_phot)  num_output = num_output + 1;
+
+  return num_output;
 }
 
 int mc_photo::query_ghost() const {
@@ -1345,11 +1393,26 @@ void mc_photo::write_plot_data(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plot_phi) {
-    this->deposit_photons(m_scratch, m_bulk_photons.get_particles(), m_plot_deposition);
     this->write_data(a_output, a_comp, m_state,  true);
   }
   if(m_plot_src) {
     this->write_data(a_output, a_comp, m_source, false);
+  }
+  if(m_plot_phot){
+    this->deposit_photons(m_scratch, m_photons.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  true);
+  }
+  if(m_plot_bulk_phot){
+    this->deposit_photons(m_scratch, m_bulk_photons.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  true);
+  }
+  if(m_plot_eb_phot){
+    this->deposit_photons(m_scratch, m_eb_photons.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  true);
+  }
+  if(m_plot_dom_phot){
+    this->deposit_photons(m_scratch, m_domain_photons.get_particles(), m_plot_deposition);
+    this->write_data(a_output, a_comp, m_scratch,  true);
   }
 }
 

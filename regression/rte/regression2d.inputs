@@ -33,9 +33,9 @@ driver.verbosity                       = 2             # Engine verbosity
 driver.geometry_generation             = plasmac       # Grid generation method, 'plasmac' or 'chombo'
 driver.geometry_scan_level             = 0             # Geometry scan level for plasmac geometry generator
 driver.recursive_regrid                = false         # Recursive regrids
-driver.plot_interval                   = 10            # Plot interval
-driver.regrid_interval                 = -10            # Regrid interval
-driver.checkpoint_interval             = 10            # Checkpoint interval
+driver.plot_interval                   = 5             # Plot interval
+driver.regrid_interval                 = 5             # Regrid interval
+driver.checkpoint_interval             = 5             # Checkpoint interval
 driver.initial_regrids                 = 0             # Number of initial regrids
 driver.start_time                      = 0             # Start time (fresh simulations only)
 driver.stop_time                       = 1.0           # Stop time
@@ -90,7 +90,7 @@ mc_photo.stationary        = true          # Stationary solver or not
 mc_photo.max_photons       = -1            # Maximum no. generated in a cell (<= 0 yields physical photons)
 mc_photo.pvr_buffer        = 0             # Buffer for PVR. Prevents clouds from leaking onto coarse levels. 
 mc_photo.random_kappa      = false         # Randomize absorption length (taken from photon implementation)
-mc_photo.plt_vars          = phi src       # Available are 'phi' and 'src'
+mc_photo.plt_vars          = phi src phot       # Available are 'phi' and 'src'
 mc_photo.plot_deposition   = cic           # Cloud-in-cell for plotting particles. 
 mc_photo.bisect_step       = 1.E-2         # Bisection step length for intersection tests
 mc_photo.seed              = -1            # Seed for RNG
@@ -140,7 +140,7 @@ rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
 # RTE_STEPPER CLASS OPTIONS
 # ====================================================================================================
 rte_stepper.verbosity      = -1      # Verbosity
-rte_stepper.kappa          = 1.0     # Inverse absorption coefficient
+rte_stepper.kappa          = 0.1     # Inverse absorption coefficient
 rte_stepper.blob_amplitude = 1E2     # Blob amplitude
 rte_stepper.blob_radius    = 0.05    # Blob radius
 rte_stepper.blob_center    = 0.5 0.5 # Blob center

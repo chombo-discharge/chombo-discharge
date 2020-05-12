@@ -180,7 +180,17 @@ public:
   /*!
     @brief Read checkpoint data from handle
   */
-  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);  
+  virtual void read_checkpoint_level(HDF5Handle& a_handle, const int a_level);
+
+    /*!
+    @brief Get output plot names
+  */
+  virtual Vector<std::string> get_plotvar_names() const;
+
+  /*!
+    @brief Get number of output fields
+  */
+  virtual int get_num_plotvars() const;
 
   /*!
     @brief Return required number of ghost cells
@@ -241,6 +251,26 @@ protected:
     @brief Switch for plotting numbers or densities
   */
   bool m_plot_numbers;
+
+  /*!
+    @brief Check if m_photons should be plotted
+  */
+  bool m_plot_phot;
+
+  /*!
+    @brief Check if m_bulk_photons should be plotted
+  */
+  bool m_plot_bulk_phot;
+
+  /*!
+    @brief Check if m_eb_photons should be plotted
+  */
+  bool m_plot_eb_phot;
+
+  /*!
+    @brief Check if m_eb_photons should be plotted
+  */
+  bool m_plot_dom_phot;
 
   /*!
     @brief Number of photons per pseudophoton

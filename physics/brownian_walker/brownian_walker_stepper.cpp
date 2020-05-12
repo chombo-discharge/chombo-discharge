@@ -136,8 +136,6 @@ void brownian_walker_stepper::post_checkpoint_setup() {
   if(m_verbosity > 5){
     pout() << "brownian_walker_stepper::post_checkpoint_setup" << endl;
   }
-
-  MayDay::Abort("brownian_walker_stepper::post_checkpoint_setup - not implemented");
 }
 
 int brownian_walker_stepper::get_num_plot_vars() const {
