@@ -58,7 +58,6 @@ namespace physics {
       RefCountedPtr<ito_species> m_species;
 
       // Diffusion coefficient and velocity
-      Real m_cfl;
       Real m_diffco;
       Real m_omega;
 

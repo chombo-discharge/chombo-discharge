@@ -10,6 +10,7 @@
 #include "EBParticleInterp.H"
 #include "units.H"
 #include "EBGhostCloud.H"
+#include "ito_layout.H"
 
 #include <EBArith.H>
 #include <ParmParse.H>
@@ -56,7 +57,8 @@ void ito_solver::parse_rng(){
 
   // Seed the RNG
   ParmParse pp(m_class_name.c_str());
-  pp.get("seed", m_seed_rng);
+  pp.get("seed",       m_seed_rng);
+  pp.get("normal_max", m_normal_max);
   if(m_seed_rng < 0) { // Random seed if input < 0
     m_seed_rng = std::chrono::system_clock::now().time_since_epoch().count();
   }
@@ -908,40 +910,40 @@ void ito_solver::pre_regrid(const int a_base, const int a_old_finest_level){
   m_particles.pre_regrid(a_base);
 }
 
-particle_container<ito_particle>& ito_solver::get_particle_container(){
-  CH_TIME("ito_solver::get_particle_container");
-  if(m_verbosity > 5){
-    pout() << m_name + "::get_particle_container" << endl;
-  }
-
-  return m_particles;
-}
-
-AMRParticles<ito_particle>& ito_solver::get_particles(){
+particle_container<ito_particle>& ito_solver::get_particles(){
   CH_TIME("ito_solver::get_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::get_particles" << endl;
   }
 
-  return m_particles.get_particles();
+  return m_particles;
 }
 
-AMRParticles<ito_particle>& ito_solver::get_eb_particles(){
+particle_container<ito_particle>& ito_solver::get_eb_particles(){
   CH_TIME("ito_solver::get_eb_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::get_eb_particles" << endl;
   }
 
-  return m_eb_particles.get_particles();
+  return m_eb_particles;
 }
 
-AMRParticles<ito_particle>& ito_solver::get_domain_particles(){
+particle_container<ito_particle>& ito_solver::get_domain_particles(){
   CH_TIME("ito_solver::get_domain_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::get_domain_particles" << endl;
   }
 
-  return m_domain_particles.get_particles();
+  return m_domain_particles;
+}
+
+particle_container<ito_particle>& ito_solver::get_source_particles(){
+  CH_TIME("ito_solver::get_source_particles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::get_source_particles" << endl;
+  }
+
+  return m_domain_particles;
 }
 
 EBAMRCellData& ito_solver::get_velo_cell(){
@@ -1050,8 +1052,13 @@ void ito_solver::interpolate_diffusion(const int a_lvl, const DataIndex& a_dit){
   meshInterp.interpolateDiffusion(particleList, dco_fab, m_deposition);
 }
 
+Real ito_solver::sign(const Real& a) const{
+  return (a > 0) - (a < 0);
+}
+
 RealVect ito_solver::random_gaussian() {
-  const double d = m_gauss01(m_rng);
+  double d = m_gauss01(m_rng);
+  d = sign(d)*Min(Abs(d), m_normal_max);
   return d*this->random_direction();
 }
 

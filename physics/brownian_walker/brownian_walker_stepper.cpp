@@ -20,12 +20,10 @@ brownian_walker_stepper::brownian_walker_stepper(){
 
   pp.get("diffco",        m_diffco);
   pp.get("omega",         m_omega);
-  pp.get("cfl",           m_cfl);
+  pp.get("verbosity",     m_verbosity);
   
   pp.get("max_diffu_hop", m_max_diffu_hop);
   pp.get("max_drift_hop", m_max_drift_hop);
-
-  m_verbosity = -1;
 }
 
 brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
@@ -238,7 +236,7 @@ void brownian_walker_stepper::setup_solvers() {
 
   m_species = RefCountedPtr<ito_species> (new brownian_walker_species());
 
-  m_solver->set_verbosity(-10);
+  m_solver->set_verbosity(m_verbosity);
   m_solver->parse_options();
   m_solver->set_amr(m_amr);
   m_solver->set_species(m_species);
@@ -265,11 +263,12 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
   const int finest_level = m_amr->get_finest_level();
   const RealVect origin  = m_amr->get_prob_lo();
+
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                      = m_amr->get_dx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->get_grids()[lvl];
-    ParticleData<ito_particle>& particles = *m_solver->get_particles()[lvl];
+    ParticleData<ito_particle>& particles = m_solver->get_particles()[lvl];
 
     const EBISLayout& ebisl = m_amr->get_ebisl(m_solver->get_phase())[lvl];
 

@@ -161,6 +161,19 @@ namespace cdr_bc {
     extrap   = 3,
   };
 };
+
+/*!
+  @brief Species iterator. So that we can iterate over all cdr equations, or a subset of them
+*/
+namespace species_iteration {
+  enum which_species {
+    all      = 0,
+    charged  = 1,
+    negative = 2,
+    positive = 3,
+    neutral  = 4,
+  };
+};
     
 
 /*!

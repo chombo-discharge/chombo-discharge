@@ -1,40 +1,35 @@
 /*!
-  @file   cdr_iterator.H
-  @brief  Iterator class for cdr_layout
+  @file   ito_iterator.H
+  @brief  Iterator class for ito_layout
   @author Robert Marskar
   @date   June Dec. 2017
 */
 
-#ifndef _CDR_ITERATOR_
-#define _CDR_ITERATOR_
+#ifndef _ITO_ITERATOR_
+#define _ITO_ITERATOR_
 
-#include "cdr_layout.H"
+#include "ito_layout.H"
 
- /*!
-  @brief Iterator class for cdr_layout
+/*!
+  @brief Iterator class for ito_layout
 */
-class cdr_iterator {
+class ito_iterator {
 public:
   
   /*!
     @brief Empty constructor
   */
-  cdr_iterator();
+  ito_iterator();
 
   /*!
     @brief Full constructor
   */
-  cdr_iterator(cdr_layout& a_layout, const species_iteration::which_species a_mode = species_iteration::all);
-
-  /*!
-    @brief Full constructor, allows iteration through data
-  */
-  cdr_iterator(cdr_layout& a_layout, Vector<EBAMRCellData*> a_data);
+  ito_iterator(ito_layout& a_layout, const species_iteration::which_species a_mode = species_iteration::all);
 
   /*!
     @brief Destructor
   */
-  virtual ~cdr_iterator();
+  virtual ~ito_iterator();
 
   /*!
     @brief Get number of solvers. 
@@ -64,17 +59,12 @@ public:
   /*!
     @brief Get solver
   */
-  virtual RefCountedPtr<cdr_solver>& operator() ();
+  virtual RefCountedPtr<ito_solver>& operator() ();
 
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<cdr_species>& get_species();
-
-  /*!
-    @brief Get current data
-  */
-  virtual EBAMRCellData& get_data();
+  virtual RefCountedPtr<ito_species>& get_species();
   
 protected:
 
@@ -101,17 +91,12 @@ protected:
   /*!
     @brief Ion solvers
   */
-  Vector<RefCountedPtr<cdr_solver> > m_solvers;
+  Vector<RefCountedPtr<ito_solver> > m_solvers;
 
   /*!
     @brief Ions
   */
-  Vector<RefCountedPtr<cdr_species> > m_species;
-
-  /*!
-    @brief Cell-centered data
-  */
-  Vector<EBAMRCellData*> m_celldata;
+  Vector<RefCountedPtr<ito_species> > m_species;
 
 };
 

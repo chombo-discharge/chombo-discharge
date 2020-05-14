@@ -188,22 +188,22 @@ public:
   /*!
     @brief Get the particle container
   */
-  virtual particle_container<ito_particle>& get_particle_container();
+  virtual particle_container<ito_particle>& get_particles();
 
-  /*!
-    @brief Get particles
+    /*!
+    @brief Get the particle container
   */
-  virtual AMRParticles<ito_particle>& get_particles();
-  
-  /*!
-    @brief Get EB particles
-  */
-  virtual AMRParticles<ito_particle>& get_eb_particles();
+  virtual particle_container<ito_particle>& get_eb_particles();
 
-  /*!
-    @brief Get domain particles
+    /*!
+    @brief Get the particle container
   */
-  virtual AMRParticles<ito_particle>& get_domain_particles();
+  virtual particle_container<ito_particle>& get_domain_particles();
+
+    /*!
+    @brief Get the particle container
+  */
+  virtual particle_container<ito_particle>& get_source_particles();
 
   /*!
     @brief Get cell-centered velocity
@@ -369,6 +369,11 @@ protected:
   std::normal_distribution<Real> m_gauss01;
 
   /*!
+    @brief Maximum exponential
+  */
+  Real m_normal_max;
+
+  /*!
     @brief Initial seed for RNG
   */
   Real m_seed_rng;
@@ -506,7 +511,7 @@ protected:
   /*!
     @brief Particle cache
   */
-  particle_container<ito_particle> m_particle_cache;
+  particle_container<ito_particle> m_source_particles;
   
   /*!
     @brief Parse RNG options
@@ -574,5 +579,10 @@ protected:
     @brief Do coarse-fine redistribution
   */
   void coarse_fine_redistribution(EBAMRCellData& a_state);
+
+  /*!
+    @brief Sign function
+  */
+  inline Real sign(const Real& a) const;
 };
 #endif
